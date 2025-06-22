@@ -280,8 +280,7 @@ public interface WebTestClient {
 		 * Provide SSL session information and certificates for the mock server.
 		 * @param sslInfo the {@link SslInfo} to use
 		 * @since 7.0
-		 * @see SslInfo#from(String)
-		 * @see SslInfo#from(String, java.security.cert.X509Certificate...)
+		 * @see org.springframework.mock.http.server.reactive.MockSslInfo
 		 */
 		<T extends B> T sslInfo(SslInfo sslInfo);
 

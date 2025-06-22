@@ -228,21 +228,20 @@ class BeanRegistrationsAotContributionTests {
 
 	@Test
 	void applyToWithLargeBeanDefinitionsCreatesSlices() {
-		BeanRegistrationsAotContribution contribution = createContribution(1001, i -> "testBean" + i);
+		BeanRegistrationsAotContribution contribution = createContribution(60000, i -> "testBean" + i);
 		contribution.applyTo(this.generationContext, this.beanFactoryInitializationCode);
 		compile((consumer, compiled) -> {
 			assertThat(compiled.getSourceFile(".*BeanFactoryRegistrations"))
 					.contains("Register the bean definitions from 0 to 999.",
-							"Register the bean definitions from 1000 to 1000.",
 							"// Registration is sliced to avoid exceeding size limit");
 			DefaultListableBeanFactory freshBeanFactory = new DefaultListableBeanFactory();
 			consumer.accept(freshBeanFactory);
-			for (int i = 0; i < 1001; i++) {
+			for (int i = 0; i < 60000; i++) {
 				String beanName = "testBean" + i;
 				assertThat(freshBeanFactory.containsBeanDefinition(beanName)).isTrue();
 				assertThat(freshBeanFactory.getBean(beanName)).isInstanceOf(TestBean.class);
 			}
-			assertThat(freshBeanFactory.getBeansOfType(TestBean.class)).hasSize(1001);
+			assertThat(freshBeanFactory.getBeansOfType(TestBean.class)).hasSize(60000);
 		});
 	}
 
@@ -268,26 +267,30 @@ class BeanRegistrationsAotContributionTests {
 
 	@SuppressWarnings({ "unchecked", "cast" })
 	private void compile(BiConsumer<Consumer<DefaultListableBeanFactory>, Compiled> result) {
-		MethodReference beanRegistrationsMethodReference = this.beanFactoryInitializationCode.getInitializers().get(0);
-		MethodReference aliasesMethodReference = this.beanFactoryInitializationCode.getInitializers().get(1);
+		MethodSpec.Builder acceptMethod = MethodSpec.methodBuilder("accept")
+				.addModifiers(Modifier.PUBLIC)
+				.addParameter(DefaultListableBeanFactory.class, "beanFactory");
+
+		ArgumentCodeGenerator beanFactory = ArgumentCodeGenerator.of(DefaultListableBeanFactory.class, "beanFactory");
+		ClassName className = this.beanFactoryInitializationCode.getClassName();
+
+		for (MethodReference initializer : this.beanFactoryInitializationCode.getInitializers()) {
+			CodeBlock codeBlock = initializer.toInvokeCodeBlock(beanFactory, className);
+			acceptMethod.addStatement(codeBlock);
+		}
+
 		this.beanFactoryInitializationCode.getTypeBuilder().set(type -> {
-			ArgumentCodeGenerator beanFactory = ArgumentCodeGenerator.of(DefaultListableBeanFactory.class, "beanFactory");
-			ClassName className = this.beanFactoryInitializationCode.getClassName();
-			CodeBlock beanRegistrationsMethodInvocation = beanRegistrationsMethodReference.toInvokeCodeBlock(beanFactory, className);
-			CodeBlock aliasesMethodInvocation = aliasesMethodReference.toInvokeCodeBlock(beanFactory, className);
 			type.addModifiers(Modifier.PUBLIC);
 			type.addSuperinterface(ParameterizedTypeName.get(Consumer.class, DefaultListableBeanFactory.class));
-			type.addMethod(MethodSpec.methodBuilder("accept")
-					.addModifiers(Modifier.PUBLIC)
-					.addParameter(DefaultListableBeanFactory.class, "beanFactory")
-					.addStatement(beanRegistrationsMethodInvocation)
-					.addStatement(aliasesMethodInvocation)
-					.build());
+			type.addMethod(acceptMethod.build());
 		});
+
 		this.generationContext.writeGeneratedContent();
+
 		TestCompiler.forSystem().with(this.generationContext).compile(compiled ->
 				result.accept(compiled.getInstance(Consumer.class), compiled));
 	}
+
 
 	private BeanRegistrationsAotContribution createContribution(RegisteredBean registeredBean,
 			BeanDefinitionMethodGenerator methodGenerator,String... aliases) {

@@ -24,7 +24,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.server.reactive.ServerHttpRequest;
-import org.springframework.http.server.reactive.SslInfo;
+import org.springframework.mock.http.server.reactive.MockSslInfo;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -65,7 +65,7 @@ class ApplicationContextTests {
 	@Test  // gh-35042
 	void buildWithSslInfo() {
 		var client = WebTestClient.bindToApplicationContext(context)
-				.sslInfo(SslInfo.from("test123"))
+				.sslInfo(new MockSslInfo("test123"))
 				.webFilter(new SslSessionIdFilter())
 				.build();
 

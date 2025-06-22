@@ -40,7 +40,7 @@ operator fun PropertyResolver.get(key: String) : String? = getProperty(key)
  * @since 5.1
  */
 inline fun <reified T> PropertyResolver.getProperty(key: String) : T? =
-		getProperty(key, T::class.java)
+	getProperty(key, T::class.java) as T?
 
 /**
  * Extension for [PropertyResolver.getProperty] providing a `getProperty<Foo>(...)`
