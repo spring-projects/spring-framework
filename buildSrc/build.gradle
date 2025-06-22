@@ -1,9 +1,12 @@
 plugins {
 	id 'java-gradle-plugin'
 	id 'checkstyle'
-	id 'io.spring.javaformat'
+	id 'io.spring.javaformat' version "${javaFormatVersion}"
 }
-apply plugin: 'io.spring.javaformat'
+
+allprojects {
+	apply plugin: 'io.spring.javaformat'
+}
 
 repositories {
 	mavenCentral()
@@ -16,6 +19,7 @@ ext {
 		def properties = new Properties()
 		properties.load(it)
 		set("kotlinVersion", properties["kotlinVersion"])
+		set("javaFormatVersion", properties["javaFormatVersion"])
 	}
 }
 
