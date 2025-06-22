@@ -42,30 +42,26 @@ public class JavaConventions {
 
 	/**
 	 * The Java version we should use as the JVM baseline for building the project.
-	 * <p>NOTE: If you update this value, you should also update the value used in
-	 * the {@code javadoc} task in {@code framework-api.gradle}.
+	 * <p>
+	 * NOTE: If you update this value, you should also update the value used in the
+	 * {@code javadoc} task in {@code framework-api.gradle}.
 	 */
 	private static final JavaLanguageVersion DEFAULT_LANGUAGE_VERSION = JavaLanguageVersion.of(24);
 
 	/**
-	 * The Java version we should use as the baseline for the compiled bytecode
-	 * (the "-release" compiler argument).
+	 * The Java version we should use as the baseline for the compiled bytecode (the
+	 * "-release" compiler argument).
 	 */
 	private static final JavaLanguageVersion DEFAULT_RELEASE_VERSION = JavaLanguageVersion.of(17);
 
 	static {
-		List<String> commonCompilerArgs = List.of(
-				"-Xlint:serial", "-Xlint:cast", "-Xlint:classfile", "-Xlint:dep-ann",
-				"-Xlint:divzero", "-Xlint:empty", "-Xlint:finally", "-Xlint:overrides",
-				"-Xlint:path", "-Xlint:processing", "-Xlint:static", "-Xlint:try", "-Xlint:-options",
-				"-parameters"
-		);
+		List<String> commonCompilerArgs = List.of("-Xlint:serial", "-Xlint:cast", "-Xlint:classfile", "-Xlint:dep-ann",
+				"-Xlint:divzero", "-Xlint:empty", "-Xlint:finally", "-Xlint:overrides", "-Xlint:path",
+				"-Xlint:processing", "-Xlint:static", "-Xlint:try", "-Xlint:-options", "-parameters");
 		COMPILER_ARGS = new ArrayList<>();
 		COMPILER_ARGS.addAll(commonCompilerArgs);
-		COMPILER_ARGS.addAll(List.of(
-				"-Xlint:varargs", "-Xlint:fallthrough", "-Xlint:rawtypes", "-Xlint:deprecation",
-				"-Xlint:unchecked", "-Werror"
-		));
+		COMPILER_ARGS.addAll(List.of("-Xlint:varargs", "-Xlint:fallthrough", "-Xlint:rawtypes", "-Xlint:deprecation",
+				"-Xlint:unchecked", "-Werror"));
 		TEST_COMPILER_ARGS = new ArrayList<>();
 		TEST_COMPILER_ARGS.addAll(commonCompilerArgs);
 		TEST_COMPILER_ARGS.addAll(List.of("-Xlint:-varargs", "-Xlint:-fallthrough", "-Xlint:-rawtypes",
@@ -96,21 +92,23 @@ public class JavaConventions {
 	 */
 	private void applyJavaCompileConventions(Project project) {
 		project.afterEvaluate(p -> {
-			p.getTasks().withType(JavaCompile.class)
-					.matching(compileTask -> compileTask.getName().startsWith(JavaPlugin.COMPILE_JAVA_TASK_NAME))
-					.forEach(compileTask -> {
-						compileTask.getOptions().setCompilerArgs(COMPILER_ARGS);
-						compileTask.getOptions().setEncoding("UTF-8");
-						setJavaRelease(compileTask);
-					});
-			p.getTasks().withType(JavaCompile.class)
-					.matching(compileTask -> compileTask.getName().startsWith(JavaPlugin.COMPILE_TEST_JAVA_TASK_NAME)
-							|| compileTask.getName().equals("compileTestFixturesJava"))
-					.forEach(compileTask -> {
-						compileTask.getOptions().setCompilerArgs(TEST_COMPILER_ARGS);
-						compileTask.getOptions().setEncoding("UTF-8");
-						setJavaRelease(compileTask);
-					});
+			p.getTasks()
+				.withType(JavaCompile.class)
+				.matching(compileTask -> compileTask.getName().startsWith(JavaPlugin.COMPILE_JAVA_TASK_NAME))
+				.forEach(compileTask -> {
+					compileTask.getOptions().setCompilerArgs(COMPILER_ARGS);
+					compileTask.getOptions().setEncoding("UTF-8");
+					setJavaRelease(compileTask);
+				});
+			p.getTasks()
+				.withType(JavaCompile.class)
+				.matching(compileTask -> compileTask.getName().startsWith(JavaPlugin.COMPILE_TEST_JAVA_TASK_NAME)
+						|| compileTask.getName().equals("compileTestFixturesJava"))
+				.forEach(compileTask -> {
+					compileTask.getOptions().setCompilerArgs(TEST_COMPILER_ARGS);
+					compileTask.getOptions().setEncoding("UTF-8");
+					setJavaRelease(compileTask);
+				});
 
 		});
 	}
@@ -123,7 +121,7 @@ public class JavaConventions {
 		int defaultVersion = DEFAULT_RELEASE_VERSION.asInt();
 		int releaseVersion = defaultVersion;
 		int compilerVersion = task.getJavaCompiler().get().getMetadata().getLanguageVersion().asInt();
-		for (int version = defaultVersion ; version <= compilerVersion ; version++) {
+		for (int version = defaultVersion; version <= compilerVersion; version++) {
 			if (task.getName().contains("Java" + version)) {
 				releaseVersion = version;
 				break;

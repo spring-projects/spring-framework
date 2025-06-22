@@ -64,10 +64,8 @@ public abstract class ArchitectureCheck extends DefaultTask {
 	public ArchitectureCheck() {
 		getOutputDirectory().convention(getProject().getLayout().getBuildDirectory().dir(getName()));
 		getProhibitObjectsRequireNonNull().convention(true);
-		getRules().addAll(packageInfoShouldBeNullMarked(),
-				classesShouldNotImportForbiddenTypes(),
-				javaClassesShouldNotImportKotlinAnnotations(),
-				allPackagesShouldBeFreeOfTangles(),
+		getRules().addAll(packageInfoShouldBeNullMarked(), classesShouldNotImportForbiddenTypes(),
+				javaClassesShouldNotImportKotlinAnnotations(), allPackagesShouldBeFreeOfTangles(),
 				noClassesShouldCallStringToLowerCaseWithoutLocale(),
 				noClassesShouldCallStringToUpperCaseWithoutLocale());
 		getRuleDescriptions().set(getRules().map((rules) -> rules.stream().map(ArchRule::getDescription).toList()));
@@ -76,12 +74,12 @@ public abstract class ArchitectureCheck extends DefaultTask {
 	@TaskAction
 	void checkArchitecture() throws IOException {
 		JavaClasses javaClasses = new ClassFileImporter()
-				.importPaths(this.classes.getFiles().stream().map(File::toPath).toList());
+			.importPaths(this.classes.getFiles().stream().map(File::toPath).toList());
 		List<EvaluationResult> violations = getRules().get()
-				.stream()
-				.map((rule) -> rule.evaluate(javaClasses))
-				.filter(EvaluationResult::hasViolation)
-				.toList();
+			.stream()
+			.map((rule) -> rule.evaluate(javaClasses))
+			.filter(EvaluationResult::hasViolation)
+			.toList();
 		File outputFile = getOutputDirectory().file("failure-report.txt").get().getAsFile();
 		outputFile.getParentFile().mkdirs();
 		if (!violations.isEmpty()) {
@@ -134,4 +132,5 @@ public abstract class ArchitectureCheck extends DefaultTask {
 	// The rules themselves can't be an input as they aren't serializable so we use
 	// their descriptions instead
 	abstract ListProperty<String> getRuleDescriptions();
+
 }

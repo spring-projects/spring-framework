@@ -21,7 +21,8 @@ import org.gradle.api.Project;
 import org.gradle.api.plugins.JavaBasePlugin;
 
 /**
- * {@link Plugin} that skips documentation tasks when the {@code "-PskipDocs"} property is defined.
+ * {@link Plugin} that skips documentation tasks when the {@code "-PskipDocs"} property is
+ * defined.
  *
  * @author Brian Clozel
  */
@@ -40,10 +41,10 @@ public class LocalDevelopmentPlugin implements Plugin<Project> {
 	private void skipDocumentationTasks(Project project) {
 		project.afterEvaluate(p -> {
 			p.getTasks().matching(task -> {
-						return JavaBasePlugin.DOCUMENTATION_GROUP.equals(task.getGroup())
-								|| "distribution".equals(task.getGroup());
-					})
-					.forEach(task -> task.setEnabled(false));
+				return JavaBasePlugin.DOCUMENTATION_GROUP.equals(task.getGroup())
+						|| "distribution".equals(task.getGroup());
+			}).forEach(task -> task.setEnabled(false));
 		});
 	}
+
 }

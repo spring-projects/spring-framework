@@ -1,11 +1,17 @@
 plugins {
 	id 'java-gradle-plugin'
 	id 'checkstyle'
+	id 'io.spring.javaformat' version "${javaFormatVersion}"
 }
 
 repositories {
 	mavenCentral()
 	gradlePluginPortal()
+}
+
+tasks.named('compileJava') {
+	dependsOn 'format'
+	mustRunAfter 'format'
 }
 
 ext {

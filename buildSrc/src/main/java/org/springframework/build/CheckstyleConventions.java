@@ -53,9 +53,11 @@ public class CheckstyleConventions {
 			checkstyle.setToolVersion("10.25.0");
 			checkstyle.getConfigDirectory().set(project.getRootProject().file("src/checkstyle"));
 			String version = SpringJavaFormatPlugin.class.getPackage().getImplementationVersion();
-			DependencySet checkstyleDependencies = project.getConfigurations().getByName("checkstyle").getDependencies();
-			checkstyleDependencies.add(
-					project.getDependencies().create("io.spring.javaformat:spring-javaformat-checkstyle:" + version));
+			DependencySet checkstyleDependencies = project.getConfigurations()
+				.getByName("checkstyle")
+				.getDependencies();
+			checkstyleDependencies
+				.add(project.getDependencies().create("io.spring.javaformat:spring-javaformat-checkstyle:" + version));
 		});
 	}
 
@@ -63,8 +65,9 @@ public class CheckstyleConventions {
 		project.getPlugins().apply(NoHttpPlugin.class);
 		NoHttpExtension noHttp = project.getExtensions().getByType(NoHttpExtension.class);
 		noHttp.setAllowlistFile(project.file("src/nohttp/allowlist.lines"));
-		noHttp.getSource().exclude("**/test-output/**", "**/.settings/**", "**/.classpath",
-				"**/.project", "**/.gradle/**", "**/node_modules/**", "**/spring-jcl/**", "buildSrc/build/**");
+		noHttp.getSource()
+			.exclude("**/test-output/**", "**/.settings/**", "**/.classpath", "**/.project", "**/.gradle/**",
+					"**/node_modules/**", "**/spring-jcl/**", "buildSrc/build/**");
 		List<String> buildFolders = List.of("bin", "build", "out");
 		project.allprojects(subproject -> {
 			Path rootPath = project.getRootDir().toPath();

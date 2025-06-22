@@ -40,18 +40,20 @@ import org.gradle.language.base.plugins.LifecycleBasePlugin;
  * @author Brian Clozel
  */
 public abstract class MultiReleaseExtension {
+
 	private final TaskContainer tasks;
+
 	private final SourceSetContainer sourceSets;
+
 	private final DependencyHandler dependencies;
+
 	private final ObjectFactory objects;
+
 	private final ConfigurationContainer configurations;
 
 	@Inject
-	public MultiReleaseExtension(SourceSetContainer sourceSets,
-								 ConfigurationContainer configurations,
-								 TaskContainer tasks,
-								 DependencyHandler dependencies,
-								 ObjectFactory objectFactory) {
+	public MultiReleaseExtension(SourceSetContainer sourceSets, ConfigurationContainer configurations,
+			TaskContainer tasks, DependencyHandler dependencies, ObjectFactory objectFactory) {
 		this.sourceSets = sourceSets;
 		this.configurations = configurations;
 		this.tasks = tasks;
@@ -72,40 +74,46 @@ public abstract class MultiReleaseExtension {
 	private void addLanguageVersion(int javaVersion, String mainSourceDirectory, String testSourceDirectory) {
 		String javaN = "java" + javaVersion;
 
-		SourceSet langSourceSet = sourceSets.create(javaN, srcSet -> srcSet.getJava().srcDir(mainSourceDirectory + javaN));
-		SourceSet testSourceSet = sourceSets.create(javaN + "Test", srcSet -> srcSet.getJava().srcDir(testSourceDirectory + javaN));
+		SourceSet langSourceSet = sourceSets.create(javaN,
+				srcSet -> srcSet.getJava().srcDir(mainSourceDirectory + javaN));
+		SourceSet testSourceSet = sourceSets.create(javaN + "Test",
+				srcSet -> srcSet.getJava().srcDir(testSourceDirectory + javaN));
 		SourceSet sharedSourceSet = sourceSets.findByName(SourceSet.MAIN_SOURCE_SET_NAME);
 		SourceSet sharedTestSourceSet = sourceSets.findByName(SourceSet.TEST_SOURCE_SET_NAME);
 
-		FileCollection mainClasses = objects.fileCollection().from(sourceSets.getByName(SourceSet.MAIN_SOURCE_SET_NAME).getOutput().getClassesDirs());
+		FileCollection mainClasses = objects.fileCollection()
+			.from(sourceSets.getByName(SourceSet.MAIN_SOURCE_SET_NAME).getOutput().getClassesDirs());
 		dependencies.add(javaN + "Implementation", mainClasses);
 
-		tasks.named(langSourceSet.getCompileJavaTaskName(), JavaCompile.class, task ->
-				task.getOptions().getRelease().set(javaVersion)
-		);
-		tasks.named(testSourceSet.getCompileJavaTaskName(), JavaCompile.class, task ->
-				task.getOptions().getRelease().set(javaVersion)
-		);
+		tasks.named(langSourceSet.getCompileJavaTaskName(), JavaCompile.class,
+				task -> task.getOptions().getRelease().set(javaVersion));
+		tasks.named(testSourceSet.getCompileJavaTaskName(), JavaCompile.class,
+				task -> task.getOptions().getRelease().set(javaVersion));
 
-		TaskProvider<Test> testTask = createTestTask(javaVersion, testSourceSet, sharedTestSourceSet, langSourceSet, sharedSourceSet);
+		TaskProvider<Test> testTask = createTestTask(javaVersion, testSourceSet, sharedTestSourceSet, langSourceSet,
+				sharedSourceSet);
 		tasks.named("check", task -> task.dependsOn(testTask));
 
 		configureMultiReleaseJar(javaVersion, langSourceSet);
 	}
 
-	private TaskProvider<Test> createTestTask(int javaVersion, SourceSet testSourceSet, SourceSet sharedTestSourceSet, SourceSet langSourceSet, SourceSet sharedSourceSet) {
+	private TaskProvider<Test> createTestTask(int javaVersion, SourceSet testSourceSet, SourceSet sharedTestSourceSet,
+			SourceSet langSourceSet, SourceSet sharedSourceSet) {
 		Configuration testImplementation = configurations.getByName(testSourceSet.getImplementationConfigurationName());
-		testImplementation.extendsFrom(configurations.getByName(sharedTestSourceSet.getImplementationConfigurationName()));
+		testImplementation
+			.extendsFrom(configurations.getByName(sharedTestSourceSet.getImplementationConfigurationName()));
 		Configuration testCompileOnly = configurations.getByName(testSourceSet.getCompileOnlyConfigurationName());
 		testCompileOnly.extendsFrom(configurations.getByName(sharedTestSourceSet.getCompileOnlyConfigurationName()));
 		testCompileOnly.getDependencies().add(dependencies.create(langSourceSet.getOutput().getClassesDirs()));
 		testCompileOnly.getDependencies().add(dependencies.create(sharedSourceSet.getOutput().getClassesDirs()));
 
-		Configuration testRuntimeClasspath = configurations.getByName(testSourceSet.getRuntimeClasspathConfigurationName());
+		Configuration testRuntimeClasspath = configurations
+			.getByName(testSourceSet.getRuntimeClasspathConfigurationName());
 		// so here's the deal. MRjars are JARs! Which means that to execute tests, we need
 		// the JAR on classpath, not just classes + resources as Gradle usually does
 		testRuntimeClasspath.getAttributes()
-				.attribute(LibraryElements.LIBRARY_ELEMENTS_ATTRIBUTE, objects.named(LibraryElements.class, LibraryElements.JAR));
+			.attribute(LibraryElements.LIBRARY_ELEMENTS_ATTRIBUTE,
+					objects.named(LibraryElements.class, LibraryElements.JAR));
 
 		TaskProvider<Test> testTask = tasks.register("java" + javaVersion + "Test", Test.class, test -> {
 			test.setGroup(LifecycleBasePlugin.VERIFICATION_GROUP);

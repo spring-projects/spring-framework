@@ -27,11 +27,12 @@ import org.springframework.build.architecture.ArchitecturePlugin;
  * Plugin to apply conventions to projects that are part of Spring Framework's build.
  * Conventions are applied in response to various plugins being applied.
  *
- * <p>When the {@link JavaBasePlugin} is applied, the conventions in {@link CheckstyleConventions},
- * {@link TestConventions} and {@link JavaConventions} are applied.
- * The {@link ArchitecturePlugin} plugin is also applied.
- * When the {@link KotlinBasePlugin} is applied, the conventions in {@link KotlinConventions}
- * are applied.
+ * <p>
+ * When the {@link JavaBasePlugin} is applied, the conventions in
+ * {@link CheckstyleConventions}, {@link TestConventions} and {@link JavaConventions} are
+ * applied. The {@link ArchitecturePlugin} plugin is also applied. When the
+ * {@link KotlinBasePlugin} is applied, the conventions in {@link KotlinConventions} are
+ * applied.
  *
  * @author Brian Clozel
  */

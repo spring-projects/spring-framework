@@ -30,8 +30,8 @@ import org.gradle.testretry.TestRetryTaskExtension;
  * Conventions that are applied in the presence of the {@link JavaBasePlugin}. When the
  * plugin is applied:
  * <ul>
- * <li>The {@link TestRetryPlugin Test Retry} plugin is applied so that flaky tests
- * are retried 3 times when running on the CI server.
+ * <li>The {@link TestRetryPlugin Test Retry} plugin is applied so that flaky tests are
+ * retried 3 times when running on the CI server.
  * </ul>
  *
  * @author Brian Clozel
@@ -45,11 +45,10 @@ class TestConventions {
 	}
 
 	private void configureTestConventions(Project project) {
-		project.getTasks().withType(Test.class,
-				test -> {
-					configureTests(project, test);
-					configureTestRetryPlugin(project, test);
-				});
+		project.getTasks().withType(Test.class, test -> {
+			configureTests(project, test);
+			configureTestRetryPlugin(project, test);
+		});
 	}
 
 	private void configureTests(Project project, Test test) {
@@ -60,18 +59,12 @@ class TestConventions {
 			}
 		});
 		test.include("**/*Tests.class", "**/*Test.class");
-		test.setSystemProperties(Map.of(
-				"java.awt.headless", "true",
-				"io.netty.leakDetection.level", "paranoid"
-		));
+		test.setSystemProperties(Map.of("java.awt.headless", "true", "io.netty.leakDetection.level", "paranoid"));
 		if (project.hasProperty("testGroups")) {
 			test.systemProperty("testGroups", project.getProperties().get("testGroups"));
 		}
-		test.jvmArgs(
-				"--add-opens=java.base/java.lang=ALL-UNNAMED",
-				"--add-opens=java.base/java.util=ALL-UNNAMED",
-				"-Xshare:off"
-		);
+		test.jvmArgs("--add-opens=java.base/java.lang=ALL-UNNAMED", "--add-opens=java.base/java.util=ALL-UNNAMED",
+				"-Xshare:off");
 	}
 
 	private void configureTestRetryPlugin(Project project, Test test) {

@@ -184,7 +184,7 @@ class ScriptBeanDefinitionParser extends AbstractBeanDefinitionParser {
 		ConstructorArgumentValues cav = bd.getConstructorArgumentValues();
 		int constructorArgNum = 0;
 		if (StringUtils.hasLength(engine)) {
-			cav.addIndexedArgumentValue(constructorArgNum++, engine);
+			cav.addIndexedArgumentValue(constructorArgNum++   , engine);
 		}
 		cav.addIndexedArgumentValue(constructorArgNum++, value);
 		if (element.hasAttribute(SCRIPT_INTERFACES_ATTRIBUTE)) {

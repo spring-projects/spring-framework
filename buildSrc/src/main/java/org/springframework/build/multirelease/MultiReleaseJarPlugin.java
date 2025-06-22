@@ -30,8 +30,8 @@ import org.gradle.api.tasks.TaskContainer;
 import org.gradle.jvm.toolchain.JavaToolchainService;
 
 /**
- * A plugin which adds support for building multi-release jars
- * with Gradle.
+ * A plugin which adds support for building multi-release jars with Gradle.
+ *
  * @author Cedric Champeau
  * @author Brian Clozel
  * @see <a href="https://github.com/melix/mrjar-gradle-plugin">original project</a>
@@ -51,11 +51,8 @@ public class MultiReleaseJarPlugin implements Plugin<Project> {
 		TaskContainer tasks = project.getTasks();
 		DependencyHandler dependencies = project.getDependencies();
 		ObjectFactory objects = project.getObjects();
-		extensions.create("multiRelease", MultiReleaseExtension.class,
-				javaPluginExtension.getSourceSets(),
-				configurations,
-				tasks,
-				dependencies,
-				objects);
+		extensions.create("multiRelease", MultiReleaseExtension.class, javaPluginExtension.getSourceSets(),
+				configurations, tasks, dependencies, objects);
 	}
+
 }

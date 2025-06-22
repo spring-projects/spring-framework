@@ -57,7 +57,6 @@ public class ShadowSource extends DefaultTask {
 
 	private final List<Relocation> relocations = new ArrayList<>();
 
-
 	@Classpath
 	@Optional
 	public List<Configuration> getConfigurations() {
@@ -105,8 +104,9 @@ public class ShadowSource extends DefaultTask {
 
 	private Set<ComponentArtifactsResult> resolveSourceArtifacts(DependencyResult dependency) {
 		ModuleComponentSelector componentSelector = (ModuleComponentSelector) dependency.getRequested();
-		ArtifactResolutionQuery query = getProject().getDependencies().createArtifactResolutionQuery()
-				.forModule(componentSelector.getGroup(), componentSelector.getModule(), componentSelector.getVersion());
+		ArtifactResolutionQuery query = getProject().getDependencies()
+			.createArtifactResolutionQuery()
+			.forModule(componentSelector.getGroup(), componentSelector.getModule(), componentSelector.getVersion());
 		return executeQuery(query).getResolvedComponents();
 	}
 
@@ -145,7 +145,6 @@ public class ShadowSource extends DefaultTask {
 		return getProject().zipTree(sourceJar);
 	}
 
-
 	/**
 	 * A single relocation.
 	 */
@@ -159,14 +158,12 @@ public class ShadowSource extends DefaultTask {
 
 		private final String pathDestination;
 
-
 		Relocation(String pattern, String destination) {
 			this.pattern = pattern;
 			this.pathPattern = pattern.replace('.', '/');
 			this.destination = destination;
 			this.pathDestination = destination.replace('.', '/');
 		}
-
 
 		@Input
 		public String getPattern() {

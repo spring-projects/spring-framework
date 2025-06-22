@@ -48,15 +48,14 @@ public class ArchitecturePlugin implements Plugin<Project> {
 				continue;
 			}
 			TaskProvider<ArchitectureCheck> checkArchitecture = project.getTasks()
-					.register(taskName(sourceSet), ArchitectureCheck.class,
-							(task) -> {
-								task.setClasses(sourceSet.getOutput().getClassesDirs());
-								task.getResourcesDirectory().set(sourceSet.getOutput().getResourcesDir());
-								task.dependsOn(sourceSet.getProcessResourcesTaskName());
-								task.setDescription("Checks the architecture of the classes of the " + sourceSet.getName()
-										+ " source set.");
-								task.setGroup(LifecycleBasePlugin.VERIFICATION_GROUP);
-							});
+				.register(taskName(sourceSet), ArchitectureCheck.class, (task) -> {
+					task.setClasses(sourceSet.getOutput().getClassesDirs());
+					task.getResourcesDirectory().set(sourceSet.getOutput().getResourcesDir());
+					task.dependsOn(sourceSet.getProcessResourcesTaskName());
+					task.setDescription(
+							"Checks the architecture of the classes of the " + sourceSet.getName() + " source set.");
+					task.setGroup(LifecycleBasePlugin.VERIFICATION_GROUP);
+				});
 			architectureChecks.add(checkArchitecture);
 		}
 		if (!architectureChecks.isEmpty()) {
@@ -66,8 +65,7 @@ public class ArchitecturePlugin implements Plugin<Project> {
 	}
 
 	private static String taskName(SourceSet sourceSet) {
-		return "checkArchitecture"
-				+ sourceSet.getName().substring(0, 1).toUpperCase()
+		return "checkArchitecture" + sourceSet.getName().substring(0, 1).toUpperCase()
 				+ sourceSet.getName().substring(1);
 	}
 

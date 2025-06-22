@@ -32,17 +32,18 @@ public interface RuntimeHintsAgentArgumentProvider extends CommandLineArgumentPr
 	@Classpath
 	ConfigurableFileCollection getAgentJar();
 
-    @Input
-    SetProperty<String> getIncludedPackages();
+	@Input
+	SetProperty<String> getIncludedPackages();
 
-    @Input
-    SetProperty<String> getExcludedPackages();
+	@Input
+	SetProperty<String> getExcludedPackages();
 
-    @Override
-    default Iterable<String> asArguments() {
-        StringBuilder packages = new StringBuilder();
-        getIncludedPackages().get().forEach(packageName -> packages.append('+').append(packageName).append(','));
-        getExcludedPackages().get().forEach(packageName -> packages.append('-').append(packageName).append(','));
-        return Collections.singleton("-javaagent:" + getAgentJar().getSingleFile() + "=" + packages);
-    }
+	@Override
+	default Iterable<String> asArguments() {
+		StringBuilder packages = new StringBuilder();
+		getIncludedPackages().get().forEach(packageName -> packages.append('+').append(packageName).append(','));
+		getExcludedPackages().get().forEach(packageName -> packages.append('-').append(packageName).append(','));
+		return Collections.singleton("-javaagent:" + getAgentJar().getSingleFile() + "=" + packages);
+	}
+
 }

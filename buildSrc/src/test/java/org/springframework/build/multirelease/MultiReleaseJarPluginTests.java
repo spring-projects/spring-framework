@@ -88,7 +88,7 @@ public class MultiReleaseJarPluginTests {
 
 		BuildResult buildResult = runGradle("printReleaseVersion");
 		assertThat(buildResult.getOutput()).contains("compileJava21Java releaseVersion: 21")
-				.contains("compileJava21TestJava releaseVersion: 21");
+			.contains("compileJava21TestJava releaseVersion: 21");
 	}
 
 	@Test
@@ -112,7 +112,7 @@ public class MultiReleaseJarPluginTests {
 			assertThat(mainAttributes.getValue("Multi-Release")).isEqualTo("true");
 
 			assertThat(jar.entries().asIterator()).toIterable()
-					.anyMatch(entry -> entry.getName().equals("META-INF/versions/17/Main.class"));
+				.anyMatch(entry -> entry.getName().equals("META-INF/versions/17/Main.class"));
 		}
 	}
 

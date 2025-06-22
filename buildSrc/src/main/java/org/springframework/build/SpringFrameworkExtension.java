@@ -31,10 +31,13 @@ public class SpringFrameworkExtension {
 
 	public SpringFrameworkExtension(Project project) {
 		this.enableJavaPreviewFeatures = project.getObjects().property(Boolean.class);
-		project.getTasks().withType(JavaCompile.class).configureEach(javaCompile ->
-				javaCompile.getOptions().getCompilerArgumentProviders().add(asArgumentProvider()));
-		project.getTasks().withType(Test.class).configureEach(test ->
-				test.getJvmArgumentProviders().add(asArgumentProvider()));
+		project.getTasks()
+			.withType(JavaCompile.class)
+			.configureEach(
+					javaCompile -> javaCompile.getOptions().getCompilerArgumentProviders().add(asArgumentProvider()));
+		project.getTasks()
+			.withType(Test.class)
+			.configureEach(test -> test.getJvmArgumentProviders().add(asArgumentProvider()));
 
 	}
 
@@ -50,4 +53,5 @@ public class SpringFrameworkExtension {
 			return Collections.emptyList();
 		};
 	}
+
 }

@@ -20,6 +20,7 @@ import org.gradle.api.provider.SetProperty;
 
 /**
  * Entry point to the DSL extension for the {@link RuntimeHintsAgentPlugin} Gradle plugin.
+ *
  * @author Brian Clozel
  */
 public interface RuntimeHintsAgentExtension {
@@ -27,4 +28,5 @@ public interface RuntimeHintsAgentExtension {
 	SetProperty<String> getIncludedPackages();
 
 	SetProperty<String> getExcludedPackages();
+
 }

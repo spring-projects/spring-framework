@@ -42,9 +42,10 @@ import java.util.Collections;
 public class RuntimeHintsAgentPlugin implements Plugin<Project> {
 
 	public static final String RUNTIMEHINTS_TEST_TASK = "runtimeHintsTest";
-	private static final String EXTENSION_NAME = "runtimeHintsAgent";
-	private static final String CONFIGURATION_NAME = "testRuntimeHintsAgentJar";
 
+	private static final String EXTENSION_NAME = "runtimeHintsAgent";
+
+	private static final String CONFIGURATION_NAME = "testRuntimeHintsAgentJar";
 
 	@Override
 	public void apply(Project project) {
@@ -70,15 +71,17 @@ public class RuntimeHintsAgentPlugin implements Plugin<Project> {
 	}
 
 	private static RuntimeHintsAgentExtension createRuntimeHintsAgentExtension(Project project) {
-		RuntimeHintsAgentExtension agentExtension = project.getExtensions().create(EXTENSION_NAME, RuntimeHintsAgentExtension.class);
+		RuntimeHintsAgentExtension agentExtension = project.getExtensions()
+			.create(EXTENSION_NAME, RuntimeHintsAgentExtension.class);
 		agentExtension.getIncludedPackages().convention(Collections.singleton("org.springframework"));
 		agentExtension.getExcludedPackages().convention(Collections.emptySet());
 		return agentExtension;
 	}
 
-	private static RuntimeHintsAgentArgumentProvider createRuntimeHintsAgentArgumentProvider(
-			Project project, RuntimeHintsAgentExtension agentExtension) {
-		RuntimeHintsAgentArgumentProvider agentArgumentProvider = project.getObjects().newInstance(RuntimeHintsAgentArgumentProvider.class);
+	private static RuntimeHintsAgentArgumentProvider createRuntimeHintsAgentArgumentProvider(Project project,
+			RuntimeHintsAgentExtension agentExtension) {
+		RuntimeHintsAgentArgumentProvider agentArgumentProvider = project.getObjects()
+			.newInstance(RuntimeHintsAgentArgumentProvider.class);
 		agentArgumentProvider.getAgentJar().from(createRuntimeHintsAgentConfiguration(project));
 		agentArgumentProvider.getIncludedPackages().set(agentExtension.getIncludedPackages());
 		agentArgumentProvider.getExcludedPackages().set(agentExtension.getExcludedPackages());
@@ -90,12 +93,18 @@ public class RuntimeHintsAgentPlugin implements Plugin<Project> {
 			configuration.setCanBeConsumed(false);
 			configuration.setTransitive(false); // Only the built artifact is required
 			configuration.attributes(attributes -> {
-				attributes.attribute(Bundling.BUNDLING_ATTRIBUTE, project.getObjects().named(Bundling.class, Bundling.EXTERNAL));
-				attributes.attribute(Category.CATEGORY_ATTRIBUTE, project.getObjects().named(Category.class, Category.LIBRARY));
-				attributes.attribute(LibraryElements.LIBRARY_ELEMENTS_ATTRIBUTE, project.getObjects().named(LibraryElements.class, LibraryElements.JAR));
-				attributes.attribute(TargetJvmVersion.TARGET_JVM_VERSION_ATTRIBUTE, Integer.valueOf(JavaVersion.current().getMajorVersion()));
-				attributes.attribute(Usage.USAGE_ATTRIBUTE, project.getObjects().named(Usage.class, Usage.JAVA_RUNTIME));
+				attributes.attribute(Bundling.BUNDLING_ATTRIBUTE,
+						project.getObjects().named(Bundling.class, Bundling.EXTERNAL));
+				attributes.attribute(Category.CATEGORY_ATTRIBUTE,
+						project.getObjects().named(Category.class, Category.LIBRARY));
+				attributes.attribute(LibraryElements.LIBRARY_ELEMENTS_ATTRIBUTE,
+						project.getObjects().named(LibraryElements.class, LibraryElements.JAR));
+				attributes.attribute(TargetJvmVersion.TARGET_JVM_VERSION_ATTRIBUTE,
+						Integer.valueOf(JavaVersion.current().getMajorVersion()));
+				attributes.attribute(Usage.USAGE_ATTRIBUTE,
+						project.getObjects().named(Usage.class, Usage.JAVA_RUNTIME));
 			});
 		});
 	}
+
 }
