@@ -485,7 +485,7 @@ comes into play. The following examples uses `@CacheConfig` to set the name of t
 
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
-	@CacheConfig("books") <1>
+	@CacheConfig(cacheNames = "books") <1>
 	public class BookRepositoryImpl implements BookRepository {
 
 		@Cacheable
