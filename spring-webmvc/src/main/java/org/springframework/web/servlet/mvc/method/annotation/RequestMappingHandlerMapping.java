@@ -46,6 +46,7 @@ import org.springframework.util.StringValueResolver;
 import org.springframework.web.accept.ApiVersionStrategy;
 import org.springframework.web.accept.ContentNegotiationManager;
 import org.springframework.web.accept.DefaultApiVersionStrategy;
+import org.springframework.web.accept.InvalidApiVersionException;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -198,6 +199,38 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	@Override
 	protected boolean isHandler(Class<?> beanType) {
 		return AnnotatedElementUtils.hasAnnotation(beanType, Controller.class);
+	}
+
+
+	@Override
+	protected @Nullable HandlerMethod getHandlerInternal(HttpServletRequest request) throws Exception {
+		if (this.apiVersionStrategy != null) {
+			Comparable<?> requestVersion = (Comparable<?>) request.getAttribute(API_VERSION_ATTRIBUTE);
+			if (requestVersion == null) {
+				requestVersion = getApiVersion(request, this.apiVersionStrategy);
+				if (requestVersion != null) {
+					request.setAttribute(API_VERSION_ATTRIBUTE, requestVersion);
+				}
+			}
+		}
+		return super.getHandlerInternal(request);
+	}
+
+	private static @Nullable Comparable<?> getApiVersion(
+			HttpServletRequest request, ApiVersionStrategy versionStrategy) {
+
+		String value = versionStrategy.resolveVersion(request);
+		if (value == null) {
+			return versionStrategy.getDefaultVersion();
+		}
+		try {
+			Comparable<?> version = versionStrategy.parseVersion(value);
+			versionStrategy.validateVersion(version, request);
+			return version;
+		}
+		catch (Exception ex) {
+			throw new InvalidApiVersionException(value, null, ex);
+		}
 	}
 
 	/**

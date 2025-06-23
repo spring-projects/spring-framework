@@ -22,6 +22,7 @@ import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.web.accept.InvalidApiVersionException;
+import org.springframework.web.accept.MissingApiVersionException;
 import org.springframework.web.accept.SemanticApiVersionParser;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest;
@@ -59,7 +60,8 @@ public class DefaultApiVersionStrategiesTests {
 	@Test
 	void validateUnsupportedVersion() {
 		assertThatThrownBy(() -> validateVersion("1.2", apiVersionStrategy()))
-				.isInstanceOf(InvalidApiVersionException.class);
+				.isInstanceOf(InvalidApiVersionException.class)
+				.hasMessage("400 BAD_REQUEST \"Invalid API version: '1.2.0'.\"");
 	}
 
 	@Test
@@ -78,6 +80,14 @@ public class DefaultApiVersionStrategiesTests {
 
 		assertThatThrownBy(() -> strategy.validateVersion(version, exchange))
 				.isInstanceOf(InvalidApiVersionException.class);
+	}
+
+	@Test
+	void missingRequiredVersion() {
+		DefaultApiVersionStrategy strategy = apiVersionStrategy();
+		assertThatThrownBy(() -> strategy.validateVersion(null, exchange))
+				.isInstanceOf(MissingApiVersionException.class)
+				.hasMessage("400 BAD_REQUEST \"API version is required.\"");
 	}
 
 	private static DefaultApiVersionStrategy apiVersionStrategy() {
