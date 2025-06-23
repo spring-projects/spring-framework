@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.ProtocolException;
+import java.net.Proxy;
 import java.net.URI;
 import java.net.URL;
 import java.util.Collections;
@@ -38,7 +39,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-public class SimpleClientHttpRequestFactoryTests extends AbstractHttpRequestFactoryTests {
+class SimpleClientHttpRequestFactoryTests extends AbstractHttpRequestFactoryTests {
 
 	@Override
 	protected ClientHttpRequestFactory createRequestFactory() {
@@ -117,6 +118,23 @@ public class SimpleClientHttpRequestFactoryTests extends AbstractHttpRequestFact
 		verify(urlConnection, times(1)).addRequestProperty("foo", "");
 	}
 
+	@Test
+	void builderShouldApplyConfiguredTimeouts() throws IOException {
+		Proxy proxy = Proxy.NO_PROXY;
+		var factory = SimpleClientHttpRequestFactory.builder()
+				.connectTimeout(1234)
+				.readTimeout(5678)
+				.proxy(proxy)
+				.build();
+
+		URL url = new URL("https://example.com");
+
+		HttpURLConnection httpURLConnection = factory.openConnection(url, proxy);
+		factory.prepareConnection(httpURLConnection, "GET");
+
+		assertThat(httpURLConnection.getConnectTimeout()).isEqualTo(1234);
+		assertThat(httpURLConnection.getReadTimeout()).isEqualTo(5678);
+	}
 
 	private static class TestHttpURLConnection extends HttpURLConnection {
 

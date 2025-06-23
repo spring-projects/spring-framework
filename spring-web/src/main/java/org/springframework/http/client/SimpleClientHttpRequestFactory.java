@@ -51,6 +51,31 @@ public class SimpleClientHttpRequestFactory implements ClientHttpRequestFactory 
 
 	private int readTimeout = -1;
 
+	/**
+	 * Private constructor to be used by the Builder.
+	 */
+	private SimpleClientHttpRequestFactory(Builder builder) {
+		this.proxy = builder.proxy;
+		this.chunkSize = builder.chunkSize;
+		this.connectTimeout = builder.connectTimeout;
+		this.readTimeout = builder.readTimeout;
+	}
+
+	/**
+	 * Default constructor.
+	 * Use {@link #builder()} for a fluent API for configuration.
+	 */
+	public SimpleClientHttpRequestFactory() {
+	}
+
+	/**
+	 * Creates a new {@code Builder} for {@link SimpleClientHttpRequestFactory}.
+	 * @return a new {@code Builder} instance
+	 * @since 7.0
+	 */
+	public static Builder builder() {
+		return new Builder();
+	}
 
 	/**
 	 * Set the {@link Proxy} to use for this request factory.
@@ -163,4 +188,99 @@ public class SimpleClientHttpRequestFactory implements ClientHttpRequestFactory 
 		connection.setRequestMethod(httpMethod);
 	}
 
+
+	/**
+	 * A builder for {@link SimpleClientHttpRequestFactory}.
+	 * @since 7.0
+	 */
+	public static class Builder {
+
+		@Nullable
+		private Proxy proxy;
+
+		private int chunkSize = DEFAULT_CHUNK_SIZE;
+
+		private int connectTimeout = -1;
+
+		private int readTimeout = -1;
+
+		/**
+		 * Set the {@link Proxy} to use for this request factory.
+		 * @param proxy the proxy to use
+		 * @return this builder
+		 */
+		public Builder proxy(Proxy proxy) {
+			this.proxy = proxy;
+			return this;
+		}
+
+		/**
+		 * Set the number of bytes to write in each chunk when not buffering request
+		 * bodies locally.
+		 * @param chunkSize the chunk size
+		 * @return this builder
+		 */
+		public Builder chunkSize(int chunkSize) {
+			this.chunkSize = chunkSize;
+			return this;
+		}
+
+		/**
+		 * Set the underlying URLConnection's connect timeout (in milliseconds).
+		 * A timeout value of 0 specifies an infinite timeout.
+		 * <p>Default is the system's default timeout.
+		 * @param connectTimeout the connect timeout in milliseconds
+		 * @return this builder
+		 */
+		public Builder connectTimeout(int connectTimeout) {
+			this.connectTimeout = connectTimeout;
+			return this;
+		}
+
+		/**
+		 * Set the underlying URLConnection's connect timeout as {@code Duration}.
+		 * A timeout value of 0 specifies an infinite timeout.
+		 * <p>Default is the system's default timeout.
+		 * @param connectTimeout the connect timeout duration
+		 * @return this builder
+		 */
+		public Builder connectTimeout(Duration connectTimeout) {
+			Assert.notNull(connectTimeout, "ConnectTimeout must not be null");
+			this.connectTimeout = (int) connectTimeout.toMillis();
+			return this;
+		}
+
+		/**
+		 * Set the underlying URLConnection's read timeout (in milliseconds).
+		 * A timeout value of 0 specifies an infinite timeout.
+		 * <p>Default is the system's default timeout.
+		 * @param readTimeout the read timeout in milliseconds
+		 * @return this builder
+		 */
+		public Builder readTimeout(int readTimeout) {
+			this.readTimeout = readTimeout;
+			return this;
+		}
+
+		/**
+		 * Set the underlying URLConnection's read timeout as {@code Duration}.
+		 * A timeout value of 0 specifies an infinite timeout.
+		 * <p>Default is the system's default timeout.
+		 * @param readTimeout the read timeout duration
+		 * @return this builder
+		 */
+		public Builder readTimeout(Duration readTimeout) {
+			Assert.notNull(readTimeout, "ReadTimeout must not be null");
+			this.readTimeout = (int) readTimeout.toMillis();
+			return this;
+		}
+
+		/**
+		 * Builds a new {@link SimpleClientHttpRequestFactory} instance with the configured properties.
+		 * @return a new {@link SimpleClientHttpRequestFactory}
+		 */
+		public SimpleClientHttpRequestFactory build() {
+			return new SimpleClientHttpRequestFactory(this);
+		}
+	}
 }
