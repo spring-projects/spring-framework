@@ -16,6 +16,7 @@
 
 package org.springframework.web.client;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -556,6 +557,27 @@ class RestClientIntegrationTests {
 			assertThat(request.getBody().readUtf8()).isEqualTo("{\"username\":\"username\"}");
 			assertThat(request.getHeader(HttpHeaders.ACCEPT)).isEqualTo("application/json");
 			assertThat(request.getHeader(HttpHeaders.CONTENT_TYPE)).isEqualTo("application/json");
+		});
+	}
+
+	@ParameterizedRestClientTest
+	void postStreamingMessageBody(ClientHttpRequestFactory requestFactory) {
+		startServer(requestFactory);
+
+		prepareResponse(response -> response.setResponseCode(200));
+
+		ResponseEntity<Void> result = this.restClient.post()
+				.uri("/streaming/body")
+				.body(new ByteArrayInputStream("test-data".getBytes(UTF_8))::transferTo)
+				.retrieve()
+				.toBodilessEntity();
+
+		assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+		expectRequestCount(1);
+		expectRequest(request -> {
+			assertThat(request.getPath()).isEqualTo("/streaming/body");
+			assertThat(request.getBody().readUtf8()).isEqualTo("test-data");
 		});
 	}
 
