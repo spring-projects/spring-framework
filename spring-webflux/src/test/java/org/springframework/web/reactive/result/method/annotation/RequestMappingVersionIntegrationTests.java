@@ -25,7 +25,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.reactive.accept.StandardApiDeprecationHandler;
+import org.springframework.web.reactive.accept.StandardApiVersionDeprecationHandler;
 import org.springframework.web.reactive.config.ApiVersionConfigurer;
 import org.springframework.web.reactive.config.EnableWebFlux;
 import org.springframework.web.reactive.config.WebFluxConfigurer;
@@ -90,7 +90,7 @@ public class RequestMappingVersionIntegrationTests extends AbstractRequestMappin
 		@Override
 		public void configureApiVersioning(ApiVersionConfigurer configurer) {
 
-			StandardApiDeprecationHandler handler = new StandardApiDeprecationHandler();
+			StandardApiVersionDeprecationHandler handler = new StandardApiVersionDeprecationHandler();
 			handler.configureVersion("1").setDeprecationLink(URI.create("https://example.org/deprecation"));
 
 			configurer.useRequestHeader("X-API-Version")

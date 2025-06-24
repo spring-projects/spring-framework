@@ -34,7 +34,7 @@ import org.springframework.web.accept.SemanticApiVersionParser;
 import org.springframework.web.server.ServerWebExchange;
 
 /**
- * {@code ApiDeprecationHandler} based on
+ * {@code ApiVersionDeprecationHandler} based on
  * <a href="https://datatracker.ietf.org/doc/html/rfc9745">RFC 9745</a> and
  * <a href="https://datatracker.ietf.org/doc/html/rfc8594">RFC 8594</a> that
  * provides the option to set the "Deprecation" and "Sunset" response headers,
@@ -46,7 +46,7 @@ import org.springframework.web.server.ServerWebExchange;
  * @author Rossen Stoyanchev
  * @since 7.0
  */
-public class StandardApiDeprecationHandler implements ApiDeprecationHandler {
+public class StandardApiVersionDeprecationHandler implements ApiVersionDeprecationHandler {
 
 	private final ApiVersionParser<?> versionParser;
 
@@ -58,9 +58,9 @@ public class StandardApiDeprecationHandler implements ApiDeprecationHandler {
 	 * <p>By default, {@link SemanticApiVersionParser} is used to parse configured
 	 * API versions, so those can be compared to request versions parsed at runtime.
 	 * If you have a custom parser, then please use the
-	 * {@link #StandardApiDeprecationHandler(ApiVersionParser)} constructor.
+	 * {@link #StandardApiVersionDeprecationHandler(ApiVersionParser)} constructor.
 	 */
-	public StandardApiDeprecationHandler() {
+	public StandardApiVersionDeprecationHandler() {
 		this(new SemanticApiVersionParser());
 	}
 
@@ -69,7 +69,7 @@ public class StandardApiDeprecationHandler implements ApiDeprecationHandler {
 	 * This needs to be the same as the parser type used at runtime to parse
 	 * request versions.
 	 */
-	public StandardApiDeprecationHandler(ApiVersionParser<?> parser) {
+	public StandardApiVersionDeprecationHandler(ApiVersionParser<?> parser) {
 		this.versionParser = parser;
 	}
 
@@ -108,7 +108,7 @@ public class StandardApiDeprecationHandler implements ApiDeprecationHandler {
 
 	@Override
 	public String toString() {
-		return "StandardApiDeprecationHandler " + this.infos.values();
+		return "StandardApiVersionDeprecationHandler " + this.infos.values();
 	}
 
 
@@ -121,7 +121,7 @@ public class StandardApiDeprecationHandler implements ApiDeprecationHandler {
 
 		private VersionSpec(Comparable<?> version) {
 			this.version = version;
-			StandardApiDeprecationHandler.this.infos.put(version, new VersionInfo(version));
+			StandardApiVersionDeprecationHandler.this.infos.put(version, new VersionInfo(version));
 		}
 
 		/**
@@ -197,7 +197,7 @@ public class StandardApiDeprecationHandler implements ApiDeprecationHandler {
 		}
 
 		private VersionSpec map(Function<VersionInfo, VersionInfo> function) {
-			StandardApiDeprecationHandler.this.infos.compute(this.version, (version, versionInfo) -> {
+			StandardApiVersionDeprecationHandler.this.infos.compute(this.version, (version, versionInfo) -> {
 				Assert.state(versionInfo != null, "No VersionInfo");
 				return function.apply(versionInfo);
 			});

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.web.reactive.accept;
+package org.springframework.web.accept;
 
 import java.net.URI;
 import java.time.ZonedDateTime;
@@ -22,21 +22,20 @@ import java.time.format.DateTimeFormatter;
 
 import org.junit.jupiter.api.Test;
 
-import org.springframework.http.HttpHeaders;
-import org.springframework.web.accept.ApiVersionParser;
-import org.springframework.web.server.ServerWebExchange;
-import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest;
-import org.springframework.web.testfixture.server.MockServerWebExchange;
+import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
+import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
 
-import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Unit tests for {@link StandardApiDeprecationHandler}.
+ * Unit tests for {@link StandardApiVersionDeprecationHandler}.
  * @author Rossen Stoyanchev
  */
-public class StandardApiDeprecationHandlerTests {
+public class StandardApiVersionDeprecationHandlerTests {
 
-	private final ServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/").build());
+	private final MockHttpServletRequest request = new MockHttpServletRequest();
+
+	private final MockHttpServletResponse response = new MockHttpServletResponse();
 
 
 	@Test
@@ -46,7 +45,7 @@ public class StandardApiDeprecationHandlerTests {
 		String sunsetUrl = "https://example.org/sunset";
 
 		ApiVersionParser<String> parser = version -> version;
-		StandardApiDeprecationHandler handler = new StandardApiDeprecationHandler(parser);
+		StandardApiVersionDeprecationHandler handler = new StandardApiVersionDeprecationHandler(parser);
 
 		handler.configureVersion("1.1")
 				.setDeprecationDate(getDate("Fri, 30 Jun 2023 23:59:59 GMT"))
@@ -54,12 +53,11 @@ public class StandardApiDeprecationHandlerTests {
 				.setSunsetDate(getDate(sunsetDate))
 				.setSunsetLink(URI.create(sunsetUrl));
 
-		handler.handleVersion("1.1", exchange);
+		handler.handleVersion("1.1", request, response);
 
-		HttpHeaders headers = exchange.getResponse().getHeaders();
-		assertThat(headers.getFirst("Deprecation")).isEqualTo("@1688169599");
-		assertThat(headers.getFirst("Sunset")).isEqualTo(sunsetDate);
-		assertThat(headers.get("Link")).containsExactlyInAnyOrder(
+		assertThat(response.getHeader("Deprecation")).isEqualTo("@1688169599");
+		assertThat(response.getHeader("Sunset")).isEqualTo(sunsetDate);
+		assertThat(response.getHeaders("Link")).containsExactlyInAnyOrder(
 				"<" + deprecationUrl + ">; rel=\"deprecation\"; type=\"text/html\"",
 				"<" + sunsetUrl + ">; rel=\"sunset\"; type=\"text/html\""
 		);

@@ -70,7 +70,7 @@ public interface ApiVersionStrategy {
 	 * to specify relevant dates and provide links to further details.
 	 * @param version the resolved and parsed request version
 	 * @param exchange the current exchange
-	 * @see ApiDeprecationHandler
+	 * @see ApiVersionDeprecationHandler
 	 */
 	void handleDeprecations(Comparable<?> version, ServerWebExchange exchange);
 

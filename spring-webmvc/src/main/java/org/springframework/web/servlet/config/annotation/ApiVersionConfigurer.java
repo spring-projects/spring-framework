@@ -26,7 +26,7 @@ import java.util.Set;
 import org.jspecify.annotations.Nullable;
 
 import org.springframework.http.MediaType;
-import org.springframework.web.accept.ApiDeprecationHandler;
+import org.springframework.web.accept.ApiVersionDeprecationHandler;
 import org.springframework.web.accept.ApiVersionParser;
 import org.springframework.web.accept.ApiVersionResolver;
 import org.springframework.web.accept.ApiVersionStrategy;
@@ -34,7 +34,7 @@ import org.springframework.web.accept.DefaultApiVersionStrategy;
 import org.springframework.web.accept.MediaTypeParamApiVersionResolver;
 import org.springframework.web.accept.PathApiVersionResolver;
 import org.springframework.web.accept.SemanticApiVersionParser;
-import org.springframework.web.accept.StandardApiDeprecationHandler;
+import org.springframework.web.accept.StandardApiVersionDeprecationHandler;
 
 /**
  * Configure API versioning.
@@ -52,7 +52,7 @@ public class ApiVersionConfigurer {
 
 	private @Nullable String defaultVersion;
 
-	private @Nullable ApiDeprecationHandler deprecationHandler;
+	private @Nullable ApiVersionDeprecationHandler deprecationHandler;
 
 	private final Set<String> supportedVersions = new LinkedHashSet<>();
 
@@ -147,9 +147,9 @@ public class ApiVersionConfigurer {
 	 * version. Typically, this involves sending hints and information about
 	 * the deprecation in response headers.
 	 * @param handler the handler to use
-	 * @see StandardApiDeprecationHandler
+	 * @see StandardApiVersionDeprecationHandler
 	 */
-	public ApiVersionConfigurer setDeprecationHandler(ApiDeprecationHandler handler) {
+	public ApiVersionConfigurer setDeprecationHandler(ApiVersionDeprecationHandler handler) {
 		this.deprecationHandler = handler;
 		return this;
 	}

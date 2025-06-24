@@ -23,7 +23,7 @@ import jakarta.servlet.ServletException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import org.springframework.web.accept.StandardApiDeprecationHandler;
+import org.springframework.web.accept.StandardApiVersionDeprecationHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
@@ -99,7 +99,7 @@ public class RequestMappingVersionHandlerMethodTests {
 		@Override
 		public void configureApiVersioning(ApiVersionConfigurer configurer) {
 
-			StandardApiDeprecationHandler handler = new StandardApiDeprecationHandler();
+			StandardApiVersionDeprecationHandler handler = new StandardApiVersionDeprecationHandler();
 			handler.configureVersion("1").setDeprecationLink(URI.create("https://example.org/deprecation"));
 
 			configurer.useRequestHeader("X-API-Version")

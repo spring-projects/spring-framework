@@ -52,7 +52,7 @@ public class DefaultApiVersionStrategy implements ApiVersionStrategy {
 
 	private final Set<Comparable<?>> detectedVersions = new TreeSet<>();
 
-	private final @Nullable ApiDeprecationHandler deprecationHandler;
+	private final @Nullable ApiVersionDeprecationHandler deprecationHandler;
 
 
 	/**
@@ -74,7 +74,7 @@ public class DefaultApiVersionStrategy implements ApiVersionStrategy {
 	public DefaultApiVersionStrategy(
 			List<ApiVersionResolver> versionResolvers, ApiVersionParser<?> versionParser,
 			boolean versionRequired, @Nullable String defaultVersion, boolean detectSupportedVersions,
-			@Nullable ApiDeprecationHandler deprecationHandler) {
+			@Nullable ApiVersionDeprecationHandler deprecationHandler) {
 
 		Assert.notEmpty(versionResolvers, "At least one ApiVersionResolver is required");
 		Assert.notNull(versionParser, "ApiVersionParser is required");

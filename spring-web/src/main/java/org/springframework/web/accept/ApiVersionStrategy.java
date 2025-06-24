@@ -69,7 +69,7 @@ public interface ApiVersionStrategy {
 	 * @param version the resolved and parsed request version
 	 * @param request the current request
 	 * @param response the current response
-	 * @see ApiDeprecationHandler
+	 * @see ApiVersionDeprecationHandler
 	 */
 	void handleDeprecations(Comparable<?> version, HttpServletRequest request, HttpServletResponse response);
 
