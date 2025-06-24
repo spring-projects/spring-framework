@@ -480,7 +480,7 @@ class DefaultServerRequestTests {
 		@Test
 		void ifMatchValueShouldMatchWhenETagMatches() {
 			MockServerHttpRequest mockRequest = MockServerHttpRequest.put("/")
-					.ifMatch("\"first\"", "\"second\"").build();
+					.header(HttpHeaders.IF_MATCH, "\"first\"", "\"second\"").build();
 			DefaultServerRequest request = createRequest(mockRequest);
 			Mono<ServerResponse> result = request.checkNotModified("\"second\"");
 

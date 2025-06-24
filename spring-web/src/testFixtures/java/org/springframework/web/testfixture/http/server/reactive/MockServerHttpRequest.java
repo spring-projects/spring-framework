@@ -282,15 +282,6 @@ public final class MockServerHttpRequest extends AbstractServerHttpRequest {
 		/**
 		 * Add the given header values.
 		 * @param headers the header values
-		 * @deprecated in favor of {@link #headers(HttpHeaders)}
-		 */
-		@Deprecated(since = "7.0", forRemoval = true)
-		B headers(MultiValueMap<String, String> headers);
-
-		/**
-		 * Add the given header values.
-		 * @param headers the header values
-		 * @since 7.0
 		 */
 		B headers(HttpHeaders headers);
 
@@ -331,12 +322,6 @@ public final class MockServerHttpRequest extends AbstractServerHttpRequest {
 		 * @see HttpHeaders#setIfUnmodifiedSince(long)
 		 */
 		B ifUnmodifiedSince(long ifUnmodifiedSince);
-
-		/**
-		 * Set the values of the {@code If-Match} header.
-		 * @param ifMatches the new value of the header
-		 */
-		B ifMatch(String... ifMatches);
 
 		/**
 		 * Set the values of the {@code If-None-Match} header.
@@ -482,14 +467,6 @@ public final class MockServerHttpRequest extends AbstractServerHttpRequest {
 			}
 			return this;
 		}
-
-		@Override
-		@Deprecated(since = "7.0", forRemoval = true)
-		public BodyBuilder headers(MultiValueMap<String, String> headers) {
-			this.headers.putAll(headers);
-			return this;
-		}
-
 		@Override
 		public BodyBuilder headers(HttpHeaders headers) {
 			this.headers.putAll(headers);
@@ -537,13 +514,6 @@ public final class MockServerHttpRequest extends AbstractServerHttpRequest {
 			this.headers.setIfUnmodifiedSince(ifUnmodifiedSince);
 			return this;
 		}
-
-		@Override
-		public BodyBuilder ifMatch(String... ifMatches) {
-			this.headers.setIfMatch(Arrays.asList(ifMatches));
-			return this;
-		}
-
 		@Override
 		public BodyBuilder ifNoneMatch(String... ifNoneMatches) {
 			this.headers.setIfNoneMatch(Arrays.asList(ifNoneMatches));

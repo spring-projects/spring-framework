@@ -314,7 +314,7 @@ class JacksonXmlHttpMessageConverterTests {
 	}
 
 
-	@SuppressWarnings("serial")
+	@SuppressWarnings({"serial", "unchecked"})
 	private static class MyXmlMapper extends XmlMapper {
 	}
 
