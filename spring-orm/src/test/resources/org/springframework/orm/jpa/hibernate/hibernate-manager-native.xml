@@ -18,6 +18,12 @@
 				<prop key="hibernate.cache.provider_class">org.hibernate.cache.HashtableCacheProvider</prop>
 			</props>
 		</property>
+		<qualifier type="org.springframework.orm.jpa.domain.MyDomain"/>
+	</bean>
+
+	<bean id="entityManager" class="org.springframework.orm.jpa.support.SharedEntityManagerBean">
+		<property name="entityManagerFactory" ref="entityManagerFactory"/>
+		<qualifier type="org.springframework.orm.jpa.domain.MyDomain"/>
 	</bean>
 
 	<bean id="transactionManager" class="org.springframework.orm.hibernate5.HibernateTransactionManager">
