@@ -467,6 +467,7 @@ public final class MockServerHttpRequest extends AbstractServerHttpRequest {
 			}
 			return this;
 		}
+
 		@Override
 		public BodyBuilder headers(HttpHeaders headers) {
 			this.headers.putAll(headers);
@@ -514,6 +515,7 @@ public final class MockServerHttpRequest extends AbstractServerHttpRequest {
 			this.headers.setIfUnmodifiedSince(ifUnmodifiedSince);
 			return this;
 		}
+		
 		@Override
 		public BodyBuilder ifNoneMatch(String... ifNoneMatches) {
 			this.headers.setIfNoneMatch(Arrays.asList(ifNoneMatches));

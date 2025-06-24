@@ -40,6 +40,7 @@ public interface SslInfo {
 	 */
 	X509Certificate @Nullable [] getPeerCertificates();
 
+
 	/**
 	 * Create {@link SslInfo} configured with the supplied session ID.
 	 * @since 7.0
