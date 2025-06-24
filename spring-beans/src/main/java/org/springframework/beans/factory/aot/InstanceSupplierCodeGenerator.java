@@ -115,6 +115,7 @@ public class InstanceSupplierCodeGenerator {
 		this.allowDirectSupplierShortcut = allowDirectSupplierShortcut;
 	}
 
+
 	/**
 	 * Generate the instance supplier code.
 	 * @param registeredBean the bean to handle
@@ -165,7 +166,8 @@ public class InstanceSupplierCodeGenerator {
 					hints -> hints.registerType(publicType, MemberCategory.INVOKE_DECLARED_CONSTRUCTORS));
 		}
 
-		if (!isVisible(constructor, constructor.getDeclaringClass())) {
+		if (!isVisible(constructor, constructor.getDeclaringClass()) ||
+				registeredBean.getMergedBeanDefinition().hasMethodOverrides()) {
 			return generateCodeForInaccessibleConstructor(descriptor,
 					hints -> hints.registerConstructor(constructor, ExecutableMode.INVOKE));
 		}

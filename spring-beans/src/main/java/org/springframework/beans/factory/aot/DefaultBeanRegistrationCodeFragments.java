@@ -245,7 +245,7 @@ class DefaultBeanRegistrationCodeFragments implements BeanRegistrationCodeFragme
 	}
 
 	private boolean hasInstanceSupplier() {
-		return this.registeredBean.getMergedBeanDefinition().getInstanceSupplier() != null;
+		return (this.registeredBean.getMergedBeanDefinition().getInstanceSupplier() != null);
 	}
 
 }

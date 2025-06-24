@@ -58,6 +58,7 @@ class BeanRegistrationCodeGenerator implements BeanRegistrationCode {
 		this.codeFragments = codeFragments;
 	}
 
+
 	@Override
 	public ClassName getClassName() {
 		return this.className;

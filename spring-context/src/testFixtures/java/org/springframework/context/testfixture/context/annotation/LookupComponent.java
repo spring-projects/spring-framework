@@ -17,13 +17,12 @@
 package org.springframework.context.testfixture.context.annotation;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Lookup;
 import org.springframework.core.env.Environment;
 
-public class AutowiredComponent {
+public abstract class LookupComponent {
 
 	private Environment environment;
-
-	private Integer counter;
 
 	@Autowired
 	public void setEnvironment(Environment environment) {
@@ -34,17 +33,11 @@ public class AutowiredComponent {
 		return this.environment;
 	}
 
-	@Autowired
-	public void setCounter(Integer counter) {
-		this.counter = counter;
-	}
-
-	public Integer getCounter() {
-		return this.counter;
-	}
+	@Lookup
+	public abstract Integer getCounter();
 
 	public Integer getCounter(Integer ignored) {
-		return this.counter;
+		return 0;
 	}
 
 }

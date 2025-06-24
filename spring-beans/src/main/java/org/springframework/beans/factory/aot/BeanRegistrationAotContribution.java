@@ -41,8 +41,7 @@ public interface BeanRegistrationAotContribution {
 	 * default code generation isn't suitable.
 	 * @param generationContext the generation context
 	 * @param codeFragments the existing code fragments
-	 * @return the code fragments to use, may be the original instance or a
-	 * wrapper
+	 * @return the code fragments to use, may be the original instance or a wrapper
 	 */
 	default BeanRegistrationCodeFragments customizeBeanRegistrationCodeFragments(
 			GenerationContext generationContext, BeanRegistrationCodeFragments codeFragments) {
@@ -78,8 +77,7 @@ public interface BeanRegistrationAotContribution {
 				return defaultCodeFragments.apply(codeFragments);
 			}
 			@Override
-			public void applyTo(GenerationContext generationContext,
-					BeanRegistrationCode beanRegistrationCode) {
+			public void applyTo(GenerationContext generationContext, BeanRegistrationCode beanRegistrationCode) {
 			}
 		};
 	}
