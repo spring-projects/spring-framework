@@ -515,7 +515,7 @@ public final class MockServerHttpRequest extends AbstractServerHttpRequest {
 			this.headers.setIfUnmodifiedSince(ifUnmodifiedSince);
 			return this;
 		}
-		
+
 		@Override
 		public BodyBuilder ifNoneMatch(String... ifNoneMatches) {
 			this.headers.setIfNoneMatch(Arrays.asList(ifNoneMatches));
