@@ -412,24 +412,24 @@ Kotlin::
 == API Version
 [.small]#xref:web/webmvc/mvc-controller/ann-requestmapping.adoc#mvc-ann-requestmapping-version[See equivalent in the Servlet stack]#
 
-There is no standard way to specify an API version, so you need to configure that first
-through the xref:web/webflux/config.adoc#webflux-config-api-version[WebFlux Config] along with other
-config options. This results in the creation of an
-xref:web/webflux-versioning.adoc#webflux-versioning-strategy[ApiVersionStrategy] that in
-supports request mapping.
+There is no standard way to specify an API version, so when you enable API versioning
+in the xref:web/webflux/config.adoc#webflux-config-api-version[WebFlux Config] you need
+to specify how to resolve the version. The WebFlux Config creates an
+xref:web/webflux-versioning.adoc#webflux-versioning-strategy[ApiVersionStrategy] that in turn
+is used to map requests.
 
 Once API versioning is enabled, you can begin to map requests with versions.
-The `@RequestMapping` version attribute supports the following:
+The `@RequestMapping` `version` attribute supports the following:
 
-- No value -- match any version
-- Fixed version ("1.2") -- match the given version only
-- Baseline version ("1.2+") -- match the given version and above
+- No value -- matches any version
+- Fixed version ("1.2") -- matches the given version only
+- Baseline version ("1.2+") -- matches the given version and above
 
 If multiple controller methods have a version less than or equal to the request version,
-the one closest to the request version is considered for mapping purposes,
+the highest of those, and closest to the request version, is the one considered,
 in effect superseding the rest.
 
-To illustrate this, consider the following controller mappings:
+To illustrate this, consider the following mappings:
 
 [tabs]
 ======
@@ -479,11 +479,12 @@ For request with version `"1.5"`:
 - (4) matches and is *chosen* as the highest match
 
 A request with version `"1.6"` does not have a match. (1) and (3) do match, but are
-superseded by (4), which does not match. In this scenario, `NotAcceptableApiVersionException`
-is raised resulting in a 400 response.
+superseded by (4), which allows only a strict match, and therefore does not match.
+In this scenario, a `NotAcceptableApiVersionException` results in a 400 response.
 
-NOTE: The above assumes the request version is a "supported" versions. If not it would
-fail xref:web/webflux-versioning.adoc#webflux-versioning-validation[Validation].
+NOTE: The above assumes the request version is a
+xref:web/webmvc/mvc-config/api-version.adoc["supported" version], or otherwise it
+would fail xref:web/webflux-versioning.adoc#webflux-versioning-validation[Validation].
 
 
 

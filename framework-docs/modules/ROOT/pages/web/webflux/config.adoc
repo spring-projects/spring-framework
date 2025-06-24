@@ -725,16 +725,16 @@ Kotlin::
 Alternatively, the version can be resolved from a request parameter, from a path segment,
 or  through a custom `ApiVersionResolver`.
 
-TIP: When resolving from a path segment, consider configuring a path prefix once in
-xref:web/webmvc/mvc-config/path-matching.adoc[Path Matching] options.
+TIP: When using a path segment, consider configuring a shared path prefix externally
+in xref:web/webmvc/mvc-config/path-matching.adoc[Path Matching] options.
 
 Raw version values are parsed with `SemanticVersionParser` by default, but you can use
 a custom xref:web/webflux-versioning.adoc#webflux-versioning-parser[ApiVersionParser].
 
 "Supported" versions are transparently detected from versions declared in request mappings
-for convenience, but you can also set the list of supported versions explicitly, and
-ignore declared ones. Requests with a version that is not supported are rejected with an
-`InvalidApiVersionException` resulting in a 400 response.
+for convenience, but you can turn that off through a flag in the WebFlux config, and use only
+the versions configured explicitly in the config. Requests with a version that is not
+supported are rejected with `InvalidApiVersionException` resulting in a 400 response.
 
 Once API versioning is configured, you can begin to map requests to
 xref:web/webflux/controller/ann-requestmapping.adoc#webflux-ann-requestmapping-version[controller methods]
