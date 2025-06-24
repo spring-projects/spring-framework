@@ -37,7 +37,6 @@ inline fun <reified T : Any> BeanFactory.getBean(): T =
  * @author Sebastien Deleuze
  * @since 5.0
  */
-@Suppress("EXTENSION_SHADOWED_BY_MEMBER")
 inline fun <reified T : Any> BeanFactory.getBean(name: String): T =
 		getBean(name, T::class.java)
 

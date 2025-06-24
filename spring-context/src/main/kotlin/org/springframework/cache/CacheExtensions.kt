@@ -23,7 +23,6 @@ package org.springframework.cache
  * @author Mikhael Sokolov
  * @since 6.0
  */
-@Suppress("EXTENSION_SHADOWED_BY_MEMBER")
 inline fun <reified T : Any> Cache.get(key: Any): T? = get(key, T::class.java)
 
 /**
@@ -32,7 +31,6 @@ inline fun <reified T : Any> Cache.get(key: Any): T? = get(key, T::class.java)
  * @author Mikhael Sokolov
  * @since 6.0
  */
-@Suppress("EXTENSION_SHADOWED_BY_MEMBER")
 operator fun Cache.get(key: Any): Cache.ValueWrapper? = get(key)
 
 /**

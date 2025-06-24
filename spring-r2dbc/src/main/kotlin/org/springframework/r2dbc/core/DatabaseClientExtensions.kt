@@ -35,7 +35,6 @@ suspend fun DatabaseClient.GenericExecuteSpec.await() {
  * @author Mark Paluch
  * @author Ibanga Enoobong Ime
  */
-@Suppress("EXTENSION_SHADOWED_BY_MEMBER")
 inline fun <reified T : Any> DatabaseClient.GenericExecuteSpec.bind(index: Int, value: T?) = bind(index, if (value != null) Parameters.`in`(value) else Parameters.`in`(T::class.java))
 
 /**
@@ -44,5 +43,4 @@ inline fun <reified T : Any> DatabaseClient.GenericExecuteSpec.bind(index: Int, 
  * @author Mark Paluch
  * @author Ibanga Enoobong Ime
  */
-@Suppress("EXTENSION_SHADOWED_BY_MEMBER")
 inline fun <reified T : Any> DatabaseClient.GenericExecuteSpec.bind(name: String, value: T?) = bind(name, if (value != null) Parameters.`in`(value) else Parameters.`in`(T::class.java))

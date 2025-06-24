@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-@file:Suppress("EXTENSION_SHADOWED_BY_MEMBER")
-
 package org.springframework.core.env
 
 /**

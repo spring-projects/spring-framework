@@ -63,7 +63,6 @@ inline fun <reified T> JdbcOperations.queryForObject(sql: String, args: Array<ou
  * @author Mario Arias
  * @since 5.0
  */
-@Suppress("EXTENSION_SHADOWED_BY_MEMBER")
 inline fun <reified T : Any> JdbcOperations.queryForList(sql: String): List<T> =
 		queryForList(sql, T::class.java)
 
@@ -74,7 +73,6 @@ inline fun <reified T : Any> JdbcOperations.queryForList(sql: String): List<T> =
  * @author Mario Arias
  * @since 5.0
  */
-@Suppress("EXTENSION_SHADOWED_BY_MEMBER")
 inline fun <reified T : Any> JdbcOperations.queryForList(sql: String, args: Array<out Any>,
 		argTypes: IntArray): List<T> =
 		queryForList(sql, args, argTypes, T::class.java)
