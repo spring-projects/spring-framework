@@ -401,7 +401,8 @@ public class BeanDefinitionValueResolver {
 			Object innerBean = this.beanFactory.createBean(actualInnerBeanName, mbd, null);
 			if (innerBean instanceof FactoryBean<?> factoryBean) {
 				boolean synthetic = mbd.isSynthetic();
-				innerBean = this.beanFactory.getObjectFromFactoryBean(factoryBean, actualInnerBeanName, !synthetic);
+				innerBean = this.beanFactory.getObjectFromFactoryBean(
+						factoryBean, null, actualInnerBeanName, !synthetic);
 			}
 			if (innerBean instanceof NullBean) {
 				innerBean = null;
