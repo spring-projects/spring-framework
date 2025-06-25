@@ -28,9 +28,6 @@ import org.springframework.util.Assert;
  * {@link JpaTransactionManager} binds instances of this class to the thread,
  * for a given {@link jakarta.persistence.EntityManagerFactory}.
  *
- * <p>Also serves as a base class for {@link org.springframework.orm.hibernate5.SessionHolder},
- * as of 5.1.
- *
  * <p>Note: This is an SPI class, not intended to be used by applications.
  *
  * @author Juergen Hoeller

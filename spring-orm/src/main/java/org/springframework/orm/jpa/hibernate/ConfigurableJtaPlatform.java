@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.orm.hibernate5;
+package org.springframework.orm.jpa.hibernate;
 
 import jakarta.transaction.Status;
 import jakarta.transaction.Synchronization;
@@ -35,7 +35,7 @@ import org.springframework.util.Assert;
  * {@link UserTransaction} and {@link TransactionSynchronizationRegistry} references.
  *
  * @author Juergen Hoeller
- * @since 4.2
+ * @since 7.0
  */
 @SuppressWarnings("serial")
 class ConfigurableJtaPlatform implements JtaPlatform {

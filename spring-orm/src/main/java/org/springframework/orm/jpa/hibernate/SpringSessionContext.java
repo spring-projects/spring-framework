@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.orm.hibernate5;
+package org.springframework.orm.jpa.hibernate;
 
 import jakarta.transaction.Status;
 import jakarta.transaction.SystemException;
@@ -32,16 +32,15 @@ import org.springframework.orm.jpa.EntityManagerHolder;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 /**
- * Implementation of Hibernate 3.1's {@link CurrentSessionContext} interface
- * that delegates to Spring's {@link SessionFactoryUtils} for providing a
- * Spring-managed current {@link Session}.
+ * Implementation of Hibernate's {@link CurrentSessionContext} interface
+ * that provides a Spring-managed current {@link Session}.
  *
  * <p>This CurrentSessionContext implementation can also be specified in custom
  * SessionFactory setup through the "hibernate.current_session_context_class"
  * property, with the fully qualified name of this class as value.
  *
  * @author Juergen Hoeller
- * @since 4.2
+ * @since 7.0
  */
 @SuppressWarnings("serial")
 public class SpringSessionContext implements CurrentSessionContext {

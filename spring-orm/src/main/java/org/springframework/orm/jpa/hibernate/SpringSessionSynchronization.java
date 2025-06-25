@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.orm.hibernate5;
+package org.springframework.orm.jpa.hibernate;
 
 import org.hibernate.FlushMode;
 import org.hibernate.Session;
@@ -23,6 +23,9 @@ import org.hibernate.engine.spi.SessionImplementor;
 
 import org.springframework.core.Ordered;
 import org.springframework.dao.DataAccessException;
+import org.springframework.dao.support.DataAccessUtils;
+import org.springframework.jdbc.datasource.DataSourceUtils;
+import org.springframework.orm.jpa.EntityManagerFactoryUtils;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
@@ -31,9 +34,18 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * for a pre-bound Hibernate Session.
  *
  * @author Juergen Hoeller
- * @since 4.2
+ * @since 7.0
  */
-public class SpringSessionSynchronization implements TransactionSynchronization, Ordered {
+class SpringSessionSynchronization implements TransactionSynchronization, Ordered {
+
+	/**
+	 * Order value for TransactionSynchronization objects that clean up Hibernate Sessions.
+	 * Returns {@code DataSourceUtils.CONNECTION_SYNCHRONIZATION_ORDER - 100}
+	 * to execute Session cleanup before JDBC Connection cleanup, if any.
+	 * @see DataSourceUtils#CONNECTION_SYNCHRONIZATION_ORDER
+	 */
+	private static final int SESSION_SYNCHRONIZATION_ORDER =
+			DataSourceUtils.CONNECTION_SYNCHRONIZATION_ORDER - 100;
 
 	private final SessionHolder sessionHolder;
 
@@ -62,7 +74,7 @@ public class SpringSessionSynchronization implements TransactionSynchronization,
 
 	@Override
 	public int getOrder() {
-		return SessionFactoryUtils.SESSION_SYNCHRONIZATION_ORDER;
+		return SESSION_SYNCHRONIZATION_ORDER;
 	}
 
 	@Override
@@ -86,7 +98,12 @@ public class SpringSessionSynchronization implements TransactionSynchronization,
 
 	@Override
 	public void flush() {
-		SessionFactoryUtils.flush(getCurrentSession(), false);
+		try {
+			getCurrentSession().flush();
+		}
+		catch (RuntimeException ex) {
+			throw DataAccessUtils.translateIfNecessary(ex, SpringFlushSynchronization.exceptionTranslator);
+		}
 	}
 
 	@Override
@@ -96,7 +113,12 @@ public class SpringSessionSynchronization implements TransactionSynchronization,
 			// Read-write transaction -> flush the Hibernate Session.
 			// Further check: only flush when not FlushMode.MANUAL.
 			if (!FlushMode.MANUAL.equals(session.getHibernateFlushMode())) {
-				SessionFactoryUtils.flush(getCurrentSession(), true);
+				try {
+					getCurrentSession().flush();
+				}
+				catch (RuntimeException ex) {
+					throw DataAccessUtils.translateIfNecessary(ex, SpringFlushSynchronization.exceptionTranslator);
+				}
 			}
 		}
 	}
@@ -140,7 +162,7 @@ public class SpringSessionSynchronization implements TransactionSynchronization,
 			this.sessionHolder.setSynchronizedWithTransaction(false);
 			// Call close() at this point if it's a new Session...
 			if (this.newSession) {
-				SessionFactoryUtils.closeSession(this.sessionHolder.getSession());
+				EntityManagerFactoryUtils.closeEntityManager(this.sessionHolder.getSession());
 			}
 		}
 	}

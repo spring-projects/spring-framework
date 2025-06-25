@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.orm.hibernate5;
+package org.springframework.orm.jpa.hibernate;
 
 import org.hibernate.FlushMode;
 import org.hibernate.Session;
@@ -26,17 +26,16 @@ import org.springframework.orm.jpa.EntityManagerHolder;
 /**
  * Resource holder wrapping a Hibernate {@link Session} (plus an optional {@link Transaction}).
  * {@link HibernateTransactionManager} binds instances of this class to the thread,
- * for a given {@link org.hibernate.SessionFactory}. Extends {@link EntityManagerHolder}
- * as of 5.1, automatically exposing an {@code EntityManager} handle on Hibernate 5.2+.
+ * for a given {@link org.hibernate.SessionFactory}. Extends {@link EntityManagerHolder},
+ * automatically exposing an {@code EntityManager} handle.
  *
  * <p>Note: This is an SPI class, not intended to be used by applications.
  *
  * @author Juergen Hoeller
- * @since 4.2
+ * @since 7.0
  * @see HibernateTransactionManager
- * @see SessionFactoryUtils
  */
-public class SessionHolder extends EntityManagerHolder {
+class SessionHolder extends EntityManagerHolder {
 
 	private @Nullable Transaction transaction;
 

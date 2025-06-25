@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.orm.hibernate5;
+package org.springframework.orm.jpa.hibernate;
 
 import java.util.Map;
 import java.util.function.Consumer;
@@ -49,7 +49,7 @@ import org.springframework.util.ConcurrentReferenceHashMap;
  *   &lt;property name="jpaPropertyMap"&gt;
  * 	   &lt;map&gt;
  *       &lt;entry key="hibernate.resource.beans.container"&gt;
- * 	       &lt;bean class="org.springframework.orm.hibernate5.SpringBeanContainer"/&gt;
+ * 	       &lt;bean class="org.springframework.orm.jpa.hibernate.SpringBeanContainer"/&gt;
  * 	     &lt;/entry&gt;
  * 	   &lt;/map&gt;
  *   &lt;/property&gt;
@@ -69,7 +69,7 @@ import org.springframework.util.ConcurrentReferenceHashMap;
  * integration will be registered out of the box.
  *
  * @author Juergen Hoeller
- * @since 5.1
+ * @since 7.0
  * @see LocalSessionFactoryBean#setBeanFactory
  * @see LocalSessionFactoryBuilder#setBeanContainer
  * @see org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean#setJpaPropertyMap

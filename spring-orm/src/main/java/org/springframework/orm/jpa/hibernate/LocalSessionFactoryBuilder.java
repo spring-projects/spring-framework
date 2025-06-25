@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.orm.hibernate5;
+package org.springframework.orm.jpa.hibernate;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -80,7 +80,7 @@ import org.springframework.util.ClassUtils;
  * Typically combined with {@link HibernateTransactionManager} for declarative
  * transactions against the {@code SessionFactory} and its JDBC {@code DataSource}.
  *
- * <p>Compatible with Hibernate ORM 5.5/5.6, as of Spring Framework 6.0.
+ * <p>Compatible with Hibernate ORM 7.0, as of Spring Framework 7.0.
  * This Hibernate-specific factory builder can also be a convenient way to set up
  * a JPA {@code EntityManagerFactory} since the Hibernate {@code SessionFactory}
  * natively exposes the JPA {@code EntityManagerFactory} interface as well now.
@@ -91,7 +91,7 @@ import org.springframework.util.ClassUtils;
  * standard JPA bootstrap contract.
  *
  * @author Juergen Hoeller
- * @since 4.2
+ * @since 7.0
  * @see HibernateTransactionManager
  * @see LocalSessionFactoryBean
  * @see #setBeanContainer
@@ -159,7 +159,6 @@ public class LocalSessionFactoryBuilder extends Configuration {
 	 * (may be {@code null})
 	 * @param resourceLoader the ResourceLoader to load application classes from
 	 * @param metadataSources the Hibernate MetadataSources service to use (for example, reusing an existing one)
-	 * @since 4.3
 	 */
 	public LocalSessionFactoryBuilder(
 			@Nullable DataSource dataSource, ResourceLoader resourceLoader, MetadataSources metadataSources) {
@@ -228,7 +227,6 @@ public class LocalSessionFactoryBuilder extends Configuration {
 	 * Set a Hibernate {@link org.hibernate.resource.beans.container.spi.BeanContainer}
 	 * for the given Spring {@link ConfigurableListableBeanFactory}.
 	 * <p>This enables autowiring of Hibernate attribute converters and entity listeners.
-	 * @since 5.1
 	 * @see SpringBeanContainer
 	 * @see AvailableSettings#BEAN_CONTAINER
 	 */
@@ -242,7 +240,6 @@ public class LocalSessionFactoryBuilder extends Configuration {
 	 * Allows for using a Spring-managed {@code RegionFactory} instance.
 	 * <p>Note: If this is set, the Hibernate settings should not define a
 	 * cache provider to avoid meaningless double configuration.
-	 * @since 5.1
 	 * @see AvailableSettings#CACHE_REGION_FACTORY
 	 */
 	public LocalSessionFactoryBuilder setCacheRegionFactory(RegionFactory cacheRegionFactory) {
@@ -252,7 +249,6 @@ public class LocalSessionFactoryBuilder extends Configuration {
 
 	/**
 	 * Set a {@link MultiTenantConnectionProvider} to be passed on to the SessionFactory.
-	 * @since 4.3
 	 * @see AvailableSettings#MULTI_TENANT_CONNECTION_PROVIDER
 	 */
 	public LocalSessionFactoryBuilder setMultiTenantConnectionProvider(MultiTenantConnectionProvider<?> multiTenantConnectionProvider) {
@@ -262,7 +258,6 @@ public class LocalSessionFactoryBuilder extends Configuration {
 
 	/**
 	 * Overridden to reliably pass a {@link CurrentTenantIdentifierResolver} to the SessionFactory.
-	 * @since 4.3.2
 	 * @see AvailableSettings#MULTI_TENANT_IDENTIFIER_RESOLVER
 	 */
 	@Override
@@ -386,7 +381,6 @@ public class LocalSessionFactoryBuilder extends Configuration {
 	 * then block until Hibernate's bootstrapping completed, if not ready by then.
 	 * For maximum benefit, make sure to avoid early {@code SessionFactory} calls
 	 * in init methods of related beans, even for metadata introspection purposes.
-	 * @since 4.3
 	 * @see #buildSessionFactory()
 	 */
 	public SessionFactory buildSessionFactory(AsyncTaskExecutor bootstrapExecutor) {
@@ -400,7 +394,6 @@ public class LocalSessionFactoryBuilder extends Configuration {
 	/**
 	 * Proxy invocation handler for background bootstrapping, only enforcing
 	 * a fully initialized target {@code SessionFactory} when actually needed.
-	 * @since 4.3
 	 */
 	private class BootstrapSessionFactoryInvocationHandler implements InvocationHandler {
 

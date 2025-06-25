@@ -14,15 +14,14 @@
  * limitations under the License.
  */
 
-package org.springframework.orm.hibernate5;
+package org.springframework.orm.jpa.hibernate;
 
 import java.sql.Connection;
-import java.sql.ResultSet;
+import java.util.Map;
 import java.util.function.Consumer;
 
 import javax.sql.DataSource;
 
-import jakarta.persistence.PersistenceException;
 import org.hibernate.ConnectionReleaseMode;
 import org.hibernate.FlushMode;
 import org.hibernate.HibernateException;
@@ -30,8 +29,12 @@ import org.hibernate.Interceptor;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
+import org.hibernate.cfg.Environment;
+import org.hibernate.engine.jdbc.connections.spi.ConnectionProvider;
+import org.hibernate.engine.spi.SessionFactoryImplementor;
 import org.hibernate.engine.spi.SessionImplementor;
 import org.hibernate.resource.transaction.spi.TransactionStatus;
+import org.hibernate.service.UnknownServiceException;
 import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.BeansException;
@@ -40,10 +43,12 @@ import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataAccessResourceFailureException;
+import org.springframework.dao.support.DataAccessUtils;
 import org.springframework.jdbc.datasource.ConnectionHolder;
 import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.jdbc.datasource.JdbcTransactionObjectSupport;
 import org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy;
+import org.springframework.orm.jpa.EntityManagerFactoryUtils;
 import org.springframework.transaction.CannotCreateTransactionException;
 import org.springframework.transaction.IllegalTransactionStateException;
 import org.springframework.transaction.InvalidIsolationLevelException;
@@ -74,9 +79,9 @@ import org.springframework.util.Assert;
  * and services which use plain JDBC (without being aware of Hibernate)!
  * Application code needs to stick to the same simple Connection lookup pattern as
  * with {@link org.springframework.jdbc.datasource.DataSourceTransactionManager}
- * (i.e. {@link org.springframework.jdbc.datasource.DataSourceUtils#getConnection}
+ * (i.e. {@link DataSourceUtils#getConnection}
  * or going through a
- * {@link org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy}).
+ * {@link TransactionAwareDataSourceProxy}).
  *
  * <p>Note: To be able to register a DataSource's Connection for plain JDBC code,
  * this instance needs to be aware of the DataSource ({@link #setDataSource}).
@@ -97,12 +102,8 @@ import org.springframework.util.Assert;
  * support nested transactions! Hence, do not expect Hibernate access code to
  * semantically participate in a nested transaction.</i>
  *
- * <p><b>NOTE: Hibernate ORM 6.x is officially only supported as a JPA provider.
- * Please use {@link org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean}
- * with {@link org.springframework.orm.jpa.JpaTransactionManager} there instead.</b>
- *
  * @author Juergen Hoeller
- * @since 4.2
+ * @since 7.0
  * @see #setSessionFactory
  * @see SessionFactory#getCurrentSession()
  * @see org.springframework.jdbc.core.JdbcTemplate
@@ -114,6 +115,8 @@ import org.springframework.util.Assert;
 public class HibernateTransactionManager extends AbstractPlatformTransactionManager
 		implements ResourceTransactionManager, BeanFactoryAware, InitializingBean {
 
+	private final HibernateExceptionTranslator exceptionTranslator = new HibernateExceptionTranslator();
+
 	private @Nullable SessionFactory sessionFactory;
 
 	private @Nullable DataSource dataSource;
@@ -121,8 +124,6 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 	private boolean autodetectDataSource = true;
 
 	private boolean prepareConnection = true;
-
-	private boolean allowResultAccessAfterCompletion = false;
 
 	private boolean hibernateManagedSession = false;
 
@@ -173,7 +174,6 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 	 * Obtain the SessionFactory for actual use.
 	 * @return the SessionFactory (never {@code null})
 	 * @throws IllegalStateException in case of no SessionFactory set
-	 * @since 5.0
 	 */
 	protected final SessionFactory obtainSessionFactory() {
 		SessionFactory sessionFactory = getSessionFactory();
@@ -258,30 +258,11 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 	}
 
 	/**
-	 * Set whether to allow result access after completion, typically via Hibernate's
-	 * ScrollableResults mechanism.
-	 * <p>Default is "false". Turning this flag on enforces over-commit holdability on the
-	 * underlying JDBC Connection (if {@link #prepareConnection "prepareConnection"} is on)
-	 * and skips the disconnect-on-completion step.
-	 * @see Connection#setHoldability
-	 * @see ResultSet#HOLD_CURSORS_OVER_COMMIT
-	 * @see #disconnectOnCompletion(Session)
-	 * @deprecated as of 5.3.29 since Hibernate 5.x aggressively closes ResultSets on commit,
-	 * making it impossible to rely on ResultSet holdability. Also, Spring does not provide
-	 * an equivalent setting on {@link org.springframework.orm.jpa.JpaTransactionManager}.
-	 */
-	@Deprecated(since = "5.3.29")
-	public void setAllowResultAccessAfterCompletion(boolean allowResultAccessAfterCompletion) {
-		this.allowResultAccessAfterCompletion = allowResultAccessAfterCompletion;
-	}
-
-	/**
 	 * Set whether to operate on a Hibernate-managed Session instead of a
 	 * Spring-managed Session, that is, whether to obtain the Session through
-	 * Hibernate's {@link SessionFactory#getCurrentSession()}
-	 * instead of {@link SessionFactory#openSession()} (with a Spring
-	 * {@link TransactionSynchronizationManager}
-	 * check preceding it).
+	 * Hibernate's {@link SessionFactory#getCurrentSession()} instead of
+	 * {@link SessionFactory#openSession()} (with a Spring
+	 * {@link TransactionSynchronizationManager} check preceding it).
 	 * <p>Default is "false", i.e. using a Spring-managed Session: taking the current
 	 * thread-bound Session if available (for example, in an Open-Session-in-View scenario),
 	 * creating a new Session for the current transaction otherwise.
@@ -308,7 +289,6 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 	 * created for a new transaction managed by this {@code HibernateTransactionManager}.
 	 * <p>This enables convenient customizations for application purposes, for example,
 	 * setting Hibernate filters.
-	 * @since 5.3
 	 * @see Session#enableFilter
 	 */
 	public void setSessionInitializer(Consumer<Session> sessionInitializer) {
@@ -392,7 +372,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 
 		// Check for SessionFactory's DataSource.
 		if (this.autodetectDataSource && getDataSource() == null) {
-			DataSource sfds = SessionFactoryUtils.getDataSource(getSessionFactory());
+			DataSource sfds = determineDataSource();
 			if (sfds != null) {
 				// Use the SessionFactory's DataSource for exposing transactions to JDBC code.
 				if (logger.isDebugEnabled()) {
@@ -402,6 +382,36 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 				setDataSource(sfds);
 			}
 		}
+	}
+
+	/**
+	 * Determine the DataSource of the given SessionFactory.
+	 * @return the DataSource, or {@code null} if none found
+	 * @see ConnectionProvider
+	 */
+	protected @Nullable DataSource determineDataSource() {
+		SessionFactory sessionFactory = obtainSessionFactory();
+		Map<String, Object> props = sessionFactory.getProperties();
+		if (props != null) {
+			Object dataSourceValue = props.get(Environment.JAKARTA_NON_JTA_DATASOURCE);
+			if (dataSourceValue instanceof DataSource dataSourceToUse) {
+				return dataSourceToUse;
+			}
+		}
+		if (sessionFactory instanceof SessionFactoryImplementor sfi) {
+			try {
+				ConnectionProvider cp = sfi.getServiceRegistry().getService(ConnectionProvider.class);
+				if (cp != null) {
+					return cp.unwrap(DataSource.class);
+				}
+			}
+			catch (UnknownServiceException ex) {
+				if (logger.isDebugEnabled()) {
+					logger.debug("No ConnectionProvider found - cannot determine DataSource for SessionFactory: " + ex);
+				}
+			}
+		}
+		return null;
 	}
 
 
@@ -485,9 +495,8 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 
 			session = txObject.getSessionHolder().getSession().unwrap(SessionImplementor.class);
 
-			boolean holdabilityNeeded = (this.allowResultAccessAfterCompletion && !txObject.isNewSession());
 			boolean isolationLevelNeeded = (definition.getIsolationLevel() != TransactionDefinition.ISOLATION_DEFAULT);
-			if (holdabilityNeeded || isolationLevelNeeded || definition.isReadOnly()) {
+			if (isolationLevelNeeded || definition.isReadOnly()) {
 				if (this.prepareConnection && ConnectionReleaseMode.ON_CLOSE.equals(
 						session.getJdbcCoordinator().getLogicalConnection().getConnectionHandlingMode().getReleaseMode())) {
 					// We're allowed to change the transaction settings of the JDBC Connection.
@@ -498,13 +507,6 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 					Integer previousIsolationLevel = DataSourceUtils.prepareConnectionForTransaction(con, definition);
 					txObject.setPreviousIsolationLevel(previousIsolationLevel);
 					txObject.setReadOnly(definition.isReadOnly());
-					if (holdabilityNeeded) {
-						int currentHoldability = con.getHoldability();
-						if (currentHoldability != ResultSet.HOLD_CURSORS_OVER_COMMIT) {
-							txObject.setPreviousHoldability(currentHoldability);
-							con.setHoldability(ResultSet.HOLD_CURSORS_OVER_COMMIT);
-						}
-					}
 					txObject.connectionPrepared();
 				}
 				else {
@@ -525,7 +527,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 			if (definition.isReadOnly() && txObject.isNewSession()) {
 				// Just set to MANUAL in case of a new Session for this transaction.
 				session.setHibernateFlushMode(FlushMode.MANUAL);
-				// As of 5.1, we're also setting Hibernate's read-only entity mode by default.
+				// We're also setting Hibernate's read-only entity mode by default.
 				session.setDefaultReadOnly(true);
 			}
 
@@ -543,8 +545,6 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 			// Register transaction timeout.
 			int timeout = determineTimeout(definition);
 			if (timeout != TransactionDefinition.TIMEOUT_DEFAULT) {
-				// Use Hibernate's own transaction timeout mechanism on Hibernate 3.1+
-				// Applies to all statements, also to inserts, updates and deletes!
 				hibTx = session.getTransaction();
 				hibTx.setTimeout(timeout);
 				hibTx.begin();
@@ -590,7 +590,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 					logger.debug("Could not rollback Session after failed transaction begin", ex);
 				}
 				finally {
-					SessionFactoryUtils.closeSession(session);
+					EntityManagerFactoryUtils.closeEntityManager(session);
 					txObject.setSessionHolder(null);
 				}
 			}
@@ -643,18 +643,15 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 			hibTx.commit();
 		}
 		catch (org.hibernate.TransactionException ex) {
-			// assumably from commit call to the underlying JDBC connection
+			DataAccessException dae = this.exceptionTranslator.translateExceptionIfPossible(ex);
+			if (dae != null) {
+				throw dae;
+			}
 			throw new TransactionSystemException("Could not commit Hibernate transaction", ex);
 		}
-		catch (HibernateException ex) {
-			// assumably failed to flush changes to database
-			throw convertHibernateAccessException(ex);
-		}
-		catch (PersistenceException ex) {
-			if (ex.getCause() instanceof HibernateException hibernateEx) {
-				throw convertHibernateAccessException(hibernateEx);
-			}
-			throw ex;
+		catch (RuntimeException ex) {
+			// Assumably failed to flush changes to database.
+			throw DataAccessUtils.translateIfNecessary(ex, this.exceptionTranslator);
 		}
 	}
 
@@ -672,17 +669,15 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 			hibTx.rollback();
 		}
 		catch (org.hibernate.TransactionException ex) {
+			DataAccessException dae = this.exceptionTranslator.translateExceptionIfPossible(ex);
+			if (dae != null) {
+				throw dae;
+			}
 			throw new TransactionSystemException("Could not roll back Hibernate transaction", ex);
 		}
-		catch (HibernateException ex) {
+		catch (RuntimeException ex) {
 			// Shouldn't really happen, as a rollback doesn't cause a flush.
-			throw convertHibernateAccessException(ex);
-		}
-		catch (PersistenceException ex) {
-			if (ex.getCause() instanceof HibernateException hibernateEx) {
-				throw convertHibernateAccessException(hibernateEx);
-			}
-			throw ex;
+			throw DataAccessUtils.translateIfNecessary(ex, this.exceptionTranslator);
 		}
 		finally {
 			if (!txObject.isNewSession() && !this.hibernateManagedSession) {
@@ -744,7 +739,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 			if (logger.isDebugEnabled()) {
 				logger.debug("Closing Hibernate Session [" + session + "] after transaction");
 			}
-			SessionFactoryUtils.closeSession(session);
+			EntityManagerFactoryUtils.closeEntityManager(session);
 		}
 		else {
 			if (logger.isDebugEnabled()) {
@@ -753,7 +748,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 			if (txObject.getSessionHolder().getPreviousFlushMode() != null) {
 				session.setHibernateFlushMode(txObject.getSessionHolder().getPreviousFlushMode());
 			}
-			if (!this.allowResultAccessAfterCompletion && !this.hibernateManagedSession) {
+			if (!this.hibernateManagedSession) {
 				disconnectOnCompletion(session);
 			}
 		}
@@ -771,17 +766,6 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 		if (session instanceof SessionImplementor sessionImpl) {
 			sessionImpl.getJdbcCoordinator().getLogicalConnection().manualDisconnect();
 		}
-	}
-
-	/**
-	 * Convert the given HibernateException to an appropriate exception
-	 * from the {@code org.springframework.dao} hierarchy.
-	 * @param ex the HibernateException that occurred
-	 * @return a corresponding DataAccessException
-	 * @see SessionFactoryUtils#convertHibernateAccessException
-	 */
-	protected DataAccessException convertHibernateAccessException(HibernateException ex) {
-		return SessionFactoryUtils.convertHibernateAccessException(ex);
 	}
 
 
@@ -879,14 +863,8 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 			try {
 				getSessionHolder().getSession().flush();
 			}
-			catch (HibernateException ex) {
-				throw convertHibernateAccessException(ex);
-			}
-			catch (PersistenceException ex) {
-				if (ex.getCause() instanceof HibernateException hibernateEx) {
-					throw convertHibernateAccessException(hibernateEx);
-				}
-				throw ex;
+			catch (RuntimeException ex) {
+				throw DataAccessUtils.translateIfNecessary(ex, HibernateTransactionManager.this.exceptionTranslator);
 			}
 		}
 	}

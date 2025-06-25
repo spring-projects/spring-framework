@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-package org.springframework.orm.hibernate5;
+package org.springframework.orm.jpa.hibernate;
 
 import org.hibernate.Session;
 import org.jspecify.annotations.Nullable;
 
+import org.springframework.dao.support.DataAccessUtils;
 import org.springframework.transaction.support.TransactionSynchronization;
 
 /**
@@ -26,9 +27,11 @@ import org.springframework.transaction.support.TransactionSynchronization;
  * to the underlying Hibernate Session. Used in combination with JTA.
  *
  * @author Juergen Hoeller
- * @since 4.2
+ * @since 7.0
  */
-public class SpringFlushSynchronization implements TransactionSynchronization {
+class SpringFlushSynchronization implements TransactionSynchronization {
+
+	static final HibernateExceptionTranslator exceptionTranslator = new HibernateExceptionTranslator();
 
 	private final Session session;
 
@@ -40,7 +43,12 @@ public class SpringFlushSynchronization implements TransactionSynchronization {
 
 	@Override
 	public void flush() {
-		SessionFactoryUtils.flush(this.session, false);
+		try {
+			this.session.flush();
+		}
+		catch (RuntimeException ex) {
+			throw DataAccessUtils.translateIfNecessary(ex, exceptionTranslator);
+		}
 	}
 
 	@Override

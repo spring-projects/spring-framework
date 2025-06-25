@@ -172,7 +172,7 @@ shows this configuration:
 			<property name="sessionFactory" ref="sessionFactory"/>
 		</bean>
 
-		<bean id="sessionFactory" class="org.springframework.orm.hibernate5.LocalSessionFactoryBean">
+		<bean id="sessionFactory" class="org.springframework.orm.jpa.hibernate.LocalSessionFactoryBean">
 			<!-- configuration elided for brevity -->
 		</bean>
 

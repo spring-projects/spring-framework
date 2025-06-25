@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.orm.hibernate5;
+package org.springframework.orm.jpa.hibernate;
 
 import org.hibernate.FlushMode;
 import org.hibernate.Session;
@@ -28,10 +28,10 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * setting {@code FlushMode.MANUAL} for read-only transactions.
  *
  * @author Juergen Hoeller
- * @since 4.2
+ * @since 7.0
  */
 @SuppressWarnings("serial")
-public class SpringJtaSessionContext extends JTASessionContext {
+class SpringJtaSessionContext extends JTASessionContext {
 
 	public SpringJtaSessionContext(SessionFactoryImplementor factory) {
 		super(factory);
