@@ -103,7 +103,7 @@ abstract class ClassFileAnnotationMetadata {
 		classDesc.packageName() + "." + classDesc.displayName();
 	}
 
-	private static Object parseArrayValue(String className, @org.jetbrains.annotations.Nullable ClassLoader classLoader, AnnotationValue.OfArray arrayValue) {
+	private static Object parseArrayValue(String className, @Nullable ClassLoader classLoader, AnnotationValue.OfArray arrayValue) {
 		if (arrayValue.values().isEmpty()) {
 			return new Object[0];
 		}
