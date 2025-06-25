@@ -97,10 +97,6 @@ import org.springframework.util.Assert;
  * support nested transactions! Hence, do not expect Hibernate access code to
  * semantically participate in a nested transaction.</i>
  *
- * <p><b>NOTE: Hibernate ORM 6.x is officially only supported as a JPA provider.
- * Please use {@link org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean}
- * with {@link org.springframework.orm.jpa.JpaTransactionManager} there instead.</b>
- *
  * @author Juergen Hoeller
  * @since 4.2
  * @see #setSessionFactory
@@ -285,10 +281,9 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 	/**
 	 * Set whether to operate on a Hibernate-managed Session instead of a
 	 * Spring-managed Session, that is, whether to obtain the Session through
-	 * Hibernate's {@link SessionFactory#getCurrentSession()}
-	 * instead of {@link SessionFactory#openSession()} (with a Spring
-	 * {@link TransactionSynchronizationManager}
-	 * check preceding it).
+	 * Hibernate's {@link SessionFactory#getCurrentSession()} instead of
+	 * {@link SessionFactory#openSession()} (with a Spring
+	 * {@link TransactionSynchronizationManager} check preceding it).
 	 * <p>Default is "false", i.e. using a Spring-managed Session: taking the current
 	 * thread-bound Session if available (for example, in an Open-Session-in-View scenario),
 	 * creating a new Session for the current transaction otherwise.
