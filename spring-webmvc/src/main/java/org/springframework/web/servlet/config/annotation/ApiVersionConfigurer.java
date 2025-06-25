@@ -53,11 +53,11 @@ public class ApiVersionConfigurer {
 
 	private @Nullable String defaultVersion;
 
-	private @Nullable ApiVersionDeprecationHandler deprecationHandler;
-
 	private final Set<String> supportedVersions = new LinkedHashSet<>();
 
 	private boolean detectSupportedVersions = true;
+
+	private @Nullable ApiVersionDeprecationHandler deprecationHandler;
 
 
 	/**
@@ -146,18 +146,6 @@ public class ApiVersionConfigurer {
 	}
 
 	/**
-	 * Configure a handler to add handling for requests with a deprecated API
-	 * version. Typically, this involves sending hints and information about
-	 * the deprecation in response headers.
-	 * @param handler the handler to use
-	 * @see StandardApiVersionDeprecationHandler
-	 */
-	public ApiVersionConfigurer setDeprecationHandler(ApiVersionDeprecationHandler handler) {
-		this.deprecationHandler = handler;
-		return this;
-	}
-
-	/**
 	 * Add to the list of supported versions to check against before raising
 	 * {@link InvalidApiVersionException} for unknown versions.
 	 * <p>By default, actual version values that appear in request mappings are
@@ -184,6 +172,18 @@ public class ApiVersionConfigurer {
 	 */
 	public ApiVersionConfigurer detectSupportedVersions(boolean detect) {
 		this.detectSupportedVersions = detect;
+		return this;
+	}
+
+	/**
+	 * Configure a handler to add handling for requests with a deprecated API
+	 * version. Typically, this involves sending hints and information about
+	 * the deprecation in response headers.
+	 * @param handler the handler to use
+	 * @see StandardApiVersionDeprecationHandler
+	 */
+	public ApiVersionConfigurer setDeprecationHandler(ApiVersionDeprecationHandler handler) {
+		this.deprecationHandler = handler;
 		return this;
 	}
 

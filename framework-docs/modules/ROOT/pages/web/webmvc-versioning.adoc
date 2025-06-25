@@ -30,6 +30,7 @@ related to versioning. It does the following:
 - Resolves versions from the requests via xref:#mvc-versioning-resolver[ApiVersionResolver]
 - Parses raw version values into `Comparable<?>` with an xref:#mvc-versioning-parser[ApiVersionParser]
 - xref:#mvc-versioning-validation[Validates] request versions
+- Sends deprecation hints in the responses
 
 `ApiVersionStrategy` helps to map requests to `@RequestMapping` controller methods,
 and is initialized by the MVC config. Typically, applications do not interact
@@ -40,7 +41,7 @@ directly with it.
 
 [[mvc-versioning-resolver]]
 == ApiVersionResolver
-[.small]#xref:web/webmvc-versioning.adoc#mvc-versioning-resolver[See equivalent in the Reactive stack]#
+[.small]#xref:web/webflux-versioning.adoc#webflux-versioning-resolver[See equivalent in the Reactive stack]#
 
 This strategy resolves the API version from a request. The MVC config provides built-in
 options to resolve from a header, from a request parameter, or from the URL path.
@@ -74,6 +75,20 @@ By default, a version is required when API versioning is enabled, and
 `MissingApiVersionException` is raised resulting in a 400 response if not present.
 You can make it optional in which case the most recent version is used.
 You can also specify a default version to use.
+
+
+
+
+[[mvc-versioning-deprecation-handler]]
+== ApiVersionDeprecationHandler
+[.small]#xref:web/webflux-versioning.adoc#webflux-versioning-deprecation-handler[See equivalent in the Reactive stack]#
+
+This strategy can be configured to send hints and information about deprecated versions to
+clients via response headers. The built-in `StandardApiVersionDeprecationHandler`
+can set the "Deprecation" "Sunset" headers and "Link" headers as defined in
+https://datatracker.ietf.org/doc/html/rfc9745[RFC 9745] and
+https://datatracker.ietf.org/doc/html/rfc8594[RFC 8594]. You can also configure a custom
+handler for different headers.
 
 
 

@@ -79,6 +79,20 @@ You can also specify a default version to use.
 
 
 
+[[webflux-versioning-deprecation-handler]]
+== ApiVersionDeprecationHandler
+[.small]#xref:web/webmvc-versioning.adoc#mvc-versioning-deprecation-handler[See equivalent in the Reactive stack]#
+
+This strategy can be configured to send hints and information about deprecated versions to
+clients via response headers. The built-in `StandardApiVersionDeprecationHandler`
+can set the "Deprecation" "Sunset" headers and "Link" headers as defined in
+https://datatracker.ietf.org/doc/html/rfc9745[RFC 9745] and
+https://datatracker.ietf.org/doc/html/rfc8594[RFC 8594]. You can also configure a custom
+handler for different headers.
+
+
+
+
 [[webflux-versioning-mapping]]
 == Request Mapping
 [.small]#xref:web/webmvc-versioning.adoc#mvc-versioning-mapping[See equivalent in the Servlet stack]#
