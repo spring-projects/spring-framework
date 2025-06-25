@@ -32,47 +32,74 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
  */
 public class DefaultApiVersionStrategiesTests {
 
-	private final SemanticApiVersionParser parser = new SemanticApiVersionParser();
+	private static final SemanticApiVersionParser parser = new SemanticApiVersionParser();
+
+	private final MockHttpServletRequest request = new MockHttpServletRequest();
 
 
 	@Test
 	void defaultVersionIsParsed() {
-		SemanticApiVersionParser.Version version = this.parser.parseVersion("1.2.3");
-		ApiVersionStrategy strategy = initVersionStrategy(version.toString());
-
-		assertThat(strategy.getDefaultVersion()).isEqualTo(version);
+		String version = "1.2.3";
+		ApiVersionStrategy strategy = apiVersionStrategy(version);
+		assertThat(strategy.getDefaultVersion()).isEqualTo(parser.parseVersion(version));
 	}
 
 	@Test
 	void validateSupportedVersion() {
-		SemanticApiVersionParser.Version v12 = this.parser.parseVersion("1.2");
-
-		DefaultApiVersionStrategy strategy = initVersionStrategy(null);
-		strategy.addSupportedVersion(v12.toString());
-
-		MockHttpServletRequest request = new MockHttpServletRequest();
-		strategy.validateVersion(v12, request);
+		String version = "1.2";
+		DefaultApiVersionStrategy strategy = apiVersionStrategy();
+		strategy.addSupportedVersion(version);
+		validateVersion(version, strategy);
 	}
 
 	@Test
-	void validateUnsupportedVersion() {
-		assertThatThrownBy(() -> initVersionStrategy(null).validateVersion("1.2", new MockHttpServletRequest()))
+	void rejectUnsupportedVersion() {
+		assertThatThrownBy(() -> validateVersion("1.2", apiVersionStrategy()))
 				.isInstanceOf(InvalidApiVersionException.class)
-				.hasMessage("400 BAD_REQUEST \"Invalid API version: '1.2'.\"");
+				.hasMessage("400 BAD_REQUEST \"Invalid API version: '1.2.0'.\"");
+	}
+
+	@Test
+	void validateDetectedVersion() {
+		String version = "1.2";
+		DefaultApiVersionStrategy strategy = apiVersionStrategy(null, true);
+		strategy.addMappedVersion(version);
+		validateVersion(version, strategy);
+	}
+
+	@Test
+	void validateWhenDetectedVersionOff() {
+		String version = "1.2";
+		DefaultApiVersionStrategy strategy = apiVersionStrategy();
+		strategy.addMappedVersion(version);
+		assertThatThrownBy(() -> validateVersion(version, strategy)).isInstanceOf(InvalidApiVersionException.class);
 	}
 
 	@Test
 	void missingRequiredVersion() {
-		DefaultApiVersionStrategy strategy = initVersionStrategy(null);
-		assertThatThrownBy(() -> strategy.validateVersion(null, new MockHttpServletRequest()))
+		assertThatThrownBy(() -> validateVersion(null, apiVersionStrategy()))
 				.isInstanceOf(MissingApiVersionException.class)
 				.hasMessage("400 BAD_REQUEST \"API version is required.\"");
 	}
 
-	private static DefaultApiVersionStrategy initVersionStrategy(@Nullable String defaultValue) {
+	private static DefaultApiVersionStrategy apiVersionStrategy() {
+		return apiVersionStrategy(null, false);
+	}
+
+	private static DefaultApiVersionStrategy apiVersionStrategy(@Nullable String defaultVersion) {
+		return apiVersionStrategy(defaultVersion, false);
+	}
+
+	private static DefaultApiVersionStrategy apiVersionStrategy(
+			@Nullable String defaultVersion, boolean detectSupportedVersions) {
+
 		return new DefaultApiVersionStrategy(
 				List.of(request -> request.getParameter("api-version")),
-				new SemanticApiVersionParser(), true, defaultValue, null);
+				new SemanticApiVersionParser(), true, defaultVersion, detectSupportedVersions, null);
+	}
+
+	private void validateVersion(@Nullable String version, DefaultApiVersionStrategy strategy) {
+		strategy.validateVersion(version != null ? parser.parseVersion(version) : null, request);
 	}
 
 }

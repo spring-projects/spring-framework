@@ -46,10 +46,10 @@ public class VersionRequestConditionTests {
 		this.strategy = initVersionStrategy(null);
 	}
 
-	private static DefaultApiVersionStrategy initVersionStrategy(@Nullable String defaultValue) {
+	private static DefaultApiVersionStrategy initVersionStrategy(@Nullable String defaultVersion) {
 		return new DefaultApiVersionStrategy(
 				List.of(request -> request.getParameter("api-version")),
-				new SemanticApiVersionParser(), true, defaultValue, null);
+				new SemanticApiVersionParser(), true, defaultVersion, false, null);
 	}
 
 	@Test

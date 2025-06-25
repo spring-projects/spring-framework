@@ -306,7 +306,7 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 		if (requestMappingInfo != null && this.apiVersionStrategy instanceof DefaultApiVersionStrategy davs) {
 			String version = requestMappingInfo.getVersionCondition().getVersion();
 			if (version != null) {
-				davs.addSupportedVersion(version);
+				davs.addMappedVersion(version);
 			}
 		}
 
