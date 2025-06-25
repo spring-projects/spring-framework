@@ -23,6 +23,7 @@ import java.lang.reflect.Executable;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -196,10 +197,9 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 
 	private ApplicationStartup applicationStartup = ApplicationStartup.DEFAULT;
 
-	@SuppressWarnings("NullAway.Init")
-	private List<PropertySourceDescriptor> propertySourceDescriptors;
+	private List<PropertySourceDescriptor> propertySourceDescriptors = Collections.emptyList();
 
-	private Map<String, BeanRegistrar> beanRegistrars = new LinkedHashMap<>();
+	private final Map<String, BeanRegistrar> beanRegistrars = new LinkedHashMap<>();
 
 
 	@Override
@@ -841,6 +841,7 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 			return instantiationDescriptor;
 		}
 	}
+
 
 	private static class BeanRegistrarAotContribution implements BeanFactoryInitializationAotContribution {
 
