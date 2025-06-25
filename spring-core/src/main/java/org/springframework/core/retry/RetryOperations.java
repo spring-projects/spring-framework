@@ -24,6 +24,9 @@ import org.jspecify.annotations.Nullable;
  * <p>Implemented by {@link RetryTemplate}. Not often used directly, but a useful
  * option to enhance testability, as it can easily be mocked or stubbed.
  *
+ * <p>Inspired by the <a href="https://github.com/spring-projects/spring-retry">Spring Retry</a>
+ * project but redesigned as a minimal core retry feature in the Spring Framework.
+ *
  * @author Mahmoud Ben Hassine
  * @since 7.0
  * @see RetryTemplate
