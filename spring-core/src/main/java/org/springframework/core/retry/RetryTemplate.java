@@ -26,18 +26,16 @@ import org.springframework.core.log.LogAccessor;
 import org.springframework.util.Assert;
 import org.springframework.util.backoff.BackOff;
 import org.springframework.util.backoff.BackOffExecution;
-import org.springframework.util.backoff.FixedBackOff;
 
 /**
  * A basic implementation of {@link RetryOperations} that executes and potentially
- * retries a {@link Retryable} operation based on a configured {@link RetryPolicy}
- * and {@link BackOff} policy.
+ * retries a {@link Retryable} operation based on a configured {@link RetryPolicy}.
  *
  * <p>By default, a retryable operation will be retried at most 3 times with a
  * fixed backoff of 1 second.
  *
  * <p>A {@link RetryListener} can be {@linkplain #setRetryListener(RetryListener)
- * registered} to intercept and inject behavior during key retry phases (before a
+ * registered} to react to events published during key retry phases (before a
  * retry attempt, after a retry attempt, etc.).
  *
  * <p>All retry actions performed by this template are logged at debug level, using
@@ -58,9 +56,7 @@ public class RetryTemplate implements RetryOperations {
 	private static final LogAccessor logger = new LogAccessor(RetryTemplate.class);
 
 
-	private RetryPolicy retryPolicy = RetryPolicy.withMaxAttempts(3);
-
-	private BackOff backOffPolicy = new FixedBackOff(Duration.ofSeconds(1));
+	private RetryPolicy retryPolicy = RetryPolicy.withDefaults();
 
 	private RetryListener retryListener = new RetryListener() {};
 
@@ -68,13 +64,13 @@ public class RetryTemplate implements RetryOperations {
 	/**
 	 * Create a new {@code RetryTemplate} with maximum 3 retry attempts and a
 	 * fixed backoff of 1 second.
+	 * @see RetryPolicy#withDefaults()
 	 */
 	public RetryTemplate() {
 	}
 
 	/**
-	 * Create a new {@code RetryTemplate} with a custom {@link RetryPolicy} and a
-	 * fixed backoff of 1 second.
+	 * Create a new {@code RetryTemplate} with the supplied {@link RetryPolicy}.
 	 * @param retryPolicy the retry policy to use
 	 */
 	public RetryTemplate(RetryPolicy retryPolicy) {
@@ -82,41 +78,19 @@ public class RetryTemplate implements RetryOperations {
 		this.retryPolicy = retryPolicy;
 	}
 
-	/**
-	 * Create a new {@code RetryTemplate} with a custom {@link RetryPolicy} and
-	 * {@link BackOff} policy.
-	 * @param retryPolicy the retry policy to use
-	 * @param backOffPolicy the backoff policy to use
-	 */
-	public RetryTemplate(RetryPolicy retryPolicy, BackOff backOffPolicy) {
-		this(retryPolicy);
-		Assert.notNull(backOffPolicy, "BackOff policy must not be null");
-		this.backOffPolicy = backOffPolicy;
-	}
-
 
 	/**
 	 * Set the {@link RetryPolicy} to use.
-	 * <p>Defaults to {@code RetryPolicy.withMaxAttempts(3)}.
+	 * <p>Defaults to {@code RetryPolicy.withDefaults()}.
 	 * @param retryPolicy the retry policy to use
+	 * @see RetryPolicy#withDefaults()
 	 * @see RetryPolicy#withMaxAttempts(int)
-	 * @see RetryPolicy#withMaxDuration(Duration)
+	 * @see RetryPolicy#withMaxElapsedTime(Duration)
 	 * @see RetryPolicy#builder()
 	 */
 	public void setRetryPolicy(RetryPolicy retryPolicy) {
 		Assert.notNull(retryPolicy, "Retry policy must not be null");
 		this.retryPolicy = retryPolicy;
-	}
-
-	/**
-	 * Set the {@link BackOff} policy to use.
-	 * <p>Defaults to {@code new FixedBackOff(Duration.ofSeconds(1))}.
-	 * @param backOffPolicy the backoff policy to use
-	 * @see FixedBackOff
-	 */
-	public void setBackOffPolicy(BackOff backOffPolicy) {
-		Assert.notNull(backOffPolicy, "BackOff policy must not be null");
-		this.backOffPolicy = backOffPolicy;
 	}
 
 	/**
@@ -157,13 +131,12 @@ public class RetryTemplate implements RetryOperations {
 					() -> "Execution of retryable operation '%s' failed; initiating the retry process"
 							.formatted(retryableName));
 			// Retry process starts here
-			RetryExecution retryExecution = this.retryPolicy.start();
-			BackOffExecution backOffExecution = this.backOffPolicy.start();
+			BackOffExecution backOffExecution = this.retryPolicy.getBackOff().start();
 			Deque<Throwable> exceptions = new ArrayDeque<>();
 			exceptions.add(initialException);
 
 			Throwable retryException = initialException;
-			while (retryExecution.shouldRetry(retryException)) {
+			while (this.retryPolicy.shouldRetry(retryException)) {
 				try {
 					long duration = backOffExecution.nextBackOff();
 					if (duration == BackOffExecution.STOP) {
@@ -181,9 +154,9 @@ public class RetryTemplate implements RetryOperations {
 				}
 				logger.debug(() -> "Preparing to retry operation '%s'".formatted(retryableName));
 				try {
-					this.retryListener.beforeRetry(retryExecution);
+					this.retryListener.beforeRetry(this.retryPolicy, retryable);
 					R result = retryable.execute();
-					this.retryListener.onRetrySuccess(retryExecution, result);
+					this.retryListener.onRetrySuccess(this.retryPolicy, retryable, result);
 					logger.debug(() -> "Retryable operation '%s' completed successfully after retry"
 							.formatted(retryableName));
 					return result;
@@ -191,7 +164,7 @@ public class RetryTemplate implements RetryOperations {
 				catch (Throwable currentAttemptException) {
 					logger.debug(() -> "Retry attempt for operation '%s' failed due to '%s'"
 							.formatted(retryableName, currentAttemptException));
-					this.retryListener.onRetryFailure(retryExecution, currentAttemptException);
+					this.retryListener.onRetryFailure(this.retryPolicy, retryable, currentAttemptException);
 					exceptions.add(currentAttemptException);
 					retryException = currentAttemptException;
 				}
@@ -203,7 +176,7 @@ public class RetryTemplate implements RetryOperations {
 					"Retry policy for operation '%s' exhausted; aborting execution".formatted(retryableName),
 					exceptions.removeLast());
 			exceptions.forEach(finalException::addSuppressed);
-			this.retryListener.onRetryPolicyExhaustion(retryExecution, finalException);
+			this.retryListener.onRetryPolicyExhaustion(this.retryPolicy, retryable, finalException);
 			throw finalException;
 		}
 	}

@@ -21,9 +21,10 @@ import java.util.List;
 
 import org.jspecify.annotations.Nullable;
 
-import org.springframework.core.retry.RetryExecution;
 import org.springframework.core.retry.RetryListener;
+import org.springframework.core.retry.RetryPolicy;
 import org.springframework.core.retry.RetryTemplate;
+import org.springframework.core.retry.Retryable;
 import org.springframework.util.Assert;
 
 /**
@@ -66,23 +67,23 @@ public class CompositeRetryListener implements RetryListener {
 
 
 	@Override
-	public void beforeRetry(RetryExecution retryExecution) {
-		this.listeners.forEach(retryListener -> retryListener.beforeRetry(retryExecution));
+	public void beforeRetry(RetryPolicy retryPolicy, Retryable<?> retryable) {
+		this.listeners.forEach(retryListener -> retryListener.beforeRetry(retryPolicy, retryable));
 	}
 
 	@Override
-	public void onRetrySuccess(RetryExecution retryExecution, @Nullable Object result) {
-		this.listeners.forEach(listener -> listener.onRetrySuccess(retryExecution, result));
+	public void onRetrySuccess(RetryPolicy retryPolicy, Retryable<?> retryable, @Nullable Object result) {
+		this.listeners.forEach(listener -> listener.onRetrySuccess(retryPolicy, retryable, result));
 	}
 
 	@Override
-	public void onRetryFailure(RetryExecution retryExecution, Throwable throwable) {
-		this.listeners.forEach(listener -> listener.onRetryFailure(retryExecution, throwable));
+	public void onRetryFailure(RetryPolicy retryPolicy, Retryable<?> retryable, Throwable throwable) {
+		this.listeners.forEach(listener -> listener.onRetryFailure(retryPolicy, retryable, throwable));
 	}
 
 	@Override
-	public void onRetryPolicyExhaustion(RetryExecution retryExecution, Throwable throwable) {
-		this.listeners.forEach(listener -> listener.onRetryPolicyExhaustion(retryExecution, throwable));
+	public void onRetryPolicyExhaustion(RetryPolicy retryPolicy, Retryable<?> retryable, Throwable throwable) {
+		this.listeners.forEach(listener -> listener.onRetryPolicyExhaustion(retryPolicy, retryable, throwable));
 	}
 
 }

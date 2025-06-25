@@ -16,15 +16,13 @@
 
 package org.springframework.core.retry;
 
-import java.time.Duration;
-import java.time.LocalDateTime;
 import java.util.Set;
 import java.util.StringJoiner;
 import java.util.function.Predicate;
 
 import org.jspecify.annotations.Nullable;
 
-import org.springframework.util.Assert;
+import org.springframework.util.backoff.BackOff;
 
 /**
  * Default {@link RetryPolicy} created by {@link RetryPolicy.Builder}.
@@ -35,44 +33,58 @@ import org.springframework.util.Assert;
  */
 class DefaultRetryPolicy implements RetryPolicy {
 
-	private final int maxAttempts;
-
-	private final @Nullable Duration maxDuration;
-
 	private final Set<Class<? extends Throwable>> includes;
 
 	private final Set<Class<? extends Throwable>> excludes;
 
 	private final @Nullable Predicate<Throwable> predicate;
 
+	private final BackOff backOff;
 
-	DefaultRetryPolicy(int maxAttempts, @Nullable Duration maxDuration, Set<Class<? extends Throwable>> includes,
-			Set<Class<? extends Throwable>> excludes, @Nullable Predicate<Throwable> predicate) {
 
-		Assert.isTrue((maxAttempts > 0 || maxDuration != null), "Max attempts or max duration must be specified");
 
-		this.maxAttempts = maxAttempts;
-		this.maxDuration = maxDuration;
+	DefaultRetryPolicy(Set<Class<? extends Throwable>> includes, Set<Class<? extends Throwable>> excludes,
+			@Nullable Predicate<Throwable> predicate, BackOff backOff) {
+
 		this.includes = includes;
 		this.excludes = excludes;
 		this.predicate = predicate;
+		this.backOff = backOff;
 	}
 
 
 	@Override
-	public RetryExecution start() {
-		return new DefaultRetryPolicyExecution();
+	public boolean shouldRetry(Throwable throwable) {
+		if (!this.excludes.isEmpty()) {
+			for (Class<? extends Throwable> excludedType : this.excludes) {
+				if (excludedType.isInstance(throwable)) {
+					return false;
+				}
+			}
+		}
+		if (!this.includes.isEmpty()) {
+			boolean included = false;
+			for (Class<? extends Throwable> includedType : this.includes) {
+				if (includedType.isInstance(throwable)) {
+					included = true;
+					break;
+				}
+			}
+			if (!included) {
+				return false;
+			}
+		}
+		return this.predicate == null || this.predicate.test(throwable);
+	}
+
+	@Override
+	public BackOff getBackOff() {
+		return this.backOff;
 	}
 
 	@Override
 	public String toString() {
 		StringJoiner result = new StringJoiner(", ", "DefaultRetryPolicy[", "]");
-		if (this.maxAttempts > 0) {
-			result.add("maxAttempts=" + this.maxAttempts);
-		}
-		if (this.maxDuration != null) {
-			result.add("maxDuration=" + this.maxDuration.toMillis() + "ms");
-		}
 		if (!this.includes.isEmpty()) {
 			result.add("includes=" + names(this.includes));
 		}
@@ -82,6 +94,7 @@ class DefaultRetryPolicy implements RetryPolicy {
 		if (this.predicate != null) {
 			result.add("predicate=" + this.predicate.getClass().getSimpleName());
 		}
+		result.add("backOff=" + this.backOff);
 		return result.toString();
 	}
 
@@ -93,75 +106,6 @@ class DefaultRetryPolicy implements RetryPolicy {
 			result.add(name != null? name : type.getName());
 		}
 		return result.toString();
-	}
-
-
-	/**
-	 * {@link RetryExecution} for {@link DefaultRetryPolicy}.
-	 */
-	private class DefaultRetryPolicyExecution implements RetryExecution {
-
-		private final LocalDateTime retryStartTime = LocalDateTime.now();
-
-		private int retryCount;
-
-
-		@Override
-		public boolean shouldRetry(Throwable throwable) {
-			if (DefaultRetryPolicy.this.maxAttempts > 0 &&
-					this.retryCount++ >= DefaultRetryPolicy.this.maxAttempts) {
-				return false;
-			}
-			if (DefaultRetryPolicy.this.maxDuration != null) {
-				Duration retryDuration = Duration.between(this.retryStartTime, LocalDateTime.now());
-				if (retryDuration.compareTo(DefaultRetryPolicy.this.maxDuration) > 0) {
-					return false;
-				}
-			}
-			if (!DefaultRetryPolicy.this.excludes.isEmpty()) {
-				for (Class<? extends Throwable> excludedType : DefaultRetryPolicy.this.excludes) {
-					if (excludedType.isInstance(throwable)) {
-						return false;
-					}
-				}
-			}
-			if (!DefaultRetryPolicy.this.includes.isEmpty()) {
-				boolean included = false;
-				for (Class<? extends Throwable> includedType : DefaultRetryPolicy.this.includes) {
-					if (includedType.isInstance(throwable)) {
-						included = true;
-						break;
-					}
-				}
-				if (!included) {
-					return false;
-				}
-			}
-			return DefaultRetryPolicy.this.predicate == null || DefaultRetryPolicy.this.predicate.test(throwable);
-		}
-
-		@Override
-		public String toString() {
-			StringJoiner result = new StringJoiner(", ", "DefaultRetryPolicyExecution[", "]");
-			if (DefaultRetryPolicy.this.maxAttempts > 0) {
-				result.add("maxAttempts=" + DefaultRetryPolicy.this.maxAttempts);
-				result.add("retryCount=" + this.retryCount);
-			}
-			if (DefaultRetryPolicy.this.maxDuration != null) {
-				result.add("maxDuration=" + DefaultRetryPolicy.this.maxDuration.toMillis() + "ms");
-				result.add("retryStartTime=" + this.retryStartTime);
-			}
-			if (!DefaultRetryPolicy.this.includes.isEmpty()) {
-				result.add("includes=" + names(DefaultRetryPolicy.this.includes));
-			}
-			if (!DefaultRetryPolicy.this.excludes.isEmpty()) {
-				result.add("excludes=" + names(DefaultRetryPolicy.this.excludes));
-			}
-			if (DefaultRetryPolicy.this.predicate != null) {
-				result.add("predicate=" + DefaultRetryPolicy.this.predicate.getClass().getSimpleName());
-			}
-			return result.toString();
-		}
 	}
 
 }

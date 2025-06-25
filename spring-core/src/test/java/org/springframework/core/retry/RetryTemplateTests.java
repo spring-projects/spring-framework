@@ -30,18 +30,17 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments.ArgumentSet;
 import org.junit.jupiter.params.provider.FieldSource;
 
-import org.springframework.util.backoff.FixedBackOff;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.jupiter.params.provider.Arguments.argumentSet;
 
 /**
- * Tests for {@link RetryTemplate}.
+ * Integration tests for {@link RetryTemplate} and {@link RetryPolicy}.
  *
  * @author Mahmoud Ben Hassine
  * @author Sam Brannen
  * @since 7.0
+ * @see RetryPolicyTests
  */
 class RetryTemplateTests {
 
@@ -49,8 +48,13 @@ class RetryTemplateTests {
 
 
 	@BeforeEach
-	void configureTemplate() {
-		this.retryTemplate.setBackOffPolicy(new FixedBackOff(Duration.ofMillis(10)));
+	void configureRetryTemplate() {
+		var retryPolicy = RetryPolicy.builder()
+				.maxAttempts(3)
+				.delay(Duration.ofMillis(1))
+				.build();
+
+		retryTemplate.setRetryPolicy(retryPolicy);
 	}
 
 	@Test
@@ -109,7 +113,7 @@ class RetryTemplateTests {
 	}
 
 	@Test
-	void retryWithFailingRetryableAndCustomRetryPolicyWithMultiplePredicates() {
+	void retryWithFailingRetryableAndMultiplePredicates() {
 		var invocationCount = new AtomicInteger();
 		var exception = new NumberFormatException("Boom!");
 
@@ -128,7 +132,7 @@ class RetryTemplateTests {
 
 		var retryPolicy = RetryPolicy.builder()
 				.maxAttempts(5)
-				.maxDuration(Duration.ofMillis(100))
+				.delay(Duration.ofMillis(1))
 				.predicate(NumberFormatException.class::isInstance)
 				.predicate(t -> t.getMessage().equals("Boom!"))
 				.build();
@@ -167,6 +171,7 @@ class RetryTemplateTests {
 
 		var retryPolicy = RetryPolicy.builder()
 				.maxAttempts(Integer.MAX_VALUE)
+				.delay(Duration.ofMillis(1))
 				.includes(IOException.class)
 				.build();
 
@@ -189,11 +194,13 @@ class RetryTemplateTests {
 			argumentSet("Excludes",
 						RetryPolicy.builder()
 							.maxAttempts(Integer.MAX_VALUE)
+							.delay(Duration.ofMillis(1))
 							.excludes(FileNotFoundException.class)
 							.build()),
 			argumentSet("Includes & Excludes",
 						RetryPolicy.builder()
 							.maxAttempts(Integer.MAX_VALUE)
+							.delay(Duration.ofMillis(1))
 							.includes(IOException.class)
 							.excludes(FileNotFoundException.class)
 							.build())
@@ -201,7 +208,7 @@ class RetryTemplateTests {
 
 	@ParameterizedTest
 	@FieldSource("includesAndExcludesRetryPolicies")
-	void retryWithIncludesAndExcludesRetryPolicies(RetryPolicy retryPolicy) {
+	void retryWithExceptionIncludesAndExcludes(RetryPolicy retryPolicy) {
 		retryTemplate.setRetryPolicy(retryPolicy);
 
 		var invocationCount = new AtomicInteger();
