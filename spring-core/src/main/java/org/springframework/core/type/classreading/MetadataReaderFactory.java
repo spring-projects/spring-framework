@@ -54,6 +54,13 @@ public interface MetadataReaderFactory {
 	MetadataReader getMetadataReader(Resource resource) throws IOException;
 
 	/**
+	 * Return the ResourceLoader that this MetadataReaderFactory has been
+	 * constructed with.
+	 * @since 7.0
+	 */
+	ResourceLoader getResourceLoader();
+
+	/**
 	 * Create a default {@link MetadataReaderFactory} implementation that's suitable
 	 * for the current JVM.
 	 * @return a new factory instance
