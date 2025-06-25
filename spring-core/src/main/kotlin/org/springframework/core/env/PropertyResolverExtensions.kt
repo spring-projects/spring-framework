@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-@file:Suppress("EXTENSION_SHADOWED_BY_MEMBER")
-
 package org.springframework.core.env
 
 /**
@@ -39,7 +37,7 @@ operator fun PropertyResolver.get(key: String) : String? = getProperty(key)
  * @author Sebastien Deleuze
  * @since 5.1
  */
-inline fun <reified T> PropertyResolver.getProperty(key: String) : T? =
+inline fun <reified T : Any> PropertyResolver.getProperty(key: String) : T? =
 		getProperty(key, T::class.java)
 
 /**

@@ -25,22 +25,26 @@ public class AutowiredComponent {
 
 	private Integer counter;
 
+	@Autowired
+	public void setEnvironment(Environment environment) {
+		this.environment = environment;
+	}
+
 	public Environment getEnvironment() {
 		return this.environment;
 	}
 
 	@Autowired
-	public void setEnvironment(Environment environment) {
-		this.environment = environment;
+	public void setCounter(Integer counter) {
+		this.counter = counter;
 	}
 
 	public Integer getCounter() {
 		return this.counter;
 	}
 
-	@Autowired
-	public void setCounter(Integer counter) {
-		this.counter = counter;
+	public Integer getCounter(Integer ignored) {
+		return this.counter;
 	}
 
 }

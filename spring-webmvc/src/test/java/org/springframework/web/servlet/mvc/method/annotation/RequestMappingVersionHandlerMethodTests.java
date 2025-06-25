@@ -17,11 +17,13 @@
 package org.springframework.web.servlet.mvc.method.annotation;
 
 import java.io.IOException;
+import java.net.URI;
 
 import jakarta.servlet.ServletException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import org.springframework.web.accept.StandardApiDeprecationHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
@@ -76,6 +78,12 @@ public class RequestMappingVersionHandlerMethodTests {
 		assertThat(response.getStatus()).isEqualTo(400);
 	}
 
+	@Test
+	void deprecation() throws Exception {
+		assertThat(requestWithVersion("1").getHeader("Link"))
+				.isEqualTo("<https://example.org/deprecation>; rel=\"deprecation\"; type=\"text/html\"");
+	}
+
 	private MockHttpServletResponse requestWithVersion(String version) throws ServletException, IOException {
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/");
 		request.addHeader("X-API-VERSION", version);
@@ -90,7 +98,13 @@ public class RequestMappingVersionHandlerMethodTests {
 
 		@Override
 		public void configureApiVersioning(ApiVersionConfigurer configurer) {
-			configurer.useRequestHeader("X-API-Version").addSupportedVersions("1", "1.1", "1.3", "1.6");
+
+			StandardApiDeprecationHandler handler = new StandardApiDeprecationHandler();
+			handler.configureVersion("1").setDeprecationLink(URI.create("https://example.org/deprecation"));
+
+			configurer.useRequestHeader("X-API-Version")
+					.addSupportedVersions("1", "1.1", "1.3", "1.6")
+					.setDeprecationHandler(handler);
 		}
 	}
 

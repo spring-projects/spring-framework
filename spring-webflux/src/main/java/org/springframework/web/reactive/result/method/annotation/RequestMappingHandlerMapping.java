@@ -28,6 +28,7 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import org.jspecify.annotations.Nullable;
+import reactor.core.publisher.Mono;
 
 import org.springframework.context.EmbeddedValueResolverAware;
 import org.springframework.core.annotation.AnnotatedElementUtils;
@@ -41,6 +42,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.util.StringValueResolver;
+import org.springframework.web.accept.InvalidApiVersionException;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -55,6 +57,7 @@ import org.springframework.web.reactive.result.condition.ConsumesRequestConditio
 import org.springframework.web.reactive.result.condition.RequestCondition;
 import org.springframework.web.reactive.result.method.RequestMappingInfo;
 import org.springframework.web.reactive.result.method.RequestMappingInfoHandlerMapping;
+import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.service.annotation.HttpExchange;
 
 /**
@@ -170,6 +173,37 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	@Override
 	protected boolean isHandler(Class<?> beanType) {
 		return AnnotatedElementUtils.hasAnnotation(beanType, Controller.class);
+	}
+
+	@Override
+	public Mono<HandlerMethod> getHandlerInternal(ServerWebExchange exchange) {
+		if (this.apiVersionStrategy != null) {
+			Comparable<?> requestVersion = exchange.getAttribute(API_VERSION_ATTRIBUTE);
+			if (requestVersion == null) {
+				requestVersion = getApiVersion(exchange, this.apiVersionStrategy);
+				if (requestVersion != null) {
+					exchange.getAttributes().put(API_VERSION_ATTRIBUTE, requestVersion);
+				}
+			}
+		}
+		return super.getHandlerInternal(exchange);
+	}
+
+	private static @Nullable Comparable<?> getApiVersion(
+			ServerWebExchange exchange, ApiVersionStrategy versionStrategy) {
+
+		String value = versionStrategy.resolveVersion(exchange);
+		if (value == null) {
+			return versionStrategy.getDefaultVersion();
+		}
+		try {
+			Comparable<?> version = versionStrategy.parseVersion(value);
+			versionStrategy.validateVersion(version, exchange);
+			return version;
+		}
+		catch (Exception ex) {
+			throw new InvalidApiVersionException(value, null, ex);
+		}
 	}
 
 	/**
@@ -356,6 +390,17 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	private static RequestMethod[] toMethodArray(String method) {
 		return (StringUtils.hasText(method) ?
 				new RequestMethod[] {RequestMethod.valueOf(method)} : EMPTY_REQUEST_METHOD_ARRAY);
+	}
+
+	@Override
+	protected void handleMatch(RequestMappingInfo info, HandlerMethod handlerMethod, ServerWebExchange exchange) {
+		super.handleMatch(info, handlerMethod, exchange);
+
+		Comparable<?> version = exchange.getAttribute(API_VERSION_ATTRIBUTE);
+		if (version != null) {
+			Assert.state(this.apiVersionStrategy != null, "No ApiVersionStrategy");
+			this.apiVersionStrategy.handleDeprecations(version, exchange);
+		}
 	}
 
 	@Override

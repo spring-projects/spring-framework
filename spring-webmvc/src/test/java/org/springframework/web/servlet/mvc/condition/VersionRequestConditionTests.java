@@ -26,6 +26,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.web.accept.DefaultApiVersionStrategy;
 import org.springframework.web.accept.NotAcceptableApiVersionException;
 import org.springframework.web.accept.SemanticApiVersionParser;
+import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -48,7 +49,7 @@ public class VersionRequestConditionTests {
 	private static DefaultApiVersionStrategy initVersionStrategy(@Nullable String defaultValue) {
 		return new DefaultApiVersionStrategy(
 				List.of(request -> request.getParameter("api-version")),
-				new SemanticApiVersionParser(), true, defaultValue);
+				new SemanticApiVersionParser(), true, defaultValue, null);
 	}
 
 	@Test
@@ -70,32 +71,40 @@ public class VersionRequestConditionTests {
 
 	@Test
 	void fixedVersionMatch() {
-		String conditionVersion = "1.2";
+		VersionRequestCondition condition = condition("1.2");
 		this.strategy.addSupportedVersion("1.1", "1.3");
 
-		testMatch("v1.1", conditionVersion, true, false);
-		testMatch("v1.2", conditionVersion, false, false);
-		testMatch("v1.3", conditionVersion, false, true);
+		testMatch("v1.1", condition, false, false);
+		testMatch("v1.2", condition, true, false);
+		testMatch("v1.3", condition, true, true); // match initially, reject if chosen
 	}
 
 	@Test
 	void baselineVersionMatch() {
-		String conditionVersion = "1.2+";
+		VersionRequestCondition condition = condition("1.2+");
 		this.strategy.addSupportedVersion("1.1", "1.3");
 
-		testMatch("v1.1", conditionVersion, true, false);
-		testMatch("v1.2", conditionVersion, false, false);
-		testMatch("v1.3", conditionVersion, false, false);
+		testMatch("v1.1", condition, false, false);
+		testMatch("v1.2", condition, true, false);
+		testMatch("v1.3", condition, true, false);
+	}
+
+	@Test
+	void notVersionedMatch() {
+		VersionRequestCondition condition = new VersionRequestCondition(null, this.strategy);
+		this.strategy.addSupportedVersion("1.1", "1.3");
+
+		testMatch("v1.1", condition, true, false);
+		testMatch("v1.3", condition, true, false);
 	}
 
 	private void testMatch(
-			String requestVersion, String conditionVersion, boolean notCompatible, boolean notAcceptable) {
+			String requestVersion, VersionRequestCondition condition, boolean matches, boolean notAcceptable) {
 
 		MockHttpServletRequest request = requestWithVersion(requestVersion);
-		VersionRequestCondition condition = condition(conditionVersion);
 		VersionRequestCondition match = condition.getMatchingCondition(request);
 
-		if (notCompatible) {
+		if (!matches) {
 			assertThat(match).isNull();
 			return;
 		}
@@ -111,12 +120,6 @@ public class VersionRequestConditionTests {
 	}
 
 	@Test
-	void missingRequiredVersion() {
-		assertThatThrownBy(() -> condition("1.2").getMatchingCondition(new MockHttpServletRequest("GET", "/path")))
-				.hasMessage("400 BAD_REQUEST \"API version is required.\"");
-	}
-
-	@Test
 	void defaultVersion() {
 		String version = "1.2";
 		this.strategy = initVersionStrategy(version);
@@ -124,12 +127,6 @@ public class VersionRequestConditionTests {
 		VersionRequestCondition match = condition.getMatchingCondition(new MockHttpServletRequest("GET", "/path"));
 
 		assertThat(match).isSameAs(condition);
-	}
-
-	@Test
-	void unsupportedVersion() {
-		assertThatThrownBy(() -> condition("1.2").getMatchingCondition(requestWithVersion("1.3")))
-				.hasMessage("400 BAD_REQUEST \"Invalid API version: '1.3.0'.\"");
 	}
 
 	@Test
@@ -155,12 +152,12 @@ public class VersionRequestConditionTests {
 	}
 
 	private VersionRequestCondition emptyCondition() {
-		return new VersionRequestCondition();
+		return new VersionRequestCondition(null, this.strategy);
 	}
 
 	private MockHttpServletRequest requestWithVersion(String v) {
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/path");
-		request.addParameter("api-version", v);
+		request.setAttribute(HandlerMapping.API_VERSION_ATTRIBUTE, this.strategy.parseVersion(v));
 		return request;
 	}
 

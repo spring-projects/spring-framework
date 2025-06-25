@@ -22,10 +22,12 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.support.StaticListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.beans.testfixture.beans.AnnotatedBean;
@@ -350,6 +352,32 @@ class BeanFactoryUtilsTests {
 	}
 
 	@Test
+	void isSingletonAndIsPrototypeWithDefaultFactory() {
+		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
+		TestBean bean = new TestBean();
+		DummyFactory fb1 = new DummyFactory();
+		RootBeanDefinition fb1bd = new RootBeanDefinition(DummyFactory.class, () -> fb1);
+		fb1bd.setAttribute(FactoryBean.OBJECT_TYPE_ATTRIBUTE, TestBean.class);
+		DummyFactory fb2 = new DummyFactory();
+		fb2.setSingleton(false);
+		RootBeanDefinition fb2bd = new RootBeanDefinition(DummyFactory.class, () -> fb2);
+		fb2bd.setAttribute(FactoryBean.OBJECT_TYPE_ATTRIBUTE, TestBean.class);
+		TestBeanSmartFactoryBean sfb1 = new TestBeanSmartFactoryBean(true, true);
+		TestBeanSmartFactoryBean sfb2 = new TestBeanSmartFactoryBean(true, false);
+		TestBeanSmartFactoryBean sfb3 = new TestBeanSmartFactoryBean(false, true);
+		TestBeanSmartFactoryBean sfb4 = new TestBeanSmartFactoryBean(false, false);
+		lbf.registerBeanDefinition("bean", new RootBeanDefinition(TestBean.class, () -> bean));
+		lbf.registerBeanDefinition("fb1", fb1bd);
+		lbf.registerBeanDefinition("fb2", fb2bd);
+		lbf.registerBeanDefinition("sfb1", new RootBeanDefinition(TestBeanSmartFactoryBean.class, () -> sfb1));
+		lbf.registerBeanDefinition("sfb2", new RootBeanDefinition(TestBeanSmartFactoryBean.class, () -> sfb2));
+		lbf.registerBeanDefinition("sfb3", new RootBeanDefinition(TestBeanSmartFactoryBean.class, () -> sfb3));
+		lbf.registerBeanDefinition("sfb4", new RootBeanDefinition(TestBeanSmartFactoryBean.class, () -> sfb4));
+
+		testIsSingletonAndIsPrototype(lbf);
+	}
+
+	@Test
 	void isSingletonAndIsPrototypeWithStaticFactory() {
 		StaticListableBeanFactory lbf = new StaticListableBeanFactory();
 		TestBean bean = new TestBean();
@@ -368,9 +396,14 @@ class BeanFactoryUtilsTests {
 		lbf.addBean("sfb3", sfb3);
 		lbf.addBean("sfb4", sfb4);
 
-		Map<String, ?> beans = BeanFactoryUtils.beansOfTypeIncludingAncestors(lbf, ITestBean.class, true, true);
-		assertThat(beans.get("bean")).isSameAs(bean);
-		assertThat(beans.get("fb1")).isSameAs(fb1.getObject());
+		testIsSingletonAndIsPrototype(lbf);
+	}
+
+	void testIsSingletonAndIsPrototype(ListableBeanFactory lbf) {
+		Map<String, ?> beans = BeanFactoryUtils.beansOfTypeIncludingAncestors(lbf, ITestBean.class);
+		assertThat(beans).hasSize(7);
+		assertThat(beans.get("bean")).isSameAs(lbf.getBean("bean"));
+		assertThat(beans.get("fb1")).isSameAs(lbf.getBean("&fb1", DummyFactory.class).getObject());
 		assertThat(beans.get("fb2")).isInstanceOf(TestBean.class);
 		assertThat(beans.get("sfb1")).isInstanceOf(TestBean.class);
 		assertThat(beans.get("sfb2")).isInstanceOf(TestBean.class);
@@ -388,33 +421,91 @@ class BeanFactoryUtilsTests {
 
 		assertThat(lbf.isSingleton("bean")).isTrue();
 		assertThat(lbf.isSingleton("fb1")).isTrue();
-		assertThat(lbf.isSingleton("fb2")).isTrue();
+		assertThat(lbf.isSingleton("fb2")).isFalse();
 		assertThat(lbf.isSingleton("sfb1")).isTrue();
 		assertThat(lbf.isSingleton("sfb2")).isTrue();
-		assertThat(lbf.isSingleton("sfb3")).isTrue();
-		assertThat(lbf.isSingleton("sfb4")).isTrue();
+		assertThat(lbf.isSingleton("sfb3")).isFalse();
+		assertThat(lbf.isSingleton("sfb4")).isFalse();
 
 		assertThat(lbf.isSingleton("&fb1")).isTrue();
-		assertThat(lbf.isSingleton("&fb2")).isFalse();
+		assertThat(lbf.isSingleton("&fb2")).isTrue();
 		assertThat(lbf.isSingleton("&sfb1")).isTrue();
 		assertThat(lbf.isSingleton("&sfb2")).isTrue();
-		assertThat(lbf.isSingleton("&sfb3")).isFalse();
-		assertThat(lbf.isSingleton("&sfb4")).isFalse();
+		assertThat(lbf.isSingleton("&sfb3")).isTrue();
+		assertThat(lbf.isSingleton("&sfb4")).isTrue();
 
 		assertThat(lbf.isPrototype("bean")).isFalse();
 		assertThat(lbf.isPrototype("fb1")).isFalse();
-		assertThat(lbf.isPrototype("fb2")).isFalse();
-		assertThat(lbf.isPrototype("sfb1")).isFalse();
+		assertThat(lbf.isPrototype("fb2")).isTrue();
+		assertThat(lbf.isPrototype("sfb1")).isTrue();
 		assertThat(lbf.isPrototype("sfb2")).isFalse();
-		assertThat(lbf.isPrototype("sfb3")).isFalse();
-		assertThat(lbf.isPrototype("sfb4")).isFalse();
+		assertThat(lbf.isPrototype("sfb3")).isTrue();
+		assertThat(lbf.isPrototype("sfb4")).isTrue();
 
 		assertThat(lbf.isPrototype("&fb1")).isFalse();
-		assertThat(lbf.isPrototype("&fb2")).isTrue();
-		assertThat(lbf.isPrototype("&sfb1")).isTrue();
+		assertThat(lbf.isPrototype("&fb2")).isFalse();
+		assertThat(lbf.isPrototype("&sfb1")).isFalse();
 		assertThat(lbf.isPrototype("&sfb2")).isFalse();
-		assertThat(lbf.isPrototype("&sfb3")).isTrue();
-		assertThat(lbf.isPrototype("&sfb4")).isTrue();
+		assertThat(lbf.isPrototype("&sfb3")).isFalse();
+		assertThat(lbf.isPrototype("&sfb4")).isFalse();
+	}
+
+	@Test
+	void supportsMultipleTypesWithDefaultFactory() {
+		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
+		TestBean bean = new TestBean();
+		DummyFactory fb1 = new DummyFactory();
+		DummyFactory fb2 = new DummyFactory();
+		fb2.setSingleton(false);
+		SupportsTypeSmartFactoryBean sfb1 = new SupportsTypeSmartFactoryBean();
+		SupportsTypeSmartFactoryBean sfb2 = new SupportsTypeSmartFactoryBean();
+		lbf.registerSingleton("bean", bean);
+		lbf.registerSingleton("fb1", fb1);
+		lbf.registerSingleton("fb2", fb2);
+		lbf.registerSingleton("sfb1", sfb1);
+		lbf.registerSingleton("sfb2", sfb2);
+
+		testSupportsMultipleTypesWithStaticFactory(lbf);
+	}
+
+	@Test
+	void supportsMultipleTypesWithStaticFactory() {
+		StaticListableBeanFactory lbf = new StaticListableBeanFactory();
+		TestBean bean = new TestBean();
+		DummyFactory fb1 = new DummyFactory();
+		DummyFactory fb2 = new DummyFactory();
+		fb2.setSingleton(false);
+		SupportsTypeSmartFactoryBean sfb1 = new SupportsTypeSmartFactoryBean();
+		SupportsTypeSmartFactoryBean sfb2 = new SupportsTypeSmartFactoryBean();
+		lbf.addBean("bean", bean);
+		lbf.addBean("fb1", fb1);
+		lbf.addBean("fb2", fb2);
+		lbf.addBean("sfb1", sfb1);
+		lbf.addBean("sfb2", sfb2);
+
+		testSupportsMultipleTypesWithStaticFactory(lbf);
+	}
+
+	void testSupportsMultipleTypesWithStaticFactory(ListableBeanFactory lbf) {
+		Map<String, ?> beans = BeanFactoryUtils.beansOfTypeIncludingAncestors(lbf, ITestBean.class);
+		assertThat(beans).hasSize(5);
+		assertThat(beans.get("bean")).isSameAs(lbf.getBean("bean"));
+		assertThat(beans.get("fb1")).isSameAs(lbf.getBean("&fb1", DummyFactory.class).getObject());
+		assertThat(beans.get("fb2")).isInstanceOf(TestBean.class);
+		assertThat(beans.get("sfb1")).isInstanceOf(TestBean.class);
+		assertThat(beans.get("sfb2")).isInstanceOf(TestBean.class);
+
+		beans = BeanFactoryUtils.beansOfTypeIncludingAncestors(lbf, CharSequence.class);
+		assertThat(beans).hasSize(2);
+		assertThat(beans.get("sfb1")).isInstanceOf(String.class);
+		assertThat(beans.get("sfb2")).isInstanceOf(String.class);
+
+		assertThat(lbf.getBean("sfb1", ITestBean.class)).isInstanceOf(TestBean.class);
+		assertThat(lbf.getBean("sfb2", ITestBean.class)).isInstanceOf(TestBean.class);
+		assertThat(lbf.getBean("sfb1", CharSequence.class)).isInstanceOf(String.class);
+		assertThat(lbf.getBean("sfb2", CharSequence.class)).isInstanceOf(String.class);
+		assertThat(lbf.getBean("sfb1")).isInstanceOf(String.class);
+		assertThat(lbf.getBean("sfb2")).isInstanceOf(String.class);
 	}
 
 
@@ -465,13 +556,10 @@ class BeanFactoryUtilsTests {
 		}
 
 		@Override
-		public boolean isSingleton() {
-			return this.singleton;
-		}
-
-		@Override
-		public boolean isPrototype() {
-			return this.prototype;
+		public TestBean getObject() {
+			// We don't really care if the actual instance is a singleton or prototype
+			// for the tests that use this factory.
+			return this.testBean;
 		}
 
 		@Override
@@ -480,10 +568,39 @@ class BeanFactoryUtilsTests {
 		}
 
 		@Override
-		public TestBean getObject() {
-			// We don't really care if the actual instance is a singleton or prototype
-			// for the tests that use this factory.
-			return this.testBean;
+		public boolean isSingleton() {
+			return this.singleton;
+		}
+
+		@Override
+		public boolean isPrototype() {
+			return this.prototype;
+		}
+	}
+
+
+	static class SupportsTypeSmartFactoryBean implements SmartFactoryBean<String> {
+
+		private final TestBean testBean = new TestBean("enigma", 42);
+
+		@Override
+		public String getObject() {
+			return "testBean";
+		}
+
+		@Override
+		public Class<String> getObjectType() {
+			return String.class;
+		}
+
+		@Override
+		public <S> @Nullable S getObject(Class<S> type) throws Exception {
+			return (type.isInstance(testBean) ? type.cast(testBean) : SmartFactoryBean.super.getObject(type));
+		}
+
+		@Override
+		public boolean supportsType(Class<?> type) {
+			return (type.isInstance(testBean) || SmartFactoryBean.super.supportsType(type));
 		}
 	}
 

@@ -17,6 +17,7 @@
 package org.springframework.web.accept;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -25,6 +26,7 @@ import org.jspecify.annotations.Nullable;
  *
  * @author Rossen Stoyanchev
  * @since 7.0
+ * @see DefaultApiVersionStrategy
  */
 public interface ApiVersionStrategy {
 
@@ -32,6 +34,7 @@ public interface ApiVersionStrategy {
 	 * Resolve the version value from a request, e.g. from a request header.
 	 * @param request the current request
 	 * @return the version, if present or {@code null}
+	 * @see ApiVersionResolver
 	 */
 	@Nullable
 	String resolveVersion(HttpServletRequest request);
@@ -40,6 +43,7 @@ public interface ApiVersionStrategy {
 	 * Parse the version of a request into an Object.
 	 * @param version the value to parse
 	 * @return an Object that represents the version
+	 * @see ApiVersionParser
 	 */
 	Comparable<?> parseVersion(String version);
 
@@ -57,5 +61,16 @@ public interface ApiVersionStrategy {
 	 * Return a default version to use for requests that don't specify one.
 	 */
 	@Nullable Comparable<?> getDefaultVersion();
+
+	/**
+	 * Check if the requested API version is deprecated, and if so handle it
+	 * accordingly, e.g. by setting response headers to signal the deprecation,
+	 * to specify relevant dates and provide links to further details.
+	 * @param version the resolved and parsed request version
+	 * @param request the current request
+	 * @param response the current response
+	 * @see ApiDeprecationHandler
+	 */
+	void handleDeprecations(Comparable<?> version, HttpServletRequest request, HttpServletResponse response);
 
 }

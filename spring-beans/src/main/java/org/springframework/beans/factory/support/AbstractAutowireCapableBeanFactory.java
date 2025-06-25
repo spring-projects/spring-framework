@@ -1294,15 +1294,15 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * @see #obtainFromSupplier
 	 */
 	@Override
-	protected Object getObjectForBeanInstance(
-			Object beanInstance, String name, String beanName, @Nullable RootBeanDefinition mbd) {
+	protected Object getObjectForBeanInstance(Object beanInstance, @Nullable Class<?> requiredType,
+			String name, String beanName, @Nullable RootBeanDefinition mbd) {
 
 		String currentlyCreatedBean = this.currentlyCreatedBean.get();
 		if (currentlyCreatedBean != null) {
 			registerDependentBean(beanName, currentlyCreatedBean);
 		}
 
-		return super.getObjectForBeanInstance(beanInstance, name, beanName, mbd);
+		return super.getObjectForBeanInstance(beanInstance, requiredType, name, beanName, mbd);
 	}
 
 	/**

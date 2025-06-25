@@ -83,6 +83,13 @@ public interface HandlerMapping {
 	 */
 	String PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE = HandlerMapping.class.getName() + ".producibleMediaTypes";
 
+	/**
+	 * Name of the {@link ServerWebExchange#getAttributes() attribute} containing
+	 * the resolved and parsed API version.
+	 * @since 7.0
+	 */
+	String API_VERSION_ATTRIBUTE = HandlerMapping.class.getName() + ".apiVersion";
+
 
 	/**
 	 * Return a handler for this request.

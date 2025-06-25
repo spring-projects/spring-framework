@@ -66,7 +66,6 @@ inline fun <reified T : Any> RequestBodySpec.body(flow: Flow<T>): RequestHeaders
  * @author Arjen Poutsma
  * @since 5.0
  */
-@Suppress("EXTENSION_SHADOWED_BY_MEMBER")
 inline fun <reified B : Any> ResponseSpec.expectBody(): BodySpec<B, *> =
 		expectBody(object : ParameterizedTypeReference<B>() {})
 

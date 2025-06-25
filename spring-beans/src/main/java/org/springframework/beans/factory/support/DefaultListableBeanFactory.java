@@ -730,10 +730,13 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		Map<String, T> result = CollectionUtils.newLinkedHashMap(beanNames.length);
 		for (String beanName : beanNames) {
 			try {
-				Object beanInstance = getBean(beanName);
+				Object beanInstance = (type != null ? getBean(beanName, type) : getBean(beanName));
 				if (!(beanInstance instanceof NullBean)) {
 					result.put(beanName, (T) beanInstance);
 				}
+			}
+			catch (BeanNotOfRequiredTypeException ex) {
+				// Ignore - probably a NullBean
 			}
 			catch (BeanCreationException ex) {
 				Throwable rootCause = ex.getMostSpecificCause();

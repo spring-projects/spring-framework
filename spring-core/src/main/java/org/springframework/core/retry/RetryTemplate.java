@@ -19,7 +19,6 @@ package org.springframework.core.retry;
 import java.time.Duration;
 import java.util.ArrayDeque;
 import java.util.Deque;
-import java.util.Iterator;
 
 import org.jspecify.annotations.Nullable;
 
@@ -203,9 +202,7 @@ public class RetryTemplate implements RetryOperations {
 			RetryException finalException = new RetryException(
 					"Retry policy for operation '%s' exhausted; aborting execution".formatted(retryableName),
 					exceptions.removeLast());
-			for (Iterator<Throwable> it = exceptions.descendingIterator(); it.hasNext();) {
-				finalException.addSuppressed(it.next());
-			}
+			exceptions.forEach(finalException::addSuppressed);
 			this.retryListener.onRetryPolicyExhaustion(retryExecution, finalException);
 			throw finalException;
 		}

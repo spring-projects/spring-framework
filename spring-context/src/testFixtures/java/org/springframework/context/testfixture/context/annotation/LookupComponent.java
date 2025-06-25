@@ -14,29 +14,30 @@
  * limitations under the License.
  */
 
-package org.springframework.cache
+package org.springframework.context.testfixture.context.annotation;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Lookup;
+import org.springframework.core.env.Environment;
 
-/**
- * Extension for [Cache.get] providing a `get<Foo>()` variant.
- *
- * @author Mikhael Sokolov
- * @since 6.0
- */
-inline fun <reified T : Any> Cache.get(key: Any): T? = get(key, T::class.java)
+public abstract class LookupComponent {
 
-/**
- * Extension for [Cache.get] providing a `foo[key]` variant.
- *
- * @author Mikhael Sokolov
- * @since 6.0
- */
-operator fun Cache.get(key: Any): Cache.ValueWrapper? = get(key)
+	private Environment environment;
 
-/**
- * Extension for [Cache.put] providing a `foo[key]` variant.
- *
- * @author Mikhael Sokolov
- * @since 6.0
- */
-operator fun Cache.set(key: Any, value: Any?) = put(key, value)
+	@Autowired
+	public void setEnvironment(Environment environment) {
+		this.environment = environment;
+	}
+
+	public Environment getEnvironment() {
+		return this.environment;
+	}
+
+	@Lookup
+	public abstract Integer getCounter();
+
+	public Integer getCounter(Integer ignored) {
+		return 0;
+	}
+
+}

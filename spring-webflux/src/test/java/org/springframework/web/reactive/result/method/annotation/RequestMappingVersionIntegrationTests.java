@@ -16,6 +16,8 @@
 
 package org.springframework.web.reactive.result.method.annotation;
 
+import java.net.URI;
+
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.http.RequestEntity;
@@ -23,6 +25,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.reactive.accept.StandardApiDeprecationHandler;
 import org.springframework.web.reactive.config.ApiVersionConfigurer;
 import org.springframework.web.reactive.config.EnableWebFlux;
 import org.springframework.web.reactive.config.WebFluxConfigurer;
@@ -67,6 +70,13 @@ public class RequestMappingVersionIntegrationTests extends AbstractRequestMappin
 		assertThatThrownBy(() -> exchangeWithVersion("1.6")).isInstanceOf(HttpClientErrorException.BadRequest.class);
 	}
 
+	@ParameterizedHttpServerTest
+	void deprecation(HttpServer httpServer) throws Exception {
+		startServer(httpServer);
+		assertThat(exchangeWithVersion("1").getHeaders().getFirst("Link"))
+				.isEqualTo("<https://example.org/deprecation>; rel=\"deprecation\"; type=\"text/html\"");
+	}
+
 	private ResponseEntity<String> exchangeWithVersion(String version) {
 		String url = "http://localhost:" + this.port;
 		RequestEntity<Void> requestEntity = RequestEntity.get(url).header("X-API-Version", version).build();
@@ -79,7 +89,13 @@ public class RequestMappingVersionIntegrationTests extends AbstractRequestMappin
 
 		@Override
 		public void configureApiVersioning(ApiVersionConfigurer configurer) {
-			configurer.useRequestHeader("X-API-Version").addSupportedVersions("1", "1.1", "1.3", "1.6");
+
+			StandardApiDeprecationHandler handler = new StandardApiDeprecationHandler();
+			handler.configureVersion("1").setDeprecationLink(URI.create("https://example.org/deprecation"));
+
+			configurer.useRequestHeader("X-API-Version")
+					.addSupportedVersions("1", "1.1", "1.3", "1.6")
+					.setDeprecationHandler(handler);
 		}
 	}
 

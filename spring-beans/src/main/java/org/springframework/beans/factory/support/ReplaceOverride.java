@@ -18,6 +18,7 @@ package org.springframework.beans.factory.support;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -54,6 +55,20 @@ public class ReplaceOverride extends MethodOverride {
 		this.methodReplacerBeanName = methodReplacerBeanName;
 	}
 
+	/**
+	 * Construct a new ReplaceOverride.
+	 * @param methodName the name of the method to override
+	 * @param methodReplacerBeanName the bean name of the {@link MethodReplacer}
+	 * @param typeIdentifiers a list of type identifiers for parameter types
+	 * @since 6.2.9
+	 */
+	public ReplaceOverride(String methodName, String methodReplacerBeanName, List<String> typeIdentifiers) {
+		super(methodName);
+		Assert.notNull(methodReplacerBeanName, "Method replacer bean name must not be null");
+		this.methodReplacerBeanName = methodReplacerBeanName;
+		this.typeIdentifiers.addAll(typeIdentifiers);
+	}
+
 
 	/**
 	 * Return the name of the bean implementing MethodReplacer.
@@ -69,6 +84,15 @@ public class ReplaceOverride extends MethodOverride {
 	 */
 	public void addTypeIdentifier(String identifier) {
 		this.typeIdentifiers.add(identifier);
+	}
+
+	/**
+	 * Return the list of registered type identifiers (fragments of a class string).
+	 * @since 6.2.9
+	 * @see #addTypeIdentifier
+	 */
+	public List<String> getTypeIdentifiers() {
+		return Collections.unmodifiableList(this.typeIdentifiers);
 	}
 
 

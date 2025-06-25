@@ -34,8 +34,8 @@ public class KotlinConventions {
 
 	private void configure(KotlinCompile compile) {
 		compile.compilerOptions(options -> {
-			options.getApiVersion().set(KotlinVersion.KOTLIN_2_1);
-			options.getLanguageVersion().set(KotlinVersion.KOTLIN_2_1);
+			options.getApiVersion().set(KotlinVersion.KOTLIN_2_2);
+			options.getLanguageVersion().set(KotlinVersion.KOTLIN_2_2);
 			options.getJvmTarget().set(JvmTarget.JVM_17);
 			options.getJavaParameters().set(true);
 			options.getAllWarningsAsErrors().set(true);
@@ -43,7 +43,8 @@ public class KotlinConventions {
 					"-Xsuppress-version-warnings",
 					"-Xjsr305=strict", // For dependencies using JSR 305
 					"-opt-in=kotlin.RequiresOptIn",
-					"-Xjdk-release=17" // Needed due to https://youtrack.jetbrains.com/issue/KT-49746
+					"-Xjdk-release=17", // Needed due to https://youtrack.jetbrains.com/issue/KT-49746
+					"-Xannotation-default-target=param-property" // Upcoming default, see https://youtrack.jetbrains.com/issue/KT-73255
 			);
 		});
 	}

@@ -80,8 +80,6 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 
 	private static final ProducesRequestCondition EMPTY_PRODUCES = new ProducesRequestCondition();
 
-	private static final VersionRequestCondition EMPTY_VERSION = new VersionRequestCondition();
-
 	private static final RequestConditionHolder EMPTY_CUSTOM = new RequestConditionHolder(null);
 
 
@@ -130,7 +128,7 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 				(headers != null ? headers : EMPTY_HEADERS),
 				(consumes != null ? consumes : EMPTY_CONSUMES),
 				(produces != null ? produces : EMPTY_PRODUCES),
-				(version != null ? version : EMPTY_VERSION),
+				(version != null ? version : new VersionRequestCondition(null, null)),
 				(custom != null ? new RequestConditionHolder(custom) : EMPTY_CUSTOM),
 				new BuilderConfiguration());
 	}
@@ -771,15 +769,10 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 
 			ContentNegotiationManager manager = this.options.getContentNegotiationManager();
 
-			VersionRequestCondition versionCondition;
-			ApiVersionStrategy versionStrategy = this.options.getApiVersionStrategy();
-			if (StringUtils.hasText(this.version)) {
-				Assert.state(versionStrategy != null, "API version specified, but no ApiVersionStrategy configured");
-				versionCondition = new VersionRequestCondition(this.version, versionStrategy);
-			}
-			else {
-				versionCondition = EMPTY_VERSION;
-			}
+			ApiVersionStrategy strategy = this.options.getApiVersionStrategy();
+			Assert.state(strategy != null || !StringUtils.hasText(this.version),
+					"API version specified, but no ApiVersionStrategy configured");
+			VersionRequestCondition versionCondition = new VersionRequestCondition(this.version, strategy);
 
 			return new RequestMappingInfo(
 					this.mappingName, pathPatternsCondition, patternsCondition,
@@ -894,14 +887,10 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 
 		@Override
 		public Builder version(@Nullable String version) {
-			if (version != null) {
-				ApiVersionStrategy strategy = this.options.getApiVersionStrategy();
-				Assert.state(strategy != null, "API version specified, but no ApiVersionStrategy configured");
-				this.versionCondition = new VersionRequestCondition(version, strategy);
-			}
-			else {
-				this.versionCondition = EMPTY_VERSION;
-			}
+			ApiVersionStrategy strategy = this.options.getApiVersionStrategy();
+			Assert.state(strategy != null || !StringUtils.hasText(version),
+					"API version specified, but no ApiVersionStrategy configured");
+			this.versionCondition = new VersionRequestCondition(version, strategy);
 			return this;
 		}
 

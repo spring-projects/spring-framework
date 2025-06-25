@@ -252,7 +252,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 					logger.trace("Returning cached instance of singleton bean '" + beanName + "'");
 				}
 			}
-			beanInstance = getObjectForBeanInstance(sharedInstance, name, beanName, null);
+			beanInstance = getObjectForBeanInstance(sharedInstance, requiredType, name, beanName, null);
 		}
 
 		else {
@@ -340,7 +340,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 							throw ex;
 						}
 					});
-					beanInstance = getObjectForBeanInstance(sharedInstance, name, beanName, mbd);
+					beanInstance = getObjectForBeanInstance(sharedInstance, requiredType, name, beanName, mbd);
 				}
 
 				else if (mbd.isPrototype()) {
@@ -353,7 +353,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 					finally {
 						afterPrototypeCreation(beanName);
 					}
-					beanInstance = getObjectForBeanInstance(prototypeInstance, name, beanName, mbd);
+					beanInstance = getObjectForBeanInstance(prototypeInstance, requiredType, name, beanName, mbd);
 				}
 
 				else {
@@ -375,7 +375,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 								afterPrototypeCreation(beanName);
 							}
 						});
-						beanInstance = getObjectForBeanInstance(scopedInstance, name, beanName, mbd);
+						beanInstance = getObjectForBeanInstance(scopedInstance, requiredType, name, beanName, mbd);
 					}
 					catch (IllegalStateException ex) {
 						throw new ScopeNotActiveException(beanName, scopeName, ex);
@@ -536,6 +536,10 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 			// Determine target for FactoryBean match if necessary.
 			if (beanInstance instanceof FactoryBean<?> factoryBean) {
 				if (!isFactoryDereference) {
+					if (factoryBean instanceof SmartFactoryBean<?> smartFactoryBean &&
+							smartFactoryBean.supportsType(typeToMatch.toClass())) {
+						return true;
+					}
 					Class<?> type = getTypeForFactoryBean(factoryBean);
 					if (type == null) {
 						return false;
@@ -1835,8 +1839,8 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	 * @param mbd the merged bean definition
 	 * @return the object to expose for the bean
 	 */
-	protected Object getObjectForBeanInstance(
-			Object beanInstance, String name, String beanName, @Nullable RootBeanDefinition mbd) {
+	protected Object getObjectForBeanInstance(Object beanInstance, @Nullable Class<?> requiredType,
+			String name, String beanName, @Nullable RootBeanDefinition mbd) {
 
 		// Don't let calling code try to dereference the factory if the bean isn't a factory.
 		if (BeanFactoryUtils.isFactoryDereference(name)) {
@@ -1873,7 +1877,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 				mbd = getMergedLocalBeanDefinition(beanName);
 			}
 			boolean synthetic = (mbd != null && mbd.isSynthetic());
-			object = getObjectFromFactoryBean(factoryBean, beanName, !synthetic);
+			object = getObjectFromFactoryBean(factoryBean, requiredType, beanName, !synthetic);
 		}
 		return object;
 	}

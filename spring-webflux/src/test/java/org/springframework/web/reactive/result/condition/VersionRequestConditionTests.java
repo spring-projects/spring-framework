@@ -25,6 +25,7 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.web.accept.NotAcceptableApiVersionException;
 import org.springframework.web.accept.SemanticApiVersionParser;
+import org.springframework.web.reactive.HandlerMapping;
 import org.springframework.web.reactive.accept.DefaultApiVersionStrategy;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest;
@@ -50,7 +51,7 @@ public class VersionRequestConditionTests {
 	private static DefaultApiVersionStrategy initVersionStrategy(@Nullable String defaultValue) {
 		return new DefaultApiVersionStrategy(
 				List.of(exchange -> exchange.getRequest().getQueryParams().getFirst("api-version")),
-				new SemanticApiVersionParser(), true, defaultValue, false);
+				new SemanticApiVersionParser(), true, defaultValue, false, null);
 	}
 
 	@Test
@@ -72,32 +73,40 @@ public class VersionRequestConditionTests {
 
 	@Test
 	void fixedVersionMatch() {
-		String conditionVersion = "1.2";
+		VersionRequestCondition condition = condition("1.2");
 		this.strategy.addSupportedVersion("1.1", "1.3");
 
-		testMatch("v1.1", conditionVersion, true, false);
-		testMatch("v1.2", conditionVersion, false, false);
-		testMatch("v1.3", conditionVersion, false, true);
+		testMatch("v1.1", condition, false, false);
+		testMatch("v1.2", condition, true, false);
+		testMatch("v1.3", condition, true, true); // match initially, reject if chosen
 	}
 
 	@Test
 	void baselineVersionMatch() {
-		String conditionVersion = "1.2+";
+		VersionRequestCondition condition = condition("1.2+");
 		this.strategy.addSupportedVersion("1.1", "1.3");
 
-		testMatch("v1.1", conditionVersion, true, false);
-		testMatch("v1.2", conditionVersion, false, false);
-		testMatch("v1.3", conditionVersion, false, false);
+		testMatch("v1.1", condition, false, false);
+		testMatch("v1.2", condition, true, false);
+		testMatch("v1.3", condition, true, false);
+	}
+
+	@Test
+	void notVersionedMatch() {
+		VersionRequestCondition condition = new VersionRequestCondition(null, this.strategy);
+		this.strategy.addSupportedVersion("1.1", "1.3");
+
+		testMatch("v1.1", condition, true, false);
+		testMatch("v1.3", condition, true, false);
 	}
 
 	private void testMatch(
-			String requestVersion, String conditionVersion, boolean notCompatible, boolean notAcceptable) {
+			String requestVersion, VersionRequestCondition condition, boolean matches, boolean notAcceptable) {
 
 		ServerWebExchange exchange = exchangeWithVersion(requestVersion);
-		VersionRequestCondition condition = condition(conditionVersion);
 		VersionRequestCondition match = condition.getMatchingCondition(exchange);
 
-		if (notCompatible) {
+		if (!matches) {
 			assertThat(match).isNull();
 			return;
 		}
@@ -113,12 +122,6 @@ public class VersionRequestConditionTests {
 	}
 
 	@Test
-	void missingRequiredVersion() {
-		assertThatThrownBy(() -> condition("1.2").getMatchingCondition(exchange()))
-				.hasMessage("400 BAD_REQUEST \"API version is required.\"");
-	}
-
-	@Test
 	void defaultVersion() {
 		String version = "1.2";
 		this.strategy = initVersionStrategy(version);
@@ -126,12 +129,6 @@ public class VersionRequestConditionTests {
 		VersionRequestCondition match = condition.getMatchingCondition(exchange());
 
 		assertThat(match).isSameAs(condition);
-	}
-
-	@Test
-	void unsupportedVersion() {
-		assertThatThrownBy(() -> condition("1.2").getMatchingCondition(exchangeWithVersion("1.3")))
-				.hasMessage("400 BAD_REQUEST \"Invalid API version: '1.3.0'.\"");
 	}
 
 	@Test
@@ -157,7 +154,7 @@ public class VersionRequestConditionTests {
 	}
 
 	private VersionRequestCondition emptyCondition() {
-		return new VersionRequestCondition();
+		return new VersionRequestCondition(null, this.strategy);
 	}
 
 	private static MockServerWebExchange exchange() {
@@ -165,8 +162,10 @@ public class VersionRequestConditionTests {
 	}
 
 	private ServerWebExchange exchangeWithVersion(String v) {
-		return MockServerWebExchange.from(
-				MockServerHttpRequest.get("/path").queryParam("api-version", v));
+		Comparable<?> version = this.strategy.parseVersion(v);
+		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/path"));
+		exchange.getAttributes().put(HandlerMapping.API_VERSION_ATTRIBUTE, version);
+		return exchange;
 	}
 
 }

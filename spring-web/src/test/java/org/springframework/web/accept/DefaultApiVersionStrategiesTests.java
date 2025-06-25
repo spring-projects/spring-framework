@@ -36,7 +36,7 @@ public class DefaultApiVersionStrategiesTests {
 
 
 	@Test
-	void defaultVersion() {
+	void defaultVersionIsParsed() {
 		SemanticApiVersionParser.Version version = this.parser.parseVersion("1.2.3");
 		ApiVersionStrategy strategy = initVersionStrategy(version.toString());
 
@@ -44,27 +44,35 @@ public class DefaultApiVersionStrategiesTests {
 	}
 
 	@Test
-	void supportedVersions() {
-		SemanticApiVersionParser.Version v1 = this.parser.parseVersion("1");
-		SemanticApiVersionParser.Version v2 = this.parser.parseVersion("2");
-		SemanticApiVersionParser.Version v9 = this.parser.parseVersion("9");
+	void validateSupportedVersion() {
+		SemanticApiVersionParser.Version v12 = this.parser.parseVersion("1.2");
 
 		DefaultApiVersionStrategy strategy = initVersionStrategy(null);
-		strategy.addSupportedVersion(v1.toString());
-		strategy.addSupportedVersion(v2.toString());
+		strategy.addSupportedVersion(v12.toString());
 
 		MockHttpServletRequest request = new MockHttpServletRequest();
-		strategy.validateVersion(v1, request);
-		strategy.validateVersion(v2, request);
+		strategy.validateVersion(v12, request);
+	}
 
-		assertThatThrownBy(() -> strategy.validateVersion(v9, request))
-				.isInstanceOf(InvalidApiVersionException.class);
+	@Test
+	void validateUnsupportedVersion() {
+		assertThatThrownBy(() -> initVersionStrategy(null).validateVersion("1.2", new MockHttpServletRequest()))
+				.isInstanceOf(InvalidApiVersionException.class)
+				.hasMessage("400 BAD_REQUEST \"Invalid API version: '1.2'.\"");
+	}
+
+	@Test
+	void missingRequiredVersion() {
+		DefaultApiVersionStrategy strategy = initVersionStrategy(null);
+		assertThatThrownBy(() -> strategy.validateVersion(null, new MockHttpServletRequest()))
+				.isInstanceOf(MissingApiVersionException.class)
+				.hasMessage("400 BAD_REQUEST \"API version is required.\"");
 	}
 
 	private static DefaultApiVersionStrategy initVersionStrategy(@Nullable String defaultValue) {
 		return new DefaultApiVersionStrategy(
 				List.of(request -> request.getParameter("api-version")),
-				new SemanticApiVersionParser(), true, defaultValue);
+				new SemanticApiVersionParser(), true, defaultValue, null);
 	}
 
 }

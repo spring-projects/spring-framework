@@ -41,7 +41,7 @@ public class HibernateQueryException extends InvalidDataAccessResourceUsageExcep
 	 */
 	public @Nullable String getQueryString() {
 		QueryException cause = (QueryException) getCause();
-		return cause == null ? null : cause.getQueryString();
+		return (cause != null ? cause.getQueryString() : null);
 	}
 
 }

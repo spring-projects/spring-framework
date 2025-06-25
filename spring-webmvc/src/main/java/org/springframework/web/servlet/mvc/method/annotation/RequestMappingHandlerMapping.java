@@ -28,6 +28,7 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.jspecify.annotations.Nullable;
 
 import org.springframework.context.EmbeddedValueResolverAware;
@@ -45,6 +46,7 @@ import org.springframework.util.StringValueResolver;
 import org.springframework.web.accept.ApiVersionStrategy;
 import org.springframework.web.accept.ContentNegotiationManager;
 import org.springframework.web.accept.DefaultApiVersionStrategy;
+import org.springframework.web.accept.InvalidApiVersionException;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -52,6 +54,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.service.annotation.HttpExchange;
+import org.springframework.web.servlet.HandlerExecutionChain;
+import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.handler.MatchableHandlerMapping;
 import org.springframework.web.servlet.handler.RequestMatchResult;
 import org.springframework.web.servlet.mvc.condition.AbstractRequestCondition;
@@ -195,6 +199,38 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	@Override
 	protected boolean isHandler(Class<?> beanType) {
 		return AnnotatedElementUtils.hasAnnotation(beanType, Controller.class);
+	}
+
+
+	@Override
+	protected @Nullable HandlerMethod getHandlerInternal(HttpServletRequest request) throws Exception {
+		if (this.apiVersionStrategy != null) {
+			Comparable<?> requestVersion = (Comparable<?>) request.getAttribute(API_VERSION_ATTRIBUTE);
+			if (requestVersion == null) {
+				requestVersion = getApiVersion(request, this.apiVersionStrategy);
+				if (requestVersion != null) {
+					request.setAttribute(API_VERSION_ATTRIBUTE, requestVersion);
+				}
+			}
+		}
+		return super.getHandlerInternal(request);
+	}
+
+	private static @Nullable Comparable<?> getApiVersion(
+			HttpServletRequest request, ApiVersionStrategy versionStrategy) {
+
+		String value = versionStrategy.resolveVersion(request);
+		if (value == null) {
+			return versionStrategy.getDefaultVersion();
+		}
+		try {
+			Comparable<?> version = versionStrategy.parseVersion(value);
+			versionStrategy.validateVersion(version, request);
+			return version;
+		}
+		catch (Exception ex) {
+			throw new InvalidApiVersionException(value, null, ex);
+		}
 	}
 
 	/**
@@ -384,6 +420,16 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	}
 
 	@Override
+	protected HandlerExecutionChain getHandlerExecutionChain(Object handler, HttpServletRequest request) {
+		HandlerExecutionChain executionChain = super.getHandlerExecutionChain(handler, request);
+		Comparable<?> version = (Comparable<?>) request.getAttribute(API_VERSION_ATTRIBUTE);
+		if (version != null) {
+			executionChain.addInterceptor(new DeprecationInterceptor(version));
+		}
+		return executionChain;
+	}
+
+	@Override
 	public void registerMapping(RequestMappingInfo mapping, Object handler, Method method) {
 		super.registerMapping(mapping, handler, method);
 		updateConsumesCondition(mapping, method);
@@ -552,6 +598,23 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 			return this.root.synthesize().toString();
 		}
 
+	}
+
+
+	private final class DeprecationInterceptor implements HandlerInterceptor {
+
+		private final Comparable<?> version;
+
+		private DeprecationInterceptor(Comparable<?> version) {
+			this.version = version;
+		}
+
+		@Override
+		public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
+			Assert.state(apiVersionStrategy != null, "No ApiVersionStrategy");
+			apiVersionStrategy.handleDeprecations(this.version, request, response);
+			return true;
+		}
 	}
 
 }

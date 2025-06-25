@@ -14,29 +14,18 @@
  * limitations under the License.
  */
 
-package org.springframework.cache
+package org.springframework.orm.jpa.domain;
 
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-/**
- * Extension for [Cache.get] providing a `get<Foo>()` variant.
- *
- * @author Mikhael Sokolov
- * @since 6.0
- */
-inline fun <reified T : Any> Cache.get(key: Any): T? = get(key, T::class.java)
+import org.springframework.beans.factory.annotation.Qualifier;
 
-/**
- * Extension for [Cache.get] providing a `foo[key]` variant.
- *
- * @author Mikhael Sokolov
- * @since 6.0
- */
-operator fun Cache.get(key: Any): Cache.ValueWrapper? = get(key)
+@Target({ElementType.FIELD, ElementType.METHOD, ElementType.PARAMETER})
+@Retention(RetentionPolicy.RUNTIME)
+@Qualifier
+public @interface MyDomain {
 
-/**
- * Extension for [Cache.put] providing a `foo[key]` variant.
- *
- * @author Mikhael Sokolov
- * @since 6.0
- */
-operator fun Cache.set(key: Any, value: Any?) = put(key, value)
+}

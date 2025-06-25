@@ -178,8 +178,8 @@ class RetryTemplateTests {
 				.withMessage("Retry policy for operation 'test' exhausted; aborting execution")
 				.withCauseExactlyInstanceOf(IllegalStateException.class)
 				.satisfies(hasSuppressedExceptionsSatisfyingExactly(
-					suppressed1 -> assertThat(suppressed1).isExactlyInstanceOf(IOException.class),
-					suppressed2 -> assertThat(suppressed2).isExactlyInstanceOf(FileNotFoundException.class)
+						suppressed1 -> assertThat(suppressed1).isExactlyInstanceOf(FileNotFoundException.class),
+						suppressed2 -> assertThat(suppressed2).isExactlyInstanceOf(IOException.class)
 				));
 		// 3 = 1 initial invocation + 2 retry attempts
 		assertThat(invocationCount).hasValue(3);

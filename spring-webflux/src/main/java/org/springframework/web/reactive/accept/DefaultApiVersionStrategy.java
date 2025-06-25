@@ -31,7 +31,7 @@ import org.springframework.web.server.ServerWebExchange;
 
 /**
  * Default implementation of {@link ApiVersionStrategy} that delegates to the
- * configured version resolvers and version parser.
+ * configured version resolvers, version parser, and deprecation handler.
  *
  * @author Rossen Stoyanchev
  * @since 7.0
@@ -52,6 +52,8 @@ public class DefaultApiVersionStrategy implements ApiVersionStrategy {
 
 	private final Set<Comparable<?>> detectedVersions = new TreeSet<>();
 
+	private final @Nullable ApiDeprecationHandler deprecationHandler;
+
 
 	/**
 	 * Create an instance.
@@ -66,10 +68,13 @@ public class DefaultApiVersionStrategy implements ApiVersionStrategy {
 	 * @param detectSupportedVersions whether to use API versions that appear in
 	 * mappings for supported version validation (true), or use only explicitly
 	 * configured versions (false).
+	 * @param deprecationHandler handler to send hints and information about
+	 * deprecated API versions to clients
 	 */
 	public DefaultApiVersionStrategy(
 			List<ApiVersionResolver> versionResolvers, ApiVersionParser<?> versionParser,
-			boolean versionRequired, @Nullable String defaultVersion, boolean detectSupportedVersions) {
+			boolean versionRequired, @Nullable String defaultVersion, boolean detectSupportedVersions,
+			@Nullable ApiDeprecationHandler deprecationHandler) {
 
 		Assert.notEmpty(versionResolvers, "At least one ApiVersionResolver is required");
 		Assert.notNull(versionParser, "ApiVersionParser is required");
@@ -79,6 +84,7 @@ public class DefaultApiVersionStrategy implements ApiVersionStrategy {
 		this.versionRequired = (versionRequired && defaultVersion == null);
 		this.defaultVersion = (defaultVersion != null ? versionParser.parseVersion(defaultVersion) : null);
 		this.detectSupportedVersions = detectSupportedVersions;
+		this.deprecationHandler = deprecationHandler;
 	}
 
 
@@ -153,6 +159,13 @@ public class DefaultApiVersionStrategy implements ApiVersionStrategy {
 	private boolean isSupportedVersion(Comparable<?> requestVersion) {
 		return (this.supportedVersions.contains(requestVersion) ||
 				this.detectSupportedVersions && this.detectedVersions.contains(requestVersion));
+	}
+
+	@Override
+	public void handleDeprecations(Comparable<?> version, ServerWebExchange exchange) {
+		if (this.deprecationHandler != null) {
+			this.deprecationHandler.handleVersion(version, exchange);
+		}
 	}
 
 	@Override

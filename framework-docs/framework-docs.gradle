@@ -46,6 +46,7 @@ repositories {
 // To avoid a redeclaration error with Kotlin compiler
 tasks.named('compileKotlin', KotlinCompilationTask.class) {
 	javaSources.from = []
+	compilerOptions.freeCompilerArgs = [ "-Xannotation-default-target=param-property" ] // Upcoming default, see https://youtrack.jetbrains.com/issue/KT-73255
 }
 
 dependencies {
