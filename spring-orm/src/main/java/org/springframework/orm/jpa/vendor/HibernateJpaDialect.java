@@ -47,6 +47,7 @@ import org.hibernate.exception.DataException;
 import org.hibernate.exception.JDBCConnectionException;
 import org.hibernate.exception.LockAcquisitionException;
 import org.hibernate.exception.SQLGrammarException;
+import org.hibernate.resource.jdbc.spi.LogicalConnectionImplementor;
 import org.jspecify.annotations.Nullable;
 
 import org.springframework.dao.CannotAcquireLockException;
@@ -89,6 +90,8 @@ public class HibernateJpaDialect extends DefaultJpaDialect {
 
 	boolean prepareConnection = true;
 
+	boolean releaseConnectionAfterTransaction = false;
+
 	private @Nullable SQLExceptionTranslator jdbcExceptionTranslator;
 
 	private @Nullable SQLExceptionTranslator transactionExceptionTranslator = new SQLExceptionSubclassTranslator();
@@ -116,6 +119,34 @@ public class HibernateJpaDialect extends DefaultJpaDialect {
 	 */
 	public void setPrepareConnection(boolean prepareConnection) {
 		this.prepareConnection = prepareConnection;
+	}
+
+	/**
+	 * Set, whether to release connection after transaction is commited or rolled
+	 * back. Only works for pre-bound sessions.
+	 * <p> This setting is needed to work around the fact, that it is not possible
+	 * to use {@link org.hibernate.resource.jdbc.spi.PhysicalConnectionHandlingMode#DELAYED_ACQUISITION_AND_RELEASE_AFTER_TRANSACTION}
+	 * handling mode without sacrificing setting non-default isolation levels
+	 * or read-only flag. Releasing connection might prevent connection pool
+	 * starvation if open-in-view is on.
+	 * <p> Default is "false" for backward compatibility. If you turn this flag
+	 * on it still does nothing unless session is pre-bound (most likely if
+	 * open-in-view) is off. If session is pre-bound and the flag is on, then
+	 * after transaction is finished (successfully or not), underlying JDBC
+	 * connection will be released and acquired later according to {@link org.hibernate.resource.jdbc.spi.PhysicalConnectionHandlingMode}
+	 * (is set to {@link org.hibernate.resource.jdbc.spi.PhysicalConnectionHandlingMode#DELAYED_ACQUISITION_AND_HOLD}
+	 * with {@link HibernateJpaVendorAdapter#getJpaPropertyMap()} if you don't
+	 * specify it yourself).
+	 * <p> Please pay attention, that this setting doesn't affect how Hibernate
+	 * handles connections, which were acquired on-demand, to lazily load
+	 * collections outside of transaction context.
+	 * <p> Specifically, connections, acquired to serialize entities, returned
+	 * by rest controller method will only be closed, after serialization is
+	 * complete. Hibernate will not acquire and release connections for each
+	 * lazy field loading.
+	 */
+	public void setReleaseConnectionAfterTransaction(boolean releaseConnectionAfterTransaction) {
+		this.releaseConnectionAfterTransaction = releaseConnectionAfterTransaction;
 	}
 
 	/**
@@ -229,6 +260,16 @@ public class HibernateJpaDialect extends DefaultJpaDialect {
 
 		SessionImplementor session = getSession(entityManager);
 		return new HibernateConnectionHandle(session);
+	}
+
+	@Override
+	public void releaseJdbcConnection(ConnectionHandle conHandle, EntityManager em) throws PersistenceException, SQLException {
+		if (releaseConnectionAfterTransaction) {
+			final LogicalConnectionImplementor logicalConnection = getSession(em).getJdbcCoordinator().getLogicalConnection();
+			if (logicalConnection.isPhysicallyConnected()) {
+				logicalConnection.manualDisconnect();
+			}
+		}
 	}
 
 	@Override
