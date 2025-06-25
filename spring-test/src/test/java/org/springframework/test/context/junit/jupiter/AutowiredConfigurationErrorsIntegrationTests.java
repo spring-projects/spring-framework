@@ -65,11 +65,9 @@ class AutowiredConfigurationErrorsIntegrationTests {
 	@ParameterizedTest
 	@ValueSource(classes = {
 		StaticAutowiredBeforeAllMethod.class,
-		StaticAutowiredPrivateBeforeAllMethod.class,
 		StaticAutowiredAfterAllMethod.class,
 		AutowiredBeforeEachMethod.class,
 		AutowiredAfterEachMethod.class,
-		AutowiredPrivateAfterEachMethod.class,
 		AutowiredTestMethod.class,
 		AutowiredRepeatedTestMethod.class,
 		AutowiredParameterizedTestMethod.class
@@ -169,21 +167,6 @@ class AutowiredConfigurationErrorsIntegrationTests {
 	}
 
 	@SpringJUnitConfig(Config.class)
-	@FailingTestCase
-	static class StaticAutowiredPrivateBeforeAllMethod {
-
-		@Autowired
-		@BeforeAll
-		private static void beforeAll(TestInfo testInfo) {
-		}
-
-		@Test
-		@DisplayName(DISPLAY_NAME)
-		void test() {
-		}
-	}
-
-	@SpringJUnitConfig(Config.class)
 	@TestInstance(PER_CLASS)
 	@FailingTestCase
 	static class NonStaticAutowiredBeforeAllMethod {
@@ -259,22 +242,6 @@ class AutowiredConfigurationErrorsIntegrationTests {
 		void afterEach(TestInfo testInfo) {
 		}
 	}
-
-	@SpringJUnitConfig(Config.class)
-	@FailingTestCase
-	static class AutowiredPrivateAfterEachMethod {
-
-		@Test
-		@DisplayName(DISPLAY_NAME)
-		void test() {
-		}
-
-		@Autowired
-		@AfterEach
-		private void afterEach(TestInfo testInfo) {
-		}
-	}
-
 
 	@SpringJUnitConfig(Config.class)
 	@FailingTestCase

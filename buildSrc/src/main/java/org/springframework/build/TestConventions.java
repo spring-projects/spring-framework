@@ -62,7 +62,8 @@ class TestConventions {
 		test.include("**/*Tests.class", "**/*Test.class");
 		test.setSystemProperties(Map.of(
 				"java.awt.headless", "true",
-				"io.netty.leakDetection.level", "paranoid"
+				"io.netty.leakDetection.level", "paranoid",
+				"junit.platform.discovery.issue.severity.critical", "INFO"
 		));
 		if (project.hasProperty("testGroups")) {
 			test.systemProperty("testGroups", project.getProperties().get("testGroups"));
