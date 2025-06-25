@@ -43,6 +43,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.StreamingHttpOutputMessage;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.ClientHttpResponse;
@@ -52,6 +53,7 @@ import org.springframework.http.client.JettyClientHttpRequestFactory;
 import org.springframework.http.client.ReactorClientHttpRequestFactory;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.FastByteArrayOutputStream;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.testfixture.xml.Pojo;
@@ -530,27 +532,6 @@ class RestClientIntegrationTests {
 		});
 	}
 
-	@ParameterizedRestClientTest
-	void postStreamingMessageBody(ClientHttpRequestFactory requestFactory) {
-		startServer(requestFactory);
-
-		prepareResponse(response -> response.setResponseCode(200));
-
-		ResponseEntity<Void> result = this.restClient.post()
-				.uri("/streaming/body")
-				.body(new ByteArrayInputStream("test-data".getBytes(UTF_8))::transferTo)
-				.retrieve()
-				.toBodilessEntity();
-
-		assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
-
-		expectRequestCount(1);
-		expectRequest(request -> {
-			assertThat(request.getPath()).isEqualTo("/streaming/body");
-			assertThat(request.getBody().readUtf8()).isEqualTo("test-data");
-		});
-	}
-
 	@ParameterizedRestClientTest // gh-31361
 	public void postForm(ClientHttpRequestFactory requestFactory) {
 		startServer(requestFactory);
@@ -594,6 +575,30 @@ class RestClientIntegrationTests {
 		});
 	}
 
+	@ParameterizedRestClientTest // gh-35102
+	void postStreamingBody(ClientHttpRequestFactory requestFactory) {
+		startServer(requestFactory);
+		prepareResponse(response -> response.setResponseCode(200));
+
+		StreamingHttpOutputMessage.Body testBody = out -> {
+			assertThat(out).as("Not a streaming response").isNotInstanceOf(FastByteArrayOutputStream.class);
+			new ByteArrayInputStream("test-data".getBytes(UTF_8)).transferTo(out);
+		};
+
+		ResponseEntity<Void> result = this.restClient.post()
+				.uri("/streaming/body")
+				.body(testBody)
+				.retrieve()
+				.toBodilessEntity();
+
+		assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+		expectRequestCount(1);
+		expectRequest(request -> {
+			assertThat(request.getPath()).isEqualTo("/streaming/body");
+			assertThat(request.getBody().readUtf8()).isEqualTo("test-data");
+		});
+	}
 
 	@ParameterizedRestClientTest
 	void statusHandler(ClientHttpRequestFactory requestFactory) {
