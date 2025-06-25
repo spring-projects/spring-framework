@@ -477,7 +477,14 @@ final class DefaultRestClient implements RestClient {
 
 		@Override
 		public RequestBodySpec body(StreamingHttpOutputMessage.Body body) {
-			this.body = request -> body.writeTo(request.getBody());
+			this.body = request -> {
+				if (request instanceof StreamingHttpOutputMessage streamingMessage) {
+					streamingMessage.setBody(body);
+				}
+				else {
+					body.writeTo(request.getBody());
+				}
+			};
 			return this;
 		}
 
