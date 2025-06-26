@@ -107,6 +107,7 @@ public class RuntimeBeanReference implements BeanReference {
 	 * @since 7.0
 	 */
 	public RuntimeBeanReference(String beanName, Class<?> beanType, boolean toParent) {
+		Assert.hasText(beanName, "'beanName' must not be empty");
 		Assert.notNull(beanType, "'beanType' must not be null");
 		this.beanName = beanName;
 		this.beanType = beanType;

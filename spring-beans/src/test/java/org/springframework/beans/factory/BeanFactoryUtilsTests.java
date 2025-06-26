@@ -555,21 +555,33 @@ class BeanFactoryUtilsTests {
 	}
 
 	@Test
-	void supportsMultipleTypesWithProperty() {
+	void supportsMultipleTypesWithPropertyAndSingleBean() {
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
 		SupportsTypeSmartFactoryBean sfb = new SupportsTypeSmartFactoryBean();
 		lbf.registerSingleton("sfb", sfb);
 
-		RootBeanDefinition rbd1 = new RootBeanDefinition(PropertyRecipient.class);
-		rbd1.getPropertyValues().add("sfb", new RuntimeBeanReference(ITestBean.class));
-		lbf.registerBeanDefinition("recipient1", rbd1);
+		RootBeanDefinition rbd = new RootBeanDefinition(PropertyRecipient.class);
+		rbd.getPropertyValues().add("sfb", new RuntimeBeanReference(ITestBean.class));
+		lbf.registerBeanDefinition("recipient", rbd);
 
-		RootBeanDefinition rbd2 = new RootBeanDefinition(PropertyRecipient.class);
-		rbd2.getPropertyValues().add("sfb", new RuntimeBeanReference("sfb", ITestBean.class));
-		lbf.registerBeanDefinition("recipient2", rbd2);
+		assertThat(lbf.getBean("recipient", PropertyRecipient.class).sfb)
+				.isSameAs(lbf.getBean("sfb", ITestBean.class));
+	}
 
-		assertThat(lbf.getBean("recipient1", PropertyRecipient.class).sfb).isSameAs(lbf.getBean("sfb", ITestBean.class));
-		assertThat(lbf.getBean("recipient2", PropertyRecipient.class).sfb).isSameAs(lbf.getBean("sfb", ITestBean.class));
+	@Test
+	void supportsMultipleTypesWithPropertyAndMultipleBeans() {
+		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
+		SupportsTypeSmartFactoryBean sfb = new SupportsTypeSmartFactoryBean();
+		lbf.registerSingleton("sfb", sfb);
+		SupportsTypeSmartFactoryBean other = new SupportsTypeSmartFactoryBean();
+		lbf.registerSingleton("other", other);
+
+		RootBeanDefinition rbd = new RootBeanDefinition(PropertyRecipient.class);
+		rbd.getPropertyValues().add("sfb", new RuntimeBeanReference("sfb", ITestBean.class));
+		lbf.registerBeanDefinition("recipient", rbd);
+
+		assertThat(lbf.getBean("recipient", PropertyRecipient.class).sfb)
+				.isSameAs(lbf.getBean("sfb", ITestBean.class));
 	}
 
 

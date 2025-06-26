@@ -333,6 +333,7 @@ public class BeanDefinitionValueResolver {
 		try {
 			Object bean;
 			Class<?> beanType = ref.getBeanType();
+			String resolvedName = String.valueOf(doEvaluate(ref.getBeanName()));
 			if (ref.isToParent()) {
 				BeanFactory parent = this.beanFactory.getParentBeanFactory();
 				if (parent == null) {
@@ -342,21 +343,25 @@ public class BeanDefinitionValueResolver {
 									" in parent factory: no parent factory available");
 				}
 				if (beanType != null) {
-					bean = parent.getBean(beanType);
+					bean = (parent.containsBean(resolvedName) ?
+							parent.getBean(resolvedName, beanType) : parent.getBean(beanType));
 				}
 				else {
-					bean = parent.getBean(String.valueOf(doEvaluate(ref.getBeanName())));
+					bean = parent.getBean(resolvedName);
 				}
 			}
 			else {
-				String resolvedName;
 				if (beanType != null) {
-					NamedBeanHolder<?> namedBean = this.beanFactory.resolveNamedBean(beanType);
-					bean = namedBean.getBeanInstance();
-					resolvedName = namedBean.getBeanName();
+					if (this.beanFactory.containsBean(resolvedName)) {
+						bean = this.beanFactory.getBean(resolvedName, beanType);
+					}
+					else {
+						NamedBeanHolder<?> namedBean = this.beanFactory.resolveNamedBean(beanType);
+						bean = namedBean.getBeanInstance();
+						resolvedName = namedBean.getBeanName();
+					}
 				}
 				else {
-					resolvedName = String.valueOf(doEvaluate(ref.getBeanName()));
 					bean = this.beanFactory.getBean(resolvedName);
 				}
 				this.beanFactory.registerDependentBean(resolvedName, this.beanName);
