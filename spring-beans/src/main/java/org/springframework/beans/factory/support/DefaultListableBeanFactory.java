@@ -1588,7 +1588,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	private <T> @Nullable NamedBeanHolder<T> resolveNamedBean(
 			String beanName, ResolvableType requiredType, @Nullable Object @Nullable [] args) throws BeansException {
 
-		Object bean = getBean(beanName, null, args);
+		Object bean = (args != null ? getBean(beanName, args) : resolveBean(beanName, requiredType));
 		if (bean instanceof NullBean) {
 			return null;
 		}

@@ -87,6 +87,32 @@ public class RuntimeBeanReference implements BeanReference {
 		this.toParent = toParent;
 	}
 
+	/**
+	 * Create a new RuntimeBeanReference to a bean of the given type.
+	 * @param beanName name of the target bean
+	 * @param beanType type of the target bean
+	 * @since 7.0
+	 */
+	public RuntimeBeanReference(String beanName, Class<?> beanType) {
+		this(beanName, beanType, false);
+	}
+
+	/**
+	 * Create a new RuntimeBeanReference to a bean of the given type,
+	 * with the option to mark it as reference to a bean in the parent factory.
+	 * @param beanName name of the target bean
+	 * @param beanType type of the target bean
+	 * @param toParent whether this is an explicit reference to a bean in the
+	 * parent factory
+	 * @since 7.0
+	 */
+	public RuntimeBeanReference(String beanName, Class<?> beanType, boolean toParent) {
+		Assert.notNull(beanType, "'beanType' must not be null");
+		this.beanName = beanName;
+		this.beanType = beanType;
+		this.toParent = toParent;
+	}
+
 
 	/**
 	 * Return the requested bean name, or the fully-qualified type name
