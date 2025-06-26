@@ -450,7 +450,7 @@ public interface RestClient {
 		 * @param configurer the configurer to apply on the list of default
 		 * {@link HttpMessageConverter} pre-initialized
 		 * @return this builder
-		 * @see #messageConverters(List)
+		 * @see #messageConverters(Iterable)
 		 */
 		Builder messageConverters(Consumer<List<HttpMessageConverter<?>>> configurer);
 
@@ -461,7 +461,7 @@ public interface RestClient {
 		 * @since 6.2
 		 * @see #messageConverters(Consumer)
 		 */
-		Builder messageConverters(List<HttpMessageConverter<?>> messageConverters);
+		Builder messageConverters(Iterable<HttpMessageConverter<?>> messageConverters);
 
 		/**
 		 * Configure the {@link io.micrometer.observation.ObservationRegistry} to use

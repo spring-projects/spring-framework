@@ -39,31 +39,8 @@ import org.springframework.format.FormatterRegistry;
 import org.springframework.format.support.DefaultFormattingConversionService;
 import org.springframework.format.support.FormattingConversionService;
 import org.springframework.http.MediaType;
-import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
-import org.springframework.http.converter.ResourceHttpMessageConverter;
-import org.springframework.http.converter.ResourceRegionHttpMessageConverter;
-import org.springframework.http.converter.StringHttpMessageConverter;
-import org.springframework.http.converter.cbor.JacksonCborHttpMessageConverter;
-import org.springframework.http.converter.cbor.KotlinSerializationCborHttpMessageConverter;
-import org.springframework.http.converter.cbor.MappingJackson2CborHttpMessageConverter;
-import org.springframework.http.converter.feed.AtomFeedHttpMessageConverter;
-import org.springframework.http.converter.feed.RssChannelHttpMessageConverter;
-import org.springframework.http.converter.json.GsonHttpMessageConverter;
-import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
-import org.springframework.http.converter.json.JacksonJsonHttpMessageConverter;
-import org.springframework.http.converter.json.JsonbHttpMessageConverter;
-import org.springframework.http.converter.json.KotlinSerializationJsonHttpMessageConverter;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
-import org.springframework.http.converter.protobuf.KotlinSerializationProtobufHttpMessageConverter;
-import org.springframework.http.converter.smile.JacksonSmileHttpMessageConverter;
-import org.springframework.http.converter.smile.MappingJackson2SmileHttpMessageConverter;
-import org.springframework.http.converter.support.AllEncompassingFormHttpMessageConverter;
-import org.springframework.http.converter.xml.JacksonXmlHttpMessageConverter;
-import org.springframework.http.converter.xml.Jaxb2RootElementHttpMessageConverter;
-import org.springframework.http.converter.xml.MappingJackson2XmlHttpMessageConverter;
-import org.springframework.http.converter.yaml.JacksonYamlHttpMessageConverter;
-import org.springframework.http.converter.yaml.MappingJackson2YamlHttpMessageConverter;
+import org.springframework.http.converter.HttpMessageConverters;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -906,15 +883,41 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 		return this.messageConverters;
 	}
 
+
 	/**
-	 * Override this method to add custom {@link HttpMessageConverter HttpMessageConverters}
+	 * Override this method to create a custom {@link HttpMessageConverters}.
+	 * Converters will be used with the
+	 * {@link RequestMappingHandlerAdapter} and the {@link ExceptionHandlerExceptionResolver}.
+	 * <p>By default, this will create an instance with default message converters registered,
+	 * if present on the classpath.
+	 * @since 7.0
+	 */
+	protected HttpMessageConverters createMessageConverters() {
+		HttpMessageConverters.Builder builder = HttpMessageConverters.withDefaults();
+		configureMessageConverters(builder);
+		return builder.build();
+	}
+
+	/**
+	 * Override this method to configure the message converters on the given
+	 * {@link HttpMessageConverters.Builder builder}.
+	 * @param builder the {@code HttpMessageConverters} builder to configure
+	 * @since 7.0
+	 */
+	protected void configureMessageConverters(HttpMessageConverters.Builder builder) {
+	}
+
+	/**
+	 * Override this method to add custom {@link HttpMessageConverter messsage converters}
 	 * to use with the {@link RequestMappingHandlerAdapter} and the
 	 * {@link ExceptionHandlerExceptionResolver}.
 	 * <p>Adding converters to the list turns off the default converters that would
 	 * otherwise be registered by default. Also see {@link #addDefaultHttpMessageConverters}
 	 * for adding default message converters.
 	 * @param converters a list to add message converters to (initially an empty list)
+	 * @deprecated since 7.0 in favor of {@link #configureMessageConverters(HttpMessageConverters.Builder)}
 	 */
+	@Deprecated(since = "7.0", forRemoval = true)
 	protected void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
 	}
 
@@ -924,7 +927,9 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	 * to be registered and then insert a custom converter through this method.
 	 * @param converters the list of configured converters to extend
 	 * @since 4.1.3
+	 * @deprecated since 7.0 in favor of {@link #configureMessageConverters(HttpMessageConverters.Builder)}
 	 */
+	@Deprecated(since = "7.0", forRemoval = true)
 	protected void extendMessageConverters(List<HttpMessageConverter<?>> converters) {
 	}
 
@@ -932,93 +937,12 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	 * Adds a set of default HttpMessageConverter instances to the given list.
 	 * Subclasses can call this method from {@link #configureMessageConverters}.
 	 * @param messageConverters the list to add the default message converters to
+	 * @deprecated since 7.0 in favor of {@link #createMessageConverters()}
 	 */
-	@SuppressWarnings("removal")
+	@Deprecated(since = "7.0", forRemoval = true)
 	protected final void addDefaultHttpMessageConverters(List<HttpMessageConverter<?>> messageConverters) {
-		messageConverters.add(new ByteArrayHttpMessageConverter());
-		messageConverters.add(new StringHttpMessageConverter());
-		messageConverters.add(new ResourceHttpMessageConverter());
-		messageConverters.add(new ResourceRegionHttpMessageConverter());
-		messageConverters.add(new AllEncompassingFormHttpMessageConverter());
-
-		if (romePresent) {
-			messageConverters.add(new AtomFeedHttpMessageConverter());
-			messageConverters.add(new RssChannelHttpMessageConverter());
-		}
-
-		if (jacksonXmlPresent) {
-			messageConverters.add(new JacksonXmlHttpMessageConverter());
-		}
-		else if (jackson2XmlPresent) {
-			Jackson2ObjectMapperBuilder builder = Jackson2ObjectMapperBuilder.xml();
-			if (this.applicationContext != null) {
-				builder.applicationContext(this.applicationContext);
-			}
-			messageConverters.add(new MappingJackson2XmlHttpMessageConverter(builder.build()));
-		}
-		else if (jaxb2Present) {
-			messageConverters.add(new Jaxb2RootElementHttpMessageConverter());
-		}
-
-		if (kotlinSerializationProtobufPresent) {
-			messageConverters.add(new KotlinSerializationProtobufHttpMessageConverter());
-		}
-
-		if (jacksonPresent) {
-			messageConverters.add(new JacksonJsonHttpMessageConverter());
-		}
-		else if (jackson2Present) {
-			Jackson2ObjectMapperBuilder builder = Jackson2ObjectMapperBuilder.json();
-			if (this.applicationContext != null) {
-				builder.applicationContext(this.applicationContext);
-			}
-			messageConverters.add(new MappingJackson2HttpMessageConverter(builder.build()));
-		}
-		else if (gsonPresent) {
-			messageConverters.add(new GsonHttpMessageConverter());
-		}
-		else if (jsonbPresent) {
-			messageConverters.add(new JsonbHttpMessageConverter());
-		}
-		else if (kotlinSerializationJsonPresent) {
-			messageConverters.add(new KotlinSerializationJsonHttpMessageConverter());
-		}
-
-		if (jacksonSmilePresent) {
-			messageConverters.add(new JacksonSmileHttpMessageConverter());
-		}
-		else if (jackson2SmilePresent) {
-			Jackson2ObjectMapperBuilder builder = Jackson2ObjectMapperBuilder.smile();
-			if (this.applicationContext != null) {
-				builder.applicationContext(this.applicationContext);
-			}
-			messageConverters.add(new MappingJackson2SmileHttpMessageConverter(builder.build()));
-		}
-
-		if (jacksonCborPresent) {
-			messageConverters.add(new JacksonCborHttpMessageConverter());
-		}
-		else if (jackson2CborPresent) {
-			Jackson2ObjectMapperBuilder builder = Jackson2ObjectMapperBuilder.cbor();
-			if (this.applicationContext != null) {
-				builder.applicationContext(this.applicationContext);
-			}
-			messageConverters.add(new MappingJackson2CborHttpMessageConverter(builder.build()));
-		}
-		else if (kotlinSerializationCborPresent) {
-			messageConverters.add(new KotlinSerializationCborHttpMessageConverter());
-		}
-
-		if (jacksonYamlPresent) {
-			messageConverters.add(new JacksonYamlHttpMessageConverter());
-		}
-		else if (jackson2YamlPresent) {
-			Jackson2ObjectMapperBuilder builder = Jackson2ObjectMapperBuilder.yaml();
-			if (this.applicationContext != null) {
-				builder.applicationContext(this.applicationContext);
-			}
-			messageConverters.add(new MappingJackson2YamlHttpMessageConverter(builder.build()));
-		}
+		HttpMessageConverters converters = createMessageConverters();
+		converters.forServer().forEach(messageConverters::add);
 	}
 
 	/**

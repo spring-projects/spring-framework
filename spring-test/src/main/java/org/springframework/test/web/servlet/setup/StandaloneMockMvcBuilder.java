@@ -470,6 +470,7 @@ public class StandaloneMockMvcBuilder extends AbstractMockMvcBuilder<StandaloneM
 		}
 
 		@Override
+		@SuppressWarnings("removal")
 		protected void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
 			converters.addAll(messageConverters);
 		}

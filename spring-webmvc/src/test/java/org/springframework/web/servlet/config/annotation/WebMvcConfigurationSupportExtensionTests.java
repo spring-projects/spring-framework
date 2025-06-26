@@ -36,8 +36,10 @@ import org.springframework.core.io.FileSystemResourceLoader;
 import org.springframework.format.FormatterRegistry;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.converter.HttpMessageConverters;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.json.JacksonJsonHttpMessageConverter;
+import org.springframework.http.converter.support.AllEncompassingFormHttpMessageConverter;
 import org.springframework.scheduling.concurrent.ConcurrentTaskExecutor;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.AntPathMatcher;
@@ -209,9 +211,10 @@ class WebMvcConfigurationSupportExtensionTests {
 
 		// Message converters
 		List<HttpMessageConverter<?>> converters = adapter.getMessageConverters();
-		assertThat(converters).hasSize(2);
+		assertThat(converters).hasSize(3);
 		assertThat(converters.get(0).getClass()).isEqualTo(StringHttpMessageConverter.class);
 		assertThat(converters.get(1).getClass()).isEqualTo(JacksonJsonHttpMessageConverter.class);
+		assertThat(converters.get(2).getClass()).isEqualTo(AllEncompassingFormHttpMessageConverter.class);
 		ObjectMapper objectMapper = ((JacksonJsonHttpMessageConverter) converters.get(1)).getObjectMapper();
 		assertThat(objectMapper.deserializationConfig().isEnabled(MapperFeature.DEFAULT_VIEW_INCLUSION)).isFalse();
 		assertThat(objectMapper.deserializationConfig().isEnabled(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)).isFalse();
@@ -347,6 +350,7 @@ class WebMvcConfigurationSupportExtensionTests {
 	 * plus WebMvcConfigurer can switch to extending WebMvcConfigurationSupport directly for
 	 * more advanced configuration needs.
 	 */
+	@SuppressWarnings("removal")
 	private static class TestWebMvcConfigurationSupport extends WebMvcConfigurationSupport implements WebMvcConfigurer {
 
 		@Override
@@ -355,8 +359,16 @@ class WebMvcConfigurationSupportExtensionTests {
 		}
 
 		@Override
+		protected HttpMessageConverters createMessageConverters() {
+			return HttpMessageConverters.create().jsonMessageConverter(new JacksonJsonHttpMessageConverter()).build();
+		}
+
+		@Override
+		public void configureMessageConverters(HttpMessageConverters.Builder builder) {
+		}
+
+		@Override
 		public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
-			converters.add(new JacksonJsonHttpMessageConverter());
 		}
 
 		@Override

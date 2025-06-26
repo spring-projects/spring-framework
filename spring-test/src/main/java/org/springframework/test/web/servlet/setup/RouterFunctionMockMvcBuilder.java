@@ -268,6 +268,7 @@ public class RouterFunctionMockMvcBuilder extends AbstractMockMvcBuilder<RouterF
 		}
 
 		@Override
+		@SuppressWarnings("removal")
 		protected void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
 			converters.addAll(messageConverters);
 		}
