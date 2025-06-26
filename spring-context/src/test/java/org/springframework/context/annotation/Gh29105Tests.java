@@ -44,6 +44,9 @@ class Gh29105Tests {
 		Stream<Class<?>> orderedTypes = child.getBeanProvider(MyService.class).orderedStream().map(Object::getClass);
 		assertThat(orderedTypes).containsExactly(CustomService.class, DefaultService.class);
 
+		assertThat(child.getDefaultListableBeanFactory().getOrder("defaultService")).isEqualTo(0);
+		assertThat(child.getDefaultListableBeanFactory().getOrder("customService")).isEqualTo(-1);
+
 		child.close();
 		parent.close();
 	}

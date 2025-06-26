@@ -29,6 +29,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.IdentityHashMap;
 import java.util.Iterator;
@@ -2315,6 +2316,33 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		return (result instanceof Optional<?> optional ? optional : Optional.ofNullable(result));
 	}
 
+	/**
+	 * Public method to determine the applicable order value for a given bean.
+	 * <p>This variant implicitly obtains a corresponding bean instance from this factory.
+	 * @param beanName the name of the bean
+	 * @return the corresponding order value (default is {@link Ordered#LOWEST_PRECEDENCE})
+	 * @since 7.0
+	 * @see #getOrder(String, Object)
+	 */
+	public int getOrder(String beanName) {
+		return getOrder(beanName, getBean(beanName));
+	}
+
+	/**
+	 * Public method to determine the applicable order value for a given bean.
+	 * @param beanName the name of the bean
+	 * @param beanInstance the bean instance to check
+	 * @return the corresponding order value (default is {@link Ordered#LOWEST_PRECEDENCE})
+	 * @since 7.0
+	 * @see #getOrder(String)
+	 */
+	public int getOrder(String beanName, Object beanInstance) {
+		OrderComparator comparator = (getDependencyComparator() instanceof OrderComparator orderComparator ?
+				orderComparator : OrderComparator.INSTANCE);
+		return comparator.getOrder(beanInstance,
+				new FactoryAwareOrderSourceProvider(Collections.singletonMap(beanInstance, beanName)));
+	}
+
 
 	@Override
 	public String toString() {
@@ -2672,7 +2700,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 				return null;
 			}
 			try {
-				RootBeanDefinition beanDefinition = (RootBeanDefinition) getMergedBeanDefinition(beanName);
+				BeanDefinition beanDefinition = getMergedBeanDefinition(beanName);
 				List<Object> sources = new ArrayList<>(3);
 				Object orderAttribute = beanDefinition.getAttribute(AbstractBeanDefinition.ORDER_ATTRIBUTE);
 				if (orderAttribute != null) {
@@ -2684,13 +2712,15 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 								AbstractBeanDefinition.ORDER_ATTRIBUTE + "': " + orderAttribute.getClass().getName());
 					}
 				}
-				Method factoryMethod = beanDefinition.getResolvedFactoryMethod();
-				if (factoryMethod != null) {
-					sources.add(factoryMethod);
-				}
-				Class<?> targetType = beanDefinition.getTargetType();
-				if (targetType != null && targetType != obj.getClass()) {
-					sources.add(targetType);
+				if (beanDefinition instanceof RootBeanDefinition rootBeanDefinition) {
+					Method factoryMethod = rootBeanDefinition.getResolvedFactoryMethod();
+					if (factoryMethod != null) {
+						sources.add(factoryMethod);
+					}
+					Class<?> targetType = rootBeanDefinition.getTargetType();
+					if (targetType != null && targetType != obj.getClass()) {
+						sources.add(targetType);
+					}
 				}
 				return sources.toArray();
 			}

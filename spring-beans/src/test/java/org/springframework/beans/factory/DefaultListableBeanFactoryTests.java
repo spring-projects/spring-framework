@@ -1542,6 +1542,7 @@ class DefaultListableBeanFactoryTests {
 		bd2.setAttribute(AbstractBeanDefinition.ORDER_ATTRIBUTE, Ordered.HIGHEST_PRECEDENCE);
 		bd2.setScope(BeanDefinition.SCOPE_PROTOTYPE);
 		lbf.registerBeanDefinition("bean2", bd2);
+
 		assertThat(lbf.getBeanProvider(TestBean.class).orderedStream().map(TestBean::getName))
 				.containsExactly("highest", "lowest");
 		assertThat(lbf.getBeanProvider(TestBean.class).orderedStream(clazz -> !DerivedTestBean.class.isAssignableFrom(clazz))
@@ -1550,6 +1551,9 @@ class DefaultListableBeanFactoryTests {
 				.containsExactly("highest", "lowest");
 		assertThat(lbf.getBeanProvider(TestBean.class).orderedStream(ObjectProvider.UNFILTERED, false).map(TestBean::getName))
 				.containsExactly("lowest");
+
+		assertThat(lbf.getOrder("bean1")).isEqualTo(Ordered.LOWEST_PRECEDENCE);
+		assertThat(lbf.getOrder("bean2")).isEqualTo(Ordered.HIGHEST_PRECEDENCE);
 	}
 
 	@Test
@@ -1562,12 +1566,16 @@ class DefaultListableBeanFactoryTests {
 		rbd2.setAttribute(AbstractBeanDefinition.ORDER_ATTRIBUTE, Ordered.LOWEST_PRECEDENCE);
 		rbd2.setScope(BeanDefinition.SCOPE_PROTOTYPE);
 		lbf.registerBeanDefinition("highestPrecedenceFactory", rbd2);
+
 		assertThat(lbf.getBeanProvider(TestBean.class).orderedStream().map(TestBean::getName))
 				.containsExactly("fromLowestPrecedenceTestBeanFactoryBean", "fromHighestPrecedenceTestBeanFactoryBean");
 		assertThat(lbf.getBeanProvider(TestBean.class).orderedStream(ObjectProvider.UNFILTERED).map(TestBean::getName))
 				.containsExactly("fromLowestPrecedenceTestBeanFactoryBean", "fromHighestPrecedenceTestBeanFactoryBean");
 		assertThat(lbf.getBeanProvider(TestBean.class).orderedStream(ObjectProvider.UNFILTERED, false).map(TestBean::getName))
 				.containsExactly("fromLowestPrecedenceTestBeanFactoryBean");
+
+		assertThat(lbf.getOrder("lowestPrecedenceFactory")).isEqualTo(Ordered.HIGHEST_PRECEDENCE);
+		assertThat(lbf.getOrder("highestPrecedenceFactory")).isEqualTo(Ordered.LOWEST_PRECEDENCE);
 	}
 
 	@Test
@@ -1579,6 +1587,7 @@ class DefaultListableBeanFactoryTests {
 		GenericBeanDefinition bd2 = new GenericBeanDefinition();
 		bd2.setBeanClass(TestBean.class);
 		lbf.registerBeanDefinition("bean", bd2);
+
 		assertThatIllegalStateException()
 				.isThrownBy(() -> lbf.getBeanProvider(TestBean.class).orderedStream().collect(Collectors.toList()))
 				.withMessageContaining("Invalid value type for attribute");
