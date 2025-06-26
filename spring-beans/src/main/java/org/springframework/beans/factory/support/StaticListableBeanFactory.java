@@ -307,7 +307,7 @@ public class StaticListableBeanFactory implements ListableBeanFactory {
 			public T getObject() throws BeansException {
 				String[] beanNames = getBeanNamesForType(requiredType);
 				if (beanNames.length == 1) {
-					return (T) getBean(beanNames[0], requiredType);
+					return (T) getBean(beanNames[0], requiredType.toClass());
 				}
 				else if (beanNames.length > 1) {
 					throw new NoUniqueBeanDefinitionException(requiredType, beanNames);
@@ -333,7 +333,7 @@ public class StaticListableBeanFactory implements ListableBeanFactory {
 			public @Nullable T getIfAvailable() throws BeansException {
 				String[] beanNames = getBeanNamesForType(requiredType);
 				if (beanNames.length == 1) {
-					return (T) getBean(beanNames[0]);
+					return (T) getBean(beanNames[0], requiredType.toClass());
 				}
 				else if (beanNames.length > 1) {
 					throw new NoUniqueBeanDefinitionException(requiredType, beanNames);
@@ -346,7 +346,7 @@ public class StaticListableBeanFactory implements ListableBeanFactory {
 			public @Nullable T getIfUnique() throws BeansException {
 				String[] beanNames = getBeanNamesForType(requiredType);
 				if (beanNames.length == 1) {
-					return (T) getBean(beanNames[0]);
+					return (T) getBean(beanNames[0], requiredType.toClass());
 				}
 				else {
 					return null;
@@ -354,7 +354,8 @@ public class StaticListableBeanFactory implements ListableBeanFactory {
 			}
 			@Override
 			public Stream<T> stream() {
-				return Arrays.stream(getBeanNamesForType(requiredType)).map(name -> (T) getBean(name));
+				return Arrays.stream(getBeanNamesForType(requiredType))
+						.map(name -> (T) getBean(name, requiredType.toClass()));
 			}
 		};
 	}

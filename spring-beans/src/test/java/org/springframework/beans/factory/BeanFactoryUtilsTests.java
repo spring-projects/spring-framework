@@ -464,8 +464,40 @@ class BeanFactoryUtilsTests {
 		lbf.registerSingleton("fb2", fb2);
 		lbf.registerSingleton("sfb1", sfb1);
 		lbf.registerSingleton("sfb2", sfb2);
+		lbf.registerBeanDefinition("recipient",
+				new RootBeanDefinition(Recipient.class, RootBeanDefinition.AUTOWIRE_CONSTRUCTOR, false));
 
-		testSupportsMultipleTypesWithStaticFactory(lbf);
+		Recipient recipient = lbf.getBean("recipient", Recipient.class);
+		assertThat(recipient.sfb1).isSameAs(lbf.getBean("sfb1", TestBean.class));
+		assertThat(recipient.sfb2).isSameAs(lbf.getBean("sfb2", TestBean.class));
+
+		List<ITestBean> testBeanList = recipient.testBeanList;
+		assertThat(testBeanList).hasSize(5);
+		assertThat(testBeanList.get(0)).isSameAs(bean);
+		assertThat(testBeanList.get(1)).isSameAs(fb1.getObject());
+		assertThat(testBeanList.get(2)).isInstanceOf(TestBean.class);
+		assertThat(testBeanList.get(3)).isSameAs(lbf.getBean("sfb1", TestBean.class));
+		assertThat(testBeanList.get(4)).isSameAs(lbf.getBean("sfb2", TestBean.class));
+
+		List<CharSequence> stringList = recipient.stringList;
+		assertThat(stringList).hasSize(2);
+		assertThat(stringList.get(0)).isSameAs(lbf.getBean("sfb1", String.class));
+		assertThat(stringList.get(1)).isSameAs(lbf.getBean("sfb2", String.class));
+
+		testBeanList = recipient.testBeanProvider.stream().toList();
+		assertThat(testBeanList).hasSize(5);
+		assertThat(testBeanList.get(0)).isSameAs(bean);
+		assertThat(testBeanList.get(1)).isSameAs(fb1.getObject());
+		assertThat(testBeanList.get(2)).isInstanceOf(TestBean.class);
+		assertThat(testBeanList.get(3)).isSameAs(lbf.getBean("sfb1", TestBean.class));
+		assertThat(testBeanList.get(4)).isSameAs(lbf.getBean("sfb2", TestBean.class));
+
+		stringList = recipient.stringProvider.stream().toList();
+		assertThat(stringList).hasSize(2);
+		assertThat(stringList.get(0)).isSameAs(lbf.getBean("sfb1", String.class));
+		assertThat(stringList.get(1)).isSameAs(lbf.getBean("sfb2", String.class));
+
+		testSupportsMultipleTypes(lbf);
 	}
 
 	@Test
@@ -483,22 +515,35 @@ class BeanFactoryUtilsTests {
 		lbf.addBean("sfb1", sfb1);
 		lbf.addBean("sfb2", sfb2);
 
-		testSupportsMultipleTypesWithStaticFactory(lbf);
+		testSupportsMultipleTypes(lbf);
 	}
 
-	void testSupportsMultipleTypesWithStaticFactory(ListableBeanFactory lbf) {
+	void testSupportsMultipleTypes(ListableBeanFactory lbf) {
+		List<ITestBean> testBeanList = lbf.getBeanProvider(ITestBean.class).stream().toList();
+		assertThat(testBeanList).hasSize(5);
+		assertThat(testBeanList.get(0)).isSameAs(lbf.getBean("bean", TestBean.class));
+		assertThat(testBeanList.get(1)).isSameAs(lbf.getBean("fb1", TestBean.class));
+		assertThat(testBeanList.get(2)).isInstanceOf(TestBean.class);
+		assertThat(testBeanList.get(3)).isSameAs(lbf.getBean("sfb1", TestBean.class));
+		assertThat(testBeanList.get(4)).isSameAs(lbf.getBean("sfb2", TestBean.class));
+
+		List<CharSequence> stringList = lbf.getBeanProvider(CharSequence.class).stream().toList();
+		assertThat(stringList).hasSize(2);
+		assertThat(stringList.get(0)).isSameAs(lbf.getBean("sfb1", String.class));
+		assertThat(stringList.get(1)).isSameAs(lbf.getBean("sfb2", String.class));
+
 		Map<String, ?> beans = BeanFactoryUtils.beansOfTypeIncludingAncestors(lbf, ITestBean.class);
 		assertThat(beans).hasSize(5);
 		assertThat(beans.get("bean")).isSameAs(lbf.getBean("bean"));
-		assertThat(beans.get("fb1")).isSameAs(lbf.getBean("&fb1", DummyFactory.class).getObject());
+		assertThat(beans.get("fb1")).isSameAs(lbf.getBean("fb1",TestBean.class));
 		assertThat(beans.get("fb2")).isInstanceOf(TestBean.class);
-		assertThat(beans.get("sfb1")).isInstanceOf(TestBean.class);
-		assertThat(beans.get("sfb2")).isInstanceOf(TestBean.class);
+		assertThat(beans.get("sfb1")).isSameAs(lbf.getBean("sfb1", TestBean.class));
+		assertThat(beans.get("sfb2")).isSameAs(lbf.getBean("sfb2", TestBean.class));
 
 		beans = BeanFactoryUtils.beansOfTypeIncludingAncestors(lbf, CharSequence.class);
 		assertThat(beans).hasSize(2);
-		assertThat(beans.get("sfb1")).isInstanceOf(String.class);
-		assertThat(beans.get("sfb2")).isInstanceOf(String.class);
+		assertThat(beans.get("sfb1")).isSameAs(lbf.getBean("sfb1", String.class));
+		assertThat(beans.get("sfb2")).isSameAs(lbf.getBean("sfb1", String.class));
 
 		assertThat(lbf.getBean("sfb1", ITestBean.class)).isInstanceOf(TestBean.class);
 		assertThat(lbf.getBean("sfb2", ITestBean.class)).isInstanceOf(TestBean.class);
@@ -602,6 +647,32 @@ class BeanFactoryUtilsTests {
 		public boolean supportsType(Class<?> type) {
 			return (type.isInstance(testBean) || SmartFactoryBean.super.supportsType(type));
 		}
+	}
+
+
+	static class Recipient {
+
+		public Recipient(ITestBean sfb1, ITestBean sfb2, List<ITestBean> testBeanList, List<CharSequence> stringList,
+				ObjectProvider<ITestBean> testBeanProvider, ObjectProvider<CharSequence> stringProvider) {
+			this.sfb1 = sfb1;
+			this.sfb2 = sfb2;
+			this.testBeanList = testBeanList;
+			this.stringList = stringList;
+			this.testBeanProvider = testBeanProvider;
+			this.stringProvider = stringProvider;
+		}
+
+		ITestBean sfb1;
+
+		ITestBean sfb2;
+
+		List<ITestBean> testBeanList;
+
+		List<CharSequence> stringList;
+
+		ObjectProvider<ITestBean> testBeanProvider;
+
+		ObjectProvider<CharSequence> stringProvider;
 	}
 
 }
