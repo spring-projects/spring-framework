@@ -32,6 +32,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
  * Tests for {@link ExponentialBackOff}.
  *
  * @author Stephane Nicoll
+ * @author Sam Brannen
  */
 class ExponentialBackOffTests {
 
@@ -128,14 +129,24 @@ class ExponentialBackOffTests {
 	}
 
 	@Test
-	void executionToStringContent() {
+	void toStringContent() {
 		ExponentialBackOff backOff = new ExponentialBackOff(2000L, 2.0);
+		assertThat(backOff).asString()
+				.isEqualTo("""
+						ExponentialBackOff[\
+						initialInterval=2000, \
+						jitter=0, \
+						multiplier=2.0, \
+						maxInterval=30000, \
+						maxElapsedTime=%d, \
+						maxAttempts=%d]""", Long.MAX_VALUE, Integer.MAX_VALUE);
+
 		BackOffExecution execution = backOff.start();
-		assertThat(execution.toString()).isEqualTo("ExponentialBackOffExecution{currentInterval=n/a, multiplier=2.0, attempts=0}");
+		assertThat(execution).asString().isEqualTo("ExponentialBackOffExecution[currentInterval=n/a, multiplier=2.0, attempts=0]");
 		execution.nextBackOff();
-		assertThat(execution.toString()).isEqualTo("ExponentialBackOffExecution{currentInterval=2000ms, multiplier=2.0, attempts=1}");
+		assertThat(execution).asString().isEqualTo("ExponentialBackOffExecution[currentInterval=2000ms, multiplier=2.0, attempts=1]");
 		execution.nextBackOff();
-		assertThat(execution.toString()).isEqualTo("ExponentialBackOffExecution{currentInterval=4000ms, multiplier=2.0, attempts=2}");
+		assertThat(execution).asString().isEqualTo("ExponentialBackOffExecution[currentInterval=4000ms, multiplier=2.0, attempts=2]");
 	}
 
 	@Test

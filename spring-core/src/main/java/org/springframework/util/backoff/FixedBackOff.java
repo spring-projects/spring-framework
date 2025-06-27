@@ -119,6 +119,13 @@ public class FixedBackOff implements BackOff {
 		return new FixedBackOffExecution();
 	}
 
+	@Override
+	public String toString() {
+		String attemptValue = (this.maxAttempts == Long.MAX_VALUE ? "unlimited" :
+				String.valueOf(FixedBackOff.this.maxAttempts));
+		return "FixedBackOff[interval=" + this.interval +
+				", maxAttempts=" + attemptValue + ']';
+	}
 
 	private class FixedBackOffExecution implements BackOffExecution {
 
@@ -139,10 +146,10 @@ public class FixedBackOff implements BackOff {
 		public String toString() {
 			String attemptValue = (FixedBackOff.this.maxAttempts == Long.MAX_VALUE ?
 					"unlimited" : String.valueOf(FixedBackOff.this.maxAttempts));
-			return "FixedBackOff{interval=" + FixedBackOff.this.interval +
+			return "FixedBackOffExecution[interval=" + FixedBackOff.this.interval +
 					", currentAttempts=" + this.currentAttempts +
 					", maxAttempts=" + attemptValue +
-					'}';
+					']';
 		}
 	}
 

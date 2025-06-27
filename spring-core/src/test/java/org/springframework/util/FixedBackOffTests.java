@@ -27,6 +27,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * Tests for {@link FixedBackOff}.
  *
  * @author Stephane Nicoll
+ * @author Sam Brannen
  */
 class FixedBackOffTests {
 
@@ -86,12 +87,14 @@ class FixedBackOffTests {
 	@Test
 	void toStringContent() {
 		FixedBackOff backOff = new FixedBackOff(200L, 10);
+		assertThat(backOff).asString().isEqualTo("FixedBackOff[interval=200, maxAttempts=10]");
+
 		BackOffExecution execution = backOff.start();
-		assertThat(execution.toString()).isEqualTo("FixedBackOff{interval=200, currentAttempts=0, maxAttempts=10}");
+		assertThat(execution).asString().isEqualTo("FixedBackOffExecution[interval=200, currentAttempts=0, maxAttempts=10]");
 		execution.nextBackOff();
-		assertThat(execution.toString()).isEqualTo("FixedBackOff{interval=200, currentAttempts=1, maxAttempts=10}");
+		assertThat(execution).asString().isEqualTo("FixedBackOffExecution[interval=200, currentAttempts=1, maxAttempts=10]");
 		execution.nextBackOff();
-		assertThat(execution.toString()).isEqualTo("FixedBackOff{interval=200, currentAttempts=2, maxAttempts=10}");
+		assertThat(execution).asString().isEqualTo("FixedBackOffExecution[interval=200, currentAttempts=2, maxAttempts=10]");
 	}
 
 }

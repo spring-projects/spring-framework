@@ -255,7 +255,7 @@ public class ExponentialBackOff implements BackOff {
 
 	@Override
 	public String toString() {
-		return new StringJoiner(", ", ExponentialBackOff.class.getSimpleName() + "{", "}")
+		return new StringJoiner(", ", "ExponentialBackOff[", "]")
 				.add("initialInterval=" + this.initialInterval)
 				.add("jitter=" + this.jitter)
 				.add("multiplier=" + this.multiplier)
@@ -316,7 +316,7 @@ public class ExponentialBackOff implements BackOff {
 		@Override
 		public String toString() {
 			String currentIntervalDescription = this.currentInterval < 0 ? "n/a" : this.currentInterval + "ms";
-			return new StringJoiner(", ", ExponentialBackOffExecution.class.getSimpleName() + "{", "}")
+			return new StringJoiner(", ", "ExponentialBackOffExecution[", "]")
 					.add("currentInterval=" + currentIntervalDescription)
 					.add("multiplier=" + getMultiplier())
 					.add("attempts=" + this.attempts)
