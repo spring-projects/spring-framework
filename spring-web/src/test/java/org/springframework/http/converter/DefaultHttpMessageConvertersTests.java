@@ -26,42 +26,24 @@ import java.util.Set;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-import com.google.gson.Gson;
-import com.rometools.rome.feed.WireFeed;
-import jakarta.json.bind.Jsonb;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import tools.jackson.databind.ObjectMapper;
-import tools.jackson.dataformat.cbor.CBORMapper;
-import tools.jackson.dataformat.smile.SmileMapper;
-import tools.jackson.dataformat.xml.XmlMapper;
-import tools.jackson.dataformat.yaml.YAMLMapper;
 
 import org.springframework.core.SmartClassLoader;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.converter.cbor.JacksonCborHttpMessageConverter;
-import org.springframework.http.converter.cbor.KotlinSerializationCborHttpMessageConverter;
-import org.springframework.http.converter.cbor.MappingJackson2CborHttpMessageConverter;
 import org.springframework.http.converter.feed.AtomFeedHttpMessageConverter;
 import org.springframework.http.converter.feed.RssChannelHttpMessageConverter;
-import org.springframework.http.converter.json.GsonHttpMessageConverter;
 import org.springframework.http.converter.json.JacksonJsonHttpMessageConverter;
-import org.springframework.http.converter.json.JsonbHttpMessageConverter;
-import org.springframework.http.converter.json.KotlinSerializationJsonHttpMessageConverter;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.http.converter.protobuf.KotlinSerializationProtobufHttpMessageConverter;
 import org.springframework.http.converter.smile.JacksonSmileHttpMessageConverter;
-import org.springframework.http.converter.smile.MappingJackson2SmileHttpMessageConverter;
 import org.springframework.http.converter.support.AllEncompassingFormHttpMessageConverter;
 import org.springframework.http.converter.xml.JacksonXmlHttpMessageConverter;
-import org.springframework.http.converter.xml.Jaxb2RootElementHttpMessageConverter;
-import org.springframework.http.converter.xml.MappingJackson2XmlHttpMessageConverter;
 import org.springframework.http.converter.yaml.JacksonYamlHttpMessageConverter;
-import org.springframework.http.converter.yaml.MappingJackson2YamlHttpMessageConverter;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
@@ -281,101 +263,6 @@ class DefaultHttpMessageConvertersTests {
 			assertThat(customConverter.processed).isTrue();
 		}
 	}
-
-	@Nested
-	class ClasspathDetectionTests {
-
-		@Test
-		void jsonUsesJackson2WhenJacksonNotPresent() {
-			var classLoader = new FilteredClassLoader(ObjectMapper.class);
-			var converters = new DefaultHttpMessageConverters.DefaultBuilder(true, classLoader).build();
-			assertThat(converters.forServer()).hasAtLeastOneElementOfType(MappingJackson2HttpMessageConverter.class)
-					.doesNotHaveAnyElementsOfTypes(JacksonJsonHttpMessageConverter.class);
-		}
-
-		@Test
-		void jsonUsesGsonWhenJacksonNotPresent() {
-			var classLoader = new FilteredClassLoader(ObjectMapper.class, com.fasterxml.jackson.databind.ObjectMapper.class);
-			var converters = new DefaultHttpMessageConverters.DefaultBuilder(true, classLoader).build();
-			assertThat(converters.forServer()).hasAtLeastOneElementOfType(GsonHttpMessageConverter.class)
-					.doesNotHaveAnyElementsOfTypes(JacksonJsonHttpMessageConverter.class, MappingJackson2HttpMessageConverter.class);
-		}
-
-		@Test
-		void jsonUsesJsonbWhenJacksonAndGsonNotPresent() {
-			var classLoader = new FilteredClassLoader(ObjectMapper.class, com.fasterxml.jackson.databind.ObjectMapper.class, Gson.class);
-			var converters = new DefaultHttpMessageConverters.DefaultBuilder(true, classLoader).build();
-			assertThat(converters.forServer()).hasAtLeastOneElementOfType(JsonbHttpMessageConverter.class)
-					.doesNotHaveAnyElementsOfTypes(JacksonJsonHttpMessageConverter.class, MappingJackson2HttpMessageConverter.class,
-							GsonHttpMessageConverter.class);
-		}
-
-		@Test
-		void jsonUsesKotlinWhenOthersNotPresent() {
-			var classLoader = new FilteredClassLoader(ObjectMapper.class, com.fasterxml.jackson.databind.ObjectMapper.class, Gson.class, Jsonb.class);
-			var converters = new DefaultHttpMessageConverters.DefaultBuilder(true, classLoader).build();
-			assertThat(converters.forServer()).hasAtLeastOneElementOfType(KotlinSerializationJsonHttpMessageConverter.class)
-					.doesNotHaveAnyElementsOfTypes(JacksonJsonHttpMessageConverter.class, MappingJackson2HttpMessageConverter.class,
-							GsonHttpMessageConverter.class, JsonbHttpMessageConverter.class);
-		}
-
-		@Test
-		void xmlUsesJackson2WhenJacksonNotPresent() {
-			var classLoader = new FilteredClassLoader(XmlMapper.class);
-			var converters = new DefaultHttpMessageConverters.DefaultBuilder(true, classLoader).build();
-			assertThat(converters.forServer()).hasAtLeastOneElementOfType(MappingJackson2XmlHttpMessageConverter.class)
-					.doesNotHaveAnyElementsOfTypes(JacksonXmlHttpMessageConverter.class);
-		}
-
-		@Test
-		void xmlUsesJaxbWhenJacksonNotPresent() {
-			var classLoader = new FilteredClassLoader(XmlMapper.class, com.fasterxml.jackson.dataformat.xml.XmlMapper.class);
-			var converters = new DefaultHttpMessageConverters.DefaultBuilder(true, classLoader).build();
-			assertThat(converters.forServer()).hasAtLeastOneElementOfType(Jaxb2RootElementHttpMessageConverter.class)
-					.doesNotHaveAnyElementsOfTypes(JacksonXmlHttpMessageConverter.class, MappingJackson2XmlHttpMessageConverter.class);
-		}
-
-		@Test
-		void smileUsesJackson2WhenJacksonNotPresent() {
-			var classLoader = new FilteredClassLoader(SmileMapper.class);
-			var converters = new DefaultHttpMessageConverters.DefaultBuilder(true, classLoader).build();
-			assertThat(converters.forServer()).hasAtLeastOneElementOfType(MappingJackson2SmileHttpMessageConverter.class)
-					.doesNotHaveAnyElementsOfTypes(JacksonSmileHttpMessageConverter.class);
-		}
-
-		@Test
-		void cborUsesJackson2WhenJacksonNotPresent() {
-			var classLoader = new FilteredClassLoader(CBORMapper.class);
-			var converters = new DefaultHttpMessageConverters.DefaultBuilder(true, classLoader).build();
-			assertThat(converters.forServer()).hasAtLeastOneElementOfType(MappingJackson2CborHttpMessageConverter.class)
-					.doesNotHaveAnyElementsOfTypes(JacksonCborHttpMessageConverter.class);
-		}
-
-		@Test
-		void cborUsesKotlinWhenJacksonNotPresent() {
-			var classLoader = new FilteredClassLoader(CBORMapper.class, com.fasterxml.jackson.dataformat.cbor.CBORFactory.class);
-			var converters = new DefaultHttpMessageConverters.DefaultBuilder(true, classLoader).build();
-			assertThat(converters.forServer()).hasAtLeastOneElementOfType(KotlinSerializationCborHttpMessageConverter.class)
-					.doesNotHaveAnyElementsOfTypes(JacksonCborHttpMessageConverter.class, MappingJackson2CborHttpMessageConverter.class);
-		}
-
-		@Test
-		void yamlUsesJackson2WhenJacksonNotPresent() {
-			var classLoader = new FilteredClassLoader(YAMLMapper.class);
-			var converters = new DefaultHttpMessageConverters.DefaultBuilder(true, classLoader).build();
-			assertThat(converters.forServer()).hasAtLeastOneElementOfType(MappingJackson2YamlHttpMessageConverter.class)
-					.doesNotHaveAnyElementsOfTypes(JacksonYamlHttpMessageConverter.class);
-		}
-
-		@Test
-		void atomAndRssNotConfiguredWhenRomeNotPresent() {
-			var classLoader = new FilteredClassLoader(WireFeed.class);
-			var converters = new DefaultHttpMessageConverters.DefaultBuilder(true, classLoader).build();
-			assertThat(converters.forServer()).doesNotHaveAnyElementsOfTypes(AtomFeedHttpMessageConverter.class, RssChannelHttpMessageConverter.class);
-		}
-
-	}
-
 
 	@SuppressWarnings("unchecked")
 	private <T> T findMessageConverter(Class<T> converterType, Iterable<HttpMessageConverter<?>> converters) {
