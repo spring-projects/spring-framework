@@ -50,29 +50,24 @@ public class RequestMappingVersionIntegrationTests extends AbstractRequestMappin
 
 
 	@ParameterizedHttpServerTest
-	void initialVersion(HttpServer httpServer) throws Exception {
+	void mapVersion(HttpServer httpServer) throws Exception {
 		startServer(httpServer);
+
 		assertThat(exchangeWithVersion("1.0").getBody()).isEqualTo("none");
 		assertThat(exchangeWithVersion("1.1").getBody()).isEqualTo("none");
-	}
-
-	@ParameterizedHttpServerTest
-	void baselineVersion(HttpServer httpServer) throws Exception {
-		startServer(httpServer);
 		assertThat(exchangeWithVersion("1.2").getBody()).isEqualTo("1.2");
 		assertThat(exchangeWithVersion("1.3").getBody()).isEqualTo("1.2");
-	}
-
-	@ParameterizedHttpServerTest
-	void fixedVersion(HttpServer httpServer) throws Exception {
-		startServer(httpServer);
 		assertThat(exchangeWithVersion("1.5").getBody()).isEqualTo("1.5");
-		assertThatThrownBy(() -> exchangeWithVersion("1.6")).isInstanceOf(HttpClientErrorException.BadRequest.class);
+
+		assertThatThrownBy(() -> exchangeWithVersion("1.6"))
+				.as("Should reject if highest supported below request version is fixed")
+				.isInstanceOf(HttpClientErrorException.BadRequest.class);
 	}
 
 	@ParameterizedHttpServerTest
 	void deprecation(HttpServer httpServer) throws Exception {
 		startServer(httpServer);
+
 		assertThat(exchangeWithVersion("1").getHeaders().getFirst("Link"))
 				.isEqualTo("<https://example.org/deprecation>; rel=\"deprecation\"; type=\"text/html\"");
 	}

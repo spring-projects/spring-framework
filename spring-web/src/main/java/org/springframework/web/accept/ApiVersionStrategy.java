@@ -63,6 +63,27 @@ public interface ApiVersionStrategy {
 	@Nullable Comparable<?> getDefaultVersion();
 
 	/**
+	 * Convenience method to return the parsed and validated request version,
+	 * or the default version if configured.
+	 * @param request the current request
+	 * @return the parsed request version, or the default version
+	 */
+	default @Nullable Comparable<?> resolveParseAndValidateVersion(HttpServletRequest request) {
+		String value = resolveVersion(request);
+		if (value == null) {
+			return getDefaultVersion();
+		}
+		try {
+			Comparable<?> version = parseVersion(value);
+			validateVersion(version, request);
+			return version;
+		}
+		catch (Exception ex) {
+			throw new InvalidApiVersionException(value, null, ex);
+		}
+	}
+
+	/**
 	 * Check if the requested API version is deprecated, and if so handle it
 	 * accordingly, e.g. by setting response headers to signal the deprecation,
 	 * to specify relevant dates and provide links to further details.

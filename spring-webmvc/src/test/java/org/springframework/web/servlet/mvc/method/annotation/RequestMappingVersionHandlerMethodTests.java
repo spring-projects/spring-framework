@@ -59,23 +59,17 @@ public class RequestMappingVersionHandlerMethodTests {
 
 
 	@Test
-	void initialVersion() throws Exception {
+	void mapVersion() throws Exception {
 		assertThat(requestWithVersion("1.0").getContentAsString()).isEqualTo("none");
 		assertThat(requestWithVersion("1.1").getContentAsString()).isEqualTo("none");
-	}
-
-	@Test
-	void baselineVersion() throws Exception {
 		assertThat(requestWithVersion("1.2").getContentAsString()).isEqualTo("1.2");
 		assertThat(requestWithVersion("1.3").getContentAsString()).isEqualTo("1.2");
-	}
-
-	@Test
-	void fixedVersion() throws Exception {
 		assertThat(requestWithVersion("1.5").getContentAsString()).isEqualTo("1.5");
 
 		MockHttpServletResponse response = requestWithVersion("1.6");
-		assertThat(response.getStatus()).isEqualTo(400);
+		assertThat(response.getStatus())
+				.as("Should reject if highest supported below request version is fixed")
+				.isEqualTo(400);
 	}
 
 	@Test

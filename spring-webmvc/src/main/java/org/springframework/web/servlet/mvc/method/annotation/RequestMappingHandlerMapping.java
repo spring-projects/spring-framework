@@ -46,7 +46,6 @@ import org.springframework.util.StringValueResolver;
 import org.springframework.web.accept.ApiVersionStrategy;
 import org.springframework.web.accept.ContentNegotiationManager;
 import org.springframework.web.accept.DefaultApiVersionStrategy;
-import org.springframework.web.accept.InvalidApiVersionException;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -207,28 +206,13 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 		if (this.apiVersionStrategy != null) {
 			Comparable<?> version = (Comparable<?>) request.getAttribute(API_VERSION_ATTRIBUTE);
 			if (version == null) {
-				version = getApiVersion(request, this.apiVersionStrategy);
+				version = this.apiVersionStrategy.resolveParseAndValidateVersion(request);
 				if (version != null) {
 					request.setAttribute(API_VERSION_ATTRIBUTE, version);
 				}
 			}
 		}
 		return super.getHandlerInternal(request);
-	}
-
-	private static @Nullable Comparable<?> getApiVersion(HttpServletRequest request, ApiVersionStrategy strategy) {
-		String value = strategy.resolveVersion(request);
-		if (value == null) {
-			return strategy.getDefaultVersion();
-		}
-		try {
-			Comparable<?> version = strategy.parseVersion(value);
-			strategy.validateVersion(version, request);
-			return version;
-		}
-		catch (Exception ex) {
-			throw new InvalidApiVersionException(value, null, ex);
-		}
 	}
 
 	/**
