@@ -219,11 +219,11 @@ class DefaultHttpMessageConvertersTests {
 			assertThat(converters.forServer()).hasExactlyElementsOfTypes(
 					ByteArrayHttpMessageConverter.class, StringHttpMessageConverter.class,
 					ResourceHttpMessageConverter.class, ResourceRegionHttpMessageConverter.class,
+					AllEncompassingFormHttpMessageConverter.class,
 					JacksonJsonHttpMessageConverter.class, JacksonSmileHttpMessageConverter.class,
 					JacksonCborHttpMessageConverter.class, JacksonYamlHttpMessageConverter.class,
 					JacksonXmlHttpMessageConverter.class, KotlinSerializationProtobufHttpMessageConverter.class,
-					AtomFeedHttpMessageConverter.class, RssChannelHttpMessageConverter.class,
-					AllEncompassingFormHttpMessageConverter.class);
+					AtomFeedHttpMessageConverter.class, RssChannelHttpMessageConverter.class);
 		}
 
 		@Test
@@ -244,7 +244,7 @@ class DefaultHttpMessageConvertersTests {
 		void registerCustomMessageConverter() {
 			var converters = HttpMessageConverters.create()
 					.additionalMessageConverter(new CustomHttpMessageConverter()).build();
-			assertThat(converters.forServer()).hasExactlyElementsOfTypes(CustomHttpMessageConverter.class, AllEncompassingFormHttpMessageConverter.class);
+			assertThat(converters.forServer()).hasExactlyElementsOfTypes(AllEncompassingFormHttpMessageConverter.class, CustomHttpMessageConverter.class);
 		}
 
 		@Test

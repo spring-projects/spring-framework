@@ -589,11 +589,11 @@ class DefaultHttpMessageConverters implements HttpMessageConverters {
 
 			allConverters.addAll(this.serverMessageConverters.getBaseConverters());
 			allConverters.addAll(this.resourceMessageConverters);
-			allConverters.addAll(this.serverMessageConverters.getCoreConverters());
-			allConverters.addAll(this.serverMessageConverters.getCustomConverters());
 			if (!partConverters.isEmpty()) {
 				allConverters.add(new AllEncompassingFormHttpMessageConverter(partConverters));
 			}
+			allConverters.addAll(this.serverMessageConverters.getCoreConverters());
+			allConverters.addAll(this.serverMessageConverters.getCustomConverters());
 			if (this.configurer != null) {
 				allConverters.forEach(this.configurer);
 			}

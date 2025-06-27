@@ -213,9 +213,9 @@ class WebMvcConfigurationSupportExtensionTests {
 		List<HttpMessageConverter<?>> converters = adapter.getMessageConverters();
 		assertThat(converters).hasSize(3);
 		assertThat(converters.get(0).getClass()).isEqualTo(StringHttpMessageConverter.class);
-		assertThat(converters.get(1).getClass()).isEqualTo(JacksonJsonHttpMessageConverter.class);
-		assertThat(converters.get(2).getClass()).isEqualTo(AllEncompassingFormHttpMessageConverter.class);
-		ObjectMapper objectMapper = ((JacksonJsonHttpMessageConverter) converters.get(1)).getObjectMapper();
+		assertThat(converters.get(1).getClass()).isEqualTo(AllEncompassingFormHttpMessageConverter.class);
+		assertThat(converters.get(2).getClass()).isEqualTo(JacksonJsonHttpMessageConverter.class);
+		ObjectMapper objectMapper = ((JacksonJsonHttpMessageConverter) converters.get(2)).getObjectMapper();
 		assertThat(objectMapper.deserializationConfig().isEnabled(MapperFeature.DEFAULT_VIEW_INCLUSION)).isFalse();
 		assertThat(objectMapper.deserializationConfig().isEnabled(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)).isFalse();
 		assertThat(objectMapper.serializationConfig().isEnabled(MapperFeature.DEFAULT_VIEW_INCLUSION)).isFalse();
