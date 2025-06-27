@@ -16,11 +16,14 @@
 
 package org.springframework.web.servlet.config.annotation;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import jakarta.servlet.ServletContext;
 import org.jspecify.annotations.Nullable;
@@ -177,63 +180,19 @@ import org.springframework.web.util.pattern.PathPatternParser;
  */
 public class WebMvcConfigurationSupport implements ApplicationContextAware, ServletContextAware {
 
-	private static final boolean romePresent;
-
-	private static final boolean jaxb2Present;
-
 	private static final boolean jacksonPresent;
 
 	private static final boolean jackson2Present;
 
-	private static final boolean jacksonXmlPresent;
-
-	private static final boolean jackson2XmlPresent;
-
-	private static final boolean jacksonSmilePresent;
-
-	private static final boolean jackson2SmilePresent;
-
-	private static final boolean jacksonCborPresent;
-
-	private static final boolean jackson2CborPresent;
-
-	private static final boolean jacksonYamlPresent;
-
-	private static final boolean jackson2YamlPresent;
-
-	private static final boolean gsonPresent;
-
-	private static final boolean jsonbPresent;
-
 	private static final boolean kotlinSerializationPresent;
 
-	private static final boolean kotlinSerializationCborPresent;
-
-	private static final boolean kotlinSerializationJsonPresent;
-
-	private static final boolean kotlinSerializationProtobufPresent;
 
 	static {
 		ClassLoader classLoader = WebMvcConfigurationSupport.class.getClassLoader();
-		romePresent = ClassUtils.isPresent("com.rometools.rome.feed.WireFeed", classLoader);
-		jaxb2Present = ClassUtils.isPresent("jakarta.xml.bind.Binder", classLoader);
 		jacksonPresent = ClassUtils.isPresent("tools.jackson.databind.ObjectMapper", classLoader);
 		jackson2Present = ClassUtils.isPresent("com.fasterxml.jackson.databind.ObjectMapper", classLoader) &&
 				ClassUtils.isPresent("com.fasterxml.jackson.core.JsonGenerator", classLoader);
-		jacksonXmlPresent = jacksonPresent && ClassUtils.isPresent("tools.jackson.dataformat.xml.XmlMapper", classLoader);
-		jackson2XmlPresent = jackson2Present && ClassUtils.isPresent("com.fasterxml.jackson.dataformat.xml.XmlMapper", classLoader);
-		jacksonSmilePresent = jacksonPresent && ClassUtils.isPresent("tools.jackson.dataformat.smile.SmileMapper", classLoader);
-		jackson2SmilePresent = jackson2Present && ClassUtils.isPresent("com.fasterxml.jackson.dataformat.smile.SmileFactory", classLoader);
-		jacksonCborPresent = jacksonPresent && ClassUtils.isPresent("tools.jackson.dataformat.cbor.CBORMapper", classLoader);
-		jackson2CborPresent = jackson2Present && ClassUtils.isPresent("com.fasterxml.jackson.dataformat.cbor.CBORFactory", classLoader);
-		jacksonYamlPresent = jacksonPresent && ClassUtils.isPresent("tools.jackson.dataformat.yaml.YAMLMapper", classLoader);
-		jackson2YamlPresent = jackson2Present && ClassUtils.isPresent("com.fasterxml.jackson.dataformat.yaml.YAMLFactory", classLoader);
-		gsonPresent = ClassUtils.isPresent("com.google.gson.Gson", classLoader);
-		jsonbPresent = ClassUtils.isPresent("jakarta.json.bind.Jsonb", classLoader);
 		kotlinSerializationPresent = ClassUtils.isPresent("kotlinx.serialization.Serializable", classLoader);
-		kotlinSerializationCborPresent = kotlinSerializationPresent && ClassUtils.isPresent("kotlinx.serialization.cbor.Cbor", classLoader);
-		kotlinSerializationJsonPresent = kotlinSerializationPresent && ClassUtils.isPresent("kotlinx.serialization.json.Json", classLoader);
-		kotlinSerializationProtobufPresent = kotlinSerializationPresent && ClassUtils.isPresent("kotlinx.serialization.protobuf.ProtoBuf", classLoader);
 	}
 
 
@@ -444,23 +403,32 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 
 	protected Map<String, MediaType> getDefaultMediaTypes() {
 		Map<String, MediaType> map = new HashMap<>(4);
-		if (romePresent) {
+		List<HttpMessageConverter<?>> messageConverters = getMessageConverters();
+		Set<MediaType> supportedMediaTypes = messageConverters.stream()
+				.flatMap(converter -> converter.getSupportedMediaTypes().stream())
+				.collect(Collectors.toSet());
+		if (supportedMediaTypes.contains(MediaType.APPLICATION_ATOM_XML)) {
 			map.put("atom", MediaType.APPLICATION_ATOM_XML);
+		}
+		if (supportedMediaTypes.contains(MediaType.APPLICATION_RSS_XML)) {
 			map.put("rss", MediaType.APPLICATION_RSS_XML);
 		}
-		if (jaxb2Present || jacksonXmlPresent || jackson2XmlPresent) {
+		MediaType xmlUtf8MediaType = new MediaType("application", "xml", StandardCharsets.UTF_8);
+		if (supportedMediaTypes.contains(MediaType.APPLICATION_XML) ||
+				supportedMediaTypes.contains(xmlUtf8MediaType)) {
 			map.put("xml", MediaType.APPLICATION_XML);
 		}
-		if (jacksonPresent || jackson2Present || gsonPresent || jsonbPresent || kotlinSerializationJsonPresent) {
+		if (supportedMediaTypes.contains(MediaType.APPLICATION_JSON)) {
 			map.put("json", MediaType.APPLICATION_JSON);
 		}
-		if (jacksonSmilePresent || jackson2SmilePresent) {
-			map.put("smile", MediaType.valueOf("application/x-jackson-smile"));
+		MediaType smileMediaType = new MediaType("application", "x-jackson-smile");
+		if (supportedMediaTypes.contains(smileMediaType)) {
+			map.put("smile", smileMediaType);
 		}
-		if (jacksonCborPresent || jackson2CborPresent || kotlinSerializationCborPresent) {
+		if (supportedMediaTypes.contains(MediaType.APPLICATION_CBOR)) {
 			map.put("cbor", MediaType.APPLICATION_CBOR);
 		}
-		if (jacksonYamlPresent || jackson2YamlPresent) {
+		if (supportedMediaTypes.contains(MediaType.APPLICATION_ATOM_XML)) {
 			map.put("yaml", MediaType.APPLICATION_YAML);
 		}
 		return map;

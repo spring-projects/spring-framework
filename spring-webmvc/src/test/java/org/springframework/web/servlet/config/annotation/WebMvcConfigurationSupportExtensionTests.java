@@ -91,7 +91,6 @@ import org.springframework.web.util.UrlPathHelper;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
-import static org.springframework.http.MediaType.APPLICATION_XML;
 
 /**
  * A test fixture with a subclass of {@link WebMvcConfigurationSupport} that also
@@ -275,9 +274,6 @@ class WebMvcConfigurationSupportExtensionTests {
 		request.setParameter("f", "json");
 		ContentNegotiationManager manager = mapping.getContentNegotiationManager();
 		assertThat(manager.resolveMediaTypes(webRequest)).isEqualTo(Collections.singletonList(APPLICATION_JSON));
-
-		request.setParameter("f", "xml");
-		assertThat(manager.resolveMediaTypes(webRequest)).isEqualTo(Collections.singletonList(APPLICATION_XML));
 
 		SimpleUrlHandlerMapping handlerMapping = (SimpleUrlHandlerMapping) this.config.resourceHandlerMapping(
 				this.config.mvcContentNegotiationManager(), this.config.mvcConversionService(),

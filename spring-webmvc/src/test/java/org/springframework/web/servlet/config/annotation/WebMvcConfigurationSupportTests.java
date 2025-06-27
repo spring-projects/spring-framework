@@ -45,6 +45,7 @@ import org.springframework.format.annotation.DateTimeFormat.ISO;
 import org.springframework.format.support.FormattingConversionService;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.converter.AbstractJacksonHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.xml.JacksonXmlHttpMessageConverter;
@@ -53,6 +54,7 @@ import org.springframework.util.AntPathMatcher;
 import org.springframework.util.PathMatcher;
 import org.springframework.validation.Validator;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
+import org.springframework.web.accept.ContentNegotiationManager;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -211,6 +213,23 @@ class WebMvcConfigurationSupportTests {
 		assertThat(bodyAdvice.get(1).getClass()).isEqualTo(KotlinRequestBodyAdvice.class);
 		assertThat(bodyAdvice.get(2).getClass()).isEqualTo(JsonViewResponseBodyAdvice.class);
 		assertThat(bodyAdvice.get(3).getClass()).isEqualTo(KotlinResponseBodyAdvice.class);
+	}
+
+	@Test
+	void contentNegotiationManager() {
+		ApplicationContext context = initContext(WebConfig.class);
+		ContentNegotiationManager contentNegotiation = context.getBean(ContentNegotiationManager.class);
+		Map<String, MediaType> mediaTypeMappings = contentNegotiation.getMediaTypeMappings();
+
+		assertThat(mediaTypeMappings)
+				.containsEntry("atom", MediaType.APPLICATION_ATOM_XML)
+				.containsEntry("rss", MediaType.APPLICATION_RSS_XML)
+				.containsEntry("rss", MediaType.APPLICATION_RSS_XML)
+				.containsEntry("xml", MediaType.APPLICATION_XML)
+				.containsEntry("json", MediaType.APPLICATION_JSON)
+				.containsEntry("smile", MediaType.valueOf("application/x-jackson-smile"))
+				.containsEntry("cbor", MediaType.APPLICATION_CBOR)
+				.containsEntry("yaml", MediaType.APPLICATION_YAML);
 	}
 
 	@Test
