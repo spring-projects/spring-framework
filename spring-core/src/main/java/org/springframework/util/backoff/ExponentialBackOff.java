@@ -66,7 +66,7 @@ public class ExponentialBackOff implements BackOff {
 	public static final long DEFAULT_INITIAL_INTERVAL = 2000L;
 
 	/**
-	 * The default jitter range for each interval: {@value} ms.
+	 * The default jitter value for each interval: {@value} ms.
 	 * @since 7.0
 	 */
 	public static final long DEFAULT_JITTER = 0;
@@ -121,7 +121,7 @@ public class ExponentialBackOff implements BackOff {
 	/**
 	 * Create an instance with the supplied settings.
 	 * @param initialInterval the initial interval in milliseconds
-	 * @param multiplier the multiplier (should be greater than or equal to 1)
+	 * @param multiplier the multiplier (must be greater than or equal to 1)
 	 */
 	public ExponentialBackOff(long initialInterval, double multiplier) {
 		checkMultiplier(multiplier);
@@ -131,7 +131,8 @@ public class ExponentialBackOff implements BackOff {
 
 
 	/**
-	 * Set the initial interval in milliseconds.
+	 * Set the initial interval.
+	 * @param initialInterval the initial interval in milliseconds
 	 */
 	public void setInitialInterval(long initialInterval) {
 		this.initialInterval = initialInterval;
@@ -145,20 +146,22 @@ public class ExponentialBackOff implements BackOff {
 	}
 
 	/**
-	 * Set the jitter range (ms) to apply for each interval, leading to random
-	 * milliseconds within the range to be subtracted or added, resulting in a
-	 * value between {@code interval - jitter} and {@code interval + jitter}
-	 * but never below {@code initialInterval} or above {@code maxInterval}.
-	 * If a multiplier is specified, it applies to the jitter range as well.
+	 * Set the jitter value to apply for each interval, leading to random
+	 * milliseconds to be subtracted or added and resulting in a value between
+	 * {@code interval - jitter} and {@code interval + jitter} but never below
+	 * {@code initialInterval} or above {@code maxInterval}.
+	 * <p>If a {@code multiplier} is specified, it is applied to the jitter value
+	 * as well.
+	 * @param jitter the jitter value in milliseconds
 	 * @since 7.0
 	 */
 	public void setJitter(long jitter) {
-		Assert.isTrue(jitter >= 0, () -> "Invalid jitter '" + jitter + "': Must be >=0.");
+		Assert.isTrue(jitter >= 0, () -> "Invalid jitter '" + jitter + "': must be >= 0.");
 		this.jitter = jitter;
 	}
 
 	/**
-	 * Return the jitter range to apply for each interval.
+	 * Return the jitter value to apply for each interval in milliseconds.
 	 * @since 7.0
 	 */
 	public long getJitter() {
@@ -169,6 +172,7 @@ public class ExponentialBackOff implements BackOff {
 	 * Set the value to multiply the current interval by for each attempt.
 	 * <p>This applies to the {@linkplain #setInitialInterval initial interval}
 	 * as well as the {@linkplain #setJitter jitter range}.
+	 * @param multiplier the multiplier (must be greater than or equal to 1)
 	 */
 	public void setMultiplier(double multiplier) {
 		checkMultiplier(multiplier);

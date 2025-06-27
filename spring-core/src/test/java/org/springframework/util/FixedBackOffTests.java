@@ -24,6 +24,8 @@ import org.springframework.util.backoff.FixedBackOff;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
+ * Tests for {@link FixedBackOff}.
+ *
  * @author Stephane Nicoll
  */
 class FixedBackOffTests {
@@ -54,14 +56,17 @@ class FixedBackOffTests {
 	}
 
 	@Test
-	void startReturnDifferentInstances() {
+	void startReturnsDifferentInstances() {
 		FixedBackOff backOff = new FixedBackOff(100L, 1);
-		BackOffExecution execution = backOff.start();
+
+		BackOffExecution execution1 = backOff.start();
 		BackOffExecution execution2 = backOff.start();
 
-		assertThat(execution.nextBackOff()).isEqualTo(100L);
+		assertThat(execution1).isNotSameAs(execution2);
+
+		assertThat(execution1.nextBackOff()).isEqualTo(100L);
 		assertThat(execution2.nextBackOff()).isEqualTo(100L);
-		assertThat(execution.nextBackOff()).isEqualTo(BackOffExecution.STOP);
+		assertThat(execution1.nextBackOff()).isEqualTo(BackOffExecution.STOP);
 		assertThat(execution2.nextBackOff()).isEqualTo(BackOffExecution.STOP);
 	}
 

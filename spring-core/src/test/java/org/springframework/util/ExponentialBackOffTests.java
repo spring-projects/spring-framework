@@ -92,28 +92,29 @@ class ExponentialBackOffTests {
 	}
 
 	@Test
-	void startReturnDifferentInstances() {
+	void startReturnsDifferentInstances() {
 		ExponentialBackOff backOff = new ExponentialBackOff();
 		backOff.setInitialInterval(2000L);
 		backOff.setMultiplier(2.0);
 		backOff.setMaxElapsedTime(4000L);
 
-		BackOffExecution execution = backOff.start();
+		BackOffExecution execution1 = backOff.start();
 		BackOffExecution execution2 = backOff.start();
 
-		assertThat(execution.nextBackOff()).isEqualTo(2000L);
+		assertThat(execution1).isNotSameAs(execution2);
+
+		assertThat(execution1.nextBackOff()).isEqualTo(2000L);
 		assertThat(execution2.nextBackOff()).isEqualTo(2000L);
-		assertThat(execution.nextBackOff()).isEqualTo(4000L);
+		assertThat(execution1.nextBackOff()).isEqualTo(4000L);
 		assertThat(execution2.nextBackOff()).isEqualTo(4000L);
-		assertThat(execution.nextBackOff()).isEqualTo(BackOffExecution.STOP);
+		assertThat(execution1.nextBackOff()).isEqualTo(BackOffExecution.STOP);
 		assertThat(execution2.nextBackOff()).isEqualTo(BackOffExecution.STOP);
 	}
 
 	@Test
 	void invalidInterval() {
 		ExponentialBackOff backOff = new ExponentialBackOff();
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				backOff.setMultiplier(0.9));
+		assertThatIllegalArgumentException().isThrownBy(() -> backOff.setMultiplier(0.9));
 	}
 
 	@Test
