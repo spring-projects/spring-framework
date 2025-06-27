@@ -135,7 +135,7 @@ public class RetryInterceptorTests {
 	}
 
 
-	@Retryable(delay = 10, jitterDelay = 5, delayMultiplier = 2.0, maxDelay = 40,
+	@Retryable(delay = 10, jitter = 5, multiplier = 2.0, maxDelay = 40,
 			includes = IOException.class, excludes = AccessDeniedException.class,
 			predicate = CustomPredicate.class)
 	public static class AnnotatedClassBean {

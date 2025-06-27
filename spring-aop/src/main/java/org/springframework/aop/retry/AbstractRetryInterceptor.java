@@ -104,8 +104,8 @@ public abstract class AbstractRetryInterceptor implements MethodInterceptor {
 
 		ExponentialBackOff backOff = new ExponentialBackOff();
 		backOff.setInitialInterval(spec.delay());
-		backOff.setJitter(spec.jitterDelay());
-		backOff.setMultiplier(spec.delayMultiplier());
+		backOff.setJitter(spec.jitter());
+		backOff.setMultiplier(spec.multiplier());
 		backOff.setMaxInterval(spec.maxDelay());
 		backOff.setMaxAttempts(spec.maxAttempts());
 		retryTemplate.setBackOffPolicy(backOff);
@@ -147,8 +147,8 @@ public abstract class AbstractRetryInterceptor implements MethodInterceptor {
 
 			Publisher<?> publisher = adapter.toPublisher(result);
 			Retry retry = Retry.backoff(spec.maxAttempts(), Duration.ofMillis(spec.delay()))
-					.jitter((double) spec.jitterDelay() / spec.delay())
-					.multiplier(spec.delayMultiplier())
+					.jitter((double) spec.jitter() / spec.delay())
+					.multiplier(spec.multiplier())
 					.maxBackoff(Duration.ofMillis(spec.maxDelay()))
 					.filter(spec.combinedPredicate().forMethod(method));
 			publisher = (adapter.isMultiValue() ? Flux.from(publisher).retryWhen(retry) :

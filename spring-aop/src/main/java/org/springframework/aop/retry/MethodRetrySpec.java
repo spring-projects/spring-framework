@@ -31,8 +31,8 @@ import java.util.Collections;
  * @param predicate a predicate for filtering exceptions from applicable methods
  * @param maxAttempts the maximum number of retry attempts
  * @param delay the base delay after the initial invocation (in milliseconds)
- * @param jitterDelay a jitter delay for the next retry attempt (in milliseconds)
- * @param delayMultiplier a multiplier for a delay for the next retry attempt
+ * @param jitter a jitter value for the next retry attempt (in milliseconds)
+ * @param multiplier a multiplier for a delay for the next retry attempt
  * @param maxDelay the maximum delay for any retry attempt (in milliseconds)
  * @see AbstractRetryInterceptor#getRetrySpec
  * @see SimpleRetryInterceptor#SimpleRetryInterceptor(MethodRetrySpec)
@@ -44,8 +44,8 @@ public record MethodRetrySpec(
 		MethodRetryPredicate predicate,
 		int maxAttempts,
 		long delay,
-		long jitterDelay,
-		double delayMultiplier,
+		long jitter,
+		double multiplier,
 		long maxDelay) {
 
 	public MethodRetrySpec(MethodRetryPredicate predicate, int maxAttempts, long delay) {
@@ -53,10 +53,10 @@ public record MethodRetrySpec(
 	}
 
 	public MethodRetrySpec(MethodRetryPredicate predicate, int maxAttempts, long delay,
-			long jitterDelay, double delayMultiplier, long maxDelay) {
+			long jitter, double multiplier, long maxDelay) {
 
 		this(Collections.emptyList(), Collections.emptyList(), predicate, maxAttempts, delay,
-				jitterDelay, delayMultiplier, maxDelay);
+				jitter, multiplier, maxDelay);
 	}
 
 

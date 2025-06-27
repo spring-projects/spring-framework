@@ -60,8 +60,8 @@ public class RetryAnnotationInterceptor extends AbstractRetryInterceptor {
 		retrySpec = new MethodRetrySpec(
 				Arrays.asList(retryable.includes()), Arrays.asList(retryable.excludes()),
 				instantiatePredicate(retryable.predicate()), retryable.maxAttempts(),
-				retryable.delay(), retryable.jitterDelay(),
-				retryable.delayMultiplier(), retryable.maxDelay());
+				retryable.delay(), retryable.jitter(),
+				retryable.multiplier(), retryable.maxDelay());
 
 		MethodRetrySpec existing = this.retrySpecCache.putIfAbsent(cacheKey, retrySpec);
 		return (existing != null ? existing : retrySpec);

@@ -97,44 +97,44 @@ public @interface Retryable {
 	 * The base delay after the initial invocation in milliseconds.
 	 * If a multiplier is specified, this serves as the initial delay to multiply from.
 	 * <p>The default is 1000.
-	 * @see #jitterDelay()
-	 * @see #delayMultiplier()
+	 * @see #jitter()
+	 * @see #multiplier()
 	 * @see #maxDelay()
 	 */
 	long delay() default 1000;
 
 	/**
-	 * A jitter delay for the base retry attempt (in milliseconds), randomly
-	 * subtracted or added to the calculated delay, resulting in a value
-	 * between {@code delay - jitterDelay} and {@code delay + jitterDelay}
-	 * but never below the base {@link #delay()} or above {@link #maxDelay()}.
-	 * If a multiplier is specified, it applies to the jitter delay as well.
+	 * A jitter value (in milliseconds) for the base retry attempt, randomly
+	 * subtracted or added to the calculated delay, resulting in a value between
+	 * {@code delay - jitter} and {@code delay + jitter} but never below the base
+	 * {@link #delay()} or above {@link #maxDelay()}.
+	 * <p>If a multiplier is specified, it is applied to the jitter value as well.
 	 * <p>The default is 0 (no jitter).
 	 * @see #delay()
-	 * @see #delayMultiplier()
+	 * @see #multiplier()
 	 * @see #maxDelay()
 	 */
-	long jitterDelay() default 0;
+	long jitter() default 0;
 
 	/**
 	 * A multiplier for a delay for the next retry attempt, applied
 	 * to the previous delay (starting with {@link #delay()}) as well
-	 * as to the applicable {@link #jitterDelay()} for each attempt.
+	 * as to the applicable {@link #jitter()} for each attempt.
 	 * <p>The default is 1.0, effectively resulting in a fixed delay.
 	 * @see #delay()
-	 * @see #jitterDelay()
+	 * @see #jitter()
 	 * @see #maxDelay()
 	 */
-	double delayMultiplier() default 1.0;
+	double multiplier() default 1.0;
 
 	/**
 	 * The maximum delay for any retry attempt (in milliseconds), limiting
-	 * how far {@link #jitterDelay()} and {@link #delayMultiplier()} can
-	 * increase the {@linkplain #delay() delay}.
+	 * how far {@link #jitter()} and {@link #multiplier()} can increase the
+	 * {@linkplain #delay() delay}.
 	 * <p>The default is unlimited.
 	 * @see #delay()
-	 * @see #jitterDelay()
-	 * @see #delayMultiplier()
+	 * @see #jitter()
+	 * @see #multiplier()
 	 */
 	long maxDelay() default Integer.MAX_VALUE;
 
