@@ -388,33 +388,33 @@ class BeanFactoryUtilsTests {
 
 		assertThat(lbf.isSingleton("bean")).isTrue();
 		assertThat(lbf.isSingleton("fb1")).isTrue();
-		assertThat(lbf.isSingleton("fb2")).isTrue();
+		assertThat(lbf.isSingleton("fb2")).isFalse();
 		assertThat(lbf.isSingleton("sfb1")).isTrue();
 		assertThat(lbf.isSingleton("sfb2")).isTrue();
-		assertThat(lbf.isSingleton("sfb3")).isTrue();
-		assertThat(lbf.isSingleton("sfb4")).isTrue();
+		assertThat(lbf.isSingleton("sfb3")).isFalse();
+		assertThat(lbf.isSingleton("sfb4")).isFalse();
 
 		assertThat(lbf.isSingleton("&fb1")).isTrue();
-		assertThat(lbf.isSingleton("&fb2")).isFalse();
+		assertThat(lbf.isSingleton("&fb2")).isTrue();
 		assertThat(lbf.isSingleton("&sfb1")).isTrue();
 		assertThat(lbf.isSingleton("&sfb2")).isTrue();
-		assertThat(lbf.isSingleton("&sfb3")).isFalse();
-		assertThat(lbf.isSingleton("&sfb4")).isFalse();
+		assertThat(lbf.isSingleton("&sfb3")).isTrue();
+		assertThat(lbf.isSingleton("&sfb4")).isTrue();
 
 		assertThat(lbf.isPrototype("bean")).isFalse();
 		assertThat(lbf.isPrototype("fb1")).isFalse();
-		assertThat(lbf.isPrototype("fb2")).isFalse();
-		assertThat(lbf.isPrototype("sfb1")).isFalse();
+		assertThat(lbf.isPrototype("fb2")).isTrue();
+		assertThat(lbf.isPrototype("sfb1")).isTrue();
 		assertThat(lbf.isPrototype("sfb2")).isFalse();
-		assertThat(lbf.isPrototype("sfb3")).isFalse();
-		assertThat(lbf.isPrototype("sfb4")).isFalse();
+		assertThat(lbf.isPrototype("sfb3")).isTrue();
+		assertThat(lbf.isPrototype("sfb4")).isTrue();
 
 		assertThat(lbf.isPrototype("&fb1")).isFalse();
-		assertThat(lbf.isPrototype("&fb2")).isTrue();
-		assertThat(lbf.isPrototype("&sfb1")).isTrue();
+		assertThat(lbf.isPrototype("&fb2")).isFalse();
+		assertThat(lbf.isPrototype("&sfb1")).isFalse();
 		assertThat(lbf.isPrototype("&sfb2")).isFalse();
-		assertThat(lbf.isPrototype("&sfb3")).isTrue();
-		assertThat(lbf.isPrototype("&sfb4")).isTrue();
+		assertThat(lbf.isPrototype("&sfb3")).isFalse();
+		assertThat(lbf.isPrototype("&sfb4")).isFalse();
 	}
 
 

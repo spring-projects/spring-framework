@@ -2701,7 +2701,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 				return null;
 			}
 			try {
-				RootBeanDefinition beanDefinition = (RootBeanDefinition) getMergedBeanDefinition(beanName);
+				BeanDefinition beanDefinition = getMergedBeanDefinition(beanName);
 				List<Object> sources = new ArrayList<>(3);
 				Object orderAttribute = beanDefinition.getAttribute(AbstractBeanDefinition.ORDER_ATTRIBUTE);
 				if (orderAttribute != null) {
@@ -2713,13 +2713,15 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 								AbstractBeanDefinition.ORDER_ATTRIBUTE + "': " + orderAttribute.getClass().getName());
 					}
 				}
-				Method factoryMethod = beanDefinition.getResolvedFactoryMethod();
-				if (factoryMethod != null) {
-					sources.add(factoryMethod);
-				}
-				Class<?> targetType = beanDefinition.getTargetType();
-				if (targetType != null && targetType != obj.getClass()) {
-					sources.add(targetType);
+				if (beanDefinition instanceof RootBeanDefinition rootBeanDefinition) {
+					Method factoryMethod = rootBeanDefinition.getResolvedFactoryMethod();
+					if (factoryMethod != null) {
+						sources.add(factoryMethod);
+					}
+					Class<?> targetType = rootBeanDefinition.getTargetType();
+					if (targetType != null && targetType != obj.getClass()) {
+						sources.add(targetType);
+					}
 				}
 				return sources.toArray();
 			}
