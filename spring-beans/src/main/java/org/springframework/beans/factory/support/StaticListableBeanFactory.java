@@ -208,7 +208,6 @@ public class StaticListableBeanFactory implements ListableBeanFactory {
 	public boolean isSingleton(String name) throws NoSuchBeanDefinitionException {
 		String beanName = BeanFactoryUtils.transformedBeanName(name);
 		Object bean = obtainBean(beanName);
-		// In case of FactoryBean, return singleton status of created object.
 		if (bean instanceof FactoryBean<?> factoryBean && !BeanFactoryUtils.isFactoryDereference(name)) {
 			return factoryBean.isSingleton();
 		}
@@ -219,7 +218,6 @@ public class StaticListableBeanFactory implements ListableBeanFactory {
 	public boolean isPrototype(String name) throws NoSuchBeanDefinitionException {
 		String beanName = BeanFactoryUtils.transformedBeanName(name);
 		Object bean = obtainBean(beanName);
-		// In case of FactoryBean, return prototype status of created object.
 		return (!BeanFactoryUtils.isFactoryDereference(name) &&
 				((bean instanceof SmartFactoryBean<?> smartFactoryBean && smartFactoryBean.isPrototype()) ||
 				(bean instanceof FactoryBean<?> factoryBean && !factoryBean.isSingleton())));
@@ -263,7 +261,6 @@ public class StaticListableBeanFactory implements ListableBeanFactory {
 		String beanName = BeanFactoryUtils.transformedBeanName(name);
 		Object bean = obtainBean(beanName);
 		if (bean instanceof FactoryBean<?> factoryBean && !BeanFactoryUtils.isFactoryDereference(name)) {
-			// If it's a FactoryBean, we want to look at what it creates, not the factory class.
 			return factoryBean.getObjectType();
 		}
 		return bean.getClass();
@@ -417,9 +414,7 @@ public class StaticListableBeanFactory implements ListableBeanFactory {
 		for (Map.Entry<String, Object> entry : this.beans.entrySet()) {
 			String beanName = entry.getKey();
 			Object beanInstance = entry.getValue();
-			// Is bean a FactoryBean?
 			if (beanInstance instanceof FactoryBean<?> factoryBean && !isFactoryType) {
-				// Match object created by FactoryBean.
 				if ((includeNonSingletons || factoryBean.isSingleton()) &&
 						(type == null || isTypeMatch(factoryBean, type))) {
 					matches.put(beanName, getBean(beanName, type));
@@ -427,8 +422,6 @@ public class StaticListableBeanFactory implements ListableBeanFactory {
 			}
 			else {
 				if (type == null || type.isInstance(beanInstance)) {
-					// If type to match is FactoryBean, return FactoryBean itself.
-					// Else, return bean instance.
 					if (isFactoryType) {
 						beanName = FACTORY_BEAN_PREFIX + beanName;
 					}
