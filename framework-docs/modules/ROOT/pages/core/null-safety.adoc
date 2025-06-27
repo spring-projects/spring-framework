@@ -80,6 +80,37 @@ public static @Nullable String buildMessage(@Nullable String message,
     // ...
 }
 ----
+=== Annotation Placement Differences: Traditional vs. JSpecify
+
+It is common for Java developers to place field or method annotations such as
+`@NotNull` or `@NotBlank` on a separate line directly above the field or method declaration:
+
+[source,java]
+----
+@NotBlank
+private String lastName;
+----
+
+In contrast, JSpecify annotations like `@Nullable` are type-use annotations,
+which means they apply to the type itself rather than the field or method declaration.
+This subtle distinction is important because it allows for more precise
+nullability declarations, including complex cases like arrays and generics.
+
+Therefore, the recommended style for JSpecify annotations is to place them
+on the same line as the type, immediately preceding the type name:
+
+[source,java]
+----
+private @Nullable String lastName;
+private @Nullable String @Nullable [] names;
+----
+
+This approach enhances clarity by showing the nullability of the type directly,
+and it aligns with the Java Language Specification rules for type-use annotations.
+
+Note that mixing traditional annotations on a separate line and JSpecify
+annotations on the same line can look inconsistent, but it reflects the
+different semantics and targets of these annotations.
 
 [NOTE]
 ====
