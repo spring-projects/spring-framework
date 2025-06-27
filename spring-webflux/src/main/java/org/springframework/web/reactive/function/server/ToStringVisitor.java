@@ -120,6 +120,11 @@ class ToStringVisitor implements RouterFunctions.Visitor, RequestPredicates.Visi
 	}
 
 	@Override
+	public void version(String version) {
+		this.builder.append(String.format("version: %s", version));
+	}
+
+	@Override
 	public void startAnd() {
 		this.builder.append('(');
 	}

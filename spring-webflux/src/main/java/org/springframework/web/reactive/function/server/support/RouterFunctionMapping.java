@@ -29,6 +29,8 @@ import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.codec.ServerCodecConfigurer;
 import org.springframework.http.server.reactive.observation.ServerRequestObservationContext;
 import org.springframework.util.CollectionUtils;
+import org.springframework.web.reactive.accept.ApiVersionStrategy;
+import org.springframework.web.reactive.accept.DefaultApiVersionStrategy;
 import org.springframework.web.reactive.function.server.HandlerFunction;
 import org.springframework.web.reactive.function.server.RouterFunction;
 import org.springframework.web.reactive.function.server.RouterFunctions;
@@ -53,6 +55,8 @@ public class RouterFunctionMapping extends AbstractHandlerMapping implements Ini
 	private @Nullable RouterFunction<?> routerFunction;
 
 	private List<HttpMessageReader<?>> messageReaders = Collections.emptyList();
+
+	private @Nullable ApiVersionStrategy versionStrategy;
 
 
 	/**
@@ -92,6 +96,16 @@ public class RouterFunctionMapping extends AbstractHandlerMapping implements Ini
 		this.messageReaders = messageReaders;
 	}
 
+	/**
+	 * Configure a strategy to manage API versioning.
+	 * @param strategy the strategy to use
+	 * @since 7.0
+	 */
+	public void setApiVersionStrategy(@Nullable ApiVersionStrategy strategy) {
+		this.versionStrategy = strategy;
+	}
+
+
 	@Override
 	public void afterPropertiesSet() throws Exception {
 		if (CollectionUtils.isEmpty(this.messageReaders)) {
@@ -102,8 +116,14 @@ public class RouterFunctionMapping extends AbstractHandlerMapping implements Ini
 		if (this.routerFunction == null) {
 			initRouterFunctions();
 		}
+
 		if (this.routerFunction != null) {
 			RouterFunctions.changeParser(this.routerFunction, getPathPatternParser());
+			if (this.versionStrategy instanceof DefaultApiVersionStrategy davs) {
+				if (davs.detectSupportedVersions()) {
+					this.routerFunction.accept(new SupportedVersionVisitor(davs));
+				}
+			}
 		}
 
 	}
@@ -149,14 +169,26 @@ public class RouterFunctionMapping extends AbstractHandlerMapping implements Ini
 
 	@Override
 	protected Mono<?> getHandlerInternal(ServerWebExchange exchange) {
-		if (this.routerFunction != null) {
-			ServerRequest request = ServerRequest.create(exchange, this.messageReaders);
-			return this.routerFunction.route(request)
-					.doOnNext(handler -> setAttributes(exchange.getAttributes(), request, handler));
-		}
-		else {
+
+		if (this.routerFunction == null) {
 			return Mono.empty();
 		}
+
+		if (this.versionStrategy != null) {
+			Comparable<?> version = exchange.getAttribute(API_VERSION_ATTRIBUTE);
+			if (version == null) {
+				version = this.versionStrategy.resolveParseAndValidateVersion(exchange);
+				if (version != null) {
+					exchange.getAttributes().put(API_VERSION_ATTRIBUTE, version);
+				}
+			}
+		}
+
+		ServerRequest request = ServerRequest.create(
+				exchange, this.messageReaders, this.versionStrategy);
+
+		return this.routerFunction.route(request)
+				.doOnNext(handler -> setAttributes(exchange.getAttributes(), request, handler));
 	}
 
 	@SuppressWarnings("unchecked")

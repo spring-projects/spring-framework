@@ -246,10 +246,13 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 	}
 
 	@Bean
-	public RouterFunctionMapping routerFunctionMapping(ServerCodecConfigurer serverCodecConfigurer) {
+	public RouterFunctionMapping routerFunctionMapping(
+			ServerCodecConfigurer serverCodecConfigurer, @Nullable ApiVersionStrategy apiVersionStrategy) {
+
 		RouterFunctionMapping mapping = createRouterFunctionMapping();
 		mapping.setOrder(-1);  // go before RequestMappingHandlerMapping
 		mapping.setMessageReaders(serverCodecConfigurer.getReaders());
+		mapping.setApiVersionStrategy(apiVersionStrategy);
 		configureAbstractHandlerMapping(mapping, getPathMatchConfigurer());
 		return mapping;
 	}

@@ -71,6 +71,7 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.validation.BindException;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
+import org.springframework.web.accept.ApiVersionStrategy;
 import org.springframework.web.bind.ServletRequestDataBinder;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.context.request.ServletWebRequest;
@@ -97,6 +98,8 @@ class DefaultServerRequest implements ServerRequest {
 
 	private final List<HttpMessageConverter<?>> messageConverters;
 
+	private final @Nullable ApiVersionStrategy versionStrategy;
+
 	private final MultiValueMap<String, String> params;
 
 	private final Map<String, Object> attributes;
@@ -105,8 +108,16 @@ class DefaultServerRequest implements ServerRequest {
 
 
 	public DefaultServerRequest(HttpServletRequest servletRequest, List<HttpMessageConverter<?>> messageConverters) {
+		this(servletRequest, messageConverters, null);
+	}
+
+	public DefaultServerRequest(
+			HttpServletRequest servletRequest, List<HttpMessageConverter<?>> messageConverters,
+			@Nullable ApiVersionStrategy versionStrategy) {
+
 		this.serverHttpRequest = new ServletServerHttpRequest(servletRequest);
 		this.messageConverters = List.copyOf(messageConverters);
+		this.versionStrategy = versionStrategy;
 
 		this.headers = new DefaultRequestHeaders(this.serverHttpRequest.getHeaders());
 		this.params = CollectionUtils.toMultiValueMap(new ServletParametersMap(servletRequest));
@@ -170,6 +181,11 @@ class DefaultServerRequest implements ServerRequest {
 	@Override
 	public List<HttpMessageConverter<?>> messageConverters() {
 		return this.messageConverters;
+	}
+
+	@Override
+	public @Nullable ApiVersionStrategy apiVersionStrategy() {
+		return this.versionStrategy;
 	}
 
 	@Override

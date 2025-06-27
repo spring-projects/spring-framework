@@ -544,13 +544,15 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	@Bean
 	public RouterFunctionMapping routerFunctionMapping(
 			@Qualifier("mvcConversionService") FormattingConversionService conversionService,
-			@Qualifier("mvcResourceUrlProvider") ResourceUrlProvider resourceUrlProvider) {
+			@Qualifier("mvcResourceUrlProvider") ResourceUrlProvider resourceUrlProvider,
+			@Qualifier("mvcApiVersionStrategy") @Nullable ApiVersionStrategy versionStrategy) {
 
 		RouterFunctionMapping mapping = new RouterFunctionMapping();
 		mapping.setOrder(-1);  // go before RequestMappingHandlerMapping
 		mapping.setInterceptors(getInterceptors(conversionService, resourceUrlProvider));
 		mapping.setCorsConfigurations(getCorsConfigurations());
 		mapping.setMessageConverters(getMessageConverters());
+		mapping.setApiVersionStrategy(versionStrategy);
 
 		PathPatternParser patternParser = getPathMatchConfigurer().getPatternParser();
 		if (patternParser != null) {
