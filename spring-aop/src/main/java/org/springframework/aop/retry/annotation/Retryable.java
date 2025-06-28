@@ -43,6 +43,7 @@ import org.springframework.core.annotation.AliasFor;
  * @since 7.0
  * @see RetryAnnotationBeanPostProcessor
  * @see RetryAnnotationInterceptor
+ * @see org.springframework.core.retry.RetryPolicy
  * @see org.springframework.core.retry.RetryTemplate
  * @see reactor.core.publisher.Mono#retryWhen
  * @see reactor.core.publisher.Flux#retryWhen
@@ -95,8 +96,8 @@ public @interface Retryable {
 	long maxAttempts() default 3;
 
 	/**
-	 * The base delay after the initial invocation in milliseconds. If a multiplier
-	 * is specified, this serves as the initial delay to multiply from.
+	 * The base delay after the initial invocation. If a multiplier is specified,
+	 * this serves as the initial delay to multiply from.
 	 * <p>The time unit is milliseconds by default but can be overridden via
 	 * {@link #timeUnit}.
 	 * <p>The default is 1000.
@@ -147,7 +148,7 @@ public @interface Retryable {
 	/**
 	 * The {@link TimeUnit} to use for {@link #delay}, {@link #jitter},
 	 * and {@link #maxDelay}.
-	 * <p>Defaults to {@link TimeUnit#MILLISECONDS}.
+	 * <p>The default is {@link TimeUnit#MILLISECONDS}.
 	 */
 	TimeUnit timeUnit() default TimeUnit.MILLISECONDS;
 

@@ -31,10 +31,10 @@ import java.util.Collections;
  * @param excludes non-applicable exception types to avoid a retry for
  * @param predicate a predicate for filtering exceptions from applicable methods
  * @param maxAttempts the maximum number of retry attempts
- * @param delay the base delay after the initial invocation (in milliseconds)
- * @param jitter a jitter value for the next retry attempt (in milliseconds)
+ * @param delay the base delay after the initial invocation
+ * @param jitter a jitter value for the next retry attempt
  * @param multiplier a multiplier for a delay for the next retry attempt
- * @param maxDelay the maximum delay for any retry attempt (in milliseconds)
+ * @param maxDelay the maximum delay for any retry attempt
  * @see AbstractRetryInterceptor#getRetrySpec
  * @see SimpleRetryInterceptor#SimpleRetryInterceptor(MethodRetrySpec)
  * @see org.springframework.aop.retry.annotation.Retryable

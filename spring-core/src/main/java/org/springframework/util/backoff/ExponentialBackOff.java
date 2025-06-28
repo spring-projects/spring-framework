@@ -90,7 +90,7 @@ public class ExponentialBackOff implements BackOff {
 	 * The default maximum attempts: unlimited.
 	 * @since 6.1
 	 */
-	public static final int DEFAULT_MAX_ATTEMPTS = Integer.MAX_VALUE;
+	public static final long DEFAULT_MAX_ATTEMPTS = Long.MAX_VALUE;
 
 
 	private long initialInterval = DEFAULT_INITIAL_INTERVAL;
