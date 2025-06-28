@@ -35,7 +35,7 @@ import org.springframework.util.backoff.FixedBackOff;
  *
  * <p>Also provides factory methods and a fluent builder API for creating retry
  * policies with common configurations. See {@link #withDefaults()},
- * {@link #withMaxAttempts(int)}, {@link #withMaxElapsedTime(Duration)},
+ * {@link #withMaxAttempts(long)}, {@link #withMaxElapsedTime(Duration)},
  * {@link #builder()}, and the configuration options in {@link Builder} for details.
  *
  * @author Sam Brannen
@@ -54,7 +54,6 @@ public interface RetryPolicy {
 	 * @return {@code true} if the operation should be retried, {@code false} otherwise
 	 */
 	boolean shouldRetry(Throwable throwable);
-
 
 	/**
 	 * Get the {@link BackOff} strategy to use for this retry policy.
@@ -84,10 +83,10 @@ public interface RetryPolicy {
 	 * <p>The returned policy uses a fixed backoff of {@value Builder#DEFAULT_DELAY}
 	 * milliseconds.
 	 * @param maxAttempts the maximum number of retry attempts; must be greater than zero
-	 * @see Builder#maxAttempts(int)
+	 * @see Builder#maxAttempts(long)
 	 * @see FixedBackOff
 	 */
-	static RetryPolicy withMaxAttempts(int maxAttempts) {
+	static RetryPolicy withMaxAttempts(long maxAttempts) {
 		Assert.isTrue(maxAttempts > 0, "Max attempts must be greater than zero");
 		return builder().backOff(new FixedBackOff(Builder.DEFAULT_DELAY, maxAttempts)).build();
 	}
@@ -120,9 +119,9 @@ public interface RetryPolicy {
 	final class Builder {
 
 		/**
-		 * The default {@linkplain #maxAttempts(int) max attempts}: {@value}.
+		 * The default {@linkplain #maxAttempts(long) max attempts}: {@value}.
 		 */
-		public static final int DEFAULT_MAX_ATTEMPTS = 3;
+		public static final long DEFAULT_MAX_ATTEMPTS = 3;
 
 		/**
 		 * The default {@linkplain #delay(Duration) delay}: {@value} ms.
@@ -143,7 +142,7 @@ public interface RetryPolicy {
 
 		private @Nullable BackOff backOff;
 
-		private int maxAttempts;
+		private long maxAttempts;
 
 		private @Nullable Duration delay;
 
@@ -172,7 +171,7 @@ public interface RetryPolicy {
 		 * <p>The supplied value will override any previously configured value.
 		 * <p><strong>WARNING</strong>: If you configure a custom {@code BackOff}
 		 * strategy, you should not configure any of the following:
-		 * {@link #maxAttempts(int) maxAttempts}, {@link #delay(Duration) delay},
+		 * {@link #maxAttempts(long) maxAttempts}, {@link #delay(Duration) delay},
 		 * {@link #jitter(Duration) jitter}, {@link #multiplier(double) multiplier},
 		 * {@link #maxDelay(Duration) maxDelay}, or {@link #maxElapsedTime(Duration)
 		 * maxElapsedTime}.
@@ -195,7 +194,7 @@ public interface RetryPolicy {
 		 * greater than zero
 		 * @return this {@code Builder} instance for chained method invocations
 		 */
-		public Builder maxAttempts(int maxAttempts) {
+		public Builder maxAttempts(long maxAttempts) {
 			Assert.isTrue(maxAttempts > 0, "Max attempts must be greater than zero");
 			this.maxAttempts = maxAttempts;
 			return this;
@@ -285,7 +284,7 @@ public interface RetryPolicy {
 		 * @see #multiplier(double)
 		 */
 		public Builder maxDelay(Duration maxDelay) {
-			assertIsPositive("max delay", maxDelay);
+			assertIsPositive("maxDelay", maxDelay);
 			this.maxDelay = maxDelay;
 			return this;
 		}
@@ -300,7 +299,7 @@ public interface RetryPolicy {
 		 * @return this {@code Builder} instance for chained method invocations
 		 */
 		public Builder maxElapsedTime(Duration maxElapsedTime) {
-			assertIsPositive("max elapsed time", maxElapsedTime);
+			assertIsPositive("maxElapsedTime", maxElapsedTime);
 			this.maxElapsedTime = maxElapsedTime;
 			return this;
 		}

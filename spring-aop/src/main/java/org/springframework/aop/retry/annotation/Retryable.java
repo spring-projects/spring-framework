@@ -21,6 +21,7 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.util.concurrent.TimeUnit;
 
 import org.springframework.aop.retry.MethodRetryPredicate;
 import org.springframework.aot.hint.annotation.Reflective;
@@ -91,11 +92,13 @@ public @interface Retryable {
 	 * The maximum number of retry attempts, in addition to the initial invocation.
 	 * <p>The default is 3.
 	 */
-	int maxAttempts() default 3;
+	long maxAttempts() default 3;
 
 	/**
-	 * The base delay after the initial invocation in milliseconds.
-	 * If a multiplier is specified, this serves as the initial delay to multiply from.
+	 * The base delay after the initial invocation in milliseconds. If a multiplier
+	 * is specified, this serves as the initial delay to multiply from.
+	 * <p>The time unit is milliseconds by default but can be overridden via
+	 * {@link #timeUnit}.
 	 * <p>The default is 1000.
 	 * @see #jitter()
 	 * @see #multiplier()
@@ -104,11 +107,13 @@ public @interface Retryable {
 	long delay() default 1000;
 
 	/**
-	 * A jitter value (in milliseconds) for the base retry attempt, randomly
-	 * subtracted or added to the calculated delay, resulting in a value between
-	 * {@code delay - jitter} and {@code delay + jitter} but never below the base
-	 * {@link #delay()} or above {@link #maxDelay()}.
-	 * <p>If a multiplier is specified, it is applied to the jitter value as well.
+	 * A jitter value for the base retry attempt, randomly subtracted or added to
+	 * the calculated delay, resulting in a value between {@code delay - jitter}
+	 * and {@code delay + jitter} but never below the base {@link #delay()} or
+	 * above {@link #maxDelay()}. If a multiplier is specified, it is applied
+	 * to the jitter value as well.
+	 * <p>The time unit is milliseconds by default but can be overridden via
+	 * {@link #timeUnit}.
 	 * <p>The default is 0 (no jitter).
 	 * @see #delay()
 	 * @see #multiplier()
@@ -128,14 +133,22 @@ public @interface Retryable {
 	double multiplier() default 1.0;
 
 	/**
-	 * The maximum delay for any retry attempt (in milliseconds), limiting
-	 * how far {@link #jitter()} and {@link #multiplier()} can increase the
-	 * {@linkplain #delay() delay}.
+	 * The maximum delay for any retry attempt, limiting how far {@link #jitter()}
+	 * and {@link #multiplier()} can increase the {@linkplain #delay() delay}.
+	 * <p>The time unit is milliseconds by default but can be overridden via
+	 * {@link #timeUnit}.
 	 * <p>The default is unlimited.
 	 * @see #delay()
 	 * @see #jitter()
 	 * @see #multiplier()
 	 */
-	long maxDelay() default Integer.MAX_VALUE;
+	long maxDelay() default Long.MAX_VALUE;
+
+	/**
+	 * The {@link TimeUnit} to use for {@link #delay}, {@link #jitter},
+	 * and {@link #maxDelay}.
+	 * <p>Defaults to {@link TimeUnit#MILLISECONDS}.
+	 */
+	TimeUnit timeUnit() default TimeUnit.MILLISECONDS;
 
 }

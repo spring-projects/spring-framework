@@ -92,10 +92,10 @@ class RetryPolicyTests {
 		void withMaxElapsedTimePreconditions() {
 			assertThatIllegalArgumentException()
 					.isThrownBy(() -> RetryPolicy.withMaxElapsedTime(Duration.ofMillis(0)))
-					.withMessage("Invalid duration (0ms): max elapsed time must be positive.");
+					.withMessage("Invalid duration (0ms): maxElapsedTime must be positive.");
 			assertThatIllegalArgumentException()
 					.isThrownBy(() -> RetryPolicy.withMaxElapsedTime(Duration.ofMillis(-1)))
-					.withMessage("Invalid duration (-1ms): max elapsed time must be positive.");
+					.withMessage("Invalid duration (-1ms): maxElapsedTime must be positive.");
 		}
 
 		@Test
@@ -110,8 +110,8 @@ class RetryPolicyTests {
 					.satisfies(hasDefaultMaxAttemptsAndDelay())
 					.extracting(ExponentialBackOff::getMaxElapsedTime).isEqualTo(42L);
 		}
-
 	}
+
 
 	@Nested
 	class BuilderTests {
@@ -236,10 +236,10 @@ class RetryPolicyTests {
 		void maxDelayPreconditions() {
 			assertThatIllegalArgumentException()
 					.isThrownBy(() -> RetryPolicy.builder().maxDelay(Duration.ofMillis(0)))
-					.withMessage("Invalid duration (0ms): max delay must be positive.");
+					.withMessage("Invalid duration (0ms): maxDelay must be positive.");
 			assertThatIllegalArgumentException()
 					.isThrownBy(() -> RetryPolicy.builder().maxDelay(Duration.ofMillis(-1)))
-					.withMessage("Invalid duration (-1ms): max delay must be positive.");
+					.withMessage("Invalid duration (-1ms): maxDelay must be positive.");
 		}
 
 		@Test
@@ -258,10 +258,10 @@ class RetryPolicyTests {
 		void maxElapsedTimePreconditions() {
 			assertThatIllegalArgumentException()
 					.isThrownBy(() -> RetryPolicy.builder().maxElapsedTime(Duration.ofMillis(0)))
-					.withMessage("Invalid duration (0ms): max elapsed time must be positive.");
+					.withMessage("Invalid duration (0ms): maxElapsedTime must be positive.");
 			assertThatIllegalArgumentException()
 					.isThrownBy(() -> RetryPolicy.builder().maxElapsedTime(Duration.ofMillis(-1)))
-					.withMessage("Invalid duration (-1ms): max elapsed time must be positive.");
+					.withMessage("Invalid duration (-1ms): maxElapsedTime must be positive.");
 		}
 
 		@Test
@@ -399,6 +399,7 @@ class RetryPolicyTests {
 					.matches("DefaultRetryPolicy\\[predicate=Predicate.+?Lambda.+?, backOff=ExponentialBackOff\\[.+?]]");
 		}
 
+
 		private static void assertToString(RetryPolicy policy, long initialInterval, long jitter,
 				double multiplier, long maxInterval, long maxElapsedTime, int maxAttempts) {
 
@@ -431,8 +432,8 @@ class RetryPolicyTests {
 			}
 			return result.toString();
 		}
-
 	}
+
 
 	private static ThrowingConsumer<? super ExponentialBackOff> hasDefaultMaxAttemptsAndDelay() {
 		return backOff -> {
@@ -440,6 +441,7 @@ class RetryPolicyTests {
 			assertThat(backOff.getInitialInterval()).isEqualTo(1000);
 		};
 	}
+
 
 	@SuppressWarnings("serial")
 	private static class CustomNumberFormatException extends NumberFormatException {

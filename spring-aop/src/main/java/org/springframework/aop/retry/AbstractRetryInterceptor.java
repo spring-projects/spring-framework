@@ -17,7 +17,6 @@
 package org.springframework.aop.retry;
 
 import java.lang.reflect.Method;
-import java.time.Duration;
 
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
@@ -93,10 +92,10 @@ public abstract class AbstractRetryInterceptor implements MethodInterceptor {
 				.excludes(spec.excludes())
 				.predicate(spec.predicate().forMethod(method))
 				.maxAttempts(spec.maxAttempts())
-				.delay(Duration.ofMillis(spec.delay()))
-				.maxDelay(Duration.ofMillis(spec.maxDelay()))
-				.jitter(Duration.ofMillis(spec.jitter()))
+				.delay(spec.delay())
+				.jitter(spec.jitter())
 				.multiplier(spec.multiplier())
+				.maxDelay(spec.maxDelay())
 				.build();
 		RetryTemplate retryTemplate = new RetryTemplate(retryPolicy);
 
@@ -136,10 +135,10 @@ public abstract class AbstractRetryInterceptor implements MethodInterceptor {
 				Object result, ReactiveAdapter adapter, MethodRetrySpec spec, Method method) {
 
 			Publisher<?> publisher = adapter.toPublisher(result);
-			Retry retry = Retry.backoff(spec.maxAttempts(), Duration.ofMillis(spec.delay()))
-					.jitter((double) spec.jitter() / spec.delay())
+			Retry retry = Retry.backoff(spec.maxAttempts(), spec.delay())
+					.jitter((double) spec.jitter().toMillis() / spec.delay().toMillis())
 					.multiplier(spec.multiplier())
-					.maxBackoff(Duration.ofMillis(spec.maxDelay()))
+					.maxBackoff(spec.maxDelay())
 					.filter(spec.combinedPredicate().forMethod(method));
 			publisher = (adapter.isMultiValue() ? Flux.from(publisher).retryWhen(retry) :
 					Mono.from(publisher).retryWhen(retry));

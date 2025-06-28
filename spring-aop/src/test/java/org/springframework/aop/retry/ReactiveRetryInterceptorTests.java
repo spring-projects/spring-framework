@@ -19,6 +19,7 @@ package org.springframework.aop.retry;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.nio.file.AccessDeniedException;
+import java.time.Duration;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.jupiter.api.Test;
@@ -48,7 +49,8 @@ public class ReactiveRetryInterceptorTests {
 		NonAnnotatedBean target = new NonAnnotatedBean();
 		ProxyFactory pf = new ProxyFactory();
 		pf.setTarget(target);
-		pf.addAdvice(new SimpleRetryInterceptor(new MethodRetrySpec((m, t) -> true, 5, 10)));
+		pf.addAdvice(new SimpleRetryInterceptor(
+				new MethodRetrySpec((m, t) -> true, 5, Duration.ofMillis(10))));
 		NonAnnotatedBean proxy = (NonAnnotatedBean) pf.getProxy();
 
 		assertThatIllegalStateException().isThrownBy(() -> proxy.retryOperation().block())

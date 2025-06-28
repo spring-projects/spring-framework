@@ -55,7 +55,6 @@ public class RetryTemplate implements RetryOperations {
 
 	private static final LogAccessor logger = new LogAccessor(RetryTemplate.class);
 
-
 	private RetryPolicy retryPolicy = RetryPolicy.withDefaults();
 
 	private RetryListener retryListener = new RetryListener() {};
@@ -84,7 +83,7 @@ public class RetryTemplate implements RetryOperations {
 	 * <p>Defaults to {@code RetryPolicy.withDefaults()}.
 	 * @param retryPolicy the retry policy to use
 	 * @see RetryPolicy#withDefaults()
-	 * @see RetryPolicy#withMaxAttempts(int)
+	 * @see RetryPolicy#withMaxAttempts(long)
 	 * @see RetryPolicy#withMaxElapsedTime(Duration)
 	 * @see RetryPolicy#builder()
 	 */
@@ -104,6 +103,7 @@ public class RetryTemplate implements RetryOperations {
 		Assert.notNull(retryListener, "Retry listener must not be null");
 		this.retryListener = retryListener;
 	}
+
 
 	/**
 	 * Execute the supplied {@link Retryable} according to the configured retry

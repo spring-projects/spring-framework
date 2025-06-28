@@ -16,6 +16,7 @@
 
 package org.springframework.aop.retry;
 
+import java.time.Duration;
 import java.util.Collection;
 import java.util.Collections;
 
@@ -42,18 +43,18 @@ public record MethodRetrySpec(
 		Collection<Class<? extends Throwable>> includes,
 		Collection<Class<? extends Throwable>> excludes,
 		MethodRetryPredicate predicate,
-		int maxAttempts,
-		long delay,
-		long jitter,
+		long maxAttempts,
+		Duration delay,
+		Duration jitter,
 		double multiplier,
-		long maxDelay) {
+		Duration maxDelay) {
 
-	public MethodRetrySpec(MethodRetryPredicate predicate, int maxAttempts, long delay) {
-		this(predicate, maxAttempts, delay, 0, 1.0, Integer.MAX_VALUE);
+	public MethodRetrySpec(MethodRetryPredicate predicate, long maxAttempts, Duration delay) {
+		this(predicate, maxAttempts, delay, Duration.ofMillis(0), 1.0, Duration.ofMillis(Long.MAX_VALUE));
 	}
 
-	public MethodRetrySpec(MethodRetryPredicate predicate, int maxAttempts, long delay,
-			long jitter, double multiplier, long maxDelay) {
+	public MethodRetrySpec(MethodRetryPredicate predicate, long maxAttempts, Duration delay,
+			Duration jitter, double multiplier, Duration maxDelay) {
 
 		this(Collections.emptyList(), Collections.emptyList(), predicate, maxAttempts, delay,
 				jitter, multiplier, maxDelay);

@@ -17,9 +17,11 @@
 package org.springframework.aop.retry.annotation;
 
 import java.lang.reflect.Method;
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 
 import org.jspecify.annotations.Nullable;
 
@@ -57,17 +59,19 @@ public class RetryAnnotationInterceptor extends AbstractRetryInterceptor {
 			}
 		}
 
+		TimeUnit timeUnit = retryable.timeUnit();
 		retrySpec = new MethodRetrySpec(
 				Arrays.asList(retryable.includes()), Arrays.asList(retryable.excludes()),
 				instantiatePredicate(retryable.predicate()), retryable.maxAttempts(),
-				retryable.delay(), retryable.jitter(),
-				retryable.multiplier(), retryable.maxDelay());
+				toDuration(retryable.delay(), timeUnit), toDuration(retryable.jitter(), timeUnit),
+				retryable.multiplier(), toDuration(retryable.maxDelay(), timeUnit));
 
 		MethodRetrySpec existing = this.retrySpecCache.putIfAbsent(cacheKey, retrySpec);
 		return (existing != null ? existing : retrySpec);
 	}
 
-	private MethodRetryPredicate instantiatePredicate(Class<? extends MethodRetryPredicate> predicateClass) {
+
+	private static MethodRetryPredicate instantiatePredicate(Class<? extends MethodRetryPredicate> predicateClass) {
 		if (predicateClass == MethodRetryPredicate.class) {
 			return (method, throwable) -> true;
 		}
@@ -76,6 +80,16 @@ public class RetryAnnotationInterceptor extends AbstractRetryInterceptor {
 		}
 		catch (Throwable ex) {
 			throw new IllegalStateException("Failed to instantiate predicate class [" + predicateClass + "]", ex);
+		}
+	}
+
+	private static Duration toDuration(long value, TimeUnit timeUnit) {
+		try {
+			return Duration.of(value, timeUnit.toChronoUnit());
+		}
+		catch (Exception ex) {
+			throw new IllegalArgumentException(
+					"Unsupported unit " + timeUnit + " for value \"" + value + "\": " + ex.getMessage());
 		}
 	}
 
