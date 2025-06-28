@@ -139,7 +139,7 @@ class ExponentialBackOffTests {
 						multiplier=2.0, \
 						maxInterval=30000, \
 						maxElapsedTime=%d, \
-						maxAttempts=%d]""", Long.MAX_VALUE, Integer.MAX_VALUE);
+						maxAttempts=%d]""", Long.MAX_VALUE, Long.MAX_VALUE);
 
 		BackOffExecution execution = backOff.start();
 		assertThat(execution).asString().isEqualTo("ExponentialBackOffExecution[currentInterval=n/a, multiplier=2.0, attempts=0]");
