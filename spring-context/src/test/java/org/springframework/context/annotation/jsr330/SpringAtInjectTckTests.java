@@ -16,7 +16,16 @@
 
 package org.springframework.context.annotation.jsr330;
 
-import junit.framework.Test;
+import java.util.Enumeration;
+import java.util.Spliterator;
+import java.util.Spliterators;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
+
+import junit.framework.TestCase;
+import junit.framework.TestFailure;
+import junit.framework.TestResult;
+import junit.framework.TestSuite;
 import org.atinject.tck.Tck;
 import org.atinject.tck.auto.Car;
 import org.atinject.tck.auto.Convertible;
@@ -28,21 +37,36 @@ import org.atinject.tck.auto.Tire;
 import org.atinject.tck.auto.V8Engine;
 import org.atinject.tck.auto.accessories.Cupholder;
 import org.atinject.tck.auto.accessories.SpareTire;
+import org.junit.jupiter.api.DynamicNode;
+import org.junit.jupiter.api.TestFactory;
 
 import org.springframework.context.annotation.AnnotatedBeanDefinitionReader;
 import org.springframework.context.annotation.Jsr330ScopeMetadataResolver;
 import org.springframework.context.annotation.Primary;
 import org.springframework.context.support.GenericApplicationContext;
 
+import static org.junit.jupiter.api.DynamicContainer.dynamicContainer;
+import static org.junit.jupiter.api.DynamicTest.dynamicTest;
+
 /**
+ * {@code @Inject} Technology Compatibility Kit (TCK) tests.
+ *
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 3.0
+ * @see org.atinject.tck.Tck
  */
-// WARNING: This class MUST be public, since it is based on JUnit 3.
-public class SpringAtInjectTckTests {
+class SpringAtInjectTckTests {
+
+	@TestFactory
+	Stream<? extends DynamicNode> runTechnologyCompatibilityKit() {
+		TestSuite testSuite = (TestSuite) Tck.testsFor(buildCar(), false, true);
+		return generateDynamicTests(testSuite);
+	}
+
 
 	@SuppressWarnings("unchecked")
-	public static Test suite() {
+	private static Car buildCar() {
 		GenericApplicationContext ac = new GenericApplicationContext();
 		AnnotatedBeanDefinitionReader bdr = new AnnotatedBeanDefinitionReader(ac);
 		bdr.setScopeMetadataResolver(new Jsr330ScopeMetadataResolver());
@@ -57,9 +81,48 @@ public class SpringAtInjectTckTests {
 		bdr.registerBean(FuelTank.class);
 
 		ac.refresh();
-		Car car = ac.getBean(Car.class);
+		return ac.getBean(Car.class);
+	}
 
-		return Tck.testsFor(car, false, true);
+	private static Stream<? extends DynamicNode> generateDynamicTests(TestSuite testSuite) {
+		return stream(testSuite.tests()).map(test -> {
+			if (test instanceof TestSuite nestedSuite) {
+				return dynamicContainer(nestedSuite.getName(), generateDynamicTests(nestedSuite));
+			}
+			if (test instanceof TestCase testCase) {
+				return dynamicTest(testCase.getName(), () -> runTestCase(testCase));
+			}
+			throw new IllegalStateException("Unsupported Test type: " + test.getClass().getName());
+		});
+	}
+
+	private static void runTestCase(TestCase testCase) {
+		TestResult testResult = new TestResult();
+		testCase.run(testResult);
+		assertSuccessfulResults(testResult);
+	}
+
+	private static void assertSuccessfulResults(TestResult testResult) {
+		if (!testResult.wasSuccessful()) {
+			Throwable throwable = Stream.concat(stream(testResult.failures()), stream(testResult.errors()))
+					.map(TestFailure::thrownException)
+					.findFirst()
+					.get();
+
+			if (throwable instanceof Error error) {
+				throw error;
+			}
+			if (throwable instanceof RuntimeException runtimeException) {
+				throw runtimeException;
+			}
+			throw new AssertionError(throwable);
+		}
+	}
+
+	private static <T> Stream<T> stream(Enumeration<T> enumeration) {
+		Spliterator<T> spliterator = Spliterators.spliteratorUnknownSize(
+				enumeration.asIterator(), Spliterator.ORDERED);
+		return StreamSupport.stream(spliterator, false);
 	}
 
 }
