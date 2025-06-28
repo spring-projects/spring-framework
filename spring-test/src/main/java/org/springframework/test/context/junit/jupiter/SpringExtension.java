@@ -169,7 +169,7 @@ public class SpringExtension implements BeforeAllCallback, AfterAllCallback, Tes
 		// re-validate all methods for the same test class multiple times.
 		Store store = context.getStore(AUTOWIRED_VALIDATION_NAMESPACE);
 
-		String errorMessage = store.getOrComputeIfAbsent(context.getRequiredTestClass(), testClass -> {
+		String errorMessage = store.computeIfAbsent(context.getRequiredTestClass(), testClass -> {
 				Method[] methodsWithErrors =
 						ReflectionUtils.getUniqueDeclaredMethods(testClass, autowiredTestOrLifecycleMethodFilter);
 				return (methodsWithErrors.length == 0 ? NO_VIOLATIONS_DETECTED :
@@ -197,7 +197,7 @@ public class SpringExtension implements BeforeAllCallback, AfterAllCallback, Tes
 		// re-validate the configuration for the same test class multiple times.
 		Store store = context.getStore(RECORD_APPLICATION_EVENTS_VALIDATION_NAMESPACE);
 
-		String errorMessage = store.getOrComputeIfAbsent(context.getRequiredTestClass(), testClass -> {
+		String errorMessage = store.computeIfAbsent(context.getRequiredTestClass(), testClass -> {
 			boolean recording = TestContextAnnotationUtils.hasAnnotation(testClass, RecordApplicationEvents.class);
 			if (!recording) {
 				return NO_VIOLATIONS_DETECTED;
@@ -358,7 +358,7 @@ public class SpringExtension implements BeforeAllCallback, AfterAllCallback, Tes
 		Assert.notNull(context, "ExtensionContext must not be null");
 		Class<?> testClass = context.getRequiredTestClass();
 		Store store = getStore(context);
-		return store.getOrComputeIfAbsent(testClass, TestContextManager::new, TestContextManager.class);
+		return store.computeIfAbsent(testClass, TestContextManager::new, TestContextManager.class);
 	}
 
 	private static Store getStore(ExtensionContext context) {
@@ -372,7 +372,6 @@ public class SpringExtension implements BeforeAllCallback, AfterAllCallback, Tes
 	 * the supplied {@link TestContextManager}.
 	 * @since 6.1
 	 */
-	@SuppressWarnings("NullAway") // org.junit.jupiter.api.extension.ExecutableInvoker is not null marked
 	private static void registerMethodInvoker(TestContextManager testContextManager, ExtensionContext context) {
 		testContextManager.getTestContext().setMethodInvoker(context.getExecutableInvoker()::invoke);
 	}

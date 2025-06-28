@@ -31,7 +31,7 @@ import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClass;
+import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClasses;
 import static org.springframework.test.context.CacheAwareContextLoaderDelegate.CONTEXT_FAILURE_THRESHOLD_PROPERTY_NAME;
 import static org.springframework.test.context.CacheAwareContextLoaderDelegate.DEFAULT_CONTEXT_FAILURE_THRESHOLD;
 import static org.springframework.test.context.cache.ContextCacheTestUtils.assertContextCacheStatistics;
@@ -85,14 +85,14 @@ class ContextFailureThresholdTests {
 	}
 
 	private static void runTests() {
-		EngineTestKit.engine("junit-jupiter")//
-			.selectors(//
-				selectClass(PassingTestCase.class), // 3 passing
-				selectClass(FailingConfigTestCase.class), // 3 failing
-				selectClass(SharedFailingConfigTestCase.class) // 3 failing
-			)//
-			.execute()//
-			.testEvents()//
+		EngineTestKit.engine("junit-jupiter")
+			.selectors(selectClasses(
+				PassingTestCase.class, // 3 passing
+				FailingConfigTestCase.class, // 3 failing
+				SharedFailingConfigTestCase.class // 3 failing
+			))
+			.execute()
+			.testEvents()
 			.assertStatistics(stats -> stats.started(9).succeeded(3).failed(6));
 		assertContextCacheStatistics(1, 2, (1 + 3 + 3));
 	}

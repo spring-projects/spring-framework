@@ -40,7 +40,7 @@ import org.springframework.test.context.event.annotation.PrepareTestInstance;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClass;
+import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClasses;
 
 /**
  * Tests for the {@link EventPublishingTestExecutionListener} which verify that
@@ -65,7 +65,7 @@ class EagerTestExecutionEventPublishingTests {
 	@Test
 	void beforeTestClassEventIsNotPublishedByDefaultForFirstTestClass() {
 		EngineTestKit.engine("junit-jupiter")//
-				.selectors(selectClass(LazyTestCase1.class), selectClass(LazyTestCase2.class))//
+				.selectors(selectClasses(LazyTestCase1.class, LazyTestCase2.class))//
 				.execute()//
 				.testEvents()//
 				.assertStatistics(stats -> stats.started(2).succeeded(2).failed(0));
@@ -93,7 +93,7 @@ class EagerTestExecutionEventPublishingTests {
 	@Test
 	void beforeTestClassEventIsPublishedForAllTestClassesIfCustomListenerEagerlyLoadsContext() {
 		EngineTestKit.engine("junit-jupiter")//
-				.selectors(selectClass(EagerTestCase1.class), selectClass(EagerTestCase2.class))//
+				.selectors(selectClasses(EagerTestCase1.class, EagerTestCase2.class))//
 				.execute()//
 				.testEvents()//
 				.assertStatistics(stats -> stats.started(2).succeeded(2).failed(0));

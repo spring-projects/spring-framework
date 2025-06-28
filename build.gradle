@@ -75,7 +75,7 @@ configure([rootProject] + javaProjects) { project ->
 			"https://hc.apache.org/httpcomponents-client-5.5.x/current/httpclient5/apidocs/",
 			"https://projectreactor.io/docs/test/release/api/",
 			"https://junit.org/junit4/javadoc/4.13.2/",
-			"https://docs.junit.org/5.13.4/api/",
+			"https://docs.junit.org/6.0.0-RC3/api/",
 			"https://www.reactive-streams.org/reactive-streams-1.0.3-javadoc/",
 			//"https://javadoc.io/static/io.rsocket/rsocket-core/1.1.1/",
 			"https://r2dbc.io/spec/1.0.0.RELEASE/api/",

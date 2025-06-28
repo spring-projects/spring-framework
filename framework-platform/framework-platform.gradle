@@ -19,7 +19,7 @@ dependencies {
 	api(platform("org.eclipse.jetty.ee11:jetty-ee11-bom:12.1.1"))
 	api(platform("org.jetbrains.kotlinx:kotlinx-coroutines-bom:1.10.2"))
 	api(platform("org.jetbrains.kotlinx:kotlinx-serialization-bom:1.9.0"))
-	api(platform("org.junit:junit-bom:5.13.4"))
+	api(platform("org.junit:junit-bom:6.0.0-RC3"))
 	api(platform("org.mockito:mockito-bom:5.19.0"))
 	api(platform("tools.jackson:jackson-bom:3.0.0-rc10"))
 

@@ -56,7 +56,7 @@ import org.springframework.test.context.aot.samples.basic.DisabledInAotRuntimeMe
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.platform.engine.discovery.ClassNameFilter.includeClassNamePatterns;
-import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClass;
+import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClasses;
 import static org.junit.platform.launcher.TagFilter.excludeTags;
 
 /**
@@ -205,11 +205,11 @@ class AotIntegrationTests extends AbstractAotTests {
 		try {
 			System.setProperty(AotDetector.AOT_ENABLED, "true");
 
-			LauncherDiscoveryRequestBuilder builder = LauncherDiscoveryRequestBuilder.request()
+			LauncherDiscoveryRequest request = LauncherDiscoveryRequestBuilder.request()
+					.selectors(selectClasses(testClasses))
 					.filters(includeClassNamePatterns(".*Tests?$"))
-					.filters(excludeTags("failing-test-case"));
-			testClasses.forEach(testClass -> builder.selectors(selectClass(testClass)));
-			LauncherDiscoveryRequest request = builder.build();
+					.filters(excludeTags("failing-test-case"))
+					.build();
 			SummaryGeneratingListener listener = new SummaryGeneratingListener();
 			LauncherFactory.create().execute(request, listener);
 			TestExecutionSummary summary = listener.getSummary();
