@@ -21,6 +21,7 @@ package org.springframework.util.backoff;
  * between two attempts and a maximum number of retries.
  *
  * @author Stephane Nicoll
+ * @author Sam Brannen
  * @since 4.1
  */
 public class FixedBackOff implements BackOff {
@@ -48,6 +49,17 @@ public class FixedBackOff implements BackOff {
 	 * @see #setMaxAttempts(long)
 	 */
 	public FixedBackOff() {
+	}
+
+	/**
+	 * Create an instance with the supplied interval and an unlimited number of
+	 * attempts.
+	 * @param interval the interval between two attempts in milliseconds
+	 * @since 7.0
+	 * @see #setMaxAttempts(long)
+	 */
+	public FixedBackOff(long interval) {
+		this.interval = interval;
 	}
 
 	/**
