@@ -720,10 +720,6 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 			// Else, we need to rely on the connection pool to perform proper cleanup.
 			try {
 				Connection con = session.getJdbcCoordinator().getLogicalConnection().getPhysicalConnection();
-				Integer previousHoldability = txObject.getPreviousHoldability();
-				if (previousHoldability != null) {
-					con.setHoldability(previousHoldability);
-				}
 				DataSourceUtils.resetConnectionAfterTransaction(
 						con, txObject.getPreviousIsolationLevel(), txObject.isReadOnly());
 			}
@@ -771,7 +767,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 
 	/**
 	 * Hibernate transaction object, representing a SessionHolder.
-	 * Used as transaction object by HibernateTransactionManager.
+	 * <p>Used as transaction object by HibernateTransactionManager.
 	 */
 	private class HibernateTransactionObject extends JdbcTransactionObjectSupport {
 
@@ -782,8 +778,6 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 		private boolean newSession;
 
 		private boolean needsConnectionReset;
-
-		private @Nullable Integer previousHoldability;
 
 		public void setSession(Session session) {
 			this.sessionHolder = new SessionHolder(session);
@@ -826,14 +820,6 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 
 		public boolean needsConnectionReset() {
 			return this.needsConnectionReset;
-		}
-
-		public void setPreviousHoldability(@Nullable Integer previousHoldability) {
-			this.previousHoldability = previousHoldability;
-		}
-
-		public @Nullable Integer getPreviousHoldability() {
-			return this.previousHoldability;
 		}
 
 		public boolean hasSpringManagedTransaction() {
