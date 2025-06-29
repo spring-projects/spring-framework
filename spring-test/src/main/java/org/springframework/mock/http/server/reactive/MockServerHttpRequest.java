@@ -185,6 +185,16 @@ public final class MockServerHttpRequest extends AbstractServerHttpRequest {
 	}
 
 	/**
+	 * HTTP POST variant. See {@link #get(String, Object...)} for general info.
+	 * @param urlTemplate a URL template; the resulting URL will be encoded
+	 * @param uriVars zero or more URI variables
+	 * @return the created builder
+	 */
+	public static BodyBuilder query(String urlTemplate, @Nullable Object... uriVars) {
+		return method(HttpMethod.QUERY, urlTemplate, uriVars);
+	}
+
+	/**
 	 * Create a builder with the given HTTP method and a {@link URI}.
 	 * @param method the HTTP method (GET, POST, etc)
 	 * @param url the URL
