@@ -386,6 +386,52 @@ class RequestMappingHandlerMappingTests {
 				.containsExactly("h1=hv1", "!h2");
 	}
 
+	@Test
+	void requestBodyAnnotationFromInterfaceIsRespected() throws Exception {
+		RequestMappingHandlerMapping mapping = createMapping();
+
+		Class<?> controllerClass = InterfaceControllerImpl.class;
+		Method method = controllerClass.getDeclaredMethod("post", Foo.class);
+
+		RequestMappingInfo info = mapping.getMappingForMethod(method, controllerClass);
+		assertThat(info).isNotNull();
+
+		mapping.registerHandlerMethod(new InterfaceControllerImpl(), method, info);
+
+		assertThat(info.getConsumesCondition()).isNotNull();
+		assertThat(info.getConsumesCondition().isBodyRequired()).isFalse();
+		assertThat(info.getConsumesCondition().getConsumableMediaTypes()).containsOnly(MediaType.APPLICATION_JSON);
+
+		MockHttpServletRequest request = new MockHttpServletRequest("POST", "/controller/postMapping");
+		initRequestPath(mapping, request);
+
+		RequestMappingInfo matchingInfo = info.getMatchingCondition(request);
+		assertThat(matchingInfo).isNotNull();
+	}
+
+	@Test
+	void requestBodyAnnotationFromImplementationOverridesInterface() throws Exception {
+		RequestMappingHandlerMapping mapping = createMapping();
+
+		Class<?> controllerClass = InterfaceControllerImplOverridesRequestBody.class;
+		Method method = controllerClass.getDeclaredMethod("post", Foo.class);
+
+		RequestMappingInfo info = mapping.getMappingForMethod(method, controllerClass);
+		assertThat(info).isNotNull();
+
+		mapping.registerHandlerMethod(new InterfaceControllerImplOverridesRequestBody(), method, info);
+
+		assertThat(info.getConsumesCondition()).isNotNull();
+		assertThat(info.getConsumesCondition().isBodyRequired()).isTrue();
+		assertThat(info.getConsumesCondition().getConsumableMediaTypes()).containsOnly(MediaType.APPLICATION_JSON);
+
+		MockHttpServletRequest request = new MockHttpServletRequest("POST", "/controller/postMapping");
+		initRequestPath(mapping, request);
+
+		RequestMappingInfo matchingInfo = info.getMatchingCondition(request);
+		assertThat(matchingInfo).isNull();
+	}
+
 	private static RequestMappingHandlerMapping createMapping() {
 		RequestMappingHandlerMapping mapping = new RequestMappingHandlerMapping();
 		mapping.setApplicationContext(new StaticWebApplicationContext());
@@ -571,6 +617,22 @@ class RequestMappingHandlerMappingTests {
 		public void post() {}
 	}
 
+	@RestController
+	@RequestMapping(value = "/controller", consumes = { "application/json" })
+	interface InterfaceController {
+		@PostMapping("/postMapping")
+		void post(@RequestBody(required = false) Foo foo);
+	}
+
+	static class InterfaceControllerImpl implements InterfaceController {
+		@Override
+		public void post(Foo foo) {}
+	}
+
+	static class InterfaceControllerImplOverridesRequestBody implements InterfaceController {
+		@Override
+		public void post(@RequestBody(required = true) Foo foo) {}
+	}
 
 	@HttpExchange
 	@Target(ElementType.TYPE)
