@@ -16,7 +16,6 @@
 
 package org.springframework.core.type.classreading;
 
-
 import org.junit.jupiter.api.Test;
 
 import org.springframework.core.io.Resource;
@@ -38,8 +37,8 @@ class CachingMetadataReaderFactoryTests {
 		when(delegate.getMetadataReader(any(Resource.class))).thenReturn(mock(MetadataReader.class));
 
 		CachingMetadataReaderFactory readerFactory = new CachingMetadataReaderFactory(delegate);
-		MetadataReader metadataReader = readerFactory.getMetadataReader(TestClass.class.getName());
-		metadataReader = readerFactory.getMetadataReader(TestClass.class.getName());
+		readerFactory.getMetadataReader(TestClass.class.getName());
+		readerFactory.getMetadataReader(TestClass.class.getName());
 
 		verify(delegate, times(1)).getMetadataReader(any(Resource.class));
 	}
