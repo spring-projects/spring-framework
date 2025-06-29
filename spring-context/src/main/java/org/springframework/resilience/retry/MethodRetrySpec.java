@@ -20,6 +20,8 @@ import java.time.Duration;
 import java.util.Collection;
 import java.util.Collections;
 
+import org.springframework.util.ExceptionTypeFilter;
+
 /**
  * A specification for retry attempts on a given method, combining common
  * retry characteristics. This roughly matches the annotation attributes
@@ -62,28 +64,9 @@ public record MethodRetrySpec(
 
 
 	MethodRetryPredicate combinedPredicate() {
-		return (method, throwable) -> {
-			if (!this.excludes.isEmpty()) {
-				for (Class<? extends Throwable> exclude : this.excludes) {
-					if (exclude.isInstance(throwable)) {
-						return false;
-					}
-				}
-			}
-			if (!this.includes.isEmpty()) {
-				boolean included = false;
-				for (Class<? extends Throwable> include : this.includes) {
-					if (include.isInstance(throwable)) {
-						included = true;
-						break;
-					}
-				}
-				if (!included) {
-					return false;
-				}
-			}
-			return this.predicate.shouldRetry(method, throwable);
-		};
+		return (method, throwable) -> new ExceptionTypeFilter(this.includes, this.excludes, true)
+				.match(throwable.getClass()) &&
+				this.predicate.shouldRetry(method, throwable);
 	}
 
 }
