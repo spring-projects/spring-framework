@@ -504,6 +504,16 @@ class GenericConversionServiceTests {
 	}
 
 	@Test
+	void toEnumCanConvertShouldNotThrowException() {
+		conversionService.addConverterFactory(new IntegerToEnumConverterFactory());
+		conversionService.addConverterFactory(new StringToEnumConverterFactory());
+		assertThat(conversionService.canConvert(Integer.class, Enum.class)).isFalse();
+		assertThat(conversionService.canConvert(Integer.class, MyEnum.class)).isTrue();
+		assertThat(conversionService.canConvert(String.class, Enum.class)).isFalse();
+		assertThat(conversionService.canConvert(String.class, MyEnum.class)).isTrue();
+	}
+
+	@Test
 	void convertNullAnnotatedStringToString() throws Exception {
 		String source = null;
 		TypeDescriptor sourceType = new TypeDescriptor(getClass().getField("annotatedString"));
