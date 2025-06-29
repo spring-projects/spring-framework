@@ -16,14 +16,11 @@
 
 package org.springframework.context.annotation.jsr330;
 
-import java.util.Enumeration;
-import java.util.Spliterator;
-import java.util.Spliterators;
+import java.net.URI;
+import java.util.Collections;
 import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 import junit.framework.TestCase;
-import junit.framework.TestFailure;
 import junit.framework.TestResult;
 import junit.framework.TestSuite;
 import org.atinject.tck.Tck;
@@ -44,6 +41,7 @@ import org.springframework.context.annotation.AnnotatedBeanDefinitionReader;
 import org.springframework.context.annotation.Jsr330ScopeMetadataResolver;
 import org.springframework.context.annotation.Primary;
 import org.springframework.context.support.GenericApplicationContext;
+import org.springframework.util.ClassUtils;
 
 import static org.junit.jupiter.api.DynamicContainer.dynamicContainer;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
@@ -61,7 +59,8 @@ class SpringAtInjectTckTests {
 	@TestFactory
 	Stream<? extends DynamicNode> runTechnologyCompatibilityKit() {
 		TestSuite testSuite = (TestSuite) Tck.testsFor(buildCar(), false, true);
-		return generateDynamicTests(testSuite);
+		Class<?> suiteClass = resolveTestSuiteClass(testSuite);
+		return generateDynamicTests(testSuite, suiteClass);
 	}
 
 
@@ -84,45 +83,34 @@ class SpringAtInjectTckTests {
 		return ac.getBean(Car.class);
 	}
 
-	private static Stream<? extends DynamicNode> generateDynamicTests(TestSuite testSuite) {
-		return stream(testSuite.tests()).map(test -> {
+	private static Stream<? extends DynamicNode> generateDynamicTests(TestSuite testSuite, Class<?> suiteClass) {
+		return Collections.list(testSuite.tests()).stream().map(test -> {
 			if (test instanceof TestSuite nestedSuite) {
-				return dynamicContainer(nestedSuite.getName(), generateDynamicTests(nestedSuite));
+				Class<?> nestedSuiteClass = resolveTestSuiteClass(nestedSuite);
+				URI uri = URI.create("class:" + nestedSuiteClass.getName());
+				return dynamicContainer(nestedSuite.getName(), uri, generateDynamicTests(nestedSuite, nestedSuiteClass));
 			}
 			if (test instanceof TestCase testCase) {
-				return dynamicTest(testCase.getName(), () -> runTestCase(testCase));
+				URI uri = URI.create("method:" + suiteClass.getName() + "#" + testCase.getName());
+				return dynamicTest(testCase.getName(), uri, () -> runTestCase(testCase));
 			}
 			throw new IllegalStateException("Unsupported Test type: " + test.getClass().getName());
 		});
 	}
 
-	private static void runTestCase(TestCase testCase) {
+	private static void runTestCase(TestCase testCase) throws Throwable {
 		TestResult testResult = new TestResult();
 		testCase.run(testResult);
-		assertSuccessfulResults(testResult);
-	}
-
-	private static void assertSuccessfulResults(TestResult testResult) {
-		if (!testResult.wasSuccessful()) {
-			Throwable throwable = Stream.concat(stream(testResult.failures()), stream(testResult.errors()))
-					.map(TestFailure::thrownException)
-					.findFirst()
-					.get();
-
-			if (throwable instanceof Error error) {
-				throw error;
-			}
-			if (throwable instanceof RuntimeException runtimeException) {
-				throw runtimeException;
-			}
-			throw new AssertionError(throwable);
+		if (testResult.failureCount() > 0) {
+			throw testResult.failures().nextElement().thrownException();
+		}
+		if (testResult.errorCount() > 0) {
+			throw testResult.errors().nextElement().thrownException();
 		}
 	}
 
-	private static <T> Stream<T> stream(Enumeration<T> enumeration) {
-		Spliterator<T> spliterator = Spliterators.spliteratorUnknownSize(
-				enumeration.asIterator(), Spliterator.ORDERED);
-		return StreamSupport.stream(spliterator, false);
+	private static Class<?> resolveTestSuiteClass(TestSuite testSuite) {
+		return ClassUtils.resolveClassName(testSuite.getName(), Tck.class.getClassLoader());
 	}
 
 }
