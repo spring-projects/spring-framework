@@ -16,7 +16,6 @@
 
 package org.springframework.http.converter;
 
-
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -29,7 +28,6 @@ import java.util.stream.StreamSupport;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import org.springframework.core.SmartClassLoader;
@@ -54,17 +52,16 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
 @SuppressWarnings("removal")
 class DefaultHttpMessageConvertersTests {
 
-
 	@ParameterizedTest
 	@MethodSource("emptyMessageConverters")
 	void emptyConverters(Iterable<HttpMessageConverter<?>> converters) {
 		assertThat(converters).isEmpty();
 	}
 
-	static Stream<Arguments> emptyMessageConverters() {
+	static Stream<Iterable<HttpMessageConverter<?>>> emptyMessageConverters() {
 		return Stream.of(
-				Arguments.of(HttpMessageConverters.create().build().forClient()),
-				Arguments.of(HttpMessageConverters.create().build().forServer())
+				HttpMessageConverters.create().build().forClient(),
+				HttpMessageConverters.create().build().forServer()
 		);
 	}
 
@@ -79,45 +76,46 @@ class DefaultHttpMessageConvertersTests {
 
 	@Test
 	void failsWhenStringConverterDoesNotSupportMediaType() {
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				HttpMessageConverters.create().stringMessageConverter(new CustomHttpMessageConverter()).build())
+		assertThatIllegalArgumentException()
+				.isThrownBy(() -> HttpMessageConverters.create().stringMessageConverter(new CustomHttpMessageConverter()).build())
 				.withMessage("stringMessageConverter should support 'text/plain'");
 	}
 
 	@Test
 	void failsWhenJsonConverterDoesNotSupportMediaType() {
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				HttpMessageConverters.create().jsonMessageConverter(new CustomHttpMessageConverter()).build())
+		assertThatIllegalArgumentException()
+				.isThrownBy(() -> HttpMessageConverters.create().jsonMessageConverter(new CustomHttpMessageConverter()).build())
 				.withMessage("jsonMessageConverter should support 'application/json'");
 	}
 
 	@Test
 	void failsWhenXmlConverterDoesNotSupportMediaType() {
-		assertThatIllegalArgumentException().isThrownBy(() ->
-						HttpMessageConverters.create().xmlMessageConverter(new CustomHttpMessageConverter()).build())
+		assertThatIllegalArgumentException()
+				.isThrownBy(() -> HttpMessageConverters.create().xmlMessageConverter(new CustomHttpMessageConverter()).build())
 				.withMessage("xmlMessageConverter should support 'text/xml'");
 	}
 
 	@Test
 	void failsWhenSmileConverterDoesNotSupportMediaType() {
-		assertThatIllegalArgumentException().isThrownBy(() ->
-						HttpMessageConverters.create().smileMessageConverter(new CustomHttpMessageConverter()).build())
+		assertThatIllegalArgumentException()
+				.isThrownBy(() -> HttpMessageConverters.create().smileMessageConverter(new CustomHttpMessageConverter()).build())
 				.withMessage("smileMessageConverter should support 'application/x-jackson-smile'");
 	}
 
 	@Test
 	void failsWhenCborConverterDoesNotSupportMediaType() {
-		assertThatIllegalArgumentException().isThrownBy(() ->
-						HttpMessageConverters.create().cborMessageConverter(new CustomHttpMessageConverter()).build())
+		assertThatIllegalArgumentException()
+				.isThrownBy(() -> HttpMessageConverters.create().cborMessageConverter(new CustomHttpMessageConverter()).build())
 				.withMessage("cborMessageConverter should support 'application/cbor'");
 	}
 
 	@Test
 	void failsWhenYamlConverterDoesNotSupportMediaType() {
-		assertThatIllegalArgumentException().isThrownBy(() ->
-						HttpMessageConverters.create().yamlMessageConverter(new CustomHttpMessageConverter()).build())
+		assertThatIllegalArgumentException()
+				.isThrownBy(() -> HttpMessageConverters.create().yamlMessageConverter(new CustomHttpMessageConverter()).build())
 				.withMessage("yamlMessageConverter should support 'application/yaml'");
 	}
+
 
 	@Nested
 	class ClientConvertersTests {
@@ -133,7 +131,6 @@ class DefaultHttpMessageConvertersTests {
 					JacksonXmlHttpMessageConverter.class, KotlinSerializationProtobufHttpMessageConverter.class,
 					AtomFeedHttpMessageConverter.class, RssChannelHttpMessageConverter.class);
 		}
-
 
 		@Test
 		void multipartConverterContainsOtherConverters() {
@@ -177,7 +174,7 @@ class DefaultHttpMessageConvertersTests {
 		@Test
 		void shouldConfigureConverter() {
 			CustomHttpMessageConverter customConverter = new CustomHttpMessageConverter();
-			var converters = HttpMessageConverters.withDefaults()
+			HttpMessageConverters.withDefaults()
 					.additionalMessageConverter(customConverter)
 					.configureClient(configurer -> {
 						configurer.configureClientMessageConverters(converter -> {
@@ -191,6 +188,7 @@ class DefaultHttpMessageConvertersTests {
 		}
 
 	}
+
 
 	@Nested
 	class ServerConvertersTests {
@@ -250,7 +248,7 @@ class DefaultHttpMessageConvertersTests {
 		@Test
 		void shouldConfigureConverter() {
 			CustomHttpMessageConverter customConverter = new CustomHttpMessageConverter();
-			var converters = HttpMessageConverters.withDefaults()
+			HttpMessageConverters.withDefaults()
 					.additionalMessageConverter(customConverter)
 					.configureServer(configurer -> {
 						configurer.configureServerMessageConverters(converter -> {
