@@ -57,17 +57,13 @@ configure([rootProject] + javaProjects) { project ->
 	apply from: "${rootDir}/gradle/ide.gradle"
 
 	dependencies {
-		testImplementation("org.junit.jupiter:junit-jupiter-api")
-		testImplementation("org.junit.jupiter:junit-jupiter-params")
-		testImplementation("org.junit.platform:junit-platform-suite-api")
+		testImplementation("org.junit.jupiter:junit-jupiter")
+		testImplementation("org.junit.platform:junit-platform-suite")
 		testImplementation("org.mockito:mockito-core")
 		testImplementation("org.mockito:mockito-junit-jupiter")
 		testImplementation("io.mockk:mockk")
 		testImplementation("org.assertj:assertj-core")
-		// Pull in the latest JUnit 5 Launcher API to ensure proper support in IDEs.
-		testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
 		testRuntimeOnly("org.junit.platform:junit-platform-launcher")
-		testRuntimeOnly("org.junit.platform:junit-platform-suite-engine")
 		testRuntimeOnly("org.apache.logging.log4j:log4j-core")
 	}
 

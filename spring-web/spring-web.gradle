@@ -65,8 +65,7 @@ dependencies {
 	optional("tools.jackson.dataformat:jackson-dataformat-yaml")
 	optional("com.fasterxml:aalto-xml")  // out of order to avoid XML parser override
 	testFixturesApi("jakarta.servlet:jakarta.servlet-api")
-	testFixturesApi("org.junit.jupiter:junit-jupiter-api")
-	testFixturesApi("org.junit.jupiter:junit-jupiter-params")
+	testFixturesApi("org.junit.jupiter:junit-jupiter")
 	testFixturesImplementation("io.projectreactor:reactor-test")
 	testFixturesImplementation("org.assertj:assertj-core")
 	testFixturesImplementation("org.bouncycastle:bcpkix-jdk18on") {
