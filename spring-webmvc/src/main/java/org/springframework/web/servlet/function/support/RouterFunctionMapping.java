@@ -31,7 +31,6 @@ import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.support.AllEncompassingFormHttpMessageConverter;
 import org.springframework.util.CollectionUtils;
-import org.springframework.web.accept.ApiVersionStrategy;
 import org.springframework.web.accept.DefaultApiVersionStrategy;
 import org.springframework.web.filter.ServerHttpObservationFilter;
 import org.springframework.web.servlet.function.HandlerFunction;
@@ -63,8 +62,6 @@ public class RouterFunctionMapping extends AbstractHandlerMapping implements Ini
 	private @Nullable RouterFunction<?> routerFunction;
 
 	private List<HttpMessageConverter<?>> messageConverters = Collections.emptyList();
-
-	private @Nullable ApiVersionStrategy versionStrategy;
 
 	private boolean detectHandlerFunctionsInAncestorContexts = false;
 
@@ -115,15 +112,6 @@ public class RouterFunctionMapping extends AbstractHandlerMapping implements Ini
 	}
 
 	/**
-	 * Configure a strategy to manage API versioning.
-	 * @param strategy the strategy to use
-	 * @since 7.0
-	 */
-	public void setApiVersionStrategy(@Nullable ApiVersionStrategy strategy) {
-		this.versionStrategy = strategy;
-	}
-
-	/**
 	 * Set whether to detect handler functions in ancestor ApplicationContexts.
 	 * <p>Default is "false": Only handler functions in the current ApplicationContext
 	 * will be detected, i.e. only in the context that this HandlerMapping itself
@@ -154,7 +142,7 @@ public class RouterFunctionMapping extends AbstractHandlerMapping implements Ini
 			}
 			RouterFunctions.changeParser(this.routerFunction, patternParser);
 
-			if (this.versionStrategy instanceof DefaultApiVersionStrategy davs) {
+			if (getApiVersionStrategy() instanceof DefaultApiVersionStrategy davs) {
 				if (davs.detectSupportedVersions()) {
 					this.routerFunction.accept(new SupportedVersionVisitor(davs));
 				}
@@ -218,24 +206,10 @@ public class RouterFunctionMapping extends AbstractHandlerMapping implements Ini
 
 	@Override
 	protected @Nullable Object getHandlerInternal(HttpServletRequest servletRequest) throws Exception {
-
 		if (this.routerFunction == null) {
 			return null;
 		}
-
-		if (this.versionStrategy != null) {
-			Comparable<?> version = (Comparable<?>) servletRequest.getAttribute(API_VERSION_ATTRIBUTE);
-			if (version == null) {
-				version = this.versionStrategy.resolveParseAndValidateVersion(servletRequest);
-				if (version != null) {
-					servletRequest.setAttribute(API_VERSION_ATTRIBUTE, version);
-				}
-			}
-		}
-
-		ServerRequest request =
-				ServerRequest.create(servletRequest, this.messageConverters, this.versionStrategy);
-
+		ServerRequest request = ServerRequest.create(servletRequest, this.messageConverters, getApiVersionStrategy());
 		HandlerFunction<?> handlerFunction = this.routerFunction.route(request).orElse(null);
 		setAttributes(servletRequest, request, handlerFunction);
 		return handlerFunction;

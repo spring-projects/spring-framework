@@ -28,7 +28,6 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import org.jspecify.annotations.Nullable;
 
 import org.springframework.context.EmbeddedValueResolverAware;
@@ -43,7 +42,6 @@ import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.util.StringValueResolver;
-import org.springframework.web.accept.ApiVersionStrategy;
 import org.springframework.web.accept.ContentNegotiationManager;
 import org.springframework.web.accept.DefaultApiVersionStrategy;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -53,8 +51,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.service.annotation.HttpExchange;
-import org.springframework.web.servlet.HandlerExecutionChain;
-import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.handler.MatchableHandlerMapping;
 import org.springframework.web.servlet.handler.RequestMatchResult;
 import org.springframework.web.servlet.mvc.condition.AbstractRequestCondition;
@@ -88,8 +84,6 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	private Map<String, Predicate<Class<?>>> pathPrefixes = Collections.emptyMap();
 
 	private ContentNegotiationManager contentNegotiationManager = new ContentNegotiationManager();
-
-	private @Nullable ApiVersionStrategy apiVersionStrategy;
 
 	private @Nullable StringValueResolver embeddedValueResolver;
 
@@ -135,23 +129,6 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	 */
 	public ContentNegotiationManager getContentNegotiationManager() {
 		return this.contentNegotiationManager;
-	}
-
-	/**
-	 * Configure a strategy to manage API versioning.
-	 * @param strategy the strategy to use
-	 * @since 7.0
-	 */
-	public void setApiVersionStrategy(@Nullable ApiVersionStrategy strategy) {
-		this.apiVersionStrategy = strategy;
-	}
-
-	/**
-	 * Return the configured {@link ApiVersionStrategy} strategy.
-	 * @since 7.0
-	 */
-	public @Nullable ApiVersionStrategy getApiVersionStrategy() {
-		return this.apiVersionStrategy;
 	}
 
 	@Override
@@ -200,20 +177,6 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 		return AnnotatedElementUtils.hasAnnotation(beanType, Controller.class);
 	}
 
-
-	@Override
-	protected @Nullable HandlerMethod getHandlerInternal(HttpServletRequest request) throws Exception {
-		if (this.apiVersionStrategy != null) {
-			Comparable<?> version = (Comparable<?>) request.getAttribute(API_VERSION_ATTRIBUTE);
-			if (version == null) {
-				version = this.apiVersionStrategy.resolveParseAndValidateVersion(request);
-				if (version != null) {
-					request.setAttribute(API_VERSION_ATTRIBUTE, version);
-				}
-			}
-		}
-		return super.getHandlerInternal(request);
-	}
 
 	/**
 	 * Uses type-level and method-level {@link RequestMapping @RequestMapping}
@@ -287,7 +250,7 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 			info = createRequestMappingInfo((HttpExchange) exchangeDescriptors.get(0).annotation, customCondition);
 		}
 
-		if (info != null && this.apiVersionStrategy instanceof DefaultApiVersionStrategy davs) {
+		if (info != null && getApiVersionStrategy() instanceof DefaultApiVersionStrategy davs) {
 			String version = info.getVersionCondition().getVersion();
 			if (version != null) {
 				davs.addMappedVersion(version);
@@ -423,16 +386,6 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	private static RequestMethod[] toMethodArray(String method) {
 		return (StringUtils.hasText(method) ?
 				new RequestMethod[] {RequestMethod.valueOf(method)} : EMPTY_REQUEST_METHOD_ARRAY);
-	}
-
-	@Override
-	protected HandlerExecutionChain getHandlerExecutionChain(Object handler, HttpServletRequest request) {
-		HandlerExecutionChain executionChain = super.getHandlerExecutionChain(handler, request);
-		Comparable<?> version = (Comparable<?>) request.getAttribute(API_VERSION_ATTRIBUTE);
-		if (version != null) {
-			executionChain.addInterceptor(new DeprecationInterceptor(version));
-		}
-		return executionChain;
 	}
 
 	@Override
@@ -595,23 +548,6 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 			return this.root.synthesize().toString();
 		}
 
-	}
-
-
-	private final class DeprecationInterceptor implements HandlerInterceptor {
-
-		private final Comparable<?> version;
-
-		private DeprecationInterceptor(Comparable<?> version) {
-			this.version = version;
-		}
-
-		@Override
-		public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
-			Assert.state(apiVersionStrategy != null, "No ApiVersionStrategy");
-			apiVersionStrategy.handleDeprecations(this.version, request, response);
-			return true;
-		}
 	}
 
 }

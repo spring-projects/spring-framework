@@ -28,7 +28,6 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import org.jspecify.annotations.Nullable;
-import reactor.core.publisher.Mono;
 
 import org.springframework.context.EmbeddedValueResolverAware;
 import org.springframework.core.annotation.AnnotatedElementUtils;
@@ -48,7 +47,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.method.HandlerMethod;
-import org.springframework.web.reactive.accept.ApiVersionStrategy;
 import org.springframework.web.reactive.accept.DefaultApiVersionStrategy;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolver;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolverBuilder;
@@ -56,7 +54,6 @@ import org.springframework.web.reactive.result.condition.ConsumesRequestConditio
 import org.springframework.web.reactive.result.condition.RequestCondition;
 import org.springframework.web.reactive.result.method.RequestMappingInfo;
 import org.springframework.web.reactive.result.method.RequestMappingInfoHandlerMapping;
-import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.service.annotation.HttpExchange;
 
 /**
@@ -81,8 +78,6 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	private final Map<String, Predicate<Class<?>>> pathPrefixes = new LinkedHashMap<>();
 
 	private RequestedContentTypeResolver contentTypeResolver = new RequestedContentTypeResolverBuilder().build();
-
-	private @Nullable ApiVersionStrategy apiVersionStrategy;
 
 	private @Nullable StringValueResolver embeddedValueResolver;
 
@@ -132,23 +127,6 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 		return this.contentTypeResolver;
 	}
 
-	/**
-	 * Configure a strategy to manage API versioning.
-	 * @param strategy the strategy to use
-	 * @since 7.0
-	 */
-	public void setApiVersionStrategy(@Nullable ApiVersionStrategy strategy) {
-		this.apiVersionStrategy = strategy;
-	}
-
-	/**
-	 * Return the configured {@link ApiVersionStrategy} strategy.
-	 * @since 7.0
-	 */
-	public @Nullable ApiVersionStrategy getApiVersionStrategy() {
-		return this.apiVersionStrategy;
-	}
-
 	@Override
 	public void setEmbeddedValueResolver(StringValueResolver resolver) {
 		this.embeddedValueResolver = resolver;
@@ -172,20 +150,6 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	@Override
 	protected boolean isHandler(Class<?> beanType) {
 		return AnnotatedElementUtils.hasAnnotation(beanType, Controller.class);
-	}
-
-	@Override
-	public Mono<HandlerMethod> getHandlerInternal(ServerWebExchange exchange) {
-		if (this.apiVersionStrategy != null) {
-			Comparable<?> version = exchange.getAttribute(API_VERSION_ATTRIBUTE);
-			if (version == null) {
-				version = this.apiVersionStrategy.resolveParseAndValidateVersion(exchange);
-				if (version != null) {
-					exchange.getAttributes().put(API_VERSION_ATTRIBUTE, version);
-				}
-			}
-		}
-		return super.getHandlerInternal(exchange);
 	}
 
 	/**
@@ -253,7 +217,7 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 			info = createRequestMappingInfo((HttpExchange) exchangeDescriptors.get(0).annotation, customCondition);
 		}
 
-		if (info != null && this.apiVersionStrategy instanceof DefaultApiVersionStrategy davs) {
+		if (info != null && getApiVersionStrategy() instanceof DefaultApiVersionStrategy davs) {
 			String version = info.getVersionCondition().getVersion();
 			if (version != null) {
 				davs.addMappedVersion(version);
@@ -395,17 +359,6 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	private static RequestMethod[] toMethodArray(String method) {
 		return (StringUtils.hasText(method) ?
 				new RequestMethod[] {RequestMethod.valueOf(method)} : EMPTY_REQUEST_METHOD_ARRAY);
-	}
-
-	@Override
-	protected void handleMatch(RequestMappingInfo info, HandlerMethod handlerMethod, ServerWebExchange exchange) {
-		super.handleMatch(info, handlerMethod, exchange);
-
-		Comparable<?> version = exchange.getAttribute(API_VERSION_ATTRIBUTE);
-		if (version != null) {
-			Assert.state(this.apiVersionStrategy != null, "No ApiVersionStrategy");
-			this.apiVersionStrategy.handleDeprecations(version, exchange);
-		}
 	}
 
 	@Override
