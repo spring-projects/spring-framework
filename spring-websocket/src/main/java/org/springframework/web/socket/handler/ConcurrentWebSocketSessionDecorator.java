@@ -275,6 +275,13 @@ public class ConcurrentWebSocketSessionDecorator extends WebSocketSessionDecorat
 		}
 	}
 
+	/**
+	 * Return the configured overflow strategy.
+	 * @since 6.3
+	 */
+	public OverflowStrategy getOverflowStrategy() {
+		return this.overflowStrategy;
+	}
 
 	@Override
 	public String toString() {
