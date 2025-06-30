@@ -186,10 +186,12 @@ public class ResponseBodyEmitterReturnValueHandler implements HandlerMethodRetur
 		HttpServletResponse response = webRequest.getNativeResponse(HttpServletResponse.class);
 		Assert.state(response != null, "No HttpServletResponse");
 		ServerHttpResponse outputMessage = new ServletServerHttpResponse(response);
+		MediaType contentType = null;
 
 		if (returnValue instanceof ResponseEntity<?> responseEntity) {
 			response.setStatus(responseEntity.getStatusCode().value());
 			outputMessage.getHeaders().putAll(responseEntity.getHeaders());
+			contentType = responseEntity.getHeaders().getContentType();
 			returnValue = responseEntity.getBody();
 			returnType = returnType.nested();
 			if (returnValue == null) {
@@ -207,7 +209,7 @@ public class ResponseBodyEmitterReturnValueHandler implements HandlerMethodRetur
 			emitter = responseBodyEmitter;
 		}
 		else {
-			emitter = this.reactiveHandler.handleValue(returnValue, returnType, mavContainer, webRequest);
+			emitter = this.reactiveHandler.handleValue(returnValue, returnType, contentType, mavContainer, webRequest);
 			if (emitter == null) {
 				// We're not streaming; write headers without committing response
 				outputMessage.getHeaders().forEach((headerName, headerValues) -> {
