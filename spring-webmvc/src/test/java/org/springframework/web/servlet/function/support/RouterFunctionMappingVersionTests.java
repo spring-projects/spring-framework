@@ -16,11 +16,16 @@
 
 package org.springframework.web.servlet.function.support;
 
+import java.net.URI;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.context.annotation.Bean;
+import org.springframework.web.accept.StandardApiVersionDeprecationHandler;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
+import org.springframework.web.servlet.HandlerExecutionChain;
+import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.config.annotation.ApiVersionConfigurer;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
@@ -30,6 +35,7 @@ import org.springframework.web.servlet.function.RouterFunctions;
 import org.springframework.web.servlet.function.ServerRequest;
 import org.springframework.web.servlet.function.ServerResponse;
 import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
+import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
 import org.springframework.web.testfixture.servlet.MockServletContext;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -66,12 +72,29 @@ public class RouterFunctionMappingVersionTests {
 		testGetHandler("1.5", "1.5");
 	}
 
-
 	private void testGetHandler(String version, String expectedBody) throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/");
 		request.addHeader("X-API-Version", version);
 		HandlerFunction<?> handler = (HandlerFunction<?>) this.mapping.getHandler(request).getHandler();
 		assertThat(((TestHandler) handler).body()).isEqualTo(expectedBody);
+	}
+
+	@Test
+	void deprecation() throws Exception {
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/");
+		request.addHeader("X-API-Version", "1");
+
+		HandlerExecutionChain chain = this.mapping.getHandler(request);
+		assertThat(chain).isNotNull();
+
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		for (HandlerInterceptor interceptor : chain.getInterceptorList()) {
+			interceptor.preHandle(request, response, chain.getHandler());
+		}
+
+		assertThat(((TestHandler) chain.getHandler()).body()).isEqualTo("none");
+		assertThat(response.getHeader("Link"))
+				.isEqualTo("<https://example.org/deprecation>; rel=\"deprecation\"; type=\"text/html\"");
 	}
 
 
@@ -80,7 +103,13 @@ public class RouterFunctionMappingVersionTests {
 
 		@Override
 		public void configureApiVersioning(ApiVersionConfigurer configurer) {
-			configurer.useRequestHeader("X-API-Version").addSupportedVersions("1", "1.1", "1.3");
+
+			StandardApiVersionDeprecationHandler handler = new StandardApiVersionDeprecationHandler();
+			handler.configureVersion("1").setDeprecationLink(URI.create("https://example.org/deprecation"));
+
+			configurer.useRequestHeader("X-API-Version")
+					.addSupportedVersions("1", "1.1", "1.3")
+					.setDeprecationHandler(handler);
 		}
 
 		@Bean

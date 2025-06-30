@@ -16,6 +16,8 @@
 
 package org.springframework.web.reactive.function.server.support;
 
+import java.net.URI;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;
@@ -23,6 +25,7 @@ import reactor.test.StepVerifier;
 
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
+import org.springframework.web.reactive.accept.StandardApiVersionDeprecationHandler;
 import org.springframework.web.reactive.config.ApiVersionConfigurer;
 import org.springframework.web.reactive.config.EnableWebFlux;
 import org.springframework.web.reactive.config.WebFluxConfigurer;
@@ -65,9 +68,7 @@ public class RouterFunctionMappingVersionTests {
 		testGetHandler("1.5", "1.5");
 	}
 
-
 	private void testGetHandler(String version, String expectedBody) {
-
 		MockServerWebExchange exchange = MockServerWebExchange.from(
 				MockServerHttpRequest.get("/").header("X-API-Version", version));
 
@@ -78,13 +79,35 @@ public class RouterFunctionMappingVersionTests {
 				.verifyComplete();
 	}
 
+	@Test
+	void deprecation() {
+		MockServerWebExchange exchange = MockServerWebExchange.from(
+				MockServerHttpRequest.get("/").header("X-API-Version", "1"));
+
+		Mono<?> result = this.mapping.getHandler(exchange);
+
+		StepVerifier.create(result)
+				.consumeNextWith(handler -> {
+					assertThat(((TestHandler) handler).body()).isEqualTo("none");
+					assertThat(exchange.getResponse().getHeaders().getFirst("Link"))
+							.isEqualTo("<https://example.org/deprecation>; rel=\"deprecation\"; type=\"text/html\"");
+				})
+				.verifyComplete();
+	}
+
 
 	@EnableWebFlux
 	private static class WebConfig implements WebFluxConfigurer {
 
 		@Override
 		public void configureApiVersioning(ApiVersionConfigurer configurer) {
-			configurer.useRequestHeader("X-API-Version").addSupportedVersions("1", "1.1", "1.3");
+
+			StandardApiVersionDeprecationHandler handler = new StandardApiVersionDeprecationHandler();
+			handler.configureVersion("1").setDeprecationLink(URI.create("https://example.org/deprecation"));
+
+			configurer.useRequestHeader("X-API-Version")
+					.addSupportedVersions("1", "1.1", "1.3")
+					.setDeprecationHandler(handler);
 		}
 
 		@Bean
