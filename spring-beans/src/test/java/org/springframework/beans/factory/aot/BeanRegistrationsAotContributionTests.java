@@ -246,6 +246,25 @@ class BeanRegistrationsAotContributionTests {
 		});
 	}
 
+	@Test
+	void applyToWithVeryLargeBeanDefinitionsCreatesSlices() {
+		BeanRegistrationsAotContribution contribution = createContribution(30000, i -> "testBean" + i);
+		contribution.applyTo(this.generationContext, this.beanFactoryInitializationCode);
+		compileMultipleClasses((consumer, compiled) -> {
+			assertThat(compiled.getSourceFile(".*BeanFactoryRegistrations"))
+					.contains("Register the bean definitions from 0 to 999.",
+							"// Registration is sliced to avoid exceeding size limit");
+			DefaultListableBeanFactory freshBeanFactory = new DefaultListableBeanFactory();
+			consumer.accept(freshBeanFactory);
+			for (int i = 0; i <30000; i++) {
+				String beanName = "testBean" + i;
+				assertThat(freshBeanFactory.containsBeanDefinition(beanName)).isTrue();
+				assertThat(freshBeanFactory.getBean(beanName)).isInstanceOf(TestBean.class);
+			}
+			assertThat(freshBeanFactory.getBeansOfType(TestBean.class)).hasSize(30000);
+		});
+	}
+
 	private BeanRegistrationsAotContribution createContribution(int size, Function<Integer, String> beanNameFactory) {
 		List<Registration> registrations = new ArrayList<>();
 		for (int i = 0; i < size; i++) {
@@ -285,6 +304,31 @@ class BeanRegistrationsAotContributionTests {
 					.build());
 		});
 		this.generationContext.writeGeneratedContent();
+		TestCompiler.forSystem().with(this.generationContext).compile(compiled ->
+				result.accept(compiled.getInstance(Consumer.class), compiled));
+	}
+
+	private void compileMultipleClasses(BiConsumer<Consumer<DefaultListableBeanFactory>, Compiled> result) {
+		MethodSpec.Builder acceptMethod = MethodSpec.methodBuilder("accept")
+				.addModifiers(Modifier.PUBLIC)
+				.addParameter(DefaultListableBeanFactory.class, "beanFactory");
+
+		ArgumentCodeGenerator beanFactory = ArgumentCodeGenerator.of(DefaultListableBeanFactory.class, "beanFactory");
+		ClassName className = this.beanFactoryInitializationCode.getClassName();
+
+		for (MethodReference initializer : this.beanFactoryInitializationCode.getInitializers()) {
+			CodeBlock codeBlock = initializer.toInvokeCodeBlock(beanFactory, className);
+			acceptMethod.addStatement(codeBlock);
+		}
+
+		this.beanFactoryInitializationCode.getTypeBuilder().set(type -> {
+			type.addModifiers(Modifier.PUBLIC);
+			type.addSuperinterface(ParameterizedTypeName.get(Consumer.class, DefaultListableBeanFactory.class));
+			type.addMethod(acceptMethod.build());
+		});
+
+		this.generationContext.writeGeneratedContent();
+
 		TestCompiler.forSystem().with(this.generationContext).compile(compiled ->
 				result.accept(compiled.getInstance(Consumer.class), compiled));
 	}
