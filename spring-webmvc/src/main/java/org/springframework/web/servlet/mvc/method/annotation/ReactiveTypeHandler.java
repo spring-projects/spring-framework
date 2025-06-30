@@ -135,7 +135,8 @@ class ReactiveTypeHandler {
 	 * @return an emitter for streaming, or {@code null} if handled internally
 	 * with a {@link DeferredResult}
 	 */
-	public @Nullable ResponseBodyEmitter handleValue(Object returnValue, MethodParameter returnType,
+	public @Nullable ResponseBodyEmitter handleValue(
+			Object returnValue, MethodParameter returnType, @Nullable MediaType presetContentType,
 			ModelAndViewContainer mav, NativeWebRequest request) throws Exception {
 
 		Assert.notNull(returnValue, "Expected return value");
@@ -154,7 +155,7 @@ class ReactiveTypeHandler {
 		ResolvableType elementType = ResolvableType.forMethodParameter(returnType).getGeneric();
 		Class<?> elementClass = elementType.toClass();
 
-		Collection<MediaType> mediaTypes = getMediaTypes(request);
+		Collection<MediaType> mediaTypes = getMediaTypes(request, presetContentType);
 		Optional<MediaType> mediaType = mediaTypes.stream().filter(MimeType::isConcrete).findFirst();
 
 		if (adapter.isMultiValue()) {
@@ -220,14 +221,25 @@ class ReactiveTypeHandler {
 	}
 
 	@SuppressWarnings("unchecked")
-	private Collection<MediaType> getMediaTypes(NativeWebRequest request)
+	private Collection<MediaType> getMediaTypes(NativeWebRequest request, @Nullable MediaType contentType)
 			throws HttpMediaTypeNotAcceptableException {
 
-		Collection<MediaType> mediaTypes = (Collection<MediaType>) request.getAttribute(
+		Collection<MediaType> producibleMediaTypes = (Collection<MediaType>) request.getAttribute(
 				HandlerMapping.PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE, RequestAttributes.SCOPE_REQUEST);
 
-		return CollectionUtils.isEmpty(mediaTypes) ?
-				this.contentNegotiationManager.resolveMediaTypes(request) : mediaTypes;
+		Collection<MediaType> mediaTypes = (CollectionUtils.isEmpty(producibleMediaTypes) ?
+				this.contentNegotiationManager.resolveMediaTypes(request) : producibleMediaTypes);
+
+		if (contentType != null) {
+			for (MediaType mediaType : mediaTypes) {
+				if (mediaType.isConcrete()) {
+					return mediaTypes;
+				}
+			}
+			return List.of(contentType);
+		}
+
+		return mediaTypes;
 	}
 
 	private ResponseBodyEmitter getEmitter(MediaType mediaType) {
