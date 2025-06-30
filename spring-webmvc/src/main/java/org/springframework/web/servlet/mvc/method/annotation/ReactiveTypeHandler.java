@@ -136,7 +136,7 @@ class ReactiveTypeHandler {
 	 * with a {@link DeferredResult}
 	 */
 	public @Nullable ResponseBodyEmitter handleValue(
-			Object returnValue, MethodParameter returnType, @Nullable MediaType presetContentType,
+			Object returnValue, MethodParameter returnType, @Nullable MediaType presetMediaType,
 			ModelAndViewContainer mav, NativeWebRequest request) throws Exception {
 
 		Assert.notNull(returnValue, "Expected return value");
@@ -155,7 +155,7 @@ class ReactiveTypeHandler {
 		ResolvableType elementType = ResolvableType.forMethodParameter(returnType).getGeneric();
 		Class<?> elementClass = elementType.toClass();
 
-		Collection<MediaType> mediaTypes = getMediaTypes(request, presetContentType);
+		Collection<MediaType> mediaTypes = (presetMediaType != null ? List.of(presetMediaType) : getMediaTypes(request));
 		Optional<MediaType> mediaType = mediaTypes.stream().filter(MimeType::isConcrete).findFirst();
 
 		if (adapter.isMultiValue()) {
@@ -221,25 +221,14 @@ class ReactiveTypeHandler {
 	}
 
 	@SuppressWarnings("unchecked")
-	private Collection<MediaType> getMediaTypes(NativeWebRequest request, @Nullable MediaType contentType)
+	private Collection<MediaType> getMediaTypes(NativeWebRequest request)
 			throws HttpMediaTypeNotAcceptableException {
 
 		Collection<MediaType> producibleMediaTypes = (Collection<MediaType>) request.getAttribute(
 				HandlerMapping.PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE, RequestAttributes.SCOPE_REQUEST);
 
-		Collection<MediaType> mediaTypes = (CollectionUtils.isEmpty(producibleMediaTypes) ?
+		return (CollectionUtils.isEmpty(producibleMediaTypes) ?
 				this.contentNegotiationManager.resolveMediaTypes(request) : producibleMediaTypes);
-
-		if (contentType != null) {
-			for (MediaType mediaType : mediaTypes) {
-				if (mediaType.isConcrete()) {
-					return mediaTypes;
-				}
-			}
-			return List.of(contentType);
-		}
-
-		return mediaTypes;
 	}
 
 	private ResponseBodyEmitter getEmitter(MediaType mediaType) {
