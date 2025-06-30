@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,11 +27,15 @@ import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
+import org.springframework.web.accept.ApiVersionStrategy;
+import org.springframework.web.accept.DefaultApiVersionStrategy;
+import org.springframework.web.accept.SemanticApiVersionParser;
 import org.springframework.web.servlet.handler.PathPatternsTestUtils;
 import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 import org.springframework.web.util.pattern.PathPatternParser;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.web.servlet.HandlerMapping.API_VERSION_ATTRIBUTE;
 
 /**
  * @author Arjen Poutsma
@@ -266,12 +270,30 @@ class RequestPredicatesTests {
 		assertThat(predicate.test(request)).isFalse();
 	}
 
+	@Test
+	void version() {
+		assertThat(RequestPredicates.version("1.1").test(serverRequest("1.1"))).isTrue();
+		assertThat(RequestPredicates.version("1.1+").test(serverRequest("1.5"))).isTrue();
+		assertThat(RequestPredicates.version("1.1").test(serverRequest("1.5"))).isFalse();
+	}
 
-	private ServerRequest initRequest(String httpMethod, String requestUri) {
+	private static ServerRequest serverRequest(String version) {
+
+		ApiVersionStrategy strategy = new DefaultApiVersionStrategy(
+				List.of(exchange -> null), new SemanticApiVersionParser(), true, null, false, null);
+
+		MockHttpServletRequest servletRequest =
+				PathPatternsTestUtils.initRequest("GET", null, "/path", true,
+						req -> req.setAttribute(API_VERSION_ATTRIBUTE, strategy.parseVersion(version)));
+
+		return new DefaultServerRequest(servletRequest, Collections.emptyList(), strategy);
+	}
+
+	private static ServerRequest initRequest(String httpMethod, String requestUri) {
 		return initRequest(httpMethod, requestUri, null);
 	}
 
-	private ServerRequest initRequest(
+	private static ServerRequest initRequest(
 			String httpMethod, String requestUri, @Nullable Consumer<MockHttpServletRequest> initializer) {
 
 		return new DefaultServerRequest(

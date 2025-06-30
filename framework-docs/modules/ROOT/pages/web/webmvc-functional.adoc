@@ -846,7 +846,7 @@ processing lifecycle and also (potentially) run side by side with annotated cont
 any are declared. It is also how functional endpoints are enabled by the Spring Boot Web
 starter.
 
-The following example shows a WebFlux Java configuration:
+The following example shows a WebMvc Java configuration:
 
 [tabs]
 ======

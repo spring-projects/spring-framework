@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,6 +40,7 @@ import org.springframework.http.client.reactive.ClientHttpConnector;
 import org.springframework.http.client.reactive.ClientHttpRequest;
 import org.springframework.http.codec.ClientCodecConfigurer;
 import org.springframework.http.codec.ServerCodecConfigurer;
+import org.springframework.http.server.reactive.SslInfo;
 import org.springframework.test.json.JsonComparator;
 import org.springframework.test.json.JsonCompareMode;
 import org.springframework.test.json.JsonComparison;
@@ -48,6 +49,7 @@ import org.springframework.validation.Validator;
 import org.springframework.web.client.ApiVersionFormatter;
 import org.springframework.web.client.ApiVersionInserter;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolverBuilder;
+import org.springframework.web.reactive.config.ApiVersionConfigurer;
 import org.springframework.web.reactive.config.BlockingExecutionConfigurer;
 import org.springframework.web.reactive.config.CorsRegistry;
 import org.springframework.web.reactive.config.PathMatchConfigurer;
@@ -275,6 +277,15 @@ public interface WebTestClient {
 		<T extends B> T webSessionManager(WebSessionManager sessionManager);
 
 		/**
+		 * Provide SSL session information and certificates for the mock server.
+		 * @param sslInfo the {@link SslInfo} to use
+		 * @since 7.0
+		 * @see SslInfo#from(String)
+		 * @see SslInfo#from(String, java.security.cert.X509Certificate...)
+		 */
+		<T extends B> T sslInfo(SslInfo sslInfo);
+
+		/**
 		 * Shortcut for pre-packaged customizations to the mock server setup.
 		 * @param configurer the configurer to apply
 		 */
@@ -345,6 +356,12 @@ public interface WebTestClient {
 		 * @see WebFluxConfigurer#getValidator()
 		 */
 		ControllerSpec validator(Validator validator);
+
+		/**
+		 * Configure API versioning for mapping requests to controller methods.
+		 * @since 7.0
+		 */
+		ControllerSpec apiVersioning(Consumer<ApiVersionConfigurer> configurer);
 
 		/**
 		 * Configure view resolution.
@@ -429,6 +446,15 @@ public interface WebTestClient {
 		 * @return this builder
 		 */
 		Builder defaultCookies(Consumer<MultiValueMap<String, String>> cookiesConsumer);
+
+		/**
+		 * Global option to specify an API version to add to every request,
+		 * if not already set.
+		 * @param version the version to use
+		 * @return this builder
+		 * @since 7.0
+		 */
+		Builder defaultApiVersion(Object version);
 
 		/**
 		 * Configure an {@link ApiVersionInserter} to abstract how an API version

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,13 +22,14 @@ import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.web.accept.InvalidApiVersionException;
+import org.springframework.web.accept.MissingApiVersionException;
 import org.springframework.web.accept.SemanticApiVersionParser;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest;
 import org.springframework.web.testfixture.server.MockServerWebExchange;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * Unit tests for {@link org.springframework.web.accept.DefaultApiVersionStrategy}.
@@ -38,7 +39,7 @@ public class DefaultApiVersionStrategiesTests {
 
 	private static final SemanticApiVersionParser parser = new SemanticApiVersionParser();
 
-	private static final ServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/"));
+	private final ServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/"));
 
 
 	@Test
@@ -57,13 +58,14 @@ public class DefaultApiVersionStrategiesTests {
 	}
 
 	@Test
-	void validateUnsupportedVersion() {
+	void rejectUnsupportedVersion() {
 		assertThatThrownBy(() -> validateVersion("1.2", apiVersionStrategy()))
-				.isInstanceOf(InvalidApiVersionException.class);
+				.isInstanceOf(InvalidApiVersionException.class)
+				.hasMessage("400 BAD_REQUEST \"Invalid API version: '1.2.0'.\"");
 	}
 
 	@Test
-	void validateDetectedSupportedVersion() {
+	void validateDetectedVersion() {
 		String version = "1.2";
 		DefaultApiVersionStrategy strategy = apiVersionStrategy(null, true);
 		strategy.addMappedVersion(version);
@@ -71,13 +73,18 @@ public class DefaultApiVersionStrategiesTests {
 	}
 
 	@Test
-	void validateWhenDetectSupportedVersionsIsOff() {
+	void validateWhenDetectedVersionOff() {
 		String version = "1.2";
 		DefaultApiVersionStrategy strategy = apiVersionStrategy();
 		strategy.addMappedVersion(version);
+		assertThatThrownBy(() -> validateVersion(version, strategy)).isInstanceOf(InvalidApiVersionException.class);
+	}
 
-		assertThatThrownBy(() -> strategy.validateVersion(version, exchange))
-				.isInstanceOf(InvalidApiVersionException.class);
+	@Test
+	void missingRequiredVersion() {
+		assertThatThrownBy(() -> validateVersion(null, apiVersionStrategy()))
+				.isInstanceOf(MissingApiVersionException.class)
+				.hasMessage("400 BAD_REQUEST \"API version is required.\"");
 	}
 
 	private static DefaultApiVersionStrategy apiVersionStrategy() {
@@ -85,15 +92,15 @@ public class DefaultApiVersionStrategiesTests {
 	}
 
 	private static DefaultApiVersionStrategy apiVersionStrategy(
-			@Nullable String defaultValue, boolean detectSupportedVersions) {
+			@Nullable String defaultVersion, boolean detectSupportedVersions) {
 
 			return new DefaultApiVersionStrategy(
 				List.of(exchange -> exchange.getRequest().getQueryParams().getFirst("api-version")),
-				parser, true, defaultValue, detectSupportedVersions);
+				parser, true, defaultVersion, detectSupportedVersions, null);
 	}
 
-	private static void validateVersion(String version, DefaultApiVersionStrategy strategy) {
-		strategy.validateVersion(parser.parseVersion(version), exchange);
+	private void validateVersion(@Nullable String version, DefaultApiVersionStrategy strategy) {
+		strategy.validateVersion(version != null ? parser.parseVersion(version) : null, exchange);
 	}
 
 }

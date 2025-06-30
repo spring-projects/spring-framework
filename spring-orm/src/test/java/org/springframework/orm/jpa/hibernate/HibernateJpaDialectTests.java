@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,11 +17,11 @@
 package org.springframework.orm.jpa.hibernate;
 
 import jakarta.persistence.OptimisticLockException;
-import jakarta.persistence.PersistenceException;
 import org.hibernate.HibernateException;
 import org.hibernate.dialect.lock.OptimisticEntityLockException;
 import org.junit.jupiter.api.Test;
 
+import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.orm.jpa.JpaDialect;
 import org.springframework.orm.jpa.JpaOptimisticLockingFailureException;
@@ -40,7 +40,7 @@ class HibernateJpaDialectTests {
 	@Test
 	void testTranslateException() {
 		// Plain JPA exception
-		PersistenceException ex = new OptimisticLockException();
+		RuntimeException ex = new OptimisticLockException();
 		assertThat(dialect.translateExceptionIfPossible(ex))
 				.isInstanceOf(JpaOptimisticLockingFailureException.class).hasCause(ex);
 
@@ -53,6 +53,11 @@ class HibernateJpaDialectTests {
 		ex = new HibernateException(new OptimisticEntityLockException("", ""));
 		assertThat(dialect.translateExceptionIfPossible(ex))
 				.isInstanceOf(ObjectOptimisticLockingFailureException.class).hasCause(ex);
+
+		// IllegalArgumentException
+		ex = new IllegalArgumentException("");
+		assertThat(dialect.translateExceptionIfPossible(ex))
+				.isInstanceOf(InvalidDataAccessApiUsageException.class).hasCause(ex);
 	}
 
 }

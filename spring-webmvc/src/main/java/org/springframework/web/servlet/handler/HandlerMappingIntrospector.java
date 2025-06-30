@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -104,6 +104,8 @@ public class HandlerMappingIntrospector
 	private static final String CACHED_RESULT_ATTRIBUTE =
 			HandlerMappingIntrospector.class.getName() + ".CachedResult";
 
+	private static final int DEFAULT_CACHE_LIMIT = 2048;
+
 
 	private @Nullable ApplicationContext applicationContext;
 
@@ -111,8 +113,29 @@ public class HandlerMappingIntrospector
 
 	private Map<HandlerMapping, PathPatternMatchableHandlerMapping> pathPatternMappings = Collections.emptyMap();
 
+	private int patternCacheLimit = DEFAULT_CACHE_LIMIT;
+
 	private final CacheResultLogHelper cacheLogHelper = new CacheResultLogHelper();
 
+
+	/**
+	 * Set a limit on the maximum number of security patterns passed into
+	 * {@link MatchableHandlerMapping#match} at runtime to cache.
+	 * <p>By default, this is set to 2048.
+	 * @param patternCacheLimit the limit to use
+	 * @since 6.2.8
+	 */
+	public void setPatternCacheLimit(int patternCacheLimit) {
+		this.patternCacheLimit = patternCacheLimit;
+	}
+
+	/**
+	 * Return the configured limit on security patterns to cache.
+	 * @since 6.2.8
+	 */
+	public int getPatternCacheLimit() {
+		return this.patternCacheLimit;
+	}
 
 	@Override
 	public void setApplicationContext(ApplicationContext applicationContext) {
@@ -127,8 +150,9 @@ public class HandlerMappingIntrospector
 
 			this.pathPatternMappings = this.handlerMappings.stream()
 					.filter(m -> m instanceof MatchableHandlerMapping hm && hm.getPatternParser() != null)
-					.map(mapping -> (MatchableHandlerMapping) mapping)
-					.collect(Collectors.toMap(mapping -> mapping, PathPatternMatchableHandlerMapping::new));
+					.map(hm -> (MatchableHandlerMapping) hm)
+					.collect(Collectors.toMap(hm -> hm, (MatchableHandlerMapping delegate) ->
+							new PathPatternMatchableHandlerMapping(delegate, getPatternCacheLimit())));
 		}
 	}
 

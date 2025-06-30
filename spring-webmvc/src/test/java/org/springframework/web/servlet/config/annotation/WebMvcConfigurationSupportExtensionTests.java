@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,10 +22,12 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.databind.MapperFeature;
+import tools.jackson.databind.ObjectMapper;
 
 import org.springframework.beans.DirectFieldAccessor;
 import org.springframework.beans.testfixture.beans.TestBean;
@@ -34,8 +36,10 @@ import org.springframework.core.io.FileSystemResourceLoader;
 import org.springframework.format.FormatterRegistry;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.converter.HttpMessageConverters;
 import org.springframework.http.converter.StringHttpMessageConverter;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.http.converter.json.JacksonJsonHttpMessageConverter;
+import org.springframework.http.converter.support.AllEncompassingFormHttpMessageConverter;
 import org.springframework.scheduling.concurrent.ConcurrentTaskExecutor;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.AntPathMatcher;
@@ -79,17 +83,14 @@ import org.springframework.web.servlet.resource.ResourceUrlProviderExposingInter
 import org.springframework.web.servlet.view.ContentNegotiatingViewResolver;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
 import org.springframework.web.servlet.view.ViewResolverComposite;
-import org.springframework.web.servlet.view.json.MappingJackson2JsonView;
+import org.springframework.web.servlet.view.json.JacksonJsonView;
 import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 import org.springframework.web.testfixture.servlet.MockServletContext;
 import org.springframework.web.util.UrlPathHelper;
 
-import static com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES;
-import static com.fasterxml.jackson.databind.MapperFeature.DEFAULT_VIEW_INCLUSION;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
-import static org.springframework.http.MediaType.APPLICATION_XML;
 
 /**
  * A test fixture with a subclass of {@link WebMvcConfigurationSupport} that also
@@ -209,13 +210,14 @@ class WebMvcConfigurationSupportExtensionTests {
 
 		// Message converters
 		List<HttpMessageConverter<?>> converters = adapter.getMessageConverters();
-		assertThat(converters).hasSize(2);
+		assertThat(converters).hasSize(3);
 		assertThat(converters.get(0).getClass()).isEqualTo(StringHttpMessageConverter.class);
-		assertThat(converters.get(1).getClass()).isEqualTo(MappingJackson2HttpMessageConverter.class);
-		ObjectMapper objectMapper = ((MappingJackson2HttpMessageConverter) converters.get(1)).getObjectMapper();
-		assertThat(objectMapper.getDeserializationConfig().isEnabled(DEFAULT_VIEW_INCLUSION)).isFalse();
-		assertThat(objectMapper.getSerializationConfig().isEnabled(DEFAULT_VIEW_INCLUSION)).isFalse();
-		assertThat(objectMapper.getDeserializationConfig().isEnabled(FAIL_ON_UNKNOWN_PROPERTIES)).isFalse();
+		assertThat(converters.get(1).getClass()).isEqualTo(AllEncompassingFormHttpMessageConverter.class);
+		assertThat(converters.get(2).getClass()).isEqualTo(JacksonJsonHttpMessageConverter.class);
+		ObjectMapper objectMapper = ((JacksonJsonHttpMessageConverter) converters.get(2)).getObjectMapper();
+		assertThat(objectMapper.deserializationConfig().isEnabled(MapperFeature.DEFAULT_VIEW_INCLUSION)).isFalse();
+		assertThat(objectMapper.deserializationConfig().isEnabled(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)).isFalse();
+		assertThat(objectMapper.serializationConfig().isEnabled(MapperFeature.DEFAULT_VIEW_INCLUSION)).isFalse();
 
 		DirectFieldAccessor fieldAccessor = new DirectFieldAccessor(adapter);
 
@@ -273,9 +275,6 @@ class WebMvcConfigurationSupportExtensionTests {
 		ContentNegotiationManager manager = mapping.getContentNegotiationManager();
 		assertThat(manager.resolveMediaTypes(webRequest)).isEqualTo(Collections.singletonList(APPLICATION_JSON));
 
-		request.setParameter("f", "xml");
-		assertThat(manager.resolveMediaTypes(webRequest)).isEqualTo(Collections.singletonList(APPLICATION_XML));
-
 		SimpleUrlHandlerMapping handlerMapping = (SimpleUrlHandlerMapping) this.config.resourceHandlerMapping(
 				this.config.mvcContentNegotiationManager(), this.config.mvcConversionService(),
 				this.config.mvcResourceUrlProvider());
@@ -313,7 +312,7 @@ class WebMvcConfigurationSupportExtensionTests {
 		List<View> defaultViews = (List<View>) accessor.getPropertyValue("defaultViews");
 		assertThat(defaultViews).isNotNull();
 		assertThat(defaultViews).hasSize(1);
-		assertThat(defaultViews.get(0).getClass()).isEqualTo(MappingJackson2JsonView.class);
+		assertThat(defaultViews.get(0).getClass()).isEqualTo(JacksonJsonView.class);
 
 		viewResolvers = (List<ViewResolver>) accessor.getPropertyValue("viewResolvers");
 		assertThat(viewResolvers).isNotNull();
@@ -347,6 +346,7 @@ class WebMvcConfigurationSupportExtensionTests {
 	 * plus WebMvcConfigurer can switch to extending WebMvcConfigurationSupport directly for
 	 * more advanced configuration needs.
 	 */
+	@SuppressWarnings("removal")
 	private static class TestWebMvcConfigurationSupport extends WebMvcConfigurationSupport implements WebMvcConfigurer {
 
 		@Override
@@ -355,8 +355,16 @@ class WebMvcConfigurationSupportExtensionTests {
 		}
 
 		@Override
+		protected HttpMessageConverters createMessageConverters() {
+			return HttpMessageConverters.create().jsonMessageConverter(new JacksonJsonHttpMessageConverter()).build();
+		}
+
+		@Override
+		public void configureMessageConverters(HttpMessageConverters.Builder builder) {
+		}
+
+		@Override
 		public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
-			converters.add(new MappingJackson2HttpMessageConverter());
 		}
 
 		@Override
@@ -386,7 +394,7 @@ class WebMvcConfigurationSupportExtensionTests {
 
 		@Override
 		public void configureApiVersioning(ApiVersionConfigurer configurer) {
-			configurer.useRequestHeader("X-API-Version");
+			configurer.useRequestHeader("X-API-Version").setVersionRequired(false);
 		}
 
 		@Override
@@ -449,7 +457,7 @@ class WebMvcConfigurationSupportExtensionTests {
 
 		@Override
 		public void configureViewResolvers(ViewResolverRegistry registry) {
-			registry.enableContentNegotiation(new MappingJackson2JsonView());
+			registry.enableContentNegotiation(new JacksonJsonView());
 			registry.jsp("/", ".jsp");
 		}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -65,7 +65,7 @@ import org.springframework.util.ReflectionUtils.MethodFilter;
 
 /**
  * {@code SpringExtension} integrates the <em>Spring TestContext Framework</em>
- * into JUnit 5's <em>Jupiter</em> programming model.
+ * into the JUnit Jupiter testing framework.
  *
  * <p>To use this extension, simply annotate a JUnit Jupiter based test class with
  * {@code @ExtendWith(SpringExtension.class)}, {@code @SpringJUnitConfig}, or

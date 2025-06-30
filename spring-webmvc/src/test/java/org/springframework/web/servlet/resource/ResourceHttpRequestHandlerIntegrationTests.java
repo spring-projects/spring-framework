@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.converter.HttpMessageConverter;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.http.converter.json.JacksonJsonHttpMessageConverter;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
@@ -140,11 +140,13 @@ class ResourceHttpRequestHandlerIntegrationTests {
 		assertThat(response.getStatus()).isEqualTo(404);
 		assertThat(response.getContentType()).isEqualTo("application/problem+json");
 		assertThat(response.getContentAsString()).isEqualTo("""
-				{"type":"about:blank",\
-				"title":"Not Found",\
-				"status":404,\
+				{\
 				"detail":"No static resource non-existing.",\
-				"instance":"/cp/non-existing"}\
+				"instance":"\\/cp\\/non-existing",\
+				"status":404,\
+				"title":"Not Found",\
+				"type":"about:blank"\
+				}\
 				""");
 	}
 
@@ -212,8 +214,9 @@ class ResourceHttpRequestHandlerIntegrationTests {
 		}
 
 		@Override
+		@SuppressWarnings("removal")
 		public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
-			converters.add(new MappingJackson2HttpMessageConverter());
+			converters.add(new JacksonJsonHttpMessageConverter());
 		}
 	}
 

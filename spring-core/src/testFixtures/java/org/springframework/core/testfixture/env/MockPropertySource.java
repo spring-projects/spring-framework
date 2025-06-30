@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ import org.springframework.core.env.PropertySource;
  * a user-provided {@link Properties} object, or if omitted during construction,
  * the implementation will initialize its own.
  *
- * The {@link #setProperty} and {@link #withProperty} methods are exposed for
+ * <p>The {@link #setProperty} and {@link #withProperty} methods are exposed for
  * convenience, for example:
  * <pre class="code">
  * {@code
@@ -95,7 +95,7 @@ public class MockPropertySource extends PropertiesPropertySource {
 
 	/**
 	 * Convenient synonym for {@link #setProperty} that returns the current instance.
-	 * Useful for method chaining and fluent-style use.
+	 * <p>Useful for method chaining and fluent-style use.
 	 * @return this {@link MockPropertySource} instance
 	 */
 	public MockPropertySource withProperty(String name, Object value) {

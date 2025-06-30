@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ import org.mockito.ArgumentCaptor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.web.socket.WebSocketSession;
-import org.springframework.web.socket.sockjs.frame.Jackson2SockJsMessageCodec;
+import org.springframework.web.socket.sockjs.frame.JacksonJsonSockJsMessageCodec;
 import org.springframework.web.socket.sockjs.transport.TransportType;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -47,7 +47,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
  */
 class DefaultTransportRequestTests {
 
-	private final Jackson2SockJsMessageCodec CODEC = new Jackson2SockJsMessageCodec();
+	private final JacksonJsonSockJsMessageCodec CODEC = new JacksonJsonSockJsMessageCodec();
 
 	private CompletableFuture<WebSocketSession> connectFuture = new CompletableFuture<>();
 

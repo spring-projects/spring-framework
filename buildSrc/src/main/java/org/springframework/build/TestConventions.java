@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,7 +62,8 @@ class TestConventions {
 		test.include("**/*Tests.class", "**/*Test.class");
 		test.setSystemProperties(Map.of(
 				"java.awt.headless", "true",
-				"io.netty.leakDetection.level", "paranoid"
+				"io.netty.leakDetection.level", "paranoid",
+				"junit.platform.discovery.issue.severity.critical", "INFO"
 		));
 		if (project.hasProperty("testGroups")) {
 			test.systemProperty("testGroups", project.getProperties().get("testGroups"));

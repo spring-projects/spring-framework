@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -117,7 +117,7 @@ class InputTagTests extends AbstractFormTagTests {
 		final String NAME = "Rob \"I Love Cafés\" Harrop";
 		final String HTML_ESCAPED_NAME = "Rob &quot;I Love Cafés&quot; Harrop";
 
-		this.getPageContext().getResponse().setCharacterEncoding("UTF-8");
+		getPageContext().getResponse().setCharacterEncoding("UTF-8");
 		this.tag.setPath("name");
 		this.rob.setName(NAME);
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -471,12 +471,12 @@ class MockHttpServletRequestBuilderTests {
 		assertThat(request.getContentType()).isEqualTo("yaml");
 	}
 
-	@Test  // SPR-11308
+	@Test
 	void contentTypeViaMultipleHeaderValues() {
-		this.builder.header("Content-Type", MediaType.TEXT_HTML_VALUE, MediaType.ALL_VALUE);
+		this.builder.header("Content-Type", MediaType.TEXT_HTML_VALUE, MediaType.TEXT_PLAIN_VALUE);
 		MockHttpServletRequest request = this.builder.buildRequest(this.servletContext);
 
-		assertThat(request.getContentType()).isEqualTo("text/html");
+		assertThat(request.getContentType()).isEqualTo("text/plain");
 	}
 
 	@Test

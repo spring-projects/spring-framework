@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,7 +66,6 @@ inline fun <reified T : Any> RequestBodySpec.body(flow: Flow<T>): RequestHeaders
  * @author Arjen Poutsma
  * @since 5.0
  */
-@Suppress("EXTENSION_SHADOWED_BY_MEMBER")
 inline fun <reified B : Any> ResponseSpec.expectBody(): BodySpec<B, *> =
 		expectBody(object : ParameterizedTypeReference<B>() {})
 

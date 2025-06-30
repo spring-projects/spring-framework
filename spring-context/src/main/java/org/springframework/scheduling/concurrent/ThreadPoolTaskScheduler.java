@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -299,10 +299,9 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 	/**
 	 * Return the current setting for the remove-on-cancel mode.
 	 * <p>Requires an underlying {@link ScheduledThreadPoolExecutor}.
-	 * @deprecated as of 5.3.9, in favor of direct
-	 * {@link #getScheduledThreadPoolExecutor()} access
+	 * @deprecated in favor of direct {@link #getScheduledThreadPoolExecutor()} access
 	 */
-	@Deprecated
+	@Deprecated(since = "5.3.9")
 	public boolean isRemoveOnCancelPolicy() {
 		if (this.scheduledExecutor == null) {
 			// Not initialized yet: return our setting for the time being.

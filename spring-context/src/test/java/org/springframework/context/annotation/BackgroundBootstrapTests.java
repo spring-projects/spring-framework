@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import org.junit.jupiter.api.Timeout;
 
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.BeanCurrentlyInCreationException;
+import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.UnsatisfiedDependencyException;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
@@ -243,14 +244,24 @@ class BackgroundBootstrapTests {
 		}
 
 		@Bean
-		public TestBean testBean4() {
+		public FactoryBean<TestBean> testBean4() {
 			try {
 				Thread.sleep(2000);
 			}
 			catch (InterruptedException ex) {
 				Thread.currentThread().interrupt();
 			}
-			return new TestBean();
+			TestBean testBean = new TestBean();
+			return new FactoryBean<>() {
+				@Override
+				public TestBean getObject() {
+					return testBean;
+				}
+				@Override
+				public Class<?> getObjectType() {
+					return testBean.getClass();
+				}
+			};
 		}
 	}
 

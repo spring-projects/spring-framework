@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -95,7 +95,7 @@ import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
 import org.springframework.http.converter.StringHttpMessageConverter;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.http.converter.json.JacksonJsonHttpMessageConverter;
 import org.springframework.http.converter.xml.Jaxb2RootElementHttpMessageConverter;
 import org.springframework.http.converter.xml.MarshallingHttpMessageConverter;
 import org.springframework.oxm.jaxb.Jaxb2Marshaller;
@@ -1026,7 +1026,7 @@ class ServletAnnotationControllerHandlerMethodTests extends AbstractServletHandl
 		initDispatcherServlet(ResponseEntityController.class, usePathPatterns, wac -> {
 			RootBeanDefinition adapterDef = new RootBeanDefinition(RequestMappingHandlerAdapter.class);
 			List<HttpMessageConverter<?>> messageConverters = new ArrayList<>();
-			messageConverters.add(new MappingJackson2HttpMessageConverter());
+			messageConverters.add(new JacksonJsonHttpMessageConverter());
 			messageConverters.add(new Jaxb2RootElementHttpMessageConverter());
 			adapterDef.getPropertyValues().add("messageConverters", messageConverters);
 			wac.registerBeanDefinition("handlerAdapter", adapterDef);
@@ -1204,7 +1204,7 @@ class ServletAnnotationControllerHandlerMethodTests extends AbstractServletHandl
 	void produces(boolean usePathPatterns) throws Exception {
 		initDispatcherServlet(ProducesController.class, usePathPatterns, wac -> {
 			List<HttpMessageConverter<?>> converters = new ArrayList<>();
-			converters.add(new MappingJackson2HttpMessageConverter());
+			converters.add(new JacksonJsonHttpMessageConverter());
 			converters.add(new Jaxb2RootElementHttpMessageConverter());
 
 			RootBeanDefinition beanDef;

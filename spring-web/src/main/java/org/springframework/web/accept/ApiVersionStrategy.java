@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.web.accept;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -25,6 +26,7 @@ import org.jspecify.annotations.Nullable;
  *
  * @author Rossen Stoyanchev
  * @since 7.0
+ * @see DefaultApiVersionStrategy
  */
 public interface ApiVersionStrategy {
 
@@ -32,6 +34,7 @@ public interface ApiVersionStrategy {
 	 * Resolve the version value from a request, e.g. from a request header.
 	 * @param request the current request
 	 * @return the version, if present or {@code null}
+	 * @see ApiVersionResolver
 	 */
 	@Nullable
 	String resolveVersion(HttpServletRequest request);
@@ -40,6 +43,7 @@ public interface ApiVersionStrategy {
 	 * Parse the version of a request into an Object.
 	 * @param version the value to parse
 	 * @return an Object that represents the version
+	 * @see ApiVersionParser
 	 */
 	Comparable<?> parseVersion(String version);
 
@@ -57,5 +61,37 @@ public interface ApiVersionStrategy {
 	 * Return a default version to use for requests that don't specify one.
 	 */
 	@Nullable Comparable<?> getDefaultVersion();
+
+	/**
+	 * Convenience method to return the parsed and validated request version,
+	 * or the default version if configured.
+	 * @param request the current request
+	 * @return the parsed request version, or the default version
+	 */
+	default @Nullable Comparable<?> resolveParseAndValidateVersion(HttpServletRequest request) {
+		String value = resolveVersion(request);
+		if (value == null) {
+			return getDefaultVersion();
+		}
+		try {
+			Comparable<?> version = parseVersion(value);
+			validateVersion(version, request);
+			return version;
+		}
+		catch (Exception ex) {
+			throw new InvalidApiVersionException(value, null, ex);
+		}
+	}
+
+	/**
+	 * Check if the requested API version is deprecated, and if so handle it
+	 * accordingly, e.g. by setting response headers to signal the deprecation,
+	 * to specify relevant dates and provide links to further details.
+	 * @param version the resolved and parsed request version
+	 * @param request the current request
+	 * @param response the current response
+	 * @see ApiVersionDeprecationHandler
+	 */
+	void handleDeprecations(Comparable<?> version, HttpServletRequest request, HttpServletResponse response);
 
 }

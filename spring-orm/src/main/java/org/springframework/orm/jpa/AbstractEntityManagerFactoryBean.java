@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,8 +53,8 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.DisposableBean;
-import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.SmartFactoryBean;
 import org.springframework.beans.factory.SmartInitializingSingleton;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.dao.DataAccessException;
@@ -66,7 +66,9 @@ import org.springframework.util.CollectionUtils;
 /**
  * Abstract {@link org.springframework.beans.factory.FactoryBean} that creates
  * a local JPA {@link jakarta.persistence.EntityManagerFactory} instance within
- * a Spring application context.
+ * a Spring application context. As of 7.0, it additionally exposes a shared
+ * {@link jakarta.persistence.EntityManager} instance through {@link SmartFactoryBean},
+ * making {@code EntityManager} available for dependency injection as well.
  *
  * <p>Encapsulates the common functionality between the different JPA bootstrap
  * contracts (standalone as well as container).
@@ -91,7 +93,7 @@ import org.springframework.util.CollectionUtils;
  */
 @SuppressWarnings("serial")
 public abstract class AbstractEntityManagerFactoryBean implements
-		FactoryBean<EntityManagerFactory>, BeanClassLoaderAware, BeanFactoryAware,
+		SmartFactoryBean<EntityManagerFactory>, BeanClassLoaderAware, BeanFactoryAware,
 		BeanNameAware, InitializingBean, SmartInitializingSingleton, DisposableBean,
 		EntityManagerFactoryInfo, PersistenceExceptionTranslator, Serializable {
 
@@ -130,6 +132,9 @@ public abstract class AbstractEntityManagerFactoryBean implements
 
 	/** Exposed client-level EntityManagerFactory proxy. */
 	private @Nullable EntityManagerFactory entityManagerFactory;
+
+	/** Exposed client-level shared EntityManager proxy. */
+	private @Nullable EntityManager sharedEntityManager;
 
 
 	/**
@@ -333,9 +338,17 @@ public abstract class AbstractEntityManagerFactoryBean implements
 		this.beanFactory = beanFactory;
 	}
 
+	protected @Nullable BeanFactory getBeanFactory() {
+		return this.beanFactory;
+	}
+
 	@Override
 	public void setBeanName(String name) {
 		this.beanName = name;
+	}
+
+	protected @Nullable String getBeanName() {
+		return this.beanName;
 	}
 
 
@@ -386,6 +399,7 @@ public abstract class AbstractEntityManagerFactoryBean implements
 		// application-managed EntityManager proxy that automatically joins
 		// existing transactions.
 		this.entityManagerFactory = createEntityManagerFactoryProxy(this.nativeEntityManagerFactory);
+		this.sharedEntityManager = SharedEntityManagerCreator.createSharedEntityManager(this.entityManagerFactory);
 	}
 
 	@Override
@@ -621,9 +635,23 @@ public abstract class AbstractEntityManagerFactoryBean implements
 		return (this.entityManagerFactory != null ? this.entityManagerFactory.getClass() : EntityManagerFactory.class);
 	}
 
+	/**
+	 * Return either the singleton EntityManagerFactory or the shared EntityManager proxy.
+	 */
 	@Override
-	public boolean isSingleton() {
-		return true;
+	public <S> @Nullable S getObject(Class<S> type) throws Exception {
+		if (EntityManager.class.isAssignableFrom(type)) {
+			return (type.isInstance(this.sharedEntityManager) ? type.cast(this.sharedEntityManager) : null);
+		}
+		return SmartFactoryBean.super.getObject(type);
+	}
+
+	@Override
+	public boolean supportsType(Class<?> type) {
+		if (EntityManager.class.isAssignableFrom(type)) {
+			return type.isInstance(this.sharedEntityManager);
+		}
+		return SmartFactoryBean.super.supportsType(type);
 	}
 
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferLimitException;
 import org.springframework.core.testfixture.io.buffer.AbstractLeakCheckingTests;
 import org.springframework.http.MediaType;
-import org.springframework.http.codec.json.Jackson2JsonDecoder;
+import org.springframework.http.codec.json.JacksonJsonDecoder;
 import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest;
 import org.springframework.web.testfixture.xml.Pojo;
 
@@ -44,7 +44,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 class ServerSentEventHttpMessageReaderTests extends AbstractLeakCheckingTests {
 
-	private final Jackson2JsonDecoder jsonDecoder = new Jackson2JsonDecoder();
+	private final JacksonJsonDecoder jsonDecoder = new JacksonJsonDecoder();
 
 	private ServerSentEventHttpMessageReader reader = new ServerSentEventHttpMessageReader(this.jsonDecoder);
 
@@ -226,7 +226,7 @@ class ServerSentEventHttpMessageReaderTests extends AbstractLeakCheckingTests {
 		String content = "data:{\"foo\": \"" + fooValue + "\"}\n\n";
 		MockServerHttpRequest request = MockServerHttpRequest.post("/").body(Mono.just(stringBuffer(content)));
 
-		Jackson2JsonDecoder jacksonDecoder = new Jackson2JsonDecoder();
+		JacksonJsonDecoder jacksonDecoder = new JacksonJsonDecoder();
 		ServerSentEventHttpMessageReader messageReader = new ServerSentEventHttpMessageReader(jacksonDecoder);
 
 		jacksonDecoder.setMaxInMemorySize(limit + 1024);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.springframework.core.io.support;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.lang.reflect.Constructor;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
@@ -147,9 +146,7 @@ public class PropertySourceProcessor {
 
 	private static PropertySourceFactory instantiateClass(Class<? extends PropertySourceFactory> type) {
 		try {
-			Constructor<? extends PropertySourceFactory> constructor = type.getDeclaredConstructor();
-			ReflectionUtils.makeAccessible(constructor);
-			return constructor.newInstance();
+			return ReflectionUtils.accessibleConstructor(type).newInstance();
 		}
 		catch (Exception ex) {
 			throw new IllegalStateException("Failed to instantiate " + type, ex);

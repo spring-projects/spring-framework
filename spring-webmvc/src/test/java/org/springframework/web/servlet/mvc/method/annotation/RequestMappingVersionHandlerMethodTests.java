@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,11 +17,13 @@
 package org.springframework.web.servlet.mvc.method.annotation;
 
 import java.io.IOException;
+import java.net.URI;
 
 import jakarta.servlet.ServletException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import org.springframework.web.accept.StandardApiVersionDeprecationHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
@@ -33,7 +35,7 @@ import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
 import org.springframework.web.testfixture.servlet.MockServletConfig;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Integration tests for API versioning.
@@ -57,23 +59,23 @@ public class RequestMappingVersionHandlerMethodTests {
 
 
 	@Test
-	void initialVersion() throws Exception {
+	void mapVersion() throws Exception {
 		assertThat(requestWithVersion("1.0").getContentAsString()).isEqualTo("none");
 		assertThat(requestWithVersion("1.1").getContentAsString()).isEqualTo("none");
-	}
-
-	@Test
-	void baselineVersion() throws Exception {
 		assertThat(requestWithVersion("1.2").getContentAsString()).isEqualTo("1.2");
 		assertThat(requestWithVersion("1.3").getContentAsString()).isEqualTo("1.2");
-	}
-
-	@Test
-	void fixedVersion() throws Exception {
 		assertThat(requestWithVersion("1.5").getContentAsString()).isEqualTo("1.5");
 
 		MockHttpServletResponse response = requestWithVersion("1.6");
-		assertThat(response.getStatus()).isEqualTo(400);
+		assertThat(response.getStatus())
+				.as("Should reject if highest supported below request version is fixed")
+				.isEqualTo(400);
+	}
+
+	@Test
+	void deprecation() throws Exception {
+		assertThat(requestWithVersion("1").getHeader("Link"))
+				.isEqualTo("<https://example.org/deprecation>; rel=\"deprecation\"; type=\"text/html\"");
 	}
 
 	private MockHttpServletResponse requestWithVersion(String version) throws ServletException, IOException {
@@ -90,7 +92,13 @@ public class RequestMappingVersionHandlerMethodTests {
 
 		@Override
 		public void configureApiVersioning(ApiVersionConfigurer configurer) {
-			configurer.useRequestHeader("X-API-Version").addSupportedVersions("1", "1.1", "1.3", "1.6");
+
+			StandardApiVersionDeprecationHandler handler = new StandardApiVersionDeprecationHandler();
+			handler.configureVersion("1").setDeprecationLink(URI.create("https://example.org/deprecation"));
+
+			configurer.useRequestHeader("X-API-Version")
+					.addSupportedVersions("1", "1.1", "1.3", "1.6")
+					.setDeprecationHandler(handler);
 		}
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,7 +42,7 @@ import org.springframework.util.StringUtils;
  * add by default. {@code AbstractEnvironment} adds none. Subclasses should contribute
  * property sources through the protected {@link #customizePropertySources(MutablePropertySources)}
  * hook, while clients should customize using {@link ConfigurableEnvironment#getPropertySources()}
- * and working against the {@link MutablePropertySources} API.
+ * and work against the {@link MutablePropertySources} API.
  * See {@link ConfigurableEnvironment} javadoc for usage examples.
  *
  * @author Chris Beams
@@ -66,7 +66,7 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 	public static final String IGNORE_GETENV_PROPERTY_NAME = "spring.getenv.ignore";
 
 	/**
-	 * Name of the property to set to specify active profiles: {@value}.
+	 * Name of the property to specify active profiles: {@value}.
 	 * <p>The value may be comma delimited.
 	 * <p>Note that certain shell environments such as Bash disallow the use of the period
 	 * character in variable names. Assuming that Spring's {@link SystemEnvironmentPropertySource}
@@ -77,7 +77,7 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 	public static final String ACTIVE_PROFILES_PROPERTY_NAME = "spring.profiles.active";
 
 	/**
-	 * Name of the property to set to specify profiles that are active by default: {@value}.
+	 * Name of the property to specify profiles that are active by default: {@value}.
 	 * <p>The value may be comma delimited.
 	 * <p>Note that certain shell environments such as Bash disallow the use of the period
 	 * character in variable names. Assuming that Spring's {@link SystemEnvironmentPropertySource}
@@ -141,7 +141,7 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 
 	/**
 	 * Factory method used to create the {@link ConfigurablePropertyResolver}
-	 * instance used by the Environment.
+	 * used by this {@code Environment}.
 	 * @since 5.3.4
 	 * @see #getPropertyResolver()
 	 */
@@ -150,8 +150,7 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 	}
 
 	/**
-	 * Return the {@link ConfigurablePropertyResolver} being used by the
-	 * {@link Environment}.
+	 * Return the {@link ConfigurablePropertyResolver} used by the {@code Environment}.
 	 * @since 5.3.4
 	 * @see #createPropertyResolver(MutablePropertySources)
 	 */
@@ -319,7 +318,6 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 		}
 	}
 
-
 	@Override
 	public String[] getDefaultProfiles() {
 		return StringUtils.toStringArray(doGetDefaultProfiles());
@@ -327,7 +325,7 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 
 	/**
 	 * Return the set of default profiles explicitly set via
-	 * {@link #setDefaultProfiles(String...)} or if the current set of default profiles
+	 * {@link #setDefaultProfiles(String...)}, or if the current set of default profiles
 	 * consists only of {@linkplain #getReservedDefaultProfiles() reserved default
 	 * profiles}, then check for the presence of {@link #doGetActiveProfilesProperty()}
 	 * and assign its value (if any) to the set of default profiles.
@@ -379,7 +377,7 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 	}
 
 	@Override
-	@Deprecated
+	@Deprecated(since = "5.1")
 	public boolean acceptsProfiles(String... profiles) {
 		Assert.notEmpty(profiles, "Must specify at least one profile");
 		for (String profile : profiles) {
@@ -418,7 +416,7 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 	 * active or default profiles.
 	 * <p>Subclasses may override to impose further restrictions on profile syntax.
 	 * @throws IllegalArgumentException if the profile is null, empty, whitespace-only or
-	 * begins with the profile NOT operator (!).
+	 * begins with the profile NOT operator (!)
 	 * @see #acceptsProfiles
 	 * @see #addActiveProfile
 	 * @see #setDefaultProfiles

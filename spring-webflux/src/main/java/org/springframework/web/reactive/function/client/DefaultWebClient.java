@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -94,6 +94,8 @@ final class DefaultWebClient implements WebClient {
 
 	private final @Nullable MultiValueMap<String, String> defaultCookies;
 
+	private final @Nullable Object defaultApiVersion;
+
 	private final @Nullable ApiVersionInserter apiVersionInserter;
 
 	private final @Nullable Consumer<RequestHeadersSpec<?>> defaultRequest;
@@ -110,7 +112,7 @@ final class DefaultWebClient implements WebClient {
 	DefaultWebClient(ExchangeFunction exchangeFunction, @Nullable ExchangeFilterFunction filterFunctions,
 			UriBuilderFactory uriBuilderFactory, @Nullable HttpHeaders defaultHeaders,
 			@Nullable MultiValueMap<String, String> defaultCookies,
-			@Nullable ApiVersionInserter apiVersionInserter,
+			@Nullable Object defaultApiVersion, @Nullable ApiVersionInserter apiVersionInserter,
 			@Nullable Consumer<RequestHeadersSpec<?>> defaultRequest,
 			@Nullable Map<Predicate<HttpStatusCode>, Function<ClientResponse, Mono<? extends Throwable>>> statusHandlerMap,
 			ObservationRegistry observationRegistry, @Nullable ClientRequestObservationConvention observationConvention,
@@ -121,6 +123,7 @@ final class DefaultWebClient implements WebClient {
 		this.uriBuilderFactory = uriBuilderFactory;
 		this.defaultHeaders = defaultHeaders;
 		this.defaultCookies = defaultCookies;
+		this.defaultApiVersion = defaultApiVersion;
 		this.apiVersionInserter = apiVersionInserter;
 		this.defaultRequest = defaultRequest;
 		this.defaultStatusHandlers = initStatusHandlers(statusHandlerMap);
@@ -491,11 +494,16 @@ final class DefaultWebClient implements WebClient {
 
 		private URI initUri() {
 			URI uriToUse = (this.uri != null ? this.uri : uriBuilderFactory.expand(""));
-			if (this.apiVersion != null) {
+			Object version = getApiVersionOrDefault();
+			if (version != null) {
 				Assert.state(apiVersionInserter != null, "No ApiVersionInserter configured");
-				uriToUse = apiVersionInserter.insertVersion(this.apiVersion, uriToUse);
+				uriToUse = apiVersionInserter.insertVersion(version, uriToUse);
 			}
 			return uriToUse;
+		}
+
+		private @Nullable Object getApiVersionOrDefault() {
+			return (this.apiVersion != null ? this.apiVersion : DefaultWebClient.this.defaultApiVersion);
 		}
 
 		private void initHeaders(HttpHeaders out) {
@@ -505,9 +513,10 @@ final class DefaultWebClient implements WebClient {
 			if (this.headers != null && !this.headers.isEmpty()) {
 				out.putAll(this.headers);
 			}
-			if (this.apiVersion != null) {
+			Object version = getApiVersionOrDefault();
+			if (version != null) {
 				Assert.state(apiVersionInserter != null, "No ApiVersionInserter configured");
-				apiVersionInserter.insertVersion(this.apiVersion, out);
+				apiVersionInserter.insertVersion(version, out);
 			}
 		}
 

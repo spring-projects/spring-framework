@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -219,7 +219,7 @@ public class R2dbcTransactionManager extends AbstractReactiveTransactionManager 
 						if (txObject.isNewConnectionHolder()) {
 							synchronizationManager.bindResource(obtainConnectionFactory(), txObject.getConnectionHolder());
 						}
-					}).thenReturn(con).onErrorResume(ex -> {
+					}).onErrorResume(ex -> {
 						if (txObject.isNewConnectionHolder()) {
 							return ConnectionFactoryUtils.releaseConnection(con, obtainConnectionFactory())
 									.doOnTerminate(() -> txObject.setConnectionHolder(null, false))

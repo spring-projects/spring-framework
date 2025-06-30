@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.lang.classfile.Annotation;
 import java.lang.classfile.AnnotationElement;
 import java.lang.classfile.AnnotationValue;
 import java.lang.classfile.attribute.RuntimeVisibleAnnotationsAttribute;
+import java.lang.constant.ClassDesc;
 import java.lang.reflect.Array;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -97,11 +98,12 @@ abstract class ClassFileAnnotationMetadata {
 	}
 
 	private static String fromTypeDescriptor(String descriptor) {
-		return descriptor.substring(1, descriptor.length() - 1)
-				.replace('/', '.');
+		ClassDesc classDesc = ClassDesc.ofDescriptor(descriptor);
+		return classDesc.isPrimitive() ? classDesc.displayName() :
+		classDesc.packageName() + "." + classDesc.displayName();
 	}
 
-	private static Object parseArrayValue(String className, @org.jetbrains.annotations.Nullable ClassLoader classLoader, AnnotationValue.OfArray arrayValue) {
+	private static Object parseArrayValue(String className, @Nullable ClassLoader classLoader, AnnotationValue.OfArray arrayValue) {
 		if (arrayValue.values().isEmpty()) {
 			return new Object[0];
 		}

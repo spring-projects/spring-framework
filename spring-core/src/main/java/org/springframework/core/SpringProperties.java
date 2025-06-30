@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,18 +26,20 @@ import org.jspecify.annotations.Nullable;
 /**
  * Static holder for local Spring properties, i.e. defined at the Spring library level.
  *
- * <p>Reads a {@code spring.properties} file from the root of the Spring library classpath,
- * and also allows for programmatically setting properties through {@link #setProperty}.
- * When checking a property, local entries are being checked first, then falling back
- * to JVM-level system properties through a {@link System#getProperty} check.
+ * <p>Reads a {@code spring.properties} file from the root of the classpath and
+ * also allows for programmatically setting properties via {@link #setProperty}.
+ * When retrieving properties, local entries are checked first, with JVM-level
+ * system properties checked next as a fallback via {@link System#getProperty}.
  *
  * <p>This is an alternative way to set Spring-related system properties such as
- * "spring.getenv.ignore" and "spring.beaninfo.ignore", in particular for scenarios
- * where JVM system properties are locked on the target platform (for example, WebSphere).
- * See {@link #setFlag} for a convenient way to locally set such flags to "true".
+ * {@code spring.getenv.ignore} and {@code spring.beaninfo.ignore}, in particular
+ * for scenarios where JVM system properties are locked on the target platform
+ * (for example, WebSphere). See {@link #setFlag} for a convenient way to locally
+ * set such flags to {@code "true"}.
  *
  * @author Juergen Hoeller
  * @since 3.2.7
+ * @see org.springframework.aot.AotDetector#AOT_ENABLED
  * @see org.springframework.beans.StandardBeanInfoFactory#IGNORE_BEANINFO_PROPERTY_NAME
  * @see org.springframework.beans.factory.support.DefaultListableBeanFactory#STRICT_LOCKING_PROPERTY_NAME
  * @see org.springframework.core.env.AbstractEnvironment#IGNORE_GETENV_PROPERTY_NAME

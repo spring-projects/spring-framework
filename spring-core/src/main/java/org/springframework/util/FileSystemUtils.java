@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,8 @@ import java.util.EnumSet;
 
 import org.jspecify.annotations.Nullable;
 
+import org.springframework.lang.Contract;
+
 import static java.nio.file.FileVisitOption.FOLLOW_LINKS;
 
 /**
@@ -54,6 +56,7 @@ public abstract class FileSystemUtils {
 	 * @return {@code true} if the {@code File} was successfully deleted,
 	 * otherwise {@code false}
 	 */
+	@Contract("null -> false")
 	public static boolean deleteRecursively(@Nullable File root) {
 		if (root == null) {
 			return false;
@@ -76,6 +79,7 @@ public abstract class FileSystemUtils {
 	 * @throws IOException in the case of I/O errors
 	 * @since 5.0
 	 */
+	@Contract("null -> false")
 	public static boolean deleteRecursively(@Nullable Path root) throws IOException {
 		if (root == null) {
 			return false;

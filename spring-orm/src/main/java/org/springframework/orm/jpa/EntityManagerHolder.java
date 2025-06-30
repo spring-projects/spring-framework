@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,9 +27,6 @@ import org.springframework.util.Assert;
  * Resource holder wrapping a JPA {@link EntityManager}.
  * {@link JpaTransactionManager} binds instances of this class to the thread,
  * for a given {@link jakarta.persistence.EntityManagerFactory}.
- *
- * <p>Also serves as a base class for {@link org.springframework.orm.hibernate5.SessionHolder},
- * as of 5.1.
  *
  * <p>Note: This is an SPI class, not intended to be used by applications.
  *

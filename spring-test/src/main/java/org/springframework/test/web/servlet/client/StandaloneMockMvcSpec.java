@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import org.springframework.test.web.servlet.setup.ConfigurableMockMvcBuilder;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.test.web.servlet.setup.StandaloneMockMvcBuilder;
 import org.springframework.validation.Validator;
+import org.springframework.web.accept.ApiVersionStrategy;
 import org.springframework.web.accept.ContentNegotiationManager;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
@@ -76,6 +77,12 @@ class StandaloneMockMvcSpec extends AbstractMockMvcServerSpec<MockMvcWebTestClie
 	@Override
 	public StandaloneMockMvcSpec conversionService(FormattingConversionService conversionService) {
 		this.mockMvcBuilder.setConversionService(conversionService);
+		return this;
+	}
+
+	@Override
+	public MockMvcWebTestClient.ControllerSpec apiVersionStrategy(ApiVersionStrategy versionStrategy) {
+		this.mockMvcBuilder.setApiVersionStrategy(versionStrategy);
 		return this;
 	}
 

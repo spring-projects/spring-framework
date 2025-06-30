@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -149,28 +149,37 @@ class JdkClientHttpRequest extends AbstractStreamingClientHttpRequest {
 			}
 		});
 
-		builder.method(this.method.name(), bodyPublisher(headers, body));
+		if (body != null) {
+			builder.method(this.method.name(), bodyPublisher(headers, body));
+		}
+		else {
+			switch (this.method.name()) {
+				case "GET" :
+					builder.GET();
+					break;
+				case "DELETE" :
+					builder.DELETE();
+					break;
+				default :
+					builder.method(this.method.name(), HttpRequest.BodyPublishers.noBody());
+			}
+		}
 		return builder.build();
 	}
 
-	private HttpRequest.BodyPublisher bodyPublisher(HttpHeaders headers, @Nullable Body body) {
-		if (body != null) {
-			Flow.Publisher<ByteBuffer> publisher = new OutputStreamPublisher<>(
-					os -> body.writeTo(StreamUtils.nonClosing(os)), BYTE_MAPPER, this.executor, null);
+	private HttpRequest.BodyPublisher bodyPublisher(HttpHeaders headers, Body body) {
+		Flow.Publisher<ByteBuffer> publisher = new OutputStreamPublisher<>(
+				os -> body.writeTo(StreamUtils.nonClosing(os)), BYTE_MAPPER, this.executor, null);
 
-			long contentLength = headers.getContentLength();
-			if (contentLength > 0) {
-				return HttpRequest.BodyPublishers.fromPublisher(publisher, contentLength);
-			}
-			else if (contentLength == 0) {
-				return HttpRequest.BodyPublishers.noBody();
-			}
-			else {
-				return HttpRequest.BodyPublishers.fromPublisher(publisher);
-			}
+		long contentLength = headers.getContentLength();
+		if (contentLength > 0) {
+			return HttpRequest.BodyPublishers.fromPublisher(publisher, contentLength);
+		}
+		else if (contentLength == 0) {
+			return HttpRequest.BodyPublishers.noBody();
 		}
 		else {
-			return HttpRequest.BodyPublishers.noBody();
+			return HttpRequest.BodyPublishers.fromPublisher(publisher);
 		}
 	}
 

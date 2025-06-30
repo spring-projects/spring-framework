@@ -265,6 +265,7 @@ Java::
 	client = WebTestClient.bindToController(new TestController())
 			.configureClient()
 			.baseUrl("/test")
+			.apiVersionInserter(ApiVersionInserter.fromHeader("API-Version").build())
 			.build();
 ----
 
@@ -275,6 +276,7 @@ Kotlin::
 	client = WebTestClient.bindToController(TestController())
 			.configureClient()
 			.baseUrl("/test")
+			.apiVersionInserter(ApiVersionInserter.fromHeader("API-Version").build())
 			.build()
 ----
 ======

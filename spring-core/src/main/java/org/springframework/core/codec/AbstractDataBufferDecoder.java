@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -97,10 +97,10 @@ public abstract class AbstractDataBufferDecoder<T> extends AbstractDecoder<T> {
 
 	/**
 	 * How to decode a {@code DataBuffer} to the target element type.
-	 * @deprecated as of 5.2, please implement
+	 * @deprecated in favor of implementing
 	 * {@link #decode(DataBuffer, ResolvableType, MimeType, Map)} instead
 	 */
-	@Deprecated
+	@Deprecated(since = "5.2")
 	protected @Nullable T decodeDataBuffer(DataBuffer buffer, ResolvableType elementType,
 			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 

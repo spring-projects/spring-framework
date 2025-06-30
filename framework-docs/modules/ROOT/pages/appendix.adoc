@@ -103,6 +103,14 @@ for details.
 {spring-framework-api}++/objenesis/SpringObjenesis.html#IGNORE_OBJENESIS_PROPERTY_NAME++[`SpringObjenesis`]
 for details.
 
+| `spring.placeholder.escapeCharacter.default`
+| The default escape character for property placeholder support. If not set, `'\'` will
+be used. Can be set to a custom escape character or an empty string to disable support
+for an escape character. The default escape character be explicitly overridden in
+`PropertySourcesPlaceholderConfigurer` and subclasses of `AbstractPropertyResolver`. See
+{spring-framework-api}++/core/env/AbstractPropertyResolver.html#DEFAULT_PLACEHOLDER_ESCAPE_CHARACTER_PROPERTY_NAME++[`AbstractPropertyResolver`]
+for details.
+
 | `spring.test.aot.processing.failOnError`
 | A boolean flag that controls whether errors encountered during AOT processing in the
 _Spring TestContext Framework_ should result in an exception that fails the overall process.

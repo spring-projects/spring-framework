@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.StringHttpMessageConverter;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.http.converter.json.JacksonJsonHttpMessageConverter;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.servlet.ModelAndView;
@@ -294,7 +294,7 @@ class DefaultServerResponseBuilderTests {
 
 		MockHttpServletRequest mockRequest = new MockHttpServletRequest("GET", "https://example.com");
 		MockHttpServletResponse mockResponse = new MockHttpServletResponse();
-		ServerResponse.Context context = () -> Collections.singletonList(new MappingJackson2HttpMessageConverter());
+		ServerResponse.Context context = () -> Collections.singletonList(new JacksonJsonHttpMessageConverter());
 
 		ModelAndView mav = response.writeTo(mockRequest, mockResponse, context);
 		assertThat(mav).isNull();

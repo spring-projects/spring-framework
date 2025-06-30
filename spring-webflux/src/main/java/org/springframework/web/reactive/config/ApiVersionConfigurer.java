@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,13 +25,17 @@ import java.util.Set;
 
 import org.jspecify.annotations.Nullable;
 
+import org.springframework.http.MediaType;
 import org.springframework.web.accept.ApiVersionParser;
 import org.springframework.web.accept.InvalidApiVersionException;
 import org.springframework.web.accept.SemanticApiVersionParser;
+import org.springframework.web.reactive.accept.ApiVersionDeprecationHandler;
 import org.springframework.web.reactive.accept.ApiVersionResolver;
 import org.springframework.web.reactive.accept.ApiVersionStrategy;
 import org.springframework.web.reactive.accept.DefaultApiVersionStrategy;
+import org.springframework.web.reactive.accept.MediaTypeParamApiVersionResolver;
 import org.springframework.web.reactive.accept.PathApiVersionResolver;
+import org.springframework.web.reactive.accept.StandardApiVersionDeprecationHandler;
 
 /**
  * Configure API versioning.
@@ -52,6 +56,8 @@ public class ApiVersionConfigurer {
 	private final Set<String> supportedVersions = new LinkedHashSet<>();
 
 	private boolean detectSupportedVersions = true;
+
+	private @Nullable ApiVersionDeprecationHandler deprecationHandler;
 
 
 	/**
@@ -79,6 +85,18 @@ public class ApiVersionConfigurer {
 	 */
 	public ApiVersionConfigurer usePathSegment(int index) {
 		this.versionResolvers.add(new PathApiVersionResolver(index));
+		return this;
+	}
+
+	/**
+	 * Add resolver to extract the version from a media type parameter found in
+	 * the Accept or Content-Type headers.
+	 * @param compatibleMediaType the media type to extract the parameter from with
+	 * the match established via {@link MediaType#isCompatibleWith(MediaType)}
+	 * @param paramName the name of the parameter
+	 */
+	public ApiVersionConfigurer useMediaTypeParameter(MediaType compatibleMediaType, String paramName) {
+		this.versionResolvers.add(new MediaTypeParamApiVersionResolver(compatibleMediaType, paramName));
 		return this;
 	}
 
@@ -157,6 +175,18 @@ public class ApiVersionConfigurer {
 		return this;
 	}
 
+	/**
+	 * Configure a handler to add handling for requests with a deprecated API
+	 * version. Typically, this involves sending hints and information about
+	 * the deprecation in response headers.
+	 * @param handler the handler to use
+	 * @see StandardApiVersionDeprecationHandler
+	 */
+	public ApiVersionConfigurer setDeprecationHandler(ApiVersionDeprecationHandler handler) {
+		this.deprecationHandler = handler;
+		return this;
+	}
+
 	protected @Nullable ApiVersionStrategy getApiVersionStrategy() {
 		if (this.versionResolvers.isEmpty()) {
 			return null;
@@ -164,7 +194,8 @@ public class ApiVersionConfigurer {
 
 		DefaultApiVersionStrategy strategy = new DefaultApiVersionStrategy(this.versionResolvers,
 				(this.versionParser != null ? this.versionParser : new SemanticApiVersionParser()),
-				this.versionRequired, this.defaultVersion, this.detectSupportedVersions);
+				this.versionRequired, this.defaultVersion, this.detectSupportedVersions,
+				this.deprecationHandler);
 
 		this.supportedVersions.forEach(strategy::addSupportedVersion);
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,7 +37,7 @@ import org.springframework.http.ProblemDetail;
 import org.springframework.http.codec.EncoderHttpMessageWriter;
 import org.springframework.http.codec.HttpMessageWriter;
 import org.springframework.http.codec.ResourceHttpMessageWriter;
-import org.springframework.http.codec.json.Jackson2JsonEncoder;
+import org.springframework.http.codec.json.JacksonJsonEncoder;
 import org.springframework.http.codec.xml.Jaxb2XmlEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -76,7 +76,7 @@ class ResponseBodyResultHandlerTests {
 		writerList.add(new EncoderHttpMessageWriter<>(CharSequenceEncoder.allMimeTypes()));
 		writerList.add(new ResourceHttpMessageWriter());
 		writerList.add(new EncoderHttpMessageWriter<>(new Jaxb2XmlEncoder()));
-		writerList.add(new EncoderHttpMessageWriter<>(new Jackson2JsonEncoder()));
+		writerList.add(new EncoderHttpMessageWriter<>(new JacksonJsonEncoder()));
 		RequestedContentTypeResolver resolver = new RequestedContentTypeResolverBuilder().build();
 		this.resultHandler = new ResponseBodyResultHandler(writerList, resolver);
 	}
@@ -148,11 +148,13 @@ class ResponseBodyResultHandlerTests {
 
 		assertThat(exchange.getResponse().getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
 		assertThat(exchange.getResponse().getHeaders().getContentType()).isEqualTo(expectedMediaType);
-		assertResponseBody(exchange,
-				"{\"type\":\"about:blank\"," +
-						"\"title\":\"Bad Request\"," +
-						"\"status\":400," +
-						"\"instance\":\"/path\"}");
+		assertResponseBody(exchange,"""
+				{\
+				"status":400,\
+				"instance":"\\/path",\
+				"title":"Bad Request",\
+				"type":"about:blank"\
+				}""");
 	}
 
 	@Test

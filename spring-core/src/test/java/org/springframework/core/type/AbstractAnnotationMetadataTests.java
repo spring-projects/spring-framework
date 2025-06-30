@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -162,6 +162,12 @@ public abstract class AbstractAnnotationMetadataTests {
 		}
 
 		@Test
+		void getSuperClassNameWhenPackageInfoReturnsNull() throws Exception {
+			Class<?> packageClass = Class.forName(getClass().getPackageName() + ".package-info");
+			assertThat(get(packageClass).getSuperClassName()).isNull();
+		}
+
+		@Test
 		void getInterfaceNamesWhenHasInterfacesReturnsNames() {
 			assertThat(get(TestSubclass.class).getInterfaceNames()).containsExactly(TestInterface.class.getName());
 			assertThat(get(TestSubInterface.class).getInterfaceNames()).containsExactly(TestInterface.class.getName());
@@ -176,6 +182,13 @@ public abstract class AbstractAnnotationMetadataTests {
 		void getMemberClassNamesWhenHasMemberClassesReturnsNames() {
 			assertThat(get(TestMemberClass.class).getMemberClassNames()).containsExactlyInAnyOrder(
 					TestMemberClass.TestMemberClassInnerClass.class.getName(), TestMemberClass.TestMemberClassInnerInterface.class.getName());
+		}
+
+		@Test
+		void getMemberClassNamesWhenHasNestedMemberClassesReturnsOnlyFirstLevel() {
+			assertThat(get(TestNestedMemberClass.class).getMemberClassNames()).containsOnly(
+					TestNestedMemberClass.TestMemberClassInnerClassA.class.getName(),
+					TestNestedMemberClass.TestMemberClassInnerClassB.class.getName());
 		}
 
 		@Test
@@ -210,6 +223,22 @@ public abstract class AbstractAnnotationMetadataTests {
 			}
 
 			interface TestMemberClassInnerInterface {
+			}
+
+		}
+
+		public static class TestNestedMemberClass {
+
+			public static class TestMemberClassInnerClassA {
+
+				public static class TestMemberClassInnerClassAA {
+
+				}
+
+			}
+
+			public static class TestMemberClassInnerClassB {
+
 			}
 
 		}
@@ -277,6 +306,14 @@ public abstract class AbstractAnnotationMetadataTests {
 			int[] values = {42};
 			assertThat(attributes.get("mv")).hasSize(1);
 			assertThat(attributes.get("mv").get(0)).isEqualTo(values);
+		}
+
+		@Test
+		void getAnnotationAttributeIntType() {
+			MultiValueMap<String, Object> attributes =
+					get(WithIntType.class).getAllAnnotationAttributes(ComplexAttributes.class.getName());
+			assertThat(attributes).containsOnlyKeys("names", "count", "type", "subAnnotation");
+			assertThat(attributes.get("type")).contains(int.class);
 		}
 
 		@Test
@@ -416,10 +453,17 @@ public abstract class AbstractAnnotationMetadataTests {
 
 		}
 
+
 		@ComplexAttributes(names = {"first", "second"}, count = TestEnum.ONE,
 				type = TestEnum.class, subAnnotation = @SubAnnotation(name="spring"))
 		@Metadata(mv = {42})
 		public static class WithComplexAttributeTypes {
+		}
+
+		@ComplexAttributes(names = "void", count = TestEnum.ONE, type = int.class,
+				subAnnotation = @SubAnnotation(name="spring"))
+		public static class WithIntType {
+
 		}
 
 		@Retention(RetentionPolicy.RUNTIME)

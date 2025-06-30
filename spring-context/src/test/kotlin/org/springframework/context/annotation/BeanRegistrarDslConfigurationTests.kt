@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.springframework.context.annotation
 
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
-import org.assertj.core.api.ThrowableAssert
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.BeanRegistrarDsl
 import org.springframework.beans.factory.InitializingBean
@@ -26,6 +25,7 @@ import org.springframework.beans.factory.NoSuchBeanDefinitionException
 import org.springframework.beans.factory.config.BeanDefinition
 import org.springframework.beans.factory.getBean
 import org.springframework.beans.factory.support.RootBeanDefinition
+import org.springframework.mock.env.MockEnvironment
 import java.util.function.Supplier
 
 /**
@@ -37,22 +37,27 @@ class BeanRegistrarDslConfigurationTests {
 
 	@Test
 	fun beanRegistrar() {
-		val context = AnnotationConfigApplicationContext(BeanRegistrarKotlinConfiguration::class.java)
+		val context = AnnotationConfigApplicationContext()
+		context.register(BeanRegistrarKotlinConfiguration::class.java)
+		context.environment = MockEnvironment().withProperty("hello.world", "Hello World!")
+		context.refresh()
 		assertThat(context.getBean<Bar>().foo).isEqualTo(context.getBean<Foo>())
 		assertThat(context.getBean<Foo>("foo")).isEqualTo(context.getBean<Foo>("fooAlias"))
-		assertThatThrownBy(ThrowableAssert.ThrowingCallable { context.getBean<Baz>() }).isInstanceOf(NoSuchBeanDefinitionException::class.java)
+		assertThatThrownBy { context.getBean<Baz>() }.isInstanceOf(NoSuchBeanDefinitionException::class.java)
 		assertThat(context.getBean<Init>().initialized).isTrue()
 		val beanDefinition = context.getBeanDefinition("bar")
 		assertThat(beanDefinition.scope).isEqualTo(BeanDefinition.SCOPE_PROTOTYPE)
 		assertThat(beanDefinition.isLazyInit).isTrue()
 		assertThat(beanDefinition.description).isEqualTo("Custom description")
+		assertThat(context.getBean<Boo>()).isEqualTo(Boo("booFactory"))
 	}
 
 	@Test
 	fun beanRegistrarWithProfile() {
 		val context = AnnotationConfigApplicationContext()
 		context.register(BeanRegistrarKotlinConfiguration::class.java)
-		context.getEnvironment().addActiveProfile("baz")
+		context.environment = MockEnvironment().withProperty("hello.world", "Hello World!")
+		context.environment.addActiveProfile("baz")
 		context.refresh()
 		assertThat(context.getBean<Bar>().foo).isEqualTo(context.getBean<Foo>())
 		assertThat(context.getBean<Baz>().message).isEqualTo("Hello World!")
@@ -75,6 +80,7 @@ class BeanRegistrarDslConfigurationTests {
 	class Foo
 	data class Bar(val foo: Foo)
 	data class Baz(val message: String = "")
+	data class Boo(val message: String = "")
 	class Init  : InitializingBean {
 		var initialized: Boolean = false
 
@@ -99,9 +105,10 @@ class BeanRegistrarDslConfigurationTests {
 			Bar(bean<Foo>())
 		}
 		profile("baz") {
-			registerBean { Baz("Hello World!") }
+			registerBean { Baz(env.getRequiredProperty("hello.world")) }
 		}
 		registerBean<Init>()
+		registerBean(::booFactory, "fooFactory")
 	})
 
 	@Configuration
@@ -110,11 +117,7 @@ class BeanRegistrarDslConfigurationTests {
 
 	private class GenericBeanRegistrar : BeanRegistrarDsl({
 		registerBean<Supplier<Foo>>(name = "fooSupplier") {
-			object: Supplier<Foo> {
-				override fun get(): Foo {
-					return Foo()
-				}
-			}
+			Supplier<Foo> { Foo() }
 		}
 	})
 
@@ -126,3 +129,5 @@ class BeanRegistrarDslConfigurationTests {
 		register(SampleBeanRegistrar())
 	})
 }
+
+fun booFactory() = BeanRegistrarDslConfigurationTests.Boo("booFactory")

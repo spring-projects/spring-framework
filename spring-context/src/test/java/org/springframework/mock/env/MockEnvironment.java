@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ import org.springframework.core.testfixture.env.MockPropertySource;
  * @author Chris Beams
  * @author Sam Brannen
  * @since 3.2
- * @see org.springframework.core.testfixture.env.MockPropertySource
+ * @see MockPropertySource
  */
 public class MockEnvironment extends AbstractEnvironment {
 
@@ -44,19 +44,23 @@ public class MockEnvironment extends AbstractEnvironment {
 
 	/**
 	 * Set a property on the underlying {@link MockPropertySource} for this environment.
+	 * @since 6.2.8
+	 * @see MockPropertySource#setProperty(String, Object)
 	 */
-	public void setProperty(String key, String value) {
-		this.propertySource.setProperty(key, value);
+	public void setProperty(String name, Object value) {
+		this.propertySource.setProperty(name, value);
 	}
 
 	/**
-	 * Convenient synonym for {@link #setProperty} that returns the current instance.
-	 * Useful for method chaining and fluent-style use.
+	 * Convenient synonym for {@link #setProperty(String, Object)} that returns
+	 * the current instance.
+	 * <p>Useful for method chaining and fluent-style use.
 	 * @return this {@link MockEnvironment} instance
-	 * @see MockPropertySource#withProperty
+	 * @since 6.2.8
+	 * @see MockPropertySource#withProperty(String, Object)
 	 */
-	public MockEnvironment withProperty(String key, String value) {
-		setProperty(key, value);
+	public MockEnvironment withProperty(String name, Object value) {
+		setProperty(name, value);
 		return this;
 	}
 

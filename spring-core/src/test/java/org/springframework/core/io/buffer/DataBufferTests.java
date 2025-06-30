@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.core.io.buffer;
 
+import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
@@ -340,6 +341,48 @@ class DataBufferTests extends AbstractDataBufferAllocatingTests {
 		len = inputStream.read(bytes);
 		assertThat(len).isEqualTo(3);
 		assertThat(bytes).containsExactly('c', 'd', 'e');
+
+		buffer.readPosition(0);
+		inputStream = buffer.asInputStream();
+		assertThat(inputStream.readAllBytes()).asString().isEqualTo("abcde");
+		assertThat(inputStream.available()).isEqualTo(0);
+		assertThat(inputStream.readAllBytes()).isEmpty();
+
+		buffer.readPosition(0);
+		inputStream = buffer.asInputStream();
+		inputStream.mark(5);
+		assertThat(inputStream.readNBytes(0)).isEmpty();
+		assertThat(inputStream.readNBytes(1000)).asString().isEqualTo("abcde");
+		inputStream.reset();
+		assertThat(inputStream.readNBytes(3)).asString().isEqualTo("abc");
+		assertThat(inputStream.readNBytes(2)).asString().isEqualTo("de");
+		assertThat(inputStream.readNBytes(10)).isEmpty();
+
+		buffer.readPosition(0);
+		inputStream = buffer.asInputStream();
+		inputStream.mark(5);
+		assertThat(inputStream.skip(1)).isEqualTo(1);
+		assertThat(inputStream.readAllBytes()).asString().isEqualTo("bcde");
+		assertThat(inputStream.skip(10)).isEqualTo(0);
+		assertThat(inputStream.available()).isEqualTo(0);
+		inputStream.reset();
+		assertThat(inputStream.skip(100)).isEqualTo(5);
+		assertThat(inputStream.available()).isEqualTo(0);
+
+		buffer.readPosition(0);
+		inputStream = buffer.asInputStream();
+		inputStream.mark(5);
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		assertThat(inputStream.transferTo(out)).isEqualTo(5);
+		assertThat(out.toByteArray()).asString().isEqualTo("abcde");
+		assertThat(inputStream.available()).isEqualTo(0);
+		out.reset();
+		inputStream.reset();
+		assertThat(inputStream.read()).isEqualTo('a');
+		assertThat(inputStream.transferTo(out)).isEqualTo(4);
+		assertThat(out.toByteArray()).asString().isEqualTo("bcde");
+		assertThat(inputStream.available()).isEqualTo(0);
+		assertThat(inputStream.transferTo(OutputStream.nullOutputStream())).isEqualTo(0);
 
 		release(buffer);
 	}

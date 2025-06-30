@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,15 +18,19 @@ package org.springframework.http.client;
 
 import java.io.IOException;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 
 import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledForJreRange;
+import org.junit.jupiter.api.condition.JRE;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
+import org.springframework.util.StreamUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -34,6 +38,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * Tests for {@link JdkClientHttpRequestFactory}.
  *
  * @author Marten Deinum
+ * @author Brian Clozel
  */
 class JdkClientHttpRequestFactoryTests extends AbstractHttpRequestFactoryTests {
 
@@ -88,6 +93,35 @@ class JdkClientHttpRequestFactoryTests extends AbstractHttpRequestFactoryTests {
 
 		try (ClientHttpResponse response = request.execute()) {
 			assertThat(response.getStatusCode()).as("Invalid response status").isEqualTo(HttpStatus.OK);
+		}
+	}
+
+	@Test // gh-35068
+	void deleteRequestWithBody() throws Exception {
+		URI uri = URI.create(baseUrl + "/echo");
+		ClientHttpRequest request = this.factory.createRequest(uri, HttpMethod.DELETE);
+		StreamUtils.copy("body", StandardCharsets.ISO_8859_1, request.getBody());
+		try (ClientHttpResponse response = request.execute()) {
+			assertThat(response.getStatusCode()).as("Invalid response status").isEqualTo(HttpStatus.OK);
+			assertThat(StreamUtils.copyToString(response.getBody(), StandardCharsets.ISO_8859_1))
+					.as("Invalid request body").isEqualTo("body");
+		}
+	}
+
+	@Test // gh-34971
+	@EnabledForJreRange(min = JRE.JAVA_19) // behavior fixed in Java 19
+	void requestContentLengthHeaderWhenNoBody() throws Exception {
+		URI uri = URI.create(baseUrl + "/header/Content-Length");
+		assertNoContentLength(uri, HttpMethod.GET);
+		assertNoContentLength(uri, HttpMethod.DELETE);
+	}
+
+	protected void assertNoContentLength(URI uri, HttpMethod method) throws Exception {
+		ClientHttpRequest request = factory.createRequest(uri, method);
+		try (ClientHttpResponse response = request.execute()) {
+			assertThat(response.getStatusCode()).as("Invalid response status").isEqualTo(HttpStatus.OK);
+			assertThat(StreamUtils.copyToString(response.getBody(), StandardCharsets.ISO_8859_1))
+					.as("Invalid Content-Length request header").isEqualTo("Content-Length:null");
 		}
 	}
 

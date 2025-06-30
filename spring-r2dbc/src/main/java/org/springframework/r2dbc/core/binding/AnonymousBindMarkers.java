@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,9 @@ package org.springframework.r2dbc.core.binding;
 import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
 
 /**
- * Anonymous, index-based bind marker using a static placeholder.
- * Instances are bound by the ordinal position ordered by the appearance of
+ * Anonymous, index-based bind markers that use a static placeholder.
+ *
+ * <p>Instances are bound by the ordinal position ordered by the appearance of
  * the placeholder. This implementation creates indexed bind markers using
  * an anonymous placeholder that correlates with an index.
  *
@@ -46,7 +47,7 @@ class AnonymousBindMarkers implements BindMarkers {
 
 
 	/**
-	 * Create a new {@link AnonymousBindMarkers} instance given {@code placeholder}.
+	 * Create a new {@link AnonymousBindMarkers} instance for the given {@code placeholder}.
 	 * @param placeholder parameter bind marker
 	 */
 	AnonymousBindMarkers(String placeholder) {

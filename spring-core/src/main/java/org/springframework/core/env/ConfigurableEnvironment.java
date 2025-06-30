@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -137,13 +137,13 @@ public interface ConfigurableEnvironment extends Environment, ConfigurableProper
 	Map<String, Object> getSystemEnvironment();
 
 	/**
-	 * Append the given parent environment's active profiles, default profiles and
+	 * Append the given parent environment's active profiles, default profiles, and
 	 * property sources to this (child) environment's respective collections of each.
 	 * <p>For any identically-named {@code PropertySource} instance existing in both
 	 * parent and child, the child instance is to be preserved and the parent instance
 	 * discarded. This has the effect of allowing overriding of property sources by the
-	 * child as well as avoiding redundant searches through common property source types,
-	 * for example, system environment and system properties.
+	 * child as well as avoiding redundant searches through common property source types
+	 * &mdash; for example, system environment and system properties.
 	 * <p>Active and default profile names are also filtered for duplicates, to avoid
 	 * confusion and redundant storage.
 	 * <p>The parent environment remains unmodified in any case. Note that any changes to

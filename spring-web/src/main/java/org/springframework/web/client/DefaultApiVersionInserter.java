@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,15 +27,13 @@ import org.springframework.util.Assert;
 import org.springframework.web.util.UriComponentsBuilder;
 
 /**
- * Default implementation of {@link ApiVersionInserter} to insert the version
- * into a request header, query parameter, or the URL path.
- *
- * <p>Use {@link #builder()} to create an instance.
+ * Default implementation of {@link ApiVersionInserter}.
  *
  * @author Rossen Stoyanchev
  * @since 7.0
+ * @see DefaultApiVersionInserterBuilder
  */
-public final class DefaultApiVersionInserter implements ApiVersionInserter {
+final class DefaultApiVersionInserter implements ApiVersionInserter {
 
 	private final @Nullable String header;
 
@@ -46,7 +44,7 @@ public final class DefaultApiVersionInserter implements ApiVersionInserter {
 	private final ApiVersionFormatter versionFormatter;
 
 
-	private DefaultApiVersionInserter(
+	DefaultApiVersionInserter(
 			@Nullable String header, @Nullable String queryParam, @Nullable Integer pathSegmentIndex,
 			@Nullable ApiVersionFormatter formatter) {
 
@@ -89,104 +87,6 @@ public final class DefaultApiVersionInserter implements ApiVersionInserter {
 	public void insertVersion(Object version, HttpHeaders headers) {
 		if (this.header != null) {
 			headers.set(this.header, this.versionFormatter.formatVersion(version));
-		}
-	}
-
-
-	/**
-	 * Create a builder for an inserter that sets a header.
-	 * @param header the name of a header to hold the version
-	 */
-	public static Builder fromHeader(@Nullable String header) {
-		return new Builder(header, null, null);
-	}
-
-	/**
-	 * Create a builder for an inserter that sets a query parameter.
-	 * @param queryParam the name of a query parameter to hold the version
-	 */
-	public static Builder fromQueryParam(@Nullable String queryParam) {
-		return new Builder(null, queryParam, null);
-	}
-
-	/**
-	 * Create a builder for an inserter that inserts a path segment.
-	 * @param pathSegmentIndex the index of the path segment to hold the version
-	 */
-	public static Builder fromPathSegment(@Nullable Integer pathSegmentIndex) {
-		return new Builder(null, null, pathSegmentIndex);
-	}
-
-	/**
-	 * Create a builder.
-	 */
-	public static Builder builder() {
-		return new Builder(null, null, null);
-	}
-
-
-	/**
-	 * A builder for {@link DefaultApiVersionInserter}.
-	 */
-	public static final class Builder {
-
-		private @Nullable String header;
-
-		private @Nullable String queryParam;
-
-		private @Nullable Integer pathSegmentIndex;
-
-		private @Nullable ApiVersionFormatter versionFormatter;
-
-		private Builder(@Nullable String header, @Nullable String queryParam, @Nullable Integer pathSegmentIndex) {
-			this.header = header;
-			this.queryParam = queryParam;
-			this.pathSegmentIndex = pathSegmentIndex;
-		}
-
-		/**
-		 * Configure the inserter to set a header.
-		 * @param header the name of the header to hold the version
-		 */
-		public Builder fromHeader(@Nullable String header) {
-			this.header = header;
-			return this;
-		}
-
-		/**
-		 * Configure the inserter to set a query parameter.
-		 * @param queryParam the name of the query parameter to hold the version
-		 */
-		public Builder fromQueryParam(@Nullable String queryParam) {
-			this.queryParam = queryParam;
-			return this;
-		}
-
-		/**
-		 * Configure the inserter to insert a path segment.
-		 * @param pathSegmentIndex the index of the path segment to hold the version
-		 */
-		public Builder fromPathSegment(@Nullable Integer pathSegmentIndex) {
-			this.pathSegmentIndex = pathSegmentIndex;
-			return this;
-		}
-
-		/**
-		 * Format the version Object into a String using the given {@link ApiVersionFormatter}.
-		 * <p>By default, the version is formatted with {@link Object#toString()}.
-		 * @param versionFormatter the formatter to use
-		 */
-		public Builder withVersionFormatter(ApiVersionFormatter versionFormatter) {
-			this.versionFormatter = versionFormatter;
-			return this;
-		}
-
-		/**
-		 * Build the inserter.
-		 */
-		public ApiVersionInserter build() {
-			return new DefaultApiVersionInserter(
-					this.header, this.queryParam, this.pathSegmentIndex, this.versionFormatter);
 		}
 	}
 

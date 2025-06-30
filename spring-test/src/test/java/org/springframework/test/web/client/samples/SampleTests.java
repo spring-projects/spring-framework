@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ package org.springframework.test.web.client.samples;
 import java.io.IOException;
 import java.util.Collections;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.core.io.ClassPathResource;
@@ -46,27 +45,22 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
 
 /**
  * Examples to demonstrate writing client-side REST tests with Spring MVC Test.
- * While the tests in this class invoke the RestTemplate directly, in actual
+ *
+ * <p>While the tests in this class invoke the RestTemplate directly, in actual
  * tests the RestTemplate may likely be invoked indirectly, i.e. through client
  * code.
  *
  * @author Rossen Stoyanchev
  */
-public class SampleTests {
+class SampleTests {
 
-	private MockRestServiceServer mockServer;
+	private final RestTemplate restTemplate = new RestTemplate();
 
-	private RestTemplate restTemplate;
+	private final MockRestServiceServer mockServer = MockRestServiceServer.bindTo(this.restTemplate).ignoreExpectOrder(true).build();
 
-	@BeforeEach
-	public void setup() {
-		this.restTemplate = new RestTemplate();
-		this.mockServer = MockRestServiceServer.bindTo(this.restTemplate).ignoreExpectOrder(true).build();
-	}
 
 	@Test
-	public void performGet() {
-
+	void performGet() {
 		String responseBody = "{\"name\" : \"Ludwig van Beethoven\", \"someDouble\" : \"1.6035\"}";
 
 		this.mockServer.expect(requestTo("/composers/42")).andExpect(method(HttpMethod.GET))
@@ -83,8 +77,7 @@ public class SampleTests {
 	}
 
 	@Test
-	public void performGetManyTimes() {
-
+	void performGetManyTimes() {
 		String responseBody = "{\"name\" : \"Ludwig van Beethoven\", \"someDouble\" : \"1.6035\"}";
 
 		this.mockServer.expect(manyTimes(), requestTo("/composers/42")).andExpect(method(HttpMethod.GET))
@@ -105,8 +98,7 @@ public class SampleTests {
 	}
 
 	@Test
-	public void expectNever() {
-
+	void expectNever() {
 		String responseBody = "{\"name\" : \"Ludwig van Beethoven\", \"someDouble\" : \"1.6035\"}";
 
 		this.mockServer.expect(once(), requestTo("/composers/42")).andExpect(method(HttpMethod.GET))
@@ -120,8 +112,7 @@ public class SampleTests {
 	}
 
 	@Test
-	public void expectNeverViolated() {
-
+	void expectNeverViolated() {
 		String responseBody = "{\"name\" : \"Ludwig van Beethoven\", \"someDouble\" : \"1.6035\"}";
 
 		this.mockServer.expect(once(), requestTo("/composers/42")).andExpect(method(HttpMethod.GET))
@@ -135,9 +126,8 @@ public class SampleTests {
 	}
 
 	@Test
-	public void performGetWithResponseBodyFromFile() {
-
-		Resource responseBody = new ClassPathResource("ludwig.json", this.getClass());
+	void performGetWithResponseBodyFromFile() {
+		Resource responseBody = new ClassPathResource("ludwig.json", getClass());
 
 		this.mockServer.expect(requestTo("/composers/42")).andExpect(method(HttpMethod.GET))
 			.andRespond(withSuccess(responseBody, MediaType.APPLICATION_JSON));
@@ -152,8 +142,7 @@ public class SampleTests {
 	}
 
 	@Test
-	public void verify() {
-
+	void verify() {
 		this.mockServer.expect(requestTo("/number")).andExpect(method(HttpMethod.GET))
 			.andRespond(withSuccess("1", MediaType.TEXT_PLAIN));
 
@@ -183,9 +172,8 @@ public class SampleTests {
 	}
 
 	@Test // SPR-14694
-	public void repeatedAccessToResponseViaResource() {
-
-		Resource resource = new ClassPathResource("ludwig.json", this.getClass());
+	void repeatedAccessToResponseViaResource() {
+		Resource resource = new ClassPathResource("ludwig.json", getClass());
 
 		RestTemplate restTemplate = new RestTemplate();
 		restTemplate.setInterceptors(Collections.singletonList(new ContentInterceptor(resource)));

@@ -34,11 +34,7 @@ Controllers can then return a `Flux<List<B>>`; Reactor provides a dedicated oper
 | `HttpHeaders`
 | For returning a response with headers and no body.
 
-| `ErrorResponse`
-| To render an RFC 9457 error response with details in the body,
-  see xref:web/webflux/ann-rest-exceptions.adoc[Error Responses]
-
-| `ProblemDetail`
+| `ErrorResponse`, `ProblemDetail`
 | To render an RFC 9457 error response with details in the body,
   see xref:web/webflux/ann-rest-exceptions.adoc[Error Responses]
 

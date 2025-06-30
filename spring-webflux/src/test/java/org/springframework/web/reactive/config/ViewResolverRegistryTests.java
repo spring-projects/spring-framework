@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.DirectFieldAccessor;
 import org.springframework.core.Ordered;
-import org.springframework.http.codec.json.Jackson2JsonEncoder;
+import org.springframework.http.codec.json.JacksonJsonEncoder;
 import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.reactive.result.view.HttpMessageWriterView;
 import org.springframework.web.reactive.result.view.UrlBasedViewResolver;
@@ -85,7 +85,7 @@ class ViewResolverRegistryTests {
 
 	@Test
 	void defaultViews() {
-		View view = new HttpMessageWriterView(new Jackson2JsonEncoder());
+		View view = new HttpMessageWriterView(new JacksonJsonEncoder());
 		this.registry.defaultViews(view);
 
 		assertThat(this.registry.getDefaultViews()).containsExactly(view);

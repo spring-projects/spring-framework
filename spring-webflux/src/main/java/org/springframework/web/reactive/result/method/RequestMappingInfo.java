@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -71,8 +71,6 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 
 	private static final ProducesRequestCondition EMPTY_PRODUCES = new ProducesRequestCondition();
 
-	private static final VersionRequestCondition EMPTY_VERSION = new VersionRequestCondition();
-
 	private static final RequestConditionHolder EMPTY_CUSTOM = new RequestConditionHolder(null);
 
 
@@ -112,7 +110,7 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 		this.headersCondition = (headers != null ? headers : EMPTY_HEADERS);
 		this.consumesCondition = (consumes != null ? consumes : EMPTY_CONSUMES);
 		this.producesCondition = (produces != null ? produces : EMPTY_PRODUCES);
-		this.versionCondition = (version != null ? version : EMPTY_VERSION);
+		this.versionCondition = (version != null ? version : new VersionRequestCondition(null, null));
 		this.customConditionHolder = (custom != null ? new RequestConditionHolder(custom) : EMPTY_CUSTOM);
 		this.options = options;
 
@@ -572,15 +570,10 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 
 			RequestedContentTypeResolver contentTypeResolver = this.options.getContentTypeResolver();
 
-			VersionRequestCondition versionCondition;
-			ApiVersionStrategy versionStrategy = this.options.getApiVersionStrategy();
-			if (StringUtils.hasText(this.version)) {
-				Assert.state(versionStrategy != null, "API version specified, but no ApiVersionStrategy configured");
-				versionCondition = new VersionRequestCondition(this.version, versionStrategy);
-			}
-			else {
-				versionCondition = EMPTY_VERSION;
-			}
+			ApiVersionStrategy strategy = this.options.getApiVersionStrategy();
+			Assert.state(strategy != null || !StringUtils.hasText(this.version),
+					"API version specified, but no ApiVersionStrategy configured");
+			VersionRequestCondition versionCondition = new VersionRequestCondition(this.version, strategy);
 
 			return new RequestMappingInfo(this.mappingName,
 					isEmpty(this.paths) ? null : new PatternsRequestCondition(parse(this.paths, parser)),
@@ -706,14 +699,10 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 
 		@Override
 		public Builder version(@Nullable String version) {
-			if (version != null) {
-				ApiVersionStrategy strategy = this.options.getApiVersionStrategy();
-				Assert.state(strategy != null, "API version specified, but no ApiVersionStrategy configured");
-				this.versionCondition = new VersionRequestCondition(version, strategy);
-			}
-			else {
-				this.versionCondition = EMPTY_VERSION;
-			}
+			ApiVersionStrategy strategy = this.options.getApiVersionStrategy();
+			Assert.state(strategy != null || !StringUtils.hasText(version),
+					"API version specified, but no ApiVersionStrategy configured");
+			this.versionCondition = new VersionRequestCondition(version, strategy);
 			return this;
 		}
 

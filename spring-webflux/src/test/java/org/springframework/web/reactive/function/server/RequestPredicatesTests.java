@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
+import org.springframework.web.accept.SemanticApiVersionParser;
+import org.springframework.web.reactive.HandlerMapping;
+import org.springframework.web.reactive.accept.ApiVersionStrategy;
+import org.springframework.web.reactive.accept.DefaultApiVersionStrategy;
 import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest;
 import org.springframework.web.testfixture.server.MockServerWebExchange;
 import org.springframework.web.util.pattern.PathPatternParser;
@@ -357,6 +361,26 @@ class RequestPredicatesTests {
 
 		predicate = RequestPredicates.queryParam("foo", s -> s.equals("baz"));
 		assertThat(predicate.test(request)).isFalse();
+	}
+
+	@Test
+	void version() {
+		assertThat(RequestPredicates.version("1.1").test(serverRequest("1.1"))).isTrue();
+		assertThat(RequestPredicates.version("1.1+").test(serverRequest("1.5"))).isTrue();
+		assertThat(RequestPredicates.version("1.1").test(serverRequest("1.5"))).isFalse();
+	}
+
+	private static DefaultServerRequest serverRequest(String version) {
+		ApiVersionStrategy versionStrategy = apiVersionStrategy();
+		Comparable<?> parsedVersion = versionStrategy.parseVersion(version);
+		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("https://localhost"));
+		exchange.getAttributes().put(HandlerMapping.API_VERSION_ATTRIBUTE, parsedVersion);
+		return new DefaultServerRequest(exchange, Collections.emptyList(), versionStrategy);
+	}
+
+	private static DefaultApiVersionStrategy apiVersionStrategy() {
+		return new DefaultApiVersionStrategy(
+				List.of(exchange -> null), new SemanticApiVersionParser(), true, null, false, null);
 	}
 
 }

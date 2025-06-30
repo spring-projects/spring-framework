@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,7 +63,6 @@ inline fun <reified T> JdbcOperations.queryForObject(sql: String, args: Array<ou
  * @author Mario Arias
  * @since 5.0
  */
-@Suppress("EXTENSION_SHADOWED_BY_MEMBER")
 inline fun <reified T : Any> JdbcOperations.queryForList(sql: String): List<T> =
 		queryForList(sql, T::class.java)
 
@@ -74,7 +73,6 @@ inline fun <reified T : Any> JdbcOperations.queryForList(sql: String): List<T> =
  * @author Mario Arias
  * @since 5.0
  */
-@Suppress("EXTENSION_SHADOWED_BY_MEMBER")
 inline fun <reified T : Any> JdbcOperations.queryForList(sql: String, args: Array<out Any>,
 		argTypes: IntArray): List<T> =
 		queryForList(sql, args, argTypes, T::class.java)

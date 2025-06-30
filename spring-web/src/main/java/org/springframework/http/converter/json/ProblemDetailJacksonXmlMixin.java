@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ import java.util.Map;
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
+import com.fasterxml.jackson.annotation.JsonRootName;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import org.jspecify.annotations.Nullable;
 
@@ -40,36 +40,44 @@ import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
  * <a href="https://github.com/FasterXML/jackson-dataformat-xml/issues/355">FasterXML/jackson-dataformat-xml#355</a>.
  *
  * @author Rossen Stoyanchev
+ * @author Sebastien Deleuze
  * @since 6.0.5
  */
 @JsonInclude(NON_EMPTY)
 @JacksonXmlRootElement(localName = "problem", namespace = ProblemDetailJacksonXmlMixin.NAMESPACE)
+@JsonRootName(value = "problem", namespace = ProblemDetailJacksonXmlMixin.NAMESPACE)
 public interface ProblemDetailJacksonXmlMixin {
 
 	/** RFC 7807 (obsoleted by RFC 9457) namespace. */
 	String NAMESPACE = "urn:ietf:rfc:7807";
 
 
-	@JacksonXmlProperty(namespace = NAMESPACE)
+	@com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty(namespace = NAMESPACE)
+	@tools.jackson.dataformat.xml.annotation.JacksonXmlProperty(namespace = NAMESPACE)
 	URI getType();
 
-	@JacksonXmlProperty(namespace = NAMESPACE)
+	@com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty(namespace = NAMESPACE)
+	@tools.jackson.dataformat.xml.annotation.JacksonXmlProperty(namespace = NAMESPACE)
 	String getTitle();
 
-	@JacksonXmlProperty(namespace = NAMESPACE)
+	@com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty(namespace = NAMESPACE)
+	@tools.jackson.dataformat.xml.annotation.JacksonXmlProperty(namespace = NAMESPACE)
 	int getStatus();
 
-	@JacksonXmlProperty(namespace = NAMESPACE)
+	@com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty(namespace = NAMESPACE)
+	@tools.jackson.dataformat.xml.annotation.JacksonXmlProperty(namespace = NAMESPACE)
 	String getDetail();
 
-	@JacksonXmlProperty(namespace = NAMESPACE)
+	@com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty(namespace = NAMESPACE)
+	@tools.jackson.dataformat.xml.annotation.JacksonXmlProperty(namespace = NAMESPACE)
 	URI getInstance();
 
 	@JsonAnySetter
 	void setProperty(String name, @Nullable Object value);
 
 	@JsonAnyGetter
-	@JacksonXmlProperty(namespace = NAMESPACE)
+	@com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty(namespace = NAMESPACE)
+	@tools.jackson.dataformat.xml.annotation.JacksonXmlProperty(namespace = NAMESPACE)
 	Map<String, Object> getProperties();
 
 }

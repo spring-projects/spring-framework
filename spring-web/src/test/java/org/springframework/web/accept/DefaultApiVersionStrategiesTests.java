@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,8 +23,8 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * Unit tests for {@link DefaultApiVersionStrategy}.
@@ -32,39 +32,74 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
  */
 public class DefaultApiVersionStrategiesTests {
 
-	private final SemanticApiVersionParser parser = new SemanticApiVersionParser();
+	private static final SemanticApiVersionParser parser = new SemanticApiVersionParser();
+
+	private final MockHttpServletRequest request = new MockHttpServletRequest();
 
 
 	@Test
-	void defaultVersion() {
-		SemanticApiVersionParser.Version version = this.parser.parseVersion("1.2.3");
-		ApiVersionStrategy strategy = initVersionStrategy(version.toString());
-
-		assertThat(strategy.getDefaultVersion()).isEqualTo(version);
+	void defaultVersionIsParsed() {
+		String version = "1.2.3";
+		ApiVersionStrategy strategy = apiVersionStrategy(version);
+		assertThat(strategy.getDefaultVersion()).isEqualTo(parser.parseVersion(version));
 	}
 
 	@Test
-	void supportedVersions() {
-		SemanticApiVersionParser.Version v1 = this.parser.parseVersion("1");
-		SemanticApiVersionParser.Version v2 = this.parser.parseVersion("2");
-		SemanticApiVersionParser.Version v9 = this.parser.parseVersion("9");
-
-		DefaultApiVersionStrategy strategy = initVersionStrategy(null);
-		strategy.addSupportedVersion(v1.toString());
-		strategy.addSupportedVersion(v2.toString());
-
-		MockHttpServletRequest request = new MockHttpServletRequest();
-		strategy.validateVersion(v1, request);
-		strategy.validateVersion(v2, request);
-
-		assertThatThrownBy(() -> strategy.validateVersion(v9, request))
-				.isInstanceOf(InvalidApiVersionException.class);
+	void validateSupportedVersion() {
+		String version = "1.2";
+		DefaultApiVersionStrategy strategy = apiVersionStrategy();
+		strategy.addSupportedVersion(version);
+		validateVersion(version, strategy);
 	}
 
-	private static DefaultApiVersionStrategy initVersionStrategy(@Nullable String defaultValue) {
+	@Test
+	void rejectUnsupportedVersion() {
+		assertThatThrownBy(() -> validateVersion("1.2", apiVersionStrategy()))
+				.isInstanceOf(InvalidApiVersionException.class)
+				.hasMessage("400 BAD_REQUEST \"Invalid API version: '1.2.0'.\"");
+	}
+
+	@Test
+	void validateDetectedVersion() {
+		String version = "1.2";
+		DefaultApiVersionStrategy strategy = apiVersionStrategy(null, true);
+		strategy.addMappedVersion(version);
+		validateVersion(version, strategy);
+	}
+
+	@Test
+	void validateWhenDetectedVersionOff() {
+		String version = "1.2";
+		DefaultApiVersionStrategy strategy = apiVersionStrategy();
+		strategy.addMappedVersion(version);
+		assertThatThrownBy(() -> validateVersion(version, strategy)).isInstanceOf(InvalidApiVersionException.class);
+	}
+
+	@Test
+	void missingRequiredVersion() {
+		assertThatThrownBy(() -> validateVersion(null, apiVersionStrategy()))
+				.isInstanceOf(MissingApiVersionException.class)
+				.hasMessage("400 BAD_REQUEST \"API version is required.\"");
+	}
+
+	private static DefaultApiVersionStrategy apiVersionStrategy() {
+		return apiVersionStrategy(null, false);
+	}
+
+	private static DefaultApiVersionStrategy apiVersionStrategy(@Nullable String defaultVersion) {
+		return apiVersionStrategy(defaultVersion, false);
+	}
+
+	private static DefaultApiVersionStrategy apiVersionStrategy(
+			@Nullable String defaultVersion, boolean detectSupportedVersions) {
+
 		return new DefaultApiVersionStrategy(
 				List.of(request -> request.getParameter("api-version")),
-				new SemanticApiVersionParser(), true, defaultValue);
+				new SemanticApiVersionParser(), true, defaultVersion, detectSupportedVersions, null);
+	}
+
+	private void validateVersion(@Nullable String version, DefaultApiVersionStrategy strategy) {
+		strategy.validateVersion(version != null ? parser.parseVersion(version) : null, request);
 	}
 
 }

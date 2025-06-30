@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -359,11 +359,11 @@ class StringUtilsTests {
 		assertThat(StringUtils.getFilename(null)).isNull();
 		assertThat(StringUtils.getFilename("")).isEmpty();
 		assertThat(StringUtils.getFilename("myfile")).isEqualTo("myfile");
-		assertThat(StringUtils.getFilename("mypath/myfile")).isEqualTo("myfile");
+		assertThat(StringUtils.getFilename("my/path/myfile")).isEqualTo("myfile");
 		assertThat(StringUtils.getFilename("myfile.")).isEqualTo("myfile.");
 		assertThat(StringUtils.getFilename("mypath/myfile.")).isEqualTo("myfile.");
 		assertThat(StringUtils.getFilename("myfile.txt")).isEqualTo("myfile.txt");
-		assertThat(StringUtils.getFilename("mypath/myfile.txt")).isEqualTo("myfile.txt");
+		assertThat(StringUtils.getFilename("my/path/myfile.txt")).isEqualTo("myfile.txt");
 	}
 
 	@Test

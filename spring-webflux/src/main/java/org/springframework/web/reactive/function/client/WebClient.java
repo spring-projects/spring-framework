@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -251,6 +251,15 @@ public interface WebClient {
 		 * @param cookiesConsumer a function that consumes the cookies map
 		 */
 		Builder defaultCookies(Consumer<MultiValueMap<String, String>> cookiesConsumer);
+
+		/**
+		 * Global option to specify an API version to add to every request,
+		 * if not already set.
+		 * @param version the version to use
+		 * @return this builder
+		 * @since 7.0
+		 */
+		Builder defaultApiVersion(Object version);
 
 		/**
 		 * Configure an {@link ApiVersionInserter} to abstract how an API version
@@ -830,7 +839,7 @@ public interface WebClient {
 		<T> Flux<T> bodyToFlux(Class<T> elementClass);
 
 		/**
-		 * Variant of {@link #bodyToMono(Class)} with a {@link ParameterizedTypeReference}.
+		 * Variant of {@link #bodyToFlux(Class)} with a {@link ParameterizedTypeReference}.
 		 * @param elementTypeRef the type of element to decode to
 		 * @param <T> the body element type
 		 * @return the decoded body
@@ -850,7 +859,7 @@ public interface WebClient {
 		<T> Mono<ResponseEntity<T>> toEntity(Class<T> bodyClass);
 
 		/**
-		 * Variant of {@link #bodyToMono(Class)} with a {@link ParameterizedTypeReference}.
+		 * Variant of {@link #toEntity(Class)} with a {@link ParameterizedTypeReference}.
 		 * @param bodyTypeReference the expected response body type
 		 * @param <T> the response body type
 		 * @return the {@code ResponseEntity} with the decoded body
@@ -872,7 +881,7 @@ public interface WebClient {
 		<T> Mono<ResponseEntity<List<T>>> toEntityList(Class<T> elementClass);
 
 		/**
-		 * Variant of {@link #toEntity(Class)} with a {@link ParameterizedTypeReference}.
+		 * Variant of {@link #toEntityList(Class)} with a {@link ParameterizedTypeReference}.
 		 * @param elementTypeRef the type of element to decode the target Flux to
 		 * @param <T> the body element type
 		 * @return the {@code ResponseEntity}

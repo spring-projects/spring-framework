@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,6 +38,7 @@ import org.springframework.test.web.servlet.setup.MockMvcConfigurer;
 import org.springframework.test.web.servlet.setup.RouterFunctionMockMvcBuilder;
 import org.springframework.test.web.servlet.setup.StandaloneMockMvcBuilder;
 import org.springframework.validation.Validator;
+import org.springframework.web.accept.ApiVersionStrategy;
 import org.springframework.web.accept.ContentNegotiationManager;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
@@ -283,6 +284,14 @@ public interface MockMvcWebTestClient {
 		 * {@link StandaloneMockMvcBuilder#setConversionService(FormattingConversionService)}.
 		 */
 		ControllerSpec conversionService(FormattingConversionService conversionService);
+
+		/**
+		 * Set the {@link ApiVersionStrategy} to use when mapping requests.
+		 * <p>This is delegated to
+		 * {@link StandaloneMockMvcBuilder#setApiVersionStrategy(ApiVersionStrategy)}.
+		 * @since 7.0
+		 */
+		ControllerSpec apiVersionStrategy(ApiVersionStrategy versionStrategy);
 
 		/**
 		 * Add global interceptors.

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -960,6 +960,33 @@ class AutowiredAnnotationBeanPostProcessorTests {
 	@Test
 	void constructorResourceInjectionWithNoCandidatesAndNoFallback() {
 		bf.registerBeanDefinition("annotatedBean", new RootBeanDefinition(ConstructorWithoutFallbackBean.class));
+
+		assertThatExceptionOfType(UnsatisfiedDependencyException.class)
+				.isThrownBy(() -> bf.getBean("annotatedBean"))
+				.satisfies(methodParameterDeclaredOn(ConstructorWithoutFallbackBean.class));
+	}
+
+	@Test
+	void constructorResourceInjectionWithCandidateAndNoFallback() {
+		bf.registerBeanDefinition("annotatedBean", new RootBeanDefinition(ConstructorWithoutFallbackBean.class));
+		RootBeanDefinition tb = new RootBeanDefinition(NullFactoryMethods.class);
+		tb.setFactoryMethodName("createTestBean");
+		bf.registerBeanDefinition("testBean", tb);
+
+		bf.getBean("testBean");
+		assertThatExceptionOfType(UnsatisfiedDependencyException.class)
+				.isThrownBy(() -> bf.getBean("annotatedBean"))
+				.satisfies(methodParameterDeclaredOn(ConstructorWithoutFallbackBean.class));
+	}
+
+	@Test
+	void constructorResourceInjectionWithNameMatchingCandidateAndNoFallback() {
+		bf.registerBeanDefinition("annotatedBean", new RootBeanDefinition(ConstructorWithoutFallbackBean.class));
+		RootBeanDefinition tb = new RootBeanDefinition(NullFactoryMethods.class);
+		tb.setFactoryMethodName("createTestBean");
+		bf.registerBeanDefinition("testBean3", tb);
+
+		bf.getBean("testBean3");
 		assertThatExceptionOfType(UnsatisfiedDependencyException.class)
 				.isThrownBy(() -> bf.getBean("annotatedBean"))
 				.satisfies(methodParameterDeclaredOn(ConstructorWithoutFallbackBean.class));
@@ -1193,6 +1220,7 @@ class AutowiredAnnotationBeanPostProcessorTests {
 	@Test
 	void singleConstructorInjectionWithMissingDependency() {
 		bf.registerBeanDefinition("annotatedBean", new RootBeanDefinition(SingleConstructorOptionalCollectionBean.class));
+
 		assertThatExceptionOfType(UnsatisfiedDependencyException.class)
 				.isThrownBy(() -> bf.getBean("annotatedBean"));
 	}
@@ -1203,6 +1231,7 @@ class AutowiredAnnotationBeanPostProcessorTests {
 		RootBeanDefinition tb = new RootBeanDefinition(NullFactoryMethods.class);
 		tb.setFactoryMethodName("createTestBean");
 		bf.registerBeanDefinition("testBean", tb);
+
 		assertThatExceptionOfType(UnsatisfiedDependencyException.class)
 				.isThrownBy(() -> bf.getBean("annotatedBean"));
 	}
@@ -2428,7 +2457,7 @@ class AutowiredAnnotationBeanPostProcessorTests {
 	}
 
 	@Test
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	void genericsBasedConstructorInjectionWithNonTypedTarget() {
 		RootBeanDefinition bd = new RootBeanDefinition(RepositoryConstructorInjectionBean.class);
 		bd.setScope(BeanDefinition.SCOPE_PROTOTYPE);
@@ -2708,22 +2737,22 @@ class AutowiredAnnotationBeanPostProcessorTests {
 	public static class ResourceInjectionBean {
 
 		@Autowired(required = false)
-		private TestBean testBean;
+		private @Nullable TestBean testBean;
 
-		TestBean testBean2;
+		@Nullable TestBean testBean2;
 
 		@Autowired
-		public void setTestBean2(TestBean testBean2) {
+		public void setTestBean2(@Nullable TestBean testBean2) {
 			Assert.state(this.testBean != null, "Wrong initialization order");
 			Assert.state(this.testBean2 == null, "Already called");
 			this.testBean2 = testBean2;
 		}
 
-		public TestBean getTestBean() {
+		public @Nullable TestBean getTestBean() {
 			return this.testBean;
 		}
 
-		public TestBean getTestBean2() {
+		public @Nullable TestBean getTestBean2() {
 			return this.testBean2;
 		}
 	}
@@ -2732,13 +2761,13 @@ class AutowiredAnnotationBeanPostProcessorTests {
 	static class NonPublicResourceInjectionBean<T> extends ResourceInjectionBean {
 
 		@Autowired
-		public final ITestBean testBean3 = null;
+		public final @Nullable ITestBean testBean3 = null;
 
-		private T nestedTestBean;
+		private @Nullable T nestedTestBean;
 
-		private ITestBean testBean4;
+		private @Nullable ITestBean testBean4;
 
-		protected BeanFactory beanFactory;
+		protected @Nullable BeanFactory beanFactory;
 
 		public boolean baseInjected = false;
 
@@ -2747,18 +2776,18 @@ class AutowiredAnnotationBeanPostProcessorTests {
 
 		@Override
 		@Autowired
-		public void setTestBean2(TestBean testBean2) {
+		public void setTestBean2(@Nullable TestBean testBean2) {
 			this.testBean2 = testBean2;
 		}
 
 		@Autowired
-		private void inject(ITestBean testBean4, T nestedTestBean) {
+		private void inject(@Nullable ITestBean testBean4, @Nullable T nestedTestBean) {
 			this.testBean4 = testBean4;
 			this.nestedTestBean = nestedTestBean;
 		}
 
 		@Autowired
-		private void inject(ITestBean testBean4) {
+		private void inject(@Nullable ITestBean testBean4) {
 			this.baseInjected = true;
 		}
 
@@ -2768,11 +2797,11 @@ class AutowiredAnnotationBeanPostProcessorTests {
 			this.beanFactory = beanFactory;
 		}
 
-		public ITestBean getTestBean3() {
+		public @Nullable ITestBean getTestBean3() {
 			return this.testBean3;
 		}
 
-		public ITestBean getTestBean4() {
+		public @Nullable ITestBean getTestBean4() {
 			return this.testBean4;
 		}
 
@@ -3060,7 +3089,6 @@ class AutowiredAnnotationBeanPostProcessorTests {
 
 		protected ITestBean testBean3;
 
-		@Autowired(required = false)
 		public ConstructorWithoutFallbackBean(ITestBean testBean3) {
 			this.testBean3 = testBean3;
 		}
@@ -3075,7 +3103,6 @@ class AutowiredAnnotationBeanPostProcessorTests {
 
 		protected ITestBean testBean3;
 
-		@Autowired(required = false)
 		public ConstructorWithNullableArgument(@Nullable ITestBean testBean3) {
 			this.testBean3 = testBean3;
 		}

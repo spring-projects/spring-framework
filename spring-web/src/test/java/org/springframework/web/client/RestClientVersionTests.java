@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,41 +59,47 @@ public class RestClientVersionTests {
 
 	@Test
 	void header() {
-		performRequest(DefaultApiVersionInserter.fromHeader("X-API-Version"));
+		performRequest(ApiVersionInserter.useHeader("X-API-Version"));
 		expectRequest(request -> assertThat(request.getHeader("X-API-Version")).isEqualTo("1.2"));
 	}
 
 	@Test
 	void queryParam() {
-		performRequest(DefaultApiVersionInserter.fromQueryParam("api-version"));
+		performRequest(ApiVersionInserter.useQueryParam("api-version"));
 		expectRequest(request -> assertThat(request.getPath()).isEqualTo("/path?api-version=1.2"));
 	}
 
 	@Test
 	void pathSegmentIndexLessThanSize() {
-		performRequest(DefaultApiVersionInserter.fromPathSegment(0).withVersionFormatter(v -> "v" + v));
+		performRequest(ApiVersionInserter.builder().usePathSegment(0).withVersionFormatter(v -> "v" + v).build());
 		expectRequest(request -> assertThat(request.getPath()).isEqualTo("/v1.2/path"));
 	}
 
 	@Test
 	void pathSegmentIndexEqualToSize() {
-		performRequest(DefaultApiVersionInserter.fromPathSegment(1).withVersionFormatter(v -> "v" + v));
+		performRequest(ApiVersionInserter.builder().usePathSegment(1).withVersionFormatter(v -> "v" + v).build());
 		expectRequest(request -> assertThat(request.getPath()).isEqualTo("/path/v1.2"));
 	}
 
 	@Test
 	void pathSegmentIndexGreaterThanSize() {
 		assertThatIllegalStateException()
-				.isThrownBy(() -> performRequest(DefaultApiVersionInserter.fromPathSegment(2)))
+				.isThrownBy(() -> performRequest(ApiVersionInserter.usePathSegment(2)))
 				.withMessage("Cannot insert version into '/path' at path segment index 2");
-		}
+	}
 
-	private void performRequest(DefaultApiVersionInserter.Builder builder) {
-		ApiVersionInserter versionInserter = builder.build();
-		RestClient restClient = restClientBuilder.apiVersionInserter(versionInserter).build();
+	@Test
+	void defaultVersion() {
+		ApiVersionInserter inserter = ApiVersionInserter.useHeader("X-API-Version");
+		RestClient restClient = restClientBuilder.defaultApiVersion(1.2).apiVersionInserter(inserter).build();
+		restClient.get().uri("/path").retrieve().body(String.class);
 
-		restClient.get()
-				.uri("/path")
+		expectRequest(request -> assertThat(request.getHeader("X-API-Version")).isEqualTo("1.2"));
+	}
+
+	private void performRequest(ApiVersionInserter versionInserter) {
+		restClientBuilder.apiVersionInserter(versionInserter).build()
+				.get().uri("/path")
 				.apiVersion(1.2)
 				.retrieve()
 				.body(String.class);

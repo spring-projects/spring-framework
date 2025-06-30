@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -148,7 +148,8 @@ public class BindingReflectionHintsRegistrar {
 		String companionClassName = clazz.getCanonicalName() + KOTLIN_COMPANION_SUFFIX;
 		if (ClassUtils.isPresent(companionClassName, null)) {
 			Class<?> companionClass = ClassUtils.resolveClassName(companionClassName, null);
-			Method serializerMethod = ClassUtils.getMethodIfAvailable(companionClass, "serializer");
+			Method serializerMethod = ClassUtils.getMethodIfAvailable(companionClass, "serializer",
+					(Class<?>[]) null);
 			if (serializerMethod != null) {
 				hints.registerMethod(serializerMethod, ExecutableMode.INVOKE);
 			}

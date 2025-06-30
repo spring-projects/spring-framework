@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -72,7 +72,7 @@ class ClassFileClassMetadata implements AnnotationMetadata {
 		this.className = className;
 		this.accessFlags = accessFlags;
 		this.enclosingClassName = enclosingClassName;
-		this.superClassName = superClassName;
+		this.superClassName = (!className.endsWith(".package-info")) ? superClassName : null;
 		this.independentInnerClass = independentInnerClass;
 		this.interfaceNames = interfaceNames;
 		this.memberClassNames = memberClassNames;
@@ -268,18 +268,16 @@ class ClassFileClassMetadata implements AnnotationMetadata {
 		void nestMembers(String currentClassName, InnerClassesAttribute innerClasses) {
 			for (InnerClassInfo classInfo : innerClasses.classes()) {
 				String innerClassName = classInfo.innerClass().name().stringValue();
-				// skip parent inner classes
-				if (!innerClassName.startsWith(currentClassName)) {
-					continue;
-				}
-				// the current class is an inner class
-				else if (currentClassName.equals(innerClassName)) {
+				if (currentClassName.equals(innerClassName)) {
+					// the current class is an inner class
 					this.innerAccessFlags = classInfo.flags();
 				}
-				// collecting data about actual inner classes
-				else {
-					this.memberClassNames.add(ClassUtils.convertResourcePathToClassName(innerClassName));
-				}
+				classInfo.outerClass().ifPresent(outerClass -> {
+					if (outerClass.name().stringValue().equals(currentClassName)) {
+						// collecting data about actual inner classes
+						this.memberClassNames.add(ClassUtils.convertResourcePathToClassName(innerClassName));
+					}
+				});
 			}
 		}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.beans.factory.aot;
 
 import java.util.List;
+import java.util.function.BiConsumer;
 
 import javax.lang.model.element.Modifier;
 
@@ -52,6 +53,10 @@ class BeanRegistrationsAotContribution
 
 	private static final String BEAN_FACTORY_PARAMETER_NAME = "beanFactory";
 
+	private static final int MAX_REGISTRATIONS_PER_FILE = 5000;
+
+	private static final int MAX_REGISTRATIONS_PER_METHOD = 1000;
+
 	private static final ArgumentCodeGenerator argumentCodeGenerator = ArgumentCodeGenerator
 			.of(DefaultListableBeanFactory.class, BEAN_FACTORY_PARAMETER_NAME);
 
@@ -67,19 +72,57 @@ class BeanRegistrationsAotContribution
 	public void applyTo(GenerationContext generationContext,
 			BeanFactoryInitializationCode beanFactoryInitializationCode) {
 
-		GeneratedClass generatedClass = generationContext.getGeneratedClasses()
-				.addForFeature("BeanFactoryRegistrations", type -> {
-					type.addJavadoc("Register bean definitions for the bean factory.");
-					type.addModifiers(Modifier.PUBLIC);
-				});
+		GeneratedClass generatedClass = createBeanFactoryRegistrationClass(generationContext);
 		BeanRegistrationsCodeGenerator codeGenerator = new BeanRegistrationsCodeGenerator(generatedClass);
-		GeneratedMethod generatedBeanDefinitionsMethod = new BeanDefinitionsRegistrationGenerator(
-				generationContext, codeGenerator, this.registrations).generateRegisterBeanDefinitionsMethod();
+		GeneratedMethod generatedBeanDefinitionsMethod = generateBeanRegistrationCode(generationContext,
+				generatedClass, codeGenerator);
 		beanFactoryInitializationCode.addInitializer(generatedBeanDefinitionsMethod.toMethodReference());
 		GeneratedMethod generatedAliasesMethod = codeGenerator.getMethods().add("registerAliases",
 				this::generateRegisterAliasesMethod);
 		beanFactoryInitializationCode.addInitializer(generatedAliasesMethod.toMethodReference());
 		generateRegisterHints(generationContext.getRuntimeHints(), this.registrations);
+	}
+
+	private GeneratedMethod generateBeanRegistrationCode(GenerationContext generationContext, GeneratedClass mainGeneratedClass, BeanRegistrationsCodeGenerator mainCodeGenerator) {
+		if (this.registrations.size() < MAX_REGISTRATIONS_PER_FILE) {
+			return generateBeanRegistrationClass(generationContext, mainCodeGenerator, 0, this.registrations.size());
+		}
+		else {
+			return mainGeneratedClass.getMethods().add("registerBeanDefinitions", method -> {
+				method.addJavadoc("Register the bean definitions.");
+				method.addModifiers(Modifier.PUBLIC);
+				method.addParameter(DefaultListableBeanFactory.class, BEAN_FACTORY_PARAMETER_NAME);
+				CodeBlock.Builder body = CodeBlock.builder();
+				Registration.doWithSlice(this.registrations, MAX_REGISTRATIONS_PER_FILE, (start, end) -> {
+					GeneratedClass sliceGeneratedClass = createBeanFactoryRegistrationClass(generationContext);
+					BeanRegistrationsCodeGenerator sliceCodeGenerator = new BeanRegistrationsCodeGenerator(sliceGeneratedClass);
+					GeneratedMethod generatedMethod = generateBeanRegistrationClass(generationContext, sliceCodeGenerator, start, end);
+					body.addStatement(generatedMethod.toMethodReference().toInvokeCodeBlock(argumentCodeGenerator));
+				});
+				method.addCode(body.build());
+			});
+		}
+	}
+
+	private GeneratedMethod generateBeanRegistrationClass(GenerationContext generationContext,
+			BeanRegistrationsCodeGenerator codeGenerator, int start, int end) {
+
+		return codeGenerator.getMethods().add("registerBeanDefinitions", method -> {
+			method.addJavadoc("Register the bean definitions.");
+			method.addModifiers(Modifier.PUBLIC);
+			method.addParameter(DefaultListableBeanFactory.class, BEAN_FACTORY_PARAMETER_NAME);
+			List<Registration> sliceRegistrations = this.registrations.subList(start, end);
+			new BeanDefinitionsRegistrationGenerator(
+					generationContext, codeGenerator, sliceRegistrations, start).generateBeanRegistrationsCode(method);
+		});
+	}
+
+	private static GeneratedClass createBeanFactoryRegistrationClass(GenerationContext generationContext) {
+		return generationContext.getGeneratedClasses()
+				.addForFeature("BeanFactoryRegistrations", type -> {
+					type.addJavadoc("Register bean definitions for the bean factory.");
+					type.addModifiers(Modifier.PUBLIC);
+				});
 	}
 
 	private void generateRegisterAliasesMethod(MethodSpec.Builder method) {
@@ -117,6 +160,28 @@ class BeanRegistrationsAotContribution
 			return this.registeredBean.getBeanName();
 		}
 
+		/**
+		 * Invoke an action for each slice of the given {@code registrations}. The
+		 * {@code action} is invoked for each slice with the start and end index of the
+		 * given list of registrations. Elements to process can be retrieved using
+		 * {@link List#subList(int, int)}.
+		 * @param registrations the registrations to process
+		 * @param sliceSize the size of a slice
+		 * @param action the action to invoke for each slice
+		 */
+		static void doWithSlice(List<Registration> registrations, int sliceSize,
+				BiConsumer<Integer, Integer> action) {
+
+			int index = 0;
+			int end = 0;
+			while (end < registrations.size()) {
+				int start = index * sliceSize;
+				end = Math.min(start + sliceSize, registrations.size());
+				action.accept(start, end);
+				index++;
+			}
+		}
+
 	}
 
 
@@ -144,6 +209,10 @@ class BeanRegistrationsAotContribution
 
 	}
 
+	/**
+	 * Generate code for bean registrations. Limited to {@value #MAX_REGISTRATIONS_PER_METHOD}
+	 * beans per method to avoid hitting a limit.
+	 */
 	static final class BeanDefinitionsRegistrationGenerator {
 
 		private final GenerationContext generationContext;
@@ -152,44 +221,38 @@ class BeanRegistrationsAotContribution
 
 		private final List<Registration> registrations;
 
+		private final int globalStart;
+
 
 		BeanDefinitionsRegistrationGenerator(GenerationContext generationContext,
-				BeanRegistrationsCodeGenerator codeGenerator, List<Registration> registrations) {
+				BeanRegistrationsCodeGenerator codeGenerator, List<Registration> registrations, int globalStart) {
 
 			this.generationContext = generationContext;
 			this.codeGenerator = codeGenerator;
 			this.registrations = registrations;
+			this.globalStart = globalStart;
 		}
 
-
-		GeneratedMethod generateRegisterBeanDefinitionsMethod() {
-			return this.codeGenerator.getMethods().add("registerBeanDefinitions", method -> {
-				method.addJavadoc("Register the bean definitions.");
-				method.addModifiers(Modifier.PUBLIC);
-				method.addParameter(DefaultListableBeanFactory.class, BEAN_FACTORY_PARAMETER_NAME);
-				if (this.registrations.size() <= 1000) {
-					generateRegisterBeanDefinitionMethods(method, this.registrations);
-				}
-				else {
-					Builder code = CodeBlock.builder();
-					code.add("// Registration is sliced to avoid exceeding size limit\n");
-					int index = 0;
-					int end = 0;
-					while (end < this.registrations.size()) {
-						int start = index * 1000;
-						end = Math.min(start + 1000, this.registrations.size());
-						GeneratedMethod sliceMethod = generateSliceMethod(start, end);
-						code.addStatement(sliceMethod.toMethodReference().toInvokeCodeBlock(
-								argumentCodeGenerator, this.codeGenerator.getClassName()));
-						index++;
-					}
-					method.addCode(code.build());
-				}
-			});
+		void generateBeanRegistrationsCode(MethodSpec.Builder method) {
+			if (this.registrations.size() <= 1000) {
+				generateRegisterBeanDefinitionMethods(method, this.registrations);
+			}
+			else {
+				Builder code = CodeBlock.builder();
+				code.add("// Registration is sliced to avoid exceeding size limit\n");
+				Registration.doWithSlice(this.registrations, MAX_REGISTRATIONS_PER_METHOD,
+						(start, end) -> {
+							GeneratedMethod sliceMethod = generateSliceMethod(start, end);
+							code.addStatement(sliceMethod.toMethodReference().toInvokeCodeBlock(
+									argumentCodeGenerator, this.codeGenerator.getClassName()));
+						});
+				method.addCode(code.build());
+			}
 		}
 
 		private GeneratedMethod generateSliceMethod(int start, int end) {
-			String description = "Register the bean definitions from %s to %s.".formatted(start, end - 1);
+			String description = "Register the bean definitions from %s to %s."
+					.formatted(this.globalStart + start, this.globalStart + end - 1);
 			List<Registration> slice = this.registrations.subList(start, end);
 			return this.codeGenerator.getMethods().add("registerBeanDefinitions", method -> {
 				method.addJavadoc(description);

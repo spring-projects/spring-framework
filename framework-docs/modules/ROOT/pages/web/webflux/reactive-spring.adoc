@@ -81,7 +81,7 @@ The following table describes server dependencies (also see
 |jetty-server, jetty-servlet
 |===
 
-The code snippets below show using the `HttpHandler` adapters with each server API:
+The code snippets below show using the `HttpHandler` adapters with each server API.
 
 *Reactor Netty*
 [tabs]
@@ -176,17 +176,16 @@ Java::
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
 	HttpHandler handler = ...
-	Servlet servlet = new JettyHttpHandlerAdapter(handler);
+	JettyCoreHttpHandlerAdapter adapter = new JettyCoreHttpHandlerAdapter(handler);
 
 	Server server = new Server();
-	ServletContextHandler contextHandler = new ServletContextHandler(server, "");
-	contextHandler.addServlet(new ServletHolder(servlet), "/");
-	contextHandler.start();
+	server.setHandler(adapter);
 
 	ServerConnector connector = new ServerConnector(server);
 	connector.setHost(host);
 	connector.setPort(port);
 	server.addConnector(connector);
+
 	server.start();
 ----
 
@@ -195,27 +194,27 @@ Kotlin::
 [source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	val handler: HttpHandler = ...
-	val servlet = JettyHttpHandlerAdapter(handler)
+	val adapter = JettyCoreHttpHandlerAdapter(handler)
 
 	val server = Server()
-	val contextHandler = ServletContextHandler(server, "")
-	contextHandler.addServlet(ServletHolder(servlet), "/")
-	contextHandler.start();
+	server.setHandler(adapter)
 
 	val connector = ServerConnector(server)
 	connector.host = host
 	connector.port = port
 	server.addConnector(connector)
+
 	server.start()
 ----
 ======
 
-*Servlet Container*
+TIP: In Spring Framework 6.2, `JettyHttpHandlerAdapter` was deprecated in favor of
+`JettyCoreHttpHandlerAdapter`, which integrates directly with Jetty 12 APIs
+without a Servlet layer.
 
-To deploy as a WAR to any Servlet container, you can extend and include
-{spring-framework-api}/web/server/adapter/AbstractReactiveWebInitializer.html[`AbstractReactiveWebInitializer`]
-in the WAR. That class wraps an `HttpHandler` with `ServletHttpHandlerAdapter` and registers
-that as a `Servlet`.
+To deploy as a WAR to a Servlet container instead, use
+{spring-framework-api}/web/server/adapter/AbstractReactiveWebInitializer.html[`AbstractReactiveWebInitializer`],
+to adapt `HttpHandler` to a `Servlet` via `ServletHttpHandlerAdapter`.
 
 
 
@@ -800,4 +799,3 @@ Kotlin::
 			.build()
 ----
 ======
-

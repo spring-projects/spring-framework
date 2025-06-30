@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,8 +20,6 @@ import java.io.IOException;
 import java.util.EnumSet;
 import java.util.Map;
 
-import com.fasterxml.jackson.databind.JsonSerializer;
-import com.fasterxml.jackson.databind.ser.impl.UnknownSerializer;
 import jakarta.servlet.DispatcherType;
 import jakarta.servlet.Filter;
 import jakarta.servlet.FilterChain;
@@ -31,11 +29,14 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
+import tools.jackson.databind.ValueSerializer;
+import tools.jackson.databind.ser.impl.UnknownSerializer;
 
-import org.springframework.http.converter.json.SpringHandlerInstantiator;
+import org.springframework.http.support.JacksonHandlerInstantiator;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.stereotype.Controller;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.web.accept.ApiVersionStrategy;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
@@ -72,6 +73,18 @@ class StandaloneMockMvcBuilderTests {
 
 		assertThat(chain).isNotNull();
 		assertThat(((HandlerMethod) chain.getHandler()).getMethod().getName()).isEqualTo("handleWithPlaceholders");
+	}
+
+	@Test
+	void apiVersionStrategySet() {
+		ApiVersionStrategy versionStrategy = mock(ApiVersionStrategy.class);
+
+		TestStandaloneMockMvcBuilder builder = new TestStandaloneMockMvcBuilder();
+		builder.setApiVersionStrategy(versionStrategy);
+		builder.build();
+
+		assertThat(builder.wac.getBean(RequestMappingHandlerMapping.class).getApiVersionStrategy())
+				.isSameAs(versionStrategy);
 	}
 
 	@Test  // SPR-12553
@@ -133,8 +146,8 @@ class StandaloneMockMvcBuilderTests {
 	void springHandlerInstantiator() {
 		TestStandaloneMockMvcBuilder builder = new TestStandaloneMockMvcBuilder(new PersonController());
 		builder.build();
-		SpringHandlerInstantiator instantiator = new SpringHandlerInstantiator(builder.wac.getAutowireCapableBeanFactory());
-		JsonSerializer serializer = instantiator.serializerInstance(null, null, UnknownSerializer.class);
+		JacksonHandlerInstantiator instantiator = new JacksonHandlerInstantiator(builder.wac.getAutowireCapableBeanFactory());
+		ValueSerializer serializer = instantiator.serializerInstance(null, null, UnknownSerializer.class);
 		assertThat(serializer).isNotNull();
 	}
 

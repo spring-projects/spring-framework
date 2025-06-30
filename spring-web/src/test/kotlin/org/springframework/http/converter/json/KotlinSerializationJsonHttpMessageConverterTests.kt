@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,8 +33,10 @@ import org.springframework.web.testfixture.http.MockHttpOutputMessage
 import java.lang.reflect.ParameterizedType
 import java.math.BigDecimal
 import java.nio.charset.StandardCharsets
+import kotlin.reflect.KType
 import kotlin.reflect.javaType
 import kotlin.reflect.jvm.javaMethod
+import kotlin.reflect.jvm.jvmName
 import kotlin.reflect.typeOf
 
 /**
@@ -246,7 +248,10 @@ class KotlinSerializationJsonHttpMessageConverterTests {
 		val inputMessage = MockHttpInputMessage(body.toByteArray(StandardCharsets.UTF_8))
 		inputMessage.headers.contentType = MediaType.APPLICATION_JSON
 		val methodParameter = MethodParameter.forExecutable(::handleMapWithNullable::javaMethod.get()!!, 0)
-		val result = converter.read(ResolvableType.forMethodParameter(methodParameter), inputMessage, null) as Map<String, String?>
+		val hints = mapOf(KType::class.jvmName to typeOf<Map<String, String?>>())
+
+		val result = converter.read(ResolvableType.forMethodParameter(methodParameter), inputMessage,
+			hints) as Map<String, String?>
 
 		assertThat(result).containsExactlyEntriesOf(mapOf("value" to null))
 	}
@@ -400,9 +405,10 @@ class KotlinSerializationJsonHttpMessageConverterTests {
 		val serializableBean = mapOf<String, String?>("value" to null)
 		val expectedJson = """{"value":null}"""
 		val methodParameter = MethodParameter.forExecutable(::handleMapWithNullable::javaMethod.get()!!, -1)
+		val hints = mapOf(KType::class.jvmName to typeOf<Map<String, String?>>())
 
 		this.converter.write(serializableBean, ResolvableType.forMethodParameter(methodParameter), null,
-			outputMessage, null)
+			outputMessage, hints)
 
 		val result = outputMessage.getBodyAsString(StandardCharsets.UTF_8)
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.jspecify.annotations.Nullable;
 
 import org.springframework.context.EmbeddedValueResolverAware;
@@ -52,6 +53,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.service.annotation.HttpExchange;
+import org.springframework.web.servlet.HandlerExecutionChain;
+import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.handler.MatchableHandlerMapping;
 import org.springframework.web.servlet.handler.RequestMatchResult;
 import org.springframework.web.servlet.mvc.condition.AbstractRequestCondition;
@@ -197,6 +200,21 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 		return AnnotatedElementUtils.hasAnnotation(beanType, Controller.class);
 	}
 
+
+	@Override
+	protected @Nullable HandlerMethod getHandlerInternal(HttpServletRequest request) throws Exception {
+		if (this.apiVersionStrategy != null) {
+			Comparable<?> version = (Comparable<?>) request.getAttribute(API_VERSION_ATTRIBUTE);
+			if (version == null) {
+				version = this.apiVersionStrategy.resolveParseAndValidateVersion(request);
+				if (version != null) {
+					request.setAttribute(API_VERSION_ATTRIBUTE, version);
+				}
+			}
+		}
+		return super.getHandlerInternal(request);
+	}
+
 	/**
 	 * Uses type-level and method-level {@link RequestMapping @RequestMapping}
 	 * and {@link HttpExchange @HttpExchange} annotations to create the
@@ -239,42 +257,44 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	}
 
 	private @Nullable RequestMappingInfo createRequestMappingInfo(AnnotatedElement element) {
-		RequestMappingInfo requestMappingInfo = null;
+
+		List<AnnotationDescriptor> descriptors =
+				MergedAnnotations.from(element, SearchStrategy.TYPE_HIERARCHY, RepeatableContainers.none())
+						.stream()
+						.filter(MergedAnnotationPredicates.typeIn(RequestMapping.class, HttpExchange.class))
+						.filter(MergedAnnotationPredicates.firstRunOf(MergedAnnotation::getAggregateIndex))
+						.map(AnnotationDescriptor::new)
+						.distinct()
+						.toList();
+
+		RequestMappingInfo info = null;
 		RequestCondition<?> customCondition = (element instanceof Class<?> clazz ?
 				getCustomTypeCondition(clazz) : getCustomMethodCondition((Method) element));
 
-		List<AnnotationDescriptor> descriptors = getAnnotationDescriptors(element);
+		List<AnnotationDescriptor> mappingDescriptors =
+				descriptors.stream().filter(desc -> desc.annotation instanceof RequestMapping).toList();
 
-		List<AnnotationDescriptor> requestMappings = descriptors.stream()
-				.filter(desc -> desc.annotation instanceof RequestMapping).toList();
-		if (!requestMappings.isEmpty()) {
-			if (requestMappings.size() > 1 && logger.isWarnEnabled()) {
-				logger.warn("Multiple @RequestMapping annotations found on %s, but only the first will be used: %s"
-						.formatted(element, requestMappings));
-			}
-			requestMappingInfo = createRequestMappingInfo((RequestMapping) requestMappings.get(0).annotation, customCondition);
+		if (!mappingDescriptors.isEmpty()) {
+			checkMultipleAnnotations(element, mappingDescriptors);
+			info = createRequestMappingInfo((RequestMapping) mappingDescriptors.get(0).annotation, customCondition);
 		}
 
-		List<AnnotationDescriptor> httpExchanges = descriptors.stream()
-				.filter(desc -> desc.annotation instanceof HttpExchange).toList();
-		if (!httpExchanges.isEmpty()) {
-			Assert.state(requestMappingInfo == null,
-					() -> "%s is annotated with @RequestMapping and @HttpExchange annotations, but only one is allowed: %s"
-							.formatted(element, Stream.of(requestMappings, httpExchanges).flatMap(List::stream).toList()));
-			Assert.state(httpExchanges.size() == 1,
-					() -> "Multiple @HttpExchange annotations found on %s, but only one is allowed: %s"
-							.formatted(element, httpExchanges));
-			requestMappingInfo = createRequestMappingInfo((HttpExchange) httpExchanges.get(0).annotation, customCondition);
+		List<AnnotationDescriptor> exchangeDescriptors =
+				descriptors.stream().filter(desc -> desc.annotation instanceof HttpExchange).toList();
+
+		if (!exchangeDescriptors.isEmpty()) {
+			checkMultipleAnnotations(element, info, mappingDescriptors, exchangeDescriptors);
+			info = createRequestMappingInfo((HttpExchange) exchangeDescriptors.get(0).annotation, customCondition);
 		}
 
-		if (requestMappingInfo != null && this.apiVersionStrategy instanceof DefaultApiVersionStrategy davs) {
-			String version = requestMappingInfo.getVersionCondition().getVersion();
+		if (info != null && this.apiVersionStrategy instanceof DefaultApiVersionStrategy davs) {
+			String version = info.getVersionCondition().getVersion();
 			if (version != null) {
-				davs.addSupportedVersion(version);
+				davs.addMappedVersion(version);
 			}
 		}
 
-		return requestMappingInfo;
+		return info;
 	}
 
 	/**
@@ -305,6 +325,28 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	 */
 	protected @Nullable RequestCondition<?> getCustomMethodCondition(Method method) {
 		return null;
+	}
+
+	private void checkMultipleAnnotations(
+			AnnotatedElement element, List<AnnotationDescriptor> mappingDescriptors) {
+
+		if (logger.isWarnEnabled() && mappingDescriptors.size() > 1) {
+			logger.warn("Multiple @RequestMapping annotations found on %s, but only the first will be used: %s"
+					.formatted(element, mappingDescriptors));
+		}
+	}
+
+	private static void checkMultipleAnnotations(
+			AnnotatedElement element, @Nullable RequestMappingInfo info,
+			List<AnnotationDescriptor> mappingDescriptors, List<AnnotationDescriptor> exchangeDescriptors) {
+
+		Assert.state(info == null,
+				() -> "%s is annotated with @RequestMapping and @HttpExchange annotations, but only one is allowed: %s"
+						.formatted(element, Stream.of(mappingDescriptors, exchangeDescriptors).flatMap(List::stream).toList()));
+
+		Assert.state(exchangeDescriptors.size() == 1,
+				() -> "Multiple @HttpExchange annotations found on %s, but only one is allowed: %s"
+						.formatted(element, exchangeDescriptors));
 	}
 
 	/**
@@ -381,6 +423,16 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	private static RequestMethod[] toMethodArray(String method) {
 		return (StringUtils.hasText(method) ?
 				new RequestMethod[] {RequestMethod.valueOf(method)} : EMPTY_REQUEST_METHOD_ARRAY);
+	}
+
+	@Override
+	protected HandlerExecutionChain getHandlerExecutionChain(Object handler, HttpServletRequest request) {
+		HandlerExecutionChain executionChain = super.getHandlerExecutionChain(handler, request);
+		Comparable<?> version = (Comparable<?>) request.getAttribute(API_VERSION_ATTRIBUTE);
+		if (version != null) {
+			executionChain.addInterceptor(new DeprecationInterceptor(version));
+		}
+		return executionChain;
 	}
 
 	@Override
@@ -517,15 +569,6 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 		}
 	}
 
-	private static List<AnnotationDescriptor> getAnnotationDescriptors(AnnotatedElement element) {
-		return MergedAnnotations.from(element, SearchStrategy.TYPE_HIERARCHY, RepeatableContainers.none())
-				.stream()
-				.filter(MergedAnnotationPredicates.typeIn(RequestMapping.class, HttpExchange.class))
-				.filter(MergedAnnotationPredicates.firstRunOf(MergedAnnotation::getAggregateIndex))
-				.map(AnnotationDescriptor::new)
-				.distinct()
-				.toList();
-	}
 
 	private static class AnnotationDescriptor {
 
@@ -552,6 +595,23 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 			return this.root.synthesize().toString();
 		}
 
+	}
+
+
+	private final class DeprecationInterceptor implements HandlerInterceptor {
+
+		private final Comparable<?> version;
+
+		private DeprecationInterceptor(Comparable<?> version) {
+			this.version = version;
+		}
+
+		@Override
+		public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
+			Assert.state(apiVersionStrategy != null, "No ApiVersionStrategy");
+			apiVersionStrategy.handleDeprecations(this.version, request, response);
+			return true;
+		}
 	}
 
 }

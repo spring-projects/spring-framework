@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,6 +57,7 @@ import org.springframework.validation.BindException;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.support.WebExchangeDataBinder;
+import org.springframework.web.reactive.accept.ApiVersionStrategy;
 import org.springframework.web.reactive.function.BodyExtractor;
 import org.springframework.web.reactive.function.BodyExtractors;
 import org.springframework.web.reactive.function.UnsupportedMediaTypeException;
@@ -92,10 +93,20 @@ class DefaultServerRequest implements ServerRequest {
 
 	private final List<HttpMessageReader<?>> messageReaders;
 
+	private final @Nullable ApiVersionStrategy versionStrategy;
+
 
 	DefaultServerRequest(ServerWebExchange exchange, List<HttpMessageReader<?>> messageReaders) {
+		this(exchange, messageReaders, null);
+	}
+
+	DefaultServerRequest(
+			ServerWebExchange exchange, List<HttpMessageReader<?>> messageReaders,
+			@Nullable ApiVersionStrategy versionStrategy) {
+
 		this.exchange = exchange;
 		this.messageReaders = List.copyOf(messageReaders);
+		this.versionStrategy = versionStrategy;
 		this.headers = new DefaultHeaders();
 	}
 
@@ -160,6 +171,11 @@ class DefaultServerRequest implements ServerRequest {
 	@Override
 	public List<HttpMessageReader<?>> messageReaders() {
 		return this.messageReaders;
+	}
+
+	@Override
+	public @Nullable ApiVersionStrategy apiVersionStrategy() {
+		return this.versionStrategy;
 	}
 
 	@Override

@@ -3,26 +3,34 @@
 
 The Spring Framework provides the following choices for making calls to REST endpoints:
 
-* xref:integration/rest-clients.adoc#rest-restclient[`RestClient`] - synchronous client with a fluent API.
-* xref:integration/rest-clients.adoc#rest-webclient[`WebClient`] - non-blocking, reactive client with fluent API.
-* xref:integration/rest-clients.adoc#rest-resttemplate[`RestTemplate`] - synchronous client with template method API.
-* xref:integration/rest-clients.adoc#rest-http-interface[HTTP Interface] - annotated interface with generated, dynamic proxy implementation.
+* xref:integration/rest-clients.adoc#rest-restclient[`RestClient`] -- synchronous client with a fluent API
+* xref:integration/rest-clients.adoc#rest-webclient[`WebClient`] -- non-blocking, reactive client with fluent API
+* xref:integration/rest-clients.adoc#rest-resttemplate[`RestTemplate`] -- synchronous client with template method API
+* xref:integration/rest-clients.adoc#rest-http-interface[HTTP Interface Clients] -- annotated interface backed by generated proxy
 
 
 [[rest-restclient]]
 == `RestClient`
 
-The `RestClient` is a synchronous HTTP client that offers a modern, fluent API.
-It offers an abstraction over HTTP libraries that allows for convenient conversion from a Java object to an HTTP request, and the creation of objects from an HTTP response.
+`RestClient` is a synchronous HTTP client that provides a fluent API to perform requests.
+It serves as an abstraction over HTTP libraries, and handles conversion of HTTP request and response content to and from higher level Java objects.
 
-=== Creating a `RestClient`
+=== Create a `RestClient`
 
-The `RestClient` is created using one of the static `create` methods.
-You can also use `builder()` to get a builder with further options, such as specifying which HTTP library to use (see <<rest-request-factories>>) and which message converters to use (see <<rest-message-conversion>>), setting a default URI, default path variables, default request headers, or `uriBuilderFactory`, or registering interceptors and initializers.
+`RestClient` has static `create` shortcut methods.
+It also exposes a `builder()` with further options:
 
-Once created (or built), the `RestClient` can be used safely by multiple threads.
+- select the HTTP library to use, see <<rest-request-factories>>
+- configure message converters, see <<rest-message-conversion>>
+- set a baseUrl
+- set default request headers, cookies, path variables, API version
+- configure an `ApiVersionInserter`
+- register interceptors
+- register request initializers
 
-The following sample shows how to create a default `RestClient`, and how to build a custom one.
+Once created, a `RestClient` is safe to use in multiple threads.
+
+The below shows how to create or build a `RestClient`:
 
 [tabs]
 ======
@@ -39,6 +47,8 @@ Java::
 		.defaultUriVariables(Map.of("variable", "foo"))
 		.defaultHeader("My-Header", "Foo")
 		.defaultCookie("My-Cookie", "Bar")
+		.defaultVersion("1.2")
+		.apiVersionInserter(ApiVersionInserter.fromHeader("API-Version").build())
 		.requestInterceptor(myCustomInterceptor)
 		.requestInitializer(myCustomInitializer)
 		.build();
@@ -57,23 +67,25 @@ Kotlin::
 		.defaultUriVariables(mapOf("variable" to "foo"))
 		.defaultHeader("My-Header", "Foo")
 		.defaultCookie("My-Cookie", "Bar")
+        .defaultVersion("1.2")
+        .apiVersionInserter(ApiVersionInserter.fromHeader("API-Version").build())
 		.requestInterceptor(myCustomInterceptor)
 		.requestInitializer(myCustomInitializer)
 		.build()
 ----
 ======
 
-=== Using the `RestClient`
+=== Use the `RestClient`
 
-When making an HTTP request with the `RestClient`, the first thing to specify is which HTTP method to use.
-This can be done with `method(HttpMethod)` or with the convenience methods `get()`, `head()`, `post()`, and so on.
+To perform an HTTP request, first specify the HTTP method to use.
+Use the convenience methods like `get()`, `head()`, `post()`, and others, or `method(HttpMethod)`.
 
 ==== Request URL
 
-Next, the request URI can be specified with the `uri` methods.
-This step is optional and can be skipped if the `RestClient` is configured with a default URI.
+Next, specify the request URI with the `uri` methods.
+This is optional, and you can skip this step if you configured a baseUrl through the builder.
 The URL is typically specified as a `String`, with optional URI template variables.
-The following example configures a GET request to `https://example.com/orders/42`:
+The following shows how to perform a request:
 
 [tabs]
 ======
@@ -108,6 +120,7 @@ For more details on working with and encoding URIs, see xref:web/webmvc/mvc-uri-
 
 If necessary, the HTTP request can be manipulated by adding request headers with `header(String, String)`, `headers(Consumer<HttpHeaders>`, or with the convenience methods `accept(MediaType...)`, `acceptCharset(Charset...)` and so on.
 For HTTP requests that can contain a body (`POST`, `PUT`, and `PATCH`), additional methods are available: `contentType(MediaType)`, and `contentLength(long)`.
+You can set an API version for the request if the client is configured with `ApiVersionInserter`.
 
 The request body itself can be set by `body(Object)`, which internally uses <<rest-message-conversion>>.
 Alternatively, the request body can be set using a `ParameterizedTypeReference`, allowing you to use generics.
@@ -844,15 +857,17 @@ It can be used to migrate from the latter to the former.
 
 
 [[rest-http-interface]]
-== HTTP Interface
+== HTTP Interface Clients
 
-The Spring Framework lets you define an HTTP service as a Java interface with
-`@HttpExchange` methods. You can pass such an interface to `HttpServiceProxyFactory`
-to create a proxy which performs requests through an HTTP client such as `RestClient`
-or `WebClient`. You can also implement the interface from an `@Controller` for server
-request handling.
+You can define an HTTP Service as a Java interface with `@HttpExchange` methods, and use
+`HttpServiceProxyFactory` to create a client proxy from it for remote access over HTTP via
+`RestClient`, `WebClient`, or `RestTemplate`. On the server side, an `@Controller` class
+can implement the same interface to handle requests with
+xref:web/webmvc/mvc-controller/ann-requestmapping.adoc#mvc-ann-httpexchange-annotation[@HttpExchange]
+controller methods.
 
-Start by creating the interface with `@HttpExchange` methods:
+
+First, create the Java interface:
 
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
@@ -866,43 +881,7 @@ Start by creating the interface with `@HttpExchange` methods:
 	}
 ----
 
-Now you can create a proxy that performs requests when methods are called.
-
-For `RestClient`:
-
-[source,java,indent=0,subs="verbatim,quotes"]
-----
-	RestClient restClient = RestClient.builder().baseUrl("https://api.github.com/").build();
-	RestClientAdapter adapter = RestClientAdapter.create(restClient);
-	HttpServiceProxyFactory factory = HttpServiceProxyFactory.builderFor(adapter).build();
-
-	RepositoryService service = factory.createClient(RepositoryService.class);
-----
-
-For `WebClient`:
-
-[source,java,indent=0,subs="verbatim,quotes"]
-----
-	WebClient webClient = WebClient.builder().baseUrl("https://api.github.com/").build();
-	WebClientAdapter adapter = WebClientAdapter.create(webClient);
-	HttpServiceProxyFactory factory = HttpServiceProxyFactory.builderFor(adapter).build();
-
-	RepositoryService service = factory.createClient(RepositoryService.class);
-----
-
-For `RestTemplate`:
-
-[source,java,indent=0,subs="verbatim,quotes"]
-----
-	RestTemplate restTemplate = new RestTemplate();
-	restTemplate.setUriTemplateHandler(new DefaultUriBuilderFactory("https://api.github.com/"));
-	RestTemplateAdapter adapter = RestTemplateAdapter.create(restTemplate);
-	HttpServiceProxyFactory factory = HttpServiceProxyFactory.builderFor(adapter).build();
-
-	RepositoryService service = factory.createClient(RepositoryService.class);
-----
-
-`@HttpExchange` is supported at the type level where it applies to all methods:
+Optionally, use `@HttpExchange` at the type level to declare common attributes for all methods:
 
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
@@ -920,15 +899,46 @@ For `RestTemplate`:
 ----
 
 
+Next, configure the client and create the `HttpServiceProxyFactory`:
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	// Using RestClient...
+
+	RestClient restClient = RestClient.create("...");
+	RestClientAdapter adapter = RestClientAdapter.create(restClient);
+
+	// or WebClient...
+
+	WebClient webClient = WebClient.create("...");
+	WebClientAdapter adapter = WebClientAdapter.create(webClient);
+
+	// or RestTemplate...
+
+	RestTemplate restTemplate = new RestTemplate();
+	RestTemplateAdapter adapter = RestTemplateAdapter.create(restTemplate);
+
+	HttpServiceProxyFactory factory = HttpServiceProxyFactory.builderFor(adapter).build();
+----
+
+Now, you're ready to create client proxies:
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	RepositoryService service = factory.createClient(RepositoryService.class);
+	// Use service methods for remote calls...
+----
+
+
+
 [[rest-http-interface-method-parameters]]
 === Method Parameters
 
-Annotated, HTTP exchange methods support flexible method signatures with the following
-method parameters:
+`@HttpExchange` methods support flexible method signatures with the following inputs:
 
 [cols="1,2", options="header"]
 |===
-| Method argument | Description
+| Method parameter | Description
 
 | `URI`
 | Dynamically set the URL for the request, overriding the annotation's `url` attribute.
@@ -989,28 +999,32 @@ Method parameters cannot be `null` unless the `required` attribute (where availa
 parameter annotation) is set to `false`, or the parameter is marked optional as determined by
 {spring-framework-api}/core/MethodParameter.html#isOptional()[`MethodParameter#isOptional`].
 
+`RestClientAdapter` provides additional support for a method parameter of type
+`StreamingHttpOutputMessage.Body` that allows sending the request body by writing to an
+`OutputStream`.
+
 
 
 [[rest-http-interface.custom-resolver]]
-=== Custom argument resolver
+=== Custom Arguments
 
-For more complex cases, HTTP interfaces do not support `RequestEntity` types as method parameters.
-This would take over the entire HTTP request and not improve the semantics of the interface.
-Instead of adding many method parameters, developers can combine them into a custom type
-and configure a dedicated `HttpServiceArgumentResolver` implementation.
-
-In the following HTTP interface, we are using a custom `Search` type as a parameter:
+You can configure a custom `HttpServiceArgumentResolver`. The example interface below
+uses a custom `Search` method parameter type:
 
 include-code::./CustomHttpServiceArgumentResolver[tag=httpinterface,indent=0]
 
-We can implement our own `HttpServiceArgumentResolver` that supports our custom `Search` type
-and writes its data in the outgoing HTTP request.
+A custom argument resolver could be implemented like this:
 
 include-code::./CustomHttpServiceArgumentResolver[tag=argumentresolver,indent=0]
 
-Finally, we can use this argument resolver during the setup and use our HTTP interface.
+To configure the custom argument resolver:
 
 include-code::./CustomHttpServiceArgumentResolver[tag=usage,indent=0]
+
+TIP: By default, `RequestEntity` is not supported as a method parameter, instead encouraging
+the use of more fine-grained method parameters for individual parts of the request.
+
+
 
 [[rest-http-interface-return-values]]
 === Return Values
@@ -1084,65 +1098,180 @@ depends on how the underlying HTTP client is configured. You can set a `blockTim
 value on the adapter level as well, but we recommend relying on timeout settings of the
 underlying HTTP client, which operates at a lower level and provides more control.
 
+`RestClientAdapter` provides supports additional support for a return value of type
+`InputStream` or `ResponseEntity<InputStream>` that provides access to the raw response
+body content.
+
+
 
 [[rest-http-interface-exceptions]]
 === Error Handling
 
-To customize error response handling, you need to configure the underlying HTTP client.
-
-For `RestClient`:
-
-By default, `RestClient` raises `RestClientException` for 4xx and 5xx HTTP status codes.
-To customize this, register a response status handler that applies to all responses
-performed through the client:
+To customize error handling for HTTP Service client proxies, you can configure the
+underlying client as needed. By default, clients raise an exception for 4xx and 5xx HTTP
+status codes. To customize this, register a response status handler that applies to all
+responses performed through the client as follows:
 
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
+	// For RestClient
 	RestClient restClient = RestClient.builder()
 			.defaultStatusHandler(HttpStatusCode::isError, (request, response) -> ...)
 			.build();
-
 	RestClientAdapter adapter = RestClientAdapter.create(restClient);
-	HttpServiceProxyFactory factory = HttpServiceProxyFactory.builderFor(adapter).build();
-----
 
-For more details and options, such as suppressing error status codes, see the Javadoc of
-`defaultStatusHandler` in `RestClient.Builder`.
-
-For `WebClient`:
-
-By default, `WebClient` raises `WebClientResponseException` for 4xx and 5xx HTTP status codes.
-To customize this, register a response status handler that applies to all responses
-performed through the client:
-
-[source,java,indent=0,subs="verbatim,quotes"]
-----
+	// or for WebClient...
 	WebClient webClient = WebClient.builder()
 			.defaultStatusHandler(HttpStatusCode::isError, resp -> ...)
 			.build();
-
 	WebClientAdapter adapter = WebClientAdapter.create(webClient);
-	HttpServiceProxyFactory factory = HttpServiceProxyFactory.builder(adapter).build();
-----
 
-For more details and options, such as suppressing error status codes, see the Javadoc of
-`defaultStatusHandler` in `WebClient.Builder`.
-
-For `RestTemplate`:
-
-By default, `RestTemplate` raises `RestClientException` for 4xx and 5xx HTTP status codes.
-To customize this, register an error handler that applies to all responses
-performed through the client:
-
-[source,java,indent=0,subs="verbatim,quotes"]
-----
+	// or for RestTemplate...
 	RestTemplate restTemplate = new RestTemplate();
 	restTemplate.setErrorHandler(myErrorHandler);
-	
+
 	RestTemplateAdapter adapter = RestTemplateAdapter.create(restTemplate);
+
 	HttpServiceProxyFactory factory = HttpServiceProxyFactory.builderFor(adapter).build();
 ----
 
-For more details and options, see the Javadoc of `setErrorHandler` in `RestTemplate` and
-the `ResponseErrorHandler` hierarchy.
+For more details and options such as suppressing error status codes, see the reference
+documentation for each client, as well as the Javadoc of `defaultStatusHandler` in
+`RestClient.Builder` or `WebClient.Builder`, and the `setErrorHandler` of `RestTemplate`.
 
+
+
+[[rest-http-interface-group-config]]
+=== HTTP Interface Groups
+
+It's trivial to create client proxies with `HttpServiceProxyFactory`, but to have them
+declared as beans leads to repetitive configuration. You may also have multiple
+target hosts, and therefore multiple clients to configure, and even more client proxy
+beans to create.
+
+To make it easier to work with interface clients at scale the Spring Framework provides
+dedicated configuration support. It lets applications focus on identifying HTTP Services
+by group, and customizing the client for each group, while the framework transparently
+creates a registry of client proxies, and declares each proxy as a bean.
+
+An HTTP Service group is simply a set of interfaces that share the same client setup and
+`HttpServiceProxyFactory` instance to create proxies. Typically, that means one group per
+host, but you can have more than one group for the same target host in case the
+underlying client needs to be configured differently.
+
+One way to declare HTTP Service groups is via `@ImportHttpServices` annotations in
+`@Configuration` classes as shown below:
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	@Configuration
+	@ImportHttpServices(group = "echo", types = {EchoServiceA.class, EchoServiceB.class}) // <1>
+	@ImportHttpServices(group = "greeting", basePackageClasses = GreetServiceA.class) // <2>
+	public class ClientConfig {
+	}
+
+----
+<1> Manually list interfaces for group "echo"
+<2> Detect interfaces for group "greeting" under a base package
+
+It is also possible to declare groups programmatically by creating an HTTP Service
+registrar and then importing it:
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	public class MyHttpServiceRegistrar extends AbstractHttpServiceRegistrar { // <1>
+
+		@Override
+		protected void registerHttpServices(GroupRegistry registry, AnnotationMetadata metadata) {
+			registry.forGroup("echo").register(EchoServiceA.class, EchoServiceB.class); // <2>
+			registry.forGroup("greeting").detectInBasePackages(GreetServiceA.class); // <3>
+		}
+	}
+
+	@Configuration
+	@Import(MyHttpServiceRegistrar.class) // <4>
+	public class ClientConfig {
+	}
+
+----
+<1> Create extension class of `AbstractHttpServiceRegistrar`
+<2> Manually list interfaces for group "echo"
+<3> Detect interfaces for group "greeting" under a base package
+<4> Import the registrar
+
+TIP: You can mix and match `@ImportHttpService` annotations with programmatic registrars,
+and you can spread the imports across multiple configuration classes. All imports
+contribute collaboratively the same, shared `HttpServiceProxyRegistry` instance.
+
+Once HTTP Service groups are declared, add an `HttpServiceGroupConfigurer` bean to
+customize the client for each group. For example:
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	@Configuration
+	@ImportHttpServices(group = "echo", types = {EchoServiceA.class, EchoServiceB.class})
+	@ImportHttpServices(group = "greeting", basePackageClasses = GreetServiceA.class)
+	public class ClientConfig {
+
+		@Bean
+		public RestClientHttpServiceGroupConfigurer groupConfigurer() {
+			return groups -> {
+				// configure client for group "echo"
+				groups.filterByName("echo").forEachClient((group, clientBuilder) -> ...);
+
+				// configure the clients for all groups
+				groups.forEachClient((group, clientBuilder) -> ...);
+
+				// configure client and proxy factory for each group
+				groups.forEachGroup((group, clientBuilder, factoryBuilder) -> ...);
+			};
+		}
+	}
+----
+
+TIP: Spring Boot uses an `HttpServiceGroupConfigurer` to add support for client properties
+by HTTP Service group, Spring Security to add OAuth support, and Spring Cloud to add load
+balancing.
+
+As a result of the above, each client proxy is available as a bean that you can
+conveniently autowire by type:
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	@RestController
+	public class EchoController {
+
+		private final EchoService echoService;
+
+		public EchoController(EchoService echoService) {
+			this.echoService = echoService;
+		}
+
+		// ...
+	}
+----
+
+However, if there are multiple client proxies of the same type, e.g. the same interface
+in multiple groups, then there is no unique bean of that type, and you cannot autowire by
+type only. For such cases, you can work directly with the `HttpServiceProxyRegistry` that
+holds all proxies, and obtain the ones you need by group:
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	@RestController
+	public class EchoController {
+
+		private final EchoService echoService1;
+
+		private final EchoService echoService2;
+
+		public EchoController(HttpServiceProxyRegistry registry) {
+			this.echoService1 = registry.getClient("echo1", EchoService.class); // <1>
+			this.echoService2 = registry.getClient("echo2", EchoService.class); // <2>
+		}
+
+		// ...
+	}
+----
+<1> Access the `EchoService` client proxy for group "echo1"
+<2> Access the `EchoService` client proxy for group "echo2"

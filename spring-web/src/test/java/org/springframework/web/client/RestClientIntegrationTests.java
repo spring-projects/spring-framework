@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.web.client;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -28,9 +29,11 @@ import java.util.Map;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
+import com.fasterxml.jackson.annotation.JsonView;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -42,6 +45,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.StreamingHttpOutputMessage;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.ClientHttpResponse;
@@ -51,6 +55,7 @@ import org.springframework.http.client.JettyClientHttpRequestFactory;
 import org.springframework.http.client.ReactorClientHttpRequestFactory;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.FastByteArrayOutputStream;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -522,7 +527,36 @@ class RestClientIntegrationTests {
 		expectRequestCount(1);
 		expectRequest(request -> {
 			assertThat(request.getPath()).isEqualTo("/pojo/capitalize");
-			assertThat(request.getBody().readUtf8()).isEqualTo("{\"foo\":\"foofoo\",\"bar\":\"barbar\"}");
+			assertThat(request.getBody().readUtf8()).isEqualTo("{\"bar\":\"barbar\",\"foo\":\"foofoo\"}");
+			assertThat(request.getHeader(HttpHeaders.ACCEPT)).isEqualTo("application/json");
+			assertThat(request.getHeader(HttpHeaders.CONTENT_TYPE)).isEqualTo("application/json");
+		});
+	}
+
+	@ParameterizedRestClientTest
+	void postUserAsJsonWithJsonView(ClientHttpRequestFactory requestFactory) {
+		startServer(requestFactory);
+
+		prepareResponse(response -> response.setHeader("Content-Type", "application/json")
+				.setBody("{\"username\":\"USERNAME\"}"));
+
+		User result = this.restClient.post()
+				.uri("/user/capitalize")
+				.accept(MediaType.APPLICATION_JSON)
+				.contentType(MediaType.APPLICATION_JSON)
+				.hint(JsonView.class.getName(), PublicView.class)
+				.body(new User("username", "password"))
+				.retrieve()
+				.body(User.class);
+
+		assertThat(result).isNotNull();
+		assertThat(result.username()).isEqualTo("USERNAME");
+		assertThat(result.password()).isNull();
+
+		expectRequestCount(1);
+		expectRequest(request -> {
+			assertThat(request.getPath()).isEqualTo("/user/capitalize");
+			assertThat(request.getBody().readUtf8()).isEqualTo("{\"username\":\"username\"}");
 			assertThat(request.getHeader(HttpHeaders.ACCEPT)).isEqualTo("application/json");
 			assertThat(request.getHeader(HttpHeaders.CONTENT_TYPE)).isEqualTo("application/json");
 		});
@@ -571,6 +605,30 @@ class RestClientIntegrationTests {
 		});
 	}
 
+	@ParameterizedRestClientTest // gh-35102
+	void postStreamingBody(ClientHttpRequestFactory requestFactory) {
+		startServer(requestFactory);
+		prepareResponse(response -> response.setResponseCode(200));
+
+		StreamingHttpOutputMessage.Body testBody = out -> {
+			assertThat(out).as("Not a streaming response").isNotInstanceOf(FastByteArrayOutputStream.class);
+			new ByteArrayInputStream("test-data".getBytes(UTF_8)).transferTo(out);
+		};
+
+		ResponseEntity<Void> result = this.restClient.post()
+				.uri("/streaming/body")
+				.body(testBody)
+				.retrieve()
+				.toBodilessEntity();
+
+		assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+		expectRequestCount(1);
+		expectRequest(request -> {
+			assertThat(request.getPath()).isEqualTo("/streaming/body");
+			assertThat(request.getBody().readUtf8()).isEqualTo("test-data");
+		});
+	}
 
 	@ParameterizedRestClientTest
 	void statusHandler(ClientHttpRequestFactory requestFactory) {
@@ -1149,5 +1207,9 @@ class RestClientIntegrationTests {
 			this.containerValue = containerValue;
 		}
 	}
+
+	interface PublicView {}
+
+	record User(@JsonView(PublicView.class) String username, @Nullable String password) {}
 
 }

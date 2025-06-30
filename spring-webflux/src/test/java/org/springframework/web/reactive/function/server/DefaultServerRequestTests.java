@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,7 +57,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.DecoderHttpMessageReader;
 import org.springframework.http.codec.HttpMessageReader;
-import org.springframework.http.codec.json.Jackson2JsonDecoder;
+import org.springframework.http.codec.json.JacksonJsonDecoder;
 import org.springframework.http.codec.multipart.FormFieldPart;
 import org.springframework.http.codec.multipart.Part;
 import org.springframework.util.LinkedMultiValueMap;
@@ -81,7 +81,7 @@ import static org.springframework.web.reactive.function.BodyExtractors.toMono;
 class DefaultServerRequestTests {
 
 	private final List<HttpMessageReader<?>> messageReaders = Arrays.asList(
-			new DecoderHttpMessageReader<>(new Jackson2JsonDecoder()),
+			new DecoderHttpMessageReader<>(new JacksonJsonDecoder()),
 			new DecoderHttpMessageReader<>(StringDecoder.allMimeTypes()));
 
 
@@ -480,7 +480,7 @@ class DefaultServerRequestTests {
 		@Test
 		void ifMatchValueShouldMatchWhenETagMatches() {
 			MockServerHttpRequest mockRequest = MockServerHttpRequest.put("/")
-					.ifMatch("\"first\"", "\"second\"").build();
+					.header(HttpHeaders.IF_MATCH, "\"first\"", "\"second\"").build();
 			DefaultServerRequest request = createRequest(mockRequest);
 			Mono<ServerResponse> result = request.checkNotModified("\"second\"");
 

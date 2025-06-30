@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,13 +22,15 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import org.jspecify.annotations.Nullable;
 
+import org.springframework.aot.hint.MemberCategory;
+import org.springframework.aot.hint.RuntimeHints;
+import org.springframework.aot.hint.RuntimeHintsRegistrar;
+import org.springframework.aot.hint.TypeReference;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanClassLoaderAware;
@@ -128,14 +130,15 @@ public final class HttpServiceProxyRegistryFactoryBean
 
 	private static class GroupAdapterInitializer {
 
+		private static final String REST_CLIENT_HTTP_SERVICE_GROUP_ADAPTER = "org.springframework.web.client.support.RestClientHttpServiceGroupAdapter";
+
+		private static final String WEB_CLIENT_HTTP_SERVICE_GROUP_ADAPTER = "org.springframework.web.reactive.function.client.support.WebClientHttpServiceGroupAdapter";
+
 		static Map<HttpServiceGroup.ClientType, HttpServiceGroupAdapter<?>> initGroupAdapters() {
 			Map<HttpServiceGroup.ClientType, HttpServiceGroupAdapter<?>> map = new LinkedHashMap<>(2);
 
-			addGroupAdapter(map, HttpServiceGroup.ClientType.REST_CLIENT,
-					"org.springframework.web.client.support.RestClientHttpServiceGroupAdapter");
-
-			addGroupAdapter(map, HttpServiceGroup.ClientType.WEB_CLIENT,
-					"org.springframework.web.reactive.function.client.support.WebClientHttpServiceGroupAdapter");
+			addGroupAdapter(map, HttpServiceGroup.ClientType.REST_CLIENT, REST_CLIENT_HTTP_SERVICE_GROUP_ADAPTER);
+			addGroupAdapter(map, HttpServiceGroup.ClientType.WEB_CLIENT, WEB_CLIENT_HTTP_SERVICE_GROUP_ADAPTER);
 
 			return map;
 		}
@@ -148,8 +151,7 @@ public final class HttpServiceProxyRegistryFactoryBean
 				Class<?> clazz = ClassUtils.forName(className, HttpServiceGroupAdapter.class.getClassLoader());
 				groupAdapters.put(clientType, (HttpServiceGroupAdapter<?>) BeanUtils.instantiateClass(clazz));
 			}
-			catch (ClassNotFoundException ex) {
-				// ignore
+			catch (ClassNotFoundException ignored) {
 			}
 		}
 	}
@@ -166,7 +168,7 @@ public final class HttpServiceProxyRegistryFactoryBean
 
 		private final Object clientBuilder;
 
-		private BiConsumer<HttpServiceGroup, HttpServiceProxyFactory.Builder> proxyFactoryConfigurer = (group, builder) -> {};
+		private final HttpServiceProxyFactory.Builder proxyFactoryBuilder = HttpServiceProxyFactory.builder();
 
 		ProxyHttpServiceGroup(HttpServiceGroup group) {
 			this.declaredGroup = group;
@@ -196,20 +198,13 @@ public final class HttpServiceProxyRegistryFactoryBean
 		}
 
 		@SuppressWarnings("unchecked")
-		public <CB> void apply(
-				BiConsumer<HttpServiceGroup, CB> clientConfigurer,
-				BiConsumer<HttpServiceGroup, HttpServiceProxyFactory.Builder> proxyFactoryConfigurer) {
-
-			clientConfigurer.accept(this, (CB) this.clientBuilder);
-			this.proxyFactoryConfigurer = this.proxyFactoryConfigurer.andThen(proxyFactoryConfigurer);
+		public <CB> void applyConfigurer(HttpServiceGroupConfigurer.GroupCallback<CB> callback) {
+			callback.withGroup(this, (CB) this.clientBuilder, this.proxyFactoryBuilder);
 		}
 
 		public Map<Class<?>, Object> createProxies() {
 			Map<Class<?>, Object> map = new LinkedHashMap<>(httpServiceTypes().size());
-			HttpExchangeAdapter exchangeAdapter = initExchangeAdapter();
-			HttpServiceProxyFactory.Builder proxyFactoryBuilder = HttpServiceProxyFactory.builderFor(exchangeAdapter);
-			this.proxyFactoryConfigurer.accept(this, proxyFactoryBuilder);
-			HttpServiceProxyFactory factory = proxyFactoryBuilder.build();
+			HttpServiceProxyFactory factory = this.proxyFactoryBuilder.exchangeAdapter(initExchangeAdapter()).build();
 			httpServiceTypes().forEach(type -> map.put(type, factory.createClient(type)));
 			return map;
 		}
@@ -221,7 +216,7 @@ public final class HttpServiceProxyRegistryFactoryBean
 
 		@Override
 		public String toString() {
-			return getClass().getSimpleName() + "[id=" + name() + "]";
+			return getClass().getSimpleName() + "[name=" + name() + "]";
 		}
 
 	}
@@ -234,48 +229,41 @@ public final class HttpServiceProxyRegistryFactoryBean
 
 		private final Set<ProxyHttpServiceGroup> groups;
 
+		private final Predicate<HttpServiceGroup> defaultFilter;
+
 		private Predicate<HttpServiceGroup> filter;
 
 		DefaultGroups(Set<ProxyHttpServiceGroup> groups, HttpServiceGroup.ClientType clientType) {
 			this.groups = groups;
-			this.filter = group -> group.clientType().equals(clientType);
+			this.defaultFilter = (group -> group.clientType().equals(clientType));
+			this.filter = this.defaultFilter;
 		}
 
 		@Override
 		public HttpServiceGroupConfigurer.Groups<CB> filterByName(String... groupNames) {
-			return filter(group -> Arrays.stream(groupNames).anyMatch(id -> id.equals(group.name())));
+			return filter(group -> Arrays.stream(groupNames).anyMatch(name -> name.equals(group.name())));
 		}
 
 		@Override
 		public HttpServiceGroupConfigurer.Groups<CB> filter(Predicate<HttpServiceGroup> predicate) {
-			this.filter = this.filter.or(predicate);
+			this.filter = this.filter.and(predicate);
 			return this;
 		}
 
 		@Override
-		public void configureClient(Consumer<CB> clientConfigurer) {
-			configureClient((group, builder) -> clientConfigurer.accept(builder));
+		public void forEachClient(HttpServiceGroupConfigurer.ClientCallback<CB> callback) {
+			forEachGroup((group, clientBuilder, factoryBuilder) -> callback.withClient(group, clientBuilder));
 		}
 
 		@Override
-		public void configureClient(BiConsumer<HttpServiceGroup, CB> clientConfigurer) {
-			configure(clientConfigurer, (group, builder) -> {});
+		public void forEachProxyFactory(HttpServiceGroupConfigurer.ProxyFactoryCallback callback) {
+			forEachGroup((group, clientBuilder, factoryBuilder) -> callback.withProxyFactory(group, factoryBuilder));
 		}
 
 		@Override
-		public void configureProxyFactory(
-				BiConsumer<HttpServiceGroup, HttpServiceProxyFactory.Builder> proxyFactoryConfigurer) {
-
-			configure((group, builder) -> {}, proxyFactoryConfigurer);
-		}
-
-		@Override
-		public void configure(
-				BiConsumer<HttpServiceGroup, CB> clientConfigurer,
-				BiConsumer<HttpServiceGroup, HttpServiceProxyFactory.Builder> proxyFactoryConfigurer) {
-
-			this.groups.stream().filter(this.filter).forEach(group ->
-					group.apply(clientConfigurer, proxyFactoryConfigurer));
+		public void forEachGroup(HttpServiceGroupConfigurer.GroupCallback<CB> callback) {
+			this.groups.stream().filter(this.filter).forEach(group -> group.applyConfigurer(callback));
+			this.filter = this.defaultFilter; // reset the filter (terminal method)
 		}
 	}
 
@@ -328,6 +316,19 @@ public final class HttpServiceProxyRegistryFactoryBean
 			Assert.notNull(map, "No group with name '" + groupName + "'");
 			return map;
 		}
+	}
+
+	static class HttpServiceProxyRegistryRuntimeHints implements RuntimeHintsRegistrar {
+
+		@Override
+		public void registerHints(RuntimeHints hints, @Nullable ClassLoader classLoader) {
+			hints.reflection()
+					.registerType(TypeReference.of(GroupAdapterInitializer.REST_CLIENT_HTTP_SERVICE_GROUP_ADAPTER),
+							MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS)
+					.registerTypeIfPresent(classLoader, GroupAdapterInitializer.WEB_CLIENT_HTTP_SERVICE_GROUP_ADAPTER,
+							MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS);
+		}
+
 	}
 
 }

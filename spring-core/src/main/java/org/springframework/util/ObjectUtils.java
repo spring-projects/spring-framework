@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -172,6 +172,7 @@ public abstract class ObjectUtils {
 	 * if the {@code Optional} is empty, or simply the given object as-is
 	 * @since 5.0
 	 */
+	@Contract("null -> null")
 	public static @Nullable Object unwrapOptional(@Nullable Object obj) {
 		if (obj instanceof Optional<?> optional) {
 			Object result = optional.orElse(null);
@@ -188,6 +189,7 @@ public abstract class ObjectUtils {
 	 * @param element the element to check for
 	 * @return whether the element has been found in the given array
 	 */
+	@Contract("null, _ -> false")
 	public static boolean containsElement(@Nullable Object @Nullable [] array, @Nullable Object element) {
 		if (array == null) {
 			return false;

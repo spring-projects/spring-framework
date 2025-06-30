@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,6 +54,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
+import org.springframework.web.reactive.accept.ApiVersionStrategy;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebSession;
 import org.springframework.web.util.UriUtils;
@@ -68,6 +69,8 @@ import org.springframework.web.util.UriUtils;
 class DefaultServerRequestBuilder implements ServerRequest.Builder {
 
 	private final List<HttpMessageReader<?>> messageReaders;
+
+	private final @Nullable ApiVersionStrategy versionStrategy;
 
 	private final ServerWebExchange exchange;
 
@@ -89,6 +92,7 @@ class DefaultServerRequestBuilder implements ServerRequest.Builder {
 	DefaultServerRequestBuilder(ServerRequest other) {
 		Assert.notNull(other, "ServerRequest must not be null");
 		this.messageReaders = other.messageReaders();
+		this.versionStrategy = other.apiVersionStrategy();
 		this.exchange = other.exchange();
 		this.method = other.method();
 		this.uri = other.uri();
@@ -195,7 +199,7 @@ class DefaultServerRequestBuilder implements ServerRequest.Builder {
 				this.method, this.uri, this.contextPath, this.headers, this.cookies, this.body, this.attributes);
 		ServerWebExchange exchange = new DelegatingServerWebExchange(
 				serverHttpRequest, this.attributes, this.exchange, this.messageReaders);
-		return new DefaultServerRequest(exchange, this.messageReaders);
+		return new DefaultServerRequest(exchange, this.messageReaders, this.versionStrategy);
 	}
 
 
@@ -357,8 +361,7 @@ class DefaultServerRequestBuilder implements ServerRequest.Builder {
 							.cache();
 				}
 			}
-			catch (InvalidMediaTypeException ex) {
-				// Ignore
+			catch (InvalidMediaTypeException ignored) {
 			}
 			return EMPTY_FORM_DATA;
 		}
@@ -379,8 +382,7 @@ class DefaultServerRequestBuilder implements ServerRequest.Builder {
 							.cache();
 				}
 			}
-			catch (InvalidMediaTypeException ex) {
-				// Ignore
+			catch (InvalidMediaTypeException ignored) {
 			}
 			return EMPTY_MULTIPART_DATA;
 		}

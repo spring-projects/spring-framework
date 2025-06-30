@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,7 @@ import org.springframework.http.client.reactive.JdkClientHttpConnector;
 import org.springframework.http.client.reactive.JettyClientHttpConnector;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.http.codec.ClientCodecConfigurer;
+import org.springframework.http.server.reactive.SslInfo;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
@@ -50,6 +51,7 @@ import org.springframework.web.util.UriBuilderFactory;
  * Default implementation of {@link WebTestClient.Builder}.
  *
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
  * @since 5.0
  */
 class DefaultWebTestClientBuilder implements WebTestClient.Builder {
@@ -78,6 +80,8 @@ class DefaultWebTestClientBuilder implements WebTestClient.Builder {
 
 	private @Nullable ClientHttpConnector connector;
 
+	private @Nullable SslInfo sslInfo;
+
 	private @Nullable String baseUrl;
 
 	private @Nullable UriBuilderFactory uriBuilderFactory;
@@ -85,6 +89,8 @@ class DefaultWebTestClientBuilder implements WebTestClient.Builder {
 	private @Nullable HttpHeaders defaultHeaders;
 
 	private @Nullable MultiValueMap<String, String> defaultCookies;
+
+	private @Nullable Object defaultApiVersion;
 
 	private @Nullable ApiVersionInserter apiVersionInserter;
 
@@ -101,21 +107,21 @@ class DefaultWebTestClientBuilder implements WebTestClient.Builder {
 
 	/** Determine connector via classpath detection. */
 	DefaultWebTestClientBuilder() {
-		this(null, null);
+		this(null, null, null);
 	}
 
 	/** Use HttpHandlerConnector with mock server. */
-	DefaultWebTestClientBuilder(WebHttpHandlerBuilder httpHandlerBuilder) {
-		this(httpHandlerBuilder, null);
+	DefaultWebTestClientBuilder(WebHttpHandlerBuilder httpHandlerBuilder, @Nullable SslInfo sslInfo) {
+		this(httpHandlerBuilder, null, sslInfo);
 	}
 
 	/** Use given connector. */
 	DefaultWebTestClientBuilder(ClientHttpConnector connector) {
-		this(null, connector);
+		this(null, connector, null);
 	}
 
-	DefaultWebTestClientBuilder(
-			@Nullable WebHttpHandlerBuilder httpHandlerBuilder, @Nullable ClientHttpConnector connector) {
+	private DefaultWebTestClientBuilder(@Nullable WebHttpHandlerBuilder httpHandlerBuilder,
+			@Nullable ClientHttpConnector connector, @Nullable SslInfo sslInfo) {
 
 		Assert.isTrue(httpHandlerBuilder == null || connector == null,
 				"Expected WebHttpHandlerBuilder or ClientHttpConnector but not both.");
@@ -125,6 +131,7 @@ class DefaultWebTestClientBuilder implements WebTestClient.Builder {
 				"To use WebTestClient, please add spring-webflux to the test classpath.");
 
 		this.connector = connector;
+		this.sslInfo = sslInfo;
 		this.httpHandlerBuilder = (httpHandlerBuilder != null ? httpHandlerBuilder.clone() : null);
 	}
 
@@ -132,6 +139,7 @@ class DefaultWebTestClientBuilder implements WebTestClient.Builder {
 	DefaultWebTestClientBuilder(DefaultWebTestClientBuilder other) {
 		this.httpHandlerBuilder = (other.httpHandlerBuilder != null ? other.httpHandlerBuilder.clone() : null);
 		this.connector = other.connector;
+		this.sslInfo = other.sslInfo;
 		this.responseTimeout = other.responseTimeout;
 
 		this.baseUrl = other.baseUrl;
@@ -145,6 +153,7 @@ class DefaultWebTestClientBuilder implements WebTestClient.Builder {
 		}
 		this.defaultCookies = (other.defaultCookies != null ?
 				new LinkedMultiValueMap<>(other.defaultCookies) : null);
+		this.defaultApiVersion = other.defaultApiVersion;
 		this.apiVersionInserter = other.apiVersionInserter;
 		this.filters = (other.filters != null ? new ArrayList<>(other.filters) : null);
 		this.entityResultConsumer = other.entityResultConsumer;
@@ -202,6 +211,12 @@ class DefaultWebTestClientBuilder implements WebTestClient.Builder {
 			this.defaultCookies = new LinkedMultiValueMap<>(3);
 		}
 		return this.defaultCookies;
+	}
+
+	@Override
+	public WebTestClient.Builder defaultApiVersion(Object version) {
+		this.defaultApiVersion = version;
+		return this;
 	}
 
 	@Override
@@ -275,7 +290,7 @@ class DefaultWebTestClientBuilder implements WebTestClient.Builder {
 		ClientHttpConnector connectorToUse = this.connector;
 		if (connectorToUse == null) {
 			if (this.httpHandlerBuilder != null) {
-				connectorToUse = new HttpHandlerConnector(this.httpHandlerBuilder.build());
+				connectorToUse = new HttpHandlerConnector(this.httpHandlerBuilder.build(), this.sslInfo);
 			}
 		}
 		if (connectorToUse == null) {
@@ -297,7 +312,7 @@ class DefaultWebTestClientBuilder implements WebTestClient.Builder {
 				connectorToUse, exchangeStrategies, exchangeFactory, initUriBuilderFactory(),
 				(this.defaultHeaders != null ? HttpHeaders.readOnlyHttpHeaders(this.defaultHeaders) : null),
 				(this.defaultCookies != null ? CollectionUtils.unmodifiableMultiValueMap(this.defaultCookies) : null),
-				this.apiVersionInserter, this.entityResultConsumer,
+				this.defaultApiVersion, this.apiVersionInserter, this.entityResultConsumer,
 				this.responseTimeout, new DefaultWebTestClientBuilder(this));
 	}
 

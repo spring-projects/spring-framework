@@ -686,6 +686,74 @@ reliance on it.
 
 
 
+[[webflux-config-api-version]]
+== API Version
+[.small]#xref:web/webmvc/mvc-config/api-version.adoc[See equivalent in the Servlet stack]#
+
+To enable API versioning, use the `ApiVersionConfigurer` callback of `WebFluxConfigurer`:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim"]
+----
+	@Configuration
+	public class WebConfiguration implements WebFluxConfigurer {
+
+		@Override
+		public void configureApiVersioning(ApiVersionConfigurer configurer) {
+			configurer.useRequestHeader("X-API-Version");
+		}
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim"]
+----
+	@Configuration
+	class WebConfiguration : WebMvcConfigurer {
+
+		override fun configureApiVersioning(configurer: ApiVersionConfigurer) {
+			configurer.useRequestHeader("X-API-Version")
+		}
+	}
+----
+======
+
+You can resolve the version through one of the built-in options listed below, or
+alternatively use a custom `ApiVersionResolver`:
+
+- Request header
+- Request parameter
+- Path segment
+- Media type parameter
+
+TIP: When using a path segment, consider configuring a shared path prefix externally
+in xref:web/webmvc/mvc-config/path-matching.adoc[Path Matching] options.
+
+By default, the version is parsed with `SemanticVersionParser`, but you can also configure
+a custom xref:web/webflux-versioning.adoc#webflux-versioning-parser[ApiVersionParser].
+
+Supported versions are transparently detected from versions declared in request mappings
+for convenience, but you can turn that off through a flag in the WebFlux config, and
+consider only the versions configured explicitly in the config as supported.
+Requests with a version that is not supported are rejected with
+`InvalidApiVersionException` resulting in a 400 response.
+
+You can set an `ApiVersionDeprecationHandler` to send information about deprecated
+versions to clients. The built-in standard handler can set "Deprecation", "Sunset", and
+"Link" headers based on https://datatracker.ietf.org/doc/html/rfc9745[RFC 9745] and
+https://datatracker.ietf.org/doc/html/rfc8594[RFC 8594].
+
+Once API versioning is configured, you can begin to map requests to
+xref:web/webflux/controller/ann-requestmapping.adoc#webflux-ann-requestmapping-version[controller methods]
+according to the request version.
+
+
+
+
 [[webflux-config-blocking-execution]]
 == Blocking Execution
 
