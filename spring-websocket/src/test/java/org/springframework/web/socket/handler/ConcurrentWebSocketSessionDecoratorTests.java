@@ -218,7 +218,8 @@ class ConcurrentWebSocketSessionDecoratorTests {
 	@Test
 	void configuredProperties() {
 		TestWebSocketSession session = new TestWebSocketSession();
-		ConcurrentWebSocketSessionDecorator sessionDecorator = new ConcurrentWebSocketSessionDecorator(session, 42, 43, OverflowStrategy.DROP);
+		ConcurrentWebSocketSessionDecorator sessionDecorator =
+				new ConcurrentWebSocketSessionDecorator(session, 42, 43, OverflowStrategy.DROP);
 
 		assertThat(sessionDecorator.getSendTimeLimit()).isEqualTo(42);
 		assertThat(sessionDecorator.getBufferSizeLimit()).isEqualTo(43);
