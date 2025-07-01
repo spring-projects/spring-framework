@@ -87,29 +87,6 @@ class RetryPolicyTests {
 						assertThat(backOff.getInterval()).isEqualTo(1000);
 					});
 		}
-
-		@Test
-		void withMaxElapsedTimePreconditions() {
-			assertThatIllegalArgumentException()
-					.isThrownBy(() -> RetryPolicy.withMaxElapsedTime(Duration.ofMillis(0)))
-					.withMessage("Invalid duration (0ms): maxElapsedTime must be positive.");
-			assertThatIllegalArgumentException()
-					.isThrownBy(() -> RetryPolicy.withMaxElapsedTime(Duration.ofMillis(-1)))
-					.withMessage("Invalid duration (-1ms): maxElapsedTime must be positive.");
-		}
-
-		@Test
-		void withMaxElapsedTime() {
-			var policy = RetryPolicy.withMaxElapsedTime(Duration.ofMillis(42));
-
-			assertThat(policy.shouldRetry(new AssertionError())).isTrue();
-			assertThat(policy.shouldRetry(new IOException())).isTrue();
-
-			assertThat(policy.getBackOff())
-					.asInstanceOf(type(ExponentialBackOff.class))
-					.satisfies(hasDefaultMaxAttemptsAndDelay())
-					.extracting(ExponentialBackOff::getMaxElapsedTime).isEqualTo(42L);
-		}
 	}
 
 
@@ -122,7 +99,7 @@ class RetryPolicyTests {
 					.isThrownBy(() -> RetryPolicy.builder().backOff(mock()).delay(Duration.ofMillis(10)).build())
 					.withMessage("""
 							The following configuration options are not supported with a custom BackOff strategy: \
-							maxAttempts, delay, jitter, multiplier, maxDelay, or maxElapsedTime.""");
+							maxAttempts, delay, jitter, multiplier, or maxDelay.""");
 		}
 
 		@Test
@@ -157,7 +134,7 @@ class RetryPolicyTests {
 						assertThat(backOff.getInitialInterval()).isEqualTo(1000);
 					});
 
-			assertToString(policy, 1000, 0, 1, Long.MAX_VALUE, Long.MAX_VALUE, 5);
+			assertToString(policy, 1000, 0, 1.0, Long.MAX_VALUE, 5);
 		}
 
 		@Test
@@ -178,7 +155,7 @@ class RetryPolicyTests {
 						assertThat(backOff.getMaxAttempts()).isEqualTo(3);
 					});
 
-			assertToString(policy, 42, 0, 1, Long.MAX_VALUE, Long.MAX_VALUE, 3);
+			assertToString(policy, 42, 0, 1.0, Long.MAX_VALUE, 3);
 		}
 
 		@Test
@@ -197,7 +174,7 @@ class RetryPolicyTests {
 					.satisfies(hasDefaultMaxAttemptsAndDelay())
 					.extracting(ExponentialBackOff::getJitter).isEqualTo(42L);
 
-			assertToString(policy, 1000, 42, 1, Long.MAX_VALUE, Long.MAX_VALUE, 3);
+			assertToString(policy, 1000, 42, 1.0, Long.MAX_VALUE, 3);
 		}
 
 		@Test
@@ -226,7 +203,7 @@ class RetryPolicyTests {
 					.satisfies(hasDefaultMaxAttemptsAndDelay())
 					.extracting(ExponentialBackOff::getMultiplier).isEqualTo(1.5);
 
-			assertToString(policy, 1000, 0, 1.5, Long.MAX_VALUE, Long.MAX_VALUE, 3);
+			assertToString(policy, 1000, 0, 1.5, Long.MAX_VALUE, 3);
 		}
 
 		@Test
@@ -248,29 +225,7 @@ class RetryPolicyTests {
 					.satisfies(hasDefaultMaxAttemptsAndDelay())
 					.extracting(ExponentialBackOff::getMaxInterval).isEqualTo(42L);
 
-			assertToString(policy, 1000, 0, 1, 42, Long.MAX_VALUE, 3);
-		}
-
-		@Test
-		void maxElapsedTimePreconditions() {
-			assertThatIllegalArgumentException()
-					.isThrownBy(() -> RetryPolicy.builder().maxElapsedTime(Duration.ofMillis(0)))
-					.withMessage("Invalid duration (0ms): maxElapsedTime must be positive.");
-			assertThatIllegalArgumentException()
-					.isThrownBy(() -> RetryPolicy.builder().maxElapsedTime(Duration.ofMillis(-1)))
-					.withMessage("Invalid duration (-1ms): maxElapsedTime must be positive.");
-		}
-
-		@Test
-		void maxElapsedTime() {
-			var policy = RetryPolicy.builder().maxElapsedTime(Duration.ofMillis(42)).build();
-
-			assertThat(policy.getBackOff())
-					.asInstanceOf(type(ExponentialBackOff.class))
-					.satisfies(hasDefaultMaxAttemptsAndDelay())
-					.extracting(ExponentialBackOff::getMaxElapsedTime).isEqualTo(42L);
-
-			assertToString(policy, 1000, 0, 1, Long.MAX_VALUE, 42, 3);
+			assertToString(policy, 1000, 0, 1.0, 42, 3);
 		}
 
 		@Test
@@ -294,7 +249,7 @@ class RetryPolicyTests {
 
 			String filters = "includes=" + names(FileNotFoundException.class, IllegalArgumentException.class,
 					NumberFormatException.class, AssertionError.class) + ", ";
-			assertToString(policy, filters, 1000, 0, 1, Long.MAX_VALUE, Long.MAX_VALUE, 3);
+			assertToString(policy, filters, 1000, 0, 1.0, Long.MAX_VALUE, 3);
 		}
 
 		@Test
@@ -311,7 +266,7 @@ class RetryPolicyTests {
 					.asInstanceOf(type(ExponentialBackOff.class))
 					.satisfies(hasDefaultMaxAttemptsAndDelay());
 
-			assertToString(policy, "includes=[java.io.IOException], ", 1000, 0, 1, Long.MAX_VALUE, Long.MAX_VALUE, 3);
+			assertToString(policy, "includes=[java.io.IOException], ", 1000, 0, 1.0, Long.MAX_VALUE, 3);
 		}
 
 		@Test
@@ -335,7 +290,7 @@ class RetryPolicyTests {
 
 			String filters = "excludes=" + names(FileNotFoundException.class, IllegalArgumentException.class,
 					NumberFormatException.class, AssertionError.class) + ", ";
-			assertToString(policy, filters, 1000, 0, 1, Long.MAX_VALUE, Long.MAX_VALUE, 3);
+			assertToString(policy, filters, 1000, 0, 1.0, Long.MAX_VALUE, 3);
 		}
 
 		@Test
@@ -349,7 +304,7 @@ class RetryPolicyTests {
 			assertThat(policy.shouldRetry(new Throwable())).isTrue();
 			assertThat(policy.shouldRetry(new AssertionError())).isTrue();
 
-			assertToString(policy, "excludes=[java.io.IOException], ", 1000, 0, 1, Long.MAX_VALUE, Long.MAX_VALUE, 3);
+			assertToString(policy, "excludes=[java.io.IOException], ", 1000, 0, 1.0, Long.MAX_VALUE, 3);
 		}
 
 		@Test
@@ -368,8 +323,7 @@ class RetryPolicyTests {
 					.asInstanceOf(type(ExponentialBackOff.class))
 					.satisfies(hasDefaultMaxAttemptsAndDelay());
 
-			assertToString(policy, "predicate=NumberFormatExceptionMatcher, ",
-					1000, 0, 1, Long.MAX_VALUE, Long.MAX_VALUE, 3);
+			assertToString(policy, "predicate=NumberFormatExceptionMatcher, ", 1000, 0, 1.0, Long.MAX_VALUE, 3);
 		}
 
 		@Test
@@ -398,13 +352,13 @@ class RetryPolicyTests {
 
 
 		private static void assertToString(RetryPolicy policy, long initialInterval, long jitter,
-				double multiplier, long maxInterval, long maxElapsedTime, int maxAttempts) {
+				double multiplier, long maxInterval, int maxAttempts) {
 
-			assertToString(policy, "", initialInterval, jitter, multiplier, maxInterval, maxElapsedTime, maxAttempts);
+			assertToString(policy, "", initialInterval, jitter, multiplier, maxInterval, maxAttempts);
 		}
 
 		private static void assertToString(RetryPolicy policy, String filters, long initialInterval, long jitter,
-				double multiplier, long maxInterval, long maxElapsedTime, int maxAttempts) {
+				double multiplier, long maxInterval, int maxAttempts) {
 
 			assertThat(policy).asString()
 				.isEqualTo("""
@@ -416,7 +370,7 @@ class RetryPolicyTests {
 						maxElapsedTime=%d, \
 						maxAttempts=%d\
 						]]""",
-						filters, initialInterval, jitter, multiplier, maxInterval, maxElapsedTime, maxAttempts);
+						filters, initialInterval, jitter, multiplier, maxInterval, Long.MAX_VALUE, maxAttempts);
 		}
 
 		@SafeVarargs

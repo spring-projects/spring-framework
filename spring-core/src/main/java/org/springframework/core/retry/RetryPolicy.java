@@ -35,8 +35,8 @@ import org.springframework.util.backoff.FixedBackOff;
  *
  * <p>Also provides factory methods and a fluent builder API for creating retry
  * policies with common configurations. See {@link #withDefaults()},
- * {@link #withMaxAttempts(long)}, {@link #withMaxElapsedTime(Duration)},
- * {@link #builder()}, and the configuration options in {@link Builder} for details.
+ * {@link #withMaxAttempts(long)}, {@link #builder()}, and the configuration
+ * options in {@link Builder} for details.
  *
  * @author Sam Brannen
  * @author Mahmoud Ben Hassine
@@ -92,18 +92,6 @@ public interface RetryPolicy {
 	}
 
 	/**
-	 * Create a {@link RetryPolicy} configured with a maximum elapsed time.
-	 * <p>The returned policy uses a fixed backoff of {@value Builder#DEFAULT_DELAY}
-	 * milliseconds.
-	 * @param maxElapsedTime the maximum elapsed time; must be positive
-	 * @see Builder#maxElapsedTime(Duration)
-	 * @see FixedBackOff
-	 */
-	static RetryPolicy withMaxElapsedTime(Duration maxElapsedTime) {
-		return builder().maxElapsedTime(maxElapsedTime).build();
-	}
-
-	/**
 	 * Create a {@link Builder} to configure a {@link RetryPolicy} with common
 	 * configuration options.
 	 */
@@ -152,8 +140,6 @@ public interface RetryPolicy {
 
 		private @Nullable Duration maxDelay;
 
-		private @Nullable Duration maxElapsedTime;
-
 		private final Set<Class<? extends Throwable>> includes = new LinkedHashSet<>();
 
 		private final Set<Class<? extends Throwable>> excludes = new LinkedHashSet<>();
@@ -173,8 +159,7 @@ public interface RetryPolicy {
 		 * strategy, you should not configure any of the following:
 		 * {@link #maxAttempts(long) maxAttempts}, {@link #delay(Duration) delay},
 		 * {@link #jitter(Duration) jitter}, {@link #multiplier(double) multiplier},
-		 * {@link #maxDelay(Duration) maxDelay}, or {@link #maxElapsedTime(Duration)
-		 * maxElapsedTime}.
+		 * or {@link #maxDelay(Duration) maxDelay}.
 		 * @param backOff the {@code BackOff} strategy
 		 * @return this {@code Builder} instance for chained method invocations
 		 */
@@ -292,21 +277,6 @@ public interface RetryPolicy {
 		}
 
 		/**
-		 * Specify the maximum elapsed time.
-		 * <p>The default is unlimited.
-		 * <p>The supplied value will override any previously configured value.
-		 * <p>You should not specify this configuration option if you have
-		 * configured a custom {@link #backOff(BackOff) BackOff} strategy.
-		 * @param maxElapsedTime the maximum elapsed time; must be positive
-		 * @return this {@code Builder} instance for chained method invocations
-		 */
-		public Builder maxElapsedTime(Duration maxElapsedTime) {
-			assertIsPositive("maxElapsedTime", maxElapsedTime);
-			this.maxElapsedTime = maxElapsedTime;
-			return this;
-		}
-
-		/**
 		 * Specify the types of exceptions for which the {@link RetryPolicy}
 		 * should retry a failed operation.
 		 * <p>Defaults to all exception types.
@@ -415,10 +385,10 @@ public interface RetryPolicy {
 			BackOff backOff = this.backOff;
 			if (backOff != null) {
 				boolean misconfigured = (this.maxAttempts != 0) || (this.delay != null) || (this.jitter != null) ||
-						(this.multiplier != 0) || (this.maxDelay != null) || (this.maxElapsedTime != null);
+						(this.multiplier != 0) || (this.maxDelay != null);
 				Assert.state(!misconfigured, """
 						The following configuration options are not supported with a custom BackOff strategy: \
-						maxAttempts, delay, jitter, multiplier, maxDelay, or maxElapsedTime.""");
+						maxAttempts, delay, jitter, multiplier, or maxDelay.""");
 			}
 			else {
 				ExponentialBackOff exponentialBackOff = new ExponentialBackOff();
@@ -428,9 +398,6 @@ public interface RetryPolicy {
 				exponentialBackOff.setMultiplier(this.multiplier > 1 ? this.multiplier : DEFAULT_MULTIPLIER);
 				if (this.jitter != null) {
 					exponentialBackOff.setJitter(this.jitter.toMillis());
-				}
-				if (this.maxElapsedTime != null) {
-					exponentialBackOff.setMaxElapsedTime(this.maxElapsedTime.toMillis());
 				}
 				backOff = exponentialBackOff;
 			}
