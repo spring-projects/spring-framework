@@ -224,7 +224,6 @@ class WebMvcConfigurationSupportTests {
 		assertThat(mediaTypeMappings)
 				.containsEntry("atom", MediaType.APPLICATION_ATOM_XML)
 				.containsEntry("rss", MediaType.APPLICATION_RSS_XML)
-				.containsEntry("rss", MediaType.APPLICATION_RSS_XML)
 				.containsEntry("xml", MediaType.APPLICATION_XML)
 				.containsEntry("json", MediaType.APPLICATION_JSON)
 				.containsEntry("smile", MediaType.valueOf("application/x-jackson-smile"))
