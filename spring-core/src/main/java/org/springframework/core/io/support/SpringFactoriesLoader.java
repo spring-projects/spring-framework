@@ -101,7 +101,7 @@ public class SpringFactoriesLoader {
 
 	private static final Log logger = LogFactory.getLog(SpringFactoriesLoader.class);
 
-	static final Map<ClassLoader, Map<String, SpringFactoriesLoader>> cache = new ConcurrentReferenceHashMap<>();
+	static final Map<ClassLoader, Map<String, Factories>> cache = new ConcurrentReferenceHashMap<>();
 
 
 	private final @Nullable ClassLoader classLoader;
@@ -319,10 +319,11 @@ public class SpringFactoriesLoader {
 		Assert.hasText(resourceLocation, "'resourceLocation' must not be empty");
 		ClassLoader resourceClassLoader = (classLoader != null ? classLoader :
 				SpringFactoriesLoader.class.getClassLoader());
-		Map<String, SpringFactoriesLoader> loaders = cache.computeIfAbsent(
+		Map<String, Factories> factoriesCache = cache.computeIfAbsent(
 				resourceClassLoader, key -> new ConcurrentReferenceHashMap<>());
-		return loaders.computeIfAbsent(resourceLocation, key ->
-				new SpringFactoriesLoader(classLoader, loadFactoriesResource(resourceClassLoader, resourceLocation)));
+		Factories factories = factoriesCache.computeIfAbsent(resourceLocation, key ->
+				new Factories(loadFactoriesResource(resourceClassLoader, resourceLocation)));
+		return new SpringFactoriesLoader(classLoader, factories.byType());
 	}
 
 	protected static Map<String, List<String>> loadFactoriesResource(ClassLoader classLoader, String resourceLocation) {
@@ -654,4 +655,8 @@ public class SpringFactoriesLoader {
 		}
 	}
 
+
+	private record Factories(Map<String, List<String>> byType) {
+
+	}
 }

@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
+import org.assertj.core.extractor.Extractors;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Nested;
@@ -166,9 +167,26 @@ class SpringFactoriesLoaderTests {
 	void sameCachedResultIsUsedForDefaultClassLoaderAndNullClassLoader() {
 		SpringFactoriesLoader forNull = SpringFactoriesLoader.forDefaultResourceLocation(null);
 		SpringFactoriesLoader forDefault = SpringFactoriesLoader.forDefaultResourceLocation(ClassUtils.getDefaultClassLoader());
-		assertThat(forNull).isSameAs(forDefault);
+		assertThat(forNull).extracting("factories").isSameAs(Extractors.byName("factories").apply(forDefault));
 	}
 
+	@Test
+	void staleClassLoaderIsUsedWithCachedResult() {
+		ClassLoader defaultClassLoader = ClassUtils.getDefaultClassLoader();
+		ClassLoader cl1 = new ClassLoader() {
+		};
+		SpringFactoriesLoader factories1 = SpringFactoriesLoader.forDefaultResourceLocation(defaultClassLoader);
+		assertThat(factories1).extracting("classLoader").isEqualTo(defaultClassLoader);
+		ClassLoader previousClassLoader = Thread.currentThread().getContextClassLoader();
+		try {
+			Thread.currentThread().setContextClassLoader(cl1);
+			SpringFactoriesLoader factories2 = SpringFactoriesLoader.forDefaultResourceLocation(null);
+			assertThat(factories2).extracting("classLoader").isNull();
+		}
+		finally {
+			Thread.currentThread().setContextClassLoader(previousClassLoader);
+		}
+	}
 
 	@Nested
 	class FailureHandlerTests {
