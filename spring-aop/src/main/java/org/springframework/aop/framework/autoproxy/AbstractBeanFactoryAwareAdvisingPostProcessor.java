@@ -41,7 +41,7 @@ import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 public abstract class AbstractBeanFactoryAwareAdvisingPostProcessor extends AbstractAdvisingBeanPostProcessor
 		implements BeanFactoryAware {
 
-	private @Nullable ConfigurableListableBeanFactory beanFactory;
+	protected @Nullable ConfigurableListableBeanFactory beanFactory;
 
 
 	@Override

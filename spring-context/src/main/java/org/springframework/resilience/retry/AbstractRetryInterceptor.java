@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.aop.retry;
+package org.springframework.resilience.retry;
 
 import java.lang.reflect.Method;
 
@@ -136,16 +136,18 @@ public abstract class AbstractRetryInterceptor implements MethodInterceptor {
 
 			Publisher<?> publisher = adapter.toPublisher(result);
 			Retry retry = Retry.backoff(spec.maxAttempts(), spec.delay())
-					.jitter(
-							spec.delay().isZero() ? 0.0 :
-							Math.max(0.0, Math.min(1.0, spec.jitter().toNanos() / (double) spec.delay().toNanos()))
-					)
+					.jitter(calculateJitterFactor(spec))
 					.multiplier(spec.multiplier())
 					.maxBackoff(spec.maxDelay())
 					.filter(spec.combinedPredicate().forMethod(method));
 			publisher = (adapter.isMultiValue() ? Flux.from(publisher).retryWhen(retry) :
 					Mono.from(publisher).retryWhen(retry));
 			return adapter.fromPublisher(publisher);
+		}
+
+		private static double calculateJitterFactor(MethodRetrySpec spec) {
+			return (spec.delay().isZero() ? 0.0 :
+					Math.max(0.0, Math.min(1.0, spec.jitter().toNanos() / (double) spec.delay().toNanos())));
 		}
 	}
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.aop.retry;
+package org.springframework.resilience.retry;
 
 import java.lang.reflect.Method;
 

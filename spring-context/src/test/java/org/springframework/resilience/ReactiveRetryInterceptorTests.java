@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.aop.retry;
+package org.springframework.resilience;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
@@ -28,11 +28,13 @@ import reactor.core.publisher.Mono;
 
 import org.springframework.aop.framework.AopProxyUtils;
 import org.springframework.aop.framework.ProxyFactory;
-import org.springframework.aop.retry.annotation.RetryAnnotationBeanPostProcessor;
-import org.springframework.aop.retry.annotation.RetryAnnotationInterceptor;
-import org.springframework.aop.retry.annotation.Retryable;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.resilience.annotation.RetryAnnotationBeanPostProcessor;
+import org.springframework.resilience.annotation.Retryable;
+import org.springframework.resilience.retry.MethodRetryPredicate;
+import org.springframework.resilience.retry.MethodRetrySpec;
+import org.springframework.resilience.retry.SimpleRetryInterceptor;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
@@ -59,19 +61,6 @@ public class ReactiveRetryInterceptorTests {
 	}
 
 	@Test
-	void withAnnotationInterceptorForMethod() {
-		AnnotatedMethodBean target = new AnnotatedMethodBean();
-		ProxyFactory pf = new ProxyFactory();
-		pf.setTarget(target);
-		pf.addAdvice(new RetryAnnotationInterceptor());
-		AnnotatedMethodBean proxy = (AnnotatedMethodBean) pf.getProxy();
-
-		assertThatIllegalStateException().isThrownBy(() -> proxy.retryOperation().block())
-				.withCauseInstanceOf(IOException.class).havingCause().withMessage("6");
-		assertThat(target.counter.get()).isEqualTo(6);
-	}
-
-	@Test
 	void withPostProcessorForMethod() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		bf.registerBeanDefinition("bean", new RootBeanDefinition(AnnotatedMethodBean.class));
@@ -83,25 +72,6 @@ public class ReactiveRetryInterceptorTests {
 
 		assertThatIllegalStateException().isThrownBy(() -> proxy.retryOperation().block())
 				.withCauseInstanceOf(IOException.class).havingCause().withMessage("6");
-		assertThat(target.counter.get()).isEqualTo(6);
-	}
-
-	@Test
-	void withAnnotationInterceptorForClass() {
-		AnnotatedClassBean target = new AnnotatedClassBean();
-		ProxyFactory pf = new ProxyFactory();
-		pf.setTarget(target);
-		pf.addAdvice(new RetryAnnotationInterceptor());
-		AnnotatedClassBean proxy = (AnnotatedClassBean) pf.getProxy();
-
-		assertThatRuntimeException().isThrownBy(() -> proxy.retryOperation().block())
-				.withCauseInstanceOf(IOException.class).havingCause().withMessage("3");
-		assertThat(target.counter.get()).isEqualTo(3);
-		assertThatRuntimeException().isThrownBy(() -> proxy.otherOperation().block())
-				.withCauseInstanceOf(IOException.class);
-		assertThat(target.counter.get()).isEqualTo(4);
-		assertThatIllegalStateException().isThrownBy(() -> proxy.overrideOperation().blockFirst())
-				.withCauseInstanceOf(IOException.class);
 		assertThat(target.counter.get()).isEqualTo(6);
 	}
 
@@ -218,6 +188,7 @@ public class ReactiveRetryInterceptorTests {
 		assertThat(target.counter.get()).isEqualTo(4);
 	}
 
+
 	public static class NonAnnotatedBean {
 
 		AtomicInteger counter = new AtomicInteger();
@@ -284,8 +255,11 @@ public class ReactiveRetryInterceptorTests {
 		}
 	}
 
+
 	// Bean classes for boundary testing
+
 	public static class MinimalRetryBean {
+
 		AtomicInteger counter = new AtomicInteger();
 
 		public Mono<Object> retryOperation() {
@@ -295,8 +269,10 @@ public class ReactiveRetryInterceptorTests {
 			});
 		}
 	}
+
 
 	public static class ZeroDelayJitterBean {
+
 		AtomicInteger counter = new AtomicInteger();
 
 		public Mono<Object> retryOperation() {
@@ -306,8 +282,10 @@ public class ReactiveRetryInterceptorTests {
 			});
 		}
 	}
+
 
 	public static class JitterGreaterThanDelayBean {
+
 		AtomicInteger counter = new AtomicInteger();
 
 		public Mono<Object> retryOperation() {
@@ -318,7 +296,9 @@ public class ReactiveRetryInterceptorTests {
 		}
 	}
 
+
 	public static class FluxMultiValueBean {
+
 		AtomicInteger counter = new AtomicInteger();
 
 		public Flux<Object> retryOperation() {
@@ -329,7 +309,9 @@ public class ReactiveRetryInterceptorTests {
 		}
 	}
 
+
 	public static class SuccessfulOperationBean {
+
 		AtomicInteger counter = new AtomicInteger();
 
 		public Mono<String> retryOperation() {
@@ -340,7 +322,9 @@ public class ReactiveRetryInterceptorTests {
 		}
 	}
 
+
 	public static class ImmediateFailureBean {
+
 		AtomicInteger counter = new AtomicInteger();
 
 		public Mono<Object> retryOperation() {

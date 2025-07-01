@@ -44,9 +44,23 @@ import org.springframework.util.ConcurrencyThrottleSupport;
 public class ConcurrencyThrottleInterceptor extends ConcurrencyThrottleSupport
 		implements MethodInterceptor, Serializable {
 
+	/**
+	 * Create a default {@code ConcurrencyThrottleInterceptor}
+	 * with concurrency limit 1.
+	 */
 	public ConcurrencyThrottleInterceptor() {
-		setConcurrencyLimit(1);
+		this(1);
 	}
+
+	/**
+	 * Create a default {@code ConcurrencyThrottleInterceptor}
+	 * with the given concurrency limit.
+	 * @since 7.0
+	 */
+	public ConcurrencyThrottleInterceptor(int concurrencyLimit) {
+		setConcurrencyLimit(concurrencyLimit);
+	}
+
 
 	@Override
 	public @Nullable Object invoke(MethodInvocation methodInvocation) throws Throwable {
