@@ -23,7 +23,7 @@ import java.util.Collections;
 /**
  * A specification for retry attempts on a given method, combining common
  * retry characteristics. This roughly matches the annotation attributes
- * on {@link org.springframework.aop.retry.annotation.Retryable}.
+ * on {@link org.springframework.resilience.annotation.Retryable}.
  *
  * @author Juergen Hoeller
  * @since 7.0
@@ -37,7 +37,7 @@ import java.util.Collections;
  * @param maxDelay the maximum delay for any retry attempt
  * @see AbstractRetryInterceptor#getRetrySpec
  * @see SimpleRetryInterceptor#SimpleRetryInterceptor(MethodRetrySpec)
- * @see org.springframework.aop.retry.annotation.Retryable
+ * @see org.springframework.resilience.annotation.Retryable
  */
 public record MethodRetrySpec(
 		Collection<Class<? extends Throwable>> includes,
