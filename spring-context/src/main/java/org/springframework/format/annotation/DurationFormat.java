@@ -53,10 +53,18 @@ public @interface DurationFormat {
 	 */
 	Unit defaultUnit() default Unit.MILLIS;
 
+
 	/**
 	 * {@link Duration} format styles.
 	 */
 	enum Style {
+
+		/**
+		 * ISO-8601 formatting.
+		 * <p>This is what the JDK uses in {@link Duration#parse(CharSequence)}
+		 * and {@link Duration#toString()}.
+		 */
+		ISO8601,
 
 		/**
 		 * Simple formatting based on a short suffix, for example '1s'.
@@ -73,13 +81,6 @@ public @interface DurationFormat {
 		SIMPLE,
 
 		/**
-		 * ISO-8601 formatting.
-		 * <p>This is what the JDK uses in {@link Duration#parse(CharSequence)}
-		 * and {@link Duration#toString()}.
-		 */
-		ISO8601,
-
-		/**
 		 * Like {@link #SIMPLE}, but allows multiple segments ordered from
 		 * largest-to-smallest units of time, like {@code 1h12m27s}.
 		 * <p>A single minus sign ({@code -}) is allowed to indicate the whole
@@ -89,6 +90,7 @@ public @interface DurationFormat {
 		 */
 		COMPOSITE
 	}
+
 
 	/**
 	 * {@link Duration} format unit, which mirrors a subset of {@link ChronoUnit} and
@@ -227,7 +229,6 @@ public @interface DurationFormat {
 			}
 			throw new IllegalArgumentException("'" + suffix + "' is not a valid simple duration Unit");
 		}
-
 	}
 
 }
