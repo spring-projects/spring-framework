@@ -163,11 +163,8 @@ class RetryPolicyTests {
 		@Test
 		void delayPreconditions() {
 			assertThatIllegalArgumentException()
-					.isThrownBy(() -> RetryPolicy.builder().delay(Duration.ofMillis(0)))
-					.withMessage("Invalid duration (0ms): delay must be positive.");
-			assertThatIllegalArgumentException()
 					.isThrownBy(() -> RetryPolicy.builder().delay(Duration.ofMillis(-1)))
-					.withMessage("Invalid duration (-1ms): delay must be positive.");
+					.withMessage("Invalid delay (-1ms): must be >= 0.");
 		}
 
 		@Test

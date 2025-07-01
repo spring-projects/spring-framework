@@ -25,6 +25,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
+import static org.springframework.core.retry.RetryPolicy.Builder.DEFAULT_DELAY;
 import static org.springframework.util.backoff.BackOffExecution.STOP;
 
 /**
@@ -38,14 +39,14 @@ class MaxAttemptsRetryPolicyTests {
 
 	@Test
 	void maxAttempts() {
-		var retryPolicy = RetryPolicy.builder().maxAttempts(2).delay(Duration.ofMillis(1)).build();
+		var retryPolicy = RetryPolicy.builder().maxAttempts(2).delay(Duration.ofMillis(0)).build();
 		var backOffExecution = retryPolicy.getBackOff().start();
 		var throwable = mock(Throwable.class);
 
 		assertThat(retryPolicy.shouldRetry(throwable)).isTrue();
-		assertThat(backOffExecution.nextBackOff()).isGreaterThan(0);
+		assertThat(backOffExecution.nextBackOff()).isZero();
 		assertThat(retryPolicy.shouldRetry(throwable)).isTrue();
-		assertThat(backOffExecution.nextBackOff()).isGreaterThan(0);
+		assertThat(backOffExecution.nextBackOff()).isZero();
 
 		assertThat(retryPolicy.shouldRetry(throwable)).isTrue();
 		assertThat(backOffExecution.nextBackOff()).isEqualTo(STOP);
@@ -65,13 +66,13 @@ class MaxAttemptsRetryPolicyTests {
 
 		// 4 retries
 		assertThat(retryPolicy.shouldRetry(new NumberFormatException())).isTrue();
-		assertThat(backOffExecution.nextBackOff()).isGreaterThan(0);
+		assertThat(backOffExecution.nextBackOff()).isEqualTo(1);
 		assertThat(retryPolicy.shouldRetry(new IllegalStateException())).isFalse();
-		assertThat(backOffExecution.nextBackOff()).isGreaterThan(0);
+		assertThat(backOffExecution.nextBackOff()).isEqualTo(1);
 		assertThat(retryPolicy.shouldRetry(new IllegalStateException())).isFalse();
-		assertThat(backOffExecution.nextBackOff()).isGreaterThan(0);
+		assertThat(backOffExecution.nextBackOff()).isEqualTo(1);
 		assertThat(retryPolicy.shouldRetry(new CustomNumberFormatException())).isTrue();
-		assertThat(backOffExecution.nextBackOff()).isGreaterThan(0);
+		assertThat(backOffExecution.nextBackOff()).isEqualTo(1);
 
 		// After policy exhaustion
 		assertThat(retryPolicy.shouldRetry(new NumberFormatException())).isTrue();
@@ -92,17 +93,17 @@ class MaxAttemptsRetryPolicyTests {
 
 		// 6 retries
 		assertThat(retryPolicy.shouldRetry(new IOException())).isTrue();
-		assertThat(backOffExecution.nextBackOff()).isGreaterThan(0);
+		assertThat(backOffExecution.nextBackOff()).isEqualTo(DEFAULT_DELAY);
 		assertThat(retryPolicy.shouldRetry(new RuntimeException())).isTrue();
-		assertThat(backOffExecution.nextBackOff()).isGreaterThan(0);
+		assertThat(backOffExecution.nextBackOff()).isEqualTo(DEFAULT_DELAY);
 		assertThat(retryPolicy.shouldRetry(new FileNotFoundException())).isFalse();
-		assertThat(backOffExecution.nextBackOff()).isGreaterThan(0);
+		assertThat(backOffExecution.nextBackOff()).isEqualTo(DEFAULT_DELAY);
 		assertThat(retryPolicy.shouldRetry(new FileSystemException("file"))).isTrue();
-		assertThat(backOffExecution.nextBackOff()).isGreaterThan(0);
+		assertThat(backOffExecution.nextBackOff()).isEqualTo(DEFAULT_DELAY);
 		assertThat(retryPolicy.shouldRetry(new CustomFileSystemException("file"))).isFalse();
-		assertThat(backOffExecution.nextBackOff()).isGreaterThan(0);
+		assertThat(backOffExecution.nextBackOff()).isEqualTo(DEFAULT_DELAY);
 		assertThat(retryPolicy.shouldRetry(new IOException())).isTrue();
-		assertThat(backOffExecution.nextBackOff()).isGreaterThan(0);
+		assertThat(backOffExecution.nextBackOff()).isEqualTo(DEFAULT_DELAY);
 
 		// After policy exhaustion
 		assertThat(retryPolicy.shouldRetry(new IOException())).isTrue();

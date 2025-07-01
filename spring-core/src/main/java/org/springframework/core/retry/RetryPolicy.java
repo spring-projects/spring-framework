@@ -209,14 +209,15 @@ public interface RetryPolicy {
 		 * <p>You should not specify this configuration option if you have
 		 * configured a custom {@link #backOff(BackOff) BackOff} strategy.
 		 * @param delay the base delay, typically in milliseconds or seconds;
-		 * must be positive
+		 * must be greater than or equal to zero
 		 * @return this {@code Builder} instance for chained method invocations
 		 * @see #jitter(Duration)
 		 * @see #multiplier(double)
 		 * @see #maxDelay(Duration)
 		 */
 		public Builder delay(Duration delay) {
-			assertIsPositive("delay", delay);
+			Assert.isTrue(!delay.isNegative(),
+					() -> "Invalid delay (%dms): must be >= 0.".formatted(delay.toMillis()));
 			this.delay = delay;
 			return this;
 		}
@@ -233,7 +234,8 @@ public interface RetryPolicy {
 		 * <p>The supplied value will override any previously configured value.
 		 * <p>You should not specify this configuration option if you have
 		 * configured a custom {@link #backOff(BackOff) BackOff} strategy.
-		 * @param jitter the jitter value, typically in milliseconds; must be positive
+		 * @param jitter the jitter value, typically in milliseconds; must be
+		 * greater than or equal to zero
 		 * @return this {@code Builder} instance for chained method invocations
 		 * @see #delay(Duration)
 		 * @see #multiplier(double)

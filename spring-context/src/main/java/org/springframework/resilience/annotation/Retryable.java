@@ -111,7 +111,7 @@ public @interface Retryable {
 	 * this serves as the initial delay to multiply from.
 	 * <p>The time unit is milliseconds by default but can be overridden via
 	 * {@link #timeUnit}.
-	 * <p>The default is 1000.
+	 * <p>Must be greater than or equal to zero. The default is 1000.
 	 * @see #jitter()
 	 * @see #multiplier()
 	 * @see #maxDelay()
