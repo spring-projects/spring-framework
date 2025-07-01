@@ -136,7 +136,10 @@ public abstract class AbstractRetryInterceptor implements MethodInterceptor {
 
 			Publisher<?> publisher = adapter.toPublisher(result);
 			Retry retry = Retry.backoff(spec.maxAttempts(), spec.delay())
-					.jitter((double) spec.jitter().toMillis() / spec.delay().toMillis())
+					.jitter(
+							spec.delay().isZero() ? 0.0 :
+							Math.max(0.0, Math.min(1.0, spec.jitter().toNanos() / (double) spec.delay().toNanos()))
+					)
 					.multiplier(spec.multiplier())
 					.maxBackoff(spec.maxDelay())
 					.filter(spec.combinedPredicate().forMethod(method));
