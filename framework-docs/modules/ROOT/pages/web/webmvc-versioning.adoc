@@ -12,6 +12,8 @@ Please, see also related content in:
 - Configure xref:web/webmvc/mvc-config/api-version.adoc[API versioning] in the MVC Config
 - xref:web/webmvc/mvc-controller/ann-requestmapping.adoc#mvc-ann-requestmapping-version[Map requests]
 to annotated controller methods with an API version
+- xref:web/webmvc-functional.adoc#api-version[Route requests]
+to functional endpoints with an API version
 
 Client support for API versioning is available also in `RestClient`, `WebClient`, and
 xref:integration/rest-clients.adoc#rest-http-interface[HTTP Service] clients, as well as

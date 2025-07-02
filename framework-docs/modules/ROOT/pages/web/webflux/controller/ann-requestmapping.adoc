@@ -483,8 +483,12 @@ superseded by (4), which allows only a strict match, and therefore does not matc
 In this scenario, a `NotAcceptableApiVersionException` results in a 400 response.
 
 NOTE: The above assumes the request version is a
-xref:web/webmvc/mvc-config/api-version.adoc["supported" version], or otherwise it
-would fail xref:web/webflux-versioning.adoc#webflux-versioning-validation[Validation].
+xref:web/webflux/config.adoc#webflux-config-api-version["supported" version],
+or otherwise it would fail.
+
+See xref:web/webflux-versioning.adoc[API Versioning] for more details on underlying
+infrastructure and support for API Versioning.
+
 
 
 

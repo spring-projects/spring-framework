@@ -13,6 +13,8 @@ Please, see also related content in:
 in the WebFlux Config
 - xref:web/webflux/controller/ann-requestmapping.adoc#webflux-ann-requestmapping-version[Map requests]
 to annotated controller methods with an API version
+- xref:web/webflux-functional.adoc#api-version[Route requests]
+to functional endpoints with an API version
 
 Client support for API versioning is available also in `RestClient`, `WebClient`, and
 xref:integration/rest-clients.adoc#rest-http-interface[HTTP Service] clients, as well as

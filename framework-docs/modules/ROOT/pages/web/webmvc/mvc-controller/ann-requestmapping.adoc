@@ -505,8 +505,10 @@ In this scenario, a `NotAcceptableApiVersionException` results in a 400 response
 
 NOTE: The above assumes the request version is a
 xref:web/webmvc/mvc-config/api-version.adoc["supported" version], or otherwise it
-would fail xref:web/webmvc-versioning.adoc#mvc-versioning-validation[Validation].
+would fail.
 
+See xref:web/webmvc-versioning.adoc[API Versioning] for more details on underlying
+infrastructure and support for API Versioning.
 
 
 

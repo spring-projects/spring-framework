@@ -585,10 +585,10 @@ parameter, though which additional constraints can be expressed.
 === Predicates
 
 You can write your own `RequestPredicate`, but the `RequestPredicates` utility class
-offers commonly used implementations, based on the request path, HTTP method, content-type,
-and so on.
-The following example uses a request predicate to create a constraint based on the `Accept`
-header:
+offers built-in options for common needs for matching based on the HTTP method, request
+path, headers, xref:#api-version[API version], and more.
+
+The following example uses an `Accept` header, request predicate:
 
 [tabs]
 ======
@@ -781,6 +781,51 @@ Kotlin::
 	}
 ----
 ======
+
+
+
+[[api-version]]
+=== API Version
+
+Router functions support matching by API version.
+
+First, enable API versioning in the
+xref:web/webflux/config.adoc#webflux-config-api-version[WebFlux Config], and then you can
+use the `version` xref:#webflux-fn-predicates[predicate] as follows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	RouterFunction<ServerResponse> route = RouterFunctions.route()
+		.GET("/hello-world", version("1.2"),
+			request -> ServerResponse.ok().body("Hello World")).build();
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes"]
+----
+	val route = coRouter {
+		GET("/hello-world", version("1.2")) {
+			ServerResponse.ok().bodyValueAndAwait("Hello World")
+		}
+	}
+----
+======
+
+The `version` predicate can be:
+
+- Fixed version ("1.2") -- matches the given version only
+- Baseline version ("1.2+") -- matches the given version and above, up to the highest
+xref:web/webmvc/mvc-config/api-version.adoc[supported version].
+
+See xref:web/webflux-versioning.adoc[API Versioning] for more details on underlying
+infrastructure and support for API Versioning.
+
+
 
 
 [[webflux-fn-serving-resources]]
