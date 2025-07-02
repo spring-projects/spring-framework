@@ -37,7 +37,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Juergen Hoeller
  * @since 7.0
  */
-public class ConcurrencyLimitTests {
+class ConcurrencyLimitTests {
 
 	@Test
 	void withSimpleInterceptor() {
@@ -98,7 +98,7 @@ public class ConcurrencyLimitTests {
 	}
 
 
-	public static class NonAnnotatedBean {
+	static class NonAnnotatedBean {
 
 		AtomicInteger counter = new AtomicInteger();
 
@@ -117,7 +117,7 @@ public class ConcurrencyLimitTests {
 	}
 
 
-	public static class AnnotatedMethodBean {
+	static class AnnotatedMethodBean {
 
 		AtomicInteger current = new AtomicInteger();
 
@@ -138,7 +138,7 @@ public class ConcurrencyLimitTests {
 
 
 	@ConcurrencyLimit(2)
-	public static class AnnotatedClassBean {
+	static class AnnotatedClassBean {
 
 		AtomicInteger current = new AtomicInteger();
 

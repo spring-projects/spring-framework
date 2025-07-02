@@ -44,7 +44,7 @@ import static org.assertj.core.api.Assertions.assertThatRuntimeException;
  * @author Juergen Hoeller
  * @since 7.0
  */
-public class ReactiveRetryInterceptorTests {
+class ReactiveRetryInterceptorTests {
 
 	@Test
 	void withSimpleInterceptor() {
@@ -189,7 +189,7 @@ public class ReactiveRetryInterceptorTests {
 	}
 
 
-	public static class NonAnnotatedBean {
+	static class NonAnnotatedBean {
 
 		AtomicInteger counter = new AtomicInteger();
 
@@ -202,7 +202,7 @@ public class ReactiveRetryInterceptorTests {
 	}
 
 
-	public static class AnnotatedMethodBean {
+	static class AnnotatedMethodBean {
 
 		AtomicInteger counter = new AtomicInteger();
 
@@ -219,7 +219,7 @@ public class ReactiveRetryInterceptorTests {
 	@Retryable(delay = 10, jitter = 5, multiplier = 2.0, maxDelay = 40,
 			includes = IOException.class, excludes = AccessDeniedException.class,
 			predicate = CustomPredicate.class)
-	public static class AnnotatedClassBean {
+	static class AnnotatedClassBean {
 
 		AtomicInteger counter = new AtomicInteger();
 
@@ -258,7 +258,7 @@ public class ReactiveRetryInterceptorTests {
 
 	// Bean classes for boundary testing
 
-	public static class MinimalRetryBean {
+	static class MinimalRetryBean {
 
 		AtomicInteger counter = new AtomicInteger();
 
@@ -271,7 +271,7 @@ public class ReactiveRetryInterceptorTests {
 	}
 
 
-	public static class ZeroDelayJitterBean {
+	static class ZeroDelayJitterBean {
 
 		AtomicInteger counter = new AtomicInteger();
 
@@ -284,7 +284,7 @@ public class ReactiveRetryInterceptorTests {
 	}
 
 
-	public static class JitterGreaterThanDelayBean {
+	static class JitterGreaterThanDelayBean {
 
 		AtomicInteger counter = new AtomicInteger();
 
@@ -297,7 +297,7 @@ public class ReactiveRetryInterceptorTests {
 	}
 
 
-	public static class FluxMultiValueBean {
+	static class FluxMultiValueBean {
 
 		AtomicInteger counter = new AtomicInteger();
 
@@ -310,7 +310,7 @@ public class ReactiveRetryInterceptorTests {
 	}
 
 
-	public static class SuccessfulOperationBean {
+	static class SuccessfulOperationBean {
 
 		AtomicInteger counter = new AtomicInteger();
 
@@ -323,7 +323,7 @@ public class ReactiveRetryInterceptorTests {
 	}
 
 
-	public static class ImmediateFailureBean {
+	static class ImmediateFailureBean {
 
 		AtomicInteger counter = new AtomicInteger();
 

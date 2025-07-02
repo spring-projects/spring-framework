@@ -47,7 +47,7 @@ import static org.assertj.core.api.Assertions.assertThatIOException;
  * @author Juergen Hoeller
  * @since 7.0
  */
-public class RetryInterceptorTests {
+class RetryInterceptorTests {
 
 	@Test
 	void withSimpleInterceptor() {
@@ -137,7 +137,7 @@ public class RetryInterceptorTests {
 	}
 
 
-	public static class NonAnnotatedBean {
+	static class NonAnnotatedBean {
 
 		int counter = 0;
 
@@ -148,7 +148,7 @@ public class RetryInterceptorTests {
 	}
 
 
-	public static class AnnotatedMethodBean {
+	static class AnnotatedMethodBean {
 
 		int counter = 0;
 
@@ -163,7 +163,7 @@ public class RetryInterceptorTests {
 	@Retryable(delay = 10, jitter = 5, multiplier = 2.0, maxDelay = 40,
 			includes = IOException.class, excludes = AccessDeniedException.class,
 			predicate = CustomPredicate.class)
-	public static class AnnotatedClassBean {
+	static class AnnotatedClassBean {
 
 		int counter = 0;
 
@@ -189,7 +189,7 @@ public class RetryInterceptorTests {
 			multiplierString = "${multiplier}", maxDelayString = "${maxDelay}",
 			includes = IOException.class, excludes = AccessDeniedException.class,
 			predicate = CustomPredicate.class)
-	public static class AnnotatedClassBeanWithStrings {
+	static class AnnotatedClassBeanWithStrings {
 
 		int counter = 0;
 
@@ -220,7 +220,7 @@ public class RetryInterceptorTests {
 	}
 
 
-	public static class DoubleAnnotatedBean {
+	static class DoubleAnnotatedBean {
 
 		AtomicInteger current = new AtomicInteger();
 
@@ -248,7 +248,7 @@ public class RetryInterceptorTests {
 
 
 	@EnableResilientMethods
-	public static class EnablingConfig {
+	static class EnablingConfig {
 	}
 
 }
