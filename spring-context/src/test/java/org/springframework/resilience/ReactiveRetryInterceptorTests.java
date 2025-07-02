@@ -22,6 +22,7 @@ import java.nio.file.AccessDeniedException;
 import java.time.Duration;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.assertj.core.api.ThrowingConsumer;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -56,6 +57,7 @@ class ReactiveRetryInterceptorTests {
 		NonAnnotatedBean proxy = (NonAnnotatedBean) pf.getProxy();
 
 		assertThatIllegalStateException().isThrownBy(() -> proxy.retryOperation().block())
+				.satisfies(isRetryExhaustedException())
 				.withCauseInstanceOf(IOException.class).havingCause().withMessage("6");
 		assertThat(target.counter.get()).isEqualTo(6);
 	}
@@ -71,6 +73,7 @@ class ReactiveRetryInterceptorTests {
 		AnnotatedMethodBean target = (AnnotatedMethodBean) AopProxyUtils.getSingletonTarget(proxy);
 
 		assertThatIllegalStateException().isThrownBy(() -> proxy.retryOperation().block())
+				.satisfies(isRetryExhaustedException())
 				.withCauseInstanceOf(IOException.class).havingCause().withMessage("6");
 		assertThat(target.counter.get()).isEqualTo(6);
 	}
@@ -86,12 +89,15 @@ class ReactiveRetryInterceptorTests {
 		AnnotatedClassBean target = (AnnotatedClassBean) AopProxyUtils.getSingletonTarget(proxy);
 
 		assertThatRuntimeException().isThrownBy(() -> proxy.retryOperation().block())
+				.satisfies(isReactiveException())
 				.withCauseInstanceOf(IOException.class).havingCause().withMessage("3");
 		assertThat(target.counter.get()).isEqualTo(3);
 		assertThatRuntimeException().isThrownBy(() -> proxy.otherOperation().block())
+				.satisfies(isReactiveException())
 				.withCauseInstanceOf(IOException.class);
 		assertThat(target.counter.get()).isEqualTo(4);
 		assertThatIllegalStateException().isThrownBy(() -> proxy.overrideOperation().blockFirst())
+				.satisfies(isRetryExhaustedException())
 				.withCauseInstanceOf(IOException.class);
 		assertThat(target.counter.get()).isEqualTo(6);
 	}
@@ -108,6 +114,7 @@ class ReactiveRetryInterceptorTests {
 
 		// Should execute only 2 times, because maxAttempts=1 means 1 call + 1 retry
 		assertThatIllegalStateException().isThrownBy(() -> proxy.retryOperation().block())
+				.satisfies(isRetryExhaustedException())
 				.withCauseInstanceOf(IOException.class).havingCause().withMessage("2");
 		assertThat(target.counter.get()).isEqualTo(2);
 	}
@@ -123,6 +130,7 @@ class ReactiveRetryInterceptorTests {
 		ZeroDelayJitterBean proxy = (ZeroDelayJitterBean) pf.getProxy();
 
 		assertThatIllegalStateException().isThrownBy(() -> proxy.retryOperation().block())
+				.satisfies(isRetryExhaustedException())
 				.withCauseInstanceOf(IOException.class).havingCause().withMessage("4");
 		assertThat(target.counter.get()).isEqualTo(4);
 	}
@@ -138,6 +146,7 @@ class ReactiveRetryInterceptorTests {
 		JitterGreaterThanDelayBean proxy = (JitterGreaterThanDelayBean) pf.getProxy();
 
 		assertThatIllegalStateException().isThrownBy(() -> proxy.retryOperation().block())
+				.satisfies(ex -> assertThat(ex.getClass().getSimpleName()).isEqualTo("RetryExhaustedException"))
 				.withCauseInstanceOf(IOException.class).havingCause().withMessage("4");
 		assertThat(target.counter.get()).isEqualTo(4);
 	}
@@ -153,6 +162,7 @@ class ReactiveRetryInterceptorTests {
 		FluxMultiValueBean proxy = (FluxMultiValueBean) pf.getProxy();
 
 		assertThatIllegalStateException().isThrownBy(() -> proxy.retryOperation().blockFirst())
+				.satisfies(isRetryExhaustedException())
 				.withCauseInstanceOf(IOException.class).havingCause().withMessage("4");
 		assertThat(target.counter.get()).isEqualTo(4);
 	}
@@ -184,8 +194,18 @@ class ReactiveRetryInterceptorTests {
 		ImmediateFailureBean proxy = (ImmediateFailureBean) pf.getProxy();
 
 		assertThatIllegalStateException().isThrownBy(() -> proxy.retryOperation().block())
+				.satisfies(isRetryExhaustedException())
 				.withCauseInstanceOf(RuntimeException.class).havingCause().withMessage("immediate failure");
 		assertThat(target.counter.get()).isEqualTo(4);
+	}
+
+
+	private static ThrowingConsumer<? super Throwable> isReactiveException() {
+		return ex -> assertThat(ex.getClass().getSimpleName()).isEqualTo("ReactiveException");
+	}
+
+	private static ThrowingConsumer<? super Throwable> isRetryExhaustedException() {
+		return ex -> assertThat(ex.getClass().getSimpleName()).isEqualTo("RetryExhaustedException");
 	}
 
 
