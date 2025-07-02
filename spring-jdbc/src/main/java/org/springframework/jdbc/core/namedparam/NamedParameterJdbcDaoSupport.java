@@ -28,7 +28,11 @@ import org.springframework.jdbc.core.support.JdbcDaoSupport;
  * @author Juergen Hoeller
  * @since 2.0
  * @see NamedParameterJdbcTemplate
+ * @deprecated as of 7.0, in favor of direct injection of {@link NamedParameterJdbcTemplate}
+ * or {@link org.springframework.jdbc.core.simple.JdbcClient}
  */
+@Deprecated(since = "7.0", forRemoval = true)
+@SuppressWarnings("removal")
 public class NamedParameterJdbcDaoSupport extends JdbcDaoSupport {
 
 	private @Nullable NamedParameterJdbcTemplate namedParameterJdbcTemplate;

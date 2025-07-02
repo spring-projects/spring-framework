@@ -45,7 +45,11 @@ import org.springframework.util.Assert;
  * @see #setDataSource
  * @see #getJdbcTemplate
  * @see org.springframework.jdbc.core.JdbcTemplate
+ * @deprecated as of 7.0, in favor of direct injection of {@link JdbcTemplate}
+ * or {@link org.springframework.jdbc.core.simple.JdbcClient}
  */
+@Deprecated(since = "7.0", forRemoval = true)
+@SuppressWarnings("removal")
 public abstract class JdbcDaoSupport extends DaoSupport {
 
 	private @Nullable JdbcTemplate jdbcTemplate;

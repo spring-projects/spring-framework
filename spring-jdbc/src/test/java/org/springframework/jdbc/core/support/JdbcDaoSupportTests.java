@@ -32,6 +32,7 @@ import static org.mockito.Mockito.mock;
  * @author Juergen Hoeller
  * @since 30.07.2003
  */
+@SuppressWarnings("removal")
 class JdbcDaoSupportTests {
 
 	@Test

@@ -31,7 +31,9 @@ import org.springframework.beans.factory.InitializingBean;
  * @author Juergen Hoeller
  * @since 1.2.2
  * @see org.springframework.jdbc.core.support.JdbcDaoSupport
+ * @deprecated as of 7.0, in favor of direct injection of client dependencies
  */
+@Deprecated(since = "7.0", forRemoval = true)
 public abstract class DaoSupport implements InitializingBean {
 
 	/** Logger available to subclasses. */

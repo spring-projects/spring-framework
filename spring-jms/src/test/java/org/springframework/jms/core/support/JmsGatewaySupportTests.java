@@ -31,6 +31,7 @@ import static org.mockito.Mockito.mock;
  * @author Mark Pollack
  * @since 24.9.2004
  */
+@SuppressWarnings("removal")
 class JmsGatewaySupportTests {
 
 	@Test
