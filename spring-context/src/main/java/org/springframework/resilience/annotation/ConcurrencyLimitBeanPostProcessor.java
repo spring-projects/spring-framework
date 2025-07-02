@@ -20,7 +20,6 @@ import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.aopalliance.intercept.Joinpoint;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.jspecify.annotations.Nullable;
@@ -93,8 +92,8 @@ public class ConcurrencyLimitBeanPostProcessor extends AbstractBeanFactoryAwareA
 							}
 						}
 						if (interceptor == null) {
-							interceptor = (limit != null ? new ConcurrencyThrottleInterceptor(limit.value()) :
-									Joinpoint::proceed);
+							Assert.state(limit != null, "No @ConcurrencyLimit annotation found");
+							interceptor = new ConcurrencyThrottleInterceptor(limit.value());
 							if (!perMethod) {
 								cache.classInterceptor = interceptor;
 							}
