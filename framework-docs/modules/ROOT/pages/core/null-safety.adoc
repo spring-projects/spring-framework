@@ -46,8 +46,10 @@ Spring-related libraries or applications.
 [[null-safety-guidelines-jspecify]]
 === JSpecify
 
-The key points to understand are that the nullness of types is unknown in Java by default and that non-null type
-usage is by far more frequent than nullable usage. In order to keep codebases readable, we typically want to define
+==== Defaults to non-null
+
+A key point to understand is that the nullness of types is unknown by default in Java and that non-null type
+usages are by far more frequent than nullable usages. In order to keep codebases readable, we typically want to define
 by default that type usage is non-null unless marked as nullable for a specific scope. This is exactly the purpose of
 https://jspecify.dev/docs/api/org/jspecify/annotations/NullMarked.html[`@NullMarked`] which is typically set in Spring
 projects at the package level via a `package-info.java` file, for example:
@@ -60,9 +62,17 @@ package org.springframework.core;
 import org.jspecify.annotations.NullMarked;
 ----
 
-In the various Java files belonging to the package, nullable type usage is defined explicitly with
-https://jspecify.dev/docs/api/org/jspecify/annotations/Nullable.html[`@Nullable`]. It is recommended that this
-annotation is specified just before the related type on the same line.
+==== Explicit nullability
+
+In `@NullMarked` code, nullable type usages are defined explicitly with
+https://jspecify.dev/docs/api/org/jspecify/annotations/Nullable.html[`@Nullable`].
+
+A key difference between JSpecify `@Nullable` / `@NonNull` annotations and most other variants is that they are
+meta-annotated with `@Target(ElementType.TYPE_USE)`, so they apply only to type usages. This impacts where such
+annotations should be placed, either to comply with
+https://docs.oracle.com/javase/specs/jls/se17/html/jls-9.html#jls-9.7.4[related Java specifications] or to follow code
+style best practices. From a style perspective, it is recommended to embrace the type-use nature of those annotations by placing them on the
+same line than the annotated type.
 
 For example, for a field:
 
@@ -75,8 +85,8 @@ Or for method parameters and method return types:
 
 [source,java,subs="verbatim,quotes"]
 ----
-public static @Nullable String buildMessage(@Nullable String message,
-                                            @Nullable Throwable cause) {
+public @Nullable String buildMessage(@Nullable String message,
+                                     @Nullable Throwable cause) {
     // ...
 }
 ----
@@ -88,24 +98,41 @@ method. That means the JSpecify annotations should be copied to the overriding m
 you want to override the implementation and keep the same nullability semantics.
 ====
 
+https://jspecify.dev/docs/api/org/jspecify/annotations/NonNull.html[`@NonNull`] and
+https://jspecify.dev/docs/api/org/jspecify/annotations/NullUnmarked.html[`@NullUnmarked`] should rarely be needed for
+typical use cases.
+
+==== Arrays and varargs
+
 With arrays and varargs, you need to be able to differentiate the nullness of the elements from the nullness of
 the array itself. Pay attention to the syntax
 https://docs.oracle.com/javase/specs/jls/se17/html/jls-9.html#jls-9.7.4[defined by the Java specification] which may be
-initially surprising:
+initially surprising. For example, in `@NullMarked` code:
 
 - `@Nullable Object[] array` means individual elements can be null but the array itself cannot.
 - `Object @Nullable [] array` means individual elements cannot be null but the array itself can.
 - `@Nullable Object @Nullable [] array` means both individual elements and the array can be null.
 
+==== Generics
+
+JSpecify annotations applies to generics as well. For example, in `@NullMarked` code:
+
+ - `List<String>` means a list of non-null elements (equivalent of `List<@NonNull String>`)
+ - `List<@Nullable String>` means a list of nullable elements
+
+Things are a bit more complicated when you are declaring generic types or generic methods, see related
+https://jspecify.dev/docs/user-guide/#generics[JSpecify generics documentation] for more details.
+
+WARNING: Generic types and generic methods nullability https://github.com/uber/NullAway/issues?q=is%3Aissue+is%3Aopen+label%3Ajspecify[is not yet fully supported by NullAway].
+
+==== Nested and fully qualified types
+
 The Java specification also enforces that annotations defined with `@Target(ElementType.TYPE_USE)` like JSpecify
 `@Nullable` should be specified after the last `.` with inner or fully qualified types:
 
- - `Cache.@Nullable ValueWrapper`
- - `jakarta.validation.@Nullable Validator`
+- `Cache.@Nullable ValueWrapper`
+- `jakarta.validation.@Nullable Validator`
 
-https://jspecify.dev/docs/api/org/jspecify/annotations/NonNull.html[`@NonNull`] and
-https://jspecify.dev/docs/api/org/jspecify/annotations/NullUnmarked.html[`@NullUnmarked`] should rarely be needed for
-typical use cases.
 
 [[null-safety-guidelines-nullaway]]
 === NullAway
@@ -126,7 +153,7 @@ parameter cannot be null after a successful invocation of `Assert.notNull()`.
 
 Optionally, it is possible to set `NullAway:JSpecifyMode=true` to enable
 https://github.com/uber/NullAway/wiki/JSpecify-Support[checks on the full JSpecify semantics], including annotations on
-generic types. Be aware that this mode is
+arrays, varargs and generics. Be aware that this mode is
 https://github.com/uber/NullAway/issues?q=is%3Aissue+is%3Aopen+label%3Ajspecify[still under development] and requires
 using JDK 22 or later (typically combined with the `--release` Java compiler flag to configure the
 expected baseline). It is recommended to enable the JSpecify mode only as a second step, after making sure the codebase
