@@ -16,7 +16,6 @@
 
 package org.springframework.core.retry;
 
-import java.time.Duration;
 import java.util.ArrayDeque;
 import java.util.Deque;
 
@@ -84,7 +83,6 @@ public class RetryTemplate implements RetryOperations {
 	 * @param retryPolicy the retry policy to use
 	 * @see RetryPolicy#withDefaults()
 	 * @see RetryPolicy#withMaxAttempts(long)
-	 * @see RetryPolicy#withMaxElapsedTime(Duration)
 	 * @see RetryPolicy#builder()
 	 */
 	public void setRetryPolicy(RetryPolicy retryPolicy) {
