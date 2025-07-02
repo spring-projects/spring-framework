@@ -45,7 +45,7 @@ import org.springframework.util.StringValueResolver;
 /**
  * A convenient {@link org.springframework.beans.factory.config.BeanPostProcessor
  * BeanPostProcessor} that applies a retry interceptor to all bean methods
- * annotated with {@link Retryable} annotations.
+ * annotated with {@link Retryable @Retryable}.
  *
  * @author Juergen Hoeller
  * @since 7.0

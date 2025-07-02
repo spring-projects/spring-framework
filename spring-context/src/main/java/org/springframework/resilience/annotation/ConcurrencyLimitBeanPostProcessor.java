@@ -39,7 +39,7 @@ import org.springframework.util.ConcurrentReferenceHashMap;
 /**
  * A convenient {@link org.springframework.beans.factory.config.BeanPostProcessor
  * BeanPostProcessor} that applies a concurrency interceptor to all bean methods
- * annotated with {@link ConcurrencyLimit} annotations.
+ * annotated with {@link ConcurrencyLimit @ConcurrencyLimit}.
  *
  * @author Juergen Hoeller
  * @since 7.0

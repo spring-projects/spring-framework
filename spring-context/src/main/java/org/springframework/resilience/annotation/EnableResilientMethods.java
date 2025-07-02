@@ -27,10 +27,10 @@ import org.springframework.core.Ordered;
 
 /**
  * Enables Spring's core resilience features for method invocations:
- * {@link Retryable} as well as {@link ConcurrencyLimit}.
+ * {@link Retryable @Retryable} as well as {@link ConcurrencyLimit @ConcurrencyLimit}.
  *
- * <p>These annotations can also be individually enabled through
- * defining a {@link RetryAnnotationBeanPostProcessor} and/or a
+ * <p>These annotations can also be individually enabled by
+ * defining a {@link RetryAnnotationBeanPostProcessor} or a
  * {@link ConcurrencyLimitBeanPostProcessor}.
  *
  * @author Juergen Hoeller
@@ -61,7 +61,7 @@ public @interface EnableResilientMethods {
 	 * Indicate the order in which the {@link RetryAnnotationBeanPostProcessor}
 	 * and {@link ConcurrencyLimitBeanPostProcessor} should be applied.
 	 * <p>The default is {@link Ordered#LOWEST_PRECEDENCE} in order to run
-	 * after all other post-processors, so that it can add an advisor to
+	 * after all other post-processors, so that they can add advisors to
 	 * existing proxies rather than double-proxy.
 	 */
 	int order() default Ordered.LOWEST_PRECEDENCE;

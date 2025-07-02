@@ -19,6 +19,8 @@ package org.springframework.aop.interceptor;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.framework.ProxyFactory;
@@ -30,21 +32,23 @@ import org.springframework.core.testfixture.io.SerializationTestUtils;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
+ * Tests for {@link ConcurrencyThrottleInterceptor}.
+ *
  * @author Juergen Hoeller
  * @author Chris Beams
  * @since 06.04.2004
  */
 class ConcurrencyThrottleInterceptorTests {
 
-	protected static final Log logger = LogFactory.getLog(ConcurrencyThrottleInterceptorTests.class);
+	private static final Log logger = LogFactory.getLog(ConcurrencyThrottleInterceptorTests.class);
 
-	public static final int NR_OF_THREADS = 100;
+	private static final int NR_OF_THREADS = 100;
 
-	public static final int NR_OF_ITERATIONS = 1000;
+	private static final int NR_OF_ITERATIONS = 1000;
 
 
 	@Test
-	void testSerializable() throws Exception {
+	void interceptorMustBeSerializable() throws Exception {
 		DerivedTestBean tb = new DerivedTestBean();
 		ProxyFactory proxyFactory = new ProxyFactory();
 		proxyFactory.setInterfaces(ITestBean.class);
@@ -62,17 +66,9 @@ class ConcurrencyThrottleInterceptorTests {
 		serializedProxy.getAge();
 	}
 
-	@Test
-	void testMultipleThreadsWithLimit1() {
-		testMultipleThreads(1);
-	}
-
-	@Test
-	void testMultipleThreadsWithLimit10() {
-		testMultipleThreads(10);
-	}
-
-	private void testMultipleThreads(int concurrencyLimit) {
+	@ParameterizedTest
+	@ValueSource(ints = {1, 10})
+	void multipleThreadsWithLimit(int concurrencyLimit) {
 		TestBean tb = new TestBean();
 		ProxyFactory proxyFactory = new ProxyFactory();
 		proxyFactory.setInterfaces(ITestBean.class);

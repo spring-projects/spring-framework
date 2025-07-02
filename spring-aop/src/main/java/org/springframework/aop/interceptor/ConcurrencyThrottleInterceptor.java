@@ -30,7 +30,7 @@ import org.springframework.util.ConcurrencyThrottleSupport;
  *
  * <p>Can be applied to methods of local services that involve heavy use
  * of system resources, in a scenario where it is more efficient to
- * throttle concurrency for a specific service rather than restricting
+ * throttle concurrency for a specific service rather than restrict
  * the entire thread pool (for example, the web container's thread pool).
  *
  * <p>The default concurrency limit of this interceptor is 1.
@@ -53,7 +53,7 @@ public class ConcurrencyThrottleInterceptor extends ConcurrencyThrottleSupport
 	}
 
 	/**
-	 * Create a default {@code ConcurrencyThrottleInterceptor}
+	 * Create a {@code ConcurrencyThrottleInterceptor}
 	 * with the given concurrency limit.
 	 * @since 7.0
 	 */

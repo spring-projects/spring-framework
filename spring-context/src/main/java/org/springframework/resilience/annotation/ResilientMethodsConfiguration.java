@@ -53,7 +53,7 @@ public class ResilientMethodsConfiguration implements ImportAware {
 	private void configureProxySupport(ProxyProcessorSupport proxySupport) {
 		if (this.enableResilientMethods != null) {
 			proxySupport.setProxyTargetClass(this.enableResilientMethods.getBoolean("proxyTargetClass"));
-			proxySupport.setOrder(this.enableResilientMethods.<Integer>getNumber("order"));
+			proxySupport.setOrder(this.enableResilientMethods.getNumber("order"));
 		}
 	}
 
