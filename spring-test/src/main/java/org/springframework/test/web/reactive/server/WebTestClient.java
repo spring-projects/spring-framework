@@ -277,13 +277,13 @@ public interface WebTestClient {
 		<T extends B> T webSessionManager(WebSessionManager sessionManager);
 
 		/**
-		 * Provide SSL session information and certificates for the mock server.
-		 * @param sslInfo the {@link SslInfo} to use
+		 * Set or reset SSL session information to assign to mock server requests.
+		 * @param info the {@link SslInfo} to use
 		 * @since 7.0
 		 * @see SslInfo#from(String)
 		 * @see SslInfo#from(String, java.security.cert.X509Certificate...)
 		 */
-		<T extends B> T sslInfo(SslInfo sslInfo);
+		<T extends B> T sslInfo(@Nullable SslInfo info);
 
 		/**
 		 * Shortcut for pre-packaged customizations to the mock server setup.

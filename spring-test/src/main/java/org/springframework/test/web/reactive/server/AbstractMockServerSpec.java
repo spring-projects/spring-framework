@@ -71,8 +71,8 @@ abstract class AbstractMockServerSpec<B extends WebTestClient.MockServerSpec<B>>
 	}
 
 	@Override
-	public <T extends B> T sslInfo(SslInfo sslInfo) {
-		this.sslInfo = sslInfo;
+	public <T extends B> T sslInfo(@Nullable SslInfo info) {
+		this.sslInfo = info;
 		return self();
 	}
 
