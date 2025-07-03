@@ -19,11 +19,13 @@ package org.springframework.resilience;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.nio.file.AccessDeniedException;
+import java.nio.file.FileSystemException;
 import java.time.Duration;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.assertj.core.api.ThrowingConsumer;
 import org.junit.jupiter.api.Test;
+import reactor.core.Exceptions;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -38,11 +40,13 @@ import org.springframework.resilience.retry.MethodRetrySpec;
 import org.springframework.resilience.retry.SimpleRetryInterceptor;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.assertj.core.api.Assertions.assertThatRuntimeException;
 
 /**
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 7.0
  */
 class ReactiveRetryInterceptorTests {
@@ -56,9 +60,12 @@ class ReactiveRetryInterceptorTests {
 				new MethodRetrySpec((m, t) -> true, 5, Duration.ofMillis(10))));
 		NonAnnotatedBean proxy = (NonAnnotatedBean) pf.getProxy();
 
-		assertThatIllegalStateException().isThrownBy(() -> proxy.retryOperation().block())
+		assertThatIllegalStateException()
+				.isThrownBy(() -> proxy.retryOperation().block())
 				.satisfies(isRetryExhaustedException())
-				.withCauseInstanceOf(IOException.class).havingCause().withMessage("6");
+				.havingCause()
+					.isInstanceOf(IOException.class)
+					.withMessage("6");
 		assertThat(target.counter.get()).isEqualTo(6);
 	}
 
@@ -72,34 +79,94 @@ class ReactiveRetryInterceptorTests {
 		AnnotatedMethodBean proxy = bf.getBean(AnnotatedMethodBean.class);
 		AnnotatedMethodBean target = (AnnotatedMethodBean) AopProxyUtils.getSingletonTarget(proxy);
 
-		assertThatIllegalStateException().isThrownBy(() -> proxy.retryOperation().block())
+		assertThatIllegalStateException()
+				.isThrownBy(() -> proxy.retryOperation().block())
 				.satisfies(isRetryExhaustedException())
-				.withCauseInstanceOf(IOException.class).havingCause().withMessage("6");
+				.havingCause()
+					.isInstanceOf(IOException.class)
+					.withMessage("6");
 		assertThat(target.counter.get()).isEqualTo(6);
 	}
 
 	@Test
-	void withPostProcessorForClass() {
-		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
-		bf.registerBeanDefinition("bean", new RootBeanDefinition(AnnotatedClassBean.class));
-		RetryAnnotationBeanPostProcessor bpp = new RetryAnnotationBeanPostProcessor();
-		bpp.setBeanFactory(bf);
-		bf.addBeanPostProcessor(bpp);
-		AnnotatedClassBean proxy = bf.getBean(AnnotatedClassBean.class);
+	void withPostProcessorForClassWithExactIncludesMatch() {
+		AnnotatedClassBean proxy = getProxiedAnnotatedClassBean();
 		AnnotatedClassBean target = (AnnotatedClassBean) AopProxyUtils.getSingletonTarget(proxy);
 
-		assertThatRuntimeException().isThrownBy(() -> proxy.retryOperation().block())
+		// Exact includes match: IOException
+		assertThatRuntimeException()
+				.isThrownBy(() -> proxy.ioOperation().block())
+				// Does NOT throw a RetryExhaustedException, because IOException3Predicate
+				// returns false once the exception's message is "3".
 				.satisfies(isReactiveException())
-				.withCauseInstanceOf(IOException.class).havingCause().withMessage("3");
+				.havingCause()
+					.isInstanceOf(IOException.class)
+					.withMessage("3");
+		// 1 initial attempt + 2 retries
 		assertThat(target.counter.get()).isEqualTo(3);
-		assertThatRuntimeException().isThrownBy(() -> proxy.otherOperation().block())
-				.satisfies(isReactiveException())
-				.withCauseInstanceOf(IOException.class);
+	}
+
+	@Test
+	void withPostProcessorForClassWithSubtypeIncludesMatch() {
+		AnnotatedClassBean proxy = getProxiedAnnotatedClassBean();
+		AnnotatedClassBean target = (AnnotatedClassBean) AopProxyUtils.getSingletonTarget(proxy);
+
+		// Subtype includes match: FileSystemException
+		assertThatRuntimeException()
+				.isThrownBy(() -> proxy.fileSystemOperation().block())
+				.satisfies(isRetryExhaustedException())
+				.withCauseInstanceOf(FileSystemException.class);
+		// 1 initial attempt + 3 retries
 		assertThat(target.counter.get()).isEqualTo(4);
-		assertThatIllegalStateException().isThrownBy(() -> proxy.overrideOperation().blockFirst())
+	}
+
+	@Test
+	void withPostProcessorForClassWithExcludesMatch() {
+		AnnotatedClassBean proxy = getProxiedAnnotatedClassBean();
+		AnnotatedClassBean target = (AnnotatedClassBean) AopProxyUtils.getSingletonTarget(proxy);
+
+		// Exact excludes match: AccessDeniedException
+		assertThatRuntimeException()
+				.isThrownBy(() -> proxy.accessOperation().block())
+				// Does NOT throw a RetryExhaustedException, because no retry is
+				// performed for an AccessDeniedException.
+				.satisfies(isReactiveException())
+				.withCauseInstanceOf(AccessDeniedException.class);
+		// 1 initial attempt + 0 retries
+		assertThat(target.counter.get()).isEqualTo(1);
+	}
+
+	@Test
+	void withPostProcessorForClassWithIncludesMismatch() {
+		AnnotatedClassBean proxy = getProxiedAnnotatedClassBean();
+		AnnotatedClassBean target = (AnnotatedClassBean) AopProxyUtils.getSingletonTarget(proxy);
+
+		// No match: ArithmeticException
+		//
+		// Does NOT throw a RetryExhaustedException because no retry is performed
+		// for an ArithmeticException, since it is not an IOException.
+		// Does NOT throw a ReactiveException because ArithmeticException is a
+		// RuntimeException, which reactor.core.Exceptions.propagate(Throwable)
+		// does not wrap.
+		assertThatExceptionOfType(ArithmeticException.class)
+				.isThrownBy(() -> proxy.arithmeticOperation().block())
+				.withMessage("1");
+		// 1 initial attempt + 0 retries
+		assertThat(target.counter.get()).isEqualTo(1);
+	}
+
+	@Test
+	void withPostProcessorForClassWithMethodLevelOverride() {
+		AnnotatedClassBean proxy = getProxiedAnnotatedClassBean();
+		AnnotatedClassBean target = (AnnotatedClassBean) AopProxyUtils.getSingletonTarget(proxy);
+
+		// Overridden, local @Retryable declaration
+		assertThatIllegalStateException()
+				.isThrownBy(() -> proxy.overrideOperation().blockFirst())
 				.satisfies(isRetryExhaustedException())
 				.withCauseInstanceOf(IOException.class);
-		assertThat(target.counter.get()).isEqualTo(6);
+		// 1 initial attempt + 1 retry
+		assertThat(target.counter.get()).isEqualTo(2);
 	}
 
 	@Test
@@ -113,9 +180,12 @@ class ReactiveRetryInterceptorTests {
 		MinimalRetryBean proxy = (MinimalRetryBean) pf.getProxy();
 
 		// Should execute only 2 times, because maxAttempts=1 means 1 call + 1 retry
-		assertThatIllegalStateException().isThrownBy(() -> proxy.retryOperation().block())
+		assertThatIllegalStateException()
+				.isThrownBy(() -> proxy.retryOperation().block())
 				.satisfies(isRetryExhaustedException())
-				.withCauseInstanceOf(IOException.class).havingCause().withMessage("2");
+				.havingCause()
+					.isInstanceOf(IOException.class)
+					.withMessage("2");
 		assertThat(target.counter.get()).isEqualTo(2);
 	}
 
@@ -129,9 +199,12 @@ class ReactiveRetryInterceptorTests {
 				new MethodRetrySpec((m, t) -> true, 3, Duration.ZERO, Duration.ofMillis(10), 2.0, Duration.ofMillis(100))));
 		ZeroDelayJitterBean proxy = (ZeroDelayJitterBean) pf.getProxy();
 
-		assertThatIllegalStateException().isThrownBy(() -> proxy.retryOperation().block())
+		assertThatIllegalStateException()
+				.isThrownBy(() -> proxy.retryOperation().block())
 				.satisfies(isRetryExhaustedException())
-				.withCauseInstanceOf(IOException.class).havingCause().withMessage("4");
+				.havingCause()
+					.isInstanceOf(IOException.class)
+					.withMessage("4");
 		assertThat(target.counter.get()).isEqualTo(4);
 	}
 
@@ -145,9 +218,12 @@ class ReactiveRetryInterceptorTests {
 				new MethodRetrySpec((m, t) -> true, 3, Duration.ofMillis(5), Duration.ofMillis(20), 1.5, Duration.ofMillis(50))));
 		JitterGreaterThanDelayBean proxy = (JitterGreaterThanDelayBean) pf.getProxy();
 
-		assertThatIllegalStateException().isThrownBy(() -> proxy.retryOperation().block())
-				.satisfies(ex -> assertThat(ex.getClass().getSimpleName()).isEqualTo("RetryExhaustedException"))
-				.withCauseInstanceOf(IOException.class).havingCause().withMessage("4");
+		assertThatIllegalStateException()
+				.isThrownBy(() -> proxy.retryOperation().block())
+				.satisfies(isRetryExhaustedException())
+				.havingCause()
+					.isInstanceOf(IOException.class)
+					.withMessage("4");
 		assertThat(target.counter.get()).isEqualTo(4);
 	}
 
@@ -161,9 +237,12 @@ class ReactiveRetryInterceptorTests {
 				new MethodRetrySpec((m, t) -> true, 3, Duration.ofMillis(10), Duration.ofMillis(5), 2.0, Duration.ofMillis(100))));
 		FluxMultiValueBean proxy = (FluxMultiValueBean) pf.getProxy();
 
-		assertThatIllegalStateException().isThrownBy(() -> proxy.retryOperation().blockFirst())
+		assertThatIllegalStateException()
+				.isThrownBy(() -> proxy.retryOperation().blockFirst())
 				.satisfies(isRetryExhaustedException())
-				.withCauseInstanceOf(IOException.class).havingCause().withMessage("4");
+				.havingCause()
+					.isInstanceOf(IOException.class)
+					.withMessage("4");
 		assertThat(target.counter.get()).isEqualTo(4);
 	}
 
@@ -184,28 +263,41 @@ class ReactiveRetryInterceptorTests {
 	}
 
 	@Test
-	void adaptReactiveResultWithImmediateFailure() {
-		// Test immediate failure case
-		ImmediateFailureBean target = new ImmediateFailureBean();
+	void adaptReactiveResultWithAlwaysFailingOperation() {
+		// Test "always fails" case, ensuring retry mechanism stops after maxAttempts (3)
+		AlwaysFailsBean target = new AlwaysFailsBean();
 		ProxyFactory pf = new ProxyFactory();
 		pf.setTarget(target);
 		pf.addAdvice(new SimpleRetryInterceptor(
 				new MethodRetrySpec((m, t) -> true, 3, Duration.ofMillis(10), Duration.ofMillis(5), 1.5, Duration.ofMillis(50))));
-		ImmediateFailureBean proxy = (ImmediateFailureBean) pf.getProxy();
+		AlwaysFailsBean proxy = (AlwaysFailsBean) pf.getProxy();
 
-		assertThatIllegalStateException().isThrownBy(() -> proxy.retryOperation().block())
+		assertThatIllegalStateException()
+				.isThrownBy(() -> proxy.retryOperation().block())
 				.satisfies(isRetryExhaustedException())
-				.withCauseInstanceOf(RuntimeException.class).havingCause().withMessage("immediate failure");
+				.havingCause()
+					.isInstanceOf(NumberFormatException.class)
+					.withMessage("always fails");
+		// 1 initial attempt + 3 retries
 		assertThat(target.counter.get()).isEqualTo(4);
 	}
 
 
 	private static ThrowingConsumer<? super Throwable> isReactiveException() {
-		return ex -> assertThat(ex.getClass().getSimpleName()).isEqualTo("ReactiveException");
+		return ex -> assertThat(ex.getClass().getName()).isEqualTo("reactor.core.Exceptions$ReactiveException");
 	}
 
 	private static ThrowingConsumer<? super Throwable> isRetryExhaustedException() {
-		return ex -> assertThat(ex.getClass().getSimpleName()).isEqualTo("RetryExhaustedException");
+		return ex -> assertThat(ex).matches(Exceptions::isRetryExhausted, "is RetryExhaustedException");
+	}
+
+	private static AnnotatedClassBean getProxiedAnnotatedClassBean() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		bf.registerBeanDefinition("bean", new RootBeanDefinition(AnnotatedClassBean.class));
+		RetryAnnotationBeanPostProcessor bpp = new RetryAnnotationBeanPostProcessor();
+		bpp.setBeanFactory(bf);
+		bf.addBeanPostProcessor(bpp);
+		return bf.getBean(AnnotatedClassBean.class);
 	}
 
 
@@ -238,26 +330,40 @@ class ReactiveRetryInterceptorTests {
 
 	@Retryable(delay = 10, jitter = 5, multiplier = 2.0, maxDelay = 40,
 			includes = IOException.class, excludes = AccessDeniedException.class,
-			predicate = CustomPredicate.class)
+			predicate = IOException3Predicate.class)
 	static class AnnotatedClassBean {
 
 		AtomicInteger counter = new AtomicInteger();
 
-		public Mono<Object> retryOperation() {
+		public Mono<Object> ioOperation() {
 			return Mono.fromCallable(() -> {
 				counter.incrementAndGet();
 				throw new IOException(counter.toString());
 			});
 		}
 
-		public Mono<Object> otherOperation() {
+		public Mono<Object> fileSystemOperation() {
+			return Mono.fromCallable(() -> {
+				counter.incrementAndGet();
+				throw new FileSystemException(counter.toString());
+			});
+		}
+
+		public Mono<Object> accessOperation() {
 			return Mono.fromCallable(() -> {
 				counter.incrementAndGet();
 				throw new AccessDeniedException(counter.toString());
 			});
 		}
 
-		@Retryable(value = IOException.class, maxAttempts = 1, delay = 10)
+		public Mono<Object> arithmeticOperation() {
+			return Mono.fromCallable(() -> {
+				counter.incrementAndGet();
+				throw new ArithmeticException(counter.toString());
+			});
+		}
+
+		@Retryable(includes = IOException.class, maxAttempts = 1, delay = 10)
 		public Flux<Object> overrideOperation() {
 			return Flux.from(Mono.fromCallable(() -> {
 				counter.incrementAndGet();
@@ -267,11 +373,11 @@ class ReactiveRetryInterceptorTests {
 	}
 
 
-	private static class CustomPredicate implements MethodRetryPredicate {
+	private static class IOException3Predicate implements MethodRetryPredicate {
 
 		@Override
 		public boolean shouldRetry(Method method, Throwable throwable) {
-			return !"3".equals(throwable.getMessage());
+			return !(throwable.getClass() == IOException.class && "3".equals(throwable.getMessage()));
 		}
 	}
 
@@ -343,14 +449,14 @@ class ReactiveRetryInterceptorTests {
 	}
 
 
-	static class ImmediateFailureBean {
+	static class AlwaysFailsBean {
 
 		AtomicInteger counter = new AtomicInteger();
 
 		public Mono<Object> retryOperation() {
 			return Mono.fromCallable(() -> {
 				counter.incrementAndGet();
-				throw new RuntimeException("immediate failure");
+				throw new NumberFormatException("always fails");
 			});
 		}
 	}
