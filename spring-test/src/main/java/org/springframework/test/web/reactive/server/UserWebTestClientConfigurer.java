@@ -49,8 +49,8 @@ import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
  * </pre>
  *
  * <p><strong>Note:</strong> This configurer is applicable only to WebFlux mock
- * server setup. For a {@code WebTestClient.Builder} with a liver server setup,
- * or a non-WebFlux, mock server, {@link IllegalStateException} is raised.
+ * server setup. For a {@code WebTestClient.Builder} with a live server setup,
+ * or a non-WebFlux, mock server, an {@link IllegalStateException} is raised.
  *
  * <p>For tests with a MockMvc server, refer to a similar facility to set the
  * user identity per request through Spring Security's
