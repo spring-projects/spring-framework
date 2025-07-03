@@ -206,7 +206,7 @@ class CacheResolverCustomizationTests {
 	}
 
 
-	@CacheConfig(cacheNames = "default")
+	@CacheConfig("default")
 	static class SimpleService {
 
 		private final AtomicLong counter = new AtomicLong();

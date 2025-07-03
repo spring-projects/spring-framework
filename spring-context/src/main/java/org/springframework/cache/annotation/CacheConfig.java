@@ -22,6 +22,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import org.springframework.core.annotation.AliasFor;
+
 /**
  * {@code @CacheConfig} provides a mechanism for sharing common cache-related
  * settings at the class level.
@@ -40,6 +42,15 @@ import java.lang.annotation.Target;
 public @interface CacheConfig {
 
 	/**
+	 * Alias for {@link #cacheNames}.
+	 * <p>Intended to be used when no other attributes are needed, for example:
+	 * {@code @CacheConfig("books")}.
+	 * @since 6.2.9
+	 */
+	@AliasFor("cacheNames")
+	String[] value() default {};
+
+	/**
 	 * Names of the default caches to consider for caching operations defined
 	 * in the annotated class.
 	 * <p>If none is set at the operation level, these are used instead of the default.
@@ -47,7 +58,9 @@ public @interface CacheConfig {
 	 * configured {@link #cacheResolver()} which typically delegates to
 	 * {@link org.springframework.cache.CacheManager#getCache}.
 	 * For further details see {@link Cacheable#cacheNames()}.
+	 * @see #value
 	 */
+	@AliasFor("value")
 	String[] cacheNames() default {};
 
 	/**

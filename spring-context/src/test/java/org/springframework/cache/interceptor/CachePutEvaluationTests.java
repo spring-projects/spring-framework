@@ -121,7 +121,7 @@ class CachePutEvaluationTests {
 
 	}
 
-	@CacheConfig(cacheNames = "test")
+	@CacheConfig("test")
 	public static class SimpleService {
 		private AtomicLong counter = new AtomicLong();
 
