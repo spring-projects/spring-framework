@@ -22,6 +22,7 @@ import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;
 
+import org.springframework.cglib.core.internal.Function;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.server.reactive.SslInfo;
@@ -94,9 +95,25 @@ public class MockServerSpecTests {
 
 	@Test
 	void sslInfo() {
+		testSslInfo(info -> this.serverSpec.sslInfo(info).build());
+	}
+
+	@Test
+	void sslInfoViaWebTestClientConfigurer() {
+		testSslInfo(info -> this.serverSpec.configureClient().apply(UserWebTestClientConfigurer.sslInfo(info)).build());
+	}
+
+	@Test
+	void sslInfoViaMutate() {
+		testSslInfo(info -> this.serverSpec.build().mutateWith(UserWebTestClientConfigurer.sslInfo(info)));
+	}
+
+	private void testSslInfo(Function<SslInfo, WebTestClient> function) {
 		SslInfo info = SslInfo.from("123");
-		this.serverSpec.sslInfo(info).build().get().uri("/").exchange().expectStatus().isOk();
-		assertThat(this.serverSpec.getSavedSslInfo()).isSameAs(info);
+		function.apply(info).get().uri("/").exchange().expectStatus().isOk();
+
+		SslInfo actual = this.serverSpec.getSavedSslInfo();
+		assertThat(actual).isSameAs(info);
 	}
 
 
