@@ -20,6 +20,8 @@ import java.lang.reflect.Method;
 
 import org.springframework.context.ApplicationListener;
 import org.springframework.core.annotation.AnnotatedElementUtils;
+import org.springframework.transaction.event.TransactionPhase;
+import org.springframework.transaction.event.TransactionalEventListener;
 import org.springframework.transaction.event.TransactionalEventListenerFactory;
 
 /**
@@ -44,13 +46,15 @@ public class RestrictedTransactionalEventListenerFactory extends TransactionalEv
 		}
 
 		if (txAnn != null) {
-			Propagation propagation = txAnn.propagation();
-			if (propagation != Propagation.REQUIRES_NEW && propagation != Propagation.NOT_SUPPORTED) {
-				throw new IllegalStateException("@TransactionalEventListener method must not be annotated with " +
-						"@Transactional unless when declared as REQUIRES_NEW or NOT_SUPPORTED: " + method);
+			TransactionalEventListener txEventListenerAnn  = AnnotatedElementUtils.findMergedAnnotation(method, TransactionalEventListener.class);
+			if (txEventListenerAnn != null && txEventListenerAnn.phase() != TransactionPhase.BEFORE_COMMIT) {
+				Propagation propagation = txAnn.propagation();
+				if (propagation != Propagation.REQUIRES_NEW && propagation != Propagation.NOT_SUPPORTED) {
+					throw new IllegalStateException("@TransactionalEventListener method must not be annotated with " +
+													"@Transactional unless when declared as REQUIRES_NEW or NOT_SUPPORTED: " + method);
+				}
 			}
 		}
 		return super.createApplicationListener(beanName, type, method);
 	}
-
 }
