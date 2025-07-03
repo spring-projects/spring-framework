@@ -247,7 +247,7 @@ public interface JmsOperations {
 	 * @throws JmsException checked JMSException converted to unchecked
 	 */
 	@Nullable
-	Message receiveSelected(String messageSelector) throws JmsException;
+	Message receiveSelected(@Nullable String messageSelector) throws JmsException;
 
 	/**
 	 * Receive a message synchronously from the specified destination, but only
@@ -261,7 +261,7 @@ public interface JmsOperations {
 	 * @throws JmsException checked JMSException converted to unchecked
 	 */
 	@Nullable
-	Message receiveSelected(Destination destination, String messageSelector) throws JmsException;
+	Message receiveSelected(Destination destination, @Nullable String messageSelector) throws JmsException;
 
 	/**
 	 * Receive a message synchronously from the specified destination, but only
@@ -276,7 +276,7 @@ public interface JmsOperations {
 	 * @throws JmsException checked JMSException converted to unchecked
 	 */
 	@Nullable
-	Message receiveSelected(String destinationName, String messageSelector) throws JmsException;
+	Message receiveSelected(String destinationName, @Nullable String messageSelector) throws JmsException;
 
 
 	//---------------------------------------------------------------------------------------

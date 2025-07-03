@@ -751,7 +751,7 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 
 	@Override
 	@Nullable
-	public Message receiveSelected(String messageSelector) throws JmsException {
+	public Message receiveSelected(@Nullable String messageSelector) throws JmsException {
 		Destination defaultDestination = getDefaultDestination();
 		if (defaultDestination != null) {
 			return receiveSelected(defaultDestination, messageSelector);
