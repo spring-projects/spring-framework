@@ -239,7 +239,7 @@ public interface JmsOperations {
 	 * @return the message received by the consumer, or {@code null} if the timeout expires
 	 * @throws JmsException checked JMSException converted to unchecked
 	 */
-	@Nullable Message receiveSelected(String messageSelector) throws JmsException;
+	@Nullable Message receiveSelected(@Nullable String messageSelector) throws JmsException;
 
 	/**
 	 * Receive a message synchronously from the specified destination, but only
@@ -252,7 +252,7 @@ public interface JmsOperations {
 	 * @return the message received by the consumer, or {@code null} if the timeout expires
 	 * @throws JmsException checked JMSException converted to unchecked
 	 */
-	@Nullable Message receiveSelected(Destination destination, String messageSelector) throws JmsException;
+	@Nullable Message receiveSelected(Destination destination, @Nullable String messageSelector) throws JmsException;
 
 	/**
 	 * Receive a message synchronously from the specified destination, but only
@@ -266,7 +266,7 @@ public interface JmsOperations {
 	 * @return the message received by the consumer, or {@code null} if the timeout expires
 	 * @throws JmsException checked JMSException converted to unchecked
 	 */
-	@Nullable Message receiveSelected(String destinationName, String messageSelector) throws JmsException;
+	@Nullable Message receiveSelected(String destinationName, @Nullable String messageSelector) throws JmsException;
 
 
 	//---------------------------------------------------------------------------------------
