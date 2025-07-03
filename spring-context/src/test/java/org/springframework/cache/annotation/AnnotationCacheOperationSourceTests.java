@@ -443,7 +443,7 @@ class AnnotationCacheOperationSourceTests {
 	}
 
 
-	@CacheConfig(cacheNames = "myCache")
+	@CacheConfig("myCache")
 	private interface CacheConfigIfc {
 
 		@Cacheable

@@ -200,7 +200,7 @@ class EnableCachingIntegrationTests {
 	}
 
 
-	@CacheConfig(cacheNames = "testCache")
+	@CacheConfig("testCache")
 	static class FooServiceImpl implements FooService {
 
 		private final AtomicLong counter = new AtomicLong();

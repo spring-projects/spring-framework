@@ -256,7 +256,7 @@ class ReactiveCachingTests {
 	}
 
 
-	@CacheConfig(cacheNames = "first")
+	@CacheConfig("first")
 	static class ReactiveCacheableService {
 
 		private final AtomicLong counter = new AtomicLong();
@@ -282,7 +282,7 @@ class ReactiveCachingTests {
 	}
 
 
-	@CacheConfig(cacheNames = "first")
+	@CacheConfig("first")
 	static class ReactiveSyncCacheableService {
 
 		private final AtomicLong counter = new AtomicLong();
@@ -304,7 +304,7 @@ class ReactiveCachingTests {
 	}
 
 
-	@CacheConfig(cacheNames = "first")
+	@CacheConfig("first")
 	static class ReactiveFailureCacheableService {
 
 		private final AtomicBoolean cacheFutureInvoked = new AtomicBoolean();
