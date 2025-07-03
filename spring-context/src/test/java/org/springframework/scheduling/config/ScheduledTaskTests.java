@@ -90,7 +90,7 @@ class ScheduledTaskTests {
 
 	@Test
 	void singleExecutionShouldNotHaveNextExecution() {
-		ScheduledTask scheduledTask = taskRegistrar.scheduleOneTimeTask(new OneTimeTask(countingRunnable, Duration.ofSeconds(0)));
+		ScheduledTask scheduledTask = taskRegistrar.scheduleOneTimeTask(new OneTimeTask(countingRunnable, Duration.ZERO));
 		Awaitility.await().atMost(Duration.ofSeconds(5)).until(() -> countingRunnable.executionCount > 0);
 		assertThat(scheduledTask.nextExecution()).isNull();
 	}

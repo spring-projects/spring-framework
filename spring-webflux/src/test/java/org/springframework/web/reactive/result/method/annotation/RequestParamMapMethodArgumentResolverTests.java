@@ -91,7 +91,7 @@ class RequestParamMapMethodArgumentResolverTests {
 
 
 	private Object resolve(MethodParameter parameter, ServerWebExchange exchange) {
-		return this.resolver.resolveArgument(parameter, null, exchange).block(Duration.ofMillis(0));
+		return this.resolver.resolveArgument(parameter, null, exchange).block(Duration.ZERO);
 	}
 
 

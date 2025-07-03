@@ -52,7 +52,7 @@ public record MethodRetrySpec(
 		Duration maxDelay) {
 
 	public MethodRetrySpec(MethodRetryPredicate predicate, long maxAttempts, Duration delay) {
-		this(predicate, maxAttempts, delay, Duration.ofMillis(0), 1.0, Duration.ofMillis(Long.MAX_VALUE));
+		this(predicate, maxAttempts, delay, Duration.ZERO, 1.0, Duration.ofMillis(Long.MAX_VALUE));
 	}
 
 	public MethodRetrySpec(MethodRetryPredicate predicate, long maxAttempts, Duration delay,

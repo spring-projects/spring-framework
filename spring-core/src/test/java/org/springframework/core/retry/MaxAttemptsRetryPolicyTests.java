@@ -39,7 +39,7 @@ class MaxAttemptsRetryPolicyTests {
 
 	@Test
 	void maxAttempts() {
-		var retryPolicy = RetryPolicy.builder().maxAttempts(2).delay(Duration.ofMillis(0)).build();
+		var retryPolicy = RetryPolicy.builder().maxAttempts(2).delay(Duration.ZERO).build();
 		var backOffExecution = retryPolicy.getBackOff().start();
 		var throwable = mock(Throwable.class);
 

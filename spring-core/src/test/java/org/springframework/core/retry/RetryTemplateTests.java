@@ -51,7 +51,7 @@ class RetryTemplateTests {
 	void configureRetryTemplate() {
 		var retryPolicy = RetryPolicy.builder()
 				.maxAttempts(3)
-				.delay(Duration.ofMillis(0))
+				.delay(Duration.ZERO)
 				.build();
 
 		retryTemplate.setRetryPolicy(retryPolicy);
@@ -171,7 +171,7 @@ class RetryTemplateTests {
 
 		var retryPolicy = RetryPolicy.builder()
 				.maxAttempts(Integer.MAX_VALUE)
-				.delay(Duration.ofMillis(0))
+				.delay(Duration.ZERO)
 				.includes(IOException.class)
 				.build();
 
@@ -194,13 +194,13 @@ class RetryTemplateTests {
 			argumentSet("Excludes",
 						RetryPolicy.builder()
 							.maxAttempts(Integer.MAX_VALUE)
-							.delay(Duration.ofMillis(0))
+							.delay(Duration.ZERO)
 							.excludes(FileNotFoundException.class)
 							.build()),
 			argumentSet("Includes & Excludes",
 						RetryPolicy.builder()
 							.maxAttempts(Integer.MAX_VALUE)
-							.delay(Duration.ofMillis(0))
+							.delay(Duration.ZERO)
 							.includes(IOException.class)
 							.excludes(FileNotFoundException.class)
 							.build())

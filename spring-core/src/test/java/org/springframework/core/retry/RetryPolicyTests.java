@@ -209,7 +209,7 @@ class RetryPolicyTests {
 		@Test
 		void maxDelayPreconditions() {
 			assertThatIllegalArgumentException()
-					.isThrownBy(() -> RetryPolicy.builder().maxDelay(Duration.ofMillis(0)))
+					.isThrownBy(() -> RetryPolicy.builder().maxDelay(Duration.ZERO))
 					.withMessage("Invalid duration (0ms): maxDelay must be positive.");
 			assertThatIllegalArgumentException()
 					.isThrownBy(() -> RetryPolicy.builder().maxDelay(Duration.ofMillis(-1)))
