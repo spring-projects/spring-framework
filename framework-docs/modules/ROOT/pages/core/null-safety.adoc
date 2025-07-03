@@ -42,14 +42,13 @@ https://github.com/uber/NullAway[NullAway] to enforce null-safety at the applica
 The purpose of this section is to share some proposed guidelines for explicitly specifying the nullability of
 Spring-related libraries or applications.
 
-
 [[null-safety-guidelines-jspecify]]
 === JSpecify
 
 ==== Defaults to non-null
 
 A key point to understand is that the nullness of types is unknown by default in Java and that non-null type
-usages are by far more frequent than nullable usages. In order to keep codebases readable, we typically want to define
+usage is by far more frequent than nullable usage. In order to keep codebases readable, we typically want to define
 by default that type usage is non-null unless marked as nullable for a specific scope. This is exactly the purpose of
 https://jspecify.dev/docs/api/org/jspecify/annotations/NullMarked.html[`@NullMarked`] which is typically set in Spring
 projects at the package level via a `package-info.java` file, for example:
@@ -64,15 +63,15 @@ import org.jspecify.annotations.NullMarked;
 
 ==== Explicit nullability
 
-In `@NullMarked` code, nullable type usages are defined explicitly with
+In `@NullMarked` code, nullable type usage is defined explicitly with
 https://jspecify.dev/docs/api/org/jspecify/annotations/Nullable.html[`@Nullable`].
 
-A key difference between JSpecify `@Nullable` / `@NonNull` annotations and most other variants is that they are
-meta-annotated with `@Target(ElementType.TYPE_USE)`, so they apply only to type usages. This impacts where such
-annotations should be placed, either to comply with
+A key difference between JSpecify `@Nullable` / `@NonNull` annotations and most other variants is that the JSpecify
+annotations are meta-annotated with `@Target(ElementType.TYPE_USE)`, so they apply only to type usage. This impacts
+where such annotations should be placed, either to comply with
 https://docs.oracle.com/javase/specs/jls/se17/html/jls-9.html#jls-9.7.4[related Java specifications] or to follow code
-style best practices. From a style perspective, it is recommended to embrace the type-use nature of those annotations by placing them on the
-same line than the annotated type.
+style best practices. From a style perspective, it is recommended to embrace the type-use nature of those annotations
+by placing them on the same line as and immediately preceding the annotated type.
 
 For example, for a field:
 
@@ -109,26 +108,27 @@ the array itself. Pay attention to the syntax
 https://docs.oracle.com/javase/specs/jls/se17/html/jls-9.html#jls-9.7.4[defined by the Java specification] which may be
 initially surprising. For example, in `@NullMarked` code:
 
-- `@Nullable Object[] array` means individual elements can be null but the array itself cannot.
-- `Object @Nullable [] array` means individual elements cannot be null but the array itself can.
-- `@Nullable Object @Nullable [] array` means both individual elements and the array can be null.
+- `@Nullable Object[] array` means individual elements can be `null` but the array itself cannot.
+- `Object @Nullable [] array` means individual elements cannot be `null` but the array itself can.
+- `@Nullable Object @Nullable [] array` means both individual elements and the array can be `null`.
 
 ==== Generics
 
-JSpecify annotations applies to generics as well. For example, in `@NullMarked` code:
+JSpecify annotations apply to generics as well. For example, in `@NullMarked` code:
 
  - `List<String>` means a list of non-null elements (equivalent of `List<@NonNull String>`)
  - `List<@Nullable String>` means a list of nullable elements
 
-Things are a bit more complicated when you are declaring generic types or generic methods, see related
+Things are a bit more complicated when you are declaring generic types or generic methods. See the related
 https://jspecify.dev/docs/user-guide/#generics[JSpecify generics documentation] for more details.
 
-WARNING: Generic types and generic methods nullability https://github.com/uber/NullAway/issues?q=is%3Aissue+is%3Aopen+label%3Ajspecify[is not yet fully supported by NullAway].
+WARNING: The nullability of generic types and generic methods
+https://github.com/uber/NullAway/issues?q=is%3Aissue+is%3Aopen+label%3Ajspecify[is not yet fully supported by NullAway].
 
 ==== Nested and fully qualified types
 
-The Java specification also enforces that annotations defined with `@Target(ElementType.TYPE_USE)` like JSpecify
-`@Nullable` should be specified after the last `.` with inner or fully qualified types:
+The Java specification also enforces that annotations defined with `@Target(ElementType.TYPE_USE)` – like JSpecify's
+`@Nullable` annotation – must be declared after the last dot (`.`) within inner or fully qualified type names:
 
 - `Cache.@Nullable ValueWrapper`
 - `jakarta.validation.@Nullable Validator`
@@ -153,15 +153,15 @@ parameter cannot be null after a successful invocation of `Assert.notNull()`.
 
 Optionally, it is possible to set `NullAway:JSpecifyMode=true` to enable
 https://github.com/uber/NullAway/wiki/JSpecify-Support[checks on the full JSpecify semantics], including annotations on
-arrays, varargs and generics. Be aware that this mode is
+arrays, varargs, and generics. Be aware that this mode is
 https://github.com/uber/NullAway/issues?q=is%3Aissue+is%3Aopen+label%3Ajspecify[still under development] and requires
-using JDK 22 or later (typically combined with the `--release` Java compiler flag to configure the
+JDK 22 or later (typically combined with the `--release` Java compiler flag to configure the
 expected baseline). It is recommended to enable the JSpecify mode only as a second step, after making sure the codebase
 generates no warning with the recommended configuration mentioned previously in this section.
 
 ==== Warnings suppression
 
-There are a few valid use cases where NullAway will incorrectly detect nullability problems. In such case, it is recommended
+There are a few valid use cases where NullAway will incorrectly detect nullability problems. In such cases, it is recommended
 to suppress related warnings and to document the reason:
 
  - `@SuppressWarnings("NullAway.Init")` at field, constructor, or class level can be used to avoid unnecessary warnings
@@ -176,7 +176,7 @@ non-null values even if that cannot be expressed by the API.
 - `@SuppressWarnings("NullAway") // Well-known map keys` can be used when `Map#get` invocations are performed with keys that are known
 to be present and when non-null related values have been inserted previously.
 - `@SuppressWarnings("NullAway") // Overridden method does not define nullability` can be used when the superclass does
-not define nullability (typically when the superclass comes from a dependency).
+not define nullability (typically when the superclass comes from an external dependency).
 
 
 [[null-safety-migrating]]
@@ -194,7 +194,7 @@ and the capability to specify nullability more precisely for more use cases.
 
 A key difference is that Spring's deprecated null-safety annotations, which follow JSR 305 semantics, apply to fields,
 parameters, and return values; while JSpecify annotations apply to type usage. This subtle difference
-is in practice pretty significant, as it allows developers to differentiate between the nullness of elements and the
+is pretty significant in practice, since it allows developers to differentiate between the nullness of elements and the
 nullness of arrays/varargs as well as to define the nullness of generic types.
 
 That means array and varargs null-safety declarations have to be updated to keep the same semantics. For example
@@ -209,6 +209,6 @@ with JSpecify annotations.
 `public @Nullable String method()` with JSpecify annotations.
 
 Also, with JSpecify, you do not need to specify `@NonNull` when overriding a type usage annotated with `@Nullable` in the
-super method to "undo" the nullable declaration in null-marked code. Just declare it unannotated and the null-marked
-defaults (a type usage is considered non-null unless explicitly annotated as nullable) will apply.
+super method to "undo" the nullable declaration in null-marked code. Just declare it unannotated, and the null-marked
+defaults will apply (type usage is considered non-null unless explicitly annotated as nullable).
 
