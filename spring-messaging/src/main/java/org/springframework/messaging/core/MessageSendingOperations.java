@@ -28,6 +28,7 @@ import org.springframework.messaging.MessagingException;
  *
  * @author Mark Fisher
  * @author Rossen Stoyanchev
+ * @author Juergen Hoeller
  * @since 4.0
  * @param <D> the destination type
  */
@@ -66,6 +67,16 @@ public interface MessageSendingOperations<D> {
 	/**
 	 * Convert the given Object to serialized form, possibly using a
 	 * {@link org.springframework.messaging.converter.MessageConverter},
+	 * wrap it as a message and send it to a default destination.
+	 * @param payload the Object to use as payload
+	 * @param headers the headers for the message to send
+	 * @since 7.0
+	 */
+	void convertAndSend(Object payload, Map<String, Object> headers) throws MessagingException;
+
+	/**
+	 * Convert the given Object to serialized form, possibly using a
+	 * {@link org.springframework.messaging.converter.MessageConverter},
 	 * wrap it as a message with the given headers and send it to
 	 * the given destination.
 	 * @param destination the target destination
@@ -77,33 +88,46 @@ public interface MessageSendingOperations<D> {
 	/**
 	 * Convert the given Object to serialized form, possibly using a
 	 * {@link org.springframework.messaging.converter.MessageConverter},
-	 * wrap it as a message, apply the given post processor, and send
+	 * wrap it as a message, apply the given post-processor, and send
 	 * the resulting message to a default destination.
 	 * @param payload the Object to use as payload
-	 * @param postProcessor the post processor to apply to the message
+	 * @param postProcessor the post-processor to apply to the message
 	 */
 	void convertAndSend(Object payload, @Nullable MessagePostProcessor postProcessor) throws MessagingException;
 
 	/**
 	 * Convert the given Object to serialized form, possibly using a
 	 * {@link org.springframework.messaging.converter.MessageConverter},
-	 * wrap it as a message, apply the given post processor, and send
+	 * wrap it as a message, apply the given post-processor, and send
 	 * the resulting message to the given destination.
 	 * @param destination the target destination
 	 * @param payload the Object to use as payload
-	 * @param postProcessor the post processor to apply to the message
+	 * @param postProcessor the post-processor to apply to the message
 	 */
-	void convertAndSend(D destination, Object payload, MessagePostProcessor postProcessor) throws MessagingException;
+	void convertAndSend(D destination, Object payload, @Nullable MessagePostProcessor postProcessor) throws MessagingException;
 
 	/**
 	 * Convert the given Object to serialized form, possibly using a
 	 * {@link org.springframework.messaging.converter.MessageConverter},
-	 * wrap it as a message with the given headers, apply the given post processor,
+	 * wrap it as a message with the given headers, apply the given post-processor,
+	 * and send the resulting message to the given destination.
+	 * @param payload the Object to use as payload
+	 * @param headers the headers for the message to send
+	 * @param postProcessor the post-processor to apply to the message
+	 * @since 7.0
+	 */
+	void convertAndSend(Object payload, @Nullable Map<String, Object> headers,
+		@Nullable MessagePostProcessor postProcessor) throws MessagingException;
+
+	/**
+	 * Convert the given Object to serialized form, possibly using a
+	 * {@link org.springframework.messaging.converter.MessageConverter},
+	 * wrap it as a message with the given headers, apply the given post-processor,
 	 * and send the resulting message to the given destination.
 	 * @param destination the target destination
 	 * @param payload the Object to use as payload
 	 * @param headers the headers for the message to send
-	 * @param postProcessor the post processor to apply to the message
+	 * @param postProcessor the post-processor to apply to the message
 	 */
 	void convertAndSend(D destination, Object payload, @Nullable Map<String, Object> headers,
 			@Nullable MessagePostProcessor postProcessor) throws MessagingException;

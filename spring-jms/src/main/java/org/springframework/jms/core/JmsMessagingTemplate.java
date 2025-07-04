@@ -27,6 +27,7 @@ import org.jspecify.annotations.Nullable;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.jms.InvalidDestinationException;
 import org.springframework.jms.JmsException;
+import org.springframework.jms.support.JmsAccessor;
 import org.springframework.jms.support.converter.MessageConverter;
 import org.springframework.jms.support.converter.MessagingMessageConverter;
 import org.springframework.jms.support.converter.SimpleMessageConverter;
@@ -39,16 +40,24 @@ import org.springframework.messaging.core.MessagePostProcessor;
 import org.springframework.util.Assert;
 
 /**
- * An implementation of {@link JmsMessageOperations}.
+ * An implementation of {@link JmsMessageOperations}, as a wrapper on top of Spring's
+ * traditional {@link JmsTemplate}. Aligned with the {@code spring-messaging} module
+ * and {@link org.springframework.messaging.core.GenericMessagingTemplate}.
+ *
+ * <p>Note: Operations in this interface throw {@link MessagingException} instead of
+ * the JMS-specific {@link org.springframework.jms.JmsException}, aligning with the
+ * {@code spring-messaging} module and its other client operation handles.
  *
  * @author Stephane Nicoll
  * @author Juergen Hoeller
  * @since 4.1
+ * @see JmsTemplate
+ * @see JmsClient
  */
 public class JmsMessagingTemplate extends AbstractMessagingTemplate<Destination>
 		implements JmsMessageOperations, InitializingBean {
 
-	private @Nullable JmsTemplate jmsTemplate;
+	private @Nullable JmsOperations jmsTemplate;
 
 	private MessageConverter jmsMessageConverter = new MessagingMessageConverter();
 
@@ -74,11 +83,19 @@ public class JmsMessagingTemplate extends AbstractMessagingTemplate<Destination>
 	}
 
 	/**
+	 * Create a {@code JmsMessagingTemplate} instance with the {@link JmsOperations} to use.
+	 * @since 7.0
+	 */
+	public JmsMessagingTemplate(JmsOperations jmsTemplate) {
+		Assert.notNull(jmsTemplate, "JmsTemplate must not be null");
+		this.jmsTemplate = jmsTemplate;
+	}
+
+	/**
 	 * Create a {@code JmsMessagingTemplate} instance with the {@link JmsTemplate} to use.
 	 */
 	public JmsMessagingTemplate(JmsTemplate jmsTemplate) {
-		Assert.notNull(jmsTemplate, "JmsTemplate must not be null");
-		this.jmsTemplate = jmsTemplate;
+		this((JmsOperations) jmsTemplate);
 	}
 
 
@@ -87,8 +104,8 @@ public class JmsMessagingTemplate extends AbstractMessagingTemplate<Destination>
 	 * @since 4.1.2
 	 */
 	public void setConnectionFactory(ConnectionFactory connectionFactory) {
-		if (this.jmsTemplate != null) {
-			this.jmsTemplate.setConnectionFactory(connectionFactory);
+		if (this.jmsTemplate instanceof JmsAccessor template) {
+			template.setConnectionFactory(connectionFactory);
 		}
 		else {
 			this.jmsTemplate = new JmsTemplate(connectionFactory);
@@ -100,7 +117,7 @@ public class JmsMessagingTemplate extends AbstractMessagingTemplate<Destination>
 	 * @since 4.1.2
 	 */
 	public @Nullable ConnectionFactory getConnectionFactory() {
-		return (this.jmsTemplate != null ? this.jmsTemplate.getConnectionFactory() : null);
+		return (this.jmsTemplate instanceof JmsTemplate template ? template.getConnectionFactory() : null);
 	}
 
 	/**
@@ -114,14 +131,14 @@ public class JmsMessagingTemplate extends AbstractMessagingTemplate<Destination>
 	 * Return the configured {@link JmsTemplate}.
 	 */
 	public @Nullable JmsTemplate getJmsTemplate() {
-		return this.jmsTemplate;
+		return (this.jmsTemplate instanceof JmsTemplate template ? template : null);
 	}
 
 	/**
-	 * Set the {@link MessageConverter} to use to convert a {@link Message} from
-	 * the messaging to and from a {@link jakarta.jms.Message}. By default, a
-	 * {@link MessagingMessageConverter} is defined using a {@link SimpleMessageConverter}
-	 * to convert the payload of the message.
+	 * Set the {@link MessageConverter} to use to convert a {@link Message}
+	 * to and from a {@link jakarta.jms.Message}.
+	 * <p>By default, a {@link MessagingMessageConverter} is defined using a
+	 * {@link SimpleMessageConverter} to convert the payload of the message.
 	 * <p>Consider configuring a {@link MessagingMessageConverter} with a different
 	 * {@link MessagingMessageConverter#setPayloadConverter(MessageConverter) payload converter}
 	 * for more advanced scenarios.
@@ -135,7 +152,7 @@ public class JmsMessagingTemplate extends AbstractMessagingTemplate<Destination>
 
 	/**
 	 * Return the {@link MessageConverter} to use to convert a {@link Message}
-	 * from the messaging to and from a {@link jakarta.jms.Message}.
+	 * to and from a {@link jakarta.jms.Message}.
 	 */
 	public MessageConverter getJmsMessageConverter() {
 		return this.jmsMessageConverter;
@@ -161,20 +178,19 @@ public class JmsMessagingTemplate extends AbstractMessagingTemplate<Destination>
 	@Override
 	public void afterPropertiesSet() {
 		Assert.notNull(this.jmsTemplate, "Property 'connectionFactory' or 'jmsTemplate' is required");
-		if (!this.converterSet && this.jmsTemplate.getMessageConverter() != null) {
-			((MessagingMessageConverter) this.jmsMessageConverter)
-					.setPayloadConverter(this.jmsTemplate.getMessageConverter());
+		if (!this.converterSet && this.jmsTemplate instanceof JmsTemplate template) {
+			((MessagingMessageConverter) this.jmsMessageConverter).setPayloadConverter(template.getMessageConverter());
 		}
 	}
 
-	private JmsTemplate obtainJmsTemplate() {
+	JmsOperations obtainJmsTemplate() {
 		Assert.state(this.jmsTemplate != null, "No JmsTemplate set");
 		return this.jmsTemplate;
 	}
 
 
 	@Override
-	public void send(Message<?> message) {
+	public void send(Message<?> message) throws MessagingException {
 		Destination defaultDestination = getDefaultDestination();
 		if (defaultDestination != null) {
 			send(defaultDestination, message);
@@ -185,13 +201,15 @@ public class JmsMessagingTemplate extends AbstractMessagingTemplate<Destination>
 	}
 
 	@Override
-	public void convertAndSend(Object payload, @Nullable MessagePostProcessor postProcessor) throws MessagingException {
+	public void convertAndSend(Object payload, @Nullable Map<String, Object> headers,
+			@Nullable MessagePostProcessor postProcessor) throws MessagingException {
+
 		Destination defaultDestination = getDefaultDestination();
 		if (defaultDestination != null) {
-			convertAndSend(defaultDestination, payload, postProcessor);
+			convertAndSend(defaultDestination, payload, headers, postProcessor);
 		}
 		else {
-			convertAndSend(getRequiredDefaultDestinationName(), payload, postProcessor);
+			convertAndSend(getRequiredDefaultDestinationName(), payload, headers, postProcessor);
 		}
 	}
 
@@ -228,7 +246,7 @@ public class JmsMessagingTemplate extends AbstractMessagingTemplate<Destination>
 	}
 
 	@Override
-	public @Nullable Message<?> receive() {
+	public @Nullable Message<?> receive() throws MessagingException {
 		Destination defaultDestination = getDefaultDestination();
 		if (defaultDestination != null) {
 			return receive(defaultDestination);
@@ -239,7 +257,7 @@ public class JmsMessagingTemplate extends AbstractMessagingTemplate<Destination>
 	}
 
 	@Override
-	public <T> @Nullable T receiveAndConvert(Class<T> targetClass) {
+	public <T> @Nullable T receiveAndConvert(Class<T> targetClass) throws MessagingException {
 		Destination defaultDestination = getDefaultDestination();
 		if (defaultDestination != null) {
 			return receiveAndConvert(defaultDestination, targetClass);
@@ -266,7 +284,71 @@ public class JmsMessagingTemplate extends AbstractMessagingTemplate<Destination>
 	}
 
 	@Override
-	public @Nullable Message<?> sendAndReceive(Message<?> requestMessage) {
+	public @Nullable Message<?> receiveSelected(@Nullable String messageSelector) throws MessagingException {
+		Destination defaultDestination = getDefaultDestination();
+		if (defaultDestination != null) {
+			return receiveSelected(defaultDestination, messageSelector);
+		}
+		else {
+			return receiveSelected(getRequiredDefaultDestinationName(), messageSelector);
+		}
+	}
+
+	@Override
+	public @Nullable Message<?> receiveSelected(Destination destination, @Nullable String messageSelector)
+			throws MessagingException {
+
+		return doReceiveSelected(destination, messageSelector);
+	}
+
+	@Override
+	public @Nullable Message<?> receiveSelected(String destinationName, @Nullable String messageSelector)
+			throws MessagingException {
+
+		return doReceiveSelected(destinationName, messageSelector);
+	}
+
+	@Override
+	public <T> @Nullable T receiveSelectedAndConvert(@Nullable String messageSelector, Class<T> targetClass)
+			throws MessagingException {
+
+		Destination defaultDestination = getDefaultDestination();
+		if (defaultDestination != null) {
+			return receiveSelectedAndConvert(defaultDestination, messageSelector, targetClass);
+		}
+		else {
+			return receiveSelectedAndConvert(getRequiredDefaultDestinationName(), messageSelector, targetClass);
+		}
+	}
+
+	@Override
+	public <T> @Nullable T receiveSelectedAndConvert(Destination destination, @Nullable String messageSelector,
+			Class<T> targetClass) throws MessagingException {
+
+		Message<?> message = doReceiveSelected(destination, messageSelector);
+		if (message != null) {
+			return doConvert(message, targetClass);
+		}
+		else {
+			return null;
+		}
+	}
+
+	@Override
+	public <T> @Nullable T receiveSelectedAndConvert(String destinationName, @Nullable String messageSelector,
+			Class<T> targetClass) throws MessagingException {
+
+		Message<?> message = doReceiveSelected(destinationName, messageSelector);
+		if (message != null) {
+			return doConvert(message, targetClass);
+		}
+		else {
+			return null;
+		}
+	}
+
+	@Override
+	public @Nullable Message<?> sendAndReceive(Message<?> requestMessage) throws MessagingException {
 		Destination defaultDestination = getDefaultDestination();
 		if (defaultDestination != null) {
 			return sendAndReceive(defaultDestination, requestMessage);
@@ -277,7 +359,9 @@ public class JmsMessagingTemplate extends AbstractMessagingTemplate<Destination>
 	}
 
 	@Override
-	public @Nullable Message<?> sendAndReceive(String destinationName, Message<?> requestMessage) throws MessagingException {
+	public @Nullable Message<?> sendAndReceive(String destinationName, Message<?> requestMessage)
+			throws MessagingException {
+
 		return doSendAndReceive(destinationName, requestMessage);
 	}
 
@@ -289,7 +373,7 @@ public class JmsMessagingTemplate extends AbstractMessagingTemplate<Destination>
 	}
 
 	@Override
-	public <T> @Nullable T convertSendAndReceive(Object request, Class<T> targetClass) {
+	public <T> @Nullable T convertSendAndReceive(Object request, Class<T> targetClass) throws MessagingException {
 		return convertSendAndReceive(request, targetClass, null);
 	}
 
@@ -301,7 +385,9 @@ public class JmsMessagingTemplate extends AbstractMessagingTemplate<Destination>
 	}
 
 	@Override
-	public <T> @Nullable T convertSendAndReceive(Object request, Class<T> targetClass, @Nullable MessagePostProcessor postProcessor) {
+	public <T> @Nullable T convertSendAndReceive(Object request, Class<T> targetClass,
+			@Nullable MessagePostProcessor postProcessor) throws MessagingException {
+
 		Destination defaultDestination = getDefaultDestination();
 		if (defaultDestination != null) {
 			return convertSendAndReceive(defaultDestination, request, targetClass, postProcessor);
@@ -320,13 +406,15 @@ public class JmsMessagingTemplate extends AbstractMessagingTemplate<Destination>
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public <T> @Nullable T convertSendAndReceive(String destinationName, Object request, @Nullable Map<String, Object> headers,
-			Class<T> targetClass, @Nullable MessagePostProcessor postProcessor) {
+	public <T> @Nullable T convertSendAndReceive(String destinationName, Object request,
+			@Nullable Map<String, Object> headers, Class<T> targetClass,
+			@Nullable MessagePostProcessor postProcessor) throws MessagingException {
 
 		Message<?> requestMessage = doConvert(request, headers, postProcessor);
 		Message<?> replyMessage = sendAndReceive(destinationName, requestMessage);
 		return (replyMessage != null ? (T) getMessageConverter().fromMessage(replyMessage, targetClass) : null);
 	}
+
 
 	@Override
 	protected void doSend(Destination destination, Message<?> message) {
@@ -361,6 +449,26 @@ public class JmsMessagingTemplate extends AbstractMessagingTemplate<Destination>
 	protected @Nullable Message<?> doReceive(String destinationName) {
 		try {
 			jakarta.jms.Message jmsMessage = obtainJmsTemplate().receive(destinationName);
+			return convertJmsMessage(jmsMessage);
+		}
+		catch (JmsException ex) {
+			throw convertJmsException(ex);
+		}
+	}
+
+	protected @Nullable Message<?> doReceiveSelected(Destination destination, @Nullable String messageSelector) {
+		try {
+			jakarta.jms.Message jmsMessage = obtainJmsTemplate().receiveSelected(destination, messageSelector);
+			return convertJmsMessage(jmsMessage);
+		}
+		catch (JmsException ex) {
+			throw convertJmsException(ex);
+		}
+	}
+
+	protected @Nullable Message<?> doReceiveSelected(String destinationName, @Nullable String messageSelector) {
+		try {
+			jakarta.jms.Message jmsMessage = obtainJmsTemplate().receiveSelected(destinationName, messageSelector);
 			return convertJmsMessage(jmsMessage);
 		}
 		catch (JmsException ex) {

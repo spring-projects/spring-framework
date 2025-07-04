@@ -37,6 +37,7 @@ import org.springframework.util.Assert;
  * @author Mark Fisher
  * @author Rossen Stoyanchev
  * @author Stephane Nicoll
+ * @author Juergen Hoeller
  * @since 4.0
  * @param <D> the destination type
  */
@@ -112,12 +113,17 @@ public abstract class AbstractMessageSendingTemplate<D> implements MessageSendin
 
 	@Override
 	public void convertAndSend(Object payload) throws MessagingException {
-		convertAndSend(payload, null);
+		convertAndSend(payload, null, null);
 	}
 
 	@Override
 	public void convertAndSend(D destination, Object payload) throws MessagingException {
-		convertAndSend(destination, payload, (Map<String, Object>) null);
+		convertAndSend(destination, payload, null, null);
+	}
+
+	@Override
+	public void convertAndSend(Object payload, Map<String, Object> headers) throws MessagingException {
+		convertAndSend(payload, headers, null);
 	}
 
 	@Override
@@ -131,7 +137,7 @@ public abstract class AbstractMessageSendingTemplate<D> implements MessageSendin
 	public void convertAndSend(Object payload, @Nullable MessagePostProcessor postProcessor)
 			throws MessagingException {
 
-		convertAndSend(getRequiredDefaultDestination(), payload, postProcessor);
+		convertAndSend(payload, null, postProcessor);
 	}
 
 	@Override
@@ -139,6 +145,13 @@ public abstract class AbstractMessageSendingTemplate<D> implements MessageSendin
 			throws MessagingException {
 
 		convertAndSend(destination, payload, null, postProcessor);
+	}
+
+	@Override
+	public void convertAndSend(Object payload, @Nullable Map<String, Object> headers,
+			@Nullable MessagePostProcessor postProcessor) throws MessagingException {
+
+		convertAndSend(getRequiredDefaultDestination(), payload, null, postProcessor);
 	}
 
 	@Override
@@ -152,10 +165,10 @@ public abstract class AbstractMessageSendingTemplate<D> implements MessageSendin
 	/**
 	 * Convert the given Object to serialized form, possibly using a
 	 * {@link MessageConverter}, wrap it as a message with the given
-	 * headers and apply the given post processor.
+	 * headers and apply the given post-processor.
 	 * @param payload the Object to use as payload
 	 * @param headers the headers for the message to send
-	 * @param postProcessor the post processor to apply to the message
+	 * @param postProcessor the post-processor to apply to the message
 	 * @return the converted message
 	 */
 	protected Message<?> doConvert(Object payload, @Nullable Map<String, Object> headers,

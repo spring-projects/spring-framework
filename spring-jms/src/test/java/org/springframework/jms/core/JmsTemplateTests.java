@@ -103,14 +103,14 @@ class JmsTemplateTests {
 
 	private JmsTemplate createTemplate() {
 		JmsTemplate template = new JmsTemplate();
-		JndiDestinationResolver destMan = new JndiDestinationResolver();
-		destMan.setJndiTemplate(new JndiTemplate() {
+		JndiDestinationResolver resolver = new JndiDestinationResolver();
+		resolver.setJndiTemplate(new JndiTemplate() {
 			@Override
 			protected Context createInitialContext() {
 				return JmsTemplateTests.this.jndiContext;
 			}
 		});
-		template.setDestinationResolver(destMan);
+		template.setDestinationResolver(resolver);
 		template.setSessionTransacted(useTransactedTemplate());
 		return template;
 	}
