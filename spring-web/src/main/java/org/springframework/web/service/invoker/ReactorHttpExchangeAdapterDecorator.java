@@ -43,7 +43,7 @@ public class ReactorHttpExchangeAdapterDecorator extends HttpExchangeAdapterDeco
 
 
 	/**
-	 * Return the wrapped delgate {@code HttpExchangeAdapter}.
+	 * Return the wrapped delegate {@code HttpExchangeAdapter}.
 	 */
 	@Override
 	public ReactorHttpExchangeAdapter getHttpExchangeAdapter() {

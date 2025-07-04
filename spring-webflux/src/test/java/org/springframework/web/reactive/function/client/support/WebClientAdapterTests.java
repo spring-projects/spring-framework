@@ -36,7 +36,9 @@ import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -225,6 +227,32 @@ class WebClientAdapterTests {
 		assertThat(this.anotherServer.getRequestCount()).isEqualTo(0);
 	}
 
+	@Test
+	void handleNotFoundException() {
+		MockResponse response = new MockResponse();
+		response.setResponseCode(404);
+		this.server.enqueue(response);
+		this.server.enqueue(response);
+
+		WebClientAdapter clientAdapter = WebClientAdapter.create(
+				WebClient.builder().baseUrl(this.server.url("/").toString()).build());
+
+		HttpServiceProxyFactory proxyFactory = HttpServiceProxyFactory.builderFor(clientAdapter)
+				.exchangeAdapterDecorator(NotFoundWebClientAdapterDecorator::new)
+				.build();
+
+		Service service = proxyFactory.createClient(Service.class);
+
+		StepVerifier.create(service.getGreeting()).verifyComplete();
+
+		StepVerifier.create(service.getGreetingEntity())
+				.consumeNextWith(entity -> {
+					assertThat(entity.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+					assertThat(entity.getBody()).isNull();
+				})
+				.verifyComplete();
+	}
+
 
 	private static MockWebServer anotherServer() {
 		MockWebServer anotherServer = new MockWebServer();
@@ -261,6 +289,9 @@ class WebClientAdapterTests {
 
 		@GetExchange("/greetings/{id}")
 		String getGreetingById(@Nullable URI uri, @PathVariable String id);
+
+		@GetExchange("/greeting")
+		Mono<ResponseEntity<String>> getGreetingEntity();
 
 		@PostExchange(contentType = "application/x-www-form-urlencoded")
 		void postForm(@RequestParam MultiValueMap<String, String> params);

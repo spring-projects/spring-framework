@@ -1141,6 +1141,34 @@ documentation for each client, as well as the Javadoc of `defaultStatusHandler` 
 
 
 
+[[rest-http-interface-adapter-decorator]]
+=== Decorating the Adapter
+
+`HttpExchangeAdapter` and `ReactorHttpExchangeAdapter` are contracts that decouple HTTP
+Interface client infrastructure from the details of invoking the underlying
+client. There are adapter implementations for `RestClient`, `WebClient`, and
+`RestTemplate`.
+
+Occasionally, it may be useful to intercept client invocations through a decorator
+configurable in the `HttpServiceProxyFactory.Builder`. For example, you can apply
+built-in decorators to suppress 404 exceptions and return a `ResponseEntity` with
+`NOT_FOUND` and a `null` body:
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	// For RestClient
+	HttpServiceProxyFactory factory = HttpServiceProxyFactory.builderFor(restCqlientAdapter)
+			.exchangeAdapterDecorator(NotFoundRestClientAdapterDecorator::new)
+			.build();
+
+	// or for WebClient...
+	HttpServiceProxyFactory proxyFactory = HttpServiceProxyFactory.builderFor(webClientAdapter)
+			.exchangeAdapterDecorator(NotFoundWebClientAdapterDecorator::new)
+			.build();
+----
+
+
+
 [[rest-http-interface-group-config]]
 === HTTP Interface Groups
 

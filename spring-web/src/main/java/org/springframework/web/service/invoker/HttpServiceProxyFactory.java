@@ -140,9 +140,9 @@ public final class HttpServiceProxyFactory {
 
 		private final List<HttpServiceArgumentResolver> customArgumentResolvers = new ArrayList<>();
 
-		private final List<HttpRequestValues.Processor> requestValuesProcessors = new ArrayList<>();
-
 		private @Nullable ConversionService conversionService;
+
+		private final List<HttpRequestValues.Processor> requestValuesProcessors = new ArrayList<>();
 
 		private @Nullable StringValueResolver embeddedValueResolver;
 
@@ -182,6 +182,17 @@ public final class HttpServiceProxyFactory {
 		}
 
 		/**
+		 * Set the {@link ConversionService} to use where input values need to
+		 * be formatted as Strings.
+		 * <p>By default, this is {@link DefaultFormattingConversionService}.
+		 * @return this same builder instance
+		 */
+		public Builder conversionService(ConversionService conversionService) {
+			this.conversionService = conversionService;
+			return this;
+		}
+
+		/**
 		 * Register an {@link HttpRequestValues} processor that can further
 		 * customize request values based on the method and all arguments.
 		 * @param processor the processor to add
@@ -190,17 +201,6 @@ public final class HttpServiceProxyFactory {
 		 */
 		public Builder httpRequestValuesProcessor(HttpRequestValues.Processor processor) {
 			this.requestValuesProcessors.add(processor);
-			return this;
-		}
-
-		/**
-		 * Set the {@link ConversionService} to use where input values need to
-		 * be formatted as Strings.
-		 * <p>By default this is {@link DefaultFormattingConversionService}.
-		 * @return this same builder instance
-		 */
-		public Builder conversionService(ConversionService conversionService) {
-			this.conversionService = conversionService;
 			return this;
 		}
 
