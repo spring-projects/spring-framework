@@ -552,7 +552,7 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 
 	@Override
 	@Nullable
-	public <T> T execute(final @Nullable Destination destination, final ProducerCallback<T> action) throws JmsException {
+	public <T> T execute(@Nullable Destination destination, ProducerCallback<T> action) throws JmsException {
 		Assert.notNull(action, "Callback object must not be null");
 		return execute(session -> {
 			MessageProducer producer = createProducer(session, destination);
@@ -567,7 +567,7 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 
 	@Override
 	@Nullable
-	public <T> T execute(final String destinationName, final ProducerCallback<T> action) throws JmsException {
+	public <T> T execute(String destinationName, ProducerCallback<T> action) throws JmsException {
 		Assert.notNull(action, "Callback object must not be null");
 		return execute(session -> {
 			Destination destination = resolveDestinationName(session, destinationName);
@@ -598,7 +598,7 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	}
 
 	@Override
-	public void send(final Destination destination, final MessageCreator messageCreator) throws JmsException {
+	public void send(Destination destination, MessageCreator messageCreator) throws JmsException {
 		execute(session -> {
 			doSend(session, destination, messageCreator);
 			return null;
@@ -606,7 +606,7 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	}
 
 	@Override
-	public void send(final String destinationName, final MessageCreator messageCreator) throws JmsException {
+	public void send(String destinationName, MessageCreator messageCreator) throws JmsException {
 		execute(session -> {
 			Destination destination = resolveDestinationName(session, destinationName);
 			doSend(session, destination, messageCreator);
@@ -678,12 +678,12 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	}
 
 	@Override
-	public void convertAndSend(Destination destination, final Object message) throws JmsException {
+	public void convertAndSend(Destination destination, Object message) throws JmsException {
 		send(destination, session -> getRequiredMessageConverter().toMessage(message, session));
 	}
 
 	@Override
-	public void convertAndSend(String destinationName, final Object message) throws JmsException {
+	public void convertAndSend(String destinationName, Object message) throws JmsException {
 		send(destinationName, session -> getRequiredMessageConverter().toMessage(message, session));
 	}
 
@@ -700,7 +700,7 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 
 	@Override
 	public void convertAndSend(
-			Destination destination, final Object message, final MessagePostProcessor postProcessor)
+			Destination destination, Object message, MessagePostProcessor postProcessor)
 			throws JmsException {
 
 		send(destination, session -> {
@@ -711,7 +711,7 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 
 	@Override
 	public void convertAndSend(
-			String destinationName, final Object message, final MessagePostProcessor postProcessor)
+			String destinationName, Object message, MessagePostProcessor postProcessor)
 		throws JmsException {
 
 		send(destinationName, session -> {
@@ -910,13 +910,13 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 
 	@Override
 	@Nullable
-	public Message sendAndReceive(final Destination destination, final MessageCreator messageCreator) throws JmsException {
+	public Message sendAndReceive(Destination destination, MessageCreator messageCreator) throws JmsException {
 		return executeLocal(session -> doSendAndReceive(session, destination, messageCreator), true);
 	}
 
 	@Override
 	@Nullable
-	public Message sendAndReceive(final String destinationName, final MessageCreator messageCreator) throws JmsException {
+	public Message sendAndReceive(String destinationName, MessageCreator messageCreator) throws JmsException {
 		return executeLocal(session -> {
 			Destination destination = resolveDestinationName(session, destinationName);
 			return doSendAndReceive(session, destination, messageCreator);
