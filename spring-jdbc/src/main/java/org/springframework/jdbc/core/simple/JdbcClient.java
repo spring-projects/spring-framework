@@ -133,6 +133,30 @@ public interface JdbcClient {
 	interface StatementSpec {
 
 		/**
+		 * Apply the given fetch size to any subsequent query statement.
+		 * @param fetchSize the fetch size
+		 * @since 7.0
+		 * @see org.springframework.jdbc.core.JdbcTemplate#setFetchSize
+		 */
+		StatementSpec withFetchSize(int fetchSize);
+
+		/**
+		 * Apply the given maximum number of rows to any subsequent query statement.
+		 * @param maxRows the maximum number of rows
+		 * @since 7.0
+		 * @see org.springframework.jdbc.core.JdbcTemplate#setMaxRows
+		 */
+		StatementSpec withMaxRows(int maxRows);
+
+		/**
+		 * Apply the given query timeout to any subsequent query statement.
+		 * @param queryTimeout the query timeout in seconds
+		 * @since 7.0
+		 * @see org.springframework.jdbc.core.JdbcTemplate#setQueryTimeout
+		 */
+		StatementSpec withQueryTimeout(int queryTimeout);
+
+		/**
 		 * Bind a positional JDBC statement parameter for "?" placeholder resolution
 		 * by implicit order of parameter value registration.
 		 * <p>This is primarily intended for statements with a single parameter

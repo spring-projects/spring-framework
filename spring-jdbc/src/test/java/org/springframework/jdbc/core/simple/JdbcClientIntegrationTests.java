@@ -196,6 +196,19 @@ class JdbcClientIntegrationTests {
 		}
 
 		@Test
+		void selectWithReusedNamedParameterAndMaxRows() {
+			List<User> users = jdbcClient.sql(QUERY1)
+					.withFetchSize(1)
+					.withMaxRows(1)
+					.withQueryTimeout(1)
+					.param("name", "John")
+					.query(User.class)
+					.list();
+
+			assertSingleResult(users);
+		}
+
+		@Test
 		void selectWithReusedNamedParameterList() {
 			List<User> users = jdbcClient.sql(QUERY2)
 					.param("names", List.of("John", "Bogus"))
@@ -215,15 +228,31 @@ class JdbcClientIntegrationTests {
 			assertResults(users);
 		}
 
+		@Test
+		void selectWithReusedNamedParameterListAndMaxRows() {
+			List<User> users = jdbcClient.sql(QUERY2)
+					.withFetchSize(1)
+					.withMaxRows(1)
+					.withQueryTimeout(1)
+					.paramSource(new Names(List.of("John", "Bogus")))
+					.query(User.class)
+					.list();
+
+			assertSingleResult(users);
+		}
 
 		private static void assertResults(List<User> users) {
 			assertThat(users).containsExactly(new User(2, "John", "John"), new User(3, "John", "Smith"));
 		}
 
+		private static void assertSingleResult(List<User> users) {
+			assertThat(users).containsExactly(new User(2, "John", "John"));
+		}
+
+
 		record Name(String name) {}
 
 		record Names(List<String> names) {}
-
 	}
 
 

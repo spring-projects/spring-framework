@@ -87,8 +87,7 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 	private final JdbcOperations classicJdbcTemplate;
 
 	/** Cache of original SQL String to ParsedSql representation. */
-	private volatile ConcurrentLruCache<String, ParsedSql> parsedSqlCache =
-			new ConcurrentLruCache<>(DEFAULT_CACHE_LIMIT, NamedParameterUtils::parseSqlStatement);
+	private volatile ConcurrentLruCache<String, ParsedSql> parsedSqlCache;
 
 
 	/**
@@ -97,8 +96,7 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 	 * @param dataSource the JDBC DataSource to access
 	 */
 	public NamedParameterJdbcTemplate(DataSource dataSource) {
-		Assert.notNull(dataSource, "DataSource must not be null");
-		this.classicJdbcTemplate = new JdbcTemplate(dataSource);
+		this(new JdbcTemplate(dataSource));
 	}
 
 	/**
@@ -109,6 +107,19 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 	public NamedParameterJdbcTemplate(JdbcOperations classicJdbcTemplate) {
 		Assert.notNull(classicJdbcTemplate, "JdbcTemplate must not be null");
 		this.classicJdbcTemplate = classicJdbcTemplate;
+		this.parsedSqlCache = new ConcurrentLruCache<>(DEFAULT_CACHE_LIMIT, NamedParameterUtils::parseSqlStatement);
+	}
+
+	/**
+	 * Copy constructor for a derived NamedParameterJdbcTemplate.
+	 * @param original the original NamedParameterJdbcTemplate to copy from
+	 * @param classicJdbcTemplate the actual JdbcTemplate delegate to use
+	 * @since 7.0
+	 */
+	public NamedParameterJdbcTemplate(NamedParameterJdbcTemplate original, JdbcTemplate classicJdbcTemplate) {
+		Assert.notNull(classicJdbcTemplate, "JdbcTemplate must not be null");
+		this.classicJdbcTemplate = classicJdbcTemplate;
+		this.parsedSqlCache = original.parsedSqlCache;
 	}
 
 

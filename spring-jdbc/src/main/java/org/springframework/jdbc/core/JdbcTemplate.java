@@ -196,6 +196,26 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 		afterPropertiesSet();
 	}
 
+	/**
+	 * Copy constructor for a derived JdbcTemplate.
+	 * @param original the original template to copy from
+	 * @since 7.0
+	 */
+	public JdbcTemplate(JdbcAccessor original) {
+		setDataSource(original.getDataSource());
+		setExceptionTranslator(original.getExceptionTranslator());
+		setLazyInit(original.isLazyInit());
+		if (original instanceof JdbcTemplate originalTemplate) {
+			setIgnoreWarnings(originalTemplate.isIgnoreWarnings());
+			setFetchSize(originalTemplate.getFetchSize());
+			setMaxRows(originalTemplate.getMaxRows());
+			setQueryTimeout(originalTemplate.getQueryTimeout());
+			setSkipResultsProcessing(originalTemplate.isSkipResultsProcessing());
+			setSkipUndeclaredResults(originalTemplate.isSkipUndeclaredResults());
+			setResultsMapCaseInsensitive(originalTemplate.isResultsMapCaseInsensitive());
+		}
+	}
+
 
 	/**
 	 * Set whether we want to ignore JDBC statement warnings ({@link SQLWarning}).
@@ -264,7 +284,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	}
 
 	/**
-	 * Set the query timeout for statements that this JdbcTemplate executes.
+	 * Set the query timeout (seconds) for statements that this JdbcTemplate executes.
 	 * <p>Default is -1, indicating to use the JDBC driver's default
 	 * (i.e. to not pass a specific query timeout setting on the driver).
 	 * <p>Note: Any timeout specified here will be overridden by the remaining
@@ -277,7 +297,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	}
 
 	/**
-	 * Return the query timeout for statements that this JdbcTemplate executes.
+	 * Return the query timeout (seconds) for statements that this JdbcTemplate executes.
 	 */
 	public int getQueryTimeout() {
 		return this.queryTimeout;

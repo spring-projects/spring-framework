@@ -45,6 +45,7 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcOperations;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SimplePropertySqlParameterSource;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
+import org.springframework.jdbc.support.JdbcAccessor;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.util.Assert;
@@ -61,8 +62,6 @@ import org.springframework.util.Assert;
  * @see JdbcClient#create(NamedParameterJdbcOperations)
  */
 final class DefaultJdbcClient implements JdbcClient {
-
-	private final JdbcOperations classicOps;
 
 	private final NamedParameterJdbcOperations namedParamOps;
 
@@ -81,7 +80,6 @@ final class DefaultJdbcClient implements JdbcClient {
 
 	public DefaultJdbcClient(NamedParameterJdbcOperations jdbcTemplate, @Nullable ConversionService conversionService) {
 		Assert.notNull(jdbcTemplate, "JdbcTemplate must not be null");
-		this.classicOps = jdbcTemplate.getJdbcOperations();
 		this.namedParamOps = jdbcTemplate;
 		this.conversionService =
 				(conversionService != null ? conversionService : DefaultConversionService.getSharedInstance());
@@ -90,7 +88,7 @@ final class DefaultJdbcClient implements JdbcClient {
 
 	@Override
 	public StatementSpec sql(String sql) {
-		return new DefaultStatementSpec(sql);
+		return new DefaultStatementSpec(sql, this.namedParamOps);
 	}
 
 
@@ -98,14 +96,55 @@ final class DefaultJdbcClient implements JdbcClient {
 
 		private final String sql;
 
-		private final List<Object> indexedParams = new ArrayList<>();
+		private JdbcOperations classicOps;
+
+		private NamedParameterJdbcOperations namedParamOps;
+
+		private @Nullable JdbcTemplate customTemplate;
+
+		private final List<@Nullable Object> indexedParams = new ArrayList<>();
 
 		private final MapSqlParameterSource namedParams = new MapSqlParameterSource();
 
 		private SqlParameterSource namedParamSource = this.namedParams;
 
-		public DefaultStatementSpec(String sql) {
+		public DefaultStatementSpec(String sql, NamedParameterJdbcOperations namedParamOps) {
 			this.sql = sql;
+			this.classicOps = namedParamOps.getJdbcOperations();
+			this.namedParamOps = namedParamOps;
+		}
+
+		private JdbcTemplate enforceCustomTemplate() {
+			if (this.customTemplate == null) {
+				if (!(this.classicOps instanceof JdbcAccessor original)) {
+					throw new IllegalStateException(
+							"Needs to be bound to a JdbcAccessor for custom settings support: " + this.classicOps);
+				}
+				this.customTemplate = new JdbcTemplate(original);
+				this.classicOps = this.customTemplate;
+				this.namedParamOps = (this.namedParamOps instanceof NamedParameterJdbcTemplate originalNamedParam ?
+						new NamedParameterJdbcTemplate(originalNamedParam, this.customTemplate) :
+						new NamedParameterJdbcTemplate(this.customTemplate));
+			}
+			return this.customTemplate;
+		}
+
+		@Override
+		public StatementSpec withFetchSize(int fetchSize) {
+			enforceCustomTemplate().setFetchSize(fetchSize);
+			return this;
+		}
+
+		@Override
+		public StatementSpec withMaxRows(int maxRows) {
+			enforceCustomTemplate().setMaxRows(maxRows);
+			return this;
+		}
+
+		@Override
+		public StatementSpec withQueryTimeout(int queryTimeout) {
+			enforceCustomTemplate().setQueryTimeout(queryTimeout);
+			return this;
 		}
 
 		@Override
@@ -220,18 +259,18 @@ final class DefaultJdbcClient implements JdbcClient {
 		@Override
 		public void query(RowCallbackHandler rch) {
 			if (useNamedParams()) {
-				namedParamOps.query(this.sql, this.namedParamSource, rch);
+				this.namedParamOps.query(this.sql, this.namedParamSource, rch);
 			}
 			else {
-				classicOps.query(statementCreatorForIndexedParams(), rch);
+				this.classicOps.query(statementCreatorForIndexedParams(), rch);
 			}
 		}
 
 		@Override
 		public <T> T query(ResultSetExtractor<T> rse) {
 			T result = (useNamedParams() ?
-					namedParamOps.query(this.sql, this.namedParamSource, rse) :
-					classicOps.query(statementCreatorForIndexedParams(), rse));
+					this.namedParamOps.query(this.sql, this.namedParamSource, rse) :
+					this.classicOps.query(statementCreatorForIndexedParams(), rse));
 			Assert.state(result != null, "No result from ResultSetExtractor");
 			return result;
 		}
@@ -239,22 +278,22 @@ final class DefaultJdbcClient implements JdbcClient {
 		@Override
 		public int update() {
 			return (useNamedParams() ?
-					namedParamOps.update(this.sql, this.namedParamSource) :
-					classicOps.update(statementCreatorForIndexedParams()));
+					this.namedParamOps.update(this.sql, this.namedParamSource) :
+					this.classicOps.update(statementCreatorForIndexedParams()));
 		}
 
 		@Override
 		public int update(KeyHolder generatedKeyHolder) {
 			return (useNamedParams() ?
-					namedParamOps.update(this.sql, this.namedParamSource, generatedKeyHolder) :
-					classicOps.update(statementCreatorForIndexedParamsWithKeys(null), generatedKeyHolder));
+					this.namedParamOps.update(this.sql, this.namedParamSource, generatedKeyHolder) :
+					this.classicOps.update(statementCreatorForIndexedParamsWithKeys(null), generatedKeyHolder));
 		}
 
 		@Override
 		public int update(KeyHolder generatedKeyHolder, String... keyColumnNames) {
 			return (useNamedParams() ?
-					namedParamOps.update(this.sql, this.namedParamSource, generatedKeyHolder, keyColumnNames) :
-					classicOps.update(statementCreatorForIndexedParamsWithKeys(keyColumnNames), generatedKeyHolder));
+					this.namedParamOps.update(this.sql, this.namedParamSource, generatedKeyHolder, keyColumnNames) :
+					this.classicOps.update(statementCreatorForIndexedParamsWithKeys(keyColumnNames), generatedKeyHolder));
 		}
 
 		private boolean useNamedParams() {
