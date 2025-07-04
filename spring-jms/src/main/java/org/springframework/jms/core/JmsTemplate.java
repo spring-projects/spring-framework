@@ -47,10 +47,9 @@ import org.springframework.util.ClassUtils;
 /**
  * Helper class that simplifies synchronous JMS access code.
  *
- * <p>If you want to use dynamic destination creation, you must specify
- * the type of JMS destination to create, using the "pubSubDomain" property.
- * For other operations, this is not necessary. Point-to-Point (Queues) is the default
- * domain.
+ * <p>If you want to use dynamic destination creation, you must specify the type of
+ * JMS destination to create, using the "pubSubDomain" property. For other operations,
+ * this is not necessary. Point-to-Point (Queues) is the default domain.
  *
  * <p>Default settings for JMS Sessions are "not transacted" and "auto-acknowledge".
  * As defined by the Jakarta EE specification, the transaction and acknowledgement
@@ -105,7 +104,6 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	@Nullable
 	private MessageConverter messageConverter;
 
-
 	private boolean messageIdEnabled = true;
 
 	private boolean messageTimestampEnabled = true;
@@ -115,7 +113,6 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	private long receiveTimeout = RECEIVE_TIMEOUT_INDEFINITE_WAIT;
 
 	private long deliveryDelay = -1;
-
 
 	private boolean explicitQosEnabled = false;
 
@@ -151,11 +148,8 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	}
 
 	/**
-	 * Initialize the default implementations for the template's strategies:
-	 * DynamicDestinationResolver and SimpleMessageConverter.
-	 * @see #setDestinationResolver
+	 * Initialize the default implementations for the template's strategies.
 	 * @see #setMessageConverter
-	 * @see org.springframework.jms.support.destination.DynamicDestinationResolver
 	 * @see org.springframework.jms.support.converter.SimpleMessageConverter
 	 */
 	protected void initDefaultStrategies() {
@@ -262,7 +256,6 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 		return converter;
 	}
 
-
 	/**
 	 * Set whether message IDs are enabled. Default is "true".
 	 * <p>This is only a hint to the JMS producer.
@@ -351,7 +344,6 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	public long getDeliveryDelay() {
 		return this.deliveryDelay;
 	}
-
 
 	/**
 	 * Set if the QOS values (deliveryMode, priority, timeToLive)
@@ -454,7 +446,7 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	 * Set the time-to-live of the message when sending.
 	 * <p>Since a default value may be defined administratively,
 	 * this is only used when "isExplicitQosEnabled" equals "true".
-	 * @param timeToLive the message's lifetime (in milliseconds)
+	 * @param timeToLive the message lifetime (in milliseconds)
 	 * @see #isExplicitQosEnabled
 	 * @see jakarta.jms.Message#DEFAULT_TIME_TO_LIVE
 	 * @see jakarta.jms.MessageProducer#send(jakarta.jms.Message, int, int, long)
@@ -472,13 +464,14 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 
 	/**
 	 * Configure the {@link ObservationRegistry} to use for recording JMS observations.
-	 * @param observationRegistry the observation registry to use.
+	 * @param observationRegistry the observation registry to use
 	 * @since 6.1
 	 * @see io.micrometer.jakarta9.instrument.jms.JmsInstrumentation
 	 */
 	public void setObservationRegistry(ObservationRegistry observationRegistry) {
 		this.observationRegistry = observationRegistry;
 	}
+
 
 	//---------------------------------------------------------------------------------------
 	// JmsOperations execute methods
@@ -699,8 +692,7 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	}
 
 	@Override
-	public void convertAndSend(
-			Destination destination, Object message, MessagePostProcessor postProcessor)
+	public void convertAndSend(Destination destination, Object message, MessagePostProcessor postProcessor)
 			throws JmsException {
 
 		send(destination, session -> {
@@ -710,8 +702,7 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	}
 
 	@Override
-	public void convertAndSend(
-			String destinationName, Object message, MessagePostProcessor postProcessor)
+	public void convertAndSend(String destinationName, Object message, MessagePostProcessor postProcessor)
 		throws JmsException {
 
 		send(destinationName, session -> {

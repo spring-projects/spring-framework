@@ -69,7 +69,7 @@ public abstract class JmsDestinationAccessor extends JmsAccessor {
 	 * @see org.springframework.jms.support.destination.JndiDestinationResolver
 	 */
 	public void setDestinationResolver(DestinationResolver destinationResolver) {
-		Assert.notNull(destinationResolver, "'destinationResolver' must not be null");
+		Assert.notNull(destinationResolver, "DestinationResolver must not be null");
 		this.destinationResolver = destinationResolver;
 	}
 
