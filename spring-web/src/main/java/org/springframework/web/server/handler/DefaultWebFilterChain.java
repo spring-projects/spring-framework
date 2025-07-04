@@ -107,9 +107,8 @@ public class DefaultWebFilterChain implements WebFilterChain {
 						this.handler.handle(exchange));
 	}
 
-	private Mono<Void> invokeFilter(WebFilter current, DefaultWebFilterChain chain, ServerWebExchange exchange) {
-		String currentName = current.getClass().getName();
-		return current.filter(exchange, chain).checkpoint(currentName + " [DefaultWebFilterChain]");
+	private Mono<Void> invokeFilter(WebFilter filter, DefaultWebFilterChain chain, ServerWebExchange exchange) {
+		return filter.filter(exchange, chain).checkpoint(filter.toString());
 	}
 
 }
