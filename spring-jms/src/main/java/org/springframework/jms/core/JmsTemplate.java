@@ -763,13 +763,13 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 
 	@Override
 	@Nullable
-	public Message receiveSelected(final Destination destination, @Nullable final String messageSelector) throws JmsException {
+	public Message receiveSelected(Destination destination, @Nullable String messageSelector) throws JmsException {
 		return execute(session -> doReceive(session, destination, messageSelector), true);
 	}
 
 	@Override
 	@Nullable
-	public Message receiveSelected(final String destinationName, @Nullable final String messageSelector) throws JmsException {
+	public Message receiveSelected(String destinationName, @Nullable String messageSelector) throws JmsException {
 		return execute(session -> {
 			Destination destination = resolveDestinationName(session, destinationName);
 			return doReceive(session, destination, messageSelector);
@@ -857,19 +857,19 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 
 	@Override
 	@Nullable
-	public Object receiveSelectedAndConvert(String messageSelector) throws JmsException {
+	public Object receiveSelectedAndConvert(@Nullable String messageSelector) throws JmsException {
 		return doConvertFromMessage(receiveSelected(messageSelector));
 	}
 
 	@Override
 	@Nullable
-	public Object receiveSelectedAndConvert(Destination destination, String messageSelector) throws JmsException {
+	public Object receiveSelectedAndConvert(Destination destination, @Nullable String messageSelector) throws JmsException {
 		return doConvertFromMessage(receiveSelected(destination, messageSelector));
 	}
 
 	@Override
 	@Nullable
-	public Object receiveSelectedAndConvert(String destinationName, String messageSelector) throws JmsException {
+	public Object receiveSelectedAndConvert(String destinationName, @Nullable String messageSelector) throws JmsException {
 		return doConvertFromMessage(receiveSelected(destinationName, messageSelector));
 	}
 
@@ -1022,7 +1022,7 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 
 	@Override
 	@Nullable
-	public <T> T browseSelected(String messageSelector, BrowserCallback<T> action) throws JmsException {
+	public <T> T browseSelected(@Nullable String messageSelector, BrowserCallback<T> action) throws JmsException {
 		Queue defaultQueue = getDefaultQueue();
 		if (defaultQueue != null) {
 			return browseSelected(defaultQueue, messageSelector, action);
@@ -1034,7 +1034,7 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 
 	@Override
 	@Nullable
-	public <T> T browseSelected(final Queue queue, @Nullable final String messageSelector, final BrowserCallback<T> action)
+	public <T> T browseSelected(Queue queue, @Nullable String messageSelector, BrowserCallback<T> action)
 			throws JmsException {
 
 		Assert.notNull(action, "Callback object must not be null");
@@ -1051,7 +1051,7 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 
 	@Override
 	@Nullable
-	public <T> T browseSelected(final String queueName, @Nullable final String messageSelector, final BrowserCallback<T> action)
+	public <T> T browseSelected(String queueName, @Nullable String messageSelector, BrowserCallback<T> action)
 			throws JmsException {
 
 		Assert.notNull(action, "Callback object must not be null");

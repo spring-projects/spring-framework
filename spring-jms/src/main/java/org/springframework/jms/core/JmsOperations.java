@@ -336,7 +336,7 @@ public interface JmsOperations {
 	 * @throws JmsException checked JMSException converted to unchecked
 	 */
 	@Nullable
-	Object receiveSelectedAndConvert(String messageSelector) throws JmsException;
+	Object receiveSelectedAndConvert(@Nullable String messageSelector) throws JmsException;
 
 	/**
 	 * Receive a message synchronously from the specified destination, but only
@@ -351,7 +351,7 @@ public interface JmsOperations {
 	 * @throws JmsException checked JMSException converted to unchecked
 	 */
 	@Nullable
-	Object receiveSelectedAndConvert(Destination destination, String messageSelector) throws JmsException;
+	Object receiveSelectedAndConvert(Destination destination, @Nullable String messageSelector) throws JmsException;
 
 	/**
 	 * Receive a message synchronously from the specified destination, but only
@@ -367,7 +367,7 @@ public interface JmsOperations {
 	 * @throws JmsException checked JMSException converted to unchecked
 	 */
 	@Nullable
-	Object receiveSelectedAndConvert(String destinationName, String messageSelector) throws JmsException;
+	Object receiveSelectedAndConvert(String destinationName, @Nullable String messageSelector) throws JmsException;
 
 
 	//---------------------------------------------------------------------------------------
@@ -468,7 +468,7 @@ public interface JmsOperations {
 	 * @throws JmsException checked JMSException converted to unchecked
 	 */
 	@Nullable
-	<T> T browseSelected(String messageSelector, BrowserCallback<T> action) throws JmsException;
+	<T> T browseSelected(@Nullable String messageSelector, BrowserCallback<T> action) throws JmsException;
 
 	/**
 	 * Browse selected messages in a JMS queue. The callback gives access to the JMS
@@ -481,7 +481,7 @@ public interface JmsOperations {
 	 * @throws JmsException checked JMSException converted to unchecked
 	 */
 	@Nullable
-	<T> T browseSelected(Queue queue, String messageSelector, BrowserCallback<T> action) throws JmsException;
+	<T> T browseSelected(Queue queue, @Nullable String messageSelector, BrowserCallback<T> action) throws JmsException;
 
 	/**
 	 * Browse selected messages in a JMS queue. The callback gives access to the JMS
@@ -495,6 +495,6 @@ public interface JmsOperations {
 	 * @throws JmsException checked JMSException converted to unchecked
 	 */
 	@Nullable
-	<T> T browseSelected(String queueName, String messageSelector, BrowserCallback<T> action) throws JmsException;
+	<T> T browseSelected(String queueName, @Nullable String messageSelector, BrowserCallback<T> action) throws JmsException;
 
 }
