@@ -20,6 +20,7 @@ import java.util.Map;
 
 import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
+import org.springframework.messaging.MessagingException;
 
 /**
  * An extension of {@link AbstractMessageReceivingTemplate} that adds support for
@@ -36,36 +37,33 @@ public abstract class AbstractMessagingTemplate<D> extends AbstractMessageReceiv
 
 	@Override
 	@Nullable
-	public Message<?> sendAndReceive(Message<?> requestMessage) {
+	public Message<?> sendAndReceive(Message<?> requestMessage) throws MessagingException {
 		return sendAndReceive(getRequiredDefaultDestination(), requestMessage);
 	}
 
 	@Override
 	@Nullable
-	public Message<?> sendAndReceive(D destination, Message<?> requestMessage) {
+	public Message<?> sendAndReceive(D destination, Message<?> requestMessage) throws MessagingException {
 		return doSendAndReceive(destination, requestMessage);
 	}
 
-	@Nullable
-	protected abstract Message<?> doSendAndReceive(D destination, Message<?> requestMessage);
-
-
 	@Override
 	@Nullable
-	public <T> T convertSendAndReceive(Object request, Class<T> targetClass) {
+	public <T> T convertSendAndReceive(Object request, Class<T> targetClass) throws MessagingException {
 		return convertSendAndReceive(getRequiredDefaultDestination(), request, targetClass);
 	}
 
 	@Override
 	@Nullable
-	public <T> T convertSendAndReceive(D destination, Object request, Class<T> targetClass) {
+	public <T> T convertSendAndReceive(D destination, Object request, Class<T> targetClass) throws MessagingException {
 		return convertSendAndReceive(destination, request, null, targetClass);
 	}
 
 	@Override
 	@Nullable
 	public <T> T convertSendAndReceive(
-			D destination, Object request, @Nullable Map<String, Object> headers, Class<T> targetClass) {
+			D destination, Object request, @Nullable Map<String, Object> headers, Class<T> targetClass)
+			throws MessagingException {
 
 		return convertSendAndReceive(destination, request, headers, targetClass, null);
 	}
@@ -73,7 +71,8 @@ public abstract class AbstractMessagingTemplate<D> extends AbstractMessageReceiv
 	@Override
 	@Nullable
 	public <T> T convertSendAndReceive(
-			Object request, Class<T> targetClass, @Nullable MessagePostProcessor postProcessor) {
+			Object request, Class<T> targetClass, @Nullable MessagePostProcessor postProcessor)
+			throws MessagingException {
 
 		return convertSendAndReceive(getRequiredDefaultDestination(), request, targetClass, postProcessor);
 	}
@@ -81,7 +80,7 @@ public abstract class AbstractMessagingTemplate<D> extends AbstractMessageReceiv
 	@Override
 	@Nullable
 	public <T> T convertSendAndReceive(D destination, Object request, Class<T> targetClass,
-			@Nullable MessagePostProcessor postProcessor) {
+			@Nullable MessagePostProcessor postProcessor) throws MessagingException {
 
 		return convertSendAndReceive(destination, request, null, targetClass, postProcessor);
 	}
@@ -90,11 +89,23 @@ public abstract class AbstractMessagingTemplate<D> extends AbstractMessageReceiv
 	@Override
 	@Nullable
 	public <T> T convertSendAndReceive(D destination, Object request, @Nullable Map<String, Object> headers,
-			Class<T> targetClass, @Nullable MessagePostProcessor postProcessor) {
+			Class<T> targetClass, @Nullable MessagePostProcessor postProcessor) throws MessagingException {
 
 		Message<?> requestMessage = doConvert(request, headers, postProcessor);
 		Message<?> replyMessage = sendAndReceive(destination, requestMessage);
 		return (replyMessage != null ? (T) getMessageConverter().fromMessage(replyMessage, targetClass) : null);
 	}
+
+
+	/**
+	 * Actually send the given request message to the given destination and
+	 * receive a reply message for it.
+	 * @param destination the target destination
+	 * @param requestMessage the message to send
+	 * @return the received reply, possibly {@code null} if the
+	 * message could not be received, for example due to a timeout
+	 */
+	@Nullable
+	protected abstract Message<?> doSendAndReceive(D destination, Message<?> requestMessage);
 
 }

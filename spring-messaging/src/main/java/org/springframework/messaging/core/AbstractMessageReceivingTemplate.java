@@ -18,6 +18,7 @@ package org.springframework.messaging.core;
 
 import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
+import org.springframework.messaging.MessagingException;
 import org.springframework.messaging.converter.MessageConversionException;
 import org.springframework.messaging.converter.MessageConverter;
 
@@ -36,35 +37,25 @@ public abstract class AbstractMessageReceivingTemplate<D> extends AbstractMessag
 
 	@Override
 	@Nullable
-	public Message<?> receive() {
+	public Message<?> receive() throws MessagingException {
 		return doReceive(getRequiredDefaultDestination());
 	}
 
 	@Override
 	@Nullable
-	public Message<?> receive(D destination) {
+	public Message<?> receive(D destination) throws MessagingException {
 		return doReceive(destination);
 	}
 
-	/**
-	 * Actually receive a message from the given destination.
-	 * @param destination the target destination
-	 * @return the received message, possibly {@code null} if the message could not
-	 * be received, for example due to a timeout
-	 */
-	@Nullable
-	protected abstract Message<?> doReceive(D destination);
-
-
 	@Override
 	@Nullable
-	public <T> T receiveAndConvert(Class<T> targetClass) {
+	public <T> T receiveAndConvert(Class<T> targetClass) throws MessagingException {
 		return receiveAndConvert(getRequiredDefaultDestination(), targetClass);
 	}
 
 	@Override
 	@Nullable
-	public <T> T receiveAndConvert(D destination, Class<T> targetClass) {
+	public <T> T receiveAndConvert(D destination, Class<T> targetClass) throws MessagingException {
 		Message<?> message = doReceive(destination);
 		if (message != null) {
 			return doConvert(message, targetClass);
@@ -91,5 +82,14 @@ public abstract class AbstractMessageReceivingTemplate<D> extends AbstractMessag
 		}
 		return value;
 	}
+
+	/**
+	 * Actually receive a message from the given destination.
+	 * @param destination the target destination
+	 * @return the received message, possibly {@code null} if the
+	 * message could not be received, for example due to a timeout
+	 */
+	@Nullable
+	protected abstract Message<?> doReceive(D destination);
 
 }

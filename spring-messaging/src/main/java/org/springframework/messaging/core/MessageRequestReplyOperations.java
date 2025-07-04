@@ -99,12 +99,12 @@ public interface MessageRequestReplyOperations<D> {
 	/**
 	 * Convert the given request Object to serialized form, possibly using a
 	 * {@link org.springframework.messaging.converter.MessageConverter},
-	 * apply the given post processor and send the resulting {@link Message} to a
+	 * apply the given post-processor and send the resulting {@link Message} to a
 	 * default destination, receive the reply and convert its body of the given
 	 * target class.
 	 * @param request payload for the request message to send
 	 * @param targetClass the target type to convert the payload of the reply to
-	 * @param requestPostProcessor post process to apply to the request message
+	 * @param requestPostProcessor post-process to apply to the request message
 	 * @return the payload of the reply message, possibly {@code null} if the message
 	 * could not be received, for example due to a timeout
 	 */
@@ -116,13 +116,13 @@ public interface MessageRequestReplyOperations<D> {
 	/**
 	 * Convert the given request Object to serialized form, possibly using a
 	 * {@link org.springframework.messaging.converter.MessageConverter},
-	 * apply the given post processor and send the resulting {@link Message} to the
+	 * apply the given post-processor and send the resulting {@link Message} to the
 	 * given destination, receive the reply and convert its body of the given
 	 * target class.
 	 * @param destination the target destination
 	 * @param request payload for the request message to send
 	 * @param targetClass the target type to convert the payload of the reply to
-	 * @param requestPostProcessor post process to apply to the request message
+	 * @param requestPostProcessor post-process to apply to the request message
 	 * @return the payload of the reply message, possibly {@code null} if the message
 	 * could not be received, for example due to a timeout
 	 */
@@ -133,13 +133,13 @@ public interface MessageRequestReplyOperations<D> {
 	/**
 	 * Convert the given request Object to serialized form, possibly using a
 	 * {@link org.springframework.messaging.converter.MessageConverter},
-	 * wrap it as a message with the given headers, apply the given post processor
+	 * wrap it as a message with the given headers, apply the given post-processor
 	 * and send the resulting {@link Message} to the specified destination, receive
 	 * the reply and convert its body of the given target class.
 	 * @param destination the target destination
 	 * @param request payload for the request message to send
 	 * @param targetClass the target type to convert the payload of the reply to
-	 * @param requestPostProcessor post process to apply to the request message
+	 * @param requestPostProcessor post-process to apply to the request message
 	 * @return the payload of the reply message, possibly {@code null} if the message
 	 * could not be received, for example due to a timeout
 	 */

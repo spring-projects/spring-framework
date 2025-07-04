@@ -30,8 +30,12 @@ import org.springframework.messaging.core.MessageSendingOperations;
 
 /**
  * A specialization of {@link MessageSendingOperations}, {@link MessageReceivingOperations}
- * and {@link MessageRequestReplyOperations} for JMS related operations that allow to specify
- * a destination name rather than the actual {@link jakarta.jms.Destination}.
+ * and {@link MessageRequestReplyOperations} for JMS related operations that allow to
+ * specify a destination name rather than the actual {@link jakarta.jms.Destination}.
+ *
+ * <p>Note: Operations in this interface throw {@link MessagingException} instead of
+ * the JMS-specific {@link org.springframework.jms.JmsException}, aligning with the
+ * {@code spring-messaging} module and its other client operation handles.
  *
  * @author Stephane Nicoll
  * @since 4.1
@@ -68,30 +72,30 @@ public interface JmsMessageOperations extends MessageSendingOperations<Destinati
 	 * @param payload the Object to use as payload
 	 * @param headers the headers for the message to send
 	 */
-	void convertAndSend(String destinationName, Object payload, Map<String, Object> headers)
+	void convertAndSend(String destinationName, Object payload, @Nullable Map<String, Object> headers)
 			throws MessagingException;
 
 	/**
 	 * Convert the given Object to serialized form, possibly using a
 	 * {@link org.springframework.messaging.converter.MessageConverter},
-	 * wrap it as a message, apply the given post processor, and send
+	 * wrap it as a message, apply the given post-processor, and send
 	 * the resulting message to the given destination.
 	 * @param destinationName the name of the target destination
 	 * @param payload the Object to use as payload
-	 * @param postProcessor the post processor to apply to the message
+	 * @param postProcessor the post-processor to apply to the message
 	 */
-	void convertAndSend(String destinationName, Object payload, MessagePostProcessor postProcessor)
+	void convertAndSend(String destinationName, Object payload, @Nullable MessagePostProcessor postProcessor)
 			throws MessagingException;
 
 	/**
 	 * Convert the given Object to serialized form, possibly using a
 	 * {@link org.springframework.messaging.converter.MessageConverter},
-	 * wrap it as a message with the given headers, apply the given post processor,
+	 * wrap it as a message with the given headers, apply the given post-processor,
 	 * and send the resulting message to the given destination.
 	 * @param destinationName the name of the target destination
 	 * @param payload the Object to use as payload
 	 * @param headers the headers for the message to send
-	 * @param postProcessor the post processor to apply to the message
+	 * @param postProcessor the post-processor to apply to the message
 	 */
 	void convertAndSend(String destinationName, Object payload, @Nullable Map<String, Object> headers,
 			@Nullable MessagePostProcessor postProcessor) throws MessagingException;
@@ -159,13 +163,13 @@ public interface JmsMessageOperations extends MessageSendingOperations<Destinati
 	/**
 	 * Convert the given request Object to serialized form, possibly using a
 	 * {@link org.springframework.messaging.converter.MessageConverter},
-	 * apply the given post processor and send the resulting {@link Message} to the
+	 * apply the given post-processor and send the resulting {@link Message} to the
 	 * given destination, receive the reply and convert its body of the given
 	 * target class.
 	 * @param destinationName the name of the target destination
 	 * @param request payload for the request message to send
 	 * @param targetClass the target type to convert the payload of the reply to
-	 * @param requestPostProcessor post process to apply to the request message
+	 * @param requestPostProcessor post-process to apply to the request message
 	 * @return the payload of the reply message, possibly {@code null} if the message
 	 * could not be received, for example due to a timeout
 	 */
@@ -176,13 +180,13 @@ public interface JmsMessageOperations extends MessageSendingOperations<Destinati
 	/**
 	 * Convert the given request Object to serialized form, possibly using a
 	 * {@link org.springframework.messaging.converter.MessageConverter},
-	 * wrap it as a message with the given headers, apply the given post processor
+	 * wrap it as a message with the given headers, apply the given post-processor
 	 * and send the resulting {@link Message} to the specified destination, receive
 	 * the reply and convert its body of the given target class.
 	 * @param destinationName the name of the target destination
 	 * @param request payload for the request message to send
 	 * @param targetClass the target type to convert the payload of the reply to
-	 * @param requestPostProcessor post process to apply to the request message
+	 * @param requestPostProcessor post-process to apply to the request message
 	 * @return the payload of the reply message, possibly {@code null} if the message
 	 * could not be received, for example due to a timeout
 	 */
