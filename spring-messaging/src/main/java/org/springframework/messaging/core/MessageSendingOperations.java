@@ -83,7 +83,7 @@ public interface MessageSendingOperations<D> {
 	 * @param payload the Object to use as payload
 	 * @param headers the headers for the message to send
 	 */
-	void convertAndSend(D destination, Object payload, Map<String, Object> headers) throws MessagingException;
+	void convertAndSend(D destination, Object payload, @Nullable Map<String, Object> headers) throws MessagingException;
 
 	/**
 	 * Convert the given Object to serialized form, possibly using a

@@ -116,7 +116,7 @@ public interface MessageRequestReplyOperations<D> {
 	 * target class.
 	 * @param request payload for the request message to send
 	 * @param targetClass the target type to convert the payload of the reply to
-	 * @param requestPostProcessor post process to apply to the request message
+	 * @param requestPostProcessor post-process to apply to the request message
 	 * @return the payload of the reply message, possibly {@code null} if the message
 	 * could not be received, for example due to a timeout
 	 */
@@ -133,7 +133,7 @@ public interface MessageRequestReplyOperations<D> {
 	 * @param destination the target destination
 	 * @param request payload for the request message to send
 	 * @param targetClass the target type to convert the payload of the reply to
-	 * @param requestPostProcessor post process to apply to the request message
+	 * @param requestPostProcessor post-process to apply to the request message
 	 * @return the payload of the reply message, possibly {@code null} if the message
 	 * could not be received, for example due to a timeout
 	 */
@@ -148,7 +148,7 @@ public interface MessageRequestReplyOperations<D> {
 	 * the reply and convert its body of the given target class.
 	 * @param request payload for the request message to send
 	 * @param targetClass the target type to convert the payload of the reply to
-	 * @param requestPostProcessor post process to apply to the request message
+	 * @param requestPostProcessor post-process to apply to the request message
 	 * @return the payload of the reply message, possibly {@code null} if the message
 	 * could not be received, for example due to a timeout
 	 * @since 7.0
@@ -166,7 +166,7 @@ public interface MessageRequestReplyOperations<D> {
 	 * @param destination the target destination
 	 * @param request payload for the request message to send
 	 * @param targetClass the target type to convert the payload of the reply to
-	 * @param requestPostProcessor post process to apply to the request message
+	 * @param requestPostProcessor post-process to apply to the request message
 	 * @return the payload of the reply message, possibly {@code null} if the message
 	 * could not be received, for example due to a timeout
 	 */

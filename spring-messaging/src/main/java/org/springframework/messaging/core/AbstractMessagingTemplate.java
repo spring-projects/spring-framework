@@ -104,6 +104,14 @@ public abstract class AbstractMessagingTemplate<D> extends AbstractMessageReceiv
 	}
 
 
+	/**
+	 * Actually send the given request message to the given destination and
+	 * receive a reply message for it.
+	 * @param destination the target destination
+	 * @param requestMessage the message to send
+	 * @return the received reply, possibly {@code null} if the
+	 * message could not be received, for example due to a timeout
+	 */
 	protected abstract @Nullable Message<?> doSendAndReceive(D destination, Message<?> requestMessage);
 
 }

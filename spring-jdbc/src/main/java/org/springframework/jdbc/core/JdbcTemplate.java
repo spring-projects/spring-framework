@@ -1199,9 +1199,9 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	public Map<String, Object> call(CallableStatementCreator csc, List<SqlParameter> declaredParameters)
 			throws DataAccessException {
 
-		final List<SqlParameter> updateCountParameters = new ArrayList<>();
-		final List<SqlParameter> resultSetParameters = new ArrayList<>();
-		final List<SqlParameter> callParameters = new ArrayList<>();
+		List<SqlParameter> updateCountParameters = new ArrayList<>();
+		List<SqlParameter> resultSetParameters = new ArrayList<>();
+		List<SqlParameter> callParameters = new ArrayList<>();
 
 		for (SqlParameter parameter : declaredParameters) {
 			if (parameter.isResultsParameter()) {

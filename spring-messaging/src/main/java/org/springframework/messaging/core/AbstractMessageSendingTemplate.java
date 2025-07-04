@@ -108,9 +108,6 @@ public abstract class AbstractMessageSendingTemplate<D> implements MessageSendin
 		doSend(destination, message);
 	}
 
-	protected abstract void doSend(D destination, Message<?> message);
-
-
 	@Override
 	public void convertAndSend(Object payload) throws MessagingException {
 		convertAndSend(payload, null, null);
@@ -162,6 +159,7 @@ public abstract class AbstractMessageSendingTemplate<D> implements MessageSendin
 		send(destination, message);
 	}
 
+
 	/**
 	 * Convert the given Object to serialized form, possibly using a
 	 * {@link MessageConverter}, wrap it as a message with the given
@@ -208,5 +206,12 @@ public abstract class AbstractMessageSendingTemplate<D> implements MessageSendin
 	protected @Nullable Map<String, Object> processHeadersToSend(@Nullable Map<String, Object> headers) {
 		return headers;
 	}
+
+	/**
+	 * Actually send the given message to the given destination.
+	 * @param destination the target destination
+	 * @param message the message to send
+	 */
+	protected abstract void doSend(D destination, Message<?> message);
 
 }
