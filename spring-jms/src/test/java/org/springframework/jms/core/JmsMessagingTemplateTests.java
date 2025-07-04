@@ -80,6 +80,7 @@ class JmsMessagingTemplateTests {
 
 	@BeforeEach
 	void setup() {
+		given(this.jmsTemplate.getMessageConverter()).willReturn(new SimpleMessageConverter());
 		this.messagingTemplate = new JmsMessagingTemplate(this.jmsTemplate);
 	}
 
@@ -93,7 +94,6 @@ class JmsMessagingTemplateTests {
 		MessageConverter messageConverter = mock();
 		given(this.jmsTemplate.getMessageConverter()).willReturn(messageConverter);
 		JmsMessagingTemplate messagingTemplate = new JmsMessagingTemplate(this.jmsTemplate);
-		messagingTemplate.afterPropertiesSet();
 		assertPayloadConverter(messagingTemplate, messageConverter);
 	}
 
@@ -174,9 +174,6 @@ class JmsMessagingTemplateTests {
 
 	@Test
 	void sendPropertyInjection() {
-		MessageConverter messageConverter = new SimpleMessageConverter();
-		given(this.jmsTemplate.getMessageConverter()).willReturn(messageConverter);
-
 		this.messagingTemplate = new JmsMessagingTemplate();
 		this.messagingTemplate.setJmsTemplate(this.jmsTemplate);
 		this.messagingTemplate.setDefaultDestinationName("myQueue");

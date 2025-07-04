@@ -42,6 +42,7 @@ import org.mockito.stubbing.Answer;
 import org.springframework.jms.InvalidDestinationException;
 import org.springframework.jms.MessageNotReadableException;
 import org.springframework.jms.StubTextMessage;
+import org.springframework.jms.support.converter.SimpleMessageConverter;
 import org.springframework.jms.support.destination.DestinationResolutionException;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessagingException;
@@ -70,7 +71,7 @@ class JmsClientTests {
 	@Captor
 	private ArgumentCaptor<MessageCreator> messageCreator;
 
-	@Mock
+	@Mock(strictness = Mock.Strictness.LENIENT)
 	private JmsTemplate jmsTemplate;
 
 	private JmsClient jmsClient;
@@ -78,6 +79,7 @@ class JmsClientTests {
 
 	@BeforeEach
 	void setup() {
+		given(this.jmsTemplate.getMessageConverter()).willReturn(new SimpleMessageConverter());
 		this.jmsClient = JmsClient.create(this.jmsTemplate);
 	}
 

@@ -59,7 +59,7 @@ public class JmsMessagingTemplate extends AbstractMessagingTemplate<Destination>
 
 	private @Nullable JmsOperations jmsTemplate;
 
-	private MessageConverter jmsMessageConverter = new MessagingMessageConverter();
+	private MessageConverter jmsMessageConverter;
 
 	private boolean converterSet;
 
@@ -71,6 +71,7 @@ public class JmsMessagingTemplate extends AbstractMessagingTemplate<Destination>
 	 * Requires {@link #setConnectionFactory} or {@link #setJmsTemplate} to be called.
 	 */
 	public JmsMessagingTemplate() {
+		this.jmsMessageConverter = new MessagingMessageConverter();
 	}
 
 	/**
@@ -79,7 +80,16 @@ public class JmsMessagingTemplate extends AbstractMessagingTemplate<Destination>
 	 * @since 4.1.2
 	 */
 	public JmsMessagingTemplate(ConnectionFactory connectionFactory) {
-		this.jmsTemplate = new JmsTemplate(connectionFactory);
+		this(new JmsTemplate(connectionFactory));
+	}
+
+	/**
+	 * Create a {@code JmsMessagingTemplate} instance with the {@link JmsTemplate} to use.
+	 */
+	public JmsMessagingTemplate(JmsTemplate jmsTemplate) {
+		Assert.notNull(jmsTemplate, "JmsTemplate must not be null");
+		this.jmsTemplate = jmsTemplate;
+		this.jmsMessageConverter = new MessagingMessageConverter(jmsTemplate.getMessageConverter());
 	}
 
 	/**
@@ -89,13 +99,8 @@ public class JmsMessagingTemplate extends AbstractMessagingTemplate<Destination>
 	public JmsMessagingTemplate(JmsOperations jmsTemplate) {
 		Assert.notNull(jmsTemplate, "JmsTemplate must not be null");
 		this.jmsTemplate = jmsTemplate;
-	}
-
-	/**
-	 * Create a {@code JmsMessagingTemplate} instance with the {@link JmsTemplate} to use.
-	 */
-	public JmsMessagingTemplate(JmsTemplate jmsTemplate) {
-		this((JmsOperations) jmsTemplate);
+		this.jmsMessageConverter = (jmsTemplate instanceof JmsTemplate template ?
+				new MessagingMessageConverter(template.getMessageConverter()) : new MessagingMessageConverter());
 	}
 
 
@@ -104,8 +109,10 @@ public class JmsMessagingTemplate extends AbstractMessagingTemplate<Destination>
 	 * @since 4.1.2
 	 */
 	public void setConnectionFactory(ConnectionFactory connectionFactory) {
-		if (this.jmsTemplate instanceof JmsAccessor template) {
+		if (this.jmsTemplate instanceof JmsAccessor accessor) {
+			JmsTemplate template = new JmsTemplate(accessor);
 			template.setConnectionFactory(connectionFactory);
+			this.jmsTemplate = template;
 		}
 		else {
 			this.jmsTemplate = new JmsTemplate(connectionFactory);
