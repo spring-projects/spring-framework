@@ -134,7 +134,7 @@ abstract class AbstractJCacheOperation<A extends Annotation> implements JCacheOp
 	protected ExceptionTypeFilter createExceptionTypeFilter(
 			Class<? extends Throwable>[] includes, Class<? extends Throwable>[] excludes) {
 
-		return new ExceptionTypeFilter(Arrays.asList(includes), Arrays.asList(excludes), true);
+		return new ExceptionTypeFilter(Arrays.asList(includes), Arrays.asList(excludes));
 	}
 
 

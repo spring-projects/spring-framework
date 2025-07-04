@@ -51,7 +51,7 @@ class DefaultRetryPolicy implements RetryPolicy {
 
 		this.includes = includes;
 		this.excludes = excludes;
-		this.exceptionFilter = new ExceptionTypeFilter(this.includes, this.excludes, true);
+		this.exceptionFilter = new ExceptionTypeFilter(this.includes, this.excludes);
 		this.predicate = predicate;
 		this.backOff = backOff;
 	}

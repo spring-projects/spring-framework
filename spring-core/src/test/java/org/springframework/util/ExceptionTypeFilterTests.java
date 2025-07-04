@@ -29,7 +29,7 @@ class ExceptionTypeFilterTests {
 
 	@Test
 	void subClassMatch() {
-		ExceptionTypeFilter filter = new ExceptionTypeFilter(List.of(RuntimeException.class), null, true);
+		ExceptionTypeFilter filter = new ExceptionTypeFilter(List.of(RuntimeException.class), null);
 		assertThat(filter.match(RuntimeException.class)).isTrue();
 		assertThat(filter.match(IllegalStateException.class)).isTrue();
 	}
