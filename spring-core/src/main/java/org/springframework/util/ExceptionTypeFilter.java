@@ -65,6 +65,16 @@ public class ExceptionTypeFilter extends InstanceFilter<Class<? extends Throwabl
 
 
 	/**
+	 * Determine if the type of the supplied {@code exception} matches this filter.
+	 * @since 7.0
+	 * @see InstanceFilter#match(Object)
+	 */
+	public boolean match(Throwable exception) {
+		return match(exception.getClass());
+	}
+
+
+	/**
 	 * Determine if the specified {@code instance} matches the specified
 	 * {@code candidate}.
 	 * <p>By default, the two instances match if the {@code candidate} type is

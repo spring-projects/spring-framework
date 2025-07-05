@@ -92,7 +92,7 @@ class CacheResultInterceptor extends AbstractKeyCacheInterceptor<CacheResultOper
 		if (exceptionCache == null) {
 			return;
 		}
-		if (filter.match(ex.getClass())) {
+		if (filter.match(ex)) {
 			doPut(exceptionCache, cacheKey, ex);
 		}
 	}

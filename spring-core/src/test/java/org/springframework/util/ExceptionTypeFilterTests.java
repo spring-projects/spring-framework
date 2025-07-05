@@ -33,81 +33,83 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 class ExceptionTypeFilterTests {
 
+	ExceptionTypeFilter filter;
+
 	@Test
 	void emptyFilter() {
-		var filter = new ExceptionTypeFilter(null, null);
+		filter = new ExceptionTypeFilter(null, null);
 
-		assertMatches(filter, Throwable.class);
-		assertMatches(filter, Error.class);
-		assertMatches(filter, Exception.class);
-		assertMatches(filter, RuntimeException.class);
+		assertMatches(new Throwable());
+		assertMatches(new Error());
+		assertMatches(new Exception());
+		assertMatches(new RuntimeException());
 	}
 
 	@Test
 	void includes() {
-		var filter = new ExceptionTypeFilter(List.of(FileNotFoundException.class, IllegalArgumentException.class), null);
+		filter = new ExceptionTypeFilter(List.of(FileNotFoundException.class, IllegalArgumentException.class), null);
 
-		assertMatches(filter, FileNotFoundException.class);
-		assertMatches(filter, IllegalArgumentException.class);
-		assertMatches(filter, NumberFormatException.class);
+		assertMatches(new FileNotFoundException());
+		assertMatches(new IllegalArgumentException());
+		assertMatches(new NumberFormatException());
 
-		assertDoesNotMatch(filter, Throwable.class);
-		assertDoesNotMatch(filter, FileSystemException.class);
+		assertDoesNotMatch(new Throwable());
+		assertDoesNotMatch(new FileSystemException("test"));
 	}
 
 	@Test
 	void includesSubtypeMatching() {
-		var filter = new ExceptionTypeFilter(List.of(RuntimeException.class), null);
+		filter = new ExceptionTypeFilter(List.of(RuntimeException.class), null);
 
-		assertMatches(filter, RuntimeException.class);
-		assertMatches(filter, IllegalStateException.class);
+		assertMatches(new RuntimeException());
+		assertMatches(new IllegalStateException());
 
-		assertDoesNotMatch(filter, Exception.class);
+		assertDoesNotMatch(new Exception());
 	}
 
 	@Test
 	void excludes() {
-		var filter = new ExceptionTypeFilter(null, List.of(FileNotFoundException.class, IllegalArgumentException.class));
+		filter = new ExceptionTypeFilter(null, List.of(FileNotFoundException.class, IllegalArgumentException.class));
 
-		assertDoesNotMatch(filter, FileNotFoundException.class);
-		assertDoesNotMatch(filter, IllegalArgumentException.class);
+		assertDoesNotMatch(new FileNotFoundException());
+		assertDoesNotMatch(new IllegalArgumentException());
 
-		assertMatches(filter, Throwable.class);
-		assertMatches(filter, AssertionError.class);
-		assertMatches(filter, FileSystemException.class);
+		assertMatches(new Throwable());
+		assertMatches(new AssertionError());
+		assertMatches(new FileSystemException("test"));
 	}
 
 	@Test
 	void excludesSubtypeMatching() {
-		var filter = new ExceptionTypeFilter(null, List.of(IllegalArgumentException.class));
+		filter = new ExceptionTypeFilter(null, List.of(IllegalArgumentException.class));
 
-		assertDoesNotMatch(filter, IllegalArgumentException.class);
-		assertDoesNotMatch(filter, NumberFormatException.class);
+		assertDoesNotMatch(new IllegalArgumentException());
+		assertDoesNotMatch(new NumberFormatException());
 
-		assertMatches(filter, Throwable.class);
+		assertMatches(new Throwable());
 	}
 
 	@Test
 	void includesAndExcludes() {
-		var filter = new ExceptionTypeFilter(List.of(IOException.class), List.of(FileNotFoundException.class));
+		filter = new ExceptionTypeFilter(List.of(IOException.class), List.of(FileNotFoundException.class));
 
-		assertMatches(filter, IOException.class);
-		assertMatches(filter, FileSystemException.class);
+		assertMatches(new IOException());
+		assertMatches(new FileSystemException("test"));
 
-		assertDoesNotMatch(filter, FileNotFoundException.class);
-		assertDoesNotMatch(filter, Throwable.class);
+		assertDoesNotMatch(new FileNotFoundException());
+		assertDoesNotMatch(new Throwable());
 	}
 
 
-	private static void assertMatches(ExceptionTypeFilter filter, Class<? extends Throwable> candidate) {
-		assertThat(filter.match(candidate))
-				.as("filter '" + filter + "' should match " + candidate.getSimpleName())
+	private void assertMatches(Throwable candidate) {
+		assertThat(this.filter.match(candidate))
+				.as("filter '" + this.filter + "' should match " + candidate.getClass().getSimpleName())
 				.isTrue();
 	}
 
-	private static void assertDoesNotMatch(ExceptionTypeFilter filter, Class<? extends Throwable> candidate) {
-		assertThat(filter.match(candidate))
-				.as("filter '" + filter + "' should not match " + candidate.getSimpleName())
+	private void assertDoesNotMatch(Throwable candidate) {
+		assertThat(this.filter.match(candidate))
+				.as("filter '" + this.filter + "' should not match " + candidate.getClass().getSimpleName())
 				.isFalse();
 	}
 

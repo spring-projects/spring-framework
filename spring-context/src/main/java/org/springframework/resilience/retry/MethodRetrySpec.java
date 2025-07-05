@@ -65,7 +65,7 @@ public record MethodRetrySpec(
 
 	MethodRetryPredicate combinedPredicate() {
 		ExceptionTypeFilter exceptionFilter = new ExceptionTypeFilter(this.includes, this.excludes);
-		return (method, throwable) -> exceptionFilter.match(throwable.getClass()) &&
+		return (method, throwable) -> exceptionFilter.match(throwable) &&
 				this.predicate.shouldRetry(method, throwable);
 	}
 

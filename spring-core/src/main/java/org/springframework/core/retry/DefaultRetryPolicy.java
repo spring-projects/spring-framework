@@ -59,7 +59,7 @@ class DefaultRetryPolicy implements RetryPolicy {
 
 	@Override
 	public boolean shouldRetry(Throwable throwable) {
-		return this.exceptionFilter.match(throwable.getClass()) &&
+		return this.exceptionFilter.match(throwable) &&
 				(this.predicate == null || this.predicate.test(throwable));
 	}
 
