@@ -18,10 +18,12 @@ package org.springframework.transaction.event;
 
 import java.lang.reflect.Method;
 
+import org.jspecify.annotations.Nullable;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.EventListenerFactory;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.AnnotatedElementUtils;
+import org.springframework.transaction.config.GlobalTransactionalEventErrorHandler;
 
 /**
  * {@link EventListenerFactory} implementation that handles {@link TransactionalEventListener}
@@ -35,6 +37,13 @@ public class TransactionalEventListenerFactory implements EventListenerFactory, 
 
 	private int order = 50;
 
+	private @Nullable GlobalTransactionalEventErrorHandler errorHandler;
+
+	public TransactionalEventListenerFactory() { }
+
+	public TransactionalEventListenerFactory(GlobalTransactionalEventErrorHandler errorHandler) {
+		this.errorHandler = errorHandler;
+	}
 
 	public void setOrder(int order) {
 		this.order = order;
@@ -53,7 +62,14 @@ public class TransactionalEventListenerFactory implements EventListenerFactory, 
 
 	@Override
 	public ApplicationListener<?> createApplicationListener(String beanName, Class<?> type, Method method) {
-		return new TransactionalApplicationListenerMethodAdapter(beanName, type, method);
+		if (errorHandler == null) {
+			return new TransactionalApplicationListenerMethodAdapter(beanName, type, method);
+		}
+		else {
+			TransactionalApplicationListenerMethodAdapter listener = new TransactionalApplicationListenerMethodAdapter(beanName, type, method);
+			listener.addCallback(errorHandler);
+			return listener;
+		}
 	}
 
 }
