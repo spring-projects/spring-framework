@@ -17,11 +17,13 @@
 package org.springframework.web.servlet.mvc.method.annotation;
 
 import java.lang.reflect.Method;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
@@ -54,6 +56,8 @@ import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.support.AllEncompassingFormHttpMessageConverter;
+import org.springframework.scheduling.TaskScheduler;
+import org.springframework.scheduling.concurrent.SimpleAsyncTaskScheduler;
 import org.springframework.ui.ModelMap;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -123,6 +127,7 @@ import org.springframework.web.util.WebUtils;
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
  * @author Sebastien Deleuze
+ * @author Réda Housni Alaoui
  * @since 3.1
  * @see HandlerMethodArgumentResolver
  * @see HandlerMethodReturnValueHandler
@@ -201,6 +206,9 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 
 	private final Map<ControllerAdviceBean, Set<Method>> modelAttributeAdviceCache = new LinkedHashMap<>();
 
+	private TaskScheduler taskScheduler = new SimpleAsyncTaskScheduler();
+
+	private @Nullable Duration sseHeartbeatPeriod;
 
 	/**
 	 * Provide resolvers for custom argument types. Custom resolvers are ordered
@@ -527,6 +535,20 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 	}
 
 	/**
+	 * Set the {@link TaskScheduler}
+	 */
+	public void setTaskScheduler(TaskScheduler taskScheduler) {
+		this.taskScheduler = taskScheduler;
+	}
+
+	/**
+	 * Sets the heartbeat period that will be used to periodically prob the SSE connection health
+	 */
+	public void setSseHeartbeatPeriod(@Nullable Duration sseHeartbeatPeriod) {
+		this.sseHeartbeatPeriod = sseHeartbeatPeriod;
+	}
+
+	/**
 	 * A {@link ConfigurableBeanFactory} is expected for resolving expressions
 	 * in method argument default values.
 	 */
@@ -733,9 +755,12 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 		handlers.add(new ModelAndViewMethodReturnValueHandler());
 		handlers.add(new ModelMethodProcessor());
 		handlers.add(new ViewMethodReturnValueHandler());
+
+		SseEmitterHeartbeatExecutor sseEmitterHeartbeatExecutor = Optional.ofNullable(sseHeartbeatPeriod)
+				.map(period -> new SseEmitterHeartbeatExecutor(taskScheduler, period)).orElse(null);
 		handlers.add(new ResponseBodyEmitterReturnValueHandler(getMessageConverters(),
 				this.reactiveAdapterRegistry, this.taskExecutor, this.contentNegotiationManager,
-				initViewResolvers(), initLocaleResolver()));
+				initViewResolvers(), initLocaleResolver(), sseEmitterHeartbeatExecutor));
 		handlers.add(new StreamingResponseBodyReturnValueHandler());
 		handlers.add(new HttpEntityMethodProcessor(getMessageConverters(),
 				this.contentNegotiationManager, this.requestResponseBodyAdvice, this.errorResponseInterceptors));
