@@ -229,6 +229,30 @@ class RouterFunctionBuilder implements RouterFunctions.Builder {
 		return add(RequestPredicates.OPTIONS(pattern).and(predicate), handlerFunction);
 	}
 
+	// QUERY
+
+	@Override
+	public RouterFunctions.Builder QUERY(HandlerFunction<ServerResponse> handlerFunction) {
+		return add(RequestPredicates.method(HttpMethod.QUERY), handlerFunction);
+	}
+
+	@Override
+	public RouterFunctions.Builder QUERY(RequestPredicate predicate, HandlerFunction<ServerResponse> handlerFunction) {
+		return add(RequestPredicates.method(HttpMethod.QUERY).and(predicate), handlerFunction);
+	}
+
+	@Override
+	public RouterFunctions.Builder QUERY(String pattern, HandlerFunction<ServerResponse> handlerFunction) {
+		return add(RequestPredicates.QUERY(pattern), handlerFunction);
+	}
+
+	@Override
+	public RouterFunctions.Builder QUERY(String pattern, RequestPredicate predicate,
+			HandlerFunction<ServerResponse> handlerFunction) {
+
+		return add(RequestPredicates.QUERY(pattern).and(predicate), handlerFunction);
+	}
+
 	// other
 
 	@Override
