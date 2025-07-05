@@ -121,7 +121,7 @@ class JmsClientTests {
 	}
 
 	@Test
-	void convertAndSendPayloadAndHeaders() {
+	void convertAndSendPayloadAndHeaders() throws JMSException {
 		Destination destination = new Destination() {};
 		Map<String, Object> headers = new HashMap<>();
 		headers.put("foo", "bar");
@@ -129,16 +129,20 @@ class JmsClientTests {
 		this.jmsClient.destination(destination).send("Hello", headers);
 		verify(this.jmsTemplate).send(eq(destination), this.messageCreator.capture());
 		assertTextMessage(this.messageCreator.getValue()); // see createTextMessage
+		TextMessage jmsMessage = createTextMessage(this.messageCreator.getValue());
+		assertThat(jmsMessage.getStringProperty("foo")).isEqualTo("bar");
 	}
 
 	@Test
-	void convertAndSendPayloadAndHeadersName() {
+	void convertAndSendPayloadAndHeadersName() throws JMSException {
 		Map<String, Object> headers = new HashMap<>();
 		headers.put("foo", "bar");
 
 		this.jmsClient.destination("myQueue").send("Hello", headers);
 		verify(this.jmsTemplate).send(eq("myQueue"), this.messageCreator.capture());
 		assertTextMessage(this.messageCreator.getValue()); // see createTextMessage
+		TextMessage jmsMessage = createTextMessage(this.messageCreator.getValue());
+		assertThat(jmsMessage.getStringProperty("foo")).isEqualTo("bar");
 	}
 
 	@Test
