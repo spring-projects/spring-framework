@@ -67,7 +67,6 @@ interface JmsClient {
 	/**
 	 * Create a new {@code JmsClient} for the given {@link ConnectionFactory}.
 	 * @param connectionFactory the factory to obtain JMS connections from
-	 * @return a new {@code JmsClient} instance
 	 */
 	static JmsClient create(ConnectionFactory connectionFactory) {
 		return new DefaultJmsClient(connectionFactory, null);
@@ -77,7 +76,6 @@ interface JmsClient {
 	 * Create a new {@code JmsClient} for the given {@link ConnectionFactory}.
 	 * @param connectionFactory the factory to obtain JMS connections from
 	 * @param messageConverter the message converter for payload objects
-	 * @return a new {@code JmsClient} instance
 	 */
 	static JmsClient create(ConnectionFactory connectionFactory, MessageConverter messageConverter) {
 		return new DefaultJmsClient(connectionFactory, messageConverter);
@@ -87,7 +85,6 @@ interface JmsClient {
 	 * Create a new {@code JmsClient} for the given {@link JmsOperations}.
 	 * @param jmsTemplate the {@link JmsTemplate} to use for performing operations
 	 * (can be a custom {@link JmsOperations} implementation as well)
-	 * @return a new {@code JmsClient} instance
 	 */
 	static JmsClient create(JmsOperations jmsTemplate) {
 		return new DefaultJmsClient(jmsTemplate, null);
@@ -98,7 +95,6 @@ interface JmsClient {
 	 * @param jmsTemplate the {@link JmsTemplate} to use for performing operations
 	 * (can be a custom {@link JmsOperations} implementation as well)
 	 * @param messageConverter the message converter for payload objects
-	 * @return a new {@code JmsClient} instance
 	 */
 	static JmsClient create(JmsOperations jmsTemplate, MessageConverter messageConverter) {
 		return new DefaultJmsClient(jmsTemplate, messageConverter);
