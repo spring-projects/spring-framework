@@ -35,6 +35,8 @@ import org.springframework.core.annotation.AliasFor;
  * @author Sam Brannen
  * @since 4.1
  * @see Cacheable
+ * @see CachePut
+ * @see CacheEvict
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
@@ -43,7 +45,9 @@ public @interface CacheConfig {
 
 	/**
 	 * Alias for {@link #cacheNames}.
-	 * @since 7.0
+	 * <p>Intended to be used when no other attributes are needed, for example:
+	 * {@code @CacheConfig("books")}.
+	 * @since 6.2.9
 	 */
 	@AliasFor("cacheNames")
 	String[] value() default {};
