@@ -19,6 +19,7 @@ package org.springframework.aop.aspectj.annotation;
 import java.io.Serializable;
 
 import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.BeanNotOfRequiredTypeException;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.OrderUtils;
@@ -130,7 +131,12 @@ public class BeanFactoryAspectInstanceFactory implements MetadataAwareAspectInst
 		Class<?> type = this.beanFactory.getType(this.name);
 		if (type != null) {
 			if (Ordered.class.isAssignableFrom(type) && this.beanFactory.isSingleton(this.name)) {
-				return ((Ordered) this.beanFactory.getBean(this.name)).getOrder();
+				try {
+					return this.beanFactory.getBean(this.name, Ordered.class).getOrder();
+				}
+				catch (BeanNotOfRequiredTypeException ex) {
+					// Not actually implementing Ordered -> possibly a NullBean.
+				}
 			}
 			return OrderUtils.getOrder(type, Ordered.LOWEST_PRECEDENCE);
 		}
