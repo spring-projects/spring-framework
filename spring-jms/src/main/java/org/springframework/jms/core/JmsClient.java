@@ -28,21 +28,55 @@ import org.springframework.messaging.converter.MessageConverter;
 
 /**
  * A fluent {@code JmsClient} with common send and receive operations against a JMS
- * destination. This is effectively an alternative to {@link JmsMessagingTemplate},
- * also delegating to Spring's {@link JmsTemplate} for performing actual operations.
+ * destination, dealing with Spring's common {@link Message} or with payload values.
+ * This is effectively an alternative to {@link JmsMessagingTemplate}, also
+ * delegating to Spring's {@link JmsTemplate} for performing actual operations.
  *
  * <p>Note: Operations in this interface throw {@link MessagingException} instead of
  * the JMS-specific {@link org.springframework.jms.JmsException}, aligning with the
  * {@code spring-messaging} module and its other client operation handles.
+ * Message conversion is preferably done through the common {@link MessageConverter}
+ * but can also be customized at the {@link JmsTemplate#setMessageConverter} level.
  *
  * <p>This client provides reusable operation handles which can be configured with
  * custom QoS settings. Note that any use of such explicit settings will override
  * administrative provider settings (see {@link JmsTemplate#setExplicitQosEnabled}).
  *
+ * <p>An example for sending a converted payload to a queue:
+ * <pre class="code">
+ * client.destination("myQueue")
+ *     .withTimeToLive(1000)
+ *     .send("myPayload");  // optionally with a headers Map next to the payload
+ * </pre>
+ *
+ * <p>An example for receiving a converted payload from a queue:
+ * <pre class="code">
+ * Optional&lt;String&gt; payload = client.destination("myQueue")
+ *     .withReceiveTimeout(1000)
+ *     .receive(String.class);
+ * </pre>
+ *
+ * <p>An example for sending a message with a payload to a queue:
+ * <pre class="code">
+ * Message&lt;?&gt; message =
+ *      MessageBuilder.withPayload("myPayload").build();  // optionally with headers
+ * client.destination("myQueue")
+ *     .withTimeToLive(1000)
+ *     .send(message);
+ * </pre>
+ *
+ * <p>An example for receiving a message with a payload from a queue:
+ * <pre class="code">
+ * Optional&lt;Message&lt;?&gt;&gt; message = client.destination("myQueue")
+ *     .withReceiveTimeout(1000)
+ *     .receive();
+ * </pre>
+ *
  * @author Juergen Hoeller
  * @since 7.0
  * @see JmsTemplate
  * @see JmsMessagingTemplate
+ * @see org.springframework.messaging.support.MessageBuilder
  */
 interface JmsClient {
 
