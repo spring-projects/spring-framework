@@ -1798,6 +1798,11 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 */
 	@SuppressWarnings("deprecation")
 	protected Object initializeBean(String beanName, Object bean, @Nullable RootBeanDefinition mbd) {
+		// Skip initialization of a NullBean
+		if (bean.getClass() == NullBean.class) {
+			return bean;
+		}
+
 		invokeAwareMethods(beanName, bean);
 
 		Object wrappedBean = bean;
