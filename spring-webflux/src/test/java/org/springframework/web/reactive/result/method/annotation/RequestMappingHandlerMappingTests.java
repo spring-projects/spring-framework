@@ -46,15 +46,20 @@ import org.springframework.web.method.HandlerTypePredicate;
 import org.springframework.web.reactive.result.condition.ConsumesRequestCondition;
 import org.springframework.web.reactive.result.condition.MediaTypeExpression;
 import org.springframework.web.reactive.result.method.RequestMappingInfo;
+import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.service.annotation.HttpExchange;
 import org.springframework.web.service.annotation.PostExchange;
 import org.springframework.web.service.annotation.PutExchange;
+import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest;
+import org.springframework.web.testfixture.server.MockServerWebExchange;
 import org.springframework.web.util.pattern.PathPattern;
 import org.springframework.web.util.pattern.PathPatternParser;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.mockito.Mockito.mock;
+import static org.springframework.web.bind.annotation.RequestMethod.POST;
+import static org.springframework.web.reactive.result.method.RequestMappingInfo.paths;
 
 /**
  * Tests for {@link RequestMappingHandlerMapping}.
@@ -110,7 +115,7 @@ class RequestMappingHandlerMappingTests {
 	}
 
 	@Test // SPR-14988
-	void getMappingOverridesConsumesFromTypeLevelAnnotation() {
+	void postMappingOverridesConsumesFromTypeLevelAnnotation() {
 		RequestMappingInfo requestMappingInfo = assertComposedAnnotationMapping(RequestMethod.POST);
 
 		ConsumesRequestCondition condition = requestMappingInfo.getConsumesCondition();
@@ -323,9 +328,12 @@ class RequestMappingHandlerMappingTests {
 				.containsExactly("h1=hv1", "!h2");
 	}
 
-	@Test
+	@Test  // gh-35086
 	void requestBodyAnnotationFromInterfaceIsRespected() {
 		this.handlerMapping.afterPropertiesSet();
+
+		String path = "/controller/postMapping";
+		MediaType mediaType = MediaType.APPLICATION_JSON;
 
 		RequestMappingHandlerMapping mapping = new RequestMappingHandlerMapping();
 		mapping.setApplicationContext(new StaticWebApplicationContext());
@@ -338,15 +346,36 @@ class RequestMappingHandlerMappingTests {
 		RequestMappingInfo info = mapping.getMappingForMethod(method, clazz);
 		assertThat(info).isNotNull();
 
+		// Original ConsumesCondition
+		ConsumesRequestCondition consumesCondition = info.getConsumesCondition();
+		assertThat(consumesCondition).isNotNull();
+		assertThat(consumesCondition.isBodyRequired()).isTrue();
+		assertThat(consumesCondition.getConsumableMediaTypes()).containsOnly(mediaType);
+
 		mapping.registerHandlerMethod(new InterfaceControllerImpl(), method, info);
-		assertThat(info.getConsumesCondition()).isNotNull();
-		assertThat(info.getConsumesCondition().isBodyRequired()).isFalse();
-		assertThat(info.getConsumesCondition().getConsumableMediaTypes()).containsOnly(MediaType.APPLICATION_JSON);
+
+		// Updated ConsumesCondition
+		consumesCondition = info.getConsumesCondition();
+		assertThat(consumesCondition).isNotNull();
+		assertThat(consumesCondition.isBodyRequired()).isFalse();
+		assertThat(consumesCondition.getConsumableMediaTypes()).containsOnly(mediaType);
+
+		MockServerHttpRequest request = MockServerHttpRequest.post(path)
+				.contentType(mediaType).build();
+		ServerWebExchange exchange = MockServerWebExchange.from(request);
+		RequestMappingInfo matchingInfo = info.getMatchingCondition(exchange);
+		// Since the request has no body AND the required flag is false, the
+		// ConsumesCondition in the matching condition in an EMPTY_CONDITION.
+		// In other words, the "consumes" expressions are removed.
+		assertThat(matchingInfo).isEqualTo(paths(path).methods(POST).build());
 	}
 
-	@Test
+	@Test  // gh-35086
 	void requestBodyAnnotationFromImplementationOverridesInterface() {
 		this.handlerMapping.afterPropertiesSet();
+
+		String path = "/controller/postMapping";
+		MediaType mediaType = MediaType.APPLICATION_JSON;
 
 		RequestMappingHandlerMapping mapping = new RequestMappingHandlerMapping();
 		mapping.setApplicationContext(new StaticWebApplicationContext());
@@ -359,10 +388,25 @@ class RequestMappingHandlerMappingTests {
 		RequestMappingInfo info = mapping.getMappingForMethod(method, clazz);
 		assertThat(info).isNotNull();
 
+		// Original ConsumesCondition
+		ConsumesRequestCondition consumesCondition = info.getConsumesCondition();
+		assertThat(consumesCondition).isNotNull();
+		assertThat(consumesCondition.isBodyRequired()).isTrue();
+		assertThat(consumesCondition.getConsumableMediaTypes()).containsOnly(mediaType);
+
 		mapping.registerHandlerMethod(new InterfaceControllerImplOverridesRequestBody(), method, info);
-		assertThat(info.getConsumesCondition()).isNotNull();
-		assertThat(info.getConsumesCondition().isBodyRequired()).isTrue();
-		assertThat(info.getConsumesCondition().getConsumableMediaTypes()).containsOnly(MediaType.APPLICATION_JSON);
+
+		// Updated ConsumesCondition
+		consumesCondition = info.getConsumesCondition();
+		assertThat(consumesCondition).isNotNull();
+		assertThat(consumesCondition.isBodyRequired()).isTrue();
+		assertThat(consumesCondition.getConsumableMediaTypes()).containsOnly(mediaType);
+
+		MockServerHttpRequest request = MockServerHttpRequest.post(path)
+				.contentType(mediaType).build();
+		ServerWebExchange exchange = MockServerWebExchange.from(request);
+		RequestMappingInfo matchingInfo = info.getMatchingCondition(exchange);
+		assertThat(matchingInfo).isEqualTo(paths(path).methods(POST).consumes(mediaType.toString()).build());
 	}
 
 	private RequestMappingInfo assertComposedAnnotationMapping(RequestMethod requestMethod) {
@@ -544,18 +588,21 @@ class RequestMappingHandlerMappingTests {
 	}
 
 	@Controller
-	@RequestMapping(value = "/controller", consumes = { "application/json" })
+	@RequestMapping(path = "/controller", consumes = "application/json")
 	interface InterfaceController {
+
 		@PostMapping("/postMapping")
 		void post(@RequestBody(required = false) Foo foo);
 	}
 
 	static class InterfaceControllerImpl implements InterfaceController {
+
 		@Override
 		public void post(Foo foo) {}
 	}
 
 	static class InterfaceControllerImplOverridesRequestBody implements InterfaceController {
+
 		@Override
 		public void post(@RequestBody(required = true) Foo foo) {}
 	}
