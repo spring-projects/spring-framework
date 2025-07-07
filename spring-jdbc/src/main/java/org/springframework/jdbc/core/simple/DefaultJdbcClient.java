@@ -239,18 +239,18 @@ final class DefaultJdbcClient implements JdbcClient {
 					new IndexedParamResultQuerySpec());
 		}
 
-		@SuppressWarnings("unchecked")
 		@Override
-		public <T> MappedQuerySpec<T> query(Class<T> mappedClass) {
+		@SuppressWarnings({"unchecked", "NullAway"}) // See https://github.com/uber/NullAway/issues/1075
+		public <T> MappedQuerySpec<@Nullable T> query(Class<T> mappedClass) {
 			RowMapper<?> rowMapper = rowMapperCache.computeIfAbsent(mappedClass, key ->
 					BeanUtils.isSimpleProperty(mappedClass) ?
 							new SingleColumnRowMapper<>(mappedClass, conversionService) :
 							new SimplePropertyRowMapper<>(mappedClass, conversionService));
-			return query((RowMapper<T>) rowMapper);
+			return query((RowMapper<@Nullable T>) rowMapper);
 		}
 
 		@Override
-		public <T> MappedQuerySpec<T> query(RowMapper<T> rowMapper) {
+		public <T extends @Nullable Object> MappedQuerySpec<T> query(RowMapper<T> rowMapper) {
 			return (useNamedParams() ?
 					new NamedParamMappedQuerySpec<>(rowMapper) :
 					new IndexedParamMappedQuerySpec<>(rowMapper));
@@ -267,7 +267,7 @@ final class DefaultJdbcClient implements JdbcClient {
 		}
 
 		@Override
-		public <T> T query(ResultSetExtractor<T> rse) {
+		public <T extends @Nullable Object> T query(ResultSetExtractor<T> rse) {
 			T result = (useNamedParams() ?
 					this.namedParamOps.query(this.sql, this.namedParamSource, rse) :
 					this.classicOps.query(statementCreatorForIndexedParams(), rse));
@@ -332,17 +332,18 @@ final class DefaultJdbcClient implements JdbcClient {
 			}
 
 			@Override
-			public List<Map<String, Object>> listOfRows() {
+			public List<Map<String, @Nullable Object>> listOfRows() {
 				return classicOps.queryForList(sql, indexedParams.toArray());
 			}
 
 			@Override
-			public Map<String, Object> singleRow() {
+			public Map<String, @Nullable Object> singleRow() {
 				return classicOps.queryForMap(sql, indexedParams.toArray());
 			}
 
 			@Override
-			public List<Object> singleColumn() {
+			@SuppressWarnings("NullAway") // See https://github.com/uber/NullAway/issues/1075
+			public List<@Nullable Object> singleColumn() {
 				return classicOps.queryForList(sql, Object.class, indexedParams.toArray());
 			}
 		}
@@ -356,23 +357,25 @@ final class DefaultJdbcClient implements JdbcClient {
 			}
 
 			@Override
-			public List<Map<String, Object>> listOfRows() {
+			public List<Map<String, @Nullable Object>> listOfRows() {
 				return namedParamOps.queryForList(sql, namedParamSource);
 			}
 
 			@Override
-			public Map<String, Object> singleRow() {
+			@SuppressWarnings("NullAway") // See https://github.com/uber/NullAway/issues/1075
+			public Map<String, @Nullable Object> singleRow() {
 				return namedParamOps.queryForMap(sql, namedParamSource);
 			}
 
 			@Override
-			public List<Object> singleColumn() {
+			@SuppressWarnings("NullAway") // See https://github.com/uber/NullAway/issues/1075
+			public List<@Nullable Object> singleColumn() {
 				return namedParamOps.queryForList(sql, namedParamSource, Object.class);
 			}
 		}
 
 
-		private class IndexedParamMappedQuerySpec<T> implements MappedQuerySpec<T> {
+		private class IndexedParamMappedQuerySpec<T extends @Nullable Object> implements MappedQuerySpec<T> {
 
 			private final RowMapper<T> rowMapper;
 
@@ -392,7 +395,7 @@ final class DefaultJdbcClient implements JdbcClient {
 		}
 
 
-		private class NamedParamMappedQuerySpec<T> implements MappedQuerySpec<T> {
+		private class NamedParamMappedQuerySpec<T extends @Nullable Object> implements MappedQuerySpec<T> {
 
 			private final RowMapper<T> rowMapper;
 

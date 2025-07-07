@@ -186,17 +186,17 @@ public class SimpleJdbcCall extends AbstractJdbcCall implements SimpleJdbcCallOp
 	}
 
 	@Override
-	public Map<String, Object> execute(Object... args) {
+	public Map<String, @Nullable Object> execute(Object... args) {
 		return doExecute(args);
 	}
 
 	@Override
-	public Map<String, Object> execute(Map<String, ?> args) {
+	public Map<String, @Nullable Object> execute(Map<String, ?> args) {
 		return doExecute(args);
 	}
 
 	@Override
-	public Map<String, Object> execute(SqlParameterSource parameterSource) {
+	public Map<String, @Nullable Object> execute(SqlParameterSource parameterSource) {
 		return doExecute(parameterSource);
 	}
 

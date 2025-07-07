@@ -51,7 +51,7 @@ import org.springframework.jdbc.core.SingleColumnRowMapper;
  * @param <T> the result type
  * @see StoredProcedure
  */
-public class SqlFunction<T> extends MappingSqlQuery<T> {
+public class SqlFunction<T> extends MappingSqlQuery<@Nullable T> {
 
 	private final SingleColumnRowMapper<T> rowMapper = new SingleColumnRowMapper<>();
 

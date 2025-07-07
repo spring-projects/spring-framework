@@ -357,7 +357,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	//-------------------------------------------------------------------------
 
 	@Override
-	public <T> @Nullable T execute(ConnectionCallback<T> action) throws DataAccessException {
+	public <T extends @Nullable Object> T execute(ConnectionCallback<T> action) throws DataAccessException {
 		Assert.notNull(action, "Callback object must not be null");
 
 		Connection con = DataSourceUtils.getConnection(obtainDataSource());
@@ -402,7 +402,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	// Methods dealing with static SQL (java.sql.Statement)
 	//-------------------------------------------------------------------------
 
-	private <T> @Nullable T execute(StatementCallback<T> action, boolean closeResources) throws DataAccessException {
+	private <T extends @Nullable Object> T execute(StatementCallback<T> action, boolean closeResources) throws DataAccessException {
 		Assert.notNull(action, "Callback object must not be null");
 
 		Connection con = DataSourceUtils.getConnection(obtainDataSource());
@@ -436,18 +436,19 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	}
 
 	@Override
-	public <T> @Nullable T execute(StatementCallback<T> action) throws DataAccessException {
+	public <T extends @Nullable Object> T execute(StatementCallback<T> action) throws DataAccessException {
 		return execute(action, true);
 	}
 
 	@Override
+	@SuppressWarnings("NullAway") // See https://github.com/uber/NullAway/issues/1075
 	public void execute(String sql) throws DataAccessException {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Executing SQL statement [" + sql + "]");
 		}
 
 		// Callback to execute the statement.
-		class ExecuteStatementCallback implements StatementCallback<Object>, SqlProvider {
+		class ExecuteStatementCallback implements StatementCallback<@Nullable Object>, SqlProvider {
 			@Override
 			public @Nullable Object doInStatement(Statement stmt) throws SQLException {
 				stmt.execute(sql);
@@ -463,7 +464,8 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	}
 
 	@Override
-	public <T> @Nullable T query(String sql, ResultSetExtractor<T> rse) throws DataAccessException {
+	@SuppressWarnings("NullAway") // See https://github.com/uber/NullAway/issues/1075
+	public <T extends @Nullable Object> T query(String sql, ResultSetExtractor<T> rse) throws DataAccessException {
 		Assert.notNull(sql, "SQL must not be null");
 		Assert.notNull(rse, "ResultSetExtractor must not be null");
 		if (logger.isDebugEnabled()) {
@@ -493,12 +495,13 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	}
 
 	@Override
+	@SuppressWarnings("NullAway") // See https://github.com/uber/NullAway/issues/1075
 	public void query(String sql, RowCallbackHandler rch) throws DataAccessException {
 		query(sql, new RowCallbackHandlerResultSetExtractor(rch, this.maxRows));
 	}
 
 	@Override
-	public <T> List<T> query(String sql, RowMapper<T> rowMapper) throws DataAccessException {
+	public <T extends @Nullable Object> List<T> query(String sql, RowMapper<T> rowMapper) throws DataAccessException {
 		return result(query(sql, new RowMapperResultSetExtractor<>(rowMapper, 0, this.maxRows)));
 	}
 
@@ -525,12 +528,12 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	}
 
 	@Override
-	public Map<String, Object> queryForMap(String sql) throws DataAccessException {
+	public Map<String, @Nullable Object> queryForMap(String sql) throws DataAccessException {
 		return result(queryForObject(sql, getColumnMapRowMapper()));
 	}
 
 	@Override
-	public <T> @Nullable T queryForObject(String sql, RowMapper<T> rowMapper) throws DataAccessException {
+	public <T extends @Nullable Object> T queryForObject(String sql, RowMapper<T> rowMapper) throws DataAccessException {
 		List<T> results = query(sql, rowMapper);
 		return DataAccessUtils.nullableSingleResult(results);
 	}
@@ -541,12 +544,13 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	}
 
 	@Override
-	public <T> List<T> queryForList(String sql, Class<T> elementType) throws DataAccessException {
+	@SuppressWarnings("NullAway") // See https://github.com/uber/NullAway/issues/1075
+	public <T> List<@Nullable T> queryForList(String sql, Class<T> elementType) throws DataAccessException {
 		return query(sql, getSingleColumnRowMapper(elementType));
 	}
 
 	@Override
-	public List<Map<String, Object>> queryForList(String sql) throws DataAccessException {
+	public List<Map<String, @Nullable Object>> queryForList(String sql) throws DataAccessException {
 		return query(sql, getColumnMapRowMapper());
 	}
 
@@ -651,7 +655,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	// Methods dealing with prepared statements
 	//-------------------------------------------------------------------------
 
-	private <T> @Nullable T execute(PreparedStatementCreator psc, PreparedStatementCallback<T> action, boolean closeResources)
+	private <T extends @Nullable Object> T execute(PreparedStatementCreator psc, PreparedStatementCallback<T> action, boolean closeResources)
 			throws DataAccessException {
 
 		Assert.notNull(psc, "PreparedStatementCreator must not be null");
@@ -699,14 +703,14 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	}
 
 	@Override
-	public <T> @Nullable T execute(PreparedStatementCreator psc, PreparedStatementCallback<T> action)
+	public <T extends @Nullable Object> T execute(PreparedStatementCreator psc, PreparedStatementCallback<T> action)
 			throws DataAccessException {
 
 		return execute(psc, action, true);
 	}
 
 	@Override
-	public <T> @Nullable T execute(String sql, PreparedStatementCallback<T> action) throws DataAccessException {
+	public <T extends @Nullable Object> T execute(String sql, PreparedStatementCallback<T> action) throws DataAccessException {
 		return execute(new SimplePreparedStatementCreator(sql), action, true);
 	}
 
@@ -747,37 +751,41 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	}
 
 	@Override
-	public <T> @Nullable T query(PreparedStatementCreator psc, ResultSetExtractor<T> rse) throws DataAccessException {
+	@SuppressWarnings("NullAway") // See https://github.com/uber/NullAway/issues/1075
+	public <T extends @Nullable Object> T query(PreparedStatementCreator psc, ResultSetExtractor<T> rse) throws DataAccessException {
 		return query(psc, null, rse);
 	}
 
 	@Override
-	public <T> @Nullable T query(String sql, @Nullable PreparedStatementSetter pss, ResultSetExtractor<T> rse) throws DataAccessException {
+	@SuppressWarnings("NullAway") // See https://github.com/uber/NullAway/issues/1075
+	public <T extends @Nullable Object> T query(String sql, @Nullable PreparedStatementSetter pss, ResultSetExtractor<T> rse) throws DataAccessException {
 		return query(new SimplePreparedStatementCreator(sql), pss, rse);
 	}
 
 	@Override
-	public <T> @Nullable T query(String sql, @Nullable Object @Nullable [] args, int[] argTypes, ResultSetExtractor<T> rse) throws DataAccessException {
+	public <T extends @Nullable Object> T query(String sql, @Nullable Object @Nullable [] args, int[] argTypes, ResultSetExtractor<T> rse) throws DataAccessException {
 		return query(sql, newArgTypePreparedStatementSetter(args, argTypes), rse);
 	}
 
 	@Deprecated(since = "5.3")
 	@Override
-	public <T> @Nullable T query(String sql, @Nullable Object @Nullable [] args, ResultSetExtractor<T> rse) throws DataAccessException {
+	public <T extends @Nullable Object> T query(String sql, @Nullable Object @Nullable [] args, ResultSetExtractor<T> rse) throws DataAccessException {
 		return query(sql, newArgPreparedStatementSetter(args), rse);
 	}
 
 	@Override
-	public <T> @Nullable T query(String sql, ResultSetExtractor<T> rse, @Nullable Object @Nullable ... args) throws DataAccessException {
+	public <T extends @Nullable Object> T query(String sql, ResultSetExtractor<T> rse, @Nullable Object @Nullable ... args) throws DataAccessException {
 		return query(sql, newArgPreparedStatementSetter(args), rse);
 	}
 
 	@Override
+	@SuppressWarnings("NullAway") // See https://github.com/uber/NullAway/issues/1075
 	public void query(PreparedStatementCreator psc, RowCallbackHandler rch) throws DataAccessException {
 		query(psc, new RowCallbackHandlerResultSetExtractor(rch, this.maxRows));
 	}
 
 	@Override
+	@SuppressWarnings("NullAway") // See https://github.com/uber/NullAway/issues/1075
 	public void query(String sql, @Nullable PreparedStatementSetter pss, RowCallbackHandler rch) throws DataAccessException {
 		query(sql, pss, new RowCallbackHandlerResultSetExtractor(rch, this.maxRows));
 	}
@@ -799,28 +807,28 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	}
 
 	@Override
-	public <T> List<T> query(PreparedStatementCreator psc, RowMapper<T> rowMapper) throws DataAccessException {
+	public <T extends @Nullable Object> List<T> query(PreparedStatementCreator psc, RowMapper<T> rowMapper) throws DataAccessException {
 		return result(query(psc, new RowMapperResultSetExtractor<>(rowMapper, 0, this.maxRows)));
 	}
 
 	@Override
-	public <T> List<T> query(String sql, @Nullable PreparedStatementSetter pss, RowMapper<T> rowMapper) throws DataAccessException {
+	public <T extends @Nullable Object> List<T> query(String sql, @Nullable PreparedStatementSetter pss, RowMapper<T> rowMapper) throws DataAccessException {
 		return result(query(sql, pss, new RowMapperResultSetExtractor<>(rowMapper, 0, this.maxRows)));
 	}
 
 	@Override
-	public <T> List<T> query(String sql, @Nullable Object @Nullable [] args, int[] argTypes, RowMapper<T> rowMapper) throws DataAccessException {
+	public <T extends @Nullable Object> List<T> query(String sql, @Nullable Object @Nullable [] args, int[] argTypes, RowMapper<T> rowMapper) throws DataAccessException {
 		return result(query(sql, args, argTypes, new RowMapperResultSetExtractor<>(rowMapper, 0, this.maxRows)));
 	}
 
 	@Deprecated(since = "5.3")
 	@Override
-	public <T> List<T> query(String sql, @Nullable Object @Nullable [] args, RowMapper<T> rowMapper) throws DataAccessException {
+	public <T extends @Nullable Object> List<T> query(String sql, @Nullable Object @Nullable [] args, RowMapper<T> rowMapper) throws DataAccessException {
 		return result(query(sql, newArgPreparedStatementSetter(args), new RowMapperResultSetExtractor<>(rowMapper, 0, this.maxRows)));
 	}
 
 	@Override
-	public <T> List<T> query(String sql, RowMapper<T> rowMapper, @Nullable Object @Nullable ... args) throws DataAccessException {
+	public <T extends @Nullable Object> List<T> query(String sql, RowMapper<T> rowMapper, @Nullable Object @Nullable ... args) throws DataAccessException {
 		return result(query(sql, newArgPreparedStatementSetter(args), new RowMapperResultSetExtractor<>(rowMapper, 0, this.maxRows)));
 	}
 
@@ -837,7 +845,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	 * @throws DataAccessException if the query fails
 	 * @since 5.3
 	 */
-	public <T> Stream<T> queryForStream(PreparedStatementCreator psc, @Nullable PreparedStatementSetter pss,
+	public <T extends @Nullable Object> Stream<T> queryForStream(PreparedStatementCreator psc, @Nullable PreparedStatementSetter pss,
 			RowMapper<T> rowMapper) throws DataAccessException {
 
 		return result(execute(psc, ps -> {
@@ -858,22 +866,22 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	}
 
 	@Override
-	public <T> Stream<T> queryForStream(PreparedStatementCreator psc, RowMapper<T> rowMapper) throws DataAccessException {
+	public <T extends @Nullable Object> Stream<T> queryForStream(PreparedStatementCreator psc, RowMapper<T> rowMapper) throws DataAccessException {
 		return queryForStream(psc, null, rowMapper);
 	}
 
 	@Override
-	public <T> Stream<T> queryForStream(String sql, @Nullable PreparedStatementSetter pss, RowMapper<T> rowMapper) throws DataAccessException {
+	public <T extends @Nullable Object> Stream<T> queryForStream(String sql, @Nullable PreparedStatementSetter pss, RowMapper<T> rowMapper) throws DataAccessException {
 		return queryForStream(new SimplePreparedStatementCreator(sql), pss, rowMapper);
 	}
 
 	@Override
-	public <T> Stream<T> queryForStream(String sql, RowMapper<T> rowMapper, @Nullable Object @Nullable ... args) throws DataAccessException {
+	public <T extends @Nullable Object> Stream<T> queryForStream(String sql, RowMapper<T> rowMapper, @Nullable Object @Nullable ... args) throws DataAccessException {
 		return queryForStream(new SimplePreparedStatementCreator(sql), newArgPreparedStatementSetter(args), rowMapper);
 	}
 
 	@Override
-	public <T> @Nullable T queryForObject(String sql, @Nullable Object @Nullable [] args, int[] argTypes, RowMapper<T> rowMapper)
+	public <T extends @Nullable Object> T queryForObject(String sql, @Nullable Object @Nullable [] args, int[] argTypes, RowMapper<T> rowMapper)
 			throws DataAccessException {
 
 		List<T> results = query(sql, args, argTypes, new RowMapperResultSetExtractor<>(rowMapper, 1));
@@ -882,13 +890,13 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 
 	@Deprecated(since = "5.3")
 	@Override
-	public <T> @Nullable T queryForObject(String sql,@Nullable Object @Nullable [] args, RowMapper<T> rowMapper) throws DataAccessException {
+	public <T extends @Nullable Object> T queryForObject(String sql, @Nullable Object @Nullable [] args, RowMapper<T> rowMapper) throws DataAccessException {
 		List<T> results = query(sql, newArgPreparedStatementSetter(args), new RowMapperResultSetExtractor<>(rowMapper, 1));
 		return DataAccessUtils.nullableSingleResult(results);
 	}
 
 	@Override
-	public <T> @Nullable T queryForObject(String sql, RowMapper<T> rowMapper, @Nullable Object @Nullable ... args) throws DataAccessException {
+	public <T extends @Nullable Object> T queryForObject(String sql, RowMapper<T> rowMapper, @Nullable Object @Nullable ... args) throws DataAccessException {
 		List<T> results = query(sql, newArgPreparedStatementSetter(args), new RowMapperResultSetExtractor<>(rowMapper, 1));
 		return DataAccessUtils.nullableSingleResult(results);
 	}
@@ -912,38 +920,41 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	}
 
 	@Override
-	public Map<String, Object> queryForMap(String sql, @Nullable Object @Nullable [] args, int[] argTypes) throws DataAccessException {
+	public Map<String, @Nullable Object> queryForMap(String sql, @Nullable Object @Nullable [] args, int[] argTypes) throws DataAccessException {
 		return result(queryForObject(sql, args, argTypes, getColumnMapRowMapper()));
 	}
 
 	@Override
-	public Map<String, Object> queryForMap(String sql, @Nullable Object @Nullable ... args) throws DataAccessException {
+	public Map<String, @Nullable Object> queryForMap(String sql, @Nullable Object @Nullable ... args) throws DataAccessException {
 		return result(queryForObject(sql, getColumnMapRowMapper(), args));
 	}
 
 	@Override
-	public <T> List<T> queryForList(String sql, @Nullable Object @Nullable [] args, int[] argTypes, Class<T> elementType) throws DataAccessException {
+	@SuppressWarnings("NullAway") // See https://github.com/uber/NullAway/issues/1075
+	public <T> List<@Nullable T> queryForList(String sql, @Nullable Object @Nullable [] args, int[] argTypes, Class<T> elementType) throws DataAccessException {
 		return query(sql, args, argTypes, getSingleColumnRowMapper(elementType));
 	}
 
 	@Deprecated(since = "5.3")
 	@Override
-	public <T> List<T> queryForList(String sql, @Nullable Object @Nullable [] args, Class<T> elementType) throws DataAccessException {
+	@SuppressWarnings("NullAway") // See https://github.com/uber/NullAway/issues/1075
+	public <T> List<@Nullable T> queryForList(String sql, @Nullable Object @Nullable [] args, Class<T> elementType) throws DataAccessException {
 		return query(sql, newArgPreparedStatementSetter(args), getSingleColumnRowMapper(elementType));
 	}
 
 	@Override
-	public <T> List<T> queryForList(String sql, Class<T> elementType, @Nullable Object @Nullable ... args) throws DataAccessException {
+	@SuppressWarnings("NullAway") // See https://github.com/uber/NullAway/issues/1075
+	public <T> List<@Nullable T> queryForList(String sql, Class<T> elementType, @Nullable Object @Nullable ... args) throws DataAccessException {
 		return query(sql, newArgPreparedStatementSetter(args), getSingleColumnRowMapper(elementType));
 	}
 
 	@Override
-	public List<Map<String, Object>> queryForList(String sql, @Nullable Object @Nullable [] args, int[] argTypes) throws DataAccessException {
+	public List<Map<String, @Nullable Object>> queryForList(String sql, @Nullable Object @Nullable [] args, int[] argTypes) throws DataAccessException {
 		return query(sql, args, argTypes, getColumnMapRowMapper());
 	}
 
 	@Override
-	public List<Map<String, Object>> queryForList(String sql, @Nullable Object @Nullable ... args) throws DataAccessException {
+	public List<Map<String, @Nullable Object>> queryForList(String sql, @Nullable Object @Nullable ... args) throws DataAccessException {
 		return query(sql, newArgPreparedStatementSetter(args), getColumnMapRowMapper());
 	}
 
@@ -1146,7 +1157,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	//-------------------------------------------------------------------------
 
 	@Override
-	public <T> @Nullable T execute(CallableStatementCreator csc, CallableStatementCallback<T> action)
+	public <T extends @Nullable Object> T execute(CallableStatementCreator csc, CallableStatementCallback<T> action)
 			throws DataAccessException {
 
 		Assert.notNull(csc, "CallableStatementCreator must not be null");
@@ -1192,12 +1203,12 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	}
 
 	@Override
-	public <T> @Nullable T execute(String callString, CallableStatementCallback<T> action) throws DataAccessException {
+	public <T extends @Nullable Object> T execute(String callString, CallableStatementCallback<T> action) throws DataAccessException {
 		return execute(new SimpleCallableStatementCreator(callString), action);
 	}
 
 	@Override
-	public Map<String, Object> call(CallableStatementCreator csc, List<SqlParameter> declaredParameters)
+	public Map<String, @Nullable Object> call(CallableStatementCreator csc, List<SqlParameter> declaredParameters)
 			throws DataAccessException {
 
 		List<SqlParameter> updateCountParameters = new ArrayList<>();
@@ -1218,14 +1229,14 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 			}
 		}
 
-		Map<String, Object> result = execute(csc, cs -> {
+		Map<String, @Nullable Object> result = execute(csc, cs -> {
 			boolean retVal = cs.execute();
 			int updateCount = cs.getUpdateCount();
 			if (logger.isTraceEnabled()) {
 				logger.trace("CallableStatement.execute() returned '" + retVal + "'");
 				logger.trace("CallableStatement.getUpdateCount() returned " + updateCount);
 			}
-			Map<String, Object> resultsMap = createResultsMap();
+			Map<String, @Nullable Object> resultsMap = createResultsMap();
 			if (retVal || updateCount != -1) {
 				resultsMap.putAll(extractReturnedResults(cs, updateCountParameters, resultSetParameters, updateCount));
 			}
@@ -1244,11 +1255,11 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	 * @param resultSetParameters the parameter list of declared resultSet parameters for the stored procedure
 	 * @return a Map that contains returned results
 	 */
-	protected Map<String, Object> extractReturnedResults(CallableStatement cs,
+	protected Map<String, @Nullable Object> extractReturnedResults(CallableStatement cs,
 			@Nullable List<SqlParameter> updateCountParameters, @Nullable List<SqlParameter> resultSetParameters,
 			int updateCount) throws SQLException {
 
-		Map<String, Object> results = new LinkedHashMap<>(4);
+		Map<String, @Nullable Object> results = new LinkedHashMap<>(4);
 		int rsIndex = 0;
 		int updateIndex = 0;
 		boolean moreResults;
@@ -1307,10 +1318,10 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	 * @param parameters parameter list for the stored procedure
 	 * @return a Map that contains returned results
 	 */
-	protected Map<String, Object> extractOutputParameters(CallableStatement cs, List<SqlParameter> parameters)
+	protected Map<String, @Nullable Object> extractOutputParameters(CallableStatement cs, List<SqlParameter> parameters)
 			throws SQLException {
 
-		Map<String, Object> results = CollectionUtils.newLinkedHashMap(parameters.size());
+		Map<String, @Nullable Object> results = CollectionUtils.newLinkedHashMap(parameters.size());
 		int sqlColIndex = 1;
 		for (SqlParameter param : parameters) {
 			if (param instanceof SqlOutParameter outParam) {
@@ -1353,13 +1364,14 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	 * @param param the corresponding stored procedure parameter
 	 * @return a Map that contains returned results
 	 */
-	protected Map<String, Object> processResultSet(
+	@SuppressWarnings("NullAway") // See https://github.com/uber/NullAway/issues/950
+	protected Map<@Nullable String, @Nullable Object> processResultSet(
 			@Nullable ResultSet rs, ResultSetSupportingSqlParameter param) throws SQLException {
 
 		if (rs != null) {
 			try {
 				if (param.getRowMapper() != null) {
-					RowMapper<?> rowMapper = param.getRowMapper();
+					RowMapper<? extends @Nullable Object> rowMapper = param.getRowMapper();
 					Object data = (new RowMapperResultSetExtractor<>(rowMapper)).extractData(rs);
 					return Collections.singletonMap(param.getName(), data);
 				}
@@ -1391,7 +1403,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	 * @return the RowMapper to use
 	 * @see ColumnMapRowMapper
 	 */
-	protected RowMapper<Map<String, Object>> getColumnMapRowMapper() {
+	protected RowMapper<Map<String, @Nullable Object>> getColumnMapRowMapper() {
 		return new ColumnMapRowMapper();
 	}
 
@@ -1401,7 +1413,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	 * @return the RowMapper to use
 	 * @see SingleColumnRowMapper
 	 */
-	protected <T> RowMapper<T> getSingleColumnRowMapper(Class<T> requiredType) {
+	protected <T> RowMapper<@Nullable T> getSingleColumnRowMapper(Class<T> requiredType) {
 		return new SingleColumnRowMapper<>(requiredType);
 	}
 
@@ -1414,7 +1426,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	 * @see #setResultsMapCaseInsensitive
 	 * @see #isResultsMapCaseInsensitive
 	 */
-	protected Map<String, Object> createResultsMap() {
+	protected Map<String, @Nullable Object> createResultsMap() {
 		if (isResultsMapCaseInsensitive()) {
 			return new LinkedCaseInsensitiveMap<>();
 		}
@@ -1744,7 +1756,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	 * <p>Uses a regular ResultSet, so we have to be careful when using it:
 	 * We don't use it for navigating since this could lead to unpredictable consequences.
 	 */
-	private static class RowCallbackHandlerResultSetExtractor implements ResultSetExtractor<Object> {
+	private static class RowCallbackHandlerResultSetExtractor implements ResultSetExtractor<@Nullable Object> {
 
 		private final RowCallbackHandler rch;
 

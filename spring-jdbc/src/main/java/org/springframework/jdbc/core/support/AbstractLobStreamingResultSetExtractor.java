@@ -59,7 +59,7 @@ import org.springframework.jdbc.core.ResultSetExtractor;
  * in favor of {@link ResultSet#getBinaryStream}/{@link ResultSet#getCharacterStream} usage
  */
 @Deprecated(since = "6.2")
-public abstract class AbstractLobStreamingResultSetExtractor<T> implements ResultSetExtractor<T> {
+public abstract class AbstractLobStreamingResultSetExtractor<T> implements ResultSetExtractor<@Nullable T> {
 
 	/**
 	 * Delegates to handleNoRowFound, handleMultipleRowsFound and streamData,

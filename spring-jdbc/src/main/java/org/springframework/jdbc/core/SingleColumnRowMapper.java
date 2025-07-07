@@ -46,7 +46,7 @@ import org.springframework.util.NumberUtils;
  * @see JdbcTemplate#queryForList(String, Class)
  * @see JdbcTemplate#queryForObject(String, Class)
  */
-public class SingleColumnRowMapper<T> implements RowMapper<T> {
+public class SingleColumnRowMapper<T> implements RowMapper<@Nullable T> {
 
 	private @Nullable Class<?> requiredType;
 

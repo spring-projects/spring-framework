@@ -161,40 +161,40 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 
 
 	@Override
-	public <T> @Nullable T execute(String sql, SqlParameterSource paramSource, PreparedStatementCallback<T> action)
+	public <T extends @Nullable Object> T execute(String sql, SqlParameterSource paramSource, PreparedStatementCallback<T> action)
 			throws DataAccessException {
 
 		return getJdbcOperations().execute(getPreparedStatementCreator(sql, paramSource), action);
 	}
 
 	@Override
-	public <T> @Nullable T execute(String sql, Map<String, ?> paramMap, PreparedStatementCallback<T> action)
+	public <T extends @Nullable Object> T execute(String sql, Map<String, ?> paramMap, PreparedStatementCallback<T> action)
 			throws DataAccessException {
 
 		return execute(sql, new MapSqlParameterSource(paramMap), action);
 	}
 
 	@Override
-	public <T> @Nullable T execute(String sql, PreparedStatementCallback<T> action) throws DataAccessException {
+	public <T extends @Nullable Object> T execute(String sql, PreparedStatementCallback<T> action) throws DataAccessException {
 		return execute(sql, EmptySqlParameterSource.INSTANCE, action);
 	}
 
 	@Override
-	public <T> @Nullable T query(String sql, SqlParameterSource paramSource, ResultSetExtractor<T> rse)
+	public <T extends @Nullable Object> T query(String sql, SqlParameterSource paramSource, ResultSetExtractor<T> rse)
 			throws DataAccessException {
 
 		return getJdbcOperations().query(getPreparedStatementCreator(sql, paramSource), rse);
 	}
 
 	@Override
-	public <T> @Nullable T query(String sql, Map<String, ?> paramMap, ResultSetExtractor<T> rse)
+	public <T extends @Nullable Object> T query(String sql, Map<String, ?> paramMap, ResultSetExtractor<T> rse)
 			throws DataAccessException {
 
 		return query(sql, new MapSqlParameterSource(paramMap), rse);
 	}
 
 	@Override
-	public <T> @Nullable T query(String sql, ResultSetExtractor<T> rse) throws DataAccessException {
+	public <T extends @Nullable Object> T query(String sql, ResultSetExtractor<T> rse) throws DataAccessException {
 		return query(sql, EmptySqlParameterSource.INSTANCE, rse);
 	}
 
@@ -218,14 +218,14 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 	}
 
 	@Override
-	public <T> List<T> query(String sql, SqlParameterSource paramSource, RowMapper<T> rowMapper)
+	public <T extends @Nullable Object> List<T> query(String sql, SqlParameterSource paramSource, RowMapper<T> rowMapper)
 			throws DataAccessException {
 
 		return getJdbcOperations().query(getPreparedStatementCreator(sql, paramSource), rowMapper);
 	}
 
 	@Override
-	public <T> List<T> query(String sql, Map<String, ?> paramMap, RowMapper<T> rowMapper)
+	public <T extends @Nullable Object> List<T> query(String sql, Map<String, ?> paramMap, RowMapper<T> rowMapper)
 			throws DataAccessException {
 
 		return query(sql, new MapSqlParameterSource(paramMap), rowMapper);
@@ -237,21 +237,21 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 	}
 
 	@Override
-	public <T> Stream<T> queryForStream(String sql, SqlParameterSource paramSource, RowMapper<T> rowMapper)
+	public <T extends @Nullable Object> Stream<T> queryForStream(String sql, SqlParameterSource paramSource, RowMapper<T> rowMapper)
 			throws DataAccessException {
 
 		return getJdbcOperations().queryForStream(getPreparedStatementCreator(sql, paramSource), rowMapper);
 	}
 
 	@Override
-	public <T> Stream<T> queryForStream(String sql, Map<String, ?> paramMap, RowMapper<T> rowMapper)
+	public <T extends @Nullable Object> Stream<T> queryForStream(String sql, Map<String, ?> paramMap, RowMapper<T> rowMapper)
 			throws DataAccessException {
 
 		return queryForStream(sql, new MapSqlParameterSource(paramMap), rowMapper);
 	}
 
 	@Override
-	public <T> @Nullable T queryForObject(String sql, SqlParameterSource paramSource, RowMapper<T> rowMapper)
+	public <T extends @Nullable Object> T queryForObject(String sql, SqlParameterSource paramSource, RowMapper<T> rowMapper)
 			throws DataAccessException {
 
 		List<T> results = getJdbcOperations().query(getPreparedStatementCreator(sql, paramSource), rowMapper);
@@ -259,7 +259,7 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 	}
 
 	@Override
-	public <T> @Nullable T queryForObject(String sql, Map<String, ?> paramMap, RowMapper<T>rowMapper)
+	public <T extends @Nullable Object> T queryForObject(String sql, Map<String, ?> paramMap, RowMapper<T>rowMapper)
 			throws DataAccessException {
 
 		return queryForObject(sql, new MapSqlParameterSource(paramMap), rowMapper);
@@ -280,42 +280,44 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 	}
 
 	@Override
-	public Map<String, Object> queryForMap(String sql, SqlParameterSource paramSource) throws DataAccessException {
-		Map<String, Object> result = queryForObject(sql, paramSource, new ColumnMapRowMapper());
+	public Map<String, @Nullable Object> queryForMap(String sql, SqlParameterSource paramSource) throws DataAccessException {
+		Map<String, @Nullable Object> result = queryForObject(sql, paramSource, new ColumnMapRowMapper());
 		Assert.state(result != null, "No result map");
 		return result;
 	}
 
 	@Override
-	public Map<String, Object> queryForMap(String sql, Map<String, ?> paramMap) throws DataAccessException {
-		Map<String, Object> result = queryForObject(sql, paramMap, new ColumnMapRowMapper());
+	public Map<String, @Nullable Object> queryForMap(String sql, Map<String, ?> paramMap) throws DataAccessException {
+		Map<String, @Nullable Object> result = queryForObject(sql, paramMap, new ColumnMapRowMapper());
 		Assert.state(result != null, "No result map");
 		return result;
 	}
 
 	@Override
-	public <T> List<T> queryForList(String sql, SqlParameterSource paramSource, Class<T> elementType)
+	@SuppressWarnings("NullAway") // See https://github.com/uber/NullAway/issues/1075
+	public <T> List<@Nullable T> queryForList(String sql, SqlParameterSource paramSource, Class<T> elementType)
 			throws DataAccessException {
 
 		return query(sql, paramSource, new SingleColumnRowMapper<>(elementType));
 	}
 
 	@Override
-	public <T> List<T> queryForList(String sql, Map<String, ?> paramMap, Class<T> elementType)
+	@SuppressWarnings("NullAway") // See https://github.com/uber/NullAway/issues/1075
+	public <T> List<@Nullable T> queryForList(String sql, Map<String, ?> paramMap, Class<T> elementType)
 			throws DataAccessException {
 
 		return queryForList(sql, new MapSqlParameterSource(paramMap), elementType);
 	}
 
 	@Override
-	public List<Map<String, Object>> queryForList(String sql, SqlParameterSource paramSource)
+	public List<Map<String, @Nullable Object>> queryForList(String sql, SqlParameterSource paramSource)
 			throws DataAccessException {
 
 		return query(sql, paramSource, new ColumnMapRowMapper());
 	}
 
 	@Override
-	public List<Map<String, Object>> queryForList(String sql, Map<String, ?> paramMap)
+	public List<Map<String, @Nullable Object>> queryForList(String sql, Map<String, ?> paramMap)
 			throws DataAccessException {
 
 		return queryForList(sql, new MapSqlParameterSource(paramMap));

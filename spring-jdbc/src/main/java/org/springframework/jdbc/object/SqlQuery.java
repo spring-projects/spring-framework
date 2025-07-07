@@ -59,7 +59,7 @@ import org.springframework.jdbc.core.namedparam.ParsedSql;
  * @param <T> the result type
  * @see SqlUpdate
  */
-public abstract class SqlQuery<T> extends SqlOperation {
+public abstract class SqlQuery<T extends @Nullable Object> extends SqlOperation {
 
 	/**
 	 * Constructor to allow use as a JavaBean.

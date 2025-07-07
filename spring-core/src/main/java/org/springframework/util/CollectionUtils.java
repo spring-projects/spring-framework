@@ -110,7 +110,7 @@ public abstract class CollectionUtils {
 	 * @since 5.3
 	 * @see #newHashMap(int)
 	 */
-	public static <K, V> LinkedHashMap<K, V> newLinkedHashMap(int expectedSize) {
+	public static <K, V extends @Nullable Object> LinkedHashMap<K, V> newLinkedHashMap(int expectedSize) {
 		return new LinkedHashMap<>(computeInitialCapacity(expectedSize), DEFAULT_LOAD_FACTOR);
 	}
 

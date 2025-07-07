@@ -19,6 +19,8 @@ package org.springframework.jdbc.core;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
+import org.jspecify.annotations.Nullable;
+
 /**
  * Parameterized callback interface used by the {@link JdbcTemplate} class for
  * batch updates.
@@ -47,6 +49,6 @@ public interface ParameterizedPreparedStatementSetter<T> {
 	 * @param argument the object containing the values to be set
 	 * @throws SQLException if an SQLException is encountered (i.e. there is no need to catch SQLException)
 	 */
-	void setValues(PreparedStatement ps, T argument) throws SQLException;
+	void setValues(PreparedStatement ps, @Nullable T argument) throws SQLException;
 
 }

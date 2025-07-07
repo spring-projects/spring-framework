@@ -50,7 +50,7 @@ import org.springframework.dao.DataAccessException;
  * @see org.springframework.jdbc.core.support.AbstractLobStreamingResultSetExtractor
  */
 @FunctionalInterface
-public interface ResultSetExtractor<T> {
+public interface ResultSetExtractor<T extends @Nullable Object> {
 
 	/**
 	 * Implementations must implement this method to process the entire ResultSet.
@@ -62,6 +62,6 @@ public interface ResultSetExtractor<T> {
 	 * values or navigating (that is, there's no need to catch SQLException)
 	 * @throws DataAccessException in case of custom exceptions
 	 */
-	@Nullable T extractData(ResultSet rs) throws SQLException, DataAccessException;
+	T extractData(ResultSet rs) throws SQLException, DataAccessException;
 
 }

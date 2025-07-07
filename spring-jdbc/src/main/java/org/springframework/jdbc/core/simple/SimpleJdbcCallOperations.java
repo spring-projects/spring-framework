@@ -174,7 +174,7 @@ public interface SimpleJdbcCallOperations {
 	 * the stored procedure.
 	 * @return a Map of output params
 	 */
-	Map<String, Object> execute(Object... args);
+	Map<String, @Nullable Object> execute(Object... args);
 
 	/**
 	 * Execute the stored procedure and return a map of output params, keyed by name
@@ -182,7 +182,7 @@ public interface SimpleJdbcCallOperations {
 	 * @param args a Map containing the parameter values to be used in the call
 	 * @return a Map of output params
 	 */
-	Map<String, Object> execute(Map<String, ?> args);
+	Map<String, @Nullable Object> execute(Map<String, ?> args);
 
 	/**
 	 * Execute the stored procedure and return a map of output params, keyed by name
@@ -190,6 +190,6 @@ public interface SimpleJdbcCallOperations {
 	 * @param args the SqlParameterSource containing the parameter values to be used in the call
 	 * @return a Map of output params
 	 */
-	Map<String, Object> execute(SqlParameterSource args);
+	Map<String, @Nullable Object> execute(SqlParameterSource args);
 
 }

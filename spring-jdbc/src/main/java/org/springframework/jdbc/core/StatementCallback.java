@@ -37,7 +37,7 @@ import org.springframework.dao.DataAccessException;
  * @see JdbcTemplate#execute(StatementCallback)
  */
 @FunctionalInterface
-public interface StatementCallback<T> {
+public interface StatementCallback<T extends @Nullable Object> {
 
 	/**
 	 * Gets called by {@code JdbcTemplate.execute} with an active JDBC
@@ -68,6 +68,6 @@ public interface StatementCallback<T> {
 	 * @see JdbcTemplate#queryForObject(String, Class)
 	 * @see JdbcTemplate#queryForRowSet(String)
 	 */
-	@Nullable T doInStatement(Statement stmt) throws SQLException, DataAccessException;
+	T doInStatement(Statement stmt) throws SQLException, DataAccessException;
 
 }

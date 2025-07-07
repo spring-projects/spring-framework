@@ -35,7 +35,7 @@ import org.springframework.util.Assert;
  * @see #setRowMapper
  * @see #setRowMapperClass
  */
-public class GenericSqlQuery<T> extends SqlQuery<T> {
+public class GenericSqlQuery<T extends @Nullable Object> extends SqlQuery<T> {
 
 	private @Nullable RowMapper<T> rowMapper;
 
