@@ -4,6 +4,7 @@ apply plugin: "kotlin"
 
 dependencies {
 	api(project(":spring-core"))
+	compileOnly("com.google.code.findbugs:jsr305") // for Reactor
 	optional(project(":spring-aop"))
 	optional(project(":spring-beans"))
 	optional(project(":spring-context"))
