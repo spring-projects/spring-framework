@@ -364,6 +364,16 @@ class AspectJAutoProxyCreatorTests {
 		}
 	}
 
+	@Test
+	void nullAdviceIsSkipped() {
+		try (ConfigurableApplicationContext context = new AnnotationConfigApplicationContext(ProxyWithNullAdviceConfig.class)) {
+			@SuppressWarnings("unchecked")
+			Supplier<String> supplier = context.getBean(Supplier.class);
+			assertThat(AopUtils.isAopProxy(supplier)).as("AOP proxy").isTrue();
+			assertThat(supplier.get()).isEqualTo("lambda");
+		}
+	}
+
 	private ClassPathXmlApplicationContext newContext(String fileSuffix) {
 		return new ClassPathXmlApplicationContext(getClass().getSimpleName() + "-" + fileSuffix, getClass());
 	}
@@ -625,6 +635,16 @@ class ProxyTargetClassFalseConfig extends AbstractProxyTargetClassConfig {
 @Configuration(proxyBeanMethods = false)
 @EnableAspectJAutoProxy(proxyTargetClass = true)
 class ProxyTargetClassTrueConfig extends AbstractProxyTargetClassConfig {
+}
+
+@Configuration(proxyBeanMethods = false)
+@EnableAspectJAutoProxy(proxyTargetClass = true)
+class ProxyWithNullAdviceConfig extends AbstractProxyTargetClassConfig {
+
+	@Override
+	SupplierAdvice supplierAdvice() {
+		return null;
+	}
 }
 
 @Configuration
