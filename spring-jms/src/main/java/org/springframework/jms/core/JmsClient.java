@@ -78,7 +78,7 @@ import org.springframework.messaging.converter.MessageConverter;
  * @see JmsMessagingTemplate
  * @see org.springframework.messaging.support.MessageBuilder
  */
-interface JmsClient {
+public interface JmsClient {
 
 	/**
 	 * Provide an operation handle for the given JMS destination.
