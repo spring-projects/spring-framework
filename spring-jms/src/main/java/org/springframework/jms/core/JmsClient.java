@@ -82,7 +82,7 @@ interface JmsClient {
 	}
 
 	/**
-	 * Create a new {@code JmsClient} for the given {@link ConnectionFactory}.
+	 * Create a new {@code JmsClient} for the given {@link JmsOperations}.
 	 * @param jmsTemplate the {@link JmsTemplate} to use for performing operations
 	 * (can be a custom {@link JmsOperations} implementation as well)
 	 */
@@ -91,7 +91,7 @@ interface JmsClient {
 	}
 
 	/**
-	 * Create a new {@code JmsClient} for the given {@link ConnectionFactory}.
+	 * Create a new {@code JmsClient} for the given {@link JmsOperations}.
 	 * @param jmsTemplate the {@link JmsTemplate} to use for performing operations
 	 * (can be a custom {@link JmsOperations} implementation as well)
 	 * @param messageConverter the message converter for payload objects
