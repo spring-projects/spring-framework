@@ -35,6 +35,8 @@ import org.springframework.core.annotation.AliasFor;
  * @author Sam Brannen
  * @since 4.1
  * @see Cacheable
+ * @see CachePut
+ * @see CacheEvict
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
