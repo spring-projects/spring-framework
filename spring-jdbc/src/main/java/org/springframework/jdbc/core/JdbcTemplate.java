@@ -246,8 +246,8 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	 * row data that will never be read by the application.
 	 * <p>Default is -1, indicating to use the JDBC driver's default configuration
 	 * (i.e. to not pass a specific fetch size setting on to the driver).
-	 * <p>Note: As of 4.3, negative values other than -1 will get passed on to the
-	 * driver, since, for example, MySQL supports special behavior for {@code Integer.MIN_VALUE}.
+	 * <p>Note: As of 4.3, negative values other than -1 will get passed on to the driver,
+	 * since, for example, MySQL supports special behavior for {@code Integer.MIN_VALUE}.
 	 * @see java.sql.Statement#setFetchSize
 	 */
 	public void setFetchSize(int fetchSize) {

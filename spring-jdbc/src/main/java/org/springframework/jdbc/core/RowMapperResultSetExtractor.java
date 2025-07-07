@@ -91,7 +91,8 @@ public class RowMapperResultSetExtractor<T> implements ResultSetExtractor<List<T
 	 * @param rowMapper the RowMapper which creates an object for each row
 	 * @param rowsExpected the number of expected rows
 	 * (just used for optimized collection handling)
-	 * @param maxRows the number of max rows
+	 * @param maxRows the number of max rows (or -1 for the driver's default)
+	 * @since 7.0
 	 */
 	public RowMapperResultSetExtractor(RowMapper<T> rowMapper, int rowsExpected, int maxRows) {
 		Assert.notNull(rowMapper, "RowMapper must not be null");
