@@ -1549,6 +1549,12 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	}
 
 	@Override
+	public void restart() {
+		getLifecycleProcessor().onRestart();
+		publishEvent(new ContextStartedEvent(this));
+	}
+
+	@Override
 	public boolean isRunning() {
 		return (this.lifecycleProcessor != null && this.lifecycleProcessor.isRunning());
 	}

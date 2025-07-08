@@ -315,6 +315,16 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 	}
 
 	@Override
+	public void onRestart() {
+		this.stoppedBeans = null;
+		if (this.running) {
+			stopBeans();
+		}
+		startBeans(true);
+		this.running = true;
+	}
+
+	@Override
 	public void onClose() {
 		stopBeans();
 		this.running = false;

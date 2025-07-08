@@ -349,6 +349,40 @@ class DefaultLifecycleProcessorTests {
 	}
 
 	@Test
+	void contextRefreshThenRestartWithMixedBeans() {
+		StaticApplicationContext context = new StaticApplicationContext();
+		CopyOnWriteArrayList<Lifecycle> stoppedBeans = new CopyOnWriteArrayList<>();
+		TestSmartLifecycleBean smartBean1 = TestSmartLifecycleBean.forShutdownTests(5, 0, stoppedBeans);
+		TestSmartLifecycleBean smartBean2 = TestSmartLifecycleBean.forShutdownTests(-3, 0, stoppedBeans);
+		smartBean2.setAutoStartup(false);
+		context.getBeanFactory().registerSingleton("smartBean1", smartBean1);
+		context.getBeanFactory().registerSingleton("smartBean2", smartBean2);
+
+		assertThat(smartBean1.isRunning()).isFalse();
+		assertThat(smartBean2.isRunning()).isFalse();
+		context.refresh();
+		assertThat(smartBean1.isRunning()).isTrue();
+		assertThat(smartBean2.isRunning()).isFalse();
+		context.restart();
+		assertThat(stoppedBeans).containsExactly(smartBean1);
+		assertThat(smartBean1.isRunning()).isTrue();
+		assertThat(smartBean2.isRunning()).isFalse();
+		smartBean1.stop();
+		assertThat(stoppedBeans).containsExactly(smartBean1, smartBean1);
+		assertThat(smartBean1.isRunning()).isFalse();
+		assertThat(smartBean2.isRunning()).isFalse();
+		context.restart();
+		assertThat(stoppedBeans).containsExactly(smartBean1, smartBean1);
+		assertThat(smartBean1.isRunning()).isTrue();
+		assertThat(smartBean2.isRunning()).isFalse();
+		context.start();
+		assertThat(smartBean1.isRunning()).isTrue();
+		assertThat(smartBean2.isRunning()).isTrue();
+		context.close();
+		assertThat(stoppedBeans).containsExactly(smartBean1, smartBean1, smartBean1, smartBean2);
+	}
+
+	@Test
 	@EnabledForTestGroups(LONG_RUNNING)
 	void smartLifecycleGroupShutdown() {
 		StaticApplicationContext context = new StaticApplicationContext();
@@ -741,17 +775,22 @@ class DefaultLifecycleProcessorTests {
 			// invocation order in the 'stoppedBeans' list
 			stop();
 			final int delay = this.shutdownDelay;
-			new Thread(() -> {
-				try {
-					Thread.sleep(delay);
-				}
-				catch (InterruptedException e) {
-					// ignore
-				}
-				finally {
-					callback.run();
-				}
-			}).start();
+			if (delay > 0) {
+				new Thread(() -> {
+					try {
+						Thread.sleep(delay);
+					}
+					catch (InterruptedException e) {
+						// ignore
+					}
+					finally {
+						callback.run();
+					}
+				}).start();
+			}
+			else {
+				callback.run();
+			}
 		}
 	}
 
