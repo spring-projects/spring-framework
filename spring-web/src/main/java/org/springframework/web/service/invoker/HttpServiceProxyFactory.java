@@ -32,6 +32,7 @@ import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.framework.ReflectiveMethodInvocation;
 import org.springframework.core.KotlinDetector;
 import org.springframework.core.MethodIntrospector;
+import org.springframework.core.MethodParameter;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.format.support.DefaultFormattingConversionService;
@@ -302,9 +303,12 @@ public final class HttpServiceProxyFactory {
 			implements HttpRequestValues.Processor {
 
 		@Override
-		public void process(Method method, @Nullable Object[] arguments, HttpRequestValues.Builder builder) {
+		public void process(
+				Method method, MethodParameter[] parameters, @Nullable Object[] arguments,
+				HttpRequestValues.Builder builder) {
+
 			for (HttpRequestValues.Processor processor : this.processors) {
-				processor.process(method, arguments, builder);
+				processor.process(method, parameters, arguments, builder);
 			}
 		}
 	}

@@ -133,7 +133,7 @@ final class HttpServiceMethod {
 	public @Nullable Object invoke(@Nullable Object[] arguments) {
 		HttpRequestValues.Builder requestValues = this.requestValuesInitializer.initializeRequestValuesBuilder();
 		applyArguments(requestValues, arguments);
-		this.requestValuesProcessor.process(this.method, arguments, requestValues);
+		this.requestValuesProcessor.process(this.method, this.parameters, arguments, requestValues);
 		return this.responseFunction.execute(requestValues.build());
 	}
 

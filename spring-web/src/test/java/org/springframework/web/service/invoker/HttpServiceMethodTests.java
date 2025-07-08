@@ -227,7 +227,7 @@ class HttpServiceMethodTests {
 
 		HttpServiceProxyFactory.builder()
 				.exchangeAdapter(this.client)
-				.httpRequestValuesProcessor((m, a, builder) -> builder.addAttribute("foo", "a"))
+				.httpRequestValuesProcessor((m, p, a, builder) -> builder.addAttribute("foo", "a"))
 				.build()
 				.createClient(Service.class)
 				.execute();
