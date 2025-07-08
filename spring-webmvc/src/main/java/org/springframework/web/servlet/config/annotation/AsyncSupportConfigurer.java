@@ -16,6 +16,7 @@
 
 package org.springframework.web.servlet.config.annotation;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -32,6 +33,7 @@ import org.springframework.web.context.request.async.DeferredResultProcessingInt
  * Helps with configuring options for asynchronous request processing.
  *
  * @author Rossen Stoyanchev
+ * @author Réda Housni Alaoui
  * @since 3.2
  */
 public class AsyncSupportConfigurer {
@@ -43,6 +45,8 @@ public class AsyncSupportConfigurer {
 	private final List<CallableProcessingInterceptor> callableInterceptors = new ArrayList<>();
 
 	private final List<DeferredResultProcessingInterceptor> deferredResultInterceptors = new ArrayList<>();
+
+	private @Nullable Duration sseHeartbeatPeriod;
 
 
 	/**
@@ -99,6 +103,14 @@ public class AsyncSupportConfigurer {
 		return this;
 	}
 
+	/**
+	 * Configure the SSE heartbeat period.
+	 * @param sseHeartbeatPeriod The SSE heartbeat period
+	 */
+	public AsyncSupportConfigurer setSseHeartbeatPeriod(Duration sseHeartbeatPeriod) {
+		this.sseHeartbeatPeriod = sseHeartbeatPeriod;
+		return this;
+	}
 
 	protected @Nullable AsyncTaskExecutor getTaskExecutor() {
 		return this.taskExecutor;
@@ -114,6 +126,10 @@ public class AsyncSupportConfigurer {
 
 	protected List<DeferredResultProcessingInterceptor> getDeferredResultInterceptors() {
 		return this.deferredResultInterceptors;
+	}
+
+	protected @Nullable Duration getSseHeartbeatPeriod() {
+		return this.sseHeartbeatPeriod;
 	}
 
 }
