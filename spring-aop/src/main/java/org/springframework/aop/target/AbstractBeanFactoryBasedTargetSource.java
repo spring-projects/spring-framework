@@ -95,6 +95,17 @@ public abstract class AbstractBeanFactoryBasedTargetSource implements TargetSour
 	}
 
 	/**
+ 	* Return the name of the target bean in the factory.
+ 	* If the configuration has not been completed yet, null can be returned
+ 	* If it's just for obtaining simple basic information, using it is very friendly.
+ 	* For example, toString().However, if strict non-null judgment is required,
+ 	* please use {@link #getTargetBeanName}
+ 	*/
+	public String getPlainTargetBeanName() {
+		return this.targetBeanName;
+	}
+	
+	/**
 	 * Specify the target class explicitly, to avoid any kind of access to the
 	 * target bean (for example, to avoid initialization of a FactoryBean instance).
 	 * <p>Default is to detect the type automatically, through a {@code getType}
