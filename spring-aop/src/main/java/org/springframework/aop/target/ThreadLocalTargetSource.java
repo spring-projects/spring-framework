@@ -61,7 +61,7 @@ public class ThreadLocalTargetSource extends AbstractPrototypeBasedTargetSource
 			new NamedThreadLocal<>("Thread-local instance of bean") {
 				@Override
 				public String toString() {
-					return super.toString() + " '" + getTargetBeanName() + "'";
+					return super.toString() + " '" + targetBeanName + "'";
 				}
 			};
 
@@ -86,7 +86,7 @@ public class ThreadLocalTargetSource extends AbstractPrototypeBasedTargetSource
 		Object target = this.targetInThread.get();
 		if (target == null) {
 			if (logger.isDebugEnabled()) {
-				logger.debug("No target for prototype '" + getTargetBeanName() + "' bound to thread: " +
+				logger.debug("No target for prototype '" + this.targetBeanName + "' bound to thread: " +
 						"creating one and binding it to thread '" + Thread.currentThread().getName() + "'");
 			}
 			// Associate target with ThreadLocal.

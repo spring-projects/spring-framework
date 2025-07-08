@@ -61,7 +61,7 @@ public abstract class AbstractBeanFactoryBasedTargetSource implements TargetSour
 
 	/** Name of the target bean we will create on each invocation. */
 	@Nullable
-	private String targetBeanName;
+	protected String targetBeanName;
 
 	/** Class of the target. */
 	@Nullable

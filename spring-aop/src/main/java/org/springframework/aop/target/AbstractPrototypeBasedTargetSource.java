@@ -54,7 +54,7 @@ public abstract class AbstractPrototypeBasedTargetSource extends AbstractBeanFac
 		if (!beanFactory.isPrototype(getTargetBeanName())) {
 			throw new BeanDefinitionStoreException(
 					"Cannot use prototype-based TargetSource against non-prototype bean with name '" +
-					getTargetBeanName() + "': instances would not be independent");
+					this.targetBeanName + "': instances would not be independent");
 		}
 	}
 
@@ -64,7 +64,7 @@ public abstract class AbstractPrototypeBasedTargetSource extends AbstractBeanFac
 	 */
 	protected Object newPrototypeInstance() throws BeansException {
 		if (logger.isDebugEnabled()) {
-			logger.debug("Creating new instance of bean '" + getTargetBeanName() + "'");
+			logger.debug("Creating new instance of bean '" + this.targetBeanName + "'");
 		}
 		return getBeanFactory().getBean(getTargetBeanName());
 	}
@@ -75,7 +75,7 @@ public abstract class AbstractPrototypeBasedTargetSource extends AbstractBeanFac
 	 */
 	protected void destroyPrototypeInstance(Object target) {
 		if (logger.isDebugEnabled()) {
-			logger.debug("Destroying instance of bean '" + getTargetBeanName() + "'");
+			logger.debug("Destroying instance of bean '" + this.targetBeanName + "'");
 		}
 		if (getBeanFactory() instanceof ConfigurableBeanFactory cbf) {
 			cbf.destroyBean(getTargetBeanName(), target);
@@ -85,7 +85,7 @@ public abstract class AbstractPrototypeBasedTargetSource extends AbstractBeanFac
 				disposableBean.destroy();
 			}
 			catch (Throwable ex) {
-				logger.warn("Destroy method on bean with name '" + getTargetBeanName() + "' threw an exception", ex);
+				logger.warn("Destroy method on bean with name '" + this.targetBeanName + "' threw an exception", ex);
 			}
 		}
 	}
