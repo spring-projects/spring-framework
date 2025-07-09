@@ -169,8 +169,11 @@ public class ResponseBodyEmitterReturnValueHandler implements HandlerMethodRetur
 				ResolvableType.forMethodParameter(returnType).getGeneric().resolve() :
 				returnType.getParameterType();
 
-		return (bodyType != null && (ResponseBodyEmitter.class.isAssignableFrom(bodyType) ||
-				this.reactiveHandler.isReactiveType(bodyType)));
+		return (bodyType != null && supportsBodyType(bodyType));
+	}
+
+	boolean supportsBodyType(Class<?> bodyType) {
+		return (ResponseBodyEmitter.class.isAssignableFrom(bodyType) || this.reactiveHandler.isReactiveType(bodyType));
 	}
 
 	@Override
