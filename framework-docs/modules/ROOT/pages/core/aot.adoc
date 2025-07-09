@@ -17,9 +17,9 @@ Applying such optimizations early implies the following restrictions:
 * The beans defined in your application cannot change at runtime, meaning:
 ** `@Profile`, in particular profile-specific configuration, needs to be chosen at build time and is automatically enabled at runtime when AOT is enabled.
 ** `Environment` properties that impact the presence of a bean (`@Conditional`) are only considered at build time.
-* Bean definitions with instance suppliers (lambdas or method references) cannot be transformed ahead-of-time.
+* Bean definitions with instance suppliers (lambdas or method references) cannot be transformed ahead of time.
 * Beans registered as singletons (using `registerSingleton`, typically from
-`ConfigurableListableBeanFactory`) cannot be transformed ahead-of-time either.
+`ConfigurableListableBeanFactory`) cannot be transformed ahead of time either.
 * As we cannot rely on the instance, make sure that the bean type is as precise as
 possible.
 
@@ -106,7 +106,7 @@ Consequently, such a bean is automatically excluded from the AOT-optimized conte
 [NOTE]
 ====
 If a bean implements the `BeanFactoryInitializationAotProcessor` interface, the bean and **all** of its dependencies will be initialized during AOT processing.
-We generally recommend that this interface is only implemented by infrastructure beans such as `BeanFactoryPostProcessor` which have limited dependencies and are already initialized early in the bean factory lifecycle.
+We generally recommend that this interface is only implemented by infrastructure beans, such as a `BeanFactoryPostProcessor`, which have limited dependencies and are already initialized early in the bean factory lifecycle.
 If such a bean is registered using an `@Bean` factory method, ensure the method is `static` so that its enclosing `@Configuration` class does not have to be initialized.
 ====
 
@@ -127,7 +127,7 @@ Typically used when the bean definition needs to be tuned for specific features 
 [NOTE]
 ====
 If a bean implements the `BeanRegistrationAotProcessor` interface, the bean and **all** of its dependencies will be initialized during AOT processing.
-We generally recommend that this interface is only implemented by infrastructure beans such as `BeanFactoryPostProcessor` which have limited dependencies and are already initialized early in the bean factory lifecycle.
+We generally recommend that this interface is only implemented by infrastructure beans, such as a `BeanFactoryPostProcessor`, which have limited dependencies and are already initialized early in the bean factory lifecycle.
 If such a bean is registered using an `@Bean` factory method, ensure the method is `static` so that its enclosing `@Configuration` class does not have to be initialized.
 ====
 
@@ -219,7 +219,7 @@ NOTE: The exact code generated may differ depending on the exact nature of your 
 TIP: Each generated class is annotated with `org.springframework.aot.generate.Generated` to
 identify them if they need to be excluded, for instance by static analysis tools.
 
-The generated code above creates bean definitions equivalent to the `@Configuration` class, but in a direct way and without the use of reflection if at all possible.
+The generated code above creates bean definitions equivalent to the `@Configuration` class, but in a direct way and without the use of reflection at all if possible.
 There is a bean definition for `dataSourceConfiguration` and one for `dataSourceBean`.
 When a `datasource` instance is required, a `BeanInstanceSupplier` is called.
 This supplier invokes the `dataSource()` method on the `dataSourceConfiguration` bean.
@@ -228,12 +228,12 @@ This supplier invokes the `dataSource()` method on the `dataSourceConfiguration`
 == Running with AOT Optimizations
 
 AOT is a mandatory step to transform a Spring application to a native executable, so it
-is automatically enabled when running in this mode. It is possible to use those optimizations
+is automatically enabled when running within a native image. However it is also possible to use AOT optimizations
 on the JVM by setting the `spring.aot.enabled` System property to `true`.
 
-NOTE: When AOT optimizations are included, some decisions that have been taken at build-time
-are hard-coded in the application setup. For instance, profiles that have been enabled at
-build-time are automatically enabled at runtime as well.
+NOTE: When AOT optimizations are included, some decisions that have been made at build time
+are hard coded in the application setup. For instance, profiles that have been enabled at
+build time are automatically enabled at runtime as well.
 
 [[aot.bestpractices]]
 == Best Practices
@@ -271,7 +271,7 @@ build time.
 While your application may interact with an interface that a bean implements, it is still very important to declare the most precise type.
 The AOT engine performs additional checks on the bean type, such as detecting the presence of `@Autowired` members or lifecycle callback methods.
 
-For `@Configuration` classes, make sure that the return type of the factory `@Bean` method is as precise as possible.
+For `@Configuration` classes, make sure that the return type of a `@Bean` factory method is as precise as possible.
 Consider the following example:
 
 [tabs]
@@ -305,11 +305,11 @@ Kotlin::
 ----
 ======
 
-In the example above, the declared  type for the `myInterface` bean is `MyInterface`.
-None of the usual post-processing will take `MyImplementation` into account.
-For instance, if there is an annotated handler method on `MyImplementation` that the context should register, it won’t be detected upfront.
+In the example above, the declared type for the `myInterface` bean is `MyInterface`.
+During AOT processing, none of the usual post-processing will take `MyImplementation` into account.
+For instance, if there is an annotated handler method on `MyImplementation` that the context should register, it will not be detected during AOT processing.
 
-The example above should be rewritten as follows:
+The example above should therefore be rewritten as follows:
 
 [tabs]
 ======
@@ -348,7 +348,7 @@ If you are registering bean definitions programmatically, consider using `RootBe
 === Avoid Multiple Constructors
 
 The container is able to choose the most appropriate constructor to use based on several candidates.
-However, this is not a best practice and flagging the preferred constructor with `@Autowired` if necessary is preferred.
+However, relying on that is not a best practice, and flagging the preferred constructor with `@Autowired` if necessary is preferred.
 
 In case you are working on a code base that you cannot modify, you can set the {spring-framework-api}/beans/factory/support/AbstractBeanDefinition.html#PREFERRED_CONSTRUCTORS_ATTRIBUTE[`preferredConstructors` attribute] on the related bean definition to indicate which constructor should be used.
 
@@ -363,13 +363,13 @@ A good rule of thumb is to keep in mind that bean definitions are an abstraction
 Rather than using such structures, decomposing to simple types or referring to a bean that is built as such is recommended.
 
 As a last resort, you can implement your own `org.springframework.aot.generate.ValueCodeGenerator$Delegate`.
-To use it, register its fully qualified name in `META-INF/spring/aot.factories` using the `Delegate` as the key.
+To use it, register its fully-qualified name in `META-INF/spring/aot.factories` using `org.springframework.aot.generate.ValueCodeGenerator$Delegate` as the key.
 
 [[aot.bestpractices.custom-arguments]]
 === Avoid Creating Beans with Custom Arguments
 
-Spring AOT detects what needs to be done to create a bean and translates that in generated code using an instance supplier.
-The container also supports creating a bean with {spring-framework-api}++/beans/factory/BeanFactory.html#getBean(java.lang.String,java.lang.Object...)++[custom arguments] that leads to several issues with AOT:
+Spring AOT detects what needs to be done to create a bean and translates that into generated code that uses an instance supplier.
+The container also supports creating a bean with {spring-framework-api}++/beans/factory/BeanFactory.html#getBean(java.lang.String,java.lang.Object...)++[custom arguments] which can lead to several issues with AOT:
 
 . The custom arguments require dynamic introspection of a matching constructor or factory method.
 Those arguments cannot be detected by AOT, so the necessary reflection hints will have to be provided manually.
@@ -396,7 +396,7 @@ for further information.
 === FactoryBean
 
 `FactoryBean` should be used with care as it introduces an intermediate layer in terms of bean type resolution that may not be conceptually necessary.
-As a rule of thumb, if the `FactoryBean` instance does not hold long-term state and is not needed at a later point in time at runtime, it should be replaced by a regular factory method, possibly with a `FactoryBean` adapter layer on top (for declarative configuration purposes).
+As a rule of thumb, if a `FactoryBean` instance does not hold long-term state and is not needed at a later point at runtime, it should be replaced by a regular `@Bean` factory method, possibly with a `FactoryBean` adapter layer on top (for declarative configuration purposes).
 
 If your `FactoryBean` implementation does not resolve the object type (i.e. `T`), extra care is necessary.
 Consider the following example:
@@ -455,7 +455,7 @@ Kotlin::
 ----
 ======
 
-If the `FactoryBean` bean definition is registered programmatically, make sure to follow these steps:
+If a `FactoryBean` bean definition is registered programmatically, make sure to follow these steps:
 
 1. Use `RootBeanDefinition`.
 2. Set the `beanClass` to the `FactoryBean` class so that AOT knows that it is an intermediate layer.
@@ -520,7 +520,7 @@ Kotlin::
 ----
 ======
 
-To make sure the scanning occurs ahead of time, a `PersistenceManagedTypes` bean must be declared and used by the
+To ensure that entity scanning occurs ahead of time, a `PersistenceManagedTypes` bean must be declared and used by the
 factory bean definition, as shown by the following example:
 
 [tabs]
@@ -609,7 +609,7 @@ Implementations of this interface can be registered using `@ImportRuntimeHints` 
 include-code::./SpellCheckService[]
 
 If at all possible, `@ImportRuntimeHints` should be used as close as possible to the component that requires the hints.
-This way, if the component is not contributed to the `BeanFactory`, the hints won't be contributed either.
+This way, if the component is not contributed to the `BeanFactory`, the hints will not be contributed either.
 
 It is also possible to register an implementation statically by adding an entry in `META-INF/spring/aot.factories` with a key equal to the fully-qualified name of the `RuntimeHintsRegistrar` interface.
 
@@ -620,13 +620,13 @@ It is also possible to register an implementation statically by adding an entry 
 {spring-framework-api}/aot/hint/annotation/Reflective.html[`@Reflective`] provides an idiomatic way to flag the need for reflection on an annotated element.
 For instance, `@EventListener` is meta-annotated with `@Reflective` since the underlying implementation invokes the annotated method using reflection.
 
-Out-of-the-box, only Spring beans are considered but you can opt-in for scanning using `@ReflectiveScan`.
-In the example below, all types of the package `com.example.app` and their subpackages are considered:
+Out-of-the-box, only Spring beans are considered, but you can opt-in for scanning using `@ReflectiveScan`.
+In the example below, all types in the `com.example.app` package and its subpackages are considered:
 
 include-code::./MyConfiguration[]
 
-Scanning happens during AOT processing and the types in the target packages do not need to have a class-level annotation to be considered.
-This performs a "deep scan" and the presence of `@Reflective`, either directly or as a meta-annotation, is checked on types, fields, constructors, methods, and enclosed elements.
+Scanning happens during AOT processing, and the types in the target packages do not need to have a class-level annotation to be considered.
+This performs a _deep scan_, and the presence of `@Reflective`, either directly or as a meta-annotation, is checked on types, fields, constructors, methods, and enclosed elements.
 
 By default, `@Reflective` registers an invocation hint for the annotated element.
 This can be tuned by specifying a custom `ReflectiveProcessor` implementation via the `@Reflective` annotation.
@@ -640,7 +640,7 @@ An example of such customization is covered in the next section.
 
 {spring-framework-api}/aot/hint/annotation/RegisterReflection.html[`@RegisterReflection`] is a specialization of `@Reflective` that provides a declarative way of registering reflection for arbitrary types.
 
-NOTE: As a specialization of `@Reflective`, this is also detected if you're using `@ReflectiveScan`.
+NOTE: As a specialization of `@Reflective`, this is also detected if you are using `@ReflectiveScan`.
 
 In the following example, public constructors and public methods can be invoked via reflection on `AccountService`:
 
