@@ -1213,6 +1213,7 @@ public class DispatcherServlet extends FrameworkServlet {
 		// leaving the other response headers in place.
 		try {
 			response.setHeader(HttpHeaders.CONTENT_TYPE, null);
+			response.setHeader(HttpHeaders.CONTENT_DISPOSITION, null);
 			response.resetBuffer();
 		}
 		catch (IllegalStateException illegalStateException) {
