@@ -91,6 +91,8 @@ public class DefaultConversionService extends GenericConversionService {
 		addCollectionConverters(converterRegistry);
 
 		converterRegistry.addConverter(new ByteBufferConverter((ConversionService) converterRegistry));
+		converterRegistry.addConverter(new DateToInstantConverter());
+		converterRegistry.addConverter(new InstantToDateConverter());
 		converterRegistry.addConverter(new StringToTimeZoneConverter());
 		converterRegistry.addConverter(new ZoneIdToTimeZoneConverter());
 		converterRegistry.addConverter(new ZonedDateTimeToCalendarConverter());
