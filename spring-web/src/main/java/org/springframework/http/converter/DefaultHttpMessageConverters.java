@@ -149,7 +149,7 @@ class DefaultHttpMessageConverters implements HttpMessageConverters {
 		@Override
 		public DefaultBuilder additionalMessageConverter(HttpMessageConverter<?> customConverter) {
 			Assert.notNull(customConverter, "'customConverter' must not be null");
-			this.commonMessageConverters.additionalMessageConverters.add(customConverter);
+			this.commonMessageConverters.customMessageConverters.add(customConverter);
 			return this;
 		}
 
@@ -216,7 +216,13 @@ class DefaultHttpMessageConverters implements HttpMessageConverters {
 
 		private @Nullable HttpMessageConverter<?> yamlMessageConverter;
 
-		private final List<HttpMessageConverter<?>> additionalMessageConverters = new ArrayList<>();
+		private @Nullable HttpMessageConverter<?> protobufMessageConverter;
+
+		private @Nullable HttpMessageConverter<?> atomMessageConverter;
+
+		private @Nullable HttpMessageConverter<?> rssMessageConverter;
+
+		private final List<HttpMessageConverter<?>> customMessageConverters = new ArrayList<>();
 
 		static {
 			ClassLoader classLoader = DefaultClientMessageConverterConfigurer.class.getClassLoader();
@@ -340,13 +346,34 @@ class DefaultHttpMessageConverters implements HttpMessageConverters {
 					this.inheritedMessageConverters.xmlMessageConverter != null) {
 				converters.add(this.inheritedMessageConverters.xmlMessageConverter);
 			}
+			if (this.protobufMessageConverter != null) {
+				converters.add(this.protobufMessageConverter);
+			}
+			else if (this.inheritedMessageConverters != null &&
+					this.inheritedMessageConverters.protobufMessageConverter != null) {
+				converters.add(this.inheritedMessageConverters.protobufMessageConverter);
+			}
+			if (this.atomMessageConverter != null) {
+				converters.add(this.atomMessageConverter);
+			}
+			else if (this.inheritedMessageConverters != null &&
+					this.inheritedMessageConverters.atomMessageConverter != null) {
+				converters.add(this.inheritedMessageConverters.atomMessageConverter);
+			}
+			if (this.rssMessageConverter != null) {
+				converters.add(this.rssMessageConverter);
+			}
+			else if (this.inheritedMessageConverters != null &&
+					this.inheritedMessageConverters.rssMessageConverter != null) {
+				converters.add(this.inheritedMessageConverters.rssMessageConverter);
+			}
 			return converters;
 		}
 
 		List<HttpMessageConverter<?>> getCustomConverters() {
-			List<HttpMessageConverter<?>> result = new ArrayList<>(this.additionalMessageConverters);
+			List<HttpMessageConverter<?>> result = new ArrayList<>(this.customMessageConverters);
 			if (this.inheritedMessageConverters != null) {
-				result.addAll(this.inheritedMessageConverters.additionalMessageConverters);
+				result.addAll(this.inheritedMessageConverters.customMessageConverters);
 			}
 			return result;
 		}
@@ -405,12 +432,12 @@ class DefaultHttpMessageConverters implements HttpMessageConverters {
 			}
 
 			if (isKotlinSerializationProtobufPresent) {
-				this.additionalMessageConverters.add(new KotlinSerializationProtobufHttpMessageConverter());
+				this.protobufMessageConverter = new KotlinSerializationProtobufHttpMessageConverter();
 			}
 
 			if (isRomePresent) {
-				this.additionalMessageConverters.add(new AtomFeedHttpMessageConverter());
-				this.additionalMessageConverters.add(new RssChannelHttpMessageConverter());
+				this.atomMessageConverter = new AtomFeedHttpMessageConverter();
+				this.rssMessageConverter = new RssChannelHttpMessageConverter();
 			}
 		}
 
@@ -466,7 +493,7 @@ class DefaultHttpMessageConverters implements HttpMessageConverters {
 		@Override
 		public ClientMessageConverterConfigurer additionalMessageConverter(HttpMessageConverter<?> customConverter) {
 			Assert.notNull(customConverter, "'customConverter' must not be null");
-			this.clientMessageConverters.additionalMessageConverters.add(customConverter);
+			this.clientMessageConverters.customMessageConverters.add(customConverter);
 			return this;
 		}
 
@@ -485,16 +512,16 @@ class DefaultHttpMessageConverters implements HttpMessageConverters {
 			List<HttpMessageConverter<?>> allConverters = new ArrayList<>();
 			List<HttpMessageConverter<?>> partConverters = new ArrayList<>();
 
-			partConverters.addAll(this.clientMessageConverters.getCoreConverters());
 			partConverters.addAll(this.clientMessageConverters.getCustomConverters());
+			partConverters.addAll(this.clientMessageConverters.getCoreConverters());
 
+			allConverters.addAll(this.clientMessageConverters.getCustomConverters());
 			allConverters.addAll(this.clientMessageConverters.getBaseConverters());
 			allConverters.addAll(this.resourceMessageConverters);
 			if (!partConverters.isEmpty()) {
 				allConverters.add(new AllEncompassingFormHttpMessageConverter(partConverters));
 			}
 			allConverters.addAll(this.clientMessageConverters.getCoreConverters());
-			allConverters.addAll(this.clientMessageConverters.getCustomConverters());
 
 			if (this.configurer != null) {
 				allConverters.forEach(this.configurer);
@@ -553,7 +580,7 @@ class DefaultHttpMessageConverters implements HttpMessageConverters {
 		@Override
 		public ServerMessageConverterConfigurer additionalMessageConverter(HttpMessageConverter<?> customConverter) {
 			Assert.notNull(customConverter, "'customConverter' must not be null");
-			this.serverMessageConverters.additionalMessageConverters.add(customConverter);
+			this.serverMessageConverters.customMessageConverters.add(customConverter);
 			return this;
 		}
 
@@ -572,16 +599,16 @@ class DefaultHttpMessageConverters implements HttpMessageConverters {
 			List<HttpMessageConverter<?>> allConverters = new ArrayList<>();
 			List<HttpMessageConverter<?>> partConverters = new ArrayList<>();
 
-			partConverters.addAll(this.serverMessageConverters.getCoreConverters());
 			partConverters.addAll(this.serverMessageConverters.getCustomConverters());
+			partConverters.addAll(this.serverMessageConverters.getCoreConverters());
 
+			allConverters.addAll(this.serverMessageConverters.getCustomConverters());
 			allConverters.addAll(this.serverMessageConverters.getBaseConverters());
 			allConverters.addAll(this.resourceMessageConverters);
 			if (!partConverters.isEmpty()) {
 				allConverters.add(new AllEncompassingFormHttpMessageConverter(partConverters));
 			}
 			allConverters.addAll(this.serverMessageConverters.getCoreConverters());
-			allConverters.addAll(this.serverMessageConverters.getCustomConverters());
 			if (this.configurer != null) {
 				allConverters.forEach(this.configurer);
 			}

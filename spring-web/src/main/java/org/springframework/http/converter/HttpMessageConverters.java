@@ -31,6 +31,7 @@ import java.util.function.Consumer;
  * <p>The following HTTP message converters will be detected and registered if available, in order.
  * For {@link #forClient() client side converters}:
  * <ol>
+ *     <li>All custom message converters configured with the builder
  *     <li>{@link ByteArrayHttpMessageConverter}
  *     <li>{@link StringHttpMessageConverter} with the {@link java.nio.charset.StandardCharsets#ISO_8859_1} charset
  *     <li>{@link ResourceHttpMessageConverter}, with resource streaming support disabled
@@ -42,11 +43,11 @@ import java.util.function.Consumer;
  *     <li>An XML converter
  *     <li>An ProtoBuf converter
  *     <li>ATOM and RSS converters
- *     <li>All custom message converters configured with the builder
  * </ol>
  *
  * For {@link #forClient() client side converters}:
  * <ol>
+ *     <li>All custom message converters configured with the builder
  *     <li>{@link ByteArrayHttpMessageConverter}
  *     <li>{@link StringHttpMessageConverter} with the {@link java.nio.charset.StandardCharsets#ISO_8859_1} charset
  *     <li>{@link ResourceHttpMessageConverter}
@@ -58,7 +59,6 @@ import java.util.function.Consumer;
  *     <li>An XML converter
  *     <li>An ProtoBuf converter
  *     <li>ATOM and RSS converters
- *     <li>All custom message converters configured with the builder
  *     <li>a Multipart converter, using all detected and custom converters for part conversion
  * </ol>
  *

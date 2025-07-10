@@ -150,7 +150,21 @@ class DefaultHttpMessageConvertersTests {
 		void registerCustomMessageConverter() {
 			var converters = HttpMessageConverters.create()
 					.additionalMessageConverter(new CustomHttpMessageConverter()).build();
-			assertThat(converters.forClient()).hasExactlyElementsOfTypes(AllEncompassingFormHttpMessageConverter.class, CustomHttpMessageConverter.class);
+			assertThat(converters.forClient()).hasExactlyElementsOfTypes(CustomHttpMessageConverter.class, AllEncompassingFormHttpMessageConverter.class);
+		}
+
+		@Test
+		void registerCustomMessageConverterAheadOfDefaults() {
+			var converters = HttpMessageConverters.withDefaults()
+					.additionalMessageConverter(new CustomHttpMessageConverter()).build();
+			assertThat(converters.forClient()).hasExactlyElementsOfTypes(
+					CustomHttpMessageConverter.class, ByteArrayHttpMessageConverter.class,
+					StringHttpMessageConverter.class, ResourceHttpMessageConverter.class,
+					AllEncompassingFormHttpMessageConverter.class,
+					JacksonJsonHttpMessageConverter.class, JacksonSmileHttpMessageConverter.class,
+					JacksonCborHttpMessageConverter.class, JacksonYamlHttpMessageConverter.class,
+					JacksonXmlHttpMessageConverter.class, KotlinSerializationProtobufHttpMessageConverter.class,
+					AtomFeedHttpMessageConverter.class, RssChannelHttpMessageConverter.class);
 		}
 
 		@Test
@@ -224,7 +238,22 @@ class DefaultHttpMessageConvertersTests {
 		void registerCustomMessageConverter() {
 			var converters = HttpMessageConverters.create()
 					.additionalMessageConverter(new CustomHttpMessageConverter()).build();
-			assertThat(converters.forServer()).hasExactlyElementsOfTypes(AllEncompassingFormHttpMessageConverter.class, CustomHttpMessageConverter.class);
+			assertThat(converters.forServer()).hasExactlyElementsOfTypes(CustomHttpMessageConverter.class, AllEncompassingFormHttpMessageConverter.class);
+		}
+
+		@Test
+		void registerCustomMessageConverterAheadOfDefaults() {
+			var converters = HttpMessageConverters.withDefaults()
+					.additionalMessageConverter(new CustomHttpMessageConverter()).build();
+			assertThat(converters.forServer()).hasExactlyElementsOfTypes(
+					CustomHttpMessageConverter.class,
+					ByteArrayHttpMessageConverter.class, StringHttpMessageConverter.class,
+					ResourceHttpMessageConverter.class, ResourceRegionHttpMessageConverter.class,
+					AllEncompassingFormHttpMessageConverter.class,
+					JacksonJsonHttpMessageConverter.class, JacksonSmileHttpMessageConverter.class,
+					JacksonCborHttpMessageConverter.class, JacksonYamlHttpMessageConverter.class,
+					JacksonXmlHttpMessageConverter.class, KotlinSerializationProtobufHttpMessageConverter.class,
+					AtomFeedHttpMessageConverter.class, RssChannelHttpMessageConverter.class);
 		}
 
 		@Test
