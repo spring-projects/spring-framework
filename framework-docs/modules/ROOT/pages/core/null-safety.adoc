@@ -177,6 +177,7 @@ non-null values even if that cannot be expressed by the API.
 to be present and when non-null related values have been inserted previously.
 - `@SuppressWarnings("NullAway") // Overridden method does not define nullability` can be used when the superclass does
 not define nullability (typically when the superclass comes from an external dependency).
+- `@SuppressWarnings("NullAway") // See https://github.com/uber/NullAway/issues/1075` can be used when NullAway is not able to detect type variable nullness in generic methods.
 
 
 [[null-safety-migrating]]
