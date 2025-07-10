@@ -35,7 +35,10 @@ import org.springframework.test.context.MergedContextConfiguration;
  * <p>As of Spring Framework 6.1, this SPI includes optional support for
  * {@linkplain #getFailureCount(MergedContextConfiguration) tracking} and
  * {@linkplain #incrementFailureCount(MergedContextConfiguration) incrementing}
- * failure counts.
+ * failure counts. As of Spring Framework 7.0, this SPI includes optional support for
+ * {@linkplain #registerContextUsage(MergedContextConfiguration, Class) registering} and
+ * {@linkplain #unregisterContextUsage(MergedContextConfiguration, Class) unregistering}
+ * context usage.
  *
  * <h3>Rationale</h3>
  * <p>Context caching can have significant performance benefits if context
@@ -88,13 +91,19 @@ public interface ContextCache {
 	boolean contains(MergedContextConfiguration key);
 
 	/**
-	 * Obtain a cached {@code ApplicationContext} for the given key.
-	 * <p>The {@linkplain #getHitCount() hit} and {@linkplain #getMissCount() miss}
-	 * counts must be updated accordingly.
+	 * Obtain a cached {@link ApplicationContext} for the given key.
+	 * <p>If the cached application context was previously
+	 * {@linkplain org.springframework.context.Lifecycle#stop() stopped}, it
+	 * must be
+	 * {@linkplain org.springframework.context.support.AbstractApplicationContext#restart()
+	 * restarted}. This applies to parent contexts as well.
+	 * <p>In addition, the {@linkplain #getHitCount() hit} and
+	 * {@linkplain #getMissCount() miss} counts must be updated accordingly.
 	 * @param key the context key (never {@code null})
 	 * @return the corresponding {@code ApplicationContext} instance, or {@code null}
 	 * if not found in the cache
-	 * @see #remove
+	 * @see #unregisterContextUsage(MergedContextConfiguration, Class)
+	 * @see #remove(MergedContextConfiguration, HierarchyMode)
 	 */
 	@Nullable ApplicationContext get(MergedContextConfiguration key);
 
@@ -151,6 +160,64 @@ public interface ContextCache {
 	 * @see #getFailureCount(MergedContextConfiguration)
 	 */
 	default void incrementFailureCount(MergedContextConfiguration key) {
+		/* no-op */
+	}
+
+	/**
+	 * Register usage of the {@link ApplicationContext} for the supplied
+	 * {@link MergedContextConfiguration} and any of its parents.
+	 * <p>The default implementation of this method does nothing. Concrete
+	 * implementations are therefore highly encouraged to override this
+	 * method, {@link #unregisterContextUsage(MergedContextConfiguration, Class)},
+	 * and {@link #getContextUsageCount()} with appropriate behavior. Note that
+	 * the standard {@code ContextContext} implementation in Spring overrides
+	 * these methods appropriately.
+	 * @param key the context key; never {@code null}
+	 * @param testClass the test class that is using the application context(s)
+	 * @since 7.0
+	 * @see #unregisterContextUsage(MergedContextConfiguration, Class)
+	 * @see #getContextUsageCount()
+	 */
+	default void registerContextUsage(MergedContextConfiguration key, Class<?> testClass) {
+		/* no-op */
+	}
+
+	/**
+	 * Unregister usage of the {@link ApplicationContext} for the supplied
+	 * {@link MergedContextConfiguration} and any of its parents.
+	 * <p>If no other test classes are actively using the same application
+	 * context(s), the application context(s) should be
+	 * {@linkplain org.springframework.context.Lifecycle#stop() stopped}.
+	 * <p>The default implementation of this method does nothing. Concrete
+	 * implementations are therefore highly encouraged to override this
+	 * method, {@link #registerContextUsage(MergedContextConfiguration, Class)},
+	 * and {@link #getContextUsageCount()} with appropriate behavior. Note that
+	 * the standard {@code ContextContext} implementation in Spring overrides
+	 * these methods appropriately.
+	 * @param key the context key; never {@code null}
+	 * @param testClass the test class that is no longer using the application context(s)
+	 * @since 7.0
+	 * @see #registerContextUsage(MergedContextConfiguration, Class)
+	 * @see #getContextUsageCount()
+	 */
+	default void unregisterContextUsage(MergedContextConfiguration key, Class<?> testClass) {
+		/* no-op */
+	}
+
+	/**
+	 * Determine the number of contexts within the cache that are currently in use.
+	 * <p>The default implementation of this method always returns {@code 0}.
+	 * Concrete implementations are therefore highly encouraged to override this
+	 * method, {@link #registerContextUsage(MergedContextConfiguration, Class)},
+	 * and {@link #unregisterContextUsage(MergedContextConfiguration, Class)} with
+	 * appropriate behavior. Note that the standard {@code ContextContext}
+	 * implementation in Spring overrides these methods appropriately.
+	 * @since 7.0
+	 * @see #registerContextUsage(MergedContextConfiguration, Class)
+	 * @see #unregisterContextUsage(MergedContextConfiguration, Class)
+	 */
+	default int getContextUsageCount() {
+		return 0;
 	}
 
 	/**
@@ -204,6 +271,7 @@ public interface ContextCache {
 	 * <ul>
 	 * <li>name of the concrete {@code ContextCache} implementation</li>
 	 * <li>{@linkplain #size}</li>
+	 * <li>{@linkplain #getContextUsageCount() context usage count}</li>
 	 * <li>{@linkplain #getParentContextCount() parent context count}</li>
 	 * <li>{@linkplain #getHitCount() hit count}</li>
 	 * <li>{@linkplain #getMissCount() miss count}</li>

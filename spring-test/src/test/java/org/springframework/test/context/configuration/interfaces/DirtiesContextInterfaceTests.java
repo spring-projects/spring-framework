@@ -55,19 +55,19 @@ class DirtiesContextInterfaceTests {
 		// for example, via JUnit's @Suite.
 		cacheHits.set(0);
 		cacheMisses.set(0);
-		assertContextCacheStatistics("BeforeClass", 0, cacheHits.get(), cacheMisses.get());
+		assertContextCacheStatistics("BeforeClass", 0, 0, cacheHits.get(), cacheMisses.get());
 	}
 
 	@AfterAll
 	static void verifyFinalCacheState() {
-		assertContextCacheStatistics("AfterClass", 0, cacheHits.get(), cacheMisses.get());
+		assertContextCacheStatistics("AfterClass", 0, 0, cacheHits.get(), cacheMisses.get());
 	}
 
 	@Test
 	void verifyDirtiesContextBehavior() throws Exception {
 		runTestClassAndAssertStats(ClassLevelDirtiesContextWithCleanMethodsAndDefaultModeTestCase.class, 1);
 		assertContextCacheStatistics("after class-level @DirtiesContext with clean test method and default class mode",
-			0, cacheHits.get(), cacheMisses.incrementAndGet());
+			0, 0, cacheHits.get(), cacheMisses.incrementAndGet());
 	}
 
 	private void runTestClassAndAssertStats(Class<?> testClass, int expectedTestCount) throws Exception {

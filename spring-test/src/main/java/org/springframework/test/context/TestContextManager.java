@@ -520,10 +520,14 @@ public class TestContextManager {
 	 * the first exception.
 	 * <p>Note that listeners will be executed in the opposite order in which they
 	 * were registered.
+	 * <p>As of Spring Framework 7.0, this method also ensures that the application
+	 * context for the current {@link #getTestContext() TestContext} is marked as
+	 * {@linkplain TestContext#markApplicationContextUnused() unused}.
 	 * @throws Exception if a registered TestExecutionListener throws an exception
 	 * @since 3.0
 	 * @see #getTestExecutionListeners()
 	 * @see Throwable#addSuppressed(Throwable)
+	 * @see TestContext#markApplicationContextUnused()
 	 */
 	public void afterTestClass() throws Exception {
 		Class<?> testClass = getTestContext().getTestClass();
@@ -547,6 +551,20 @@ public class TestContextManager {
 				else {
 					afterTestClassException.addSuppressed(ex);
 				}
+			}
+		}
+
+		try {
+			if (getTestContext().hasApplicationContext()) {
+				getTestContext().markApplicationContextUnused();
+			}
+		}
+		catch (Throwable ex) {
+			if (afterTestClassException == null) {
+				afterTestClassException = ex;
+			}
+			else {
+				afterTestClassException.addSuppressed(ex);
 			}
 		}
 
