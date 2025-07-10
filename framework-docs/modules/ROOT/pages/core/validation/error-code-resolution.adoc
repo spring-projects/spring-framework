@@ -1,7 +1,7 @@
-[[validation-conversion]]
-= Resolving Codes to Error Messages
+[[validation-error-code-resolution]]
+= Resolving Error Codes to Error Messages
 
-We covered databinding and validation. This section covers outputting messages that correspond
+We covered data binding and validation. This section covers outputting messages that correspond
 to validation errors. In the example shown in the xref:core/validation/validator.adoc[preceding section],
 we rejected the `name` and `age` fields. If we want to output the error messages by using a
 `MessageSource`, we can do so using the error code we provide when rejecting the field
@@ -22,7 +22,4 @@ in the javadoc of
 {spring-framework-api}/validation/MessageCodesResolver.html[`MessageCodesResolver`] and
 {spring-framework-api}/validation/DefaultMessageCodesResolver.html[`DefaultMessageCodesResolver`],
 respectively.
-
-
-
 

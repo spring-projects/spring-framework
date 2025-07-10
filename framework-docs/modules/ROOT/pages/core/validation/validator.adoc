@@ -1,5 +1,5 @@
 [[validator]]
-= Validation by Using Spring's Validator Interface
+= Validation Using Spring's Validator Interface
 
 Spring features a `Validator` interface that you can use to validate objects. The
 `Validator` interface works by using an `Errors` object so that, while validating,
