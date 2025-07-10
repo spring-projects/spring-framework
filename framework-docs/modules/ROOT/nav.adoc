@@ -100,6 +100,7 @@
 *** xref:core/aop-api/autoproxy.adoc[]
 *** xref:core/aop-api/targetsource.adoc[]
 *** xref:core/aop-api/extensibility.adoc[]
+** xref:core/resilience.adoc[]
 ** xref:core/null-safety.adoc[]
 ** xref:core/databuffer-codec.adoc[]
 ** xref:core/aot.adoc[]
