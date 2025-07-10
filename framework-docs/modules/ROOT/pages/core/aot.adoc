@@ -271,7 +271,7 @@ build time.
 While your application may interact with an interface that a bean implements, it is still very important to declare the most precise type.
 The AOT engine performs additional checks on the bean type, such as detecting the presence of `@Autowired` members or lifecycle callback methods.
 
-For `@Configuration` classes, make sure that the return type of a `@Bean` factory method is as precise as possible.
+For `@Configuration` classes, make sure that the return type of an `@Bean` factory method is as precise as possible.
 Consider the following example:
 
 [tabs]
@@ -602,9 +602,12 @@ A number of convenient annotations are also provided for common use cases.
 [[aot.hints.import-runtime-hints]]
 === `@ImportRuntimeHints`
 
-`RuntimeHintsRegistrar` implementations allow you to get a callback to the `RuntimeHints` instance managed by the AOT engine.
-Implementations of this interface can be registered using `@ImportRuntimeHints` on any Spring bean or `@Bean` factory method.
-`RuntimeHintsRegistrar` implementations are detected and invoked at build time.
+{spring-framework-api}/aot/hint/RuntimeHintsRegistrar.html[`RuntimeHintsRegistrar`]
+implementations allow you to get a callback to the `RuntimeHints` instance managed by the
+AOT engine. Implementations of this interface can be registered using
+{spring-framework-api}/context/annotation/ImportRuntimeHints.html[`@ImportRuntimeHints`]
+on any Spring bean or `@Bean` factory method. `RuntimeHintsRegistrar` implementations are
+detected and invoked at build time.
 
 include-code::./SpellCheckService[]
 
@@ -620,8 +623,10 @@ It is also possible to register an implementation statically by adding an entry 
 {spring-framework-api}/aot/hint/annotation/Reflective.html[`@Reflective`] provides an idiomatic way to flag the need for reflection on an annotated element.
 For instance, `@EventListener` is meta-annotated with `@Reflective` since the underlying implementation invokes the annotated method using reflection.
 
-Out-of-the-box, only Spring beans are considered, but you can opt-in for scanning using `@ReflectiveScan`.
-In the example below, all types in the `com.example.app` package and its subpackages are considered:
+Out-of-the-box, only Spring beans are considered, but you can opt-in for scanning using
+{spring-framework-api}/context/annotation/ReflectiveScan.html[`@ReflectiveScan`]. In the
+example below, all types in the `com.example.app` package and its subpackages are
+considered:
 
 include-code::./MyConfiguration[]
 
@@ -638,9 +643,9 @@ An example of such customization is covered in the next section.
 [[aot.hints.register-reflection]]
 === `@RegisterReflection`
 
-{spring-framework-api}/aot/hint/annotation/RegisterReflection.html[`@RegisterReflection`] is a specialization of `@Reflective` that provides a declarative way of registering reflection for arbitrary types.
+{spring-framework-api}/aot/hint/annotation/RegisterReflection.html[`@RegisterReflection`] is a specialization of `@Reflective` that provides a declarative way to register reflection for arbitrary types.
 
-NOTE: As a specialization of `@Reflective`, this is also detected if you are using `@ReflectiveScan`.
+NOTE: As a specialization of `@Reflective`, `@RegisterReflection` is also detected if you are using `@ReflectiveScan`.
 
 In the following example, public constructors and public methods can be invoked via reflection on `AccountService`:
 
@@ -648,8 +653,8 @@ include-code::./MyConfiguration[tag=snippet,indent=0]
 
 `@RegisterReflection` can be applied to any target type at the class level, but it can also be applied directly to a method to better indicate where the hints are actually required.
 
-`@RegisterReflection` can be used as a meta-annotation to provide more specific needs.
-{spring-framework-api}/aot/hint/annotation/RegisterReflectionForBinding.html[`@RegisterReflectionForBinding`] is such composed annotation and registers the need for serializing arbitrary types.
+`@RegisterReflection` can be used as a meta-annotation to support more specific needs.
+{spring-framework-api}/aot/hint/annotation/RegisterReflectionForBinding.html[`@RegisterReflectionForBinding`] is a composed annotation that is meta-annotated with `@RegisterReflection` and registers the need for serializing arbitrary types.
 A typical use case is the use of DTOs that the container cannot infer, such as using a web client within a method body.
 
 The following example registers `Order` for serialization.
@@ -664,7 +669,7 @@ In other words, if `Order` exposes others types, hints are registered for those 
 === Testing Runtime Hints
 
 Spring Core also ships `RuntimeHintsPredicates`, a utility for checking that existing hints match a particular use case.
-This can be used in your own tests to validate that a `RuntimeHintsRegistrar` contains the expected results.
+This can be used in your own tests to validate that a `RuntimeHintsRegistrar` produces the expected results.
 We can write a test for our `SpellCheckService` and ensure that we will be able to load a dictionary at runtime:
 
 include-code::./SpellCheckServiceTests[tag=hintspredicates]
