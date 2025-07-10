@@ -60,7 +60,7 @@ public abstract class AbstractBeanFactoryBasedTargetSource implements TargetSour
 	protected final transient Log logger = LogFactory.getLog(getClass());
 
 	/** Name of the target bean we will create on each invocation. */
-	private @Nullable String targetBeanName;
+	protected @Nullable String targetBeanName;
 
 	/** Class of the target. */
 	private volatile @Nullable Class<?> targetClass;
@@ -91,17 +91,6 @@ public abstract class AbstractBeanFactoryBasedTargetSource implements TargetSour
 	 */
 	public String getTargetBeanName() {
 		Assert.state(this.targetBeanName != null, "Target bean name not set");
-		return this.targetBeanName;
-	}
-
-	/**
- 	* Return the name of the target bean in the factory.
- 	* If the configuration has not been completed yet, null can be returned
- 	* If it's just for obtaining simple basic information, using it is very friendly.
- 	* For example, toString().However, if strict non-null judgment is required,
- 	* please use {@link #getTargetBeanName}
- 	*/
-	public String getPlainTargetBeanName() {
 		return this.targetBeanName;
 	}
 	
