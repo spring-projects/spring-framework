@@ -212,6 +212,7 @@ In the second case, the request is executed through the `ClientHttpRequestFactor
 captured earlier. This generates a response that could, for example, come from an actual remote server,
 depending on how the `RestTemplate` was originally configured.
 
+
 [[spring-mvc-test-client-static-imports]]
 == Static Imports
 

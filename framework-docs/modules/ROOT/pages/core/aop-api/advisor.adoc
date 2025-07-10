@@ -14,7 +14,3 @@ It is possible to mix advisor and advice types in Spring in the same AOP proxy. 
 example, you could use an interception around advice, throws advice, and before advice in
 one proxy configuration. Spring automatically creates the necessary interceptor
 chain.
-
-
-
-

@@ -88,6 +88,3 @@ However, when you use a full-featured broker (such as RabbitMQ), each applicatio
 instance connects to the broker, and messages broadcast from one application
 instance can be broadcast through the broker to WebSocket clients connected
 through any other application instances.
-
-
-

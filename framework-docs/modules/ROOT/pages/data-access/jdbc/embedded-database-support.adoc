@@ -255,6 +255,3 @@ You can extend Spring JDBC embedded database support in two ways:
 
 We encourage you to contribute extensions to the Spring community at
 {spring-framework-issues}[GitHub Issues].
-
-
-

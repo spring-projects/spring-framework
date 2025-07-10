@@ -14,8 +14,6 @@ Spring. It includes the following topics:
 * xref:core/resources.adoc#resources-app-ctx[Application Contexts and Resource Paths]
 
 
-
-
 [[resources-introduction]]
 == Introduction
 
@@ -27,8 +25,6 @@ resource that needs to be obtained from the classpath or relative to a
 prefixes (similar to existing handlers for prefixes such as `http:`), this is generally
 quite complicated, and the `URL` interface still lacks some desirable functionality,
 such as a method to check for the existence of the resource being pointed to.
-
-
 
 
 [[resources-resource]]
@@ -121,11 +117,8 @@ While this couples your code to Spring, it really only couples it to this small 
 utility classes, which serves as a more capable replacement for `URL` and can be
 considered equivalent to any other library you would use for this purpose.
 
-NOTE: The `Resource` abstraction does not replace functionality. It wraps it where
-possible. For example, a `UrlResource` wraps a URL and uses the wrapped `URL` to do its
-work.
-
-
+NOTE: The `Resource` abstraction does not replace functionality. It wraps it where possible.
+For example, a `UrlResource` wraps a URL and uses the wrapped `URL` to do its work.
 
 
 [[resources-implementations]]
@@ -145,8 +138,6 @@ For a complete list of `Resource` implementations available in Spring, consult t
 "All Known Implementing Classes" section of the
 {spring-framework-api}/core/io/Resource.html[`Resource`] javadoc.
 
-
-
 [[resources-implementations-urlresource]]
 === `UrlResource`
 
@@ -164,8 +155,6 @@ ultimately decides which type of `Resource` to create. If the path string contai
 well-known (to property editor, that is) prefix (such as `classpath:`), it creates an
 appropriate specialized `Resource` for that prefix. However, if it does not recognize the
 prefix, it assumes the string is a standard URL string and creates a `UrlResource`.
-
-
 
 [[resources-implementations-classpathresource]]
 === `ClassPathResource`
@@ -186,8 +175,6 @@ constructor but is often created implicitly when you call an API method that tak
 `PropertyEditor` recognizes the special prefix, `classpath:`, on the string path and
 creates a `ClassPathResource` in that case.
 
-
-
 [[resources-implementations-filesystemresource]]
 === `FileSystemResource`
 
@@ -197,8 +184,6 @@ transformations but performing all operations via the `java.nio.file.Files` API.
 `java.nio.path.Path` based support use a `PathResource` instead. `FileSystemResource`
 supports resolution as a `File` and as a `URL`.
 
-
-
 [[resources-implementations-pathresource]]
 === `PathResource`
 
@@ -207,8 +192,6 @@ operations and transformations via the `Path` API. It supports resolution as a `
 as a `URL` and also implements the extended `WritableResource` interface. `PathResource`
 is effectively a pure `java.nio.path.Path` based alternative to `FileSystemResource` with
 different `createRelative` behavior.
-
-
 
 [[resources-implementations-servletcontextresource]]
 === `ServletContextResource`
@@ -221,8 +204,6 @@ when the web application archive is expanded and the resource is physically on t
 filesystem. Whether or not it is expanded and on the filesystem or accessed
 directly from the JAR or somewhere else like a database (which is conceivable) is actually
 dependent on the Servlet container.
-
-
 
 [[resources-implementations-inputstreamresource]]
 === `InputStreamResource`
@@ -237,8 +218,6 @@ already-opened resource. Therefore, it returns `true` from `isOpen()`. Do not us
 you need to keep the resource descriptor somewhere or if you need to read a stream
 multiple times.
 
-
-
 [[resources-implementations-bytearrayresource]]
 === `ByteArrayResource`
 
@@ -247,8 +226,6 @@ This is a `Resource` implementation for a given byte array. It creates a
 
 It is useful for loading content from any given byte array without having to resort to a
 single-use `InputStreamResource`.
-
-
 
 
 [[resources-resourceloader]]
@@ -385,8 +362,6 @@ objects:
 |===
 
 
-
-
 [[resources-resourcepatternresolver]]
 == The `ResourcePatternResolver` Interface
 
@@ -436,8 +411,6 @@ implements the `ResourcePatternResolver` interface and delegates to the default
 ====
 
 
-
-
 [[resources-resourceloaderaware]]
 == The `ResourceLoaderAware` Interface
 
@@ -481,8 +454,6 @@ NOTE: To load one or more `Resource` objects for a resource path that contains w
 or makes use of the special `classpath*:` resource prefix, consider having an instance of
 xref:core/resources.adoc#resources-resourcepatternresolver[`ResourcePatternResolver`] autowired into your
 application components instead of `ResourceLoader`.
-
-
 
 
 [[resources-as-dependencies]]
@@ -631,15 +602,11 @@ Kotlin::
 ======
 
 
-
-
 [[resources-app-ctx]]
 == Application Contexts and Resource Paths
 
 This section covers how to create application contexts with resources, including shortcuts
 that work with XML, how to use wildcards, and other details.
-
-
 
 [[resources-app-ctx-construction]]
 === Constructing Application Contexts
@@ -720,7 +687,6 @@ Using `FileSystemXmlApplicationContext` loads the bean definitions from the clas
 However, it is still a `FileSystemXmlApplicationContext`. If it is subsequently used as a
 `ResourceLoader`, any unprefixed paths are still treated as filesystem paths.
 
-
 [[resources-app-ctx-classpathxml]]
 ==== Constructing `ClassPathXmlApplicationContext` Instances -- Shortcuts
 
@@ -766,8 +732,6 @@ Kotlin::
 See the {spring-framework-api}/context/support/ClassPathXmlApplicationContext.html[`ClassPathXmlApplicationContext`]
 javadoc for details on the various constructors.
 
-
-
 [[resources-app-ctx-wildcards-in-resource-paths]]
 === Wildcards in Application Context Constructor Resource Paths
 
@@ -787,7 +751,6 @@ constructors (or when you use the `PathMatcher` utility class hierarchy directly
 resolved at construction time. It has nothing to do with the `Resource` type itself.
 You cannot use the `classpath*:` prefix to construct an actual `Resource`, as
 a resource points to just one resource at a time.
-
 
 [[resources-app-ctx-ant-patterns-in-paths]]
 ==== Ant-style Patterns
@@ -831,7 +794,6 @@ get a `java.net.JarURLConnection` from it or manually parse the jar URL, to be a
 walk the contents of the jar and resolve the wildcard. This does work in most environments
 but fails in others, and we strongly recommend that the wildcard resolution of resources
 coming from jars be thoroughly tested in your specific environment before you rely on it.
-
 
 [[resources-classpath-wildcards]]
 ==== The `classpath*:` Prefix
@@ -879,7 +841,6 @@ case, the resolution strategy is fairly simple: A `ClassLoader.getResources()` c
 used on the last non-wildcard path segment to get all the matching resources in the
 class loader hierarchy and then, off each resource, the same `PathMatcher` resolution
 strategy described earlier is used for the wildcard subpath.
-
 
 [[resources-wildcards-in-path-other-stuff]]
 ==== Other Notes Relating to Wildcards
@@ -933,8 +894,6 @@ multiple `ClassLoader` locations, the desired resource may not exist in the firs
 location found. Therefore, in such cases you should prefer using `classpath*:` with the
 same Ant-style pattern, which searches all classpath locations that contain the
 `com.mycompany` base package: `classpath*:com/mycompany/**/service-context.xml`.
-
-
 
 [[resources-filesystemresource-caveats]]
 === `FileSystemResource` Caveats

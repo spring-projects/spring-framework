@@ -27,8 +27,6 @@ use a similar nullability arrangement, delivering a consistent overall experienc
 Spring application developers.
 
 
-
-
 [[use-cases]]
 == Use cases
 
@@ -39,8 +37,6 @@ warnings related to null-safety in order to avoid `NullPointerException` at runt
 They are also used to make Spring APIs null-safe in Kotlin projects, since Kotlin natively
 supports {kotlin-docs}/null-safety.html[null-safety]. More details
 are available in the xref:languages/kotlin/null-safety.adoc[Kotlin support documentation].
-
-
 
 
 [[jsr-305-meta-annotations]]

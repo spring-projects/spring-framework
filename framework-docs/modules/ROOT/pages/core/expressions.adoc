@@ -54,4 +54,3 @@ The expression language supports the following functionality:
 * Collection projection
 * Collection selection
 * Templated expressions
-

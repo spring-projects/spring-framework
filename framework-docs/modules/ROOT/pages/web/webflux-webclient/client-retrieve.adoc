@@ -114,7 +114,3 @@ Kotlin::
 			.awaitBody<Person>()
 ----
 ======
-
-
-
-

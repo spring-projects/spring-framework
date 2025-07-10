@@ -1081,6 +1081,3 @@ Kotlin::
 	// keyHolder.getKey() now contains the generated key
 ----
 ======
-
-
-

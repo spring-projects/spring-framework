@@ -20,7 +20,6 @@ composition of asynchronous logic. At the programming-model level, Java 8 enable
 WebFlux to offer functional web endpoints alongside annotated controllers.
 
 
-
 [[webflux-why-reactive]]
 == Define "`Reactive`"
 
@@ -51,7 +50,6 @@ can then write to the response. The main purpose of Reactive Streams is to let t
 NOTE: *Common question: what if a publisher cannot slow down?* +
 The purpose of Reactive Streams is only to establish the mechanism and a boundary.
 If a publisher cannot slow down, it has to decide whether to buffer, drop, or fail.
-
 
 
 [[webflux-reactive-api]]
@@ -86,27 +84,26 @@ xref:languages/kotlin/coroutines.adoc[Coroutines] APIs in Kotlin which provides 
 The following Kotlin code samples will be provided with Coroutines APIs.
 
 
-
 [[webflux-programming-models]]
 == Programming Models
 
 The `spring-web` module contains the reactive foundation that underlies Spring WebFlux,
-including HTTP abstractions, Reactive Streams xref:web/webflux/reactive-spring.adoc#webflux-httphandler[adapters] for supported
-servers, xref:web/webflux/reactive-spring.adoc#webflux-codecs[codecs], and a core xref:web/webflux/reactive-spring.adoc#webflux-web-handler-api[`WebHandler` API] comparable to
+including HTTP abstractions, Reactive Streams xref:web/webflux/reactive-spring.adoc#webflux-httphandler[adapters]
+for supported servers, xref:web/webflux/reactive-spring.adoc#webflux-codecs[codecs], and a core
+xref:web/webflux/reactive-spring.adoc#webflux-web-handler-api[`WebHandler` API] comparable to
 the Servlet API but with non-blocking contracts.
 
 On that foundation, Spring WebFlux provides a choice of two programming models:
 
-* xref:web/webflux/controller.adoc[Annotated Controllers]: Consistent with Spring MVC and based on the same annotations
-from the `spring-web` module. Both Spring MVC and WebFlux controllers support reactive
+* xref:web/webflux/controller.adoc[Annotated Controllers]: Consistent with Spring MVC and based on the
+same annotations from the `spring-web` module. Both Spring MVC and WebFlux controllers support reactive
 (Reactor and RxJava) return types, and, as a result, it is not easy to tell them apart. One notable
 difference is that WebFlux also supports reactive `@RequestBody` arguments.
-* xref:web/webflux-functional.adoc[Functional Endpoints]: Lambda-based, lightweight, and functional programming model. You can think of
-this as a small library or a set of utilities that an application can use to route and
-handle requests. The big difference with annotated controllers is that the application
-is in charge of request handling from start to finish versus declaring intent through
-annotations and being called back.
-
+* xref:web/webflux-functional.adoc[Functional Endpoints]: Lambda-based, lightweight,
+and functional programming model. You can think of this as a small library or a set of
+utilities that an application can use to route and handle requests. The big difference
+with annotated controllers is that the application is in charge of request handling
+from start to finish versus declaring intent through annotations and being called back.
 
 
 [[webflux-framework-choice]]
@@ -164,7 +161,6 @@ unsure what benefits to look for, start by learning about how non-blocking I/O w
 (for example, concurrency on single-threaded Node.js) and its effects.
 
 
-
 [[webflux-server-choice]]
 == Servers
 
@@ -195,7 +191,6 @@ For the reasons listed above, mixing blocking I/O and non-blocking I/O in the sa
 For Undertow, Spring WebFlux uses Undertow APIs directly without the Servlet API.
 
 
-
 [[webflux-performance]]
 == Performance
 
@@ -210,7 +205,6 @@ because they scale in a more predictable way. In order to observe those benefits
 need to have some latency (including a mix of slow and unpredictable network I/O).
 That is where the reactive stack begins to show its strengths, and the differences can be
 dramatic.
-
 
 
 [[webflux-concurrency-model]]
@@ -230,7 +224,6 @@ do not block. Therefore, non-blocking servers use a small, fixed-size thread poo
 TIP: "`To scale`" and "`small number of threads`" may sound contradictory, but to never block the
 current thread (and rely on callbacks instead) means that you do not need extra threads, as
 there are no blocking calls to absorb.
-
 
 [[invoking-a-blocking-api]]
 === Invoking a Blocking API
@@ -283,7 +276,3 @@ you need to use server-specific configuration APIs, or, if you use Spring Boot,
 check the Spring Boot configuration options for each server. You can
 xref:web/webflux-webclient/client-builder.adoc[configure] the `WebClient` directly.
 For all other libraries, see their respective documentation.
-
-
-
-

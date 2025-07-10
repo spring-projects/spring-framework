@@ -45,8 +45,5 @@ xref:data-access/orm/jpa.adoc[Spring's JPA support] where load-time weaving may 
 necessary for JPA class transformation.
 Consult the
 {spring-framework-api}/orm/jpa/LocalContainerEntityManagerFactoryBean.html[`LocalContainerEntityManagerFactoryBean`]
-javadoc for more detail. For more on AspectJ load-time weaving, see xref:core/aop/using-aspectj.adoc#aop-aj-ltw[Load-time Weaving with AspectJ in the Spring Framework].
-
-
-
-
+javadoc for more detail. For more on AspectJ load-time weaving, see
+xref:core/aop/using-aspectj.adoc#aop-aj-ltw[Load-time Weaving with AspectJ in the Spring Framework].

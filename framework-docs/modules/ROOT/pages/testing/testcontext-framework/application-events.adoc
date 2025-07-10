@@ -90,4 +90,3 @@ Kotlin::
 See the
 {spring-framework-api}/test/context/event/ApplicationEvents.html[`ApplicationEvents`
 javadoc] for further details regarding the `ApplicationEvents` API.
-

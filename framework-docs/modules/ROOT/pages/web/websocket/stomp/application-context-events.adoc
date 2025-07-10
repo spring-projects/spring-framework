@@ -35,6 +35,3 @@ NOTE: When you use a full-featured broker, the STOMP "`broker relay`" automatica
 however, are not automatically reconnected. Assuming heartbeats are enabled, the client
 typically notices the broker is not responding within 10 seconds. Clients need to
 implement their own reconnecting logic.
-
-
-

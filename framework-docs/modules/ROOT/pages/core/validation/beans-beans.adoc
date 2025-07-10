@@ -703,7 +703,3 @@ This style of `PropertyEditor` registration can lead to concise code (the implem
 of the `@InitBinder` method is only one line long) and lets common `PropertyEditor`
 registration code be encapsulated in a class and then shared amongst as many controllers
 as needed.
-
-
-
-

@@ -15,7 +15,3 @@ Both web frameworks mirror the names of their source modules
 {spring-framework-code}/spring-webflux[spring-webflux]) and co-exist side by side in the
 Spring Framework. Each module is optional. Applications can use one or the other module or,
 in some cases, both -- for example, Spring MVC controllers with the reactive `WebClient`.
-
-
-
-

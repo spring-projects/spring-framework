@@ -1,6 +1,7 @@
 [[kotlin-web]]
 = Web
 
+
 [[router-dsl]]
 == Router DSL
 
@@ -44,7 +45,6 @@ when you need to register routes depending on dynamic data (for example, from a 
 See https://github.com/mixitconf/mixit/[MiXiT project] for a concrete example.
 
 
-
 [[mockmvc-dsl]]
 == MockMvc DSL
 
@@ -70,7 +70,6 @@ idiomatic Kotlin API and to allow better discoverability (no usage of static met
 		print()
 	}
 ----
-
 
 
 [[kotlin-script-templates]]
@@ -120,7 +119,6 @@ See the https://github.com/sdeleuze/kotlin-script-templating[kotlin-script-templ
 project for more details.
 
 
-
 [[kotlin-multiplatform-serialization]]
 == Kotlin multiplatform serialization
 
@@ -132,4 +130,3 @@ With Spring MVC and WebFlux, both Kotlin serialization and Jackson will be confi
 Kotlin serialization is designed to serialize only Kotlin classes annotated with `@Serializable`.
 With Spring Messaging (RSocket), make sure that neither Jackson, GSON or JSONB are in the classpath if you want automatic configuration,
 if Jackson is needed configure `KotlinSerializationJsonMessageConverter` manually.
-

@@ -64,6 +64,3 @@ time it is accessed from the controller and stores the instance in the WebSocket
 session attributes. The same instance is subsequently returned until the session
 ends. WebSocket-scoped beans have all Spring lifecycle methods invoked, as
 shown in the preceding examples.
-
-
-

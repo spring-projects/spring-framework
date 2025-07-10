@@ -31,5 +31,3 @@ Kotlin::
 ----
 <1> Using `@RequestAttribute`.
 ======
-
-

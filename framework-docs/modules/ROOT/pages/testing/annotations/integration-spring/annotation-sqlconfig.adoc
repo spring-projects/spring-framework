@@ -33,4 +33,3 @@ Kotlin::
 ----
 <1> Set the comment prefix and the separator in SQL scripts.
 ======
-

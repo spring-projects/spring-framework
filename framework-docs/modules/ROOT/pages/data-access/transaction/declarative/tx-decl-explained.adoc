@@ -48,5 +48,3 @@ to be associated with a regular `PlatformTransactionManager`, for example, throu
 The following image shows a conceptual view of calling a method on a transactional proxy:
 
 image::tx.png[]
-
-

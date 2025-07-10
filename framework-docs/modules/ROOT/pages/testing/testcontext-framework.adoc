@@ -19,8 +19,7 @@ The following section provides an overview of the internals of the TestContext f
 If you are interested only in using the framework and are not interested in extending it
 with your own custom listeners or custom loaders, feel free to go directly to the
 configuration (xref:testing/testcontext-framework/ctx-management.adoc[context management],
-xref:testing/testcontext-framework/fixture-di.adoc[dependency injection], xref:testing/testcontext-framework/tx.adoc[transaction management]
-), xref:testing/testcontext-framework/support-classes.adoc[support classes], and
+xref:testing/testcontext-framework/fixture-di.adoc[dependency injection],
+xref:testing/testcontext-framework/tx.adoc[transaction management]),
+xref:testing/testcontext-framework/support-classes.adoc[support classes], and
 xref:testing/annotations.adoc[annotation support] sections.
-
-

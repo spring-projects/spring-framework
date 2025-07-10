@@ -161,5 +161,3 @@ Note that you need to enable the use of matrix variables. In the MVC Java config
 you need to set a `UrlPathHelper` with `removeSemicolonContent=false` through
 xref:web/webmvc/mvc-config/path-matching.adoc[Path Matching]. In the MVC XML namespace, you can set
 `<mvc:annotation-driven enable-matrix-variables="true"/>`.
-
-

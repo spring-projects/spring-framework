@@ -4,7 +4,6 @@
 This section describes how Spring handles the crucial pointcut concept.
 
 
-
 [[aop-api-concepts]]
 == Concepts
 
@@ -69,7 +68,6 @@ TIP: If possible, try to make pointcuts static, allowing the AOP framework to ca
 results of pointcut evaluation when an AOP proxy is created.
 
 
-
 [[aop-api-pointcut-ops]]
 == Operations on Pointcuts
 
@@ -84,7 +82,6 @@ You can compose pointcuts by using the static methods in the
 expressions is usually a simpler approach.
 
 
-
 [[aop-api-pointcuts-aspectj]]
 == AspectJ Expression Pointcuts
 
@@ -95,13 +92,11 @@ uses an AspectJ-supplied library to parse an AspectJ pointcut expression string.
 See the xref:core/aop.adoc[previous chapter] for a discussion of supported AspectJ pointcut primitives.
 
 
-
 [[aop-api-pointcuts-impls]]
 == Convenience Pointcut Implementations
 
 Spring provides several convenient pointcut implementations. You can use some of them
 directly; others are intended to be subclassed in application-specific pointcuts.
-
 
 [[aop-api-pointcuts-static]]
 === Static Pointcuts
@@ -146,7 +141,6 @@ You can use `RegexpMethodPointcutAdvisor` with any `Advice` type.
 An important type of static pointcut is a metadata-driven pointcut. This uses the
 values of metadata attributes (typically, source-level metadata).
 
-
 [[aop-api-pointcuts-dynamic]]
 === Dynamic pointcuts
 
@@ -170,7 +164,6 @@ are specified by using the `org.springframework.aop.support.ControlFlowPointcut`
 NOTE: Control flow pointcuts are significantly more expensive to evaluate at runtime than even
 other dynamic pointcuts. In Java 1.4, the cost is about five times that of other dynamic
 pointcuts.
-
 
 
 [[aop-api-pointcuts-superclasses]]
@@ -214,7 +207,6 @@ There are also superclasses for dynamic pointcuts.
 You can use custom pointcuts with any advice type.
 
 
-
 [[aop-api-pointcuts-custom]]
 == Custom Pointcuts
 
@@ -225,7 +217,3 @@ expression language, if you can.
 
 NOTE: Later versions of Spring may offer support for "`semantic pointcuts`" as offered by JAC --
 for example, "`all methods that change instance variables in the target object.`"
-
-
-
-

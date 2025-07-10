@@ -12,5 +12,3 @@ the server to handle requests. The advantage of using `WebTestClient` is that it
 you the option of working with higher level objects instead of raw data as well as the
 ability to switch to full, end-to-end HTTP tests against a live server and use the same
 test API.
-
-

@@ -20,6 +20,3 @@ include-code::./MyController[tag=snippet,indent=0]
 
 TIP: If you need to have a `LocalValidatorFactoryBean` injected somewhere, create a bean and
 mark it with `@Primary` in order to avoid conflict with the one declared in the MVC configuration.
-
-
-

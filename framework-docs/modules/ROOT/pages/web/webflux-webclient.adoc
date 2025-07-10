@@ -17,7 +17,3 @@ support for the following:
 * https://github.com/jetty-project/jetty-reactive-httpclient[Jetty Reactive HttpClient]
 * https://hc.apache.org/index.html[Apache HttpComponents]
 * Others can be plugged via `ClientHttpConnector`.
-
-
-
-

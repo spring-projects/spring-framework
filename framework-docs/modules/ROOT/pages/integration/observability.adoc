@@ -88,6 +88,7 @@ include-code::./ServerRequestObservationFilter[]
 
 You can configure `ObservationFilter` instances on the `ObservationRegistry`.
 
+
 [[observability.tasks-scheduled]]
 == @Scheduled tasks instrumentation
 
@@ -184,6 +185,7 @@ Such listeners are set on a `MessageConsumer` within a session callback (see `Jm
 
 This observation uses the `io.micrometer.jakarta9.instrument.jms.DefaultJmsProcessObservationConvention` by default, backed by the `io.micrometer.jakarta9.instrument.jms.JmsProcessObservationContext`.
 
+
 [[observability.http-server]]
 == HTTP Server instrumentation
 
@@ -226,7 +228,6 @@ By default, the following `KeyValues` are created:
 |`http.url` _(required)_|HTTP request URI.
 |===
 
-
 [[observability.http-server.reactive]]
 === Reactive applications
 
@@ -265,7 +266,6 @@ By default, the following `KeyValues` are created:
 |===
 
 
-
 [[observability.http-client]]
 == HTTP Client Instrumentation
 
@@ -301,7 +301,6 @@ Instrumentation uses the `org.springframework.http.client.observation.ClientRequ
 |`http.url` _(required)_|HTTP request URI.
 |===
 
-
 [[observability.http-client.restclient]]
 === RestClient
 
@@ -328,7 +327,6 @@ Instrumentation uses the `org.springframework.http.client.observation.ClientRequ
 |Name | Description
 |`http.url` _(required)_|HTTP request URI.
 |===
-
 
 [[observability.http-client.webclient]]
 === WebClient

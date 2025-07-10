@@ -44,8 +44,6 @@ and {reactor-github-org}/reactor-netty[Reactor Netty] for the transport. That me
 signals from Reactive Streams Publishers in your application propagate transparently
 through RSocket across the network.
 
-
-
 [[rsocket-protocol]]
 === The Protocol
 
@@ -100,8 +98,6 @@ Protocol extensions define common metadata formats for use in applications:
   independently formatted metadata entries.
 * {rsocket-protocol-extensions}/Routing.md[Routing] -- the route for a request.
 
-
-
 [[rsocket-java]]
 === Java Implementation
 
@@ -129,8 +125,6 @@ will not have to use its API directly. However it may be important to see or exp
 with RSocket independent of Spring. The RSocket Java repository contains a number of
 {rsocket-java-code}/rsocket-examples[sample apps] that
 demonstrate its API and protocol features.
-
-
 
 [[rsocket-spring]]
 === Spring Support
@@ -163,14 +157,12 @@ clients and servers. See the Spring Integration Reference Manual for more detail
 Spring Cloud Gateway supports RSocket connections.
 
 
-
 [[rsocket-requester]]
 == RSocketRequester
 
 `RSocketRequester` provides a fluent API to perform RSocket requests, accepting and
 returning objects for data and metadata instead of low level data buffers. It can be used
 symmetrically, to make requests from clients and to make requests from servers.
-
 
 [[rsocket-requester-client]]
 === Client Requester
@@ -208,7 +200,6 @@ Kotlin::
 The above does not connect immediately. When requests are made, a shared connection is
 established transparently and used.
 
-
 [[rsocket-requester-client-setup]]
 ==== Connection Setup
 
@@ -226,10 +217,9 @@ metadata, the default mime type is
 metadata value and mime type pairs per request. Typically both don't need to be changed.
 
 Data and metadata in the `SETUP` frame is optional. On the server side,
-xref:rsocket.adoc#rsocket-annot-connectmapping[@ConnectMapping] methods can be used to handle the start of a
-connection and the content of the `SETUP` frame. Metadata may be used for connection
-level security.
-
+xref:rsocket.adoc#rsocket-annot-connectmapping[@ConnectMapping] methods can be used to
+handle the start of a connection and the content of the `SETUP` frame. Metadata may be
+used for connection level security.
 
 [[rsocket-requester-client-strategies]]
 ==== Strategies
@@ -273,7 +263,6 @@ Kotlin::
 
 `RSocketStrategies` is designed for re-use. In some scenarios, for example, client and server in
 the same application, it may be preferable to declare it in Spring configuration.
-
 
 [[rsocket-requester-client-responder]]
 ==== Client Responders
@@ -368,7 +357,6 @@ application.
 
 See also xref:rsocket.adoc#rsocket-annot-responders[Annotated Responders], for more on the programming model.
 
-
 [[rsocket-requester-client-advanced]]
 ==== Advanced
 
@@ -401,7 +389,6 @@ Kotlin::
 			.tcp("localhost", 7000)
 ----
 ======
-
 
 [[rsocket-requester-server]]
 === Server Requester
@@ -451,8 +438,6 @@ Kotlin::
 <1> Start the request asynchronously, independent from handling.
 <2> Perform handling in the suspending function.
 ======
-
-
 
 [[rsocket-requester-requests]]
 === Requests
@@ -578,7 +563,6 @@ indicates only that the message was successfully sent, and not that it was handl
 For `Metadata-Push` use the `sendMetadata()` method with a `Mono<Void>` return value.
 
 
-
 [[rsocket-annot-responders]]
 == Annotated Responders
 
@@ -586,8 +570,6 @@ RSocket responders can be implemented as `@MessageMapping` and `@ConnectMapping`
 `@MessageMapping` methods handle individual requests while `@ConnectMapping` methods handle
 connection-level events (setup and metadata push). Annotated responders are supported
 symmetrically, for responding from the server side and for responding from the client side.
-
-
 
 [[rsocket-annot-responders-server]]
 === Server Responders
@@ -729,16 +711,12 @@ Kotlin::
 ----
 ======
 
-
-
 [[rsocket-annot-responders-client]]
 === Client Responders
 
 Annotated responders on the client side need to be configured in the
 `RSocketRequester.Builder`. For details, see
 xref:rsocket.adoc#rsocket-requester-client-responder[Client Responders].
-
-
 
 [[rsocket-annot-messagemapping]]
 === @MessageMapping
@@ -863,8 +841,6 @@ interaction type(s):
 
 |===
 
-
-
 [[rsocket-annot-rsocketexchange]]
 === @RSocketExchange
 
@@ -927,7 +903,6 @@ xref:rsocket-interface[RSocket Interface] for a list of supported parameters.
 `@RSocketExchange` can be used at the type level to specify a common prefix for all routes
 for a given RSocket service interface.
 
-
 [[rsocket-annot-connectmapping]]
 === @ConnectMapping
 
@@ -946,8 +921,6 @@ then all connections match.
 connection then the connection is rejected. Handling must not be held up to make
 requests to the `RSocketRequester` for the connection. See
 xref:rsocket.adoc#rsocket-requester-server[Server Requester] for details.
-
-
 
 
 [[rsocket-metadata-extractor]]
@@ -1057,8 +1030,6 @@ Kotlin::
 ======
 
 
-
-
 [[rsocket-interface]]
 == RSocket Interface
 
@@ -1095,8 +1066,6 @@ Now you can create a proxy that performs requests when methods are called:
 You can also implement the interface to handle requests as a responder.
 See xref:rsocket.adoc#rsocket-annot-rsocketexchange[Annotated Responders].
 
-
-
 [[rsocket-interface-method-parameters]]
 === Method Parameters
 
@@ -1131,7 +1100,6 @@ method parameters:
 
 |===
 
-
 [[rsocket-interface-return-values]]
 === Return Values
 
@@ -1144,4 +1112,3 @@ signature depends on response timeout settings of the underlying RSocket `Client
 as well as RSocket keep-alive settings. `RSocketServiceProxyFactory.Builder` does expose a
 `blockTimeout` option that also lets you configure the maximum time to block for a response,
 but we recommend configuring timeout values at the RSocket level for more control.
-

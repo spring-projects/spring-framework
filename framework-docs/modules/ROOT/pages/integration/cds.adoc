@@ -9,6 +9,7 @@ To use this feature, a CDS archive should be created for the particular classpat
 application. The Spring Framework provides a hook-point to ease the creation of the
 archive. Once the archive is available, users should opt in to use it via a JVM flag.
 
+
 == Creating the CDS Archive
 
 A CDS archive for an application can be created when the application exits. The Spring
@@ -39,6 +40,7 @@ command:
 ----
   $ java -Xshare:dump
 ----
+
 
 == Using the Archive
 

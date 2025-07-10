@@ -21,6 +21,3 @@ These features are designed to work without coupling your application components
 either Spring or JMX interfaces and classes. Indeed, for the most part, your application
 classes need not be aware of either Spring or JMX in order to take advantage of the
 Spring JMX features.
-
-
-

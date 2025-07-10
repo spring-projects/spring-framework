@@ -90,5 +90,3 @@ Kotlin::
 ----
 <1> Set the `@Sql` merge mode to `MERGE` for a specific test method.
 ======
-
-

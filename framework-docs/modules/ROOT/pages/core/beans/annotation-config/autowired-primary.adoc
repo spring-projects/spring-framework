@@ -152,6 +152,3 @@ The corresponding bean definitions follow:
 
 	</beans>
 ----
-
-
-

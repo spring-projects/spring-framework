@@ -21,7 +21,6 @@ operate on shared `BeanDefinition` objects as a core metadata representation.
 This is the essence of what makes Spring's container so flexible and extensible.
 
 
-
 [[context-introduction-ctx-vs-beanfactory]]
 == `BeanFactory` or `ApplicationContext`?
 

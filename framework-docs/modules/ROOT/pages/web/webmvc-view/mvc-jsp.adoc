@@ -4,7 +4,6 @@
 The Spring Framework has a built-in integration for using Spring MVC with JSP and JSTL.
 
 
-
 [[mvc-view-jsp-resolver]]
 == View Resolvers
 
@@ -24,14 +23,11 @@ a directory under the `'WEB-INF'` directory so there can be no direct access by 
 ----
 
 
-
 [[mvc-view-jsp-jstl]]
 == JSPs versus JSTL
 
 When using the JSP Standard Tag Library (JSTL) you must use a special view class, the
-`JstlView`, as JSTL needs some preparation before things such as the I18N features can
-work.
-
+`JstlView`, as JSTL needs some preparation before things such as the I18N features can work.
 
 
 [[mvc-view-jsp-tags]]
@@ -64,7 +60,6 @@ JSPs easier to develop, read, and maintain.
 We go through the form tags and look at an example of how each tag is used. We have
 included generated HTML snippets where certain tags require further commentary.
 
-
 [[mvc-view-jsp-formtaglib-configuration]]
 === Configuration
 
@@ -79,7 +74,6 @@ page:
 	<%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
 ----
 where `form` is the tag name prefix you want to use for the tags from this library.
-
 
 [[mvc-view-jsp-formtaglib-formtag]]
 === The Form Tag
@@ -168,14 +162,12 @@ following example shows:
 	</form:form>
 ----
 
-
 [[mvc-view-jsp-formtaglib-inputtag]]
 === The `input` Tag
 
 This tag renders an HTML `input` element with the bound value and `type='text'` by default.
 For an example of this tag, see xref:web/webmvc-view/mvc-jsp.adoc#mvc-view-jsp-formtaglib-formtag[The Form Tag]. You can also use
 HTML5-specific types, such as `email`, `tel`, `date`, and others.
-
 
 [[mvc-view-jsp-formtaglib-checkboxtag]]
 === The `checkbox` Tag
@@ -306,7 +298,6 @@ prefixed by an underscore (`_`) for each checkbox. By doing this, you are effect
 telling Spring that "`the checkbox was visible in the form, and I want my object to
 which the form data binds to reflect the state of the checkbox, no matter what.`"
 
-
 [[mvc-view-jsp-formtaglib-checkboxestag]]
 === The `checkboxes` Tag
 
@@ -341,8 +332,6 @@ the map entry key is used as the value, and the map entry's value is used as
 the label to be displayed. You can also use a custom object where you can provide the
 property names for the value by using `itemValue` and the label by using `itemLabel`.
 
-
-
 [[mvc-view-jsp-formtaglib-radiobuttontag]]
 === The `radiobutton` Tag
 
@@ -361,7 +350,6 @@ but with different values, as the following example shows:
 		</td>
 	</tr>
 ----
-
 
 [[mvc-view-jsp-formtaglib-radiobuttonstag]]
 === The `radiobuttons` Tag
@@ -383,7 +371,6 @@ by using `itemValue` and the label by using `itemLabel`, as the following exampl
 		<td><form:radiobuttons path="sex" items="${sexOptions}"/></td>
 	</tr>
 ----
-
 
 [[mvc-view-jsp-formtaglib-passwordtag]]
 === The `password` Tag
@@ -413,7 +400,6 @@ password value to be shown, you can set the value of the `showPassword` attribut
 		</td>
 	</tr>
 ----
-
 
 [[mvc-view-jsp-formtaglib-selecttag]]
 === The `select` Tag
@@ -447,7 +433,6 @@ as follows:
 		</td>
 	</tr>
 ----
-
 
 [[mvc-view-jsp-formtaglib-optiontag]]
 === The `option` Tag
@@ -488,7 +473,6 @@ as follows:
 	</tr>
 ----
 <1> Note the addition of a `selected` attribute.
-
 
 [[mvc-view-jsp-formtaglib-optionstag]]
 === The `options` Tag
@@ -540,7 +524,6 @@ values and the map values correspond to option labels. If `itemValue` or `itemLa
 happen to be specified as well, the item value property applies to the map key, and
 the item label property applies to the map value.
 
-
 [[mvc-view-jsp-formtaglib-textareatag]]
 === The `textarea` Tag
 
@@ -554,7 +537,6 @@ This tag renders an HTML `textarea` element. The following HTML shows typical ou
 		<td><form:errors path="notes"/></td>
 	</tr>
 ----
-
 
 [[mvc-view-jsp-formtaglib-hiddeninputtag]]
 === The `hidden` Tag
@@ -575,7 +557,6 @@ If we choose to submit the `house` value as a hidden one, the HTML would be as f
 	<input name="house" type="hidden" value="Gryffindor"/>
 
 ----
-
 
 [[mvc-view-jsp-formtaglib-errorstag]]
 === The `errors` Tag
@@ -748,8 +729,6 @@ For a comprehensive reference on individual tags, browse the
 {spring-framework-api}/web/servlet/tags/form/package-summary.html#package.description[API reference]
 or see the tag library description.
 
-
-
 [[mvc-rest-method-conversion]]
 === HTTP Method Conversion
 
@@ -832,7 +811,3 @@ The form `input` tag supports entering a type attribute other than `text`. This 
 intended to allow rendering new HTML5 specific input types, such as `email`, `date`,
 `range`, and others. Note that entering `type='text'` is not required, since `text`
 is the default type.
-
-
-
-

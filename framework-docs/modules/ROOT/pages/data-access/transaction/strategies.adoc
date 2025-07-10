@@ -279,6 +279,3 @@ for enforcing the same defaults:
 
 	<bean id="txManager" class="org.springframework.transaction.jta.JtaTransactionManager"/>
 ----
-
-
-

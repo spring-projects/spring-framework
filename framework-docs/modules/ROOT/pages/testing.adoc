@@ -8,13 +8,3 @@ found that the correct use of inversion of control (IoC) certainly does make bot
 and integration testing easier (in that the presence of setter methods and appropriate
 constructors on classes makes them easier to wire together in a test without having to
 set up service locator registries and similar structures).
-
-
-
-
-
-
-
-
-
-

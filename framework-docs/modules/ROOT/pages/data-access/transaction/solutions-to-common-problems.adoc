@@ -18,6 +18,3 @@ it) for all your transactional operations. Otherwise, the transaction infrastruc
 tries to perform local transactions on such resources as container `DataSource`
 instances. Such local transactions do not make sense, and a good application server
 treats them as errors.
-
-
-

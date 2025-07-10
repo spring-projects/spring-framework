@@ -43,4 +43,3 @@ reason about, and debug but does not replace the need for full integration tests
 same time, it is important not to lose sight of the fact that the response is the most
 important thing to check. In short, there is room for multiple styles and strategies
 of testing even within the same project.
-

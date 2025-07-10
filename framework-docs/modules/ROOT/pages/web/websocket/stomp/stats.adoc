@@ -54,6 +54,3 @@ Client Outbound Channel:: Statistics from the thread pool that backs the `client
 SockJS Task Scheduler:: Statistics from the thread pool of the SockJS task scheduler that
 	is used to send heartbeats. Note that, when heartbeats are negotiated on the
 	STOMP level, the SockJS heartbeats are disabled.
-
-
-

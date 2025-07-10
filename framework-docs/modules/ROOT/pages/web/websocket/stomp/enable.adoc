@@ -46,4 +46,3 @@ For more example code see:
 interactive web application] -- a getting started guide.
 * https://github.com/rstoyanchev/spring-websocket-portfolio[Stock Portfolio] -- a sample
 application.
-

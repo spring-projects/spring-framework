@@ -293,6 +293,3 @@ in an unmanaged environment, you can specify these values through the use of the
 properties `sessionTransacted` and `sessionAcknowledgeMode`. When you use a
 `PlatformTransactionManager` with `JmsTemplate`, the template is always given a
 transactional JMS `Session`.
-
-
-

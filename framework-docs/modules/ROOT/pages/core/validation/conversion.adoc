@@ -22,7 +22,3 @@ in the javadoc of
 {spring-framework-api}/validation/MessageCodesResolver.html[`MessageCodesResolver`] and
 {spring-framework-api}/validation/DefaultMessageCodesResolver.html[`DefaultMessageCodesResolver`],
 respectively.
-
-
-
-

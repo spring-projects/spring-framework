@@ -368,7 +368,6 @@ Kotlin::
 <3> Convert the response into a Pet domain object
 ======
 
-
 [[rest-message-conversion]]
 === HTTP Message Conversion
 
@@ -441,6 +440,7 @@ Finally, it will resort to the simple default.
 TIP: Note that the `SimpleClientHttpRequestFactory` may raise an exception when accessing the status of a response that represents an error (for example, 401).
 If this is an issue, use any of the alternative request factories.
 
+
 [[rest-webclient]]
 == `WebClient`
 
@@ -458,8 +458,6 @@ synchronous, asynchronous, and streaming scenarios.
 * Streaming up to or streaming down from a server
 
 See xref:web/webflux-webclient.adoc[WebClient] for more details.
-
-
 
 
 [[rest-resttemplate]]
@@ -533,7 +531,8 @@ See the xref:integration/observability.adoc#http-client.resttemplate[RestTemplat
 [[rest-template-body]]
 === Body
 
-Objects passed into and returned from `RestTemplate` methods are converted to and from HTTP messages with the help of an `HttpMessageConverter`, see <<rest-message-conversion>>.
+Objects passed into and returned from `RestTemplate` methods are converted to and from HTTP messages
+with the help of an `HttpMessageConverter`, see <<rest-message-conversion>>.
 
 === Migrating from `RestTemplate` to `RestClient`
 
@@ -919,7 +918,6 @@ For `RestTemplate`:
 	}
 ----
 
-
 [[rest-http-interface-method-parameters]]
 === Method Parameters
 
@@ -988,8 +986,6 @@ method parameters:
 Method parameters cannot be `null` unless the `required` attribute (where available on a
 parameter annotation) is set to `false`, or the parameter is marked optional as determined by
 {spring-framework-api}/core/MethodParameter.html#isOptional()[`MethodParameter#isOptional`].
-
-
 
 [[rest-http-interface.custom-resolver]]
 === Custom argument resolver
@@ -1084,7 +1080,6 @@ depends on how the underlying HTTP client is configured. You can set a `blockTim
 value on the adapter level as well, but we recommend relying on timeout settings of the
 underlying HTTP client, which operates at a lower level and provides more control.
 
-
 [[rest-http-interface-exceptions]]
 === Error Handling
 
@@ -1145,4 +1140,3 @@ performed through the client:
 
 For more details and options, see the Javadoc of `setErrorHandler` in `RestTemplate` and
 the `ResponseErrorHandler` hierarchy.
-

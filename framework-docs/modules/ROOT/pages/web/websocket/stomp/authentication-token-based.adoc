@@ -47,6 +47,3 @@ you need to ensure that the authentication `ChannelInterceptor` config is ordere
 ahead of Spring Security's. This is best done by declaring the custom interceptor in
 its own implementation of `WebSocketMessageBrokerConfigurer` that is marked with
 `@Order(Ordered.HIGHEST_PRECEDENCE + 99)`.
-
-
-

@@ -43,5 +43,3 @@ Kotlin::
 
 Type conversion is applied automatically if the target method parameter type is not
 `String`. See xref:web/webflux/controller/ann-methods/typeconversion.adoc[Type Conversion].
-
-

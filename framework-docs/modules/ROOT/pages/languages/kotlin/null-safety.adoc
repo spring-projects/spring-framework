@@ -32,7 +32,3 @@ be added in the future.
 NOTE: Generic type arguments, varargs, and array elements nullability are not supported yet,
 but should be in an upcoming release. See {kotlin-github-org}/KEEP/issues/79[this discussion]
 for up-to-date information.
-
-
-
-

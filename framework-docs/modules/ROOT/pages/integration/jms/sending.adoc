@@ -59,8 +59,8 @@ If you created the `JmsTemplate` and specified a default destination, the
 `send(MessageCreator c)` sends a message to that destination.
 
 
-[[jms-msg-conversion]]
-== Using Message Converters
+[[jms-sending-conversion]]
+== Using JMS Message Converters
 
 To facilitate the sending of domain model objects, the `JmsTemplate` has
 various send methods that take a Java object as an argument for a message's data
@@ -87,7 +87,7 @@ following example shows how to modify a message header and a property after a
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public void sendWithConversion() {
-		Map map = new HashMap();
+		Map<String, String> map = new HashMap<>();
 		map.put("Name", "Mark");
 		map.put("Age", new Integer(47));
 		jmsTemplate.convertAndSend("testQueue", map, new MessagePostProcessor() {
@@ -121,14 +121,11 @@ MapMessage={
 ----
 
 
-[[jms-callbacks]]
-== Using `SessionCallback` and `ProducerCallback`
+[[jms-sending-callbacks]]
+== Using `SessionCallback` and `ProducerCallback` on `JmsTemplate`
 
 While the send operations cover many common usage scenarios, you might sometimes
 want to perform multiple operations on a JMS `Session` or `MessageProducer`. The
 `SessionCallback` and `ProducerCallback` expose the JMS `Session` and `Session` /
 `MessageProducer` pair, respectively. The `execute()` methods on `JmsTemplate` run
 these callback methods.
-
-
-

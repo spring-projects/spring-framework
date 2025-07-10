@@ -16,8 +16,6 @@ You can find fully working examples of where this dynamic language support can b
 immediately useful in xref:languages/dynamic.adoc#dynamic-language-scenarios[Scenarios].
 
 
-
-
 [[dynamic-language-a-first-example]]
 == A First Example
 
@@ -127,8 +125,6 @@ Hopefully, the preceding XML snippet is self-explanatory, but do not worry undul
 Keep reading for the in-depth detail on the whys and wherefores of the preceding configuration.
 
 
-
-
 [[dynamic-language-beans]]
 == Defining Beans that Are Backed by Dynamic Languages
 
@@ -138,10 +134,9 @@ supported dynamic languages.
 Note that this chapter does not attempt to explain the syntax and idioms of the supported
 dynamic languages. For example, if you want to use Groovy to write certain of the classes
 in your application, we assume that you already know Groovy. If you need further details
-about the dynamic languages themselves, see xref:languages/dynamic.adoc#dynamic-language-resources[Further Resources] at the end of
+about the dynamic languages themselves, see
+xref:languages/dynamic.adoc#dynamic-language-resources[Further Resources] at the end of
 this chapter.
-
-
 
 [[dynamic-language-beans-concepts]]
 === Common Concepts
@@ -164,7 +159,6 @@ source files. You first want to read the rest of this chapter, though, as
 Spring's dynamic language support does make some (small) assumptions about the contents
 of your dynamic language source files.
 
-
 [[dynamic-language-beans-concepts-xml-language-element]]
 ==== The <lang:language/> element
 
@@ -184,7 +178,6 @@ Each of the supported languages has a corresponding `<lang:language/>` element:
 The exact attributes and child elements that are available for configuration depends on
 exactly which language the bean has been defined in (the language-specific sections
 later in this chapter detail this).
-
 
 [[dynamic-language-refreshable-beans]]
 ==== Refreshable Beans
@@ -310,11 +303,10 @@ results in a fatal exception being propagated to the calling code.
 
 The refreshable bean behavior described earlier does not apply to dynamic language
 source files defined with the `<lang:inline-script/>` element notation (see
-xref:languages/dynamic.adoc#dynamic-language-beans-inline[Inline Dynamic Language Source Files]). Additionally, it applies only to beans where
-changes to the underlying source file can actually be detected (for example, by code
-that checks the last modified date of a dynamic language source file that exists on the
-file system).
-
+xref:languages/dynamic.adoc#dynamic-language-beans-inline[Inline Dynamic Language Source Files]).
+Additionally, it applies only to beans where changes to the underlying source file can
+actually be detected (for example, by code that checks the last modified date of a
+dynamic language source file that exists on the file system).
 
 [[dynamic-language-beans-inline]]
 ==== Inline Dynamic Language Source Files
@@ -347,9 +339,9 @@ If we put to one side the issues surrounding whether it is good practice to defi
 dynamic language source inside a Spring configuration file, the `<lang:inline-script/>`
 element can be useful in some scenarios. For instance, we might want to quickly add a
 Spring `Validator` implementation to a Spring MVC `Controller`. This is but a moment's
-work using inline source. (See xref:languages/dynamic.adoc#dynamic-language-scenarios-validators[Scripted Validators] for such an
-example.)
-
+work using inline source. (See
+xref:languages/dynamic.adoc#dynamic-language-scenarios-validators[Scripted Validators]
+for such an example.)
 
 [[dynamic-language-beans-ctor-injection]]
 ==== Understanding Constructor Injection in the Context of Dynamic-language-backed Beans
@@ -401,8 +393,6 @@ does not work:
 In practice this limitation is not as significant as it first appears, since setter
 injection is the injection style favored by the overwhelming majority of developers
 (we leave the discussion as to whether that is a good thing to another day).
-
-
 
 [[dynamic-language-beans-groovy]]
 === Groovy Beans
@@ -481,7 +471,6 @@ You must not define more than one class per Groovy source file. While this is pe
 legal in Groovy, it is (arguably) a bad practice. In the interests of a consistent
 approach, you should (in the opinion of the Spring team) respect the standard Java
 conventions of one (public) class per source file.
-
 
 [[dynamic-language-beans-groovy-customizer]]
 ==== Customizing Groovy Objects by Using a Callback
@@ -565,8 +554,6 @@ configuration for your beans at the `ConfigurableApplicationContext.setClassLoad
 this also leads to shared `GroovyClassLoader` usage and is therefore recommendable in case of
 a large number of scripted beans (avoiding an isolated `GroovyClassLoader` instance per bean).
 
-
-
 [[dynamic-language-beans-bsh]]
 === BeanShell Beans
 
@@ -633,10 +620,8 @@ The following example shows the Spring XML that defines an "`instance`" of the a
 	</lang:bsh>
 ----
 
-See xref:languages/dynamic.adoc#dynamic-language-scenarios[Scenarios] for some scenarios where you might want to use
-BeanShell-based beans.
-
-
+See xref:languages/dynamic.adoc#dynamic-language-scenarios[Scenarios] for some scenarios
+where you might want to use BeanShell-based beans.
 
 
 [[dynamic-language-scenarios]]
@@ -645,8 +630,6 @@ BeanShell-based beans.
 The possible scenarios where defining Spring managed beans in a scripting language would
 be beneficial are many and varied. This section describes two possible use cases for the
 dynamic language support in Spring.
-
-
 
 [[dynamic-language-scenarios-controllers]]
 === Scripted Spring MVC Controllers
@@ -708,8 +691,6 @@ by using the Groovy dynamic language:
 	</lang:groovy>
 ----
 
-
-
 [[dynamic-language-scenarios-validators]]
 === Scripted Validators
 
@@ -725,12 +706,13 @@ running application and would not require the restart of an application.
 
 NOTE: To effect the automatic "`pickup`" of any changes to dynamic-language-backed
 beans, you have to enable the 'refreshable beans' feature. See
-xref:languages/dynamic.adoc#dynamic-language-refreshable-beans[Refreshable Beans] for a full and detailed treatment of this feature.
+xref:languages/dynamic.adoc#dynamic-language-refreshable-beans[Refreshable Beans]
+for a full and detailed treatment of this feature.
 
 The following example shows a Spring `org.springframework.validation.Validator`
-implemented by using the Groovy dynamic language (see xref:core/validation/validator.adoc[Validation using Spring’s Validator interface]
- for a discussion of the
-`Validator` interface):
+implemented by using the Groovy dynamic language (see
+xref:core/validation/validator.adoc[Validation using Spring’s Validator interface]
+for a discussion of the `Validator` interface):
 
 [source,groovy,indent=0,subs="verbatim,quotes"]
 ----
@@ -754,14 +736,10 @@ implemented by using the Groovy dynamic language (see xref:core/validation/valid
 ----
 
 
-
-
 [[dynamic-language-final-notes]]
 == Additional Details
 
 This last section contains some additional details related to the dynamic language support.
-
-
 
 [[dynamic-language-final-notes-aop]]
 === AOP -- Advising Scripted Beans
@@ -775,8 +753,6 @@ proxies. You must use xref:core/aop/proxying.adoc[interface-based proxies].
 You are not limited to advising scripted beans. You can also write aspects themselves
 in a supported dynamic language and use such beans to advise other Spring beans.
 This really would be an advanced use of the dynamic language support though.
-
-
 
 [[dynamic-language-final-notes-scopes]]
 === Scoping
@@ -810,10 +786,9 @@ a xref:core/beans/factory-scopes.adoc#beans-factory-scopes-prototype[prototype]:
 	</beans>
 ----
 
-See xref:core/beans/factory-scopes.adoc[Bean Scopes] in xref:web/webmvc-view/mvc-xslt.adoc#mvc-view-xslt-beandefs[The IoC Container]
+See xref:core/beans/factory-scopes.adoc[Bean Scopes] in
+xref:web/webmvc-view/mvc-xslt.adoc#mvc-view-xslt-beandefs[The IoC Container]
 for a full discussion of the scoping support in the Spring Framework.
-
-
 
 [[xsd-schemas-lang]]
 === The `lang` XML schema
@@ -843,8 +818,6 @@ the correct schema so that the tags in the `lang` namespace are available to you
 
 	</beans>
 ----
-
-
 
 
 [[dynamic-language-resources]]
