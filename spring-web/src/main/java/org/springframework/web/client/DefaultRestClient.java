@@ -561,7 +561,7 @@ final class DefaultRestClient implements RestClient {
 		}
 
 		@Override
-		public <T> @Nullable T exchange(ExchangeFunction<T> exchangeFunction, boolean close) {
+		public <T extends @Nullable Object> T exchange(ExchangeFunction<T> exchangeFunction, boolean close) {
 			return exchangeInternal(exchangeFunction, close);
 		}
 
@@ -572,7 +572,7 @@ final class DefaultRestClient implements RestClient {
 			return value;
 		}
 
-		private <T> @Nullable T exchangeInternal(ExchangeFunction<T> exchangeFunction, boolean close) {
+		private <T extends @Nullable Object> T exchangeInternal(ExchangeFunction<T> exchangeFunction, boolean close) {
 			Assert.notNull(exchangeFunction, "ExchangeFunction must not be null");
 
 			ClientHttpResponse clientResponse = null;
@@ -803,11 +803,13 @@ final class DefaultRestClient implements RestClient {
 		}
 
 		@Override
+		@SuppressWarnings("NullAway") // See https://github.com/uber/NullAway/issues/1075
 		public <T> @Nullable T body(Class<T> bodyType) {
 			return executeAndExtract((request, response) -> readBody(request, response, bodyType, bodyType, this.hints));
 		}
 
 		@Override
+		@SuppressWarnings("NullAway") // See https://github.com/uber/NullAway/issues/1075
 		public <T> @Nullable T body(ParameterizedTypeReference<T> bodyType) {
 			Type type = bodyType.getType();
 			Class<T> bodyClass = bodyClass(type);
@@ -880,7 +882,7 @@ final class DefaultRestClient implements RestClient {
 			return hints;
 		}
 
-		public <T> @Nullable T executeAndExtract(RequestHeadersSpec.ExchangeFunction<T> exchangeFunction) {
+		public <T extends @Nullable Object> T executeAndExtract(RequestHeadersSpec.ExchangeFunction<T> exchangeFunction) {
 			return this.requestHeadersSpec.exchange(exchangeFunction);
 		}
 

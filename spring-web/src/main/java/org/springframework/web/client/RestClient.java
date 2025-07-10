@@ -29,6 +29,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 
 import io.micrometer.observation.ObservationRegistry;
+import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
 import org.springframework.core.ParameterizedTypeReference;
@@ -714,7 +715,7 @@ public interface RestClient {
 		 * @return the value returned from the exchange function, potentially {@code null}
 		 * @see RequestHeadersSpec#exchangeForRequiredValue(RequiredValueExchangeFunction)
 		 */
-		default <T> @Nullable T exchange(ExchangeFunction<T> exchangeFunction) {
+		default <T extends @Nullable Object> T exchange(ExchangeFunction<T> exchangeFunction) {
 			return exchange(exchangeFunction, true);
 		}
 
@@ -775,7 +776,7 @@ public interface RestClient {
 		 * @return the value returned from the exchange function, potentially {@code null}
 		 * @see RequestHeadersSpec#exchangeForRequiredValue(RequiredValueExchangeFunction, boolean)
 		 */
-		<T> @Nullable T exchange(ExchangeFunction<T> exchangeFunction, boolean close);
+		<T extends @Nullable Object> T exchange(ExchangeFunction<T> exchangeFunction, boolean close);
 
 		/**
 		 * Exchange the {@link ClientHttpResponse} for a value of type {@code T}.
@@ -814,7 +815,7 @@ public interface RestClient {
 		 * @param <T> the type the response will be transformed to
 		 */
 		@FunctionalInterface
-		interface ExchangeFunction<T> {
+		interface ExchangeFunction<T extends @Nullable Object> {
 
 			/**
 			 * Exchange the given response into a value of type {@code T}.
@@ -823,7 +824,7 @@ public interface RestClient {
 			 * @return the exchanged value, potentially {@code null}
 			 * @throws IOException in case of I/O errors
 			 */
-			@Nullable T exchange(HttpRequest clientRequest, ConvertibleClientHttpResponse clientResponse) throws IOException;
+			T exchange(HttpRequest clientRequest, ConvertibleClientHttpResponse clientResponse) throws IOException;
 		}
 
 		/**
@@ -833,7 +834,7 @@ public interface RestClient {
 		 * @param <T> the type the response will be transformed to
 		 */
 		@FunctionalInterface
-		interface RequiredValueExchangeFunction<T> extends ExchangeFunction<T> {
+		interface RequiredValueExchangeFunction<T> extends ExchangeFunction<@NonNull T> {
 
 			/**
 			 * Exchange the given response into a value of type {@code T}.
