@@ -54,7 +54,7 @@ public class PrototypeTargetSource extends AbstractPrototypeBasedTargetSource {
 
 	@Override
 	public String toString() {
-		return "PrototypeTargetSource for target bean with name '" + getPlainTargetBeanName() + "'";
+		return "PrototypeTargetSource for target bean with name '" + this.targetBeanName + "'";
 	}
 
 }
