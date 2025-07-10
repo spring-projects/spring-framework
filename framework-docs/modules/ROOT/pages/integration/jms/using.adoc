@@ -4,12 +4,19 @@
 This section describes how to use Spring's JMS components.
 
 
-[[jms-jmstemplate]]
-== Using `JmsTemplate`
+[[jms-jmstemplate-jmsclient]]
+== `JmsTemplate` and `JmsClient`
 
 The `JmsTemplate` class is the central class in the JMS core package. It simplifies the
 use of JMS, since it handles the creation and release of resources when sending or
 synchronously receiving messages.
+
+`JmsClient` is a new API variant in Spring Framework 7.0, following the design of
+`JdbcClient` and co. `JmsClient` builds on `JmsTemplate` for straightforward send
+and receive operations with customization options per operation.
+
+[[jms-jmstemplate]]
+=== Using `JmsTemplate`
 
 Code that uses the `JmsTemplate` needs only to implement callback interfaces that give them
 a clearly defined high-level contract. The `MessageCreator` callback interface creates a
@@ -43,10 +50,23 @@ and then safely inject this shared reference into multiple collaborators. To be
 clear, the `JmsTemplate` is stateful, in that it maintains a reference to a
 `ConnectionFactory`, but this state is not conversational state.
 
+[[jms-jmsclient]]
+=== Using `JmsClient`
+
 As of Spring Framework 4.1, `JmsMessagingTemplate` is built on top of `JmsTemplate`
-and provides an integration with the messaging abstraction -- that is,
-`org.springframework.messaging.Message`. This lets you create the message to
-send in a generic manner.
+and provides an integration with the Spring's common messaging abstraction -- that is,
+handling `org.springframework.messaging.Message` for sending and receiving,
+throwing `org.springframework.messaging.MessagingException` and with payload conversion
+going through `org.springframework.messaging.converter.MessageConverter` (with many
+common converter implementations available).
+
+As of Spring Framework 7.0, a fluent API called `JmsClient` is available. This provides
+customizable operations around `org.springframework.messaging.Message` and throwing
+`org.springframework.messaging.MessagingException`, similar to `JmsMessagingTemplate`,
+as well as integration with `org.springframework.messaging.converter.MessageConverter`.
+A `JmsClient can either be created for a given `ConnectionFactory` or for a given
+`JmsTemplate`, in the latter case reusing its settings by default. See
+{spring-framework-api}/jms/core/JmsClient.html[`JmsClient`] for usage examples.
 
 
 [[jms-connections]]
@@ -293,6 +313,3 @@ in an unmanaged environment, you can specify these values through the use of the
 properties `sessionTransacted` and `sessionAcknowledgeMode`. When you use a
 `PlatformTransactionManager` with `JmsTemplate`, the template is always given a
 transactional JMS `Session`.
-
-
-

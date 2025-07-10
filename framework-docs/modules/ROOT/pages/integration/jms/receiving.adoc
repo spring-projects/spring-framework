@@ -7,8 +7,8 @@ This describes how to receive messages with JMS in Spring.
 [[jms-receiving-sync]]
 == Synchronous Receipt
 
-While JMS is typically associated with asynchronous processing, you can
-consume messages synchronously. The overloaded `receive(..)` methods provide this
+While JMS is typically associated with asynchronous processing, you can consume messages
+synchronously. The `receive(..)` methods on `JmsTemplate` and `JmsClient` provide this
 functionality. During a synchronous receive, the calling thread blocks until a message
 becomes available. This can be a dangerous operation, since the calling thread can
 potentially be blocked indefinitely. The `receiveTimeout` property specifies how long

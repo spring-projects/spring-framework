@@ -59,8 +59,8 @@ If you created the `JmsTemplate` and specified a default destination, the
 `send(MessageCreator c)` sends a message to that destination.
 
 
-[[jms-msg-conversion]]
-== Using Message Converters
+[[jms-sending-conversion]]
+== Using JMS Message Converters
 
 To facilitate the sending of domain model objects, the `JmsTemplate` has
 various send methods that take a Java object as an argument for a message's data
@@ -87,7 +87,7 @@ following example shows how to modify a message header and a property after a
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public void sendWithConversion() {
-		Map map = new HashMap();
+		Map<String, String> map = new HashMap<>();
 		map.put("Name", "Mark");
 		map.put("Age", new Integer(47));
 		jmsTemplate.convertAndSend("testQueue", map, new MessagePostProcessor() {
@@ -120,15 +120,43 @@ MapMessage={
 }
 ----
 
+NOTE: This JMS-specific `org.springframework.jms.support.converter.MessageConverter`
+arrangement operates on JMS message types and is responsible for immediate conversion
+to `jakarta.jms.TextMessage`, `jakarta.jms.BytesMessage`, etc. For a contract supporting
+generic message payloads, use `org.springframework.messaging.converter.MessageConverter`
+with `JmsMessagingTemplate` or preferably `JmsClient` as your central delegate instead.
 
-[[jms-callbacks]]
-== Using `SessionCallback` and `ProducerCallback`
+
+[[jms-sending-jmsclient]]
+== Sending a Message with `JmsClient`
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+// Reusable handle, typically created through JmsClient.create(ConnectionFactory)
+// For custom conversion, use JmsClient.create(ConnectionFactory, MessageConverter)
+private JmsClient jmsClient;
+
+public void sendWithConversion() {
+    this.jmsClient.destination("myQueue")
+            .withTimeToLive(1000)
+            .send("myPayload");  // optionally with a headers Map next to the payload
+}
+
+public void sendCustomMessage() {
+    Message<?> message =
+            MessageBuilder.withPayload("myPayload").build();  // optionally with headers
+    this.jmsClient.destination("myQueue")
+            .withTimeToLive(1000)
+            .send(message);
+}
+----
+
+
+[[jms-sending-callbacks]]
+== Using `SessionCallback` and `ProducerCallback` on `JmsTemplate`
 
 While the send operations cover many common usage scenarios, you might sometimes
 want to perform multiple operations on a JMS `Session` or `MessageProducer`. The
 `SessionCallback` and `ProducerCallback` expose the JMS `Session` and `Session` /
 `MessageProducer` pair, respectively. The `execute()` methods on `JmsTemplate` run
 these callback methods.
-
-
-
