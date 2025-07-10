@@ -316,9 +316,11 @@ Java::
 
 	List<Integer> input = ...
 	cs.convert(input,
-		TypeDescriptor.forObject(input), // List<Integer> type descriptor
-		TypeDescriptor.collection(List.class, TypeDescriptor.valueOf(String.class)));
+		TypeDescriptor.collection(List.class, TypeDescriptor.valueOf(Integer.class)), // <1>
+		TypeDescriptor.collection(List.class, TypeDescriptor.valueOf(String.class))); // <2>
 ----
+<1> `List<Integer>` type descriptor
+<2> `List<String>` type descriptor
 
 Kotlin::
 +
@@ -328,9 +330,11 @@ Kotlin::
 
 	val input: List<Integer> = ...
 	cs.convert(input,
-			TypeDescriptor.forObject(input), // List<Integer> type descriptor
-			TypeDescriptor.collection(List::class.java, TypeDescriptor.valueOf(String::class.java)))
+		TypeDescriptor.collection(List::class.java, TypeDescriptor.valueOf(Integer::class.java)), // <1>
+		TypeDescriptor.collection(List::class.java, TypeDescriptor.valueOf(String::class.java))) // <2>
 ----
+<1> `List<Integer>` type descriptor
+<2> `List<String>` type descriptor
 ======
 
 Note that `DefaultConversionService` automatically registers converters that are
