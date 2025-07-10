@@ -665,6 +665,61 @@ This registers hints for constructors, fields, properties, and record components
 Hints are also registered for types transitively used on properties and record components.
 In other words, if `Order` exposes others types, hints are registered for those as well.
 
+[[aot.hints.convention-based-conversion]]
+=== Runtime Hints for Convention-based Conversion
+
+Although the core container provides built-in support for automatic conversion of many
+common types (see xref:core/validation/convert.adoc[Spring Type Conversion]), some
+conversions are supported via a convention-based algorithm that relies on reflection.
+
+Specifically, if there is no explicit `Converter` registered with the `ConversionService`
+for a particular source &#8594; target type pair, the internal `ObjectToObjectConverter`
+will attempt to use conventions to convert a source object to a target type by delegating
+to a method on the source object or to a static factory method or constructor on the
+target type. Since this convention-based algorithm can be applied to arbitrary types at
+runtime, the core container is not able to infer the runtime hints necessary to support
+such reflection.
+
+If you encounter convention-based conversion issues within a native image resulting from
+lacking runtime hints, you can register the necessary hints programmatically. For
+example, if your application requires a conversion from `java.time.Instant` to
+`java.sql.Timestamp` and relies on `ObjectToObjectConverter` to invoke
+`java.sql.Timestamp.from(Instant)` using reflection, you could implement a custom
+`RuntimeHintsRegitrar` to support this use case within a native image, as demonstrated in
+the following example.
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+public class TimestampConversionRuntimeHints implements RuntimeHintsRegistrar {
+
+	public void registerHints(RuntimeHints hints, ClassLoader classLoader) {
+		ReflectionHints reflectionHints = hints.reflection();
+
+		reflectionHints.registerTypeIfPresent(classLoader, "java.sql.Timestamp", hint -> hint
+				.withMethod("from", List.of(TypeReference.of(Instant.class)), ExecutableMode.INVOKE)
+				.onReachableType(TypeReference.of("java.sql.Timestamp")));
+	}
+}
+----
+======
+
+`TimestampConversionRuntimeHints` can then be registered declaratively via
+<<aot.hints.import-runtime-hints>> or statically via a `META-INF/spring/aot.factories`
+configuration file.
+
+[NOTE]
+====
+The above `TimestampConversionRuntimeHints` class is a simplified version of the
+`ObjectToObjectConverterRuntimeHints` class that is included in the framework and
+registered by default.
+
+Thus, this specific `Instant`-to-`Timestamp` use case is already handled by the framework.
+====
+
 [[aot.hints.testing]]
 === Testing Runtime Hints
 
