@@ -15,6 +15,3 @@ annotated controller is considered a strong enough indication of endpoint owners
 that a 405 (METHOD_NOT_ALLOWED), a 415 (UNSUPPORTED_MEDIA_TYPE), or similar response can
 be sent to the client to help with debugging. For this reason it is recommended to avoid
 splitting URL handling across an annotated controller and a view controller.
-
-
-

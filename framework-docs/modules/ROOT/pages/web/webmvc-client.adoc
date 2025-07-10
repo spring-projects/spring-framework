@@ -4,16 +4,12 @@
 This section describes options for client-side access to REST endpoints.
 
 
-
-
 [[webmvc-restclient]]
 == `RestClient`
 
 `RestClient` is a synchronous HTTP client that exposes a modern, fluent API.
 
 See xref:integration/rest-clients.adoc#rest-restclient[`RestClient`] for more details.
-
-
 
 
 [[webmvc-webclient]]
@@ -24,8 +20,6 @@ See xref:integration/rest-clients.adoc#rest-restclient[`RestClient`] for more de
 See xref:web/webflux-webclient.adoc[WebClient] for more details.
 
 
-
-
 [[webmvc-resttemplate]]
 == `RestTemplate`
 
@@ -34,6 +28,7 @@ Spring REST client and exposes a simple, template-method API over underlying HTT
 libraries.
 
 See xref:integration/rest-clients.adoc[REST Endpoints] for details.
+
 
 [[webmvc-http-interface]]
 == HTTP Interface

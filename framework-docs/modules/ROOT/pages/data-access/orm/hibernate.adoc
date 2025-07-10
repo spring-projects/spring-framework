@@ -514,6 +514,3 @@ the following events occur when a JTA transaction commits:
 * Hibernate is synchronized to the JTA transaction, so the transaction is called back
   through an `afterCompletion` callback by the JTA transaction manager and can
   properly clear its cache.
-
-
-

@@ -14,9 +14,5 @@ need to advise a method that is not declared on an interface or where you need t
 pass a proxied object to a method as a concrete type.
 
 It is important to grasp the fact that Spring AOP is proxy-based. See
-xref:core/aop/proxying.adoc#aop-understanding-aop-proxies[Understanding AOP Proxies] for a thorough examination of exactly what this
-implementation detail actually means.
-
-
-
-
+xref:core/aop/proxying.adoc#aop-understanding-aop-proxies[Understanding AOP Proxies]
+for a thorough examination of exactly what this implementation detail actually means.

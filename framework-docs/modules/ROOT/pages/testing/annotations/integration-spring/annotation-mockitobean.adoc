@@ -96,6 +96,7 @@ Such fields can therefore be `public`, `protected`, package-private (default vis
 or `private` depending on the needs or coding practices of the project.
 ====
 
+
 [[spring-testing-annotation-beanoverriding-mockitobean-examples]]
 == `@MockitoBean` Examples
 
@@ -200,6 +201,7 @@ Java::
 TIP: The mocks can also be injected into `@Configuration` classes or other test-related
 components in the `ApplicationContext` in order to configure them with Mockito's stubbing
 APIs.
+
 
 [[spring-testing-annotation-beanoverriding-mockitospybean-examples]]
 == `@MockitoSpyBean` Examples

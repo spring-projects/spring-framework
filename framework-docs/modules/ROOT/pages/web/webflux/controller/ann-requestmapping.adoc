@@ -5,6 +5,7 @@
 
 This section discusses request mapping for annotated controllers.
 
+
 [[webflux-ann-requestmapping-annotation]]
 == `@RequestMapping`
 
@@ -490,9 +491,6 @@ See xref:web/webflux-versioning.adoc[API Versioning] for more details on underly
 infrastructure and support for API Versioning.
 
 
-
-
-
 [[webflux-ann-requestmapping-head-options]]
 == HTTP HEAD, OPTIONS
 [.small]#xref:web/webmvc/mvc-controller/ann-requestmapping.adoc#mvc-ann-requestmapping-head-options[See equivalent in the Servlet stack]#
@@ -600,7 +598,6 @@ Kotlin::
 <3> Get the handler method.
 <4> Add the registration.
 ======
-
 
 
 [[webflux-ann-httpexchange-annotation]]

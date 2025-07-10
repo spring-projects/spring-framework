@@ -2,8 +2,6 @@
 = Appendix
 
 
-
-
 [[xsd-schemas]]
 == XML Schemas
 
@@ -11,8 +9,6 @@ This part of the appendix lists XML schemas for data access, including the follo
 
 * xref:data-access/appendix.adoc#xsd-schemas-tx[The `tx` Schema]
 * xref:data-access/appendix.adoc#xsd-schemas-jdbc[The `jdbc` Schema]
-
-
 
 [[xsd-schemas-tx]]
 === The `tx` Schema
@@ -60,8 +56,6 @@ elements from the `aop` namespace (since the declarative transaction support in 
 implemented by using AOP). The preceding XML snippet contains the relevant lines needed
 to reference the `aop` schema so that the elements in the `aop` namespace are available
 to you.
-
-
 
 [[xsd-schemas-jdbc]]
 === The `jdbc` Schema

@@ -13,7 +13,8 @@ It is also designed to be a Spring bean itself and implements `ApplicationContex
 for access to the context in which it runs. If `DispatcherHandler` is declared with a bean
 name of `webHandler`, it is, in turn, discovered by
 {spring-framework-api}/web/server/adapter/WebHttpHandlerBuilder.html[`WebHttpHandlerBuilder`],
-which puts together a request-processing chain, as described in xref:web/webflux/reactive-spring.adoc#webflux-web-handler-api[`WebHandler` API].
+which puts together a request-processing chain, as described in
+xref:web/webflux/reactive-spring.adoc#webflux-web-handler-api[`WebHandler` API].
 
 Spring configuration in a WebFlux application typically contains:
 
@@ -44,8 +45,8 @@ Kotlin::
 ----
 ======
 
-The resulting `HttpHandler` is ready for use with a xref:web/webflux/reactive-spring.adoc#webflux-httphandler[server adapter].
-
+The resulting `HttpHandler` is ready for use with a
+xref:web/webflux/reactive-spring.adoc#webflux-httphandler[server adapter].
 
 
 [[webflux-special-bean-types]]
@@ -59,7 +60,8 @@ you can customize their properties, extend them, or replace them.
 
 The following table lists the special beans detected by the `DispatcherHandler`. Note that
 there are also some other beans detected at a lower level (see
-xref:web/webflux/reactive-spring.adoc#webflux-web-handler-api-special-beans[Special bean types] in the Web Handler API).
+xref:web/webflux/reactive-spring.adoc#webflux-web-handler-api-special-beans[Special bean types]
+in the Web Handler API).
 
 [[webflux-special-beans-table]]
 [cols="1,2", options="header"]
@@ -89,20 +91,20 @@ xref:web/webflux/reactive-spring.adoc#webflux-web-handler-api-special-beans[Spec
 |===
 
 
-
 [[webflux-framework-config]]
 == WebFlux Config
 [.small]#xref:web/webmvc/mvc-servlet/config.adoc[See equivalent in the Servlet stack]#
 
 Applications can declare the infrastructure beans (listed under
 xref:web/webflux/reactive-spring.adoc#webflux-web-handler-api-special-beans[Web Handler API] and
-xref:web/webflux/dispatcher-handler.adoc#webflux-special-bean-types[`DispatcherHandler`]) that are required to process requests.
-However, in most cases, the xref:web/webflux/dispatcher-handler.adoc#webflux-framework-config[WebFlux Config] is the best starting point. It declares the
-required beans and provides a higher-level configuration callback API to customize it.
+xref:web/webflux/dispatcher-handler.adoc#webflux-special-bean-types[`DispatcherHandler`])
+that are required to process requests. However, in most cases, the
+xref:web/webflux/dispatcher-handler.adoc#webflux-framework-config[WebFlux Config]
+is the best starting point. It declares the required beans and provides a higher-level
+configuration callback API to customize it.
 
 NOTE: Spring Boot relies on the WebFlux config to configure Spring WebFlux and also provides
 many extra convenient options.
-
 
 
 [[webflux-dispatcher-handler-sequence]]
@@ -118,14 +120,14 @@ exposes the return value from the execution as `HandlerResult`.
 processing by writing to the response directly or by using a view to render.
 
 
-
 [[webflux-resulthandling]]
 == Result Handling
 
 The return value from the invocation of a handler, through a `HandlerAdapter`, is wrapped
 as a `HandlerResult`, along with some additional context, and passed to the first
 `HandlerResultHandler` that claims support for it. The following table shows the available
-`HandlerResultHandler` implementations, all of which are declared in the xref:web/webflux/dispatcher-handler.adoc#webflux-framework-config[WebFlux Config]:
+`HandlerResultHandler` implementations, all of which are declared in the
+xref:web/webflux/dispatcher-handler.adoc#webflux-framework-config[WebFlux Config]:
 
 [cols="1,2,1", options="header"]
 |===
@@ -155,7 +157,6 @@ as a `HandlerResult`, along with some additional context, and passed to the firs
 |===
 
 
-
 [[webflux-dispatcher-exceptions]]
 == Exceptions
 [.small]#xref:web/webmvc/mvc-servlet/exceptionhandlers.adoc[See equivalent in the Servlet stack]#
@@ -176,19 +177,17 @@ See also xref:web/webflux/controller/ann-exceptions.adoc[Exceptions] in the "`An
 xref:web/webflux/reactive-spring.adoc#webflux-exception-handler[Exceptions] in the WebHandler API section.
 
 
-
 [[webflux-viewresolution]]
 == View Resolution
 [.small]#xref:web/webmvc/mvc-servlet/viewresolver.adoc[See equivalent in the Servlet stack]#
 
 View resolution enables rendering to a browser with an HTML template and a model without
 tying you to a specific view technology. In Spring WebFlux, view resolution is
-supported through a dedicated xref:web/webflux/dispatcher-handler.adoc#webflux-resulthandling[HandlerResultHandler] that uses
-`ViewResolver` instances to map a String (representing a logical view name) to a `View`
-instance. The `View` is then used to render the response.
+supported through a dedicated xref:web/webflux/dispatcher-handler.adoc#webflux-resulthandling[HandlerResultHandler]
+that uses `ViewResolver` instances to map a String (representing a logical view name) to
+a `View` instance. The `View` is then used to render the response.
 
 Web applications need to use a xref:web/webflux-view.adoc[View rendering library] to support this use case.
-
 
 [[webflux-viewresolution-handling]]
 === Handling
@@ -225,7 +224,6 @@ dedicated configuration API for view resolution.
 
 See xref:web/webflux-view.adoc[View Technologies] for more on the view technologies integrated with Spring WebFlux.
 
-
 [[webflux-redirecting-redirect-prefix]]
 === Redirecting
 [.small]#xref:web/webmvc/mvc-servlet/viewresolver.adoc#mvc-redirecting-redirect-prefix[See equivalent in the Servlet stack]#
@@ -243,7 +241,6 @@ operate in terms of logical view names. A view name such as
 NOTE: xref:web/webmvc/mvc-servlet/viewresolver.adoc#mvc-redirecting-forward-prefix[Unlike the Servlet stack],
 Spring WebFlux does not support "FORWARD" dispatches, so `forward:` prefixes are not supported as a result.
 
-
 [[webflux-multiple-representations]]
 === Content Negotiation
 [.small]#xref:web/webmvc/mvc-servlet/viewresolver.adoc#mvc-multiple-representations[See equivalent in the Servlet stack]#
@@ -257,7 +254,3 @@ In order to support media types such as JSON and XML, Spring WebFlux provides
 xref:web/webflux/reactive-spring.adoc#webflux-codecs[HttpMessageWriter]. Typically, you would configure these as default
 views through the xref:web/webflux/config.adoc#webflux-config-view-resolvers[WebFlux Configuration]. Default views are
 always selected and used if they match the requested media type.
-
-
-
-

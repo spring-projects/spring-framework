@@ -61,7 +61,6 @@ proxies _for all three of them_.
 ====
 
 
-
 [[aop-understanding-aop-proxies]]
 == Understanding AOP Proxies
 
@@ -291,4 +290,3 @@ Kotlin::
 
 NOTE: AspectJ compile-time weaving and load-time weaving do not have this self-invocation
 issue because they apply advice within the bytecode instead of via a proxy.
-

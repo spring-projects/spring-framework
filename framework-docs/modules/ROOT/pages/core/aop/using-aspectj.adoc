@@ -8,12 +8,14 @@ alone.
 
 Spring ships with a small AspectJ aspect library, which is available stand-alone in your
 distribution as `spring-aspects.jar`. You need to add this to your classpath in order
-to use the aspects in it. xref:core/aop/using-aspectj.adoc#aop-atconfigurable[Using AspectJ to Dependency Inject Domain Objects with Spring] and xref:core/aop/using-aspectj.adoc#aop-ajlib-other[Other Spring aspects for AspectJ] discuss the
-content of this library and how you can use it. xref:core/aop/using-aspectj.adoc#aop-aj-configure[Configuring AspectJ Aspects by Using Spring IoC] discusses how to
-dependency inject AspectJ aspects that are woven using the AspectJ compiler. Finally,
-xref:core/aop/using-aspectj.adoc#aop-aj-ltw[Load-time Weaving with AspectJ in the Spring Framework] provides an introduction to load-time weaving for Spring applications
-that use AspectJ.
-
+to use the aspects in it.
+xref:core/aop/using-aspectj.adoc#aop-atconfigurable[Using AspectJ to Dependency Inject Domain Objects with Spring]
+and xref:core/aop/using-aspectj.adoc#aop-ajlib-other[Other Spring aspects for AspectJ]
+discuss the content of this library and how you can use it.
+xref:core/aop/using-aspectj.adoc#aop-aj-configure[Configuring AspectJ Aspects by Using Spring IoC]
+discusses how to dependency inject AspectJ aspects that are woven using the AspectJ compiler. Finally,
+xref:core/aop/using-aspectj.adoc#aop-aj-ltw[Load-time Weaving with AspectJ in the Spring Framework]
+provides an introduction to load-time weaving for Spring applications that use AspectJ.
 
 
 [[aop-atconfigurable]]
@@ -206,7 +208,6 @@ not use `@Configurable` on bean classes that are registered as regular Spring be
 with the container. Doing so results in double initialization, once through the
 container and once through the aspect.
 
-
 [[aop-configurable-testing]]
 === Unit Testing `@Configurable` Objects
 
@@ -218,7 +219,6 @@ test and proceed as normal. If `@Configurable` types have been woven by AspectJ,
 you can still unit test outside of the container as normal, but you see a warning
 message each time that you construct a `@Configurable` object indicating that it has
 not been configured by Spring.
-
 
 [[aop-configurable-container]]
 === Working with Multiple Application Contexts
@@ -247,7 +247,6 @@ web application loads the types in `spring-aspects.jar` by using its own `ClassL
 is added only to the container-wide classpath (and hence loaded by the shared parent
 `ClassLoader`), all web applications share the same aspect instance (which is probably
 not what you want).
-
 
 
 [[aop-ajlib-other]]
@@ -300,7 +299,6 @@ fully qualified class names:
 			this(beanInstance);
 	}
 ----
-
 
 
 [[aop-aj-configure]]
@@ -357,7 +355,6 @@ results in the creation of Spring AOP proxies. The @AspectJ style of aspect
 declaration is being used here, but the AspectJ runtime is not involved.
 
 
-
 [[aop-aj-ltw]]
 == Load-time Weaving with AspectJ in the Spring Framework
 
@@ -390,7 +387,6 @@ Now that the sales pitch is over, let us first walk through a quick example of A
 LTW that uses Spring, followed by detailed specifics about elements introduced in the
 example. For a complete example, see the
 {petclinic-github-org}/spring-framework-petclinic[Petclinic sample application based on Spring Framework].
-
 
 [[aop-aj-ltw-first-example]]
 === A First Example
@@ -677,7 +673,6 @@ nice example of a development-time aspect that developers can use during develop
 and then easily exclude from builds of the application being deployed
 into UAT or production.
 
-
 [[aop-aj-ltw-the-aspects]]
 === Aspects
 
@@ -685,7 +680,6 @@ The aspects that you use in LTW have to be AspectJ aspects. You can write them i
 either the AspectJ language itself, or you can write your aspects in the @AspectJ-style.
 Your aspects are then both valid AspectJ and Spring AOP aspects.
 Furthermore, the compiled aspect classes need to be available on the classpath.
-
 
 [[aop-aj-ltw-aop_dot_xml]]
 === `META-INF/aop.xml`
@@ -716,7 +710,6 @@ The structure and contents of this file is detailed in the LTW part of the
 {aspectj-docs-devguide}/ltw-configuration.html[AspectJ reference
 documentation]. Because the `aop.xml` file is 100% AspectJ, we do not describe it further here.
 
-
 [[aop-aj-ltw-libraries]]
 === Required libraries (JARS)
 
@@ -730,7 +723,6 @@ If you use the xref:core/aop/using-aspectj.adoc#aop-aj-ltw-environments-generic[
 , you also need:
 
 * `spring-instrument.jar`
-
 
 [[aop-aj-ltw-spring]]
 === Spring Configuration
@@ -831,7 +823,6 @@ possible values:
   then AspectJ weaving is on. Otherwise, it is off. This is the default value.
 |===
 
-
 [[aop-aj-ltw-environments]]
 === Environment-specific Configuration
 
@@ -880,7 +871,3 @@ Note that this requires modification of the JVM launch script, which may prevent
 from using this in application server environments (depending on your server and your
 operation policies). That said, for one-app-per-JVM deployments such as standalone
 Spring Boot applications, you typically control the entire JVM setup in any case.
-
-
-
-

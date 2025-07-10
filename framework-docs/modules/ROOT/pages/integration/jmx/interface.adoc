@@ -425,6 +425,3 @@ appropriate half of a JMX attribute. In the preceding code, the method mappings 
 beans that are exposed to JMX. To control method exposure on a bean-by-bean basis, you can use
 the `methodMappings` property of `MethodNameMBeanInfoAssembler` to map bean names to
 lists of method names.
-
-
-

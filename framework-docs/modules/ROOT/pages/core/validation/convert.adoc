@@ -9,7 +9,6 @@ the required property types. You can also use the public API anywhere in your ap
 where type conversion is needed.
 
 
-
 [[core-convert-Converter-API]]
 == Converter SPI
 
@@ -52,7 +51,6 @@ The following listing shows the `StringToInteger` class, which is a typical `Con
 		}
 	}
 ----
-
 
 
 [[core-convert-ConverterFactory-SPI]]
@@ -146,7 +144,6 @@ NOTE: Because `GenericConverter` is a more complex SPI interface, you should use
 it only when you need it. Favor `Converter` or `ConverterFactory` for basic type
 conversion needs.
 
-
 [[core-convert-ConditionalGenericConverter-SPI]]
 === Using `ConditionalGenericConverter`
 
@@ -173,7 +170,6 @@ between a persistent entity identifier and an entity reference. Such an `IdToEnt
 might match only if the target entity type declares a static finder method (for example,
 `findAccount(Long)`). You might perform such a finder method check in the implementation of
 `matches(TypeDescriptor, TypeDescriptor)`.
-
 
 
 [[core-convert-ConversionService-API]]
@@ -206,7 +202,6 @@ A robust `ConversionService` implementation is provided in the `core.convert.sup
 package. `GenericConversionService` is the general-purpose implementation suitable for
 use in most environments. `ConversionServiceFactory` provides a convenient factory for
 creating common `ConversionService` configurations.
-
 
 
 [[core-convert-Spring-config]]
@@ -254,7 +249,6 @@ xref:web/webmvc/mvc-config/conversion.adoc[Conversion and Formatting] in the Spr
 In certain situations, you may wish to apply formatting during conversion. See
 xref:core/validation/format.adoc#format-FormatterRegistry-SPI[The `FormatterRegistry` SPI]
 for details on using `FormattingConversionServiceFactoryBean`.
-
 
 
 [[core-convert-programmatic-usage]]

@@ -133,7 +133,6 @@ The Java specification also enforces that annotations defined with `@Target(Elem
 - `Cache.@Nullable ValueWrapper`
 - `jakarta.validation.@Nullable Validator`
 
-
 [[null-safety-guidelines-nullaway]]
 === NullAway
 

@@ -33,7 +33,6 @@ including error handling. It includes the following topics:
 * xref:data-access/r2dbc.adoc#r2dbc-DatabaseClient-filter[Statement Filters]
 * xref:data-access/r2dbc.adoc#r2dbc-auto-generated-keys[Retrieving Auto-generated Keys]
 
-
 [[r2dbc-DatabaseClient]]
 === Using `DatabaseClient`
 
@@ -639,6 +638,7 @@ databases, you may want multiple `DatabaseClient` instances, which requires mult
 `ConnectionFactory` and, subsequently, multiple differently configured `DatabaseClient`
 instances.
 
+
 [[r2dbc-auto-generated-keys]]
 == Retrieving Auto-generated Keys
 
@@ -686,7 +686,6 @@ This section covers:
 * xref:data-access/r2dbc.adoc#r2dbc-TransactionAwareConnectionFactoryProxy[Using `TransactionAwareConnectionFactoryProxy`]
 * xref:data-access/r2dbc.adoc#r2dbc-R2dbcTransactionManager[Using `R2dbcTransactionManager`]
 
-
 [[r2dbc-ConnectionFactory]]
 === Using `ConnectionFactory`
 
@@ -729,7 +728,6 @@ Kotlin::
 ----
 ======
 
-
 [[r2dbc-ConnectionFactoryUtils]]
 === Using `ConnectionFactoryUtils`
 
@@ -739,7 +737,6 @@ and close connections (if necessary).
 
 It supports subscriber ``Context``-bound connections with, for example
 `R2dbcTransactionManager`.
-
 
 [[r2dbc-SingleConnectionFactory]]
 === Using `SingleConnectionFactory`
@@ -757,7 +754,6 @@ such as pipelining if your R2DBC driver permits for such use.
 In contrast to a pooled `ConnectionFactory`, it reuses the same connection all the time, avoiding
 excessive creation of physical connections.
 
-
 [[r2dbc-TransactionAwareConnectionFactoryProxy]]
 === Using `TransactionAwareConnectionFactoryProxy`
 
@@ -773,7 +769,6 @@ for resource management.
 See the {spring-framework-api}/r2dbc/connection/TransactionAwareConnectionFactoryProxy.html[`TransactionAwareConnectionFactoryProxy`]
 javadoc for more details.
 
-
 [[r2dbc-R2dbcTransactionManager]]
 === Using `R2dbcTransactionManager`
 
@@ -787,6 +782,3 @@ Application code is required to retrieve the R2DBC `Connection` through
 `ConnectionFactory.create()`. All framework classes (such as `DatabaseClient`) use this
 strategy implicitly. If not used with a transaction manager, the lookup strategy behaves
 exactly like `ConnectionFactory.create()` and can therefore be used in any case.
-
-
-

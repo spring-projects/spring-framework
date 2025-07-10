@@ -22,7 +22,6 @@ use these features.
 ====
 
 
-
 [[beans-stereotype-annotations]]
 == `@Component` and Further Stereotype Annotations
 
@@ -44,7 +43,6 @@ carry additional semantics in future releases of the Spring Framework. Thus, if 
 choosing between using `@Component` or `@Service` for your service layer, `@Service` is
 clearly the better choice. Similarly, as stated earlier, `@Repository` is already
 supported as a marker for automatic exception translation in your persistence layer.
-
 
 
 [[beans-meta-annotations]]
@@ -195,7 +193,6 @@ For further details, see the
 wiki page.
 
 
-
 [[beans-scanning-autodetection]]
 == Automatically Detecting Classes and Registering Bean Definitions
 
@@ -334,7 +331,6 @@ NOTE: You can disable the registration of `AutowiredAnnotationBeanPostProcessor`
 with a value of `false`.
 
 
-
 [[beans-scanning-filters]]
 == Using Filters to Customize Scanning
 
@@ -424,7 +420,6 @@ annotation or by providing `use-default-filters="false"` as an attribute of the
 `<component-scan/>` element. This effectively disables automatic detection of classes
 annotated or meta-annotated with `@Component`, `@Repository`, `@Service`, `@Controller`,
 `@RestController`, or `@Configuration`.
-
 
 
 [[beans-factorybeans-annotations]]
@@ -663,7 +658,6 @@ analogous to how the container selects between multiple `@Autowired` constructor
 ====
 
 
-
 [[beans-scanning-name-generator]]
 == Naming Autodetected Components
 
@@ -795,7 +789,6 @@ components may be making explicit references to it. On the other hand, the
 auto-generated names are adequate whenever the container is responsible for wiring.
 
 
-
 [[beans-scanning-scope-resolver]]
 == Providing a Scope for Autodetected Components
 
@@ -918,7 +911,6 @@ Kotlin::
 ----
 
 
-
 [[beans-scanning-qualifiers]]
 == Providing Qualifier Metadata with Annotations
 
@@ -1010,7 +1002,3 @@ NOTE: As with most annotation-based alternatives, keep in mind that the annotati
 bound to the class definition itself, while the use of XML allows for multiple beans
 of the same type to provide variations in their qualifier metadata, because that
 metadata is provided per-instance rather than per-class.
-
-
-
-

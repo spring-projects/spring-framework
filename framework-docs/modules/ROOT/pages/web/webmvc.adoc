@@ -19,4 +19,3 @@ xref:web-reactive.adoc[Web on Reactive Stack].
 For baseline information and compatibility with Servlet container and Jakarta EE version
 ranges, see the Spring Framework
 {spring-framework-wiki}/Spring-Framework-Versions[Wiki].
-

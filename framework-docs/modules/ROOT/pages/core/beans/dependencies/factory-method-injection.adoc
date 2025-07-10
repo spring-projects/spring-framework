@@ -2,16 +2,17 @@
 = Method Injection
 
 In most application scenarios, most beans in the container are
-xref:core/beans/factory-scopes.adoc#beans-factory-scopes-singleton[singletons]. When a singleton bean needs to
-collaborate with another singleton bean or a non-singleton bean needs to collaborate
-with another non-singleton bean, you typically handle the dependency by defining one
-bean as a property of the other. A problem arises when the bean lifecycles are
-different. Suppose singleton bean A needs to use non-singleton (prototype) bean B,
+xref:core/beans/factory-scopes.adoc#beans-factory-scopes-singleton[singletons]. When a
+singleton bean needs to collaborate with another singleton bean or a non-singleton bean
+needs to collaborate with another non-singleton bean, you typically handle the dependency
+by defining one bean as a property of the other. A problem arises when the bean lifecycles
+are different. Suppose singleton bean A needs to use non-singleton (prototype) bean B,
 perhaps on each method invocation on A. The container creates the singleton bean A only
 once, and thus only gets one opportunity to set the properties. The container cannot
 provide bean A with a new instance of bean B every time one is needed.
 
-A solution is to forego some inversion of control. You can xref:core/beans/factory-nature.adoc#beans-factory-aware[make bean A aware of the container]
+A solution is to forego some inversion of control. You can
+xref:core/beans/factory-nature.adoc#beans-factory-aware[make bean A aware of the container]
  by implementing the `ApplicationContextAware` interface,
 and by xref:core/beans/basics.adoc#beans-factory-client[making a `getBean("B")` call to the container] ask for (a
 typically new) bean B instance every time bean A needs it. The following example
@@ -101,7 +102,6 @@ container, lets you handle this use case cleanly.
 You can read more about the motivation for Method Injection in
 {spring-site-blog}/2004/08/06/method-injection/[this blog entry].
 ****
-
 
 
 [[beans-factory-lookup-method-injection]]
@@ -294,12 +294,12 @@ Kotlin::
 [TIP]
 ====
 Another way of accessing differently scoped target beans is an `ObjectFactory`/
-`Provider` injection point. See xref:core/beans/factory-scopes.adoc#beans-factory-scopes-other-injection[Scoped Beans as Dependencies].
+`Provider` injection point. See
+xref:core/beans/factory-scopes.adoc#beans-factory-scopes-other-injection[Scoped Beans as Dependencies].
 
 You may also find the `ServiceLocatorFactoryBean` (in the
 `org.springframework.beans.factory.config` package) to be useful.
 ====
-
 
 
 [[beans-factory-arbitrary-method-replacement]]
@@ -422,6 +422,3 @@ substring of the fully qualified type name. For example, the following all match
 Because the number of arguments is often enough to distinguish between each possible
 choice, this shortcut can save a lot of typing, by letting you type only the
 shortest string that matches an argument type.
-
-
-

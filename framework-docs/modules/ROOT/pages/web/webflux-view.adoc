@@ -16,8 +16,6 @@ such, we do not recommend use the Spring WebFlux template support in application
 the templates are editable by external sources, since this can have security implications.
 
 
-
-
 [[webflux-view-thymeleaf]]
 == Thymeleaf
 [.small]#xref:web/webmvc-view/mvc-thymeleaf.adoc[See equivalent in the Servlet stack]#
@@ -37,8 +35,6 @@ https://www.thymeleaf.org/documentation.html[Thymeleaf+Spring] and the WebFlux i
 https://web.archive.org/web/20210623051330/http%3A//forum.thymeleaf.org/Thymeleaf-3-0-8-JUST-PUBLISHED-td4030687.html[announcement].
 
 
-
-
 [[webflux-view-freemarker]]
 == FreeMarker
 [.small]#xref:web/webmvc-view/mvc-freemarker.adoc[See equivalent in the Servlet stack]#
@@ -46,8 +42,6 @@ https://web.archive.org/web/20210623051330/http%3A//forum.thymeleaf.org/Thymelea
 https://freemarker.apache.org/[Apache FreeMarker] is a template engine for generating any
 kind of text output from HTML to email and others. The Spring Framework has built-in
 integration for using Spring WebFlux with FreeMarker templates.
-
-
 
 [[webflux-view-freemarker-contextconfig]]
 === View Configuration
@@ -108,8 +102,6 @@ shown in the preceding example. Given the preceding configuration, if your contr
 returns the view name, `welcome`, the resolver looks for the
 `classpath:/templates/freemarker/welcome.ftl` template.
 
-
-
 [[webflux-views-freemarker]]
 === FreeMarker Configuration
 [.small]#xref:web/webmvc-view/mvc-freemarker.adoc#mvc-views-freemarker[See equivalent in the Servlet stack]#
@@ -167,8 +159,6 @@ Kotlin::
 See the FreeMarker documentation for details of settings and variables as they apply to
 the `Configuration` object.
 
-
-
 [[webflux-view-freemarker-forms]]
 === Form Handling
 [.small]#xref:web/webmvc-view/mvc-freemarker.adoc#mvc-view-freemarker-forms[See equivalent in the Servlet stack]#
@@ -178,7 +168,6 @@ Spring provides a tag library for use in JSPs that contains, among others, a
 form-backing objects and show the results of failed validations from a `Validator` in the
 web or business tier. Spring also has support for the same functionality in FreeMarker,
 with additional convenience macros for generating form input elements themselves.
-
 
 [[webflux-view-bind-macros]]
 ==== The Bind Macros
@@ -197,7 +186,6 @@ directly, the file is called `spring.ftl` and is in the
 For additional details on binding support, see xref:web/webmvc-view/mvc-freemarker.adoc#mvc-view-simple-binding[Simple Binding]
  for Spring MVC.
 
-
 [[webflux-views-form-macros]]
 ==== Form Macros
 
@@ -208,7 +196,6 @@ sections of the Spring MVC documentation.
 * xref:web/webmvc-view/mvc-freemarker.adoc#mvc-views-form-macros-input[Input Fields]
 * xref:web/webmvc-view/mvc-freemarker.adoc#mvc-views-form-macros-select[Selection Fields]
 * xref:web/webmvc-view/mvc-freemarker.adoc#mvc-views-form-macros-html-escaping[HTML Escaping]
-
 
 
 [[webflux-view-script]]
@@ -235,8 +222,6 @@ The following table shows the templating libraries that we have tested on differ
 TIP: The basic rule for integrating any other script engine is that it must implement the
 `ScriptEngine` and `Invocable` interfaces.
 
-
-
 [[webflux-view-script-dependencies]]
 === Requirements
 [.small]#xref:web/webmvc-view/mvc-script.adoc#mvc-view-script-dependencies[See equivalent in the Servlet stack]#
@@ -254,8 +239,6 @@ Java 8+. Using the latest update release available is highly recommended.
 
 You need to have the script templating library. One way to do that for JavaScript is
 through https://www.webjars.org/[WebJars].
-
-
 
 [[webflux-view-script-integrate]]
 === Script Templates
@@ -417,8 +400,6 @@ Check out the Spring Framework unit tests,
 for more configuration examples.
 
 
-
-
 [[webflux-view-fragments]]
 == HTML Fragment
 [.small]#xref:web/webmvc-view/mvc-fragments.adoc[See equivalent in the Servlet stack]#
@@ -492,22 +473,20 @@ It is also possible to return `Flux<Fragment>` directly without the `FragmentsRe
 wrapper.
 
 
-
-
 [[webflux-view-httpmessagewriter]]
 == JSON and XML
 [.small]#xref:web/webmvc-view/mvc-jackson.adoc[See equivalent in the Servlet stack]#
 
-For xref:web/webflux/dispatcher-handler.adoc#webflux-multiple-representations[Content Negotiation] purposes, it is useful to be able to alternate
-between rendering a model with an HTML template or as other formats (such as JSON or XML),
-depending on the content type requested by the client. To support doing so, Spring WebFlux
-provides the `HttpMessageWriterView`, which you can use to plug in any of the available
-xref:web/webflux/reactive-spring.adoc#webflux-codecs[Codecs] from `spring-web`, such as `Jackson2JsonEncoder`, `Jackson2SmileEncoder`,
-or `Jaxb2XmlEncoder`.
+For xref:web/webflux/dispatcher-handler.adoc#webflux-multiple-representations[Content Negotiation]
+purposes, it is useful to be able to alternate between rendering a model with an HTML template
+or as other formats (such as JSON or XML), depending on the content type requested by the client.
+To support doing so, Spring WebFlux provides the `HttpMessageWriterView`, which you can use to
+plug in any of the available xref:web/webflux/reactive-spring.adoc#webflux-codecs[Codecs] from
+`spring-web`, such as `Jackson2JsonEncoder`, `Jackson2SmileEncoder`, or `Jaxb2XmlEncoder`.
 
-Unlike other view technologies, `HttpMessageWriterView` does not require a `ViewResolver`
-but is instead xref:web/webflux/config.adoc#webflux-config-view-resolvers[configured] as a default view. You can
-configure one or more such default views, wrapping different `HttpMessageWriter` instances
+Unlike other view technologies, `HttpMessageWriterView` does not require a `ViewResolver` but is
+instead xref:web/webflux/config.adoc#webflux-config-view-resolvers[configured] as a default view.
+You can configure one or more such default views, wrapping different `HttpMessageWriter` instances
 or `Encoder` instances. The one that matches the requested content type is used at runtime.
 
 In most cases, a model contains multiple attributes. To determine which one to serialize,

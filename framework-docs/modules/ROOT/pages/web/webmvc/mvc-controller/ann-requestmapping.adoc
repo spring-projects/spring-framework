@@ -6,7 +6,6 @@
 This section discusses request mapping for annotated controllers.
 
 
-
 [[mvc-ann-requestmapping-annotation]]
 == `@RequestMapping`
 
@@ -25,9 +24,10 @@ There are also HTTP method specific shortcut variants of `@RequestMapping`:
 * `@DeleteMapping`
 * `@PatchMapping`
 
-The shortcuts are xref:web/webmvc/mvc-controller/ann-requestmapping.adoc#mvc-ann-requestmapping-composed[Custom Annotations] that are provided because,
-arguably, most controller methods should be mapped to a specific HTTP method versus
-using `@RequestMapping`, which, by default, matches to all HTTP methods.
+The shortcuts are
+xref:web/webmvc/mvc-controller/ann-requestmapping.adoc#mvc-ann-requestmapping-composed[Custom Annotations]
+that are provided because, arguably, most controller methods should be mapped to a specific
+HTTP method versus using `@RequestMapping`, which, by default, matches to all HTTP methods.
 A `@RequestMapping` is still needed at the class level to express shared mappings.
 
 NOTE: `@RequestMapping` cannot be used in conjunction with other `@RequestMapping`
@@ -82,7 +82,6 @@ Kotlin::
 	}
 ----
 ======
-
 
 
 [[mvc-ann-requestmapping-uri-templates]]
@@ -222,7 +221,6 @@ URI path patterns can also have embedded `${...}` placeholders that are resolved
 by using `PropertySourcesPlaceholderConfigurer` against local, system, environment, and
 other property sources. You can use this, for example, to parameterize a base URL based on
 some external configuration.
-
 
 
 [[mvc-ann-requestmapping-pattern-comparison]]
@@ -425,7 +423,8 @@ Kotlin::
 ======
 
 TIP: You can match `Content-Type` and `Accept` with the headers condition, but it is better to use
-xref:web/webmvc/mvc-controller/ann-requestmapping.adoc#mvc-ann-requestmapping-consumes[consumes] and xref:web/webmvc/mvc-controller/ann-requestmapping.adoc#mvc-ann-requestmapping-produces[produces]
+xref:web/webmvc/mvc-controller/ann-requestmapping.adoc#mvc-ann-requestmapping-consumes[consumes]
+and xref:web/webmvc/mvc-controller/ann-requestmapping.adoc#mvc-ann-requestmapping-produces[produces]
 instead.
 
 

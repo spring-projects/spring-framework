@@ -26,7 +26,6 @@ use either only the `<aop:config>` style or only the `AutoProxyCreator` style an
 never mix them.
 
 
-
 [[aop-schema-declaring-an-aspect]]
 == Declaring an Aspect
 
@@ -52,7 +51,6 @@ by using the `ref` attribute, as the following example shows:
 
 The bean that backs the aspect (`aBean` in this case) can of course be configured and
 dependency injected just like any other Spring bean.
-
 
 
 [[aop-schema-pointcuts]]
@@ -177,9 +175,7 @@ follows:
 
 Note that pointcuts defined in this way are referred to by their XML `id` and cannot be
 used as named pointcuts to form composite pointcuts. The named pointcut support in the
-schema-based definition style is thus more limited than that offered by the @AspectJ
-style.
-
+schema-based definition style is thus more limited than that offered by the @AspectJ style.
 
 
 [[aop-schema-advice]]
@@ -187,7 +183,6 @@ style.
 
 The schema-based AOP support uses the same five kinds of advice as the @AspectJ style, and they have
 exactly the same semantics.
-
 
 [[aop-schema-advice-before]]
 === Before Advice
@@ -236,7 +231,6 @@ the advice. This method must be defined for the bean referenced by the aspect el
 that contains the advice. Before a data access operation is performed (a method execution
 join point matched by the pointcut expression), the `doAccessCheck` method on the aspect
 bean is invoked.
-
 
 [[aop-schema-advice-after-returning]]
 === After Returning Advice
@@ -295,7 +289,6 @@ Kotlin::
 ----
 ======
 
-
 [[aop-schema-advice-after-throwing]]
 === After Throwing Advice
 
@@ -353,7 +346,6 @@ Kotlin::
 ----
 ======
 
-
 [[aop-schema-advice-after-finally]]
 === After (Finally) Advice
 
@@ -371,7 +363,6 @@ You can declare it by using the `after` element, as the following example shows:
 		...
 	</aop:aspect>
 ----
-
 
 [[aop-schema-advice-around]]
 === Around Advice
@@ -444,17 +435,18 @@ Kotlin::
 ----
 ======
 
-
 [[aop-schema-params]]
 === Advice Parameters
 
 The schema-based declaration style supports fully typed advice in the same way as
 described for the @AspectJ support -- by matching pointcut parameters by name against
-advice method parameters. See xref:core/aop/ataspectj/advice.adoc#aop-ataspectj-advice-params[Advice Parameters] for details. If you wish
-to explicitly specify argument names for the advice methods (not relying on the
+advice method parameters. See
+xref:core/aop/ataspectj/advice.adoc#aop-ataspectj-advice-params[Advice Parameters] for details.
+If you wish to explicitly specify argument names for the advice methods (not relying on the
 detection strategies previously described), you can do so by using the `arg-names`
 attribute of the advice element, which is treated in the same manner as the `argNames`
-attribute in an advice annotation (as described in xref:core/aop/ataspectj/advice.adoc#aop-ataspectj-advice-params-names[Determining Argument Names]).
+attribute in an advice annotation (as described in
+xref:core/aop/ataspectj/advice.adoc#aop-ataspectj-advice-params-names[Determining Argument Names]).
 The following example shows how to specify an argument name in XML:
 
 [source,xml,indent=0,subs="verbatim"]
@@ -464,7 +456,8 @@ The following example shows how to specify an argument name in XML:
 		method="audit"
 		arg-names="auditable" />
 ----
-<1> References the `publicMethod` named pointcut defined in xref:core/aop/ataspectj/pointcuts.adoc#aop-pointcuts-combining[Combining Pointcut Expressions].
+<1> References the `publicMethod` named pointcut defined in
+xref:core/aop/ataspectj/pointcuts.adoc#aop-pointcuts-combining[Combining Pointcut Expressions].
 
 The `arg-names` attribute accepts a comma-delimited list of parameter names.
 
@@ -645,15 +638,15 @@ ms     %     Task name
 00000  ?  execution(getFoo)
 ----
 
-
 [[aop-ordering]]
 === Advice Ordering
 
 When multiple pieces of advice need to run at the same join point (executing method)
-the ordering rules are as described in xref:core/aop/ataspectj/advice.adoc#aop-ataspectj-advice-ordering[Advice Ordering]. The precedence
-between aspects is determined via the `order` attribute in the `<aop:aspect>` element or
-by either adding the `@Order` annotation to the bean that backs the aspect or by having
-the bean implement the `Ordered` interface.
+the ordering rules are as described in
+xref:core/aop/ataspectj/advice.adoc#aop-ataspectj-advice-ordering[Advice Ordering]. The
+precedence between aspects is determined via the `order` attribute in the `<aop:aspect>`
+element or by either adding the `@Order` annotation to the bean that backs the aspect
+or by having the bean implement the `Ordered` interface.
 
 [NOTE]
 ====
@@ -674,7 +667,6 @@ such advice methods into one advice method per join point in each `<aop:aspect>`
 or refactor the pieces of advice into separate `<aop:aspect>` elements that you can order
 at the aspect level.
 ====
-
 
 
 [[aop-schema-introductions]]
@@ -756,13 +748,11 @@ Kotlin::
 ======
 
 
-
 [[aop-schema-instantiation-models]]
 == Aspect Instantiation Models
 
 The only supported instantiation model for schema-defined aspects is the singleton
 model. Other instantiation models may be supported in future releases.
-
 
 
 [[aop-schema-advisors]]
@@ -772,7 +762,8 @@ The concept of "advisors" comes from the AOP support defined in Spring
 and does not have a direct equivalent in AspectJ. An advisor is like a small
 self-contained aspect that has a single piece of advice. The advice itself is
 represented by a bean and must implement one of the advice interfaces described in
-xref:core/aop-api/advice.adoc#aop-api-advice-types[Advice Types in Spring]. Advisors can take advantage of AspectJ pointcut expressions.
+xref:core/aop-api/advice.adoc#aop-api-advice-types[Advice Types in Spring].
+Advisors can take advantage of AspectJ pointcut expressions.
 
 Spring supports the advisor concept with the `<aop:advisor>` element. You most
 commonly see it used in conjunction with transactional advice, which also has its own
@@ -803,7 +794,6 @@ As well as the `pointcut-ref` attribute used in the preceding example, you can a
 
 To define the precedence of an advisor so that the advice can participate in ordering,
 use the `order` attribute to define the `Ordered` value of the advisor.
-
 
 
 [[aop-schema-example]]
@@ -981,7 +971,3 @@ pointcut expression so that only `@Idempotent` operations match, as follows:
 			expression="execution(* com.xyz.service.*.*(..)) and
 			@annotation(com.xyz.service.Idempotent)"/>
 ----
-
-
-
-

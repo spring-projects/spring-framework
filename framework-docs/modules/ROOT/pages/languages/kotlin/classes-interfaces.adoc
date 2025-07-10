@@ -14,7 +14,3 @@ running the Kotlin compiler with its `-java-parameters` flag for standard Java p
 You can declare configuration classes as
 {kotlin-docs}/nested-classes.html[top level or nested but not inner],
 since the later requires a reference to the outer class.
-
-
-
-

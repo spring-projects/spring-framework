@@ -15,7 +15,6 @@ gain full control over the configuration through the
 xref:web/webflux/config.adoc#webflux-config-advanced-java[Advanced Configuration Mode].
 
 
-
 [[webflux-config-enable]]
 == Enabling WebFlux Config
 [.small]#xref:web/webmvc/mvc-config/enable.adoc[See equivalent in the Servlet stack]#
@@ -54,7 +53,6 @@ xref:web/webflux/dispatcher-handler.adoc#webflux-special-bean-types[infrastructu
 available on the classpath -- for JSON, XML, and others.
 
 
-
 [[webflux-config-customize]]
 == WebFlux config API
 [.small]#xref:web/webmvc/mvc-config/customize.adoc[See equivalent in the Servlet stack]#
@@ -86,7 +84,6 @@ class WebConfig : WebFluxConfigurer {
 }
 ----
 ======
-
 
 
 [[webflux-config-conversion]]
@@ -174,7 +171,6 @@ and the `FormattingConversionServiceFactoryBean` for more information on when to
 use `FormatterRegistrar` implementations.
 
 
-
 [[webflux-config-validation]]
 == Validation
 [.small]#xref:web/webmvc/mvc-config/validation.adoc[See equivalent in the Servlet stack]#
@@ -254,10 +250,8 @@ Kotlin::
 ----
 ======
 
-
 TIP: If you need to have a `LocalValidatorFactoryBean` injected somewhere, create a bean and
 mark it with `@Primary` in order to avoid conflict with the one declared in the MVC config.
-
 
 
 [[webflux-config-content-negotiation]]
@@ -299,7 +293,6 @@ Kotlin::
 	}
 ----
 ======
-
 
 
 [[webflux-config-message-codecs]]
@@ -353,7 +346,6 @@ It also automatically registers the following well-known modules if they are det
 * {jackson-github-org}/jackson-datatype-jsr310[`jackson-datatype-jsr310`]: Support for Java 8 Date and Time API types.
 * {jackson-github-org}/jackson-datatype-jdk8[`jackson-datatype-jdk8`]: Support for other Java 8 types, such as `Optional`.
 * {jackson-github-org}/jackson-module-kotlin[`jackson-module-kotlin`]: Support for Kotlin classes and data classes.
-
 
 
 [[webflux-config-view-resolvers]]
@@ -528,7 +520,6 @@ Kotlin::
 See xref:web/webflux-view.adoc[View Technologies] for more on the view technologies that are integrated with Spring WebFlux.
 
 
-
 [[webflux-config-static-resources]]
 == Static Resources
 [.small]#xref:web/webmvc/mvc-config/static-resources.adoc[See equivalent in the Servlet stack]#
@@ -659,7 +650,6 @@ TIP: The Java configuration based on `ResourceHandlerRegistry` provides further 
 for fine-grained control, for example, last-modified behavior and optimized resource resolution.
 
 
-
 [[webflux-config-path-matching]]
 == Path Matching
 [.small]#xref:web/webmvc/mvc-config/path-matching.adoc[See equivalent in the Servlet stack]#
@@ -682,8 +672,6 @@ Spring WebFlux also does not support suffix pattern matching, unlike in Spring M
 are also xref:web/webmvc/mvc-controller/ann-requestmapping.adoc#mvc-ann-requestmapping-suffix-pattern-match[recommend] moving away from
 reliance on it.
 ====
-
-
 
 
 [[webflux-config-api-version]]
@@ -752,8 +740,6 @@ xref:web/webflux/controller/ann-requestmapping.adoc#webflux-ann-requestmapping-v
 according to the request version.
 
 
-
-
 [[webflux-config-blocking-execution]]
 == Blocking Execution
 
@@ -800,8 +786,6 @@ Kotlin::
 By default, controller methods whose return type is not recognized by the configured
 `ReactiveAdapterRegistry` are considered blocking, but you can set a custom controller
 method predicate via `BlockingExecutionConfigurer`.
-
-
 
 
 [[webflux-config-websocket-service]]
@@ -853,8 +837,6 @@ Kotlin::
 ======
 
 
-
-
 [[webflux-config-advanced-java]]
 == Advanced Configuration Mode
 [.small]#xref:web/webmvc/mvc-config/advanced-java.adoc[See equivalent in the Servlet stack]#
@@ -897,7 +879,3 @@ Kotlin::
 You can keep existing methods in `WebConfig`, but you can now also override bean declarations
 from the base class and still have any number of other `WebMvcConfigurer` implementations on
 the classpath.
-
-
-
-

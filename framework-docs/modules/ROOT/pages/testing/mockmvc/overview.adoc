@@ -20,5 +20,3 @@ to perform requests and to verify responses using Hamcrest or through `MockMvcTe
 which provides a fluent API using AssertJ. You can also use it through the
 xref:testing/webtestclient.adoc[WebTestClient] API with MockMvc plugged in as the server
 to handle requests.
-
-

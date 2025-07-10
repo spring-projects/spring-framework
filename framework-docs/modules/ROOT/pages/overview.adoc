@@ -19,8 +19,6 @@ based on a diverse range of real-world use cases. This has helped Spring to succ
 evolve over a very long time.
 
 
-
-
 [[overview-spring]]
 == What We Mean by "Spring"
 
@@ -43,8 +41,6 @@ Module System). For use in module-enabled applications, the Spring Framework jar
 (`spring.core`, `spring.context`, etc.) independent from jar artifact names. The jars follow
 the same naming pattern with `-` instead of `.` – for example, `spring-core` and `spring-context`.
 Of course, Spring Framework's jars also work fine on the classpath.
-
-
 
 
 [[overview-history]]
@@ -93,8 +89,6 @@ issue tracker, and release cadence. See {spring-site-projects}[spring.io/project
 the complete list of Spring projects.
 
 
-
-
 [[overview-philosophy]]
 == Design Philosophy
 
@@ -119,8 +113,6 @@ meaningful, current, and accurate javadoc. It is one of very few projects that c
 clean code structure with  no circular dependencies between packages.
 
 
-
-
 [[overview-feedback]]
 == Feedback and Contributions
 
@@ -137,8 +129,6 @@ tracker, where discussions take place and leave a record for future reference.
 
 For more details see the guidelines at the {spring-framework-code}/CONTRIBUTING.md[CONTRIBUTING],
 top-level project page.
-
-
 
 
 [[overview-getting-started]]

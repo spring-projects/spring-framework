@@ -40,5 +40,3 @@ For use cases that require adding or removing session attributes, consider injec
 For temporary storage of model attributes in the session as part of a controller
 workflow, consider using `@SessionAttributes` as described in
 xref:web/webmvc/mvc-controller/ann-methods/sessionattributes.adoc[`@SessionAttributes`].
-
-

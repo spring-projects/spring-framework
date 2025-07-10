@@ -60,4 +60,3 @@ Kotlin::
 See the javadoc for
 {spring-framework-api}/test/web/servlet/setup/ConfigurableMockMvcBuilder.html[`ConfigurableMockMvcBuilder`]
 for a list of all MockMvc builder features or use the IDE to explore the available options.
-

@@ -5,7 +5,6 @@ This section provides some specific hints and recommendations worth for developi
 in Kotlin.
 
 
-
 [[final-by-default]]
 == Final by Default
 
@@ -53,7 +52,6 @@ NOTE: The Kotlin code samples in Spring Framework documentation do not explicitl
 using the `kotlin-allopen` plugin, since this is the most commonly used setup.
 
 
-
 [[using-immutable-class-instances-for-persistence]]
 == Using Immutable Class Instances for Persistence
 
@@ -97,7 +95,6 @@ plugin.
 NOTE: As of the Kay release train, Spring Data supports Kotlin immutable class instances and
 does not require the `kotlin-noarg` plugin if the module uses Spring Data object mappings
 (such as MongoDB, Redis, Cassandra, and others).
-
 
 
 [[injecting-dependencies]]
@@ -175,6 +172,7 @@ As a consequence, the related bean name represented as a Kotlin string is `"samp
 instead of `"sampleBean"` for the regular `public` function use-case. Make sure to use the mangled name when injecting
 such bean by name, or add `@JvmName("sampleBean")` to disable name mangling.
 
+
 [[injecting-configuration-properties]]
 == Injecting Configuration Properties
 
@@ -236,7 +234,6 @@ To get the original exception thrown like in Java, methods should be annotated w
 to specify explicitly the checked exceptions thrown (for example `@Throws(IOException::class)`).
 
 
-
 [[annotation-array-attributes]]
 == Annotation Array Attributes
 
@@ -283,7 +280,6 @@ NOTE: If the `@RequestMapping` `method` attribute is not specified, all HTTP met
 be matched, not only the `GET` method.
 
 
-
 [[declaration-site-variance]]
 == Declaration-site variance
 
@@ -319,7 +315,6 @@ subscribe to {spring-framework-issues}/22313[spring-framework#22313] to track re
 progresses.
 
 
-
 [[testing]]
 == Testing
 
@@ -329,7 +324,6 @@ https://mockk.io/[Mockk] for mocking.
 
 NOTE: If you are using Spring Boot, see
 {spring-boot-docs-ref}/features/kotlin.html#features.kotlin.testing[this related documentation].
-
 
 [[constructor-injection]]
 === Constructor injection
@@ -354,7 +348,6 @@ file with a `spring.test.constructor.autowire.mode = all` property.
 		// tests that use the injected OrderService and CustomerService
 	}
 ----
-
 
 [[per_class-lifecycle]]
 === `PER_CLASS` Lifecycle
@@ -400,7 +393,6 @@ class IntegrationTests {
 }
 ----
 
-
 [[specification-like-tests]]
 === Specification-like Tests
 
@@ -431,5 +423,3 @@ class support. The following example shows how to do so:
 		}
 	}
 ----
-
-

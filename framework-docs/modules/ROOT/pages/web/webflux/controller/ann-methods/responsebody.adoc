@@ -38,13 +38,12 @@ than a meta-annotation marked with `@Controller` and `@ResponseBody`.
 
 `@ResponseBody` supports reactive types, which means you can return Reactor or RxJava
 types and have the asynchronous values they produce rendered to the response.
-For additional details, see xref:web/webflux/reactive-spring.adoc#webflux-codecs-streaming[Streaming] and
-xref:web/webflux/reactive-spring.adoc#webflux-codecs-jackson[JSON rendering].
+For additional details, see xref:web/webflux/reactive-spring.adoc#webflux-codecs-streaming[Streaming]
+and xref:web/webflux/reactive-spring.adoc#webflux-codecs-jackson[JSON rendering].
 
 You can combine `@ResponseBody` methods with JSON serialization views.
 See xref:web/webflux/controller/ann-methods/jackson.adoc[Jackson JSON] for details.
 
-You can use the xref:web/webflux/config.adoc#webflux-config-message-codecs[HTTP message codecs] option of the xref:web/webflux/dispatcher-handler.adoc#webflux-framework-config[WebFlux Config] to
-configure or customize message writing.
-
-
+You can use the xref:web/webflux/config.adoc#webflux-config-message-codecs[HTTP message codecs]
+option of the xref:web/webflux/dispatcher-handler.adoc#webflux-framework-config[WebFlux Config]
+to configure or customize message writing.

@@ -568,6 +568,3 @@ the following example:
 	</beans>
 ----
 --
-
-
-

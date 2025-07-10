@@ -7,7 +7,6 @@ implementations of special integration interfaces. The next few sections describ
 integration interfaces.
 
 
-
 [[beans-factory-extension-bpp]]
 == Customizing Beans by Using a `BeanPostProcessor`
 
@@ -108,7 +107,6 @@ Spring accesses other beans for matching them by type.
 
 The following examples show how to write, register, and use `BeanPostProcessor` instances
 in an `ApplicationContext`.
-
 
 [[beans-factory-extension-bpp-examples-hw]]
 === Example: Hello World, `BeanPostProcessor`-style
@@ -244,7 +242,6 @@ Bean 'messenger' created : org.springframework.scripting.groovy.GroovyMessenger@
 org.springframework.scripting.groovy.GroovyMessenger@272961
 ----
 
-
 [[beans-factory-extension-bpp-examples-aabpp]]
 === Example: The `AutowiredAnnotationBeanPostProcessor`
 
@@ -253,7 +250,6 @@ implementation is a common means of extending the Spring IoC container. An examp
 Spring's `AutowiredAnnotationBeanPostProcessor` -- a `BeanPostProcessor` implementation
 that ships with the Spring distribution and autowires annotated fields, setter methods,
 and arbitrary config methods.
-
 
 
 [[beans-factory-extension-factory-postprocessors]]
@@ -311,7 +307,6 @@ NOTE: As with ``BeanPostProcessor``s , you typically do not want to configure
 Thus, marking it for lazy initialization will be ignored, and the
 `Bean(Factory)PostProcessor` will be instantiated eagerly even if you set the
 `default-lazy-init` attribute to `true` on the declaration of your `<beans />` element.
-
 
 [[beans-factory-placeholderconfigurer]]
 === Example: Property Placeholder Substitution with `PropertySourcesPlaceholderConfigurer`
@@ -412,7 +407,6 @@ fails when it is about to be created, which is during the `preInstantiateSinglet
 phase of an `ApplicationContext` for a non-lazy-init bean.
 =====
 
-
 [[beans-factory-overrideconfigurer]]
 === Example: The `PropertyOverrideConfigurer`
 
@@ -469,7 +463,6 @@ property overriding with a dedicated configuration element, as the following exa
 ----
 
 
-
 [[beans-factory-extension-factorybean]]
 == Customizing Instantiation Logic with a `FactoryBean`
 
@@ -502,6 +495,3 @@ calling the `getBean()` method of the `ApplicationContext`. So, for a given `Fac
 with an `id` of `myBean`, invoking `getBean("myBean")` on the container returns the
 product of the `FactoryBean`, whereas invoking `getBean("&myBean")` returns the
 `FactoryBean` instance itself.
-
-
-

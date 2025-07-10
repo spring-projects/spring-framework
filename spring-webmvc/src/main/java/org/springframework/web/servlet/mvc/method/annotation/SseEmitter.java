@@ -47,10 +47,9 @@ public class SseEmitter extends ResponseBodyEmitter {
 
 	private static final MediaType TEXT_PLAIN = new MediaType("text", "plain", StandardCharsets.UTF_8);
 
-	/**
-	 * Guards access to write operations on the response.
-	 */
+	/** Guards access to write operations on the response. */
 	private final Lock writeLock = new ReentrantLock();
+
 
 	/**
 	 * Create a new SseEmitter instance.

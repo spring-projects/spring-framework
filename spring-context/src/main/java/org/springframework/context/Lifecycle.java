@@ -52,8 +52,8 @@ public interface Lifecycle {
 	/**
 	 * Start this component.
 	 * <p>Should not throw an exception if the component is already running.
-	 * <p>In the case of a container, this will propagate the start signal to all
-	 * components that apply.
+	 * <p>In the case of a container, this will propagate a hard start signal to all
+	 * components that apply, even to non-auto-startup components.
 	 * @see SmartLifecycle#isAutoStartup()
 	 */
 	void start();

@@ -16,7 +16,3 @@ The Thymeleaf integration with Spring MVC is managed by the Thymeleaf project.
 The configuration involves a few bean declarations, such as
 `ServletContextTemplateResolver`, `SpringTemplateEngine`, and `ThymeleafViewResolver`.
 See https://www.thymeleaf.org/documentation.html[Thymeleaf+Spring] for more details.
-
-
-
-

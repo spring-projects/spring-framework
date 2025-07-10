@@ -24,7 +24,6 @@ TIP: The basic rule for integrating any other script engine is that it must impl
 `ScriptEngine` and `Invocable` interfaces.
 
 
-
 [[mvc-view-script-dependencies]]
 == Requirements
 [.small]#xref:web/webflux-view.adoc#webflux-view-script-dependencies[See equivalent in the Reactive stack]#
@@ -42,7 +41,6 @@ Java 8+. Using the latest update release available is highly recommended.
 
 You need to have the script templating library. One way to do that for JavaScript is
 through https://www.webjars.org/[WebJars].
-
 
 
 [[mvc-view-script-integrate]]
@@ -268,7 +266,3 @@ Check out the Spring Framework unit tests,
 {spring-framework-code}/spring-webmvc/src/test/java/org/springframework/web/servlet/view/script[Java], and
 {spring-framework-code}/spring-webmvc/src/test/resources/org/springframework/web/servlet/view/script[resources],
 for more configuration examples.
-
-
-
-

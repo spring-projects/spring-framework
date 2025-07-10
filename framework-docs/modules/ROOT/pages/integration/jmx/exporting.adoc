@@ -231,6 +231,3 @@ behavior to the `REPLACE_EXISTING` behavior:
 
 	</beans>
 ----
-
-
-

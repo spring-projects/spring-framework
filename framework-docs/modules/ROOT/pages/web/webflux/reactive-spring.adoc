@@ -22,7 +22,6 @@ builds on this basic contract.
 deserialization of HTTP request and response content.
 
 
-
 [[webflux-httphandler]]
 == `HttpHandler`
 
@@ -217,11 +216,11 @@ To deploy as a WAR to a Servlet container instead, use
 to adapt `HttpHandler` to a `Servlet` via `ServletHttpHandlerAdapter`.
 
 
-
 [[webflux-web-handler-api]]
 == `WebHandler` API
 
-The `org.springframework.web.server` package builds on the xref:web/webflux/reactive-spring.adoc#webflux-httphandler[`HttpHandler`] contract
+The `org.springframework.web.server` package builds on the
+xref:web/webflux/reactive-spring.adoc#webflux-httphandler[`HttpHandler`] contract
 to provide a general-purpose web API for processing requests through a chain of multiple
 {spring-framework-api}/web/server/WebExceptionHandler.html[`WebExceptionHandler`], multiple
 {spring-framework-api}/web/server/WebFilter.html[`WebFilter`], and a single
@@ -362,14 +361,11 @@ to individual parts by name and, hence, requires parsing multipart data in full.
 By contrast, you can use `@RequestBody` to decode the content to `Flux<PartEvent>` without
 collecting to a `MultiValueMap`.
 
-
 [[webflux-forwarded-headers]]
 === Forwarded Headers
 [.small]#xref:web/webmvc/filters.adoc#filters-forwarded-headers[See equivalent in the Servlet stack]#
 
 include::partial$web/forwarded-headers.adoc[]
-
-
 
 [[webflux-forwarded-headers-transformer]]
 === ForwardedHeaderTransformer
@@ -384,8 +380,6 @@ NOTE: In 5.1 `ForwardedHeaderFilter` was deprecated and superseded by
 exchange is created. If the filter is configured anyway, it is taken out of the list of
 filters, and `ForwardedHeaderTransformer` is used instead.
 
-
-
 [[webflux-forwarded-headers-security]]
 === Security Considerations
 
@@ -394,7 +388,6 @@ if the headers were added by a proxy, as intended, or by a malicious client. Thi
 a proxy at the boundary of trust should be configured to remove untrusted forwarded traffic coming
 from the outside. You can also configure the `ForwardedHeaderTransformer` with
 `removeOnly=true`, in which case it removes but does not use the headers.
-
 
 
 [[webflux-filters]]
@@ -406,7 +399,6 @@ logic before and after the rest of the processing chain of filters and the targe
 `WebHandler`. When using the xref:web/webflux/dispatcher-handler.adoc#webflux-framework-config[WebFlux Config], registering a `WebFilter` is as simple
 as declaring it as a Spring bean and (optionally) expressing precedence by using `@Order` on
 the bean declaration or by implementing `Ordered`.
-
 
 [[webflux-filters-cors]]
 === CORS
@@ -434,7 +426,6 @@ The `UrlHandlerFilter` web filter has been designed for this purpose. It can be 
 Here is how you can instantiate and configure a `UrlHandlerFilter` for a blog application:
 
 include-code::./UrlHandlerFilterConfiguration[tag=config,indent=0]
-
 
 
 [[webflux-exception-handler]]
@@ -465,7 +456,6 @@ The following table describes the available `WebExceptionHandler` implementation
   This handler is declared in the xref:web/webflux/dispatcher-handler.adoc#webflux-framework-config[WebFlux Config].
 
 |===
-
 
 
 [[webflux-codecs]]
@@ -549,12 +539,12 @@ encode a `Mono<List<String>>`.
 On the server side where form content often needs to be accessed from multiple places,
 `ServerWebExchange` provides a dedicated `getFormData()` method that parses the content
 through `FormHttpMessageReader` and then caches the result for repeated access.
-See xref:web/webflux/reactive-spring.adoc#webflux-form-data[Form Data] in the xref:web/webflux/reactive-spring.adoc#webflux-web-handler-api[`WebHandler` API] section.
+See xref:web/webflux/reactive-spring.adoc#webflux-form-data[Form Data] in the
+xref:web/webflux/reactive-spring.adoc#webflux-web-handler-api[`WebHandler` API] section.
 
 Once `getFormData()` is used, the original raw content can no longer be read from the
 request body. For this reason, applications are expected to go through `ServerWebExchange`
 consistently for access to the cached form data versus reading from the raw request body.
-
 
 [[webflux-codecs-multipart]]
 === Multipart
@@ -571,13 +561,13 @@ For more information about the `DefaultPartHttpMessageReader`, refer to the
 On the server side where multipart form content may need to be accessed from multiple
 places, `ServerWebExchange` provides a dedicated `getMultipartData()` method that parses
 the content through `MultipartHttpMessageReader` and then caches the result for repeated access.
-See xref:web/webflux/reactive-spring.adoc#webflux-multipart[Multipart Data] in the xref:web/webflux/reactive-spring.adoc#webflux-web-handler-api[`WebHandler` API] section.
+See xref:web/webflux/reactive-spring.adoc#webflux-multipart[Multipart Data] in the
+xref:web/webflux/reactive-spring.adoc#webflux-web-handler-api[`WebHandler` API] section.
 
 Once `getMultipartData()` is used, the original raw content can no longer be read from the
 request body. For this reason applications have to consistently use `getMultipartData()`
 for repeated, map-like access to parts, or otherwise rely on the
 `SynchronossPartHttpMessageReader` for a one-time access to `Flux<Part>`.
-
 
 [[webflux-codecs-protobuf]]
 === Protocol Buffers
@@ -618,8 +608,6 @@ a `maxParts` property to limit the overall number of parts in a multipart reques
 To configure all three in WebFlux, you'll need to supply a pre-configured instance of
 `MultipartHttpMessageReader` to `ServerCodecConfigurer`.
 
-
-
 [[webflux-codecs-streaming]]
 === Streaming
 [.small]#xref:web/webmvc/mvc-ann-async.adoc#mvc-ann-async-http-streaming[See equivalent in the Servlet stack]#
@@ -629,7 +617,6 @@ When streaming to the HTTP response (for example, `text/event-stream`,
 reliably detect a disconnected client sooner rather than later. Such a send could be a
 comment-only, empty SSE event or any other "no-op" data that would effectively serve as
 a heartbeat.
-
 
 [[webflux-codecs-buffers]]
 === `DataBuffer`
@@ -647,7 +634,6 @@ cases please review the information in xref:core/databuffer-codec.adoc[Data Buff
 especially the section on xref:core/databuffer-codec.adoc#databuffers-using[Using DataBuffer].
 
 
-
 [[webflux-logging]]
 == Logging
 [.small]#xref:web/webmvc/mvc-servlet/logging.adoc[See equivalent in the Servlet stack]#
@@ -663,7 +649,6 @@ messages may show a different level of detail at `TRACE` vs `DEBUG`.
 Good logging comes from the experience of using the logs. If you spot anything that does
 not meet the stated goals, please let us know.
 
-
 [[webflux-logging-id]]
 === Log Id
 
@@ -678,7 +663,6 @@ while a fully formatted prefix based on that ID is available from
 `ClientRequest` attribute
 ({spring-framework-api}/web/reactive/function/client/ClientRequest.html#LOG_ID_ATTRIBUTE[`LOG_ID_ATTRIBUTE`])
 ,while a fully formatted prefix is available from `ClientRequest#logPrefix()`.
-
 
 [[webflux-logging-sensitive-data]]
 === Sensitive Data
@@ -749,7 +733,6 @@ Kotlin::
 ----
 ======
 
-
 [[webflux-logging-appenders]]
 === Appenders
 
@@ -757,8 +740,6 @@ Logging libraries such as SLF4J and Log4J 2 provide asynchronous loggers that av
 blocking. While those have their own drawbacks such as potentially dropping messages
 that could not be queued for logging, they are the best available options currently
 for use in a reactive, non-blocking application.
-
-
 
 [[webflux-codecs-custom]]
 === Custom codecs
