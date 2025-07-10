@@ -6,32 +6,34 @@ annotated with https://jspecify.dev/docs/start-here/[JSpecify] annotations to de
 fields, and related type usages. Reading the https://jspecify.dev/docs/user-guide/[JSpecify user guide] is highly
 recommended in order to get familiar with those annotations and semantics.
 
-The primary goal of this null-safety arrangement is to prevent a `NullPointerException` from being thrown at runtime via build
-time checks and to use explicit nullability as a way to express the possible absence of value. It is useful in both
-Java by leveraging some tooling (https://github.com/uber/NullAway[NullAway] or IDEs supporting JSpecify annotations
-such as IntelliJ IDEA) and Kotlin where JSpecify annotations are automatically translated to
+The primary goal of this null-safety arrangement is to prevent a `NullPointerException` from being thrown at
+runtime via build time checks and to use explicit nullability as a way to express the possible absence of value.
+It is useful in both Java by leveraging some tooling (https://github.com/uber/NullAway[NullAway] or IDEs supporting
+JSpecify annotations such as IntelliJ IDEA) and Kotlin where JSpecify annotations are automatically translated to
 {kotlin-docs}/null-safety.html[Kotlin's null safety].
 
-The {spring-framework-api}/core/Nullness.html[`Nullness` Spring API] can be used at runtime to detect the nullness of a
-type usage, a field, a method return type, or a parameter. It provides full support for JSpecify annotations,
-Kotlin null safety, and Java primitive types, as well as a pragmatic check on any `@Nullable` annotation (regardless of the
-package).
+The {spring-framework-api}/core/Nullness.html[`Nullness` Spring API] can be used at runtime to detect the
+nullness of a type usage, a field, a method return type, or a parameter. It provides full support for
+JSpecify annotations, Kotlin null safety, and Java primitive types, as well as a pragmatic check on any
+`@Nullable` annotation (regardless of the package).
+
 
 [[null-safety-libraries]]
 == Annotating libraries with JSpecify annotations
 
-As of Spring Framework 7, the Spring Framework codebase leverages JSpecify annotations to expose null-safe APIs and
-to check the consistency of those nullability declarations with https://github.com/uber/NullAway[NullAway] as part of
-its build. It is recommended for each library depending on Spring Framework and Spring portfolio projects, as
-well as other libraries related to the Spring ecosystem (Reactor, Micrometer, and Spring community projects), to do the
-same.
+As of Spring Framework 7, the Spring Framework codebase leverages JSpecify annotations to expose null-safe APIs
+and to check the consistency of those nullability declarations with https://github.com/uber/NullAway[NullAway]
+as part of its build. It is recommended for each library depending on Spring Framework and Spring portfolio projects,
+as well as other libraries related to the Spring ecosystem (Reactor, Micrometer, and Spring community projects),
+to do the same.
+
 
 [[null-safety-applications]]
 == Leveraging JSpecify annotations in Spring applications
 
-Developing applications with IDEs that support nullness annotations will provide warnings in Java and errors in Kotlin
-when the nullability contracts are not honored, allowing Spring application developers to refine their null handling to
-prevent a `NullPointerException` from being thrown at runtime.
+Developing applications with IDEs that support nullness annotations will provide warnings in Java and errors in
+Kotlin when the nullability contracts are not honored, allowing Spring application developers to refine their
+null handling to prevent a `NullPointerException` from being thrown at runtime.
 
 Optionally, Spring application developers can annotate their codebase and use build plugins like
 https://github.com/uber/NullAway[NullAway] to enforce null-safety at the application level during build time.
@@ -47,11 +49,11 @@ Spring-related libraries or applications.
 
 ==== Defaults to non-null
 
-A key point to understand is that the nullness of types is unknown by default in Java and that non-null type
-usage is by far more frequent than nullable usage. In order to keep codebases readable, we typically want to define
-by default that type usage is non-null unless marked as nullable for a specific scope. This is exactly the purpose of
-https://jspecify.dev/docs/api/org/jspecify/annotations/NullMarked.html[`@NullMarked`] which is typically set in Spring
-projects at the package level via a `package-info.java` file, for example:
+A key point to understand is that the nullness of types is unknown by default in Java and that non-null type usage
+is by far more frequent than nullable usage. In order to keep codebases readable, we typically want to define by
+default that type usage is non-null unless marked as nullable for a specific scope. This is exactly the purpose
+of https://jspecify.dev/docs/api/org/jspecify/annotations/NullMarked.html[`@NullMarked`] which is typically set
+in Spring projects at the package level via a `package-info.java` file, for example:
 
 [source,java,subs="verbatim,quotes",chomp="-packages",fold="none"]
 ----
@@ -133,6 +135,7 @@ The Java specification also enforces that annotations defined with `@Target(Elem
 - `Cache.@Nullable ValueWrapper`
 - `jakarta.validation.@Nullable Validator`
 
+
 [[null-safety-guidelines-nullaway]]
 === NullAway
 
@@ -146,9 +149,9 @@ The recommended configuration is:
 can be used to express complementary semantics to avoid irrelevant warnings in your codebase.
 
 A good example of the benefits of a `@Contract` declaration can be seen with
-{spring-framework-api}/util/Assert.html#notNull(java.lang.Object,java.lang.String)[`Assert.notNull()`] which is annotated
-with `@Contract("null, _ -> fail")`. With that contract declaration, NullAway will understand that the value passed as a
-parameter cannot be null after a successful invocation of `Assert.notNull()`.
+{spring-framework-api}/util/Assert.html#notNull(java.lang.Object,java.lang.String)[`Assert.notNull()`]
+which is annotated with `@Contract("null, _ -> fail")`. With that contract declaration, NullAway will understand
+that the value passed as a parameter cannot be null after a successful invocation of `Assert.notNull()`.
 
 Optionally, it is possible to set `NullAway:JSpecifyMode=true` to enable
 https://github.com/uber/NullAway/wiki/JSpecify-Support[checks on the full JSpecify semantics], including annotations on
@@ -160,8 +163,8 @@ generates no warning with the recommended configuration mentioned previously in 
 
 ==== Warnings suppression
 
-There are a few valid use cases where NullAway will incorrectly detect nullability problems. In such cases, it is recommended
-to suppress related warnings and to document the reason:
+There are a few valid use cases where NullAway will incorrectly detect nullability problems. In such cases,
+it is recommended to suppress related warnings and to document the reason:
 
  - `@SuppressWarnings("NullAway.Init")` at field, constructor, or class level can be used to avoid unnecessary warnings
 due to the lazy initialization of fields – for example, due to a class implementing
@@ -172,8 +175,8 @@ able to detect that the path involving a nullability problem will never happen.
 outside of a lambda for the code path within the lambda.
 - `@SuppressWarnings("NullAway") // Reflection` can be used for some reflection operations that are known to return
 non-null values even if that cannot be expressed by the API.
-- `@SuppressWarnings("NullAway") // Well-known map keys` can be used when `Map#get` invocations are performed with keys that are known
-to be present and when non-null related values have been inserted previously.
+- `@SuppressWarnings("NullAway") // Well-known map keys` can be used when `Map#get` invocations are performed with keys
+that are known to be present and when non-null related values have been inserted previously.
 - `@SuppressWarnings("NullAway") // Overridden method does not define nullability` can be used when the superclass does
 not define nullability (typically when the superclass comes from an external dependency).
 - `@SuppressWarnings("NullAway") // See https://github.com/uber/NullAway/issues/1075` can be used when NullAway is not able to detect type variable nullness in generic methods.
@@ -208,7 +211,6 @@ with JSpecify annotations.
 - For method return types, instead of `@Nullable public String method()` with Spring annotations, use
 `public @Nullable String method()` with JSpecify annotations.
 
-Also, with JSpecify, you do not need to specify `@NonNull` when overriding a type usage annotated with `@Nullable` in the
-super method to "undo" the nullable declaration in null-marked code. Just declare it unannotated, and the null-marked
-defaults will apply (type usage is considered non-null unless explicitly annotated as nullable).
-
+Also, with JSpecify, you do not need to specify `@NonNull` when overriding a type usage annotated with `@Nullable`
+in the super method to "undo" the nullable declaration in null-marked code. Just declare it unannotated, and the
+null-marked defaults will apply (type usage is considered non-null unless explicitly annotated as nullable).
