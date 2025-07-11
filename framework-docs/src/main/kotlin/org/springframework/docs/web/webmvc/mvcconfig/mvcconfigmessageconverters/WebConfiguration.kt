@@ -16,7 +16,7 @@ import java.text.SimpleDateFormat
 @Configuration
 class WebConfiguration : WebMvcConfigurer {
 
-	override fun configureMessageConverters(builder: HttpMessageConverters.Builder) {
+	override fun configureMessageConverters(builder: HttpMessageConverters.ServerBuilder) {
 		val jsonMapper = JsonMapper.builder()
 			.findAndAddModules()
 			.enable(SerializationFeature.INDENT_OUTPUT)

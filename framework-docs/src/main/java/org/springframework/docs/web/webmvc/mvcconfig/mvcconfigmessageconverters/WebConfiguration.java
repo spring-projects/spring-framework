@@ -34,7 +34,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 public class WebConfiguration implements WebMvcConfigurer {
 
 	@Override
-	public void configureMessageConverters(HttpMessageConverters.Builder builder) {
+	public void configureMessageConverters(HttpMessageConverters.ServerBuilder builder) {
 		JsonMapper jsonMapper = JsonMapper.builder()
 				.findAndAddModules()
 				.enable(SerializationFeature.INDENT_OUTPUT)

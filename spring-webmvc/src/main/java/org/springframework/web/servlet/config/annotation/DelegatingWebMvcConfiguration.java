@@ -122,7 +122,7 @@ public class DelegatingWebMvcConfiguration extends WebMvcConfigurationSupport {
 	}
 
 	@Override
-	protected void configureMessageConverters(HttpMessageConverters.Builder builder) {
+	protected void configureMessageConverters(HttpMessageConverters.ServerBuilder builder) {
 		this.configurers.configureMessageConverters(builder);
 	}
 

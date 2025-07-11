@@ -124,9 +124,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 	 * Default {@link HttpMessageConverter HttpMessageConverters} are initialized.
 	 */
 	public RestTemplate() {
-		HttpMessageConverters.withDefaults().build().forClient().forEach(this.messageConverters::add);
-		updateErrorHandlerConverters();
-		this.uriTemplateHandler = initUriTemplateHandler();
+		this(HttpMessageConverters.forClient().registerDefaults().build());
 	}
 
 	/**

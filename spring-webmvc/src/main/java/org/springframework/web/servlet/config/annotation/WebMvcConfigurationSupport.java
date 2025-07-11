@@ -863,9 +863,9 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	 * @since 7.0
 	 */
 	protected HttpMessageConverters createMessageConverters() {
-		HttpMessageConverters.Builder builder = HttpMessageConverters.withDefaults();
-		configureMessageConverters(builder);
-		return builder.build();
+		HttpMessageConverters.ServerBuilder serverBuilder = HttpMessageConverters.forServer().registerDefaults();
+		configureMessageConverters(serverBuilder);
+		return serverBuilder.build();
 	}
 
 	/**
@@ -874,7 +874,7 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	 * @param builder the {@code HttpMessageConverters} builder to configure
 	 * @since 7.0
 	 */
-	protected void configureMessageConverters(HttpMessageConverters.Builder builder) {
+	protected void configureMessageConverters(HttpMessageConverters.ServerBuilder builder) {
 	}
 
 	/**
@@ -885,7 +885,7 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	 * otherwise be registered by default. Also see {@link #addDefaultHttpMessageConverters}
 	 * for adding default message converters.
 	 * @param converters a list to add message converters to (initially an empty list)
-	 * @deprecated since 7.0 in favor of {@link #configureMessageConverters(HttpMessageConverters.Builder)}
+	 * @deprecated since 7.0 in favor of {@link #configureMessageConverters(HttpMessageConverters.ServerBuilder)}
 	 */
 	@Deprecated(since = "7.0", forRemoval = true)
 	protected void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
@@ -897,7 +897,7 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	 * to be registered and then insert a custom converter through this method.
 	 * @param converters the list of configured converters to extend
 	 * @since 4.1.3
-	 * @deprecated since 7.0 in favor of {@link #configureMessageConverters(HttpMessageConverters.Builder)}
+	 * @deprecated since 7.0 in favor of {@link #configureMessageConverters(HttpMessageConverters.ServerBuilder)}
 	 */
 	@Deprecated(since = "7.0", forRemoval = true)
 	protected void extendMessageConverters(List<HttpMessageConverter<?>> converters) {
@@ -912,7 +912,7 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	@Deprecated(since = "7.0", forRemoval = true)
 	protected final void addDefaultHttpMessageConverters(List<HttpMessageConverter<?>> messageConverters) {
 		HttpMessageConverters converters = createMessageConverters();
-		converters.forServer().forEach(messageConverters::add);
+		converters.forEach(messageConverters::add);
 	}
 
 	/**

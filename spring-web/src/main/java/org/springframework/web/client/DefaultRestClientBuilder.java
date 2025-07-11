@@ -361,6 +361,7 @@ final class DefaultRestClientBuilder implements RestClient.Builder {
 	}
 
 	@Override
+	@SuppressWarnings("removal")
 	public RestClient.Builder messageConverters(Consumer<List<HttpMessageConverter<?>>> configurer) {
 		configurer.accept(initMessageConverters());
 		validateConverters(this.messageConverters);
@@ -374,6 +375,13 @@ final class DefaultRestClientBuilder implements RestClient.Builder {
 		messageConverters.forEach(converter -> converters.add(converter));
 		this.messageConverters = Collections.unmodifiableList(converters);
 		return this;
+	}
+
+	@Override
+	public RestClient.Builder configureMessageConverters(Consumer<HttpMessageConverters.ClientBuilder> configurer) {
+		HttpMessageConverters.ClientBuilder clientBuilder = HttpMessageConverters.forClient();
+		configurer.accept(clientBuilder);
+		return messageConverters(clientBuilder.build());
 	}
 
 	@Override
@@ -399,7 +407,7 @@ final class DefaultRestClientBuilder implements RestClient.Builder {
 	private List<HttpMessageConverter<?>> initMessageConverters() {
 		if (this.messageConverters == null) {
 			this.messageConverters = new ArrayList<>();
-			HttpMessageConverters.withDefaults().build().forClient().forEach(this.messageConverters::add);
+			HttpMessageConverters.forClient().registerDefaults().build().forEach(this.messageConverters::add);
 		}
 		return this.messageConverters;
 	}

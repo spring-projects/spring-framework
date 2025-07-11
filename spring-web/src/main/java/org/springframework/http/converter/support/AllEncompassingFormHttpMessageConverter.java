@@ -39,7 +39,7 @@ public class AllEncompassingFormHttpMessageConverter extends FormHttpMessageConv
 	 */
 	@SuppressWarnings("removal")
 	public AllEncompassingFormHttpMessageConverter() {
-		HttpMessageConverters.withDefaults().build().forClient().forEach(this::addPartConverter);
+		HttpMessageConverters.forClient().registerDefaults().build().forEach(this::addPartConverter);
 	}
 
 	/**

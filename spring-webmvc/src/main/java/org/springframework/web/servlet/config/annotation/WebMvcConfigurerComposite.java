@@ -142,7 +142,7 @@ class WebMvcConfigurerComposite implements WebMvcConfigurer {
 	}
 
 	@Override
-	public void configureMessageConverters(HttpMessageConverters.Builder builder) {
+	public void configureMessageConverters(HttpMessageConverters.ServerBuilder builder) {
 		for (WebMvcConfigurer delegate : this.delegates) {
 			delegate.configureMessageConverters(builder);
 		}

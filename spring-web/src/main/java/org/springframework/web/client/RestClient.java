@@ -47,6 +47,7 @@ import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.http.client.observation.ClientRequestObservationConvention;
 import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.converter.HttpMessageConverters;
 import org.springframework.lang.CheckReturnValue;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.util.DefaultUriBuilderFactory;
@@ -452,7 +453,9 @@ public interface RestClient {
 		 * {@link HttpMessageConverter} pre-initialized
 		 * @return this builder
 		 * @see #messageConverters(Iterable)
+		 * @deprecated since 7.0 in favor of {@link #configureMessageConverters(Consumer)}
 		 */
+		@Deprecated(since = "7.0", forRemoval = true)
 		Builder messageConverters(Consumer<List<HttpMessageConverter<?>>> configurer);
 
 		/**
@@ -460,9 +463,17 @@ public interface RestClient {
 		 * @param messageConverters the list of {@link HttpMessageConverter} to use
 		 * @return this builder
 		 * @since 6.2
-		 * @see #messageConverters(Consumer)
+		 * @see #configureMessageConverters(Consumer)
 		 */
 		Builder messageConverters(Iterable<HttpMessageConverter<?>> messageConverters);
+
+		/**
+		 * Configure the message converters for the {@code RestClient} to use.
+		 * @param configurer the configurer to apply on an empty {@link HttpMessageConverters.ClientBuilder}.
+		 * @return this builder
+		 * @since 7.0
+		 */
+		Builder configureMessageConverters(Consumer<HttpMessageConverters.ClientBuilder> configurer);
 
 		/**
 		 * Configure the {@link io.micrometer.observation.ObservationRegistry} to use

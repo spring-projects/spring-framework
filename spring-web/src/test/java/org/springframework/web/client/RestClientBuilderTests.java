@@ -41,6 +41,7 @@ import static org.assertj.core.api.Assertions.fail;
 
 
 /**
+ * Tests for {@link DefaultRestClientBuilder}.
  * @author Arjen Poutsma
  * @author Sebastien Deleuze
  * @author Nicklas Wiegandt
@@ -137,6 +138,19 @@ public class RestClientBuilderTests {
 		List<HttpMessageConverter<?>> converters = new ArrayList<>();
 		converters.add(null);
 		assertThatIllegalArgumentException().isThrownBy(() -> builder.messageConverters(converters));
+	}
+
+	@Test
+	void configureMessageConverters() {
+		StringHttpMessageConverter stringConverter = new StringHttpMessageConverter();
+		RestClient.Builder builder = RestClient.builder();
+		builder.configureMessageConverters(clientBuilder -> clientBuilder.stringMessageConverter(stringConverter));
+		assertThat(builder).isInstanceOf(DefaultRestClientBuilder.class);
+		DefaultRestClientBuilder defaultBuilder = (DefaultRestClientBuilder) builder;
+
+		assertThat(fieldValue("messageConverters", defaultBuilder))
+				.asInstanceOf(InstanceOfAssertFactories.LIST)
+				.containsExactly(stringConverter);
 	}
 
 	@Test

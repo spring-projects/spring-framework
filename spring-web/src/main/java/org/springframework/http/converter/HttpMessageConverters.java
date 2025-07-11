@@ -20,79 +20,69 @@ import java.util.function.Consumer;
 
 /**
  * Utility for building and configuring an immutable collection of {@link HttpMessageConverter}
- * instances for client and server usage. You can {@link #create() create}
- * a new empty instance or ask to {@link #withDefaults() register default converters},
- * if available in your classpath.
- *
- * <p>This class offers a flexible arrangement for {@link HttpMessageConverters.Builder configuring message converters shared between}
- * client and server, or {@link HttpMessageConverters.Builder#configureClient(Consumer) configuring client-specific}
- * and {@link HttpMessageConverters.Builder#configureServer(Consumer) server-specific} converters.
- *
- * <p>The following HTTP message converters will be detected and registered if available, in order.
- * For {@link #forClient() client side converters}:
- * <ol>
- *     <li>All custom message converters configured with the builder
- *     <li>{@link ByteArrayHttpMessageConverter}
- *     <li>{@link StringHttpMessageConverter} with the {@link java.nio.charset.StandardCharsets#ISO_8859_1} charset
- *     <li>{@link ResourceHttpMessageConverter}, with resource streaming support disabled
- *     <li>a Multipart converter, using all detected and custom converters for part conversion
- *     <li>A JSON converter
- *     <li>A Smile converter
- *     <li>A CBOR converter
- *     <li>A YAML converter
- *     <li>An XML converter
- *     <li>An ProtoBuf converter
- *     <li>ATOM and RSS converters
- * </ol>
- *
- * For {@link #forClient() client side converters}:
- * <ol>
- *     <li>All custom message converters configured with the builder
- *     <li>{@link ByteArrayHttpMessageConverter}
- *     <li>{@link StringHttpMessageConverter} with the {@link java.nio.charset.StandardCharsets#ISO_8859_1} charset
- *     <li>{@link ResourceHttpMessageConverter}
- *     <li>{@link ResourceRegionHttpMessageConverter}
- *     <li>A JSON converter
- *     <li>A Smile converter
- *     <li>A CBOR converter
- *     <li>A YAML converter
- *     <li>An XML converter
- *     <li>An ProtoBuf converter
- *     <li>ATOM and RSS converters
- *     <li>a Multipart converter, using all detected and custom converters for part conversion
- * </ol>
+ * instances for {@link #forClient() client} or {@link #forServer() server} usage. You can
+ * ask to {@link Builder#registerDefaults() register default converters with classpath detection},
+ * add custom converters and post-process configured converters.
  *
  * @author Brian Clozel
  * @since 7.0
  */
-public interface HttpMessageConverters {
+public interface HttpMessageConverters extends Iterable<HttpMessageConverter<?>> {
+
 
 	/**
-	 * Return the list of configured message converters, tailored for HTTP client usage.
+	 * Create a builder instance, tailored for HTTP client usage.
+	 * <p>The following HTTP message converters can be detected and registered if available, in order:
+	 * <ol>
+	 *     <li>All custom message converters configured with the builder
+	 *     <li>{@link ByteArrayHttpMessageConverter}
+	 *     <li>{@link StringHttpMessageConverter} with the {@link java.nio.charset.StandardCharsets#ISO_8859_1} charset
+	 *     <li>{@link ResourceHttpMessageConverter}, with resource streaming support disabled
+	 *     <li>a Multipart converter, using all detected and custom converters for part conversion
+	 *     <li>A JSON converter
+	 *     <li>A Smile converter
+	 *     <li>A CBOR converter
+	 *     <li>A YAML converter
+	 *     <li>An XML converter
+	 *     <li>A ProtoBuf converter
+	 *     <li>ATOM and RSS converters
+	 * </ol>
 	 */
-	Iterable<HttpMessageConverter<?>> forClient();
-
-	/**
-	 * Return the list of configured message converters, tailored for HTTP server usage.
-	 */
-	Iterable<HttpMessageConverter<?>> forServer();
-
-	/**
-	 * Create a builder instance, without any message converter pre-configured.
-	 */
-	static Builder create() {
-		return new DefaultHttpMessageConverters.DefaultBuilder(false);
+	static ClientBuilder forClient() {
+		return new DefaultHttpMessageConverters.DefaultClientBuilder();
 	}
 
 	/**
-	 * Create a builder instance with default message converters pre-configured.
+	 * Create a builder instance, tailored for HTTP server usage.
+	 * <p>The following HTTP message converters can be detected and registered if available, in order:
+	 * <ol>
+	 *     <li>All custom message converters configured with the builder
+	 *     <li>{@link ByteArrayHttpMessageConverter}
+	 *     <li>{@link StringHttpMessageConverter} with the {@link java.nio.charset.StandardCharsets#ISO_8859_1} charset
+	 *     <li>{@link ResourceHttpMessageConverter}
+	 *     <li>{@link ResourceRegionHttpMessageConverter}
+	 *     <li>A JSON converter
+	 *     <li>A Smile converter
+	 *     <li>A CBOR converter
+	 *     <li>A YAML converter
+	 *     <li>An XML converter
+	 *     <li>A ProtoBuf converter
+	 *     <li>ATOM and RSS converters
+	 *     <li>a Multipart converter, using all detected and custom converters for part conversion
+	 * </ol>
 	 */
-	static Builder withDefaults() {
-		return new DefaultHttpMessageConverters.DefaultBuilder(true);
+	static ServerBuilder forServer() {
+		return new DefaultHttpMessageConverters.DefaultServerBuilder();
 	}
 
+	interface Builder<T extends Builder<T>> {
 
-	interface MessageConverterConfigurer<T extends MessageConverterConfigurer<T>> {
+		/**
+		 * Register default converters using classpath detection.
+		 * Manual registrations like {@link #jsonMessageConverter(HttpMessageConverter)} will
+		 * override auto-detected ones.
+		 */
+		T registerDefaults();
 
 		/**
 		 * Override the default String {@code HttpMessageConverter}
@@ -146,27 +136,13 @@ public interface HttpMessageConverters {
 		 * Add a custom {@code HttpMessageConverter} to the list of converters.
 		 * @param customConverter the converter instance to add
 		 */
-		T additionalMessageConverter(HttpMessageConverter<?> customConverter);
-
-	}
-
-	/**
-	 * Builder for an {@link HttpMessageConverters}.
-	 * This builder manages the configuration of common and client/server-specific message converters.
-	 */
-	interface Builder extends MessageConverterConfigurer<Builder> {
+		T customMessageConverter(HttpMessageConverter<?> customConverter);
 
 		/**
-		 * Configure client-specific message converters.
-		 * If no opinion is provided here, message converters defined in this builder will be used.
+		 * Add a consumer for configuring the selected message converters.
+		 * @param configurer the configurer to use
 		 */
-		Builder configureClient(Consumer<ClientMessageConverterConfigurer> consumer);
-
-		/**
-		 * Configure server-specific message converters.
-		 * If no opinion is provided here, message converters defined in this builder will be used.
-		 */
-		Builder configureServer(Consumer<ServerMessageConverterConfigurer> consumer);
+		T configureMessageConverters(Consumer<HttpMessageConverter<?>> configurer);
 
 		/**
 		 * Build and return the {@link HttpMessageConverters} instance configured by this builder.
@@ -174,25 +150,17 @@ public interface HttpMessageConverters {
 		HttpMessageConverters build();
 	}
 
-	interface ClientMessageConverterConfigurer extends MessageConverterConfigurer<ClientMessageConverterConfigurer> {
-
-		/**
-		 * Register a consumer to apply to configured converter instances.
-		 * This can be used to configure rather than replace one or more specific converters.
-		 * @param configurer the consumer to apply
-		 */
-		ClientMessageConverterConfigurer configureClientMessageConverters(Consumer<HttpMessageConverter<?>> configurer);
+	/**
+	 * Client builder for an {@link HttpMessageConverters} instance.
+	 */
+	interface ClientBuilder extends Builder<ClientBuilder> {
 
 	}
 
-	interface ServerMessageConverterConfigurer extends MessageConverterConfigurer<ServerMessageConverterConfigurer> {
-
-		/**
-		 * Register a consumer to apply to configured converter instances.
-		 * This can be used to configure rather than replace one or more specific converters.
-		 * @param configurer the consumer to apply
-		 */
-		ServerMessageConverterConfigurer configureServerMessageConverters(Consumer<HttpMessageConverter<?>> configurer);
+	/**
+	 * Server builder for an {@link HttpMessageConverters} instance.
+	 */
+	interface ServerBuilder extends Builder<ServerBuilder> {
 
 	}
 

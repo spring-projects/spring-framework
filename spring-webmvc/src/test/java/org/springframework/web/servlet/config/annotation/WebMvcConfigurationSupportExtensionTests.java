@@ -356,11 +356,11 @@ class WebMvcConfigurationSupportExtensionTests {
 
 		@Override
 		protected HttpMessageConverters createMessageConverters() {
-			return HttpMessageConverters.create().jsonMessageConverter(new JacksonJsonHttpMessageConverter()).build();
+			return HttpMessageConverters.forServer().jsonMessageConverter(new JacksonJsonHttpMessageConverter()).build();
 		}
 
 		@Override
-		public void configureMessageConverters(HttpMessageConverters.Builder builder) {
+		public void configureMessageConverters(HttpMessageConverters.ServerBuilder builder) {
 		}
 
 		@Override

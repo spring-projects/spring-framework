@@ -177,7 +177,7 @@ public interface WebMvcConfigurer {
 	 * @param builder the builder to configure
 	 * @since 7.0
 	 */
-	default void configureMessageConverters(HttpMessageConverters.Builder builder) {
+	default void configureMessageConverters(HttpMessageConverters.ServerBuilder builder) {
 	}
 
 	/**
@@ -195,7 +195,7 @@ public interface WebMvcConfigurer {
 	 * {@link #extendMessageConverters(java.util.List)} to modify the configured
 	 * list of message converters.
 	 * @param converters initially an empty list of converters
-	 * @deprecated since 7.0 in favor of configuring converters on {@link #configureMessageConverters(HttpMessageConverters.Builder)}
+	 * @deprecated since 7.0 in favor of configuring converters on {@link #configureMessageConverters(HttpMessageConverters.ServerBuilder)}
 	 */
 	@Deprecated(since = "7.0", forRemoval = true)
 	default void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
@@ -210,7 +210,7 @@ public interface WebMvcConfigurer {
 	 * the converters configured earlier will be preferred.
 	 * @param converters the list of configured converters to be extended
 	 * @since 4.1.3
-	 * @deprecated since 7.0 in favor of configuring converters on {@link #configureMessageConverters(HttpMessageConverters.Builder)}
+	 * @deprecated since 7.0 in favor of configuring converters on {@link #configureMessageConverters(HttpMessageConverters.ServerBuilder)}
 	 */
 	@Deprecated(since = "7.0", forRemoval = true)
 	default void extendMessageConverters(List<HttpMessageConverter<?>> converters) {
