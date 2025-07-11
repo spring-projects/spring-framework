@@ -18,6 +18,7 @@ package org.springframework.web.method.support;
 
 import java.lang.reflect.Method;
 
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -25,6 +26,7 @@ import org.springframework.core.MethodParameter;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.ServletWebRequest;
+import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.testfixture.method.ResolvableMethod;
 import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
@@ -106,6 +108,14 @@ class InvocableHandlerMethodTests {
 	}
 
 	@Test
+	void resolveHandlerMethodArgToNull() throws Exception {
+		Object value = getInvocable(HandlerMethod.class).invokeForRequest(request, null);
+
+		assertThat(value).isNotNull();
+		assertThat(value).isEqualTo("success");
+	}
+
+	@Test
 	void exceptionInResolvingArg() {
 		this.composite.addResolver(new ExceptionRaisingArgumentResolver());
 		assertThatIllegalArgumentException().isThrownBy(() ->
@@ -183,6 +193,10 @@ class InvocableHandlerMethodTests {
 
 		public void handleWithException(Throwable ex) throws Throwable {
 			throw ex;
+		}
+
+		public String handleHandlerMethod(@Nullable HandlerMethod handlerMethod) {
+			return "success";
 		}
 	}
 

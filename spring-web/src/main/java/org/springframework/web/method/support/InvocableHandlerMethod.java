@@ -217,6 +217,10 @@ public class InvocableHandlerMethod extends HandlerMethod {
 			if (args[i] != null) {
 				continue;
 			}
+			if (parameter.getParameterType().equals(HandlerMethod.class) && parameter.isOptional()) {
+				args[i] = null;
+				continue;
+			}
 			if (!this.resolvers.supportsParameter(parameter)) {
 				throw new IllegalStateException(formatArgumentError(parameter, "No suitable resolver"));
 			}
