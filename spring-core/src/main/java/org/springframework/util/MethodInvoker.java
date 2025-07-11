@@ -16,6 +16,7 @@
 
 package org.springframework.util;
 
+import java.lang.reflect.InaccessibleObjectException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -169,7 +170,8 @@ public class MethodInvoker {
 		@Nullable Object[] arguments = getArguments();
 		Class<?>[] argTypes = new Class<?>[arguments.length];
 		for (int i = 0; i < arguments.length; ++i) {
-			argTypes[i] = (arguments[i] != null ? arguments[i].getClass() : Object.class);
+			Object argument = arguments[i];
+			argTypes[i] = (argument != null ? argument.getClass() : Object.class);
 		}
 
 		// Try to get the exact method first.
@@ -268,8 +270,20 @@ public class MethodInvoker {
 		if (targetObject == null && !Modifier.isStatic(preparedMethod.getModifiers())) {
 			throw new IllegalArgumentException("Target method must not be non-static without a target");
 		}
-		ReflectionUtils.makeAccessible(preparedMethod);
-		return preparedMethod.invoke(targetObject, getArguments());
+		try {
+			ReflectionUtils.makeAccessible(preparedMethod);
+			return preparedMethod.invoke(targetObject, getArguments());
+		}
+		catch (IllegalAccessException | InaccessibleObjectException ex) {
+			if (targetObject != null) {
+				Method fallbackMethod =
+						ClassUtils.getPubliclyAccessibleMethodIfPossible(preparedMethod, targetObject.getClass());
+				if (fallbackMethod != preparedMethod) {
+					return fallbackMethod.invoke(targetObject, getArguments());
+				}
+			}
+			throw ex;
+		}
 	}
 
 
@@ -296,12 +310,13 @@ public class MethodInvoker {
 	public static int getTypeDifferenceWeight(Class<?>[] paramTypes, @Nullable Object[] args) {
 		int result = 0;
 		for (int i = 0; i < paramTypes.length; i++) {
-			if (!ClassUtils.isAssignableValue(paramTypes[i], args[i])) {
+			Class<?> paramType = paramTypes[i];
+			Object arg = args[i];
+			if (!ClassUtils.isAssignableValue(paramType, arg)) {
 				return Integer.MAX_VALUE;
 			}
-			if (args[i] != null) {
-				Class<?> paramType = paramTypes[i];
-				Class<?> superClass = args[i].getClass().getSuperclass();
+			if (arg != null) {
+				Class<?> superClass = arg.getClass().getSuperclass();
 				while (superClass != null) {
 					if (paramType.equals(superClass)) {
 						result = result + 2;

@@ -17,6 +17,7 @@
 package org.springframework.beans.factory.support;
 
 import java.lang.reflect.Constructor;
+import java.lang.reflect.InaccessibleObjectException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.function.Supplier;
@@ -167,7 +168,7 @@ public class SimpleInstantiationStrategy implements InstantiationStrategy {
 						"Illegal arguments to factory method '" + factoryMethod.getName() + "'; " +
 								"args: " + StringUtils.arrayToCommaDelimitedString(args), ex);
 			}
-			catch (IllegalAccessException ex) {
+			catch (IllegalAccessException | InaccessibleObjectException ex) {
 				throw new BeanInstantiationException(factoryMethod,
 						"Cannot access factory method '" + factoryMethod.getName() + "'; is it public?", ex);
 			}

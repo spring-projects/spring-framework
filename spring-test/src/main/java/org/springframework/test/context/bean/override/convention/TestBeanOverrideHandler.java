@@ -17,7 +17,6 @@
 package org.springframework.test.context.bean.override.convention;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Objects;
 
@@ -59,7 +58,7 @@ final class TestBeanOverrideHandler extends BeanOverrideHandler {
 			ReflectionUtils.makeAccessible(this.factoryMethod);
 			return this.factoryMethod.invoke(null);
 		}
-		catch (IllegalAccessException | InvocationTargetException ex) {
+		catch (Throwable ex) {
 			throw new IllegalStateException(
 					"Failed to invoke @TestBean factory method: " + this.factoryMethod, ex);
 		}

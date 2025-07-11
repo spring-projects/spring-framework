@@ -16,6 +16,7 @@
 
 package org.springframework.aop.support;
 
+import java.lang.reflect.InaccessibleObjectException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -366,7 +367,7 @@ public abstract class AopUtils {
 			throw new AopInvocationException("AOP configuration seems to be invalid: tried calling method [" +
 					method + "] on target [" + target + "]", ex);
 		}
-		catch (IllegalAccessException ex) {
+		catch (IllegalAccessException | InaccessibleObjectException ex) {
 			throw new AopInvocationException("Could not access method [" + method + "]", ex);
 		}
 	}

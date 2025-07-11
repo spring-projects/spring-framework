@@ -16,6 +16,7 @@
 
 package org.springframework.aop.aspectj;
 
+import java.lang.reflect.InaccessibleObjectException;
 import java.lang.reflect.InvocationTargetException;
 
 import org.jspecify.annotations.Nullable;
@@ -67,7 +68,7 @@ public class SimpleAspectInstanceFactory implements AspectInstanceFactory {
 			throw new AopConfigException(
 					"Unable to instantiate aspect class: " + this.aspectClass.getName(), ex);
 		}
-		catch (IllegalAccessException ex) {
+		catch (IllegalAccessException | InaccessibleObjectException ex) {
 			throw new AopConfigException(
 					"Could not access aspect constructor: " + this.aspectClass.getName(), ex);
 		}
