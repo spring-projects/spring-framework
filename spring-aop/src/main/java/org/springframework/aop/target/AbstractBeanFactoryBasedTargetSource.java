@@ -60,7 +60,7 @@ public abstract class AbstractBeanFactoryBasedTargetSource implements TargetSour
 	protected final transient Log logger = LogFactory.getLog(getClass());
 
 	/** Name of the target bean we will create on each invocation. */
-	private @Nullable String targetBeanName;
+	protected @Nullable String targetBeanName;
 
 	/** Class of the target. */
 	private volatile @Nullable Class<?> targetClass;
