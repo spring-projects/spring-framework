@@ -16,6 +16,7 @@
 
 package org.springframework.scheduling.annotation;
 
+import java.lang.reflect.InaccessibleObjectException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
@@ -173,7 +174,7 @@ abstract class ScheduledAnnotationReactiveSupport {
 					"Cannot obtain a Publisher-convertible value from the @Scheduled reactive method",
 					ex.getTargetException());
 		}
-		catch (IllegalAccessException ex) {
+		catch (IllegalAccessException | InaccessibleObjectException ex) {
 			throw new IllegalArgumentException(
 					"Cannot obtain a Publisher-convertible value from the @Scheduled reactive method", ex);
 		}

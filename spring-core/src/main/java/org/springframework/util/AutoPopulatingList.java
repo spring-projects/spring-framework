@@ -17,6 +17,7 @@
 package org.springframework.util;
 
 import java.io.Serializable;
+import java.lang.reflect.InaccessibleObjectException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
@@ -305,7 +306,7 @@ public class AutoPopulatingList<E> implements List<E>, Serializable {
 				throw new ElementInstantiationException(
 						"Unable to instantiate element class: " + this.elementClass.getName(), ex);
 			}
-			catch (IllegalAccessException ex) {
+			catch (IllegalAccessException | InaccessibleObjectException ex) {
 				throw new ElementInstantiationException(
 						"Could not access element constructor: " + this.elementClass.getName(), ex);
 			}
