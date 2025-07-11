@@ -687,13 +687,13 @@ class ClassUtilsTests {
 		}
 
 		@Test
-		void publicMethodInPublicClass() throws Exception {
+		void publicMethodInObjectClass() throws Exception {
 			Class<?> originalType = String.class;
-			Method originalMethod = originalType.getDeclaredMethod("toString");
+			Method originalMethod = originalType.getDeclaredMethod("hashCode");
 
 			Method publiclyAccessibleMethod = ClassUtils.getPubliclyAccessibleMethodIfPossible(originalMethod, null);
-			assertThat(publiclyAccessibleMethod.getDeclaringClass()).isEqualTo(originalType);
-			assertThat(publiclyAccessibleMethod).isSameAs(originalMethod);
+			assertThat(publiclyAccessibleMethod.getDeclaringClass()).isEqualTo(Object.class);
+			assertThat(publiclyAccessibleMethod.getName()).isEqualTo("hashCode");
 			assertPubliclyAccessible(publiclyAccessibleMethod);
 		}
 
@@ -703,9 +703,9 @@ class ClassUtilsTests {
 			Method originalMethod = originalType.getDeclaredMethod("size");
 
 			Method publiclyAccessibleMethod = ClassUtils.getPubliclyAccessibleMethodIfPossible(originalMethod, null);
-			// Should not find the interface method in List.
-			assertThat(publiclyAccessibleMethod.getDeclaringClass()).isEqualTo(originalType);
-			assertThat(publiclyAccessibleMethod).isSameAs(originalMethod);
+			// Should find the interface method in List.
+			assertThat(publiclyAccessibleMethod.getDeclaringClass()).isEqualTo(List.class);
+			assertThat(publiclyAccessibleMethod.getName()).isEqualTo("size");
 			assertPubliclyAccessible(publiclyAccessibleMethod);
 		}
 
