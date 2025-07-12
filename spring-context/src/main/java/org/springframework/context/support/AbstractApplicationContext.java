@@ -67,6 +67,7 @@ import org.springframework.context.ResourceLoaderAware;
 import org.springframework.context.event.ApplicationEventMulticaster;
 import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.context.event.ContextRestartedEvent;
 import org.springframework.context.event.ContextStartedEvent;
 import org.springframework.context.event.ContextStoppedEvent;
 import org.springframework.context.event.SimpleApplicationEventMulticaster;
@@ -1551,7 +1552,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	@Override
 	public void restart() {
 		getLifecycleProcessor().onRestart();
-		publishEvent(new ContextStartedEvent(this));
+		publishEvent(new ContextRestartedEvent(this));
 	}
 
 	@Override

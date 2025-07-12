@@ -19,23 +19,25 @@ package org.springframework.context.event;
 import org.springframework.context.ApplicationContext;
 
 /**
- * Event raised when an {@code ApplicationContext} gets stopped.
+ * Event raised when an {@code ApplicationContext} gets restarted.
  *
- * @author Mark Fisher
- * @author Juergen Hoeller
- * @since 2.5
+ * <p>Note that {@code ContextRestartedEvent} is a specialization of
+ * {@link ContextStartedEvent}.
+ *
+ * @author Sam Brannen
+ * @since 7.0
  * @see ContextStartedEvent
- * @see ContextRestartedEvent
+ * @see ContextStoppedEvent
  */
 @SuppressWarnings("serial")
-public class ContextStoppedEvent extends ApplicationContextEvent {
+public class ContextRestartedEvent extends ContextStartedEvent {
 
 	/**
-	 * Create a new {@code ContextStoppedEvent}.
-	 * @param source the {@code ApplicationContext} that has been stopped
+	 * Create a new {@code ContextRestartedEvent}.
+	 * @param source the {@code ApplicationContext} that has been restarted
 	 * (must not be {@code null})
 	 */
-	public ContextStoppedEvent(ApplicationContext source) {
+	public ContextRestartedEvent(ApplicationContext source) {
 		super(source);
 	}
 
