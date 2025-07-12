@@ -218,6 +218,10 @@ public class InvocableHandlerMethod extends HandlerMethod {
 				continue;
 			}
 			if (!this.resolvers.supportsParameter(parameter)) {
+				if (isParameterDeclaredButNull(parameter, providedArgs)) {
+					args[i] = null;
+					continue;
+				}
 				throw new IllegalStateException(formatArgumentError(parameter, "No suitable resolver"));
 			}
 			try {
@@ -235,6 +239,27 @@ public class InvocableHandlerMethod extends HandlerMethod {
 			}
 		}
 		return args;
+	}
+
+	/**
+	 * If there is null in providedArgs and the paramType does not have any non-null value matching, then consider null to be explicit.
+	 */
+	private boolean isParameterDeclaredButNull(MethodParameter parameter, @Nullable Object[] providedArgs) {
+		if (providedArgs == null) {
+			return false;
+		}
+		Class<?> paramType = parameter.getParameterType();
+		boolean hasNull = false;
+		for (Object arg : providedArgs) {
+			if (arg == null) {
+				hasNull = true;
+				continue;
+			}
+			if (paramType.isAssignableFrom(arg.getClass())) {
+				return false;
+			}
+		}
+		return hasNull;
 	}
 
 	/**

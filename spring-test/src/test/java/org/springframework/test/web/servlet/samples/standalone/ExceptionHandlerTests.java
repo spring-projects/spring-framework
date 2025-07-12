@@ -29,6 +29,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.HandlerMethod;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.forwardedUrl;
@@ -62,6 +63,14 @@ public class ExceptionHandlerTests {
 				.andExpect(status().isOk())
 				.andExpect(forwardedUrl("globalErrorView"));
 		}
+
+		@Test
+		void nullHandlerMethod() throws Exception {
+			standaloneSetup(new PersonController()).setControllerAdvice(new GlobalExceptionHandler()).build()
+				.perform(get("/invalid"))
+				.andExpect(status().isOk())
+				.andExpect(forwardedUrl("null handlerMethod exception"));
+		}
 	}
 
 
@@ -91,6 +100,14 @@ public class ExceptionHandlerTests {
 		@ExceptionHandler
 		String handleException(IllegalStateException exception) {
 			return "globalErrorView";
+		}
+
+		@ExceptionHandler(Exception.class)
+		String handleAllExceptions(IllegalStateException exception, HandlerMethod handlerMethod) {
+			if (handlerMethod == null) {
+				return "null handlerMethod exception";
+			}
+			return "simulated exception";
 		}
 	}
 
