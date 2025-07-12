@@ -245,7 +245,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	 * If there is null in providedArgs and the paramType does not have any non-null value matching, then consider null to be explicit.
 	 */
 	private boolean isParameterDeclaredButNull(MethodParameter parameter, @Nullable Object[] providedArgs) {
-		if (providedArgs == null) {
+		if (ObjectUtils.isEmpty(providedArgs)) {
 			return false;
 		}
 		Class<?> paramType = parameter.getParameterType();
