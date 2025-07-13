@@ -197,6 +197,54 @@ other bean. (The preceding configuration also defines a bean that is backed by a
 script. The Spring dynamic language support is detailed in the chapter entitled
 xref:languages/dynamic.adoc[Dynamic Language Support].)
 
+The following example shows recommended to register a class-based configuration using @Configuration:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+    @Configuration
+    public class MyConfig {
+
+        // Static @Bean method, no dependencies
+        @Bean
+        public static InstantiationTracingBeanPostProcessor instantiationTracingBeanPostProcessor() {
+           return new InstantiationTracingBeanPostProcessor();
+        }
+    }
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes"]
+----
+    @Configuration
+    class MyConfig {
+
+        companion object {
+            @JvmStatic
+            @Bean
+            fun instantiationTracingBeanPostProcessor(): InstantiationTracingBeanPostProcessor {
+                return InstantiationTracingBeanPostProcessor()
+            }
+        }
+    }
+----
+======
+
+.Use static `@Bean` methods for post-processors
+[NOTE]
+====
+As mentioned in the previous note, when defining a `BeanPostProcessor` as a `@Bean` in a `@Configuration` class, it is recommended to declare the `@Bean` method as `static` and, ideally, ensure it has no dependencies. This helps avoid the eager initialization of other beans during the early phase, which could otherwise make them ineligible for full post-processing, such as auto-proxying or aspect weaving.
+
+Eager initialization can make these beans ineligible for full post-processing, including auto-proxying or aspect weaving. If Spring detects this situation, it logs a warning like:
+
+`Bean 'someBean' is not eligible for getting processed by all BeanPostProcessor interfaces (for example: not eligible for auto-proxying)`
+====
+
+
 The following Java application runs the preceding code and configuration:
 
 [tabs]
@@ -262,6 +310,82 @@ difference: `BeanFactoryPostProcessor` operates on the bean configuration metada
 That is, the Spring IoC container lets a `BeanFactoryPostProcessor` read the
 configuration metadata and potentially change it _before_ the container instantiates
 any beans other than `BeanFactoryPostProcessor` instances.
+
+The following listing shows a custom `BeanFactoryPostProcessor` implementation class definition:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+    public class MyCustomBeanFactoryPostProcessor implements BeanFactoryPostProcessor {
+
+        @Override
+        public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) {
+            System.out.println("BeanFactoryPostProcessor called - total bean definitions: "
+                    + beanFactory.getBeanDefinitionCount());
+        }
+    }
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes"]
+----
+    class MyCustomBeanFactoryPostProcessor : BeanFactoryPostProcessor {
+
+        override fun postProcessBeanFactory(beanFactory: ConfigurableListableBeanFactory) {
+            println("BeanFactoryPostProcessor called - total bean definitions: ${beanFactory.beanDefinitionCount}")
+        }
+    }
+----
+======
+
+The following example shows recommended way to define a `BeanFactoryPostProcessor` as a static `@Bean` method in a `@Configuration` class:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+    @Configuration
+    public class MyConfig {
+
+        // Static @Bean method, no dependencies
+        @Bean
+        public static MyCustomBeanFactoryPostProcessor myCustomBeanFactoryPostProcessor() {
+            return new MyCustomBeanFactoryPostProcessor();
+        }
+    }
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes"]
+----
+    @Configuration
+    class MyConfig {
+
+        companion object {
+            @JvmStatic
+            @Bean
+            fun myCustomBeanFactoryPostProcessor(): MyCustomBeanFactoryPostProcessor {
+                return MyCustomBeanFactoryPostProcessor()
+            }
+        }
+    }
+----
+======
+
+.Use static `@Bean` methods for factory post-processors
+[NOTE]
+====
+As with `BeanPostProcessor`, it is recommended to declare `BeanFactoryPostProcessor` `@Bean` methods as static and dependency-free. This avoids premature bean instantiation during context bootstrap and ensures proper processing of all beans.
+
+Premature initialization may skip processing steps such as property resolution or `BeanPostProcessor` application. Declaring these methods as `static` ensures they are created early and without triggering unwanted side effects.
+====
 
 You can configure multiple `BeanFactoryPostProcessor` instances, and you can control the order in
 which these `BeanFactoryPostProcessor` instances run by setting the `order` property.
