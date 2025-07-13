@@ -166,4 +166,9 @@ public class StandardMethodMetadata implements MethodMetadata {
 		return this.introspectedMethod.toString();
 	}
 
+
+	static MethodMetadata from(Method introspectedMethod) {
+		return new StandardMethodMetadata(introspectedMethod, true);
+	}
+
 }

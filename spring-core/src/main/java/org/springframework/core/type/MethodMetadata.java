@@ -16,6 +16,8 @@
 
 package org.springframework.core.type;
 
+import java.lang.reflect.Method;
+
 /**
  * Interface that defines abstract access to the annotations of a specific
  * method, in a form that does not require that method's class to be loaded yet.
@@ -70,5 +72,17 @@ public interface MethodMetadata extends AnnotatedTypeMetadata {
 	 * i.e. not marked as static, final, or private.
 	 */
 	boolean isOverridable();
+
+
+	/**
+	 * Factory method to create a new {@link MethodMetadata} instance
+	 * for the given method using standard reflection.
+	 * @param method the method to introspect
+	 * @return a new {@link MethodMetadata} instance
+	 * @since 7.0
+	 */
+	static MethodMetadata introspect(Method method) {
+		return StandardMethodMetadata.from(method);
+	}
 
 }

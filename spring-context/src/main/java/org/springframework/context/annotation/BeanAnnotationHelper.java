@@ -19,8 +19,10 @@ package org.springframework.context.annotation;
 import java.lang.reflect.Method;
 import java.util.Map;
 
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.annotation.AnnotationAttributes;
+import org.springframework.core.type.MethodMetadata;
 import org.springframework.util.ConcurrentReferenceHashMap;
 
 /**
@@ -41,11 +43,26 @@ abstract class BeanAnnotationHelper {
 		return AnnotatedElementUtils.hasAnnotation(method, Bean.class);
 	}
 
+	public static String determineBeanNameFor(Method beanMethod, ConfigurableBeanFactory beanFactory) {
+		String beanName = retrieveBeanNameFor(beanMethod);
+		if (!beanName.isEmpty()) {
+			return beanName;
+		}
+		return (beanFactory.getSingleton(AnnotationConfigUtils.CONFIGURATION_BEAN_NAME_GENERATOR)
+				instanceof ConfigurationBeanNameGenerator cbng ?
+				cbng.deriveBeanName(MethodMetadata.introspect(beanMethod)) : beanMethod.getName());
+	}
+
 	public static String determineBeanNameFor(Method beanMethod) {
+		String beanName = retrieveBeanNameFor(beanMethod);
+		return (!beanName.isEmpty() ? beanName : beanMethod.getName());
+	}
+
+	private static String retrieveBeanNameFor(Method beanMethod) {
 		String beanName = beanNameCache.get(beanMethod);
 		if (beanName == null) {
-			// By default, the bean name is the name of the @Bean-annotated method
-			beanName = beanMethod.getName();
+			// By default, the bean name is empty (indicating a name to be derived from the method name)
+			beanName = "";
 			// Check to see if the user has explicitly set a custom bean name...
 			AnnotationAttributes bean =
 					AnnotatedElementUtils.findMergedAnnotationAttributes(beanMethod, Bean.class, false, false);
