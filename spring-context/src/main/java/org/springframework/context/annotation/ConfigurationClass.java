@@ -131,6 +131,7 @@ final class ConfigurationClass {
 	 * @param metadata the metadata for the underlying class to represent
 	 * @param beanName name of the {@code @Configuration} class bean
 	 * @param scanned whether the underlying class has been registered through a scan
+	 * @since 6.2
 	 */
 	ConfigurationClass(AnnotationMetadata metadata, String beanName, boolean scanned) {
 		Assert.notNull(beanName, "Bean name must not be null");

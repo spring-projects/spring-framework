@@ -195,14 +195,14 @@ class ConfigurationClassBeanDefinitionReader {
 		AnnotationAttributes bean = AnnotationConfigUtils.attributesFor(metadata, Bean.class);
 		Assert.state(bean != null, "No @Bean annotation attributes");
 
-		// Consider name and any aliases
+		// Consider name and any aliases.
 		String[] explicitNames = bean.getStringArray("name");
 		String beanName;
 		String localBeanName;
 		if (explicitNames.length > 0 && StringUtils.hasText(explicitNames[0])) {
 			beanName = explicitNames[0];
 			localBeanName = beanName;
-			// Register aliases even when overridden below
+			// Register aliases even when overridden below.
 			for (int i = 1; i < explicitNames.length; i++) {
 				this.registry.registerAlias(beanName, explicitNames[i]);
 			}
