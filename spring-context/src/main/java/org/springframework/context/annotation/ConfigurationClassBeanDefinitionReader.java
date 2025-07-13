@@ -18,10 +18,7 @@ package org.springframework.context.annotation;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -194,13 +191,19 @@ class ConfigurationClassBeanDefinitionReader {
 		AnnotationAttributes bean = AnnotationConfigUtils.attributesFor(metadata, Bean.class);
 		Assert.state(bean != null, "No @Bean annotation attributes");
 
-		// Consider name and any aliases
-		List<String> names = new ArrayList<>(Arrays.asList(bean.getStringArray("name")));
-		String beanName = (!names.isEmpty() ? names.remove(0) : methodName);
-
-		// Register aliases even when overridden
-		for (String alias : names) {
-			this.registry.registerAlias(beanName, alias);
+		// Consider name and any aliases.
+		String[] explicitNames = bean.getStringArray("name");
+		String beanName;
+		if (explicitNames.length > 0) {
+			beanName = explicitNames[0];
+			// Register aliases even when overridden below.
+			for (int i = 1; i < explicitNames.length; i++) {
+				this.registry.registerAlias(beanName, explicitNames[i]);
+			}
+		}
+		else {
+			// Default bean name derived from method name.
+			beanName = methodName;
 		}
 
 		// Has this effectively been overridden before (for example, via XML)?
