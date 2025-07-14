@@ -31,10 +31,10 @@ under a key that is based solely on those locations. So, if `TestClassB` also de
 `{"app-config.xml", "test-config.xml"}` for its locations (either explicitly or
 implicitly through inheritance) but does not define `@WebAppConfiguration`, a different
 `ContextLoader`, different active profiles, different context initializers, different
-test property sources, or a different parent context, then the same `ApplicationContext`
-is shared by both test classes. This means that the setup cost for loading an application
-context is incurred only once (per test suite), and subsequent test execution is much
-faster.
+context customizers, different test or dynamic property sources, or a different parent
+context, then the same `ApplicationContext` is shared by both test classes. This means
+that the setup cost for loading an application context is incurred only once (per test
+suite), and subsequent test execution is much faster.
 
 .Test suites and forked processes
 [NOTE]
@@ -71,10 +71,11 @@ the underlying context cache, you can set the log level for the
 In the unlikely case that a test corrupts the application context and requires reloading
 (for example, by modifying a bean definition or the state of an application object), you
 can annotate your test class or test method with `@DirtiesContext` (see the discussion of
-`@DirtiesContext` in xref:testing/annotations/integration-spring/annotation-dirtiescontext.adoc[Spring Testing Annotations]
-). This instructs Spring to remove the context from the cache and rebuild
-the application context before running the next test that requires the same application
-context. Note that support for the `@DirtiesContext` annotation is provided by the
+`@DirtiesContext` in
+xref:testing/annotations/integration-spring/annotation-dirtiescontext.adoc[Spring Testing Annotations]).
+This instructs Spring to remove the context from the cache and rebuild the application
+context before running the next test that requires the same application context. Note
+that support for the `@DirtiesContext` annotation is provided by the
 `DirtiesContextBeforeModesTestExecutionListener` and the
 `DirtiesContextTestExecutionListener`, which are enabled by default.
 
