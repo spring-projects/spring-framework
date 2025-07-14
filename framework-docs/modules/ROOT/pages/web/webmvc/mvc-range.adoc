@@ -1,0 +1,20 @@
+[[mvc-range]]
+= Range Requests
+:page-section-summary-toc: 1
+
+[.small]#xref:web/webflux/range.adoc[See equivalent in the Reactive stack]#
+
+Spring MVC supports https://datatracker.ietf.org/doc/html/rfc9110#section-14[RFC 9110]
+range requests. For an overview, see the
+https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Range_requests[Ranger Requests]
+Mozilla guide.
+
+The `Range` header is parsed and handled transparently in Spring MVC when an annotated
+controller returns a `Resource` or `ResponseEntity<Resource>`, or a functional endpoint
+xref:web/webmvc-functional.adoc#webmvc-fn-resources[serves a `Resource`]. `Range` header
+support is also transparently handled when serving
+xref:web/webmvc/mvc-config/static-resources.adoc[static resources].
+
+The underlying support is in the `HttpRange` class, which exposes methods to parse
+`Range` headers and split a `Resource` into a `List<ResourceRegion>` that in turn can be
+then written to the response via `ResourceRegionHttpMessageConverter`.
