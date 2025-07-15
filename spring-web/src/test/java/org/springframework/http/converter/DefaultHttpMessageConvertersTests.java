@@ -161,6 +161,13 @@ class DefaultHttpMessageConvertersTests {
 		}
 
 		@Test
+		void registerMultipartConverterWhenOtherConvertersPresent() {
+			var converters = HttpMessageConverters.forClient()
+					.stringMessageConverter(new StringHttpMessageConverter()).build();
+			assertThat(converters).hasExactlyElementsOfTypes(StringHttpMessageConverter.class, AllEncompassingFormHttpMessageConverter.class);
+		}
+
+		@Test
 		void shouldUseSpecificConverter() {
 			var jacksonConverter = new JacksonJsonHttpMessageConverter();
 			var converters = HttpMessageConverters.forClient().registerDefaults()
@@ -248,7 +255,14 @@ class DefaultHttpMessageConvertersTests {
 		}
 
 		@Test
-		void shouldUseServerSpecificConverter() {
+		void registerMultipartConverterWhenOtherConvertersPresent() {
+			var converters = HttpMessageConverters.forServer()
+					.stringMessageConverter(new StringHttpMessageConverter()).build();
+			assertThat(converters).hasExactlyElementsOfTypes(StringHttpMessageConverter.class, AllEncompassingFormHttpMessageConverter.class);
+		}
+
+		@Test
+		void shouldUseSpecificConverter() {
 			var jacksonConverter = new JacksonJsonHttpMessageConverter();
 			var converters = HttpMessageConverters.forServer().registerDefaults()
 					.jsonMessageConverter(jacksonConverter).build();

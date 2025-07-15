@@ -17,8 +17,6 @@
 package org.springframework.http.converter;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.function.Consumer;
@@ -110,7 +108,9 @@ class DefaultHttpMessageConverters implements HttpMessageConverters {
 
 		@Nullable HttpMessageConverter<?> stringMessageConverter;
 
-		List<HttpMessageConverter<?>> resourceMessageConverters = Collections.emptyList();
+		@Nullable HttpMessageConverter<?> resourceMessageConverter;
+
+		@Nullable HttpMessageConverter<?> resourceRegionMessageConverter;
 
 		@Nullable Consumer<HttpMessageConverter<?>> configurer;
 
@@ -386,7 +386,7 @@ class DefaultHttpMessageConverters implements HttpMessageConverters {
 		@Override
 		public HttpMessageConverters build() {
 			if (this.registerDefaults) {
-				this.resourceMessageConverters = Collections.singletonList(new ResourceHttpMessageConverter(false));
+				this.resourceMessageConverter = new ResourceHttpMessageConverter(false);
 				detectMessageConverters();
 			}
 			List<HttpMessageConverter<?>> allConverters = new ArrayList<>();
@@ -396,8 +396,10 @@ class DefaultHttpMessageConverters implements HttpMessageConverters {
 
 			allConverters.addAll(this.getCustomConverters());
 			allConverters.addAll(this.getBaseConverters());
-			allConverters.addAll(this.resourceMessageConverters);
-			if (!partConverters.isEmpty()) {
+			if (this.resourceMessageConverter != null) {
+				allConverters.add(this.resourceMessageConverter);
+			}
+			if (!partConverters.isEmpty() || !allConverters.isEmpty()) {
 				allConverters.add(new AllEncompassingFormHttpMessageConverter(partConverters));
 			}
 			allConverters.addAll(this.getCoreConverters());
@@ -468,7 +470,8 @@ class DefaultHttpMessageConverters implements HttpMessageConverters {
 		@Override
 		public HttpMessageConverters build() {
 			if (this.registerDefaults) {
-				this.resourceMessageConverters = Arrays.asList(new ResourceHttpMessageConverter(), new ResourceRegionHttpMessageConverter());
+				this.resourceMessageConverter = new ResourceHttpMessageConverter();
+				this.resourceRegionMessageConverter = new ResourceRegionHttpMessageConverter();
 				detectMessageConverters();
 			}
 			List<HttpMessageConverter<?>> allConverters = new ArrayList<>();
@@ -479,8 +482,13 @@ class DefaultHttpMessageConverters implements HttpMessageConverters {
 
 			allConverters.addAll(this.getCustomConverters());
 			allConverters.addAll(this.getBaseConverters());
-			allConverters.addAll(this.resourceMessageConverters);
-			if (!partConverters.isEmpty()) {
+			if (this.resourceMessageConverter != null) {
+				allConverters.add(this.resourceMessageConverter);
+			}
+			if (this.resourceRegionMessageConverter != null) {
+				allConverters.add(this.resourceRegionMessageConverter);
+			}
+			if (!partConverters.isEmpty() || !allConverters.isEmpty()) {
 				allConverters.add(new AllEncompassingFormHttpMessageConverter(partConverters));
 			}
 			allConverters.addAll(this.getCoreConverters());
