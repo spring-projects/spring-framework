@@ -31,8 +31,10 @@ import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
-import javax.annotation.Nonnull;
-import javax.annotation.ParametersAreNonnullByDefault;
+import javax.annotation.RegEx;
+import javax.annotation.Syntax;
+import javax.annotation.concurrent.ThreadSafe;
+import javax.annotation.meta.TypeQualifierNickname;
 import javax.annotation.meta.When;
 
 import jakarta.annotation.Resource;
@@ -46,6 +48,7 @@ import org.springframework.core.annotation.AnnotationUtilsTests.WebController;
 import org.springframework.core.annotation.AnnotationUtilsTests.WebMapping;
 import org.springframework.core.testfixture.stereotype.Component;
 import org.springframework.core.testfixture.stereotype.Indexed;
+import org.springframework.lang.Contract;
 import org.springframework.util.MultiValueMap;
 
 import static java.util.Arrays.asList;
@@ -237,9 +240,8 @@ class AnnotatedElementUtilsTests {
 	@SuppressWarnings("deprecation")
 	void isAnnotatedForPlainTypes() {
 		assertThat(isAnnotated(Order.class, Documented.class)).isTrue();
-		assertThat(isAnnotated(org.springframework.lang.NonNullApi.class, Documented.class)).isTrue();
-		assertThat(isAnnotated(org.springframework.lang.NonNullApi.class, Nonnull.class)).isTrue();
-		assertThat(isAnnotated(ParametersAreNonnullByDefault.class, Nonnull.class)).isTrue();
+		assertThat(isAnnotated(Inherited.class, Documented.class)).isTrue();
+		assertThat(isAnnotated(Contract.class, Documented.class)).isTrue();
 	}
 
 	@Test
@@ -278,9 +280,8 @@ class AnnotatedElementUtilsTests {
 	@SuppressWarnings("deprecation")
 	void hasAnnotationForPlainTypes() {
 		assertThat(hasAnnotation(Order.class, Documented.class)).isTrue();
-		assertThat(hasAnnotation(org.springframework.lang.NonNullApi.class, Documented.class)).isTrue();
-		assertThat(hasAnnotation(org.springframework.lang.NonNullApi.class, Nonnull.class)).isTrue();
-		assertThat(hasAnnotation(ParametersAreNonnullByDefault.class, Nonnull.class)).isTrue();
+		assertThat(hasAnnotation(Inherited.class, Documented.class)).isTrue();
+		assertThat(hasAnnotation(Contract.class, Documented.class)).isTrue();
 	}
 
 	@Test
@@ -346,17 +347,16 @@ class AnnotatedElementUtilsTests {
 	@SuppressWarnings("deprecation")
 	void getAllAnnotationAttributesOnLangType() {
 		MultiValueMap<String, Object> attributes = getAllAnnotationAttributes(
-				org.springframework.lang.NonNullApi.class, Nonnull.class.getName());
-		assertThat(attributes).as("Annotation attributes map for @Nonnull on NonNullApi").isNotNull();
-		assertThat(attributes.get("when")).as("value for NonNullApi").isEqualTo(List.of(When.ALWAYS));
+				org.springframework.lang.NonNullApi.class, javax.annotation.Nonnull.class.getName());
+		assertThat(attributes).as("Annotation attributes map for @Nonnull on @NonNullApi").isNotNull();
+		assertThat(attributes.get("when")).as("value for @NonNullApi").isEqualTo(List.of(When.ALWAYS));
 	}
 
 	@Test
 	void getAllAnnotationAttributesOnJavaxType() {
-		MultiValueMap<String, Object> attributes = getAllAnnotationAttributes(
-				ParametersAreNonnullByDefault.class, Nonnull.class.getName());
-		assertThat(attributes).as("Annotation attributes map for @Nonnull on NonNullApi").isNotNull();
-		assertThat(attributes.get("when")).as("value for NonNullApi").isEqualTo(List.of(When.ALWAYS));
+		MultiValueMap<String, Object> attributes = getAllAnnotationAttributes(RegEx.class, Syntax.class.getName());
+		assertThat(attributes).as("Annotation attributes map for @Syntax on @RegEx").isNotNull();
+		assertThat(attributes.get("when")).as("value for @RegEx").isEqualTo(List.of(When.ALWAYS));
 	}
 
 	@Test
@@ -855,8 +855,10 @@ class AnnotatedElementUtilsTests {
 
 	@Test
 	void javaxMetaAnnotationTypeViaFindMergedAnnotation() {
-		assertThat(findMergedAnnotation(ParametersAreNonnullByDefault.class, Nonnull.class)).isEqualTo(ParametersAreNonnullByDefault.class.getAnnotation(Nonnull.class));
-		assertThat(findMergedAnnotation(ResourceHolder.class, Nonnull.class)).isEqualTo(ParametersAreNonnullByDefault.class.getAnnotation(Nonnull.class));
+		assertThat(findMergedAnnotation(ThreadSafe.class, Documented.class))
+				.isEqualTo(ThreadSafe.class.getAnnotation(Documented.class));
+		assertThat(findMergedAnnotation(ResourceHolder.class, TypeQualifierNickname.class))
+				.isEqualTo(RegEx.class.getAnnotation(TypeQualifierNickname.class));
 	}
 
 	@Test
@@ -1536,7 +1538,7 @@ class AnnotatedElementUtilsTests {
 	}
 
 	@Resource(name = "x")
-	@ParametersAreNonnullByDefault
+	@RegEx
 	static class ResourceHolder {
 	}
 

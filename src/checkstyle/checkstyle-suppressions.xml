@@ -21,9 +21,6 @@
 	<!-- Framework docs -->
 	<suppress files="org[\\/]springframework[\\/]docs[\\/].+" checks="IllegalImport" id="bannedJUnitJupiterImports" />
 
-	<!-- spring-aop -->
-	<suppress files="[\\/]src[\\/]main[\\/]java[\\/]org[\\/]aopalliance[\\/]" checks="IllegalImport" id="bannedImports" message="javax"/>
-
 	<!-- spring-beans -->
 	<suppress files="TypeMismatchException" checks="MutableException"/>
 	<suppress files="BeanCreationException" checks="MutableException"/>
@@ -40,9 +37,7 @@
 	<suppress files="[\\/]src[\\/]main[\\/]java[\\/]org[\\/]springframework[\\/](asm|cglib|objenesis|javapoet)[\\/]" checks=".*"/>
 	<suppress files="[\\/]src[\\/]main[\\/]java[\\/]org[\\/]springframework[\\/]aot[\\/]nativex[\\/]feature[\\/]" checks="RegexpSinglelineJava" id="systemOutErrPrint"/>
 	<suppress files="[\\/]src[\\/]main[\\/]java[\\/]org[\\/]springframework[\\/](core|util)[\\/](SpringProperties|SystemPropertyUtils)" checks="RegexpSinglelineJava" id="systemOutErrPrint"/>
-	<suppress files="[\\/]src[\\/]main[\\/]java[\\/]org[\\/]springframework[\\/]lang[\\/]" checks="IllegalImport" id="bannedImports" message="javax"/>
-	<suppress files="[\\/]src[\\/]main[\\/]java[\\/]org[\\/]springframework[\\/]core[\\/]annotation[\\/]" checks="IllegalImport" id="bannedImports" message="javax"/>
-	<suppress files="[\\/]src[\\/]test[\\/]java[\\/]org[\\/]springframework[\\/]core[\\/]annotation[\\/]" checks="IllegalImport" id="bannedImports" message="javax"/>
+	<suppress files="[\\/]src[\\/]main[\\/]java[\\/]org[\\/]springframework[\\/]lang[\\/]NonNull.+" checks="IllegalImport" id="bannedNullabilityImports"/>
 	<suppress files="ByteArrayEncoder" checks="SpringLambda"/>
 	<suppress files="SocketUtils" checks="HideUtilityClassConstructor"/>
 	<suppress files="ResolvableType" checks="FinalClass"/>
