@@ -55,18 +55,22 @@ import org.springframework.http.server.observation.ServerRequestObservationConve
 public class ServerHttpObservationFilter extends OncePerRequestFilter {
 
 	/**
-	 * Name of the request attribute holding the {@link ServerRequestObservationContext context} for the current observation.
+	 * Name of the request attribute holding the {@link ServerRequestObservationContext} for the current observation.
 	 */
-	public static final String CURRENT_OBSERVATION_CONTEXT_ATTRIBUTE = ServerHttpObservationFilter.class.getName() + ".context";
+	public static final String CURRENT_OBSERVATION_CONTEXT_ATTRIBUTE =
+			ServerHttpObservationFilter.class.getName() + ".context";
 
-	private static final ServerRequestObservationConvention DEFAULT_OBSERVATION_CONVENTION = new DefaultServerRequestObservationConvention();
+	private static final String CURRENT_OBSERVATION_ATTRIBUTE =
+			ServerHttpObservationFilter.class.getName() + ".observation";
 
-	private static final String CURRENT_OBSERVATION_ATTRIBUTE = ServerHttpObservationFilter.class.getName() + ".observation";
+	private static final ServerRequestObservationConvention DEFAULT_OBSERVATION_CONVENTION =
+			new DefaultServerRequestObservationConvention();
 
 
 	private final ObservationRegistry observationRegistry;
 
 	private final ServerRequestObservationConvention observationConvention;
+
 
 	/**
 	 * Create an {@code HttpRequestsObservationFilter} that records observations
@@ -89,14 +93,6 @@ public class ServerHttpObservationFilter extends OncePerRequestFilter {
 		this.observationConvention = observationConvention;
 	}
 
-	/**
-	 * Get the current {@link ServerRequestObservationContext observation context} from the given request, if available.
-	 * @param request the current request
-	 * @return the current observation context
-	 */
-	public static Optional<ServerRequestObservationContext> findObservationContext(HttpServletRequest request) {
-		return Optional.ofNullable((ServerRequestObservationContext) request.getAttribute(CURRENT_OBSERVATION_CONTEXT_ATTRIBUTE));
-	}
 
 	@Override
 	protected boolean shouldNotFilterAsyncDispatch() {
@@ -150,8 +146,9 @@ public class ServerHttpObservationFilter extends OncePerRequestFilter {
 		Observation observation = (Observation) request.getAttribute(CURRENT_OBSERVATION_ATTRIBUTE);
 		if (observation == null) {
 			ServerRequestObservationContext context = new ServerRequestObservationContext(request, response);
-			observation = ServerHttpObservationDocumentation.HTTP_SERVLET_SERVER_REQUESTS.observation(this.observationConvention,
-					DEFAULT_OBSERVATION_CONVENTION, () -> context, this.observationRegistry).start();
+			observation = ServerHttpObservationDocumentation.HTTP_SERVLET_SERVER_REQUESTS.observation(
+					this.observationConvention, DEFAULT_OBSERVATION_CONVENTION, () -> context, this.observationRegistry)
+					.start();
 			request.setAttribute(CURRENT_OBSERVATION_ATTRIBUTE, observation);
 			if (!observation.isNoop()) {
 				request.setAttribute(CURRENT_OBSERVATION_CONTEXT_ATTRIBUTE, observation.getContext());
@@ -160,13 +157,31 @@ public class ServerHttpObservationFilter extends OncePerRequestFilter {
 		return observation;
 	}
 
-	static @Nullable Throwable unwrapServletException(Throwable ex) {
-		return (ex instanceof ServletException) ? ex.getCause() : ex;
+
+	/**
+	 * Get the current {@link ServerRequestObservationContext observation context} from the given request, if available.
+	 * @param request the current request
+	 * @return the current observation context
+	 */
+	public static Optional<ServerRequestObservationContext> findObservationContext(HttpServletRequest request) {
+		return Optional.ofNullable(
+				(ServerRequestObservationContext) request.getAttribute(CURRENT_OBSERVATION_CONTEXT_ATTRIBUTE));
 	}
 
 	static @Nullable Throwable fetchException(ServletRequest request) {
 		return (Throwable) request.getAttribute(RequestDispatcher.ERROR_EXCEPTION);
 	}
+
+	static Throwable unwrapServletException(Throwable ex) {
+		if (ex instanceof ServletException) {
+			Throwable cause = ex.getCause();
+			if (cause != null) {
+				return cause;
+			}
+		}
+		return ex;
+	}
+
 
 	private static class ObservationAsyncListener implements AsyncListener {
 
@@ -195,7 +210,6 @@ public class ServerHttpObservationFilter extends OncePerRequestFilter {
 		public void onError(AsyncEvent event) {
 			this.currentObservation.error(unwrapServletException(event.getThrowable()));
 		}
-
 	}
 
 }

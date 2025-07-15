@@ -21,6 +21,7 @@ import java.util.Set;
 
 import io.micrometer.common.KeyValue;
 import io.micrometer.common.KeyValues;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -87,12 +88,15 @@ public class DefaultServerRequestObservationConvention implements ServerRequestO
 	}
 
 	@Override
-	public String getContextualName(ServerRequestObservationContext context) {
-		String httpMethod = context.getCarrier().getMethod().name().toLowerCase(Locale.ROOT);
-		if (context.getPathPattern() != null) {
-			return "http " + httpMethod + " " + context.getPathPattern();
+	public @Nullable String getContextualName(ServerRequestObservationContext context) {
+		if (context.getCarrier() != null) {
+			String httpMethod = context.getCarrier().getMethod().name().toLowerCase(Locale.ROOT);
+			if (context.getPathPattern() != null) {
+				return "http " + httpMethod + " " + context.getPathPattern();
+			}
+			return "http " + httpMethod;
 		}
-		return "http " + httpMethod;
+		return null;
 	}
 
 	@Override
