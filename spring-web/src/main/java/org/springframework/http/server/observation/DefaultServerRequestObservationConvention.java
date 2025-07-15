@@ -29,6 +29,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.server.observation.ServerHttpObservationDocumentation.HighCardinalityKeyNames;
 import org.springframework.http.server.observation.ServerHttpObservationDocumentation.LowCardinalityKeyNames;
+import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 
 /**
@@ -89,12 +90,16 @@ public class DefaultServerRequestObservationConvention implements ServerRequestO
 	}
 
 	@Override
+	@Nullable
 	public String getContextualName(ServerRequestObservationContext context) {
-		String httpMethod = context.getCarrier().getMethod().toLowerCase(Locale.ROOT);
-		if (context.getPathPattern() != null) {
-			return "http " + httpMethod + " " + context.getPathPattern();
+		if (context.getCarrier() != null) {
+			String httpMethod = context.getCarrier().getMethod().toLowerCase(Locale.ROOT);
+			if (context.getPathPattern() != null) {
+				return "http " + httpMethod + " " + context.getPathPattern();
+			}
+			return "http " + httpMethod;
 		}
-		return "http " + httpMethod;
+		return null;
 	}
 
 	@Override
@@ -193,7 +198,6 @@ public class DefaultServerRequestObservationConvention implements ServerRequestO
 				return HTTP_OUTCOME_UNKNOWN;
 			}
 		}
-
 	}
 
 }
