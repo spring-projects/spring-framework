@@ -25,6 +25,7 @@ import org.gradle.api.tasks.testing.TestFrameworkOptions;
 import org.gradle.api.tasks.testing.junitplatform.JUnitPlatformOptions;
 import org.gradle.testretry.TestRetryPlugin;
 import org.gradle.testretry.TestRetryTaskExtension;
+import org.jetbrains.kotlin.gradle.targets.jvm.tasks.KotlinJvmTest;
 
 import java.util.Map;
 
@@ -89,6 +90,11 @@ class TestConventions {
 			mockitoAgentConfig.getDependencies().add(mockitoCore);
 			project.afterEvaluate(p -> {
 				p.getTasks().withType(Test.class, test -> test.jvmArgs("-javaagent:" + mockitoAgentConfig.getAsPath()));
+				project.getPlugins().withId("org.jetbrains.kotlin.jvm", plugin -> {
+					project.getTasks().withType(KotlinJvmTest.class, kotlinTest -> {
+						kotlinTest.jvmArgs("-javaagent:" + mockitoAgentConfig.getAsPath());
+					});
+				});
 			});
 		}
 	}
