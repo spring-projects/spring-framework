@@ -16,8 +16,8 @@
 package org.springframework.web.reactive.function.client.support
 
 import kotlinx.coroutines.runBlocking
-import okhttp3.mockwebserver.MockResponse
-import okhttp3.mockwebserver.MockWebServer
+import mockwebserver3.MockResponse
+import mockwebserver3.MockWebServer
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -39,7 +39,6 @@ import reactor.core.publisher.Mono
 import reactor.test.StepVerifier
 import java.net.URI
 import java.time.Duration
-import java.util.function.Consumer
 
 /**
  * Kotlin integration tests for [HTTP Service proxy][HttpServiceProxyFactory]
@@ -58,23 +57,20 @@ class KotlinWebClientHttpServiceGroupAdapterServiceProxyTests {
 	@BeforeEach
 	fun setUp() {
 		server = MockWebServer()
+		server.start()
 		anotherServer = anotherServer()
+		anotherServer.start()
 	}
 
 	@AfterEach
 	fun shutdown() {
-		server.shutdown()
-		anotherServer.shutdown()
+		server.close()
+		anotherServer.close()
 	}
 
 	@Test
 	fun greetingSuspending() {
-		prepareResponse { response: MockResponse ->
-			response.setHeader(
-				"Content-Type",
-				"text/plain"
-			).setBody("Hello Spring!")
-		}
+		prepareResponse { it.setHeader("Content-Type", "text/plain").body("Hello Spring!") }
 		runBlocking {
 			val greeting = initHttpService().getGreetingSuspending()
 			assertThat(greeting).isEqualTo("Hello Spring!")
@@ -83,12 +79,7 @@ class KotlinWebClientHttpServiceGroupAdapterServiceProxyTests {
 
 	@Test
 	fun greetingMono() {
-		prepareResponse { response: MockResponse ->
-			response.setHeader(
-				"Content-Type",
-				"text/plain"
-			).setBody("Hello Spring!")
-		}
+		prepareResponse { it.setHeader("Content-Type", "text/plain").body("Hello Spring!") }
 		StepVerifier.create(initHttpService().getGreetingMono())
 			.expectNext("Hello Spring!")
 			.expectComplete()
@@ -97,12 +88,7 @@ class KotlinWebClientHttpServiceGroupAdapterServiceProxyTests {
 
 	@Test
 	fun greetingBlocking() {
-		prepareResponse { response: MockResponse ->
-			response.setHeader(
-				"Content-Type",
-				"text/plain"
-			).setBody("Hello Spring!")
-		}
+		prepareResponse { it.setHeader("Content-Type", "text/plain").body("Hello Spring!") }
 		val greeting = initHttpService().getGreetingBlocking()
 		assertThat(greeting).isEqualTo("Hello Spring!")
 	}
@@ -117,12 +103,7 @@ class KotlinWebClientHttpServiceGroupAdapterServiceProxyTests {
 				next.exchange(request)
 			}
 			.build()
-		prepareResponse { response: MockResponse ->
-			response.setHeader(
-				"Content-Type",
-				"text/plain"
-			).setBody("Hello Spring!")
-		}
+		prepareResponse { it.setHeader("Content-Type", "text/plain").body("Hello Spring!") }
 		val service = initHttpService(webClient)
 		runBlocking {
 			val greeting = service.getGreetingSuspendingWithAttribute("myAttributeValue")
@@ -134,9 +115,7 @@ class KotlinWebClientHttpServiceGroupAdapterServiceProxyTests {
 	@Test
 	@Throws(InterruptedException::class)
 	fun getWithFactoryPathVariableAndRequestParam() {
-		prepareResponse { response: MockResponse ->
-			response.setHeader("Content-Type", "text/plain").setBody("Hello Spring!")
-		}
+		prepareResponse { it.setHeader("Content-Type", "text/plain").body("Hello Spring!") }
 		val factory: UriBuilderFactory = DefaultUriBuilderFactory(anotherServer.url("/").toString())
 
 		val actualResponse: ResponseEntity<String> =
@@ -146,17 +125,16 @@ class KotlinWebClientHttpServiceGroupAdapterServiceProxyTests {
 		assertThat(actualResponse.statusCode).isEqualTo(HttpStatus.OK)
 		assertThat(actualResponse.body).isEqualTo("Hello Spring 2!")
 		assertThat(request.method).isEqualTo("GET")
-		assertThat(request.path).isEqualTo("/greeting/123?param=test")
+		assertThat(request.target).isEqualTo("/greeting/123?param=test")
 		assertThat(server.requestCount).isEqualTo(0)
 	}
 
 	@Test
 	@Throws(InterruptedException::class)
 	fun getWithIgnoredUriBuilderFactory() {
-		prepareResponse { response: MockResponse ->
-			response.setHeader("Content-Type", "text/plain").setBody("Hello Spring!")
-		}
-		val dynamicUri = server.url("/greeting/123").uri()
+		prepareResponse {
+			it.setHeader("Content-Type", "text/plain").body("Hello Spring!") }
+		val dynamicUri = server.url("/greeting/123").toUri()
 		val factory: UriBuilderFactory = DefaultUriBuilderFactory(anotherServer.url("/").toString())
 
 		val actualResponse: ResponseEntity<String> =
@@ -166,7 +144,7 @@ class KotlinWebClientHttpServiceGroupAdapterServiceProxyTests {
 		assertThat(actualResponse.statusCode).isEqualTo(HttpStatus.OK)
 		assertThat(actualResponse.body).isEqualTo("Hello Spring!")
 		assertThat(request.method).isEqualTo("GET")
-		assertThat(request.path).isEqualTo("/greeting/123")
+		assertThat(request.target).isEqualTo("/greeting/123")
 		assertThat(anotherServer.requestCount).isEqualTo(0)
 	}
 
@@ -181,16 +159,17 @@ class KotlinWebClientHttpServiceGroupAdapterServiceProxyTests {
 		return HttpServiceProxyFactory.builderFor(adapter).build().createClient()
 	}
 
-	private fun prepareResponse(consumer: Consumer<MockResponse>) {
-		val response = MockResponse()
-		consumer.accept(response)
-		server.enqueue(response)
+	private fun prepareResponse(f: (MockResponse.Builder) -> MockResponse.Builder) {
+		val builder = MockResponse.Builder()
+		server.enqueue(f.invoke(builder).build())
 	}
 
 	private fun anotherServer(): MockWebServer {
 		val anotherServer = MockWebServer()
-		val response = MockResponse()
-		response.setHeader("Content-Type", "text/plain").setBody("Hello Spring 2!")
+		val response = MockResponse.Builder()
+			.setHeader("Content-Type", "text/plain")
+			.body("Hello Spring 2!")
+			.build()
 		anotherServer.enqueue(response)
 		return anotherServer
 	}

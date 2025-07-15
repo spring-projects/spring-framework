@@ -37,10 +37,10 @@ import java.util.Base64;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Stream;
 
-import okhttp3.mockwebserver.Dispatcher;
-import okhttp3.mockwebserver.MockResponse;
-import okhttp3.mockwebserver.MockWebServer;
-import okhttp3.mockwebserver.RecordedRequest;
+import mockwebserver3.Dispatcher;
+import mockwebserver3.MockResponse;
+import mockwebserver3.MockWebServer;
+import mockwebserver3.RecordedRequest;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -419,7 +419,7 @@ class ResourceTests {
 			assertThat(resource.exists()).isTrue();
 			RecordedRequest request = this.server.takeRequest();
 			assertThat(request.getMethod()).isEqualTo("HEAD");
-			assertThat(request.getHeader("Framework-Name")).isEqualTo("Spring");
+			assertThat(request.getHeaders().get("Framework-Name")).isEqualTo("Spring");
 		}
 
 		@Test
@@ -429,7 +429,7 @@ class ResourceTests {
 			assertThat(resource.exists()).isTrue();
 			RecordedRequest request = this.server.takeRequest();
 			assertThat(request.getMethod()).isEqualTo("HEAD");
-			assertThat(request.getHeader("Framework-Name")).isEqualTo("Spring");
+			assertThat(request.getHeaders().get("Framework-Name")).isEqualTo("Spring");
 		}
 
 		@Test
@@ -439,7 +439,7 @@ class ResourceTests {
 			assertThat(resource.getInputStream()).hasContent("Spring");
 			RecordedRequest request = this.server.takeRequest();
 			assertThat(request.getMethod()).isEqualTo("GET");
-			assertThat(request.getHeader("Framework-Name")).isEqualTo("Spring");
+			assertThat(request.getHeaders().get("Framework-Name")).isEqualTo("Spring");
 		}
 
 		@Test
@@ -449,15 +449,15 @@ class ResourceTests {
 					"http://alice:secret@localhost:" + this.server.getPort() + "/resource");
 			assertThat(resource.getInputStream()).hasContent("Spring");
 			RecordedRequest request = this.server.takeRequest();
-			String authorization = request.getHeader("Authorization");
+			String authorization = request.getHeaders().get("Authorization");
 			assertThat(authorization).isNotNull().startsWith("Basic ");
 			assertThat(new String(Base64.getDecoder().decode(authorization.substring(6)),
 					StandardCharsets.ISO_8859_1)).isEqualTo("alice:secret");
 		}
 
 		@AfterEach
-		void shutdown() throws Exception {
-			this.server.shutdown();
+		void shutdown() {
+			this.server.close();
 		}
 
 		private String startServer(boolean withHeadSupport) throws Exception {
@@ -488,23 +488,25 @@ class ResourceTests {
 
 			@Override
 			public MockResponse dispatch(RecordedRequest request) {
-				if (request.getPath().equals("/resource")) {
+				if (request.getTarget().equals("/resource")) {
 					return switch (request.getMethod()) {
 						case "HEAD" -> (this.withHeadSupport ?
-								new MockResponse()
+								new MockResponse.Builder()
 										.addHeader("Content-Type", "text/plain")
 										.addHeader("Content-Length", "6")
-										.addHeader("Last-Modified", LAST_MODIFIED) :
-								new MockResponse().setResponseCode(405));
-						case "GET" -> new MockResponse()
+										.addHeader("Last-Modified", LAST_MODIFIED)
+										.build() :
+								new MockResponse.Builder().code(405).build());
+						case "GET" -> new MockResponse.Builder()
 									.addHeader("Content-Type", "text/plain")
 									.addHeader("Content-Length", "6")
 									.addHeader("Last-Modified", LAST_MODIFIED)
-									.setBody("Spring");
-						default -> new MockResponse().setResponseCode(404);
+									.body("Spring")
+									.build();
+						default -> new MockResponse.Builder().code(404).build();
 					};
 				}
-				return new MockResponse().setResponseCode(404);
+				return new MockResponse.Builder().code(404).build();
 			}
 		}
 	}

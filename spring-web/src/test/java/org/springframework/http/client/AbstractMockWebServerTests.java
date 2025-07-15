@@ -16,10 +16,10 @@
 
 package org.springframework.http.client;
 
-import okhttp3.mockwebserver.Dispatcher;
-import okhttp3.mockwebserver.MockResponse;
-import okhttp3.mockwebserver.MockWebServer;
-import okhttp3.mockwebserver.RecordedRequest;
+import mockwebserver3.Dispatcher;
+import mockwebserver3.MockResponse;
+import mockwebserver3.MockWebServer;
+import mockwebserver3.RecordedRequest;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 
@@ -49,8 +49,8 @@ public abstract class AbstractMockWebServerTests {
 	}
 
 	@AfterEach
-	void tearDown() throws Exception {
-		this.server.shutdown();
+	void tearDown() {
+		this.server.close();
 	}
 
 
@@ -59,56 +59,57 @@ public abstract class AbstractMockWebServerTests {
 		@Override
 		public MockResponse dispatch(RecordedRequest request) {
 			try {
-				if (request.getPath().equals("/echo")) {
-					assertThat(request.getHeader("Host")).contains("localhost:" + port);
-					MockResponse response = new MockResponse()
-							.setHeaders(request.getHeaders())
-							.setHeader("Content-Length", request.getBody().size())
-							.setResponseCode(200)
-							.setBody(request.getBody());
-					request.getBody().flush();
-					return response;
+				if (request.getTarget().equals("/echo")) {
+					assertThat(request.getHeaders().get("Host")).contains("localhost:" + port);
+					MockResponse.Builder builder = new MockResponse.Builder().headers(request.getHeaders());
+					if (request.getBody() != null) {
+						builder = builder.body(request.getBody().utf8());
+					}
+					else {
+						builder.setHeader("Content-Length", 0);
+					}
+					return builder.code(200).build();
 				}
-				else if(request.getPath().equals("/status/ok")) {
-					return new MockResponse();
+				else if(request.getTarget().equals("/status/ok")) {
+					return new MockResponse.Builder().build();
 				}
-				else if(request.getPath().equals("/status/notfound")) {
-					return new MockResponse().setResponseCode(404);
+				else if(request.getTarget().equals("/status/notfound")) {
+					return new MockResponse.Builder().code(404).build();
 				}
-				else if (request.getPath().equals("/status/299")) {
-					assertThat(request.getHeader("Expect")).contains("299");
-					return new MockResponse().setResponseCode(299);
+				else if (request.getTarget().equals("/status/299")) {
+					assertThat(request.getHeaders().get("Expect")).contains("299");
+					return new MockResponse.Builder().code(299).build();
 				}
-				else if(request.getPath().startsWith("/params")) {
-					assertThat(request.getPath()).contains("param1=value");
-					assertThat(request.getPath()).contains("param2=value1&param2=value2");
-					return new MockResponse();
+				else if(request.getTarget().startsWith("/params")) {
+					assertThat(request.getTarget()).contains("param1=value");
+					assertThat(request.getTarget()).contains("param2=value1&param2=value2");
+					return new MockResponse.Builder().build();
 				}
-				else if(request.getPath().equals("/methods/post")) {
+				else if(request.getTarget().equals("/methods/post")) {
 					assertThat(request.getMethod()).isEqualTo("POST");
-					String transferEncoding = request.getHeader("Transfer-Encoding");
+					String transferEncoding = request.getHeaders().get("Transfer-Encoding");
 					if(StringUtils.hasLength(transferEncoding)) {
 						assertThat(transferEncoding).isEqualTo("chunked");
 					}
 					else {
-						long contentLength = Long.parseLong(request.getHeader("Content-Length"));
+						long contentLength = Long.parseLong(request.getHeaders().get("Content-Length"));
 						assertThat(request.getBody().size()).isEqualTo(contentLength);
 					}
-					return new MockResponse().setResponseCode(200);
+					return new MockResponse.Builder().code(200).build();
 				}
-				else if(request.getPath().startsWith("/methods/")) {
-					String expectedMethod = request.getPath().replace("/methods/","").toUpperCase();
+				else if(request.getTarget().startsWith("/methods/")) {
+					String expectedMethod = request.getTarget().replace("/methods/","").toUpperCase();
 					assertThat(request.getMethod()).isEqualTo(expectedMethod);
-					return new MockResponse();
+					return new MockResponse.Builder().build();
 				}
-				else if(request.getPath().startsWith("/header/")) {
-					String headerName = request.getPath().replace("/header/","");
-					return new MockResponse().setBody(headerName + ":" + request.getHeader(headerName)).setResponseCode(200);
+				else if(request.getTarget().startsWith("/header/")) {
+					String headerName = request.getTarget().replace("/header/","");
+					return new MockResponse.Builder().body(headerName + ":" + request.getHeaders().get(headerName)).code(200).build();
 				}
-				return new MockResponse().setResponseCode(404);
+				return new MockResponse.Builder().code(404).build();
 			}
 			catch (Throwable ex) {
-				return new MockResponse().setResponseCode(500).setBody(ex.toString());
+				return new MockResponse.Builder().code(500).body(ex.toString()).build();
 			}
 		}
 	}

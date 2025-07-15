@@ -16,11 +16,9 @@
 
 package org.springframework.web.client.support;
 
-import java.io.IOException;
-
-import okhttp3.mockwebserver.MockResponse;
-import okhttp3.mockwebserver.MockWebServer;
-import okhttp3.mockwebserver.RecordedRequest;
+import mockwebserver3.MockResponse;
+import mockwebserver3.MockWebServer;
+import mockwebserver3.RecordedRequest;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -61,8 +59,8 @@ public class RestClientProxyRegistryIntegrationTests {
 	}
 
 	@AfterEach
-	void shutdown() throws IOException {
-		this.server.shutdown();
+	void shutdown() {
+		this.server.close();
 	}
 
 
@@ -89,7 +87,7 @@ public class RestClientProxyRegistryIntegrationTests {
 		assertThat(registry.getClient(GreetingB.class)).isSameAs(greetingB);
 
 		for (int i = 0; i < 4; i++) {
-			this.server.enqueue(new MockResponse().setBody("body"));
+			this.server.enqueue(new MockResponse.Builder().body("body").build());
 		}
 
 		echoA.handle("a");
@@ -97,22 +95,22 @@ public class RestClientProxyRegistryIntegrationTests {
 
 		RecordedRequest request = this.server.takeRequest();
 		assertThat(request.getMethod()).isEqualTo("GET");
-		assertThat(request.getPath()).isEqualTo("/echoA?input=a");
+		assertThat(request.getTarget()).isEqualTo("/echoA?input=a");
 
 		request = this.server.takeRequest();
 		assertThat(request.getMethod()).isEqualTo("GET");
-		assertThat(request.getPath()).isEqualTo("/echoB?input=b");
+		assertThat(request.getTarget()).isEqualTo("/echoB?input=b");
 
 		greetingA.handle("a");
 		greetingB.handle("b");
 
 		request = this.server.takeRequest();
 		assertThat(request.getMethod()).isEqualTo("GET");
-		assertThat(request.getPath()).isEqualTo("/greetingA?input=a");
+		assertThat(request.getTarget()).isEqualTo("/greetingA?input=a");
 
 		request = this.server.takeRequest();
 		assertThat(request.getMethod()).isEqualTo("GET");
-		assertThat(request.getPath()).isEqualTo("/greetingB?input=b");
+		assertThat(request.getTarget()).isEqualTo("/greetingB?input=b");
 	}
 
 	@Test

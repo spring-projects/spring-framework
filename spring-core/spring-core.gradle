@@ -96,7 +96,7 @@ dependencies {
 	testImplementation("com.fasterxml.jackson.core:jackson-databind")
 	testImplementation("com.fasterxml.woodstox:woodstox-core")
 	testImplementation("com.google.code.findbugs:jsr305")
-	testImplementation("com.squareup.okhttp3:mockwebserver")
+	testImplementation("com.squareup.okhttp3:mockwebserver3")
 	testImplementation("io.projectreactor:reactor-test")
 	testImplementation("io.projectreactor.tools:blockhound")
 	testImplementation("jakarta.annotation:jakarta.annotation-api")

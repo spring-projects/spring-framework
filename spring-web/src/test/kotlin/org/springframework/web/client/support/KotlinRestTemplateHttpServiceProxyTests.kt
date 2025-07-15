@@ -16,8 +16,8 @@
 
 package org.springframework.web.client.support
 
-import okhttp3.mockwebserver.MockResponse
-import okhttp3.mockwebserver.MockWebServer
+import mockwebserver3.MockResponse
+import mockwebserver3.MockWebServer
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -57,8 +57,10 @@ class KotlinRestTemplateHttpServiceProxyTests {
 	@BeforeEach
 	fun setUp() {
 		server = MockWebServer()
+		server.start()
 		prepareResponse()
 		anotherServer = anotherServer()
+		anotherServer.start()
 		testService = initTestService()
 	}
 
@@ -73,8 +75,8 @@ class KotlinRestTemplateHttpServiceProxyTests {
 
 	@AfterEach
 	fun shutDown() {
-		server.shutdown()
-		anotherServer.shutdown()
+		server.close()
+		anotherServer.close()
 	}
 
 	@Test
@@ -85,7 +87,7 @@ class KotlinRestTemplateHttpServiceProxyTests {
 		val request = server.takeRequest()
 		assertThat(response).isEqualTo("Hello Spring!")
 		assertThat(request.method).isEqualTo("GET")
-		assertThat(request.path).isEqualTo("/test")
+		assertThat(request.target).isEqualTo("/test")
 	}
 
 	@Test
@@ -97,20 +99,20 @@ class KotlinRestTemplateHttpServiceProxyTests {
 		assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
 		assertThat(response.body).isEqualTo("Hello Spring!")
 		assertThat(request.method).isEqualTo("GET")
-		assertThat(request.path).isEqualTo("/test/456")
+		assertThat(request.target).isEqualTo("/test/456")
 	}
 
 	@Test
 	@Throws(InterruptedException::class)
 	fun getRequestWithDynamicUri() {
-		val dynamicUri = server.url("/greeting/123").uri()
+		val dynamicUri = server.url("/greeting/123").toUri()
 
 		val response = testService.getRequestWithDynamicUri(dynamicUri, "456")
 
 		val request = server.takeRequest()
 		assertThat(response.orElse("empty")).isEqualTo("Hello Spring!")
 		assertThat(request.method).isEqualTo("GET")
-		assertThat(request.requestUrl.uri()).isEqualTo(dynamicUri)
+		assertThat(request.url.toUri()).isEqualTo(dynamicUri)
 	}
 
 	@Test
@@ -120,9 +122,9 @@ class KotlinRestTemplateHttpServiceProxyTests {
 
 		val request = server.takeRequest()
 		assertThat(request.method).isEqualTo("POST")
-		assertThat(request.path).isEqualTo("/test")
+		assertThat(request.target).isEqualTo("/test")
 		assertThat(request.headers["testHeaderName"]).isEqualTo("testHeader")
-		assertThat(request.body.readUtf8()).isEqualTo("testBody")
+		assertThat(request.body!!.utf8()).isEqualTo("testBody")
 	}
 
 	@Test
@@ -136,7 +138,7 @@ class KotlinRestTemplateHttpServiceProxyTests {
 
 		val request = server.takeRequest()
 		assertThat(request.headers["Content-Type"]).isEqualTo("application/x-www-form-urlencoded")
-		assertThat(request.body.readUtf8()).isEqualTo("param1=value+1&param2=value+2")
+		assertThat(request.body!!.utf8()).isEqualTo("param1=value+1&param2=value+2")
 	}
 
 	// gh-30342
@@ -152,7 +154,7 @@ class KotlinRestTemplateHttpServiceProxyTests {
 
 		val request = server.takeRequest()
 		assertThat(request.headers["Content-Type"]).startsWith("multipart/form-data;boundary=")
-		assertThat(request.body.readUtf8()).containsSubsequence(
+		assertThat(request.body!!.utf8()).containsSubsequence(
 				"Content-Disposition: form-data; name=\"file\"; filename=\"originalTestFileName\"",
 				"Content-Type: application/json", "Content-Length: 4", "test",
 				"Content-Disposition: form-data; name=\"anotherPart\"", "Content-Type: text/plain;charset=UTF-8",
@@ -166,7 +168,7 @@ class KotlinRestTemplateHttpServiceProxyTests {
 
 		val request = server.takeRequest()
 		assertThat(request.method).isEqualTo("PUT")
-		assertThat(request.getHeader("Cookie"))
+		assertThat(request.headers["Cookie"])
 				.isEqualTo("firstCookie=test1; secondCookie=test2")
 	}
 
@@ -177,7 +179,7 @@ class KotlinRestTemplateHttpServiceProxyTests {
 
 		val request = server.takeRequest()
 		assertThat(request.method).isEqualTo("PUT")
-		assertThat(request.getHeader("Cookie"))
+		assertThat(request.headers["Cookie"])
 				.isEqualTo("testCookie=test1; testCookie=test2")
 	}
 
@@ -194,7 +196,7 @@ class KotlinRestTemplateHttpServiceProxyTests {
 		assertThat(actualResponse.statusCode).isEqualTo(HttpStatus.OK)
 		assertThat(actualResponse.body).isEqualTo("Hello Spring 2!")
 		assertThat(request.method).isEqualTo("GET")
-		assertThat(request.path).isEqualTo("/greeting")
+		assertThat(request.target).isEqualTo("/greeting")
 		assertThat(server.requestCount).isEqualTo(0)
 	}
 
@@ -212,14 +214,14 @@ class KotlinRestTemplateHttpServiceProxyTests {
 		assertThat(actualResponse.statusCode).isEqualTo(HttpStatus.OK)
 		assertThat(actualResponse.body).isEqualTo("Hello Spring 2!")
 		assertThat(request.method).isEqualTo("GET")
-		assertThat(request.path).isEqualTo("/greeting/123?param=test")
+		assertThat(request.target).isEqualTo("/greeting/123?param=test")
 		assertThat(server.requestCount).isEqualTo(0)
 	}
 
 	@Test
 	@Throws(InterruptedException::class)
 	fun getWithIgnoredUriBuilderFactory() {
-		val dynamicUri = server.url("/greeting/123").uri()
+		val dynamicUri = server.url("/greeting/123").toUri()
 		val factory: UriBuilderFactory = DefaultUriBuilderFactory(anotherServer.url("/")
 				.toString())
 
@@ -230,21 +232,23 @@ class KotlinRestTemplateHttpServiceProxyTests {
 		assertThat(actualResponse.statusCode).isEqualTo(HttpStatus.OK)
 		assertThat(actualResponse.body).isEqualTo("Hello Spring!")
 		assertThat(request.method).isEqualTo("GET")
-		assertThat(request.path).isEqualTo("/greeting/123")
+		assertThat(request.target).isEqualTo("/greeting/123")
 		assertThat(anotherServer.requestCount).isEqualTo(0)
 	}
 
 
 	private fun prepareResponse() {
-		val response = MockResponse()
-		response.setHeader("Content-Type", "text/plain").setBody("Hello Spring!")
+		val response = MockResponse.Builder()
+			.setHeader("Content-Type", "text/plain").body("Hello Spring!").build()
 		server.enqueue(response)
 	}
 
 	private fun anotherServer(): MockWebServer {
 		val anotherServer = MockWebServer()
-		val response = MockResponse()
-		response.setHeader("Content-Type", "text/plain").setBody("Hello Spring 2!")
+		val response = MockResponse.Builder()
+			.setHeader("Content-Type", "text/plain")
+			.body("Hello Spring 2!")
+			.build()
 		anotherServer.enqueue(response)
 		return anotherServer
 	}
