@@ -20,10 +20,12 @@ import java.util.List;
 
 import org.jspecify.annotations.Nullable;
 
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.AbstractApplicationContext;
 import org.springframework.test.context.ContextConfigurationAttributes;
 import org.springframework.test.context.ContextCustomizer;
 import org.springframework.test.context.ContextCustomizerFactory;
+import org.springframework.test.context.MergedContextConfiguration;
 
 /**
  * @author Sam Brannen
@@ -32,11 +34,35 @@ import org.springframework.test.context.ContextCustomizerFactory;
 class DisplayNameCustomizerFactory implements ContextCustomizerFactory {
 
 	@Override
-	public @Nullable ContextCustomizer createContextCustomizer(Class<?> testClass,
-			List<ContextConfigurationAttributes> __) {
+	public ContextCustomizer createContextCustomizer(Class<?> testClass,
+			List<ContextConfigurationAttributes> configAttributes) {
 
-		return (context, mergedConfig) ->
-			((AbstractApplicationContext) context).setDisplayName(mergedConfig.getTestClass().getSimpleName());
+		return new DisplayNameCustomizer(testClass.getSimpleName());
+	}
+
+
+	private static class DisplayNameCustomizer implements ContextCustomizer {
+
+		private final String displayName;
+
+		DisplayNameCustomizer(String displayName) {
+			this.displayName = displayName;
+		}
+
+		@Override
+		public void customizeContext(ConfigurableApplicationContext context, MergedContextConfiguration mergedConfig) {
+			((AbstractApplicationContext) context).setDisplayName(this.displayName);
+		}
+
+		@Override
+		public boolean equals(@Nullable Object other) {
+			return (this == other || (other != null && getClass() == other.getClass()));
+		}
+
+		@Override
+		public int hashCode() {
+			return getClass().hashCode();
+		}
 	}
 
 }
