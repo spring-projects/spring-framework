@@ -195,7 +195,6 @@ public class DefaultServerRequestObservationConvention implements ServerRequestO
 				return HTTP_OUTCOME_UNKNOWN;
 			}
 		}
-
 	}
 
 }
