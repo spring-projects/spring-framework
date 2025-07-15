@@ -86,7 +86,7 @@ public abstract class OncePerRequestFilter extends GenericFilterBean {
 	 * @see #doFilterInternal
 	 */
 	@Override
-	public final void doFilter(ServletRequest request, ServletResponse response, FilterChain filterChain)
+	public void doFilter(ServletRequest request, ServletResponse response, FilterChain filterChain)
 			throws ServletException, IOException {
 
 		if (!((request instanceof HttpServletRequest httpRequest) && (response instanceof HttpServletResponse httpResponse))) {
