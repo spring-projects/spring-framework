@@ -74,7 +74,7 @@ abstract class AbstractMockWebServerTests {
 
 	private MockResponse getRequest(RecordedRequest request, byte[] body, String contentType) {
 		if (request.getMethod().equals("OPTIONS")) {
-			return new MockResponse().setResponseCode(200).setHeader("Allow", "GET, OPTIONS, HEAD, TRACE");
+			return new MockResponse().setResponseCode(200).setHeader("Allow", "GET, QUERY, OPTIONS, HEAD, TRACE");
 		}
 		Buffer buf = new Buffer();
 		buf.write(body);
@@ -231,6 +231,28 @@ abstract class AbstractMockWebServerTests {
 		return new MockResponse().setResponseCode(202);
 	}
 
+	private MockResponse queryRequest(RecordedRequest request, String expectedRequestContent,
+									  String contentType, byte[] responseBody) {
+
+		assertThat(request.getHeaders().values(CONTENT_LENGTH)).hasSize(1);
+		assertThat(Integer.parseInt(request.getHeader(CONTENT_LENGTH))).as("Invalid request content-length").isGreaterThan(0);
+		String requestContentType = request.getHeader(CONTENT_TYPE);
+		assertThat(requestContentType).as("No content-type").isNotNull();
+		Charset charset = StandardCharsets.ISO_8859_1;
+		if (requestContentType.contains("charset=")) {
+			String charsetName = requestContentType.split("charset=")[1];
+			charset = Charset.forName(charsetName);
+		}
+		assertThat(request.getBody().readString(charset)).as("Invalid request body").isEqualTo(expectedRequestContent);
+		Buffer buf = new Buffer();
+		buf.write(responseBody);
+		return new MockResponse()
+				.setHeader(CONTENT_TYPE, contentType)
+				.setHeader(CONTENT_LENGTH, responseBody.length)
+				.setBody(buf)
+				.setResponseCode(200);
+	}
+
 
 	protected class TestDispatcher extends Dispatcher {
 
@@ -292,6 +314,9 @@ abstract class AbstractMockWebServerTests {
 				}
 				else if (request.getPath().equals("/put")) {
 					return putRequest(request, helloWorld);
+				}
+				else if (request.getPath().equals("/query")) {
+					return queryRequest(request, helloWorld, textContentType.toString(), helloWorldBytes);
 				}
 				return new MockResponse().setResponseCode(404);
 			}
