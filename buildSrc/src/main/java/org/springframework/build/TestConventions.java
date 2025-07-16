@@ -25,7 +25,6 @@ import org.gradle.api.tasks.testing.TestFrameworkOptions;
 import org.gradle.api.tasks.testing.junitplatform.JUnitPlatformOptions;
 import org.gradle.testretry.TestRetryPlugin;
 import org.gradle.testretry.TestRetryTaskExtension;
-import org.jetbrains.kotlin.gradle.targets.jvm.tasks.KotlinJvmTest;
 
 import java.util.Map;
 
@@ -36,7 +35,7 @@ import java.util.Map;
  * <li>The {@link TestRetryPlugin Test Retry} plugin is applied so that flaky tests
  * are retried 3 times when running on the CI server.
  * <li>Common test properties are configured
- * <li>The Mockito Java agent is set on test tasks.
+ * <li>The ByteBuddy Java agent is configured on test tasks.
  * </ul>
  *
  * @author Brian Clozel
@@ -50,7 +49,7 @@ class TestConventions {
 	}
 
 	private void configureTestConventions(Project project) {
-		configureMockitoAgent(project);
+		configureByteBuddyAgent(project);
 		project.getTasks().withType(Test.class,
 				test -> {
 					configureTests(project, test);
@@ -81,20 +80,16 @@ class TestConventions {
 		);
 	}
 
-	private void configureMockitoAgent(Project project) {
-		if (project.hasProperty("mockitoVersion")) {
-			String mockitoVersion = (String) project.getProperties().get("mockitoVersion");
-			Configuration mockitoAgentConfig = project.getConfigurations().create("mockitoAgent");
-			mockitoAgentConfig.setTransitive(false);
-			Dependency mockitoCore = project.getDependencies().create("org.mockito:mockito-core:" + mockitoVersion);
-			mockitoAgentConfig.getDependencies().add(mockitoCore);
+	private void configureByteBuddyAgent(Project project) {
+		if (project.hasProperty("byteBuddyVersion")) {
+			String byteBuddyVersion = (String) project.getProperties().get("byteBuddyVersion");
+			Configuration byteBuddyAgentConfig = project.getConfigurations().create("byteBuddyAgentConfig");
+			byteBuddyAgentConfig.setTransitive(false);
+			Dependency byteBuddyAgent = project.getDependencies().create("net.bytebuddy:byte-buddy-agent:" + byteBuddyVersion);
+			byteBuddyAgentConfig.getDependencies().add(byteBuddyAgent);
 			project.afterEvaluate(p -> {
-				p.getTasks().withType(Test.class, test -> test.jvmArgs("-javaagent:" + mockitoAgentConfig.getAsPath()));
-				project.getPlugins().withId("org.jetbrains.kotlin.jvm", plugin -> {
-					project.getTasks().withType(KotlinJvmTest.class, kotlinTest -> {
-						kotlinTest.jvmArgs("-javaagent:" + mockitoAgentConfig.getAsPath());
-					});
-				});
+				p.getTasks().withType(Test.class, test -> test
+						.jvmArgs("-javaagent:" + byteBuddyAgentConfig.getAsPath()));
 			});
 		}
 	}

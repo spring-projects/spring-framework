@@ -20,7 +20,7 @@ dependencies {
 	api(platform("org.jetbrains.kotlinx:kotlinx-coroutines-bom:1.10.2"))
 	api(platform("org.jetbrains.kotlinx:kotlinx-serialization-bom:1.9.0"))
 	api(platform("org.junit:junit-bom:5.13.3"))
-	api(platform("org.mockito:mockito-bom:${mockitoVersion}"))
+	api(platform("org.mockito:mockito-bom:5.18.0"))
 	api(platform("tools.jackson:jackson-bom:3.0.0-rc5"))
 
 	constraints {
