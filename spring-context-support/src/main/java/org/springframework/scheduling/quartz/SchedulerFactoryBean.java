@@ -28,6 +28,8 @@ import org.jspecify.annotations.Nullable;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.quartz.SchedulerFactory;
+import org.quartz.core.QuartzScheduler;
+import org.quartz.core.QuartzSchedulerResources;
 import org.quartz.impl.RemoteScheduler;
 import org.quartz.impl.SchedulerRepository;
 import org.quartz.impl.StdSchedulerFactory;
@@ -165,7 +167,7 @@ public class SchedulerFactoryBean extends SchedulerAccessor implements FactoryBe
 
 	private @Nullable SchedulerFactory schedulerFactory;
 
-	private Class<? extends SchedulerFactory> schedulerFactoryClass = StdSchedulerFactory.class;
+	private Class<? extends SchedulerFactory> schedulerFactoryClass = LocalSchedulerFactory.class;
 
 	private @Nullable String schedulerName;
 
@@ -203,6 +205,8 @@ public class SchedulerFactoryBean extends SchedulerAccessor implements FactoryBe
 
 	private @Nullable Scheduler scheduler;
 
+	private @Nullable LocalDataSourceJobStore jobStore;
+
 
 	/**
 	 * Set an external Quartz {@link SchedulerFactory} instance to use.
@@ -223,11 +227,12 @@ public class SchedulerFactoryBean extends SchedulerAccessor implements FactoryBe
 
 	/**
 	 * Set the Quartz {@link SchedulerFactory} implementation to use.
-	 * <p>Default is the {@link StdSchedulerFactory} class, reading in the standard
-	 * {@code quartz.properties} from {@code quartz.jar}. For applying custom Quartz
-	 * properties, specify {@link #setConfigLocation "configLocation"} and/or
-	 * {@link #setQuartzProperties "quartzProperties"} etc on this local
-	 * {@code SchedulerFactoryBean} instance.
+	 * <p>Default is a Spring-internal subclass of the {@link StdSchedulerFactory}
+	 * class, reading in the standard {@code quartz.properties} from
+	 * {@code quartz.jar}. For applying custom Quartz properties,
+	 * specify {@link #setConfigLocation "configLocation"} and/or
+	 * {@link #setQuartzProperties "quartzProperties"} etc on this
+	 * local {@code SchedulerFactoryBean} instance.
 	 * @see org.quartz.impl.StdSchedulerFactory
 	 * @see #setConfigLocation
 	 * @see #setQuartzProperties
@@ -508,8 +513,9 @@ public class SchedulerFactoryBean extends SchedulerAccessor implements FactoryBe
 	private SchedulerFactory prepareSchedulerFactory() throws SchedulerException, IOException {
 		SchedulerFactory schedulerFactory = this.schedulerFactory;
 		if (schedulerFactory == null) {
-			// Create local SchedulerFactory instance (typically a StdSchedulerFactory)
-			schedulerFactory = BeanUtils.instantiateClass(this.schedulerFactoryClass);
+			// Create local SchedulerFactory instance (typically a LocalSchedulerFactory)
+			schedulerFactory = (this.schedulerFactoryClass == LocalSchedulerFactory.class ?
+					new LocalSchedulerFactory() : BeanUtils.instantiateClass(this.schedulerFactoryClass));
 			if (schedulerFactory instanceof StdSchedulerFactory stdSchedulerFactory) {
 				initSchedulerFactory(stdSchedulerFactory);
 			}
@@ -778,6 +784,9 @@ public class SchedulerFactoryBean extends SchedulerAccessor implements FactoryBe
 	@Override
 	public void start() throws SchedulingException {
 		if (this.scheduler != null) {
+			if (this.jobStore != null) {
+				this.jobStore.initializeConnectionProvider();
+			}
 			try {
 				startScheduler(this.scheduler, this.startupDelay);
 			}
@@ -826,6 +835,18 @@ public class SchedulerFactoryBean extends SchedulerAccessor implements FactoryBe
 		if (this.scheduler != null) {
 			logger.info("Shutting down Quartz Scheduler");
 			this.scheduler.shutdown(this.waitForJobsToCompleteOnShutdown);
+		}
+	}
+
+
+	private class LocalSchedulerFactory extends StdSchedulerFactory {
+
+		@Override
+		protected Scheduler instantiate(QuartzSchedulerResources rsrcs, QuartzScheduler qs) {
+			if (rsrcs.getJobStore() instanceof LocalDataSourceJobStore ldsjs) {
+				SchedulerFactoryBean.this.jobStore = ldsjs;
+			}
+			return super.instantiate(rsrcs, qs);
 		}
 	}
 
