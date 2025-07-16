@@ -17,6 +17,10 @@
 package org.springframework.build;
 
 import org.gradle.api.Project;
+import org.gradle.api.tasks.SourceSet;
+import org.gradle.api.tasks.SourceSetContainer;
+import org.jetbrains.dokka.gradle.DokkaExtension;
+import org.jetbrains.dokka.gradle.DokkaPlugin;
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget;
 import org.jetbrains.kotlin.gradle.dsl.KotlinVersion;
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile;
@@ -28,8 +32,14 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile;
 public class KotlinConventions {
 
 	void apply(Project project) {
-		project.getPlugins().withId("org.jetbrains.kotlin.jvm",
-				(plugin) -> project.getTasks().withType(KotlinCompile.class, this::configure));
+		project.getPlugins().withId("org.jetbrains.kotlin.jvm", _ -> {
+			project.getTasks().withType(KotlinCompile.class, this::configure);
+			if (project.getLayout().getProjectDirectory().dir("src/main/kotlin").getAsFile().exists()) {
+				project.getPlugins().apply(DokkaPlugin.class);
+				project.getExtensions().configure(DokkaExtension.class, dokka -> configure(project, dokka));
+				project.project(":framework-api").getDependencies().add("dokka", project);
+			}
+		});
 	}
 
 	private void configure(KotlinCompile compile) {
@@ -46,6 +56,36 @@ public class KotlinConventions {
 					"-Xjdk-release=17", // Needed due to https://youtrack.jetbrains.com/issue/KT-49746
 					"-Xannotation-default-target=param-property" // Upcoming default, see https://youtrack.jetbrains.com/issue/KT-73255
 			);
+		});
+	}
+
+	private void configure(Project project, DokkaExtension dokka) {
+		dokka.getDokkaSourceSets().forEach(sourceSet -> {
+			sourceSet.getSourceRoots().setFrom(project.file("src/main/kotlin"));
+			sourceSet.getClasspath()
+					.from(project.getExtensions()
+							.getByType(SourceSetContainer.class)
+							.getByName(SourceSet.MAIN_SOURCE_SET_NAME)
+							.getOutput());
+			var externalDocumentationLinks = sourceSet.getExternalDocumentationLinks();
+			externalDocumentationLinks.register("spring-framework", spec -> {
+				spec.url("https://docs.spring.io/spring-framework/docs/current/javadoc-api/");
+				spec.packageListUrl("https://docs.spring.io/spring-framework/docs/current/javadoc-api/element-list");
+			});
+			externalDocumentationLinks.register("reactor-core", spec ->
+					spec.url("https://projectreactor.io/docs/core/release/api/"));
+			externalDocumentationLinks.register("reactive-streams", spec ->
+					spec.url("https://www.reactive-streams.org/reactive-streams-1.0.3-javadoc/"));
+			externalDocumentationLinks.register("kotlinx-coroutines", spec ->
+					spec.url("https://kotlinlang.org/api/kotlinx.coroutines/"));
+			externalDocumentationLinks.register("hamcrest", spec ->
+					spec.url("https://javadoc.io/doc/org.hamcrest/hamcrest/2.1/"));
+			externalDocumentationLinks.register("jakarta-servlet", spec -> {
+				spec.url("https://javadoc.io/doc/jakarta.servlet/jakarta.servlet-api/latest/");
+				spec.packageListUrl("https://javadoc.io/doc/jakarta.servlet/jakarta.servlet-api/latest/element-list");
+			});
+			externalDocumentationLinks.register("rsocket-core", spec ->
+					spec.url("https://javadoc.io/static/io.rsocket/rsocket-core/1.1.1/"));
 		});
 	}
 

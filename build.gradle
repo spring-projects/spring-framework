@@ -2,7 +2,7 @@ plugins {
 	id 'io.freefair.aspectj' version '8.13.1' apply false
 	// kotlinVersion is managed in gradle.properties
 	id 'org.jetbrains.kotlin.plugin.serialization' version "${kotlinVersion}" apply false
-	id 'org.jetbrains.dokka' version '1.9.20'
+	id 'org.jetbrains.dokka'
 	id 'com.github.bjornvester.xjc' version '1.8.2' apply false
 	id 'io.github.goooler.shadow' version '8.1.8' apply false
 	id 'me.champeau.jmh' version '0.7.2' apply false

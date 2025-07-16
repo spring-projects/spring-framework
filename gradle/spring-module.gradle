@@ -15,11 +15,6 @@ dependencies {
 	jmh 'net.sf.jopt-simple:jopt-simple'
 }
 
-pluginManager.withPlugin("kotlin") {
-	apply plugin: "org.jetbrains.dokka"
-	apply from: "${rootDir}/gradle/docs-dokka.gradle"
-}
-
 jmh {
 	duplicateClassesStrategy = DuplicatesStrategy.EXCLUDE
 }
