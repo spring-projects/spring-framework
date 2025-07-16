@@ -47,7 +47,7 @@ dependencies {
 		api("commons-io:commons-io:2.15.0")
 		api("commons-logging:commons-logging:1.3.5")
 		api("de.bechte.junit:junit-hierarchicalcontextrunner:4.12.2")
-		api("io.mockk:mockk:1.13.4")
+		api("io.mockk:mockk:1.13.17")
 		api("io.projectreactor.tools:blockhound:1.0.8.RELEASE")
 		api("io.r2dbc:r2dbc-h2:1.0.0.RELEASE")
 		api("io.r2dbc:r2dbc-spi-test:1.0.0.RELEASE")
