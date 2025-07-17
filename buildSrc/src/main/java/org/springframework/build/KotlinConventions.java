@@ -32,7 +32,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile;
 public class KotlinConventions {
 
 	void apply(Project project) {
-		project.getPlugins().withId("org.jetbrains.kotlin.jvm", _ -> {
+		project.getPlugins().withId("org.jetbrains.kotlin.jvm", plugin -> {
 			project.getTasks().withType(KotlinCompile.class, this::configure);
 			if (project.getLayout().getProjectDirectory().dir("src/main/kotlin").getAsFile().exists()) {
 				project.getPlugins().apply(DokkaPlugin.class);
