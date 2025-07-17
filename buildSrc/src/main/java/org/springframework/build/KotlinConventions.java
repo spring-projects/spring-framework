@@ -68,9 +68,10 @@ public class KotlinConventions {
 							.getByName(SourceSet.MAIN_SOURCE_SET_NAME)
 							.getOutput());
 			var externalDocumentationLinks = sourceSet.getExternalDocumentationLinks();
+			var springVersion = project.getVersion();
 			externalDocumentationLinks.register("spring-framework", spec -> {
-				spec.url("https://docs.spring.io/spring-framework/docs/current/javadoc-api/");
-				spec.packageListUrl("https://docs.spring.io/spring-framework/docs/current/javadoc-api/element-list");
+				spec.url("https://docs.spring.io/spring-framework/docs/" + springVersion + "/javadoc-api/");
+				spec.packageListUrl("https://docs.spring.io/spring-framework/docs/" + springVersion + "/javadoc-api/element-list");
 			});
 			externalDocumentationLinks.register("reactor-core", spec ->
 					spec.url("https://projectreactor.io/docs/core/release/api/"));
