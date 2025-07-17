@@ -53,7 +53,7 @@ public final class GeneratedMethod {
 		MethodSpec.Builder builder = MethodSpec.methodBuilder(this.name);
 		method.accept(builder);
 		this.methodSpec = builder.build();
-		Assert.state(this.name.equals(this.methodSpec.name),
+		Assert.state(this.name.equals(this.methodSpec.name()),
 				"'method' consumer must not change the generated method name");
 	}
 

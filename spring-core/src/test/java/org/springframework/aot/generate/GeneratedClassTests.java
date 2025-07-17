@@ -112,8 +112,8 @@ class GeneratedClassTests {
 	@Test
 	void generateJavaFileIncludesDeclaredClasses() {
 		GeneratedClass generatedClass = createGeneratedClass(TEST_CLASS_NAME);
-		generatedClass.getOrAdd("First", type -> type.modifiers.add(Modifier.STATIC));
-		generatedClass.getOrAdd("Second", type -> type.modifiers.add(Modifier.PRIVATE));
+		generatedClass.getOrAdd("First", type -> type.addModifiers(Modifier.STATIC));
+		generatedClass.getOrAdd("Second", type -> type.addModifiers(Modifier.PRIVATE));
 		assertThat(generatedClass.generateJavaFile().toString())
 				.contains("static class First").contains("private class Second");
 	}

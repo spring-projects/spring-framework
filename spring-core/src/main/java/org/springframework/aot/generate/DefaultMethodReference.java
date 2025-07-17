@@ -26,6 +26,7 @@ import org.jspecify.annotations.Nullable;
 import org.springframework.javapoet.ClassName;
 import org.springframework.javapoet.CodeBlock;
 import org.springframework.javapoet.MethodSpec;
+import org.springframework.javapoet.ParameterSpec;
 import org.springframework.javapoet.TypeName;
 import org.springframework.util.Assert;
 
@@ -51,7 +52,7 @@ public class DefaultMethodReference implements MethodReference {
 
 	@Override
 	public CodeBlock toCodeBlock() {
-		String methodName = this.method.name;
+		String methodName = this.method.name();
 		if (isStatic()) {
 			Assert.state(this.declaringClass != null, "Static method reference must define a declaring class");
 			return CodeBlock.of("$T::$L", this.declaringClass, methodName);
@@ -65,7 +66,7 @@ public class DefaultMethodReference implements MethodReference {
 	public CodeBlock toInvokeCodeBlock(ArgumentCodeGenerator argumentCodeGenerator,
 			@Nullable ClassName targetClassName) {
 
-		String methodName = this.method.name;
+		String methodName = this.method.name();
 		CodeBlock.Builder code = CodeBlock.builder();
 		if (isStatic()) {
 			Assert.state(this.declaringClass != null, "Static method reference must define a declaring class");
@@ -96,8 +97,8 @@ public class DefaultMethodReference implements MethodReference {
 	 */
 	protected void addArguments(CodeBlock.Builder code, ArgumentCodeGenerator argumentCodeGenerator) {
 		List<CodeBlock> arguments = new ArrayList<>();
-		TypeName[] argumentTypes = this.method.parameters.stream()
-				.map(parameter -> parameter.type).toArray(TypeName[]::new);
+		TypeName[] argumentTypes = this.method.parameters().stream()
+				.map(ParameterSpec::type).toArray(TypeName[]::new);
 		for (int i = 0; i < argumentTypes.length; i++) {
 			TypeName argumentType = argumentTypes[i];
 			CodeBlock argumentCode = argumentCodeGenerator.generateCode(argumentType);
@@ -115,12 +116,12 @@ public class DefaultMethodReference implements MethodReference {
 	}
 
 	private boolean isStatic() {
-		return this.method.modifiers.contains(Modifier.STATIC);
+		return this.method.modifiers().contains(Modifier.STATIC);
 	}
 
 	@Override
 	public String toString() {
-		String methodName = this.method.name;
+		String methodName = this.method.name();
 		if (isStatic()) {
 			return this.declaringClass + "::" + methodName;
 		}

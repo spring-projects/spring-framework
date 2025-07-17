@@ -48,8 +48,8 @@ public interface GeneratedFiles {
 	 * @param javaFile the java file to add
 	 */
 	default void addSourceFile(JavaFile javaFile) {
-		validatePackage(javaFile.packageName, javaFile.typeSpec.name);
-		String className = javaFile.packageName + "." + javaFile.typeSpec.name;
+		validatePackage(javaFile.packageName(), javaFile.typeSpec().name());
+		String className = javaFile.packageName() + "." + javaFile.typeSpec().name();
 		addSourceFile(className, javaFile::writeTo);
 	}
 

@@ -119,7 +119,7 @@ class GeneratedMethodsTests {
 		this.methods.add("springBeans", methodSpecCustomizer);
 		this.methods.add("springContext", methodSpecCustomizer);
 		List<String> names = new ArrayList<>();
-		this.methods.doWithMethodSpecs(methodSpec -> names.add(methodSpec.name));
+		this.methods.doWithMethodSpecs(methodSpec -> names.add(methodSpec.name()));
 		assertThat(names).containsExactly("springBeans", "springContext");
 	}
 

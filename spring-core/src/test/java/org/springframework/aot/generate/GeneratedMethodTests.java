@@ -53,7 +53,7 @@ class GeneratedMethodTests {
 	@Test
 	void generateMethodSpecReturnsMethodSpec() {
 		GeneratedMethod generatedMethod = create(method -> method.addJavadoc("Test"));
-		assertThat(generatedMethod.getMethodSpec().javadoc).asString().contains("Test");
+		assertThat(generatedMethod.getMethodSpec().javadoc()).asString().contains("Test");
 	}
 
 	@Test

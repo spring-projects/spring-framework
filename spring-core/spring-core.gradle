@@ -14,7 +14,7 @@ multiRelease {
 	releaseVersions 21, 24
 }
 
-def javapoetVersion = "1.13.0"
+def javapoetVersion = "0.7.0"
 def objenesisVersion = "3.4"
 
 configurations {
@@ -30,12 +30,12 @@ tasks.register('javapoetRepackJar', ShadowJar) {
 	archiveBaseName = 'spring-javapoet-repack'
 	archiveVersion = javapoetVersion
 	configurations = [project.configurations.javapoet]
-	relocate('com.squareup.javapoet', 'org.springframework.javapoet')
+	relocate('com.palantir.javapoet', 'org.springframework.javapoet')
 }
 
 tasks.register('javapoetSource', ShadowSource) {
 	configurations = [project.configurations.javapoet]
-	relocate('com.squareup.javapoet', 'org.springframework.javapoet')
+	relocate('com.palantir.javapoet', 'org.springframework.javapoet')
 	outputDirectory = file("build/shadow-source/javapoet")
 }
 
@@ -67,7 +67,7 @@ tasks.register('objenesisSourceJar', Jar) {
 }
 
 dependencies {
-	javapoet("com.squareup:javapoet:${javapoetVersion}@jar")
+	javapoet("com.palantir.javapoet:javapoet:${javapoetVersion}@jar")
 	objenesis("org.objenesis:objenesis:${objenesisVersion}@jar")
 	api(files(javapoetRepackJar))
 	api(files(objenesisRepackJar))
