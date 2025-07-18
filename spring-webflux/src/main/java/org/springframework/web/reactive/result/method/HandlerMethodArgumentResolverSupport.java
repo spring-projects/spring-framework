@@ -140,7 +140,7 @@ public abstract class HandlerMethodArgumentResolverSupport implements HandlerMet
 		return checkAnnotatedParamNoReactiveWrapperCommon(parameter, annotation, typePredicate);
 	}
 
-	private  <A extends Annotation> boolean checkAnnotatedParamNoReactiveWrapperCommon(
+	private <A extends Annotation> boolean checkAnnotatedParamNoReactiveWrapperCommon(
 			MethodParameter parameter, A annotation, BiPredicate<A, Class<?>> typePredicate) {
 
 		parameter = parameter.nestedIfOptional();

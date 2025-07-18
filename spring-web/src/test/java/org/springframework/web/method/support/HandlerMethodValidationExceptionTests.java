@@ -16,20 +16,11 @@
 
 package org.springframework.web.method.support;
 
-import java.lang.annotation.*;
-import java.lang.reflect.Method;
-import java.util.Arrays;
-import java.util.List;
-import java.util.StringJoiner;
-import java.util.function.Consumer;
-import java.util.function.Predicate;
-
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
 import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
-
 import org.springframework.beans.BeanUtils;
 import org.springframework.context.MessageSourceResolvable;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
@@ -52,6 +43,18 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.method.annotation.HandlerMethodValidationException;
 import org.springframework.web.testfixture.method.ResolvableMethod;
+
+import java.lang.annotation.Annotation;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.List;
+import java.util.StringJoiner;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
