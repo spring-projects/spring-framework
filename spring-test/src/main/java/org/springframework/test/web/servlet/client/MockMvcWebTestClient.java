@@ -88,7 +88,7 @@ public interface MockMvcWebTestClient {
 	 * to initialize {@link MockMvc}.
 	 */
 	static ControllerSpec bindToController(Object... controllers) {
-		return new StandaloneMockMvcSpec(controllers);
+		return new MockMvcWebTestClientSpecs.StandaloneMockMvcSpec(controllers);
 	}
 
 	/**
@@ -100,7 +100,7 @@ public interface MockMvcWebTestClient {
 	 * @since 6.2
 	 */
 	static RouterFunctionSpec bindToRouterFunction(RouterFunction<?>... routerFunctions) {
-		return new RouterFunctionMockMvcSpec(routerFunctions);
+		return new MockMvcWebTestClientSpecs.RouterFunctionMockMvcSpec(routerFunctions);
 	}
 
 	/**
@@ -112,7 +112,7 @@ public interface MockMvcWebTestClient {
 	 * to initialize {@code MockMvc}.
 	 */
 	static MockMvcServerSpec<?> bindToApplicationContext(WebApplicationContext context) {
-		return new ApplicationContextMockMvcSpec(context);
+		return new MockMvcWebTestClientSpecs.ApplicationContextMockMvcSpec(context);
 	}
 
 	/**
