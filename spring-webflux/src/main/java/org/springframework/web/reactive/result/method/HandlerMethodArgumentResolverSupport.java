@@ -118,6 +118,31 @@ public abstract class HandlerMethodArgumentResolverSupport implements HandlerMet
 			return false;
 		}
 
+		return checkAnnotatedParamNoReactiveWrapperCommon(parameter, annotation, typePredicate);
+	}
+
+
+	/**
+	 * Evaluate the {@code Predicate} on the method parameter type if it has the
+	 * given annotation, either directly declared or as a meta-annotation,
+	 * nesting within {@link java.util.Optional} if necessary,
+	 * but raise an {@code IllegalStateException} if the same matches the generic
+	 * type within a reactive type wrapper.
+	 */
+	protected <A extends Annotation> boolean checkNestedAnnotatedParamNoReactiveWrapper(
+			MethodParameter parameter, Class<A> annotationType, BiPredicate<A, Class<?>> typePredicate) {
+
+		A annotation = parameter.getParameterNestedAnnotation(annotationType);
+		if (annotation == null) {
+			return false;
+		}
+
+		return checkAnnotatedParamNoReactiveWrapperCommon(parameter, annotation, typePredicate);
+	}
+
+	private  <A extends Annotation> boolean checkAnnotatedParamNoReactiveWrapperCommon(
+			MethodParameter parameter, A annotation, BiPredicate<A, Class<?>> typePredicate) {
+
 		parameter = parameter.nestedIfOptional();
 		Class<?> type = parameter.getNestedParameterType();
 

@@ -65,7 +65,7 @@ public class RequestHeaderMethodArgumentResolver extends AbstractNamedValueSyncA
 
 	@Override
 	public boolean supportsParameter(MethodParameter param) {
-		return checkAnnotatedParamNoReactiveWrapper(param, RequestHeader.class, this::singleParam);
+		return checkNestedAnnotatedParamNoReactiveWrapper(param, RequestHeader.class, this::singleParam);
 	}
 
 	private boolean singleParam(RequestHeader annotation, Class<?> type) {
@@ -74,7 +74,7 @@ public class RequestHeaderMethodArgumentResolver extends AbstractNamedValueSyncA
 
 	@Override
 	protected NamedValueInfo createNamedValueInfo(MethodParameter parameter) {
-		RequestHeader ann = parameter.getParameterAnnotation(RequestHeader.class);
+		RequestHeader ann = parameter.getParameterNestedAnnotation(RequestHeader.class);
 		Assert.state(ann != null, "No RequestHeader annotation");
 		return new RequestHeaderNamedValueInfo(ann);
 	}
