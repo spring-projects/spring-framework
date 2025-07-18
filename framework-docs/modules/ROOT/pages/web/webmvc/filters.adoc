@@ -15,6 +15,35 @@ Servlet filters can be configured in the `web.xml` configuration file or using S
 If you are using Spring Boot, you can
 {spring-boot-docs}/how-to/webserver.html#howto.webserver.add-servlet-filter-listener.spring-bean[declare them as beans and configure them as part of your application].
 
+In addition to the built-in filters, you can also create custom filters by implementing the standard
+`javax.servlet.Filter` interface or extending one of Spring's convenient base classes:
+
+* `GenericFilterBean` – Useful when you need access to Spring-managed beans or the application context.
+* `OncePerRequestFilter` – Ensures a single execution per request, even for asynchronous or error dispatches.
+
+These base classes simplify filter development and offer integration with Spring's `ApplicationContext`.
+
+For example:
+
+[source,java]
+----
+public class MyFilter extends OncePerRequestFilter {
+
+    @Override
+    protected void doFilterInternal(HttpServletRequest request,
+                                    HttpServletResponse response,
+                                    FilterChain filterChain)
+                                    throws ServletException, IOException {
+        // Pre-processing logic
+        System.out.println("Processing request: " + request.getRequestURI());
+
+        filterChain.doFilter(request, response);
+
+        // Post-processing logic
+    }
+}
+----
+
 
 [[filters-http-put]]
 == Form Data
