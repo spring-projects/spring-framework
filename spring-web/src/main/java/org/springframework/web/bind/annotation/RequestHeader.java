@@ -41,7 +41,7 @@ import org.springframework.core.annotation.AliasFor;
  * @see RequestParam
  * @see CookieValue
  */
-@Target(ElementType.PARAMETER)
+@Target({ ElementType.PARAMETER, ElementType.ANNOTATION_TYPE })
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 public @interface RequestHeader {

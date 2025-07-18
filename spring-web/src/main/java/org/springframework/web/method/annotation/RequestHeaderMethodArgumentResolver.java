@@ -61,14 +61,14 @@ public class RequestHeaderMethodArgumentResolver extends AbstractNamedValueMetho
 
 	@Override
 	public boolean supportsParameter(MethodParameter parameter) {
-		return (parameter.hasParameterAnnotation(RequestHeader.class) &&
+		return (parameter.hasParameterNestedAnnotation(RequestHeader.class) &&
 				!Map.class.isAssignableFrom(parameter.nestedIfOptional().getNestedParameterType())) &&
 				!HttpHeaders.class.isAssignableFrom(parameter.nestedIfOptional().getNestedParameterType());
 	}
 
 	@Override
 	protected NamedValueInfo createNamedValueInfo(MethodParameter parameter) {
-		RequestHeader ann = parameter.getParameterAnnotation(RequestHeader.class);
+		RequestHeader ann = parameter.getParameterNestedAnnotation(RequestHeader.class);
 		Assert.state(ann != null, "No RequestHeader annotation");
 		return new RequestHeaderNamedValueInfo(ann);
 	}

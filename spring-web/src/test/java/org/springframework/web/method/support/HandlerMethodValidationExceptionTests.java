@@ -16,7 +16,7 @@
 
 package org.springframework.web.method.support;
 
-import java.lang.annotation.Annotation;
+import java.lang.annotation.*;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
@@ -68,7 +68,7 @@ class HandlerMethodValidationExceptionTests {
 
 
 	private final HandlerMethod handlerMethod = handlerMethod(new ValidController(),
-			controller -> controller.handle(person, person, person, List.of(), person, "", "", "", "", "", ""));
+			controller -> controller.handle(person, person, person, List.of(), person, "", "", "", "", "", "", ""));
 
 	private final TestVisitor visitor = new TestVisitor();
 
@@ -87,7 +87,7 @@ class HandlerMethodValidationExceptionTests {
 				@ModelAttribute: modelAttribute1, @ModelAttribute: modelAttribute2, \
 				@RequestBody: requestBody, @RequestBody: requestBodyList, @RequestPart: requestPart, \
 				@RequestParam: requestParam1, @RequestParam: requestParam2, \
-				@RequestHeader: header, @PathVariable: pathVariable, \
+				@RequestHeader: header, @RequestHeader: nestedAnnotationHeader, @PathVariable: pathVariable, \
 				@CookieValue: cookie, @MatrixVariable: matrixVariable""");
 	}
 
@@ -103,7 +103,7 @@ class HandlerMethodValidationExceptionTests {
 				Other: modelAttribute1, @ModelAttribute: modelAttribute2, \
 				@RequestBody: requestBody, @RequestBody: requestBodyList, @RequestPart: requestPart, \
 				Other: requestParam1, @RequestParam: requestParam2, \
-				@RequestHeader: header, @PathVariable: pathVariable, \
+				@RequestHeader: header, @RequestHeader: nestedAnnotationHeader, @PathVariable: pathVariable, \
 				@CookieValue: cookie, @MatrixVariable: matrixVariable""");
 	}
 
@@ -161,11 +161,17 @@ class HandlerMethodValidationExceptionTests {
 				@Size(min = 5) String requestParam1,
 				@Size(min = 5) @RequestParam String requestParam2,
 				@Size(min = 5) @RequestHeader String header,
+				@Size(min = 5) @HeaderRequestHeader String nestedAnnotationHeader,
 				@Size(min = 5) @PathVariable String pathVariable,
 				@Size(min = 5) @CookieValue String cookie,
 				@Size(min = 5) @MatrixVariable String matrixVariable) {
 		}
 
+		@Target(ElementType.PARAMETER)
+		@Retention(RetentionPolicy.RUNTIME)
+		@RequestHeader(name = "header")
+		private @interface HeaderRequestHeader {
+		}
 	}
 
 

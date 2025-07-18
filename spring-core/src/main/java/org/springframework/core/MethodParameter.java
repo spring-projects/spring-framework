@@ -40,6 +40,8 @@ import kotlin.reflect.KParameter;
 import kotlin.reflect.jvm.ReflectJvmMapping;
 import org.jspecify.annotations.Nullable;
 
+import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.core.annotation.MergedAnnotations;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
@@ -651,12 +653,43 @@ public class MethodParameter {
 	}
 
 	/**
+	 * Return the parameter annotation of the given type, if available,
+	 * either directly declared or as a meta-annotation.
+	 * @param annotationType the annotation type to look for
+	 * @return the annotation object, or {@code null} if not found
+	 */
+	public <A extends Annotation> @Nullable A getParameterNestedAnnotation(Class<A> annotationType) {
+		A annotation = getParameterAnnotation(annotationType);
+		if (annotation != null) {
+			return annotation;
+		}
+		Annotation[] annotationsToSearch = getParameterAnnotations();
+		for (Annotation toSearch : annotationsToSearch) {
+			annotation = AnnotationUtils.findAnnotation(toSearch.annotationType(), annotationType);
+			if (annotation != null) {
+				return MergedAnnotations.from(toSearch).get(annotationType).synthesize();
+			}
+		}
+		return null;
+	}
+
+	/**
 	 * Return whether the parameter is declared with the given annotation type.
 	 * @param annotationType the annotation type to look for
 	 * @see #getParameterAnnotation(Class)
 	 */
 	public <A extends Annotation> boolean hasParameterAnnotation(Class<A> annotationType) {
 		return (getParameterAnnotation(annotationType) != null);
+	}
+
+	/**
+	 * Return whether the parameter is declared with the given annotation type,
+	 * either directly or as a meta-annotation.
+	 * @param annotationType the annotation type to look for
+	 * @see #getParameterNestedAnnotation(Class)
+	 */
+	public <A extends Annotation> boolean hasParameterNestedAnnotation(Class<A> annotationType) {
+		return getParameterNestedAnnotation(annotationType) != null;
 	}
 
 	/**

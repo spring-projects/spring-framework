@@ -155,7 +155,7 @@ public class HandlerMethodValidationException extends ResponseStatusException im
 				}
 				continue;
 			}
-			RequestHeader requestHeader = param.getParameterAnnotation(RequestHeader.class);
+			RequestHeader requestHeader = param.getParameterNestedAnnotation(RequestHeader.class);
 			if (requestHeader != null) {
 				visitor.requestHeader(requestHeader, result);
 				continue;
