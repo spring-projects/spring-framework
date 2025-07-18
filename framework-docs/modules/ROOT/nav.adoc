@@ -355,6 +355,7 @@
 *** xref:testing/testcontext-framework/support-classes.adoc[]
 *** xref:testing/testcontext-framework/aot.adoc[]
 ** xref:testing/webtestclient.adoc[]
+** xref:testing/resttestclient.adoc[]
 ** xref:testing/mockmvc.adoc[]
 *** xref:testing/mockmvc/overview.adoc[]
 *** xref:testing/mockmvc/setup-options.adoc[]
