@@ -79,12 +79,18 @@ public final class ResponseCookie extends HttpCookie {
 
 
 	/**
-	 * Return the cookie "Max-Age" attribute in seconds.
-	 * <p>A positive value indicates when the cookie expires relative to the
-	 * current time. A value of 0 means the cookie should expire immediately.
-	 * A negative value means no "Max-Age" attribute in which case the cookie
-	 * is removed when the browser is closed.
+	 * Return the cookie "Max-Age" attribute.
+	 * <p>
+	 * <ul>
+	 *   <li>Positive value: the cookie expires after the specified duration (persistent cookie).</li>
+	 *   <li>Zero: the cookie expires immediately (deleted).</li>
+	 *   <li>Negative value: no "Max-Age" attribute is sent, and the cookie becomes a <b>session cookie</b>
+	 *       (removed when the browser is closed).</li>
+	 * </ul>
+	 *
+	 * <p>See <a href="https://datatracker.ietf.org/doc/html/rfc6265#section-5.2.2">RFC 6265, Section 5.2.2</a>.
 	 */
+
 	public Duration getMaxAge() {
 		return this.maxAge;
 	}
@@ -268,11 +274,15 @@ public final class ResponseCookie extends HttpCookie {
 
 		/**
 		 * Set the cookie "Max-Age" attribute.
+		 * <p>
+		 * <ul>
+		 *   <li>Positive value: the cookie expires after the specified duration (persistent cookie).</li>
+		 *   <li>Zero: the cookie expires immediately (deleted).</li>
+		 *   <li>Negative value: no "Max-Age" attribute is sent, and the cookie becomes a <b>session cookie</b>
+		 *       (removed when the browser is closed).</li>
+		 * </ul>
 		 *
-		 * <p>A positive value indicates when the cookie should expire relative
-		 * to the current time. A value of 0 means the cookie should expire
-		 * immediately. A negative value results in no "Max-Age" attribute in
-		 * which case the cookie is removed when the browser is closed.
+		 * <p>See <a href="https://datatracker.ietf.org/doc/html/rfc6265#section-5.2.2">RFC 6265, Section 5.2.2</a>.
 		 */
 		ResponseCookieBuilder maxAge(Duration maxAge);
 
