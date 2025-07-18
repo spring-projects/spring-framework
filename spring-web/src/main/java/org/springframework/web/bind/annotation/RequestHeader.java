@@ -27,7 +27,8 @@ import org.springframework.core.annotation.AliasFor;
 /**
  * Annotation which indicates that a method parameter should be bound to a web request header.
  *
- * <p>Supported for annotated handler methods in Spring MVC and Spring WebFlux.
+ * <p>Supported for declared as a meta-annotation or directly annotated handler methods
+ * in Spring MVC and Spring WebFlux.
  *
  * <p>If the method parameter is {@link java.util.Map Map&lt;String, String&gt;},
  * {@link org.springframework.util.MultiValueMap MultiValueMap&lt;String, String&gt;},
@@ -36,6 +37,7 @@ import org.springframework.core.annotation.AliasFor;
  *
  * @author Juergen Hoeller
  * @author Sam Brannen
+ * @author Zakaria Shahen
  * @since 3.0
  * @see RequestMapping
  * @see RequestParam
