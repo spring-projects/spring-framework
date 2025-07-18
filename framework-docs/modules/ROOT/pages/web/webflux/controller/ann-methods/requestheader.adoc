@@ -63,3 +63,60 @@ TIP: Built-in support is available for converting a comma-separated string into 
 array or collection of strings or other types known to the type conversion system. For
 example, a method parameter annotated with `@RequestHeader("Accept")` may be of type
 `String` but also of `String[]` or `List<String>`.
+
+We can further remove our dependency on Spring Web MVC by making `@RequestHeader` a meta-annotation on our own annotation. The next example demonstrates how we could do so on an annotation named `@LanguageRequestHeader`.
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+@Target({ElementType.PARAMETER, ElementType.TYPE})
+@Retention(RetentionPolicy.RUNTIME)
+@Documented
+@RequestHeader(value = HttpHeaders.ACCEPT_LANGUAGE, defaultValue = "en")
+public @interface LanguageRequestHeader {}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes"]
+----
+@Target(AnnotationTarget.VALUE_PARAMETER, AnnotationTarget.TYPE)
+@Retention(AnnotationRetention.RUNTIME)
+@MustBeDocumented
+@RequestHeader(value = HttpHeaders.ACCEPT_LANGUAGE, defaultValue = "en")
+annotation class LanguageRequestHeader
+----
+======
+
+We have isolated our dependency on Spring MVC to a single file. Now that `@LanguageRequestHeader` has been specified, we can use it to signal to resolve our LanguageRequestHeader of the currently `Accept-Language` request header:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+@GetMapping("/product")
+public Flux<Product> fetchProduct(@LanguageRequestHeader String lang) {
+
+	// .. fetch product and return them ...
+}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes"]
+----
+@GetMapping("/product")
+fun fetchProduct(@LanguageRequestHeader lang: String): Flux<Product> {
+
+    // .. fetch product and return them ...
+}
+----
+======
+
+
+TIP: We can replace the lang parameter type from `String` to `java.util.Locale` or to our own Language enum, and Spring will handle the conversion of the header value.

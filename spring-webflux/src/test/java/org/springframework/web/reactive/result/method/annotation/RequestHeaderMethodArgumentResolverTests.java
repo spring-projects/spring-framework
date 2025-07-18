@@ -16,6 +16,10 @@
 
 package org.springframework.web.reactive.result.method.annotation;
 
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.lang.reflect.Method;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
@@ -68,6 +72,7 @@ class RequestHeaderMethodArgumentResolverTests {
 	private MethodParameter paramInstant;
 	private MethodParameter paramMono;
 	private MethodParameter primitivePlaceholderParam;
+	private MethodParameter paramWithNestedAnnotated;
 
 
 	@BeforeEach
@@ -92,6 +97,7 @@ class RequestHeaderMethodArgumentResolverTests {
 		this.paramInstant = new SynthesizingMethodParameter(method, 7);
 		this.paramMono = new SynthesizingMethodParameter(method, 8);
 		this.primitivePlaceholderParam = new SynthesizingMethodParameter(method, 9);
+		this.paramWithNestedAnnotated = new SynthesizingMethodParameter(method, 10);
 	}
 
 
@@ -103,6 +109,8 @@ class RequestHeaderMethodArgumentResolverTests {
 		assertThatIllegalStateException()
 				.isThrownBy(() -> this.resolver.supportsParameter(this.paramMono))
 				.withMessageStartingWith("RequestHeaderMethodArgumentResolver does not support reactive type wrapper");
+		assertThat(resolver.supportsParameter(paramWithNestedAnnotated)).as("String parameter with nested annotated not supported").isTrue();
+
 	}
 
 	@Test
@@ -265,6 +273,16 @@ class RequestHeaderMethodArgumentResolverTests {
 		assertThat(result).isEqualTo(Instant.from(DateTimeFormatter.RFC_1123_DATE_TIME.parse(rfc1123val)));
 	}
 
+	@Test
+	void resolveStringWithNestedAnnotatedArgument() {
+		String expected = "foo";
+		ServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/").header("name", expected));
+
+		Mono<Object> mono = this.resolver.resolveArgument(
+				this.paramWithNestedAnnotated, this.bindingContext, exchange);
+
+		assertThat(mono.block()).isEqualTo(expected);
+	}
 
 	@SuppressWarnings("unused")
 	public void params(
@@ -277,7 +295,14 @@ class RequestHeaderMethodArgumentResolverTests {
 			@RequestHeader("name") Date dateParam,
 			@RequestHeader("name") Instant instantParam,
 			@RequestHeader Mono<String> alsoNotSupported,
-			@RequestHeader(value = "${systemProperty}", required = false) int primitivePlaceholderParam) {
+			@RequestHeader(value = "${systemProperty}", required = false) int primitivePlaceholderParam,
+			@NameRequestHeader String param6) {
+	}
+
+	@Target(ElementType.PARAMETER)
+	@Retention(RetentionPolicy.RUNTIME)
+	@RequestHeader(name = "name", defaultValue = "bar")
+	private @interface NameRequestHeader {
 	}
 
 }

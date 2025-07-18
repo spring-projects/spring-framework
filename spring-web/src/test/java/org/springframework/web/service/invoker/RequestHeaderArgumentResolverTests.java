@@ -16,6 +16,10 @@
 
 package org.springframework.web.service.invoker;
 
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
@@ -57,6 +61,12 @@ class RequestHeaderArgumentResolverTests {
 		assertRequestHeaders("myHeader", "1", "2");
 	}
 
+	@Test
+	void doesNestedAnnotationNotOverrideAnnotationHeaders() {
+		this.service.executeWithAnnotationHeadersAndNestedAnnotation("2");
+		assertRequestHeaders("myHeader", "1", "2");
+	}
+
 	private void assertRequestHeaders(String key, String... values) {
 		List<String> actualValues = this.client.getRequestValues().getHeaders().get(key);
 		if (ObjectUtils.isEmpty(values)) {
@@ -76,6 +86,14 @@ class RequestHeaderArgumentResolverTests {
 		@HttpExchange(method = "GET", headers = "myHeader=1")
 		void executeWithAnnotationHeaders(@RequestHeader String myHeader);
 
+		@HttpExchange(method = "GET", headers = "myHeader=1")
+		void executeWithAnnotationHeadersAndNestedAnnotation(@MyHeader String myHeader);
+
 	}
 
+	@Target(ElementType.PARAMETER)
+	@Retention(RetentionPolicy.RUNTIME)
+	@RequestHeader(name = "myHeader")
+	private @interface MyHeader {
+	}
 }

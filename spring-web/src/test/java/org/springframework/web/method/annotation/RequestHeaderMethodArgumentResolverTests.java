@@ -16,6 +16,10 @@
 
 package org.springframework.web.method.annotation;
 
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.lang.reflect.Method;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
@@ -69,6 +73,7 @@ class RequestHeaderMethodArgumentResolverTests {
 	private MethodParameter paramUuid;
 	private MethodParameter paramUuidOptional;
 	private MethodParameter paramUuidPlaceholder;
+	private MethodParameter paramNestedAnnotation;
 
 	private MockHttpServletRequest servletRequest;
 
@@ -94,6 +99,7 @@ class RequestHeaderMethodArgumentResolverTests {
 		paramUuid = new SynthesizingMethodParameter(method, 9);
 		paramUuidOptional = new SynthesizingMethodParameter(method, 10);
 		paramUuidPlaceholder = new SynthesizingMethodParameter(method, 11);
+		paramNestedAnnotation = new SynthesizingMethodParameter(method, 12);
 
 		servletRequest = new MockHttpServletRequest();
 		webRequest = new ServletWebRequest(servletRequest, new MockHttpServletResponse());
@@ -113,6 +119,8 @@ class RequestHeaderMethodArgumentResolverTests {
 		assertThat(resolver.supportsParameter(paramNamedDefaultValueStringHeader)).as("String parameter not supported").isTrue();
 		assertThat(resolver.supportsParameter(paramNamedValueStringArray)).as("String array parameter not supported").isTrue();
 		assertThat(resolver.supportsParameter(paramNamedValueMap)).as("non-@RequestParam parameter supported").isFalse();
+		assertThat(resolver.supportsParameter(paramNestedAnnotation)).as("String parameter with nested annotation not supported").isTrue();
+
 	}
 
 	@Test
@@ -332,6 +340,16 @@ class RequestHeaderMethodArgumentResolverTests {
 		}
 	}
 
+	@Test
+	void resolveStringNestedAnnotationArgument() throws Exception {
+		String expected = "foo";
+		servletRequest.addHeader("name", expected);
+
+		Object result = resolver.resolveArgument(paramNestedAnnotation, null, webRequest, null);
+
+		assertThat(result).isEqualTo(expected);
+	}
+
 	void params(
 			@RequestHeader(name = "name", defaultValue = "bar") String param1,
 			@RequestHeader("name") String[] param2,
@@ -344,7 +362,15 @@ class RequestHeaderMethodArgumentResolverTests {
 			@RequestHeader("name") Instant instantParam,
 			@RequestHeader("name") UUID uuid,
 			@RequestHeader(name = "name", required = false) UUID uuidOptional,
-			@RequestHeader(name = "${systemProperty}") UUID uuidPlaceholder) {
+			@RequestHeader(name = "${systemProperty}") UUID uuidPlaceholder,
+			@NameRequestHeader String param7) {
+	}
+
+
+	@Target(ElementType.PARAMETER)
+	@Retention(RetentionPolicy.RUNTIME)
+	@RequestHeader(name = "name", defaultValue = "bar")
+	private @interface NameRequestHeader {
 	}
 
 }
