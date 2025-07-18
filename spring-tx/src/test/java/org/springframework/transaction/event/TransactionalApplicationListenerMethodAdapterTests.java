@@ -158,6 +158,13 @@ class TransactionalApplicationListenerMethodAdapterTests {
 	}
 
 	@Test
+	void withTransactionalAnnotationBeforeCommit() {
+		RestrictedTransactionalEventListenerFactory factory = new RestrictedTransactionalEventListenerFactory();
+		Method m = ReflectionUtils.findMethod(SampleEvents.class, "withTransactionalAnnotationBeforeCommit", String.class);
+		assertThatNoException().isThrownBy(() -> factory.createApplicationListener("test", SampleEvents.class, m));
+	}
+
+	@Test
 	void withTransactionalAnnotationOnEnclosingClass() {
 		RestrictedTransactionalEventListenerFactory factory = new RestrictedTransactionalEventListenerFactory();
 		Method m = ReflectionUtils.findMethod(SampleEvents.SampleEventsWithTransactionalAnnotation.class, "defaultPhase", String.class);
@@ -275,6 +282,11 @@ class TransactionalApplicationListenerMethodAdapterTests {
 		@TransactionalEventListener
 		@Async @Transactional(propagation = Propagation.REQUIRES_NEW)
 		public void withAsyncTransactionalAnnotation(String data) {
+		}
+
+		@TransactionalEventListener(phase = TransactionPhase.BEFORE_COMMIT)
+		@Transactional
+		public void withTransactionalAnnotationBeforeCommit(String data) {
 		}
 
 		@Transactional
