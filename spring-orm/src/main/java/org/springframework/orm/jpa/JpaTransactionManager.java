@@ -93,9 +93,9 @@ import org.springframework.util.CollectionUtils;
  *
  * <p>This transaction manager supports nested transactions via JDBC Savepoints.
  * The {@link #setNestedTransactionAllowed "nestedTransactionAllowed"} flag defaults
- * to {@code false} though, since nested transactions will just apply to the JDBC
+ * to {@code true} though, since nested transactions will just apply to the JDBC
  * Connection, not to the JPA EntityManager and its cached entity objects and related
- * context. You can manually set the flag to {@code true} if you want to use nested
+ * context. You can manually set the flag to {@code false} if you want to disallow nested
  * transactions for JDBC access code which participates in JPA transactions (provided
  * that your JDBC driver supports Savepoints). <i>Note that JPA itself does not support
  * nested transactions! Hence, do not expect JPA access code to semantically
