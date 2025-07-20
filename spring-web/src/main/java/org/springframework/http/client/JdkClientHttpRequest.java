@@ -25,6 +25,10 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.net.http.HttpTimeoutException;
+import java.net.http.HttpResponse.BodyHandler;
+import java.net.http.HttpResponse.BodySubscriber;
+import java.net.http.HttpResponse.BodySubscribers;
+import java.net.http.HttpResponse.ResponseInfo;
 import java.nio.ByteBuffer;
 import java.time.Duration;
 import java.util.Collections;
@@ -37,6 +41,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Flow;
 import java.util.concurrent.TimeUnit;
+import java.util.zip.GZIPInputStream;
 
 import org.jspecify.annotations.Nullable;
 
@@ -70,15 +75,18 @@ class JdkClientHttpRequest extends AbstractStreamingClientHttpRequest {
 
 	private final @Nullable Duration timeout;
 
+	private final boolean compressionEnabled;
+
 
 	public JdkClientHttpRequest(HttpClient httpClient, URI uri, HttpMethod method, Executor executor,
-			@Nullable Duration readTimeout) {
+			@Nullable Duration readTimeout, boolean compressionEnabled) {
 
 		this.httpClient = httpClient;
 		this.uri = uri;
 		this.method = method;
 		this.executor = executor;
 		this.timeout = readTimeout;
+		this.compressionEnabled = compressionEnabled;
 	}
 
 
@@ -98,7 +106,11 @@ class JdkClientHttpRequest extends AbstractStreamingClientHttpRequest {
 		CompletableFuture<HttpResponse<InputStream>> responseFuture = null;
 		try {
 			HttpRequest request = buildRequest(headers, body);
-			responseFuture = this.httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofInputStream());
+			if (compressionEnabled) {
+				responseFuture = this.httpClient.sendAsync(request, new DecompressingBodyHandler());
+			} else {
+				responseFuture = this.httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofInputStream());
+			}
 
 			if (this.timeout != null) {
 				TimeoutHandler timeoutHandler = new TimeoutHandler(responseFuture, this.timeout);
@@ -140,6 +152,10 @@ class JdkClientHttpRequest extends AbstractStreamingClientHttpRequest {
 
 	private HttpRequest buildRequest(HttpHeaders headers, @Nullable Body body) {
 		HttpRequest.Builder builder = HttpRequest.newBuilder().uri(this.uri);
+		
+		if (compressionEnabled) {
+			headers.add(HttpHeaders.ACCEPT_ENCODING, "gzip");
+		}
 
 		headers.forEach((headerName, headerValues) -> {
 			if (!DISALLOWED_HEADERS.contains(headerName.toLowerCase(Locale.ROOT))) {
@@ -266,6 +282,32 @@ class JdkClientHttpRequest extends AbstractStreamingClientHttpRequest {
 					super.close();
 				}
 			};
+		}
+	}
+
+	/**
+	 * Custom BodyHandler that checks the Content-Encoding header and applies the appropriate decompression algorithm.
+	 */
+	public static final class DecompressingBodyHandler implements BodyHandler<InputStream> {
+
+		@Override
+		public BodySubscriber<InputStream> apply(ResponseInfo responseInfo) {
+			String contentEncoding = responseInfo.headers().firstValue(HttpHeaders.CONTENT_ENCODING).orElse("");
+			if (contentEncoding.equalsIgnoreCase("gzip")) {
+				// If the content is gzipped, wrap the InputStream with a GZIPInputStream
+				return BodySubscribers.mapping(
+						BodySubscribers.ofInputStream(),
+						(InputStream is) -> {
+							try {
+								return new GZIPInputStream(is);
+							} catch (IOException e) {
+								throw new UncheckedIOException(e); // Propagate IOExceptions
+							}
+						});
+			} else {
+				// Otherwise, return a standard InputStream BodySubscriber
+				return BodySubscribers.ofInputStream();
+			}
 		}
 	}
 
