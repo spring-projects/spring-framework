@@ -64,7 +64,9 @@ array or collection of strings or other types known to the type conversion syste
 example, a method parameter annotated with `@RequestHeader("Accept")` can be of type
 `String` but also `String[]` or `List<String>`.
 
-We can further remove our dependency on Spring Web MVC by making `@RequestHeader` a meta-annotation on our own annotation. The next example demonstrates how we could do so on an annotation named `@LanguageRequestHeader`.
+
+We can use `@RequestHeader` as a meta-annotation, so you can create custom annotations for repeatedly used headers, like the `Accept-Language` header.
+The next example demonstrates how we could do this with an annotation named `@LanguageRequestHeader`:
 
 [tabs]
 ======
@@ -91,7 +93,7 @@ annotation class LanguageRequestHeader
 ----
 ======
 
-We have isolated our dependency on Spring MVC to a single file. Now that `@LanguageRequestHeader` has been specified, we can use it to signal to resolve our LanguageRequestHeader of the currently `Accept-Language` request header:
+Now that `@LanguageRequestHeader` has been specified, we can use it to signal Spring to resolve our `@LanguageRequestHeader` from the current `Accept-Language` request header:
 
 [tabs]
 ======
@@ -119,4 +121,4 @@ fun fetchProduct(@LanguageRequestHeader lang: String): List<Product> {
 ======
 
 
-TIP: We can replace the lang parameter type from `String` to `java.util.Locale` or to our own Language enum, and Spring will handle the conversion of the header value.
+TIP: We can replace the lang parameter type from `String` to `java.util.Locale` or to your own Language enum, and Spring will handle the conversion of the header value. You may need to implement the xref:core/validation/convert.adoc[`Converter`] interface and register it.

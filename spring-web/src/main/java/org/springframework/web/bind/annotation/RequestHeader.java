@@ -37,7 +37,6 @@ import org.springframework.core.annotation.AliasFor;
  *
  * @author Juergen Hoeller
  * @author Sam Brannen
- * @author Zakaria Shahen
  * @since 3.0
  * @see RequestMapping
  * @see RequestParam
