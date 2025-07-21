@@ -98,9 +98,7 @@ import org.springframework.util.CollectionUtils;
  * context. You can manually set the flag to {@code false} if you want to disallow nested
  * transactions for JDBC access code which participates in JPA transactions (provided
  * that your JDBC driver supports Savepoints). <i>Note that JPA itself does not support
- * nested transactions! Furthermore, as most JPA providers (e.g., Hibernate)
- * do not support savepoints, {@code Propagation.NESTED} will not work and will typically
- * result in an exception. Hence, do not expect JPA access code to semantically
+ * nested transactions! Hence, do not expect JPA access code to semantically
  * participate in a nested transaction.</i>
  *
  * @author Juergen Hoeller
