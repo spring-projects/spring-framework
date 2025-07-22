@@ -27,7 +27,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * Tests for {@link StandaloneMockMvcSpec}.
+ * Tests for {@link StandaloneMockSpec}.
  *
  * @author Rob Worsnop
  */
@@ -35,13 +35,13 @@ public class StandaloneMockMvcSpecTests {
 
 	@Test
 	public void controller() {
-		new StandaloneMockMvcSpec(new MyController()).build()
+		new StandaloneMockSpec(new MyController()).build()
 				.get().uri("/")
 				.exchange()
 				.expectStatus().isOk()
 				.expectBody(String.class).isEqualTo("Success");
 
-		new StandaloneMockMvcSpec(new MyController()).build()
+		new StandaloneMockSpec(new MyController()).build()
 				.get().uri("")
 				.exchange()
 				.expectStatus().isOk()
@@ -50,7 +50,7 @@ public class StandaloneMockMvcSpecTests {
 
 	@Test
 	public void controllerAdvice() {
-		new StandaloneMockMvcSpec(new MyController())
+		new StandaloneMockSpec(new MyController())
 				.controllerAdvice(new MyControllerAdvice())
 				.build()
 				.get().uri("/exception")
@@ -61,7 +61,7 @@ public class StandaloneMockMvcSpecTests {
 
 	@Test
 	public void controllerAdviceWithClassArgument() {
-		new StandaloneMockMvcSpec(MyController.class)
+		new StandaloneMockSpec(MyController.class)
 				.controllerAdvice(MyControllerAdvice.class)
 				.build()
 				.get().uri("/exception")

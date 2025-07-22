@@ -28,15 +28,15 @@ import org.springframework.test.web.servlet.setup.ConfigurableMockMvcBuilder;
 import org.springframework.test.web.servlet.setup.MockMvcConfigurer;
 
 /**
- * Base class for implementations of {@link RestTestClient.MockMvcServerSpec}
+ * Base class for implementations of {@link RestTestClient.MockServerSpec}
  * that simply delegates to a {@link org.springframework.test.web.servlet.setup.ConfigurableMockMvcBuilder} supplied by
  * the concrete subclasses.
  *
  * @author Rob Worsnop
  * @param <B> the type of the concrete subclass spec
  */
-abstract class AbstractMockMvcServerSpec<B extends RestTestClient.MockMvcServerSpec<B>>
-		implements RestTestClient.MockMvcServerSpec<B> {
+abstract class AbstractMockServerSpec<B extends RestTestClient.MockServerSpec<B>>
+		implements RestTestClient.MockServerSpec<B> {
 
 	@Override
 	public <T extends B> T filters(Filter... filters) {

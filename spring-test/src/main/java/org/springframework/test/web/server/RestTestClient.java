@@ -145,7 +145,7 @@ public interface RestTestClient {
 	 * to initialize {@link MockMvc}.
 	 */
 	static ControllerSpec bindToController(Object... controllers) {
-		return new StandaloneMockMvcSpec(controllers);
+		return new StandaloneMockSpec(controllers);
 	}
 
 	/**
@@ -156,7 +156,7 @@ public interface RestTestClient {
 	 * to initialize {@link MockMvc}.
 	 */
 	static RouterFunctionSpec bindToRouterFunction(RouterFunction<?>... routerFunctions) {
-		return new RouterFunctionMockMvcSpec(routerFunctions);
+		return new RouterFunctionMockSpec(routerFunctions);
 	}
 
 	/**
@@ -167,8 +167,8 @@ public interface RestTestClient {
 	 * {@link org.springframework.test.web.servlet.setup.MockMvcBuilders#webAppContextSetup(WebApplicationContext)}
 	 * to initialize {@code MockMvc}.
 	 */
-	static MockMvcServerSpec<?> bindToApplicationContext(WebApplicationContext context) {
-		return new ApplicationContextMockMvcSpec(context);
+	static MockServerSpec<?> bindToApplicationContext(WebApplicationContext context) {
+		return new ApplicationContextMockSpec(context);
 	}
 
 
@@ -207,7 +207,7 @@ public interface RestTestClient {
 	/**
 	 * Specification for customizing controller configuration.
 	 */
-	interface ControllerSpec extends MockMvcServerSpec<ControllerSpec> {
+	interface ControllerSpec extends MockServerSpec<ControllerSpec> {
 		/**
 		 * Register {@link org.springframework.web.bind.annotation.ControllerAdvice}
 		 * <p>This is delegated to
@@ -342,7 +342,7 @@ public interface RestTestClient {
 	 * {@linkplain RouterFunction router functions}
 	 * directly, and a simple facade around {@link RouterFunctionMockMvcBuilder}.
 	 */
-	interface RouterFunctionSpec extends MockMvcServerSpec<RouterFunctionSpec> {
+	interface RouterFunctionSpec extends MockServerSpec<RouterFunctionSpec> {
 
 		/**
 		 * Set the message converters to use.
@@ -411,7 +411,7 @@ public interface RestTestClient {
 	 *
 	 * @param <B> a self reference to the builder type
 	 */
-	interface MockMvcServerSpec<B extends MockMvcServerSpec<B>> {
+	interface MockServerSpec<B extends MockServerSpec<B>> {
 		/**
 		 * Add a global filter.
 		 * <p>This is delegated to

@@ -36,12 +36,12 @@ import org.springframework.web.util.pattern.PathPatternParser;
  *
  * @author Rob Worsnop
  */
-class RouterFunctionMockMvcSpec extends AbstractMockMvcServerSpec<RouterFunctionSpec>
+class RouterFunctionMockSpec extends AbstractMockServerSpec<RouterFunctionSpec>
 		implements RouterFunctionSpec {
 
 	private final RouterFunctionMockMvcBuilder mockMvcBuilder;
 
-	RouterFunctionMockMvcSpec(RouterFunction<?>... routerFunctions) {
+	RouterFunctionMockSpec(RouterFunction<?>... routerFunctions) {
 		this.mockMvcBuilder = MockMvcBuilders.routerFunctions(routerFunctions);
 	}
 

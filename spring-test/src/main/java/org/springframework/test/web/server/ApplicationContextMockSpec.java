@@ -26,10 +26,10 @@ import org.springframework.web.context.WebApplicationContext;
  *
  * @author Rob Worsnop
  */
-class ApplicationContextMockMvcSpec extends AbstractMockMvcServerSpec<ApplicationContextMockMvcSpec> {
+class ApplicationContextMockSpec extends AbstractMockServerSpec<ApplicationContextMockSpec> {
 	private final DefaultMockMvcBuilder mockMvcBuilder;
 
-	public ApplicationContextMockMvcSpec(WebApplicationContext context) {
+	public ApplicationContextMockSpec(WebApplicationContext context) {
 		this.mockMvcBuilder = MockMvcBuilders.webAppContextSetup(context);
 	}
 

@@ -44,47 +44,47 @@ import org.springframework.web.util.pattern.PathPatternParser;
  *
  * @author Rob Worsnop
  */
-class StandaloneMockMvcSpec extends AbstractMockMvcServerSpec<RestTestClient.ControllerSpec>
+class StandaloneMockSpec extends AbstractMockServerSpec<RestTestClient.ControllerSpec>
 	implements RestTestClient.ControllerSpec {
 
 	private final StandaloneMockMvcBuilder mockMvcBuilder;
 
-	StandaloneMockMvcSpec(Object... controllers) {
+	StandaloneMockSpec(Object... controllers) {
 		this.mockMvcBuilder = MockMvcBuilders.standaloneSetup(controllers);
 	}
 
 	@Override
-	public StandaloneMockMvcSpec controllerAdvice(Object... controllerAdvice) {
+	public StandaloneMockSpec controllerAdvice(Object... controllerAdvice) {
 		this.mockMvcBuilder.setControllerAdvice(controllerAdvice);
 		return this;
 	}
 
 	@Override
-	public StandaloneMockMvcSpec messageConverters(HttpMessageConverter<?>... messageConverters) {
+	public StandaloneMockSpec messageConverters(HttpMessageConverter<?>... messageConverters) {
 		this.mockMvcBuilder.setMessageConverters(messageConverters);
 		return this;
 	}
 
 	@Override
-	public StandaloneMockMvcSpec validator(Validator validator) {
+	public StandaloneMockSpec validator(Validator validator) {
 		this.mockMvcBuilder.setValidator(validator);
 		return this;
 	}
 
 	@Override
-	public StandaloneMockMvcSpec conversionService(FormattingConversionService conversionService) {
+	public StandaloneMockSpec conversionService(FormattingConversionService conversionService) {
 		this.mockMvcBuilder.setConversionService(conversionService);
 		return this;
 	}
 
 	@Override
-	public StandaloneMockMvcSpec interceptors(HandlerInterceptor... interceptors) {
+	public StandaloneMockSpec interceptors(HandlerInterceptor... interceptors) {
 		mappedInterceptors(null, interceptors);
 		return this;
 	}
 
 	@Override
-	public StandaloneMockMvcSpec mappedInterceptors(
+	public StandaloneMockSpec mappedInterceptors(
 			String @Nullable [] pathPatterns, HandlerInterceptor... interceptors) {
 
 		this.mockMvcBuilder.addMappedInterceptors(pathPatterns, interceptors);
@@ -92,73 +92,73 @@ class StandaloneMockMvcSpec extends AbstractMockMvcServerSpec<RestTestClient.Con
 	}
 
 	@Override
-	public StandaloneMockMvcSpec contentNegotiationManager(ContentNegotiationManager manager) {
+	public StandaloneMockSpec contentNegotiationManager(ContentNegotiationManager manager) {
 		this.mockMvcBuilder.setContentNegotiationManager(manager);
 		return this;
 	}
 
 	@Override
-	public StandaloneMockMvcSpec asyncRequestTimeout(long timeout) {
+	public StandaloneMockSpec asyncRequestTimeout(long timeout) {
 		this.mockMvcBuilder.setAsyncRequestTimeout(timeout);
 		return this;
 	}
 
 	@Override
-	public StandaloneMockMvcSpec customArgumentResolvers(HandlerMethodArgumentResolver... argumentResolvers) {
+	public StandaloneMockSpec customArgumentResolvers(HandlerMethodArgumentResolver... argumentResolvers) {
 		this.mockMvcBuilder.setCustomArgumentResolvers(argumentResolvers);
 		return this;
 	}
 
 	@Override
-	public StandaloneMockMvcSpec customReturnValueHandlers(HandlerMethodReturnValueHandler... handlers) {
+	public StandaloneMockSpec customReturnValueHandlers(HandlerMethodReturnValueHandler... handlers) {
 		this.mockMvcBuilder.setCustomReturnValueHandlers(handlers);
 		return this;
 	}
 
 	@Override
-	public StandaloneMockMvcSpec handlerExceptionResolvers(HandlerExceptionResolver... exceptionResolvers) {
+	public StandaloneMockSpec handlerExceptionResolvers(HandlerExceptionResolver... exceptionResolvers) {
 		this.mockMvcBuilder.setHandlerExceptionResolvers(exceptionResolvers);
 		return this;
 	}
 
 	@Override
-	public StandaloneMockMvcSpec viewResolvers(ViewResolver... resolvers) {
+	public StandaloneMockSpec viewResolvers(ViewResolver... resolvers) {
 		this.mockMvcBuilder.setViewResolvers(resolvers);
 		return this;
 	}
 
 	@Override
-	public StandaloneMockMvcSpec singleView(View view) {
+	public StandaloneMockSpec singleView(View view) {
 		this.mockMvcBuilder.setSingleView(view);
 		return this;
 	}
 
 	@Override
-	public StandaloneMockMvcSpec localeResolver(LocaleResolver localeResolver) {
+	public StandaloneMockSpec localeResolver(LocaleResolver localeResolver) {
 		this.mockMvcBuilder.setLocaleResolver(localeResolver);
 		return this;
 	}
 
 	@Override
-	public StandaloneMockMvcSpec flashMapManager(FlashMapManager flashMapManager) {
+	public StandaloneMockSpec flashMapManager(FlashMapManager flashMapManager) {
 		this.mockMvcBuilder.setFlashMapManager(flashMapManager);
 		return this;
 	}
 
 	@Override
-	public StandaloneMockMvcSpec patternParser(PathPatternParser parser) {
+	public StandaloneMockSpec patternParser(PathPatternParser parser) {
 		this.mockMvcBuilder.setPatternParser(parser);
 		return this;
 	}
 
 	@Override
-	public StandaloneMockMvcSpec placeholderValue(String name, String value) {
+	public StandaloneMockSpec placeholderValue(String name, String value) {
 		this.mockMvcBuilder.addPlaceholderValue(name, value);
 		return this;
 	}
 
 	@Override
-	public StandaloneMockMvcSpec customHandlerMapping(Supplier<RequestMappingHandlerMapping> factory) {
+	public StandaloneMockSpec customHandlerMapping(Supplier<RequestMappingHandlerMapping> factory) {
 		this.mockMvcBuilder.setCustomHandlerMapping(factory);
 		return this;
 	}
