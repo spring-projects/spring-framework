@@ -19,7 +19,6 @@ package org.springframework.test.web.servlet.client;
 import jakarta.servlet.Filter;
 
 import org.springframework.http.client.ClientHttpRequestFactory;
-import org.springframework.test.web.client.MockMvcClientHttpRequestFactory;
 import org.springframework.test.web.servlet.DispatcherServletCustomizer;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.RequestBuilder;
