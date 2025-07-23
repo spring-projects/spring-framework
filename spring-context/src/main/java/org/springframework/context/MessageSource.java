@@ -54,7 +54,7 @@ public interface MessageSource {
 	 * @see #getMessage(MessageSourceResolvable, Locale)
 	 * @see java.text.MessageFormat
 	 */
-	@Nullable String getMessage(String code, Object @Nullable [] args, @Nullable String defaultMessage, Locale locale);
+	@Nullable String getMessage(String code, Object @Nullable [] args, @Nullable String defaultMessage, @Nullable Locale locale);
 
 	/**
 	 * Try to resolve the message. Treat as an error if the message can't be found.
@@ -70,7 +70,7 @@ public interface MessageSource {
 	 * @see #getMessage(MessageSourceResolvable, Locale)
 	 * @see java.text.MessageFormat
 	 */
-	String getMessage(String code, Object @Nullable [] args, Locale locale) throws NoSuchMessageException;
+	String getMessage(String code, Object @Nullable [] args, @Nullable Locale locale) throws NoSuchMessageException;
 
 	/**
 	 * Try to resolve the message using all the attributes contained within the
@@ -90,6 +90,6 @@ public interface MessageSource {
 	 * @see MessageSourceResolvable#getDefaultMessage()
 	 * @see java.text.MessageFormat
 	 */
-	String getMessage(MessageSourceResolvable resolvable, Locale locale) throws NoSuchMessageException;
+	String getMessage(MessageSourceResolvable resolvable, @Nullable Locale locale) throws NoSuchMessageException;
 
 }

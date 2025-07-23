@@ -116,7 +116,7 @@ public abstract class BindErrorUtils {
 		}
 
 		@Override
-		protected @Nullable String getDefaultMessage(MessageSourceResolvable resolvable, Locale locale) {
+		protected @Nullable String getDefaultMessage(MessageSourceResolvable resolvable, @Nullable Locale locale) {
 			String message = super.getDefaultMessage(resolvable, locale);
 			return (resolvable instanceof FieldError error ? error.getField() + ": " + message : message);
 		}

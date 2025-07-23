@@ -134,7 +134,7 @@ public abstract class AbstractMessageSource extends MessageSourceSupport impleme
 
 
 	@Override
-	public final @Nullable String getMessage(String code, Object @Nullable [] args, @Nullable String defaultMessage, Locale locale) {
+	public final @Nullable String getMessage(String code, Object @Nullable [] args, @Nullable String defaultMessage, @Nullable Locale locale) {
 		String msg = getMessageInternal(code, args, locale);
 		if (msg != null) {
 			return msg;
@@ -146,7 +146,7 @@ public abstract class AbstractMessageSource extends MessageSourceSupport impleme
 	}
 
 	@Override
-	public final String getMessage(String code, Object @Nullable [] args, Locale locale) throws NoSuchMessageException {
+	public final String getMessage(String code, Object @Nullable [] args, @Nullable Locale locale) throws NoSuchMessageException {
 		String msg = getMessageInternal(code, args, locale);
 		if (msg != null) {
 			return msg;
@@ -155,11 +155,16 @@ public abstract class AbstractMessageSource extends MessageSourceSupport impleme
 		if (fallback != null) {
 			return fallback;
 		}
-		throw new NoSuchMessageException(code, locale);
+		if (locale == null ) {
+			throw new NoSuchMessageException(code);
+		}
+		else {
+			throw new NoSuchMessageException(code, locale);
+		}
 	}
 
 	@Override
-	public final String getMessage(MessageSourceResolvable resolvable, Locale locale) throws NoSuchMessageException {
+	public final String getMessage(MessageSourceResolvable resolvable, @Nullable Locale locale) throws NoSuchMessageException {
 		String[] codes = resolvable.getCodes();
 		if (codes != null) {
 			for (String code : codes) {
@@ -173,7 +178,13 @@ public abstract class AbstractMessageSource extends MessageSourceSupport impleme
 		if (defaultMessage != null) {
 			return defaultMessage;
 		}
-		throw new NoSuchMessageException(!ObjectUtils.isEmpty(codes) ? codes[codes.length - 1] : "", locale);
+		String code = !ObjectUtils.isEmpty(codes) ? codes[codes.length - 1] : "";
+		if (locale == null ) {
+			throw new NoSuchMessageException(code);
+		}
+		else {
+			throw new NoSuchMessageException(code, locale);
+		}
 	}
 
 
@@ -277,7 +288,7 @@ public abstract class AbstractMessageSource extends MessageSourceSupport impleme
 	 * @see #renderDefaultMessage(String, Object[], Locale)
 	 * @see #getDefaultMessage(String)
 	 */
-	protected @Nullable String getDefaultMessage(MessageSourceResolvable resolvable, Locale locale) {
+	protected @Nullable String getDefaultMessage(MessageSourceResolvable resolvable, @Nullable Locale locale) {
 		String defaultMessage = resolvable.getDefaultMessage();
 		String[] codes = resolvable.getCodes();
 		if (defaultMessage != null) {
@@ -323,7 +334,7 @@ public abstract class AbstractMessageSource extends MessageSourceSupport impleme
 	 * @return an array of arguments with any MessageSourceResolvables resolved
 	 */
 	@Override
-	protected Object[] resolveArguments(Object @Nullable [] args, Locale locale) {
+	protected Object[] resolveArguments(Object @Nullable [] args, @Nullable Locale locale) {
 		if (ObjectUtils.isEmpty(args)) {
 			return super.resolveArguments(args, locale);
 		}
