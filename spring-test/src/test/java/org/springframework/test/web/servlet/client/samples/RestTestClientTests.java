@@ -53,7 +53,7 @@ class RestTestClientTests {
 
 	@BeforeEach
 	void setUp() {
-		this.client = RestTestClient.bindToController(new TestController()).build();
+		this.client = RestTestClient.standaloneSetup(new TestController()).build();
 	}
 
 	@Nested

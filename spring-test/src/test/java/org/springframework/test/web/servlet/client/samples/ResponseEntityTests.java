@@ -43,8 +43,7 @@ import static org.hamcrest.Matchers.startsWith;
  * @author Rob Worsnop
  */
 class ResponseEntityTests {
-	private final RestTestClient client = RestTestClient.bindToController(new PersonController())
-			.configureClient()
+	private final RestTestClient client = RestTestClient.standaloneSetup(new PersonController())
 			.baseUrl("/persons")
 			.build();
 

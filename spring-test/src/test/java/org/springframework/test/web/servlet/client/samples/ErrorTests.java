@@ -30,7 +30,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 class ErrorTests {
 
-	private final RestTestClient client = RestTestClient.bindToController(new TestController()).build();
+	private final RestTestClient client = RestTestClient.standaloneSetup(new TestController()).build();
 
 
 	@Test

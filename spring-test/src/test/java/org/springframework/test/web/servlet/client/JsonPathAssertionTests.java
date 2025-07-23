@@ -48,10 +48,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class JsonPathAssertionTests {
 
 	private final RestTestClient client =
-		RestTestClient.bindToController(new MusicController())
-					.alwaysExpect(status().isOk())
-					.alwaysExpect(content().contentType(MediaType.APPLICATION_JSON))
-					.configureClient()
+			RestTestClient.standaloneSetup(new MusicController())
+					.configureServer(builder ->
+							builder.alwaysExpect(status().isOk())
+									.alwaysExpect(content().contentType(MediaType.APPLICATION_JSON))
+					)
 					.defaultHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE)
 					.build();
 

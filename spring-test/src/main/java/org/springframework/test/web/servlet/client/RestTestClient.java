@@ -22,48 +22,30 @@ import java.time.ZonedDateTime;
 import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
-import jakarta.servlet.Filter;
 import org.hamcrest.Matcher;
 import org.jspecify.annotations.Nullable;
 
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.format.support.FormattingConversionService;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.ClientHttpRequestFactory;
-import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.test.json.JsonComparator;
 import org.springframework.test.json.JsonCompareMode;
 import org.springframework.test.json.JsonComparison;
-import org.springframework.test.web.servlet.DispatcherServletCustomizer;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.RequestBuilder;
-import org.springframework.test.web.servlet.ResultMatcher;
-import org.springframework.test.web.servlet.setup.ConfigurableMockMvcBuilder;
-import org.springframework.test.web.servlet.setup.MockMvcConfigurer;
+import org.springframework.test.web.servlet.MockMvcBuilder;
+import org.springframework.test.web.servlet.setup.DefaultMockMvcBuilder;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.test.web.servlet.setup.RouterFunctionMockMvcBuilder;
 import org.springframework.test.web.servlet.setup.StandaloneMockMvcBuilder;
 import org.springframework.util.MultiValueMap;
-import org.springframework.validation.Validator;
-import org.springframework.web.accept.ContentNegotiationManager;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.context.WebApplicationContext;
-import org.springframework.web.method.support.HandlerMethodArgumentResolver;
-import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
-import org.springframework.web.servlet.FlashMapManager;
-import org.springframework.web.servlet.HandlerExceptionResolver;
-import org.springframework.web.servlet.HandlerInterceptor;
-import org.springframework.web.servlet.LocaleResolver;
-import org.springframework.web.servlet.View;
-import org.springframework.web.servlet.ViewResolver;
 import org.springframework.web.servlet.function.RouterFunction;
-import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 import org.springframework.web.util.UriBuilder;
 import org.springframework.web.util.UriBuilderFactory;
-import org.springframework.web.util.pattern.PathPatternParser;
 
 /**
  * Client for testing web servers.
@@ -132,9 +114,7 @@ public interface RestTestClient {
 	/**
 	 * Return a builder to mutate properties of this test client.
 	 */
-	Builder mutate();
-
-
+	<B extends Builder<B>> Builder<B> mutate();
 
 	/**
 	 * Begin creating a {@link RestTestClient} by providing the {@code @Controller}
@@ -143,8 +123,9 @@ public interface RestTestClient {
 	 * {@link org.springframework.test.web.servlet.setup.MockMvcBuilders#standaloneSetup(Object...)}
 	 * to initialize {@link MockMvc}.
 	 */
-	static ControllerSpec bindToController(Object... controllers) {
-		return new StandaloneMockSpec(controllers);
+	static MockServerBuilder<StandaloneMockMvcBuilder> standaloneSetup(Object... controllers) {
+		StandaloneMockMvcBuilder builder = MockMvcBuilders.standaloneSetup(controllers);
+		return new DefaultMockServerBuilder<>(builder);
 	}
 
 	/**
@@ -154,8 +135,9 @@ public interface RestTestClient {
 	 * {@link org.springframework.test.web.servlet.setup.MockMvcBuilders#routerFunctions(RouterFunction[])}
 	 * to initialize {@link MockMvc}.
 	 */
-	static RouterFunctionSpec bindToRouterFunction(RouterFunction<?>... routerFunctions) {
-		return new RouterFunctionMockSpec(routerFunctions);
+	static MockServerBuilder<RouterFunctionMockMvcBuilder> bindToRouterFunction(RouterFunction<?>... routerFunctions) {
+		RouterFunctionMockMvcBuilder builder = MockMvcBuilders.routerFunctions(routerFunctions);
+		return new DefaultMockServerBuilder<>(builder);
 	}
 
 	/**
@@ -166,17 +148,16 @@ public interface RestTestClient {
 	 * {@link org.springframework.test.web.servlet.setup.MockMvcBuilders#webAppContextSetup(WebApplicationContext)}
 	 * to initialize {@code MockMvc}.
 	 */
-	static MockServerSpec<?> bindToApplicationContext(WebApplicationContext context) {
-		return new ApplicationContextMockSpec(context);
+	static MockServerBuilder<DefaultMockMvcBuilder> bindToApplicationContext(WebApplicationContext context) {
+		DefaultMockMvcBuilder builder = MockMvcBuilders.webAppContextSetup(context);
+		return new DefaultMockServerBuilder<>(builder);
 	}
-
-
 
 	/**
 	 * Begin creating a {@link RestTestClient} by providing an already
 	 * initialized {@link MockMvc} instance to use as the server.
 	 */
-	static RestTestClient.Builder bindTo(MockMvc mockMvc) {
+	static <B extends Builder<B>> Builder<B> bindTo(MockMvc mockMvc) {
 		ClientHttpRequestFactory requestFactory = new MockMvcClientHttpRequestFactory(mockMvc);
 		return RestTestClient.bindToServer(requestFactory);
 	}
@@ -191,288 +172,16 @@ public interface RestTestClient {
 	 * </pre>
 	 * @return chained API to customize client config
 	 */
-	static Builder bindToServer() {
-		return new DefaultRestTestClientBuilder();
+	static <B extends Builder<B>> Builder<B> bindToServer() {
+		return new DefaultRestTestClientBuilder<>();
 	}
 
 	/**
 	 * A variant of {@link #bindToServer()} with a pre-configured request factory.
 	 * @return chained API to customize client config
 	 */
-	static Builder bindToServer(ClientHttpRequestFactory requestFactory) {
-		return new DefaultRestTestClientBuilder(RestClient.builder().requestFactory(requestFactory));
-	}
-
-	/**
-	 * Specification for customizing controller configuration.
-	 */
-	interface ControllerSpec extends MockServerSpec<ControllerSpec> {
-		/**
-		 * Register {@link org.springframework.web.bind.annotation.ControllerAdvice}
-		 * <p>This is delegated to
-		 * {@link StandaloneMockMvcBuilder#setControllerAdvice(Object...)}.
-		 */
-		ControllerSpec controllerAdvice(Object... controllerAdvice);
-
-		/**
-		 * Set the message converters to use.
-		 * <p>This is delegated to
-		 * {@link StandaloneMockMvcBuilder#setMessageConverters(HttpMessageConverter[])}.
-		 */
-		ControllerSpec messageConverters(HttpMessageConverter<?>... messageConverters);
-
-		/**
-		 * Provide a custom {@link Validator}.
-		 * <p>This is delegated to
-		 * {@link StandaloneMockMvcBuilder#setValidator(Validator)}.
-		 */
-		ControllerSpec validator(Validator validator);
-
-		/**
-		 * Provide a conversion service.
-		 * <p>This is delegated to
-		 * {@link StandaloneMockMvcBuilder#setConversionService(FormattingConversionService)}.
-		 */
-		ControllerSpec conversionService(FormattingConversionService conversionService);
-
-		/**
-		 * Add global interceptors.
-		 * <p>This is delegated to
-		 * {@link StandaloneMockMvcBuilder#addInterceptors(HandlerInterceptor...)}.
-		 */
-		ControllerSpec interceptors(HandlerInterceptor... interceptors);
-
-		/**
-		 * Add interceptors for specific patterns.
-		 * <p>This is delegated to
-		 * {@link StandaloneMockMvcBuilder#addMappedInterceptors(String[], HandlerInterceptor...)}.
-		 */
-		ControllerSpec mappedInterceptors(
-				String @Nullable [] pathPatterns, HandlerInterceptor... interceptors);
-
-		/**
-		 * Set a ContentNegotiationManager.
-		 * <p>This is delegated to
-		 * {@link StandaloneMockMvcBuilder#setContentNegotiationManager(ContentNegotiationManager)}.
-		 */
-		ControllerSpec contentNegotiationManager(ContentNegotiationManager manager);
-
-		/**
-		 * Specify the timeout value for async execution.
-		 * <p>This is delegated to
-		 * {@link StandaloneMockMvcBuilder#setAsyncRequestTimeout(long)}.
-		 */
-		ControllerSpec asyncRequestTimeout(long timeout);
-
-		/**
-		 * Provide custom argument resolvers.
-		 * <p>This is delegated to
-		 * {@link StandaloneMockMvcBuilder#setCustomArgumentResolvers(HandlerMethodArgumentResolver...)}.
-		 */
-		ControllerSpec customArgumentResolvers(HandlerMethodArgumentResolver... argumentResolvers);
-
-		/**
-		 * Provide custom return value handlers.
-		 * <p>This is delegated to
-		 * {@link StandaloneMockMvcBuilder#setCustomReturnValueHandlers(HandlerMethodReturnValueHandler...)}.
-		 */
-		ControllerSpec customReturnValueHandlers(HandlerMethodReturnValueHandler... handlers);
-
-		/**
-		 * Set the HandlerExceptionResolver types to use.
-		 * <p>This is delegated to
-		 * {@link StandaloneMockMvcBuilder#setHandlerExceptionResolvers(HandlerExceptionResolver...)}.
-		 */
-		ControllerSpec handlerExceptionResolvers(HandlerExceptionResolver... exceptionResolvers);
-
-		/**
-		 * Set up view resolution.
-		 * <p>This is delegated to
-		 * {@link StandaloneMockMvcBuilder#setViewResolvers(ViewResolver...)}.
-		 */
-		ControllerSpec viewResolvers(ViewResolver... resolvers);
-
-		/**
-		 * Set up a single {@link ViewResolver} with a fixed view.
-		 * <p>This is delegated to
-		 * {@link StandaloneMockMvcBuilder#setSingleView(View)}.
-		 */
-		ControllerSpec singleView(View view);
-
-		/**
-		 * Provide the LocaleResolver to use.
-		 * <p>This is delegated to
-		 * {@link StandaloneMockMvcBuilder#setLocaleResolver(LocaleResolver)}.
-		 */
-		ControllerSpec localeResolver(LocaleResolver localeResolver);
-
-		/**
-		 * Provide a custom FlashMapManager.
-		 * <p>This is delegated to
-		 * {@link StandaloneMockMvcBuilder#setFlashMapManager(FlashMapManager)}.
-		 */
-		ControllerSpec flashMapManager(FlashMapManager flashMapManager);
-
-		/**
-		 * Enable URL path matching with parsed
-		 * {@link org.springframework.web.util.pattern.PathPattern PathPatterns}.
-		 * <p>This is delegated to
-		 * {@link StandaloneMockMvcBuilder#setPatternParser(PathPatternParser)}.
-		 */
-		ControllerSpec patternParser(PathPatternParser parser);
-
-		/**
-		 * Configure placeholder values to use.
-		 * <p>This is delegated to
-		 * {@link StandaloneMockMvcBuilder#addPlaceholderValue(String, String)}.
-		 */
-		ControllerSpec placeholderValue(String name, String value);
-
-		/**
-		 * Configure factory for a custom {@link RequestMappingHandlerMapping}.
-		 * <p>This is delegated to
-		 * {@link StandaloneMockMvcBuilder#setCustomHandlerMapping(Supplier)}.
-		 */
-		ControllerSpec customHandlerMapping(Supplier<RequestMappingHandlerMapping> factory);
-	}
-
-	/**
-	 * Specification for configuring {@link MockMvc} to test one or more
-	 * {@linkplain RouterFunction router functions}
-	 * directly, and a simple facade around {@link RouterFunctionMockMvcBuilder}.
-	 */
-	interface RouterFunctionSpec extends MockServerSpec<RouterFunctionSpec> {
-
-		/**
-		 * Set the message converters to use.
-		 * <p>This is delegated to
-		 * {@link RouterFunctionMockMvcBuilder#setMessageConverters(HttpMessageConverter[])}.
-		 */
-		RouterFunctionSpec messageConverters(HttpMessageConverter<?>... messageConverters);
-
-		/**
-		 * Add global interceptors.
-		 * <p>This is delegated to
-		 * {@link RouterFunctionMockMvcBuilder#addInterceptors(HandlerInterceptor...)}.
-		 */
-		RouterFunctionSpec interceptors(HandlerInterceptor... interceptors);
-
-		/**
-		 * Add interceptors for specific patterns.
-		 * <p>This is delegated to
-		 * {@link RouterFunctionMockMvcBuilder#addMappedInterceptors(String[], HandlerInterceptor...)}.
-		 */
-		RouterFunctionSpec mappedInterceptors(
-				String @Nullable [] pathPatterns, HandlerInterceptor... interceptors);
-
-		/**
-		 * Specify the timeout value for async execution.
-		 * <p>This is delegated to
-		 * {@link RouterFunctionMockMvcBuilder#setAsyncRequestTimeout(long)}.
-		 */
-		RouterFunctionSpec asyncRequestTimeout(long timeout);
-
-		/**
-		 * Set the HandlerExceptionResolver types to use.
-		 * <p>This is delegated to
-		 * {@link RouterFunctionMockMvcBuilder#setHandlerExceptionResolvers(HandlerExceptionResolver...)}.
-		 */
-		RouterFunctionSpec handlerExceptionResolvers(HandlerExceptionResolver... exceptionResolvers);
-
-		/**
-		 * Set up view resolution.
-		 * <p>This is delegated to
-		 * {@link RouterFunctionMockMvcBuilder#setViewResolvers(ViewResolver...)}.
-		 */
-		RouterFunctionSpec viewResolvers(ViewResolver... resolvers);
-
-		/**
-		 * Set up a single {@link ViewResolver} with a fixed view.
-		 * <p>This is delegated to
-		 * {@link RouterFunctionMockMvcBuilder#setSingleView(View)}.
-		 */
-		RouterFunctionSpec singleView(View view);
-
-		/**
-		 * Enable URL path matching with parsed
-		 * {@link org.springframework.web.util.pattern.PathPattern PathPatterns}.
-		 * <p>This is delegated to
-		 * {@link RouterFunctionMockMvcBuilder#setPatternParser(PathPatternParser)}.
-		 */
-		RouterFunctionSpec patternParser(PathPatternParser parser);
-
-	}
-
-
-	/**
-	 * Base specification for configuring {@link MockMvc}, and a simple facade
-	 * around {@link ConfigurableMockMvcBuilder}.
-	 *
-	 * @param <B> a self reference to the builder type
-	 */
-	interface MockServerSpec<B extends MockServerSpec<B>> {
-		/**
-		 * Add a global filter.
-		 * <p>This is delegated to
-		 * {@link ConfigurableMockMvcBuilder#addFilters(Filter...)}.
-		 */
-		<T extends B> T filters(Filter... filters);
-
-		/**
-		 * Add a filter for specific URL patterns.
-		 * <p>This is delegated to
-		 * {@link ConfigurableMockMvcBuilder#addFilter(Filter, String...)}.
-		 */
-		<T extends B> T filter(Filter filter, String... urlPatterns);
-
-		/**
-		 * Define default request properties that should be merged into all
-		 * performed requests such that input from the client request override
-		 * the default properties defined here.
-		 * <p>This is delegated to
-		 * {@link ConfigurableMockMvcBuilder#defaultRequest(RequestBuilder)}.
-		 */
-		<T extends B> T defaultRequest(RequestBuilder requestBuilder);
-
-		/**
-		 * Define a global expectation that should <em>always</em> be applied to
-		 * every response.
-		 * <p>This is delegated to
-		 * {@link ConfigurableMockMvcBuilder#alwaysExpect(ResultMatcher)}.
-		 */
-		<T extends B> T alwaysExpect(ResultMatcher resultMatcher);
-
-		/**
-		 * Whether to handle HTTP OPTIONS requests.
-		 * <p>This is delegated to
-		 * {@link ConfigurableMockMvcBuilder#dispatchOptions(boolean)}.
-		 */
-		<T extends B> T dispatchOptions(boolean dispatchOptions);
-
-		/**
-		 * Allow customization of {@code DispatcherServlet}.
-		 * <p>This is delegated to
-		 * {@link ConfigurableMockMvcBuilder#addDispatcherServletCustomizer(DispatcherServletCustomizer)}.
-		 */
-		<T extends B> T dispatcherServletCustomizer(DispatcherServletCustomizer customizer);
-
-		/**
-		 * Add a {@code MockMvcConfigurer} that automates MockMvc setup.
-		 * <p>This is delegated to
-		 * {@link ConfigurableMockMvcBuilder#apply(MockMvcConfigurer)}.
-		 */
-		<T extends B> T apply(MockMvcConfigurer configurer);
-
-
-		/**
-		 * Proceed to configure and build the test client.
-		 */
-		Builder configureClient();
-
-		/**
-		 * Shortcut to build the test client.
-		 */
-		RestTestClient build();
+	static <B extends Builder<B>> Builder<B> bindToServer(ClientHttpRequestFactory requestFactory) {
+		return new DefaultRestTestClientBuilder<>(RestClient.builder().requestFactory(requestFactory));
 	}
 
 	/**
@@ -878,67 +587,70 @@ public interface RestTestClient {
 		RequestHeadersSpec<?> body(Object body);
 	}
 
-		interface Builder {
+	interface Builder<B extends Builder<B>> {
+		/**
+		 * Apply the given {@code Consumer} to this builder instance.
+		 * <p>This can be useful for applying pre-packaged customizations.
+		 * @param builderConsumer the consumer to apply
+		 */
+		Builder<B> apply(Consumer<Builder<B>> builderConsumer);
 
-			/**
-			 * Apply the given {@code Consumer} to this builder instance.
-			 * <p>This can be useful for applying pre-packaged customizations.
-			 * @param builderConsumer the consumer to apply
-			 */
-			Builder apply(Consumer<Builder> builderConsumer);
+		/**
+		 * Add the given cookie to all requests.
+		 * @param cookieName   the cookie name
+		 * @param cookieValues the cookie values
+		 */
+		Builder<B> defaultCookie(String cookieName, String... cookieValues);
 
-			/**
-			 * Add the given cookie to all requests.
-			 * @param cookieName the cookie name
-			 * @param cookieValues the cookie values
-			 */
-			Builder defaultCookie(String cookieName, String... cookieValues);
+		/**
+		 * Manipulate the default cookies with the given consumer. The
+		 * map provided to the consumer is "live", so that the consumer can be used to
+		 * {@linkplain MultiValueMap#set(Object, Object) overwrite} existing header values,
+		 * {@linkplain MultiValueMap#remove(Object) remove} values, or use any of the other
+		 * {@link MultiValueMap} methods.
+		 * @param cookiesConsumer a function that consumes the cookies map
+		 * @return this builder
+		 */
+		Builder<B> defaultCookies(Consumer<MultiValueMap<String, String>> cookiesConsumer);
 
-			/**
-			 * Manipulate the default cookies with the given consumer. The
-			 * map provided to the consumer is "live", so that the consumer can be used to
-			 * {@linkplain MultiValueMap#set(Object, Object) overwrite} existing header values,
-			 * {@linkplain MultiValueMap#remove(Object) remove} values, or use any of the other
-			 * {@link MultiValueMap} methods.
-			 * @param cookiesConsumer a function that consumes the cookies map
-			 * @return this builder
-			 */
-			Builder defaultCookies(Consumer<MultiValueMap<String, String>> cookiesConsumer);
+		/**
+		 * Add the given header to all requests that haven't added it.
+		 * @param headerName   the header name
+		 * @param headerValues the header values
+		 */
+		Builder<B> defaultHeader(String headerName, String... headerValues);
 
-			/**
-			 * Add the given header to all requests that haven't added it.
-			 * @param headerName the header name
-			 * @param headerValues the header values
-			 */
-			Builder defaultHeader(String headerName, String... headerValues);
+		/**
+		 * Manipulate the default headers with the given consumer. The
+		 * headers provided to the consumer are "live", so that the consumer can be used to
+		 * {@linkplain HttpHeaders#set(String, String) overwrite} existing header values,
+		 * {@linkplain HttpHeaders#remove(String) remove} values, or use any of the other
+		 * {@link HttpHeaders} methods.
+		 * @param headersConsumer a function that consumes the {@code HttpHeaders}
+		 * @return this builder
+		 */
+		Builder<B> defaultHeaders(Consumer<HttpHeaders> headersConsumer);
 
-			/**
-			 * Manipulate the default headers with the given consumer. The
-			 * headers provided to the consumer are "live", so that the consumer can be used to
-			 * {@linkplain HttpHeaders#set(String, String) overwrite} existing header values,
-			 * {@linkplain HttpHeaders#remove(String) remove} values, or use any of the other
-			 * {@link HttpHeaders} methods.
-			 * @param headersConsumer a function that consumes the {@code HttpHeaders}
-			 * @return this builder
-			 */
-			Builder defaultHeaders(Consumer<HttpHeaders> headersConsumer);
+		/**
+		 * Provide a pre-configured {@link UriBuilderFactory} instance as an
+		 * alternative to and effectively overriding {@link #baseUrl(String)}.
+		 */
+		Builder<B> uriBuilderFactory(UriBuilderFactory uriFactory);
 
-			/**
-			 * Provide a pre-configured {@link UriBuilderFactory} instance as an
-			 * alternative to and effectively overriding {@link #baseUrl(String)}.
-			 */
-			Builder uriBuilderFactory(UriBuilderFactory uriFactory);
+		/**
+		 * Build the {@link RestTestClient} instance.
+		 */
+		RestTestClient build();
 
-			/**
-			 * Build the {@link RestTestClient} instance.
-			 */
-			RestTestClient build();
+		/**
+		 * Configure a base URI as described in
+		 * {@link RestClient#create(String)
+		 * WebClient.create(String)}.
+		 */
+		Builder<B> baseUrl(String baseUrl);
+	}
 
-			/**
-			 * Configure a base URI as described in
-			 * {@link RestClient#create(String)
-			 * WebClient.create(String)}.
-			 */
-			Builder baseUrl(String baseUrl);
-		}
+	interface MockServerBuilder<M extends MockMvcBuilder> extends Builder<MockServerBuilder<M>> {
+		MockServerBuilder<M> configureServer(Consumer<M> consumer);
+	}
 }

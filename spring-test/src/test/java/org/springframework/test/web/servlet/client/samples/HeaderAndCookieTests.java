@@ -34,7 +34,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 class HeaderAndCookieTests {
 
-	private final RestTestClient client = RestTestClient.bindToController(new TestController()).build();
+	private final RestTestClient client = RestTestClient.standaloneSetup(new TestController()).build();
 
 	@Test
 	void requestResponseHeaderPair() {

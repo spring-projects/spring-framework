@@ -51,7 +51,7 @@ class FilterTests {
 
 		RestTestClient client = RestTestClient.bindToRouterFunction(
 				request -> Optional.of(req -> ServerResponse.status(I_AM_A_TEAPOT).build()))
-				.filter(filter)
+				.configureServer(builder -> builder.addFilters(filter))
 				.build();
 
 		client.get().uri("/")

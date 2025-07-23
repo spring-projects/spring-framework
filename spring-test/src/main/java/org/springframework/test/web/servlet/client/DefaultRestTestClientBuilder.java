@@ -25,12 +25,12 @@ import org.springframework.web.util.UriBuilderFactory;
 
 /**
  * Default implementation of {@link RestTestClient.Builder}.
- *
  * @author Rob Worsnop
+ * @param <B> the type of the builder
  */
-class DefaultRestTestClientBuilder implements RestTestClient.Builder {
+class DefaultRestTestClientBuilder<B extends RestTestClient.Builder<B>> implements RestTestClient.Builder<B> {
 
-	private final RestClient.Builder restClientBuilder;
+	protected final RestClient.Builder restClientBuilder;
 
 	DefaultRestTestClientBuilder() {
 		this.restClientBuilder = RestClient.builder();
@@ -41,43 +41,43 @@ class DefaultRestTestClientBuilder implements RestTestClient.Builder {
 	}
 
 	@Override
-	public RestTestClient.Builder apply(Consumer<RestTestClient.Builder> builderConsumer) {
+	public RestTestClient.Builder<B> apply(Consumer<RestTestClient.Builder<B>> builderConsumer) {
 		builderConsumer.accept(this);
 		return this;
 	}
 
 	@Override
-	public RestTestClient.Builder baseUrl(String baseUrl) {
+	public RestTestClient.Builder<B> baseUrl(String baseUrl) {
 		this.restClientBuilder.baseUrl(baseUrl);
 		return this;
 	}
 
 	@Override
-	public RestTestClient.Builder defaultCookie(String cookieName, String... cookieValues) {
+	public RestTestClient.Builder<B> defaultCookie(String cookieName, String... cookieValues) {
 		this.restClientBuilder.defaultCookie(cookieName, cookieValues);
 		return this;
 	}
 
 	@Override
-	public RestTestClient.Builder defaultCookies(Consumer<MultiValueMap<String, String>> cookiesConsumer) {
+	public RestTestClient.Builder<B> defaultCookies(Consumer<MultiValueMap<String, String>> cookiesConsumer) {
 		this.restClientBuilder.defaultCookies(cookiesConsumer);
 		return this;
 	}
 
 	@Override
-	public RestTestClient.Builder defaultHeader(String headerName, String... headerValues) {
+	public RestTestClient.Builder<B> defaultHeader(String headerName, String... headerValues) {
 		this.restClientBuilder.defaultHeader(headerName, headerValues);
 		return this;
 	}
 
 	@Override
-	public RestTestClient.Builder defaultHeaders(Consumer<HttpHeaders> headersConsumer) {
+	public RestTestClient.Builder<B> defaultHeaders(Consumer<HttpHeaders> headersConsumer) {
 		this.restClientBuilder.defaultHeaders(headersConsumer);
 		return this;
 	}
 
 	@Override
-	public RestTestClient.Builder uriBuilderFactory(UriBuilderFactory uriFactory) {
+	public RestTestClient.Builder<B> uriBuilderFactory(UriBuilderFactory uriFactory) {
 		this.restClientBuilder.uriBuilderFactory(uriFactory);
 		return this;
 	}

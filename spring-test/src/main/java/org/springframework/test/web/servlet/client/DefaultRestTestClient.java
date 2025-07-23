@@ -105,8 +105,8 @@ class DefaultRestTestClient implements RestTestClient {
 	}
 
 	@Override
-	public Builder mutate() {
-		return new DefaultRestTestClientBuilder(this.restClientBuilder);
+	public <B extends Builder<B>> Builder<B> mutate() {
+		return new DefaultRestTestClientBuilder<>(this.restClientBuilder);
 	}
 
 	private RequestBodyUriSpec methodInternal(HttpMethod httpMethod) {
