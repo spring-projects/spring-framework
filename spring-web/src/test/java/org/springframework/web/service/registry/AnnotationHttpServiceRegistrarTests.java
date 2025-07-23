@@ -22,6 +22,7 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.BiConsumer;
+import java.util.function.Function;
 
 import org.junit.jupiter.api.Test;
 
@@ -179,13 +180,14 @@ public class AnnotationHttpServiceRegistrarTests {
 		}
 
 		@Override
-		public GroupSpec forGroup(String name, ClientType clientType) {
-			return new TestGroupSpec(this.groupMap, name, clientType);
+		public GroupSpec forGroup(Function<Class<?>, String> nameProvider,
+				Function<Class<?>, ClientType> clientTypeProvider) {
+			return new TestGroupSpec(this.groupMap, nameProvider, clientTypeProvider);
 		}
 
 
-		private record TestGroupSpec(Map<String, StubGroup> groupMap, String groupName,
-				ClientType clientType) implements GroupSpec {
+		private record TestGroupSpec(Map<String, StubGroup> groupMap, Function<Class<?>, String> groupNameProvider,
+				Function<Class<?>, ClientType> clientTypeProvider) implements GroupSpec {
 
 			@Override
 			public GroupSpec register(Class<?>... serviceTypes) {
@@ -206,7 +208,9 @@ public class AnnotationHttpServiceRegistrarTests {
 			}
 
 			private StubGroup getOrCreateGroup() {
-				return this.groupMap.computeIfAbsent(this.groupName, name -> new StubGroup(name, this.clientType));
+				String groupName = this.groupNameProvider.apply(Object.class);
+				ClientType clientType = this.clientTypeProvider.apply(Object.class);
+				return this.groupMap.computeIfAbsent(groupName, name -> new StubGroup(name, clientType));
 			}
 		}
 	}

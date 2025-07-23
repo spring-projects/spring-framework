@@ -18,6 +18,7 @@ package org.springframework.web.service.registry;
 
 import java.util.Arrays;
 import java.util.Objects;
+import java.util.function.Function;
 
 import org.jspecify.annotations.Nullable;
 
@@ -44,6 +45,7 @@ import org.springframework.core.type.filter.AnnotationTypeFilter;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.web.service.annotation.HttpExchange;
+import org.springframework.web.service.registry.HttpServiceGroup.ClientType;
 
 /**
  * Abstract registrar class that imports:
@@ -226,9 +228,21 @@ public abstract class AbstractHttpServiceRegistrar implements
 		}
 
 		/**
-		 * Variant of {@link #forGroup(String)} with a client type.
+		 * Perform HTTP Service registrations for the given group and client type.
 		 */
-		GroupSpec forGroup(String name, HttpServiceGroup.ClientType clientType);
+		default GroupSpec forGroup(String name, HttpServiceGroup.ClientType clientType) {
+			return forGroup(serviceType -> name, serviceType -> clientType);
+		}
+
+		/**
+		 * Perform HTTP Service registrations for the given group and client type.
+		 * @param nameProvider a function that will provide the name given a service type
+		 * or return {@code null} if the HTTP service should not be registered
+		 * @param clientTypeProvider a function that will provide the client type given a
+		 * service type
+		 */
+		GroupSpec forGroup(Function<Class<?>, @Nullable String> nameProvider,
+				Function<Class<?>, HttpServiceGroup.ClientType> clientTypeProvider);
 
 		/**
 		 * Perform HTTP Service registrations for the
@@ -269,22 +283,28 @@ public abstract class AbstractHttpServiceRegistrar implements
 	private class DefaultGroupRegistry implements GroupRegistry {
 
 		@Override
-		public GroupSpec forGroup(String name, HttpServiceGroup.ClientType clientType) {
-			return new DefaultGroupSpec(name, clientType);
+		public GroupSpec forGroup(Function<Class<?>, @Nullable String> nameProvider,
+				Function<Class<?>, ClientType> clientTypeProvider) {
+
+			return new DefaultGroupSpec(nameProvider, clientTypeProvider);
 		}
 
 		private class DefaultGroupSpec implements GroupSpec {
 
-			private final GroupsMetadata.Registration registration;
+			private final Function<Class<?>, @Nullable String> groupNameProvider;
 
-			DefaultGroupSpec(String groupName, HttpServiceGroup.ClientType clientType) {
-				clientType = (clientType != HttpServiceGroup.ClientType.UNSPECIFIED ? clientType : defaultClientType);
-				this.registration = groupsMetadata.getOrCreateGroup(groupName, clientType);
+			private final Function<Class<?>, ClientType> clientTypeProvider;
+
+			DefaultGroupSpec(Function<Class<?>, @Nullable String> groupNameProvider,
+					Function<Class<?>, ClientType> clientTypeProvider) {
+
+				this.groupNameProvider = groupNameProvider;
+				this.clientTypeProvider = clientTypeProvider;
 			}
 
 			@Override
 			public GroupRegistry.GroupSpec register(Class<?>... serviceTypes) {
-				Arrays.stream(serviceTypes).map(Class::getName).forEach(this::registerServiceTypeName);
+				Arrays.stream(serviceTypes).forEach(this::registerServiceType);
 				return this;
 			}
 
@@ -304,11 +324,19 @@ public abstract class AbstractHttpServiceRegistrar implements
 				getScanner().findCandidateComponents(packageName).stream()
 						.map(BeanDefinition::getBeanClassName)
 						.filter(Objects::nonNull)
-						.forEach(this::registerServiceTypeName);
+						.map(serviceTypeName -> ClassUtils.resolveClassName(serviceTypeName, beanClassLoader))
+						.forEach(this::registerServiceType);
 			}
 
-			private void registerServiceTypeName(String httpServiceTypeName) {
-				this.registration.httpServiceTypeNames().add(httpServiceTypeName);
+			private void registerServiceType(Class<?> httpServiceType) {
+				String groupName = this.groupNameProvider.apply(httpServiceType);
+				if (groupName != null) {
+					ClientType clientType = this.clientTypeProvider.apply(httpServiceType);
+					clientType = (clientType != HttpServiceGroup.ClientType.UNSPECIFIED ? clientType : defaultClientType);
+					groupsMetadata.getOrCreateGroup(groupName, clientType)
+						.httpServiceTypeNames()
+						.add(httpServiceType.getName());
+				}
 			}
 		}
 	}

@@ -71,6 +71,33 @@ public class HttpServiceRegistrarTests {
 	}
 
 	@Test
+	void scanWithProviders() {
+		doRegister(registry -> registry
+			.forGroup(type -> type.getName().substring(type.getName().length() - 1),
+					type -> type.getName().endsWith("B") ? ClientType.REST_CLIENT : ClientType.UNSPECIFIED)
+			.detectInBasePackages(EchoA.class));
+		assertRegistryBeanDef(new TestGroup("A", EchoA.class), new TestGroup("B", EchoB.class));
+		assertProxyBeanDef("A", EchoA.class);
+		assertProxyBeanDef("B", EchoB.class);
+		assertBeanDefinitionCount(3);
+		GroupsMetadata groupsMetadata = groupsMetadata();
+		assertThat(getRegistration(groupsMetadata, "A").clientType()).isEqualTo(ClientType.UNSPECIFIED);
+		assertThat(getRegistration(groupsMetadata, "B").clientType()).isEqualTo(ClientType.REST_CLIENT);
+	}
+
+	@Test
+	void scanWithProvidersWhenProviderReturnsNull() {
+		doRegister(registry -> registry
+			.forGroup(type -> type.getName().endsWith("A") ? null : ECHO_GROUP, type -> ClientType.UNSPECIFIED)
+			.detectInBasePackages(EchoA.class));
+		assertRegistryBeanDef(new TestGroup(ECHO_GROUP, EchoB.class));
+	}
+
+	private GroupsMetadata.Registration getRegistration(GroupsMetadata groupsMetadata, String name) {
+		return groupsMetadata.registrations().filter(candidate -> candidate.name().equals(name)).findFirst().get();
+	}
+
+	@Test
 	void merge() {
 		doRegister(
 				registry -> registry.forGroup(ECHO_GROUP).register(EchoA.class),
@@ -149,6 +176,13 @@ public class HttpServiceRegistrarTests {
 	}
 
 	private Map<String, HttpServiceGroup> groupMap() {
+		GroupsMetadata metadata = groupsMetadata();
+		assertThat(metadata).isNotNull();
+		return metadata.groups(null).stream()
+				.collect(Collectors.toMap(HttpServiceGroup::name, Function.identity()));
+	}
+
+	private GroupsMetadata groupsMetadata() {
 		BeanDefinition beanDef = this.beanDefRegistry.getBeanDefinition(AbstractHttpServiceRegistrar.HTTP_SERVICE_PROXY_REGISTRY_BEAN_NAME);
 		assertThat(beanDef.getBeanClassName()).isEqualTo(HttpServiceProxyRegistryFactoryBean.class.getName());
 
@@ -156,11 +190,7 @@ public class HttpServiceRegistrarTests {
 		ConstructorArgumentValues.ValueHolder valueHolder = args.getArgumentValue(0, Map.class);
 		assertThat(valueHolder).isNotNull();
 
-		GroupsMetadata metadata = (GroupsMetadata) valueHolder.getValue();
-		assertThat(metadata).isNotNull();
-
-		return metadata.groups(null).stream()
-				.collect(Collectors.toMap(HttpServiceGroup::name, Function.identity()));
+		return (GroupsMetadata) valueHolder.getValue();
 	}
 
 	private void assertProxyBeanDef(String group, Class<?> httpServiceType) {
