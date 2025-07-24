@@ -16,190 +16,37 @@
 
 package org.springframework.test.web.servlet.client;
 
-import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Consumer;
 
-import javax.xml.xpath.XPathExpressionException;
-
-import org.hamcrest.Matcher;
 import org.jspecify.annotations.Nullable;
 
 import org.springframework.http.HttpHeaders;
-import org.springframework.test.util.XpathExpectationsHelper;
+import org.springframework.test.web.support.AbstractXpathAssertions;
 import org.springframework.util.Assert;
-import org.springframework.util.MimeType;
 
 /**
  * XPath assertions for the {@link RestTestClient}.
  *
  * @author Rob Worsnop
  */
-public class XpathAssertions {
-
-	private final RestTestClient.BodyContentSpec bodySpec;
-
-	private final XpathExpectationsHelper xpathHelper;
-
+public class XpathAssertions extends AbstractXpathAssertions<RestTestClient.BodyContentSpec> {
 
 	XpathAssertions(RestTestClient.BodyContentSpec spec,
 					String expression, @Nullable Map<String, String> namespaces, Object... args) {
-
-		this.bodySpec = spec;
-		this.xpathHelper = initXpathHelper(expression, namespaces, args);
+		super(spec, expression, namespaces, args);
 	}
 
-	private static XpathExpectationsHelper initXpathHelper(
-			String expression, @Nullable Map<String, String> namespaces, Object[] args) {
-
-		try {
-			return new XpathExpectationsHelper(expression, namespaces, args);
-		}
-		catch (XPathExpressionException ex) {
-			throw new AssertionError("XML parsing error", ex);
-		}
+	@Override
+	protected Optional<HttpHeaders> getResponseHeaders() {
+		return Optional.of(bodySpec.returnResult())
+				.map(ExchangeResult::getResponseHeaders);
 	}
 
-
-	/**
-	 * Delegates to {@link XpathExpectationsHelper#assertString(byte[], String, String)}.
-	 */
-	public RestTestClient.BodyContentSpec isEqualTo(String expectedValue) {
-		return assertWith(() -> this.xpathHelper.assertString(getContent(), getCharset(), expectedValue));
-	}
-
-	/**
-	 * Delegates to {@link XpathExpectationsHelper#assertNumber(byte[], String, Double)}.
-	 */
-	public RestTestClient.BodyContentSpec isEqualTo(Double expectedValue) {
-		return assertWith(() -> this.xpathHelper.assertNumber(getContent(), getCharset(), expectedValue));
-	}
-
-	/**
-	 * Delegates to {@link XpathExpectationsHelper#assertBoolean(byte[], String, boolean)}.
-	 */
-	public RestTestClient.BodyContentSpec isEqualTo(boolean expectedValue) {
-		return assertWith(() -> this.xpathHelper.assertBoolean(getContent(), getCharset(), expectedValue));
-	}
-
-	/**
-	 * Delegates to {@link XpathExpectationsHelper#exists(byte[], String)}.
-	 */
-	public RestTestClient.BodyContentSpec exists() {
-		return assertWith(() -> this.xpathHelper.exists(getContent(), getCharset()));
-	}
-
-	/**
-	 * Delegates to {@link XpathExpectationsHelper#doesNotExist(byte[], String)}.
-	 */
-	public RestTestClient.BodyContentSpec doesNotExist() {
-		return assertWith(() -> this.xpathHelper.doesNotExist(getContent(), getCharset()));
-	}
-
-	/**
-	 * Delegates to {@link XpathExpectationsHelper#assertNodeCount(byte[], String, int)}.
-	 */
-	public RestTestClient.BodyContentSpec nodeCount(int expectedCount) {
-		return assertWith(() -> this.xpathHelper.assertNodeCount(getContent(), getCharset(), expectedCount));
-	}
-
-	/**
-	 * Delegates to {@link XpathExpectationsHelper#assertString(byte[], String, Matcher)}.
-	 */
-	public RestTestClient.BodyContentSpec string(Matcher<? super String> matcher){
-		return assertWith(() -> this.xpathHelper.assertString(getContent(), getCharset(), matcher));
-	}
-
-	/**
-	 * Delegates to {@link XpathExpectationsHelper#assertNumber(byte[], String, Matcher)}.
-	 */
-	public RestTestClient.BodyContentSpec number(Matcher<? super Double> matcher){
-		return assertWith(() -> this.xpathHelper.assertNumber(getContent(), getCharset(), matcher));
-	}
-
-	/**
-	 * Delegates to {@link XpathExpectationsHelper#assertNodeCount(byte[], String, Matcher)}.
-	 */
-	public RestTestClient.BodyContentSpec nodeCount(Matcher<? super Integer> matcher){
-		return assertWith(() -> this.xpathHelper.assertNodeCount(getContent(), getCharset(), matcher));
-	}
-
-	/**
-	 * Consume the result of the XPath evaluation as a String.
-	 */
-	public RestTestClient.BodyContentSpec string(Consumer<String> consumer){
-		return assertWith(() -> {
-			String value = this.xpathHelper.evaluateXpath(getContent(), getCharset(), String.class);
-			consumer.accept(value);
-		});
-	}
-
-	/**
-	 * Consume the result of the XPath evaluation as a Double.
-	 */
-	public RestTestClient.BodyContentSpec number(Consumer<Double> consumer){
-		return assertWith(() -> {
-			Double value = this.xpathHelper.evaluateXpath(getContent(), getCharset(), Double.class);
-			consumer.accept(value);
-		});
-	}
-
-	/**
-	 * Consume the count of nodes as result of the XPath evaluation.
-	 */
-	public RestTestClient.BodyContentSpec nodeCount(Consumer<Integer> consumer){
-		return assertWith(() -> {
-			Integer value = this.xpathHelper.evaluateXpath(getContent(), getCharset(), Integer.class);
-			consumer.accept(value);
-		});
-	}
-
-	private RestTestClient.BodyContentSpec assertWith(CheckedExceptionTask task) {
-		try {
-			task.run();
-		}
-		catch (Exception ex) {
-			throw new AssertionError("XML parsing error", ex);
-		}
-		return this.bodySpec;
-	}
-
-	private byte[] getContent() {
+	@Override
+	protected byte[] getContent() {
 		byte[] body = this.bodySpec.returnResult().getResponseBody();
 		Assert.notNull(body, "Expected body content");
 		return body;
-	}
-
-	private String getCharset() {
-		return Optional.of(this.bodySpec.returnResult())
-				.map(EntityExchangeResult::getResponseHeaders)
-				.map(HttpHeaders::getContentType)
-				.map(MimeType::getCharset)
-				.orElse(StandardCharsets.UTF_8)
-				.name();
-	}
-
-
-	@Override
-	public boolean equals(@Nullable Object obj) {
-		throw new AssertionError("Object#equals is disabled " +
-				"to avoid being used in error instead of XPathAssertions#isEqualTo(String).");
-	}
-
-	@Override
-	public int hashCode() {
-		return super.hashCode();
-	}
-
-
-	/**
-	 * Lets us be able to use lambda expressions that could throw checked exceptions, since
-	 * {@link XpathExpectationsHelper} throws {@link Exception} on its methods.
-	 */
-	private interface CheckedExceptionTask {
-
-		void run() throws Exception;
-
 	}
 }
