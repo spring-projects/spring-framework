@@ -90,6 +90,7 @@
 	<suppress files="src[\\/]main[\\/]java[\\/]org[\\/]springframework[\\/]test[\\/]web[\\/]client[\\/]match[\\/].+Matchers" checks="IllegalImport" id="bannedHamcrestImports"/>
 	<suppress files="src[\\/]main[\\/]java[\\/]org[\\/]springframework[\\/]test[\\/]web[\\/]reactive[\\/]server[\\/].+" checks="IllegalImport" id="bannedHamcrestImports"/>
 	<suppress files="src[\\/]main[\\/]java[\\/]org[\\/]springframework[\\/]test[\\/]web[\\/]servlet[\\/]client[\\/].+" checks="IllegalImport" id="bannedHamcrestImports"/>
+	<suppress files="src[\\/]main[\\/]java[\\/]org[\\/]springframework[\\/]test[\\/]web[\\/]support[\\/].+" checks="IllegalImport" id="bannedHamcrestImports"/>
 	<suppress files="src[\\/]main[\\/]java[\\/]org[\\/]springframework[\\/]test[\\/]web[\\/]servlet[\\/]result[\\/].+Matchers" checks="IllegalImport" id="bannedHamcrestImports"/>
 	<!-- spring-test - test -->
 	<suppress files="ContextHierarchyLevel1TestCase" checks="IllegalImport" id="bannedJUnitJupiterImports"/>
