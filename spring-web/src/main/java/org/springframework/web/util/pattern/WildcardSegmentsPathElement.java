@@ -17,23 +17,41 @@
 package org.springframework.web.util.pattern;
 
 /**
- * A path element representing wildcarding the rest of a path. In the pattern
- * '/foo/**' the /** is represented as a {@link WildcardTheRestPathElement}.
+ * A path element representing wildcarding multiple segments in a path.
+ * This element is only allowed in two situations:
+ * <ol>
+ * <li>At the start of a path, immediately followed by a {@link LiteralPathElement} like '&#47;**&#47;foo&#47;{bar}'
+ * <li>At the end of a path, like '&#47;foo&#47;**'
+ * </ol>
+ * <p>Only a single {@link WildcardSegmentsPathElement} or {@link CaptureSegmentsPathElement} element is allowed
+ * in a pattern. In the pattern '&#47;foo&#47;**' the '&#47;**' is represented as a {@link WildcardSegmentsPathElement}.
  *
  * @author Andy Clement
+ * @author Brian Clozel
  * @since 5.0
  */
-class WildcardTheRestPathElement extends PathElement {
+class WildcardSegmentsPathElement extends PathElement {
 
-	WildcardTheRestPathElement(int pos, char separator) {
+	WildcardSegmentsPathElement(int pos, char separator) {
 		super(pos, separator);
 	}
 
 
 	@Override
 	public boolean matches(int pathIndex, PathPattern.MatchingContext matchingContext) {
-		// If there is more data, it must start with the separator
-		if (pathIndex < matchingContext.pathLength && !matchingContext.isSeparator(pathIndex)) {
+		// wildcard segments at the start of the pattern
+		if (pathIndex == 0 && this.next != null) {
+			int endPathIndex = pathIndex;
+			while (endPathIndex < matchingContext.pathLength) {
+				if (this.next.matches(endPathIndex, matchingContext)) {
+					return true;
+				}
+				endPathIndex++;
+			}
+			return false;
+		}
+		// match until the end of the path
+		else if (pathIndex < matchingContext.pathLength && !matchingContext.isSeparator(pathIndex)) {
 			return false;
 		}
 		if (matchingContext.determineRemainingPath) {
@@ -60,7 +78,7 @@ class WildcardTheRestPathElement extends PathElement {
 
 	@Override
 	public String toString() {
-		return "WildcardTheRest(" + this.separator + "**)";
+		return "WildcardSegments(" + this.separator + "**)";
 	}
 
 }
