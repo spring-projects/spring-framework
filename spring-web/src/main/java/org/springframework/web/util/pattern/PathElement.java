@@ -108,7 +108,7 @@ abstract class PathElement {
 	}
 
 	/**
-	 * Return if the there are no more PathElements in the pattern.
+	 * Return if there are no more PathElements in the pattern.
 	 * @return {@code true} if the there are no more elements
 	 */
 	protected final boolean isNoMorePattern() {
