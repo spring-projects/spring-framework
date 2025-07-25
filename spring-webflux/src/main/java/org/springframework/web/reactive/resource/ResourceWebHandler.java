@@ -420,7 +420,7 @@ public class ResourceWebHandler implements WebHandler, InitializingBean {
 					if (logger.isDebugEnabled()) {
 						logger.debug(exchange.getLogPrefix() + "Resource not found");
 					}
-					return Mono.error(new NoResourceFoundException(getResourcePath(exchange)));
+					return Mono.error(new NoResourceFoundException(exchange.getRequest().getURI(), getResourcePath(exchange)));
 				}))
 				.flatMap(resource -> {
 					try {
