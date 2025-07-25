@@ -162,7 +162,7 @@ public class FormHttpMessageWriter extends LoggingCodecSupport
 		StringBuilder builder = new StringBuilder();
 		formData.forEach((name, values) ->
 				values.forEach(value -> {
-					if (builder.length() != 0) {
+					if (!builder.isEmpty()) {
 						builder.append('&');
 					}
 					builder.append(URLEncoder.encode(name, charset));

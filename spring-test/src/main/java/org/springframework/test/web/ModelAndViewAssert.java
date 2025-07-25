@@ -128,7 +128,7 @@ public abstract class ModelAndViewAssert {
 			}
 		});
 
-		if (sb.length() != 0) {
+		if (!sb.isEmpty()) {
 			sb.insert(0, "Values of expected model do not match.\n");
 			fail(sb.toString());
 		}

@@ -293,7 +293,7 @@ public abstract class AbstractStompBrokerRelayIntegrationTests {
 
 		public void expectMessages(MessageExchange... messageExchanges) throws InterruptedException {
 			List<MessageExchange> expectedMessages = new ArrayList<>(Arrays.asList(messageExchanges));
-			while (expectedMessages.size() > 0) {
+			while (!expectedMessages.isEmpty()) {
 				Message<?> message = this.queue.poll(10000, TimeUnit.MILLISECONDS);
 				assertThat(message).as("Timed out waiting for messages, expected [" + expectedMessages + "]").isNotNull();
 				MessageExchange match = findMatch(expectedMessages, message);

@@ -187,7 +187,7 @@ public class ParameterizableViewController extends AbstractController {
 			sb.append("status=").append(this.statusCode);
 		}
 		if (this.view != null) {
-			sb.append(sb.length() != 0 ? ", " : "");
+			sb.append(!sb.isEmpty() ? ", " : "");
 			String viewName = getViewName();
 			sb.append("view=").append(viewName != null ? "\"" + viewName + "\"" : this.view);
 		}

@@ -141,7 +141,7 @@ public class SockJsHttpRequestHandler
 	private String getSockJsPath(HttpServletRequest servletRequest) {
 		String attribute = HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE;
 		String path = (String) servletRequest.getAttribute(attribute);
-		return (path.length() > 0 && path.charAt(0) != '/' ? "/" + path : path);
+		return (!path.isEmpty() && path.charAt(0) != '/' ? "/" + path : path);
 	}
 
 	@Override

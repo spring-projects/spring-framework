@@ -84,7 +84,7 @@ public class NestedPathTag extends TagSupport implements TryCatchFinally {
 		if (path == null) {
 			path = "";
 		}
-		if (path.length() > 0 && !path.endsWith(PropertyAccessor.NESTED_PROPERTY_SEPARATOR)) {
+		if (!path.isEmpty() && !path.endsWith(PropertyAccessor.NESTED_PROPERTY_SEPARATOR)) {
 			path += PropertyAccessor.NESTED_PROPERTY_SEPARATOR;
 		}
 		this.path = path;

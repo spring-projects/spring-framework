@@ -444,7 +444,7 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 					return;
 				}
 				values.forEach(value -> {
-					if (builder.length() != 0) {
+					if (!builder.isEmpty()) {
 						builder.append('&');
 					}
 					builder.append(URLEncoder.encode(name, charset));

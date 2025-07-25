@@ -238,14 +238,14 @@ public class UriTemplate implements Serializable {
 				}
 				builder.append(c);
 			}
-			if (builder.length() > 0) {
+			if (!builder.isEmpty()) {
 				pattern.append(quote(builder));
 			}
 			return new TemplateInfo(variableNames, Pattern.compile(pattern.toString()));
 		}
 
 		private static String quote(StringBuilder builder) {
-			return (builder.length() > 0 ? Pattern.quote(builder.toString()) : "");
+			return (!builder.isEmpty() ? Pattern.quote(builder.toString()) : "");
 		}
 	}
 

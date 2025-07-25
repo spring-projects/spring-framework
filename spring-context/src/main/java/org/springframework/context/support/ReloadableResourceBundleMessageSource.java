@@ -379,18 +379,18 @@ public class ReloadableResourceBundleMessageSource extends AbstractResourceBased
 		StringBuilder temp = new StringBuilder(basename);
 
 		temp.append('_');
-		if (language.length() > 0) {
+		if (!language.isEmpty()) {
 			temp.append(language);
 			result.add(0, temp.toString());
 		}
 
 		temp.append('_');
-		if (country.length() > 0) {
+		if (!country.isEmpty()) {
 			temp.append(country);
 			result.add(0, temp.toString());
 		}
 
-		if (variant.length() > 0 && (language.length() > 0 || country.length() > 0)) {
+		if (!variant.isEmpty() && (!language.isEmpty() || !country.isEmpty())) {
 			temp.append('_').append(variant);
 			result.add(0, temp.toString());
 		}

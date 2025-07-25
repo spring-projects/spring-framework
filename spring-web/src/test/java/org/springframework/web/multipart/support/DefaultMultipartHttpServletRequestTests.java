@@ -81,7 +81,7 @@ class DefaultMultipartHttpServletRequestTests {
 		for (String key : this.queryParams.keySet()) {
 			for (String value : this.queryParams.get(key)) {
 				this.servletRequest.addParameter(key, value);
-				query.append(query.length() > 0 ? "&" : "").append(key).append('=').append(value);
+				query.append(!query.isEmpty() ? "&" : "").append(key).append('=').append(value);
 			}
 		}
 		this.servletRequest.setQueryString(query.toString());

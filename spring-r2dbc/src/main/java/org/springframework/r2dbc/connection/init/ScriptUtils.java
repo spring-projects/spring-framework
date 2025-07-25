@@ -318,7 +318,7 @@ public abstract class ScriptUtils {
 		StringBuilder scriptBuilder = new StringBuilder();
 		String currentLine = lineNumberReader.readLine();
 		while (currentLine != null) {
-			if (scriptBuilder.length() > 0) {
+			if (!scriptBuilder.isEmpty()) {
 				scriptBuilder.append('\n');
 			}
 			scriptBuilder.append(currentLine);
@@ -487,7 +487,7 @@ public abstract class ScriptUtils {
 			if (!inSingleQuote && !inDoubleQuote) {
 				if (script.startsWith(separator, i)) {
 					// We've reached the end of the current statement
-					if (sb.length() > 0) {
+					if (!sb.isEmpty()) {
 						statements.add(sb.toString());
 						sb = new StringBuilder();
 					}
@@ -520,7 +520,7 @@ public abstract class ScriptUtils {
 				}
 				else if (c == ' ' || c == '\r' || c == '\n' || c == '\t') {
 					// Avoid multiple adjacent whitespace characters
-					if (sb.length() > 0 && sb.charAt(sb.length() - 1) != ' ') {
+					if (!sb.isEmpty() && sb.charAt(sb.length() - 1) != ' ') {
 						c = ' ';
 					}
 					else {
