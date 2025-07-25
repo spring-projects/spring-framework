@@ -148,6 +148,17 @@ public class VersionRequestConditionTests {
 		assertThat(list.get(0)).isEqualTo(condition(expected));
 	}
 
+	@Test // gh-35236
+	void noRequestVersion() {
+		MockServerWebExchange exchange = exchange();
+		VersionRequestCondition condition = condition("1.1");
+
+		VersionRequestCondition match = condition.getMatchingCondition(exchange);
+		assertThat(match).isSameAs(condition);
+
+		condition.handleMatch(exchange);
+	}
+
 	private VersionRequestCondition condition(String v) {
 		this.strategy.addSupportedVersion(v.endsWith("+") ? v.substring(0, v.length() - 1) : v);
 		return new VersionRequestCondition(v, this.strategy);

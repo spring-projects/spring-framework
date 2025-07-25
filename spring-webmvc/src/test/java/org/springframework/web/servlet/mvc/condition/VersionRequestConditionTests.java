@@ -146,6 +146,17 @@ public class VersionRequestConditionTests {
 		assertThat(list.get(0)).isEqualTo(condition(expected));
 	}
 
+	@Test // gh-35236
+	void noRequestVersion() {
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/path");
+		VersionRequestCondition condition = condition("1.1");
+
+		VersionRequestCondition match = condition.getMatchingCondition(request);
+		assertThat(match).isSameAs(condition);
+
+		condition.handleMatch(request);
+	}
+
 	private VersionRequestCondition condition(String v) {
 		this.strategy.addSupportedVersion(v.endsWith("+") ? v.substring(0, v.length() - 1) : v);
 		return new VersionRequestCondition(v, this.strategy);

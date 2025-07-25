@@ -148,8 +148,7 @@ public final class VersionRequestCondition extends AbstractRequestCondition<Vers
 	public void handleMatch(HttpServletRequest request) {
 		if (this.version != null && !this.baselineVersion) {
 			Comparable<?> version = (Comparable<?>) request.getAttribute(HandlerMapping.API_VERSION_ATTRIBUTE);
-			Assert.state(version != null, "No API version attribute");
-			if (!this.version.equals(version)) {
+			if (version != null && !this.version.equals(version)) {
 				throw new NotAcceptableApiVersionException(version.toString());
 			}
 		}
