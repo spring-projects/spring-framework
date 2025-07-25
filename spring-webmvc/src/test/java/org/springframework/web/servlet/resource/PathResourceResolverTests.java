@@ -183,20 +183,18 @@ class PathResourceResolverTests {
 
 		private String relativePath;
 
-
 		public TestUrlResource(String path) throws MalformedURLException {
 			super(path);
-		}
-
-
-		public String getSavedRelativePath() {
-			return this.relativePath;
 		}
 
 		@Override
 		public Resource createRelative(String relativePath) {
 			this.relativePath = relativePath;
 			return this;
+		}
+
+		public String getSavedRelativePath() {
+			return this.relativePath;
 		}
 	}
 
