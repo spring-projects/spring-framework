@@ -69,8 +69,7 @@ public class UrlResource extends AbstractFileResolvingResource {
 	/**
 	 * Whether to use URLConnection caches ({@code null} means default).
 	 */
-	@Nullable
-	volatile Boolean useCaches;
+	volatile @Nullable Boolean useCaches;
 
 
 	/**
