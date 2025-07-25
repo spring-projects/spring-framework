@@ -67,6 +67,12 @@ public class UrlResource extends AbstractFileResolvingResource {
 	@Nullable
 	private volatile String cleanedUrl;
 
+	/**
+	 * Whether to use URLConnection caches ({@code null} means default).
+	 */
+	@Nullable
+	volatile Boolean useCaches;
+
 
 	/**
 	 * Create a new {@code UrlResource} based on the given URL object.
@@ -216,11 +222,22 @@ public class UrlResource extends AbstractFileResolvingResource {
 		return cleanedUrl;
 	}
 
+	/**
+	 * Set an explicit flag for {@link URLConnection#setUseCaches},
+	 * to be applied for any {@link URLConnection} operation in this resource.
+	 * <p>By default, caching will be applied only to jar resources.
+	 * An explicit {@code true} flag applies caching to all resources, whereas an
+	 * explicit {@code false} flag turns off caching for jar resources as well.
+	 * @since 6.2.10
+	 * @see ResourceUtils#useCachesIfNecessary
+	 */
+	public void setUseCaches(boolean useCaches) {
+		this.useCaches = useCaches;
+	}
+
 
 	/**
 	 * This implementation opens an InputStream for the given URL.
-	 * <p>It sets the {@code useCaches} flag to {@code false},
-	 * mainly to avoid jar file locking on Windows.
 	 * @see java.net.URL#openConnection()
 	 * @see java.net.URLConnection#setUseCaches(boolean)
 	 * @see java.net.URLConnection#getInputStream()
@@ -248,6 +265,17 @@ public class UrlResource extends AbstractFileResolvingResource {
 		if (userInfo != null) {
 			String encodedCredentials = Base64.getUrlEncoder().encodeToString(userInfo.getBytes());
 			con.setRequestProperty(AUTHORIZATION, "Basic " + encodedCredentials);
+		}
+	}
+
+	@Override
+	void useCachesIfNecessary(URLConnection con) {
+		Boolean useCaches = this.useCaches;
+		if (useCaches != null) {
+			con.setUseCaches(useCaches);
+		}
+		else {
+			super.useCachesIfNecessary(con);
 		}
 	}
 
@@ -305,7 +333,9 @@ public class UrlResource extends AbstractFileResolvingResource {
 	 */
 	@Override
 	public Resource createRelative(String relativePath) throws MalformedURLException {
-		return new UrlResource(createRelativeURL(relativePath));
+		UrlResource resource = new UrlResource(createRelativeURL(relativePath));
+		resource.useCaches = this.useCaches;
+		return resource;
 	}
 
 	/**
