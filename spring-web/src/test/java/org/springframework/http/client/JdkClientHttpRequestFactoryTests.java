@@ -108,6 +108,44 @@ class JdkClientHttpRequestFactoryTests extends AbstractHttpRequestFactoryTests {
 		}
 	}
 
+	@Test
+	void compressionDisabled() throws IOException {
+		URI uri = URI.create(baseUrl + "/compress/");
+		ClientHttpRequest request = this.factory.createRequest(uri, HttpMethod.GET);
+		try (ClientHttpResponse response = request.execute()) {
+			assertThat(response.getStatusCode()).as("Invalid response status").isEqualTo(HttpStatus.OK);
+			assertThat(StreamUtils.copyToString(response.getBody(), StandardCharsets.ISO_8859_1))
+					.as("Invalid request body").isEqualTo("Test Payload");
+		}
+	}
+
+	@Test
+	void compressionGzip() throws IOException {
+		URI uri = URI.create(baseUrl + "/compress/gzip");
+		JdkClientHttpRequestFactory requestFactory = (JdkClientHttpRequestFactory) this.factory;
+		requestFactory.setCompressionEnabled(true);
+		ClientHttpRequest request = requestFactory.createRequest(uri, HttpMethod.GET);
+
+		try (ClientHttpResponse response = request.execute()) {
+			assertThat(response.getStatusCode()).as("Invalid response status").isEqualTo(HttpStatus.OK);
+			assertThat(StreamUtils.copyToString(response.getBody(), StandardCharsets.ISO_8859_1))
+					.as("Invalid request body").isEqualTo("Test Payload");
+		}
+	}
+
+	@Test
+	void compressionDeflate() throws IOException {
+		URI uri = URI.create(baseUrl + "/compress/deflate");
+		JdkClientHttpRequestFactory requestFactory = (JdkClientHttpRequestFactory) this.factory;
+		requestFactory.setCompressionEnabled(true);
+		ClientHttpRequest request = requestFactory.createRequest(uri, HttpMethod.GET);
+		try (ClientHttpResponse response = request.execute()) {
+			assertThat(response.getStatusCode()).as("Invalid response status").isEqualTo(HttpStatus.OK);
+			assertThat(StreamUtils.copyToString(response.getBody(), StandardCharsets.ISO_8859_1))
+					.as("Invalid request body").isEqualTo("Test Payload");
+		}
+	}
+
 	@Test // gh-34971
 	@EnabledForJreRange(min = JRE.JAVA_19) // behavior fixed in Java 19
 	void requestContentLengthHeaderWhenNoBody() throws Exception {
