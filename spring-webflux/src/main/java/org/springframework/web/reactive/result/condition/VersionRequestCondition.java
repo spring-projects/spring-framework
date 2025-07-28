@@ -128,7 +128,9 @@ public final class VersionRequestCondition extends AbstractRequestCondition<Vers
 			return (-1 * compareVersions(this.version, otherVersion));
 		}
 		else {
-			return (this.version != null ? -1 : 1);
+			// Prefer mapping without version for unversioned request
+			Comparable<?> version = exchange.getAttribute(HandlerMapping.API_VERSION_ATTRIBUTE);
+			return (version != null ? (this.version != null ? -1 : 1) : (this.version != null ? 1 : -1));
 		}
 	}
 

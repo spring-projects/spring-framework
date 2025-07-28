@@ -18,6 +18,7 @@ package org.springframework.web.reactive.result.condition;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Stream;
 
 import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.BeforeEach;
@@ -157,6 +158,15 @@ public class VersionRequestConditionTests {
 		assertThat(match).isSameAs(condition);
 
 		condition.handleMatch(exchange);
+	}
+
+	@Test
+	void compareWithoutRequestVersion() {
+		VersionRequestCondition condition = Stream.of(condition("1.1"), condition("1.2"), emptyCondition())
+				.min((c1, c2) -> c1.compareTo(c2, exchange()))
+				.get();
+
+		assertThat(condition).isEqualTo(emptyCondition());
 	}
 
 	private VersionRequestCondition condition(String v) {
