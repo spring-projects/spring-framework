@@ -218,17 +218,21 @@ public class GenericTableMetaDataProvider implements TableMetaDataProvider {
 		}
 	}
 
+	/**
+	 * This implementation delegates to {@link #catalogNameToUse}.
+	 */
 	@Override
 	public @Nullable String metaDataCatalogNameToUse(@Nullable String catalogName) {
 		return catalogNameToUse(catalogName);
 	}
 
+	/**
+	 * This implementation delegates to {@link #schemaNameToUse}.
+	 * @see #getDefaultSchema()
+	 */
 	@Override
 	public @Nullable String metaDataSchemaNameToUse(@Nullable String schemaName) {
-		if (schemaName == null) {
-			return schemaNameToUse(getDefaultSchema());
-		}
-		return schemaNameToUse(schemaName);
+		return schemaNameToUse(schemaName != null ? schemaName : getDefaultSchema());
 	}
 
 	/**
@@ -389,7 +393,7 @@ public class GenericTableMetaDataProvider implements TableMetaDataProvider {
 		try {
 			tableColumns = databaseMetaData.getColumns(
 					metaDataCatalogName, metaDataSchemaName, metaDataTableName, null);
-			while (tableColumns.next()) {
+			while (tableColumns != null && tableColumns.next()) {
 				String columnName = tableColumns.getString("COLUMN_NAME");
 				int dataType = tableColumns.getInt("DATA_TYPE");
 				if (dataType == Types.DECIMAL) {
