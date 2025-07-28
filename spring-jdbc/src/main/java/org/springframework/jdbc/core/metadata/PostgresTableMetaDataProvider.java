@@ -19,7 +19,7 @@ package org.springframework.jdbc.core.metadata;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * The PostgreSQL specific implementation of {@link TableMetaDataProvider}.
@@ -39,14 +39,12 @@ public class PostgresTableMetaDataProvider extends GenericTableMetaDataProvider 
 
 
 	@Override
-	@Nullable
-	public String metaDataCatalogNameToUse(@Nullable String catalogName) {
+	public @Nullable String metaDataCatalogNameToUse(@Nullable String catalogName) {
 		return catalogName;
 	}
 
 	@Override
-	@Nullable
-	public String metaDataSchemaNameToUse(@Nullable String schemaName) {
+	public @Nullable String metaDataSchemaNameToUse(@Nullable String schemaName) {
 		return (schemaName != null ? schemaName : getDefaultSchema());
 	}
 
