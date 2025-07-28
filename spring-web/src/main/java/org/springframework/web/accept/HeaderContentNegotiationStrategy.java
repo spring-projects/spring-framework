@@ -54,7 +54,7 @@ public class HeaderContentNegotiationStrategy implements ContentNegotiationStrat
 		try {
 			List<MediaType> mediaTypes = MediaType.parseMediaTypes(headerValues);
 			MimeTypeUtils.sortBySpecificity(mediaTypes);
-			return !CollectionUtils.isEmpty(mediaTypes) ? mediaTypes : MEDIA_TYPE_ALL_LIST;
+			return CollectionUtils.isNotEmpty(mediaTypes) ? mediaTypes : MEDIA_TYPE_ALL_LIST;
 		}
 		catch (InvalidMediaTypeException | InvalidMimeTypeException ex) {
 			throw new HttpMediaTypeNotAcceptableException(

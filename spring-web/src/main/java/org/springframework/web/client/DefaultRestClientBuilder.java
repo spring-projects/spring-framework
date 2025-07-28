@@ -152,11 +152,11 @@ final class DefaultRestClientBuilder implements RestClient.Builder {
 		this.uriBuilderFactory = getUriBuilderFactory(restTemplate);
 		this.statusHandlers = new ArrayList<>();
 		this.statusHandlers.add(StatusHandler.fromErrorHandler(restTemplate.getErrorHandler()));
-		if (!CollectionUtils.isEmpty(restTemplate.getInterceptors())) {
+		if (CollectionUtils.isNotEmpty(restTemplate.getInterceptors())) {
 			this.interceptors = new ArrayList<>(restTemplate.getInterceptors());
 		}
 		this.bufferingPredicate = restTemplate.getBufferingPredicate();
-		if (!CollectionUtils.isEmpty(restTemplate.getClientHttpRequestInitializers())) {
+		if (CollectionUtils.isNotEmpty(restTemplate.getClientHttpRequestInitializers())) {
 			this.initializers = new ArrayList<>(restTemplate.getClientHttpRequestInitializers());
 		}
 		this.requestFactory = getRequestFactory(restTemplate);

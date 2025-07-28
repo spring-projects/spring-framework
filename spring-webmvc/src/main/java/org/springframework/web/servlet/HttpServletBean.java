@@ -215,7 +215,7 @@ public abstract class HttpServletBean extends HttpServlet implements Environment
 		public ServletConfigPropertyValues(ServletConfig config, Set<String> requiredProperties)
 				throws ServletException {
 
-			Set<String> missingProps = (!CollectionUtils.isEmpty(requiredProperties) ?
+			Set<String> missingProps = (CollectionUtils.isNotEmpty(requiredProperties) ?
 					new HashSet<>(requiredProperties) : null);
 
 			Enumeration<String> paramNames = config.getInitParameterNames();
@@ -229,7 +229,7 @@ public abstract class HttpServletBean extends HttpServlet implements Environment
 			}
 
 			// Fail if we are still missing properties.
-			if (!CollectionUtils.isEmpty(missingProps)) {
+			if (CollectionUtils.isNotEmpty(missingProps)) {
 				throw new ServletException(
 						"Initialization from ServletConfig for servlet '" + config.getServletName() +
 						"' failed; the following required properties were missing: " +

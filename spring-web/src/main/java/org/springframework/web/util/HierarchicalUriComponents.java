@@ -211,14 +211,14 @@ final class HierarchicalUriComponents extends UriComponents {
 			StringBuilder queryBuilder = new StringBuilder();
 			this.queryParams.forEach((name, values) -> {
 				if (CollectionUtils.isEmpty(values)) {
-					if (queryBuilder.length() != 0) {
+					if (StringUtils.hasLength(queryBuilder)) {
 						queryBuilder.append('&');
 					}
 					queryBuilder.append(name);
 				}
 				else {
 					for (Object value : values) {
-						if (queryBuilder.length() != 0) {
+						if (StringUtils.hasLength(queryBuilder)) {
 							queryBuilder.append('&');
 						}
 						queryBuilder.append(name);
@@ -482,7 +482,7 @@ final class HierarchicalUriComponents extends UriComponents {
 		}
 		String path = getPath();
 		if (StringUtils.hasLength(path)) {
-			if (uriBuilder.length() != 0 && path.charAt(0) != PATH_DELIMITER) {
+			if (StringUtils.hasLength(uriBuilder) && path.charAt(0) != PATH_DELIMITER) {
 				uriBuilder.append(PATH_DELIMITER);
 			}
 			uriBuilder.append(path);

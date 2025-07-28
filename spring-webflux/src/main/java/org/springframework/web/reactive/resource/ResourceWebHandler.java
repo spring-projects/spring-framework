@@ -521,7 +521,7 @@ public class ResourceWebHandler implements WebHandler, InitializingBean {
 	private @Nullable MediaType getMediaType(Resource resource) {
 		MediaType mediaType = null;
 		String filename = resource.getFilename();
-		if (!CollectionUtils.isEmpty(this.mediaTypes)) {
+		if (CollectionUtils.isNotEmpty(this.mediaTypes)) {
 			String ext = StringUtils.getFilenameExtension(filename);
 			if (ext != null) {
 				mediaType = this.mediaTypes.get(ext.toLowerCase(Locale.ROOT));
@@ -529,7 +529,7 @@ public class ResourceWebHandler implements WebHandler, InitializingBean {
 		}
 		if (mediaType == null) {
 			List<MediaType> mediaTypes = MediaTypeFactory.getMediaTypes(filename);
-			if (!CollectionUtils.isEmpty(mediaTypes)) {
+			if (CollectionUtils.isNotEmpty(mediaTypes)) {
 				mediaType = mediaTypes.get(0);
 			}
 		}

@@ -63,7 +63,7 @@ implements CallbackFilter
     abstract protected Object getCallback(Method method);
 
     public Callback[] getCallbacks() {
-        if (callbacks.size() == 0) {
+        if (callbacks.isEmpty()) {
             return new Callback[0];
         }
         if (callbacks.get(0) instanceof Callback) {
@@ -75,7 +75,7 @@ implements CallbackFilter
     }
 
     public Class[] getCallbackTypes() {
-        if (callbacks.size() == 0) {
+        if (callbacks.isEmpty()) {
             return new Class[0];
         }
         if (callbacks.get(0) instanceof Callback) {

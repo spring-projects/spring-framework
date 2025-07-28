@@ -72,7 +72,7 @@ public class WebSocketExtension {
 	public WebSocketExtension(String name, @Nullable Map<String, String> parameters) {
 		Assert.hasLength(name, "Extension name must not be empty");
 		this.name = name;
-		if (!CollectionUtils.isEmpty(parameters)) {
+		if (CollectionUtils.isNotEmpty(parameters)) {
 			Map<String, String> map = new LinkedCaseInsensitiveMap<>(parameters.size(), Locale.ROOT);
 			map.putAll(parameters);
 			this.parameters = Collections.unmodifiableMap(map);

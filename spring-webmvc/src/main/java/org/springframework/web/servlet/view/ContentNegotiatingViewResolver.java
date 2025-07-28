@@ -277,7 +277,7 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport
 	private List<MediaType> getProducibleMediaTypes(HttpServletRequest request) {
 		Set<MediaType> mediaTypes = (Set<MediaType>)
 				request.getAttribute(HandlerMapping.PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE);
-		if (!CollectionUtils.isEmpty(mediaTypes)) {
+		if (CollectionUtils.isNotEmpty(mediaTypes)) {
 			return new ArrayList<>(mediaTypes);
 		}
 		else {
@@ -322,7 +322,7 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport
 				}
 			}
 		}
-		if (!CollectionUtils.isEmpty(this.defaultViews)) {
+		if (CollectionUtils.isNotEmpty(this.defaultViews)) {
 			candidateViews.addAll(this.defaultViews);
 		}
 		return candidateViews;

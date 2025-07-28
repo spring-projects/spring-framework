@@ -653,7 +653,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 			}
 			if (mediaType == null) {
 				List<MediaType> mediaTypes = MediaTypeFactory.getMediaTypes(filename);
-				if (!CollectionUtils.isEmpty(mediaTypes)) {
+				if (CollectionUtils.isNotEmpty(mediaTypes)) {
 					mediaType = mediaTypes.get(0);
 				}
 			}

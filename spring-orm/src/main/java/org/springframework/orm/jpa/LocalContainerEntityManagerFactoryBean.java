@@ -376,7 +376,7 @@ public class LocalContainerEntityManagerFactoryBean extends AbstractEntityManage
 		}
 
 		List<String> qualifiers = this.persistenceUnitInfo.getQualifierAnnotationNames();
-		if (!CollectionUtils.isEmpty(qualifiers)) {
+		if (CollectionUtils.isNotEmpty(qualifiers)) {
 			BeanFactory beanFactory = getBeanFactory();
 			String beanName = getBeanName();
 			if (beanFactory instanceof ConfigurableBeanFactory cbf && beanName != null) {

@@ -446,7 +446,7 @@ public abstract class AbstractHtmlElementTag extends AbstractDataBoundFormElemen
 		writeOptionalAttribute(tagWriter, ONKEYUP_ATTRIBUTE, getOnkeyup());
 		writeOptionalAttribute(tagWriter, ONKEYDOWN_ATTRIBUTE, getOnkeydown());
 
-		if (!CollectionUtils.isEmpty(this.dynamicAttributes)) {
+		if (CollectionUtils.isNotEmpty(this.dynamicAttributes)) {
 			for (Map.Entry<String, Object> entry : this.dynamicAttributes.entrySet()) {
 				tagWriter.writeOptionalAttributeValue(entry.getKey(), getDisplayString(entry.getValue()));
 			}

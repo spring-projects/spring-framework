@@ -185,7 +185,7 @@ public class StandardWebSocketSession extends AbstractWebSocketSession<Session> 
 		this.acceptedProtocol = session.getNegotiatedSubprotocol();
 
 		List<Extension> standardExtensions = getNativeSession().getNegotiatedExtensions();
-		if (!CollectionUtils.isEmpty(standardExtensions)) {
+		if (CollectionUtils.isNotEmpty(standardExtensions)) {
 			this.extensions = new ArrayList<>(standardExtensions.size());
 			for (Extension standardExtension : standardExtensions) {
 				this.extensions.add(new StandardToWebSocketExtensionAdapter(standardExtension));

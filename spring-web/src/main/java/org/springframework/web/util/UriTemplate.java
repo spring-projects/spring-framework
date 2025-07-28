@@ -29,6 +29,7 @@ import org.jspecify.annotations.Nullable;
 
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 
 /**
  * Representation of a URI template that can be expanded with URI variables via
@@ -238,14 +239,14 @@ public class UriTemplate implements Serializable {
 				}
 				builder.append(c);
 			}
-			if (builder.length() > 0) {
+			if (StringUtils.hasLength(builder)) {
 				pattern.append(quote(builder));
 			}
 			return new TemplateInfo(variableNames, Pattern.compile(pattern.toString()));
 		}
 
 		private static String quote(StringBuilder builder) {
-			return (builder.length() > 0 ? Pattern.quote(builder.toString()) : "");
+			return (StringUtils.hasLength(builder) ? Pattern.quote(builder.toString()) : "");
 		}
 	}
 

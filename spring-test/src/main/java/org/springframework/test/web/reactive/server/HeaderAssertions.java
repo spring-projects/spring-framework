@@ -199,7 +199,7 @@ public class HeaderAssertions {
 
 	private List<String> getRequiredValues(String name) {
 		List<String> values = getHeaders().get(name);
-		if (!CollectionUtils.isEmpty(values)) {
+		if (CollectionUtils.isNotEmpty(values)) {
 			return values;
 		}
 		else {

@@ -142,7 +142,7 @@ class HttpComponentsClientHttpRequest extends AbstractClientHttpRequest {
 		if (getCookies().isEmpty()) {
 			return;
 		}
-		if (!CollectionUtils.isEmpty(getCookies())) {
+		if (CollectionUtils.isNotEmpty(getCookies())) {
 			this.httpRequest.setHeader(HttpHeaders.COOKIE, serializeCookies());
 		}
 	}

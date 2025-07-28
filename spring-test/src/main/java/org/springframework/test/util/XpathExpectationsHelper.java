@@ -69,7 +69,7 @@ public class XpathExpectationsHelper {
 
 		this.expression = String.format(expression, args);
 		this.xpathExpression = compileXpathExpression(this.expression, namespaces);
-		this.hasNamespaces = !CollectionUtils.isEmpty(namespaces);
+		this.hasNamespaces = CollectionUtils.isNotEmpty(namespaces);
 	}
 
 	private static XPathExpression compileXpathExpression(String expression,

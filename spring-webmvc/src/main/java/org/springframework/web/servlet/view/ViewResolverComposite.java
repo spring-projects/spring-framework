@@ -54,7 +54,7 @@ public class ViewResolverComposite implements ViewResolver, Ordered, Initializin
 	 */
 	public void setViewResolvers(List<ViewResolver> viewResolvers) {
 		this.viewResolvers.clear();
-		if (!CollectionUtils.isEmpty(viewResolvers)) {
+		if (CollectionUtils.isNotEmpty(viewResolvers)) {
 			this.viewResolvers.addAll(viewResolvers);
 		}
 	}

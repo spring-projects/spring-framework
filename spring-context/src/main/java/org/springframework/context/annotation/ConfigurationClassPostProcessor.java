@@ -341,7 +341,7 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 
 	@Override
 	public @Nullable BeanFactoryInitializationAotContribution processAheadOfTime(ConfigurableListableBeanFactory beanFactory) {
-		boolean hasPropertySourceDescriptors = !CollectionUtils.isEmpty(this.propertySourceDescriptors);
+		boolean hasPropertySourceDescriptors = CollectionUtils.isNotEmpty(this.propertySourceDescriptors);
 		boolean hasImportRegistry = beanFactory.containsBean(IMPORT_REGISTRY_BEAN_NAME);
 		boolean hasBeanRegistrars = !this.beanRegistrars.isEmpty();
 		if (hasPropertySourceDescriptors || hasImportRegistry || hasBeanRegistrars) {

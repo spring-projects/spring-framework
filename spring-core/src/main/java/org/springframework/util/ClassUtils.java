@@ -753,7 +753,7 @@ public abstract class ClassUtils {
 	 * @see StringUtils#toStringArray
 	 */
 	public static Class<?>[] toClassArray(@Nullable Collection<Class<?>> collection) {
-		return (!CollectionUtils.isEmpty(collection) ? collection.toArray(EMPTY_CLASS_ARRAY) : EMPTY_CLASS_ARRAY);
+		return (CollectionUtils.isNotEmpty(collection) ? collection.toArray(EMPTY_CLASS_ARRAY) : EMPTY_CLASS_ARRAY);
 	}
 
 	/**

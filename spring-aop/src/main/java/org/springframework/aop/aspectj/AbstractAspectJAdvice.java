@@ -571,7 +571,7 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 			numBound++;
 		}
 
-		if (!CollectionUtils.isEmpty(this.argumentBindings)) {
+		if (CollectionUtils.isNotEmpty(this.argumentBindings)) {
 			// binding from pointcut match
 			if (jpMatch != null) {
 				PointcutParameter[] parameterBindings = jpMatch.getParameterBindings();

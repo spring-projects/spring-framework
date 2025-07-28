@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.ModelAndView;
 
 import static org.springframework.test.util.AssertionErrors.assertTrue;
@@ -128,7 +129,7 @@ public abstract class ModelAndViewAssert {
 			}
 		});
 
-		if (sb.length() != 0) {
+		if (StringUtils.hasLength(sb)) {
 			sb.insert(0, "Values of expected model do not match.\n");
 			fail(sb.toString());
 		}

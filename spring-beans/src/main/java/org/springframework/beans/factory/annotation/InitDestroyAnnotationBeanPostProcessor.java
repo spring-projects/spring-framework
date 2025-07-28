@@ -186,11 +186,11 @@ public class InitDestroyAnnotationBeanPostProcessor implements DestructionAwareB
 		RootBeanDefinition beanDefinition = registeredBean.getMergedBeanDefinition();
 		beanDefinition.resolveDestroyMethodIfNecessary();
 		LifecycleMetadata metadata = findLifecycleMetadata(beanDefinition, registeredBean.getBeanClass());
-		if (!CollectionUtils.isEmpty(metadata.initMethods)) {
+		if (CollectionUtils.isNotEmpty(metadata.initMethods)) {
 			String[] initMethodNames = safeMerge(beanDefinition.getInitMethodNames(), metadata.initMethods);
 			beanDefinition.setInitMethodNames(initMethodNames);
 		}
-		if (!CollectionUtils.isEmpty(metadata.destroyMethods)) {
+		if (CollectionUtils.isNotEmpty(metadata.destroyMethods)) {
 			String[] destroyMethodNames = safeMerge(beanDefinition.getDestroyMethodNames(), metadata.destroyMethods);
 			beanDefinition.setDestroyMethodNames(destroyMethodNames);
 		}

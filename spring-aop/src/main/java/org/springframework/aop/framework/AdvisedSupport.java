@@ -378,7 +378,7 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 		if (isFrozen()) {
 			throw new AopConfigException("Cannot add advisor: Configuration is frozen.");
 		}
-		if (!CollectionUtils.isEmpty(advisors)) {
+		if (CollectionUtils.isNotEmpty(advisors)) {
 			for (Advisor advisor : advisors) {
 				if (advisor instanceof IntroductionAdvisor introductionAdvisor) {
 					validateIntroductionAdvisor(introductionAdvisor);

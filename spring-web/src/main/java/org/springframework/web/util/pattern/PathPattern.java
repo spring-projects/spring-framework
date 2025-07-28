@@ -567,7 +567,7 @@ public class PathPattern implements Comparable<PathPattern> {
 	 * @return {@code true} has more than zero elements
 	 */
 	private boolean hasLength(@Nullable PathContainer container) {
-		return container != null && container.elements().size() > 0;
+		return container != null && CollectionUtils.isNotEmpty(container.elements());
 	}
 
 	private static int scoreByNormalizedLength(PathPattern pattern) {

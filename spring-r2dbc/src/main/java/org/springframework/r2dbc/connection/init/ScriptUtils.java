@@ -487,7 +487,7 @@ public abstract class ScriptUtils {
 			if (!inSingleQuote && !inDoubleQuote) {
 				if (script.startsWith(separator, i)) {
 					// We've reached the end of the current statement
-					if (sb.length() > 0) {
+					if (StringUtils.hasLength(sb)) {
 						statements.add(sb.toString());
 						sb = new StringBuilder();
 					}
@@ -520,7 +520,7 @@ public abstract class ScriptUtils {
 				}
 				else if (c == ' ' || c == '\r' || c == '\n' || c == '\t') {
 					// Avoid multiple adjacent whitespace characters
-					if (sb.length() > 0 && sb.charAt(sb.length() - 1) != ' ') {
+					if (StringUtils.hasLength(sb) && sb.charAt(sb.length() - 1) != ' ') {
 						c = ' ';
 					}
 					else {

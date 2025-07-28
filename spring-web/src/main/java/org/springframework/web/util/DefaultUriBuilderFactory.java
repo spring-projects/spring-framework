@@ -432,7 +432,7 @@ public class DefaultUriBuilderFactory implements UriBuilderFactory {
 
 		@Override
 		public URI build(Map<String, ?> uriVars) {
-			if (!CollectionUtils.isEmpty(defaultUriVariables)) {
+			if (CollectionUtils.isNotEmpty(defaultUriVariables)) {
 				Map<String, Object> map = new HashMap<>(defaultUriVariables.size() + uriVars.size());
 				map.putAll(defaultUriVariables);
 				map.putAll(uriVars);
@@ -447,7 +447,7 @@ public class DefaultUriBuilderFactory implements UriBuilderFactory {
 
 		@Override
 		public URI build(@Nullable Object... uriVars) {
-			if (ObjectUtils.isEmpty(uriVars) && !CollectionUtils.isEmpty(defaultUriVariables)) {
+			if (ObjectUtils.isEmpty(uriVars) && CollectionUtils.isNotEmpty(defaultUriVariables)) {
 				return build(Collections.emptyMap());
 			}
 			if (encodingMode.equals(EncodingMode.VALUES_ONLY)) {

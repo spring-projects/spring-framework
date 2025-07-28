@@ -81,6 +81,27 @@ public abstract class CollectionUtils {
 	}
 
 	/**
+	 * Return {@code true} if the supplied Collection is not {@code null} and not empty.
+	 * Otherwise, return {@code false}.
+	 * @param collection the Collection to check
+	 * @return whether the given Collection is not empty
+	 */
+	public static boolean isNotEmpty(@Nullable Collection<? extends @Nullable Object> collection) {
+		return (collection != null && !collection.isEmpty());
+	}
+
+	/**
+	 * Return {@code true} if the supplied Map is not {@code null} and not empty.
+	 * Otherwise, return {@code false}.
+	 * @param map the Map to check
+	 * @return whether the given Map is not empty
+	 */
+	public static boolean isNotEmpty(@Nullable Map<?, ? extends @Nullable Object> map) {
+		return (map != null && !map.isEmpty());
+	}
+
+
+	/**
 	 * Instantiate a new {@link HashMap} with an initial capacity
 	 * that can accommodate the specified number of elements without
 	 * any immediate resize/rehash operations to be expected.

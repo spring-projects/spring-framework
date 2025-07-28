@@ -49,7 +49,7 @@ public class DelegatingWebFluxConfiguration extends WebFluxConfigurationSupport 
 
 	@Autowired(required = false)
 	public void setConfigurers(List<WebFluxConfigurer> configurers) {
-		if (!CollectionUtils.isEmpty(configurers)) {
+		if (CollectionUtils.isNotEmpty(configurers)) {
 			this.configurers.addWebFluxConfigurers(configurers);
 		}
 	}

@@ -23,6 +23,7 @@ import jakarta.servlet.jsp.tagext.TryCatchFinally;
 import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.PropertyAccessor;
+import org.springframework.util.StringUtils;
 
 /**
  * <p>The {@code <nestedPath>} tag supports and assists with nested beans or
@@ -84,7 +85,7 @@ public class NestedPathTag extends TagSupport implements TryCatchFinally {
 		if (path == null) {
 			path = "";
 		}
-		if (path.length() > 0 && !path.endsWith(PropertyAccessor.NESTED_PROPERTY_SEPARATOR)) {
+		if (StringUtils.hasLength(path) && !path.endsWith(PropertyAccessor.NESTED_PROPERTY_SEPARATOR)) {
 			path += PropertyAccessor.NESTED_PROPERTY_SEPARATOR;
 		}
 		this.path = path;

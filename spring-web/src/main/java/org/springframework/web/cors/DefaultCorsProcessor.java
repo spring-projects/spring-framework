@@ -156,11 +156,11 @@ public class DefaultCorsProcessor implements CorsProcessor {
 			responseHeaders.setAccessControlAllowMethods(allowMethods);
 		}
 
-		if (preFlightRequest && !CollectionUtils.isEmpty(allowHeaders)) {
+		if (preFlightRequest && CollectionUtils.isNotEmpty(allowHeaders)) {
 			responseHeaders.setAccessControlAllowHeaders(allowHeaders);
 		}
 
-		if (!CollectionUtils.isEmpty(config.getExposedHeaders())) {
+		if (CollectionUtils.isNotEmpty(config.getExposedHeaders())) {
 			responseHeaders.setAccessControlExposeHeaders(config.getExposedHeaders());
 		}
 

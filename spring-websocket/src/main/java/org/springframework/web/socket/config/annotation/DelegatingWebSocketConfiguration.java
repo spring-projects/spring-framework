@@ -40,7 +40,7 @@ public class DelegatingWebSocketConfiguration extends WebSocketConfigurationSupp
 
 	@Autowired(required = false)
 	public void setConfigurers(List<WebSocketConfigurer> configurers) {
-		if (!CollectionUtils.isEmpty(configurers)) {
+		if (CollectionUtils.isNotEmpty(configurers)) {
 			this.configurers.addAll(configurers);
 		}
 	}

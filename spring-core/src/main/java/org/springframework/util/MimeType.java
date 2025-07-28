@@ -181,7 +181,7 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 		checkToken(subtype);
 		this.type = type.toLowerCase(Locale.ROOT);
 		this.subtype = subtype.toLowerCase(Locale.ROOT);
-		if (!CollectionUtils.isEmpty(parameters)) {
+		if (CollectionUtils.isNotEmpty(parameters)) {
 			Map<String, String> map = new LinkedCaseInsensitiveMap<>(parameters.size(), Locale.ROOT);
 			parameters.forEach((parameter, value) -> {
 				checkParameters(parameter, value);

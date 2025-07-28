@@ -395,11 +395,11 @@ public class ScheduledTaskRegistrar implements ScheduledTaskHolder, Initializing
 	 * @since 3.2
 	 */
 	public boolean hasTasks() {
-		return (!CollectionUtils.isEmpty(this.triggerTasks) ||
-				!CollectionUtils.isEmpty(this.cronTasks) ||
-				!CollectionUtils.isEmpty(this.fixedRateTasks) ||
-				!CollectionUtils.isEmpty(this.fixedDelayTasks) ||
-				!CollectionUtils.isEmpty(this.oneTimeTasks));
+		return (CollectionUtils.isNotEmpty(this.triggerTasks) ||
+				CollectionUtils.isNotEmpty(this.cronTasks) ||
+				CollectionUtils.isNotEmpty(this.fixedRateTasks) ||
+				CollectionUtils.isNotEmpty(this.fixedDelayTasks) ||
+				CollectionUtils.isNotEmpty(this.oneTimeTasks));
 	}
 
 

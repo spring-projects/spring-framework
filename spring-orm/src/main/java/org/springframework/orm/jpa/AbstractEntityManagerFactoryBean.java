@@ -362,7 +362,7 @@ public abstract class AbstractEntityManagerFactoryBean implements
 			PersistenceUnitInfo pui = getPersistenceUnitInfo();
 			Map<String, ?> vendorPropertyMap = (pui != null ? jpaVendorAdapter.getJpaPropertyMap(pui) :
 					jpaVendorAdapter.getJpaPropertyMap());
-			if (!CollectionUtils.isEmpty(vendorPropertyMap)) {
+			if (CollectionUtils.isNotEmpty(vendorPropertyMap)) {
 				vendorPropertyMap.forEach((key, value) -> {
 					if (!this.jpaPropertyMap.containsKey(key)) {
 						this.jpaPropertyMap.put(key, value);
@@ -583,7 +583,7 @@ public abstract class AbstractEntityManagerFactoryBean implements
 
 	@Override
 	public EntityManager createNativeEntityManager(@Nullable Map<?, ?> properties) {
-		EntityManager rawEntityManager = (!CollectionUtils.isEmpty(properties) ?
+		EntityManager rawEntityManager = (CollectionUtils.isNotEmpty(properties) ?
 				getNativeEntityManagerFactory().createEntityManager(properties) :
 				getNativeEntityManagerFactory().createEntityManager());
 		postProcessEntityManager(rawEntityManager);

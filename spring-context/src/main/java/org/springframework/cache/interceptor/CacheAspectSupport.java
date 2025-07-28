@@ -399,7 +399,7 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 			CacheOperationSource cacheOperationSource = getCacheOperationSource();
 			if (cacheOperationSource != null) {
 				Collection<CacheOperation> operations = cacheOperationSource.getCacheOperations(method, targetClass);
-				if (!CollectionUtils.isEmpty(operations)) {
+				if (CollectionUtils.isNotEmpty(operations)) {
 					return execute(invoker, method,
 							new CacheOperationContexts(operations, method, args, target, targetClass));
 				}

@@ -174,7 +174,7 @@ public abstract class ExtendedEntityManagerCreator {
 			return createProxy(rawEntityManager, emfInfo, true, synchronizedWithTransaction);
 		}
 		else {
-			EntityManager rawEntityManager = (!CollectionUtils.isEmpty(properties) ?
+			EntityManager rawEntityManager = (CollectionUtils.isNotEmpty(properties) ?
 					emf.createEntityManager(properties) : emf.createEntityManager());
 			return createProxy(rawEntityManager, null, null, null, null, true, synchronizedWithTransaction);
 		}

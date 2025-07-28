@@ -416,8 +416,8 @@ public abstract class AbstractSockJsService implements SockJsService, CorsConfig
 			}
 
 			else if (sockJsPath.matches("/iframe[0-9-.a-z_]*.html")) {
-				if (!CollectionUtils.isEmpty(getAllowedOrigins()) && !getAllowedOrigins().contains("*") ||
-						!CollectionUtils.isEmpty(getAllowedOriginPatterns())) {
+				if (CollectionUtils.isNotEmpty(getAllowedOrigins()) && !getAllowedOrigins().contains("*") ||
+						CollectionUtils.isNotEmpty(getAllowedOriginPatterns())) {
 					if (requestInfo != null) {
 						logger.debug("Iframe support is disabled when an origin check is required. " +
 								"Ignoring transport request: " + requestInfo);
@@ -648,7 +648,7 @@ public abstract class AbstractSockJsService implements SockJsService, CorsConfig
 			String etagValue = builder.toString();
 
 			List<String> ifNoneMatch = request.getHeaders().getIfNoneMatch();
-			if (!CollectionUtils.isEmpty(ifNoneMatch) && ifNoneMatch.get(0).equals(etagValue)) {
+			if (CollectionUtils.isNotEmpty(ifNoneMatch) && ifNoneMatch.get(0).equals(etagValue)) {
 				response.setStatusCode(HttpStatus.NOT_MODIFIED);
 				return;
 			}

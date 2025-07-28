@@ -272,7 +272,7 @@ public class MultipartControllerTests {
 		public String processMultipartFileList(@RequestParam(required = false) List<MultipartFile> file,
 				@RequestPart(required = false) Map<String, String> json) throws IOException {
 
-			if (!CollectionUtils.isEmpty(file)) {
+			if (CollectionUtils.isNotEmpty(file)) {
 				byte[] content = file.get(0).getBytes();
 				assertThat(file.get(1).getBytes()).isEqualTo(content);
 			}

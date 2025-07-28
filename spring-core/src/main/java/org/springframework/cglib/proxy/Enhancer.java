@@ -755,7 +755,7 @@ public class Enhancer extends AbstractClassGenerator {
 	 */
 	protected void filterConstructors(Class sc, List constructors) {
 		CollectionUtils.filter(constructors, new VisibilityPredicate(sc, true));
-		if (constructors.size() == 0) {
+		if (constructors.isEmpty()) {
 			throw new IllegalArgumentException("No visible constructors in " + sc);
 		}
 	}

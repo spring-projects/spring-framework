@@ -114,7 +114,7 @@ public class ViewResolverRegistry {
 
 		if (this.contentNegotiatingResolver != null) {
 			if (!ObjectUtils.isEmpty(defaultViews) &&
-					!CollectionUtils.isEmpty(this.contentNegotiatingResolver.getDefaultViews())) {
+					CollectionUtils.isNotEmpty(this.contentNegotiatingResolver.getDefaultViews())) {
 				List<View> views = new ArrayList<>(this.contentNegotiatingResolver.getDefaultViews());
 				views.addAll(Arrays.asList(defaultViews));
 				this.contentNegotiatingResolver.setDefaultViews(views);

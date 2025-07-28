@@ -443,7 +443,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 	 */
 	protected String[] getPropertyMethodSuffixes(String propertyName) {
 		String suffix = getPropertyMethodSuffix(propertyName);
-		if (suffix.length() > 0 && Character.isUpperCase(suffix.charAt(0))) {
+		if (StringUtils.hasLength(suffix) && Character.isUpperCase(suffix.charAt(0))) {
 			return new String[] {suffix};
 		}
 		return new String[] {suffix, StringUtils.capitalize(suffix)};

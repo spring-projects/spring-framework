@@ -117,7 +117,7 @@ public final class TypePath {
    * @return the corresponding TypePath object, or {@literal null} if the path is empty.
    */
   public static TypePath fromString(final String typePath) {
-    if (typePath == null || typePath.length() == 0) {
+    if (typePath == null || typePath.isEmpty()) {
       return null;
     }
     int typePathLength = typePath.length();

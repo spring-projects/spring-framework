@@ -86,7 +86,7 @@ public class FormContentFilter extends OncePerRequestFilter {
 			throws ServletException, IOException {
 
 		MultiValueMap<String, String> params = parseIfNecessary(request);
-		if (!CollectionUtils.isEmpty(params)) {
+		if (CollectionUtils.isNotEmpty(params)) {
 			filterChain.doFilter(new FormContentRequestWrapper(request, params), response);
 		}
 		else {

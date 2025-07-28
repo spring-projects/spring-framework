@@ -62,7 +62,7 @@ public interface CacheOperationSource {
 	 * @see #getCacheOperations
 	 */
 	default boolean hasCacheOperations(Method method, @Nullable Class<?> targetClass) {
-		return !CollectionUtils.isEmpty(getCacheOperations(method, targetClass));
+		return CollectionUtils.isNotEmpty(getCacheOperations(method, targetClass));
 	}
 
 	/**

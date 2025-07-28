@@ -46,7 +46,7 @@ public class WebFluxConfigurerComposite implements WebFluxConfigurer {
 
 
 	public void addWebFluxConfigurers(List<WebFluxConfigurer> configurers) {
-		if (!CollectionUtils.isEmpty(configurers)) {
+		if (CollectionUtils.isNotEmpty(configurers)) {
 			this.delegates.addAll(configurers);
 		}
 	}

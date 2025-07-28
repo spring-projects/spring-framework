@@ -397,10 +397,10 @@ class DefaultWebTestClient implements WebTestClient {
 						}
 					})
 					.cookies(cookiesToUse -> {
-						if (!CollectionUtils.isEmpty(DefaultWebTestClient.this.defaultCookies)) {
+						if (CollectionUtils.isNotEmpty(DefaultWebTestClient.this.defaultCookies)) {
 							cookiesToUse.putAll(DefaultWebTestClient.this.defaultCookies);
 						}
-						if (!CollectionUtils.isEmpty(this.cookies)) {
+						if (CollectionUtils.isNotEmpty(this.cookies)) {
 							cookiesToUse.putAll(this.cookies);
 						}
 					})

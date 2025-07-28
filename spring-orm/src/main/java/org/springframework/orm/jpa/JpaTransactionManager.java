@@ -477,7 +477,7 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 			em = emfInfo.createNativeEntityManager(properties);
 		}
 		else {
-			em = (!CollectionUtils.isEmpty(properties) ?
+			em = (CollectionUtils.isNotEmpty(properties) ?
 					emf.createEntityManager(properties) : emf.createEntityManager());
 		}
 		if (this.entityManagerInitializer != null) {

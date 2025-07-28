@@ -60,7 +60,7 @@ public class PlaceholderResolutionException extends IllegalArgumentException {
 	private static String buildMessage(String reason, List<String> values) {
 		StringBuilder sb = new StringBuilder();
 		sb.append(reason);
-		if (!CollectionUtils.isEmpty(values)) {
+		if (CollectionUtils.isNotEmpty(values)) {
 			String valuesChain = values.stream().map(value -> "\"" + value + "\"")
 					.collect(Collectors.joining(" <-- "));
 			sb.append(" in value %s".formatted(valuesChain));

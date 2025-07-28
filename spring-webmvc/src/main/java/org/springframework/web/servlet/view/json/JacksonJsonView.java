@@ -151,7 +151,7 @@ public class JacksonJsonView extends AbstractJacksonView {
 	@Override
 	protected Object filterModel(Map<String, Object> model, HttpServletRequest request) {
 		Map<String, Object> result = CollectionUtils.newHashMap(model.size());
-		Set<String> modelKeys = (!CollectionUtils.isEmpty(this.modelKeys) ? this.modelKeys : model.keySet());
+		Set<String> modelKeys = (CollectionUtils.isNotEmpty(this.modelKeys) ? this.modelKeys : model.keySet());
 		model.forEach((clazz, value) -> {
 			if (!(value instanceof BindingResult) && modelKeys.contains(clazz) &&
 					!clazz.equals(JSON_VIEW_HINT) &&

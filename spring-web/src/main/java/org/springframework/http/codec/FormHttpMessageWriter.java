@@ -26,6 +26,7 @@ import java.util.Map;
 
 import org.jspecify.annotations.Nullable;
 import org.reactivestreams.Publisher;
+import org.springframework.util.StringUtils;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.ResolvableType;
@@ -162,7 +163,7 @@ public class FormHttpMessageWriter extends LoggingCodecSupport
 		StringBuilder builder = new StringBuilder();
 		formData.forEach((name, values) ->
 				values.forEach(value -> {
-					if (builder.length() != 0) {
+					if (StringUtils.hasLength(builder)) {
 						builder.append('&');
 					}
 					builder.append(URLEncoder.encode(name, charset));

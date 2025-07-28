@@ -591,7 +591,7 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 			for (LifecycleGroupMember member : this.members) {
 				doStart(this.lifecycleBeans, member.name, this.autoStartupOnly, futures);
 			}
-			if (concurrentStartup != null && !CollectionUtils.isEmpty(futures)) {
+			if (concurrentStartup != null && CollectionUtils.isNotEmpty(futures)) {
 				try {
 					CompletableFuture.allOf(futures.toArray(new CompletableFuture<?>[0]))
 							.get(concurrentStartup, TimeUnit.MILLISECONDS);

@@ -50,7 +50,7 @@ public class DelegatingWebMvcConfiguration extends WebMvcConfigurationSupport {
 
 	@Autowired(required = false)
 	public void setConfigurers(List<WebMvcConfigurer> configurers) {
-		if (!CollectionUtils.isEmpty(configurers)) {
+		if (CollectionUtils.isNotEmpty(configurers)) {
 			this.configurers.addWebMvcConfigurers(configurers);
 		}
 	}

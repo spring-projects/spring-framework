@@ -103,7 +103,7 @@ class GroovyBeanDefinitionWrapper extends GroovyObjectSupport {
 	protected AbstractBeanDefinition createBeanDefinition() {
 		AbstractBeanDefinition bd = new GenericBeanDefinition();
 		bd.setBeanClass(this.clazz);
-		if (!CollectionUtils.isEmpty(this.constructorArgs)) {
+		if (CollectionUtils.isNotEmpty(this.constructorArgs)) {
 			ConstructorArgumentValues cav = new ConstructorArgumentValues();
 			for (Object constructorArg : this.constructorArgs) {
 				cav.addGenericArgumentValue(constructorArg);

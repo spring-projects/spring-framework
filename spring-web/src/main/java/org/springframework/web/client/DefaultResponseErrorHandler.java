@@ -151,7 +151,7 @@ public class DefaultResponseErrorHandler implements ResponseErrorHandler {
 			ex = new UnknownHttpStatusCodeException(message, statusCode.value(), statusText, headers, body, charset);
 		}
 
-		if (!CollectionUtils.isEmpty(this.messageConverters)) {
+		if (CollectionUtils.isNotEmpty(this.messageConverters)) {
 			ex.setBodyConvertFunction(initBodyConvertFunction(response, body));
 		}
 
@@ -226,7 +226,7 @@ public class DefaultResponseErrorHandler implements ResponseErrorHandler {
 	 */
 	@SuppressWarnings("NullAway") // Lambda
 	protected Function<ResolvableType, ?> initBodyConvertFunction(ClientHttpResponse response, byte[] body) {
-		Assert.state(!CollectionUtils.isEmpty(this.messageConverters), "Expected message converters");
+		Assert.state(CollectionUtils.isNotEmpty(this.messageConverters), "Expected message converters");
 		return resolvableType -> {
 			try {
 				HttpMessageConverterExtractor<?> extractor =

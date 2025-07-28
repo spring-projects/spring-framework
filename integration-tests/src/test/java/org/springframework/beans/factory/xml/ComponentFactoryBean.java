@@ -19,6 +19,7 @@ package org.springframework.beans.factory.xml;
 import java.util.List;
 
 import org.springframework.beans.factory.FactoryBean;
+import org.springframework.util.CollectionUtils;
 
 public class ComponentFactoryBean implements FactoryBean<Component> {
 
@@ -35,7 +36,7 @@ public class ComponentFactoryBean implements FactoryBean<Component> {
 
 	@Override
 	public Component getObject() {
-		if (this.children != null && this.children.size() > 0) {
+		if (this.children != null && CollectionUtils.isNotEmpty(this.children)) {
 			for (Component child : children) {
 				this.parent.addComponent(child);
 			}

@@ -521,10 +521,10 @@ final class DefaultWebClient implements WebClient {
 		}
 
 		private void initCookies(MultiValueMap<String, String> out) {
-			if (!CollectionUtils.isEmpty(defaultCookies)) {
+			if (CollectionUtils.isNotEmpty(defaultCookies)) {
 				out.putAll(defaultCookies);
 			}
-			if (!CollectionUtils.isEmpty(this.cookies)) {
+			if (CollectionUtils.isNotEmpty(this.cookies)) {
 				out.putAll(this.cookies);
 			}
 		}

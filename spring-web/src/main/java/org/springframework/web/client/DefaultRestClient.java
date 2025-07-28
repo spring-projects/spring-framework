@@ -663,7 +663,7 @@ final class DefaultRestClient implements RestClient {
 				map.putAll(defaultCookies);
 				map.putAll(this.cookies);
 			}
-			return (!CollectionUtils.isEmpty(map) ? serializeCookies(map) : null);
+			return (CollectionUtils.isNotEmpty(map) ? serializeCookies(map) : null);
 		}
 
 		private static String serializeCookies(MultiValueMap<String, String> map) {

@@ -194,7 +194,7 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 
 	@Override
 	public void destroy() {
-		if (!CollectionUtils.isEmpty(this.beanPostProcessors)) {
+		if (CollectionUtils.isNotEmpty(this.beanPostProcessors)) {
 			for (DestructionAwareBeanPostProcessor processor : this.beanPostProcessors) {
 				processor.postProcessBeforeDestruction(this.bean, this.beanName);
 			}
@@ -448,7 +448,7 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 	 * @param postProcessors the post-processor candidates
 	 */
 	public static boolean hasApplicableProcessors(Object bean, List<DestructionAwareBeanPostProcessor> postProcessors) {
-		if (!CollectionUtils.isEmpty(postProcessors)) {
+		if (CollectionUtils.isNotEmpty(postProcessors)) {
 			for (DestructionAwareBeanPostProcessor processor : postProcessors) {
 				if (processor.requiresDestruction(bean)) {
 					return true;
@@ -467,7 +467,7 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 			List<DestructionAwareBeanPostProcessor> processors, Object bean) {
 
 		List<DestructionAwareBeanPostProcessor> filteredPostProcessors = null;
-		if (!CollectionUtils.isEmpty(processors)) {
+		if (CollectionUtils.isNotEmpty(processors)) {
 			filteredPostProcessors = new ArrayList<>(processors.size());
 			for (DestructionAwareBeanPostProcessor processor : processors) {
 				if (processor.requiresDestruction(bean)) {

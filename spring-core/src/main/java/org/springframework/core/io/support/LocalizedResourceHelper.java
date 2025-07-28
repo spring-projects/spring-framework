@@ -24,6 +24,7 @@ import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
 /**
  * Helper class for loading a localized resource,
@@ -100,20 +101,20 @@ public class LocalizedResourceHelper {
 			String variant = locale.getVariant();
 
 			// Check for file with language, country and variant localization.
-			if (variant.length() > 0) {
+			if (StringUtils.hasLength(variant)) {
 				String location =
 						name + this.separator + lang + this.separator + country + this.separator + variant + extension;
 				resource = this.resourceLoader.getResource(location);
 			}
 
 			// Check for file with language and country localization.
-			if ((resource == null || !resource.exists()) && country.length() > 0) {
+			if ((resource == null || !resource.exists()) && StringUtils.hasLength(country)) {
 				String location = name + this.separator + lang + this.separator + country + extension;
 				resource = this.resourceLoader.getResource(location);
 			}
 
 			// Check for document with language localization.
-			if ((resource == null || !resource.exists()) && lang.length() > 0) {
+			if ((resource == null || !resource.exists()) && StringUtils.hasLength(lang)) {
 				String location = name + this.separator + lang + extension;
 				resource = this.resourceLoader.getResource(location);
 			}

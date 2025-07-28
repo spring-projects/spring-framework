@@ -360,7 +360,7 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 					(Set<MediaType>) inputMessage.getServletRequest()
 							.getAttribute(HandlerMapping.PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE);
 
-			if (isContentTypePreset || !CollectionUtils.isEmpty(producibleMediaTypes)) {
+			if (isContentTypePreset || CollectionUtils.isNotEmpty(producibleMediaTypes)) {
 				throw new HttpMessageNotWritableException(
 						"No converter for [" + valueType + "] with preset Content-Type '" + contentType + "'");
 			}
@@ -423,7 +423,7 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 
 		Set<MediaType> mediaTypes =
 				(Set<MediaType>) request.getAttribute(HandlerMapping.PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE);
-		if (!CollectionUtils.isEmpty(mediaTypes)) {
+		if (CollectionUtils.isNotEmpty(mediaTypes)) {
 			return new ArrayList<>(mediaTypes);
 		}
 		Set<MediaType> result = new LinkedHashSet<>();
@@ -542,7 +542,7 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 		if (extension.equals("html")) {
 			String name = HandlerMapping.PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE;
 			Set<MediaType> mediaTypes = (Set<MediaType>) request.getAttribute(name);
-			if (!CollectionUtils.isEmpty(mediaTypes) && mediaTypes.contains(MediaType.TEXT_HTML)) {
+			if (CollectionUtils.isNotEmpty(mediaTypes) && mediaTypes.contains(MediaType.TEXT_HTML)) {
 				return true;
 			}
 		}

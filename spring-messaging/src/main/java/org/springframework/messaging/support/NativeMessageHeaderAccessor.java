@@ -62,7 +62,7 @@ public class NativeMessageHeaderAccessor extends MessageHeaderAccessor {
 	 * @param nativeHeaders native headers to create the message with (may be {@code null})
 	 */
 	protected NativeMessageHeaderAccessor(@Nullable Map<String, List<String>> nativeHeaders) {
-		if (!CollectionUtils.isEmpty(nativeHeaders)) {
+		if (CollectionUtils.isNotEmpty(nativeHeaders)) {
 			setHeader(NATIVE_HEADERS, new LinkedMultiValueMap<>(nativeHeaders));
 		}
 	}
@@ -172,7 +172,7 @@ public class NativeMessageHeaderAccessor extends MessageHeaderAccessor {
 		Map<String, List<String>> map = getNativeHeaders();
 		if (map != null) {
 			List<String> values = map.get(headerName);
-			if (!CollectionUtils.isEmpty(values)) {
+			if (CollectionUtils.isNotEmpty(values)) {
 				return values.get(0);
 			}
 		}
@@ -292,7 +292,7 @@ public class NativeMessageHeaderAccessor extends MessageHeaderAccessor {
 		Map<String, List<String>> map = (Map<String, List<String>>) headers.get(NATIVE_HEADERS);
 		if (map != null) {
 			List<String> values = map.get(headerName);
-			if (!CollectionUtils.isEmpty(values)) {
+			if (CollectionUtils.isNotEmpty(values)) {
 				return values.get(0);
 			}
 		}

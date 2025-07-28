@@ -207,7 +207,7 @@ public final class ConsumesRequestCondition extends AbstractRequestCondition<Con
 			return EMPTY_CONDITION;
 		}
 		List<ConsumeMediaTypeExpression> result = getMatchingExpressions(exchange);
-		return !CollectionUtils.isEmpty(result) ? new ConsumesRequestCondition(result) : null;
+		return CollectionUtils.isNotEmpty(result) ? new ConsumesRequestCondition(result) : null;
 	}
 
 	private boolean hasBody(ServerHttpRequest request) {

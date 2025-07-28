@@ -96,7 +96,7 @@ public abstract class InterceptingHttpAccessor extends HttpAccessor {
 	@Override
 	public ClientHttpRequestFactory getRequestFactory() {
 		List<ClientHttpRequestInterceptor> interceptors = getInterceptors();
-		if (!CollectionUtils.isEmpty(interceptors)) {
+		if (CollectionUtils.isNotEmpty(interceptors)) {
 			ClientHttpRequestFactory factory = this.interceptingRequestFactory;
 			if (factory == null) {
 				factory = new InterceptingClientHttpRequestFactory(

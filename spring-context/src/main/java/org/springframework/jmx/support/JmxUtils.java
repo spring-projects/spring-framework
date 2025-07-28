@@ -95,7 +95,7 @@ public abstract class JmxUtils {
 		// null means any registered server, but "" specifically means the platform server
 		if (!"".equals(agentId)) {
 			List<MBeanServer> servers = MBeanServerFactory.findMBeanServer(agentId);
-			if (!CollectionUtils.isEmpty(servers)) {
+			if (CollectionUtils.isNotEmpty(servers)) {
 				// Check to see if an MBeanServer is registered.
 				if (servers.size() > 1 && logger.isInfoEnabled()) {
 					logger.info("Found more than one MBeanServer instance" +

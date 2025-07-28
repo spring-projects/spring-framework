@@ -409,7 +409,7 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 			for (PartialMatch match : this.partialMatches) {
 				if (match.hasProducesMatch()) {
 					Set<NameValueExpression<String>> set = match.getInfo().getParamsCondition().getExpressions();
-					if (!CollectionUtils.isEmpty(set)) {
+					if (CollectionUtils.isNotEmpty(set)) {
 						int i = 0;
 						String[] array = new String[set.size()];
 						for (NameValueExpression<String> expression : set) {

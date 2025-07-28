@@ -203,7 +203,7 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 				result.addAll(entry.getValue().keySet());
 			}
 		}
-		if (!CollectionUtils.isEmpty(result)) {
+		if (CollectionUtils.isNotEmpty(result)) {
 			return result;
 		}
 		return (ProblemDetail.class.isAssignableFrom(clazz) ?

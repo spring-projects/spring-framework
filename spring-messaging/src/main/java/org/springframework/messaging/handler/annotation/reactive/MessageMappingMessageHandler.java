@@ -344,12 +344,12 @@ public class MessageMappingMessageHandler extends AbstractMethodMessageHandler<C
 			CompositeMessageCondition mapping, HandlerMethod handlerMethod, Message<?> message) {
 
 		Set<String> patterns = mapping.getCondition(DestinationPatternsMessageCondition.class).getPatterns();
-		if (!CollectionUtils.isEmpty(patterns)) {
+		if (CollectionUtils.isNotEmpty(patterns)) {
 			String pattern = patterns.iterator().next();
 			RouteMatcher.Route destination = getDestination(message);
 			Assert.state(destination != null, "Missing destination header");
 			Map<String, String> vars = obtainRouteMatcher().matchAndExtract(pattern, destination);
-			if (!CollectionUtils.isEmpty(vars)) {
+			if (CollectionUtils.isNotEmpty(vars)) {
 				MessageHeaderAccessor mha = MessageHeaderAccessor.getAccessor(message, MessageHeaderAccessor.class);
 				Assert.state(mha != null && mha.isMutable(), "Mutable MessageHeaderAccessor required");
 				mha.setHeader(DestinationVariableMethodArgumentResolver.DESTINATION_TEMPLATE_VARIABLES_HEADER, vars);

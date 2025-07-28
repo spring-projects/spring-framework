@@ -383,7 +383,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 					uriTemplateVariables.putAll(decodedVars);
 				}
 			}
-			if (logger.isTraceEnabled() && uriTemplateVariables.size() > 0) {
+			if (logger.isTraceEnabled() && CollectionUtils.isNotEmpty(uriTemplateVariables)) {
 				logger.trace("URI variables " + uriTemplateVariables);
 			}
 			return buildPathExposingHandler(handler, bestMatch, pathWithinMapping, uriTemplateVariables);
@@ -434,7 +434,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 
 		HandlerExecutionChain chain = new HandlerExecutionChain(rawHandler);
 		chain.addInterceptor(new PathExposingHandlerInterceptor(bestMatchingPattern, pathWithinMapping));
-		if (!CollectionUtils.isEmpty(uriTemplateVariables)) {
+		if (CollectionUtils.isNotEmpty(uriTemplateVariables)) {
 			chain.addInterceptor(new UriTemplateVariablesHandlerInterceptor(uriTemplateVariables));
 		}
 		return chain;

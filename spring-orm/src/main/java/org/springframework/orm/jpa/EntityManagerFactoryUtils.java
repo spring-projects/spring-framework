@@ -259,7 +259,7 @@ public abstract class EntityManagerFactoryUtils {
 			}
 		}
 		if (em == null) {
-			em = (!CollectionUtils.isEmpty(properties) ? emf.createEntityManager(properties) : emf.createEntityManager());
+			em = (CollectionUtils.isNotEmpty(properties) ? emf.createEntityManager(properties) : emf.createEntityManager());
 		}
 
 		try {

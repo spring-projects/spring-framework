@@ -539,7 +539,7 @@ public class HttpRequestValues {
 				bodyValue = buildMultipartBody();
 			}
 
-			if (!CollectionUtils.isEmpty(this.requestParams)) {
+			if (CollectionUtils.isNotEmpty(this.requestParams)) {
 				if (hasFormDataContentType()) {
 					Assert.isTrue(!hasParts(), "Request parts not expected for a form data request");
 					Assert.isTrue(!hasBody(), "Body not expected for a form data request");

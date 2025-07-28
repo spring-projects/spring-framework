@@ -63,7 +63,7 @@ public class PathVariableMapMethodArgumentResolver implements HandlerMethodArgum
 				(Map<String, String>) webRequest.getAttribute(
 						HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE, RequestAttributes.SCOPE_REQUEST);
 
-		if (!CollectionUtils.isEmpty(uriTemplateVars)) {
+		if (CollectionUtils.isNotEmpty(uriTemplateVars)) {
 			return Collections.unmodifiableMap(uriTemplateVars);
 		}
 		else {

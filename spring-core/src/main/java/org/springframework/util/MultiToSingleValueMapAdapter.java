@@ -201,7 +201,7 @@ final class MultiToSingleValueMapAdapter<K, V> implements Map<K, V>, Serializabl
 	}
 
 	private @Nullable V adaptValue(@Nullable List<V> values) {
-		if (!CollectionUtils.isEmpty(values)) {
+		if (CollectionUtils.isNotEmpty(values)) {
 			return values.get(0);
 		}
 		else {

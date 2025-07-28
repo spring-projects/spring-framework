@@ -240,7 +240,7 @@ public abstract class AbstractMessageWriterResultHandler extends HandlerResultHa
 		MediaType contentType = exchange.getResponse().getHeaders().getContentType();
 		boolean isPresentMediaType = (contentType != null && contentType.equals(bestMediaType));
 		Set<MediaType> producibleTypes = exchange.getAttribute(HandlerMapping.PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE);
-		if (isPresentMediaType || !CollectionUtils.isEmpty(producibleTypes)) {
+		if (isPresentMediaType || CollectionUtils.isNotEmpty(producibleTypes)) {
 			return Mono.error(new HttpMessageNotWritableException(
 					"No Encoder for [" + elementType + "] with preset Content-Type '" + contentType + "'"));
 		}

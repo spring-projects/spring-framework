@@ -305,7 +305,7 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 		ModelMap model = mav.getModel();
 		if (model instanceof RedirectAttributes redirectAttributes) {
 			Map<String, ?> flashAttributes = redirectAttributes.getFlashAttributes();
-			if (!CollectionUtils.isEmpty(flashAttributes)) {
+			if (CollectionUtils.isNotEmpty(flashAttributes)) {
 				HttpServletRequest req = request.getNativeRequest(HttpServletRequest.class);
 				HttpServletResponse res = request.getNativeResponse(HttpServletResponse.class);
 				if (req != null) {

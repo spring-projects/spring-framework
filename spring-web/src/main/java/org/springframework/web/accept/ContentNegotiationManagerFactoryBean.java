@@ -158,7 +158,7 @@ public class ContentNegotiationManagerFactoryBean implements FactoryBean<Content
 	 * @see #addMediaTypes(Map)
 	 */
 	public void setMediaTypes(Properties mediaTypes) {
-		if (!CollectionUtils.isEmpty(mediaTypes)) {
+		if (CollectionUtils.isNotEmpty(mediaTypes)) {
 			mediaTypes.forEach((key, value) ->
 					addMediaType((String) key, MediaType.valueOf((String) value)));
 		}
@@ -269,7 +269,7 @@ public class ContentNegotiationManagerFactoryBean implements FactoryBean<Content
 		// Ensure media type mappings are available via ContentNegotiationManager#getMediaTypeMappings()
 		// independent of path extension or parameter strategies.
 
-		if (!CollectionUtils.isEmpty(this.mediaTypes) && !this.favorParameter) {
+		if (CollectionUtils.isNotEmpty(this.mediaTypes) && !this.favorParameter) {
 			this.contentNegotiationManager.addFileExtensionResolvers(
 					new MappingMediaTypeFileExtensionResolver(this.mediaTypes));
 		}

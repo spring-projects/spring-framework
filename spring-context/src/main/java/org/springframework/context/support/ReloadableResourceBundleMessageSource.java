@@ -123,7 +123,7 @@ public class ReloadableResourceBundleMessageSource extends AbstractResourceBased
 	 * @since 6.1
 	 */
 	public void setFileExtensions(List<String> fileExtensions) {
-		Assert.isTrue(!CollectionUtils.isEmpty(fileExtensions), "At least one file extension is required");
+		Assert.isTrue(CollectionUtils.isNotEmpty(fileExtensions), "At least one file extension is required");
 		for (String extension : fileExtensions) {
 			if (!extension.startsWith(".")) {
 				throw new IllegalArgumentException("File extension '" + extension + "' should start with '.'");
@@ -379,18 +379,18 @@ public class ReloadableResourceBundleMessageSource extends AbstractResourceBased
 		StringBuilder temp = new StringBuilder(basename);
 
 		temp.append('_');
-		if (language.length() > 0) {
+		if (StringUtils.hasLength(language)) {
 			temp.append(language);
 			result.add(0, temp.toString());
 		}
 
 		temp.append('_');
-		if (country.length() > 0) {
+		if (StringUtils.hasLength(country)) {
 			temp.append(country);
 			result.add(0, temp.toString());
 		}
 
-		if (variant.length() > 0 && (language.length() > 0 || country.length() > 0)) {
+		if (StringUtils.hasLength(variant) && (StringUtils.hasLength(language) || StringUtils.hasLength(country))) {
 			temp.append('_').append(variant);
 			result.add(0, temp.toString());
 		}

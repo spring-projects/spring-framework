@@ -89,7 +89,7 @@ public class PayloadMethodArgumentResolver implements HandlerMethodArgumentResol
 	public PayloadMethodArgumentResolver(List<? extends Decoder<?>> decoders, @Nullable Validator validator,
 			@Nullable ReactiveAdapterRegistry registry, boolean useDefaultResolution) {
 
-		Assert.isTrue(!CollectionUtils.isEmpty(decoders), "At least one Decoder is required");
+		Assert.isTrue(CollectionUtils.isNotEmpty(decoders), "At least one Decoder is required");
 		this.decoders = List.copyOf(decoders);
 		this.validator = validator;
 		this.adapterRegistry = registry != null ? registry : ReactiveAdapterRegistry.getSharedInstance();

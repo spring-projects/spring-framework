@@ -681,7 +681,7 @@ public class FormTag extends AbstractHtmlElementTag {
 	 * Writes the given values as hidden fields.
 	 */
 	private void writeHiddenFields(@Nullable Map<String, String> hiddenFields) throws JspException {
-		if (!CollectionUtils.isEmpty(hiddenFields)) {
+		if (CollectionUtils.isNotEmpty(hiddenFields)) {
 			Assert.state(this.tagWriter != null, "No TagWriter set");
 			this.tagWriter.appendValue("<div>\n");
 			for (Map.Entry<String, String> entry : hiddenFields.entrySet()) {

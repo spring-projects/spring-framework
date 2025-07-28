@@ -147,7 +147,7 @@ public class WebExchangeDataBinder extends WebDataBinder {
 	}
 
 	protected static void addBindValue(Map<String, Object> params, String key, List<?> values) {
-		if (!CollectionUtils.isEmpty(values)) {
+		if (CollectionUtils.isNotEmpty(values)) {
 			if (values.size() == 1) {
 				params.put(key, adaptBindValue(values.get(0)));
 			}

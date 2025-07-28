@@ -149,7 +149,7 @@ public abstract class ReflectionHelper {
 	static @Nullable ArgumentsMatchKind compareArgumentsVarargs(
 			List<TypeDescriptor> expectedArgTypes, List<TypeDescriptor> suppliedArgTypes, TypeConverter typeConverter) {
 
-		Assert.isTrue(!CollectionUtils.isEmpty(expectedArgTypes),
+		Assert.isTrue(CollectionUtils.isNotEmpty(expectedArgTypes),
 				"Expected arguments must at least include one array (the varargs parameter)");
 		Assert.isTrue(expectedArgTypes.get(expectedArgTypes.size() - 1).isArray(),
 				"Final expected argument should be array type (the varargs parameter)");

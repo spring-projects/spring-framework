@@ -174,7 +174,7 @@ public class JettyWebSocketSession extends AbstractWebSocketSession<Session> {
 
 		HttpHeaders headers = new HttpHeaders();
 		Map<String, List<String>> nativeHeaders = session.getUpgradeRequest().getHeaders();
-		if (!CollectionUtils.isEmpty(nativeHeaders)) {
+		if (CollectionUtils.isNotEmpty(nativeHeaders)) {
 			headers.putAll(nativeHeaders);
 		}
 		this.headers = HttpHeaders.readOnlyHttpHeaders(headers);
@@ -189,7 +189,7 @@ public class JettyWebSocketSession extends AbstractWebSocketSession<Session> {
 
 	private List<WebSocketExtension> getExtensions(Session session) {
 		List<ExtensionConfig> configs = session.getUpgradeResponse().getExtensions();
-		if (!CollectionUtils.isEmpty(configs)) {
+		if (CollectionUtils.isNotEmpty(configs)) {
 			List<WebSocketExtension> result = new ArrayList<>(configs.size());
 			for (ExtensionConfig config : configs) {
 				result.add(new WebSocketExtension(config.getName(), config.getParameters()));

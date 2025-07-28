@@ -291,7 +291,7 @@ public class CorsConfiguration {
 	 */
 	public void setAllowedMethods(@Nullable List<String> allowedMethods) {
 		this.allowedMethods = (allowedMethods != null ? new ArrayList<>(allowedMethods) : null);
-		if (!CollectionUtils.isEmpty(allowedMethods)) {
+		if (CollectionUtils.isNotEmpty(allowedMethods)) {
 			this.resolvedMethods = new ArrayList<>(allowedMethods.size());
 			for (String method : allowedMethods) {
 				if (ALL.equals(method)) {
@@ -601,7 +601,7 @@ public class CorsConfiguration {
 		CorsConfiguration config = new CorsConfiguration(this);
 		List<String> origins = combine(getAllowedOrigins(), other.getAllowedOrigins());
 		List<OriginPattern> patterns = combinePatterns(this.allowedOriginPatterns, other.allowedOriginPatterns);
-		config.allowedOrigins = (origins == DEFAULT_PERMIT_ALL && !CollectionUtils.isEmpty(patterns) ? null : origins);
+		config.allowedOrigins = (origins == DEFAULT_PERMIT_ALL && CollectionUtils.isNotEmpty(patterns) ? null : origins);
 		config.allowedOriginPatterns = patterns;
 		config.setAllowedMethods(combine(getAllowedMethods(), other.getAllowedMethods()));
 		config.setAllowedHeaders(combine(getAllowedHeaders(), other.getAllowedHeaders()));

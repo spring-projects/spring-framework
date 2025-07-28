@@ -74,7 +74,7 @@ public abstract class AbstractFallbackCacheOperationSource implements CacheOpera
 
 	@Override
 	public boolean hasCacheOperations(Method method, @Nullable Class<?> targetClass) {
-		return !CollectionUtils.isEmpty(getCacheOperations(method, targetClass, false));
+		return CollectionUtils.isNotEmpty(getCacheOperations(method, targetClass, false));
 	}
 
 	@Override

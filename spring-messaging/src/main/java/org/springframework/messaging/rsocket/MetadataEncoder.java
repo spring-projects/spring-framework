@@ -158,7 +158,7 @@ final class MetadataEncoder {
 		if (route != null) {
 			this.route = expand(route, vars != null ? vars : new Object[0]);
 		}
-		if (!CollectionUtils.isEmpty(metadata)) {
+		if (CollectionUtils.isNotEmpty(metadata)) {
 			for (Map.Entry<Object, MimeType> entry : metadata.entrySet()) {
 				metadata(entry.getKey(), entry.getValue());
 			}

@@ -202,7 +202,7 @@ public final class ProducesRequestCondition extends AbstractRequestCondition<Pro
 			return this;
 		}
 		List<ProduceMediaTypeExpression> result = getMatchingExpressions(exchange);
-		if (!CollectionUtils.isEmpty(result)) {
+		if (CollectionUtils.isNotEmpty(result)) {
 			return new ProducesRequestCondition(result, this);
 		}
 		else {

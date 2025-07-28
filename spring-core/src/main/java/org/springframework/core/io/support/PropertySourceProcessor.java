@@ -35,6 +35,7 @@ import org.springframework.core.env.PropertySource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.PlaceholderResolutionException;
 import org.springframework.util.ReflectionUtils;
 
@@ -80,7 +81,7 @@ public class PropertySourceProcessor {
 		String name = descriptor.name();
 		String encoding = descriptor.encoding();
 		List<String> locations = descriptor.locations();
-		Assert.isTrue(locations.size() > 0, "At least one @PropertySource(value) location is required");
+		Assert.isTrue(CollectionUtils.isNotEmpty(locations), "At least one @PropertySource(value) location is required");
 		boolean ignoreResourceNotFound = descriptor.ignoreResourceNotFound();
 		PropertySourceFactory factory = (descriptor.propertySourceFactory() != null ?
 				instantiateClass(descriptor.propertySourceFactory()) : defaultPropertySourceFactory);

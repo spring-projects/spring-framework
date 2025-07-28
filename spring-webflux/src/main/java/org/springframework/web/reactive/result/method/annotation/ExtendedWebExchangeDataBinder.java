@@ -83,7 +83,7 @@ public class ExtendedWebExchangeDataBinder extends WebExchangeDataBinder {
 	public Mono<Map<String, Object>> getValuesToBind(ServerWebExchange exchange) {
 		return super.getValuesToBind(exchange).doOnNext(map -> {
 			Map<String, String> vars = exchange.getAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE);
-			if (!CollectionUtils.isEmpty(vars)) {
+			if (CollectionUtils.isNotEmpty(vars)) {
 				vars.forEach((key, value) -> addValueIfNotPresent(map, "URI variable", key, value));
 			}
 			HttpHeaders headers = exchange.getRequest().getHeaders();
@@ -93,7 +93,7 @@ public class ExtendedWebExchangeDataBinder extends WebExchangeDataBinder {
 					continue;
 				}
 				List<String> values = entry.getValue();
-				if (!CollectionUtils.isEmpty(values)) {
+				if (CollectionUtils.isNotEmpty(values)) {
 					// For constructor args with @BindParam mapped to the actual header name
 					addValueIfNotPresent(map, "Header", name, (values.size() == 1 ? values.get(0) : values));
 					// Also adapt to Java conventions for setters

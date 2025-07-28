@@ -266,7 +266,7 @@ final class DefaultRSocketRequesterBuilder implements RSocketRequester.Builder {
 			MimeType dataMimeType, MimeType metaMimeType, RSocketStrategies strategies) {
 
 		Object data = this.setupData;
-		boolean hasMetadata = (this.setupRoute != null || !CollectionUtils.isEmpty(this.setupMetadata));
+		boolean hasMetadata = (this.setupRoute != null || CollectionUtils.isNotEmpty(this.setupMetadata));
 		if (!hasMetadata && data == null) {
 			return Mono.just(EMPTY_SETUP_PAYLOAD);
 		}

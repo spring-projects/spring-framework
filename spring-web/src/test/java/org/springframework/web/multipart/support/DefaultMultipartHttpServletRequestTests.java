@@ -24,6 +24,7 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.util.StringUtils;
 import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -81,7 +82,7 @@ class DefaultMultipartHttpServletRequestTests {
 		for (String key : this.queryParams.keySet()) {
 			for (String value : this.queryParams.get(key)) {
 				this.servletRequest.addParameter(key, value);
-				query.append(query.length() > 0 ? "&" : "").append(key).append('=').append(value);
+				query.append(StringUtils.hasLength(query) ? "&" : "").append(key).append('=').append(value);
 			}
 		}
 		this.servletRequest.setQueryString(query.toString());

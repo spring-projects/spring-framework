@@ -44,7 +44,7 @@ class WebMvcConfigurerComposite implements WebMvcConfigurer {
 
 
 	public void addWebMvcConfigurers(List<WebMvcConfigurer> configurers) {
-		if (!CollectionUtils.isEmpty(configurers)) {
+		if (CollectionUtils.isNotEmpty(configurers)) {
 			this.delegates.addAll(configurers);
 		}
 	}

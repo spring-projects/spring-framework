@@ -764,7 +764,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 		}
 
 		// Catch-all
-		if (!CollectionUtils.isEmpty(getModelAndViewResolvers())) {
+		if (CollectionUtils.isNotEmpty(getModelAndViewResolvers())) {
 			handlers.add(new ModelAndViewResolverMethodReturnValueHandler(getModelAndViewResolvers()));
 		}
 		else {

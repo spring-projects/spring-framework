@@ -503,10 +503,10 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 			String lookupDestination, Message<?> message) {
 
 		Set<String> patterns = mapping.getDestinationConditions().getPatterns();
-		if (!CollectionUtils.isEmpty(patterns)) {
+		if (CollectionUtils.isNotEmpty(patterns)) {
 			String pattern = patterns.iterator().next();
 			Map<String, String> vars = getPathMatcher().extractUriTemplateVariables(pattern, lookupDestination);
-			if (!CollectionUtils.isEmpty(vars)) {
+			if (CollectionUtils.isNotEmpty(vars)) {
 				MessageHeaderAccessor mha = MessageHeaderAccessor.getAccessor(message, MessageHeaderAccessor.class);
 				Assert.state(mha != null && mha.isMutable(), "Mutable MessageHeaderAccessor required");
 				mha.setHeader(DestinationVariableMethodArgumentResolver.DESTINATION_TEMPLATE_VARIABLES_HEADER, vars);

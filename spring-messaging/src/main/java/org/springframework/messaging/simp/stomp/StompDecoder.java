@@ -33,6 +33,7 @@ import org.springframework.messaging.support.NativeMessageHeaderAccessor;
 import org.springframework.util.InvalidMimeTypeException;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StreamUtils;
+import org.springframework.util.StringUtils;
 
 /**
  * Decodes one or more STOMP frames contained in a {@link ByteBuffer}.
@@ -134,7 +135,7 @@ public class StompDecoder {
 		byteBuffer.mark();
 
 		String command = readCommand(byteBuffer);
-		if (command.length() > 0) {
+		if (StringUtils.hasLength(command)) {
 			StompHeaderAccessor headerAccessor = null;
 			byte[] payload = null;
 			if (byteBuffer.remaining() > 0) {

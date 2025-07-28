@@ -23,6 +23,7 @@ import org.jspecify.annotations.Nullable;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
+import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.support.RequestContextUtils;
@@ -187,7 +188,7 @@ public class ParameterizableViewController extends AbstractController {
 			sb.append("status=").append(this.statusCode);
 		}
 		if (this.view != null) {
-			sb.append(sb.length() != 0 ? ", " : "");
+			sb.append(StringUtils.hasLength(sb) ? ", " : "");
 			String viewName = getViewName();
 			sb.append("view=").append(viewName != null ? "\"" + viewName + "\"" : this.view);
 		}

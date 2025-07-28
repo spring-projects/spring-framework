@@ -49,6 +49,7 @@ import org.springframework.messaging.support.ExecutorSubscribableChannel;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.messaging.tcp.TcpOperations;
 import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -293,7 +294,7 @@ public abstract class AbstractStompBrokerRelayIntegrationTests {
 
 		public void expectMessages(MessageExchange... messageExchanges) throws InterruptedException {
 			List<MessageExchange> expectedMessages = new ArrayList<>(Arrays.asList(messageExchanges));
-			while (expectedMessages.size() > 0) {
+			while (CollectionUtils.isNotEmpty(expectedMessages)) {
 				Message<?> message = this.queue.poll(10000, TimeUnit.MILLISECONDS);
 				assertThat(message).as("Timed out waiting for messages, expected [" + expectedMessages + "]").isNotNull();
 				MessageExchange match = findMatch(expectedMessages, message);

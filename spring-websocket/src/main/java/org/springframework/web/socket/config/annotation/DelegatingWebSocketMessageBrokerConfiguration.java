@@ -48,7 +48,7 @@ public class DelegatingWebSocketMessageBrokerConfiguration extends WebSocketMess
 
 	@Autowired(required = false)
 	public void setConfigurers(List<WebSocketMessageBrokerConfigurer> configurers) {
-		if (!CollectionUtils.isEmpty(configurers)) {
+		if (CollectionUtils.isNotEmpty(configurers)) {
 			this.configurers.addAll(configurers);
 		}
 	}
