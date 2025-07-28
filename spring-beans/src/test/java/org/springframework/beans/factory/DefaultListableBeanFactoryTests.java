@@ -3211,6 +3211,29 @@ class DefaultListableBeanFactoryTests {
 		assertThat(holder.getNonPublicEnum()).isEqualTo(NonPublicEnum.VALUE_1);
 	}
 
+	@Test
+	void mostSpecificCacheEntryForTypeMatching() {
+		RootBeanDefinition bd1 = new RootBeanDefinition();
+		bd1.setFactoryBeanName("config");
+		bd1.setFactoryMethodName("create");
+		lbf.registerBeanDefinition("config", new RootBeanDefinition(BeanWithFactoryMethod.class));
+		lbf.registerBeanDefinition("bd1", bd1);
+		lbf.registerBeanDefinition("bd2", new RootBeanDefinition(NestedTestBean.class));
+		lbf.freezeConfiguration();
+
+		String[] allBeanNames = lbf.getBeanNamesForType(Object.class);
+		String[] nestedBeanNames = lbf.getBeanNamesForType(NestedTestBean.class);
+		assertThat(lbf.getType("bd1")).isEqualTo(TestBean.class);
+		assertThat(lbf.getBeanNamesForType(TestBean.class)).containsExactly("bd1");
+		assertThat(lbf.getBeanNamesForType(DerivedTestBean.class)).isEmpty();
+		lbf.getBean("bd1");
+		assertThat(lbf.getType("bd1")).isEqualTo(DerivedTestBean.class);
+		assertThat(lbf.getBeanNamesForType(TestBean.class)).containsExactly("bd1");
+		assertThat(lbf.getBeanNamesForType(DerivedTestBean.class)).containsExactly("bd1");
+		assertThat(lbf.getBeanNamesForType(NestedTestBean.class)).isSameAs(nestedBeanNames);
+		assertThat(lbf.getBeanNamesForType(Object.class)).isSameAs(allBeanNames);
+	}
+
 
 	private int registerBeanDefinitions(Properties p) {
 		return registerBeanDefinitions(p, null);
@@ -3427,7 +3450,7 @@ class DefaultListableBeanFactoryTests {
 		}
 
 		public TestBean create() {
-			TestBean tb = new TestBean();
+			DerivedTestBean tb = new DerivedTestBean();
 			tb.setName(this.name);
 			return tb;
 		}
@@ -3655,11 +3678,11 @@ class DefaultListableBeanFactoryTests {
 
 		private FactoryBean<?> factoryBean;
 
-		public final FactoryBean<?> getFactoryBean() {
+		public FactoryBean<?> getFactoryBean() {
 			return this.factoryBean;
 		}
 
-		public final void setFactoryBean(final FactoryBean<?> factoryBean) {
+		public void setFactoryBean(FactoryBean<?> factoryBean) {
 			this.factoryBean = factoryBean;
 		}
 	}

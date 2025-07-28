@@ -162,7 +162,7 @@ public class PathPattern implements Comparable<PathPattern> {
 			this.capturedVariableCount += elem.getCaptureCount();
 			this.normalizedLength += elem.getNormalizedLength();
 			this.score += elem.getScore();
-			if (elem instanceof CaptureTheRestPathElement || elem instanceof WildcardTheRestPathElement) {
+			if (elem instanceof CaptureSegmentsPathElement || elem instanceof WildcardSegmentsPathElement) {
 				this.catchAll = true;
 			}
 			if (elem instanceof SeparatorPathElement && elem.next instanceof WildcardPathElement && elem.next.next == null) {
@@ -200,7 +200,7 @@ public class PathPattern implements Comparable<PathPattern> {
 			return !hasLength(pathContainer);
 		}
 		else if (!hasLength(pathContainer)) {
-			if (this.head instanceof WildcardTheRestPathElement || this.head instanceof CaptureTheRestPathElement) {
+			if (this.head instanceof WildcardSegmentsPathElement || this.head instanceof CaptureSegmentsPathElement) {
 				pathContainer = EMPTY_PATH; // Will allow CaptureTheRest to bind the variable to empty
 			}
 			else {
@@ -222,7 +222,7 @@ public class PathPattern implements Comparable<PathPattern> {
 			return (hasLength(pathContainer) && !pathContainerIsJustSeparator(pathContainer) ? null : PathMatchInfo.EMPTY);
 		}
 		else if (!hasLength(pathContainer)) {
-			if (this.head instanceof WildcardTheRestPathElement || this.head instanceof CaptureTheRestPathElement) {
+			if (this.head instanceof WildcardSegmentsPathElement || this.head instanceof CaptureSegmentsPathElement) {
 				pathContainer = EMPTY_PATH; // Will allow CaptureTheRest to bind the variable to empty
 			}
 			else {

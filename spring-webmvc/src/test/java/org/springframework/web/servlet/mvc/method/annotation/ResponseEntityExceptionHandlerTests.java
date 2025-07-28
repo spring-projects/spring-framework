@@ -306,7 +306,7 @@ class ResponseEntityExceptionHandlerTests {
 
 	@Test
 	void noResourceFoundException() {
-		testException(new NoResourceFoundException(HttpMethod.GET, "/resource"));
+		testException(new NoResourceFoundException(HttpMethod.GET, "/context/resource", "/resource"));
 	}
 
 	@Test

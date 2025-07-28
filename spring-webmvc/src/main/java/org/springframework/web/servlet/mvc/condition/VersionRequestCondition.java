@@ -127,7 +127,10 @@ public final class VersionRequestCondition extends AbstractRequestCondition<Vers
 			return (-1 * compareVersions(this.version, otherVersion));
 		}
 		else {
-			return (this.version != null ? -1 : 1);
+			// Prefer mappings with a version unless the request is without a version
+			int result = this.version != null ? -1 : 1;
+			Comparable<?> version = (Comparable<?>) request.getAttribute(HandlerMapping.API_VERSION_ATTRIBUTE);
+			return (version == null ? -1 * result : result);
 		}
 	}
 
@@ -148,8 +151,7 @@ public final class VersionRequestCondition extends AbstractRequestCondition<Vers
 	public void handleMatch(HttpServletRequest request) {
 		if (this.version != null && !this.baselineVersion) {
 			Comparable<?> version = (Comparable<?>) request.getAttribute(HandlerMapping.API_VERSION_ATTRIBUTE);
-			Assert.state(version != null, "No API version attribute");
-			if (!this.version.equals(version)) {
+			if (version != null && !this.version.equals(version)) {
 				throw new NotAcceptableApiVersionException(version.toString());
 			}
 		}
