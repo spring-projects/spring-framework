@@ -45,11 +45,11 @@ public class NoResourceFoundException extends ServletException implements ErrorR
 	/**
 	 * Create an instance.
 	 */
-	public NoResourceFoundException(HttpMethod httpMethod, String resourcePath) {
-		super("No static resource " + resourcePath + ".");
+	public NoResourceFoundException(HttpMethod httpMethod, String requestUri, String resourcePath) {
+		super("No static resource " + resourcePath + " for request '" + requestUri + "'.");
 		this.httpMethod = httpMethod;
 		this.resourcePath = resourcePath;
-		this.body = ProblemDetail.forStatusAndDetail(getStatusCode(), getMessage());
+		this.body = ProblemDetail.forStatusAndDetail(getStatusCode(), "No static resource " + resourcePath + ".");
 	}
 
 

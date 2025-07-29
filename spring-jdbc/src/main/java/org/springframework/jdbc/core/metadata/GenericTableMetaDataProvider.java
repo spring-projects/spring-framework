@@ -21,7 +21,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -47,11 +46,6 @@ public class GenericTableMetaDataProvider implements TableMetaDataProvider {
 
 	/** Logger available to subclasses. */
 	protected static final Log logger = LogFactory.getLog(TableMetaDataProvider.class);
-
-	/** Database products we know not supporting the use of a String[] for generated keys. */
-	private static final List<String> productsNotSupportingGeneratedKeysColumnNameArray =
-			Arrays.asList("Apache Derby", "HSQL Database Engine");
-
 
 	/** The name of the user currently connected. */
 	private final @Nullable String userName;
@@ -93,43 +87,12 @@ public class GenericTableMetaDataProvider implements TableMetaDataProvider {
 	@Override
 	public void initializeWithMetaData(DatabaseMetaData databaseMetaData) throws SQLException {
 		try {
-			if (databaseMetaData.supportsGetGeneratedKeys()) {
-				logger.debug("GetGeneratedKeys is supported");
-				setGetGeneratedKeysSupported(true);
-			}
-			else {
-				logger.debug("GetGeneratedKeys is not supported");
-				setGetGeneratedKeysSupported(false);
-			}
+			setGetGeneratedKeysSupported(databaseMetaData.supportsGetGeneratedKeys());
+			setGeneratedKeysColumnNameArraySupported(isGetGeneratedKeysSupported());
 		}
 		catch (SQLException ex) {
 			if (logger.isWarnEnabled()) {
 				logger.warn("Error retrieving 'DatabaseMetaData.supportsGetGeneratedKeys': " + ex.getMessage());
-			}
-		}
-		try {
-			String databaseProductName = databaseMetaData.getDatabaseProductName();
-			if (productsNotSupportingGeneratedKeysColumnNameArray.contains(databaseProductName)) {
-				if (logger.isDebugEnabled()) {
-					logger.debug("GeneratedKeysColumnNameArray is not supported for " + databaseProductName);
-				}
-				setGeneratedKeysColumnNameArraySupported(false);
-			}
-			else {
-				if (isGetGeneratedKeysSupported()) {
-					if (logger.isDebugEnabled()) {
-						logger.debug("GeneratedKeysColumnNameArray is supported for " + databaseProductName);
-					}
-					setGeneratedKeysColumnNameArraySupported(true);
-				}
-				else {
-					setGeneratedKeysColumnNameArraySupported(false);
-				}
-			}
-		}
-		catch (SQLException ex) {
-			if (logger.isWarnEnabled()) {
-				logger.warn("Error retrieving 'DatabaseMetaData.getDatabaseProductName': " + ex.getMessage());
 			}
 		}
 
@@ -218,17 +181,21 @@ public class GenericTableMetaDataProvider implements TableMetaDataProvider {
 		}
 	}
 
+	/**
+	 * This implementation delegates to {@link #catalogNameToUse}.
+	 */
 	@Override
 	public @Nullable String metaDataCatalogNameToUse(@Nullable String catalogName) {
 		return catalogNameToUse(catalogName);
 	}
 
+	/**
+	 * This implementation delegates to {@link #schemaNameToUse}.
+	 * @see #getDefaultSchema()
+	 */
 	@Override
 	public @Nullable String metaDataSchemaNameToUse(@Nullable String schemaName) {
-		if (schemaName == null) {
-			return schemaNameToUse(getDefaultSchema());
-		}
-		return schemaNameToUse(schemaName);
+		return schemaNameToUse(schemaName != null ? schemaName : getDefaultSchema());
 	}
 
 	/**
@@ -389,7 +356,7 @@ public class GenericTableMetaDataProvider implements TableMetaDataProvider {
 		try {
 			tableColumns = databaseMetaData.getColumns(
 					metaDataCatalogName, metaDataSchemaName, metaDataTableName, null);
-			while (tableColumns.next()) {
+			while (tableColumns != null && tableColumns.next()) {
 				String columnName = tableColumns.getString("COLUMN_NAME");
 				int dataType = tableColumns.getInt("DATA_TYPE");
 				if (dataType == Types.DECIMAL) {

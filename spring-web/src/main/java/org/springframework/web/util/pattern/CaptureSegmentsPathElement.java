@@ -25,24 +25,31 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.util.pattern.PathPattern.MatchingContext;
 
 /**
- * A path element representing capturing the rest of a path. In the pattern
- * '/foo/{*foobar}' the /{*foobar} is represented as a {@link CaptureTheRestPathElement}.
+ * A path element that captures multiple path segments.
+ * This element is only allowed in two situations:
+ * <ol>
+ * <li>At the start of a path, immediately followed by a {@link LiteralPathElement} like '/{*foobar}/foo/{bar}'
+ * <li>At the end of a path, like '/foo/{*foobar}'
+ * </ol>
+ * <p>Only a single {@link WildcardSegmentsPathElement} or {@link CaptureSegmentsPathElement} element is allowed
+ *  * in a pattern. In the pattern '/foo/{*foobar}' the /{*foobar} is represented as a {@link CaptureSegmentsPathElement}.
  *
  * @author Andy Clement
+ * @author Brian Clozel
  * @since 5.0
  */
-class CaptureTheRestPathElement extends PathElement {
+class CaptureSegmentsPathElement extends PathElement {
 
 	private final String variableName;
 
 
 	/**
-	 * Create a new {@link CaptureTheRestPathElement} instance.
+	 * Create a new {@link CaptureSegmentsPathElement} instance.
 	 * @param pos position of the path element within the path pattern text
 	 * @param captureDescriptor a character array containing contents like '{' '*' 'a' 'b' '}'
 	 * @param separator the separator used in the path pattern
 	 */
-	CaptureTheRestPathElement(int pos, char[] captureDescriptor, char separator) {
+	CaptureSegmentsPathElement(int pos, char[] captureDescriptor, char separator) {
 		super(pos, separator);
 		this.variableName = new String(captureDescriptor, 2, captureDescriptor.length - 3);
 	}
@@ -50,41 +57,53 @@ class CaptureTheRestPathElement extends PathElement {
 
 	@Override
 	public boolean matches(int pathIndex, MatchingContext matchingContext) {
-		// No need to handle 'match start' checking as this captures everything
-		// anyway and cannot be followed by anything else
-		// assert next == null
-
-		// If there is more data, it must start with the separator
-		if (pathIndex < matchingContext.pathLength && !matchingContext.isSeparator(pathIndex)) {
+		// wildcard segments at the start of the pattern
+		if (pathIndex == 0 && this.next != null) {
+			int endPathIndex = pathIndex;
+			while (endPathIndex < matchingContext.pathLength) {
+				if (this.next.matches(endPathIndex, matchingContext)) {
+					collectParameters(matchingContext, pathIndex, endPathIndex);
+					return true;
+				}
+				endPathIndex++;
+			}
+			return false;
+		}
+		// match until the end of the path
+		else if (pathIndex < matchingContext.pathLength && !matchingContext.isSeparator(pathIndex)) {
 			return false;
 		}
 		if (matchingContext.determineRemainingPath) {
 			matchingContext.remainingPathIndex = matchingContext.pathLength;
 		}
+		collectParameters(matchingContext, pathIndex, matchingContext.pathLength);
+		return true;
+	}
+
+	private void collectParameters(MatchingContext matchingContext, int pathIndex, int endPathIndex) {
 		if (matchingContext.extractingVariables) {
 			// Collect the parameters from all the remaining segments
-			MultiValueMap<String,String> parametersCollector = null;
-			for (int i = pathIndex; i < matchingContext.pathLength; i++) {
+			MultiValueMap<String, String> parametersCollector = NO_PARAMETERS;
+			for (int i = pathIndex; i < endPathIndex; i++) {
 				Element element = matchingContext.pathElements.get(i);
 				if (element instanceof PathSegment pathSegment) {
 					MultiValueMap<String, String> parameters = pathSegment.parameters();
 					if (!parameters.isEmpty()) {
-						if (parametersCollector == null) {
+						if (parametersCollector == NO_PARAMETERS) {
 							parametersCollector = new LinkedMultiValueMap<>();
 						}
 						parametersCollector.addAll(parameters);
 					}
 				}
 			}
-			matchingContext.set(this.variableName, pathToString(pathIndex, matchingContext.pathElements),
-					parametersCollector == null?NO_PARAMETERS:parametersCollector);
+			matchingContext.set(this.variableName, pathToString(pathIndex, endPathIndex, matchingContext.pathElements),
+					parametersCollector);
 		}
-		return true;
 	}
 
-	private String pathToString(int fromSegment, List<Element> pathElements) {
+	private String pathToString(int fromSegment, int toSegment, List<Element> pathElements) {
 		StringBuilder sb = new StringBuilder();
-		for (int i = fromSegment, max = pathElements.size(); i < max; i++) {
+		for (int i = fromSegment, max = toSegment; i < max; i++) {
 			Element element = pathElements.get(i);
 			if (element instanceof PathSegment pathSegment) {
 				sb.append(pathSegment.valueToMatch());
@@ -119,7 +138,7 @@ class CaptureTheRestPathElement extends PathElement {
 
 	@Override
 	public String toString() {
-		return "CaptureTheRest(/{*" + this.variableName + "})";
+		return "CaptureSegments(/{*" + this.variableName + "})";
 	}
 
 }

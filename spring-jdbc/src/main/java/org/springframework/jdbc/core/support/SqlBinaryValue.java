@@ -35,11 +35,17 @@ import org.springframework.jdbc.core.SqlTypeValue;
  *
  * <p>Designed for use with {@link org.springframework.jdbc.core.JdbcTemplate}
  * as well as {@link org.springframework.jdbc.core.simple.JdbcClient}, to be
- * passed in as a parameter value wrapping the target content value. Can be
- * combined with {@link org.springframework.jdbc.core.SqlParameterValue} for
- * specifying a SQL type, for example,
+ * passed in as a parameter value wrapping the target content value.
+ *
+ * <p>Can be combined with {@link org.springframework.jdbc.core.SqlParameterValue}
+ * for specifying a SQL type, for example,
  * {@code new SqlParameterValue(Types.BLOB, new SqlBinaryValue(myContent))}.
  * With most database drivers, the type hint is not actually necessary.
+ *
+ * <p>Note: Only specify {@code Types.BLOB} in case of an actual BLOB, preferring
+ * {@code Types.LONGVARBINARY} otherwise. With PostgreSQL, {@code Types.ARRAY}
+ * has to be specified for BYTEA columns, rather than {@code Types.BLOB}. This
+ * is in contrast to {@link SqlLobValue} where byte array handling was lenient.
  *
  * @author Juergen Hoeller
  * @since 6.1.4

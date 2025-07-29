@@ -18,6 +18,7 @@ package org.springframework.web.servlet.mvc.condition;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Stream;
 
 import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.BeforeEach;
@@ -144,6 +145,26 @@ public class VersionRequestConditionTests {
 				.toList();
 
 		assertThat(list.get(0)).isEqualTo(condition(expected));
+	}
+
+	@Test
+	void compareWithoutRequestVersion() {
+		VersionRequestCondition condition = Stream.of(condition("1.1"), condition("1.2"), emptyCondition())
+				.min((c1, c2) -> c1.compareTo(c2, new MockHttpServletRequest()))
+				.get();
+
+		assertThat(condition).isEqualTo(emptyCondition());
+	}
+
+	@Test // gh-35236
+	void noRequestVersion() {
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/path");
+		VersionRequestCondition condition = condition("1.1");
+
+		VersionRequestCondition match = condition.getMatchingCondition(request);
+		assertThat(match).isSameAs(condition);
+
+		condition.handleMatch(request);
 	}
 
 	private VersionRequestCondition condition(String v) {

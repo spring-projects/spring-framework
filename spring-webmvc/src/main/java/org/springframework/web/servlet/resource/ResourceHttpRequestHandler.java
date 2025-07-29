@@ -524,7 +524,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 		Resource resource = getResource(request);
 		if (resource == null) {
 			logger.debug("Resource not found");
-			throw new NoResourceFoundException(HttpMethod.valueOf(request.getMethod()), getPath(request));
+			throw new NoResourceFoundException(HttpMethod.valueOf(request.getMethod()), request.getRequestURI(), getPath(request));
 		}
 
 		if (HttpMethod.OPTIONS.matches(request.getMethod())) {

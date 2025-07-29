@@ -88,37 +88,71 @@ Kotlin::
 == URI patterns
 [.small]#xref:web/webflux/controller/ann-requestmapping.adoc#webflux-ann-requestmapping-uri-templates[See equivalent in the Reactive stack]#
 
-`@RequestMapping` methods can be mapped using URL patterns. There are two alternatives:
+`@RequestMapping` methods can be mapped using URL patterns.
+Spring MVC is using `PathPattern` -- a pre-parsed pattern matched against the URL path also pre-parsed as `PathContainer`.
+Designed for web use, this solution deals effectively with encoding and path parameters, and matches efficiently.
+See xref:web/webmvc/mvc-config/path-matching.adoc[MVC config] for customizations of path matching options.
 
-* `PathPattern` -- a pre-parsed pattern matched against the URL path also pre-parsed as
-`PathContainer`. Designed for web use, this solution deals effectively with encoding and
-path parameters, and matches efficiently.
-* `AntPathMatcher` -- match String patterns against a String path. This is the original
-solution also used in Spring configuration to select resources on the classpath, on the
-filesystem, and other locations. It is less efficient and the String path input is a
+NOTE: the `AntPathMatcher` variant is now deprecated because it is less efficient and the String path input is a
 challenge for dealing effectively with encoding and other issues with URLs.
 
-`PathPattern` is the recommended solution for web applications and it is the only choice in
-Spring WebFlux. It was enabled for use in Spring MVC from version 5.3 and is enabled by
-default from version 6.0. See xref:web/webmvc/mvc-config/path-matching.adoc[MVC config] for
-customizations of path matching options.
+You can map requests by using glob patterns and wildcards:
 
-`PathPattern` supports the same pattern syntax as `AntPathMatcher`. In addition, it also
-supports the capturing pattern, for example, `+{*spring}+`, for matching 0 or more path segments
-at the end of a path. `PathPattern` also restricts the use of `+**+` for matching multiple
-path segments such that it's only allowed at the end of a pattern. This eliminates many
-cases of ambiguity when choosing the best matching pattern for a given request.
-For full pattern syntax please refer to
-{spring-framework-api}/web/util/pattern/PathPattern.html[PathPattern] and
-{spring-framework-api}/util/AntPathMatcher.html[AntPathMatcher].
+[cols="2,3,5"]
+|===
+|Pattern |Description |Example
 
-Some example patterns:
+| `spring`
+| Literal pattern
+| `+"/spring"+` matches `+"/spring"+`
 
-* `+"/resources/ima?e.png"+` - match one character in a path segment
-* `+"/resources/*.png"+` - match zero or more characters in a path segment
-* `+"/resources/**"+` - match multiple path segments
-* `+"/projects/{project}/versions"+` - match a path segment and capture it as a variable
-* `++"/projects/{project:[a-z]+}/versions"++` - match and capture a variable with a regex
+| `+?+`
+| Matches one character
+| `+"/pages/t?st.html"+` matches `+"/pages/test.html"+` and `+"/pages/t3st.html"+`
+
+| `+*+`
+| Matches zero or more characters within a path segment
+| `+"/resources/*.png"+` matches `+"/resources/file.png"+`
+
+`+"/projects/*/versions"+` matches `+"/projects/spring/versions"+` but does not match `+"/projects/spring/boot/versions"+`
+
+| `+**+`
+| Matches zero or more path segments
+| `+"/resources/**"+` matches `+"/resources/file.png"+` and `+"/resources/images/file.png"+`
+
+`+"/**/resources"+` matches `+"/spring/resources"+` and `+"/spring/framework/resources"+`
+
+`+"/resources/**/file.png"+` is invalid as `+**+` is not allowed in the middle of the path.
+
+`+"/**/{name}/resources"+` is invalid as only a literal pattern is allowed right after `+**+`.
+`+"/**/project/{project}/resources"+` is allowed.
+
+`+"/**/spring/**"+` is not allowed, as only a single `+**+`/`+{*path}+` instance is allowed per pattern.
+
+| `+{name}+`
+| Matches a path segment and captures it as a variable named "name"
+| `+"/projects/{project}/versions"+` matches `+"/projects/spring/versions"+` and captures `+project=spring+`
+
+`+"/projects/{project}/versions"+` does not match `+"/projects/spring/framework/versions"+` as it captures a single path segment.
+
+| `+{name:[a-z]+}+`
+| Matches the regexp `+"[a-z]+"+` as a path variable named "name"
+| `+"/projects/{project:[a-z]+}/versions"+` matches `+"/projects/spring/versions"+` but not `+"/projects/spring1/versions"+`
+
+| `+{*path}+`
+| Matches zero or more path segments and captures it as a variable named "path"
+| `+"/resources/{*file}"+` matches `+"/resources/images/file.png"+` and captures `+file=/images/file.png+`
+
+`+"{*path}/resources"+` matches `+"/spring/framework/resources"+` and captures `+path=/spring/framework+`
+
+`+"/resources/{*path}/file.png"+` is invalid as `{*path}` is not allowed in the middle of the path.
+
+`+"/{*path}/{name}/resources"+` is invalid as only a literal pattern is allowed right after `{*path}`.
+`+"/{*path}/project/{project}/resources"+` is allowed.
+
+`+"/{*path}/spring/**"+` is not allowed, as only a single `+**+`/`+{*path}+` instance is allowed per pattern.
+
+|===
 
 Captured URI variables can be accessed with `@PathVariable`. For example:
 
