@@ -23,6 +23,7 @@ import org.springframework.test.web.support.AbstractHeaderAssertions;
  * Assertions on headers of the response.
  *
  * @author Rob Worsnop
+ * @since 7.0
  * @see RestTestClient.ResponseSpec#expectHeader()
  */
 public class HeaderAssertions extends AbstractHeaderAssertions<ExchangeResult, RestTestClient.ResponseSpec> {

@@ -29,6 +29,7 @@ import org.springframework.util.Assert;
  * XPath assertions for the {@link RestTestClient}.
  *
  * @author Rob Worsnop
+ * @since 7.0
  */
 public class XpathAssertions extends AbstractXpathAssertions<RestTestClient.BodyContentSpec> {
 

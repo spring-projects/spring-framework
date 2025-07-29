@@ -820,6 +820,7 @@ public interface WebTestClient {
 	interface RequestHeadersUriSpec<S extends RequestHeadersSpec<S>> extends UriSpec<S>, RequestHeadersSpec<S> {
 	}
 
+
 	/**
 	 * Specification for providing the body and the URI of a request.
 	 */
@@ -932,7 +933,6 @@ public interface WebTestClient {
 		@FunctionalInterface
 		interface ResponseSpecConsumer extends Consumer<ResponseSpec> {
 		}
-
 	}
 
 
@@ -1014,7 +1014,6 @@ public interface WebTestClient {
 	 * Spec for expectations on the response body content.
 	 */
 	interface BodyContentSpec {
-
 		/**
 		 * Assert the response body is empty and return the exchange result.
 		 */

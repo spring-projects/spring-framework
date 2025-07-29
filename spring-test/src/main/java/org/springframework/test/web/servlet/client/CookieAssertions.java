@@ -24,6 +24,7 @@ import org.springframework.util.MultiValueMap;
  * Assertions on cookies of the response.
  *
  * @author Rob Worsnop
+ * @since 7.0
  */
 public class CookieAssertions extends AbstractCookieAssertions<ExchangeResult, RestTestClient.ResponseSpec> {
 

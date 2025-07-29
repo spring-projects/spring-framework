@@ -24,7 +24,7 @@ import org.springframework.test.web.support.AbstractStatusAssertions;
  * Assertions on the response status.
  *
  * @author Rob Worsnop
- *
+ * @since 7.0
  * @see ResponseSpec#expectStatus()
  */
 public class StatusAssertions extends AbstractStatusAssertions<ExchangeResult, RestTestClient.ResponseSpec> {

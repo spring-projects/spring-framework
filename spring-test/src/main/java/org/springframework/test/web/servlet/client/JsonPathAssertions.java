@@ -26,7 +26,7 @@ import org.springframework.test.web.support.AbstractJsonPathAssertions;
  * <a href="https://github.com/jayway/JsonPath">JsonPath</a> assertions.
  *
  * @author Rob Worsnop
- *
+ * @since 7.0
  * @see <a href="https://github.com/jayway/JsonPath">https://github.com/jayway/JsonPath</a>
  * @see JsonPathExpectationsHelper
  */
