@@ -258,8 +258,12 @@ public abstract class ScriptUtils {
 				for (String statement : statements) {
 					stmtNumber++;
 					try {
-						stmt.execute(statement);
+						boolean results = stmt.execute(statement);
 						int rowsAffected = stmt.getUpdateCount();
+						while (results || rowsAffected != -1) {
+							rowsAffected = stmt.getUpdateCount();
+							results = stmt.getMoreResults(Statement.CLOSE_CURRENT_RESULT);
+						}
 						if (logger.isDebugEnabled()) {
 							logger.debug(rowsAffected + " returned as update count for SQL: " + statement);
 							SQLWarning warningToLog = stmt.getWarnings();
