@@ -31,17 +31,41 @@ import static org.springframework.test.util.AssertionErrors.assertNotNull;
  * Assertions on the response status.
  *
  * @author Rob Worsnop
+ * @author Rossen Stoyanchev
+ * @since 7.0
  * @param <E> the type of the exchange result
  * @param <R> the type of the response spec
  */
 public abstract class AbstractStatusAssertions<E, R> {
-	protected final E exchangeResult;
+
+	private final E exchangeResult;
+
 	private final R responseSpec;
+
 
 	protected AbstractStatusAssertions(E exchangeResult, R responseSpec) {
 		this.exchangeResult = exchangeResult;
 		this.responseSpec = responseSpec;
 	}
+
+
+	/**
+	 * Return the exchange result.
+	 */
+	protected E getExchangeResult() {
+		return this.exchangeResult;
+	}
+
+	/**
+	 * Subclasses must implement this to provide access to the response status.
+	 */
+	protected abstract HttpStatusCode getStatus();
+
+	/**
+	 * Subclasses must implement this to assert with diagnostics.
+	 */
+	protected abstract void assertWithDiagnostics(Runnable assertion);
+
 
 	/**
 	 * Assert the response status as an {@link HttpStatusCode}.
@@ -225,10 +249,6 @@ public abstract class AbstractStatusAssertions<E, R> {
 		assertWithDiagnostics(() -> consumer.accept(actual));
 		return this.responseSpec;
 	}
-
-	protected abstract void assertWithDiagnostics(Runnable assertion);
-
-	protected abstract HttpStatusCode getStatus();
 
 	private R assertStatusAndReturn(HttpStatus expected) {
 		assertNotNull("exchangeResult unexpectedly null", this.exchangeResult);

@@ -35,12 +35,13 @@ public class CookieAssertions extends AbstractCookieAssertions<ExchangeResult, R
 
 
 	@Override
-	protected void assertWithDiagnostics(Runnable assertion) {
-		exchangeResult.assertWithDiagnostics(assertion);
+	protected MultiValueMap<String, ResponseCookie> getResponseCookies() {
+		return getExchangeResult().getResponseCookies();
 	}
 
 	@Override
-	protected MultiValueMap<String, ResponseCookie> getResponseCookies() {
-		return exchangeResult.getResponseCookies();
+	protected void assertWithDiagnostics(Runnable assertion) {
+		getExchangeResult().assertWithDiagnostics(assertion);
 	}
+
 }

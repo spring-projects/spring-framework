@@ -35,20 +35,23 @@ import org.springframework.util.Assert;
  */
 public class XpathAssertions extends AbstractXpathAssertions<WebTestClient.BodyContentSpec> {
 
-	XpathAssertions(WebTestClient.BodyContentSpec spec,
-					String expression, @Nullable Map<String, String> namespaces, Object... args) {
+
+	XpathAssertions(
+			WebTestClient.BodyContentSpec spec,
+			String expression, @Nullable Map<String, String> namespaces, Object... args) {
+
 		super(spec, expression, namespaces, args);
 	}
 
+
 	@Override
 	protected Optional<HttpHeaders> getResponseHeaders() {
-		return Optional.of(bodySpec.returnResult())
-				.map(ExchangeResult::getResponseHeaders);
+		return Optional.of(getBodySpec().returnResult()).map(ExchangeResult::getResponseHeaders);
 	}
 
 	@Override
 	protected byte[] getContent() {
-		byte[] body = this.bodySpec.returnResult().getResponseBody();
+		byte[] body = getBodySpec().returnResult().getResponseBody();
 		Assert.notNull(body, "Expected body content");
 		return body;
 	}

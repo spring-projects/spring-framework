@@ -36,12 +36,13 @@ public class StatusAssertions extends AbstractStatusAssertions<ExchangeResult, R
 
 
 	@Override
-	protected void assertWithDiagnostics(Runnable assertion) {
-		exchangeResult.assertWithDiagnostics(assertion);
+	protected HttpStatusCode getStatus() {
+		return getExchangeResult().getStatus();
 	}
 
 	@Override
-	protected HttpStatusCode getStatus() {
-		return exchangeResult.getStatus();
+	protected void assertWithDiagnostics(Runnable assertion) {
+		getExchangeResult().assertWithDiagnostics(assertion);
 	}
+
 }

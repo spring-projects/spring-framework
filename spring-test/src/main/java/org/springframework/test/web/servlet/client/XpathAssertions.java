@@ -44,13 +44,12 @@ public class XpathAssertions extends AbstractXpathAssertions<RestTestClient.Body
 
 	@Override
 	protected Optional<HttpHeaders> getResponseHeaders() {
-		return Optional.of(bodySpec.returnResult())
-				.map(ExchangeResult::getResponseHeaders);
+		return Optional.of(getBodySpec().returnResult()).map(ExchangeResult::getResponseHeaders);
 	}
 
 	@Override
 	protected byte[] getContent() {
-		byte[] body = this.bodySpec.returnResult().getResponseBody();
+		byte[] body = getBodySpec().returnResult().getResponseBody();
 		Assert.notNull(body, "Expected body content");
 		return body;
 	}

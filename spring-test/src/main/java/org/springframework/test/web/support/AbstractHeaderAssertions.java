@@ -40,18 +40,41 @@ import static org.springframework.test.util.AssertionErrors.fail;
  * Assertions on headers of the response.
  *
  * @author Rob Worsnop
+ * @author Rossen Stoyanchev
  * @since 7.0
  * @param <E> the type of the exchange result
  * @param <R> the type of the response spec
  */
 public abstract class AbstractHeaderAssertions <E, R> {
-	protected final E exchangeResult;
+
+	private final E exchangeResult;
+
 	private final R responseSpec;
+
 
 	protected AbstractHeaderAssertions(E exchangeResult, R responseSpec) {
 		this.exchangeResult = exchangeResult;
 		this.responseSpec = responseSpec;
 	}
+
+
+	/**
+	 * Return the exchange result.
+	 */
+	protected E getExchangeResult() {
+		return this.exchangeResult;
+	}
+
+	/**
+	 * Subclasses must implement this to provide access to response headers.
+	 */
+	protected abstract HttpHeaders getResponseHeaders();
+
+	/**
+	 * Subclasses must implement this to assert with diagnostics.
+	 */
+	protected abstract void assertWithDiagnostics(Runnable assertion);
+
 
 	/**
 	 * Expect a header with the given name to match the specified values.
@@ -276,10 +299,6 @@ public abstract class AbstractHeaderAssertions <E, R> {
 	public R location(String location) {
 		return assertHeader("Location", URI.create(location), getResponseHeaders().getLocation());
 	}
-
-	protected abstract void assertWithDiagnostics(Runnable assertion);
-
-	protected abstract HttpHeaders getResponseHeaders();
 
 	private R assertHeader(String name, @Nullable Object expected, @Nullable Object actual) {
 		assertWithDiagnostics(() -> {

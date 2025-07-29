@@ -14,42 +14,48 @@
  * limitations under the License.
  */
 
-package org.springframework.test.web.reactive.server;
+package org.springframework.test.web.support;
 
-import java.net.URI;
+import java.io.IOException;
 import java.time.Duration;
+import java.util.Map;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import reactor.core.publisher.Mono;
 
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
-import org.springframework.mock.http.client.reactive.MockClientHttpRequest;
-import org.springframework.mock.http.client.reactive.MockClientHttpResponse;
+import org.springframework.util.MultiValueMap;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.hamcrest.Matchers.equalTo;
-import static org.mockito.Mockito.mock;
 
 /**
- * Tests for {@link CookieAssertions}
+ * Tests for {@link AbstractCookieAssertions}.
  *
+ * @author Rob Worsnop
  * @author Rossen Stoyanchev
  */
 public class CookieAssertionsTests {
 
-	private final ResponseCookie cookie = ResponseCookie.from("foo", "bar")
-			.maxAge(Duration.ofMinutes(30))
-			.domain("foo.com")
-			.path("/foo")
-			.secure(true)
-			.httpOnly(true)
-			.partitioned(true)
-			.sameSite("Lax")
-			.build();
+	private TestCookieAssertions assertions;
 
-	private final CookieAssertions assertions = cookieAssertions(cookie);
+
+	@BeforeEach
+	void setUp() throws IOException {
+
+		ResponseCookie cookie = ResponseCookie.from("foo", "bar")
+				.maxAge(Duration.ofMinutes(30))
+				.domain("foo.com")
+				.path("/foo")
+				.secure(true)
+				.httpOnly(true)
+				.partitioned(true)
+				.sameSite("Lax")
+				.build();
+
+		this.assertions = initCookieAssertions(cookie);
+	}
 
 
 	@Test
@@ -63,6 +69,13 @@ public class CookieAssertionsTests {
 	void value() {
 		assertions.value("foo", equalTo("bar"));
 		assertThatExceptionOfType(AssertionError.class).isThrownBy(() -> assertions.value("foo", equalTo("what?!")));
+	}
+
+	@Test
+	void valueConsumer() {
+		assertions.value("foo", input -> assertThat(input).isEqualTo("bar"));
+		assertThatExceptionOfType(AssertionError.class)
+				.isThrownBy(() -> assertions.value("foo", input -> assertThat(input).isEqualTo("what?!")));
 	}
 
 	@Test
@@ -130,16 +143,31 @@ public class CookieAssertionsTests {
 		assertThatExceptionOfType(AssertionError.class).isThrownBy(() -> assertions.sameSite("foo", "Strict"));
 	}
 
+	private TestCookieAssertions initCookieAssertions(ResponseCookie cookie) throws IOException {
+		return new TestCookieAssertions(cookie);
+	}
 
-	private CookieAssertions cookieAssertions(ResponseCookie cookie) {
-		MockClientHttpRequest request = new MockClientHttpRequest(HttpMethod.GET, URI.create("/"));
-		MockClientHttpResponse response = new MockClientHttpResponse(HttpStatus.OK);
-		response.getCookies().add(cookie.getName(), cookie);
 
-		ExchangeResult result = new ExchangeResult(
-				request, response, Mono.empty(), Mono.empty(), Duration.ZERO, null, null);
+	private static class TestCookieAssertions extends AbstractCookieAssertions<TestExchangeResult, Object> {
 
-		return new CookieAssertions(result, mock());
+		TestCookieAssertions(ResponseCookie cookie) {
+			super(new TestExchangeResult(cookie), "");
+		}
+
+		@Override
+		protected MultiValueMap<String, ResponseCookie> getResponseCookies() {
+			ResponseCookie cookie = getExchangeResult().cookie();
+			return MultiValueMap.fromSingleValue(Map.of(cookie.getName(), cookie));
+		}
+
+		@Override
+		protected void assertWithDiagnostics(Runnable assertion) {
+			assertion.run();
+		}
+	}
+
+
+	private record TestExchangeResult(ResponseCookie cookie) {
 	}
 
 }

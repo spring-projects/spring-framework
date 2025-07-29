@@ -38,12 +38,13 @@ public class HeaderAssertions extends AbstractHeaderAssertions<ExchangeResult, W
 
 
 	@Override
-	protected void assertWithDiagnostics(Runnable assertion) {
-		exchangeResult.assertWithDiagnostics(assertion);
+	protected HttpHeaders getResponseHeaders() {
+		return getExchangeResult().getResponseHeaders();
 	}
 
 	@Override
-	protected HttpHeaders getResponseHeaders() {
-		return exchangeResult.getResponseHeaders();
+	protected void assertWithDiagnostics(Runnable assertion) {
+		getExchangeResult().assertWithDiagnostics(assertion);
 	}
+
 }

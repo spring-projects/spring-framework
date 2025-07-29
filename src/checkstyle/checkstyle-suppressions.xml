@@ -98,7 +98,7 @@
 	<suppress files="src[\\/]test[\\/]java[\\/]org[\\/]springframework[\\/]test[\\/]context[\\/]aot[\\/]samples[\\/]web[\\/].+Tests" checks="IllegalImport" id="bannedHamcrestImports"/>
 	<suppress files="src[\\/]test[\\/]java[\\/]org[\\/]springframework[\\/]test[\\/]context[\\/]junit[\\/]jupiter[\\/]web[\\/].+Tests" checks="IllegalImport" id="bannedHamcrestImports"/>
 	<suppress files="src[\\/]test[\\/]java[\\/]org[\\/]springframework[\\/]test[\\/]util[\\/].+Tests" checks="IllegalImport" id="bannedHamcrestImports"/>
-	<suppress files="src[\\/]test[\\/]java[\\/]org[\\/]springframework[\\/]test[\\/]web[\\/](client|reactive|servlet)[\\/].+Tests" checks="IllegalImport" id="bannedHamcrestImports"/>
+	<suppress files="src[\\/]test[\\/]java[\\/]org[\\/]springframework[\\/]test[\\/]web[\\/](client|reactive|servlet|support)[\\/].+Tests" checks="IllegalImport" id="bannedHamcrestImports"/>
 	<suppress files="src[\\/]test[\\/]java[\\/]org[\\/]springframework[\\/]test[\\/]context[\\/](aot|junit4)" checks="SpringJUnit5"/>
 	<suppress files="org[\\/]springframework[\\/]test[\\/]context[\\/].+[\\/](ExpectedExceptionSpringRunnerTests|StandardJUnit4FeaturesTests|ProgrammaticTxMgmtTestNGTests)" checks="RegexpSinglelineJava" id="expectedExceptionAnnotation"/>
 

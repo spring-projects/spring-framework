@@ -26,6 +26,18 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.test.util.JsonPathExpectationsHelper;
 import org.springframework.util.Assert;
 
+/**
+ * Base class for applying
+ * <a href="https://github.com/jayway/JsonPath">JsonPath</a> assertions
+ * in RestTestClient and WebTestClient.
+ *
+ * @author Rob Worsnop
+ * @author Rossen Stoyanchev
+ * @since 7.0
+ * @param <B> the type of body spec (RestTestClient vs WebTestClient specific)
+ * @see <a href="https://github.com/jayway/JsonPath">https://github.com/jayway/JsonPath</a>
+ * @see JsonPathExpectationsHelper
+ */
 public abstract class AbstractJsonPathAssertions<B> {
 
 	private final B bodySpec;
@@ -34,12 +46,14 @@ public abstract class AbstractJsonPathAssertions<B> {
 
 	private final JsonPathExpectationsHelper pathHelper;
 
+
 	protected AbstractJsonPathAssertions(B spec, String content, String expression, @Nullable Configuration configuration) {
 		Assert.hasText(expression, "expression must not be null or empty");
 		this.bodySpec = spec;
 		this.content = content;
 		this.pathHelper = new JsonPathExpectationsHelper(expression, configuration);
 	}
+
 
 	/**
 	 * Applies {@link JsonPathExpectationsHelper#assertValue(String, Object)}.

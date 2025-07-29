@@ -34,18 +34,41 @@ import static org.springframework.test.util.AssertionErrors.fail;
  * Assertions on cookies of the response.
  *
  * @author Rob Worsnop
+ * @author Rossen Stoyanchev
  * @since 7.0
  * @param <E> the type of the exchange result
  * @param <R> the type of the response spec
  */
 public abstract class AbstractCookieAssertions<E, R> {
-	protected final E exchangeResult;
+
+	private final E exchangeResult;
+
 	private final R responseSpec;
+
 
 	protected AbstractCookieAssertions(E exchangeResult, R responseSpec) {
 		this.exchangeResult = exchangeResult;
 		this.responseSpec = responseSpec;
 	}
+
+
+	/**
+	 * Return the exchange result.
+	 */
+	protected E getExchangeResult() {
+		return this.exchangeResult;
+	}
+
+	/**
+	 * Subclasses must implement this to provide access to response cookies.
+	 */
+	protected abstract MultiValueMap<String, ResponseCookie> getResponseCookies();
+
+	/**
+	 * Subclasses must implement this to assert with diagnostics.
+	 */
+	protected abstract void assertWithDiagnostics(Runnable assertion);
+
 
 	/**
 	 * Expect a response cookie with the given name to match the specified value.
@@ -223,10 +246,6 @@ public abstract class AbstractCookieAssertions<E, R> {
 		});
 		return this.responseSpec;
 	}
-
-	protected abstract void assertWithDiagnostics(Runnable assertion);
-
-	protected abstract MultiValueMap<String, ResponseCookie> getResponseCookies();
 
 	private ResponseCookie getCookie(String name) {
 		ResponseCookie cookie = getResponseCookies().getFirst(name);

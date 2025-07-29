@@ -23,6 +23,7 @@ import org.jspecify.annotations.Nullable;
  * extracted to a representation of type {@code <T>}.
  *
  * @author Rob Worsnop
+ * @since 7.0
  * @param <T> the response body type
  */
 public class EntityExchangeResult<T> extends ExchangeResult {

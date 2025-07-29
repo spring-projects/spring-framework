@@ -33,13 +33,15 @@ public class HeaderAssertions extends AbstractHeaderAssertions<ExchangeResult, R
 		super(exchangeResult, responseSpec);
 	}
 
-	@Override
-	protected void assertWithDiagnostics(Runnable assertion) {
-		exchangeResult.assertWithDiagnostics(assertion);
-	}
 
 	@Override
 	protected HttpHeaders getResponseHeaders() {
-		return exchangeResult.getResponseHeaders();
+		return getExchangeResult().getResponseHeaders();
 	}
+
+	@Override
+	protected void assertWithDiagnostics(Runnable assertion) {
+		getExchangeResult().assertWithDiagnostics(assertion);
+	}
+
 }

@@ -30,12 +30,24 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.test.util.XpathExpectationsHelper;
 import org.springframework.util.MimeType;
 
+/**
+ * Base class for applying XPath assertions in RestTestClient and WebTestClient.
+ *
+ * @author Rob Worsnop
+ * @author Rossen Stoyanchev
+ * @since 7.0
+ * @param <B> the type of body spec (RestTestClient vs WebTestClient specific)
+ */
 public abstract class AbstractXpathAssertions<B> {
-	protected final B bodySpec;
+
+	private final B bodySpec;
 
 	private final XpathExpectationsHelper xpathHelper;
 
-	public AbstractXpathAssertions(B spec, String expression, @Nullable Map<String, String> namespaces, Object... args) {
+
+	public AbstractXpathAssertions(
+			B spec, String expression, @Nullable Map<String, String> namespaces, Object... args) {
+
 		this.bodySpec = spec;
 		this.xpathHelper = initXpathHelper(expression, namespaces, args);
 	}
@@ -50,6 +62,24 @@ public abstract class AbstractXpathAssertions<B> {
 			throw new AssertionError("XML parsing error", ex);
 		}
 	}
+
+
+	/**
+	 * Return the body spec.
+	 */
+	protected B getBodySpec() {
+		return this.bodySpec;
+	}
+
+	/**
+	 * Subclasses must implement this to provide access to response headers.
+	 */
+	protected abstract Optional<HttpHeaders> getResponseHeaders();
+
+	/**
+	 * Subclasses must implement this to provide access to the response content.
+	 */
+	protected abstract byte[] getContent();
 
 
 	/**
@@ -175,9 +205,6 @@ public abstract class AbstractXpathAssertions<B> {
 		return super.hashCode();
 	}
 
-	protected abstract Optional<HttpHeaders> getResponseHeaders();
-
-	protected abstract byte[] getContent();
 
 	/**
 	 * Lets us be able to use lambda expressions that could throw checked exceptions, since
