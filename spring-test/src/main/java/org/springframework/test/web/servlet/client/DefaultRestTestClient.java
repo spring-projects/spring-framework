@@ -227,6 +227,12 @@ class DefaultRestTestClient implements RestTestClient {
 		}
 
 		@Override
+		public RequestBodySpec apiVersion(Object version) {
+			this.requestHeadersUriSpec.apiVersion(version);
+			return this;
+		}
+
+		@Override
 		public RequestHeadersSpec<?> body(Object body) {
 			this.requestHeadersUriSpec.body(body);
 			return this;
@@ -235,8 +241,8 @@ class DefaultRestTestClient implements RestTestClient {
 		@Override
 		public ResponseSpec exchange() {
 			return new DefaultResponseSpec(
-					this.requestHeadersUriSpec.exchangeForRequiredValue((request, response) ->
-							new ExchangeResult(request, response, this.uriTemplate), false));
+					this.requestHeadersUriSpec.exchangeForRequiredValue(
+							(request, response) -> new ExchangeResult(request, response, this.uriTemplate), false));
 		}
 	}
 

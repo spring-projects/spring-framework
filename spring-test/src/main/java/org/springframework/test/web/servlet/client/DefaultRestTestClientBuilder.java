@@ -31,6 +31,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.test.web.servlet.setup.RouterFunctionMockMvcBuilder;
 import org.springframework.test.web.servlet.setup.StandaloneMockMvcBuilder;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.ApiVersionInserter;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.servlet.function.RouterFunction;
@@ -91,6 +92,18 @@ class DefaultRestTestClientBuilder<B extends RestTestClient.Builder<B>> implemen
 	@Override
 	public <T extends B> T defaultCookies(Consumer<MultiValueMap<String, String>> cookiesConsumer) {
 		this.restClientBuilder.defaultCookies(cookiesConsumer);
+		return self();
+	}
+
+	@Override
+	public <T extends B> T defaultApiVersion(Object version) {
+		this.restClientBuilder.defaultApiVersion(version);
+		return self();
+	}
+
+	@Override
+	public <T extends B> T apiVersionInserter(ApiVersionInserter apiVersionInserter) {
+		this.restClientBuilder.apiVersionInserter(apiVersionInserter);
 		return self();
 	}
 

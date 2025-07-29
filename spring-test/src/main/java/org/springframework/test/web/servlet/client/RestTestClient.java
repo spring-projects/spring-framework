@@ -41,6 +41,8 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.test.web.servlet.setup.RouterFunctionMockMvcBuilder;
 import org.springframework.test.web.servlet.setup.StandaloneMockMvcBuilder;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.ApiVersionFormatter;
+import org.springframework.web.client.ApiVersionInserter;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.servlet.function.RouterFunction;
@@ -242,6 +244,24 @@ public interface RestTestClient {
 		<T extends B> T defaultCookies(Consumer<MultiValueMap<String, String>> cookiesConsumer);
 
 		/**
+		 * Global option to specify an API version to add to every request,
+		 * if not already set.
+		 * @param version the version to use
+		 * @return this builder
+		 * @since 7.0
+		 */
+		<T extends B> T defaultApiVersion(Object version);
+
+		/**
+		 * Configure an {@link ApiVersionInserter} to abstract how an API version
+		 * specified via {@link RequestHeadersSpec#apiVersion(Object)}
+		 * is inserted into the request.
+		 * @param apiVersionInserter the inserter to use
+		 * @since 7.0
+		 */
+		<T extends B> T apiVersionInserter(ApiVersionInserter apiVersionInserter);
+
+		/**
 		 * Build the {@link RestTestClient} instance.
 		 */
 		RestTestClient build();
@@ -402,6 +422,17 @@ public interface RestTestClient {
 		 * @return this builder
 		 */
 		S headers(Consumer<HttpHeaders> headersConsumer);
+
+		/**
+		 * Set an API version for the request. The version is inserted into the
+		 * request by the {@linkplain Builder#apiVersionInserter(ApiVersionInserter)
+		 * configured} {@code ApiVersionInserter}.
+		 * @param version the API version of the request; this can be a String or
+		 * some Object that can be formatted by the inserter &mdash; for example,
+		 * through an {@link ApiVersionFormatter}
+		 * @since 7.0
+		 */
+		S apiVersion(Object version);
 
 		/**
 		 * Set the attribute with the given name to the given value.
