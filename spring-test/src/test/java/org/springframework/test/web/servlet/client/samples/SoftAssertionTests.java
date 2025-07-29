@@ -30,7 +30,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  */
 class SoftAssertionTests {
 
-	private final RestTestClient restTestClient = RestTestClient.standaloneSetup(new TestController()).build();
+	private final RestTestClient restTestClient = RestTestClient.bindToController(new TestController()).build();
 
 
 	@Test

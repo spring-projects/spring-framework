@@ -36,7 +36,7 @@ class ControllerTests {
 
 	@BeforeEach
 	void setUp() {
-		this.client = RestTestClient.standaloneSetup(new TestController()).build();
+		this.client = RestTestClient.bindToController(new TestController()).build();
 	}
 
 

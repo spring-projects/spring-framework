@@ -42,7 +42,7 @@ import static org.hamcrest.Matchers.containsString;
  */
 class JsonContentTests {
 
-	private final RestTestClient client = RestTestClient.standaloneSetup(new PersonController()).build();
+	private final RestTestClient client = RestTestClient.bindToController(new PersonController()).build();
 
 
 	@Test

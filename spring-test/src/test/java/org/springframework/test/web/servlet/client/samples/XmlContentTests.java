@@ -58,7 +58,7 @@ class XmlContentTests {
 			""";
 
 
-	private final RestTestClient client = RestTestClient.standaloneSetup(new PersonController()).build();
+	private final RestTestClient client = RestTestClient.bindToController(new PersonController()).build();
 
 
 	@Test

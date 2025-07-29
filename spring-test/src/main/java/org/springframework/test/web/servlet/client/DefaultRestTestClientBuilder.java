@@ -18,9 +18,20 @@ package org.springframework.test.web.servlet.client;
 
 import java.util.function.Consumer;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.client.ClientHttpRequestFactory;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MockMvcBuilder;
+import org.springframework.test.web.servlet.setup.DefaultMockMvcBuilder;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.test.web.servlet.setup.RouterFunctionMockMvcBuilder;
+import org.springframework.test.web.servlet.setup.StandaloneMockMvcBuilder;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.servlet.function.RouterFunction;
 import org.springframework.web.util.UriBuilderFactory;
 
 /**
@@ -33,7 +44,7 @@ import org.springframework.web.util.UriBuilderFactory;
  */
 class DefaultRestTestClientBuilder<B extends RestTestClient.Builder<B>> implements RestTestClient.Builder<B> {
 
-	protected final RestClient.Builder restClientBuilder;
+	private final RestClient.Builder restClientBuilder;
 
 
 	DefaultRestTestClientBuilder() {
@@ -46,49 +57,110 @@ class DefaultRestTestClientBuilder<B extends RestTestClient.Builder<B>> implemen
 
 
 	@Override
-	public RestTestClient.Builder<B> baseUrl(String baseUrl) {
+	public <T extends B> T baseUrl(String baseUrl) {
 		this.restClientBuilder.baseUrl(baseUrl);
-		return this;
+		return self();
 	}
 
 	@Override
-	public RestTestClient.Builder<B> uriBuilderFactory(UriBuilderFactory uriFactory) {
+	public <T extends B> T uriBuilderFactory(UriBuilderFactory uriFactory) {
 		this.restClientBuilder.uriBuilderFactory(uriFactory);
-		return this;
+		return self();
 	}
 
 	@Override
-	public RestTestClient.Builder<B> defaultHeader(String headerName, String... headerValues) {
+	public <T extends B> T defaultHeader(String headerName, String... headerValues) {
 		this.restClientBuilder.defaultHeader(headerName, headerValues);
-		return this;
+		return self();
 	}
 
 	@Override
-	public RestTestClient.Builder<B> defaultHeaders(Consumer<HttpHeaders> headersConsumer) {
+	public <T extends B> T defaultHeaders(Consumer<HttpHeaders> headersConsumer) {
 		this.restClientBuilder.defaultHeaders(headersConsumer);
-		return this;
+		return self();
 	}
 
 	@Override
-	public RestTestClient.Builder<B> defaultCookie(String cookieName, String... cookieValues) {
+	public <T extends B> T defaultCookie(String cookieName, String... cookieValues) {
 		this.restClientBuilder.defaultCookie(cookieName, cookieValues);
-		return this;
+		return self();
 	}
 
 	@Override
-	public RestTestClient.Builder<B> defaultCookies(Consumer<MultiValueMap<String, String>> cookiesConsumer) {
+	public <T extends B> T defaultCookies(Consumer<MultiValueMap<String, String>> cookiesConsumer) {
 		this.restClientBuilder.defaultCookies(cookiesConsumer);
-		return this;
+		return self();
 	}
 
 	@Override
-	public RestTestClient.Builder<B> apply(Consumer<RestTestClient.Builder<B>> builderConsumer) {
+	public <T extends B> T apply(Consumer<RestTestClient.Builder<B>> builderConsumer) {
 		builderConsumer.accept(this);
-		return this;
+		return self();
+	}
+
+	@SuppressWarnings("unchecked")
+	protected <T extends B> T self() {
+		return (T) this;
+	}
+
+	protected void setClientHttpRequestFactory(ClientHttpRequestFactory requestFactory) {
+		this.restClientBuilder.requestFactory(requestFactory);
 	}
 
 	@Override
 	public RestTestClient build() {
 		return new DefaultRestTestClient(this.restClientBuilder);
 	}
+
+
+	static class AbstractMockMvcSetupBuilder<S extends RestTestClient.Builder<S>, M extends MockMvcBuilder>
+			extends DefaultRestTestClientBuilder<S> implements RestTestClient.MockMvcSetupBuilder<S, M> {
+
+		private final M mockMvcBuilder;
+
+		public AbstractMockMvcSetupBuilder(M mockMvcBuilder) {
+			this.mockMvcBuilder = mockMvcBuilder;
+		}
+
+		public <T extends S> T configureServer(Consumer<M> consumer) {
+			consumer.accept(this.mockMvcBuilder);
+			return self();
+		}
+
+		@Override
+		public RestTestClient build() {
+			MockMvc mockMvc = this.mockMvcBuilder.build();
+			setClientHttpRequestFactory(new MockMvcClientHttpRequestFactory(mockMvc));
+			return super.build();
+		}
+	}
+
+
+	static class DefaultStandaloneSetupBuilder extends AbstractMockMvcSetupBuilder<RestTestClient.StandaloneSetupBuilder, StandaloneMockMvcBuilder>
+			implements RestTestClient.StandaloneSetupBuilder {
+
+		DefaultStandaloneSetupBuilder(Object... controllers) {
+			super(MockMvcBuilders.standaloneSetup(controllers));
+		}
+	}
+
+
+	static class DefaultRouterFunctionSetupBuilder extends AbstractMockMvcSetupBuilder<RestTestClient.RouterFunctionSetupBuilder, RouterFunctionMockMvcBuilder>
+			implements RestTestClient.RouterFunctionSetupBuilder {
+
+		DefaultRouterFunctionSetupBuilder(RouterFunction<?>... routerFunctions) {
+			super(MockMvcBuilders.routerFunctions(routerFunctions));
+		}
+
+	}
+
+
+	static class DefaultWebAppContextSetupBuilder extends AbstractMockMvcSetupBuilder<RestTestClient.WebAppContextSetupBuilder, DefaultMockMvcBuilder>
+			implements RestTestClient.WebAppContextSetupBuilder {
+
+		DefaultWebAppContextSetupBuilder(WebApplicationContext context) {
+			super(MockMvcBuilders.webAppContextSetup(context));
+		}
+	}
+
 }

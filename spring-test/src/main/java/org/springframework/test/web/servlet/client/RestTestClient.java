@@ -37,7 +37,6 @@ import org.springframework.test.json.JsonComparison;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MockMvcBuilder;
 import org.springframework.test.web.servlet.setup.DefaultMockMvcBuilder;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.test.web.servlet.setup.RouterFunctionMockMvcBuilder;
 import org.springframework.test.web.servlet.setup.StandaloneMockMvcBuilder;
 import org.springframework.util.MultiValueMap;
@@ -51,6 +50,8 @@ import org.springframework.web.util.UriBuilderFactory;
  * Client for testing web servers.
  *
  * @author Rob Worsnop
+ * @author Rossen Stoyanchev
+ * @since 7.0
  */
 public interface RestTestClient {
 
@@ -126,9 +127,8 @@ public interface RestTestClient {
 	 * {@link org.springframework.test.web.servlet.setup.MockMvcBuilders#standaloneSetup(Object...)}
 	 * to initialize {@link MockMvc}.
 	 */
-	static MockServerBuilder<StandaloneMockMvcBuilder> standaloneSetup(Object... controllers) {
-		StandaloneMockMvcBuilder builder = MockMvcBuilders.standaloneSetup(controllers);
-		return new DefaultMockServerBuilder<>(builder);
+	static StandaloneSetupBuilder bindToController(Object... controllers) {
+		return new DefaultRestTestClientBuilder.DefaultStandaloneSetupBuilder(controllers);
 	}
 
 	/**
@@ -138,9 +138,8 @@ public interface RestTestClient {
 	 * {@link org.springframework.test.web.servlet.setup.MockMvcBuilders#routerFunctions(RouterFunction[])}
 	 * to initialize {@link MockMvc}.
 	 */
-	static MockServerBuilder<RouterFunctionMockMvcBuilder> bindToRouterFunction(RouterFunction<?>... routerFunctions) {
-		RouterFunctionMockMvcBuilder builder = MockMvcBuilders.routerFunctions(routerFunctions);
-		return new DefaultMockServerBuilder<>(builder);
+	static RouterFunctionSetupBuilder bindToRouterFunction(RouterFunction<?>... routerFunctions) {
+		return new DefaultRestTestClientBuilder.DefaultRouterFunctionSetupBuilder(routerFunctions);
 	}
 
 	/**
@@ -151,16 +150,15 @@ public interface RestTestClient {
 	 * {@link org.springframework.test.web.servlet.setup.MockMvcBuilders#webAppContextSetup(WebApplicationContext)}
 	 * to initialize {@code MockMvc}.
 	 */
-	static MockServerBuilder<DefaultMockMvcBuilder> bindToApplicationContext(WebApplicationContext context) {
-		DefaultMockMvcBuilder builder = MockMvcBuilders.webAppContextSetup(context);
-		return new DefaultMockServerBuilder<>(builder);
+	static WebAppContextSetupBuilder bindToApplicationContext(WebApplicationContext context) {
+		return new DefaultRestTestClientBuilder.DefaultWebAppContextSetupBuilder(context);
 	}
 
 	/**
 	 * Begin creating a {@link RestTestClient} by providing an already
 	 * initialized {@link MockMvc} instance to use as the server.
 	 */
-	static <B extends Builder<B>> Builder<B> bindTo(MockMvc mockMvc) {
+	static Builder<?> bindTo(MockMvc mockMvc) {
 		ClientHttpRequestFactory requestFactory = new MockMvcClientHttpRequestFactory(mockMvc);
 		return RestTestClient.bindToServer(requestFactory);
 	}
@@ -175,7 +173,7 @@ public interface RestTestClient {
 	 * </pre>
 	 * @return chained API to customize client config
 	 */
-	static <B extends Builder<B>> Builder<B> bindToServer() {
+	static Builder<?> bindToServer() {
 		return new DefaultRestTestClientBuilder<>();
 	}
 
@@ -183,7 +181,7 @@ public interface RestTestClient {
 	 * A variant of {@link #bindToServer()} with a pre-configured request factory.
 	 * @return chained API to customize client config
 	 */
-	static <B extends Builder<B>> Builder<B> bindToServer(ClientHttpRequestFactory requestFactory) {
+	static Builder<?> bindToServer(ClientHttpRequestFactory requestFactory) {
 		return new DefaultRestTestClientBuilder<>(RestClient.builder().requestFactory(requestFactory));
 	}
 
@@ -195,20 +193,20 @@ public interface RestTestClient {
 		 * {@link RestClient#create(String)
 		 * WebClient.create(String)}.
 		 */
-		Builder<B> baseUrl(String baseUrl);
+		<T extends B> T baseUrl(String baseUrl);
 
 		/**
 		 * Provide a pre-configured {@link UriBuilderFactory} instance as an
 		 * alternative to and effectively overriding {@link #baseUrl(String)}.
 		 */
-		Builder<B> uriBuilderFactory(UriBuilderFactory uriBuilderFactory);
+		<T extends B> T uriBuilderFactory(UriBuilderFactory uriBuilderFactory);
 
 		/**
 		 * Add the given header to all requests that haven't added it.
 		 * @param headerName   the header name
 		 * @param headerValues the header values
 		 */
-		Builder<B> defaultHeader(String headerName, String... headerValues);
+		<T extends B> T defaultHeader(String headerName, String... headerValues);
 
 		/**
 		 * Manipulate the default headers with the given consumer. The
@@ -219,14 +217,14 @@ public interface RestTestClient {
 		 * @param headersConsumer a function that consumes the {@code HttpHeaders}
 		 * @return this builder
 		 */
-		Builder<B> defaultHeaders(Consumer<HttpHeaders> headersConsumer);
+		<T extends B> T defaultHeaders(Consumer<HttpHeaders> headersConsumer);
 
 		/**
 		 * Add the given cookie to all requests.
 		 * @param cookieName   the cookie name
 		 * @param cookieValues the cookie values
 		 */
-		Builder<B> defaultCookie(String cookieName, String... cookieValues);
+		<T extends B> T defaultCookie(String cookieName, String... cookieValues);
 
 		/**
 		 * Manipulate the default cookies with the given consumer. The
@@ -237,27 +235,39 @@ public interface RestTestClient {
 		 * @param cookiesConsumer a function that consumes the cookies map
 		 * @return this builder
 		 */
-		Builder<B> defaultCookies(Consumer<MultiValueMap<String, String>> cookiesConsumer);
+		<T extends B> T defaultCookies(Consumer<MultiValueMap<String, String>> cookiesConsumer);
 
 		/**
 		 * Apply the given {@code Consumer} to this builder instance.
 		 * <p>This can be useful for applying pre-packaged customizations.
 		 * @param builderConsumer the consumer to apply
 		 */
-		Builder<B> apply(Consumer<Builder<B>> builderConsumer);
+		<T extends B> T apply(Consumer<Builder<B>> builderConsumer);
 
 		/**
 		 * Build the {@link RestTestClient} instance.
 		 */
 		RestTestClient build();
+ 	}
+
+
+	interface MockMvcSetupBuilder<B extends Builder<B>, M extends MockMvcBuilder> extends Builder<B> {
+
+		<T extends B> T configureServer(Consumer<M> consumer);
 	}
 
 
-	interface MockServerBuilder<M extends MockMvcBuilder> extends Builder<MockServerBuilder<M>> {
-
-		MockServerBuilder<M> configureServer(Consumer<M> consumer);
-
+	interface StandaloneSetupBuilder extends MockMvcSetupBuilder<StandaloneSetupBuilder, StandaloneMockMvcBuilder> {
 	}
+
+
+	interface RouterFunctionSetupBuilder extends MockMvcSetupBuilder<RouterFunctionSetupBuilder, RouterFunctionMockMvcBuilder> {
+	}
+
+
+	interface WebAppContextSetupBuilder extends MockMvcSetupBuilder<WebAppContextSetupBuilder, DefaultMockMvcBuilder> {
+	}
+
 
 
 	/**

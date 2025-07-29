@@ -155,7 +155,7 @@ public interface WebTestClient {
 
 
 	/**
-	 * Return a builder to mutate properties of this web test client.
+	 * Return a builder to mutate properties of this test client.
 	 */
 	Builder mutate();
 
@@ -170,8 +170,6 @@ public interface WebTestClient {
 	 */
 	WebTestClient mutateWith(WebTestClientConfigurer configurer);
 
-
-	// Static factory methods
 
 	/**
 	 * Use this server setup to test one {@code @Controller} at a time.
