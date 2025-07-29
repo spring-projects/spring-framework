@@ -16,6 +16,7 @@
 
 package org.springframework.test.web.servlet.client;
 
+import java.io.IOException;
 import java.net.URI;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -26,7 +27,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.http.CacheControl;
 import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
+import org.springframework.mock.http.client.MockClientHttpRequest;
 import org.springframework.web.client.RestClient;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -311,10 +314,16 @@ class HeaderAssertionTests {
 	}
 
 	private HeaderAssertions headerAssertions(HttpHeaders responseHeaders) {
+		try {
 		RestClient.RequestHeadersSpec.ConvertibleClientHttpResponse response = mock();
+		when(response.getStatusCode()).thenReturn(HttpStatusCode.valueOf(200));
 		when(response.getHeaders()).thenReturn(responseHeaders);
-		ExchangeResult result = new ExchangeResult(response);
+		ExchangeResult result = new ExchangeResult(new MockClientHttpRequest(), response, null);
 		return new HeaderAssertions(result, mock());
+		}
+		catch (IOException ex) {
+			throw new IllegalStateException(ex);
+		}
 	}
 
 }

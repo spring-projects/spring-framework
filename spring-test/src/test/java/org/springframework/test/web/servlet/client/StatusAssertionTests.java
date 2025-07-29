@@ -20,8 +20,10 @@ import java.io.IOException;
 
 import org.junit.jupiter.api.Test;
 
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
+import org.springframework.mock.http.client.MockClientHttpRequest;
 import org.springframework.web.client.RestClient;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -255,7 +257,8 @@ class StatusAssertionTests {
 		try {
 			RestClient.RequestHeadersSpec.ConvertibleClientHttpResponse response = mock();
 			when(response.getStatusCode()).thenReturn(HttpStatusCode.valueOf(status));
-			ExchangeResult result = new ExchangeResult(response);
+			when(response.getHeaders()).thenReturn(new HttpHeaders());
+			ExchangeResult result = new ExchangeResult(new MockClientHttpRequest(), response, null);
 			return new StatusAssertions(result, mock());
 		}
 		catch (IOException ex) {

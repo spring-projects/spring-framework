@@ -16,12 +16,16 @@
 
 package org.springframework.test.web.servlet.client;
 
+import java.io.IOException;
 import java.time.Duration;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseCookie;
+import org.springframework.mock.http.client.MockClientHttpRequest;
 import org.springframework.web.client.RestClient;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -47,8 +51,13 @@ public class CookieAssertionsTests {
 			.sameSite("Lax")
 			.build();
 
-	private final CookieAssertions assertions = cookieAssertions(cookie);
+	private CookieAssertions assertions;
 
+
+	@BeforeEach
+	void setUp() throws IOException {
+		this.assertions = cookieAssertions(cookie);
+	}
 
 	@Test
 	void valueEquals() {
@@ -135,12 +144,13 @@ public class CookieAssertionsTests {
 	}
 
 
-	private CookieAssertions cookieAssertions(ResponseCookie cookie) {
+	private CookieAssertions cookieAssertions(ResponseCookie cookie) throws IOException {
 		RestClient.RequestHeadersSpec.ConvertibleClientHttpResponse response = mock();
 		var headers = new HttpHeaders();
 		headers.set(HttpHeaders.SET_COOKIE, cookie.toString());
 		when(response.getHeaders()).thenReturn(headers);
-		ExchangeResult result = new ExchangeResult(response);
+		when(response.getStatusCode()).thenReturn(HttpStatusCode.valueOf(200));
+		ExchangeResult result = new ExchangeResult(new MockClientHttpRequest(), response, null);
 		return new CookieAssertions(result, mock());
 	}
 

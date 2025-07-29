@@ -118,6 +118,8 @@ class DefaultRestTestClient implements RestTestClient {
 
 		private final RestClient.RequestBodyUriSpec requestHeadersUriSpec;
 
+		private @Nullable String uriTemplate;
+
 		DefaultRequestBodyUriSpec(RestClient.RequestBodyUriSpec spec) {
 			this.requestHeadersUriSpec = spec;
 			String requestId = String.valueOf(requestIndex.incrementAndGet());
@@ -126,24 +128,28 @@ class DefaultRestTestClient implements RestTestClient {
 
 		@Override
 		public RequestBodySpec uri(String uriTemplate, @Nullable Object... uriVariables) {
+			this.uriTemplate = uriTemplate;
 			this.requestHeadersUriSpec.uri(uriTemplate, uriVariables);
 			return this;
 		}
 
 		@Override
 		public RequestBodySpec uri(String uri, Map<String, ?> uriVariables) {
+			this.uriTemplate = uri;
 			this.requestHeadersUriSpec.uri(uri, uriVariables);
 			return this;
 		}
 
 		@Override
 		public RequestBodySpec uri(Function<UriBuilder, URI> uriFunction) {
+			this.uriTemplate = null;
 			this.requestHeadersUriSpec.uri(uriFunction);
 			return this;
 		}
 
 		@Override
 		public RequestBodySpec uri(URI uri) {
+			this.uriTemplate = null;
 			this.requestHeadersUriSpec.uri(uri);
 			return this;
 		}
@@ -229,8 +235,8 @@ class DefaultRestTestClient implements RestTestClient {
 		@Override
 		public ResponseSpec exchange() {
 			return new DefaultResponseSpec(
-					this.requestHeadersUriSpec.exchangeForRequiredValue(
-							(request, response) -> new ExchangeResult(response), false));
+					this.requestHeadersUriSpec.exchangeForRequiredValue((request, response) ->
+							new ExchangeResult(request, response, this.uriTemplate), false));
 		}
 	}
 

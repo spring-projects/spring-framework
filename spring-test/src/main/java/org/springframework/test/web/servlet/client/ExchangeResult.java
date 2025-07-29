@@ -18,10 +18,12 @@ package org.springframework.test.web.servlet.client;
 
 import java.io.IOException;
 import java.net.HttpCookie;
+import java.net.URI;
 import java.util.List;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -29,6 +31,9 @@ import org.jspecify.annotations.Nullable;
 
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpRequest;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseCookie;
 import org.springframework.util.Assert;
@@ -54,22 +59,59 @@ public class ExchangeResult {
 	private static final Log logger = LogFactory.getLog(ExchangeResult.class);
 
 
+	private final HttpRequest request;
+
 	private final ConvertibleClientHttpResponse clientResponse;
+
+	private final @Nullable String uriTemplate;
 
 	/** Ensure single logging; for example, for expectAll. */
 	private boolean diagnosticsLogged;
 
 
-	ExchangeResult(@Nullable ConvertibleClientHttpResponse response) {
-		Assert.notNull(response, "Response must not be null");
+	ExchangeResult(
+			HttpRequest request, ConvertibleClientHttpResponse response, @Nullable String uriTemplate) {
+
+		Assert.notNull(request, "HttpRequest must not be null");
+		Assert.notNull(response, "ClientHttpResponse must not be null");
+		this.request = request;
 		this.clientResponse = response;
+		this.uriTemplate = uriTemplate;
 	}
 
 	ExchangeResult(ExchangeResult result) {
-		this(result.clientResponse);
+		this(result.request, result.clientResponse, result.uriTemplate);
 		this.diagnosticsLogged = result.diagnosticsLogged;
 	}
 
+
+	/**
+	 * Return the method of the request.
+	 */
+	public HttpMethod getMethod() {
+		return this.request.getMethod();
+	}
+
+	/**
+	 * Return the URI of the request.
+	 */
+	public URI getUrl() {
+		return this.request.getURI();
+	}
+
+	/**
+	 * Return the original URI template used to prepare the request, if any.
+	 */
+	public @Nullable String getUriTemplate() {
+		return this.uriTemplate;
+	}
+
+	/**
+	 * Return the request headers sent to the server.
+	 */
+	public HttpHeaders getRequestHeaders() {
+		return this.request.getHeaders();
+	}
 
 	/**
 	 * Return the HTTP status code as an {@link HttpStatusCode} value.
@@ -144,6 +186,30 @@ public class ExchangeResult {
 			}
 			throw ex;
 		}
+	}
+
+	@Override
+	public String toString() {
+		return "\n" +
+				"> " + getMethod() + " " + getUrl() + "\n" +
+				"> " + formatHeaders(getRequestHeaders(), "\n> ") + "\n" +
+				"\n" +
+				"< " + formatStatus(getStatus()) + "\n" +
+				"< " + formatHeaders(getResponseHeaders(), "\n< ") + "\n";
+	}
+
+	private String formatStatus(HttpStatusCode statusCode) {
+		String result = statusCode.toString();
+		if (statusCode instanceof HttpStatus status) {
+			result += " " + status.getReasonPhrase();
+		}
+		return result;
+	}
+
+	private String formatHeaders(HttpHeaders headers, String delimiter) {
+		return headers.headerSet().stream()
+				.map(entry -> entry.getKey() + ": " + entry.getValue())
+				.collect(Collectors.joining(delimiter));
 	}
 
 }
