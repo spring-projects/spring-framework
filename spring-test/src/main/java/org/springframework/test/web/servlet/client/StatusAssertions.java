@@ -29,9 +29,11 @@ import org.springframework.test.web.support.AbstractStatusAssertions;
  */
 public class StatusAssertions extends AbstractStatusAssertions<ExchangeResult, RestTestClient.ResponseSpec> {
 
-	public StatusAssertions(ExchangeResult exchangeResult, ResponseSpec responseSpec) {
+
+	StatusAssertions(ExchangeResult exchangeResult, ResponseSpec responseSpec) {
 		super(exchangeResult, responseSpec);
 	}
+
 
 	@Override
 	protected void assertWithDiagnostics(Runnable assertion) {

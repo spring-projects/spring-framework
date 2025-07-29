@@ -18,12 +18,14 @@ package org.springframework.test.web.servlet.client;
 
 import java.util.function.Consumer;
 
-import org.jspecify.annotations.Nullable;
-
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MockMvcBuilder;
+import org.springframework.test.web.servlet.client.RestTestClient.MockMvcSetupBuilder;
+import org.springframework.test.web.servlet.client.RestTestClient.RouterFunctionSetupBuilder;
+import org.springframework.test.web.servlet.client.RestTestClient.StandaloneSetupBuilder;
+import org.springframework.test.web.servlet.client.RestTestClient.WebAppContextSetupBuilder;
 import org.springframework.test.web.servlet.setup.DefaultMockMvcBuilder;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.test.web.servlet.setup.RouterFunctionMockMvcBuilder;
@@ -39,8 +41,8 @@ import org.springframework.web.util.UriBuilderFactory;
  *
  * @author Rob Worsnop
  * @author Rossen Stoyanchev
- * @param <B> the type of the builder
  * @since 7.0
+ * @param <B> the type of the builder
  */
 class DefaultRestTestClientBuilder<B extends RestTestClient.Builder<B>> implements RestTestClient.Builder<B> {
 
@@ -92,12 +94,6 @@ class DefaultRestTestClientBuilder<B extends RestTestClient.Builder<B>> implemen
 		return self();
 	}
 
-	@Override
-	public <T extends B> T apply(Consumer<RestTestClient.Builder<B>> builderConsumer) {
-		builderConsumer.accept(this);
-		return self();
-	}
-
 	@SuppressWarnings("unchecked")
 	protected <T extends B> T self() {
 		return (T) this;
@@ -113,8 +109,13 @@ class DefaultRestTestClientBuilder<B extends RestTestClient.Builder<B>> implemen
 	}
 
 
+	/**
+	 * Base class for implementations for {@link MockMvcSetupBuilder}.
+	 * @param <S> the "self" type of the builder
+	 * @param <M> the type of {@link MockMvc} builder
+	 */
 	static class AbstractMockMvcSetupBuilder<S extends RestTestClient.Builder<S>, M extends MockMvcBuilder>
-			extends DefaultRestTestClientBuilder<S> implements RestTestClient.MockMvcSetupBuilder<S, M> {
+			extends DefaultRestTestClientBuilder<S> implements MockMvcSetupBuilder<S, M> {
 
 		private final M mockMvcBuilder;
 
@@ -136,8 +137,12 @@ class DefaultRestTestClientBuilder<B extends RestTestClient.Builder<B>> implemen
 	}
 
 
-	static class DefaultStandaloneSetupBuilder extends AbstractMockMvcSetupBuilder<RestTestClient.StandaloneSetupBuilder, StandaloneMockMvcBuilder>
-			implements RestTestClient.StandaloneSetupBuilder {
+	/**
+	 * Default implementation of {@link StandaloneSetupBuilder}.
+	 */
+	static class DefaultStandaloneSetupBuilder
+			extends AbstractMockMvcSetupBuilder<StandaloneSetupBuilder, StandaloneMockMvcBuilder>
+			implements StandaloneSetupBuilder {
 
 		DefaultStandaloneSetupBuilder(Object... controllers) {
 			super(MockMvcBuilders.standaloneSetup(controllers));
@@ -145,8 +150,12 @@ class DefaultRestTestClientBuilder<B extends RestTestClient.Builder<B>> implemen
 	}
 
 
-	static class DefaultRouterFunctionSetupBuilder extends AbstractMockMvcSetupBuilder<RestTestClient.RouterFunctionSetupBuilder, RouterFunctionMockMvcBuilder>
-			implements RestTestClient.RouterFunctionSetupBuilder {
+	/**
+	 * Default implementation of {@link RouterFunctionSetupBuilder}.
+	 */
+	static class DefaultRouterFunctionSetupBuilder
+			extends AbstractMockMvcSetupBuilder<RouterFunctionSetupBuilder, RouterFunctionMockMvcBuilder>
+			implements RouterFunctionSetupBuilder {
 
 		DefaultRouterFunctionSetupBuilder(RouterFunction<?>... routerFunctions) {
 			super(MockMvcBuilders.routerFunctions(routerFunctions));
@@ -155,8 +164,12 @@ class DefaultRestTestClientBuilder<B extends RestTestClient.Builder<B>> implemen
 	}
 
 
-	static class DefaultWebAppContextSetupBuilder extends AbstractMockMvcSetupBuilder<RestTestClient.WebAppContextSetupBuilder, DefaultMockMvcBuilder>
-			implements RestTestClient.WebAppContextSetupBuilder {
+	/**
+	 * Default implementation of {@link WebAppContextSetupBuilder}.
+	 */
+	static class DefaultWebAppContextSetupBuilder
+			extends AbstractMockMvcSetupBuilder<WebAppContextSetupBuilder, DefaultMockMvcBuilder>
+			implements WebAppContextSetupBuilder {
 
 		DefaultWebAppContextSetupBuilder(WebApplicationContext context) {
 			super(MockMvcBuilders.webAppContextSetup(context));

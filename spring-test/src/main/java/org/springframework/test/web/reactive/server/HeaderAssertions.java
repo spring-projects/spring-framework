@@ -31,9 +31,11 @@ import org.springframework.test.web.support.AbstractHeaderAssertions;
  */
 public class HeaderAssertions extends AbstractHeaderAssertions<ExchangeResult, WebTestClient.ResponseSpec> {
 
+
 	HeaderAssertions(ExchangeResult result, WebTestClient.ResponseSpec spec) {
 		super(result, spec);
 	}
+
 
 	@Override
 	protected void assertWithDiagnostics(Runnable assertion) {

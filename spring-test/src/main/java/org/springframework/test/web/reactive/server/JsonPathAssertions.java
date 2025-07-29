@@ -34,8 +34,11 @@ import org.springframework.test.web.support.AbstractJsonPathAssertions;
  */
 public class JsonPathAssertions extends AbstractJsonPathAssertions<WebTestClient.BodyContentSpec> {
 
-	JsonPathAssertions(WebTestClient.BodyContentSpec spec, String content, String expression,
+
+	JsonPathAssertions(
+			WebTestClient.BodyContentSpec spec, String content, String expression,
 			@Nullable Configuration configuration) {
+
 		super(spec, content, expression, configuration);
 	}
 }

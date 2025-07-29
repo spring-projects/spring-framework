@@ -26,13 +26,19 @@ import org.springframework.test.web.support.AbstractJsonPathAssertions;
  * <a href="https://github.com/jayway/JsonPath">JsonPath</a> assertions.
  *
  * @author Rob Worsnop
+ * @author Rossen Stoyanchev
  * @since 7.0
  * @see <a href="https://github.com/jayway/JsonPath">https://github.com/jayway/JsonPath</a>
  * @see JsonPathExpectationsHelper
  */
 public class JsonPathAssertions extends AbstractJsonPathAssertions<RestTestClient.BodyContentSpec> {
 
-	JsonPathAssertions(RestTestClient.BodyContentSpec spec, String content, String expression, @Nullable Configuration configuration) {
+
+	JsonPathAssertions(
+			RestTestClient.BodyContentSpec spec, String content, String expression,
+			@Nullable Configuration configuration) {
+
 		super(spec, content, expression, configuration);
 	}
+
 }

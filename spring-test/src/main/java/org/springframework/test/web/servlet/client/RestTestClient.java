@@ -37,6 +37,7 @@ import org.springframework.test.json.JsonComparison;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MockMvcBuilder;
 import org.springframework.test.web.servlet.setup.DefaultMockMvcBuilder;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.test.web.servlet.setup.RouterFunctionMockMvcBuilder;
 import org.springframework.test.web.servlet.setup.StandaloneMockMvcBuilder;
 import org.springframework.util.MultiValueMap;
@@ -47,7 +48,19 @@ import org.springframework.web.util.UriBuilder;
 import org.springframework.web.util.UriBuilderFactory;
 
 /**
- * Client for testing web servers.
+ * Client for testing web servers that uses {@link RestClient} internally to
+ * perform requests while also providing a fluent API to verify responses.
+ * This client can connect to any server over HTTP or to a {@link MockMvc} server
+ * with a mock request and response.
+ *
+ * <p>Use one of the bindToXxx methods to create an instance. For example:
+ * <ul>
+ * <li>{@link #bindToController(Object...)}
+ * <li>{@link #bindToRouterFunction(RouterFunction[])}
+ * <li>{@link #bindToApplicationContext(WebApplicationContext)}
+ * <li>{@link #bindToServer()}
+ * <li>...
+ * </ul>
  *
  * @author Rob Worsnop
  * @author Rossen Stoyanchev
@@ -121,34 +134,24 @@ public interface RestTestClient {
 
 
 	/**
-	 * Begin creating a {@link RestTestClient} by providing the {@code @Controller}
-	 * instance(s) to handle requests with.
-	 * <p>Internally this is delegated to and equivalent to using
-	 * {@link org.springframework.test.web.servlet.setup.MockMvcBuilders#standaloneSetup(Object...)}
-	 * to initialize {@link MockMvc}.
+	 * Begin creating a {@link RestTestClient} with a {@link MockMvcBuilders#standaloneSetup
+	 * Standalone MockMvc setup}.
 	 */
 	static StandaloneSetupBuilder bindToController(Object... controllers) {
 		return new DefaultRestTestClientBuilder.DefaultStandaloneSetupBuilder(controllers);
 	}
 
 	/**
-	 * Begin creating a {@link RestTestClient} by providing the {@link RouterFunction}
-	 * instance(s) to handle requests with.
-	 * <p>Internally this is delegated to and equivalent to using
-	 * {@link org.springframework.test.web.servlet.setup.MockMvcBuilders#routerFunctions(RouterFunction[])}
-	 * to initialize {@link MockMvc}.
+	 * Begin creating a {@link RestTestClient} with a {@link MockMvcBuilders#routerFunctions}
+	 * RouterFunction's MockMvc setup}.
 	 */
 	static RouterFunctionSetupBuilder bindToRouterFunction(RouterFunction<?>... routerFunctions) {
 		return new DefaultRestTestClientBuilder.DefaultRouterFunctionSetupBuilder(routerFunctions);
 	}
 
 	/**
-	 * Begin creating a {@link RestTestClient} by providing a
-	 * {@link WebApplicationContext} with Spring MVC infrastructure and
-	 * controllers.
-	 * <p>Internally this is delegated to and equivalent to using
-	 * {@link org.springframework.test.web.servlet.setup.MockMvcBuilders#webAppContextSetup(WebApplicationContext)}
-	 * to initialize {@code MockMvc}.
+	 * Begin creating a {@link RestTestClient} with a {@link MockMvcBuilders#webAppContextSetup}
+	 * WebAppContext MockMvc setup}.
 	 */
 	static WebAppContextSetupBuilder bindToApplicationContext(WebApplicationContext context) {
 		return new DefaultRestTestClientBuilder.DefaultWebAppContextSetupBuilder(context);
@@ -164,8 +167,7 @@ public interface RestTestClient {
 	}
 
 	/**
-	 * This server setup option allows you to connect to a live server through
-	 * a client connector.
+	 * This server setup option allows you to connect to a live server.
 	 * <p><pre class="code">
 	 * RestTestClient client = RestTestClient.bindToServer()
 	 *         .baseUrl("http://localhost:8080")
@@ -186,12 +188,14 @@ public interface RestTestClient {
 	}
 
 
+	/**
+	 * Steps to customize the underlying {@link RestClient} via {@link RestClient.Builder}.
+	 * @param <B> the type of builder
+	 */
 	interface Builder<B extends Builder<B>> {
 
 		/**
-		 * Configure a base URI as described in
-		 * {@link RestClient#create(String)
-		 * WebClient.create(String)}.
+		 * Configure a base URI as described in {@link RestClient#create(String)}.
 		 */
 		<T extends B> T baseUrl(String baseUrl);
 
@@ -203,7 +207,7 @@ public interface RestTestClient {
 
 		/**
 		 * Add the given header to all requests that haven't added it.
-		 * @param headerName   the header name
+		 * @param headerName the header name
 		 * @param headerValues the header values
 		 */
 		<T extends B> T defaultHeader(String headerName, String... headerValues);
@@ -220,8 +224,8 @@ public interface RestTestClient {
 		<T extends B> T defaultHeaders(Consumer<HttpHeaders> headersConsumer);
 
 		/**
-		 * Add the given cookie to all requests.
-		 * @param cookieName   the cookie name
+		 * Add the given cookie to all requests that haven't already added it.
+		 * @param cookieName the cookie name
 		 * @param cookieValues the cookie values
 		 */
 		<T extends B> T defaultCookie(String cookieName, String... cookieValues);
@@ -238,36 +242,45 @@ public interface RestTestClient {
 		<T extends B> T defaultCookies(Consumer<MultiValueMap<String, String>> cookiesConsumer);
 
 		/**
-		 * Apply the given {@code Consumer} to this builder instance.
-		 * <p>This can be useful for applying pre-packaged customizations.
-		 * @param builderConsumer the consumer to apply
-		 */
-		<T extends B> T apply(Consumer<Builder<B>> builderConsumer);
-
-		/**
 		 * Build the {@link RestTestClient} instance.
 		 */
 		RestTestClient build();
- 	}
-
-
-	interface MockMvcSetupBuilder<B extends Builder<B>, M extends MockMvcBuilder> extends Builder<B> {
-
-		<T extends B> T configureServer(Consumer<M> consumer);
 	}
 
 
+	/**
+	 * Extension of {@link Builder} for tests against a MockMvc server.
+	 * @param <S> the builder type
+	 * @param <M> the type of {@link MockMvc} setup
+	 */
+	interface MockMvcSetupBuilder<S extends Builder<S>, M extends MockMvcBuilder> extends Builder<S> {
+
+		<T extends S> T configureServer(Consumer<M> consumer);
+	}
+
+
+	/**
+	 * Extension of {@link Builder} for tests витх а
+	 * {@link MockMvcBuilders#standaloneSetup(Object...) standalone MockMvc setup}.
+	 */
 	interface StandaloneSetupBuilder extends MockMvcSetupBuilder<StandaloneSetupBuilder, StandaloneMockMvcBuilder> {
 	}
 
 
+	/**
+	 * Extension of {@link Builder} for tests витх а
+	 * {@link MockMvcBuilders#routerFunctions(RouterFunction[]) RouterFunction MockMvc setup}.
+	 */
 	interface RouterFunctionSetupBuilder extends MockMvcSetupBuilder<RouterFunctionSetupBuilder, RouterFunctionMockMvcBuilder> {
 	}
 
 
+	/**
+	 * Extension of {@link Builder} for tests витх а
+	 * {@link MockMvcBuilders#webAppContextSetup(WebApplicationContext) WebAppContext MockMvc setup}.
+	 */
 	interface WebAppContextSetupBuilder extends MockMvcSetupBuilder<WebAppContextSetupBuilder, DefaultMockMvcBuilder> {
 	}
-
 
 
 	/**
@@ -294,7 +307,7 @@ public interface RestTestClient {
 		 * with a base URI) it will be used to expand the URI template.
 		 * @return spec to add headers or perform the exchange
 		 */
-		S uri(String uri, Object... uriVariables);
+		S uri(String uri, @Nullable Object... uriVariables);
 
 		/**
 		 * Specify the URI for the request using a URI template and URI variables.
@@ -302,7 +315,7 @@ public interface RestTestClient {
 		 * with a base URI) it will be used to expand the URI template.
 		 * @return spec to add headers or perform the exchange
 		 */
-		S uri(String uri, Map<String, ?> uriVariables);
+		S uri(String uri, Map<String, ? extends @Nullable Object> uriVariables);
 
 		/**
 		 * Build the URI for the request with a {@link UriBuilder} obtained
@@ -419,6 +432,16 @@ public interface RestTestClient {
 	 * Specification for providing body of a request.
 	 */
 	interface RequestBodySpec extends RequestHeadersSpec<RequestBodySpec> {
+
+		/**
+		 * Set the length of the body in bytes, as specified by the
+		 * {@code Content-Length} header.
+		 * @param contentLength the content length
+		 * @return the same instance
+		 * @see HttpHeaders#setContentLength(long)
+		 */
+		RequestBodySpec contentLength(long contentLength);
+
 		/**
 		 * Set the {@linkplain MediaType media type} of the body, as specified
 		 * by the {@code Content-Type} header.
@@ -430,7 +453,7 @@ public interface RestTestClient {
 
 		/**
 		 * Set the body to the given {@code Object} value. This method invokes the
-		 * {@link org.springframework.web.client.RestClient.RequestBodySpec#body(Object)} (Object)
+		 * {@link RestClient.RequestBodySpec#body(Object)} (Object)
 		 * bodyValue} method on the underlying {@code RestClient}.
 		 * @param body the value to write to the request body
 		 * @return spec for further declaration of the request
@@ -461,8 +484,8 @@ public interface RestTestClient {
 	interface ResponseSpec {
 
 		/**
-		 * Apply multiple assertions to a response with the given
-		 * {@linkplain RestTestClient.ResponseSpec.ResponseSpecConsumer consumers}, with the guarantee that
+s		 * Apply multiple assertions to a response with the given
+		 * {@linkplain ResponseSpecConsumer consumers}, with the guarantee that
 		 * all assertions will be applied even if one or more assertions fails
 		 * with an exception.
 		 * <p>If a single {@link Error} or {@link RuntimeException} is thrown,
@@ -522,8 +545,7 @@ public interface RestTestClient {
 		BodyContentSpec expectBody();
 
 		/**
-		 * Exit the chained flow in order to consume the response body
-		 * externally.
+		 * Exit the chained flow in order to consume the response body externally.
 		 */
 		<T> EntityExchangeResult<T> returnResult(Class<T> elementClass);
 
@@ -534,8 +556,8 @@ public interface RestTestClient {
 		<T> EntityExchangeResult<T> returnResult(ParameterizedTypeReference<T> elementTypeRef);
 
 		/**
-		 * {@link Consumer} of a {@link RestTestClient.ResponseSpec}.
-		 * @see RestTestClient.ResponseSpec#expectAll(RestTestClient.ResponseSpec.ResponseSpecConsumer...)
+		 * {@link Consumer} of a {@link ResponseSpec}.
+		 * @see ResponseSpec#expectAll(ResponseSpecConsumer...)
 		 */
 		@FunctionalInterface
 		interface ResponseSpecConsumer extends Consumer<ResponseSpec> {
@@ -554,18 +576,24 @@ public interface RestTestClient {
 		/**
 		 * Assert the extracted body is equal to the given value.
 		 */
-		<T extends S> T isEqualTo(B expected);
+		<T extends S> T isEqualTo(@Nullable B expected);
+
+		/**
+		 * Assert the extracted body with a {@link Matcher}.
+		 * @since 5.1
+		 */
+		<T extends S> T value(Matcher<? super @Nullable B> matcher);
 
 		/**
 		 * Transform the extracted the body with a function, for example, extracting a
 		 * property, and assert the mapped value with a {@link Matcher}.
 		 */
-		<T extends S, R> T value(Function<B, R> bodyMapper, Matcher<? super R> matcher);
+		<T extends S, R> T value(Function<@Nullable B, @Nullable R> bodyMapper, Matcher<? super @Nullable R> matcher);
 
 		/**
 		 * Assert the extracted body with a {@link Consumer}.
 		 */
-		<T extends S> T value(Consumer<B> consumer);
+		<T extends S> T value(Consumer<@Nullable B> consumer);
 
 		/**
 		 * Assert the exchange result with the given {@link Consumer}.

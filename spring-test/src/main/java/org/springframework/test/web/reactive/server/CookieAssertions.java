@@ -29,9 +29,11 @@ import org.springframework.util.MultiValueMap;
  */
 public class CookieAssertions extends AbstractCookieAssertions<ExchangeResult, WebTestClient.ResponseSpec> {
 
-	public CookieAssertions(ExchangeResult exchangeResult, WebTestClient.ResponseSpec responseSpec) {
+
+	CookieAssertions(ExchangeResult exchangeResult, WebTestClient.ResponseSpec responseSpec) {
 		super(exchangeResult, responseSpec);
 	}
+
 
 	@Override
 	protected void assertWithDiagnostics(Runnable assertion) {

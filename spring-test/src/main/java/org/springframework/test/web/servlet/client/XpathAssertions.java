@@ -33,10 +33,14 @@ import org.springframework.util.Assert;
  */
 public class XpathAssertions extends AbstractXpathAssertions<RestTestClient.BodyContentSpec> {
 
-	XpathAssertions(RestTestClient.BodyContentSpec spec,
-					String expression, @Nullable Map<String, String> namespaces, Object... args) {
+
+	XpathAssertions(
+			RestTestClient.BodyContentSpec spec,
+			String expression, @Nullable Map<String, String> namespaces, Object... args) {
+
 		super(spec, expression, namespaces, args);
 	}
+
 
 	@Override
 	protected Optional<HttpHeaders> getResponseHeaders() {

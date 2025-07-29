@@ -19,7 +19,6 @@ package org.springframework.test.web.servlet.client;
 import java.io.IOException;
 import java.net.HttpCookie;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -32,6 +31,7 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseCookie;
+import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestClient.RequestHeadersSpec.ConvertibleClientHttpResponse;
@@ -41,21 +41,28 @@ import org.springframework.web.client.RestClient.RequestHeadersSpec.ConvertibleC
  * {@link RestTestClient}.
  *
  * @author Rob Worsnop
+ * @author Rossen Stoyanchev
+ * @since 7.0
  */
 public class ExchangeResult {
+
 	private static final Pattern SAME_SITE_PATTERN = Pattern.compile("(?i).*SameSite=(Strict|Lax|None).*");
+
 	private static final Pattern PARTITIONED_PATTERN = Pattern.compile("(?i).*;\\s*Partitioned(\\s*;.*|\\s*)$");
 
 
 	private static final Log logger = LogFactory.getLog(ExchangeResult.class);
 
-	/** Ensure single logging; for example, for expectAll. */
-	private boolean diagnosticsLogged;
 
 	private final ConvertibleClientHttpResponse clientResponse;
 
-	ExchangeResult(@Nullable ConvertibleClientHttpResponse clientResponse) {
-		this.clientResponse = Objects.requireNonNull(clientResponse, "clientResponse must be non-null");
+	/** Ensure single logging; for example, for expectAll. */
+	private boolean diagnosticsLogged;
+
+
+	ExchangeResult(@Nullable ConvertibleClientHttpResponse response) {
+		Assert.notNull(response, "Response must not be null");
+		this.clientResponse = response;
 	}
 
 	ExchangeResult(ExchangeResult result) {
@@ -63,6 +70,10 @@ public class ExchangeResult {
 		this.diagnosticsLogged = result.diagnosticsLogged;
 	}
 
+
+	/**
+	 * Return the HTTP status code as an {@link HttpStatusCode} value.
+	 */
 	public HttpStatusCode getStatus() {
 		try {
 			return this.clientResponse.getStatusCode();
@@ -72,37 +83,11 @@ public class ExchangeResult {
 		}
 	}
 
+	/**
+	 * Return the response headers received from the server.
+	 */
 	public HttpHeaders getResponseHeaders() {
 		return this.clientResponse.getHeaders();
-	}
-
-	@Nullable
-	public <T> T getBody(Class<T> bodyType) {
-		return this.clientResponse.bodyTo(bodyType);
-	}
-
-	@Nullable
-	public <T> T getBody(ParameterizedTypeReference<T> bodyType) {
-		return this.clientResponse.bodyTo(bodyType);
-	}
-
-
-	/**
-	 * Execute the given Runnable, catch any {@link AssertionError}, log details
-	 * about the request and response at ERROR level under the class log
-	 * category, and after that re-throw the error.
-	 */
-	public void assertWithDiagnostics(Runnable assertion) {
-		try {
-			assertion.run();
-		}
-		catch (AssertionError ex) {
-			if (!this.diagnosticsLogged && logger.isErrorEnabled()) {
-				this.diagnosticsLogged = true;
-				logger.error("Request details for assertion failure:\n" + this);
-			}
-			throw ex;
-		}
 	}
 
 	/**
@@ -132,4 +117,33 @@ public class ExchangeResult {
 				.partitioned(partitioned)
 				.build();
 	}
+
+	@Nullable
+	public <T> T getBody(Class<T> bodyType) {
+		return this.clientResponse.bodyTo(bodyType);
+	}
+
+	@Nullable
+	public <T> T getBody(ParameterizedTypeReference<T> bodyType) {
+		return this.clientResponse.bodyTo(bodyType);
+	}
+
+	/**
+	 * Execute the given Runnable, catch any {@link AssertionError}, log details
+	 * about the request and response at ERROR level under the class log
+	 * category, and after that re-throw the error.
+	 */
+	public void assertWithDiagnostics(Runnable assertion) {
+		try {
+			assertion.run();
+		}
+		catch (AssertionError ex) {
+			if (!this.diagnosticsLogged && logger.isErrorEnabled()) {
+				this.diagnosticsLogged = true;
+				logger.error("Request details for assertion failure:\n" + this);
+			}
+			throw ex;
+		}
+	}
+
 }

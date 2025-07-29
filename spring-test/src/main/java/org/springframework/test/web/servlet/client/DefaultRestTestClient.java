@@ -21,7 +21,6 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.time.ZonedDateTime;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
@@ -59,12 +58,9 @@ class DefaultRestTestClient implements RestTestClient {
 
 	private final AtomicLong requestIndex = new AtomicLong();
 
-	private final RestClient.Builder restClientBuilder;
 
-
-	DefaultRestTestClient(RestClient.Builder restClientBuilder) {
-		this.restClient = restClientBuilder.build();
-		this.restClientBuilder = restClientBuilder;
+	DefaultRestTestClient(RestClient.Builder builder) {
+		this.restClient = builder.build();
 	}
 
 
@@ -104,8 +100,8 @@ class DefaultRestTestClient implements RestTestClient {
 	}
 
 	@Override
-	public RequestBodyUriSpec method(HttpMethod method) {
-		return methodInternal(method);
+	public RequestBodyUriSpec method(HttpMethod httpMethod) {
+		return methodInternal(httpMethod);
 	}
 
 	private RequestBodyUriSpec methodInternal(HttpMethod httpMethod) {
@@ -114,7 +110,7 @@ class DefaultRestTestClient implements RestTestClient {
 
 	@Override
 	public <B extends Builder<B>> Builder<B> mutate() {
-		return new DefaultRestTestClientBuilder<>(this.restClientBuilder);
+		return new DefaultRestTestClientBuilder<>(this.restClient.mutate());
 	}
 
 
@@ -122,103 +118,105 @@ class DefaultRestTestClient implements RestTestClient {
 
 		private final RestClient.RequestBodyUriSpec requestHeadersUriSpec;
 
-		private RestClient.RequestBodySpec requestBodySpec;
-
-		private final String requestId;
-
 		DefaultRequestBodyUriSpec(RestClient.RequestBodyUriSpec spec) {
 			this.requestHeadersUriSpec = spec;
-			this.requestBodySpec = spec;
-			this.requestId = String.valueOf(requestIndex.incrementAndGet());
+			String requestId = String.valueOf(requestIndex.incrementAndGet());
+			this.requestHeadersUriSpec.header(RESTTESTCLIENT_REQUEST_ID, requestId);
 		}
 
 		@Override
-		public RequestBodySpec uri(String uriTemplate, Object... uriVariables) {
-			this.requestBodySpec = this.requestHeadersUriSpec.uri(uriTemplate, uriVariables);
+		public RequestBodySpec uri(String uriTemplate, @Nullable Object... uriVariables) {
+			this.requestHeadersUriSpec.uri(uriTemplate, uriVariables);
 			return this;
 		}
 
 		@Override
 		public RequestBodySpec uri(String uri, Map<String, ?> uriVariables) {
-			this.requestBodySpec = this.requestHeadersUriSpec.uri(uri, uriVariables);
+			this.requestHeadersUriSpec.uri(uri, uriVariables);
 			return this;
 		}
 
 		@Override
 		public RequestBodySpec uri(Function<UriBuilder, URI> uriFunction) {
-			this.requestBodySpec = this.requestHeadersUriSpec.uri(uriFunction);
+			this.requestHeadersUriSpec.uri(uriFunction);
 			return this;
 		}
 
 		@Override
 		public RequestBodySpec uri(URI uri) {
-			this.requestBodySpec = this.requestHeadersUriSpec.uri(uri);
+			this.requestHeadersUriSpec.uri(uri);
 			return this;
 		}
 
 		@Override
 		public RequestBodySpec header(String headerName, String... headerValues) {
-			this.requestBodySpec = this.requestHeadersUriSpec.header(headerName, headerValues);
+			this.requestHeadersUriSpec.header(headerName, headerValues);
 			return this;
 		}
 
 		@Override
 		public RequestBodySpec headers(Consumer<HttpHeaders> headersConsumer) {
-			this.requestBodySpec = this.requestHeadersUriSpec.headers(headersConsumer);
+			this.requestHeadersUriSpec.headers(headersConsumer);
 			return this;
 		}
 
 		@Override
 		public RequestBodySpec accept(MediaType... acceptableMediaTypes) {
-			this.requestBodySpec = this.requestHeadersUriSpec.accept(acceptableMediaTypes);
+			this.requestHeadersUriSpec.accept(acceptableMediaTypes);
 			return this;
 		}
 
 		@Override
 		public RequestBodySpec acceptCharset(Charset... acceptableCharsets) {
-			this.requestBodySpec = this.requestHeadersUriSpec.acceptCharset(acceptableCharsets);
+			this.requestHeadersUriSpec.acceptCharset(acceptableCharsets);
 			return this;
 		}
 
 		@Override
 		public RequestBodySpec contentType(MediaType contentType) {
-			this.requestBodySpec = this.requestHeadersUriSpec.contentType(contentType);
+			this.requestHeadersUriSpec.contentType(contentType);
+			return this;
+		}
+
+		@Override
+		public RequestBodySpec contentLength(long contentLength) {
+			this.requestHeadersUriSpec.contentLength(contentLength);
 			return this;
 		}
 
 		@Override
 		public RequestBodySpec cookie(String name, String value) {
-			this.requestBodySpec = this.requestHeadersUriSpec.cookie(name, value);
+			this.requestHeadersUriSpec.cookie(name, value);
 			return this;
 		}
 
 		@Override
 		public RequestBodySpec cookies(Consumer<MultiValueMap<String, String>> cookiesConsumer) {
-			this.requestBodySpec = this.requestHeadersUriSpec.cookies(cookiesConsumer);
+			this.requestHeadersUriSpec.cookies(cookiesConsumer);
 			return this;
 		}
 
 		@Override
 		public RequestBodySpec ifModifiedSince(ZonedDateTime ifModifiedSince) {
-			this.requestBodySpec = this.requestHeadersUriSpec.ifModifiedSince(ifModifiedSince);
+			this.requestHeadersUriSpec.ifModifiedSince(ifModifiedSince);
 			return this;
 		}
 
 		@Override
 		public RequestBodySpec ifNoneMatch(String... ifNoneMatches) {
-			this.requestBodySpec = this.requestHeadersUriSpec.ifNoneMatch(ifNoneMatches);
+			this.requestHeadersUriSpec.ifNoneMatch(ifNoneMatches);
 			return this;
 		}
 
 		@Override
 		public RequestBodySpec attribute(String name, Object value) {
-			this.requestBodySpec = this.requestHeadersUriSpec.attribute(name, value);
+			this.requestHeadersUriSpec.attribute(name, value);
 			return this;
 		}
 
 		@Override
 		public RequestBodySpec attributes(Consumer<Map<String, Object>> attributesConsumer) {
-			this.requestBodySpec = this.requestHeadersUriSpec.attributes(attributesConsumer);
+			this.requestHeadersUriSpec.attributes(attributesConsumer);
 			return this;
 		}
 
@@ -230,11 +228,9 @@ class DefaultRestTestClient implements RestTestClient {
 
 		@Override
 		public ResponseSpec exchange() {
-			this.requestBodySpec = this.requestBodySpec.header(RESTTESTCLIENT_REQUEST_ID, this.requestId);
-			ExchangeResult exchangeResult = this.requestBodySpec.exchange(
-					(clientRequest, clientResponse) -> new ExchangeResult(clientResponse),
-					false);
-			return new DefaultResponseSpec(Objects.requireNonNull(exchangeResult));
+			return new DefaultResponseSpec(
+					this.requestHeadersUriSpec.exchangeForRequiredValue(
+							(request, response) -> new ExchangeResult(response), false));
 		}
 	}
 
@@ -243,8 +239,8 @@ class DefaultRestTestClient implements RestTestClient {
 
 		private final ExchangeResult exchangeResult;
 
-		DefaultResponseSpec(ExchangeResult exchangeResult) {
-			this.exchangeResult = exchangeResult;
+		DefaultResponseSpec(ExchangeResult result) {
+			this.exchangeResult = result;
 		}
 
 		@Override
@@ -265,19 +261,22 @@ class DefaultRestTestClient implements RestTestClient {
 		@Override
 		public <B> BodySpec<B, ?> expectBody(Class<B> bodyType) {
 			B body = this.exchangeResult.getBody(bodyType);
-			return new DefaultBodySpec<>(new EntityExchangeResult<>(this.exchangeResult, body));
+			EntityExchangeResult<B> result = new EntityExchangeResult<>(this.exchangeResult, body);
+			return new DefaultBodySpec<>(result);
 		}
 
 		@Override
 		public <B> BodySpec<B, ?> expectBody(ParameterizedTypeReference<B> bodyType) {
 			B body = this.exchangeResult.getBody(bodyType);
-			return new DefaultBodySpec<>(new EntityExchangeResult<>(this.exchangeResult, body));
+			EntityExchangeResult<B> result = new EntityExchangeResult<>(this.exchangeResult, body);
+			return new DefaultBodySpec<>(result);
 		}
 
 		@Override
 		public BodyContentSpec expectBody() {
 			byte[] body = this.exchangeResult.getBody(byte[].class);
-			return new DefaultBodyContentSpec( new EntityExchangeResult<>(this.exchangeResult, body));
+			EntityExchangeResult<byte[]> result = new EntityExchangeResult<>(this.exchangeResult, body);
+			return new DefaultBodyContentSpec(result);
 		}
 
 		@Override
@@ -318,20 +317,26 @@ class DefaultRestTestClient implements RestTestClient {
 
 		private final EntityExchangeResult<B> result;
 
-		DefaultBodySpec(@Nullable EntityExchangeResult<B> result) {
-			this.result = Objects.requireNonNull(result, "exchangeResult must be non-null");
+		DefaultBodySpec(EntityExchangeResult<B> result) {
+			this.result = result;
 		}
 
 		@Override
-		public <T extends S> T isEqualTo(B expected) {
+		public <T extends S> T isEqualTo(@Nullable B expected) {
 			this.result.assertWithDiagnostics(() ->
 					AssertionErrors.assertEquals("Response body", expected, this.result.getResponseBody()));
 			return self();
 		}
 
 		@Override
+		public <T extends S> T value(Matcher<? super @Nullable B> matcher) {
+			this.result.assertWithDiagnostics(() -> MatcherAssert.assertThat(this.result.getResponseBody(), matcher));
+			return self();
+		}
+
+		@Override
 		@SuppressWarnings("NullAway") // https://github.com/uber/NullAway/issues/1129
-		public <T extends S, R> T value(Function<B, R> bodyMapper, Matcher<? super R> matcher) {
+		public <T extends S, R> T value(Function<@Nullable B, @Nullable R> bodyMapper, Matcher<? super @Nullable R> matcher) {
 			this.result.assertWithDiagnostics(() -> {
 				B body = this.result.getResponseBody();
 				MatcherAssert.assertThat(bodyMapper.apply(body), matcher);
@@ -340,7 +345,8 @@ class DefaultRestTestClient implements RestTestClient {
 		}
 
 		@Override
-		public <T extends S> T value(Consumer<B> consumer) {
+		@SuppressWarnings("NullAway") // https://github.com/uber/NullAway/issues/1129
+		public <T extends S> T value(Consumer<@Nullable B> consumer) {
 			this.result.assertWithDiagnostics(() -> consumer.accept(this.result.getResponseBody()));
 			return self();
 		}
@@ -374,8 +380,7 @@ class DefaultRestTestClient implements RestTestClient {
 		@Override
 		public EntityExchangeResult<Void> isEmpty() {
 			this.result.assertWithDiagnostics(() ->
-					AssertionErrors.assertTrue("Expected empty body",
-							this.result.getBody(byte[].class) == null));
+					AssertionErrors.assertTrue("Expected empty body", this.result.getBody(byte[].class) == null));
 			return new EntityExchangeResult<>(this.result, null);
 		}
 

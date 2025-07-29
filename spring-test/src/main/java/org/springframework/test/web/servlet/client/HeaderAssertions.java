@@ -29,7 +29,7 @@ import org.springframework.test.web.support.AbstractHeaderAssertions;
 public class HeaderAssertions extends AbstractHeaderAssertions<ExchangeResult, RestTestClient.ResponseSpec> {
 
 
-	public HeaderAssertions(ExchangeResult exchangeResult, RestTestClient.ResponseSpec responseSpec) {
+	HeaderAssertions(ExchangeResult exchangeResult, RestTestClient.ResponseSpec responseSpec) {
 		super(exchangeResult, responseSpec);
 	}
 

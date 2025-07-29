@@ -73,7 +73,7 @@ import org.springframework.web.util.UriBuilderFactory;
  * Client for testing web servers that uses {@link WebClient} internally to
  * perform requests while also providing a fluent API to verify responses.
  * This client can connect to any server over HTTP, or to a WebFlux application
- * via mock request and response objects.
+ * with a mock request and response.
  *
  * <p>Use one of the bindToXxx methods to create an instance. For example:
  * <ul>
@@ -89,9 +89,6 @@ import org.springframework.web.util.UriBuilderFactory;
  * @author Sam Brannen
  * @author Michał Rowicki
  * @since 5.0
- * @see StatusAssertions
- * @see HeaderAssertions
- * @see JsonPathAssertions
  */
 public interface WebTestClient {
 
@@ -172,12 +169,10 @@ public interface WebTestClient {
 
 
 	/**
-	 * Use this server setup to test one {@code @Controller} at a time.
-	 * This option loads the default configuration of
-	 * {@link org.springframework.web.reactive.config.EnableWebFlux @EnableWebFlux}.
-	 * There are builder methods to customize the Java config. The resulting
-	 * WebFlux application will be tested without an HTTP server using a mock
-	 * request and response.
+	 * Begin creating a {@link WebTestClient} with a mock server setup that
+	 * tests one {@code @Controller} at a time with
+	 * {@link org.springframework.web.reactive.config.EnableWebFlux @EnableWebFlux}
+	 * equivalent configuration.
 	 * @param controllers one or more controller instances to test
 	 * (specified {@code Class} will be turned into instance)
 	 * @return chained API to customize server and client config; use
@@ -188,10 +183,10 @@ public interface WebTestClient {
 	}
 
 	/**
-	 * Use this option to set up a server from a {@link RouterFunction}.
-	 * Internally the provided configuration is passed to
-	 * {@code RouterFunctions#toWebHandler}. The resulting WebFlux application
-	 * will be tested without an HTTP server using a mock request and response.
+	 * Begin creating a {@link WebTestClient} with a mock server setup that
+	 * tests one {@code RouterFunction} at a time with
+	 * {@link org.springframework.web.reactive.config.EnableWebFlux @EnableWebFlux}
+	 * equivalent configuration.
 	 * @param routerFunction the RouterFunction to test
 	 * @return chained API to customize server and client config; use
 	 * {@link MockServerSpec#configureClient()} to transition to client config
@@ -229,8 +224,7 @@ public interface WebTestClient {
 	}
 
 	/**
-	 * This server setup option allows you to connect to a live server through
-	 * a Reactor Netty client connector.
+	 * This server setup option allows you to connect to a live server.
 	 * <p><pre class="code">
 	 * WebTestClient client = WebTestClient.bindToServer()
 	 *         .baseUrl("http://localhost:8080")
@@ -389,17 +383,12 @@ public interface WebTestClient {
 
 
 	/**
-	 * Steps for customizing the {@link WebClient} used to test with,
-	 * internally delegating to a
-	 * {@link org.springframework.web.reactive.function.client.WebClient.Builder
-	 * WebClient.Builder}.
+	 * Steps to customize the underlying {@link WebClient} via {@link WebClient.Builder}.
 	 */
 	interface Builder {
 
 		/**
-		 * Configure a base URI as described in
-		 * {@link org.springframework.web.reactive.function.client.WebClient#create(String)
-		 * WebClient.create(String)}.
+		 * Configure a base URI as described in {@link WebClient#create(String)}.
 		 */
 		Builder baseUrl(String baseUrl);
 
@@ -428,7 +417,7 @@ public interface WebTestClient {
 		Builder defaultHeaders(Consumer<HttpHeaders> headersConsumer);
 
 		/**
-		 * Add the given header to all requests that haven't added it.
+		 * Add the given cookie to all requests that haven't already added it.
 		 * @param cookieName the cookie name
 		 * @param cookieValues the cookie values
 		 */
@@ -718,6 +707,7 @@ public interface WebTestClient {
 	 * Specification for providing body of a request.
 	 */
 	interface RequestBodySpec extends RequestHeadersSpec<RequestBodySpec> {
+
 		/**
 		 * Set the length of the body in bytes, as specified by the
 		 * {@code Content-Length} header.
@@ -738,7 +728,7 @@ public interface WebTestClient {
 
 		/**
 		 * Set the body to the given {@code Object} value. This method invokes the
-		 * {@link org.springframework.web.reactive.function.client.WebClient.RequestBodySpec#bodyValue(Object)
+		 * {@link WebClient.RequestBodySpec#bodyValue(Object)
 		 * bodyValue} method on the underlying {@code WebClient}.
 		 * @param body the value to write to the request body
 		 * @return spec for further declaration of the request
@@ -773,7 +763,7 @@ public interface WebTestClient {
 
 		/**
 		 * Set the body from the given producer. This method invokes the
-		 * {@link org.springframework.web.reactive.function.client.WebClient.RequestBodySpec#body(Object, Class)
+		 * {@link WebClient.RequestBodySpec#body(Object, Class)
 		 * body(Object, Class)} method on the underlying {@code WebClient}.
 		 * @param producer the producer to write to the request. This must be a
 		 * {@link Publisher} or another producer adaptable to a
@@ -786,7 +776,7 @@ public interface WebTestClient {
 
 		/**
 		 * Set the body from the given producer. This method invokes the
-		 * {@link org.springframework.web.reactive.function.client.WebClient.RequestBodySpec#body(Object, ParameterizedTypeReference)
+		 * {@link WebClient.RequestBodySpec#body(Object, ParameterizedTypeReference)
 		 * body(Object, ParameterizedTypeReference)} method on the underlying {@code WebClient}.
 		 * @param producer the producer to write to the request. This must be a
 		 * {@link Publisher} or another producer adaptable to a
@@ -800,7 +790,7 @@ public interface WebTestClient {
 		/**
 		 * Set the body of the request to the given {@code BodyInserter}.
 		 * This method invokes the
-		 * {@link org.springframework.web.reactive.function.client.WebClient.RequestBodySpec#body(BodyInserter)
+		 * {@link WebClient.RequestBodySpec#body(BodyInserter)
 		 * body(BodyInserter)} method on the underlying {@code WebClient}.
 		 * @param inserter the body inserter to use
 		 * @return spec for further declaration of the request
@@ -908,8 +898,8 @@ public interface WebTestClient {
 		BodyContentSpec expectBody();
 
 		/**
-		 * Exit the chained flow in order to consume the response body
-		 * externally, for example, via {@link reactor.test.StepVerifier}.
+		 * Exit the chained flow in order to consume the response body externally,
+		 * for example, via {@link reactor.test.StepVerifier}.
 		 * <p>Note that when {@code Void.class} is passed in, the response body
 		 * is consumed and released. If no content is expected, then consider
 		 * using {@code .expectBody().isEmpty()} instead which asserts that

@@ -133,7 +133,7 @@ class RestTestClientTests {
 		@Test
 		void test() {
 			RestTestClientTests.this.client.mutate()
-					.apply(builder -> builder.defaultHeader("foo", "bar"))
+					.defaultHeader("foo", "bar")
 					.uriBuilderFactory(new DefaultUriBuilderFactory("/test"))
 					.defaultCookie("foo", "bar")
 					.defaultCookies(cookies -> cookies.add("a", "b"))
