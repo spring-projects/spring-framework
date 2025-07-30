@@ -16,11 +16,7 @@
 
 package org.springframework.web.service.registry;
 
-import java.util.Arrays;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.Map;
-import java.util.Set;
 import java.util.function.BiConsumer;
 
 import org.junit.jupiter.api.Test;
@@ -43,12 +39,12 @@ import org.springframework.web.service.registry.greeting.GreetingB;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests for {@link AnnotationHttpServiceRegistrar}.
+ * Tests for {@link ImportHttpServicesRegistrar}.
  *
  * @author Rossen Stoyanchev
  * @author Stephane Nicoll
  */
-public class AnnotationHttpServiceRegistrarTests {
+public class ImportHttpServicesRegistrarTests {
 
 	private static final String ECHO_GROUP = "echo";
 
@@ -57,13 +53,13 @@ public class AnnotationHttpServiceRegistrarTests {
 
 	private final TestGroupRegistry groupRegistry = new TestGroupRegistry();
 
-	private final TestAnnotationHttpServiceRegistrar registrar = new TestAnnotationHttpServiceRegistrar();
+	private final ImportHttpServicesRegistrar registrar = new ImportHttpServicesRegistrar();
 
 
 	@Test
 	void basicListing() {
 		doRegister(ListingConfig.class);
-		assertGroups(StubGroup.ofListing(ECHO_GROUP, EchoA.class, EchoB.class));
+		assertGroups(TestGroup.ofListing(ECHO_GROUP, EchoA.class, EchoB.class));
 	}
 
 	@Test
@@ -83,8 +79,8 @@ public class AnnotationHttpServiceRegistrarTests {
 	void basicScan() {
 		doRegister(ScanConfig.class);
 		assertGroups(
-				StubGroup.ofPackageClasses(ECHO_GROUP, EchoA.class),
-				StubGroup.ofPackageClasses(GREETING_GROUP, GreetingA.class));
+				TestGroup.ofPackageClasses(ECHO_GROUP, EchoA.class),
+				TestGroup.ofPackageClasses(GREETING_GROUP, GreetingA.class));
 	}
 
 	@Test
@@ -105,8 +101,8 @@ public class AnnotationHttpServiceRegistrarTests {
 	void clientType() {
 		doRegister(ClientTypeConfig.class);
 		assertGroups(
-				StubGroup.ofListing(ECHO_GROUP, ClientType.WEB_CLIENT, EchoA.class),
-				StubGroup.ofListing(GREETING_GROUP, ClientType.WEB_CLIENT, GreetingA.class));
+				TestGroup.ofListing(ECHO_GROUP, ClientType.WEB_CLIENT, EchoA.class),
+				TestGroup.ofListing(GREETING_GROUP, ClientType.WEB_CLIENT, GreetingA.class));
 	}
 
 	private void doRegister(Class<?> configClass) {
@@ -133,11 +129,11 @@ public class AnnotationHttpServiceRegistrarTests {
 		return freshApplicationContext;
 	}
 
-	private void assertGroups(StubGroup... expectedGroups) {
-		Map<String, StubGroup> groupMap = this.groupRegistry.groupMap();
+	private void assertGroups(TestGroup... expectedGroups) {
+		Map<String, TestGroup> groupMap = this.groupRegistry.groupMap();
 		assertThat(groupMap.size()).isEqualTo(expectedGroups.length);
-		for (StubGroup expected : expectedGroups) {
-			StubGroup actual = groupMap.get(expected.name());
+		for (TestGroup expected : expectedGroups) {
+			TestGroup actual = groupMap.get(expected.name());
 			assertThat(actual.httpServiceTypes()).isEqualTo(expected.httpServiceTypes());
 			assertThat(actual.clientType()).isEqualTo(expected.clientType());
 			assertThat(actual.packageNames()).isEqualTo(expected.packageNames());
@@ -159,86 +155,4 @@ public class AnnotationHttpServiceRegistrarTests {
 	@ImportHttpServices(clientType = ClientType.WEB_CLIENT, group = GREETING_GROUP, types = { GreetingA.class })
 	static class ClientTypeConfig {
 	}
-
-
-	private static class TestAnnotationHttpServiceRegistrar extends AnnotationHttpServiceRegistrar {
-
-		@Override
-		public void registerHttpServices(GroupRegistry registry, AnnotationMetadata metadata) {
-			super.registerHttpServices(registry, metadata);
-		}
-	}
-
-
-	private static class TestGroupRegistry implements AbstractHttpServiceRegistrar.GroupRegistry {
-
-		private final Map<String, StubGroup> groupMap = new LinkedHashMap<>();
-
-		public Map<String, StubGroup> groupMap() {
-			return this.groupMap;
-		}
-
-		@Override
-		public GroupSpec forGroup(String name, ClientType clientType) {
-			return new TestGroupSpec(this.groupMap, name, clientType);
-		}
-
-
-		private record TestGroupSpec(Map<String, StubGroup> groupMap, String groupName,
-				ClientType clientType) implements GroupSpec {
-
-			@Override
-			public GroupSpec register(Class<?>... serviceTypes) {
-				getOrCreateGroup().httpServiceTypes().addAll(Arrays.asList(serviceTypes));
-				return this;
-			}
-
-			@Override
-			public GroupSpec detectInBasePackages(Class<?>... packageClasses) {
-				getOrCreateGroup().packageClasses().addAll(Arrays.asList(packageClasses));
-				return this;
-			}
-
-			@Override
-			public GroupSpec detectInBasePackages(String... packageNames) {
-				getOrCreateGroup().packageNames().addAll(Arrays.asList(packageNames));
-				return this;
-			}
-
-			private StubGroup getOrCreateGroup() {
-				return this.groupMap.computeIfAbsent(this.groupName, name -> new StubGroup(name, this.clientType));
-			}
-		}
-	}
-
-
-	private record StubGroup(
-			String name, ClientType clientType, Set<Class<?>> httpServiceTypes,
-			Set<Class<?>> packageClasses, Set<String> packageNames) implements HttpServiceGroup {
-
-		StubGroup(String name, ClientType clientType) {
-			this(name, clientType, new LinkedHashSet<>(), new LinkedHashSet<>(), new LinkedHashSet<>());
-		}
-
-		public static StubGroup ofListing(String name, Class<?>... httpServiceTypes) {
-			return ofListing(name, ClientType.UNSPECIFIED, httpServiceTypes);
-		}
-
-		public static StubGroup ofListing(String name, ClientType clientType, Class<?>... httpServiceTypes) {
-			StubGroup group = new StubGroup(name, clientType);
-			group.httpServiceTypes().addAll(Arrays.asList(httpServiceTypes));
-			return group;
-		}
-
-		public static StubGroup ofPackageClasses(String name, Class<?>... packageClasses) {
-			return ofPackageClasses(name, ClientType.UNSPECIFIED, packageClasses);
-		}
-
-		public static StubGroup ofPackageClasses(String name, ClientType clientType, Class<?>... packageClasses) {
-			StubGroup group = new StubGroup(name, clientType);
-			group.packageClasses().addAll(Arrays.asList(packageClasses));
-			return group;
-		}
-	}
-
 }

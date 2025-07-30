@@ -29,7 +29,7 @@ import org.springframework.core.type.AnnotationMetadata;
  * @author Olga Maciaszek-Sharma
  * @since 7.0
  */
-class AnnotationHttpServiceRegistrar extends AbstractHttpServiceRegistrar {
+class ImportHttpServicesRegistrar extends AbstractHttpServiceRegistrar {
 
 	@Override
 	protected void registerHttpServices(GroupRegistry registry, AnnotationMetadata metadata) {

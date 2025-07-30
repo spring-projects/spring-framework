@@ -30,7 +30,7 @@ import java.util.Set;
 public interface HttpServiceGroup {
 
 	/**
-	 * The name of the group to add HTTP Services to when a group isn't specified.
+	 * The name of the default group to add HTTP Services to when a group is not specified.
 	 */
 	String DEFAULT_GROUP_NAME = "default";
 

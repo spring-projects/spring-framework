@@ -53,7 +53,7 @@ import org.springframework.web.service.annotation.HttpExchange;
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 @Repeatable(ImportHttpServices.Container.class)
-@Import(AnnotationHttpServiceRegistrar.class)
+@Import(ImportHttpServicesRegistrar.class)
 public @interface ImportHttpServices {
 
 	/**
@@ -106,7 +106,7 @@ public @interface ImportHttpServices {
 	@Target(ElementType.TYPE)
 	@Retention(RetentionPolicy.RUNTIME)
 	@Documented
-	@Import(AnnotationHttpServiceRegistrar.class)
+	@Import(ImportHttpServicesRegistrar.class)
 	@interface Container {
 
 		ImportHttpServices[] value();
