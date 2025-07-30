@@ -2,10 +2,10 @@
 = RestTestClient
 
 `RestTestClient` is an HTTP client designed for testing server applications. It wraps
-Spring's xref:integration/rest-clients.adoc#rest-restclient[`RestClient`] and uses it to perform requests
+Spring's xref:integration/rest-clients.adoc#rest-restclient[`RestClient`] and uses it to perform requests,
 but exposes a testing facade for verifying responses. `RestTestClient` can be used to
 perform end-to-end HTTP tests. It can also be used to test Spring MVC
-applications without a running server via mock server request and response objects.
+applications without a running server via MockMvc.
 
 
 
@@ -14,7 +14,7 @@ applications without a running server via mock server request and response objec
 == Setup
 
 To set up a `RestTestClient` you need to choose a server setup to bind to. This can be one
-of several mock server setup choices or a connection to a live server.
+of several MockMvc setup choices, or a connection to a live server.
 
 
 
@@ -144,9 +144,7 @@ Kotlin::
 
 In addition to the server setup options described earlier, you can also configure client
 options, including base URL, default headers, client filters, and others. These options
-are readily available following `bindToServer()`. For all other configuration options,
-you need to use `configureClient()` to transition from server to client configuration, as
-follows:
+are readily available following the initial `bindTo` call, as follows:
 
 [tabs]
 ======
@@ -155,7 +153,6 @@ Java::
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
 	client = RestTestClient.bindToController(new TestController())
-			.configureClient()
 			.baseUrl("/test")
 			.build();
 ----
@@ -165,7 +162,6 @@ Kotlin::
 [source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	client = RestTestClient.bindToController(TestController())
-			.configureClient()
 			.baseUrl("/test")
 			.build()
 ----
@@ -180,7 +176,7 @@ Kotlin::
 `RestTestClient` provides an API identical to xref:integration/rest-clients.adoc#rest-restclient[`RestClient`]
 up to the point of performing a request by using `exchange()`.
 
-After the call to `exchange()`, `RestTestClient` diverges from the `RestClient` and
+After the call to `exchange()`, `RestTestClient` diverges from `RestClient`, and
 instead continues with a workflow to verify responses.
 
 To assert the response status and headers, use the following:
@@ -310,8 +306,7 @@ Kotlin::
 ======
 
 TIP: When you need to decode to a target type with generics, look for the overloaded methods
-that accept
-{spring-framework-api}/core/ParameterizedTypeReference.html[`ParameterizedTypeReference`]
+that accept{spring-framework-api}/core/ParameterizedTypeReference.html[`ParameterizedTypeReference`]
 instead of `Class<T>`.
 
 
@@ -346,8 +341,7 @@ Kotlin::
 ----
 ======
 
-If you want to ignore the response content, the following releases the content without
-any assertions:
+If you want to ignore the response content, the following releases the content without any assertions:
 
 [tabs]
 ======
