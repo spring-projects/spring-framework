@@ -18,6 +18,7 @@ package org.springframework.web.service.registry;
 
 import java.util.Arrays;
 import java.util.Objects;
+import java.util.stream.Stream;
 
 import org.jspecify.annotations.Nullable;
 
@@ -186,7 +187,8 @@ public abstract class AbstractHttpServiceRegistrar implements
 	protected abstract void registerHttpServices(
 			GroupRegistry registry, AnnotationMetadata importingClassMetadata);
 
-	private ClassPathScanningCandidateComponentProvider getScanner() {
+
+	protected Stream<BeanDefinition> findHttpServices(String basePackage) {
 		if (this.scanner == null) {
 			Assert.state(this.environment != null, "Environment has not been set");
 			Assert.state(this.resourceLoader != null, "ResourceLoader has not been set");
@@ -194,7 +196,7 @@ public abstract class AbstractHttpServiceRegistrar implements
 			this.scanner.setEnvironment(this.environment);
 			this.scanner.setResourceLoader(this.resourceLoader);
 		}
-		return this.scanner;
+		return this.scanner.findCandidateComponents(basePackage).stream();
 	}
 
 	private void mergeGroups(RootBeanDefinition proxyRegistryBeanDef) {
@@ -244,9 +246,14 @@ public abstract class AbstractHttpServiceRegistrar implements
 		interface GroupSpec {
 
 			/**
-			 * List HTTP Service types to create proxies for.
+			 * Register HTTP Service types to create proxies for.
 			 */
 			GroupSpec register(Class<?>... serviceTypes);
+
+			/**
+			 * Register HTTP Service types using fully qualified type names.
+			 */
+			GroupSpec registerTypeNames(String... serviceTypes);
 
 			/**
 			 * Detect HTTP Service types in the given packages, looking for
@@ -258,7 +265,6 @@ public abstract class AbstractHttpServiceRegistrar implements
 			 * Variant of {@link #detectInBasePackages(Class[])} with a String package name.
 			 */
 			GroupSpec detectInBasePackages(String... packageNames);
-
 		}
 	}
 
@@ -289,6 +295,12 @@ public abstract class AbstractHttpServiceRegistrar implements
 			}
 
 			@Override
+			public GroupRegistry.GroupSpec registerTypeNames(String... serviceTypes) {
+				Arrays.stream(serviceTypes).forEach(this::registerServiceTypeName);
+				return this;
+			}
+
+			@Override
 			public GroupRegistry.GroupSpec detectInBasePackages(Class<?>... packageClasses) {
 				Arrays.stream(packageClasses).map(Class::getPackageName).forEach(this::detectInBasePackage);
 				return this;
@@ -301,7 +313,7 @@ public abstract class AbstractHttpServiceRegistrar implements
 			}
 
 			private void detectInBasePackage(String packageName) {
-				getScanner().findCandidateComponents(packageName).stream()
+				findHttpServices(packageName)
 						.map(BeanDefinition::getBeanClassName)
 						.filter(Objects::nonNull)
 						.forEach(this::registerServiceTypeName);
