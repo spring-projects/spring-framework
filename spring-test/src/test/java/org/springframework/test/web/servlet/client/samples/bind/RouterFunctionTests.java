@@ -37,16 +37,13 @@ class RouterFunctionTests {
 
 
 	@BeforeEach
-	void setUp() throws Exception {
-
-		RouterFunction<?> route = route(GET("/test"), request ->
-				ServerResponse.ok().body("It works!"));
-
+	void setUp() {
+		RouterFunction<?> route = route(GET("/test"), request -> ServerResponse.ok().body("It works!"));
 		this.testClient = RestTestClient.bindToRouterFunction(route).build();
 	}
 
 	@Test
-	void test() throws Exception {
+	void test() {
 		this.testClient.get().uri("/test")
 				.exchange()
 				.expectStatus().isOk()

@@ -61,7 +61,7 @@ class SoftAssertionTests {
 
 
 	@RestController
-	static class TestController {
+	private static class TestController {
 
 		@GetMapping("/test")
 		String handle() {

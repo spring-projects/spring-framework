@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.test.web.servlet.client.samples;
+package org.springframework.test.web.servlet.client;
 
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
@@ -36,7 +36,6 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.client.RestTestClient;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -51,10 +50,12 @@ class RestTestClientTests {
 
 	private RestTestClient client;
 
+
 	@BeforeEach
 	void setUp() {
 		this.client = RestTestClient.bindToController(new TestController()).build();
 	}
+
 
 	@Nested
 	class HttpMethods {
@@ -127,6 +128,7 @@ class RestTestClientTests {
 
 	}
 
+
 	@Nested
 	class Mutation {
 
@@ -148,6 +150,7 @@ class RestTestClientTests {
 					.jsonPath("$.headers.a").isEqualTo("b");
 		}
 	}
+
 
 	@Nested
 	class Uris {
@@ -193,6 +196,7 @@ class RestTestClientTests {
 		}
 	}
 
+
 	@Nested
 	class Cookies {
 		@Test
@@ -213,6 +217,7 @@ class RestTestClientTests {
 					.expectBody().jsonPath("$.headers.Cookie").isEqualTo("foo=bar");
 		}
 	}
+
 
 	@Nested
 	class Headers {
@@ -271,6 +276,7 @@ class RestTestClientTests {
 		}
 	}
 
+
 	@Nested
 	class Expectations {
 		@Test
@@ -280,6 +286,7 @@ class RestTestClientTests {
 					.expectCookie().value("session", Matchers.equalTo("abc"));
 		}
 	}
+
 
 	@Nested
 	class ReturnResults {
@@ -311,6 +318,7 @@ class RestTestClientTests {
 			assertThat(result.getResponseBody().get("uri")).isEqualTo("/test");
 		}
 	}
+
 
 	@RestController
 	static class TestController {

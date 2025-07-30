@@ -37,16 +37,20 @@ import org.springframework.web.context.WebApplicationContext;
 class ApplicationContextTests {
 
 	private RestTestClient client;
+
 	private final WebApplicationContext context;
+
 
 	public ApplicationContextTests(WebApplicationContext context) {
 		this.context = context;
 	}
 
+
 	@BeforeEach
 	void setUp() {
 		this.client = RestTestClient.bindToApplicationContext(context).build();
 	}
+
 
 	@Test
 	void test() {

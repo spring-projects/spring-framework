@@ -172,9 +172,10 @@ class XmlContentTests {
 		}
 	}
 
+
 	@RestController
 	@RequestMapping("/persons")
-	static class PersonController {
+	private static class PersonController {
 
 		@GetMapping(produces = MediaType.APPLICATION_XML_VALUE)
 		PersonsWrapper getPersons() {

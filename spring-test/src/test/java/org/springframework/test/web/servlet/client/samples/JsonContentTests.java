@@ -129,7 +129,7 @@ class JsonContentTests {
 
 	@RestController
 	@RequestMapping("/persons")
-	static class PersonController {
+	private static class PersonController {
 
 		@GetMapping
 		List<Person> getPersons() {
@@ -143,11 +143,13 @@ class JsonContentTests {
 
 		@PostMapping
 		ResponseEntity<String> savePerson(@RequestBody Person person) {
-			return ResponseEntity.created(URI.create(String.format("/persons/%s/%s", person.getFirstName(), person.getLastName()))).build();
+			URI location = URI.create(String.format("/persons/%s/%s", person.getFirstName(), person.getLastName()));
+			return ResponseEntity.created(location).build();
 		}
 	}
 
-	static class Person {
+
+	private static class Person {
 		private String firstName;
 		private String lastName;
 

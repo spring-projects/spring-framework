@@ -43,9 +43,11 @@ import static org.hamcrest.Matchers.startsWith;
  * @author Rob Worsnop
  */
 class ResponseEntityTests {
+
 	private final RestTestClient client = RestTestClient.bindToController(new PersonController())
 			.baseUrl("/persons")
 			.build();
+
 
 	@Test
 	void entity() {
@@ -126,7 +128,7 @@ class ResponseEntityTests {
 
 	@RestController
 	@RequestMapping("/persons")
-	static class PersonController {
+	private static class PersonController {
 
 		@GetMapping(path = "/{name}", produces = MediaType.APPLICATION_JSON_VALUE)
 		Person getPerson(@PathVariable String name) {

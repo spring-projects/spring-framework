@@ -43,6 +43,7 @@ class HttpServerTests {
 
 	@BeforeEach
 	void start() throws Exception {
+
 		HttpHandler httpHandler = RouterFunctions.toHttpHandler(
 				route(GET("/test"), request -> ServerResponse.ok().bodyValue("It works!")));
 

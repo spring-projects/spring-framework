@@ -47,8 +47,9 @@ class ErrorTests {
 				.expectStatus().isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
 	}
 
+
 	@RestController
-	static class TestController {
+	private static class TestController {
 
 		@GetMapping("/server-error")
 		void handleAndThrowException() {

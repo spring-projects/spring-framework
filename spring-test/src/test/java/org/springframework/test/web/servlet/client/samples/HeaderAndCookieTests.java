@@ -36,6 +36,7 @@ class HeaderAndCookieTests {
 
 	private final RestTestClient client = RestTestClient.bindToController(new TestController()).build();
 
+
 	@Test
 	void requestResponseHeaderPair() {
 		this.client.get().uri("/header-echo")
@@ -61,8 +62,9 @@ class HeaderAndCookieTests {
 				.expectHeader().valueMatches("Set-Cookie", "k1=v1");
 	}
 
+
 	@RestController
-	static class TestController {
+	private static class TestController {
 
 		@GetMapping("header-echo")
 		ResponseEntity<Void> handleHeader(@RequestHeader("h1") String myHeader) {

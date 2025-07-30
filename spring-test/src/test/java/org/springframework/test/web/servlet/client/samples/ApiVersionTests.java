@@ -94,7 +94,7 @@ public class ApiVersionTests {
 
 
 	@RestController
-	static class TestController {
+	private static class TestController {
 
 		private static final String HEADER = "X-API-Version";
 
