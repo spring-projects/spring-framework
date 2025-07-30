@@ -133,6 +133,11 @@ public class ApiVersionConfigurer {
 	 */
 	public ApiVersionConfigurer setVersionRequired(boolean required) {
 		this.versionRequired = required;
+
+		if(required && this.versionResolvers.isEmpty()) {
+			throw new IllegalStateException("API Versioning is required but no version resolvers are configured");
+		}
+		
 		return this;
 	}
 
