@@ -87,7 +87,7 @@ public class DelegatingWebFluxConfigurationTests {
 	void requestMappingHandlerMapping() {
 		delegatingConfig.setConfigurers(Collections.singletonList(webFluxConfigurer));
 		delegatingConfig.requestMappingHandlerMapping(
-				delegatingConfig.webFluxContentTypeResolver(), delegatingConfig.mvcApiVersionStrategy());
+				delegatingConfig.webFluxContentTypeResolver(), delegatingConfig.webFluxApiVersionStrategy());
 
 		verify(webFluxConfigurer).configureContentTypeResolver(any(RequestedContentTypeResolverBuilder.class));
 		verify(webFluxConfigurer).addCorsMappings(any(CorsRegistry.class));

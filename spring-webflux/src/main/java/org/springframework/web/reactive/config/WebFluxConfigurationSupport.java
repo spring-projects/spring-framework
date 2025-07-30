@@ -136,7 +136,7 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 	@Bean
 	public RequestMappingHandlerMapping requestMappingHandlerMapping(
 			@Qualifier("webFluxContentTypeResolver") RequestedContentTypeResolver contentTypeResolver,
-			@Qualifier("mvcApiVersionStrategy") @Nullable ApiVersionStrategy apiVersionStrategy) {
+			@Qualifier("webFluxApiVersionStrategy") @Nullable ApiVersionStrategy apiVersionStrategy) {
 
 		RequestMappingHandlerMapping mapping = createRequestMappingHandlerMapping();
 		mapping.setOrder(0);
@@ -188,7 +188,7 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 	 * @since 7.0
 	 */
 	@Bean
-	public @Nullable ApiVersionStrategy mvcApiVersionStrategy() {
+	public @Nullable ApiVersionStrategy webFluxApiVersionStrategy() {
 		if (this.apiVersionStrategy == null) {
 			ApiVersionConfigurer configurer = new ApiVersionConfigurer();
 			configureApiVersioning(configurer);
