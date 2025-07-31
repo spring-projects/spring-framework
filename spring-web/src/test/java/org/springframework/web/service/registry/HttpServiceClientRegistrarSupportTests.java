@@ -25,9 +25,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.core.env.StandardEnvironment;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.type.AnnotationMetadata;
-import org.springframework.web.service.registry.client.DefaultClient;
-import org.springframework.web.service.registry.client.EchoClientA;
-import org.springframework.web.service.registry.client.EchoClientB;
+import org.springframework.web.service.registry.basic.BasicClient;
+import org.springframework.web.service.registry.echo.EchoClientA;
+import org.springframework.web.service.registry.echo.EchoClientB;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
@@ -43,21 +43,24 @@ public class HttpServiceClientRegistrarSupportTests {
 
 	@Test
 	void register() {
+
+		List<String> basePackages = List.of(
+				BasicClient.class.getPackageName(), EchoClientA.class.getPackageName());
+
 		HttpServiceClientRegistrarSupport registrar = new HttpServiceClientRegistrarSupport() {
 
 			@Override
 			protected void registerHttpServices(GroupRegistry registry, AnnotationMetadata importingClassMetadata) {
-				findAndRegisterHttpServiceClients(groupRegistry, List.of(getClass().getPackage().getName() + ".client"));
+				findAndRegisterHttpServiceClients(groupRegistry, basePackages);
 			}
 		};
 		registrar.setEnvironment(new StandardEnvironment());
 		registrar.setResourceLoader(new PathMatchingResourcePatternResolver());
-
 		registrar.registerHttpServices(groupRegistry, mock(AnnotationMetadata.class));
 
 		assertGroups(
-				TestGroup.ofListing("echo", EchoClientA.class, EchoClientB.class),
-				TestGroup.ofListing("default", DefaultClient.class));
+				TestGroup.ofListing("default", BasicClient.class),
+				TestGroup.ofListing("echo", EchoClientA.class, EchoClientB.class));
 	}
 
 	private void assertGroups(TestGroup... expectedGroups) {

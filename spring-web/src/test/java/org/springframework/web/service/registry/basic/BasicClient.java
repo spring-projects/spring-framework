@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.web.service.registry.client;
+package org.springframework.web.service.registry.basic;
 
 
 import org.springframework.web.bind.annotation.RequestParam;
@@ -22,7 +22,7 @@ import org.springframework.web.service.annotation.GetExchange;
 import org.springframework.web.service.registry.HttpServiceClient;
 
 @HttpServiceClient
-public interface DefaultClient {
+public interface BasicClient {
 
 	@GetExchange
 	String handle(@RequestParam String input);

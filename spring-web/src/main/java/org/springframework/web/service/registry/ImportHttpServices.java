@@ -76,10 +76,11 @@ public @interface ImportHttpServices {
 	String group() default HttpServiceGroup.DEFAULT_GROUP_NAME;
 
 	/**
-	 * Detect HTTP Services in the packages of the specified classes by looking
-	 * for interfaces with type-level or method-level
-	 * {@link org.springframework.web.service.annotation.HttpExchange @HttpExchange}
-	 * annotations.
+	 * Detect HTTP Services in the packages of the specified classes, looking
+	 * for interfaces with type or method {@link HttpExchange} annotations.
+	 * <p>The performed scan, however, filters out interfaces annotated with
+	 * {@link HttpServiceClient} that are instead supported by
+	 * {@link HttpServiceClientRegistrarSupport}.
 	 */
 	Class<?>[] basePackageClasses() default {};
 
