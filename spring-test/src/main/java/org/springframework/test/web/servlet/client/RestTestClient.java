@@ -515,7 +515,7 @@ public interface RestTestClient {
 	interface ResponseSpec {
 
 		/**
-s		 * Apply multiple assertions to a response with the given
+		 * Apply multiple assertions to a response with the given
 		 * {@linkplain ResponseSpecConsumer consumers}, with the guarantee that
 		 * all assertions will be applied even if one or more assertions fails
 		 * with an exception.
