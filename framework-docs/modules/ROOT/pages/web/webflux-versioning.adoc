@@ -46,8 +46,8 @@ directly with it.
 [.small]#xref:web/webmvc-versioning.adoc#mvc-versioning-resolver[See equivalent in the Servlet stack]#
 
 This strategy resolves the API version from a request. The WebFlux config provides built-in
-options to resolve from a header, a request parameter, or from the URL path.
-You can also use a custom `ApiVersionResolver`.
+options to resolve from a header, query parameter, media type parameter,
+or from the URL path. You can also use a custom `ApiVersionResolver`.
 
 
 

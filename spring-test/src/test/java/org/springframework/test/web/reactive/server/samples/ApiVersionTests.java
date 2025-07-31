@@ -54,7 +54,7 @@ public class ApiVersionTests {
 		String param = "api-version";
 
 		Map<String, String> result = performRequest(
-				configurer -> configurer.useRequestParam(param),
+				configurer -> configurer.useQueryParam(param),
 				ApiVersionInserter.useQueryParam(param));
 
 		assertThat(result.get("query")).isEqualTo(param + "=1.2");

@@ -46,8 +46,8 @@ directly with it.
 [.small]#xref:web/webflux-versioning.adoc#webflux-versioning-resolver[See equivalent in the Reactive stack]#
 
 This strategy resolves the API version from a request. The MVC config provides built-in
-options to resolve from a header, from a request parameter, or from the URL path.
-You can also use a custom `ApiVersionResolver`.
+options to resolve from a header, query parameter, media type parameter,
+or from the URL path. You can also use a custom `ApiVersionResolver`.
 
 
 

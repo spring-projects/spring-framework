@@ -71,10 +71,10 @@ public class ApiVersionConfigurer {
 	}
 
 	/**
-	 * Add a resolver that extracts the API version from a request parameter.
+	 * Add a resolver that extracts the API version from a query string parameter.
 	 * @param paramName the parameter name to check
 	 */
-	public ApiVersionConfigurer useRequestParam(String paramName) {
+	public ApiVersionConfigurer useQueryParam(String paramName) {
 		this.versionResolvers.add(exchange -> exchange.getRequest().getQueryParams().getFirst(paramName));
 		return this;
 	}

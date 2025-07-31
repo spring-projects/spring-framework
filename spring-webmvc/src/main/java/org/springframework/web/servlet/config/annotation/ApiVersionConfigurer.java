@@ -35,6 +35,7 @@ import org.springframework.web.accept.DefaultApiVersionStrategy;
 import org.springframework.web.accept.InvalidApiVersionException;
 import org.springframework.web.accept.MediaTypeParamApiVersionResolver;
 import org.springframework.web.accept.PathApiVersionResolver;
+import org.springframework.web.accept.QueryApiVersionResolver;
 import org.springframework.web.accept.SemanticApiVersionParser;
 import org.springframework.web.accept.StandardApiVersionDeprecationHandler;
 
@@ -71,11 +72,11 @@ public class ApiVersionConfigurer {
 	}
 
 	/**
-	 * Add resolver to extract the version from a request parameter.
+	 * Add resolver to extract the version from a query string parameter.
 	 * @param paramName the parameter name to check
 	 */
-	public ApiVersionConfigurer useRequestParam(String paramName) {
-		this.versionResolvers.add(request -> request.getParameter(paramName));
+	public ApiVersionConfigurer useQueryParam(String paramName) {
+		this.versionResolvers.add(new QueryApiVersionResolver(paramName));
 		return this;
 	}
 
