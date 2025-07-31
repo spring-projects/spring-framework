@@ -26,6 +26,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import org.springframework.http.MediaType;
 import org.springframework.http.client.JdkClientHttpRequestFactory;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -74,6 +75,12 @@ public class RestClientVersionTests {
 	}
 
 	@Test
+	void mediaTypeParam() {
+		performRequest(ApiVersionInserter.useMediaTypeParam("v"));
+		expectRequest(request -> assertThat(request.getHeaders().get("Content-Type")).isEqualTo("application/json;v=1.2"));
+	}
+
+	@Test
 	void pathSegmentIndexLessThanSize() {
 		performRequest(ApiVersionInserter.builder().usePathSegment(0).withVersionFormatter(v -> "v" + v).build());
 		expectRequest(request -> assertThat(request.getTarget()).isEqualTo("/v1.2/path"));
@@ -103,7 +110,8 @@ public class RestClientVersionTests {
 
 	private void performRequest(ApiVersionInserter versionInserter) {
 		restClientBuilder.apiVersionInserter(versionInserter).build()
-				.get().uri("/path")
+				.post().uri("/path")
+				.contentType(MediaType.APPLICATION_JSON)
 				.apiVersion(1.2)
 				.retrieve()
 				.body(String.class);

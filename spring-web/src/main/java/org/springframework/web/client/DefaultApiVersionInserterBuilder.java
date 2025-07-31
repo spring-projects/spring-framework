@@ -33,16 +33,20 @@ final class DefaultApiVersionInserterBuilder implements ApiVersionInserter.Build
 
 	private @Nullable String queryParam;
 
+	private @Nullable String mediaTypeParam;
+
 	private @Nullable Integer pathSegmentIndex;
 
 	private @Nullable ApiVersionFormatter versionFormatter;
 
 
 	DefaultApiVersionInserterBuilder(
-			@Nullable String header, @Nullable String queryParam, @Nullable Integer pathSegmentIndex) {
+			@Nullable String header, @Nullable String queryParam, @Nullable String mediaTypeParam,
+			@Nullable Integer pathSegmentIndex) {
 
 		this.header = header;
 		this.queryParam = queryParam;
+		this.mediaTypeParam = mediaTypeParam;
 		this.pathSegmentIndex = pathSegmentIndex;
 	}
 
@@ -50,45 +54,40 @@ final class DefaultApiVersionInserterBuilder implements ApiVersionInserter.Build
 	 * Configure the inserter to set a header.
 	 * @param header the name of the header to hold the version
 	 */
+	@Override
 	public ApiVersionInserter.Builder useHeader(@Nullable String header) {
 		this.header = header;
 		return this;
 	}
 
-	/**
-	 * Configure the inserter to set a query parameter.
-	 * @param queryParam the name of the query parameter to hold the version
-	 */
+	@Override
 	public ApiVersionInserter.Builder useQueryParam(@Nullable String queryParam) {
 		this.queryParam = queryParam;
 		return this;
 	}
 
-	/**
-	 * Configure the inserter to insert a path segment.
-	 * @param pathSegmentIndex the index of the path segment to hold the version
-	 */
+	@Override
+	public ApiVersionInserter.Builder useMediaTypeParam(@Nullable String param) {
+		this.mediaTypeParam = param;
+		return this;
+	}
+
+	@Override
 	public ApiVersionInserter.Builder usePathSegment(@Nullable Integer pathSegmentIndex) {
 		this.pathSegmentIndex = pathSegmentIndex;
 		return this;
 	}
 
-	/**
-	 * Format the version Object into a String using the given {@link ApiVersionFormatter}.
-	 * <p>By default, the version is formatted with {@link Object#toString()}.
-	 * @param versionFormatter the formatter to use
-	 */
+	@Override
 	public ApiVersionInserter.Builder withVersionFormatter(ApiVersionFormatter versionFormatter) {
 		this.versionFormatter = versionFormatter;
 		return this;
 	}
 
-	/**
-	 * Build the inserter.
-	 */
 	public ApiVersionInserter build() {
 		return new DefaultApiVersionInserter(
-				this.header, this.queryParam, this.pathSegmentIndex, this.versionFormatter);
+				this.header, this.queryParam, this.mediaTypeParam, this.pathSegmentIndex,
+				this.versionFormatter);
 	}
 
 }
