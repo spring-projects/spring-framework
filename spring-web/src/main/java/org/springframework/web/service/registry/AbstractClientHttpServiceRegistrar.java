@@ -24,17 +24,19 @@ import org.springframework.core.annotation.MergedAnnotations;
 import org.springframework.core.type.AnnotationMetadata;
 
 /**
- * Base class for an {@link AbstractHttpServiceRegistrar} to detects and register
- * {@link HttpServiceClient @HttpServiceClient} annotated interfaces.
+ * Base class for an HTTP Service registrar that detects
+ * {@link HttpServiceClient @HttpServiceClient} annotated interfaces and
+ * registers them.
  *
  * <p>Subclasses need to implement
  * {@link #registerHttpServices(GroupRegistry, AnnotationMetadata)} and invoke
- * {@link #findAndRegisterHttpServiceClients(GroupRegistry, List)}.
+ * {@link #findAndRegisterHttpServiceClients(GroupRegistry, List)} with the
+ * list of base packages to scan.
  *
  * @author Rossen Stoyanchev
  * @since 7.0
  */
-public abstract class HttpServiceClientRegistrarSupport extends AbstractHttpServiceRegistrar {
+public abstract class AbstractClientHttpServiceRegistrar extends AbstractHttpServiceRegistrar {
 
 	/**
 	 * Find all HTTP Services under the given base packages that also have an

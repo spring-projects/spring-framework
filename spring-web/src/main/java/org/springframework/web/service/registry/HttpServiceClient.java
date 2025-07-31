@@ -27,11 +27,11 @@ import org.springframework.core.annotation.AliasFor;
 
 /**
  * Annotation to mark an HTTP Service interface as a candidate client proxy creation.
- * Supported by extensions of {@link HttpServiceClientRegistrarSupport}.
+ * Supported through the import of an {@link AbstractClientHttpServiceRegistrar}.
  *
  * @author Rossen Stoyanchev
  * @since 7.0
- * @see HttpServiceClientRegistrarSupport
+ * @see AbstractClientHttpServiceRegistrar
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)

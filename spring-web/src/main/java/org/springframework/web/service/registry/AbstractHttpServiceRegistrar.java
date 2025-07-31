@@ -226,7 +226,8 @@ public abstract class AbstractHttpServiceRegistrar implements
 	protected interface GroupRegistry {
 
 		/**
-		 * Perform HTTP Service registrations for the given group.
+		 * Perform HTTP Service registrations for the given group, either
+		 * creating the group if it does not exist, or updating the existing one.
 		 */
 		default GroupSpec forGroup(String name) {
 			return forGroup(name, HttpServiceGroup.ClientType.UNSPECIFIED);
@@ -251,7 +252,7 @@ public abstract class AbstractHttpServiceRegistrar implements
 		interface GroupSpec {
 
 			/**
-			 * Register HTTP Service types to create proxies for.
+			 * Register HTTP Service types associated with this group.
 			 */
 			GroupSpec register(Class<?>... serviceTypes);
 
@@ -265,7 +266,7 @@ public abstract class AbstractHttpServiceRegistrar implements
 			 * interfaces with type or method {@link HttpExchange} annotations.
 			 * <p>The performed scan, however, filters out any interfaces
 			 * annotated with {@link HttpServiceClient} that are instead supported
-			 * by {@link HttpServiceClientRegistrarSupport}.
+			 * by {@link AbstractClientHttpServiceRegistrar}.
 			 */
 			GroupSpec detectInBasePackages(Class<?>... packageClasses);
 

@@ -33,10 +33,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 
 /**
- * Unit tests for {@link HttpServiceClientRegistrarSupport}.
+ * Unit tests for {@link AbstractClientHttpServiceRegistrar}.
  * @author Rossen Stoyanchev
  */
-public class HttpServiceClientRegistrarSupportTests {
+public class ClientHttpServiceRegistrarTests {
 
 	private final TestGroupRegistry groupRegistry = new TestGroupRegistry();
 
@@ -47,7 +47,7 @@ public class HttpServiceClientRegistrarSupportTests {
 		List<String> basePackages = List.of(
 				BasicClient.class.getPackageName(), EchoClientA.class.getPackageName());
 
-		HttpServiceClientRegistrarSupport registrar = new HttpServiceClientRegistrarSupport() {
+		AbstractClientHttpServiceRegistrar registrar = new AbstractClientHttpServiceRegistrar() {
 
 			@Override
 			protected void registerHttpServices(GroupRegistry registry, AnnotationMetadata importingClassMetadata) {

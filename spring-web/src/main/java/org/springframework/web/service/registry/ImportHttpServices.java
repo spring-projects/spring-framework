@@ -53,7 +53,7 @@ import org.springframework.web.service.annotation.HttpExchange;
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 @Repeatable(ImportHttpServices.Container.class)
-@Import(ImportHttpServicesRegistrar.class)
+@Import(ImportHttpServiceRegistrar.class)
 public @interface ImportHttpServices {
 
 	/**
@@ -80,7 +80,7 @@ public @interface ImportHttpServices {
 	 * for interfaces with type or method {@link HttpExchange} annotations.
 	 * <p>The performed scan, however, filters out interfaces annotated with
 	 * {@link HttpServiceClient} that are instead supported by
-	 * {@link HttpServiceClientRegistrarSupport}.
+	 * {@link AbstractClientHttpServiceRegistrar}.
 	 */
 	Class<?>[] basePackageClasses() default {};
 
@@ -107,7 +107,7 @@ public @interface ImportHttpServices {
 	@Target(ElementType.TYPE)
 	@Retention(RetentionPolicy.RUNTIME)
 	@Documented
-	@Import(ImportHttpServicesRegistrar.class)
+	@Import(ImportHttpServiceRegistrar.class)
 	@interface Container {
 
 		ImportHttpServices[] value();

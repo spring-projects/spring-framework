@@ -39,12 +39,12 @@ import org.springframework.web.service.registry.greeting.GreetingB;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests for {@link ImportHttpServicesRegistrar}.
+ * Tests for {@link ImportHttpServiceRegistrar}.
  *
  * @author Rossen Stoyanchev
  * @author Stephane Nicoll
  */
-public class ImportHttpServicesRegistrarTests {
+public class ImportHttpServiceRegistrarTests {
 
 	private static final String ECHO_GROUP = "echo";
 
@@ -53,7 +53,7 @@ public class ImportHttpServicesRegistrarTests {
 
 	private final TestGroupRegistry groupRegistry = new TestGroupRegistry();
 
-	private final ImportHttpServicesRegistrar registrar = new ImportHttpServicesRegistrar();
+	private final ImportHttpServiceRegistrar registrar = new ImportHttpServiceRegistrar();
 
 
 	@Test
