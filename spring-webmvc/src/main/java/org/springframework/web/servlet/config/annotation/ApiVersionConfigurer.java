@@ -26,6 +26,7 @@ import java.util.Set;
 import org.jspecify.annotations.Nullable;
 
 import org.springframework.http.MediaType;
+import org.springframework.util.Assert;
 import org.springframework.web.accept.ApiVersionDeprecationHandler;
 import org.springframework.web.accept.ApiVersionParser;
 import org.springframework.web.accept.ApiVersionResolver;
@@ -49,7 +50,7 @@ public class ApiVersionConfigurer {
 
 	private @Nullable ApiVersionParser<?> versionParser;
 
-	private boolean versionRequired = true;
+	private @Nullable Boolean versionRequired;
 
 	private @Nullable String defaultVersion;
 
@@ -188,18 +189,26 @@ public class ApiVersionConfigurer {
 	}
 
 	protected @Nullable ApiVersionStrategy getApiVersionStrategy() {
+
 		if (this.versionResolvers.isEmpty()) {
+			Assert.state(isNotCustomized(), "API version config customized, but no ApiVersionResolver provided");
 			return null;
 		}
 
 		DefaultApiVersionStrategy strategy = new DefaultApiVersionStrategy(this.versionResolvers,
 				(this.versionParser != null ? this.versionParser : new SemanticApiVersionParser()),
-				this.versionRequired, this.defaultVersion, this.detectSupportedVersions,
+				(this.versionRequired != null ? this.versionRequired : true),
+				this.defaultVersion, this.detectSupportedVersions,
 				this.deprecationHandler);
 
 		this.supportedVersions.forEach(strategy::addSupportedVersion);
 
 		return strategy;
+	}
+
+	private boolean isNotCustomized() {
+		return (this.versionParser == null && this.versionRequired == null &&
+				this.defaultVersion == null && this.supportedVersions.isEmpty());
 	}
 
 }
