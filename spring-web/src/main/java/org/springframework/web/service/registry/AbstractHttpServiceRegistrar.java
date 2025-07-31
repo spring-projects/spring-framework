@@ -163,6 +163,16 @@ public abstract class AbstractHttpServiceRegistrar implements
 		}));
 	}
 
+	/**
+	 * This method is called before any bean definition registrations are made.
+	 * Subclasses must implement it to register the HTTP Services for which bean
+	 * definitions for which proxies need to be created.
+	 * @param registry to perform HTTP Service registrations with
+	 * @param importingClassMetadata annotation metadata of the importing class
+	 */
+	protected abstract void registerHttpServices(
+			GroupRegistry registry, AnnotationMetadata importingClassMetadata);
+
 	private RootBeanDefinition createOrGetRegistry(BeanDefinitionRegistry beanRegistry) {
 		if (!beanRegistry.containsBeanDefinition(HTTP_SERVICE_PROXY_REGISTRY_BEAN_NAME)) {
 			RootBeanDefinition proxyRegistryBeanDef = new RootBeanDefinition();
@@ -175,34 +185,6 @@ public abstract class AbstractHttpServiceRegistrar implements
 		else {
 			return (RootBeanDefinition) beanRegistry.getBeanDefinition(HTTP_SERVICE_PROXY_REGISTRY_BEAN_NAME);
 		}
-	}
-
-	/**
-	 * This method is called before any bean definition registrations are made.
-	 * Subclasses must implement it to register the HTTP Services for which bean
-	 * definitions for which proxies need to be created.
-	 * @param registry to perform HTTP Service registrations with
-	 * @param importingClassMetadata annotation metadata of the importing class
-	 */
-	protected abstract void registerHttpServices(
-			GroupRegistry registry, AnnotationMetadata importingClassMetadata);
-
-
-	/**
-	 * Exposes the scan for HTTP Service types, looking for
-	 * interfaces with type or method {@link HttpExchange} annotations.
-	 * @param basePackage the packages to look under
-	 * @return match bean definitions
-	 */
-	protected Stream<BeanDefinition> findHttpServices(String basePackage) {
-		if (this.scanner == null) {
-			Assert.state(this.environment != null, "Environment has not been set");
-			Assert.state(this.resourceLoader != null, "ResourceLoader has not been set");
-			this.scanner = new HttpExchangeClassPathScanningCandidateComponentProvider();
-			this.scanner.setEnvironment(this.environment);
-			this.scanner.setResourceLoader(this.resourceLoader);
-		}
-		return this.scanner.findCandidateComponents(basePackage).stream();
 	}
 
 	private void mergeGroups(RootBeanDefinition proxyRegistryBeanDef) {
@@ -218,6 +200,23 @@ public abstract class AbstractHttpServiceRegistrar implements
 		Assert.state(this.beanFactory != null, "BeanFactory has not been set");
 		HttpServiceProxyRegistry registry = this.beanFactory.getBean(HTTP_SERVICE_PROXY_REGISTRY_BEAN_NAME, HttpServiceProxyRegistry.class);
 		return registry.getClient(groupName, ClassUtils.resolveClassName(httpServiceType, this.beanClassLoader));
+	}
+
+	/**
+	 * Find HTTP Service types under the given base package, looking for
+	 * interfaces with type or method {@link HttpExchange} annotations.
+	 * @param basePackage the names of packages to look under
+	 * @return match bean definitions
+	 */
+	protected Stream<BeanDefinition> findHttpServices(String basePackage) {
+		if (this.scanner == null) {
+			Assert.state(this.environment != null, "Environment has not been set");
+			Assert.state(this.resourceLoader != null, "ResourceLoader has not been set");
+			this.scanner = new HttpExchangeClassPathScanningCandidateComponentProvider();
+			this.scanner.setEnvironment(this.environment);
+			this.scanner.setResourceLoader(this.resourceLoader);
+		}
+		return this.scanner.findCandidateComponents(basePackage).stream();
 	}
 
 
