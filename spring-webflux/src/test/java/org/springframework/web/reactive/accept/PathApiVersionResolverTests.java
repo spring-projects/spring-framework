@@ -18,11 +18,13 @@ package org.springframework.web.reactive.accept;
 
 import org.junit.jupiter.api.Test;
 
+import org.springframework.web.accept.InvalidApiVersionException;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest;
 import org.springframework.web.testfixture.server.MockServerWebExchange;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * Unit tests for {@link org.springframework.web.accept.PathApiVersionResolver}.
@@ -34,6 +36,11 @@ public class PathApiVersionResolverTests {
 	void resolve() {
 		testResolve(0, "/1.0/path", "1.0");
 		testResolve(1, "/app/1.1/path", "1.1");
+	}
+
+	@Test
+	void insufficientPathSegments() {
+		assertThatThrownBy(() -> testResolve(0, "/", "1.0")).isInstanceOf(InvalidApiVersionException.class);
 	}
 
 	private static void testResolve(int index, String requestUri, String expected) {

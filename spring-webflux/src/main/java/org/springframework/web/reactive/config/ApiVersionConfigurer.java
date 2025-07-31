@@ -80,16 +80,6 @@ public class ApiVersionConfigurer {
 	}
 
 	/**
-	 * Add a resolver that extracts the API version from a path segment.
-	 * @param index the index of the path segment to check; e.g. for URL's like
-	 * "/{version}/..." use index 0, for "/api/{version}/..." index 1.
-	 */
-	public ApiVersionConfigurer usePathSegment(int index) {
-		this.versionResolvers.add(new PathApiVersionResolver(index));
-		return this;
-	}
-
-	/**
 	 * Add resolver to extract the version from a media type parameter found in
 	 * the Accept or Content-Type headers.
 	 * @param compatibleMediaType the media type to extract the parameter from with
@@ -98,6 +88,18 @@ public class ApiVersionConfigurer {
 	 */
 	public ApiVersionConfigurer useMediaTypeParameter(MediaType compatibleMediaType, String paramName) {
 		this.versionResolvers.add(new MediaTypeParamApiVersionResolver(compatibleMediaType, paramName));
+		return this;
+	}
+
+	/**
+	 * Add a resolver that extracts the API version from a path segment.
+	 * <p>Note that this resolver never returns {@code null}, and therefore
+	 * cannot yield to other resolvers, see {@link org.springframework.web.accept.PathApiVersionResolver}.
+	 * @param index the index of the path segment to check; e.g. for URL's like
+	 * "/{version}/..." use index 0, for "/api/{version}/..." index 1.
+	 */
+	public ApiVersionConfigurer usePathSegment(int index) {
+		this.versionResolvers.add(new PathApiVersionResolver(index));
 		return this;
 	}
 

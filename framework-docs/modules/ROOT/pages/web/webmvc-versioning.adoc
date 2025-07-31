@@ -49,6 +49,11 @@ This strategy resolves the API version from a request. The MVC config provides b
 options to resolve from a header, query parameter, media type parameter,
 or from the URL path. You can also use a custom `ApiVersionResolver`.
 
+NOTE: The path resolver always resolves the version from the specified path segment, or
+raises `InvalidApiVersionException` otherwise, and therefore it cannot yield to other
+resolvers.
+
+
 
 
 

@@ -17,7 +17,6 @@
 package org.springframework.web.accept;
 
 import jakarta.servlet.http.HttpServletRequest;
-import org.jspecify.annotations.Nullable;
 
 import org.springframework.http.server.PathContainer;
 import org.springframework.http.server.RequestPath;
@@ -26,6 +25,11 @@ import org.springframework.web.util.ServletRequestPathUtils;
 
 /**
  * {@link ApiVersionResolver} that extract the version from a path segment.
+ *
+ * <p>Note that this resolver will either resolve the version from the specified
+ * path segment, or raise an {@link InvalidApiVersionException}, e.g. if there
+ * are not enough path segments. It never returns {@code null}, and therefore
+ * cannot yield to other resolvers.
  *
  * @author Rossen Stoyanchev
  * @since 7.0
@@ -47,17 +51,18 @@ public class PathApiVersionResolver implements ApiVersionResolver {
 
 
 	@Override
-	public @Nullable String resolveVersion(HttpServletRequest request) {
-		if (ServletRequestPathUtils.hasParsedRequestPath(request)) {
-			RequestPath path = ServletRequestPathUtils.getParsedRequestPath(request);
-			int i = 0;
-			for (PathContainer.Element e : path.pathWithinApplication().elements()) {
-				if (e instanceof PathContainer.PathSegment && i++ == this.pathSegmentIndex) {
-					return e.value();
-				}
+	public String resolveVersion(HttpServletRequest request) {
+		if (!ServletRequestPathUtils.hasParsedRequestPath(request)) {
+			throw new IllegalStateException("Expected parsed request path");
+		}
+		RequestPath path = ServletRequestPathUtils.getParsedRequestPath(request);
+		int i = 0;
+		for (PathContainer.Element element : path.pathWithinApplication().elements()) {
+			if (element instanceof PathContainer.PathSegment && i++ == this.pathSegmentIndex) {
+				return element.value();
 			}
 		}
-		return null;
+		throw new InvalidApiVersionException("No path segment at index " + this.pathSegmentIndex);
 	}
 
 }

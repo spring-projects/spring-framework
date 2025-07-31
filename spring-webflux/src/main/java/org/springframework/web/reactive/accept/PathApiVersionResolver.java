@@ -16,14 +16,18 @@
 
 package org.springframework.web.reactive.accept;
 
-import org.jspecify.annotations.Nullable;
-
 import org.springframework.http.server.PathContainer;
 import org.springframework.util.Assert;
+import org.springframework.web.accept.InvalidApiVersionException;
 import org.springframework.web.server.ServerWebExchange;
 
 /**
  * {@link ApiVersionResolver} that extract the version from a path segment.
+ *
+ * <p>Note that this resolver will either resolve the version from the specified
+ * path segment, or raise an {@link InvalidApiVersionException}, e.g. if there
+ * are not enough path segments. It never returns {@code null}, and therefore
+ * cannot yield to other resolvers.
  *
  * @author Rossen Stoyanchev
  * @since 7.0
@@ -45,14 +49,14 @@ public class PathApiVersionResolver implements ApiVersionResolver {
 
 
 	@Override
-	public @Nullable String resolveVersion(ServerWebExchange exchange) {
+	public String resolveVersion(ServerWebExchange exchange) {
 		int i = 0;
 		for (PathContainer.Element e : exchange.getRequest().getPath().pathWithinApplication().elements()) {
 			if (e instanceof PathContainer.PathSegment && i++ == this.pathSegmentIndex) {
 				return e.value();
 			}
 		}
-		return null;
+		throw new InvalidApiVersionException("No path segment at index " + this.pathSegmentIndex);
 	}
 
 }
