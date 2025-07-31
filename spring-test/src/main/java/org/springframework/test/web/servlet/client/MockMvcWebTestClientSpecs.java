@@ -69,7 +69,6 @@ abstract class MockMvcWebTestClientSpecs {
 	 * the concrete subclasses.
 	 *
 	 * @author Rossen Stoyanchev
-	 * @since 5.3
 	 * @param <B> the type of the concrete subclass spec
 	 */
 	abstract static class AbstractMockMvcServerSpec<B extends MockMvcServerSpec<B>>
@@ -147,7 +146,6 @@ abstract class MockMvcWebTestClientSpecs {
 	 * Simple wrapper around a {@link DefaultMockMvcBuilder}.
 	 *
 	 * @author Rossen Stoyanchev
-	 * @since 5.3
 	 */
 	static class ApplicationContextMockMvcSpec extends AbstractMockMvcServerSpec<ApplicationContextMockMvcSpec> {
 
@@ -171,7 +169,6 @@ abstract class MockMvcWebTestClientSpecs {
 	 * {@link MockMvcWebTestClient.RouterFunctionSpec}.
 	 *
 	 * @author Arjen Poutsma
-	 * @since 6.2
 	 */
 	static class RouterFunctionMockMvcSpec extends AbstractMockMvcServerSpec<MockMvcWebTestClient.RouterFunctionSpec>
 			implements MockMvcWebTestClient.RouterFunctionSpec {
@@ -242,7 +239,6 @@ abstract class MockMvcWebTestClientSpecs {
 	 * {@link MockMvcWebTestClient.ControllerSpec}.
 	 *
 	 * @author Rossen Stoyanchev
-	 * @since 5.3
 	 */
 	static class StandaloneMockMvcSpec extends AbstractMockMvcServerSpec<MockMvcWebTestClient.ControllerSpec>
 			implements MockMvcWebTestClient.ControllerSpec {
