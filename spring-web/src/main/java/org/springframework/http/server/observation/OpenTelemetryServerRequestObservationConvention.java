@@ -29,7 +29,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.server.observation.OpenTelemetryServerHttpObservationDocumentation.HighCardinalityKeyNames;
 import org.springframework.http.server.observation.OpenTelemetryServerHttpObservationDocumentation.LowCardinalityKeyNames;
-import org.springframework.util.StringUtils;
 
 /**
  * A {@link ServerRequestObservationConvention} based on the stable OpenTelemetry semantic conventions.
@@ -180,9 +179,7 @@ public class OpenTelemetryServerRequestObservationConvention implements ServerRe
 	protected KeyValue exception(ServerRequestObservationContext context) {
 		Throwable error = context.getError();
 		if (error != null) {
-			String simpleName = error.getClass().getSimpleName();
-			return KeyValue.of(LowCardinalityKeyNames.EXCEPTION,
-					StringUtils.hasText(simpleName) ? simpleName : error.getClass().getName());
+			return KeyValue.of(LowCardinalityKeyNames.EXCEPTION, error.getClass().getName());
 		}
 		return EXCEPTION_NONE;
 	}

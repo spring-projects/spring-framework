@@ -97,7 +97,7 @@ public enum OpenTelemetryServerHttpObservationDocumentation implements Observati
 		},
 
 		/**
-		 * Name of the exception thrown during the exchange, or
+		 * Fully qualified name of the exception thrown during the exchange, or
 		 * {@value KeyValue#NONE_VALUE} if no exception was thrown.
 		 */
 		EXCEPTION {
