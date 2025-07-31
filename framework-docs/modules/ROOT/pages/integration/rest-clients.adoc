@@ -1195,6 +1195,46 @@ One way to declare HTTP Service groups is via `@ImportHttpServices` annotations 
 <1> Manually list interfaces for group "echo"
 <2> Detect interfaces for group "greeting" under a base package
 
+The above lets you declare HTTP Services and groups. As an alternative, you can also
+annotate HTTP interfaces as follows:
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	@HttpServiceClient("echo")
+	public class EchoServiceA {
+		// ...
+	}
+
+	@HttpServiceClient("echo")
+	public class EchoServiceB {
+		// ...
+	}
+----
+
+The above requires a dedicated import registrar as follows:
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	public class MyClientHttpServiceRegistrar implements AbstractClientHttpServiceRegistrar { // <1>
+
+		@Override
+		protected void registerHttpServices(GroupRegistry registry, AnnotationMetadata metadata) {
+			findAndRegisterHttpServiceClients(groupRegistry, List.of("org.example.echo")); // <2>
+		}
+	}
+
+	@Configuration
+	@Import(MyClientHttpServiceRegistrar.class) // <3>
+	public class ClientConfig {
+	}
+----
+<1> Extend dedicated `AbstractClientHttpServiceRegistrar`
+<2> Specify base packages where to find client interfaces
+<3> Import the registrar
+
+TIP: `@HttpServiceClient` interfaces are excluded from `@ImportHttpServices` scans, so there
+is no overlap with scans for client interfaces when pointed at the same package.
+
 It is also possible to declare groups programmatically by creating an HTTP Service
 registrar and then importing it:
 
