@@ -93,8 +93,8 @@ public interface ContextCache {
 	/**
 	 * Obtain a cached {@link ApplicationContext} for the given key.
 	 * <p>If the cached application context was previously
-	 * {@linkplain org.springframework.context.Lifecycle#stop() stopped}, it
-	 * must be
+	 * {@linkplain org.springframework.context.ConfigurableApplicationContext#pause() paused},
+	 * it must be
 	 * {@linkplain org.springframework.context.support.AbstractApplicationContext#restart()
 	 * restarted}. This applies to parent contexts as well.
 	 * <p>In addition, the {@linkplain #getHitCount() hit} and
@@ -187,7 +187,7 @@ public interface ContextCache {
 	 * {@link MergedContextConfiguration} and any of its parents.
 	 * <p>If no other test classes are actively using the same application
 	 * context(s), the application context(s) should be
-	 * {@linkplain org.springframework.context.Lifecycle#stop() stopped}.
+	 * {@linkplain org.springframework.context.ConfigurableApplicationContext#pause() paused}.
 	 * <p>The default implementation of this method does nothing. Concrete
 	 * implementations are therefore highly encouraged to override this
 	 * method, {@link #registerContextUsage(MergedContextConfiguration, Class)},

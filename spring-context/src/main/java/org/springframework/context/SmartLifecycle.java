@@ -85,7 +85,7 @@ public interface SmartLifecycle extends Lifecycle, Phased {
 	/**
 	 * Returns {@code true} if this {@code Lifecycle} component should get
 	 * started automatically by the container at the time that the containing
-	 * {@link ApplicationContext} gets refreshed.
+	 * {@link ApplicationContext} gets refreshed or restarted.
 	 * <p>A value of {@code false} indicates that the component is intended to
 	 * be started through an explicit {@link #start()} call instead, analogous
 	 * to a plain {@link Lifecycle} implementation.
@@ -93,9 +93,32 @@ public interface SmartLifecycle extends Lifecycle, Phased {
 	 * @see #start()
 	 * @see #getPhase()
 	 * @see LifecycleProcessor#onRefresh()
+	 * @see LifecycleProcessor#onRestart()
 	 * @see ConfigurableApplicationContext#refresh()
+	 * @see ConfigurableApplicationContext#restart()
 	 */
 	default boolean isAutoStartup() {
+		return true;
+	}
+
+	/**
+	 * Returns {@code true} if this {@code Lifecycle} component is able to
+	 * participate in a restart sequence, receiving corresponding {@link #stop()}
+	 * and {@link #start()} calls with a potential pause in-between.
+	 * <p>A value of {@code false} indicates that the component prefers to
+	 * be skipped in a pause scenario, neither receiving a {@link #stop()}
+	 * call nor a subsequent {@link #start()} call, analogous to a plain
+	 * {@link Lifecycle} implementation. It will only receive a {@link #stop()}
+	 * call on close and on explicit context-wide stopping but not on pause.
+	 * <p>The default implementation returns {@code true}.
+	 * @since 7.0
+	 * @see #stop()
+	 * @see LifecycleProcessor#onPause()
+	 * @see LifecycleProcessor#onClose()
+	 * @see ConfigurableApplicationContext#pause()
+	 * @see ConfigurableApplicationContext#close()
+	 */
+	default boolean isPauseable() {
 		return true;
 	}
 

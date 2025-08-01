@@ -187,7 +187,7 @@ public class DefaultContextCache implements ContextCache {
 		activeTestClasses.remove(testClass);
 		if (activeTestClasses.isEmpty()) {
 			if (context instanceof ConfigurableApplicationContext cac && cac.isRunning()) {
-				cac.stop();
+				cac.pause();
 			}
 			this.contextUsageMap.remove(mergedConfig);
 		}

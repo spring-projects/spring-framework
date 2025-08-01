@@ -355,6 +355,7 @@ class DefaultLifecycleProcessorTests {
 		TestSmartLifecycleBean smartBean1 = TestSmartLifecycleBean.forShutdownTests(5, 0, stoppedBeans);
 		TestSmartLifecycleBean smartBean2 = TestSmartLifecycleBean.forShutdownTests(-3, 0, stoppedBeans);
 		smartBean2.setAutoStartup(false);
+		smartBean2.setPauseable(false);
 		context.getBeanFactory().registerSingleton("smartBean1", smartBean1);
 		context.getBeanFactory().registerSingleton("smartBean2", smartBean2);
 
@@ -375,11 +376,23 @@ class DefaultLifecycleProcessorTests {
 		assertThat(stoppedBeans).containsExactly(smartBean1, smartBean1);
 		assertThat(smartBean1.isRunning()).isTrue();
 		assertThat(smartBean2.isRunning()).isFalse();
+		context.pause();
+		assertThat(stoppedBeans).containsExactly(smartBean1, smartBean1, smartBean1);
+		assertThat(smartBean1.isRunning()).isFalse();
+		assertThat(smartBean2.isRunning()).isFalse();
+		context.restart();
+		assertThat(stoppedBeans).containsExactly(smartBean1, smartBean1, smartBean1);
+		assertThat(smartBean1.isRunning()).isTrue();
+		assertThat(smartBean2.isRunning()).isFalse();
 		context.start();
 		assertThat(smartBean1.isRunning()).isTrue();
 		assertThat(smartBean2.isRunning()).isTrue();
+		context.pause();
+		assertThat(stoppedBeans).containsExactly(smartBean1, smartBean1, smartBean1, smartBean1);
+		assertThat(smartBean1.isRunning()).isFalse();
+		assertThat(smartBean2.isRunning()).isTrue();
 		context.close();
-		assertThat(stoppedBeans).containsExactly(smartBean1, smartBean1, smartBean1, smartBean2);
+		assertThat(stoppedBeans).containsExactly(smartBean1, smartBean1, smartBean1, smartBean1, smartBean2);
 	}
 
 	@Test
@@ -740,6 +753,8 @@ class DefaultLifecycleProcessorTests {
 
 		private volatile boolean autoStartup = true;
 
+		private volatile boolean pauseable = true;
+
 		static TestSmartLifecycleBean forStartupTests(int phase, CopyOnWriteArrayList<Lifecycle> startedBeans) {
 			return new TestSmartLifecycleBean(phase, 0, startedBeans, null);
 		}
@@ -767,6 +782,15 @@ class DefaultLifecycleProcessorTests {
 
 		public void setAutoStartup(boolean autoStartup) {
 			this.autoStartup = autoStartup;
+		}
+
+		@Override
+		public boolean isPauseable() {
+			return this.pauseable;
+		}
+
+		public void setPauseable(boolean pauseable) {
+			this.pauseable = pauseable;
 		}
 
 		@Override

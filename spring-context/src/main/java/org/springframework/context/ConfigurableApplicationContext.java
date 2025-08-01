@@ -221,15 +221,26 @@ public interface ConfigurableApplicationContext extends ApplicationContext, Life
 	void refresh() throws BeansException, IllegalStateException;
 
 	/**
-	 * Stop all beans in this application context if necessary, and subsequently
+	 * Pause all beans in this application context if necessary, and subsequently
 	 * restart all auto-startup beans, effectively restoring the lifecycle state
 	 * after {@link #refresh()} (typically after a preceding {@link #stop()} call
 	 * when a full {@link #start()} of even lazy-starting beans is to be avoided).
 	 * @since 7.0
-	 * @see #stop()
+	 * @see #pause()
+	 * @see #start()
 	 * @see SmartLifecycle#isAutoStartup()
 	 */
 	void restart();
+
+	/**
+	 * Stop all beans in this application context unless they explicitly opt out of
+	 * pausing through {@link SmartLifecycle#isPauseable()} returning {@code false}.
+	 * @since 7.0
+	 * @see #restart()
+	 * @see #stop()
+	 * @see SmartLifecycle#isPauseable()
+	 */
+	void pause();
 
 	/**
 	 * Register a shutdown hook with the JVM runtime, closing this context

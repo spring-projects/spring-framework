@@ -45,6 +45,15 @@ public interface LifecycleProcessor extends Lifecycle {
 	}
 
 	/**
+	 * Notification of context pause for auto-stopping components.
+	 * @since 7.0
+	 * @see ConfigurableApplicationContext#pause()
+	 */
+	default void onPause() {
+		stop();
+	}
+
+	/**
 	 * Notification of context close phase for auto-stopping components
 	 * before destruction.
 	 * @see ConfigurableApplicationContext#close()

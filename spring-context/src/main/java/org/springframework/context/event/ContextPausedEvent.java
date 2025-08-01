@@ -20,26 +20,26 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
 
 /**
- * Event raised when an {@code ApplicationContext} gets restarted.
+ * Event raised when an {@code ApplicationContext} gets paused.
  *
- * <p>Note that {@code ContextRestartedEvent} is a specialization of
- * {@link ContextStartedEvent}.
+ * <p>Note that {@code ContextPausedEvent} is a specialization of
+ * {@link ContextStoppedEvent}.
  *
- * @author Sam Brannen
+ * @author Juergen Hoeller
  * @since 7.0
- * @see ConfigurableApplicationContext#restart()
- * @see ContextPausedEvent
- * @see ContextStartedEvent
+ * @see ConfigurableApplicationContext#pause()
+ * @see ContextRestartedEvent
+ * @see ContextStoppedEvent
  */
 @SuppressWarnings("serial")
-public class ContextRestartedEvent extends ContextStartedEvent {
+public class ContextPausedEvent extends ContextStoppedEvent {
 
 	/**
 	 * Create a new {@code ContextRestartedEvent}.
-	 * @param source the {@code ApplicationContext} that has been restarted
+	 * @param source the {@code ContextPausedEvent} that has been restarted
 	 * (must not be {@code null})
 	 */
-	public ContextRestartedEvent(ApplicationContext source) {
+	public ContextPausedEvent(ApplicationContext source) {
 		super(source);
 	}
 
