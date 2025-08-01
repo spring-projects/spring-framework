@@ -183,7 +183,7 @@ public interface StompSession {
 		/**
 		 * Remove the subscription by sending an UNSUBSCRIBE frame.
 		 */
-		void unsubscribe();
+		Receiptable unsubscribe();
 
 		/**
 		 * Alternative to {@link #unsubscribe()} with additional custom headers
@@ -192,7 +192,7 @@ public interface StompSession {
 		 * @param headers the custom headers, if any
 		 * @since 5.0
 		 */
-		void unsubscribe(@Nullable StompHeaders headers);
+		Receiptable unsubscribe(@Nullable StompHeaders headers);
 	}
 
 }
