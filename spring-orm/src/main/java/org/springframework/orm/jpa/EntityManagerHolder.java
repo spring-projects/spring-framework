@@ -37,7 +37,7 @@ import org.springframework.util.Assert;
  */
 public class EntityManagerHolder extends ResourceHolderSupport {
 
-	private final @Nullable EntityManager entityManager;
+	protected @Nullable EntityManager entityManager;
 
 	private boolean transactionActive;
 
@@ -76,6 +76,10 @@ public class EntityManagerHolder extends ResourceHolderSupport {
 		super.clear();
 		this.transactionActive = false;
 		this.savepointManager = null;
+	}
+
+	protected void closeAll() {
+		EntityManagerFactoryUtils.closeEntityManager(this.entityManager);
 	}
 
 }

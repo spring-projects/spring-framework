@@ -25,7 +25,6 @@ import org.springframework.core.Ordered;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.support.DataAccessUtils;
 import org.springframework.jdbc.datasource.DataSourceUtils;
-import org.springframework.orm.jpa.EntityManagerFactoryUtils;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
@@ -44,7 +43,7 @@ class SpringSessionSynchronization implements TransactionSynchronization, Ordere
 	 * to execute Session cleanup before JDBC Connection cleanup, if any.
 	 * @see DataSourceUtils#CONNECTION_SYNCHRONIZATION_ORDER
 	 */
-	private static final int SESSION_SYNCHRONIZATION_ORDER =
+	static final int SESSION_SYNCHRONIZATION_ORDER =
 			DataSourceUtils.CONNECTION_SYNCHRONIZATION_ORDER - 100;
 
 	private final SessionHolder sessionHolder;
@@ -55,10 +54,6 @@ class SpringSessionSynchronization implements TransactionSynchronization, Ordere
 
 	private boolean holderActive = true;
 
-
-	public SpringSessionSynchronization(SessionHolder sessionHolder, SessionFactory sessionFactory) {
-		this(sessionHolder, sessionFactory, false);
-	}
 
 	public SpringSessionSynchronization(SessionHolder sessionHolder, SessionFactory sessionFactory, boolean newSession) {
 		this.sessionHolder = sessionHolder;
@@ -162,7 +157,7 @@ class SpringSessionSynchronization implements TransactionSynchronization, Ordere
 			this.sessionHolder.setSynchronizedWithTransaction(false);
 			// Call close() at this point if it's a new Session...
 			if (this.newSession) {
-				EntityManagerFactoryUtils.closeEntityManager(this.sessionHolder.getSession());
+				this.sessionHolder.closeAll();
 			}
 		}
 	}

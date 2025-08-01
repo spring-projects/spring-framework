@@ -18,10 +18,12 @@ package org.springframework.orm.jpa.hibernate;
 
 import org.hibernate.FlushMode;
 import org.hibernate.Session;
+import org.hibernate.StatelessSession;
 import org.hibernate.Transaction;
 import org.jspecify.annotations.Nullable;
 
 import org.springframework.orm.jpa.EntityManagerHolder;
+import org.springframework.util.Assert;
 
 /**
  * Resource holder wrapping a Hibernate {@link Session} (plus an optional {@link Transaction}).
@@ -37,6 +39,8 @@ import org.springframework.orm.jpa.EntityManagerHolder;
  */
 class SessionHolder extends EntityManagerHolder {
 
+	private @Nullable StatelessSession statelessSession;
+
 	private @Nullable Transaction transaction;
 
 	private @Nullable FlushMode previousFlushMode;
@@ -46,9 +50,35 @@ class SessionHolder extends EntityManagerHolder {
 		super(session);
 	}
 
+	public SessionHolder(StatelessSession session) {
+		super(null);
+		this.statelessSession = session;
+	}
+
+
+	public void setSession(Session session) {
+		this.entityManager = session;
+	}
 
 	public Session getSession() {
 		return (Session) getEntityManager();
+	}
+
+	public boolean hasSession() {
+		return (this.entityManager != null);
+	}
+
+	public void setStatelessSession(StatelessSession statelessSession) {
+		this.statelessSession = statelessSession;
+	}
+
+	public StatelessSession getStatelessSession() {
+		Assert.state(this.statelessSession != null, "No StatelessSession available");
+		return this.statelessSession;
+	}
+
+	public boolean hasStatelessSession() {
+		return (this.statelessSession != null);
 	}
 
 	public void setTransaction(@Nullable Transaction transaction) {
@@ -74,6 +104,14 @@ class SessionHolder extends EntityManagerHolder {
 		super.clear();
 		this.transaction = null;
 		this.previousFlushMode = null;
+	}
+
+	@Override
+	protected void closeAll() {
+		super.closeAll();
+		if (this.statelessSession != null && this.statelessSession.isOpen()) {
+			this.statelessSession.close();
+		}
 	}
 
 }

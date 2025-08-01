@@ -17,7 +17,6 @@
 package org.springframework.orm.jpa.hibernate;
 
 import java.sql.Connection;
-import java.util.Map;
 import java.util.function.Consumer;
 
 import javax.sql.DataSource;
@@ -29,12 +28,8 @@ import org.hibernate.Interceptor;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
-import org.hibernate.cfg.Environment;
-import org.hibernate.engine.jdbc.connections.spi.ConnectionProvider;
-import org.hibernate.engine.spi.SessionFactoryImplementor;
 import org.hibernate.engine.spi.SessionImplementor;
 import org.hibernate.resource.transaction.spi.TransactionStatus;
-import org.hibernate.service.UnknownServiceException;
 import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.BeansException;
@@ -372,7 +367,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 
 		// Check for SessionFactory's DataSource.
 		if (this.autodetectDataSource && getDataSource() == null) {
-			DataSource sfds = determineDataSource();
+			DataSource sfds = SpringSessionContext.determineDataSource(obtainSessionFactory());
 			if (sfds != null) {
 				// Use the SessionFactory's DataSource for exposing transactions to JDBC code.
 				if (logger.isDebugEnabled()) {
@@ -382,36 +377,6 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 				setDataSource(sfds);
 			}
 		}
-	}
-
-	/**
-	 * Determine the DataSource of the given SessionFactory.
-	 * @return the DataSource, or {@code null} if none found
-	 * @see ConnectionProvider
-	 */
-	protected @Nullable DataSource determineDataSource() {
-		SessionFactory sessionFactory = obtainSessionFactory();
-		Map<String, Object> props = sessionFactory.getProperties();
-		if (props != null) {
-			Object dataSourceValue = props.get(Environment.JAKARTA_NON_JTA_DATASOURCE);
-			if (dataSourceValue instanceof DataSource dataSourceToUse) {
-				return dataSourceToUse;
-			}
-		}
-		if (sessionFactory instanceof SessionFactoryImplementor sfi) {
-			try {
-				ConnectionProvider cp = sfi.getServiceRegistry().getService(ConnectionProvider.class);
-				if (cp != null) {
-					return cp.unwrap(DataSource.class);
-				}
-			}
-			catch (UnknownServiceException ex) {
-				if (logger.isDebugEnabled()) {
-					logger.debug("No ConnectionProvider found - cannot determine DataSource for SessionFactory: " + ex);
-				}
-			}
-		}
-		return null;
 	}
 
 
@@ -735,7 +700,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 			if (logger.isDebugEnabled()) {
 				logger.debug("Closing Hibernate Session [" + session + "] after transaction");
 			}
-			EntityManagerFactoryUtils.closeEntityManager(session);
+			txObject.getSessionHolder().closeAll();
 		}
 		else {
 			if (logger.isDebugEnabled()) {

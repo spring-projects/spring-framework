@@ -18,16 +18,22 @@ package org.springframework.orm.jpa.hibernate;
 
 import java.util.List;
 
+import javax.sql.DataSource;
+
 import org.hibernate.FlushMode;
+import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.hibernate.StatelessSession;
 import org.hibernate.query.Query;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.orm.jpa.AbstractContainerEntityManagerFactoryIntegrationTests;
 import org.springframework.orm.jpa.EntityManagerFactoryInfo;
 import org.springframework.orm.jpa.domain.Person;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -41,6 +47,15 @@ class HibernateNativeEntityManagerFactoryIntegrationTests extends AbstractContai
 
 	@Autowired
 	private SessionFactory sessionFactory;
+
+	@Autowired
+	private Session sharedSession;
+
+	@Autowired
+	private StatelessSession statelessSession;
+
+	@Autowired
+	private DataSource dataSource;
 
 	@Autowired
 	private ApplicationContext applicationContext;
@@ -81,6 +96,58 @@ class HibernateNativeEntityManagerFactoryIntegrationTests extends AbstractContai
 		assertThat(q.getResultList()).hasSize(1);
 		assertThat(q.getResultList().get(0).getFirstName()).isEqualTo(firstName);
 		assertThat(q.getResultList().get(0).postLoaded).isSameAs(applicationContext);
+	}
+
+	@Test
+	public void testSharedSession() {
+		String firstName = "Tony";
+		insertPerson(firstName);
+
+		Query<Person> q = sharedSession.createQuery("select p from Person as p", Person.class);
+		assertThat(q.getResultList()).hasSize(1);
+		assertThat(q.getResultList().get(0).getFirstName()).isEqualTo(firstName);
+		assertThat(q.getResultList().get(0).postLoaded).isSameAs(applicationContext);
+
+		endTransaction();
+
+		DataSourceTransactionManager dstm = new DataSourceTransactionManager(dataSource);
+		new TransactionTemplate(dstm).execute(status -> {
+			insertPerson(firstName);
+			Query<Person> q2 = sharedSession.createQuery("select p from Person as p", Person.class);
+			assertThat(q2.getResultList()).hasSize(1);
+			assertThat(q2.getResultList().get(0).getFirstName()).isEqualTo(firstName);
+			assertThat(q2.getResultList().get(0).postLoaded).isSameAs(applicationContext);
+			Query<Person> q3 = statelessSession.createQuery("select p from Person as p", Person.class);
+			assertThat(q3.getResultList()).hasSize(1);
+			assertThat(q3.getResultList().get(0).getFirstName()).isEqualTo(firstName);
+			status.setRollbackOnly();
+			return null;
+		});
+	}
+
+	@Test
+	public void testStatelessSession() {
+		String firstName = "Tony";
+		insertPerson(firstName);
+
+		Query<Person> q = statelessSession.createQuery("select p from Person as p", Person.class);
+		assertThat(q.getResultList()).hasSize(1);
+		assertThat(q.getResultList().get(0).getFirstName()).isEqualTo(firstName);
+
+		endTransaction();
+
+		DataSourceTransactionManager dstm = new DataSourceTransactionManager(dataSource);
+		new TransactionTemplate(dstm).execute(status -> {
+			insertPerson(firstName);
+			Query<Person> q2 = statelessSession.createQuery("select p from Person as p", Person.class);
+			assertThat(q2.getResultList()).hasSize(1);
+			assertThat(q2.getResultList().get(0).getFirstName()).isEqualTo(firstName);
+			Query<Person> q3 = sharedSession.createQuery("select p from Person as p", Person.class);
+			assertThat(q3.getResultList()).hasSize(1);
+			assertThat(q3.getResultList().get(0).getFirstName()).isEqualTo(firstName);
+			status.setRollbackOnly();
+			return null;
+		});
 	}
 
 	@Test  // SPR-16956
