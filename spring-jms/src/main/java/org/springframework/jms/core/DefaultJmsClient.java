@@ -27,6 +27,7 @@ import org.springframework.jms.support.JmsAccessor;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessagingException;
 import org.springframework.messaging.converter.MessageConverter;
+import org.springframework.messaging.core.MessagePostProcessor;
 import org.springframework.util.Assert;
 
 /**
@@ -34,28 +35,38 @@ import org.springframework.util.Assert;
  * as created by the static factory methods.
  *
  * @author Juergen Hoeller
+ * @author Brian Clozel
  * @since 7.0
  * @see JmsClient#create(ConnectionFactory)
- * @see JmsClient#create(ConnectionFactory, MessageConverter)
  * @see JmsClient#create(JmsOperations)
- * @see JmsClient#create(JmsOperations, MessageConverter)
  */
 class DefaultJmsClient implements JmsClient {
 
 	private final JmsOperations jmsTemplate;
 
-	private final @Nullable MessageConverter messageConverter;
+	private @Nullable MessageConverter messageConverter;
+
+	private @Nullable MessagePostProcessor messagePostProcessor;
 
 
-	public DefaultJmsClient(ConnectionFactory connectionFactory, @Nullable MessageConverter messageConverter) {
+	public DefaultJmsClient(ConnectionFactory connectionFactory) {
+		Assert.notNull(connectionFactory, "ConnectionFactory must not be null");
 		this.jmsTemplate = new JmsTemplate(connectionFactory);
+	}
+
+	public DefaultJmsClient(JmsOperations jmsTemplate) {
+		Assert.notNull(jmsTemplate, "JmsTemplate must not be null");
+		this.jmsTemplate = jmsTemplate;
+	}
+
+	void setMessageConverter(MessageConverter messageConverter) {
+		Assert.notNull(messageConverter, "MessageConverter must not be null");
 		this.messageConverter = messageConverter;
 	}
 
-	public DefaultJmsClient(JmsOperations jmsTemplate, @Nullable MessageConverter messageConverter) {
-		Assert.notNull(jmsTemplate, "JmsTemplate must not be null");
-		this.jmsTemplate = jmsTemplate;
-		this.messageConverter = messageConverter;
+	void setMessagePostProcessor(MessagePostProcessor messagePostProcessor) {
+		Assert.notNull(messagePostProcessor, "MessagePostProcessor must not be null");
+		this.messagePostProcessor = messagePostProcessor;
 	}
 
 
@@ -141,17 +152,18 @@ class DefaultJmsClient implements JmsClient {
 
 		@Override
 		public void send(Message<?> message) throws MessagingException {
+			message = postProcessMessage(message);
 			this.delegate.send(message);
 		}
 
 		@Override
 		public void send(Object payload) throws MessagingException {
-			this.delegate.convertAndSend(payload);
+			this.delegate.convertAndSend(payload, DefaultJmsClient.this.messagePostProcessor);
 		}
 
 		@Override
 		public void send(Object payload, Map<String, Object> headers) throws MessagingException {
-			this.delegate.convertAndSend(payload, headers);
+			this.delegate.convertAndSend(payload, headers, DefaultJmsClient.this.messagePostProcessor);
 		}
 
 		@Override
@@ -176,19 +188,27 @@ class DefaultJmsClient implements JmsClient {
 
 		@Override
 		public Optional<Message<?>> sendAndReceive(Message<?> requestMessage) throws MessagingException {
+			requestMessage = postProcessMessage(requestMessage);
 			return Optional.ofNullable(this.delegate.sendAndReceive(requestMessage));
 		}
 
 		@Override
 		public <T> Optional<T> sendAndReceive(Object request, Class<T> targetClass) throws MessagingException {
-			return Optional.ofNullable(this.delegate.convertSendAndReceive(request, targetClass));
+			return Optional.ofNullable(this.delegate.convertSendAndReceive(request, targetClass, DefaultJmsClient.this.messagePostProcessor));
 		}
 
 		@Override
 		public <T> Optional<T> sendAndReceive(Object request, Map<String, Object> headers, Class<T> targetClass)
 				throws MessagingException {
 
-			return Optional.ofNullable(this.delegate.convertSendAndReceive(request, headers, targetClass));
+			return Optional.ofNullable(this.delegate.convertSendAndReceive(request, headers, targetClass, DefaultJmsClient.this.messagePostProcessor));
+		}
+
+		private Message<?> postProcessMessage(Message<?> message) {
+			if (DefaultJmsClient.this.messagePostProcessor != null) {
+				return DefaultJmsClient.this.messagePostProcessor.postProcessMessage(message);
+			}
+			return message;
 		}
 	}
 

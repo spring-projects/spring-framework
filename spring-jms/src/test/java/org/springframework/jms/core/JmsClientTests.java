@@ -142,6 +142,21 @@ class JmsClientTests {
 	}
 
 	@Test
+	void convertAndSendPayloadAndHeadersWithPostProcessor() throws JMSException {
+		Destination destination = new Destination() {};
+		Map<String, Object> headers = new HashMap<>();
+		headers.put("foo", "bar");
+
+		this.jmsClient = JmsClient.builder(this.jmsTemplate)
+				.messagePostProcessor(msg -> MessageBuilder.fromMessage(msg).setHeader("spring", "framework").build())
+				.build();
+		this.jmsClient.destination(destination).send("Hello", headers);
+		verify(this.jmsTemplate).send(eq(destination), this.messageCreator.capture());
+		TextMessage jmsMessage = createTextMessage(this.messageCreator.getValue());
+		assertThat(jmsMessage.getObjectProperty("spring")).isEqualTo("framework");
+	}
+
+	@Test
 	void receive() {
 		Destination destination = new Destination() {};
 		jakarta.jms.Message jmsMessage = createJmsTextMessage();
@@ -209,7 +224,7 @@ class JmsClientTests {
 		jakarta.jms.Message jmsMessage = createJmsTextMessage("123");
 		given(this.jmsTemplate.receive("myQueue")).willReturn(jmsMessage);
 
-		this.jmsClient = JmsClient.create(this.jmsTemplate, new GenericMessageConverter());
+		this.jmsClient = JmsClient.builder(this.jmsTemplate).messageConverter(new GenericMessageConverter()).build();
 
 		Integer payload = this.jmsClient.destination("myQueue").receive(Integer.class).get();
 		assertThat(payload).isEqualTo(Integer.valueOf(123));
@@ -258,7 +273,7 @@ class JmsClientTests {
 		jakarta.jms.Message jmsMessage = createJmsTextMessage("123");
 		given(this.jmsTemplate.receiveSelected("myQueue", "selector")).willReturn(jmsMessage);
 
-		this.jmsClient = JmsClient.create(this.jmsTemplate, new GenericMessageConverter());
+		this.jmsClient = JmsClient.builder(this.jmsTemplate).messageConverter(new GenericMessageConverter()).build();
 
 		Integer payload = this.jmsClient.destination("myQueue").receive("selector", Integer.class).get();
 		assertThat(payload).isEqualTo(Integer.valueOf(123));
@@ -313,6 +328,22 @@ class JmsClientTests {
 		String reply = this.jmsClient.destination(destination).sendAndReceive("my Payload", String.class).get();
 		verify(this.jmsTemplate, times(1)).sendAndReceive(eq(destination), any());
 		assertThat(reply).isEqualTo("My reply");
+	}
+
+	@Test
+	void convertSendAndReceivePayloadWithPostProcessor() throws JMSException {
+		Destination destination = new Destination() {};
+		jakarta.jms.Message replyJmsMessage = createJmsTextMessage("My reply");
+		given(this.jmsTemplate.sendAndReceive(eq(destination), any())).willReturn(replyJmsMessage);
+
+		this.jmsClient = JmsClient.builder(this.jmsTemplate)
+				.messagePostProcessor(msg -> MessageBuilder.fromMessage(msg).setHeader("spring", "framework").build())
+				.build();
+		this.jmsClient.destination(destination).sendAndReceive("my Payload", String.class);
+		verify(this.jmsTemplate).sendAndReceive(eq(destination), this.messageCreator.capture());
+		TextMessage jmsMessage = createTextMessage(this.messageCreator.getValue());
+		assertThat(jmsMessage.getObjectProperty("spring")).isEqualTo("framework");
+		verify(this.jmsTemplate, times(1)).sendAndReceive(eq(destination), any());
 	}
 
 	@Test
@@ -385,6 +416,32 @@ class JmsClientTests {
 		JmsClient.create(connectionFactory).destination(queue)
 				.send("just testing");
 
+		verify(messageProducer).send(textMessage);
+		verify(messageProducer).close();
+		verify(session).close();
+		verify(connection).close();
+	}
+
+	@Test
+	void sendWithPostProcessor() throws Exception {
+		ConnectionFactory connectionFactory = mock();
+		Connection connection = mock();
+		Session session = mock();
+		Queue queue = mock();
+		MessageProducer messageProducer = mock();
+		TextMessage textMessage = mock();
+
+		given(connectionFactory.createConnection()).willReturn(connection);
+		given(connection.createSession(false, Session.AUTO_ACKNOWLEDGE)).willReturn(session);
+		given(session.createProducer(queue)).willReturn(messageProducer);
+		given(session.createTextMessage("just testing")).willReturn(textMessage);
+
+		JmsClient.builder(connectionFactory)
+				.messagePostProcessor(msg -> MessageBuilder.fromMessage(msg).setHeader("spring", "framework").build())
+				.build()
+				.destination(queue).send("just testing");
+
+		verify(textMessage).setObjectProperty("spring", "framework");
 		verify(messageProducer).send(textMessage);
 		verify(messageProducer).close();
 		verify(session).close();

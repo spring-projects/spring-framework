@@ -9,39 +9,7 @@ that takes no destination argument uses the default destination.
 The following example uses the `MessageCreator` callback to create a text message from the
 supplied `Session` object:
 
-[source,java,indent=0,subs="verbatim,quotes"]
-----
-	import jakarta.jms.ConnectionFactory;
-	import jakarta.jms.JMSException;
-	import jakarta.jms.Message;
-	import jakarta.jms.Queue;
-	import jakarta.jms.Session;
-
-	import org.springframework.jms.core.MessageCreator;
-	import org.springframework.jms.core.JmsTemplate;
-
-	public class JmsQueueSender {
-
-		private JmsTemplate jmsTemplate;
-		private Queue queue;
-
-		public void setConnectionFactory(ConnectionFactory cf) {
-			this.jmsTemplate = new JmsTemplate(cf);
-		}
-
-		public void setQueue(Queue queue) {
-			this.queue = queue;
-		}
-
-		public void simpleSend() {
-			this.jmsTemplate.send(this.queue, new MessageCreator() {
-				public Message createMessage(Session session) throws JMSException {
-					return session.createTextMessage("hello queue world");
-				}
-			});
-		}
-	}
-----
+include-code::./JmsQueueSender[]
 
 In the preceding example, the `JmsTemplate` is constructed by passing a reference to a
 `ConnectionFactory`. As an alternative, a zero-argument constructor and
@@ -84,21 +52,7 @@ gives you access to the message after it has been converted but before it is sen
 following example shows how to modify a message header and a property after a
 `java.util.Map` is converted to a message:
 
-[source,java,indent=0,subs="verbatim,quotes"]
-----
-	public void sendWithConversion() {
-		Map<String, String> map = new HashMap<>();
-		map.put("Name", "Mark");
-		map.put("Age", new Integer(47));
-		jmsTemplate.convertAndSend("testQueue", map, new MessagePostProcessor() {
-			public Message postProcessMessage(Message message) throws JMSException {
-				message.setIntProperty("AccountID", 1234);
-				message.setJMSCorrelationID("123-00001");
-				return message;
-			}
-		});
-	}
-----
+include-code::./JmsSenderWithConversion[]
 
 This results in a message of the following form:
 
@@ -126,32 +80,6 @@ to `jakarta.jms.TextMessage`, `jakarta.jms.BytesMessage`, etc. For a contract su
 generic message payloads, use `org.springframework.messaging.converter.MessageConverter`
 with `JmsMessagingTemplate` or preferably `JmsClient` as your central delegate instead.
 
-
-[[jms-sending-jmsclient]]
-== Sending a Message with `JmsClient`
-
-[source,java,indent=0,subs="verbatim,quotes"]
-----
-// Reusable handle, typically created through JmsClient.create(ConnectionFactory)
-// For custom conversion, use JmsClient.create(ConnectionFactory, MessageConverter)
-private JmsClient jmsClient;
-
-public void sendWithConversion() {
-    this.jmsClient.destination("myQueue")
-            .withTimeToLive(1000)
-            .send("myPayload");  // optionally with a headers Map next to the payload
-}
-
-public void sendCustomMessage() {
-    Message<?> message =
-            MessageBuilder.withPayload("myPayload").build();  // optionally with headers
-    this.jmsClient.destination("myQueue")
-            .withTimeToLive(1000)
-            .send(message);
-}
-----
-
-
 [[jms-sending-callbacks]]
 == Using `SessionCallback` and `ProducerCallback` on `JmsTemplate`
 
@@ -160,3 +88,21 @@ want to perform multiple operations on a JMS `Session` or `MessageProducer`. The
 `SessionCallback` and `ProducerCallback` expose the JMS `Session` and `Session` /
 `MessageProducer` pair, respectively. The `execute()` methods on `JmsTemplate` run
 these callback methods.
+
+
+[[jms-sending-jmsclient]]
+== Sending a Message with `JmsClient`
+
+include-code::./JmsClientSample[]
+
+
+[[jms-sending-postprocessor]]
+== Post-processing outgoing messages
+
+Applications often need to intercept messages before they are sent out, for example to add message properties to all outgoing messages.
+The `org.springframework.messaging.core.MessagePostProcessor` based on the spring-messaging `Message` can do that,
+when configured on the `JmsClient`. It will be used for all outgoing messages sent with the `send` and `sendAndReceive` methods.
+
+Here is an example of an interceptor adding a "tenantId" property to all outgoing messages.
+
+include-code::./JmsClientWithPostProcessor[]

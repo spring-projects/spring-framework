@@ -25,6 +25,7 @@ import jakarta.jms.Destination;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessagingException;
 import org.springframework.messaging.converter.MessageConverter;
+import org.springframework.messaging.core.MessagePostProcessor;
 
 /**
  * A fluent {@code JmsClient} with common send and receive operations against a JMS
@@ -73,6 +74,7 @@ import org.springframework.messaging.converter.MessageConverter;
  * </pre>
  *
  * @author Juergen Hoeller
+ * @author Brian Clozel
  * @since 7.0
  * @see JmsTemplate
  * @see JmsMessagingTemplate
@@ -103,16 +105,7 @@ public interface JmsClient {
 	 * @param connectionFactory the factory to obtain JMS connections from
 	 */
 	static JmsClient create(ConnectionFactory connectionFactory) {
-		return new DefaultJmsClient(connectionFactory, null);
-	}
-
-	/**
-	 * Create a new {@code JmsClient} for the given {@link ConnectionFactory}.
-	 * @param connectionFactory the factory to obtain JMS connections from
-	 * @param messageConverter the message converter for payload objects
-	 */
-	static JmsClient create(ConnectionFactory connectionFactory, MessageConverter messageConverter) {
-		return new DefaultJmsClient(connectionFactory, messageConverter);
+		return new DefaultJmsClient(connectionFactory);
 	}
 
 	/**
@@ -121,17 +114,56 @@ public interface JmsClient {
 	 * (can be a custom {@link JmsOperations} implementation as well)
 	 */
 	static JmsClient create(JmsOperations jmsTemplate) {
-		return new DefaultJmsClient(jmsTemplate, null);
+		return new DefaultJmsClient(jmsTemplate);
 	}
 
 	/**
-	 * Create a new {@code JmsClient} for the given {@link JmsOperations}.
+	 * Obtain a {@code JmsClient} builder that will use the given connection
+	 * factory for JMS connections.
+	 * @param connectionFactory the factory to obtain JMS connections from
+	 * @return a {@code JmsClient} builder that uses the given connection factory.
+	 */
+	static Builder builder(ConnectionFactory connectionFactory) {
+		return new DefaultJmsClientBuilder(connectionFactory);
+	}
+
+	/**
+	 * Obtain a {@code JmsClient} builder based on the configuration of the
+	 * given {@code JmsTemplate}.
 	 * @param jmsTemplate the {@link JmsTemplate} to use for performing operations
 	 * (can be a custom {@link JmsOperations} implementation as well)
-	 * @param messageConverter the message converter for payload objects
+	 * @return a {@code JmsClient} builder that uses the given JMS template.
 	 */
-	static JmsClient create(JmsOperations jmsTemplate, MessageConverter messageConverter) {
-		return new DefaultJmsClient(jmsTemplate, messageConverter);
+	static Builder builder(JmsOperations jmsTemplate) {
+		return new DefaultJmsClientBuilder(jmsTemplate);
+	}
+
+	/**
+	 * A mutable builder for creating a {@link JmsClient}.
+	 */
+	interface Builder {
+
+		/**
+		 * Add a {@code MessageConverter} to use for converting payload objects to/from messages.
+		 * Message converters will be considered in order of registration.
+		 * @param messageConverter the message converter for payload objects
+		 * @return this builder
+		 */
+		Builder messageConverter(MessageConverter messageConverter);
+
+		/**
+		 * Add a {@link MessagePostProcessor} to use for modifying {@code Message} instances before sending.
+		 * Post-processors will be executed in order of registration.
+		 * @param messagePostProcessor the post-processor to use for outgoing messages
+		 * @return this builder
+		 */
+		Builder messagePostProcessor(MessagePostProcessor messagePostProcessor);
+
+		/**
+		 * Build the {@code JmsClient} instance.
+		 */
+		JmsClient build();
+
 	}
 
 
