@@ -360,7 +360,7 @@ public class SimpleAsyncTaskScheduler extends SimpleAsyncTaskExecutor implements
 
 	@Override
 	public boolean isRunning() {
-		return this.triggerLifecycle.isRunning();
+		return (this.triggerLifecycle.isRunning() || this.fixedDelayLifecycle.isRunning());
 	}
 
 	@Override
