@@ -185,6 +185,12 @@ public interface ServerHttpRequest extends HttpRequest, ReactiveHttpInputMessage
 		Builder remoteAddress(InetSocketAddress remoteAddress);
 
 		/**
+		 * Set the address of the local client.
+		 * @since 7.x
+		 */
+		Builder localAddress(InetSocketAddress localAddress);
+
+		/**
 		 * Build a {@link ServerHttpRequest} decorator with the mutated properties.
 		 */
 		ServerHttpRequest build();

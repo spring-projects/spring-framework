@@ -57,6 +57,8 @@ class DefaultServerHttpRequestBuilder implements ServerHttpRequest.Builder {
 
 	private @Nullable InetSocketAddress remoteAddress;
 
+	private @Nullable InetSocketAddress localAddress;
+
 	private final Flux<DataBuffer> body;
 
 	private final ServerHttpRequest originalRequest;
@@ -132,9 +134,15 @@ class DefaultServerHttpRequestBuilder implements ServerHttpRequest.Builder {
 	}
 
 	@Override
+	public ServerHttpRequest.Builder localAddress(InetSocketAddress localAddress) {
+		this.localAddress = localAddress;
+		return this;
+	}
+
+	@Override
 	public ServerHttpRequest build() {
 		return new MutatedServerHttpRequest(getUriToUse(), this.contextPath,
-				this.httpMethod, this.sslInfo, this.remoteAddress, this.headers, this.body, this.originalRequest);
+				this.httpMethod, this.sslInfo, this.remoteAddress, this.localAddress, this.headers, this.body, this.originalRequest);
 	}
 
 	private URI getUriToUse() {
@@ -182,16 +190,19 @@ class DefaultServerHttpRequestBuilder implements ServerHttpRequest.Builder {
 
 		private final @Nullable InetSocketAddress remoteAddress;
 
+		private final @Nullable InetSocketAddress localAddress;
+
 		private final Flux<DataBuffer> body;
 
 		private final ServerHttpRequest originalRequest;
 
 		public MutatedServerHttpRequest(URI uri, @Nullable String contextPath,
-				HttpMethod method, @Nullable SslInfo sslInfo, @Nullable InetSocketAddress remoteAddress,
+				HttpMethod method, @Nullable SslInfo sslInfo, @Nullable InetSocketAddress remoteAddress, @Nullable InetSocketAddress localAddress,
 				HttpHeaders headers, Flux<DataBuffer> body, ServerHttpRequest originalRequest) {
 
 			super(method, uri, contextPath, headers);
 			this.remoteAddress = (remoteAddress != null ? remoteAddress : originalRequest.getRemoteAddress());
+			this.localAddress = (localAddress != null ? localAddress : originalRequest.getLocalAddress());
 			this.sslInfo = (sslInfo != null ? sslInfo : originalRequest.getSslInfo());
 			this.body = body;
 			this.originalRequest = originalRequest;
@@ -204,7 +215,7 @@ class DefaultServerHttpRequestBuilder implements ServerHttpRequest.Builder {
 
 		@Override
 		public @Nullable InetSocketAddress getLocalAddress() {
-			return this.originalRequest.getLocalAddress();
+			return this.localAddress;
 		}
 
 		@Override
