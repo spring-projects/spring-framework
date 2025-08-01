@@ -56,11 +56,20 @@ class DefaultRestTestClient implements RestTestClient {
 
 	private final RestClient restClient;
 
+	private final Consumer<EntityExchangeResult<?>> entityResultConsumer;
+
+	private final DefaultRestTestClientBuilder<?> restTestClientBuilder;
+
 	private final AtomicLong requestIndex = new AtomicLong();
 
 
-	DefaultRestTestClient(RestClient.Builder builder) {
+	DefaultRestTestClient(
+			RestClient.Builder builder, Consumer<EntityExchangeResult<?>> entityResultConsumer,
+			DefaultRestTestClientBuilder<?> restTestClientBuilder) {
+
 		this.restClient = builder.build();
+		this.entityResultConsumer = entityResultConsumer;
+		this.restTestClientBuilder = restTestClientBuilder;
 	}
 
 
@@ -108,9 +117,10 @@ class DefaultRestTestClient implements RestTestClient {
 		return new DefaultRequestBodyUriSpec(this.restClient.method(httpMethod));
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public <B extends Builder<B>> Builder<B> mutate() {
-		return new DefaultRestTestClientBuilder<>(this.restClient.mutate());
+		return (Builder<B>) this.restTestClientBuilder;
 	}
 
 
@@ -242,7 +252,8 @@ class DefaultRestTestClient implements RestTestClient {
 		public ResponseSpec exchange() {
 			return new DefaultResponseSpec(
 					this.requestHeadersUriSpec.exchangeForRequiredValue(
-							(request, response) -> new ExchangeResult(request, response, this.uriTemplate), false));
+							(request, response) -> new ExchangeResult(request, response, this.uriTemplate), false),
+					DefaultRestTestClient.this.entityResultConsumer);
 		}
 	}
 
@@ -251,8 +262,11 @@ class DefaultRestTestClient implements RestTestClient {
 
 		private final ExchangeResult exchangeResult;
 
-		DefaultResponseSpec(ExchangeResult result) {
+		private final Consumer<EntityExchangeResult<?>> entityResultConsumer;
+
+		DefaultResponseSpec(ExchangeResult result, Consumer<EntityExchangeResult<?>> entityResultConsumer) {
 			this.exchangeResult = result;
+			this.entityResultConsumer = entityResultConsumer;
 		}
 
 		@Override
@@ -280,25 +294,31 @@ class DefaultRestTestClient implements RestTestClient {
 		@Override
 		public <B> BodySpec<B, ?> expectBody(ParameterizedTypeReference<B> bodyType) {
 			B body = this.exchangeResult.getBody(bodyType);
-			EntityExchangeResult<B> result = new EntityExchangeResult<>(this.exchangeResult, body);
+			EntityExchangeResult<B> result = initExchangeResult(body);
 			return new DefaultBodySpec<>(result);
 		}
 
 		@Override
 		public BodyContentSpec expectBody() {
 			byte[] body = this.exchangeResult.getBody(byte[].class);
-			EntityExchangeResult<byte[]> result = new EntityExchangeResult<>(this.exchangeResult, body);
+			EntityExchangeResult<byte[]> result = initExchangeResult(body);
 			return new DefaultBodyContentSpec(result);
 		}
 
 		@Override
 		public <T> EntityExchangeResult<T> returnResult(Class<T> elementClass) {
-			return new EntityExchangeResult<>(this.exchangeResult, this.exchangeResult.getBody(elementClass));
+			return initExchangeResult(this.exchangeResult.getBody(elementClass));
 		}
 
 		@Override
 		public <T> EntityExchangeResult<T> returnResult(ParameterizedTypeReference<T> elementTypeRef) {
-			return new EntityExchangeResult<>(this.exchangeResult, this.exchangeResult.getBody(elementTypeRef));
+			return initExchangeResult(this.exchangeResult.getBody(elementTypeRef));
+		}
+
+		private <B> EntityExchangeResult<B> initExchangeResult(@Nullable B body) {
+			EntityExchangeResult<B> result = new EntityExchangeResult<>(this.exchangeResult, body);
+			result.assertWithDiagnostics(() -> this.entityResultConsumer.accept(result));
+			return result;
 		}
 
 		@Override

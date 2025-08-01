@@ -19,6 +19,7 @@ package org.springframework.test.web.servlet.client;
 import java.net.URI;
 import java.nio.charset.Charset;
 import java.time.ZonedDateTime;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -31,6 +32,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.ClientHttpRequestFactory;
+import org.springframework.http.client.ClientHttpRequestInterceptor;
+import org.springframework.http.converter.HttpMessageConverters;
 import org.springframework.test.json.JsonComparator;
 import org.springframework.test.json.JsonCompareMode;
 import org.springframework.test.json.JsonComparison;
@@ -260,6 +263,54 @@ public interface RestTestClient {
 		 * @since 7.0
 		 */
 		<T extends B> T apiVersionInserter(ApiVersionInserter apiVersionInserter);
+
+		/**
+		 * Add the given request interceptor to the end of the interceptor chain.
+		 * @param interceptor the interceptor to be added to the chain
+		 */
+		<T extends B> T requestInterceptor(ClientHttpRequestInterceptor interceptor);
+
+		/**
+		 * Manipulate the interceptors with the given consumer. The list provided to
+		 * the consumer is "live", so that the consumer can be used to remove
+		 * interceptors, change ordering, etc.
+		 * @param interceptorsConsumer a function that consumes the interceptors list
+		 * @return this builder
+		 */
+		<T extends B> T requestInterceptors(Consumer<List<ClientHttpRequestInterceptor>> interceptorsConsumer);
+
+		/**
+		 * Configure the message converters to use for the request and response body.
+		 * @param configurer the configurer to apply on an empty {@link HttpMessageConverters.ClientBuilder}.
+		 * @return this builder
+		 */
+		<T extends B> T configureMessageConverters(Consumer<HttpMessageConverters.ClientBuilder> configurer);
+
+		/**
+		 * Configure an {@code EntityExchangeResult} callback that is invoked
+		 * every time after a response is fully decoded to a single entity, to a
+		 * List of entities, or to a byte[]. In effect, equivalent to each and
+		 * all of the below but registered once, globally:
+		 * <pre>
+		 * client.get().uri("/accounts/1")
+		 *         .exchange()
+		 *         .expectBody(Person.class).consumeWith(exchangeResult -&gt; ... ));
+		 *
+		 * client.get().uri("/accounts")
+		 *         .exchange()
+		 *         .expectBodyList(Person.class).consumeWith(exchangeResult -&gt; ... ));
+		 *
+		 * client.get().uri("/accounts/1")
+		 *         .exchange()
+		 *         .expectBody().consumeWith(exchangeResult -&gt; ... ));
+		 * </pre>
+		 * <p>Note that the configured consumer does not apply to responses
+		 * decoded to {@code Flux<T>} which can be consumed outside the workflow
+		 * of the test client, for example via {@code reactor.test.StepVerifier}.
+		 * @param consumer the consumer to apply to entity responses
+		 * @return the builder
+		 */
+		<T extends B> T entityExchangeResultConsumer(Consumer<EntityExchangeResult<?>> consumer);
 
 		/**
 		 * Build the {@link RestTestClient} instance.

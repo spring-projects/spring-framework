@@ -242,7 +242,7 @@ public interface WebTestClient {
 	 * @since 5.0.2
 	 */
 	static Builder bindToServer(ClientHttpConnector connector) {
-		return new DefaultWebTestClientBuilder(connector);
+		return new DefaultWebTestClientBuilder().clientConnector(connector);
 	}
 
 
@@ -468,33 +468,6 @@ public interface WebTestClient {
 		Builder filters(Consumer<List<ExchangeFilterFunction>> filtersConsumer);
 
 		/**
-		 * Configure an {@code EntityExchangeResult} callback that is invoked
-		 * every time after a response is fully decoded to a single entity, to a
-		 * List of entities, or to a byte[]. In effect, equivalent to each and
-		 * all of the below but registered once, globally:
-		 * <pre>
-		 * client.get().uri("/accounts/1")
-		 *         .exchange()
-		 *         .expectBody(Person.class).consumeWith(exchangeResult -&gt; ... ));
-		 *
-		 * client.get().uri("/accounts")
-		 *         .exchange()
-		 *         .expectBodyList(Person.class).consumeWith(exchangeResult -&gt; ... ));
-		 *
-		 * client.get().uri("/accounts/1")
-		 *         .exchange()
-		 *         .expectBody().consumeWith(exchangeResult -&gt; ... ));
-		 * </pre>
-		 * <p>Note that the configured consumer does not apply to responses
-		 * decoded to {@code Flux<T>} which can be consumed outside the workflow
-		 * of the test client, for example via {@code reactor.test.StepVerifier}.
-		 * @param consumer the consumer to apply to entity responses
-		 * @return the builder
-		 * @since 5.3.5
-		 */
-		Builder entityExchangeResultConsumer(Consumer<EntityExchangeResult<?>> consumer);
-
-		/**
 		 * Configure the codecs for the {@code WebClient} in the
 		 * {@link #exchangeStrategies(ExchangeStrategies) underlying}
 		 * {@code ExchangeStrategies}.
@@ -532,6 +505,33 @@ public interface WebTestClient {
 		 * @since 6.1
 		 */
 		Builder clientConnector(ClientHttpConnector connector);
+
+		/**
+		 * Configure an {@code EntityExchangeResult} callback that is invoked
+		 * every time after a response is fully decoded to a single entity, to a
+		 * List of entities, or to a byte[]. In effect, equivalent to each and
+		 * all of the below but registered once, globally:
+		 * <pre>
+		 * client.get().uri("/accounts/1")
+		 *         .exchange()
+		 *         .expectBody(Person.class).consumeWith(exchangeResult -&gt; ... ));
+		 *
+		 * client.get().uri("/accounts")
+		 *         .exchange()
+		 *         .expectBodyList(Person.class).consumeWith(exchangeResult -&gt; ... ));
+		 *
+		 * client.get().uri("/accounts/1")
+		 *         .exchange()
+		 *         .expectBody().consumeWith(exchangeResult -&gt; ... ));
+		 * </pre>
+		 * <p>Note that the configured consumer does not apply to responses
+		 * decoded to {@code Flux<T>} which can be consumed outside the workflow
+		 * of the test client, for example via {@code reactor.test.StepVerifier}.
+		 * @param consumer the consumer to apply to entity responses
+		 * @return the builder
+		 * @since 5.3.5
+		 */
+		Builder entityExchangeResultConsumer(Consumer<EntityExchangeResult<?>> consumer);
 
 		/**
 		 * Apply the given configurer to this builder instance.

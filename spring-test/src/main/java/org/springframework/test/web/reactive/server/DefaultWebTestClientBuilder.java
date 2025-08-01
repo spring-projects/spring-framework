@@ -115,11 +115,6 @@ class DefaultWebTestClientBuilder implements WebTestClient.Builder {
 		this(httpHandlerBuilder, null, sslInfo);
 	}
 
-	/** Use given connector. */
-	DefaultWebTestClientBuilder(ClientHttpConnector connector) {
-		this(null, connector, null);
-	}
-
 	private DefaultWebTestClientBuilder(@Nullable WebHttpHandlerBuilder httpHandlerBuilder,
 			@Nullable ClientHttpConnector connector, @Nullable SslInfo sslInfo) {
 

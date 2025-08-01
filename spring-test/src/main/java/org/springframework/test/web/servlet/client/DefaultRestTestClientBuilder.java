@@ -16,10 +16,13 @@
 
 package org.springframework.test.web.servlet.client;
 
+import java.util.List;
 import java.util.function.Consumer;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.client.ClientHttpRequestFactory;
+import org.springframework.http.client.ClientHttpRequestInterceptor;
+import org.springframework.http.converter.HttpMessageConverters;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MockMvcBuilder;
 import org.springframework.test.web.servlet.client.RestTestClient.MockMvcSetupBuilder;
@@ -30,6 +33,7 @@ import org.springframework.test.web.servlet.setup.DefaultMockMvcBuilder;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.test.web.servlet.setup.RouterFunctionMockMvcBuilder;
 import org.springframework.test.web.servlet.setup.StandaloneMockMvcBuilder;
+import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.ApiVersionInserter;
 import org.springframework.web.client.RestClient;
@@ -49,13 +53,20 @@ class DefaultRestTestClientBuilder<B extends RestTestClient.Builder<B>> implemen
 
 	private final RestClient.Builder restClientBuilder;
 
+	private Consumer<EntityExchangeResult<?>> entityResultConsumer = result -> {};
+
 
 	DefaultRestTestClientBuilder() {
-		this.restClientBuilder = RestClient.builder();
+		this(RestClient.builder());
 	}
 
 	DefaultRestTestClientBuilder(RestClient.Builder restClientBuilder) {
 		this.restClientBuilder = restClientBuilder;
+	}
+
+	DefaultRestTestClientBuilder(DefaultRestTestClientBuilder<B> other) {
+		this.restClientBuilder = other.restClientBuilder.clone();
+		this.entityResultConsumer = other.entityResultConsumer;
 	}
 
 
@@ -107,6 +118,31 @@ class DefaultRestTestClientBuilder<B extends RestTestClient.Builder<B>> implemen
 		return self();
 	}
 
+	@Override
+	public <T extends B> T requestInterceptor(ClientHttpRequestInterceptor interceptor) {
+		this.restClientBuilder.requestInterceptor(interceptor);
+		return self();
+	}
+
+	@Override
+	public <T extends B> T requestInterceptors(Consumer<List<ClientHttpRequestInterceptor>> interceptorsConsumer) {
+		this.restClientBuilder.requestInterceptors(interceptorsConsumer);
+		return self();
+	}
+
+	@Override
+	public <T extends B> T configureMessageConverters(Consumer<HttpMessageConverters.ClientBuilder> configurer) {
+		this.restClientBuilder.configureMessageConverters(configurer);
+		return self();
+	}
+
+	@Override
+	public <T extends B> T entityExchangeResultConsumer(Consumer<EntityExchangeResult<?>> entityResultConsumer) {
+		Assert.notNull(entityResultConsumer, "'entityResultConsumer' is required");
+		this.entityResultConsumer = this.entityResultConsumer.andThen(entityResultConsumer);
+		return self();
+	}
+
 	@SuppressWarnings("unchecked")
 	protected <T extends B> T self() {
 		return (T) this;
@@ -118,7 +154,8 @@ class DefaultRestTestClientBuilder<B extends RestTestClient.Builder<B>> implemen
 
 	@Override
 	public RestTestClient build() {
-		return new DefaultRestTestClient(this.restClientBuilder);
+		return new DefaultRestTestClient(
+				this.restClientBuilder, this.entityResultConsumer, new DefaultRestTestClientBuilder<>(this));
 	}
 
 
