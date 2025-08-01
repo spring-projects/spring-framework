@@ -26,10 +26,12 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
@@ -43,6 +45,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.config.GlobalTransactionalEventErrorHandler;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -99,12 +102,12 @@ class TransactionalEventListenerTests {
 	void immediatelyImpactsCurrentTransaction() {
 		load(ImmediateTestListener.class, BeforeCommitTestListener.class);
 		assertThatIllegalStateException().isThrownBy(() ->
-				this.transactionTemplate.execute(status -> {
-					getContext().publishEvent("FAIL");
-					throw new AssertionError("Should have thrown an exception at this point");
-				}))
-			.withMessageContaining("Test exception")
-			.withMessageContaining(EventCollector.IMMEDIATELY);
+						this.transactionTemplate.execute(status -> {
+							getContext().publishEvent("FAIL");
+							throw new AssertionError("Should have thrown an exception at this point");
+						}))
+				.withMessageContaining("Test exception")
+				.withMessageContaining(EventCollector.IMMEDIATELY);
 
 		getEventCollector().assertEvents(EventCollector.IMMEDIATELY, "FAIL");
 		getEventCollector().assertTotalEventsCount(1);
@@ -369,6 +372,45 @@ class TransactionalEventListenerTests {
 		getEventCollector().assertNoEventReceived();
 	}
 
+	@Test
+	void afterCommitThrowException() {
+		doLoad(HandlerConfiguration.class, AfterCommitErrorHandlerTestListener.class);
+		this.transactionTemplate.execute(status -> {
+			getContext().publishEvent("test");
+			getEventCollector().assertNoEventReceived();
+			return null;
+		});
+		getEventCollector().assertEvents(EventCollector.AFTER_COMMIT, "test");
+		getEventCollector().assertEvents(EventCollector.HANDLE_ERROR, "HANDLE_ERROR");
+		getEventCollector().assertTotalEventsCount(2);
+	}
+
+	@Test
+	void afterRollbackThrowException() {
+		doLoad(HandlerConfiguration.class, AfterRollbackErrorHandlerTestListener.class);
+		this.transactionTemplate.execute(status -> {
+			getContext().publishEvent("test");
+			getEventCollector().assertNoEventReceived();
+			status.setRollbackOnly();
+			return null;
+		});
+		getEventCollector().assertEvents(EventCollector.AFTER_ROLLBACK, "test");
+		getEventCollector().assertEvents(EventCollector.HANDLE_ERROR, "HANDLE_ERROR");
+		getEventCollector().assertTotalEventsCount(2);
+	}
+
+	@Test
+	void afterCompletionThrowException() {
+		doLoad(HandlerConfiguration.class, AfterCompletionErrorHandlerTestListener.class);
+		this.transactionTemplate.execute(status -> {
+			getContext().publishEvent("test");
+			getEventCollector().assertNoEventReceived();
+			return null;
+		});
+		getEventCollector().assertEvents(EventCollector.AFTER_COMPLETION, "test");
+		getEventCollector().assertEvents(EventCollector.HANDLE_ERROR, "HANDLE_ERROR");
+		getEventCollector().assertTotalEventsCount(2);
+	}
 
 	protected EventCollector getEventCollector() {
 		return this.eventCollector;
@@ -442,6 +484,36 @@ class TransactionalEventListenerTests {
 		}
 	}
 
+	@Configuration
+	@EnableTransactionManagement
+	static class HandlerConfiguration {
+
+		@Bean
+		public EventCollector eventCollector() {
+			return new EventCollector();
+		}
+
+		@Bean
+		public TestBean testBean(ApplicationEventPublisher eventPublisher) {
+			return new TestBean(eventPublisher);
+		}
+
+		@Bean
+		public CallCountingTransactionManager transactionManager() {
+			return new CallCountingTransactionManager();
+		}
+
+		@Bean
+		public TransactionTemplate transactionTemplate() {
+			return new TransactionTemplate(transactionManager());
+		}
+
+		@Bean
+		public AfterRollbackErrorHandler errorHandler(ApplicationEventPublisher eventPublisher) {
+			return new AfterRollbackErrorHandler(eventPublisher);
+		}
+	}
+
 
 	@Configuration
 	static class MulticasterWithCustomExecutor {
@@ -467,7 +539,9 @@ class TransactionalEventListenerTests {
 
 		public static final String AFTER_ROLLBACK = "AFTER_ROLLBACK";
 
-		public static final String[] ALL_PHASES = {IMMEDIATELY, BEFORE_COMMIT, AFTER_COMMIT, AFTER_ROLLBACK};
+		public static final String HANDLE_ERROR = "HANDLE_ERROR";
+
+		public static final String[] ALL_PHASES = {IMMEDIATELY, BEFORE_COMMIT, AFTER_COMMIT, AFTER_ROLLBACK, HANDLE_ERROR};
 
 		private final MultiValueMap<String, Object> events = new LinkedMultiValueMap<>();
 
@@ -486,7 +560,7 @@ class TransactionalEventListenerTests {
 			for (String phase : phases) {
 				List<Object> eventsForPhase = getEvents(phase);
 				assertThat(eventsForPhase.size()).as("Expected no events for phase '" + phase + "' " +
-								"but got " + eventsForPhase + ":").isEqualTo(0);
+						"but got " + eventsForPhase + ":").isEqualTo(0);
 			}
 		}
 
@@ -504,7 +578,7 @@ class TransactionalEventListenerTests {
 				size += entry.getValue().size();
 			}
 			assertThat(size).as("Wrong number of total events (" + this.events.size() + ") " +
-						"registered phase(s)").isEqualTo(number);
+					"registered phase(s)").isEqualTo(number);
 		}
 	}
 
@@ -677,6 +751,51 @@ class TransactionalEventListenerTests {
 	}
 
 
+	@Component
+	static class AfterCommitErrorHandlerTestListener extends BaseTransactionalTestListener {
+
+		@TransactionalEventListener(phase = AFTER_COMMIT, condition = "!'HANDLE_ERROR'.equals(#data)")
+		public void handleBeforeCommit(String data) {
+			handleEvent(EventCollector.AFTER_COMMIT, data);
+			throw new IllegalStateException("test");
+		}
+
+		@EventListener(condition = "'HANDLE_ERROR'.equals(#data)")
+		public void handleImmediately(String data) {
+			handleEvent(EventCollector.HANDLE_ERROR, data);
+		}
+	}
+
+	@Component
+	static class AfterRollbackErrorHandlerTestListener extends BaseTransactionalTestListener {
+
+		@TransactionalEventListener(phase = AFTER_ROLLBACK, condition = "!'HANDLE_ERROR'.equals(#data)")
+		public void handleBeforeCommit(String data) {
+			handleEvent(EventCollector.AFTER_ROLLBACK, data);
+			throw new IllegalStateException("test");
+		}
+
+		@EventListener(condition = "'HANDLE_ERROR'.equals(#data)")
+		public void handleImmediately(String data) {
+			handleEvent(EventCollector.HANDLE_ERROR, data);
+		}
+	}
+
+	@Component
+	static class AfterCompletionErrorHandlerTestListener extends BaseTransactionalTestListener {
+
+		@TransactionalEventListener(phase = AFTER_COMPLETION, condition = "!'HANDLE_ERROR'.equals(#data)")
+		public void handleBeforeCommit(String data) {
+			handleEvent(EventCollector.AFTER_COMPLETION, data);
+			throw new IllegalStateException("test");
+		}
+
+		@EventListener(condition = "'HANDLE_ERROR'.equals(#data)")
+		public void handleImmediately(String data) {
+			handleEvent(EventCollector.HANDLE_ERROR, data);
+		}
+	}
+
 	static class EventTransactionSynchronization implements TransactionSynchronization {
 
 		private final int order;
@@ -688,6 +807,20 @@ class TransactionalEventListenerTests {
 		@Override
 		public int getOrder() {
 			return order;
+		}
+	}
+
+	static class AfterRollbackErrorHandler extends GlobalTransactionalEventErrorHandler {
+
+		private final ApplicationEventPublisher eventPublisher;
+
+		AfterRollbackErrorHandler(ApplicationEventPublisher eventPublisher) {
+			this.eventPublisher = eventPublisher;
+		}
+
+		@Override
+		public void handle(ApplicationEvent event, @Nullable Throwable ex) {
+			eventPublisher.publishEvent("HANDLE_ERROR");
 		}
 	}
 
