@@ -76,7 +76,7 @@ public class ApiVersionTests {
 
 		DefaultApiVersionStrategy versionStrategy = new DefaultApiVersionStrategy(
 				List.of(versionResolver), new SemanticApiVersionParser(),
-				true, null, true, null);
+				true, null, true, null, null);
 
 		RestTestClient client = RestTestClient.bindToController(new TestController())
 				.configureServer(mockMvcBuilder -> mockMvcBuilder.setApiVersionStrategy(versionStrategy))

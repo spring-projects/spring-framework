@@ -22,6 +22,7 @@ import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Predicate;
 
 import org.jspecify.annotations.Nullable;
 
@@ -58,6 +59,8 @@ public class ApiVersionConfigurer {
 	private final Set<String> supportedVersions = new LinkedHashSet<>();
 
 	private boolean detectSupportedVersions = true;
+
+	private @Nullable Predicate<Comparable<?>> supportedVersionPredicate;
 
 	private @Nullable ApiVersionDeprecationHandler deprecationHandler;
 
@@ -180,6 +183,16 @@ public class ApiVersionConfigurer {
 	}
 
 	/**
+	 * Provide a {@link Predicate} to perform supported version checks with, in
+	 * effect taking over the supported version check and superseding the
+	 * {@link #addSupportedVersions} and {@link #detectSupportedVersions}.
+	 * @param predicate the predicate to use
+	 */
+	public void setSupportedVersionPredicate(@Nullable Predicate<Comparable<?>> predicate) {
+		this.supportedVersionPredicate = predicate;
+	}
+
+	/**
 	 * Configure a handler to add handling for requests with a deprecated API
 	 * version. Typically, this involves sending hints and information about
 	 * the deprecation in response headers.
@@ -200,8 +213,8 @@ public class ApiVersionConfigurer {
 
 		DefaultApiVersionStrategy strategy = new DefaultApiVersionStrategy(this.versionResolvers,
 				(this.versionParser != null ? this.versionParser : new SemanticApiVersionParser()),
-				(this.versionRequired != null ? this.versionRequired : true),
-				this.defaultVersion, this.detectSupportedVersions,
+				(this.versionRequired != null ? this.versionRequired : true), this.defaultVersion,
+				this.detectSupportedVersions, this.supportedVersionPredicate,
 				this.deprecationHandler);
 
 		this.supportedVersions.forEach(strategy::addSupportedVersion);

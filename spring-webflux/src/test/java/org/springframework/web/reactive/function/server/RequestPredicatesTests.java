@@ -380,7 +380,7 @@ class RequestPredicatesTests {
 
 	private static DefaultApiVersionStrategy apiVersionStrategy() {
 		return new DefaultApiVersionStrategy(
-				List.of(exchange -> null), new SemanticApiVersionParser(), true, null, false, null);
+				List.of(exchange -> null), new SemanticApiVersionParser(), true, null, false, null, null);
 	}
 
 }

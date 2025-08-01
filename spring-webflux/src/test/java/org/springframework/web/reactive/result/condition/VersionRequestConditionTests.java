@@ -52,7 +52,7 @@ public class VersionRequestConditionTests {
 	private static DefaultApiVersionStrategy initVersionStrategy(@Nullable String defaultVersion) {
 		return new DefaultApiVersionStrategy(
 				List.of(exchange -> exchange.getRequest().getQueryParams().getFirst("api-version")),
-				new SemanticApiVersionParser(), true, defaultVersion, false, null);
+				new SemanticApiVersionParser(), true, defaultVersion, false, null, null);
 	}
 
 	@Test

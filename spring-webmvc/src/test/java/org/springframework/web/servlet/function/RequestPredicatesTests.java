@@ -280,7 +280,7 @@ class RequestPredicatesTests {
 	private static ServerRequest serverRequest(String version) {
 
 		ApiVersionStrategy strategy = new DefaultApiVersionStrategy(
-				List.of(exchange -> null), new SemanticApiVersionParser(), true, null, false, null);
+				List.of(exchange -> null), new SemanticApiVersionParser(), true, null, false, null, null);
 
 		MockHttpServletRequest servletRequest =
 				PathPatternsTestUtils.initRequest("GET", null, "/path", true,

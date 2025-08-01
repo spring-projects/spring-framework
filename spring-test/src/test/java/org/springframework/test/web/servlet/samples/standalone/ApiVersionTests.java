@@ -50,7 +50,7 @@ public class ApiVersionTests {
 
 		DefaultApiVersionStrategy versionStrategy = new DefaultApiVersionStrategy(
 				List.of(request -> request.getHeader(header)), new SemanticApiVersionParser(),
-				true, null, true, null);
+				true, null, true, null, null);
 
 		MockMvc mockMvc = standaloneSetup(new PersonController())
 				.setApiVersionStrategy(versionStrategy)
