@@ -22,8 +22,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.eclipse.jetty.http.HttpMethod;
 import org.jspecify.annotations.Nullable;
+import org.springframework.http.HttpMethod;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.Assert;
 import org.springframework.util.PathMatcher;
