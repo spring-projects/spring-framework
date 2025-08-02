@@ -109,12 +109,16 @@ public @interface RequestMapping {
 	 * At the method level, relative paths (for example, {@code "edit"}) are supported
 	 * within the primary mapping expressed at the type level.
 	 * Path mapping URIs may contain placeholders (for example, <code>"/${profile_path}"</code>).
+	 * By default, SpEL expression is also supported (for example {@code "/profile/#{@bean.property}"}).
 	 * <p><b>Supported at the type level as well as at the method level!</b>
 	 * When used at the type level, all method-level mappings inherit
 	 * this primary mapping, narrowing it for a specific handler method.
 	 * <p><strong>NOTE</strong>: A handler method that is not mapped to any path
 	 * explicitly is effectively mapped to an empty path.
 	 * @since 4.2
+	 * @see org.springframework.beans.factory.config.EmbeddedValueResolver
+	 * @see org.springframework.context.expression.StandardBeanExpressionResolver
+	 * @see org.springframework.context.support.AbstractApplicationContext
 	 */
 	@AliasFor("value")
 	String[] path() default {};
