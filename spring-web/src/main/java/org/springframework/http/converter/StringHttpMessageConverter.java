@@ -101,8 +101,7 @@ public class StringHttpMessageConverter extends AbstractHttpMessageConverter<Str
 
 	@Override
 	protected Long getContentLength(String str, @Nullable MediaType contentType) {
-		Charset charset = getContentTypeCharset(contentType);
-		return (long) str.getBytes(charset).length;
+		return null;
 	}
 
 
@@ -125,7 +124,11 @@ public class StringHttpMessageConverter extends AbstractHttpMessageConverter<Str
 			headers.setAcceptCharset(getAcceptedCharsets());
 		}
 		Charset charset = getContentTypeCharset(headers.getContentType());
-		StreamUtils.copy(str, charset, outputMessage.getBody());
+		byte[] strBytes = str.getBytes(charset);
+		if (!headers.containsHeader(HttpHeaders.TRANSFER_ENCODING)) {
+			headers.setContentLength(strBytes.length);
+		}
+		StreamUtils.copy(strBytes, outputMessage.getBody());
 	}
 
 
