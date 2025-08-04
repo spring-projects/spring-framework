@@ -63,13 +63,15 @@ alternative, you can set the same property via the
 xref:appendix.adoc#appendix-spring-properties[`SpringProperties`] mechanism.
 
 As of Spring Framework 7.0, an application context stored in the context cache will be
-stopped when it is no longer actively in use and automatically restarted the next time
+_paused_ when it is no longer actively in use and automatically _restarted_ the next time
 the context is retrieved from the cache. Specifically, the latter will restart all
 auto-startup beans in the application context, effectively restoring the lifecycle state.
 This ensures that background processes within the context are not actively running while
 the context is not used by tests. For example, JMS listener containers, scheduled tasks,
 and any other components in the context that implement `Lifecycle` or `SmartLifecycle`
-will be in a "stopped" state until the context is used again by a test.
+will be in a "stopped" state until the context is used again by a test. Note, however,
+that `SmartLifecycle` components can opt out of pausing by returning `false` from
+`SmartLifecycle#isPauseable()`.
 
 Since having a large number of application contexts loaded within a given test suite can
 cause the suite to take an unnecessarily long time to run, it is often beneficial to
