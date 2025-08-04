@@ -485,6 +485,10 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 								}
 							});
 						}
+						else {
+							// Don't wait for beans that aren't pauseable...
+							latch.countDown();
+						}
 					}
 					else if (!pauseableOnly) {
 						if (logger.isTraceEnabled()) {
