@@ -143,8 +143,8 @@ public class DefaultTestContext implements TestContext {
 	/**
 	 * Mark the {@linkplain ApplicationContext application context} associated
 	 * with this test context as <em>unused</em> so that it can be safely
-	 * {@linkplain org.springframework.context.Lifecycle#stop() stopped} if no
-	 * other test classes are actively using the same application context.
+	 * {@linkplain org.springframework.context.ConfigurableApplicationContext#pause() paused}
+	 * if no other test classes are actively using the same application context.
 	 * <p>The default implementation delegates to the {@link CacheAwareContextLoaderDelegate}
 	 * that was supplied when this {@code TestContext} was constructed.
 	 * @since 7.0

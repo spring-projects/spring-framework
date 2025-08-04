@@ -35,8 +35,8 @@ import org.springframework.context.ConfigurableApplicationContext;
 public class ContextPausedEvent extends ContextStoppedEvent {
 
 	/**
-	 * Create a new {@code ContextRestartedEvent}.
-	 * @param source the {@code ContextPausedEvent} that has been restarted
+	 * Create a new {@code ContextPausedEvent}.
+	 * @param source the {@code ApplicationContext} that has been paused
 	 * (must not be {@code null})
 	 */
 	public ContextPausedEvent(ApplicationContext source) {

@@ -223,7 +223,7 @@ public interface ConfigurableApplicationContext extends ApplicationContext, Life
 	/**
 	 * Pause all beans in this application context if necessary, and subsequently
 	 * restart all auto-startup beans, effectively restoring the lifecycle state
-	 * after {@link #refresh()} (typically after a preceding {@link #stop()} call
+	 * after {@link #refresh()} (typically after a preceding {@link #pause()} call
 	 * when a full {@link #start()} of even lazy-starting beans is to be avoided).
 	 * @since 7.0
 	 * @see #pause()

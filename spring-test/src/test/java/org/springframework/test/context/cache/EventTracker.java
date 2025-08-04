@@ -22,9 +22,9 @@ import java.util.List;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.event.ApplicationContextEvent;
 import org.springframework.context.event.ContextClosedEvent;
+import org.springframework.context.event.ContextPausedEvent;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.ContextRestartedEvent;
-import org.springframework.context.event.ContextStoppedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 import org.springframework.test.context.event.TestContextEvent;
@@ -51,8 +51,8 @@ class EventTracker {
 		trackApplicationContextEvent(event);
 	}
 
-	@EventListener(ContextStoppedEvent.class)
-	void contextStopped(ContextStoppedEvent event) {
+	@EventListener(ContextPausedEvent.class)
+	void contextPaused(ContextPausedEvent event) {
 		trackApplicationContextEvent(event);
 	}
 

@@ -169,8 +169,8 @@ public interface CacheAwareContextLoaderDelegate {
 	 * for the supplied {@link MergedContextConfiguration} as well as usage of the
 	 * application context for its {@linkplain MergedContextConfiguration#getParent()
 	 * parent}, recursively.
-	 * <p>This informs the {@code ContextCache} that the application context(s) can
-	 * be safely {@linkplain org.springframework.context.Lifecycle#stop() stopped}
+	 * <p>This informs the {@code ContextCache} that the application context(s) can be safely
+	 * {@linkplain org.springframework.context.ConfigurableApplicationContext#pause() paused}
 	 * if no other test classes are actively using the same application context(s).
 	 * @param key the context key; never {@code null}
 	 * @param testClass the test class that is no longer using the application context(s)

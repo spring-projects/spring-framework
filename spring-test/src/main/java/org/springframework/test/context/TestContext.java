@@ -135,8 +135,8 @@ public interface TestContext extends AttributeAccessor, Serializable {
 	 * Call this method to signal that the {@linkplain #getTestClass() test class}
 	 * is no longer using the {@linkplain ApplicationContext application context}
 	 * associated with this test context.
-	 * <p>This informs the context cache that the application context can be
-	 * safely {@linkplain org.springframework.context.Lifecycle#stop() stopped}
+	 * <p>This informs the context cache that the application context can be safely
+	 * {@linkplain org.springframework.context.ConfigurableApplicationContext#pause() paused}
 	 * if no other test classes are actively using the same application context.
 	 * <p>This method is intended to be invoked after execution of the test class
 	 * has ended and should not be invoked unless the application context for this
