@@ -30,7 +30,6 @@ import org.springframework.util.Assert;
  *
  * @author Rossen Stoyanchev
  * @since 6.2
- *
  * @see <a href="https://www.rfc-editor.org/info/rfc3986">RFC 3986</a>
  */
 abstract class RfcUriParser {
@@ -78,10 +77,10 @@ abstract class RfcUriParser {
 	 * @param query the query, if present
 	 * @param fragment the fragment, if present
 	 */
-	record UriRecord(@Nullable String scheme, boolean isOpaque,
-						@Nullable String user, @Nullable String host, @Nullable String port,
-						@Nullable String path, @Nullable String query, @Nullable String fragment) {
-
+	record UriRecord(
+			@Nullable String scheme, boolean isOpaque,
+			@Nullable String user, @Nullable String host, @Nullable String port,
+			@Nullable String path, @Nullable String query, @Nullable String fragment) {
 	}
 
 
@@ -130,6 +129,7 @@ abstract class RfcUriParser {
 			}
 		},
 
+
 		HOST_OR_PATH {
 
 			@Override
@@ -157,6 +157,7 @@ abstract class RfcUriParser {
 				parser.capturePath();
 			}
 		},
+
 
 		SCHEME_OR_PATH {
 
@@ -187,6 +188,7 @@ abstract class RfcUriParser {
 				parser.capturePath();
 			}
 		},
+
 
 		HOST {
 
@@ -229,6 +231,7 @@ abstract class RfcUriParser {
 			}
 		},
 
+
 		IPV6 {
 
 			@Override
@@ -258,6 +261,7 @@ abstract class RfcUriParser {
 				verify(parser.hasHost(), parser, "Bad authority");  // no closing ']'
 			}
 		},
+
 
 		PORT {
 
@@ -291,6 +295,7 @@ abstract class RfcUriParser {
 			}
 		},
 
+
 		PATH {
 
 			@Override
@@ -319,6 +324,7 @@ abstract class RfcUriParser {
 			}
 		},
 
+
 		QUERY {
 
 			@Override
@@ -334,7 +340,9 @@ abstract class RfcUriParser {
 			}
 		},
 
+
 		FRAGMENT {
+
 			@Override
 			public void handleNext(InternalParser parser, char c, int i) {
 			}
@@ -344,6 +352,7 @@ abstract class RfcUriParser {
 				parser.captureFragmentIfNotEmpty();
 			}
 		},
+
 
 		WILDCARD {
 
@@ -357,6 +366,7 @@ abstract class RfcUriParser {
 				parser.capturePath();
 			}
 		};
+
 
 		/**
 		 * Method to handle each character from the input string.
@@ -422,6 +432,7 @@ abstract class RfcUriParser {
 			this.uri = uri;
 		}
 
+
 		// Check internal state
 
 		public boolean hasScheme() {
@@ -443,6 +454,7 @@ abstract class RfcUriParser {
 		public boolean isAtStartOfComponent() {
 			return (this.index == this.componentIndex);
 		}
+
 
 		// Top-level parse loop, iterate over chars and delegate to states
 
@@ -468,6 +480,7 @@ abstract class RfcUriParser {
 			return this.uri.charAt(this.index);
 		}
 
+
 		// Transitions and index updates
 
 		public void advanceTo(State state) {
@@ -492,6 +505,7 @@ abstract class RfcUriParser {
 		public void index(int index) {
 			this.index = index;
 		}
+
 
 		// Component capture
 
@@ -586,6 +600,7 @@ abstract class RfcUriParser {
 			return this;
 		}
 
+
 		// Encoding and curly bracket handling
 
 		/**
@@ -635,6 +650,7 @@ abstract class RfcUriParser {
 			}
 			return (this.openCurlyBracketCount > 0);
 		}
+
 
 		@Override
 		public String toString() {
