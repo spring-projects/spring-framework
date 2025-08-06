@@ -25,9 +25,9 @@ import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 
 /**
- * Extension of {@link AbstractAutoProxyCreator} which implements {@link BeanFactoryAware},
- * adds exposure of the original target class for each proxied bean
- * ({@link AutoProxyUtils#ORIGINAL_TARGET_CLASS_ATTRIBUTE}),
+ * Extension of {@link AbstractAdvisingBeanPostProcessor} which implements
+ * {@link BeanFactoryAware}, adds exposure of the original target class for each
+ * proxied bean ({@link AutoProxyUtils#ORIGINAL_TARGET_CLASS_ATTRIBUTE}),
  * and participates in an externally enforced target-class mode for any given bean
  * ({@link AutoProxyUtils#PRESERVE_TARGET_CLASS_ATTRIBUTE}).
  * This post-processor is therefore aligned with {@link AbstractAutoProxyCreator}.
@@ -47,6 +47,7 @@ public abstract class AbstractBeanFactoryAwareAdvisingPostProcessor extends Abst
 	@Override
 	public void setBeanFactory(BeanFactory beanFactory) {
 		this.beanFactory = (beanFactory instanceof ConfigurableListableBeanFactory clbf ? clbf : null);
+		AutoProxyUtils.applyDefaultProxyConfig(this, beanFactory);
 	}
 
 	@Override
@@ -56,9 +57,19 @@ public abstract class AbstractBeanFactoryAwareAdvisingPostProcessor extends Abst
 		}
 
 		ProxyFactory proxyFactory = super.prepareProxyFactory(bean, beanName);
-		if (!proxyFactory.isProxyTargetClass() && this.beanFactory != null &&
-				AutoProxyUtils.shouldProxyTargetClass(this.beanFactory, beanName)) {
-			proxyFactory.setProxyTargetClass(true);
+		if (this.beanFactory != null) {
+			if (AutoProxyUtils.shouldProxyTargetClass(this.beanFactory, beanName)) {
+				proxyFactory.setProxyTargetClass(true);
+			}
+			else {
+				Class<?>[] ifcs = AutoProxyUtils.determineExposedInterfaces(this.beanFactory, beanName);
+				if (ifcs != null) {
+					proxyFactory.setProxyTargetClass(false);
+					for (Class<?> ifc : ifcs) {
+						proxyFactory.addInterface(ifc);
+					}
+				}
+			}
 		}
 		return proxyFactory;
 	}

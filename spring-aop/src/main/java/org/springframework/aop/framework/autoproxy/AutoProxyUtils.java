@@ -18,6 +18,8 @@ package org.springframework.aop.framework.autoproxy;
 
 import org.jspecify.annotations.Nullable;
 
+import org.springframework.aop.framework.ProxyConfig;
+import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
@@ -31,8 +33,36 @@ import org.springframework.util.StringUtils;
  * @author Juergen Hoeller
  * @since 2.0.3
  * @see AbstractAutoProxyCreator
+ * @see AbstractBeanFactoryAwareAdvisingPostProcessor
  */
 public abstract class AutoProxyUtils {
+
+	/**
+	 * The bean name of the internally managed auto-proxy creator.
+	 * @since 7.0
+	 */
+	public static final String DEFAULT_PROXY_CONFIG_BEAN_NAME =
+			"org.springframework.aop.framework.autoproxy.defaultProxyConfig";
+
+	/**
+	 * Bean definition attribute that may indicate the interfaces to be proxied
+	 * (in case of it getting proxied in the first place). The value is either
+	 * a single interface {@code Class} or an array of {@code Class}, with an
+	 * empty array specifically signalling that all implemented interfaces need
+	 * to be proxied.
+	 * @since 7.0
+	 * @see #determineExposedInterfaces
+	 */
+	public static final String EXPOSED_INTERFACES_ATTRIBUTE =
+			Conventions.getQualifiedAttributeName(AutoProxyUtils.class, "exposedInterfaces");
+
+	/**
+	 * Attribute value for specifically signalling that all implemented interfaces
+	 * need to be proxied (through an empty {@code Class} array).
+	 * @since 7.0
+	 * @see #EXPOSED_INTERFACES_ATTRIBUTE
+	 */
+	public static final Object ALL_INTERFACES_ATTRIBUTE_VALUE = new Class<?>[0];
 
 	/**
 	 * Bean definition attribute that may indicate whether a given bean is supposed
@@ -58,6 +88,47 @@ public abstract class AutoProxyUtils {
 
 
 	/**
+	 * Apply default ProxyConfig settings to the given ProxyConfig instance, if necessary.
+	 * @param proxyConfig the current ProxyConfig instance
+	 * @param beanFactory the BeanFactory to take the default ProxyConfig from
+	 * @since 7.0
+	 * @see #DEFAULT_PROXY_CONFIG_BEAN_NAME
+	 * @see ProxyConfig#copyDefault
+	 */
+	static void applyDefaultProxyConfig(ProxyConfig proxyConfig, BeanFactory beanFactory) {
+		if (beanFactory.containsBean(DEFAULT_PROXY_CONFIG_BEAN_NAME)) {
+			ProxyConfig defaultProxyConfig = beanFactory.getBean(DEFAULT_PROXY_CONFIG_BEAN_NAME, ProxyConfig.class);
+			proxyConfig.copyDefault(defaultProxyConfig);
+		}
+	}
+
+	/**
+	 * Determine the specific interfaces for proxying the given bean, if any.
+	 * Checks the {@link #EXPOSED_INTERFACES_ATTRIBUTE "exposedInterfaces" attribute}
+	 * of the corresponding bean definition.
+	 * @param beanFactory the containing ConfigurableListableBeanFactory
+	 * @param beanName the name of the bean
+	 * @return whether the given bean should be proxied with its target class
+	 * @since 7.0
+	 * @see #EXPOSED_INTERFACES_ATTRIBUTE
+	 */
+	static Class<?> @Nullable [] determineExposedInterfaces(
+			ConfigurableListableBeanFactory beanFactory, @Nullable String beanName) {
+
+		if (beanName != null && beanFactory.containsBeanDefinition(beanName)) {
+			BeanDefinition bd = beanFactory.getBeanDefinition(beanName);
+			Object interfaces = bd.getAttribute(EXPOSED_INTERFACES_ATTRIBUTE);
+			if (interfaces instanceof Class<?>[] ifcs) {
+				return ifcs;
+			}
+			else if (interfaces instanceof Class<?> ifc) {
+				return new Class<?>[] {ifc};
+			}
+		}
+		return null;
+	}
+
+	/**
 	 * Determine whether the given bean should be proxied with its target
 	 * class rather than its interfaces. Checks the
 	 * {@link #PRESERVE_TARGET_CLASS_ATTRIBUTE "preserveTargetClass" attribute}
@@ -65,6 +136,7 @@ public abstract class AutoProxyUtils {
 	 * @param beanFactory the containing ConfigurableListableBeanFactory
 	 * @param beanName the name of the bean
 	 * @return whether the given bean should be proxied with its target class
+	 * @see #PRESERVE_TARGET_CLASS_ATTRIBUTE
 	 */
 	public static boolean shouldProxyTargetClass(
 			ConfigurableListableBeanFactory beanFactory, @Nullable String beanName) {

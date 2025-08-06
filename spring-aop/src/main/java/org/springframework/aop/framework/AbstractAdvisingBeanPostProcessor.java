@@ -112,11 +112,13 @@ public abstract class AbstractAdvisingBeanPostProcessor extends ProxyProcessorSu
 
 		if (isEligible(bean, beanName)) {
 			ProxyFactory proxyFactory = prepareProxyFactory(bean, beanName);
-			if (!proxyFactory.isProxyTargetClass()) {
+			if (!proxyFactory.isProxyTargetClass() && !proxyFactory.hasUserSuppliedInterfaces()) {
 				evaluateProxyInterfaces(bean.getClass(), proxyFactory);
 			}
 			proxyFactory.addAdvisor(this.advisor);
 			customizeProxyFactory(proxyFactory);
+			proxyFactory.setFrozen(isFrozen());
+			proxyFactory.setPreFiltered(true);
 
 			// Use original ClassLoader if bean class not locally loaded in overriding class loader
 			ClassLoader classLoader = getProxyClassLoader();
@@ -187,6 +189,7 @@ public abstract class AbstractAdvisingBeanPostProcessor extends ProxyProcessorSu
 	protected ProxyFactory prepareProxyFactory(Object bean, String beanName) {
 		ProxyFactory proxyFactory = new ProxyFactory();
 		proxyFactory.copyFrom(this);
+		proxyFactory.setFrozen(false);
 		proxyFactory.setTarget(bean);
 		return proxyFactory;
 	}
