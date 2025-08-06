@@ -117,6 +117,7 @@ public abstract class AbstractAdvisingBeanPostProcessor extends ProxyProcessorSu
 			}
 			proxyFactory.addAdvisor(this.advisor);
 			customizeProxyFactory(proxyFactory);
+			proxyFactory.setPreFiltered(true);
 
 			// Use original ClassLoader if bean class not locally loaded in overriding class loader
 			ClassLoader classLoader = getProxyClassLoader();

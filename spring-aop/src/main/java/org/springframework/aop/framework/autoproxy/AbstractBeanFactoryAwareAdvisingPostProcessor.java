@@ -24,9 +24,9 @@ import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.lang.Nullable;
 
 /**
- * Extension of {@link AbstractAutoProxyCreator} which implements {@link BeanFactoryAware},
- * adds exposure of the original target class for each proxied bean
- * ({@link AutoProxyUtils#ORIGINAL_TARGET_CLASS_ATTRIBUTE}),
+ * Extension of {@link AbstractAdvisingBeanPostProcessor} which implements
+ * {@link BeanFactoryAware}, adds exposure of the original target class for each
+ * proxied bean ({@link AutoProxyUtils#ORIGINAL_TARGET_CLASS_ATTRIBUTE}),
  * and participates in an externally enforced target-class mode for any given bean
  * ({@link AutoProxyUtils#PRESERVE_TARGET_CLASS_ATTRIBUTE}).
  * This post-processor is therefore aligned with {@link AbstractAutoProxyCreator}.

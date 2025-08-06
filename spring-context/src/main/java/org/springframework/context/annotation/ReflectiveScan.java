@@ -51,9 +51,9 @@ import org.springframework.core.annotation.AliasFor;
  * ignored.
  *
  * @author Stephane Nicoll
+ * @since 6.2
  * @see Reflective @Reflective
  * @see RegisterReflection @RegisterReflection
- * @since 6.2
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
