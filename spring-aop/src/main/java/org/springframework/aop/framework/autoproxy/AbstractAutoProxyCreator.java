@@ -464,7 +464,7 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 					proxyFactory.addInterface(ifc);
 				}
 			}
-			else if (!proxyFactory.isProxyTargetClass()) {
+			if (ifcs != null ? ifcs.length == 0 : !proxyFactory.isProxyTargetClass()) {
 				evaluateProxyInterfaces(beanClass, proxyFactory);
 			}
 		}

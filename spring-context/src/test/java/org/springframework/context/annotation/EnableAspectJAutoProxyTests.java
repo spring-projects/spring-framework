@@ -47,6 +47,7 @@ class EnableAspectJAutoProxyTests {
 
 		aspectIsApplied(ctx);
 		assertThat(AopUtils.isJdkDynamicProxy(ctx.getBean(FooService.class))).isTrue();
+		assertThat(AopUtils.isJdkDynamicProxy(ctx.getBean("otherFooService"))).isTrue();
 		ctx.close();
 	}
 
@@ -56,6 +57,7 @@ class EnableAspectJAutoProxyTests {
 
 		aspectIsApplied(ctx);
 		assertThat(AopUtils.isCglibProxy(ctx.getBean(FooService.class))).isTrue();
+		assertThat(AopUtils.isJdkDynamicProxy(ctx.getBean("otherFooService"))).isTrue();
 		ctx.close();
 	}
 
@@ -124,7 +126,7 @@ class EnableAspectJAutoProxyTests {
 	}
 
 
-	@Import({ ServiceInvocationCounter.class, StubFooDao.class })
+	@Import({ServiceInvocationCounter.class, StubFooDao.class})
 	@EnableAspectJAutoProxy(exposeProxy = true)
 	static class ConfigWithExposedProxy {
 

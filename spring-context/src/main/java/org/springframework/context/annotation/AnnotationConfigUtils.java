@@ -22,6 +22,7 @@ import java.util.function.Predicate;
 
 import org.jspecify.annotations.Nullable;
 
+import org.springframework.aop.framework.autoproxy.AutoProxyUtils;
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -257,6 +258,20 @@ public abstract class AnnotationConfigUtils {
 		AnnotationAttributes description = attributesFor(metadata, Description.class);
 		if (description != null) {
 			abd.setDescription(description.getString("value"));
+		}
+
+		AnnotationAttributes proxyable = attributesFor(metadata, Proxyable.class);
+		if (proxyable != null) {
+			ProxyType mode = proxyable.getEnum("value");
+			if (mode == ProxyType.TARGET_CLASS) {
+				abd.setAttribute(AutoProxyUtils.PRESERVE_TARGET_CLASS_ATTRIBUTE, Boolean.TRUE);
+			}
+			else {
+				Class<?>[] ifcs = proxyable.getClassArray("interfaces");
+				if (ifcs.length > 0 || mode == ProxyType.INTERFACES) {
+					abd.setAttribute(AutoProxyUtils.EXPOSED_INTERFACES_ATTRIBUTE, ifcs);
+				}
+			}
 		}
 	}
 

@@ -41,6 +41,7 @@ import example.scannable.JakartaNamedComponent;
 import example.scannable.MessageBean;
 import example.scannable.NamedComponent;
 import example.scannable.NamedStubDao;
+import example.scannable.OtherFooService;
 import example.scannable.ScopedProxyTestBean;
 import example.scannable.ServiceInvocationCounter;
 import example.scannable.StubFooDao;
@@ -85,13 +86,13 @@ class ClassPathScanningCandidateComponentProviderTests {
 
 	private static final Set<Class<?>> springComponents = Set.of(
 			DefaultNamedComponent.class,
-			NamedComponent.class,
 			FooServiceImpl.class,
-			StubFooDao.class,
+			NamedComponent.class,
 			NamedStubDao.class,
+			OtherFooService.class,
 			ServiceInvocationCounter.class,
-			BarComponent.class
-	);
+			StubFooDao.class,
+			BarComponent.class);
 
 
 	@Test
@@ -213,7 +214,8 @@ class ClassPathScanningCandidateComponentProviderTests {
 		Set<BeanDefinition> candidates = provider.findCandidateComponents(TEST_BASE_PACKAGE);
 		assertScannedBeanDefinitions(candidates);
 		// Interfaces/Abstract class are filtered out automatically.
-		assertBeanTypes(candidates, AutowiredQualifierFooService.class, FooServiceImpl.class, ScopedProxyTestBean.class);
+		assertBeanTypes(candidates,
+				AutowiredQualifierFooService.class, FooServiceImpl.class, OtherFooService.class, ScopedProxyTestBean.class);
 	}
 
 	@Test
@@ -237,7 +239,8 @@ class ClassPathScanningCandidateComponentProviderTests {
 		provider.addExcludeFilter(new AnnotationTypeFilter(Repository.class));
 		Set<BeanDefinition> candidates = provider.findCandidateComponents(TEST_BASE_PACKAGE);
 		assertScannedBeanDefinitions(candidates);
-		assertBeanTypes(candidates, NamedComponent.class, ServiceInvocationCounter.class, BarComponent.class);
+		assertBeanTypes(candidates,
+				NamedComponent.class, ServiceInvocationCounter.class, BarComponent.class);
 	}
 
 	@Test
@@ -282,7 +285,8 @@ class ClassPathScanningCandidateComponentProviderTests {
 	private void testExclude(ClassPathScanningCandidateComponentProvider provider) {
 		Set<BeanDefinition> candidates = provider.findCandidateComponents(TEST_BASE_PACKAGE);
 		assertScannedBeanDefinitions(candidates);
-		assertBeanTypes(candidates, FooServiceImpl.class, StubFooDao.class, ServiceInvocationCounter.class,
+		assertBeanTypes(candidates,
+				FooServiceImpl.class, OtherFooService.class, ServiceInvocationCounter.class, StubFooDao.class,
 				BarComponent.class);
 	}
 
@@ -301,7 +305,8 @@ class ClassPathScanningCandidateComponentProviderTests {
 		provider.addExcludeFilter(new AnnotationTypeFilter(Service.class));
 		provider.addExcludeFilter(new AnnotationTypeFilter(Controller.class));
 		Set<BeanDefinition> candidates = provider.findCandidateComponents(TEST_BASE_PACKAGE);
-		assertBeanTypes(candidates, NamedComponent.class, ServiceInvocationCounter.class, BarComponent.class);
+		assertBeanTypes(candidates,
+				NamedComponent.class, ServiceInvocationCounter.class, BarComponent.class);
 	}
 
 	@Test
@@ -334,8 +339,9 @@ class ClassPathScanningCandidateComponentProviderTests {
 		provider.addIncludeFilter(new AnnotationTypeFilter(Component.class));
 		provider.addIncludeFilter(new AssignableTypeFilter(FooServiceImpl.class));
 		Set<BeanDefinition> candidates = provider.findCandidateComponents(TEST_BASE_PACKAGE);
-		assertBeanTypes(candidates, NamedComponent.class, ServiceInvocationCounter.class, FooServiceImpl.class,
-				BarComponent.class, DefaultNamedComponent.class, NamedStubDao.class, StubFooDao.class);
+		assertBeanTypes(candidates,
+				DefaultNamedComponent.class, FooServiceImpl.class, NamedComponent.class, NamedStubDao.class,
+				OtherFooService.class, ServiceInvocationCounter.class, StubFooDao.class, BarComponent.class);
 	}
 
 	@Test
@@ -345,8 +351,9 @@ class ClassPathScanningCandidateComponentProviderTests {
 		provider.addIncludeFilter(new AssignableTypeFilter(FooServiceImpl.class));
 		provider.addExcludeFilter(new AssignableTypeFilter(FooService.class));
 		Set<BeanDefinition> candidates = provider.findCandidateComponents(TEST_BASE_PACKAGE);
-		assertBeanTypes(candidates, NamedComponent.class, ServiceInvocationCounter.class, BarComponent.class,
-				DefaultNamedComponent.class, NamedStubDao.class, StubFooDao.class);
+		assertBeanTypes(candidates,
+				DefaultNamedComponent.class, NamedComponent.class, NamedStubDao.class,
+				ServiceInvocationCounter.class, StubFooDao.class, BarComponent.class);
 	}
 
 	@Test
