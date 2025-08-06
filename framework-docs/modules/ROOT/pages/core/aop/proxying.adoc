@@ -28,6 +28,10 @@ you can do so. However, you should consider the following issues:
   deploying on the module path. Such cases require a JVM bootstrap flag
   `--add-opens=java.base/java.lang=ALL-UNNAMED` which is not available for modules.
 
+
+[[aop-forcing-proxy-types]]
+== Forcing Specific AOP Proxy Types
+
 To force the use of CGLIB proxies, set the value of the `proxy-target-class` attribute
 of the `<aop:config>` element to true, as follows:
 
@@ -59,6 +63,24 @@ To be clear, using `proxy-target-class="true"` on `<tx:annotation-driven/>`,
 `<aop:aspectj-autoproxy/>`, or `<aop:config/>` elements forces the use of CGLIB
 proxies _for all three of them_.
 ====
+
+`@EnableAspectJAutoProxy`, `@EnableTransactionManagement` and related configuration
+annotations offer a corresponding `proxyTargetClass` attribute. These are collapsed
+into a single unified auto-proxy creator too, effectively applying the _strongest_
+proxy settings at runtime. As of 7.0, this applies to individual proxy processors
+as well, for example `@EnableAsync`, consistently participating in unified global
+default settings for all auto-proxying attempts in a given application.
+
+The global default proxy type may differ between setups. While the core framework
+suggests interface-based proxies by default, Spring Boot may - depending on
+configuration properties - enable class-based proxies by default.
+
+As of 7.0, forcing a specific proxy type for individual beans is possible through
+the `@Proxyable` annotation on a given `@Bean` method or `@Component` class, with
+`@Proxyable(INTERFACES)` or `@Proxyable(TARGET_CLASS)` overriding any globally
+configured default. For very specific purposes, you may even specify the proxy
+interface(s) to use through `@Proxyable(interfaces=...)`, limiting the exposure
+to selected interfaces rather than all interfaces that the target bean implements.
 
 
 [[aop-understanding-aop-proxies]]
