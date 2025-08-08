@@ -152,8 +152,7 @@ class ResponseBodyResultHandlerTests {
 				{\
 				"status":400,\
 				"instance":"\\/path",\
-				"title":"Bad Request",\
-				"type":"about:blank"\
+				"title":"Bad Request"\
 				}""");
 	}
 

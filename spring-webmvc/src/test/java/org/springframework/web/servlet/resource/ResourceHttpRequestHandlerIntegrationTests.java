@@ -144,8 +144,7 @@ class ResourceHttpRequestHandlerIntegrationTests {
 				"detail":"No static resource non-existing.",\
 				"instance":"\\/cp\\/non-existing",\
 				"status":404,\
-				"title":"Not Found",\
-				"type":"about:blank"\
+				"title":"Not Found"\
 				}\
 				""");
 	}

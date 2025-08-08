@@ -102,7 +102,8 @@ public class ProblemDetail implements Serializable {
 
 	/**
 	 * Setter for the {@link #getType() problem type}.
-	 * <p>By default, this is not set. According to the spec, when not present, its value is assumed to be "about:blank"
+	 * <p>By default, this is not set. According to the spec, when not present,
+	 * the type is assumed to be "about:blank"
 	 * @param type the problem type
 	 */
 	public void setType(@Nullable URI type) {

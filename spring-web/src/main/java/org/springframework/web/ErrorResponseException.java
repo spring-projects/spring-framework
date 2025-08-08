@@ -111,7 +111,7 @@ public class ErrorResponseException extends NestedRuntimeException implements Er
 	 * Set the {@link ProblemDetail#setType(URI) type} field of the response body.
 	 * @param type the problem type
 	 */
-	public void setType(URI type) {
+	public void setType(@Nullable URI type) {
 		this.body.setType(type);
 	}
 

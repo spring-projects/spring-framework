@@ -244,8 +244,7 @@ class ResponseEntityResultHandlerTests {
 				{\
 				"instance":"\\/path",\
 				"status":400,\
-				"title":"Bad Request",\
-				"type":"about:blank"\
+				"title":"Bad Request"\
 				}""");
 	}
 
@@ -265,8 +264,7 @@ class ResponseEntityResultHandlerTests {
 				{\
 				"instance":"\\/path",\
 				"status":400,\
-				"title":"Bad Request",\
-				"type":"about:blank"\
+				"title":"Bad Request"\
 				}""");
 	}
 

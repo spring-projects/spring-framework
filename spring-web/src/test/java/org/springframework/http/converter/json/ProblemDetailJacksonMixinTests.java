@@ -42,12 +42,11 @@ class ProblemDetailJacksonMixinTests {
 
 
 	@Test
-	void writeStatusAndHeaders() throws Exception {
+	void writeStatusAndHeaders() {
 		ProblemDetail detail = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "Missing header");
 		testWrite(detail,
 				"""
 				{
-					"type": "about:blank",
 					"title": "Bad Request",
 					"status": 400,
 					"detail": "Missing header"
@@ -55,14 +54,13 @@ class ProblemDetailJacksonMixinTests {
 	}
 
 	@Test
-	void writeCustomProperty() throws Exception {
+	void writeCustomProperty() {
 		ProblemDetail detail = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "Missing header");
 		detail.setProperty("host", "abc.org");
 		detail.setProperty("user", null);
 
 		testWrite(detail, """
 				{
-					"type": "about:blank",
 					"title": "Bad Request",
 					"status": 400,
 					"detail": "Missing header",
@@ -72,7 +70,7 @@ class ProblemDetailJacksonMixinTests {
 	}
 
 	@Test
-	void readCustomProperty() throws Exception {
+	void readCustomProperty() {
 		ProblemDetail detail = this.mapper.readValue("""
 				{
 					"type": "about:blank",
@@ -93,7 +91,7 @@ class ProblemDetailJacksonMixinTests {
 	}
 
 	@Test
-	void readCustomPropertyFromXml() throws Exception {
+	void readCustomPropertyFromXml() {
 		ObjectMapper xmlMapper = XmlMapper.builder().addMixIn(ProblemDetail.class, ProblemDetailJacksonMixin.class).build();
 		ProblemDetail detail = xmlMapper.readValue("""
 				<problem xmlns="urn:ietf:rfc:7807">
@@ -111,7 +109,7 @@ class ProblemDetailJacksonMixinTests {
 		assertThat(detail.getProperties()).containsEntry("host", "abc.org");
 	}
 
-	private void testWrite(ProblemDetail problemDetail, String expected) throws Exception {
+	private void testWrite(ProblemDetail problemDetail, String expected) {
 		String output = this.mapper.writeValueAsString(problemDetail);
 		JSONAssert.assertEquals(expected, output, false);
 	}

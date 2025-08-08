@@ -85,7 +85,7 @@ final class DefaultErrorResponseBuilder implements ErrorResponse.Builder {
 	}
 
 	@Override
-	public ErrorResponse.Builder type(URI type) {
+	public ErrorResponse.Builder type(@Nullable URI type) {
 		this.problemDetail.setType(type);
 		return this;
 	}

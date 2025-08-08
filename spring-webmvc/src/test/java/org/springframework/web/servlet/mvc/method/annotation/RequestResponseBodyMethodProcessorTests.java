@@ -395,7 +395,6 @@ class RequestResponseBodyMethodProcessorTests {
 							<status>400</status>
 							<instance>/path</instance>
 							<title>Bad Request</title>
-							<type>about:blank</type>
 						</problem>""")
 					.ignoreWhitespace()
 					.areIdentical();
@@ -403,7 +402,6 @@ class RequestResponseBodyMethodProcessorTests {
 		else {
 			JSONAssert.assertEquals("""
 					{
-						"type":     "about:blank",
 						"title":    "Bad Request",
 						"status":   400,
 						"instance": "/path"

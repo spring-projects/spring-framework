@@ -125,8 +125,7 @@ public class DispatcherHandlerErrorTests {
 				"detail":"No static resource non-existing.",\
 				"instance":"\\/resources\\/non-existing",\
 				"status":404,\
-				"title":"Not Found",\
-				"type":"about:blank"}\
+				"title":"Not Found"}\
 				""");
 	}
 
