@@ -122,11 +122,11 @@ class JdkClientHttpRequest extends AbstractStreamingClientHttpRequest {
 		catch (ExecutionException ex) {
 			Throwable cause = ex.getCause();
 
-			if (cause instanceof CancellationException) {
-				if (timeoutHandler != null && timeoutHandler.isTimeout()) {
-					throw new HttpTimeoutException("Request timed out");
+			if (cause instanceof CancellationException ce) {
+				if (timeoutHandler != null) {
+					timeoutHandler.handleCancellationException(ce);
 				}
-				throw new IOException("Request was cancelled");
+				throw new IOException("Request cancelled", cause);
 			}
 			if (cause instanceof UncheckedIOException uioEx) {
 				throw uioEx.getCause();
@@ -142,10 +142,10 @@ class JdkClientHttpRequest extends AbstractStreamingClientHttpRequest {
 			}
 		}
 		catch (CancellationException ex) {
-			if (timeoutHandler != null && timeoutHandler.isTimeout()) {
-				throw new HttpTimeoutException("Request timed out");
+			if (timeoutHandler != null) {
+				timeoutHandler.handleCancellationException(ex);
 			}
-			throw new IOException("Request was cancelled");
+			throw new IOException("Request cancelled", ex);
 		}
 	}
 
@@ -244,7 +244,8 @@ class JdkClientHttpRequest extends AbstractStreamingClientHttpRequest {
 	private static final class TimeoutHandler {
 
 		private final CompletableFuture<Void> timeoutFuture;
-		private final AtomicBoolean isTimeout = new AtomicBoolean(false);
+
+		private final AtomicBoolean timeout = new AtomicBoolean(false);
 
 		private TimeoutHandler(CompletableFuture<HttpResponse<InputStream>> future, Duration timeout) {
 
@@ -252,8 +253,8 @@ class JdkClientHttpRequest extends AbstractStreamingClientHttpRequest {
 					.completeOnTimeout(null, timeout.toMillis(), TimeUnit.MILLISECONDS);
 
 			this.timeoutFuture.thenRun(() -> {
+				this.timeout.set(true);
 				if (future.cancel(true) || future.isCompletedExceptionally() || !future.isDone()) {
-					isTimeout.set(true);
 					return;
 				}
 				try {
@@ -263,7 +264,6 @@ class JdkClientHttpRequest extends AbstractStreamingClientHttpRequest {
 					// ignore
 				}
 			});
-
 		}
 
 		@Nullable
@@ -282,8 +282,10 @@ class JdkClientHttpRequest extends AbstractStreamingClientHttpRequest {
 			};
 		}
 
-		public boolean isTimeout() {
-			return isTimeout.get();
+		public void handleCancellationException(CancellationException ex) throws HttpTimeoutException {
+			if (this.timeout.get()) {
+				throw new HttpTimeoutException(ex.getMessage());
+			}
 		}
 	}
 
