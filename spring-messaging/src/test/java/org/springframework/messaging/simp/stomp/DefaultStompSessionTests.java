@@ -22,6 +22,7 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -660,6 +661,75 @@ public class DefaultStompSessionTests {
 		assertThat(notReceived.get()).isTrue();
 		verify(future).cancel(true);
 		verifyNoMoreInteractions(future);
+	}
+
+	@Test
+	void unsubscribeWithReceipt() {
+		this.session.afterConnected(this.connection);
+		assertThat(this.session.isConnected()).isTrue();
+		Subscription subscription = this.session.subscribe("/topic/foo", mock());
+
+		Receiptable receipt = subscription.unsubscribe();
+		assertThat(receipt).isNotNull();
+		assertThat(receipt.getReceiptId()).isNull();
+
+		Message<byte[]> message = this.messageCaptor.getValue();
+		StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
+		assertThat(accessor.getCommand()).isEqualTo(StompCommand.UNSUBSCRIBE);
+
+		StompHeaders stompHeaders = StompHeaders.readOnlyStompHeaders(accessor.getNativeHeaders());
+		assertThat(stompHeaders).hasSize(1);
+		assertThat(stompHeaders.getId()).isEqualTo(subscription.getSubscriptionId());
+	}
+
+	@Test
+	void unsubscribeWithCustomHeaderAndReceipt() {
+		this.session.afterConnected(this.connection);
+		this.session.setTaskScheduler(mock());
+		this.session.setAutoReceipt(true);
+
+		StompHeaders subHeaders = new StompHeaders();
+		subHeaders.setDestination("/topic/foo");
+		Subscription subscription = this.session.subscribe(subHeaders, mock());
+
+		StompHeaders custom = new StompHeaders();
+		custom.set("x-cust", "value");
+
+		Receiptable receipt = subscription.unsubscribe(custom);
+		assertThat(receipt).isNotNull();
+		assertThat(receipt.getReceiptId()).isNotNull();
+
+		Message<byte[]> message = this.messageCaptor.getValue();
+		StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
+		assertThat(accessor.getCommand()).isEqualTo(StompCommand.UNSUBSCRIBE);
+
+		StompHeaders stompHeaders = StompHeaders.readOnlyStompHeaders(accessor.getNativeHeaders());
+		assertThat(stompHeaders.getId()).isEqualTo(subscription.getSubscriptionId());
+		assertThat(stompHeaders.get("x-cust")).containsExactly("value");
+		assertThat(stompHeaders.getReceipt()).isEqualTo(receipt.getReceiptId());
+	}
+
+	@Test
+	void receiptReceivedOnUnsubscribe() {
+		this.session.afterConnected(this.connection);
+		TaskScheduler scheduler = mock();
+		this.session.setTaskScheduler(scheduler);
+		this.session.setAutoReceipt(true);
+
+		Subscription subscription = this.session.subscribe("/topic/foo", mock());
+		Receiptable receipt = subscription.unsubscribe();
+
+		StompHeaderAccessor ack = StompHeaderAccessor.create(StompCommand.RECEIPT);
+		ack.setReceiptId(receipt.getReceiptId());
+		ack.setLeaveMutable(true);
+		Message<byte[]> receiptMessage = MessageBuilder.createMessage(new byte[0], ack.getMessageHeaders());
+
+		AtomicBoolean called = new AtomicBoolean(false);
+		receipt.addReceiptTask(() -> called.set(true));
+
+		this.session.handleMessage(receiptMessage);
+
+		assertThat(called.get()).isTrue();
 	}
 
 	@Test
