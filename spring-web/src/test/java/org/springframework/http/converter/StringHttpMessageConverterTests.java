@@ -17,10 +17,13 @@
 package org.springframework.http.converter;
 
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
 import org.junit.jupiter.api.Test;
 
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.web.testfixture.http.MockHttpInputMessage;
@@ -185,5 +188,44 @@ class StringHttpMessageConverterTests {
 		assertThat(outputMessage2.getBodyAsString()).isEqualTo(body);
 	}
 
+	@ParameterizedTest
+	@ValueSource(strings = {"US-ASCII", "ISO_8859_1", "UTF-8"})
+	public void testContentLength(String charsetName) {
+		Charset charset = Charset.forName(charsetName);
+		MediaType mediaType = new MediaType(MediaType.TEXT_PLAIN, charset);
+		assertThat(this.converter.getContentLength("", mediaType)).isEqualTo(0L);
+		assertThat(this.converter.getContentLength("Hello world", mediaType)).isEqualTo(11L);
 
+		String nonAsciiInput = "Résumé";
+		assertThat(this.converter.getContentLength(nonAsciiInput, mediaType)).isEqualTo(
+				nonAsciiInput.getBytes(charset).length);
+
+		nonAsciiInput = "H\u00e9llo W\u00f6rld";
+		assertThat(this.converter.getContentLength(nonAsciiInput, mediaType)).isEqualTo(
+				nonAsciiInput.getBytes(charset).length);
+
+		nonAsciiInput = "\ud83d\udca9";
+		assertThat(this.converter.getContentLength(nonAsciiInput, mediaType)).isEqualTo(
+				nonAsciiInput.getBytes(charset).length);
+	}
+
+	@Test
+	public void testContentLengthNonAsciiSuperset() {
+		Charset charset = StandardCharsets.UTF_16;
+		MediaType mediaType = new MediaType(MediaType.TEXT_PLAIN, charset);
+		assertThat(this.converter.getContentLength("", mediaType)).isEqualTo(0L);
+		assertThat(this.converter.getContentLength("Hello world", mediaType)).isEqualTo(24L);
+
+		String nonAsciiInput = "Résumé";
+		assertThat(this.converter.getContentLength(nonAsciiInput, mediaType)).isEqualTo(
+				nonAsciiInput.getBytes(charset).length);
+
+		nonAsciiInput = "H\u00e9llo W\u00f6rld";
+		assertThat(this.converter.getContentLength(nonAsciiInput, mediaType)).isEqualTo(
+				nonAsciiInput.getBytes(charset).length);
+
+		nonAsciiInput = "\ud83d\udca9";
+		assertThat(this.converter.getContentLength(nonAsciiInput, mediaType)).isEqualTo(
+				nonAsciiInput.getBytes(charset).length);
+	}
 }

@@ -102,6 +102,17 @@ public class StringHttpMessageConverter extends AbstractHttpMessageConverter<Str
 	@Override
 	protected Long getContentLength(String str, @Nullable MediaType contentType) {
 		Charset charset = getContentTypeCharset(contentType);
+		if (charset.equals(StandardCharsets.UTF_8) || charset.equals(StandardCharsets.US_ASCII) || charset.equals(StandardCharsets.ISO_8859_1)) {
+			int utf16Length = str.length();
+			int i = 0;
+
+			while (i < utf16Length && str.charAt(i) < 0x80) {
+				i++;
+			}
+			if (i == utf16Length) {
+				return (long) utf16Length;
+			}
+		}
 		return (long) str.getBytes(charset).length;
 	}
 
