@@ -110,7 +110,6 @@ public class ProblemDetail implements Serializable {
 	 * @param type the problem type
 	 */
 	public void setType(URI type) {
-		Assert.notNull(type, "'type' is required");
 		this.type = type;
 	}
 
@@ -251,7 +250,7 @@ public class ProblemDetail implements Serializable {
 	@Override
 	public boolean equals(@Nullable Object other) {
 		return (this == other || (other instanceof ProblemDetail that &&
-				getType().equals(that.getType()) &&
+				ObjectUtils.nullSafeEquals(getType(), that.getType()) &&
 				ObjectUtils.nullSafeEquals(getTitle(), that.getTitle()) &&
 				this.status == that.status &&
 				ObjectUtils.nullSafeEquals(this.detail, that.detail) &&
