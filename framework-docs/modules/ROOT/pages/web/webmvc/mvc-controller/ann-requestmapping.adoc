@@ -251,10 +251,13 @@ Kotlin::
 ----
 ======
 
-URI path patterns can also have embedded `${...}` placeholders that are resolved on startup
-by using `PropertySourcesPlaceholderConfigurer` against local, system, environment, and
-other property sources. You can use this, for example, to parameterize a base URL based on
-some external configuration.
+URI path patterns can also have:
+
+- Embedded `${...}` placeholders that are resolved on startup via
+`PropertySourcesPlaceholderConfigurer` against local, system, environment, and
+other property sources. This is useful, for example, to parameterize a base URL based on
+external configuration.
+- SpEL expression `#{...}`.
 
 
 [[mvc-ann-requestmapping-pattern-comparison]]
