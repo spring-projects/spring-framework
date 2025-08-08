@@ -81,7 +81,7 @@ class JdkClientHttpRequestTests {
 	}
 
 	private JdkClientHttpRequest createRequest(Duration timeout) {
-		return new JdkClientHttpRequest(client, URI.create("http://abc.com"), HttpMethod.GET, executor, timeout);
+		return new JdkClientHttpRequest(client, URI.create("https://abc.com"), HttpMethod.GET, executor, timeout);
 	}
 
 }
