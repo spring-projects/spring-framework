@@ -22,6 +22,7 @@ import java.util.List;
 
 import org.jspecify.annotations.Nullable;
 
+import org.springframework.http.HttpMethod;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.Assert;
 import org.springframework.util.PathMatcher;
@@ -47,6 +48,10 @@ public class InterceptorRegistration {
 	private @Nullable List<String> includePatterns;
 
 	private @Nullable List<String> excludePatterns;
+
+	private @Nullable List<HttpMethod> includeHttpMethods;
+
+	private @Nullable List<HttpMethod> excludeHttpMethods;
 
 	private @Nullable PathMatcher pathMatcher;
 
@@ -107,6 +112,46 @@ public class InterceptorRegistration {
 	}
 
 	/**
+	 * Add HTTP methods the interceptor should be included for.
+	 * <p>Only requests with these HTTP methods will be intercepted.
+	 * @since 7.0.x
+	 */
+	public InterceptorRegistration includeHttpMethods(HttpMethod... httpMethods) {
+		return includeHttpMethods(Arrays.asList(httpMethods));
+	}
+
+	/**
+	 * List-based variant of {@link #includeHttpMethods(HttpMethod...)}.
+	 * @since 7.0.x
+	 */
+	public InterceptorRegistration includeHttpMethods(List<HttpMethod> httpMethods) {
+		this.includeHttpMethods = (this.includeHttpMethods != null ?
+				this.includeHttpMethods : new ArrayList<>(httpMethods.size()));
+		this.includeHttpMethods.addAll(httpMethods);
+		return this;
+	}
+
+	/**
+	 * Add HTTP methods the interceptor should be excluded from.
+	 * <p>Requests with these HTTP methods will be ignored by the interceptor.
+	 * @since 7.0.x
+	 */
+	public InterceptorRegistration excludeHttpMethods(HttpMethod... httpMethods){
+		return this.excludeHttpMethods(Arrays.asList(httpMethods));
+	}
+
+	/**
+	 * List-based variant of {@link #excludeHttpMethods(HttpMethod...)}.
+	 * @since 7.0.x
+	 */
+	public InterceptorRegistration excludeHttpMethods(List<HttpMethod> httpMethods){
+		this.excludeHttpMethods = (this.excludeHttpMethods != null ?
+				this.excludeHttpMethods : new ArrayList<>(httpMethods.size()));
+		this.excludeHttpMethods.addAll(httpMethods);
+		return this;
+	}
+
+	/**
 	 * Configure the PathMatcher to use to match URL paths with against include
 	 * and exclude patterns.
 	 * <p>This is an advanced property that should be used only when a
@@ -143,19 +188,32 @@ public class InterceptorRegistration {
 	}
 
 	/**
-	 * Build the underlying interceptor. If URL patterns are provided, the returned
+	 * Build the underlying interceptor. If URL patterns or HTTP methods are provided, the returned
 	 * type is {@link MappedInterceptor}; otherwise {@link HandlerInterceptor}.
 	 */
 	@SuppressWarnings("removal")
 	protected Object getInterceptor() {
 
-		if (this.includePatterns == null && this.excludePatterns == null) {
+		if (this.includePatterns == null && this.excludePatterns == null && this.includeHttpMethods == null && this.excludeHttpMethods == null) {
 			return this.interceptor;
 		}
 
+		HttpMethod[] includeMethodsArray = (this.includeHttpMethods != null) ?
+				this.includeHttpMethods.toArray(new HttpMethod[0]) : null;
+
+		HttpMethod[] excludeMethodsArray = (this.excludeHttpMethods != null) ?
+				this.excludeHttpMethods.toArray(new HttpMethod[0]) : null;
+
+		String[] includePattersArray = StringUtils.toStringArray(this.includePatterns);
+
+		String[] excludePattersArray = StringUtils.toStringArray(this.excludePatterns);
+
+
 		MappedInterceptor mappedInterceptor = new MappedInterceptor(
-				StringUtils.toStringArray(this.includePatterns),
-				StringUtils.toStringArray(this.excludePatterns),
+				includePattersArray,
+				excludePattersArray,
+				includeMethodsArray,
+				excludeMethodsArray,
 				this.interceptor);
 
 		if (this.pathMatcher != null) {
