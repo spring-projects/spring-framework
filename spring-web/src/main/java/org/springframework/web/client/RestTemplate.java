@@ -392,7 +392,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 	}
 
 	@Override
-	public <T> @Nullable T postForObject(String url, @Nullable Object request, Class<T> responseType,
+	public <T> @Nullable T postForObject(String url, @Nullable Object request, Type responseType,
 			@Nullable Object... uriVariables) throws RestClientException {
 
 		RequestCallback requestCallback = httpEntityCallback(request, responseType);
@@ -402,7 +402,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 	}
 
 	@Override
-	public <T> @Nullable T postForObject(String url, @Nullable Object request, Class<T> responseType,
+	public <T> @Nullable T postForObject(String url, @Nullable Object request, Type responseType,
 			Map<String, ? extends @Nullable Object> uriVariables) throws RestClientException {
 
 		RequestCallback requestCallback = httpEntityCallback(request, responseType);
@@ -412,7 +412,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 	}
 
 	@Override
-	public <T> @Nullable T postForObject(URI url, @Nullable Object request, Class<T> responseType)
+	public <T> @Nullable T postForObject(URI url, @Nullable Object request, Type responseType)
 			throws RestClientException {
 
 		RequestCallback requestCallback = httpEntityCallback(request, responseType);
@@ -423,7 +423,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 
 	@Override
 	public <T> ResponseEntity<T> postForEntity(String url, @Nullable Object request,
-			Class<T> responseType, @Nullable Object... uriVariables) throws RestClientException {
+			Type responseType, @Nullable Object... uriVariables) throws RestClientException {
 
 		RequestCallback requestCallback = httpEntityCallback(request, responseType);
 		ResponseExtractor<ResponseEntity<T>> responseExtractor = responseEntityExtractor(responseType);
@@ -432,7 +432,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 
 	@Override
 	public <T> ResponseEntity<T> postForEntity(String url, @Nullable Object request,
-			Class<T> responseType, Map<String, ? extends @Nullable Object> uriVariables) throws RestClientException {
+			Type responseType, Map<String, ? extends @Nullable Object> uriVariables) throws RestClientException {
 
 		RequestCallback requestCallback = httpEntityCallback(request, responseType);
 		ResponseExtractor<ResponseEntity<T>> responseExtractor = responseEntityExtractor(responseType);
@@ -440,7 +440,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 	}
 
 	@Override
-	public <T> ResponseEntity<T> postForEntity(URI url, @Nullable Object request, Class<T> responseType)
+	public <T> ResponseEntity<T> postForEntity(URI url, @Nullable Object request, Type responseType)
 			throws RestClientException {
 
 		RequestCallback requestCallback = httpEntityCallback(request, responseType);
