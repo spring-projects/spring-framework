@@ -477,7 +477,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 	// PATCH
 
 	@Override
-	public <T> @Nullable T patchForObject(String url, @Nullable Object request, Class<T> responseType,
+	public <T> @Nullable T patchForObject(String url, @Nullable Object request, Type responseType,
 			@Nullable Object... uriVariables) throws RestClientException {
 
 		RequestCallback requestCallback = httpEntityCallback(request, responseType);
@@ -487,7 +487,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 	}
 
 	@Override
-	public <T> @Nullable T patchForObject(String url, @Nullable Object request, Class<T> responseType,
+	public <T> @Nullable T patchForObject(String url, @Nullable Object request, Type responseType,
 			Map<String, ? extends @Nullable Object> uriVariables) throws RestClientException {
 
 		RequestCallback requestCallback = httpEntityCallback(request, responseType);
@@ -497,7 +497,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 	}
 
 	@Override
-	public <T> @Nullable T patchForObject(URI url, @Nullable Object request, Class<T> responseType)
+	public <T> @Nullable T patchForObject(URI url, @Nullable Object request, Type responseType)
 			throws RestClientException {
 
 		RequestCallback requestCallback = httpEntityCallback(request, responseType);
