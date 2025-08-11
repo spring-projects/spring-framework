@@ -83,8 +83,9 @@ public class InterceptorRegistration {
 	 * @since 5.0.3
 	 */
 	public InterceptorRegistration addPathPatterns(List<String> patterns) {
-		this.includePatterns = (this.includePatterns != null ?
-				this.includePatterns : new ArrayList<>(patterns.size()));
+		if (this.includePatterns == null) {
+			this.includePatterns = new ArrayList<>(patterns.size());
+		}
 		this.includePatterns.addAll(patterns);
 		return this;
 	}
@@ -105,16 +106,16 @@ public class InterceptorRegistration {
 	 * @since 5.0.3
 	 */
 	public InterceptorRegistration excludePathPatterns(List<String> patterns) {
-		this.excludePatterns = (this.excludePatterns != null ?
-				this.excludePatterns : new ArrayList<>(patterns.size()));
+		if (this.excludePatterns == null) {
+			this.excludePatterns = new ArrayList<>(patterns.size());
+		}
 		this.excludePatterns.addAll(patterns);
 		return this;
 	}
 
 	/**
-	 * Add HTTP methods the interceptor should be included for.
-	 * <p>Only requests with these HTTP methods will be intercepted.
-	 * @since 7.0.x
+	 * Add HTTP methods for requests the interceptor should be included in.
+	 * @since 7.0
 	 */
 	public InterceptorRegistration includeHttpMethods(HttpMethod... httpMethods) {
 		return includeHttpMethods(Arrays.asList(httpMethods));
@@ -122,31 +123,33 @@ public class InterceptorRegistration {
 
 	/**
 	 * List-based variant of {@link #includeHttpMethods(HttpMethod...)}.
-	 * @since 7.0.x
+	 * @since 7.0
 	 */
 	public InterceptorRegistration includeHttpMethods(List<HttpMethod> httpMethods) {
-		this.includeHttpMethods = (this.includeHttpMethods != null ?
-				this.includeHttpMethods : new ArrayList<>(httpMethods.size()));
+		if (this.includeHttpMethods == null) {
+			this.includeHttpMethods = new ArrayList<>(httpMethods.size());
+		}
 		this.includeHttpMethods.addAll(httpMethods);
 		return this;
 	}
 
 	/**
-	 * Add HTTP methods the interceptor should be excluded from.
+	 * Add HTTP methods for requests the interceptor should be excluded from.
 	 * <p>Requests with these HTTP methods will be ignored by the interceptor.
-	 * @since 7.0.x
+	 * @since 7.0
 	 */
-	public InterceptorRegistration excludeHttpMethods(HttpMethod... httpMethods){
-		return this.excludeHttpMethods(Arrays.asList(httpMethods));
+	public InterceptorRegistration excludeHttpMethods(HttpMethod... httpMethods) {
+		return excludeHttpMethods(Arrays.asList(httpMethods));
 	}
 
 	/**
 	 * List-based variant of {@link #excludeHttpMethods(HttpMethod...)}.
-	 * @since 7.0.x
+	 * @since 7.0
 	 */
-	public InterceptorRegistration excludeHttpMethods(List<HttpMethod> httpMethods){
-		this.excludeHttpMethods = (this.excludeHttpMethods != null ?
-				this.excludeHttpMethods : new ArrayList<>(httpMethods.size()));
+	public InterceptorRegistration excludeHttpMethods(List<HttpMethod> httpMethods) {
+		if (this.excludeHttpMethods == null) {
+			this.excludeHttpMethods = new ArrayList<>(httpMethods.size());
+		}
 		this.excludeHttpMethods.addAll(httpMethods);
 		return this;
 	}
@@ -175,7 +178,7 @@ public class InterceptorRegistration {
 	 * Specify an order position to be used. Default is 0.
 	 * @since 4.3.23
 	 */
-	public InterceptorRegistration order(int order){
+	public InterceptorRegistration order(int order) {
 		this.order = order;
 		return this;
 	}
@@ -194,27 +197,18 @@ public class InterceptorRegistration {
 	@SuppressWarnings("removal")
 	protected Object getInterceptor() {
 
-		if (this.includePatterns == null && this.excludePatterns == null && this.includeHttpMethods == null && this.excludeHttpMethods == null) {
+		if (this.includePatterns == null && this.excludePatterns == null &&
+				this.includeHttpMethods == null && this.excludeHttpMethods == null) {
+
 			return this.interceptor;
 		}
 
-		HttpMethod[] includeMethodsArray = (this.includeHttpMethods != null) ?
-				this.includeHttpMethods.toArray(new HttpMethod[0]) : null;
-
-		HttpMethod[] excludeMethodsArray = (this.excludeHttpMethods != null) ?
-				this.excludeHttpMethods.toArray(new HttpMethod[0]) : null;
-
-		String[] includePattersArray = StringUtils.toStringArray(this.includePatterns);
-
-		String[] excludePattersArray = StringUtils.toStringArray(this.excludePatterns);
-
-
 		MappedInterceptor mappedInterceptor = new MappedInterceptor(
-				includePattersArray,
-				excludePattersArray,
-				includeMethodsArray,
-				excludeMethodsArray,
-				this.interceptor);
+				StringUtils.toStringArray(this.includePatterns),
+				StringUtils.toStringArray(this.excludePatterns),
+				(this.includeHttpMethods != null) ? this.includeHttpMethods.toArray(new HttpMethod[0]) : null,
+				(this.excludeHttpMethods != null) ? this.excludeHttpMethods.toArray(new HttpMethod[0]) : null,
+				this.interceptor, null);
 
 		if (this.pathMatcher != null) {
 			mappedInterceptor.setPathMatcher(this.pathMatcher);

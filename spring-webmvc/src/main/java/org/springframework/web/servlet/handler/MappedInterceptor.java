@@ -68,9 +68,9 @@ public final class MappedInterceptor implements HandlerInterceptor {
 
 	private final PatternAdapter @Nullable [] excludePatterns;
 
-	private final MethodAdapter @Nullable [] includeHttpMethods;
+	private final HttpMethod @Nullable [] includeHttpMethods;
 
-	private final MethodAdapter @Nullable [] excludeHttpMethods;
+	private final HttpMethod @Nullable [] excludeHttpMethods;
 
 	private PathMatcher pathMatcher = defaultPathMatcher;
 
@@ -78,28 +78,40 @@ public final class MappedInterceptor implements HandlerInterceptor {
 
 
 	/**
-	 * Create an instance with the given include and exclude patterns along with
-	 * the target interceptor for the mappings.
-	 * @param includePatterns patterns to which requests must match, or null to
-	 * match all paths
-	 * @param excludePatterns patterns to which requests must not match
-	 * @param includeHttpMethods http methods to which request must match, or null to match all paths
-	 * @param excludeHttpMethods http methods to which request must not match
+	 * Create an instance with the given include and exclude patterns and HTTP methods.
+	 * @param includePatterns patterns to match, or null to match all paths
+	 * @param excludePatterns patterns for which requests must not match
+	 * @param includeHttpMethods the HTTP methods to match, or null for all methods
+	 * @param excludeHttpMethods the ßHTTP methods to which requests must not match
 	 * @param interceptor the target interceptor
 	 * @param parser a parser to use to pre-parse patterns into {@link PathPattern};
 	 * when not provided, {@link PathPatternParser#defaultInstance} is used.
-	 * @since 5.3
+	 * @since 7.0
 	 */
-	public MappedInterceptor(String @Nullable [] includePatterns, String @Nullable [] excludePatterns, HttpMethod @Nullable [] includeHttpMethods, HttpMethod @Nullable [] excludeHttpMethods,
+	public MappedInterceptor(String @Nullable [] includePatterns, String @Nullable [] excludePatterns,
+			HttpMethod @Nullable [] includeHttpMethods, HttpMethod @Nullable [] excludeHttpMethods,
 			HandlerInterceptor interceptor, @Nullable PathPatternParser parser) {
 
 		this.includePatterns = PatternAdapter.initPatterns(includePatterns, parser);
 		this.excludePatterns = PatternAdapter.initPatterns(excludePatterns, parser);
-		this.includeHttpMethods = MethodAdapter.initHttpMethods(includeHttpMethods);
-		this.excludeHttpMethods = MethodAdapter.initHttpMethods(excludeHttpMethods);
+		this.includeHttpMethods = includeHttpMethods;
+		this.excludeHttpMethods = excludeHttpMethods;
 		this.interceptor = interceptor;
 	}
 
+	/**
+	 * Variation of
+	 * {@link #MappedInterceptor(String[], String[], HttpMethod[], HttpMethod[], HandlerInterceptor, PathPatternParser)}
+	 * without HTTP methods.
+	 * @since 5.3
+	 * @deprecated in favor of the constructor variant with HTTP methods
+	 */
+	@Deprecated(since = "7.0", forRemoval = true)
+	public MappedInterceptor(String @Nullable [] includePatterns, String @Nullable [] excludePatterns,
+			HandlerInterceptor interceptor, @Nullable PathPatternParser parser) {
+
+		this(includePatterns, excludePatterns, null, null, interceptor, parser);
+	}
 
 	/**
 	 * Variant of
@@ -107,16 +119,7 @@ public final class MappedInterceptor implements HandlerInterceptor {
 	 * with include patterns only.
 	 */
 	public MappedInterceptor(String @Nullable [] includePatterns, HandlerInterceptor interceptor) {
-		this(includePatterns, null, null, null, interceptor);
-	}
-
-	/**
-	 * Variant of
-	 * {@link #MappedInterceptor(String[], String[], HttpMethod[], HttpMethod[], HandlerInterceptor, PathPatternParser)}
-	 * with include methods only.
-	 */
-	public MappedInterceptor(HttpMethod @Nullable [] includeHttpMethods, HandlerInterceptor interceptor) {
-		this(null, null, includeHttpMethods, null, interceptor);
+		this(includePatterns, null, null, null, interceptor, null);
 	}
 
 	/**
@@ -124,10 +127,10 @@ public final class MappedInterceptor implements HandlerInterceptor {
 	 * {@link #MappedInterceptor(String[], String[], HttpMethod[], HttpMethod[], HandlerInterceptor, PathPatternParser)}
 	 * without a provided parser.
 	 */
-	public MappedInterceptor(String @Nullable [] includePatterns, String @Nullable [] excludePatterns, HttpMethod @Nullable [] includeHttpMethods, HttpMethod @Nullable [] excludeHttpMethods,
+	public MappedInterceptor(String @Nullable [] includePatterns, String @Nullable [] excludePatterns,
 			HandlerInterceptor interceptor) {
 
-		this(includePatterns, excludePatterns,includeHttpMethods,excludeHttpMethods, interceptor, null);
+		this(includePatterns, excludePatterns, null, null, interceptor, null);
 	}
 
 	/**
@@ -136,26 +139,18 @@ public final class MappedInterceptor implements HandlerInterceptor {
 	 * with a {@link WebRequestInterceptor} as the target.
 	 */
 	public MappedInterceptor(String @Nullable [] includePatterns, WebRequestInterceptor interceptor) {
-		this(includePatterns, null,null,null, interceptor);
+		this(includePatterns, null, interceptor);
 	}
+
 	/**
 	 * Variant of
 	 * {@link #MappedInterceptor(String[], String[], HttpMethod[], HttpMethod[], HandlerInterceptor, PathPatternParser)}
 	 * with a {@link WebRequestInterceptor} as the target.
 	 */
-	public MappedInterceptor(HttpMethod @Nullable [] includeHttpMethods, WebRequestInterceptor interceptor) {
-		this(null, null,includeHttpMethods ,null, interceptor);
-	}
-
-	/**
-	 * Variant of
-	 * {@link #MappedInterceptor(String[], String[], HttpMethod[], HttpMethod[] , HandlerInterceptor, PathPatternParser)}
-	 * with a {@link WebRequestInterceptor} as the target.
-	 */
-	public MappedInterceptor(String @Nullable [] includePatterns, String @Nullable [] excludePatterns, HttpMethod @Nullable [] includeHttpMethods, HttpMethod @Nullable [] excludeHttpMethods,
+	public MappedInterceptor(String @Nullable [] includePatterns, String @Nullable [] excludePatterns,
 			WebRequestInterceptor interceptor) {
 
-		this(includePatterns, excludePatterns,includeHttpMethods,excludeHttpMethods, new WebRequestHandlerInterceptorAdapter(interceptor));
+		this(includePatterns, excludePatterns, null, null, new WebRequestHandlerInterceptorAdapter(interceptor), null);
 	}
 
 
@@ -228,7 +223,7 @@ public final class MappedInterceptor implements HandlerInterceptor {
 	 */
 	public boolean matches(HttpServletRequest request) {
 		Object path = ServletRequestPathUtils.getCachedPath(request);
-		HttpMethod method = HttpMethod.valueOf(request.getMethod());
+		HttpMethod httpMethod = HttpMethod.valueOf(request.getMethod());
 		if (this.pathMatcher != defaultPathMatcher) {
 			path = path.toString();
 		}
@@ -241,33 +236,16 @@ public final class MappedInterceptor implements HandlerInterceptor {
 			}
 		}
 		if (!ObjectUtils.isEmpty(this.excludeHttpMethods)) {
-			for (MethodAdapter adapter : this.excludeHttpMethods) {
-				if (adapter.match(method)){
+			for (HttpMethod excluded : this.excludeHttpMethods) {
+				if (excluded == httpMethod) {
 					return false;
 				}
 			}
 		}
-		if (ObjectUtils.isEmpty(this.includePatterns) && ObjectUtils.isEmpty(this.includeHttpMethods)) {
-			return true;
-		}
-		if (!ObjectUtils.isEmpty(this.includePatterns) && ObjectUtils.isEmpty(this.includeHttpMethods)) {
+		if (!ObjectUtils.isEmpty(this.includePatterns)) {
+			boolean match = false;
 			for (PatternAdapter adapter : this.includePatterns) {
 				if (adapter.match(path, isPathContainer, this.pathMatcher)) {
-					return true;
-				}
-			}
-		}
-		if (!ObjectUtils.isEmpty(this.includeHttpMethods) && ObjectUtils.isEmpty(this.includePatterns)) {
-			for (MethodAdapter adapter : this.includeHttpMethods) {
-				if (adapter.match(method)) {
-					return true;
-				}
-			}
-		}
-		if (!ObjectUtils.isEmpty(this.includePatterns) && !ObjectUtils.isEmpty(this.includeHttpMethods)) {
-			boolean match = false;
-			for (MethodAdapter methodAdapter : this.includeHttpMethods) {
-				if (methodAdapter.match(method)) {
 					match = true;
 					break;
 				}
@@ -275,13 +253,20 @@ public final class MappedInterceptor implements HandlerInterceptor {
 			if (!match) {
 				return false;
 			}
-			for (PatternAdapter pathAdapter : this.includePatterns) {
-				if (pathAdapter.match(path, isPathContainer, pathMatcher)) {
-					return true;
+		}
+		if (!ObjectUtils.isEmpty(this.includeHttpMethods)) {
+			boolean match = false;
+			for (HttpMethod included : this.includeHttpMethods) {
+				if (included == httpMethod) {
+					match = true;
+					break;
 				}
 			}
+			if (!match) {
+				return false;
+			}
 		}
-		return false;
+		return true;
 	}
 
 
@@ -363,42 +348,6 @@ public final class MappedInterceptor implements HandlerInterceptor {
 					.map(pattern -> new PatternAdapter(pattern, parser))
 					.toArray(PatternAdapter[]::new);
 		}
-	}
-
-	/**
-	 * Adapts {@link HttpMethod} instances for internal matching purposes.
-	 *
-	 * <p>Encapsulates an {@link HttpMethod} and provides matching functionality.
-	 * Also provides a utility method to initialize arrays of {@code MethodAdapter}
-	 * instances from arrays of {@link HttpMethod}.</p>
-	 *
-	 * @since 7.0.x
-	 */
-	private static class MethodAdapter {
-
-		private final @Nullable HttpMethod httpMethod;
-
-		public MethodAdapter(@Nullable HttpMethod httpMethod) {
-			this.httpMethod = httpMethod;
-		}
-
-		public boolean match(HttpMethod method) {
-			return this.httpMethod == method;
-		}
-
-		public @Nullable HttpMethod  getHttpMethod() {
-			return this.httpMethod;
-		}
-
-		private static MethodAdapter @Nullable [] initHttpMethods(HttpMethod @Nullable [] methods) {
-			if (ObjectUtils.isEmpty(methods)) {
-				return null;
-			}
-			return Arrays.stream(methods)
-					.map(MethodAdapter::new)
-					.toArray(MethodAdapter[]::new);
-		}
-
 	}
 
 }
