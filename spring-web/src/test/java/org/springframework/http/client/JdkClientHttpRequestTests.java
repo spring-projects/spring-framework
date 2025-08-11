@@ -28,15 +28,14 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.AutoClose;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.Mockito.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -47,21 +46,12 @@ class JdkClientHttpRequestTests {
 
 	private final HttpClient client = mock(HttpClient.class);
 
-	private ExecutorService executor;
-
-
-	@BeforeEach
-	void setup() {
-		executor = Executors.newSingleThreadExecutor();
-	}
-
-	@AfterEach
-	void tearDown() {
-		executor.shutdownNow();
-	}
+	@AutoClose("shutdownNow")
+	private final ExecutorService executor = Executors.newSingleThreadExecutor();
 
 
 	@Test
+	@SuppressWarnings("unchecked")
 	void futureCancelledAfterTimeout() {
 		CompletableFuture<HttpResponse<InputStream>> future = new CompletableFuture<>();
 		when(client.sendAsync(any(HttpRequest.class), any(HttpResponse.BodyHandler.class))).thenReturn(future);
@@ -71,6 +61,7 @@ class JdkClientHttpRequestTests {
 	}
 
 	@Test
+	@SuppressWarnings("unchecked")
 	void futureCancelled() {
 		CompletableFuture<HttpResponse<InputStream>> future = new CompletableFuture<>();
 		future.cancel(true);

@@ -395,7 +395,7 @@ class RequestMappingHandlerAdapterTests {
 	}
 
 
-	private static class SseController {
+	static class SseController {
 
 		public ResponseEntity<?> handle(@RequestParam String q) throws IOException {
 			if (q.equals("sse")) {
