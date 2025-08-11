@@ -120,8 +120,7 @@ public class HttpServiceRegistrarTests {
 	@Test
 	void noRegistrations() {
 		doRegister(registry -> {});
-		assertRegistryBeanDef();
-		assertBeanDefinitionCount(1);
+		assertBeanDefinitionCount(0);
 	}
 
 

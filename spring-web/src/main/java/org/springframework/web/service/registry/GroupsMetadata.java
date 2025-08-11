@@ -97,6 +97,13 @@ final class GroupsMetadata {
 		return this.groupMap.values().stream();
 	}
 
+	/**
+	 * Return if there are any {@link Registration registrations}.
+	 */
+	boolean hasRegistrations() {
+		return !this.groupMap.isEmpty();
+	}
+
 
 	/**
 	 * Registration metadata for an {@link HttpServiceGroup}.
