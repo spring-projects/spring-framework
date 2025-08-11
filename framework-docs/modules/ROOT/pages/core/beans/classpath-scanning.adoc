@@ -1,24 +1,26 @@
 [[beans-classpath-scanning]]
 = Classpath Scanning and Managed Components
 
-Most examples in this chapter use XML to specify the configuration metadata that produces
-each `BeanDefinition` within the Spring container. The previous section
-(xref:core/beans/annotation-config.adoc[Annotation-based Container Configuration]) demonstrates how to provide a lot of the configuration
-metadata through source-level annotations. Even in those examples, however, the "base"
-bean definitions are explicitly defined in the XML file, while the annotations drive only
-the dependency injection. This section describes an option for implicitly detecting the
-candidate components by scanning the classpath. Candidate components are classes that
-match against a filter criteria and have a corresponding bean definition registered with
-the container. This removes the need to use XML to perform bean registration. Instead, you
-can use annotations (for example, `@Component`), AspectJ type expressions, or your own
+Most examples in this chapter use XML to specify the configuration metadata that
+produces each `BeanDefinition` within the Spring container. The previous section
+(xref:core/beans/annotation-config.adoc[Annotation-based Container Configuration])
+demonstrates how to provide a lot of the configuration metadata through source-level
+annotations. Even in those examples, however, the "base" bean definitions are explicitly
+defined in the XML file, while the annotations drive only the dependency injection.
+
+This section describes an option for implicitly detecting the candidate components by
+scanning the classpath. Candidate components are classes that match against a filter
+criteria and have a corresponding bean definition registered with the container.
+This removes the need to use XML to perform bean registration. Instead, you can use
+annotations (for example, `@Component`), AspectJ type expressions, or your own
 custom filter criteria to select which classes have bean definitions registered with
 the container.
 
 [NOTE]
 ====
 You can define beans using Java rather than using XML files. Take a look at the
-`@Configuration`, `@Bean`, `@Import`, and `@DependsOn` annotations for examples of how to
-use these features.
+`@Configuration`, `@Bean`, `@Import`, and `@DependsOn` annotations for examples
+of how to use these features.
 ====
 
 
@@ -828,10 +830,10 @@ definitions, there is no notion of bean definition inheritance, and inheritance
 hierarchies at the class level are irrelevant for metadata purposes.
 
 For details on web-specific scopes such as "`request`" or "`session`" in a Spring context,
-see xref:core/beans/factory-scopes.adoc#beans-factory-scopes-other[Request, Session, Application, and WebSocket Scopes]. As with the pre-built annotations for those scopes,
-you may also compose your own scoping annotations by using Spring's meta-annotation
-approach: for example, a custom annotation meta-annotated with `@Scope("prototype")`,
-possibly also declaring a custom scoped-proxy mode.
+see xref:core/beans/factory-scopes.adoc#beans-factory-scopes-other[Request, Session, Application, and WebSocket Scopes].
+As with the pre-built annotations for those scopes, you may also compose your own scoping
+annotations by using Spring's meta-annotation approach: for example, a custom annotation
+meta-annotated with `@Scope("prototype")`, possibly also declaring a custom scoped-proxy mode.
 
 NOTE: To provide a custom strategy for scope resolution rather than relying on the
 annotation-based approach, you can implement the
@@ -873,7 +875,8 @@ Kotlin::
 ----
 
 When using certain non-singleton scopes, it may be necessary to generate proxies for the
-scoped objects. The reasoning is described in xref:core/beans/factory-scopes.adoc#beans-factory-scopes-other-injection[Scoped Beans as Dependencies].
+scoped objects. The reasoning is described in
+xref:core/beans/factory-scopes.adoc#beans-factory-scopes-other-injection[Scoped Beans as Dependencies].
 For this purpose, a scoped-proxy attribute is available on the component-scan
 element. The three possible values are: `no`, `interfaces`, and `targetClass`. For example,
 the following configuration results in standard JDK dynamic proxies:
