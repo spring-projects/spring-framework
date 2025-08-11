@@ -246,7 +246,7 @@ class JdbcClientIntegrationTests {
 		}
 
 		private static void assertSingleResult(List<User> users) {
-			assertThat(users).containsExactly(new User(2, "John", "John"));
+			assertThat(users).containsExactly(new User(1, "John", "John"));
 		}
 
 
