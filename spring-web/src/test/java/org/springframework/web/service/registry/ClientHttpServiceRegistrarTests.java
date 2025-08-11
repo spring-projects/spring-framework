@@ -22,6 +22,9 @@ import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.core.env.StandardEnvironment;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.type.AnnotationMetadata;
@@ -63,6 +66,13 @@ public class ClientHttpServiceRegistrarTests {
 				TestGroup.ofListing("echo", EchoClientA.class, EchoClientB.class));
 	}
 
+	@Test
+	void registerWhenNoClientsDoesNotCreateBeans() {
+		try (AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(NothingFoundConfiguration.class)) {
+			assertThat(context.getBeanNamesForType(HttpServiceProxyRegistry.class)).isEmpty();
+		}
+	}
+
 	private void assertGroups(TestGroup... expectedGroups) {
 		Map<String, TestGroup> groupMap = this.groupRegistry.groupMap();
 		assertThat(groupMap.size()).isEqualTo(expectedGroups.length);
@@ -72,6 +82,21 @@ public class ClientHttpServiceRegistrarTests {
 			assertThat(actual.clientType()).isEqualTo(expected.clientType());
 			assertThat(actual.packageNames()).isEqualTo(expected.packageNames());
 			assertThat(actual.packageClasses()).isEqualTo(expected.packageClasses());
+		}
+	}
+
+	@Configuration(proxyBeanMethods = false)
+	@Import(NothingFoundRegistrar.class)
+	static class NothingFoundConfiguration {
+
+	}
+
+	static class NothingFoundRegistrar extends AbstractClientHttpServiceRegistrar {
+
+		@Override
+		protected void registerHttpServices(GroupRegistry registry,
+				AnnotationMetadata importingClassMetadata) {
+			findAndRegisterHttpServiceClients(registry, List.of("com.example.missing.package"));
 		}
 	}
 
