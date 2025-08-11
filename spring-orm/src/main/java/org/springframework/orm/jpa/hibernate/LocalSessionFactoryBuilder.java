@@ -80,7 +80,7 @@ import org.springframework.util.ClassUtils;
  * Typically combined with {@link HibernateTransactionManager} for declarative
  * transactions against the {@code SessionFactory} and its JDBC {@code DataSource}.
  *
- * <p>Compatible with Hibernate ORM 7.0, as of Spring Framework 7.0.
+ * <p>Compatible with Hibernate ORM 7.1, as of Spring Framework 7.0.
  * This Hibernate-specific factory builder can also be a convenient way to set up
  * a JPA {@code EntityManagerFactory} since the Hibernate {@code SessionFactory}
  * natively exposes the JPA {@code EntityManagerFactory} interface as well now.
@@ -261,7 +261,7 @@ public class LocalSessionFactoryBuilder extends Configuration {
 	 * @see AvailableSettings#MULTI_TENANT_IDENTIFIER_RESOLVER
 	 */
 	@Override
-	public LocalSessionFactoryBuilder setCurrentTenantIdentifierResolver(CurrentTenantIdentifierResolver<Object> currentTenantIdentifierResolver) {
+	public LocalSessionFactoryBuilder setCurrentTenantIdentifierResolver(CurrentTenantIdentifierResolver<?> currentTenantIdentifierResolver) {
 		getProperties().put(AvailableSettings.MULTI_TENANT_IDENTIFIER_RESOLVER, currentTenantIdentifierResolver);
 		super.setCurrentTenantIdentifierResolver(currentTenantIdentifierResolver);
 		return this;

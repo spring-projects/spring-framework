@@ -62,7 +62,7 @@ import org.springframework.core.type.filter.TypeFilter;
  * way to set up a shared Hibernate SessionFactory in a Spring application context; the
  * SessionFactory can then be passed to data access objects via dependency injection.
  *
- * <p>Compatible with Hibernate ORM 7.0, as of Spring Framework 7.0.
+ * <p>Compatible with Hibernate ORM 7.1, as of Spring Framework 7.0.
  * This Hibernate-specific {@code LocalSessionFactoryBean} can be an immediate alternative
  * to {@link org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean} for
  * common JPA purposes: The Hibernate {@code SessionFactory} will natively expose the JPA
@@ -109,7 +109,7 @@ public class LocalSessionFactoryBean extends HibernateExceptionTranslator
 
 	private @Nullable MultiTenantConnectionProvider<?> multiTenantConnectionProvider;
 
-	private @Nullable CurrentTenantIdentifierResolver<Object> currentTenantIdentifierResolver;
+	private @Nullable CurrentTenantIdentifierResolver<?> currentTenantIdentifierResolver;
 
 	private @Nullable Properties hibernateProperties;
 
@@ -295,7 +295,7 @@ public class LocalSessionFactoryBean extends HibernateExceptionTranslator
 	 * Set a {@link CurrentTenantIdentifierResolver} to be passed on to the SessionFactory.
 	 * @see LocalSessionFactoryBuilder#setCurrentTenantIdentifierResolver
 	 */
-	public void setCurrentTenantIdentifierResolver(CurrentTenantIdentifierResolver<Object> currentTenantIdentifierResolver) {
+	public void setCurrentTenantIdentifierResolver(CurrentTenantIdentifierResolver<?> currentTenantIdentifierResolver) {
 		this.currentTenantIdentifierResolver = currentTenantIdentifierResolver;
 	}
 

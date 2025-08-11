@@ -10,11 +10,11 @@ cover the other ORM technologies and show brief examples.
 
 [NOTE]
 ====
-As of Spring Framework 7.0, Spring requires Hibernate ORM 7.0 for Spring's
-`HibernateJpaVendorAdapter` as well as for a native Hibernate `SessionFactory` setup.
+As of Spring Framework 7.0, Spring requires Hibernate ORM 7.x for Spring's
+`HibernateJpaVendorAdapter`.
 
 The `org.springframework.orm.jpa.hibernate` package supersedes the former `orm.hibernate5`:
-now for use with Hibernate ORM 7.0, tightly integrated with `HibernateJpaVendorAdapter`
+now for use with Hibernate ORM 7.1+, tightly integrated with `HibernateJpaVendorAdapter`
 as well as supporting Hibernate's native `SessionFactory.getCurrentSession()` style.
 ====
 

@@ -41,7 +41,7 @@ import org.jspecify.annotations.Nullable;
 
 /**
  * {@link org.springframework.orm.jpa.JpaVendorAdapter} implementation for Hibernate.
- * Compatible with Hibernate ORM 7.0.
+ * Compatible with Hibernate ORM 7.x.
  *
  * <p>Exposes Hibernate's persistence provider and Hibernate's Session as extended
  * EntityManager interface, and adapts {@link AbstractJpaVendorAdapter}'s common

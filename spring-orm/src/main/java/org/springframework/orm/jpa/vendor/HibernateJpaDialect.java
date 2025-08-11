@@ -42,7 +42,7 @@ import org.springframework.transaction.support.ResourceTransactionDefinition;
 
 /**
  * {@link org.springframework.orm.jpa.JpaDialect} implementation for Hibernate.
- * Compatible with Hibernate ORM 7.0.
+ * Compatible with Hibernate ORM 7.x.
  *
  * @author Juergen Hoeller
  * @author Costin Leau
