@@ -74,7 +74,7 @@ class JdbcClientIntegrationTests {
 
 	@Test
 	void updateWithGeneratedKeys() {
-		int expectedId = 2;
+		int expectedId = 1;
 		String firstName = "Jane";
 		String lastName = "Smith";
 
@@ -92,7 +92,7 @@ class JdbcClientIntegrationTests {
 
 	@Test
 	void updateWithGeneratedKeysAndKeyColumnNames() {
-		int expectedId = 2;
+		int expectedId = 1;
 		String firstName = "Jane";
 		String lastName = "Smith";
 
@@ -110,7 +110,7 @@ class JdbcClientIntegrationTests {
 
 	@Test
 	void updateWithGeneratedKeysUsingNamedParameters() {
-		int expectedId = 2;
+		int expectedId = 1;
 		String firstName = "Jane";
 		String lastName = "Smith";
 
@@ -129,7 +129,7 @@ class JdbcClientIntegrationTests {
 
 	@Test
 	void updateWithGeneratedKeysAndKeyColumnNamesUsingNamedParameters() {
-		int expectedId = 2;
+		int expectedId = 1;
 		String firstName = "Jane";
 		String lastName = "Smith";
 
@@ -217,7 +217,7 @@ class JdbcClientIntegrationTests {
 
 
 		private static void assertResults(List<User> users) {
-			assertThat(users).containsExactly(new User(2, "John", "John"), new User(3, "John", "Smith"));
+			assertThat(users).containsExactly(new User(1, "John", "John"), new User(2, "John", "Smith"));
 		}
 
 		record Name(String name) {}

@@ -258,18 +258,29 @@ public abstract class ScriptUtils {
 				for (String statement : statements) {
 					stmtNumber++;
 					try {
-						stmt.execute(statement);
-						int rowsAffected = stmt.getUpdateCount();
+						boolean hasResultSet = stmt.execute(statement);
+						int updateCount = -1;
 						if (logger.isDebugEnabled()) {
-							logger.debug(rowsAffected + " returned as update count for SQL: " + statement);
-							SQLWarning warningToLog = stmt.getWarnings();
-							while (warningToLog != null) {
-								logger.debug("SQLWarning ignored: SQL state '" + warningToLog.getSQLState() +
-										"', error code '" + warningToLog.getErrorCode() +
-										"', message [" + warningToLog.getMessage() + "]");
-								warningToLog = warningToLog.getNextWarning();
-							}
+							logSqlWarnings(stmt);
 						}
+						do {
+							if (hasResultSet) {
+								// We invoke getResultSet() to ensure the JDBC driver processes
+								// it, but we intentionally ignore the returned ResultSet since
+								// we cannot do anything meaningful with it here.
+								stmt.getResultSet();
+								if (logger.isDebugEnabled()) {
+									logger.debug("ResultSet returned for SQL: " + statement);
+								}
+							}
+							else {
+								updateCount = stmt.getUpdateCount();
+								if (updateCount >= 0 && logger.isDebugEnabled()) {
+									logger.debug(updateCount + " returned as update count for SQL: " + statement);
+								}
+							}
+							hasResultSet = stmt.getMoreResults();
+						} while (hasResultSet || updateCount != -1);
 					}
 					catch (SQLException ex) {
 						boolean dropStatement = StringUtils.startsWithIgnoreCase(statement.trim(), "drop");
@@ -304,6 +315,16 @@ public abstract class ScriptUtils {
 			}
 			throw new UncategorizedScriptException(
 				"Failed to execute database script from resource [" + resource + "]", ex);
+		}
+	}
+
+	private static void logSqlWarnings(Statement stmt) throws SQLException {
+		SQLWarning warningToLog = stmt.getWarnings();
+		while (warningToLog != null) {
+			logger.debug("SQLWarning ignored: SQL state '" + warningToLog.getSQLState() +
+					"', error code '" + warningToLog.getErrorCode() +
+					"', message [" + warningToLog.getMessage() + "]");
+			warningToLog = warningToLog.getNextWarning();
 		}
 	}
 
