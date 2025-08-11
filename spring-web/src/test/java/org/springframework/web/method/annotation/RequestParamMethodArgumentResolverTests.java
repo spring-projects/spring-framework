@@ -159,10 +159,13 @@ class RequestParamMethodArgumentResolverTests {
 		param = this.testMethod.annotPresent(RequestPart.class).arg(MultipartFile.class);
 		assertThat(resolver.supportsParameter(param)).isFalse();
 
-		param = this.testMethod.annotPresent(RequestParam.class).arg(Integer.class);
+		param = this.testMethod.annot(requestParam().name("${systemProperty}")).arg(Integer.class);
 		assertThat(resolver.supportsParameter(param)).isTrue();
 
 		param = this.testMethod.annotPresent(RequestParam.class).arg(int.class);
+		assertThat(resolver.supportsParameter(param)).isTrue();
+
+		param = this.testMethod.annot(requestParam().name("#{'na'.concat('me')}")).arg(Integer.class);
 		assertThat(resolver.supportsParameter(param)).isTrue();
 	}
 
@@ -715,6 +718,21 @@ class RequestParamMethodArgumentResolverTests {
 		System.clearProperty("systemProperty");
 	}
 
+	@Test
+	void resolveNameThroughSpEL() throws Exception{
+		ConfigurableWebBindingInitializer initializer = new ConfigurableWebBindingInitializer();
+		initializer.setConversionService(new DefaultConversionService());
+		WebDataBinderFactory binderFactory = new DefaultDataBinderFactory(initializer);
+
+		Integer expected = 100;
+		request.addParameter("name", expected.toString());
+
+		MethodParameter param = this.testMethod.annot(requestParam().name("#{'na'.concat('me')}")).arg(Integer.class);
+		Object result = resolver.resolveArgument(param, null, webRequest, binderFactory);
+		assertThat(result).isEqualTo(100);
+
+	}
+
 	@SuppressWarnings({"unused", "OptionalUsedAsFieldOrParameterType"})
 	public void handle(
 			@RequestParam(name = "name", defaultValue = "bar") String param1,
@@ -740,7 +758,9 @@ class RequestParamMethodArgumentResolverTests {
 			@RequestParam("mfile") Optional<MultipartFile> multipartFileOptional,
 			@RequestParam(defaultValue = "false") Boolean booleanParam,
 			@RequestParam("${systemProperty}") Integer placeholderParam,
-			@RequestParam(name = "${systemProperty}", required = false) int primitivePlaceholderParam) {
+			@RequestParam(name = "${systemProperty}", required = false) int primitivePlaceholderParam,
+			@RequestParam("#{'na'.concat('me')}") Integer spelParam
+			) {
 	}
 
 }
