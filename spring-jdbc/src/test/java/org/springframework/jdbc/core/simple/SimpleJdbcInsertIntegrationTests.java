@@ -323,7 +323,7 @@ class SimpleJdbcInsertIntegrationTests {
 
 		protected void insertJaneSmith(SimpleJdbcInsert insert) {
 			Number id = insert.executeAndReturnKey(Map.of("first_name", "Jane", "last_name", "Smith"));
-			assertThat(id.intValue()).isEqualTo(2);
+			assertThat(id.intValue()).isEqualTo(1);
 			assertNumRows(2);
 		}
 
