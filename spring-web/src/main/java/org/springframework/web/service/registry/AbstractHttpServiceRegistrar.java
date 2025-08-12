@@ -147,22 +147,23 @@ public abstract class AbstractHttpServiceRegistrar implements
 
 		registerHttpServices(new DefaultGroupRegistry(), metadata);
 
-		if (this.groupsMetadata.hasRegistrations()) {
-			RootBeanDefinition proxyRegistryBeanDef = createOrGetRegistry(beanRegistry);
-
-			mergeGroups(proxyRegistryBeanDef);
-
-			this.groupsMetadata.forEachRegistration((groupName, types) -> types.forEach(type -> {
-				RootBeanDefinition proxyBeanDef = new RootBeanDefinition();
-				proxyBeanDef.setBeanClassName(type);
-				proxyBeanDef.setAttribute(HTTP_SERVICE_GROUP_NAME_ATTRIBUTE, groupName);
-				proxyBeanDef.setInstanceSupplier(() -> getProxyInstance(groupName, type));
-				String beanName = (groupName + "#" + type);
-				if (!beanRegistry.containsBeanDefinition(beanName)) {
-					beanRegistry.registerBeanDefinition(beanName, proxyBeanDef);
-				}
-			}));
+		if (this.groupsMetadata.isEmpty()) {
+			return;
 		}
+
+		RootBeanDefinition proxyRegistryBeanDef = createOrGetRegistry(beanRegistry);
+		mergeGroups(proxyRegistryBeanDef);
+
+		this.groupsMetadata.forEachRegistration((groupName, types) -> types.forEach(type -> {
+			RootBeanDefinition proxyBeanDef = new RootBeanDefinition();
+			proxyBeanDef.setBeanClassName(type);
+			proxyBeanDef.setAttribute(HTTP_SERVICE_GROUP_NAME_ATTRIBUTE, groupName);
+			proxyBeanDef.setInstanceSupplier(() -> getProxyInstance(groupName, type));
+			String beanName = (groupName + "#" + type);
+			if (!beanRegistry.containsBeanDefinition(beanName)) {
+				beanRegistry.registerBeanDefinition(beanName, proxyBeanDef);
+			}
+		}));
 	}
 
 	/**

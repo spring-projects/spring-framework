@@ -68,8 +68,8 @@ public class ClientHttpServiceRegistrarTests {
 
 	@Test
 	void registerWhenNoClientsDoesNotCreateBeans() {
-		try (AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(NothingFoundConfiguration.class)) {
-			assertThat(context.getBeanNamesForType(HttpServiceProxyRegistry.class)).isEmpty();
+		try (AnnotationConfigApplicationContext cxt = new AnnotationConfigApplicationContext(NoOpImportConfig.class)) {
+			assertThat(cxt.getBeanNamesForType(HttpServiceProxyRegistry.class)).isEmpty();
 		}
 	}
 
@@ -85,18 +85,17 @@ public class ClientHttpServiceRegistrarTests {
 		}
 	}
 
-	@Configuration(proxyBeanMethods = false)
-	@Import(NothingFoundRegistrar.class)
-	static class NothingFoundConfiguration {
 
+	@Configuration(proxyBeanMethods = false)
+	@Import(NoOpRegistrar.class)
+	static class NoOpImportConfig {
 	}
 
-	static class NothingFoundRegistrar extends AbstractClientHttpServiceRegistrar {
+
+	static class NoOpRegistrar extends AbstractClientHttpServiceRegistrar {
 
 		@Override
-		protected void registerHttpServices(GroupRegistry registry,
-				AnnotationMetadata importingClassMetadata) {
-			findAndRegisterHttpServiceClients(registry, List.of("com.example.missing.package"));
+		protected void registerHttpServices(GroupRegistry registry, AnnotationMetadata metadata) {
 		}
 	}
 

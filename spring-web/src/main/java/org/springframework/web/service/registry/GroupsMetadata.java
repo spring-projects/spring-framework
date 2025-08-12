@@ -98,10 +98,10 @@ final class GroupsMetadata {
 	}
 
 	/**
-	 * Return if there are any {@link Registration registrations}.
+	 * Return {@code true} if there are no {@link Registration registrations}.
 	 */
-	boolean hasRegistrations() {
-		return !this.groupMap.isEmpty();
+	boolean isEmpty() {
+		return this.groupMap.isEmpty();
 	}
 
 
