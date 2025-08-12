@@ -242,7 +242,7 @@ class ResponseEntityResultHandlerTests {
 		assertThat(exchange.getResponse().getHeaders().getContentType()).isEqualTo(MediaType.APPLICATION_PROBLEM_JSON);
 		assertResponseBody(exchange,"""
 				{\
-				"instance":"\\/path",\
+				"instance":"/path",\
 				"status":400,\
 				"title":"Bad Request"\
 				}""");
@@ -262,7 +262,7 @@ class ResponseEntityResultHandlerTests {
 		assertThat(exchange.getResponse().getHeaders().getContentType()).isEqualTo(MediaType.APPLICATION_PROBLEM_JSON);
 		assertResponseBody(exchange,"""
 				{\
-				"instance":"\\/path",\
+				"instance":"/path",\
 				"status":400,\
 				"title":"Bad Request"\
 				}""");

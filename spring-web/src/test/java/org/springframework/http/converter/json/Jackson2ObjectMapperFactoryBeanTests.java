@@ -39,6 +39,7 @@ import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.SerializerProvider;
@@ -222,7 +223,7 @@ public class Jackson2ObjectMapperFactoryBeanTests {
 
 	@Test
 	void propertyNamingStrategy() {
-		PropertyNamingStrategy strategy = new PropertyNamingStrategy.SnakeCaseStrategy();
+		PropertyNamingStrategy strategy = new PropertyNamingStrategies.SnakeCaseStrategy();
 		this.factory.setPropertyNamingStrategy(strategy);
 		this.factory.afterPropertiesSet();
 

@@ -123,7 +123,7 @@ class RequestMappingExceptionHandlingIntegrationTests extends AbstractRequestMap
 				.satisfies(ex -> {
 					assertThat(ex.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
 					assertThat(ex.getResponseBodyAsString()).isEqualTo("{" +
-							"\"instance\":\"\\/no-such-handler\"," +
+							"\"instance\":\"/no-such-handler\"," +
 							"\"status\":404," +
 							"\"title\":\"Not Found\"}");
 				});
@@ -139,7 +139,7 @@ class RequestMappingExceptionHandlingIntegrationTests extends AbstractRequestMap
 					assertThat(ex.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
 					assertThat(ex.getResponseBodyAsString()).isEqualTo("{" +
 							"\"detail\":\"Required query parameter 'q' is not present.\"," +
-							"\"instance\":\"\\/missing-request-parameter\"," +
+							"\"instance\":\"/missing-request-parameter\"," +
 							"\"status\":400," +
 							"\"title\":\"Bad Request\"}");
 				});

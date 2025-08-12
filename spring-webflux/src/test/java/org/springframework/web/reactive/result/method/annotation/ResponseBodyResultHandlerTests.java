@@ -151,7 +151,7 @@ class ResponseBodyResultHandlerTests {
 		assertResponseBody(exchange,"""
 				{\
 				"status":400,\
-				"instance":"\\/path",\
+				"instance":"/path",\
 				"title":"Bad Request"\
 				}""");
 	}
