@@ -24,7 +24,6 @@ import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.SerializationFeature;
 import tools.jackson.databind.json.JsonMapper;
 
@@ -109,8 +108,8 @@ class SseServerResponseTests {
 			}
 		});
 
-		ObjectMapper objectMapper = JsonMapper.builder().enable(SerializationFeature.INDENT_OUTPUT).build();
-		JacksonJsonHttpMessageConverter converter = new JacksonJsonHttpMessageConverter(objectMapper);
+		JsonMapper jsonMapper = JsonMapper.builder().enable(SerializationFeature.INDENT_OUTPUT).build();
+		JacksonJsonHttpMessageConverter converter = new JacksonJsonHttpMessageConverter(jsonMapper);
 		ServerResponse.Context context = () -> List.of(converter);
 
 		ModelAndView mav = response.writeTo(this.mockRequest, this.mockResponse, context);

@@ -527,7 +527,7 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs, CodecConfigure
 				}
 			}
 			if (jacksonPresent) {
-				if (codec instanceof AbstractJacksonDecoder abstractJacksonDecoder) {
+				if (codec instanceof AbstractJacksonDecoder<?> abstractJacksonDecoder) {
 					abstractJacksonDecoder.setMaxInMemorySize(size);
 				}
 			}

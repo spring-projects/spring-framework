@@ -50,12 +50,13 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.MimeType;
 
 /**
- * Base class providing support methods for Jackson 2.x encoding and decoding.
+ * Base class providing support methods for Jackson 3.x encoding and decoding.
  *
  * @author Sebastien Deleuze
  * @since 7.0
+ * @param <T> the type of {@link ObjectMapper}
  */
-public abstract class JacksonCodecSupport {
+public abstract class JacksonCodecSupport<T extends ObjectMapper> {
 
 	/**
 	 * The key for the hint to specify a "JSON View" for encoding or decoding
@@ -83,9 +84,9 @@ public abstract class JacksonCodecSupport {
 
 	protected final Log logger = HttpLogging.forLogName(getClass());
 
-	private final ObjectMapper defaultObjectMapper;
+	private final T defaultMapper;
 
-	protected @Nullable Map<Class<?>, Map<MimeType, ObjectMapper>> objectMapperRegistrations;
+	protected @Nullable Map<Class<?>, Map<MimeType, T>> mapperRegistrations;
 
 	private final List<MimeType> mimeTypes;
 
@@ -96,10 +97,10 @@ public abstract class JacksonCodecSupport {
 	 * customized with the {@link tools.jackson.databind.JacksonModule}s found
 	 * by {@link MapperBuilder#findModules(ClassLoader)} and {@link MimeType}s.
 	 */
-	protected JacksonCodecSupport(MapperBuilder<?, ?> builder, MimeType... mimeTypes) {
+	protected JacksonCodecSupport(MapperBuilder<T, ?> builder, MimeType... mimeTypes) {
 		Assert.notNull(builder, "MapperBuilder must not be null");
 		Assert.notEmpty(mimeTypes, "MimeTypes must not be empty");
-		this.defaultObjectMapper = builder.addModules(initModules()).build();
+		this.defaultMapper = builder.addModules(initModules()).build();
 		this.mimeTypes = List.of(mimeTypes);
 	}
 
@@ -108,10 +109,10 @@ public abstract class JacksonCodecSupport {
 	 * customized with the {@link tools.jackson.databind.JacksonModule}s found
 	 * by {@link MapperBuilder#findModules(ClassLoader)} and {@link MimeType}s.
 	 */
-	protected JacksonCodecSupport(ObjectMapper objectMapper, MimeType... mimeTypes) {
-		Assert.notNull(objectMapper, "ObjectMapper must not be null");
+	protected JacksonCodecSupport(T mapper, MimeType... mimeTypes) {
+		Assert.notNull(mapper, "ObjectMapper must not be null");
 		Assert.notEmpty(mimeTypes, "MimeTypes must not be empty");
-		this.defaultObjectMapper = objectMapper;
+		this.defaultMapper = mapper;
 		this.mimeTypes = List.of(mimeTypes);
 	}
 
@@ -124,19 +125,19 @@ public abstract class JacksonCodecSupport {
 	}
 
 	/**
-	 * Return the {@link ObjectMapper configured} default ObjectMapper.
+	 * Return the {@link ObjectMapper configured} default mapper.
 	 */
-	public ObjectMapper getObjectMapper() {
-		return this.defaultObjectMapper;
+	public T getMapper() {
+		return this.defaultMapper;
 	}
 
 	/**
 	 * Configure the {@link ObjectMapper} instances to use for the given
 	 * {@link Class}. This is useful when you want to deviate from the
-	 * {@link #getObjectMapper() default} ObjectMapper or have the
+	 * {@link #getMapper() default} ObjectMapper or have the
 	 * {@code ObjectMapper} vary by {@code MediaType}.
 	 * <p><strong>Note:</strong> Use of this method effectively turns off use of
-	 * the default {@link #getObjectMapper() ObjectMapper} and supported
+	 * the default {@link #getMapper() ObjectMapper} and supported
 	 * {@link #getMimeTypes() MimeTypes} for the given class. Therefore it is
 	 * important for the mappings configured here to
 	 * {@link MediaType#includes(MediaType) include} every MediaType that must
@@ -145,12 +146,12 @@ public abstract class JacksonCodecSupport {
 	 * @param registrar a consumer to populate or otherwise update the
 	 * MediaType-to-ObjectMapper associations for the given Class
 	 */
-	public void registerObjectMappersForType(Class<?> clazz, Consumer<Map<MimeType, ObjectMapper>> registrar) {
-		if (this.objectMapperRegistrations == null) {
-			this.objectMapperRegistrations = new LinkedHashMap<>();
+	public void registerMappersForType(Class<?> clazz, Consumer<Map<MimeType, T>> registrar) {
+		if (this.mapperRegistrations == null) {
+			this.mapperRegistrations = new LinkedHashMap<>();
 		}
-		Map<MimeType, ObjectMapper> registrations =
-				this.objectMapperRegistrations.computeIfAbsent(clazz, c -> new LinkedHashMap<>());
+		Map<MimeType, T> registrations =
+				this.mapperRegistrations.computeIfAbsent(clazz, c -> new LinkedHashMap<>());
 		registrar.accept(registrations);
 	}
 
@@ -160,8 +161,8 @@ public abstract class JacksonCodecSupport {
 	 * @return a map with registered MediaType-to-ObjectMapper registrations,
 	 * or empty if in case of no registrations for the given class.
 	 */
-	public @Nullable Map<MimeType, ObjectMapper> getObjectMappersForType(Class<?> clazz) {
-		for (Map.Entry<Class<?>, Map<MimeType, ObjectMapper>> entry : getObjectMapperRegistrations().entrySet()) {
+	public @Nullable Map<MimeType, T> getMappersForType(Class<?> clazz) {
+		for (Map.Entry<Class<?>, Map<MimeType, T>> entry : getMapperRegistrations().entrySet()) {
 			if (entry.getKey().isAssignableFrom(clazz)) {
 				return entry.getValue();
 			}
@@ -169,8 +170,8 @@ public abstract class JacksonCodecSupport {
 		return Collections.emptyMap();
 	}
 
-	protected Map<Class<?>, Map<MimeType, ObjectMapper>> getObjectMapperRegistrations() {
-		return (this.objectMapperRegistrations != null ? this.objectMapperRegistrations : Collections.emptyMap());
+	protected Map<Class<?>, Map<MimeType, T>> getMapperRegistrations() {
+		return (this.mapperRegistrations != null ? this.mapperRegistrations : Collections.emptyMap());
 	}
 
 	/**
@@ -183,7 +184,7 @@ public abstract class JacksonCodecSupport {
 	protected List<MimeType> getMimeTypes(ResolvableType elementType) {
 		Class<?> elementClass = elementType.toClass();
 		List<MimeType> result = null;
-		for (Map.Entry<Class<?>, Map<MimeType, ObjectMapper>> entry : getObjectMapperRegistrations().entrySet()) {
+		for (Map.Entry<Class<?>, Map<MimeType, T>> entry : getMapperRegistrations().entrySet()) {
 			if (entry.getKey().isAssignableFrom(elementClass)) {
 				result = (result != null ? result : new ArrayList<>(entry.getValue().size()));
 				result.addAll(entry.getValue().keySet());
@@ -216,7 +217,7 @@ public abstract class JacksonCodecSupport {
 	}
 
 	protected JavaType getJavaType(Type type, @Nullable Class<?> contextClass) {
-		return this.defaultObjectMapper.constructType(GenericTypeResolver.resolveType(type, contextClass));
+		return this.defaultMapper.constructType(GenericTypeResolver.resolveType(type, contextClass));
 	}
 
 	protected Map<String, Object> getHints(ResolvableType resolvableType) {
@@ -250,18 +251,18 @@ public abstract class JacksonCodecSupport {
 	/**
 	 * Select an ObjectMapper to use, either the main ObjectMapper or another
 	 * if the handling for the given Class has been customized through
-	 * {@link #registerObjectMappersForType(Class, Consumer)}.
+	 * {@link #registerMappersForType(Class, Consumer)}.
 	 */
-	protected @Nullable ObjectMapper selectObjectMapper(ResolvableType targetType, @Nullable MimeType targetMimeType) {
-		if (targetMimeType == null || CollectionUtils.isEmpty(this.objectMapperRegistrations)) {
-			return this.defaultObjectMapper;
+	protected @Nullable T selectMapper(ResolvableType targetType, @Nullable MimeType targetMimeType) {
+		if (targetMimeType == null || CollectionUtils.isEmpty(this.mapperRegistrations)) {
+			return this.defaultMapper;
 		}
 		Class<?> targetClass = targetType.toClass();
-		for (Map.Entry<Class<?>, Map<MimeType, ObjectMapper>> typeEntry : getObjectMapperRegistrations().entrySet()) {
+		for (Map.Entry<Class<?>, Map<MimeType, T>> typeEntry : getMapperRegistrations().entrySet()) {
 			if (typeEntry.getKey().isAssignableFrom(targetClass)) {
-				for (Map.Entry<MimeType, ObjectMapper> objectMapperEntry : typeEntry.getValue().entrySet()) {
-					if (objectMapperEntry.getKey().includes(targetMimeType)) {
-						return objectMapperEntry.getValue();
+				for (Map.Entry<MimeType, T> mapperEntry : typeEntry.getValue().entrySet()) {
+					if (mapperEntry.getKey().includes(targetMimeType)) {
+						return mapperEntry.getValue();
 					}
 				}
 				// No matching registrations
@@ -269,7 +270,7 @@ public abstract class JacksonCodecSupport {
 			}
 		}
 		// No registrations
-		return this.defaultObjectMapper;
+		return this.defaultMapper;
 	}
 
 }

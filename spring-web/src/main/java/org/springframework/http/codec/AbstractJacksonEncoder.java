@@ -64,8 +64,9 @@ import org.springframework.util.MimeType;
  *
  * @author Sebastien Deleuze
  * @since 7.0
+ * @param <T> the type of {@link ObjectMapper}
  */
-public abstract class AbstractJacksonEncoder extends JacksonCodecSupport implements HttpMessageEncoder<Object> {
+public abstract class AbstractJacksonEncoder<T extends ObjectMapper> extends JacksonCodecSupport<T> implements HttpMessageEncoder<Object> {
 
 	private static final byte[] NEWLINE_SEPARATOR = {'\n'};
 
@@ -90,14 +91,14 @@ public abstract class AbstractJacksonEncoder extends JacksonCodecSupport impleme
 	 * customized with the {@link tools.jackson.databind.JacksonModule}s found
 	 * by {@link MapperBuilder#findModules(ClassLoader)} and {@link MimeType}s.
 	 */
-	protected AbstractJacksonEncoder(MapperBuilder<?, ?> builder, MimeType... mimeTypes) {
+	protected AbstractJacksonEncoder(MapperBuilder<T, ?> builder, MimeType... mimeTypes) {
 		super(builder, mimeTypes);
 	}
 
 	/**
 	 * Construct a new instance with the provided {@link ObjectMapper} and {@link MimeType}s.
 	 */
-	protected AbstractJacksonEncoder(ObjectMapper mapper, MimeType... mimeTypes) {
+	protected AbstractJacksonEncoder(T mapper, MimeType... mimeTypes) {
 		super(mapper, mimeTypes);
 	}
 
@@ -122,7 +123,7 @@ public abstract class AbstractJacksonEncoder extends JacksonCodecSupport impleme
 				return false;
 			}
 		}
-		if (this.objectMapperRegistrations != null && selectObjectMapper(elementType, mimeType) == null) {
+		if (this.mapperRegistrations != null && selectMapper(elementType, mimeType) == null) {
 			return false;
 		}
 		Class<?> clazz = elementType.resolve();
@@ -155,7 +156,7 @@ public abstract class AbstractJacksonEncoder extends JacksonCodecSupport impleme
 			}
 
 			try {
-				ObjectMapper mapper = selectObjectMapper(elementType, mimeType);
+				T mapper = selectMapper(elementType, mimeType);
 				if (mapper == null) {
 					throw new IllegalStateException("No ObjectMapper for " + elementType);
 				}
@@ -225,7 +226,7 @@ public abstract class AbstractJacksonEncoder extends JacksonCodecSupport impleme
 			filters = (FilterProvider) hints.get(FILTER_PROVIDER_HINT);
 		}
 
-		ObjectMapper mapper = selectObjectMapper(valueType, mimeType);
+		T mapper = selectMapper(valueType, mimeType);
 		if (mapper == null) {
 			throw new IllegalStateException("No ObjectMapper for " + valueType);
 		}
@@ -319,7 +320,7 @@ public abstract class AbstractJacksonEncoder extends JacksonCodecSupport impleme
 	}
 
 	private ObjectWriter createObjectWriter(
-			ObjectMapper mapper, ResolvableType valueType, @Nullable MimeType mimeType,
+			T mapper, ResolvableType valueType, @Nullable MimeType mimeType,
 			@Nullable Class<?> jsonView, @Nullable Map<String, Object> hints) {
 
 		JavaType javaType = getJavaType(valueType.getType(), null);

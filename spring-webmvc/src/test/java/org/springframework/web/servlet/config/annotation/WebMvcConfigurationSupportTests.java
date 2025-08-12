@@ -181,7 +181,7 @@ class WebMvcConfigurationSupportTests {
 				.filter(AbstractJacksonHttpMessageConverter.class::isInstance)
 				.map(AbstractJacksonHttpMessageConverter.class::cast)
 				.forEach(converter -> {
-					ObjectMapper mapper = converter.getObjectMapper();
+					ObjectMapper mapper = converter.getMapper();
 					assertThat(mapper.deserializationConfig().isEnabled(MapperFeature.DEFAULT_VIEW_INCLUSION)).isFalse();
 					assertThat(mapper.deserializationConfig().isEnabled(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)).isFalse();
 					assertThat(mapper.serializationConfig().isEnabled(MapperFeature.DEFAULT_VIEW_INCLUSION)).isFalse();

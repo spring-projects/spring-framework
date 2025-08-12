@@ -38,7 +38,7 @@ import org.springframework.http.converter.AbstractJacksonHttpMessageConverter;
  * @author Sebastien Deleuze
  * @since 7.0
  */
-public class JacksonSmileHttpMessageConverter extends AbstractJacksonHttpMessageConverter {
+public class JacksonSmileHttpMessageConverter extends AbstractJacksonHttpMessageConverter<SmileMapper> {
 
 	private static final MediaType DEFAULT_SMILE_MIME_TYPES = new MediaType("application", "x-jackson-smile");
 

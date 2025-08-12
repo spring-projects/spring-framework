@@ -38,7 +38,7 @@ import org.springframework.http.converter.AbstractJacksonHttpMessageConverter;
  * @author Sebastien Deleuze
  * @since 7.0
  */
-public class JacksonCborHttpMessageConverter extends AbstractJacksonHttpMessageConverter {
+public class JacksonCborHttpMessageConverter extends AbstractJacksonHttpMessageConverter<CBORMapper> {
 
 	/**
 	 * Construct a new instance with a {@link CBORMapper} customized with the
