@@ -33,7 +33,6 @@ import tools.jackson.core.JacksonException;
 import tools.jackson.core.JsonGenerator;
 import tools.jackson.databind.BeanDescription;
 import tools.jackson.databind.JavaType;
-import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.SerializationContext;
 import tools.jackson.databind.SerializationFeature;
 import tools.jackson.databind.ValueSerializer;
@@ -181,7 +180,7 @@ class JacksonJsonViewTests {
 	@Test
 	void renderWithCustomSerializerLocatedByFactory() throws Exception {
 		SerializerFactory factory = new DelegatingSerializerFactory(null);
-		ObjectMapper mapper = JsonMapper.builder().serializerFactory(factory).build();
+		JsonMapper mapper = JsonMapper.builder().serializerFactory(factory).build();
 		view = new JacksonJsonView(mapper);
 
 		Object bean = new TestBeanSimple();

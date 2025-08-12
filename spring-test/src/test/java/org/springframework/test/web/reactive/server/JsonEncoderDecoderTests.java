@@ -19,7 +19,7 @@ package org.springframework.test.web.reactive.server;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
-import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 import org.springframework.http.codec.DecoderHttpMessageReader;
 import org.springframework.http.codec.EncoderHttpMessageWriter;
@@ -39,13 +39,13 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 class JsonEncoderDecoderTests {
 
-	private static final ObjectMapper objectMapper = new ObjectMapper();
+	private static final JsonMapper jsonMapper = new JsonMapper();
 
 	private static final HttpMessageWriter<?> jacksonMessageWriter = new EncoderHttpMessageWriter<>(
-			new JacksonJsonEncoder(objectMapper));
+			new JacksonJsonEncoder(jsonMapper));
 
 	private static final HttpMessageReader<?> jacksonMessageReader = new DecoderHttpMessageReader<>(
-			new JacksonJsonDecoder(objectMapper));
+			new JacksonJsonDecoder(jsonMapper));
 
 	@Test
 	void fromWithEmptyWriters() {

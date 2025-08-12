@@ -27,7 +27,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import tools.jackson.databind.JavaType;
-import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 import org.springframework.core.ParameterizedTypeReference;
 
@@ -385,14 +385,14 @@ class JsonPathExpectationsHelperTests {
 	 */
 	private static class JacksonMappingProvider implements MappingProvider {
 
-		private final ObjectMapper objectMapper;
+		private final JsonMapper jsonMapper;
 
 		public JacksonMappingProvider() {
-			this(new ObjectMapper());
+			this(new JsonMapper());
 		}
 
-		public JacksonMappingProvider(ObjectMapper objectMapper) {
-			this.objectMapper = objectMapper;
+		public JacksonMappingProvider(JsonMapper jsonMapper) {
+			this.jsonMapper = jsonMapper;
 		}
 
 
@@ -402,7 +402,7 @@ class JsonPathExpectationsHelperTests {
 				return null;
 			}
 			try {
-				return objectMapper.convertValue(source, targetType);
+				return jsonMapper.convertValue(source, targetType);
 			}
 			catch (Exception ex) {
 				throw new MappingException(ex);
@@ -416,10 +416,10 @@ class JsonPathExpectationsHelperTests {
 			if (source == null){
 				return null;
 			}
-			JavaType type = objectMapper.getTypeFactory().constructType(targetType.getType());
+			JavaType type = jsonMapper.getTypeFactory().constructType(targetType.getType());
 
 			try {
-				return (T) objectMapper.convertValue(source, type);
+				return (T) jsonMapper.convertValue(source, type);
 			}
 			catch (Exception ex) {
 				throw new MappingException(ex);

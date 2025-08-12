@@ -28,7 +28,6 @@ import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
-import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.SerializationFeature;
 import tools.jackson.databind.json.JsonMapper;
 
@@ -109,7 +108,7 @@ class JacksonJsonEncoderTests extends AbstractEncoderTests<JacksonJsonEncoder> {
 	@Test  // SPR-15866
 	public void canEncodeWithCustomMimeType() {
 		MimeType textJavascript = new MimeType("text", "javascript", StandardCharsets.UTF_8);
-		JacksonJsonEncoder encoder = new JacksonJsonEncoder(new ObjectMapper(), textJavascript);
+		JacksonJsonEncoder encoder = new JacksonJsonEncoder(new JsonMapper(), textJavascript);
 
 		assertThat(encoder.getEncodableMimeTypes()).isEqualTo(Collections.singletonList(textJavascript));
 	}
@@ -117,7 +116,7 @@ class JacksonJsonEncoderTests extends AbstractEncoderTests<JacksonJsonEncoder> {
 	@Test
 	void encodableMimeTypesIsImmutable() {
 		MimeType textJavascript = new MimeType("text", "javascript", StandardCharsets.UTF_8);
-		JacksonJsonEncoder encoder = new JacksonJsonEncoder(new ObjectMapper(), textJavascript);
+		JacksonJsonEncoder encoder = new JacksonJsonEncoder(new JsonMapper(), textJavascript);
 
 		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() ->
 				encoder.getEncodableMimeTypes().add(new MimeType("text", "ecmascript")));
@@ -231,7 +230,7 @@ class JacksonJsonEncoderTests extends AbstractEncoderTests<JacksonJsonEncoder> {
 
 	@Test  // gh-22771
 	public void encodeWithFlushAfterWriteOff() {
-		ObjectMapper mapper = JsonMapper.builder().configure(SerializationFeature.FLUSH_AFTER_WRITE_VALUE, false).build();
+		JsonMapper mapper = JsonMapper.builder().configure(SerializationFeature.FLUSH_AFTER_WRITE_VALUE, false).build();
 		JacksonJsonEncoder encoder = new JacksonJsonEncoder(mapper);
 
 		Flux<DataBuffer> result = encoder.encode(Flux.just(new Pojo("foo", "bar")), this.bufferFactory,

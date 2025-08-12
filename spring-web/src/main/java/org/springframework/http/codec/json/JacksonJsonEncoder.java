@@ -25,7 +25,6 @@ import reactor.core.publisher.Flux;
 import tools.jackson.core.PrettyPrinter;
 import tools.jackson.core.util.DefaultIndenter;
 import tools.jackson.core.util.DefaultPrettyPrinter;
-import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.ObjectWriter;
 import tools.jackson.databind.SerializationFeature;
 import tools.jackson.databind.cfg.MapperBuilder;
@@ -80,21 +79,21 @@ public class JacksonJsonEncoder extends AbstractJacksonEncoder {
 	}
 
 	/**
-	 * Construct a new instance with the provided {@link ObjectMapper}.
+	 * Construct a new instance with the provided {@link JsonMapper}.
 	 * @see JsonMapper#builder()
 	 * @see MapperBuilder#findModules(ClassLoader)
 	 */
-	public JacksonJsonEncoder(ObjectMapper mapper) {
+	public JacksonJsonEncoder(JsonMapper mapper) {
 		this(mapper, DEFAULT_JSON_MIME_TYPES);
 	}
 
 	/**
-	 * Construct a new instance with the provided {@link ObjectMapper} and
+	 * Construct a new instance with the provided {@link JsonMapper} and
 	 * {@link MimeType}s.
 	 * @see JsonMapper#builder()
 	 * @see MapperBuilder#findModules(ClassLoader)
 	 */
-	public JacksonJsonEncoder(ObjectMapper mapper, MimeType... mimeTypes) {
+	public JacksonJsonEncoder(JsonMapper mapper, MimeType... mimeTypes) {
 		super(mapper, mimeTypes);
 		setStreamingMediaTypes(List.of(MediaType.APPLICATION_NDJSON));
 		this.ssePrettyPrinter = initSsePrettyPrinter();
