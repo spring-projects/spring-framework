@@ -18,8 +18,8 @@ package org.springframework.web.socket.sockjs.frame;
 
 import java.io.InputStream;
 
-import com.fasterxml.jackson.core.io.JsonStringEncoder;
 import org.jspecify.annotations.Nullable;
+import tools.jackson.core.io.JsonStringEncoder;
 import tools.jackson.databind.cfg.MapperBuilder;
 import tools.jackson.databind.json.JsonMapper;
 
@@ -71,7 +71,7 @@ public class JacksonJsonSockJsMessageCodec extends AbstractSockJsMessageCodec {
 
 	@Override
 	protected char[] applyJsonQuoting(String content) {
-		return JsonStringEncoder.getInstance().quoteAsString(content);
+		return JsonStringEncoder.getInstance().quoteAsCharArray(content);
 	}
 
 }
