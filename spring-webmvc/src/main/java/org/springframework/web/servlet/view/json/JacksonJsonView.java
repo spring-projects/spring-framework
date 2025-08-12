@@ -24,6 +24,7 @@ import java.util.Set;
 import jakarta.servlet.http.HttpServletRequest;
 import org.jspecify.annotations.Nullable;
 import tools.jackson.core.JsonGenerator;
+import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.cfg.MapperBuilder;
 import tools.jackson.databind.json.JsonMapper;
 
@@ -34,7 +35,7 @@ import org.springframework.web.servlet.view.AbstractJacksonView;
 
 /**
  * Spring MVC {@link View} that renders JSON content by serializing the model for the current request
- * using <a href="https://github.com/FasterXML/jackson">Jackson 3's</a> {@link JsonMapper}.
+ * using <a href="https://github.com/FasterXML/jackson">Jackson 3's</a> {@link ObjectMapper}.
  *
  * <p>By default, the entire contents of the model map (with the exception of framework-specific classes)
  * will be encoded as JSON. If the model contains only one key, you can have it extracted encoded as JSON
@@ -78,11 +79,11 @@ public class JacksonJsonView extends AbstractJacksonView {
 	}
 
 	/**
-	 * Construct a new instance using the provided {@link JsonMapper}
+	 * Construct a new instance using the provided {@link ObjectMapper}
 	 * and setting the content type to {@value #DEFAULT_CONTENT_TYPE}.
 	 */
-	public JacksonJsonView(JsonMapper jsonMapper) {
-		super(jsonMapper, DEFAULT_CONTENT_TYPE);
+	public JacksonJsonView(ObjectMapper objectMapper) {
+		super(objectMapper, DEFAULT_CONTENT_TYPE);
 	}
 
 

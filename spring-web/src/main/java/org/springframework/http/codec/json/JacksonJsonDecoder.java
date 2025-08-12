@@ -25,6 +25,7 @@ import java.util.Map;
 import org.jspecify.annotations.Nullable;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
+import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.cfg.MapperBuilder;
 import tools.jackson.databind.json.JsonMapper;
 
@@ -72,20 +73,20 @@ public class JacksonJsonDecoder extends AbstractJacksonDecoder {
 	}
 
 	/**
-	 * Construct a new instance with the provided {@link JsonMapper}.
+	 * Construct a new instance with the provided {@link ObjectMapper}.
 	 * @see JsonMapper#builder()
 	 * @see MapperBuilder#findModules(ClassLoader)
 	 */
-	public JacksonJsonDecoder(JsonMapper mapper) {
+	public JacksonJsonDecoder(ObjectMapper mapper) {
 		this(mapper, DEFAULT_JSON_MIME_TYPES);
 	}
 
 	/**
-	 * Construct a new instance with the provided {@link JsonMapper} and {@link MimeType}s.
+	 * Construct a new instance with the provided {@link ObjectMapper} and {@link MimeType}s.
 	 * @see JsonMapper#builder()
 	 * @see MapperBuilder#findModules(ClassLoader)
 	 */
-	public JacksonJsonDecoder(JsonMapper mapper, MimeType... mimeTypes) {
+	public JacksonJsonDecoder(ObjectMapper mapper, MimeType... mimeTypes) {
 		super(mapper, mimeTypes);
 	}
 

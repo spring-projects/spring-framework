@@ -45,7 +45,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.skyscreamer.jsonassert.JSONCompareResult;
 import org.skyscreamer.jsonassert.comparator.JSONComparator;
-import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.databind.ObjectMapper;
 
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.ClassPathResource;
@@ -86,7 +86,7 @@ class AbstractJsonContentAssertTests {
 	private static final String DIFFERENT = loadJson("different.json");
 
 	private static final HttpMessageContentConverter jsonContentConverter = HttpMessageContentConverter.of(
-			new JacksonJsonHttpMessageConverter(new JsonMapper()));
+			new JacksonJsonHttpMessageConverter(new ObjectMapper()));
 
 	private static final JsonComparator comparator = JsonAssert.comparator(JsonCompareMode.LENIENT);
 

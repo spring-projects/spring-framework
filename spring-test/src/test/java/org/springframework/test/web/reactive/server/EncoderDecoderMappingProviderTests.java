@@ -22,7 +22,7 @@ import java.util.Map;
 import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.TypeRef;
 import org.junit.jupiter.api.Test;
-import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.databind.ObjectMapper;
 
 import org.springframework.http.codec.json.JacksonJsonDecoder;
 import org.springframework.http.codec.json.JacksonJsonEncoder;
@@ -36,10 +36,10 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 class EncoderDecoderMappingProviderTests {
 
-	private static final JsonMapper jsonMapper = new JsonMapper();
+	private static final ObjectMapper objectMapper = new ObjectMapper();
 
 	private final EncoderDecoderMappingProvider mappingProvider = new EncoderDecoderMappingProvider(
-			new JacksonJsonEncoder(jsonMapper), new JacksonJsonDecoder(jsonMapper));
+			new JacksonJsonEncoder(objectMapper), new JacksonJsonDecoder(objectMapper));
 
 
 	@Test

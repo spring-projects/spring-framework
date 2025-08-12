@@ -365,7 +365,7 @@ class JacksonJsonHttpMessageConverterTests {
 		PrettyPrintBean bean = new PrettyPrintBean();
 		bean.setName("Jason");
 
-		JsonMapper mapper = JsonMapper.builder().enable(SerializationFeature.INDENT_OUTPUT).build();
+		ObjectMapper mapper = JsonMapper.builder().enable(SerializationFeature.INDENT_OUTPUT).build();
 		this.converter = new JacksonJsonHttpMessageConverter(mapper);
 		this.converter.write(bean, ResolvableType.forType(PrettyPrintBean.class),
 				MediaType.APPLICATION_JSON, outputMessage, null);
@@ -384,7 +384,7 @@ class JacksonJsonHttpMessageConverterTests {
 		PrettyPrintBean bean = new PrettyPrintBean();
 		bean.setName("Jason");
 
-		JsonMapper mapper = JsonMapper.builder().enable(SerializationFeature.INDENT_OUTPUT).build();
+		ObjectMapper mapper = JsonMapper.builder().enable(SerializationFeature.INDENT_OUTPUT).build();
 		this.converter = new JacksonJsonHttpMessageConverter(mapper);
 		this.converter.write(bean, ResolvableType.forType(PrettyPrintBean.class),
 				MediaType.APPLICATION_JSON, outputMessage, null);

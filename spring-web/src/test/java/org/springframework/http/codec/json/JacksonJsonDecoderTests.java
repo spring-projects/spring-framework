@@ -31,6 +31,7 @@ import reactor.test.StepVerifier;
 import tools.jackson.core.JsonParser;
 import tools.jackson.databind.DeserializationContext;
 import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.annotation.JsonDeserialize;
 import tools.jackson.databind.deser.std.StdDeserializer;
 import tools.jackson.databind.json.JsonMapper;
@@ -101,8 +102,8 @@ class JacksonJsonDecoderTests extends AbstractDecoderTests<JacksonJsonDecoder> {
 		assertThat(decoder.canDecode(ResolvableType.forClass(Map.class), MediaType.APPLICATION_JSON)).isTrue();
 
 		decoder.registerObjectMappersForType(Pojo.class, map -> {
-			map.put(halJsonMediaType, new JsonMapper());
-			map.put(MediaType.APPLICATION_JSON, new JsonMapper());
+			map.put(halJsonMediaType, new ObjectMapper());
+			map.put(MediaType.APPLICATION_JSON, new ObjectMapper());
 		});
 
 		assertThat(decoder.canDecode(ResolvableType.forClass(Pojo.class), halJsonMediaType)).isTrue();
@@ -114,7 +115,7 @@ class JacksonJsonDecoderTests extends AbstractDecoderTests<JacksonJsonDecoder> {
 	@Test  // SPR-15866
 	void canDecodeWithProvidedMimeType() {
 		MimeType textJavascript = new MimeType("text", "javascript", StandardCharsets.UTF_8);
-		JacksonJsonDecoder decoder = new JacksonJsonDecoder(new JsonMapper(), textJavascript);
+		JacksonJsonDecoder decoder = new JacksonJsonDecoder(new ObjectMapper(), textJavascript);
 
 		assertThat(decoder.getDecodableMimeTypes()).isEqualTo(Collections.singletonList(textJavascript));
 	}
@@ -123,7 +124,7 @@ class JacksonJsonDecoderTests extends AbstractDecoderTests<JacksonJsonDecoder> {
 	@SuppressWarnings("unchecked")
 	void decodableMimeTypesIsImmutable() {
 		MimeType textJavascript = new MimeType("text", "javascript", StandardCharsets.UTF_8);
-		JacksonJsonDecoder decoder = new JacksonJsonDecoder(new JsonMapper(), textJavascript);
+		JacksonJsonDecoder decoder = new JacksonJsonDecoder(new ObjectMapper(), textJavascript);
 
 		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() ->
 						decoder.getDecodableMimeTypes().add(new MimeType("text", "ecmascript")));
@@ -134,8 +135,8 @@ class JacksonJsonDecoderTests extends AbstractDecoderTests<JacksonJsonDecoder> {
 		MimeType mimeType1 = MediaType.parseMediaType("application/hal+json");
 		MimeType mimeType2 = new MimeType("text", "javascript", StandardCharsets.UTF_8);
 
-		JacksonJsonDecoder decoder = new JacksonJsonDecoder(new JsonMapper(), mimeType2);
-		decoder.registerObjectMappersForType(Pojo.class, map -> map.put(mimeType1, new JsonMapper()));
+		JacksonJsonDecoder decoder = new JacksonJsonDecoder(new ObjectMapper(), mimeType2);
+		decoder.registerObjectMappersForType(Pojo.class, map -> map.put(mimeType1, new ObjectMapper()));
 
 		assertThat(decoder.getDecodableMimeTypes(ResolvableType.forClass(Pojo.class)))
 				.containsExactly(mimeType1);
