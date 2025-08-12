@@ -351,7 +351,6 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 		if (headers == null){
 			headers = new StompHeaders();
 		}
-
 		String receiptId = checkOrAddReceipt(headers);
 		Receiptable receiptable = new ReceiptHandler(receiptId);
 

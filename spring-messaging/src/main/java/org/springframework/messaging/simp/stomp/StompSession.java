@@ -182,13 +182,15 @@ public interface StompSession {
 
 		/**
 		 * Remove the subscription by sending an UNSUBSCRIBE frame.
+		 * <p>As of 7.0, this method returns {@link Receiptable}.
 		 */
 		Receiptable unsubscribe();
 
 		/**
 		 * Alternative to {@link #unsubscribe()} with additional custom headers
-		 * to send to the server.
-		 * <p><strong>Note:</strong> There is no need to set the subscription id.
+		 * to send to the server. Note, however, there is no need to set the
+		 * subscription id.
+		 * <p>As of 7.0, this method returns {@link Receiptable}.
 		 * @param headers the custom headers, if any
 		 * @since 5.0
 		 */
