@@ -372,6 +372,10 @@ public abstract class AbstractMockHttpServletRequestBuilder<B extends AbstractMo
 	 * @param values one or more values
 	 */
 	public B param(String name, String... values) {
+		if (values.length == 0) {
+			this.parameters.computeIfAbsent(name, k -> new ArrayList<>());
+			return self();
+		}
 		addToMultiValueMap(this.parameters, name, values);
 		return self();
 	}
@@ -821,11 +825,8 @@ public abstract class AbstractMockHttpServletRequestBuilder<B extends AbstractMo
 		}
 		addRequestParams(request, UriComponentsBuilder.fromUri(uri).build().getQueryParams());
 
-		this.parameters.forEach((name, values) -> {
-			for (String value : values) {
-				request.addParameter(name, value);
-			}
-		});
+		this.parameters.forEach((name, values) ->
+				request.setParameter(name, values.toArray(new String[0])));
 
 		if (!this.formFields.isEmpty()) {
 			if (this.content != null && this.content.length > 0) {

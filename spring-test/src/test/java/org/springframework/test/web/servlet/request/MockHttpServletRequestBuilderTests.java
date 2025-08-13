@@ -263,6 +263,16 @@ class MockHttpServletRequestBuilderTests {
 		assertThat(request.getQueryString()).isEqualTo("foo=bar&foo=baz");
 	}
 
+	@Test // gh-35210
+	void queryParameterWithoutValues() {
+		this.builder = new MockHttpServletRequestBuilder(GET).uri("/");
+		this.builder.queryParam("foo");
+		MockHttpServletRequest request = this.builder.buildRequest(this.servletContext);
+
+		assertThat(request.getQueryString()).isEqualTo("foo");
+		assertThat(request.getParameterMap().get("foo")).containsExactly();
+	}
+
 	@Test
 	void queryParameterMap() {
 		this.builder = new MockHttpServletRequestBuilder(GET).uri("/");
