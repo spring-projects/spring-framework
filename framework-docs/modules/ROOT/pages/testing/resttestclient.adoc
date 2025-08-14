@@ -306,7 +306,7 @@ Kotlin::
 ======
 
 TIP: When you need to decode to a target type with generics, look for the overloaded methods
-that accept{spring-framework-api}/core/ParameterizedTypeReference.html[`ParameterizedTypeReference`]
+that accept {spring-framework-api}/core/ParameterizedTypeReference.html[`ParameterizedTypeReference`]
 instead of `Class<T>`.
 
 
