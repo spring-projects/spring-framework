@@ -30,6 +30,7 @@ runs:
         java-version: |
           ${{ inputs.java-early-access == 'true' && format('{0}-ea', inputs.java-version) || inputs.java-version }}
           ${{ inputs.java-toolchain == 'true' && '17' || '' }}
+          24
     - name: Set Up Gradle
       uses: gradle/actions/setup-gradle@ac638b010cf58a27ee6c972d7336334ccaf61c96 # v4.4.1
       with:
