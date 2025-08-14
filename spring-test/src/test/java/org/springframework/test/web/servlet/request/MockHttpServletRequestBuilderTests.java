@@ -274,6 +274,15 @@ class MockHttpServletRequestBuilderTests {
 	}
 
 	@Test
+	void queryParametersWithUriAndQueryParam() {
+		this.builder = new MockHttpServletRequestBuilder(GET).uri("/path?param1=value1");
+		this.builder.queryParam("param1", "value2");
+		MockHttpServletRequest request = this.builder.buildRequest(this.servletContext);
+
+		assertThat(request.getParameterMap().get("param1")).containsExactly("value1", "value2");
+	}
+
+	@Test
 	void queryParameterMap() {
 		this.builder = new MockHttpServletRequestBuilder(GET).uri("/");
 		MultiValueMap<String, String> queryParams = new LinkedMultiValueMap<>();
