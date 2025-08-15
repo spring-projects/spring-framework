@@ -165,6 +165,42 @@ class YamlPropertiesFactoryBeanTests {
 		assertThat(properties.getProperty("one")).isEqualTo("two");
 	}
 
+
+	@Test // gh-27020
+	void loadResourceWithEscapedKey() {
+		String yaml = "root:\n" +
+				"  webservices:\n" +
+				"    \"[domain.test:8080]\":\n" +
+				"      - username: foo\n" +
+				"        password: bar\n";
+		YamlPropertiesFactoryBean factory = new YamlPropertiesFactoryBean();
+		factory.setResources(
+				new ByteArrayResource(yaml.getBytes()),
+				new ByteArrayResource("indexed:\n  \"[0]\": foo\n  \"[1]\": bar".getBytes()),
+				new ByteArrayResource("indexed2:\n  - \"[a]\": foo\n    \"[b]\": bar".getBytes()),
+				new ByteArrayResource("only-left-bracket:\n  \"[/key1/\": foo".getBytes()),
+				new ByteArrayResource("only-right-bracket:\n  \"/key1/]\": foo".getBytes()),
+				new ByteArrayResource("special-bracket:\n  \"][/key1/][\": foo".getBytes()),
+				new ByteArrayResource("number-key:\n  1: foo".getBytes()));
+
+		Properties properties = factory.getObject();
+		assertThat(properties.getProperty("root.webservices[[domain.test:8080]][0].username")).isEqualTo("foo");
+		assertThat(properties.getProperty("root.webservices[[domain.test:8080]][0].password")).isEqualTo("bar");
+
+		assertThat(properties.getProperty("indexed[[0]]")).isEqualTo("foo");
+		assertThat(properties.getProperty("indexed[[1]]")).isEqualTo("bar");
+
+		assertThat(properties.getProperty("indexed2[0][[a]]")).isEqualTo("foo");
+		assertThat(properties.getProperty("indexed2[0][[b]]")).isEqualTo("bar");
+
+		assertThat(properties.getProperty("only-left-bracket[[/key1/]")).isEqualTo("foo");
+		assertThat(properties.getProperty("only-right-bracket[/key1/]]")).isEqualTo("foo");
+		assertThat(properties.getProperty("special-bracket.][/key1/][")).isEqualTo("foo");
+
+		assertThat(properties.getProperty("number-key.1")).isEqualTo("foo");
+	}
+
+
 	@Test
 	void loadNonExistentResource() {
 		YamlPropertiesFactoryBean factory = new YamlPropertiesFactoryBean();
