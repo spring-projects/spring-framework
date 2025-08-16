@@ -112,8 +112,7 @@ public abstract class AbstractRetryInterceptor implements MethodInterceptor {
 			});
 		}
 		catch (RetryException ex) {
-			Throwable cause = ex.getCause();
-			throw (cause != null ? cause : new IllegalStateException(ex.getMessage(), ex));
+			throw ex.getCause();
 		}
 	}
 

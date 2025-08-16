@@ -17,6 +17,9 @@
 package org.springframework.core.retry;
 
 import java.io.Serial;
+import java.util.Objects;
+
+import org.jspecify.annotations.NonNull;
 
 /**
  * Exception thrown when a {@link RetryPolicy} has been exhausted.
@@ -32,20 +35,18 @@ public class RetryException extends Exception {
 
 
 	/**
-	 * Create a new {@code RetryException} for the supplied message.
-	 * @param message the detail message
-	 */
-	public RetryException(String message) {
-		super(message);
-	}
-
-	/**
 	 * Create a new {@code RetryException} for the supplied message and cause.
 	 * @param message the detail message
 	 * @param cause the root cause
 	 */
 	public RetryException(String message, Throwable cause) {
 		super(message, cause);
+	}
+
+
+	@Override
+	public synchronized @NonNull Throwable getCause() {
+		return Objects.requireNonNull(super.getCause());
 	}
 
 }
