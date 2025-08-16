@@ -174,7 +174,7 @@ public class RetryTemplate implements RetryOperations {
 					"Retry policy for operation '%s' exhausted; aborting execution".formatted(retryableName),
 					exceptions.removeLast());
 			exceptions.forEach(finalException::addSuppressed);
-			this.retryListener.onRetryPolicyExhaustion(this.retryPolicy, retryable, finalException);
+			this.retryListener.onRetryPolicyExhaustion(this.retryPolicy, retryable, retryException);
 			throw finalException;
 		}
 	}

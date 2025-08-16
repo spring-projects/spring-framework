@@ -29,13 +29,20 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments.ArgumentSet;
 import org.junit.jupiter.params.provider.FieldSource;
+import org.mockito.InOrder;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.jupiter.params.provider.Arguments.argumentSet;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verifyNoInteractions;
 
 /**
- * Integration tests for {@link RetryTemplate} and {@link RetryPolicy}.
+ * Integration tests for {@link RetryTemplate}, {@link RetryPolicy} and
+ * {@link RetryListener}.
  *
  * @author Mahmoud Ben Hassine
  * @author Sam Brannen
@@ -44,17 +51,22 @@ import static org.junit.jupiter.params.provider.Arguments.argumentSet;
  */
 class RetryTemplateTests {
 
-	private final RetryTemplate retryTemplate = new RetryTemplate();
-
-
-	@BeforeEach
-	void configureRetryTemplate() {
-		var retryPolicy = RetryPolicy.builder()
+	private final RetryPolicy retryPolicy =
+			RetryPolicy.builder()
 				.maxAttempts(3)
 				.delay(Duration.ZERO)
 				.build();
 
-		retryTemplate.setRetryPolicy(retryPolicy);
+	private final RetryTemplate retryTemplate = new RetryTemplate(retryPolicy);
+
+	private final RetryListener retryListener = mock();
+
+	private final InOrder inOrder = inOrder(retryListener);
+
+
+	@BeforeEach
+	void configureRetryTemplate() {
+		retryTemplate.setRetryListener(retryListener);
 	}
 
 	@Test
@@ -68,14 +80,18 @@ class RetryTemplateTests {
 		assertThat(invocationCount).hasValue(0);
 		assertThat(retryTemplate.execute(retryable)).isEqualTo("always succeeds");
 		assertThat(invocationCount).hasValue(1);
+
+		// RetryListener interactions:
+		verifyNoInteractions(retryListener);
 	}
 
 	@Test
 	void retryWithSuccessAfterInitialFailures() throws Exception {
+		Exception exception = new Exception("Boom!");
 		AtomicInteger invocationCount = new AtomicInteger();
 		Retryable<String> retryable = () -> {
 			if (invocationCount.incrementAndGet() <= 2) {
-				throw new Exception("Boom!");
+				throw exception;
 			}
 			return "finally succeeded";
 		};
@@ -83,6 +99,13 @@ class RetryTemplateTests {
 		assertThat(invocationCount).hasValue(0);
 		assertThat(retryTemplate.execute(retryable)).isEqualTo("finally succeeded");
 		assertThat(invocationCount).hasValue(3);
+
+		// RetryListener interactions:
+		inOrder.verify(retryListener).beforeRetry(retryPolicy, retryable);
+		inOrder.verify(retryListener).onRetryFailure(retryPolicy, retryable, exception);
+		inOrder.verify(retryListener).beforeRetry(retryPolicy, retryable);
+		inOrder.verify(retryListener).onRetrySuccess(retryPolicy, retryable, "finally succeeded");
+		inOrder.verifyNoMoreInteractions();
 	}
 
 	@Test
@@ -110,6 +133,14 @@ class RetryTemplateTests {
 				.withCause(exception);
 		// 4 = 1 initial invocation + 3 retry attempts
 		assertThat(invocationCount).hasValue(4);
+
+		// RetryListener interactions:
+		repeat(3, () -> {
+			inOrder.verify(retryListener).beforeRetry(retryPolicy, retryable);
+			inOrder.verify(retryListener).onRetryFailure(retryPolicy, retryable, exception);
+		});
+		inOrder.verify(retryListener).onRetryPolicyExhaustion(retryPolicy, retryable, exception);
+		inOrder.verifyNoMoreInteractions();
 	}
 
 	@Test
@@ -146,6 +177,14 @@ class RetryTemplateTests {
 				.withCause(exception);
 		// 6 = 1 initial invocation + 5 retry attempts
 		assertThat(invocationCount).hasValue(6);
+
+		// RetryListener interactions:
+		repeat(5, () -> {
+			inOrder.verify(retryListener).beforeRetry(retryPolicy, retryable);
+			inOrder.verify(retryListener).onRetryFailure(retryPolicy, retryable, exception);
+		});
+		inOrder.verify(retryListener).onRetryPolicyExhaustion(retryPolicy, retryable, exception);
+		inOrder.verifyNoMoreInteractions();
 	}
 
 	@Test
@@ -188,6 +227,15 @@ class RetryTemplateTests {
 				));
 		// 3 = 1 initial invocation + 2 retry attempts
 		assertThat(invocationCount).hasValue(3);
+
+		// RetryListener interactions:
+		repeat(2, () -> {
+			inOrder.verify(retryListener).beforeRetry(retryPolicy, retryable);
+			inOrder.verify(retryListener).onRetryFailure(eq(retryPolicy), eq(retryable), any(Throwable.class));
+		});
+		inOrder.verify(retryListener).onRetryPolicyExhaustion(
+				eq(retryPolicy), eq(retryable), any(IllegalStateException.class));
+		inOrder.verifyNoMoreInteractions();
 	}
 
 	static final List<ArgumentSet> includesAndExcludesRetryPolicies = List.of(
@@ -241,8 +289,23 @@ class RetryTemplateTests {
 				));
 		// 3 = 1 initial invocation + 2 retry attempts
 		assertThat(invocationCount).hasValue(3);
+
+		// RetryListener interactions:
+		repeat(2, () -> {
+			inOrder.verify(retryListener).beforeRetry(retryPolicy, retryable);
+			inOrder.verify(retryListener).onRetryFailure(eq(retryPolicy), eq(retryable), any(Throwable.class));
+		});
+		inOrder.verify(retryListener).onRetryPolicyExhaustion(
+				eq(retryPolicy), eq(retryable), any(CustomFileNotFoundException.class));
+		inOrder.verifyNoMoreInteractions();
 	}
 
+
+	private static void repeat(int times, Runnable runnable) {
+		for (int i = 0; i < times; i++) {
+			runnable.run();
+		}
+	}
 
 	@SafeVarargs
 	private static final Consumer<Throwable> hasSuppressedExceptionsSatisfyingExactly(
