@@ -133,8 +133,8 @@ public class RetryTemplate implements RetryOperations {
 			Deque<Throwable> exceptions = new ArrayDeque<>();
 			exceptions.add(initialException);
 
-			Throwable retryException = initialException;
-			while (this.retryPolicy.shouldRetry(retryException)) {
+			Throwable lastException = initialException;
+			while (this.retryPolicy.shouldRetry(lastException)) {
 				try {
 					long duration = backOffExecution.nextBackOff();
 					if (duration == BackOffExecution.STOP) {
@@ -159,23 +159,23 @@ public class RetryTemplate implements RetryOperations {
 							.formatted(retryableName));
 					return result;
 				}
-				catch (Throwable currentAttemptException) {
+				catch (Throwable currentException) {
 					logger.debug(() -> "Retry attempt for operation '%s' failed due to '%s'"
-							.formatted(retryableName, currentAttemptException));
-					this.retryListener.onRetryFailure(this.retryPolicy, retryable, currentAttemptException);
-					exceptions.add(currentAttemptException);
-					retryException = currentAttemptException;
+							.formatted(retryableName, currentException));
+					this.retryListener.onRetryFailure(this.retryPolicy, retryable, currentException);
+					exceptions.add(currentException);
+					lastException = currentException;
 				}
 			}
 
 			// The RetryPolicy has exhausted at this point, so we throw a RetryException with the
-			// initial exception as the cause and remaining exceptions as suppressed exceptions.
-			RetryException finalException = new RetryException(
+			// last exception as the cause and remaining exceptions as suppressed exceptions.
+			RetryException retryException = new RetryException(
 					"Retry policy for operation '%s' exhausted; aborting execution".formatted(retryableName),
 					exceptions.removeLast());
-			exceptions.forEach(finalException::addSuppressed);
-			this.retryListener.onRetryPolicyExhaustion(this.retryPolicy, retryable, retryException);
-			throw finalException;
+			exceptions.forEach(retryException::addSuppressed);
+			this.retryListener.onRetryPolicyExhaustion(this.retryPolicy, retryable, lastException);
+			throw retryException;
 		}
 	}
 
