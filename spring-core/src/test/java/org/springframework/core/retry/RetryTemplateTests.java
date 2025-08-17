@@ -32,6 +32,9 @@ import org.junit.jupiter.params.provider.Arguments.ArgumentSet;
 import org.junit.jupiter.params.provider.FieldSource;
 import org.mockito.InOrder;
 
+import org.springframework.util.backoff.BackOff;
+import org.springframework.util.backoff.FixedBackOff;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.jupiter.params.provider.Arguments.argumentSet;
@@ -85,6 +88,60 @@ class RetryTemplateTests {
 
 		// RetryListener interactions:
 		verifyNoInteractions(retryListener);
+	}
+
+	@Test
+	void retryWithInitialFailureAndZeroRetriesRetryPolicy() {
+		RetryPolicy retryPolicy = throwable -> false; // Zero retries
+		RetryTemplate retryTemplate = new RetryTemplate(retryPolicy);
+		retryTemplate.setRetryListener(retryListener);
+		Exception exception = new RuntimeException("Boom!");
+		Retryable<String> retryable = () -> {
+			throw exception;
+		};
+
+		assertThatExceptionOfType(RetryException.class)
+				.isThrownBy(() -> retryTemplate.execute(retryable))
+				.withMessageMatching("Retry policy for operation '.+?' exhausted; aborting execution")
+				.withCause(exception)
+				.satisfies(throwable -> assertThat(throwable.getSuppressed()).isEmpty());
+
+		// RetryListener interactions:
+		inOrder.verify(retryListener).onRetryPolicyExhaustion(retryPolicy, retryable, exception);
+		verifyNoMoreInteractions(retryListener);
+	}
+
+	@Test
+	void retryWithInitialFailureAndZeroRetriesBackOffPolicy() {
+		RetryPolicy retryPolicy = new RetryPolicy() {
+
+			@Override
+			public boolean shouldRetry(Throwable throwable) {
+				return true;
+			}
+
+			@Override
+			public BackOff getBackOff() {
+				return new FixedBackOff(10, 0); // Zero retries
+			}
+		};
+
+		RetryTemplate retryTemplate = new RetryTemplate(retryPolicy);
+		retryTemplate.setRetryListener(retryListener);
+		Exception exception = new RuntimeException("Boom!");
+		Retryable<String> retryable = () -> {
+			throw exception;
+		};
+
+		assertThatExceptionOfType(RetryException.class)
+				.isThrownBy(() -> retryTemplate.execute(retryable))
+				.withMessageMatching("Retry policy for operation '.+?' exhausted; aborting execution")
+				.withCause(exception)
+				.satisfies(throwable -> assertThat(throwable.getSuppressed()).isEmpty());
+
+		// RetryListener interactions:
+		inOrder.verify(retryListener).onRetryPolicyExhaustion(retryPolicy, retryable, exception);
+		verifyNoMoreInteractions(retryListener);
 	}
 
 	@Test
