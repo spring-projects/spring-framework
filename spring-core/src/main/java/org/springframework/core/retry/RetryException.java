@@ -22,6 +22,11 @@ import java.util.Objects;
 /**
  * Exception thrown when a {@link RetryPolicy} has been exhausted.
  *
+ * <p>A {@code RetryException} will contain the last exception thrown by the
+ * {@link Retryable} operation as the {@linkplain #getCause() cause} and any
+ * exceptions from previous attempts as {@linkplain #getSuppressed() suppressed
+ * exceptions}.
+ *
  * @author Mahmoud Ben Hassine
  * @since 7.0
  * @see RetryOperations

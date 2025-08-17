@@ -104,15 +104,17 @@ public class RetryTemplate implements RetryOperations {
 
 
 	/**
-	 * Execute the supplied {@link Retryable} according to the configured retry
-	 * and backoff policies.
-	 * <p>If the {@code Retryable} succeeds, its result will be returned. Otherwise,
-	 * a {@link RetryException} will be thrown to the caller.
+	 * Execute the supplied {@link Retryable} operation according to the configured
+	 * {@link RetryPolicy}.
+	 * <p>If the {@code Retryable} succeeds, its result will be returned. Otherwise, a
+	 * {@link RetryException} will be thrown to the caller. The {@code RetryException}
+	 * will contain the last exception thrown by the {@code Retryable} operation as the
+	 * {@linkplain RetryException#getCause() cause} and any exceptions from previous
+	 * attempts as {@linkplain RetryException#getSuppressed() suppressed exceptions}.
 	 * @param retryable the {@code Retryable} to execute and retry if needed
 	 * @param <R> the type of the result
 	 * @return the result of the {@code Retryable}, if any
-	 * @throws RetryException if the {@code RetryPolicy} is exhausted; exceptions
-	 * encountered during retry attempts are available as suppressed exceptions
+	 * @throws RetryException if the {@code RetryPolicy} is exhausted
 	 */
 	@Override
 	public <R> @Nullable R execute(Retryable<? extends @Nullable R> retryable) throws RetryException {
