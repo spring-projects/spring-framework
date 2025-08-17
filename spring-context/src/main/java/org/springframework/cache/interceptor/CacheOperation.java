@@ -50,6 +50,8 @@ public abstract class CacheOperation implements BasicOperation {
 
 	private final String toString;
 
+	private final int hashCode;
+
 
 	/**
 	 * Create a new {@link CacheOperation} instance from the given builder.
@@ -64,6 +66,7 @@ public abstract class CacheOperation implements BasicOperation {
 		this.cacheResolver = b.cacheResolver;
 		this.condition = b.condition;
 		this.toString = b.getOperationDescription().toString();
+		this.hashCode = this.toString.hashCode();
 	}
 
 
@@ -107,12 +110,13 @@ public abstract class CacheOperation implements BasicOperation {
 	}
 
 	/**
-	 * This implementation returns {@code toString()}'s hash code.
+	 * This implementation returns the cached hash code computed
+	 * during construction based on {@code toString()}'s hash code.
 	 * @see #toString()
 	 */
 	@Override
 	public int hashCode() {
-		return toString().hashCode();
+		return this.hashCode;
 	}
 
 	/**
