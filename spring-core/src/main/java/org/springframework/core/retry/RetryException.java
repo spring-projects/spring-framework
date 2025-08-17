@@ -43,7 +43,7 @@ public class RetryException extends Exception {
 
 
 	/**
-	 * Get the the last exception thrown by the {@link Retryable} operation.
+	 * Get the last exception thrown by the {@link Retryable} operation.
 	 */
 	@Override
 	public final synchronized Throwable getCause() {
