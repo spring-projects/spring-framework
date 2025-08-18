@@ -234,14 +234,22 @@ class InternalPathPatternParser {
 	}
 
 	private boolean isDoubleWildcard(char separator) {
+		// next char is present
 		if ((this.pos + 1) >= this.pathPatternLength) {
 			return false;
 		}
+		// current char and next char are '*'
 		if (this.pathPatternData[this.pos] != '*' || this.pathPatternData[this.pos + 1] != '*') {
 			return false;
 		}
-		if ((this.pos + 2) < this.pathPatternLength) {
-			return this.pathPatternData[this.pos + 2] == separator;
+		// previous char is a separator, if any
+		if ((this.pos - 1 >= 0) && (this.pathPatternData[this.pos - 1] != separator)) {
+			return false;
+		}
+		// next char is a separator, if any
+		if (((this.pos + 2) < this.pathPatternLength) &&
+				this.pathPatternData[this.pos + 2] != separator) {
+			return false;
 		}
 		return true;
 	}

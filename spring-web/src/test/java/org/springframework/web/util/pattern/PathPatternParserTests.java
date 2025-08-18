@@ -85,8 +85,13 @@ class PathPatternParserTests {
 
 		@Test
 		void regexpSegmentIsNotWildcardSegment() {
-			// this is not double wildcard, it's / then **acb (an odd, unnecessary use of double *)
 			pathPattern = checkStructure("/**acb");
+			assertPathElements(pathPattern, SeparatorPathElement.class, RegexPathElement.class);
+
+			pathPattern = checkStructure("/a**bc");
+			assertPathElements(pathPattern, SeparatorPathElement.class, RegexPathElement.class);
+
+			pathPattern = checkStructure("/abc**");
 			assertPathElements(pathPattern, SeparatorPathElement.class, RegexPathElement.class);
 		}
 
