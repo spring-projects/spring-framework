@@ -1413,7 +1413,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	 * @return the RowMapper to use
 	 * @see SingleColumnRowMapper
 	 */
-	protected <T> RowMapper<@Nullable T> getSingleColumnRowMapper(Class<T> requiredType) {
+	protected <T extends @Nullable Object> RowMapper<T> getSingleColumnRowMapper(Class<T> requiredType) {
 		return new SingleColumnRowMapper<>(requiredType);
 	}
 
