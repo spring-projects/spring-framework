@@ -20,6 +20,8 @@ import kotlinx.serialization.Serializable
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
 import org.springframework.core.MethodParameter
+import org.springframework.http.RequestEntity
+import org.springframework.http.ResponseEntity
 import org.springframework.http.converter.StringHttpMessageConverter
 import org.springframework.http.converter.json.KotlinSerializationJsonHttpMessageConverter
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean
@@ -62,6 +64,22 @@ class RequestResponseBodyMethodProcessorKotlinTests {
 		val processor = RequestResponseBodyMethodProcessor(converters, null, null)
 
 		val returnValue: Any = SampleController().writeMessage()
+		processor.handleReturnValue(returnValue, methodReturnType, this.container, this.request)
+
+		Assertions.assertThat(this.servletResponse.contentAsString)
+			.contains("\"value\":\"foo\"")
+	}
+
+	@Test
+	fun writeEntityWithKotlinSerializationJsonMessageConverter() {
+		val method = SampleController::writeMessageEntity::javaMethod.get()!!
+		val handlerMethod = HandlerMethod(SampleController(), method)
+		val methodReturnType = handlerMethod.returnType
+
+		val converters = listOf(KotlinSerializationJsonHttpMessageConverter())
+		val processor = RequestResponseBodyMethodProcessor(converters, null, listOf(KotlinResponseBodyAdvice()))
+
+		val returnValue: Any? = SampleController().writeMessageEntity().body
 		processor.handleReturnValue(returnValue, methodReturnType, this.container, this.request)
 
 		Assertions.assertThat(this.servletResponse.contentAsString)
@@ -118,6 +136,24 @@ class RequestResponseBodyMethodProcessorKotlinTests {
 		Assertions.assertThat(result).isEqualTo(Message("foo"))
 	}
 
+	@Test
+	@Suppress("UNCHECKED_CAST")
+	fun readEntityWithKotlinSerializationJsonMessageConverter() {
+		val content = "{\"value\" : \"foo\"}"
+		this.servletRequest.setContent(content.toByteArray(StandardCharsets.UTF_8))
+		this.servletRequest.setContentType("application/json")
+
+		val converters = listOf(StringHttpMessageConverter(), KotlinSerializationJsonHttpMessageConverter())
+		val processor = RequestResponseBodyMethodProcessor(converters, null, listOf(KotlinRequestBodyAdvice()))
+
+		val method = SampleController::readMessageEntity::javaMethod.get()!!
+		val methodParameter = MethodParameter(method, 0)
+
+		val result = processor.resolveArgument(methodParameter, container, request, factory) as Message
+
+		Assertions.assertThat(result).isEqualTo(Message("foo"))
+	}
+
 	@Suppress("UNCHECKED_CAST")
 	@Test
 	fun readGenericTypeWithKotlinSerializationJsonMessageConverter() {
@@ -163,11 +199,19 @@ class RequestResponseBodyMethodProcessorKotlinTests {
 
 		@RequestMapping
 		@ResponseBody
+		fun writeMessageEntity() = ResponseEntity.ok(Message("foo"))
+
+		@RequestMapping
+		@ResponseBody
 		fun writeMessages() = listOf(Message("foo"), Message("bar"))
 
 		@RequestMapping
 		@ResponseBody
 		fun readMessage(message: Message) = message.value
+
+		@RequestMapping
+		@ResponseBody
+		fun readMessageEntity(entity: RequestEntity<Message>) = entity.body!!.value
 
 		@RequestMapping
 		@ResponseBody

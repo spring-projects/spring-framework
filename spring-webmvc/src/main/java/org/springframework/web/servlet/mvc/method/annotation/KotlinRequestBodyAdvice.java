@@ -28,6 +28,7 @@ import kotlin.reflect.jvm.ReflectJvmMapping;
 import org.jspecify.annotations.Nullable;
 
 import org.springframework.core.MethodParameter;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.converter.AbstractKotlinSerializationHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.SmartHttpMessageConverter;
@@ -61,6 +62,10 @@ public class KotlinRequestBodyAdvice extends RequestBodyAdviceAdapter {
 		for (KParameter p : Objects.requireNonNull(function).getParameters()) {
 			if (KParameter.Kind.VALUE.equals(p.getKind())) {
 				if (index == i++) {
+					if (HttpEntity.class.isAssignableFrom(parameter.getParameterType())) {
+						return Collections.singletonMap(KType.class.getName(),
+								Objects.requireNonNull(p.getType().getArguments().get(0).getType()));
+					}
 					return Collections.singletonMap(KType.class.getName(), p.getType());
 				}
 			}
