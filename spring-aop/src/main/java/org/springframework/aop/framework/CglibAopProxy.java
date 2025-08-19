@@ -79,6 +79,7 @@ import org.springframework.util.ObjectUtils;
  * @author Chris Beams
  * @author Dave Syer
  * @author Sebastien Deleuze
+ * @author Yongjun Hong
  * @see org.springframework.cglib.proxy.Enhancer
  * @see AdvisedSupport#setProxyTargetClass
  * @see DefaultAopProxyFactory
@@ -233,13 +234,32 @@ class CglibAopProxy implements AopProxy, Serializable {
 			}
 		}
 		catch (CodeGenerationException | IllegalArgumentException ex) {
-			throw new AopConfigException("Could not generate CGLIB subclass of " + this.advised.getTargetClass() +
-					": Common causes of this problem include using a final class or a non-visible class",
-					ex);
+			if (logger.isWarnEnabled()) {
+				logger.warn("CGLIB subclass failed: " + ex.getMessage() +
+						" - falling back to JDK dynamic proxy for " + this.advised.getTargetSource(), ex);
+			}
+			return handleCglibFailure(classLoader, ex);
 		}
 		catch (Throwable ex) {
 			// TargetSource.getTarget() failed
 			throw new AopConfigException("Unexpected AOP exception", ex);
+		}
+	}
+
+	private Object handleCglibFailure(@Nullable ClassLoader classLoader, Exception originalException) {
+		Class<?>[] interfaces = this.advised.getProxiedInterfaces();
+
+		if (interfaces.length == 0) {
+			throw new AopConfigException("Could not generate CGLIB subclass of " +
+					this.advised.getTargetClass() + " and JDK proxy fallback not possible", originalException);
+		}
+		try {
+			JdkDynamicAopProxy jdkProxy = new JdkDynamicAopProxy(this.advised);
+			return jdkProxy.getProxy(classLoader);
+		}
+		catch (Throwable ex) {
+			throw new AopConfigException("Could not generate CGLIB subclass of " +
+					this.advised.getTargetClass() + " and JDK proxy fallback failed for interfaces " + ex);
 		}
 	}
 
