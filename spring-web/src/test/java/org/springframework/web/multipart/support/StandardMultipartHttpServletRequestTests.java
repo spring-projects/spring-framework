@@ -123,15 +123,6 @@ class StandardMultipartHttpServletRequestTests {
 				.isThrownBy(() -> requestWithException(ex)).withCause(ex);
 	}
 
-	@Test  // gh-32549
-	void undertowRequestTooBigException() {
-		IOException ex = new IOException("Connection terminated as request was larger than 10000");
-
-		assertThatExceptionOfType(MaxUploadSizeExceededException.class)
-				.isThrownBy(() -> requestWithException(ex)).withCause(ex);
-	}
-
-
 	private static StandardMultipartHttpServletRequest requestWithPart(String name, String disposition, String content) {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		MockPart part = new MockPart(name, null, content.getBytes(StandardCharsets.UTF_8));
@@ -144,16 +135,6 @@ class StandardMultipartHttpServletRequestTests {
 		MockHttpServletRequest request = new MockHttpServletRequest() {
 			@Override
 			public Collection<Part> getParts() throws ServletException {
-				throw ex;
-			}
-		};
-		return new StandardMultipartHttpServletRequest(request);
-	}
-
-	private static StandardMultipartHttpServletRequest requestWithException(IOException ex) {
-		MockHttpServletRequest request = new MockHttpServletRequest() {
-			@Override
-			public Collection<Part> getParts() throws IOException {
 				throw ex;
 			}
 		};

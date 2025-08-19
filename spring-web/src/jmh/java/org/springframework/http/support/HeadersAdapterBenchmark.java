@@ -84,9 +84,8 @@ public class HeadersAdapterBenchmark {
 				case "Netty" -> new Netty4HeadersAdapter(new DefaultHttpHeaders());
 				case "HttpComponents" -> new HttpComponentsHeadersAdapter(new HttpGet("https://example.com"));
 				case "Jetty" -> new JettyHeadersAdapter(HttpFields.build());
-				// FIXME tomcat/undertow implementations (in another package)
+				// FIXME tomcat implementations (in another package)
 //				case "Tomcat" -> new TomcatHeadersAdapter(new MimeHeaders());
-//				case "Undertow" -> new UndertowHeadersAdapter(new HeaderMap());
 				default -> throw new IllegalArgumentException("Unsupported implementation: " + this.implementation);
 			};
 			initHeaders();

@@ -128,8 +128,7 @@ public abstract class AbstractHttpHandlerIntegrationTests {
 				argumentSet("Jetty", new JettyHttpServer()),
 				argumentSet("Jetty Core", new JettyCoreHttpServer()),
 				argumentSet("Reactor Netty", new ReactorHttpServer()),
-				argumentSet("Tomcat", new TomcatHttpServer()),
-				argumentSet("Undertow", new UndertowHttpServer())
+				argumentSet("Tomcat", new TomcatHttpServer())
 		);
 	}
 

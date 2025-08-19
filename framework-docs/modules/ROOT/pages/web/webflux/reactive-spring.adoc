@@ -7,7 +7,7 @@ applications:
 * For server request processing there are two levels of support.
 ** xref:web/webflux/reactive-spring.adoc#webflux-httphandler[HttpHandler]: Basic contract for HTTP request handling with
 non-blocking I/O and Reactive Streams back pressure, along with adapters for Reactor Netty,
-Undertow, Tomcat, Jetty, and any Servlet container.
+Tomcat, Jetty, and any Servlet container.
 ** xref:web/webflux/reactive-spring.adoc#webflux-web-handler-api[`WebHandler` API]: Slightly higher level, general-purpose web API for
 request handling, on top of which concrete programming models such as annotated
 controllers and functional endpoints are built.
@@ -40,10 +40,6 @@ The following table describes the supported server APIs:
 | Netty API
 | {reactor-github-org}/reactor-netty[Reactor Netty]
 
-| Undertow
-| Undertow API
-| spring-web: Undertow to Reactive Streams bridge
-
 | Tomcat
 | Servlet non-blocking I/O; Tomcat API to read and write ByteBuffers vs byte[]
 | spring-web: Servlet non-blocking I/O to Reactive Streams bridge
@@ -66,10 +62,6 @@ The following table describes server dependencies (also see
 |Reactor Netty
 |io.projectreactor.netty
 |reactor-netty
-
-|Undertow
-|io.undertow
-|undertow-core
 
 |Tomcat
 |org.apache.tomcat.embed
@@ -101,30 +93,6 @@ Kotlin::
 	val handler: HttpHandler = ...
 	val adapter = ReactorHttpHandlerAdapter(handler)
 	HttpServer.create().host(host).port(port).handle(adapter).bindNow()
-----
-======
-
-*Undertow*
-[tabs]
-======
-Java::
-+
-[source,java,indent=0,subs="verbatim,quotes"]
-----
-	HttpHandler handler = ...
-	UndertowHttpHandlerAdapter adapter = new UndertowHttpHandlerAdapter(handler);
-	Undertow server = Undertow.builder().addHttpListener(port, host).setHandler(adapter).build();
-	server.start();
-----
-
-Kotlin::
-+
-[source,kotlin,indent=0,subs="verbatim,quotes"]
-----
-	val handler: HttpHandler = ...
-	val adapter = UndertowHttpHandlerAdapter(handler)
-	val server = Undertow.builder().addHttpListener(port, host).setHandler(adapter).build()
-	server.start()
 ----
 ======
 

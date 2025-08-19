@@ -127,7 +127,7 @@ You have maximum choice of libraries, since, historically, most are blocking.
 
 * If you are already shopping for a non-blocking web stack, Spring WebFlux offers the same
 execution model benefits as others in this space and also provides a choice of servers
-(Netty, Tomcat, Jetty, Undertow, and Servlet containers), a choice of programming models
+(Netty, Tomcat, Jetty, and Servlet containers), a choice of programming models
 (annotated controllers and functional web endpoints), and a choice of reactive libraries
 (Reactor, RxJava, or other).
 
@@ -165,7 +165,7 @@ unsure what benefits to look for, start by learning about how non-blocking I/O w
 == Servers
 
 Spring WebFlux is supported on Tomcat, Jetty, Servlet containers, as well as on
-non-Servlet runtimes such as Netty and Undertow. All servers are adapted to a low-level,
+non-Servlet runtimes such as Netty. All servers are adapted to a low-level,
 xref:web/webflux/reactive-spring.adoc#webflux-httphandler[common API] so that higher-level
 xref:web/webflux/new-framework.adoc#webflux-programming-models[programming models] can be supported across servers.
 
@@ -175,7 +175,7 @@ xref:web/webflux/dispatcher-handler.adoc#webflux-framework-config[WebFlux infras
 lines of code.
 
 Spring Boot has a WebFlux starter that automates these steps. By default, the starter uses
-Netty, but it is easy to switch to Tomcat, Jetty, or Undertow by changing your
+Netty, but it is easy to switch to Tomcat, or Jetty by changing your
 Maven or Gradle dependencies. Spring Boot defaults to Netty, because it is more widely
 used in the asynchronous, non-blocking space and lets a client and a server share resources.
 
@@ -187,8 +187,6 @@ adapter. It is not exposed for direct use.
 
 NOTE: It is strongly advised not to map Servlet filters or directly manipulate the Servlet API in the context of a WebFlux application.
 For the reasons listed above, mixing blocking I/O and non-blocking I/O in the same context will cause runtime issues.
-
-For Undertow, Spring WebFlux uses Undertow APIs directly without the Servlet API.
 
 
 [[webflux-performance]]

@@ -73,7 +73,7 @@ As of Spring Framework 6.0, Spring has been upgraded to the Jakarta EE 9 level
 traditional `javax` packages. With EE 9 as the minimum and EE 10 supported already,
 Spring is prepared to provide out-of-the-box support for the further evolution of
 the Jakarta EE APIs. Spring Framework 6.0 is fully compatible with Tomcat 10.1,
-Jetty 11 and Undertow 2.3 as web servers, and also with Hibernate ORM 6.1.
+Jetty 11 as web servers, and also with Hibernate ORM 6.1.
 
 Over time, the role of Java/Jakarta EE in application development has evolved. In the
 early days of J2EE and Spring, applications were created to be deployed to an application

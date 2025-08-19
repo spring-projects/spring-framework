@@ -367,7 +367,7 @@ subsequently use `DataBufferUtils.release(dataBuffer)` when the buffers are cons
 `WebSocketHandlerAdapter` delegates to a `WebSocketService`. By default, that is an instance
 of `HandshakeWebSocketService`, which performs basic checks on the WebSocket request and
 then uses `RequestUpgradeStrategy` for the server in use. Currently, there is built-in
-support for Reactor Netty, Tomcat, Jetty, and Undertow.
+support for Reactor Netty, Tomcat, and Jetty.
 
 `HandshakeWebSocketService` exposes a `sessionAttributePredicate` property that allows
 setting a `Predicate<String>` to extract attributes from the `WebSession` and insert them
@@ -446,7 +446,7 @@ specify CORS settings by URL pattern. If both are specified, they are combined b
 === Client
 
 Spring WebFlux provides a `WebSocketClient` abstraction with implementations for
-Reactor Netty, Tomcat, Jetty, Undertow, and standard Java (that is, JSR-356).
+Reactor Netty, Tomcat, Jetty, and standard Java (that is, JSR-356).
 
 NOTE: The Tomcat client is effectively an extension of the standard Java one with some extra
 functionality in the `WebSocketSession` handling to take advantage of the Tomcat-specific

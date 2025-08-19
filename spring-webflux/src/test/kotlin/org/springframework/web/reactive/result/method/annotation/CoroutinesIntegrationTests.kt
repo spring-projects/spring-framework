@@ -38,7 +38,6 @@ import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.client.HttpServerErrorException
 import org.springframework.web.reactive.config.EnableWebFlux
 import org.springframework.web.testfixture.http.server.reactive.bootstrap.HttpServer
-import org.springframework.web.testfixture.http.server.reactive.bootstrap.UndertowHttpServer
 import reactor.core.publisher.Flux
 
 class CoroutinesIntegrationTests : AbstractRequestMappingIntegrationTests() {
@@ -116,8 +115,6 @@ class CoroutinesIntegrationTests : AbstractRequestMappingIntegrationTests() {
 
 	@ParameterizedHttpServerTest
 	fun `Suspending handler method returning ResponseEntity of Flux `(httpServer: HttpServer) {
-		assumeFalse(httpServer is UndertowHttpServer, "Undertow currently fails")
-
 		startServer(httpServer)
 
 		val entity = performGet("/entity-flux", HttpHeaders.EMPTY, String::class.java)

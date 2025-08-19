@@ -34,8 +34,8 @@ import org.springframework.util.StringUtils;
  * event-listener write APIs and Reactive Streams.
  *
  * <p>Specifically a base class for writing to the HTTP response body with
- * Servlet non-blocking I/O and Undertow XNIO as well for writing WebSocket
- * messages through the Jakarta WebSocket API (JSR-356), Jetty, and Undertow.
+ * Servlet non-blocking I/O as well for writing WebSocket
+ * messages through the Jakarta WebSocket API (JSR-356), and Jetty.
  *
  * @author Arjen Poutsma
  * @author Violeta Georgieva

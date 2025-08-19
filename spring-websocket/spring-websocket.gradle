@@ -7,8 +7,6 @@ dependencies {
 	optional(project(":spring-messaging"))
 	optional(project(":spring-webmvc"))
 	optional("com.fasterxml.jackson.core:jackson-databind")
-	optional("io.undertow:undertow-servlet")
-	optional("io.undertow:undertow-websockets-jsr")
 	optional("jakarta.servlet:jakarta.servlet-api")
 	optional("jakarta.websocket:jakarta.websocket-api")
 	optional("jakarta.websocket:jakarta.websocket-client-api")

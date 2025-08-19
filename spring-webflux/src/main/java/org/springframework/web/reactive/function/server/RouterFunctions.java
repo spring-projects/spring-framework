@@ -56,7 +56,7 @@ import org.springframework.web.util.pattern.PathPatternParser;
  *
  * <p>Additionally, this class can {@linkplain #toHttpHandler(RouterFunction) transform}
  * a {@code RouterFunction} into an {@code HttpHandler}, which can be run in Servlet
- * environments, Reactor, or Undertow.
+ * environments, or Reactor.
  *
  * @author Arjen Poutsma
  * @author Sebastien Deleuze
@@ -272,8 +272,6 @@ public abstract class RouterFunctions {
 	 * {@link org.springframework.http.server.reactive.ServletHttpHandlerAdapter}</li>
 	 * <li>Reactor using the
 	 * {@link org.springframework.http.server.reactive.ReactorHttpHandlerAdapter}
-	 * <li>Undertow using the
-	 * {@link org.springframework.http.server.reactive.UndertowHttpHandlerAdapter}</li>
 	 * </ul>
 	 * <p>Note that {@code HttpWebHandlerAdapter} also implements {@link WebHandler},
 	 * allowing for additional filter and exception handler registration through
@@ -294,8 +292,6 @@ public abstract class RouterFunctions {
 	 * {@link org.springframework.http.server.reactive.ServletHttpHandlerAdapter}</li>
 	 * <li>Reactor using the
 	 * {@link org.springframework.http.server.reactive.ReactorHttpHandlerAdapter}</li>
-	 * <li>Undertow using the
-	 * {@link org.springframework.http.server.reactive.UndertowHttpHandlerAdapter}</li>
 	 * </ul>
 	 * @param routerFunction the router function to convert
 	 * @param strategies the strategies to use

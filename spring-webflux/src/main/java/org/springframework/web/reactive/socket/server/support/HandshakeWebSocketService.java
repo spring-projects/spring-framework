@@ -48,7 +48,6 @@ import org.springframework.web.reactive.socket.server.upgrade.JettyCoreRequestUp
 import org.springframework.web.reactive.socket.server.upgrade.JettyRequestUpgradeStrategy;
 import org.springframework.web.reactive.socket.server.upgrade.ReactorNettyRequestUpgradeStrategy;
 import org.springframework.web.reactive.socket.server.upgrade.StandardWebSocketUpgradeStrategy;
-import org.springframework.web.reactive.socket.server.upgrade.UndertowRequestUpgradeStrategy;
 import org.springframework.web.server.MethodNotAllowedException;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.ServerWebInputException;
@@ -79,8 +78,6 @@ public class HandshakeWebSocketService implements WebSocketService, Lifecycle {
 
 	private static final boolean jettyCoreWsPresent;
 
-	private static final boolean undertowWsPresent;
-
 	private static final boolean reactorNettyPresent;
 
 	static {
@@ -89,8 +86,6 @@ public class HandshakeWebSocketService implements WebSocketService, Lifecycle {
 				"org.eclipse.jetty.ee11.websocket.server.JettyWebSocketServerContainer", classLoader);
 		jettyCoreWsPresent = ClassUtils.isPresent(
 				"org.eclipse.jetty.websocket.server.ServerWebSocketContainer", classLoader);
-		undertowWsPresent = ClassUtils.isPresent(
-				"io.undertow.websockets.WebSocketProtocolHandshakeHandler", classLoader);
 		reactorNettyPresent = ClassUtils.isPresent(
 				"reactor.netty.http.server.HttpServerResponse", classLoader);
 	}
@@ -275,9 +270,6 @@ public class HandshakeWebSocketService implements WebSocketService, Lifecycle {
 		}
 		else if (jettyCoreWsPresent) {
 			return new JettyCoreRequestUpgradeStrategy();
-		}
-		else if (undertowWsPresent) {
-			return new UndertowRequestUpgradeStrategy();
 		}
 		else if (reactorNettyPresent) {
 			return new ReactorNettyRequestUpgradeStrategy();

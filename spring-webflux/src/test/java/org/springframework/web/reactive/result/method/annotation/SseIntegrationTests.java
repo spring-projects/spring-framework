@@ -57,7 +57,6 @@ import org.springframework.web.testfixture.http.server.reactive.bootstrap.JettyC
 import org.springframework.web.testfixture.http.server.reactive.bootstrap.JettyHttpServer;
 import org.springframework.web.testfixture.http.server.reactive.bootstrap.ReactorHttpServer;
 import org.springframework.web.testfixture.http.server.reactive.bootstrap.TomcatHttpServer;
-import org.springframework.web.testfixture.http.server.reactive.bootstrap.UndertowHttpServer;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
@@ -314,10 +313,7 @@ class SseIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 				args(new ReactorHttpServer(), new HttpComponentsClientHttpConnector()),
 				args(new TomcatHttpServer(), new ReactorClientHttpConnector()),
 				args(new TomcatHttpServer(), new JettyClientHttpConnector()),
-				args(new TomcatHttpServer(), new HttpComponentsClientHttpConnector()),
-				args(new UndertowHttpServer(), new ReactorClientHttpConnector()),
-				args(new UndertowHttpServer(), new JettyClientHttpConnector()),
-				args(new UndertowHttpServer(), new HttpComponentsClientHttpConnector())
+				args(new TomcatHttpServer(), new HttpComponentsClientHttpConnector())
 		);
 	}
 

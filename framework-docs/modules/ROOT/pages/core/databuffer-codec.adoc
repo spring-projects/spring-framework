@@ -3,8 +3,8 @@
 
 Java NIO provides `ByteBuffer` but many libraries build their own byte buffer API on top,
 especially for network operations where reusing buffers and/or using direct buffers is
-beneficial for performance. For example Netty has the `ByteBuf` hierarchy, Undertow uses
-XNIO, Jetty uses pooled byte buffers with a callback to be released, and so on.
+beneficial for performance. For example Netty has the `ByteBuf` hierarchy,
+Jetty uses pooled byte buffers with a callback to be released, and so on.
 The `spring-core` module provides a set of abstractions to work with various byte buffer
 APIs as follows:
 

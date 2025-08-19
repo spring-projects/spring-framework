@@ -29,8 +29,6 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 
 import io.netty.handler.codec.http.DefaultHttpHeaders;
-import io.undertow.util.HeaderMap;
-import io.undertow.util.HttpString;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.tomcat.util.http.MimeHeaders;
 import org.eclipse.jetty.http.HttpFields;
@@ -273,7 +271,6 @@ class HeadersAdaptersTests {
 				argumentSet("Map", CollectionUtils.toMultiValueMap(new LinkedCaseInsensitiveMap<>(8, Locale.ENGLISH))),
 				argumentSet("Netty", new Netty4HeadersAdapter(new DefaultHttpHeaders())),
 				argumentSet("Tomcat", new TomcatHeadersAdapter(new MimeHeaders())),
-				argumentSet("Undertow", new UndertowHeadersAdapter(new HeaderMap())),
 				argumentSet("Jetty", new JettyHeadersAdapter(HttpFields.build())),
 				argumentSet("HttpComponents", new HttpComponentsHeadersAdapter(new HttpGet("https://example.com")))
 		);
@@ -291,8 +288,6 @@ class HeadersAdaptersTests {
 				argumentSet("Netty", new Netty4HeadersAdapter(withHeaders(new DefaultHttpHeaders(), h -> h::add))),
 				argumentSet("Tomcat", new TomcatHeadersAdapter(withHeaders(new MimeHeaders(),
 						h -> (k, v) -> h.addValue(k).setString(v)))),
-				argumentSet("Undertow", new UndertowHeadersAdapter(withHeaders(new HeaderMap(),
-						h -> (k, v) -> h.add(HttpString.tryFromString(k), v)))),
 				argumentSet("Jetty", new JettyHeadersAdapter(withHeaders(HttpFields.build(), h -> h::add))),
 				argumentSet("HttpComponents", new HttpComponentsHeadersAdapter(withHeaders(new HttpGet("https://example.com"),
 						h -> h::addHeader)))

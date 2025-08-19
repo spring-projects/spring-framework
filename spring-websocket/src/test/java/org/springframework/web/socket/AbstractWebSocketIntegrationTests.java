@@ -55,8 +55,7 @@ public abstract class AbstractWebSocketIntegrationTests {
 	static Stream<Arguments> argumentsFactory() {
 		return Stream.of(
 				arguments(named("Jetty", new JettyWebSocketTestServer()), named("Standard", new StandardWebSocketClient())),
-				arguments(named("Tomcat", new TomcatWebSocketTestServer()), named("Standard", new StandardWebSocketClient())),
-				arguments(named("Undertow", new UndertowTestServer()), named("Standard", new StandardWebSocketClient())));
+				arguments(named("Tomcat", new TomcatWebSocketTestServer()), named("Standard", new StandardWebSocketClient())));
 	}
 
 

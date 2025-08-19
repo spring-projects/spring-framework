@@ -21,7 +21,6 @@ import java.util.stream.Stream;
 
 import io.netty.handler.codec.http.DefaultHttpHeaders;
 import io.netty.handler.codec.http.ReadOnlyHttpHeaders;
-import io.undertow.util.HeaderMap;
 import org.apache.tomcat.util.http.MimeHeaders;
 import org.eclipse.jetty.http.HttpFields;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -102,7 +101,6 @@ class DefaultServerHttpRequestBuilderTests {
 				initHeader("Map", CollectionUtils.toMultiValueMap(new LinkedCaseInsensitiveMap<>(8, Locale.ENGLISH))),
 				initHeader("Netty", new Netty4HeadersAdapter(new DefaultHttpHeaders())),
 				initHeader("Tomcat", new TomcatHeadersAdapter(new MimeHeaders())),
-				initHeader("Undertow", new UndertowHeadersAdapter(new HeaderMap())),
 				initHeader("Jetty", new JettyHeadersAdapter(HttpFields.build())),
 				//immutable versions of some headers
 				argumentSet("Netty immutable", new Netty4HeadersAdapter(new ReadOnlyHttpHeaders(false,

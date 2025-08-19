@@ -60,10 +60,8 @@ import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
 import org.springframework.web.testfixture.http.server.reactive.bootstrap.AbstractHttpHandlerIntegrationTests;
 import org.springframework.web.testfixture.http.server.reactive.bootstrap.HttpServer;
-import org.springframework.web.testfixture.http.server.reactive.bootstrap.UndertowHttpServer;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 class MultipartWebClientIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 
@@ -168,8 +166,6 @@ class MultipartWebClientIntegrationTests extends AbstractHttpHandlerIntegrationT
 
 	@ParameterizedHttpServerTest
 	void transferTo(HttpServer httpServer) throws Exception {
-		// TODO Determine why Undertow fails: https://github.com/spring-projects/spring-framework/issues/25310
-		assumeFalse(httpServer instanceof UndertowHttpServer, "Undertow currently fails with transferTo");
 		startServer(httpServer);
 
 		Flux<String> result = webClient
