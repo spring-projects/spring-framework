@@ -20,8 +20,6 @@ import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
 import java.lang.reflect.Method;
 
-import org.jspecify.annotations.NonNull;
-
 import org.springframework.core.Ordered;
 
 /**
@@ -44,7 +42,7 @@ import org.springframework.core.Ordered;
 public class ExtendedBeanInfoFactory extends StandardBeanInfoFactory {
 
 	@Override
-	public @NonNull BeanInfo getBeanInfo(Class<?> beanClass) throws IntrospectionException {
+	public BeanInfo getBeanInfo(Class<?> beanClass) throws IntrospectionException {
 		BeanInfo beanInfo = super.getBeanInfo(beanClass);
 		return (supports(beanClass) ? new ExtendedBeanInfo(beanInfo) : beanInfo);
 	}

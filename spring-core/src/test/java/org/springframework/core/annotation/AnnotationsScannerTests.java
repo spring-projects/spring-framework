@@ -29,7 +29,6 @@ import java.util.Objects;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 
@@ -470,13 +469,13 @@ class AnnotationsScannerTests {
 				new AnnotationsProcessor<Object, String>() {
 
 					@Override
-					public @NonNull String doWithAggregate(Object context, int aggregateIndex) {
+					public String doWithAggregate(Object context, int aggregateIndex) {
 						return "";
 					}
 
 					@Override
-					public @NonNull String doWithAnnotations(Object context, int aggregateIndex,
-							@Nullable Object source, @Nullable Annotation @Nullable [] annotations) {
+					public String doWithAnnotations(Object context, int aggregateIndex,
+							@Nullable Object source, @Nullable Annotation[] annotations) {
 						throw new IllegalStateException("Should not call");
 					}
 
@@ -502,13 +501,13 @@ class AnnotationsScannerTests {
 				new AnnotationsProcessor<Object, String>() {
 
 					@Override
-					public @NonNull String doWithAnnotations(Object context, int aggregateIndex,
-							@Nullable Object source, @Nullable Annotation @Nullable [] annotations) {
+					public String doWithAnnotations(Object context, int aggregateIndex,
+							@Nullable Object source, @Nullable Annotation[] annotations) {
 						return "K";
 					}
 
 					@Override
-					public @NonNull String finish(@Nullable String result) {
+					public String finish(@Nullable String result) {
 						return "O" + result;
 					}
 

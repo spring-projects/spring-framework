@@ -29,7 +29,6 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -483,7 +482,7 @@ final class TypeMappedAnnotations implements MergedAnnotations {
 		}
 
 		@Override
-		public @NonNull List<Aggregate> finish(@Nullable List<Aggregate> processResult) {
+		public List<Aggregate> finish(@Nullable List<Aggregate> processResult) {
 			return this.aggregates;
 		}
 	}
