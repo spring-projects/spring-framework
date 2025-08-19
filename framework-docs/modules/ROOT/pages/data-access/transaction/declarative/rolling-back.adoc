@@ -86,11 +86,13 @@ rollback rules may be configured via the `rollbackFor`/`noRollbackFor` and
 `rollbackForClassName`/`noRollbackForClassName` attributes, which allow rules to be
 defined based on exception types or patterns, respectively.
 
-When a rollback rule is defined with an exception type, that type will be used to match
-against the type of a thrown exception and its super types, providing type safety and
-avoiding any unintentional matches that may occur when using a pattern. For example, a
-value of `jakarta.servlet.ServletException.class` will only match thrown exceptions of
-type `jakarta.servlet.ServletException` and its subclasses.
+When a rollback rule is defined with an exception type – for example, via `rollbackFor` –
+that type will be used to match against the type of a thrown exception. Specifically,
+given a configured exception type `C`, a thrown exception of type `T` will be considered
+a match against `C` if `T` is equal to `C` or a subclass of `C`. This provides type
+safety and avoids any unintentional matches that may occur when using a pattern. For
+example, a value of `jakarta.servlet.ServletException.class` will only match thrown
+exceptions of type `jakarta.servlet.ServletException` and its subclasses.
 
 When a rollback rule is defined with an exception pattern, the pattern can be a fully
 qualified class name or a substring of a fully qualified class name for an exception type
