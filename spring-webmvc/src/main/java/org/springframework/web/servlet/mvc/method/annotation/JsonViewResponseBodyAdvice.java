@@ -33,11 +33,14 @@ import org.springframework.util.Assert;
 /**
  * A {@link ResponseBodyAdvice} implementation that adds support for Jackson's
  * {@code @JsonView} annotation declared on a Spring MVC {@code @RequestMapping}
- * or {@code @ExceptionHandler} method.
+ * or {@code @ExceptionHandler} method, or at the controller class level.
  *
  * <p>The serialization view specified in the annotation will be passed in to the
  * {@link org.springframework.http.converter.json.MappingJackson2HttpMessageConverter}
  * which will then use it to serialize the response body.
+ *
+ * <p>When both method-level and class-level {@code @JsonView} annotations are present,
+ * the method-level annotation takes precedence.
  *
  * <p>Note that despite {@code @JsonView} allowing for more than one class to
  * be specified, the use for a response body advice is only supported with
@@ -53,7 +56,9 @@ public class JsonViewResponseBodyAdvice extends AbstractMappingJacksonResponseBo
 
 	@Override
 	public boolean supports(MethodParameter returnType, Class<? extends HttpMessageConverter<?>> converterType) {
-		return super.supports(returnType, converterType) && returnType.hasMethodAnnotation(JsonView.class);
+		return super.supports(returnType, converterType) && 
+			(returnType.hasMethodAnnotation(JsonView.class) || 
+			 returnType.getDeclaringClass().isAnnotationPresent(JsonView.class));
 	}
 
 	@Override
@@ -70,6 +75,12 @@ public class JsonViewResponseBodyAdvice extends AbstractMappingJacksonResponseBo
 
 	private static Class<?> getJsonView(MethodParameter returnType) {
 		JsonView ann = returnType.getMethodAnnotation(JsonView.class);
+		
+		// If no method-level annotation, check for class-level annotation
+		if (ann == null) {
+			ann = returnType.getDeclaringClass().getAnnotation(JsonView.class);
+		}
+		
 		Assert.state(ann != null, "No JsonView annotation");
 
 		Class<?>[] classes = ann.value();
