@@ -189,13 +189,13 @@ This observation uses the `io.micrometer.jakarta9.instrument.jms.DefaultJmsProce
 [[observability.http-server]]
 == HTTP Server instrumentation
 
-HTTP server exchange observations are created with the name `"http.server.requests"` for Servlet and Reactive applications.
+HTTP server exchange observations are created with the name `"http.server.requests"` for Servlet and Reactive applications,
+or "http.server.request.duration" if using the OpenTelemetry convention.
 
 [[observability.http-server.servlet]]
 === Servlet applications
 
 Applications need to configure the `org.springframework.web.filter.ServerHttpObservationFilter` Servlet filter in their application.
-It uses the `org.springframework.http.server.observation.DefaultServerRequestObservationConvention` by default, backed by the `ServerRequestObservationContext`.
 
 This will only record an observation as an error if the `Exception` has not been handled by the web framework and has bubbled up to the Servlet filter.
 Typically, all exceptions handled by Spring MVC's `@ExceptionHandler` and xref:web/webmvc/mvc-ann-rest-exceptions.adoc[`ProblemDetail` support] will not be recorded with the observation.
@@ -206,6 +206,11 @@ include-code::./UserController[]
 NOTE: Because the instrumentation is done at the Servlet Filter level, the observation scope only covers the filters ordered after this one as well as the handling of the request.
 Typically, Servlet container error handling is performed at a lower level and won't have any active observation or span.
 For this use case, a container-specific implementation is required, such as a `org.apache.catalina.Valve` for Tomcat; this is outside the scope of this project.
+
+[[observability.http-server.servlet.default]]
+==== Default Semantic Convention
+
+It uses the `org.springframework.http.server.observation.DefaultServerRequestObservationConvention` by default, backed by the `ServerRequestObservationContext`.
 
 By default, the following `KeyValues` are created:
 
@@ -227,6 +232,16 @@ By default, the following `KeyValues` are created:
 |Name | Description
 |`http.url` _(required)_|HTTP request URI.
 |===
+
+
+[[observability.http-server.servlet.otel]]
+==== OpenTelemetry Semantic Convention
+
+An OpenTelemetry variant is available with `org.springframework.http.server.observation.OpenTelemetryServerRequestObservationConvention`, backed by the `ServerRequestObservationContext`.
+
+This variant complies with the https://github.com/open-telemetry/semantic-conventions/blob/v1.36.0/docs/http/http-metrics.md[OpenTelemetry Semantic Conventions for HTTP Metrics (v1.36.0)]
+and the https://github.com/open-telemetry/semantic-conventions/blob/v1.36.0/docs/http/http-spans.md[OpenTelemetry Semantic Conventions for HTTP Spans (v1.36.0)].
+
 
 [[observability.http-server.reactive]]
 === Reactive applications
