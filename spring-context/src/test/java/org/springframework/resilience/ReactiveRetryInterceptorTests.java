@@ -190,6 +190,26 @@ class ReactiveRetryInterceptorTests {
 	}
 
 	@Test
+	void adaptReactiveResultWithZeroAttempts() {
+		// Test minimal retry configuration: maxAttempts=1, delay=0, jitter=0, multiplier=1.0, maxDelay=0
+		MinimalRetryBean target = new MinimalRetryBean();
+		ProxyFactory pf = new ProxyFactory();
+		pf.setTarget(target);
+		pf.addAdvice(new SimpleRetryInterceptor(
+				new MethodRetrySpec((m, t) -> true, 0, Duration.ZERO, Duration.ZERO, 1.0, Duration.ZERO)));
+		MinimalRetryBean proxy = (MinimalRetryBean) pf.getProxy();
+
+		// Should execute only 1 time, because maxAttempts=0 means initial call only
+		assertThatIllegalStateException()
+				.isThrownBy(() -> proxy.retryOperation().block())
+				.satisfies(isRetryExhaustedException())
+				.havingCause()
+				.isInstanceOf(IOException.class)
+				.withMessage("1");
+		assertThat(target.counter.get()).isEqualTo(1);
+	}
+
+	@Test
 	void adaptReactiveResultWithZeroDelayAndJitter() {
 		// Test case where delay=0 and jitter>0
 		ZeroDelayJitterBean target = new ZeroDelayJitterBean();

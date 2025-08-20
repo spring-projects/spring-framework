@@ -28,6 +28,7 @@ import java.util.Objects;
  * exceptions}.
  *
  * @author Mahmoud Ben Hassine
+ * @author Juergen Hoeller
  * @since 7.0
  * @see RetryOperations
  */
@@ -51,8 +52,16 @@ public class RetryException extends Exception {
 	 * Get the last exception thrown by the {@link Retryable} operation.
 	 */
 	@Override
-	public final synchronized Throwable getCause() {
+	public final Throwable getCause() {
 		return Objects.requireNonNull(super.getCause());
+	}
+
+	/**
+	 * Return the number of retry attempts, or 0 if no retry has been attempted
+	 * after the initial invocation at all.
+	 */
+	public int getRetryCount() {
+		return getSuppressed().length;
 	}
 
 }

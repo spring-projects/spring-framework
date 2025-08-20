@@ -32,9 +32,6 @@ import org.junit.jupiter.params.provider.Arguments.ArgumentSet;
 import org.junit.jupiter.params.provider.FieldSource;
 import org.mockito.InOrder;
 
-import org.springframework.util.backoff.BackOff;
-import org.springframework.util.backoff.FixedBackOff;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.jupiter.params.provider.Arguments.argumentSet;
@@ -51,16 +48,13 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
  *
  * @author Mahmoud Ben Hassine
  * @author Sam Brannen
+ * @author Juergen Hoeller
  * @since 7.0
  * @see RetryPolicyTests
  */
 class RetryTemplateTests {
 
-	private final RetryPolicy retryPolicy =
-			RetryPolicy.builder()
-				.maxAttempts(3)
-				.delay(Duration.ZERO)
-				.build();
+	private final RetryPolicy retryPolicy = RetryPolicy.builder().maxAttempts(3).delay(Duration.ZERO).build();
 
 	private final RetryTemplate retryTemplate = new RetryTemplate(retryPolicy);
 
@@ -104,7 +98,8 @@ class RetryTemplateTests {
 				.isThrownBy(() -> retryTemplate.execute(retryable))
 				.withMessageMatching("Retry policy for operation '.+?' exhausted; aborting execution")
 				.withCause(exception)
-				.satisfies(throwable -> assertThat(throwable.getSuppressed()).isEmpty());
+				.satisfies(throwable -> assertThat(throwable.getSuppressed()).isEmpty())
+				.satisfies(throwable -> assertThat(throwable.getRetryCount()).isZero());
 
 		// RetryListener interactions:
 		inOrder.verify(retryListener).onRetryPolicyExhaustion(retryPolicy, retryable, exception);
@@ -112,19 +107,8 @@ class RetryTemplateTests {
 	}
 
 	@Test
-	void retryWithInitialFailureAndZeroRetriesBackOffPolicy() {
-		RetryPolicy retryPolicy = new RetryPolicy() {
-
-			@Override
-			public boolean shouldRetry(Throwable throwable) {
-				return true;
-			}
-
-			@Override
-			public BackOff getBackOff() {
-				return new FixedBackOff(10, 0); // Zero retries
-			}
-		};
+	void retryWithInitialFailureAndZeroRetriesFixedBackOffPolicy() {
+		RetryPolicy retryPolicy = RetryPolicy.withMaxAttempts(0);
 
 		RetryTemplate retryTemplate = new RetryTemplate(retryPolicy);
 		retryTemplate.setRetryListener(retryListener);
@@ -137,7 +121,31 @@ class RetryTemplateTests {
 				.isThrownBy(() -> retryTemplate.execute(retryable))
 				.withMessageMatching("Retry policy for operation '.+?' exhausted; aborting execution")
 				.withCause(exception)
-				.satisfies(throwable -> assertThat(throwable.getSuppressed()).isEmpty());
+				.satisfies(throwable -> assertThat(throwable.getSuppressed()).isEmpty())
+				.satisfies(throwable -> assertThat(throwable.getRetryCount()).isZero());
+
+		// RetryListener interactions:
+		inOrder.verify(retryListener).onRetryPolicyExhaustion(retryPolicy, retryable, exception);
+		verifyNoMoreInteractions(retryListener);
+	}
+
+	@Test
+	void retryWithInitialFailureAndZeroRetriesBackOffPolicyFromBuilder() {
+		RetryPolicy retryPolicy = RetryPolicy.builder().maxAttempts(0).build();
+
+		RetryTemplate retryTemplate = new RetryTemplate(retryPolicy);
+		retryTemplate.setRetryListener(retryListener);
+		Exception exception = new RuntimeException("Boom!");
+		Retryable<String> retryable = () -> {
+			throw exception;
+		};
+
+		assertThatExceptionOfType(RetryException.class)
+				.isThrownBy(() -> retryTemplate.execute(retryable))
+				.withMessageMatching("Retry policy for operation '.+?' exhausted; aborting execution")
+				.withCause(exception)
+				.satisfies(throwable -> assertThat(throwable.getSuppressed()).isEmpty())
+				.satisfies(throwable -> assertThat(throwable.getRetryCount()).isZero());
 
 		// RetryListener interactions:
 		inOrder.verify(retryListener).onRetryPolicyExhaustion(retryPolicy, retryable, exception);
@@ -282,7 +290,8 @@ class RetryTemplateTests {
 				.satisfies(hasSuppressedExceptionsSatisfyingExactly(
 						suppressed1 -> assertThat(suppressed1).isExactlyInstanceOf(FileNotFoundException.class),
 						suppressed2 -> assertThat(suppressed2).isExactlyInstanceOf(IOException.class)
-				));
+				))
+				.satisfies(throwable -> assertThat(throwable.getRetryCount()).isEqualTo(2));
 		// 3 = 1 initial invocation + 2 retry attempts
 		assertThat(invocationCount).hasValue(3);
 
@@ -344,7 +353,8 @@ class RetryTemplateTests {
 				.satisfies(hasSuppressedExceptionsSatisfyingExactly(
 					suppressed1 -> assertThat(suppressed1).isExactlyInstanceOf(IOException.class),
 					suppressed2 -> assertThat(suppressed2).isExactlyInstanceOf(IOException.class)
-				));
+				))
+				.satisfies(throwable -> assertThat(throwable.getRetryCount()).isEqualTo(2));
 		// 3 = 1 initial invocation + 2 retry attempts
 		assertThat(invocationCount).hasValue(3);
 
@@ -366,8 +376,9 @@ class RetryTemplateTests {
 	}
 
 	@SafeVarargs
-	private static final Consumer<Throwable> hasSuppressedExceptionsSatisfyingExactly(
+	private static Consumer<Throwable> hasSuppressedExceptionsSatisfyingExactly(
 			ThrowingConsumer<? super Throwable>... requirements) {
+
 		return throwable -> assertThat(throwable.getSuppressed()).satisfiesExactly(requirements);
 	}
 
@@ -375,6 +386,7 @@ class RetryTemplateTests {
 	@SuppressWarnings("serial")
 	private static class CustomFileNotFoundException extends FileNotFoundException {
 	}
+
 
 	/**
 	 * Custom {@link RuntimeException} that implements {@link #equals(Object)}

@@ -55,6 +55,18 @@ class MaxAttemptsRetryPolicyTests {
 	}
 
 	@Test
+	void maxAttemptsZero() {
+		var retryPolicy = RetryPolicy.builder().maxAttempts(0).delay(Duration.ZERO).build();
+		var backOffExecution = retryPolicy.getBackOff().start();
+		var throwable = mock(Throwable.class);
+
+		assertThat(retryPolicy.shouldRetry(throwable)).isTrue();
+		assertThat(backOffExecution.nextBackOff()).isEqualTo(STOP);
+		assertThat(retryPolicy.shouldRetry(throwable)).isTrue();
+		assertThat(backOffExecution.nextBackOff()).isEqualTo(STOP);
+	}
+
+	@Test
 	void maxAttemptsAndPredicate() {
 		var retryPolicy = RetryPolicy.builder()
 				.maxAttempts(4)
@@ -114,6 +126,7 @@ class MaxAttemptsRetryPolicyTests {
 	@SuppressWarnings("serial")
 	private static class CustomNumberFormatException extends NumberFormatException {
 	}
+
 
 	@SuppressWarnings("serial")
 	private static class CustomFileSystemException extends FileSystemException {

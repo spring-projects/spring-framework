@@ -66,11 +66,8 @@ class RetryPolicyTests {
 		@Test
 		void withMaxAttemptsPreconditions() {
 			assertThatIllegalArgumentException()
-					.isThrownBy(() -> RetryPolicy.withMaxAttempts(0))
-					.withMessage("Invalid maxAttempts (0): must be greater than zero.");
-			assertThatIllegalArgumentException()
 					.isThrownBy(() -> RetryPolicy.withMaxAttempts(-1))
-					.withMessage("Invalid maxAttempts (-1): must be greater than zero.");
+					.withMessageStartingWith("Invalid maxAttempts (-1)");
 		}
 
 		@Test
@@ -116,11 +113,8 @@ class RetryPolicyTests {
 		@Test
 		void maxAttemptsPreconditions() {
 			assertThatIllegalArgumentException()
-					.isThrownBy(() -> RetryPolicy.builder().maxAttempts(0))
-					.withMessage("Invalid maxAttempts (0): must be greater than zero.");
-			assertThatIllegalArgumentException()
 					.isThrownBy(() -> RetryPolicy.builder().maxAttempts(-1))
-					.withMessage("Invalid maxAttempts (-1): must be greater than zero.");
+					.withMessageStartingWith("Invalid maxAttempts (-1)");
 		}
 
 		@Test

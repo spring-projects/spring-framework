@@ -195,6 +195,31 @@ class RetryInterceptorTests {
 	}
 
 	@Test
+	void withPostProcessorForClassWithZeroAttempts() {
+		Properties props = new Properties();
+		props.setProperty("delay", "10");
+		props.setProperty("jitter", "5");
+		props.setProperty("multiplier", "2.0");
+		props.setProperty("maxDelay", "40");
+		props.setProperty("limitedAttempts", "0");
+
+		GenericApplicationContext ctx = new GenericApplicationContext();
+		ctx.getEnvironment().getPropertySources().addFirst(new PropertiesPropertySource("props", props));
+		ctx.registerBeanDefinition("bean", new RootBeanDefinition(AnnotatedClassBeanWithStrings.class));
+		ctx.registerBeanDefinition("bpp", new RootBeanDefinition(RetryAnnotationBeanPostProcessor.class));
+		ctx.refresh();
+		AnnotatedClassBeanWithStrings proxy = ctx.getBean(AnnotatedClassBeanWithStrings.class);
+		AnnotatedClassBeanWithStrings target = (AnnotatedClassBeanWithStrings) AopProxyUtils.getSingletonTarget(proxy);
+
+		assertThatIOException().isThrownBy(proxy::retryOperation).withMessage("3");
+		assertThat(target.counter).isEqualTo(3);
+		assertThatIOException().isThrownBy(proxy::otherOperation);
+		assertThat(target.counter).isEqualTo(4);
+		assertThatIOException().isThrownBy(proxy::overrideOperation);
+		assertThat(target.counter).isEqualTo(5);
+	}
+
+	@Test
 	void withEnableAnnotation() throws Exception {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.registerBeanDefinition("bean", new RootBeanDefinition(DoubleAnnotatedBean.class));

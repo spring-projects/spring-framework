@@ -45,7 +45,6 @@ class DefaultRetryPolicy implements RetryPolicy {
 	private final BackOff backOff;
 
 
-
 	DefaultRetryPolicy(Set<Class<? extends Throwable>> includes, Set<Class<? extends Throwable>> excludes,
 			@Nullable Predicate<Throwable> predicate, BackOff backOff) {
 
@@ -59,8 +58,8 @@ class DefaultRetryPolicy implements RetryPolicy {
 
 	@Override
 	public boolean shouldRetry(Throwable throwable) {
-		return this.exceptionFilter.match(throwable) &&
-				(this.predicate == null || this.predicate.test(throwable));
+		return (this.exceptionFilter.match(throwable) &&
+				(this.predicate == null || this.predicate.test(throwable)));
 	}
 
 	@Override
