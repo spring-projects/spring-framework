@@ -22,6 +22,7 @@ import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.core.MethodParameter;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
@@ -42,6 +43,7 @@ import static org.assertj.core.api.Assertions.assertThatRuntimeException;
  * Tests for {@link InvocableHandlerMethod}.
  *
  * @author Rossen Stoyanchev
+ * @author Yongjun Hong
  */
 class InvocableHandlerMethodTests {
 
@@ -168,6 +170,21 @@ class InvocableHandlerMethodTests {
 			.withMessageContaining("Illegal argument");
 	}
 
+	@Test
+	void testPrivateMethodOnCglibProxyThrowsException() throws Exception {
+		TestController target = new TestController();
+		ProxyFactory proxyFactory = new ProxyFactory(target);
+		proxyFactory.setProxyTargetClass(true);
+		Object proxy = proxyFactory.getProxy();
+
+		Method privateMethod = TestController.class.getDeclaredMethod("privateMethod");
+		InvocableHandlerMethod handlerMethod = new InvocableHandlerMethod(proxy, privateMethod);
+
+		assertThatIllegalStateException()
+				.isThrownBy(() -> handlerMethod.invokeForRequest(null, null))
+				.withMessageContaining("Cannot invoke private method [privateMethod] on a CGLIB proxy");
+	}
+
 	private InvocableHandlerMethod getInvocable(Class<?>... argTypes) {
 		Method method = ResolvableMethod.on(Handler.class).argTypes(argTypes).resolveMethod();
 		InvocableHandlerMethod handlerMethod = new InvocableHandlerMethod(new Handler(), method);
@@ -214,6 +231,14 @@ class InvocableHandlerMethodTests {
 
 			throw new IllegalArgumentException("oops, can't read");
 		}
+	}
+
+	private static class TestController {
+		public TestController() {
+			// Default constructor for proxy creation
+		}
+
+		private void privateMethod() { }
 	}
 
 }
