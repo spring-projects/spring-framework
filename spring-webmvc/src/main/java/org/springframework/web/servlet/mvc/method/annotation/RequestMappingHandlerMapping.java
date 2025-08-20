@@ -19,6 +19,7 @@ package org.springframework.web.servlet.mvc.method.annotation;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -41,6 +42,7 @@ import org.springframework.core.annotation.MergedAnnotations.SearchStrategy;
 import org.springframework.core.annotation.RepeatableContainers;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.util.StringValueResolver;
@@ -72,6 +74,7 @@ import org.springframework.web.util.UrlPathHelper;
  * @author Rossen Stoyanchev
  * @author Sam Brannen
  * @author Olga Maciaszek-Sharma
+ * @author Yongjun Hong
  * @since 3.1
  */
 @SuppressWarnings("removal")
@@ -184,6 +187,12 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	 * Uses type-level and method-level {@link RequestMapping @RequestMapping}
 	 * and {@link HttpExchange @HttpExchange} annotations to create the
 	 * {@link RequestMappingInfo}.
+	 * <p>For CGLIB proxy classes, additional validation is performed based on method visibility:
+	 * <ul>
+	 * <li>Private methods cannot be overridden and therefore cannot be used as handler methods.</li>
+	 * <li>Package-private methods from different packages are inaccessible and must be
+	 * changed to public or protected.</li>
+	 * </ul>
 	 * @return the created {@code RequestMappingInfo}, or {@code null} if the method
 	 * does not have a {@code @RequestMapping} or {@code @HttpExchange} annotation
 	 * @see #getCustomMethodCondition(Method)
@@ -191,6 +200,8 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	 */
 	@Override
 	protected @Nullable RequestMappingInfo getMappingForMethod(Method method, Class<?> handlerType) {
+		validateCglibProxyMethodVisibility(method, handlerType);
+
 		RequestMappingInfo info = createRequestMappingInfo(method);
 		if (info != null) {
 			RequestMappingInfo typeInfo = createRequestMappingInfo(handlerType);
@@ -207,6 +218,38 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 		}
 		return info;
 	}
+
+	private void validateCglibProxyMethodVisibility(Method method, Class<?> handlerType) {
+		if (isCglibProxy(handlerType)) {
+			int modifiers = method.getModifiers();
+
+			if (Modifier.isPrivate(modifiers)) {
+				throw new IllegalStateException(
+						"Private method [" + method.getName() + "] on CGLIB proxy class [" + handlerType.getName() +
+								"] cannot be used as a request handler method because private methods cannot be overridden. " +
+								"Change the method to non-private visibility or use interface-based JDK proxying instead.");
+			}
+
+			if (!Modifier.isPublic(modifiers) && !Modifier.isProtected(modifiers)) {
+				Class<?> declaringClass = method.getDeclaringClass();
+				Package methodPackage = declaringClass.getPackage();
+				Package handlerPackage = handlerType.getPackage();
+
+				if (!Objects.equals(methodPackage, handlerPackage)) {
+					throw new IllegalStateException(
+							"Package-private method [" + method.getName() + "] on CGLIB proxy class [" + declaringClass.getName() +
+									"] from package [" + methodPackage.getName() + "] cannot be advised when used by handler class [" +
+									handlerType.getName() + "] from package [" + handlerPackage.getName() + "] because it is effectively private. " +
+									"Either make the method public/protected or use interface-based JDK proxying instead.");
+				}
+			}
+		}
+	}
+
+	private boolean isCglibProxy(Class<?> beanType) {
+		return beanType.getName().contains(ClassUtils.CGLIB_CLASS_SEPARATOR);
+	}
+
 
 	@Nullable String getPathPrefix(Class<?> handlerType) {
 		for (Map.Entry<String, Predicate<Class<?>>> entry : this.pathPrefixes.entrySet()) {
