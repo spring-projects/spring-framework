@@ -2,10 +2,10 @@
 = Application Events
 
 The TestContext framework provides support for recording
-xref:core/beans/context-introduction.adoc#context-functionality-events[application events] published in the
-`ApplicationContext` so that assertions can be performed against those events within
-tests. All events published during the execution of a single test are made available via
-the `ApplicationEvents` API which allows you to process the events as a
+xref:core/beans/context-introduction.adoc#context-functionality-events[application events]
+published in the `ApplicationContext` so that assertions can be performed against those
+events within tests. All events published during the execution of a single test are made
+available via the `ApplicationEvents` API which allows you to process the events as a
 `java.util.Stream`.
 
 To use `ApplicationEvents` in your tests, do the following.
@@ -16,16 +16,23 @@ To use `ApplicationEvents` in your tests, do the following.
   that `ApplicationEventsTestExecutionListener` is registered by default and only needs
   to be manually registered if you have custom configuration via
   `@TestExecutionListeners` that does not include the default listeners.
-* Annotate a field of type `ApplicationEvents` with `@Autowired` and use that instance of
-  `ApplicationEvents` in your test and lifecycle methods (such as `@BeforeEach` and
-  `@AfterEach` methods in JUnit Jupiter).
-** When using the xref:testing/testcontext-framework/support-classes.adoc#testcontext-junit-jupiter-extension[SpringExtension for JUnit Jupiter], you may declare a method
-   parameter of type `ApplicationEvents` in a test or lifecycle method as an alternative
-   to an `@Autowired` field in the test class.
+* When using the
+  xref:testing/testcontext-framework/support-classes.adoc#testcontext-junit-jupiter-extension[SpringExtension for JUnit Jupiter],
+  declare a method parameter of type `ApplicationEvents` in a `@Test`, `@BeforeEach`, or
+  `@AfterEach` method.
+** Since `ApplicationEvents` is scoped to the lifecycle of the current test method, this
+   is the recommended approach.
+* Alternatively, you can annotate a field of type `ApplicationEvents` with `@Autowired`
+  and use that instance of `ApplicationEvents` in your test and lifecycle methods.
+
+NOTE: `ApplicationEvents` is registered with the `ApplicationContext` as a _resolvable
+dependency_ which is scoped to the lifecycle of the current test method. Consequently,
+`ApplicationEvents` cannot be accessed outside the lifecycle of a test method and cannot be
+`@Autowired` into the constructor of a test class.
 
 The following test class uses the `SpringExtension` for JUnit Jupiter and
-{assertj-docs}[AssertJ] to assert the types of application events
-published while invoking a method in a Spring-managed component:
+{assertj-docs}[AssertJ] to assert the types of application events published while
+invoking a method in a Spring-managed component:
 
 // Don't use "quotes" in the "subs" section because of the asterisks in /* ... */
 [tabs]
@@ -38,16 +45,10 @@ Java::
 	@RecordApplicationEvents // <1>
 	class OrderServiceTests {
 
-		@Autowired
-		OrderService orderService;
-
-		@Autowired
-		ApplicationEvents events; // <2>
-
 		@Test
-		void submitOrder() {
+		void submitOrder(@Autowired OrderService service, ApplicationEvents events) { // <2>
 			// Invoke method in OrderService that publishes an event
-			orderService.submitOrder(new Order(/* ... */));
+			service.submitOrder(new Order(/* ... */));
 			// Verify that an OrderSubmitted event was published
 			long numEvents = events.stream(OrderSubmitted.class).count(); // <3>
 			assertThat(numEvents).isEqualTo(1);
@@ -66,16 +67,10 @@ Kotlin::
 	@RecordApplicationEvents // <1>
 	class OrderServiceTests {
 
-		@Autowired
-		lateinit var orderService: OrderService
-
-		@Autowired
-		lateinit var events: ApplicationEvents // <2>
-
 		@Test
-		fun submitOrder() {
+		fun submitOrder(@Autowired service: OrderService, events: ApplicationEvents) { // <2>
 			// Invoke method in OrderService that publishes an event
-			orderService.submitOrder(Order(/* ... */))
+			service.submitOrder(Order(/* ... */))
 			// Verify that an OrderSubmitted event was published
 			val numEvents = events.stream(OrderSubmitted::class).count() // <3>
 			assertThat(numEvents).isEqualTo(1)
