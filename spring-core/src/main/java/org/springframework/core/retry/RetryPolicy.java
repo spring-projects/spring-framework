@@ -87,7 +87,7 @@ public interface RetryPolicy {
 	 * @see FixedBackOff
 	 */
 	static RetryPolicy withMaxAttempts(long maxAttempts) {
-		Assert.isTrue(maxAttempts > 0, "Max attempts must be greater than zero");
+		assertMaxAttemptsIsPositive(maxAttempts);
 		return builder().backOff(new FixedBackOff(Builder.DEFAULT_DELAY, maxAttempts)).build();
 	}
 
@@ -97,6 +97,22 @@ public interface RetryPolicy {
 	 */
 	static Builder builder() {
 		return new Builder();
+	}
+
+
+	private static void assertMaxAttemptsIsPositive(long maxAttempts) {
+		Assert.isTrue(maxAttempts > 0,
+				() -> "Invalid maxAttempts (%d): must be greater than zero.".formatted(maxAttempts));
+	}
+
+	private static void assertIsPositive(String name, Duration duration) {
+		Assert.isTrue((!duration.isNegative() && !duration.isZero()),
+				() -> "Invalid %s (%dms): must be greater than zero.".formatted(name, duration.toMillis()));
+	}
+
+	private static void assertIsNotNegative(String name, Duration duration) {
+		Assert.isTrue(!duration.isNegative(),
+				() -> "Invalid %s (%dms): must be greater than or equal to zero.".formatted(name, duration.toMillis()));
 	}
 
 
@@ -180,7 +196,7 @@ public interface RetryPolicy {
 		 * @return this {@code Builder} instance for chained method invocations
 		 */
 		public Builder maxAttempts(long maxAttempts) {
-			Assert.isTrue(maxAttempts > 0, "Max attempts must be greater than zero");
+			assertMaxAttemptsIsPositive(maxAttempts);
 			this.maxAttempts = maxAttempts;
 			return this;
 		}
@@ -201,8 +217,7 @@ public interface RetryPolicy {
 		 * @see #maxDelay(Duration)
 		 */
 		public Builder delay(Duration delay) {
-			Assert.isTrue(!delay.isNegative(),
-					() -> "Invalid delay (%dms): must be >= 0.".formatted(delay.toMillis()));
+			assertIsNotNegative("delay", delay);
 			this.delay = delay;
 			return this;
 		}
@@ -227,8 +242,7 @@ public interface RetryPolicy {
 		 * @see #maxDelay(Duration)
 		 */
 		public Builder jitter(Duration jitter) {
-			Assert.isTrue(!jitter.isNegative(),
-					() -> "Invalid jitter (%dms): must be >= 0.".formatted(jitter.toMillis()));
+			assertIsNotNegative("jitter", jitter);
 			this.jitter = jitter;
 			return this;
 		}
@@ -243,6 +257,7 @@ public interface RetryPolicy {
 		 * <p>The supplied value will override any previously configured value.
 		 * <p>You should not specify this configuration option if you have
 		 * configured a custom {@link #backOff(BackOff) BackOff} strategy.
+		 * @param multiplier the multiplier value; must be greater than or equal to 1
 		 * @return this {@code Builder} instance for chained method invocations
 		 * @see #delay(Duration)
 		 * @see #jitter(Duration)
@@ -264,7 +279,7 @@ public interface RetryPolicy {
 		 * <p>The supplied value will override any previously configured value.
 		 * <p>You should not specify this configuration option if you have
 		 * configured a custom {@link #backOff(BackOff) BackOff} strategy.
-		 * @param maxDelay the maximum delay; must be positive
+		 * @param maxDelay the maximum delay; must be greater than zero
 		 * @return this {@code Builder} instance for chained method invocations
 		 * @see #delay(Duration)
 		 * @see #jitter(Duration)
@@ -402,11 +417,6 @@ public interface RetryPolicy {
 				backOff = exponentialBackOff;
 			}
 			return new DefaultRetryPolicy(this.includes, this.excludes, this.predicate, backOff);
-		}
-
-		private static void assertIsPositive(String name, Duration duration) {
-			Assert.isTrue((!duration.isNegative() && !duration.isZero()),
-					() -> "Invalid duration (%dms): %s must be positive.".formatted(duration.toMillis(), name));
 		}
 	}
 

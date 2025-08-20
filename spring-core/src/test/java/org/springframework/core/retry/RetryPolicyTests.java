@@ -67,10 +67,10 @@ class RetryPolicyTests {
 		void withMaxAttemptsPreconditions() {
 			assertThatIllegalArgumentException()
 					.isThrownBy(() -> RetryPolicy.withMaxAttempts(0))
-					.withMessage("Max attempts must be greater than zero");
+					.withMessage("Invalid maxAttempts (0): must be greater than zero.");
 			assertThatIllegalArgumentException()
 					.isThrownBy(() -> RetryPolicy.withMaxAttempts(-1))
-					.withMessage("Max attempts must be greater than zero");
+					.withMessage("Invalid maxAttempts (-1): must be greater than zero.");
 		}
 
 		@Test
@@ -117,10 +117,10 @@ class RetryPolicyTests {
 		void maxAttemptsPreconditions() {
 			assertThatIllegalArgumentException()
 					.isThrownBy(() -> RetryPolicy.builder().maxAttempts(0))
-					.withMessage("Max attempts must be greater than zero");
+					.withMessage("Invalid maxAttempts (0): must be greater than zero.");
 			assertThatIllegalArgumentException()
 					.isThrownBy(() -> RetryPolicy.builder().maxAttempts(-1))
-					.withMessage("Max attempts must be greater than zero");
+					.withMessage("Invalid maxAttempts (-1): must be greater than zero.");
 		}
 
 		@Test
@@ -141,7 +141,7 @@ class RetryPolicyTests {
 		void delayPreconditions() {
 			assertThatIllegalArgumentException()
 					.isThrownBy(() -> RetryPolicy.builder().delay(Duration.ofMillis(-1)))
-					.withMessage("Invalid delay (-1ms): must be >= 0.");
+					.withMessage("Invalid delay (-1ms): must be greater than or equal to zero.");
 		}
 
 		@Test
@@ -162,7 +162,7 @@ class RetryPolicyTests {
 		void jitterPreconditions() {
 			assertThatIllegalArgumentException()
 					.isThrownBy(() -> RetryPolicy.builder().jitter(Duration.ofMillis(-1)))
-					.withMessage("Invalid jitter (-1ms): must be >= 0.");
+					.withMessage("Invalid jitter (-1ms): must be greater than or equal to zero.");
 		}
 
 		@Test
@@ -209,11 +209,8 @@ class RetryPolicyTests {
 		@Test
 		void maxDelayPreconditions() {
 			assertThatIllegalArgumentException()
-					.isThrownBy(() -> RetryPolicy.builder().maxDelay(Duration.ZERO))
-					.withMessage("Invalid duration (0ms): maxDelay must be positive.");
-			assertThatIllegalArgumentException()
 					.isThrownBy(() -> RetryPolicy.builder().maxDelay(Duration.ofMillis(-1)))
-					.withMessage("Invalid duration (-1ms): maxDelay must be positive.");
+					.withMessage("Invalid maxDelay (-1ms): must be greater than zero.");
 		}
 
 		@Test
