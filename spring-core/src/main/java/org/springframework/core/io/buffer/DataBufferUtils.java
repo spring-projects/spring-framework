@@ -859,7 +859,26 @@ public abstract class DataBufferUtils {
 
 
 	/**
-	 * Base class for a {@link NestedMatcher}.
+	 * An abstract base implementation of {@link NestedMatcher} that looks for
+	 * a specific delimiter in a {@link DataBuffer}.
+	 * <p>
+	 * Uses a thread-local buffer to scan data in chunks, reducing memory
+	 * allocations and improving performance when processing large buffers.
+	 * </p>
+	 *
+	 * <p>
+	 * Each matcher keeps its own match state, so it is intended for
+	 * single-threaded use. The thread-local buffer ensures that multiple
+	 * threads can run their own matchers independently without interfering.
+	 * </p>
+	 *
+	 * <p>
+	 * Subclasses can extend this class to add custom matching behavior while
+	 * reusing the built-in delimiter tracking and scanning logic.
+	 * </p>
+	 *
+	 * @see NestedMatcher
+	 * @see DataBuffer
 	 */
 	private abstract static class AbstractNestedMatcher implements NestedMatcher {
 
@@ -867,6 +886,8 @@ public abstract class DataBufferUtils {
 
 		private int matches = 0;
 
+		// Thread-local chunk buffer to avoid per-call allocations
+		private static final ThreadLocal<byte[]> LOCAL_BUFFER = ThreadLocal.withInitial(() -> new byte[8 * 1024]);
 
 		protected AbstractNestedMatcher(byte[] delimiter) {
 			this.delimiter = delimiter;
@@ -880,16 +901,86 @@ public abstract class DataBufferUtils {
 			return this.matches;
 		}
 
+		protected static void releaseLocalBuffer() {
+			LOCAL_BUFFER.remove();
+		}
+
 		@Override
 		public int match(DataBuffer dataBuffer) {
-			for (int pos = dataBuffer.readPosition(); pos < dataBuffer.writePosition(); pos++) {
-				byte b = dataBuffer.getByte(pos);
-				if (match(b)) {
+			final int readPos = dataBuffer.readPosition();
+			final int writePos = dataBuffer.writePosition();
+			final int length = writePos - readPos;
+
+			final byte[] delimiter0 = this.delimiter;
+			final int delimiterLen = delimiter0.length;
+			final byte delimiter1 = delimiter0[0];
+
+			int matchIndex = this.matches;
+
+			final byte[] chunk = LOCAL_BUFFER.get();
+			final int chunkSize = Math.min(chunk.length, length);
+
+			try {
+				for (int offset = 0; offset < length; offset += chunkSize) {
+					int currentChunkSize = Math.min(chunkSize, length - offset);
+
+					dataBuffer.readPosition(readPos + offset);
+					dataBuffer.read(chunk, 0, currentChunkSize);
+
+					matchIndex = processChunk(chunk, currentChunkSize, delimiter0, delimiterLen, delimiter1, matchIndex, readPos, offset);
+					if (matchIndex < 0) {
+						return -(matchIndex + 1); // found, returning actual position
+					}
+				}
+
+				this.matches = matchIndex;
+				return -1;
+			}
+			finally {
+				dataBuffer.readPosition(readPos); // restore original position
+				releaseLocalBuffer();
+			}
+		}
+
+		private int processChunk(byte[] chunk, int currentChunkSize, byte[] delimiter0, int delimiterLen, byte delimiter1, int matchIndex, int readPos, int offset) {
+			int i = 0;
+			while (i < currentChunkSize) {
+				if (matchIndex == 0) {
+					i = findNextCandidate(chunk, i, currentChunkSize, delimiter1);
+					if (i >= currentChunkSize) {
+						return matchIndex; // no candidate in this chunk
+					}
+				}
+
+				matchIndex = updateMatchIndex(chunk[i], delimiter0, delimiterLen, delimiter1, matchIndex);
+				if (matchIndex == -1) {
+					return -(readPos + offset + i + 1); // return found delimiter position (encoded as negative)
+				}
+				i++;
+			}
+			return matchIndex;
+		}
+
+		private int findNextCandidate(byte[] chunk, int start, int limit, byte delimiter1) {
+			int j = start;
+			while (j < limit && chunk[j] != delimiter1) {
+				j++;
+			}
+			return j;
+		}
+
+		private int updateMatchIndex(byte b, byte[] delimiter0, int delimiterLen, byte delimiter1, int matchIndex) {
+			if (b == delimiter0[matchIndex]) {
+				matchIndex++;
+				if (matchIndex == delimiterLen) {
 					reset();
-					return pos;
+					return -1;
 				}
 			}
-			return -1;
+			else {
+				matchIndex = (b == delimiter1) ? 1 : 0;
+			}
+			return matchIndex;
 		}
 
 		@Override
@@ -1026,7 +1117,7 @@ public abstract class DataBufferUtils {
 		private final AtomicReference<State> state = new AtomicReference<>(State.IDLE);
 
 		public ReadCompletionHandler(AsynchronousFileChannel channel,
-				FluxSink<DataBuffer> sink, long position, DataBufferFactory dataBufferFactory, int bufferSize) {
+									 FluxSink<DataBuffer> sink, long position, DataBufferFactory dataBufferFactory, int bufferSize) {
 
 			this.channel = channel;
 			this.sink = sink;
