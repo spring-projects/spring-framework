@@ -1201,12 +1201,12 @@ annotate HTTP interfaces as follows:
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@HttpServiceClient("echo")
-	public class EchoServiceA {
+	public interface EchoServiceA {
 		// ...
 	}
 
 	@HttpServiceClient("echo")
-	public class EchoServiceB {
+	public interface EchoServiceB {
 		// ...
 	}
 ----
