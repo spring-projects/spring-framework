@@ -60,12 +60,6 @@ class CacheOperationExpressionEvaluatorTests {
 	private final AnnotationCacheOperationSource source = new AnnotationCacheOperationSource();
 
 
-	private Collection<CacheOperation> getOps(String name) {
-		Method method = ReflectionUtils.findMethod(AnnotatedClass.class, name, Object.class, Object.class);
-		return this.source.getCacheOperations(method, AnnotatedClass.class);
-	}
-
-
 	@Test
 	void testMultipleCachingSource() {
 		Collection<CacheOperation> ops = getOps("multipleCaching");
@@ -142,6 +136,12 @@ class CacheOperationExpressionEvaluatorTests {
 		EvaluationContext context = createEvaluationContext(CacheOperationExpressionEvaluator.NO_RESULT, applicationContext);
 		Object value = new SpelExpressionParser().parseExpression("@myBean.class.getName()").getValue(context);
 		assertThat(value).isEqualTo(String.class.getName());
+	}
+
+
+	private Collection<CacheOperation> getOps(String name) {
+		Method method = ReflectionUtils.findMethod(AnnotatedClass.class, name, Object.class, Object.class);
+		return this.source.getCacheOperations(method, AnnotatedClass.class);
 	}
 
 	private EvaluationContext createEvaluationContext(Object result) {
