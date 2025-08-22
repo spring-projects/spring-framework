@@ -22,11 +22,17 @@ import java.util.List;
 import jakarta.annotation.Priority;
 import org.junit.jupiter.api.Test;
 
+import org.springframework.core.CyclicOrderException;
+import org.springframework.core.DependsOnAfter;
+import org.springframework.core.DependsOnBefore;
+
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * @author Juergen Hoeller
  * @author Oliver Gierke
+ * @author Yongjun Hong
  */
 class AnnotationAwareOrderComparatorTests {
 
@@ -100,6 +106,44 @@ class AnnotationAwareOrderComparatorTests {
 		assertThat(list).containsExactly(A.class, B.class, null, null);
 	}
 
+	@Test
+	void sortWithDependsOnBefore() {
+		List<Object> list = new ArrayList<>();
+		list.add(A.class);
+		list.add(D.class);
+		AnnotationAwareOrderComparator.sort(list);
+		assertThat(list).containsExactly(D.class, A.class);
+	}
+
+	@Test
+	void sortWithDependsOnAfter() {
+		List<Object> list = new ArrayList<>();
+		list.add(B.class);
+		list.add(E.class);
+		AnnotationAwareOrderComparator.sort(list);
+		assertThat(list).containsExactly(B.class, E.class);
+	}
+
+	@Test
+	void sortWithDependsOnBeforeAndAfter() {
+		List<Object> list = new ArrayList<>();
+		list.add(A.class);
+		list.add(B.class);
+		list.add(D.class);
+		list.add(E.class);
+		AnnotationAwareOrderComparator.sort(list);
+		assertThat(list).containsExactly(D.class, A.class, B.class, E.class);
+	}
+
+	@Test
+	void sortWithCircularDependsOn() {
+		List<Object> list = new ArrayList<>();
+		list.add(F.class);
+		list.add(G.class);
+		assertThatThrownBy(() -> AnnotationAwareOrderComparator.sort(list))
+				.isInstanceOf(CyclicOrderException.class);
+	}
+
 	@Order(1)
 	private static class A {
 	}
@@ -119,4 +163,19 @@ class AnnotationAwareOrderComparatorTests {
 	private static class B2 {
 	}
 
+	@DependsOnBefore(A.class)
+	private static class D {
+	}
+
+	@DependsOnAfter(B.class)
+	private static class E {
+	}
+
+	@DependsOnBefore(G.class)
+	private static class F {
+	}
+
+	@DependsOnBefore(F.class)
+	private static class G {
+	}
 }
