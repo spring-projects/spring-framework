@@ -261,7 +261,7 @@ Kotlin::
 
 This improves on the design of our xref:testing/mockmvc/htmlunit/mah.adoc#spring-mvc-test-server-htmlunit-mah-usage[HtmlUnit test]
 by leveraging the Page Object Pattern. As we mentioned in
-xref:testing/mockmvc/htmlunit/webdriver.adoc#spring-mvc-test-server-htmlunit-webdriver-why[Why WebDriver and MockMvc?], we can use the Page Object Pattern
+xref:testing/mockmvc/htmlunit/webdriver.adoc#mockmvc-server-htmlunit-webdriver-why[Why WebDriver and MockMvc?], we can use the Page Object Pattern
 with HtmlUnit, but it is much easier with WebDriver. Consider the following
 `CreateMessagePage` implementation:
 
