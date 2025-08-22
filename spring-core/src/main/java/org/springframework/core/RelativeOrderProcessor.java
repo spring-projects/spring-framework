@@ -67,15 +67,15 @@ public final class RelativeOrderProcessor {
 	private static Comparator<Object> getComparatorFor(Collection<?> items) {
 		List<Object> components = new ArrayList<>(items);
 
-		Map<Object, Integer> relativeOrderMap = new HashMap<>();
+		Map<Object, Integer> orderMap = new HashMap<>();
 		if (!components.isEmpty()) {
 			List<Object> sortedRelative = TOPOLOGICAL_ORDER_SOLVER.resolveOrder(components);
 			for (int i = 0; i < sortedRelative.size(); i++) {
-				relativeOrderMap.put(sortedRelative.get(i), i);
+				orderMap.put(sortedRelative.get(i), i);
 			}
 		}
 
-		return new ConfiguredComparator(relativeOrderMap);
+		return new ConfiguredComparator(orderMap);
 	}
 
 	private static boolean hasRelativeOrderAnnotations(Object obj) {
@@ -93,11 +93,11 @@ public final class RelativeOrderProcessor {
 	 * components and falls back to AnnotationAwareOrderComparator for everything else.
 	 */
 	private static class ConfiguredComparator implements Comparator<Object> {
-		private final Map<Object, Integer> relativeOrderMap;
+		private final Map<Object, Integer> orderMap;
 		private final Comparator<Object> fallbackComparator = AnnotationAwareOrderComparator.INSTANCE;
 
-		public ConfiguredComparator(Map<Object, Integer> relativeOrderMap) {
-			this.relativeOrderMap = relativeOrderMap;
+		public ConfiguredComparator(Map<Object, Integer> orderMap) {
+			this.orderMap = orderMap;
 		}
 
 		@Override
@@ -105,10 +105,10 @@ public final class RelativeOrderProcessor {
 			boolean o1isRelative = hasRelativeOrderAnnotations(o1);
 			boolean o2isRelative = hasRelativeOrderAnnotations(o2);
 
-			// Case 1: Both components have relative order. Compare their topological index.
+			// Case 1: Either components have relative order. Compare their topological index.
 			if (o1isRelative || o2isRelative) {
-				int order1 = this.relativeOrderMap.getOrDefault(o1, 0);
-				int order2 = this.relativeOrderMap.getOrDefault(o2, 0);
+				int order1 = this.orderMap.getOrDefault(o1, 0);
+				int order2 = this.orderMap.getOrDefault(o2, 0);
 				return Integer.compare(order1, order2);
 			}
 
