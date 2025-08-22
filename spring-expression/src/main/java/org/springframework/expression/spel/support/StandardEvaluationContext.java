@@ -272,7 +272,7 @@ public class StandardEvaluationContext implements EvaluationContext {
 	 * @param constructorResolver the constructor resolver to remove
 	 * @return {@code true} if the constructor resolver was removed, {@code false}
 	 * if the constructor resolver was not configured in this evaluation context
-<	 * @see #getConstructorResolvers()
+	 * @see #getConstructorResolvers()
 	 * @see #setConstructorResolvers(List)
 	 * @see #addConstructorResolver(ConstructorResolver)
 	 */
