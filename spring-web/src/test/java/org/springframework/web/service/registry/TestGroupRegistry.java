@@ -16,7 +16,6 @@
 
 package org.springframework.web.service.registry;
 
-
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -76,4 +75,5 @@ class TestGroupRegistry implements GroupRegistry {
 			return this.groupMap.computeIfAbsent(this.groupName, name -> new TestGroup(name, this.clientType));
 		}
 	}
+
 }

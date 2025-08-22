@@ -27,10 +27,10 @@ import static org.mockito.Mockito.mock;
 
 /**
  * Unit tests for {@link HttpServiceProxyFactory}.
+ *
  * @author Rossen Stoyanchev
  */
 public class HttpServiceProxyFactoryTests {
-
 
 	@Test
 	void httpExchangeAdapterDecorator() {
@@ -42,7 +42,6 @@ public class HttpServiceProxyFactoryTests {
 		Service service = factory.createClient(Service.class);
 		assertThat(service.execute()).isEqualTo("decorated");
 	}
-
 
 
 	private interface Service {

@@ -16,7 +16,6 @@
 
 package org.springframework.web.service.registry;
 
-
 import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -53,4 +52,5 @@ record TestGroup(
 		group.packageClasses().addAll(Arrays.asList(packageClasses));
 		return group;
 	}
+
 }
