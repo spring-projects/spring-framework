@@ -17,18 +17,21 @@
 package org.springframework.resilience;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.nio.file.AccessDeniedException;
 import java.time.Duration;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.aopalliance.intercept.MethodInterceptor;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.framework.AopProxyUtils;
 import org.springframework.aop.framework.ProxyConfig;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.framework.autoproxy.AutoProxyUtils;
+import org.springframework.aop.interceptor.SimpleTraceInterceptor;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
@@ -59,7 +62,30 @@ class RetryInterceptorTests {
 		pf.setTarget(target);
 		pf.addAdvice(new SimpleRetryInterceptor(
 				new MethodRetrySpec((m, t) -> true, 5, Duration.ofMillis(10))));
-		NonAnnotatedBean proxy = (NonAnnotatedBean) pf.getProxy();
+		pf.addAdvice(new SimpleTraceInterceptor());
+		PlainInterface proxy = (PlainInterface) pf.getProxy();
+
+		assertThatIOException().isThrownBy(proxy::retryOperation).withMessage("6");
+		assertThat(target.counter).isEqualTo(6);
+	}
+
+	@Test
+	void withSimpleInterceptorAndNoTarget() {
+		NonAnnotatedBean target = new NonAnnotatedBean();
+		ProxyFactory pf = new ProxyFactory();
+		pf.addAdvice(new SimpleRetryInterceptor(
+				new MethodRetrySpec((m, t) -> true, 5, Duration.ofMillis(10))));
+		pf.addAdvice(new SimpleTraceInterceptor());
+		pf.addAdvice((MethodInterceptor) invocation -> {
+			try {
+				return invocation.getMethod().invoke(target, invocation.getArguments());
+			}
+			catch (InvocationTargetException ex) {
+				throw ex.getTargetException();
+			}
+		});
+		pf.addInterface(PlainInterface.class);
+		PlainInterface proxy = (PlainInterface) pf.getProxy();
 
 		assertThatIOException().isThrownBy(proxy::retryOperation).withMessage("6");
 		assertThat(target.counter).isEqualTo(6);
@@ -237,7 +263,7 @@ class RetryInterceptorTests {
 	}
 
 
-	static class NonAnnotatedBean {
+	static class NonAnnotatedBean implements PlainInterface {
 
 		int counter = 0;
 
@@ -245,6 +271,12 @@ class RetryInterceptorTests {
 			counter++;
 			throw new IOException(Integer.toString(counter));
 		}
+	}
+
+
+	public interface PlainInterface {
+
+		void retryOperation() throws IOException;
 	}
 
 

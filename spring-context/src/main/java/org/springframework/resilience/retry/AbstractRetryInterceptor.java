@@ -26,6 +26,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.retry.Retry;
 
+import org.springframework.aop.ProxyMethodInvocation;
 import org.springframework.core.ReactiveAdapter;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.retry.RetryException;
@@ -103,7 +104,8 @@ public abstract class AbstractRetryInterceptor implements MethodInterceptor {
 			return retryTemplate.execute(new Retryable<>() {
 				@Override
 				public @Nullable Object execute() throws Throwable {
-					return invocation.proceed();
+					return (invocation instanceof ProxyMethodInvocation pmi ?
+							pmi.invocableClone().proceed() : invocation.proceed());
 				}
 				@Override
 				public String getName() {

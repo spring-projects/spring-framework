@@ -29,6 +29,7 @@ import org.springframework.core.retry.support.CompositeRetryListener;
  *
  * @author Mahmoud Ben Hassine
  * @author Sam Brannen
+ * @author Juergen Hoeller
  * @since 7.0
  * @see CompositeRetryListener
  */
@@ -64,9 +65,13 @@ public interface RetryListener {
 	 * Called if the {@link RetryPolicy} is exhausted.
 	 * @param retryPolicy the {@code RetryPolicy}
 	 * @param retryable the {@code Retryable} operation
-	 * @param throwable the last exception thrown by the {@link Retryable} operation
+	 * @param exception the resulting {@link RetryException}, including the last operation
+	 * exception as a cause and all earlier operation exceptions as suppressed exceptions
+	 * @see RetryException#getCause()
+	 * @see RetryException#getSuppressed()
+	 * @see RetryException#getRetryCount()
 	 */
-	default void onRetryPolicyExhaustion(RetryPolicy retryPolicy, Retryable<?> retryable, Throwable throwable) {
+	default void onRetryPolicyExhaustion(RetryPolicy retryPolicy, Retryable<?> retryable, RetryException exception) {
 	}
 
 }

@@ -21,6 +21,7 @@ import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import org.springframework.core.retry.RetryException;
 import org.springframework.core.retry.RetryListener;
 import org.springframework.core.retry.RetryPolicy;
 import org.springframework.core.retry.Retryable;
@@ -83,7 +84,7 @@ class CompositeRetryListenerTests {
 
 	@Test
 	void onRetryPolicyExhaustion() {
-		Exception exception = new Exception();
+		RetryException exception = new RetryException("", new Exception());
 		compositeRetryListener.onRetryPolicyExhaustion(retryPolicy, retryable, exception);
 
 		verify(listener1).onRetryPolicyExhaustion(retryPolicy, retryable, exception);

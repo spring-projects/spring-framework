@@ -91,6 +91,14 @@ public class RetryTemplate implements RetryOperations {
 	}
 
 	/**
+	 * Return the current {@link RetryPolicy} that is in use
+	 * with this template.
+	 */
+	public RetryPolicy getRetryPolicy() {
+		return this.retryPolicy;
+	}
+
+	/**
 	 * Set the {@link RetryListener} to use.
 	 * <p>If multiple listeners are needed, use a
 	 * {@link org.springframework.core.retry.support.CompositeRetryListener}.
@@ -100,6 +108,14 @@ public class RetryTemplate implements RetryOperations {
 	public void setRetryListener(RetryListener retryListener) {
 		Assert.notNull(retryListener, "Retry listener must not be null");
 		this.retryListener = retryListener;
+	}
+
+	/**
+	 * Return the current {@link RetryListener} that is in use
+	 * with this template.
+	 */
+	public RetryListener getRetryListener() {
+		return this.retryListener;
 	}
 
 
@@ -176,7 +192,7 @@ public class RetryTemplate implements RetryOperations {
 					"Retry policy for operation '%s' exhausted; aborting execution".formatted(retryableName),
 					exceptions.removeLast());
 			exceptions.forEach(retryException::addSuppressed);
-			this.retryListener.onRetryPolicyExhaustion(this.retryPolicy, retryable, lastException);
+			this.retryListener.onRetryPolicyExhaustion(this.retryPolicy, retryable, retryException);
 			throw retryException;
 		}
 	}

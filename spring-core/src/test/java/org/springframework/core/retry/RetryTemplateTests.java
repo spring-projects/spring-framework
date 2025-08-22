@@ -69,6 +69,12 @@ class RetryTemplateTests {
 	}
 
 	@Test
+	void checkRetryTemplateConfiguration() {
+		assertThat(retryTemplate.getRetryPolicy()).isSameAs(retryPolicy);
+		assertThat(retryTemplate.getRetryListener()).isSameAs(retryListener);
+	}
+
+	@Test
 	void retryWithImmediateSuccess() throws Exception {
 		AtomicInteger invocationCount = new AtomicInteger();
 		Retryable<String> retryable = () -> {
@@ -99,10 +105,9 @@ class RetryTemplateTests {
 				.withMessageMatching("Retry policy for operation '.+?' exhausted; aborting execution")
 				.withCause(exception)
 				.satisfies(throwable -> assertThat(throwable.getSuppressed()).isEmpty())
-				.satisfies(throwable -> assertThat(throwable.getRetryCount()).isZero());
+				.satisfies(throwable -> assertThat(throwable.getRetryCount()).isZero())
+				.satisfies(throwable -> inOrder.verify(retryListener).onRetryPolicyExhaustion(retryPolicy, retryable, throwable));
 
-		// RetryListener interactions:
-		inOrder.verify(retryListener).onRetryPolicyExhaustion(retryPolicy, retryable, exception);
 		verifyNoMoreInteractions(retryListener);
 	}
 
@@ -122,10 +127,9 @@ class RetryTemplateTests {
 				.withMessageMatching("Retry policy for operation '.+?' exhausted; aborting execution")
 				.withCause(exception)
 				.satisfies(throwable -> assertThat(throwable.getSuppressed()).isEmpty())
-				.satisfies(throwable -> assertThat(throwable.getRetryCount()).isZero());
+				.satisfies(throwable -> assertThat(throwable.getRetryCount()).isZero())
+				.satisfies(throwable -> inOrder.verify(retryListener).onRetryPolicyExhaustion(retryPolicy, retryable, throwable));
 
-		// RetryListener interactions:
-		inOrder.verify(retryListener).onRetryPolicyExhaustion(retryPolicy, retryable, exception);
 		verifyNoMoreInteractions(retryListener);
 	}
 
@@ -145,10 +149,9 @@ class RetryTemplateTests {
 				.withMessageMatching("Retry policy for operation '.+?' exhausted; aborting execution")
 				.withCause(exception)
 				.satisfies(throwable -> assertThat(throwable.getSuppressed()).isEmpty())
-				.satisfies(throwable -> assertThat(throwable.getRetryCount()).isZero());
+				.satisfies(throwable -> assertThat(throwable.getRetryCount()).isZero())
+				.satisfies(throwable -> inOrder.verify(retryListener).onRetryPolicyExhaustion(retryPolicy, retryable, throwable));
 
-		// RetryListener interactions:
-		inOrder.verify(retryListener).onRetryPolicyExhaustion(retryPolicy, retryable, exception);
 		verifyNoMoreInteractions(retryListener);
 	}
 
@@ -194,18 +197,19 @@ class RetryTemplateTests {
 		assertThatExceptionOfType(RetryException.class)
 				.isThrownBy(() -> retryTemplate.execute(retryable))
 				.withMessage("Retry policy for operation 'test' exhausted; aborting execution")
-				.withCause(new CustomException("Boom 4"));
+				.withCause(new CustomException("Boom 4"))
+				.satisfies(throwable -> {
+					invocationCount.set(1);
+					repeat(3, () -> {
+						inOrder.verify(retryListener).beforeRetry(retryPolicy, retryable);
+						inOrder.verify(retryListener).onRetryFailure(retryPolicy, retryable,
+								new CustomException("Boom " + invocationCount.incrementAndGet()));
+					});
+					inOrder.verify(retryListener).onRetryPolicyExhaustion(retryPolicy, retryable, throwable);
+				});
 		// 4 = 1 initial invocation + 3 retry attempts
 		assertThat(invocationCount).hasValue(4);
 
-		// RetryListener interactions:
-		invocationCount.set(1);
-		repeat(3, () -> {
-			inOrder.verify(retryListener).beforeRetry(retryPolicy, retryable);
-			inOrder.verify(retryListener).onRetryFailure(retryPolicy, retryable,
-					new CustomException("Boom " + invocationCount.incrementAndGet()));
-		});
-		inOrder.verify(retryListener).onRetryPolicyExhaustion(retryPolicy, retryable, new CustomException("Boom 4"));
 		verifyNoMoreInteractions(retryListener);
 	}
 
@@ -240,16 +244,17 @@ class RetryTemplateTests {
 		assertThatExceptionOfType(RetryException.class)
 				.isThrownBy(() -> retryTemplate.execute(retryable))
 				.withMessage("Retry policy for operation 'always fails' exhausted; aborting execution")
-				.withCause(exception);
+				.withCause(exception)
+				.satisfies(throwable -> {
+					repeat(5, () -> {
+						inOrder.verify(retryListener).beforeRetry(retryPolicy, retryable);
+						inOrder.verify(retryListener).onRetryFailure(retryPolicy, retryable, exception);
+					});
+					inOrder.verify(retryListener).onRetryPolicyExhaustion(retryPolicy, retryable, throwable);
+				});
 		// 6 = 1 initial invocation + 5 retry attempts
 		assertThat(invocationCount).hasValue(6);
 
-		// RetryListener interactions:
-		repeat(5, () -> {
-			inOrder.verify(retryListener).beforeRetry(retryPolicy, retryable);
-			inOrder.verify(retryListener).onRetryFailure(retryPolicy, retryable, exception);
-		});
-		inOrder.verify(retryListener).onRetryPolicyExhaustion(retryPolicy, retryable, exception);
 		verifyNoMoreInteractions(retryListener);
 	}
 
@@ -291,17 +296,17 @@ class RetryTemplateTests {
 						suppressed1 -> assertThat(suppressed1).isExactlyInstanceOf(FileNotFoundException.class),
 						suppressed2 -> assertThat(suppressed2).isExactlyInstanceOf(IOException.class)
 				))
-				.satisfies(throwable -> assertThat(throwable.getRetryCount()).isEqualTo(2));
+				.satisfies(throwable -> assertThat(throwable.getRetryCount()).isEqualTo(2))
+				.satisfies(throwable -> {
+					repeat(2, () -> {
+						inOrder.verify(retryListener).beforeRetry(retryPolicy, retryable);
+						inOrder.verify(retryListener).onRetryFailure(eq(retryPolicy), eq(retryable), any(Exception.class));
+					});
+					inOrder.verify(retryListener).onRetryPolicyExhaustion(retryPolicy, retryable, throwable);
+				});
 		// 3 = 1 initial invocation + 2 retry attempts
 		assertThat(invocationCount).hasValue(3);
 
-		// RetryListener interactions:
-		repeat(2, () -> {
-			inOrder.verify(retryListener).beforeRetry(retryPolicy, retryable);
-			inOrder.verify(retryListener).onRetryFailure(eq(retryPolicy), eq(retryable), any(Exception.class));
-		});
-		inOrder.verify(retryListener).onRetryPolicyExhaustion(
-				eq(retryPolicy), eq(retryable), any(IllegalStateException.class));
 		verifyNoMoreInteractions(retryListener);
 	}
 
@@ -354,17 +359,17 @@ class RetryTemplateTests {
 					suppressed1 -> assertThat(suppressed1).isExactlyInstanceOf(IOException.class),
 					suppressed2 -> assertThat(suppressed2).isExactlyInstanceOf(IOException.class)
 				))
-				.satisfies(throwable -> assertThat(throwable.getRetryCount()).isEqualTo(2));
+				.satisfies(throwable -> assertThat(throwable.getRetryCount()).isEqualTo(2))
+				.satisfies(throwable -> {
+					repeat(2, () -> {
+						inOrder.verify(retryListener).beforeRetry(retryPolicy, retryable);
+						inOrder.verify(retryListener).onRetryFailure(eq(retryPolicy), eq(retryable), any(IOException.class));
+					});
+					inOrder.verify(retryListener).onRetryPolicyExhaustion(retryPolicy, retryable, throwable);
+				});
 		// 3 = 1 initial invocation + 2 retry attempts
 		assertThat(invocationCount).hasValue(3);
 
-		// RetryListener interactions:
-		repeat(2, () -> {
-			inOrder.verify(retryListener).beforeRetry(retryPolicy, retryable);
-			inOrder.verify(retryListener).onRetryFailure(eq(retryPolicy), eq(retryable), any(IOException.class));
-		});
-		inOrder.verify(retryListener).onRetryPolicyExhaustion(
-				eq(retryPolicy), eq(retryable), any(CustomFileNotFoundException.class));
 		verifyNoMoreInteractions(retryListener);
 	}
 

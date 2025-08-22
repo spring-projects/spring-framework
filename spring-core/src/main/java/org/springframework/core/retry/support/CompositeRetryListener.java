@@ -21,6 +21,7 @@ import java.util.List;
 
 import org.jspecify.annotations.Nullable;
 
+import org.springframework.core.retry.RetryException;
 import org.springframework.core.retry.RetryListener;
 import org.springframework.core.retry.RetryPolicy;
 import org.springframework.core.retry.RetryTemplate;
@@ -34,6 +35,7 @@ import org.springframework.util.Assert;
  * <p>This class is used to compose multiple listeners within a {@link RetryTemplate}.
  *
  * @author Mahmoud Ben Hassine
+ * @author Juergen Hoeller
  * @since 7.0
  */
 public class CompositeRetryListener implements RetryListener {
@@ -82,8 +84,8 @@ public class CompositeRetryListener implements RetryListener {
 	}
 
 	@Override
-	public void onRetryPolicyExhaustion(RetryPolicy retryPolicy, Retryable<?> retryable, Throwable throwable) {
-		this.listeners.forEach(listener -> listener.onRetryPolicyExhaustion(retryPolicy, retryable, throwable));
+	public void onRetryPolicyExhaustion(RetryPolicy retryPolicy, Retryable<?> retryable, RetryException exception) {
+		this.listeners.forEach(listener -> listener.onRetryPolicyExhaustion(retryPolicy, retryable, exception));
 	}
 
 }
