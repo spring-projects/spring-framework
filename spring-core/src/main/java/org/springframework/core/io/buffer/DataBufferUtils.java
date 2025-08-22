@@ -61,6 +61,7 @@ import org.springframework.util.CollectionUtils;
  *
  * @author Arjen Poutsma
  * @author Brian Clozel
+ * @author Nabil Fawwaz Elqayyim
  * @since 5.0
  */
 public abstract class DataBufferUtils {
@@ -859,23 +860,17 @@ public abstract class DataBufferUtils {
 
 
 	/**
-	 * An abstract base implementation of {@link NestedMatcher} that looks for
-	 * a specific delimiter in a {@link DataBuffer}.
-	 * <p>
-	 * Uses a thread-local buffer to scan data in chunks, reducing memory
-	 * allocations and improving performance when processing large buffers.
-	 * </p>
+	 * Base {@link NestedMatcher} implementation that scans a {@link DataBuffer}
+	 * for a specific delimiter.
 	 *
-	 * <p>
-	 * Each matcher keeps its own match state, so it is intended for
-	 * single-threaded use. The thread-local buffer ensures that multiple
-	 * threads can run their own matchers independently without interfering.
-	 * </p>
+	 * <p>Relies on a per-instance reusable buffer to scan data in chunks,
+	 * minimizing allocations and improving performance for large or streaming data.</p>
 	 *
-	 * <p>
-	 * Subclasses can extend this class to add custom matching behavior while
-	 * reusing the built-in delimiter tracking and scanning logic.
-	 * </p>
+	 * <p>Each matcher maintains its own state and buffer, ensuring safe use
+	 * in reactive pipelines where execution may shift across threads.</p>
+	 *
+	 * <p>Subclasses may extend this class to customize matching strategies
+	 * while reusing the built-in delimiter tracking and scanning logic.</p>
 	 *
 	 * @see NestedMatcher
 	 * @see DataBuffer
@@ -886,8 +881,7 @@ public abstract class DataBufferUtils {
 
 		private int matches = 0;
 
-		// Thread-local chunk buffer to avoid per-call allocations
-		private static final ThreadLocal<byte[]> LOCAL_BUFFER = ThreadLocal.withInitial(() -> new byte[8 * 1024]);
+		private final byte[] localBuffer = new byte[8 * 1024]; // Reusable buffer per matcher instance
 
 		protected AbstractNestedMatcher(byte[] delimiter) {
 			this.delimiter = delimiter;
@@ -901,24 +895,20 @@ public abstract class DataBufferUtils {
 			return this.matches;
 		}
 
-		protected static void releaseLocalBuffer() {
-			LOCAL_BUFFER.remove();
-		}
-
 		@Override
 		public int match(DataBuffer dataBuffer) {
 			final int readPos = dataBuffer.readPosition();
 			final int writePos = dataBuffer.writePosition();
 			final int length = writePos - readPos;
 
-			final byte[] delimiter0 = this.delimiter;
-			final int delimiterLen = delimiter0.length;
-			final byte delimiter1 = delimiter0[0];
+			final byte[] delimiterBytes = this.delimiter;
+			final int delimiterLength = delimiterBytes.length;
+			final byte delimiterFirstByte = delimiterBytes[0];
+
+			final byte[] chunk = localBuffer;
+			final int chunkSize = Math.min(chunk.length, length);
 
 			int matchIndex = this.matches;
-
-			final byte[] chunk = LOCAL_BUFFER.get();
-			final int chunkSize = Math.min(chunk.length, length);
 
 			try {
 				for (int offset = 0; offset < length; offset += chunkSize) {
@@ -927,7 +917,7 @@ public abstract class DataBufferUtils {
 					dataBuffer.readPosition(readPos + offset);
 					dataBuffer.read(chunk, 0, currentChunkSize);
 
-					matchIndex = processChunk(chunk, currentChunkSize, delimiter0, delimiterLen, delimiter1, matchIndex, readPos, offset);
+					matchIndex = processChunk(chunk, currentChunkSize, delimiterBytes, delimiterLength, delimiterFirstByte, matchIndex, readPos, offset);
 					if (matchIndex < 0) {
 						return -(matchIndex + 1); // found, returning actual position
 					}
@@ -938,21 +928,20 @@ public abstract class DataBufferUtils {
 			}
 			finally {
 				dataBuffer.readPosition(readPos); // restore original position
-				releaseLocalBuffer();
 			}
 		}
 
-		private int processChunk(byte[] chunk, int currentChunkSize, byte[] delimiter0, int delimiterLen, byte delimiter1, int matchIndex, int readPos, int offset) {
+		private int processChunk(byte[] chunk, int currentChunkSize, byte[] delimiterBytes, int delimiterLen, byte delimiterFirstByte, int matchIndex, int readPos, int offset) {
 			int i = 0;
 			while (i < currentChunkSize) {
 				if (matchIndex == 0) {
-					i = findNextCandidate(chunk, i, currentChunkSize, delimiter1);
+					i = findNextCandidate(chunk, i, currentChunkSize, delimiterFirstByte);
 					if (i >= currentChunkSize) {
 						return matchIndex; // no candidate in this chunk
 					}
 				}
 
-				matchIndex = updateMatchIndex(chunk[i], delimiter0, delimiterLen, delimiter1, matchIndex);
+				matchIndex = updateMatchIndex(chunk[i], delimiterBytes, delimiterLen, delimiterFirstByte, matchIndex);
 				if (matchIndex == -1) {
 					return -(readPos + offset + i + 1); // return found delimiter position (encoded as negative)
 				}
@@ -961,16 +950,16 @@ public abstract class DataBufferUtils {
 			return matchIndex;
 		}
 
-		private int findNextCandidate(byte[] chunk, int start, int limit, byte delimiter1) {
+		private int findNextCandidate(byte[] chunk, int start, int limit, byte delimiterFirstByte) {
 			int j = start;
-			while (j < limit && chunk[j] != delimiter1) {
+			while (j < limit && chunk[j] != delimiterFirstByte) {
 				j++;
 			}
 			return j;
 		}
 
-		private int updateMatchIndex(byte b, byte[] delimiter0, int delimiterLen, byte delimiter1, int matchIndex) {
-			if (b == delimiter0[matchIndex]) {
+		private int updateMatchIndex(byte b, byte[] delimiterBytes, int delimiterLen, byte delimiterFirstByte, int matchIndex) {
+			if (b == delimiterBytes[matchIndex]) {
 				matchIndex++;
 				if (matchIndex == delimiterLen) {
 					reset();
@@ -978,7 +967,7 @@ public abstract class DataBufferUtils {
 				}
 			}
 			else {
-				matchIndex = (b == delimiter1) ? 1 : 0;
+				matchIndex = (b == delimiterFirstByte) ? 1 : 0;
 			}
 			return matchIndex;
 		}
