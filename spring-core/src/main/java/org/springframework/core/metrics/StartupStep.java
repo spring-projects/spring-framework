@@ -36,7 +36,7 @@ import org.jspecify.annotations.Nullable;
  * @author Brian Clozel
  * @since 5.3
  */
-public interface StartupStep {
+public interface StartupStep extends AutoCloseable {
 
 	/**
 	 * Return the name of the startup step.
@@ -83,6 +83,10 @@ public interface StartupStep {
 	 */
 	void end();
 
+	@Override
+	default void close() {
+		this.end();
+	}
 
 	/**
 	 * Immutable collection of {@link Tag}.

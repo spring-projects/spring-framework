@@ -57,8 +57,9 @@ import org.springframework.util.MimeType;
  *
  * @author Sebastien Deleuze
  * @since 7.0
+ * @param <T> the type of {@link ObjectMapper}
  */
-public abstract class AbstractJacksonDecoder extends JacksonCodecSupport implements HttpMessageDecoder<Object> {
+public abstract class AbstractJacksonDecoder<T extends ObjectMapper> extends JacksonCodecSupport<T> implements HttpMessageDecoder<Object> {
 
 	private int maxInMemorySize = 256 * 1024;
 
@@ -68,14 +69,14 @@ public abstract class AbstractJacksonDecoder extends JacksonCodecSupport impleme
 	 * customized with the {@link tools.jackson.databind.JacksonModule}s found
 	 * by {@link MapperBuilder#findModules(ClassLoader)} and {@link MimeType}s.
 	 */
-	protected AbstractJacksonDecoder(MapperBuilder<?, ?> builder, MimeType... mimeTypes) {
+	protected AbstractJacksonDecoder(MapperBuilder<T, ?> builder, MimeType... mimeTypes) {
 		super(builder, mimeTypes);
 	}
 
 	/**
 	 * Construct a new instance with the provided {@link ObjectMapper} and {@link MimeType}s.
 	 */
-	protected AbstractJacksonDecoder(ObjectMapper mapper, MimeType... mimeTypes) {
+	protected AbstractJacksonDecoder(T mapper, MimeType... mimeTypes) {
 		super(mapper, mimeTypes);
 	}
 
@@ -104,7 +105,7 @@ public abstract class AbstractJacksonDecoder extends JacksonCodecSupport impleme
 		if (!supportsMimeType(mimeType)) {
 			return false;
 		}
-		ObjectMapper mapper = selectObjectMapper(elementType, mimeType);
+		T mapper = selectMapper(elementType, mimeType);
 		if (mapper == null) {
 			return false;
 		}
@@ -115,7 +116,7 @@ public abstract class AbstractJacksonDecoder extends JacksonCodecSupport impleme
 	public Flux<Object> decode(Publisher<DataBuffer> input, ResolvableType elementType,
 			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
-		ObjectMapper mapper = selectObjectMapper(elementType, mimeType);
+		T mapper = selectMapper(elementType, mimeType);
 		if (mapper == null) {
 			return Flux.error(new IllegalStateException("No ObjectMapper for " + elementType));
 		}
@@ -141,7 +142,7 @@ public abstract class AbstractJacksonDecoder extends JacksonCodecSupport impleme
 
 			return tokens.handle((tokenBuffer, sink) -> {
 				try {
-					Object value = reader.readValue(tokenBuffer.asParser(getObjectMapper()._deserializationContext()));
+					Object value = reader.readValue(tokenBuffer.asParser(getMapper()._deserializationContext()));
 					logValue(value, hints);
 					if (value != null) {
 						sink.next(value);
@@ -189,7 +190,7 @@ public abstract class AbstractJacksonDecoder extends JacksonCodecSupport impleme
 	public Object decode(DataBuffer dataBuffer, ResolvableType targetType,
 			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) throws DecodingException {
 
-		ObjectMapper mapper = selectObjectMapper(targetType, mimeType);
+		T mapper = selectMapper(targetType, mimeType);
 		if (mapper == null) {
 			throw new IllegalStateException("No ObjectMapper for " + targetType);
 		}
@@ -208,8 +209,7 @@ public abstract class AbstractJacksonDecoder extends JacksonCodecSupport impleme
 		}
 	}
 
-	private ObjectReader createObjectReader(
-			ObjectMapper mapper, ResolvableType elementType, @Nullable Map<String, Object> hints) {
+	private ObjectReader createObjectReader(T mapper, ResolvableType elementType, @Nullable Map<String, Object> hints) {
 
 		Assert.notNull(elementType, "'elementType' must not be null");
 		Class<?> contextClass = getContextClass(elementType);

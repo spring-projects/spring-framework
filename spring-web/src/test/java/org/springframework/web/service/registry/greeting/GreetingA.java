@@ -16,7 +16,6 @@
 
 package org.springframework.web.service.registry.greeting;
 
-
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.service.annotation.GetExchange;
 

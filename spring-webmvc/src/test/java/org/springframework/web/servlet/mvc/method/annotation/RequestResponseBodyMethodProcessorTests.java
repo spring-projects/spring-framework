@@ -338,7 +338,7 @@ class RequestResponseBodyMethodProcessorTests {
 		simpleBean.setName("Jason");
 
 		JacksonJsonHttpMessageConverter converter = new JacksonJsonHttpMessageConverter();
-		converter.registerObjectMappersForType(SimpleBean.class, map -> map.put(halMediaType, mapper));
+		converter.registerMappersForType(SimpleBean.class, map -> map.put(halMediaType, mapper));
 		RequestResponseBodyMethodProcessor processor =
 				new RequestResponseBodyMethodProcessor(List.of(converter));
 		MethodParameter returnType = new MethodParameter(getClass().getDeclaredMethod("getSimpleBean"), -1);

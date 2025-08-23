@@ -21,7 +21,6 @@ import java.util.List;
 
 import org.jspecify.annotations.Nullable;
 import tools.jackson.core.JsonGenerator;
-import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.cfg.MapperBuilder;
 import tools.jackson.databind.json.JsonMapper;
 
@@ -32,7 +31,7 @@ import org.springframework.http.converter.AbstractJacksonHttpMessageConverter;
 /**
  * Implementation of {@link org.springframework.http.converter.HttpMessageConverter}
  * that can read and write JSON using <a href="https://github.com/FasterXML/jackson">Jackson 3.x's</a>
- * {@link ObjectMapper}.
+ * {@link JsonMapper}.
  *
  * <p>This converter can be used to bind to typed beans, or untyped
  * {@code HashMap} instances.
@@ -56,7 +55,7 @@ import org.springframework.http.converter.AbstractJacksonHttpMessageConverter;
  * @author Sebastien Deleuze
  * @since 7.0
  */
-public class JacksonJsonHttpMessageConverter extends AbstractJacksonHttpMessageConverter {
+public class JacksonJsonHttpMessageConverter extends AbstractJacksonHttpMessageConverter<JsonMapper> {
 
 	private static final List<MediaType> problemDetailMediaTypes =
 			Collections.singletonList(MediaType.APPLICATION_PROBLEM_JSON);
@@ -79,11 +78,11 @@ public class JacksonJsonHttpMessageConverter extends AbstractJacksonHttpMessageC
 	}
 
 	/**
-	 * Construct a new instance with the provided {@link ObjectMapper}.
+	 * Construct a new instance with the provided {@link JsonMapper}.
 	 * @see JsonMapper#builder()
 	 * @see MapperBuilder#findModules(ClassLoader)
 	 */
-	public JacksonJsonHttpMessageConverter(ObjectMapper objectMapper) {
+	public JacksonJsonHttpMessageConverter(JsonMapper objectMapper) {
 		super(objectMapper, DEFAULT_JSON_MIME_TYPES);
 	}
 

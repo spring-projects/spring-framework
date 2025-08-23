@@ -41,7 +41,7 @@ import org.springframework.util.MimeType;
  * @since 7.0
  * @see JacksonSmileDecoder
  */
-public class JacksonSmileEncoder extends AbstractJacksonEncoder {
+public class JacksonSmileEncoder extends AbstractJacksonEncoder<SmileMapper> {
 
 	private static final MimeType[] DEFAULT_SMILE_MIME_TYPES = new MimeType[] {
 			new MimeType("application", "x-jackson-smile"),

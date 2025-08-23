@@ -33,7 +33,6 @@ import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
-import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.SerializationFeature;
 import tools.jackson.databind.json.JsonMapper;
 
@@ -439,10 +438,10 @@ class ResponseEntityResultHandlerTests {
 		MediaType halFormsMediaType = MediaType.parseMediaType("application/prs.hal-forms+json");
 		MediaType halMediaType = MediaType.parseMediaType("application/hal+json");
 
-		ObjectMapper objectMapper = JsonMapper.builder().enable(SerializationFeature.INDENT_OUTPUT).build();
+		JsonMapper jsonMapper = JsonMapper.builder().enable(SerializationFeature.INDENT_OUTPUT).build();
 
 		JacksonJsonEncoder encoder = new JacksonJsonEncoder();
-		encoder.registerObjectMappersForType(Person.class, map -> map.put(halMediaType, objectMapper));
+		encoder.registerMappersForType(Person.class, map -> map.put(halMediaType, jsonMapper));
 		EncoderHttpMessageWriter<?> writer = new EncoderHttpMessageWriter<>(encoder);
 
 		ResponseEntityResultHandler handler = new ResponseEntityResultHandler(

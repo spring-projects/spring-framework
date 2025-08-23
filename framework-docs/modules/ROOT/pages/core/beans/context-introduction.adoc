@@ -933,13 +933,12 @@ Java::
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
 	// create a startup step and start recording
-	StartupStep scanPackages = getApplicationStartup().start("spring.context.base-packages.scan");
-	// add tagging information to the current step
-	scanPackages.tag("packages", () -> Arrays.toString(basePackages));
-	// perform the actual phase we're instrumenting
-	this.scanner.scan(basePackages);
-	// end the current step
-	scanPackages.end();
+	try (StartupStep scanPackages = getApplicationStartup().start("spring.context.base-packages.scan")) {
+        // add tagging information to the current step
+        scanPackages.tag("packages", () -> Arrays.toString(basePackages));
+        // perform the actual phase we're instrumenting
+        this.scanner.scan(basePackages);
+	}
 ----
 
 Kotlin::
@@ -947,13 +946,12 @@ Kotlin::
 [source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	// create a startup step and start recording
-	val scanPackages = getApplicationStartup().start("spring.context.base-packages.scan")
-	// add tagging information to the current step
-	scanPackages.tag("packages", () -> Arrays.toString(basePackages))
-	// perform the actual phase we're instrumenting
-	this.scanner.scan(basePackages)
-	// end the current step
-	scanPackages.end()
+	try (val scanPackages = getApplicationStartup().start("spring.context.base-packages.scan")) {
+        // add tagging information to the current step
+        scanPackages.tag("packages", () -> Arrays.toString(basePackages));
+        // perform the actual phase we're instrumenting
+        this.scanner.scan(basePackages);
+	}
 ----
 ======
 

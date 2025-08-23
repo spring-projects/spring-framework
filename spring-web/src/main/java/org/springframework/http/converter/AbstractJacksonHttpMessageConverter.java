@@ -82,9 +82,10 @@ import org.springframework.util.TypeUtils;
  *
  * @author Sebastien Deleuze
  * @since 7.0
+ * @param <T> the type of {@link ObjectMapper}
  * @see JacksonJsonHttpMessageConverter
  */
-public abstract class AbstractJacksonHttpMessageConverter extends AbstractSmartHttpMessageConverter<Object> {
+public abstract class AbstractJacksonHttpMessageConverter<T extends ObjectMapper> extends AbstractSmartHttpMessageConverter<Object> {
 
 	private static final String JSON_VIEW_HINT = JsonView.class.getName();
 
@@ -103,9 +104,9 @@ public abstract class AbstractJacksonHttpMessageConverter extends AbstractSmartH
 	}
 
 
-	protected final ObjectMapper defaultObjectMapper;
+	protected final T defaultMapper;
 
-	private @Nullable Map<Class<?>, Map<MediaType, ObjectMapper>> objectMapperRegistrations;
+	private @Nullable Map<Class<?>, Map<MediaType, T>> mapperRegistrations;
 
 	private final @Nullable PrettyPrinter ssePrettyPrinter;
 
@@ -115,8 +116,8 @@ public abstract class AbstractJacksonHttpMessageConverter extends AbstractSmartH
 	 * customized with the {@link tools.jackson.databind.JacksonModule}s found
 	 * by {@link MapperBuilder#findModules(ClassLoader)}.
 	 */
-	private AbstractJacksonHttpMessageConverter(MapperBuilder<?, ?> builder) {
-		this.defaultObjectMapper = builder.addModules(initModules()).build();
+	private AbstractJacksonHttpMessageConverter(MapperBuilder<T, ?> builder) {
+		this.defaultMapper = builder.addModules(initModules()).build();
 		this.ssePrettyPrinter = initSsePrettyPrinter();
 	}
 
@@ -125,7 +126,7 @@ public abstract class AbstractJacksonHttpMessageConverter extends AbstractSmartH
 	 * customized with the {@link tools.jackson.databind.JacksonModule}s found
 	 * by {@link MapperBuilder#findModules(ClassLoader)} and {@link MediaType}.
 	 */
-	protected AbstractJacksonHttpMessageConverter(MapperBuilder<?, ?> builder, MediaType supportedMediaType) {
+	protected AbstractJacksonHttpMessageConverter(MapperBuilder<T, ?> builder, MediaType supportedMediaType) {
 		this(builder);
 		setSupportedMediaTypes(Collections.singletonList(supportedMediaType));
 	}
@@ -135,7 +136,7 @@ public abstract class AbstractJacksonHttpMessageConverter extends AbstractSmartH
 	 * customized with the {@link tools.jackson.databind.JacksonModule}s found
 	 * by {@link MapperBuilder#findModules(ClassLoader)} and {@link MediaType}s.
 	 */
-	protected AbstractJacksonHttpMessageConverter(MapperBuilder<?, ?> builder, MediaType... supportedMediaTypes) {
+	protected AbstractJacksonHttpMessageConverter(MapperBuilder<T, ?> builder, MediaType... supportedMediaTypes) {
 		this(builder);
 		setSupportedMediaTypes(Arrays.asList(supportedMediaTypes));
 	}
@@ -143,24 +144,24 @@ public abstract class AbstractJacksonHttpMessageConverter extends AbstractSmartH
 	/**
 	 * Construct a new instance with the provided {@link ObjectMapper}.
 	 */
-	protected AbstractJacksonHttpMessageConverter(ObjectMapper objectMapper) {
-		this.defaultObjectMapper = objectMapper;
+	protected AbstractJacksonHttpMessageConverter(T mapper) {
+		this.defaultMapper = mapper;
 		this.ssePrettyPrinter = initSsePrettyPrinter();
 	}
 
 	/**
 	 * Construct a new instance with the provided {@link ObjectMapper} and {@link MediaType}.
 	 */
-	protected AbstractJacksonHttpMessageConverter(ObjectMapper objectMapper, MediaType supportedMediaType) {
-		this(objectMapper);
+	protected AbstractJacksonHttpMessageConverter(T mapper, MediaType supportedMediaType) {
+		this(mapper);
 		setSupportedMediaTypes(Collections.singletonList(supportedMediaType));
 	}
 
 	/**
 	 * Construct a new instance with the provided {@link ObjectMapper} and {@link MediaType}s.
 	 */
-	protected AbstractJacksonHttpMessageConverter(ObjectMapper objectMapper, MediaType... supportedMediaTypes) {
-		this(objectMapper);
+	protected AbstractJacksonHttpMessageConverter(T mapper, MediaType... supportedMediaTypes) {
+		this(mapper);
 		setSupportedMediaTypes(Arrays.asList(supportedMediaTypes));
 	}
 
@@ -184,19 +185,19 @@ public abstract class AbstractJacksonHttpMessageConverter extends AbstractSmartH
 	}
 
 	/**
-	 * Return the main {@code ObjectMapper} in use.
+	 * Return the main {@link ObjectMapper} in use.
 	 */
-	public ObjectMapper getObjectMapper() {
-		return this.defaultObjectMapper;
+	public T getMapper() {
+		return this.defaultMapper;
 	}
 
 	/**
 	 * Configure the {@link ObjectMapper} instances to use for the given
 	 * {@link Class}. This is useful when you want to deviate from the
-	 * {@link #getObjectMapper() default} ObjectMapper or have the
+	 * {@link #getMapper() default} ObjectMapper or have the
 	 * {@code ObjectMapper} vary by {@code MediaType}.
 	 * <p><strong>Note:</strong> Use of this method effectively turns off use of
-	 * the default {@link #getObjectMapper() ObjectMapper} and
+	 * the default {@link #getMapper() ObjectMapper} and
 	 * {@link #setSupportedMediaTypes(List) supportedMediaTypes} for the given
 	 * class. Therefore it is important for the mappings configured here to
 	 * {@link MediaType#includes(MediaType) include} every MediaType that must
@@ -205,12 +206,12 @@ public abstract class AbstractJacksonHttpMessageConverter extends AbstractSmartH
 	 * @param registrar a consumer to populate or otherwise update the
 	 * MediaType-to-ObjectMapper associations for the given Class
 	 */
-	public void registerObjectMappersForType(Class<?> clazz, Consumer<Map<MediaType, ObjectMapper>> registrar) {
-		if (this.objectMapperRegistrations == null) {
-			this.objectMapperRegistrations = new LinkedHashMap<>();
+	public void registerMappersForType(Class<?> clazz, Consumer<Map<MediaType, T>> registrar) {
+		if (this.mapperRegistrations == null) {
+			this.mapperRegistrations = new LinkedHashMap<>();
 		}
-		Map<MediaType, ObjectMapper> registrations =
-				this.objectMapperRegistrations.computeIfAbsent(clazz, c -> new LinkedHashMap<>());
+		Map<MediaType, T> registrations =
+				this.mapperRegistrations.computeIfAbsent(clazz, c -> new LinkedHashMap<>());
 		registrar.accept(registrations);
 	}
 
@@ -220,8 +221,8 @@ public abstract class AbstractJacksonHttpMessageConverter extends AbstractSmartH
 	 * @return a map with registered MediaType-to-ObjectMapper registrations,
 	 * or empty if in case of no registrations for the given class.
 	 */
-	public Map<MediaType, ObjectMapper> getObjectMappersForType(Class<?> clazz) {
-		for (Map.Entry<Class<?>, Map<MediaType, ObjectMapper>> entry : getObjectMapperRegistrations().entrySet()) {
+	public Map<MediaType, T> getMappersForType(Class<?> clazz) {
+		for (Map.Entry<Class<?>, Map<MediaType, T>> entry : getMapperRegistrations().entrySet()) {
 			if (entry.getKey().isAssignableFrom(clazz)) {
 				return entry.getValue();
 			}
@@ -232,7 +233,7 @@ public abstract class AbstractJacksonHttpMessageConverter extends AbstractSmartH
 	@Override
 	public List<MediaType> getSupportedMediaTypes(Class<?> clazz) {
 		List<MediaType> result = null;
-		for (Map.Entry<Class<?>, Map<MediaType, ObjectMapper>> entry : getObjectMapperRegistrations().entrySet()) {
+		for (Map.Entry<Class<?>, Map<MediaType, T>> entry : getMapperRegistrations().entrySet()) {
 			if (entry.getKey().isAssignableFrom(clazz)) {
 				result = (result != null ? result : new ArrayList<>(entry.getValue().size()));
 				result.addAll(entry.getValue().keySet());
@@ -245,8 +246,8 @@ public abstract class AbstractJacksonHttpMessageConverter extends AbstractSmartH
 				getMediaTypesForProblemDetail() : getSupportedMediaTypes());
 	}
 
-	private Map<Class<?>, Map<MediaType, ObjectMapper>> getObjectMapperRegistrations() {
-		return (this.objectMapperRegistrations != null ? this.objectMapperRegistrations : Collections.emptyMap());
+	private Map<Class<?>, Map<MediaType, T>> getMapperRegistrations() {
+		return (this.mapperRegistrations != null ? this.mapperRegistrations : Collections.emptyMap());
 	}
 
 	/**
@@ -267,7 +268,7 @@ public abstract class AbstractJacksonHttpMessageConverter extends AbstractSmartH
 		if (clazz == null) {
 			return false;
 		}
-		return this.objectMapperRegistrations == null || selectObjectMapper(clazz, mediaType) != null;
+		return this.mapperRegistrations == null || selectMapper(clazz, mediaType) != null;
 	}
 
 	@Override
@@ -285,23 +286,23 @@ public abstract class AbstractJacksonHttpMessageConverter extends AbstractSmartH
 		if (MappingJacksonValue.class.isAssignableFrom(clazz)) {
 			throw new UnsupportedOperationException("MappingJacksonValue is not supported, use hints instead");
 		}
-		return this.objectMapperRegistrations == null || selectObjectMapper(clazz, mediaType) != null;
+		return this.mapperRegistrations == null || selectMapper(clazz, mediaType) != null;
 	}
 
 	/**
 	 * Select an ObjectMapper to use, either the main ObjectMapper or another
 	 * if the handling for the given Class has been customized through
-	 * {@link #registerObjectMappersForType(Class, Consumer)}.
+	 * {@link #registerMappersForType(Class, Consumer)}.
 	 */
-	private @Nullable ObjectMapper selectObjectMapper(Class<?> targetType, @Nullable MediaType targetMediaType) {
-		if (targetMediaType == null || CollectionUtils.isEmpty(this.objectMapperRegistrations)) {
-			return this.defaultObjectMapper;
+	private @Nullable T selectMapper(Class<?> targetType, @Nullable MediaType targetMediaType) {
+		if (targetMediaType == null || CollectionUtils.isEmpty(this.mapperRegistrations)) {
+			return this.defaultMapper;
 		}
-		for (Map.Entry<Class<?>, Map<MediaType, ObjectMapper>> typeEntry : getObjectMapperRegistrations().entrySet()) {
+		for (Map.Entry<Class<?>, Map<MediaType, T>> typeEntry : getMapperRegistrations().entrySet()) {
 			if (typeEntry.getKey().isAssignableFrom(targetType)) {
-				for (Map.Entry<MediaType, ObjectMapper> objectMapperEntry : typeEntry.getValue().entrySet()) {
-					if (objectMapperEntry.getKey().includes(targetMediaType)) {
-						return objectMapperEntry.getValue();
+				for (Map.Entry<MediaType, T> mapperEntry : typeEntry.getValue().entrySet()) {
+					if (mapperEntry.getKey().includes(targetMediaType)) {
+						return mapperEntry.getValue();
 					}
 				}
 				// No matching registrations
@@ -309,7 +310,7 @@ public abstract class AbstractJacksonHttpMessageConverter extends AbstractSmartH
 			}
 		}
 		// No registrations
-		return this.defaultObjectMapper;
+		return this.defaultMapper;
 	}
 
 	@Override
@@ -334,8 +335,8 @@ public abstract class AbstractJacksonHttpMessageConverter extends AbstractSmartH
 		MediaType contentType = inputMessage.getHeaders().getContentType();
 		Charset charset = getCharset(contentType);
 
-		ObjectMapper objectMapper = selectObjectMapper(javaType.getRawClass(), contentType);
-		Assert.state(objectMapper != null, () -> "No ObjectMapper for " + javaType);
+		T mapper = selectMapper(javaType.getRawClass(), contentType);
+		Assert.state(mapper != null, () -> "No ObjectMapper for " + javaType);
 
 		boolean isUnicode = ENCODINGS.containsKey(charset.name()) ||
 				"UTF-16".equals(charset.name()) ||
@@ -345,7 +346,7 @@ public abstract class AbstractJacksonHttpMessageConverter extends AbstractSmartH
 			if (inputMessage instanceof MappingJacksonInputMessage) {
 				throw new UnsupportedOperationException("MappingJacksonInputMessage is not supported, use hints instead");
 			}
-			ObjectReader objectReader = objectMapper.readerFor(javaType);
+			ObjectReader objectReader = mapper.readerFor(javaType);
 			if (hints != null && hints.containsKey(JSON_VIEW_HINT)) {
 				objectReader = objectReader.withView((Class<?>) hints.get(JSON_VIEW_HINT));
 			}
@@ -401,8 +402,8 @@ public abstract class AbstractJacksonHttpMessageConverter extends AbstractSmartH
 		JsonEncoding encoding = getJsonEncoding(contentType);
 
 		Class<?> clazz = object.getClass();
-		ObjectMapper objectMapper = selectObjectMapper(clazz, contentType);
-		Assert.state(objectMapper != null, () -> "No ObjectMapper for " + clazz.getName());
+		T mapper = selectMapper(clazz, contentType);
+		Assert.state(mapper != null, () -> "No ObjectMapper for " + clazz.getName());
 
 		OutputStream outputStream = StreamUtils.nonClosing(outputMessage.getBody());
 		Class<?> jsonView = null;
@@ -419,7 +420,7 @@ public abstract class AbstractJacksonHttpMessageConverter extends AbstractSmartH
 		}
 
 		ObjectWriter objectWriter = (jsonView != null ?
-				objectMapper.writerWithView(jsonView) : objectMapper.writer());
+				mapper.writerWithView(jsonView) : mapper.writer());
 		if (filters != null) {
 			objectWriter = objectWriter.with(filters);
 		}
@@ -485,7 +486,7 @@ public abstract class AbstractJacksonHttpMessageConverter extends AbstractSmartH
 	 * @return the Jackson JavaType
 	 */
 	protected JavaType getJavaType(Type type, @Nullable Class<?> contextClass) {
-		return this.defaultObjectMapper.constructType(GenericTypeResolver.resolveType(type, contextClass));
+		return this.defaultMapper.constructType(GenericTypeResolver.resolveType(type, contextClass));
 	}
 
 	/**

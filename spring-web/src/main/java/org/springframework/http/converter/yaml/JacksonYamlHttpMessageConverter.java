@@ -38,7 +38,7 @@ import org.springframework.http.converter.AbstractJacksonHttpMessageConverter;
  * @author Sebastien Deleuze
  * @since 7.0
  */
-public class JacksonYamlHttpMessageConverter extends AbstractJacksonHttpMessageConverter {
+public class JacksonYamlHttpMessageConverter extends AbstractJacksonHttpMessageConverter<YAMLMapper> {
 
 	/**
 	 * Construct a new instance with a {@link YAMLMapper} customized with the

@@ -53,7 +53,7 @@ import org.springframework.util.xml.StaxUtils;
  * @author Sebastien Deleuze
  * @since 7.0
  */
-public class JacksonXmlHttpMessageConverter extends AbstractJacksonHttpMessageConverter {
+public class JacksonXmlHttpMessageConverter extends AbstractJacksonHttpMessageConverter<XmlMapper> {
 
 	private static final List<MediaType> problemDetailMediaTypes =
 			Collections.singletonList(MediaType.APPLICATION_PROBLEM_XML);

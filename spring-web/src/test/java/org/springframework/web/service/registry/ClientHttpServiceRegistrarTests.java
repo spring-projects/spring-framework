@@ -16,7 +16,6 @@
 
 package org.springframework.web.service.registry;
 
-
 import java.util.List;
 import java.util.Map;
 
@@ -37,6 +36,7 @@ import static org.mockito.Mockito.mock;
 
 /**
  * Unit tests for {@link AbstractClientHttpServiceRegistrar}.
+ *
  * @author Rossen Stoyanchev
  */
 public class ClientHttpServiceRegistrarTests {
