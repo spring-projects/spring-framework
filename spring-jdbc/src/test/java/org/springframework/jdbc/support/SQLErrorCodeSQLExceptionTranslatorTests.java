@@ -209,6 +209,7 @@ class SQLErrorCodeSQLExceptionTranslatorTests {
 
 		reset(dataSource);
 		given(dataSource.getConnection()).willReturn(connection);
+		translator = new SQLErrorCodeSQLExceptionTranslator(dataSource);
 		assertThat(translator.translate("test", null, duplicateKeyException))
 				.isInstanceOf(DuplicateKeyException.class);
 
