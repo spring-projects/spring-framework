@@ -8,9 +8,9 @@ recommended in order to get familiar with those annotations and semantics.
 
 The primary goal of this null-safety arrangement is to prevent a `NullPointerException` from being thrown at
 runtime via build time checks and to use explicit nullability as a way to express the possible absence of value.
-It is useful in both Java by leveraging some tooling (https://github.com/uber/NullAway[NullAway] or IDEs supporting
-JSpecify annotations such as IntelliJ IDEA) and Kotlin where JSpecify annotations are automatically translated to
-{kotlin-docs}/null-safety.html[Kotlin's null safety].
+It is useful in Java by leveraging nullability checkers such as https://github.com/uber/NullAway[NullAway] or IDEs
+supporting JSpecify annotations such as IntelliJ IDEA and Eclipse (the latter requiring manual configuration). In Kotlin,
+JSpecify annotations are automatically translated to {kotlin-docs}/null-safety.html[Kotlin's null safety].
 
 The {spring-framework-api}/core/Nullness.html[`Nullness` Spring API] can be used at runtime to detect the
 nullness of a type usage, a field, a method return type, or a parameter. It provides full support for
