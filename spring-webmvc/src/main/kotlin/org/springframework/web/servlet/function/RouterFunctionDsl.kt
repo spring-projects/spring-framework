@@ -813,8 +813,15 @@ class RouterFunctionDsl internal constructor (private val init: (RouterFunctionD
 	fun notFound() = ServerResponse.notFound()
 
 	/**
+	 * @see ServerResponse.unprocessableContent
+	 */
+	fun unprocessableContent() = ServerResponse.unprocessableContent()
+
+	/**
 	 * @see ServerResponse.unprocessableEntity
 	 */
+	@Deprecated("Use Unprocessable Content instead", ReplaceWith("unprocessableContent()"))
+	@Suppress("DEPRECATION")
 	fun unprocessableEntity() = ServerResponse.unprocessableEntity()
 
 	/**

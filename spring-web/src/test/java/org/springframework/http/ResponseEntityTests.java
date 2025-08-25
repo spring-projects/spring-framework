@@ -166,6 +166,16 @@ class ResponseEntityTests {
 	}
 
 	@Test
+	void unprocessableContent() {
+		ResponseEntity<String> responseEntity = ResponseEntity.unprocessableContent().body("error");
+
+		assertThat(responseEntity).isNotNull();
+		assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.UNPROCESSABLE_CONTENT);
+		assertThat(responseEntity.getBody()).isEqualTo("error");
+	}
+
+	@Test
+	@SuppressWarnings("deprecate")
 	void unprocessableEntity() {
 		ResponseEntity<String> responseEntity = ResponseEntity.unprocessableEntity().body("error");
 

@@ -135,6 +135,7 @@ class ResponseEntityExceptionHandlerTests {
 	}
 
 	@Test
+	@SuppressWarnings("deprecation")
 	void handleResponseStatusException() {
 		testException(new ResponseStatusException(HttpStatus.BANDWIDTH_LIMIT_EXCEEDED));
 	}

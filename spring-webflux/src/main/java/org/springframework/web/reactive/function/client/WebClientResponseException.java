@@ -465,10 +465,28 @@ public class WebClientResponseException extends WebClientException {
 	}
 
 	/**
-	 * {@link WebClientResponseException} for status HTTP 422 Unprocessable Entity.
-	 * @since 5.1
+	 * {@link WebClientResponseException} for status HTTP 422 Unprocessable Content.
+	 * @since 7.0
 	 */
 	@SuppressWarnings("serial")
+	public static class UnprocessableContent extends WebClientResponseException {
+
+		UnprocessableContent(
+				String statusText, HttpHeaders headers, byte[] body, @Nullable Charset charset,
+				@Nullable HttpRequest request) {
+
+			super(HttpStatus.UNPROCESSABLE_CONTENT.value(), statusText, headers, body, charset, request);
+		}
+	}
+
+
+	/**
+	 * {@link WebClientResponseException} for status HTTP 422 Unprocessable Entity.
+	 * @since 5.1
+	 * @deprecated since 7.0 in favor of {@link UnprocessableContent}
+	 */
+	@SuppressWarnings("serial")
+	@Deprecated(since = "7.0")
 	public static class UnprocessableEntity extends WebClientResponseException {
 
 		UnprocessableEntity(

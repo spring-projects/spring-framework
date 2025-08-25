@@ -872,10 +872,21 @@ class RouterFunctionDsl internal constructor (private val init: RouterFunctionDs
 
 	/**
 	 * Create a builder with an
+	 * [422 Unprocessable Content][HttpStatus.UNPROCESSABLE_CONTENT] status.
+	 * @return the created builder
+	 * @since 7.0
+	 */
+	fun unprocessableContent(): ServerResponse.BodyBuilder =
+		ServerResponse.unprocessableContent()
+
+	/**
+	 * Create a builder with an
 	 * [422 Unprocessable Entity][HttpStatus.UNPROCESSABLE_ENTITY] status.
 	 * @return the created builder
 	 * @since 5.1
 	 */
+	@Deprecated("Use unprocessable content instead.", ReplaceWith("unprocessableContent()"))
+	@Suppress("DEPRECATION")
 	fun unprocessableEntity(): ServerResponse.BodyBuilder =
 			ServerResponse.unprocessableEntity()
 

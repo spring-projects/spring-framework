@@ -808,8 +808,15 @@ class CoRouterFunctionDsl internal constructor (private val init: (CoRouterFunct
 	fun notFound() = ServerResponse.notFound()
 
 	/**
+	 * @see ServerResponse.unprocessableContent
+	 */
+	fun unprocessableContent() = ServerResponse.unprocessableContent()
+
+	/**
 	 * @see ServerResponse.unprocessableEntity
 	 */
+	@Deprecated("Use unprocessable content instead.", ReplaceWith("unprocessableContent()"))
+	@Suppress("DEPRECATION")
 	fun unprocessableEntity() = ServerResponse.unprocessableEntity()
 
 	/**

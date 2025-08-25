@@ -52,7 +52,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.reactive.BindingContext;
-import org.springframework.web.server.PayloadTooLargeException;
+import org.springframework.web.server.ContentTooLargeException;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.ServerWebInputException;
 import org.springframework.web.server.UnsupportedMediaTypeStatusException;
@@ -128,7 +128,7 @@ class MessageReaderArgumentResolverTests {
 		Mono<TestBean> result = (Mono<TestBean>) this.resolver.readBody(
 				param, true, this.bindingContext, exchange).block();
 
-		StepVerifier.create(result).expectError(PayloadTooLargeException.class).verify();
+		StepVerifier.create(result).expectError(ContentTooLargeException.class).verify();
 	}
 
 	@Test

@@ -16,25 +16,22 @@
 
 package org.springframework.web.server;
 
-
 import org.jspecify.annotations.Nullable;
 
 import org.springframework.http.HttpStatus;
 
 /**
- * Exception for errors that fit response status 413 (payload too large) for use in
+ * Exception for errors that fit response status 413 (Content too large) for use in
  * Spring Web applications.
  *
- * @author Kim Bosung
- * @since 6.2
- * @deprecated since 7.0 in favor of {@link ContentTooLargeException}
+ * @author Brian Clozel
+ * @since 7.0
  */
 @SuppressWarnings("serial")
-@Deprecated(since = "7.0")
-public class PayloadTooLargeException extends ResponseStatusException {
+public class ContentTooLargeException extends ResponseStatusException {
 
-	public PayloadTooLargeException(@Nullable Throwable cause) {
-		super(HttpStatus.PAYLOAD_TOO_LARGE, null, cause);
+	public ContentTooLargeException(@Nullable Throwable cause) {
+		super(HttpStatus.CONTENT_TOO_LARGE, null, cause);
 	}
 
 }

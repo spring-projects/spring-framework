@@ -52,7 +52,7 @@ import org.springframework.web.bind.support.WebExchangeBindException;
 import org.springframework.web.bind.support.WebExchangeDataBinder;
 import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.reactive.result.method.HandlerMethodArgumentResolverSupport;
-import org.springframework.web.server.PayloadTooLargeException;
+import org.springframework.web.server.ContentTooLargeException;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.ServerWebInputException;
@@ -236,7 +236,7 @@ public abstract class AbstractMessageReaderArgumentResolver extends HandlerMetho
 
 	private Throwable handleReadError(MethodParameter parameter, Throwable ex) {
 		if (ex instanceof DataBufferLimitException) {
-			return new PayloadTooLargeException(ex);
+			return new ContentTooLargeException(ex);
 		}
 		if (ex instanceof DecodingException) {
 			return new ServerWebInputException("Failed to read HTTP message", parameter, ex);
