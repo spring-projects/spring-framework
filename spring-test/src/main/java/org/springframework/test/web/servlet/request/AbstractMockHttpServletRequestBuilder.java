@@ -826,7 +826,7 @@ public abstract class AbstractMockHttpServletRequestBuilder<B extends AbstractMo
 		addRequestParams(request, UriComponentsBuilder.fromUri(uri).build().getQueryParams());
 
 		this.parameters.forEach((name, values) ->
-				request.setParameter(name, values.toArray(new String[0])));
+				request.addParameter(name, values.toArray(new String[0])));
 
 		if (!this.formFields.isEmpty()) {
 			if (this.content != null && this.content.length > 0) {
