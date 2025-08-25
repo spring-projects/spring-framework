@@ -67,7 +67,7 @@ class JdkClientHttpRequest extends AbstractStreamingClientHttpRequest {
 
 	private static final Set<String> DISALLOWED_HEADERS = disallowedHeaders();
 
-	private static final List<String> ALLOWED_ENCODINGS = List.of("gzip", "deflate");
+	private static final List<String> SUPPORTED_ENCODINGS = List.of("gzip", "deflate");
 
 
 	private final HttpClient httpClient;
@@ -80,18 +80,18 @@ class JdkClientHttpRequest extends AbstractStreamingClientHttpRequest {
 
 	private final @Nullable Duration timeout;
 
-	private final boolean compressionEnabled;
+	private final boolean compression;
 
 
-	public JdkClientHttpRequest(HttpClient httpClient, URI uri, HttpMethod method, Executor executor,
-			@Nullable Duration readTimeout, boolean compressionEnabled) {
+	JdkClientHttpRequest(HttpClient httpClient, URI uri, HttpMethod method, Executor executor,
+			@Nullable Duration readTimeout, boolean compression) {
 
 		this.httpClient = httpClient;
 		this.uri = uri;
 		this.method = method;
 		this.executor = executor;
 		this.timeout = readTimeout;
-		this.compressionEnabled = compressionEnabled;
+		this.compression = compression;
 	}
 
 
@@ -164,13 +164,10 @@ class JdkClientHttpRequest extends AbstractStreamingClientHttpRequest {
 	private HttpRequest buildRequest(HttpHeaders headers, @Nullable Body body) {
 		HttpRequest.Builder builder = HttpRequest.newBuilder().uri(this.uri);
 
-		// When compression is enabled and valid encoding is absent, we add gzip as standard encoding
-		if (this.compressionEnabled) {
-			if (headers.containsHeader(HttpHeaders.ACCEPT_ENCODING) &&
-					!ALLOWED_ENCODINGS.contains(headers.getFirst(HttpHeaders.ACCEPT_ENCODING))) {
-				headers.remove(HttpHeaders.ACCEPT_ENCODING);
+		if (this.compression) {
+			if (!headers.containsHeader(HttpHeaders.ACCEPT_ENCODING)) {
+				headers.addAll(HttpHeaders.ACCEPT_ENCODING, SUPPORTED_ENCODINGS);
 			}
-			headers.add(HttpHeaders.ACCEPT_ENCODING, "gzip");
 		}
 
 		headers.forEach((headerName, headerValues) -> {
@@ -310,16 +307,15 @@ class JdkClientHttpRequest extends AbstractStreamingClientHttpRequest {
 	}
 
 	/**
-	 * Custom BodyHandler that checks the Content-Encoding header and applies the appropriate decompression algorithm.
+	 * BodyHandler that checks the Content-Encoding header and applies the appropriate decompression algorithm.
 	 * Supports Gzip and Deflate encoded responses.
 	 */
-	public static final class DecompressingBodyHandler implements BodyHandler<InputStream> {
+	private static final class DecompressingBodyHandler implements BodyHandler<InputStream> {
 
 		@Override
 		public BodySubscriber<InputStream> apply(ResponseInfo responseInfo) {
 			String contentEncoding = responseInfo.headers().firstValue(HttpHeaders.CONTENT_ENCODING).orElse("");
 			if (contentEncoding.equalsIgnoreCase("gzip")) {
-				// If the content is gzipped, wrap the InputStream with a GZIPInputStream
 				return BodySubscribers.mapping(
 						BodySubscribers.ofInputStream(),
 						(InputStream is) -> {
@@ -327,18 +323,16 @@ class JdkClientHttpRequest extends AbstractStreamingClientHttpRequest {
 								return new GZIPInputStream(is);
 							}
 							catch (IOException ex) {
-								throw new UncheckedIOException(ex); // Propagate IOExceptions
+								throw new UncheckedIOException(ex);
 							}
 						});
 			}
 			else if (contentEncoding.equalsIgnoreCase("deflate")) {
-				// If the content is encoded using deflate, wrap the InputStream with a InflaterInputStream
 				return BodySubscribers.mapping(
 						BodySubscribers.ofInputStream(),
 						InflaterInputStream::new);
 			}
 			else {
-				// Otherwise, return a standard InputStream BodySubscriber
 				return BodySubscribers.ofInputStream();
 			}
 		}

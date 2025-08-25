@@ -43,7 +43,7 @@ public class JdkClientHttpRequestFactory implements ClientHttpRequestFactory {
 
 	private @Nullable Duration readTimeout;
 
-	private boolean compressionEnabled;
+	private boolean compression = true;
 
 
 	/**
@@ -99,17 +99,17 @@ public class JdkClientHttpRequestFactory implements ClientHttpRequestFactory {
 	}
 
 	/**
-	 * Sets custom {@link BodyHandler} that can handle gzip encoded {@link HttpClient}'s response.
-	 * @param compressionEnabled to enable compression by default for all {@link HttpClient}'s requests.
+	 * Set whether support for uncompressing "gzip" and "deflate" HTTP responses is enabled.
+	 * @since 7.0
 	 */
-	public void setCompressionEnabled(boolean compressionEnabled) {
-		this.compressionEnabled = compressionEnabled;
+	public void enableCompression(boolean enable) {
+		this.compression = enable;
 	}
 
 
 	@Override
 	public ClientHttpRequest createRequest(URI uri, HttpMethod httpMethod) throws IOException {
-		return new JdkClientHttpRequest(this.httpClient, uri, httpMethod, this.executor, this.readTimeout, this.compressionEnabled);
+		return new JdkClientHttpRequest(this.httpClient, uri, httpMethod, this.executor, this.readTimeout, this.compression);
 	}
 
 }
