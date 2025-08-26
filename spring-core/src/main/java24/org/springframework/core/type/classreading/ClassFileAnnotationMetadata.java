@@ -87,7 +87,7 @@ abstract class ClassFileAnnotationMetadata {
 				return createMergedAnnotation(className, annotationValue.annotation(), classLoader);
 			}
 			case AnnotationValue.OfClass classValue -> {
-				return loadClass(classValue.className().stringValue(), classLoader);
+				return fromTypeDescriptor(classValue.className().stringValue());
 			}
 			case AnnotationValue.OfEnum enumValue -> {
 				return parseEnum(enumValue, classLoader);
@@ -105,13 +105,8 @@ abstract class ClassFileAnnotationMetadata {
 	}
 
 	private static Class<?> loadClass(String className, @Nullable ClassLoader classLoader) {
-		try {
-			String name = fromTypeDescriptor(className);
-			return ClassUtils.forName(name, classLoader);
-		}
-		catch (ClassNotFoundException ex) {
-			return Object.class;
-		}
+		String name = fromTypeDescriptor(className);
+		return ClassUtils.resolveClassName(name, classLoader);
 	}
 
 	private static Object parseArrayValue(String className, @Nullable ClassLoader classLoader, AnnotationValue.OfArray arrayValue) {
@@ -160,7 +155,7 @@ abstract class ClassFileAnnotationMetadata {
 				return MergedAnnotation.class;
 			}
 			case AnnotationValue.OfClass _ -> {
-				return Class.class;
+				return String.class;
 			}
 			case AnnotationValue.OfEnum enumValue -> {
 				return loadClass(enumValue.className().stringValue(), classLoader);
