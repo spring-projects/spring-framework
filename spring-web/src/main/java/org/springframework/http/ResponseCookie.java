@@ -211,7 +211,7 @@ public final class ResponseCookie extends HttpCookie {
 	 * @return a builder to create the cookie with
 	 * @since 6.0
 	 */
-	public static ResponseCookieBuilder from(final String name) {
+	public static ResponseCookieBuilder from(String name) {
 		return new DefaultResponseCookieBuilder(name, null, false);
 	}
 
@@ -222,7 +222,7 @@ public final class ResponseCookie extends HttpCookie {
 	 * @param value the cookie value
 	 * @return a builder to create the cookie with
 	 */
-	public static ResponseCookieBuilder from(final String name, final String value) {
+	public static ResponseCookieBuilder from(String name, @Nullable String value) {
 		return new DefaultResponseCookieBuilder(name, value, false);
 	}
 
@@ -236,7 +236,7 @@ public final class ResponseCookie extends HttpCookie {
 	 * @return a builder to create the cookie with
 	 * @since 5.2.5
 	 */
-	public static ResponseCookieBuilder fromClientResponse(final String name, final String value) {
+	public static ResponseCookieBuilder fromClientResponse(String name, @Nullable String value) {
 		return new DefaultResponseCookieBuilder(name, value, true);
 	}
 
@@ -425,7 +425,7 @@ public final class ResponseCookie extends HttpCookie {
 		@Nullable
 		private String sameSite;
 
-		public DefaultResponseCookieBuilder(String name, @Nullable String value, boolean lenient) {
+		DefaultResponseCookieBuilder(String name, @Nullable String value, boolean lenient) {
 			this.name = name;
 			this.value = value;
 			this.lenient = lenient;
