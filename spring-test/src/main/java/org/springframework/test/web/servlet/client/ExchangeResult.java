@@ -29,7 +29,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jspecify.annotations.Nullable;
 
-import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpRequest;
@@ -160,14 +159,11 @@ public class ExchangeResult {
 				.build();
 	}
 
-	@Nullable
-	public <T> T getBody(Class<T> bodyType) {
-		return this.clientResponse.bodyTo(bodyType);
-	}
-
-	@Nullable
-	public <T> T getBody(ParameterizedTypeReference<T> bodyType) {
-		return this.clientResponse.bodyTo(bodyType);
+	/**
+	 * Provide access to the response. For internal use to decode the body.
+	 */
+	ConvertibleClientHttpResponse getClientResponse() {
+		return this.clientResponse;
 	}
 
 	/**

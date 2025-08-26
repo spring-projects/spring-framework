@@ -16,13 +16,17 @@
 
 package org.springframework.test.web.servlet.client.samples.bind;
 
+import java.nio.charset.StandardCharsets;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import org.springframework.test.web.servlet.client.EntityExchangeResult;
 import org.springframework.test.web.servlet.client.RestTestClient;
 import org.springframework.web.servlet.function.RouterFunction;
 import org.springframework.web.servlet.function.ServerResponse;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.web.servlet.function.RequestPredicates.GET;
 import static org.springframework.web.servlet.function.RouterFunctions.route;
 
@@ -48,6 +52,17 @@ class RouterFunctionTests {
 				.exchange()
 				.expectStatus().isOk()
 				.expectBody(String.class).isEqualTo("It works!");
+	}
+
+	@Test
+	void testEntityExchangeResult() {
+		EntityExchangeResult<byte[]> result = this.testClient.get().uri("/test")
+				.exchange()
+				.expectStatus().isOk()
+				.expectBody()
+				.returnResult();
+
+		assertThat(result.getResponseBody()).isEqualTo("It works!".getBytes(StandardCharsets.UTF_8));
 	}
 
 }

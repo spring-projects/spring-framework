@@ -286,33 +286,33 @@ class DefaultRestTestClient implements RestTestClient {
 
 		@Override
 		public <B> BodySpec<B, ?> expectBody(Class<B> bodyType) {
-			B body = this.exchangeResult.getBody(bodyType);
+			B body = this.exchangeResult.getClientResponse().bodyTo(bodyType);
 			EntityExchangeResult<B> result = new EntityExchangeResult<>(this.exchangeResult, body);
 			return new DefaultBodySpec<>(result);
 		}
 
 		@Override
 		public <B> BodySpec<B, ?> expectBody(ParameterizedTypeReference<B> bodyType) {
-			B body = this.exchangeResult.getBody(bodyType);
+			B body = this.exchangeResult.getClientResponse().bodyTo(bodyType);
 			EntityExchangeResult<B> result = initExchangeResult(body);
 			return new DefaultBodySpec<>(result);
 		}
 
 		@Override
 		public BodyContentSpec expectBody() {
-			byte[] body = this.exchangeResult.getBody(byte[].class);
+			byte[] body = this.exchangeResult.getClientResponse().bodyTo(byte[].class);
 			EntityExchangeResult<byte[]> result = initExchangeResult(body);
 			return new DefaultBodyContentSpec(result);
 		}
 
 		@Override
 		public <T> EntityExchangeResult<T> returnResult(Class<T> elementClass) {
-			return initExchangeResult(this.exchangeResult.getBody(elementClass));
+			return initExchangeResult(this.exchangeResult.getClientResponse().bodyTo(elementClass));
 		}
 
 		@Override
 		public <T> EntityExchangeResult<T> returnResult(ParameterizedTypeReference<T> elementTypeRef) {
-			return initExchangeResult(this.exchangeResult.getBody(elementTypeRef));
+			return initExchangeResult(this.exchangeResult.getClientResponse().bodyTo(elementTypeRef));
 		}
 
 		private <B> EntityExchangeResult<B> initExchangeResult(@Nullable B body) {
@@ -412,7 +412,7 @@ class DefaultRestTestClient implements RestTestClient {
 		@Override
 		public EntityExchangeResult<Void> isEmpty() {
 			this.result.assertWithDiagnostics(() ->
-					AssertionErrors.assertTrue("Expected empty body", this.result.getBody(byte[].class) == null));
+					AssertionErrors.assertTrue("Expected empty body", this.result.getResponseBody() == null));
 			return new EntityExchangeResult<>(this.result, null);
 		}
 
