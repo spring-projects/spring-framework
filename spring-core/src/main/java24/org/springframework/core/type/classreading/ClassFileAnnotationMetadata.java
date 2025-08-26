@@ -25,6 +25,7 @@ import java.lang.constant.ClassDesc;
 import java.lang.reflect.Array;
 import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -86,7 +87,7 @@ abstract class ClassFileAnnotationMetadata {
 				return createMergedAnnotation(className, annotationValue.annotation(), classLoader);
 			}
 			case AnnotationValue.OfClass classValue -> {
-				return fromTypeDescriptor(classValue.className().stringValue());
+				return loadClass(classValue.className().stringValue(), classLoader);
 			}
 			case AnnotationValue.OfEnum enumValue -> {
 				return parseEnum(enumValue, classLoader);
@@ -101,6 +102,16 @@ abstract class ClassFileAnnotationMetadata {
 		ClassDesc classDesc = ClassDesc.ofDescriptor(descriptor);
 		return classDesc.isPrimitive() ? classDesc.displayName() :
 		classDesc.packageName() + "." + classDesc.displayName();
+	}
+
+	private static Class<?> loadClass(String className, @Nullable ClassLoader classLoader) {
+		try {
+			String name = fromTypeDescriptor(className);
+			return ClassUtils.forName(name, classLoader);
+		}
+		catch (ClassNotFoundException ex) {
+			return Object.class;
+		}
 	}
 
 	private static Object parseArrayValue(String className, @Nullable ClassLoader classLoader, AnnotationValue.OfArray arrayValue) {
@@ -119,10 +130,10 @@ abstract class ClassFileAnnotationMetadata {
 				return stream.map(AnnotationValue.OfLong.class::cast).mapToLong(AnnotationValue.OfLong::longValue).toArray();
 			}
 			default -> {
-				Object firstResolvedValue = readAnnotationValue(className, arrayValue.values().getFirst(), classLoader);
+				Class<?> arrayElementType = resolveArrayElementType(arrayValue.values(), classLoader);
 				return stream
 						.map(rawValue -> readAnnotationValue(className, rawValue, classLoader))
-						.toArray(s -> (Object[]) Array.newInstance(firstResolvedValue.getClass(), s));
+						.toArray(s -> (Object[]) Array.newInstance(arrayElementType, s));
 			}
 		}
 	}
@@ -138,6 +149,28 @@ abstract class ClassFileAnnotationMetadata {
 			return null;
 		}
 	}
+
+	private static Class<?> resolveArrayElementType(List<AnnotationValue> values, @Nullable ClassLoader classLoader) {
+		AnnotationValue firstValue = values.getFirst();
+		switch (firstValue) {
+			case AnnotationValue.OfConstant constantValue -> {
+				return constantValue.resolvedValue().getClass();
+			}
+			case AnnotationValue.OfAnnotation _ -> {
+				return MergedAnnotation.class;
+			}
+			case AnnotationValue.OfClass _ -> {
+				return Class.class;
+			}
+			case AnnotationValue.OfEnum enumValue -> {
+				return loadClass(enumValue.className().stringValue(), classLoader);
+			}
+			default -> {
+				return Object.class;
+			}
+		}
+	}
+
 
 	record Source(Annotation entryName) {
 
