@@ -54,7 +54,6 @@ public final class JettyDataBuffer implements PooledDataBuffer {
 		this.bufferFactory = bufferFactory;
 		this.delegate = delegate;
 		this.chunk = chunk;
-		this.chunk.retain();
 	}
 
 	JettyDataBuffer(JettyDataBufferFactory bufferFactory, DefaultDataBuffer delegate) {
