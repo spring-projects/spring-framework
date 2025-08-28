@@ -27,7 +27,7 @@ See xref:web/webflux-webclient.adoc[WebClient] for more details.
 Spring REST client and exposes a simple, template-method API over underlying HTTP client
 libraries.
 
-See xref:integration/rest-clients.adoc[REST Endpoints] for details.
+See xref:integration/rest-clients.adoc#rest-resttemplate[REST Endpoints] for details.
 
 
 [[webmvc-http-interface]]
