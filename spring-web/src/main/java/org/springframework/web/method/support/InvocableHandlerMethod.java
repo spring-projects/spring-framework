@@ -18,6 +18,7 @@ package org.springframework.web.method.support;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Objects;
@@ -35,6 +36,7 @@ import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.SynchronousSink;
 
+import org.springframework.aop.support.AopUtils;
 import org.springframework.context.MessageSource;
 import org.springframework.core.CoroutinesUtils;
 import org.springframework.core.DefaultParameterNameDiscoverer;
@@ -58,6 +60,7 @@ import org.springframework.web.method.HandlerMethod;
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
  * @author Sebastien Deleuze
+ * @author Yongjun Hong
  * @since 3.1
  */
 public class InvocableHandlerMethod extends HandlerMethod {
@@ -246,6 +249,16 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	 */
 	protected @Nullable Object doInvoke(@Nullable Object... args) throws Exception {
 		Method method = getBridgedMethod();
+		Object bean = getBean();
+
+		if (AopUtils.isCglibProxy(bean) && Modifier.isPrivate(method.getModifiers())) {
+			throw new IllegalStateException(
+					"Cannot invoke private method [" + method.getName() + "] on a CGLIB proxy. " +
+							"Handler methods on proxied components must be public or protected. " +
+							"Change method visibility or use interface-based JDK proxies if applicable."
+			);
+		}
+
 		try {
 			if (KotlinDetector.isKotlinType(method.getDeclaringClass())) {
 				if (KotlinDetector.isSuspendingFunction(method)) {
