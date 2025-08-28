@@ -35,8 +35,6 @@ public class DefaultApiVersionStrategiesTests {
 
 	private static final SemanticApiVersionParser parser = new SemanticApiVersionParser();
 
-	private final MockHttpServletRequest request = new MockHttpServletRequest();
-
 
 	@Test
 	void defaultVersionIsParsed() {
@@ -113,8 +111,11 @@ public class DefaultApiVersionStrategiesTests {
 	}
 
 	private void validateVersion(@Nullable String version, DefaultApiVersionStrategy strategy) {
-		Comparable<?> parsedVersion = (version != null ? parser.parseVersion(version) : null);
-		strategy.validateVersion(parsedVersion, request);
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		if (version != null) {
+			request.setParameter("api-version", version);
+		}
+		strategy.resolveParseAndValidateVersion(request);
 	}
 
 }

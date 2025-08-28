@@ -25,7 +25,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.web.accept.InvalidApiVersionException;
 import org.springframework.web.accept.MissingApiVersionException;
 import org.springframework.web.accept.SemanticApiVersionParser;
-import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest;
 import org.springframework.web.testfixture.server.MockServerWebExchange;
 
@@ -39,8 +38,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 public class DefaultApiVersionStrategiesTests {
 
 	private static final SemanticApiVersionParser parser = new SemanticApiVersionParser();
-
-	private final ServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/"));
 
 
 	@Test
@@ -114,8 +111,12 @@ public class DefaultApiVersionStrategiesTests {
 	}
 
 	private void validateVersion(@Nullable String version, DefaultApiVersionStrategy strategy) {
+		MockServerHttpRequest.BaseBuilder<?> requestBuilder = MockServerHttpRequest.get("/");
+		if (version != null) {
+			requestBuilder.queryParam("api-version", version);
+		}
 		Comparable<?> parsedVersion = (version != null ? parser.parseVersion(version) : null);
-		strategy.validateVersion(parsedVersion, exchange);
+		strategy.resolveParseAndValidateVersion(MockServerWebExchange.builder(requestBuilder).build());
 	}
 
 }
