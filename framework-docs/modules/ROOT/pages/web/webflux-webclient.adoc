@@ -3,7 +3,7 @@
 :page-section-summary-toc: 1
 
 Spring WebFlux includes a client to perform HTTP requests with. `WebClient` has a
-functional, fluent API based on Reactor, see xref:web-reactive.adoc#webflux-reactive-libraries[Reactive Libraries],
+functional, fluent API based on Reactor, see xref:web/webflux-reactive-libraries.adoc[Reactive Libraries],
 which enables declarative composition of asynchronous logic without the need to deal with
 threads or concurrency. It is fully non-blocking, it supports streaming, and relies on
 the same xref:web/webflux/reactive-spring.adoc#webflux-codecs[codecs] that are also used to encode and
