@@ -25,6 +25,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
@@ -93,6 +94,16 @@ public class DefaultApiVersionStrategiesTests {
 		assertThatThrownBy(() -> validateVersion("1.2", strategy)).isInstanceOf(InvalidApiVersionException.class);
 	}
 
+	@Test
+	void versionRequiredAndDefaultVersionSet() {
+		assertThatIllegalArgumentException()
+				.isThrownBy(() ->
+						new DefaultApiVersionStrategy(
+								List.of(request -> request.getParameter("api-version")), new SemanticApiVersionParser(),
+								true, "1.2", true, version -> true, null))
+				.withMessage("versionRequired cannot be set to true if a defaultVersion is also configured");
+	}
+
 	private static DefaultApiVersionStrategy apiVersionStrategy() {
 		return apiVersionStrategy(null, false, null);
 	}
@@ -107,7 +118,7 @@ public class DefaultApiVersionStrategiesTests {
 
 		return new DefaultApiVersionStrategy(
 				List.of(request -> request.getParameter("api-version")), new SemanticApiVersionParser(),
-				true, defaultVersion, detectSupportedVersions, supportedVersionPredicate, null);
+				null, defaultVersion, detectSupportedVersions, supportedVersionPredicate, null);
 	}
 
 	private void validateVersion(@Nullable String version, DefaultApiVersionStrategy strategy) {

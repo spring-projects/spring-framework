@@ -213,7 +213,7 @@ public class ApiVersionConfigurer {
 
 		DefaultApiVersionStrategy strategy = new DefaultApiVersionStrategy(this.versionResolvers,
 				(this.versionParser != null ? this.versionParser : new SemanticApiVersionParser()),
-				(this.versionRequired != null ? this.versionRequired : true), this.defaultVersion,
+				this.versionRequired, this.defaultVersion,
 				this.detectSupportedVersions, this.supportedVersionPredicate,
 				this.deprecationHandler);
 

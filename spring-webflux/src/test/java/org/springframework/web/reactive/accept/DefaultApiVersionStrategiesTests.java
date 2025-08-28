@@ -29,6 +29,7 @@ import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRe
 import org.springframework.web.testfixture.server.MockServerWebExchange;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
@@ -97,6 +98,16 @@ public class DefaultApiVersionStrategiesTests {
 		assertThatThrownBy(() -> validateVersion("1.2", strategy)).isInstanceOf(InvalidApiVersionException.class);
 	}
 
+	@Test
+	void versionRequiredAndDefaultVersionSet() {
+		assertThatIllegalArgumentException()
+				.isThrownBy(() ->
+						new org.springframework.web.accept.DefaultApiVersionStrategy(
+								List.of(request -> request.getParameter("api-version")), new SemanticApiVersionParser(),
+								true, "1.2", true, version -> true, null))
+				.withMessage("versionRequired cannot be set to true if a defaultVersion is also configured");
+	}
+
 	private static DefaultApiVersionStrategy apiVersionStrategy() {
 		return apiVersionStrategy(null, false, null);
 	}
@@ -107,7 +118,7 @@ public class DefaultApiVersionStrategiesTests {
 
 			return new DefaultApiVersionStrategy(
 				List.of(exchange -> exchange.getRequest().getQueryParams().getFirst("api-version")),
-				parser, true, defaultVersion, detectSupportedVersions, supportedVersionPredicate, null);
+				parser, null, defaultVersion, detectSupportedVersions, supportedVersionPredicate, null);
 	}
 
 	private void validateVersion(@Nullable String version, DefaultApiVersionStrategy strategy) {
@@ -115,7 +126,6 @@ public class DefaultApiVersionStrategiesTests {
 		if (version != null) {
 			requestBuilder.queryParam("api-version", version);
 		}
-		Comparable<?> parsedVersion = (version != null ? parser.parseVersion(version) : null);
 		strategy.resolveParseAndValidateVersion(MockServerWebExchange.builder(requestBuilder).build());
 	}
 
