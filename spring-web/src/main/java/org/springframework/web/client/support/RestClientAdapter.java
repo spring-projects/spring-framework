@@ -16,6 +16,7 @@
 
 package org.springframework.web.client.support;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.util.ArrayList;
@@ -72,13 +73,10 @@ public final class RestClientAdapter implements HttpExchangeAdapter {
 		return newRequest(values).retrieve().toBodilessEntity().getHeaders();
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public <T> @Nullable T exchangeForBody(HttpRequestValues values, ParameterizedTypeReference<T> bodyType) {
-		if (bodyType.getType().equals(InputStream.class)) {
-			return (T) newRequest(values).exchange((request, response) -> response.getBody(), false);
-		}
-		return newRequest(values).retrieve().body(bodyType);
+		return (bodyType.getType().equals(InputStream.class) ?
+				exchangeForInputStream(values) : newRequest(values).retrieve().body(bodyType));
 	}
 
 	@Override
@@ -86,16 +84,23 @@ public final class RestClientAdapter implements HttpExchangeAdapter {
 		return newRequest(values).retrieve().toBodilessEntity();
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public <T> ResponseEntity<T> exchangeForEntity(HttpRequestValues values, ParameterizedTypeReference<T> bodyType) {
-		if (bodyType.getType().equals(InputStream.class)) {
-			return (ResponseEntity<T>) newRequest(values).exchangeForRequiredValue((request, response) ->
-					ResponseEntity.status(response.getStatusCode())
-							.headers(response.getHeaders())
-							.body(response.getBody()), false);
-		}
-		return newRequest(values).retrieve().toEntity(bodyType);
+		return (bodyType.getType().equals(InputStream.class) ?
+				exchangeForEntityInputStream(values) : newRequest(values).retrieve().toEntity(bodyType));
+	}
+
+	@SuppressWarnings("unchecked")
+	private <T> T exchangeForInputStream(HttpRequestValues values) {
+		return (T) newRequest(values).exchange((request, response) -> getInputStream(response), false);
+	}
+
+	@SuppressWarnings("unchecked")
+	private <T> ResponseEntity<T> exchangeForEntityInputStream(HttpRequestValues values) {
+		return (ResponseEntity<T>) newRequest(values).exchangeForRequiredValue((request, response) ->
+				ResponseEntity.status(response.getStatusCode())
+						.headers(response.getHeaders())
+						.body(getInputStream(response)), false);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -156,6 +161,16 @@ public final class RestClientAdapter implements HttpExchangeAdapter {
 
 		return bodySpec;
 	}
+
+	private static InputStream getInputStream(
+			RestClient.RequestHeadersSpec.ConvertibleClientHttpResponse response) throws IOException {
+
+		if (response.getStatusCode().isError()) {
+			throw response.createException();
+		}
+		return response.getBody();
+	}
+
 
 
 	/**

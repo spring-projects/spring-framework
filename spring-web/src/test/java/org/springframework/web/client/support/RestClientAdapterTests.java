@@ -56,6 +56,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.client.ApiVersionInserter;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
@@ -69,6 +70,7 @@ import org.springframework.web.util.DefaultUriBuilderFactory;
 import org.springframework.web.util.UriBuilderFactory;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * Integration tests for {@link HttpServiceProxyFactory} with {@link RestClient}
@@ -333,6 +335,15 @@ class RestClientAdapterTests {
 		RecordedRequest request = this.anotherServer.takeRequest();
 		assertThat(request.getTarget()).isEqualTo("/input-stream");
 		assertThat(StreamUtils.copyToString(inputStream, StandardCharsets.UTF_8)).isEqualTo("Hello Spring 2!");
+	}
+
+	@Test // gh-35375
+	void getInputStreamWithError() {
+		prepareResponse(builder -> builder.code(400).body("rejected"));
+
+		assertThatThrownBy(() -> initService().getInputStream())
+				.isExactlyInstanceOf(HttpClientErrorException.BadRequest.class)
+				.hasMessage("400 Client Error: \"rejected\"");
 	}
 
 	@Test
