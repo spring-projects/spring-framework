@@ -311,6 +311,15 @@ class MockHttpServletRequestBuilderTests {
 		assertThat(request.getParameterMap().get("foo")).containsExactly();
 	}
 
+	@Test // gh-35210
+	void queryStringWithoutValues() {
+		this.builder = new MockHttpServletRequestBuilder(GET).uri("/path?foo");
+		MockHttpServletRequest request = this.builder.buildRequest(this.servletContext);
+
+		assertThat(request.getQueryString()).isEqualTo("foo");
+		assertThat(request.getParameterMap().get("foo")).containsExactly((String) null);
+	}
+
 	@Test
 	void formField() {
 		this.builder = new MockHttpServletRequestBuilder(POST).uri("/");

@@ -911,10 +911,12 @@ public abstract class AbstractMockHttpServletRequestBuilder<B extends AbstractMo
 	}
 
 	private void addRequestParams(MockHttpServletRequest request, MultiValueMap<String, String> map) {
-		map.forEach((key, values) -> values.forEach(value -> {
-			value = (value != null ? UriUtils.decode(value, StandardCharsets.UTF_8) : null);
-			request.addParameter(UriUtils.decode(key, StandardCharsets.UTF_8), value);
-		}));
+		map.forEach((key, values) ->
+				request.addParameter(
+						UriUtils.decode(key, StandardCharsets.UTF_8),
+						values.stream()
+								.map(value -> value != null ? UriUtils.decode(value, StandardCharsets.UTF_8) : null)
+								.toArray(String[]::new)));
 	}
 
 	private byte[] writeFormData(MediaType mediaType, Charset charset) {
