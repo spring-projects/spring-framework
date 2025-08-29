@@ -230,7 +230,7 @@ class MockHttpServletRequestBuilderTests {
 	}
 
 	@Test
-	void requestParameterFromQuery() {
+	void requestParameterFromQueryString() {
 		this.builder = new MockHttpServletRequestBuilder(GET).uri("/?foo=bar&foo=baz");
 
 		MockHttpServletRequest request = this.builder.buildRequest(this.servletContext);
@@ -241,7 +241,7 @@ class MockHttpServletRequestBuilderTests {
 	}
 
 	@Test
-	void requestParameterFromQueryList() {
+	void requestParameterFromQueryStringWithListValues() {
 		this.builder = new MockHttpServletRequestBuilder(GET).uri("/?foo[0]=bar&foo[1]=baz");
 
 		MockHttpServletRequest request = this.builder.buildRequest(this.servletContext);
@@ -263,25 +263,6 @@ class MockHttpServletRequestBuilderTests {
 		assertThat(request.getQueryString()).isEqualTo("foo=bar&foo=baz");
 	}
 
-	@Test // gh-35210
-	void queryParameterWithoutValues() {
-		this.builder = new MockHttpServletRequestBuilder(GET).uri("/");
-		this.builder.queryParam("foo");
-		MockHttpServletRequest request = this.builder.buildRequest(this.servletContext);
-
-		assertThat(request.getQueryString()).isEqualTo("foo");
-		assertThat(request.getParameterMap().get("foo")).containsExactly();
-	}
-
-	@Test
-	void queryParametersWithUriAndQueryParam() {
-		this.builder = new MockHttpServletRequestBuilder(GET).uri("/path?param1=value1");
-		this.builder.queryParam("param1", "value2");
-		MockHttpServletRequest request = this.builder.buildRequest(this.servletContext);
-
-		assertThat(request.getParameterMap().get("param1")).containsExactly("value1", "value2");
-	}
-
 	@Test
 	void queryParameterMap() {
 		this.builder = new MockHttpServletRequestBuilder(GET).uri("/");
@@ -299,7 +280,7 @@ class MockHttpServletRequestBuilderTests {
 	}
 
 	@Test
-	void queryParameterList() {
+	void queryParameterWithListValues() {
 		this.builder = new MockHttpServletRequestBuilder(GET).uri("/");
 		this.builder.queryParam("foo[0]", "bar");
 		this.builder.queryParam("foo[1]", "baz");
@@ -309,6 +290,25 @@ class MockHttpServletRequestBuilderTests {
 		assertThat(request.getQueryString()).isEqualTo("foo%5B0%5D=bar&foo%5B1%5D=baz");
 		assertThat(request.getParameter("foo[0]")).isEqualTo("bar");
 		assertThat(request.getParameter("foo[1]")).isEqualTo("baz");
+	}
+
+	@Test // gh-35329
+	void queryParameterAndQueryString() {
+		this.builder = new MockHttpServletRequestBuilder(GET).uri("/path?param1=value1");
+		this.builder.queryParam("param1", "value2");
+		MockHttpServletRequest request = this.builder.buildRequest(this.servletContext);
+
+		assertThat(request.getParameterMap().get("param1")).containsExactly("value1", "value2");
+	}
+
+	@Test // gh-35210
+	void queryParameterWithoutValues() {
+		this.builder = new MockHttpServletRequestBuilder(GET).uri("/");
+		this.builder.queryParam("foo");
+		MockHttpServletRequest request = this.builder.buildRequest(this.servletContext);
+
+		assertThat(request.getQueryString()).isEqualTo("foo");
+		assertThat(request.getParameterMap().get("foo")).containsExactly();
 	}
 
 	@Test

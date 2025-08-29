@@ -342,7 +342,7 @@ public abstract class AbstractMockHttpServletRequestBuilder<B extends AbstractMo
 	 * @param values one or more header values
 	 */
 	public B header(String name, Object... values) {
-		addToMultiValueMap(this.headers, name, values);
+		this.headers.addAll(name, Arrays.asList(values));
 		return self();
 	}
 
@@ -372,11 +372,7 @@ public abstract class AbstractMockHttpServletRequestBuilder<B extends AbstractMo
 	 * @param values one or more values
 	 */
 	public B param(String name, String... values) {
-		if (values.length == 0) {
-			this.parameters.computeIfAbsent(name, k -> new ArrayList<>());
-			return self();
-		}
-		addToMultiValueMap(this.parameters, name, values);
+		this.parameters.addAll(name, Arrays.asList(values));
 		return self();
 	}
 
@@ -823,10 +819,9 @@ public abstract class AbstractMockHttpServletRequestBuilder<B extends AbstractMo
 		if (query != null) {
 			request.setQueryString(query);
 		}
-		addRequestParams(request, UriComponentsBuilder.fromUri(uri).build().getQueryParams());
 
-		this.parameters.forEach((name, values) ->
-				request.addParameter(name, values.toArray(new String[0])));
+		addRequestParams(request, UriComponentsBuilder.fromUri(uri).build().getQueryParams());
+		this.parameters.forEach((name, values) -> request.addParameter(name, values.toArray(new String[0])));
 
 		if (!this.formFields.isEmpty()) {
 			if (this.content != null && this.content.length > 0) {
@@ -993,19 +988,10 @@ public abstract class AbstractMockHttpServletRequestBuilder<B extends AbstractMo
 		return request;
 	}
 
-
 	private static void addToMap(Map<String, Object> map, String name, Object value) {
 		Assert.hasLength(name, "'name' must not be empty");
 		Assert.notNull(value, "'value' must not be null");
 		map.put(name, value);
-	}
-
-	private static <T> void addToMultiValueMap(MultiValueMap<String, T> map, String name, T[] values) {
-		Assert.hasLength(name, "'name' must not be empty");
-		Assert.notEmpty(values, "'values' must not be empty");
-		for (T value : values) {
-			map.add(name, value);
-		}
 	}
 
 }
