@@ -112,7 +112,7 @@ class JdkClientHttpRequest extends AbstractStreamingClientHttpRequest {
 		TimeoutHandler timeoutHandler = null;
 		try {
 			HttpRequest request = buildRequest(headers, body);
-			responseFuture = this.httpClient.sendAsync(request, new DecompressingBodyHandler());
+			responseFuture = this.httpClient.sendAsync(request, this.compression ? new DecompressingBodyHandler() : HttpResponse.BodyHandlers.ofInputStream());
 
 			if (this.timeout != null) {
 				timeoutHandler = new TimeoutHandler(responseFuture, this.timeout);

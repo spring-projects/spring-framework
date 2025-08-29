@@ -110,12 +110,18 @@ class JdkClientHttpRequestFactoryTests extends AbstractHttpRequestFactoryTests {
 	@Test
 	void compressionDisabled() throws IOException {
 		URI uri = URI.create(baseUrl + "/compress/");
+		if (this.factory instanceof JdkClientHttpRequestFactory jdkClientHttpRequestFactory) {
+			jdkClientHttpRequestFactory.enableCompression(false);
+		}
 		ClientHttpRequest request = this.factory.createRequest(uri, HttpMethod.POST);
 		StreamUtils.copy("Payload to compress", StandardCharsets.UTF_8, request.getBody());
 		try (ClientHttpResponse response = request.execute()) {
+		assertThat(request.getHeaders().containsHeader("Accept-Encoding")).isFalse();
 			assertThat(response.getStatusCode()).as("Invalid response status").isEqualTo(HttpStatus.OK);
-			assertThat(response.getHeaders().containsHeader("Content-Encoding")).isFalse();
-			assertThat(response.getBody()).as("Invalid request body").hasContent("Payload to compress");
+			assertThat(response.getHeaders().containsHeader("Content-Encoding")).isTrue();
+			assertThat(StreamUtils.copyToString(response.getBody(), StandardCharsets.UTF_8))
+					.as("Body should not be decompressed")
+					.doesNotContain("Payload to compress");
 		}
 	}
 

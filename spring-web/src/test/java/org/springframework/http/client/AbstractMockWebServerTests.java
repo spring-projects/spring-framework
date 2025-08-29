@@ -116,29 +116,26 @@ public abstract class AbstractMockWebServerTests {
 					String encoding = request.getTarget().replace("/compress/","");
 					String requestBody = request.getBody().utf8();
 					ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-					if (encoding.equals("gzip")) {
-						try(GZIPOutputStream gzipOutputStream = new GZIPOutputStream(outputStream)) {
-							gzipOutputStream.write(requestBody.getBytes());
-							gzipOutputStream.flush();
-						}
-					}
-					else if(encoding.equals("deflate")) {
+					if(encoding.equals("deflate")) {
 							try(DeflaterOutputStream deflaterOutputStream = new DeflaterOutputStream(outputStream)) {
 							deflaterOutputStream.write(requestBody.getBytes());
 							deflaterOutputStream.flush();
 						}
 					}
+					// compress anyway with gzip
 					else {
-						outputStream.write(requestBody.getBytes());
+						encoding = "gzip";
+						try(GZIPOutputStream gzipOutputStream = new GZIPOutputStream(outputStream)) {
+							gzipOutputStream.write(requestBody.getBytes());
+							gzipOutputStream.flush();
+						}
 					}
 					Buffer buffer = new Buffer();
 					buffer.write(outputStream.toByteArray());
 					MockResponse.Builder builder = new MockResponse.Builder()
 							.body(buffer)
 							.code(200);
-					if (!encoding.isEmpty()) {
-						builder.setHeader(HttpHeaders.CONTENT_ENCODING, encoding);
-					}
+					builder.setHeader(HttpHeaders.CONTENT_ENCODING, encoding);
 					return builder.build();
 				}
 				return new MockResponse.Builder().code(404).build();
