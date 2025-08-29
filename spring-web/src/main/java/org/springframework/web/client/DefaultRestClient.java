@@ -775,7 +775,7 @@ final class DefaultRestClient implements RestClient {
 		DefaultResponseSpec(RequestHeadersSpec<?> requestHeadersSpec) {
 			this.requestHeadersSpec = requestHeadersSpec;
 			this.statusHandlers.addAll(DefaultRestClient.this.defaultStatusHandlers);
-			this.statusHandlers.add(StatusHandler.defaultHandler(DefaultRestClient.this.messageConverters));
+			this.statusHandlers.add(StatusHandler.createDefaultStatusHandler(DefaultRestClient.this.messageConverters));
 			this.defaultStatusHandlerCount = this.statusHandlers.size();
 		}
 
@@ -886,7 +886,10 @@ final class DefaultRestClient implements RestClient {
 			return this.requestHeadersSpec.exchange(exchangeFunction);
 		}
 
-		private <T> @Nullable T readBody(HttpRequest request, ClientHttpResponse response, Type bodyType, Class<T> bodyClass, @Nullable Map<String, Object> hints) {
+		private <T> @Nullable T readBody(
+				HttpRequest request, ClientHttpResponse response, Type bodyType, Class<T> bodyClass,
+				@Nullable Map<String, Object> hints) {
+
 			return DefaultRestClient.this.readWithMessageConverters(
 					response, () -> applyStatusHandlers(request, response), bodyType, bodyClass, hints);
 
@@ -923,28 +926,6 @@ final class DefaultRestClient implements RestClient {
 		}
 
 		@Override
-		public <T> @Nullable T bodyTo(Class<T> bodyType) {
-			return readWithMessageConverters(this.delegate, () -> {} , bodyType, bodyType, this.hints);
-		}
-
-		@Override
-		public <T> @Nullable T bodyTo(ParameterizedTypeReference<T> bodyType) {
-			Type type = bodyType.getType();
-			Class<T> bodyClass = bodyClass(type);
-			return readWithMessageConverters(this.delegate, () -> {}, type, bodyClass, this.hints);
-		}
-
-		@Override
-		public InputStream getBody() throws IOException {
-			return this.delegate.getBody();
-		}
-
-		@Override
-		public HttpHeaders getHeaders() {
-			return this.delegate.getHeaders();
-		}
-
-		@Override
 		public HttpStatusCode getStatusCode() throws IOException {
 			return this.delegate.getStatusCode();
 		}
@@ -955,8 +936,30 @@ final class DefaultRestClient implements RestClient {
 		}
 
 		@Override
+		public HttpHeaders getHeaders() {
+			return this.delegate.getHeaders();
+		}
+
+		@Override
+		public InputStream getBody() throws IOException {
+			return this.delegate.getBody();
+		}
+
+		@Override
 		public void close() {
 			this.delegate.close();
+		}
+
+		@Override
+		public <T> @Nullable T bodyTo(Class<T> bodyType) {
+			return readWithMessageConverters(this.delegate, () -> {} , bodyType, bodyType, this.hints);
+		}
+
+		@Override
+		public <T> @Nullable T bodyTo(ParameterizedTypeReference<T> bodyType) {
+			Type type = bodyType.getType();
+			Class<T> bodyClass = bodyClass(type);
+			return readWithMessageConverters(this.delegate, () -> {}, type, bodyClass, this.hints);
 		}
 	}
 
