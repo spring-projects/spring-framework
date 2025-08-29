@@ -108,7 +108,16 @@ final class StatusHandler {
 				});
 	}
 
-	private static RestClientResponseException createException(
+	/**
+	 * Create a {@link RestClientResponseException} of the appropriate
+	 * subtype depending on the response status code.
+	 * @param response the response
+	 * @param converters the converters to use to decode the body
+	 * @return the created exception
+	 * @throws IOException in case of a response failure (e.g. to obtain the status)
+	 * @since 7.0
+	 */
+	public static RestClientResponseException createException(
 			ClientHttpResponse response, List<HttpMessageConverter<?>> converters) throws IOException {
 
 		HttpStatusCode statusCode = response.getStatusCode();

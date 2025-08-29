@@ -878,6 +878,15 @@ public interface RestClient {
 			 * @return the body, or {@code null} if no response body was available
 			 */
 			<T> @Nullable T bodyTo(ParameterizedTypeReference<T> bodyType);
+
+			/**
+			 * Create a {@link RestClientResponseException} of the appropriate
+			 * subtype depending on the response status code. The exception contains
+			 * the status, headers, and body of the response.
+			 * @throws IOException in case of a response failure (e.g. to obtain the status)
+			 * @since 7.0
+			 */
+			RestClientResponseException createException() throws IOException;
 		}
 	}
 

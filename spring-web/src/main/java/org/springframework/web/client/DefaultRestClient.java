@@ -961,6 +961,11 @@ final class DefaultRestClient implements RestClient {
 			Class<T> bodyClass = bodyClass(type);
 			return readWithMessageConverters(this.delegate, () -> {}, type, bodyClass, this.hints);
 		}
+
+		@Override
+		public RestClientResponseException createException() throws IOException {
+			return StatusHandler.createException(this, DefaultRestClient.this.messageConverters);
+		}
 	}
 
 }
