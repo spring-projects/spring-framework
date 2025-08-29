@@ -47,6 +47,7 @@ public class SingletonSupplier<T> implements Supplier<@Nullable T> {
 
 	private volatile @Nullable T singletonInstance;
 
+	private volatile boolean initialized;
 	/**
 	 * Guards access to write operations on the {@code singletonInstance} field.
 	 */
@@ -63,6 +64,7 @@ public class SingletonSupplier<T> implements Supplier<@Nullable T> {
 		this.instanceSupplier = null;
 		this.defaultSupplier = defaultSupplier;
 		this.singletonInstance = instance;
+		this.initialized = (instance != null);
 	}
 
 	/**
@@ -85,6 +87,7 @@ public class SingletonSupplier<T> implements Supplier<@Nullable T> {
 		this.instanceSupplier = null;
 		this.defaultSupplier = null;
 		this.singletonInstance = singletonInstance;
+		this.initialized = (singletonInstance != null);
 	}
 
 
@@ -94,26 +97,24 @@ public class SingletonSupplier<T> implements Supplier<@Nullable T> {
 	 */
 	@Override
 	public @Nullable T get() {
-		T instance = this.singletonInstance;
-		if (instance == null) {
+		if (!this.initialized) {
 			this.writeLock.lock();
 			try {
-				instance = this.singletonInstance;
-				if (instance == null) {
+				if (!this.initialized) {
 					if (this.instanceSupplier != null) {
-						instance = this.instanceSupplier.get();
+						this.singletonInstance = this.instanceSupplier.get();
 					}
-					if (instance == null && this.defaultSupplier != null) {
-						instance = this.defaultSupplier.get();
+					if (this.singletonInstance == null && this.defaultSupplier != null) {
+						this.singletonInstance = this.defaultSupplier.get();
 					}
-					this.singletonInstance = instance;
+					this.initialized = true;
 				}
 			}
 			finally {
 				this.writeLock.unlock();
 			}
 		}
-		return instance;
+		return this.singletonInstance;
 	}
 
 	/**
