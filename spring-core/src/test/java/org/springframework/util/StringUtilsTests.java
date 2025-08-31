@@ -795,6 +795,25 @@ class StringUtilsTests {
 	}
 
 	@Test
+	void applyRelativePath() {
+		// Basic combination
+		assertThat(StringUtils.applyRelativePath("mypath/myfile", "otherfile")).isEqualTo("mypath/otherfile");
+		// Relative path starts with slash
+		assertThat(StringUtils.applyRelativePath("mypath/myfile", "/otherfile")).isEqualTo("mypath/otherfile");
+		// Includes root path
+		assertThat(StringUtils.applyRelativePath("/mypath/myfile", "otherfile")).isEqualTo("/mypath/otherfile");
+		assertThat(StringUtils.applyRelativePath("/mypath/myfile", "/otherfile")).isEqualTo("/mypath/otherfile");
+		// When base path has no slash
+		assertThat(StringUtils.applyRelativePath("myfile", "otherfile")).isEqualTo("otherfile");
+		// Keep parent directory token as-is
+		assertThat(StringUtils.applyRelativePath("mypath/myfile", "../otherfile")).isEqualTo("mypath/../otherfile");
+		// Base path ends with slash
+		assertThat(StringUtils.applyRelativePath("mypath/", "otherfile")).isEqualTo("mypath/otherfile");
+		// Empty relative path
+		assertThat(StringUtils.applyRelativePath("mypath/myfile", "")).isEqualTo("mypath/");
+	}
+
+	@Test
 	void truncatePreconditions() {
 		assertThatIllegalArgumentException()
 				.isThrownBy(() -> StringUtils.truncate("foo", 0))
