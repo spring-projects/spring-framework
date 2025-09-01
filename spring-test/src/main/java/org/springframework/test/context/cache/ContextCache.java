@@ -21,6 +21,7 @@ import org.jspecify.annotations.Nullable;
 import org.springframework.context.ApplicationContext;
 import org.springframework.test.annotation.DirtiesContext.HierarchyMode;
 import org.springframework.test.context.MergedContextConfiguration;
+import org.springframework.util.Assert;
 
 /**
  * {@code ContextCache} defines the SPI for caching Spring
@@ -102,6 +103,7 @@ public interface ContextCache {
 	 * @param key the context key; never {@code null}
 	 * @return the corresponding {@code ApplicationContext} instance, or {@code null}
 	 * if not found in the cache
+	 * @see #put(MergedContextConfiguration, LoadFunction)
 	 * @see #unregisterContextUsage(MergedContextConfiguration, Class)
 	 * @see #remove(MergedContextConfiguration, HierarchyMode)
 	 */
@@ -113,8 +115,36 @@ public interface ContextCache {
 	 * @param key the context key; never {@code null}
 	 * @param context the {@code ApplicationContext}; never {@code null}
 	 * @see #get(MergedContextConfiguration)
+	 * @see #put(MergedContextConfiguration, LoadFunction)
 	 */
 	void put(MergedContextConfiguration key, ApplicationContext context);
+
+	/**
+	 * Explicitly add an {@link ApplicationContext} to the cache under the given
+	 * key, potentially honoring a custom eviction policy.
+	 * <p>The supplied {@link LoadFunction} will be invoked to load the
+	 * {@code ApplicationContext}.
+	 * <p>Concrete implementations which honor a custom eviction policy must
+	 * override this method to ensure that an evicted context is removed from the
+	 * cache and closed before a new context is loaded via the supplied
+	 * {@code LoadFunction}.
+	 * @param key the context key; never {@code null}
+	 * @param loadFunction a function which loads the context for the supplied key;
+	 * never {@code null}
+	 * @return the {@code ApplicationContext}; never {@code null}
+	 * @since 7.0
+	 * @see #get(MergedContextConfiguration)
+	 * @see #put(MergedContextConfiguration, ApplicationContext)
+	 */
+	default ApplicationContext put(MergedContextConfiguration key, LoadFunction loadFunction) {
+		Assert.notNull(key, "Key must not be null");
+		Assert.notNull(loadFunction, "LoadFunction must not be null");
+
+		ApplicationContext applicationContext = loadFunction.loadContext(key);
+		Assert.state(applicationContext != null, "LoadFunction must return a non-null ApplicationContext");
+		put(key, applicationContext);
+		return applicationContext;
+	}
 
 	/**
 	 * Remove the context with the given key from the cache and explicitly
@@ -280,5 +310,27 @@ public interface ContextCache {
 	 * </ul>
 	 */
 	void logStatistics();
+
+
+	/**
+	 * Represents a function that loads an {@link ApplicationContext}.
+	 *
+	 * @since 7.0
+	 */
+	@FunctionalInterface
+	interface LoadFunction {
+
+		/**
+		 * Load a new {@link ApplicationContext} based on the supplied
+		 * {@link MergedContextConfiguration} and return the context in a fully
+		 * <em>refreshed</em> state.
+		 * @param mergedConfig the merged context configuration to use to load the
+		 * application context
+		 * @return a new application context; never {@code null}
+		 * @see org.springframework.test.context.SmartContextLoader#loadContext(MergedContextConfiguration)
+		 */
+		ApplicationContext loadContext(MergedContextConfiguration mergedConfig);
+
+	}
 
 }

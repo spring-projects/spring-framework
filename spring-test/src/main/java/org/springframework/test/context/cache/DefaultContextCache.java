@@ -19,6 +19,7 @@ package org.springframework.test.context.cache;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -62,7 +63,7 @@ public class DefaultContextCache implements ContextCache {
 	 * Map of context keys to Spring {@code ApplicationContext} instances.
 	 */
 	private final Map<MergedContextConfiguration, ApplicationContext> contextMap =
-			Collections.synchronizedMap(new LruCache(32, 0.75f));
+			Collections.synchronizedMap(new LinkedHashMap<>(32, 0.75f, true));
 
 	/**
 	 * Map of parent keys to sets of children keys, representing a top-down <em>tree</em>
@@ -157,7 +158,41 @@ public class DefaultContextCache implements ContextCache {
 		Assert.notNull(key, "Key must not be null");
 		Assert.notNull(context, "ApplicationContext must not be null");
 
+		evictLruContextIfNecessary();
+		putInternal(key, context);
+	}
+
+	@Override
+	public ApplicationContext put(MergedContextConfiguration key, LoadFunction loadFunction) {
+		Assert.notNull(key, "Key must not be null");
+		Assert.notNull(loadFunction, "LoadFunction must not be null");
+
+		evictLruContextIfNecessary();
+		ApplicationContext context = loadFunction.loadContext(key);
+		Assert.state(context != null, "LoadFunction must return a non-null ApplicationContext");
+		putInternal(key, context);
+		return context;
+	}
+
+	/**
+	 * Evict the least recently used (LRU) context if necessary.
+	 * @since 7.0
+	 */
+	private void evictLruContextIfNecessary() {
+		if (this.contextMap.size() >= this.maxSize) {
+			Iterator<MergedContextConfiguration> iterator = this.contextMap.keySet().iterator();
+			Assert.state(iterator.hasNext(), "Failed to retrieve LRU context");
+			// The least recently used (LRU) key is the first/head in a LinkedHashMap
+			// configured for access-order iteration order.
+			MergedContextConfiguration lruKey = iterator.next();
+			remove(lruKey, HierarchyMode.CURRENT_LEVEL);
+		}
+	}
+
+	private void putInternal(MergedContextConfiguration key, ApplicationContext context) {
 		this.contextMap.put(key, context);
+
+		// Update context hierarchy map.
 		MergedContextConfiguration child = key;
 		MergedContextConfiguration parent = child.getParent();
 		while (parent != null) {
@@ -355,39 +390,6 @@ public class DefaultContextCache implements ContextCache {
 				.append("missCount", getMissCount())
 				.append("failureCount", this.totalFailureCount)
 				.toString();
-	}
-
-
-	/**
-	 * Simple cache implementation based on {@link LinkedHashMap} with a maximum
-	 * size and a <em>least recently used</em> (LRU) eviction policy that
-	 * properly closes application contexts.
-	 * @since 4.3
-	 */
-	@SuppressWarnings("serial")
-	private class LruCache extends LinkedHashMap<MergedContextConfiguration, ApplicationContext> {
-
-		/**
-		 * Create a new {@code LruCache} with the supplied initial capacity
-		 * and load factor.
-		 * @param initialCapacity the initial capacity
-		 * @param loadFactor the load factor
-		 */
-		LruCache(int initialCapacity, float loadFactor) {
-			super(initialCapacity, loadFactor, true);
-		}
-
-		@Override
-		protected boolean removeEldestEntry(Map.Entry<MergedContextConfiguration, ApplicationContext> eldest) {
-			if (this.size() > DefaultContextCache.this.getMaxSize()) {
-				// Do NOT delete "DefaultContextCache.this."; otherwise, we accidentally
-				// invoke java.util.Map.remove(Object, Object).
-				DefaultContextCache.this.remove(eldest.getKey(), HierarchyMode.CURRENT_LEVEL);
-			}
-
-			// Return false since we invoke a custom eviction algorithm.
-			return false;
-		}
 	}
 
 }
