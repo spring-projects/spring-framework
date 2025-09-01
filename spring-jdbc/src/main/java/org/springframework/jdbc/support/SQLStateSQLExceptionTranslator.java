@@ -94,7 +94,9 @@ public class SQLStateSQLExceptionTranslator extends AbstractFallbackSQLException
 			301,   // SAP HANA
 			1062,  // MySQL/MariaDB
 			2601,  // MS SQL Server
-			2627   // MS SQL Server
+			2627,  // MS SQL Server
+			-239,  // Informix
+			-268   // Informix
 		);
 
 
