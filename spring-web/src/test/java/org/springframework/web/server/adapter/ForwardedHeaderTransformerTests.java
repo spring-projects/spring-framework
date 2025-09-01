@@ -53,7 +53,6 @@ class ForwardedHeaderTransformerTests {
 		headers.add("X-Forwarded-Prefix", "prefix");
 		headers.add("X-Forwarded-Ssl", "on");
 		headers.add("X-Forwarded-For", "203.0.113.195");
-		headers.add("X-Forwarded-By", "203.0.113.196");
 		ServerHttpRequest request = this.requestMutator.apply(getRequest(headers));
 
 		assertForwardedHeadersRemoved(request);
@@ -252,21 +251,6 @@ class ForwardedHeaderTransformerTests {
 		assertThat(request.getLocalAddress()).isNotNull();
 		assertThat(request.getLocalAddress().getHostName()).isEqualTo("203.0.113.195");
 		assertThat(request.getLocalAddress().getPort()).isEqualTo(4711);
-	}
-
-	@Test
-	void xForwardedBy() {
-		HttpHeaders headers = new HttpHeaders();
-		headers.add("x-forwarded-by", "203.0.113.195, 70.41.3.18, 150.172.238.178");
-
-		ServerHttpRequest request = MockServerHttpRequest
-				.method(HttpMethod.GET, URI.create("https://example.com/a%20b?q=a%2Bb"))
-				.headers(headers)
-				.build();
-
-		request = this.requestMutator.apply(request);
-		assertThat(request.getLocalAddress()).isNotNull();
-		assertThat(request.getLocalAddress().getHostName()).isEqualTo("203.0.113.195");
 	}
 
 

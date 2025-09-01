@@ -186,7 +186,7 @@ public interface ServerHttpRequest extends HttpRequest, ReactiveHttpInputMessage
 
 		/**
 		 * Set the address of the local client.
-		 * @since 7.x
+		 * @since 7.0
 		 */
 		Builder localAddress(InetSocketAddress localAddress);
 

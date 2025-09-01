@@ -9,7 +9,7 @@ that proxies can use to provide information about the original request.
 === Non-standard Headers
 
 There are other non-standard headers, too, including `X-Forwarded-Host`, `X-Forwarded-Port`,
-`X-Forwarded-Proto`, `X-Forwarded-Ssl`, and `X-Forwarded-Prefix`.
+`X-Forwarded-Proto`, `X-Forwarded-Ssl`, `X-Forwarded-Prefix`, and `X-Forwarded-For`.
 
 [[x-forwarded-host]]
 ==== X-Forwarded-Host
@@ -113,3 +113,12 @@ https://example.com/api/app1/{path} -> http://localhost:8080/app1/{path}
 In this case, the proxy has a prefix of `/api/app1` and the server has a prefix of
 `/app1`. The proxy can send `X-Forwarded-Prefix: /api/app1` to have the original prefix
 `/api/app1` override the server prefix `/app1`.
+
+[[x-forwarded-for]]
+==== X-Forwarded-For
+
+https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/X-Forwarded-For[`X-Forwarded-For: <address>`]
+is a de-facto standard header that is used to communicate the original `InetSocketAddress` of the client to a
+downstream server. For example, if a request is sent by a client at `[fd00:fefe:1::4]` to a proxy at
+`192.168.0.1`, the "remote address" information contained in the HTTP request will reflect the actual address of the
+client, not the proxy.

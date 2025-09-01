@@ -93,7 +93,6 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 		FORWARDED_HEADER_NAMES.add("X-Forwarded-Prefix");
 		FORWARDED_HEADER_NAMES.add("X-Forwarded-Ssl");
 		FORWARDED_HEADER_NAMES.add("X-Forwarded-For");
-		FORWARDED_HEADER_NAMES.add("X-Forwarded-By");
 	}
 
 

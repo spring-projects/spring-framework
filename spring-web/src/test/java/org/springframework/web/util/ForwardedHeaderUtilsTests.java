@@ -551,4 +551,15 @@ class ForwardedHeaderUtilsTests {
 		assertThat(address.getHostName()).isEqualTo("[fd00:fefe:1::4]");
 	}
 
+	@Test
+	void parseForwardedByHeader() {
+		HttpHeaders headers = new HttpHeaders();
+		headers.add("Forwarded", "by=[fd00:fefe:1::4], 192.168.0.1");
+
+		InetSocketAddress address =
+				ForwardedHeaderUtils.parseForwardedBy(URI.create("https://example.com"), headers, null);
+
+		assertThat(address.getHostName()).isEqualTo("[fd00:fefe:1::4]");
+	}
+
 }

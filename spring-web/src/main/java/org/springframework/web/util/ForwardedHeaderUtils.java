@@ -159,23 +159,7 @@ public abstract class ForwardedHeaderUtils {
 			Matcher matcher = FORWARDED_FOR_PATTERN.matcher(forwardedToUse);
 			if (matcher.find()) {
 				String value = matcher.group(1).trim();
-				String host = value;
-				int portSeparatorIdx = value.lastIndexOf(':');
-				int squareBracketIdx = value.lastIndexOf(']');
-				if (portSeparatorIdx > squareBracketIdx) {
-					if (squareBracketIdx == -1 && value.indexOf(':') != portSeparatorIdx) {
-						throw new IllegalArgumentException("Invalid IPv4 address: " + value);
-					}
-					host = value.substring(0, portSeparatorIdx);
-					try {
-						port = Integer.parseInt(value, portSeparatorIdx + 1, value.length(), 10);
-					}
-					catch (NumberFormatException ex) {
-						throw new IllegalArgumentException(
-								"Failed to parse a port from \"forwarded\"-type header value: " + value);
-					}
-				}
-				return InetSocketAddress.createUnresolved(host, port);
+				return parseInetSocketAddress(value, port);
 			}
 		}
 
@@ -191,13 +175,14 @@ public abstract class ForwardedHeaderUtils {
 	}
 
 	/**
-	 * Parse the first "Forwarded: by=..." or "X-Forwarded-By" header value to
+	 * Parse the first "Forwarded: by=..." header value to
 	 * an {@code InetSocketAddress} representing the address of the server.
 	 * @param uri the request {@code URI}
 	 * @param headers the request headers that may contain forwarded headers
 	 * @param localAddress the current local address
 	 * @return an {@code InetSocketAddress} with the extracted host and port, or
 	 * {@code null} if the headers are not present
+	 * @since 7.0
 	 * @see <a href="https://tools.ietf.org/html/rfc7239#section-5.1">RFC 7239, Section 5.1</a>
 	 */
 	public static @Nullable InetSocketAddress parseForwardedBy(
@@ -212,35 +197,31 @@ public abstract class ForwardedHeaderUtils {
 			Matcher matcher = FORWARDED_BY_PATTERN.matcher(forwardedToUse);
 			if (matcher.find()) {
 				String value = matcher.group(1).trim();
-				String host = value;
-				int portSeparatorIdx = value.lastIndexOf(':');
-				int squareBracketIdx = value.lastIndexOf(']');
-				if (portSeparatorIdx > squareBracketIdx) {
-					if (squareBracketIdx == -1 && value.indexOf(':') != portSeparatorIdx) {
-						throw new IllegalArgumentException("Invalid IPv4 address: " + value);
-					}
-					host = value.substring(0, portSeparatorIdx);
-					try {
-						port = Integer.parseInt(value, portSeparatorIdx + 1, value.length(), 10);
-					}
-					catch (NumberFormatException ex) {
-						throw new IllegalArgumentException(
-								"Failed to parse a port from \"forwarded\"-type header value: " + value);
-					}
-				}
-				return InetSocketAddress.createUnresolved(host, port);
+				return parseInetSocketAddress(value, port);
 			}
 		}
 
-		String byHeader = headers.getFirst("X-Forwarded-By");
-		if (StringUtils.hasText(byHeader)) {
-			String host = StringUtils.tokenizeToStringArray(byHeader, ",")[0];
-			boolean ipv6 = (host.indexOf(':') != -1);
-			host = (ipv6 && !host.startsWith("[") && !host.endsWith("]") ? "[" + host + "]" : host);
-			return InetSocketAddress.createUnresolved(host, port);
-		}
-
 		return null;
+	}
+
+	private static InetSocketAddress parseInetSocketAddress(String value, int port) {
+		String host = value;
+		int portSeparatorIdx = value.lastIndexOf(':');
+		int squareBracketIdx = value.lastIndexOf(']');
+		if (portSeparatorIdx > squareBracketIdx) {
+			if (squareBracketIdx == -1 && value.indexOf(':') != portSeparatorIdx) {
+				throw new IllegalArgumentException("Invalid IPv4 address: " + value);
+			}
+			host = value.substring(0, portSeparatorIdx);
+			try {
+				port = Integer.parseInt(value, portSeparatorIdx + 1, value.length(), 10);
+			}
+			catch (NumberFormatException ex) {
+				throw new IllegalArgumentException(
+						"Failed to parse a port from \"forwarded\"-type header value: " + value);
+			}
+		}
+		return InetSocketAddress.createUnresolved(host, port);
 	}
 
 }

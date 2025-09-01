@@ -73,7 +73,6 @@ public class ForwardedHeaderTransformer implements Function<ServerHttpRequest, S
 		FORWARDED_HEADER_NAMES.add("X-Forwarded-Prefix");
 		FORWARDED_HEADER_NAMES.add("X-Forwarded-Ssl");
 		FORWARDED_HEADER_NAMES.add("X-Forwarded-For");
-		FORWARDED_HEADER_NAMES.add("X-Forwarded-By");
 	}
 
 
