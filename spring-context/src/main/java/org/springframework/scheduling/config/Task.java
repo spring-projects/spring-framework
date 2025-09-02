@@ -26,6 +26,13 @@ import org.springframework.util.Assert;
  * Holder class defining a {@code Runnable} to be executed as a task, typically at a
  * scheduled time or interval. See subclass hierarchy for various scheduling approaches.
  *
+ * <p><strong>Note:</strong> this is not merely a holder for the user-provided
+ * {@code Runnable}. The framework may wrap the runnable instance for scheduling
+ * or observability purposes (for example with {@code OutcomeTrackingRunnable},
+ * {@code SchedulingAwareRunnable}, or {@code SubscribingRunnable}). The runnable
+ * returned by {@link #getRunnable()} is the one to execute, and it may differ
+ * from the original object supplied by the user.
+ *
  * @author Chris Beams
  * @author Juergen Hoeller
  * @author Brian Clozel
@@ -40,6 +47,8 @@ public class Task {
 
 	/**
 	 * Create a new {@code Task}.
+	 * <p>The provided runnable may be wrapped by the framework; see the class-level
+	 * Javadoc for details.
 	 * @param runnable the underlying task to execute
 	 */
 	public Task(Runnable runnable) {
@@ -51,6 +60,8 @@ public class Task {
 
 	/**
 	 * Return the underlying task.
+	 * <p>Note that this may be a framework wrapper around the original runnable
+	 * supplied at construction time.
 	 */
 	public Runnable getRunnable() {
 		return this.runnable;
