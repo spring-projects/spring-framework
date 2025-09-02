@@ -55,10 +55,11 @@ import org.springframework.web.util.UriBuilderFactory;
 /**
  * Client for testing web servers that uses {@link RestClient} internally to
  * perform requests while also providing a fluent API to verify responses.
- * This client can connect to any server over HTTP or to a {@link MockMvc} server
- * with a mock request and response.
  *
- * <p>Use one of the bindToXxx methods to create an instance. For example:
+ * <p>This client can connect to any server over HTTP or to a {@link MockMvc}
+ * server with a mock request and response.
+ *
+ * <p>Use one of the {@code bindToXxx()} methods to create an instance. For example:
  * <ul>
  * <li>{@link #bindToController(Object...)}
  * <li>{@link #bindToRouterFunction(RouterFunction[])}
@@ -74,10 +75,10 @@ import org.springframework.web.util.UriBuilderFactory;
 public interface RestTestClient {
 
 	/**
-	 * The name of a request header used to assign a unique id to every request
-	 * performed through the {@code RestTestClient}. This can be useful for
-	 * storing contextual information at all phases of request processing (for example,
-	 * from a server-side component) under that id and later to look up
+	 * The name of a request header used to assign a unique ID to every request
+	 * performed through the {@code RestTestClient}. This can be useful to
+	 * store contextual information under that ID at all phases of request
+	 * processing (for example, from a server-side component) and later look up
 	 * that information once an {@link ExchangeResult} is available.
 	 */
 	String RESTTESTCLIENT_REQUEST_ID = "RestTestClient-Request-Id";
@@ -139,7 +140,7 @@ public interface RestTestClient {
 
 
 	/**
-	 * Begin creating a {@link RestTestClient} with a {@link MockMvcBuilders#standaloneSetup
+	 * Begin creating a {@link RestTestClient} with a {@linkplain MockMvcBuilders#standaloneSetup
 	 * Standalone MockMvc setup}.
 	 */
 	static StandaloneSetupBuilder bindToController(Object... controllers) {
@@ -147,16 +148,16 @@ public interface RestTestClient {
 	}
 
 	/**
-	 * Begin creating a {@link RestTestClient} with a {@link MockMvcBuilders#routerFunctions}
-	 * RouterFunction's MockMvc setup}.
+	 * Begin creating a {@link RestTestClient} with a {@linkplain MockMvcBuilders#routerFunctions
+	 * RouterFunction MockMvc setup}.
 	 */
 	static RouterFunctionSetupBuilder bindToRouterFunction(RouterFunction<?>... routerFunctions) {
 		return new DefaultRestTestClientBuilder.DefaultRouterFunctionSetupBuilder(routerFunctions);
 	}
 
 	/**
-	 * Begin creating a {@link RestTestClient} with a {@link MockMvcBuilders#webAppContextSetup}
-	 * WebAppContext MockMvc setup}.
+	 * Begin creating a {@link RestTestClient} with a {@linkplain MockMvcBuilders#webAppContextSetup
+	 * WebApplicationContext MockMvc setup}.
 	 */
 	static WebAppContextSetupBuilder bindToApplicationContext(WebApplicationContext context) {
 		return new DefaultRestTestClientBuilder.DefaultWebAppContextSetupBuilder(context);
@@ -201,25 +202,28 @@ public interface RestTestClient {
 
 		/**
 		 * Configure a base URI as described in {@link RestClient#create(String)}.
+		 * @return this builder
 		 */
 		<T extends B> T baseUrl(String baseUrl);
 
 		/**
 		 * Provide a pre-configured {@link UriBuilderFactory} instance as an
 		 * alternative to and effectively overriding {@link #baseUrl(String)}.
+		 * @return this builder
 		 */
 		<T extends B> T uriBuilderFactory(UriBuilderFactory uriBuilderFactory);
 
 		/**
-		 * Add the given header to all requests that haven't added it.
+		 * Add the given header to all requests that have not added it.
 		 * @param headerName the header name
 		 * @param headerValues the header values
+		 * @return this builder
 		 */
 		<T extends B> T defaultHeader(String headerName, String... headerValues);
 
 		/**
-		 * Manipulate the default headers with the given consumer. The
-		 * headers provided to the consumer are "live", so that the consumer can be used to
+		 * Manipulate the default headers with the given consumer. The headers
+		 * provided to the consumer are "live", so that the consumer can be used to
 		 * {@linkplain HttpHeaders#set(String, String) overwrite} existing header values,
 		 * {@linkplain HttpHeaders#remove(String) remove} values, or use any of the other
 		 * {@link HttpHeaders} methods.
@@ -229,15 +233,16 @@ public interface RestTestClient {
 		<T extends B> T defaultHeaders(Consumer<HttpHeaders> headersConsumer);
 
 		/**
-		 * Add the given cookie to all requests that haven't already added it.
+		 * Add the given cookie to all requests that have not already added it.
 		 * @param cookieName the cookie name
 		 * @param cookieValues the cookie values
+		 * @return this builder
 		 */
 		<T extends B> T defaultCookie(String cookieName, String... cookieValues);
 
 		/**
-		 * Manipulate the default cookies with the given consumer. The
-		 * map provided to the consumer is "live", so that the consumer can be used to
+		 * Manipulate the default cookies with the given consumer. The map provided
+		 * to the consumer is "live", so that the consumer can be used to
 		 * {@linkplain MultiValueMap#set(Object, Object) overwrite} existing header values,
 		 * {@linkplain MultiValueMap#remove(Object) remove} values, or use any of the other
 		 * {@link MultiValueMap} methods.
@@ -251,7 +256,6 @@ public interface RestTestClient {
 		 * if not already set.
 		 * @param version the version to use
 		 * @return this builder
-		 * @since 7.0
 		 */
 		<T extends B> T defaultApiVersion(Object version);
 
@@ -260,7 +264,6 @@ public interface RestTestClient {
 		 * specified via {@link RequestHeadersSpec#apiVersion(Object)}
 		 * is inserted into the request.
 		 * @param apiVersionInserter the inserter to use
-		 * @since 7.0
 		 */
 		<T extends B> T apiVersionInserter(ApiVersionInserter apiVersionInserter);
 
@@ -287,10 +290,10 @@ public interface RestTestClient {
 		<T extends B> T configureMessageConverters(Consumer<HttpMessageConverters.ClientBuilder> configurer);
 
 		/**
-		 * Configure an {@code EntityExchangeResult} callback that is invoked
+		 * Configure an {@link EntityExchangeResult} callback that is invoked
 		 * every time after a response is fully decoded to a single entity, to a
-		 * List of entities, or to a byte[]. In effect, equivalent to each and
-		 * all of the below but registered once, globally:
+		 * List of entities, or to a byte[]. In effect, this is equivalent to each
+		 * of the below but registered only once, globally.
 		 * <pre>
 		 * client.get().uri("/accounts/1")
 		 *         .exchange()
@@ -331,24 +334,24 @@ public interface RestTestClient {
 
 
 	/**
-	 * Extension of {@link Builder} for tests витх а
-	 * {@link MockMvcBuilders#standaloneSetup(Object...) standalone MockMvc setup}.
+	 * Extension of {@link Builder} for tests against а
+	 * {@linkplain MockMvcBuilders#standaloneSetup(Object...) standalone MockMvc setup}.
 	 */
 	interface StandaloneSetupBuilder extends MockMvcSetupBuilder<StandaloneSetupBuilder, StandaloneMockMvcBuilder> {
 	}
 
 
 	/**
-	 * Extension of {@link Builder} for tests витх а
-	 * {@link MockMvcBuilders#routerFunctions(RouterFunction[]) RouterFunction MockMvc setup}.
+	 * Extension of {@link Builder} for tests against а
+	 * {@linkplain MockMvcBuilders#routerFunctions(RouterFunction[]) RouterFunction MockMvc setup}.
 	 */
 	interface RouterFunctionSetupBuilder extends MockMvcSetupBuilder<RouterFunctionSetupBuilder, RouterFunctionMockMvcBuilder> {
 	}
 
 
 	/**
-	 * Extension of {@link Builder} for tests витх а
-	 * {@link MockMvcBuilders#webAppContextSetup(WebApplicationContext) WebAppContext MockMvc setup}.
+	 * Extension of {@link Builder} for tests against а
+	 * {@linkplain MockMvcBuilders#webAppContextSetup(WebApplicationContext) WebAppContext MockMvc setup}.
 	 */
 	interface WebAppContextSetupBuilder extends MockMvcSetupBuilder<WebAppContextSetupBuilder, DefaultMockMvcBuilder> {
 	}
@@ -408,7 +411,7 @@ public interface RestTestClient {
 		 * Set the list of acceptable {@linkplain MediaType media types}, as
 		 * specified by the {@code Accept} header.
 		 * @param acceptableMediaTypes the acceptable media types
-		 * @return the same instance
+		 * @return this spec for further declaration of the request
 		 */
 		S accept(MediaType... acceptableMediaTypes);
 
@@ -416,7 +419,7 @@ public interface RestTestClient {
 		 * Set the list of acceptable {@linkplain Charset charsets}, as specified
 		 * by the {@code Accept-Charset} header.
 		 * @param acceptableCharsets the acceptable charsets
-		 * @return the same instance
+		 * @return this spec for further declaration of the request
 		 */
 		S acceptCharset(Charset... acceptableCharsets);
 
@@ -424,7 +427,7 @@ public interface RestTestClient {
 		 * Add a cookie with the given name and value.
 		 * @param name the cookie name
 		 * @param value the cookie value
-		 * @return the same instance
+		 * @return this spec for further declaration of the request
 		 */
 		S cookie(String name, String value);
 
@@ -435,7 +438,7 @@ public interface RestTestClient {
 		 * {@linkplain MultiValueMap#remove(Object) remove} values, or use any of the other
 		 * {@link MultiValueMap} methods.
 		 * @param cookiesConsumer a function that consumes the cookies map
-		 * @return this builder
+		 * @return this spec for further declaration of the request
 		 */
 		S cookies(Consumer<MultiValueMap<String, String>> cookiesConsumer);
 
@@ -444,14 +447,14 @@ public interface RestTestClient {
 		 * <p>The date should be specified as the number of milliseconds since
 		 * January 1, 1970 GMT.
 		 * @param ifModifiedSince the new value of the header
-		 * @return the same instance
+		 * @return this spec for further declaration of the request
 		 */
 		S ifModifiedSince(ZonedDateTime ifModifiedSince);
 
 		/**
 		 * Set the values of the {@code If-None-Match} header.
 		 * @param ifNoneMatches the new value of the header
-		 * @return the same instance
+		 * @return this spec for further declaration of the request
 		 */
 		S ifNoneMatch(String... ifNoneMatches);
 
@@ -459,7 +462,7 @@ public interface RestTestClient {
 		 * Add the given, single header value under the given name.
 		 * @param headerName  the header name
 		 * @param headerValues the header value(s)
-		 * @return the same instance
+		 * @return this spec for further declaration of the request
 		 */
 		S header(String headerName, String... headerValues);
 
@@ -470,7 +473,7 @@ public interface RestTestClient {
 		 * {@linkplain HttpHeaders#remove(String) remove} values, or use any of the other
 		 * {@link HttpHeaders} methods.
 		 * @param headersConsumer a function that consumes the {@code HttpHeaders}
-		 * @return this builder
+		 * @return this spec for further declaration of the request
 		 */
 		S headers(Consumer<HttpHeaders> headersConsumer);
 
@@ -481,7 +484,7 @@ public interface RestTestClient {
 		 * @param version the API version of the request; this can be a String or
 		 * some Object that can be formatted by the inserter &mdash; for example,
 		 * through an {@link ApiVersionFormatter}
-		 * @since 7.0
+		 * @return this spec for further declaration of the request
 		 */
 		S apiVersion(Object version);
 
@@ -489,7 +492,7 @@ public interface RestTestClient {
 		 * Set the attribute with the given name to the given value.
 		 * @param name the name of the attribute to add
 		 * @param value the value of the attribute to add
-		 * @return this builder
+		 * @return this spec for further declaration of the request
 		 */
 		S attribute(String name, Object value);
 
@@ -498,20 +501,20 @@ public interface RestTestClient {
 		 * the consumer are "live", so that the consumer can be used to inspect attributes,
 		 * remove attributes, or use any of the other map-provided methods.
 		 * @param attributesConsumer a function that consumes the attributes
-		 * @return this builder
+		 * @return this spec for further declaration of the request
 		 */
 		S attributes(Consumer<Map<String, Object>> attributesConsumer);
 
 		/**
 		 * Perform the exchange without a request body.
-		 * @return spec for decoding the response
+		 * @return a spec for decoding the response
 		 */
 		ResponseSpec exchange();
 	}
 
 
 	/**
-	 * Specification for providing body of a request.
+	 * Specification for providing the body of a request.
 	 */
 	interface RequestBodySpec extends RequestHeadersSpec<RequestBodySpec> {
 
@@ -519,7 +522,7 @@ public interface RestTestClient {
 		 * Set the length of the body in bytes, as specified by the
 		 * {@code Content-Length} header.
 		 * @param contentLength the content length
-		 * @return the same instance
+		 * @return this spec for further declaration of the request
 		 * @see HttpHeaders#setContentLength(long)
 		 */
 		RequestBodySpec contentLength(long contentLength);
@@ -528,7 +531,7 @@ public interface RestTestClient {
 		 * Set the {@linkplain MediaType media type} of the body, as specified
 		 * by the {@code Content-Type} header.
 		 * @param contentType the content type
-		 * @return the same instance
+		 * @return this spec for further declaration of the request
 		 * @see HttpHeaders#setContentType(MediaType)
 		 */
 		RequestBodySpec contentType(MediaType contentType);
@@ -538,7 +541,7 @@ public interface RestTestClient {
 		 * {@link RestClient.RequestBodySpec#body(Object)} (Object)
 		 * bodyValue} method on the underlying {@code RestClient}.
 		 * @param body the value to write to the request body
-		 * @return spec for further declaration of the request
+		 * @return a spec for further declaration of the request
 		 */
 		RequestHeadersSpec<?> body(Object body);
 	}
@@ -662,7 +665,6 @@ public interface RestTestClient {
 
 		/**
 		 * Assert the extracted body with a {@link Matcher}.
-		 * @since 5.1
 		 */
 		<T extends S> T value(Matcher<? super @Nullable B> matcher);
 
@@ -694,6 +696,7 @@ public interface RestTestClient {
 	 * Spec for expectations on the response body content.
 	 */
 	interface BodyContentSpec {
+
 		/**
 		 * Assert the response body is empty and return the exchange result.
 		 */
