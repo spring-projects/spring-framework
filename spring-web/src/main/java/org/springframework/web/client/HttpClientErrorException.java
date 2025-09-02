@@ -95,6 +95,7 @@ public class HttpClientErrorException extends HttpStatusCodeException {
 	 * with an optional prepared message.
 	 * @since 5.2.2
 	 */
+	@SuppressWarnings("deprecation")
 	public static HttpClientErrorException create(@Nullable String message, HttpStatusCode statusCode,
 			String statusText, HttpHeaders headers, byte[] body, @Nullable Charset charset) {
 

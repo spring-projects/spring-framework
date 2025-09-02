@@ -86,6 +86,7 @@ class DefaultResponseErrorHandlerHttpStatusTests {
 				.isThrownBy(() -> this.handler.handleError(URI.create("/"), HttpMethod.GET, this.response));
 	}
 
+	@SuppressWarnings("deprecation")
 	static Stream<Arguments> errorCodes() {
 		return Stream.of(
 			// 4xx

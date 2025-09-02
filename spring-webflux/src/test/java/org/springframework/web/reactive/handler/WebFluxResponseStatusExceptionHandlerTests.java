@@ -45,19 +45,19 @@ class WebFluxResponseStatusExceptionHandlerTests extends AbstractResponseStatusE
 	void handleAnnotatedException() {
 		Throwable ex = new CustomException();
 		this.handler.handle(this.exchange, ex).block(Duration.ofSeconds(5));
-		assertThat(this.exchange.getResponse().getStatusCode()).isEqualTo(HttpStatus.I_AM_A_TEAPOT);
+		assertThat(this.exchange.getResponse().getStatusCode()).isEqualTo(HttpStatus.ALREADY_REPORTED);
 	}
 
 	@Test
 	void handleNestedAnnotatedException() {
 		Throwable ex = new Exception(new CustomException());
 		this.handler.handle(this.exchange, ex).block(Duration.ofSeconds(5));
-		assertThat(this.exchange.getResponse().getStatusCode()).isEqualTo(HttpStatus.I_AM_A_TEAPOT);
+		assertThat(this.exchange.getResponse().getStatusCode()).isEqualTo(HttpStatus.ALREADY_REPORTED);
 	}
 
 
 	@SuppressWarnings("serial")
-	@ResponseStatus(HttpStatus.I_AM_A_TEAPOT)
+	@ResponseStatus(HttpStatus.ALREADY_REPORTED)
 	private static class CustomException extends Exception {
 	}
 

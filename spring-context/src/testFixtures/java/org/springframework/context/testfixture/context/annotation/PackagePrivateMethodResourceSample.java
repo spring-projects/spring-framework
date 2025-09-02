@@ -20,7 +20,7 @@ import jakarta.annotation.Resource;
 
 public class PackagePrivateMethodResourceSample {
 
-	private String one;
+	String one;
 
 	@Resource
 	void setOne(String one) {

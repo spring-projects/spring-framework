@@ -149,7 +149,7 @@ class JsonContentTests {
 	}
 
 
-	private static class Person {
+	static class Person {
 		private String firstName;
 		private String lastName;
 

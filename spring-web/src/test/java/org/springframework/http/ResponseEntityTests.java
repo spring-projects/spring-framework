@@ -175,7 +175,7 @@ class ResponseEntityTests {
 	}
 
 	@Test
-	@SuppressWarnings("deprecate")
+	@SuppressWarnings("deprecation")
 	void unprocessableEntity() {
 		ResponseEntity<String> responseEntity = ResponseEntity.unprocessableEntity().body("error");
 

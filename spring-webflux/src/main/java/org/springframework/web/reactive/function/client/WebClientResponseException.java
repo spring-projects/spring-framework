@@ -297,6 +297,7 @@ public class WebClientResponseException extends WebClientException {
 	 * Create {@code WebClientResponseException} or an HTTP status specific subclass.
 	 * @since 6.0
 	 */
+	@SuppressWarnings("deprecation")
 	public static WebClientResponseException create(
 			HttpStatusCode statusCode, String statusText, HttpHeaders headers,
 			byte[] body, @Nullable Charset charset, @Nullable HttpRequest request) {
