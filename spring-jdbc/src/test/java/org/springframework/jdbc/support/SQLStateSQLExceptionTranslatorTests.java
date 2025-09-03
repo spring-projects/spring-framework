@@ -91,6 +91,16 @@ class SQLStateSQLExceptionTranslatorTests {
 	}
 
 	@Test
+	void translateDuplicateKeyInformix1() {
+		assertTranslation("23000", -239, DuplicateKeyException.class);
+	}
+
+	@Test
+	void translateDuplicateKeyInformix2() {
+		assertTranslation("23000", -268, DuplicateKeyException.class);
+	}
+
+	@Test
 	void translateDataAccessResourceFailure() {
 		assertTranslation("53", DataAccessResourceFailureException.class);
 	}
