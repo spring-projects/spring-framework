@@ -67,6 +67,15 @@ import org.springframework.test.context.bean.override.BeanOverride;
  * {@link org.springframework.beans.factory.config.ConfigurableListableBeanFactory#registerResolvableDependency(Class, Object)
  * registered directly} as resolvable dependencies.
  *
+ * <p><strong>NOTE</strong>: As stated in the documentation for Mockito, there are
+ * times when using {@code Mockito.when()} is inappropriate for stubbing a spy
+ * &mdash; for example, if calling a real method on a spy results in undesired
+ * side effects. To avoid such undesired side effects, consider using
+ * {@link org.mockito.Mockito#doReturn(Object) Mockito.doReturn(...).when(spy)...},
+ * {@link org.mockito.Mockito#doThrow(Class) Mockito.doThrow(...).when(spy)...},
+ * {@link org.mockito.Mockito#doNothing() Mockito.doNothing().when(spy)...}, and
+ * similar methods.
+ *
  * <p><strong>WARNING</strong>: Using {@code @MockitoSpyBean} in conjunction with
  * {@code @ContextHierarchy} can lead to undesirable results since each
  * {@code @MockitoSpyBean} will be applied to all context hierarchy levels by default.
