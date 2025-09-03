@@ -294,7 +294,28 @@ allPartsEvents.windowUntil(PartEvent::isLast)
 ----
 ======
 
-Note that the body contents of the `PartEvent` objects must be completely consumed, relayed, or released to avoid memory leaks.
+NOTE: The body contents of the `PartEvent` objects must be completely consumed, relayed, or released to avoid memory leaks.
+
+The following shows how to bind request parameters, including an optional `DataBinder` customization:
+
+[tabs]
+======
+Java::
++
+[source,java]
+----
+Pet pet = request.bind(Pet.class, dataBinder -> dataBinder.setAllowedFields("name"));
+----
+
+Kotlin::
++
+[source,kotlin]
+----
+val pet = request.bind(Pet::class.java, {dataBinder -> dataBinder.setAllowedFields("name")})
+----
+======
+
+
 
 [[webflux-fn-response]]
 === ServerResponse
