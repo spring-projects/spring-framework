@@ -136,24 +136,27 @@ class ConnectionFactoryUtilsTests {
 	void messageGeneration() {
 		Exception exception = ConnectionFactoryUtils.convertR2dbcException("TASK",
 				"SOME-SQL", new R2dbcTransientResourceException("MESSAGE"));
-		assertThat(exception).isExactlyInstanceOf(
-				TransientDataAccessResourceException.class).hasMessage("TASK; SQL [SOME-SQL]; MESSAGE");
+		assertThat(exception)
+				.isExactlyInstanceOf(TransientDataAccessResourceException.class)
+				.hasMessage("TASK; SQL [SOME-SQL]; MESSAGE");
 	}
 
 	@Test
 	void messageGenerationNullSQL() {
 		Exception exception = ConnectionFactoryUtils.convertR2dbcException("TASK", null,
 				new R2dbcTransientResourceException("MESSAGE"));
-		assertThat(exception).isExactlyInstanceOf(
-				TransientDataAccessResourceException.class).hasMessage("TASK; MESSAGE");
+		assertThat(exception)
+				.isExactlyInstanceOf(TransientDataAccessResourceException.class)
+				.hasMessage("TASK; MESSAGE");
 	}
 
 	@Test
 	void messageGenerationNullMessage() {
 		Exception exception = ConnectionFactoryUtils.convertR2dbcException("TASK",
 				"SOME-SQL", new R2dbcTransientResourceException());
-		assertThat(exception).isExactlyInstanceOf(
-				TransientDataAccessResourceException.class).hasMessage("TASK; SQL [SOME-SQL]; null");
+		assertThat(exception)
+				.isExactlyInstanceOf(TransientDataAccessResourceException.class)
+				.hasMessage("TASK; SQL [SOME-SQL]; null");
 	}
 
 
