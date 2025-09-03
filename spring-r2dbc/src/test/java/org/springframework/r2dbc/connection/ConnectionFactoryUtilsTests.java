@@ -16,6 +16,8 @@
 
 package org.springframework.r2dbc.connection;
 
+import java.util.List;
+
 import io.r2dbc.spi.R2dbcBadGrammarException;
 import io.r2dbc.spi.R2dbcDataIntegrityViolationException;
 import io.r2dbc.spi.R2dbcException;
@@ -27,7 +29,8 @@ import io.r2dbc.spi.R2dbcTransientResourceException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.FieldSource;
+
 import org.springframework.dao.CannotAcquireLockException;
 import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -39,11 +42,8 @@ import org.springframework.dao.TransientDataAccessResourceException;
 import org.springframework.r2dbc.BadSqlGrammarException;
 import org.springframework.r2dbc.UncategorizedR2dbcException;
 
-import java.util.stream.Stream;
-
 import static org.assertj.core.api.Assertions.assertThat;
-
-
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 /**
  * Tests for {@link ConnectionFactoryUtils}.
@@ -92,32 +92,30 @@ class ConnectionFactoryUtilsTests {
 		assertThat(exception).isExactlyInstanceOf(DataAccessResourceFailureException.class);
 	}
 
-	private static Stream<Arguments> duplicateKeyErrorCodes() {
-		return Stream.of(
-				Arguments.of("Oracle", "23505", 0),
-				Arguments.of("Oracle", "23000", 1),
-				Arguments.of("SAP HANA", "23000", 301),
-				Arguments.of("MySQL/MariaDB", "23000", 1062),
-				Arguments.of("MS SQL Server", "23000", 2601),
-				Arguments.of("MS SQL Server", "23000", 2627),
-				Arguments.of("Informix", "23000", -239),
-				Arguments.of("Informix", "23000", -268)
-		);
-	}
-
-	@ParameterizedTest
-	@MethodSource("duplicateKeyErrorCodes")
-	void shouldTranslateIntegrityViolationException(final String db, String sqlState, final int errorCode) {
-		Exception exception = ConnectionFactoryUtils.convertR2dbcException("", "",
-				new R2dbcDataIntegrityViolationException("reason", sqlState, errorCode));
-		assertThat(exception).as(db).isExactlyInstanceOf(DuplicateKeyException.class);
-	}
-
 	@Test
-	void shouldTranslateGenericIntegrityViolationException() {
+	void shouldTranslateIntegrityViolationException() {
 		Exception exception = ConnectionFactoryUtils.convertR2dbcException("", "",
 				new R2dbcDataIntegrityViolationException());
 		assertThat(exception).isExactlyInstanceOf(DataIntegrityViolationException.class);
+	}
+
+	static final List<Arguments> duplicateKeyErrorCodes = List.of(
+			arguments("Oracle", "23505", 0),
+			arguments("Oracle", "23000", 1),
+			arguments("SAP HANA", "23000", 301),
+			arguments("MySQL/MariaDB", "23000", 1062),
+			arguments("MS SQL Server", "23000", 2601),
+			arguments("MS SQL Server", "23000", 2627),
+			arguments("Informix", "23000", -239),
+			arguments("Informix", "23000", -268)
+		);
+
+	@ParameterizedTest
+	@FieldSource("duplicateKeyErrorCodes")
+	void shouldTranslateIntegrityViolationExceptionToDuplicateKeyException(String db, String sqlState, int errorCode) {
+		Exception exception = ConnectionFactoryUtils.convertR2dbcException("", "",
+				new R2dbcDataIntegrityViolationException("reason", sqlState, errorCode));
+		assertThat(exception).as(db).isExactlyInstanceOf(DuplicateKeyException.class);
 	}
 
 	@Test
