@@ -116,7 +116,10 @@ public interface ContextCache {
 	 * @param context the {@code ApplicationContext}; never {@code null}
 	 * @see #get(MergedContextConfiguration)
 	 * @see #put(MergedContextConfiguration, LoadFunction)
+	 * @deprecated since Spring Framework 7.0 in favor of
+	 * {@link #put(MergedContextConfiguration, LoadFunction)}
 	 */
+	@Deprecated(since = "7.0")
 	void put(MergedContextConfiguration key, ApplicationContext context);
 
 	/**

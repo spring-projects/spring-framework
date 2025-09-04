@@ -154,6 +154,7 @@ public class DefaultContextCache implements ContextCache {
 	}
 
 	@Override
+	@Deprecated(since = "7.0")
 	public void put(MergedContextConfiguration key, ApplicationContext context) {
 		Assert.notNull(key, "Key must not be null");
 		Assert.notNull(context, "ApplicationContext must not be null");

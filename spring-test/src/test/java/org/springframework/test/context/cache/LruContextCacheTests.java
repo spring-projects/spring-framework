@@ -83,6 +83,7 @@ class LruContextCacheTests {
 
 
 	@Nested
+	@SuppressWarnings("deprecation")
 	class PutUnitTests {
 
 		@Test
