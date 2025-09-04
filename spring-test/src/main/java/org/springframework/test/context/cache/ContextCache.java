@@ -85,7 +85,7 @@ public interface ContextCache {
 
 	/**
 	 * Determine whether there is a cached context for the given key.
-	 * @param key the context key (never {@code null})
+	 * @param key the context key; never {@code null}
 	 * @return {@code true} if the cache contains a context with the given key
 	 */
 	boolean contains(MergedContextConfiguration key);
@@ -99,7 +99,7 @@ public interface ContextCache {
 	 * restarted}. This applies to parent contexts as well.
 	 * <p>In addition, the {@linkplain #getHitCount() hit} and
 	 * {@linkplain #getMissCount() miss} counts must be updated accordingly.
-	 * @param key the context key (never {@code null})
+	 * @param key the context key; never {@code null}
 	 * @return the corresponding {@code ApplicationContext} instance, or {@code null}
 	 * if not found in the cache
 	 * @see #unregisterContextUsage(MergedContextConfiguration, Class)
@@ -108,10 +108,11 @@ public interface ContextCache {
 	@Nullable ApplicationContext get(MergedContextConfiguration key);
 
 	/**
-	 * Explicitly add an {@code ApplicationContext} instance to the cache
-	 * under the given key, potentially honoring a custom eviction policy.
-	 * @param key the context key (never {@code null})
-	 * @param context the {@code ApplicationContext} instance (never {@code null})
+	 * Explicitly add an {@link ApplicationContext} to the cache under the given
+	 * key, potentially honoring a custom eviction policy.
+	 * @param key the context key; never {@code null}
+	 * @param context the {@code ApplicationContext}; never {@code null}
+	 * @see #get(MergedContextConfiguration)
 	 */
 	void put(MergedContextConfiguration key, ApplicationContext context);
 
