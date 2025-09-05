@@ -21,6 +21,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicLongArray;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.atomic.AtomicReferenceArray;
@@ -36,10 +37,12 @@ import org.jspecify.annotations.Nullable;
  * use in Spring Framework. It is inspired from
  * <a href="https://github.com/ben-manes/concurrentlinkedhashmap">ConcurrentLinkedHashMap</a>.
  * <p>Read and write operations are internally recorded in dedicated buffers,
- * then drained at chosen times to avoid contention.
+ * then drained at chosen times to avoid contention. The implementation includes
+ * performance monitoring and statistics collection capabilities.
  *
  * @author Brian Clozel
  * @author Ben Manes
+ * @author JongJun Kim
  * @since 5.3
  * @param <K> the type of the key used for cache retrieval
  * @param <V> the type of the cached values, does not allow null values
@@ -49,6 +52,8 @@ import org.jspecify.annotations.Nullable;
 public final class ConcurrentLruCache<K, V> {
 
 	private final int capacity;
+	
+	private final boolean statsEnabled;
 
 	private final AtomicInteger currentSize = new AtomicInteger();
 
@@ -70,23 +75,56 @@ public final class ConcurrentLruCache<K, V> {
 
 	private final AtomicReference<DrainStatus> drainStatus = new AtomicReference<>(DrainStatus.IDLE);
 
+	// Performance statistics (null if stats disabled)
+	@Nullable
+	private final AtomicLong hits;
+	@Nullable
+	private final AtomicLong misses;
+	@Nullable
+	private final AtomicLong evictions;
+	
+
 	/**
 	 * Create a new cache instance with the given capacity and generator function.
+	 * Statistics collection is enabled by default for backward compatibility.
 	 * @param capacity the maximum number of entries in the cache
 	 * (0 indicates no caching, always generating a new value)
 	 * @param generator a function to generate a new value for a given key
 	 */
 	public ConcurrentLruCache(int capacity, Function<K, V> generator) {
-		this(capacity, generator, 16);
+		this(capacity, generator, true);
 	}
 
-	private ConcurrentLruCache(int capacity, Function<K, V> generator, int concurrencyLevel) {
+	/**
+	 * Create a new cache instance with the given capacity, generator function, and statistics setting.
+	 * @param capacity the maximum number of entries in the cache
+	 * (0 indicates no caching, always generating a new value)
+	 * @param generator a function to generate a new value for a given key
+	 * @param enableStatistics whether to collect performance statistics
+	 */
+	public ConcurrentLruCache(int capacity, Function<K, V> generator, boolean enableStatistics) {
+		this(capacity, generator, enableStatistics, 16);
+	}
+
+	private ConcurrentLruCache(int capacity, Function<K, V> generator, boolean enableStatistics, int concurrencyLevel) {
 		Assert.isTrue(capacity >= 0, "Capacity must be >= 0");
 		this.capacity = capacity;
+		this.statsEnabled = enableStatistics;
 		this.cache = new ConcurrentHashMap<>(16, 0.75f, concurrencyLevel);
 		this.generator = generator;
 		this.readOperations = new ReadOperations<>(this.evictionQueue);
 		this.writeOperations = new WriteOperations();
+		
+		// Initialize statistics fields only if enabled
+		if (enableStatistics) {
+			this.hits = new AtomicLong();
+			this.misses = new AtomicLong();
+			this.evictions = new AtomicLong();
+		} else {
+			this.hits = null;
+			this.misses = null;
+			this.evictions = null;
+		}
 	}
 
 	/**
@@ -100,9 +138,16 @@ public final class ConcurrentLruCache<K, V> {
 		}
 		final Node<K, V> node = this.cache.get(key);
 		if (node == null) {
+			if (this.statsEnabled && this.misses != null) {
+				this.misses.incrementAndGet();
+			}
 			V value = this.generator.apply(key);
 			put(key, value);
 			return value;
+		}
+
+		if (this.statsEnabled && this.hits != null) {
+			this.hits.incrementAndGet();
 		}
 		processRead(node);
 		return node.getValue();
@@ -173,6 +218,41 @@ public final class ConcurrentLruCache<K, V> {
 	 */
 	public int size() {
 		return this.cache.size();
+	}
+
+	/**
+	 * Return cache performance statistics.
+	 * @return statistics including hit ratio, hits, misses, and evictions
+	 * @throws IllegalStateException if statistics collection is disabled
+	 */
+	public CacheStats getStats() {
+		if (!this.statsEnabled) {
+			throw new IllegalStateException("Statistics collection is disabled. " +
+					"Create cache with enableStatistics=true to collect statistics.");
+		}
+		
+		long totalHits = hits != null ? hits.get() : 0;
+		long totalMisses = misses != null ? misses.get() : 0;
+		long totalEvictions = evictions != null ? evictions.get() : 0;
+		long totalRequests = totalHits + totalMisses;
+		double hitRatio = totalRequests > 0 ? (double) totalHits / totalRequests : 0.0;
+		
+		return new CacheStats(
+			totalHits,
+			totalMisses,
+			totalEvictions,
+			hitRatio,
+			size(),
+			capacity
+		);
+	}
+	
+	/**
+	 * Check if statistics collection is enabled for this cache.
+	 * @return true if statistics are being collected, false otherwise
+	 */
+	public boolean isStatsEnabled() {
+		return this.statsEnabled;
 	}
 
 	/**
@@ -277,6 +357,9 @@ public final class ConcurrentLruCache<K, V> {
 				}
 				cache.remove(node.key, node);
 				markAsRemoved(node);
+				if (ConcurrentLruCache.this.statsEnabled && ConcurrentLruCache.this.evictions != null) {
+					ConcurrentLruCache.this.evictions.incrementAndGet();
+				}
 			}
 		}
 
@@ -597,6 +680,42 @@ public final class ConcurrentLruCache<K, V> {
 			}
 		}
 
+	}
+
+	/**
+	 * Cache statistics holder for performance monitoring.
+	 */
+	public static final class CacheStats {
+		private final long hits;
+		private final long misses;
+		private final long evictions;
+		private final double hitRatio;
+		private final int size;
+		private final int capacity;
+
+		CacheStats(long hits, long misses, long evictions, double hitRatio, int size, int capacity) {
+			this.hits = hits;
+			this.misses = misses;
+			this.evictions = evictions;
+			this.hitRatio = hitRatio;
+			this.size = size;
+			this.capacity = capacity;
+		}
+
+		public long getHits() { return hits; }
+		public long getMisses() { return misses; }
+		public long getEvictions() { return evictions; }
+		public double getHitRatio() { return hitRatio; }
+		public int getSize() { return size; }
+		public int getCapacity() { return capacity; }
+		public long getRequests() { return hits + misses; }
+
+		@Override
+		public String toString() {
+			return String.format(
+				"CacheStats{hits=%d, misses=%d, evictions=%d, hitRatio=%.3f, size=%d/%d}",
+				hits, misses, evictions, hitRatio, size, capacity);
+		}
 	}
 
 }
