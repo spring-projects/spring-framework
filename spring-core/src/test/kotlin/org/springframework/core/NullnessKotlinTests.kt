@@ -38,6 +38,13 @@ class NullnessKotlinTests {
 	}
 
 	@Test
+	fun unitReturnType() {
+		val method = ::unit.javaMethod!!
+		val nullness = Nullness.forMethodReturnType(method)
+		Assertions.assertThat(nullness).isEqualTo(Nullness.UNSPECIFIED)
+	}
+
+	@Test
 	fun nullableParameter() {
 		val method = ::nullable.javaMethod!!
 		val nullness = Nullness.forParameter(method.parameters[0])
@@ -77,5 +84,8 @@ class NullnessKotlinTests {
 
 	@Suppress("unused_parameter")
 	fun nonNull(nonNull: String): String = "foo"
+
+	fun unit() {
+	}
 
 }

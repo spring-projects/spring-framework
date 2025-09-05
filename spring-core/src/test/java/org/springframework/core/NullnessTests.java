@@ -377,6 +377,13 @@ public class NullnessTests {
 		Assertions.assertThat(nullness).isEqualTo(Nullness.NULLABLE);
 	}
 
+	@Test
+	void voidClassMethod() throws NoSuchMethodException {
+		var method = JSpecifyProcessor.class.getMethod("voidClassProcess");
+		var nullness = Nullness.forMethodReturnType(method);
+		Assertions.assertThat(nullness).isEqualTo(Nullness.UNSPECIFIED);
+	}
+
 	// Primitive types
 
 	@Test

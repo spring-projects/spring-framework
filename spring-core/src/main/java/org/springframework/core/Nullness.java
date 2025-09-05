@@ -181,10 +181,10 @@ public enum Nullness {
 
 		public static Nullness forMethodReturnType(Method method) {
 			KFunction<?> function = ReflectJvmMapping.getKotlinFunction(method);
-			if (function != null && function.getReturnType().isMarkedNullable()) {
-				return Nullness.NULLABLE;
+			if (function != null && ReflectJvmMapping.getJavaType(function.getReturnType()) != void.class) {
+				return (function.getReturnType().isMarkedNullable() ? Nullness.NULLABLE : Nullness.NON_NULL);
 			}
-			return Nullness.NON_NULL;
+			return Nullness.UNSPECIFIED;
 		}
 
 		public static Nullness forParameter(Executable executable, int parameterIndex) {
