@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.http.converter.HttpMessageConverter;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.http.converter.json.JacksonJsonHttpMessageConverter;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -54,17 +54,17 @@ class ExtractingResponseErrorHandlerTests {
 
 	@BeforeEach
 	void setup() {
-		HttpMessageConverter<Object> converter = new MappingJackson2HttpMessageConverter();
+		HttpMessageConverter<Object> converter = new JacksonJsonHttpMessageConverter();
 		this.errorHandler = new ExtractingResponseErrorHandler(List.of(converter));
 
-		this.errorHandler.setStatusMapping(Map.of(HttpStatus.I_AM_A_TEAPOT, MyRestClientException.class));
+		this.errorHandler.setStatusMapping(Map.of(HttpStatus.EXPECTATION_FAILED, MyRestClientException.class));
 		this.errorHandler.setSeriesMapping(Map.of(HttpStatus.Series.SERVER_ERROR, MyRestClientException.class));
 	}
 
 
 	@Test
 	void hasError() throws Exception {
-		given(this.response.getStatusCode()).willReturn(HttpStatus.I_AM_A_TEAPOT);
+		given(this.response.getStatusCode()).willReturn(HttpStatus.EXPECTATION_FAILED);
 		assertThat(this.errorHandler.hasError(this.response)).isTrue();
 
 		given(this.response.getStatusCode()).willReturn(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -78,7 +78,7 @@ class ExtractingResponseErrorHandlerTests {
 	void hasErrorOverride() throws Exception {
 		this.errorHandler.setSeriesMapping(Collections.singletonMap(HttpStatus.Series.CLIENT_ERROR, null));
 
-		given(this.response.getStatusCode()).willReturn(HttpStatus.I_AM_A_TEAPOT);
+		given(this.response.getStatusCode()).willReturn(HttpStatus.EXPECTATION_FAILED);
 		assertThat(this.errorHandler.hasError(this.response)).isTrue();
 
 		given(this.response.getStatusCode()).willReturn(HttpStatus.NOT_FOUND);
@@ -90,7 +90,7 @@ class ExtractingResponseErrorHandlerTests {
 
 	@Test
 	void handleErrorStatusMatch() throws Exception {
-		given(this.response.getStatusCode()).willReturn(HttpStatus.I_AM_A_TEAPOT);
+		given(this.response.getStatusCode()).willReturn(HttpStatus.EXPECTATION_FAILED);
 		HttpHeaders responseHeaders = new HttpHeaders();
 		responseHeaders.setContentType(MediaType.APPLICATION_JSON);
 		given(this.response.getHeaders()).willReturn(responseHeaders);

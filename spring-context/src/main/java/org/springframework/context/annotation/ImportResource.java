@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,14 +29,15 @@ import org.springframework.core.annotation.AliasFor;
  * Indicates one or more resources containing bean definitions to import.
  *
  * <p>Like {@link Import @Import}, this annotation provides functionality similar to
- * the {@code <import/>} element in Spring XML. It is typically used when designing
- * {@link Configuration @Configuration} classes to be bootstrapped by an
- * {@link AnnotationConfigApplicationContext}, but where some XML functionality such
- * as namespaces is still necessary.
+ * the {@code <import/>} element in Spring XML configuration. It is typically used
+ * when designing {@link Configuration @Configuration} classes to be bootstrapped by
+ * an {@link AnnotationConfigApplicationContext}, but where some XML functionality
+ * such as namespaces is still necessary.
  *
- * <p>By default, arguments to the {@link #value} attribute will be processed using a
+ * <p>By default, arguments to the {@link #locations() locations} or {@link #value() value}
+ * attribute will be processed using a
  * {@link org.springframework.beans.factory.groovy.GroovyBeanDefinitionReader GroovyBeanDefinitionReader}
- * if ending in {@code ".groovy"}; otherwise, an
+ * for resource locations ending in {@code ".groovy"}; otherwise, an
  * {@link org.springframework.beans.factory.xml.XmlBeanDefinitionReader XmlBeanDefinitionReader}
  * will be used to parse Spring {@code <beans/>} XML files. Optionally, the {@link #reader}
  * attribute may be declared, allowing the user to choose a custom {@link BeanDefinitionReader}
@@ -77,12 +78,19 @@ public @interface ImportResource {
 
 	/**
 	 * {@link BeanDefinitionReader} implementation to use when processing
-	 * resources specified via the {@link #value} attribute.
+	 * resources specified via the {@link #locations() locations} or
+	 * {@link #value() value} attribute.
+	 * <p>The configured {@code BeanDefinitionReader} type must declare a
+	 * constructor that accepts a single
+	 * {@link org.springframework.beans.factory.support.BeanDefinitionRegistry
+	 * BeanDefinitionRegistry} argument.
 	 * <p>By default, the reader will be adapted to the resource path specified:
 	 * {@code ".groovy"} files will be processed with a
-	 * {@link org.springframework.beans.factory.groovy.GroovyBeanDefinitionReader GroovyBeanDefinitionReader};
-	 * whereas, all other resources will be processed with an
-	 * {@link org.springframework.beans.factory.xml.XmlBeanDefinitionReader XmlBeanDefinitionReader}.
+	 * {@link org.springframework.beans.factory.groovy.GroovyBeanDefinitionReader
+	 * GroovyBeanDefinitionReader}; whereas, all other resources will be processed
+	 * with an {@link org.springframework.beans.factory.xml.XmlBeanDefinitionReader
+	 * XmlBeanDefinitionReader}.
+	 * @see #locations
 	 * @see #value
 	 */
 	Class<? extends BeanDefinitionReader> reader() default BeanDefinitionReader.class;

@@ -42,5 +42,3 @@ Kotlin::
 
 If the target method parameter type is not `String`, type conversion is applied automatically.
 See xref:web/webmvc/mvc-controller/ann-methods/typeconversion.adoc[Type Conversion].
-
-

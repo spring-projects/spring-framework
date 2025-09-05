@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -86,9 +86,7 @@ public final class Fragment {
 		if (CollectionUtils.isEmpty(model.asMap())) {
 			return;
 		}
-		if (this.model == null) {
-			this.model = new LinkedHashMap<>();
-		}
+		this.model = new LinkedHashMap<>(this.model != null ? this.model : Collections.emptyMap());
 		model.asMap().forEach((key, value) -> this.model.putIfAbsent(key, value));
 	}
 

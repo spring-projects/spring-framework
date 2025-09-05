@@ -2,7 +2,6 @@
 = Marshalling XML by Using Object-XML Mappers
 
 
-
 [[oxm-introduction]]
 == Introduction
 
@@ -22,7 +21,6 @@ Some of the benefits of using Spring for your O/X mapping needs are:
 * xref:data-access/oxm.adoc#oxm-consistent-interfaces[Consistent Interfaces]
 * xref:data-access/oxm.adoc#oxm-consistent-exception-hierarchy[Consistent Exception Hierarchy]
 
-
 [[oxm-ease-of-configuration]]
 === Ease of configuration
 
@@ -31,7 +29,6 @@ construct JAXB context, JiBX binding factories, and so on. You can configure the
 as you would any other bean in your application context. Additionally, XML namespace-based
 configuration is available for a number of marshallers, making the configuration even
 simpler.
-
 
 [[oxm-consistent-interfaces]]
 === Consistent Interfaces
@@ -44,7 +41,6 @@ marshalling with a mix-and-match approach (for example, some marshalling perform
 and some by XStream) in a non-intrusive fashion, letting you use the strength of each
 technology.
 
-
 [[oxm-consistent-exception-hierarchy]]
 === Consistent Exception Hierarchy
 
@@ -53,14 +49,12 @@ own exception hierarchy with the `XmlMappingException` as the root exception.
 These runtime exceptions wrap the original exception so that no information is lost.
 
 
-
 [[oxm-marshaller-unmarshaller]]
 == `Marshaller` and `Unmarshaller`
 
 As stated in the xref:data-access/oxm.adoc#oxm-introduction[introduction], a marshaller serializes an object
 to XML, and an unmarshaller deserializes XML stream to an object. This section describes
 the two Spring interfaces used for this purpose.
-
 
 [[oxm-marshaller]]
 === Understanding `Marshaller`
@@ -104,7 +98,6 @@ must be mapped in a mapping file, be marked with an annotation, be registered wi
 marshaller, or have a common base class. Refer to the later sections in this chapter
 to determine how your O-X technology manages this.
 
-
 [[oxm-unmarshaller]]
 === Understanding `Unmarshaller`
 
@@ -146,7 +139,6 @@ Even though there are two separate marshalling interfaces (`Marshaller` and
 This means that you can wire up one marshaller class and refer to it both as a
 marshaller and as an unmarshaller in your `applicationContext.xml`.
 
-
 [[oxm-xmlmappingexception]]
 === Understanding `XmlMappingException`
 
@@ -161,7 +153,6 @@ underlying O-X mapping tool does not do so.
 The O-X Mapping exception hierarchy is shown in the following figure:
 
 image::oxm-exceptions.png[]
-
 
 
 [[oxm-usage]]
@@ -319,7 +310,6 @@ This sample application produces the following `settings.xml` file:
 ----
 
 
-
 [[oxm-schema-based-config]]
 == XML Configuration Namespace
 
@@ -356,7 +346,6 @@ the configuration of a JAXB2 marshaller might resemble the following:
 ----
 
 
-
 [[oxm-jaxb]]
 == JAXB
 
@@ -368,7 +357,6 @@ Spring supports the JAXB 2.0 API as XML marshalling strategies, following the
 `Marshaller` and `Unmarshaller` interfaces described in xref:data-access/oxm.adoc#oxm-marshaller-unmarshaller[`Marshaller` and `Unmarshaller`].
 The corresponding integration classes reside in the `org.springframework.oxm.jaxb`
 package.
-
 
 [[oxm-jaxb2]]
 === Using `Jaxb2Marshaller`
@@ -436,7 +424,6 @@ The following table describes the available attributes:
 |===
 
 
-
 [[oxm-jibx]]
 == JiBX
 
@@ -449,7 +436,6 @@ from or to XML.
 For more information on JiBX, see the http://jibx.sourceforge.net/[JiBX web
 site]. The Spring integration classes reside in the `org.springframework.oxm.jibx`
 package.
-
 
 [[oxm-jibx-marshaller]]
 === Using `JibxMarshaller`
@@ -503,7 +489,6 @@ The following table describes the available attributes:
 |===
 
 
-
 [[oxm-xstream]]
 == XStream
 
@@ -513,7 +498,6 @@ require any mapping and generates clean XML.
 For more information on XStream, see the https://x-stream.github.io/[XStream
 web site]. The Spring integration classes reside in the
 `org.springframework.oxm.xstream` package.
-
 
 [[oxm-xstream-marshaller]]
 === Using `XStreamMarshaller`
@@ -557,16 +541,14 @@ set the `supportedClasses` property on the `XStreamMarshaller`, as the following
 Doing so ensures that only the registered classes are eligible for unmarshalling.
 
 Additionally, you can register
-{spring-framework-api}/oxm/xstream/XStreamMarshaller.html#setConverters(com.thoughtworks.xstream.converters.ConverterMatcher...)[custom
-converters] to make sure that only your supported classes can be unmarshalled. You might
-want to add a `CatchAllConverter` as the last converter in the list, in addition to
-converters that explicitly support the domain classes that should be supported. As a
-result, default XStream converters with lower priorities and possible security
+{spring-framework-api}/oxm/xstream/XStreamMarshaller.html#setConverters(com.thoughtworks.xstream.converters.ConverterMatcher...)[custom converters]
+to make sure that only your supported classes can be unmarshalled. You might want
+to add a `CatchAllConverter` as the last converter in the list, in addition to
+converters that explicitly support the domain classes that should be supported.
+As a result, default XStream converters with lower priorities and possible security
 vulnerabilities do not get invoked.
 =====
 
 NOTE: Note that XStream is an XML serialization library, not a data binding library.
 Therefore, it has limited namespace support. As a result, it is rather unsuitable for usage
 within Web Services.
-
-

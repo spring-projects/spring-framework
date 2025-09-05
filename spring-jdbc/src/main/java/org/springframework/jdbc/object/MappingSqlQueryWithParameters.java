@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,7 +51,7 @@ import org.springframework.jdbc.core.RowMapper;
  * @see org.springframework.jdbc.object.MappingSqlQuery
  * @see org.springframework.jdbc.object.SqlQuery
  */
-public abstract class MappingSqlQueryWithParameters<T> extends SqlQuery<T> {
+public abstract class MappingSqlQueryWithParameters<T extends @Nullable Object> extends SqlQuery<T> {
 
 	/**
 	 * Constructor to allow use as a JavaBean.
@@ -93,7 +93,7 @@ public abstract class MappingSqlQueryWithParameters<T> extends SqlQuery<T> {
 	 * Subclasses can simply not catch SQLExceptions, relying on the
 	 * framework to clean up.
 	 */
-	protected abstract @Nullable T mapRow(ResultSet rs, int rowNum, @Nullable Object @Nullable [] parameters, @Nullable Map<?, ?> context)
+	protected abstract T mapRow(ResultSet rs, int rowNum, @Nullable Object @Nullable [] parameters, @Nullable Map<?, ?> context)
 			throws SQLException;
 
 
@@ -116,7 +116,7 @@ public abstract class MappingSqlQueryWithParameters<T> extends SqlQuery<T> {
 		}
 
 		@Override
-		public @Nullable T mapRow(ResultSet rs, int rowNum) throws SQLException {
+		public T mapRow(ResultSet rs, int rowNum) throws SQLException {
 			return MappingSqlQueryWithParameters.this.mapRow(rs, rowNum, this.params, this.context);
 		}
 	}

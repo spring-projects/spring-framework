@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,10 @@ import org.springframework.jms.core.JmsTemplate;
  * @see #setJmsTemplate
  * @see #createJmsTemplate
  * @see org.springframework.jms.core.JmsTemplate
+ * @deprecated as of 7.0, in favor of direct injection of {@link JmsTemplate}
+ * or {@link org.springframework.jms.core.JmsMessagingTemplate}
  */
+@Deprecated(since = "7.0", forRemoval = true)
 public abstract class JmsGatewaySupport implements InitializingBean {
 
 	/** Logger available to subclasses. */

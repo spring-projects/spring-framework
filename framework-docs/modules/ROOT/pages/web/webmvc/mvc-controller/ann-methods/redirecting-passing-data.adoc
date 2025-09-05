@@ -51,8 +51,7 @@ Kotlin::
 ----
 ======
 
-Another way of passing data to the redirect target is by using flash attributes. Unlike
-other redirect attributes, flash attributes are saved in the HTTP session (and, hence, do
-not appear in the URL). See xref:web/webmvc/mvc-controller/ann-methods/flash-attributes.adoc[Flash Attributes] for more information.
-
-
+Another way of passing data to the redirect target is by using flash attributes. Unlike other
+redirect attributes, flash attributes are saved in the HTTP session (and, hence, do not appear
+in the URL). See xref:web/webmvc/mvc-controller/ann-methods/flash-attributes.adoc[Flash Attributes]
+for more information.

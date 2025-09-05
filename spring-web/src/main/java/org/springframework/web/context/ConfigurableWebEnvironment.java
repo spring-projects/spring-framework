@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@ public interface ConfigurableWebEnvironment extends ConfigurableEnvironment {
 	 * org.springframework.core.env.PropertySource.StubPropertySource stub property source}
 	 * instances acting as placeholders with real servlet context/config property sources
 	 * using the given parameters.
-	 * @param servletContext the {@link ServletContext} (may not be {@code null})
+	 * @param servletContext the {@link ServletContext} ({@code null} if not available)
 	 * @param servletConfig the {@link ServletConfig} ({@code null} if not available)
 	 * @see org.springframework.web.context.support.WebApplicationContextUtils#initServletPropertySources(
 	 * org.springframework.core.env.MutablePropertySources, ServletContext, ServletConfig)

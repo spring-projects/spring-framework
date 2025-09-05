@@ -13,7 +13,6 @@ On the Servlet stack, the Spring Framework provides both server (and also client
 for the SockJS protocol.
 
 
-
 [[websocket-fallback-sockjs-overview]]
 == Overview
 
@@ -78,7 +77,6 @@ For even more detail, see the SockJS protocol
 https://sockjs.github.io/sockjs-protocol/sockjs-protocol-0.3.3.html[narrated test].
 
 
-
 [[websocket-fallback-sockjs-enable]]
 == Enabling SockJS
 
@@ -99,7 +97,6 @@ transport option, depending on the browser in which it runs. See the
 {sockjs-client}[sockjs-client] page and the list of
 transport types supported by browser. The client also provides several
 configuration options -- for example, to specify which transports to include.
-
 
 
 [[websocket-fallback-xhr-vs-iframe]]
@@ -182,7 +179,6 @@ be cached. For details on how to enable it see the
 {sockjs-client}[SockJS client] page.
 
 
-
 [[websocket-fallback-sockjs-heartbeat]]
 == Heartbeats
 
@@ -200,7 +196,6 @@ The Spring SockJS support also lets you configure the `TaskScheduler` to
 schedule heartbeats tasks. The task scheduler is backed by a thread pool,
 with default settings based on the number of available processors. You
 should consider customizing the settings according to your specific needs.
-
 
 
 [[websocket-fallback-sockjs-servlet3-async]]
@@ -229,15 +224,15 @@ a minimal message by using the dedicated log category, `DISCONNECTED_CLIENT_LOG_
 log category to TRACE.
 
 
-
 [[websocket-fallback-cors]]
 == SockJS and CORS
 
-If you allow cross-origin requests (see xref:web/websocket/server.adoc#websocket-server-allowed-origins[Allowed Origins]), the SockJS protocol
-uses CORS for cross-domain support in the XHR streaming and polling transports. Therefore,
-CORS headers are added automatically, unless the presence of CORS headers in the response
-is detected. So, if an application is already configured to provide CORS support (for example,
-through a Servlet Filter), Spring's `SockJsService` skips this part.
+If you allow cross-origin requests (see
+xref:web/websocket/server.adoc#websocket-server-allowed-origins[Allowed Origins]), the SockJS
+protocol uses CORS for cross-domain support in the XHR streaming and polling transports.
+Therefore, CORS headers are added automatically, unless the presence of CORS headers in the
+response is detected. So, if an application is already configured to provide CORS support
+(for example, through a Servlet Filter), Spring's `SockJsService` skips this part.
 
 It is also possible to disable the addition of these CORS headers by setting the
 `suppressCors` property in Spring's SockJsService.
@@ -255,7 +250,6 @@ the `TransportType` enum in the source code.
 
 Alternatively, if the CORS configuration allows it, consider excluding URLs with the
 SockJS endpoint prefix, thus letting Spring's `SockJsService` handle it.
-
 
 
 [[websocket-fallback-sockjs-client]]
@@ -333,7 +327,3 @@ that you should also consider customizing:
 <2> Set the `httpMessageCacheSize` property to 1,000 (the default is `100`).
 <3> Set the `disconnectDelay` property to 30 property seconds (the default is five seconds
 -- `5 * 1000`).
-
-
-
-

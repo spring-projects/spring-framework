@@ -11,54 +11,55 @@ apply plugin: "kotlin"
 apply plugin: "kotlinx-serialization"
 
 multiRelease {
-	releaseVersions 21
+	releaseVersions 21, 24
 }
 
-def javapoetVersion = "1.13.0"
+def javapoetVersion = "0.7.0"
 def objenesisVersion = "3.4"
 
 configurations {
 	java21Api.extendsFrom(api)
 	java21Implementation.extendsFrom(implementation)
+	java24Api.extendsFrom(api)
 	javapoet
 	objenesis
 	graalvm
 }
 
-task javapoetRepackJar(type: ShadowJar) {
+tasks.register('javapoetRepackJar', ShadowJar) {
 	archiveBaseName = 'spring-javapoet-repack'
 	archiveVersion = javapoetVersion
 	configurations = [project.configurations.javapoet]
-	relocate('com.squareup.javapoet', 'org.springframework.javapoet')
+	relocate('com.palantir.javapoet', 'org.springframework.javapoet')
 }
 
-task javapoetSource(type: ShadowSource) {
+tasks.register('javapoetSource', ShadowSource) {
 	configurations = [project.configurations.javapoet]
-	relocate('com.squareup.javapoet', 'org.springframework.javapoet')
+	relocate('com.palantir.javapoet', 'org.springframework.javapoet')
 	outputDirectory = file("build/shadow-source/javapoet")
 }
 
-task javapoetSourceJar(type: Jar) {
+tasks.register('javapoetSourceJar', Jar) {
 	archiveBaseName = 'spring-javapoet-repack'
 	archiveVersion = javapoetVersion
 	archiveClassifier = 'sources'
 	from javapoetSource
 }
 
-task objenesisRepackJar(type: ShadowJar) {
+tasks.register('objenesisRepackJar', ShadowJar) {
 	archiveBaseName = 'spring-objenesis-repack'
 	archiveVersion = objenesisVersion
 	configurations = [project.configurations.objenesis]
 	relocate('org.objenesis', 'org.springframework.objenesis')
 }
 
-task objenesisSource(type: ShadowSource) {
+tasks.register('objenesisSource', ShadowSource) {
 	configurations = [project.configurations.objenesis]
 	relocate('org.objenesis', 'org.springframework.objenesis')
 	outputDirectory = file("build/shadow-source/objenesis")
 }
 
-task objenesisSourceJar(type: Jar) {
+tasks.register('objenesisSourceJar', Jar) {
 	archiveBaseName = 'spring-objenesis-repack'
 	archiveVersion = objenesisVersion
 	archiveClassifier = 'sources'
@@ -66,7 +67,7 @@ task objenesisSourceJar(type: Jar) {
 }
 
 dependencies {
-	javapoet("com.squareup:javapoet:${javapoetVersion}@jar")
+	javapoet("com.palantir.javapoet:javapoet:${javapoetVersion}@jar")
 	objenesis("org.objenesis:objenesis:${objenesisVersion}@jar")
 	api(files(javapoetRepackJar))
 	api(files(objenesisRepackJar))
@@ -87,16 +88,16 @@ dependencies {
 	optional("org.jetbrains.kotlin:kotlin-stdlib")
 	optional("org.jetbrains.kotlinx:kotlinx-coroutines-core")
 	optional("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
+    testCompileOnly("com.github.ben-manes.caffeine:caffeine")
 	testFixturesImplementation("io.projectreactor:reactor-test")
 	testFixturesImplementation("org.assertj:assertj-core")
+	testFixturesImplementation("org.junit.jupiter:junit-jupiter")
 	testFixturesImplementation("org.junit.platform:junit-platform-launcher")
-	testFixturesImplementation("org.junit.jupiter:junit-jupiter-api")
-	testFixturesImplementation("org.junit.jupiter:junit-jupiter-params")
 	testFixturesImplementation("org.xmlunit:xmlunit-assertj")
 	testImplementation("com.fasterxml.jackson.core:jackson-databind")
 	testImplementation("com.fasterxml.woodstox:woodstox-core")
 	testImplementation("com.google.code.findbugs:jsr305")
-	testImplementation("com.squareup.okhttp3:mockwebserver")
+	testImplementation("com.squareup.okhttp3:mockwebserver3")
 	testImplementation("io.projectreactor:reactor-test")
 	testImplementation("io.projectreactor.tools:blockhound")
 	testImplementation("jakarta.annotation:jakarta.annotation-api")

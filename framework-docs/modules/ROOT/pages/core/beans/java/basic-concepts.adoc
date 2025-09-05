@@ -84,6 +84,3 @@ subclassing has to be applied at runtime, reducing the overhead and the footprin
 The `@Bean` and `@Configuration` annotations are discussed in depth in the following sections.
 First, however, we cover the various ways of creating a Spring container by using
 Java-based configuration.
-
-
-

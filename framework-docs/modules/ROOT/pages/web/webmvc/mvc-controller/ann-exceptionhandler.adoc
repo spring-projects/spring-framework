@@ -6,7 +6,6 @@
 `@Controller` and xref:web/webmvc/mvc-controller/ann-advice.adoc[@ControllerAdvice] classes can have
 `@ExceptionHandler` methods to handle exceptions from controller methods, as the following example shows:
 
-
 include-code::./SimpleController[indent=0]
 
 
@@ -72,7 +71,6 @@ the given `@ExceptionHandler` method would not have matched in the first place.
 
 Support for `@ExceptionHandler` methods in Spring MVC is built on the `DispatcherServlet`
 level, xref:web/webmvc/mvc-servlet/exceptionhandlers.adoc[HandlerExceptionResolver] mechanism.
-
 
 
 [[mvc-ann-exceptionhandler-media]]
@@ -177,13 +175,9 @@ the content negotiation during the error handling phase will decide which conten
   be converted through `HttpMessageConverter` instances and written to the response.
   See xref:web/webmvc/mvc-controller/ann-methods/responseentity.adoc[ResponseEntity].
 
-| `ErrorResponse`
+| `ErrorResponse`, `ProblemDetail`
 | To render an RFC 9457 error response with details in the body,
-see xref:web/webmvc/mvc-ann-rest-exceptions.adoc[Error Responses]
-
-| `ProblemDetail`
-| To render an RFC 9457 error response with details in the body,
-see xref:web/webmvc/mvc-ann-rest-exceptions.adoc[Error Responses]
+  see xref:web/webmvc/mvc-ann-rest-exceptions.adoc[Error Responses]
 
 | `String`
 | A view name to be resolved with `ViewResolver` implementations and used together with the
@@ -225,6 +219,3 @@ see xref:web/webmvc/mvc-ann-rest-exceptions.adoc[Error Responses]
   by default, it is treated as a model attribute to be added to the model. If it is a simple type,
   it remains unresolved.
 |===
-
-
-

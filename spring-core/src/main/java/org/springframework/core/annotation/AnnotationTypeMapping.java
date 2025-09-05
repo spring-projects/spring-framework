@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -415,8 +415,8 @@ final class AnnotationTypeMapping {
 	 * Get a mapped attribute value from the most suitable
 	 * {@link #getAnnotation() meta-annotation}.
 	 * <p>The resulting value is obtained from the closest meta-annotation,
-	 * taking into consideration both convention and alias based mapping rules.
-	 * For root mappings, this method will always return {@code null}.
+	 * taking into consideration alias based mapping rules. For root mappings,
+	 * this method will always return {@code null}.
 	 * @param attributeIndex the attribute index of the source attribute
 	 * @param metaAnnotationsOnly if only meta annotations should be considered.
 	 * If this parameter is {@code false} then aliases within the annotation will

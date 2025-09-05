@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -86,8 +86,8 @@ class DefaultBeanRegistrationCodeFragmentsTests {
 		BeanRegistrationCodeFragments codeFragments = createInstance(registeredBean);
 		assertThatExceptionOfType(AotBeanProcessingException.class)
 				.isThrownBy(() -> codeFragments.getTarget(registeredBean))
-				.withMessageContaining("Error processing bean with name 'testBean' defined in my test resource: "
-						+ "instance supplier is not supported");
+				.withMessageContaining("Error processing bean with name 'testBean' defined in my test resource: " +
+						"instance supplier is not supported");
 	}
 
 	@Test

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -69,8 +69,8 @@ class BeanDefinitionMethodGeneratorFactory {
 		this.excludeFilters = loader.load(BeanRegistrationExcludeFilter.class);
 		for (BeanRegistrationExcludeFilter excludeFilter : this.excludeFilters) {
 			if (this.excludeFilters.getSource(excludeFilter) == Source.BEAN_FACTORY) {
-				Assert.state(excludeFilter instanceof BeanRegistrationAotProcessor
-						|| excludeFilter instanceof BeanFactoryInitializationAotProcessor,
+				Assert.state(excludeFilter instanceof BeanRegistrationAotProcessor ||
+						excludeFilter instanceof BeanFactoryInitializationAotProcessor,
 						() -> "BeanRegistrationExcludeFilter bean of type %s must also implement an AOT processor interface"
 								.formatted(excludeFilter.getClass().getName()));
 			}

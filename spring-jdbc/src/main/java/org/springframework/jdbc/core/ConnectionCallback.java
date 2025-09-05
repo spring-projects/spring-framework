@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,7 +41,7 @@ import org.springframework.dao.DataAccessException;
  * @see JdbcTemplate#update
  */
 @FunctionalInterface
-public interface ConnectionCallback<T> {
+public interface ConnectionCallback<T extends @Nullable Object> {
 
 	/**
 	 * Gets called by {@code JdbcTemplate.execute} with an active JDBC
@@ -65,6 +65,6 @@ public interface ConnectionCallback<T> {
 	 * @see JdbcTemplate#queryForObject(String, Class)
 	 * @see JdbcTemplate#queryForRowSet(String)
 	 */
-	@Nullable T doInConnection(Connection con) throws SQLException, DataAccessException;
+	T doInConnection(Connection con) throws SQLException, DataAccessException;
 
 }

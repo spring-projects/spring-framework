@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -106,12 +106,12 @@ public interface ServerWebExchange {
 	}
 
 	/**
-	 * Return the web session for the current request. Always guaranteed  to
-	 * return an instance either matching to the session id requested by the
-	 * client, or with a new session id either because the client did not
-	 * specify one or because the underlying session had expired. Use of this
-	 * method does not automatically create a session. See {@link WebSession}
-	 * for more details.
+	 * Return the web session for the current request.
+	 * <p>Always guaranteed to return either an instance matching the session id
+	 * requested by the client, or a new session either because the client did not
+	 * specify a session id or because the underlying session expired.
+	 * <p>Use of this method does not automatically create a session. See
+	 * {@link WebSession} for more details.
 	 */
 	Mono<WebSession> getSession();
 

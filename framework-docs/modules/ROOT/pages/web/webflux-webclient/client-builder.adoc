@@ -1,7 +1,7 @@
 [[webflux-client-builder]]
 = Configuration
 
-The simplest way to create a `WebClient` is through one of the static factory methods:
+The simplest way to create `WebClient` is through one of the static factory methods:
 
 * `WebClient.create()`
 * `WebClient.create(String baseUrl)`
@@ -12,10 +12,12 @@ You can also use `WebClient.builder()` with further options:
 * `defaultUriVariables`: default values to use when expanding URI templates.
 * `defaultHeader`: Headers for every request.
 * `defaultCookie`: Cookies for every request.
+* `defaultApiVersion`: API version for every request.
 * `defaultRequest`: `Consumer` to customize every request.
 * `filter`: Client filter for every request.
 * `exchangeStrategies`: HTTP message reader/writer customizations.
 * `clientConnector`: HTTP client library settings.
+* `apiVersionInserter`: to insert API version values in the request
 * `observationRegistry`: the registry to use for enabling xref:integration/observability.adoc#http-client.webclient[Observability support].
 * `observationConvention`: xref:integration/observability.adoc#config[an optional, custom convention to extract metadata] for recorded observations.
 
@@ -78,6 +80,7 @@ Kotlin::
 ----
 ======
 
+
 [[webflux-client-builder-maxinmemorysize]]
 == MaxInMemorySize
 
@@ -113,7 +116,6 @@ Kotlin::
 ======
 
 
-
 [[webflux-client-builder-reactor]]
 == Reactor Netty
 
@@ -143,7 +145,6 @@ Kotlin::
 		.build()
 ----
 ======
-
 
 [[webflux-client-builder-reactor-resources]]
 === Resources
@@ -244,7 +245,6 @@ Kotlin::
 <3> Plug the connector into the `WebClient.Builder`.
 ======
 --
-
 
 [[webflux-client-builder-reactor-timeout]]
 === Timeouts
@@ -378,7 +378,6 @@ Kotlin::
 ======
 
 
-
 [[webflux-client-builder-jdk-httpclient]]
 == JDK HttpClient
 
@@ -390,32 +389,31 @@ Java::
 +
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
-    HttpClient httpClient = HttpClient.newBuilder()
-        .followRedirects(Redirect.NORMAL)
-        .connectTimeout(Duration.ofSeconds(20))
-        .build();
+	HttpClient httpClient = HttpClient.newBuilder()
+		.followRedirects(Redirect.NORMAL)
+		.connectTimeout(Duration.ofSeconds(20))
+		.build();
 
-    ClientHttpConnector connector =
-            new JdkClientHttpConnector(httpClient, new DefaultDataBufferFactory());
+	ClientHttpConnector connector =
+			new JdkClientHttpConnector(httpClient, new DefaultDataBufferFactory());
 
-    WebClient webClient = WebClient.builder().clientConnector(connector).build();
+	WebClient webClient = WebClient.builder().clientConnector(connector).build();
 ----
 
 Kotlin::
 +
 [source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
-    val httpClient = HttpClient.newBuilder()
-        .followRedirects(Redirect.NORMAL)
-        .connectTimeout(Duration.ofSeconds(20))
-        .build()
+	val httpClient = HttpClient.newBuilder()
+		.followRedirects(Redirect.NORMAL)
+		.connectTimeout(Duration.ofSeconds(20))
+		.build()
 
-    val connector = JdkClientHttpConnector(httpClient, DefaultDataBufferFactory())
+	val connector = JdkClientHttpConnector(httpClient, DefaultDataBufferFactory())
 
-    val webClient = WebClient.builder().clientConnector(connector).build()
+	val webClient = WebClient.builder().clientConnector(connector).build()
 ----
 ======
-
 
 
 [[webflux-client-builder-jetty]]
@@ -511,7 +509,6 @@ Kotlin::
 --
 
 
-
 [[webflux-client-builder-http-components]]
 == HttpComponents
 
@@ -543,5 +540,3 @@ Kotlin::
 	val webClient = WebClient.builder().clientConnector(connector).build()
 ----
 ======
-
-

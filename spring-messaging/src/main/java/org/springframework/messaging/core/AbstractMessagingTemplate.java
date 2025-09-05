@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.util.Map;
 import org.jspecify.annotations.Nullable;
 
 import org.springframework.messaging.Message;
+import org.springframework.messaging.MessagingException;
 
 /**
  * An extension of {@link AbstractMessageReceivingTemplate} that adds support for
@@ -29,6 +30,7 @@ import org.springframework.messaging.Message;
  * @author Mark Fisher
  * @author Rossen Stoyanchev
  * @author Stephane Nicoll
+ * @author Juergen Hoeller
  * @since 4.0
  * @param <D> the destination type
  */
@@ -36,57 +38,80 @@ public abstract class AbstractMessagingTemplate<D> extends AbstractMessageReceiv
 		implements MessageRequestReplyOperations<D> {
 
 	@Override
-	public @Nullable Message<?> sendAndReceive(Message<?> requestMessage) {
+	public @Nullable Message<?> sendAndReceive(Message<?> requestMessage) throws MessagingException {
 		return sendAndReceive(getRequiredDefaultDestination(), requestMessage);
 	}
 
 	@Override
-	public @Nullable Message<?> sendAndReceive(D destination, Message<?> requestMessage) {
+	public @Nullable Message<?> sendAndReceive(D destination, Message<?> requestMessage) throws MessagingException {
 		return doSendAndReceive(destination, requestMessage);
 	}
 
-	protected abstract @Nullable Message<?> doSendAndReceive(D destination, Message<?> requestMessage);
-
-
 	@Override
-	public <T> @Nullable T convertSendAndReceive(Object request, Class<T> targetClass) {
-		return convertSendAndReceive(getRequiredDefaultDestination(), request, targetClass);
+	public <T> @Nullable T convertSendAndReceive(Object request, Class<T> targetClass) throws MessagingException {
+		return convertSendAndReceive(request, null, targetClass, null);
 	}
 
 	@Override
-	public <T> @Nullable T convertSendAndReceive(D destination, Object request, Class<T> targetClass) {
-		return convertSendAndReceive(destination, request, null, targetClass);
+	public <T> @Nullable T convertSendAndReceive(D destination, Object request, Class<T> targetClass) throws MessagingException {
+		return convertSendAndReceive(destination, request, null, targetClass, null);
+	}
+
+	@Override
+	public <T> @Nullable T convertSendAndReceive(Object request, @Nullable Map<String, Object> headers, Class<T> targetClass) throws MessagingException {
+		return convertSendAndReceive(request, headers, targetClass, null);
 	}
 
 	@Override
 	public <T> @Nullable T convertSendAndReceive(
-			D destination, Object request, @Nullable Map<String, Object> headers, Class<T> targetClass) {
+			D destination, Object request, @Nullable Map<String, Object> headers, Class<T> targetClass)
+			throws MessagingException {
 
 		return convertSendAndReceive(destination, request, headers, targetClass, null);
 	}
 
 	@Override
 	public <T> @Nullable T convertSendAndReceive(
-			Object request, Class<T> targetClass, @Nullable MessagePostProcessor postProcessor) {
+			Object request, Class<T> targetClass, @Nullable MessagePostProcessor postProcessor)
+			throws MessagingException {
 
-		return convertSendAndReceive(getRequiredDefaultDestination(), request, targetClass, postProcessor);
+		return convertSendAndReceive(request, null, targetClass, postProcessor);
 	}
 
 	@Override
 	public <T> @Nullable T convertSendAndReceive(D destination, Object request, Class<T> targetClass,
-			@Nullable MessagePostProcessor postProcessor) {
+			@Nullable MessagePostProcessor postProcessor) throws MessagingException {
 
 		return convertSendAndReceive(destination, request, null, targetClass, postProcessor);
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
+	public <T> @Nullable T convertSendAndReceive(Object request, @Nullable Map<String, Object> headers,
+			Class<T> targetClass, @Nullable MessagePostProcessor postProcessor) throws MessagingException {
+
+		return convertSendAndReceive(getRequiredDefaultDestination(), request, headers, targetClass, postProcessor);
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
 	public <T> @Nullable T convertSendAndReceive(D destination, Object request, @Nullable Map<String, Object> headers,
-			Class<T> targetClass, @Nullable MessagePostProcessor postProcessor) {
+			Class<T> targetClass, @Nullable MessagePostProcessor postProcessor) throws MessagingException {
 
 		Message<?> requestMessage = doConvert(request, headers, postProcessor);
-		Message<?> replyMessage = sendAndReceive(destination, requestMessage);
+		Message<?> replyMessage = doSendAndReceive(destination, requestMessage);
 		return (replyMessage != null ? (T) getMessageConverter().fromMessage(replyMessage, targetClass) : null);
 	}
+
+
+	/**
+	 * Actually send the given request message to the given destination and
+	 * receive a reply message for it.
+	 * @param destination the target destination
+	 * @param requestMessage the message to send
+	 * @return the received reply, possibly {@code null} if the
+	 * message could not be received, for example due to a timeout
+	 */
+	protected abstract @Nullable Message<?> doSendAndReceive(D destination, Message<?> requestMessage);
 
 }

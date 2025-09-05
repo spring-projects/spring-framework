@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -138,14 +138,19 @@ public final class DataSize implements Comparable<DataSize>, Serializable {
 	}
 
 	/**
-	 * Obtain a {@link DataSize} from a text string such as {@code 12MB} using
+	 * Obtain a {@link DataSize} from a text string such as {@code "5MB"} using
 	 * {@link DataUnit#BYTES} if no unit is specified.
-	 * <p>Examples:
-	 * <pre>
-	 * "12KB" -- parses as "12 kilobytes"
-	 * "5MB"  -- parses as "5 megabytes"
-	 * "20"   -- parses as "20 bytes"
-	 * </pre>
+	 * <h4>Examples</h4>
+	 * <table border="1">
+	 * <tr><th>Text</th><th>Parsed As</th><th>Size in Bytes</th></tr>
+	 * <tr><td>"20"</td><td>20 bytes</td><td>20</td></tr>
+	 * <tr><td>"20B"</td><td>20 bytes</td><td>20</td></tr>
+	 * <tr><td>"12KB"</td><td>12 kilobytes</td><td>12,288</td></tr>
+	 * <tr><td>"5MB"</td><td>5 megabytes</td><td>5,242,880</td></tr>
+	 * </table>
+	 * <p>Note that the terms and units used in the above examples are based on
+	 * <a href="https://en.wikipedia.org/wiki/Binary_prefix">binary prefixes</a>.
+	 * Consult the {@linkplain DataSize class-level Javadoc} for details.
 	 * @param text the text to parse
 	 * @return the parsed {@code DataSize}
 	 * @see #parse(CharSequence, DataUnit)
@@ -155,19 +160,24 @@ public final class DataSize implements Comparable<DataSize>, Serializable {
 	}
 
 	/**
-	 * Obtain a {@link DataSize} from a text string such as {@code 12MB} using
+	 * Obtain a {@link DataSize} from a text string such as {@code "5MB"} using
 	 * the specified default {@link DataUnit} if no unit is specified.
 	 * <p>The string starts with a number followed optionally by a unit matching
 	 * one of the supported {@linkplain DataUnit suffixes}.
 	 * <p>If neither a unit nor a default {@code DataUnit} is specified,
 	 * {@link DataUnit#BYTES} will be inferred.
-	 * <p>Examples:
-	 * <pre>
-	 * "12KB" -- parses as "12 kilobytes"
-	 * "5MB"  -- parses as "5 megabytes"
-	 * "20"   -- parses as "20 kilobytes" (where the {@code defaultUnit} is {@link DataUnit#KILOBYTES})
-	 * "20"   -- parses as "20 bytes" (if the {@code defaultUnit} is {@code null})
-	 * </pre>
+	 * <h4>Examples</h4>
+	 * <table border="1">
+	 * <tr><th>Text</th><th>Default Unit</th><th>Parsed As</th><th>Size in Bytes</th></tr>
+	 * <tr><td>"20"</td><td>{@code null}</td><td>20 bytes</td><td>20</td></tr>
+	 * <tr><td>"20"</td><td>{@link DataUnit#KILOBYTES KILOBYTES}</td><td>20 kilobytes</td><td>20,480</td></tr>
+	 * <tr><td>"20B"</td><td>N/A</td><td>20 bytes</td><td>20</td></tr>
+	 * <tr><td>"12KB"</td><td>N/A</td><td>12 kilobytes</td><td>12,288</td></tr>
+	 * <tr><td>"5MB"</td><td>N/A</td><td>5 megabytes</td><td>5,242,880</td></tr>
+	 * </table>
+	 * <p>Note that the terms and units used in the above examples are based on
+	 * <a href="https://en.wikipedia.org/wiki/Binary_prefix">binary prefixes</a>.
+	 * Consult the {@linkplain DataSize class-level Javadoc} for details.
 	 * @param text the text to parse
 	 * @param defaultUnit the default {@code DataUnit} to use
 	 * @return the parsed {@code DataSize}

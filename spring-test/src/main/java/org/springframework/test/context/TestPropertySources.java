@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,9 +31,8 @@ import java.lang.annotation.Target;
  * completely optional since {@code @TestPropertySource} is a
  * {@linkplain java.lang.annotation.Repeatable repeatable} annotation.
  *
- * <p>As of Spring Framework 5.3, this annotation will be inherited from an
- * enclosing test class by default. See
- * {@link NestedTestConfiguration @NestedTestConfiguration} for details.
+ * <p>This annotation will be inherited from an enclosing test class by default.
+ * See {@link NestedTestConfiguration @NestedTestConfiguration} for details.
  *
  * @author Anatoliy Korovin
  * @author Sam Brannen

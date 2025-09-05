@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,13 +22,14 @@ import java.util.Collections;
 import org.jspecify.annotations.Nullable;
 
 /**
- * A simple instance filter that checks if a given instance match based on
- * a collection of includes and excludes element.
+ * A simple instance filter that checks if a given instance matches based on
+ * collections of includes and excludes.
  *
- * <p>Subclasses may want to override {@link #match(Object, Object)} to provide
- * a custom matching algorithm.
+ * <p>Subclasses may override {@link #match(Object, Object)} to provide a custom
+ * matching algorithm.
  *
  * @author Stephane Nicoll
+ * @author Sam Brannen
  * @since 4.1
  * @param <T> the instance type
  */
@@ -42,17 +43,33 @@ public class InstanceFilter<T> {
 
 
 	/**
-	 * Create a new instance based on includes/excludes collections.
-	 * <p>A particular element will match if it "matches" the one of the element in the
-	 * includes list and  does not match one of the element in the excludes list.
-	 * <p>Subclasses may redefine what matching means. By default, an element match with
-	 * another if it is equals according to {@link Object#equals(Object)}
-	 * <p>If both collections are empty, {@code matchIfEmpty} defines if
-	 * an element matches or not.
+	 * Create a new {@code InstanceFilter} based on include and exclude collections,
+	 * with the {@code matchIfEmpty} flag set to {@code true}.
+	 * <p>See {@link #InstanceFilter(Collection, Collection, boolean)} for details.
 	 * @param includes the collection of includes
 	 * @param excludes the collection of excludes
-	 * @param matchIfEmpty the matching result if both the includes and the excludes
-	 * collections are empty
+	 * @since 7.0
+	 */
+	public InstanceFilter(@Nullable Collection<? extends T> includes,
+			@Nullable Collection<? extends T> excludes) {
+
+		this(includes, excludes, true);
+	}
+
+	/**
+	 * Create a new {@code InstanceFilter} based on include and exclude collections.
+	 * <p>A particular element will match if it <em>matches</em> one of the elements
+	 * in the {@code includes} list and does not match one of the elements in the
+	 * {@code excludes} list.
+	 * <p>Subclasses may redefine what matching means. By default, an element
+	 * {@linkplain #match(Object, Object) matches} another if the two elements are
+	 * {@linkplain Object#equals(Object) equal}.
+	 * <p>If both collections are empty, {@code matchIfEmpty} defines if an element
+	 * matches or not.
+	 * @param includes the collection of includes
+	 * @param excludes the collection of excludes
+	 * @param matchIfEmpty the matching result if the includes and the excludes
+	 * collections are both {@code null} or empty
 	 */
 	public InstanceFilter(@Nullable Collection<? extends T> includes,
 			@Nullable Collection<? extends T> excludes, boolean matchIfEmpty) {
@@ -69,27 +86,25 @@ public class InstanceFilter<T> {
 	public boolean match(T instance) {
 		Assert.notNull(instance, "Instance to match must not be null");
 
-		boolean includesSet = !this.includes.isEmpty();
-		boolean excludesSet = !this.excludes.isEmpty();
-		if (!includesSet && !excludesSet) {
+		boolean emptyIncludes = this.includes.isEmpty();
+		boolean emptyExcludes = this.excludes.isEmpty();
+
+		if (emptyIncludes && emptyExcludes) {
 			return this.matchIfEmpty;
 		}
-
-		boolean matchIncludes = match(instance, this.includes);
-		boolean matchExcludes = match(instance, this.excludes);
-		if (!includesSet) {
-			return !matchExcludes;
+		if (!emptyExcludes && match(instance, this.excludes)) {
+			return false;
 		}
-		if (!excludesSet) {
-			return matchIncludes;
-		}
-		return matchIncludes && !matchExcludes;
+		return (emptyIncludes || match(instance, this.includes));
 	}
 
 	/**
-	 * Determine if the specified {@code instance} is equal to the
-	 * specified {@code candidate}.
-	 * @param instance the instance to handle
+	 * Determine if the specified {@code instance} matches the specified
+	 * {@code candidate}.
+	 * <p>By default, the two instances match if they are
+	 * {@linkplain Object#equals(Object) equal}.
+	 * <p>Can be overridden by subclasses.
+	 * @param instance the instance to check
 	 * @param candidate a candidate defined by this filter
 	 * @return {@code true} if the instance matches the candidate
 	 */
@@ -99,10 +114,10 @@ public class InstanceFilter<T> {
 
 	/**
 	 * Determine if the specified {@code instance} matches one of the candidates.
-	 * <p>If the candidates collection is {@code null}, returns {@code false}.
 	 * @param instance the instance to check
-	 * @param candidates a list of candidates
-	 * @return {@code true} if the instance match or the candidates collection is null
+	 * @param candidates the collection of candidates
+	 * @return {@code true} if the instance matches; {@code false} if the
+	 * candidates collection is empty or there is no match
 	 */
 	protected boolean match(T instance, Collection<? extends T> candidates) {
 		for (T candidate : candidates) {

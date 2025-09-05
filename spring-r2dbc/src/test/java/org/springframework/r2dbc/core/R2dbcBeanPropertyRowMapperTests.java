@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -96,8 +96,8 @@ class R2dbcBeanPropertyRowMapperTests {
 
 		assertThatExceptionOfType(TypeMismatchException.class)
 				.isThrownBy(() -> mapper.apply(EXTENDED_PERSON_ROW))
-				.withMessage("Failed to convert property value of type 'java.lang.String' to required type "
-						+ "'java.lang.String' for property 'address'; simulating type mismatch for address");
+				.withMessage("Failed to convert property value of type 'java.lang.String' to required type " +
+						"'java.lang.String' for property 'address'; simulating type mismatch for address");
 	}
 
 	@ParameterizedTest

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,6 +42,7 @@ import org.springframework.util.PropertyPlaceholderHelper;
 import org.springframework.util.PropertyPlaceholderHelper.PlaceholderResolver;
 import org.springframework.util.StringValueResolver;
 import org.springframework.validation.Validator;
+import org.springframework.web.accept.ApiVersionStrategy;
 import org.springframework.web.accept.ContentNegotiationManager;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.WebApplicationObjectSupport;
@@ -107,6 +108,8 @@ public class StandaloneMockMvcBuilder extends AbstractMockMvcBuilder<StandaloneM
 	private @Nullable ContentNegotiationManager contentNegotiationManager;
 
 	private @Nullable FormattingConversionService conversionService;
+
+	private @Nullable ApiVersionStrategy versionStrategy;
 
 	private @Nullable List<HandlerExceptionResolver> handlerExceptionResolvers;
 
@@ -186,6 +189,15 @@ public class StandaloneMockMvcBuilder extends AbstractMockMvcBuilder<StandaloneM
 	 */
 	public StandaloneMockMvcBuilder setConversionService(FormattingConversionService conversionService) {
 		this.conversionService = conversionService;
+		return this;
+	}
+
+	/**
+	 * Set the {@link ApiVersionStrategy} to use when mapping requests.
+	 * @since 7.0
+	 */
+	public StandaloneMockMvcBuilder setApiVersionStrategy(@Nullable ApiVersionStrategy versionStrategy) {
+		this.versionStrategy = versionStrategy;
 		return this;
 	}
 
@@ -449,12 +461,16 @@ public class StandaloneMockMvcBuilder extends AbstractMockMvcBuilder<StandaloneM
 			else if (patternParser != null) {
 				handlerMapping.setPatternParser(patternParser);
 			}
+			if (versionStrategy != null) {
+				handlerMapping.setApiVersionStrategy(versionStrategy);
+			}
 			handlerMapping.setOrder(0);
 			handlerMapping.setInterceptors(getInterceptors(mvcConversionService, mvcResourceUrlProvider));
 			return handlerMapping;
 		}
 
 		@Override
+		@SuppressWarnings("removal")
 		protected void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
 			converters.addAll(messageConverters);
 		}

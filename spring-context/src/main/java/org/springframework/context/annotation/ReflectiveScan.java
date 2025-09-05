@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,9 +51,9 @@ import org.springframework.core.annotation.AliasFor;
  * ignored.
  *
  * @author Stephane Nicoll
+ * @since 6.2
  * @see Reflective @Reflective
  * @see RegisterReflection @RegisterReflection
- * @since 6.2
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)

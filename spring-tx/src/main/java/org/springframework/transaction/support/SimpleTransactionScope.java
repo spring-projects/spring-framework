@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -79,11 +79,6 @@ public class SimpleTransactionScope implements Scope {
 		if (scopedObjects != null) {
 			scopedObjects.destructionCallbacks.put(name, callback);
 		}
-	}
-
-	@Override
-	public @Nullable Object resolveContextualObject(String key) {
-		return null;
 	}
 
 	@Override

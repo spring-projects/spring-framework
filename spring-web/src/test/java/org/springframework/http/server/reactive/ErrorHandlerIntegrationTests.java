@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -88,8 +88,8 @@ class ErrorHandlerIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 		// but an application can apply CompactPathRule via RewriteHandler:
 		// https://www.eclipse.org/jetty/documentation/jetty-11/programming_guide.php
 
-		HttpStatus expectedStatus = (httpServer instanceof JettyHttpServer || httpServer instanceof JettyCoreHttpServer
-				? HttpStatus.BAD_REQUEST : HttpStatus.OK);
+		HttpStatus expectedStatus = (httpServer instanceof JettyHttpServer || httpServer instanceof JettyCoreHttpServer ?
+				HttpStatus.BAD_REQUEST : HttpStatus.OK);
 
 		assertThat(response.getStatusCode()).isEqualTo(expectedStatus);
 	}

@@ -78,7 +78,7 @@ Kotlin::
 ======
 
 By default, both constructor and property
-xref:core/validation/beans-beans.adoc#beans-binding[data binding] are applied. However,
+xref:core/validation/data-binding.adoc[data binding] are applied. However,
 model object design requires careful consideration, and for security reasons it is
 recommended either to use an object tailored specifically for web binding, or to apply
 constructor binding only. If property binding must still be used, then _allowedFields_
@@ -97,7 +97,7 @@ Java::
 ----
 	class Account {
 
-	    private final String firstName;
+		private final String firstName;
 
 		public Account(@BindParam("first-name") String firstName) {
 			this.firstName = firstName;
@@ -243,7 +243,7 @@ Kotlin::
 ======
 
 If there is no `BindingResult` parameter after the `@ModelAttribute`, then
-`MethodArgumentNotValueException` is raised with the validation errors. However, if method
+a `MethodArgumentNotValidException` is raised with the validation errors. However, if method
 validation applies because other parameters have `@jakarta.validation.Constraint` annotations,
 then `HandlerMethodValidationException` is raised instead. For more details, see the section
 xref:web/webmvc/mvc-controller/ann-validation.adoc[Validation].

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -176,8 +176,8 @@ public class GenericMessagingTemplate extends AbstractDestinationResolvingMessag
 			accessor.removeHeader(this.receiveTimeoutHeader);
 			accessor.setImmutable();
 		}
-		else if (message.getHeaders().containsKey(this.sendTimeoutHeader)
-				|| message.getHeaders().containsKey(this.receiveTimeoutHeader)) {
+		else if (message.getHeaders().containsKey(this.sendTimeoutHeader) ||
+				message.getHeaders().containsKey(this.receiveTimeoutHeader)) {
 			messageToSend = MessageBuilder.fromMessage(message)
 					.setHeader(this.sendTimeoutHeader, null)
 					.setHeader(this.receiveTimeoutHeader, null)

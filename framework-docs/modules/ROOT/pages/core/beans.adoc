@@ -3,7 +3,3 @@
 :page-section-summary-toc: 1
 
 This chapter covers Spring's Inversion of Control (IoC) container.
-
-
-
-

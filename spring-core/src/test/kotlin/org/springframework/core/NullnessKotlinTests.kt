@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,13 @@ class NullnessKotlinTests {
 		val method = ::nullable.javaMethod!!
 		val nullness = Nullness.forMethodReturnType(method)
 		Assertions.assertThat(nullness).isEqualTo(Nullness.NULLABLE)
+	}
+
+	@Test
+	fun unitReturnType() {
+		val method = ::unit.javaMethod!!
+		val nullness = Nullness.forMethodReturnType(method)
+		Assertions.assertThat(nullness).isEqualTo(Nullness.UNSPECIFIED)
 	}
 
 	@Test
@@ -77,5 +84,8 @@ class NullnessKotlinTests {
 
 	@Suppress("unused_parameter")
 	fun nonNull(nonNull: String): String = "foo"
+
+	fun unit() {
+	}
 
 }

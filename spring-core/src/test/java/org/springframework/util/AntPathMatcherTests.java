@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -491,8 +491,8 @@ class AntPathMatcherTests {
 		assertThat(comparator.compare("/hotels/{hotel}/bookings/{booking}", "/hotels/{hotel}/booking")).isEqualTo(1);
 
 		// SPR-10550
-		assertThat(comparator.compare("/hotels/{hotel}/bookings/{booking}/cutomers/{customer}", "/**")).isEqualTo(-1);
-		assertThat(comparator.compare("/**", "/hotels/{hotel}/bookings/{booking}/cutomers/{customer}")).isEqualTo(1);
+		assertThat(comparator.compare("/hotels/{hotel}/bookings/{booking}/customers/{customer}", "/**")).isEqualTo(-1);
+		assertThat(comparator.compare("/**", "/hotels/{hotel}/bookings/{booking}/customers/{customer}")).isEqualTo(1);
 		assertThat(comparator.compare("/**", "/**")).isEqualTo(0);
 
 		assertThat(comparator.compare("/hotels/{hotel}", "/hotels/*")).isEqualTo(-1);
@@ -505,8 +505,8 @@ class AntPathMatcherTests {
 		assertThat(comparator.compare("/hotels/{hotel}", "/hotels/{hotel}.*")).isEqualTo(2);
 
 		// SPR-6741
-		assertThat(comparator.compare("/hotels/{hotel}/bookings/{booking}/cutomers/{customer}", "/hotels/**")).isEqualTo(-1);
-		assertThat(comparator.compare("/hotels/**", "/hotels/{hotel}/bookings/{booking}/cutomers/{customer}")).isEqualTo(1);
+		assertThat(comparator.compare("/hotels/{hotel}/bookings/{booking}/customers/{customer}", "/hotels/**")).isEqualTo(-1);
+		assertThat(comparator.compare("/hotels/**", "/hotels/{hotel}/bookings/{booking}/customers/{customer}")).isEqualTo(1);
 		assertThat(comparator.compare("/hotels/foo/bar/**", "/hotels/{hotel}")).isEqualTo(1);
 		assertThat(comparator.compare("/hotels/{hotel}", "/hotels/foo/bar/**")).isEqualTo(-1);
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,8 +37,7 @@ import org.springframework.core.annotation.AliasFor;
  * specific exception. This also serves as a mapping hint if the annotation
  * itself does not narrow the exception types through its {@link #value()}.
  * You may refer to a top-level exception being propagated or to a nested
- * cause within a wrapper exception. As of 5.3, any cause level is being
- * exposed, whereas previously only an immediate cause was considered.
+ * cause within a wrapper exception. Any cause level is exposed.
  * <li>Request and/or response objects (typically from the Servlet API).
  * You may choose any specific request/response type, for example,
  * {@link jakarta.servlet.ServletRequest} / {@link jakarta.servlet.http.HttpServletRequest}.
@@ -72,23 +71,25 @@ import org.springframework.core.annotation.AliasFor;
  *
  * <p>The following return types are supported for handler methods:
  * <ul>
- * <li>A {@code ModelAndView} object (from Servlet MVC).
- * <li>A {@link org.springframework.ui.Model} object, with the view name implicitly
+ * <li>{@code ModelAndView} object (from Servlet MVC).
+ * <li>{@link org.springframework.ui.Model} object, with the view name implicitly
  * determined through a {@link org.springframework.web.servlet.RequestToViewNameTranslator}.
- * <li>A {@link java.util.Map} object for exposing a model,
+ * <li>{@link java.util.Map} object for exposing a model,
  * with the view name implicitly determined through a
  * {@link org.springframework.web.servlet.RequestToViewNameTranslator}.
- * <li>A {@link org.springframework.web.servlet.View} object.
- * <li>A {@link String} value which is interpreted as view name.
+ * <li>{@link org.springframework.web.servlet.View} object.
+ * <li>{@link String} value which is interpreted as view name.
  * <li>{@link ResponseBody @ResponseBody} annotated methods (Servlet-only)
  * to set the response content. The return value will be converted to the
  * response stream using
  * {@linkplain org.springframework.http.converter.HttpMessageConverter message converters}.
- * <li>An {@link org.springframework.http.HttpEntity HttpEntity&lt;?&gt;} or
+ * <li>{@link org.springframework.http.HttpEntity HttpEntity&lt;?&gt;} or
  * {@link org.springframework.http.ResponseEntity ResponseEntity&lt;?&gt;} object
  * (Servlet-only) to set response headers and content. The ResponseEntity body
  * will be converted and written to the response stream using
  * {@linkplain org.springframework.http.converter.HttpMessageConverter message converters}.
+ * <li>{@link org.springframework.http.ProblemDetail} or {@link org.springframework.web.ErrorResponse}
+ * object to render an RFC 9457 error response with details in the body.
  * <li>{@code void} if the method handles the response itself (by
  * writing the response content directly, declaring an argument of type
  * {@link jakarta.servlet.ServletResponse} / {@link jakarta.servlet.http.HttpServletResponse}

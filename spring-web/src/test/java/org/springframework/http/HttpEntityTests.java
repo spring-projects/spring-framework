@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,10 @@ import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
+ * Unit tests for {@link HttpEntity}.
+ *
  * @author Arjen Poutsma
+ * @author Yanming Zhou
  */
 class HttpEntityTests {
 
@@ -31,6 +34,7 @@ class HttpEntityTests {
 	void noHeaders() {
 		String body = "foo";
 		HttpEntity<String> entity = new HttpEntity<>(body);
+
 		assertThat(entity.getBody()).isSameAs(body);
 		assertThat(entity.getHeaders().isEmpty()).as("isEmpty").isTrue();
 	}
@@ -41,6 +45,7 @@ class HttpEntityTests {
 		headers.setContentType(MediaType.TEXT_PLAIN);
 		String body = "foo";
 		HttpEntity<String> entity = new HttpEntity<>(body, headers);
+
 		assertThat(entity.getBody()).isEqualTo(body);
 		assertThat(entity.getHeaders().getContentType()).isEqualTo(MediaType.TEXT_PLAIN);
 		assertThat(entity.getHeaders().getFirst("Content-Type")).isEqualTo("text/plain");
@@ -52,6 +57,7 @@ class HttpEntityTests {
 		headers.set("Content-Type", "text/plain");
 		String body = "foo";
 		HttpEntity<String> entity = new HttpEntity<>(body, headers);
+
 		assertThat(entity.getBody()).isEqualTo(body);
 		assertThat(entity.getHeaders().getContentType()).isEqualTo(MediaType.TEXT_PLAIN);
 		assertThat(entity.getHeaders().getFirst("Content-Type")).isEqualTo("text/plain");
@@ -118,6 +124,16 @@ class HttpEntityTests {
 		assertThat(requestEntity).isNotEqualTo(httpEntity);
 		assertThat(requestEntity).isEqualTo(requestEntity2);
 		assertThat(requestEntity2).isEqualTo(requestEntity);
+	}
+
+	@Test // gh-34806
+	void mutateEmptyInstanceHeaders() {
+		HttpHeaders headers = new HttpHeaders(HttpEntity.EMPTY.getHeaders());
+		headers.add("Authorization", "Bearer some-token");
+
+		assertThat(HttpEntity.EMPTY.getHeaders().headerNames())
+				.as("Headers of HttpEntity.EMPTY should remain empty")
+				.isEmpty();
 	}
 
 }

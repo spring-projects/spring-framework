@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +36,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.ArgumentsProvider;
 import org.junit.jupiter.params.provider.ArgumentsSource;
 import org.junit.jupiter.params.support.AnnotationConsumer;
+import org.junit.jupiter.params.support.ParameterDeclarations;
 
 import org.springframework.beans.factory.BeanCurrentlyInCreationException;
 import org.springframework.beans.factory.ObjectProvider;
@@ -102,8 +103,8 @@ class BeanInstanceSupplierTests {
 		RegisteredBean registerBean = source.registerBean(this.beanFactory);
 		assertThatIllegalArgumentException()
 				.isThrownBy(() -> resolver.get(registerBean)).withMessage(
-						"Constructor with parameter types [java.io.InputStream] cannot be found on "
-								+ SingleArgConstructor.class.getName());
+						"Constructor with parameter types [java.io.InputStream] cannot be found on " +
+								SingleArgConstructor.class.getName());
 	}
 
 	@Test
@@ -150,8 +151,8 @@ class BeanInstanceSupplierTests {
 		RegisteredBean registerBean = source.registerBean(this.beanFactory);
 		assertThatIllegalArgumentException()
 				.isThrownBy(() -> resolver.get(registerBean)).withMessage(
-						"Factory method 'single' with parameter types [java.io.InputStream] declared on class "
-								+ SingleArgFactory.class.getName() + " cannot be found");
+						"Factory method 'single' with parameter types [java.io.InputStream] declared on class " +
+								SingleArgFactory.class.getName() + " cannot be found");
 	}
 
 	@Test
@@ -668,7 +669,7 @@ class BeanInstanceSupplierTests {
 		}
 
 		@Override
-		public Stream<? extends Arguments> provideArguments(ExtensionContext context) {
+		public Stream<? extends Arguments> provideArguments(ParameterDeclarations parameters, ExtensionContext context) {
 			return this.source.provideArguments(context);
 		}
 	}

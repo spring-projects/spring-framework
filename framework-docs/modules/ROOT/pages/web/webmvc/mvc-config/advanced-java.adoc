@@ -17,6 +17,3 @@ include-code::./WebConfiguration[tag=snippet,indent=0]
 You can keep existing methods in `WebConfig`, but you can now also override bean declarations
 from the base class, and you can still have any number of other `WebMvcConfigurer` implementations on
 the classpath.
-
-
-

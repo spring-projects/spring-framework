@@ -8,7 +8,9 @@ and its various callback interfaces, plus a variety of related classes. A subpac
 named `org.springframework.jdbc.core.simple` contains the `SimpleJdbcInsert` and
 `SimpleJdbcCall` classes. Another subpackage named
 `org.springframework.jdbc.core.namedparam` contains the `NamedParameterJdbcTemplate`
-class and the related support classes. See xref:data-access/jdbc/core.adoc[Using the JDBC Core Classes to Control Basic JDBC Processing and Error Handling], xref:data-access/jdbc/advanced.adoc[JDBC Batch Operations], and
+class and the related support classes. See
+xref:data-access/jdbc/core.adoc[Using the JDBC Core Classes to Control Basic JDBC Processing and Error Handling],
+xref:data-access/jdbc/advanced.adoc[JDBC Batch Operations], and
 xref:data-access/jdbc/simple.adoc[Simplifying JDBC Operations with the `SimpleJdbc` Classes].
 
 * `datasource`: The `org.springframework.jdbc.datasource` package contains a utility class
@@ -16,7 +18,8 @@ for easy `DataSource` access and various simple `DataSource` implementations tha
 use for testing and running unmodified JDBC code outside of a Jakarta EE container. A subpackage
 named `org.springframework.jdbc.datasource.embedded` provides support for creating
 embedded databases by using Java database engines, such as HSQL, H2, and Derby. See
-xref:data-access/jdbc/connections.adoc[Controlling Database Connections] and xref:data-access/jdbc/embedded-database-support.adoc[Embedded Database Support].
+xref:data-access/jdbc/connections.adoc[Controlling Database Connections] and
+xref:data-access/jdbc/embedded-database-support.adoc[Embedded Database Support].
 
 * `object`: The `org.springframework.jdbc.object` package contains classes that represent
 RDBMS queries, updates, and stored procedures as thread-safe, reusable objects. See
@@ -31,7 +34,5 @@ are translated to exceptions defined in the `org.springframework.dao` package. T
 that code using the Spring JDBC abstraction layer does not need to implement JDBC or
 RDBMS-specific error handling. All translated exceptions are unchecked, which gives you
 the option of catching the exceptions from which you can recover while letting other
-exceptions be propagated to the caller. See xref:data-access/jdbc/core.adoc#jdbc-SQLExceptionTranslator[Using `SQLExceptionTranslator`].
-
-
-
+exceptions be propagated to the caller. See
+xref:data-access/jdbc/core.adoc#jdbc-SQLExceptionTranslator[Using `SQLExceptionTranslator`].

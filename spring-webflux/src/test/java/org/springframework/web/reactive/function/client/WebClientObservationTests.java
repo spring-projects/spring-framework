@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,18 +42,16 @@ import org.springframework.http.MediaType;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.BDDMockito.when;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 
 /**
  * Tests for the {@link WebClient} {@link io.micrometer.observation.Observation observations}.
  * @author Brian Clozel
  */
 class WebClientObservationTests {
-
 
 	private final TestObservationRegistry observationRegistry = TestObservationRegistry.create();
 
@@ -64,15 +62,17 @@ class WebClientObservationTests {
 	private WebClient.Builder builder;
 
 	@BeforeEach
+	@SuppressWarnings("unchecked")
 	void setup() {
 		Hooks.enableAutomaticContextPropagation();
 		ClientResponse mockResponse = mock();
 		when(mockResponse.statusCode()).thenReturn(HttpStatus.OK);
 		when(mockResponse.headers()).thenReturn(new MockClientHeaders());
 		when(mockResponse.bodyToMono(Void.class)).thenReturn(Mono.empty());
+		when(mockResponse.bodyToMono(String.class)).thenReturn(Mono.error(IllegalStateException::new), Mono.just("Hello"));
 		when(mockResponse.bodyToFlux(String.class)).thenReturn(Flux.just("first", "second"));
 		when(mockResponse.releaseBody()).thenReturn(Mono.empty());
-		given(this.exchangeFunction.exchange(this.request.capture())).willReturn(Mono.just(mockResponse));
+		when(this.exchangeFunction.exchange(this.request.capture())).thenReturn(Mono.just(mockResponse));
 		this.builder = WebClient.builder().baseUrl("/base").exchangeFunction(this.exchangeFunction).observationRegistry(this.observationRegistry);
 		this.observationRegistry.observationConfig().observationHandler(new HeaderInjectingHandler());
 	}
@@ -113,7 +113,7 @@ class WebClientObservationTests {
 	@Test
 	void recordsObservationForErrorExchange() {
 		ExchangeFunction exchangeFunction = mock();
-		given(exchangeFunction.exchange(any())).willReturn(Mono.error(new IllegalStateException()));
+		when(exchangeFunction.exchange(any())).thenReturn(Mono.error(new IllegalStateException()));
 		WebClient client = WebClient.builder().observationRegistry(observationRegistry).exchangeFunction(exchangeFunction).build();
 		StepVerifier.create(client.get().uri("/path").retrieve().bodyToMono(Void.class))
 				.expectError(IllegalStateException.class)
@@ -138,6 +138,16 @@ class WebClientObservationTests {
 				.expectNextCount(1)
 				.expectComplete()
 				.verify(Duration.ofSeconds(5));
+		assertThatHttpObservation().hasLowCardinalityKeyValue("outcome", "SUCCESS")
+				.hasLowCardinalityKeyValue("status", "200");
+	}
+
+	@Test
+	void recordsSingleObservationForRetries() {
+		StepVerifier.create(this.builder.build().get().uri("/path").retrieve().bodyToMono(String.class).retry(1))
+				.expectNextCount(1)
+				.expectComplete()
+				.verify(Duration.ofSeconds(2));
 		assertThatHttpObservation().hasLowCardinalityKeyValue("outcome", "SUCCESS")
 				.hasLowCardinalityKeyValue("status", "200");
 	}

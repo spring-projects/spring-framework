@@ -48,7 +48,8 @@ The benefits of using the Spring Framework to create your ORM DAOs include:
   aspect-oriented programming (AOP) style method interceptor either through the
   `@Transactional` annotation or by explicitly configuring the transaction AOP advice in
   an XML configuration file. In both cases, transaction semantics and exception handling
-  (rollback and so on) are handled for you. As discussed in xref:data-access/orm/general.adoc#orm-resource-mngmnt[Resource and Transaction Management],
+  (rollback and so on) are handled for you. As discussed in
+  xref:data-access/orm/general.adoc#orm-resource-mngmnt[Resource and Transaction Management],
   you can also swap various transaction managers, without affecting your ORM-related code.
   For example, you can swap between local transactions and JTA, with the same full services
   (such as declarative transactions) available in both scenarios. Additionally,
@@ -61,6 +62,3 @@ technologies such as MongoDB, you might want to check out the
 {spring-site-projects}/spring-data/[Spring Data] suite of projects. If you are
 a JPA user, the {spring-site-guides}/gs/accessing-data-jpa/[Getting Started Accessing
 Data with JPA] guide from https://spring.io provides a great introduction.
-
-
-

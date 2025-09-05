@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -217,6 +217,10 @@ public class InvocableHandlerMethod extends HandlerMethod {
 			if (args[i] != null) {
 				continue;
 			}
+			if (parameter.getParameterType().equals(HandlerMethod.class) && parameter.isOptional()) {
+				args[i] = null;
+				continue;
+			}
 			if (!this.resolvers.supportsParameter(parameter)) {
 				throw new IllegalStateException(formatArgumentError(parameter, "No suitable resolver"));
 			}
@@ -316,13 +320,10 @@ public class InvocableHandlerMethod extends HandlerMethod {
 						Object arg = args[index];
 						if (!(parameter.isOptional() && arg == null)) {
 							KType type = parameter.getType();
-							if (!(type.isMarkedNullable() && arg == null) && type.getClassifier() instanceof KClass<?> kClass
-									&& KotlinDetector.isInlineClass(JvmClassMappingKt.getJavaClass(kClass))) {
-								KFunction<?> constructor = Objects.requireNonNull(KClasses.getPrimaryConstructor(kClass));
-								if (!KCallablesJvm.isAccessible(constructor)) {
-									KCallablesJvm.setAccessible(constructor, true);
-								}
-								arg = constructor.call(arg);
+							if (!(type.isMarkedNullable() && arg == null) &&
+									type.getClassifier() instanceof KClass<?> kClass &&
+									KotlinDetector.isInlineClass(JvmClassMappingKt.getJavaClass(kClass))) {
+								arg = box(kClass, arg);
 							}
 							argMap.put(parameter, arg);
 						}
@@ -335,6 +336,20 @@ public class InvocableHandlerMethod extends HandlerMethod {
 				result = unbox(result);
 			}
 			return (result == Unit.INSTANCE ? null : result);
+		}
+
+		private static Object box(KClass<?> kClass, @Nullable Object arg) {
+			KFunction<?> constructor = Objects.requireNonNull(KClasses.getPrimaryConstructor(kClass));
+			KType type = constructor.getParameters().get(0).getType();
+			if (!(type.isMarkedNullable() && arg == null) &&
+					type.getClassifier() instanceof KClass<?> parameterClass &&
+					KotlinDetector.isInlineClass(JvmClassMappingKt.getJavaClass(parameterClass))) {
+				arg = box(parameterClass, arg);
+			}
+			if (!KCallablesJvm.isAccessible(constructor)) {
+				KCallablesJvm.setAccessible(constructor, true);
+			}
+			return constructor.call(arg);
 		}
 
 		private static void handleResult(Object result, SynchronousSink<Object> sink) {
@@ -357,7 +372,11 @@ public class InvocableHandlerMethod extends HandlerMethod {
 		}
 
 		private static Object unbox(Object result) throws InvocationTargetException, IllegalAccessException, NoSuchMethodException {
-			return result.getClass().getDeclaredMethod("unbox-impl").invoke(result);
+			Object unboxed = result.getClass().getDeclaredMethod("unbox-impl").invoke(result);
+			if (KotlinDetector.isInlineClass(unboxed.getClass())) {
+				return unbox(unboxed);
+			}
+			return unboxed;
 		}
 	}
 

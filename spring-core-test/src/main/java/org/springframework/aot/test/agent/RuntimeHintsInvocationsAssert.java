@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -108,8 +108,8 @@ public class RuntimeHintsInvocationsAssert extends AbstractAssert<RuntimeHintsIn
 
 	private String formatStackTrace(Stream<StackWalker.StackFrame> stackTraceElements) {
 		return stackTraceElements
-				.map(f -> f.getClassName() + "#" + f.getMethodName()
-						+ ", Line " + f.getLineNumber()).collect(Collectors.joining(System.lineSeparator()));
+				.map(f -> f.getClassName() + "#" + f.getMethodName() + ", Line " +
+						f.getLineNumber()).collect(Collectors.joining(System.lineSeparator()));
 	}
 
 	/**

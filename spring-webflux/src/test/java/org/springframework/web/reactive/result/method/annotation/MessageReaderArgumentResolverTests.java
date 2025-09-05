@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,14 +45,14 @@ import org.springframework.core.codec.Decoder;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.DecoderHttpMessageReader;
 import org.springframework.http.codec.HttpMessageReader;
-import org.springframework.http.codec.json.Jackson2JsonDecoder;
+import org.springframework.http.codec.json.JacksonJsonDecoder;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.reactive.BindingContext;
-import org.springframework.web.server.PayloadTooLargeException;
+import org.springframework.web.server.ContentTooLargeException;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.ServerWebInputException;
 import org.springframework.web.server.UnsupportedMediaTypeStatusException;
@@ -71,7 +71,7 @@ import static org.springframework.web.testfixture.http.server.reactive.MockServe
  */
 class MessageReaderArgumentResolverTests {
 
-	private AbstractMessageReaderArgumentResolver resolver = resolver(new Jackson2JsonDecoder());
+	private AbstractMessageReaderArgumentResolver resolver = resolver(new JacksonJsonDecoder());
 
 	private BindingContext bindingContext;
 
@@ -128,7 +128,7 @@ class MessageReaderArgumentResolverTests {
 		Mono<TestBean> result = (Mono<TestBean>) this.resolver.readBody(
 				param, true, this.bindingContext, exchange).block();
 
-		StepVerifier.create(result).expectError(PayloadTooLargeException.class).verify();
+		StepVerifier.create(result).expectError(ContentTooLargeException.class).verify();
 	}
 
 	@Test

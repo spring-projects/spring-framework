@@ -15,6 +15,3 @@ declarative transaction management is usually worthwhile. It keeps transaction
 management out of business logic and is not difficult to configure. When using the
 Spring Framework, rather than EJB CMT, the configuration cost of declarative transaction
 management is greatly reduced.
-
-
-

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -808,8 +808,15 @@ class CoRouterFunctionDsl internal constructor (private val init: (CoRouterFunct
 	fun notFound() = ServerResponse.notFound()
 
 	/**
+	 * @see ServerResponse.unprocessableContent
+	 */
+	fun unprocessableContent() = ServerResponse.unprocessableContent()
+
+	/**
 	 * @see ServerResponse.unprocessableEntity
 	 */
+	@Deprecated("Use unprocessable content instead.", ReplaceWith("unprocessableContent()"))
+	@Suppress("DEPRECATION")
 	fun unprocessableEntity() = ServerResponse.unprocessableEntity()
 
 	/**

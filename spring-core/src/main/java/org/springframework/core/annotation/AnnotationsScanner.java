@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -350,21 +350,18 @@ abstract class AnnotationsScanner {
 
 	private static boolean isOverride(Method rootMethod, Method candidateMethod) {
 		return (!Modifier.isPrivate(candidateMethod.getModifiers()) &&
+				candidateMethod.getParameterCount() == rootMethod.getParameterCount() &&
 				candidateMethod.getName().equals(rootMethod.getName()) &&
 				hasSameParameterTypes(rootMethod, candidateMethod));
 	}
 
 	private static boolean hasSameParameterTypes(Method rootMethod, Method candidateMethod) {
-		if (candidateMethod.getParameterCount() != rootMethod.getParameterCount()) {
-			return false;
-		}
 		Class<?>[] rootParameterTypes = rootMethod.getParameterTypes();
 		Class<?>[] candidateParameterTypes = candidateMethod.getParameterTypes();
 		if (Arrays.equals(candidateParameterTypes, rootParameterTypes)) {
 			return true;
 		}
-		return hasSameGenericTypeParameters(rootMethod, candidateMethod,
-				rootParameterTypes);
+		return hasSameGenericTypeParameters(rootMethod, candidateMethod, rootParameterTypes);
 	}
 
 	private static boolean hasSameGenericTypeParameters(
@@ -377,7 +374,7 @@ abstract class AnnotationsScanner {
 		}
 		for (int i = 0; i < rootParameterTypes.length; i++) {
 			Class<?> resolvedParameterType = ResolvableType.forMethodParameter(
-					candidateMethod, i, sourceDeclaringClass).resolve();
+					candidateMethod, i, sourceDeclaringClass).toClass();
 			if (rootParameterTypes[i] != resolvedParameterType) {
 				return false;
 			}

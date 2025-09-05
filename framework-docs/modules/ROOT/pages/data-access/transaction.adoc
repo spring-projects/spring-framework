@@ -32,6 +32,3 @@ The following sections describe the Spring Framework's transaction features and 
 The chapter also includes discussions of best practices,
 xref:data-access/transaction/application-server-integration.adoc[application server integration],
 and xref:data-access/transaction/solutions-to-common-problems.adoc[solutions to common problems].
-
-
-

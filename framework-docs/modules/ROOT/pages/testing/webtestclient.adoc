@@ -8,15 +8,11 @@ perform end-to-end HTTP tests. It can also be used to test Spring MVC and Spring
 applications without a running server via mock server request and response objects.
 
 
-
-
 [[webtestclient-setup]]
 == Setup
 
 To set up a `WebTestClient` you need to choose a server setup to bind to. This can be one
 of several mock server setup choices or a connection to a live server.
-
-
 
 [[webtestclient-controller-config]]
 === Bind to Controller
@@ -70,8 +66,6 @@ Kotlin::
 	val client = MockMvcWebTestClient.bindToController(TestController()).build()
 ----
 ======
-
-
 
 [[webtestclient-context-config]]
 === Bind to `ApplicationContext`
@@ -188,8 +182,6 @@ Kotlin::
 <3> Create the `WebTestClient`
 ======
 
-
-
 [[webtestclient-fn-config]]
 === Bind to Router Function
 
@@ -221,8 +213,6 @@ Kotlin::
 For Spring MVC there are currently no options to test
 xref:web/webmvc-functional.adoc[WebMvc functional endpoints].
 
-
-
 [[webtestclient-server-config]]
 === Bind to Server
 
@@ -245,8 +235,6 @@ Kotlin::
 ----
 ======
 
-
-
 [[webtestclient-client-config]]
 === Client Config
 
@@ -265,6 +253,7 @@ Java::
 	client = WebTestClient.bindToController(new TestController())
 			.configureClient()
 			.baseUrl("/test")
+			.apiVersionInserter(ApiVersionInserter.fromHeader("API-Version").build())
 			.build();
 ----
 
@@ -275,11 +264,10 @@ Kotlin::
 	client = WebTestClient.bindToController(TestController())
 			.configureClient()
 			.baseUrl("/test")
+			.apiVersionInserter(ApiVersionInserter.fromHeader("API-Version").build())
 			.build()
 ----
 ======
-
-
 
 
 [[webtestclient-tests]]
@@ -396,7 +384,7 @@ Java::
 +
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
-    import org.springframework.test.web.reactive.server.expectBody
+	import org.springframework.test.web.reactive.server.expectBody
 
 	client.get().uri("/persons/1")
 			.exchange()
@@ -455,8 +443,6 @@ that accept
 {spring-framework-api}/core/ParameterizedTypeReference.html[`ParameterizedTypeReference`]
 instead of `Class<T>`.
 
-
-
 [[webtestclient-no-content]]
 === No Content
 
@@ -512,8 +498,6 @@ Kotlin::
 			.expectBody<Unit>()
 ----
 ======
-
-
 
 [[webtestclient-json]]
 === JSON Content
@@ -576,8 +560,6 @@ Kotlin::
 			.jsonPath("$[1].name").isEqualTo("Jason")
 ----
 ======
-
-
 
 [[webtestclient-stream]]
 === Streaming Responses
@@ -646,7 +628,6 @@ Kotlin::
 			.verify()
 ----
 ======
-
 
 [[webtestclient-mockmvc]]
 === MockMvc Assertions

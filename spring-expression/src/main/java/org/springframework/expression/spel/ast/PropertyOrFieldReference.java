@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Supplier;
 
 import org.jspecify.annotations.Nullable;
@@ -43,7 +44,19 @@ import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
 
 /**
- * Represents a simple property or field reference.
+ * Represents a simple public property or field reference.
+ *
+ * <h3>Null-safe Navigation</h3>
+ *
+ * <p>Null-safe navigation is supported via the {@code '?.'} operator. For example,
+ * {@code 'user?.name'} will evaluate to {@code null} if {@code user} is {@code null}
+ * and will otherwise evaluate to the name of the user. As of Spring Framework 7.0,
+ * null-safe navigation also applies when accessing a property or field on an
+ * {@link Optional} target. For example, if {@code user} is of type
+ * {@code Optional<User>}, the expression {@code 'user?.name'} will evaluate to
+ * {@code null} if {@code user} is {@code null} or {@link Optional#isEmpty() empty}
+ * and will otherwise evaluate to the name of the user, effectively
+ * {@code user.get().getName()} or {@code user.get().name}.
  *
  * @author Andy Clement
  * @author Juergen Hoeller
@@ -179,16 +192,31 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 	private TypedValue readProperty(TypedValue contextObject, EvaluationContext evalContext, String name)
 			throws EvaluationException {
 
-		Object targetObject = contextObject.getValue();
-		if (targetObject == null && isNullSafe()) {
-			return TypedValue.NULL;
+		final Object originalTarget = contextObject.getValue();
+		Object target = originalTarget;
+		Optional<?> fallbackOptionalTarget = null;
+		boolean isEmptyOptional = false;
+
+		if (isNullSafe()) {
+			if (target == null) {
+				return TypedValue.NULL;
+			}
+			if (target instanceof Optional<?> optional) {
+				if (optional.isPresent()) {
+					target = optional.get();
+					fallbackOptionalTarget = optional;
+				}
+				else {
+					isEmptyOptional = true;
+				}
+			}
 		}
 
 		PropertyAccessor accessorToUse = this.cachedReadAccessor;
 		if (accessorToUse != null) {
 			if (evalContext.getPropertyAccessors().contains(accessorToUse)) {
 				try {
-					return accessorToUse.read(evalContext, targetObject, name);
+					return accessorToUse.read(evalContext, target, name);
 				}
 				catch (Exception ex) {
 					// This is OK - it may have gone stale due to a class change,
@@ -199,19 +227,29 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 		}
 
 		List<PropertyAccessor> accessorsToTry =
-				AccessorUtils.getAccessorsToTry(targetObject, evalContext.getPropertyAccessors());
+				AccessorUtils.getAccessorsToTry(target, evalContext.getPropertyAccessors());
 		// Go through the accessors that may be able to resolve it. If they are a cacheable accessor then
 		// get the accessor and use it. If they are not cacheable but report they can read the property
-		// then ask them to read it
+		// then ask them to read it.
 		try {
 			for (PropertyAccessor accessor : accessorsToTry) {
-				if (accessor.canRead(evalContext, targetObject, name)) {
+				// First, attempt to find the property on the target object.
+				if (accessor.canRead(evalContext, target, name)) {
 					if (accessor instanceof ReflectivePropertyAccessor reflectivePropertyAccessor) {
 						accessor = reflectivePropertyAccessor.createOptimalAccessor(
-								evalContext, targetObject, name);
+								evalContext, target, name);
 					}
 					this.cachedReadAccessor = accessor;
-					return accessor.read(evalContext, targetObject, name);
+					return accessor.read(evalContext, target, name);
+				}
+				// Second, attempt to find the property on the original Optional instance.
+				else if (fallbackOptionalTarget != null && accessor.canRead(evalContext, fallbackOptionalTarget, name)) {
+					if (accessor instanceof ReflectivePropertyAccessor reflectivePropertyAccessor) {
+						accessor = reflectivePropertyAccessor.createOptimalAccessor(
+								evalContext, fallbackOptionalTarget, name);
+					}
+					this.cachedReadAccessor = accessor;
+					return accessor.read(evalContext, fallbackOptionalTarget, name);
 				}
 			}
 		}
@@ -219,12 +257,19 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 			throw new SpelEvaluationException(ex, SpelMessage.EXCEPTION_DURING_PROPERTY_READ, name, ex.getMessage());
 		}
 
-		if (contextObject.getValue() == null) {
+		// If we got this far, that means we failed to find an accessor for both the
+		// target and the fallback target. So, we return NULL if the original target
+		// is a null-safe empty Optional.
+		if (isEmptyOptional) {
+			return TypedValue.NULL;
+		}
+
+		if (originalTarget == null) {
 			throw new SpelEvaluationException(SpelMessage.PROPERTY_OR_FIELD_NOT_READABLE_ON_NULL, name);
 		}
 		else {
 			throw new SpelEvaluationException(getStartPosition(), SpelMessage.PROPERTY_OR_FIELD_NOT_READABLE, name,
-					FormatHelper.formatClassNameForMessage(getObjectClass(contextObject.getValue())));
+					FormatHelper.formatClassNameForMessage(getObjectClass(originalTarget)));
 		}
 	}
 
@@ -232,8 +277,8 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 			TypedValue contextObject, EvaluationContext evalContext, String name, @Nullable Object newValue)
 			throws EvaluationException {
 
-		Object targetObject = contextObject.getValue();
-		if (targetObject == null) {
+		Object target = contextObject.getValue();
+		if (target == null) {
 			if (isNullSafe()) {
 				return;
 			}
@@ -245,7 +290,7 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 		if (accessorToUse != null) {
 			if (evalContext.getPropertyAccessors().contains(accessorToUse)) {
 				try {
-					accessorToUse.write(evalContext, targetObject, name, newValue);
+					accessorToUse.write(evalContext, target, name, newValue);
 					return;
 				}
 				catch (Exception ex) {
@@ -257,12 +302,12 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 		}
 
 		List<PropertyAccessor> accessorsToTry =
-				AccessorUtils.getAccessorsToTry(targetObject, evalContext.getPropertyAccessors());
+				AccessorUtils.getAccessorsToTry(target, evalContext.getPropertyAccessors());
 		try {
 			for (PropertyAccessor accessor : accessorsToTry) {
-				if (accessor.canWrite(evalContext, targetObject, name)) {
+				if (accessor.canWrite(evalContext, target, name)) {
 					this.cachedWriteAccessor = accessor;
-					accessor.write(evalContext, targetObject, name, newValue);
+					accessor.write(evalContext, target, name, newValue);
 					return;
 				}
 			}
@@ -273,19 +318,19 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 		}
 
 		throw new SpelEvaluationException(getStartPosition(), SpelMessage.PROPERTY_OR_FIELD_NOT_WRITABLE, name,
-				FormatHelper.formatClassNameForMessage(getObjectClass(targetObject)));
+				FormatHelper.formatClassNameForMessage(getObjectClass(target)));
 	}
 
 	public boolean isWritableProperty(String name, TypedValue contextObject, EvaluationContext evalContext)
 			throws EvaluationException {
 
-		Object targetObject = contextObject.getValue();
-		if (targetObject != null) {
+		Object target = contextObject.getValue();
+		if (target != null) {
 			List<PropertyAccessor> accessorsToTry =
-					AccessorUtils.getAccessorsToTry(targetObject, evalContext.getPropertyAccessors());
+					AccessorUtils.getAccessorsToTry(target, evalContext.getPropertyAccessors());
 			for (PropertyAccessor accessor : accessorsToTry) {
 				try {
-					if (accessor.canWrite(evalContext, targetObject, name)) {
+					if (accessor.canWrite(evalContext, target, name)) {
 						return true;
 					}
 				}

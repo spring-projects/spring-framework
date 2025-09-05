@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,6 +40,7 @@ import org.springframework.core.codec.Hints;
 import org.springframework.http.HttpLogging;
 import org.springframework.http.MediaType;
 import org.springframework.http.ProblemDetail;
+import org.springframework.http.codec.JacksonCodecSupport;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.util.Assert;
@@ -53,7 +54,9 @@ import org.springframework.util.ObjectUtils;
  * @author Sebastien Deleuze
  * @author Rossen Stoyanchev
  * @since 5.0
+ * @deprecated since 7.0 in favor of {@link JacksonCodecSupport}
  */
+@Deprecated(since = "7.0", forRemoval = true)
 public abstract class Jackson2CodecSupport {
 
 	/**

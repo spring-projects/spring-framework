@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,8 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
+import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.env.Environment;
 
@@ -37,9 +39,24 @@ import org.springframework.core.env.Environment;
 public interface BeanRegistry {
 
 	/**
-	 * Register a bean from the given bean class, which will be instantiated
-	 * using the related {@link BeanUtils#getResolvableConstructor resolvable constructor}
-	 * if any.
+	 * Register beans using the given {@link BeanRegistrar}.
+	 * @param registrar the bean registrar that will be called to register
+	 * additional beans
+	 */
+	void register(BeanRegistrar registrar);
+
+	/**
+	 * Given a name, register an alias for it.
+	 * @param name the canonical name
+	 * @param alias the alias to be registered
+	 * @throws IllegalStateException if the alias is already in use
+	 * and may not be overridden
+	 */
+	void registerAlias(String name, String alias);
+
+	/**
+	 * Register a bean from the given bean class, which will be instantiated using the
+	 * related {@link BeanUtils#getResolvableConstructor resolvable constructor} if any.
 	 * @param beanClass the class of the bean
 	 * @return the generated bean name
 	 */
@@ -47,10 +64,9 @@ public interface BeanRegistry {
 
 	/**
 	 * Register a bean from the given bean class, customizing it with the customizer
-	 * callback. The bean will be instantiated using the supplier that can be
-	 * configured in the customizer callback, or will be tentatively instantiated
-	 * with its {@link BeanUtils#getResolvableConstructor resolvable constructor}
-	 * otherwise.
+	 * callback. The bean will be instantiated using the supplier that can be configured
+	 * in the customizer callback, or will be tentatively instantiated with its
+	 * {@link BeanUtils#getResolvableConstructor resolvable constructor} otherwise.
 	 * @param beanClass the class of the bean
 	 * @param customizer callback to customize other bean properties than the name
 	 * @return the generated bean name
@@ -58,9 +74,8 @@ public interface BeanRegistry {
 	<T> String registerBean(Class<T> beanClass, Consumer<Spec<T>> customizer);
 
 	/**
-	 * Register a bean from the given bean class, which will be instantiated
-	 * using the related {@link BeanUtils#getResolvableConstructor resolvable constructor}
-	 * if any.
+	 * Register a bean from the given bean class, which will be instantiated using the
+	 * related {@link BeanUtils#getResolvableConstructor resolvable constructor} if any.
 	 * @param name the name of the bean
 	 * @param beanClass the class of the bean
 	 */
@@ -68,14 +83,15 @@ public interface BeanRegistry {
 
 	/**
 	 * Register a bean from the given bean class, customizing it with the customizer
-	 * callback. The bean will be instantiated using the supplier that can be
-	 * configured in the customizer callback, or will be tentatively instantiated with its
+	 * callback. The bean will be instantiated using the supplier that can be configured
+	 * in the customizer callback, or will be tentatively instantiated with its
 	 * {@link BeanUtils#getResolvableConstructor resolvable constructor} otherwise.
 	 * @param name the name of the bean
 	 * @param beanClass the class of the bean
 	 * @param customizer callback to customize other bean properties than the name
 	 */
 	<T> void registerBean(String name, Class<T> beanClass, Consumer<Spec<T>> customizer);
+
 
 	/**
 	 * Specification for customizing a bean.
@@ -103,8 +119,8 @@ public interface BeanRegistry {
 		Spec<T> fallback();
 
 		/**
-		 * Hint that this bean has an infrastructure role, meaning it has no
-		 * relevance to the end-user.
+		 * Hint that this bean has an infrastructure role, meaning it has no relevance
+		 * to the end-user.
 		 * @see BeanDefinition#setRole(int)
 		 * @see BeanDefinition#ROLE_INFRASTRUCTURE
 		 */
@@ -117,8 +133,7 @@ public interface BeanRegistry {
 		Spec<T> lazyInit();
 
 		/**
-		 * Configure this bean as not a candidate for getting autowired into some
-		 * other bean.
+		 * Configure this bean as not a candidate for getting autowired into another bean.
 		 * @see BeanDefinition#setAutowireCandidate(boolean)
 		 */
 		Spec<T> notAutowirable();
@@ -149,7 +164,22 @@ public interface BeanRegistry {
 		 * @see AbstractBeanDefinition#setInstanceSupplier(Supplier)
 		 */
 		Spec<T> supplier(Function<SupplierContext, T> supplier);
+
+		/**
+		 * Set a generics-containing target type of this bean.
+		 * @see #targetType(ResolvableType)
+		 * @see RootBeanDefinition#setTargetType(ResolvableType)
+		 */
+		Spec<T> targetType(ParameterizedTypeReference<? extends T> type);
+
+		/**
+		 * Set a generics-containing target type of this bean.
+		 * @see #targetType(ParameterizedTypeReference)
+		 * @see RootBeanDefinition#setTargetType(ResolvableType)
+		 */
+		Spec<T> targetType(ResolvableType type);
 	}
+
 
 	/**
 	 * Context available from the bean instance supplier designed to give access
@@ -158,10 +188,8 @@ public interface BeanRegistry {
 	interface SupplierContext {
 
 		/**
-		 * Return the bean instance that uniquely matches the given object type,
-		 * if any.
-		 * @param requiredType type the bean must match; can be an interface or
-		 * superclass
+		 * Return the bean instance that uniquely matches the given object type, if any.
+		 * @param requiredType type the bean must match; can be an interface or superclass
 		 * @return an instance of the single bean matching the required type
 		 * @see BeanFactory#getBean(String)
 		 */
@@ -207,4 +235,5 @@ public interface BeanRegistry {
 		 */
 		<T> ObjectProvider<T> beanProvider(ResolvableType requiredType);
 	}
+
 }

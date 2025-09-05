@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,7 +41,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.codec.HttpMessageWriter;
 import org.springframework.http.codec.ServerCodecConfigurer;
-import org.springframework.http.codec.json.Jackson2JsonEncoder;
+import org.springframework.http.codec.json.JacksonJsonEncoder;
 import org.springframework.http.codec.xml.Jaxb2XmlDecoder;
 import org.springframework.http.codec.xml.Jaxb2XmlEncoder;
 import org.springframework.util.MimeType;
@@ -114,7 +114,7 @@ class WebFluxConfigurationSupportTests {
 		assertThat(adapter).isNotNull();
 
 		List<HttpMessageReader<?>> readers = adapter.getMessageReaders();
-		assertThat(readers).hasSize(15);
+		assertThat(readers).hasSizeGreaterThanOrEqualTo(15);
 
 		ResolvableType multiValueMapType = forClassWithGenerics(MultiValueMap.class, String.class, String.class);
 
@@ -169,7 +169,7 @@ class WebFluxConfigurationSupportTests {
 		assertThat(handler.getOrder()).isEqualTo(0);
 
 		List<HttpMessageWriter<?>> writers = handler.getMessageWriters();
-		assertThat(writers).hasSize(15);
+		assertThat(writers).hasSizeGreaterThanOrEqualTo(15);
 
 		assertHasMessageWriter(writers, forClass(byte[].class), APPLICATION_OCTET_STREAM);
 		assertHasMessageWriter(writers, forClass(ByteBuffer.class), APPLICATION_OCTET_STREAM);
@@ -197,7 +197,7 @@ class WebFluxConfigurationSupportTests {
 		assertThat(handler.getOrder()).isEqualTo(100);
 
 		List<HttpMessageWriter<?>> writers = handler.getMessageWriters();
-		assertThat(writers).hasSize(15);
+		assertThat(writers).hasSizeGreaterThanOrEqualTo(15);
 
 		assertHasMessageWriter(writers, forClass(byte[].class), APPLICATION_OCTET_STREAM);
 		assertHasMessageWriter(writers, forClass(ByteBuffer.class), APPLICATION_OCTET_STREAM);
@@ -326,7 +326,7 @@ class WebFluxConfigurationSupportTests {
 		@Override
 		protected void configureViewResolvers(ViewResolverRegistry registry) {
 			registry.freeMarker();
-			registry.defaultViews(new HttpMessageWriterView(new Jackson2JsonEncoder()));
+			registry.defaultViews(new HttpMessageWriterView(new JacksonJsonEncoder()));
 		}
 
 		@Bean

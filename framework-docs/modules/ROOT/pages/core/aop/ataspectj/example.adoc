@@ -18,7 +18,8 @@ call `proceed` multiple times. The following listing shows the basic aspect impl
 
 include-code::./ConcurrentOperationExecutor[tag=snippet,indent=0]
 
-`@Around("com.xyz.CommonPointcuts.businessService()")` references the `businessService` named pointcut defined in xref:core/aop/ataspectj/pointcuts.adoc#aop-common-pointcuts[Sharing Named Pointcut Definitions].
+`@Around("com.xyz.CommonPointcuts.businessService()")` references the `businessService` named pointcut defined in
+xref:core/aop/ataspectj/pointcuts.adoc#aop-common-pointcuts[Sharing Named Pointcut Definitions].
 
 Note that the aspect implements the `Ordered` interface so that we can set the precedence of
 the aspect higher than the transaction advice (we want a fresh transaction each time we

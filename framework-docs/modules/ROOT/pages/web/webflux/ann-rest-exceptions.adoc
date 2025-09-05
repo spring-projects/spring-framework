@@ -22,7 +22,6 @@ xref:web/webflux/controller/ann-advice.adoc[@ControllerAdvice] that handles all 
 and any `ErrorResponseException`, and renders an error response with a body.
 
 
-
 [[webflux-ann-rest-exceptions-render]]
 == Render
 [.small]#xref:web/webmvc/mvc-ann-rest-exceptions.adoc#mvc-ann-rest-exceptions-render[See equivalent in the Servlet stack]#
@@ -49,7 +48,6 @@ xref:web/webflux/config.adoc[WebFlux Config] with a `WebFluxConfigurer`. Use tha
 any RFC 9457 response and take some action.
 
 
-
 [[webflux-ann-rest-exceptions-non-standard]]
 == Non-Standard Fields
 [.small]#xref:web/webmvc/mvc-ann-rest-exceptions.adoc#mvc-ann-rest-exceptions-non-standard[See equivalent in the Servlet stack]#
@@ -67,7 +65,6 @@ The copy constructor in `ProblemDetail` allows a subclass to make it easy to be 
 from an existing `ProblemDetail`. This could be done centrally, for example, from an
 `@ControllerAdvice` such as `ResponseEntityExceptionHandler` that re-creates the
 `ProblemDetail` of an exception into a subclass with the additional non-standard fields.
-
 
 
 [[webflux-ann-rest-exceptions-i18n]]
@@ -149,8 +146,6 @@ xref:core/validation/beanvalidation.adoc#validation-beanvalidation-spring-method
 for more details.
 
 
-
-
 [[webflux-ann-rest-exceptions-client]]
 == Client Handling
 [.small]#xref:web/webmvc/mvc-ann-rest-exceptions.adoc#mvc-ann-rest-exceptions-client[See equivalent in the Servlet stack]#
@@ -159,7 +154,3 @@ A client application can catch `WebClientResponseException`, when using the `Web
 or `RestClientResponseException` when using the `RestTemplate`, and use their
 `getResponseBodyAs` methods to decode the error response body to any target type such as
 `ProblemDetail`, or a subclass of `ProblemDetail`.
-
-
-
-

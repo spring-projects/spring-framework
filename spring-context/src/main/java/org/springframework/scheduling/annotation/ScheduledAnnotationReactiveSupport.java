@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.scheduling.annotation;
 
+import java.lang.reflect.InaccessibleObjectException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
@@ -173,7 +174,7 @@ abstract class ScheduledAnnotationReactiveSupport {
 					"Cannot obtain a Publisher-convertible value from the @Scheduled reactive method",
 					ex.getTargetException());
 		}
-		catch (IllegalAccessException ex) {
+		catch (IllegalAccessException | InaccessibleObjectException ex) {
 			throw new IllegalArgumentException(
 					"Cannot obtain a Publisher-convertible value from the @Scheduled reactive method", ex);
 		}
@@ -204,9 +205,9 @@ abstract class ScheduledAnnotationReactiveSupport {
 		final Supplier<ScheduledTaskObservationContext> contextSupplier;
 
 		SubscribingRunnable(Publisher<?> publisher, boolean shouldBlock,
-							@Nullable String qualifier, List<Runnable> subscriptionTrackerRegistry,
-							String displayName, Supplier<ObservationRegistry> observationRegistrySupplier,
-							Supplier<ScheduledTaskObservationContext> contextSupplier) {
+				@Nullable String qualifier, List<Runnable> subscriptionTrackerRegistry,
+				String displayName, Supplier<ObservationRegistry> observationRegistrySupplier,
+				Supplier<ScheduledTaskObservationContext> contextSupplier) {
 
 			this.publisher = publisher;
 			this.shouldBlock = shouldBlock;
@@ -234,7 +235,7 @@ abstract class ScheduledAnnotationReactiveSupport {
 					latch.await();
 				}
 				catch (InterruptedException ex) {
-					throw new RuntimeException(ex);
+					Thread.currentThread().interrupt();
 				}
 			}
 			else {

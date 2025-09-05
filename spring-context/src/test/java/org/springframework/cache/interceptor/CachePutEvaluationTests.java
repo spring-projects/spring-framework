@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -104,6 +104,7 @@ class CachePutEvaluationTests {
 		assertThat(this.cache.get(anotherValue + 100).get()).as("Wrong value for @CachePut key").isEqualTo(anotherValue);
 	}
 
+
 	@Configuration
 	@EnableCaching
 	static class Config implements CachingConfigurer {
@@ -121,8 +122,10 @@ class CachePutEvaluationTests {
 
 	}
 
-	@CacheConfig(cacheNames = "test")
+
+	@CacheConfig("test")
 	public static class SimpleService {
+
 		private AtomicLong counter = new AtomicLong();
 
 		/**
@@ -144,4 +147,5 @@ class CachePutEvaluationTests {
 			return this.counter.getAndIncrement();
 		}
 	}
+
 }

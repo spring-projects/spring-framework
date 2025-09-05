@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,12 +22,16 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.sql.Time;
+import java.sql.Timestamp;
+import java.time.Instant;
 import java.time.ZoneId;
 import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Currency;
+import java.util.Date;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -44,9 +48,11 @@ import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 import org.jspecify.annotations.Nullable;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.core.MethodParameter;
+import org.springframework.core.ResolvableType;
 import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.core.convert.ConverterNotFoundException;
 import org.springframework.core.convert.TypeDescriptor;
@@ -55,6 +61,7 @@ import org.springframework.util.ClassUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.byLessThan;
 import static org.assertj.core.api.Assertions.entry;
 
 /**
@@ -948,29 +955,201 @@ class DefaultConversionServiceTests {
 		assertThat(converted).containsExactly(2, 3, 4);
 	}
 
-	@Test
-	@SuppressWarnings("unchecked")
-	void convertObjectToOptional() {
-		Method method = ClassUtils.getMethod(TestEntity.class, "handleOptionalValue", Optional.class);
-		MethodParameter parameter = new MethodParameter(method, 0);
-		TypeDescriptor descriptor = new TypeDescriptor(parameter);
-		Object actual = conversionService.convert("1,2,3", TypeDescriptor.valueOf(String.class), descriptor);
-		assertThat(actual.getClass()).isEqualTo(Optional.class);
-		assertThat(((Optional<List<Integer>>) actual)).contains(List.of(1, 2, 3));
+
+	@Nested
+	class OptionalConversionTests {
+
+		private static final TypeDescriptor rawOptionalType = TypeDescriptor.valueOf(Optional.class);
+
+
+		@Test
+		@SuppressWarnings("unchecked")
+		void convertObjectToOptional() {
+			Method method = ClassUtils.getMethod(getClass(), "handleOptionalList", Optional.class);
+			MethodParameter parameter = new MethodParameter(method, 0);
+			TypeDescriptor descriptor = new TypeDescriptor(parameter);
+			Object actual = conversionService.convert("1,2,3", TypeDescriptor.valueOf(String.class), descriptor);
+			assertThat(((Optional<List<Integer>>) actual)).contains(List.of(1, 2, 3));
+		}
+
+		@Test
+		void convertNullToOptional() {
+			assertThat((Object) conversionService.convert(null, Optional.class)).isSameAs(Optional.empty());
+			assertThat(conversionService.convert(null, TypeDescriptor.valueOf(Object.class), rawOptionalType))
+					.isSameAs(Optional.empty());
+		}
+
+		@Test
+		void convertNullOptionalToNull() {
+			assertThat(conversionService.convert(null, rawOptionalType, TypeDescriptor.valueOf(Object.class))).isNull();
+		}
+
+		@Test  // gh-34544
+		void convertEmptyOptionalToNull() {
+			Optional<Object> empty = Optional.empty();
+
+			assertThat(conversionService.convert(empty, Object.class)).isNull();
+			assertThat(conversionService.convert(empty, String.class)).isNull();
+
+			assertThat(conversionService.convert(empty, rawOptionalType, TypeDescriptor.valueOf(Object.class))).isNull();
+			assertThat(conversionService.convert(empty, rawOptionalType, TypeDescriptor.valueOf(String.class))).isNull();
+			assertThat(conversionService.convert(empty, rawOptionalType, TypeDescriptor.valueOf(Integer[].class))).isNull();
+			assertThat(conversionService.convert(empty, rawOptionalType, TypeDescriptor.valueOf(List.class))).isNull();
+		}
+
+		@Test
+		void convertEmptyOptionalToOptional() {
+			assertThat((Object) conversionService.convert(Optional.empty(), Optional.class)).isSameAs(Optional.empty());
+			assertThat(conversionService.convert(Optional.empty(), TypeDescriptor.valueOf(Object.class), rawOptionalType))
+					.isSameAs(Optional.empty());
+		}
+
+		@Test  // gh-34544
+		@SuppressWarnings("unchecked")
+		void convertOptionalToOptionalWithoutConversionOfContainedObject() {
+			assertThat(conversionService.convert(Optional.of(42), Optional.class)).contains(42);
+
+			assertThat(conversionService.convert(Optional.of("enigma"), Optional.class)).contains("enigma");
+			assertThat((Optional<String>) conversionService.convert(Optional.of("enigma"), rawOptionalType, rawOptionalType))
+					.contains("enigma");
+		}
+
+		@Test  // gh-34544
+		@SuppressWarnings("unchecked")
+		void convertOptionalToOptionalWithConversionOfContainedObject() {
+			TypeDescriptor integerOptionalType =
+					new TypeDescriptor(ResolvableType.forClassWithGenerics(Optional.class, Integer.class), null, null);
+			TypeDescriptor stringOptionalType =
+					new TypeDescriptor(ResolvableType.forClassWithGenerics(Optional.class, String.class), null, null);
+
+			assertThat((Optional<String>) conversionService.convert(Optional.of(42), integerOptionalType, stringOptionalType))
+					.contains("42");
+		}
+
+		@Test  // gh-34544
+		@SuppressWarnings("unchecked")
+		void convertOptionalToObjectWithoutConversionOfContainedObject() {
+			assertThat(conversionService.convert(Optional.of("enigma"), String.class)).isEqualTo("enigma");
+			assertThat(conversionService.convert(Optional.of(42), Integer.class)).isEqualTo(42);
+			assertThat(conversionService.convert(Optional.of(new int[] {1, 2, 3}), int[].class)).containsExactly(1, 2, 3);
+			assertThat(conversionService.convert(Optional.of(new Integer[] {1, 2, 3}), Integer[].class)).containsExactly(1, 2, 3);
+			assertThat(conversionService.convert(Optional.of(List.of(1, 2, 3)), List.class)).containsExactly(1, 2, 3);
+		}
+
+		@Test  // gh-34544
+		@SuppressWarnings("unchecked")
+		void convertOptionalToObjectWithConversionOfContainedObject() {
+			assertThat(conversionService.convert(Optional.of(42), String.class)).isEqualTo("42");
+			assertThat(conversionService.convert(Optional.of(3.14F), Double.class)).isCloseTo(3.14, byLessThan(0.001));
+			assertThat(conversionService.convert(Optional.of(new int[] {1, 2, 3}), Integer[].class)).containsExactly(1, 2, 3);
+			assertThat(conversionService.convert(Optional.of(List.of(1, 2, 3)), Set.class)).containsExactly(1, 2, 3);
+		}
+
+		@Test  // gh-34544
+		@SuppressWarnings("unchecked")
+		void convertNestedOptionalsToObject() {
+			assertThat(conversionService.convert(Optional.of(Optional.of("unwrap me twice")), String.class))
+					.isEqualTo("unwrap me twice");
+		}
+
+		@Test  // gh-34544
+		@SuppressWarnings("unchecked")
+		void convertOptionalToObjectViaTypeDescriptorForMethodParameter() {
+			Method method = ClassUtils.getMethod(getClass(), "handleList", List.class);
+			MethodParameter parameter = new MethodParameter(method, 0);
+			TypeDescriptor descriptor = new TypeDescriptor(parameter);
+
+			Optional<List<Integer>> source = Optional.of(List.of(1, 2, 3));
+			assertThat((List<Integer>) conversionService.convert(source, rawOptionalType, descriptor)).containsExactly(1, 2, 3);
+		}
+
+		public void handleList(List<Integer> value) {
+		}
+
+		public void handleOptionalList(Optional<List<Integer>> value) {
+		}
+	}
+
+	@Test  // gh-35175
+	void convertDateToInstant() {
+		TypeDescriptor dateDescriptor = TypeDescriptor.valueOf(Date.class);
+		TypeDescriptor instantDescriptor = TypeDescriptor.valueOf(Instant.class);
+		Date date = new Date();
+
+		// Conversion performed by DateToInstantConverter.
+		assertThat(conversionService.convert(date, dateDescriptor, instantDescriptor))
+				.isEqualTo(date.toInstant());
+	}
+
+	@Test  // gh-35175
+	void convertSqlDateToInstant() {
+		TypeDescriptor sqlDateDescriptor = TypeDescriptor.valueOf(java.sql.Date.class);
+		TypeDescriptor instantDescriptor = TypeDescriptor.valueOf(Instant.class);
+		java.sql.Date sqlDate = new java.sql.Date(System.currentTimeMillis());
+
+		// DateToInstantConverter blindly invokes toInstant() on any java.util.Date
+		// subtype, which results in an UnsupportedOperationException since
+		// java.sql.Date does not have a time component. However, even if
+		// DateToInstantConverter were not registered, ObjectToObjectConverter
+		// would still attempt to invoke toInstant() on a java.sql.Date by convention,
+		// which results in the same UnsupportedOperationException.
+		assertThatExceptionOfType(ConversionFailedException.class)
+				.isThrownBy(() -> conversionService.convert(sqlDate, sqlDateDescriptor, instantDescriptor))
+				.withCauseExactlyInstanceOf(UnsupportedOperationException.class);
+	}
+
+	@Test  // gh-35175
+	void convertSqlTimeToInstant() {
+		TypeDescriptor timeDescriptor = TypeDescriptor.valueOf(Time.class);
+		TypeDescriptor instantDescriptor = TypeDescriptor.valueOf(Instant.class);
+		Time time = new Time(System.currentTimeMillis());
+
+		// DateToInstantConverter blindly invokes toInstant() on any java.util.Date
+		// subtype, which results in an UnsupportedOperationException since
+		// java.sql.Date does not have a time component. However, even if
+		// DateToInstantConverter were not registered, ObjectToObjectConverter
+		// would still attempt to invoke toInstant() on a java.sql.Date by convention,
+		// which results in the same UnsupportedOperationException.
+		assertThatExceptionOfType(ConversionFailedException.class)
+				.isThrownBy(() -> conversionService.convert(time, timeDescriptor, instantDescriptor))
+				.withCauseExactlyInstanceOf(UnsupportedOperationException.class);
+	}
+
+	@Test  // gh-35175
+	void convertSqlTimestampToInstant() {
+		TypeDescriptor timestampDescriptor = TypeDescriptor.valueOf(Timestamp.class);
+		TypeDescriptor instantDescriptor = TypeDescriptor.valueOf(Instant.class);
+		Timestamp timestamp = new Timestamp(System.currentTimeMillis());
+
+		// Conversion performed by DateToInstantConverter.
+		assertThat(conversionService.convert(timestamp, timestampDescriptor, instantDescriptor))
+				.isEqualTo(timestamp.toInstant());
+	}
+
+	@Test  // gh-35175
+	void convertInstantToDate() {
+		TypeDescriptor instantDescriptor = TypeDescriptor.valueOf(Instant.class);
+		TypeDescriptor dateDescriptor = TypeDescriptor.valueOf(Date.class);
+		Date date = new Date();
+		Instant instant = date.toInstant();
+
+		// Conversion performed by InstantToDateConverter.
+		assertThat(conversionService.convert(instant, instantDescriptor, dateDescriptor))
+				.isExactlyInstanceOf(Date.class)
+				.isEqualTo(date);
 	}
 
 	@Test
-	void convertObjectToOptionalNull() {
-		assertThat(conversionService.convert(null, TypeDescriptor.valueOf(Object.class),
-				TypeDescriptor.valueOf(Optional.class))).isSameAs(Optional.empty());
-		assertThat((Object) conversionService.convert(null, Optional.class)).isSameAs(Optional.empty());
-	}
+	void convertInstantToSqlTimestamp() {
+		TypeDescriptor instantDescriptor = TypeDescriptor.valueOf(Instant.class);
+		TypeDescriptor timestampDescriptor = TypeDescriptor.valueOf(Timestamp.class);
+		Timestamp timestamp = new Timestamp(System.currentTimeMillis());
+		Instant instant = timestamp.toInstant();
 
-	@Test
-	void convertExistingOptional() {
-		assertThat(conversionService.convert(Optional.empty(), TypeDescriptor.valueOf(Object.class),
-				TypeDescriptor.valueOf(Optional.class))).isSameAs(Optional.empty());
-		assertThat((Object) conversionService.convert(Optional.empty(), Optional.class)).isSameAs(Optional.empty());
+		// Conversion performed by ObjectToObjectConverter.
+		assertThat(conversionService.convert(instant, instantDescriptor, timestampDescriptor))
+				.isExactlyInstanceOf(Timestamp.class)
+				.isEqualTo(timestamp);
 	}
 
 
@@ -1067,9 +1246,6 @@ class DefaultConversionServiceTests {
 
 		public static TestEntity findTestEntity(Long id) {
 			return new TestEntity(id);
-		}
-
-		public void handleOptionalValue(Optional<List<Integer>> value) {
 		}
 	}
 

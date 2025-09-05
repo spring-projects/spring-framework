@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -391,6 +391,7 @@ class QuartzSupportTests {
 		try (ClassPathXmlApplicationContext ctx = context("databasePersistence.xml")) {
 			JdbcTemplate jdbcTemplate = new JdbcTemplate(ctx.getBean(DataSource.class));
 			assertThat(jdbcTemplate.queryForList("SELECT * FROM qrtz_triggers").isEmpty()).as("No triggers were persisted").isFalse();
+			ctx.restart();
 		}
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.view.ContentNegotiatingViewResolver;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
-import org.springframework.web.servlet.view.json.MappingJackson2JsonView;
+import org.springframework.web.servlet.view.json.JacksonJsonView;
 import org.springframework.web.servlet.view.xml.MarshallingView;
 
 import static org.hamcrest.Matchers.equalTo;
@@ -70,7 +70,7 @@ class ViewResolutionTests {
 
 	@Test
 	void jsonOnly() throws Exception {
-		standaloneSetup(new PersonController()).setSingleView(new MappingJackson2JsonView()).build()
+		standaloneSetup(new PersonController()).setSingleView(new JacksonJsonView()).build()
 			.perform(get("/person/Corea"))
 				.andExpect(status().isOk())
 				.andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
@@ -95,7 +95,7 @@ class ViewResolutionTests {
 		marshaller.setClassesToBeBound(Person.class);
 
 		List<View> viewList = new ArrayList<>();
-		viewList.add(new MappingJackson2JsonView());
+		viewList.add(new JacksonJsonView());
 		viewList.add(new MarshallingView(marshaller));
 
 		ContentNegotiationManager manager = new ContentNegotiationManager(

@@ -7,8 +7,6 @@ Spring WebFlux lets you handle CORS (Cross-Origin Resource Sharing). This sectio
 describes how to do so.
 
 
-
-
 [[webflux-cors-intro]]
 == Introduction
 [.small]#xref:web/webmvc-cors.adoc#mvc-cors-intro[See equivalent in the Servlet stack]#
@@ -22,8 +20,6 @@ Cross-Origin Resource Sharing (CORS) is a https://www.w3.org/TR/cors/[W3C specif
 implemented by https://caniuse.com/#feat=cors[most browsers] that lets you specify
 what kind of cross-domain requests are authorized, rather than using less secure and less
 powerful workarounds based on IFRAME or JSONP.
-
-
 
 
 [[webflux-cors-processing]]
@@ -74,8 +70,6 @@ To learn more from the source or to make advanced customizations, see:
 ====
 
 
-
-
 [[webflux-cors-credentialed-requests]]
 == Credentialed Requests
 [.small]#xref:web/webmvc-cors.adoc#mvc-cors-credentialed-requests[See equivalent in the Servlet stack]#
@@ -101,8 +95,6 @@ specified regardless of the value of the `allowCredentials` property.
 
 WARNING: While such wildcard configuration can be handy, it is recommended when possible to configure
 a finite set of values instead to provide a higher level of security.
-
-
 
 
 [[webflux-cors-controller]]
@@ -280,8 +272,6 @@ Kotlin::
 ======
 --
 
-
-
 [[webflux-cors-global]]
 == Global Configuration
 [.small]#xref:web/webmvc-cors.adoc#mvc-cors-global[See equivalent in the Servlet stack]#
@@ -355,8 +345,6 @@ Kotlin::
 	}
 ----
 ======
-
-
 
 
 [[webflux-cors-webfilter]]

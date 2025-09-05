@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -149,8 +149,8 @@ class NestedRouteIntegrationTests extends AbstractRouterFunctionIntegrationTests
 			Map<String, String> pathVariables = request.pathVariables();
 			Map<String, String> attributePathVariables =
 					(Map<String, String>) request.attributes().get(RouterFunctions.URI_TEMPLATE_VARIABLES_ATTRIBUTE);
-			assertThat((pathVariables.equals(attributePathVariables))
-						|| (pathVariables.isEmpty() && (attributePathVariables == null))).isTrue();
+			assertThat((pathVariables.equals(attributePathVariables)) ||
+					(pathVariables.isEmpty() && (attributePathVariables == null))).isTrue();
 
 			PathPattern pathPattern = matchingPattern(request);
 			String pattern = pathPattern != null ? pathPattern.getPatternString() : "";

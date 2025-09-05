@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,6 @@
  */
 
 package org.springframework.web.context.request;
-
-import org.jspecify.annotations.Nullable;
 
 /**
  * Request-backed {@link org.springframework.beans.factory.config.Scope}
@@ -42,15 +40,6 @@ public class RequestScope extends AbstractRequestAttributesScope {
 	@Override
 	protected int getScope() {
 		return RequestAttributes.SCOPE_REQUEST;
-	}
-
-	/**
-	 * There is no conversation id concept for a request, so this method
-	 * returns {@code null}.
-	 */
-	@Override
-	public @Nullable String getConversationId() {
-		return null;
 	}
 
 }

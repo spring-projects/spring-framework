@@ -8,7 +8,6 @@ kind of text output from HTML to email and others. The Spring Framework has buil
 integration for using Spring MVC with FreeMarker templates.
 
 
-
 [[mvc-view-freemarker-contextconfig]]
 == View Configuration
 [.small]#xref:web/webflux-view.adoc#webflux-view-freemarker-contextconfig[See equivalent in the Reactive stack]#
@@ -98,7 +97,6 @@ returns a view name of `welcome`, the resolver looks for the
 `/WEB-INF/freemarker/welcome.ftl` template.
 
 
-
 [[mvc-views-freemarker]]
 == FreeMarker Configuration
 [.small]#xref:web/webflux-view.adoc#webflux-views-freemarker[See equivalent in the Reactive stack]#
@@ -127,7 +125,6 @@ See the FreeMarker documentation for details of settings and variables as they a
 the `Configuration` object.
 
 
-
 [[mvc-view-freemarker-forms]]
 == Form Handling
 [.small]#xref:web/webflux-view.adoc#webflux-view-freemarker-forms[See equivalent in the Reactive stack]#
@@ -137,7 +134,6 @@ Spring provides a tag library for use in JSPs that contains, among others, a
 form-backing objects and show the results of failed validations from a `Validator` in the
 web or business tier. Spring also has support for the same functionality in FreeMarker,
 with additional convenience macros for generating form input elements themselves.
-
 
 [[mvc-view-bind-macros]]
 === The Bind Macros
@@ -152,7 +148,6 @@ to calling code and user templates. The following sections concentrate only on t
 you need to directly call from within your templates. If you wish to view the macro code
 directly, the file is called `spring.ftl` and is in the
 `org.springframework.web.servlet.view.freemarker` package.
-
 
 [[mvc-view-simple-binding]]
 === Simple Binding
@@ -196,7 +191,6 @@ that explicitly specifies whether HTML escaping should be used in the status err
 messages or values. You can set it to `true` or `false` as required. Additional form
 handling macros simplify the use of HTML escaping, and you should use these macros
 wherever possible. They are explained in the next section.
-
 
 [[mvc-views-form-macros]]
 === Input Macros
@@ -418,7 +412,6 @@ user still sees the more user-friendly city names, as follows:
 	<input type="radio" name="address.town" value="NYC">New York</input>
 ----
 
-
 [[mvc-views-form-macros-html-escaping]]
 === HTML Escaping
 
@@ -455,7 +448,3 @@ In similar fashion, you can specify HTML escaping per field, as the following ex
 	<#assign htmlEscape = false in spring>
 	<#-- all future fields will be bound with HTML escaping off -->
 ----
-
-
-
-

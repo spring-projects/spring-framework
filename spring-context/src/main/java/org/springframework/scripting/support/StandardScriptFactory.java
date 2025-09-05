@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.scripting.support;
 
 import java.io.IOException;
+import java.lang.reflect.InaccessibleObjectException;
 import java.lang.reflect.InvocationTargetException;
 
 import javax.script.Invocable;
@@ -167,7 +168,7 @@ public class StandardScriptFactory implements ScriptFactory, BeanClassLoaderAwar
 				throw new ScriptCompilationException(
 						scriptSource, "Unable to instantiate script class: " + scriptClass.getName(), ex);
 			}
-			catch (IllegalAccessException ex) {
+			catch (IllegalAccessException | InaccessibleObjectException ex) {
 				throw new ScriptCompilationException(
 						scriptSource, "Could not access script constructor: " + scriptClass.getName(), ex);
 			}

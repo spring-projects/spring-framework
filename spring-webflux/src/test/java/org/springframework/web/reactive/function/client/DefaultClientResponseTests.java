@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,7 +47,7 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.reactive.ClientHttpResponse;
 import org.springframework.http.codec.DecoderHttpMessageReader;
-import org.springframework.http.codec.json.Jackson2JsonDecoder;
+import org.springframework.http.codec.json.JacksonJsonDecoder;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
@@ -343,7 +343,7 @@ class DefaultClientResponseTests {
 
 		given(mockExchangeStrategies.messageReaders()).willReturn(List.of(
 				new DecoderHttpMessageReader<>(new ByteArrayDecoder()),
-				new DecoderHttpMessageReader<>(new Jackson2JsonDecoder())));
+				new DecoderHttpMessageReader<>(new JacksonJsonDecoder())));
 
 		WebClientResponseException ex = defaultClientResponse.createException().block();
 		assertThat(ex.getResponseBodyAs(Map.class)).containsExactly(entry("name", "Jason"));
@@ -361,7 +361,7 @@ class DefaultClientResponseTests {
 
 		given(mockExchangeStrategies.messageReaders()).willReturn(List.of(
 				new DecoderHttpMessageReader<>(new ByteArrayDecoder()),
-				new DecoderHttpMessageReader<>(new Jackson2JsonDecoder())));
+				new DecoderHttpMessageReader<>(new JacksonJsonDecoder())));
 
 		WebClientResponseException ex = defaultClientResponse.createException().block();
 		assertThat(ex.getResponseBodyAs(Map.class)).isNull();

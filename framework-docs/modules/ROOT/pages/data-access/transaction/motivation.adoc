@@ -85,6 +85,3 @@ and face a hefty rework if you need that code to run within global, container-ma
 transactions. With the Spring Framework, only some of the bean definitions in your
 configuration file need to change (rather than your code).
 ****
-
-
-

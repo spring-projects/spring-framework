@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ package org.springframework.util.backoff;
  * between two attempts and a maximum number of retries.
  *
  * @author Stephane Nicoll
+ * @author Sam Brannen
  * @since 4.1
  */
 public class FixedBackOff implements BackOff {
@@ -35,21 +36,35 @@ public class FixedBackOff implements BackOff {
 	 */
 	public static final long UNLIMITED_ATTEMPTS = Long.MAX_VALUE;
 
+
 	private long interval = DEFAULT_INTERVAL;
 
 	private long maxAttempts = UNLIMITED_ATTEMPTS;
 
 
 	/**
-	 * Create an instance with an interval of {@value #DEFAULT_INTERVAL}
-	 * ms and an unlimited number of attempts.
+	 * Create an instance with an interval of {@value #DEFAULT_INTERVAL} ms and
+	 * an unlimited number of attempts.
+	 * @see #setInterval(long)
+	 * @see #setMaxAttempts(long)
 	 */
 	public FixedBackOff() {
 	}
 
 	/**
-	 * Create an instance.
-	 * @param interval the interval between two attempts
+	 * Create an instance with the supplied interval and an unlimited number of
+	 * attempts.
+	 * @param interval the interval between two attempts in milliseconds
+	 * @since 7.0
+	 * @see #setMaxAttempts(long)
+	 */
+	public FixedBackOff(long interval) {
+		this.interval = interval;
+	}
+
+	/**
+	 * Create an instance with the supplied interval and maximum number of attempts.
+	 * @param interval the interval between two attempts in milliseconds
 	 * @param maxAttempts the maximum number of attempts
 	 */
 	public FixedBackOff(long interval, long maxAttempts) {
@@ -73,22 +88,31 @@ public class FixedBackOff implements BackOff {
 	}
 
 	/**
-	 * Set the maximum number of attempts in milliseconds.
+	 * Set the maximum number of attempts.
 	 */
 	public void setMaxAttempts(long maxAttempts) {
 		this.maxAttempts = maxAttempts;
 	}
 
 	/**
-	 * Return the maximum number of attempts in milliseconds.
+	 * Return the maximum number of attempts.
 	 */
 	public long getMaxAttempts() {
 		return this.maxAttempts;
 	}
 
+
 	@Override
 	public BackOffExecution start() {
 		return new FixedBackOffExecution();
+	}
+
+	@Override
+	public String toString() {
+		String attemptValue = (this.maxAttempts == Long.MAX_VALUE ? "unlimited" :
+				String.valueOf(FixedBackOff.this.maxAttempts));
+		return "FixedBackOff[interval=" + this.interval +
+				", maxAttempts=" + attemptValue + ']';
 	}
 
 
@@ -111,10 +135,9 @@ public class FixedBackOff implements BackOff {
 		public String toString() {
 			String attemptValue = (FixedBackOff.this.maxAttempts == Long.MAX_VALUE ?
 					"unlimited" : String.valueOf(FixedBackOff.this.maxAttempts));
-			return "FixedBackOff{interval=" + FixedBackOff.this.interval +
+			return "FixedBackOffExecution[interval=" + FixedBackOff.this.interval +
 					", currentAttempts=" + this.currentAttempts +
-					", maxAttempts=" + attemptValue +
-					'}';
+					", maxAttempts=" + attemptValue + ']';
 		}
 	}
 

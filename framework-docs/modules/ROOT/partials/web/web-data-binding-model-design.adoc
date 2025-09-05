@@ -1,4 +1,4 @@
-xref:core/validation/beans-beans.adoc#beans-binding[Data binding] for web requests involves
+xref:core/validation/data-binding.adoc[Data binding] for web requests involves
 binding request parameters to a model object. By default, request parameters can be bound
 to any public property of the model object, which means malicious clients can provide
 extra values for properties that exist in the model object graph, but are not expected to
@@ -39,7 +39,7 @@ the properties required for the input:
 ----
 
 Another good practice is to apply
-xref:core/validation/beans-beans.adoc#beans-constructor-binding[constructor binding],
+xref:core/validation/data-binding.adoc#data-binding-constructor-binding[constructor binding],
 which uses only the request parameters it needs for constructor arguments, and any other
 input is ignored. This is in contrast to property binding which by default binds every
 request parameter for which there is a matching property.

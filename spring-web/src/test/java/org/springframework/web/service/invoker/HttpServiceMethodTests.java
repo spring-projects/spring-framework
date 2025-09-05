@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -198,12 +198,12 @@ class HttpServiceMethodTests {
 
 	@Test
 	void typeAndMethodAnnotatedService() {
-		HttpServiceProxyFactory proxyFactory = HttpServiceProxyFactory.builder()
-			.exchangeAdapter(this.client)
-			.embeddedValueResolver(value -> (value.equals("${baseUrl}") ? "/base" : value))
-			.build();
 
-		MethodLevelAnnotatedService service = proxyFactory.createClient(TypeAndMethodLevelAnnotatedService.class);
+		MethodLevelAnnotatedService service = HttpServiceProxyFactory.builder()
+				.exchangeAdapter(this.client)
+				.embeddedValueResolver(value -> (value.equals("${baseUrl}") ? "/base" : value))
+				.build()
+				.createClient(TypeAndMethodLevelAnnotatedService.class);
 
 		service.performGet();
 
@@ -220,6 +220,19 @@ class HttpServiceMethodTests {
 		assertThat(requestValues.getUriTemplate()).isEqualTo("/base/url");
 		assertThat(requestValues.getHeaders().getContentType()).isEqualTo(MediaType.APPLICATION_JSON);
 		assertThat(requestValues.getHeaders().getAccept()).containsOnly(MediaType.APPLICATION_JSON);
+	}
+
+	@Test
+	void httpRequestValuesProcessor() {
+
+		HttpServiceProxyFactory.builder()
+				.exchangeAdapter(this.client)
+				.httpRequestValuesProcessor((m, p, a, builder) -> builder.addAttribute("foo", "a"))
+				.build()
+				.createClient(Service.class)
+				.execute();
+
+		assertThat(this.client.getRequestValues().getAttributes().get("foo")).isEqualTo("a");
 	}
 
 	@Test  // gh-32049

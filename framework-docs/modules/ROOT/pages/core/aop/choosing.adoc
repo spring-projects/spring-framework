@@ -8,7 +8,6 @@ decisions are influenced by a number of factors including application requiremen
 development tools, and team familiarity with AOP.
 
 
-
 [[aop-spring-or-aspectj]]
 == Spring AOP or Full AspectJ?
 
@@ -29,7 +28,6 @@ designed for writing aspects. If you do not use Eclipse or have only a few aspec
 that do not play a major role in your application, you may want to consider using
 the @AspectJ style, sticking with regular Java compilation in your IDE, and adding
 an aspect weaving phase to your build script.
-
 
 
 [[aop-ataspectj-or-xml]]
@@ -107,7 +105,3 @@ Spring AOP and by AspectJ. So, if you later decide you need the capabilities of 
 to implement additional requirements, you can easily migrate to a classic AspectJ setup.
 In general, the Spring team prefers the @AspectJ style for custom aspects beyond simple
 configuration of enterprise services.
-
-
-
-

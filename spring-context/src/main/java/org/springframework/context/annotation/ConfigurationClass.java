@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,7 +66,7 @@ final class ConfigurationClass {
 	private final Map<String, Class<? extends BeanDefinitionReader>> importedResources =
 			new LinkedHashMap<>();
 
-	private final Set<BeanRegistrar> beanRegistrars = new LinkedHashSet<>();
+	private final Map<String, BeanRegistrar> beanRegistrars = new LinkedHashMap<>();
 
 	private final Map<ImportBeanDefinitionRegistrar, AnnotationMetadata> importBeanDefinitionRegistrars =
 			new LinkedHashMap<>();
@@ -131,6 +131,7 @@ final class ConfigurationClass {
 	 * @param metadata the metadata for the underlying class to represent
 	 * @param beanName name of the {@code @Configuration} class bean
 	 * @param scanned whether the underlying class has been registered through a scan
+	 * @since 6.2
 	 */
 	ConfigurationClass(AnnotationMetadata metadata, String beanName, boolean scanned) {
 		Assert.notNull(beanName, "Bean name must not be null");
@@ -222,11 +223,11 @@ final class ConfigurationClass {
 		return this.importedResources;
 	}
 
-	void addBeanRegistrar(BeanRegistrar beanRegistrar) {
-		this.beanRegistrars.add(beanRegistrar);
+	void addBeanRegistrar(String sourceClassName, BeanRegistrar beanRegistrar) {
+		this.beanRegistrars.put(sourceClassName, beanRegistrar);
 	}
 
-	public Set<BeanRegistrar> getBeanRegistrars() {
+	public Map<String, BeanRegistrar> getBeanRegistrars() {
 		return this.beanRegistrars;
 	}
 

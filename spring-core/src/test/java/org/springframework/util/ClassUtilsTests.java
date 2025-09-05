@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -228,7 +228,7 @@ class ClassUtilsTests {
 
 	@Test
 	void getShortNameAsProperty() {
-		String shortName = ClassUtils.getShortNameAsProperty(this.getClass());
+		String shortName = ClassUtils.getShortNameAsProperty(getClass());
 		assertThat(shortName).as("Class name did not match").isEqualTo("classUtilsTests");
 	}
 
@@ -687,13 +687,13 @@ class ClassUtilsTests {
 		}
 
 		@Test
-		void publicMethodInPublicClass() throws Exception {
+		void publicMethodInObjectClass() throws Exception {
 			Class<?> originalType = String.class;
-			Method originalMethod = originalType.getDeclaredMethod("toString");
+			Method originalMethod = originalType.getDeclaredMethod("hashCode");
 
 			Method publiclyAccessibleMethod = ClassUtils.getPubliclyAccessibleMethodIfPossible(originalMethod, null);
-			assertThat(publiclyAccessibleMethod.getDeclaringClass()).isEqualTo(originalType);
-			assertThat(publiclyAccessibleMethod).isSameAs(originalMethod);
+			assertThat(publiclyAccessibleMethod.getDeclaringClass()).isEqualTo(Object.class);
+			assertThat(publiclyAccessibleMethod.getName()).isEqualTo("hashCode");
 			assertPubliclyAccessible(publiclyAccessibleMethod);
 		}
 
@@ -703,9 +703,9 @@ class ClassUtilsTests {
 			Method originalMethod = originalType.getDeclaredMethod("size");
 
 			Method publiclyAccessibleMethod = ClassUtils.getPubliclyAccessibleMethodIfPossible(originalMethod, null);
-			// Should not find the interface method in List.
-			assertThat(publiclyAccessibleMethod.getDeclaringClass()).isEqualTo(originalType);
-			assertThat(publiclyAccessibleMethod).isSameAs(originalMethod);
+			// Should find the interface method in List.
+			assertThat(publiclyAccessibleMethod.getDeclaringClass()).isEqualTo(List.class);
+			assertThat(publiclyAccessibleMethod.getName()).isEqualTo("size");
 			assertPubliclyAccessible(publiclyAccessibleMethod);
 		}
 

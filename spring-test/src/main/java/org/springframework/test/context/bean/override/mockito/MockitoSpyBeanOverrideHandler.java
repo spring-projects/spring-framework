@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,7 +54,7 @@ class MockitoSpyBeanOverrideHandler extends AbstractMockitoBeanOverrideHandler {
 
 	MockitoSpyBeanOverrideHandler(@Nullable Field field, ResolvableType typeToSpy, MockitoSpyBean spyBean) {
 		super(field, typeToSpy, (StringUtils.hasText(spyBean.name()) ? spyBean.name() : null),
-				BeanOverrideStrategy.WRAP, spyBean.reset());
+				spyBean.contextName(), BeanOverrideStrategy.WRAP, spyBean.reset());
 		Assert.notNull(typeToSpy, "typeToSpy must not be null");
 	}
 

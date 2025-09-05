@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.aop.aspectj;
 
+import java.lang.reflect.InaccessibleObjectException;
 import java.lang.reflect.InvocationTargetException;
 
 import org.jspecify.annotations.Nullable;
@@ -67,7 +68,7 @@ public class SimpleAspectInstanceFactory implements AspectInstanceFactory {
 			throw new AopConfigException(
 					"Unable to instantiate aspect class: " + this.aspectClass.getName(), ex);
 		}
-		catch (IllegalAccessException ex) {
+		catch (IllegalAccessException | InaccessibleObjectException ex) {
 			throw new AopConfigException(
 					"Could not access aspect constructor: " + this.aspectClass.getName(), ex);
 		}

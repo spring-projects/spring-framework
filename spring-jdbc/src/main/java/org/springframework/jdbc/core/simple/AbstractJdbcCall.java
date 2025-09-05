@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -379,7 +379,7 @@ public abstract class AbstractJdbcCall {
 	 * @param parameterSource parameter names and values to be used in call
 	 * @return a Map of out parameters
 	 */
-	protected Map<String, Object> doExecute(SqlParameterSource parameterSource) {
+	protected Map<String, @Nullable Object> doExecute(SqlParameterSource parameterSource) {
 		checkCompiled();
 		Map<String, Object> params = matchInParameterValuesWithCallParameters(parameterSource);
 		return executeCallInternal(params);
@@ -391,7 +391,7 @@ public abstract class AbstractJdbcCall {
 	 * declared for the stored procedure.
 	 * @return a Map of out parameters
 	 */
-	protected Map<String, Object> doExecute(Object... args) {
+	protected Map<String, @Nullable Object> doExecute(Object... args) {
 		checkCompiled();
 		Map<String, ?> params = matchInParameterValuesWithCallParameters(args);
 		return executeCallInternal(params);
@@ -402,7 +402,7 @@ public abstract class AbstractJdbcCall {
 	 * @param args a Map of parameter name and values
 	 * @return a Map of out parameters
 	 */
-	protected Map<String, Object> doExecute(Map<String, ?> args) {
+	protected Map<String, @Nullable Object> doExecute(Map<String, ?> args) {
 		checkCompiled();
 		Map<String, ?> params = matchInParameterValuesWithCallParameters(args);
 		return executeCallInternal(params);
@@ -411,7 +411,7 @@ public abstract class AbstractJdbcCall {
 	/**
 	 * Delegate method to perform the actual call processing.
 	 */
-	private Map<String, Object> executeCallInternal(Map<String, ?> args) {
+	private Map<String, @Nullable Object> executeCallInternal(Map<String, ?> args) {
 		CallableStatementCreator csc = getCallableStatementFactory().newCallableStatementCreator(args);
 		if (logger.isDebugEnabled()) {
 			logger.debug("The following parameters are used for call " + getCallString() + " with " + args);

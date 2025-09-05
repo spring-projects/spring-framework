@@ -24,5 +24,3 @@ Kotlin::
 
 Registered filters are invoked through the `MockFilterChain` from `spring-test`, and the
 last filter delegates to the `DispatcherServlet`.
-
-

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,7 +51,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.codec.json.Jackson2JsonEncoder;
+import org.springframework.http.codec.json.JacksonJsonEncoder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -497,7 +497,7 @@ class RequestMappingMessageConversionIntegrationTests extends AbstractRequestMap
 		@GetMapping("/publisher")
 		@SuppressWarnings("deprecation")
 		Publisher<ByteBuffer> getPublisher() {
-			Jackson2JsonEncoder encoder = new Jackson2JsonEncoder();
+			JacksonJsonEncoder encoder = new JacksonJsonEncoder();
 			return encoder.encode(Mono.just(new Person("Robert")), DefaultDataBufferFactory.sharedInstance,
 					ResolvableType.forClass(Person.class), JSON, Collections.emptyMap()).map(DataBuffer::toByteBuffer);
 		}

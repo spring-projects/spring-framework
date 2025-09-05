@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,26 +17,20 @@
 package org.springframework.http.converter;
 
 import java.io.IOException;
-import java.lang.reflect.Method;
 import java.lang.reflect.Type;
+import java.util.List;
 import java.util.Map;
 
-import kotlin.reflect.KFunction;
 import kotlin.reflect.KType;
-import kotlin.reflect.full.KCallables;
-import kotlin.reflect.jvm.ReflectJvmMapping;
 import kotlinx.serialization.KSerializer;
 import kotlinx.serialization.SerialFormat;
 import kotlinx.serialization.SerializersKt;
 import org.jspecify.annotations.Nullable;
 
-import org.springframework.core.KotlinDetector;
-import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
-import org.springframework.util.Assert;
 import org.springframework.util.ConcurrentReferenceHashMap;
 
 
@@ -77,13 +71,18 @@ public abstract class AbstractKotlinSerializationHttpMessageConverter<T extends 
 	}
 
 	@Override
+	public List<MediaType> getSupportedMediaTypes(Class<?> clazz) {
+		return getSupportedMediaTypes();
+	}
+
+	@Override
 	protected boolean supports(Class<?> clazz) {
-		return serializer(ResolvableType.forClass(clazz)) != null;
+		return serializer(ResolvableType.forClass(clazz), null) != null;
 	}
 
 	@Override
 	public boolean canRead(ResolvableType type, @Nullable MediaType mediaType) {
-		if (!ResolvableType.NONE.equals(type) && serializer(type) != null) {
+		if (!ResolvableType.NONE.equals(type) && serializer(type, null) != null) {
 			return canRead(mediaType);
 		}
 		else {
@@ -93,7 +92,7 @@ public abstract class AbstractKotlinSerializationHttpMessageConverter<T extends 
 
 	@Override
 	public boolean canWrite(ResolvableType type, Class<?> clazz, @Nullable MediaType mediaType) {
-		if (!ResolvableType.NONE.equals(type) && serializer(type) != null) {
+		if (!ResolvableType.NONE.equals(type) && serializer(type, null) != null) {
 			return canWrite(mediaType);
 		}
 		else {
@@ -105,7 +104,7 @@ public abstract class AbstractKotlinSerializationHttpMessageConverter<T extends 
 	public final Object read(ResolvableType type, HttpInputMessage inputMessage, @Nullable Map<String, Object> hints)
 			throws IOException, HttpMessageNotReadableException {
 
-		KSerializer<Object> serializer = serializer(type);
+		KSerializer<Object> serializer = serializer(type, hints);
 		if (serializer == null) {
 			throw new HttpMessageNotReadableException("Could not find KSerializer for " + type, inputMessage);
 		}
@@ -123,7 +122,7 @@ public abstract class AbstractKotlinSerializationHttpMessageConverter<T extends 
 			@Nullable Map<String, Object> hints) throws IOException, HttpMessageNotWritableException {
 
 		ResolvableType resolvableType = (ResolvableType.NONE.equals(type) ? ResolvableType.forInstance(object) : type);
-		KSerializer<Object> serializer = serializer(resolvableType);
+		KSerializer<Object> serializer = serializer(resolvableType, hints);
 		if (serializer == null) {
 			throw new HttpMessageNotWritableException("Could not find KSerializer for " + resolvableType);
 		}
@@ -143,29 +142,21 @@ public abstract class AbstractKotlinSerializationHttpMessageConverter<T extends 
 	 * @param resolvableType the type to find a serializer for
 	 * @return a resolved serializer for the given type, or {@code null}
 	 */
-	private @Nullable KSerializer<Object> serializer(ResolvableType resolvableType) {
-		if (resolvableType.getSource() instanceof MethodParameter parameter) {
-			Method method = parameter.getMethod();
-			Assert.notNull(method, "Method must not be null");
-			if (KotlinDetector.isKotlinType(method.getDeclaringClass())) {
-				KFunction<?> function = ReflectJvmMapping.getKotlinFunction(method);
-				if (function != null) {
-					KType type = (parameter.getParameterIndex() == -1 ? function.getReturnType() :
-							KCallables.getValueParameters(function).get(parameter.getParameterIndex()).getType());
-					KSerializer<Object> serializer = this.kTypeSerializerCache.get(type);
-					if (serializer == null) {
-						try {
-							serializer = SerializersKt.serializerOrNull(this.format.getSerializersModule(), type);
-						}
-						catch (IllegalArgumentException ignored) {
-						}
-						if (serializer != null) {
-							this.kTypeSerializerCache.put(type, serializer);
-						}
-					}
-					return serializer;
+	private @Nullable KSerializer<Object> serializer(ResolvableType resolvableType, @Nullable Map<String, Object> hints) {
+		if (hints != null && hints.containsKey(KType.class.getName())) {
+			KType type = (KType) hints.get(KType.class.getName());
+			KSerializer<Object> serializer = this.kTypeSerializerCache.get(type);
+			if (serializer == null) {
+				try {
+					serializer = SerializersKt.serializerOrNull(this.format.getSerializersModule(), type);
+				}
+				catch (IllegalArgumentException ignored) {
+				}
+				if (serializer != null) {
+					this.kTypeSerializerCache.put(type, serializer);
 				}
 			}
+			return serializer;
 		}
 		Type type = resolvableType.getType();
 		KSerializer<Object> serializer = this.typeSerializerCache.get(type);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,7 +50,7 @@ import org.springframework.context.MessageSourceResolvable;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.StringHttpMessageConverter;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.http.converter.json.JacksonJsonHttpMessageConverter;
 import org.springframework.validation.Errors;
 import org.springframework.validation.ObjectError;
 import org.springframework.validation.Validator;
@@ -138,7 +138,7 @@ class MethodValidationTests {
 		handlerAdapter.setApplicationContext(context);
 		handlerAdapter.setBeanFactory(context.getBeanFactory());
 		handlerAdapter.setMessageConverters(
-				List.of(new StringHttpMessageConverter(), new MappingJackson2HttpMessageConverter()));
+				List.of(new StringHttpMessageConverter(), new JacksonJsonHttpMessageConverter()));
 		handlerAdapter.afterPropertiesSet();
 		return handlerAdapter;
 	}

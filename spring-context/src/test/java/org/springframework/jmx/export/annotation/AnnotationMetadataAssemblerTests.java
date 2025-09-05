@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.jmx.export.annotation;
 
+import javax.management.MBeanNotificationInfo;
 import javax.management.modelmbean.ModelMBeanAttributeInfo;
 import javax.management.modelmbean.ModelMBeanInfo;
 import javax.management.modelmbean.ModelMBeanOperationInfo;
@@ -36,6 +37,17 @@ class AnnotationMetadataAssemblerTests extends AbstractMetadataAssemblerTests {
 
 	private static final String OBJECT_NAME = "bean:name=testBean4";
 
+	@Test
+	@Override
+	protected void notificationMetadata() throws Exception {
+		ModelMBeanInfo info = (ModelMBeanInfo) getMBeanInfo();
+		MBeanNotificationInfo[] notifications = info.getNotifications();
+		assertThat(notifications).as("Incorrect number of notifications").hasSize(2);
+		assertThat(notifications[0].getName()).as("Incorrect notification name").isEqualTo("My Notification 1");
+		assertThat(notifications[0].getNotifTypes()).as("notification types").containsExactly("type.foo", "type.bar");
+		assertThat(notifications[1].getName()).as("Incorrect notification name").isEqualTo("My Notification 2");
+		assertThat(notifications[1].getNotifTypes()).as("notification types").containsExactly("type.enigma");
+	}
 
 	@Test
 	void testAttributeFromInterface() throws Exception {
@@ -111,4 +123,5 @@ class AnnotationMetadataAssemblerTests extends AbstractMetadataAssemblerTests {
 	protected int getExpectedOperationCount() {
 		return super.getExpectedOperationCount() + 4;
 	}
+
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +19,8 @@ package org.springframework.core.annotation;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
-import javax.annotation.Nonnull;
+import javax.annotation.concurrent.ThreadSafe;
 
-import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.lang.Contract;
@@ -86,12 +85,13 @@ class AnnotationFilterTests {
 
 	@Test
 	void javaWhenJavaxAnnotationReturnsTrue() {
-		assertThat(AnnotationFilter.JAVA.matches(Nonnull.class)).isTrue();
+		assertThat(AnnotationFilter.JAVA.matches(ThreadSafe.class)).isTrue();
 	}
 
 	@Test
+	@SuppressWarnings("deprecation")
 	void javaWhenSpringLangAnnotationReturnsFalse() {
-		assertThat(AnnotationFilter.JAVA.matches(Nullable.class)).isFalse();
+		assertThat(AnnotationFilter.JAVA.matches(org.springframework.lang.Nullable.class)).isFalse();
 	}
 
 	@Test
@@ -103,7 +103,7 @@ class AnnotationFilterTests {
 	@SuppressWarnings("deprecation")
 	void noneReturnsFalse() {
 		assertThat(AnnotationFilter.NONE.matches(Retention.class)).isFalse();
-		assertThat(AnnotationFilter.NONE.matches(Nullable.class)).isFalse();
+		assertThat(AnnotationFilter.NONE.matches(org.springframework.lang.Nullable.class)).isFalse();
 		assertThat(AnnotationFilter.NONE.matches(TestAnnotation.class)).isFalse();
 	}
 

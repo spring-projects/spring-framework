@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -135,7 +135,9 @@ public class HandlerMethodMappingTests {
 		chain.getInterceptorList().get(0).preHandle(request, response, chain.getHandler());
 		new HttpRequestHandlerAdapter().handle(request, response, chain.getHandler());
 
-		assertThat(response.getStatus()).isEqualTo(403);
+		assertThat(response.getStatus()).isEqualTo(200);
+		assertThat(response.getHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN)).isNull();
+		assertThat(response.getHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_METHODS)).isNull();
 	}
 
 	@Test // gh-26490

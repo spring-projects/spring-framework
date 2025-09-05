@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,36 +41,34 @@ public class KotlinReflectionParameterNameDiscoverer implements ParameterNameDis
 
 	@Override
 	public @Nullable String @Nullable [] getParameterNames(Method method) {
-		if (!KotlinDetector.isKotlinType(method.getDeclaringClass())) {
-			return null;
+		if (KotlinDetector.isKotlinType(method.getDeclaringClass())) {
+			try {
+				KFunction<?> function = ReflectJvmMapping.getKotlinFunction(method);
+				return (function != null ? getParameterNames(function.getParameters()) : null);
+			}
+			catch (UnsupportedOperationException ignored) {
+			}
 		}
-
-		try {
-			KFunction<?> function = ReflectJvmMapping.getKotlinFunction(method);
-			return (function != null ? getParameterNames(function.getParameters()) : null);
-		}
-		catch (UnsupportedOperationException ex) {
-			return null;
-		}
+		return null;
 	}
 
 	@Override
 	public @Nullable String @Nullable [] getParameterNames(Constructor<?> ctor) {
-		if (ctor.getDeclaringClass().isEnum() || !KotlinDetector.isKotlinType(ctor.getDeclaringClass())) {
-			return null;
+		if (!ctor.getDeclaringClass().isEnum() && KotlinDetector.isKotlinType(ctor.getDeclaringClass())) {
+			try {
+				KFunction<?> function = ReflectJvmMapping.getKotlinFunction(ctor);
+				if (function != null) {
+					return getParameterNames(function.getParameters());
+				}
+			}
+			catch (UnsupportedOperationException ignored) {
+			}
 		}
-
-		try {
-			KFunction<?> function = ReflectJvmMapping.getKotlinFunction(ctor);
-			return (function != null ? getParameterNames(function.getParameters()) : null);
-		}
-		catch (UnsupportedOperationException ex) {
-			return null;
-		}
+		return null;
 	}
 
 	private @Nullable String @Nullable [] getParameterNames(List<KParameter> parameters) {
-		String[] parameterNames = parameters.stream()
+		@Nullable String[] parameterNames = parameters.stream()
 				// Extension receivers of extension methods must be included as they appear as normal method parameters in Java
 				.filter(p -> KParameter.Kind.VALUE.equals(p.getKind()) || KParameter.Kind.EXTENSION_RECEIVER.equals(p.getKind()))
 				// extension receivers are not explicitly named, but require a name for Java interoperability

@@ -4,6 +4,7 @@ apply plugin: "kotlin"
 
 dependencies {
 	api(project(":spring-core"))
+	compileOnly("com.google.code.findbugs:jsr305") // for Reactor
 	optional(project(":spring-aop"))
 	optional(project(":spring-beans"))
 	optional(project(":spring-context"))
@@ -81,6 +82,7 @@ dependencies {
 	testImplementation("org.hibernate.validator:hibernate-validator")
 	testImplementation("org.hsqldb:hsqldb")
 	testImplementation("org.junit.platform:junit-platform-testkit")
+	testImplementation("tools.jackson.core:jackson-databind")
 	testRuntimeOnly("com.sun.xml.bind:jaxb-core")
 	testRuntimeOnly("com.sun.xml.bind:jaxb-impl")
 	testRuntimeOnly("org.glassfish:jakarta.el")
@@ -104,14 +106,10 @@ test {
 	description = "Runs JUnit 4, JUnit Jupiter, and TestNG tests."
 	useJUnitPlatform {
 		includeEngines "junit-vintage", "junit-jupiter", "testng"
-		excludeTags "failing-test-case"
 	}
-	// We use `include` instead of `filter.includeTestsMatching`, since
-	// the latter results in some tests being executed/reported
-	// multiple times.
-	include(["**/*Tests.class", "**/*Test.class"])
+	// `include` test filters and system properties are configured in
+	// org.springframework.build.TestConventions in buildSrc.
 	filter.excludeTestsMatching("*TestCase")
-	systemProperty("testGroups", project.properties.get("testGroups"))
-	// Java Util Logging for the JUnit Platform.
+	// Optionally configure Java Util Logging for the JUnit Platform.
 	// systemProperty("java.util.logging.manager", "org.apache.logging.log4j.jul.LogManager")
 }

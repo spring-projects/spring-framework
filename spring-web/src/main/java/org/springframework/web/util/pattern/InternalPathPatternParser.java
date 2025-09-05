@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ import org.springframework.web.util.pattern.PatternParseException.PatternMessage
  * {@link PathElement PathElements} in a linked list. Instances are reusable but are not thread-safe.
  *
  * @author Andy Clement
+ * @author Brian Clozel
  * @since 5.0
  */
 class InternalPathPatternParser {
@@ -52,7 +53,7 @@ class InternalPathPatternParser {
 	private boolean wildcard = false;
 
 	// Is the construct {*...} being used in a particular path element
-	private boolean isCaptureTheRestVariable = false;
+	private boolean isCaptureSegmentsVariable = false;
 
 	// Has the parser entered a {...} variable capture block in a particular
 	// path element
@@ -66,6 +67,9 @@ class InternalPathPatternParser {
 
 	// Start of the most recent variable capture in a particular path element
 	private int variableCaptureStart;
+
+	// Did we parse a WildcardSegments(**) or CaptureSegments({*foo}) PathElement already?
+	private boolean hasMultipleSegmentsElement = false;
 
 	// Variables captures in this path pattern
 	private @Nullable List<String> capturedVariableNames;
@@ -108,13 +112,7 @@ class InternalPathPatternParser {
 				if (this.pathElementStart != -1) {
 					pushPathElement(createPathElement());
 				}
-				if (peekDoubleWildcard()) {
-					pushPathElement(new WildcardTheRestPathElement(this.pos, separator));
-					this.pos += 2;
-				}
-				else {
-					pushPathElement(new SeparatorPathElement(this.pos, separator));
-				}
+				pushPathElement(new SeparatorPathElement(this.pos, separator));
 			}
 			else {
 				if (this.pathElementStart == -1) {
@@ -142,35 +140,37 @@ class InternalPathPatternParser {
 								PatternMessage.MISSING_OPEN_CAPTURE);
 					}
 					this.insideVariableCapture = false;
-					if (this.isCaptureTheRestVariable && (this.pos + 1) < this.pathPatternLength) {
-						throw new PatternParseException(this.pos + 1, this.pathPatternData,
-								PatternMessage.NO_MORE_DATA_EXPECTED_AFTER_CAPTURE_THE_REST);
-					}
 					this.variableCaptureCount++;
 				}
 				else if (ch == ':') {
-					if (this.insideVariableCapture && !this.isCaptureTheRestVariable) {
+					if (this.insideVariableCapture && !this.isCaptureSegmentsVariable) {
 						skipCaptureRegex();
 						this.insideVariableCapture = false;
 						this.variableCaptureCount++;
 					}
 				}
+				else if (isDoubleWildcard(separator)) {
+					checkValidMultipleSegmentsElements(this.pos, this.pos + 1);
+					pushPathElement(new WildcardSegmentsPathElement(this.pos, separator));
+					this.hasMultipleSegmentsElement = true;
+					this.pos++;
+				}
 				else if (ch == '*') {
 					if (this.insideVariableCapture && this.variableCaptureStart == this.pos - 1) {
-						this.isCaptureTheRestVariable = true;
+						this.isCaptureSegmentsVariable = true;
 					}
 					this.wildcard = true;
 				}
 				// Check that the characters used for captured variable names are like java identifiers
 				if (this.insideVariableCapture) {
-					if ((this.variableCaptureStart + 1 + (this.isCaptureTheRestVariable ? 1 : 0)) == this.pos &&
+					if ((this.variableCaptureStart + 1 + (this.isCaptureSegmentsVariable ? 1 : 0)) == this.pos &&
 							!Character.isJavaIdentifierStart(ch)) {
 						throw new PatternParseException(this.pos, this.pathPatternData,
 								PatternMessage.ILLEGAL_CHARACTER_AT_START_OF_CAPTURE_DESCRIPTOR,
 								Character.toString(ch));
 
 					}
-					else if ((this.pos > (this.variableCaptureStart + 1 + (this.isCaptureTheRestVariable ? 1 : 0)) &&
+					else if ((this.pos > (this.variableCaptureStart + 1 + (this.isCaptureSegmentsVariable ? 1 : 0)) &&
 							!Character.isJavaIdentifierPart(ch) && ch != '-')) {
 						throw new PatternParseException(this.pos, this.pathPatternData,
 								PatternMessage.ILLEGAL_CHARACTER_IN_CAPTURE_DESCRIPTOR,
@@ -183,6 +183,7 @@ class InternalPathPatternParser {
 		if (this.pathElementStart != -1) {
 			pushPathElement(createPathElement());
 		}
+		verifyPatternElements(this.headPE);
 		return new PathPattern(pathPattern, this.parser, this.headPE);
 	}
 
@@ -232,23 +233,36 @@ class InternalPathPatternParser {
 				PatternMessage.MISSING_CLOSE_CAPTURE);
 	}
 
-	/**
-	 * After processing a separator, a quick peek whether it is followed by
-	 * a double wildcard (and only as the last path element).
-	 */
-	private boolean peekDoubleWildcard() {
-		if ((this.pos + 2) >= this.pathPatternLength) {
+	private boolean isDoubleWildcard(char separator) {
+		// next char is present
+		if ((this.pos + 1) >= this.pathPatternLength) {
 			return false;
 		}
-		if (this.pathPatternData[this.pos + 1] != '*' || this.pathPatternData[this.pos + 2] != '*') {
+		// current char and next char are '*'
+		if (this.pathPatternData[this.pos] != '*' || this.pathPatternData[this.pos + 1] != '*') {
 			return false;
 		}
-		char separator = this.parser.getPathOptions().separator();
-		if ((this.pos + 3) < this.pathPatternLength && this.pathPatternData[this.pos + 3] == separator) {
+		// previous char is a separator, if any
+		if ((this.pos - 1 >= 0) && (this.pathPatternData[this.pos - 1] != separator)) {
+			return false;
+		}
+		// next char is a separator, if any
+		if (((this.pos + 2) < this.pathPatternLength) &&
+				this.pathPatternData[this.pos + 2] != separator) {
+			return false;
+		}
+		return true;
+	}
+
+	private void checkValidMultipleSegmentsElements(int startPosition, int endPosition) {
+		if (this.hasMultipleSegmentsElement) {
 			throw new PatternParseException(this.pos, this.pathPatternData,
-					PatternMessage.NO_MORE_DATA_EXPECTED_AFTER_CAPTURE_THE_REST);
+					PatternMessage.CANNOT_HAVE_MANY_MULTISEGMENT_PATHELEMENTS);
 		}
-		return (this.pos + 3 == this.pathPatternLength);
+		if (startPosition > 1 && endPosition != this.pathPatternLength - 1) {
+			throw new PatternParseException(this.pos, this.pathPatternData,
+					PatternMessage.INVALID_LOCATION_FOR_MULTISEGMENT_PATHELEMENT);
+		}
 	}
 
 	/**
@@ -256,7 +270,8 @@ class InternalPathPatternParser {
 	 * @param newPathElement the new path element to add
 	 */
 	private void pushPathElement(PathElement newPathElement) {
-		if (newPathElement instanceof CaptureTheRestPathElement) {
+		if (newPathElement instanceof CaptureSegmentsPathElement ||
+				newPathElement instanceof WildcardSegmentsPathElement) {
 			// There must be a separator ahead of this thing
 			// currentPE SHOULD be a SeparatorPathElement
 			if (this.currentPE == null) {
@@ -277,7 +292,8 @@ class InternalPathPatternParser {
 				this.currentPE = newPathElement;
 			}
 			else {
-				throw new IllegalStateException("Expected SeparatorPathElement but was " + this.currentPE);
+				throw new IllegalStateException("Expected SeparatorPathElement before " +
+						newPathElement.getClass().getName() +" but was " + this.currentPE);
 			}
 		}
 		else {
@@ -318,9 +334,11 @@ class InternalPathPatternParser {
 		if (this.variableCaptureCount > 0) {
 			if (this.variableCaptureCount == 1 && this.pathElementStart == this.variableCaptureStart &&
 					this.pathPatternData[this.pos - 1] == '}') {
-				if (this.isCaptureTheRestVariable) {
+				if (this.isCaptureSegmentsVariable) {
 					// It is {*....}
-					newPE = new CaptureTheRestPathElement(
+					checkValidMultipleSegmentsElements(this.pathElementStart, this.pos -1);
+					this.hasMultipleSegmentsElement = true;
+					newPE = new CaptureSegmentsPathElement(
 							this.pathElementStart, getPathElementText(), separator);
 				}
 				else {
@@ -339,7 +357,7 @@ class InternalPathPatternParser {
 				}
 			}
 			else {
-				if (this.isCaptureTheRestVariable) {
+				if (this.isCaptureSegmentsVariable) {
 					throw new PatternParseException(this.pathElementStart, this.pathPatternData,
 							PatternMessage.CAPTURE_ALL_IS_STANDALONE_CONSTRUCT);
 				}
@@ -403,7 +421,7 @@ class InternalPathPatternParser {
 		this.insideVariableCapture = false;
 		this.variableCaptureCount = 0;
 		this.wildcard = false;
-		this.isCaptureTheRestVariable = false;
+		this.isCaptureSegmentsVariable = false;
 		this.variableCaptureStart = -1;
 	}
 
@@ -419,6 +437,24 @@ class InternalPathPatternParser {
 					PatternMessage.ILLEGAL_DOUBLE_CAPTURE, variableName);
 		}
 		this.capturedVariableNames.add(variableName);
+	}
+
+	private void verifyPatternElements(@Nullable PathElement headPE) {
+		PathElement currentElement = headPE;
+		while (currentElement != null) {
+			if (currentElement instanceof CaptureSegmentsPathElement ||
+					currentElement instanceof WildcardSegmentsPathElement) {
+				PathElement nextElement = currentElement.next;
+				while (nextElement instanceof SeparatorPathElement) {
+					nextElement = nextElement.next;
+				}
+				if (nextElement != null && !(nextElement instanceof LiteralPathElement)) {
+					throw new PatternParseException(nextElement.pos, this.pathPatternData,
+							PatternMessage.MULTISEGMENT_PATHELEMENT_NOT_FOLLOWED_BY_LITERAL);
+				}
+			}
+			currentElement = currentElement.next;
+		}
 	}
 
 }

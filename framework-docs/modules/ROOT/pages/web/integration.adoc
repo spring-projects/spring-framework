@@ -9,10 +9,9 @@ particular architecture, technology, or methodology (although it certainly recom
 some over others). This freedom to pick and choose the architecture, technology, or
 methodology that is most relevant to a developer and their development team is
 arguably most evident in the web area, where Spring provides its own web frameworks
-(xref:web/webmvc.adoc#mvc[Spring MVC] and xref:web/webflux.adoc#webflux[Spring WebFlux]) while, at the same time,
-supporting integration with a number of popular third-party web frameworks.
-
-
+(xref:web/webmvc.adoc#mvc[Spring MVC] and xref:web/webflux.adoc#webflux[Spring WebFlux])
+while, at the same time, supporting integration with a number of popular third-party
+web frameworks.
 
 
 [[web-integration-common]]
@@ -96,8 +95,6 @@ use dependency injection on their controllers. Each web framework section has mo
 on its specific integration strategies.
 
 
-
-
 [[jsf]]
 == JSF
 
@@ -111,8 +108,6 @@ environment. Spring's JSF support is not actively evolved anymore and primarily
 exists for migration purposes when modernizing older JSF-based applications.
 
 The key element in Spring's JSF integration is the JSF `ELResolver` mechanism.
-
-
 
 [[jsf-springbeanfaceselresolver]]
 === Spring Bean Resolver
@@ -135,8 +130,6 @@ Configuration-wise, you can define `SpringBeanFacesELResolver` in your JSF
 	</faces-config>
 ----
 
-
-
 [[jsf-facescontextutils]]
 === Using `FacesContextUtils`
 
@@ -154,8 +147,6 @@ The following example shows how to use `FacesContextUtils`:
 ----
 
 
-
-
 [[struts]]
 == Apache Struts
 
@@ -170,8 +161,6 @@ as well as the Struts-provided
 https://struts.apache.org/plugins/spring/[Spring Plugin] for built-in Spring integration.
 
 
-
-
 [[tapestry]]
 == Apache Tapestry
 
@@ -184,8 +173,6 @@ for the web user interface and the Spring container for the lower layers.
 
 For more information, see Tapestry's dedicated
 https://tapestry.apache.org/integrating-with-spring-framework.html[integration module for Spring].
-
-
 
 
 [[web-integration-resources]]

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -898,8 +898,8 @@ class DispatcherServletTests {
 		assertThat(response.getHeader("Test-Header")).isEqualTo("spring");
 	}
 
-	@Test
-	void shouldResetContentTypeIfNotCommitted() throws Exception {
+	@Test // gh-34366, gh-35116
+	void shouldResetContentHeadersIfNotCommitted() throws Exception {
 		StaticWebApplicationContext context = new StaticWebApplicationContext();
 		context.setServletContext(getServletContext());
 		context.registerSingleton("/error", ErrorController.class);
@@ -908,11 +908,15 @@ class DispatcherServletTests {
 
 		MockHttpServletRequest request = new MockHttpServletRequest(getServletContext(), "GET", "/error");
 		MockHttpServletResponse response = new MockHttpServletResponse();
-		assertThatThrownBy(() -> servlet.service(request, response)).isInstanceOf(ServletException.class)
+
+		assertThatThrownBy(() -> servlet.service(request, response))
+				.isInstanceOf(ServletException.class)
 				.hasCauseInstanceOf(IllegalArgumentException.class);
+
 		assertThat(response.getContentAsByteArray()).isEmpty();
 		assertThat(response.getStatus()).isEqualTo(400);
 		assertThat(response.getHeaderNames()).doesNotContain(HttpHeaders.CONTENT_TYPE);
+		assertThat(response.getHeaderNames()).doesNotContain(HttpHeaders.CONTENT_DISPOSITION);
 	}
 
 
@@ -968,6 +972,7 @@ class DispatcherServletTests {
 			response.setStatus(400);
 			response.setHeader("Test-Header", "spring");
 			response.addHeader("Content-Type", "application/json");
+			response.addHeader("Content-Disposition", "attachment; filename=\"report.txt\"");
 			if (request.getAttribute("commit") != null) {
 				response.flushBuffer();
 			}

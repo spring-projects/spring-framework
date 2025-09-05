@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -88,6 +88,11 @@ public class DisconnectedClientHelperTests {
 	void onwardClientDisconnectedExceptionType() {
 		Exception ex = new ResourceAccessException("I/O error", new EOFException());
 		assertThat(DisconnectedClientHelper.isClientDisconnectedException(ex)).isFalse();
+	}
+
+	@Test // gh-34533
+	void nullException() {
+		assertThat(DisconnectedClientHelper.isClientDisconnectedException(null)).isFalse();
 	}
 
 }

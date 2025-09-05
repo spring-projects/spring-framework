@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.codec.ServerCodecConfigurer;
 import org.springframework.http.server.reactive.observation.ServerRequestObservationContext;
 import org.springframework.util.CollectionUtils;
+import org.springframework.web.reactive.accept.DefaultApiVersionStrategy;
 import org.springframework.web.reactive.function.server.HandlerFunction;
 import org.springframework.web.reactive.function.server.RouterFunction;
 import org.springframework.web.reactive.function.server.RouterFunctions;
@@ -92,6 +93,7 @@ public class RouterFunctionMapping extends AbstractHandlerMapping implements Ini
 		this.messageReaders = messageReaders;
 	}
 
+
 	@Override
 	public void afterPropertiesSet() throws Exception {
 		if (CollectionUtils.isEmpty(this.messageReaders)) {
@@ -102,8 +104,14 @@ public class RouterFunctionMapping extends AbstractHandlerMapping implements Ini
 		if (this.routerFunction == null) {
 			initRouterFunctions();
 		}
+
 		if (this.routerFunction != null) {
 			RouterFunctions.changeParser(this.routerFunction, getPathPatternParser());
+			if (getApiVersionStrategy() instanceof DefaultApiVersionStrategy davs) {
+				if (davs.detectSupportedVersions()) {
+					this.routerFunction.accept(new SupportedVersionVisitor(davs));
+				}
+			}
 		}
 
 	}
@@ -149,14 +157,12 @@ public class RouterFunctionMapping extends AbstractHandlerMapping implements Ini
 
 	@Override
 	protected Mono<?> getHandlerInternal(ServerWebExchange exchange) {
-		if (this.routerFunction != null) {
-			ServerRequest request = ServerRequest.create(exchange, this.messageReaders);
-			return this.routerFunction.route(request)
-					.doOnNext(handler -> setAttributes(exchange.getAttributes(), request, handler));
-		}
-		else {
+		if (this.routerFunction == null) {
 			return Mono.empty();
 		}
+		ServerRequest request = ServerRequest.create(exchange, this.messageReaders, getApiVersionStrategy());
+		return this.routerFunction.route(request)
+				.doOnNext(handler -> setAttributes(exchange.getAttributes(), request, handler));
 	}
 
 	@SuppressWarnings("unchecked")

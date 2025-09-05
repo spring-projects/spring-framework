@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,6 +54,8 @@ import org.springframework.util.MimeTypeUtils;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.cors.reactive.CorsUtils;
+import org.springframework.web.reactive.HandlerMapping;
+import org.springframework.web.reactive.accept.ApiVersionStrategy;
 import org.springframework.web.reactive.function.BodyExtractor;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebSession;
@@ -180,6 +182,25 @@ public abstract class RequestPredicates {
 		else {
 			return new MultipleAcceptsPredicate(mediaTypes);
 		}
+	}
+
+	/**
+	 * {@code RequestPredicate} to match to the request API version extracted
+	 * from and parsed with the configured {@link ApiVersionStrategy}.
+	 * <p>The version may be one of the following:
+	 * <ul>
+	 * <li>Fixed version ("1.2") -- match this version only.
+	 * <li>Baseline version ("1.2+") -- match this and subsequent versions.
+	 * </ul>
+	 * <p>A baseline version allows n endpoint route to continue to work in
+	 * subsequent versions if it remains compatible until an incompatible change
+	 * eventually leads to the creation of a new route.
+	 * @param version the version to use
+	 * @return the created predicate instance
+	 * @since 7.0
+	 */
+	public static RequestPredicate version(Object version) {
+		return new ApiVersionPredicate(version);
 	}
 
 	/**
@@ -389,6 +410,14 @@ public abstract class RequestPredicates {
 		 * @see RequestPredicates#queryParam(String, String)
 		 */
 		void queryParam(String name, String value);
+
+		/**
+		 * Receive notification of an API version predicate. The version could
+		 * be fixed ("1.2") or baseline ("1.2+").
+		 * @param version the configured version
+		 * @since 7.0
+		 */
+		void version(String version);
 
 		/**
 		 * Receive first notification of a logical AND predicate.
@@ -831,6 +860,69 @@ public abstract class RequestPredicates {
 	}
 
 
+	private static class ApiVersionPredicate implements RequestPredicate {
+
+		private final String version;
+
+		private final boolean baselineVersion;
+
+		private @Nullable Comparable<?> parsedVersion;
+
+		public ApiVersionPredicate(Object version) {
+			if (version instanceof String s) {
+				this.baselineVersion = s.endsWith("+");
+				this.version = initVersion(s, this.baselineVersion);
+			}
+			else {
+				this.baselineVersion = false;
+				this.version = version.toString();
+				this.parsedVersion = (Comparable<?>) version;
+			}
+		}
+
+		private static String initVersion(String version, boolean baselineVersion) {
+			return (baselineVersion ? version.substring(0, version.length() - 1) : version);
+		}
+
+		@Override
+		public boolean test(ServerRequest request) {
+			if (this.parsedVersion == null) {
+				ApiVersionStrategy strategy = request.apiVersionStrategy();
+				Assert.state(strategy != null, "No ApiVersionStrategy to parse version with");
+				this.parsedVersion = strategy.parseVersion(this.version);
+			}
+
+			Comparable<?> requestVersion =
+					(Comparable<?>) request.attribute(HandlerMapping.API_VERSION_ATTRIBUTE).orElse(null);
+
+			if (requestVersion == null) {
+				traceMatch("Version", this.version, null, true);
+				return true;
+			}
+
+			int result = compareVersions(this.parsedVersion, requestVersion);
+			boolean match = (this.baselineVersion ? result <= 0 : result == 0);
+			traceMatch("Version", this.version, requestVersion, match);
+			return match;
+		}
+
+		@SuppressWarnings("unchecked")
+		private <V extends Comparable<V>> int compareVersions(Object v1, Object v2) {
+			return ((V) v1).compareTo((V) v2);
+		}
+
+		@Override
+		public void accept(Visitor visitor) {
+			visitor.version(this.version + (this.baselineVersion ? "+" : ""));
+		}
+
+		@Override
+		public String toString() {
+			return this.version;
+		}
+	}
+
+
 	@Deprecated(since = "7.0", forRemoval = true)
 	private static class PathExtensionPredicate implements RequestPredicate {
 
@@ -1187,6 +1279,11 @@ public abstract class RequestPredicates {
 		@Override
 		public List<HttpMessageReader<?>> messageReaders() {
 			return this.delegate.messageReaders();
+		}
+
+		@Override
+		public @Nullable ApiVersionStrategy apiVersionStrategy() {
+			return this.delegate.apiVersionStrategy();
 		}
 
 		@Override

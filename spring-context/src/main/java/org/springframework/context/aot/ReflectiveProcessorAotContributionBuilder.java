@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -100,6 +100,7 @@ public class ReflectiveProcessorAotContributionBuilder {
 		return (!this.classes.isEmpty() ? new AotContribution(this.classes) : null);
 	}
 
+
 	private static class AotContribution implements BeanFactoryInitializationAotContribution {
 
 		private final Class<?>[] classes;
@@ -113,8 +114,8 @@ public class ReflectiveProcessorAotContributionBuilder {
 			RuntimeHints runtimeHints = generationContext.getRuntimeHints();
 			registrar.registerRuntimeHints(runtimeHints, this.classes);
 		}
-
 	}
+
 
 	private static class ReflectiveClassPathScanner extends ClassPathScanningCandidateComponentProvider {
 

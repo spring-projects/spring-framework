@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,26 +37,6 @@ import static org.assertj.core.api.SoftAssertions.assertSoftly;
  * @see TrackingRunListener
  */
 public class JUnitTestingUtils {
-
-	/**
-	 * Run the tests in the supplied {@code testClass}, using the {@link Runner}
-	 * configured via {@link RunWith @RunWith} or the default JUnit runner, and
-	 * assert the expectations of the test execution.
-	 *
-	 * @param testClass the test class to run with JUnit
-	 * @param expectedStartedCount the expected number of tests that started
-	 * @param expectedFailedCount the expected number of tests that failed
-	 * @param expectedFinishedCount the expected number of tests that finished
-	 * @param expectedIgnoredCount the expected number of tests that were ignored
-	 * @param expectedAssumptionFailedCount the expected number of tests that
-	 * resulted in a failed assumption
-	 */
-	public static void runTestsAndAssertCounters(Class<?> testClass, int expectedStartedCount, int expectedFailedCount,
-			int expectedFinishedCount, int expectedIgnoredCount, int expectedAssumptionFailedCount) throws Exception {
-
-		runTestsAndAssertCounters(null, testClass, expectedStartedCount, expectedFailedCount, expectedFinishedCount,
-			expectedIgnoredCount, expectedAssumptionFailedCount);
-	}
 
 	/**
 	 * Run the tests in the supplied {@code testClass}, using the specified

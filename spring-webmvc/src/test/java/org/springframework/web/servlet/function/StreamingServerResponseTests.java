@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,13 +20,14 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
+import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.http.CacheControl;
 import org.springframework.http.MediaType;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.http.converter.json.JacksonJsonHttpMessageConverter;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
@@ -35,20 +36,21 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Tests for {@link StreamingServerResponse}.
+ *
  * @author Brian Clozel
  */
 class StreamingServerResponseTests {
 
-	private MockHttpServletRequest mockRequest;
+	private final MockHttpServletRequest mockRequest = new MockHttpServletRequest("GET", "https://example.com");
 
-	private MockHttpServletResponse mockResponse;
+	private final MockHttpServletResponse mockResponse = new MockHttpServletResponse();
+
 
 	@BeforeEach
 	void setUp() {
-		this.mockRequest = new MockHttpServletRequest("GET", "https://example.com");
 		this.mockRequest.setAsyncSupported(true);
-		this.mockResponse = new MockHttpServletResponse();
 	}
+
 
 	@Test
 	void writeSingleString() throws Exception {
@@ -113,7 +115,7 @@ class StreamingServerResponseTests {
 					}
 				});
 
-		ServerResponse.Context context = () -> Collections.singletonList(new MappingJackson2HttpMessageConverter());
+		ServerResponse.Context context = () -> List.of(new JacksonJsonHttpMessageConverter());
 		ModelAndView mav = response.writeTo(this.mockRequest, this.mockResponse, context);
 		assertThat(mav).isNull();
 		assertThat(this.mockResponse.getContentType()).isEqualTo(MediaType.APPLICATION_NDJSON.toString());
@@ -125,7 +127,6 @@ class StreamingServerResponseTests {
 
 
 	record Person(String name, int age) {
-
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,8 @@ import org.springframework.util.Assert;
  * <p>Favor this bean naming strategy over {@code AnnotationBeanNameGenerator} if
  * you run into naming conflicts due to multiple autodetected components having the
  * same non-qualified class name (i.e., classes with identical names but residing in
- * different packages).
+ * different packages). If you need such conflict avoidance for {@link Bean @Bean}
+ * methods as well, consider {@link FullyQualifiedConfigurationBeanNameGenerator}.
  *
  * <p>Note that an instance of this class is used by default for configuration-level
  * import purposes; whereas, the default for component scanning purposes is a plain
@@ -39,6 +40,7 @@ import org.springframework.util.Assert;
  * @since 5.2.3
  * @see org.springframework.beans.factory.support.DefaultBeanNameGenerator
  * @see AnnotationBeanNameGenerator
+ * @see FullyQualifiedConfigurationBeanNameGenerator
  * @see ConfigurationClassPostProcessor#IMPORT_BEAN_NAME_GENERATOR
  */
 public class FullyQualifiedAnnotationBeanNameGenerator extends AnnotationBeanNameGenerator {

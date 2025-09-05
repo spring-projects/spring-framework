@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,8 +45,9 @@ class ContextAotProcessorTests {
 	void processGeneratesAssets(@TempDir Path directory) {
 		GenericApplicationContext context = new AnnotationConfigApplicationContext();
 		context.registerBean(SampleApplication.class);
-		ContextAotProcessor processor = new DemoContextAotProcessor(SampleApplication.class, directory);
+		DemoContextAotProcessor processor = new DemoContextAotProcessor(SampleApplication.class, directory);
 		ClassName className = processor.process();
+		assertThat(processor.context.isClosed()).isTrue();
 		assertThat(className).isEqualTo(ClassName.get(SampleApplication.class.getPackageName(),
 				"ContextAotProcessorTests_SampleApplication__ApplicationContextInitializer"));
 		assertThat(directory).satisfies(hasGeneratedAssetsForSampleApplication());
@@ -61,9 +62,10 @@ class ContextAotProcessorTests {
 		Path existingSourceOutput = createExisting(sourceOutput);
 		Path existingResourceOutput = createExisting(resourceOutput);
 		Path existingClassOutput = createExisting(classOutput);
-		ContextAotProcessor processor = new DemoContextAotProcessor(SampleApplication.class,
+		DemoContextAotProcessor processor = new DemoContextAotProcessor(SampleApplication.class,
 				sourceOutput, resourceOutput, classOutput);
 		processor.process();
+		assertThat(processor.context.isClosed()).isTrue();
 		assertThat(existingSourceOutput).doesNotExist();
 		assertThat(existingResourceOutput).doesNotExist();
 		assertThat(existingClassOutput).doesNotExist();
@@ -73,13 +75,14 @@ class ContextAotProcessorTests {
 	void processWithEmptyNativeImageArgumentsDoesNotCreateNativeImageProperties(@TempDir Path directory) {
 		GenericApplicationContext context = new AnnotationConfigApplicationContext();
 		context.registerBean(SampleApplication.class);
-		ContextAotProcessor processor = new DemoContextAotProcessor(SampleApplication.class, directory) {
+		DemoContextAotProcessor processor = new DemoContextAotProcessor(SampleApplication.class, directory) {
 			@Override
 			protected List<String> getDefaultNativeImageArguments(String application) {
 				return Collections.emptyList();
 			}
 		};
 		processor.process();
+		assertThat(processor.context.isClosed()).isTrue();
 		assertThat(directory.resolve("resource/META-INF/native-image/com.example/example/native-image.properties"))
 				.doesNotExist();
 		context.close();
@@ -118,6 +121,8 @@ class ContextAotProcessorTests {
 
 	private static class DemoContextAotProcessor extends ContextAotProcessor {
 
+		AnnotationConfigApplicationContext context;
+
 		DemoContextAotProcessor(Class<?> application, Path rootPath) {
 			this(application, rootPath.resolve("source"), rootPath.resolve("resource"), rootPath.resolve("class"));
 		}
@@ -141,10 +146,11 @@ class ContextAotProcessorTests {
 		protected GenericApplicationContext prepareApplicationContext(Class<?> application) {
 			AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
 			context.register(application);
+			this.context = context;
 			return context;
 		}
-
 	}
+
 
 	@Configuration(proxyBeanMethods = false)
 	static class SampleApplication {
@@ -153,7 +159,6 @@ class ContextAotProcessorTests {
 		public String testBean() {
 			return "Hello";
 		}
-
 	}
 
 }

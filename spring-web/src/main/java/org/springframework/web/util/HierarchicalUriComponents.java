@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -443,11 +443,10 @@ final class HierarchicalUriComponents extends UriComponents {
 		UriTemplateVariables queryVariables = new QueryUriTemplateVariables(variables);
 		this.queryParams.forEach((key, values) -> {
 			String name = expandUriComponent(key, queryVariables, this.variableEncoder);
-			List<String> expandedValues = new ArrayList<>(values.size());
+			List<String> expandedValues = result.computeIfAbsent(name, k -> new ArrayList<>(values.size()));
 			for (String value : values) {
 				expandedValues.add(expandUriComponent(value, queryVariables, this.variableEncoder));
 			}
-			result.put(name, expandedValues);
 		});
 		return CollectionUtils.unmodifiableMultiValueMap(result);
 	}

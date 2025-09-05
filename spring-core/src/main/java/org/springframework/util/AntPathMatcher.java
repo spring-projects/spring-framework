@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -274,8 +274,8 @@ public class AntPathMatcher implements PathMatcher {
 			if (!matchStrings(pattDir, pathDirs[pathIdxEnd], uriTemplateVariables)) {
 				return false;
 			}
-			if (pattIdxEnd == (pattDirs.length - 1)
-					&& pattern.endsWith(this.pathSeparator) != path.endsWith(this.pathSeparator)) {
+			if (pattIdxEnd == (pattDirs.length - 1) &&
+					pattern.endsWith(this.pathSeparator) != path.endsWith(this.pathSeparator)) {
 				return false;
 			}
 			pattIdxEnd--;

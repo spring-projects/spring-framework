@@ -1,0 +1,109 @@
+[[webflux-versioning]]
+= API Versioning
+:page-section-summary-toc: 1
+
+[.small]#xref:web/webmvc-versioning.adoc[See equivalent in the Servlet stack]#
+
+Spring WebFlux supports API versioning. This section provides an overview of the support
+and underlying strategies.
+
+Please, see also related content in:
+
+- Configure xref:web/webflux/config.adoc#webflux-config-api-version[API versioning]
+in the WebFlux Config
+- xref:web/webflux/controller/ann-requestmapping.adoc#webflux-ann-requestmapping-version[Map requests]
+to annotated controller methods with an API version
+- xref:web/webflux-functional.adoc#api-version[Route requests]
+to functional endpoints with an API version
+
+Client support for API versioning is available also in `RestClient`, `WebClient`, and
+xref:integration/rest-clients.adoc#rest-http-interface[HTTP Service] clients, as well as
+for testing in `WebTestClient`.
+
+
+
+
+[[webflux-versioning-strategy]]
+== ApiVersionStrategy
+[.small]#xref:web/webmvc-versioning.adoc#mvc-versioning-strategy[See equivalent in the Servlet stack]#
+
+This is the central strategy for API versioning that holds all configured preferences
+related to versioning. It does the following:
+
+- Resolves versions from the requests via xref:#webflux-versioning-resolver[ApiVersionResolver]
+- Parses raw version values into `Comparable<?>` with xref:#webflux-versioning-parser[ApiVersionParser]
+- xref:#webflux-versioning-validation[Validates] request versions
+
+`ApiVersionStrategy` helps to map requests to `@RequestMapping` controller methods,
+and is initialized by the WebFlux config. Typically, applications do not interact
+directly with it.
+
+
+
+
+[[webflux-versioning-resolver]]
+== ApiVersionResolver
+[.small]#xref:web/webmvc-versioning.adoc#mvc-versioning-resolver[See equivalent in the Servlet stack]#
+
+This strategy resolves the API version from a request. The WebFlux config provides built-in
+options to resolve from a header, query parameter, media type parameter,
+or from the URL path. You can also use a custom `ApiVersionResolver`.
+
+NOTE: The path resolver always resolves the version from the specified path segment, or
+raises `InvalidApiVersionException` otherwise, and therefore it cannot yield to other
+resolvers.
+
+
+
+
+
+[[webflux-versioning-parser]]
+== ApiVersionParser
+[.small]#xref:web/webmvc-versioning.adoc#mvc-versioning-parser[See equivalent in the Servlet stack]#
+
+This strategy helps to parse raw version values into `Comparable<?>`, which helps to
+compare, sort, and select versions. By default, the built-in `SemanticApiVersionParser`
+parses a version into `major`, `minor`, and `patWebFluxch` integer values. Minor and patch
+values are set to 0 if not present.
+
+
+
+
+[[webflux-versioning-validation]]
+== Validation
+[.small]#xref:web/webmvc-versioning.adoc#mvc-versioning-validation[See equivalent in the Servlet stack]#
+
+If a request version is not supported, `InvalidApiVersionException` is raised resulting
+in a 400 response. By default, the list of supported versions is initialized from declared
+versions in annotated controller mappings, but you can turn that off through a flag in the
+WebFlux config, and use only the versions configured explicitly in the config.
+
+By default, a version is required when API versioning is enabled, and
+`MissingApiVersionException` is raised resulting in a 400 response if not present.
+You can make it optional in which case the most recent version is used.
+You can also specify a default version to use.
+
+
+
+
+[[webflux-versioning-deprecation-handler]]
+== ApiVersionDeprecationHandler
+[.small]#xref:web/webmvc-versioning.adoc#mvc-versioning-deprecation-handler[See equivalent in the Reactive stack]#
+
+This strategy can be configured to send hints and information about deprecated versions to
+clients via response headers. The built-in `StandardApiVersionDeprecationHandler`
+can set the "Deprecation" "Sunset" headers and "Link" headers as defined in
+https://datatracker.ietf.org/doc/html/rfc9745[RFC 9745] and
+https://datatracker.ietf.org/doc/html/rfc8594[RFC 8594]. You can also configure a custom
+handler for different headers.
+
+
+
+
+[[webflux-versioning-mapping]]
+== Request Mapping
+[.small]#xref:web/webmvc-versioning.adoc#mvc-versioning-mapping[See equivalent in the Servlet stack]#
+
+`ApiVersionStrategy` supports the mapping of requests to annotated controller methods.
+See xref:web/webflux/controller/ann-requestmapping.adoc#webflux-ann-requestmapping-version[API Versions]
+for more details.

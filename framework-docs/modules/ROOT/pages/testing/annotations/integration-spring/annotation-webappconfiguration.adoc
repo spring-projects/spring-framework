@@ -41,7 +41,6 @@ Kotlin::
 ======
 --
 
-
 To override the default, you can specify a different base resource path by using the
 implicit `value` attribute. Both `classpath:` and `file:` resource prefixes are
 supported. If no resource prefix is supplied, the path is assumed to be a file system
@@ -82,4 +81,3 @@ Note that `@WebAppConfiguration` must be used in conjunction with
 hierarchy. See the
 {spring-framework-api}/test/context/web/WebAppConfiguration.html[`@WebAppConfiguration`]
 javadoc for further details.
-

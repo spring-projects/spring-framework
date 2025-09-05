@@ -42,5 +42,3 @@ This does not entirely eliminate the possibility of a concurrency issue but
 reduces it greatly with information that is already available in the redirect URL.
 Therefore, we recommend that you use flash attributes mainly for redirect scenarios.
 ****
-
-

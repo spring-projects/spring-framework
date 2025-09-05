@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -640,11 +640,8 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 
 		// Remove the entity manager holder from the thread.
 		if (txObject.isNewEntityManagerHolder()) {
-			EntityManager em = txObject.getEntityManagerHolder().getEntityManager();
-			if (logger.isDebugEnabled()) {
-				logger.debug("Closing JPA EntityManager [" + em + "] after transaction");
-			}
-			EntityManagerFactoryUtils.closeEntityManager(em);
+			logger.debug("Closing JPA EntityManager after transaction");
+			txObject.getEntityManagerHolder().closeAll();
 		}
 		else {
 			logger.debug("Not closing pre-bound JPA EntityManager after transaction");

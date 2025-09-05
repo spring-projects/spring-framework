@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,13 +48,14 @@ import static org.hamcrest.Matchers.startsWith;
  */
 class XmlContentTests {
 
-	private static final String persons_XML =
-			"<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>"
-			+ "<persons>"
-			+ "<person><name>Jane</name></person>"
-			+ "<person><name>Jason</name></person>"
-			+ "<person><name>John</name></person>"
-			+ "</persons>";
+	private static final String persons_XML = """
+			<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+			<persons>
+				<person><name>Jane</name></person>
+				<person><name>Jason</name></person>
+				<person><name>John</name></person>
+			</persons>
+			""";
 
 
 	private final WebTestClient client = WebTestClient.bindToController(new PersonController()).build();

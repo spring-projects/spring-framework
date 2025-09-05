@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,10 +36,9 @@ import org.springframework.util.Assert;
  * "merged" from different source values, typically:
  *
  * <ul>
- * <li>Explicit and Implicit {@link AliasFor @AliasFor} declarations on one or
+ * <li>Explicit and implicit {@link AliasFor @AliasFor} declarations on one or
  * more attributes within the annotation</li>
  * <li>Explicit {@code @AliasFor} declarations for a meta-annotation</li>
- * <li>Convention based attribute aliases for a meta-annotation</li>
  * <li>From a meta-annotation declaration</li>
  * </ul>
  *

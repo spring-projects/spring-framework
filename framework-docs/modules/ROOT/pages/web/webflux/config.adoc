@@ -15,7 +15,6 @@ gain full control over the configuration through the
 xref:web/webflux/config.adoc#webflux-config-advanced-java[Advanced Configuration Mode].
 
 
-
 [[webflux-config-enable]]
 == Enabling WebFlux Config
 [.small]#xref:web/webmvc/mvc-config/enable.adoc[See equivalent in the Servlet stack]#
@@ -54,7 +53,6 @@ xref:web/webflux/dispatcher-handler.adoc#webflux-special-bean-types[infrastructu
 available on the classpath -- for JSON, XML, and others.
 
 
-
 [[webflux-config-customize]]
 == WebFlux config API
 [.small]#xref:web/webmvc/mvc-config/customize.adoc[See equivalent in the Servlet stack]#
@@ -86,7 +84,6 @@ class WebConfig : WebFluxConfigurer {
 }
 ----
 ======
-
 
 
 [[webflux-config-conversion]]
@@ -149,7 +146,7 @@ Java::
 			DateTimeFormatterRegistrar registrar = new DateTimeFormatterRegistrar();
 			registrar.setUseIsoFormat(true);
 			registrar.registerFormatters(registry);
-      	}
+		}
 	}
 ----
 
@@ -172,7 +169,6 @@ Kotlin::
 NOTE: See xref:core/validation/format.adoc#format-FormatterRegistrar-SPI[`FormatterRegistrar` SPI]
 and the `FormattingConversionServiceFactoryBean` for more information on when to
 use `FormatterRegistrar` implementations.
-
 
 
 [[webflux-config-validation]]
@@ -254,10 +250,8 @@ Kotlin::
 ----
 ======
 
-
 TIP: If you need to have a `LocalValidatorFactoryBean` injected somewhere, create a bean and
 mark it with `@Primary` in order to avoid conflict with the one declared in the MVC config.
-
 
 
 [[webflux-config-content-negotiation]]
@@ -299,7 +293,6 @@ Kotlin::
 	}
 ----
 ======
-
 
 
 [[webflux-config-message-codecs]]
@@ -353,7 +346,6 @@ It also automatically registers the following well-known modules if they are det
 * {jackson-github-org}/jackson-datatype-jsr310[`jackson-datatype-jsr310`]: Support for Java 8 Date and Time API types.
 * {jackson-github-org}/jackson-datatype-jdk8[`jackson-datatype-jdk8`]: Support for other Java 8 types, such as `Optional`.
 * {jackson-github-org}/jackson-module-kotlin[`jackson-module-kotlin`]: Support for Kotlin classes and data classes.
-
 
 
 [[webflux-config-view-resolvers]]
@@ -528,7 +520,6 @@ Kotlin::
 See xref:web/webflux-view.adoc[View Technologies] for more on the view technologies that are integrated with Spring WebFlux.
 
 
-
 [[webflux-config-static-resources]]
 == Static Resources
 [.small]#xref:web/webmvc/mvc-config/static-resources.adoc[See equivalent in the Servlet stack]#
@@ -659,7 +650,6 @@ TIP: The Java configuration based on `ResourceHandlerRegistry` provides further 
 for fine-grained control, for example, last-modified behavior and optimized resource resolution.
 
 
-
 [[webflux-config-path-matching]]
 == Path Matching
 [.small]#xref:web/webmvc/mvc-config/path-matching.adoc[See equivalent in the Servlet stack]#
@@ -684,6 +674,70 @@ reliance on it.
 ====
 
 
+[[webflux-config-api-version]]
+== API Version
+[.small]#xref:web/webmvc/mvc-config/api-version.adoc[See equivalent in the Servlet stack]#
+
+To enable API versioning, use the `ApiVersionConfigurer` callback of `WebFluxConfigurer`:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim"]
+----
+	@Configuration
+	public class WebConfiguration implements WebFluxConfigurer {
+
+		@Override
+		public void configureApiVersioning(ApiVersionConfigurer configurer) {
+			configurer.useRequestHeader("X-API-Version");
+		}
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim"]
+----
+	@Configuration
+	class WebConfiguration : WebMvcConfigurer {
+
+		override fun configureApiVersioning(configurer: ApiVersionConfigurer) {
+			configurer.useRequestHeader("X-API-Version")
+		}
+	}
+----
+======
+
+You can resolve the version through one of the built-in options listed below, or
+alternatively use a custom `ApiVersionResolver`:
+
+- Request header
+- Request parameter
+- Path segment
+- Media type parameter
+
+TIP: When using a path segment, consider configuring a shared path prefix externally
+in xref:web/webmvc/mvc-config/path-matching.adoc[Path Matching] options.
+
+By default, the version is parsed with `SemanticVersionParser`, but you can also configure
+a custom xref:web/webflux-versioning.adoc#webflux-versioning-parser[ApiVersionParser].
+
+Supported versions are transparently detected from versions declared in request mappings
+for convenience, but you can turn that off through a flag in the WebFlux config, and
+consider only the versions configured explicitly in the config as supported.
+Requests with a version that is not supported are rejected with
+`InvalidApiVersionException` resulting in a 400 response.
+
+You can set an `ApiVersionDeprecationHandler` to send information about deprecated
+versions to clients. The built-in standard handler can set "Deprecation", "Sunset", and
+"Link" headers based on https://datatracker.ietf.org/doc/html/rfc9745[RFC 9745] and
+https://datatracker.ietf.org/doc/html/rfc8594[RFC 8594].
+
+Once API versioning is configured, you can begin to map requests to
+xref:web/webflux/controller/ann-requestmapping.adoc#webflux-ann-requestmapping-version[controller methods]
+according to the request version.
 
 
 [[webflux-config-blocking-execution]]
@@ -732,8 +786,6 @@ Kotlin::
 By default, controller methods whose return type is not recognized by the configured
 `ReactiveAdapterRegistry` are considered blocking, but you can set a custom controller
 method predicate via `BlockingExecutionConfigurer`.
-
-
 
 
 [[webflux-config-websocket-service]]
@@ -785,8 +837,6 @@ Kotlin::
 ======
 
 
-
-
 [[webflux-config-advanced-java]]
 == Advanced Configuration Mode
 [.small]#xref:web/webmvc/mvc-config/advanced-java.adoc[See equivalent in the Servlet stack]#
@@ -829,7 +879,3 @@ Kotlin::
 You can keep existing methods in `WebConfig`, but you can now also override bean declarations
 from the base class and still have any number of other `WebMvcConfigurer` implementations on
 the classpath.
-
-
-
-

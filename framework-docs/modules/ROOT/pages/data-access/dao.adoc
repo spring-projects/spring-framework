@@ -8,7 +8,6 @@ and it also lets you code without worrying about catching exceptions that are
 specific to each technology.
 
 
-
 [[dao-exceptions]]
 == Consistent Exception Hierarchy
 
@@ -40,7 +39,6 @@ The following image shows the exception hierarchy that Spring provides.
 `DataAccessException` hierarchy.)
 
 image::DataAccessException.png[]
-
 
 
 [[dao-annotations]]
@@ -192,7 +190,3 @@ Kotlin::
 
 NOTE: See the specific coverage of each persistence technology for details on how to
 configure the application context to take advantage of these annotations.
-
-
-
-

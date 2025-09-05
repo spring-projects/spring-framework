@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,13 +18,17 @@ package org.springframework.core.type.classreading;
 
 import java.io.IOException;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
 
 /**
  * Factory interface for {@link MetadataReader} instances.
  * Allows for caching a MetadataReader per original resource.
  *
  * @author Juergen Hoeller
+ * @author Brian Clozel
  * @since 2.5
  * @see SimpleMetadataReaderFactory
  * @see CachingMetadataReaderFactory
@@ -49,4 +53,30 @@ public interface MetadataReaderFactory {
 	 */
 	MetadataReader getMetadataReader(Resource resource) throws IOException;
 
+	/**
+	 * Return the ResourceLoader that this MetadataReaderFactory has been
+	 * constructed with.
+	 * @since 7.0
+	 */
+	ResourceLoader getResourceLoader();
+
+	/**
+	 * Create a default {@link MetadataReaderFactory} implementation that's suitable
+	 * for the current JVM.
+	 * @return a new factory instance
+	 * @since 7.0
+	 */
+	static MetadataReaderFactory create(@Nullable ResourceLoader resourceLoader) {
+		return MetadataReaderFactoryDelegate.create(resourceLoader);
+	}
+
+	/**
+	 * Create a default {@link MetadataReaderFactory} implementation that's suitable
+	 * for the current JVM.
+	 * @return a new factory instance
+	 * @since 7.0
+	 */
+	static MetadataReaderFactory create(@Nullable ClassLoader classLoader) {
+		return MetadataReaderFactoryDelegate.create(classLoader);
+	}
 }

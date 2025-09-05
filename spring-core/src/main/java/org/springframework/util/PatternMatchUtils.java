@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,8 @@
 package org.springframework.util;
 
 import org.jspecify.annotations.Nullable;
+
+import org.springframework.lang.Contract;
 
 /**
  * Utility methods for simple pattern matching, in particular for Spring's typical
@@ -36,14 +38,28 @@ public abstract class PatternMatchUtils {
 	 * @param str the String to match
 	 * @return whether the String matches the given pattern
 	 */
+	@Contract("null, _ -> false; _, null -> false")
 	public static boolean simpleMatch(@Nullable String pattern, @Nullable String str) {
+		return simpleMatch(pattern, str, false);
+	}
+
+	/**
+	 * Variant of {@link #simpleMatch(String, String)} that ignores upper/lower case.
+	 * @since 6.1.20
+	 */
+	@Contract("null, _ -> false; _, null -> false")
+	public static boolean simpleMatchIgnoreCase(@Nullable String pattern, @Nullable String str) {
+		return simpleMatch(pattern, str, true);
+	}
+
+	private static boolean simpleMatch(@Nullable String pattern, @Nullable String str, boolean ignoreCase) {
 		if (pattern == null || str == null) {
 			return false;
 		}
 
 		int firstIndex = pattern.indexOf('*');
 		if (firstIndex == -1) {
-			return pattern.equals(str);
+			return (ignoreCase ? pattern.equalsIgnoreCase(str) : pattern.equals(str));
 		}
 
 		if (firstIndex == 0) {
@@ -52,25 +68,43 @@ public abstract class PatternMatchUtils {
 			}
 			int nextIndex = pattern.indexOf('*', 1);
 			if (nextIndex == -1) {
-				return str.endsWith(pattern.substring(1));
+				String part = pattern.substring(1);
+				return (ignoreCase ? StringUtils.endsWithIgnoreCase(str, part) : str.endsWith(part));
 			}
 			String part = pattern.substring(1, nextIndex);
 			if (part.isEmpty()) {
-				return simpleMatch(pattern.substring(nextIndex), str);
+				return simpleMatch(pattern.substring(nextIndex), str, ignoreCase);
 			}
-			int partIndex = str.indexOf(part);
+			int partIndex = indexOf(str, part, 0, ignoreCase);
 			while (partIndex != -1) {
-				if (simpleMatch(pattern.substring(nextIndex), str.substring(partIndex + part.length()))) {
+				if (simpleMatch(pattern.substring(nextIndex), str.substring(partIndex + part.length()), ignoreCase)) {
 					return true;
 				}
-				partIndex = str.indexOf(part, partIndex + 1);
+				partIndex = indexOf(str, part, partIndex + 1, ignoreCase);
 			}
 			return false;
 		}
 
 		return (str.length() >= firstIndex &&
-				pattern.startsWith(str.substring(0, firstIndex)) &&
-				simpleMatch(pattern.substring(firstIndex), str.substring(firstIndex)));
+				checkStartsWith(pattern, str, firstIndex, ignoreCase) &&
+				simpleMatch(pattern.substring(firstIndex), str.substring(firstIndex), ignoreCase));
+	}
+
+	private static boolean checkStartsWith(String pattern, String str, int index, boolean ignoreCase) {
+		String part = str.substring(0, index);
+		return (ignoreCase ? StringUtils.startsWithIgnoreCase(pattern, part) : pattern.startsWith(part));
+	}
+
+	private static int indexOf(String str, String otherStr, int startIndex, boolean ignoreCase) {
+		if (!ignoreCase) {
+			return str.indexOf(otherStr, startIndex);
+		}
+		for (int i = startIndex; i <= (str.length() - otherStr.length()); i++) {
+			if (str.regionMatches(true, i, otherStr, 0, otherStr.length())) {
+				return i;
+			}
+		}
+		return -1;
 	}
 
 	/**
@@ -83,10 +117,27 @@ public abstract class PatternMatchUtils {
 	 * @param str the String to match
 	 * @return whether the String matches any of the given patterns
 	 */
+	@Contract("null, _ -> false; _, null -> false")
 	public static boolean simpleMatch(String @Nullable [] patterns, @Nullable String str) {
 		if (patterns != null) {
 			for (String pattern : patterns) {
 				if (simpleMatch(pattern, str)) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Variant of {@link #simpleMatch(String[], String)} that ignores upper/lower case.
+	 * @since 6.1.20
+	 */
+	@Contract("null, _ -> false; _, null -> false")
+	public static boolean simpleMatchIgnoreCase(String @Nullable [] patterns, @Nullable String str) {
+		if (patterns != null) {
+			for (String pattern : patterns) {
+				if (simpleMatch(pattern, str, true)) {
 					return true;
 				}
 			}

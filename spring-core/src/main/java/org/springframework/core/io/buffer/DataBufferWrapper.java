@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -85,13 +85,13 @@ public class DataBufferWrapper implements DataBuffer {
 	}
 
 	@Override
-	@Deprecated
+	@Deprecated(since = "6.0")
 	public DataBuffer capacity(int capacity) {
 		return this.delegate.capacity(capacity);
 	}
 
 	@Override
-	@Deprecated
+	@Deprecated(since = "6.0")
 	public DataBuffer ensureCapacity(int capacity) {
 		return this.delegate.ensureCapacity(capacity);
 	}
@@ -173,13 +173,13 @@ public class DataBufferWrapper implements DataBuffer {
 	}
 
 	@Override
-	@Deprecated
+	@Deprecated(since = "6.0")
 	public DataBuffer slice(int index, int length) {
 		return this.delegate.slice(index, length);
 	}
 
 	@Override
-	@Deprecated
+	@Deprecated(since = "6.0")
 	public DataBuffer retainedSlice(int index, int length) {
 		return this.delegate.retainedSlice(index, length);
 	}
@@ -190,25 +190,25 @@ public class DataBufferWrapper implements DataBuffer {
 	}
 
 	@Override
-	@Deprecated
+	@Deprecated(since = "6.0")
 	public ByteBuffer asByteBuffer() {
 		return this.delegate.asByteBuffer();
 	}
 
 	@Override
-	@Deprecated
+	@Deprecated(since = "6.0")
 	public ByteBuffer asByteBuffer(int index, int length) {
 		return this.delegate.asByteBuffer(index, length);
 	}
 
 	@Override
-	@Deprecated
+	@Deprecated(since = "6.0.5")
 	public ByteBuffer toByteBuffer() {
 		return this.delegate.toByteBuffer();
 	}
 
 	@Override
-	@Deprecated
+	@Deprecated(since = "6.0.5")
 	public ByteBuffer toByteBuffer(int index, int length) {
 		return this.delegate.toByteBuffer(index, length);
 	}

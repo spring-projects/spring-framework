@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,8 +25,6 @@ import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
@@ -49,12 +47,9 @@ import org.springframework.web.reactive.function.server.RouterFunction;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
 import org.springframework.web.testfixture.http.server.reactive.bootstrap.HttpServer;
-import org.springframework.web.testfixture.http.server.reactive.bootstrap.TomcatHttpServer;
-import org.springframework.web.testfixture.http.server.reactive.bootstrap.UndertowHttpServer;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
-import static org.junit.jupiter.api.Assumptions.assumeFalse;
 import static org.springframework.web.reactive.function.server.RouterFunctions.route;
 
 /**
@@ -69,8 +64,6 @@ class MultipartRouterFunctionIntegrationTests extends AbstractRouterFunctionInte
 
 	@ParameterizedHttpServerTest
 	void multipartData(HttpServer httpServer) throws Exception {
-		assumeFalse(httpServer instanceof TomcatHttpServer,
-				"TomcatHttpServer fails with invalid request body chunk");
 		startServer(httpServer);
 
 		Mono<ResponseEntity<Void>> result = webClient
@@ -89,8 +82,6 @@ class MultipartRouterFunctionIntegrationTests extends AbstractRouterFunctionInte
 
 	@ParameterizedHttpServerTest
 	void parts(HttpServer httpServer) throws Exception {
-		assumeFalse(httpServer instanceof TomcatHttpServer,
-				"TomcatHttpServer fails with invalid request body chunk");
 		startServer(httpServer);
 
 		Mono<ResponseEntity<Void>> result = webClient
@@ -109,18 +100,7 @@ class MultipartRouterFunctionIntegrationTests extends AbstractRouterFunctionInte
 
 	@ParameterizedHttpServerTest
 	void transferTo(HttpServer httpServer) throws Exception {
-		assumeFalse(httpServer instanceof TomcatHttpServer,
-				"TomcatHttpServer fails with invalid request body chunk");
-		// TODO Determine why Undertow fails: https://github.com/spring-projects/spring-framework/issues/25310
-		assumeFalse(httpServer instanceof UndertowHttpServer, "Undertow currently fails with transferTo");
 		verifyTransferTo(httpServer);
-	}
-
-	@Disabled("Unstable on Undertow: https://github.com/spring-projects/spring-framework/issues/25310")
-	// Using @RepeatedTest(100), this test fails approximately 10% - 20% of the time.
-	@Test
-	void transferToWithUndertow() throws Exception {
-		verifyTransferTo(new UndertowHttpServer());
 	}
 
 	private void verifyTransferTo(HttpServer httpServer) throws Exception {
@@ -151,8 +131,6 @@ class MultipartRouterFunctionIntegrationTests extends AbstractRouterFunctionInte
 
 	@ParameterizedHttpServerTest
 	void partData(HttpServer httpServer) throws Exception {
-		assumeFalse(httpServer instanceof TomcatHttpServer,
-				"TomcatHttpServer fails with invalid request body chunk");
 		startServer(httpServer);
 
 		Mono<ResponseEntity<Void>> result = webClient
@@ -171,9 +149,6 @@ class MultipartRouterFunctionIntegrationTests extends AbstractRouterFunctionInte
 
 	@ParameterizedHttpServerTest
 	void proxy(HttpServer httpServer) throws Exception {
-		assumeFalse(httpServer instanceof TomcatHttpServer,
-				"TomcatHttpServer fails with invalid request body chunk");
-		assumeFalse(httpServer instanceof UndertowHttpServer, "Undertow currently fails proxying requests");
 		startServer(httpServer);
 
 		Mono<ResponseEntity<Void>> result = webClient

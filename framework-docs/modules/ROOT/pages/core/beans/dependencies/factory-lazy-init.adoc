@@ -29,6 +29,3 @@ annotated class or in XML using the `default-lazy-init` attribute on the `<beans
 shows:
 
 include-code::./LazyConfiguration[tag=snippet,indent=0]
-
-
-

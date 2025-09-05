@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -84,7 +84,6 @@ import org.springframework.core.annotation.MergedAnnotations;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.MethodMetadata;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
-import org.springframework.core.type.classreading.SimpleMetadataReaderFactory;
 import org.springframework.javapoet.ClassName;
 import org.springframework.javapoet.CodeBlock;
 import org.springframework.util.Assert;
@@ -271,7 +270,7 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 					"AutowiredAnnotationBeanPostProcessor requires a ConfigurableListableBeanFactory: " + beanFactory);
 		}
 		this.beanFactory = clbf;
-		this.metadataReaderFactory = new SimpleMetadataReaderFactory(clbf.getBeanClassLoader());
+		this.metadataReaderFactory = MetadataReaderFactory.create(clbf.getBeanClassLoader());
 	}
 
 

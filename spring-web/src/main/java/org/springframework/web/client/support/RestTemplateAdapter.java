@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -86,7 +86,7 @@ public final class RestTemplateAdapter implements HttpExchangeAdapter {
 		return this.restTemplate.exchange(newRequest(values), bodyType);
 	}
 
-	private RequestEntity<?> newRequest(HttpRequestValues values) {
+	private <B> RequestEntity<?> newRequest(HttpRequestValues values) {
 		HttpMethod httpMethod = values.getHttpMethod();
 		Assert.notNull(httpMethod, "HttpMethod is required");
 
@@ -120,11 +120,16 @@ public final class RestTemplateAdapter implements HttpExchangeAdapter {
 			builder.header(HttpHeaders.COOKIE, String.join("; ", cookies));
 		}
 
-		if (values.getBodyValue() != null) {
-			return builder.body(values.getBodyValue());
+		Object body = values.getBodyValue();
+		if (body == null) {
+			return builder.build();
 		}
 
-		return builder.build();
+		if (values.getBodyValueType() != null) {
+			return builder.body(body, values.getBodyValueType().getType());
+		}
+
+		return builder.body(body);
 	}
 
 

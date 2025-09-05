@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,19 +45,19 @@ class WebFluxResponseStatusExceptionHandlerTests extends AbstractResponseStatusE
 	void handleAnnotatedException() {
 		Throwable ex = new CustomException();
 		this.handler.handle(this.exchange, ex).block(Duration.ofSeconds(5));
-		assertThat(this.exchange.getResponse().getStatusCode()).isEqualTo(HttpStatus.I_AM_A_TEAPOT);
+		assertThat(this.exchange.getResponse().getStatusCode()).isEqualTo(HttpStatus.ALREADY_REPORTED);
 	}
 
 	@Test
 	void handleNestedAnnotatedException() {
 		Throwable ex = new Exception(new CustomException());
 		this.handler.handle(this.exchange, ex).block(Duration.ofSeconds(5));
-		assertThat(this.exchange.getResponse().getStatusCode()).isEqualTo(HttpStatus.I_AM_A_TEAPOT);
+		assertThat(this.exchange.getResponse().getStatusCode()).isEqualTo(HttpStatus.ALREADY_REPORTED);
 	}
 
 
 	@SuppressWarnings("serial")
-	@ResponseStatus(HttpStatus.I_AM_A_TEAPOT)
+	@ResponseStatus(HttpStatus.ALREADY_REPORTED)
 	private static class CustomException extends Exception {
 	}
 

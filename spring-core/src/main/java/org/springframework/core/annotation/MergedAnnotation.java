@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -490,8 +490,6 @@ public interface MergedAnnotation<A extends Annotation> {
 	 * it has not already been synthesized and one of the following is true.
 	 * <ul>
 	 * <li>The annotation declares attributes annotated with {@link AliasFor @AliasFor}.</li>
-	 * <li>The annotation is a composed annotation that relies on convention-based
-	 * annotation attribute overrides in meta-annotations.</li>
 	 * <li>The annotation declares attributes that are annotations or arrays of
 	 * annotations that are themselves synthesizable.</li>
 	 * </ul>

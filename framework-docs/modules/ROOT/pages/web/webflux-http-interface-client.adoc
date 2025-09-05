@@ -7,4 +7,3 @@ performs the exchanges. This helps to simplify HTTP remote access and provides a
 flexibility for to choose an API style such as synchronous or reactive.
 
 See xref:integration/rest-clients.adoc#rest-http-interface[REST Endpoints] for details.
-

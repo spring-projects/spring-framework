@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -76,7 +76,7 @@ public interface NamedParameterJdbcOperations {
 	 * @return a result object returned by the action, or {@code null}
 	 * @throws DataAccessException if there is any problem
 	 */
-	<T> @Nullable T execute(String sql, SqlParameterSource paramSource, PreparedStatementCallback<T> action)
+	<T extends @Nullable Object> T execute(String sql, SqlParameterSource paramSource, PreparedStatementCallback<T> action)
 			throws DataAccessException;
 
 	/**
@@ -94,7 +94,7 @@ public interface NamedParameterJdbcOperations {
 	 * @return a result object returned by the action, or {@code null}
 	 * @throws DataAccessException if there is any problem
 	 */
-	<T> @Nullable T execute(String sql, Map<String, ?> paramMap, PreparedStatementCallback<T> action)
+	<T extends @Nullable Object> T execute(String sql, Map<String, ?> paramMap, PreparedStatementCallback<T> action)
 			throws DataAccessException;
 
 	/**
@@ -110,7 +110,7 @@ public interface NamedParameterJdbcOperations {
 	 * @return a result object returned by the action, or {@code null}
 	 * @throws DataAccessException if there is any problem
 	 */
-	<T> @Nullable T execute(String sql, PreparedStatementCallback<T> action) throws DataAccessException;
+	<T extends @Nullable Object> T execute(String sql, PreparedStatementCallback<T> action) throws DataAccessException;
 
 	/**
 	 * Query given SQL to create a prepared statement from SQL and a list
@@ -122,7 +122,7 @@ public interface NamedParameterJdbcOperations {
 	 * @return an arbitrary result object, as returned by the ResultSetExtractor
 	 * @throws DataAccessException if the query fails
 	 */
-	<T> @Nullable T query(String sql, SqlParameterSource paramSource, ResultSetExtractor<T> rse)
+	<T extends @Nullable Object> T query(String sql, SqlParameterSource paramSource, ResultSetExtractor<T> rse)
 			throws DataAccessException;
 
 	/**
@@ -136,7 +136,7 @@ public interface NamedParameterJdbcOperations {
 	 * @return an arbitrary result object, as returned by the ResultSetExtractor
 	 * @throws DataAccessException if the query fails
 	 */
-	<T> @Nullable T query(String sql, Map<String, ?> paramMap, ResultSetExtractor<T> rse)
+	<T extends @Nullable Object> T query(String sql, Map<String, ?> paramMap, ResultSetExtractor<T> rse)
 			throws DataAccessException;
 
 	/**
@@ -150,7 +150,7 @@ public interface NamedParameterJdbcOperations {
 	 * @return an arbitrary result object, as returned by the ResultSetExtractor
 	 * @throws DataAccessException if the query fails
 	 */
-	<T> @Nullable T query(String sql, ResultSetExtractor<T> rse) throws DataAccessException;
+	<T extends @Nullable Object> T query(String sql, ResultSetExtractor<T> rse) throws DataAccessException;
 
 	/**
 	 * Query given SQL to create a prepared statement from SQL and a list of
@@ -198,7 +198,7 @@ public interface NamedParameterJdbcOperations {
 	 * @return the result List, containing mapped objects
 	 * @throws DataAccessException if the query fails
 	 */
-	<T> List<T> query(String sql, SqlParameterSource paramSource, RowMapper<T> rowMapper)
+	<T extends @Nullable Object> List<T> query(String sql, SqlParameterSource paramSource, RowMapper<T> rowMapper)
 			throws DataAccessException;
 
 	/**
@@ -212,7 +212,7 @@ public interface NamedParameterJdbcOperations {
 	 * @return the result List, containing mapped objects
 	 * @throws DataAccessException if the query fails
 	 */
-	<T> List<T> query(String sql, Map<String, ?> paramMap, RowMapper<T> rowMapper)
+	<T extends @Nullable Object> List<T> query(String sql, Map<String, ?> paramMap, RowMapper<T> rowMapper)
 			throws DataAccessException;
 
 	/**
@@ -226,7 +226,7 @@ public interface NamedParameterJdbcOperations {
 	 * @return the result List, containing mapped objects
 	 * @throws DataAccessException if the query fails
 	 */
-	<T> List<T> query(String sql, RowMapper<T> rowMapper) throws DataAccessException;
+	<T extends @Nullable Object> List<T> query(String sql, RowMapper<T> rowMapper) throws DataAccessException;
 
 	/**
 	 * Query given SQL to create a prepared statement from SQL and a list
@@ -240,7 +240,7 @@ public interface NamedParameterJdbcOperations {
 	 * @throws DataAccessException if the query fails
 	 * @since 5.3
 	 */
-	<T> Stream<T> queryForStream(String sql, SqlParameterSource paramSource, RowMapper<T> rowMapper)
+	<T extends @Nullable Object> Stream<T> queryForStream(String sql, SqlParameterSource paramSource, RowMapper<T> rowMapper)
 			throws DataAccessException;
 
 	/**
@@ -256,7 +256,7 @@ public interface NamedParameterJdbcOperations {
 	 * @throws DataAccessException if the query fails
 	 * @since 5.3
 	 */
-	<T> Stream<T> queryForStream(String sql, Map<String, ?> paramMap, RowMapper<T> rowMapper)
+	<T extends @Nullable Object> Stream<T> queryForStream(String sql, Map<String, ?> paramMap, RowMapper<T> rowMapper)
 			throws DataAccessException;
 
 	/**
@@ -272,7 +272,7 @@ public interface NamedParameterJdbcOperations {
 	 * if the query does not return exactly one row
 	 * @throws DataAccessException if the query fails
 	 */
-	<T> @Nullable T queryForObject(String sql, SqlParameterSource paramSource, RowMapper<T> rowMapper)
+	<T extends @Nullable Object> T queryForObject(String sql, SqlParameterSource paramSource, RowMapper<T> rowMapper)
 			throws DataAccessException;
 
 	/**
@@ -289,7 +289,7 @@ public interface NamedParameterJdbcOperations {
 	 * if the query does not return exactly one row
 	 * @throws DataAccessException if the query fails
 	 */
-	<T> @Nullable T queryForObject(String sql, Map<String, ?> paramMap, RowMapper<T> rowMapper)
+	<T extends @Nullable Object> T queryForObject(String sql, Map<String, ?> paramMap, RowMapper<T> rowMapper)
 			throws DataAccessException;
 
 	/**
@@ -346,7 +346,7 @@ public interface NamedParameterJdbcOperations {
 	 * @see org.springframework.jdbc.core.JdbcTemplate#queryForMap(String)
 	 * @see org.springframework.jdbc.core.ColumnMapRowMapper
 	 */
-	Map<String, Object> queryForMap(String sql, SqlParameterSource paramSource) throws DataAccessException;
+	Map<String, @Nullable Object> queryForMap(String sql, SqlParameterSource paramSource) throws DataAccessException;
 
 	/**
 	 * Query given SQL to create a prepared statement from SQL and a
@@ -366,7 +366,7 @@ public interface NamedParameterJdbcOperations {
 	 * @see org.springframework.jdbc.core.JdbcTemplate#queryForMap(String)
 	 * @see org.springframework.jdbc.core.ColumnMapRowMapper
 	 */
-	Map<String, Object> queryForMap(String sql, Map<String, ?> paramMap) throws DataAccessException;
+	Map<String, @Nullable Object> queryForMap(String sql, Map<String, ?> paramMap) throws DataAccessException;
 
 	/**
 	 * Query given SQL to create a prepared statement from SQL and a
@@ -382,7 +382,7 @@ public interface NamedParameterJdbcOperations {
 	 * @see org.springframework.jdbc.core.JdbcTemplate#queryForList(String, Class)
 	 * @see org.springframework.jdbc.core.SingleColumnRowMapper
 	 */
-	<T> List<T> queryForList(String sql, SqlParameterSource paramSource, Class<T> elementType)
+	<T> List<@Nullable T> queryForList(String sql, SqlParameterSource paramSource, Class<T> elementType)
 			throws DataAccessException;
 
 	/**
@@ -400,7 +400,7 @@ public interface NamedParameterJdbcOperations {
 	 * @see org.springframework.jdbc.core.JdbcTemplate#queryForList(String, Class)
 	 * @see org.springframework.jdbc.core.SingleColumnRowMapper
 	 */
-	<T> List<T> queryForList(String sql, Map<String, ?> paramMap, Class<T> elementType)
+	<T> List<@Nullable T> queryForList(String sql, Map<String, ?> paramMap, Class<T> elementType)
 			throws DataAccessException;
 
 	/**
@@ -416,7 +416,7 @@ public interface NamedParameterJdbcOperations {
 	 * @throws DataAccessException if the query fails
 	 * @see org.springframework.jdbc.core.JdbcTemplate#queryForList(String)
 	 */
-	List<Map<String, Object>> queryForList(String sql, SqlParameterSource paramSource) throws DataAccessException;
+	List<Map<String, @Nullable Object>> queryForList(String sql, SqlParameterSource paramSource) throws DataAccessException;
 
 	/**
 	 * Query given SQL to create a prepared statement from SQL and a
@@ -432,7 +432,7 @@ public interface NamedParameterJdbcOperations {
 	 * @throws DataAccessException if the query fails
 	 * @see org.springframework.jdbc.core.JdbcTemplate#queryForList(String)
 	 */
-	List<Map<String, Object>> queryForList(String sql, Map<String, ?> paramMap) throws DataAccessException;
+	List<Map<String, @Nullable Object>> queryForList(String sql, Map<String, ?> paramMap) throws DataAccessException;
 
 	/**
 	 * Query given SQL to create a prepared statement from SQL and a

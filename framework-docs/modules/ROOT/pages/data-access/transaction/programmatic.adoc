@@ -220,6 +220,7 @@ of a `TransactionTemplate`, if a class needs to use a `TransactionTemplate` with
 different settings (for example, a different isolation level), you need to create
 two distinct `TransactionTemplate` instances.
 
+
 [[tx-prog-operator]]
 == Using the `TransactionalOperator`
 
@@ -331,7 +332,6 @@ As a result it is important to consider the operators used downstream from a tra
 `Publisher`. In particular in the case of a `Flux` or other multi-value `Publisher`,
 the full output must be consumed to allow the transaction to complete.
 
-
 [[tx-prog-operator-settings]]
 === Specifying Transaction Settings
 
@@ -381,6 +381,7 @@ Kotlin::
 	}
 ----
 ======
+
 
 [[transaction-programmatic-tm]]
 == Using the `TransactionManager`
@@ -440,7 +441,6 @@ Kotlin::
 ----
 ======
 
-
 [[transaction-programmatic-rtm]]
 === Using the `ReactiveTransactionManager`
 
@@ -492,5 +492,3 @@ Kotlin::
 	}
 ----
 ======
-
-

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +36,7 @@ import org.springframework.aop.AopInvocationException;
 import org.springframework.aop.RawTargetAccess;
 import org.springframework.aop.TargetSource;
 import org.springframework.aop.support.AopUtils;
+import org.springframework.aot.AotDetector;
 import org.springframework.cglib.core.ClassLoaderAwareGeneratorStrategy;
 import org.springframework.cglib.core.CodeGenerationException;
 import org.springframework.cglib.core.GeneratorStrategy;
@@ -203,7 +204,7 @@ class CglibAopProxy implements AopProxy, Serializable {
 			enhancer.setSuperclass(proxySuperClass);
 			enhancer.setInterfaces(AopProxyUtils.completeProxiedInterfaces(this.advised));
 			enhancer.setNamingPolicy(SpringNamingPolicy.INSTANCE);
-			enhancer.setAttemptLoad(true);
+			enhancer.setAttemptLoad(enhancer.getUseCache() && AotDetector.useGeneratedArtifacts());
 			enhancer.setStrategy(KotlinDetector.isKotlinType(proxySuperClass) ?
 					new ClassLoaderAwareGeneratorStrategy(classLoader) :
 					new ClassLoaderAwareGeneratorStrategy(classLoader, undeclaredThrowableStrategy)
@@ -289,9 +290,15 @@ class CglibAopProxy implements AopProxy, Serializable {
 				int mod = method.getModifiers();
 				if (!Modifier.isStatic(mod) && !Modifier.isPrivate(mod)) {
 					if (Modifier.isFinal(mod)) {
-						if (logger.isWarnEnabled() && implementsInterface(method, ifcs)) {
-							logger.warn("Unable to proxy interface-implementing method [" + method + "] because " +
-									"it is marked as final, consider using interface-based JDK proxies instead.");
+						if (logger.isWarnEnabled() && Modifier.isPublic(mod)) {
+							if (implementsInterface(method, ifcs)) {
+								logger.warn("Unable to proxy interface-implementing method [" + method + "] because " +
+										"it is marked as final, consider using interface-based JDK proxies instead.");
+							}
+							else {
+								logger.warn("Public final method [" + method + "] cannot get proxied via CGLIB, " +
+										"consider removing the final marker or using interface-based JDK proxies.");
+							}
 						}
 						if (logger.isDebugEnabled()) {
 							logger.debug("Final method [" + method + "] cannot get proxied via CGLIB: " +
@@ -687,7 +694,7 @@ class CglibAopProxy implements AopProxy, Serializable {
 			Object target = null;
 			TargetSource targetSource = this.advised.getTargetSource();
 			try {
-				if (this.advised.exposeProxy) {
+				if (this.advised.isExposeProxy()) {
 					// Make invocation available if necessary.
 					oldProxy = AopContext.setCurrentProxy(proxy);
 					setProxyContext = true;

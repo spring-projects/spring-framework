@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -660,6 +661,53 @@ public class DefaultStompSessionTests {
 		assertThat(notReceived.get()).isTrue();
 		verify(future).cancel(true);
 		verifyNoMoreInteractions(future);
+	}
+
+	@Test
+	void unsubscribeWithoutReceipt() {
+		this.session.afterConnected(this.connection);
+		assertThat(this.session.isConnected()).isTrue();
+		Subscription subscription = this.session.subscribe("/topic/foo", mock());
+
+		Receiptable receipt = subscription.unsubscribe();
+		assertThat(receipt).isNotNull();
+		assertThat(receipt.getReceiptId()).isNull();
+	}
+
+	@Test
+	void unsubscribeWithReceipt() {
+		this.session.afterConnected(this.connection);
+		this.session.setTaskScheduler(mock());
+		this.session.setAutoReceipt(true);
+		Subscription subscription = this.session.subscribe("/topic/foo", mock());
+
+		Receiptable receipt = subscription.unsubscribe();
+		assertThat(receipt).isNotNull();
+		assertThat(receipt.getReceiptId()).isNotNull();
+
+		Message<byte[]> message = this.messageCaptor.getValue();
+		StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
+		assertThat(accessor.getReceipt()).isEqualTo(receipt.getReceiptId());
+	}
+
+	@Test
+	void receiptReceivedOnUnsubscribe() {
+		this.session.afterConnected(this.connection);
+		this.session.setTaskScheduler(mock());
+		this.session.setAutoReceipt(true);
+
+		Subscription subscription = this.session.subscribe("/topic/foo", mock());
+		Receiptable receipt = subscription.unsubscribe();
+
+		AtomicBoolean called = new AtomicBoolean(false);
+		receipt.addReceiptTask(() -> called.set(true));
+
+		StompHeaderAccessor ack = StompHeaderAccessor.create(StompCommand.RECEIPT);
+		ack.setReceiptId(receipt.getReceiptId());
+		ack.setLeaveMutable(true);
+		this.session.handleMessage(MessageBuilder.createMessage(new byte[0], ack.getMessageHeaders()));
+
+		assertThat(called.get()).isTrue();
 	}
 
 	@Test

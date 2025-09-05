@@ -45,38 +45,40 @@ repositories {
 
 // To avoid a redeclaration error with Kotlin compiler
 tasks.named('compileKotlin', KotlinCompilationTask.class) {
-    javaSources.from = []
+	javaSources.from = []
+	compilerOptions.freeCompilerArgs = [ "-Xannotation-default-target=param-property" ] // Upcoming default, see https://youtrack.jetbrains.com/issue/KT-73255
 }
 
 dependencies {
-	api(project(":spring-aspects"))
-	api(project(":spring-context"))
-	api(project(":spring-context-support"))
-	api(project(":spring-jdbc"))
-	api(project(":spring-jms"))
-	api(project(":spring-test"))
-	api(project(":spring-web"))
-	api(project(":spring-webflux"))
-	api(project(":spring-webmvc"))
-	api(project(":spring-websocket"))
-
-	api("com.fasterxml.jackson.core:jackson-databind")
-	api("com.fasterxml.jackson.module:jackson-module-parameter-names")
-	api("com.mchange:c3p0:0.9.5.5")
-	api("com.oracle.database.jdbc:ojdbc11")
-	api("io.projectreactor.netty:reactor-netty-http")
-	api("jakarta.jms:jakarta.jms-api")
-	api("jakarta.servlet:jakarta.servlet-api")
-	api("jakarta.resource:jakarta.resource-api")
-	api("jakarta.validation:jakarta.validation-api")
-	api("jakarta.websocket:jakarta.websocket-client-api")
-	api("javax.cache:cache-api")
-	api("org.apache.activemq:activemq-ra:6.1.2")
-	api("org.apache.commons:commons-dbcp2:2.11.0")
-	api("org.aspectj:aspectjweaver")
-	api("org.eclipse.jetty.websocket:jetty-websocket-jetty-api")
-	api("org.jetbrains.kotlin:kotlin-stdlib")
-
+	implementation(project(":spring-aspects"))
+	implementation(project(":spring-context"))
+	implementation(project(":spring-context-support"))
 	implementation(project(":spring-core-test"))
+	implementation(project(":spring-jdbc"))
+	implementation(project(":spring-jms"))
+	implementation(project(":spring-test"))
+	implementation(project(":spring-web"))
+	implementation(project(":spring-webflux"))
+	implementation(project(":spring-webmvc"))
+	implementation(project(":spring-websocket"))
+
+	implementation("com.github.ben-manes.caffeine:caffeine")
+	implementation("com.mchange:c3p0:0.9.5.5")
+	implementation("com.oracle.database.jdbc:ojdbc11")
+	implementation("io.projectreactor.netty:reactor-netty-http")
+	implementation("jakarta.jms:jakarta.jms-api")
+	implementation("jakarta.servlet:jakarta.servlet-api")
+	implementation("jakarta.resource:jakarta.resource-api")
+	implementation("jakarta.validation:jakarta.validation-api")
+	implementation("jakarta.websocket:jakarta.websocket-client-api")
+	implementation("javax.cache:cache-api")
+	implementation("org.apache.activemq:activemq-ra:6.1.2")
+	implementation("org.apache.commons:commons-dbcp2:2.11.0")
+	implementation("org.aspectj:aspectjweaver")
 	implementation("org.assertj:assertj-core")
+	implementation("org.eclipse.jetty.websocket:jetty-websocket-jetty-api")
+	implementation("org.jetbrains.kotlin:kotlin-stdlib")
+	implementation("org.junit.jupiter:junit-jupiter-api")
+	implementation("tools.jackson.core:jackson-databind")
+	implementation("tools.jackson.dataformat:jackson-dataformat-xml")
 }

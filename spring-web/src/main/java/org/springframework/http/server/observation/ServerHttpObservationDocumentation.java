@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,9 +23,11 @@ import io.micrometer.observation.ObservationConvention;
 import io.micrometer.observation.docs.ObservationDocumentation;
 
 /**
- * Documented {@link io.micrometer.common.KeyValue KeyValues} for the HTTP server observations
- * for Servlet-based web applications.
- * <p>This class is used by automated tools to document KeyValues attached to the HTTP server observations.
+ * Documented {@link io.micrometer.common.KeyValue KeyValues} for the HTTP server
+ * observations for Servlet-based web applications.
+ *
+ * <p>This class is used by automated tools to document KeyValues attached to the
+ * HTTP server observations.
  *
  * @author Brian Clozel
  * @since 6.0
@@ -56,7 +58,8 @@ public enum ServerHttpObservationDocumentation implements ObservationDocumentati
 	public enum LowCardinalityKeyNames implements KeyName {
 
 		/**
-		 * Name of HTTP request method or {@value KeyValue#NONE_VALUE} if the request was not received properly.
+		 * Name of the HTTP request method or {@value KeyValue#NONE_VALUE} if the
+		 * request was not received properly.
 		 */
 		METHOD {
 			@Override
@@ -67,7 +70,8 @@ public enum ServerHttpObservationDocumentation implements ObservationDocumentati
 		},
 
 		/**
-		 * HTTP response raw status code, or {@code "UNKNOWN"} if no response was created.
+		 * HTTP response raw status code, or {@code "UNKNOWN"} if no response was
+		 * created.
 		 */
 		STATUS {
 			@Override
@@ -77,9 +81,10 @@ public enum ServerHttpObservationDocumentation implements ObservationDocumentati
 		},
 
 		/**
-		 * URI pattern for the matching handler if available, falling back to {@code REDIRECTION} for 3xx responses,
-		 * {@code NOT_FOUND} for 404 responses, {@code root} for requests with no path info,
-		 * and {@code UNKNOWN} for all other requests.
+		 * URI pattern for the matching handler if available, falling back to
+		 * {@code REDIRECTION} for 3xx responses, {@code NOT_FOUND} for 404
+		 * responses, {@code root} for requests with no path info, and
+		 * {@code UNKNOWN} for all other requests.
 		 */
 		URI {
 			@Override
@@ -89,7 +94,8 @@ public enum ServerHttpObservationDocumentation implements ObservationDocumentati
 		},
 
 		/**
-		 * Name of the exception thrown during the exchange, or {@value KeyValue#NONE_VALUE}} if no exception happened.
+		 * Name of the exception thrown during the exchange, or
+		 * {@value KeyValue#NONE_VALUE} if no exception was thrown.
 		 */
 		EXCEPTION {
 			@Override
@@ -113,7 +119,7 @@ public enum ServerHttpObservationDocumentation implements ObservationDocumentati
 	public enum HighCardinalityKeyNames implements KeyName {
 
 		/**
-		 * HTTP request URI.
+		 * HTTP request URL.
 		 */
 		HTTP_URL {
 			@Override
@@ -123,4 +129,5 @@ public enum ServerHttpObservationDocumentation implements ObservationDocumentati
 		}
 
 	}
+
 }

@@ -16,6 +16,3 @@ NOTE: When using Spring Boot, you may want to use `@Configuration` classes of ty
 The preceding example registers a number of Spring MVC
 xref:web/webmvc/mvc-servlet/special-bean-types.adoc[infrastructure beans] and adapts to dependencies
 available on the classpath (for example, payload converters for JSON, XML, and others).
-
-
-

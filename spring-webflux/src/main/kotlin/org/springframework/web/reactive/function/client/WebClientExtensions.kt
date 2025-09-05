@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,17 +20,18 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.reactive.asFlow
-import kotlinx.coroutines.reactor.asFlux
-import kotlinx.coroutines.reactor.awaitSingle
-import kotlinx.coroutines.reactor.awaitSingleOrNull
-import kotlinx.coroutines.reactor.mono
+import kotlinx.coroutines.reactor.*
+import kotlinx.coroutines.withContext
 import org.reactivestreams.Publisher
 import org.springframework.core.ParameterizedTypeReference
 import org.springframework.http.ResponseEntity
+import org.springframework.web.reactive.function.client.CoExchangeFilterFunction.Companion.COROUTINE_CONTEXT_ATTRIBUTE
 import org.springframework.web.reactive.function.client.WebClient.RequestBodySpec
 import org.springframework.web.reactive.function.client.WebClient.RequestHeadersSpec
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
+import reactor.util.context.Context
+import kotlin.coroutines.CoroutineContext
 
 /**
  * Extension for [WebClient.RequestBodySpec.body] providing a `body(Publisher<T>)` variant
@@ -38,6 +39,7 @@ import reactor.core.publisher.Mono
  * erasure and retains actual generic type arguments.
  *
  * @author Sebastien Deleuze
+ * @author Dmitry Sulman
  * @since 5.0
  */
 inline fun <reified T : Any, S : Publisher<T>> RequestBodySpec.body(publisher: S): RequestHeadersSpec<*> =
@@ -89,7 +91,9 @@ inline fun <reified T : Any> RequestBodySpec.bodyValueWithType(body: T): Request
  */
 suspend fun <T: Any> RequestHeadersSpec<out RequestHeadersSpec<*>>.awaitExchange(responseHandler: suspend (ClientResponse) -> T): T {
 	val context = currentCoroutineContext().minusKey(Job.Key)
-	return exchangeToMono { mono(context) { responseHandler.invoke(it) } }.awaitSingle()
+	return withContext(context.toReactorContext()) {
+		exchangeToMono { mono(context) { responseHandler.invoke(it) } }.awaitSingle()
+	}
 }
 
 /**
@@ -99,7 +103,9 @@ suspend fun <T: Any> RequestHeadersSpec<out RequestHeadersSpec<*>>.awaitExchange
  */
 suspend fun <T: Any> RequestHeadersSpec<out RequestHeadersSpec<*>>.awaitExchangeOrNull(responseHandler: suspend (ClientResponse) -> T?): T? {
 	val context = currentCoroutineContext().minusKey(Job.Key)
-	return exchangeToMono { mono(context) { responseHandler.invoke(it) } }.awaitSingleOrNull()
+	return withContext(context.toReactorContext()) {
+		exchangeToMono { mono(context) { responseHandler.invoke(it) } }.awaitSingleOrNull()
+	}
 }
 
 /**
@@ -150,11 +156,15 @@ inline fun <reified T : Any> WebClient.ResponseSpec.bodyToFlow(): Flow<T> =
  * @author Sebastien Deleuze
  * @since 5.2
  */
-suspend inline fun <reified T : Any> WebClient.ResponseSpec.awaitBody() : T =
-	when (T::class) {
-		Unit::class -> awaitBodilessEntity().let { Unit as T }
-		else -> bodyToMono<T>().awaitSingle()
+suspend inline fun <reified T : Any> WebClient.ResponseSpec.awaitBody() : T {
+	val context = currentCoroutineContext().minusKey(Job.Key)
+	return withContext(context.toReactorContext()) {
+		when (T::class) {
+			Unit::class -> toBodilessEntity().awaitSingle().let { Unit as T }
+			else -> bodyToMono<T>().awaitSingle()
+		}
 	}
+}
 
 /**
  * Coroutines variant of [WebClient.ResponseSpec.bodyToMono].
@@ -162,17 +172,25 @@ suspend inline fun <reified T : Any> WebClient.ResponseSpec.awaitBody() : T =
  * @author Valentin Shakhov
  * @since 5.3.6
  */
-suspend inline fun <reified T : Any> WebClient.ResponseSpec.awaitBodyOrNull() : T? =
-	when (T::class) {
-		Unit::class -> awaitBodilessEntity().let { Unit as T? }
-		else -> bodyToMono<T>().awaitSingleOrNull()
+suspend inline fun <reified T : Any> WebClient.ResponseSpec.awaitBodyOrNull() : T? {
+	val context = currentCoroutineContext().minusKey(Job.Key)
+	return withContext(context.toReactorContext()) {
+		when (T::class) {
+			Unit::class -> toBodilessEntity().awaitSingle().let { Unit as T? }
+			else -> bodyToMono<T>().awaitSingleOrNull()
+		}
 	}
+}
 
 /**
  * Coroutines variant of [WebClient.ResponseSpec.toBodilessEntity].
  */
-suspend fun WebClient.ResponseSpec.awaitBodilessEntity() =
-	toBodilessEntity().awaitSingle()
+suspend fun WebClient.ResponseSpec.awaitBodilessEntity(): ResponseEntity<Void> {
+	val context = currentCoroutineContext().minusKey(Job.Key)
+	return withContext(context.toReactorContext()) {
+		toBodilessEntity().awaitSingle()
+	}
+}
 
 /**
  * Extension for [WebClient.ResponseSpec.toEntity] providing a `toEntity<Foo>()` variant
@@ -203,3 +221,24 @@ inline fun <reified T : Any> WebClient.ResponseSpec.toEntityList(): Mono<Respons
  */
 inline fun <reified T : Any> WebClient.ResponseSpec.toEntityFlux(): Mono<ResponseEntity<Flux<T>>> =
 		toEntityFlux(object : ParameterizedTypeReference<T>() {})
+
+/**
+ * Extension for [WebClient.ResponseSpec.toEntity] providing a `toEntity<Foo>()` variant
+ * leveraging Kotlin reified type parameters and allows [kotlin.coroutines.CoroutineContext]
+ * propagation to the [CoExchangeFilterFunction]. This extension is not subject to type erasure
+ * and retains actual generic type arguments.
+ *
+ * @since 7.0
+ */
+suspend inline fun <reified T : Any> WebClient.ResponseSpec.awaitEntity(): ResponseEntity<T> {
+	val context = currentCoroutineContext().minusKey(Job.Key)
+	return withContext(context.toReactorContext()) {
+		toEntity(T::class.java).awaitSingle()
+	}
+}
+
+@PublishedApi
+internal fun CoroutineContext.toReactorContext(): ReactorContext {
+	val context = Context.of(COROUTINE_CONTEXT_ATTRIBUTE, this).readOnly()
+	return (this[ReactorContext.Key]?.context?.putAll(context) ?: context).asCoroutineContext()
+}

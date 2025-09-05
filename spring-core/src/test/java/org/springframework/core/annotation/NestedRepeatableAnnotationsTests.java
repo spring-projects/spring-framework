@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -109,7 +109,7 @@ class NestedRepeatableAnnotationsTests {
 		@Test
 		void streamRepeatableAnnotationsWithExplicitRepeatables_MergedAnnotationsApi() {
 			RepeatableContainers repeatableContainers =
-					RepeatableContainers.of(A.class, A.Container.class).and(B.Container.class, B.class);
+					RepeatableContainers.explicitRepeatable(A.class, A.Container.class).plus(B.class, B.Container.class);
 			Set<A> annotations = MergedAnnotations.from(method, SearchStrategy.TYPE_HIERARCHY, repeatableContainers)
 					.stream(A.class).collect(MergedAnnotationCollectors.toAnnotationSet());
 			// Merged, so we expect to find @A twice with values coming from @B(5) and @B(10).
@@ -127,8 +127,8 @@ class NestedRepeatableAnnotationsTests {
 		void findMergedRepeatableAnnotationsWithExplicitContainer_AnnotatedElementUtils() {
 			Set<A> annotations = AnnotatedElementUtils.findMergedRepeatableAnnotations(method, A.class, A.Container.class);
 			// When findMergedRepeatableAnnotations(...) is invoked with an explicit container
-			// type, it uses RepeatableContainers.of(...) which limits the repeatable annotation
-			// support to a single container type.
+			// type, it uses RepeatableContainers.explicitRepeatable(...) which limits the
+			// repeatable annotation support to a single container type.
 			//
 			// In this test case, we are therefore limiting the support to @A.Container, which
 			// means that @B.Container is unsupported and effectively ignored as a repeatable
@@ -149,8 +149,8 @@ class NestedRepeatableAnnotationsTests {
 		void getMergedRepeatableAnnotationsWithExplicitContainer_AnnotatedElementUtils() {
 			Set<A> annotations = AnnotatedElementUtils.getMergedRepeatableAnnotations(method, A.class, A.Container.class);
 			// When getMergedRepeatableAnnotations(...) is invoked with an explicit container
-			// type, it uses RepeatableContainers.of(...) which limits the repeatable annotation
-			// support to a single container type.
+			// type, it uses RepeatableContainers.explicitRepeatable(...) which limits the
+			// repeatable annotation support to a single container type.
 			//
 			// In this test case, we are therefore limiting the support to @A.Container, which
 			// means that @B.Container is unsupported and effectively ignored as a repeatable

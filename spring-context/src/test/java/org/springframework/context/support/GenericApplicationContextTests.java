@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,6 +46,8 @@ import org.springframework.beans.factory.support.MergedBeanDefinitionPostProcess
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.context.testfixture.beans.factory.ImportAwareBeanRegistrar;
+import org.springframework.context.testfixture.beans.factory.SampleBeanRegistrar;
 import org.springframework.core.DecoratingProxy;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.Environment;
@@ -625,6 +627,22 @@ class GenericApplicationContextTests {
 		context.refreshForAotProcessing(runtimeHints);
 		assertThat(RuntimeHintsPredicates.proxies().forInterfaces(Map.class, DecoratingProxy.class)).accepts(runtimeHints);
 		context.close();
+	}
+
+	@Test
+	void beanRegistrar() {
+		GenericApplicationContext context = new GenericApplicationContext();
+		context.register(new SampleBeanRegistrar());
+		context.refresh();
+		assertThat(context.getBean(SampleBeanRegistrar.Bar.class).foo()).isEqualTo(context.getBean(SampleBeanRegistrar.Foo.class));
+	}
+
+	@Test
+	void importAwareBeanRegistrar() {
+		GenericApplicationContext context = new GenericApplicationContext();
+		context.register(new ImportAwareBeanRegistrar());
+		context.refresh();
+		assertThat(context.getBean(ImportAwareBeanRegistrar.ClassNameHolder.class).className()).isNull();
 	}
 
 

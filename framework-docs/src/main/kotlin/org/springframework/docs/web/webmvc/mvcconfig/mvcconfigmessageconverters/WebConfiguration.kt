@@ -1,25 +1,33 @@
+@file:Suppress("DEPRECATION")
+
 package org.springframework.docs.web.webmvc.mvcconfig.mvcconfigmessageconverters
 
-import com.fasterxml.jackson.module.paramnames.ParameterNamesModule
 import org.springframework.context.annotation.Configuration
-import org.springframework.http.converter.HttpMessageConverter
-import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter
-import org.springframework.http.converter.xml.MappingJackson2XmlHttpMessageConverter
+import org.springframework.http.converter.HttpMessageConverters
+import org.springframework.http.converter.json.JacksonJsonHttpMessageConverter
+import org.springframework.http.converter.xml.JacksonXmlHttpMessageConverter
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
+import tools.jackson.databind.SerializationFeature
+import tools.jackson.databind.json.JsonMapper
+import tools.jackson.dataformat.xml.XmlMapper
 import java.text.SimpleDateFormat
 
 // tag::snippet[]
 @Configuration
 class WebConfiguration : WebMvcConfigurer {
 
-	override fun configureMessageConverters(converters: MutableList<HttpMessageConverter<*>>) {
-		val builder = Jackson2ObjectMapperBuilder()
-			.indentOutput(true)
-			.dateFormat(SimpleDateFormat("yyyy-MM-dd"))
-			.modulesToInstall(ParameterNamesModule())
-		converters.add(MappingJackson2HttpMessageConverter(builder.build()))
-		converters.add(MappingJackson2XmlHttpMessageConverter(builder.createXmlMapper(true).build()))
+	override fun configureMessageConverters(builder: HttpMessageConverters.ServerBuilder) {
+		val jsonMapper = JsonMapper.builder()
+			.findAndAddModules()
+			.enable(SerializationFeature.INDENT_OUTPUT)
+			.defaultDateFormat(SimpleDateFormat("yyyy-MM-dd"))
+			.build()
+		val xmlMapper = XmlMapper.builder()
+			.findAndAddModules()
+			.defaultUseWrapper(false)
+			.build()
+		builder.jsonMessageConverter(JacksonJsonHttpMessageConverter(jsonMapper))
+			.xmlMessageConverter(JacksonXmlHttpMessageConverter(xmlMapper))
 	}
 }
 // end::snippet[]

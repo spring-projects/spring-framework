@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,10 +50,16 @@ public final class ReactiveHttpRequestValues extends HttpRequestValues {
 			@Nullable HttpMethod httpMethod,
 			@Nullable URI uri, @Nullable UriBuilderFactory uriBuilderFactory,
 			@Nullable String uriTemplate, Map<String, String> uriVars,
-			HttpHeaders headers, MultiValueMap<String, String> cookies, Map<String, Object> attributes,
-			@Nullable Object bodyValue, @Nullable Publisher<?> body, @Nullable ParameterizedTypeReference<?> elementType) {
+			HttpHeaders headers, MultiValueMap<String, String> cookies,
+			@Nullable Object version, Map<String, Object> attributes,
+			@Nullable Object bodyValue, @Nullable ParameterizedTypeReference<?> bodyValueType,
+			@Nullable Publisher<?> body, @Nullable ParameterizedTypeReference<?> elementType) {
 
-		super(httpMethod, uri, uriBuilderFactory, uriTemplate, uriVars, headers, cookies, attributes, bodyValue);
+		super(httpMethod,
+				uri, uriBuilderFactory, uriTemplate, uriVars,
+				headers, cookies, version, attributes,
+				bodyValue, bodyValueType);
+
 		this.body = body;
 		this.bodyElementType = elementType;
 	}
@@ -91,6 +97,9 @@ public final class ReactiveHttpRequestValues extends HttpRequestValues {
 		private @Nullable Publisher<?> body;
 
 		private @Nullable ParameterizedTypeReference<?> bodyElementType;
+
+		private Builder() {
+		}
 
 		@Override
 		public Builder setHttpMethod(HttpMethod httpMethod) {
@@ -232,12 +241,13 @@ public final class ReactiveHttpRequestValues extends HttpRequestValues {
 				@Nullable HttpMethod httpMethod,
 				@Nullable URI uri, @Nullable UriBuilderFactory uriBuilderFactory,
 				@Nullable String uriTemplate, Map<String, String> uriVars,
-				HttpHeaders headers, MultiValueMap<String, String> cookies, Map<String, Object> attributes,
-				@Nullable Object bodyValue) {
+				HttpHeaders headers, MultiValueMap<String, String> cookies,
+				@Nullable Object version, Map<String, Object> attributes,
+				@Nullable Object bodyValue, @Nullable ParameterizedTypeReference<?> bodyValueType) {
 
 			return new ReactiveHttpRequestValues(
 					httpMethod, uri, uriBuilderFactory, uriTemplate, uriVars,
-					headers, cookies, attributes, bodyValue, this.body, this.bodyElementType);
+					headers, cookies, version, attributes, bodyValue, bodyValueType, this.body, this.bodyElementType);
 		}
 	}
 

@@ -84,5 +84,3 @@ content type. This requires the `com.google.protobuf:protobuf-java` dependency.
 This requires the `com.google.protobuf:protobuf-java-util` dependency.
 
 |===
-
-

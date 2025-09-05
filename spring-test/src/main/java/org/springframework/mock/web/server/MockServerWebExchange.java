@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,12 @@
 
 package org.springframework.mock.web.server;
 
+import java.security.Principal;
+
 import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Mono;
 
+import org.springframework.context.ApplicationContext;
 import org.springframework.http.codec.ServerCodecConfigurer;
 import org.springframework.mock.http.server.reactive.MockServerHttpRequest;
 import org.springframework.mock.http.server.reactive.MockServerHttpResponse;
@@ -39,15 +42,35 @@ import org.springframework.web.server.session.WebSessionManager;
  */
 public final class MockServerWebExchange extends DefaultServerWebExchange {
 
-	private MockServerWebExchange(MockServerHttpRequest request, WebSessionManager sessionManager) {
-		super(request, new MockServerHttpResponse(), sessionManager,
-				ServerCodecConfigurer.create(), new AcceptHeaderLocaleContextResolver());
+	private final Mono<Principal> principalMono;
+
+
+	private MockServerWebExchange(
+			MockServerHttpRequest request, @Nullable WebSessionManager sessionManager,
+			@Nullable ApplicationContext applicationContext, @Nullable Principal principal) {
+
+		super(request, new MockServerHttpResponse(),
+				sessionManager != null ? sessionManager : new DefaultWebSessionManager(),
+				ServerCodecConfigurer.create(), new AcceptHeaderLocaleContextResolver(),
+				applicationContext);
+
+		this.principalMono = (principal != null) ? Mono.just(principal) : Mono.empty();
 	}
 
 
 	@Override
 	public MockServerHttpResponse getResponse() {
 		return (MockServerHttpResponse) super.getResponse();
+	}
+
+	/**
+	 * Return the user set via {@link Builder#principal(Principal)}.
+	 * @since 6.2.7
+	 */
+	@SuppressWarnings("unchecked")
+	@Override
+	public <T extends Principal> Mono<T> getPrincipal() {
+		return (Mono<T>) this.principalMono;
 	}
 
 
@@ -100,6 +123,10 @@ public final class MockServerWebExchange extends DefaultServerWebExchange {
 
 		private @Nullable WebSessionManager sessionManager;
 
+		private @Nullable ApplicationContext applicationContext;
+
+		private @Nullable Principal principal;
+
 		public Builder(MockServerHttpRequest request) {
 			this.request = request;
 		}
@@ -127,11 +154,31 @@ public final class MockServerWebExchange extends DefaultServerWebExchange {
 		}
 
 		/**
+		 * Provide the {@code ApplicationContext} to expose through the exchange.
+		 * @param applicationContext the context to use
+		 * @since 6.2.5
+		 */
+		public Builder applicationContext(ApplicationContext applicationContext) {
+			this.applicationContext = applicationContext;
+			return this;
+		}
+
+		/**
+		 * Provide a user to associate with the exchange.
+		 * @param principal the principal to use
+		 * @since 6.2.7
+		 */
+		public Builder principal(@Nullable Principal principal) {
+			this.principal = principal;
+			return this;
+		}
+
+		/**
 		 * Build the {@code MockServerWebExchange} instance.
 		 */
 		public MockServerWebExchange build() {
-			return new MockServerWebExchange(this.request,
-					this.sessionManager != null ? this.sessionManager : new DefaultWebSessionManager());
+			return new MockServerWebExchange(
+					this.request, this.sessionManager, this.applicationContext, this.principal);
 		}
 	}
 

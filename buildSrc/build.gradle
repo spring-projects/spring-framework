@@ -20,13 +20,16 @@ ext {
 dependencies {
 	checkstyle "io.spring.javaformat:spring-javaformat-checkstyle:${javaFormatVersion}"
 	implementation "org.jetbrains.kotlin:kotlin-gradle-plugin:${kotlinVersion}"
+	implementation "org.jetbrains.dokka:dokka-gradle-plugin:2.0.0"
 	implementation "com.tngtech.archunit:archunit:1.4.0"
 	implementation "org.gradle:test-retry-gradle-plugin:1.6.2"
 	implementation "io.spring.javaformat:spring-javaformat-gradle-plugin:${javaFormatVersion}"
 	implementation "io.spring.nohttp:nohttp-gradle:0.0.11"
 
 	testImplementation("org.assertj:assertj-core:${assertjVersion}")
-	testImplementation("org.junit.jupiter:junit-jupiter:${junitJupiterVersion}")
+	testImplementation(platform("org.junit:junit-bom:${junitVersion}"))
+	testImplementation("org.junit.jupiter:junit-jupiter")
+	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
 gradlePlugin {

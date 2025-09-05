@@ -4,7 +4,6 @@
 Now we can examine how Spring AOP handles advice.
 
 
-
 [[aop-api-advice-lifecycle]]
 == Advice Lifecycles
 
@@ -22,13 +21,11 @@ the advice adds state to the proxied object.
 You can use a mix of shared and per-instance advice in the same AOP proxy.
 
 
-
 [[aop-api-advice-types]]
 == Advice Types in Spring
 
 Spring provides several advice types and is extensible to support
 arbitrary advice types. This section describes the basic concepts and standard advice types.
-
 
 [[aop-api-advice-around]]
 === Interception Around Advice
@@ -101,7 +98,6 @@ you are likely to want to run the aspect in another AOP framework. Note that poi
 are not currently interoperable between frameworks, and the AOP Alliance does not
 currently define pointcut interfaces.
 
-
 [[aop-api-advice-before]]
 === Before Advice
 
@@ -167,7 +163,6 @@ Kotlin::
 ======
 
 TIP: Before advice can be used with any pointcut.
-
 
 [[aop-api-advice-throws]]
 === Throws Advice
@@ -297,7 +292,6 @@ exception that is incompatible with the target method's signature!_
 
 TIP: Throws advice can be used with any pointcut.
 
-
 [[aop-api-advice-after-returning]]
 === After Returning Advice
 
@@ -360,7 +354,6 @@ This advice does not change the execution path. If it throws an exception, it is
 thrown up the interceptor chain instead of the return value.
 
 TIP: After returning advice can be used with any pointcut.
-
 
 [[aop-api-advice-introduction]]
 === Introduction Advice
@@ -501,7 +494,6 @@ Java::
 			}
 			return super.invoke(invocation);
 		}
-
 	}
 ----
 
@@ -531,7 +523,6 @@ Kotlin::
 			}
 			return super.invoke(invocation)
 		}
-
 	}
 ----
 ======
@@ -582,8 +573,3 @@ We can apply this advisor programmatically by using the `Advised.addAdvisor()` m
 (the recommended way) in XML configuration, as any other advisor. All proxy creation
 choices discussed below, including "`auto proxy creators,`" correctly handle introductions
 and stateful mixins.
-
-
-
-
-

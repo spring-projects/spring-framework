@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -1035,8 +1035,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	 * @see #getDateHeader
 	 */
 	public void addHeader(String name, Object value) {
-		if (HttpHeaders.CONTENT_TYPE.equalsIgnoreCase(name) &&
-				!this.headers.containsKey(HttpHeaders.CONTENT_TYPE)) {
+		if (HttpHeaders.CONTENT_TYPE.equalsIgnoreCase(name)) {
 			setContentType(value.toString());
 		}
 		else if (HttpHeaders.ACCEPT_LANGUAGE.equalsIgnoreCase(name) &&
@@ -1129,8 +1128,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 			try {
 				return simpleDateFormat.parse(value).getTime();
 			}
-			catch (ParseException ex) {
-				// ignore
+			catch (ParseException ignored) {
 			}
 		}
 		throw new IllegalArgumentException("Cannot parse date value '" + value + "' for '" + name + "' header");

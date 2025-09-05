@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ import org.springframework.test.web.servlet.MockMvcBuilder;
 import org.springframework.test.web.servlet.RequestBuilder;
 import org.springframework.test.web.servlet.ResultHandler;
 import org.springframework.test.web.servlet.ResultMatcher;
+import org.springframework.web.client.ApiVersionInserter;
 
 /**
  * Defines common methods for building a {@code MockMvc}.
@@ -75,6 +76,14 @@ public interface ConfigurableMockMvcBuilder<B extends ConfigurableMockMvcBuilder
 	<T extends B> T addFilter(
 			Filter filter, @Nullable String filterName, Map<String, String> initParams,
 			EnumSet<DispatcherType> dispatcherTypes, String... urlPatterns);
+
+	/**
+	 * Set the {@link ApiVersionInserter} to use to apply to versions specified via
+	 * {@link org.springframework.test.web.servlet.request.AbstractMockHttpServletRequestBuilder#apiVersion(Object)}.
+	 * @param versionInserter the inserter to use
+	 * @since 7.0
+	 */
+	<T extends B> T apiVersionInserter(ApiVersionInserter versionInserter);
 
 	/**
 	 * Define default request properties that should be merged into all

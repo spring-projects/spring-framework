@@ -29,7 +29,6 @@ created and initialized, you have a fully configured and executable system or ap
 image::container-magic.png[]
 
 
-
 [[beans-factory-metadata]]
 == Configuration Metadata
 
@@ -62,8 +61,6 @@ infrastructure objects such as a JPA `EntityManagerFactory`, JMS queues, and so 
 Typically, one does not configure fine-grained domain objects in the container, because
 it is usually the responsibility of repositories and business logic to create and load
 domain objects.
-
-
 
 [[beans-factory-xml]]
 === XML as an External Configuration DSL
@@ -119,7 +116,7 @@ Kotlin::
 +
 [source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
-    val context = ClassPathXmlApplicationContext("services.xml", "daos.xml")
+	val context = ClassPathXmlApplicationContext("services.xml", "daos.xml")
 ----
 ======
 
@@ -188,7 +185,6 @@ definition. This linkage between `id` and `ref` elements expresses the dependenc
 collaborating objects. For details of configuring an object's dependencies, see
 xref:core/beans/dependencies.adoc[Dependencies].
 
-
 [[beans-factory-xml-import]]
 === Composing XML-based Configuration Metadata
 
@@ -243,7 +239,6 @@ The namespace itself provides the import directive feature. Further
 configuration features beyond plain bean definitions are available in a selection
 of XML namespaces provided by Spring -- for example, the `context` and `util` namespaces.
 
-
 [[beans-factory-groovy]]
 === The Groovy Bean Definition DSL
 
@@ -278,7 +273,6 @@ supports Spring's XML configuration namespaces. It also allows for importing XML
 bean definition files through an `importBeans` directive.
 
 
-
 [[beans-factory-client]]
 == Using the Container
 
@@ -309,16 +303,16 @@ Kotlin::
 +
 [source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
-    import org.springframework.beans.factory.getBean
+	import org.springframework.beans.factory.getBean
 
 	// create and configure beans
-    val context = ClassPathXmlApplicationContext("services.xml", "daos.xml")
+	val context = ClassPathXmlApplicationContext("services.xml", "daos.xml")
 
-    // retrieve configured instance
-    val service = context.getBean<PetStoreService>("petStore")
+	// retrieve configured instance
+	val service = context.getBean<PetStoreService>("petStore")
 
-    // use configured instance
-    var userList = service.getUsernameList()
+	// use configured instance
+	var userList = service.getUsernameList()
 ----
 ======
 
@@ -402,6 +396,3 @@ code should never use them. Indeed, your application code should have no calls t
 Spring's integration with web frameworks provides dependency injection for various web
 framework components such as controllers and JSF-managed beans, letting you declare
 a dependency on a specific bean through metadata (such as an autowiring annotation).
-
-
-

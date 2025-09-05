@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,13 +33,14 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Chris Beams
  */
 class FactoryBeanLookupTests {
-	private BeanFactory beanFactory;
+
+	private final BeanFactory beanFactory = new DefaultListableBeanFactory();
+
 
 	@BeforeEach
 	void setUp() {
-		beanFactory = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader((BeanDefinitionRegistry) beanFactory).loadBeanDefinitions(
-				new ClassPathResource("FactoryBeanLookupTests-context.xml", this.getClass()));
+				new ClassPathResource("FactoryBeanLookupTests-context.xml", getClass()));
 	}
 
 	@Test
@@ -71,6 +72,7 @@ class FactoryBeanLookupTests {
 		Foo foo = beanFactory.getBean("fooFactory", Foo.class);
 		assertThat(foo).isNotNull();
 	}
+
 }
 
 class FooFactoryBean extends AbstractFactoryBean<Foo> {

@@ -217,8 +217,6 @@ Kotlin::
 ======
 
 
-
-
 [[expressions-evaluation-context]]
 == Understanding `EvaluationContext`
 
@@ -254,7 +252,6 @@ to properties via `DataBindingPropertyAccessor`. Similarly,
 properties. Alternatively, configure custom accessors via
 `SimpleEvaluationContext.forPropertyAccessors(...)`, potentially disable assignment, and
 optionally activate method resolution and/or a type converter through the builder.
-
 
 [[expressions-type-conversion]]
 === Type Conversion
@@ -431,7 +428,6 @@ numeric operations, the performance gain can be very noticeable. In an example m
 benchmark run of 50,000 iterations, it took 75ms to evaluate by using the interpreter and
 only 3ms using the compiled version of the expression.
 
-
 [[expressions-compiler-configuration]]
 === Compiler Configuration
 
@@ -524,7 +520,6 @@ property via a JVM system property (or via the
 xref:appendix.adoc#appendix-spring-properties[`SpringProperties`] mechanism) to one of the
 `SpelCompilerMode` enum values (`off`, `immediate`, or `mixed`).
 
-
 [[expressions-compiler-limitations]]
 === Compiler Limitations
 
@@ -541,4 +536,3 @@ following kinds of expressions cannot be compiled.
 * Expressions using bean references
 
 Compilation of additional kinds of expressions may be supported in the future.
-

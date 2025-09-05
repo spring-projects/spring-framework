@@ -14,7 +14,6 @@ the `Last-Modified` header.
 This section describes the HTTP caching related options available in Spring WebFlux.
 
 
-
 [[webflux-caching-cachecontrol]]
 == `CacheControl`
 [.small]#xref:web/webmvc/mvc-caching.adoc#mvc-caching-cachecontrol[See equivalent in the Servlet stack]#
@@ -65,7 +64,6 @@ Kotlin::
 
 ----
 ======
-
 
 
 [[webflux-caching-etag-lastmodified]]
@@ -178,11 +176,10 @@ values, or both. For conditional `GET` and `HEAD` requests, you can set the resp
 to 412 (PRECONDITION_FAILED) to prevent concurrent modification.
 
 
-
 [[webflux-caching-static-resources]]
 == Static Resources
 [.small]#xref:web/webmvc/mvc-caching.adoc#mvc-caching-static-resources[See equivalent in the Servlet stack]#
 
 You should serve static resources with a `Cache-Control` and conditional response headers
-for optimal performance. See the section on configuring xref:web/webflux/config.adoc#webflux-config-static-resources[Static Resources].
-
+for optimal performance. See the section on configuring
+xref:web/webflux/config.adoc#webflux-config-static-resources[Static Resources].

@@ -91,7 +91,3 @@ Simply return the resulting reactive type from the controller method. The same p
 Kotlin Coroutines and Spring WebFlux, just use suspending function or return `Flow` in your
 controller method .
 ====
-
-
-
-

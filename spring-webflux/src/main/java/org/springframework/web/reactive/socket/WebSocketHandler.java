@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,65 +23,69 @@ import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
 
 /**
- * Handler for a WebSocket session.
- *
- * <p>A server {@code WebSocketHandler} is mapped to requests with
+ * Handler for a WebSocket messages. You can use it as follows:
+ * <ul>
+ * <li>On the server side, {@code WebSocketHandler} is mapped to requests with
  * {@link org.springframework.web.reactive.handler.SimpleUrlHandlerMapping
  * SimpleUrlHandlerMapping} and
  * {@link org.springframework.web.reactive.socket.server.support.WebSocketHandlerAdapter
- * WebSocketHandlerAdapter}. A client {@code WebSocketHandler} is passed to the
+ * WebSocketHandlerAdapter}.
+ * <li>On the client side, {@code WebSocketHandler} is passed into the
  * {@link org.springframework.web.reactive.socket.client.WebSocketClient
  * WebSocketClient} execute method.
+ * </ul>
  *
- * <p>Use {@link WebSocketSession#receive() session.receive()} to compose on
- * the inbound message stream, and {@link WebSocketSession#send(Publisher)
- * session.send(publisher)} for the outbound message stream. Below is an
- * example, combined flow to process inbound and to send outbound messages:
+ * <p>{@link WebSocketSession#receive() session.receive()} handles inbound
+ * messages, while {@link WebSocketSession#send(Publisher) session.send}
+ * sends outbound messages. Below is an example of handling inbound messages
+ * and responding to every message:
  *
  * <pre class="code">
- * class ExampleHandler implements WebSocketHandler {
+ *	class ExampleHandler implements WebSocketHandler {
  *
- * 	&#064;Override
- * 	public Mono&lt;Void&gt; handle(WebSocketSession session) {
- *
- * 		Flux&lt;WebSocketMessage&gt; output = session.receive()
- *			.doOnNext(message -&gt; {
- * 				// ...
- * 			})
- * 			.concatMap(message -&gt; {
- * 				// ...
- * 			})
- * 			.map(value -&gt; session.textMessage("Echo " + value));
- *
- * 		return session.send(output);
- * 	}
- * }
+ *		&#064;Override
+ *		public Mono&lt;Void&gt; handle(WebSocketSession session) {
+ *			Flux&lt;WebSocketMessage&gt; output = session.receive()
+ * 				.doOnNext(message -&gt; {
+ * 					// Imperative calls without a return value:
+ * 					// perform access checks, log, validate, update metrics.
+ * 					// ...
+ * 				})
+ * 				.concatMap(message -&gt; {
+ * 					// Async, non-blocking calls:
+ * 					// parse messages, call a database, make remote calls.
+ * 					// Return the same message, or a transformed value
+ * 					// ...
+ * 				});
+ * 			return session.send(output);
+ *		}
+ *	}
  * </pre>
  *
  * <p>If processing inbound and sending outbound messages are independent
  * streams, they can be joined together with the "zip" operator:
  *
  * <pre class="code">
- * class ExampleHandler implements WebSocketHandler {
+ *	class ExampleHandler implements WebSocketHandler {
  *
- * 	&#064;Override
- * 	public Mono&lt;Void&gt; handle(WebSocketSession session) {
+ *		&#064;Override
+ *		public Mono&lt;Void&gt; handle(WebSocketSession session) {
  *
- * 		Mono&lt;Void&gt; input = session.receive()
- *			.doOnNext(message -&gt; {
- * 				// ...
- * 			})
- * 			.concatMap(message -&gt; {
- * 				// ...
- * 			})
- * 			.then();
+ *			Mono&lt;Void&gt; input = session.receive()
+ *				.doOnNext(message -&gt; {
+ * 					// ...
+ * 				})
+ * 				.concatMap(message -&gt; {
+ * 					// ...
+ * 				})
+ * 				.then();
  *
- *		Flux&lt;String&gt; source = ... ;
- * 		Mono&lt;Void&gt; output = session.send(source.map(session::textMessage));
+ *			Flux&lt;String&gt; source = ... ;
+ * 			Mono&lt;Void&gt; output = session.send(source.map(session::textMessage));
  *
- * 		return Mono.zip(input, output).then();
- * 	}
- * }
+ * 			return Mono.zip(input, output).then();
+ *		}
+ *	}
  * </pre>
  *
  * <p>A {@code WebSocketHandler} must compose the inbound and outbound streams

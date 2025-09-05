@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
+import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.testfixture.http.MockHttpInputMessage;
 
@@ -202,6 +203,18 @@ class Jaxb2CollectionHttpMessageConverterTests {
 		assertThatExceptionOfType(HttpMessageNotReadableException.class)
 				.isThrownBy(() -> this.converter.read(this.rootElementListType, null, inputMessage))
 				.withMessageContaining("\"lol9\"");
+	}
+
+	@Test
+	@SuppressWarnings("unchecked")
+	public void readXmlRootElementListHeaderCharset() throws Exception {
+		String content = "<list><rootElement><type s=\"Hellø Wørld\"/></rootElement></list>";
+		MockHttpInputMessage inputMessage = new MockHttpInputMessage(content.getBytes(StandardCharsets.ISO_8859_1));
+		inputMessage.getHeaders().setContentType(MediaType.parseMediaType("application/xml;charset=iso-8859-1"));
+		List<RootElement> result = (List<RootElement>) converter.read(rootElementListType, null, inputMessage);
+
+		assertThat(result).as("Invalid result").hasSize(1);
+		assertThat(result.get(0).type.s).as("Invalid result").isEqualTo("Hellø Wørld");
 	}
 
 

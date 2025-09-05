@@ -142,7 +142,3 @@ case, the `Advised` `isFrozen()` method returns `true`, and any attempts to modi
 advice through addition or removal results in an `AopConfigException`. The ability
 to freeze the state of an advised object is useful in some cases (for example, to
 prevent calling code removing a security interceptor).
-
-
-
-

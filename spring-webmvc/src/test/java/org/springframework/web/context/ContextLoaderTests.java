@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -294,8 +294,8 @@ class ContextLoaderTests {
 	@Test
 	void frameworkServletWithCustomLocation() throws Exception {
 		DispatcherServlet servlet = new DispatcherServlet();
-		servlet.setContextConfigLocation("/org/springframework/web/context/WEB-INF/testNamespace.xml "
-				+ "/org/springframework/web/context/WEB-INF/context-addition.xml");
+		servlet.setContextConfigLocation("/org/springframework/web/context/WEB-INF/testNamespace.xml " +
+				"/org/springframework/web/context/WEB-INF/context-addition.xml");
 		servlet.init(new MockServletConfig(new MockServletContext(""), "test"));
 		assertThat(servlet.getWebApplicationContext().containsBean("kerry")).isTrue();
 		assertThat(servlet.getWebApplicationContext().containsBean("kerryX")).isTrue();

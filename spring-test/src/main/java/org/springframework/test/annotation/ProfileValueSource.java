@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,7 +40,11 @@ import org.jspecify.annotations.Nullable;
  * @see ProfileValueSourceConfiguration
  * @see IfProfileValue
  * @see ProfileValueUtils
+ * @deprecated since Spring Framework 7.0 in favor of the
+ * {@link org.springframework.test.context.junit.jupiter.SpringExtension SpringExtension}
+ * and JUnit Jupiter
  */
+@Deprecated(since = "7.0")
 public interface ProfileValueSource {
 
 	/**

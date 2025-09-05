@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,7 @@ import org.springframework.http.client.JettyClientHttpRequestFactory;
 import org.springframework.http.client.support.BasicAuthenticationInterceptor;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
+import org.springframework.http.converter.support.AllEncompassingFormHttpMessageConverter;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -41,6 +42,7 @@ import static org.assertj.core.api.Assertions.fail;
 
 
 /**
+ * Tests for {@link DefaultRestClientBuilder}.
  * @author Arjen Poutsma
  * @author Sebastien Deleuze
  * @author Nicklas Wiegandt
@@ -137,6 +139,19 @@ public class RestClientBuilderTests {
 		List<HttpMessageConverter<?>> converters = new ArrayList<>();
 		converters.add(null);
 		assertThatIllegalArgumentException().isThrownBy(() -> builder.messageConverters(converters));
+	}
+
+	@Test
+	void configureMessageConverters() {
+		StringHttpMessageConverter stringConverter = new StringHttpMessageConverter();
+		RestClient.Builder builder = RestClient.builder();
+		builder.configureMessageConverters(clientBuilder -> clientBuilder.stringMessageConverter(stringConverter));
+		assertThat(builder).isInstanceOf(DefaultRestClientBuilder.class);
+		DefaultRestClientBuilder defaultBuilder = (DefaultRestClientBuilder) builder;
+
+		assertThat(fieldValue("messageConverters", defaultBuilder))
+				.asInstanceOf(InstanceOfAssertFactories.LIST)
+				.hasExactlyElementsOfTypes(StringHttpMessageConverter.class, AllEncompassingFormHttpMessageConverter.class);
 	}
 
 	@Test

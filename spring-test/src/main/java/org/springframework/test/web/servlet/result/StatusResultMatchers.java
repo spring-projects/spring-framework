@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -141,7 +141,9 @@ public class StatusResultMatchers {
 
 	/**
 	 * Assert the response status code is {@code HttpStatus.PROCESSING} (102).
+	 * @deprecated since 7.0, removed from <a href="https://datatracker.ietf.org/doc/html/rfc4918#section-21.4">WebDAV specification</a>
 	 */
+	@Deprecated(since = "7.0")
 	public ResultMatcher isProcessing() {
 		return matcher(HttpStatus.PROCESSING);
 	}
@@ -365,9 +367,19 @@ public class StatusResultMatchers {
 	}
 
 	/**
+	 * Assert the response status code is {@code HttpStatus.CONTENT_TOO_LARGE} (413).
+	 * @since 7.0
+	 */
+	public ResultMatcher isContentTooLarge() {
+		return matcher(HttpStatus.CONTENT_TOO_LARGE);
+	}
+
+	/**
 	 * Assert the response status code is {@code HttpStatus.PAYLOAD_TOO_LARGE} (413).
 	 * @since 4.1
+	 * @deprecated since 7.0 in favor of {@link #isContentTooLarge()}
 	 */
+	@Deprecated(since = "7.0")
 	public ResultMatcher isPayloadTooLarge() {
 		return matcher(HttpStatus.PAYLOAD_TOO_LARGE);
 	}
@@ -403,14 +415,34 @@ public class StatusResultMatchers {
 
 	/**
 	 * Assert the response status code is {@code HttpStatus.I_AM_A_TEAPOT} (418).
+	 * @deprecated since 7.0, this was marked as unused in RFC 9110
 	 */
+	@Deprecated(since = "7.0")
 	public ResultMatcher isIAmATeapot() {
-		return matcher(HttpStatus.valueOf(418));
+		return matcher(HttpStatus.I_AM_A_TEAPOT);
+	}
+
+	/**
+	 * Assert the response status code is {@code HttpStatus.MISDIRECTED_REQUEST} (421).
+	 * @since 7.0
+	 */
+	public ResultMatcher isMisdirectedRequest() {
+		return matcher(HttpStatus.MISDIRECTED_REQUEST);
+	}
+
+	/**
+	 * Assert the response status code is {@code HttpStatus.UNPROCESSABLE_CONTENT} (422).
+	 * @since 7.0
+	 */
+	public ResultMatcher isUnprocessableContent() {
+		return matcher(HttpStatus.UNPROCESSABLE_CONTENT);
 	}
 
 	/**
 	 * Assert the response status code is {@code HttpStatus.UNPROCESSABLE_ENTITY} (422).
+	 * @deprecated since 7.0 in favor of {@link #isUnprocessableContent()}
 	 */
+	@Deprecated(since = "7.0")
 	public ResultMatcher isUnprocessableEntity() {
 		return matcher(HttpStatus.UNPROCESSABLE_ENTITY);
 	}
@@ -538,14 +570,18 @@ public class StatusResultMatchers {
 
 	/**
 	 * Assert the response status code is {@code HttpStatus.BANDWIDTH_LIMIT_EXCEEDED} (509).
+	 * @deprecated since 7.0, since this is now unassigned
 	 */
+	@Deprecated(since = "7.0")
 	public ResultMatcher isBandwidthLimitExceeded() {
-		return matcher(HttpStatus.valueOf(509));
+		return matcher(HttpStatus.BANDWIDTH_LIMIT_EXCEEDED);
 	}
 
 	/**
 	 * Assert the response status code is {@code HttpStatus.NOT_EXTENDED} (510).
+	 * @deprecated since 7.0, this is now marked as "historic" and not endorsed by a standards body.
 	 */
+	@Deprecated(since = "7.0")
 	public ResultMatcher isNotExtended() {
 		return matcher(HttpStatus.NOT_EXTENDED);
 	}

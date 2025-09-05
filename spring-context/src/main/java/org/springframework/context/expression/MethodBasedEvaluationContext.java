@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,7 +53,7 @@ public class MethodBasedEvaluationContext extends StandardEvaluationContext {
 	private boolean argumentsLoaded = false;
 
 
-	public MethodBasedEvaluationContext(Object rootObject, Method method, @Nullable Object[] arguments,
+	public MethodBasedEvaluationContext(@Nullable Object rootObject, Method method, @Nullable Object[] arguments,
 			ParameterNameDiscoverer parameterNameDiscoverer) {
 
 		super(rootObject);

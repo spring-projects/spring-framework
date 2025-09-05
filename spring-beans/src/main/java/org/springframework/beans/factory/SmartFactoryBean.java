@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,16 +16,23 @@
 
 package org.springframework.beans.factory;
 
+import org.jspecify.annotations.Nullable;
+
 /**
  * Extension of the {@link FactoryBean} interface. Implementations may
  * indicate whether they always return independent instances, for the
  * case where their {@link #isSingleton()} implementation returning
  * {@code false} does not clearly indicate independent instances.
- *
- * <p>Plain {@link FactoryBean} implementations which do not implement
+ * Plain {@link FactoryBean} implementations which do not implement
  * this extended interface are simply assumed to always return independent
  * instances if their {@link #isSingleton()} implementation returns
  * {@code false}; the exposed object is only accessed on demand.
+ *
+ * <p>As of 7.0, this interface also allows for exposing additional object
+ * types for dependency injection through implementing a pair of methods:
+ * {@link #getObject(Class)} as well as {@link #supportsType(Class)}.
+ * The primary {@link #getObjectType()} will be exposed for regular access.
+ * Only if a specific type is requested, additional types are considered.
  *
  * <p><b>NOTE:</b> This interface is a special purpose interface, mainly for
  * internal use within the framework and within collaborating frameworks.
@@ -40,6 +47,42 @@ package org.springframework.beans.factory;
  * @see #isSingleton()
  */
 public interface SmartFactoryBean<T> extends FactoryBean<T> {
+
+	/**
+	 * Return an instance of the given type, if supported by this factory.
+	 * <p>By default, this supports the primary type exposed by the factory, as
+	 * indicated by {@link #getObjectType()} and returned by {@link #getObject()}.
+	 * Specific factories may support additional types for dependency injection.
+	 * @param type the requested type
+	 * @return a corresponding instance managed by this factory,
+	 * or {@code null} if none available
+	 * @throws Exception in case of creation errors
+	 * @since 7.0
+	 * @see #getObject()
+	 * @see #supportsType(Class)
+	 */
+	@SuppressWarnings("unchecked")
+	default <S> @Nullable S getObject(Class<S> type) throws Exception{
+		Class<?> objectType = getObjectType();
+		return (objectType != null && type.isAssignableFrom(objectType) ? (S) getObject() : null);
+	}
+
+	/**
+	 * Determine whether this factory supports the requested type.
+	 * <p>By default, this supports the primary type exposed by the factory, as
+	 * indicated by {@link #getObjectType()}. Specific factories may support
+	 * additional types for dependency injection.
+	 * @param type the requested type
+	 * @return {@code true} if {@link #getObject(Class)} is able to
+	 * return a corresponding instance, {@code false} otherwise
+	 * @since 7.0
+	 * @see #getObject(Class)
+	 * @see #getObjectType()
+	 */
+	default boolean supportsType(Class<?> type) {
+		Class<?> objectType = getObjectType();
+		return (objectType != null && type.isAssignableFrom(objectType));
+	}
 
 	/**
 	 * Is the object managed by this factory a prototype? That is,

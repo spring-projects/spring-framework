@@ -22,11 +22,7 @@ supported for all return values.
 | `HttpHeaders`
 | For returning a response with headers and no body.
 
-| `ErrorResponse`
-| To render an RFC 9457 error response with details in the body,
-  see xref:web/webmvc/mvc-ann-rest-exceptions.adoc[Error Responses]
-
-| `ProblemDetail`
+| `ErrorResponse`, `ProblemDetail`
 | To render an RFC 9457 error response with details in the body,
   see xref:web/webmvc/mvc-ann-rest-exceptions.adoc[Error Responses]
 
@@ -105,5 +101,3 @@ supported for all return values.
   {spring-framework-api}/beans/BeanUtils.html#isSimpleProperty-java.lang.Class-[BeanUtils#isSimpleProperty],
   in which case it remains unresolved.
 |===
-
-

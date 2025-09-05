@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -448,6 +448,7 @@ public abstract class AbstractJdbcInsert {
 	/**
 	 * Delegate method to execute the insert, generating any number of keys.
 	 */
+	@SuppressWarnings("NullAway") // See https://github.com/uber/NullAway/issues/1075
 	private KeyHolder executeInsertAndReturnKeyHolderInternal(List<?> values) {
 		if (logger.isDebugEnabled()) {
 			logger.debug("The following parameters are used for call " + getInsertString() + " with: " + values);
@@ -496,7 +497,7 @@ public abstract class AbstractJdbcInsert {
 				keyHolder.getKeyList().add(keys);
 			}
 			else {
-				getJdbcTemplate().execute((ConnectionCallback<Object>) con -> {
+				getJdbcTemplate().execute((ConnectionCallback<@Nullable Object>) con -> {
 					// Do the insert
 					PreparedStatement ps = null;
 					try {

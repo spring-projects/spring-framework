@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,9 +34,6 @@ import org.springframework.test.context.MergedContextConfiguration;
  */
 class BeanOverrideContextCustomizer implements ContextCustomizer {
 
-	static final String REGISTRY_BEAN_NAME =
-			"org.springframework.test.context.bean.override.internalBeanOverrideRegistry";
-
 	private static final String INFRASTRUCTURE_BEAN_NAME =
 			"org.springframework.test.context.bean.override.internalBeanOverridePostProcessor";
 
@@ -60,7 +57,7 @@ class BeanOverrideContextCustomizer implements ContextCustomizer {
 		// AOT processing, since a bean definition cannot be generated for the
 		// Set<BeanOverrideHandler> argument that it accepts in its constructor.
 		BeanOverrideRegistry beanOverrideRegistry = new BeanOverrideRegistry(beanFactory);
-		beanFactory.registerSingleton(REGISTRY_BEAN_NAME, beanOverrideRegistry);
+		beanFactory.registerSingleton(BeanOverrideRegistry.BEAN_NAME, beanOverrideRegistry);
 		beanFactory.registerSingleton(INFRASTRUCTURE_BEAN_NAME,
 				new BeanOverrideBeanFactoryPostProcessor(this.handlers, beanOverrideRegistry));
 		beanFactory.registerSingleton(EARLY_INFRASTRUCTURE_BEAN_NAME,

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,6 +47,7 @@ import org.springframework.web.socket.sockjs.frame.SockJsMessageCodec;
  *
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
+ * @author Sebastien Deleuze
  * @since 4.1
  */
 public abstract class AbstractClientSockJsSession implements WebSocketSession {
@@ -268,7 +269,7 @@ public abstract class AbstractClientSockJsSession implements WebSocketSession {
 			try {
 				messages = getMessageCodec().decode(frameData);
 			}
-			catch (IOException ex) {
+			catch (RuntimeException | IOException ex) {
 				if (logger.isErrorEnabled()) {
 					logger.error("Failed to decode data for SockJS \"message\" frame: " + frame + " in " + this, ex);
 				}

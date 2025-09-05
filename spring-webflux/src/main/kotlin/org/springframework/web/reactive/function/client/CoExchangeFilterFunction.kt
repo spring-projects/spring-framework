@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,13 @@
 package org.springframework.web.reactive.function.client
 
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.reactor.awaitSingle
 import kotlinx.coroutines.reactor.mono
 import reactor.core.publisher.Mono
+import kotlin.coroutines.CoroutineContext
+import kotlin.jvm.optionals.getOrNull
 
 /**
  * Kotlin-specific implementation of the [ExchangeFilterFunction] interface
@@ -31,10 +35,14 @@ import reactor.core.publisher.Mono
 abstract class CoExchangeFilterFunction : ExchangeFilterFunction {
 
 	final override fun filter(request: ClientRequest, next: ExchangeFunction): Mono<ClientResponse> {
-		return mono(Dispatchers.Unconfined) {
+		val context = request.attribute(COROUTINE_CONTEXT_ATTRIBUTE).getOrNull() as CoroutineContext?
+		return mono(context ?: Dispatchers.Unconfined) {
 			filter(request, object : CoExchangeFunction {
 				override suspend fun exchange(request: ClientRequest): ClientResponse {
-					return next.exchange(request).awaitSingle()
+					val newRequest = ClientRequest.from(request)
+						.attribute(COROUTINE_CONTEXT_ATTRIBUTE, currentCoroutineContext().minusKey(Job.Key))
+						.build()
+					return next.exchange(newRequest).awaitSingle()
 				}
 			})
 		}
@@ -58,6 +66,17 @@ abstract class CoExchangeFilterFunction : ExchangeFilterFunction {
 	 * @return the filtered response
 	 */
 	protected abstract suspend fun filter(request: ClientRequest, next: CoExchangeFunction): ClientResponse
+
+	companion object {
+
+		/**
+		 * Name of the [ClientRequest] attribute that contains the
+		 * [kotlin.coroutines.CoroutineContext] to be passed to the
+		 * [CoExchangeFilterFunction.filter].
+		 */
+		@JvmField
+		val COROUTINE_CONTEXT_ATTRIBUTE = CoExchangeFilterFunction::class.java.name + ".context"
+	}
 }
 
 

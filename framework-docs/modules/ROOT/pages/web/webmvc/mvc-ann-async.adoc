@@ -4,15 +4,18 @@
 Spring MVC has an extensive integration with Servlet asynchronous request
 xref:web/webmvc/mvc-ann-async.adoc#mvc-ann-async-processing[processing]:
 
-* xref:web/webmvc/mvc-ann-async.adoc#mvc-ann-async-deferredresult[`DeferredResult`] and xref:web/webmvc/mvc-ann-async.adoc#mvc-ann-async-callable[`Callable`]
-return values in controller methods provide basic support for a single asynchronous
-return value.
+* xref:web/webmvc/mvc-ann-async.adoc#mvc-ann-async-deferredresult[`DeferredResult`],
+xref:web/webmvc/mvc-ann-async.adoc#mvc-ann-async-callable[`Callable`], and
+xref:web/webmvc/mvc-ann-async.adoc#mvc-ann-async-webasynctask[`WebAsyncTask`] return values
+in controller methods provide support for a single asynchronous return value.
 * Controllers can xref:web/webmvc/mvc-ann-async.adoc#mvc-ann-async-http-streaming[stream] multiple values, including
-xref:web/webmvc/mvc-ann-async.adoc#mvc-ann-async-sse[SSE] and xref:web/webmvc/mvc-ann-async.adoc#mvc-ann-async-output-stream[raw data].
+xref:web/webmvc/mvc-ann-async.adoc#mvc-ann-async-sse[SSE] and
+xref:web/webmvc/mvc-ann-async.adoc#mvc-ann-async-output-stream[raw data].
 * Controllers can use reactive clients and return
 xref:web/webmvc/mvc-ann-async.adoc#mvc-ann-async-reactive-types[reactive types] for response handling.
 
 For an overview of how this differs from Spring WebFlux, see the xref:web/webmvc/mvc-ann-async.adoc#mvc-ann-async-vs-webflux[Async Spring MVC compared to WebFlux] section below.
+
 
 [[mvc-ann-async-deferredresult]]
 == `DeferredResult`
@@ -60,7 +63,6 @@ The controller can produce the return value asynchronously, from a different thr
 example, in response to an external event (JMS message), a scheduled task, or other event.
 
 
-
 [[mvc-ann-async-callable]]
 == `Callable`
 
@@ -94,6 +96,43 @@ Kotlin::
 The return value can then be obtained by running the given task through the
 xref:web/webmvc/mvc-ann-async.adoc#mvc-ann-async-configuration-spring-mvc[configured] `AsyncTaskExecutor`.
 
+
+[[mvc-ann-async-webasynctask]]
+== `WebAsyncTask`
+
+`WebAsyncTask` is comparable to using xref:web/webmvc/mvc-ann-async.adoc#mvc-ann-async-callable[Callable]
+but allows customizing additional settings such a request timeout value, and the
+`AsyncTaskExecutor` to execute the `java.util.concurrent.Callable` with instead
+of the defaults set up globally for Spring MVC. Below is an example of using `WebAsyncTask`:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	@GetMapping("/callable")
+	WebAsyncTask<String> handle() {
+		return new WebAsyncTask<String>(20000L,()->{
+			Thread.sleep(10000); //simulate long-running task
+			return "asynchronous request completed";
+		});
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes"]
+----
+@GetMapping("/callable")
+fun handle(): WebAsyncTask<String> {
+    return WebAsyncTask(20000L) {
+        Thread.sleep(10000) // simulate long-running task
+        "asynchronous request completed"
+    }
+}
+----
+======
 
 
 [[mvc-ann-async-processing]]
@@ -140,7 +179,6 @@ For further background and context, you can also read
 {spring-site-blog}/2012/05/07/spring-mvc-3-2-preview-introducing-servlet-3-async-support[the
 blog posts] that introduced asynchronous request processing support in Spring MVC 3.2.
 
-
 [[mvc-ann-async-exceptions]]
 === Exception Handling
 
@@ -153,7 +191,6 @@ The exception then goes through the regular exception handling mechanism (for ex
 
 When you use `Callable`, similar processing logic occurs, the main difference being that
 the result is returned from the `Callable` or an exception is raised by it.
-
 
 [[mvc-ann-async-interception]]
 === Interception
@@ -172,7 +209,6 @@ for more details.
 See the {spring-framework-api}/web/context/request/async/DeferredResult.html[javadoc of `DeferredResult`]
 for more details. `Callable` can be substituted for `WebAsyncTask` that exposes additional
 methods for timeout and completion callbacks.
-
 
 [[mvc-ann-async-vs-webflux]]
 === Async Spring MVC compared to WebFlux
@@ -213,7 +249,6 @@ xref:web/webmvc/mvc-ann-async.adoc#mvc-ann-async-configuration[enabled at the Se
 You can use `DeferredResult` and `Callable` for a single asynchronous return value.
 What if you want to produce multiple asynchronous values and have those written to the
 response? This section describes how to do so.
-
 
 [[mvc-ann-async-objects]]
 === Objects
@@ -276,12 +311,11 @@ or `emitter.completeWithError`. Instead, the servlet container automatically ini
 This call, in turn, performs one final `ASYNC` dispatch to the application, during which Spring MVC
 invokes the configured exception resolvers and completes the request.
 
-
 [[mvc-ann-async-sse]]
 === SSE
 
 `SseEmitter` (a subclass of `ResponseBodyEmitter`) provides support for
-https://www.w3.org/TR/eventsource/[Server-Sent Events], where events sent from the server
+https://html.spec.whatwg.org/multipage/server-sent-events.html[Server-Sent Events], where events sent from the server
 are formatted according to the W3C SSE specification. To produce an SSE
 stream from a controller, return `SseEmitter`, as the following example shows:
 
@@ -336,7 +370,6 @@ a wide range of browsers.
 
 See also xref:web/webmvc/mvc-ann-async.adoc#mvc-ann-async-objects[previous section] for notes on exception handling.
 
-
 [[mvc-ann-async-output-stream]]
 === Raw Data
 
@@ -376,7 +409,6 @@ You can use `StreamingResponseBody` as the body in a `ResponseEntity` to
 customize the status and headers of the response.
 
 
-
 [[mvc-ann-async-reactive-types]]
 == Reactive Types
 [.small]#xref:web/webflux/reactive-spring.adoc#webflux-codecs-streaming[See equivalent in the Reactive stack]#
@@ -390,7 +422,7 @@ reactive types from the controller method.
 Reactive return values are handled as follows:
 
 * A single-value promise is adapted to, similar to using `DeferredResult`. Examples
-include `Mono` (Reactor) or `Single` (RxJava).
+include `CompletionStage` (JDK), Mono` (Reactor), and `Single` (RxJava).
 * A multi-value stream with a streaming media type (such as `application/x-ndjson`
 or `text/event-stream`) is adapted to, similar to using `ResponseBodyEmitter` or
 `SseEmitter`. Examples include `Flux` (Reactor) or `Observable` (RxJava).
@@ -407,8 +439,6 @@ response are still blocking and are run on a separate thread through the
 xref:web/webmvc/mvc-ann-async.adoc#mvc-ann-async-configuration-spring-mvc[configured]
 `AsyncTaskExecutor`, to avoid blocking the upstream source such as a `Flux` returned
 from `WebClient`.
-
-
 
 
 [[mvc-ann-async-context-propagation]]
@@ -456,7 +486,6 @@ For more details, see the {micrometer-context-propagation-docs}/[documentation] 
 Micrometer Context Propagation library.
 
 
-
 [[mvc-ann-async-disconnects]]
 == Disconnects
 [.small]#xref:web/webflux/reactive-spring.adoc#webflux-codecs-streaming[See equivalent in the Reactive stack]#
@@ -473,13 +502,11 @@ xref:web/websocket/stomp.adoc[STOMP over WebSocket] or WebSocket with xref:web/w
 that have a built-in heartbeat mechanism.
 
 
-
 [[mvc-ann-async-configuration]]
 == Configuration
 
 The asynchronous request processing feature must be enabled at the Servlet container level.
 The MVC configuration also exposes several options for asynchronous requests.
-
 
 [[mvc-ann-async-configuration-servlet3]]
 === Servlet Container
@@ -494,7 +521,6 @@ to initialize the Servlet container, this is done automatically.
 In `web.xml` configuration, you can add `<async-supported>true</async-supported>` to the
 `DispatcherServlet` and to `Filter` declarations and add
 `<dispatcher>ASYNC</dispatcher>` to filter mappings.
-
 
 [[mvc-ann-async-configuration-spring-mvc]]
 === Spring MVC
@@ -517,4 +543,3 @@ The one used by default is not suitable for production under load.
 Note that you can also set the default timeout value on a `DeferredResult`,
 a `ResponseBodyEmitter`, and an `SseEmitter`. For a `Callable`, you can use
 `WebAsyncTask` to provide a timeout value.
-

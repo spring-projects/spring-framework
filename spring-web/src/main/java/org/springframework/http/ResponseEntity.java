@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -364,10 +364,22 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 
 	/**
 	 * Create a builder with an
+	 * {@linkplain HttpStatus#UNPROCESSABLE_CONTENT UNPROCESSABLE_CONTENT} status.
+	 * @return the created builder
+	 * @since 7.0
+	 */
+	public static BodyBuilder unprocessableContent() {
+		return status(HttpStatus.UNPROCESSABLE_CONTENT);
+	}
+
+	/**
+	 * Create a builder with an
 	 * {@linkplain HttpStatus#UNPROCESSABLE_ENTITY UNPROCESSABLE_ENTITY} status.
 	 * @return the created builder
 	 * @since 4.1.3
+	 * @deprecated since 7.0 in favor of {@link #unprocessableContent()}
 	 */
+	@Deprecated(since = "7.0")
 	public static BodyBuilder unprocessableEntity() {
 		return status(HttpStatus.UNPROCESSABLE_ENTITY);
 	}

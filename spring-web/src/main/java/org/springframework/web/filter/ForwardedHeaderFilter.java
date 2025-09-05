@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -73,6 +73,7 @@ import org.springframework.web.util.WebUtils;
  * @author Eddú Meléndez
  * @author Rob Winch
  * @author Brian Clozel
+ * @author Mengqi Xu
  * @since 4.3
  * @see <a href="https://tools.ietf.org/html/rfc7239">https://tools.ietf.org/html/rfc7239</a>
  * @see <a href="https://docs.spring.io/spring-framework/reference/web/webmvc/filters.html#filters-forwarded-headers">Forwarded Headers</a>
@@ -255,6 +256,8 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 
 		private final @Nullable InetSocketAddress remoteAddress;
 
+		private final @Nullable InetSocketAddress localAddress;
+
 		private final ForwardedPrefixExtractor forwardedPrefixExtractor;
 
 		ForwardedHeaderExtractingRequest(HttpServletRequest servletRequest) {
@@ -272,6 +275,7 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 			this.port = (port == -1 ? (this.secure ? 443 : 80) : port);
 
 			this.remoteAddress = ForwardedHeaderUtils.parseForwardedFor(uri, headers, request.getRemoteAddress());
+			this.localAddress = ForwardedHeaderUtils.parseForwardedBy(uri, headers, request.getLocalAddress());
 
 			// Use Supplier as Tomcat updates delegate request on FORWARD
 			Supplier<HttpServletRequest> requestSupplier = () -> (HttpServletRequest) getRequest();
@@ -328,6 +332,16 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 		@Override
 		public int getRemotePort() {
 			return (this.remoteAddress != null ? this.remoteAddress.getPort() : super.getRemotePort());
+		}
+
+		@Override
+		public @Nullable String getLocalAddr() {
+			return (this.localAddress != null ? this.localAddress.getHostString() : super.getLocalAddr());
+		}
+
+		@Override
+		public int getLocalPort() {
+			return (this.localAddress != null ? this.localAddress.getPort() : super.getLocalPort());
 		}
 
 		@SuppressWarnings("DataFlowIssue")

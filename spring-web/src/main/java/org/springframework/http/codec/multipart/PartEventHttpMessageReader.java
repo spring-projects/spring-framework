@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -212,8 +212,8 @@ public class PartEventHttpMessageReader extends LoggingCodecSupport implements H
 									this.maxPartSize + " bytes"));
 						}
 						else {
-							return isFilePart ? Mono.just(DefaultPartEvents.file(headers, buffer, body.isLast()))
-									: Mono.just(DefaultPartEvents.create(headers, body.buffer(), body.isLast()));
+							return (isFilePart ? Mono.just(DefaultPartEvents.file(headers, buffer, body.isLast())) :
+									Mono.just(DefaultPartEvents.create(headers, body.buffer(), body.isLast())));
 						}
 					})
 					.switchIfEmpty(Mono.fromCallable(() ->

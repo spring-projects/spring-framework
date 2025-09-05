@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,13 +44,13 @@ import org.springframework.util.LinkedCaseInsensitiveMap;
  * @see JdbcTemplate#queryForList(String)
  * @see JdbcTemplate#queryForMap(String)
  */
-public class ColumnMapRowMapper implements RowMapper<Map<String, Object>> {
+public class ColumnMapRowMapper implements RowMapper<Map<String, @Nullable Object>> {
 
 	@Override
-	public Map<String, Object> mapRow(ResultSet rs, int rowNum) throws SQLException {
+	public Map<String, @Nullable Object> mapRow(ResultSet rs, int rowNum) throws SQLException {
 		ResultSetMetaData rsmd = rs.getMetaData();
 		int columnCount = rsmd.getColumnCount();
-		Map<String, Object> mapOfColumnValues = createColumnMap(columnCount);
+		Map<String, @Nullable Object> mapOfColumnValues = createColumnMap(columnCount);
 		for (int i = 1; i <= columnCount; i++) {
 			String column = JdbcUtils.lookupColumnName(rsmd, i);
 			mapOfColumnValues.putIfAbsent(getColumnKey(column), getColumnValue(rs, i));
@@ -66,7 +66,7 @@ public class ColumnMapRowMapper implements RowMapper<Map<String, Object>> {
 	 * @return the new Map instance
 	 * @see org.springframework.util.LinkedCaseInsensitiveMap
 	 */
-	protected Map<String, Object> createColumnMap(int columnCount) {
+	protected Map<String, @Nullable Object> createColumnMap(int columnCount) {
 		return new LinkedCaseInsensitiveMap<>(columnCount);
 	}
 

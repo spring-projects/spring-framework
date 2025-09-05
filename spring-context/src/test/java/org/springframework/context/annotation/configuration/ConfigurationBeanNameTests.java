@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,8 +64,7 @@ class ConfigurationBeanNameTests {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.setBeanNameGenerator(new AnnotationBeanNameGenerator() {
 			@Override
-			public String generateBeanName(
-					BeanDefinition definition, BeanDefinitionRegistry registry) {
+			public String generateBeanName(BeanDefinition definition, BeanDefinitionRegistry registry) {
 				return "custom-" + super.generateBeanName(definition, registry);
 			}
 		});
@@ -78,17 +77,22 @@ class ConfigurationBeanNameTests {
 		ctx.close();
 	}
 
+
 	@Configuration("outer")
 	@Import(C.class)
 	static class A {
+
 		@Component("nested")
 		static class B {
+
 			@Bean public String nestedBean() { return ""; }
 		}
 	}
 
+
 	@Configuration("imported")
 	static class C {
+
 		@Bean public String s() { return "s"; }
 	}
 

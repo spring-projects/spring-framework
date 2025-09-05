@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,21 +42,21 @@ import org.springframework.web.util.pattern.PathPatternParser;
 @Deprecated(since = "7.0", forRemoval = true)
 class PathPatternMatchableHandlerMapping implements MatchableHandlerMapping {
 
-	private static final int MAX_PATTERNS = 1024;
-
-
 	private final MatchableHandlerMapping delegate;
 
 	private final PathPatternParser parser;
 
 	private final Map<String, PathPattern> pathPatternCache = new ConcurrentHashMap<>();
 
+	private final int cacheLimit;
 
-	public PathPatternMatchableHandlerMapping(MatchableHandlerMapping delegate) {
+
+	public PathPatternMatchableHandlerMapping(MatchableHandlerMapping delegate, int cacheLimit) {
 		Assert.notNull(delegate, "HandlerMapping to delegate to is required.");
 		Assert.notNull(delegate.getPatternParser(), "Expected HandlerMapping configured to use PatternParser.");
 		this.delegate = delegate;
 		this.parser = delegate.getPatternParser();
+		this.cacheLimit = cacheLimit;
 	}
 
 	@SuppressWarnings("removal")
@@ -64,7 +64,7 @@ class PathPatternMatchableHandlerMapping implements MatchableHandlerMapping {
 	@Override
 	public @Nullable RequestMatchResult match(HttpServletRequest request, String pattern) {
 		PathPattern pathPattern = this.pathPatternCache.computeIfAbsent(pattern, value -> {
-			Assert.state(this.pathPatternCache.size() < MAX_PATTERNS, "Max size for pattern cache exceeded.");
+			Assert.state(this.pathPatternCache.size() < this.cacheLimit, "Max size for pattern cache exceeded.");
 			return this.parser.parse(pattern);
 		});
 		PathContainer path = ServletRequestPathUtils.getParsedRequestPath(request).pathWithinApplication();

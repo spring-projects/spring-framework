@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,14 +34,17 @@ import org.springframework.util.Assert;
 import org.springframework.util.MimeType;
 
 /**
- * Encode from an {@code Object} to bytes of CBOR objects using Jackson.
+ * Encode from an {@code Object} to bytes of CBOR objects using Jackson 2.x.
  * Stream encoding is not supported yet.
  *
  * @author Sebastien Deleuze
  * @since 5.2
  * @see Jackson2CborDecoder
  * @see <a href="https://github.com/spring-projects/spring-framework/issues/20513">Add CBOR support to WebFlux</a>
+ * @deprecated since 7.0 in favor of {@link JacksonCborEncoder}
  */
+@Deprecated(since = "7.0", forRemoval = true)
+@SuppressWarnings("removal")
 public class Jackson2CborEncoder extends AbstractJackson2Encoder {
 
 	public Jackson2CborEncoder() {

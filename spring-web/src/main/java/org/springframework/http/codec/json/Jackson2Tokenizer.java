@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,13 +44,15 @@ import org.springframework.core.io.buffer.DataBufferUtils;
 /**
  * {@link Function} to transform a JSON stream of arbitrary size, byte array
  * chunks into a {@code Flux<TokenBuffer>} where each token buffer is a
- * well-formed JSON object.
+ * well-formed JSON object with Jackson 2.x.
  *
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
  * @since 5.0
+ * @deprecated since 7.0 in favor of {@code org.springframework.http.codec.JacksonTokenizer}
  */
+@Deprecated(since = "7.0", forRemoval = true)
 final class Jackson2Tokenizer {
 
 	private final JsonParser parser;

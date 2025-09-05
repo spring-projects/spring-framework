@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "https://www.springframework.org/dtd/spring-beans-2.0.dtd">
-
-<beans>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xsi:schemaLocation="http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
 
 	<bean id="persistenceUnitManager" class="org.springframework.orm.jpa.persistenceunit.DefaultPersistenceUnitManager">
 		<property name="persistenceXmlLocations" value="org/springframework/orm/jpa/domain/persistence-multi.xml"/>
@@ -16,6 +16,7 @@
 
 	<bean id="entityManagerFactory" parent="abstractEMF">
 		<property name="persistenceUnitName" value="Drivers"/>
+		<qualifier type="org.springframework.orm.jpa.domain.MyDomain"/>
 	</bean>
 
 	<bean id="entityManagerFactory2" parent="abstractEMF">

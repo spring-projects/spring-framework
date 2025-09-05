@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,6 +39,7 @@ import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.SerializerProvider;
@@ -72,7 +73,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
  * @author Sebastien Deleuze
  * @author Sam Brannen
  */
-@SuppressWarnings("deprecation")
+@SuppressWarnings({"deprecation", "removal" })
 public class Jackson2ObjectMapperFactoryBeanTests {
 
 	private static final String DATE_FORMAT = "yyyy-MM-dd";
@@ -222,7 +223,7 @@ public class Jackson2ObjectMapperFactoryBeanTests {
 
 	@Test
 	void propertyNamingStrategy() {
-		PropertyNamingStrategy strategy = new PropertyNamingStrategy.SnakeCaseStrategy();
+		PropertyNamingStrategy strategy = new PropertyNamingStrategies.SnakeCaseStrategy();
 		this.factory.setPropertyNamingStrategy(strategy);
 		this.factory.afterPropertiesSet();
 
@@ -358,7 +359,7 @@ public class Jackson2ObjectMapperFactoryBeanTests {
 
 		@Override
 		public String getModuleName() {
-			return this.getClass().getSimpleName();
+			return getClass().getSimpleName();
 		}
 
 		@Override

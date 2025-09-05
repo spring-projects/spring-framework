@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -277,9 +277,9 @@ public class GroovyScriptFactoryTests {
 
 	@Test
 	void testScriptCompilationException() {
-		assertThatExceptionOfType(NestedRuntimeException.class).isThrownBy(() ->
-				new ClassPathXmlApplicationContext("org/springframework/scripting/groovy/groovyBrokenContext.xml"))
-			.matches(ex -> ex.contains(ScriptCompilationException.class));
+		assertThatExceptionOfType(NestedRuntimeException.class)
+				.isThrownBy(() -> new ClassPathXmlApplicationContext("org/springframework/scripting/groovy/groovyBrokenContext.xml"))
+				.matches(ex -> ex.contains(ScriptCompilationException.class));
 	}
 
 	@Test
@@ -288,11 +288,10 @@ public class GroovyScriptFactoryTests {
 		String badScript = "class Foo { public Foo(String foo) {}}";
 		given(script.getScriptAsString()).willReturn(badScript);
 		given(script.suggestedClassName()).willReturn("someName");
-		GroovyScriptFactory factory = new GroovyScriptFactory(ScriptFactoryPostProcessor.INLINE_SCRIPT_PREFIX
-				+ badScript);
-		assertThatExceptionOfType(ScriptCompilationException.class).isThrownBy(() ->
-				factory.getScriptedObject(script))
-			.matches(ex -> ex.contains(NoSuchMethodException.class));
+		GroovyScriptFactory factory = new GroovyScriptFactory(ScriptFactoryPostProcessor.INLINE_SCRIPT_PREFIX + badScript);
+		assertThatExceptionOfType(ScriptCompilationException.class)
+				.isThrownBy(() -> factory.getScriptedObject(script))
+				.matches(ex -> ex.contains(NoSuchMethodException.class));
 	}
 
 	@Test
@@ -327,27 +326,24 @@ public class GroovyScriptFactoryTests {
 
 	@Test
 	void testCtorWithNullScriptSourceLocator() {
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				new GroovyScriptFactory(null));
+		assertThatIllegalArgumentException().isThrownBy(() -> new GroovyScriptFactory(null));
 	}
 
 	@Test
 	void testCtorWithEmptyScriptSourceLocator() {
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				new GroovyScriptFactory(""));
+		assertThatIllegalArgumentException().isThrownBy(() -> new GroovyScriptFactory(""));
 	}
 
 	@Test
 	void testCtorWithWhitespacedScriptSourceLocator() {
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				new GroovyScriptFactory("\n   "));
+		assertThatIllegalArgumentException().isThrownBy(() -> new GroovyScriptFactory("\n   "));
 	}
 
 	@Test
 	void testWithInlineScriptWithLeadingWhitespace() {
-		assertThatExceptionOfType(BeanCreationException.class).as("'inline:' prefix was preceded by whitespace").isThrownBy(() ->
-				new ClassPathXmlApplicationContext("lwspBadGroovyContext.xml", getClass()))
-			.matches(ex -> ex.contains(FileNotFoundException.class));
+		assertThatExceptionOfType(BeanCreationException.class).as("'inline:' prefix was preceded by whitespace")
+				.isThrownBy(() -> new ClassPathXmlApplicationContext("lwspBadGroovyContext.xml", getClass()))
+				.matches(ex -> ex.contains(FileNotFoundException.class));
 	}
 
 	@Test
@@ -364,8 +360,8 @@ public class GroovyScriptFactoryTests {
 	@Test
 	void testGetScriptedObjectDoesChokeOnNullScriptSourceBeingPassedIn() {
 		GroovyScriptFactory factory = new GroovyScriptFactory("a script source locator (doesn't matter here)");
-		assertThatNullPointerException().as("NullPointerException as per contract ('null' ScriptSource supplied)").isThrownBy(() ->
-				factory.getScriptedObject(null));
+		assertThatNullPointerException().as("NullPointerException as per contract ('null' ScriptSource supplied)")
+				.isThrownBy(() -> factory.getScriptedObject(null));
 	}
 
 	@Test

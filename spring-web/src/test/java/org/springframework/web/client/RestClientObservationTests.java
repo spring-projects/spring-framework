@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,7 +44,7 @@ import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.http.client.observation.ClientRequestObservationContext;
 import org.springframework.http.client.observation.ClientRequestObservationConvention;
 import org.springframework.http.client.observation.DefaultClientRequestObservationConvention;
-import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.util.StreamUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -70,8 +70,6 @@ class RestClientObservationTests {
 
 	private final ClientHttpResponse response = mock();
 
-	private final HttpMessageConverter<String> converter = mock();
-
 	private RestClient client;
 
 
@@ -84,7 +82,7 @@ class RestClientObservationTests {
 	RestClient.Builder createBuilder() {
 		return RestClient.builder()
 				.baseUrl("https://example.com/base")
-				.messageConverters(converters -> converters.add(0, this.converter))
+				.configureMessageConverters(converters -> converters.customMessageConverter(new StringHttpMessageConverter()))
 				.requestFactory(this.requestFactory)
 				.observationRegistry(this.observationRegistry);
 	}
@@ -203,7 +201,7 @@ class RestClientObservationTests {
 		assertThatExceptionOfType(RestClientException.class).isThrownBy(() ->
 				client.get().uri(url).retrieve().body(User.class));
 
-		assertThatHttpObservation().hasLowCardinalityKeyValue("exception", "RestClientException");
+		assertThatHttpObservation().hasLowCardinalityKeyValue("exception", "UnknownContentTypeException");
 	}
 
 	@Test

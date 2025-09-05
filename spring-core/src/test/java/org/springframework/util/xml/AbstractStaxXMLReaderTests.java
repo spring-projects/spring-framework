@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -218,8 +218,8 @@ abstract class AbstractStaxXMLReaderTests {
 
 		@Override
 		public Object[] adaptArguments(Object[] arguments) {
-			if (arguments.length == 3 && arguments[0] instanceof char[]
-					&& arguments[1] instanceof Integer && arguments[2] instanceof Integer) {
+			if (arguments.length == 3 && arguments[0] instanceof char[] &&
+					arguments[1] instanceof Integer && arguments[2] instanceof Integer) {
 				return new Object[] {new String((char[]) arguments[0], (Integer) arguments[1], (Integer) arguments[2])};
 			}
 			return arguments;
@@ -271,10 +271,10 @@ abstract class AbstractStaxXMLReaderTests {
 			for (int i = 0; i < other.getLength(); i++) {
 				boolean found = false;
 				for (int j = 0; j < attributes.getLength(); j++) {
-					if (other.getURI(i).equals(attributes.getURI(j))
-							&& other.getQName(i).equals(attributes.getQName(j))
-							&& other.getType(i).equals(attributes.getType(j))
-							&& other.getValue(i).equals(attributes.getValue(j))) {
+					if (other.getURI(i).equals(attributes.getURI(j)) &&
+							other.getQName(i).equals(attributes.getQName(j)) &&
+							other.getType(i).equals(attributes.getType(j)) &&
+							other.getValue(i).equals(attributes.getValue(j))) {
 						found = true;
 						break;
 					}

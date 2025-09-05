@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,9 +28,9 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import okhttp3.mockwebserver.MockResponse;
-import okhttp3.mockwebserver.MockWebServer;
-import okhttp3.mockwebserver.RecordedRequest;
+import mockwebserver3.MockResponse;
+import mockwebserver3.MockWebServer;
+import mockwebserver3.RecordedRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -53,8 +53,8 @@ import org.springframework.http.converter.GenericHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.SmartHttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
+import org.springframework.http.converter.json.JacksonJsonHttpMessageConverter;
 import org.springframework.http.converter.json.KotlinSerializationJsonHttpMessageConverter;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 
@@ -113,7 +113,7 @@ class RestTemplateTests {
 		RestTemplate restTemplate = new RestTemplate();
 		List<HttpMessageConverter<?>> httpMessageConverters = restTemplate.getMessageConverters();
 		assertThat(httpMessageConverters).extracting("class").containsOnlyOnce(
-			MappingJackson2HttpMessageConverter.class
+			JacksonJsonHttpMessageConverter.class
 		);
 		assertThat(httpMessageConverters).extracting("class").doesNotContain(
 				KotlinSerializationJsonHttpMessageConverter.class
@@ -504,18 +504,18 @@ class RestTemplateTests {
 	@Test // gh-23740
 	void headerAcceptAllOnPut() throws Exception {
 		try (MockWebServer server = new MockWebServer()) {
-			server.enqueue(new MockResponse().setResponseCode(500).setBody("internal server error"));
+			server.enqueue(new MockResponse.Builder().code(500).body("internal server error").build());
 			server.start();
 			template.setRequestFactory(new SimpleClientHttpRequestFactory());
 			template.put(server.url("/internal/server/error").uri(), null);
-			assertThat(server.takeRequest().getHeader("Accept")).isEqualTo("*/*");
+			assertThat(server.takeRequest().getHeaders().get("Accept")).isEqualTo("*/*");
 		}
 	}
 
 	@Test // gh-23740
 	void keepGivenAcceptHeaderOnPut() throws Exception {
 		try (MockWebServer server = new MockWebServer()) {
-			server.enqueue(new MockResponse().setResponseCode(500).setBody("internal server error"));
+			server.enqueue(new MockResponse.Builder().code(500).body("internal server error").build());
 			server.start();
 			HttpHeaders headers = new HttpHeaders();
 			headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
@@ -582,11 +582,11 @@ class RestTemplateTests {
 	@Test // gh-23740
 	void headerAcceptAllOnDelete() throws Exception {
 		try (MockWebServer server = new MockWebServer()) {
-			server.enqueue(new MockResponse().setResponseCode(500).setBody("internal server error"));
+			server.enqueue(new MockResponse.Builder().code(500).body("internal server error").build());
 			server.start();
 			template.setRequestFactory(new SimpleClientHttpRequestFactory());
 			template.delete(server.url("/internal/server/error").uri());
-			assertThat(server.takeRequest().getHeader("Accept")).isEqualTo("*/*");
+			assertThat(server.takeRequest().getHeaders().get("Accept")).isEqualTo("*/*");
 		}
 	}
 
@@ -773,7 +773,7 @@ class RestTemplateTests {
 	@Test
 	void requestInterceptorWithBuffering() throws Exception {
 		try (MockWebServer server = new MockWebServer()) {
-			server.enqueue(new MockResponse().setResponseCode(200).setBody("Hello Spring!"));
+			server.enqueue(new MockResponse.Builder().code(200).body("Hello Spring!").build());
 			server.start();
 			template.setRequestFactory(new SimpleClientHttpRequestFactory());
 			template.setInterceptors(List.of((request, body, execution) -> {
@@ -793,7 +793,7 @@ class RestTemplateTests {
 	@Test
 	void buffering() throws Exception {
 		try (MockWebServer server = new MockWebServer()) {
-			server.enqueue(new MockResponse().setResponseCode(200).setBody("Hello Spring!"));
+			server.enqueue(new MockResponse.Builder().code(200).body("Hello Spring!").build());
 			server.start();
 			template.setRequestFactory(new SimpleClientHttpRequestFactory());
 			template.setBufferingPredicate((uri, httpMethod) -> true);

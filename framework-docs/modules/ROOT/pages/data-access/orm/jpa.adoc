@@ -627,7 +627,3 @@ On `LocalSessionFactoryBean`, this is available through the `bootstrapExecutor`
 property. On the programmatic `LocalSessionFactoryBuilder`, an overloaded
 `buildSessionFactory` method takes a bootstrap executor argument.
 ====
-
-
-
-

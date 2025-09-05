@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,7 +56,7 @@ import org.springframework.web.util.pattern.PathPatternParser;
  *
  * <p>Additionally, this class can {@linkplain #toHttpHandler(RouterFunction) transform}
  * a {@code RouterFunction} into an {@code HttpHandler}, which can be run in Servlet
- * environments, Reactor, or Undertow.
+ * environments, or Reactor.
  *
  * @author Arjen Poutsma
  * @author Sebastien Deleuze
@@ -153,7 +153,7 @@ public abstract class RouterFunctions {
 	 * Resource resource = new ClassPathResource("static/index.html")
 	 * RouterFunction&lt;ServerResponse&gt; resources = RouterFunctions.resource(path("/api/**").negate(), resource);
 	 * </pre>
-	 * @param predicate predicate to match
+	 * @param predicate the predicate to match
 	 * @param resource the resources to serve
 	 * @return a router function that routes to a resource
 	 * @since 6.1.4
@@ -169,7 +169,7 @@ public abstract class RouterFunctions {
 	 * Resource resource = new ClassPathResource("static/index.html")
 	 * RouterFunction&lt;ServerResponse&gt; resources = RouterFunctions.resource(path("/api/**").negate(), resource);
 	 * </pre>
-	 * @param predicate predicate to match
+	 * @param predicate the predicate to match
 	 * @param resource the resources to serve
 	 * @param headersConsumer provides access to the HTTP headers for served resources
 	 * @return a router function that routes to a resource
@@ -272,8 +272,6 @@ public abstract class RouterFunctions {
 	 * {@link org.springframework.http.server.reactive.ServletHttpHandlerAdapter}</li>
 	 * <li>Reactor using the
 	 * {@link org.springframework.http.server.reactive.ReactorHttpHandlerAdapter}
-	 * <li>Undertow using the
-	 * {@link org.springframework.http.server.reactive.UndertowHttpHandlerAdapter}</li>
 	 * </ul>
 	 * <p>Note that {@code HttpWebHandlerAdapter} also implements {@link WebHandler},
 	 * allowing for additional filter and exception handler registration through
@@ -294,8 +292,6 @@ public abstract class RouterFunctions {
 	 * {@link org.springframework.http.server.reactive.ServletHttpHandlerAdapter}</li>
 	 * <li>Reactor using the
 	 * {@link org.springframework.http.server.reactive.ReactorHttpHandlerAdapter}</li>
-	 * <li>Undertow using the
-	 * {@link org.springframework.http.server.reactive.UndertowHttpHandlerAdapter}</li>
 	 * </ul>
 	 * @param routerFunction the router function to convert
 	 * @param strategies the strategies to use
@@ -384,7 +380,7 @@ public abstract class RouterFunctions {
 		/**
 		 * Adds a route to the given handler function that handles all HTTP {@code GET} requests
 		 * that match the given predicate.
-		 * @param predicate predicate to match
+		 * @param predicate the predicate to match
 		 * @param handlerFunction the handler function to handle all {@code GET} requests that
 		 * match {@code predicate}
 		 * @return this builder
@@ -436,7 +432,7 @@ public abstract class RouterFunctions {
 		/**
 		 * Adds a route to the given handler function that handles all HTTP {@code HEAD} requests
 		 * that match the given predicate.
-		 * @param predicate predicate to match
+		 * @param predicate the predicate to match
 		 * @param handlerFunction the handler function to handle all {@code HEAD} requests that
 		 * match {@code predicate}
 		 * @return this builder
@@ -479,7 +475,7 @@ public abstract class RouterFunctions {
 		/**
 		 * Adds a route to the given handler function that handles all HTTP {@code POST} requests
 		 * that match the given predicate.
-		 * @param predicate predicate to match
+		 * @param predicate the predicate to match
 		 * @param handlerFunction the handler function to handle all {@code POST} requests that
 		 * match {@code predicate}
 		 * @return this builder
@@ -530,7 +526,7 @@ public abstract class RouterFunctions {
 		/**
 		 * Adds a route to the given handler function that handles all HTTP {@code PUT} requests
 		 * that match the given predicate.
-		 * @param predicate predicate to match
+		 * @param predicate the predicate to match
 		 * @param handlerFunction the handler function to handle all {@code PUT} requests that
 		 * match {@code predicate}
 		 * @return this builder
@@ -581,7 +577,7 @@ public abstract class RouterFunctions {
 		/**
 		 * Adds a route to the given handler function that handles all HTTP {@code PATCH} requests
 		 * that match the given predicate.
-		 * @param predicate predicate to match
+		 * @param predicate the predicate to match
 		 * @param handlerFunction the handler function to handle all {@code PATCH} requests that
 		 * match {@code predicate}
 		 * @return this builder
@@ -632,7 +628,7 @@ public abstract class RouterFunctions {
 		/**
 		 * Adds a route to the given handler function that handles all HTTP {@code DELETE} requests
 		 * that match the given predicate.
-		 * @param predicate predicate to match
+		 * @param predicate the predicate to match
 		 * @param handlerFunction the handler function to handle all {@code DELETE} requests that
 		 * match {@code predicate}
 		 * @return this builder
@@ -675,7 +671,7 @@ public abstract class RouterFunctions {
 		/**
 		 * Adds a route to the given handler function that handles all HTTP {@code OPTIONS} requests
 		 * that match the given predicate.
-		 * @param predicate predicate to match
+		 * @param predicate the predicate to match
 		 * @param handlerFunction the handler function to handle all {@code OPTIONS} requests that
 		 * match {@code predicate}
 		 * @return this builder
@@ -735,7 +731,7 @@ public abstract class RouterFunctions {
 		 * Resource resource = new ClassPathResource("static/index.html")
 		 * RouterFunction&lt;ServerResponse&gt; resources = RouterFunctions.resource(path("/api/**").negate(), resource);
 		 * </pre>
-		 * @param predicate predicate to match
+		 * @param predicate the predicate to match
 		 * @param resource the resources to serve
 		 * @return a router function that routes to a resource
 		 * @since 6.1.4
@@ -749,7 +745,7 @@ public abstract class RouterFunctions {
 		 * Resource resource = new ClassPathResource("static/index.html")
 		 * RouterFunction&lt;ServerResponse&gt; resources = RouterFunctions.resource(path("/api/**").negate(), resource);
 		 * </pre>
-		 * @param predicate predicate to match
+		 * @param predicate the predicate to match
 		 * @param resource the resources to serve
 		 * @param headersConsumer provides access to the HTTP headers for served resources
 		 * @return a router function that routes to a resource

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -119,8 +119,7 @@ class HttpComponentsClientHttpResponse extends AbstractClientHttpResponse {
 				ZonedDateTime expiresDate = ZonedDateTime.parse(expiresAttribute, DateTimeFormatter.RFC_1123_DATE_TIME);
 				return Duration.between(ZonedDateTime.now(expiresDate.getZone()), expiresDate).toSeconds();
 			}
-			catch (DateTimeParseException ex) {
-				// ignore
+			catch (DateTimeParseException ignored) {
 			}
 		}
 		return -1;

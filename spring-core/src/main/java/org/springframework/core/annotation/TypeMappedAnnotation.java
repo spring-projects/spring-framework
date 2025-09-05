@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -369,8 +369,8 @@ final class TypeMappedAnnotation<A extends Annotation> extends AbstractMergedAnn
 	private Object getRequiredValue(int attributeIndex, String attributeName) {
 		Object value = getValue(attributeIndex, Object.class);
 		if (value == null) {
-			throw new NoSuchElementException("No element at attribute index "
-					+ attributeIndex + " for name " + attributeName);
+			throw new NoSuchElementException("No element at attribute index " +
+					attributeIndex + " for name " + attributeName);
 		}
 		return value;
 	}

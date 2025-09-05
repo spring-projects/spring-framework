@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -321,7 +321,7 @@ public abstract class JdbcUtils {
 	 * @throws MetaDataAccessException if meta-data access failed
 	 * @see java.sql.DatabaseMetaData
 	 */
-	public static <T> T extractDatabaseMetaData(DataSource dataSource, DatabaseMetaDataCallback<T> action)
+	public static <T extends @Nullable Object> T extractDatabaseMetaData(DataSource dataSource, DatabaseMetaDataCallback<T> action)
 			throws MetaDataAccessException {
 
 		Connection con = null;
@@ -375,11 +375,11 @@ public abstract class JdbcUtils {
 	 * @throws MetaDataAccessException if we couldn't access the DatabaseMetaData
 	 * or failed to invoke the specified method
 	 * @see java.sql.DatabaseMetaData
-	 * @deprecated as of 5.2.9, in favor of
+	 * @deprecated in favor of
 	 * {@link #extractDatabaseMetaData(DataSource, DatabaseMetaDataCallback)}
 	 * with a lambda expression or method reference and a generically typed result
 	 */
-	@Deprecated
+	@Deprecated(since = "5.2.9")
 	@SuppressWarnings("unchecked")
 	public static <T> T extractDatabaseMetaData(DataSource dataSource, final String metaDataMethodName)
 			throws MetaDataAccessException {

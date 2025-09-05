@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,8 +23,6 @@ import org.springframework.beans.factory.config.CustomScopeConfigurer;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.task.TaskExecutor;
-import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
-import org.springframework.messaging.converter.MappingJackson2MessageConverter;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.messaging.simp.SimpSessionScope;
 import org.springframework.messaging.simp.annotation.support.SimpAnnotationMethodMessageHandler;
@@ -56,9 +54,17 @@ import org.springframework.web.socket.server.support.WebSocketHandlerMapping;
  * @author Rossen Stoyanchev
  * @author Artem Bilan
  * @author Sebastien Deleuze
+ * @author Juergen Hoeller
  * @since 4.0
  */
 public abstract class WebSocketMessageBrokerConfigurationSupport extends AbstractMessageBrokerConfiguration {
+
+	/**
+	 * Scope identifier for WebSocket scope: "websocket".
+	 * @since 7.0
+	 */
+	public static final String SCOPE_WEBSOCKET = "websocket";
+
 
 	private @Nullable WebSocketTransportRegistration transportRegistration;
 
@@ -139,7 +145,7 @@ public abstract class WebSocketMessageBrokerConfigurationSupport extends Abstrac
 	@Bean
 	public static CustomScopeConfigurer webSocketScopeConfigurer() {
 		CustomScopeConfigurer configurer = new CustomScopeConfigurer();
-		configurer.addScope("websocket", new SimpSessionScope());
+		configurer.addScope(SCOPE_WEBSOCKET, new SimpSessionScope());
 		return configurer;
 	}
 
@@ -160,19 +166,6 @@ public abstract class WebSocketMessageBrokerConfigurationSupport extends Abstrac
 		stats.setOutboundChannelExecutor(outboundExecutor);
 		stats.setSockJsTaskScheduler(scheduler);
 		return stats;
-	}
-
-	@Override
-	protected MappingJackson2MessageConverter createJacksonConverter() {
-		MappingJackson2MessageConverter messageConverter = super.createJacksonConverter();
-		// Use Jackson builder in order to have well-known modules registered automatically.
-		Jackson2ObjectMapperBuilder builder = Jackson2ObjectMapperBuilder.json();
-		ApplicationContext applicationContext = getApplicationContext();
-		if (applicationContext != null) {
-			builder.applicationContext(applicationContext);
-		}
-		messageConverter.setObjectMapper(builder.build());
-		return messageConverter;
 	}
 
 }

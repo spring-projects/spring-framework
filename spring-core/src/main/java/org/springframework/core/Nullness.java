@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -181,10 +181,10 @@ public enum Nullness {
 
 		public static Nullness forMethodReturnType(Method method) {
 			KFunction<?> function = ReflectJvmMapping.getKotlinFunction(method);
-			if (function != null && function.getReturnType().isMarkedNullable()) {
-				return Nullness.NULLABLE;
+			if (function != null && ReflectJvmMapping.getJavaType(function.getReturnType()) != void.class) {
+				return (function.getReturnType().isMarkedNullable() ? Nullness.NULLABLE : Nullness.NON_NULL);
 			}
-			return Nullness.NON_NULL;
+			return Nullness.UNSPECIFIED;
 		}
 
 		public static Nullness forParameter(Executable executable, int parameterIndex) {

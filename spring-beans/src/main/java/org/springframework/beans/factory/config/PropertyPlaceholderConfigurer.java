@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,11 +52,13 @@ import org.springframework.util.StringValueResolver;
  * @see #setSystemPropertiesModeName
  * @see PlaceholderConfigurerSupport
  * @see PropertyOverrideConfigurer
- * @deprecated as of 5.2; use {@code org.springframework.context.support.PropertySourcesPlaceholderConfigurer}
- * instead which is more flexible through taking advantage of the {@link org.springframework.core.env.Environment}
- * and {@link org.springframework.core.env.PropertySource} mechanisms.
+ * @deprecated as of 5.2, to be removed in 8.0;
+ * use {@code org.springframework.context.support.PropertySourcesPlaceholderConfigurer}
+ * instead which is more flexible through taking advantage of the
+ * {@link org.springframework.core.env.Environment} and
+ * {@link org.springframework.core.env.PropertySource} mechanisms.
  */
-@Deprecated
+@Deprecated(since = "5.2", forRemoval = true)
 public class PropertyPlaceholderConfigurer extends PlaceholderConfigurerSupport {
 
 	/** Never check system properties. */

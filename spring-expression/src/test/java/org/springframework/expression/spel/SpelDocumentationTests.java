@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -737,8 +737,8 @@ class SpelDocumentationTests extends AbstractExpressionTests {
 			parser.parseExpression("Name").setValue(societyContext, "IEEE");
 			societyContext.setVariable("queryName", "Nikola Tesla");
 
-			String expression = "isMember(#queryName) ? #queryName + ' is a member of the ' "
-					+ "+ Name + ' Society' : #queryName + ' is not a member of the ' + Name + ' Society'";
+			String expression = "isMember(#queryName) ? #queryName + ' is a member of the ' " +
+					"+ Name + ' Society' : #queryName + ' is not a member of the ' + Name + ' Society'";
 
 			String queryResultString = parser.parseExpression(expression).getValue(societyContext, String.class);
 			assertThat(queryResultString).isEqualTo("Nikola Tesla is a member of the IEEE Society");

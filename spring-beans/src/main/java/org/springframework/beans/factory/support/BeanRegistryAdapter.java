@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,10 @@ import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionCustomizer;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.ResolvableType;
+import org.springframework.core.env.Environment;
+import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
 
 /**
@@ -46,23 +49,40 @@ public class BeanRegistryAdapter implements BeanRegistry {
 
 	private final ListableBeanFactory beanFactory;
 
+	private final Environment environment;
+
 	private final Class<? extends BeanRegistrar> beanRegistrarClass;
 
 	private final @Nullable MultiValueMap<String, BeanDefinitionCustomizer> customizers;
 
 
-	public BeanRegistryAdapter(BeanDefinitionRegistry beanRegistry, ListableBeanFactory beanFactory,
+	public BeanRegistryAdapter(DefaultListableBeanFactory beanFactory, Environment environment,
 			Class<? extends BeanRegistrar> beanRegistrarClass) {
-		this(beanRegistry, beanFactory, beanRegistrarClass, null);
+
+		this(beanFactory, beanFactory, environment, beanRegistrarClass, null);
 	}
 
 	public BeanRegistryAdapter(BeanDefinitionRegistry beanRegistry, ListableBeanFactory beanFactory,
-			Class<? extends BeanRegistrar> beanRegistrarClass, @Nullable MultiValueMap<String, BeanDefinitionCustomizer> customizers) {
+			Environment environment, Class<? extends BeanRegistrar> beanRegistrarClass) {
+
+		this(beanRegistry, beanFactory, environment, beanRegistrarClass, null);
+	}
+
+	public BeanRegistryAdapter(BeanDefinitionRegistry beanRegistry, ListableBeanFactory beanFactory,
+			Environment environment, Class<? extends BeanRegistrar> beanRegistrarClass,
+			@Nullable MultiValueMap<String, BeanDefinitionCustomizer> customizers) {
 
 		this.beanRegistry = beanRegistry;
 		this.beanFactory = beanFactory;
+		this.environment = environment;
 		this.beanRegistrarClass = beanRegistrarClass;
 		this.customizers = customizers;
+	}
+
+
+	@Override
+	public void registerAlias(String name, String alias) {
+		this.beanRegistry.registerAlias(name, alias);
 	}
 
 	@Override
@@ -100,6 +120,12 @@ public class BeanRegistryAdapter implements BeanRegistry {
 			}
 		}
 		this.beanRegistry.registerBeanDefinition(name, beanDefinition);
+	}
+
+	@Override
+	public void register(BeanRegistrar registrar) {
+		Assert.notNull(registrar, "'registrar' must not be null");
+		registrar.register(this, this.environment);
 	}
 
 
@@ -140,7 +166,8 @@ public class BeanRegistryAdapter implements BeanRegistry {
 		}
 	}
 
-	static class BeanSpecAdapter<T> implements Spec<T> {
+
+	private static class BeanSpecAdapter<T> implements Spec<T> {
 
 		private final RootBeanDefinition beanDefinition;
 
@@ -211,9 +238,22 @@ public class BeanRegistryAdapter implements BeanRegistry {
 					supplier.apply(new SupplierContextAdapter(this.beanFactory)));
 			return this;
 		}
+
+		@Override
+		public Spec<T> targetType(ParameterizedTypeReference<? extends T> targetType) {
+			this.beanDefinition.setTargetType(ResolvableType.forType(targetType));
+			return this;
+		}
+
+		@Override
+		public Spec<T> targetType(ResolvableType targetType) {
+			this.beanDefinition.setTargetType(targetType);
+			return this;
+		}
 	}
 
-	static class SupplierContextAdapter implements SupplierContext {
+
+	private static class SupplierContextAdapter implements SupplierContext {
 
 		private final ListableBeanFactory beanFactory;
 

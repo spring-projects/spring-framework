@@ -7,7 +7,6 @@ The Spring Framework provides a WebSocket API that you can use to write client- 
 server-side applications that handle WebSocket messages.
 
 
-
 [[websocket-server-handler]]
 == `WebSocketHandler`
 [.small]#xref:web/webflux-websocket.adoc#webflux-websocket-server-handler[See equivalent in the Reactive stack]#
@@ -34,7 +33,6 @@ xref:web/websocket/stomp.adoc[STOMP] messaging, the application must synchronize
 since the underlying standard WebSocket session (JSR-356) does not allow concurrent
 sending. One option is to wrap the `WebSocketSession` with
 {spring-framework-api}/web/socket/handler/ConcurrentWebSocketSessionDecorator.html[`ConcurrentWebSocketSessionDecorator`].
-
 
 
 [[websocket-server-handshake]]
@@ -65,7 +63,6 @@ implementations are provided and added by default when using the WebSocket Java 
 or XML namespace. The `ExceptionWebSocketHandlerDecorator` catches all uncaught
 exceptions that arise from any `WebSocketHandler` method and closes the WebSocket
 session with status `1011`, which indicates a server error.
-
 
 
 [[websocket-server-deployment]]
@@ -129,7 +126,6 @@ Java initialization API. The following example shows how to do so:
 ----
 
 
-
 [[websocket-server-runtime-configuration]]
 == Configuring the Server
 [.small]#xref:web/webflux-websocket.adoc#webflux-websocket-server-config[See equivalent in the Reactive stack]#
@@ -153,7 +149,6 @@ include-code::./JettyWebSocketConfiguration[tag=snippet,indent=0]
 TIP: When using STOMP over WebSocket, you will also need to configure
 xref:web/websocket/stomp/server-config.adoc[STOMP WebSocket transport]
 properties.
-
 
 
 [[websocket-server-allowed-origins]]

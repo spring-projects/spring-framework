@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -224,6 +224,15 @@ class MockHttpServletRequestTests {
 		assertThat(request.getContentType()).isEqualTo(contentType);
 		assertThat(request.getHeader(HttpHeaders.CONTENT_TYPE)).isEqualTo(contentType);
 		assertThat(request.getCharacterEncoding()).isEqualTo("UTF-8");
+	}
+
+	@Test
+	void contentTypeMultipleCalls() {
+		String contentType = "text/html";
+		request.addHeader(HttpHeaders.CONTENT_TYPE, "text/plain");
+		request.addHeader(HttpHeaders.CONTENT_TYPE, contentType);
+		assertThat(request.getContentType()).isEqualTo(contentType);
+		assertThat(request.getHeader(HttpHeaders.CONTENT_TYPE)).isEqualTo(contentType);
 	}
 
 	@Test  // SPR-12677

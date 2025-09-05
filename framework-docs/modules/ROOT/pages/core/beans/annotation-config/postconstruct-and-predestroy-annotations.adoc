@@ -64,7 +64,3 @@ JDK 11. As of Jakarta EE 9, the package lives in `jakarta.annotation` now. If ne
 the `jakarta.annotation-api` artifact needs to be obtained via Maven Central now,
 simply to be added to the application's classpath like any other library.
 ====
-
-
-
-

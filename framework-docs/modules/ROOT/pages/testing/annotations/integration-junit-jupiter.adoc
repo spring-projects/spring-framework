@@ -2,8 +2,8 @@
 = Spring JUnit Jupiter Testing Annotations
 
 The following annotations are supported when used in conjunction with the
-xref:testing/testcontext-framework/support-classes.adoc#testcontext-junit-jupiter-extension[`SpringExtension`] and JUnit Jupiter
-(that is, the programming model in JUnit 5):
+xref:testing/testcontext-framework/support-classes.adoc#testcontext-junit-jupiter-extension[`SpringExtension`]
+and JUnit Jupiter (that is, the programming model in JUnit):
 
 * xref:testing/annotations/integration-junit-jupiter.adoc#integration-testing-annotations-junit-jupiter-springjunitconfig[`@SpringJUnitConfig`]
 * xref:testing/annotations/integration-junit-jupiter.adoc#integration-testing-annotations-junit-jupiter-springjunitwebconfig[`@SpringJUnitWebConfig`]
@@ -12,6 +12,7 @@ xref:testing/testcontext-framework/support-classes.adoc#testcontext-junit-jupite
 * xref:testing/annotations/integration-junit-jupiter.adoc#integration-testing-annotations-junit-jupiter-enabledif[`@EnabledIf`]
 * xref:testing/annotations/integration-junit-jupiter.adoc#integration-testing-annotations-junit-jupiter-disabledif[`@DisabledIf`]
 * xref:testing/annotations/integration-spring/annotation-disabledinaotmode.adoc[`@DisabledInAotMode`]
+
 
 [[integration-testing-annotations-junit-jupiter-springjunitconfig]]
 == `@SpringJUnitConfig`
@@ -84,6 +85,7 @@ Kotlin::
 See xref:testing/testcontext-framework/ctx-management.adoc[Context Management] as well as the javadoc for
 {spring-framework-api}/test/context/junit/jupiter/SpringJUnitConfig.html[`@SpringJUnitConfig`]
 and `@ContextConfiguration` for further details.
+
 
 [[integration-testing-annotations-junit-jupiter-springjunitwebconfig]]
 == `@SpringJUnitWebConfig`
@@ -162,6 +164,7 @@ See xref:testing/testcontext-framework/ctx-management.adoc[Context Management] a
 {spring-framework-api}/test/context/web/WebAppConfiguration.html[`@WebAppConfiguration`]
 for further details.
 
+
 [[integration-testing-annotations-testconstructor]]
 == `@TestConstructor`
 
@@ -194,6 +197,7 @@ NOTE: `@TestConstructor` is only supported in conjunction with the `SpringExtens
 use with JUnit Jupiter. Note that the `SpringExtension` is often automatically registered
 for you – for example, when using annotations such as `@SpringJUnitConfig` and
 `@SpringJUnitWebConfig` or various test-related annotations from Spring Boot Test.
+
 
 [[integration-testing-annotations-nestedtestconfiguration]]
 == `@NestedTestConfiguration`
@@ -243,8 +247,9 @@ with `@Nested` test classes in JUnit Jupiter; however, there may be other testin
 frameworks with support for Spring and nested test classes that make use of this
 annotation.
 
-See xref:testing/testcontext-framework/support-classes.adoc#testcontext-junit-jupiter-nested-test-configuration[`@Nested` test class configuration] for an example and further
-details.
+See xref:testing/testcontext-framework/support-classes.adoc#testcontext-junit-jupiter-nested-test-configuration[`@Nested` test class configuration]
+for an example and further details.
+
 
 [[integration-testing-annotations-junit-jupiter-enabledif]]
 == `@EnabledIf`
@@ -312,6 +317,7 @@ if you wish to use Spring's `@EnabledIf` support make sure you import the annota
 from the correct package.
 ====
 
+
 [[integration-testing-annotations-junit-jupiter-disabledif]]
 == `@DisabledIf`
 
@@ -377,6 +383,3 @@ Since JUnit 5.7, JUnit Jupiter also has a condition annotation named `@DisabledI
 if you wish to use Spring's `@DisabledIf` support make sure you import the annotation type
 from the correct package.
 ====
-
-
-

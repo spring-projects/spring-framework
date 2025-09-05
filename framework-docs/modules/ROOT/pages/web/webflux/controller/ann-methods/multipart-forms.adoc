@@ -19,7 +19,7 @@ Java::
 
 		private String name;
 
-		private MultipartFile file;
+		private FilePart file;
 
 		// ...
 
@@ -42,7 +42,7 @@ Kotlin::
 ----
 	class MyForm(
 			val name: String,
-			val file: MultipartFile)
+			val file: FilePart)
 
 	@Controller
 	class FileUploadController {
@@ -209,6 +209,7 @@ Kotlin::
 <1> Using `@RequestBody`.
 ======
 --
+
 
 [[partevent]]
 == `PartEvent`

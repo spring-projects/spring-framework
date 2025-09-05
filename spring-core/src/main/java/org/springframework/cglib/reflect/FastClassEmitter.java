@@ -75,6 +75,8 @@ class FastClassEmitter extends ClassEmitter {
         super(v);
 
         Type base = Type.getType(type);
+        // Byte code level cannot be higher than 1.8 due to STATICHOOK methods
+        // which set static final fields outside the initializer method <clinit>.
         begin_class(Constants.V1_8, Constants.ACC_PUBLIC, className, FAST_CLASS, null, Constants.SOURCE_FILE);
 
         // constructor

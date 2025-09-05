@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -135,7 +135,7 @@ public class NettyDataBuffer implements PooledDataBuffer {
 	}
 
 	@Override
-	@Deprecated
+	@Deprecated(since = "6.0")
 	public NettyDataBuffer capacity(int capacity) {
 		this.byteBuf.capacity(capacity);
 		return this;
@@ -255,14 +255,14 @@ public class NettyDataBuffer implements PooledDataBuffer {
 	}
 
 	@Override
-	@Deprecated
+	@Deprecated(since = "6.0")
 	public NettyDataBuffer slice(int index, int length) {
 		ByteBuf slice = this.byteBuf.slice(index, length);
 		return new NettyDataBuffer(slice, this.dataBufferFactory);
 	}
 
 	@Override
-	@Deprecated
+	@Deprecated(since = "6.0")
 	public NettyDataBuffer retainedSlice(int index, int length) {
 		ByteBuf slice = this.byteBuf.retainedSlice(index, length);
 		return new NettyDataBuffer(slice, this.dataBufferFactory);
@@ -285,19 +285,19 @@ public class NettyDataBuffer implements PooledDataBuffer {
 	}
 
 	@Override
-	@Deprecated
+	@Deprecated(since = "6.0")
 	public ByteBuffer asByteBuffer() {
 		return this.byteBuf.nioBuffer();
 	}
 
 	@Override
-	@Deprecated
+	@Deprecated(since = "6.0")
 	public ByteBuffer asByteBuffer(int index, int length) {
 		return this.byteBuf.nioBuffer(index, length);
 	}
 
 	@Override
-	@Deprecated
+	@Deprecated(since = "6.0.5")
 	public ByteBuffer toByteBuffer(int index, int length) {
 		ByteBuffer result = this.byteBuf.isDirect() ?
 				ByteBuffer.allocateDirect(length) :

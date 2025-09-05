@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -706,8 +706,7 @@ public class HtmlUnitRequestBuilderTests {
 		webRequest.setAdditionalHeader("Cookie", "JSESSIONID=" + sessionId + "NEW");
 		actualRequest = requestBuilder.buildRequest(servletContext);
 		assertThat(actualRequest.getSession()).isNotEqualTo(session);
-		assertSingleSessionCookie("JSESSIONID=" + actualRequest.getSession().getId()
-				+ "; Path=/test; Domain=example.com");
+		assertSingleSessionCookie("JSESSIONID=" + actualRequest.getSession().getId() + "; Path=/test; Domain=example.com");
 	}
 
 	@Test
@@ -763,8 +762,8 @@ public class HtmlUnitRequestBuilderTests {
 		sessionToRemove.invalidate();
 
 		assertThat(sessions.containsKey(sessionToRemove.getId())).isFalse();
-		assertSingleSessionCookie("JSESSIONID=" + sessionToRemove.getId()
-				+ "; Expires=Thu, 01-Jan-1970 00:00:01 GMT; Path=/test; Domain=example.com");
+		assertSingleSessionCookie("JSESSIONID=" + sessionToRemove.getId() +
+				"; Expires=Thu, 01-Jan-1970 00:00:01 GMT; Path=/test; Domain=example.com");
 
 		webRequest.removeAdditionalHeader("Cookie");
 		requestBuilder = new HtmlUnitRequestBuilder(sessions, webClient, webRequest);

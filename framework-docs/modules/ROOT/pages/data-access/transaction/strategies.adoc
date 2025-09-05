@@ -212,7 +212,7 @@ example declares `sessionFactory` and `txManager` beans:
 
 [source,xml,indent=0,subs="verbatim,quotes"]
 ----
-	<bean id="sessionFactory" class="org.springframework.orm.hibernate5.LocalSessionFactoryBean">
+	<bean id="sessionFactory" class="org.springframework.orm.jpa.hibernate.LocalSessionFactoryBean">
 		<property name="dataSource" ref="dataSource"/>
 		<property name="mappingResources">
 			<list>
@@ -226,7 +226,7 @@ example declares `sessionFactory` and `txManager` beans:
 		</property>
 	</bean>
 
-	<bean id="txManager" class="org.springframework.orm.hibernate5.HibernateTransactionManager">
+	<bean id="txManager" class="org.springframework.orm.jpa.hibernate.HibernateTransactionManager">
 		<property name="sessionFactory" ref="sessionFactory"/>
 	</bean>
 ----
@@ -238,7 +238,7 @@ transaction coordinator and possibly also its connection release mode configurat
 
 [source,xml,indent=0,subs="verbatim,quotes"]
 ----
-	<bean id="sessionFactory" class="org.springframework.orm.hibernate5.LocalSessionFactoryBean">
+	<bean id="sessionFactory" class="org.springframework.orm.jpa.hibernate.LocalSessionFactoryBean">
 		<property name="dataSource" ref="dataSource"/>
 		<property name="mappingResources">
 			<list>
@@ -262,7 +262,7 @@ for enforcing the same defaults:
 
 [source,xml,indent=0,subs="verbatim,quotes"]
 ----
-	<bean id="sessionFactory" class="org.springframework.orm.hibernate5.LocalSessionFactoryBean">
+	<bean id="sessionFactory" class="org.springframework.orm.jpa.hibernate.LocalSessionFactoryBean">
 		<property name="dataSource" ref="dataSource"/>
 		<property name="mappingResources">
 			<list>
@@ -279,6 +279,3 @@ for enforcing the same defaults:
 
 	<bean id="txManager" class="org.springframework.transaction.jta.JtaTransactionManager"/>
 ----
-
-
-

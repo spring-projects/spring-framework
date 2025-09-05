@@ -57,7 +57,7 @@ locale and language specific resource bundles.
 For further custom handling of method validation errors, you can extend
 `ResponseEntityExceptionHandler` or use an `@ExceptionHandler` method in a controller
 or in a `@ControllerAdvice`, and handle `HandlerMethodValidationException` directly.
-The exception contains a list of``ParameterValidationResult``s that group validation errors
+The exception contains a list of ``ParameterValidationResult``s that group validation errors
 by method parameter. You can either iterate over those, or provide a visitor with callback
 methods by controller method parameter type:
 
@@ -73,12 +73,12 @@ Java::
 
 		@Override
 		public void requestHeader(RequestHeader requestHeader, ParameterValidationResult result) {
-				// ...
+			// ...
 		}
 
 		@Override
 		public void requestParam(@Nullable RequestParam requestParam, ParameterValidationResult result) {
-				// ...
+			// ...
 		}
 
 		@Override
@@ -88,7 +88,7 @@ Java::
 
 		@Override
 		public void other(ParameterValidationResult result) {
-				// ...
+			// ...
 		}
 	});
 ----
@@ -103,22 +103,22 @@ Kotlin::
 	ex.visitResults(object : HandlerMethodValidationException.Visitor {
 
 		override fun requestHeader(requestHeader: RequestHeader, result: ParameterValidationResult) {
-				// ...
-        }
+			// ...
+		}
 
 		override fun requestParam(requestParam: RequestParam?, result: ParameterValidationResult) {
-				// ...
-        }
+			// ...
+		}
 
 		override fun modelAttribute(modelAttribute: ModelAttribute?, errors: ParameterErrors) {
-				// ...
-        }
+			// ...
+		}
 
 		// ...
 
 		override fun other(result: ParameterValidationResult) {
-				// ...
-        }
+			// ...
+		}
 	})
 ----
 ======

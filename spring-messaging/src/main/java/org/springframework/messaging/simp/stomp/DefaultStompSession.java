@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -345,14 +345,23 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 		return receiptable;
 	}
 
-	private void unsubscribe(String id, @Nullable StompHeaders headers) {
-		StompHeaderAccessor accessor = createHeaderAccessor(StompCommand.UNSUBSCRIBE);
-		if (headers != null) {
-			accessor.addNativeHeaders(headers);
+	private Receiptable unsubscribe(String id, @Nullable StompHeaders headers) {
+		Assert.hasText(id, "Subscription id is required");
+
+		if (headers == null){
+			headers = new StompHeaders();
 		}
+		String receiptId = checkOrAddReceipt(headers);
+		Receiptable receiptable = new ReceiptHandler(receiptId);
+
+		StompHeaderAccessor accessor = createHeaderAccessor(StompCommand.UNSUBSCRIBE);
+		accessor.addNativeHeaders(headers);
 		accessor.setSubscriptionId(id);
+
 		Message<byte[]> message = createMessage(accessor, EMPTY_PAYLOAD);
 		execute(message);
+
+		return receiptable;
 	}
 
 	@Override
@@ -526,8 +535,7 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 			try {
 				conn.close();
 			}
-			catch (Throwable ex) {
-				// ignore
+			catch (Throwable ignored) {
 			}
 		}
 	}
@@ -675,17 +683,19 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 		}
 
 		@Override
-		public void unsubscribe() {
-			unsubscribe(null);
+		public Receiptable unsubscribe() {
+			return unsubscribe(null);
 		}
 
 		@Override
-		public void unsubscribe(@Nullable StompHeaders headers) {
+		public Receiptable unsubscribe(@Nullable StompHeaders headers) {
 			String id = this.headers.getId();
+			Receiptable receiptable = new ReceiptHandler(null);
 			if (id != null) {
 				DefaultStompSession.this.subscriptions.remove(id);
-				DefaultStompSession.this.unsubscribe(id, headers);
+				receiptable = DefaultStompSession.this.unsubscribe(id, headers);
 			}
+			return receiptable;
 		}
 
 		@Override

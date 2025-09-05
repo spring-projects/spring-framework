@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,7 @@ import org.springframework.web.cors.reactive.CorsUtils;
 import org.springframework.web.cors.reactive.DefaultCorsProcessor;
 import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource;
 import org.springframework.web.reactive.HandlerMapping;
+import org.springframework.web.reactive.accept.ApiVersionStrategy;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebHandler;
 import org.springframework.web.util.pattern.PathPatternParser;
@@ -63,6 +64,8 @@ public abstract class AbstractHandlerMapping extends ApplicationObjectSupport
 	private @Nullable CorsConfigurationSource corsConfigurationSource;
 
 	private CorsProcessor corsProcessor = new DefaultCorsProcessor();
+
+	private @Nullable ApiVersionStrategy apiVersionStrategy;
 
 	private int order = Ordered.LOWEST_PRECEDENCE;  // default: same as non-Ordered
 
@@ -139,6 +142,23 @@ public abstract class AbstractHandlerMapping extends ApplicationObjectSupport
 	}
 
 	/**
+	 * Configure a strategy to manage API versioning.
+	 * @param strategy the strategy to use
+	 * @since 7.0
+	 */
+	public void setApiVersionStrategy(@Nullable ApiVersionStrategy strategy) {
+		this.apiVersionStrategy = strategy;
+	}
+
+	/**
+	 * Return the configured {@link ApiVersionStrategy} strategy.
+	 * @since 7.0
+	 */
+	public @Nullable ApiVersionStrategy getApiVersionStrategy() {
+		return this.apiVersionStrategy;
+	}
+
+	/**
 	 * Specify the order value for this HandlerMapping bean.
 	 * <p>The default value is {@code Ordered.LOWEST_PRECEDENCE}, meaning non-ordered.
 	 * @see org.springframework.core.Ordered#getOrder()
@@ -164,6 +184,7 @@ public abstract class AbstractHandlerMapping extends ApplicationObjectSupport
 
 	@Override
 	public Mono<Object> getHandler(ServerWebExchange exchange) {
+		initApiVersion(exchange);
 		return getHandlerInternal(exchange).map(handler -> {
 			if (logger.isDebugEnabled()) {
 				logger.debug(exchange.getLogPrefix() + "Mapped to " + handler);
@@ -182,8 +203,26 @@ public abstract class AbstractHandlerMapping extends ApplicationObjectSupport
 					return NO_OP_HANDLER;
 				}
 			}
+			if (getApiVersionStrategy() != null) {
+				Comparable<?> version = exchange.getAttribute(API_VERSION_ATTRIBUTE);
+				if (version != null) {
+					getApiVersionStrategy().handleDeprecations(version, exchange);
+				}
+			}
 			return handler;
 		});
+	}
+
+	private void initApiVersion(ServerWebExchange exchange) {
+		if (this.apiVersionStrategy != null) {
+			Comparable<?> version = exchange.getAttribute(API_VERSION_ATTRIBUTE);
+			if (version == null) {
+				version = this.apiVersionStrategy.resolveParseAndValidateVersion(exchange);
+				if (version != null) {
+					exchange.getAttributes().put(API_VERSION_ATTRIBUTE, version);
+				}
+			}
+		}
 	}
 
 	/**

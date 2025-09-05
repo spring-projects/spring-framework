@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -110,7 +110,7 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 	 * Create a new {@code ReflectiveAspectJAdvisorFactory}, propagating the given
 	 * {@link BeanFactory} to the created {@link AspectJExpressionPointcut} instances,
 	 * for bean pointcut handling as well as consistent {@link ClassLoader} resolution.
-	 * @param beanFactory the BeanFactory to propagate (may be {@code null}}
+	 * @param beanFactory the BeanFactory to propagate (may be {@code null})
 	 * @since 4.3.6
 	 * @see AspectJExpressionPointcut#setBeanFactory
 	 * @see org.springframework.beans.factory.config.ConfigurableBeanFactory#getBeanClassLoader()

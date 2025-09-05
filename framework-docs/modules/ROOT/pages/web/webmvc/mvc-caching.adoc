@@ -14,7 +14,6 @@ the `Last-Modified` header.
 This section describes the HTTP caching-related options that are available in Spring Web MVC.
 
 
-
 [[mvc-caching-cachecontrol]]
 == `CacheControl`
 [.small]#xref:web/webflux/caching.adoc#webflux-caching-cachecontrol[See equivalent in the Reactive stack]#
@@ -74,7 +73,6 @@ works as follows:
 * A `0` value prevents caching by using the `'Cache-Control: no-store'` directive.
 * An `n > 0` value caches the given response for `n` seconds by using the
 `'Cache-Control: max-age=n'` directive.
-
 
 
 [[mvc-caching-etag-lastmodified]]
@@ -181,12 +179,10 @@ Kotlin::
 ======
 --
 
-
 There are three variants for checking conditional requests against `eTag` values, `lastModified`
 values, or both. For conditional `GET` and `HEAD` requests, you can set the response to
 304 (NOT_MODIFIED). For conditional `POST`, `PUT`, and `DELETE`, you can instead set the response
 to 412 (PRECONDITION_FAILED), to prevent concurrent modification.
-
 
 
 [[mvc-caching-static-resources]]
@@ -197,10 +193,8 @@ You should serve static resources with a `Cache-Control` and conditional respons
 for optimal performance. See the section on configuring xref:web/webmvc/mvc-config/static-resources.adoc[Static Resources].
 
 
-
 [[mvc-httpcaching-shallowetag]]
 == `ETag` Filter
 
 You can use the `ShallowEtagHeaderFilter` to add "`shallow`" `eTag` values that are computed from the
 response content and, thus, save bandwidth but not CPU time. See xref:web/webmvc/filters.adoc#filters-shallow-etag[Shallow ETag].
-

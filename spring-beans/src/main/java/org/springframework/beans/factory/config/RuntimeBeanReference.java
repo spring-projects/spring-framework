@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -83,6 +83,33 @@ public class RuntimeBeanReference implements BeanReference {
 	public RuntimeBeanReference(Class<?> beanType, boolean toParent) {
 		Assert.notNull(beanType, "'beanType' must not be null");
 		this.beanName = beanType.getName();
+		this.beanType = beanType;
+		this.toParent = toParent;
+	}
+
+	/**
+	 * Create a new RuntimeBeanReference to a bean of the given type.
+	 * @param beanName name of the target bean
+	 * @param beanType type of the target bean
+	 * @since 7.0
+	 */
+	public RuntimeBeanReference(String beanName, Class<?> beanType) {
+		this(beanName, beanType, false);
+	}
+
+	/**
+	 * Create a new RuntimeBeanReference to a bean of the given type,
+	 * with the option to mark it as reference to a bean in the parent factory.
+	 * @param beanName name of the target bean
+	 * @param beanType type of the target bean
+	 * @param toParent whether this is an explicit reference to a bean in the
+	 * parent factory
+	 * @since 7.0
+	 */
+	public RuntimeBeanReference(String beanName, Class<?> beanType, boolean toParent) {
+		Assert.hasText(beanName, "'beanName' must not be empty");
+		Assert.notNull(beanType, "'beanType' must not be null");
+		this.beanName = beanName;
 		this.beanType = beanType;
 		this.toParent = toParent;
 	}

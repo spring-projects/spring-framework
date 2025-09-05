@@ -14,7 +14,6 @@ the pointcuts, any advice that applies, and their ordering. However, there are s
 options that are preferable if you do not need such control.
 
 
-
 [[aop-pfb-1]]
 == Basics
 
@@ -30,7 +29,6 @@ managed by IoC. This is a powerful feature, enabling certain approaches that are
 achieve with other AOP frameworks. For example, an advice may itself reference
 application objects (besides the target, which should be available in any AOP
 framework), benefiting from all the pluggability provided by Dependency Injection.
-
 
 
 [[aop-pfb-2]]
@@ -87,7 +85,6 @@ to be applied. You can find an example of using this feature in xref:core/aop-ap
   `false`.
 
 
-
 [[aop-pfb-proxy-types]]
 == JDK- and CGLIB-based proxies
 
@@ -135,7 +132,6 @@ that are actually proxied are all of the interfaces that the target class
 implements. In effect, this is the same as supplying a list of each and every
 interface that the target class implements to the `proxyInterfaces` property. However,
 it is significantly less work and less prone to typographical errors.
-
 
 
 [[aop-api-proxying-intf]]
@@ -263,7 +259,6 @@ However, there are times when being able to obtain the un-advised target from th
 factory might actually be an advantage (for example, in certain test scenarios).
 
 
-
 [[aop-api-proxying-class]]
 == Proxying Classes
 
@@ -302,7 +297,6 @@ There is little performance difference between CGLIB proxies and dynamic proxies
 Performance should not be a decisive consideration in this case.
 
 
-
 [[aop-global-advisors]]
 == Using "`Global`" Advisors
 
@@ -325,7 +319,3 @@ two global advisors:
 	<bean id="global_debug" class="org.springframework.aop.interceptor.DebugInterceptor"/>
 	<bean id="global_performance" class="org.springframework.aop.interceptor.PerformanceMonitorInterceptor"/>
 ----
-
-
-
-

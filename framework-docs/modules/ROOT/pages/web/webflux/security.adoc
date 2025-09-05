@@ -12,7 +12,3 @@ reference documentation, including:
 * {docs-spring-security}/reactive/test/index.html[WebFlux Testing Support]
 * {docs-spring-security}/features/exploits/csrf.html#csrf-protection[CSRF protection]
 * {docs-spring-security}/features/exploits/headers.html[Security Response Headers]
-
-
-
-

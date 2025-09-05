@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,12 +18,17 @@ package org.springframework.web.servlet.mvc.method.annotation;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
+import java.util.Collections;
+import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonView;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpInputMessage;
+import org.springframework.http.converter.AbstractJacksonHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.converter.SmartHttpMessageConverter;
 import org.springframework.http.converter.json.AbstractJackson2HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJacksonInputMessage;
 import org.springframework.util.Assert;
@@ -46,20 +51,35 @@ import org.springframework.util.Assert;
  * @see com.fasterxml.jackson.annotation.JsonView
  * @see com.fasterxml.jackson.databind.ObjectMapper#readerWithView(Class)
  */
+@SuppressWarnings("removal")
 public class JsonViewRequestBodyAdvice extends RequestBodyAdviceAdapter {
 
 	@Override
 	public boolean supports(MethodParameter methodParameter, Type targetType,
 			Class<? extends HttpMessageConverter<?>> converterType) {
 
-		return (AbstractJackson2HttpMessageConverter.class.isAssignableFrom(converterType) &&
-				methodParameter.getParameterAnnotation(JsonView.class) != null);
+		return methodParameter.getParameterAnnotation(JsonView.class) != null &&
+				(AbstractJacksonHttpMessageConverter.class.isAssignableFrom(converterType) ||
+						AbstractJackson2HttpMessageConverter.class.isAssignableFrom(converterType));
 	}
 
 	@Override
 	public HttpInputMessage beforeBodyRead(HttpInputMessage inputMessage, MethodParameter methodParameter,
 			Type targetType, Class<? extends HttpMessageConverter<?>> selectedConverterType) throws IOException {
 
+		if (AbstractJacksonHttpMessageConverter.class.isAssignableFrom(selectedConverterType)) {
+			return inputMessage;
+		}
+
+		return new MappingJacksonInputMessage(inputMessage.getBody(), inputMessage.getHeaders(), getJsonView(methodParameter));
+	}
+
+	@Override
+	public @Nullable Map<String, Object> determineReadHints(MethodParameter parameter, Type targetType, Class<? extends SmartHttpMessageConverter<?>> converterType) {
+		return Collections.singletonMap(JsonView.class.getName(), getJsonView(parameter));
+	}
+
+	private static Class<?> getJsonView(MethodParameter methodParameter) {
 		JsonView ann = methodParameter.getParameterAnnotation(JsonView.class);
 		Assert.state(ann != null, "No JsonView annotation");
 
@@ -68,8 +88,7 @@ public class JsonViewRequestBodyAdvice extends RequestBodyAdviceAdapter {
 			throw new IllegalArgumentException(
 					"@JsonView only supported for request body advice with exactly 1 class argument: " + methodParameter);
 		}
-
-		return new MappingJacksonInputMessage(inputMessage.getBody(), inputMessage.getHeaders(), classes[0]);
+		return classes[0];
 	}
 
 }

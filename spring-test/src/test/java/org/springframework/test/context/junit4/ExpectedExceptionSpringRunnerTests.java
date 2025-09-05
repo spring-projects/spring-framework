@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,13 +28,14 @@ import org.springframework.test.context.TestExecutionListeners;
 import static org.springframework.test.context.junit4.JUnitTestingUtils.runTestsAndAssertCounters;
 
 /**
- * Verifies proper handling of JUnit's {@link Test#expected() &#064;Test(expected = ...)}
+ * Verifies proper handling of JUnit's {@link Test#expected() @Test(expected = ...)}
  * support in conjunction with the {@link SpringRunner}.
  *
  * @author Sam Brannen
  * @since 3.0
  */
 @RunWith(JUnit4.class)
+@SuppressWarnings("deprecation")
 public class ExpectedExceptionSpringRunnerTests {
 
 	@Test

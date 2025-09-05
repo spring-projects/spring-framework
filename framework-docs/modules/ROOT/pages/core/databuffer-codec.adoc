@@ -3,8 +3,8 @@
 
 Java NIO provides `ByteBuffer` but many libraries build their own byte buffer API on top,
 especially for network operations where reusing buffers and/or using direct buffers is
-beneficial for performance. For example Netty has the `ByteBuf` hierarchy, Undertow uses
-XNIO, Jetty uses pooled byte buffers with a callback to be released, and so on.
+beneficial for performance. For example Netty has the `ByteBuf` hierarchy,
+Jetty uses pooled byte buffers with a callback to be released, and so on.
 The `spring-core` module provides a set of abstractions to work with various byte buffer
 APIs as follows:
 
@@ -13,8 +13,6 @@ APIs as follows:
 xref:core/databuffer-codec.adoc#databuffers-buffer-pooled[pooled].
 * xref:core/databuffer-codec.adoc#databuffers-utils[`DataBufferUtils`] offers utility methods for data buffers.
 * <<Codecs>> decode or encode data buffer streams into higher level objects.
-
-
 
 
 [[databuffers-factory]]
@@ -33,8 +31,6 @@ The type of factory depends on the underlying client or server, for example,
 `NettyDataBufferFactory` for Reactor Netty, `DefaultDataBufferFactory` for others.
 
 
-
-
 [[databuffers-buffer]]
 == `DataBuffer`
 
@@ -48,8 +44,6 @@ alternate between read and write.
 * Pooled buffers and reference counting via xref:core/databuffer-codec.adoc#databuffers-buffer-pooled[`PooledDataBuffer`].
 * View a buffer as `java.nio.ByteBuffer`, `InputStream`, or `OutputStream`.
 * Determine the index, or the last index, for a given byte.
-
-
 
 
 [[databuffers-buffer-pooled]]
@@ -75,8 +69,6 @@ to use the convenience methods in `DataBufferUtils` that apply release or retain
 `DataBuffer` only if it is an instance of `PooledDataBuffer`.
 
 
-
-
 [[databuffers-utils]]
 == `DataBufferUtils`
 
@@ -91,8 +83,6 @@ composite buffers, if that's supported by the underlying byte buffer API.
 * Skip or take from a stream of bytes until a specific byte count.
 
 
-
-
 [[codecs]]
 == Codecs
 
@@ -105,8 +95,6 @@ The `spring-core` module provides `byte[]`, `ByteBuffer`, `DataBuffer`, `Resourc
 `String` encoder and decoder implementations. The `spring-web` module adds Jackson JSON,
 Jackson Smile, JAXB2, Protocol Buffers and other encoders and decoders. See
 xref:web/webflux/reactive-spring.adoc#webflux-codecs[Codecs] in the WebFlux section.
-
-
 
 
 [[databuffers-using]]

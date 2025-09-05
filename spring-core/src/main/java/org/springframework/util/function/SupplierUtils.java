@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,7 +37,7 @@ public abstract class SupplierUtils {
 	 * @param supplier the supplier to resolve
 	 * @return the supplier's result, or {@code null} if none
 	 */
-	@Contract("null -> null; !null -> !null")
+	@Contract("null -> null")
 	public static <T> @Nullable T resolve(@Nullable Supplier<T> supplier) {
 		return (supplier != null ? supplier.get() : null);
 	}
@@ -49,6 +49,7 @@ public abstract class SupplierUtils {
 	 * @return a supplier's result or the given Object as-is
 	 * @since 6.1.4
 	 */
+	@Contract("null -> null")
 	public static @Nullable Object resolve(@Nullable Object candidate) {
 		return (candidate instanceof Supplier<?> supplier ? supplier.get() : candidate);
 	}

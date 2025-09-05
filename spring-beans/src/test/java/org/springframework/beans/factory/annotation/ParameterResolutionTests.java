@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -71,8 +71,8 @@ class ParameterResolutionTests {
 	}
 
 	private void assertAutowirableParameters(Executable executable) {
-		int startIndex = (executable instanceof Constructor)
-				&& ClassUtils.isInnerClass(executable.getDeclaringClass()) ? 1 : 0;
+		int startIndex = (executable instanceof Constructor) &&
+				ClassUtils.isInnerClass(executable.getDeclaringClass()) ? 1 : 0;
 		Parameter[] parameters = executable.getParameters();
 		for (int parameterIndex = startIndex; parameterIndex < parameters.length; parameterIndex++) {
 			Parameter parameter = parameters[parameterIndex];

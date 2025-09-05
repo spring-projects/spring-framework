@@ -4,7 +4,7 @@
 Once the TestContext framework loads an `ApplicationContext` (or `WebApplicationContext`)
 for a test, that context is cached and reused for all subsequent tests that declare the
 same unique context configuration within the same test suite. To understand how caching
-works, it is important to understand what is meant by "`unique`" and "`test suite.`"
+works, it is important to understand what is meant by "unique" and "test suite."
 
 An `ApplicationContext` can be uniquely identified by the combination of configuration
 parameters that is used to load it. Consequently, the unique combination of configuration
@@ -15,8 +15,8 @@ framework uses the following configuration parameters to build the context cache
 * `classes` (from `@ContextConfiguration`)
 * `contextInitializerClasses` (from `@ContextConfiguration`)
 * `contextCustomizers` (from `ContextCustomizerFactory`) – this includes
-  `@DynamicPropertySource` methods as well as various features from Spring Boot's
-  testing support such as `@MockBean` and `@SpyBean`.
+  `@DynamicPropertySource` methods, bean overrides (such as `@TestBean`, `@MockitoBean`,
+  `@MockitoSpyBean` etc.), as well as various features from Spring Boot's testing support.
 * `contextLoader` (from `@ContextConfiguration`)
 * `parent` (from `@ContextHierarchy`)
 * `activeProfiles` (from `@ActiveProfiles`)
@@ -31,10 +31,10 @@ under a key that is based solely on those locations. So, if `TestClassB` also de
 `{"app-config.xml", "test-config.xml"}` for its locations (either explicitly or
 implicitly through inheritance) but does not define `@WebAppConfiguration`, a different
 `ContextLoader`, different active profiles, different context initializers, different
-test property sources, or a different parent context, then the same `ApplicationContext`
-is shared by both test classes. This means that the setup cost for loading an application
-context is incurred only once (per test suite), and subsequent test execution is much
-faster.
+context customizers, different test or dynamic property sources, or a different parent
+context, then the same `ApplicationContext` is shared by both test classes. This means
+that the setup cost for loading an application context is incurred only once (per test
+suite), and subsequent test execution is much faster.
 
 .Test suites and forked processes
 [NOTE]
@@ -62,6 +62,17 @@ script by setting a JVM system property named `spring.test.context.cache.maxSize
 alternative, you can set the same property via the
 xref:appendix.adoc#appendix-spring-properties[`SpringProperties`] mechanism.
 
+As of Spring Framework 7.0, an application context stored in the context cache will be
+_paused_ when it is no longer actively in use and automatically _restarted_ the next time
+the context is retrieved from the cache. Specifically, the latter will restart all
+auto-startup beans in the application context, effectively restoring the lifecycle state.
+This ensures that background processes within the context are not actively running while
+the context is not used by tests. For example, JMS listener containers, scheduled tasks,
+and any other components in the context that implement `Lifecycle` or `SmartLifecycle`
+will be in a "stopped" state until the context is used again by a test. Note, however,
+that `SmartLifecycle` components can opt out of pausing by returning `false` from
+`SmartLifecycle#isPauseable()`.
+
 Since having a large number of application contexts loaded within a given test suite can
 cause the suite to take an unnecessarily long time to run, it is often beneficial to
 know exactly how many contexts have been loaded and cached. To view the statistics for
@@ -71,10 +82,11 @@ the underlying context cache, you can set the log level for the
 In the unlikely case that a test corrupts the application context and requires reloading
 (for example, by modifying a bean definition or the state of an application object), you
 can annotate your test class or test method with `@DirtiesContext` (see the discussion of
-`@DirtiesContext` in xref:testing/annotations/integration-spring/annotation-dirtiescontext.adoc[Spring Testing Annotations]
-). This instructs Spring to remove the context from the cache and rebuild
-the application context before running the next test that requires the same application
-context. Note that support for the `@DirtiesContext` annotation is provided by the
+`@DirtiesContext` in
+xref:testing/annotations/integration-spring/annotation-dirtiescontext.adoc[Spring Testing Annotations]).
+This instructs Spring to remove the context from the cache and rebuild the application
+context before running the next test that requires the same application context. Note
+that support for the `@DirtiesContext` annotation is provided by the
 `DirtiesContextBeforeModesTestExecutionListener` and the
 `DirtiesContextTestExecutionListener`, which are enabled by default.
 

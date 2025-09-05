@@ -5,14 +5,11 @@ host, port, and scheme from a client perspective.
 {rfc-site}/rfc7239[RFC 7239] defines the `Forwarded` HTTP header
 that proxies can use to provide information about the original request.
 
-
-
 [[forwarded-headers-non-standard]]
 === Non-standard Headers
 
 There are other non-standard headers, too, including `X-Forwarded-Host`, `X-Forwarded-Port`,
-`X-Forwarded-Proto`, `X-Forwarded-Ssl`, and `X-Forwarded-Prefix`.
-
+`X-Forwarded-Proto`, `X-Forwarded-Ssl`, `X-Forwarded-Prefix`, and `X-Forwarded-For`.
 
 [[x-forwarded-host]]
 ==== X-Forwarded-Host
@@ -23,7 +20,6 @@ downstream server. For example, if a request of `https://example.com/resource` i
 a proxy which forwards the request to `http://localhost:8080/resource`, then a header of
 `X-Forwarded-Host: example.com` can be sent to inform the server that the original host was `example.com`.
 
-
 [[x-forwarded-port]]
 ==== X-Forwarded-Port
 
@@ -33,16 +29,14 @@ communicate the original port to a downstream server. For example, if a request 
 `http://localhost:8080/resource`, then a header of `X-Forwarded-Port: 443` can be sent
 to inform the server that the original port was `443`.
 
-
 [[x-forwarded-proto]]
 ==== X-Forwarded-Proto
 
 While not standard, https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Forwarded-Proto[`X-Forwarded-Proto: (https|http)`]
-is a de-facto standard header that is used to communicate the original protocol (for example, https / https)
+is a de-facto standard header that is used to communicate the original protocol (for example, https / http)
 to a downstream server. For example, if a request of `https://example.com/resource` is sent to
 a proxy which forwards the request to `http://localhost:8080/resource`, then a header of
 `X-Forwarded-Proto: https` can be sent to inform the server that the original protocol was `https`.
-
 
 [[x-forwarded-ssl]]
 ==== X-Forwarded-Ssl
@@ -52,7 +46,6 @@ original protocol (for example, https / https) to a downstream server. For examp
 `https://example.com/resource` is sent to a proxy which forwards the request to
 `http://localhost:8080/resource`, then a header of `X-Forwarded-Ssl: on` to inform the server that the
 original protocol was `https`.
-
 
 [[x-forwarded-prefix]]
 ==== X-Forwarded-Prefix
@@ -120,3 +113,12 @@ https://example.com/api/app1/{path} -> http://localhost:8080/app1/{path}
 In this case, the proxy has a prefix of `/api/app1` and the server has a prefix of
 `/app1`. The proxy can send `X-Forwarded-Prefix: /api/app1` to have the original prefix
 `/api/app1` override the server prefix `/app1`.
+
+[[x-forwarded-for]]
+==== X-Forwarded-For
+
+https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/X-Forwarded-For[`X-Forwarded-For: <address>`]
+is a de-facto standard header that is used to communicate the original `InetSocketAddress` of the client to a
+downstream server. For example, if a request is sent by a client at `[fd00:fefe:1::4]` to a proxy at
+`192.168.0.1`, the "remote address" information contained in the HTTP request will reflect the actual address of the
+client, not the proxy.

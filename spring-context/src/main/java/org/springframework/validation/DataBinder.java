@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -536,14 +535,13 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	 * <p>Mark fields as disallowed, for example to avoid unwanted
 	 * modifications by malicious users when binding HTTP request parameters.
 	 * <p>Supports {@code "xxx*"}, {@code "*xxx"}, {@code "*xxx*"}, and
-	 * {@code "xxx*yyy"} matches (with an arbitrary number of pattern parts), as
-	 * well as direct equality.
-	 * <p>The default implementation of this method stores disallowed field patterns
-	 * in {@linkplain PropertyAccessorUtils#canonicalPropertyName(String) canonical}
-	 * form and also transforms disallowed field patterns to
-	 * {@linkplain String#toLowerCase() lowercase} to support case-insensitive
-	 * pattern matching in {@link #isAllowed}. Subclasses which override this
-	 * method must therefore take both of these transformations into account.
+	 * {@code "xxx*yyy"} matches (with an arbitrary number of pattern parts),
+	 * as well as direct equality.
+	 * <p>The default implementation of this method stores disallowed field
+	 * patterns in {@linkplain PropertyAccessorUtils#canonicalPropertyName(String)
+	 * canonical} form, and subsequently pattern matching in {@link #isAllowed}
+	 * is case-insensitive. Subclasses that override this method must therefore
+	 * take this transformation into account.
 	 * <p>More sophisticated matching can be implemented by overriding the
 	 * {@link #isAllowed} method.
 	 * <p>Alternatively, specify a list of <i>allowed</i> field patterns.
@@ -561,8 +559,7 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 		else {
 			String[] fieldPatterns = new String[disallowedFields.length];
 			for (int i = 0; i < fieldPatterns.length; i++) {
-				String field = PropertyAccessorUtils.canonicalPropertyName(disallowedFields[i]);
-				fieldPatterns[i] = field.toLowerCase(Locale.ROOT);
+				fieldPatterns[i] = PropertyAccessorUtils.canonicalPropertyName(disallowedFields[i]);
 			}
 			this.disallowedFields = fieldPatterns;
 		}
@@ -1270,9 +1267,9 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	 * Determine if the given field is allowed for binding.
 	 * <p>Invoked for each passed-in property value.
 	 * <p>Checks for {@code "xxx*"}, {@code "*xxx"}, {@code "*xxx*"}, and
-	 * {@code "xxx*yyy"} matches (with an arbitrary number of pattern parts), as
-	 * well as direct equality, in the configured lists of allowed field patterns
-	 * and disallowed field patterns.
+	 * {@code "xxx*yyy"} matches (with an arbitrary number of pattern parts),
+	 * as well as direct equality, in the configured lists of allowed field
+	 * patterns and disallowed field patterns.
 	 * <p>Matching against allowed field patterns is case-sensitive; whereas,
 	 * matching against disallowed field patterns is case-insensitive.
 	 * <p>A field matching a disallowed pattern will not be accepted even if it
@@ -1288,8 +1285,13 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	protected boolean isAllowed(String field) {
 		String[] allowed = getAllowedFields();
 		String[] disallowed = getDisallowedFields();
-		return ((ObjectUtils.isEmpty(allowed) || PatternMatchUtils.simpleMatch(allowed, field)) &&
-				(ObjectUtils.isEmpty(disallowed) || !PatternMatchUtils.simpleMatch(disallowed, field.toLowerCase(Locale.ROOT))));
+		if (!ObjectUtils.isEmpty(allowed) && !PatternMatchUtils.simpleMatch(allowed, field)) {
+			return false;
+		}
+		if (!ObjectUtils.isEmpty(disallowed)) {
+			return !PatternMatchUtils.simpleMatchIgnoreCase(disallowed, field);
+		}
+		return true;
 	}
 
 	/**

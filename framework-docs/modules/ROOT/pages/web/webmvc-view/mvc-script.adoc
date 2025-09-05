@@ -13,16 +13,15 @@ templating libraries on different script engines:
 |Scripting Library |Scripting Engine
 |https://handlebarsjs.com/[Handlebars] |https://openjdk.java.net/projects/nashorn/[Nashorn]
 |https://mustache.github.io/[Mustache] |https://openjdk.java.net/projects/nashorn/[Nashorn]
-|https://facebook.github.io/react/[React] |https://openjdk.java.net/projects/nashorn/[Nashorn]
-|https://www.embeddedjs.com/[EJS] |https://openjdk.java.net/projects/nashorn/[Nashorn]
-|https://www.stuartellis.name/articles/erb/[ERB] |https://www.jruby.org[JRuby]
+|https://react.dev/[React] |https://openjdk.java.net/projects/nashorn/[Nashorn]
+|https://ejs.co/[EJS] |https://openjdk.java.net/projects/nashorn/[Nashorn]
+|https://docs.ruby-lang.org/en/master/ERB.html[ERB] |https://www.jruby.org[JRuby]
 |https://docs.python.org/2/library/string.html#template-strings[String templates] |https://www.jython.org/[Jython]
 |https://github.com/sdeleuze/kotlin-script-templating[Kotlin Script templating] |{kotlin-site}[Kotlin]
 |===
 
 TIP: The basic rule for integrating any other script engine is that it must implement the
 `ScriptEngine` and `Invocable` interfaces.
-
 
 
 [[mvc-view-script-dependencies]]
@@ -42,7 +41,6 @@ Java 8+. Using the latest update release available is highly recommended.
 
 You need to have the script templating library. One way to do that for JavaScript is
 through https://www.webjars.org/[WebJars].
-
 
 
 [[mvc-view-script-integrate]]
@@ -268,7 +266,3 @@ Check out the Spring Framework unit tests,
 {spring-framework-code}/spring-webmvc/src/test/java/org/springframework/web/servlet/view/script[Java], and
 {spring-framework-code}/spring-webmvc/src/test/resources/org/springframework/web/servlet/view/script[resources],
 for more configuration examples.
-
-
-
-

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,7 +68,7 @@ import static org.springframework.context.expression.StandardBeanExpressionResol
 class ApplicationContextExpressionTests {
 
 	@Test
-	@SuppressWarnings("deprecation")
+	@SuppressWarnings({"deprecation", "removal"})
 	void genericApplicationContext() throws Exception {
 		GenericApplicationContext ac = new GenericApplicationContext();
 		AnnotationConfigUtils.registerAnnotationConfigProcessors(ac);
@@ -93,10 +93,6 @@ class ApplicationContextExpressionTests {
 				else {
 					return null;
 				}
-			}
-			@Override
-			public String getConversationId() {
-				return null;
 			}
 		});
 

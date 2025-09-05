@@ -43,7 +43,7 @@ request parameters. Argument names are determined through runtime-retained param
 names in the bytecode.
 
 By default, both constructor and property
-xref:core/validation/beans-beans.adoc#beans-binding[data binding] are applied. However,
+xref:core/validation/data-binding.adoc[data binding] are applied. However,
 model object design requires careful consideration, and for security reasons it is
 recommended either to use an object tailored specifically for web binding, or to apply
 constructor binding only. If property binding must still be used, then _allowedFields_
@@ -62,7 +62,7 @@ Java::
 ----
 	class Account {
 
-	    private final String firstName;
+		private final String firstName;
 
 		public Account(@BindParam("first-name") String firstName) {
 			this.firstName = firstName;

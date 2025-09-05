@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import java.lang.reflect.Executable;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -114,6 +115,7 @@ import org.springframework.javapoet.ClassName;
 import org.springframework.javapoet.CodeBlock;
 import org.springframework.javapoet.CodeBlock.Builder;
 import org.springframework.javapoet.MethodSpec;
+import org.springframework.javapoet.NameAllocator;
 import org.springframework.javapoet.ParameterizedTypeName;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -122,6 +124,7 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
+import org.springframework.util.StringUtils;
 
 /**
  * {@link BeanFactoryPostProcessor} used for bootstrapping processing of
@@ -194,10 +197,9 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 
 	private ApplicationStartup applicationStartup = ApplicationStartup.DEFAULT;
 
-	@SuppressWarnings("NullAway.Init")
-	private List<PropertySourceDescriptor> propertySourceDescriptors;
+	private List<PropertySourceDescriptor> propertySourceDescriptors = Collections.emptyList();
 
-	private Set<BeanRegistrar> beanRegistrars = new LinkedHashSet<>();
+	private final Map<String, BeanRegistrar> beanRegistrars = new LinkedHashMap<>();
 
 
 	@Override
@@ -406,12 +408,20 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 		SingletonBeanRegistry singletonRegistry = null;
 		if (registry instanceof SingletonBeanRegistry sbr) {
 			singletonRegistry = sbr;
-			if (!this.localBeanNameGeneratorSet) {
-				BeanNameGenerator generator = (BeanNameGenerator) singletonRegistry.getSingleton(
-						AnnotationConfigUtils.CONFIGURATION_BEAN_NAME_GENERATOR);
-				if (generator != null) {
-					this.componentScanBeanNameGenerator = generator;
-					this.importBeanNameGenerator = generator;
+			BeanNameGenerator configurationGenerator = (BeanNameGenerator) singletonRegistry.getSingleton(
+					AnnotationConfigUtils.CONFIGURATION_BEAN_NAME_GENERATOR);
+			if (configurationGenerator != null) {
+				if (this.localBeanNameGeneratorSet) {
+					if (configurationGenerator instanceof ConfigurationBeanNameGenerator &
+							configurationGenerator != this.importBeanNameGenerator) {
+						throw new IllegalStateException("Context-level ConfigurationBeanNameGenerator [" +
+								configurationGenerator + "] must not be overridden with processor-level generator [" +
+								this.importBeanNameGenerator + "]");
+					}
+				}
+				else {
+					this.componentScanBeanNameGenerator = configurationGenerator;
+					this.importBeanNameGenerator = configurationGenerator;
 				}
 			}
 		}
@@ -443,7 +453,7 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 			}
 			this.reader.loadBeanDefinitions(configClasses);
 			for (ConfigurationClass configClass : configClasses) {
-				this.beanRegistrars.addAll(configClass.getBeanRegistrars());
+				this.beanRegistrars.putAll(configClass.getBeanRegistrars());
 			}
 			alreadyParsed.addAll(configClasses);
 			processConfig.tag("classCount", () -> String.valueOf(configClasses.size())).end();
@@ -840,19 +850,20 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 		}
 	}
 
+
 	private static class BeanRegistrarAotContribution implements BeanFactoryInitializationAotContribution {
 
 		private static final String CUSTOMIZER_MAP_VARIABLE = "customizers";
 
 		private static final String ENVIRONMENT_VARIABLE = "environment";
 
-		private final Set<BeanRegistrar> beanRegistrars;
+		private final Map<String, BeanRegistrar> beanRegistrars;
 
 		private final ConfigurableListableBeanFactory beanFactory;
 
 		private final AotServices<BeanRegistrationAotProcessor> aotProcessors;
 
-		public BeanRegistrarAotContribution(Set<BeanRegistrar> beanRegistrars, ConfigurableListableBeanFactory beanFactory) {
+		public BeanRegistrarAotContribution(Map<String, BeanRegistrar> beanRegistrars, ConfigurableListableBeanFactory beanFactory) {
 			this.beanRegistrars = beanRegistrars;
 			this.beanFactory = beanFactory;
 			this.aotProcessors = AotServices.factoriesAndBeans(this.beanFactory).load(BeanRegistrationAotProcessor.class);
@@ -875,8 +886,8 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 
 			for (String name : this.beanFactory.getBeanDefinitionNames()) {
 				BeanDefinition beanDefinition = this.beanFactory.getMergedBeanDefinition(name);
-				if (beanDefinition.getSource() instanceof Class<?> sourceClass
-						&& BeanRegistrar.class.isAssignableFrom(sourceClass)) {
+				if (beanDefinition.getSource() instanceof Class<?> sourceClass &&
+						BeanRegistrar.class.isAssignableFrom(sourceClass)) {
 
 					for (BeanRegistrationAotProcessor aotProcessor : this.aotProcessors) {
 						BeanRegistrationAotContribution contribution =
@@ -918,8 +929,8 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 				throw new UnsupportedOperationException("AOT post processing of qualifiers is not supported yet with BeanRegistrar");
 			}
 			for (String attributeName : beanDefinition.attributeNames()) {
-				if (!attributeName.equals(AbstractBeanDefinition.ORDER_ATTRIBUTE)
-						&& !attributeName.equals("aotProcessingIgnoreRegistration")) {
+				if (!attributeName.equals(AbstractBeanDefinition.ORDER_ATTRIBUTE) &&
+						!attributeName.equals("aotProcessingIgnoreRegistration")) {
 					throw new UnsupportedOperationException("AOT post processing of attribute " + attributeName +
 							" is not supported yet with BeanRegistrar");
 				}
@@ -935,13 +946,32 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 
 		private CodeBlock generateRegisterCode() {
 			Builder code = CodeBlock.builder();
-			for (BeanRegistrar beanRegistrar : this.beanRegistrars) {
-				code.addStatement("new $T().register(new $T(($T)$L, $L, $T.class, $L), $L)", beanRegistrar.getClass(),
+			Builder metadataReaderFactoryCode = null;
+			NameAllocator nameAllocator = new NameAllocator();
+			for (Map.Entry<String, BeanRegistrar> beanRegistrarEntry : this.beanRegistrars.entrySet()) {
+				BeanRegistrar beanRegistrar = beanRegistrarEntry.getValue();
+				String beanRegistrarName = nameAllocator.newName(StringUtils.uncapitalize(beanRegistrar.getClass().getSimpleName()));
+				code.addStatement("$T $L = new $T()", beanRegistrar.getClass(), beanRegistrarName, beanRegistrar.getClass());
+				if (beanRegistrar instanceof ImportAware) {
+					if (metadataReaderFactoryCode == null) {
+						metadataReaderFactoryCode = CodeBlock.builder();
+						metadataReaderFactoryCode.addStatement("$T metadataReaderFactory = new $T()",
+								MetadataReaderFactory.class, CachingMetadataReaderFactory.class);
+					}
+					code.beginControlFlow("try")
+							.addStatement("$L.setImportMetadata(metadataReaderFactory.getMetadataReader($S).getAnnotationMetadata())",
+									beanRegistrarName, beanRegistrarEntry.getKey())
+							.nextControlFlow("catch ($T ex)", IOException.class)
+							.addStatement("throw new $T(\"Failed to read metadata for '$L'\", ex)",
+									IllegalStateException.class, beanRegistrarEntry.getKey())
+							.endControlFlow();
+				}
+				code.addStatement("$L.register(new $T(($T)$L, $L, $L, $T.class, $L), $L)", beanRegistrarName,
 						BeanRegistryAdapter.class, BeanDefinitionRegistry.class, BeanFactoryInitializationCode.BEAN_FACTORY_VARIABLE,
-						BeanFactoryInitializationCode.BEAN_FACTORY_VARIABLE, beanRegistrar.getClass(), CUSTOMIZER_MAP_VARIABLE,
-						ENVIRONMENT_VARIABLE);
+						BeanFactoryInitializationCode.BEAN_FACTORY_VARIABLE, ENVIRONMENT_VARIABLE, beanRegistrar.getClass(),
+						CUSTOMIZER_MAP_VARIABLE, ENVIRONMENT_VARIABLE);
 			}
-			return code.build();
+			return (metadataReaderFactoryCode == null ? code.build() : metadataReaderFactoryCode.add(code.build()).build());
 		}
 
 		private CodeBlock generateInitDestroyMethods(String beanName, AbstractBeanDefinition beanDefinition,
