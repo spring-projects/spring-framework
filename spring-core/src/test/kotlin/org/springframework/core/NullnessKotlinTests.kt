@@ -79,6 +79,34 @@ class NullnessKotlinTests {
 		Assertions.assertThat(nullness).isEqualTo(Nullness.NON_NULL)
 	}
 
+	@Test
+	fun nullableDataClassGetter() {
+		val method = NullableName::class.java.getDeclaredMethod("getName")
+		val nullness = Nullness.forMethodReturnType(method)
+		Assertions.assertThat(nullness).isEqualTo(Nullness.NULLABLE)
+	}
+
+	@Test
+	fun nonNullableDataClassGetter() {
+		val method = NonNullableName::class.java.getDeclaredMethod("getName")
+		val nullness = Nullness.forMethodReturnType(method)
+		Assertions.assertThat(nullness).isEqualTo(Nullness.NON_NULL)
+	}
+
+	@Test
+	fun nullableDataClassSetter() {
+		val method = NullableName::class.java.getDeclaredMethod("setName", String::class.java)
+		val nullness = Nullness.forParameter(method.parameters[0])
+		Assertions.assertThat(nullness).isEqualTo(Nullness.NULLABLE)
+	}
+
+	@Test
+	fun nonNullableDataClassSetter() {
+		val method = NonNullableName::class.java.getDeclaredMethod("setName", String::class.java)
+		val nullness = Nullness.forParameter(method.parameters[0])
+		Assertions.assertThat(nullness).isEqualTo(Nullness.NON_NULL)
+	}
+
 	@Suppress("unused_parameter")
 	fun nullable(nullable: String?): String? = "foo"
 
@@ -87,5 +115,9 @@ class NullnessKotlinTests {
 
 	fun unit() {
 	}
+
+	data class NullableName(var name: String?)
+
+	data class NonNullableName(var name: String)
 
 }
