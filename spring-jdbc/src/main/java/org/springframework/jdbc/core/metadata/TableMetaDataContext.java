@@ -18,6 +18,7 @@ package org.springframework.jdbc.core.metadata;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -265,18 +266,19 @@ public class TableMetaDataContext {
 	 * @param inParameters the parameter names and values
 	 */
 	public List<Object> matchInParameterValuesWithInsertColumns(Map<String, ?> inParameters) {
-		List<Object> values = new ArrayList<>(inParameters.size());
+		List<Object> values = new ArrayList<>(this.tableColumns.size());
+		
+		Map<String, Object> caseInsensitiveLookup = new HashMap<>(inParameters.size());
+		for (Map.Entry<String, ?> entry : inParameters.entrySet()) {
+			caseInsensitiveLookup.put(entry.getKey().toLowerCase(Locale.ROOT), entry.getValue());
+		}
+		
 		for (String column : this.tableColumns) {
 			Object value = inParameters.get(column);
 			if (value == null) {
 				value = inParameters.get(column.toLowerCase(Locale.ROOT));
 				if (value == null) {
-					for (Map.Entry<String, ?> entry : inParameters.entrySet()) {
-						if (column.equalsIgnoreCase(entry.getKey())) {
-							value = entry.getValue();
-							break;
-						}
-					}
+					value = caseInsensitiveLookup.get(column.toLowerCase(Locale.ROOT));
 				}
 			}
 			values.add(value);
