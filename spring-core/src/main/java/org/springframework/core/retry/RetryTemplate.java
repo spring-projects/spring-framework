@@ -178,7 +178,7 @@ public class RetryTemplate implements RetryOperations {
 					return result;
 				}
 				catch (Throwable currentException) {
-					logger.debug(() -> "Retry attempt for operation '%s' failed due to '%s'"
+					logger.debug(currentException, () -> "Retry attempt for operation '%s' failed due to '%s'"
 							.formatted(retryableName, currentException));
 					this.retryListener.onRetryFailure(this.retryPolicy, retryable, currentException);
 					exceptions.add(currentException);
