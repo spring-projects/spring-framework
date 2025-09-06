@@ -164,9 +164,11 @@ public class RetryTemplate implements RetryOperations {
 				}
 				catch (InterruptedException interruptedException) {
 					Thread.currentThread().interrupt();
-					throw new RetryException(
+					RetryException retryException = new RetryException(
 							"Unable to back off for retryable operation '%s'".formatted(retryableName),
 							interruptedException);
+					exceptions.forEach(retryException::addSuppressed);
+					throw retryException;
 				}
 				logger.debug(() -> "Preparing to retry operation '%s'".formatted(retryableName));
 				try {
