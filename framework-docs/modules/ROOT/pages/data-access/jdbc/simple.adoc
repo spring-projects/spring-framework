@@ -768,6 +768,3 @@ Kotlin::
 
 The `execute` call passes in an empty `Map`, because this call does not take any parameters.
 The list of actors is then retrieved from the results map and returned to the caller.
-
-
-

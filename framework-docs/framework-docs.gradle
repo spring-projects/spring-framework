@@ -46,6 +46,7 @@ repositories {
 // To avoid a redeclaration error with Kotlin compiler
 tasks.named('compileKotlin', KotlinCompilationTask.class) {
 	javaSources.from = []
+	compilerOptions.freeCompilerArgs = [ "-Xannotation-default-target=param-property" ] // Upcoming default, see https://youtrack.jetbrains.com/issue/KT-73255
 }
 
 dependencies {
@@ -61,8 +62,6 @@ dependencies {
 	implementation(project(":spring-webmvc"))
 	implementation(project(":spring-websocket"))
 
-	implementation("com.fasterxml.jackson.core:jackson-databind")
-	implementation("com.fasterxml.jackson.module:jackson-module-parameter-names")
 	implementation("com.github.ben-manes.caffeine:caffeine")
 	implementation("com.mchange:c3p0:0.9.5.5")
 	implementation("com.oracle.database.jdbc:ojdbc11")
@@ -80,4 +79,6 @@ dependencies {
 	implementation("org.eclipse.jetty.websocket:jetty-websocket-jetty-api")
 	implementation("org.jetbrains.kotlin:kotlin-stdlib")
 	implementation("org.junit.jupiter:junit-jupiter-api")
+	implementation("tools.jackson.core:jackson-databind")
+	implementation("tools.jackson.dataformat:jackson-dataformat-xml")
 }

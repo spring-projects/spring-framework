@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,9 +54,17 @@ import org.springframework.web.socket.server.support.WebSocketHandlerMapping;
  * @author Rossen Stoyanchev
  * @author Artem Bilan
  * @author Sebastien Deleuze
+ * @author Juergen Hoeller
  * @since 4.0
  */
 public abstract class WebSocketMessageBrokerConfigurationSupport extends AbstractMessageBrokerConfiguration {
+
+	/**
+	 * Scope identifier for WebSocket scope: "websocket".
+	 * @since 7.0
+	 */
+	public static final String SCOPE_WEBSOCKET = "websocket";
+
 
 	private @Nullable WebSocketTransportRegistration transportRegistration;
 
@@ -137,7 +145,7 @@ public abstract class WebSocketMessageBrokerConfigurationSupport extends Abstrac
 	@Bean
 	public static CustomScopeConfigurer webSocketScopeConfigurer() {
 		CustomScopeConfigurer configurer = new CustomScopeConfigurer();
-		configurer.addScope("websocket", new SimpSessionScope());
+		configurer.addScope(SCOPE_WEBSOCKET, new SimpSessionScope());
 		return configurer;
 	}
 

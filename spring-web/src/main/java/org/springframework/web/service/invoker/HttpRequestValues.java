@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import java.util.function.Consumer;
 
 import org.jspecify.annotations.Nullable;
 
+import org.springframework.core.MethodParameter;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -240,11 +241,12 @@ public class HttpRequestValues {
 		 * Invoked after argument resolvers have been called, and before the
 		 * {@link HttpRequestValues} is built.
 		 * @param method the {@code @HttpExchange} method
+		 * @param parameters provides access to method parameter information
 		 * @param arguments the raw argument values to the method
 		 * @param builder the builder to add request values too; the builder
 		 * also exposes method {@link Metadata} from the {@code HttpExchange} method.
 		 */
-		void process(Method method, @Nullable Object[] arguments, Builder builder);
+		void process(Method method, MethodParameter[] parameters, @Nullable Object[] arguments, Builder builder);
 
 	}
 

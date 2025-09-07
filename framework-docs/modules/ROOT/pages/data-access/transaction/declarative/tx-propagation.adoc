@@ -8,6 +8,7 @@ details some of the semantics regarding transaction propagation in Spring.
 In Spring-managed transactions, be aware of the difference between physical and
 logical transactions, and how the propagation setting applies to this difference.
 
+
 [[tx-propagation-required]]
 == Understanding `PROPAGATION_REQUIRED`
 
@@ -45,6 +46,7 @@ is not aware) silently marks a transaction as rollback-only, the outer caller st
 calls commit. The outer caller needs to receive an `UnexpectedRollbackException` to
 indicate clearly that a rollback was performed instead.
 
+
 [[tx-propagation-requires_new]]
 == Understanding `PROPAGATION_REQUIRES_NEW`
 
@@ -67,6 +69,7 @@ for their inner transaction, with the pool not being able to hand out any such i
 connection anymore. Do not use `PROPAGATION_REQUIRES_NEW` unless your connection pool
 is appropriately sized, exceeding the number of concurrent threads by at least 1.
 
+
 [[tx-propagation-nested]]
 == Understanding `PROPAGATION_NESTED`
 
@@ -75,6 +78,5 @@ that it can roll back to. Such partial rollbacks let an inner transaction scope
 trigger a rollback for its scope, with the outer transaction being able to continue
 the physical transaction despite some operations having been rolled back. This setting
 is typically mapped onto JDBC savepoints, so it works only with JDBC resource
-transactions. See Spring's {spring-framework-api}/jdbc/datasource/DataSourceTransactionManager.html[`DataSourceTransactionManager`].
-
-
+transactions. See Spring's
+{spring-framework-api}/jdbc/datasource/DataSourceTransactionManager.html[`DataSourceTransactionManager`].

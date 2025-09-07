@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,7 +43,6 @@ import org.springframework.context.annotation.Configuration;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.assertj.core.api.AssertionsForClassTypes.catchThrowable;
 
 /**
  * Tests for annotation-based caching methods that use reactive operators.
@@ -154,16 +153,15 @@ class ReactiveCachingTests {
 				ExceptionCacheManager.class, ReactiveCacheableService.class);
 		ReactiveCacheableService service = ctx.getBean(ReactiveCacheableService.class);
 
-		Throwable completableFutureThrowable = catchThrowable(() -> service.cacheFuture(new Object()).join());
-		assertThat(completableFutureThrowable).isInstanceOf(CompletionException.class)
-				.extracting(Throwable::getCause)
-				.isInstanceOf(UnsupportedOperationException.class);
+		assertThatExceptionOfType(CompletionException.class)
+				.isThrownBy(() -> service.cacheFuture(new Object()).join())
+				.withCauseInstanceOf(UnsupportedOperationException.class);
 
-		Throwable monoThrowable = catchThrowable(() -> service.cacheMono(new Object()).block());
-		assertThat(monoThrowable).isInstanceOf(UnsupportedOperationException.class);
+		assertThatExceptionOfType(UnsupportedOperationException.class)
+				.isThrownBy(() -> service.cacheMono(new Object()).block());
 
-		Throwable fluxThrowable = catchThrowable(() -> service.cacheFlux(new Object()).blockFirst());
-		assertThat(fluxThrowable).isInstanceOf(UnsupportedOperationException.class);
+		assertThatExceptionOfType(UnsupportedOperationException.class)
+				.isThrownBy(() -> service.cacheFlux(new Object()).blockFirst());
 	}
 
 	@Test
@@ -172,16 +170,15 @@ class ReactiveCachingTests {
 				ExceptionCacheManager.class, ReactiveSyncCacheableService.class);
 		ReactiveSyncCacheableService service = ctx.getBean(ReactiveSyncCacheableService.class);
 
-		Throwable completableFutureThrowable = catchThrowable(() -> service.cacheFuture(new Object()).join());
-		assertThat(completableFutureThrowable).isInstanceOf(CompletionException.class)
-				.extracting(Throwable::getCause)
-				.isInstanceOf(UnsupportedOperationException.class);
+		assertThatExceptionOfType(CompletionException.class)
+				.isThrownBy(() -> service.cacheFuture(new Object()).join())
+				.withCauseInstanceOf(UnsupportedOperationException.class);
 
-		Throwable monoThrowable = catchThrowable(() -> service.cacheMono(new Object()).block());
-		assertThat(monoThrowable).isInstanceOf(UnsupportedOperationException.class);
+		assertThatExceptionOfType(UnsupportedOperationException.class)
+				.isThrownBy(() -> service.cacheMono(new Object()).block());
 
-		Throwable fluxThrowable = catchThrowable(() -> service.cacheFlux(new Object()).blockFirst());
-		assertThat(fluxThrowable).isInstanceOf(UnsupportedOperationException.class);
+		assertThatExceptionOfType(UnsupportedOperationException.class)
+				.isThrownBy(() -> service.cacheFlux(new Object()).blockFirst());
 	}
 
 	@Test
@@ -259,7 +256,7 @@ class ReactiveCachingTests {
 	}
 
 
-	@CacheConfig(cacheNames = "first")
+	@CacheConfig("first")
 	static class ReactiveCacheableService {
 
 		private final AtomicLong counter = new AtomicLong();
@@ -285,7 +282,7 @@ class ReactiveCachingTests {
 	}
 
 
-	@CacheConfig(cacheNames = "first")
+	@CacheConfig("first")
 	static class ReactiveSyncCacheableService {
 
 		private final AtomicLong counter = new AtomicLong();
@@ -307,7 +304,7 @@ class ReactiveCachingTests {
 	}
 
 
-	@CacheConfig(cacheNames = "first")
+	@CacheConfig("first")
 	static class ReactiveFailureCacheableService {
 
 		private final AtomicBoolean cacheFutureInvoked = new AtomicBoolean();

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -297,6 +297,7 @@ public class WebClientResponseException extends WebClientException {
 	 * Create {@code WebClientResponseException} or an HTTP status specific subclass.
 	 * @since 6.0
 	 */
+	@SuppressWarnings("deprecation")
 	public static WebClientResponseException create(
 			HttpStatusCode statusCode, String statusText, HttpHeaders headers,
 			byte[] body, @Nullable Charset charset, @Nullable HttpRequest request) {
@@ -465,10 +466,28 @@ public class WebClientResponseException extends WebClientException {
 	}
 
 	/**
-	 * {@link WebClientResponseException} for status HTTP 422 Unprocessable Entity.
-	 * @since 5.1
+	 * {@link WebClientResponseException} for status HTTP 422 Unprocessable Content.
+	 * @since 7.0
 	 */
 	@SuppressWarnings("serial")
+	public static class UnprocessableContent extends WebClientResponseException {
+
+		UnprocessableContent(
+				String statusText, HttpHeaders headers, byte[] body, @Nullable Charset charset,
+				@Nullable HttpRequest request) {
+
+			super(HttpStatus.UNPROCESSABLE_CONTENT.value(), statusText, headers, body, charset, request);
+		}
+	}
+
+
+	/**
+	 * {@link WebClientResponseException} for status HTTP 422 Unprocessable Entity.
+	 * @since 5.1
+	 * @deprecated since 7.0 in favor of {@link UnprocessableContent}
+	 */
+	@SuppressWarnings("serial")
+	@Deprecated(since = "7.0")
 	public static class UnprocessableEntity extends WebClientResponseException {
 
 		UnprocessableEntity(

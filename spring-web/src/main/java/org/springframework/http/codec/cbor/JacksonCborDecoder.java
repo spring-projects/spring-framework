@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,7 +40,7 @@ import org.springframework.util.MimeType;
  * @see JacksonCborEncoder
  * @see <a href="https://github.com/spring-projects/spring-framework/issues/20513">Add CBOR support to WebFlux</a>
  */
-public class JacksonCborDecoder extends AbstractJacksonDecoder {
+public class JacksonCborDecoder extends AbstractJacksonDecoder<CBORMapper> {
 
 	/**
 	 * Construct a new instance with a {@link CBORMapper} customized with the

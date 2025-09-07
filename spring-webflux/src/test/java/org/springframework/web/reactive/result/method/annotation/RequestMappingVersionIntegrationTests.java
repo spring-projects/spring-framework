@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 
 package org.springframework.web.reactive.result.method.annotation;
 
+import java.net.URI;
+
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.http.RequestEntity;
@@ -23,6 +25,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.reactive.accept.StandardApiVersionDeprecationHandler;
 import org.springframework.web.reactive.config.ApiVersionConfigurer;
 import org.springframework.web.reactive.config.EnableWebFlux;
 import org.springframework.web.reactive.config.WebFluxConfigurer;
@@ -47,24 +50,26 @@ public class RequestMappingVersionIntegrationTests extends AbstractRequestMappin
 
 
 	@ParameterizedHttpServerTest
-	void initialVersion(HttpServer httpServer) throws Exception {
+	void mapVersion(HttpServer httpServer) throws Exception {
 		startServer(httpServer);
+
 		assertThat(exchangeWithVersion("1.0").getBody()).isEqualTo("none");
 		assertThat(exchangeWithVersion("1.1").getBody()).isEqualTo("none");
-	}
-
-	@ParameterizedHttpServerTest
-	void baselineVersion(HttpServer httpServer) throws Exception {
-		startServer(httpServer);
 		assertThat(exchangeWithVersion("1.2").getBody()).isEqualTo("1.2");
 		assertThat(exchangeWithVersion("1.3").getBody()).isEqualTo("1.2");
+		assertThat(exchangeWithVersion("1.5").getBody()).isEqualTo("1.5");
+
+		assertThatThrownBy(() -> exchangeWithVersion("1.6"))
+				.as("Should reject if highest supported below request version is fixed")
+				.isInstanceOf(HttpClientErrorException.BadRequest.class);
 	}
 
 	@ParameterizedHttpServerTest
-	void fixedVersion(HttpServer httpServer) throws Exception {
+	void deprecation(HttpServer httpServer) throws Exception {
 		startServer(httpServer);
-		assertThat(exchangeWithVersion("1.5").getBody()).isEqualTo("1.5");
-		assertThatThrownBy(() -> exchangeWithVersion("1.6")).isInstanceOf(HttpClientErrorException.BadRequest.class);
+
+		assertThat(exchangeWithVersion("1").getHeaders().getFirst("Link"))
+				.isEqualTo("<https://example.org/deprecation>; rel=\"deprecation\"; type=\"text/html\"");
 	}
 
 	private ResponseEntity<String> exchangeWithVersion(String version) {
@@ -79,7 +84,13 @@ public class RequestMappingVersionIntegrationTests extends AbstractRequestMappin
 
 		@Override
 		public void configureApiVersioning(ApiVersionConfigurer configurer) {
-			configurer.useRequestHeader("X-API-Version").addSupportedVersions("1", "1.1", "1.3", "1.6");
+
+			StandardApiVersionDeprecationHandler handler = new StandardApiVersionDeprecationHandler();
+			handler.configureVersion("1").setDeprecationLink(URI.create("https://example.org/deprecation"));
+
+			configurer.useRequestHeader("X-API-Version")
+					.addSupportedVersions("1", "1.1", "1.3", "1.6")
+					.setDeprecationHandler(handler);
 		}
 	}
 

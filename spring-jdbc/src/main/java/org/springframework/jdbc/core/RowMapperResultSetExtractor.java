@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.util.Assert;
 
@@ -52,17 +54,20 @@ import org.springframework.util.Assert;
  * you can have executable query objects (containing row-mapping logic) there.
  *
  * @author Juergen Hoeller
+ * @author Yanming Zhou
  * @since 1.0.2
  * @param <T> the result element type
  * @see RowMapper
  * @see JdbcTemplate
  * @see org.springframework.jdbc.object.MappingSqlQuery
  */
-public class RowMapperResultSetExtractor<T> implements ResultSetExtractor<List<T>> {
+public class RowMapperResultSetExtractor<T extends @Nullable Object> implements ResultSetExtractor<List<T>> {
 
 	private final RowMapper<T> rowMapper;
 
 	private final int rowsExpected;
+
+	private final int maxRows;
 
 
 	/**
@@ -80,9 +85,22 @@ public class RowMapperResultSetExtractor<T> implements ResultSetExtractor<List<T
 	 * (just used for optimized collection handling)
 	 */
 	public RowMapperResultSetExtractor(RowMapper<T> rowMapper, int rowsExpected) {
+		this(rowMapper, rowsExpected, -1);
+	}
+
+	/**
+	 * Create a new RowMapperResultSetExtractor.
+	 * @param rowMapper the RowMapper which creates an object for each row
+	 * @param rowsExpected the number of expected rows
+	 * (just used for optimized collection handling)
+	 * @param maxRows the number of max rows (or -1 for the driver's default)
+	 * @since 7.0
+	 */
+	public RowMapperResultSetExtractor(RowMapper<T> rowMapper, int rowsExpected, int maxRows) {
 		Assert.notNull(rowMapper, "RowMapper must not be null");
 		this.rowMapper = rowMapper;
 		this.rowsExpected = rowsExpected;
+		this.maxRows = maxRows;
 	}
 
 
@@ -90,7 +108,7 @@ public class RowMapperResultSetExtractor<T> implements ResultSetExtractor<List<T
 	public List<T> extractData(ResultSet rs) throws SQLException {
 		List<T> results = (this.rowsExpected > 0 ? new ArrayList<>(this.rowsExpected) : new ArrayList<>());
 		int rowNum = 0;
-		while (rs.next()) {
+		while (rs.next() && (this.maxRows == -1 || rowNum < this.maxRows)) {
 			results.add(this.rowMapper.mapRow(rs, rowNum++));
 		}
 		return results;

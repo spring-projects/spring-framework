@@ -9,8 +9,6 @@ It is an alternative to the annotation-based programming model but otherwise run
 the same xref:web/webflux/reactive-spring.adoc[Reactive Core] foundation.
 
 
-
-
 [[webflux-fn-overview]]
 == Overview
 [.small]#xref:web/webmvc-functional.adoc#webmvc-fn-overview[See equivalent in the Servlet stack]#
@@ -115,8 +113,6 @@ through one of the built-in xref:web/webflux/reactive-spring.adoc#webflux-httpha
 Most applications can run through the WebFlux Java configuration, see xref:web/webflux-functional.adoc#webflux-fn-running[Running a Server].
 
 
-
-
 [[webflux-fn-handler-functions]]
 == HandlerFunction
 [.small]#xref:web/webmvc-functional.adoc#webmvc-fn-handler-functions[See equivalent in the Servlet stack]#
@@ -128,8 +124,6 @@ against the body streams.
 The request body is represented with a Reactor `Flux` or `Mono`.
 The response body is represented with any Reactive Streams `Publisher`, including `Flux` and `Mono`.
 For more on that, see xref:web-reactive.adoc#webflux-reactive-libraries[Reactive Libraries].
-
-
 
 [[webflux-fn-request]]
 === ServerRequest
@@ -370,7 +364,6 @@ ServerResponse.ok().hint(Jackson2CodecSupport.JSON_VIEW_HINT, MyJacksonView::cla
 ----
 ======
 
-
 [[webflux-fn-handler-classes]]
 === Handler Classes
 
@@ -484,7 +477,6 @@ found. If it is not found, we return a 404 Not Found response.
 ======
 --
 
-
 [[webflux-fn-handler-validation]]
 === Validation
 
@@ -558,7 +550,6 @@ a global `Validator` instance based on `LocalValidatorFactoryBean`.
 See xref:core/validation/beanvalidation.adoc[Spring Validation].
 
 
-
 [[webflux-fn-router-functions]]
 == `RouterFunction`
 [.small]#xref:web/webmvc-functional.adoc#webmvc-fn-router-functions[See equivalent in the Servlet stack]#
@@ -573,22 +564,22 @@ to create a router.
 Generally, it is recommended to use the `route()` builder, as it provides
 convenient short-cuts for typical mapping scenarios without requiring hard-to-discover
 static imports.
-For instance, the router function builder offers the method `GET(String, HandlerFunction)` to create a mapping for GET requests; and `POST(String, HandlerFunction)` for POSTs.
+For instance, the router function builder offers the method `GET(String, HandlerFunction)`
+to create a mapping for GET requests; and `POST(String, HandlerFunction)` for POSTs.
 
 Besides HTTP method-based mapping, the route builder offers a way to introduce additional
 predicates when mapping to requests.
 For each HTTP method there is an overloaded variant that takes a `RequestPredicate` as a
 parameter, though which additional constraints can be expressed.
 
-
 [[webflux-fn-predicates]]
 === Predicates
 
 You can write your own `RequestPredicate`, but the `RequestPredicates` utility class
-offers commonly used implementations, based on the request path, HTTP method, content-type,
-and so on.
-The following example uses a request predicate to create a constraint based on the `Accept`
-header:
+offers built-in options for common needs for matching based on the HTTP method, request
+path, headers, xref:#api-version[API version], and more.
+
+The following example uses an `Accept` header, request predicate:
 
 [tabs]
 ======
@@ -623,8 +614,6 @@ For example, `RequestPredicates.GET(String)` is composed from `RequestPredicates
 and `RequestPredicates.path(String)`.
 The example shown above also uses two request predicates, as the builder uses
 `RequestPredicates.GET` internally, and composes that with the `accept` predicate.
-
-
 
 [[webflux-fn-routes]]
 === Routes
@@ -704,7 +693,6 @@ Kotlin::
 <4> `otherRoute` is a router function that is created elsewhere, and added to the route built.
 ======
 
-
 [[nested-routes]]
 === Nested Routes
 
@@ -781,6 +769,51 @@ Kotlin::
 	}
 ----
 ======
+
+
+
+[[api-version]]
+=== API Version
+
+Router functions support matching by API version.
+
+First, enable API versioning in the
+xref:web/webflux/config.adoc#webflux-config-api-version[WebFlux Config], and then you can
+use the `version` xref:#webflux-fn-predicates[predicate] as follows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	RouterFunction<ServerResponse> route = RouterFunctions.route()
+		.GET("/hello-world", version("1.2"),
+			request -> ServerResponse.ok().body("Hello World")).build();
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes"]
+----
+	val route = coRouter {
+		GET("/hello-world", version("1.2")) {
+			ServerResponse.ok().bodyValueAndAwait("Hello World")
+		}
+	}
+----
+======
+
+The `version` predicate can be:
+
+- Fixed version ("1.2") -- matches the given version only
+- Baseline version ("1.2+") -- matches the given version and above, up to the highest
+xref:web/webmvc/mvc-config/api-version.adoc[supported version].
+
+See xref:web/webflux-versioning.adoc[API Versioning] for more details on underlying
+infrastructure and support for API Versioning.
+
+
 
 
 [[webflux-fn-serving-resources]]
@@ -955,8 +988,6 @@ Kotlin::
 	}
 ----
 ======
-
-
 
 
 [[webflux-fn-handler-filter-function]]

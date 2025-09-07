@@ -207,5 +207,3 @@ Kotlin::
 If method validation applies because other parameters have `@Constraint` annotations,
 then `HandlerMethodValidationException` is raised instead. For more details, see the
 section on xref:web/webmvc/mvc-controller/ann-validation.adoc[Validation].
-
-

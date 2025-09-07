@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,7 +44,7 @@ import org.springframework.dao.DataAccessException;
  * @see JdbcTemplate#execute(PreparedStatementCreator, PreparedStatementCallback)
  */
 @FunctionalInterface
-public interface PreparedStatementCallback<T> {
+public interface PreparedStatementCallback<T extends @Nullable Object> {
 
 	/**
 	 * Gets called by {@code JdbcTemplate.execute} with an active JDBC
@@ -75,6 +75,6 @@ public interface PreparedStatementCallback<T> {
 	 * @see JdbcTemplate#queryForObject(String, Class, Object...)
 	 * @see JdbcTemplate#queryForList(String, Object...)
 	 */
-	@Nullable T doInPreparedStatement(PreparedStatement ps) throws SQLException, DataAccessException;
+	T doInPreparedStatement(PreparedStatement ps) throws SQLException, DataAccessException;
 
 }

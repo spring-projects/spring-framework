@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import java.util.stream.Stream;
 
 import javax.sql.DataSource;
 
+import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
 import org.springframework.core.convert.ConversionService;
@@ -131,6 +132,30 @@ public interface JdbcClient {
 	 * A statement specification for parameter bindings and query/update execution.
 	 */
 	interface StatementSpec {
+
+		/**
+		 * Apply the given fetch size to any subsequent query statement.
+		 * @param fetchSize the fetch size
+		 * @since 7.0
+		 * @see org.springframework.jdbc.core.JdbcTemplate#setFetchSize
+		 */
+		StatementSpec withFetchSize(int fetchSize);
+
+		/**
+		 * Apply the given maximum number of rows to any subsequent query statement.
+		 * @param maxRows the maximum number of rows
+		 * @since 7.0
+		 * @see org.springframework.jdbc.core.JdbcTemplate#setMaxRows
+		 */
+		StatementSpec withMaxRows(int maxRows);
+
+		/**
+		 * Apply the given query timeout to any subsequent query statement.
+		 * @param queryTimeout the query timeout in seconds
+		 * @since 7.0
+		 * @see org.springframework.jdbc.core.JdbcTemplate#setQueryTimeout
+		 */
+		StatementSpec withQueryTimeout(int queryTimeout);
 
 		/**
 		 * Bind a positional JDBC statement parameter for "?" placeholder resolution
@@ -262,7 +287,7 @@ public interface JdbcClient {
 		 * @see org.springframework.jdbc.core.SingleColumnRowMapper
 		 * @see org.springframework.jdbc.core.SimplePropertyRowMapper
 		 */
-		<T> MappedQuerySpec<T> query(Class<T> mappedClass);
+		<T> MappedQuerySpec<@Nullable T> query(Class<T> mappedClass);
 
 		/**
 		 * Proceed towards execution of a mapped query, with several options
@@ -271,7 +296,7 @@ public interface JdbcClient {
 		 * @return the mapped query specification
 		 * @see java.sql.PreparedStatement#executeQuery()
 		 */
-		<T> MappedQuerySpec<T> query(RowMapper<T> rowMapper);
+		<T extends @Nullable Object> MappedQuerySpec<T> query(RowMapper<T> rowMapper);
 
 		/**
 		 * Execute a query with the provided SQL statement,
@@ -288,7 +313,7 @@ public interface JdbcClient {
 		 * @return the value returned by the ResultSetExtractor
 		 * @see java.sql.PreparedStatement#executeQuery()
 		 */
-		<T> T query(ResultSetExtractor<T> rse);
+		<T extends @Nullable Object> T query(ResultSetExtractor<T> rse);
 
 		/**
 		 * Execute the provided SQL statement as an update.
@@ -341,14 +366,14 @@ public interface JdbcClient {
 		 * with each result row represented as a map of
 		 * case-insensitive column names to column values
 		 */
-		List<Map<String, Object>> listOfRows();
+		List<Map<String, @Nullable Object>> listOfRows();
 
 		/**
 		 * Retrieve a single row result.
 		 * @return the result row represented as a map of
 		 * case-insensitive column names to column values
 		 */
-		Map<String, Object> singleRow();
+		Map<String, @Nullable Object> singleRow();
 
 		/**
 		 * Retrieve a single column result,
@@ -356,7 +381,7 @@ public interface JdbcClient {
 		 * @return a (potentially empty) list of rows, with each
 		 * row represented as its single column value
 		 */
-		List<Object> singleColumn();
+		List<@Nullable Object> singleColumn();
 
 		/**
 		 * Retrieve a single value result.
@@ -366,6 +391,7 @@ public interface JdbcClient {
 		 * @see #optionalValue()
 		 * @see DataAccessUtils#requiredSingleResult(Collection)
 		 */
+		@SuppressWarnings("NullAway") // See https://github.com/uber/NullAway/issues/1075
 		default Object singleValue() {
 			return DataAccessUtils.requiredSingleResult(singleColumn());
 		}
@@ -377,6 +403,7 @@ public interface JdbcClient {
 		 * @see #singleValue()
 		 * @see DataAccessUtils#optionalResult(Collection)
 		 */
+		@SuppressWarnings("NullAway") // See https://github.com/uber/NullAway/issues/1075
 		default Optional<Object> optionalValue() {
 			return DataAccessUtils.optionalResult(singleColumn());
 		}
@@ -388,7 +415,7 @@ public interface JdbcClient {
 	 *
 	 * @param <T> the RowMapper-declared result type
 	 */
-	interface MappedQuerySpec<T> {
+	interface MappedQuerySpec<T extends @Nullable Object> {
 
 		/**
 		 * Retrieve the result as a lazily resolved stream of mapped objects,
@@ -423,7 +450,7 @@ public interface JdbcClient {
 		 * @see #optional()
 		 * @see DataAccessUtils#requiredSingleResult(Collection)
 		 */
-		default T single() {
+		default @NonNull T single() {
 			return DataAccessUtils.requiredSingleResult(list());
 		}
 
@@ -433,7 +460,7 @@ public interface JdbcClient {
 		 * @see #single()
 		 * @see DataAccessUtils#optionalResult(Collection)
 		 */
-		default Optional<T> optional() {
+		default Optional<@NonNull T> optional() {
 			return DataAccessUtils.optionalResult(list());
 		}
 	}

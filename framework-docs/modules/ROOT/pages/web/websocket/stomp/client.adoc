@@ -119,6 +119,3 @@ messages. When an inbound STOMP message size exceeds the configured limit, a
 	stompClient.setInboundMessageSizeLimit(64 * 1024); // 64KB
 	stompClient.setOutboundMessageSizeLimit(64 * 1024); // 64KB
 ----
-
-
-

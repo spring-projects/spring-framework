@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,10 +45,10 @@ class ProtobufEncoderTests extends AbstractEncoderTests<ProtobufEncoder> {
 
 	private static final MimeType PROTOBUF_MIME_TYPE = new MimeType("application", "x-protobuf");
 
-	private Msg msg1 =
+	private final Msg msg1 =
 			Msg.newBuilder().setFoo("Foo").setBlah(SecondMsg.newBuilder().setBlah(123).build()).build();
 
-	private Msg msg2 =
+	private final Msg msg2 =
 			Msg.newBuilder().setFoo("Bar").setBlah(SecondMsg.newBuilder().setBlah(456).build()).build();
 
 
@@ -61,6 +61,7 @@ class ProtobufEncoderTests extends AbstractEncoderTests<ProtobufEncoder> {
 	protected void canEncode() {
 		assertThat(this.encoder.canEncode(forClass(Msg.class), null)).isTrue();
 		assertThat(this.encoder.canEncode(forClass(Msg.class), PROTOBUF_MIME_TYPE)).isTrue();
+		assertThat(this.encoder.canEncode(forClass(Msg.class), MediaType.parseMediaType("application/vnd.example.public.v1+x-protobuf"))).isTrue();
 		assertThat(this.encoder.canEncode(forClass(Msg.class), MediaType.APPLICATION_OCTET_STREAM)).isTrue();
 		assertThat(this.encoder.canEncode(forClass(Msg.class), MediaType.APPLICATION_JSON)).isFalse();
 		assertThat(this.encoder.canEncode(forClass(Object.class), PROTOBUF_MIME_TYPE)).isFalse();

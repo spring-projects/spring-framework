@@ -78,7 +78,3 @@ important (at least for singleton beans) that if you have a (parent) bean defini
 which you intend to use only as a template, and this definition specifies a class, you
 must make sure to set the __abstract__ attribute to __true__, otherwise the application
 context will actually (attempt to) pre-instantiate the `abstract` bean.
-
-
-
-

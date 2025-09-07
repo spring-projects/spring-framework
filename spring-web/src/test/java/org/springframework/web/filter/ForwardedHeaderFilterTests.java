@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,6 +49,7 @@ import static org.mockito.Mockito.mock;
  * @author Rob Winch
  * @author Brian Clozel
  * @author Sebastien Deleuze
+ * @author Mengqi Xu
  */
 class ForwardedHeaderFilterTests {
 
@@ -156,6 +157,7 @@ class ForwardedHeaderFilterTests {
 		assertThat(actual.isSecure()).isFalse();
 		assertThat(actual.getRemoteAddr()).isEqualTo(MockHttpServletRequest.DEFAULT_REMOTE_ADDR);
 		assertThat(actual.getRemoteHost()).isEqualTo(MockHttpServletRequest.DEFAULT_REMOTE_HOST);
+		assertThat(actual.getLocalAddr()).isEqualTo(MockHttpServletRequest.DEFAULT_SERVER_ADDR);
 
 		assertThat(actual.getHeader(X_FORWARDED_PROTO)).isNull();
 		assertThat(actual.getHeader(X_FORWARDED_HOST)).isNull();
@@ -537,6 +539,56 @@ class ForwardedHeaderFilterTests {
 
 			assertThat(actual.getRemoteAddr()).isEqualTo(actual.getRemoteHost()).isEqualTo("203.0.113.195");
 			assertThat(actual.getRemotePort()).isEqualTo(MockHttpServletRequest.DEFAULT_SERVER_PORT);
+		}
+
+	}
+
+	@Nested
+	class ForwardedBy {
+
+		@Test
+		void forwardedByIpV4Identifier() throws Exception {
+			request.addHeader(FORWARDED, "By=203.0.113.195");
+			HttpServletRequest actual = filterAndGetWrappedRequest();
+
+			assertThat(actual.getLocalAddr()).isEqualTo(actual.getLocalAddr()).isEqualTo("203.0.113.195");
+			assertThat(actual.getLocalPort()).isEqualTo(MockHttpServletRequest.DEFAULT_SERVER_PORT);
+		}
+
+		@Test
+		void forwardedByIpV6Identifier() throws Exception {
+			request.addHeader(FORWARDED, "By=\"[2001:db8:cafe::17]\"");
+			HttpServletRequest actual = filterAndGetWrappedRequest();
+
+			assertThat(actual.getLocalAddr()).isEqualTo(actual.getLocalAddr()).isEqualTo("[2001:db8:cafe::17]");
+			assertThat(actual.getLocalPort()).isEqualTo(MockHttpServletRequest.DEFAULT_SERVER_PORT);
+		}
+
+		@Test
+		void forwardedByIpV4IdentifierWithPort() throws Exception {
+			request.addHeader(FORWARDED, "By=\"203.0.113.195:47011\"");
+			HttpServletRequest actual = filterAndGetWrappedRequest();
+
+			assertThat(actual.getLocalAddr()).isEqualTo(actual.getLocalAddr()).isEqualTo("203.0.113.195");
+			assertThat(actual.getLocalPort()).isEqualTo(47011);
+		}
+
+		@Test
+		void forwardedByIpV6IdentifierWithPort() throws Exception {
+			request.addHeader(FORWARDED, "By=\"[2001:db8:cafe::17]:47011\"");
+			HttpServletRequest actual = filterAndGetWrappedRequest();
+
+			assertThat(actual.getLocalAddr()).isEqualTo(actual.getLocalAddr()).isEqualTo("[2001:db8:cafe::17]");
+			assertThat(actual.getLocalPort()).isEqualTo(47011);
+		}
+
+		@Test
+		void forwardedByMultipleIdentifiers() throws Exception {
+			request.addHeader(FORWARDED, "by=203.0.113.195;proto=http, by=\"[2001:db8:cafe::17]\", by=unknown");
+			HttpServletRequest actual = filterAndGetWrappedRequest();
+
+			assertThat(actual.getLocalAddr()).isEqualTo(actual.getLocalAddr()).isEqualTo("203.0.113.195");
+			assertThat(actual.getLocalPort()).isEqualTo(MockHttpServletRequest.DEFAULT_SERVER_PORT);
 		}
 
 	}

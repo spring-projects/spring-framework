@@ -59,5 +59,3 @@ that are nested within `<tx:advice/>` and `<tx:attributes/>` tags:
 | Comma-delimited list of `Exception` instances that do not trigger rollback. For example,
   `com.foo.MyBusinessException,ServletException`.
 |===
-
-

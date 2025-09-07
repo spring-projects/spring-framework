@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,7 +45,6 @@ import org.springframework.util.ResourceUtils;
  */
 public abstract class AbstractFileResolvingResource extends AbstractResource {
 
-	@SuppressWarnings("try")
 	@Override
 	public boolean exists() {
 		try {
@@ -90,8 +89,14 @@ public abstract class AbstractFileResolvingResource extends AbstractResource {
 					// existence of the entry (or the jar root in case of no entryName).
 					// getJarFile() called for enforced presence check of the jar file,
 					// throwing a NoSuchFileException otherwise (turned to false below).
-					try (JarFile jarFile = jarCon.getJarFile()) {
+					JarFile jarFile = jarCon.getJarFile();
+					try {
 						return (jarCon.getEntryName() == null || jarCon.getJarEntry() != null);
+					}
+					finally {
+						if (!jarCon.getUseCaches()) {
+							jarFile.close();
+						}
 					}
 				}
 				else if (con.getContentLengthLong() > 0) {
@@ -356,10 +361,20 @@ public abstract class AbstractFileResolvingResource extends AbstractResource {
 	 * @throws IOException if thrown from URLConnection methods
 	 */
 	protected void customizeConnection(URLConnection con) throws IOException {
-		ResourceUtils.useCachesIfNecessary(con);
+		useCachesIfNecessary(con);
 		if (con instanceof HttpURLConnection httpCon) {
 			customizeConnection(httpCon);
 		}
+	}
+
+	/**
+	 * Apply {@link URLConnection#setUseCaches useCaches} if necessary.
+	 * @param con the URLConnection to customize
+	 * @since 6.2.10
+	 * @see ResourceUtils#useCachesIfNecessary(URLConnection)
+	 */
+	void useCachesIfNecessary(URLConnection con) {
+		ResourceUtils.useCachesIfNecessary(con);
 	}
 
 	/**

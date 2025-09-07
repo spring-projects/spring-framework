@@ -9,6 +9,7 @@ transactions, however, you must configure a `PlatformTransactionManager` bean in
 details are provided later). In addition, you must declare Spring's `@Transactional`
 annotation either at the class or the method level for your tests.
 
+
 [[testcontext-tx-test-managed-transactions]]
 == Test-managed Transactions
 
@@ -45,6 +46,7 @@ Situations in which this can occur include but are not limited to the following.
   `org.junit.jupiter.api.Assertions` class
 * TestNG's `@Test(timeOut = ...)` support
 ====
+
 
 [[testcontext-tx-enabling-transactions]]
 == Enabling and Disabling Transactions
@@ -193,9 +195,11 @@ Kotlin::
 ----
 ======
 
-As explained in xref:testing/testcontext-framework/tx.adoc#testcontext-tx-rollback-and-commit-behavior[Transaction Rollback and Commit Behavior], there is no need to
-clean up the database after the `createUser()` method runs, since any changes made to the
-database are automatically rolled back by the `TransactionalTestExecutionListener`.
+As explained in xref:testing/testcontext-framework/tx.adoc#testcontext-tx-rollback-and-commit-behavior[Transaction Rollback and Commit Behavior],
+there is no need to clean up the database after the `createUser()` method runs,
+since any changes made to the database are automatically rolled back by the
+`TransactionalTestExecutionListener`.
+
 
 [[testcontext-tx-rollback-and-commit-behavior]]
 == Transaction Rollback and Commit Behavior
@@ -204,6 +208,7 @@ By default, test transactions will be automatically rolled back after completion
 test; however, transactional commit and rollback behavior can be configured declaratively
 via the `@Commit` and `@Rollback` annotations. See the corresponding entries in the
 xref:testing/annotations.adoc[annotation support] section for further details.
+
 
 [[testcontext-tx-programmatic-tx-mgt]]
 == Programmatic Transaction Management
@@ -285,6 +290,7 @@ Kotlin::
 ----
 ======
 
+
 [[testcontext-tx-before-and-after-tx]]
 == Running Code Outside of a Transaction
 
@@ -346,6 +352,7 @@ Similarly, methods annotated with `@BeforeTransaction` or `@AfterTransaction` ar
 run for transactional test methods.
 ====
 
+
 [[testcontext-tx-mgr-config]]
 == Configuring a Transaction Manager
 
@@ -358,6 +365,7 @@ qualifier by using `@Transactional("myTxMgr")` or `@Transactional(transactionMan
 {spring-framework-api}/test/context/transaction/TestContextTransactionUtils.html#retrieveTransactionManager-org.springframework.test.context.TestContext-java.lang.String-[javadoc
 for `TestContextTransactionUtils.retrieveTransactionManager()`] for details on the
 algorithm used to look up a transaction manager in the test's `ApplicationContext`.
+
 
 [[testcontext-tx-annotation-demo]]
 == Demonstration of All Transaction-related Annotations
@@ -671,5 +679,3 @@ See
 {spring-framework-code}/spring-test/src/test/java/org/springframework/test/context/junit/jupiter/orm/JpaEntityListenerTests.java[JpaEntityListenerTests]
 in the Spring Framework test suite for working examples using all JPA lifecycle callbacks.
 =====
-
-

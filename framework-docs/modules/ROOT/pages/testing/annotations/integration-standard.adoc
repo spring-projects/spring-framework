@@ -32,6 +32,3 @@ the test class. On the other hand, if a method within a test class is annotated 
 you use test lifecycle callbacks from the underlying test framework instead of
 `@PostConstruct` and `@PreDestroy`.
 ====
-
-
-

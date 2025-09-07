@@ -141,6 +141,3 @@ also hides the JMX-managed resource annotations. Hence, you should use target-cl
 case (through setting the 'proxy-target-class' flag on `<aop:config/>`,
 `<tx:annotation-driven/>` and so on). Otherwise, your JMX beans might be silently ignored at
 startup.
-
-
-

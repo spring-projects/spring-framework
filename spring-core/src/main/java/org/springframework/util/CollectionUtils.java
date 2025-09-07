@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,6 +45,7 @@ import org.springframework.lang.Contract;
  * @author Juergen Hoeller
  * @author Rob Harrop
  * @author Arjen Poutsma
+ * @author Sam Brannen
  * @since 1.1.3
  */
 public abstract class CollectionUtils {
@@ -109,7 +110,7 @@ public abstract class CollectionUtils {
 	 * @since 5.3
 	 * @see #newHashMap(int)
 	 */
-	public static <K, V> LinkedHashMap<K, V> newLinkedHashMap(int expectedSize) {
+	public static <K, V extends @Nullable Object> LinkedHashMap<K, V> newLinkedHashMap(int expectedSize) {
 		return new LinkedHashMap<>(computeInitialCapacity(expectedSize), DEFAULT_LOAD_FACTOR);
 	}
 
@@ -195,12 +196,15 @@ public abstract class CollectionUtils {
 
 
 	/**
-	 * Check whether the given Iterator contains the given element.
-	 * @param iterator the Iterator to check
+	 * Check whether the given {@link Iterator} contains the given element.
+	 * @param iterator the {@code Iterator} to check
 	 * @param element the element to look for
 	 * @return {@code true} if found, {@code false} otherwise
 	 */
-	public static boolean contains(@Nullable Iterator<?> iterator, Object element) {
+	@Contract("null, _ -> false")
+	public static boolean contains(@Nullable Iterator<? extends @Nullable Object> iterator,
+			@Nullable Object element) {
+
 		if (iterator != null) {
 			while (iterator.hasNext()) {
 				Object candidate = iterator.next();
@@ -213,12 +217,15 @@ public abstract class CollectionUtils {
 	}
 
 	/**
-	 * Check whether the given Enumeration contains the given element.
-	 * @param enumeration the Enumeration to check
+	 * Check whether the given {@link Enumeration} contains the given element.
+	 * @param enumeration the {@code Enumeration} to check
 	 * @param element the element to look for
 	 * @return {@code true} if found, {@code false} otherwise
 	 */
-	public static boolean contains(@Nullable Enumeration<?> enumeration, Object element) {
+	@Contract("null, _ -> false")
+	public static boolean contains(@Nullable Enumeration<? extends @Nullable Object> enumeration,
+			@Nullable Object element) {
+
 		if (enumeration != null) {
 			while (enumeration.hasMoreElements()) {
 				Object candidate = enumeration.nextElement();
@@ -231,14 +238,17 @@ public abstract class CollectionUtils {
 	}
 
 	/**
-	 * Check whether the given Collection contains the given element instance.
+	 * Check whether the given {@link Collection} contains the given element instance.
 	 * <p>Enforces the given instance to be present, rather than returning
 	 * {@code true} for an equal element as well.
-	 * @param collection the Collection to check
+	 * @param collection the {@code Collection} to check
 	 * @param element the element to look for
 	 * @return {@code true} if found, {@code false} otherwise
 	 */
-	public static boolean containsInstance(@Nullable Collection<?> collection, Object element) {
+	@Contract("null, _ -> false")
+	public static boolean containsInstance(@Nullable Collection<? extends @Nullable Object> collection,
+			@Nullable Object element) {
+
 		if (collection != null) {
 			for (Object candidate : collection) {
 				if (candidate == element) {
@@ -252,12 +262,22 @@ public abstract class CollectionUtils {
 	/**
 	 * Return {@code true} if any element in '{@code candidates}' is
 	 * contained in '{@code source}'; otherwise returns {@code false}.
-	 * @param source the source Collection
+	 * @param source the source {@link Collection}
 	 * @param candidates the candidates to search for
 	 * @return whether any of the candidates has been found
 	 */
-	public static boolean containsAny(Collection<?> source, Collection<?> candidates) {
-		return findFirstMatch(source, candidates) != null;
+	public static boolean containsAny(Collection<? extends @Nullable Object> source,
+			Collection<? extends @Nullable Object> candidates) {
+
+		if (isEmpty(source) || isEmpty(candidates)) {
+			return false;
+		}
+		for (Object candidate : candidates) {
+			if (source.contains(candidate)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**
@@ -289,6 +309,7 @@ public abstract class CollectionUtils {
 	 * or {@code null} if none or more than one such value found
 	 */
 	@SuppressWarnings("unchecked")
+	@Contract("null, _ -> null")
 	public static <T> @Nullable T findValueOfType(@Nullable Collection<?> collection, @Nullable Class<T> type) {
 		if (isEmpty(collection)) {
 			return null;
@@ -386,6 +407,7 @@ public abstract class CollectionUtils {
 	 * @see LinkedHashMap#keySet()
 	 * @see java.util.LinkedHashSet
 	 */
+	@Contract("null -> null")
 	public static <T> @Nullable T firstElement(@Nullable Set<T> set) {
 		if (isEmpty(set)) {
 			return null;
@@ -408,6 +430,7 @@ public abstract class CollectionUtils {
 	 * @return the first element, or {@code null} if none
 	 * @since 5.2.3
 	 */
+	@Contract("null -> null")
 	public static <T> @Nullable T firstElement(@Nullable List<T> list) {
 		if (isEmpty(list)) {
 			return null;
@@ -425,6 +448,7 @@ public abstract class CollectionUtils {
 	 * @see LinkedHashMap#keySet()
 	 * @see java.util.LinkedHashSet
 	 */
+	@Contract("null -> null")
 	public static <T> @Nullable T lastElement(@Nullable Set<T> set) {
 		if (isEmpty(set)) {
 			return null;
@@ -448,6 +472,7 @@ public abstract class CollectionUtils {
 	 * @return the last element, or {@code null} if none
 	 * @since 5.0.3
 	 */
+	@Contract("null -> null")
 	public static <T> @Nullable T lastElement(@Nullable List<T> list) {
 		if (isEmpty(list)) {
 			return null;

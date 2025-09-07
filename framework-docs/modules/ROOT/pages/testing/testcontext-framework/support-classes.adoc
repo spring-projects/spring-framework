@@ -169,7 +169,6 @@ Specifically, the `SpringExtension` can inject dependencies from the test's
 `@BeforeTransaction` and `@AfterTransaction` or JUnit's `@BeforeAll`, `@AfterAll`,
 `@BeforeEach`, `@AfterEach`, `@Test`, `@RepeatedTest`, `@ParameterizedTest`, and others.
 
-
 [[testcontext-junit-jupiter-di-constructor]]
 ==== Constructor Injection
 
@@ -703,4 +702,3 @@ to be tied to a Spring-specific class hierarchy, you can configure your own cust
 classes by using `@ContextConfiguration`, `@TestExecutionListeners`, and so on and by
 manually instrumenting your test class with a `TestContextManager`. See the source code
 of `AbstractTestNGSpringContextTests` for an example of how to instrument your test class.
-

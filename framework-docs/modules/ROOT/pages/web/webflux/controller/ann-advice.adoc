@@ -66,4 +66,3 @@ The selectors in the preceding example are evaluated at runtime and may negative
 performance if used extensively. See the
 {spring-framework-api}/web/bind/annotation/ControllerAdvice.html[`@ControllerAdvice`]
 javadoc for more details.
-

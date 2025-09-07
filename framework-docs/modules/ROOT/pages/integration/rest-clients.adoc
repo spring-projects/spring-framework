@@ -381,7 +381,6 @@ Kotlin::
 <3> Convert the response into a Pet domain object
 ======
 
-
 [[rest-message-conversion]]
 === HTTP Message Conversion
 
@@ -454,6 +453,7 @@ Finally, it will resort to the simple default.
 TIP: Note that the `SimpleClientHttpRequestFactory` may raise an exception when accessing the status of a response that represents an error (for example, 401).
 If this is an issue, use any of the alternative request factories.
 
+
 [[rest-webclient]]
 == `WebClient`
 
@@ -471,8 +471,6 @@ synchronous, asynchronous, and streaming scenarios.
 * Streaming up to or streaming down from a server
 
 See xref:web/webflux-webclient.adoc[WebClient] for more details.
-
-
 
 
 [[rest-resttemplate]]
@@ -546,7 +544,8 @@ See the xref:integration/observability.adoc#http-client.resttemplate[RestTemplat
 [[rest-template-body]]
 === Body
 
-Objects passed into and returned from `RestTemplate` methods are converted to and from HTTP messages with the help of an `HttpMessageConverter`, see <<rest-message-conversion>>.
+Objects passed into and returned from `RestTemplate` methods are converted to and from HTTP messages
+with the help of an `HttpMessageConverter`, see <<rest-message-conversion>>.
 
 === Migrating from `RestTemplate` to `RestClient`
 
@@ -929,8 +928,6 @@ Now, you're ready to create client proxies:
 	// Use service methods for remote calls...
 ----
 
-
-
 [[rest-http-interface-method-parameters]]
 === Method Parameters
 
@@ -999,7 +996,9 @@ Method parameters cannot be `null` unless the `required` attribute (where availa
 parameter annotation) is set to `false`, or the parameter is marked optional as determined by
 {spring-framework-api}/core/MethodParameter.html#isOptional()[`MethodParameter#isOptional`].
 
-
+`RestClientAdapter` provides additional support for a method parameter of type
+`StreamingHttpOutputMessage.Body` that allows sending the request body by writing to an
+`OutputStream`.
 
 [[rest-http-interface.custom-resolver]]
 === Custom Arguments
@@ -1094,6 +1093,9 @@ depends on how the underlying HTTP client is configured. You can set a `blockTim
 value on the adapter level as well, but we recommend relying on timeout settings of the
 underlying HTTP client, which operates at a lower level and provides more control.
 
+`RestClientAdapter` provides supports additional support for a return value of type
+`InputStream` or `ResponseEntity<InputStream>` that provides access to the raw response
+body content.
 
 [[rest-http-interface-exceptions]]
 === Error Handling
@@ -1132,6 +1134,34 @@ documentation for each client, as well as the Javadoc of `defaultStatusHandler` 
 
 
 
+[[rest-http-interface-adapter-decorator]]
+=== Decorating the Adapter
+
+`HttpExchangeAdapter` and `ReactorHttpExchangeAdapter` are contracts that decouple HTTP
+Interface client infrastructure from the details of invoking the underlying
+client. There are adapter implementations for `RestClient`, `WebClient`, and
+`RestTemplate`.
+
+Occasionally, it may be useful to intercept client invocations through a decorator
+configurable in the `HttpServiceProxyFactory.Builder`. For example, you can apply
+built-in decorators to suppress 404 exceptions and return a `ResponseEntity` with
+`NOT_FOUND` and a `null` body:
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	// For RestClient
+	HttpServiceProxyFactory factory = HttpServiceProxyFactory.builderFor(restCqlientAdapter)
+			.exchangeAdapterDecorator(NotFoundRestClientAdapterDecorator::new)
+			.build();
+
+	// or for WebClient...
+	HttpServiceProxyFactory proxyFactory = HttpServiceProxyFactory.builderFor(webClientAdapter)
+			.exchangeAdapterDecorator(NotFoundWebClientAdapterDecorator::new)
+			.build();
+----
+
+
+
 [[rest-http-interface-group-config]]
 === HTTP Interface Groups
 
@@ -1164,6 +1194,46 @@ One way to declare HTTP Service groups is via `@ImportHttpServices` annotations 
 ----
 <1> Manually list interfaces for group "echo"
 <2> Detect interfaces for group "greeting" under a base package
+
+The above lets you declare HTTP Services and groups. As an alternative, you can also
+annotate HTTP interfaces as follows:
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	@HttpServiceClient("echo")
+	public interface EchoServiceA {
+		// ...
+	}
+
+	@HttpServiceClient("echo")
+	public interface EchoServiceB {
+		// ...
+	}
+----
+
+The above requires a dedicated import registrar as follows:
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	public class MyClientHttpServiceRegistrar implements AbstractClientHttpServiceRegistrar { // <1>
+
+		@Override
+		protected void registerHttpServices(GroupRegistry registry, AnnotationMetadata metadata) {
+			findAndRegisterHttpServiceClients(groupRegistry, List.of("org.example.echo")); // <2>
+		}
+	}
+
+	@Configuration
+	@Import(MyClientHttpServiceRegistrar.class) // <3>
+	public class ClientConfig {
+	}
+----
+<1> Extend dedicated `AbstractClientHttpServiceRegistrar`
+<2> Specify base packages where to find client interfaces
+<3> Import the registrar
+
+TIP: `@HttpServiceClient` interfaces are excluded from `@ImportHttpServices` scans, so there
+is no overlap with scans for client interfaces when pointed at the same package.
 
 It is also possible to declare groups programmatically by creating an HTTP Service
 registrar and then importing it:

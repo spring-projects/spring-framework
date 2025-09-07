@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.stream.Stream;
 
 import javax.lang.model.element.Modifier;
 
@@ -53,6 +54,8 @@ import org.springframework.javapoet.ParameterizedTypeName;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.mockito.BDDMockito.then;
+import static org.mockito.Mockito.mock;
 import static org.springframework.aot.hint.predicate.RuntimeHintsPredicates.reflection;
 
 /**
@@ -227,6 +230,40 @@ class BeanRegistrationsAotContributionTests {
 	}
 
 	@Test
+	void doWithSliceWithOnlyLessThanOneSlice() {
+		List<Registration> registration = Stream.generate(() -> mock(Registration.class)).limit(10).toList();
+		BiConsumer<Integer, Integer> sliceAction = mockSliceAction();
+		Registration.doWithSlice(registration, 20, sliceAction);
+		then(sliceAction).should().accept(0, 10);
+		then(sliceAction).shouldHaveNoMoreInteractions();
+	}
+
+	@Test
+	void doWithSliceWithOnlyOneExactSlice() {
+		List<Registration> registration = Stream.generate(() -> mock(Registration.class)).limit(20).toList();
+		BiConsumer<Integer, Integer> sliceAction = mockSliceAction();
+		Registration.doWithSlice(registration, 20, sliceAction);
+		then(sliceAction).should().accept(0, 20);
+		then(sliceAction).shouldHaveNoMoreInteractions();
+	}
+
+	@Test
+	void doWithSeveralSlices() {
+		List<Registration> registration = Stream.generate(() -> mock(Registration.class)).limit(20).toList();
+		BiConsumer<Integer, Integer> sliceAction = mockSliceAction();
+		Registration.doWithSlice(registration, 7, sliceAction);
+		then(sliceAction).should().accept(0, 7);
+		then(sliceAction).should().accept(7, 14);
+		then(sliceAction).should().accept(14, 20);
+		then(sliceAction).shouldHaveNoMoreInteractions();
+	}
+
+	@SuppressWarnings("unchecked")
+	BiConsumer<Integer, Integer> mockSliceAction() {
+		return mock(BiConsumer.class);
+	}
+
+	@Test
 	void applyToWithLargeBeanDefinitionsCreatesSlices() {
 		BeanRegistrationsAotContribution contribution = createContribution(1001, i -> "testBean" + i);
 		contribution.applyTo(this.generationContext, this.beanFactoryInitializationCode);
@@ -243,6 +280,38 @@ class BeanRegistrationsAotContributionTests {
 				assertThat(freshBeanFactory.getBean(beanName)).isInstanceOf(TestBean.class);
 			}
 			assertThat(freshBeanFactory.getBeansOfType(TestBean.class)).hasSize(1001);
+		});
+	}
+
+	@Test
+	void applyToWithVeryLargeBeanDefinitionsCreatesSeparateSourceFiles() {
+		BeanRegistrationsAotContribution contribution = createContribution(10001, i -> "testBean" + i);
+		contribution.applyTo(this.generationContext, this.beanFactoryInitializationCode);
+		compile((consumer, compiled) -> {
+			assertThat(compiled.getSourceFile(".*BeanFactoryRegistrations1"))
+					.contains("Register the bean definitions from 0 to 999.",
+							"Register the bean definitions from 1000 to 1999.",
+							"Register the bean definitions from 2000 to 2999.",
+							"Register the bean definitions from 3000 to 3999.",
+							"Register the bean definitions from 4000 to 4999.",
+							"// Registration is sliced to avoid exceeding size limit");
+			assertThat(compiled.getSourceFile(".*BeanFactoryRegistrations2"))
+					.contains("Register the bean definitions from 5000 to 5999.",
+							"Register the bean definitions from 6000 to 6999.",
+							"Register the bean definitions from 7000 to 7999.",
+							"Register the bean definitions from 8000 to 8999.",
+							"Register the bean definitions from 9000 to 9999.",
+							"// Registration is sliced to avoid exceeding size limit");
+			assertThat(compiled.getSourceFile(".*BeanFactoryRegistrations3"))
+					.doesNotContain("// Registration is sliced to avoid exceeding size limit");
+			DefaultListableBeanFactory freshBeanFactory = new DefaultListableBeanFactory();
+			consumer.accept(freshBeanFactory);
+			for (int i = 0; i < 10001; i++) {
+				String beanName = "testBean" + i;
+				assertThat(freshBeanFactory.containsBeanDefinition(beanName)).isTrue();
+				assertThat(freshBeanFactory.getBean(beanName)).isInstanceOf(TestBean.class);
+			}
+			assertThat(freshBeanFactory.getBeansOfType(TestBean.class)).hasSize(10001);
 		});
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import org.springframework.core.MethodParameter;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.ReactiveAdapter;
 import org.springframework.core.ReactiveAdapterRegistry;
+import org.springframework.http.StreamingHttpOutputMessage;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -65,6 +66,11 @@ public class RequestBodyArgumentResolver implements HttpServiceArgumentResolver 
 	@Override
 	public boolean resolve(
 			@Nullable Object argument, MethodParameter parameter, HttpRequestValues.Builder requestValues) {
+
+		if (parameter.getParameterType().equals(StreamingHttpOutputMessage.Body.class)) {
+			requestValues.setBodyValue(argument);
+			return true;
+		}
 
 		RequestBody annot = parameter.getParameterAnnotation(RequestBody.class);
 		if (annot == null) {

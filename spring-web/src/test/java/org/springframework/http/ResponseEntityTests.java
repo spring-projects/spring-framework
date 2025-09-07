@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -166,6 +166,16 @@ class ResponseEntityTests {
 	}
 
 	@Test
+	void unprocessableContent() {
+		ResponseEntity<String> responseEntity = ResponseEntity.unprocessableContent().body("error");
+
+		assertThat(responseEntity).isNotNull();
+		assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.UNPROCESSABLE_CONTENT);
+		assertThat(responseEntity.getBody()).isEqualTo("error");
+	}
+
+	@Test
+	@SuppressWarnings("deprecation")
 	void unprocessableEntity() {
 		ResponseEntity<String> responseEntity = ResponseEntity.unprocessableEntity().body("error");
 

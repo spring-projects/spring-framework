@@ -26,7 +26,6 @@ application) and need to parse and print localized field values. The `Conversion
 provides a unified type conversion API for both SPIs.
 
 
-
 [[format-Formatter-SPI]]
 == The `Formatter` SPI
 
@@ -141,7 +140,6 @@ Kotlin::
 
 The Spring team welcomes community-driven `Formatter` contributions. See
 {spring-framework-issues}[GitHub Issues] to contribute.
-
 
 
 [[format-CustomFormatAnnotations]]
@@ -275,7 +273,6 @@ Kotlin::
 ----
 ======
 
-
 [[format-annotations-api]]
 === Format Annotation API
 
@@ -335,6 +332,7 @@ https://github.com/spring-projects/spring-framework/wiki/Date-and-Time-Formattin
 page in the Spring Framework wiki.
 ====
 
+
 [[format-FormatterRegistry-SPI]]
 == The `FormatterRegistry` SPI
 
@@ -376,7 +374,6 @@ annotation are formatted in a certain way. With a shared `FormatterRegistry`, yo
 these rules once, and they are applied whenever formatting is needed.
 
 
-
 [[format-FormatterRegistrar-SPI]]
 == The `FormatterRegistrar` SPI
 
@@ -401,12 +398,7 @@ registering a `Printer`/`Parser` pair. The next section provides more informatio
 converter and formatter registration.
 
 
-
 [[format-configuring-formatting-mvc]]
 == Configuring Formatting in Spring MVC
 
 See xref:web/webmvc/mvc-config/conversion.adoc[Conversion and Formatting] in the Spring MVC chapter.
-
-
-
-

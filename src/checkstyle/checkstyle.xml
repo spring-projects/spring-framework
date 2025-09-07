@@ -11,7 +11,7 @@
 	<module name="io.spring.javaformat.checkstyle.check.SpringHeaderCheck">
 		<property name="fileExtensions" value="java"/>
 		<property name="headerType" value="apache2"/>
-		<property name="headerCopyrightPattern" value="20\d\d-20\d\d"/>
+		<property name="headerCopyrightPattern" value="20\d\d-present"/>
 		<property name="packageInfoHeaderType" value="none"/>
 	</module>
 	<module name="com.puppycrawl.tools.checkstyle.checks.NewlineAtEndOfFileCheck"/>
@@ -27,6 +27,7 @@
 		<module name="com.puppycrawl.tools.checkstyle.checks.annotation.MissingOverrideCheck"/>
 		<module name="com.puppycrawl.tools.checkstyle.checks.annotation.PackageAnnotationCheck"/>
 		<module name="com.puppycrawl.tools.checkstyle.checks.annotation.AnnotationLocationCheck"/>
+		<module name="io.spring.javaformat.checkstyle.check.SpringDeprecatedCheck" />
 
 		<!-- Block Checks -->
 		<module name="com.puppycrawl.tools.checkstyle.checks.blocks.EmptyBlockCheck">
@@ -38,6 +39,9 @@
 		</module>
 		<module name="com.puppycrawl.tools.checkstyle.checks.blocks.NeedBracesCheck"/>
 		<module name="com.puppycrawl.tools.checkstyle.checks.blocks.AvoidNestedBlocksCheck"/>
+		<module name="com.puppycrawl.tools.checkstyle.checks.blocks.EmptyCatchBlockCheck">
+			<property name="exceptionVariableName" value="expected|ignore"/>
+		</module>
 
 		<!-- Class Design -->
 		<module name="com.puppycrawl.tools.checkstyle.checks.design.FinalClassCheck"/>
@@ -100,10 +104,20 @@
 			<property name="sortStaticImportsAlphabetically" value="true"/>
 		</module>
 		<module name="com.puppycrawl.tools.checkstyle.checks.imports.IllegalImportCheck">
-			<property name="id" value="bannedImports"/>
+			<property name="id" value="bannedReactorImports"/>
 			<property name="regexp" value="true"/>
-			<property name="illegalClasses"
-				value="^reactor\.core\.support\.Assert,^org\.slf4j\.LoggerFactory,^(?!org\.jspecify|\.annotations).*(NonNull|Nullable)$"/>
+			<property name="illegalClasses" value="^reactor\.core\.support\.Assert"/>
+		</module>
+		<module name="com.puppycrawl.tools.checkstyle.checks.imports.IllegalImportCheck">
+			<property name="id" value="bannedSlf4jImports"/>
+			<property name="regexp" value="true"/>
+			<property name="illegalClasses" value="^org\.slf4j\.LoggerFactory"/>
+		</module>
+		<module name="com.puppycrawl.tools.checkstyle.checks.imports.IllegalImportCheck">
+			<property name="id" value="bannedNullabilityImports"/>
+			<property name="regexp" value="true"/>
+			<!-- Rejects all NonNull, Nonnull, and Nullable types that are NOT in the org.jspecify.annotations package. -->
+			<property name="illegalClasses" value="^(?!org\.jspecify\.annotations).*(Non[Nn]ull|Nullable)$"/>
 		</module>
 		<module name="com.puppycrawl.tools.checkstyle.checks.imports.IllegalImportCheck">
 			<property name="id" value="bannedJUnit3Imports"/>

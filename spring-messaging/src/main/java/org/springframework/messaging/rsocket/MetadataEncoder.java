@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -106,8 +106,7 @@ final class MetadataEncoder {
 		Matcher matcher = VARS_PATTERN.matcher(route);
 		while (matcher.find()) {
 			Assert.isTrue(index < routeVars.length, () -> "No value for variable '" + matcher.group(1) + "'");
-			String value = routeVars[index].toString();
-			value = value.contains(".") ? value.replaceAll("\\.", "%2E") : value;
+			String value = routeVars[index].toString().replace(".", "%2E");
 			matcher.appendReplacement(sb, value);
 			index++;
 		}

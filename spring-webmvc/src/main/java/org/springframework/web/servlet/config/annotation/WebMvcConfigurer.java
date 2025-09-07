@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import org.springframework.core.convert.converter.Converter;
 import org.springframework.format.Formatter;
 import org.springframework.format.FormatterRegistry;
 import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.converter.HttpMessageConverters;
 import org.springframework.validation.MessageCodesResolver;
 import org.springframework.validation.Validator;
 import org.springframework.web.ErrorResponse;
@@ -172,6 +173,14 @@ public interface WebMvcConfigurer {
 	}
 
 	/**
+	 * Configure the {@link HttpMessageConverters} instance being built.
+	 * @param builder the builder to configure
+	 * @since 7.0
+	 */
+	default void configureMessageConverters(HttpMessageConverters.ServerBuilder builder) {
+	}
+
+	/**
 	 * Configure the {@link HttpMessageConverter HttpMessageConverter}s for
 	 * reading from the request body and for writing to the response body.
 	 * <p>By default, all built-in converters are configured as long as the
@@ -186,20 +195,24 @@ public interface WebMvcConfigurer {
 	 * {@link #extendMessageConverters(java.util.List)} to modify the configured
 	 * list of message converters.
 	 * @param converters initially an empty list of converters
+	 * @deprecated since 7.0 in favor of configuring converters on {@link #configureMessageConverters(HttpMessageConverters.ServerBuilder)}
 	 */
+	@Deprecated(since = "7.0", forRemoval = true)
 	default void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
 	}
 
 	/**
 	 * Extend or modify the list of converters after it has been, either
-	 * {@link #configureMessageConverters(List) configured} or initialized with
+	 * {@link #configureMessageConverters(List) configured}, or initialized with
 	 * a default list.
 	 * <p>Note that the order of converter registration is important. Especially
 	 * in cases where clients accept {@link org.springframework.http.MediaType#ALL}
 	 * the converters configured earlier will be preferred.
 	 * @param converters the list of configured converters to be extended
 	 * @since 4.1.3
+	 * @deprecated since 7.0 in favor of configuring converters on {@link #configureMessageConverters(HttpMessageConverters.ServerBuilder)}
 	 */
+	@Deprecated(since = "7.0", forRemoval = true)
 	default void extendMessageConverters(List<HttpMessageConverter<?>> converters) {
 	}
 

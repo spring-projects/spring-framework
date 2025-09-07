@@ -21,6 +21,3 @@ include-code::./DateTimeWebConfiguration[tag=snippet,indent=0]
 NOTE: See xref:core/validation/format.adoc#format-FormatterRegistrar-SPI[the `FormatterRegistrar` SPI]
 and the `FormattingConversionServiceFactoryBean` for more information on when to use
 FormatterRegistrar implementations.
-
-
-

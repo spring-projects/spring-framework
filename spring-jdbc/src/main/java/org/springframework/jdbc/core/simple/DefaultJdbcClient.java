@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,6 +45,7 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcOperations;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SimplePropertySqlParameterSource;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
+import org.springframework.jdbc.support.JdbcAccessor;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.util.Assert;
@@ -61,8 +62,6 @@ import org.springframework.util.Assert;
  * @see JdbcClient#create(NamedParameterJdbcOperations)
  */
 final class DefaultJdbcClient implements JdbcClient {
-
-	private final JdbcOperations classicOps;
 
 	private final NamedParameterJdbcOperations namedParamOps;
 
@@ -81,7 +80,6 @@ final class DefaultJdbcClient implements JdbcClient {
 
 	public DefaultJdbcClient(NamedParameterJdbcOperations jdbcTemplate, @Nullable ConversionService conversionService) {
 		Assert.notNull(jdbcTemplate, "JdbcTemplate must not be null");
-		this.classicOps = jdbcTemplate.getJdbcOperations();
 		this.namedParamOps = jdbcTemplate;
 		this.conversionService =
 				(conversionService != null ? conversionService : DefaultConversionService.getSharedInstance());
@@ -90,7 +88,7 @@ final class DefaultJdbcClient implements JdbcClient {
 
 	@Override
 	public StatementSpec sql(String sql) {
-		return new DefaultStatementSpec(sql);
+		return new DefaultStatementSpec(sql, this.namedParamOps);
 	}
 
 
@@ -98,14 +96,55 @@ final class DefaultJdbcClient implements JdbcClient {
 
 		private final String sql;
 
-		private final List<Object> indexedParams = new ArrayList<>();
+		private JdbcOperations classicOps;
+
+		private NamedParameterJdbcOperations namedParamOps;
+
+		private @Nullable JdbcTemplate customTemplate;
+
+		private final List<@Nullable Object> indexedParams = new ArrayList<>();
 
 		private final MapSqlParameterSource namedParams = new MapSqlParameterSource();
 
 		private SqlParameterSource namedParamSource = this.namedParams;
 
-		public DefaultStatementSpec(String sql) {
+		public DefaultStatementSpec(String sql, NamedParameterJdbcOperations namedParamOps) {
 			this.sql = sql;
+			this.classicOps = namedParamOps.getJdbcOperations();
+			this.namedParamOps = namedParamOps;
+		}
+
+		private JdbcTemplate enforceCustomTemplate() {
+			if (this.customTemplate == null) {
+				if (!(this.classicOps instanceof JdbcAccessor original)) {
+					throw new IllegalStateException(
+							"Needs to be bound to a JdbcAccessor for custom settings support: " + this.classicOps);
+				}
+				this.customTemplate = new JdbcTemplate(original);
+				this.classicOps = this.customTemplate;
+				this.namedParamOps = (this.namedParamOps instanceof NamedParameterJdbcTemplate originalNamedParam ?
+						new NamedParameterJdbcTemplate(originalNamedParam, this.customTemplate) :
+						new NamedParameterJdbcTemplate(this.customTemplate));
+			}
+			return this.customTemplate;
+		}
+
+		@Override
+		public StatementSpec withFetchSize(int fetchSize) {
+			enforceCustomTemplate().setFetchSize(fetchSize);
+			return this;
+		}
+
+		@Override
+		public StatementSpec withMaxRows(int maxRows) {
+			enforceCustomTemplate().setMaxRows(maxRows);
+			return this;
+		}
+
+		@Override
+		public StatementSpec withQueryTimeout(int queryTimeout) {
+			enforceCustomTemplate().setQueryTimeout(queryTimeout);
+			return this;
 		}
 
 		@Override
@@ -200,18 +239,18 @@ final class DefaultJdbcClient implements JdbcClient {
 					new IndexedParamResultQuerySpec());
 		}
 
-		@SuppressWarnings("unchecked")
 		@Override
-		public <T> MappedQuerySpec<T> query(Class<T> mappedClass) {
+		@SuppressWarnings({"unchecked", "NullAway"}) // See https://github.com/uber/NullAway/issues/1075
+		public <T> MappedQuerySpec<@Nullable T> query(Class<T> mappedClass) {
 			RowMapper<?> rowMapper = rowMapperCache.computeIfAbsent(mappedClass, key ->
 					BeanUtils.isSimpleProperty(mappedClass) ?
 							new SingleColumnRowMapper<>(mappedClass, conversionService) :
 							new SimplePropertyRowMapper<>(mappedClass, conversionService));
-			return query((RowMapper<T>) rowMapper);
+			return query((RowMapper<@Nullable T>) rowMapper);
 		}
 
 		@Override
-		public <T> MappedQuerySpec<T> query(RowMapper<T> rowMapper) {
+		public <T extends @Nullable Object> MappedQuerySpec<T> query(RowMapper<T> rowMapper) {
 			return (useNamedParams() ?
 					new NamedParamMappedQuerySpec<>(rowMapper) :
 					new IndexedParamMappedQuerySpec<>(rowMapper));
@@ -220,18 +259,18 @@ final class DefaultJdbcClient implements JdbcClient {
 		@Override
 		public void query(RowCallbackHandler rch) {
 			if (useNamedParams()) {
-				namedParamOps.query(this.sql, this.namedParamSource, rch);
+				this.namedParamOps.query(this.sql, this.namedParamSource, rch);
 			}
 			else {
-				classicOps.query(statementCreatorForIndexedParams(), rch);
+				this.classicOps.query(statementCreatorForIndexedParams(), rch);
 			}
 		}
 
 		@Override
-		public <T> T query(ResultSetExtractor<T> rse) {
+		public <T extends @Nullable Object> T query(ResultSetExtractor<T> rse) {
 			T result = (useNamedParams() ?
-					namedParamOps.query(this.sql, this.namedParamSource, rse) :
-					classicOps.query(statementCreatorForIndexedParams(), rse));
+					this.namedParamOps.query(this.sql, this.namedParamSource, rse) :
+					this.classicOps.query(statementCreatorForIndexedParams(), rse));
 			Assert.state(result != null, "No result from ResultSetExtractor");
 			return result;
 		}
@@ -239,22 +278,22 @@ final class DefaultJdbcClient implements JdbcClient {
 		@Override
 		public int update() {
 			return (useNamedParams() ?
-					namedParamOps.update(this.sql, this.namedParamSource) :
-					classicOps.update(statementCreatorForIndexedParams()));
+					this.namedParamOps.update(this.sql, this.namedParamSource) :
+					this.classicOps.update(statementCreatorForIndexedParams()));
 		}
 
 		@Override
 		public int update(KeyHolder generatedKeyHolder) {
 			return (useNamedParams() ?
-					namedParamOps.update(this.sql, this.namedParamSource, generatedKeyHolder) :
-					classicOps.update(statementCreatorForIndexedParamsWithKeys(null), generatedKeyHolder));
+					this.namedParamOps.update(this.sql, this.namedParamSource, generatedKeyHolder) :
+					this.classicOps.update(statementCreatorForIndexedParamsWithKeys(null), generatedKeyHolder));
 		}
 
 		@Override
 		public int update(KeyHolder generatedKeyHolder, String... keyColumnNames) {
 			return (useNamedParams() ?
-					namedParamOps.update(this.sql, this.namedParamSource, generatedKeyHolder, keyColumnNames) :
-					classicOps.update(statementCreatorForIndexedParamsWithKeys(keyColumnNames), generatedKeyHolder));
+					this.namedParamOps.update(this.sql, this.namedParamSource, generatedKeyHolder, keyColumnNames) :
+					this.classicOps.update(statementCreatorForIndexedParamsWithKeys(keyColumnNames), generatedKeyHolder));
 		}
 
 		private boolean useNamedParams() {
@@ -293,17 +332,18 @@ final class DefaultJdbcClient implements JdbcClient {
 			}
 
 			@Override
-			public List<Map<String, Object>> listOfRows() {
+			public List<Map<String, @Nullable Object>> listOfRows() {
 				return classicOps.queryForList(sql, indexedParams.toArray());
 			}
 
 			@Override
-			public Map<String, Object> singleRow() {
+			public Map<String, @Nullable Object> singleRow() {
 				return classicOps.queryForMap(sql, indexedParams.toArray());
 			}
 
 			@Override
-			public List<Object> singleColumn() {
+			@SuppressWarnings("NullAway") // See https://github.com/uber/NullAway/issues/1075
+			public List<@Nullable Object> singleColumn() {
 				return classicOps.queryForList(sql, Object.class, indexedParams.toArray());
 			}
 		}
@@ -317,23 +357,25 @@ final class DefaultJdbcClient implements JdbcClient {
 			}
 
 			@Override
-			public List<Map<String, Object>> listOfRows() {
+			public List<Map<String, @Nullable Object>> listOfRows() {
 				return namedParamOps.queryForList(sql, namedParamSource);
 			}
 
 			@Override
-			public Map<String, Object> singleRow() {
+			@SuppressWarnings("NullAway") // See https://github.com/uber/NullAway/issues/1075
+			public Map<String, @Nullable Object> singleRow() {
 				return namedParamOps.queryForMap(sql, namedParamSource);
 			}
 
 			@Override
-			public List<Object> singleColumn() {
+			@SuppressWarnings("NullAway") // See https://github.com/uber/NullAway/issues/1075
+			public List<@Nullable Object> singleColumn() {
 				return namedParamOps.queryForList(sql, namedParamSource, Object.class);
 			}
 		}
 
 
-		private class IndexedParamMappedQuerySpec<T> implements MappedQuerySpec<T> {
+		private class IndexedParamMappedQuerySpec<T extends @Nullable Object> implements MappedQuerySpec<T> {
 
 			private final RowMapper<T> rowMapper;
 
@@ -353,7 +395,7 @@ final class DefaultJdbcClient implements JdbcClient {
 		}
 
 
-		private class NamedParamMappedQuerySpec<T> implements MappedQuerySpec<T> {
+		private class NamedParamMappedQuerySpec<T extends @Nullable Object> implements MappedQuerySpec<T> {
 
 			private final RowMapper<T> rowMapper;
 

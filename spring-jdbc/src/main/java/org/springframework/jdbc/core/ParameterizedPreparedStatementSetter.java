@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,8 @@ package org.springframework.jdbc.core;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+
+import org.jspecify.annotations.Nullable;
 
 /**
  * Parameterized callback interface used by the {@link JdbcTemplate} class for
@@ -47,6 +49,6 @@ public interface ParameterizedPreparedStatementSetter<T> {
 	 * @param argument the object containing the values to be set
 	 * @throws SQLException if an SQLException is encountered (i.e. there is no need to catch SQLException)
 	 */
-	void setValues(PreparedStatement ps, T argument) throws SQLException;
+	void setValues(PreparedStatement ps, @Nullable T argument) throws SQLException;
 
 }

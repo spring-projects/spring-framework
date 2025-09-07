@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -105,10 +105,11 @@ public abstract class StringUtils {
 	 * {@link #hasLength(String)} or {@link #hasText(String)} instead.</b>
 	 * @param str the candidate object (possibly a {@code String})
 	 * @since 3.2.1
-	 * @deprecated as of 5.3, in favor of {@link #hasLength(String)} and
-	 * {@link #hasText(String)} (or {@link ObjectUtils#isEmpty(Object)})
+	 * @deprecated in favor of {@link #hasLength(String)} and {@link #hasText(String)}
+	 * (or {@link ObjectUtils#isEmpty(Object)})
 	 */
-	@Deprecated
+	@Deprecated(since = "5.3")
+	@Contract("null -> true")
 	public static boolean isEmpty(@Nullable Object str) {
 		return (str == null || "".equals(str));
 	}
@@ -210,6 +211,7 @@ public abstract class StringUtils {
 	 * contains at least 1 whitespace character
 	 * @see Character#isWhitespace
 	 */
+	@Contract("null -> false")
 	public static boolean containsWhitespace(@Nullable CharSequence str) {
 		if (!hasLength(str)) {
 			return false;
@@ -231,6 +233,7 @@ public abstract class StringUtils {
 	 * contains at least 1 whitespace character
 	 * @see #containsWhitespace(CharSequence)
 	 */
+	@Contract("null -> false")
 	public static boolean containsWhitespace(@Nullable String str) {
 		return containsWhitespace((CharSequence) str);
 	}
@@ -366,6 +369,7 @@ public abstract class StringUtils {
 	 * @param singleCharacter the character to compare to
 	 * @since 5.2.9
 	 */
+	@Contract("null, _ -> false")
 	public static boolean matchesCharacter(@Nullable String str, char singleCharacter) {
 		return (str != null && str.length() == 1 && str.charAt(0) == singleCharacter);
 	}
@@ -377,6 +381,7 @@ public abstract class StringUtils {
 	 * @param prefix the prefix to look for
 	 * @see java.lang.String#startsWith
 	 */
+	@Contract("null, _ -> false; _, null -> false")
 	public static boolean startsWithIgnoreCase(@Nullable String str, @Nullable String prefix) {
 		return (str != null && prefix != null && str.length() >= prefix.length() &&
 				str.regionMatches(true, 0, prefix, 0, prefix.length()));
@@ -389,6 +394,7 @@ public abstract class StringUtils {
 	 * @param suffix the suffix to look for
 	 * @see java.lang.String#endsWith
 	 */
+	@Contract("null, _ -> false; _, null -> false")
 	public static boolean endsWithIgnoreCase(@Nullable String str, @Nullable String suffix) {
 		return (str != null && suffix != null && str.length() >= suffix.length() &&
 				str.regionMatches(true, str.length() - suffix.length(), suffix, 0, suffix.length()));
@@ -528,6 +534,7 @@ public abstract class StringUtils {
 	 * @return the quoted {@code String} (for example, "'myString'"),
 	 * or the input object as-is if not a {@code String}
 	 */
+	@Contract("null -> null; !null -> !null")
 	public static @Nullable Object quoteIfString(@Nullable Object obj) {
 		return (obj instanceof String str ? quote(str) : obj);
 	}
@@ -653,6 +660,7 @@ public abstract class StringUtils {
 	 * {@code null} if the provided path is {@code null} or does not contain a dot
 	 * ({@code "."})
 	 */
+	@Contract("null -> null")
 	public static @Nullable String getFilenameExtension(@Nullable String path) {
 		if (path == null) {
 			return null;
@@ -1034,6 +1042,7 @@ public abstract class StringUtils {
 	 * @param array2 the second array (can be {@code null})
 	 * @return the new array ({@code null} if both given arrays were {@code null})
 	 */
+	@Contract("null, _ -> param2; _, null -> param1")
 	public static String @Nullable [] concatenateStringArrays(String @Nullable [] array1, String @Nullable [] array2) {
 		if (ObjectUtils.isEmpty(array1)) {
 			return array2;
@@ -1105,6 +1114,7 @@ public abstract class StringUtils {
 	 * index 1 being after the delimiter (neither element includes the delimiter);
 	 * or {@code null} if the delimiter wasn't found in the given input {@code String}
 	 */
+	@Contract("null, _ -> null; _, null -> null")
 	public static String @Nullable [] split(@Nullable String toSplit, @Nullable String delimiter) {
 		if (!hasLength(toSplit) || !hasLength(delimiter)) {
 			return null;
@@ -1147,8 +1157,9 @@ public abstract class StringUtils {
 	 * @return a {@code Properties} instance representing the array contents,
 	 * or {@code null} if the array to process was {@code null} or empty
 	 */
+	@Contract("null, _, _ -> null")
 	public static @Nullable Properties splitArrayElementsIntoProperties(
-			String[] array, String delimiter, @Nullable String charsToDelete) {
+			String @Nullable [] array, String delimiter, @Nullable String charsToDelete) {
 
 		if (ObjectUtils.isEmpty(array)) {
 			return null;

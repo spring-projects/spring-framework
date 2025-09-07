@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,6 +51,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.context.request.async.AsyncRequestNotUsableException;
@@ -203,6 +204,21 @@ class RequestMappingHandlerAdapterTests {
 		this.handlerAdapter.afterPropertiesSet();
 
 		assertMethodProcessorCount(RESOLVER_COUNT, INIT_BINDER_RESOLVER_COUNT, 1);
+	}
+
+	@Test // gh-35153
+	void responseEntityWithWildCardAndConditionalStream() throws Exception {
+		HandlerMethod handlerMethod = handlerMethod(new SseController(), "handle", String.class);
+		this.handlerAdapter.afterPropertiesSet();
+
+		this.request.setAsyncSupported(true);
+		this.request.addParameter("q", "sse");
+
+		this.handlerAdapter.handle(this.request, this.response, handlerMethod);
+
+		assertThat(this.response.getStatus()).isEqualTo(200);
+		assertThat(this.response.getHeader("Content-Type")).isEqualTo("text/event-stream");
+		assertThat(this.response.getContentAsString()).isEqualTo("data:event 1\n\ndata:event 2\n\n");
 	}
 
 	@Test
@@ -376,6 +392,22 @@ class RequestMappingHandlerAdapterTests {
 			model.addAttribute("someAttr", "someAttrValue");
 			return "redirect:/path";
 		}
+	}
+
+
+	static class SseController {
+
+		public ResponseEntity<?> handle(@RequestParam String q) throws IOException {
+			if (q.equals("sse")) {
+				SseEmitter emitter = new SseEmitter();
+				emitter.send("event 1");
+				emitter.send("event 2");
+				emitter.complete();
+				return ResponseEntity.ok().body(emitter);
+			}
+			return ResponseEntity.ok("text");
+		}
+
 	}
 
 

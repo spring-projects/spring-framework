@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -219,6 +219,28 @@ public interface ConfigurableApplicationContext extends ApplicationContext, Life
 	 * attempts are not supported
 	 */
 	void refresh() throws BeansException, IllegalStateException;
+
+	/**
+	 * Pause all beans in this application context if necessary, and subsequently
+	 * restart all auto-startup beans, effectively restoring the lifecycle state
+	 * after {@link #refresh()} (typically after a preceding {@link #pause()} call
+	 * when a full {@link #start()} of even lazy-starting beans is to be avoided).
+	 * @since 7.0
+	 * @see #pause()
+	 * @see #start()
+	 * @see SmartLifecycle#isAutoStartup()
+	 */
+	void restart();
+
+	/**
+	 * Stop all beans in this application context unless they explicitly opt out of
+	 * pausing through {@link SmartLifecycle#isPauseable()} returning {@code false}.
+	 * @since 7.0
+	 * @see #restart()
+	 * @see #stop()
+	 * @see SmartLifecycle#isPauseable()
+	 */
+	void pause();
 
 	/**
 	 * Register a shutdown hook with the JVM runtime, closing this context

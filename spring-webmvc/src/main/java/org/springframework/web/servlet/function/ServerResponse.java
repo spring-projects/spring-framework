@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -213,9 +213,20 @@ public interface ServerResponse {
 
 	/**
 	 * Create a builder with a
-	 * {@linkplain HttpStatus#UNPROCESSABLE_ENTITY 422 Unprocessable Entity} status.
+	 * {@linkplain HttpStatus#UNPROCESSABLE_CONTENT 422 Unprocessable Content} status.
 	 * @return the created builder
 	 */
+	static BodyBuilder unprocessableContent() {
+		return status(HttpStatus.UNPROCESSABLE_CONTENT);
+	}
+
+	/**
+	 * Create a builder with a
+	 * {@linkplain HttpStatus#UNPROCESSABLE_ENTITY 422 Unprocessable Entity} status.
+	 * @return the created builder
+	 * @deprecated since 7.0 in favor of {@link #unprocessableContent()}
+	 */
+	@Deprecated(since = "7.0")
 	static BodyBuilder unprocessableEntity() {
 		return status(HttpStatus.UNPROCESSABLE_ENTITY);
 	}

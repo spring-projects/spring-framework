@@ -91,5 +91,3 @@ class EditPetForm {
 <1> Storing the `Pet` value in the Servlet session.
 <2> Clearing the `Pet` value from the Servlet session.
 ======
-
-

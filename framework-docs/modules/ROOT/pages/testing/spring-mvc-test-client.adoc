@@ -1,10 +1,26 @@
 [[spring-mvc-test-client]]
 = Testing Client Applications
 
-You can use client-side tests to test code that internally uses the `RestTemplate`. The
-idea is to declare expected requests and to provide "`stub`" responses so that you can
-focus on testing the code in isolation (that is, without running a server). The following
-example shows how to do so:
+To test code that uses the `RestClient` or `RestTemplate`, you can use a mock web server, such as
+https://github.com/square/okhttp#mockwebserver[OkHttp MockWebServer] or
+https://wiremock.org/[WireMock]. Mock web servers accept requests over HTTP like a regular
+server, and that means you can test with the same HTTP client that is also configured in
+the same way as in production, which is important because there are often subtle
+differences in the way different clients handle network I/O. Another advantage of mock
+web servers is the ability to simulate specific network issues and conditions at the
+transport level, in combination with the client used in production.
+
+In addition to dedicated mock web servers, historically the Spring Framework has provided
+a built-in option to test `RestClient` or `RestTemplate` through `MockRestServiceServer`.
+This relies on configuring the client under test with a custom `ClientHttpRequestFactory`
+backed by the mock server that is in turn set up to expect requests and send "`stub`"
+responses so that you can focus on testing the code in isolation, without running a server.
+
+TIP: `MockRestServiceServer` predates the existence of mock web servers. At present, we
+recommend using mock web servers for more complete testing of the transport layer and
+network conditions.
+
+The following example shows an example of using `MockRestServiceServer`:
 
 [tabs]
 ======
@@ -195,6 +211,7 @@ Then we define expectations with two kinds of responses:
 In the second case, the request is executed through the `ClientHttpRequestFactory` that was
 captured earlier. This generates a response that could, for example, come from an actual remote server,
 depending on how the `RestTemplate` was originally configured.
+
 
 [[spring-mvc-test-client-static-imports]]
 == Static Imports

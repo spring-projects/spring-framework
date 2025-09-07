@@ -937,5 +937,3 @@ reflection for javac-compiled classes). Consider collapsing such advice methods 
 advice method per join point in each `@Aspect` class or refactor the pieces of advice into
 separate `@Aspect` classes that you can order at the aspect level via `Ordered` or `@Order`.
 ====
-
-

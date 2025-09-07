@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -96,10 +96,68 @@ class JdkClientHttpRequestFactoryTests extends AbstractHttpRequestFactoryTests {
 		}
 	}
 
+	@Test // gh-35068
+	void deleteRequestWithBody() throws Exception {
+		URI uri = URI.create(baseUrl + "/echo");
+		ClientHttpRequest request = this.factory.createRequest(uri, HttpMethod.DELETE);
+		StreamUtils.copy("body", StandardCharsets.UTF_8, request.getBody());
+		try (ClientHttpResponse response = request.execute()) {
+			assertThat(response.getStatusCode()).as("Invalid response status").isEqualTo(HttpStatus.OK);
+			assertThat(response.getBody()).as("Invalid request body").hasContent("body");
+		}
+	}
+
+	@Test
+	void compressionDisabled() throws IOException {
+		URI uri = URI.create(baseUrl + "/compress/");
+		if (this.factory instanceof JdkClientHttpRequestFactory jdkClientHttpRequestFactory) {
+			jdkClientHttpRequestFactory.enableCompression(false);
+		}
+		ClientHttpRequest request = this.factory.createRequest(uri, HttpMethod.POST);
+		StreamUtils.copy("Payload to compress", StandardCharsets.UTF_8, request.getBody());
+		try (ClientHttpResponse response = request.execute()) {
+		assertThat(request.getHeaders().containsHeader("Accept-Encoding")).isFalse();
+			assertThat(response.getStatusCode()).as("Invalid response status").isEqualTo(HttpStatus.OK);
+			assertThat(response.getHeaders().containsHeader("Content-Encoding")).isTrue();
+			assertThat(StreamUtils.copyToString(response.getBody(), StandardCharsets.UTF_8))
+					.as("Body should not be decompressed")
+					.doesNotContain("Payload to compress");
+		}
+	}
+
+	@Test
+	void compressionGzip() throws IOException {
+		URI uri = URI.create(baseUrl + "/compress/gzip");
+		JdkClientHttpRequestFactory requestFactory = (JdkClientHttpRequestFactory) this.factory;
+		requestFactory.enableCompression(true);
+		ClientHttpRequest request = requestFactory.createRequest(uri, HttpMethod.POST);
+		StreamUtils.copy("Payload to compress", StandardCharsets.UTF_8, request.getBody());
+		try (ClientHttpResponse response = request.execute()) {
+			assertThat(response.getStatusCode()).as("Invalid response status").isEqualTo(HttpStatus.OK);
+			assertThat(response.getHeaders().getFirst("Content-Encoding"))
+					.as("Invalid content encoding").isEqualTo("gzip");
+			assertThat(response.getBody()).as("Invalid request body").hasContent("Payload to compress");
+		}
+	}
+
+	@Test
+	void compressionDeflate() throws IOException {
+		URI uri = URI.create(baseUrl + "/compress/deflate");
+		JdkClientHttpRequestFactory requestFactory = (JdkClientHttpRequestFactory) this.factory;
+		requestFactory.enableCompression(true);
+		ClientHttpRequest request = requestFactory.createRequest(uri, HttpMethod.POST);
+		StreamUtils.copy("Payload to compress", StandardCharsets.UTF_8, request.getBody());
+		try (ClientHttpResponse response = request.execute()) {
+			assertThat(response.getStatusCode()).as("Invalid response status").isEqualTo(HttpStatus.OK);
+			assertThat(response.getHeaders().getFirst("Content-Encoding"))
+					.as("Invalid content encoding").isEqualTo("deflate");
+			assertThat(response.getBody()).as("Invalid request body").hasContent("Payload to compress");
+		}
+	}
 
 	@Test // gh-34971
 	@EnabledForJreRange(min = JRE.JAVA_19) // behavior fixed in Java 19
-	void requestContentLengthHeader() throws Exception {
+	void requestContentLengthHeaderWhenNoBody() throws Exception {
 		URI uri = URI.create(baseUrl + "/header/Content-Length");
 		assertNoContentLength(uri, HttpMethod.GET);
 		assertNoContentLength(uri, HttpMethod.DELETE);

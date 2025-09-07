@@ -12,6 +12,3 @@ In XML, you can check attributes and sub-elements of `<mvc:annotation-driven/>`.
 view the https://schema.spring.io/mvc/spring-mvc.xsd[Spring MVC XML schema] or use
 the code completion feature of your IDE to discover what attributes and
 sub-elements are available.
-
-
-

@@ -72,7 +72,7 @@ such as https://github.com/stomp-js/stompjs[`stomp-js/stompjs`] and others split
 STOMP messages at 16K boundaries and send them as multiple WebSocket messages,
 which requires the server to buffer and re-assemble.
 
-Spring's STOMP-over-WebSocket support does this ,so applications can configure the
+Spring's STOMP-over-WebSocket support does this, so applications can configure the
 maximum size for STOMP messages irrespective of WebSocket server-specific message
 sizes. Keep in mind that the WebSocket message size is automatically
 adjusted, if necessary, to ensure they can carry 16K WebSocket messages at a
@@ -88,6 +88,3 @@ However, when you use a full-featured broker (such as RabbitMQ), each applicatio
 instance connects to the broker, and messages broadcast from one application
 instance can be broadcast through the broker to WebSocket clients connected
 through any other application instances.
-
-
-

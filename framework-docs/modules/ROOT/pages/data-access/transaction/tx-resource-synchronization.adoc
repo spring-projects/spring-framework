@@ -78,6 +78,3 @@ code must be called and passed a standard JDBC `DataSource` interface implementa
 that case, it is possible that this code is usable but is participating in Spring-managed
 transactions. You can write your new code by using the higher-level
 abstractions mentioned earlier.
-
-
-

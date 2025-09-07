@@ -1063,4 +1063,3 @@ it is therefore not recommended to specify values at both levels. For example, d
 an "org.quartz.jobStore.class" property if you mean to rely on a Spring-provided DataSource,
 or specify an `org.springframework.scheduling.quartz.LocalDataSourceJobStore` variant which
 is a full-fledged replacement for the standard `org.quartz.impl.jdbcjobstore.JobStoreTX`.
-

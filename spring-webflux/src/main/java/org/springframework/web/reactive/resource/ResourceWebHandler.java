@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -417,8 +417,10 @@ public class ResourceWebHandler implements WebHandler, InitializingBean {
 	public Mono<Void> handle(ServerWebExchange exchange) {
 		return getResource(exchange)
 				.switchIfEmpty(Mono.defer(() -> {
-					logger.debug(exchange.getLogPrefix() + "Resource not found");
-					return Mono.error(new NoResourceFoundException(getResourcePath(exchange)));
+					if (logger.isDebugEnabled()) {
+						logger.debug(exchange.getLogPrefix() + "Resource not found");
+					}
+					return Mono.error(new NoResourceFoundException(exchange.getRequest().getURI(), getResourcePath(exchange)));
 				}))
 				.flatMap(resource -> {
 					try {
@@ -435,10 +437,12 @@ public class ResourceWebHandler implements WebHandler, InitializingBean {
 						}
 
 						// Header phase
-						String eTagValue = (this.getEtagGenerator() != null) ? this.getEtagGenerator().apply(resource) : null;
+						String eTagValue = (getEtagGenerator() != null) ? getEtagGenerator().apply(resource) : null;
 						Instant lastModified = isUseLastModified() ? Instant.ofEpochMilli(resource.lastModified()) : Instant.MIN;
 						if (exchange.checkNotModified(eTagValue, lastModified)) {
-							logger.trace(exchange.getLogPrefix() + "Resource not modified");
+							if (logger.isTraceEnabled()) {
+								logger.trace(exchange.getLogPrefix() + "Resource not modified");
+							}
 							return Mono.empty();
 						}
 

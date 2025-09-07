@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,6 +52,10 @@ public class MutablePersistenceUnitInfo implements SmartPersistenceUnitInfo {
 
 	private @Nullable String persistenceProviderClassName;
 
+	private @Nullable String scopeAnnotationName;
+
+	private final List<String> qualifierAnnotationNames = new ArrayList<>();
+
 	private @Nullable PersistenceUnitTransactionType transactionType;
 
 	private @Nullable DataSource nonJtaDataSource;
@@ -76,7 +80,7 @@ public class MutablePersistenceUnitInfo implements SmartPersistenceUnitInfo {
 
 	private Properties properties = new Properties();
 
-	private String persistenceXMLSchemaVersion = "2.0";
+	private String persistenceXMLSchemaVersion = "3.2";
 
 	private @Nullable String persistenceProviderPackageName;
 
@@ -97,6 +101,24 @@ public class MutablePersistenceUnitInfo implements SmartPersistenceUnitInfo {
 	@Override
 	public @Nullable String getPersistenceProviderClassName() {
 		return this.persistenceProviderClassName;
+	}
+
+	public void setScopeAnnotationName(@Nullable String scopeAnnotationName) {
+		this.scopeAnnotationName = scopeAnnotationName;
+	}
+
+	@Override
+	public @Nullable String getScopeAnnotationName() {
+		return this.scopeAnnotationName;
+	}
+
+	public void addQualifierAnnotationName(String qualifierAnnotationName) {
+		this.qualifierAnnotationNames.add(qualifierAnnotationName);
+	}
+
+	@Override
+	public List<String> getQualifierAnnotationNames() {
+		return this.qualifierAnnotationNames;
 	}
 
 	public void setTransactionType(PersistenceUnitTransactionType transactionType) {
@@ -274,16 +296,6 @@ public class MutablePersistenceUnitInfo implements SmartPersistenceUnitInfo {
 	@Override
 	public ClassLoader getNewTempClassLoader() {
 		throw new UnsupportedOperationException("getNewTempClassLoader not supported");
-	}
-
-	@Override
-	public @Nullable String getScopeAnnotationName() {
-		return null;
-	}
-
-	@Override
-	public @Nullable List<String> getQualifierAnnotationNames() {
-		return null;
 	}
 
 

@@ -85,6 +85,3 @@ and sent on the WebSocket connection.
 
 The next section provides more details on annotated methods, including the
 kinds of arguments and return values that are supported.
-
-
-

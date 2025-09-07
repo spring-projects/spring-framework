@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import org.springframework.format.support.FormattingConversionService;
 import org.springframework.http.converter.HttpMessageConverter;
-import org.springframework.http.converter.StringHttpMessageConverter;
+import org.springframework.http.converter.HttpMessageConverters;
 import org.springframework.util.PathMatcher;
 import org.springframework.validation.DefaultMessageCodesResolver;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
@@ -92,6 +92,7 @@ public class DelegatingWebMvcConfigurationTests {
 
 
 	@Test
+	@SuppressWarnings("removal")
 	void requestMappingHandlerAdapter() {
 		webMvcConfig.setConfigurers(Collections.singletonList(webMvcConfigurer));
 		RequestMappingHandlerAdapter adapter = this.webMvcConfig.requestMappingHandlerAdapter(
@@ -122,16 +123,11 @@ public class DelegatingWebMvcConfigurationTests {
 	@Test
 	void configureMessageConverters() {
 		HttpMessageConverter<?> customConverter = mock();
-		StringHttpMessageConverter stringConverter = new StringHttpMessageConverter();
 		WebMvcConfigurer configurer = new WebMvcConfigurer() {
-			@Override
-			public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
-				converters.add(stringConverter);
-			}
 
 			@Override
-			public void extendMessageConverters(List<HttpMessageConverter<?>> converters) {
-				converters.add(0, customConverter);
+			public void configureMessageConverters(HttpMessageConverters.ServerBuilder builder) {
+				builder.customMessageConverter(customConverter);
 			}
 		};
 		webMvcConfig.setConfigurers(Collections.singletonList(configurer));
@@ -141,9 +137,7 @@ public class DelegatingWebMvcConfigurationTests {
 				this.webMvcConfig.mvcConversionService(),
 				this.webMvcConfig.mvcValidator());
 
-		assertThat(adapter.getMessageConverters()).as("One custom converter expected").hasSize(2);
-		assertThat(adapter.getMessageConverters()).element(0).isSameAs(customConverter);
-		assertThat(adapter.getMessageConverters()).element(1).isSameAs(stringConverter);
+		assertThat(adapter.getMessageConverters()).as("One custom converter expected").contains(customConverter);
 	}
 
 	@Test
@@ -167,6 +161,7 @@ public class DelegatingWebMvcConfigurationTests {
 	}
 
 	@Test
+	@SuppressWarnings("removal")
 	void handlerExceptionResolver() {
 		webMvcConfig.setConfigurers(Collections.singletonList(webMvcConfigurer));
 		webMvcConfig.handlerExceptionResolver(webMvcConfig.mvcContentNegotiationManager());

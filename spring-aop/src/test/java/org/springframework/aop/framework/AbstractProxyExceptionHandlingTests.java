@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,6 @@ import org.mockito.Mockito;
 import org.mockito.stubbing.Answer;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.BDDMockito.willAnswer;
 import static org.mockito.BDDMockito.willThrow;
 import static org.mockito.Mockito.mock;
@@ -69,7 +68,12 @@ abstract class AbstractProxyExceptionHandlingTests {
 
 
 	private void invokeProxy() {
-		throwableSeenByCaller = catchThrowable(() -> Objects.requireNonNull(proxy).doSomething());
+		try {
+			Objects.requireNonNull(proxy).doSomething();
+		}
+		catch (Throwable throwable) {
+			throwableSeenByCaller = throwable;
+		}
 	}
 
 	@SuppressWarnings("SameParameterValue")

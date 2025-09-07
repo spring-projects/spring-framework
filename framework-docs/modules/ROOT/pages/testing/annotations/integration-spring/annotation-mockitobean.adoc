@@ -77,6 +77,17 @@ exactly one candidate bean exists.
 
 [TIP]
 ====
+As stated in the documentation for Mockito, there are times when using `Mockito.when()` is
+inappropriate for stubbing a spy – for example, if calling a real method on a spy results
+in undesired side effects.
+
+To avoid such undesired side effects, consider using
+`Mockito.doReturn(...).when(spy)...`, `Mockito.doThrow(...).when(spy)...`,
+`Mockito.doNothing().when(spy)...`, and similar methods.
+====
+
+[NOTE]
+====
 Only _singleton_ beans can be overridden. Any attempt to override a non-singleton bean
 will result in an exception.
 
@@ -95,6 +106,7 @@ fields.
 Such fields can therefore be `public`, `protected`, package-private (default visibility),
 or `private` depending on the needs or coding practices of the project.
 ====
+
 
 [[spring-testing-annotation-beanoverriding-mockitobean-examples]]
 == `@MockitoBean` Examples
@@ -200,6 +212,7 @@ Java::
 TIP: The mocks can also be injected into `@Configuration` classes or other test-related
 components in the `ApplicationContext` in order to configure them with Mockito's stubbing
 APIs.
+
 
 [[spring-testing-annotation-beanoverriding-mockitospybean-examples]]
 == `@MockitoSpyBean` Examples

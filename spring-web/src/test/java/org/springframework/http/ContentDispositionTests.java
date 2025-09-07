@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -266,6 +266,13 @@ class ContentDispositionTests {
 		tester.accept("foo.txt\\", "foo.txt\\\\");
 		tester.accept("foo.txt\\\\", "foo.txt\\\\\\\\");
 		tester.accept("foo.txt\\\\\\", "foo.txt\\\\\\\\\\\\");
+	}
+
+	@Test
+	void formatWithUtf8FilenameWithQuotes() {
+		String filename = "\"中文.txt";
+		assertThat(ContentDisposition.formData().filename(filename, StandardCharsets.UTF_8).build().toString())
+				.isEqualTo("form-data; filename=\"=?UTF-8?Q?=22=E4=B8=AD=E6=96=87.txt?=\"; filename*=UTF-8''%22%E4%B8%AD%E6%96%87.txt");
 	}
 
 	@Test

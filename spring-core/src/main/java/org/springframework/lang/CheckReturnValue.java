@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,10 +33,13 @@ import java.lang.annotation.Target;
  * and the return value is only interesting when adding an element to a set,
  * to see if the set already contained that element before.
  *
+ * <p>When used on a type, the annotation applies to all constructors and all
+ * methods that do not return {@code void}.
+ *
  * @author Sebastien Deleuze
  * @since 6.2
  */
 @Documented
-@Target(ElementType.METHOD)
+@Target({ElementType.TYPE, ElementType.METHOD, ElementType.CONSTRUCTOR})
 public @interface CheckReturnValue {
 }

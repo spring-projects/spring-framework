@@ -4,6 +4,6 @@
 
 [.small]#xref:web/webmvc/mvc-http2.adoc[See equivalent in the Servlet stack]#
 
-HTTP/2 is supported with Reactor Netty, Tomcat, Jetty, and Undertow. However, there are
+HTTP/2 is supported with Reactor Netty, Tomcat, and Jetty. However, there are
 considerations related to server configuration. For more details, see the
 {spring-framework-wiki}/HTTP-2-support[HTTP/2 wiki page].

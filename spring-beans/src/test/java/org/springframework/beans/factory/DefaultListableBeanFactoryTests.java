@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -1542,6 +1542,7 @@ class DefaultListableBeanFactoryTests {
 		bd2.setAttribute(AbstractBeanDefinition.ORDER_ATTRIBUTE, Ordered.HIGHEST_PRECEDENCE);
 		bd2.setScope(BeanDefinition.SCOPE_PROTOTYPE);
 		lbf.registerBeanDefinition("bean2", bd2);
+
 		assertThat(lbf.getBeanProvider(TestBean.class).orderedStream().map(TestBean::getName))
 				.containsExactly("highest", "lowest");
 		assertThat(lbf.getBeanProvider(TestBean.class).orderedStream(clazz -> !DerivedTestBean.class.isAssignableFrom(clazz))
@@ -1550,6 +1551,9 @@ class DefaultListableBeanFactoryTests {
 				.containsExactly("highest", "lowest");
 		assertThat(lbf.getBeanProvider(TestBean.class).orderedStream(ObjectProvider.UNFILTERED, false).map(TestBean::getName))
 				.containsExactly("lowest");
+
+		assertThat(lbf.getOrder("bean1")).isEqualTo(Ordered.LOWEST_PRECEDENCE);
+		assertThat(lbf.getOrder("bean2")).isEqualTo(Ordered.HIGHEST_PRECEDENCE);
 	}
 
 	@Test
@@ -1562,12 +1566,16 @@ class DefaultListableBeanFactoryTests {
 		rbd2.setAttribute(AbstractBeanDefinition.ORDER_ATTRIBUTE, Ordered.LOWEST_PRECEDENCE);
 		rbd2.setScope(BeanDefinition.SCOPE_PROTOTYPE);
 		lbf.registerBeanDefinition("highestPrecedenceFactory", rbd2);
+
 		assertThat(lbf.getBeanProvider(TestBean.class).orderedStream().map(TestBean::getName))
 				.containsExactly("fromLowestPrecedenceTestBeanFactoryBean", "fromHighestPrecedenceTestBeanFactoryBean");
 		assertThat(lbf.getBeanProvider(TestBean.class).orderedStream(ObjectProvider.UNFILTERED).map(TestBean::getName))
 				.containsExactly("fromLowestPrecedenceTestBeanFactoryBean", "fromHighestPrecedenceTestBeanFactoryBean");
 		assertThat(lbf.getBeanProvider(TestBean.class).orderedStream(ObjectProvider.UNFILTERED, false).map(TestBean::getName))
 				.containsExactly("fromLowestPrecedenceTestBeanFactoryBean");
+
+		assertThat(lbf.getOrder("lowestPrecedenceFactory")).isEqualTo(Ordered.HIGHEST_PRECEDENCE);
+		assertThat(lbf.getOrder("highestPrecedenceFactory")).isEqualTo(Ordered.LOWEST_PRECEDENCE);
 	}
 
 	@Test
@@ -1579,6 +1587,7 @@ class DefaultListableBeanFactoryTests {
 		GenericBeanDefinition bd2 = new GenericBeanDefinition();
 		bd2.setBeanClass(TestBean.class);
 		lbf.registerBeanDefinition("bean", bd2);
+
 		assertThatIllegalStateException()
 				.isThrownBy(() -> lbf.getBeanProvider(TestBean.class).orderedStream().collect(Collectors.toList()))
 				.withMessageContaining("Invalid value type for attribute");
@@ -3202,6 +3211,29 @@ class DefaultListableBeanFactoryTests {
 		assertThat(holder.getNonPublicEnum()).isEqualTo(NonPublicEnum.VALUE_1);
 	}
 
+	@Test
+	void mostSpecificCacheEntryForTypeMatching() {
+		RootBeanDefinition bd1 = new RootBeanDefinition();
+		bd1.setFactoryBeanName("config");
+		bd1.setFactoryMethodName("create");
+		lbf.registerBeanDefinition("config", new RootBeanDefinition(BeanWithFactoryMethod.class));
+		lbf.registerBeanDefinition("bd1", bd1);
+		lbf.registerBeanDefinition("bd2", new RootBeanDefinition(NestedTestBean.class));
+		lbf.freezeConfiguration();
+
+		String[] allBeanNames = lbf.getBeanNamesForType(Object.class);
+		String[] nestedBeanNames = lbf.getBeanNamesForType(NestedTestBean.class);
+		assertThat(lbf.getType("bd1")).isEqualTo(TestBean.class);
+		assertThat(lbf.getBeanNamesForType(TestBean.class)).containsExactly("bd1");
+		assertThat(lbf.getBeanNamesForType(DerivedTestBean.class)).isEmpty();
+		lbf.getBean("bd1");
+		assertThat(lbf.getType("bd1")).isEqualTo(DerivedTestBean.class);
+		assertThat(lbf.getBeanNamesForType(TestBean.class)).containsExactly("bd1");
+		assertThat(lbf.getBeanNamesForType(DerivedTestBean.class)).containsExactly("bd1");
+		assertThat(lbf.getBeanNamesForType(NestedTestBean.class)).isSameAs(nestedBeanNames);
+		assertThat(lbf.getBeanNamesForType(Object.class)).isSameAs(allBeanNames);
+	}
+
 
 	private int registerBeanDefinitions(Properties p) {
 		return registerBeanDefinitions(p, null);
@@ -3418,7 +3450,7 @@ class DefaultListableBeanFactoryTests {
 		}
 
 		public TestBean create() {
-			TestBean tb = new TestBean();
+			DerivedTestBean tb = new DerivedTestBean();
 			tb.setName(this.name);
 			return tb;
 		}
@@ -3646,11 +3678,11 @@ class DefaultListableBeanFactoryTests {
 
 		private FactoryBean<?> factoryBean;
 
-		public final FactoryBean<?> getFactoryBean() {
+		public FactoryBean<?> getFactoryBean() {
 			return this.factoryBean;
 		}
 
-		public final void setFactoryBean(final FactoryBean<?> factoryBean) {
+		public void setFactoryBean(FactoryBean<?> factoryBean) {
 			this.factoryBean = factoryBean;
 		}
 	}

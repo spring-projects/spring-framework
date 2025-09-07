@@ -7,9 +7,10 @@ application context that you configured with `@ContextConfiguration` or related
 annotations. You may use setter injection, field injection, or both, depending on
 which annotations you choose and whether you place them on setter methods or fields.
 If you are using JUnit Jupiter you may also optionally use constructor injection
-(see xref:testing/testcontext-framework/support-classes.adoc#testcontext-junit-jupiter-di[Dependency Injection with `SpringExtension`]). For consistency with Spring's annotation-based
-injection support, you may also use Spring's `@Autowired` annotation or the `@Inject`
-annotation from JSR-330 for field and setter injection.
+(see xref:testing/testcontext-framework/support-classes.adoc#testcontext-junit-jupiter-di[Dependency Injection with `SpringExtension`]).
+For consistency with Spring's annotation-based injection support, you may also use
+Spring's `@Autowired` annotation or the `@Inject` annotation from JSR-330 for
+field and setter injection.
 
 TIP: For testing frameworks other than JUnit Jupiter, the TestContext framework does not
 participate in instantiation of the test class. Thus, the use of `@Autowired` or
@@ -35,9 +36,9 @@ dependency injection altogether by explicitly configuring your class with
 from the list of listeners.
 
 Consider the scenario of testing a `HibernateTitleRepository` class, as outlined in the
-xref:testing/integration.adoc#integration-testing-goals[Goals] section. The next two code listings demonstrate the
-use of `@Autowired` on fields and setter methods. The application context configuration
-is presented after all sample code listings.
+xref:testing/integration.adoc#integration-testing-goals[Goals] section. The next two code
+listings demonstrate the use of `@Autowired` on fields and setter methods. The application
+context configuration is presented after all sample code listings.
 
 [NOTE]
 ====
@@ -172,7 +173,7 @@ shows this configuration:
 			<property name="sessionFactory" ref="sessionFactory"/>
 		</bean>
 
-		<bean id="sessionFactory" class="org.springframework.orm.hibernate5.LocalSessionFactoryBean">
+		<bean id="sessionFactory" class="org.springframework.orm.jpa.hibernate.LocalSessionFactoryBean">
 			<!-- configuration elided for brevity -->
 		</bean>
 
@@ -226,5 +227,3 @@ narrowing the set of type matches to a specific bean. Its value is matched again
 is used as a fallback qualifier value, so you can effectively also point to a specific
 bean by name there (as shown earlier, assuming that `myDataSource` is the bean `id`).
 =====
-
-

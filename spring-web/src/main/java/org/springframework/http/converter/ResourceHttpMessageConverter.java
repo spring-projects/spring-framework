@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -158,20 +158,20 @@ public class ResourceHttpMessageConverter extends AbstractHttpMessageConverter<R
 				in.transferTo(out);
 				out.flush();
 			}
-			catch (NullPointerException ex) {
-				// ignore, see SPR-13620
+			catch (NullPointerException ignored) {
+				// see SPR-13620
 			}
 			finally {
 				try {
 					in.close();
 				}
-				catch (Throwable ex) {
-					// ignore, see SPR-12999
+				catch (Throwable ignored) {
+					// see SPR-12999
 				}
 			}
 		}
-		catch (FileNotFoundException ex) {
-			// ignore, see SPR-12999
+		catch (FileNotFoundException ignored) {
+			// see SPR-12999
 		}
 	}
 

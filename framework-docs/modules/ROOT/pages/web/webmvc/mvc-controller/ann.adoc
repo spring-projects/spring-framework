@@ -39,6 +39,3 @@ NOTE: Keep in mind that as of 6.0, with interface proxying, Spring MVC no longer
 controllers based solely on a type-level `@RequestMapping` annotation on the interface.
 Please, enable class based proxying, or otherwise the interface must also have an
 `@Controller` annotation.
-
-
-

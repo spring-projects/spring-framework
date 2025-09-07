@@ -10,12 +10,10 @@ By default, only the `Accept` header is checked.
 
 If you must use URL-based content type resolution, consider using the query parameter
 strategy over path extensions. See
-xref:web/webmvc/mvc-controller/ann-requestmapping.adoc#mvc-ann-requestmapping-suffix-pattern-match[Suffix Match] and xref:web/webmvc/mvc-controller/ann-requestmapping.adoc#mvc-ann-requestmapping-rfd[Suffix Match and RFD] for
+xref:web/webmvc/mvc-controller/ann-requestmapping.adoc#mvc-ann-requestmapping-suffix-pattern-match[Suffix Match]
+and xref:web/webmvc/mvc-controller/ann-requestmapping.adoc#mvc-ann-requestmapping-rfd[Suffix Match and RFD] for
 more details.
 
 You can customize requested content type resolution, as the following example shows:
 
 include-code::./WebConfiguration[tag=snippet,indent=0]
-
-
-

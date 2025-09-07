@@ -7,9 +7,7 @@
 `@ExceptionHandler` methods to handle exceptions from controller methods. The following
 example includes such a handler method:
 
-
 include-code::./SimpleController[indent=0]
-
 
 The exception can match against a top-level exception being propagated (that is, a direct
 `IOException` being thrown) or against the immediate cause within a top-level wrapper
@@ -30,6 +28,7 @@ Support for `@ExceptionHandler` methods in Spring WebFlux is provided by the
 `HandlerAdapter` for `@RequestMapping` methods. See xref:web/webflux/dispatcher-handler.adoc[`DispatcherHandler`]
 for more detail.
 
+
 [[webflux-ann-exceptionhandler-media]]
 == Media Type Mapping
 [.small]#xref:web/webmvc/mvc-controller/ann-exceptionhandler.adoc#mvc-ann-exceptionhandler-media[See equivalent in the Servlet stack]#
@@ -38,7 +37,6 @@ In addition to exception types, `@ExceptionHandler` methods can also declare pro
 This allows to refine error responses depending on the media types requested by HTTP clients, typically in the "Accept" HTTP request header.
 
 Applications can declare producible media types directly on annotations, for the same exception type:
-
 
 include-code::./MediaTypeController[tag=mediatype,indent=0]
 
@@ -56,13 +54,9 @@ the content negotiation during the error handling phase will decide which conten
 as `@RequestMapping` methods, except the request body might have been consumed already.
 
 
-
 [[webflux-ann-exceptionhandler-return-values]]
 == Return Values
 [.small]#xref:web/webmvc/mvc-controller/ann-exceptionhandler.adoc#mvc-ann-exceptionhandler-return-values[See equivalent in the Servlet stack]#
 
 `@ExceptionHandler` methods support the same xref:web/webflux/controller/ann-methods/return-types.adoc[return values]
 as `@RequestMapping` methods.
-
-
-

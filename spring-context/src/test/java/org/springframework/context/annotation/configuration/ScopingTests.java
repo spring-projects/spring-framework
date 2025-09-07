@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -354,11 +354,6 @@ class ScopingTests {
 		}
 
 		@Override
-		public String getConversationId() {
-			return null;
-		}
-
-		@Override
 		public void registerDestructionCallback(String name, Runnable callback) {
 			throw new IllegalStateException("Not supposed to be called");
 		}
@@ -368,10 +363,6 @@ class ScopingTests {
 			return beans.remove(name);
 		}
 
-		@Override
-		public Object resolveContextualObject(String key) {
-			return null;
-		}
 	}
 
 }

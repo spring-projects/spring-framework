@@ -33,6 +33,3 @@ business services, and others) can also send messages to the broker relay, as de
 in xref:web/websocket/stomp/handle-send.adoc[Sending Messages], to broadcast messages to subscribed WebSocket clients.
 
 In effect, the broker relay enables robust and scalable message broadcasting.
-
-
-

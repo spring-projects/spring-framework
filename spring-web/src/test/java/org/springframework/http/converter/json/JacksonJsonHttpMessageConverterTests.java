@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -87,9 +87,9 @@ class JacksonJsonHttpMessageConverterTests {
 		assertThat(converter.canRead(MyBean.class, halFormsJsonMediaType)).isTrue();
 		assertThat(converter.canRead(Map.class, MediaType.APPLICATION_JSON)).isTrue();
 
-		converter.registerObjectMappersForType(MyBean.class, map -> {
-			map.put(halJsonMediaType, new ObjectMapper());
-			map.put(MediaType.APPLICATION_JSON, new ObjectMapper());
+		converter.registerMappersForType(MyBean.class, map -> {
+			map.put(halJsonMediaType, new JsonMapper());
+			map.put(MediaType.APPLICATION_JSON, new JsonMapper());
 		});
 
 		assertThat(converter.canRead(MyBean.class, halJsonMediaType)).isTrue();
@@ -121,9 +121,9 @@ class JacksonJsonHttpMessageConverterTests {
 		assertThat(converter.getSupportedMediaTypes(MyBean.class)).containsExactly(defaultMediaTypes);
 
 		MediaType halJson = MediaType.parseMediaType("application/hal+json");
-		converter.registerObjectMappersForType(MyBean.class, map -> {
-			map.put(halJson, new ObjectMapper());
-			map.put(MediaType.APPLICATION_JSON, new ObjectMapper());
+		converter.registerMappersForType(MyBean.class, map -> {
+			map.put(halJson, new JsonMapper());
+			map.put(MediaType.APPLICATION_JSON, new JsonMapper());
 		});
 
 		assertThat(converter.getSupportedMediaTypes(MyBean.class)).containsExactly(halJson, MediaType.APPLICATION_JSON);
@@ -365,7 +365,7 @@ class JacksonJsonHttpMessageConverterTests {
 		PrettyPrintBean bean = new PrettyPrintBean();
 		bean.setName("Jason");
 
-		ObjectMapper mapper = JsonMapper.builder().enable(SerializationFeature.INDENT_OUTPUT).build();
+		JsonMapper mapper = JsonMapper.builder().enable(SerializationFeature.INDENT_OUTPUT).build();
 		this.converter = new JacksonJsonHttpMessageConverter(mapper);
 		this.converter.write(bean, ResolvableType.forType(PrettyPrintBean.class),
 				MediaType.APPLICATION_JSON, outputMessage, null);
@@ -384,7 +384,7 @@ class JacksonJsonHttpMessageConverterTests {
 		PrettyPrintBean bean = new PrettyPrintBean();
 		bean.setName("Jason");
 
-		ObjectMapper mapper = JsonMapper.builder().enable(SerializationFeature.INDENT_OUTPUT).build();
+		JsonMapper mapper = JsonMapper.builder().enable(SerializationFeature.INDENT_OUTPUT).build();
 		this.converter = new JacksonJsonHttpMessageConverter(mapper);
 		this.converter.write(bean, ResolvableType.forType(PrettyPrintBean.class),
 				MediaType.APPLICATION_JSON, outputMessage, null);

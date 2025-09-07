@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 
 import io.micrometer.observation.ObservationRegistry;
+import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
 import org.springframework.core.ParameterizedTypeReference;
@@ -46,6 +47,7 @@ import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.http.client.observation.ClientRequestObservationConvention;
 import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.converter.HttpMessageConverters;
 import org.springframework.lang.CheckReturnValue;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.util.DefaultUriBuilderFactory;
@@ -456,8 +458,10 @@ public interface RestClient {
 		 * @param configurer the configurer to apply on the list of default
 		 * {@link HttpMessageConverter} pre-initialized
 		 * @return this builder
-		 * @see #messageConverters(List)
+		 * @see #messageConverters(Iterable)
+		 * @deprecated since 7.0 in favor of {@link #configureMessageConverters(Consumer)}
 		 */
+		@Deprecated(since = "7.0", forRemoval = true)
 		Builder messageConverters(Consumer<List<HttpMessageConverter<?>>> configurer);
 
 		/**
@@ -465,9 +469,17 @@ public interface RestClient {
 		 * @param messageConverters the list of {@link HttpMessageConverter} to use
 		 * @return this builder
 		 * @since 6.2
-		 * @see #messageConverters(Consumer)
+		 * @see #configureMessageConverters(Consumer)
 		 */
-		Builder messageConverters(List<HttpMessageConverter<?>> messageConverters);
+		Builder messageConverters(Iterable<HttpMessageConverter<?>> messageConverters);
+
+		/**
+		 * Configure the message converters for the {@code RestClient} to use.
+		 * @param configurer the configurer to apply on an empty {@link HttpMessageConverters.ClientBuilder}.
+		 * @return this builder
+		 * @since 7.0
+		 */
+		Builder configureMessageConverters(Consumer<HttpMessageConverters.ClientBuilder> configurer);
 
 		/**
 		 * Configure the {@link io.micrometer.observation.ObservationRegistry} to use
@@ -720,7 +732,7 @@ public interface RestClient {
 		 * @return the value returned from the exchange function, potentially {@code null}
 		 * @see RequestHeadersSpec#exchangeForRequiredValue(RequiredValueExchangeFunction)
 		 */
-		default <T> @Nullable T exchange(ExchangeFunction<T> exchangeFunction) {
+		default <T extends @Nullable Object> T exchange(ExchangeFunction<T> exchangeFunction) {
 			return exchange(exchangeFunction, true);
 		}
 
@@ -781,7 +793,7 @@ public interface RestClient {
 		 * @return the value returned from the exchange function, potentially {@code null}
 		 * @see RequestHeadersSpec#exchangeForRequiredValue(RequiredValueExchangeFunction, boolean)
 		 */
-		<T> @Nullable T exchange(ExchangeFunction<T> exchangeFunction, boolean close);
+		<T extends @Nullable Object> T exchange(ExchangeFunction<T> exchangeFunction, boolean close);
 
 		/**
 		 * Exchange the {@link ClientHttpResponse} for a value of type {@code T}.
@@ -820,7 +832,7 @@ public interface RestClient {
 		 * @param <T> the type the response will be transformed to
 		 */
 		@FunctionalInterface
-		interface ExchangeFunction<T> {
+		interface ExchangeFunction<T extends @Nullable Object> {
 
 			/**
 			 * Exchange the given response into a value of type {@code T}.
@@ -829,7 +841,7 @@ public interface RestClient {
 			 * @return the exchanged value, potentially {@code null}
 			 * @throws IOException in case of I/O errors
 			 */
-			@Nullable T exchange(HttpRequest clientRequest, ConvertibleClientHttpResponse clientResponse) throws IOException;
+			T exchange(HttpRequest clientRequest, ConvertibleClientHttpResponse clientResponse) throws IOException;
 		}
 
 		/**
@@ -839,7 +851,7 @@ public interface RestClient {
 		 * @param <T> the type the response will be transformed to
 		 */
 		@FunctionalInterface
-		interface RequiredValueExchangeFunction<T> extends ExchangeFunction<T> {
+		interface RequiredValueExchangeFunction<T> extends ExchangeFunction<@NonNull T> {
 
 			/**
 			 * Exchange the given response into a value of type {@code T}.
@@ -872,6 +884,15 @@ public interface RestClient {
 			 * @return the body, or {@code null} if no response body was available
 			 */
 			<T> @Nullable T bodyTo(ParameterizedTypeReference<T> bodyType);
+
+			/**
+			 * Create a {@link RestClientResponseException} of the appropriate
+			 * subtype depending on the response status code. The exception contains
+			 * the status, headers, and body of the response.
+			 * @throws IOException in case of a response failure (e.g. to obtain the status)
+			 * @since 7.0
+			 */
+			RestClientResponseException createException() throws IOException;
 		}
 	}
 
@@ -933,6 +954,17 @@ public interface RestClient {
 		 * @return this builder
 		 */
 		RequestBodySpec body(StreamingHttpOutputMessage.Body body);
+
+		/**
+		 * Set the hint with the given name to the given value for
+		 * {@link org.springframework.http.converter.SmartHttpMessageConverter}s
+		 * supporting them.
+		 * @param key the key of the hint to add
+		 * @param value the value of the hint to add
+		 * @return this builder
+		 * @since 7.0
+		 */
+		RequestBodySpec hint(String key, Object value);
 	}
 
 
@@ -1031,6 +1063,17 @@ public interface RestClient {
 		 * handling.
 		 */
 		ResponseEntity<Void> toBodilessEntity();
+
+		/**
+		 * Set the hint with the given name to the given value for
+		 * {@link org.springframework.http.converter.SmartHttpMessageConverter}s
+		 * supporting them.
+		 * @param key the key of the hint to add
+		 * @param value the value of the hint to add
+		 * @return this builder
+		 * @since 7.0
+		 */
+		ResponseSpec hint(String key, Object value);
 
 
 		/**

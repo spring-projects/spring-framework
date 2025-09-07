@@ -40,7 +40,3 @@ With Kotlin and the Spring Framework extensions, you can instead write the follo
 
 As in Java, `users` in Kotlin is strongly typed, but Kotlin's clever type inference allows
 for shorter syntax.
-
-
-
-

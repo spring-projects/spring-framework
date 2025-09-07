@@ -52,8 +52,8 @@ Kotlin::
 <2> Get the value of the `Keep-Alive` header.
 ======
 
-If the target method parameter type is not
-`String`, type conversion is automatically applied. See xref:web/webmvc/mvc-controller/ann-methods/typeconversion.adoc[Type Conversion].
+If the target method parameter type is not `String`, type conversion is automatically applied.
+See xref:web/webmvc/mvc-controller/ann-methods/typeconversion.adoc[Type Conversion].
 
 When an `@RequestHeader` annotation is used on a `Map<String, String>`,
 `MultiValueMap<String, String>`, or `HttpHeaders` argument, the map is populated
@@ -63,5 +63,3 @@ TIP: Built-in support is available for converting a comma-separated string into 
 array or collection of strings or other types known to the type conversion system. For
 example, a method parameter annotated with `@RequestHeader("Accept")` can be of type
 `String` but also `String[]` or `List<String>`.
-
-

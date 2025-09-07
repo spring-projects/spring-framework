@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.springframework.test.context.bean.override.convention;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Objects;
 
@@ -59,7 +58,7 @@ final class TestBeanOverrideHandler extends BeanOverrideHandler {
 			ReflectionUtils.makeAccessible(this.factoryMethod);
 			return this.factoryMethod.invoke(null);
 		}
-		catch (IllegalAccessException | InvocationTargetException ex) {
+		catch (Throwable ex) {
 			throw new IllegalStateException(
 					"Failed to invoke @TestBean factory method: " + this.factoryMethod, ex);
 		}

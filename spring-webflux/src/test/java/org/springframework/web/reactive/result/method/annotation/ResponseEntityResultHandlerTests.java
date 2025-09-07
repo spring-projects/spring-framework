@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,6 @@ import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
-import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.SerializationFeature;
 import tools.jackson.databind.json.JsonMapper;
 
@@ -242,10 +241,9 @@ class ResponseEntityResultHandlerTests {
 		assertThat(exchange.getResponse().getHeaders().getContentType()).isEqualTo(MediaType.APPLICATION_PROBLEM_JSON);
 		assertResponseBody(exchange,"""
 				{\
-				"instance":"\\/path",\
+				"instance":"/path",\
 				"status":400,\
-				"title":"Bad Request",\
-				"type":"about:blank"\
+				"title":"Bad Request"\
 				}""");
 	}
 
@@ -263,10 +261,9 @@ class ResponseEntityResultHandlerTests {
 		assertThat(exchange.getResponse().getHeaders().getContentType()).isEqualTo(MediaType.APPLICATION_PROBLEM_JSON);
 		assertResponseBody(exchange,"""
 				{\
-				"instance":"\\/path",\
+				"instance":"/path",\
 				"status":400,\
-				"title":"Bad Request",\
-				"type":"about:blank"\
+				"title":"Bad Request"\
 				}""");
 	}
 
@@ -441,10 +438,10 @@ class ResponseEntityResultHandlerTests {
 		MediaType halFormsMediaType = MediaType.parseMediaType("application/prs.hal-forms+json");
 		MediaType halMediaType = MediaType.parseMediaType("application/hal+json");
 
-		ObjectMapper objectMapper = JsonMapper.builder().enable(SerializationFeature.INDENT_OUTPUT).build();
+		JsonMapper jsonMapper = JsonMapper.builder().enable(SerializationFeature.INDENT_OUTPUT).build();
 
 		JacksonJsonEncoder encoder = new JacksonJsonEncoder();
-		encoder.registerObjectMappersForType(Person.class, map -> map.put(halMediaType, objectMapper));
+		encoder.registerMappersForType(Person.class, map -> map.put(halMediaType, jsonMapper));
 		EncoderHttpMessageWriter<?> writer = new EncoderHttpMessageWriter<>(encoder);
 
 		ResponseEntityResultHandler handler = new ResponseEntityResultHandler(

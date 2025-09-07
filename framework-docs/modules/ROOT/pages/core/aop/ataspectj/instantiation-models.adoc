@@ -60,6 +60,3 @@ Programming Guide for more information on `per` clauses.
 
 The `pertarget` instantiation model works in exactly the same way as `perthis`, but it
 creates one aspect instance for each unique target object at matched join points.
-
-
-

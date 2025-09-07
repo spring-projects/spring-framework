@@ -80,6 +80,7 @@ Kotlin::
 ----
 ======
 
+
 [[webflux-client-builder-maxinmemorysize]]
 == MaxInMemorySize
 
@@ -115,7 +116,6 @@ Kotlin::
 ======
 
 
-
 [[webflux-client-builder-reactor]]
 == Reactor Netty
 
@@ -145,7 +145,6 @@ Kotlin::
 		.build()
 ----
 ======
-
 
 [[webflux-client-builder-reactor-resources]]
 === Resources
@@ -246,7 +245,6 @@ Kotlin::
 <3> Plug the connector into the `WebClient.Builder`.
 ======
 --
-
 
 [[webflux-client-builder-reactor-timeout]]
 === Timeouts
@@ -380,7 +378,6 @@ Kotlin::
 ======
 
 
-
 [[webflux-client-builder-jdk-httpclient]]
 == JDK HttpClient
 
@@ -417,7 +414,6 @@ Kotlin::
 	val webClient = WebClient.builder().clientConnector(connector).build()
 ----
 ======
-
 
 
 [[webflux-client-builder-jetty]]
@@ -513,7 +509,6 @@ Kotlin::
 --
 
 
-
 [[webflux-client-builder-http-components]]
 == HttpComponents
 
@@ -545,5 +540,3 @@ Kotlin::
 	val webClient = WebClient.builder().clientConnector(connector).build()
 ----
 ======
-
-

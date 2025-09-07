@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -352,6 +352,12 @@ public class HandlerMethod extends AnnotatedMethod {
 		return (this.bean.hashCode() * 31 + super.hashCode());
 	}
 
+	/**
+	 * Returns a concise description of this {@code HandlerMethod}, which is used
+	 * in log and error messages.
+	 * <p>The description should typically include the method signature of the
+	 * underlying handler method for clarity and debugging purposes.
+	 */
 	@Override
 	public String toString() {
 		return this.description;

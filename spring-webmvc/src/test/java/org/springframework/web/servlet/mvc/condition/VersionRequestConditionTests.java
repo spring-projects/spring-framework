@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.web.servlet.mvc.condition;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Stream;
 
 import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.BeforeEach;
@@ -26,10 +27,11 @@ import org.junit.jupiter.api.Test;
 import org.springframework.web.accept.DefaultApiVersionStrategy;
 import org.springframework.web.accept.NotAcceptableApiVersionException;
 import org.springframework.web.accept.SemanticApiVersionParser;
+import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * Unit tests for {@link VersionRequestCondition}.
@@ -45,10 +47,10 @@ public class VersionRequestConditionTests {
 		this.strategy = initVersionStrategy(null);
 	}
 
-	private static DefaultApiVersionStrategy initVersionStrategy(@Nullable String defaultValue) {
+	private static DefaultApiVersionStrategy initVersionStrategy(@Nullable String defaultVersion) {
 		return new DefaultApiVersionStrategy(
 				List.of(request -> request.getParameter("api-version")),
-				new SemanticApiVersionParser(), true, defaultValue);
+				new SemanticApiVersionParser(), null, defaultVersion, false, null, null);
 	}
 
 	@Test
@@ -70,32 +72,40 @@ public class VersionRequestConditionTests {
 
 	@Test
 	void fixedVersionMatch() {
-		String conditionVersion = "1.2";
+		VersionRequestCondition condition = condition("1.2");
 		this.strategy.addSupportedVersion("1.1", "1.3");
 
-		testMatch("v1.1", conditionVersion, true, false);
-		testMatch("v1.2", conditionVersion, false, false);
-		testMatch("v1.3", conditionVersion, false, true);
+		testMatch("v1.1", condition, false, false);
+		testMatch("v1.2", condition, true, false);
+		testMatch("v1.3", condition, true, true); // match initially, reject if chosen
 	}
 
 	@Test
 	void baselineVersionMatch() {
-		String conditionVersion = "1.2+";
+		VersionRequestCondition condition = condition("1.2+");
 		this.strategy.addSupportedVersion("1.1", "1.3");
 
-		testMatch("v1.1", conditionVersion, true, false);
-		testMatch("v1.2", conditionVersion, false, false);
-		testMatch("v1.3", conditionVersion, false, false);
+		testMatch("v1.1", condition, false, false);
+		testMatch("v1.2", condition, true, false);
+		testMatch("v1.3", condition, true, false);
+	}
+
+	@Test
+	void notVersionedMatch() {
+		VersionRequestCondition condition = new VersionRequestCondition(null, this.strategy);
+		this.strategy.addSupportedVersion("1.1", "1.3");
+
+		testMatch("v1.1", condition, true, false);
+		testMatch("v1.3", condition, true, false);
 	}
 
 	private void testMatch(
-			String requestVersion, String conditionVersion, boolean notCompatible, boolean notAcceptable) {
+			String requestVersion, VersionRequestCondition condition, boolean matches, boolean notAcceptable) {
 
 		MockHttpServletRequest request = requestWithVersion(requestVersion);
-		VersionRequestCondition condition = condition(conditionVersion);
 		VersionRequestCondition match = condition.getMatchingCondition(request);
 
-		if (notCompatible) {
+		if (!matches) {
 			assertThat(match).isNull();
 			return;
 		}
@@ -111,12 +121,6 @@ public class VersionRequestConditionTests {
 	}
 
 	@Test
-	void missingRequiredVersion() {
-		assertThatThrownBy(() -> condition("1.2").getMatchingCondition(new MockHttpServletRequest("GET", "/path")))
-				.hasMessage("400 BAD_REQUEST \"API version is required.\"");
-	}
-
-	@Test
 	void defaultVersion() {
 		String version = "1.2";
 		this.strategy = initVersionStrategy(version);
@@ -124,12 +128,6 @@ public class VersionRequestConditionTests {
 		VersionRequestCondition match = condition.getMatchingCondition(new MockHttpServletRequest("GET", "/path"));
 
 		assertThat(match).isSameAs(condition);
-	}
-
-	@Test
-	void unsupportedVersion() {
-		assertThatThrownBy(() -> condition("1.2").getMatchingCondition(requestWithVersion("1.3")))
-				.hasMessage("400 BAD_REQUEST \"Invalid API version: '1.3.0'.\"");
 	}
 
 	@Test
@@ -149,18 +147,38 @@ public class VersionRequestConditionTests {
 		assertThat(list.get(0)).isEqualTo(condition(expected));
 	}
 
+	@Test
+	void compareWithoutRequestVersion() {
+		VersionRequestCondition condition = Stream.of(condition("1.1"), condition("1.2"), emptyCondition())
+				.min((c1, c2) -> c1.compareTo(c2, new MockHttpServletRequest()))
+				.get();
+
+		assertThat(condition).isEqualTo(emptyCondition());
+	}
+
+	@Test // gh-35236
+	void noRequestVersion() {
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/path");
+		VersionRequestCondition condition = condition("1.1");
+
+		VersionRequestCondition match = condition.getMatchingCondition(request);
+		assertThat(match).isSameAs(condition);
+
+		condition.handleMatch(request);
+	}
+
 	private VersionRequestCondition condition(String v) {
 		this.strategy.addSupportedVersion(v.endsWith("+") ? v.substring(0, v.length() - 1) : v);
 		return new VersionRequestCondition(v, this.strategy);
 	}
 
 	private VersionRequestCondition emptyCondition() {
-		return new VersionRequestCondition();
+		return new VersionRequestCondition(null, this.strategy);
 	}
 
 	private MockHttpServletRequest requestWithVersion(String v) {
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/path");
-		request.addParameter("api-version", v);
+		request.setAttribute(HandlerMapping.API_VERSION_ATTRIBUTE, this.strategy.parseVersion(v));
 		return request;
 	}
 

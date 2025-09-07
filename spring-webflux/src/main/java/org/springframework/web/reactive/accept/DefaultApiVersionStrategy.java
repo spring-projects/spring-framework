@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.function.Predicate;
 
 import org.jspecify.annotations.Nullable;
 
@@ -31,7 +32,7 @@ import org.springframework.web.server.ServerWebExchange;
 
 /**
  * Default implementation of {@link ApiVersionStrategy} that delegates to the
- * configured version resolvers and version parser.
+ * configured version resolvers, version parser, and deprecation handler.
  *
  * @author Rossen Stoyanchev
  * @since 7.0
@@ -52,39 +53,67 @@ public class DefaultApiVersionStrategy implements ApiVersionStrategy {
 
 	private final Set<Comparable<?>> detectedVersions = new TreeSet<>();
 
+	private final Predicate<Comparable<?>> supportedVersionPredicate;
+
+	private final @Nullable ApiVersionDeprecationHandler deprecationHandler;
+
 
 	/**
 	 * Create an instance.
 	 * @param versionResolvers one or more resolvers to try; the first non-null
 	 * value returned by any resolver becomes the resolved used
 	 * @param versionParser parser for to raw version values
-	 * @param versionRequired whether a version is required; if a request
-	 * does not have a version, and a {@code defaultVersion} is not specified,
-	 * validation fails with {@link MissingApiVersionException}
+	 * @param versionRequired whether a version is required leading to
+	 * {@link MissingApiVersionException} for requests that don't have one;
+	 * by default set to true unless there is a defaultVersion
 	 * @param defaultVersion a default version to assign to requests that
 	 * don't specify one
 	 * @param detectSupportedVersions whether to use API versions that appear in
 	 * mappings for supported version validation (true), or use only explicitly
 	 * configured versions (false).
+	 * @param deprecationHandler handler to send hints and information about
+	 * deprecated API versions to clients
 	 */
 	public DefaultApiVersionStrategy(
 			List<ApiVersionResolver> versionResolvers, ApiVersionParser<?> versionParser,
-			boolean versionRequired, @Nullable String defaultVersion, boolean detectSupportedVersions) {
+			@Nullable Boolean versionRequired, @Nullable String defaultVersion,
+			boolean detectSupportedVersions, @Nullable Predicate<Comparable<?>> supportedVersionPredicate,
+			@Nullable ApiVersionDeprecationHandler deprecationHandler) {
 
 		Assert.notEmpty(versionResolvers, "At least one ApiVersionResolver is required");
 		Assert.notNull(versionParser, "ApiVersionParser is required");
+		Assert.isTrue(defaultVersion == null || versionRequired == null || !versionRequired,
+				"versionRequired cannot be set to true if a defaultVersion is also configured");
 
 		this.versionResolvers = new ArrayList<>(versionResolvers);
 		this.versionParser = versionParser;
-		this.versionRequired = (versionRequired && defaultVersion == null);
+		this.versionRequired = (versionRequired != null ? versionRequired : defaultVersion == null);
 		this.defaultVersion = (defaultVersion != null ? versionParser.parseVersion(defaultVersion) : null);
 		this.detectSupportedVersions = detectSupportedVersions;
+		this.supportedVersionPredicate = initSupportedVersionPredicate(supportedVersionPredicate);
+		this.deprecationHandler = deprecationHandler;
+	}
+
+	private Predicate<Comparable<?>> initSupportedVersionPredicate(@Nullable Predicate<Comparable<?>> predicate) {
+		return (predicate != null ? predicate :
+				(version -> (this.supportedVersions.contains(version) ||
+						this.detectSupportedVersions && this.detectedVersions.contains(version))));
 	}
 
 
 	@Override
 	public @Nullable Comparable<?> getDefaultVersion() {
 		return this.defaultVersion;
+	}
+
+	/**
+	 * Whether the strategy is configured to detect supported versions.
+	 * If this is set to {@code false} then {@link #addMappedVersion} is ignored
+	 * and the list of supported versions can be built explicitly through calls
+	 * to {@link #addSupportedVersion}.
+	 */
+	public boolean detectSupportedVersions() {
+		return this.detectSupportedVersions;
 	}
 
 	/**
@@ -95,7 +124,7 @@ public class DefaultApiVersionStrategy implements ApiVersionStrategy {
 	 * considered supported, and use of this method is optional. However, if you
 	 * prefer to use only explicitly configured, supported versions, then set
 	 * {@code detectSupportedVersions} flag to {@code false}.
- 	 * @param versions the supported versions to add
+	 * @param versions the supported versions to add
 	 * @see #addMappedVersion(String...)
 	 */
 	public void addSupportedVersion(String... versions) {
@@ -145,14 +174,16 @@ public class DefaultApiVersionStrategy implements ApiVersionStrategy {
 			return;
 		}
 
-		if (!isSupportedVersion(requestVersion)) {
+		if (!this.supportedVersionPredicate.test(requestVersion)) {
 			throw new InvalidApiVersionException(requestVersion.toString());
 		}
 	}
 
-	private boolean isSupportedVersion(Comparable<?> requestVersion) {
-		return (this.supportedVersions.contains(requestVersion) ||
-				this.detectSupportedVersions && this.detectedVersions.contains(requestVersion));
+	@Override
+	public void handleDeprecations(Comparable<?> version, ServerWebExchange exchange) {
+		if (this.deprecationHandler != null) {
+			this.deprecationHandler.handleVersion(version, exchange);
+		}
 	}
 
 	@Override

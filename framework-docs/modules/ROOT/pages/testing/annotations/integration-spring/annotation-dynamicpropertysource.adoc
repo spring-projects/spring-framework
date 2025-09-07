@@ -60,5 +60,5 @@ Kotlin::
 <3> Register a dynamic `server.port` property to be retrieved lazily from the server.
 ======
 
-See xref:testing/testcontext-framework/ctx-management/dynamic-property-sources.adoc[Context Configuration with Dynamic Property Sources] for further details.
-
+See xref:testing/testcontext-framework/ctx-management/dynamic-property-sources.adoc[Context Configuration with Dynamic Property Sources]
+for further details.

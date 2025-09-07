@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ import java.util.Set;
 public interface HttpServiceGroup {
 
 	/**
-	 * The name of the group to add HTTP Services to when a group isn't specified.
+	 * The name of the default group to add HTTP Services to when a group is not specified.
 	 */
 	String DEFAULT_GROUP_NAME = "default";
 

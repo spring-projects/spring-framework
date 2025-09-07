@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -74,7 +74,7 @@ class JdbcClientIntegrationTests {
 
 	@Test
 	void updateWithGeneratedKeys() {
-		int expectedId = 2;
+		int expectedId = 1;
 		String firstName = "Jane";
 		String lastName = "Smith";
 
@@ -92,7 +92,7 @@ class JdbcClientIntegrationTests {
 
 	@Test
 	void updateWithGeneratedKeysAndKeyColumnNames() {
-		int expectedId = 2;
+		int expectedId = 1;
 		String firstName = "Jane";
 		String lastName = "Smith";
 
@@ -110,7 +110,7 @@ class JdbcClientIntegrationTests {
 
 	@Test
 	void updateWithGeneratedKeysUsingNamedParameters() {
-		int expectedId = 2;
+		int expectedId = 1;
 		String firstName = "Jane";
 		String lastName = "Smith";
 
@@ -129,7 +129,7 @@ class JdbcClientIntegrationTests {
 
 	@Test
 	void updateWithGeneratedKeysAndKeyColumnNamesUsingNamedParameters() {
-		int expectedId = 2;
+		int expectedId = 1;
 		String firstName = "Jane";
 		String lastName = "Smith";
 
@@ -196,6 +196,19 @@ class JdbcClientIntegrationTests {
 		}
 
 		@Test
+		void selectWithReusedNamedParameterAndMaxRows() {
+			List<User> users = jdbcClient.sql(QUERY1)
+					.withFetchSize(1)
+					.withMaxRows(1)
+					.withQueryTimeout(1)
+					.param("name", "John")
+					.query(User.class)
+					.list();
+
+			assertSingleResult(users);
+		}
+
+		@Test
 		void selectWithReusedNamedParameterList() {
 			List<User> users = jdbcClient.sql(QUERY2)
 					.param("names", List.of("John", "Bogus"))
@@ -215,15 +228,31 @@ class JdbcClientIntegrationTests {
 			assertResults(users);
 		}
 
+		@Test
+		void selectWithReusedNamedParameterListAndMaxRows() {
+			List<User> users = jdbcClient.sql(QUERY2)
+					.withFetchSize(1)
+					.withMaxRows(1)
+					.withQueryTimeout(1)
+					.paramSource(new Names(List.of("John", "Bogus")))
+					.query(User.class)
+					.list();
+
+			assertSingleResult(users);
+		}
 
 		private static void assertResults(List<User> users) {
-			assertThat(users).containsExactly(new User(2, "John", "John"), new User(3, "John", "Smith"));
+			assertThat(users).containsExactly(new User(1, "John", "John"), new User(2, "John", "Smith"));
 		}
+
+		private static void assertSingleResult(List<User> users) {
+			assertThat(users).containsExactly(new User(1, "John", "John"));
+		}
+
 
 		record Name(String name) {}
 
 		record Names(List<String> names) {}
-
 	}
 
 

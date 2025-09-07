@@ -167,4 +167,3 @@ The preceding properties affect every request performed through the `MockMvc` in
 If the same property is also specified on a given request, it overrides the default
 value. That is why the HTTP method and URI in the default request do not matter, since
 they must be specified on every request.
-

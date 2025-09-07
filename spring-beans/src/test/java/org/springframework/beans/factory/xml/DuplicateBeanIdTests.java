@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,7 +46,7 @@ class DuplicateBeanIdTests {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(bf);
 		assertThatException().as("duplicate ids in same nesting level").isThrownBy(() ->
-			reader.loadBeanDefinitions(new ClassPathResource("DuplicateBeanIdTests-sameLevel-context.xml", this.getClass())));
+			reader.loadBeanDefinitions(new ClassPathResource("DuplicateBeanIdTests-sameLevel-context.xml", getClass())));
 	}
 
 	@Test
@@ -54,7 +54,7 @@ class DuplicateBeanIdTests {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		bf.setAllowBeanDefinitionOverriding(true);
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(bf);
-		reader.loadBeanDefinitions(new ClassPathResource("DuplicateBeanIdTests-multiLevel-context.xml", this.getClass()));
+		reader.loadBeanDefinitions(new ClassPathResource("DuplicateBeanIdTests-multiLevel-context.xml", getClass()));
 		TestBean testBean = bf.getBean(TestBean.class); // there should be only one
 		assertThat(testBean.getName()).isEqualTo("nested");
 	}

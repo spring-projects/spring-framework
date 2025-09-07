@@ -7,5 +7,3 @@
 This section describes various options available in the Spring Framework to prepare URIs.
 
 include::partial$web/web-uris.adoc[leveloffset=+1]
-
-

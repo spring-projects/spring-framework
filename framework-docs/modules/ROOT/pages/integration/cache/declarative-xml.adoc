@@ -51,6 +51,3 @@ However, through XML, it is easier to apply package or group or interface-wide c
 (again, due to the AspectJ pointcut) and to create template-like definitions (as we did
 in the preceding example by defining the target cache through the `cache:definitions`
 `cache` attribute).
-
-
-

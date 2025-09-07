@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,11 +45,11 @@ public class NoResourceFoundException extends ServletException implements ErrorR
 	/**
 	 * Create an instance.
 	 */
-	public NoResourceFoundException(HttpMethod httpMethod, String resourcePath) {
-		super("No static resource " + resourcePath + ".");
+	public NoResourceFoundException(HttpMethod httpMethod, String requestUri, String resourcePath) {
+		super("No static resource " + resourcePath + " for request '" + requestUri + "'.");
 		this.httpMethod = httpMethod;
 		this.resourcePath = resourcePath;
-		this.body = ProblemDetail.forStatusAndDetail(getStatusCode(), getMessage());
+		this.body = ProblemDetail.forStatusAndDetail(getStatusCode(), "No static resource " + resourcePath + ".");
 	}
 
 

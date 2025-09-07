@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.sql.DataSource;
+
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
@@ -109,8 +111,8 @@ public abstract class StoredProcedure extends SqlCall {
 	 * Output parameters will appear here, with their values after the stored procedure
 	 * has been called.
 	 */
-	public Map<String, Object> execute(Object... inParams) {
-		Map<String, Object> paramsToUse = new HashMap<>();
+	public Map<String, @Nullable Object> execute(Object... inParams) {
+		Map<String, @Nullable Object> paramsToUse = new HashMap<>();
 		validateParameters(inParams);
 		int i = 0;
 		for (SqlParameter sqlParameter : getDeclaredParameters()) {
@@ -135,7 +137,7 @@ public abstract class StoredProcedure extends SqlCall {
 	 * Output parameters will appear here, with their values after the
 	 * stored procedure has been called.
 	 */
-	public Map<String, Object> execute(Map<String, ?> inParams) throws DataAccessException {
+	public Map<String, @Nullable Object> execute(Map<String, ?> inParams) throws DataAccessException {
 		validateParameters(inParams.values().toArray());
 		return getJdbcTemplate().call(newCallableStatementCreator(inParams), getDeclaredParameters());
 	}
@@ -156,7 +158,7 @@ public abstract class StoredProcedure extends SqlCall {
 	 * Output parameters will appear here, with their values after the
 	 * stored procedure has been called.
 	 */
-	public Map<String, Object> execute(ParameterMapper inParamMapper) throws DataAccessException {
+	public Map<String, @Nullable Object> execute(ParameterMapper inParamMapper) throws DataAccessException {
 		checkCompiled();
 		return getJdbcTemplate().call(newCallableStatementCreator(inParamMapper), getDeclaredParameters());
 	}

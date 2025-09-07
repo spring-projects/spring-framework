@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import org.jspecify.annotations.Nullable;
 
 import org.springframework.format.FormatterRegistry;
 import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.converter.HttpMessageConverters;
 import org.springframework.util.CollectionUtils;
 import org.springframework.validation.MessageCodesResolver;
 import org.springframework.validation.Validator;
@@ -141,6 +142,15 @@ class WebMvcConfigurerComposite implements WebMvcConfigurer {
 	}
 
 	@Override
+	public void configureMessageConverters(HttpMessageConverters.ServerBuilder builder) {
+		for (WebMvcConfigurer delegate : this.delegates) {
+			delegate.configureMessageConverters(builder);
+		}
+	}
+
+	@Override
+	@Deprecated(since = "7.0", forRemoval = true)
+	@SuppressWarnings("removal")
 	public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
 		for (WebMvcConfigurer delegate : this.delegates) {
 			delegate.configureMessageConverters(converters);
@@ -148,6 +158,8 @@ class WebMvcConfigurerComposite implements WebMvcConfigurer {
 	}
 
 	@Override
+	@Deprecated(since = "7.0", forRemoval = true)
+	@SuppressWarnings("removal")
 	public void extendMessageConverters(List<HttpMessageConverter<?>> converters) {
 		for (WebMvcConfigurer delegate : this.delegates) {
 			delegate.extendMessageConverters(converters);

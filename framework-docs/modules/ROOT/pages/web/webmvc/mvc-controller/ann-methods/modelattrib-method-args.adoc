@@ -78,7 +78,7 @@ Kotlin::
 ======
 
 By default, both constructor and property
-xref:core/validation/beans-beans.adoc#beans-binding[data binding] are applied. However,
+xref:core/validation/data-binding.adoc[data binding] are applied. However,
 model object design requires careful consideration, and for security reasons it is
 recommended either to use an object tailored specifically for web binding, or to apply
 constructor binding only. If property binding must still be used, then _allowedFields_

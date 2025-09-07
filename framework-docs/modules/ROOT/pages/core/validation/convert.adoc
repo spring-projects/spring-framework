@@ -9,7 +9,6 @@ the required property types. You can also use the public API anywhere in your ap
 where type conversion is needed.
 
 
-
 [[core-convert-Converter-API]]
 == Converter SPI
 
@@ -54,7 +53,6 @@ The following listing shows the `StringToInteger` class, which is a typical `Con
 ----
 
 
-
 [[core-convert-ConverterFactory-SPI]]
 == Using `ConverterFactory`
 
@@ -72,9 +70,9 @@ When you need to centralize the conversion logic for an entire class hierarchy
 	}
 ----
 
-Parameterize S to be the type you are converting from and R to be the base type defining
+Parameterize `S` to be the type you are converting from and `R` to be the base type defining
 the __range__ of classes you can convert to. Then implement `getConverter(Class<T>)`,
-where T is a subclass of R.
+where `T` is a subclass of `R`.
 
 Consider the `StringToEnumConverterFactory` as an example:
 
@@ -107,13 +105,15 @@ Consider the `StringToEnumConverterFactory` as an example:
 [[core-convert-GenericConverter-SPI]]
 == Using `GenericConverter`
 
-When you require a sophisticated `Converter` implementation, consider using the
-`GenericConverter` interface. With a more flexible but less strongly typed signature
-than `Converter`, a `GenericConverter` supports converting between multiple source and
-target types. In addition, a `GenericConverter` makes available source and target field
-context that you can use when you implement your conversion logic. Such context lets a
-type conversion be driven by a field annotation or by generic information declared on a
-field signature. The following listing shows the interface definition of `GenericConverter`:
+When you require a more sophisticated `Converter` implementation, consider using the
+`GenericConverter` interface. With a more flexible but less strongly typed signature than
+`Converter`, a `GenericConverter` supports converting between multiple source and target
+types. In addition, a `GenericConverter` is provided source and target type descriptors
+that you can use when you implement your conversion logic. Such type descriptors enable
+type conversion to be driven by an annotation on the source of the descriptor (such as a
+field or method) or by generic information declared in a field signature, method
+signature, etc. The following listing shows the definition of the `GenericConverter`
+interface:
 
 [source,java,indent=0,subs="verbatim,quotes",chomp="-packages"]
 ----
@@ -128,29 +128,29 @@ field signature. The following listing shows the interface definition of `Generi
 ----
 
 To implement a `GenericConverter`, have `getConvertibleTypes()` return the supported
-source->target type pairs. Then implement `convert(Object, TypeDescriptor,
+source &#8594; target type pairs. Then implement `convert(Object, TypeDescriptor,
 TypeDescriptor)` to contain your conversion logic. The source `TypeDescriptor` provides
-access to the source field that holds the value being converted. The target `TypeDescriptor`
-provides access to the target field where the converted value is to be set.
+access to the source field or method that holds the value being converted. The target
+`TypeDescriptor` provides access to the target field or method where the converted value
+is to be set.
 
 A good example of a `GenericConverter` is a converter that converts between a Java array
-and a collection. Such an `ArrayToCollectionConverter` introspects the field that declares
-the target collection type to resolve the collection's element type. This lets each
-element in the source array be converted to the collection element type before the
-collection is set on the target field.
+and a collection. Such an `ArrayToCollectionConverter` introspects the field or method
+that declares the target collection type to resolve the collection's element type. This
+lets each element in the source array be converted to the collection element type before
+the collection is set on the target field or supplied to the target method or constructor.
 
 NOTE: Because `GenericConverter` is a more complex SPI interface, you should use
 it only when you need it. Favor `Converter` or `ConverterFactory` for basic type
 conversion needs.
 
-
 [[core-convert-ConditionalGenericConverter-SPI]]
 === Using `ConditionalGenericConverter`
 
 Sometimes, you want a `Converter` to run only if a specific condition holds true. For
-example, you might want to run a `Converter` only if a specific annotation is present
-on the target field, or you might want to run a `Converter` only if a specific method
-(such as a `static valueOf` method) is defined on the target class.
+example, you might want to run a `Converter` only if a specific annotation is present on
+the target field or method, or you might want to run a `Converter` only if a specific
+method (such as a `static valueOf` method) is defined on the target type.
 `ConditionalGenericConverter` is the union of the `GenericConverter` and
 `ConditionalConverter` interfaces that lets you define such custom matching criteria:
 
@@ -170,7 +170,6 @@ between a persistent entity identifier and an entity reference. Such an `IdToEnt
 might match only if the target entity type declares a static finder method (for example,
 `findAccount(Long)`). You might perform such a finder method check in the implementation of
 `matches(TypeDescriptor, TypeDescriptor)`.
-
 
 
 [[core-convert-ConversionService-API]]
@@ -205,14 +204,13 @@ use in most environments. `ConversionServiceFactory` provides a convenient facto
 creating common `ConversionService` configurations.
 
 
-
 [[core-convert-Spring-config]]
 == Configuring a `ConversionService`
 
 A `ConversionService` is a stateless object designed to be instantiated at application
 startup and then shared between multiple threads. In a Spring application, you typically
 configure a `ConversionService` instance for each Spring container (or `ApplicationContext`).
-Spring picks up that `ConversionService` and uses it whenever a type
+Spring picks up that `ConversionService` and uses it whenever type
 conversion needs to be performed by the framework. You can also inject this
 `ConversionService` into any of your beans and invoke it directly.
 
@@ -249,8 +247,8 @@ It is also common to use a `ConversionService` within a Spring MVC application. 
 xref:web/webmvc/mvc-config/conversion.adoc[Conversion and Formatting] in the Spring MVC chapter.
 
 In certain situations, you may wish to apply formatting during conversion. See
-xref:core/validation/format.adoc#format-FormatterRegistry-SPI[The `FormatterRegistry` SPI] for details on using `FormattingConversionServiceFactoryBean`.
-
+xref:core/validation/format.adoc#format-FormatterRegistry-SPI[The `FormatterRegistry` SPI]
+for details on using `FormattingConversionServiceFactoryBean`.
 
 
 [[core-convert-programmatic-usage]]
@@ -312,9 +310,11 @@ Java::
 
 	List<Integer> input = ...
 	cs.convert(input,
-		TypeDescriptor.forObject(input), // List<Integer> type descriptor
-		TypeDescriptor.collection(List.class, TypeDescriptor.valueOf(String.class)));
+		TypeDescriptor.collection(List.class, TypeDescriptor.valueOf(Integer.class)), // <1>
+		TypeDescriptor.collection(List.class, TypeDescriptor.valueOf(String.class))); // <2>
 ----
+<1> `List<Integer>` type descriptor
+<2> `List<String>` type descriptor
 
 Kotlin::
 +
@@ -324,9 +324,11 @@ Kotlin::
 
 	val input: List<Integer> = ...
 	cs.convert(input,
-			TypeDescriptor.forObject(input), // List<Integer> type descriptor
-			TypeDescriptor.collection(List::class.java, TypeDescriptor.valueOf(String::class.java)))
+		TypeDescriptor.collection(List::class.java, TypeDescriptor.valueOf(Integer::class.java)), // <1>
+		TypeDescriptor.collection(List::class.java, TypeDescriptor.valueOf(String::class.java))) // <2>
 ----
+<1> `List<Integer>` type descriptor
+<2> `List<String>` type descriptor
 ======
 
 Note that `DefaultConversionService` automatically registers converters that are
@@ -338,7 +340,3 @@ method on the `DefaultConversionService` class.
 Converters for value types are reused for arrays and collections, so there is
 no need to create a specific converter to convert from a `Collection` of `S` to a
 `Collection` of `T`, assuming that standard collection handling is appropriate.
-
-
-
-

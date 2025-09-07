@@ -1,6 +1,7 @@
 [[kotlin-web]]
 = Web
 
+
 [[router-dsl]]
 == Router DSL
 
@@ -44,7 +45,6 @@ when you need to register routes depending on dynamic data (for example, from a 
 See https://github.com/mixitconf/mixit/[MiXiT project] for a concrete example.
 
 
-
 [[mockmvc-dsl]]
 == MockMvc DSL
 
@@ -70,7 +70,6 @@ idiomatic Kotlin API and to allow better discoverability (no usage of static met
 		print()
 	}
 ----
-
 
 
 [[kotlin-multiplatform-serialization]]

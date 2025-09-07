@@ -33,6 +33,3 @@ It uses the same underlying resource provider contract. As with EJB 2.1 MDBs, yo
 message listener interface supported by your JCA provider in the Spring context as well.
 Spring nevertheless provides explicit "`convenience`" support for JMS, because JMS is the
 most common endpoint API used with the JCA endpoint management contract.
-
-
-

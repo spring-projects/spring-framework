@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -95,6 +95,13 @@ final class GroupsMetadata {
 	 */
 	Stream<Registration> registrations() {
 		return this.groupMap.values().stream();
+	}
+
+	/**
+	 * Return {@code true} if there are no {@link Registration registrations}.
+	 */
+	boolean isEmpty() {
+		return this.groupMap.isEmpty();
 	}
 
 

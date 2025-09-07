@@ -56,12 +56,4 @@ dependencies {
 	// Substitute for javax.management:jmxremote_optional:1.0.1_04 (not available on Maven Central)
 	testRuntimeOnly("org.glassfish.external:opendmk_jmxremote_optional_jar")
 	testRuntimeOnly("org.javamoney:moneta")
-	testRuntimeOnly("org.junit.vintage:junit-vintage-engine") // for @Inject TCK
-}
-
-test {
-	description = "Runs JUnit Jupiter tests and the @Inject TCK via JUnit Vintage."
-	useJUnitPlatform {
-		includeEngines "junit-jupiter", "junit-vintage"
-	}
 }

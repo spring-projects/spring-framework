@@ -19,7 +19,6 @@ however, the Spring Framework provides mock objects and testing support classes,
 are described in this chapter.
 
 
-
 [[mock-objects]]
 == Mock Objects
 
@@ -28,7 +27,6 @@ Spring includes a number of packages dedicated to mocking:
 * xref:testing/unit.adoc#mock-objects-env[Environment]
 * xref:testing/unit.adoc#mock-objects-servlet[Servlet API]
 * xref:testing/unit.adoc#mock-objects-web-reactive[Spring Web Reactive]
-
 
 [[mock-objects-env]]
 === Environment
@@ -39,7 +37,6 @@ xref:core/beans/environment.adoc#beans-definition-profiles[Bean Definition Profi
 and xref:core/beans/environment.adoc#beans-property-source-abstraction[`PropertySource` Abstraction]).
 `MockEnvironment` and `MockPropertySource` are useful for developing
 out-of-container tests for code that depends on environment-specific properties.
-
 
 [[mock-objects-servlet]]
 === Servlet API
@@ -54,7 +51,6 @@ based on the Servlet 6.0 API.
 
 MockMvc builds on the mock Servlet API objects to provide an integration testing
 framework for Spring MVC. See xref:testing/mockmvc.adoc[MockMvc].
-
 
 [[mock-objects-web-reactive]]
 === Spring Web Reactive
@@ -79,7 +75,6 @@ testing WebFlux applications without an HTTP server. The client can also be used
 end-to-end tests with a running server.
 
 
-
 [[unit-testing-support-classes]]
 == Unit Testing Support Classes
 
@@ -88,7 +83,6 @@ categories:
 
 * xref:testing/unit.adoc#unit-testing-utilities[General Testing Utilities]
 * xref:testing/unit.adoc#unit-testing-spring-mvc[Spring MVC Testing Utilities]
-
 
 [[unit-testing-utilities]]
 === General Testing Utilities
@@ -134,7 +128,6 @@ assigned by the operating system. To interact with that server, you should query
 server for the port it is currently using.
 ====
 
-
 [[unit-testing-spring-mvc]]
 === Spring MVC Testing Utilities
 
@@ -146,7 +139,7 @@ that deal with Spring MVC `ModelAndView` objects.
 .Unit testing Spring MVC Controllers
 TIP: To unit test your Spring MVC `Controller` classes as POJOs, use `ModelAndViewAssert`
 combined with `MockHttpServletRequest`, `MockHttpSession`, and so on from Spring's
-xref:testing/unit.adoc#mock-objects-servlet[Servlet API mocks]. For thorough integration testing of your
-Spring MVC and REST `Controller` classes in conjunction with your `WebApplicationContext`
-configuration for Spring MVC, use the
+xref:testing/unit.adoc#mock-objects-servlet[Servlet API mocks]. For thorough integration
+testing of your Spring MVC and REST `Controller` classes in conjunction with your
+`WebApplicationContext` configuration for Spring MVC, use
 xref:testing/mockmvc.adoc[MockMvc] instead.

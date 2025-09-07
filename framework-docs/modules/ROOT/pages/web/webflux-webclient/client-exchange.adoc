@@ -47,7 +47,3 @@ When using the above, after the returned `Mono` or `Flux` completes, the respons
 is checked and if not consumed it is released to prevent memory and connection leaks.
 Therefore the response cannot be decoded further downstream. It is up to the provided
 function to declare how to decode the response if needed.
-
-
-
-

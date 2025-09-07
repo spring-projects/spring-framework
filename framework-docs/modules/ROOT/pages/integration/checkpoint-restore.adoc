@@ -13,6 +13,7 @@ WARNING: The files generated in the path specified by `-XX:CRaCCheckpointTo=PATH
 
 Conceptually, checkpoint and restore align with the xref:core/beans/factory-nature.adoc#beans-factory-lifecycle-processor[Spring `Lifecycle` contract] for individual beans.
 
+
 == On-demand checkpoint/restore of a running application
 
 A checkpoint can be created on demand, for example using a command like `jcmd application.jar JDK.checkpoint`. Before the creation of the checkpoint, Spring stops all the running beans, giving them a chance to close resources if needed by implementing `Lifecycle.stop`. After restore, the same beans are restarted, with `Lifecycle.start` allowing beans to reopen resources when relevant. For libraries that do not depend on Spring, custom checkpoint/restore integration can be provided by implementing `org.crac.Resource` and registering the related instance.
@@ -22,6 +23,7 @@ WARNING: Leveraging checkpoint/restore of a running application typically requir
 WARNING: Be aware that when defining scheduling tasks at a fixed rate, for example with an annotation like `@Scheduled(fixedRate = 5000)`, all missed executions between checkpoint and restore will be performed when the JVM is restored with on-demand checkpoint/restore. If this is not the behavior you want, it is recommended to schedule tasks at a fixed delay (for example with `@Scheduled(fixedDelay = 5000)`) or with a cron expression as those are calculated after every task execution.
 
 NOTE: If the checkpoint is created on a warmed-up JVM, the restored JVM will be equally warmed-up, allowing potentially peak performance immediately. This method typically requires access to remote services, and thus requires some level of platform integration.
+
 
 == Automatic checkpoint/restore at startup
 

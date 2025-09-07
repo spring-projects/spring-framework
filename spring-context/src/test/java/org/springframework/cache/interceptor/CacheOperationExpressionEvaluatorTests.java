@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,12 +58,6 @@ class CacheOperationExpressionEvaluatorTests {
 			new CacheEvaluationContextFactory(this.originalEvaluationContext));
 
 	private final AnnotationCacheOperationSource source = new AnnotationCacheOperationSource();
-
-
-	private Collection<CacheOperation> getOps(String name) {
-		Method method = ReflectionUtils.findMethod(AnnotatedClass.class, name, Object.class, Object.class);
-		return this.source.getCacheOperations(method, AnnotatedClass.class);
-	}
 
 
 	@Test
@@ -142,6 +136,12 @@ class CacheOperationExpressionEvaluatorTests {
 		EvaluationContext context = createEvaluationContext(CacheOperationExpressionEvaluator.NO_RESULT, applicationContext);
 		Object value = new SpelExpressionParser().parseExpression("@myBean.class.getName()").getValue(context);
 		assertThat(value).isEqualTo(String.class.getName());
+	}
+
+
+	private Collection<CacheOperation> getOps(String name) {
+		Method method = ReflectionUtils.findMethod(AnnotatedClass.class, name, Object.class, Object.class);
+		return this.source.getCacheOperations(method, AnnotatedClass.class);
 	}
 
 	private EvaluationContext createEvaluationContext(Object result) {

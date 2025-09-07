@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,8 @@ import java.net.URLConnection;
 import java.util.Locale;
 
 import org.jspecify.annotations.Nullable;
+
+import org.springframework.lang.Contract;
 
 /**
  * Utility methods for resolving resource locations to files in the
@@ -104,6 +106,7 @@ public abstract class ResourceUtils {
 	 * @see java.net.URL
 	 * @see #toURL(String)
 	 */
+	@Contract("null -> false")
 	public static boolean isUrl(@Nullable String resourceLocation) {
 		if (resourceLocation == null) {
 			return false;

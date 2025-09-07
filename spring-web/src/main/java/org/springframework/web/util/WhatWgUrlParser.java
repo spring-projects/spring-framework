@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -2023,7 +2023,7 @@ final class WhatWgUrlParser {
 			if (obj == this) {
 				return true;
 			}
-			if (obj == null || obj.getClass() != this.getClass()) {
+			if (obj == null || getClass() != obj.getClass()) {
 				return false;
 			}
 			UrlRecord that = (UrlRecord) obj;
@@ -2305,7 +2305,7 @@ final class WhatWgUrlParser {
 
 		@Override
 		public boolean equals(Object obj) {
-			return obj == this || obj != null && obj.getClass() == this.getClass();
+			return obj == this || obj != null && getClass() == obj.getClass();
 		}
 
 		@Override

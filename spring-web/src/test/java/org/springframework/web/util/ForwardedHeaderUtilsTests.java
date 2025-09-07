@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -547,6 +547,17 @@ class ForwardedHeaderUtilsTests {
 
 		InetSocketAddress address =
 				ForwardedHeaderUtils.parseForwardedFor(URI.create("https://example.com"), headers, null);
+
+		assertThat(address.getHostName()).isEqualTo("[fd00:fefe:1::4]");
+	}
+
+	@Test
+	void parseForwardedByHeader() {
+		HttpHeaders headers = new HttpHeaders();
+		headers.add("Forwarded", "by=[fd00:fefe:1::4], 192.168.0.1");
+
+		InetSocketAddress address =
+				ForwardedHeaderUtils.parseForwardedBy(URI.create("https://example.com"), headers, null);
 
 		assertThat(address.getHostName()).isEqualTo("[fd00:fefe:1::4]");
 	}

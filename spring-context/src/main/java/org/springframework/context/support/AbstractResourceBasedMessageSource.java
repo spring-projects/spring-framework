@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -156,9 +156,9 @@ public abstract class AbstractResourceBasedMessageSource extends AbstractMessage
 	 * Return whether to fall back to the system Locale if no files for a specific
 	 * Locale have been found.
 	 * @since 4.3
-	 * @deprecated as of 5.2.2, in favor of {@link #getDefaultLocale()}
+	 * @deprecated in favor of {@link #getDefaultLocale()}
 	 */
-	@Deprecated
+	@Deprecated(since = "5.2.2")
 	protected boolean isFallbackToSystemLocale() {
 		return this.fallbackToSystemLocale;
 	}

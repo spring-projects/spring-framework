@@ -32,6 +32,3 @@ Java::
 			.contextWrite(context -> context.put("foo", ...));
 ----
 ======
-
-
-

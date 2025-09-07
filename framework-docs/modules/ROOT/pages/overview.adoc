@@ -19,8 +19,6 @@ based on a diverse range of real-world use cases. This has helped Spring to succ
 evolve over a very long time.
 
 
-
-
 [[overview-spring]]
 == What We Mean by "Spring"
 
@@ -43,8 +41,6 @@ Module System). For use in module-enabled applications, the Spring Framework jar
 (`spring.core`, `spring.context`, etc.) independent from jar artifact names. The jars follow
 the same naming pattern with `-` instead of `.` – for example, `spring-core` and `spring-context`.
 Of course, Spring Framework's jars also work fine on the classpath.
-
-
 
 
 [[overview-history]]
@@ -77,7 +73,7 @@ As of Spring Framework 6.0, Spring has been upgraded to the Jakarta EE 9 level
 traditional `javax` packages. With EE 9 as the minimum and EE 10 supported already,
 Spring is prepared to provide out-of-the-box support for the further evolution of
 the Jakarta EE APIs. Spring Framework 6.0 is fully compatible with Tomcat 10.1,
-Jetty 11 and Undertow 2.3 as web servers, and also with Hibernate ORM 6.1.
+Jetty 11 as web servers, and also with Hibernate ORM 6.1.
 
 Over time, the role of Java/Jakarta EE in application development has evolved. In the
 early days of J2EE and Spring, applications were created to be deployed to an application
@@ -91,8 +87,6 @@ projects, such as Spring Boot, Spring Security, Spring Data, Spring Cloud, Sprin
 among others. It’s important to remember that each project has its own source code repository,
 issue tracker, and release cadence. See {spring-site-projects}[spring.io/projects] for
 the complete list of Spring projects.
-
-
 
 
 [[overview-philosophy]]
@@ -119,8 +113,6 @@ meaningful, current, and accurate javadoc. It is one of very few projects that c
 clean code structure with  no circular dependencies between packages.
 
 
-
-
 [[overview-feedback]]
 == Feedback and Contributions
 
@@ -137,8 +129,6 @@ tracker, where discussions take place and leave a record for future reference.
 
 For more details see the guidelines at the {spring-framework-code}/CONTRIBUTING.md[CONTRIBUTING],
 top-level project page.
-
-
 
 
 [[overview-getting-started]]

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -333,6 +333,7 @@ public class BeanDefinitionValueResolver {
 		try {
 			Object bean;
 			Class<?> beanType = ref.getBeanType();
+			String resolvedName = String.valueOf(doEvaluate(ref.getBeanName()));
 			if (ref.isToParent()) {
 				BeanFactory parent = this.beanFactory.getParentBeanFactory();
 				if (parent == null) {
@@ -342,21 +343,25 @@ public class BeanDefinitionValueResolver {
 									" in parent factory: no parent factory available");
 				}
 				if (beanType != null) {
-					bean = parent.getBean(beanType);
+					bean = (parent.containsBean(resolvedName) ?
+							parent.getBean(resolvedName, beanType) : parent.getBean(beanType));
 				}
 				else {
-					bean = parent.getBean(String.valueOf(doEvaluate(ref.getBeanName())));
+					bean = parent.getBean(resolvedName);
 				}
 			}
 			else {
-				String resolvedName;
 				if (beanType != null) {
-					NamedBeanHolder<?> namedBean = this.beanFactory.resolveNamedBean(beanType);
-					bean = namedBean.getBeanInstance();
-					resolvedName = namedBean.getBeanName();
+					if (this.beanFactory.containsBean(resolvedName)) {
+						bean = this.beanFactory.getBean(resolvedName, beanType);
+					}
+					else {
+						NamedBeanHolder<?> namedBean = this.beanFactory.resolveNamedBean(beanType);
+						bean = namedBean.getBeanInstance();
+						resolvedName = namedBean.getBeanName();
+					}
 				}
 				else {
-					resolvedName = String.valueOf(doEvaluate(ref.getBeanName()));
 					bean = this.beanFactory.getBean(resolvedName);
 				}
 				this.beanFactory.registerDependentBean(resolvedName, this.beanName);
@@ -401,7 +406,8 @@ public class BeanDefinitionValueResolver {
 			Object innerBean = this.beanFactory.createBean(actualInnerBeanName, mbd, null);
 			if (innerBean instanceof FactoryBean<?> factoryBean) {
 				boolean synthetic = mbd.isSynthetic();
-				innerBean = this.beanFactory.getObjectFromFactoryBean(factoryBean, actualInnerBeanName, !synthetic);
+				innerBean = this.beanFactory.getObjectFromFactoryBean(
+						factoryBean, null, actualInnerBeanName, !synthetic);
 			}
 			if (innerBean instanceof NullBean) {
 				innerBean = null;

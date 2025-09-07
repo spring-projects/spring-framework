@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,18 @@
 
 package org.springframework.core.type.classreading;
 
+import java.io.IOException;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+
+import com.github.benmanes.caffeine.cache.Caffeine;
+import org.junit.jupiter.api.Test;
+
 import org.springframework.core.type.AbstractAnnotationMetadataTests;
 import org.springframework.core.type.AnnotationMetadata;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 /**
  * Tests for {@link SimpleAnnotationMetadata} and
@@ -25,6 +35,7 @@ import org.springframework.core.type.AnnotationMetadata;
  * and for the ClassFile API variant on Java >= 24.
  *
  * @author Phillip Webb
+ * @author Brian Clozel
  */
 class DefaultAnnotationMetadataTests extends AbstractAnnotationMetadataTests {
 
@@ -34,9 +45,25 @@ class DefaultAnnotationMetadataTests extends AbstractAnnotationMetadataTests {
 			return MetadataReaderFactory.create(source.getClassLoader())
 					.getMetadataReader(source.getName()).getAnnotationMetadata();
 		}
-		catch (Exception ex) {
+		catch (IOException ex) {
 			throw new IllegalStateException(ex);
 		}
+	}
+
+	@Test
+	void getClassAttributeWhenUnknownClass() {
+		var annotation = get(WithClassMissingFromClasspath.class).getAnnotations().get(ClassAttributes.class);
+		assertThat(annotation.getStringArray("types")).contains("com.github.benmanes.caffeine.cache.Caffeine");
+		assertThatIllegalArgumentException().isThrownBy(() -> annotation.getClassArray("types"));
+	}
+
+	@ClassAttributes(types = {Caffeine.class})
+	public static class WithClassMissingFromClasspath {
+	}
+
+	@Retention(RetentionPolicy.RUNTIME)
+	public @interface ClassAttributes {
+		Class<?>[] types();
 	}
 
 }

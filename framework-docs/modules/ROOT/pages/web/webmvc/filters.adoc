@@ -29,14 +29,11 @@ the body of the request, and wrap the `ServletRequest` to make the form data
 available through the `ServletRequest.getParameter{asterisk}()` family of methods.
 
 
-
 [[filters-forwarded-headers]]
 == Forwarded Headers
 [.small]#xref:web/webflux/reactive-spring.adoc#webflux-forwarded-headers[See equivalent in the Reactive stack]#
 
 include::partial$web/forwarded-headers.adoc[]
-
-
 
 [[filters-forwarded-headers-non-forwardedheaderfilter]]
 === ForwardedHeaderFilter
@@ -47,8 +44,6 @@ headers to eliminate further impact. The filter relies on wrapping the request, 
 therefore it must be ordered ahead of other filters, such as `RequestContextFilter`, that
 should work with the modified and not the original request.
 
-
-
 [[filters-forwarded-headers-security]]
 === Security Considerations
 
@@ -57,8 +52,6 @@ if the headers were added by a proxy, as intended, or by a malicious client. Thi
 a proxy at the boundary of trust should be configured to remove untrusted `Forwarded`
 headers that come from the outside. You can also configure the `ForwardedHeaderFilter`
 with `removeOnly=true`, in which case it removes but does not use the headers.
-
-
 
 [[filters-forwarded-headers-dispatcher]]
 === Dispatcher Types
@@ -70,7 +63,6 @@ If using Spring Framework's `AbstractAnnotationConfigDispatcherServletInitialize
 types. However if registering the filter via `web.xml` or in Spring Boot via a
 `FilterRegistrationBean` be sure to include `DispatcherType.ASYNC` and
 `DispatcherType.ERROR` in addition to `DispatcherType.REQUEST`.
-
 
 
 [[filters-shallow-etag]]
@@ -100,7 +92,6 @@ the filter via `web.xml` or in Spring Boot via a `FilterRegistrationBean` be sur
 `DispatcherType.ASYNC`.
 
 
-
 [[filters-cors]]
 == CORS
 [.small]#xref:web/webflux/reactive-spring.adoc#webflux-filters-cors[See equivalent in the Reactive stack]#
@@ -110,7 +101,6 @@ controllers. However, when used with Spring Security, we advise relying on the b
 `CorsFilter` that must be ordered ahead of Spring Security's chain of filters.
 
 See the sections on xref:web/webmvc-cors.adoc[CORS] and the xref:web/webmvc-cors.adoc#mvc-cors-filter[CORS Filter] for more details.
-
 
 
 [[filters.url-handler]]
@@ -131,4 +121,3 @@ It can be configured to:
 Here is how you can instantiate and configure a `UrlHandlerFilter` for a blog application:
 
 include-code::./UrlHandlerFilterConfiguration[tag=config,indent=0]
-

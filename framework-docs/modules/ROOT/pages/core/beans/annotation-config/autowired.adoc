@@ -530,6 +530,3 @@ The `@Autowired`, `@Inject`, `@Value`, and `@Resource` annotations are handled b
 within your own `BeanPostProcessor` or `BeanFactoryPostProcessor` types (if any).
 These types must be 'wired up' explicitly by using XML or a Spring `@Bean` method.
 ====
-
-
-

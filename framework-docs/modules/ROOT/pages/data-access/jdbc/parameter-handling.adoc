@@ -231,4 +231,3 @@ access by unwrapping it. You can use the `SqlTypeValue` to create an array and p
 it with values from the Java `java.sql.Array`, as the following example shows:
 
 include-code::./SqlTypeValueFactory[tag=oracle-array,indent=0]
-

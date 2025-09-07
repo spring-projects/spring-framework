@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,12 +22,16 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.sql.Time;
+import java.sql.Timestamp;
+import java.time.Instant;
 import java.time.ZoneId;
 import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Currency;
+import java.util.Date;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -1064,6 +1068,88 @@ class DefaultConversionServiceTests {
 
 		public void handleOptionalList(Optional<List<Integer>> value) {
 		}
+	}
+
+	@Test  // gh-35175
+	void convertDateToInstant() {
+		TypeDescriptor dateDescriptor = TypeDescriptor.valueOf(Date.class);
+		TypeDescriptor instantDescriptor = TypeDescriptor.valueOf(Instant.class);
+		Date date = new Date();
+
+		// Conversion performed by DateToInstantConverter.
+		assertThat(conversionService.convert(date, dateDescriptor, instantDescriptor))
+				.isEqualTo(date.toInstant());
+	}
+
+	@Test  // gh-35175
+	void convertSqlDateToInstant() {
+		TypeDescriptor sqlDateDescriptor = TypeDescriptor.valueOf(java.sql.Date.class);
+		TypeDescriptor instantDescriptor = TypeDescriptor.valueOf(Instant.class);
+		java.sql.Date sqlDate = new java.sql.Date(System.currentTimeMillis());
+
+		// DateToInstantConverter blindly invokes toInstant() on any java.util.Date
+		// subtype, which results in an UnsupportedOperationException since
+		// java.sql.Date does not have a time component. However, even if
+		// DateToInstantConverter were not registered, ObjectToObjectConverter
+		// would still attempt to invoke toInstant() on a java.sql.Date by convention,
+		// which results in the same UnsupportedOperationException.
+		assertThatExceptionOfType(ConversionFailedException.class)
+				.isThrownBy(() -> conversionService.convert(sqlDate, sqlDateDescriptor, instantDescriptor))
+				.withCauseExactlyInstanceOf(UnsupportedOperationException.class);
+	}
+
+	@Test  // gh-35175
+	void convertSqlTimeToInstant() {
+		TypeDescriptor timeDescriptor = TypeDescriptor.valueOf(Time.class);
+		TypeDescriptor instantDescriptor = TypeDescriptor.valueOf(Instant.class);
+		Time time = new Time(System.currentTimeMillis());
+
+		// DateToInstantConverter blindly invokes toInstant() on any java.util.Date
+		// subtype, which results in an UnsupportedOperationException since
+		// java.sql.Date does not have a time component. However, even if
+		// DateToInstantConverter were not registered, ObjectToObjectConverter
+		// would still attempt to invoke toInstant() on a java.sql.Date by convention,
+		// which results in the same UnsupportedOperationException.
+		assertThatExceptionOfType(ConversionFailedException.class)
+				.isThrownBy(() -> conversionService.convert(time, timeDescriptor, instantDescriptor))
+				.withCauseExactlyInstanceOf(UnsupportedOperationException.class);
+	}
+
+	@Test  // gh-35175
+	void convertSqlTimestampToInstant() {
+		TypeDescriptor timestampDescriptor = TypeDescriptor.valueOf(Timestamp.class);
+		TypeDescriptor instantDescriptor = TypeDescriptor.valueOf(Instant.class);
+		Timestamp timestamp = new Timestamp(System.currentTimeMillis());
+
+		// Conversion performed by DateToInstantConverter.
+		assertThat(conversionService.convert(timestamp, timestampDescriptor, instantDescriptor))
+				.isEqualTo(timestamp.toInstant());
+	}
+
+	@Test  // gh-35175
+	void convertInstantToDate() {
+		TypeDescriptor instantDescriptor = TypeDescriptor.valueOf(Instant.class);
+		TypeDescriptor dateDescriptor = TypeDescriptor.valueOf(Date.class);
+		Date date = new Date();
+		Instant instant = date.toInstant();
+
+		// Conversion performed by InstantToDateConverter.
+		assertThat(conversionService.convert(instant, instantDescriptor, dateDescriptor))
+				.isExactlyInstanceOf(Date.class)
+				.isEqualTo(date);
+	}
+
+	@Test
+	void convertInstantToSqlTimestamp() {
+		TypeDescriptor instantDescriptor = TypeDescriptor.valueOf(Instant.class);
+		TypeDescriptor timestampDescriptor = TypeDescriptor.valueOf(Timestamp.class);
+		Timestamp timestamp = new Timestamp(System.currentTimeMillis());
+		Instant instant = timestamp.toInstant();
+
+		// Conversion performed by ObjectToObjectConverter.
+		assertThat(conversionService.convert(instant, instantDescriptor, timestampDescriptor))
+				.isExactlyInstanceOf(Timestamp.class)
+				.isEqualTo(timestamp);
 	}
 
 

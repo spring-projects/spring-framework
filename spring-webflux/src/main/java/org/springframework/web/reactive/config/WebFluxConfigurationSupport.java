@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -136,7 +136,7 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 	@Bean
 	public RequestMappingHandlerMapping requestMappingHandlerMapping(
 			@Qualifier("webFluxContentTypeResolver") RequestedContentTypeResolver contentTypeResolver,
-			@Qualifier("mvcApiVersionStrategy") @Nullable ApiVersionStrategy apiVersionStrategy) {
+			@Qualifier("webFluxApiVersionStrategy") @Nullable ApiVersionStrategy apiVersionStrategy) {
 
 		RequestMappingHandlerMapping mapping = createRequestMappingHandlerMapping();
 		mapping.setOrder(0);
@@ -188,7 +188,7 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 	 * @since 7.0
 	 */
 	@Bean
-	public @Nullable ApiVersionStrategy mvcApiVersionStrategy() {
+	public @Nullable ApiVersionStrategy webFluxApiVersionStrategy() {
 		if (this.apiVersionStrategy == null) {
 			ApiVersionConfigurer configurer = new ApiVersionConfigurer();
 			configureApiVersioning(configurer);
@@ -246,10 +246,13 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 	}
 
 	@Bean
-	public RouterFunctionMapping routerFunctionMapping(ServerCodecConfigurer serverCodecConfigurer) {
+	public RouterFunctionMapping routerFunctionMapping(
+			ServerCodecConfigurer serverCodecConfigurer, @Nullable ApiVersionStrategy apiVersionStrategy) {
+
 		RouterFunctionMapping mapping = createRouterFunctionMapping();
 		mapping.setOrder(-1);  // go before RequestMappingHandlerMapping
 		mapping.setMessageReaders(serverCodecConfigurer.getReaders());
+		mapping.setApiVersionStrategy(apiVersionStrategy);
 		configureAbstractHandlerMapping(mapping, getPathMatchConfigurer());
 		return mapping;
 	}

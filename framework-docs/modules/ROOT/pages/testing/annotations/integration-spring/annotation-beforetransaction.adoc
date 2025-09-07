@@ -33,5 +33,3 @@ Kotlin::
 ----
 <1> Run this method before a transaction.
 ======
-
-

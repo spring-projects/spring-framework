@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -124,7 +124,7 @@ final class DataBufferInputStream extends InputStream {
 			return 0L;
 		}
 		int skipped = Math.min(available(), n > Integer.MAX_VALUE ? Integer.MAX_VALUE : (int) n);
-		this.dataBuffer.readPosition(Math.min(this.end, this.dataBuffer.readPosition() + skipped));
+		this.dataBuffer.readPosition(this.dataBuffer.readPosition() + skipped);
 		return skipped;
 	}
 

@@ -14,6 +14,3 @@ Spring's `JtaTransactionManager` is the standard choice to run on Jakarta EE app
 servers and is known to work on all common servers. Advanced functionality, such as
 transaction suspension, works on many servers as well (including GlassFish, JBoss and
 Geronimo) without any special configuration required.
-
-
-

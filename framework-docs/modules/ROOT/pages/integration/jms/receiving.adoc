@@ -7,8 +7,8 @@ This describes how to receive messages with JMS in Spring.
 [[jms-receiving-sync]]
 == Synchronous Receipt
 
-While JMS is typically associated with asynchronous processing, you can
-consume messages synchronously. The overloaded `receive(..)` methods provide this
+While JMS is typically associated with asynchronous processing, you can consume messages
+synchronously. The `receive(..)` methods on `JmsTemplate` and `JmsClient` provide this
 functionality. During a synchronous receive, the calling thread blocks until a message
 becomes available. This can be a dangerous operation, since the calling thread can
 potentially be blocked indefinitely. The `receiveTimeout` property specifies how long
@@ -25,9 +25,10 @@ See xref:integration/jms/annotated.adoc#jms-annotated-support[Enable Listener En
 
 In a fashion similar to a Message-Driven Bean (MDB) in the EJB world, the Message-Driven
 POJO (MDP) acts as a receiver for JMS messages. The one restriction (but see
-xref:integration/jms/receiving.adoc#jms-receiving-async-message-listener-adapter[Using `MessageListenerAdapter`]) on an MDP is that it must implement
-the `jakarta.jms.MessageListener` interface. Note that, if your POJO receives messages
-on multiple threads, it is important to ensure that your implementation is thread-safe.
+xref:integration/jms/receiving.adoc#jms-receiving-async-message-listener-adapter[Using `MessageListenerAdapter`])
+on an MDP is that it must implement the `jakarta.jms.MessageListener` interface.
+Note that, if your POJO receives messages on multiple threads, it is important to
+ensure that your implementation is thread-safe.
 
 The following example shows a simple implementation of an MDP:
 

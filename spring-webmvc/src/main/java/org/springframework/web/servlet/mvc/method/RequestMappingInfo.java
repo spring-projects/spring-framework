@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -80,8 +80,6 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 
 	private static final ProducesRequestCondition EMPTY_PRODUCES = new ProducesRequestCondition();
 
-	private static final VersionRequestCondition EMPTY_VERSION = new VersionRequestCondition();
-
 	private static final RequestConditionHolder EMPTY_CUSTOM = new RequestConditionHolder(null);
 
 
@@ -113,11 +111,10 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 
 	/**
 	 * Full constructor with a mapping name.
-	 * @deprecated as of 5.3 in favor using {@link RequestMappingInfo.Builder} via
-	 * {@link #paths(String...)}.
+	 * @deprecated in favor using {@link RequestMappingInfo.Builder} via {@link #paths(String...)}.
 	 */
 	@SuppressWarnings("removal")
-	@Deprecated
+	@Deprecated(since = "5.3")
 	public RequestMappingInfo(@Nullable String name, @Nullable PatternsRequestCondition patterns,
 			@Nullable RequestMethodsRequestCondition methods, @Nullable ParamsRequestCondition params,
 			@Nullable HeadersRequestCondition headers, @Nullable ConsumesRequestCondition consumes,
@@ -131,18 +128,18 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 				(headers != null ? headers : EMPTY_HEADERS),
 				(consumes != null ? consumes : EMPTY_CONSUMES),
 				(produces != null ? produces : EMPTY_PRODUCES),
-				(version != null ? version : EMPTY_VERSION),
+				(version != null ? version : new VersionRequestCondition(null, null)),
 				(custom != null ? new RequestConditionHolder(custom) : EMPTY_CUSTOM),
 				new BuilderConfiguration());
 	}
 
 	/**
 	 * Create an instance with the given conditions.
-	 * @deprecated as of 5.3 in favor using {@link RequestMappingInfo.Builder} via
+	 * @deprecated in favor using {@link RequestMappingInfo.Builder} via
 	 * {@link #paths(String...)}.
 	 */
 	@SuppressWarnings("removal")
-	@Deprecated
+	@Deprecated(since = "5.3")
 	public RequestMappingInfo(@Nullable PatternsRequestCondition patterns,
 			@Nullable RequestMethodsRequestCondition methods, @Nullable ParamsRequestCondition params,
 			@Nullable HeadersRequestCondition headers, @Nullable ConsumesRequestCondition consumes,
@@ -156,7 +153,7 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 	 * Re-create a RequestMappingInfo with the given custom request condition.
 	 * @deprecated since 5.3 in favor of using {@link #addCustomCondition(RequestCondition)}.
 	 */
-	@Deprecated
+	@Deprecated(since = "5.3")
 	public RequestMappingInfo(RequestMappingInfo info, @Nullable RequestCondition<?> customRequestCondition) {
 		this(info.name, info.patternsCondition, info.methodsCondition, info.paramsCondition,
 				info.headersCondition, info.consumesCondition, info.producesCondition,
@@ -772,15 +769,10 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 
 			ContentNegotiationManager manager = this.options.getContentNegotiationManager();
 
-			VersionRequestCondition versionCondition;
-			ApiVersionStrategy versionStrategy = this.options.getApiVersionStrategy();
-			if (StringUtils.hasText(this.version)) {
-				Assert.state(versionStrategy != null, "API version specified, but no ApiVersionStrategy configured");
-				versionCondition = new VersionRequestCondition(this.version, versionStrategy);
-			}
-			else {
-				versionCondition = EMPTY_VERSION;
-			}
+			ApiVersionStrategy strategy = this.options.getApiVersionStrategy();
+			Assert.state(strategy != null || !StringUtils.hasText(this.version),
+					"API version specified, but no ApiVersionStrategy configured");
+			VersionRequestCondition versionCondition = new VersionRequestCondition(this.version, strategy);
 
 			return new RequestMappingInfo(
 					this.mappingName, pathPatternsCondition, patternsCondition,
@@ -895,14 +887,10 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 
 		@Override
 		public Builder version(@Nullable String version) {
-			if (version != null) {
-				ApiVersionStrategy strategy = this.options.getApiVersionStrategy();
-				Assert.state(strategy != null, "API version specified, but no ApiVersionStrategy configured");
-				this.versionCondition = new VersionRequestCondition(version, strategy);
-			}
-			else {
-				this.versionCondition = EMPTY_VERSION;
-			}
+			ApiVersionStrategy strategy = this.options.getApiVersionStrategy();
+			Assert.state(strategy != null || !StringUtils.hasText(version),
+					"API version specified, but no ApiVersionStrategy configured");
+			this.versionCondition = new VersionRequestCondition(version, strategy);
 			return this;
 		}
 
@@ -983,20 +971,20 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 		 * Set a custom UrlPathHelper to use for the PatternsRequestCondition.
 		 * <p>By default this is not set.
 		 * @since 4.2.8
-		 * @deprecated as of 5.3, the path is resolved externally and obtained with
+		 * @deprecated the path is resolved externally and obtained with
 		 * {@link ServletRequestPathUtils#getCachedPathValue(ServletRequest)}
 		 */
-		@Deprecated
+		@Deprecated(since = "5.3")
 		public void setUrlPathHelper(@Nullable UrlPathHelper urlPathHelper) {
 		}
 
 		/**
 		 * Return the configured UrlPathHelper.
-		 * @deprecated as of 5.3, the path is resolved externally and obtained with
+		 * @deprecated the path is resolved externally and obtained with
 		 * {@link ServletRequestPathUtils#getCachedPathValue(ServletRequest)};
 		 * this method always returns {@link UrlPathHelper#defaultInstance}.
 		 */
-		@Deprecated
+		@Deprecated(since = "5.3")
 		public @Nullable UrlPathHelper getUrlPathHelper() {
 			return UrlPathHelper.defaultInstance;
 		}

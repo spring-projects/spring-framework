@@ -303,6 +303,3 @@ the nicer features of Spring's JMX support. It does, however, come with the pric
 coupling your classes to both Spring and JMX. As always, the advice here is to be
 pragmatic. If you need the functionality offered by the `NotificationPublisher` and
 you can accept the coupling to both Spring and JMX, then do so.
-
-
-

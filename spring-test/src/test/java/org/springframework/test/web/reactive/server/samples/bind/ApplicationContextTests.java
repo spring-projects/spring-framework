@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,65 +16,93 @@
 
 package org.springframework.test.web.reactive.server.samples.bind;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import reactor.core.publisher.Mono;
 
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-import org.springframework.context.annotation.Bean;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
+import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.http.server.reactive.SslInfo;
+import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.reactive.config.EnableWebFlux;
+import org.springframework.web.server.ServerWebExchange;
+import org.springframework.web.server.WebFilter;
+import org.springframework.web.server.WebFilterChain;
 
 /**
  * Sample tests demonstrating "mock" server tests binding to server infrastructure
  * declared in a Spring ApplicationContext.
  *
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
  * @since 5.0
  */
-public class ApplicationContextTests {
+@SpringJUnitConfig
+class ApplicationContextTests {
 
-	private WebTestClient client;
+	private static final String SSL_SESSION_ID = "sslSessionId";
 
 
-	@BeforeEach
-	public void setUp() throws Exception {
+	@Autowired
+	ApplicationContext context;
 
-		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
-		context.register(WebConfig.class);
-		context.refresh();
-
-		this.client = WebTestClient.bindToApplicationContext(context).build();
-	}
 
 	@Test
-	public void test() throws Exception {
-		this.client.get().uri("/test")
+	void buildWithDefaults() {
+		var client = WebTestClient.bindToApplicationContext(context).build();
+
+		client.get().uri("/test")
 				.exchange()
 				.expectStatus().isOk()
 				.expectBody(String.class).isEqualTo("It works!");
 	}
 
+	@Test  // gh-35042
+	void buildWithSslInfo() {
+		var client = WebTestClient.bindToApplicationContext(context)
+				.sslInfo(SslInfo.from("test123"))
+				.webFilter(new SslSessionIdFilter())
+				.build();
+
+		client.get().uri("/sslInfo")
+				.exchange()
+				.expectStatus().isOk()
+				.expectBody(String.class).isEqualTo("Session ID: test123");
+	}
+
 
 	@Configuration
 	@EnableWebFlux
-	static class WebConfig {
-
-		@Bean
-		public TestController controller() {
-			return new TestController();
-		}
-
+	@Import(TestController.class)
+	static class WebFluxConfig {
 	}
 
 	@RestController
 	static class TestController {
 
 		@GetMapping("/test")
-		public String handle() {
+		String test() {
 			return "It works!";
+		}
+
+		@GetMapping("/sslInfo")
+		String sslInfo(ServerHttpRequest request) {
+			return "Session ID: " + request.getAttributes().get(SSL_SESSION_ID);
+		}
+	}
+
+	private static class SslSessionIdFilter implements WebFilter {
+
+		@Override
+		public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
+			var request = exchange.getRequest();
+			request.getAttributes().put(SSL_SESSION_ID, request.getSslInfo().getSessionId());
+			return chain.filter(exchange);
 		}
 	}
 

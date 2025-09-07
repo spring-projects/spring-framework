@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ inline fun <reified T> JdbcOperations.queryForObject(sql: String): T =
  * @since 5.0
  */
 inline fun <reified T> JdbcOperations.queryForObject(sql: String, vararg args: Any, crossinline function: (ResultSet, Int) -> T): T =
-		queryForObject(sql, { resultSet, i -> function(resultSet, i) }, *args) as T
+		queryForObject(sql, { resultSet, i -> function(resultSet, i) }, *args)
 
 /**
  * Extension for [JdbcOperations.queryForObject] providing a
@@ -44,7 +44,7 @@ inline fun <reified T> JdbcOperations.queryForObject(sql: String, vararg args: A
  * @author Mario Arias
  * @since 5.0
  */
-inline fun <reified T> JdbcOperations.queryForObject(sql: String, args: Array<out Any>, argTypes: IntArray): T? =
+inline fun <reified T> JdbcOperations.queryForObject(sql: String, args: Array<out Any>, argTypes: IntArray): T =
 		queryForObject(sql, args, argTypes, T::class.java as Class<*>) as T
 
 /**
@@ -54,7 +54,7 @@ inline fun <reified T> JdbcOperations.queryForObject(sql: String, args: Array<ou
  * @author Mario Arias
  * @since 5.0
  */
-inline fun <reified T> JdbcOperations.queryForObject(sql: String, args: Array<out Any>): T? =
+inline fun <reified T> JdbcOperations.queryForObject(sql: String, args: Array<out Any>): T =
 		queryForObject(sql, T::class.java as Class<*>, args) as T
 
 /**
@@ -63,9 +63,9 @@ inline fun <reified T> JdbcOperations.queryForObject(sql: String, args: Array<ou
  * @author Mario Arias
  * @since 5.0
  */
-@Suppress("EXTENSION_SHADOWED_BY_MEMBER")
-inline fun <reified T : Any> JdbcOperations.queryForList(sql: String): List<T> =
-		queryForList(sql, T::class.java)
+@Suppress("UNCHECKED_CAST")
+inline fun <reified T> JdbcOperations.queryForList(sql: String): List<T> =
+		queryForList(sql, T::class.java) as List<T>
 
 /**
  * Extension for [JdbcOperations.queryForList] providing a
@@ -74,10 +74,10 @@ inline fun <reified T : Any> JdbcOperations.queryForList(sql: String): List<T> =
  * @author Mario Arias
  * @since 5.0
  */
-@Suppress("EXTENSION_SHADOWED_BY_MEMBER")
-inline fun <reified T : Any> JdbcOperations.queryForList(sql: String, args: Array<out Any>,
-		argTypes: IntArray): List<T> =
-		queryForList(sql, args, argTypes, T::class.java)
+@Suppress("UNCHECKED_CAST")
+inline fun <reified T> JdbcOperations.queryForList(sql: String, args: Array<out Any>,
+												   argTypes: IntArray): List<T> =
+		queryForList(sql, args, argTypes, T::class.java) as List<T>
 
 /**
  * Extension for [JdbcOperations.queryForList] providing a
@@ -86,8 +86,9 @@ inline fun <reified T : Any> JdbcOperations.queryForList(sql: String, args: Arra
  * @author Mario Arias
  * @since 5.0
  */
-inline fun <reified T : Any> JdbcOperations.queryForList(sql: String, args: Array<out Any>): List<T> =
-		queryForList(sql, T::class.java, args)
+@Suppress("UNCHECKED_CAST")
+inline fun <reified T> JdbcOperations.queryForList(sql: String, args: Array<out Any>): List<T> =
+		queryForList(sql, T::class.java, args) as List<T>
 
 
 /**
@@ -97,9 +98,9 @@ inline fun <reified T : Any> JdbcOperations.queryForList(sql: String, args: Arra
  * @author Mario Arias
  * @since 5.0
  */
-inline fun <reified T> JdbcOperations.query(sql: String, vararg args: Any,
-		crossinline function: (ResultSet) -> T): T =
-		query(sql, ResultSetExtractor { function(it) }, *args) as T
+fun <T> JdbcOperations.query(sql: String, vararg args: Any,
+		function: (ResultSet) -> T): T =
+		query(sql, ResultSetExtractor { function(it) }, *args)
 
 /**
  * Extension for [JdbcOperations.query] providing a RowCallbackHandler-like function

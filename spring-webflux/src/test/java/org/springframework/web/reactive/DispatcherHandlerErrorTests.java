@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -123,10 +123,9 @@ public class DispatcherHandlerErrorTests {
 		assertThat(response.getBodyAsString().block()).isEqualTo("""
 				{\
 				"detail":"No static resource non-existing.",\
-				"instance":"\\/resources\\/non-existing",\
+				"instance":"/resources/non-existing",\
 				"status":404,\
-				"title":"Not Found",\
-				"type":"about:blank"}\
+				"title":"Not Found"}\
 				""");
 	}
 

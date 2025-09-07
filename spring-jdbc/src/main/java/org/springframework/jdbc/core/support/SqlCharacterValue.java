@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,11 +34,16 @@ import org.springframework.jdbc.core.SqlTypeValue;
  *
  * <p>Designed for use with {@link org.springframework.jdbc.core.JdbcTemplate}
  * as well as {@link org.springframework.jdbc.core.simple.JdbcClient}, to be
- * passed in as a parameter value wrapping the target content value. Can be
- * combined with {@link org.springframework.jdbc.core.SqlParameterValue} for
- * specifying a SQL type, for example,
+ * passed in as a parameter value wrapping the target content value.
+ *
+ * <p>Can be combined with {@link org.springframework.jdbc.core.SqlParameterValue}
+ * for specifying a SQL type, for example,
  * {@code new SqlParameterValue(Types.CLOB, new SqlCharacterValue(myContent))}.
  * With most database drivers, the type hint is not actually necessary.
+ *
+ * <p>Note: Only specify {@code Types.CLOB} in case of an actual CLOB, preferring
+ * {@code Types.LONGVARCHAR} otherwise. This is in contrast to {@link SqlLobValue}
+ * where char sequence handling was lenient.
  *
  * @author Juergen Hoeller
  * @since 6.1.4

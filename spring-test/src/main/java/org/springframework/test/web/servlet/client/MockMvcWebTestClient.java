@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -88,7 +88,7 @@ public interface MockMvcWebTestClient {
 	 * to initialize {@link MockMvc}.
 	 */
 	static ControllerSpec bindToController(Object... controllers) {
-		return new StandaloneMockMvcSpec(controllers);
+		return new MockMvcWebTestClientSpecs.StandaloneMockMvcSpec(controllers);
 	}
 
 	/**
@@ -100,7 +100,7 @@ public interface MockMvcWebTestClient {
 	 * @since 6.2
 	 */
 	static RouterFunctionSpec bindToRouterFunction(RouterFunction<?>... routerFunctions) {
-		return new RouterFunctionMockMvcSpec(routerFunctions);
+		return new MockMvcWebTestClientSpecs.RouterFunctionMockMvcSpec(routerFunctions);
 	}
 
 	/**
@@ -112,7 +112,7 @@ public interface MockMvcWebTestClient {
 	 * to initialize {@code MockMvc}.
 	 */
 	static MockMvcServerSpec<?> bindToApplicationContext(WebApplicationContext context) {
-		return new ApplicationContextMockMvcSpec(context);
+		return new MockMvcWebTestClientSpecs.ApplicationContextMockMvcSpec(context);
 	}
 
 	/**

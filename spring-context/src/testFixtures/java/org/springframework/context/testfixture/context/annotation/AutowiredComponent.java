@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,22 +25,26 @@ public class AutowiredComponent {
 
 	private Integer counter;
 
+	@Autowired
+	public void setEnvironment(Environment environment) {
+		this.environment = environment;
+	}
+
 	public Environment getEnvironment() {
 		return this.environment;
 	}
 
 	@Autowired
-	public void setEnvironment(Environment environment) {
-		this.environment = environment;
+	public void setCounter(Integer counter) {
+		this.counter = counter;
 	}
 
 	public Integer getCounter() {
 		return this.counter;
 	}
 
-	@Autowired
-	public void setCounter(Integer counter) {
-		this.counter = counter;
+	public Integer getCounter(Integer ignored) {
+		return this.counter;
 	}
 
 }

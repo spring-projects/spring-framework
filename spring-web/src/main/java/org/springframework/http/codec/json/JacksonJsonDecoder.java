@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,6 @@ import java.util.Map;
 import org.jspecify.annotations.Nullable;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
-import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.cfg.MapperBuilder;
 import tools.jackson.databind.json.JsonMapper;
 
@@ -50,7 +49,7 @@ import org.springframework.util.MimeTypeUtils;
  * @since 7.0
  * @see JacksonJsonEncoder
  */
-public class JacksonJsonDecoder extends AbstractJacksonDecoder {
+public class JacksonJsonDecoder extends AbstractJacksonDecoder<JsonMapper> {
 
 	private static final CharBufferDecoder CHAR_BUFFER_DECODER = CharBufferDecoder.textPlainOnly(Arrays.asList(",", "\n"), false);
 
@@ -73,20 +72,20 @@ public class JacksonJsonDecoder extends AbstractJacksonDecoder {
 	}
 
 	/**
-	 * Construct a new instance with the provided {@link ObjectMapper}.
+	 * Construct a new instance with the provided {@link JsonMapper}.
 	 * @see JsonMapper#builder()
 	 * @see MapperBuilder#findModules(ClassLoader)
 	 */
-	public JacksonJsonDecoder(ObjectMapper mapper) {
+	public JacksonJsonDecoder(JsonMapper mapper) {
 		this(mapper, DEFAULT_JSON_MIME_TYPES);
 	}
 
 	/**
-	 * Construct a new instance with the provided {@link ObjectMapper} and {@link MimeType}s.
+	 * Construct a new instance with the provided {@link JsonMapper} and {@link MimeType}s.
 	 * @see JsonMapper#builder()
 	 * @see MapperBuilder#findModules(ClassLoader)
 	 */
-	public JacksonJsonDecoder(ObjectMapper mapper, MimeType... mimeTypes) {
+	public JacksonJsonDecoder(JsonMapper mapper, MimeType... mimeTypes) {
 		super(mapper, mimeTypes);
 	}
 

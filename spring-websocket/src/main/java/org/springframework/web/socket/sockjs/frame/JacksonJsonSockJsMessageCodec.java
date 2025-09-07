@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,9 +18,8 @@ package org.springframework.web.socket.sockjs.frame;
 
 import java.io.InputStream;
 
-import com.fasterxml.jackson.core.io.JsonStringEncoder;
 import org.jspecify.annotations.Nullable;
-import tools.jackson.databind.ObjectMapper;
+import tools.jackson.core.io.JsonStringEncoder;
 import tools.jackson.databind.cfg.MapperBuilder;
 import tools.jackson.databind.json.JsonMapper;
 
@@ -37,7 +36,7 @@ import org.springframework.util.Assert;
  */
 public class JacksonJsonSockJsMessageCodec extends AbstractSockJsMessageCodec {
 
-	private final ObjectMapper objectMapper;
+	private final JsonMapper jsonMapper;
 
 
 	/**
@@ -46,33 +45,33 @@ public class JacksonJsonSockJsMessageCodec extends AbstractSockJsMessageCodec {
 	 * {@link MapperBuilder#findModules(ClassLoader)}.
 	 */
 	public JacksonJsonSockJsMessageCodec() {
-		this.objectMapper = JsonMapper.builder().findAndAddModules(JacksonJsonSockJsMessageCodec.class.getClassLoader()).build();
+		this.jsonMapper = JsonMapper.builder().findAndAddModules(JacksonJsonSockJsMessageCodec.class.getClassLoader()).build();
 	}
 
 	/**
-	 * Construct a new instance with the provided {@link ObjectMapper}.
+	 * Construct a new instance with the provided {@link JsonMapper}.
 	 * @see JsonMapper#builder()
 	 * @see MapperBuilder#findAndAddModules(ClassLoader)
 	 */
-	public JacksonJsonSockJsMessageCodec(ObjectMapper objectMapper) {
-		Assert.notNull(objectMapper, "ObjectMapper must not be null");
-		this.objectMapper = objectMapper;
+	public JacksonJsonSockJsMessageCodec(JsonMapper jsonMapper) {
+		Assert.notNull(jsonMapper, "JsonMapper must not be null");
+		this.jsonMapper = jsonMapper;
 	}
 
 
 	@Override
 	public String @Nullable [] decode(String content) {
-		return this.objectMapper.readValue(content, String[].class);
+		return this.jsonMapper.readValue(content, String[].class);
 	}
 
 	@Override
 	public String @Nullable [] decodeInputStream(InputStream content) {
-		return this.objectMapper.readValue(content, String[].class);
+		return this.jsonMapper.readValue(content, String[].class);
 	}
 
 	@Override
 	protected char[] applyJsonQuoting(String content) {
-		return JsonStringEncoder.getInstance().quoteAsString(content);
+		return JsonStringEncoder.getInstance().quoteAsCharArray(content);
 	}
 
 }

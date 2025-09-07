@@ -6,7 +6,6 @@
 Spring offers support for the Jackson JSON library.
 
 
-
 [[mvc-view-json-mapping]]
 == Jackson-based JSON MVC Views
 [.small]#xref:web/webflux-view.adoc#webflux-view-httpmessagewriter[See equivalent in the Reactive stack]#
@@ -25,7 +24,6 @@ through the `ObjectMapper` property, for cases where you need to provide custom 
 serializers and deserializers for specific types.
 
 
-
 [[mvc-view-xml-mapping]]
 == Jackson-based XML Views
 [.small]#xref:web/webflux-view.adoc#webflux-view-httpmessagewriter[See equivalent in the Reactive stack]#
@@ -40,7 +38,3 @@ You can customize XML mapping as needed by using JAXB or Jackson's provided
 annotations. When you need further control, you can inject a custom `XmlMapper`
 through the `ObjectMapper` property, for cases where custom XML
 you need to provide serializers and deserializers for specific types.
-
-
-
-

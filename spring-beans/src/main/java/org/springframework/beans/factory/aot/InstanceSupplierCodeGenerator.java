@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -115,6 +115,7 @@ public class InstanceSupplierCodeGenerator {
 		this.allowDirectSupplierShortcut = allowDirectSupplierShortcut;
 	}
 
+
 	/**
 	 * Generate the instance supplier code.
 	 * @param registeredBean the bean to handle
@@ -165,7 +166,8 @@ public class InstanceSupplierCodeGenerator {
 					hints -> hints.registerType(publicType, MemberCategory.INVOKE_DECLARED_CONSTRUCTORS));
 		}
 
-		if (!isVisible(constructor, constructor.getDeclaringClass())) {
+		if (!isVisible(constructor, constructor.getDeclaringClass()) ||
+				registeredBean.getMergedBeanDefinition().hasMethodOverrides()) {
 			return generateCodeForInaccessibleConstructor(descriptor,
 					hints -> hints.registerConstructor(constructor, ExecutableMode.INVOKE));
 		}

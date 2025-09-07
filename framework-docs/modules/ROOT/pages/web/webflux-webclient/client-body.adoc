@@ -103,7 +103,6 @@ Kotlin::
 ======
 
 
-
 [[webflux-client-body-form]]
 == Form Data
 
@@ -170,7 +169,6 @@ Kotlin::
 			.awaitBody<Unit>()
 ----
 ======
-
 
 
 [[webflux-client-body-multipart]]
@@ -340,6 +338,3 @@ Kotlin::
 On the server side, `PartEvent` objects that are received via `@RequestBody` or
 `ServerRequest::bodyToFlux(PartEvent.class)` can be relayed to another service
 via the `WebClient`.
-
-
-

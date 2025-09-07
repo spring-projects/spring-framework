@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -453,7 +453,7 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 						() -> {
 							CompletableFuture<?> invokeResult = ((CompletableFuture<?>) invokeOperation(invoker));
 							if (invokeResult == null) {
-								return null;
+								throw new IllegalStateException("Returned CompletableFuture must not be null: " + method);
 							}
 							return invokeResult.exceptionallyCompose(ex -> {
 								invokeFailure.set(true);

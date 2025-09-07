@@ -16,7 +16,8 @@ advantages:
   during development, without negating the option of switching to explicit wiring when
   the code base becomes more stable.
 
-When using XML-based configuration metadata (see xref:core/beans/dependencies/factory-collaborators.adoc[Dependency Injection]), you
+When using XML-based configuration metadata (see
+xref:core/beans/dependencies/factory-collaborators.adoc[Dependency Injection]), you
 can specify the autowire mode for a bean definition with the `autowire` attribute of the
 `<bean/>` element. The autowiring functionality has four modes. You specify autowiring
 per bean and can thus choose which ones to autowire. The following table describes the
@@ -60,7 +61,6 @@ instance's values consist of all bean instances that match the expected type, an
 `Map` instance's keys contain the corresponding bean names.
 
 
-
 [[beans-autowired-exceptions]]
 == Limitations and Disadvantages of Autowiring
 
@@ -90,12 +90,12 @@ In the latter scenario, you have several options:
 
 * Abandon autowiring in favor of explicit wiring.
 * Avoid autowiring for a bean definition by setting its `autowire-candidate` attributes
-  to `false`, as described in the xref:core/beans/dependencies/factory-autowire.adoc#beans-factory-autowire-candidate[next section].
+  to `false`, as described in the
+  xref:core/beans/dependencies/factory-autowire.adoc#beans-factory-autowire-candidate[next section].
 * Designate a single bean definition as the primary candidate by setting the
   `primary` attribute of its `<bean/>` element to `true`.
 * Implement the more fine-grained control available with annotation-based configuration,
   as described in xref:core/beans/annotation-config.adoc[Annotation-based Container Configuration].
-
 
 
 [[beans-factory-autowire-candidate]]
@@ -139,6 +139,3 @@ get injected by plain declared type only, rather by type plus specific qualifier
 In contrast, `autowireCandidate=false` behaves exactly like the `autowire-candidate`
 attribute as explained above: Such a bean will never get injected by type at all.
 ====
-
-
-

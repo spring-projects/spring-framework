@@ -232,4 +232,3 @@ tasked only with creating the data that is to be rendered in the email template 
 sending the email. It is definitely a best practice when the content of your email messages
 becomes even moderately complex, and, with the Spring Framework's support classes for
 FreeMarker, it becomes quite easy to do.
-

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,10 +55,8 @@ public class ProblemDetail implements Serializable {
 
 	private static final long serialVersionUID = 3307761915842206538L;
 
-	private static final URI BLANK_TYPE = URI.create("about:blank");
 
-
-	private URI type = BLANK_TYPE;
+	private @Nullable URI type;
 
 	private @Nullable String title;
 
@@ -104,18 +102,18 @@ public class ProblemDetail implements Serializable {
 
 	/**
 	 * Setter for the {@link #getType() problem type}.
-	 * <p>By default, this is {@link #BLANK_TYPE}.
+	 * <p>By default, this is not set. According to the spec, when not present,
+	 * the type is assumed to be "about:blank"
 	 * @param type the problem type
 	 */
-	public void setType(URI type) {
-		Assert.notNull(type, "'type' is required");
+	public void setType(@Nullable URI type) {
 		this.type = type;
 	}
 
 	/**
 	 * Return the configured {@link #setType(URI) problem type}.
 	 */
-	public URI getType() {
+	public @Nullable URI getType() {
 		return this.type;
 	}
 
@@ -245,7 +243,7 @@ public class ProblemDetail implements Serializable {
 	@Override
 	public boolean equals(@Nullable Object other) {
 		return (this == other || (other instanceof ProblemDetail that &&
-				getType().equals(that.getType()) &&
+				ObjectUtils.nullSafeEquals(getType(), that.getType()) &&
 				ObjectUtils.nullSafeEquals(getTitle(), that.getTitle()) &&
 				this.status == that.status &&
 				ObjectUtils.nullSafeEquals(this.detail, that.detail) &&

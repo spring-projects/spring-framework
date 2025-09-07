@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -71,7 +71,7 @@ class DispatcherHandlerTests {
 		context.refresh();
 
 		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/"));
-		new DispatcherHandler(context).handle(exchange).block(Duration.ofSeconds(0));
+		new DispatcherHandler(context).handle(exchange).block(Duration.ZERO);
 
 		assertThat(exchange.getResponse().getBodyAsString().block(Duration.ofSeconds(5))).isEqualTo("1");
 	}
@@ -94,7 +94,7 @@ class DispatcherHandlerTests {
 				.build();
 
 		MockServerWebExchange exchange = MockServerWebExchange.from(request);
-		new DispatcherHandler(context).handle(exchange).block(Duration.ofSeconds(0));
+		new DispatcherHandler(context).handle(exchange).block(Duration.ZERO);
 
 		verifyNoInteractions(webHandler);
 	}

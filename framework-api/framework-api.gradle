@@ -1,6 +1,7 @@
 plugins {
 	id 'java-platform'
 	id 'io.freefair.aggregate-javadoc' version '8.13.1'
+	id 'org.jetbrains.dokka'
 }
 
 description = "Spring Framework API Docs"
@@ -54,23 +55,19 @@ javadoc {
 	}
 }
 
-/**
- * Produce KDoc for all Spring Framework modules in "build/docs/kdoc"
- */
-rootProject.tasks.dokkaHtmlMultiModule.configure {
-	dependsOn {
-		tasks.named("javadoc")
+dokka {
+	moduleName = "spring-framework"
+	dokkaPublications.html {
+		outputDirectory = project.java.docsDir.dir("kdoc-api")
+		includes.from("$rootProject.rootDir/framework-docs/src/docs/api/dokka-overview.md")
 	}
-	moduleName.set("spring-framework")
-	outputDirectory.set(project.java.docsDir.dir("kdoc-api").get().asFile)
-	includes.from("$rootProject.rootDir/framework-docs/src/docs/api/dokka-overview.md")
 }
 
 /**
  * Zip all Java docs (javadoc & kdoc) into a single archive
  */
 tasks.register('docsZip', Zip) {
-	dependsOn = ['javadoc', rootProject.tasks.dokkaHtmlMultiModule]
+	dependsOn = ['javadoc', 'dokkaGenerate']
 	group = "distribution"
 	description = "Builds -${archiveClassifier} archive containing api and reference " +
 			"for deployment at https://docs.spring.io/spring-framework/docs/."
@@ -83,7 +80,7 @@ tasks.register('docsZip', Zip) {
 	from(javadoc) {
 		into "javadoc-api"
 	}
-	from(rootProject.tasks.dokkaHtmlMultiModule.outputDirectory) {
+	from(project.java.docsDir.dir("kdoc-api")) {
 		into "kdoc-api"
 	}
 }

@@ -4,7 +4,6 @@
 This part of the appendix lists XML schemas related to the core container.
 
 
-
 [[xsd-schemas-util]]
 == The `util` Schema
 
@@ -28,7 +27,6 @@ correct schema so that the tags in the `util` namespace are available to you):
 
 	</beans>
 ----
-
 
 [[xsd-schemas-util-constant]]
 === Using `<util:constant/>`
@@ -186,7 +184,6 @@ Kotlin::
 	</bean>
 ----
 
-
 [[xsd-schemas-util-property-path]]
 === Using `<util:property-path/>`
 
@@ -308,7 +305,6 @@ You can specifically set the result type in the actual definition. This is not n
 for most use cases, but it can sometimes be useful. See the javadoc for more info on
 this feature.
 
-
 [[xsd-schemas-util-properties]]
 === Using `<util:properties/>`
 
@@ -333,7 +329,6 @@ The following example uses a `util:properties` element to make a more concise re
 	<!-- creates a java.util.Properties instance with values loaded from the supplied location -->
 	<util:properties id="jdbcConfiguration" location="classpath:com/foo/jdbc-production.properties"/>
 ----
-
 
 [[xsd-schemas-util-list]]
 === Using `<util:list/>`
@@ -389,7 +384,6 @@ following configuration:
 
 If no `list-class` attribute is supplied, the container chooses a `List` implementation.
 
-
 [[xsd-schemas-util-map]]
 === Using `<util:map/>`
 
@@ -443,7 +437,6 @@ following configuration:
 ----
 
 If no `'map-class'` attribute is supplied, the container chooses a `Map` implementation.
-
 
 [[xsd-schemas-util-set]]
 === Using `<util:set/>`
@@ -500,7 +493,6 @@ following configuration:
 If no `set-class` attribute is supplied, the container chooses a `Set` implementation.
 
 
-
 [[xsd-schemas-aop]]
 == The `aop` Schema
 
@@ -530,7 +522,6 @@ are available to you):
 ----
 
 
-
 [[xsd-schemas-context]]
 == The `context` Schema
 
@@ -554,7 +545,6 @@ available to you:
 
 	</beans>
 ----
-
 
 [[xsd-schemas-context-pphc]]
 === Using `<property-placeholder/>`
@@ -599,34 +589,25 @@ element for that purpose. Similarly, Spring's
 xref:integration/cache/annotations.adoc[caching annotations] need to be explicitly
 xref:integration/cache/annotations.adoc#cache-annotation-enable[enabled] as well.
 
-
 [[xsd-schemas-context-component-scan]]
 === Using `<component-scan/>`
 
-This element is detailed in the section on xref:core/beans/annotation-config.adoc[annotation-based container configuration]
-.
-
+This element is detailed in the section on xref:core/beans/annotation-config.adoc[annotation-based container configuration].
 
 [[xsd-schemas-context-ltw]]
 === Using `<load-time-weaver/>`
 
-This element is detailed in the section on xref:core/aop/using-aspectj.adoc#aop-aj-ltw[load-time weaving with AspectJ in the Spring Framework]
-.
-
+This element is detailed in the section on xref:core/aop/using-aspectj.adoc#aop-aj-ltw[load-time weaving with AspectJ in the Spring Framework].
 
 [[xsd-schemas-context-sc]]
 === Using `<spring-configured/>`
 
-This element is detailed in the section on xref:core/aop/using-aspectj.adoc#aop-atconfigurable[using AspectJ to dependency inject domain objects with Spring]
-.
-
+This element is detailed in the section on xref:core/aop/using-aspectj.adoc#aop-atconfigurable[using AspectJ to dependency inject domain objects with Spring].
 
 [[xsd-schemas-context-mbe]]
 === Using `<mbean-export/>`
 
-This element is detailed in the section on xref:integration/jmx/naming.adoc#jmx-context-mbeanexport[configuring annotation-based MBean export]
-.
-
+This element is detailed in the section on xref:integration/jmx/naming.adoc#jmx-context-mbeanexport[configuring annotation-based MBean export].
 
 
 [[xsd-schemas-beans]]
@@ -666,7 +647,3 @@ as it stands).
 
 In the case of the preceding example, you could assume that there is some logic that consumes
 the bean definition and sets up some caching infrastructure that uses the supplied metadata.
-
-
-
-

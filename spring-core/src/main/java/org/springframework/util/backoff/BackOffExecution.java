@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,10 @@
 package org.springframework.util.backoff;
 
 /**
- * Represent a particular back-off execution.
+ * <p>A {@code BackOffExecution} is effectively an executable instance of a given
+ * {@link BackOff} strategy.
  *
- * <p>Implementations do not need to be thread safe.
+ * <p>Implementations may be stateful but do not need to be thread-safe.
  *
  * @author Stephane Nicoll
  * @since 4.1
@@ -29,7 +30,7 @@ package org.springframework.util.backoff;
 public interface BackOffExecution {
 
 	/**
-	 * Return value of {@link #nextBackOff()} that indicates that the operation
+	 * Return value of {@link #nextBackOff()} which indicates that the operation
 	 * should not be retried.
 	 */
 	long STOP = -1;

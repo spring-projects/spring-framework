@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,18 +26,16 @@ import java.lang.annotation.Target;
 import org.springframework.core.annotation.AliasFor;
 
 /**
- * A convenience annotation that is itself annotated with
- * {@link ControllerAdvice @ControllerAdvice}
- * and {@link ResponseBody @ResponseBody}.
+ * A shortcut annotation that combines {@link ControllerAdvice @ControllerAdvice}
+ * with {@link ResponseBody @ResponseBody}, in effect simply an
+ * {@code @ControllerAdvice} whose exception handler methods render to the
+ * response body.
  *
- * <p>Types that carry this annotation are treated as controller advice where
- * {@link ExceptionHandler @ExceptionHandler} methods assume
- * {@link ResponseBody @ResponseBody} semantics by default.
+ * <p>By default, {@code @RestControllerAdvice} applies to any controller,
+ * including {@code @Controller} and {@code @RestController}. Use attributes of
+ * the annotation to apply more specific filtering criteria.
  *
- * <p><b>NOTE:</b> {@code @RestControllerAdvice} is processed if an appropriate
- * {@code HandlerMapping}-{@code HandlerAdapter} pair is configured such as the
- * {@code RequestMappingHandlerMapping}-{@code RequestMappingHandlerAdapter} pair
- * which are the default in the MVC Java config and the MVC namespace.
+ * <p>See {@link ControllerAdvice} for more details.
  *
  * @author Rossen Stoyanchev
  * @author Sam Brannen

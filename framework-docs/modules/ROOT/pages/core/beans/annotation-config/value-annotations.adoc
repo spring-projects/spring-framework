@@ -241,5 +241,3 @@ Kotlin::
 		@Value("#{{'Thriller': 100, 'Comedy': 300}}") private val countOfMoviesPerCatalog: Map<String, Int>)
 ----
 ======
-
-

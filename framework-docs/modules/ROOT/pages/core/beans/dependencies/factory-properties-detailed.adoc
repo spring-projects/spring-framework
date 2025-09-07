@@ -1,11 +1,10 @@
 [[beans-factory-properties-detailed]]
 = Dependencies and Configuration in Detail
 
-As mentioned in the xref:core/beans/dependencies/factory-collaborators.adoc[previous section], you can define bean
-properties and constructor arguments as references to other managed beans (collaborators)
-or as values defined inline. Spring's XML-based configuration metadata supports
-sub-element types within its `<property/>` and `<constructor-arg/>` elements for this
-purpose.
+As mentioned in the xref:core/beans/dependencies/factory-collaborators.adoc[previous section],
+you can define bean properties and constructor arguments as references to other managed beans
+(collaborators) or as values defined inline. Spring's XML-based configuration metadata supports
+sub-element types within its `<property/>` and `<constructor-arg/>` elements for this purpose.
 
 
 [[beans-value-element]]
@@ -544,9 +543,10 @@ three approaches at the same time.
 [[beans-c-namespace]]
 == XML Shortcut with the c-namespace
 
-Similar to the xref:core/beans/dependencies/factory-properties-detailed.adoc#beans-p-namespace[XML Shortcut with the p-namespace], the c-namespace, introduced in Spring
-3.1, allows inlined attributes for configuring the constructor arguments rather
-then nested `constructor-arg` elements.
+Similar to the
+xref:core/beans/dependencies/factory-properties-detailed.adoc#beans-p-namespace[XML Shortcut with the p-namespace],
+the c-namespace, introduced in Spring 3.1, allows inlined attributes for configuring
+the constructor arguments rather then nested `constructor-arg` elements.
 
 The following example uses the `c:` namespace to do the same thing as the from
 xref:core/beans/dependencies/factory-collaborators.adoc#beans-constructor-injection[Constructor-based Dependency Injection]:
@@ -598,9 +598,9 @@ A corresponding index notation is also available for `<constructor-arg>` element
 not commonly used since the plain order of declaration is usually sufficient there.
 
 In practice, the constructor resolution
-xref:core/beans/dependencies/factory-collaborators.adoc#beans-factory-ctor-arguments-resolution[mechanism] is quite efficient in matching
-arguments, so unless you really need to, we recommend using the name notation
-throughout your configuration.
+xref:core/beans/dependencies/factory-collaborators.adoc#beans-factory-ctor-arguments-resolution[mechanism]
+is quite efficient in matching arguments, so unless you really need to, we recommend
+using the name notation throughout your configuration.
 
 
 [[beans-compound-property-names]]
@@ -621,6 +621,3 @@ The `something` bean has a `fred` property, which has a `bob` property, which ha
 property, and that final `sammy` property is being set to a value of `123`. In order for
 this to work, the `fred` property of `something` and the `bob` property of `fred` must not
 be `null` after the bean is constructed. Otherwise, a `NullPointerException` is thrown.
-
-
-

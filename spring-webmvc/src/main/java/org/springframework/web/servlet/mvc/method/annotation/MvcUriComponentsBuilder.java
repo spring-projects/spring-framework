@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -622,8 +622,7 @@ public class MvcUriComponentsBuilder {
 			try {
 				return wac.getBean(MVC_URI_COMPONENTS_CONTRIBUTOR_BEAN_NAME, CompositeUriComponentsContributor.class);
 			}
-			catch (NoSuchBeanDefinitionException ex) {
-				// Ignore
+			catch (NoSuchBeanDefinitionException ignored) {
 			}
 		}
 		return defaultUriComponentsContributor;

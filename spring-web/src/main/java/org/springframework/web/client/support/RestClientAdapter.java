@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 
 package org.springframework.web.client.support;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
@@ -27,6 +29,7 @@ import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.StreamingHttpOutputMessage;
 import org.springframework.util.Assert;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.service.invoker.HttpExchangeAdapter;
@@ -72,7 +75,8 @@ public final class RestClientAdapter implements HttpExchangeAdapter {
 
 	@Override
 	public <T> @Nullable T exchangeForBody(HttpRequestValues values, ParameterizedTypeReference<T> bodyType) {
-		return newRequest(values).retrieve().body(bodyType);
+		return (bodyType.getType().equals(InputStream.class) ?
+				exchangeForInputStream(values) : newRequest(values).retrieve().body(bodyType));
 	}
 
 	@Override
@@ -82,7 +86,21 @@ public final class RestClientAdapter implements HttpExchangeAdapter {
 
 	@Override
 	public <T> ResponseEntity<T> exchangeForEntity(HttpRequestValues values, ParameterizedTypeReference<T> bodyType) {
-		return newRequest(values).retrieve().toEntity(bodyType);
+		return (bodyType.getType().equals(InputStream.class) ?
+				exchangeForEntityInputStream(values) : newRequest(values).retrieve().toEntity(bodyType));
+	}
+
+	@SuppressWarnings("unchecked")
+	private <T> T exchangeForInputStream(HttpRequestValues values) {
+		return (T) newRequest(values).exchange((request, response) -> getInputStream(response), false);
+	}
+
+	@SuppressWarnings("unchecked")
+	private <T> ResponseEntity<T> exchangeForEntityInputStream(HttpRequestValues values) {
+		return (ResponseEntity<T>) newRequest(values).exchangeForRequiredValue((request, response) ->
+				ResponseEntity.status(response.getStatusCode())
+						.headers(response.getHeaders())
+						.body(getInputStream(response)), false);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -130,7 +148,10 @@ public final class RestClientAdapter implements HttpExchangeAdapter {
 
 		B body = (B) values.getBodyValue();
 		if (body != null) {
-			if (values.getBodyValueType() != null) {
+			if (body instanceof StreamingHttpOutputMessage.Body streamingBody) {
+				bodySpec.body(streamingBody);
+			}
+			else if (values.getBodyValueType() != null) {
 				bodySpec.body(body, (ParameterizedTypeReference<? super B>) values.getBodyValueType());
 			}
 			else {
@@ -140,6 +161,16 @@ public final class RestClientAdapter implements HttpExchangeAdapter {
 
 		return bodySpec;
 	}
+
+	private static InputStream getInputStream(
+			RestClient.RequestHeadersSpec.ConvertibleClientHttpResponse response) throws IOException {
+
+		if (response.getStatusCode().isError()) {
+			throw response.createException();
+		}
+		return response.getBody();
+	}
+
 
 
 	/**

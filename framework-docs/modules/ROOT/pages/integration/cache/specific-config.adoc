@@ -8,4 +8,3 @@ policies and different topologies that other solutions do not support (for examp
 the JDK `ConcurrentHashMap` -- exposing that in the cache abstraction would be useless
 because there would no backing support). Such functionality should be controlled
 directly through the backing cache (when configuring it) or through its native API.
-

@@ -31,5 +31,3 @@ Kotlin::
 ----
 <1> Run this method after a transaction.
 ======
-
-

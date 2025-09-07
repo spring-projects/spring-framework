@@ -35,5 +35,3 @@ Kotlin::
 ----
 <1> Commit the result of the test to the database.
 ======
-
-

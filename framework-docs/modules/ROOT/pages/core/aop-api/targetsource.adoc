@@ -22,7 +22,6 @@ rather than a singleton bean definition. This allows Spring to create a new targ
 instance when required.
 
 
-
 [[aop-ts-swap]]
 == Hot-swappable Target Sources
 
@@ -75,7 +74,6 @@ the new target.
 Although this example does not add any advice (it is not necessary to add advice to
 use a `TargetSource`), any `TargetSource` can be used in conjunction with
 arbitrary advice.
-
 
 
 [[aop-ts-pool]]
@@ -175,7 +173,6 @@ Simpler pooling is available by using auto-proxying. You can set the `TargetSour
 used by any auto-proxy creator.
 
 
-
 [[aop-ts-prototype]]
 == Prototype Target Sources
 
@@ -198,7 +195,6 @@ To do this, you could modify the `poolTargetSource` definition shown earlier as 
 The only property is the name of the target bean. Inheritance is used in the
 `TargetSource` implementations to ensure consistent naming. As with the pooling target
 source, the target bean must be a prototype bean definition.
-
 
 
 [[aop-ts-threadlocal]]
@@ -226,7 +222,3 @@ always remember to correctly set and unset (where the latter involves a call to
 any case, since not unsetting it might result in problematic behavior. Spring's
 `ThreadLocal` support does this for you and should always be considered in favor of using
 `ThreadLocal` instances without other proper handling code.
-
-
-
-

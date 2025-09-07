@@ -19,13 +19,11 @@ There are two ways to do this:
   auto-proxy creation driven by source-level metadata attributes.
 
 
-
 [[aop-autoproxy-choices]]
 == Auto-proxy Bean Definitions
 
 This section covers the  auto-proxy creators provided by the
 `org.springframework.aop.framework.autoproxy` package.
-
 
 [[aop-api-autoproxy]]
 === `BeanNameAutoProxyCreator`
@@ -60,7 +58,6 @@ example, are plain old bean definitions with the target class. An AOP proxy is
 automatically created by the `BeanNameAutoProxyCreator`. The same advice is applied
 to all matching beans. Note that, if advisors are used (rather than the interceptor in
 the preceding example), the pointcuts may apply differently to different beans.
-
 
 [[aop-api-autoproxy-default]]
 === `DefaultAdvisorAutoProxyCreator`
@@ -125,7 +122,3 @@ differently configured, AdvisorAutoProxyCreators in the same factory) and orderi
 Advisors can implement the `org.springframework.core.Ordered` interface to ensure
 correct ordering if this is an issue. The `TransactionAttributeSourceAdvisor` used in the
 preceding example has a configurable order value. The default setting is unordered.
-
-
-
-

@@ -92,6 +92,3 @@ client subscription.
 The preceding overview is intended to provide the most basic understanding of the
 STOMP protocol. We recommended reviewing the protocol
 https://stomp.github.io/stomp-specification-1.2.html[specification] in full.
-
-
-

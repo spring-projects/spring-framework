@@ -48,5 +48,3 @@ Note that you can configure a `defaultRequest` callback globally at the
 `WebClient.Builder` level which lets you insert attributes into all requests,
 which could be used for example in a Spring MVC application to populate
 request attributes based on `ThreadLocal` data.
-
-

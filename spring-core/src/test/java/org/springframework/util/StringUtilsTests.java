@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -792,6 +792,25 @@ class StringUtilsTests {
 	@Test
 	void collectionToDelimitedStringWithNullValuesShouldNotFail() {
 		assertThat(StringUtils.collectionToCommaDelimitedString(Collections.singletonList(null))).isEqualTo("null");
+	}
+
+	@Test
+	void applyRelativePath() {
+		// Basic combination
+		assertThat(StringUtils.applyRelativePath("mypath/myfile", "otherfile")).isEqualTo("mypath/otherfile");
+		// Relative path starts with slash
+		assertThat(StringUtils.applyRelativePath("mypath/myfile", "/otherfile")).isEqualTo("mypath/otherfile");
+		// Includes root path
+		assertThat(StringUtils.applyRelativePath("/mypath/myfile", "otherfile")).isEqualTo("/mypath/otherfile");
+		assertThat(StringUtils.applyRelativePath("/mypath/myfile", "/otherfile")).isEqualTo("/mypath/otherfile");
+		// When base path has no slash
+		assertThat(StringUtils.applyRelativePath("myfile", "otherfile")).isEqualTo("otherfile");
+		// Keep parent directory token as-is
+		assertThat(StringUtils.applyRelativePath("mypath/myfile", "../otherfile")).isEqualTo("mypath/../otherfile");
+		// Base path ends with slash
+		assertThat(StringUtils.applyRelativePath("mypath/", "otherfile")).isEqualTo("mypath/otherfile");
+		// Empty relative path
+		assertThat(StringUtils.applyRelativePath("mypath/myfile", "")).isEqualTo("mypath/");
 	}
 
 	@Test

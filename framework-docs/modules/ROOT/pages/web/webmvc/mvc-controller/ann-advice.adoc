@@ -10,18 +10,20 @@ to any controller. Moreover, as of 5.3, `@ExceptionHandler` methods in `@Control
 can be used to handle exceptions from any `@Controller` or any other handler.
 
 `@ControllerAdvice` is meta-annotated with `@Component` and therefore can be registered as
-a Spring bean through xref:core/beans/java/instantiating-container.adoc#beans-java-instantiating-container-scan[component scanning]
-. `@RestControllerAdvice` is meta-annotated with `@ControllerAdvice`
-and `@ResponseBody`, and that means `@ExceptionHandler` methods will have their return
-value rendered via response body message conversion, rather than via HTML views.
+a Spring bean through xref:core/beans/java/instantiating-container.adoc#beans-java-instantiating-container-scan[component scanning].
+
+`@RestControllerAdvice` is a shortcut annotation that combines `@ControllerAdvice`
+with `@ResponseBody`, in effect simply an `@ControllerAdvice` whose exception handler
+methods render to the response body.
 
 On startup, `RequestMappingHandlerMapping` and `ExceptionHandlerExceptionResolver` detect
 controller advice beans and apply them at runtime. Global `@ExceptionHandler` methods,
 from an `@ControllerAdvice`, are applied _after_ local ones, from the `@Controller`.
 By contrast, global `@ModelAttribute` and `@InitBinder` methods are applied _before_ local ones.
 
-The `@ControllerAdvice` annotation has attributes that let you narrow the set of controllers
-and handlers that they apply to. For example:
+By default, both `@ControllerAdvice` and `@RestControllerAdvice` apply to any controller,
+including `@Controller` and `@RestController`. Use attributes of the annotation to narrow
+the set of controllers and handlers that they apply to. For example:
 
 [tabs]
 ======
@@ -64,7 +66,3 @@ The selectors in the preceding example are evaluated at runtime and may negative
 performance if used extensively. See the
 {spring-framework-api}/web/bind/annotation/ControllerAdvice.html[`@ControllerAdvice`]
 javadoc for more details.
-
-
-
-

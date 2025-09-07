@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.format.FormatterRegistry;
 import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.converter.HttpMessageConverters;
 import org.springframework.util.CollectionUtils;
 import org.springframework.validation.MessageCodesResolver;
 import org.springframework.validation.Validator;
@@ -121,11 +122,20 @@ public class DelegatingWebMvcConfiguration extends WebMvcConfigurationSupport {
 	}
 
 	@Override
+	protected void configureMessageConverters(HttpMessageConverters.ServerBuilder builder) {
+		this.configurers.configureMessageConverters(builder);
+	}
+
+	@Override
+	@Deprecated(since = "7.0", forRemoval = true)
+	@SuppressWarnings("removal")
 	protected void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
 		this.configurers.configureMessageConverters(converters);
 	}
 
 	@Override
+	@Deprecated(since = "7.0", forRemoval = true)
+	@SuppressWarnings("removal")
 	protected void extendMessageConverters(List<HttpMessageConverter<?>> converters) {
 		this.configurers.extendMessageConverters(converters);
 	}

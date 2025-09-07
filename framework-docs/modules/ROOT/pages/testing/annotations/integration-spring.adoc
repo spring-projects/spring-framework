@@ -30,4 +30,3 @@ Spring's testing annotations include the following:
 * xref:testing/annotations/integration-spring/annotation-sqlmergemode.adoc[`@SqlMergeMode`]
 * xref:testing/annotations/integration-spring/annotation-sqlgroup.adoc[`@SqlGroup`]
 * xref:testing/annotations/integration-spring/annotation-disabledinaotmode.adoc[`@DisabledInAotMode`]
-

@@ -94,8 +94,6 @@ Kotlin::
 ----
 ======
 
-
-
 The `buildFeedItems()` and `buildFeedEntries()` methods pass in the HTTP request, in case
 you need to access the Locale. The HTTP response is passed in only for the setting of
 cookies or other HTTP headers. The feed is automatically written to the response
@@ -103,7 +101,3 @@ object after the method returns.
 
 For an example of creating an Atom view, see Alef Arendsen's Spring Team Blog
 {spring-site-blog}/2009/03/16/adding-an-atom-view-to-an-application-using-spring-s-rest-support[entry].
-
-
-
-

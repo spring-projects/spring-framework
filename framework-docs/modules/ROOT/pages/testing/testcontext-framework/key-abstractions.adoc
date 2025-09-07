@@ -13,6 +13,7 @@ test execution by providing dependency injection, managing transactions, and so 
 class. See the {spring-framework-api}/test/context/package-summary.html[javadoc] and the
 Spring test suite for further information and examples of various implementations.
 
+
 [[testcontext]]
 == `TestContext`
 
@@ -20,6 +21,7 @@ Spring test suite for further information and examples of various implementation
 actual testing framework in use) and provides context management and caching support for
 the test instance for which it is responsible. The `TestContext` also delegates to a
 `SmartContextLoader` to load an `ApplicationContext` if requested.
+
 
 [[testcontextmanager]]
 == `TestContextManager`
@@ -36,11 +38,14 @@ responsible for managing a single `TestContext` and signaling events to each reg
 * After any "`after`" or "`after each`" methods of a particular testing framework.
 * After any "`after class`" or "`after all`" methods of a particular testing framework.
 
+
 [[testexecutionlistener]]
 == `TestExecutionListener`
 
 `TestExecutionListener` defines the API for reacting to test-execution events published by
-the `TestContextManager` with which the listener is registered. See xref:testing/testcontext-framework/tel-config.adoc[`TestExecutionListener` Configuration].
+the `TestContextManager` with which the listener is registered. See
+xref:testing/testcontext-framework/tel-config.adoc[`TestExecutionListener` Configuration].
+
 
 [[context-loaders]]
 == Context Loaders
@@ -82,5 +87,3 @@ Spring provides the following implementations:
   locations.
 * `GenericXmlWebContextLoader`: Loads a `WebApplicationContext` from XML resource
   locations.
-
-

@@ -28,6 +28,7 @@ by default, exactly in the following order:
   `ApplicationContext` (see xref:testing/testcontext-framework/test-execution-events.adoc[Test Execution Events]).
 * `MockitoResetTestExecutionListener`: Resets mocks as configured by `@MockitoBean` or `@MockitoSpyBean`.
 
+
 [[testcontext-tel-config-registering-tels]]
 == Registering `TestExecutionListener` Implementations
 
@@ -76,6 +77,7 @@ Kotlin::
 ======
 ====
 
+
 [[testcontext-tel-config-automatic-discovery]]
 == Automatic Discovery of Default `TestExecutionListener` Implementations
 
@@ -92,6 +94,7 @@ properties file]. Third-party frameworks and developers can contribute their own
 `TestExecutionListener` implementations to the list of default listeners in the same
 manner through their own `spring.factories` files.
 
+
 [[testcontext-tel-config-ordering]]
 == Ordering `TestExecutionListener` Implementations
 
@@ -106,6 +109,7 @@ their default `TestExecutionListener` implementations are registered in the prop
 by implementing `Ordered` or declaring `@Order`. See the javadoc for the `getOrder()`
 methods of the core default `TestExecutionListener` implementations for details on what
 values are assigned to each core listener.
+
 
 [[testcontext-tel-config-merging]]
 == Merging `TestExecutionListener` Implementations

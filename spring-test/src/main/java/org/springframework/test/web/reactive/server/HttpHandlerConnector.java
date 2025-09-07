@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.util.function.Function;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -40,9 +41,11 @@ import org.springframework.http.server.reactive.HttpHandler;
 import org.springframework.http.server.reactive.HttpHeadResponseDecorator;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
+import org.springframework.http.server.reactive.SslInfo;
 import org.springframework.mock.http.client.reactive.MockClientHttpRequest;
 import org.springframework.mock.http.client.reactive.MockClientHttpResponse;
 import org.springframework.mock.http.server.reactive.MockServerHttpRequest;
+import org.springframework.mock.http.server.reactive.MockServerHttpRequest.BodyBuilder;
 import org.springframework.mock.http.server.reactive.MockServerHttpResponse;
 import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
@@ -56,6 +59,7 @@ import org.springframework.util.MultiValueMap;
  * {@link MockServerHttpRequest} and {@link MockServerHttpResponse}.
  *
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
  * @since 5.0
  */
 public class HttpHandlerConnector implements ClientHttpConnector {
@@ -64,13 +68,26 @@ public class HttpHandlerConnector implements ClientHttpConnector {
 
 	private final HttpHandler handler;
 
+	private final @Nullable SslInfo sslInfo;
+
 
 	/**
-	 * Constructor with the {@link HttpHandler} to handle requests with.
+	 * Construct an {@code HttpHandlerConnector} with the supplied {@link HttpHandler}
+	 * to handle requests with.
 	 */
 	public HttpHandlerConnector(HttpHandler handler) {
+		this(handler, null);
+	}
+
+	/**
+	 * Construct an {@code HttpHandlerConnector} with the supplied {@link SslInfo}
+	 * and {@link HttpHandler} to handle requests with.
+	 * @since 7.0
+	 */
+	public HttpHandlerConnector(HttpHandler handler, @Nullable SslInfo sslInfo) {
 		Assert.notNull(handler, "HttpHandler is required");
 		this.handler = handler;
+		this.sslInfo = sslInfo;
 	}
 
 
@@ -136,7 +153,11 @@ public class HttpHandlerConnector implements ClientHttpConnector {
 		URI uri = request.getURI();
 		HttpHeaders headers = request.getHeaders();
 		MultiValueMap<String, HttpCookie> cookies = request.getCookies();
-		return MockServerHttpRequest.method(method, uri).headers(headers).cookies(cookies).body(body);
+		BodyBuilder builder = MockServerHttpRequest.method(method, uri).headers(headers).cookies(cookies);
+		if (this.sslInfo != null) {
+			builder.sslInfo(this.sslInfo);
+		}
+		return builder.body(body);
 	}
 
 	private ServerHttpResponse prepareResponse(ServerHttpResponse response, ServerHttpRequest request) {

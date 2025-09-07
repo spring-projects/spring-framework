@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,14 @@
 
 package org.springframework.web.servlet.config.annotation;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import jakarta.servlet.ServletContext;
 import org.jspecify.annotations.Nullable;
@@ -40,31 +42,8 @@ import org.springframework.format.FormatterRegistry;
 import org.springframework.format.support.DefaultFormattingConversionService;
 import org.springframework.format.support.FormattingConversionService;
 import org.springframework.http.MediaType;
-import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
-import org.springframework.http.converter.ResourceHttpMessageConverter;
-import org.springframework.http.converter.ResourceRegionHttpMessageConverter;
-import org.springframework.http.converter.StringHttpMessageConverter;
-import org.springframework.http.converter.cbor.JacksonCborHttpMessageConverter;
-import org.springframework.http.converter.cbor.KotlinSerializationCborHttpMessageConverter;
-import org.springframework.http.converter.cbor.MappingJackson2CborHttpMessageConverter;
-import org.springframework.http.converter.feed.AtomFeedHttpMessageConverter;
-import org.springframework.http.converter.feed.RssChannelHttpMessageConverter;
-import org.springframework.http.converter.json.GsonHttpMessageConverter;
-import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
-import org.springframework.http.converter.json.JacksonJsonHttpMessageConverter;
-import org.springframework.http.converter.json.JsonbHttpMessageConverter;
-import org.springframework.http.converter.json.KotlinSerializationJsonHttpMessageConverter;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
-import org.springframework.http.converter.protobuf.KotlinSerializationProtobufHttpMessageConverter;
-import org.springframework.http.converter.smile.JacksonSmileHttpMessageConverter;
-import org.springframework.http.converter.smile.MappingJackson2SmileHttpMessageConverter;
-import org.springframework.http.converter.support.AllEncompassingFormHttpMessageConverter;
-import org.springframework.http.converter.xml.JacksonXmlHttpMessageConverter;
-import org.springframework.http.converter.xml.Jaxb2RootElementHttpMessageConverter;
-import org.springframework.http.converter.xml.MappingJackson2XmlHttpMessageConverter;
-import org.springframework.http.converter.yaml.JacksonYamlHttpMessageConverter;
-import org.springframework.http.converter.yaml.MappingJackson2YamlHttpMessageConverter;
+import org.springframework.http.converter.HttpMessageConverters;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -106,8 +85,12 @@ import org.springframework.web.servlet.mvc.annotation.ResponseStatusExceptionRes
 import org.springframework.web.servlet.mvc.method.annotation.ExceptionHandlerExceptionResolver;
 import org.springframework.web.servlet.mvc.method.annotation.JsonViewRequestBodyAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.JsonViewResponseBodyAdvice;
+import org.springframework.web.servlet.mvc.method.annotation.KotlinRequestBodyAdvice;
+import org.springframework.web.servlet.mvc.method.annotation.KotlinResponseBodyAdvice;
+import org.springframework.web.servlet.mvc.method.annotation.RequestBodyAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
+import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
 import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver;
 import org.springframework.web.servlet.resource.ResourceUrlProvider;
 import org.springframework.web.servlet.resource.ResourceUrlProviderExposingInterceptor;
@@ -197,60 +180,19 @@ import org.springframework.web.util.pattern.PathPatternParser;
  */
 public class WebMvcConfigurationSupport implements ApplicationContextAware, ServletContextAware {
 
-	private static final boolean romePresent;
-
-	private static final boolean jaxb2Present;
-
 	private static final boolean jacksonPresent;
 
 	private static final boolean jackson2Present;
 
-	private static final boolean jacksonXmlPresent;
+	private static final boolean kotlinSerializationPresent;
 
-	private static final boolean jackson2XmlPresent;
-
-	private static final boolean jacksonSmilePresent;
-
-	private static final boolean jackson2SmilePresent;
-
-	private static final boolean jacksonCborPresent;
-
-	private static final boolean jackson2CborPresent;
-
-	private static final boolean jacksonYamlPresent;
-
-	private static final boolean jackson2YamlPresent;
-
-	private static final boolean gsonPresent;
-
-	private static final boolean jsonbPresent;
-
-	private static final boolean kotlinSerializationCborPresent;
-
-	private static final boolean kotlinSerializationJsonPresent;
-
-	private static final boolean kotlinSerializationProtobufPresent;
 
 	static {
 		ClassLoader classLoader = WebMvcConfigurationSupport.class.getClassLoader();
-		romePresent = ClassUtils.isPresent("com.rometools.rome.feed.WireFeed", classLoader);
-		jaxb2Present = ClassUtils.isPresent("jakarta.xml.bind.Binder", classLoader);
 		jacksonPresent = ClassUtils.isPresent("tools.jackson.databind.ObjectMapper", classLoader);
 		jackson2Present = ClassUtils.isPresent("com.fasterxml.jackson.databind.ObjectMapper", classLoader) &&
 				ClassUtils.isPresent("com.fasterxml.jackson.core.JsonGenerator", classLoader);
-		jacksonXmlPresent = jacksonPresent && ClassUtils.isPresent("tools.jackson.dataformat.xml.XmlMapper", classLoader);
-		jackson2XmlPresent = jackson2Present && ClassUtils.isPresent("com.fasterxml.jackson.dataformat.xml.XmlMapper", classLoader);
-		jacksonSmilePresent = jacksonPresent && ClassUtils.isPresent("tools.jackson.dataformat.smile.SmileMapper", classLoader);
-		jackson2SmilePresent = jackson2Present && ClassUtils.isPresent("com.fasterxml.jackson.dataformat.smile.SmileFactory", classLoader);
-		jacksonCborPresent = jacksonPresent && ClassUtils.isPresent("tools.jackson.dataformat.cbor.CBORMapper", classLoader);
-		jackson2CborPresent = jackson2Present && ClassUtils.isPresent("com.fasterxml.jackson.dataformat.cbor.CBORFactory", classLoader);
-		jacksonYamlPresent = jacksonPresent && ClassUtils.isPresent("tools.jackson.dataformat.yaml.YAMLMapper", classLoader);
-		jackson2YamlPresent = jackson2Present && ClassUtils.isPresent("com.fasterxml.jackson.dataformat.yaml.YAMLFactory", classLoader);
-		gsonPresent = ClassUtils.isPresent("com.google.gson.Gson", classLoader);
-		jsonbPresent = ClassUtils.isPresent("jakarta.json.bind.Jsonb", classLoader);
-		kotlinSerializationCborPresent = ClassUtils.isPresent("kotlinx.serialization.cbor.Cbor", classLoader);
-		kotlinSerializationJsonPresent = ClassUtils.isPresent("kotlinx.serialization.json.Json", classLoader);
-		kotlinSerializationProtobufPresent = ClassUtils.isPresent("kotlinx.serialization.protobuf.ProtoBuf", classLoader);
+		kotlinSerializationPresent = ClassUtils.isPresent("kotlinx.serialization.Serializable", classLoader);
 	}
 
 
@@ -461,23 +403,32 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 
 	protected Map<String, MediaType> getDefaultMediaTypes() {
 		Map<String, MediaType> map = new HashMap<>(4);
-		if (romePresent) {
+		List<HttpMessageConverter<?>> messageConverters = getMessageConverters();
+		Set<MediaType> supportedMediaTypes = messageConverters.stream()
+				.flatMap(converter -> converter.getSupportedMediaTypes().stream())
+				.collect(Collectors.toSet());
+		if (supportedMediaTypes.contains(MediaType.APPLICATION_ATOM_XML)) {
 			map.put("atom", MediaType.APPLICATION_ATOM_XML);
+		}
+		if (supportedMediaTypes.contains(MediaType.APPLICATION_RSS_XML)) {
 			map.put("rss", MediaType.APPLICATION_RSS_XML);
 		}
-		if (jaxb2Present || jacksonXmlPresent || jackson2XmlPresent) {
+		MediaType xmlUtf8MediaType = new MediaType("application", "xml", StandardCharsets.UTF_8);
+		if (supportedMediaTypes.contains(MediaType.APPLICATION_XML) ||
+				supportedMediaTypes.contains(xmlUtf8MediaType)) {
 			map.put("xml", MediaType.APPLICATION_XML);
 		}
-		if (jacksonPresent || jackson2Present || gsonPresent || jsonbPresent || kotlinSerializationJsonPresent) {
+		if (supportedMediaTypes.contains(MediaType.APPLICATION_JSON)) {
 			map.put("json", MediaType.APPLICATION_JSON);
 		}
-		if (jacksonSmilePresent || jackson2SmilePresent) {
-			map.put("smile", MediaType.valueOf("application/x-jackson-smile"));
+		MediaType smileMediaType = new MediaType("application", "x-jackson-smile");
+		if (supportedMediaTypes.contains(smileMediaType)) {
+			map.put("smile", smileMediaType);
 		}
-		if (jacksonCborPresent || jackson2CborPresent || kotlinSerializationCborPresent) {
+		if (supportedMediaTypes.contains(MediaType.APPLICATION_CBOR)) {
 			map.put("cbor", MediaType.APPLICATION_CBOR);
 		}
-		if (jacksonYamlPresent || jackson2YamlPresent) {
+		if (supportedMediaTypes.contains(MediaType.APPLICATION_ATOM_XML)) {
 			map.put("yaml", MediaType.APPLICATION_YAML);
 		}
 		return map;
@@ -593,13 +544,15 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	@Bean
 	public RouterFunctionMapping routerFunctionMapping(
 			@Qualifier("mvcConversionService") FormattingConversionService conversionService,
-			@Qualifier("mvcResourceUrlProvider") ResourceUrlProvider resourceUrlProvider) {
+			@Qualifier("mvcResourceUrlProvider") ResourceUrlProvider resourceUrlProvider,
+			@Qualifier("mvcApiVersionStrategy") @Nullable ApiVersionStrategy versionStrategy) {
 
 		RouterFunctionMapping mapping = new RouterFunctionMapping();
 		mapping.setOrder(-1);  // go before RequestMappingHandlerMapping
 		mapping.setInterceptors(getInterceptors(conversionService, resourceUrlProvider));
 		mapping.setCorsConfigurations(getCorsConfigurations());
 		mapping.setMessageConverters(getMessageConverters());
+		mapping.setApiVersionStrategy(versionStrategy);
 
 		PathPatternParser patternParser = getPathMatchConfigurer().getPatternParser();
 		if (patternParser != null) {
@@ -699,9 +652,19 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 		adapter.setCustomReturnValueHandlers(getReturnValueHandlers());
 		adapter.setErrorResponseInterceptors(getErrorResponseInterceptors());
 
-		if (jacksonPresent || jackson2Present) {
-			adapter.setRequestBodyAdvice(Collections.singletonList(new JsonViewRequestBodyAdvice()));
-			adapter.setResponseBodyAdvice(Collections.singletonList(new JsonViewResponseBodyAdvice()));
+		if (jacksonPresent || jackson2Present || kotlinSerializationPresent) {
+			List<RequestBodyAdvice> requestBodyAdvices = new ArrayList<>(2);
+			List<ResponseBodyAdvice<?>> responseBodyAdvices = new ArrayList<>(2);
+			if (jacksonPresent || jackson2Present) {
+				requestBodyAdvices.add(new JsonViewRequestBodyAdvice());
+				responseBodyAdvices.add(new JsonViewResponseBodyAdvice());
+			}
+			if (kotlinSerializationPresent) {
+				requestBodyAdvices.add(new KotlinRequestBodyAdvice());
+				responseBodyAdvices.add(new KotlinResponseBodyAdvice());
+			}
+			adapter.setRequestBodyAdvice(requestBodyAdvices);
+			adapter.setResponseBodyAdvice(responseBodyAdvices);
 		}
 
 		AsyncSupportConfigurer configurer = getAsyncSupportConfigurer();
@@ -890,15 +853,41 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 		return this.messageConverters;
 	}
 
+
 	/**
-	 * Override this method to add custom {@link HttpMessageConverter HttpMessageConverters}
+	 * Override this method to create a custom {@link HttpMessageConverters}.
+	 * Converters will be used with the
+	 * {@link RequestMappingHandlerAdapter} and the {@link ExceptionHandlerExceptionResolver}.
+	 * <p>By default, this will create an instance with default message converters registered,
+	 * if present on the classpath.
+	 * @since 7.0
+	 */
+	protected HttpMessageConverters createMessageConverters() {
+		HttpMessageConverters.ServerBuilder serverBuilder = HttpMessageConverters.forServer().registerDefaults();
+		configureMessageConverters(serverBuilder);
+		return serverBuilder.build();
+	}
+
+	/**
+	 * Override this method to configure the message converters on the given
+	 * {@link HttpMessageConverters.Builder builder}.
+	 * @param builder the {@code HttpMessageConverters} builder to configure
+	 * @since 7.0
+	 */
+	protected void configureMessageConverters(HttpMessageConverters.ServerBuilder builder) {
+	}
+
+	/**
+	 * Override this method to add custom {@link HttpMessageConverter messsage converters}
 	 * to use with the {@link RequestMappingHandlerAdapter} and the
 	 * {@link ExceptionHandlerExceptionResolver}.
 	 * <p>Adding converters to the list turns off the default converters that would
 	 * otherwise be registered by default. Also see {@link #addDefaultHttpMessageConverters}
 	 * for adding default message converters.
 	 * @param converters a list to add message converters to (initially an empty list)
+	 * @deprecated since 7.0 in favor of {@link #configureMessageConverters(HttpMessageConverters.ServerBuilder)}
 	 */
+	@Deprecated(since = "7.0", forRemoval = true)
 	protected void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
 	}
 
@@ -908,7 +897,9 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	 * to be registered and then insert a custom converter through this method.
 	 * @param converters the list of configured converters to extend
 	 * @since 4.1.3
+	 * @deprecated since 7.0 in favor of {@link #configureMessageConverters(HttpMessageConverters.ServerBuilder)}
 	 */
+	@Deprecated(since = "7.0", forRemoval = true)
 	protected void extendMessageConverters(List<HttpMessageConverter<?>> converters) {
 	}
 
@@ -916,93 +907,12 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	 * Adds a set of default HttpMessageConverter instances to the given list.
 	 * Subclasses can call this method from {@link #configureMessageConverters}.
 	 * @param messageConverters the list to add the default message converters to
+	 * @deprecated since 7.0 in favor of {@link #createMessageConverters()}
 	 */
-	@SuppressWarnings("removal")
+	@Deprecated(since = "7.0", forRemoval = true)
 	protected final void addDefaultHttpMessageConverters(List<HttpMessageConverter<?>> messageConverters) {
-		messageConverters.add(new ByteArrayHttpMessageConverter());
-		messageConverters.add(new StringHttpMessageConverter());
-		messageConverters.add(new ResourceHttpMessageConverter());
-		messageConverters.add(new ResourceRegionHttpMessageConverter());
-		messageConverters.add(new AllEncompassingFormHttpMessageConverter());
-
-		if (romePresent) {
-			messageConverters.add(new AtomFeedHttpMessageConverter());
-			messageConverters.add(new RssChannelHttpMessageConverter());
-		}
-
-		if (jacksonXmlPresent) {
-			messageConverters.add(new JacksonXmlHttpMessageConverter());
-		}
-		else if (jackson2XmlPresent) {
-			Jackson2ObjectMapperBuilder builder = Jackson2ObjectMapperBuilder.xml();
-			if (this.applicationContext != null) {
-				builder.applicationContext(this.applicationContext);
-			}
-			messageConverters.add(new MappingJackson2XmlHttpMessageConverter(builder.build()));
-		}
-		else if (jaxb2Present) {
-			messageConverters.add(new Jaxb2RootElementHttpMessageConverter());
-		}
-
-		if (kotlinSerializationProtobufPresent) {
-			messageConverters.add(new KotlinSerializationProtobufHttpMessageConverter());
-		}
-
-		if (jacksonPresent) {
-			messageConverters.add(new JacksonJsonHttpMessageConverter());
-		}
-		else if (jackson2Present) {
-			Jackson2ObjectMapperBuilder builder = Jackson2ObjectMapperBuilder.json();
-			if (this.applicationContext != null) {
-				builder.applicationContext(this.applicationContext);
-			}
-			messageConverters.add(new MappingJackson2HttpMessageConverter(builder.build()));
-		}
-		else if (gsonPresent) {
-			messageConverters.add(new GsonHttpMessageConverter());
-		}
-		else if (jsonbPresent) {
-			messageConverters.add(new JsonbHttpMessageConverter());
-		}
-		else if (kotlinSerializationJsonPresent) {
-			messageConverters.add(new KotlinSerializationJsonHttpMessageConverter());
-		}
-
-		if (jacksonSmilePresent) {
-			messageConverters.add(new JacksonSmileHttpMessageConverter());
-		}
-		else if (jackson2SmilePresent) {
-			Jackson2ObjectMapperBuilder builder = Jackson2ObjectMapperBuilder.smile();
-			if (this.applicationContext != null) {
-				builder.applicationContext(this.applicationContext);
-			}
-			messageConverters.add(new MappingJackson2SmileHttpMessageConverter(builder.build()));
-		}
-
-		if (jacksonCborPresent) {
-			messageConverters.add(new JacksonCborHttpMessageConverter());
-		}
-		else if (jackson2CborPresent) {
-			Jackson2ObjectMapperBuilder builder = Jackson2ObjectMapperBuilder.cbor();
-			if (this.applicationContext != null) {
-				builder.applicationContext(this.applicationContext);
-			}
-			messageConverters.add(new MappingJackson2CborHttpMessageConverter(builder.build()));
-		}
-		else if (kotlinSerializationCborPresent) {
-			messageConverters.add(new KotlinSerializationCborHttpMessageConverter());
-		}
-
-		if (jacksonYamlPresent) {
-			messageConverters.add(new JacksonYamlHttpMessageConverter());
-		}
-		else if (jackson2YamlPresent) {
-			Jackson2ObjectMapperBuilder builder = Jackson2ObjectMapperBuilder.yaml();
-			if (this.applicationContext != null) {
-				builder.applicationContext(this.applicationContext);
-			}
-			messageConverters.add(new MappingJackson2YamlHttpMessageConverter(builder.build()));
-		}
+		HttpMessageConverters converters = createMessageConverters();
+		converters.forEach(messageConverters::add);
 	}
 
 	/**
@@ -1122,9 +1032,15 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 		exceptionHandlerResolver.setCustomArgumentResolvers(getArgumentResolvers());
 		exceptionHandlerResolver.setCustomReturnValueHandlers(getReturnValueHandlers());
 		exceptionHandlerResolver.setErrorResponseInterceptors(getErrorResponseInterceptors());
-		if (jacksonPresent || jackson2Present) {
-			exceptionHandlerResolver.setResponseBodyAdvice(
-					Collections.singletonList(new JsonViewResponseBodyAdvice()));
+		if (jacksonPresent || jackson2Present || kotlinSerializationPresent) {
+			List<ResponseBodyAdvice<?>> responseBodyAdvices = new ArrayList<>(2);
+			if (jacksonPresent || jackson2Present) {
+				responseBodyAdvices.add(new JsonViewResponseBodyAdvice());
+			}
+			if (kotlinSerializationPresent) {
+				responseBodyAdvices.add(new KotlinResponseBodyAdvice());
+			}
+			exceptionHandlerResolver.setResponseBodyAdvice(responseBodyAdvices);
 		}
 		if (this.applicationContext != null) {
 			exceptionHandlerResolver.setApplicationContext(this.applicationContext);

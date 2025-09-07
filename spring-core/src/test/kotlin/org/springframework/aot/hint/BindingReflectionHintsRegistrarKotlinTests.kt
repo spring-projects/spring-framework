@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -80,6 +80,12 @@ class BindingReflectionHintsRegistrarKotlinTests {
 		bindingRegistrar.registerReflectionHints(hints.reflection(), SampleClass::class.java)
 		assertThat(RuntimeHintsPredicates.reflection().onType(SampleClass::class.java)).accepts(hints)
 	}
+
+	@Test
+	fun `Register reflection hints on serializer function with parameter`() {
+		bindingRegistrar.registerReflectionHints(hints.reflection(), SampleResult::class.java)
+		assertThat(RuntimeHintsPredicates.reflection().onMethodInvocation(SampleResult.Companion::class.java, "serializer")).accepts(hints)
+	}
 }
 
 @kotlinx.serialization.Serializable
@@ -88,3 +94,17 @@ class SampleSerializableClass(val name: String)
 data class SampleDataClass(val name: String, val isNonNullable: Boolean, val isNullable: Boolean?)
 
 class SampleClass(val name: String)
+
+@kotlinx.serialization.Serializable
+data class SampleResult <T>(
+	val code: Int,
+	val message: String,
+	val data: T,
+) {
+	companion object {
+		private const val SUCCESS: Int = 200
+		private const val FAILURE: Int = 500
+		fun <T> success(message: String, data: T) = SampleResult<T>(code = SUCCESS, message = message, data = data)
+		fun <T> failure(message: String, data: T) = SampleResult<T>(code = FAILURE, message = message, data = data)
+	}
+}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,7 +44,7 @@ import org.jspecify.annotations.Nullable;
  * @deprecated This class should only be used by the runtime-hints agent when instrumenting bytecode
  * and is not considered public API.
  */
-@Deprecated
+@Deprecated(since = "6.0")
 public abstract class InstrumentedBridgeMethods {
 
 	private InstrumentedBridgeMethods() {

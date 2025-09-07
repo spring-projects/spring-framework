@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -346,6 +346,53 @@ class DefaultLifecycleProcessorTests {
 		assertThat(startedBeans).satisfiesExactly(hasPhase(-3), hasPhase(5),
 				hasPhase(0), hasPhase(0), hasPhase(5), hasPhase(-3), hasPhase(0));
 		context.close();
+	}
+
+	@Test
+	void contextRefreshThenRestartWithMixedBeans() {
+		StaticApplicationContext context = new StaticApplicationContext();
+		CopyOnWriteArrayList<Lifecycle> stoppedBeans = new CopyOnWriteArrayList<>();
+		TestSmartLifecycleBean smartBean1 = TestSmartLifecycleBean.forShutdownTests(5, 0, stoppedBeans);
+		TestSmartLifecycleBean smartBean2 = TestSmartLifecycleBean.forShutdownTests(-3, 0, stoppedBeans);
+		smartBean2.setAutoStartup(false);
+		smartBean2.setPauseable(false);
+		context.getBeanFactory().registerSingleton("smartBean1", smartBean1);
+		context.getBeanFactory().registerSingleton("smartBean2", smartBean2);
+
+		assertThat(smartBean1.isRunning()).isFalse();
+		assertThat(smartBean2.isRunning()).isFalse();
+		context.refresh();
+		assertThat(smartBean1.isRunning()).isTrue();
+		assertThat(smartBean2.isRunning()).isFalse();
+		context.restart();
+		assertThat(stoppedBeans).containsExactly(smartBean1);
+		assertThat(smartBean1.isRunning()).isTrue();
+		assertThat(smartBean2.isRunning()).isFalse();
+		smartBean1.stop();
+		assertThat(stoppedBeans).containsExactly(smartBean1, smartBean1);
+		assertThat(smartBean1.isRunning()).isFalse();
+		assertThat(smartBean2.isRunning()).isFalse();
+		context.restart();
+		assertThat(stoppedBeans).containsExactly(smartBean1, smartBean1);
+		assertThat(smartBean1.isRunning()).isTrue();
+		assertThat(smartBean2.isRunning()).isFalse();
+		context.pause();
+		assertThat(stoppedBeans).containsExactly(smartBean1, smartBean1, smartBean1);
+		assertThat(smartBean1.isRunning()).isFalse();
+		assertThat(smartBean2.isRunning()).isFalse();
+		context.restart();
+		assertThat(stoppedBeans).containsExactly(smartBean1, smartBean1, smartBean1);
+		assertThat(smartBean1.isRunning()).isTrue();
+		assertThat(smartBean2.isRunning()).isFalse();
+		context.start();
+		assertThat(smartBean1.isRunning()).isTrue();
+		assertThat(smartBean2.isRunning()).isTrue();
+		context.pause();
+		assertThat(stoppedBeans).containsExactly(smartBean1, smartBean1, smartBean1, smartBean1);
+		assertThat(smartBean1.isRunning()).isFalse();
+		assertThat(smartBean2.isRunning()).isTrue();
+		context.close();
+		assertThat(stoppedBeans).containsExactly(smartBean1, smartBean1, smartBean1, smartBean1, smartBean2);
 	}
 
 	@Test
@@ -706,6 +753,8 @@ class DefaultLifecycleProcessorTests {
 
 		private volatile boolean autoStartup = true;
 
+		private volatile boolean pauseable = true;
+
 		static TestSmartLifecycleBean forStartupTests(int phase, CopyOnWriteArrayList<Lifecycle> startedBeans) {
 			return new TestSmartLifecycleBean(phase, 0, startedBeans, null);
 		}
@@ -736,22 +785,36 @@ class DefaultLifecycleProcessorTests {
 		}
 
 		@Override
+		public boolean isPauseable() {
+			return this.pauseable;
+		}
+
+		public void setPauseable(boolean pauseable) {
+			this.pauseable = pauseable;
+		}
+
+		@Override
 		public void stop(final Runnable callback) {
 			// calling stop() before the delay to preserve
 			// invocation order in the 'stoppedBeans' list
 			stop();
 			final int delay = this.shutdownDelay;
-			new Thread(() -> {
-				try {
-					Thread.sleep(delay);
-				}
-				catch (InterruptedException e) {
-					// ignore
-				}
-				finally {
-					callback.run();
-				}
-			}).start();
+			if (delay > 0) {
+				new Thread(() -> {
+					try {
+						Thread.sleep(delay);
+					}
+					catch (InterruptedException e) {
+						// ignore
+					}
+					finally {
+						callback.run();
+					}
+				}).start();
+			}
+			else {
+				callback.run();
+			}
 		}
 	}
 

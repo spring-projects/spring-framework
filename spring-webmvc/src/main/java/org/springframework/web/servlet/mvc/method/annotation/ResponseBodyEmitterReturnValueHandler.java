@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -169,8 +169,11 @@ public class ResponseBodyEmitterReturnValueHandler implements HandlerMethodRetur
 				ResolvableType.forMethodParameter(returnType).getGeneric().resolve() :
 				returnType.getParameterType();
 
-		return (bodyType != null && (ResponseBodyEmitter.class.isAssignableFrom(bodyType) ||
-				this.reactiveHandler.isReactiveType(bodyType)));
+		return (bodyType != null && supportsBodyType(bodyType));
+	}
+
+	boolean supportsBodyType(Class<?> bodyType) {
+		return (ResponseBodyEmitter.class.isAssignableFrom(bodyType) || this.reactiveHandler.isReactiveType(bodyType));
 	}
 
 	@Override
@@ -186,10 +189,12 @@ public class ResponseBodyEmitterReturnValueHandler implements HandlerMethodRetur
 		HttpServletResponse response = webRequest.getNativeResponse(HttpServletResponse.class);
 		Assert.state(response != null, "No HttpServletResponse");
 		ServerHttpResponse outputMessage = new ServletServerHttpResponse(response);
+		MediaType contentType = null;
 
 		if (returnValue instanceof ResponseEntity<?> responseEntity) {
 			response.setStatus(responseEntity.getStatusCode().value());
 			outputMessage.getHeaders().putAll(responseEntity.getHeaders());
+			contentType = responseEntity.getHeaders().getContentType();
 			returnValue = responseEntity.getBody();
 			returnType = returnType.nested();
 			if (returnValue == null) {
@@ -207,7 +212,7 @@ public class ResponseBodyEmitterReturnValueHandler implements HandlerMethodRetur
 			emitter = responseBodyEmitter;
 		}
 		else {
-			emitter = this.reactiveHandler.handleValue(returnValue, returnType, mavContainer, webRequest);
+			emitter = this.reactiveHandler.handleValue(returnValue, returnType, contentType, mavContainer, webRequest);
 			if (emitter == null) {
 				// We're not streaming; write headers without committing response
 				outputMessage.getHeaders().forEach((headerName, headerValues) -> {

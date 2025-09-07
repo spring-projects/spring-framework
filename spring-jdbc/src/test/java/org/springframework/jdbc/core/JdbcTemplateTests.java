@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,9 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
+import java.util.stream.Stream;
 
 import javax.sql.DataSource;
 
@@ -77,6 +79,7 @@ import static org.mockito.Mockito.verify;
  * @author Thomas Risberg
  * @author Juergen Hoeller
  * @author Phillip Webb
+ * @author Yanming Zhou
  */
 class JdbcTemplateTests {
 
@@ -1234,6 +1237,50 @@ class JdbcTemplateTests {
 		assertThat(keyHolder.getKeyList()).containsExactly(
 				Collections.singletonMap("someId", 123),
 				Collections.singletonMap("someId", 456));
+	}
+
+	@Test
+	void testSkipFurtherRowsOnceMaxRowsHasBeenReachedForRowMapper() throws Exception {
+		testDiscardFurtherRowsOnceMaxRowsHasBeenReached((template, sql) ->
+				template.query(sql, (rs, rowNum) -> rs.getString(1)));
+	}
+
+	@Test
+	void testDiscardFurtherRowsOnceMaxRowsHasBeenReachedForRowCallbackHandler() throws Exception {
+		testDiscardFurtherRowsOnceMaxRowsHasBeenReached((template, sql) -> {
+			List<String> list = new ArrayList<>();
+			template.query(sql, (RowCallbackHandler) rs -> list.add(rs.getString(1)));
+			return list;
+		});
+	}
+
+	@Test
+	void testDiscardFurtherRowsOnceMaxRowsHasBeenReachedForStream() throws Exception {
+		testDiscardFurtherRowsOnceMaxRowsHasBeenReached((template, sql) -> {
+			try (Stream<String> stream = template.queryForStream(sql, (rs, rowNum) -> rs.getString(1))) {
+				return stream.toList();
+			}
+		});
+	}
+
+	private void testDiscardFurtherRowsOnceMaxRowsHasBeenReached(BiFunction<JdbcTemplate,String,List<String>> function) throws Exception {
+		String sql = "SELECT FORENAME FROM CUSTMR";
+		String[] results = {"rod", "gary", " portia"};
+		int maxRows = 2;
+
+		given(this.resultSet.next()).willReturn(true, true, true, false);
+		given(this.resultSet.getString(1)).willReturn(results[0], results[1], results[2]);
+		given(this.connection.createStatement()).willReturn(this.preparedStatement);
+
+		JdbcTemplate template = new JdbcTemplate();
+		template.setDataSource(this.dataSource);
+		template.setMaxRows(maxRows);
+
+		assertThat(function.apply(template, sql)).as("same length").hasSize(maxRows);
+
+		verify(this.resultSet).close();
+		verify(this.preparedStatement).close();
+		verify(this.connection).close();
 	}
 
 	private void mockDatabaseMetaData(boolean supportsBatchUpdates) throws SQLException {

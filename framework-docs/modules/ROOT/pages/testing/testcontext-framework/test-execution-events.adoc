@@ -66,6 +66,7 @@ package.
 * `@AfterTestMethod`
 * `@AfterTestClass`
 
+
 [[testcontext-test-execution-events-exception-handling]]
 == Exception Handling
 
@@ -77,12 +78,11 @@ contrast, if an asynchronous test execution event listener throws an exception, 
 exception will not propagate to the underlying testing framework. For further details on
 asynchronous exception handling, consult the class-level javadoc for `@EventListener`.
 
+
 [[testcontext-test-execution-events-async]]
 == Asynchronous Listeners
 
 If you want a particular test execution event listener to process events asynchronously,
-you can use Spring's xref:integration/scheduling.adoc#scheduling-annotation-support-async[regular `@Async` support]
-. For further details, consult the class-level javadoc for
-`@EventListener`.
-
-
+you can use Spring's
+xref:integration/scheduling.adoc#scheduling-annotation-support-async[regular `@Async` support].
+For further details, consult the class-level javadoc for `@EventListener`.

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -872,10 +872,21 @@ class RouterFunctionDsl internal constructor (private val init: RouterFunctionDs
 
 	/**
 	 * Create a builder with an
+	 * [422 Unprocessable Content][HttpStatus.UNPROCESSABLE_CONTENT] status.
+	 * @return the created builder
+	 * @since 7.0
+	 */
+	fun unprocessableContent(): ServerResponse.BodyBuilder =
+		ServerResponse.unprocessableContent()
+
+	/**
+	 * Create a builder with an
 	 * [422 Unprocessable Entity][HttpStatus.UNPROCESSABLE_ENTITY] status.
 	 * @return the created builder
 	 * @since 5.1
 	 */
+	@Deprecated("Use unprocessable content instead.", ReplaceWith("unprocessableContent()"))
+	@Suppress("DEPRECATION")
 	fun unprocessableEntity(): ServerResponse.BodyBuilder =
 			ServerResponse.unprocessableEntity()
 

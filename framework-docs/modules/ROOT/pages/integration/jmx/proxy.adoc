@@ -44,6 +44,3 @@ that uses the `MBeanServerConnectionFactoryBean`. This `MBeanServerConnection` i
 passed to the `MBeanProxyFactoryBean` through the `server` property. The proxy that is
 created forwards all invocations to the `MBeanServer` through this
 `MBeanServerConnection`.
-
-
-

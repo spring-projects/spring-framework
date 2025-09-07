@@ -8,14 +8,13 @@ messaging.
 
 include::partial$web/websocket-intro.adoc[leveloffset=+1]
 
+
 [[webflux-websocket-server]]
 == WebSocket API
 [.small]#xref:web/websocket/stomp/server-config.adoc[See equivalent in the Servlet stack]#
 
 The Spring Framework provides a WebSocket API that you can use to write client- and
 server-side applications that handle WebSocket messages.
-
-
 
 [[webflux-websocket-server-handler]]
 === Server
@@ -134,8 +133,6 @@ Kotlin::
 	}
 ----
 ======
-
-
 
 [[webflux-websockethandler]]
 === `WebSocketHandler`
@@ -350,8 +347,6 @@ Kotlin::
 <3> Join the streams and return a `Mono<Void>` that completes when either stream ends.
 ======
 
-
-
 [[webflux-websocket-databuffer]]
 === `DataBuffer`
 
@@ -365,9 +360,6 @@ When running on Netty, applications must use `DataBufferUtils.retain(dataBuffer)
 wish to hold on input data buffers in order to ensure they are not released, and
 subsequently use `DataBufferUtils.release(dataBuffer)` when the buffers are consumed.
 
-
-
-
 [[webflux-websocket-server-handshake]]
 === Handshake
 [.small]#xref:web/websocket/server.adoc#websocket-server-handshake[See equivalent in the Servlet stack]#
@@ -375,13 +367,11 @@ subsequently use `DataBufferUtils.release(dataBuffer)` when the buffers are cons
 `WebSocketHandlerAdapter` delegates to a `WebSocketService`. By default, that is an instance
 of `HandshakeWebSocketService`, which performs basic checks on the WebSocket request and
 then uses `RequestUpgradeStrategy` for the server in use. Currently, there is built-in
-support for Reactor Netty, Tomcat, Jetty, and Undertow.
+support for Reactor Netty, Tomcat, and Jetty.
 
 `HandshakeWebSocketService` exposes a `sessionAttributePredicate` property that allows
 setting a `Predicate<String>` to extract attributes from the `WebSession` and insert them
 into the attributes of the `WebSocketSession`.
-
-
 
 [[webflux-websocket-server-config]]
 === Server Configuration
@@ -441,8 +431,6 @@ Kotlin::
 Check the upgrade strategy for your server to see what options are available. Currently,
 only Tomcat and Jetty expose such options.
 
-
-
 [[webflux-websocket-server-cors]]
 === CORS
 [.small]#xref:web/websocket/server.adoc#websocket-server-allowed-origins[See equivalent in the Servlet stack]#
@@ -454,13 +442,11 @@ that, you can also set the `corsConfigurations` property on the `SimpleUrlHandle
 specify CORS settings by URL pattern. If both are specified, they are combined by using the
 `combine` method on `CorsConfiguration`.
 
-
-
 [[webflux-websocket-client]]
 === Client
 
 Spring WebFlux provides a `WebSocketClient` abstraction with implementations for
-Reactor Netty, Tomcat, Jetty, Undertow, and standard Java (that is, JSR-356).
+Reactor Netty, Tomcat, Jetty, and standard Java (that is, JSR-356).
 
 NOTE: The Tomcat client is effectively an extension of the standard Java one with some extra
 functionality in the `WebSocketSession` handling to take advantage of the Tomcat-specific

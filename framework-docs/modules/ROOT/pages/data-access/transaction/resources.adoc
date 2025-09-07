@@ -12,7 +12,3 @@ For more information about the Spring Framework's transaction support, see:
   available from https://www.infoq.com/[InfoQ] that provides a well-paced introduction
   to transactions in Java. It also includes side-by-side examples of how to configure
   and use transactions with both the Spring Framework and EJB3.
-
-
-
-

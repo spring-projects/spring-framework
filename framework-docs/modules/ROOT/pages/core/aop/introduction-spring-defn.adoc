@@ -52,10 +52,6 @@ configuration-style approach. The fact that this chapter chooses to introduce th
 @AspectJ-style approach first should not be taken as an indication that the Spring team
 favors the @AspectJ annotation-style approach over the Spring XML configuration-style.
 
-See xref:core/aop/choosing.adoc[Choosing which AOP Declaration Style to Use] for a more complete discussion of the advantages and disadvantages of
-each style.
+See xref:core/aop/choosing.adoc[Choosing which AOP Declaration Style to Use] for a more
+complete discussion of the advantages and disadvantages of each style.
 ====
-
-
-
-

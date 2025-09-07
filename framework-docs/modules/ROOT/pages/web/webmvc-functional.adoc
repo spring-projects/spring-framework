@@ -9,8 +9,6 @@ It is an alternative to the annotation-based programming model but otherwise run
 the same xref:web/webmvc/mvc-servlet.adoc[DispatcherServlet].
 
 
-
-
 [[webmvc-fn-overview]]
 == Overview
 [.small]#xref:web/webflux-functional.adoc#webflux-fn-overview[See equivalent in the Reactive stack]#
@@ -110,9 +108,8 @@ Kotlin::
 
 
 If you register the `RouterFunction` as a bean, for instance by exposing it in a
-`@Configuration` class, it will be auto-detected by the servlet, as explained in xref:web/webmvc-functional.adoc#webmvc-fn-running[Running a Server].
-
-
+`@Configuration` class, it will be auto-detected by the servlet, as explained in
+xref:web/webmvc-functional.adoc#webmvc-fn-running[Running a Server].
 
 
 [[webmvc-fn-handler-functions]]
@@ -121,7 +118,6 @@ If you register the `RouterFunction` as a bean, for instance by exposing it in a
 
 `ServerRequest` and `ServerResponse` are immutable interfaces that offer JDK 8-friendly
 access to the HTTP request and response, including headers, body, method, and status code.
-
 
 [[webmvc-fn-request]]
 === ServerRequest
@@ -187,7 +183,6 @@ Kotlin::
 val map = request.params()
 ----
 ======
-
 
 [[webmvc-fn-response]]
 === ServerResponse
@@ -335,8 +330,6 @@ Kotlin::
 ----
 ======
 
-
-
 [[webmvc-fn-handler-classes]]
 === Handler Classes
 
@@ -452,7 +445,6 @@ found. If it is not found, we return a 404 Not Found response.
 ======
 --
 
-
 [[webmvc-fn-handler-validation]]
 === Validation
 
@@ -528,7 +520,6 @@ a global `Validator` instance based on `LocalValidatorFactoryBean`.
 See xref:core/validation/beanvalidation.adoc[Spring Validation].
 
 
-
 [[webmvc-fn-router-functions]]
 == `RouterFunction`
 [.small]#xref:web/webflux-functional.adoc#webflux-fn-router-functions[See equivalent in the Reactive stack]#
@@ -543,22 +534,22 @@ to create a router.
 Generally, it is recommended to use the `route()` builder, as it provides
 convenient short-cuts for typical mapping scenarios without requiring hard-to-discover
 static imports.
-For instance, the router function builder offers the method `GET(String, HandlerFunction)` to create a mapping for GET requests; and `POST(String, HandlerFunction)` for POSTs.
+For instance, the router function builder offers the method `GET(String, HandlerFunction)`
+to create a mapping for GET requests; and `POST(String, HandlerFunction)` for POSTs.
 
 Besides HTTP method-based mapping, the route builder offers a way to introduce additional
 predicates when mapping to requests.
 For each HTTP method there is an overloaded variant that takes a `RequestPredicate` as a
 parameter, through which additional constraints can be expressed.
 
-
 [[webmvc-fn-predicates]]
 === Predicates
 
 You can write your own `RequestPredicate`, but the `RequestPredicates` utility class
-offers commonly used implementations, based on the request path, HTTP method, content-type,
-and so on.
-The following example uses a request predicate to create a constraint based on the `Accept`
-header:
+offers built-in options for common needs for matching based on the HTTP method, request
+path, headers, xref:#api-version[API version], and more.
+
+The following example uses an `Accept` header, request predicate:
 
 [tabs]
 ======
@@ -595,8 +586,6 @@ For example, `RequestPredicates.GET(String)` is composed from `RequestPredicates
 and `RequestPredicates.path(String)`.
 The example shown above also uses two request predicates, as the builder uses
 `RequestPredicates.GET` internally, and composes that with the `accept` predicate.
-
-
 
 [[webmvc-fn-routes]]
 === Routes
@@ -676,7 +665,6 @@ Kotlin::
 `PersonHandler.createPerson`, and
 <4> `otherRoute` is a router function that is created elsewhere, and added to the route built.
 ======
-
 
 [[nested-routes]]
 === Nested Routes
@@ -759,6 +747,51 @@ Kotlin::
 	}
 ----
 ======
+
+
+
+[[api-version]]
+=== API Version
+
+Router functions support matching by API version.
+
+First, enable API versioning in the
+xref:web/webmvc/mvc-config/api-version.adoc[MVC Config], and then you can use the
+`version` xref:#webmvc-fn-predicates[predicate] as follows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	RouterFunction<ServerResponse> route = RouterFunctions.route()
+		.GET("/hello-world", version("1.2"),
+			request -> ServerResponse.ok().body("Hello World")).build();
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes"]
+----
+	val route = router {
+		GET("/hello-world", version("1.2")) {
+			ServerResponse.ok().body("Hello World")
+		}
+	}
+----
+======
+
+The `version` predicate can be:
+
+- Fixed version ("1.2") -- matches the given version only
+- Baseline version ("1.2+") -- matches the given version and above, up to the highest
+xref:web/webmvc/mvc-config/api-version.adoc[supported version].
+
+See xref:web/webmvc-versioning.adoc[API Versioning] for more details on underlying
+infrastructure and support for API Versioning.
+
+
 
 
 [[webmvc-fn-serving-resources]]
@@ -846,7 +879,7 @@ processing lifecycle and also (potentially) run side by side with annotated cont
 any are declared. It is also how functional endpoints are enabled by the Spring Boot Web
 starter.
 
-The following example shows a WebFlux Java configuration:
+The following example shows a WebMvc Java configuration:
 
 [tabs]
 ======
@@ -921,8 +954,6 @@ Kotlin::
 	}
 ----
 ======
-
-
 
 
 [[webmvc-fn-handler-filter-function]]

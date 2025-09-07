@@ -3,7 +3,8 @@
 
 [.small]#xref:web/webmvc/mvc-controller/ann-methods/responseentity.adoc[See equivalent in the Servlet stack]#
 
-`ResponseEntity` is like xref:web/webflux/controller/ann-methods/responsebody.adoc[`@ResponseBody`] but with status and headers. For example:
+`ResponseEntity` is like xref:web/webflux/controller/ann-methods/responsebody.adoc[`@ResponseBody`]
+but with status and headers. For example:
 
 [tabs]
 ======
@@ -45,5 +46,3 @@ for the body. This allows a variety of async responses with `ResponseEntity` as 
 * `Mono<ResponseEntity<Mono<T>>>` or `Mono<ResponseEntity<Flux<T>>>` are yet another
   possible, albeit less common alternative. They provide the response status and headers
   asynchronously first and then the response body, also asynchronously, second.
-
-

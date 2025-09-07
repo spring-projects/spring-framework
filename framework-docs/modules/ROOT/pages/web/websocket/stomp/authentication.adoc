@@ -29,6 +29,3 @@ Those were originally designed for and are needed for STOMP over TCP. However, f
 over WebSocket, by default, Spring ignores authentication headers at the STOMP protocol
 level, and assumes that the user is already authenticated at the HTTP transport level.
 The expectation is that the WebSocket or SockJS session contain the authenticated user.
-
-
-

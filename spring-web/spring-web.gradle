@@ -28,7 +28,6 @@ dependencies {
 	optional("io.netty:netty-transport")
 	optional("io.projectreactor.netty:reactor-netty-http")
 	optional("io.reactivex.rxjava3:rxjava")
-	optional("io.undertow:undertow-core")
 	optional("jakarta.el:jakarta.el-api")
 	optional("jakarta.faces:jakarta.faces-api")
 	optional("jakarta.json.bind:jakarta.json.bind-api")
@@ -65,8 +64,7 @@ dependencies {
 	optional("tools.jackson.dataformat:jackson-dataformat-yaml")
 	optional("com.fasterxml:aalto-xml")  // out of order to avoid XML parser override
 	testFixturesApi("jakarta.servlet:jakarta.servlet-api")
-	testFixturesApi("org.junit.jupiter:junit-jupiter-api")
-	testFixturesApi("org.junit.jupiter:junit-jupiter-params")
+	testFixturesApi("org.junit.jupiter:junit-jupiter")
 	testFixturesImplementation("io.projectreactor:reactor-test")
 	testFixturesImplementation("org.assertj:assertj-core")
 	testFixturesImplementation("org.bouncycastle:bcpkix-jdk18on") {
@@ -83,7 +81,7 @@ dependencies {
 	testImplementation("com.fasterxml.jackson.module:jackson-module-kotlin")
 	testImplementation("com.fasterxml.jackson.module:jackson-module-parameter-names")
 	testImplementation("com.fasterxml.jackson.dataformat:jackson-dataformat-csv")
-	testImplementation("com.squareup.okhttp3:mockwebserver")
+	testImplementation("com.squareup.okhttp3:mockwebserver3")
 	testImplementation("io.micrometer:micrometer-observation-test")
 	testImplementation("io.projectreactor:reactor-test")
 	testImplementation("io.projectreactor.tools:blockhound")

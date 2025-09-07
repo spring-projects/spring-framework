@@ -9,7 +9,6 @@ integration for using Spring MVC with Groovy Markup.
 NOTE: The Groovy Markup Template engine requires Groovy 2.3.1+.
 
 
-
 [[mvc-view-groovymarkup-configuration]]
 == Configuration
 
@@ -78,7 +77,6 @@ The following example shows how to configure the same in XML:
 ----
 
 
-
 [[mvc-view-groovymarkup-example]]
 == Example
 
@@ -98,7 +96,3 @@ syntax. The following example shows a sample template for an HTML page:
 		}
 	}
 ----
-
-
-
-

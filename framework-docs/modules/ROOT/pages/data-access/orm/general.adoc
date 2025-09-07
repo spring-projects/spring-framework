@@ -109,6 +109,3 @@ In summary, you can implement DAOs based on the plain persistence technology's A
 annotations while still benefiting from Spring-managed transactions, dependency
 injection, and transparent exception conversion (if desired) to Spring's custom
 exception hierarchies.
-
-
-

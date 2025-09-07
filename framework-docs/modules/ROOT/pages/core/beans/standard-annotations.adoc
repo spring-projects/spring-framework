@@ -23,7 +23,6 @@ You can add the following dependency to your file pom.xml:
 =====
 
 
-
 [[beans-inject-named]]
 == Dependency Injection with `@Inject` and `@Named`
 
@@ -214,7 +213,6 @@ Kotlin::
 ======
 
 
-
 [[beans-named]]
 == `@Named` and `@ManagedBean`: Standard Equivalents to the `@Component` Annotation
 
@@ -339,7 +337,6 @@ annotations are not composable. You should use Spring's stereotype model for bui
 custom component annotations.
 
 
-
 [[beans-standard-annotations-limitations]]
 == Limitations of JSR-330 Standard Annotations
 
@@ -388,6 +385,3 @@ features are not available, as the following table shows:
   only with a shorter `get()` method name. It can also be used in combination with
   Spring's `@Autowired` or with non-annotated constructors and setter methods.
 |===
-
-
-

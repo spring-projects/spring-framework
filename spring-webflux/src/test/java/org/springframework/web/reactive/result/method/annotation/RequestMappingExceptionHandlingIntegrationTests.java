@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -123,10 +123,9 @@ class RequestMappingExceptionHandlingIntegrationTests extends AbstractRequestMap
 				.satisfies(ex -> {
 					assertThat(ex.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
 					assertThat(ex.getResponseBodyAsString()).isEqualTo("{" +
-							"\"instance\":\"\\/no-such-handler\"," +
+							"\"instance\":\"/no-such-handler\"," +
 							"\"status\":404," +
-							"\"title\":\"Not Found\"," +
-							"\"type\":\"about:blank\"}");
+							"\"title\":\"Not Found\"}");
 				});
 	}
 
@@ -140,10 +139,9 @@ class RequestMappingExceptionHandlingIntegrationTests extends AbstractRequestMap
 					assertThat(ex.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
 					assertThat(ex.getResponseBodyAsString()).isEqualTo("{" +
 							"\"detail\":\"Required query parameter 'q' is not present.\"," +
-							"\"instance\":\"\\/missing-request-parameter\"," +
+							"\"instance\":\"/missing-request-parameter\"," +
 							"\"status\":400," +
-							"\"title\":\"Bad Request\"," +
-							"\"type\":\"about:blank\"}");
+							"\"title\":\"Bad Request\"}");
 				});
 	}
 

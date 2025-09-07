@@ -20,7 +20,6 @@ user with a convenient service interface for configuring property sources and re
 properties from them.
 
 
-
 [[beans-definition-profiles]]
 == Bean Definition Profiles
 
@@ -113,7 +112,6 @@ definitions, we end up with the need to register certain bean definitions in
 certain contexts but not in others. You could say that you want to register a
 certain profile of bean definitions in situation A and a different profile in
 situation B. We start by updating our configuration to reflect this need.
-
 
 [[beans-definition-profiles-java]]
 === Using `@Profile`
@@ -345,7 +343,6 @@ way to represent such an arrangement in a valid Java class in the first place
 (since there can only be one method of a particular name and argument signature).
 ====
 
-
 [[beans-definition-profiles-xml]]
 === XML Bean Definition Profiles
 
@@ -437,7 +434,6 @@ In the preceding example, the `dataSource` bean is exposed if both the `producti
 `us-east` profiles are active.
 =====
 
-
 [[beans-definition-profiles-enable]]
 === Activating a Profile
 
@@ -512,7 +508,6 @@ as the following example shows:
 	-Dspring.profiles.active="profile1,profile2"
 ----
 
-
 [[beans-definition-profiles-default]]
 === Default Profile
 
@@ -565,7 +560,6 @@ beans. If any profile is enabled, the default profile does not apply.
 The name of the default profile is `default`. You can change the name of
 the default profile by using `setDefaultProfiles()` on the `Environment` or,
 declaratively, by using the `spring.profiles.default` property.
-
 
 
 [[beans-property-source-abstraction]]
@@ -666,7 +660,6 @@ any `my-property` property in any other `PropertySource`. The
 {spring-framework-api}/core/env/MutablePropertySources.html[`MutablePropertySources`]
 API exposes a number of methods that allow for precise manipulation of the set of
 property sources.
-
 
 
 [[beans-using-propertysource]]
@@ -777,7 +770,6 @@ may also be used as a meta-annotation to create custom composed annotations with
 attribute overrides.
 
 
-
 [[beans-placeholder-resolution-in-statements]]
 == Placeholder Resolution in Statements
 
@@ -798,7 +790,3 @@ property is defined, as long as it is available in the `Environment`:
 		<import resource="com/bank/service/${customer}-config.xml"/>
 	</beans>
 ----
-
-
-
-

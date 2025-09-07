@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -131,6 +131,7 @@ final class ConfigurationClass {
 	 * @param metadata the metadata for the underlying class to represent
 	 * @param beanName name of the {@code @Configuration} class bean
 	 * @param scanned whether the underlying class has been registered through a scan
+	 * @since 6.2
 	 */
 	ConfigurationClass(AnnotationMetadata metadata, String beanName, boolean scanned) {
 		Assert.notNull(beanName, "Bean name must not be null");

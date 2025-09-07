@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.web.service.registry;
 
 import java.util.Arrays;
 import java.util.Objects;
+import java.util.stream.Stream;
 
 import org.jspecify.annotations.Nullable;
 
@@ -146,8 +147,11 @@ public abstract class AbstractHttpServiceRegistrar implements
 
 		registerHttpServices(new DefaultGroupRegistry(), metadata);
 
-		RootBeanDefinition proxyRegistryBeanDef = createOrGetRegistry(beanRegistry);
+		if (this.groupsMetadata.isEmpty()) {
+			return;
+		}
 
+		RootBeanDefinition proxyRegistryBeanDef = createOrGetRegistry(beanRegistry);
 		mergeGroups(proxyRegistryBeanDef);
 
 		this.groupsMetadata.forEachRegistration((groupName, types) -> types.forEach(type -> {
@@ -162,6 +166,16 @@ public abstract class AbstractHttpServiceRegistrar implements
 		}));
 	}
 
+	/**
+	 * This method is called before any bean definition registrations are made.
+	 * Subclasses must implement it to register the HTTP Services for which bean
+	 * definitions for which proxies need to be created.
+	 * @param registry to perform HTTP Service registrations with
+	 * @param importingClassMetadata annotation metadata of the importing class
+	 */
+	protected abstract void registerHttpServices(
+			GroupRegistry registry, AnnotationMetadata importingClassMetadata);
+
 	private RootBeanDefinition createOrGetRegistry(BeanDefinitionRegistry beanRegistry) {
 		if (!beanRegistry.containsBeanDefinition(HTTP_SERVICE_PROXY_REGISTRY_BEAN_NAME)) {
 			RootBeanDefinition proxyRegistryBeanDef = new RootBeanDefinition();
@@ -174,27 +188,6 @@ public abstract class AbstractHttpServiceRegistrar implements
 		else {
 			return (RootBeanDefinition) beanRegistry.getBeanDefinition(HTTP_SERVICE_PROXY_REGISTRY_BEAN_NAME);
 		}
-	}
-
-	/**
-	 * This method is called before any bean definition registrations are made.
-	 * Subclasses must implement it to register the HTTP Services for which bean
-	 * definitions for which proxies need to be created.
-	 * @param registry to perform HTTP Service registrations with
-	 * @param importingClassMetadata annotation metadata of the importing class
-	 */
-	protected abstract void registerHttpServices(
-			GroupRegistry registry, AnnotationMetadata importingClassMetadata);
-
-	private ClassPathScanningCandidateComponentProvider getScanner() {
-		if (this.scanner == null) {
-			Assert.state(this.environment != null, "Environment has not been set");
-			Assert.state(this.resourceLoader != null, "ResourceLoader has not been set");
-			this.scanner = new HttpExchangeClassPathScanningCandidateComponentProvider();
-			this.scanner.setEnvironment(this.environment);
-			this.scanner.setResourceLoader(this.resourceLoader);
-		}
-		return this.scanner;
 	}
 
 	private void mergeGroups(RootBeanDefinition proxyRegistryBeanDef) {
@@ -212,6 +205,23 @@ public abstract class AbstractHttpServiceRegistrar implements
 		return registry.getClient(groupName, ClassUtils.resolveClassName(httpServiceType, this.beanClassLoader));
 	}
 
+	/**
+	 * Find HTTP Service types under the given base package, looking for
+	 * interfaces with type or method {@link HttpExchange} annotations.
+	 * @param basePackage the names of packages to look under
+	 * @return match bean definitions
+	 */
+	protected Stream<BeanDefinition> findHttpServices(String basePackage) {
+		if (this.scanner == null) {
+			Assert.state(this.environment != null, "Environment has not been set");
+			Assert.state(this.resourceLoader != null, "ResourceLoader has not been set");
+			this.scanner = new HttpExchangeClassPathScanningCandidateComponentProvider();
+			this.scanner.setEnvironment(this.environment);
+			this.scanner.setResourceLoader(this.resourceLoader);
+		}
+		return this.scanner.findCandidateComponents(basePackage).stream();
+	}
+
 
 	/**
 	 * Registry API to allow subclasses to register HTTP Services.
@@ -219,7 +229,8 @@ public abstract class AbstractHttpServiceRegistrar implements
 	protected interface GroupRegistry {
 
 		/**
-		 * Perform HTTP Service registrations for the given group.
+		 * Perform HTTP Service registrations for the given group, either
+		 * creating the group if it does not exist, or updating the existing one.
 		 */
 		default GroupSpec forGroup(String name) {
 			return forGroup(name, HttpServiceGroup.ClientType.UNSPECIFIED);
@@ -244,13 +255,21 @@ public abstract class AbstractHttpServiceRegistrar implements
 		interface GroupSpec {
 
 			/**
-			 * List HTTP Service types to create proxies for.
+			 * Register HTTP Service types associated with this group.
 			 */
 			GroupSpec register(Class<?>... serviceTypes);
 
 			/**
+			 * Register HTTP Service types using fully qualified type names.
+			 */
+			GroupSpec registerTypeNames(String... serviceTypes);
+
+			/**
 			 * Detect HTTP Service types in the given packages, looking for
-			 * interfaces with a type and/or method {@link HttpExchange} annotation.
+			 * interfaces with type or method {@link HttpExchange} annotations.
+			 * <p>The performed scan, however, filters out any interfaces
+			 * annotated with {@link HttpServiceClient} that are instead supported
+			 * by {@link AbstractClientHttpServiceRegistrar}.
 			 */
 			GroupSpec detectInBasePackages(Class<?>... packageClasses);
 
@@ -258,7 +277,6 @@ public abstract class AbstractHttpServiceRegistrar implements
 			 * Variant of {@link #detectInBasePackages(Class[])} with a String package name.
 			 */
 			GroupSpec detectInBasePackages(String... packageNames);
-
 		}
 	}
 
@@ -289,6 +307,12 @@ public abstract class AbstractHttpServiceRegistrar implements
 			}
 
 			@Override
+			public GroupRegistry.GroupSpec registerTypeNames(String... serviceTypes) {
+				Arrays.stream(serviceTypes).forEach(this::registerServiceTypeName);
+				return this;
+			}
+
+			@Override
 			public GroupRegistry.GroupSpec detectInBasePackages(Class<?>... packageClasses) {
 				Arrays.stream(packageClasses).map(Class::getPackageName).forEach(this::detectInBasePackage);
 				return this;
@@ -301,10 +325,18 @@ public abstract class AbstractHttpServiceRegistrar implements
 			}
 
 			private void detectInBasePackage(String packageName) {
-				getScanner().findCandidateComponents(packageName).stream()
+				findHttpServices(packageName)
+						.filter(DefaultGroupSpec::isNotHttpServiceClientAnnotated)
 						.map(BeanDefinition::getBeanClassName)
 						.filter(Objects::nonNull)
 						.forEach(this::registerServiceTypeName);
+			}
+
+			private static boolean isNotHttpServiceClientAnnotated(BeanDefinition defintion) {
+				if (defintion instanceof AnnotatedBeanDefinition abd) {
+					return !abd.getMetadata().hasAnnotation(HttpServiceClient.class.getName());
+				}
+				return true;
 			}
 
 			private void registerServiceTypeName(String httpServiceTypeName) {

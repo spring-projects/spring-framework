@@ -581,6 +581,3 @@ performance (time and memory used), due to extra processing and analysis. Scopin
 designators are very fast to match, and using them means AspectJ can very quickly
 dismiss groups of join points that should not be further processed. A good
 pointcut should always include one if possible.
-
-
-

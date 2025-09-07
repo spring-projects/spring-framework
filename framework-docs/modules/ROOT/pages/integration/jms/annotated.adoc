@@ -243,6 +243,3 @@ as the following example shows:
 		}
 	}
 ----
-
-
-

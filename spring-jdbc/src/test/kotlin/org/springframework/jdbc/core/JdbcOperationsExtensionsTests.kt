@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,6 +44,13 @@ class JdbcOperationsExtensionsTests {
 	}
 
 	@Test
+	fun `queryForObject with nullable reified type parameters`() {
+		every { template.queryForObject(sql, any<Class<Int>>()) } returns null
+		assertThat(template.queryForObject<Int?>(sql)).isNull()
+		verify { template.queryForObject(sql, any<Class<Int>>()) }
+	}
+
+	@Test
 	fun `queryForObject with RowMapper-like function`() {
 		every { template.queryForObject(sql, any<RowMapper<Int>>(), any<Int>()) } returns 2
 		assertThat(template.queryForObject(sql, 3) { rs: ResultSet, _: Int -> rs.getInt(1) }).isEqualTo(2)
@@ -52,9 +59,9 @@ class JdbcOperationsExtensionsTests {
 
 	@Test  // gh-22682
 	fun `queryForObject with nullable RowMapper-like function`() {
-		every { template.queryForObject(sql, any<RowMapper<Int>>(), 3) } returns null
+		every { template.queryForObject(sql, any<RowMapper<Int?>>(), 3) } returns null
 		assertThat(template.queryForObject<Int?>(sql, 3) { _, _ -> null }).isNull()
-		verify { template.queryForObject(eq(sql), any<RowMapper<Int>>(), eq(3)) }
+		verify { template.queryForObject(eq(sql), any<RowMapper<Int?>>(), eq(3)) }
 	}
 
 	@Test
@@ -67,6 +74,15 @@ class JdbcOperationsExtensionsTests {
 	}
 
 	@Test
+	fun `queryForObject with nullable reified type parameters and argTypes`() {
+		val args = arrayOf(3)
+		val argTypes = intArrayOf(JDBCType.INTEGER.vendorTypeNumber)
+		every { template.queryForObject(sql, args, argTypes, any<Class<Int>>()) } returns null
+		assertThat(template.queryForObject<Int?>(sql, args, argTypes)).isNull()
+		verify { template.queryForObject(sql, args, argTypes, any<Class<Int>>()) }
+	}
+
+	@Test
 	fun `queryForObject with reified type parameters and args`() {
 		val args = arrayOf(3, 4)
 		every { template.queryForObject(sql, any<Class<Int>>(), args) } returns 2
@@ -75,10 +91,26 @@ class JdbcOperationsExtensionsTests {
 	}
 
 	@Test
+	fun `queryForObject with nullable reified type parameters and args`() {
+		val args = arrayOf(3, 4)
+		every { template.queryForObject(sql, any<Class<Int>>(), args) } returns null
+		assertThat(template.queryForObject<Int?>(sql, args)).isNull()
+		verify { template.queryForObject(sql, any<Class<Int>>(), args) }
+	}
+
+	@Test
 	fun `queryForList with reified type parameters`() {
 		val list = listOf(1, 2, 3)
 		every { template.queryForList(sql, any<Class<Int>>()) } returns list
 		assertThat(template.queryForList<Int>(sql)).isEqualTo(list)
+		verify { template.queryForList(sql, any<Class<Int>>()) }
+	}
+
+	@Test
+	fun `queryForList with nullable reified type parameters`() {
+		val list = listOf(1, null, 3)
+		every { template.queryForList(sql, any<Class<Int>>()) } returns list
+		assertThat(template.queryForList<Int?>(sql)).isEqualTo(list)
 		verify { template.queryForList(sql, any<Class<Int>>()) }
 	}
 
@@ -93,11 +125,30 @@ class JdbcOperationsExtensionsTests {
 	}
 
 	@Test
+	fun `queryForList with nullable reified type parameters and argTypes`() {
+		val list = listOf(1, null, 3)
+		val args = arrayOf(3)
+		val argTypes = intArrayOf(JDBCType.INTEGER.vendorTypeNumber)
+		every { template.queryForList(sql, args, argTypes, any<Class<Int>>()) } returns list
+		assertThat(template.queryForList<Int?>(sql, args, argTypes)).isEqualTo(list)
+		verify { template.queryForList(sql, args, argTypes, any<Class<Int>>()) }
+	}
+
+	@Test
 	fun `queryForList with reified type parameters and args`() {
 		val list = listOf(1, 2, 3)
 		val args = arrayOf(3, 4)
 		every { template.queryForList(sql, any<Class<Int>>(), args) } returns list
 		template.queryForList<Int>(sql, args)
+		verify { template.queryForList(sql, any<Class<Int>>(), args) }
+	}
+
+	@Test
+	fun `queryForList with nullable reified type parameters and args`() {
+		val list = listOf(1, null, 3)
+		val args = arrayOf(3, 4)
+		every { template.queryForList(sql, any<Class<Int>>(), args) } returns list
+		template.queryForList<Int?>(sql, args)
 		verify { template.queryForList(sql, any<Class<Int>>(), args) }
 	}
 
@@ -113,12 +164,11 @@ class JdbcOperationsExtensionsTests {
 
 	@Test  // gh-22682
 	fun `query with nullable ResultSetExtractor-like function`() {
-		every { template.query(eq(sql), any<ResultSetExtractor<Int>>(), eq(3)) } returns null
+		every { template.query(eq(sql), any<ResultSetExtractor<Int?>>(), eq(3)) } returns null
 		assertThat(template.query<Int?>(sql, 3) { _ -> null }).isNull()
-		verify { template.query(eq(sql), any<ResultSetExtractor<Int>>(), eq(3)) }
+		verify { template.query(eq(sql), any<ResultSetExtractor<Int?>>(), eq(3)) }
 	}
 
-	@Suppress("RemoveExplicitTypeArguments")
 	@Test
 	fun `query with RowCallbackHandler-like function`() {
 		every { template.query(sql, ofType<RowCallbackHandler>(), 3) } returns Unit
@@ -131,11 +181,21 @@ class JdbcOperationsExtensionsTests {
 	@Test
 	fun `query with RowMapper-like function`() {
 		val list = mutableListOf(1, 2, 3)
-		every { template.query(sql, ofType<RowMapper<*>>(), 3) } returns list
+		every { template.query(sql, ofType<RowMapper<Int>>(), 3) } returns list
 		assertThat(template.query(sql, 3) { rs, _ ->
 			rs.getInt(1)
 		}).isEqualTo(list)
-		verify { template.query(sql, ofType<RowMapper<*>>(), 3) }
+		verify { template.query(sql, ofType<RowMapper<Int>>(), 3) }
+	}
+
+	@Test
+	fun `query with nullable RowMapper-like function`() {
+		val list = mutableListOf(1, null, 3)
+		every { template.query(sql, ofType<RowMapper<Int?>>(), 3) } returns list
+		assertThat(template.query(sql, 3) { rs, _ ->
+			rs.getInt(1)
+		}).isEqualTo(list)
+		verify { template.query(sql, ofType<RowMapper<Int?>>(), 3) }
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Rossen Stoyanchev
  * @author Sebastien Deleuze
+ * @author Mengqi Xu
  */
 class ForwardedHeaderTransformerTests {
 
@@ -231,6 +232,25 @@ class ForwardedHeaderTransformerTests {
 		request = this.requestMutator.apply(request);
 		assertThat(request.getRemoteAddress()).isNotNull();
 		assertThat(request.getRemoteAddress().getHostName()).isEqualTo("203.0.113.195");
+	}
+
+	@Test
+	void forwardedBy() {
+		HttpHeaders headers = new HttpHeaders();
+		headers.add("Forwarded", "by=\"203.0.113.195:4711\";host=84.198.58.199;proto=https");
+
+		InetSocketAddress localAddress = new InetSocketAddress("example.client", 47011);
+
+		ServerHttpRequest request = MockServerHttpRequest
+				.method(HttpMethod.GET, URI.create("https://example.com/a%20b?q=a%2Bb"))
+				.localAddress(localAddress)
+				.headers(headers)
+				.build();
+
+		request = this.requestMutator.apply(request);
+		assertThat(request.getLocalAddress()).isNotNull();
+		assertThat(request.getLocalAddress().getHostName()).isEqualTo("203.0.113.195");
+		assertThat(request.getLocalAddress().getPort()).isEqualTo(4711);
 	}
 
 

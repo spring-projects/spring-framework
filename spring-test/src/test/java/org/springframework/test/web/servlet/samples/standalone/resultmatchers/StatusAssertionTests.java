@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,8 +35,8 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.CREATED;
+import static org.springframework.http.HttpStatus.EXPECTATION_FAILED;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
-import static org.springframework.http.HttpStatus.I_AM_A_TEAPOT;
 import static org.springframework.http.HttpStatus.NOT_IMPLEMENTED;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -62,11 +62,11 @@ class StatusAssertionTests {
 
 	@Test
 	void statusCode() throws Exception {
-		this.mockMvc.perform(get("/teaPot")).andExpect(status().is(I_AM_A_TEAPOT.value()));
+		this.mockMvc.perform(get("/expectationFailed")).andExpect(status().is(EXPECTATION_FAILED.value()));
 		this.mockMvc.perform(get("/created")).andExpect(status().is(CREATED.value()));
 		this.mockMvc.perform(get("/createdWithComposedAnnotation")).andExpect(status().is(CREATED.value()));
 		this.mockMvc.perform(get("/badRequest")).andExpect(status().is(BAD_REQUEST.value()));
-		this.mockMvc.perform(get("/throwsException")).andExpect(status().is(I_AM_A_TEAPOT.value()));
+		this.mockMvc.perform(get("/throwsException")).andExpect(status().is(EXPECTATION_FAILED.value()));
 	}
 
 	@Test
@@ -99,11 +99,11 @@ class StatusAssertionTests {
 	}
 
 	@RestController
-	@ResponseStatus(I_AM_A_TEAPOT)
+	@ResponseStatus(EXPECTATION_FAILED)
 	private static class StatusController {
 
-		@RequestMapping("/teaPot")
-		void teaPot() {
+		@RequestMapping("/expectationFailed")
+		void expectationFailed() {
 		}
 
 		@RequestMapping("/created")

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import java.lang.constant.ClassDesc;
 import java.lang.reflect.Array;
 import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -103,7 +104,12 @@ abstract class ClassFileAnnotationMetadata {
 		classDesc.packageName() + "." + classDesc.displayName();
 	}
 
-	private static Object parseArrayValue(String className, @org.jetbrains.annotations.Nullable ClassLoader classLoader, AnnotationValue.OfArray arrayValue) {
+	private static Class<?> loadClass(String className, @Nullable ClassLoader classLoader) {
+		String name = fromTypeDescriptor(className);
+		return ClassUtils.resolveClassName(name, classLoader);
+	}
+
+	private static Object parseArrayValue(String className, @Nullable ClassLoader classLoader, AnnotationValue.OfArray arrayValue) {
 		if (arrayValue.values().isEmpty()) {
 			return new Object[0];
 		}
@@ -119,10 +125,10 @@ abstract class ClassFileAnnotationMetadata {
 				return stream.map(AnnotationValue.OfLong.class::cast).mapToLong(AnnotationValue.OfLong::longValue).toArray();
 			}
 			default -> {
-				Object firstResolvedValue = readAnnotationValue(className, arrayValue.values().getFirst(), classLoader);
+				Class<?> arrayElementType = resolveArrayElementType(arrayValue.values(), classLoader);
 				return stream
 						.map(rawValue -> readAnnotationValue(className, rawValue, classLoader))
-						.toArray(s -> (Object[]) Array.newInstance(firstResolvedValue.getClass(), s));
+						.toArray(s -> (Object[]) Array.newInstance(arrayElementType, s));
 			}
 		}
 	}
@@ -138,6 +144,28 @@ abstract class ClassFileAnnotationMetadata {
 			return null;
 		}
 	}
+
+	private static Class<?> resolveArrayElementType(List<AnnotationValue> values, @Nullable ClassLoader classLoader) {
+		AnnotationValue firstValue = values.getFirst();
+		switch (firstValue) {
+			case AnnotationValue.OfConstant constantValue -> {
+				return constantValue.resolvedValue().getClass();
+			}
+			case AnnotationValue.OfAnnotation _ -> {
+				return MergedAnnotation.class;
+			}
+			case AnnotationValue.OfClass _ -> {
+				return String.class;
+			}
+			case AnnotationValue.OfEnum enumValue -> {
+				return loadClass(enumValue.className().stringValue(), classLoader);
+			}
+			default -> {
+				return Object.class;
+			}
+		}
+	}
+
 
 	record Source(Annotation entryName) {
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,23 +17,27 @@
 package org.springframework.web.client.support;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.util.LinkedHashSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiFunction;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 import io.micrometer.observation.tck.TestObservationRegistry;
-import okhttp3.mockwebserver.MockResponse;
-import okhttp3.mockwebserver.MockWebServer;
-import okhttp3.mockwebserver.RecordedRequest;
+import mockwebserver3.MockResponse;
+import mockwebserver3.MockWebServer;
+import mockwebserver3.RecordedRequest;
 import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -41,8 +45,10 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.StreamingHttpOutputMessage;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.util.StreamUtils;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -50,6 +56,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.client.ApiVersionInserter;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
@@ -63,6 +70,7 @@ import org.springframework.web.util.DefaultUriBuilderFactory;
 import org.springframework.web.util.UriBuilderFactory;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * Integration tests for {@link HttpServiceProxyFactory} with {@link RestClient}
@@ -75,16 +83,18 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SuppressWarnings("JUnitMalformedDeclaration")
 class RestClientAdapterTests {
 
-	private final MockWebServer anotherServer = anotherServer();
+	private final MockWebServer anotherServer = new MockWebServer();
 
-
-	@SuppressWarnings("ConstantValue")
-	@AfterEach
-	void shutdown() throws IOException {
-		if (this.anotherServer != null) {
-			this.anotherServer.shutdown();
-		}
+	@BeforeEach
+	void setUp() throws IOException {
+		this.anotherServer.start();
 	}
+
+	@AfterEach
+	void shutdown() {
+		this.anotherServer.close();
+	}
+
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.METHOD)
@@ -93,7 +103,7 @@ class RestClientAdapterTests {
 	@interface ParameterizedAdapterTest {
 	}
 
-	public static Stream<Object[]> arguments() {
+	public static Stream<Object[]> arguments() throws IOException {
 		return Stream.of(
 				createArgsForAdapter((url, or) -> {
 					RestClient restClient = RestClient.builder().baseUrl(url).observationRegistry(or).build();
@@ -109,12 +119,15 @@ class RestClientAdapterTests {
 
 	@SuppressWarnings("resource")
 	private static Object[] createArgsForAdapter(
-			BiFunction<String, TestObservationRegistry, HttpExchangeAdapter> adapterFactory) {
+			BiFunction<String, TestObservationRegistry, HttpExchangeAdapter> adapterFactory) throws IOException {
 
 		MockWebServer server = new MockWebServer();
+		server.start();
 
-		MockResponse response = new MockResponse();
-		response.setHeader("Content-Type", "text/plain").setBody("Hello Spring!");
+		MockResponse response = new MockResponse.Builder()
+				.setHeader("Content-Type", "text/plain")
+				.body("Hello Spring!")
+				.build();
 		server.enqueue(response);
 
 		TestObservationRegistry registry = TestObservationRegistry.create();
@@ -134,7 +147,7 @@ class RestClientAdapterTests {
 		RecordedRequest request = server.takeRequest();
 		assertThat(response).isEqualTo("Hello Spring!");
 		assertThat(request.getMethod()).isEqualTo("GET");
-		assertThat(request.getPath()).isEqualTo("/greeting");
+		assertThat(request.getTarget()).isEqualTo("/greeting");
 		assertThat(registry).hasObservationWithNameEqualTo("http.client.requests").that()
 				.hasLowCardinalityKeyValue("uri", "/greeting");
 	}
@@ -148,7 +161,7 @@ class RestClientAdapterTests {
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 		assertThat(response.getBody()).isEqualTo("Hello Spring!");
 		assertThat(request.getMethod()).isEqualTo("GET");
-		assertThat(request.getPath()).isEqualTo("/greeting/456");
+		assertThat(request.getTarget()).isEqualTo("/greeting/456");
 		assertThat(registry).hasObservationWithNameEqualTo("http.client.requests").that()
 				.hasLowCardinalityKeyValue("uri", "/greeting/{id}");
 	}
@@ -162,13 +175,16 @@ class RestClientAdapterTests {
 		RecordedRequest request = server.takeRequest();
 		assertThat(response.orElse("empty")).isEqualTo("Hello Spring!");
 		assertThat(request.getMethod()).isEqualTo("GET");
-		assertThat(request.getRequestUrl().uri()).isEqualTo(dynamicUri);
+		assertThat(request.getUrl().uri()).isEqualTo(dynamicUri);
 		assertThat(registry).hasObservationWithNameEqualTo("http.client.requests").that()
 				.hasLowCardinalityKeyValue("uri", "none");
 	}
 
 	@Test
 	void greetingWithApiVersion() throws Exception {
+		prepareResponse(builder ->
+				builder.setHeader("Content-Type", "text/plain").body("Hello Spring 2!"));
+
 		RestClient restClient = RestClient.builder()
 				.baseUrl(anotherServer.url("/").toString())
 				.apiVersionInserter(ApiVersionInserter.useHeader("X-API-Version"))
@@ -177,15 +193,18 @@ class RestClientAdapterTests {
 		RestClientAdapter adapter = RestClientAdapter.create(restClient);
 		Service service = HttpServiceProxyFactory.builderFor(adapter).build().createClient(Service.class);
 
-		String response = service.getGreetingWithVersion();
+		String actualResponse = service.getGreetingWithVersion();
 
 		RecordedRequest request = anotherServer.takeRequest();
-		assertThat(request.getHeader("X-API-Version")).isEqualTo("1.2");
-		assertThat(response).isEqualTo("Hello Spring 2!");
+		assertThat(request.getHeaders().get("X-API-Version")).isEqualTo("1.2");
+		assertThat(actualResponse).isEqualTo("Hello Spring 2!");
 	}
 
 	@ParameterizedAdapterTest
 	void getWithUriBuilderFactory(MockWebServer server, Service service) throws InterruptedException {
+		prepareResponse(builder ->
+				builder.setHeader("Content-Type", "text/plain").body("Hello Spring 2!"));
+
 		String url = this.anotherServer.url("/").toString();
 		UriBuilderFactory factory = new DefaultUriBuilderFactory(url);
 
@@ -195,12 +214,15 @@ class RestClientAdapterTests {
 		assertThat(actualResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
 		assertThat(actualResponse.getBody()).isEqualTo("Hello Spring 2!");
 		assertThat(request.getMethod()).isEqualTo("GET");
-		assertThat(request.getPath()).isEqualTo("/greeting");
+		assertThat(request.getTarget()).isEqualTo("/greeting");
 		assertThat(server.getRequestCount()).isEqualTo(0);
 	}
 
 	@ParameterizedAdapterTest
 	void getWithFactoryPathVariableAndRequestParam(MockWebServer server, Service service) throws InterruptedException {
+		prepareResponse(builder ->
+				builder.setHeader("Content-Type", "text/plain").body("Hello Spring 2!"));
+
 		String url = this.anotherServer.url("/").toString();
 		UriBuilderFactory factory = new DefaultUriBuilderFactory(url);
 
@@ -210,12 +232,15 @@ class RestClientAdapterTests {
 		assertThat(actualResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
 		assertThat(actualResponse.getBody()).isEqualTo("Hello Spring 2!");
 		assertThat(request.getMethod()).isEqualTo("GET");
-		assertThat(request.getPath()).isEqualTo("/greeting/123?param=test");
+		assertThat(request.getTarget()).isEqualTo("/greeting/123?param=test");
 		assertThat(server.getRequestCount()).isEqualTo(0);
 	}
 
 	@ParameterizedAdapterTest
 	void getWithIgnoredUriBuilderFactory(MockWebServer server, Service service) throws InterruptedException {
+		prepareResponse(builder ->
+				builder.setHeader("Content-Type", "text/plain").body("Hello Spring 2!"));
+
 		URI dynamicUri = server.url("/greeting/123").uri();
 		UriBuilderFactory factory = new DefaultUriBuilderFactory(this.anotherServer.url("/").toString());
 
@@ -225,7 +250,7 @@ class RestClientAdapterTests {
 		assertThat(actualResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
 		assertThat(actualResponse.getBody()).isEqualTo("Hello Spring!");
 		assertThat(request.getMethod()).isEqualTo("GET");
-		assertThat(request.getPath()).isEqualTo("/greeting/123");
+		assertThat(request.getTarget()).isEqualTo("/greeting/123");
 		assertThat(this.anotherServer.getRequestCount()).isEqualTo(0);
 	}
 
@@ -235,9 +260,9 @@ class RestClientAdapterTests {
 
 		RecordedRequest request = server.takeRequest();
 		assertThat(request.getMethod()).isEqualTo("POST");
-		assertThat(request.getPath()).isEqualTo("/greeting");
+		assertThat(request.getTarget()).isEqualTo("/greeting");
 		assertThat(request.getHeaders().get("testHeaderName")).isEqualTo("testHeader");
-		assertThat(request.getBody().readUtf8()).isEqualTo("testBody");
+		assertThat(request.getBody().utf8()).isEqualTo("testBody");
 	}
 
 	@ParameterizedAdapterTest
@@ -250,7 +275,7 @@ class RestClientAdapterTests {
 
 		RecordedRequest request = server.takeRequest();
 		assertThat(request.getHeaders().get("Content-Type")).isEqualTo("application/x-www-form-urlencoded");
-		assertThat(request.getBody().readUtf8()).isEqualTo("param1=value+1&param2=value+2");
+		assertThat(request.getBody().utf8()).isEqualTo("param1=value+1&param2=value+2");
 	}
 
 	@ParameterizedAdapterTest // gh-30342
@@ -262,7 +287,7 @@ class RestClientAdapterTests {
 
 		RecordedRequest request = server.takeRequest();
 		assertThat(request.getHeaders().get("Content-Type")).startsWith("multipart/form-data;boundary=");
-		assertThat(request.getBody().readUtf8()).containsSubsequence(
+		assertThat(request.getBody().utf8()).containsSubsequence(
 				"Content-Disposition: form-data; name=\"file\"; filename=\"originalTestFileName\"",
 				"Content-Type: application/json", "Content-Length: 4", "test",
 				"Content-Disposition: form-data; name=\"anotherPart\"", "Content-Type: text/plain;charset=UTF-8",
@@ -278,8 +303,8 @@ class RestClientAdapterTests {
 
 		RecordedRequest request = server.takeRequest();
 		assertThat(request.getMethod()).isEqualTo("POST");
-		assertThat(request.getPath()).isEqualTo("/persons");
-		assertThat(request.getBody().readUtf8()).isEqualTo("[{\"name\":\"John\"},{\"name\":\"Richard\"}]");
+		assertThat(request.getTarget()).isEqualTo("/persons");
+		assertThat(request.getBody().utf8()).isEqualTo("[{\"name\":\"John\"},{\"name\":\"Richard\"}]");
 	}
 
 	@ParameterizedAdapterTest
@@ -288,7 +313,7 @@ class RestClientAdapterTests {
 
 		RecordedRequest request = server.takeRequest();
 		assertThat(request.getMethod()).isEqualTo("PUT");
-		assertThat(request.getHeader("Cookie")).isEqualTo("firstCookie=test1; secondCookie=test2");
+		assertThat(request.getHeaders().get("Cookie")).isEqualTo("firstCookie=test1; secondCookie=test2");
 	}
 
 	@ParameterizedAdapterTest
@@ -297,16 +322,71 @@ class RestClientAdapterTests {
 
 		RecordedRequest request = server.takeRequest();
 		assertThat(request.getMethod()).isEqualTo("PUT");
-		assertThat(request.getHeader("Cookie")).isEqualTo("testCookie=test1; testCookie=test2");
+		assertThat(request.getHeaders().get("Cookie")).isEqualTo("testCookie=test1; testCookie=test2");
 	}
 
+	@Test
+	void getInputStream() throws Exception {
+		prepareResponse(builder ->
+				builder.setHeader("Content-Type", "text/plain").body("Hello Spring 2!"));
 
-	private static MockWebServer anotherServer() {
-		MockWebServer server = new MockWebServer();
-		MockResponse response = new MockResponse();
-		response.setHeader("Content-Type", "text/plain").setBody("Hello Spring 2!");
-		server.enqueue(response);
-		return server;
+		InputStream inputStream = initService().getInputStream();
+
+		RecordedRequest request = this.anotherServer.takeRequest();
+		assertThat(request.getTarget()).isEqualTo("/input-stream");
+		assertThat(StreamUtils.copyToString(inputStream, StandardCharsets.UTF_8)).isEqualTo("Hello Spring 2!");
+	}
+
+	@Test // gh-35375
+	void getInputStreamWithError() {
+		prepareResponse(builder -> builder.code(400).body("rejected"));
+
+		assertThatThrownBy(() -> initService().getInputStream())
+				.isExactlyInstanceOf(HttpClientErrorException.BadRequest.class)
+				.hasMessage("400 Client Error: \"rejected\"");
+	}
+
+	@Test
+	void postOutputStream() throws Exception {
+		prepareResponse(builder ->
+				builder.setHeader("Content-Type", "text/plain").body("Hello Spring 2!"));
+
+		String body = "test stream";
+		initService().postOutputStream(outputStream -> outputStream.write(body.getBytes()));
+
+		RecordedRequest request = this.anotherServer.takeRequest();
+		assertThat(request.getTarget()).isEqualTo("/output-stream");
+		assertThat(request.getBody().utf8()).isEqualTo(body);
+	}
+
+	@Test
+	void handleNotFoundException() {
+		MockResponse response = new MockResponse.Builder().code(404).build();
+		this.anotherServer.enqueue(response);
+
+		RestClientAdapter clientAdapter = RestClientAdapter.create(
+				RestClient.builder().baseUrl(this.anotherServer.url("/").toString()).build());
+
+		HttpServiceProxyFactory factory = HttpServiceProxyFactory.builderFor(clientAdapter)
+				.exchangeAdapterDecorator(NotFoundRestClientAdapterDecorator::new)
+				.build();
+
+		ResponseEntity<String> responseEntity = factory.createClient(Service.class).getGreetingById("1");
+
+		assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+		assertThat(responseEntity.getBody()).isNull();
+	}
+
+	private Service initService() {
+		String url = this.anotherServer.url("/").toString();
+		RestClient restClient = RestClient.builder().baseUrl(url).build();
+		RestClientAdapter adapter = RestClientAdapter.create(restClient);
+		return HttpServiceProxyFactory.builderFor(adapter).build().createClient(Service.class);
+	}
+
+	private void prepareResponse(Function<MockResponse.Builder, MockResponse.Builder> f) {
+		MockResponse.Builder builder = new MockResponse.Builder();
+		this.anotherServer.enqueue(f.apply(builder).build());
 	}
 
 
@@ -352,6 +432,12 @@ class RestClientAdapterTests {
 		@PutExchange
 		void putWithSameNameCookies(
 				@CookieValue("testCookie") String firstCookie, @CookieValue("testCookie") String secondCookie);
+
+		@GetExchange(url = "/input-stream")
+		InputStream getInputStream();
+
+		@PostExchange(url = "/output-stream")
+		void postOutputStream(StreamingHttpOutputMessage.Body body);
 
 	}
 

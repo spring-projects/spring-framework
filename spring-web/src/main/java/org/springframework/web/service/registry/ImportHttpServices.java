@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2025 the original author or authors.
+ * Copyright 2012-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,7 +53,7 @@ import org.springframework.web.service.annotation.HttpExchange;
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 @Repeatable(ImportHttpServices.Container.class)
-@Import(AnnotationHttpServiceRegistrar.class)
+@Import(ImportHttpServiceRegistrar.class)
 public @interface ImportHttpServices {
 
 	/**
@@ -76,10 +76,11 @@ public @interface ImportHttpServices {
 	String group() default HttpServiceGroup.DEFAULT_GROUP_NAME;
 
 	/**
-	 * Detect HTTP Services in the packages of the specified classes by looking
-	 * for interfaces with type-level or method-level
-	 * {@link org.springframework.web.service.annotation.HttpExchange @HttpExchange}
-	 * annotations.
+	 * Detect HTTP Services in the packages of the specified classes, looking
+	 * for interfaces with type or method {@link HttpExchange} annotations.
+	 * <p>The performed scan, however, filters out interfaces annotated with
+	 * {@link HttpServiceClient} that are instead supported by
+	 * {@link AbstractClientHttpServiceRegistrar}.
 	 */
 	Class<?>[] basePackageClasses() default {};
 
@@ -106,7 +107,7 @@ public @interface ImportHttpServices {
 	@Target(ElementType.TYPE)
 	@Retention(RetentionPolicy.RUNTIME)
 	@Documented
-	@Import(AnnotationHttpServiceRegistrar.class)
+	@Import(ImportHttpServiceRegistrar.class)
 	@interface Container {
 
 		ImportHttpServices[] value();

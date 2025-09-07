@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -258,7 +258,7 @@ public final class MockServerHttpRequest extends AbstractServerHttpRequest {
 		/**
 		 * Set SSL session information and certificates.
 		 */
-		void sslInfo(SslInfo sslInfo);
+		B sslInfo(SslInfo sslInfo);
 
 		/**
 		 * Add one or more cookies.
@@ -282,15 +282,6 @@ public final class MockServerHttpRequest extends AbstractServerHttpRequest {
 		/**
 		 * Add the given header values.
 		 * @param headers the header values
-		 * @deprecated in favor of {@link #headers(HttpHeaders)}
-		 */
-		@Deprecated(since = "7.0", forRemoval = true)
-		B headers(MultiValueMap<String, String> headers);
-
-		/**
-		 * Add the given header values.
-		 * @param headers the header values
-		 * @since 7.0
 		 */
 		B headers(HttpHeaders headers);
 
@@ -331,12 +322,6 @@ public final class MockServerHttpRequest extends AbstractServerHttpRequest {
 		 * @see HttpHeaders#setIfUnmodifiedSince(long)
 		 */
 		B ifUnmodifiedSince(long ifUnmodifiedSince);
-
-		/**
-		 * Set the values of the {@code If-Match} header.
-		 * @param ifMatches the new value of the header
-		 */
-		B ifMatch(String... ifMatches);
 
 		/**
 		 * Set the values of the {@code If-None-Match} header.
@@ -458,8 +443,9 @@ public final class MockServerHttpRequest extends AbstractServerHttpRequest {
 		}
 
 		@Override
-		public void sslInfo(SslInfo sslInfo) {
+		public BodyBuilder sslInfo(SslInfo sslInfo) {
 			this.sslInfo = sslInfo;
+			return this;
 		}
 
 		@Override
@@ -479,13 +465,6 @@ public final class MockServerHttpRequest extends AbstractServerHttpRequest {
 			for (String headerValue : headerValues) {
 				this.headers.add(headerName, headerValue);
 			}
-			return this;
-		}
-
-		@Override
-		@Deprecated(since = "7.0", forRemoval = true)
-		public BodyBuilder headers(MultiValueMap<String, String> headers) {
-			this.headers.putAll(headers);
 			return this;
 		}
 
@@ -534,12 +513,6 @@ public final class MockServerHttpRequest extends AbstractServerHttpRequest {
 		@Override
 		public BodyBuilder ifUnmodifiedSince(long ifUnmodifiedSince) {
 			this.headers.setIfUnmodifiedSince(ifUnmodifiedSince);
-			return this;
-		}
-
-		@Override
-		public BodyBuilder ifMatch(String... ifMatches) {
-			this.headers.setIfMatch(Arrays.asList(ifMatches));
 			return this;
 		}
 

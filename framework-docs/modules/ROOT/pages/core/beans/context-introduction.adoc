@@ -24,7 +24,6 @@ package also provides the following functionality:
   `HierarchicalBeanFactory` interface.
 
 
-
 [[context-functionality-messagesource]]
 == Internationalization using `MessageSource`
 
@@ -271,7 +270,6 @@ files from any Spring resource location (not only from the classpath) and suppor
 reloading of bundle property files (while efficiently caching them in between).
 See the {spring-framework-api}/context/support/ReloadableResourceBundleMessageSource.html[`ReloadableResourceBundleMessageSource`]
 javadoc for details.
-
 
 
 [[context-functionality-events]]
@@ -534,7 +532,6 @@ complete support for building lightweight,
 https://www.enterpriseintegrationpatterns.com[pattern-oriented], event-driven
 architectures that build upon the well-known Spring programming model.
 
-
 [[context-functionality-events-annotation]]
 === Annotation-based Event Listeners
 
@@ -707,7 +704,6 @@ The `handleBlockedListEvent()` method publishes a new `ListUpdateEvent` for ever
 `BlockedListEvent` that it handles. If you need to publish several events, you can return
 a `Collection` or an array of events instead.
 
-
 [[context-functionality-events-async]]
 === Asynchronous Listeners
 
@@ -754,7 +750,6 @@ Be aware of the following limitations when using asynchronous events:
   See xref:integration/observability.adoc#observability.application-events[the `@EventListener` Observability section]
   for more information on Observability concerns.
 
-
 [[context-functionality-events-order]]
 === Ordering Listeners
 
@@ -785,7 +780,6 @@ Kotlin::
 	}
 ----
 ======
-
 
 [[context-functionality-events-generics]]
 === Generic Events
@@ -880,7 +874,6 @@ for example, for processing all events asynchronously and/or for handling listen
 ----
 
 
-
 [[context-functionality-resources]]
 == Convenient Access to Low-level Resources
 
@@ -913,7 +906,6 @@ with special prefixes to force loading of definitions from the classpath or a UR
 regardless of the actual context type.
 
 
-
 [[context-functionality-startup]]
 == Application Startup Tracking
 
@@ -941,13 +933,12 @@ Java::
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
 	// create a startup step and start recording
-	StartupStep scanPackages = getApplicationStartup().start("spring.context.base-packages.scan");
-	// add tagging information to the current step
-	scanPackages.tag("packages", () -> Arrays.toString(basePackages));
-	// perform the actual phase we're instrumenting
-	this.scanner.scan(basePackages);
-	// end the current step
-	scanPackages.end();
+	try (StartupStep scanPackages = getApplicationStartup().start("spring.context.base-packages.scan")) {
+        // add tagging information to the current step
+        scanPackages.tag("packages", () -> Arrays.toString(basePackages));
+        // perform the actual phase we're instrumenting
+        this.scanner.scan(basePackages);
+	}
 ----
 
 Kotlin::
@@ -955,13 +946,12 @@ Kotlin::
 [source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	// create a startup step and start recording
-	val scanPackages = getApplicationStartup().start("spring.context.base-packages.scan")
-	// add tagging information to the current step
-	scanPackages.tag("packages", () -> Arrays.toString(basePackages))
-	// perform the actual phase we're instrumenting
-	this.scanner.scan(basePackages)
-	// end the current step
-	scanPackages.end()
+	try (val scanPackages = getApplicationStartup().start("spring.context.base-packages.scan")) {
+        // add tagging information to the current step
+        scanPackages.tag("packages", () -> Arrays.toString(basePackages));
+        // perform the actual phase we're instrumenting
+        this.scanner.scan(basePackages);
+	}
 ----
 ======
 
@@ -989,6 +979,7 @@ or ask for the `ApplicationStartup` type on any injection point.
 
 NOTE: Developers should not use the `"spring.*"` namespace when creating custom startup steps.
 This namespace is reserved for internal Spring usage and is subject to change.
+
 
 [[context-create]]
 == Convenient ApplicationContext Instantiation for Web Applications
@@ -1022,7 +1013,6 @@ Examples are `/WEB-INF/{asterisk}Context.xml` (for all files with names that end
 (for all such files in any subdirectory of `WEB-INF`).
 
 
-
 [[context-deploy-rar]]
 == Deploying a Spring `ApplicationContext` as a Jakarta EE RAR File
 
@@ -1053,7 +1043,8 @@ all application classes into a RAR file (which is a standard JAR file with a dif
 file extension).
 . Add all required library JARs into the root of the RAR archive.
 . Add a
-`META-INF/ra.xml` deployment descriptor (as shown in the {spring-framework-api}/jca/context/SpringContextResourceAdapter.html[javadoc for `SpringContextResourceAdapter`])
+`META-INF/ra.xml` deployment descriptor (as shown in the
+{spring-framework-api}/jca/context/SpringContextResourceAdapter.html[javadoc for `SpringContextResourceAdapter`])
 and the corresponding Spring XML bean definition file(s) (typically
 `META-INF/applicationContext.xml`).
 . Drop the resulting RAR file into your
@@ -1066,7 +1057,3 @@ other modules. A RAR-based `ApplicationContext` may also, for example, schedule 
 or react to new files in the file system (or the like). If it needs to allow synchronous
 access from the outside, it could (for example) export RMI endpoints, which may be used
 by other application modules on the same machine.
-
-
-
-

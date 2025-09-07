@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import java.lang.reflect.Executable;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -196,10 +197,9 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 
 	private ApplicationStartup applicationStartup = ApplicationStartup.DEFAULT;
 
-	@SuppressWarnings("NullAway.Init")
-	private List<PropertySourceDescriptor> propertySourceDescriptors;
+	private List<PropertySourceDescriptor> propertySourceDescriptors = Collections.emptyList();
 
-	private Map<String, BeanRegistrar> beanRegistrars = new LinkedHashMap<>();
+	private final Map<String, BeanRegistrar> beanRegistrars = new LinkedHashMap<>();
 
 
 	@Override
@@ -408,12 +408,20 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 		SingletonBeanRegistry singletonRegistry = null;
 		if (registry instanceof SingletonBeanRegistry sbr) {
 			singletonRegistry = sbr;
-			if (!this.localBeanNameGeneratorSet) {
-				BeanNameGenerator generator = (BeanNameGenerator) singletonRegistry.getSingleton(
-						AnnotationConfigUtils.CONFIGURATION_BEAN_NAME_GENERATOR);
-				if (generator != null) {
-					this.componentScanBeanNameGenerator = generator;
-					this.importBeanNameGenerator = generator;
+			BeanNameGenerator configurationGenerator = (BeanNameGenerator) singletonRegistry.getSingleton(
+					AnnotationConfigUtils.CONFIGURATION_BEAN_NAME_GENERATOR);
+			if (configurationGenerator != null) {
+				if (this.localBeanNameGeneratorSet) {
+					if (configurationGenerator instanceof ConfigurationBeanNameGenerator &
+							configurationGenerator != this.importBeanNameGenerator) {
+						throw new IllegalStateException("Context-level ConfigurationBeanNameGenerator [" +
+								configurationGenerator + "] must not be overridden with processor-level generator [" +
+								this.importBeanNameGenerator + "]");
+					}
+				}
+				else {
+					this.componentScanBeanNameGenerator = configurationGenerator;
+					this.importBeanNameGenerator = configurationGenerator;
 				}
 			}
 		}
@@ -841,6 +849,7 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 			return instantiationDescriptor;
 		}
 	}
+
 
 	private static class BeanRegistrarAotContribution implements BeanFactoryInitializationAotContribution {
 

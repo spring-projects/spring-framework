@@ -1,0 +1,115 @@
+[[resilience]]
+= Resilience Features
+
+As of 7.0, the core Spring Framework includes a couple of common resilience features,
+in particular `@Retryable` and `@ConcurrencyLimit` annotations for method invocations.
+
+
+[[resilience-retryable]]
+== Using `@Retryable`
+
+`@Retryable` is a common annotation that specifies retry characteristics for an individual
+method (with the annotation declared at the method level), or for all proxy-invoked
+methods in a given class hierarchy (with the annotation declared at the type level).
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+@Retryable
+public void sendNotification() {
+    this.jmsClient.destination("notifications").send(...);
+}
+----
+
+By default, the method invocation will be retried for any exception thrown: with at
+most 3 retry attempts after an initial failure, and a delay of 1 second between attempts.
+
+This can be specifically adapted for every method if necessary – for example, by narrowing
+the exceptions to retry:
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+@Retryable(MessageDeliveryException.class)
+public void sendNotification() {
+    this.jmsClient.destination("notifications").send(...);
+}
+----
+
+Or for 5 retry attempts and an exponential back-off strategy with a bit of jitter:
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+@Retryable(maxAttempts = 5, delay = 100, jitter = 10, multiplier = 2, maxDelay = 1000)
+public void sendNotification() {
+    this.jmsClient.destination("notifications").send(...);
+}
+----
+
+Last but not least, `@Retryable` also works for reactive methods with a reactive
+return type, decorating the pipeline with Reactor's retry capabilities:
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+@Retryable(maxAttempts = 5, delay = 100, jitter = 10, multiplier = 2, maxDelay = 1000)
+public Mono<Void> sendNotification() {
+    return Mono.from(...); // <1>
+}
+----
+<1> This raw `Mono` will get decorated with a retry spec.
+	
+For details on the various characteristics, see the available annotation attributes
+in {spring-framework-api}/resilience/annotation/Retryable.html[`@Retryable`].
+
+NOTE: There a `String` variants with placeholder support available for several attributes
+as well, as an alternative to the specifically typed annotation attributes used in the
+above examples.
+
+
+[[resilience-concurrency]]
+== Using `@ConcurrencyLimit`
+
+`@ConcurrencyLimit` is an annotation that specifies a concurrency limit for an individual
+method (with the annotation declared at the method level), or for all proxy-invoked
+methods in a given class hierarchy (with the annotation declared at the type level).
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+@ConcurrencyLimit(10)
+public void sendNotification() {
+    this.jmsClient.destination("notifications").send(...);
+}
+----
+
+This is meant to protect the target resource from being accessed from too many threads at
+the same time, similar to the effect of a pool size limit for a thread pool or a
+connection pool that blocks access if its limit is reached.
+
+You may optionally set the limit to 1, effectively locking access to the target bean
+instance:
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+@ConcurrencyLimit(1) // <1>
+public void sendNotification() {
+    this.jmsClient.destination("notifications").send(...);
+}
+----
+<1> 1 is the default, but specifying it makes the intent clearer.
+	
+Such limiting is particularly useful with Virtual Threads where there is generally
+no thread pool limit in place. For asynchronous tasks, this can be constrained on
+{spring-framework-api}/core/task/SimpleAsyncTaskExecutor.html[`SimpleAsyncTaskExecutor`].
+For synchronous invocations, this annotation provides equivalent behavior through
+{spring-framework-api}/aop/interceptor/ConcurrencyThrottleInterceptor.html[`ConcurrencyThrottleInterceptor`]
+which has been available since Spring Framework 1.0 for programmatic use with the AOP
+framework.
+
+
+[[resilience-enable]]
+== Configuring `@EnableResilientMethods`
+
+Note that like many of Spring's core annotation-based features, `@Retryable` and
+`@ConcurrencyLimit` are designed as metadata that you can choose to honor or ignore.
+The most convenient way to enable actual processing of the resilience annotations
+through AOP interception is to declare `@EnableResilientMethods` on a corresponding
+configuration class. Alternatively, you may declare `RetryAnnotationBeanPostProcessor`
+and/or `ConcurrencyLimitBeanPostProcessor` individually.

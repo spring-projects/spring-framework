@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,6 +45,7 @@ import org.springframework.format.annotation.DateTimeFormat.ISO;
 import org.springframework.format.support.FormattingConversionService;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.converter.AbstractJacksonHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.xml.JacksonXmlHttpMessageConverter;
@@ -53,6 +54,7 @@ import org.springframework.util.AntPathMatcher;
 import org.springframework.util.PathMatcher;
 import org.springframework.validation.Validator;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
+import org.springframework.web.accept.ContentNegotiationManager;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -80,6 +82,8 @@ import org.springframework.web.servlet.mvc.annotation.ResponseStatusExceptionRes
 import org.springframework.web.servlet.mvc.method.annotation.ExceptionHandlerExceptionResolver;
 import org.springframework.web.servlet.mvc.method.annotation.JsonViewRequestBodyAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.JsonViewResponseBodyAdvice;
+import org.springframework.web.servlet.mvc.method.annotation.KotlinRequestBodyAdvice;
+import org.springframework.web.servlet.mvc.method.annotation.KotlinResponseBodyAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
@@ -177,7 +181,7 @@ class WebMvcConfigurationSupportTests {
 				.filter(AbstractJacksonHttpMessageConverter.class::isInstance)
 				.map(AbstractJacksonHttpMessageConverter.class::cast)
 				.forEach(converter -> {
-					ObjectMapper mapper = converter.getObjectMapper();
+					ObjectMapper mapper = converter.getMapper();
 					assertThat(mapper.deserializationConfig().isEnabled(MapperFeature.DEFAULT_VIEW_INCLUSION)).isFalse();
 					assertThat(mapper.deserializationConfig().isEnabled(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)).isFalse();
 					assertThat(mapper.serializationConfig().isEnabled(MapperFeature.DEFAULT_VIEW_INCLUSION)).isFalse();
@@ -204,9 +208,27 @@ class WebMvcConfigurationSupportTests {
 		DirectFieldAccessor fieldAccessor = new DirectFieldAccessor(adapter);
 		@SuppressWarnings("unchecked")
 		List<Object> bodyAdvice = (List<Object>) fieldAccessor.getPropertyValue("requestResponseBodyAdvice");
-		assertThat(bodyAdvice).hasSize(2);
+		assertThat(bodyAdvice).hasSize(4);
 		assertThat(bodyAdvice.get(0).getClass()).isEqualTo(JsonViewRequestBodyAdvice.class);
-		assertThat(bodyAdvice.get(1).getClass()).isEqualTo(JsonViewResponseBodyAdvice.class);
+		assertThat(bodyAdvice.get(1).getClass()).isEqualTo(KotlinRequestBodyAdvice.class);
+		assertThat(bodyAdvice.get(2).getClass()).isEqualTo(JsonViewResponseBodyAdvice.class);
+		assertThat(bodyAdvice.get(3).getClass()).isEqualTo(KotlinResponseBodyAdvice.class);
+	}
+
+	@Test
+	void contentNegotiationManager() {
+		ApplicationContext context = initContext(WebConfig.class);
+		ContentNegotiationManager contentNegotiation = context.getBean(ContentNegotiationManager.class);
+		Map<String, MediaType> mediaTypeMappings = contentNegotiation.getMediaTypeMappings();
+
+		assertThat(mediaTypeMappings)
+				.containsEntry("atom", MediaType.APPLICATION_ATOM_XML)
+				.containsEntry("rss", MediaType.APPLICATION_RSS_XML)
+				.containsEntry("xml", MediaType.APPLICATION_XML)
+				.containsEntry("json", MediaType.APPLICATION_JSON)
+				.containsEntry("smile", MediaType.valueOf("application/x-jackson-smile"))
+				.containsEntry("cbor", MediaType.APPLICATION_CBOR)
+				.containsEntry("yaml", MediaType.APPLICATION_YAML);
 	}
 
 	@Test
@@ -238,8 +260,9 @@ class WebMvcConfigurationSupportTests {
 
 		DirectFieldAccessor fieldAccessor = new DirectFieldAccessor(eher);
 		List<Object> interceptors = (List<Object>) fieldAccessor.getPropertyValue("responseBodyAdvice");
-		assertThat(interceptors).hasSize(1);
+		assertThat(interceptors).hasSize(2);
 		assertThat(interceptors.get(0).getClass()).isEqualTo(JsonViewResponseBodyAdvice.class);
+		assertThat(interceptors.get(1).getClass()).isEqualTo(KotlinResponseBodyAdvice.class);
 
 		LocaleContextHolder.setLocale(Locale.ENGLISH);
 		try {

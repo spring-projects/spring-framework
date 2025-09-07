@@ -38,6 +38,3 @@ Kotlin::
 ----
 <1> Declare a group of SQL scripts.
 ======
-
-
-

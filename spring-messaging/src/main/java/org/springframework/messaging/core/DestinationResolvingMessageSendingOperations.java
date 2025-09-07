@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -69,11 +69,11 @@ public interface DestinationResolvingMessageSendingOperations<D> extends Message
 	 * Resolve the given destination name to a destination, convert the payload
 	 * Object to serialized form, possibly using a
 	 * {@link org.springframework.messaging.converter.MessageConverter},
-	 * wrap it as a message, apply the given post processor, and send the resulting
+	 * wrap it as a message, apply the given post-processor, and send the resulting
 	 * message to the resolved destination.
 	 * @param destinationName the destination name to resolve
 	 * @param payload the Object to use as payload
-	 * @param postProcessor the post processor to apply to the message
+	 * @param postProcessor the post-processor to apply to the message
 	 */
 	<T> void convertAndSend(String destinationName, T payload, @Nullable MessagePostProcessor postProcessor)
 			throws MessagingException;
@@ -82,12 +82,12 @@ public interface DestinationResolvingMessageSendingOperations<D> extends Message
 	 * Resolve the given destination name to a destination, convert the payload
 	 * Object to serialized form, possibly using a
 	 * {@link org.springframework.messaging.converter.MessageConverter},
-	 * wrap it as a message with the given headers, apply the given post processor,
+	 * wrap it as a message with the given headers, apply the given post-processor,
 	 * and send the resulting message to the resolved destination.
 	 * @param destinationName the destination name to resolve
 	 * @param payload the Object to use as payload
 	 * @param headers the headers for the message to send
-	 * @param postProcessor the post processor to apply to the message
+	 * @param postProcessor the post-processor to apply to the message
 	 */
 	<T> void convertAndSend(String destinationName, T payload, @Nullable Map<String, Object> headers,
 			@Nullable MessagePostProcessor postProcessor) throws MessagingException;

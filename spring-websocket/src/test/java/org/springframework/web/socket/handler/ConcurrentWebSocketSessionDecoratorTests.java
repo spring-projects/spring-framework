@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -213,6 +213,17 @@ class ConcurrentWebSocketSessionDecoratorTests {
 			}
 		});
 		assertThat(latch.await(5, TimeUnit.SECONDS)).isTrue();
+	}
+
+	@Test
+	void configuredProperties() {
+		TestWebSocketSession session = new TestWebSocketSession();
+		ConcurrentWebSocketSessionDecorator sessionDecorator =
+				new ConcurrentWebSocketSessionDecorator(session, 42, 43, OverflowStrategy.DROP);
+
+		assertThat(sessionDecorator.getSendTimeLimit()).isEqualTo(42);
+		assertThat(sessionDecorator.getBufferSizeLimit()).isEqualTo(43);
+		assertThat(sessionDecorator.getOverflowStrategy()).isEqualTo(OverflowStrategy.DROP);
 	}
 
 }

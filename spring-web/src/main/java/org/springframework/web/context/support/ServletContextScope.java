@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -95,17 +95,6 @@ public class ServletContextScope implements Scope, DisposableBean {
 			this.destructionCallbacks.put(name, callback);
 		}
 	}
-
-	@Override
-	public @Nullable Object resolveContextualObject(String key) {
-		return null;
-	}
-
-	@Override
-	public @Nullable String getConversationId() {
-		return null;
-	}
-
 
 	/**
 	 * Invoke all registered destruction callbacks.

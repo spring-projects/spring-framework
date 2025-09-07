@@ -20,7 +20,7 @@ jobs:
             toolchain: false
           - version: 21
             toolchain: true
-          - version: 23
+          - version: 24
             toolchain: true
         exclude:
           - os:

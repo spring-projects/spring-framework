@@ -35,7 +35,6 @@ integration support, and the rest of this chapter then focuses on dedicated topi
 * xref:testing/annotations.adoc[Annotations]
 
 
-
 [[integration-testing-goals]]
 == Goals of Integration Testing
 
@@ -49,7 +48,6 @@ Spring's integration testing support has the following primary goals:
 
 The next few sections describe each goal and provide links to implementation and
 configuration details.
-
 
 [[testing-ctx-management]]
 === Context Management and Caching
@@ -78,9 +76,9 @@ reloading (for example, by modifying a bean definition or the state of an applic
 object) the TestContext framework can be configured to reload the configuration and
 rebuild the application context before executing the next test.
 
-See xref:testing/testcontext-framework/ctx-management.adoc[Context Management] and xref:testing/testcontext-framework/ctx-management/caching.adoc[Context Caching] with the
+See xref:testing/testcontext-framework/ctx-management.adoc[Context Management] and
+xref:testing/testcontext-framework/ctx-management/caching.adoc[Context Caching] with the
 TestContext framework.
-
 
 [[testing-fixture-di]]
 === Dependency Injection of Test Fixtures
@@ -107,7 +105,6 @@ integration tests that test the following areas:
 See dependency injection of test fixtures with the
 xref:testing/testcontext-framework/fixture-di.adoc[TestContext framework].
 
-
 [[testing-tx]]
 === Transaction Management
 
@@ -131,7 +128,6 @@ framework to cause the transaction to commit instead of roll back by using the
 xref:testing/annotations.adoc[`@Commit`] annotation.
 
 See transaction management with the xref:testing/testcontext-framework/tx.adoc[TestContext framework].
-
 
 [[testing-support-classes]]
 === Support Classes for Integration Testing

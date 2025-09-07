@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,8 @@
  */
 
 package org.springframework.core.type;
+
+import java.lang.reflect.Method;
 
 /**
  * Interface that defines abstract access to the annotations of a specific
@@ -70,5 +72,17 @@ public interface MethodMetadata extends AnnotatedTypeMetadata {
 	 * i.e. not marked as static, final, or private.
 	 */
 	boolean isOverridable();
+
+
+	/**
+	 * Factory method to create a new {@link MethodMetadata} instance
+	 * for the given method using standard reflection.
+	 * @param method the method to introspect
+	 * @return a new {@link MethodMetadata} instance
+	 * @since 7.0
+	 */
+	static MethodMetadata introspect(Method method) {
+		return StandardMethodMetadata.from(method);
+	}
 
 }

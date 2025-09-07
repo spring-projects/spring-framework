@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -338,7 +338,7 @@ class RequestResponseBodyMethodProcessorTests {
 		simpleBean.setName("Jason");
 
 		JacksonJsonHttpMessageConverter converter = new JacksonJsonHttpMessageConverter();
-		converter.registerObjectMappersForType(SimpleBean.class, map -> map.put(halMediaType, mapper));
+		converter.registerMappersForType(SimpleBean.class, map -> map.put(halMediaType, mapper));
 		RequestResponseBodyMethodProcessor processor =
 				new RequestResponseBodyMethodProcessor(List.of(converter));
 		MethodParameter returnType = new MethodParameter(getClass().getDeclaredMethod("getSimpleBean"), -1);
@@ -395,7 +395,6 @@ class RequestResponseBodyMethodProcessorTests {
 							<status>400</status>
 							<instance>/path</instance>
 							<title>Bad Request</title>
-							<type>about:blank</type>
 						</problem>""")
 					.ignoreWhitespace()
 					.areIdentical();
@@ -403,7 +402,6 @@ class RequestResponseBodyMethodProcessorTests {
 		else {
 			JSONAssert.assertEquals("""
 					{
-						"type":     "about:blank",
 						"title":    "Bad Request",
 						"status":   400,
 						"instance": "/path"

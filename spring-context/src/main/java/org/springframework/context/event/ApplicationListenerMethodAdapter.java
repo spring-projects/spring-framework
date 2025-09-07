@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.context.event;
 
+import java.lang.reflect.InaccessibleObjectException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
@@ -366,8 +367,8 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 			return null;
 		}
 
-		ReflectionUtils.makeAccessible(this.method);
 		try {
+			ReflectionUtils.makeAccessible(this.method);
 			if (KotlinDetector.isSuspendingFunction(this.method)) {
 				return CoroutinesUtils.invokeSuspendingFunction(this.method, bean, args);
 			}
@@ -377,7 +378,7 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 			assertTargetBean(this.method, bean, args);
 			throw new IllegalStateException(getInvocationErrorMessage(bean, ex.getMessage(), args), ex);
 		}
-		catch (IllegalAccessException ex) {
+		catch (IllegalAccessException | InaccessibleObjectException ex) {
 			throw new IllegalStateException(getInvocationErrorMessage(bean, ex.getMessage(), args), ex);
 		}
 		catch (InvocationTargetException ex) {

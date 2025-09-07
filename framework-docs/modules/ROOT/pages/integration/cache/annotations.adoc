@@ -649,11 +649,11 @@ triggers cache population or eviction. This is quite handy as a template mechani
 as it eliminates the need to duplicate cache annotation declarations, which is
 especially useful if the key or condition are specified or if the foreign imports
 (`org.springframework`) are not allowed in your code base. Similarly to the rest
-of the xref:core/beans/classpath-scanning.adoc#beans-stereotype-annotations[stereotype] annotations, you can
-use `@Cacheable`, `@CachePut`, `@CacheEvict`, and `@CacheConfig` as
-xref:core/beans/classpath-scanning.adoc#beans-meta-annotations[meta-annotations] (that is, annotations that
-can annotate other annotations). In the following example, we replace a common
-`@Cacheable` declaration with our own custom annotation:
+of the xref:core/beans/classpath-scanning.adoc#beans-stereotype-annotations[stereotype]
+annotations, you can use `@Cacheable`, `@CachePut`, `@CacheEvict`, and `@CacheConfig`
+as xref:core/beans/classpath-scanning.adoc#beans-meta-annotations[meta-annotations]
+(that is, annotations that can annotate other annotations). In the following example,
+we replace a common `@Cacheable` declaration with our own custom annotation:
 
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
@@ -684,7 +684,5 @@ preceding code:
 
 Even though `@SlowService` is not a Spring annotation, the container automatically picks
 up its declaration at runtime and understands its meaning. Note that, as mentioned
-xref:integration/cache/annotations.adoc#cache-annotation-enable[earlier], annotation-driven behavior needs to be enabled.
-
-
-
+xref:integration/cache/annotations.adoc#cache-annotation-enable[earlier],
+annotation-driven behavior needs to be enabled.

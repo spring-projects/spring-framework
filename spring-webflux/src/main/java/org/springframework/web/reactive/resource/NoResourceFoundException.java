@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 
 package org.springframework.web.reactive.resource;
 
+import java.net.URI;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -30,9 +32,9 @@ import org.springframework.web.server.ResponseStatusException;
 public class NoResourceFoundException extends ResponseStatusException {
 
 
-	public NoResourceFoundException(String resourcePath) {
-		super(HttpStatus.NOT_FOUND, "No static resource " + resourcePath + ".");
-		setDetail(getReason());
+	public NoResourceFoundException(URI uri, String resourcePath) {
+		super(HttpStatus.NOT_FOUND, "No static resource " + resourcePath + " for request '" + uri + "'.");
+		setDetail("No static resource " + resourcePath + ".");
 	}
 
 }

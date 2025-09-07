@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,8 @@
 package org.springframework.util;
 
 import org.jspecify.annotations.Nullable;
+
+import org.springframework.lang.Contract;
 
 /**
  * Utility methods for simple pattern matching, in particular for Spring's typical
@@ -36,6 +38,7 @@ public abstract class PatternMatchUtils {
 	 * @param str the String to match
 	 * @return whether the String matches the given pattern
 	 */
+	@Contract("null, _ -> false; _, null -> false")
 	public static boolean simpleMatch(@Nullable String pattern, @Nullable String str) {
 		return simpleMatch(pattern, str, false);
 	}
@@ -44,6 +47,7 @@ public abstract class PatternMatchUtils {
 	 * Variant of {@link #simpleMatch(String, String)} that ignores upper/lower case.
 	 * @since 6.1.20
 	 */
+	@Contract("null, _ -> false; _, null -> false")
 	public static boolean simpleMatchIgnoreCase(@Nullable String pattern, @Nullable String str) {
 		return simpleMatch(pattern, str, true);
 	}
@@ -113,6 +117,7 @@ public abstract class PatternMatchUtils {
 	 * @param str the String to match
 	 * @return whether the String matches any of the given patterns
 	 */
+	@Contract("null, _ -> false; _, null -> false")
 	public static boolean simpleMatch(String @Nullable [] patterns, @Nullable String str) {
 		if (patterns != null) {
 			for (String pattern : patterns) {
@@ -125,9 +130,10 @@ public abstract class PatternMatchUtils {
 	}
 
 	/**
-	 * Variant of {@link #simpleMatch(String[], String)}  that ignores upper/lower case.
+	 * Variant of {@link #simpleMatch(String[], String)} that ignores upper/lower case.
 	 * @since 6.1.20
 	 */
+	@Contract("null, _ -> false; _, null -> false")
 	public static boolean simpleMatchIgnoreCase(String @Nullable [] patterns, @Nullable String str) {
 		if (patterns != null) {
 			for (String pattern : patterns) {

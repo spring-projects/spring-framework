@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 
 package org.springframework.orm.jpa;
 
+import java.util.List;
+
 import javax.sql.DataSource;
 
 import jakarta.persistence.EntityManagerFactory;
@@ -27,6 +29,11 @@ import jakarta.persistence.spi.PersistenceUnitInfo;
 import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.beans.factory.support.AbstractBeanDefinition;
+import org.springframework.beans.factory.support.AutowireCandidateQualifier;
 import org.springframework.context.ResourceLoaderAware;
 import org.springframework.context.weaving.LoadTimeWeaverAware;
 import org.springframework.core.io.ResourceLoader;
@@ -40,6 +47,8 @@ import org.springframework.orm.jpa.persistenceunit.PersistenceUnitPostProcessor;
 import org.springframework.orm.jpa.persistenceunit.SmartPersistenceUnitInfo;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 
 /**
  * {@link org.springframework.beans.factory.FactoryBean} that creates a JPA
@@ -358,6 +367,25 @@ public class LocalContainerEntityManagerFactoryBean extends AbstractEntityManage
 			String rootPackage = jpaVendorAdapter.getPersistenceProviderRootPackage();
 			if (rootPackage != null) {
 				smartInfo.setPersistenceProviderPackageName(rootPackage);
+			}
+		}
+
+		String scope = this.persistenceUnitInfo.getScopeAnnotationName();
+		if (StringUtils.hasText(scope)) {
+			logger.info("Scope annotation name for persistence unit ignored by Spring: " + scope);
+		}
+
+		List<String> qualifiers = this.persistenceUnitInfo.getQualifierAnnotationNames();
+		if (!CollectionUtils.isEmpty(qualifiers)) {
+			BeanFactory beanFactory = getBeanFactory();
+			String beanName = getBeanName();
+			if (beanFactory instanceof ConfigurableBeanFactory cbf && beanName != null) {
+				BeanDefinition bd = cbf.getMergedBeanDefinition(beanName);
+				if (bd instanceof AbstractBeanDefinition abd) {
+					for (String qualifier : qualifiers) {
+						abd.addQualifier(new AutowireCandidateQualifier(qualifier));
+					}
+				}
 			}
 		}
 

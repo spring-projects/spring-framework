@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -3889,7 +3889,7 @@ class ServletAnnotationControllerHandlerMethodTests extends AbstractServletHandl
 
 		@RequestMapping("/path")
 		public ModelAndView methodWithHttpStatus(MyEntity object) {
-			return new ModelAndView("view", HttpStatus.UNPROCESSABLE_ENTITY);
+			return new ModelAndView("view", HttpStatus.UNPROCESSABLE_CONTENT);
 		}
 
 		@RequestMapping("/redirect")
@@ -3904,7 +3904,7 @@ class ServletAnnotationControllerHandlerMethodTests extends AbstractServletHandl
 
 		@ExceptionHandler(TestException.class)
 		public ModelAndView handleException() {
-			return new ModelAndView("view", HttpStatus.UNPROCESSABLE_ENTITY);
+			return new ModelAndView("view", HttpStatus.UNPROCESSABLE_CONTENT);
 		}
 
 		@SuppressWarnings("serial")
