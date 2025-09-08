@@ -164,7 +164,7 @@ public class RetryTemplate implements RetryOperations {
 				}
 				catch (InterruptedException interruptedException) {
 					Thread.currentThread().interrupt();
-					RetryException retryException = new RetryException(
+					RetryException retryException = new RetryInterruptedException(
 							"Unable to back off for retryable operation '%s'".formatted(retryableName),
 							interruptedException);
 					exceptions.forEach(retryException::addSuppressed);
@@ -198,6 +198,22 @@ public class RetryTemplate implements RetryOperations {
 			this.retryListener.onRetryPolicyExhaustion(this.retryPolicy, retryable, retryException);
 			throw retryException;
 		}
+	}
+
+	private static class RetryInterruptedException extends RetryException {
+
+		private static final long serialVersionUID = 1L;
+
+
+		RetryInterruptedException(String message, InterruptedException cause) {
+			super(message, cause);
+		}
+
+		@Override
+		public int getRetryCount() {
+			return (getSuppressed().length - 1);
+		}
+
 	}
 
 }

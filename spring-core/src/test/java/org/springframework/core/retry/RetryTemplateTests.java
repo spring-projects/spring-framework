@@ -238,9 +238,7 @@ class RetryTemplateTests {
 				.withMessageMatching("Unable to back off for retryable operation '.+?'")
 				.withCause(interruptedException)
 				.satisfies(throwable -> assertThat(throwable.getSuppressed()).containsExactly(exception))
-				// TODO Fix retry count for InterruptedException scenario.
-				// Retry count should actually be 0.
-				.satisfies(throwable -> assertThat(throwable.getRetryCount()).isEqualTo(1))
+				.satisfies(throwable -> assertThat(throwable.getRetryCount()).isZero())
 				.satisfies(throwable -> inOrder.verify(retryListener).onRetryPolicyInterruption(retryPolicy, retryable, throwable));
 
 		verifyNoMoreInteractions(retryListener);
