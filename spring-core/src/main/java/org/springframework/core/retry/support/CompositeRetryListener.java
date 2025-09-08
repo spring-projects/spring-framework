@@ -29,13 +29,14 @@ import org.springframework.core.retry.Retryable;
 import org.springframework.util.Assert;
 
 /**
- * A composite implementation of the {@link RetryListener} interface.
- * Delegate listeners will be called in their registration order.
+ * A composite implementation of the {@link RetryListener} interface, which is
+ * used to compose multiple listeners within a {@link RetryTemplate}.
  *
- * <p>This class is used to compose multiple listeners within a {@link RetryTemplate}.
+ * <p>Delegate listeners will be called in their registration order.
  *
  * @author Mahmoud Ben Hassine
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 7.0
  */
 public class CompositeRetryListener implements RetryListener {
@@ -86,6 +87,11 @@ public class CompositeRetryListener implements RetryListener {
 	@Override
 	public void onRetryPolicyExhaustion(RetryPolicy retryPolicy, Retryable<?> retryable, RetryException exception) {
 		this.listeners.forEach(listener -> listener.onRetryPolicyExhaustion(retryPolicy, retryable, exception));
+	}
+
+	@Override
+	public void onRetryPolicyInterruption(RetryPolicy retryPolicy, Retryable<?> retryable, RetryException exception) {
+		this.listeners.forEach(listener -> listener.onRetryPolicyInterruption(retryPolicy, retryable, exception));
 	}
 
 }

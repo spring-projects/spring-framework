@@ -168,6 +168,7 @@ public class RetryTemplate implements RetryOperations {
 							"Unable to back off for retryable operation '%s'".formatted(retryableName),
 							interruptedException);
 					exceptions.forEach(retryException::addSuppressed);
+					this.retryListener.onRetryPolicyInterruption(this.retryPolicy, retryable, retryException);
 					throw retryException;
 				}
 				logger.debug(() -> "Preparing to retry operation '%s'".formatted(retryableName));

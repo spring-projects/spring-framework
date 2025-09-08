@@ -53,7 +53,7 @@ public interface RetryListener {
 	}
 
 	/**
-	 * Called every time a retry attempt fails.
+	 * Called after every failed retry attempt.
 	 * @param retryPolicy the {@link RetryPolicy}
 	 * @param retryable the {@link Retryable} operation
 	 * @param throwable the exception thrown by the {@code Retryable} operation
@@ -65,13 +65,29 @@ public interface RetryListener {
 	 * Called if the {@link RetryPolicy} is exhausted.
 	 * @param retryPolicy the {@code RetryPolicy}
 	 * @param retryable the {@code Retryable} operation
-	 * @param exception the resulting {@link RetryException}, including the last operation
-	 * exception as a cause and all earlier operation exceptions as suppressed exceptions
+	 * @param exception the resulting {@link RetryException}, with the last
+	 * exception thrown by the {@link Retryable} operation as the cause and any
+	 * exceptions from previous attempts as suppressed exceptions
 	 * @see RetryException#getCause()
 	 * @see RetryException#getSuppressed()
 	 * @see RetryException#getRetryCount()
 	 */
 	default void onRetryPolicyExhaustion(RetryPolicy retryPolicy, Retryable<?> retryable, RetryException exception) {
+	}
+
+	/**
+	 * Called if an {@link InterruptedException} is encountered while
+	 * {@linkplain Thread#sleep(long) sleeping} between retry attempts.
+	 * @param retryPolicy the {@code RetryPolicy}
+	 * @param retryable the {@code Retryable} operation
+	 * @param exception the resulting {@link RetryException}, with the
+	 * {@code InterruptedException} as the cause and any exceptions from previous
+	 * retry attempts as suppressed exceptions
+	 * @see RetryException#getCause()
+	 * @see RetryException#getSuppressed()
+	 * @see RetryException#getRetryCount()
+	 */
+	default void onRetryPolicyInterruption(RetryPolicy retryPolicy, Retryable<?> retryable, RetryException exception) {
 	}
 
 }
