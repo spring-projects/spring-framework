@@ -33,6 +33,7 @@ import org.assertj.core.api.ThrowingConsumer;
 import org.junit.jupiter.api.Test;
 
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
@@ -54,7 +55,6 @@ import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.assertj.core.api.Assertions.entry;
 import static org.springframework.http.HttpMethod.GET;
 import static org.springframework.http.HttpMethod.POST;
-import static org.springframework.http.HttpMethod.QUERY;
 
 /**
  * Tests for building a {@link MockHttpServletRequest} with
@@ -420,21 +420,21 @@ class MockHttpServletRequestBuilderTests {
 		assertThat(request.getParameterMap().get("foo")).containsExactly("bar", "baz");
 	}
 
-	@Test
+	@ValueSource(strings = {"POST", "QUERY"})
 	@ParameterizedTest()
-	void requestParameterFromRequestBodyFormData() {
+	void requestParameterFromRequestBodyFormData(String methodName) {
 		String contentType = "application/x-www-form-urlencoded;charset=UTF-8";
 		String body = "name+1=value+1&name+2=value+A&name+2=value+B&name+3";
 
-		for (HttpMethod method : List.of(POST, QUERY)) {
-			MockHttpServletRequest request = new MockHttpServletRequestBuilder(method).uri("/foo")
-					.contentType(contentType).content(body.getBytes(UTF_8))
-					.buildRequest(this.servletContext);
+		HttpMethod method = HttpMethod.valueOf(methodName);
+		MockHttpServletRequest request = new MockHttpServletRequestBuilder(method).uri("/foo")
+				.contentType(contentType).content(body.getBytes(UTF_8))
+				.buildRequest(this.servletContext);
 
-			assertThat(request.getParameterMap().get("name 1")).containsExactly("value 1");
-			assertThat(request.getParameterMap().get("name 2")).containsExactly("value A", "value B");
-			assertThat(request.getParameterMap().get("name 3")).containsExactly((String) null);
-		}
+		assertThat(request.getParameterMap().get("name 1")).containsExactly("value 1");
+		assertThat(request.getParameterMap().get("name 2")).containsExactly("value A", "value B");
+		assertThat(request.getParameterMap().get("name 3")).containsExactly((String) null);
+
 	}
 
 	@Test

@@ -244,18 +244,18 @@ abstract class AbstractMockWebServerTests {
 									  String contentType, byte[] responseBody) {
 
 		assertThat(request.getHeaders().values(CONTENT_LENGTH)).hasSize(1);
-		assertThat(Integer.parseInt(request.getHeader(CONTENT_LENGTH))).as("Invalid request content-length").isGreaterThan(0);
-		String requestContentType = request.getHeader(CONTENT_TYPE);
+		assertThat(Integer.parseInt(request.getHeaders().get(CONTENT_LENGTH))).as("Invalid request content-length").isGreaterThan(0);
+		String requestContentType = request.getHeaders().get(CONTENT_TYPE);
 		assertThat(requestContentType).as("No content-type").isNotNull();
 		Charset charset = StandardCharsets.ISO_8859_1;
 		if (requestContentType.contains("charset=")) {
 			String charsetName = requestContentType.split("charset=")[1];
 			charset = Charset.forName(charsetName);
 		}
-		assertThat(request.getBody().readString(charset)).as("Invalid request body").isEqualTo(expectedRequestContent);
+		assertThat(request.getBody().string(charset)).as("Invalid request body").isEqualTo(expectedRequestContent);
 		Buffer buf = new Buffer();
 		buf.write(responseBody);
-		return new MockResponse.builder()
+		return new MockResponse.Builder()
 				.code(200)
 				.setHeader(CONTENT_TYPE, contentType)
 				.setHeader(CONTENT_LENGTH, responseBody.length)
@@ -325,7 +325,7 @@ abstract class AbstractMockWebServerTests {
 				else if (request.getTarget().equals("/put")) {
 					return putRequest(request, helloWorld);
 				}
-				else if (request.getPath().equals("/query")) {
+				else if (request.getTarget().equals("/query")) {
 					return queryRequest(request, helloWorld, textContentType.toString(), helloWorldBytes);
 				}
 				return new MockResponse.Builder().code(404).build();
