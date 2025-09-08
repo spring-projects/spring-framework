@@ -256,10 +256,10 @@ abstract class AbstractMockWebServerTests {
 		Buffer buf = new Buffer();
 		buf.write(responseBody);
 		return new MockResponse.Builder()
+				.code(200)
 				.setHeader(CONTENT_TYPE, contentType)
 				.setHeader(CONTENT_LENGTH, responseBody.length)
 				.body(buf)
-				.code(200)
 				.build();
 	}
 
