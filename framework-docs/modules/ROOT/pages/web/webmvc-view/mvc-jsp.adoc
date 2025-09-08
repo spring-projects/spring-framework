@@ -43,7 +43,7 @@ Prefer JavaConfig for new applications.
 ====
 
 [.text-muted]
-See the Javadoc of {api-docs}/org/springframework/web/servlet/config/annotation/ViewResolverRegistry.html#jsp() for defaults.
+See the Javadoc of ViewResolverRegistry#jsp() for default prefix and suffix values.
 
 [[mvc-view-jsp-jstl]]
 == JSPs versus JSTL
