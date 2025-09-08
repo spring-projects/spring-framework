@@ -16,7 +16,6 @@
 
 package org.springframework.core.io.buffer;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -223,17 +222,17 @@ public abstract class DataBufferUtils {
 
 		try {
 			if (resource.isFile()) {
-				File file = resource.getFile();
+				Path filePath = resource.getFile().toPath();
 				return readAsynchronousFileChannel(
-						() -> AsynchronousFileChannel.open(file.toPath(), StandardOpenOption.READ),
+						() -> AsynchronousFileChannel.open(filePath, StandardOpenOption.READ),
 						position, bufferFactory, bufferSize);
 			}
 		}
-		catch (IOException ignore) {
+		catch (IOException | UnsupportedOperationException ignore) {
 			// fallback to resource.readableChannel(), below
 		}
 		Flux<DataBuffer> result = readByteChannel(resource::readableChannel, bufferFactory, bufferSize);
-		return position == 0 ? result : skipUntilByteCount(result, position);
+		return (position == 0 ? result : skipUntilByteCount(result, position));
 	}
 
 

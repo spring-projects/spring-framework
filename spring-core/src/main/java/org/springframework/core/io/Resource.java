@@ -117,8 +117,10 @@ public interface Resource extends InputStreamSource {
 
 	/**
 	 * Return a File handle for this resource.
-	 * @throws java.io.FileNotFoundException if the resource cannot be resolved as
-	 * absolute file path, i.e. if the resource is not available in a file system
+	 * <p>Note: This only works for files in the default file system.
+	 * @throws UnsupportedOperationException if the resource is a file but cannot be
+	 * exposed as a {@code java.io.File}; an alternative to {@code FileNotFoundException}
+	 * @throws java.io.FileNotFoundException if the resource cannot be resolved as a file
 	 * @throws IOException in case of general resolution/reading failures
 	 * @see #getInputStream()
 	 */

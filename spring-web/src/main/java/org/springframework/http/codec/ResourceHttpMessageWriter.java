@@ -203,8 +203,8 @@ public class ResourceHttpMessageWriter implements HttpMessageWriter<Resource> {
 				}
 				return zeroCopyHttpOutputMessage.writeWith(file, pos, count);
 			}
-			catch (IOException ex) {
-				// should not happen
+			catch (IOException | UnsupportedOperationException ignore) {
+				// returning null below leads to fallback code path
 			}
 		}
 		return null;
