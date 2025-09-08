@@ -64,7 +64,7 @@ class RestTestClientTests {
 	class HttpMethods {
 
 		@ParameterizedTest
-		@ValueSource(strings = {"GET", "POST", "PUT", "DELETE", "PATCH", "HEAD"})
+		@ValueSource(strings = {"GET", "POST", "PUT", "DELETE", "PATCH", "QUERY", "HEAD"})
 		void testMethod(String method) {
 			RestTestClientTests.this.client.method(HttpMethod.valueOf(method)).uri("/test")
 					.exchange()
@@ -125,8 +125,16 @@ class RestTestClientTests {
 			RestTestClientTests.this.client.options().uri("/test")
 					.exchange()
 					.expectStatus().isOk()
-					.expectHeader().valueEquals("Allow", "GET,HEAD,POST,PUT,PATCH,DELETE,OPTIONS")
+					.expectHeader().valueEquals("Allow", "GET,HEAD,POST,PUT,PATCH,DELETE,OPTIONS,QUERY")
 					.expectBody().isEmpty();
+		}
+
+		@Test
+		void testQuery() {
+			RestTestClientTests.this.client.query().uri("/test")
+					.exchange()
+					.expectStatus().isOk()
+					.expectBody().jsonPath("$.method").isEqualTo("QUERY");
 		}
 
 	}

@@ -244,7 +244,7 @@ abstract class AbstractMockWebServerTests {
 									  String contentType, byte[] responseBody) {
 
 		assertThat(request.getHeaders().values(CONTENT_LENGTH)).hasSize(1);
-		assertThat(Integer.parseInt(request.getHeaders().get(CONTENT_LENGTH))).as("Invalid request content-length").isGreaterThan(0);
+ 		assertThat(Integer.parseInt(request.getHeaders().get(CONTENT_LENGTH))).as("Invalid request content-length").isGreaterThan(0);
 		String requestContentType = request.getHeaders().get(CONTENT_TYPE);
 		assertThat(requestContentType).as("No content-type").isNotNull();
 		Charset charset = StandardCharsets.ISO_8859_1;
