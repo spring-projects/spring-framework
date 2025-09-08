@@ -98,9 +98,10 @@ public class JettyWebSocketHandlerAdapter implements Session.Listener {
 	}
 
 	@Override
-	public void onWebSocketClose(int statusCode, String reason) {
+	public void onWebSocketClose(int statusCode, String reason, Callback callback) {
 		Assert.state(this.delegateSession != null, "No delegate session available");
 		this.delegateSession.handleClose(CloseStatus.create(statusCode, reason));
+		callback.succeed();
 	}
 
 	@Override
