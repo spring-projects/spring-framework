@@ -84,7 +84,11 @@ class FileSystemUtilsTests {
 		assertThat(new File(dest, "child")).exists();
 		assertThat(new File(dest, "child/bar.txt")).exists();
 
-		URI uri = URI.create("jar:file:/" + dest.toString().replace('\\', '/') + "/archive.zip");
+		String destPath = dest.toString().replace('\\', '/');
+		if (!destPath.startsWith("/")) {
+			destPath = "/" + destPath;
+		}
+		URI uri = URI.create("jar:file:" + destPath + "/archive.zip");
 		Map<String, String> env = Map.of("create", "true");
 		FileSystem zipfs = FileSystems.newFileSystem(uri, env);
 		Path ziproot = zipfs.getPath("/");
