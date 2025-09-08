@@ -44,7 +44,7 @@ import java.util.Objects;
 public class RetryException extends Exception {
 
 	@Serial
-	private static final long serialVersionUID = 5439915454935047936L;
+	private static final long serialVersionUID = 1L;
 
 
 	/**

@@ -16,6 +16,7 @@
 
 package org.springframework.core.retry;
 
+import java.io.Serial;
 import java.util.ArrayDeque;
 import java.util.Deque;
 
@@ -148,7 +149,7 @@ public class RetryTemplate implements RetryOperations {
 							.formatted(retryableName));
 			// Retry process starts here
 			BackOffExecution backOffExecution = this.retryPolicy.getBackOff().start();
-			Deque<Throwable> exceptions = new ArrayDeque<>();
+			Deque<Throwable> exceptions = new ArrayDeque<>(4);
 			exceptions.add(initialException);
 
 			Throwable lastException = initialException;
@@ -200,8 +201,10 @@ public class RetryTemplate implements RetryOperations {
 		}
 	}
 
+
 	private static class RetryInterruptedException extends RetryException {
 
+		@Serial
 		private static final long serialVersionUID = 1L;
 
 
@@ -213,7 +216,6 @@ public class RetryTemplate implements RetryOperations {
 		public int getRetryCount() {
 			return (getSuppressed().length - 1);
 		}
-
 	}
 
 }

@@ -46,6 +46,7 @@ public class CompositeRetryListener implements RetryListener {
 
 	/**
 	 * Create a new {@code CompositeRetryListener}.
+	 * @see #addListener(RetryListener)
 	 */
 	public CompositeRetryListener() {
 	}
@@ -56,7 +57,7 @@ public class CompositeRetryListener implements RetryListener {
 	 * @param listeners the list of delegate listeners to register; must not be empty
 	 */
 	public CompositeRetryListener(List<RetryListener> listeners) {
-		Assert.notEmpty(listeners, "RetryListener List must not be empty");
+		Assert.notEmpty(listeners, "RetryListener list must not be empty");
 		this.listeners.addAll(listeners);
 	}
 
