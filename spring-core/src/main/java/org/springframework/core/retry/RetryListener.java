@@ -64,9 +64,9 @@ public interface RetryListener {
 	/**
 	 * Called if the {@link RetryPolicy} is exhausted.
 	 * @param retryPolicy the {@code RetryPolicy}
-	 * @param retryable the {@code Retryable} operation
+	 * @param retryable the {@link Retryable} operation
 	 * @param exception the resulting {@link RetryException}, with the last
-	 * exception thrown by the {@link Retryable} operation as the cause and any
+	 * exception thrown by the {@code Retryable} operation as the cause and any
 	 * exceptions from previous attempts as suppressed exceptions
 	 * @see RetryException#getCause()
 	 * @see RetryException#getSuppressed()
@@ -76,13 +76,12 @@ public interface RetryListener {
 	}
 
 	/**
-	 * Called if an {@link InterruptedException} is encountered while
-	 * {@linkplain Thread#sleep(long) sleeping} between retry attempts.
+	 * Called if the {@link RetryPolicy} is interrupted between retry attempts.
 	 * @param retryPolicy the {@code RetryPolicy}
-	 * @param retryable the {@code Retryable} operation
-	 * @param exception the resulting {@link RetryException}, with the
-	 * {@code InterruptedException} as the cause and any exceptions from previous
-	 * retry attempts as suppressed exceptions
+	 * @param retryable the {@link Retryable} operation
+	 * @param exception the resulting {@link RetryException}, with an
+	 * {@link InterruptedException} as the cause and any exceptions from previous
+	 * invocations of the {@code Retryable} operation as suppressed exceptions
 	 * @see RetryException#getCause()
 	 * @see RetryException#getSuppressed()
 	 * @see RetryException#getRetryCount()

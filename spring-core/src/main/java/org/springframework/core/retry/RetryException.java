@@ -20,7 +20,7 @@ import java.io.Serial;
 import java.util.Objects;
 
 /**
- * Exception thrown when a {@link RetryPolicy} has been exhausted.
+ * Exception thrown when a {@link RetryPolicy} has been exhausted or interrupted.
  *
  * <p>A {@code RetryException} will typically contain the last exception thrown
  * by the {@link Retryable} operation as the {@linkplain #getCause() cause} and
@@ -31,9 +31,9 @@ import java.util.Objects;
  * {@linkplain Thread#sleep(long) sleeping} for the current
  * {@link org.springframework.util.backoff.BackOff BackOff} duration, a
  * {@code RetryException} will contain the {@code InterruptedException} as the
- * {@linkplain #getCause() cause} and any exceptions from previous attempts to
- * invoke the {@code Retryable} operation as {@linkplain #getSuppressed()
- * suppressed exceptions}.
+ * {@linkplain #getCause() cause} and any exceptions from previous invocations
+ * of the {@code Retryable} operation as {@linkplain #getSuppressed() suppressed
+ * exceptions}.
  *
  * @author Mahmoud Ben Hassine
  * @author Juergen Hoeller
