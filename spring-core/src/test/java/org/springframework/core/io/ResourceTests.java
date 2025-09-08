@@ -55,6 +55,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.junit.jupiter.params.provider.Arguments.argumentSet;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
 
 /**
  * Tests for various {@link Resource} implementations.
@@ -266,6 +268,16 @@ class ResourceTests {
 			Resource resource = new FileSystemResource("dir/");
 			Resource relative = resource.createRelative("subdir");
 			assertThat(relative).isEqualTo(new FileSystemResource("dir/subdir"));
+		}
+
+		@Test
+		void getFilePath() throws Exception {
+			Path path = mock();
+			given(path.normalize()).willReturn(path);
+			given(path.toFile()).willThrow(new UnsupportedOperationException());
+			Resource resource = new FileSystemResource(path);
+			assertThat(resource.getFilePath()).isSameAs(path);
+			assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(resource::getFile);
 		}
 
 		@Test

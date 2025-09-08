@@ -16,8 +16,9 @@
 
 package org.springframework.http.codec;
 
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 
@@ -193,17 +194,17 @@ public class ResourceHttpMessageWriter implements HttpMessageWriter<Resource> {
 
 		if (message instanceof ZeroCopyHttpOutputMessage zeroCopyHttpOutputMessage && resource.isFile()) {
 			try {
-				File file = resource.getFile();
-				long pos = region != null ? region.getPosition() : 0;
-				long count = region != null ? region.getCount() : file.length();
+				Path filePath = resource.getFilePath();
+				long pos = (region != null ? region.getPosition() : 0);
+				long count = (region != null ? region.getCount() : Files.size(filePath));
 				if (logger.isDebugEnabled()) {
 					String formatted = region != null ? "region " + pos + "-" + (count) + " of " : "";
 					logger.debug(Hints.getLogPrefix(hints) + "Zero-copy " + formatted + "[" + resource + "]");
 				}
-				return zeroCopyHttpOutputMessage.writeWith(file, pos, count);
+				return zeroCopyHttpOutputMessage.writeWith(filePath, pos, count);
 			}
-			catch (IOException ex) {
-				// should not happen
+			catch (IOException ignore) {
+				// returning null below leads to fallback code path
 			}
 		}
 		return null;
