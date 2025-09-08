@@ -24,13 +24,13 @@ import org.jspecify.annotations.Nullable;
 import org.springframework.core.retry.RetryException;
 import org.springframework.core.retry.RetryListener;
 import org.springframework.core.retry.RetryPolicy;
-import org.springframework.core.retry.RetryTemplate;
 import org.springframework.core.retry.Retryable;
 import org.springframework.util.Assert;
 
 /**
  * A composite implementation of the {@link RetryListener} interface, which is
- * used to compose multiple listeners within a {@link RetryTemplate}.
+ * used to compose multiple listeners within a
+ * {@link org.springframework.core.retry.RetryTemplate RetryTemplate}.
  *
  * <p>Delegate listeners will be called in their registration order.
  *

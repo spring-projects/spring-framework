@@ -18,20 +18,18 @@ package org.springframework.core.retry;
 
 import org.jspecify.annotations.Nullable;
 
-import org.springframework.core.retry.support.CompositeRetryListener;
-
 /**
  * {@code RetryListener} defines a <em>listener</em> API for reacting to events
  * published during the execution of a {@link Retryable} operation.
  *
- * <p>Typically registered in a {@link RetryTemplate}, and can be composed using
- * a {@link CompositeRetryListener}.
+ * <p>Typically registered in a {@link RetryTemplate}, and can be composed using a
+ * {@link org.springframework.core.retry.support.CompositeRetryListener CompositeRetryListener}.
  *
  * @author Mahmoud Ben Hassine
  * @author Sam Brannen
  * @author Juergen Hoeller
  * @since 7.0
- * @see CompositeRetryListener
+ * @see org.springframework.core.retry.support.CompositeRetryListener
  */
 public interface RetryListener {
 
