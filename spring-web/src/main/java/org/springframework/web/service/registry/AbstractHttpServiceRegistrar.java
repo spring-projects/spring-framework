@@ -211,7 +211,7 @@ public abstract class AbstractHttpServiceRegistrar implements
 	 * @param basePackage the names of packages to look under
 	 * @return match bean definitions
 	 */
-	private Stream<BeanDefinition> findHttpServices(String basePackage) {
+	protected final Stream<BeanDefinition> findHttpServices(String basePackage) {
 		if (this.scanner == null) {
 			Assert.state(this.environment != null, "Environment has not been set");
 			Assert.state(this.resourceLoader != null, "ResourceLoader has not been set");

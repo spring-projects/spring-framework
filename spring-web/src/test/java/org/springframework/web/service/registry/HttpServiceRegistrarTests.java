@@ -24,12 +24,15 @@ import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Test;
 
+import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.beans.factory.support.SimpleBeanDefinitionRegistry;
 import org.springframework.core.env.StandardEnvironment;
+import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.type.AnnotationMetadata;
+import org.springframework.util.ClassUtils;
 import org.springframework.web.service.registry.HttpServiceGroup.ClientType;
 import org.springframework.web.service.registry.echo.EchoA;
 import org.springframework.web.service.registry.echo.EchoB;
@@ -123,6 +126,18 @@ public class HttpServiceRegistrarTests {
 		assertBeanDefinitionCount(0);
 	}
 
+	@Test
+	void registrarUsingFindHttpService() {
+		TestRegistrarUsingFindHttpServices registrar = new TestRegistrarUsingFindHttpServices();
+		registrar.setEnvironment(new StandardEnvironment());
+		registrar.setResourceLoader(new DefaultResourceLoader());
+		registrar.registerBeanDefinitions(null, beanDefRegistry);
+
+		assertRegistryBeanDef(
+				new TestGroup("EchoA", EchoA.class),
+				new TestGroup("EchoB", EchoB.class));
+	}
+
 
 	@SuppressWarnings("unchecked")
 	private void doRegister(Consumer<AbstractHttpServiceRegistrar.GroupRegistry>... registrars) {
@@ -190,6 +205,21 @@ public class HttpServiceRegistrarTests {
 		protected void registerHttpServices(GroupRegistry registry, AnnotationMetadata metadata) {
 			this.registrar.accept(registry);
 		}
+	}
+
+	private static class TestRegistrarUsingFindHttpServices extends AbstractHttpServiceRegistrar {
+
+		@Override
+		protected void registerHttpServices(GroupRegistry registry, AnnotationMetadata importingClassMetadata) {
+			findHttpServices(EchoA.class.getPackageName())
+				.map(definition -> ((AnnotatedBeanDefinition) definition).getMetadata())
+				.forEach(metadata -> {
+					String className = metadata.getClassName();
+					String shortName = ClassUtils.getShortName(className);
+					registry.forGroup(shortName).registerTypeNames(className);
+				});
+		}
+
 	}
 
 	private record TestGroup(String name, Set<Class<?>> httpServiceTypes, ClientType clientType)
