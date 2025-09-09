@@ -58,7 +58,7 @@ public abstract class AbstractJsonPathAssertions<B> {
 	/**
 	 * Applies {@link JsonPathExpectationsHelper#assertValue(String, Object)}.
 	 */
-	public B isEqualTo(Object expectedValue) {
+	public B isEqualTo(@Nullable Object expectedValue) {
 		this.pathHelper.assertValue(this.content, expectedValue);
 		return this.bodySpec;
 	}
