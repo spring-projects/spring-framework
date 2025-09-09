@@ -23,8 +23,11 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.context.annotation.Import;
 import org.springframework.core.annotation.AliasFor;
+import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.web.service.annotation.HttpExchange;
 
 /**
@@ -47,6 +50,7 @@ import org.springframework.web.service.annotation.HttpExchange;
  *
  * @author Olga Maciaszek-Sharma
  * @author Rossen Stoyanchev
+ * @author Phillip Webb
  * @since 7.0
  * @see Container
  * @see AbstractHttpServiceRegistrar
@@ -74,8 +78,17 @@ public @interface ImportHttpServices {
 	 * The name of the HTTP Service group.
 	 * <p>If not specified, declared HTTP Services are grouped under the
 	 * {@link HttpServiceGroup#DEFAULT_GROUP_NAME}.
+	 * @see #groupProvider()
 	 */
-	String group() default HttpServiceGroup.DEFAULT_GROUP_NAME;
+	String group() default "";
+
+	/**
+	 * Strategy used to provide the name of the HTTP Service group.
+	 * <p>May be used as an alternative to {@link #group()} when the group name can
+	 * be determined from the type.
+	 * @see #group()
+	 */
+	Class<? extends GroupProvider> groupProvider() default GroupProvider.class;
 
 	/**
 	 * Detect HTTP Services in the packages of the specified classes, looking
@@ -112,4 +125,19 @@ public @interface ImportHttpServices {
 		ImportHttpServices[] value();
 	}
 
+	/**
+	 * Strategy interface to provide the group name for HTTP Service interface.
+	 */
+	@FunctionalInterface
+	interface GroupProvider {
+
+		/**
+		 * Provide the group name that should be used for the given HTTP Service interface
+		 * metadata.
+		 * @param metadata the HTTP Service interface metadata
+		 * @return the provided group name or {@code null} if the HTTP Service client
+		 * should not be registered
+		 */
+		@Nullable String group(AnnotationMetadata metadata);
+	}
 }

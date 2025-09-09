@@ -19,6 +19,7 @@ package org.springframework.web.service.registry;
 import java.util.Map;
 import java.util.function.BiConsumer;
 
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.aot.test.generate.TestGenerationContext;
@@ -26,11 +27,15 @@ import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.aot.ApplicationContextAotGenerator;
 import org.springframework.context.support.GenericApplicationContext;
+import org.springframework.core.env.StandardEnvironment;
+import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.test.tools.CompileWithForkedClassLoader;
 import org.springframework.core.test.tools.Compiled;
 import org.springframework.core.test.tools.TestCompiler;
 import org.springframework.core.type.AnnotationMetadata;
+import org.springframework.util.ClassUtils;
 import org.springframework.web.service.registry.HttpServiceGroup.ClientType;
+import org.springframework.web.service.registry.ImportHttpServices.GroupProvider;
 import org.springframework.web.service.registry.echo.EchoA;
 import org.springframework.web.service.registry.echo.EchoB;
 import org.springframework.web.service.registry.echo.ScanConventionConfig;
@@ -38,12 +43,14 @@ import org.springframework.web.service.registry.greeting.GreetingA;
 import org.springframework.web.service.registry.greeting.GreetingB;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 
 /**
  * Tests for {@link ImportHttpServiceRegistrar}.
  *
  * @author Rossen Stoyanchev
  * @author Stephane Nicoll
+ * @author Phillip Webb
  */
 public class ImportHttpServiceRegistrarTests {
 
@@ -54,7 +61,14 @@ public class ImportHttpServiceRegistrarTests {
 
 	private final TestGroupRegistry groupRegistry = new TestGroupRegistry();
 
-	private final ImportHttpServiceRegistrar registrar = new ImportHttpServiceRegistrar();
+	private final ImportHttpServiceRegistrar registrar;
+
+
+	ImportHttpServiceRegistrarTests() {
+		this.registrar = new ImportHttpServiceRegistrar();
+		this.registrar.setEnvironment(new StandardEnvironment());
+		this.registrar.setResourceLoader(new DefaultResourceLoader());
+	}
 
 
 	@Test
@@ -112,6 +126,28 @@ public class ImportHttpServiceRegistrarTests {
 				TestGroup.ofListing(GREETING_GROUP, ClientType.WEB_CLIENT, GreetingA.class));
 	}
 
+	@Test
+	void providedGroupName() {
+		doRegister(ProvidedGroupNameConfig.class);
+		assertGroups(
+				TestGroup.ofListing(ECHO_GROUP, EchoA.class, EchoB.class),
+				TestGroup.ofListing(GREETING_GROUP, GreetingA.class, GreetingB.class));
+	}
+
+	@Test
+	void providedGroupNameWhenNull() {
+		doRegister(ProvidedGroupNameConfigWhenNull.class);
+		assertGroups(
+				TestGroup.ofListing(ECHO_GROUP, EchoB.class),
+				TestGroup.ofListing(GREETING_GROUP, GreetingB.class));
+	}
+
+	@Test
+	void providedGroupNameWhenGroupAndGroupProviderThrowsException() {
+		assertThatIllegalStateException().isThrownBy(() -> doRegister(InvalidProvidedGroupNameConfig.class))
+			.withMessage("'group' cannot be mixed with 'groupProvider'");
+	}
+
 	private void doRegister(Class<?> configClass) {
 		AnnotationMetadata metadata = AnnotationMetadata.introspect(configClass);
 		this.registrar.registerHttpServices(this.groupRegistry, metadata);
@@ -162,4 +198,34 @@ public class ImportHttpServiceRegistrarTests {
 	@ImportHttpServices(clientType = ClientType.WEB_CLIENT, group = GREETING_GROUP, types = { GreetingA.class })
 	static class ClientTypeConfig {
 	}
+
+	@ImportHttpServices(groupProvider = FromClassGroupProvider.class)
+	static class ProvidedGroupNameConfig {
+	}
+
+	@ImportHttpServices(groupProvider = FromClassGroupProviderWithoutAs.class)
+	static class ProvidedGroupNameConfigWhenNull {
+	}
+
+	@ImportHttpServices(group = "test", groupProvider = FromClassGroupProvider.class)
+	static class InvalidProvidedGroupNameConfig {
+	}
+
+	static class FromClassGroupProvider implements GroupProvider {
+
+		@Override
+		public @Nullable String group(AnnotationMetadata metadata) {
+			String shortName = ClassUtils.getShortName(metadata.getClassName());
+			return shortName.substring(0, shortName.length()-1).toLowerCase();
+		}
+	}
+
+	static class FromClassGroupProviderWithoutAs extends FromClassGroupProvider {
+
+		@Override
+		public @Nullable String group(AnnotationMetadata metadata) {
+			return (metadata.getClassName().endsWith("A")) ? null : super.group(metadata);
+		}
+	}
+
 }
