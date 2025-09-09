@@ -18,6 +18,8 @@ package org.springframework.web.service.registry;
 
 import org.springframework.core.annotation.MergedAnnotation;
 import org.springframework.core.type.AnnotationMetadata;
+import org.springframework.util.ClassUtils;
+import org.springframework.util.ObjectUtils;
 
 /**
  * Built-in implementation of {@link AbstractHttpServiceRegistrar} that uses
@@ -37,23 +39,31 @@ class ImportHttpServiceRegistrar extends AbstractHttpServiceRegistrar {
 		MergedAnnotation<?> groupsAnnot = metadata.getAnnotations().get(ImportHttpServices.Container.class);
 		if (groupsAnnot.isPresent()) {
 			for (MergedAnnotation<?> annot : groupsAnnot.getAnnotationArray("value", ImportHttpServices.class)) {
-				processImportAnnotation(annot, registry);
+				processImportAnnotation(annot, registry, metadata);
 			}
 		}
 
 		metadata.getAnnotations().stream(ImportHttpServices.class)
-				.forEach(annot -> processImportAnnotation(annot, registry));
+				.forEach(annot -> processImportAnnotation(annot, registry, metadata));
 	}
 
-	private void processImportAnnotation(MergedAnnotation<?> annotation, GroupRegistry groupRegistry) {
+	private void processImportAnnotation(MergedAnnotation<?> annotation, GroupRegistry groupRegistry,
+			AnnotationMetadata metadata) {
 
 		String groupName = annotation.getString("group");
 		HttpServiceGroup.ClientType clientType = annotation.getEnum("clientType", HttpServiceGroup.ClientType.class);
+		Class<?>[] types = annotation.getClassArray("types");
+		Class<?>[] basePackageClasses = annotation.getClassArray("basePackageClasses");
+		String[] basePackages = annotation.getStringArray("basePackages");
+
+		if (ObjectUtils.isEmpty(types) && ObjectUtils.isEmpty(basePackages) && ObjectUtils.isEmpty(basePackageClasses)) {
+			basePackages = new String[] { ClassUtils.getPackageName(metadata.getClassName()) };
+		}
 
 		groupRegistry.forGroup(groupName, clientType)
-				.register(annotation.getClassArray("types"))
-				.detectInBasePackages(annotation.getStringArray("basePackages"))
-				.detectInBasePackages(annotation.getClassArray("basePackageClasses"));
+				.register(types)
+				.detectInBasePackages(basePackageClasses)
+				.detectInBasePackages(basePackages);
 	}
 
 }

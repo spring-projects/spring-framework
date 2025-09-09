@@ -53,4 +53,10 @@ record TestGroup(
 		return group;
 	}
 
+	public static TestGroup ofPackageNames(String name, ClientType clientType, String... packageNames) {
+		TestGroup group = new TestGroup(name, clientType);
+		group.packageNames().addAll(Arrays.asList(packageNames));
+		return group;
+	}
+
 }

@@ -39,6 +39,8 @@ import org.springframework.web.service.annotation.HttpExchange;
  *
  * <p>The HTTP Services for each group can be listed via {@link #types()}, or
  * detected via {@link #basePackageClasses()} or {@link #basePackages()}.
+ * If neither types or base packages are defined, detection will occur recursively
+ * beginning with the package of the class that declares this annotation.
  *
  * <p>An application can autowire HTTP Service proxy beans, or autowire the
  * {@link HttpServiceProxyRegistry} from which to obtain proxies.

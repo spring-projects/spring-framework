@@ -33,6 +33,7 @@ import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.web.service.registry.HttpServiceGroup.ClientType;
 import org.springframework.web.service.registry.echo.EchoA;
 import org.springframework.web.service.registry.echo.EchoB;
+import org.springframework.web.service.registry.echo.ScanConventionConfig;
 import org.springframework.web.service.registry.greeting.GreetingA;
 import org.springframework.web.service.registry.greeting.GreetingB;
 
@@ -81,6 +82,12 @@ public class ImportHttpServiceRegistrarTests {
 		assertGroups(
 				TestGroup.ofPackageClasses(ECHO_GROUP, EchoA.class),
 				TestGroup.ofPackageClasses(GREETING_GROUP, GreetingA.class));
+	}
+
+	@Test
+	void basicScanByConvention() {
+		doRegister(ScanConventionConfig.class);
+		assertGroups(TestGroup.ofPackageNames(ECHO_GROUP, ClientType.UNSPECIFIED, EchoA.class.getPackage().getName()));
 	}
 
 	@Test
