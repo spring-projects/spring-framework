@@ -117,7 +117,6 @@ public class JettyWebSocketHandlerAdapter implements Session.Listener {
 
 		private final Callback callback;
 
-
 		public JettyCallbackDataBuffer(DataBuffer delegate, Callback callback) {
 			Assert.notNull(delegate, "'delegate` must not be null");
 			Assert.notNull(callback, "Callback must not be null");

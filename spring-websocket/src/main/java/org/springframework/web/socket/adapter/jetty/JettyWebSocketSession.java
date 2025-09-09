@@ -173,7 +173,6 @@ public class JettyWebSocketSession extends AbstractWebSocketSession<Session> {
 		return getNativeSession().isOpen();
 	}
 
-
 	@Override
 	public void initializeNativeSession(Session session) {
 		super.initializeNativeSession(session);
@@ -213,7 +212,6 @@ public class JettyWebSocketSession extends AbstractWebSocketSession<Session> {
 		return Collections.emptyList();
 	}
 
-
 	@Override
 	protected void sendTextMessage(TextMessage message) throws IOException {
 		useSession((session, callback) -> session.sendText(message.getPayload(), callback));
@@ -247,7 +245,6 @@ public class JettyWebSocketSession extends AbstractWebSocketSession<Session> {
 		}
 		catch (ExecutionException ex) {
 			Throwable cause = ex.getCause();
-
 			if (cause instanceof IOException ioEx) {
 				throw ioEx;
 			}
@@ -262,6 +259,7 @@ public class JettyWebSocketSession extends AbstractWebSocketSession<Session> {
 			Thread.currentThread().interrupt();
 		}
 	}
+
 
 	@FunctionalInterface
 	private interface SessionConsumer {

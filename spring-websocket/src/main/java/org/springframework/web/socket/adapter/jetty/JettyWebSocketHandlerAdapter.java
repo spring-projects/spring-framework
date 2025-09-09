@@ -58,6 +58,7 @@ public class JettyWebSocketHandlerAdapter implements Session.Listener {
 		this.wsSession = wsSession;
 	}
 
+
 	@Override
 	public void onWebSocketOpen(Session session) {
 		try {
@@ -147,4 +148,5 @@ public class JettyWebSocketHandlerAdapter implements Session.Listener {
 			}
 		}
 	}
+
 }
