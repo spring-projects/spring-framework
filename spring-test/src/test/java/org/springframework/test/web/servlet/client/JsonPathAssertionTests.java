@@ -222,10 +222,13 @@ class JsonPathAssertionTests {
 
 			return map;
 		}
+
 		@GetMapping("/music/null")
 		public Map<String, Object> getNull() {
 			Map<String, Object> map = new LinkedHashMap<>();
+
 			map.put("value", null);
+
 			return map;
 		}
 	}
