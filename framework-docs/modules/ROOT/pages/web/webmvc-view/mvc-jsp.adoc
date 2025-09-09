@@ -37,9 +37,11 @@ XML::
 +
 [source,xml,indent=0,subs="verbatim,quotes"]
 ----
-<mvc:view-resolvers>
-    <mvc:jsp />
-</mvc:view-resolvers>
+    <mvc:annotation-driven/>
+
+    <mvc:view-resolvers>
+        <mvc:jsp/>
+    </mvc:view-resolvers>
 ----
 ======
 
