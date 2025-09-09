@@ -8,10 +8,10 @@ javaPlatform {
 
 dependencies {
 	api(platform("com.fasterxml.jackson:jackson-bom:2.18.4.1"))
-	api(platform("io.micrometer:micrometer-bom:1.14.10"))
+	api(platform("io.micrometer:micrometer-bom:1.14.11"))
 	api(platform("io.netty:netty-bom:4.1.127.Final"))
 	api(platform("io.netty:netty5-bom:5.0.0.Alpha5"))
-	api(platform("io.projectreactor:reactor-bom:2024.0.9"))
+	api(platform("io.projectreactor:reactor-bom:2024.0.10"))
 	api(platform("io.rsocket:rsocket-bom:1.1.5"))
 	api(platform("org.apache.groovy:groovy-bom:4.0.28"))
 	api(platform("org.apache.logging.log4j:log4j-bom:2.21.1"))
@@ -100,7 +100,7 @@ dependencies {
 		api("org.apache.derby:derbyclient:10.16.1.1")
 		api("org.apache.derby:derbytools:10.16.1.1")
 		api("org.apache.httpcomponents.client5:httpclient5:5.5")
-		api("org.apache.httpcomponents.core5:httpcore5-reactive:5.3.4")
+		api("org.apache.httpcomponents.core5:httpcore5-reactive:5.3.5")
 		api("org.apache.poi:poi-ooxml:5.2.5")
 		api("org.apache.tomcat.embed:tomcat-embed-core:10.1.28")
 		api("org.apache.tomcat.embed:tomcat-embed-websocket:10.1.28")
