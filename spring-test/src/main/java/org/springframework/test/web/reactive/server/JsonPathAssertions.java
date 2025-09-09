@@ -56,7 +56,7 @@ public class JsonPathAssertions {
 	/**
 	 * Applies {@link JsonPathExpectationsHelper#assertValue(String, Object)}.
 	 */
-	public WebTestClient.BodyContentSpec isEqualTo(Object expectedValue) {
+	public WebTestClient.BodyContentSpec isEqualTo(@Nullable Object expectedValue) {
 		this.pathHelper.assertValue(this.content, expectedValue);
 		return this.bodySpec;
 	}
