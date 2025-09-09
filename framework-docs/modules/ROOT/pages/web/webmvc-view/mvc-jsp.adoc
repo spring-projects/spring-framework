@@ -9,10 +9,18 @@ The Spring Framework has a built-in integration for using Spring MVC with JSP an
 
 When developing with JSPs, you typically declare an `InternalResourceViewResolver` bean.
 
-`InternalResourceViewResolver` can be used for dispatching to any Servlet resource but in particular for JSPs.
-As a best practice, we strongly encourage placing your JSP files in a directory under the `WEB-INF` directory so there can be no direct access by clients.
+`InternalResourceViewResolver` can be used for dispatching to any Servlet resource but in
+particular for JSPs. As a best practice, we strongly encourage placing your JSP files in
+a directory under the `WEB-INF` directory so there can be no direct access by clients.
 
-[source,java]
+This is what is done by the configuration below which registers a JSP view resolver using
+a default view name prefix of `"/WEB-INF/"` and a default suffix of `".jsp"`.
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 @EnableWebMvc
 @Configuration
@@ -20,30 +28,24 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void configureViewResolvers(ViewResolverRegistry registry) {
-        // Use sensible defaults
         registry.jsp();
-        // Example of customizing:
-        // registry.jsp("/WEB-INF/views/", ".jsp");
     }
 }
 ----
 
-[NOTE]
-====
-For legacy XML configuration:
-
-[source,xml]
+XML::
++
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 <mvc:view-resolvers>
-    <mvc:jsp prefix="/WEB-INF/jsp/" suffix=".jsp"/>
+    <mvc:jsp />
 </mvc:view-resolvers>
 ----
+======
 
-Prefer JavaConfig for new applications.
-====
+[NOTE]
+You can specify custom prefix and suffix.
 
-[.text-muted]
-See the Javadoc of ViewResolverRegistry#jsp() for default prefix and suffix values.
 
 [[mvc-view-jsp-jstl]]
 == JSPs versus JSTL
