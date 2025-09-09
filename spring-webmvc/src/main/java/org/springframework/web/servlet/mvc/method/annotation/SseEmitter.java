@@ -21,8 +21,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 import org.jspecify.annotations.Nullable;
 
@@ -46,10 +44,6 @@ import org.springframework.web.servlet.ModelAndView;
 public class SseEmitter extends ResponseBodyEmitter {
 
 	private static final MediaType TEXT_PLAIN = new MediaType("text", "plain", StandardCharsets.UTF_8);
-
-	/** Guards access to write operations on the response. */
-	private final Lock writeLock = new ReentrantLock();
-
 
 	/**
 	 * Create a new SseEmitter instance.
