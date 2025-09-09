@@ -47,7 +47,7 @@ import org.springframework.web.service.registry.HttpServiceGroup.ClientType;
  * @author Olga Maciaszek-Sharma
  * @since 7.0
  */
-class ImportHttpServiceRegistrar extends AbstractHttpServiceRegistrar {
+public class ImportHttpServiceRegistrar extends AbstractHttpServiceRegistrar {
 
 	private @Nullable MetadataReaderFactory metadataReaderFactory;
 
@@ -97,7 +97,15 @@ class ImportHttpServiceRegistrar extends AbstractHttpServiceRegistrar {
 		return (ImportHttpServices.GroupProvider) BeanUtils.instantiateClass(groupProvider);
 	}
 
-	private void registerHttpServices(GroupRegistry groupRegistry,
+	/**
+	 * Register HTTP service to given registry.
+	 * @param groupRegistry the group registry
+	 * @param groupProvider the group provider to use
+	 * @param clientType the client type to use
+	 * @param types the types to register
+	 * @param basePackages the base packages to register
+	 */
+	protected final void registerHttpServices(GroupRegistry groupRegistry,
 			ImportHttpServices.GroupProvider groupProvider, ClientType clientType, Class<?>[] types,
 			Class<?>[] basePackageClasses, String[] basePackages) {
 
