@@ -19,6 +19,7 @@ package org.springframework.test.web.servlet.client;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.LinkedHashMap
 
 import org.junit.jupiter.api.Test;
 
@@ -192,6 +193,14 @@ class JsonPathAssertionTests {
 				.jsonPath("$.composers").isArray();
 	}
 
+	@Test
+	void isEqualToWithNull() {
+		client.get().uri("/music/null")
+				.exchange()
+				.expectBody()
+				.jsonPath("$.value").isEqualTo(null);
+	}
+
 	@RestController
 	private static class MusicController {
 		@GetMapping("/music/instruments")
@@ -211,6 +220,12 @@ class JsonPathAssertionTests {
 			map.add("performers", new Person("Vladimir Ashkenazy"));
 			map.add("performers", new Person("Yehudi Menuhin"));
 
+			return map;
+		}
+		@GetMapping("/music/null")
+		public Map<String, Object> getNull() {
+			Map<String, Object> map = new LinkedHashMap<>();
+			map.put("value", null);
 			return map;
 		}
 	}
