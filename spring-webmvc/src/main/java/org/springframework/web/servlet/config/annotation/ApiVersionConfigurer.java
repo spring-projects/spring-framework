@@ -100,7 +100,7 @@ public class ApiVersionConfigurer {
 	 * <p>Note that this resolver never returns {@code null}, and therefore
 	 * cannot yield to other resolvers, see {@link PathApiVersionResolver}.
 	 * @param index the index of the path segment to check; e.g. for URL's like
-	 * "/{version}/..." use index 0, for "/api/{version}/..." index 1.
+	 * {@code "/{version}/..."} use index 0, for {@code "/api/{version}/..."} index 1.
 	 */
 	public ApiVersionConfigurer usePathSegment(int index) {
 		this.versionResolvers.add(new PathApiVersionResolver(index));
