@@ -18,6 +18,7 @@ package org.springframework.core.annotation;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -38,6 +39,7 @@ import org.springframework.util.StringUtils;
  * interface-declared parameter annotations from the concrete target method.
  *
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 6.1
  * @see #getMethodAnnotation(Class)
  * @see #getMethodParameters()
@@ -181,7 +183,7 @@ public class AnnotatedMethod {
 					clazz = null;
 				}
 				if (clazz != null) {
-					for (Method candidate : clazz.getMethods()) {
+					for (Method candidate : clazz.getDeclaredMethods()) {
 						if (isOverrideFor(candidate)) {
 							parameterAnnotations.add(candidate.getParameterAnnotations());
 						}
@@ -194,8 +196,9 @@ public class AnnotatedMethod {
 	}
 
 	private boolean isOverrideFor(Method candidate) {
-		if (!candidate.getName().equals(this.method.getName()) ||
-				candidate.getParameterCount() != this.method.getParameterCount()) {
+		if (Modifier.isPrivate(candidate.getModifiers()) ||
+				!candidate.getName().equals(this.method.getName()) ||
+				(candidate.getParameterCount() != this.method.getParameterCount())) {
 			return false;
 		}
 		Class<?>[] paramTypes = this.method.getParameterTypes();
