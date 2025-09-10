@@ -24,7 +24,7 @@ dependencies {
 	api(platform("tools.jackson:jackson-bom:3.0.0-rc9"))
 
 	constraints {
-		api("com.fasterxml:aalto-xml:1.3.2")
+		api("com.fasterxml:aalto-xml:1.3.3")
 		api("com.fasterxml.woodstox:woodstox-core:6.7.0")
 		api("com.github.ben-manes.caffeine:caffeine:3.2.2")
 		api("com.github.librepdf:openpdf:1.3.43")
@@ -52,7 +52,7 @@ dependencies {
 		api("io.r2dbc:r2dbc-h2:1.0.0.RELEASE")
 		api("io.r2dbc:r2dbc-spi-test:1.0.0.RELEASE")
 		api("io.r2dbc:r2dbc-spi:1.0.0.RELEASE")
-		api("io.reactivex.rxjava3:rxjava:3.1.10")
+		api("io.reactivex.rxjava3:rxjava:3.1.11")
 		api("io.smallrye.reactive:mutiny:1.10.0")
 		api("io.vavr:vavr:0.10.4")
 		api("jakarta.activation:jakarta.activation-api:2.1.3")
