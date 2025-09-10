@@ -270,7 +270,12 @@ public class MediaType extends MimeType implements Serializable {
 	 * A String equivalent of {@link MediaType#IMAGE_PNG}.
 	 */
 	public static final String IMAGE_PNG_VALUE = "image/png";
-
+	
+	/**
+	 * A String equivalent of {@link MediaType#IMAGE_WEBP}.
+	 */
+	public static final String IMAGE_WEBP_VALUE = "image/webp";
+	
 	/**
 	 * Media type for {@code multipart/form-data}.
 	 */
@@ -384,6 +389,7 @@ public class MediaType extends MimeType implements Serializable {
 		IMAGE_GIF = new MediaType("image", "gif");
 		IMAGE_JPEG = new MediaType("image", "jpeg");
 		IMAGE_PNG = new MediaType("image", "png");
+		IMAGE_WEBP = new MediaType("image", "webp");
 		MULTIPART_FORM_DATA = new MediaType("multipart", "form-data");
 		MULTIPART_MIXED = new MediaType("multipart", "mixed");
 		MULTIPART_RELATED = new MediaType("multipart", "related");
