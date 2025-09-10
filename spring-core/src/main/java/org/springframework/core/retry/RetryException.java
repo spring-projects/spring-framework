@@ -20,28 +20,39 @@ import java.io.Serial;
 import java.util.Objects;
 
 /**
- * Exception thrown when a {@link RetryPolicy} has been exhausted.
+ * Exception thrown when a {@link RetryPolicy} has been exhausted or interrupted.
  *
- * <p>A {@code RetryException} will contain the last exception thrown by the
- * {@link Retryable} operation as the {@linkplain #getCause() cause} and any
- * exceptions from previous attempts as {@linkplain #getSuppressed() suppressed
+ * <p>A {@code RetryException} will typically contain the last exception thrown
+ * by the {@link Retryable} operation as the {@linkplain #getCause() cause} and
+ * any exceptions from previous attempts as {@linkplain #getSuppressed() suppressed
+ * exceptions}.
+ *
+ * <p>However, if an {@link InterruptedException} is encountered while
+ * {@linkplain Thread#sleep(long) sleeping} for the current
+ * {@link org.springframework.util.backoff.BackOff BackOff} duration, a
+ * {@code RetryException} will contain the {@code InterruptedException} as the
+ * {@linkplain #getCause() cause} and any exceptions from previous invocations
+ * of the {@code Retryable} operation as {@linkplain #getSuppressed() suppressed
  * exceptions}.
  *
  * @author Mahmoud Ben Hassine
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 7.0
  * @see RetryOperations
  */
 public class RetryException extends Exception {
 
 	@Serial
-	private static final long serialVersionUID = 5439915454935047936L;
+	private static final long serialVersionUID = 1L;
 
 
 	/**
 	 * Create a new {@code RetryException} for the supplied message and cause.
 	 * @param message the detail message
-	 * @param cause the last exception thrown by the {@link Retryable} operation
+	 * @param cause the last exception thrown by the {@link Retryable} operation,
+	 * or an {@link InterruptedException} thrown while sleeping for the current
+	 * {@code BackOff} duration
 	 */
 	public RetryException(String message, Throwable cause) {
 		super(message, Objects.requireNonNull(cause, "cause must not be null"));
@@ -49,7 +60,9 @@ public class RetryException extends Exception {
 
 
 	/**
-	 * Get the last exception thrown by the {@link Retryable} operation.
+	 * Get the last exception thrown by the {@link Retryable} operation, or an
+	 * {@link InterruptedException} thrown while sleeping for the current
+	 * {@code BackOff} duration.
 	 */
 	@Override
 	public final Throwable getCause() {

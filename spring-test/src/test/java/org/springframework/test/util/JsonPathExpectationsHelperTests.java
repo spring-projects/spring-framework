@@ -60,7 +60,8 @@ class JsonPathExpectationsHelperTests {
 				'whitespace':  '    ',
 				'emptyString': '',
 				'emptyArray':  [],
-				'emptyMap':    {}
+				'emptyMap':    {},
+				'nullValue':   null
 			}""";
 
 	private static final String SIMPSONS = """
@@ -250,6 +251,11 @@ class JsonPathExpectationsHelperTests {
 	@Test
 	void assertValue() {
 		new JsonPathExpectationsHelper("$.num").assertValue(CONTENT, 5);
+	}
+
+	@Test
+	void assertNullValue() {
+		new JsonPathExpectationsHelper("$.nullValue").assertValue(CONTENT, (Object) null);
 	}
 
 	@Test // SPR-14498

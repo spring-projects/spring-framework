@@ -104,6 +104,8 @@ dependencies {
 	testImplementation("jakarta.xml.bind:jakarta.xml.bind-api")
 	testImplementation("org.jetbrains.kotlinx:kotlinx-serialization-json")
 	testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
+	testImplementation("io.micrometer:context-propagation")
+	testImplementation("io.micrometer:micrometer-observation-test")
 	testImplementation("org.mockito:mockito-core")
 	testImplementation("com.networknt:json-schema-validator");
 	testImplementation("org.skyscreamer:jsonassert")

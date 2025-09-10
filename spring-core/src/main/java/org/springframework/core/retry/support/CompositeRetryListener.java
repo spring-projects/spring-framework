@@ -24,18 +24,19 @@ import org.jspecify.annotations.Nullable;
 import org.springframework.core.retry.RetryException;
 import org.springframework.core.retry.RetryListener;
 import org.springframework.core.retry.RetryPolicy;
-import org.springframework.core.retry.RetryTemplate;
 import org.springframework.core.retry.Retryable;
 import org.springframework.util.Assert;
 
 /**
- * A composite implementation of the {@link RetryListener} interface.
- * Delegate listeners will be called in their registration order.
+ * A composite implementation of the {@link RetryListener} interface, which is
+ * used to compose multiple listeners within a
+ * {@link org.springframework.core.retry.RetryTemplate RetryTemplate}.
  *
- * <p>This class is used to compose multiple listeners within a {@link RetryTemplate}.
+ * <p>Delegate listeners will be called in their registration order.
  *
  * @author Mahmoud Ben Hassine
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 7.0
  */
 public class CompositeRetryListener implements RetryListener {
@@ -45,6 +46,7 @@ public class CompositeRetryListener implements RetryListener {
 
 	/**
 	 * Create a new {@code CompositeRetryListener}.
+	 * @see #addListener(RetryListener)
 	 */
 	public CompositeRetryListener() {
 	}
@@ -55,7 +57,7 @@ public class CompositeRetryListener implements RetryListener {
 	 * @param listeners the list of delegate listeners to register; must not be empty
 	 */
 	public CompositeRetryListener(List<RetryListener> listeners) {
-		Assert.notEmpty(listeners, "RetryListener List must not be empty");
+		Assert.notEmpty(listeners, "RetryListener list must not be empty");
 		this.listeners.addAll(listeners);
 	}
 
@@ -86,6 +88,11 @@ public class CompositeRetryListener implements RetryListener {
 	@Override
 	public void onRetryPolicyExhaustion(RetryPolicy retryPolicy, Retryable<?> retryable, RetryException exception) {
 		this.listeners.forEach(listener -> listener.onRetryPolicyExhaustion(retryPolicy, retryable, exception));
+	}
+
+	@Override
+	public void onRetryPolicyInterruption(RetryPolicy retryPolicy, Retryable<?> retryable, RetryException exception) {
+		this.listeners.forEach(listener -> listener.onRetryPolicyInterruption(retryPolicy, retryable, exception));
 	}
 
 }

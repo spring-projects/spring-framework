@@ -16,6 +16,7 @@
 
 package org.springframework.core.retry;
 
+import java.io.Serial;
 import java.util.ArrayDeque;
 import java.util.Deque;
 
@@ -148,7 +149,7 @@ public class RetryTemplate implements RetryOperations {
 							.formatted(retryableName));
 			// Retry process starts here
 			BackOffExecution backOffExecution = this.retryPolicy.getBackOff().start();
-			Deque<Throwable> exceptions = new ArrayDeque<>();
+			Deque<Throwable> exceptions = new ArrayDeque<>(4);
 			exceptions.add(initialException);
 
 			Throwable lastException = initialException;
@@ -164,9 +165,12 @@ public class RetryTemplate implements RetryOperations {
 				}
 				catch (InterruptedException interruptedException) {
 					Thread.currentThread().interrupt();
-					throw new RetryException(
+					RetryException retryException = new RetryInterruptedException(
 							"Unable to back off for retryable operation '%s'".formatted(retryableName),
 							interruptedException);
+					exceptions.forEach(retryException::addSuppressed);
+					this.retryListener.onRetryPolicyInterruption(this.retryPolicy, retryable, retryException);
+					throw retryException;
 				}
 				logger.debug(() -> "Preparing to retry operation '%s'".formatted(retryableName));
 				try {
@@ -178,7 +182,7 @@ public class RetryTemplate implements RetryOperations {
 					return result;
 				}
 				catch (Throwable currentException) {
-					logger.debug(() -> "Retry attempt for operation '%s' failed due to '%s'"
+					logger.debug(currentException, () -> "Retry attempt for operation '%s' failed due to '%s'"
 							.formatted(retryableName, currentException));
 					this.retryListener.onRetryFailure(this.retryPolicy, retryable, currentException);
 					exceptions.add(currentException);
@@ -194,6 +198,23 @@ public class RetryTemplate implements RetryOperations {
 			exceptions.forEach(retryException::addSuppressed);
 			this.retryListener.onRetryPolicyExhaustion(this.retryPolicy, retryable, retryException);
 			throw retryException;
+		}
+	}
+
+
+	private static class RetryInterruptedException extends RetryException {
+
+		@Serial
+		private static final long serialVersionUID = 1L;
+
+
+		RetryInterruptedException(String message, InterruptedException cause) {
+			super(message, cause);
+		}
+
+		@Override
+		public int getRetryCount() {
+			return (getSuppressed().length - 1);
 		}
 	}
 

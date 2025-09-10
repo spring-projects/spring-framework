@@ -30,7 +30,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments.ArgumentSet;
 import org.junit.jupiter.params.provider.FieldSource;
+import org.junit.platform.commons.util.ExceptionUtils;
 import org.mockito.InOrder;
+
+import org.springframework.util.backoff.BackOff;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -209,6 +212,34 @@ class RetryTemplateTests {
 				});
 		// 4 = 1 initial invocation + 3 retry attempts
 		assertThat(invocationCount).hasValue(4);
+
+		verifyNoMoreInteractions(retryListener);
+	}
+
+	@Test
+	void retryWithInterruptionDuringSleep() {
+		Exception exception = new RuntimeException("Boom!");
+		InterruptedException interruptedException = new InterruptedException();
+
+		// Simulates interruption during sleep:
+		BackOff backOff = () -> () -> {
+			throw ExceptionUtils.throwAsUncheckedException(interruptedException);
+		};
+
+		RetryPolicy retryPolicy = RetryPolicy.builder().backOff(backOff).build();
+		RetryTemplate retryTemplate = new RetryTemplate(retryPolicy);
+		retryTemplate.setRetryListener(retryListener);
+		Retryable<String> retryable = () -> {
+			throw exception;
+		};
+
+		assertThatExceptionOfType(RetryException.class)
+				.isThrownBy(() -> retryTemplate.execute(retryable))
+				.withMessageMatching("Unable to back off for retryable operation '.+?'")
+				.withCause(interruptedException)
+				.satisfies(throwable -> assertThat(throwable.getSuppressed()).containsExactly(exception))
+				.satisfies(throwable -> assertThat(throwable.getRetryCount()).isZero())
+				.satisfies(throwable -> inOrder.verify(retryListener).onRetryPolicyInterruption(retryPolicy, retryable, throwable));
 
 		verifyNoMoreInteractions(retryListener);
 	}

@@ -67,11 +67,15 @@ public class DefaultCorsProcessor implements CorsProcessor {
 
 	@Override
 	public boolean process(@Nullable CorsConfiguration config, ServerWebExchange exchange) {
+		ServerHttpRequest request = exchange.getRequest();
+
 		if (config == null) {
+			if (logger.isDebugEnabled() && CorsUtils.isCorsRequest(request)) {
+				logger.debug("Skip: no CORS configuration has been provided");
+			}
 			return true;
 		}
 
-		ServerHttpRequest request = exchange.getRequest();
 		ServerHttpResponse response = exchange.getResponse();
 		HttpHeaders responseHeaders = response.getHeaders();
 

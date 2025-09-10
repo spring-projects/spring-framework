@@ -27,9 +27,13 @@ import java.lang.reflect.Parameter;
 import java.util.Objects;
 import java.util.function.Predicate;
 
+import kotlin.jvm.JvmClassMappingKt;
+import kotlin.reflect.KClass;
 import kotlin.reflect.KFunction;
 import kotlin.reflect.KParameter;
 import kotlin.reflect.KProperty;
+import kotlin.reflect.KType;
+import kotlin.reflect.full.KClasses;
 import kotlin.reflect.jvm.ReflectJvmMapping;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.NullMarked;
@@ -181,8 +185,23 @@ public enum Nullness {
 
 		public static Nullness forMethodReturnType(Method method) {
 			KFunction<?> function = ReflectJvmMapping.getKotlinFunction(method);
-			if (function != null && ReflectJvmMapping.getJavaType(function.getReturnType()) != void.class) {
-				return (function.getReturnType().isMarkedNullable() ? Nullness.NULLABLE : Nullness.NON_NULL);
+			if (function == null) {
+				String methodName = method.getName();
+				if (methodName.startsWith("get")) {
+					String propertyName = accessorToPropertyName(methodName);
+					KClass<?> kClass = JvmClassMappingKt.getKotlinClass(method.getDeclaringClass());
+					for (KProperty<?> property : KClasses.getMemberProperties(kClass)) {
+						if (property.getName().equals(propertyName)) {
+							return (property.getReturnType().isMarkedNullable() ? Nullness.NULLABLE : Nullness.NON_NULL);
+						}
+					}
+				}
+			}
+			else {
+				KType type = function.getReturnType();
+				if (ReflectJvmMapping.getJavaType(type) != void.class) {
+					return (type.isMarkedNullable() ? Nullness.NULLABLE : Nullness.NON_NULL);
+				}
 			}
 			return Nullness.UNSPECIFIED;
 		}
@@ -200,12 +219,23 @@ public enum Nullness {
 						KParameter.Kind.INSTANCE.equals(p.getKind()));
 			}
 			if (function == null) {
-				return Nullness.UNSPECIFIED;
+				String methodName = executable.getName();
+				if (methodName.startsWith("set")) {
+					String propertyName = accessorToPropertyName(methodName);
+					KClass<?> kClass = JvmClassMappingKt.getKotlinClass(executable.getDeclaringClass());
+					for (KProperty<?> property : KClasses.getMemberProperties(kClass)) {
+						if (property.getName().equals(propertyName)) {
+							return (property.getReturnType().isMarkedNullable() ? Nullness.NULLABLE : Nullness.NON_NULL);
+						}
+					}
+				}
 			}
-			int i = 0;
-			for (KParameter kParameter : function.getParameters()) {
-				if (predicate.test(kParameter) && parameterIndex == i++) {
-					return (kParameter.getType().isMarkedNullable() ? Nullness.NULLABLE : Nullness.NON_NULL);
+			else {
+				int i = 0;
+				for (KParameter kParameter : function.getParameters()) {
+					if (predicate.test(kParameter) && parameterIndex == i++) {
+						return (kParameter.getType().isMarkedNullable() ? Nullness.NULLABLE : Nullness.NON_NULL);
+					}
 				}
 			}
 			return Nullness.UNSPECIFIED;
@@ -213,10 +243,16 @@ public enum Nullness {
 
 		public static Nullness forField(Field field) {
 			KProperty<?> property = ReflectJvmMapping.getKotlinProperty(field);
-			if (property != null && property.getReturnType().isMarkedNullable()) {
-				return Nullness.NULLABLE;
+			if (property != null) {
+				return (property.getReturnType().isMarkedNullable() ? Nullness.NULLABLE : Nullness.NON_NULL);
 			}
-			return Nullness.NON_NULL;
+			return Nullness.UNSPECIFIED;
+		}
+
+		private static String accessorToPropertyName(String method) {
+			char[] methodNameChars = method.toCharArray();
+			methodNameChars[3] = Character.toLowerCase(methodNameChars[3]);
+			return new String(methodNameChars, 3, methodNameChars.length - 3);
 		}
 
 	}

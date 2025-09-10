@@ -23,6 +23,7 @@ import java.net.URI;
 import java.net.URL;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.charset.Charset;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -234,6 +235,11 @@ public class EncodedResourceResolver extends AbstractResourceResolver {
 		@Override
 		public File getFile() throws IOException {
 			return this.encoded.getFile();
+		}
+
+		@Override
+		public Path getFilePath() throws IOException {
+			return this.encoded.getFilePath();
 		}
 
 		@Override

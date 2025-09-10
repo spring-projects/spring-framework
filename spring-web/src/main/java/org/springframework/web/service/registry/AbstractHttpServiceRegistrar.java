@@ -211,7 +211,7 @@ public abstract class AbstractHttpServiceRegistrar implements
 	 * @param basePackage the names of packages to look under
 	 * @return match bean definitions
 	 */
-	protected Stream<BeanDefinition> findHttpServices(String basePackage) {
+	private Stream<BeanDefinition> findHttpServices(String basePackage) {
 		if (this.scanner == null) {
 			Assert.state(this.environment != null, "Environment has not been set");
 			Assert.state(this.resourceLoader != null, "ResourceLoader has not been set");
@@ -267,9 +267,6 @@ public abstract class AbstractHttpServiceRegistrar implements
 			/**
 			 * Detect HTTP Service types in the given packages, looking for
 			 * interfaces with type or method {@link HttpExchange} annotations.
-			 * <p>The performed scan, however, filters out any interfaces
-			 * annotated with {@link HttpServiceClient} that are instead supported
-			 * by {@link AbstractClientHttpServiceRegistrar}.
 			 */
 			GroupSpec detectInBasePackages(Class<?>... packageClasses);
 
@@ -326,17 +323,9 @@ public abstract class AbstractHttpServiceRegistrar implements
 
 			private void detectInBasePackage(String packageName) {
 				findHttpServices(packageName)
-						.filter(DefaultGroupSpec::isNotHttpServiceClientAnnotated)
 						.map(BeanDefinition::getBeanClassName)
 						.filter(Objects::nonNull)
 						.forEach(this::registerServiceTypeName);
-			}
-
-			private static boolean isNotHttpServiceClientAnnotated(BeanDefinition defintion) {
-				if (defintion instanceof AnnotatedBeanDefinition abd) {
-					return !abd.getMetadata().hasAnnotation(HttpServiceClient.class.getName());
-				}
-				return true;
 			}
 
 			private void registerServiceTypeName(String httpServiceTypeName) {
