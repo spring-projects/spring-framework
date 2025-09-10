@@ -74,6 +74,12 @@ class MediaTypeTests {
 		assertThat(mediaType.getSubtype()).as("Invalid subtype").isEqualTo("*");
 		assertThat(mediaType.getQualityValue()).as("Invalid quality factor").isCloseTo(0.2D, within(0D));
 	}
+	
+	@Test
+	void imageWebpConstants() {
+	    assertThat(MediaType.IMAGE_WEBP_VALUE).isEqualTo("image/webp");
+	    assertThat(MediaType.IMAGE_WEBP).isEqualTo(new MediaType("image", "webp"));
+	}
 
 	@Test
 	void parseMediaTypeNoSubtype() {
