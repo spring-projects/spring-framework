@@ -88,12 +88,12 @@ import org.springframework.util.Assert;
  * such a scenario (see container setup).
  *
  * <p>This transaction manager supports nested transactions via JDBC Savepoints.
- * The {@link #setNestedTransactionAllowed} "nestedTransactionAllowed"} flag defaults
+ * The {@link #setNestedTransactionAllowed "nestedTransactionAllowed"} flag defaults
  * to "false", though, as nested transactions will just apply to the JDBC Connection,
  * not to the Hibernate Session and its cached entity objects and related context.
  * You can manually set the flag to "true" if you want to use nested transactions
  * for JDBC access code which participates in Hibernate transactions (provided that
- * your JDBC driver supports Savepoints). <i>Note that Hibernate itself does not
+ * your JDBC driver supports savepoints). <i>Note that Hibernate itself does not
  * support nested transactions! Hence, do not expect Hibernate access code to
  * semantically participate in a nested transaction.</i>
  *
