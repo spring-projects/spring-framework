@@ -31,9 +31,12 @@ import org.springframework.aop.interceptor.ConcurrencyThrottleInterceptor;
 import org.springframework.aop.support.ComposablePointcut;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
 import org.springframework.aop.support.annotation.AnnotationMatchingPointcut;
+import org.springframework.context.EmbeddedValueResolverAware;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.util.Assert;
 import org.springframework.util.ConcurrentReferenceHashMap;
+import org.springframework.util.StringUtils;
+import org.springframework.util.StringValueResolver;
 
 /**
  * A convenient {@link org.springframework.beans.factory.config.BeanPostProcessor
@@ -41,10 +44,14 @@ import org.springframework.util.ConcurrentReferenceHashMap;
  * annotated with {@link ConcurrencyLimit @ConcurrencyLimit}.
  *
  * @author Juergen Hoeller
+ * @author Hyunsang Han
  * @since 7.0
  */
 @SuppressWarnings("serial")
-public class ConcurrencyLimitBeanPostProcessor extends AbstractBeanFactoryAwareAdvisingPostProcessor {
+public class ConcurrencyLimitBeanPostProcessor extends AbstractBeanFactoryAwareAdvisingPostProcessor
+		implements EmbeddedValueResolverAware {
+
+	private @Nullable StringValueResolver embeddedValueResolver;
 
 	public ConcurrencyLimitBeanPostProcessor() {
 		setBeforeExistingAdvisors(true);
@@ -57,7 +64,13 @@ public class ConcurrencyLimitBeanPostProcessor extends AbstractBeanFactoryAwareA
 	}
 
 
-	private static class ConcurrencyLimitInterceptor implements MethodInterceptor {
+	@Override
+	public void setEmbeddedValueResolver(StringValueResolver resolver) {
+		this.embeddedValueResolver = resolver;
+	}
+
+
+	private class ConcurrencyLimitInterceptor implements MethodInterceptor {
 
 		private final Map<Object, ConcurrencyThrottleCache> cachePerInstance =
 				new ConcurrentReferenceHashMap<>(16, ConcurrentReferenceHashMap.ReferenceType.WEAK);
@@ -93,7 +106,8 @@ public class ConcurrencyLimitBeanPostProcessor extends AbstractBeanFactoryAwareA
 						}
 						if (interceptor == null) {
 							Assert.state(limit != null, "No @ConcurrencyLimit annotation found");
-							interceptor = new ConcurrencyThrottleInterceptor(limit.value());
+							int concurrencyLimit = parseInt(limit.value(), limit.valueString());
+							interceptor = new ConcurrencyThrottleInterceptor(concurrencyLimit);
 							if (!perMethod) {
 								cache.classInterceptor = interceptor;
 							}
@@ -103,6 +117,18 @@ public class ConcurrencyLimitBeanPostProcessor extends AbstractBeanFactoryAwareA
 				}
 			}
 			return interceptor.invoke(invocation);
+		}
+
+		private int parseInt(int value, String stringValue) {
+			if (StringUtils.hasText(stringValue)) {
+				if (embeddedValueResolver != null) {
+					stringValue = embeddedValueResolver.resolveStringValue(stringValue);
+				}
+				if (StringUtils.hasText(stringValue)) {
+					return Integer.parseInt(stringValue);
+				}
+			}
+			return value;
 		}
 	}
 
