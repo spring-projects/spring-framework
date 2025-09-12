@@ -201,10 +201,10 @@ public class ResponseBodyEmitter {
 	 * @throws java.lang.IllegalStateException wraps any other errors
 	 */
 	public void send(Object object, @Nullable MediaType mediaType) throws IOException {
-		Assert.state(!this.complete, () -> "ResponseBodyEmitter has already completed" +
-				(this.failure != null ? " with error: " + this.failure : ""));
 		this.writeLock.lock();
 		try {
+			Assert.state(!this.complete, () -> "ResponseBodyEmitter has already completed" +
+					(this.failure != null ? " with error: " + this.failure : ""));
 			if (this.handler != null) {
 				try {
 					this.handler.send(object, mediaType);
@@ -235,10 +235,10 @@ public class ResponseBodyEmitter {
 	 * @since 6.0.12
 	 */
 	public void send(Set<DataWithMediaType> items) throws IOException {
-		Assert.state(!this.complete, () -> "ResponseBodyEmitter has already completed" +
-				(this.failure != null ? " with error: " + this.failure : ""));
 		this.writeLock.lock();
 		try {
+			Assert.state(!this.complete, () -> "ResponseBodyEmitter has already completed" +
+					(this.failure != null ? " with error: " + this.failure : ""));
 			sendInternal(items);
 		}
 		finally {
