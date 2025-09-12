@@ -16,8 +16,9 @@
 
 package org.springframework.docs.languages.kotlin.coroutines.propagation
 
-import kotlinx.coroutines.currentCoroutineContext
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.runBlocking
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
 import org.springframework.core.PropagationContextElement
@@ -31,10 +32,15 @@ class ContextPropagationSample {
 	}
 
 	// tag::context[]
+	fun main() {
+		runBlocking(Dispatchers.IO + PropagationContextElement()) {
+			suspendingFunction()
+		}
+	}
+
 	suspend fun suspendingFunction() {
-		return withContext(PropagationContextElement(currentCoroutineContext())) {
-            logger.info("Suspending function with traceId")
-        }
+		delay(1)
+		logger.info("Suspending function with traceId")
 	}
 	// end::context[]
 }

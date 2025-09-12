@@ -21,55 +21,78 @@ import io.micrometer.context.ContextSnapshot
 import io.micrometer.context.ContextSnapshotFactory
 import kotlinx.coroutines.ThreadContextElement
 import kotlinx.coroutines.reactor.ReactorContext
+import org.springframework.util.ClassUtils
 import reactor.util.context.ContextView
 import kotlin.coroutines.AbstractCoroutineContextElement
 import kotlin.coroutines.CoroutineContext
 
 
 /**
- * [ThreadContextElement] that restores `ThreadLocals` from the Reactor [ContextSnapshot]
- * every time the coroutine with this element in the context is resumed on a thread.
+ * [ThreadContextElement] that ensures that contexts registered with the
+ * Micrometer Context Propagation library are captured and restored when
+ * a coroutine is resumed on a thread. This is typically being used for
+ * Micrometer Tracing support in Kotlin suspended functions.
  *
- * This effectively ensures that Kotlin Coroutines, Reactor and Micrometer Context Propagation
- * work together in an application, typically for observability purposes.
+ * It requires the `io.micrometer:context-propagation` library. If the
+ * `org.jetbrains.kotlinx:kotlinx-coroutines-reactor` dependency is also
+ * on the classpath, this element also supports Reactor `Context`.
  *
- * Applications need to have both `"io.micrometer:context-propagation"` and
- * `"org.jetbrains.kotlinx:kotlinx-coroutines-reactor"` on the classpath to use this context element.
+ * `PropagationContextElement` can be used like this:
  *
- * The `PropagationContextElement` can be used like this:
- * 
  * ```kotlin
- *   suspend fun suspendable() {
- *     withContext(PropagationContextElement(coroutineContext)) {
- *       logger.info("Log statement with traceId")
- *     }
+ *   fun main() {
+ * 		runBlocking(Dispatchers.IO + PropagationContextElement()) {
+ * 			suspendingFunction()
+ * 		}
  *   }
+ *
+ *  suspend fun suspendingFunction() {
+ *      delay(1)
+ *      logger.info("Log statement with traceId")
+ *  }
  * ```
  *
  * @author Brian Clozel
+ * @author Sebastien Deleuze
  * @since 7.0
  */
-class PropagationContextElement(private val context: CoroutineContext) : ThreadContextElement<ContextSnapshot.Scope>,
+class PropagationContextElement : ThreadContextElement<ContextSnapshot.Scope>,
 	AbstractCoroutineContextElement(Key) {
 
-	companion object Key : CoroutineContext.Key<PropagationContextElement>
+	companion object Key : CoroutineContext.Key<PropagationContextElement> {
 
-	val contextSnapshot: ContextSnapshot
-		get() {
-			val contextView: ContextView? = context[ReactorContext]?.context
-			val contextSnapshotFactory =
-				ContextSnapshotFactory.builder().contextRegistry(ContextRegistry.getInstance()).build()
-			if (contextView != null) {
-				return contextSnapshotFactory.captureFrom(contextView)
-			}
-			return contextSnapshotFactory.captureAll()
-		}
+		private val contextSnapshotFactory =
+			ContextSnapshotFactory.builder().contextRegistry(ContextRegistry.getInstance()).build()
+
+		private val coroutinesReactorPresent =
+			ClassUtils.isPresent("kotlinx.coroutines.reactor.ReactorContext",
+				PropagationContextElement::class.java.classLoader);
+	}
+
+	// Context captured from the the ThreadLocal where the PropagationContextElement is instantiated
+	private val threadLocalContextSnapshot: ContextSnapshot = contextSnapshotFactory.captureAll()
 
 	override fun restoreThreadContext(context: CoroutineContext, oldState: ContextSnapshot.Scope) {
 		oldState.close()
 	}
 
 	override fun updateThreadContext(context: CoroutineContext): ContextSnapshot.Scope {
+		val contextSnapshot = if (coroutinesReactorPresent) {
+			ReactorDelegate().captureFrom(context) ?: threadLocalContextSnapshot
+		} else {
+			threadLocalContextSnapshot
+		}
 		return contextSnapshot.setThreadLocals()
+	}
+
+	private class ReactorDelegate {
+
+		fun captureFrom(context: CoroutineContext): ContextSnapshot? {
+			val contextView: ContextView? = context[ReactorContext]?.context
+			if (contextView != null) {
+				return contextSnapshotFactory.captureFrom(contextView)
+			}
+			return null;
+		}
 	}
 }

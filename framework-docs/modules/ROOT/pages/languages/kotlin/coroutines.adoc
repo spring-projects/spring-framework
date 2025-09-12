@@ -257,29 +257,20 @@ For Kotlin `Flow`, a  `Flow<T>.transactional` extension is provided.
 Spring applications are xref:integration/observability.adoc[instrumented with Micrometer for Observability support].
 For tracing support, the current observation is propagated through a `ThreadLocal` for blocking code,
 or the Reactor `Context` for reactive pipelines. But the current observation also needs to be made available
-in the execution context of a suspended function. Without that, the current "traceId" will not be automatically prepended
-to logged statements from coroutines.
+in the execution context of a suspended function. Without that, the current "traceId" will not be automatically
+prepended to logged statements from coroutines.
 
-The `org.springframework.core.PropagationContextElement` operator generally ensures that the
+The {spring-framework-api-kdoc}/spring-core/org.springframework.core/-propagation-context-element/index.html[`PropagationContextElement`] operator generally ensures that the
 {micrometer-context-propagation-docs}/[Micrometer Context Propagation library] works with Kotlin Coroutines.
 
-The `PropagationContextElement` requires the following dependencies:
+It requires the `io.micrometer:context-propagation` dependency and optionally the
+`org.jetbrains.kotlinx:kotlinx-coroutines-reactor` one.
 
-`build.gradle.kts`
-[source,kotlin,indent=0]
-----
-dependencies {
-    implementation("io.micrometer:context-propagation:${contextPropagationVersion}")
-	implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:${coroutinesVersion}")
-	implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor:${coroutinesVersion}")
-}
-----
-
-Applications can then use the `PropagationContextElement` operator to connect the `currentCoroutineContext()`
+Applications can then use the `PropagationContextElement` to augment the `CoroutineContext`
 with the context propagation mechanism:
 
 include-code::./ContextPropagationSample[tag=context,indent=0]
 
-Here, assuming that Micrometer Tracing is configured, the resulting logging statement
-will show the current "traceId" and unlock better observability for your application.
+Here, assuming that Micrometer Tracing is configured, the resulting logging statement will show the current "traceId"
+and unlock better observability for your application.
 

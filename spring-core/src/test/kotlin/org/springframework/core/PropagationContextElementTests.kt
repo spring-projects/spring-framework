@@ -19,18 +19,14 @@ package org.springframework.core
 import io.micrometer.observation.Observation
 import io.micrometer.observation.tck.TestObservationRegistry
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withContext
 import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.AfterAll
-import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.reactivestreams.Publisher
 import reactor.core.publisher.Hooks
 import reactor.core.publisher.Mono
-import reactor.core.scheduler.Schedulers
 import kotlin.coroutines.Continuation
 
 
@@ -38,32 +34,18 @@ import kotlin.coroutines.Continuation
  * Kotlin tests for [PropagationContextElement].
  *
  * @author Brian Clozel
+ * @author Sebastien Deleuze
  */
 class PropagationContextElementTests {
 
 	private val observationRegistry = TestObservationRegistry.create()
 
-	companion object {
-
-		@BeforeAll
-		@JvmStatic
-		fun init() {
-			Hooks.enableAutomaticContextPropagation()
-		}
-
-		@AfterAll
-		@JvmStatic
-		fun cleanup() {
-			Hooks.disableAutomaticContextPropagation()
-		}
-
-	}
-
 	@Test
 	fun restoresFromThreadLocal() {
 		val observation = Observation.createNotStarted("coroutine", observationRegistry)
 		observation.observe {
-			val result = runBlocking(Dispatchers.Unconfined) {
+			val coroutineContext = Dispatchers.IO + PropagationContextElement()
+			val result = runBlocking(coroutineContext) {
                 suspendingFunction("test")
             }
 			Assertions.assertThat(result).isEqualTo("coroutine")
@@ -74,20 +56,23 @@ class PropagationContextElementTests {
 	@Suppress("UNCHECKED_CAST")
 	fun restoresFromReactorContext() {
 		val method = PropagationContextElementTests::class.java.getDeclaredMethod("suspendingFunction", String::class.java, Continuation::class.java)
-		val publisher = CoroutinesUtils.invokeSuspendingFunction(method, this, "test", null) as Publisher<String>
+		val coroutineContext = Dispatchers.IO + PropagationContextElement()
+		val publisher = CoroutinesUtils.invokeSuspendingFunction(coroutineContext, method, this, "test", null) as Publisher<String>
 		val observation = Observation.createNotStarted("coroutine", observationRegistry)
+		Hooks.enableAutomaticContextPropagation()
 		observation.observe {
-			val result = Mono.from<String>(publisher).publishOn(Schedulers.boundedElastic()).block()
+			val mono = Mono.from<String>(publisher)
+			val result = mono.block()
 			assertThat(result).isEqualTo("coroutine")
 		}
+		Hooks.disableAutomaticContextPropagation()
 	}
 
 	suspend fun suspendingFunction(value: String): String? {
-		return withContext(PropagationContextElement(currentCoroutineContext())) {
-            val currentObservation = observationRegistry.currentObservation
-            assertThat(currentObservation).isNotNull
-            currentObservation?.context?.name
-        }
+		delay(1)
+		val currentObservation = observationRegistry.currentObservation
+		assertThat(currentObservation).isNotNull
+		return currentObservation?.context?.name
 	}
 
 }
