@@ -122,7 +122,7 @@ class MappedInterceptorTests {
 	void excludeMultipleMethods() {
 		testHttpMethods(
 				new HttpMethod[] {},
-				new HttpMethod[] {HttpMethod.GET, HttpMethod.POST, HttpMethod.OPTIONS},
+				new HttpMethod[] {HttpMethod.GET, HttpMethod.QUERY, HttpMethod.POST, HttpMethod.OPTIONS},
 				"HEAD", "PUT", "DELETE", "TRACE", "PATCH");
 	}
 

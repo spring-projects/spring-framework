@@ -104,6 +104,11 @@ class DefaultRestTestClient implements RestTestClient {
 	}
 
 	@Override
+	public RequestBodyUriSpec query() {
+		return methodInternal(HttpMethod.QUERY);
+	}
+
+	@Override
 	public RequestHeadersUriSpec<?> options() {
 		return methodInternal(HttpMethod.OPTIONS);
 	}
