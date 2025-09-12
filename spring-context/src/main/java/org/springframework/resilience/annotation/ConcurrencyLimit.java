@@ -42,6 +42,7 @@ import org.springframework.aot.hint.annotation.Reflective;
  * {@link org.springframework.aop.interceptor.ConcurrencyThrottleInterceptor}.
  *
  * @author Juergen Hoeller
+ * @author Hyunsang Han
  * @since 7.0
  * @see EnableResilientMethods
  * @see ConcurrencyLimitBeanPostProcessor
@@ -61,5 +62,13 @@ public @interface ConcurrencyLimit {
 	 * the number of concurrent invocations similar to the upper bound of a pool.
 	 */
 	int value() default 1;
+
+	/**
+	 * The concurrency limit as a configurable String.
+	 * A non-empty value specified here overrides the {@link #value()} attribute.
+	 * <p>This supports Spring-style "${...}" placeholders as well as SpEL expressions.
+	 * @see #value()
+	 */
+	String valueString() default "";
 
 }
