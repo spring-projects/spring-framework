@@ -74,7 +74,7 @@ public abstract class ExchangeFunctions {
 
 		private final ExchangeStrategies strategies;
 
-		private boolean enableLoggingRequestDetails;
+		private final boolean enableLoggingRequestDetails;
 
 
 		public DefaultExchangeFunction(ClientHttpConnector connector, ExchangeStrategies strategies) {
@@ -82,14 +82,9 @@ public abstract class ExchangeFunctions {
 			Assert.notNull(strategies, "ExchangeStrategies must not be null");
 			this.connector = connector;
 			this.strategies = strategies;
-
-			strategies.messageWriters().stream()
-					.filter(LoggingCodecSupport.class::isInstance)
-					.forEach(reader -> {
-						if (((LoggingCodecSupport) reader).isEnableLoggingRequestDetails()) {
-							this.enableLoggingRequestDetails = true;
-						}
-					});
+			this.enableLoggingRequestDetails = strategies.messageWriters().stream()
+					.anyMatch(writer -> writer instanceof LoggingCodecSupport loggingCodecSupport 
+							&& loggingCodecSupport.isEnableLoggingRequestDetails());
 		}
 
 
