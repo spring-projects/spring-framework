@@ -37,4 +37,6 @@ class HtmlCharacterEntityDecoderTest {
 		// Assert
 		assertEquals(expectedOutput, actualOutput, "Basic HTML entities were not unescaped correctly.");
 	}
+
 }
+
