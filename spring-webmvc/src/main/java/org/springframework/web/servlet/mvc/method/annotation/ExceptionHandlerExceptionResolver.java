@@ -302,6 +302,18 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 		}
 
 		List<ControllerAdviceBean> adviceBeans = ControllerAdviceBean.findAnnotatedBeans(getApplicationContext());
+		adviceBeans.sort((bean1, bean2) -> {
+			boolean hasSelectors1 = hasSelectors(bean1);
+			boolean hasSelectors2 = hasSelectors(bean2);
+			if (hasSelectors1 && !hasSelectors2) {
+				return -1;
+			} else if (!hasSelectors1 && hasSelectors2) {
+				return 1;
+			} else {
+				return 0;
+			}
+		});
+
 		for (ControllerAdviceBean adviceBean : adviceBeans) {
 			Class<?> beanType = adviceBean.getBeanType();
 			if (beanType == null) {
@@ -327,6 +339,21 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 						handlerSize + " @ExceptionHandler, " + adviceSize + " ResponseBodyAdvice");
 			}
 		}
+	}
+
+	private boolean hasSelectors(ControllerAdviceBean adviceBean) {
+		Class<?> beanType = adviceBean.getBeanType();
+		if (beanType == null) {
+			return false;
+		}
+		ControllerAdvice controllerAdvice = AnnotationUtils.getAnnotation(beanType, ControllerAdvice.class);
+		if (controllerAdvice == null) {
+			return false;
+		}
+
+		return (controllerAdvice.basePackages().length > 0)
+				|| (controllerAdvice.assignableTypes().length > 0)
+				|| (controllerAdvice.annotations().length > 0);
 	}
 
 	/**
