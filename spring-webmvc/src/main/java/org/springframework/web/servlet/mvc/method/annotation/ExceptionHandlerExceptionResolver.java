@@ -313,7 +313,6 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 				return 0;
 			}
 		});
-
 		for (ControllerAdviceBean adviceBean : adviceBeans) {
 			Class<?> beanType = adviceBean.getBeanType();
 			if (beanType == null) {
