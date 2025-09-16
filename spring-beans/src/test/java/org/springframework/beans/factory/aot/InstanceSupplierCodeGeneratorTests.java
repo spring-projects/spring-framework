@@ -408,6 +408,16 @@ class InstanceSupplierCodeGeneratorTests {
 			compileAndCheckWarnings(beanDefinition);
 		}
 
+		@Test
+		void generateWhenTargetFactoryMethodIsProtectedAndReturnTypeIsDeprecated() {
+			BeanDefinition beanDefinition = BeanDefinitionBuilder
+					.rootBeanDefinition(DeprecatedBean.class)
+					.setFactoryMethodOnBean("deprecatedReturnTypeProtected", "config").getBeanDefinition();
+			beanFactory.registerBeanDefinition("config", BeanDefinitionBuilder
+					.genericBeanDefinition(DeprecatedMemberConfiguration.class).getBeanDefinition());
+			compileAndCheckWarnings(beanDefinition);
+		}
+
 		private void compileAndCheckWarnings(BeanDefinition beanDefinition) {
 			assertThatNoException().isThrownBy(() -> compile(TEST_COMPILER, beanDefinition,
 					((instanceSupplier, compiled) -> {})));
@@ -451,6 +461,26 @@ class InstanceSupplierCodeGeneratorTests {
 			beanFactory.registerBeanDefinition("config", BeanDefinitionBuilder
 					.genericBeanDefinition(DeprecatedForRemovalMemberConfiguration.class).getBeanDefinition());
 			beanFactory.registerBeanDefinition("parameter", new RootBeanDefinition(DeprecatedForRemovalBean.class));
+			compileAndCheckWarnings(beanDefinition);
+		}
+
+		@Test
+		void generateWhenTargetFactoryMethodReturnTypeIsDeprecatedForRemoval() {
+			BeanDefinition beanDefinition = BeanDefinitionBuilder
+					.rootBeanDefinition(DeprecatedForRemovalBean.class)
+					.setFactoryMethodOnBean("deprecatedReturnType", "config").getBeanDefinition();
+			beanFactory.registerBeanDefinition("config", BeanDefinitionBuilder
+					.genericBeanDefinition(DeprecatedForRemovalMemberConfiguration.class).getBeanDefinition());
+			compileAndCheckWarnings(beanDefinition);
+		}
+
+		@Test
+		void generateWhenTargetFactoryMethodIsProtectedAndReturnTypeIsDeprecatedForRemoval() {
+			BeanDefinition beanDefinition = BeanDefinitionBuilder
+					.rootBeanDefinition(DeprecatedForRemovalBean.class)
+					.setFactoryMethodOnBean("deprecatedReturnTypeProtected", "config").getBeanDefinition();
+			beanFactory.registerBeanDefinition("config", BeanDefinitionBuilder
+					.genericBeanDefinition(DeprecatedForRemovalMemberConfiguration.class).getBeanDefinition());
 			compileAndCheckWarnings(beanDefinition);
 		}
 

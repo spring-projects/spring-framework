@@ -293,9 +293,12 @@ public class InstanceSupplierCodeGenerator {
 
 		this.generationContext.getRuntimeHints().reflection().registerMethod(factoryMethod, ExecutableMode.INVOKE);
 		GeneratedMethod getInstanceMethod = generateGetInstanceSupplierMethod(method -> {
+			CodeWarnings codeWarnings = new CodeWarnings();
 			Class<?> suppliedType = ClassUtils.resolvePrimitiveIfNecessary(factoryMethod.getReturnType());
+			codeWarnings.detectDeprecation(suppliedType, factoryMethod);
 			method.addJavadoc("Get the bean instance supplier for '$L'.", beanName);
 			method.addModifiers(PRIVATE_STATIC);
+			codeWarnings.suppress(method);
 			method.returns(ParameterizedTypeName.get(BeanInstanceSupplier.class, suppliedType));
 			method.addStatement(generateInstanceSupplierForFactoryMethod(
 					factoryMethod, suppliedType, targetClass, factoryMethod.getName()));
