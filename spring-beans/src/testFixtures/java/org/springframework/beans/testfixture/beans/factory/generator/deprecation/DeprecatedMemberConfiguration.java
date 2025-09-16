@@ -38,4 +38,9 @@ public class DeprecatedMemberConfiguration {
 		return new DeprecatedBean();
 	}
 
+	@SuppressWarnings("deprecation")
+	DeprecatedBean deprecatedReturnTypeProtected() {
+		return new DeprecatedBean();
+	}
+
 }
