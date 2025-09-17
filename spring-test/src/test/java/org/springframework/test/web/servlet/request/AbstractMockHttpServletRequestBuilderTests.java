@@ -31,6 +31,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * Tests for {@link AbstractMockHttpServletRequestBuilder}
  *
  * @author Stephane Nicoll
+ * @author Réda Housni Alaoui
  */
 class AbstractMockHttpServletRequestBuilderTests {
 
@@ -96,6 +97,14 @@ class AbstractMockHttpServletRequestBuilderTests {
 		assertThat(request.getMethod()).isEqualTo(HttpMethod.POST.name());
 	}
 
+
+	@Test
+	void pathInfoIsNotMutatedByBuildMethod() {
+		TestRequestBuilder builder = new TestRequestBuilder(HttpMethod.GET).uri("/b");
+		assertThat(buildRequest(builder).getPathInfo()).isEqualTo("/b");
+		builder.uri("/a");
+		assertThat(buildRequest(builder).getPathInfo()).isEqualTo("/a");
+	}
 
 	private MockHttpServletRequest buildRequest(AbstractMockHttpServletRequestBuilder<?> builder) {
 		return builder.buildRequest(this.servletContext);
