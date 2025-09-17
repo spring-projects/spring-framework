@@ -16,12 +16,14 @@
 
 package org.springframework.test.web.servlet.client;
 
+import java.io.IOException;
 import java.net.URI;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.time.ZonedDateTime;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -33,13 +35,18 @@ import org.jspecify.annotations.Nullable;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpRequest;
 import org.springframework.http.MediaType;
+import org.springframework.http.client.ClientHttpRequestExecution;
+import org.springframework.http.client.ClientHttpRequestInterceptor;
+import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.test.json.JsonAssert;
 import org.springframework.test.json.JsonComparator;
 import org.springframework.test.json.JsonCompareMode;
 import org.springframework.test.util.AssertionErrors;
 import org.springframework.test.util.ExceptionCollector;
 import org.springframework.test.util.XmlExpectationsHelper;
+import org.springframework.util.Assert;
 import org.springframework.util.MimeType;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestClient;
@@ -56,6 +63,8 @@ class DefaultRestTestClient implements RestTestClient {
 
 	private final RestClient restClient;
 
+	private final WiretapInterceptor wiretapInterceptor = new WiretapInterceptor();
+
 	private final Consumer<EntityExchangeResult<?>> entityResultConsumer;
 
 	private final DefaultRestTestClientBuilder<?> restTestClientBuilder;
@@ -67,7 +76,7 @@ class DefaultRestTestClient implements RestTestClient {
 			RestClient.Builder builder, Consumer<EntityExchangeResult<?>> entityResultConsumer,
 			DefaultRestTestClientBuilder<?> restTestClientBuilder) {
 
-		this.restClient = builder.build();
+		this.restClient = builder.requestInterceptor(this.wiretapInterceptor).build();
 		this.entityResultConsumer = entityResultConsumer;
 		this.restTestClientBuilder = restTestClientBuilder;
 	}
@@ -128,12 +137,14 @@ class DefaultRestTestClient implements RestTestClient {
 
 		private final RestClient.RequestBodyUriSpec requestHeadersUriSpec;
 
+		private final String requestId;
+
 		private @Nullable String uriTemplate;
 
 		DefaultRequestBodyUriSpec(RestClient.RequestBodyUriSpec spec) {
 			this.requestHeadersUriSpec = spec;
-			String requestId = String.valueOf(requestIndex.incrementAndGet());
-			this.requestHeadersUriSpec.header(RESTTESTCLIENT_REQUEST_ID, requestId);
+			this.requestId = String.valueOf(requestIndex.incrementAndGet());
+			this.requestHeadersUriSpec.header(RESTTESTCLIENT_REQUEST_ID, this.requestId);
 		}
 
 		@Override
@@ -252,7 +263,10 @@ class DefaultRestTestClient implements RestTestClient {
 		public ResponseSpec exchange() {
 			return new DefaultResponseSpec(
 					this.requestHeadersUriSpec.exchangeForRequiredValue(
-							(request, response) -> new ExchangeResult(request, response, this.uriTemplate), false),
+							(request, response) -> {
+								byte[] requestBody = wiretapInterceptor.getRequestContent(this.requestId);
+								return new ExchangeResult(request, response, this.uriTemplate, requestBody);
+							}, false),
 					DefaultRestTestClient.this.entityResultConsumer);
 		}
 	}
@@ -476,4 +490,29 @@ class DefaultRestTestClient implements RestTestClient {
 			return this.result;
 		}
 	}
+
+
+	private static class WiretapInterceptor implements ClientHttpRequestInterceptor {
+
+		private final Map<String, byte[]> requestContentMap = new ConcurrentHashMap<>();
+
+		@Override
+		public ClientHttpResponse intercept(
+				HttpRequest request, byte[] body, ClientHttpRequestExecution execution) throws IOException {
+
+			String header = RestTestClient.RESTTESTCLIENT_REQUEST_ID;
+			String requestId = request.getHeaders().getFirst(header);
+			Assert.state(requestId != null, () -> "No \"" + header + "\" header");
+			this.requestContentMap.put(requestId, body);
+			return execution.execute(request, body);
+		}
+
+		public byte[] getRequestContent(String requestId) {
+			byte[] bytes = this.requestContentMap.remove(requestId);
+			Assert.state(bytes != null, () ->
+					"No match for %s=%s".formatted(RestTestClient.RESTTESTCLIENT_REQUEST_ID, requestId));
+			return bytes;
+		}
+	}
+
 }

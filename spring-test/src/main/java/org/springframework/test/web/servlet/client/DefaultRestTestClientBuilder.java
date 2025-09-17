@@ -61,7 +61,7 @@ class DefaultRestTestClientBuilder<B extends RestTestClient.Builder<B>> implemen
 	}
 
 	DefaultRestTestClientBuilder(RestClient.Builder restClientBuilder) {
-		this.restClientBuilder = restClientBuilder;
+		this.restClientBuilder = restClientBuilder.bufferContent((uri, httpMethod) -> true);
 	}
 
 	DefaultRestTestClientBuilder(DefaultRestTestClientBuilder<B> other) {
