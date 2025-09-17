@@ -37,6 +37,7 @@ import kotlin.reflect.full.KClasses;
 import kotlin.reflect.jvm.KCallablesJvm;
 import kotlin.reflect.jvm.ReflectJvmMapping;
 import org.jspecify.annotations.Nullable;
+import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.SynchronousSink;
 import reactor.core.scheduler.Scheduler;
@@ -332,7 +333,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 
 			if (isSuspendingFunction) {
 				Object coroutineContext = exchange.getAttribute(COROUTINE_CONTEXT_ATTRIBUTE);
-				Object result = (coroutineContext == null ? CoroutinesUtils.invokeSuspendingFunction(method, target, args) :
+				Publisher<?> result = (coroutineContext == null ? CoroutinesUtils.invokeSuspendingFunction(method, target, args) :
 						CoroutinesUtils.invokeSuspendingFunction((CoroutineContext) coroutineContext, method, target, args));
 				return (result instanceof Mono<?> mono ? mono.handle(KotlinDelegate::handleResult) : result);
 			}
