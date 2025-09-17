@@ -1,0 +1,9 @@
+diff a/spring-beans/src/main/java/org/springframework/beans/factory/support/AbstractBeanFactory.java b/spring-beans/src/main/java/org/springframework/beans/factory/support/AbstractBeanFactory.java	(rejected hunks)
+@@ -29,6 +29,7 @@
+ import java.util.concurrent.ConcurrentHashMap;
+ import java.util.concurrent.CopyOnWriteArrayList;
+ import java.util.function.Predicate;
++import java.util.function.Supplier;
+ import java.util.function.UnaryOperator;
+ 
+ import org.springframework.beans.BeanUtils;

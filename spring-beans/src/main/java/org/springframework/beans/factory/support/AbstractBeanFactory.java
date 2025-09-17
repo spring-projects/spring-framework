@@ -580,6 +580,27 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 				// Generics potentially only match on the target class, not on the proxy...
 				RootBeanDefinition mbd = getMergedLocalBeanDefinition(beanName);
 				Class<?> targetType = mbd.getTargetType();
+
+				String scope = mbd.getScope();
+				if (targetType == null && scope != null && !scope.isEmpty()) {
+					String targetBeanName = "scopedTarget." + beanName;
+					if (containsBeanDefinition(targetBeanName)) {
+						RootBeanDefinition targetMbd = getMergedLocalBeanDefinition(targetBeanName);
+
+						ResolvableType targetResolvableType = targetMbd.targetType;
+						if (targetResolvableType == null) {
+							targetResolvableType = targetMbd.factoryMethodReturnType;
+							if (targetResolvableType == null) {
+								targetResolvableType = ResolvableType.forClass(targetMbd.getBeanClass());
+							}
+						}
+
+						if (typeToMatch.isAssignableFrom(targetResolvableType)) {
+							return true;
+						}
+					}
+				}
+
 				if (targetType != null && targetType != ClassUtils.getUserClass(beanInstance)) {
 					// Check raw class match as well, making sure it's exposed on the proxy.
 					Class<?> classToMatch = typeToMatch.resolve();
