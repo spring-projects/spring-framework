@@ -94,6 +94,7 @@ public class ResponseBodyEmitter {
 	/** Guards access to write operations on the response. */
 	protected final Lock writeLock = new ReentrantLock();
 
+
 	/**
 	 * Create a new ResponseBodyEmitter instance.
 	 */
