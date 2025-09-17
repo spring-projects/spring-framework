@@ -975,7 +975,7 @@ public interface WebTestClient {
 	 *
 	 * @param <E> the body list element type
 	 */
-	interface ListBodySpec<E> extends BodySpec<List<@Nullable E>, ListBodySpec<E>> {
+	interface ListBodySpec<E extends @Nullable Object> extends BodySpec<List<E>, ListBodySpec<E>> {
 
 		/**
 		 * Assert the extracted list of values is of the given size.
@@ -988,14 +988,14 @@ public interface WebTestClient {
 		 * @param elements the elements to check
 		 */
 		@SuppressWarnings("unchecked")
-		ListBodySpec<E> contains(@Nullable E... elements);
+		ListBodySpec<E> contains(E... elements);
 
 		/**
 		 * Assert the extracted list of values doesn't contain the given elements.
 		 * @param elements the elements to check
 		 */
 		@SuppressWarnings("unchecked")
-		ListBodySpec<E> doesNotContain(@Nullable E... elements);
+		ListBodySpec<E> doesNotContain(E... elements);
 	}
 
 

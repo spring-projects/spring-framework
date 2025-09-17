@@ -23,6 +23,7 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
@@ -367,14 +368,14 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	 * Resolve placeholder values in the given array of patterns.
 	 * @return a new array with updated patterns
 	 */
-	protected @Nullable String[] resolveEmbeddedValuesInPatterns(String[] patterns) {
+	protected String[] resolveEmbeddedValuesInPatterns(String[] patterns) {
 		if (this.embeddedValueResolver == null) {
 			return patterns;
 		}
 		else {
-			@Nullable String[] resolvedPatterns = new String[patterns.length];
+			String[] resolvedPatterns = new String[patterns.length];
 			for (int i = 0; i < patterns.length; i++) {
-				resolvedPatterns[i] = this.embeddedValueResolver.resolveStringValue(patterns[i]);
+				resolvedPatterns[i] = Objects.requireNonNull(this.embeddedValueResolver.resolveStringValue(patterns[i]));
 			}
 			return resolvedPatterns;
 		}

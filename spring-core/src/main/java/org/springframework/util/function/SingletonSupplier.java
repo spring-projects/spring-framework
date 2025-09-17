@@ -39,7 +39,7 @@ import org.springframework.util.Assert;
  * @since 5.1
  * @param <T> the type of results supplied by this supplier
  */
-public class SingletonSupplier<T> implements Supplier<@Nullable T> {
+public class SingletonSupplier<T extends @Nullable Object> implements Supplier<T> {
 
 	private final @Nullable Supplier<? extends @Nullable T> instanceSupplier;
 

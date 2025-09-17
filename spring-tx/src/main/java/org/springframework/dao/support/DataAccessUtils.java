@@ -116,7 +116,7 @@ public abstract class DataAccessUtils {
 	 * element has been found in the given Collection
 	 * @since 6.1
 	 */
-	public static <T extends @Nullable Object> Optional<@NonNull T> optionalResult(@Nullable Collection<T> results)
+	public static <T> Optional<T> optionalResult(@Nullable Collection<? extends @Nullable T> results)
 			throws IncorrectResultSizeDataAccessException {
 
 		return Optional.ofNullable(singleResult(results));

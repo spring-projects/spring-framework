@@ -803,13 +803,13 @@ final class DefaultRestClient implements RestClient {
 		}
 
 		@Override
-		@SuppressWarnings("NullAway") // See https://github.com/uber/NullAway/issues/1075
+		@SuppressWarnings("NullAway") // See https://github.com/uber/NullAway/issues/1290
 		public <T> @Nullable T body(Class<T> bodyType) {
 			return executeAndExtract((request, response) -> readBody(request, response, bodyType, bodyType, this.hints));
 		}
 
 		@Override
-		@SuppressWarnings("NullAway") // See https://github.com/uber/NullAway/issues/1075
+		@SuppressWarnings("NullAway") // See https://github.com/uber/NullAway/issues/1290
 		public <T> @Nullable T body(ParameterizedTypeReference<T> bodyType) {
 			Type type = bodyType.getType();
 			Class<T> bodyClass = bodyClass(type);
