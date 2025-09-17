@@ -294,6 +294,7 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 		this.messageConverters.add(new ByteArrayHttpMessageConverter());
 		this.messageConverters.add(new StringHttpMessageConverter());
 		this.messageConverters.add(new AllEncompassingFormHttpMessageConverter());
+
 	}
 
 	private void initExceptionHandlerAdviceCache() {
