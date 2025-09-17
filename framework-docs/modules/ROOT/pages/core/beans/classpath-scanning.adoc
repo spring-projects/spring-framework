@@ -323,6 +323,45 @@ sure that they are 'opened' (that is, that they use an `opens` declaration inste
 `exports` declaration in your `module-info` descriptor).
 ====
 
+==== Property placeholders and Ant-style patterns
+
+`@ComponentScan(basePackages)` supports `${…}` property placeholders resolved
+against the `Environment` and Ant-style package patterns such as `com.example.**`.
+Multiple packages and/or patterns may be specified.
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+@Configuration
+@ComponentScan(basePackages = "${app.scan.packages}")
+public class AppConfig {
+	// ...
+}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes"]
+----
+@Configuration
+@ComponentScan(basePackages = ["\${app.scan.packages}"])
+class AppConfig {
+	// ...
+}
+----
+======
+
+[source,properties,indent=0,subs="verbatim,quotes"]
+----
+app.scan.packages=com.example.**,org.acme.*
+----
+
+NOTE: Ant-style patterns do not apply to `basePackageClasses`, which accepts concrete
+classes and derives packages from those classes.
+
 Furthermore, the `AutowiredAnnotationBeanPostProcessor` and
 `CommonAnnotationBeanPostProcessor` are both implicitly included when you use the
 component-scan element. That means that the two components are autodetected and
