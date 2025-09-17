@@ -74,7 +74,7 @@ public class RequestMappingVersionIntegrationTests extends AbstractRequestMappin
 
 	private ResponseEntity<String> exchangeWithVersion(String version) {
 		String url = "http://localhost:" + this.port;
-		RequestEntity<Void> requestEntity = RequestEntity.get(url).header("X-API-Version", version).build();
+		RequestEntity<Void> requestEntity = RequestEntity.get(url).header("API-Version", version).build();
 		return getRestTemplate().exchange(requestEntity, String.class);
 	}
 
@@ -88,7 +88,7 @@ public class RequestMappingVersionIntegrationTests extends AbstractRequestMappin
 			StandardApiVersionDeprecationHandler handler = new StandardApiVersionDeprecationHandler();
 			handler.configureVersion("1").setDeprecationLink(URI.create("https://example.org/deprecation"));
 
-			configurer.useRequestHeader("X-API-Version")
+			configurer.useRequestHeader("API-Version")
 					.addSupportedVersions("1", "1.1", "1.3", "1.6")
 					.setDeprecationHandler(handler);
 		}

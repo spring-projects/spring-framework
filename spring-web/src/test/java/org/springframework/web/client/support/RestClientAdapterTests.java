@@ -187,7 +187,7 @@ class RestClientAdapterTests {
 
 		RestClient restClient = RestClient.builder()
 				.baseUrl(anotherServer.url("/").toString())
-				.apiVersionInserter(ApiVersionInserter.useHeader("X-API-Version"))
+				.apiVersionInserter(ApiVersionInserter.useHeader("API-Version"))
 				.build();
 
 		RestClientAdapter adapter = RestClientAdapter.create(restClient);
@@ -196,7 +196,7 @@ class RestClientAdapterTests {
 		String actualResponse = service.getGreetingWithVersion();
 
 		RecordedRequest request = anotherServer.takeRequest();
-		assertThat(request.getHeaders().get("X-API-Version")).isEqualTo("1.2");
+		assertThat(request.getHeaders().get("API-Version")).isEqualTo("1.2");
 		assertThat(actualResponse).isEqualTo("Hello Spring 2!");
 	}
 

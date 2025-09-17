@@ -25,7 +25,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
 class WebConfiguration : WebMvcConfigurer {
 
 	override fun configureApiVersioning(configurer: ApiVersionConfigurer) {
-		configurer.useRequestHeader("X-API-Version")
+		configurer.useRequestHeader("API-Version")
 	}
 }
 // end::snippet[]

@@ -691,7 +691,7 @@ Java::
 
 		@Override
 		public void configureApiVersioning(ApiVersionConfigurer configurer) {
-			configurer.useRequestHeader("X-API-Version");
+			configurer.useRequestHeader("API-Version");
 		}
 	}
 ----
@@ -704,7 +704,7 @@ Kotlin::
 	class WebConfiguration : WebMvcConfigurer {
 
 		override fun configureApiVersioning(configurer: ApiVersionConfigurer) {
-			configurer.useRequestHeader("X-API-Version")
+			configurer.useRequestHeader("API-Version")
 		}
 	}
 ----
