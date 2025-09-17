@@ -20,6 +20,7 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 
 import io.r2dbc.spi.Connection;
@@ -176,7 +177,7 @@ public class SingleConnectionFactory extends DelegatingConnectionFactory
 				this.connection =
 						(isSuppressClose() ? getCloseSuppressingConnectionProxy(connectionToUse) : connectionToUse);
 			}
-			return this.connection;
+			return Objects.requireNonNull(this.connection);
 		}).flatMap(this::prepareConnection);
 	}
 
