@@ -63,7 +63,7 @@ import org.springframework.util.Assert;
  * @see #setTimeBetweenEvictionRunsMillis
  * @see #setMinEvictableIdleTimeMillis
  */
-@SuppressWarnings({"rawtypes", "unchecked", "serial"})
+@SuppressWarnings({"rawtypes", "unchecked", "serial", "deprecation"})
 public class CommonsPool2TargetSource extends AbstractPoolingTargetSource implements PooledObjectFactory<Object> {
 
 	private int maxIdle = GenericObjectPoolConfig.DEFAULT_MAX_IDLE;
