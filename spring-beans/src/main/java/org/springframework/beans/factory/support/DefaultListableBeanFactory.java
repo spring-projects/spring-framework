@@ -688,7 +688,8 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 		if (!isFactoryBean) {
 			return processRegularBean(beanName, mbd, dbd, type, includeNonSingletons, allowFactoryBeanInit);
-		} else {
+		}
+		else {
 			return processFactoryBean(result, beanName, mbd, dbd, type, includeNonSingletons, allowFactoryBeanInit, isNonLazyDecorated);
 		}
 	}
