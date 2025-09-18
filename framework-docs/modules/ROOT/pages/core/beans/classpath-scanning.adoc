@@ -323,11 +323,29 @@ sure that they are 'opened' (that is, that they use an `opens` declaration inste
 `exports` declaration in your `module-info` descriptor).
 ====
 
-==== Property placeholders and Ant-style patterns
+Furthermore, the `AutowiredAnnotationBeanPostProcessor` and
+`CommonAnnotationBeanPostProcessor` are both implicitly included when you use the
+`<context:component-scan>` element. That means that the two components are autodetected
+and wired together -- all without any bean configuration metadata provided in XML.
 
-`@ComponentScan(basePackages)` supports `${…}` property placeholders resolved
-against the `Environment` and Ant-style package patterns such as `com.example.**`.
-Multiple packages and/or patterns may be specified.
+NOTE: You can disable the registration of `AutowiredAnnotationBeanPostProcessor` and
+`CommonAnnotationBeanPostProcessor` by including the `annotation-config` attribute
+with a value of `false`.
+
+
+[[beans-scanning-placeholders-and-patterns]]
+=== Property Placeholders and Ant-style Patterns
+
+The `basePackages` and `value` attributes in `@ComponentScan` support `${...}` property
+placeholders which are resolved against the `Environment` as well as Ant-style package
+patterns such as `"org.example.+++**+++"`.
+
+In addition, multiple packages or patterns may be specified, either separately or within
+a single String — for example, `{"org.example.config", "org.example.service.+++**+++"}`
+or `"org.example.config, org.example.service.+++**+++"`.
+
+The following example specifies the `app.scan.packages` property placeholder for the
+implicit `value` attribute in `@ComponentScan`.
 
 [tabs]
 ======
@@ -336,40 +354,35 @@ Java::
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
 @Configuration
-@ComponentScan(basePackages = "${app.scan.packages}")
+@ComponentScan("${app.scan.packages}") // <1>
 public class AppConfig {
 	// ...
 }
 ----
+<1> `app.scan.packages` property placeholder to be resolved against the `Environment`
 
 Kotlin::
 +
 [source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 @Configuration
-@ComponentScan(basePackages = ["\${app.scan.packages}"])
+@ComponentScan(["\${app.scan.packages}"]) // <1>
 class AppConfig {
 	// ...
 }
 ----
+<1> `app.scan.packages` property placeholder to be resolved against the `Environment`
 ======
+
+The following listing represents a properties file which defines the `app.scan.packages`
+property. In the preceding example, it is assumed that this properties file has been
+registered with the `Environment` – for example, via `@PropertySource` or a similar
+mechanism.
 
 [source,properties,indent=0,subs="verbatim,quotes"]
 ----
-app.scan.packages=com.example.**,org.acme.*
+app.scan.packages=org.example.config, org.example.service.**
 ----
-
-NOTE: Ant-style patterns do not apply to `basePackageClasses`, which accepts concrete
-classes and derives packages from those classes.
-
-Furthermore, the `AutowiredAnnotationBeanPostProcessor` and
-`CommonAnnotationBeanPostProcessor` are both implicitly included when you use the
-component-scan element. That means that the two components are autodetected and
-wired together -- all without any bean configuration metadata provided in XML.
-
-NOTE: You can disable the registration of `AutowiredAnnotationBeanPostProcessor` and
-`CommonAnnotationBeanPostProcessor` by including the `annotation-config` attribute
-with a value of `false`.
 
 
 [[beans-scanning-filters]]

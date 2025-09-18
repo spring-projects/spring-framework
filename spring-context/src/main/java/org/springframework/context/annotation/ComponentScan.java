@@ -74,12 +74,8 @@ public @interface ComponentScan {
 	/**
 	 * Alias for {@link #basePackages}.
 	 * <p>Allows for more concise annotation declarations if no other attributes
-	 * are needed &mdash; for example, {@code @ComponentScan("org.my.pkg")}
-	 * instead of {@code @ComponentScan(basePackages = "org.my.pkg")}.
-	 * <p>This attribute has the same semantics as {@link #basePackages}, including
-	 * support for {@code ${...}} placeholders (resolved against the
-	 * {@link org.springframework.core.env.Environment Environment}) and
-	 * Ant-style package patterns (for example, {@code com.example.**}).
+	 * are needed &mdash; for example, {@code @ComponentScan("org.example")}
+	 * instead of {@code @ComponentScan(basePackages = "org.example")}.
 	 */
 	@AliasFor("basePackages")
 	String[] value() default {};
@@ -88,15 +84,16 @@ public @interface ComponentScan {
 	 * Base packages to scan for annotated components.
 	 * <p>{@link #value} is an alias for (and mutually exclusive with) this
 	 * attribute.
+	 * <p>Supports {@code ${...}} placeholders which are resolved against the
+	 * {@link org.springframework.core.env.Environment Environment} as well as
+	 * Ant-style package patterns &mdash; for example, {@code "org.example.**"}.
+	 * <p>Multiple packages or patterns may be specified, either separately or
+	 * within a single {@code String} &mdash; for example,
+	 * {@code {"org.example.config", "org.example.service.**"}} or
+	 * {@code "org.example.config, org.example.service.**"}.
 	 * <p>Use {@link #basePackageClasses} for a type-safe alternative to
 	 * String-based package names.
-	 * <p>Supports {@code ${...}} placeholders resolved against the
-	 * {@link org.springframework.core.env.Environment Environment} as well as
-	 * Ant-style package patterns (for example, {@code com.example.**}).
-	 * Multiple packages and/or patterns may be specified.
-	 * <p><strong>Note:</strong> Ant-style patterns are <em>not</em> applicable to
-	 * {@link #basePackageClasses()}, which accepts concrete classes for type-safe
-	 * package selection.
+	 * @see org.springframework.context.ConfigurableApplicationContext#CONFIG_LOCATION_DELIMITERS
 	 */
 	@AliasFor("value")
 	String[] basePackages() default {};
@@ -106,8 +103,6 @@ public @interface ComponentScan {
 	 * to scan for annotated components. The package of each class specified will be scanned.
 	 * <p>Consider creating a special no-op marker class or interface in each package
 	 * that serves no purpose other than being referenced by this attribute.
-	 * <p><strong>Note:</strong> Ant-style package patterns do not apply here; this
-	 * attribute accepts concrete classes only and derives packages from those classes.
 	 */
 	Class<?>[] basePackageClasses() default {};
 
