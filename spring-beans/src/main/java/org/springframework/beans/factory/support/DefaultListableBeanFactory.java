@@ -1327,7 +1327,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 					else {  // alias pointing to non-existing bean definition
 						throw new BeanDefinitionStoreException(beanDefinition.getResourceDescription(), beanName,
 								"Cannot register bean definition for bean '" + beanName +
-										"' since there is already an alias for bean '" + aliasedName + "' bound.");
+								"' since there is already an alias for bean '" + aliasedName + "' bound.");
 					}
 				}
 				else {
@@ -2208,7 +2208,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		if (highestPriorityConflictDetected) {
 			throw new NoUniqueBeanDefinitionException(requiredType, candidates.size(),
 					"Multiple beans found with the same highest priority (" + highestPriority +
-							") among candidates: " + candidates.keySet());
+					") among candidates: " + candidates.keySet());
 
 		}
 		return highestPriorityBeanName;
@@ -2337,7 +2337,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 		throw new NoSuchBeanDefinitionException(resolvableType,
 				"expected at least 1 bean which qualifies as autowire candidate. " +
-						"Dependency annotations: " + ObjectUtils.nullSafeToString(descriptor.getAnnotations()));
+				"Dependency annotations: " + ObjectUtils.nullSafeToString(descriptor.getAnnotations()));
 	}
 
 	/**
