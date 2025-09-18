@@ -615,81 +615,125 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		List<String> result = new ArrayList<>();
 
 		// Check all bean definitions.
+		processBeanDefinitions(result, type, includeNonSingletons, allowEagerInit);
+
+		// Check manually registered singletons too.
+		processManualSingletons(result, type, includeNonSingletons);
+
+		return StringUtils.toStringArray(result);
+	}
+
+	private void processBeanDefinitions(List<String> result, ResolvableType type, boolean includeNonSingletons, boolean allowEagerInit) {
 		for (String beanName : this.beanDefinitionNames) {
 			// Only consider bean as eligible if the bean name is not defined as alias for some other bean.
-			if (!isAlias(beanName)) {
-				try {
-					RootBeanDefinition mbd = getMergedLocalBeanDefinition(beanName);
-					// Only check bean definition if it is complete.
-					if (!mbd.isAbstract() && (allowEagerInit ||
-							(mbd.hasBeanClass() || !mbd.isLazyInit() || isAllowEagerClassLoading()) &&
-									!requiresEagerInitForType(mbd.getFactoryBeanName()))) {
-						boolean isFactoryBean = isFactoryBean(beanName, mbd);
-						BeanDefinitionHolder dbd = mbd.getDecoratedDefinition();
-						boolean matchFound = false;
-						boolean allowFactoryBeanInit = (allowEagerInit || containsSingleton(beanName));
-						boolean isNonLazyDecorated = (dbd != null && !mbd.isLazyInit());
-						if (!isFactoryBean) {
-							if (includeNonSingletons || isSingleton(beanName, mbd, dbd)) {
-								matchFound = isTypeMatch(beanName, type, allowFactoryBeanInit);
-							}
-						}
-						else {
-							if (includeNonSingletons || isNonLazyDecorated) {
-								matchFound = isTypeMatch(beanName, type, allowFactoryBeanInit);
-							}
-							else if (allowFactoryBeanInit) {
-								// Type check before singleton check, avoiding FactoryBean instantiation
-								// for early FactoryBean.isSingleton() calls on non-matching beans.
-								matchFound = isTypeMatch(beanName, type, allowFactoryBeanInit) &&
-										isSingleton(beanName, mbd, dbd);
-							}
-							if (!matchFound) {
-								// In case of FactoryBean, try to match FactoryBean instance itself next.
-								beanName = FACTORY_BEAN_PREFIX + beanName;
-								if (includeNonSingletons || isSingleton(beanName, mbd, dbd)) {
-									matchFound = isTypeMatch(beanName, type, allowFactoryBeanInit);
-								}
-							}
-						}
-						if (matchFound) {
-							result.add(beanName);
-						}
-					}
+			if (isAlias(beanName)) {
+				continue;
+			}
+
+			RootBeanDefinition mbd;
+			try {
+				mbd = getMergedLocalBeanDefinition(beanName);
+			}
+			catch (CannotLoadBeanClassException | BeanDefinitionStoreException ex) {
+				if (allowEagerInit) {
+					throw ex;
 				}
-				catch (CannotLoadBeanClassException | BeanDefinitionStoreException ex) {
-					if (allowEagerInit) {
-						throw ex;
-					}
-					// Probably a placeholder: let's ignore it for type matching purposes.
-					LogMessage message = (ex instanceof CannotLoadBeanClassException ?
-							LogMessage.format("Ignoring bean class loading failure for bean '%s'", beanName) :
-							LogMessage.format("Ignoring unresolvable metadata in bean definition '%s'", beanName));
-					logger.trace(message, ex);
-					// Register exception, in case the bean was accidentally unresolvable.
-					onSuppressedException(ex);
-				}
-				catch (NoSuchBeanDefinitionException ex) {
-					// Bean definition got removed while we were iterating -> ignore.
-				}
+				handleBeanDefinitionException(beanName, ex);
+				continue;
+			}
+			catch (NoSuchBeanDefinitionException ex) {
+				// Bean definition got removed while we were iterating -> ignore.
+				continue;
+			}
+
+			if (processBeanDefinition(result, beanName, mbd, type, includeNonSingletons, allowEagerInit)) {
+				result.add(beanName);
+			}
+		}
+	}
+
+	private void handleBeanDefinitionException(String beanName, Exception ex) {
+		// Probably a placeholder: let's ignore it for type matching purposes.
+		LogMessage message = (ex instanceof CannotLoadBeanClassException ?
+				LogMessage.format("Ignoring bean class loading failure for bean '%s'", beanName) :
+				LogMessage.format("Ignoring unresolvable metadata in bean definition '%s'", beanName));
+		logger.trace(message, ex);
+		// Register exception, in case the bean was accidentally unresolvable.
+		onSuppressedException(ex);
+	}
+
+	private boolean processBeanDefinition(List<String> result, String beanName, RootBeanDefinition mbd,
+			ResolvableType type, boolean includeNonSingletons, boolean allowEagerInit) {
+		// Cache merged bean definition properties to avoid repeated access
+		boolean isAbstract = mbd.isAbstract();
+		boolean hasBeanClass = mbd.hasBeanClass();
+		boolean isLazyInit = mbd.isLazyInit();
+		String factoryBeanName = mbd.getFactoryBeanName();
+		BeanDefinitionHolder dbd = mbd.getDecoratedDefinition();
+
+		// Only check bean definition if it is complete.
+		if (isAbstract) {
+			return false;
+		}
+
+		if (!allowEagerInit &&
+				!(hasBeanClass || !isLazyInit || isAllowEagerClassLoading()) &&
+				requiresEagerInitForType(factoryBeanName)) {
+			return false;
+		}
+
+		boolean isFactoryBean = isFactoryBean(beanName, mbd);
+		boolean allowFactoryBeanInit = (allowEagerInit || containsSingleton(beanName));
+		boolean isNonLazyDecorated = (dbd != null && !isLazyInit);
+
+		if (!isFactoryBean) {
+			return processRegularBean(beanName, mbd, dbd, type, includeNonSingletons, allowFactoryBeanInit);
+		} else {
+			return processFactoryBean(result, beanName, mbd, dbd, type, includeNonSingletons, allowFactoryBeanInit, isNonLazyDecorated);
+		}
+	}
+
+	private boolean processRegularBean(String beanName, RootBeanDefinition mbd, @Nullable BeanDefinitionHolder dbd,
+			ResolvableType type, boolean includeNonSingletons, boolean allowFactoryBeanInit) {
+		if (includeNonSingletons || isSingleton(beanName, mbd, dbd)) {
+			return isTypeMatch(beanName, type, allowFactoryBeanInit);
+		}
+		return false;
+	}
+
+	private boolean processFactoryBean(List<String> result, String beanName, RootBeanDefinition mbd, @Nullable BeanDefinitionHolder dbd,
+			ResolvableType type, boolean includeNonSingletons, boolean allowFactoryBeanInit, boolean isNonLazyDecorated) {
+		boolean matchFound = false;
+
+		if (includeNonSingletons || isNonLazyDecorated) {
+			matchFound = isTypeMatch(beanName, type, allowFactoryBeanInit);
+		}
+		else if (allowFactoryBeanInit) {
+			// Type check before singleton check, avoiding FactoryBean instantiation
+			// for early FactoryBean.isSingleton() calls on non-matching beans.
+			matchFound = isTypeMatch(beanName, type, allowFactoryBeanInit) &&
+					isSingleton(beanName, mbd, dbd);
+		}
+
+		if (!matchFound) {
+			// In case of FactoryBean, try to match FactoryBean instance itself next.
+			String factoryBeanName = FACTORY_BEAN_PREFIX + beanName;
+			if (includeNonSingletons || isSingleton(factoryBeanName, mbd, dbd)) {
+				matchFound = isTypeMatch(factoryBeanName, type, allowFactoryBeanInit);
+			}
+			if (matchFound) {
+				result.add(factoryBeanName);
+				return false; // Don't add original beanName
 			}
 		}
 
-		// Check manually registered singletons too.
+		return matchFound;
+	}
+
+	private void processManualSingletons(List<String> result, ResolvableType type, boolean includeNonSingletons) {
 		for (String beanName : this.manualSingletonNames) {
 			try {
-				// In case of FactoryBean, match object created by FactoryBean.
-				if (isFactoryBean(beanName)) {
-					if ((includeNonSingletons || isSingleton(beanName)) && isTypeMatch(beanName, type)) {
-						result.add(beanName);
-						// Match found for this bean: do not match FactoryBean itself anymore.
-						continue;
-					}
-					// In case of FactoryBean, try to match FactoryBean itself next.
-					beanName = FACTORY_BEAN_PREFIX + beanName;
-				}
-				// Match raw bean instance (might be raw FactoryBean).
-				if (isTypeMatch(beanName, type)) {
+				if (processManualSingleton(result, beanName, type, includeNonSingletons)) {
 					result.add(beanName);
 				}
 			}
@@ -699,8 +743,24 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 						"Failed to check manually registered singleton with name '%s'", beanName), ex);
 			}
 		}
+	}
 
-		return StringUtils.toStringArray(result);
+	private boolean processManualSingleton(List<String> result, String beanName, ResolvableType type, boolean includeNonSingletons) {
+		// In case of FactoryBean, match object created by FactoryBean.
+		if (isFactoryBean(beanName)) {
+			if ((includeNonSingletons || isSingleton(beanName)) && isTypeMatch(beanName, type)) {
+				return true; // Match found for this bean
+			}
+			// In case of FactoryBean, try to match FactoryBean itself next.
+			String factoryBeanName = FACTORY_BEAN_PREFIX + beanName;
+			if (isTypeMatch(factoryBeanName, type)) {
+				result.add(factoryBeanName);
+			}
+			return false; // Don't add original beanName
+		}
+
+		// Match raw bean instance (might be raw FactoryBean).
+		return isTypeMatch(beanName, type);
 	}
 
 	private boolean isSingleton(String beanName, RootBeanDefinition mbd, @Nullable BeanDefinitionHolder dbd) {
@@ -1267,7 +1327,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 					else {  // alias pointing to non-existing bean definition
 						throw new BeanDefinitionStoreException(beanDefinition.getResourceDescription(), beanName,
 								"Cannot register bean definition for bean '" + beanName +
-								"' since there is already an alias for bean '" + aliasedName + "' bound.");
+										"' since there is already an alias for bean '" + aliasedName + "' bound.");
 					}
 				}
 				else {
@@ -2148,7 +2208,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		if (highestPriorityConflictDetected) {
 			throw new NoUniqueBeanDefinitionException(requiredType, candidates.size(),
 					"Multiple beans found with the same highest priority (" + highestPriority +
-					") among candidates: " + candidates.keySet());
+							") among candidates: " + candidates.keySet());
 
 		}
 		return highestPriorityBeanName;
@@ -2277,7 +2337,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 		throw new NoSuchBeanDefinitionException(resolvableType,
 				"expected at least 1 bean which qualifies as autowire candidate. " +
-				"Dependency annotations: " + ObjectUtils.nullSafeToString(descriptor.getAnnotations()));
+						"Dependency annotations: " + ObjectUtils.nullSafeToString(descriptor.getAnnotations()));
 	}
 
 	/**
