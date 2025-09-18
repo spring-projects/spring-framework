@@ -636,9 +636,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 				String factoryBeanName = mbd.getFactoryBeanName();
 				BeanDefinitionHolder dbd = mbd.getDecoratedDefinition();
 
-				if (isAbstract || (!allowEagerInit &&
-						((!hasBeanClass && isLazyInit && !isAllowEagerClassLoading()) ||
-								requiresEagerInitForType(factoryBeanName)))) {
+				if (shouldSkipBeanDefinition(isAbstract, allowEagerInit, hasBeanClass, isLazyInit, factoryBeanName)) {
 					continue;
 				}
 
@@ -711,6 +709,23 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 						"Failed to check manually registered singleton with name '%s'", beanName), ex);
 			}
 		}
+	}
+
+	private boolean shouldSkipBeanDefinition(
+			boolean isAbstract, boolean allowEagerInit,
+			boolean hasBeanClass, boolean isLazyInit, @Nullable String factoryBeanName) {
+
+		if (isAbstract) {
+			return true;
+		}
+		if (!allowEagerInit) {
+			boolean needsEagerInit = (!hasBeanClass && isLazyInit && !isAllowEagerClassLoading())
+					|| requiresEagerInitForType(factoryBeanName);
+			if (needsEagerInit) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	private boolean isSingleton(String beanName, RootBeanDefinition mbd, @Nullable BeanDefinitionHolder dbd) {
