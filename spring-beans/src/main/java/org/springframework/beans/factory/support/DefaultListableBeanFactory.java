@@ -711,16 +711,15 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		}
 	}
 
-	private boolean shouldSkipBeanDefinition(
-			boolean isAbstract, boolean allowEagerInit,
+	private boolean shouldSkipBeanDefinition(boolean isAbstract, boolean allowEagerInit,
 			boolean hasBeanClass, boolean isLazyInit, @Nullable String factoryBeanName) {
 
 		if (isAbstract) {
 			return true;
 		}
 		if (!allowEagerInit) {
-			boolean needsEagerInit = (!hasBeanClass && isLazyInit && !isAllowEagerClassLoading())
-					|| requiresEagerInitForType(factoryBeanName);
+			boolean needsEagerInit = (!hasBeanClass && isLazyInit && !isAllowEagerClassLoading()) ||
+					requiresEagerInitForType(factoryBeanName);
 			if (needsEagerInit) {
 				return true;
 			}
