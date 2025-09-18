@@ -674,8 +674,8 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 				if (matchFound) {
 					result.add(beanName);
 				}
-
-			} catch (CannotLoadBeanClassException | BeanDefinitionStoreException ex) {
+			}
+			catch (CannotLoadBeanClassException | BeanDefinitionStoreException ex) {
 				if (allowEagerInit) {
 					throw ex;
 				}
@@ -684,7 +684,8 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 						LogMessage.format("Ignoring unresolvable metadata in bean definition '%s'", beanName));
 				logger.trace(message, ex);
 				onSuppressedException(ex);
-			} catch (NoSuchBeanDefinitionException ex) {
+			}
+			catch (NoSuchBeanDefinitionException ex) {
 				// Bean definition got removed while we were iterating -> ignore
 			}
 		}
@@ -704,7 +705,8 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 				if (isTypeMatch(beanName, type)) {
 					result.add(beanName);
 				}
-			} catch (NoSuchBeanDefinitionException ex) {
+			}
+			catch (NoSuchBeanDefinitionException ex) {
 				logger.trace(LogMessage.format(
 						"Failed to check manually registered singleton with name '%s'", beanName), ex);
 			}
