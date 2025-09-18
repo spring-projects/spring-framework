@@ -65,9 +65,9 @@ public interface ClassMetadata {
 	boolean isFinal();
 
 	/**
-	 * Determine whether the underlying class is independent, i.e. whether
-	 * it is a top-level class or a nested class (static inner class) that
-	 * can be constructed independently of an enclosing class.
+	 * Determine whether the underlying class is independent, i.e. whether it is
+	 * a top-level class or a static nested class that can be constructed
+	 * independently of an enclosing class.
 	 */
 	boolean isIndependent();
 
