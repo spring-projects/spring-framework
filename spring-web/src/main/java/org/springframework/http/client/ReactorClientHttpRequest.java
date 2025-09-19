@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.URI;
 import java.time.Duration;
+import java.util.Objects;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -131,13 +132,13 @@ final class ReactorClientHttpRequest extends AbstractStreamingClientHttpRequest 
 			return Mono.empty();
 		}
 
-		AtomicReference<Executor> executorRef = new AtomicReference<>();
+		AtomicReference<@Nullable Executor> executorRef = new AtomicReference<>();
 
 		return outbound
 				.withConnection(connection -> executorRef.set(connection.channel().eventLoop()))
 				.send(FlowAdapters.toPublisher(new OutputStreamPublisher<>(
 						os -> body.writeTo(StreamUtils.nonClosing(os)), new ByteBufMapper(outbound),
-						executorRef.getAndSet(null), null)));
+						Objects.requireNonNull(executorRef.getAndSet(null)), null)));
 	}
 
 	static IOException convertException(RuntimeException ex) {

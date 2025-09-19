@@ -256,7 +256,7 @@ class ReactiveTypeHandler {
 
 		private @Nullable Subscription subscription;
 
-		private final AtomicReference<Object> elementRef = new AtomicReference<>();
+		private final AtomicReference<@Nullable Object> elementRef = new AtomicReference<>();
 
 		private @Nullable Throwable error;
 
