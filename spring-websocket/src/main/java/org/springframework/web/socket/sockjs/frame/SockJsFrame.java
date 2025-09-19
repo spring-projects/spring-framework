@@ -156,12 +156,13 @@ public class SockJsFrame {
 	@Override
 	public String toString() {
 		int maxLen = 80;
-		int len = Math.min(content.length(), maxLen);
+		int contentLength = this.content.length();
+		int len = Math.min(contentLength, maxLen);
 
 		StringBuilder sb = new StringBuilder(len + 20);
 
 		for (int i = 0; i < len; i++) {
-			char c = content.charAt(i);
+			char c = this.content.charAt(i);
 			switch (c){
 				case '\n' -> sb.append("\\n");
 				case '\r' -> sb.append("\\r");
@@ -169,7 +170,7 @@ public class SockJsFrame {
 			}
 		}
 
-		if (content.length() > maxLen) {
+		if (contentLength > maxLen) {
 			sb.append("...(truncated)");
 		}
 
