@@ -133,13 +133,25 @@ public class SockJsFrame {
 
 	@Override
 	public String toString() {
-		String result = this.content;
-		if (result.length() > 80) {
-			result = result.substring(0, 80) + "...(truncated)";
+		int maxLen = 80;
+		int len = Math.min(content.length(), maxLen);
+
+		StringBuilder sb = new StringBuilder(len + 20);
+
+		for (int i = 0; i < len; i++) {
+			char c = content.charAt(i);
+			switch (c){
+				case '\n' -> sb.append("\\n");
+				case '\r' -> sb.append("\\r");
+				default -> sb.append(c);
+			}
 		}
-		result = StringUtils.replace(result, "\n", "\\n");
-		result = StringUtils.replace(result, "\r", "\\r");
-		return "SockJsFrame content='" + result + "'";
+
+		if (content.length() > maxLen) {
+			sb.append("...(truncated)");
+		}
+
+		return "SockJsFrame content='" + sb + "'";
 	}
 
 
