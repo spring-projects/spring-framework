@@ -16,10 +16,11 @@
 
 package org.springframework.web.socket.sockjs.frame;
 
-
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+
 import org.jspecify.annotations.Nullable;
+
 import org.springframework.util.Assert;
 
 /**
