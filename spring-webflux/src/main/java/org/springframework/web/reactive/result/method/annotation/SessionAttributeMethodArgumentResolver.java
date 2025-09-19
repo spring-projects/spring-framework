@@ -16,6 +16,9 @@
 
 package org.springframework.web.reactive.result.method.annotation;
 
+import java.util.function.Function;
+
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Mono;
 
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -26,6 +29,7 @@ import org.springframework.web.bind.annotation.SessionAttribute;
 import org.springframework.web.bind.annotation.ValueConstants;
 import org.springframework.web.server.MissingRequestValueException;
 import org.springframework.web.server.ServerWebExchange;
+import org.springframework.web.server.WebSession;
 
 /**
  * Resolves method arguments annotated with an @{@link SessionAttribute}.
@@ -55,9 +59,8 @@ public class SessionAttributeMethodArgumentResolver extends AbstractNamedValueAr
 
 	@Override
 	protected Mono<Object> resolveName(String name, MethodParameter parameter, ServerWebExchange exchange) {
-		return exchange.getSession()
-				.filter(session -> session.getAttribute(name) != null)
-				.map(session -> session.getAttribute(name));
+		Function<WebSession, @Nullable Object> extractAttributeFn = session -> session.getAttribute(name);
+		return exchange.getSession().mapNotNull(extractAttributeFn);
 	}
 
 	@Override

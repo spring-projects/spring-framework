@@ -66,10 +66,10 @@ class KotlinSerializationCborEncoderTests : AbstractEncoderTests<KotlinSerializa
 				pojo3
 		)
 		val pojoBytes = Cbor.Default.encodeToByteArray(arrayOf(pojo1, pojo2, pojo3))
-		testEncode(input, Pojo::class.java) { step: FirstStep<DataBuffer?> ->
+		testEncode(input, Pojo::class.java) { step: FirstStep<DataBuffer> ->
 			step
 				.consumeNextWith(expectBytes(pojoBytes)
-					.andThen { dataBuffer: DataBuffer? -> DataBufferUtils.release(dataBuffer) })
+					.andThen { dataBuffer: DataBuffer -> DataBufferUtils.release(dataBuffer) })
 				.verifyComplete()
 		}
 	}
@@ -78,7 +78,7 @@ class KotlinSerializationCborEncoderTests : AbstractEncoderTests<KotlinSerializa
 	fun encodeMono() {
 		val pojo = Pojo("foo", "bar")
 		val input = Mono.just(pojo)
-		testEncode(input, Pojo::class.java) { step: FirstStep<DataBuffer?> ->
+		testEncode(input, Pojo::class.java) { step: FirstStep<DataBuffer> ->
 			step
 				.consumeNextWith(expectBytes(Cbor.Default.encodeToByteArray(pojo))
 					.andThen { dataBuffer: DataBuffer? -> DataBufferUtils.release(dataBuffer) })

@@ -739,7 +739,8 @@ class CoRouterFunctionDsl internal constructor (private val init: (CoRouterFunct
 	}
 
 	@PublishedApi
-	internal fun <T> asMono(request: ServerRequest, context: CoroutineContext = Dispatchers.Unconfined, handler: suspend (ServerRequest) -> T): Mono<T> {
+	internal fun <T : Any> asMono(request: ServerRequest, context: CoroutineContext =
+		Dispatchers.Unconfined, handler: suspend (ServerRequest) -> T?): Mono<T> {
 		return mono(context) {
 			contextProvider?.let {
 				withContext(it.invoke(request)) {
