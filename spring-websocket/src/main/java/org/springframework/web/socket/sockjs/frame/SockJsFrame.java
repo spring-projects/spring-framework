@@ -16,6 +16,7 @@
 
 package org.springframework.web.socket.sockjs.frame;
 
+
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import org.jspecify.annotations.Nullable;
@@ -80,6 +81,30 @@ public class SockJsFrame {
 		}
 	}
 
+	public static SockJsFrame openFrame() {
+		return OPEN_FRAME;
+	}
+
+	public static SockJsFrame heartbeatFrame() {
+		return HEARTBEAT_FRAME;
+	}
+
+	public static SockJsFrame messageFrame(SockJsMessageCodec codec, String... messages) {
+		String encoded = codec.encode(messages);
+		return new SockJsFrame(encoded);
+	}
+
+	public static SockJsFrame closeFrameGoAway() {
+		return CLOSE_GO_AWAY_FRAME;
+	}
+
+	public static SockJsFrame closeFrameAnotherConnectionOpen() {
+		return CLOSE_ANOTHER_CONNECTION_OPEN_FRAME;
+	}
+
+	public static SockJsFrame closeFrame(int code, @Nullable String reason) {
+		return new SockJsFrame("c[" + code + ",\"" + (reason != null ? reason : "") + "\"]");
+	}
 
 	/**
 	 * Return the SockJS frame type.
@@ -116,7 +141,6 @@ public class SockJsFrame {
 		}
 	}
 
-
 	@Override
 	public boolean equals(@Nullable Object other) {
 		return (this == other || (other instanceof SockJsFrame that &&
@@ -149,32 +173,6 @@ public class SockJsFrame {
 		}
 
 		return "SockJsFrame content='" + sb + "'";
-	}
-
-
-	public static SockJsFrame openFrame() {
-		return OPEN_FRAME;
-	}
-
-	public static SockJsFrame heartbeatFrame() {
-		return HEARTBEAT_FRAME;
-	}
-
-	public static SockJsFrame messageFrame(SockJsMessageCodec codec, String... messages) {
-		String encoded = codec.encode(messages);
-		return new SockJsFrame(encoded);
-	}
-
-	public static SockJsFrame closeFrameGoAway() {
-		return CLOSE_GO_AWAY_FRAME;
-	}
-
-	public static SockJsFrame closeFrameAnotherConnectionOpen() {
-		return CLOSE_ANOTHER_CONNECTION_OPEN_FRAME;
-	}
-
-	public static SockJsFrame closeFrame(int code, @Nullable String reason) {
-		return new SockJsFrame("c[" + code + ",\"" + (reason != null ? reason : "") + "\"]");
 	}
 
 }
