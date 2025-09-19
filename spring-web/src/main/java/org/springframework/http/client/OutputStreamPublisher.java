@@ -135,7 +135,7 @@ final class OutputStreamPublisher<T> implements Flow.Publisher<T> {
 
 		private final AtomicLong requested = new AtomicLong();
 
-		private final AtomicReference<Object> parkedThread = new AtomicReference<>();
+		private final AtomicReference<@Nullable Object> parkedThread = new AtomicReference<>();
 
 		private volatile @Nullable Throwable error;
 

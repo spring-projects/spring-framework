@@ -72,7 +72,7 @@ final class SubscriberInputStream extends InputStream implements Subscriber<Data
 
 	private final Queue<DataBuffer> queue;
 
-	private final AtomicReference<Object> parkedThread = new AtomicReference<>();
+	private final AtomicReference<@Nullable Object> parkedThread = new AtomicReference<>();
 
 	private final AtomicInteger workAmount = new AtomicInteger();
 

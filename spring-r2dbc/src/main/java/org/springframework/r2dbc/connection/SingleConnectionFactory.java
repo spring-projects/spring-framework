@@ -73,7 +73,7 @@ public class SingleConnectionFactory extends DelegatingConnectionFactory
 	private @Nullable Boolean autoCommit;
 
 	/** Wrapped Connection. */
-	private final AtomicReference<Connection> target = new AtomicReference<>();
+	private final AtomicReference<@Nullable Connection> target = new AtomicReference<>();
 
 	/** Proxy Connection. */
 	private @Nullable Connection connection;
