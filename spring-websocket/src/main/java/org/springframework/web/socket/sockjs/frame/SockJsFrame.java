@@ -22,7 +22,6 @@ import java.nio.charset.StandardCharsets;
 import org.jspecify.annotations.Nullable;
 
 import org.springframework.util.Assert;
-import org.springframework.util.StringUtils;
 
 /**
  * Represents a SockJS frame. Provides factory methods to create SockJS frames.
@@ -46,6 +45,11 @@ public class SockJsFrame {
 	private static final SockJsFrame CLOSE_ANOTHER_CONNECTION_OPEN_FRAME =
 			closeFrame(2010, "Another connection still open");
 
+	private static final String TRUNCATED_SUFFIX = "...(truncated)";
+
+	private static final String FRAME_PREFIX = "SockJsFrame content='";
+
+	private static final int MAX_CONTENT_PREVIEW_LENGTH = 80;
 
 	private final SockJsFrameType type;
 
@@ -83,7 +87,6 @@ public class SockJsFrame {
 		}
 	}
 
-
 	/**
 	 * Return the SockJS frame type.
 	 */
@@ -119,7 +122,6 @@ public class SockJsFrame {
 		}
 	}
 
-
 	@Override
 	public boolean equals(@Nullable Object other) {
 		return (this == other || (other instanceof SockJsFrame that &&
@@ -133,13 +135,32 @@ public class SockJsFrame {
 
 	@Override
 	public String toString() {
-		String result = this.content;
-		if (result.length() > 80) {
-			result = result.substring(0, 80) + "...(truncated)";
+		int contentLength = this.content.length();
+		int truncatedLength = Math.min(contentLength, MAX_CONTENT_PREVIEW_LENGTH);
+		boolean isTruncated = contentLength > MAX_CONTENT_PREVIEW_LENGTH;
+
+		int suffixLength = isTruncated ? TRUNCATED_SUFFIX.length() : 0;
+		int initialCapacity = FRAME_PREFIX.length() + truncatedLength + suffixLength + 1;
+		StringBuilder sb = new StringBuilder(initialCapacity);
+
+		sb.append(FRAME_PREFIX);
+
+		for (int i = 0; i < truncatedLength; i++) {
+			char c = this.content.charAt(i);
+			switch (c) {
+				case '\n' -> sb.append("\\n");
+				case '\r' -> sb.append("\\r");
+				default -> sb.append(c);
+			}
 		}
-		result = StringUtils.replace(result, "\n", "\\n");
-		result = StringUtils.replace(result, "\r", "\\r");
-		return "SockJsFrame content='" + result + "'";
+
+		if (isTruncated) {
+			sb.append(TRUNCATED_SUFFIX);
+		}
+
+		sb.append('\'');
+
+		return sb.toString();
 	}
 
 
