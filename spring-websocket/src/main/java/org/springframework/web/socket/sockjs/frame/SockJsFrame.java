@@ -22,7 +22,6 @@ import java.nio.charset.StandardCharsets;
 import org.jspecify.annotations.Nullable;
 
 import org.springframework.util.Assert;
-import org.springframework.util.StringUtils;
 
 /**
  * Represents a SockJS frame. Provides factory methods to create SockJS frames.
@@ -83,7 +82,6 @@ public class SockJsFrame {
 		}
 	}
 
-
 	/**
 	 * Return the SockJS frame type.
 	 */
@@ -119,7 +117,6 @@ public class SockJsFrame {
 		}
 	}
 
-
 	@Override
 	public boolean equals(@Nullable Object other) {
 		return (this == other || (other instanceof SockJsFrame that &&
@@ -133,15 +130,27 @@ public class SockJsFrame {
 
 	@Override
 	public String toString() {
-		String result = this.content;
-		if (result.length() > 80) {
-			result = result.substring(0, 80) + "...(truncated)";
-		}
-		result = StringUtils.replace(result, "\n", "\\n");
-		result = StringUtils.replace(result, "\r", "\\r");
-		return "SockJsFrame content='" + result + "'";
-	}
+		int maxLen = 80;
+		int contentLength = this.content.length();
+		int len = Math.min(contentLength, maxLen);
 
+		StringBuilder sb = new StringBuilder(len + 20);
+
+		for (int i = 0; i < len; i++) {
+			char c = this.content.charAt(i);
+			switch (c){
+				case '\n' -> sb.append("\\n");
+				case '\r' -> sb.append("\\r");
+				default -> sb.append(c);
+			}
+		}
+
+		if (contentLength > maxLen) {
+			sb.append("...(truncated)");
+		}
+
+		return "SockJsFrame content='" + sb + "'";
+	}
 
 	public static SockJsFrame openFrame() {
 		return OPEN_FRAME;
