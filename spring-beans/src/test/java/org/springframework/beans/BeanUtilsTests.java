@@ -61,6 +61,7 @@ import static org.assertj.core.api.SoftAssertions.assertSoftly;
  * @author Chris Beams
  * @author Sebastien Deleuze
  * @author Sam Brannen
+ * @author Wonyong Hwang
  * @since 19.05.2003
  */
 class BeanUtilsTests {
@@ -531,6 +532,20 @@ class BeanUtilsTests {
 	void resolveMultipleRecordePackagePrivateConstructor() throws NoSuchMethodException {
 		assertThat(BeanUtils.getResolvableConstructor(RecordWithMultiplePackagePrivateConstructors.class))
 				.isEqualTo(RecordWithMultiplePackagePrivateConstructors.class.getDeclaredConstructor(String.class, String.class));
+	}
+
+	@Test
+	void instantiateClassWithJavaTypeWorksNormally() throws NoSuchMethodException {
+		Constructor<TestBean> ctor = TestBean.class.getDeclaredConstructor();
+		TestBean instance = BeanUtils.instantiateClass(ctor);
+		assertThat(instance).isNotNull();
+		assertThat(instance.getClass()).isEqualTo(TestBean.class);
+	}
+
+	@Test
+	void findPrimaryConstructorWithJavaTypeReturnsNull() {
+		Constructor<?> primaryConstructor = BeanUtils.findPrimaryConstructor(TestBean.class);
+		assertThat(primaryConstructor).isNull();
 	}
 
 	private void assertSignatureEquals(Method desiredMethod, String signature) {

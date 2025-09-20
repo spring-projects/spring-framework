@@ -23,6 +23,7 @@ import org.junit.jupiter.api.Test
  * Kotlin tests for [BeanUtils].
  * 
  * @author Sebastien Deleuze
+ * @author Wonyong Hwang
  */
 @Suppress("unused", "UNUSED_PARAMETER")
 class BeanUtilsKotlinTests {
@@ -192,6 +193,20 @@ class BeanUtilsKotlinTests {
 		assertThat(names).isEmpty()
 	}
 
+	@Test
+	fun `instantiateClass with Kotlin type works correctly`() {
+		val ctor = Foo::class.java.getDeclaredConstructor(String::class.java, Int::class.java)
+		val foo = BeanUtils.instantiateClass(ctor, "test", 42)
+		assertThat(foo.param1).isEqualTo("test")
+		assertThat(foo.param2).isEqualTo(42)
+	}
+
+	@Test
+	fun `findPrimaryConstructor with Kotlin type works correctly`() {
+		val primaryConstructor = BeanUtils.findPrimaryConstructor(Foo::class.java)
+		assertThat(primaryConstructor).isNotNull()
+		assertThat(primaryConstructor!!.parameterCount).isEqualTo(2)
+	}
 
 	class Foo(val param1: String, val param2: Int)
 

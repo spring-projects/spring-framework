@@ -69,6 +69,7 @@ import org.springframework.util.StringUtils;
  * @author Rob Harrop
  * @author Sam Brannen
  * @author Sebastien Deleuze
+ * @author Wonyong Hwang
  */
 public abstract class BeanUtils {
 
@@ -186,7 +187,7 @@ public abstract class BeanUtils {
 		Assert.notNull(ctor, "Constructor must not be null");
 		try {
 			ReflectionUtils.makeAccessible(ctor);
-			if (KotlinDetector.isKotlinType(ctor.getDeclaringClass())) {
+			if (KotlinDetector.isKotlinType(ctor.getDeclaringClass()) && KotlinDetector.isKotlinReflectPresent()) {
 				return KotlinDelegate.instantiateClass(ctor, args);
 			}
 			else {
@@ -279,7 +280,7 @@ public abstract class BeanUtils {
 	 */
 	public static <T> @Nullable Constructor<T> findPrimaryConstructor(Class<T> clazz) {
 		Assert.notNull(clazz, "Class must not be null");
-		if (KotlinDetector.isKotlinType(clazz)) {
+		if (KotlinDetector.isKotlinType(clazz) && KotlinDetector.isKotlinReflectPresent()) {
 			return KotlinDelegate.findPrimaryConstructor(clazz);
 		}
 		if (clazz.isRecord()) {
