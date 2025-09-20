@@ -82,31 +82,6 @@ public class SockJsFrame {
 		}
 	}
 
-	public static SockJsFrame openFrame() {
-		return OPEN_FRAME;
-	}
-
-	public static SockJsFrame heartbeatFrame() {
-		return HEARTBEAT_FRAME;
-	}
-
-	public static SockJsFrame messageFrame(SockJsMessageCodec codec, String... messages) {
-		String encoded = codec.encode(messages);
-		return new SockJsFrame(encoded);
-	}
-
-	public static SockJsFrame closeFrameGoAway() {
-		return CLOSE_GO_AWAY_FRAME;
-	}
-
-	public static SockJsFrame closeFrameAnotherConnectionOpen() {
-		return CLOSE_ANOTHER_CONNECTION_OPEN_FRAME;
-	}
-
-	public static SockJsFrame closeFrame(int code, @Nullable String reason) {
-		return new SockJsFrame("c[" + code + ",\"" + (reason != null ? reason : "") + "\"]");
-	}
-
 	/**
 	 * Return the SockJS frame type.
 	 */
@@ -175,6 +150,31 @@ public class SockJsFrame {
 		}
 
 		return "SockJsFrame content='" + sb + "'";
+	}
+
+	public static SockJsFrame openFrame() {
+		return OPEN_FRAME;
+	}
+
+	public static SockJsFrame heartbeatFrame() {
+		return HEARTBEAT_FRAME;
+	}
+
+	public static SockJsFrame messageFrame(SockJsMessageCodec codec, String... messages) {
+		String encoded = codec.encode(messages);
+		return new SockJsFrame(encoded);
+	}
+
+	public static SockJsFrame closeFrameGoAway() {
+		return CLOSE_GO_AWAY_FRAME;
+	}
+
+	public static SockJsFrame closeFrameAnotherConnectionOpen() {
+		return CLOSE_ANOTHER_CONNECTION_OPEN_FRAME;
+	}
+
+	public static SockJsFrame closeFrame(int code, @Nullable String reason) {
+		return new SockJsFrame("c[" + code + ",\"" + (reason != null ? reason : "") + "\"]");
 	}
 
 }
