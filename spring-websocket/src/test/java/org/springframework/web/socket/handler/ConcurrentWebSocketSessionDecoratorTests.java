@@ -17,14 +17,21 @@
 package org.springframework.web.socket.handler;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.jupiter.api.Test;
 
+import org.springframework.web.socket.BinaryMessage;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
+import org.springframework.web.socket.WebSocketMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.ConcurrentWebSocketSessionDecorator.OverflowStrategy;
 
@@ -224,6 +231,121 @@ class ConcurrentWebSocketSessionDecoratorTests {
 		assertThat(sessionDecorator.getSendTimeLimit()).isEqualTo(42);
 		assertThat(sessionDecorator.getBufferSizeLimit()).isEqualTo(43);
 		assertThat(sessionDecorator.getOverflowStrategy()).isEqualTo(OverflowStrategy.DROP);
+	}
+
+	@Test
+	void concurrentBinaryMessageSharingAcrossSessions() throws Exception {
+		byte[] originalData = new byte[100];
+		for (int i = 0; i < originalData.length; i++) {
+			originalData[i] = (byte) i;
+		}
+		ByteBuffer buffer = ByteBuffer.wrap(originalData);
+		BinaryMessage sharedMessage = new BinaryMessage(buffer);
+
+		int sessionCount = 5;
+		int messagesPerSession = 3;
+		CountDownLatch startLatch = new CountDownLatch(1);
+		CountDownLatch completeLatch = new CountDownLatch(sessionCount * messagesPerSession);
+		AtomicInteger corruptedBuffers = new AtomicInteger(0);
+		
+		List<TestBinaryMessageCapturingSession> sessions = new ArrayList<>();
+		List<ConcurrentWebSocketSessionDecorator> decorators = new ArrayList<>();
+		
+		for (int i = 0; i < sessionCount; i++) {
+			TestBinaryMessageCapturingSession session = new TestBinaryMessageCapturingSession();
+			session.setOpen(true);
+			session.setId("session-" + i);
+			sessions.add(session);
+			
+			ConcurrentWebSocketSessionDecorator decorator = 
+					new ConcurrentWebSocketSessionDecorator(session, 10000, 10240);
+			decorators.add(decorator);
+		}
+
+		ExecutorService executor = Executors.newFixedThreadPool(sessionCount * messagesPerSession);
+
+		try {
+			for (ConcurrentWebSocketSessionDecorator decorator : decorators) {
+				for (int j = 0; j < messagesPerSession; j++) {
+					executor.submit(() -> {
+						try {
+							startLatch.await();
+							decorator.sendMessage(sharedMessage);
+						} catch (Exception e) {
+							e.printStackTrace();
+						} finally {
+							completeLatch.countDown();
+						}
+					});
+				}
+			}
+
+			startLatch.countDown();
+			assertThat(completeLatch.await(5, TimeUnit.SECONDS)).isTrue();
+
+			for (TestBinaryMessageCapturingSession session : sessions) {
+				List<ByteBuffer> capturedBuffers = session.getCapturedBuffers();
+				
+				for (ByteBuffer capturedBuffer : capturedBuffers) {
+					byte[] capturedData = new byte[capturedBuffer.remaining()];
+					capturedBuffer.get(capturedData);
+					
+					boolean isCorrupted = false;
+					if (capturedData.length != originalData.length) {
+						isCorrupted = true;
+					} else {
+						for (int j = 0; j < originalData.length; j++) {
+							if (capturedData[j] != originalData[j]) {
+								isCorrupted = true;
+								break;
+							}
+						}
+					}
+					
+					if (isCorrupted) {
+						corruptedBuffers.incrementAndGet();
+					}
+				}
+			}
+
+			assertThat(corruptedBuffers.get())
+					.as("No ByteBuffer corruption should occur with duplicate() fix")
+					.isEqualTo(0);
+		} finally {
+			executor.shutdown();
+		}
+	}
+
+	static class TestBinaryMessageCapturingSession extends TestWebSocketSession {
+		private final List<ByteBuffer> capturedBuffers = new ArrayList<>();
+		
+		@Override
+		public void sendMessage(WebSocketMessage<?> message) throws IOException {
+			if (message instanceof BinaryMessage) {
+				ByteBuffer payload = ((BinaryMessage) message).getPayload();
+				ByteBuffer captured = ByteBuffer.allocate(payload.remaining());
+				
+				while (payload.hasRemaining()) {
+					captured.put(payload.get());
+				}
+				captured.flip();
+				
+				synchronized (capturedBuffers) {
+					capturedBuffers.add(captured);
+				}
+				
+				try {
+					Thread.sleep(1);
+				} catch (InterruptedException e) {
+					Thread.currentThread().interrupt();
+				}
+			}
+			super.sendMessage(message);
+		}
+		
+		public synchronized List<ByteBuffer> getCapturedBuffers() {
+			return new ArrayList<>(capturedBuffers);
+		}
 	}
 
 }
