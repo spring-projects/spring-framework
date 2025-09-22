@@ -35,6 +35,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  * Tests for {@link ConcurrentWebSocketSessionDecorator}.
  *
  * @author Rossen Stoyanchev
+ * @author xeroman.k
  */
 class ConcurrentWebSocketSessionDecoratorTests {
 
