@@ -629,17 +629,16 @@ Kotlin::
 == `@HttpExchange`
 [.small]#xref:web/webmvc/mvc-controller/ann-requestmapping.adoc#mvc-ann-httpexchange-annotation[See equivalent in the Servlet stack]#
 
-While the main purpose of `@HttpExchange` is to abstract HTTP client code with a
-generated proxy, the
-xref:integration/rest-clients.adoc#rest-http-interface[HTTP Interface] on which
-such annotations are placed is a contract neutral to client vs server use.
-In addition to simplifying client code, there are also cases where an HTTP Interface
-may be a convenient way for servers to expose their API for client access. This leads
-to increased coupling between client and server and is often not a good choice,
-especially for public API's, but may be exactly the goal for an internal API.
-It is an approach commonly used in Spring Cloud, and it is why `@HttpExchange` is
-supported as an alternative to `@RequestMapping` for server side handling in
-controller classes.
+While the main purpose of `@HttpExchange` is for an HTTP Service
+xref:integration/rest-clients.adoc#rest-http-service-client[client with a generated proxy],
+the HTTP Service interface on which such annotations are placed is a contract neutral
+to client vs server use. In addition to simplifying client code, there are also cases
+where an HTTP Service interface may be a convenient way for servers to expose their
+API for client access. This leads to increased coupling between client and server and
+is often not a good choice, especially for public API's, but may be exactly the goal
+for an internal API. It is an approach commonly used in Spring Cloud, and it is why
+`@HttpExchange` is supported as an alternative to `@RequestMapping` for server side
+handling in controller classes.
 
 For example:
 
@@ -710,5 +709,5 @@ path, and content types.
 For method parameters and returns values, generally, `@HttpExchange` supports a
 subset of the method parameters that `@RequestMapping` does. Notably, it excludes any
 server-side specific parameter types. For details, see the list for
-xref:integration/rest-clients.adoc#rest-http-interface-method-parameters[@HttpExchange] and
+xref:integration/rest-clients.adoc#rest-http-service-client-method-parameters[@HttpExchange] and
 xref:web/webflux/controller/ann-methods/arguments.adoc[@RequestMapping].

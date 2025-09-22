@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.docs.integration.resthttpinterface.customresolver
+package org.springframework.docs.integration.resthttpserviceclient.customresolver
 
 import org.springframework.core.MethodParameter
 import org.springframework.web.client.RestClient
@@ -26,14 +26,14 @@ import org.springframework.web.service.invoker.HttpServiceProxyFactory
 
 class CustomHttpServiceArgumentResolver {
 
-	// tag::httpinterface[]
+	// tag::httpserviceclient[]
 	interface RepositoryService {
 
 		@GetExchange("/repos/search")
 		fun searchRepository(search: Search): List<Repository>
 
 	}
-	// end::httpinterface[]
+	// end::httpserviceclient[]
 
 	class Sample {
 		fun sample() {

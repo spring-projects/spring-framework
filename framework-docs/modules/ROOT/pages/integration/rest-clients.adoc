@@ -6,7 +6,7 @@ The Spring Framework provides the following choices for making calls to REST end
 * xref:integration/rest-clients.adoc#rest-restclient[`RestClient`] -- synchronous client with a fluent API
 * xref:integration/rest-clients.adoc#rest-webclient[`WebClient`] -- non-blocking, reactive client with fluent API
 * xref:integration/rest-clients.adoc#rest-resttemplate[`RestTemplate`] -- synchronous client with template method API
-* xref:integration/rest-clients.adoc#rest-http-interface[HTTP Interface Clients] -- annotated interface backed by generated proxy
+* xref:integration/rest-clients.adoc#rest-http-service-client[HTTP Service Clients] -- annotated interface backed by generated proxy
 
 
 [[rest-restclient]]
@@ -855,8 +855,8 @@ It can be used to migrate from the latter to the former.
 |===
 
 
-[[rest-http-interface]]
-== HTTP Interface Clients
+[[rest-http-service-client]]
+== HTTP Service Clients
 
 You can define an HTTP Service as a Java interface with `@HttpExchange` methods, and use
 `HttpServiceProxyFactory` to create a client proxy from it for remote access over HTTP via
@@ -928,7 +928,7 @@ Now, you're ready to create client proxies:
 	// Use service methods for remote calls...
 ----
 
-[[rest-http-interface-method-parameters]]
+[[rest-http-service-client-method-parameters]]
 === Method Parameters
 
 `@HttpExchange` methods support flexible method signatures with the following inputs:
@@ -1000,13 +1000,13 @@ parameter annotation) is set to `false`, or the parameter is marked optional as 
 `StreamingHttpOutputMessage.Body` that allows sending the request body by writing to an
 `OutputStream`.
 
-[[rest-http-interface.custom-resolver]]
+[[rest-http-service-client.custom-resolver]]
 === Custom Arguments
 
 You can configure a custom `HttpServiceArgumentResolver`. The example interface below
 uses a custom `Search` method parameter type:
 
-include-code::./CustomHttpServiceArgumentResolver[tag=httpinterface,indent=0]
+include-code::./CustomHttpServiceArgumentResolver[tag=httpserviceclient,indent=0]
 
 A custom argument resolver could be implemented like this:
 
@@ -1021,7 +1021,7 @@ the use of more fine-grained method parameters for individual parts of the reque
 
 
 
-[[rest-http-interface-return-values]]
+[[rest-http-service-client-return-values]]
 === Return Values
 
 The supported return values depend on the underlying client.
@@ -1097,7 +1097,7 @@ underlying HTTP client, which operates at a lower level and provides more contro
 `InputStream` or `ResponseEntity<InputStream>` that provides access to the raw response
 body content.
 
-[[rest-http-interface-exceptions]]
+[[rest-http-service-client-exceptions]]
 === Error Handling
 
 To customize error handling for HTTP Service client proxies, you can configure the
@@ -1134,7 +1134,7 @@ documentation for each client, as well as the Javadoc of `defaultStatusHandler` 
 
 
 
-[[rest-http-interface-adapter-decorator]]
+[[rest-http-service-client-adapter-decorator]]
 === Decorating the Adapter
 
 `HttpExchangeAdapter` and `ReactorHttpExchangeAdapter` are contracts that decouple HTTP
@@ -1162,8 +1162,8 @@ built-in decorators to suppress 404 exceptions and return a `ResponseEntity` wit
 
 
 
-[[rest-http-interface-group-config]]
-=== HTTP Interface Groups
+[[rest-http-service-client-group-config]]
+=== HTTP Service Groups
 
 It's trivial to create client proxies with `HttpServiceProxyFactory`, but to have them
 declared as beans leads to repetitive configuration. You may also have multiple

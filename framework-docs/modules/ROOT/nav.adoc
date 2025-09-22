@@ -314,7 +314,7 @@
 *** xref:web/webflux-webclient/client-context.adoc[]
 *** xref:web/webflux-webclient/client-synchronous.adoc[]
 *** xref:web/webflux-webclient/client-testing.adoc[]
-** xref:web/webflux-http-interface-client.adoc[]
+** xref:web/webflux-http-service-client.adoc[]
 ** xref:web/webflux-websocket.adoc[]
 ** xref:web/webflux-test.adoc[]
 ** xref:rsocket.adoc[]

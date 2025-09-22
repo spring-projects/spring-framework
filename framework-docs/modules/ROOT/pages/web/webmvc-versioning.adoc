@@ -16,7 +16,7 @@ to annotated controller methods with an API version
 to functional endpoints with an API version
 
 Client support for API versioning is available also in `RestClient`, `WebClient`, and
-xref:integration/rest-clients.adoc#rest-http-interface[HTTP Service] clients, as well as
+xref:integration/rest-clients.adoc#rest-http-service-client[HTTP Service] clients, as well as
 for testing in MockMvc and `WebTestClient`.
 
 
