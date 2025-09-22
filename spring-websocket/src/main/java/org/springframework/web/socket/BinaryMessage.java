@@ -22,6 +22,7 @@ import java.nio.ByteBuffer;
  * A binary WebSocket message.
  *
  * @author Rossen Stoyanchev
+ * @author xeroman.k
  * @since 4.0
  */
 public final class BinaryMessage extends AbstractWebSocketMessage<ByteBuffer> {
@@ -89,6 +90,11 @@ public final class BinaryMessage extends AbstractWebSocketMessage<ByteBuffer> {
 	@Override
 	protected String toStringPayload() {
 		return getPayload().toString();
+	}
+
+	@Override
+	public ByteBuffer getPayload() {
+		return super.getPayload().duplicate();
 	}
 
 }
