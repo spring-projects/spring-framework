@@ -34,8 +34,8 @@ import org.apache.commons.logging.LogFactory;
  * appropriate points of its workflow. Note that {@code afterAccess}
  * should usually be called in a {@code finally} block!
  *
- * <p>The default concurrency limit of this support class is -1
- * ("unbounded concurrency"). Subclasses may override this default;
+ * <p>The default concurrency limit of this support class is
+ * {@link #UNBOUNDED_CONCURRENCY}. Subclasses may override this default;
  * check the javadoc of the concrete class that you're using.
  *
  * @author Juergen Hoeller
@@ -50,12 +50,19 @@ import org.apache.commons.logging.LogFactory;
 public abstract class ConcurrencyThrottleSupport implements Serializable {
 
 	/**
-	 * Permit any number of concurrent invocations: that is, don't throttle concurrency.
+	 * Concurrency limit which signals unbounded concurrency: {@value}.
+	 * <p>Setting the limit to this value permits any number of concurrent
+	 * invocations: that is, concurrency will not be throttled.
+	 * @see #NO_CONCURRENCY
 	 */
 	public static final int UNBOUNDED_CONCURRENCY = -1;
 
 	/**
-	 * Switch concurrency 'off': that is, don't allow any concurrent invocations.
+	 * Concurrency limit which signals that concurrency throttling has been
+	 * disabled: {@value}.
+	 * <p>Setting the limit to this value prevents all invocations.
+	 * @see #beforeAccess()
+	 * @see #UNBOUNDED_CONCURRENCY
 	 */
 	public static final int NO_CONCURRENCY = 0;
 
