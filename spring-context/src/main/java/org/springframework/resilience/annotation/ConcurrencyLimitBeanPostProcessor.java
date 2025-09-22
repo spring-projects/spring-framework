@@ -108,6 +108,9 @@ public class ConcurrencyLimitBeanPostProcessor extends AbstractBeanFactoryAwareA
 						if (interceptor == null) {
 							Assert.state(annotation != null, "No @ConcurrencyLimit annotation found");
 							int concurrencyLimit = parseInt(annotation.limit(), annotation.limitString());
+							if (concurrencyLimit < -1) {
+								throw new IllegalStateException(annotation + " must be configured with a valid limit");
+							}
 							interceptor = new ConcurrencyThrottleInterceptor(concurrencyLimit);
 							if (!perMethod) {
 								cache.classInterceptor = interceptor;

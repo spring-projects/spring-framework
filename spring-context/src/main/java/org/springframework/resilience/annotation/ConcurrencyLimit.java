@@ -64,25 +64,30 @@ public @interface ConcurrencyLimit {
 	 * @see #limitString()
 	 */
 	@AliasFor("limit")
-	int value() default 1;
+	int value() default Integer.MIN_VALUE;
 
 	/**
-	 * The applicable concurrency limit: 1 by default,
-	 * effectively locking the target instance for each method invocation.
-	 * <p>Specify a limit higher than 1 for pool-like throttling, constraining
+	 * The concurrency limit.
+	 * <p>Specify {@code 1} to effectively lock the target instance for each method
+	 * invocation.
+	 * <p>Specify a limit greater than {@code 1} for pool-like throttling, constraining
 	 * the number of concurrent invocations similar to the upper bound of a pool.
+	 * <p>Specify {@code -1} for unbounded concurrency.
 	 * @see #value()
 	 * @see #limitString()
+	 * @see org.springframework.util.ConcurrencyThrottleSupport#UNBOUNDED_CONCURRENCY
 	 */
 	@AliasFor("value")
-	int limit() default 1;
+	int limit() default Integer.MIN_VALUE;
 
 	/**
 	 * The concurrency limit, as a configurable String.
-	 * <p>A non-empty value specified here overrides the {@link #limit()} (or
-	 * {@link #value()}) attribute.
+	 * <p>A non-empty value specified here overrides the {@link #limit()} and
+	 * {@link #value()} attributes.
 	 * <p>This supports Spring-style "${...}" placeholders as well as SpEL expressions.
+	 * <p>See the Javadoc for {@link #limit()} for details on supported values.
 	 * @see #limit()
+	 * @see org.springframework.util.ConcurrencyThrottleSupport#UNBOUNDED_CONCURRENCY
 	 */
 	String limitString() default "";
 

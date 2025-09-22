@@ -35,10 +35,13 @@ import org.springframework.resilience.annotation.ConcurrencyLimitBeanPostProcess
 import org.springframework.resilience.annotation.EnableResilientMethods;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 
 /**
  * @author Juergen Hoeller
  * @author Hyunsang Han
+ * @author Sam Brannen
  * @since 7.0
  */
 class ConcurrencyLimitTests {
@@ -61,12 +64,7 @@ class ConcurrencyLimitTests {
 
 	@Test
 	void withPostProcessorForMethod() {
-		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
-		bf.registerBeanDefinition("bean", new RootBeanDefinition(AnnotatedMethodBean.class));
-		ConcurrencyLimitBeanPostProcessor bpp = new ConcurrencyLimitBeanPostProcessor();
-		bpp.setBeanFactory(bf);
-		bf.addBeanPostProcessor(bpp);
-		AnnotatedMethodBean proxy = bf.getBean(AnnotatedMethodBean.class);
+		AnnotatedMethodBean proxy = createProxy(AnnotatedMethodBean.class);
 		AnnotatedMethodBean target = (AnnotatedMethodBean) AopProxyUtils.getSingletonTarget(proxy);
 
 		List<CompletableFuture<?>> futures = new ArrayList<>(10);
@@ -78,13 +76,21 @@ class ConcurrencyLimitTests {
 	}
 
 	@Test
+	void withPostProcessorForMethodWithUnboundedConcurrency() {
+		AnnotatedMethodBean proxy = createProxy(AnnotatedMethodBean.class);
+		AnnotatedMethodBean target = (AnnotatedMethodBean) AopProxyUtils.getSingletonTarget(proxy);
+
+		List<CompletableFuture<?>> futures = new ArrayList<>(10);
+		for (int i = 0; i < 10; i++) {
+			futures.add(CompletableFuture.runAsync(proxy::unboundedConcurrency));
+		}
+		CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
+		assertThat(target.current).hasValue(10);
+	}
+
+	@Test
 	void withPostProcessorForClass() {
-		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
-		bf.registerBeanDefinition("bean", new RootBeanDefinition(AnnotatedClassBean.class));
-		ConcurrencyLimitBeanPostProcessor bpp = new ConcurrencyLimitBeanPostProcessor();
-		bpp.setBeanFactory(bf);
-		bf.addBeanPostProcessor(bpp);
-		AnnotatedClassBean proxy = bf.getBean(AnnotatedClassBean.class);
+		AnnotatedClassBean proxy = createProxy(AnnotatedClassBean.class);
 		AnnotatedClassBean target = (AnnotatedClassBean) AopProxyUtils.getSingletonTarget(proxy);
 
 		List<CompletableFuture<?>> futures = new ArrayList<>(30);
@@ -122,17 +128,52 @@ class ConcurrencyLimitTests {
 		ctx.close();
 	}
 
+	@Test
+	void configurationErrors() {
+		ConfigurationErrorsBean proxy = createProxy(ConfigurationErrorsBean.class);
+
+		assertThatIllegalStateException()
+				.isThrownBy(proxy::emptyDeclaration)
+				.withMessageMatching("@.+?ConcurrencyLimit(.+?) must be configured with a valid limit")
+				.withMessageContaining("\"\"")
+				.withMessageContaining(String.valueOf(Integer.MIN_VALUE));
+
+		assertThatIllegalStateException()
+				.isThrownBy(proxy::negative42Int)
+				.withMessageMatching("@.+?ConcurrencyLimit(.+?) must be configured with a valid limit")
+				.withMessageContaining("-42");
+
+		assertThatIllegalStateException()
+				.isThrownBy(proxy::negative42String)
+				.withMessageMatching("@.+?ConcurrencyLimit(.+?) must be configured with a valid limit")
+				.withMessageContaining("-42");
+
+		assertThatExceptionOfType(NumberFormatException.class)
+				.isThrownBy(proxy::alphanumericString)
+				.withMessageContaining("B2");
+	}
+
+
+	private static <T> T createProxy(Class<T> beanClass) {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		bf.registerBeanDefinition("bean", new RootBeanDefinition(beanClass));
+		ConcurrencyLimitBeanPostProcessor bpp = new ConcurrencyLimitBeanPostProcessor();
+		bpp.setBeanFactory(bf);
+		bf.addBeanPostProcessor(bpp);
+		return bf.getBean(beanClass);
+	}
+
 
 	static class NonAnnotatedBean {
 
-		AtomicInteger counter = new AtomicInteger();
+		final AtomicInteger counter = new AtomicInteger();
 
 		public void concurrentOperation() {
 			if (counter.incrementAndGet() > 2) {
 				throw new IllegalStateException();
 			}
 			try {
-				Thread.sleep(100);
+				Thread.sleep(10);
 			}
 			catch (InterruptedException ex) {
 				throw new IllegalStateException(ex);
@@ -144,7 +185,7 @@ class ConcurrencyLimitTests {
 
 	static class AnnotatedMethodBean {
 
-		AtomicInteger current = new AtomicInteger();
+		final AtomicInteger current = new AtomicInteger();
 
 		@ConcurrencyLimit(2)
 		public void concurrentOperation() {
@@ -152,12 +193,23 @@ class ConcurrencyLimitTests {
 				throw new IllegalStateException();
 			}
 			try {
-				Thread.sleep(100);
+				Thread.sleep(10);
 			}
 			catch (InterruptedException ex) {
 				throw new IllegalStateException(ex);
 			}
 			current.decrementAndGet();
+		}
+
+		@ConcurrencyLimit(limit = -1)
+		public void unboundedConcurrency() {
+			current.incrementAndGet();
+			try {
+				Thread.sleep(10);
+			}
+			catch (InterruptedException ex) {
+				throw new IllegalStateException(ex);
+			}
 		}
 	}
 
@@ -165,16 +217,16 @@ class ConcurrencyLimitTests {
 	@ConcurrencyLimit(2)
 	static class AnnotatedClassBean {
 
-		AtomicInteger current = new AtomicInteger();
+		final AtomicInteger current = new AtomicInteger();
 
-		AtomicInteger currentOverride = new AtomicInteger();
+		final AtomicInteger currentOverride = new AtomicInteger();
 
 		public void concurrentOperation() {
 			if (current.incrementAndGet() > 2) {
 				throw new IllegalStateException();
 			}
 			try {
-				Thread.sleep(100);
+				Thread.sleep(10);
 			}
 			catch (InterruptedException ex) {
 				throw new IllegalStateException(ex);
@@ -187,7 +239,7 @@ class ConcurrencyLimitTests {
 				throw new IllegalStateException();
 			}
 			try {
-				Thread.sleep(100);
+				Thread.sleep(10);
 			}
 			catch (InterruptedException ex) {
 				throw new IllegalStateException(ex);
@@ -201,7 +253,7 @@ class ConcurrencyLimitTests {
 				throw new IllegalStateException();
 			}
 			try {
-				Thread.sleep(100);
+				Thread.sleep(10);
 			}
 			catch (InterruptedException ex) {
 				throw new IllegalStateException(ex);
@@ -218,7 +270,7 @@ class ConcurrencyLimitTests {
 
 	static class PlaceholderBean {
 
-		AtomicInteger current = new AtomicInteger();
+		final AtomicInteger current = new AtomicInteger();
 
 		@ConcurrencyLimit(limitString = "${test.concurrency.limit}")
 		public void concurrentOperation() {
@@ -226,12 +278,32 @@ class ConcurrencyLimitTests {
 				throw new IllegalStateException();
 			}
 			try {
-				Thread.sleep(100);
+				Thread.sleep(10);
 			}
 			catch (InterruptedException ex) {
 				throw new IllegalStateException(ex);
 			}
 			current.decrementAndGet();
+		}
+	}
+
+
+	static class ConfigurationErrorsBean {
+
+		@ConcurrencyLimit
+		public void emptyDeclaration() {
+		}
+
+		@ConcurrencyLimit(-42)
+		public void negative42Int() {
+		}
+
+		@ConcurrencyLimit(limitString = "-42")
+		public void negative42String() {
+		}
+
+		@ConcurrencyLimit(limitString = "B2")
+		public void alphanumericString() {
 		}
 	}
 
