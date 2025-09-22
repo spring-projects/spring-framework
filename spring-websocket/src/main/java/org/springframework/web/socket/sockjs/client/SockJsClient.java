@@ -63,10 +63,10 @@ import org.springframework.web.util.UriComponentsBuilder;
  */
 public class SockJsClient implements WebSocketClient, Lifecycle {
 
-	private static final boolean jacksonPresent = ClassUtils.isPresent(
+	private static final boolean JACKSON_PRESENT = ClassUtils.isPresent(
 			"tools.jackson.databind.ObjectMapper", SockJsClient.class.getClassLoader());
 
-	private static final boolean jackson2Present = ClassUtils.isPresent(
+	private static final boolean JACKSON_2_PRESENT = ClassUtils.isPresent(
 			"com.fasterxml.jackson.databind.ObjectMapper", SockJsClient.class.getClassLoader());
 
 	private static final Log logger = LogFactory.getLog(SockJsClient.class);
@@ -102,10 +102,10 @@ public class SockJsClient implements WebSocketClient, Lifecycle {
 		Assert.notEmpty(transports, "No transports provided");
 		this.transports = new ArrayList<>(transports);
 		this.infoReceiver = initInfoReceiver(transports);
-		if (jacksonPresent) {
+		if (JACKSON_PRESENT) {
 			this.messageCodec = new JacksonJsonSockJsMessageCodec();
 		}
-		else if (jackson2Present) {
+		else if (JACKSON_2_PRESENT) {
 			this.messageCodec = new Jackson2SockJsMessageCodec();
 		}
 	}

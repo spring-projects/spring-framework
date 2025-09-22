@@ -106,7 +106,7 @@ import org.springframework.util.xml.StaxUtils;
 @SuppressWarnings("removal")
 public class Jackson2ObjectMapperBuilder {
 
-	private static final boolean jackson2XmlPresent = ClassUtils.isPresent(
+	private static final boolean JACKSON_2_XML_PRESENT = ClassUtils.isPresent(
 			"com.fasterxml.jackson.dataformat.xml.XmlMapper", Jackson2ObjectMapperBuilder.class.getClassLoader());
 
 
@@ -747,7 +747,7 @@ public class Jackson2ObjectMapperBuilder {
 			objectMapper.setFilterProvider(this.filters);
 		}
 
-		if (jackson2XmlPresent) {
+		if (JACKSON_2_XML_PRESENT) {
 			objectMapper.addMixIn(ProblemDetail.class, ProblemDetailJacksonXmlMixin.class);
 		}
 		else {

@@ -80,7 +80,7 @@ class MockitoSpyBeanOverrideHandler extends AbstractMockitoBeanOverrideHandler {
 		if (StringUtils.hasLength(name)) {
 			settings.name(name);
 		}
-		if (SpringMockResolver.springAopPresent) {
+		if (SpringMockResolver.SPRING_AOP_PRESENT) {
 			settings.verificationStartedListeners(verificationStartedListener);
 		}
 

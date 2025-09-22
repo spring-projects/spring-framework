@@ -74,7 +74,7 @@ import org.springframework.util.StringUtils;
  */
 public class ApplicationListenerMethodAdapter implements GenericApplicationListener {
 
-	private static final boolean reactiveStreamsPresent = ClassUtils.isPresent(
+	private static final boolean REACTIVE_STREAMS_PRESENT = ClassUtils.isPresent(
 			"org.reactivestreams.Publisher", ApplicationListenerMethodAdapter.class.getClassLoader());
 
 
@@ -309,7 +309,7 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 	}
 
 	protected void handleResult(Object result) {
-		if (reactiveStreamsPresent && new ReactiveResultHandler().subscribeToPublisher(result)) {
+		if (REACTIVE_STREAMS_PRESENT && new ReactiveResultHandler().subscribeToPublisher(result)) {
 			if (logger.isTraceEnabled()) {
 				logger.trace("Adapted to reactive result: " + result);
 			}

@@ -66,21 +66,21 @@ final class DefaultRestClientBuilder implements RestClient.Builder {
 
 	// request factories
 
-	private static final boolean httpComponentsClientPresent;
+	private static final boolean HTTP_COMPONENTS_CLIENT_PRESENT;
 
-	private static final boolean jettyClientPresent;
+	private static final boolean JETTY_CLIENT_PRESENT;
 
-	private static final boolean reactorNettyClientPresent;
+	private static final boolean REACTOR_NETTY_CLIENT_PRESENT;
 
-	private static final boolean jdkClientPresent;
+	private static final boolean JDK_CLIENT_PRESENT;
 
 	static {
 		ClassLoader loader = DefaultRestClientBuilder.class.getClassLoader();
 
-		httpComponentsClientPresent = ClassUtils.isPresent("org.apache.hc.client5.http.classic.HttpClient", loader);
-		jettyClientPresent = ClassUtils.isPresent("org.eclipse.jetty.client.HttpClient", loader);
-		reactorNettyClientPresent = ClassUtils.isPresent("reactor.netty.http.client.HttpClient", loader);
-		jdkClientPresent = ClassUtils.isPresent("java.net.http.HttpClient", loader);
+		HTTP_COMPONENTS_CLIENT_PRESENT = ClassUtils.isPresent("org.apache.hc.client5.http.classic.HttpClient", loader);
+		JETTY_CLIENT_PRESENT = ClassUtils.isPresent("org.eclipse.jetty.client.HttpClient", loader);
+		REACTOR_NETTY_CLIENT_PRESENT = ClassUtils.isPresent("reactor.netty.http.client.HttpClient", loader);
+		JDK_CLIENT_PRESENT = ClassUtils.isPresent("java.net.http.HttpClient", loader);
 	}
 
 	private @Nullable String baseUrl;
@@ -449,16 +449,16 @@ final class DefaultRestClientBuilder implements RestClient.Builder {
 		if (this.requestFactory != null) {
 			return this.requestFactory;
 		}
-		else if (httpComponentsClientPresent) {
+		else if (HTTP_COMPONENTS_CLIENT_PRESENT) {
 			return new HttpComponentsClientHttpRequestFactory();
 		}
-		else if (jettyClientPresent) {
+		else if (JETTY_CLIENT_PRESENT) {
 			return new JettyClientHttpRequestFactory();
 		}
-		else if (reactorNettyClientPresent) {
+		else if (REACTOR_NETTY_CLIENT_PRESENT) {
 			return new ReactorClientHttpRequestFactory();
 		}
-		else if (jdkClientPresent) {
+		else if (JDK_CLIENT_PRESENT) {
 			// java.net.http module might not be loaded, so we can't default to the JDK HttpClient
 			return new JdkClientHttpRequestFactory();
 		}

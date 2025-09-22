@@ -83,7 +83,7 @@ class ReactiveTypeHandler {
 
 	private static final MediaType APPLICATION_GRPC = MediaType.valueOf("application/grpc");
 
-	private static final boolean isContextPropagationPresent = ClassUtils.isPresent(
+	private static final boolean CONTEXT_PROPAGATION_PRESENT = ClassUtils.isPresent(
 			"io.micrometer.context.ContextSnapshot", ReactiveTypeHandler.class.getClassLoader());
 
 	private static final Log logger = LogFactory.getLog(ReactiveTypeHandler.class);
@@ -116,7 +116,7 @@ class ReactiveTypeHandler {
 	}
 
 	private static @Nullable Object initContextSnapshotHelper(@Nullable Object snapshotFactory) {
-		if (isContextPropagationPresent) {
+		if (CONTEXT_PROPAGATION_PRESENT) {
 			return new ContextSnapshotHelper((ContextSnapshotFactory) snapshotFactory);
 		}
 		return null;
@@ -147,7 +147,7 @@ class ReactiveTypeHandler {
 		Assert.state(adapter != null, () -> "Unexpected return value type: " + clazz);
 
 		TaskDecorator taskDecorator = null;
-		if (isContextPropagationPresent) {
+		if (CONTEXT_PROPAGATION_PRESENT) {
 			ContextSnapshotHelper helper = (ContextSnapshotHelper) this.contextSnapshotHelper;
 			Assert.notNull(helper, "No ContextSnapshotHelper");
 			returnValue = helper.writeReactorContext(returnValue);

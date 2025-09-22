@@ -68,39 +68,39 @@ class DefaultHttpMessageConverters implements HttpMessageConverters {
 
 	abstract static class DefaultBuilder {
 
-		private static final boolean isJacksonPresent;
+		private static final boolean JACKSON_PRESENT;
 
-		private static final boolean isJackson2Present;
+		private static final boolean JACKSON_2_PRESENT;
 
-		private static final boolean isGsonPresent;
+		private static final boolean GSON_PRESENT;
 
-		private static final boolean isJsonbPresent;
+		private static final boolean JSONB_PRESENT;
 
-		private static final boolean isKotlinSerializationJsonPresent;
+		private static final boolean KOTLIN_SERIALIZATION_JSON_PRESENT;
 
-		private static final boolean isJacksonXmlPresent;
+		private static final boolean JACKSON_XML_PRESENT;
 
-		private static final boolean isJackson2XmlPresent;
+		private static final boolean JACKSON_2_XML_PRESENT;
 
-		private static final boolean isJaxb2Present;
+		private static final boolean JAXB_2_PRESENT;
 
-		private static final boolean isJacksonSmilePresent;
+		private static final boolean JACKSON_SMILE_PRESENT;
 
-		private static final boolean isJackson2SmilePresent;
+		private static final boolean JACKSON_2_SMILE_PRESENT;
 
-		private static final boolean isJacksonCborPresent;
+		private static final boolean JACKSON_CBOR_PRESENT;
 
-		private static final boolean isJackson2CborPresent;
+		private static final boolean JACKSON_2_CBOR_PRESENT;
 
-		private static final boolean isKotlinSerializationCborPresent;
+		private static final boolean KOTLIN_SERIALIZATION_CBOR_PRESENT;
 
-		private static final boolean isJacksonYamlPresent;
+		private static final boolean JACKSON_YAML_PRESENT;
 
-		private static final boolean isJackson2YamlPresent;
+		private static final boolean JACKSON_2_YAML_PRESENT;
 
-		private static final boolean isKotlinSerializationProtobufPresent;
+		private static final boolean KOTLIN_SERIALIZATION_PROTOBUF_PRESENT;
 
-		private static final boolean isRomePresent;
+		private static final boolean ROME_PRESENT;
 
 		boolean registerDefaults;
 
@@ -135,24 +135,24 @@ class DefaultHttpMessageConverters implements HttpMessageConverters {
 
 		static {
 			ClassLoader classLoader = DefaultBuilder.class.getClassLoader();
-			isJacksonPresent = ClassUtils.isPresent("tools.jackson.databind.ObjectMapper", classLoader);
-			isJackson2Present = ClassUtils.isPresent("com.fasterxml.jackson.databind.ObjectMapper", classLoader) &&
+			JACKSON_PRESENT = ClassUtils.isPresent("tools.jackson.databind.ObjectMapper", classLoader);
+			JACKSON_2_PRESENT = ClassUtils.isPresent("com.fasterxml.jackson.databind.ObjectMapper", classLoader) &&
 						ClassUtils.isPresent("com.fasterxml.jackson.core.JsonGenerator", classLoader);
-			isGsonPresent = ClassUtils.isPresent("com.google.gson.Gson", classLoader);
-			isJsonbPresent = ClassUtils.isPresent("jakarta.json.bind.Jsonb", classLoader);
-			isKotlinSerializationJsonPresent = ClassUtils.isPresent("kotlinx.serialization.json.Json", classLoader);
-			isJacksonSmilePresent = isJacksonPresent && ClassUtils.isPresent("tools.jackson.dataformat.smile.SmileMapper", classLoader);
-			isJackson2SmilePresent = ClassUtils.isPresent("com.fasterxml.jackson.dataformat.smile.SmileFactory", classLoader);
-			isJaxb2Present = ClassUtils.isPresent("jakarta.xml.bind.Binder", classLoader);
-			isJacksonXmlPresent = isJacksonPresent && ClassUtils.isPresent("tools.jackson.dataformat.xml.XmlMapper", classLoader);
-			isJackson2XmlPresent = ClassUtils.isPresent("com.fasterxml.jackson.dataformat.xml.XmlMapper", classLoader);
-			isJacksonCborPresent = isJacksonPresent && ClassUtils.isPresent("tools.jackson.dataformat.cbor.CBORMapper", classLoader);
-			isJackson2CborPresent = ClassUtils.isPresent("com.fasterxml.jackson.dataformat.cbor.CBORFactory", classLoader);
-			isJacksonYamlPresent = isJacksonPresent && ClassUtils.isPresent("tools.jackson.dataformat.yaml.YAMLMapper", classLoader);
-			isJackson2YamlPresent = ClassUtils.isPresent("com.fasterxml.jackson.dataformat.yaml.YAMLFactory", classLoader);
-			isKotlinSerializationCborPresent = ClassUtils.isPresent("kotlinx.serialization.cbor.Cbor", classLoader);
-			isKotlinSerializationProtobufPresent = ClassUtils.isPresent("kotlinx.serialization.protobuf.ProtoBuf", classLoader);
-			isRomePresent = ClassUtils.isPresent("com.rometools.rome.feed.WireFeed", classLoader);
+			GSON_PRESENT = ClassUtils.isPresent("com.google.gson.Gson", classLoader);
+			JSONB_PRESENT = ClassUtils.isPresent("jakarta.json.bind.Jsonb", classLoader);
+			KOTLIN_SERIALIZATION_JSON_PRESENT = ClassUtils.isPresent("kotlinx.serialization.json.Json", classLoader);
+			JACKSON_SMILE_PRESENT = JACKSON_PRESENT && ClassUtils.isPresent("tools.jackson.dataformat.smile.SmileMapper", classLoader);
+			JACKSON_2_SMILE_PRESENT = ClassUtils.isPresent("com.fasterxml.jackson.dataformat.smile.SmileFactory", classLoader);
+			JAXB_2_PRESENT = ClassUtils.isPresent("jakarta.xml.bind.Binder", classLoader);
+			JACKSON_XML_PRESENT = JACKSON_PRESENT && ClassUtils.isPresent("tools.jackson.dataformat.xml.XmlMapper", classLoader);
+			JACKSON_2_XML_PRESENT = ClassUtils.isPresent("com.fasterxml.jackson.dataformat.xml.XmlMapper", classLoader);
+			JACKSON_CBOR_PRESENT = JACKSON_PRESENT && ClassUtils.isPresent("tools.jackson.dataformat.cbor.CBORMapper", classLoader);
+			JACKSON_2_CBOR_PRESENT = ClassUtils.isPresent("com.fasterxml.jackson.dataformat.cbor.CBORFactory", classLoader);
+			JACKSON_YAML_PRESENT = JACKSON_PRESENT && ClassUtils.isPresent("tools.jackson.dataformat.yaml.YAMLMapper", classLoader);
+			JACKSON_2_YAML_PRESENT = ClassUtils.isPresent("com.fasterxml.jackson.dataformat.yaml.YAMLFactory", classLoader);
+			KOTLIN_SERIALIZATION_CBOR_PRESENT = ClassUtils.isPresent("kotlinx.serialization.cbor.Cbor", classLoader);
+			KOTLIN_SERIALIZATION_PROTOBUF_PRESENT = ClassUtils.isPresent("kotlinx.serialization.protobuf.ProtoBuf", classLoader);
+			ROME_PRESENT = ClassUtils.isPresent("com.rometools.rome.feed.WireFeed", classLoader);
 		}
 
 
@@ -250,72 +250,72 @@ class DefaultHttpMessageConverters implements HttpMessageConverters {
 			this.stringMessageConverter = new StringHttpMessageConverter();
 
 			if (this.jsonMessageConverter == null) {
-				if (isJacksonPresent) {
+				if (JACKSON_PRESENT) {
 					this.jsonMessageConverter = new JacksonJsonHttpMessageConverter();
 				}
-				else if (isJackson2Present) {
+				else if (JACKSON_2_PRESENT) {
 					this.jsonMessageConverter = new MappingJackson2HttpMessageConverter();
 				}
-				else if (isGsonPresent) {
+				else if (GSON_PRESENT) {
 					this.jsonMessageConverter = new GsonHttpMessageConverter();
 				}
-				else if (isJsonbPresent) {
+				else if (JSONB_PRESENT) {
 					this.jsonMessageConverter = new JsonbHttpMessageConverter();
 				}
-				else if (isKotlinSerializationJsonPresent) {
+				else if (KOTLIN_SERIALIZATION_JSON_PRESENT) {
 					this.jsonMessageConverter = new KotlinSerializationJsonHttpMessageConverter();
 				}
 			}
 
 			if (this.xmlMessageConverter == null) {
-				if (isJacksonXmlPresent) {
+				if (JACKSON_XML_PRESENT) {
 					this.xmlMessageConverter = new JacksonXmlHttpMessageConverter();
 				}
-				else if (isJackson2XmlPresent) {
+				else if (JACKSON_2_XML_PRESENT) {
 					this.xmlMessageConverter = new MappingJackson2XmlHttpMessageConverter();
 				}
-				else if (isJaxb2Present) {
+				else if (JAXB_2_PRESENT) {
 					this.xmlMessageConverter = new Jaxb2RootElementHttpMessageConverter();
 				}
 			}
 
 			if (this.smileMessageConverter == null) {
-				if (isJacksonSmilePresent) {
+				if (JACKSON_SMILE_PRESENT) {
 					this.smileMessageConverter = new JacksonSmileHttpMessageConverter();
 				}
-				else if (isJackson2SmilePresent) {
+				else if (JACKSON_2_SMILE_PRESENT) {
 					this.smileMessageConverter = new MappingJackson2SmileHttpMessageConverter();
 				}
 			}
 
 			if (this.cborMessageConverter == null) {
-				if (isJacksonCborPresent) {
+				if (JACKSON_CBOR_PRESENT) {
 					this.cborMessageConverter = new JacksonCborHttpMessageConverter();
 				}
-				else if (isJackson2CborPresent) {
+				else if (JACKSON_2_CBOR_PRESENT) {
 					this.cborMessageConverter = new MappingJackson2CborHttpMessageConverter();
 				}
-				else if (isKotlinSerializationCborPresent) {
+				else if (KOTLIN_SERIALIZATION_CBOR_PRESENT) {
 					this.cborMessageConverter = new KotlinSerializationCborHttpMessageConverter();
 				}
 			}
 
 			if (this.yamlMessageConverter == null) {
-				if (isJacksonYamlPresent) {
+				if (JACKSON_YAML_PRESENT) {
 					this.yamlMessageConverter = new JacksonYamlHttpMessageConverter();
 				}
-				else if (isJackson2YamlPresent) {
+				else if (JACKSON_2_YAML_PRESENT) {
 					this.yamlMessageConverter = new MappingJackson2YamlHttpMessageConverter();
 				}
 			}
 
 			if (this.protobufMessageConverter == null) {
-				if (isKotlinSerializationProtobufPresent) {
+				if (KOTLIN_SERIALIZATION_PROTOBUF_PRESENT) {
 					this.protobufMessageConverter = new KotlinSerializationProtobufHttpMessageConverter();
 				}
 			}
 
-			if (isRomePresent) {
+			if (ROME_PRESENT) {
 				if (this.atomMessageConverter == null) {
 					this.atomMessageConverter = new AtomFeedHttpMessageConverter();
 				}

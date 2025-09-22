@@ -65,7 +65,7 @@ import org.springframework.web.context.request.WebRequest;
  */
 public abstract class WebApplicationContextUtils {
 
-	private static final boolean jsfPresent =
+	private static final boolean JSF_PRESENT =
 			ClassUtils.isPresent("jakarta.faces.context.FacesContext", RequestContextHolder.class.getClassLoader());
 
 
@@ -193,7 +193,7 @@ public abstract class WebApplicationContextUtils {
 		beanFactory.registerResolvableDependency(ServletResponse.class, new ResponseObjectFactory());
 		beanFactory.registerResolvableDependency(HttpSession.class, new SessionObjectFactory());
 		beanFactory.registerResolvableDependency(WebRequest.class, new WebRequestObjectFactory());
-		if (jsfPresent) {
+		if (JSF_PRESENT) {
 			FacesDependencyRegistrar.registerFacesDependencies(beanFactory);
 		}
 	}

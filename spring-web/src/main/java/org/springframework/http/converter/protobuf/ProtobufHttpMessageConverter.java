@@ -97,7 +97,8 @@ public class ProtobufHttpMessageConverter extends AbstractHttpMessageConverter<M
 	 */
 	public static final String X_PROTOBUF_MESSAGE_HEADER = "X-Protobuf-Message";
 
-	private static final boolean protobufJsonFormatPresent = ClassUtils.isPresent("com.google.protobuf.util.JsonFormat", ProtobufHttpMessageConverter.class.getClassLoader());
+	private static final boolean PROTOBUF_JSON_FORMAT_PRESENT =
+			ClassUtils.isPresent("com.google.protobuf.util.JsonFormat", ProtobufHttpMessageConverter.class.getClassLoader());
 
 	private static final Map<Class<?>, Method> methodCache = new ConcurrentReferenceHashMap<>();
 
@@ -129,7 +130,7 @@ public class ProtobufHttpMessageConverter extends AbstractHttpMessageConverter<M
 		if (formatSupport != null) {
 			this.protobufFormatSupport = formatSupport;
 		}
-		else if (protobufJsonFormatPresent) {
+		else if (PROTOBUF_JSON_FORMAT_PRESENT) {
 			this.protobufFormatSupport = new ProtobufJavaUtilSupport(null, null);
 		}
 		else {

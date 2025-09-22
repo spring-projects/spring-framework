@@ -55,17 +55,17 @@ import org.springframework.web.util.UriBuilderFactory;
  */
 final class DefaultWebClientBuilder implements WebClient.Builder {
 
-	private static final boolean reactorNettyClientPresent;
+	private static final boolean REACTOR_NETTY_CLIENT_PRESENT;
 
-	private static final boolean jettyClientPresent;
+	private static final boolean JETTY_CLIENT_PRESENT;
 
-	private static final boolean httpComponentsClientPresent;
+	private static final boolean HTTP_COMPONENTS_CLIENT_PRESENT;
 
 	static {
 		ClassLoader loader = DefaultWebClientBuilder.class.getClassLoader();
-		reactorNettyClientPresent = ClassUtils.isPresent("reactor.netty.http.client.HttpClient", loader);
-		jettyClientPresent = ClassUtils.isPresent("org.eclipse.jetty.client.HttpClient", loader);
-		httpComponentsClientPresent =
+		REACTOR_NETTY_CLIENT_PRESENT = ClassUtils.isPresent("reactor.netty.http.client.HttpClient", loader);
+		JETTY_CLIENT_PRESENT = ClassUtils.isPresent("org.eclipse.jetty.client.HttpClient", loader);
+		HTTP_COMPONENTS_CLIENT_PRESENT =
 				ClassUtils.isPresent("org.apache.hc.client5.http.impl.async.CloseableHttpAsyncClient", loader) &&
 						ClassUtils.isPresent("org.apache.hc.core5.reactive.ReactiveDataConsumer", loader);
 	}
@@ -325,13 +325,13 @@ final class DefaultWebClientBuilder implements WebClient.Builder {
 	}
 
 	private ClientHttpConnector initConnector() {
-		if (reactorNettyClientPresent) {
+		if (REACTOR_NETTY_CLIENT_PRESENT) {
 			return new ReactorClientHttpConnector();
 		}
-		else if (jettyClientPresent) {
+		else if (JETTY_CLIENT_PRESENT) {
 			return new JettyClientHttpConnector();
 		}
-		else if (httpComponentsClientPresent) {
+		else if (HTTP_COMPONENTS_CLIENT_PRESENT) {
 			return new HttpComponentsClientHttpConnector();
 		}
 		else {

@@ -68,12 +68,12 @@ import org.springframework.util.ReflectionUtils;
 @SuppressWarnings("unchecked")
 class PersistenceManagedTypesBeanRegistrationAotProcessor implements BeanRegistrationAotProcessor {
 
-	private static final boolean jpaPresent = ClassUtils.isPresent("jakarta.persistence.Entity",
+	private static final boolean JPA_PRESENT = ClassUtils.isPresent("jakarta.persistence.Entity",
 			PersistenceManagedTypesBeanRegistrationAotProcessor.class.getClassLoader());
 
 	@Override
 	public @Nullable BeanRegistrationAotContribution processAheadOfTime(RegisteredBean registeredBean) {
-		if (jpaPresent) {
+		if (JPA_PRESENT) {
 			if (PersistenceManagedTypes.class.isAssignableFrom(registeredBean.getBeanClass())) {
 				return BeanRegistrationAotContribution.withCustomCodeFragments(codeFragments ->
 						new JpaManagedTypesBeanRegistrationCodeFragments(codeFragments, registeredBean));

@@ -142,24 +142,24 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 		implements InstantiationAwareBeanPostProcessor, BeanFactoryAware, Serializable {
 
 	// Defensive reference to JNDI API for JDK 9+ (optional java.naming module)
-	private static final boolean jndiPresent = ClassUtils.isPresent(
+	private static final boolean JNDI_PRESENT = ClassUtils.isPresent(
 			"javax.naming.InitialContext", CommonAnnotationBeanPostProcessor.class.getClassLoader());
 
 	private static final Set<Class<? extends Annotation>> resourceAnnotationTypes = CollectionUtils.newLinkedHashSet(3);
 
-	private static final @Nullable Class<? extends Annotation> jakartaResourceType;
+	private static final @Nullable Class<? extends Annotation> JAKARTA_RESOURCE_TYPE;
 
-	private static final @Nullable Class<? extends Annotation> ejbAnnotationType;
+	private static final @Nullable Class<? extends Annotation> EJB_ANNOTATION_TYPE;
 
 	static {
-		jakartaResourceType = loadAnnotationType("jakarta.annotation.Resource");
-		if (jakartaResourceType != null) {
-			resourceAnnotationTypes.add(jakartaResourceType);
+		JAKARTA_RESOURCE_TYPE = loadAnnotationType("jakarta.annotation.Resource");
+		if (JAKARTA_RESOURCE_TYPE != null) {
+			resourceAnnotationTypes.add(JAKARTA_RESOURCE_TYPE);
 		}
 
-		ejbAnnotationType = loadAnnotationType("jakarta.ejb.EJB");
-		if (ejbAnnotationType != null) {
-			resourceAnnotationTypes.add(ejbAnnotationType);
+		EJB_ANNOTATION_TYPE = loadAnnotationType("jakarta.ejb.EJB");
+		if (EJB_ANNOTATION_TYPE != null) {
+			resourceAnnotationTypes.add(EJB_ANNOTATION_TYPE);
 		}
 	}
 
@@ -195,7 +195,7 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 		addDestroyAnnotationType(loadAnnotationType("jakarta.annotation.PreDestroy"));
 
 		// java.naming module present on JDK 9+?
-		if (jndiPresent) {
+		if (JNDI_PRESENT) {
 			this.jndiFactory = new SimpleJndiBeanFactory();
 		}
 	}
@@ -405,13 +405,13 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 			final List<InjectionMetadata.InjectedElement> currElements = new ArrayList<>();
 
 			ReflectionUtils.doWithLocalFields(targetClass, field -> {
-				if (ejbAnnotationType != null && field.isAnnotationPresent(ejbAnnotationType)) {
+				if (EJB_ANNOTATION_TYPE != null && field.isAnnotationPresent(EJB_ANNOTATION_TYPE)) {
 					if (Modifier.isStatic(field.getModifiers())) {
 						throw new IllegalStateException("@EJB annotation is not supported on static fields");
 					}
 					currElements.add(new EjbRefElement(field, field, null));
 				}
-				else if (jakartaResourceType != null && field.isAnnotationPresent(jakartaResourceType)) {
+				else if (JAKARTA_RESOURCE_TYPE != null && field.isAnnotationPresent(JAKARTA_RESOURCE_TYPE)) {
 					if (Modifier.isStatic(field.getModifiers())) {
 						throw new IllegalStateException("@Resource annotation is not supported on static fields");
 					}
@@ -426,7 +426,7 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 				if (!BridgeMethodResolver.isVisibilityBridgeMethodPair(method, bridgedMethod)) {
 					return;
 				}
-				if (ejbAnnotationType != null && bridgedMethod.isAnnotationPresent(ejbAnnotationType)) {
+				if (EJB_ANNOTATION_TYPE != null && bridgedMethod.isAnnotationPresent(EJB_ANNOTATION_TYPE)) {
 					if (method.equals(ClassUtils.getMostSpecificMethod(method, clazz))) {
 						if (Modifier.isStatic(method.getModifiers())) {
 							throw new IllegalStateException("@EJB annotation is not supported on static methods");
@@ -438,7 +438,7 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 						currElements.add(new EjbRefElement(method, bridgedMethod, pd));
 					}
 				}
-				else if (jakartaResourceType != null && bridgedMethod.isAnnotationPresent(jakartaResourceType)) {
+				else if (JAKARTA_RESOURCE_TYPE != null && bridgedMethod.isAnnotationPresent(JAKARTA_RESOURCE_TYPE)) {
 					if (method.equals(ClassUtils.getMostSpecificMethod(method, clazz))) {
 						if (Modifier.isStatic(method.getModifiers())) {
 							throw new IllegalStateException("@Resource annotation is not supported on static methods");

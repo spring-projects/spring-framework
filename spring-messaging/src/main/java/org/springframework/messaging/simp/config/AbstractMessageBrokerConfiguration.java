@@ -104,25 +104,25 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 
 	private static final String MVC_VALIDATOR_NAME = "mvcValidator";
 
-	private static final boolean jacksonPresent;
+	private static final boolean JACKSON_PRESENT;
 
-	private static final boolean jackson2Present;
+	private static final boolean JACKSON_2_PRESENT;
 
-	private static final boolean gsonPresent;
+	private static final boolean GSON_PRESENT;
 
-	private static final boolean jsonbPresent;
+	private static final boolean JSONB_PRESENT;
 
-	private static final boolean kotlinSerializationJsonPresent;
+	private static final boolean KOTLIN_SERIALIZATION_JSON_PRESENT;
 
 
 	static {
 		ClassLoader classLoader = AbstractMessageBrokerConfiguration.class.getClassLoader();
-		jacksonPresent = ClassUtils.isPresent("tools.jackson.databind.ObjectMapper", classLoader);
-		jackson2Present = ClassUtils.isPresent("com.fasterxml.jackson.databind.ObjectMapper", classLoader) &&
+		JACKSON_PRESENT = ClassUtils.isPresent("tools.jackson.databind.ObjectMapper", classLoader);
+		JACKSON_2_PRESENT = ClassUtils.isPresent("com.fasterxml.jackson.databind.ObjectMapper", classLoader) &&
 				ClassUtils.isPresent("com.fasterxml.jackson.core.JsonGenerator", classLoader);
-		gsonPresent = ClassUtils.isPresent("com.google.gson.Gson", classLoader);
-		jsonbPresent = ClassUtils.isPresent("jakarta.json.bind.Jsonb", classLoader);
-		kotlinSerializationJsonPresent = ClassUtils.isPresent("kotlinx.serialization.json.Json", classLoader);
+		GSON_PRESENT = ClassUtils.isPresent("com.google.gson.Gson", classLoader);
+		JSONB_PRESENT = ClassUtils.isPresent("jakarta.json.bind.Jsonb", classLoader);
+		KOTLIN_SERIALIZATION_JSON_PRESENT = ClassUtils.isPresent("kotlinx.serialization.json.Json", classLoader);
 	}
 
 
@@ -502,19 +502,19 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 		if (registerDefaults) {
 			converters.add(new StringMessageConverter());
 			converters.add(new ByteArrayMessageConverter());
-			if (kotlinSerializationJsonPresent) {
+			if (KOTLIN_SERIALIZATION_JSON_PRESENT) {
 				converters.add(new KotlinSerializationJsonMessageConverter());
 			}
-			if (jacksonPresent) {
+			if (JACKSON_PRESENT) {
 				converters.add(createJacksonJsonConverter());
 			}
-			else if (jackson2Present) {
+			else if (JACKSON_2_PRESENT) {
 				converters.add(createJacksonConverter());
 			}
-			else if (gsonPresent) {
+			else if (GSON_PRESENT) {
 				converters.add(new GsonMessageConverter());
 			}
-			else if (jsonbPresent) {
+			else if (JSONB_PRESENT) {
 				converters.add(new JsonbMessageConverter());
 			}
 		}

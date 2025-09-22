@@ -79,7 +79,7 @@ import org.springframework.validation.method.ParameterValidationResult;
  */
 public class MethodValidationInterceptor implements MethodInterceptor {
 
-	private static final boolean reactorPresent = ClassUtils.isPresent(
+	private static final boolean REACTOR_PRESENT = ClassUtils.isPresent(
 			"reactor.core.publisher.Mono", MethodValidationInterceptor.class.getClassLoader());
 
 
@@ -152,7 +152,7 @@ public class MethodValidationInterceptor implements MethodInterceptor {
 		@Nullable Object[] arguments = invocation.getArguments();
 		Class<?>[] groups = determineValidationGroups(invocation);
 
-		if (reactorPresent) {
+		if (REACTOR_PRESENT) {
 			arguments = ReactorValidationHelper.insertAsyncValidation(
 					this.validationAdapter.getSpringValidatorAdapter(), this.adaptViolations,
 					target, method, arguments);

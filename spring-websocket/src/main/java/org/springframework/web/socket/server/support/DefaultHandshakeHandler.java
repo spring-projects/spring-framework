@@ -36,13 +36,13 @@ import org.springframework.web.socket.server.standard.StandardWebSocketUpgradeSt
  */
 public class DefaultHandshakeHandler extends AbstractHandshakeHandler implements ServletContextAware {
 
-	private static final boolean jettyWsPresent = ClassUtils.isPresent(
+	private static final boolean JETTY_WS_PRESENT = ClassUtils.isPresent(
 			"org.eclipse.jetty.ee11.websocket.server.JettyWebSocketServerContainer",
 			DefaultHandshakeHandler.class.getClassLoader());
 
 
 	public DefaultHandshakeHandler() {
-		super(jettyWsPresent ? new JettyRequestUpgradeStrategy() : new StandardWebSocketUpgradeStrategy());
+		super(JETTY_WS_PRESENT ? new JettyRequestUpgradeStrategy() : new StandardWebSocketUpgradeStrategy());
 	}
 
 	public DefaultHandshakeHandler(RequestUpgradeStrategy requestUpgradeStrategy) {

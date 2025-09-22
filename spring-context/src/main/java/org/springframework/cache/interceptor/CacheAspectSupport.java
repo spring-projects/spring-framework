@@ -114,10 +114,10 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 	 */
 	public static final String IGNORE_REACTIVESTREAMS_PROPERTY_NAME = "spring.cache.reactivestreams.ignore";
 
-	private static final boolean shouldIgnoreReactiveStreams =
+	private static final boolean SHOULD_IGNORE_REACTIVE_STREAMS =
 			SpringProperties.getFlag(IGNORE_REACTIVESTREAMS_PROPERTY_NAME);
 
-	private static final boolean reactiveStreamsPresent = ClassUtils.isPresent(
+	private static final boolean REACTIVE_STREAMS_PRESENT = ClassUtils.isPresent(
 			"org.reactivestreams.Publisher", CacheAspectSupport.class.getClassLoader());
 
 
@@ -145,7 +145,7 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 
 	protected CacheAspectSupport() {
 		this.reactiveCachingHandler =
-				(reactiveStreamsPresent && !shouldIgnoreReactiveStreams ? new ReactiveCachingHandler() : null);
+				(REACTIVE_STREAMS_PRESENT && !SHOULD_IGNORE_REACTIVE_STREAMS ? new ReactiveCachingHandler() : null);
 	}
 
 

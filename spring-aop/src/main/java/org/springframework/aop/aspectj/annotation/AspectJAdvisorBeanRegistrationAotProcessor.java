@@ -39,13 +39,13 @@ class AspectJAdvisorBeanRegistrationAotProcessor implements BeanRegistrationAotP
 
 	private static final String AJC_MAGIC = "ajc$";
 
-	private static final boolean aspectjPresent = ClassUtils.isPresent("org.aspectj.lang.annotation.Pointcut",
+	private static final boolean ASPECTJ_PRESENT = ClassUtils.isPresent("org.aspectj.lang.annotation.Pointcut",
 			AspectJAdvisorBeanRegistrationAotProcessor.class.getClassLoader());
 
 
 	@Override
 	public @Nullable BeanRegistrationAotContribution processAheadOfTime(RegisteredBean registeredBean) {
-		if (aspectjPresent) {
+		if (ASPECTJ_PRESENT) {
 			Class<?> beanClass = registeredBean.getBeanClass();
 			if (compiledByAjc(beanClass)) {
 				return new AspectJAdvisorContribution(beanClass);

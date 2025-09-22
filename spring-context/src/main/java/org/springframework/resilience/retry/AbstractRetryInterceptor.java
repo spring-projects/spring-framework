@@ -51,14 +51,14 @@ public abstract class AbstractRetryInterceptor implements MethodInterceptor {
 	/**
 	 * Reactive Streams API present on the classpath?
 	 */
-	private static final boolean reactiveStreamsPresent = ClassUtils.isPresent(
+	private static final boolean REACTIVE_STREAMS_PRESENT = ClassUtils.isPresent(
 			"org.reactivestreams.Publisher", AbstractRetryInterceptor.class.getClassLoader());
 
 	private final @Nullable ReactiveAdapterRegistry reactiveAdapterRegistry;
 
 
 	public AbstractRetryInterceptor() {
-		if (reactiveStreamsPresent) {
+		if (REACTIVE_STREAMS_PRESENT) {
 			this.reactiveAdapterRegistry = ReactiveAdapterRegistry.getSharedInstance();
 		}
 		else {

@@ -49,7 +49,7 @@ import org.springframework.web.servlet.ModelAndView;
  */
 final class DefaultAsyncServerResponse extends ErrorHandlingServerResponse implements AsyncServerResponse {
 
-	static final boolean reactiveStreamsPresent = ClassUtils.isPresent(
+	static final boolean REACTIVE_STREAMS_PRESENT = ClassUtils.isPresent(
 			"org.reactivestreams.Publisher", DefaultAsyncServerResponse.class.getClassLoader());
 
 	private final CompletableFuture<ServerResponse> futureResponse;

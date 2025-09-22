@@ -57,7 +57,7 @@ class MergedContextConfigurationRuntimeHints {
 
 	private static final String GET_RESOURCE_BASE_PATH_METHOD_NAME = "getResourceBasePath";
 
-	private static final Class<?> webMergedContextConfigurationClass = loadWebMergedContextConfigurationClass();
+	private static final Class<?> WEB_MERGED_CONTEXT_CONFIGURATION_CLASS = loadWebMergedContextConfigurationClass();
 
 	private static final Method getResourceBasePathMethod = loadGetResourceBasePathMethod();
 
@@ -90,7 +90,7 @@ class MergedContextConfigurationRuntimeHints {
 		}
 
 		// @WebAppConfiguration(value = ...)
-		if (webMergedContextConfigurationClass.isInstance(mergedConfig)) {
+		if (WEB_MERGED_CONTEXT_CONFIGURATION_CLASS.isInstance(mergedConfig)) {
 			String resourceBasePath;
 			try {
 				resourceBasePath = (String) getResourceBasePathMethod.invoke(mergedConfig);
@@ -162,7 +162,7 @@ class MergedContextConfigurationRuntimeHints {
 
 	private static Method loadGetResourceBasePathMethod() {
 		try {
-			return webMergedContextConfigurationClass.getMethod(GET_RESOURCE_BASE_PATH_METHOD_NAME);
+			return WEB_MERGED_CONTEXT_CONFIGURATION_CLASS.getMethod(GET_RESOURCE_BASE_PATH_METHOD_NAME);
 		}
 		catch (Exception ex) {
 			throw new IllegalStateException(

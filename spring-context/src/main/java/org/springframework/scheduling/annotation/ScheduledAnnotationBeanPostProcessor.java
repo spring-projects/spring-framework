@@ -127,7 +127,7 @@ public class ScheduledAnnotationBeanPostProcessor
 	/**
 	 * Reactive Streams API present on the classpath?
 	 */
-	private static final boolean reactiveStreamsPresent = ClassUtils.isPresent(
+	private static final boolean REACTIVE_STREAMS_PRESENT = ClassUtils.isPresent(
 			"org.reactivestreams.Publisher", ScheduledAnnotationBeanPostProcessor.class.getClassLoader());
 
 	protected final Log logger = LogFactory.getLog(getClass());
@@ -330,7 +330,7 @@ public class ScheduledAnnotationBeanPostProcessor
 	protected void processScheduled(Scheduled scheduled, Method method, Object bean) {
 		// Is the method a Kotlin suspending function? Throws if true and the reactor bridge isn't on the classpath.
 		// Does the method return a reactive type? Throws if true and it isn't a deferred Publisher type.
-		if (reactiveStreamsPresent && ScheduledAnnotationReactiveSupport.isReactive(method)) {
+		if (REACTIVE_STREAMS_PRESENT && ScheduledAnnotationReactiveSupport.isReactive(method)) {
 			processScheduledAsync(scheduled, method, bean);
 			return;
 		}

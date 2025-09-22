@@ -28,14 +28,14 @@ import org.springframework.util.ClassUtils;
  */
 public class WebSocketNamespaceHandler extends NamespaceHandlerSupport {
 
-	private static final boolean isSpringMessagingPresent = ClassUtils.isPresent(
+	private static final boolean SPRING_MESSAGING_PRESENT = ClassUtils.isPresent(
 			"org.springframework.messaging.Message", WebSocketNamespaceHandler.class.getClassLoader());
 
 
 	@Override
 	public void init() {
 		registerBeanDefinitionParser("handlers", new HandlersBeanDefinitionParser());
-		if (isSpringMessagingPresent) {
+		if (SPRING_MESSAGING_PRESENT) {
 			registerBeanDefinitionParser("message-broker", new MessageBrokerBeanDefinitionParser());
 		}
 	}

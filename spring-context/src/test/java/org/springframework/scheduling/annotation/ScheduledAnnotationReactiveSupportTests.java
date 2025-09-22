@@ -50,7 +50,7 @@ class ScheduledAnnotationReactiveSupportTests {
 
 	@Test
 	void ensureReactor() {
-		assertThat(ScheduledAnnotationReactiveSupport.reactorPresent).isTrue();
+		assertThat(ScheduledAnnotationReactiveSupport.REACTOR_PRESENT).isTrue();
 	}
 
 	@ParameterizedTest

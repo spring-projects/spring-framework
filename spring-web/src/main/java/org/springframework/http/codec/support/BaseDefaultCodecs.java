@@ -89,39 +89,39 @@ import org.springframework.util.ObjectUtils;
  */
 class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs, CodecConfigurer.DefaultCodecConfig {
 
-	static final boolean jacksonPresent;
+	static final boolean JACKSON_PRESENT;
 
-	static final boolean jackson2Present;
+	static final boolean JACKSON_2_PRESENT;
 
-	private static final boolean jacksonSmilePresent;
+	private static final boolean JACKSON_SMILE_PRESENT;
 
-	private static final boolean jackson2SmilePresent;
+	private static final boolean JACKSON_2_SMILE_PRESENT;
 
-	private static final boolean jaxb2Present;
+	private static final boolean JAXB_2_PRESENT;
 
-	private static final boolean protobufPresent;
+	private static final boolean PROTOBUF_PRESENT;
 
-	static final boolean nettyByteBufPresent;
+	static final boolean NETTY_BYTE_BUF_PRESENT;
 
-	static final boolean kotlinSerializationCborPresent;
+	static final boolean KOTLIN_SERIALIZATION_CBOR_PRESENT;
 
-	static final boolean kotlinSerializationJsonPresent;
+	static final boolean KOTLIN_SERIALIZATION_JSON_PRESENT;
 
-	static final boolean kotlinSerializationProtobufPresent;
+	static final boolean KOTLIN_SERIALIZATION_PROTOBUF_PRESENT;
 
 	static {
 		ClassLoader classLoader = BaseCodecConfigurer.class.getClassLoader();
-		jacksonPresent = ClassUtils.isPresent("tools.jackson.databind.ObjectMapper", classLoader);
-		jackson2Present = ClassUtils.isPresent("com.fasterxml.jackson.databind.ObjectMapper", classLoader) &&
+		JACKSON_PRESENT = ClassUtils.isPresent("tools.jackson.databind.ObjectMapper", classLoader);
+		JACKSON_2_PRESENT = ClassUtils.isPresent("com.fasterxml.jackson.databind.ObjectMapper", classLoader) &&
 						ClassUtils.isPresent("com.fasterxml.jackson.core.JsonGenerator", classLoader);
-		jacksonSmilePresent = jacksonPresent && ClassUtils.isPresent("tools.jackson.dataformat.smile.SmileMapper", classLoader);
-		jackson2SmilePresent = jackson2Present && ClassUtils.isPresent("com.fasterxml.jackson.dataformat.smile.SmileFactory", classLoader);
-		jaxb2Present = ClassUtils.isPresent("jakarta.xml.bind.Binder", classLoader);
-		protobufPresent = ClassUtils.isPresent("com.google.protobuf.Message", classLoader);
-		nettyByteBufPresent = ClassUtils.isPresent("io.netty.buffer.ByteBuf", classLoader);
-		kotlinSerializationCborPresent = ClassUtils.isPresent("kotlinx.serialization.cbor.Cbor", classLoader);
-		kotlinSerializationJsonPresent = ClassUtils.isPresent("kotlinx.serialization.json.Json", classLoader);
-		kotlinSerializationProtobufPresent = ClassUtils.isPresent("kotlinx.serialization.protobuf.ProtoBuf", classLoader);
+		JACKSON_SMILE_PRESENT = JACKSON_PRESENT && ClassUtils.isPresent("tools.jackson.dataformat.smile.SmileMapper", classLoader);
+		JACKSON_2_SMILE_PRESENT = JACKSON_2_PRESENT && ClassUtils.isPresent("com.fasterxml.jackson.dataformat.smile.SmileFactory", classLoader);
+		JAXB_2_PRESENT = ClassUtils.isPresent("jakarta.xml.bind.Binder", classLoader);
+		PROTOBUF_PRESENT = ClassUtils.isPresent("com.google.protobuf.Message", classLoader);
+		NETTY_BYTE_BUF_PRESENT = ClassUtils.isPresent("io.netty.buffer.ByteBuf", classLoader);
+		KOTLIN_SERIALIZATION_CBOR_PRESENT = ClassUtils.isPresent("kotlinx.serialization.cbor.Cbor", classLoader);
+		KOTLIN_SERIALIZATION_JSON_PRESENT = ClassUtils.isPresent("kotlinx.serialization.json.Json", classLoader);
+		KOTLIN_SERIALIZATION_PROTOBUF_PRESENT = ClassUtils.isPresent("kotlinx.serialization.protobuf.ProtoBuf", classLoader);
 	}
 
 
@@ -448,12 +448,12 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs, CodecConfigure
 		addCodec(this.typedReaders, new DecoderHttpMessageReader<>(new ByteArrayDecoder()));
 		addCodec(this.typedReaders, new DecoderHttpMessageReader<>(new ByteBufferDecoder()));
 		addCodec(this.typedReaders, new DecoderHttpMessageReader<>(new DataBufferDecoder()));
-		if (nettyByteBufPresent) {
+		if (NETTY_BYTE_BUF_PRESENT) {
 			addCodec(this.typedReaders, new DecoderHttpMessageReader<>(new NettyByteBufDecoder()));
 		}
 		addCodec(this.typedReaders, new ResourceHttpMessageReader(new ResourceDecoder()));
 		addCodec(this.typedReaders, new DecoderHttpMessageReader<>(StringDecoder.textPlainOnly()));
-		if (protobufPresent) {
+		if (PROTOBUF_PRESENT) {
 			addCodec(this.typedReaders, new DecoderHttpMessageReader<>(this.protobufDecoder != null ?
 					(ProtobufDecoder) this.protobufDecoder : new ProtobufDecoder()));
 		}
@@ -506,37 +506,37 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs, CodecConfigure
 			}
 			// Pattern variables in the following if-blocks cannot be named the same as instance fields
 			// due to lacking support in Checkstyle: https://github.com/checkstyle/checkstyle/issues/10969
-			if (protobufPresent) {
+			if (PROTOBUF_PRESENT) {
 				if (codec instanceof ProtobufDecoder protobufDec) {
 					protobufDec.setMaxMessageSize(size);
 				}
 			}
-			if (kotlinSerializationCborPresent) {
+			if (KOTLIN_SERIALIZATION_CBOR_PRESENT) {
 				if (codec instanceof KotlinSerializationCborDecoder kotlinSerializationCborDec) {
 					kotlinSerializationCborDec.setMaxInMemorySize(size);
 				}
 			}
-			if (kotlinSerializationJsonPresent) {
+			if (KOTLIN_SERIALIZATION_JSON_PRESENT) {
 				if (codec instanceof KotlinSerializationJsonDecoder kotlinSerializationJsonDec) {
 					kotlinSerializationJsonDec.setMaxInMemorySize(size);
 				}
 			}
-			if (kotlinSerializationProtobufPresent) {
+			if (KOTLIN_SERIALIZATION_PROTOBUF_PRESENT) {
 				if (codec instanceof KotlinSerializationProtobufDecoder kotlinSerializationProtobufDec) {
 					kotlinSerializationProtobufDec.setMaxInMemorySize(size);
 				}
 			}
-			if (jacksonPresent) {
+			if (JACKSON_PRESENT) {
 				if (codec instanceof AbstractJacksonDecoder<?> abstractJacksonDecoder) {
 					abstractJacksonDecoder.setMaxInMemorySize(size);
 				}
 			}
-			if (jackson2Present) {
+			if (JACKSON_2_PRESENT) {
 				if (codec instanceof AbstractJackson2Decoder abstractJackson2Decoder) {
 					abstractJackson2Decoder.setMaxInMemorySize(size);
 				}
 			}
-			if (jaxb2Present) {
+			if (JAXB_2_PRESENT) {
 				if (codec instanceof Jaxb2XmlDecoder jaxb2XmlDecoder) {
 					jaxb2XmlDecoder.setMaxInMemorySize(size);
 				}
@@ -619,35 +619,35 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs, CodecConfigure
 		if (!this.registerDefaults) {
 			return;
 		}
-		if (kotlinSerializationCborPresent) {
+		if (KOTLIN_SERIALIZATION_CBOR_PRESENT) {
 			addCodec(this.objectReaders, new DecoderHttpMessageReader<>(this.kotlinSerializationCborDecoder != null ?
 					(KotlinSerializationCborDecoder) this.kotlinSerializationCborDecoder :
 					new KotlinSerializationCborDecoder()));
 		}
-		if (kotlinSerializationProtobufPresent) {
+		if (KOTLIN_SERIALIZATION_PROTOBUF_PRESENT) {
 			addCodec(this.objectReaders,
 					new DecoderHttpMessageReader<>(this.kotlinSerializationProtobufDecoder != null ?
 							(KotlinSerializationProtobufDecoder) this.kotlinSerializationProtobufDecoder :
 							new KotlinSerializationProtobufDecoder()));
 		}
-		if (jacksonPresent) {
+		if (JACKSON_PRESENT) {
 			addCodec(this.objectReaders, new DecoderHttpMessageReader<>(getJacksonJsonDecoder()));
 		}
-		else if (jackson2Present) {
+		else if (JACKSON_2_PRESENT) {
 			addCodec(this.objectReaders, new DecoderHttpMessageReader<>(getJackson2JsonDecoder()));
 		}
-		else if (kotlinSerializationJsonPresent) {
+		else if (KOTLIN_SERIALIZATION_JSON_PRESENT) {
 			addCodec(this.objectReaders, new DecoderHttpMessageReader<>(getKotlinSerializationJsonDecoder()));
 		}
-		if (jacksonSmilePresent) {
+		if (JACKSON_SMILE_PRESENT) {
 			addCodec(this.objectReaders, new DecoderHttpMessageReader<>(this.jacksonSmileDecoder != null ?
 					(JacksonSmileDecoder) this.jacksonSmileDecoder : new JacksonSmileDecoder()));
 		}
-		else if (jackson2SmilePresent) {
+		else if (JACKSON_2_SMILE_PRESENT) {
 			addCodec(this.objectReaders, new DecoderHttpMessageReader<>(this.jackson2SmileDecoder != null ?
 					(Jackson2SmileDecoder) this.jackson2SmileDecoder : new Jackson2SmileDecoder()));
 		}
-		if (jaxb2Present) {
+		if (JAXB_2_PRESENT) {
 			addCodec(this.objectReaders, new DecoderHttpMessageReader<>(this.jaxb2Decoder != null ?
 					(Jaxb2XmlDecoder) this.jaxb2Decoder : new Jaxb2XmlDecoder()));
 		}
@@ -705,12 +705,12 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs, CodecConfigure
 		addCodec(writers, new EncoderHttpMessageWriter<>(new ByteArrayEncoder()));
 		addCodec(writers, new EncoderHttpMessageWriter<>(new ByteBufferEncoder()));
 		addCodec(writers, new EncoderHttpMessageWriter<>(new DataBufferEncoder()));
-		if (nettyByteBufPresent) {
+		if (NETTY_BYTE_BUF_PRESENT) {
 			addCodec(writers, new EncoderHttpMessageWriter<>(new NettyByteBufEncoder()));
 		}
 		addCodec(writers, new ResourceHttpMessageWriter());
 		addCodec(writers, new EncoderHttpMessageWriter<>(CharSequenceEncoder.textPlainOnly()));
-		if (protobufPresent) {
+		if (PROTOBUF_PRESENT) {
 			addCodec(writers, new ProtobufHttpMessageWriter(this.protobufEncoder != null ?
 					(ProtobufEncoder) this.protobufEncoder : new ProtobufEncoder()));
 		}
@@ -765,34 +765,34 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs, CodecConfigure
 	@SuppressWarnings("removal")
 	final List<HttpMessageWriter<?>> getBaseObjectWriters() {
 		List<HttpMessageWriter<?>> writers = new ArrayList<>();
-		if (kotlinSerializationCborPresent) {
+		if (KOTLIN_SERIALIZATION_CBOR_PRESENT) {
 			addCodec(writers, new EncoderHttpMessageWriter<>(this.kotlinSerializationCborEncoder != null ?
 					(KotlinSerializationCborEncoder) this.kotlinSerializationCborEncoder :
 					new KotlinSerializationCborEncoder()));
 		}
-		if (kotlinSerializationProtobufPresent) {
+		if (KOTLIN_SERIALIZATION_PROTOBUF_PRESENT) {
 			addCodec(writers, new EncoderHttpMessageWriter<>(this.kotlinSerializationProtobufEncoder != null ?
 					(KotlinSerializationProtobufEncoder) this.kotlinSerializationProtobufEncoder :
 					new KotlinSerializationProtobufEncoder()));
 		}
-		if (jacksonPresent) {
+		if (JACKSON_PRESENT) {
 			addCodec(writers, new EncoderHttpMessageWriter<>(getJacksonJsonEncoder()));
 		}
-		else if (jackson2Present) {
+		else if (JACKSON_2_PRESENT) {
 			addCodec(writers, new EncoderHttpMessageWriter<>(getJackson2JsonEncoder()));
 		}
-		else if (kotlinSerializationJsonPresent) {
+		else if (KOTLIN_SERIALIZATION_JSON_PRESENT) {
 			addCodec(writers, new EncoderHttpMessageWriter<>(getKotlinSerializationJsonEncoder()));
 		}
-		if (jacksonSmilePresent) {
+		if (JACKSON_SMILE_PRESENT) {
 			addCodec(writers, new EncoderHttpMessageWriter<>(this.jacksonSmileEncoder != null ?
 					(JacksonSmileEncoder) this.jacksonSmileEncoder : new JacksonSmileEncoder()));
 		}
-		else if (jackson2SmilePresent) {
+		else if (JACKSON_2_SMILE_PRESENT) {
 			addCodec(writers, new EncoderHttpMessageWriter<>(this.jackson2SmileEncoder != null ?
 					(Jackson2SmileEncoder) this.jackson2SmileEncoder : new Jackson2SmileEncoder()));
 		}
-		if (jaxb2Present) {
+		if (JAXB_2_PRESENT) {
 			addCodec(writers, new EncoderHttpMessageWriter<>(this.jaxb2Encoder != null ?
 					(Jaxb2XmlEncoder) this.jaxb2Encoder : new Jaxb2XmlEncoder()));
 		}
