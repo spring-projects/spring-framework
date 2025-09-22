@@ -43,6 +43,7 @@ import org.springframework.web.socket.WebSocketSession;
  *
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
+ * @author xeroman.k
  * @since 4.0.3
  */
 public class ConcurrentWebSocketSessionDecorator extends WebSocketSessionDecorator {
