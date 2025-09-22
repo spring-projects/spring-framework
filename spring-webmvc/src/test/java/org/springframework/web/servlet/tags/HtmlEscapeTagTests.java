@@ -31,6 +31,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Juergen Hoeller
  * @author Alef Arendsen
  */
+@SuppressWarnings("serial")
 class HtmlEscapeTagTests extends AbstractTagTests {
 
 	@Test

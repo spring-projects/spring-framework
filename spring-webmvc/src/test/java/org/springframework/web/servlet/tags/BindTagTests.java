@@ -1004,6 +1004,7 @@ class BindTagTests extends AbstractTagTests {
 		binder.registerCustomEditor(Date.class, l);
 		pc.getRequest().setAttribute(BindingResult.MODEL_KEY_PREFIX + "tb", binder.getBindingResult());
 
+		@SuppressWarnings("serial")
 		FormTag formTag = new FormTag() {
 			@Override
 			protected TagWriter createTagWriter() {

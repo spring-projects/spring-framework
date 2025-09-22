@@ -439,6 +439,7 @@ class WebMvcConfigurationSupportExtensionTests {
 		}
 
 		@Override
+		@SuppressWarnings("serial")
 		public MessageCodesResolver getMessageCodesResolver() {
 			return new DefaultMessageCodesResolver() {
 				@Override

@@ -70,10 +70,12 @@ class DefaultJmsClient implements JmsClient {
 	}
 
 
+	@Override
 	public OperationSpec destination(Destination destination) {
 		return new DefaultOperationSpec(destination);
 	}
 
+	@Override
 	public OperationSpec destination(String destinationName) {
 		return new DefaultOperationSpec(destinationName);
 	}

@@ -84,6 +84,7 @@ final class DefaultApiVersionInserterBuilder implements ApiVersionInserter.Build
 		return this;
 	}
 
+	@Override
 	public ApiVersionInserter build() {
 		return new DefaultApiVersionInserter(
 				this.header, this.queryParam, this.mediaTypeParam, this.pathSegmentIndex,

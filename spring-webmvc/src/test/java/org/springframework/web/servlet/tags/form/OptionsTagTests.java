@@ -60,6 +60,7 @@ class OptionsTagTests extends AbstractHtmlElementTagTests {
 	private OptionsTag tag;
 
 	@Override
+	@SuppressWarnings("serial")
 	protected void onSetUp() {
 		this.tag = new OptionsTag() {
 			@Override

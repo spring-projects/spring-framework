@@ -791,6 +791,7 @@ class DispatcherServletTests {
 		assertThat(servlet.getEnvironment()).isSameAs(env1);
 		assertThatIllegalArgumentException().isThrownBy(() -> servlet.setEnvironment(mock(Environment.class)));
 		class CustomServletEnvironment extends StandardServletEnvironment { }
+		@SuppressWarnings("serial")
 		DispatcherServlet custom = new DispatcherServlet() {
 			@Override
 			protected ConfigurableWebEnvironment createEnvironment() {

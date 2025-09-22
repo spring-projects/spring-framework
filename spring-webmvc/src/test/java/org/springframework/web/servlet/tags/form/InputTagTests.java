@@ -395,6 +395,7 @@ class InputTagTests extends AbstractFormTagTests {
 		assertThat(output).as("Tag not opened properly").startsWith("<input ");
 	}
 
+	@SuppressWarnings("serial")
 	protected InputTag createTag(final Writer writer) {
 		return new InputTag() {
 			@Override

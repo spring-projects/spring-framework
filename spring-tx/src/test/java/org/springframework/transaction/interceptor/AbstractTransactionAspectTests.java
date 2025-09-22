@@ -370,6 +370,7 @@ public abstract class AbstractTransactionAspectTests {
 	protected void doTestRollbackOnException(
 			final Exception ex, final boolean shouldRollback, boolean rollbackException) throws Exception {
 
+		@SuppressWarnings("serial")
 		TransactionAttribute txatt = new DefaultTransactionAttribute() {
 			@Override
 			public boolean rollbackOn(Throwable t) {

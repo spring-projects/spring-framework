@@ -46,6 +46,7 @@ class RadioButtonTagTests extends AbstractFormTagTests {
 	private TestBean bean;
 
 	@Override
+	@SuppressWarnings("serial")
 	protected void onSetUp() {
 		this.tag = new RadioButtonTag() {
 			@Override

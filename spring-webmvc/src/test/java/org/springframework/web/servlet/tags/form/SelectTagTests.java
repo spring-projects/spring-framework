@@ -67,6 +67,7 @@ public class SelectTagTests extends AbstractFormTagTests {
 
 
 	@Override
+	@SuppressWarnings("serial")
 	protected void onSetUp() {
 		this.tag = new SelectTag() {
 			@Override

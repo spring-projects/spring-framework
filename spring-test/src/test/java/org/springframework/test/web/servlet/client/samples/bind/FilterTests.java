@@ -41,6 +41,7 @@ class FilterTests {
 	@Test
 	void filter() {
 
+		@SuppressWarnings("serial")
 		Filter filter = new HttpFilter() {
 			@Override
 			protected void doFilter(HttpServletRequest req, HttpServletResponse res, FilterChain chain) throws IOException {

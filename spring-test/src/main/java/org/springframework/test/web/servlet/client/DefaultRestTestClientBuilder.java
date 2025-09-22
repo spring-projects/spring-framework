@@ -173,6 +173,7 @@ class DefaultRestTestClientBuilder<B extends RestTestClient.Builder<B>> implemen
 			this.mockMvcBuilder = mockMvcBuilder;
 		}
 
+		@Override
 		public <T extends S> T configureServer(Consumer<M> consumer) {
 			consumer.accept(this.mockMvcBuilder);
 			return self();

@@ -164,6 +164,7 @@ public class DefaultApiVersionStrategy implements ApiVersionStrategy {
 		return this.versionParser.parseVersion(version);
 	}
 
+	@Override
 	public void validateVersion(@Nullable Comparable<?> requestVersion, ServerWebExchange exchange)
 			throws MissingApiVersionException, InvalidApiVersionException {
 

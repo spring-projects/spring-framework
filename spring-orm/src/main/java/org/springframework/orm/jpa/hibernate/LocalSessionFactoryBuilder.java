@@ -284,6 +284,7 @@ public class LocalSessionFactoryBuilder extends Configuration {
 	 * @see #addPackage
 	 * @see #scanPackages
 	 */
+	@Override
 	public LocalSessionFactoryBuilder addPackages(String... annotatedPackages) {
 		for (String annotatedPackage : annotatedPackages) {
 			addPackage(annotatedPackage);

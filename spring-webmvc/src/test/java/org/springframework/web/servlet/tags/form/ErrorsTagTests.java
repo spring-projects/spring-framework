@@ -54,6 +54,7 @@ public class ErrorsTagTests extends AbstractFormTagTests {
 
 
 	@Override
+	@SuppressWarnings("serial")
 	protected void onSetUp() {
 		this.tag = new ErrorsTag() {
 			@Override

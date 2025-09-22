@@ -37,6 +37,7 @@ class TextareaTagTests extends AbstractFormTagTests {
 	private TestBean rob;
 
 	@Override
+	@SuppressWarnings("serial")
 	protected void onSetUp() {
 		this.tag = new TextareaTag() {
 			@Override
