@@ -53,6 +53,7 @@ public class ConcurrencyLimitBeanPostProcessor extends AbstractBeanFactoryAwareA
 
 	private @Nullable StringValueResolver embeddedValueResolver;
 
+
 	public ConcurrencyLimitBeanPostProcessor() {
 		setBeforeExistingAdvisors(true);
 
@@ -94,19 +95,19 @@ public class ConcurrencyLimitBeanPostProcessor extends AbstractBeanFactoryAwareA
 					interceptor = cache.methodInterceptors.get(method);
 					if (interceptor == null) {
 						boolean perMethod = false;
-						ConcurrencyLimit limit = AnnotatedElementUtils.getMergedAnnotation(method, ConcurrencyLimit.class);
-						if (limit != null) {
+						ConcurrencyLimit annotation = AnnotatedElementUtils.getMergedAnnotation(method, ConcurrencyLimit.class);
+						if (annotation != null) {
 							perMethod = true;
 						}
 						else {
 							interceptor = cache.classInterceptor;
 							if (interceptor == null) {
-								limit = AnnotatedElementUtils.getMergedAnnotation(targetClass, ConcurrencyLimit.class);
+								annotation = AnnotatedElementUtils.getMergedAnnotation(targetClass, ConcurrencyLimit.class);
 							}
 						}
 						if (interceptor == null) {
-							Assert.state(limit != null, "No @ConcurrencyLimit annotation found");
-							int concurrencyLimit = parseInt(limit.value(), limit.valueString());
+							Assert.state(annotation != null, "No @ConcurrencyLimit annotation found");
+							int concurrencyLimit = parseInt(annotation.limit(), annotation.limitString());
 							interceptor = new ConcurrencyThrottleInterceptor(concurrencyLimit);
 							if (!perMethod) {
 								cache.classInterceptor = interceptor;

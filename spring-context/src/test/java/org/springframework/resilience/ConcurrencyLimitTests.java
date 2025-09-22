@@ -18,7 +18,6 @@ package org.springframework.resilience;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Properties;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -30,7 +29,7 @@ import org.springframework.aop.interceptor.ConcurrencyThrottleInterceptor;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-import org.springframework.core.env.PropertiesPropertySource;
+import org.springframework.core.testfixture.env.MockPropertySource;
 import org.springframework.resilience.annotation.ConcurrencyLimit;
 import org.springframework.resilience.annotation.ConcurrencyLimitBeanPostProcessor;
 import org.springframework.resilience.annotation.EnableResilientMethods;
@@ -104,18 +103,16 @@ class ConcurrencyLimitTests {
 
 	@Test
 	void withPlaceholderResolution() {
-		Properties props = new Properties();
-		props.setProperty("test.concurrency.limit", "3");
-
+		MockPropertySource mockPropertySource = new MockPropertySource("test").withProperty("test.concurrency.limit", "3");
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
-		ctx.getEnvironment().getPropertySources().addFirst(new PropertiesPropertySource("test", props));
+		ctx.getEnvironment().getPropertySources().addFirst(mockPropertySource);
 		ctx.register(PlaceholderTestConfig.class, PlaceholderBean.class);
 		ctx.refresh();
 
 		PlaceholderBean proxy = ctx.getBean(PlaceholderBean.class);
 		PlaceholderBean target = (PlaceholderBean) AopProxyUtils.getSingletonTarget(proxy);
 
-		// Test with limit=3 from properties
+		// Test with limit=3 from MockPropertySource
 		List<CompletableFuture<?>> futures = new ArrayList<>(10);
 		for (int i = 0; i < 10; i++) {
 			futures.add(CompletableFuture.runAsync(proxy::concurrentOperation));
@@ -124,6 +121,7 @@ class ConcurrencyLimitTests {
 		assertThat(target.current).hasValue(0);
 		ctx.close();
 	}
+
 
 	static class NonAnnotatedBean {
 
@@ -197,7 +195,7 @@ class ConcurrencyLimitTests {
 			current.decrementAndGet();
 		}
 
-		@ConcurrencyLimit(1)
+		@ConcurrencyLimit(limit = 1)
 		public void overrideOperation() {
 			if (currentOverride.incrementAndGet() > 1) {
 				throw new IllegalStateException();
@@ -222,7 +220,7 @@ class ConcurrencyLimitTests {
 
 		AtomicInteger current = new AtomicInteger();
 
-		@ConcurrencyLimit(valueString = "${test.concurrency.limit}")
+		@ConcurrencyLimit(limitString = "${test.concurrency.limit}")
 		public void concurrentOperation() {
 			if (current.incrementAndGet() > 3) {  // Assumes test.concurrency.limit=3
 				throw new IllegalStateException();

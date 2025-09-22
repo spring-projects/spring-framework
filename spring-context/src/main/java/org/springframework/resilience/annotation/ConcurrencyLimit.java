@@ -23,6 +23,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 import org.springframework.aot.hint.annotation.Reflective;
+import org.springframework.core.annotation.AliasFor;
 
 /**
  * A common annotation specifying a concurrency limit for an individual method,
@@ -43,6 +44,7 @@ import org.springframework.aot.hint.annotation.Reflective;
  *
  * @author Juergen Hoeller
  * @author Hyunsang Han
+ * @author Sam Brannen
  * @since 7.0
  * @see EnableResilientMethods
  * @see ConcurrencyLimitBeanPostProcessor
@@ -56,19 +58,32 @@ import org.springframework.aot.hint.annotation.Reflective;
 public @interface ConcurrencyLimit {
 
 	/**
+	 * Alias for {@link #limit()}.
+	 * <p>Intended to be used when no other attributes are needed &mdash; for
+	 * example, {@code @ConcurrencyLimit(5)}.
+	 * @see #limitString()
+	 */
+	@AliasFor("limit")
+	int value() default 1;
+
+	/**
 	 * The applicable concurrency limit: 1 by default,
 	 * effectively locking the target instance for each method invocation.
 	 * <p>Specify a limit higher than 1 for pool-like throttling, constraining
 	 * the number of concurrent invocations similar to the upper bound of a pool.
+	 * @see #value()
+	 * @see #limitString()
 	 */
-	int value() default 1;
+	@AliasFor("value")
+	int limit() default 1;
 
 	/**
-	 * The concurrency limit as a configurable String.
-	 * A non-empty value specified here overrides the {@link #value()} attribute.
+	 * The concurrency limit, as a configurable String.
+	 * <p>A non-empty value specified here overrides the {@link #limit()} (or
+	 * {@link #value()}) attribute.
 	 * <p>This supports Spring-style "${...}" placeholders as well as SpEL expressions.
-	 * @see #value()
+	 * @see #limit()
 	 */
-	String valueString() default "";
+	String limitString() default "";
 
 }
