@@ -928,6 +928,13 @@ Now, you're ready to create client proxies:
 	// Use service methods for remote calls...
 ----
 
+HTTP service clients is a powerful and expressive choice for remote access over HTTP.
+It allows one team to own the knowledge of how a REST API works, what parts are relevant
+to a client application, what input and output types to create, what endpoint method
+signatures are needed, what Javadoc to have, and so on. The resulting Java API guides and
+is ready to use.
+
+
 [[rest-http-service-client-method-parameters]]
 === Method Parameters
 
