@@ -85,6 +85,8 @@ public class InvocableHandlerMethod extends HandlerMethod {
 
 	private static final Object NO_ARG_VALUE = new Object();
 
+	private static final boolean KOTLIN_REFLECT_PRESENT = KotlinDetector.isKotlinReflectPresent();
+
 
 	private final HandlerMethodArgumentResolverComposite resolvers = new HandlerMethodArgumentResolverComposite();
 
@@ -197,12 +199,17 @@ public class InvocableHandlerMethod extends HandlerMethod {
 				}
 			}
 			Object value;
+			boolean isSuspendingFunction;
 			Method method = getBridgedMethod();
-			boolean isSuspendingFunction = KotlinDetector.isSuspendingFunction(method);
 			try {
-				value = (KotlinDetector.isKotlinType(method.getDeclaringClass()) ?
-						KotlinDelegate.invokeFunction(method, getBean(), args, isSuspendingFunction, exchange) :
-						method.invoke(getBean(), args));
+				if (KOTLIN_REFLECT_PRESENT && KotlinDetector.isKotlinType(method.getDeclaringClass())) {
+					isSuspendingFunction = KotlinDetector.isSuspendingFunction(method);
+					value = KotlinDelegate.invokeFunction(method, getBean(), args, isSuspendingFunction, exchange);
+				}
+				else {
+					isSuspendingFunction = false;
+					value = method.invoke(getBean(), args);
+				}
 			}
 			catch (IllegalArgumentException ex) {
 				assertTargetBean(getBridgedMethod(), getBean(), args);

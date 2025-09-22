@@ -66,6 +66,8 @@ public class MethodParameter {
 
 	private static final Annotation[] EMPTY_ANNOTATION_ARRAY = new Annotation[0];
 
+	private static final boolean KOTLIN_REFLECT_PRESENT = KotlinDetector.isKotlinReflectPresent();
+
 
 	private final Executable executable;
 
@@ -396,7 +398,8 @@ public class MethodParameter {
 	 */
 	public boolean isOptional() {
 		return (getParameterType() == Optional.class || Nullness.forMethodParameter(this) == Nullness.NULLABLE ||
-				(KotlinDetector.isKotlinType(getContainingClass()) && KotlinDelegate.isOptional(this)));
+				(KOTLIN_REFLECT_PRESENT && KotlinDetector.isKotlinType(getContainingClass()) &&
+						KotlinDelegate.isOptional(this)));
 	}
 
 	/**
@@ -484,7 +487,7 @@ public class MethodParameter {
 			if (this.parameterIndex < 0) {
 				Method method = getMethod();
 				paramType = (method != null ?
-						(KotlinDetector.isKotlinType(getContainingClass()) ?
+						(KOTLIN_REFLECT_PRESENT && KotlinDetector.isKotlinType(getContainingClass()) ?
 								KotlinDelegate.getGenericReturnType(method) : method.getGenericReturnType()) : void.class);
 			}
 			else {
@@ -512,7 +515,7 @@ public class MethodParameter {
 			if (method == null) {
 				return void.class;
 			}
-			if (KotlinDetector.isKotlinType(getContainingClass())) {
+			if (KOTLIN_REFLECT_PRESENT && KotlinDetector.isKotlinType(getContainingClass())) {
 				return KotlinDelegate.getReturnType(method);
 			}
 			return method.getReturnType();

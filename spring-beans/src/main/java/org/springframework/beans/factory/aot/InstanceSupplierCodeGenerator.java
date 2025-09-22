@@ -88,6 +88,8 @@ public class InstanceSupplierCodeGenerator {
 
 	private static final CodeBlock NO_ARGS = CodeBlock.of("");
 
+	private static final boolean KOTLIN_REFLECT_PRESENT = KotlinDetector.isKotlinReflectPresent();
+
 
 	private final GenerationContext generationContext;
 
@@ -161,7 +163,7 @@ public class InstanceSupplierCodeGenerator {
 				registeredBean.getBeanName(), constructor, registeredBean.getBeanClass());
 
 		Class<?> publicType = descriptor.publicType();
-		if (KotlinDetector.isKotlinType(publicType) && KotlinDelegate.hasConstructorWithOptionalParameter(publicType)) {
+		if (KOTLIN_REFLECT_PRESENT && KotlinDetector.isKotlinType(publicType) && KotlinDelegate.hasConstructorWithOptionalParameter(publicType)) {
 			return generateCodeForInaccessibleConstructor(descriptor,
 					hints -> hints.registerType(publicType, MemberCategory.INVOKE_DECLARED_CONSTRUCTORS));
 		}

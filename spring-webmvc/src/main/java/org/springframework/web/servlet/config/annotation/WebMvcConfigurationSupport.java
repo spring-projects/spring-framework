@@ -36,6 +36,7 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.core.KotlinDetector;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.format.Formatter;
 import org.springframework.format.FormatterRegistry;
@@ -184,6 +185,8 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 
 	private static final boolean JACKSON_2_PRESENT;
 
+	private static final boolean KOTLIN_REFLECT_PRESENT;
+
 	private static final boolean KOTLIN_SERIALIZATION_PRESENT;
 
 
@@ -192,6 +195,7 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 		JACKSON_PRESENT = ClassUtils.isPresent("tools.jackson.databind.ObjectMapper", classLoader);
 		JACKSON_2_PRESENT = ClassUtils.isPresent("com.fasterxml.jackson.databind.ObjectMapper", classLoader) &&
 				ClassUtils.isPresent("com.fasterxml.jackson.core.JsonGenerator", classLoader);
+		KOTLIN_REFLECT_PRESENT = KotlinDetector.isKotlinReflectPresent();
 		KOTLIN_SERIALIZATION_PRESENT = ClassUtils.isPresent("kotlinx.serialization.Serializable", classLoader);
 	}
 
@@ -659,7 +663,7 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 				requestBodyAdvices.add(new JsonViewRequestBodyAdvice());
 				responseBodyAdvices.add(new JsonViewResponseBodyAdvice());
 			}
-			if (KOTLIN_SERIALIZATION_PRESENT) {
+			if (KOTLIN_REFLECT_PRESENT && KOTLIN_SERIALIZATION_PRESENT) {
 				requestBodyAdvices.add(new KotlinRequestBodyAdvice());
 				responseBodyAdvices.add(new KotlinResponseBodyAdvice());
 			}

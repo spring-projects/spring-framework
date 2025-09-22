@@ -69,6 +69,8 @@ import org.springframework.web.server.ServerWebInputException;
  */
 public abstract class AbstractNamedValueArgumentResolver extends HandlerMethodArgumentResolverSupport {
 
+	private static final boolean KOTLIN_REFLECT_PRESENT = KotlinDetector.isKotlinReflectPresent();
+
 	private final @Nullable ConfigurableBeanFactory configurableBeanFactory;
 
 	private final @Nullable BeanExpressionContext expressionContext;
@@ -222,7 +224,7 @@ public abstract class AbstractNamedValueArgumentResolver extends HandlerMethodAr
 
 		return Mono.fromSupplier(() -> {
 			Object value = null;
-			boolean hasDefaultValue = KotlinDetector.isKotlinType(parameter.getDeclaringClass()) &&
+			boolean hasDefaultValue = KOTLIN_REFLECT_PRESENT && KotlinDetector.isKotlinType(parameter.getDeclaringClass()) &&
 					KotlinDelegate.hasDefaultValue(parameter);
 			if (namedValueInfo.defaultValue != null) {
 				value = resolveEmbeddedValuesAndExpressions(namedValueInfo.defaultValue);

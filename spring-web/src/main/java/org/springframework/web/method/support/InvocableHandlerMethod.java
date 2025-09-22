@@ -66,6 +66,8 @@ public class InvocableHandlerMethod extends HandlerMethod {
 
 	private static final Class<?>[] EMPTY_GROUPS = new Class<?>[0];
 
+	private static final boolean KOTLIN_REFLECT_PRESENT = KotlinDetector.isKotlinReflectPresent();
+
 
 	private HandlerMethodArgumentResolverComposite resolvers = new HandlerMethodArgumentResolverComposite();
 
@@ -247,7 +249,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	protected @Nullable Object doInvoke(@Nullable Object... args) throws Exception {
 		Method method = getBridgedMethod();
 		try {
-			if (KotlinDetector.isKotlinType(method.getDeclaringClass())) {
+			if (KOTLIN_REFLECT_PRESENT && KotlinDetector.isKotlinType(method.getDeclaringClass())) {
 				if (KotlinDetector.isSuspendingFunction(method)) {
 					return invokeSuspendingFunction(method, getBean(), args);
 				}

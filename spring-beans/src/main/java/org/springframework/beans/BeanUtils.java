@@ -88,6 +88,8 @@ public abstract class BeanUtils {
 			double.class, 0D,
 			char.class, '\0');
 
+	private static final boolean KOTLIN_REFLECT_PRESENT = KotlinDetector.isKotlinReflectPresent();
+
 
 	/**
 	 * Convenience method to instantiate a class using its no-arg constructor.
@@ -186,7 +188,7 @@ public abstract class BeanUtils {
 		Assert.notNull(ctor, "Constructor must not be null");
 		try {
 			ReflectionUtils.makeAccessible(ctor);
-			if (KotlinDetector.isKotlinType(ctor.getDeclaringClass())) {
+			if (KOTLIN_REFLECT_PRESENT && KotlinDetector.isKotlinType(ctor.getDeclaringClass())) {
 				return KotlinDelegate.instantiateClass(ctor, args);
 			}
 			else {
@@ -279,7 +281,7 @@ public abstract class BeanUtils {
 	 */
 	public static <T> @Nullable Constructor<T> findPrimaryConstructor(Class<T> clazz) {
 		Assert.notNull(clazz, "Class must not be null");
-		if (KotlinDetector.isKotlinType(clazz)) {
+		if (KOTLIN_REFLECT_PRESENT && KotlinDetector.isKotlinType(clazz)) {
 			return KotlinDelegate.findPrimaryConstructor(clazz);
 		}
 		if (clazz.isRecord()) {
@@ -659,7 +661,7 @@ public abstract class BeanUtils {
 		ConstructorProperties cp = ctor.getAnnotation(ConstructorProperties.class);
 		@Nullable String[] paramNames = (cp != null ? cp.value() : parameterNameDiscoverer.getParameterNames(ctor));
 		Assert.state(paramNames != null, () -> "Cannot resolve parameter names for constructor " + ctor);
-		int parameterCount = (KotlinDetector.isKotlinReflectPresent() && KotlinDelegate.hasDefaultConstructorMarker(ctor) ?
+		int parameterCount = (KOTLIN_REFLECT_PRESENT && KotlinDelegate.hasDefaultConstructorMarker(ctor) ?
 				ctor.getParameterCount() - 1 : ctor.getParameterCount());
 		Assert.state(paramNames.length == parameterCount,
 				() -> "Invalid number of parameter names: " + paramNames.length + " for constructor " + ctor);

@@ -77,6 +77,8 @@ public enum Nullness {
 	 */
 	NON_NULL;
 
+	private static final boolean KOTLIN_REFLECT_PRESENT = KotlinDetector.isKotlinReflectPresent();
+
 
 	/**
 	 * Return the nullness of the return type for the given method.
@@ -84,7 +86,7 @@ public enum Nullness {
 	 * @return the corresponding nullness
 	 */
 	public static Nullness forMethodReturnType(Method method) {
-		if (KotlinDetector.isKotlinType(method.getDeclaringClass())) {
+		if (KOTLIN_REFLECT_PRESENT && KotlinDetector.isKotlinType(method.getDeclaringClass())) {
 			return KotlinDelegate.forMethodReturnType(method);
 		}
 		return (hasNullableAnnotation(method) ? Nullness.NULLABLE :
@@ -97,7 +99,7 @@ public enum Nullness {
 	 * @return the corresponding nullness
 	 */
 	public static Nullness forParameter(Parameter parameter) {
-		if (KotlinDetector.isKotlinType(parameter.getDeclaringExecutable().getDeclaringClass())) {
+		if (KOTLIN_REFLECT_PRESENT && KotlinDetector.isKotlinType(parameter.getDeclaringExecutable().getDeclaringClass())) {
 			// TODO Optimize when kotlin-reflect provide a more direct Parameter to KParameter resolution
 			MethodParameter methodParameter = MethodParameter.forParameter(parameter);
 			return KotlinDelegate.forParameter(methodParameter.getExecutable(), methodParameter.getParameterIndex());
@@ -124,7 +126,7 @@ public enum Nullness {
 	 * @return the corresponding nullness
 	 */
 	public static Nullness forField(Field field) {
-		if (KotlinDetector.isKotlinType(field.getDeclaringClass())) {
+		if (KOTLIN_REFLECT_PRESENT && KotlinDetector.isKotlinType(field.getDeclaringClass())) {
 			return KotlinDelegate.forField(field);
 		}
 		return (hasNullableAnnotation(field) ? Nullness.NULLABLE :
