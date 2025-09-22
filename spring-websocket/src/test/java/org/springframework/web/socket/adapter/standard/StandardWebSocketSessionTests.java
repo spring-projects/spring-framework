@@ -16,17 +16,24 @@
 
 package org.springframework.web.socket.adapter.standard;
 
+import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.BiConsumer;
 
+import jakarta.websocket.RemoteEndpoint.Basic;
 import jakarta.websocket.Session;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.core.testfixture.security.TestPrincipal;
 import org.springframework.http.HttpHeaders;
+import org.springframework.web.socket.BinaryMessage;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -104,6 +111,46 @@ class StandardWebSocketSessionTests {
 
 		assertThat(new StandardWebSocketSession(this.headers, this.attributes, null, null).getAttributes())
 				.hasSize(1).containsEntry("foo", "bar");
+	}
+
+	@Test
+	void binaryMessageWithSharedBufferSendsToMultipleSessions() throws Exception {
+		byte[] data = {1, 2, 3, 4, 5};
+		ByteBuffer sharedBuffer = ByteBuffer.wrap(data);
+		BinaryMessage message = new BinaryMessage(sharedBuffer);
+
+		ByteBuffer[] captured = new ByteBuffer[2];
+		StandardWebSocketSession session1 = createMockSession((buffer, idx) -> captured[0] = buffer);
+		StandardWebSocketSession session2 = createMockSession((buffer, idx) -> captured[1] = buffer);
+
+		session1.sendMessage(message);
+		session2.sendMessage(message);
+
+		assertThat(captured[0].array()).isEqualTo(data);
+		assertThat(captured[1].array()).isEqualTo(data);
+
+		assertThat(sharedBuffer.position()).isEqualTo(0);
+	}
+
+	private StandardWebSocketSession createMockSession(BiConsumer<ByteBuffer, Integer> captureFunction) throws Exception {
+		Session nativeSession = mock(Session.class);
+		Basic basicRemote = mock(Basic.class);
+
+		given(nativeSession.getBasicRemote()).willReturn(basicRemote);
+		given(nativeSession.isOpen()).willReturn(true);
+
+		doAnswer(invocation -> {
+			ByteBuffer buffer = invocation.getArgument(0);
+			ByteBuffer copy = ByteBuffer.allocate(buffer.remaining());
+			copy.put(buffer);
+			copy.flip();
+			captureFunction.accept(copy, 0);
+			return null;
+		}).when(basicRemote).sendBinary(any(ByteBuffer.class), anyBoolean());
+
+		StandardWebSocketSession session = new StandardWebSocketSession(this.headers, this.attributes, null, null);
+		session.initializeNativeSession(nativeSession);
+		return session;
 	}
 
 }

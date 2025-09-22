@@ -208,7 +208,7 @@ public class StandardWebSocketSession extends AbstractWebSocketSession<Session> 
 
 	@Override
 	protected void sendBinaryMessage(BinaryMessage message) throws IOException {
-		getNativeSession().getBasicRemote().sendBinary(message.getPayload(), message.isLast());
+		getNativeSession().getBasicRemote().sendBinary(message.getPayload().asReadOnlyBuffer(), message.isLast());
 	}
 
 	@Override

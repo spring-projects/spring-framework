@@ -205,7 +205,7 @@ public class JettyWebSocketSession extends AbstractWebSocketSession<Session> {
 
 	@Override
 	protected void sendBinaryMessage(BinaryMessage message) throws IOException {
-		useSession((session, callback) -> session.sendBinary(message.getPayload(), callback));
+		useSession((session, callback) -> session.sendBinary(message.getPayload().asReadOnlyBuffer(), callback));
 	}
 
 	@Override
