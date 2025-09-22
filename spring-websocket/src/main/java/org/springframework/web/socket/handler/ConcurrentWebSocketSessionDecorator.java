@@ -17,6 +17,7 @@
 package org.springframework.web.socket.handler;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.util.Queue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -28,6 +29,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jspecify.annotations.Nullable;
 
+import org.springframework.web.socket.BinaryMessage;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.WebSocketMessage;
 import org.springframework.web.socket.WebSocketSession;
@@ -43,6 +45,7 @@ import org.springframework.web.socket.WebSocketSession;
  *
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
+ * @author xeroman.k
  * @since 4.0.3
  */
 public class ConcurrentWebSocketSessionDecorator extends WebSocketSessionDecorator {
@@ -170,7 +173,7 @@ public class ConcurrentWebSocketSessionDecorator extends WebSocketSessionDecorat
 			if (!tryFlushMessageBuffer()) {
 				if (logger.isTraceEnabled()) {
 					logger.trace(String.format("Another send already in progress: " +
-							"session id '%s':, \"in-progress\" send time %d (ms), buffer size %d bytes",
+									"session id '%s':, \"in-progress\" send time %d (ms), buffer size %d bytes",
 							getId(), getTimeSinceSendStarted(), getBufferSize()));
 				}
 				checkSessionLimits();
@@ -194,7 +197,7 @@ public class ConcurrentWebSocketSessionDecorator extends WebSocketSessionDecorat
 					}
 					this.bufferSize.addAndGet(-message.getPayloadLength());
 					this.sendStartTime = System.currentTimeMillis();
-					getDelegate().sendMessage(message);
+					getDelegate().sendMessage(prepareMessage(message));
 					this.sendStartTime = 0;
 				}
 			}
@@ -205,6 +208,14 @@ public class ConcurrentWebSocketSessionDecorator extends WebSocketSessionDecorat
 			return true;
 		}
 		return false;
+	}
+
+	private WebSocketMessage<?> prepareMessage(WebSocketMessage<?> message) {
+		if (message instanceof BinaryMessage) {
+			ByteBuffer payload = ((BinaryMessage) message).getPayload();
+			return new BinaryMessage(payload.duplicate(), message.isLast());
+		}
+		return message;
 	}
 
 	private void checkSessionLimits() {
@@ -238,7 +249,7 @@ public class ConcurrentWebSocketSessionDecorator extends WebSocketSessionDecorat
 						}
 						default ->
 							// Should never happen..
-							throw new IllegalStateException("Unexpected OverflowStrategy: " + this.overflowStrategy);
+								throw new IllegalStateException("Unexpected OverflowStrategy: " + this.overflowStrategy);
 					}
 				}
 			}
