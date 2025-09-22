@@ -140,7 +140,7 @@ class BodyInsertersTests {
 		StepVerifier.create(result).expectComplete().verify();
 
 		StepVerifier.create(response.getBodyAsString())
-				.expectNext("{\"password\":\"bar\",\"username\":\"foo\"}")
+				.expectNext("{\"username\":\"foo\",\"password\":\"bar\"}")
 				.expectComplete()
 				.verify();
 	}
@@ -169,7 +169,7 @@ class BodyInsertersTests {
 		Mono<Void> result = inserter.insert(response, this.context);
 		StepVerifier.create(result).expectComplete().verify();
 		StepVerifier.create(response.getBodyAsString())
-				.expectNext("{\"password\":\"bar\",\"username\":\"foo\"}")
+				.expectNext("{\"username\":\"foo\",\"password\":\"bar\"}")
 				.expectComplete()
 				.verify();
 	}
@@ -200,7 +200,7 @@ class BodyInsertersTests {
 		Mono<Void> result = inserter.insert(response, this.context);
 		StepVerifier.create(result).expectComplete().verify();
 		StepVerifier.create(response.getBodyAsString())
-				.expectNext("{\"password\":\"bar\",\"username\":\"foo\"}")
+				.expectNext("{\"username\":\"foo\",\"password\":\"bar\"}")
 				.expectComplete()
 				.verify();
 	}

@@ -151,10 +151,10 @@ class ServerSentEventHttpMessageWriterTests extends AbstractDataBufferAllocating
 
 		StepVerifier.create(outputMessage.getBody())
 				.consumeNextWith(stringConsumer("data:"))
-				.consumeNextWith(stringConsumer("{\"bar\":\"barbar\",\"foo\":\"foofoo\"}"))
+				.consumeNextWith(stringConsumer("{\"foo\":\"foofoo\",\"bar\":\"barbar\"}"))
 				.consumeNextWith(stringConsumer("\n\n"))
 				.consumeNextWith(stringConsumer("data:"))
-				.consumeNextWith(stringConsumer("{\"bar\":\"barbarbar\",\"foo\":\"foofoofoo\"}"))
+				.consumeNextWith(stringConsumer("{\"foo\":\"foofoofoo\",\"bar\":\"barbarbar\"}"))
 				.consumeNextWith(stringConsumer("\n\n"))
 				.expectComplete()
 				.verify();
@@ -175,15 +175,15 @@ class ServerSentEventHttpMessageWriterTests extends AbstractDataBufferAllocating
 				.consumeNextWith(stringConsumer("data:"))
 				.consumeNextWith(stringConsumer("""
 						{
-						data:  "bar" : "barbar",
-						data:  "foo" : "foofoo"
+						data:  "foo" : "foofoo",
+						data:  "bar" : "barbar"
 						data:}"""))
 				.consumeNextWith(stringConsumer("\n\n"))
 				.consumeNextWith(stringConsumer("data:"))
 				.consumeNextWith(stringConsumer("""
 						{
-						data:  "bar" : "barbarbar",
-						data:  "foo" : "foofoofoo"
+						data:  "foo" : "foofoofoo",
+						data:  "bar" : "barbarbar"
 						data:}"""))
 				.consumeNextWith(stringConsumer("\n\n"))
 				.expectComplete()
@@ -203,7 +203,7 @@ class ServerSentEventHttpMessageWriterTests extends AbstractDataBufferAllocating
 		assertThat(outputMessage.getHeaders().getContentType()).isEqualTo(mediaType);
 		StepVerifier.create(outputMessage.getBody())
 				.consumeNextWith(stringConsumer("data:", charset))
-				.consumeNextWith(stringConsumer("{\"bar\":\"bar\uD834\uDD1E\",\"foo\":\"foo\uD834\uDD1E\"}", charset))
+				.consumeNextWith(stringConsumer("{\"foo\":\"foo\uD834\uDD1E\",\"bar\":\"bar\uD834\uDD1E\"}", charset))
 				.consumeNextWith(stringConsumer("\n\n", charset))
 				.expectComplete()
 				.verify();

@@ -528,7 +528,7 @@ class RestClientIntegrationTests {
 		expectRequestCount(1);
 		expectRequest(request -> {
 			assertThat(request.getTarget()).isEqualTo("/pojo/capitalize");
-			assertThat(request.getBody().utf8()).isEqualTo("{\"bar\":\"barbar\",\"foo\":\"foofoo\"}");
+			assertThat(request.getBody().utf8()).isEqualTo("{\"foo\":\"foofoo\",\"bar\":\"barbar\"}");
 			assertThat(request.getHeaders().get(HttpHeaders.ACCEPT)).isEqualTo("application/json");
 			assertThat(request.getHeaders().get(HttpHeaders.CONTENT_TYPE)).isEqualTo("application/json");
 		});

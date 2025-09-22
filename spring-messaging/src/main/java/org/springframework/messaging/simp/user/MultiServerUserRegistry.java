@@ -209,7 +209,7 @@ public class MultiServerUserRegistry implements SimpUserRegistry, SmartApplicati
 		/**
 		 * Constructor to create DTO from a local user registry.
 		 */
-		public UserRegistrySnapshot(String id, SimpUserRegistry registry) {
+		UserRegistrySnapshot(String id, SimpUserRegistry registry) {
 			this.id = id;
 			Set<SimpUser> users = registry.getUsers();
 			this.users = CollectionUtils.newHashMap(users.size());

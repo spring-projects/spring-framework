@@ -98,9 +98,9 @@ class JacksonJsonEncoderTests extends AbstractEncoderTests<JacksonJsonEncoder> {
 				new Pojo("foofoofoo", "barbarbar"));
 
 		testEncodeAll(input, ResolvableType.forClass(Pojo.class), APPLICATION_NDJSON, null, step -> step
-				.consumeNextWith(expectString("{\"bar\":\"bar\",\"foo\":\"foo\"}\n"))
-				.consumeNextWith(expectString("{\"bar\":\"barbar\",\"foo\":\"foofoo\"}\n"))
-				.consumeNextWith(expectString("{\"bar\":\"barbarbar\",\"foo\":\"foofoofoo\"}\n"))
+				.consumeNextWith(expectString("{\"foo\":\"foo\",\"bar\":\"bar\"}\n"))
+				.consumeNextWith(expectString("{\"foo\":\"foofoo\",\"bar\":\"barbar\"}\n"))
+				.consumeNextWith(expectString("{\"foo\":\"foofoofoo\",\"bar\":\"barbarbar\"}\n"))
 				.verifyComplete()
 		);
 	}
@@ -137,9 +137,9 @@ class JacksonJsonEncoderTests extends AbstractEncoderTests<JacksonJsonEncoder> {
 		);
 
 		testEncode(input, Pojo.class, step -> step
-				.consumeNextWith(expectString("[{\"bar\":\"bar\",\"foo\":\"foo\"}"))
-				.consumeNextWith(expectString(",{\"bar\":\"barbar\",\"foo\":\"foofoo\"}"))
-				.consumeNextWith(expectString(",{\"bar\":\"barbarbar\",\"foo\":\"foofoofoo\"}"))
+				.consumeNextWith(expectString("[{\"foo\":\"foo\",\"bar\":\"bar\"}"))
+				.consumeNextWith(expectString(",{\"foo\":\"foofoo\",\"bar\":\"barbar\"}"))
+				.consumeNextWith(expectString(",{\"foo\":\"foofoofoo\",\"bar\":\"barbarbar\"}"))
 				.consumeNextWith(expectString("]"))
 				.verifyComplete());
 	}
@@ -187,9 +187,9 @@ class JacksonJsonEncoderTests extends AbstractEncoderTests<JacksonJsonEncoder> {
 		);
 
 		testEncode(input, ResolvableType.forClass(Pojo.class), barMediaType, null, step -> step
-				.consumeNextWith(expectString("{\"bar\":\"bar\",\"foo\":\"foo\"}\n"))
-				.consumeNextWith(expectString("{\"bar\":\"barbar\",\"foo\":\"foofoo\"}\n"))
-				.consumeNextWith(expectString("{\"bar\":\"barbarbar\",\"foo\":\"foofoofoo\"}\n"))
+				.consumeNextWith(expectString("{\"foo\":\"foo\",\"bar\":\"bar\"}\n"))
+				.consumeNextWith(expectString("{\"foo\":\"foofoo\",\"bar\":\"barbar\"}\n"))
+				.consumeNextWith(expectString("{\"foo\":\"foofoofoo\",\"bar\":\"barbarbar\"}\n"))
 				.verifyComplete()
 		);
 	}
@@ -237,7 +237,7 @@ class JacksonJsonEncoderTests extends AbstractEncoderTests<JacksonJsonEncoder> {
 				ResolvableType.forClass(Pojo.class), MimeTypeUtils.APPLICATION_JSON, Collections.emptyMap());
 
 		StepVerifier.create(result)
-				.consumeNextWith(expectString("[{\"bar\":\"bar\",\"foo\":\"foo\"}"))
+				.consumeNextWith(expectString("[{\"foo\":\"foo\",\"bar\":\"bar\"}"))
 				.consumeNextWith(expectString("]"))
 				.expectComplete()
 				.verify(Duration.ofSeconds(5));
@@ -249,7 +249,7 @@ class JacksonJsonEncoderTests extends AbstractEncoderTests<JacksonJsonEncoder> {
 		MimeType mimeType = new MimeType("application", "json", StandardCharsets.US_ASCII);
 
 		testEncode(input, ResolvableType.forClass(Pojo.class), mimeType, null, step -> step
-				.consumeNextWith(expectString("{\"bar\":\"bar\",\"foo\":\"foo\"}"))
+				.consumeNextWith(expectString("{\"foo\":\"foo\",\"bar\":\"bar\"}"))
 				.verifyComplete()
 		);
 	}
