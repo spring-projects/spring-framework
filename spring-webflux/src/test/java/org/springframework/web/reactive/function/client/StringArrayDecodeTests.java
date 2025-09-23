@@ -41,4 +41,33 @@ class StringArrayDecodeTests {
 
 		disposable.disposeNow();
 	}
+
+	@Test
+	void decodeEmptyList() {
+		HttpServer server = HttpServer.create()
+				.port(0)
+				.route(routes -> routes.get("/empty", (req, res) ->
+						res.addHeader("Content-Type", "application/json")
+								.sendString(Mono.just("[]"))
+				));
+
+		var disposable = server.bindNow();
+		int port = disposable.port();
+
+		WebClient client = WebClient.builder()
+				.baseUrl("http://localhost:" + port)
+				.build();
+
+		List<String> values = client.get()
+				.uri("/empty")
+				.accept(MediaType.APPLICATION_JSON)
+				.retrieve()
+				.bodyToMono(new ParameterizedTypeReference<@NotNull List<String>>() {})
+				.block();
+
+		assertThat(values).isEmpty();
+
+		disposable.disposeNow();
+	}
+
 }
