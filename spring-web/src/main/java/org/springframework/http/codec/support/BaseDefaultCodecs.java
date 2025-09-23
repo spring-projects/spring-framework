@@ -54,6 +54,8 @@ import org.springframework.http.codec.ServerSentEventHttpMessageWriter;
 import org.springframework.http.codec.cbor.KotlinSerializationCborDecoder;
 import org.springframework.http.codec.cbor.KotlinSerializationCborEncoder;
 import org.springframework.http.codec.json.AbstractJackson2Decoder;
+import org.springframework.http.codec.json.GsonDecoder;
+import org.springframework.http.codec.json.GsonEncoder;
 import org.springframework.http.codec.json.Jackson2JsonDecoder;
 import org.springframework.http.codec.json.Jackson2JsonEncoder;
 import org.springframework.http.codec.json.Jackson2SmileDecoder;
@@ -93,6 +95,8 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs, CodecConfigure
 
 	static final boolean JACKSON_2_PRESENT;
 
+	static final boolean GSON_PRESENT;
+
 	private static final boolean JACKSON_SMILE_PRESENT;
 
 	private static final boolean JACKSON_2_SMILE_PRESENT;
@@ -114,6 +118,7 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs, CodecConfigure
 		JACKSON_PRESENT = ClassUtils.isPresent("tools.jackson.databind.ObjectMapper", classLoader);
 		JACKSON_2_PRESENT = ClassUtils.isPresent("com.fasterxml.jackson.databind.ObjectMapper", classLoader) &&
 						ClassUtils.isPresent("com.fasterxml.jackson.core.JsonGenerator", classLoader);
+		GSON_PRESENT = ClassUtils.isPresent("com.google.gson.Gson", classLoader);
 		JACKSON_SMILE_PRESENT = JACKSON_PRESENT && ClassUtils.isPresent("tools.jackson.dataformat.smile.SmileMapper", classLoader);
 		JACKSON_2_SMILE_PRESENT = JACKSON_2_PRESENT && ClassUtils.isPresent("com.fasterxml.jackson.dataformat.smile.SmileFactory", classLoader);
 		JAXB_2_PRESENT = ClassUtils.isPresent("jakarta.xml.bind.Binder", classLoader);
@@ -132,6 +137,10 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs, CodecConfigure
 	private @Nullable Encoder<?> jacksonJsonEncoder;
 
 	private @Nullable Encoder<?> jackson2JsonEncoder;
+
+	private @Nullable Decoder<?> gsonDecoder;
+
+	private @Nullable Encoder<?> gsonEncoder;
 
 	private @Nullable Encoder<?> jacksonSmileEncoder;
 
@@ -218,6 +227,8 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs, CodecConfigure
 		this.jackson2JsonDecoder = other.jackson2JsonDecoder;
 		this.jacksonJsonEncoder = other.jacksonJsonEncoder;
 		this.jackson2JsonEncoder = other.jackson2JsonEncoder;
+		this.gsonDecoder = other.gsonDecoder;
+		this.gsonEncoder = other.gsonEncoder;
 		this.jacksonSmileDecoder = other.jacksonSmileDecoder;
 		this.jackson2SmileDecoder = other.jackson2SmileDecoder;
 		this.jacksonSmileEncoder = other.jacksonSmileEncoder;
@@ -267,6 +278,19 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs, CodecConfigure
 	@Override
 	public void jackson2JsonEncoder(Encoder<?> encoder) {
 		this.jackson2JsonEncoder = encoder;
+		initObjectWriters();
+		initTypedWriters();
+	}
+
+	@Override
+	public void gsonDecoder(Decoder<?> decoder) {
+		this.gsonDecoder = decoder;
+		initObjectReaders();
+	}
+
+	@Override
+	public void gsonEncoder(Encoder<?> encoder) {
+		this.gsonEncoder = encoder;
 		initObjectWriters();
 		initTypedWriters();
 	}
@@ -636,6 +660,9 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs, CodecConfigure
 		else if (JACKSON_2_PRESENT) {
 			addCodec(this.objectReaders, new DecoderHttpMessageReader<>(getJackson2JsonDecoder()));
 		}
+		else if (GSON_PRESENT) {
+			addCodec(this.objectReaders, new DecoderHttpMessageReader<>(getGsonDecoder()));
+		}
 		else if (KOTLIN_SERIALIZATION_JSON_PRESENT) {
 			addCodec(this.objectReaders, new DecoderHttpMessageReader<>(getKotlinSerializationJsonDecoder()));
 		}
@@ -781,6 +808,9 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs, CodecConfigure
 		else if (JACKSON_2_PRESENT) {
 			addCodec(writers, new EncoderHttpMessageWriter<>(getJackson2JsonEncoder()));
 		}
+		else if (GSON_PRESENT) {
+			addCodec(writers, new EncoderHttpMessageWriter<>(getGsonEncoder()));
+		}
 		else if (KOTLIN_SERIALIZATION_JSON_PRESENT) {
 			addCodec(writers, new EncoderHttpMessageWriter<>(getKotlinSerializationJsonEncoder()));
 		}
@@ -863,6 +893,20 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs, CodecConfigure
 			this.jackson2JsonEncoder = new Jackson2JsonEncoder();
 		}
 		return this.jackson2JsonEncoder;
+	}
+
+	protected Decoder<?> getGsonDecoder() {
+		if (this.gsonDecoder == null) {
+			this.gsonDecoder = new GsonDecoder();
+		}
+		return this.gsonDecoder;
+	}
+
+	protected Encoder<?> getGsonEncoder() {
+		if (this.gsonEncoder == null) {
+			this.gsonEncoder = new GsonEncoder();
+		}
+		return this.gsonEncoder;
 	}
 
 	protected Decoder<?> getKotlinSerializationJsonDecoder() {

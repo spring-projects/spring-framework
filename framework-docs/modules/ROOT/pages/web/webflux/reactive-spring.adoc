@@ -545,6 +545,20 @@ The `ProtobufJsonDecoder` and `ProtobufJsonEncoder` variants support reading and
 They require the "com.google.protobuf:protobuf-java-util" dependency. Note, the JSON variants do not support reading stream of messages,
 see the {spring-framework-api}/http/codec/protobuf/ProtobufJsonDecoder.html[javadoc of `ProtobufJsonDecoder`] for more details.
 
+[[webflux-codecs-gson]]
+=== Google Gson
+
+Applications can use the `GsonEncoder` and `GsonDecoder` to serialize and deserialize JSON documents thanks to the https://google.github.io/gson/[Google Gson] library .
+This codec supports both JSON media types and the NDJSON format for streaming.
+
+[NOTE]
+====
+`Gson` does not support non-blocking parsing, so the `GsonDecoder` does not support deserializing
+to `Flux<*>` types. For example, if this decoder is used for deserializing a JSON stream or even a list of elements
+as a `Flux<*>`, an `UnsupportedOperationException` will be thrown at runtime.
+Applications should instead focus on deserializing bounded collections and use `Mono<List<*>>` as target types.
+====
+
 [[webflux-codecs-limits]]
 === Limits
 

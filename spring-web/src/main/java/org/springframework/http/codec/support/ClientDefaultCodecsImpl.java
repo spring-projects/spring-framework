@@ -55,6 +55,7 @@ class ClientDefaultCodecsImpl extends BaseDefaultCodecs implements ClientCodecCo
 		Decoder<?> decoder = (this.sseDecoder != null ? this.sseDecoder :
 				JACKSON_PRESENT ? getJacksonJsonDecoder() :
 				JACKSON_2_PRESENT ? getJackson2JsonDecoder() :
+				GSON_PRESENT ? getGsonDecoder() :
 				KOTLIN_SERIALIZATION_JSON_PRESENT ? getKotlinSerializationJsonDecoder() :
 				null);
 
