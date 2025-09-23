@@ -1,3 +1,4 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompilationTask
 
 plugins {
@@ -43,10 +44,14 @@ repositories {
 	}
 }
 
-// To avoid a redeclaration error with Kotlin compiler
-tasks.named('compileKotlin', KotlinCompilationTask.class) {
+// To avoid a redeclaration error with Kotlin compiler and set the JVM target
+tasks.withType(KotlinCompilationTask.class).configureEach {
 	javaSources.from = []
-	compilerOptions.freeCompilerArgs = [ "-Xannotation-default-target=param-property" ] // Upcoming default, see https://youtrack.jetbrains.com/issue/KT-73255
+	compilerOptions.jvmTarget = JvmTarget.JVM_17
+	compilerOptions.freeCompilerArgs.addAll(
+			"-Xjdk-release=17", // Needed due to https://youtrack.jetbrains.com/issue/KT-49746
+			"-Xannotation-default-target=param-property" // Upcoming default, see https://youtrack.jetbrains.com/issue/KT-73255
+	)
 }
 
 dependencies {

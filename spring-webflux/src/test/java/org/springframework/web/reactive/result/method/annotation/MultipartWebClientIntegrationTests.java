@@ -25,6 +25,7 @@ import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.junit.jupiter.api.condition.JRE;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
@@ -60,8 +61,10 @@ import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
 import org.springframework.web.testfixture.http.server.reactive.bootstrap.AbstractHttpHandlerIntegrationTests;
 import org.springframework.web.testfixture.http.server.reactive.bootstrap.HttpServer;
+import org.springframework.web.testfixture.http.server.reactive.bootstrap.JettyHttpServer;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assumptions.assumeThat;
 
 class MultipartWebClientIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 
@@ -166,6 +169,11 @@ class MultipartWebClientIntegrationTests extends AbstractHttpHandlerIntegrationT
 
 	@ParameterizedHttpServerTest
 	void transferTo(HttpServer httpServer) throws Exception {
+		// TODO https://github.com/spring-projects/spring-framework/issues/35531
+		if (JRE.JAVA_25.isCurrentVersion()) {
+			assumeThat(httpServer).isNotInstanceOf(JettyHttpServer.class);
+		}
+
 		startServer(httpServer);
 
 		Flux<String> result = webClient

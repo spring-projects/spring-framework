@@ -22,7 +22,7 @@ dependencies {
 
 javadoc {
 	javadocTool.set(javaToolchains.javadocToolFor({
-		languageVersion = JavaLanguageVersion.of(24)
+		languageVersion = JavaLanguageVersion.of(25)
 	}))
 
 	title = "${rootProject.description} ${version} API"
