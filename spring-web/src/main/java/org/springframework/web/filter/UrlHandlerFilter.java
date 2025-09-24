@@ -75,40 +75,22 @@ public final class UrlHandlerFilter extends OncePerRequestFilter {
 
 
 	@Override
-	protected boolean shouldNotFilterAsyncDispatch() {
-		return false;
-	}
-
-	@Override
-	protected boolean shouldNotFilterErrorDispatch() {
-		return false;
-	}
-
-	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
 			throws ServletException, IOException {
 
-		RequestPath previousPath = (RequestPath) request.getAttribute(ServletRequestPathUtils.PATH_ATTRIBUTE);
-		RequestPath path = previousPath;
-		try {
-			if (path == null) {
-				path = ServletRequestPathUtils.parseAndCache(request);
+		RequestPath path = (ServletRequestPathUtils.hasParsedRequestPath(request) ?
+				ServletRequestPathUtils.getParsedRequestPath(request) :
+				ServletRequestPathUtils.parse(request));
+
+		for (Map.Entry<Handler, List<PathPattern>> entry : this.handlers.entrySet()) {
+			if (!entry.getKey().supports(request, path)) {
+				continue;
 			}
-			for (Map.Entry<Handler, List<PathPattern>> entry : this.handlers.entrySet()) {
-				if (!entry.getKey().supports(request, path)) {
-					continue;
+			for (PathPattern pattern : entry.getValue()) {
+				if (pattern.matches(path)) {
+					entry.getKey().handle(request, response, chain);
+					return;
 				}
-				for (PathPattern pattern : entry.getValue()) {
-					if (pattern.matches(path)) {
-						entry.getKey().handle(request, response, chain);
-						return;
-					}
-				}
-			}
-		}
-		finally {
-			if (previousPath != null) {
-				ServletRequestPathUtils.setParsedRequestPath(previousPath, request);
 			}
 		}
 
@@ -349,7 +331,18 @@ public final class UrlHandlerFilter extends OncePerRequestFilter {
 					hasPathInfo ? servletPath : trimTrailingSlash(servletPath),
 					hasPathInfo ? trimTrailingSlash(pathInfo) : pathInfo);
 
-			chain.doFilter(request, response);
+			RequestPath previousPath = (RequestPath) request.getAttribute(ServletRequestPathUtils.PATH_ATTRIBUTE);
+			if (previousPath != null) {
+				ServletRequestPathUtils.parseAndCache(request);
+			}
+			try {
+				chain.doFilter(request, response);
+			}
+			finally {
+				if (previousPath != null) {
+					ServletRequestPathUtils.setParsedRequestPath(previousPath, request);
+				}
+			}
 		}
 	}
 
