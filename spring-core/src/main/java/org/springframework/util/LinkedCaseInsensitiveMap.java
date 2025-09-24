@@ -44,11 +44,13 @@ import org.jspecify.annotations.Nullable;
  *
  * @author Juergen Hoeller
  * @author Phillip Webb
+ * @author Yanming Zhou
  * @since 3.0
  * @param <V> the value type
  */
-@SuppressWarnings("serial")
 public class LinkedCaseInsensitiveMap<V> implements Map<String, V>, Serializable, Cloneable {
+
+	private static final long serialVersionUID = -1797561627545787622L;
 
 	private final LinkedHashMap<String, V> targetMap;
 
