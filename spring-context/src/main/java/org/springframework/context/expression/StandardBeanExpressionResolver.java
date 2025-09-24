@@ -168,7 +168,7 @@ public class StandardBeanExpressionResolver implements BeanExpressionResolver {
 					StandardEvaluationContext sec = new StandardEvaluationContext(bec);
 					sec.addPropertyAccessor(new BeanExpressionContextAccessor());
 					sec.addPropertyAccessor(new BeanFactoryAccessor());
-					sec.addPropertyAccessor(new MapAccessor());
+					sec.addPropertyAccessor(new org.springframework.expression.spel.support.MapAccessor());
 					sec.addPropertyAccessor(new EnvironmentAccessor());
 					sec.setBeanResolver(new BeanFactoryResolver(beanFactory));
 					sec.setTypeLocator(new StandardTypeLocator(beanFactory.getBeanClassLoader()));

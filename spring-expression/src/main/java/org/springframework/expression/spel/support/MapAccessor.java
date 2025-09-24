@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.expression.spel;
+package org.springframework.expression.spel.support;
 
 import java.util.Map;
 
@@ -23,37 +23,39 @@ import org.jspecify.annotations.Nullable;
 import org.springframework.asm.MethodVisitor;
 import org.springframework.expression.AccessException;
 import org.springframework.expression.EvaluationContext;
+import org.springframework.expression.PropertyAccessor;
 import org.springframework.expression.TypedValue;
+import org.springframework.expression.spel.CodeFlow;
+import org.springframework.expression.spel.CompilablePropertyAccessor;
 import org.springframework.util.Assert;
 
 /**
- * This is a local COPY of {@link org.springframework.context.expression.MapAccessor}.
+ * SpEL {@link PropertyAccessor} that knows how to access the keys of a standard
+ * {@link java.util.Map}.
  *
  * @author Juergen Hoeller
  * @author Andy Clement
- * @since 4.1
+ * @since 7.0
  */
-public class CompilableMapAccessor implements CompilablePropertyAccessor {
+public class MapAccessor implements CompilablePropertyAccessor {
 
 	private final boolean allowWrite;
 
 
 	/**
-	 * Create a new {@code CompilableMapAccessor} for reading as well as writing.
-	 * @since 6.2
-	 * @see #CompilableMapAccessor(boolean)
+	 * Create a new {@code MapAccessor} for reading as well as writing.
+	 * @see #MapAccessor(boolean)
 	 */
-	public CompilableMapAccessor() {
+	public MapAccessor() {
 		this(true);
 	}
 
 	/**
-	 * Create a new {@code CompilableMapAccessor} for reading and possibly also writing.
+	 * Create a new {@code MapAccessor} for reading and possibly also writing.
 	 * @param allowWrite whether to allow write operations on a target instance
-	 * @since 6.2
 	 * @see #canWrite
 	 */
-	public CompilableMapAccessor(boolean allowWrite) {
+	public MapAccessor(boolean allowWrite) {
 		this.allowWrite = allowWrite;
 	}
 

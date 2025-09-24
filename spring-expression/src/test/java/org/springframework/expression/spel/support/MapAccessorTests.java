@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.context.expression;
+package org.springframework.expression.spel.support;
 
 import java.util.HashMap;
 import java.util.List;
@@ -25,7 +25,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.expression.AccessException;
 import org.springframework.expression.spel.standard.SpelCompiler;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
-import org.springframework.expression.spel.support.StandardEvaluationContext;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -36,7 +35,6 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  * @author Andy Clement
  * @author Sam Brannen
  */
-@SuppressWarnings("removal")
 class MapAccessorTests {
 
 	private final StandardEvaluationContext context = new StandardEvaluationContext();
