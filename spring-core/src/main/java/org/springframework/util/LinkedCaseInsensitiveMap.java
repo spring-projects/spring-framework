@@ -16,6 +16,7 @@
 
 package org.springframework.util;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.AbstractCollection;
 import java.util.AbstractSet;
@@ -49,7 +50,9 @@ import org.jspecify.annotations.Nullable;
  */
 public class LinkedCaseInsensitiveMap<V> implements Map<String, V>, Serializable, Cloneable {
 
+	@Serial
 	private static final long serialVersionUID = -1797561627545787622L;
+
 
 	private final LinkedHashMap<String, V> targetMap;
 
