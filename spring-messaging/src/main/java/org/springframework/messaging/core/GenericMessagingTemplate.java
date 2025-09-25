@@ -263,9 +263,8 @@ public class GenericMessagingTemplate extends AbstractDestinationResolvingMessag
 		else if (headerValue instanceof String text) {
 			return Long.parseLong(text);
 		}
-		else {
-			return null;
-		}
+
+		return null;
 	}
 
 

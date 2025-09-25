@@ -57,9 +57,8 @@ public abstract class AbstractMessageReceivingTemplate<D> extends AbstractMessag
 		if (message != null) {
 			return doConvert(message, targetClass);
 		}
-		else {
-			return null;
-		}
+
+		return null;
 	}
 
 	/**
