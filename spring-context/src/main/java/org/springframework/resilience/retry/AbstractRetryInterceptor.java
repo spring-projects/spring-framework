@@ -101,7 +101,7 @@ public abstract class AbstractRetryInterceptor implements MethodInterceptor {
 		RetryTemplate retryTemplate = new RetryTemplate(retryPolicy);
 
 		try {
-			return retryTemplate.execute(new Retryable<>() {
+			return retryTemplate.execute(new Retryable<@Nullable Object>() {
 				@Override
 				public @Nullable Object execute() throws Throwable {
 					return (invocation instanceof ProxyMethodInvocation pmi ?

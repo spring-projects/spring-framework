@@ -134,7 +134,7 @@ public class RetryTemplate implements RetryOperations {
 	 * @throws RetryException if the {@code RetryPolicy} is exhausted
 	 */
 	@Override
-	public <R> @Nullable R execute(Retryable<? extends @Nullable R> retryable) throws RetryException {
+	public <R extends @Nullable Object> R execute(Retryable<R> retryable) throws RetryException {
 		String retryableName = retryable.getName();
 		// Initial attempt
 		try {

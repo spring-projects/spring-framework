@@ -46,6 +46,6 @@ public interface RetryOperations {
 	 * @return the result of the {@code Retryable}, if any
 	 * @throws RetryException if the {@code RetryPolicy} is exhausted
 	 */
-	<R> @Nullable R execute(Retryable<? extends @Nullable R> retryable) throws RetryException;
+	<R extends @Nullable Object> R execute(Retryable<R> retryable) throws RetryException;
 
 }
