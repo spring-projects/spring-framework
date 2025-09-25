@@ -129,10 +129,6 @@ public class SockJsFrame {
 		return this.content.hashCode();
 	}
 
-	/**
-	 * @author polyglot-k
-	 * Return a string representation of the SockJS frame, truncating the content if it exceeds 80 characters.
-	 */
 	@Override
 	public String toString() {
 		int maxLength = 80;
