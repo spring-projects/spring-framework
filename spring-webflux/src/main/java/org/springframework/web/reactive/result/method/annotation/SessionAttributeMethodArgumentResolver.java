@@ -16,9 +16,6 @@
 
 package org.springframework.web.reactive.result.method.annotation;
 
-import java.util.function.Function;
-
-import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Mono;
 
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -29,7 +26,6 @@ import org.springframework.web.bind.annotation.SessionAttribute;
 import org.springframework.web.bind.annotation.ValueConstants;
 import org.springframework.web.server.MissingRequestValueException;
 import org.springframework.web.server.ServerWebExchange;
-import org.springframework.web.server.WebSession;
 
 /**
  * Resolves method arguments annotated with an @{@link SessionAttribute}.
@@ -57,10 +53,10 @@ public class SessionAttributeMethodArgumentResolver extends AbstractNamedValueAr
 		return new NamedValueInfo(ann.name(), ann.required(), ValueConstants.DEFAULT_NONE);
 	}
 
+	@SuppressWarnings("NullAway") // https://github.com/uber/NullAway/issues/1290
 	@Override
 	protected Mono<Object> resolveName(String name, MethodParameter parameter, ServerWebExchange exchange) {
-		Function<WebSession, @Nullable Object> extractAttributeFn = session -> session.getAttribute(name);
-		return exchange.getSession().mapNotNull(extractAttributeFn);
+		return exchange.getSession().mapNotNull(session -> session.getAttribute(name));
 	}
 
 	@Override
