@@ -52,16 +52,19 @@ public abstract class ServletRequestPathUtils {
 
 	/**
 	 * Parse the {@link HttpServletRequest#getRequestURI() requestURI} to a
-	 * {@link RequestPath} and save it in the request attribute
-	 * {@link #PATH_ATTRIBUTE} for subsequent use with
-	 * {@link org.springframework.web.util.pattern.PathPattern parsed patterns}.
+	 * {@link RequestPath}.
 	 * <p>The returned {@code RequestPath} will have both the contextPath and any
 	 * servletPath prefix omitted from the {@link RequestPath#pathWithinApplication()
 	 * pathWithinApplication} it exposes.
-	 * <p>This method is typically called by the {@code DispatcherServlet} to determine
-	 * if any {@code HandlerMapping} indicates that it uses parsed patterns.
-	 * After that the pre-parsed and cached {@code RequestPath} can be accessed
-	 * through {@link #getParsedRequestPath(ServletRequest)}.
+	 * @since 6.2.12
+	 */
+	public static RequestPath parse(HttpServletRequest request) {
+		return ServletRequestPath.parse(request);
+	}
+
+	/**
+	 * Variant of {@link #parse(HttpServletRequest)} that also saves the parsed
+	 * path in the request attribute {@link #PATH_ATTRIBUTE}.
 	 */
 	public static RequestPath parseAndCache(HttpServletRequest request) {
 		RequestPath requestPath = ServletRequestPath.parse(request);
