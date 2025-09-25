@@ -29,6 +29,22 @@ import org.springframework.asm.Type;
 public class CodeEmitter extends LocalVariablesSorter {
     private static final Signature BOOLEAN_VALUE =
       TypeUtils.parseSignature("boolean booleanValue()");
+    private static final Signature BOOLEAN_VALUE_OF =
+      TypeUtils.parseSignature("Boolean valueOf(boolean)");
+    private static final Signature INTEGER_VALUE_OF =
+      TypeUtils.parseSignature("Integer valueOf(int)");
+    private static final Signature BYTE_VALUE_OF =
+      TypeUtils.parseSignature("Byte valueOf(byte)");
+    private static final Signature SHORT_VALUE_OF =
+      TypeUtils.parseSignature("Short valueOf(short)");
+    private static final Signature LONG_VALUE_OF =
+      TypeUtils.parseSignature("Long valueOf(long)");
+    private static final Signature FLOAT_VALUE_OF =
+      TypeUtils.parseSignature("Float valueOf(float)");
+    private static final Signature DOUBLE_VALUE_OF =
+      TypeUtils.parseSignature("Double valueOf(double)");
+    private static final Signature CHARACTER_VALUE_OF =
+      TypeUtils.parseSignature("Character valueOf(char)");
     private static final Signature CHAR_VALUE =
       TypeUtils.parseSignature("char charValue()");
     private static final Signature LONG_VALUE =
@@ -705,29 +721,56 @@ public class CodeEmitter extends LocalVariablesSorter {
 
     /**
      * If the argument is a primitive class, replaces the primitive value
-     * on the top of the stack with the wrapped (Object) equivalent. For
-     * example, char -> Character.
+     * on the top of the stack with the wrapped (Object) equivalent using valueOf() methods.
+	 * For example, char -> Character.
      * If the class is Void, a null is pushed onto the stack instead.
      * @param type the class indicating the current type of the top stack value
      */
     public void box(Type type) {
         if (TypeUtils.isPrimitive(type)) {
-            if (type == Type.VOID_TYPE) {
-                aconst_null();
-            } else {
-                Type boxed = TypeUtils.getBoxedType(type);
-                new_instance(boxed);
-                if (type.getSize() == 2) {
-                    // Pp -> Ppo -> oPpo -> ooPpo -> ooPp -> o
-                    dup_x2();
-                    dup_x2();
-                    pop();
-                } else {
-                    // p -> po -> opo -> oop -> o
-                    dup_x1();
-                    swap();
-                }
-                invoke_constructor(boxed, new Signature(Constants.CONSTRUCTOR_NAME, Type.VOID_TYPE, new Type[]{ type }));
+			switch (type.getSort()) {
+				case Type.VOID:
+					aconst_null();
+					break;
+				case Type.BOOLEAN:
+					invoke_static(Constants.TYPE_BOOLEAN, BOOLEAN_VALUE_OF);
+					break;
+				case Type.INT:
+					invoke_static(Constants.TYPE_INTEGER, INTEGER_VALUE_OF);
+					break;
+				case Type.BYTE:
+					invoke_static(Constants.TYPE_BYTE, BYTE_VALUE_OF);
+					break;
+				case Type.SHORT:
+					invoke_static(Constants.TYPE_SHORT, SHORT_VALUE_OF);
+					break;
+				case Type.LONG:
+					invoke_static(Constants.TYPE_LONG, LONG_VALUE_OF);
+					break;
+				case Type.FLOAT:
+					invoke_static(Constants.TYPE_FLOAT, FLOAT_VALUE_OF);
+					break;
+				case Type.DOUBLE:
+					invoke_static(Constants.TYPE_DOUBLE, DOUBLE_VALUE_OF);
+					break;
+				case Type.CHAR:
+					invoke_static(Constants.TYPE_CHARACTER, CHARACTER_VALUE_OF);
+					break;
+
+				default:
+					Type boxed = TypeUtils.getBoxedType(type);
+					new_instance(boxed);
+					if (type.getSize() == 2) {
+						// Pp -> Ppo -> oPpo -> ooPpo -> ooPp -> o
+						dup_x2();
+						dup_x2();
+						pop();
+					} else {
+						// p -> po -> opo -> oop -> o
+						dup_x1();
+						swap();
+					}
+					invoke_constructor(boxed, new Signature(Constants.CONSTRUCTOR_NAME, Type.VOID_TYPE, new Type[]{ type }));
             }
         }
     }
