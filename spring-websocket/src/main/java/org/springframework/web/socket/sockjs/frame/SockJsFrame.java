@@ -133,7 +133,7 @@ public class SockJsFrame {
 	public String toString() {
 		int maxLength = 80;
 		int contentLength = this.content.length();
-		int truncatedContentLength  = Math.min(contentLength, maxLength);
+		int truncatedContentLength = Math.min(contentLength, maxLength);
 
 		int extra = (contentLength > maxLength ? truncatedSuffix.length() : 0);
 
