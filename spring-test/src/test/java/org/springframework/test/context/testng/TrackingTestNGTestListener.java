@@ -16,6 +16,10 @@
 
 package org.springframework.test.context.testng;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
+
 import org.testng.ITestContext;
 import org.testng.ITestListener;
 import org.testng.ITestResult;
@@ -29,18 +33,20 @@ import org.testng.ITestResult;
  */
 public class TrackingTestNGTestListener implements ITestListener {
 
-	public int testStartCount = 0;
+	public final List<Throwable> throwables = new ArrayList<>();
 
-	public int testSuccessCount = 0;
+	public final AtomicInteger testStartCount = new AtomicInteger();
 
-	public int testFailureCount = 0;
+	public final AtomicInteger testSuccessCount = new AtomicInteger();
 
-	public int failedConfigurationsCount = 0;
+	public final AtomicInteger testFailureCount = new AtomicInteger();
+
+	public final AtomicInteger failedConfigurationsCount = new AtomicInteger();
 
 
 	@Override
 	public void onFinish(ITestContext testContext) {
-		this.failedConfigurationsCount += testContext.getFailedConfigurations().size();
+		this.failedConfigurationsCount.addAndGet(testContext.getFailedConfigurations().size());
 	}
 
 	@Override
@@ -53,7 +59,12 @@ public class TrackingTestNGTestListener implements ITestListener {
 
 	@Override
 	public void onTestFailure(ITestResult testResult) {
-		this.testFailureCount++;
+		this.testFailureCount.incrementAndGet();
+
+		Throwable throwable = testResult.getThrowable();
+		if (throwable != null) {
+			this.throwables.add(throwable);
+		}
 	}
 
 	@Override
@@ -62,12 +73,12 @@ public class TrackingTestNGTestListener implements ITestListener {
 
 	@Override
 	public void onTestStart(ITestResult testResult) {
-		this.testStartCount++;
+		this.testStartCount.incrementAndGet();
 	}
 
 	@Override
 	public void onTestSuccess(ITestResult testResult) {
-		this.testSuccessCount++;
+		this.testSuccessCount.incrementAndGet();
 	}
 
 }
