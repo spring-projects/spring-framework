@@ -25,12 +25,9 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.hc.client5.http.classic.HttpClient;
+import org.apache.hc.client5.http.routing.RoutingSupport;
 import org.apache.hc.core5.function.Supplier;
-import org.apache.hc.core5.http.ClassicHttpRequest;
-import org.apache.hc.core5.http.ClassicHttpResponse;
-import org.apache.hc.core5.http.Header;
-import org.apache.hc.core5.http.HttpEntity;
-import org.apache.hc.core5.http.Method;
+import org.apache.hc.core5.http.*;
 import org.apache.hc.core5.http.io.entity.NullEntity;
 import org.apache.hc.core5.http.protocol.HttpContext;
 import org.jspecify.annotations.Nullable;
@@ -96,7 +93,13 @@ final class HttpComponentsClientHttpRequest extends AbstractStreamingClientHttpR
 		else if (!Method.isSafe(this.httpRequest.getMethod())) {
 			this.httpRequest.setEntity(NullEntity.INSTANCE);
 		}
-		ClassicHttpResponse httpResponse = this.httpClient.executeOpen(null, this.httpRequest, this.httpContext);
+		HttpHost httpHost;
+		try {
+			httpHost = RoutingSupport.determineHost(this.httpRequest);
+		} catch (HttpException e) {
+			throw new IOException("Failed to determine HTTP host for request", e);
+		}
+		ClassicHttpResponse httpResponse = this.httpClient.executeOpen(httpHost, this.httpRequest, this.httpContext);
 		return new HttpComponentsClientHttpResponse(httpResponse);
 	}
 
