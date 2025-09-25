@@ -137,7 +137,7 @@ public class SockJsFrame {
 
 		int extra = (contentLength > maxLength ? truncatedSuffix.length() : 0);
 
-		StringBuilder sb = new StringBuilder(truncatedContentLength  + extra);
+		StringBuilder sb = new StringBuilder(truncatedContentLength + extra);
 
 		for (int i = 0; i < truncatedContentLength; i++) {
 			char c = this.content.charAt(i);
