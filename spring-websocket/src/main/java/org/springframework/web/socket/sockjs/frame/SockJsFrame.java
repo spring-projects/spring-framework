@@ -45,7 +45,7 @@ public class SockJsFrame {
 	private static final SockJsFrame CLOSE_ANOTHER_CONNECTION_OPEN_FRAME =
 			closeFrame(2010, "Another connection still open");
 
-	private static final String truncatedSuffix = "...(truncated)";
+	private static final String TRUNCATED_SUFFIX = "...(truncated)";
 
 	private final SockJsFrameType type;
 
@@ -135,7 +135,7 @@ public class SockJsFrame {
 		int contentLength = this.content.length();
 		int truncatedContentLength = Math.min(contentLength, maxLength);
 
-		int extra = (contentLength > maxLength ? truncatedSuffix.length() : 0);
+		int extra = (contentLength > maxLength ? TRUNCATED_SUFFIX.length() : 0);
 
 		StringBuilder sb = new StringBuilder(truncatedContentLength + extra);
 
@@ -149,7 +149,7 @@ public class SockJsFrame {
 		}
 
 		if (contentLength > maxLength) {
-			sb.append(truncatedSuffix);
+			sb.append(TRUNCATED_SUFFIX);
 		}
 
 		return "SockJsFrame content='" + sb + "'";
