@@ -18,6 +18,7 @@ package org.springframework.web.filter;
 
 import java.io.IOException;
 
+import jakarta.servlet.DispatcherType;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -127,20 +128,20 @@ public class UrlHandlerFilterTests {
 		assertThat(response.isCommitted()).isFalse();
 	}
 
-	@Test
+	@Test // gh-35538
 	void shouldNotFilterErrorAndAsyncDispatches() {
 		UrlHandlerFilter filter = UrlHandlerFilter.trailingSlashHandler("/path/**").wrapRequest().build();
 
 		assertThat(filter.shouldNotFilterAsyncDispatch())
-				.as("Should not filter async dispatch: wrapped request is reused")
+				.as("Should not filter ASYNC dispatch as wrapped request is reused")
 				.isTrue();
 
 		assertThat(filter.shouldNotFilterErrorDispatch())
-				.as("Should not filter error dispatch: it's a different path")
+				.as("Should not filter ERROR dispatch as it's an internal, fixed path")
 				.isTrue();
 	}
 
-	@Test
+	@Test // gh-35538
 	void shouldNotCacheParsedPath() throws Exception {
 		UrlHandlerFilter filter = UrlHandlerFilter.trailingSlashHandler("/path/*").wrapRequest().build();
 
@@ -155,8 +156,8 @@ public class UrlHandlerFilterTests {
 				.isFalse();
 	}
 
-	@Test
-	void shouldReplaceCachedPath() throws Exception {
+	@Test // gh-35538
+	void shouldClearPreviouslyCachedPath() throws Exception {
 		UrlHandlerFilter filter = UrlHandlerFilter.trailingSlashHandler("/path/*").wrapRequest().build();
 
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/path/123/");
@@ -165,16 +166,38 @@ public class UrlHandlerFilterTests {
 		ServletRequestPathUtils.parseAndCache(request);
 		assertThat(ServletRequestPathUtils.getParsedRequestPath(request).value()).isEqualTo("/path/123/");
 
-		PathSavingServlet servlet = new PathSavingServlet();
+		PathServlet servlet = new PathServlet();
 		MockFilterChain chain = new MockFilterChain(servlet);
 		filter.doFilterInternal(request, new MockHttpServletResponse(), chain);
 
-		assertThat(servlet.getParsedPath()).isEqualTo("/path/123");
-		assertThat(ServletRequestPathUtils.getParsedRequestPath(request).value()).isEqualTo("/path/123/");
+		assertThat(servlet.getParsedPath()).isNull();
+	}
+
+	@Test // gh-35509
+	void shouldRespectForwardedPath() throws Exception {
+		UrlHandlerFilter filter = UrlHandlerFilter.trailingSlashHandler("/requestURI/*").wrapRequest().build();
+
+		String requestURI = "/requestURI/123/";
+		MockHttpServletRequest originalRequest = new MockHttpServletRequest("GET", requestURI);
+		originalRequest.setServletPath(requestURI);
+
+		MockFilterChain chain = new MockFilterChain();
+		filter.doFilterInternal(originalRequest, new MockHttpServletResponse(), chain);
+
+		HttpServletRequest wrapped = (HttpServletRequest) chain.getRequest();
+		assertThat(wrapped).isNotNull().isNotSameAs(originalRequest);
+		assertThat(wrapped.getRequestURI()).isEqualTo("/requestURI/123");
+
+		// Change dispatcher type of underlying requests
+		originalRequest.setDispatcherType(DispatcherType.FORWARD);
+		assertThat(wrapped.getRequestURI())
+				.as("Should delegate to underlying request for the requestURI on FORWARD")
+				.isEqualTo(requestURI);
 	}
 
 
-	private static class PathSavingServlet extends HttpServlet {
+	@SuppressWarnings("serial")
+	private static class PathServlet extends HttpServlet {
 
 		private String parsedPath;
 
@@ -183,8 +206,9 @@ public class UrlHandlerFilterTests {
 		}
 
 		@Override
-		protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-			this.parsedPath = ServletRequestPathUtils.getParsedRequestPath(request).value();
+		protected void doGet(HttpServletRequest request, HttpServletResponse response) {
+			this.parsedPath = (ServletRequestPathUtils.hasParsedRequestPath(request) ?
+					ServletRequestPathUtils.getParsedRequestPath(request).value() : null);
 		}
 	}
 
