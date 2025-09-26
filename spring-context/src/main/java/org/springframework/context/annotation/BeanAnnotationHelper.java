@@ -45,17 +45,15 @@ abstract class BeanAnnotationHelper {
 
 	public static String determineBeanNameFor(Method beanMethod, ConfigurableBeanFactory beanFactory) {
 		String beanName = retrieveBeanNameFor(beanMethod);
-		if (!beanName.isEmpty()) {
-			return beanName;
+		if (beanFactory.getSingleton(AnnotationConfigUtils.CONFIGURATION_BEAN_NAME_GENERATOR)
+				instanceof ConfigurationBeanNameGenerator cbng) {
+			return cbng.deriveBeanName(MethodMetadata.introspect(beanMethod), (!beanName.isEmpty() ? beanName : null));
 		}
-		return (beanFactory.getSingleton(AnnotationConfigUtils.CONFIGURATION_BEAN_NAME_GENERATOR)
-				instanceof ConfigurationBeanNameGenerator cbng ?
-				cbng.deriveBeanName(MethodMetadata.introspect(beanMethod)) : beanMethod.getName());
+		return determineBeanNameFrom(beanName, beanMethod);
 	}
 
 	public static String determineBeanNameFor(Method beanMethod) {
-		String beanName = retrieveBeanNameFor(beanMethod);
-		return (!beanName.isEmpty() ? beanName : beanMethod.getName());
+		return determineBeanNameFrom(retrieveBeanNameFor(beanMethod), beanMethod);
 	}
 
 	private static String retrieveBeanNameFor(Method beanMethod) {
@@ -77,6 +75,10 @@ abstract class BeanAnnotationHelper {
 		return beanName;
 	}
 
+	private static String determineBeanNameFrom(String derivedBeanName, Method beanMethod) {
+		return (!derivedBeanName.isEmpty() ? derivedBeanName : beanMethod.getName());
+	}
+
 	public static boolean isScopedProxy(Method beanMethod) {
 		Boolean scopedProxy = scopedProxyCache.get(beanMethod);
 		if (scopedProxy == null) {
@@ -86,6 +88,11 @@ abstract class BeanAnnotationHelper {
 			scopedProxyCache.put(beanMethod, scopedProxy);
 		}
 		return scopedProxy;
+	}
+
+	static void clearCaches() {
+		scopedProxyCache.clear();
+		beanNameCache.clear();
 	}
 
 }

@@ -197,21 +197,15 @@ class ConfigurationClassBeanDefinitionReader {
 
 		// Consider name and any aliases.
 		String[] explicitNames = bean.getStringArray("name");
-		String beanName;
-		String localBeanName;
-		if (explicitNames.length > 0 && StringUtils.hasText(explicitNames[0])) {
-			beanName = explicitNames[0];
-			localBeanName = beanName;
+		String beanName = (explicitNames.length > 0 && StringUtils.hasText(explicitNames[0])) ? explicitNames[0] : null;
+		String localBeanName = defaultBeanName(beanName, methodName);
+		beanName = (this.importBeanNameGenerator instanceof ConfigurationBeanNameGenerator cbng ?
+				cbng.deriveBeanName(metadata, beanName) : defaultBeanName(beanName, methodName));
+		if (explicitNames.length > 0) {
 			// Register aliases even when overridden below.
 			for (int i = 1; i < explicitNames.length; i++) {
 				this.registry.registerAlias(beanName, explicitNames[i]);
 			}
-		}
-		else {
-			// Default bean name derived from method name.
-			beanName = (this.importBeanNameGenerator instanceof ConfigurationBeanNameGenerator cbng ?
-					cbng.deriveBeanName(metadata) : methodName);
-			localBeanName = methodName;
 		}
 
 		ConfigurationClassBeanDefinition beanDef =
@@ -304,6 +298,10 @@ class ConfigurationClassBeanDefinitionReader {
 					.formatted(configClass.getMetadata().getClassName(), beanName));
 		}
 		this.registry.registerBeanDefinition(beanName, beanDefToRegister);
+	}
+
+	private static String defaultBeanName(@Nullable String beanName, String methodName) {
+		return (beanName != null ? beanName : methodName);
 	}
 
 	@SuppressWarnings("NullAway") // Reflection
