@@ -44,6 +44,7 @@ import org.apache.commons.logging.LogFactory;
  * @see #beforeAccess()
  * @see #afterAccess()
  * @see org.springframework.aop.interceptor.ConcurrencyThrottleInterceptor
+ * @see org.springframework.core.concurrency.ConcurrencyLimitTemplate
  * @see java.io.Serializable
  */
 @SuppressWarnings("serial")
