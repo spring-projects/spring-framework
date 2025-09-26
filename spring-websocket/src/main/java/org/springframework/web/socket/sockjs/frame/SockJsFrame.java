@@ -47,6 +47,10 @@ public class SockJsFrame {
 
 	private static final String TRUNCATED_SUFFIX = "...(truncated)";
 
+	private static final String FRAME_PREFIX = "SockJsFrame content='";
+
+	private static final int MAX_CONTENT_PREVIEW_LENGTH = 80;
+
 	private final SockJsFrameType type;
 
 	private final String content;
@@ -131,15 +135,17 @@ public class SockJsFrame {
 
 	@Override
 	public String toString() {
-		int maxLength = 80;
 		int contentLength = this.content.length();
-		int truncatedContentLength = Math.min(contentLength, maxLength);
+		int truncatedLength = Math.min(contentLength, MAX_CONTENT_PREVIEW_LENGTH);
+		boolean isTruncated = contentLength > MAX_CONTENT_PREVIEW_LENGTH;
 
-		int extra = (contentLength > maxLength ? TRUNCATED_SUFFIX.length() : 0);
+		int suffixLength = isTruncated ? TRUNCATED_SUFFIX.length() : 0;
+		int initialCapacity = FRAME_PREFIX.length() + truncatedLength + suffixLength + 1;
+		StringBuilder sb = new StringBuilder(initialCapacity);
 
-		StringBuilder sb = new StringBuilder(truncatedContentLength + extra);
+		sb.append(FRAME_PREFIX);
 
-		for (int i = 0; i < truncatedContentLength; i++) {
+		for (int i = 0; i < truncatedLength; i++) {
 			char c = this.content.charAt(i);
 			switch (c) {
 				case '\n' -> sb.append("\\n");
@@ -148,11 +154,13 @@ public class SockJsFrame {
 			}
 		}
 
-		if (contentLength > maxLength) {
+		if (isTruncated) {
 			sb.append(TRUNCATED_SUFFIX);
 		}
 
-		return "SockJsFrame content='" + sb + "'";
+		sb.append('\'');
+
+		return sb.toString();
 	}
 
 
