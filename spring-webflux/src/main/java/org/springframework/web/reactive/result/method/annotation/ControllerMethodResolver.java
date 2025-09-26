@@ -242,6 +242,7 @@ class ControllerMethodResolver {
 			result.add(new SessionStatusMethodArgumentResolver());
 		}
 		result.add(new WebSessionMethodArgumentResolver(adapterRegistry));
+		result.add(new ApiVersionMethodArgumentResolver());
 		if (KotlinDetector.isKotlinPresent()) {
 			result.add(new ContinuationHandlerMethodArgumentResolver());
 		}

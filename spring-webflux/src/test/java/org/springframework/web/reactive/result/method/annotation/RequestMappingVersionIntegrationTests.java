@@ -22,6 +22,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.accept.SemanticApiVersionParser.Version;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.HttpClientErrorException;
@@ -104,7 +105,8 @@ public class RequestMappingVersionIntegrationTests extends AbstractRequestMappin
 		}
 
 		@GetMapping(version = "1.2+")
-		String version1_2() {
+		String version1_2(Version version) {
+			assertThat(version).isNotNull();
 			return getBody("1.2");
 		}
 

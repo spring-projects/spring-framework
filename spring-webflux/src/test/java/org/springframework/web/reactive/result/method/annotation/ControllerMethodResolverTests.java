@@ -120,6 +120,7 @@ class ControllerMethodResolverTests {
 		assertThat(next(resolvers, index).getClass()).isEqualTo(PrincipalMethodArgumentResolver.class);
 		assertThat(next(resolvers, index).getClass()).isEqualTo(SessionStatusMethodArgumentResolver.class);
 		assertThat(next(resolvers, index).getClass()).isEqualTo(WebSessionMethodArgumentResolver.class);
+		assertThat(next(resolvers, index).getClass()).isEqualTo(ApiVersionMethodArgumentResolver.class);
 		assertThat(next(resolvers, index).getClass()).isEqualTo(ContinuationHandlerMethodArgumentResolver.class);
 
 		assertThat(next(resolvers, index).getClass()).isEqualTo(CustomArgumentResolver.class);
@@ -157,6 +158,7 @@ class ControllerMethodResolverTests {
 		assertThat(next(resolvers, index).getClass()).isEqualTo(ServerWebExchangeMethodArgumentResolver.class);
 		assertThat(next(resolvers, index).getClass()).isEqualTo(PrincipalMethodArgumentResolver.class);
 		assertThat(next(resolvers, index).getClass()).isEqualTo(WebSessionMethodArgumentResolver.class);
+		assertThat(next(resolvers, index).getClass()).isEqualTo(ApiVersionMethodArgumentResolver.class);
 		assertThat(next(resolvers, index).getClass()).isEqualTo(ContinuationHandlerMethodArgumentResolver.class);
 
 		assertThat(next(resolvers, index).getClass()).isEqualTo(CustomArgumentResolver.class);
@@ -190,6 +192,7 @@ class ControllerMethodResolverTests {
 
 		assertThat(next(resolvers, index).getClass()).isEqualTo(ModelMethodArgumentResolver.class);
 		assertThat(next(resolvers, index).getClass()).isEqualTo(ServerWebExchangeMethodArgumentResolver.class);
+		assertThat(next(resolvers, index).getClass()).isEqualTo(ApiVersionMethodArgumentResolver.class);
 
 		assertThat(next(resolvers, index).getClass()).isEqualTo(CustomSyncArgumentResolver.class);
 
@@ -224,6 +227,7 @@ class ControllerMethodResolverTests {
 		assertThat(next(resolvers, index).getClass()).isEqualTo(ServerWebExchangeMethodArgumentResolver.class);
 		assertThat(next(resolvers, index).getClass()).isEqualTo(PrincipalMethodArgumentResolver.class);
 		assertThat(next(resolvers, index).getClass()).isEqualTo(WebSessionMethodArgumentResolver.class);
+		assertThat(next(resolvers, index).getClass()).isEqualTo(ApiVersionMethodArgumentResolver.class);
 		assertThat(next(resolvers, index).getClass()).isEqualTo(ContinuationHandlerMethodArgumentResolver.class);
 
 		assertThat(next(resolvers, index).getClass()).isEqualTo(CustomArgumentResolver.class);
