@@ -45,11 +45,6 @@ public class SockJsFrame {
 	private static final SockJsFrame CLOSE_ANOTHER_CONNECTION_OPEN_FRAME =
 			closeFrame(2010, "Another connection still open");
 
-	private static final String TRUNCATED_SUFFIX = "...(truncated)";
-
-	private static final String FRAME_PREFIX = "SockJsFrame content='";
-
-	private static final int MAX_CONTENT_PREVIEW_LENGTH = 80;
 
 	private final SockJsFrameType type;
 
@@ -87,6 +82,7 @@ public class SockJsFrame {
 		}
 	}
 
+
 	/**
 	 * Return the SockJS frame type.
 	 */
@@ -122,6 +118,7 @@ public class SockJsFrame {
 		}
 	}
 
+
 	@Override
 	public boolean equals(@Nullable Object other) {
 		return (this == other || (other instanceof SockJsFrame that &&
@@ -135,27 +132,23 @@ public class SockJsFrame {
 
 	@Override
 	public String toString() {
-		int contentLength = this.content.length();
-		int truncatedLength = Math.min(contentLength, MAX_CONTENT_PREVIEW_LENGTH);
-		boolean isTruncated = contentLength > MAX_CONTENT_PREVIEW_LENGTH;
+		int maxLength = 80;
+		int length = Math.min(this.content.length(), maxLength);
 
-		int suffixLength = isTruncated ? TRUNCATED_SUFFIX.length() : 0;
-		int initialCapacity = FRAME_PREFIX.length() + truncatedLength + suffixLength + 1;
-		StringBuilder sb = new StringBuilder(initialCapacity);
+		StringBuilder sb = new StringBuilder(length + 36);
+		sb.append("SockJsFrame content='");
 
-		sb.append(FRAME_PREFIX);
-
-		for (int i = 0; i < truncatedLength; i++) {
+		for (int i = 0; i < length; i++) {
 			char c = this.content.charAt(i);
-			switch (c) {
+			switch(c) {
 				case '\n' -> sb.append("\\n");
 				case '\r' -> sb.append("\\r");
 				default -> sb.append(c);
 			}
 		}
 
-		if (isTruncated) {
-			sb.append(TRUNCATED_SUFFIX);
+		if (length < this.content.length()) {
+			sb.append("...(truncated)");
 		}
 
 		sb.append('\'');
