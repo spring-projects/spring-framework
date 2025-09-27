@@ -53,11 +53,10 @@ public class SessionAttributeMethodArgumentResolver extends AbstractNamedValueAr
 		return new NamedValueInfo(ann.name(), ann.required(), ValueConstants.DEFAULT_NONE);
 	}
 
+	@SuppressWarnings("NullAway") // https://github.com/uber/NullAway/issues/1290
 	@Override
 	protected Mono<Object> resolveName(String name, MethodParameter parameter, ServerWebExchange exchange) {
-		return exchange.getSession()
-				.filter(session -> session.getAttribute(name) != null)
-				.map(session -> session.getAttribute(name));
+		return exchange.getSession().mapNotNull(session -> session.getAttribute(name));
 	}
 
 	@Override
