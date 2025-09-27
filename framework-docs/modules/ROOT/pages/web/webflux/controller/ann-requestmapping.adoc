@@ -112,10 +112,11 @@ You can map requests by using glob patterns and wildcards:
 | `+{name}+`
 | Matches a path segment and captures it as a variable named "name"
 | `+"/projects/{project}/versions"+` matches `+"/projects/spring/versions"+` and captures `+project=spring+`
+`+"/projects/{project}/versions"+` does not match `+"/projects/spring/framework/versions"+` as it captures a single path segment.
 
-| `+{name:[a-z]+}+`
-| Matches the regexp `+"[a-z]+"+` as a path variable named "name"
-| `+"/projects/{project:[a-z]+}/versions"+` matches `+"/projects/spring/versions"+` but not `+"/projects/spring1/versions"+`
+| `{name:[a-z]+}`
+| Matches the regexp `[a-z]+` as a path variable named "name"
+| `/projects/{project:[a-z]+}/versions` matches `/projects/spring/versions` but not `/projects/spring1/versions`
 
 | `+{*path}+`
 | Matches zero or more path segments until the end of the path and captures it as a variable named "path"
