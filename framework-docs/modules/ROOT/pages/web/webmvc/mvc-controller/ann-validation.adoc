@@ -20,6 +20,13 @@ directly on method parameters, or on the method (for the return value), then met
 validation must be applied, and that supersedes validation at the method argument level
 because method validation covers both method parameter constraints and nested constraints
 via `@Valid`. The exception raised in this case is `HandlerMethodValidationException`.
++
+Container parameters annotated with `@Valid`—for example,
+`@RequestBody List<Foo> items` or `@RequestBody @Valid List<@Valid Foo> items`—are
+likewise subject to method validation. They are detected by
+`HandlerMethod.MethodValidationInitializer.checkArguments(…)`, and any
+resulting constraint violations cause a `HandlerMethodValidationException`
+to be raised.
 
 Applications must handle both `MethodArgumentNotValidException` and
 `HandlerMethodValidationException` as either may be raised depending on the controller
