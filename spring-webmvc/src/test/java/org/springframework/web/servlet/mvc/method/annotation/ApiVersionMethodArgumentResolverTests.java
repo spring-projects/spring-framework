@@ -32,6 +32,7 @@ import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.InstanceOfAssertFactories.OPTIONAL;
 
 /**
  * Test fixture with {@link ApiVersionMethodArgumentResolver}.
@@ -102,13 +103,13 @@ class ApiVersionMethodArgumentResolverTests {
 		this.servletRequest.setAttribute(HandlerMapping.API_VERSION_ATTRIBUTE, version);
 
 		Object actual = this.resolver.resolveArgument(this.optionalParam, this.mav, this.webRequest, null);
-		assertThat(((Optional) actual)).hasValue(version);
+		assertThat(actual).asInstanceOf(OPTIONAL).hasValue(version);
 	}
 
 	@Test
 	void resolveOptionalArgumentWhenEmpty() throws Exception {
 		Object actual = this.resolver.resolveArgument(this.optionalParam, this.mav, this.webRequest, null);
-		assertThat(((Optional) actual)).isEmpty();
+		assertThat(actual).asInstanceOf(OPTIONAL).isEmpty();
 	}
 
 

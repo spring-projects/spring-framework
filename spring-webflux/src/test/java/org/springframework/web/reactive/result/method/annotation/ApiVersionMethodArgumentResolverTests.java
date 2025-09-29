@@ -32,6 +32,7 @@ import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRe
 import org.springframework.web.testfixture.server.MockServerWebExchange;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.InstanceOfAssertFactories.OPTIONAL;
 
 /**
  * Tests for {@link ApiVersionMethodArgumentResolver}.
@@ -94,13 +95,13 @@ class ApiVersionMethodArgumentResolverTests {
 		this.exchange.getAttributes().put(HandlerMapping.API_VERSION_ATTRIBUTE, version);
 
 		Object actual = this.resolver.resolveArgumentValue(this.optionalParam, new BindingContext(), exchange);
-		assertThat(((Optional) actual)).hasValue(version);
+		assertThat(actual).asInstanceOf(OPTIONAL).hasValue(version);
 	}
 
 	@Test
 	void resolveOptionalArgumentWhenEmpty() {
 		Object actual = this.resolver.resolveArgumentValue(this.optionalParam, new BindingContext(), exchange);
-		assertThat(((Optional) actual)).isEmpty();
+		assertThat(actual).asInstanceOf(OPTIONAL).isEmpty();
 	}
 
 
