@@ -233,8 +233,7 @@ public class ResourceHttpMessageWriter implements HttpMessageWriter<Resource> {
 			ranges = request.getHeaders().getRange();
 		}
 		catch (IllegalArgumentException ex) {
-			response.setStatusCode(HttpStatus.REQUESTED_RANGE_NOT_SATISFIABLE);
-			return response.setComplete();
+			return handleInvalidRange(response);
 		}
 
 		return Mono.from(inputStream).flatMap(resource -> {
@@ -242,7 +241,13 @@ public class ResourceHttpMessageWriter implements HttpMessageWriter<Resource> {
 				return writeResource(resource, elementType, mediaType, response, hints);
 			}
 			response.setStatusCode(HttpStatus.PARTIAL_CONTENT);
-			List<ResourceRegion> regions = HttpRange.toResourceRegions(ranges, resource);
+			List<ResourceRegion> regions;
+			try {
+				regions = HttpRange.toResourceRegions(ranges, resource);
+			}
+			catch (IllegalArgumentException ex) {
+				return handleInvalidRange(response);
+			}
 			MediaType resourceMediaType = getResourceMediaType(mediaType, resource, hints);
 			if (regions.size() == 1){
 				ResourceRegion region = regions.get(0);
@@ -266,6 +271,11 @@ public class ResourceHttpMessageWriter implements HttpMessageWriter<Resource> {
 				return encodeAndWriteRegions(Flux.fromIterable(regions), resourceMediaType, response, allHints);
 			}
 		});
+	}
+
+	private static Mono<Void> handleInvalidRange(ServerHttpResponse response) {
+		response.setStatusCode(HttpStatus.REQUESTED_RANGE_NOT_SATISFIABLE);
+		return response.setComplete();
 	}
 
 	private Mono<Void> writeSingleRegion(ResourceRegion region, ReactiveHttpOutputMessage message,

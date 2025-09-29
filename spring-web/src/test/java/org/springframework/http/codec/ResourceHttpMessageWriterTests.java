@@ -156,6 +156,15 @@ class ResourceHttpMessageWriterTests {
 		assertThat(this.response.getStatusCode()).isEqualTo(HttpStatus.REQUESTED_RANGE_NOT_SATISFIABLE);
 	}
 
+	@Test // gh-35536
+	void invalidRangePosition() {
+
+		testWrite(get("/").header(HttpHeaders.RANGE, "bytes=2000-5000").build());
+
+		assertThat(this.response.getHeaders().getFirst(HttpHeaders.ACCEPT_RANGES)).isEqualTo("bytes");
+		assertThat(this.response.getStatusCode()).isEqualTo(HttpStatus.REQUESTED_RANGE_NOT_SATISFIABLE);
+	}
+
 
 	private void testWrite(MockServerHttpRequest request) {
 		Mono<Void> mono = this.writer.write(this.input, null, null, TEXT_PLAIN, request, this.response, HINTS);
