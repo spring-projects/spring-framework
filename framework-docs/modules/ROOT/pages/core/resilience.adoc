@@ -96,17 +96,16 @@ This is meant to protect the target resource from being accessed from too many t
 the same time, similar to the effect of a pool size limit for a thread pool or a
 connection pool that blocks access if its limit is reached.
 
-You may optionally set the limit to 1, effectively locking access to the target bean
+You may optionally set the limit to `1`, effectively locking access to the target bean
 instance:
 
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
-@ConcurrencyLimit(1) // <1>
+@ConcurrencyLimit(1)
 public void sendNotification() {
     this.jmsClient.destination("notifications").send(...);
 }
 ----
-<1> 1 is the default, but specifying it makes the intent clearer.
 	
 Such limiting is particularly useful with Virtual Threads where there is generally no
 thread pool limit in place. For asynchronous tasks, this can be constrained on
@@ -115,6 +114,9 @@ For synchronous invocations, this annotation provides equivalent behavior throug
 {spring-framework-api}/aop/interceptor/ConcurrencyThrottleInterceptor.html[`ConcurrencyThrottleInterceptor`]
 which has been available since Spring Framework 1.0 for programmatic use with the AOP
 framework.
+
+TIP: `@ConcurrencyLimit` also has a `limitString` attribute that provides property
+placeholder and SpEL support, as an alternative to the `int` based examples above.
 
 
 [[resilience-annotations-configuration]]
