@@ -37,6 +37,9 @@ public void sendNotification() {
 }
 ----
 
+NOTE: `@Retryable(MessageDeliveryException.class)` is a shortcut for
+`@Retryable(includes{nbsp}={nbsp}MessageDeliveryException.class)`.
+
 Or for 5 retry attempts and an exponential back-off strategy with a bit of jitter:
 
 [source,java,indent=0,subs="verbatim,quotes"]
@@ -68,9 +71,9 @@ public Mono<Void> sendNotification() {
 For details on the various characteristics, see the available annotation attributes in
 {spring-framework-api}/resilience/annotation/Retryable.html[`@Retryable`].
 
-NOTE: There are `String` variants with placeholder support available for several
-attributes as well, as an alternative to the specifically typed annotation attributes used
-in the above examples.
+TIP: Several attributes in `@Retryable` have `String` variants that provide property
+placeholder and SpEL support, as an alternative to the specifically typed annotation
+attributes used in the above examples.
 
 
 [[resilience-annotations-concurrencylimit]]
