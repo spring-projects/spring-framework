@@ -74,7 +74,6 @@ import org.springframework.web.util.UrlPathHelper;
  * @author Arjen Poutsma
  * @author Sam Brannen
  * @author Kamill Sokol
- * @author Réda Housni Alaoui
  * @since 6.2
  * @param <B> a self reference to the builder type
  */
@@ -855,17 +854,14 @@ public abstract class AbstractMockHttpServletRequestBuilder<B extends AbstractMo
 		request.setContextPath(this.contextPath);
 		request.setServletPath(this.servletPath);
 
-		String pathInfoToUse = this.pathInfo;
-		if ("".equals(pathInfoToUse)) {
-			if (!requestUri.startsWith(this.contextPath + this.servletPath)) {
-				throw new IllegalArgumentException(
-						"Invalid servlet path [" + this.servletPath + "] for request URI [" + requestUri + "]");
-			}
-			String extraPath = requestUri.substring(this.contextPath.length() + this.servletPath.length());
-			pathInfoToUse = (StringUtils.hasText(extraPath) ?
-					UrlPathHelper.defaultInstance.decodeRequestString(request, extraPath) : null);
+		String path = this.pathInfo;
+		if ("".equals(path)) {
+			Assert.isTrue(requestUri.startsWith(this.contextPath + this.servletPath),
+					() -> "Invalid servlet path [" + this.servletPath + "] for request URI [" + requestUri + "]");
+			String other = requestUri.substring(this.contextPath.length() + this.servletPath.length());
+			path = (StringUtils.hasText(other) ? UrlPathHelper.defaultInstance.decodeRequestString(request, other) : null);
 		}
-		request.setPathInfo(pathInfoToUse);
+		request.setPathInfo(path);
 	}
 
 	private void addRequestParams(MockHttpServletRequest request, MultiValueMap<String, String> map) {

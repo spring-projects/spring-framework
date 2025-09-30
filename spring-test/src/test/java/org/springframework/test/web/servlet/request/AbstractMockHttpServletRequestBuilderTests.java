@@ -98,7 +98,7 @@ class AbstractMockHttpServletRequestBuilderTests {
 	}
 
 
-	@Test
+	@Test // gh-35493
 	void pathInfoIsNotMutatedByBuildMethod() {
 		TestRequestBuilder builder = new TestRequestBuilder(HttpMethod.GET).uri("/b");
 		assertThat(buildRequest(builder).getPathInfo()).isEqualTo("/b");
