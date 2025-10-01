@@ -51,7 +51,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.MimeTypeUtils;
 
 /**
- * {@code HttpMessageWriter} that can write a {@link Resource} from both`` client
+ * {@code HttpMessageWriter} that can write a {@link Resource} from both client
  * and server perspectives.
  *
  * <p>From a server perspective, the server-side only write method supports
