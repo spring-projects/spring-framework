@@ -38,7 +38,7 @@ public abstract class SupplierUtils {
 	 * @return the supplier's result, or {@code null} if none
 	 */
 	@Contract("null -> null")
-	public static <T> @Nullable T resolve(@Nullable Supplier<T> supplier) {
+	public static <T extends @Nullable Object> @Nullable T resolve(@Nullable Supplier<T> supplier) {
 		return (supplier != null ? supplier.get() : null);
 	}
 

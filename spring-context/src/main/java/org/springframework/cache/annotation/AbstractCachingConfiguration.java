@@ -50,13 +50,17 @@ public abstract class AbstractCachingConfiguration implements ImportAware {
 
 	protected @Nullable AnnotationAttributes enableCaching;
 
-	protected @Nullable Supplier<@Nullable CacheManager> cacheManager;
+	@SuppressWarnings("NullAway.Init")
+	protected Supplier<@Nullable CacheManager> cacheManager;
 
-	protected @Nullable Supplier<@Nullable CacheResolver> cacheResolver;
+	@SuppressWarnings("NullAway.Init")
+	protected Supplier<@Nullable CacheResolver> cacheResolver;
 
-	protected @Nullable Supplier<@Nullable KeyGenerator> keyGenerator;
+	@SuppressWarnings("NullAway.Init")
+	protected Supplier<@Nullable KeyGenerator> keyGenerator;
 
-	protected @Nullable Supplier<@Nullable CacheErrorHandler> errorHandler;
+	@SuppressWarnings("NullAway.Init")
+	protected Supplier<@Nullable CacheErrorHandler> errorHandler;
 
 
 	@Override
@@ -101,7 +105,7 @@ public abstract class AbstractCachingConfiguration implements ImportAware {
 
 	protected static class CachingConfigurerSupplier {
 
-		private final SingletonSupplier<CachingConfigurer> supplier;
+		private final SingletonSupplier<@Nullable CachingConfigurer> supplier;
 
 		public CachingConfigurerSupplier(Supplier<@Nullable CachingConfigurer> supplier) {
 			this.supplier = SingletonSupplier.ofNullable(supplier);
