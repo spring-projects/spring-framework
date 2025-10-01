@@ -85,11 +85,11 @@ element. The following example shows how to use it:
 
 [source,xml,indent=0,subs="verbatim,quotes"]
 ----
-	<bean id="theTargetBean" class="..."/>
+	<bean id="collaborator" class="..." />
 
-	<bean id="theClientBean" class="...">
+	<bean id="client" class="...">
 		<property name="targetName">
-			<idref bean="theTargetBean"/>
+			<idref bean="collaborator" />
 		</property>
 	</bean>
 ----
@@ -99,10 +99,10 @@ following snippet:
 
 [source,xml,indent=0,subs="verbatim,quotes"]
 ----
-	<bean id="theTargetBean" class="..." />
+	<bean id="collaborator" class="..." />
 
-	<bean id="theClientBean" class="...">
-		<property name="targetName" ref="theTargetBean"/>
+	<bean id="client" class="...">
+		<property name="targetName" value="collaborator" />
 	</bean>
 ----
 
