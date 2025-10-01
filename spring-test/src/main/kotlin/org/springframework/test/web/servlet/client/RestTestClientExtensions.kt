@@ -22,7 +22,7 @@ import org.springframework.test.web.servlet.client.RestTestClient.ResponseSpec
 
 /**
  * Extension for [ResponseSpec.expectBody] providing an `expectBody<Foo>()` variant
- * leveraging Kotlin reified type parameters. This extension is not subject ot type
+ * leveraging Kotlin reified type parameters. This extension is not subject to type
  * erasure and retains actual generic type arguments.
  *
  * @author Sebastien Deleuze
