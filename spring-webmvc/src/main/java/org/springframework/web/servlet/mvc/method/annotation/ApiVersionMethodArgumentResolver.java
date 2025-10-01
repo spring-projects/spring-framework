@@ -32,7 +32,7 @@ import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.servlet.HandlerMapping;
 
 /**
- * Resolvers argument values of type {@link SemanticApiVersionParser.Version}.
+ * Resolves argument values of type {@link SemanticApiVersionParser.Version}.
  *
  * @author Rossen Stoyanchev
  * @since 7.0

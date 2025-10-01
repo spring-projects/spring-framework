@@ -29,7 +29,7 @@ import org.springframework.web.reactive.result.method.SyncHandlerMethodArgumentR
 import org.springframework.web.server.ServerWebExchange;
 
 /**
- * Resolvers argument values of type {@link SemanticApiVersionParser.Version}.
+ * Resolves argument values of type {@link SemanticApiVersionParser.Version}.
  *
  * @author Rossen Stoyanchev
  * @since 7.0
