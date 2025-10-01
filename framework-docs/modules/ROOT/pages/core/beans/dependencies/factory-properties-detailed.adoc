@@ -107,20 +107,16 @@ following snippet:
 ----
 
 The first form is preferable to the second, because using the `idref` tag lets the
-container validate at deployment time that the referenced, named bean actually
-exists. In the second variation, no validation is performed on the value that is passed
-to the `targetName` property of the `client` bean. Typos are only discovered (with most
+container validate at deployment time that the referenced, named bean actually exists. In
+the second variation, no validation is performed on the value that is passed to the
+`targetName` property of the `client` bean. Typos are therefore only discovered (with most
 likely fatal results) when the `client` bean is actually instantiated. If the `client`
-bean is a xref:core/beans/factory-scopes.adoc[prototype] bean, this typo and the resulting exception
-may only be discovered long after the container is deployed.
+bean is a xref:core/beans/factory-scopes.adoc[prototype] bean, this typo and the resulting
+exception may only be discovered long after the container is deployed.
 
-NOTE: The `local` attribute on the `idref` element is no longer supported in the 4.0 beans
-XSD, since it does not provide value over a regular `bean` reference any more. Change
-your existing `idref local` references to `idref bean` when upgrading to the 4.0 schema.
-
-A common place (at least in versions earlier than Spring 2.0) where the `<idref/>` element
-brings value is in the configuration of xref:core/aop-api/pfb.adoc#aop-pfb-1[AOP interceptors] in a
-`ProxyFactoryBean` bean definition. Using `<idref/>` elements when you specify the
+NOTE: A common place (at least in versions earlier than Spring 2.0) where the `<idref/>`
+element brings value is in the configuration of xref:core/aop-api/pfb.adoc#aop-pfb-1[AOP interceptors]
+in a `ProxyFactoryBean` bean definition. Using `<idref/>` elements when you specify the
 interceptor names prevents you from misspelling an interceptor ID.
 
 
