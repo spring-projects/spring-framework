@@ -101,10 +101,9 @@ public @interface EventListener {
 
 	/**
 	 * The event classes that this listener handles.
-	 * <p>If this attribute is specified with a single value, the
-	 * annotated method may optionally accept a single parameter.
-	 * However, if this attribute is specified with multiple values,
-	 * the annotated method must <em>not</em> declare any parameters.
+	 * <p>The annotated method may optionally accept a single parameter
+	 * of the given event class, or of a common base class or interface
+	 * for all given event classes.
 	 */
 	@AliasFor("value")
 	Class<?>[] classes() default {};

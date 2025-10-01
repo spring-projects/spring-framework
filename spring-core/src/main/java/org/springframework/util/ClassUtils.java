@@ -1466,8 +1466,8 @@ public abstract class ClassUtils {
 	}
 
 	/**
-	 * Get the highest publicly accessible method in the supplied method's type hierarchy that
-	 * has a method signature equivalent to the supplied method, if possible.
+	 * Get the closest publicly accessible (and exported) method in the supplied method's type
+	 * hierarchy that has a method signature equivalent to the supplied method, if possible.
 	 * <p>Otherwise, this method recursively searches the class hierarchy and implemented
 	 * interfaces for an equivalent method that is {@code public} and declared in a
 	 * {@code public} type.
@@ -1490,18 +1490,21 @@ public abstract class ClassUtils {
 	 * @see #getMostSpecificMethod(Method, Class)
 	 */
 	public static Method getPubliclyAccessibleMethodIfPossible(Method method, @Nullable Class<?> targetClass) {
-		// If the method is not public, we can abort the search immediately.
-		if (!Modifier.isPublic(method.getModifiers())) {
+		Class<?> declaringClass = method.getDeclaringClass();
+		// If the method is not public or its declaring class is public and exported already,
+		// we can abort the search immediately (avoiding reflection as well as cache access).
+		if (!Modifier.isPublic(method.getModifiers()) || (Modifier.isPublic(declaringClass.getModifiers()) &&
+				declaringClass.getModule().isExported(declaringClass.getPackageName(), ClassUtils.class.getModule()))) {
 			return method;
 		}
 
 		Method interfaceMethod = getInterfaceMethodIfPossible(method, targetClass, true);
 		// If we found a method in a public interface, return the interface method.
-		if (interfaceMethod != method) {
+		if (interfaceMethod != method && interfaceMethod.getDeclaringClass().getModule().isExported(
+				interfaceMethod.getDeclaringClass().getPackageName(), ClassUtils.class.getModule())) {
 			return interfaceMethod;
 		}
 
-		Class<?> declaringClass = method.getDeclaringClass();
 		// Bypass cache for java.lang.Object unless it is actually an overridable method declared there.
 		if (declaringClass.getSuperclass() == Object.class && !ReflectionUtils.isObjectMethod(method)) {
 			return method;
@@ -1522,7 +1525,9 @@ public abstract class ClassUtils {
 			if (method == null) {
 				break;
 			}
-			if (Modifier.isPublic(method.getDeclaringClass().getModifiers())) {
+			if (Modifier.isPublic(method.getDeclaringClass().getModifiers()) &&
+					method.getDeclaringClass().getModule().isExported(
+							method.getDeclaringClass().getPackageName(), ClassUtils.class.getModule())) {
 				result = method;
 			}
 			current = method.getDeclaringClass().getSuperclass();
