@@ -16,6 +16,7 @@
 
 package org.springframework.transaction.reactive;
 
+import org.jspecify.annotations.Nullable;
 import org.reactivestreams.Publisher;
 
 import org.springframework.transaction.ReactiveTransaction;
@@ -36,7 +37,7 @@ import org.springframework.transaction.ReactiveTransaction;
  * @see TransactionalOperator
  */
 @FunctionalInterface
-public interface TransactionCallback<T> {
+public interface TransactionCallback<T extends @Nullable Object> {
 
 	/**
 	 * Gets called by {@link TransactionalOperator} within a transactional context.

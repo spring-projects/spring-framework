@@ -41,7 +41,7 @@ final class WithoutTransactionOperations implements TransactionOperations {
 
 
 	@Override
-	public <T> @Nullable T execute(TransactionCallback<T> action) throws TransactionException {
+	public <T extends @Nullable Object> T execute(TransactionCallback<T> action) throws TransactionException {
 		return action.doInTransaction(new SimpleTransactionStatus(false));
 	}
 

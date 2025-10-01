@@ -29,7 +29,7 @@ import org.springframework.transaction.TransactionStatus;
  * @since 28.03.2003
  * @see TransactionTemplate
  */
-public abstract class TransactionCallbackWithoutResult implements TransactionCallback<Object> {
+public abstract class TransactionCallbackWithoutResult implements TransactionCallback<@Nullable Object> {
 
 	@Override
 	public final @Nullable Object doInTransaction(TransactionStatus status) {

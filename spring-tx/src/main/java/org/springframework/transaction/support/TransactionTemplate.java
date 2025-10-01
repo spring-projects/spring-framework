@@ -124,7 +124,7 @@ public class TransactionTemplate extends DefaultTransactionDefinition
 
 
 	@Override
-	public <T> @Nullable T execute(TransactionCallback<T> action) throws TransactionException {
+	public <T extends @Nullable Object> T execute(TransactionCallback<T> action) throws TransactionException {
 		Assert.state(this.transactionManager != null, "No PlatformTransactionManager set");
 
 		if (this.transactionManager instanceof CallbackPreferringPlatformTransactionManager cpptm) {

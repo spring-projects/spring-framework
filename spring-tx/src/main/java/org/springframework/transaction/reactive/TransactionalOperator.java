@@ -16,6 +16,7 @@
 
 package org.springframework.transaction.reactive;
 
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -59,7 +60,7 @@ public interface TransactionalOperator {
 	 * @throws TransactionException in case of initialization, rollback, or system errors
 	 * @throws RuntimeException if thrown by the TransactionCallback
 	 */
-	default <T> Flux<T> transactional(Flux<T> flux) {
+	default <T extends @Nullable Object> Flux<T> transactional(Flux<T> flux) {
 		return execute(it -> flux);
 	}
 
@@ -70,7 +71,7 @@ public interface TransactionalOperator {
 	 * @throws TransactionException in case of initialization, rollback, or system errors
 	 * @throws RuntimeException if thrown by the TransactionCallback
 	 */
-	default <T> Mono<T> transactional(Mono<T> mono) {
+	default <T extends @Nullable Object> Mono<T> transactional(Mono<T> mono) {
 		return execute(it -> mono).singleOrEmpty();
 	}
 
@@ -85,7 +86,7 @@ public interface TransactionalOperator {
 	 * @throws TransactionException in case of initialization, rollback, or system errors
 	 * @throws RuntimeException if thrown by the TransactionCallback
 	 */
-	<T> Flux<T> execute(TransactionCallback<T> action) throws TransactionException;
+	<T extends @Nullable Object> Flux<T> execute(TransactionCallback<T> action) throws TransactionException;
 
 
 	// Static builder methods
