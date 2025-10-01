@@ -898,16 +898,14 @@ public abstract class AbstractMockHttpServletRequestBuilder<B extends AbstractMo
 		request.setContextPath(this.contextPath);
 		request.setServletPath(this.servletPath);
 
-		if ("".equals(this.pathInfo)) {
-			if (!requestUri.startsWith(this.contextPath + this.servletPath)) {
-				throw new IllegalArgumentException(
-						"Invalid servlet path [" + this.servletPath + "] for request URI [" + requestUri + "]");
-			}
-			String extraPath = requestUri.substring(this.contextPath.length() + this.servletPath.length());
-			this.pathInfo = (StringUtils.hasText(extraPath) ?
-					UrlPathHelper.defaultInstance.decodeRequestString(request, extraPath) : null);
+		String path = this.pathInfo;
+		if ("".equals(path)) {
+			Assert.isTrue(requestUri.startsWith(this.contextPath + this.servletPath),
+					() -> "Invalid servlet path [" + this.servletPath + "] for request URI [" + requestUri + "]");
+			String other = requestUri.substring(this.contextPath.length() + this.servletPath.length());
+			path = (StringUtils.hasText(other) ? UrlPathHelper.defaultInstance.decodeRequestString(request, other) : null);
 		}
-		request.setPathInfo(this.pathInfo);
+		request.setPathInfo(path);
 	}
 
 	private void addRequestParams(MockHttpServletRequest request, MultiValueMap<String, String> map) {

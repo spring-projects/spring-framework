@@ -52,12 +52,14 @@ import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.util.MimeTypeUtils;
 
 /**
- * {@code HttpMessageWriter} that can write a {@link Resource}.
+ * {@code HttpMessageWriter} that can write a {@link Resource} from both`` client
+ * and server perspectives.
  *
- * <p>Also an implementation of {@code HttpMessageWriter} with support for writing one
- * or more {@link ResourceRegion}'s based on the HTTP ranges specified in the request.
+ * <p>From a server perspective, the server-side only write method supports
+ * writing one or more {@link ResourceRegion}'s based on HTTP ranges specified
+ * in the request.
  *
- * <p>For reading to a Resource, use {@link ResourceDecoder} wrapped with
+ * <p>To read a Resource, use {@link ResourceDecoder} wrapped with
  * {@link DecoderHttpMessageReader}.
  *
  * @author Arjen Poutsma
@@ -123,16 +125,19 @@ public class ResourceHttpMessageWriter implements HttpMessageWriter<Resource> {
 					if (result != null) {
 						return result;
 					}
-					else {
-						Mono<Resource> input = Mono.just(resource);
-						DataBufferFactory factory = message.bufferFactory();
-						Flux<DataBuffer> body = this.encoder.encode(input, factory, type, message.getHeaders().getContentType(), hints)
-								.subscribeOn(Schedulers.boundedElastic());
-						if (logger.isDebugEnabled()) {
-							body = body.doOnNext(buffer -> Hints.touchDataBuffer(buffer, hints, logger));
-						}
-						return message.writeWith(body);
+
+					Mono<Resource> input = Mono.just(resource);
+					DataBufferFactory factory = message.bufferFactory();
+					MediaType contentType = message.getHeaders().getContentType();
+
+					Flux<DataBuffer> body = this.encoder.encode(input, factory, type, contentType, hints)
+							.subscribeOn(Schedulers.boundedElastic());
+
+					if (logger.isDebugEnabled()) {
+						body = body.doOnNext(buffer -> Hints.touchDataBuffer(buffer, hints, logger));
 					}
+
+					return message.writeWith(body);
 				}));
 	}
 
@@ -140,7 +145,10 @@ public class ResourceHttpMessageWriter implements HttpMessageWriter<Resource> {
 	 * Adds the default headers for the given resource to the given message.
 	 * @since 6.1
 	 */
-	public Mono<Void> addDefaultHeaders(ReactiveHttpOutputMessage message, Resource resource, @Nullable MediaType contentType, Map<String, Object> hints) {
+	public Mono<Void> addDefaultHeaders(
+			ReactiveHttpOutputMessage message, Resource resource, @Nullable MediaType contentType,
+			Map<String, Object> hints) {
+
 		return Mono.defer(() -> {
 			HttpHeaders headers = message.getHeaders();
 			MediaType resourceMediaType = getResourceMediaType(contentType, resource, hints);
@@ -150,16 +158,15 @@ public class ResourceHttpMessageWriter implements HttpMessageWriter<Resource> {
 				headers.set(HttpHeaders.ACCEPT_RANGES, "bytes");
 			}
 
-			if (headers.getContentLength() < 0) {
-				return lengthOf(resource)
-						.flatMap(contentLength -> {
-							headers.setContentLength(contentLength);
-							return Mono.empty();
-						});
-			}
-			else {
+			if (headers.getContentLength() >= 0) {
 				return Mono.empty();
 			}
+
+			return lengthOf(resource)
+					.flatMap(contentLength -> {
+						headers.setContentLength(contentLength);
+						return Mono.empty();
+					});
 		});
 	}
 
@@ -226,8 +233,7 @@ public class ResourceHttpMessageWriter implements HttpMessageWriter<Resource> {
 			ranges = request.getHeaders().getRange();
 		}
 		catch (IllegalArgumentException ex) {
-			response.setStatusCode(HttpStatus.REQUESTED_RANGE_NOT_SATISFIABLE);
-			return response.setComplete();
+			return handleInvalidRange(response);
 		}
 
 		return Mono.from(inputStream).flatMap(resource -> {
@@ -235,7 +241,13 @@ public class ResourceHttpMessageWriter implements HttpMessageWriter<Resource> {
 				return writeResource(resource, elementType, mediaType, response, hints);
 			}
 			response.setStatusCode(HttpStatus.PARTIAL_CONTENT);
-			List<ResourceRegion> regions = HttpRange.toResourceRegions(ranges, resource);
+			List<ResourceRegion> regions;
+			try {
+				regions = HttpRange.toResourceRegions(ranges, resource);
+			}
+			catch (IllegalArgumentException ex) {
+				return handleInvalidRange(response);
+			}
 			MediaType resourceMediaType = getResourceMediaType(mediaType, resource, hints);
 			if (regions.size() == 1){
 				ResourceRegion region = regions.get(0);
@@ -259,6 +271,11 @@ public class ResourceHttpMessageWriter implements HttpMessageWriter<Resource> {
 				return encodeAndWriteRegions(Flux.fromIterable(regions), resourceMediaType, response, allHints);
 			}
 		});
+	}
+
+	private static Mono<Void> handleInvalidRange(ServerHttpResponse response) {
+		response.setStatusCode(HttpStatus.REQUESTED_RANGE_NOT_SATISFIABLE);
+		return response.setComplete();
 	}
 
 	private Mono<Void> writeSingleRegion(ResourceRegion region, ReactiveHttpOutputMessage message,
