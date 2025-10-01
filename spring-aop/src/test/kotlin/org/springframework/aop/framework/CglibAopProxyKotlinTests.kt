@@ -19,6 +19,7 @@ package org.springframework.aop.framework
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
+import java.time.LocalDateTime
 
 /**
  * Tests for Kotlin support in [CglibAopProxy].
@@ -48,6 +49,13 @@ class CglibAopProxyKotlinTests {
 		assertThatThrownBy { proxy.checkedException() }.isInstanceOf(CheckedException::class.java)
 	}
 
+	@Test // gh-35487
+	fun jvmDefault() {
+		val proxyFactory = ProxyFactory()
+		proxyFactory.setTarget(AddressRepo())
+		proxyFactory.proxy
+	}
+
 
 	open class MyKotlinBean {
 
@@ -63,4 +71,24 @@ class CglibAopProxyKotlinTests {
 	}
 
 	class CheckedException() : Exception()
+
+	open class AddressRepo(): CrudRepo<Address, Int>
+
+	interface CrudRepo<E : Any, ID : Any> {
+		fun save(e: E): E {
+			return e
+		}
+		fun delete(id: ID): Long {
+			return 0L
+		}
+	}
+
+	data class Address(
+		val id: Int = 0,
+		val street: String,
+		val version: Int = 0,
+		val createdAt: LocalDateTime? = null,
+		val updatedAt: LocalDateTime? = null,
+	)
+
 }
