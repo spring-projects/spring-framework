@@ -178,6 +178,16 @@ class DefaultHttpMessageConvertersTests {
 		}
 
 		@Test
+		void shouldOverrideStringConverters() {
+			var stringConverter = new StringHttpMessageConverter();
+			var converters = HttpMessageConverters.forClient().registerDefaults()
+					.stringMessageConverter(stringConverter).build();
+
+			var actualConverter = findMessageConverter(StringHttpMessageConverter.class, converters);
+			assertThat(actualConverter).isEqualTo(stringConverter);
+		}
+
+		@Test
 		void shouldConfigureConverter() {
 			var customConverter = new CustomHttpMessageConverter();
 			HttpMessageConverters.forClient()
@@ -269,6 +279,17 @@ class DefaultHttpMessageConvertersTests {
 
 			var customConverter = findMessageConverter(JacksonJsonHttpMessageConverter.class, converters);
 			assertThat(customConverter).isEqualTo(jacksonConverter);
+		}
+
+
+		@Test
+		void shouldOverrideStringConverters() {
+			var stringConverter = new StringHttpMessageConverter();
+			var converters = HttpMessageConverters.forServer().registerDefaults()
+					.stringMessageConverter(stringConverter).build();
+
+			var actualConverter = findMessageConverter(StringHttpMessageConverter.class, converters);
+			assertThat(actualConverter).isEqualTo(stringConverter);
 		}
 
 		@Test

@@ -247,8 +247,10 @@ class DefaultHttpMessageConverters implements HttpMessageConverters {
 
 		void detectMessageConverters() {
 			this.byteArrayMessageConverter = new ByteArrayHttpMessageConverter();
-			this.stringMessageConverter = new StringHttpMessageConverter();
 
+			if (this.stringMessageConverter == null) {
+				this.stringMessageConverter = new StringHttpMessageConverter();
+			}
 			if (this.jsonMessageConverter == null) {
 				if (JACKSON_PRESENT) {
 					this.jsonMessageConverter = new JacksonJsonHttpMessageConverter();
