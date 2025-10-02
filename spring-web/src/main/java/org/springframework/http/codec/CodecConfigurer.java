@@ -115,6 +115,7 @@ public interface CodecConfigurer {
 		 * <p>Note that {@link #maxInMemorySize(int)}, if configured, will be
 		 * applied to the given decoder.
 		 * @param decoder the decoder instance to use
+		 * @since 7.0
 		 * @see org.springframework.http.codec.json.JacksonJsonDecoder
 		 */
 		void jacksonJsonDecoder(Decoder<?> decoder);
@@ -125,12 +126,17 @@ public interface CodecConfigurer {
 		 * applied to the given decoder.
 		 * @param decoder the decoder instance to use
 		 * @see org.springframework.http.codec.json.Jackson2JsonDecoder
+		 * @deprecated in favor of {@link #jacksonJsonDecoder(Decoder)}.
 		 */
-		void jackson2JsonDecoder(Decoder<?> decoder);
+		@Deprecated(since = "7.0", forRemoval = true)
+		default void jackson2JsonDecoder(Decoder<?> decoder) {
+			jacksonJsonDecoder(decoder);
+		}
 
 		/**
 		 * Override the default Jackson 3.x JSON {@code Encoder}.
 		 * @param encoder the encoder instance to use
+		 * @since 7.0
 		 * @see org.springframework.http.codec.json.JacksonJsonEncoder
 		 */
 		void jacksonJsonEncoder(Encoder<?> encoder);
@@ -139,8 +145,12 @@ public interface CodecConfigurer {
 		 * Override the default Jackson 2.x JSON {@code Encoder}.
 		 * @param encoder the encoder instance to use
 		 * @see org.springframework.http.codec.json.Jackson2JsonEncoder
+		 * @deprecated in favor of {@link #jacksonJsonEncoder(Encoder)}.
 		 */
-		void jackson2JsonEncoder(Encoder<?> encoder);
+		@Deprecated(since = "7.0", forRemoval = true)
+		default void jackson2JsonEncoder(Encoder<?> encoder) {
+			jacksonJsonEncoder(encoder);
+		}
 
 		/**
 		 * Override the default Gson {@code Decoder}.
@@ -161,6 +171,7 @@ public interface CodecConfigurer {
 		 * <p>Note that {@link #maxInMemorySize(int)}, if configured, will be
 		 * applied to the given decoder.
 		 * @param decoder the decoder instance to use
+		 * @since 7.0
 		 * @see JacksonSmileDecoder
 		 */
 		void jacksonSmileDecoder(Decoder<?> decoder);
@@ -171,12 +182,17 @@ public interface CodecConfigurer {
 		 * applied to the given decoder.
 		 * @param decoder the decoder instance to use
 		 * @see org.springframework.http.codec.json.Jackson2SmileDecoder
+		 * @deprecated in favor of {@link #jacksonSmileDecoder(Decoder)}.
 		 */
-		void jackson2SmileDecoder(Decoder<?> decoder);
+		@Deprecated(since = "7.0", forRemoval = true)
+		default void jackson2SmileDecoder(Decoder<?> decoder) {
+			jacksonSmileDecoder(decoder);
+		}
 
 		/**
 		 * Override the default Jackson 3.x Smile {@code Encoder}.
 		 * @param encoder the encoder instance to use
+		 * @since 7.0
 		 * @see JacksonSmileEncoder
 		 */
 		void jacksonSmileEncoder(Encoder<?> encoder);
@@ -185,8 +201,12 @@ public interface CodecConfigurer {
 		 * Override the default Jackson 2.x Smile {@code Encoder}.
 		 * @param encoder the encoder instance to use
 		 * @see org.springframework.http.codec.json.Jackson2SmileEncoder
+		 * @deprecated in favor of {@link #jacksonSmileEncoder(Encoder)}.
 		 */
-		void jackson2SmileEncoder(Encoder<?> encoder);
+		@Deprecated(since = "7.0", forRemoval = true)
+		default void jackson2SmileEncoder(Encoder<?> encoder) {
+			jacksonSmileEncoder(encoder);
+		};
 
 		/**
 		 * Override the default Protobuf {@code Decoder}.
