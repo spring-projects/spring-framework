@@ -184,6 +184,10 @@ public abstract class JdbcTransactionObjectSupport implements SavepointManager, 
 			// typically on Oracle - ignore
 		}
 		catch (SQLException ex) {
+			if ("3B001".equals(ex.getSQLState())) {
+				// Savepoint already released (HSQLDB, PostgreSQL, DB2) - ignore
+				return;
+			}
 			// ignore Microsoft SQLServerException: This operation is not supported.
 			String msg = ex.getMessage();
 			if (msg == null || !msg.contains("not supported")) {
