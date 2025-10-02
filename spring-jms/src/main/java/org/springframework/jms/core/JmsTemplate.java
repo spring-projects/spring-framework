@@ -60,7 +60,7 @@ import org.springframework.util.ClassUtils;
  * the "sessionTransacted" and "sessionAcknowledgeMode" bean properties.
  *
  * <p>This template uses a
- * {@link org.springframework.jms.support.destination.DynamicDestinationResolver}
+ * {@link org.springframework.jms.support.destination.SimpleDestinationResolver}
  * and a {@link org.springframework.jms.support.converter.SimpleMessageConverter}
  * as default strategies for resolving a destination name or converting a message,
  * respectively. These defaults can be overridden through the "destinationResolver"

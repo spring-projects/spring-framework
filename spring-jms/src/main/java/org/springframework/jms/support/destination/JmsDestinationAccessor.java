@@ -55,7 +55,7 @@ public abstract class JmsDestinationAccessor extends JmsAccessor {
 	public static final long RECEIVE_TIMEOUT_INDEFINITE_WAIT = 0;
 
 
-	private DestinationResolver destinationResolver = new DynamicDestinationResolver();
+	private DestinationResolver destinationResolver = new SimpleDestinationResolver();
 
 	private boolean pubSubDomain = false;
 
@@ -63,9 +63,9 @@ public abstract class JmsDestinationAccessor extends JmsAccessor {
 	/**
 	 * Set the {@link DestinationResolver} that is to be used to resolve
 	 * {@link jakarta.jms.Destination} references for this accessor.
-	 * <p>The default resolver is a DynamicDestinationResolver. Specify a
+	 * <p>The default resolver is a SimpleDestinationResolver. Specify a
 	 * JndiDestinationResolver for resolving destination names as JNDI locations.
-	 * @see org.springframework.jms.support.destination.DynamicDestinationResolver
+	 * @see org.springframework.jms.support.destination.SimpleDestinationResolver
 	 * @see org.springframework.jms.support.destination.JndiDestinationResolver
 	 */
 	public void setDestinationResolver(DestinationResolver destinationResolver) {

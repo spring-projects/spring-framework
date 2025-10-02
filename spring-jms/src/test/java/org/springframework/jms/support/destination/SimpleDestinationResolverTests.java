@@ -33,14 +33,14 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
 /**
- * @author Rick Evans
  * @author Juergen Hoeller
+ * @since 7.0
  */
-class DynamicDestinationResolverTests {
+class SimpleDestinationResolverTests {
 
 	private static final String DESTINATION_NAME = "foo";
 
-	private final DynamicDestinationResolver resolver = new DynamicDestinationResolver();
+	private final SimpleDestinationResolver resolver = new SimpleDestinationResolver();
 
 
 	@Test
@@ -52,7 +52,7 @@ class DynamicDestinationResolverTests {
 		given(session.createTopic(DESTINATION_NAME)).willReturn(expectedDestination1);
 		testResolveDestination(session, expectedDestination1, true);
 		given(session.createTopic(DESTINATION_NAME)).willReturn(expectedDestination2);
-		testResolveDestination(session, expectedDestination2, true);
+		testResolveDestination(session, expectedDestination1, true);
 	}
 
 	@Test
@@ -64,7 +64,7 @@ class DynamicDestinationResolverTests {
 		given(session.createTopic(DESTINATION_NAME)).willReturn(expectedDestination1);
 		testResolveDestination(session, expectedDestination1, true);
 		given(session.createTopic(DESTINATION_NAME)).willReturn(expectedDestination2);
-		testResolveDestination(session, expectedDestination2, true);
+		testResolveDestination(session, expectedDestination1, true);
 	}
 
 	@Test
@@ -76,7 +76,7 @@ class DynamicDestinationResolverTests {
 		given(session.createQueue(DESTINATION_NAME)).willReturn(expectedDestination1);
 		testResolveDestination(session, expectedDestination1, false);
 		given(session.createQueue(DESTINATION_NAME)).willReturn(expectedDestination2);
-		testResolveDestination(session, expectedDestination2, false);
+		testResolveDestination(session, expectedDestination1, false);
 	}
 
 	@Test
@@ -88,7 +88,7 @@ class DynamicDestinationResolverTests {
 		given(session.createQueue(DESTINATION_NAME)).willReturn(expectedDestination1);
 		testResolveDestination(session, expectedDestination1, false);
 		given(session.createQueue(DESTINATION_NAME)).willReturn(expectedDestination2);
-		testResolveDestination(session, expectedDestination2, false);
+		testResolveDestination(session, expectedDestination1, false);
 	}
 
 	private void testResolveDestination(Session session, Destination expected, boolean isPubSub) throws JMSException {
