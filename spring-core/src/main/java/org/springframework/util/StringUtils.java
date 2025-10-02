@@ -825,7 +825,7 @@ public abstract class StringUtils {
 	 * @return whether the two paths are equivalent after normalization
 	 */
 	public static boolean pathEquals(String path1, String path2) {
-		return (path1 == null || path2 == null) ? false : cleanPath(path1).equals(cleanPath(path2));
+		return (path1 != null && path2 != null) && cleanPath(path1).equals(cleanPath(path2));
 	}
 
 	/**
