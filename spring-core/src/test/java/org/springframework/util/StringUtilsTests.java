@@ -448,6 +448,9 @@ class StringUtilsTests {
 		assertThat(StringUtils.pathEquals("/dummy1/bin/tmp/../dummy2/dummy3", "/dummy1/dummy2/dummy3")).as("Must be false for one false path on 1").isFalse();
 		assertThat(StringUtils.pathEquals("C:\\dummy1\\dummy2\\dummy3", "C:\\dummy1\\bin\\tmp\\..\\dummy2\\dummy3")).as("Must be false for one false win top path on 2").isFalse();
 		assertThat(StringUtils.pathEquals("/dummy1/bin/../dummy2/dummy3", "/dummy1/dummy2/dummy4")).as("Must be false for top path on 1 + difference").isFalse();
+		assertThat(StringUtils.pathEquals(null, null)).as("Must be false for both null parameters").isFalse();
+		assertThat(StringUtils.pathEquals(null, "/dummy1/dummy2/dummy3")).as("Must be false for first null parameter").isFalse();
+		assertThat(StringUtils.pathEquals("/dummy1/dummy2/dummy3", null)).as("Must be false for second null parameter").isFalse();
 	}
 
 	@Test
