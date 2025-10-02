@@ -1536,7 +1536,6 @@ public abstract class ClassUtils {
 	private static Method findPubliclyAccessibleMethodIfPossible(
 			String methodName, Class<?>[] parameterTypes, Class<?> declaringClass) {
 
-		Method result = null;
 		Class<?> current = declaringClass.getSuperclass();
 		while (current != null) {
 			Method method = getMethodOrNull(current, methodName, parameterTypes);
@@ -1546,11 +1545,11 @@ public abstract class ClassUtils {
 			if (Modifier.isPublic(method.getDeclaringClass().getModifiers()) &&
 					method.getDeclaringClass().getModule().isExported(
 							method.getDeclaringClass().getPackageName(), ClassUtils.class.getModule())) {
-				result = method;
+				return method;
 			}
 			current = method.getDeclaringClass().getSuperclass();
 		}
-		return result;
+		return null;
 	}
 
 	/**
