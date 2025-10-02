@@ -818,13 +818,14 @@ public abstract class StringUtils {
 	}
 
 	/**
-	 * Compare two paths after normalization of them.
+	 * Compare two paths after normalization of them. Results in false if any or both of
+	 * the supplied path values are {@code null}.
 	 * @param path1 first path for comparison
 	 * @param path2 second path for comparison
 	 * @return whether the two paths are equivalent after normalization
 	 */
 	public static boolean pathEquals(String path1, String path2) {
-		return cleanPath(path1).equals(cleanPath(path2));
+		return (path1 == null || path2 == null) ? false : cleanPath(path1).equals(cleanPath(path2));
 	}
 
 	/**
