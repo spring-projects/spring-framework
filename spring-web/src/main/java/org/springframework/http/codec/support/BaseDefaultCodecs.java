@@ -846,7 +846,6 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs, CodecConfigure
 			else {
 				throw new IllegalStateException("Jackson not present");
 			}
-			this.jacksonJsonEncoder = new JacksonJsonEncoder();
 		}
 		return this.jacksonJsonEncoder;
 	}
