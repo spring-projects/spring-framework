@@ -1807,7 +1807,7 @@ class DefaultListableBeanFactoryTests {
 
 		assertThatExceptionOfType(NoUniqueBeanDefinitionException.class)
 				.isThrownBy(() -> lbf.getBean(TestBean.class))
-				.withMessageContaining("more than one 'primary'");
+				.withMessageEndingWith("more than one 'primary' bean found among candidates: [bd1, bd2]");
 	}
 
 	@Test
@@ -2131,7 +2131,7 @@ class DefaultListableBeanFactoryTests {
 
 		assertThatExceptionOfType(NoUniqueBeanDefinitionException.class)
 				.isThrownBy(() -> lbf.getBean(ConstructorDependency.class, 42))
-				.withMessageContaining("more than one 'primary'");
+				.withMessageEndingWith("more than one 'primary' bean found among candidates: [bd1, bd2]");
 	}
 
 	@Test
