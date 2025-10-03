@@ -128,53 +128,48 @@ public abstract class FactoryBeanRegistrySupport extends DefaultSingletonBeanReg
 				locked = (lockFlag && this.singletonLock.tryLock());
 			}
 			try {
-				Object object = this.factoryBeanObjectCache.get(beanName);
-				if (object == null) {
-					if (locked) {
-						// The common case: within general singleton lock.
+				// Defensively synchronize against non-thread-safe FactoryBean.getObject() implementations,
+				// potentially to be called from a background thread while the main thread currently calls
+				// the same getObject() method within the singleton lock.
+				synchronized (factory) {
+					Object object = this.factoryBeanObjectCache.get(beanName);
+					if (object == null) {
 						object = doGetObjectFromFactoryBean(factory, beanName);
-					}
-					else {
-						// Fall back to local synchronization on the given FactoryBean instance,
-						// as a defensive measure for non-thread-safe FactoryBean implementations.
-						synchronized (factory) {
-							object = doGetObjectFromFactoryBean(factory, beanName);
+						// Only post-process and store if not put there already during getObject() call above
+						// (for example, because of circular reference processing triggered by custom getBean calls)
+						Object alreadyThere = this.factoryBeanObjectCache.get(beanName);
+						if (alreadyThere != null) {
+							object = alreadyThere;
 						}
-					}
-					// Only post-process and store if not put there already during getObject() call above
-					// (for example, because of circular reference processing triggered by custom getBean calls)
-					Object alreadyThere = this.factoryBeanObjectCache.get(beanName);
-					if (alreadyThere != null) {
-						object = alreadyThere;
-					}
-					else {
-						if (shouldPostProcess) {
-							if (locked) {
-								if (isSingletonCurrentlyInCreation(beanName)) {
-									// Temporarily return non-post-processed object, not storing it yet
-									return object;
-								}
-								beforeSingletonCreation(beanName);
-							}
-							try {
-								object = postProcessObjectFromFactoryBean(object, beanName);
-							}
-							catch (Throwable ex) {
-								throw new BeanCreationException(beanName,
-										"Post-processing of FactoryBean's singleton object failed", ex);
-							}
-							finally {
+						else {
+							if (shouldPostProcess) {
 								if (locked) {
-									afterSingletonCreation(beanName);
+									if (isSingletonCurrentlyInCreation(beanName)) {
+										// Temporarily return non-post-processed object, not storing it yet
+										return object;
+									}
+									beforeSingletonCreation(beanName);
+								}
+								try {
+									object = postProcessObjectFromFactoryBean(object, beanName);
+								}
+								catch (Throwable ex) {
+									throw new BeanCreationException(beanName,
+											"Post-processing of FactoryBean's singleton object failed", ex);
+								}
+								finally {
+									if (locked) {
+										afterSingletonCreation(beanName);
+									}
 								}
 							}
-						}
-						if (containsSingleton(beanName)) {
-							this.factoryBeanObjectCache.put(beanName, object);
+							if (containsSingleton(beanName)) {
+								this.factoryBeanObjectCache.put(beanName, object);
+							}
 						}
 					}
+					return object;
 				}
-				return object;
 			}
 			finally {
 				if (locked) {
