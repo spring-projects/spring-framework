@@ -17,6 +17,7 @@
 package org.springframework.transaction.interceptor;
 
 import java.lang.reflect.Method;
+import java.util.Objects;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
@@ -903,7 +904,7 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 								createTransactionIfNecessary(rtm, txAttr, joinpointIdentification),
 								tx -> {
 									try {
-										return (Mono<?>) invocation.proceedWithInvocation();
+										return (Mono<?>) Objects.requireNonNull(invocation.proceedWithInvocation());
 									}
 									catch (Throwable ex) {
 										return Mono.error(ex);

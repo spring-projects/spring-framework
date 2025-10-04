@@ -17,6 +17,7 @@
 package org.springframework.core.codec;
 
 import java.util.Map;
+import java.util.Objects;
 
 import org.jspecify.annotations.Nullable;
 import org.reactivestreams.Publisher;
@@ -84,15 +85,16 @@ public abstract class AbstractDataBufferDecoder<T> extends AbstractDecoder<T> {
 	public Flux<T> decode(Publisher<DataBuffer> input, ResolvableType elementType,
 			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
-		return Flux.from(input).map(buffer -> decodeDataBuffer(buffer, elementType, mimeType, hints));
+		return Flux.from(input).map(buffer ->
+				Objects.requireNonNull(decodeDataBuffer(buffer, elementType, mimeType, hints)));
 	}
 
 	@Override
 	public Mono<T> decodeToMono(Publisher<DataBuffer> input, ResolvableType elementType,
 			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
-		return DataBufferUtils.join(input, this.maxInMemorySize)
-				.map(buffer -> decodeDataBuffer(buffer, elementType, mimeType, hints));
+		return DataBufferUtils.join(input, this.maxInMemorySize).map(buffer ->
+				Objects.requireNonNull(decodeDataBuffer(buffer, elementType, mimeType, hints)));
 	}
 
 	/**

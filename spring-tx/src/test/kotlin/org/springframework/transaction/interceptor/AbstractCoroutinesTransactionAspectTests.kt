@@ -301,7 +301,7 @@ abstract class AbstractCoroutinesTransactionAspectTests {
 
 	private fun checkReactiveTransaction(expected: Boolean) {
 		Mono.deferContextual{context -> Mono.just(context)}
-				.handle { context: ContextView, sink: SynchronousSink<Any?> ->
+				.handle { context: ContextView, sink: SynchronousSink<ContextView> ->
 					if (context.hasKey(TransactionContext::class.java) != expected) {
 						Fail.fail<Any>("Should have thrown NoTransactionException")
 					}

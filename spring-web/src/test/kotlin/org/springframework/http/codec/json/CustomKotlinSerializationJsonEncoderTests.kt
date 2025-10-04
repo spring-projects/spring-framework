@@ -45,9 +45,9 @@ class CustomKotlinSerializationJsonEncoderTests :
 	@Test
 	override fun encode() {
 		val input = Mono.just(BigDecimal(1))
-		testEncode(input, BigDecimal::class.java) { step: StepVerifier.FirstStep<DataBuffer?> ->
+		testEncode(input, BigDecimal::class.java) { step: StepVerifier.FirstStep<DataBuffer> ->
 			step.consumeNextWith(expectString("1.0")
-					.andThen { dataBuffer: DataBuffer? -> DataBufferUtils.release(dataBuffer) })
+					.andThen { dataBuffer: DataBuffer -> DataBufferUtils.release(dataBuffer) })
 					.verifyComplete()
 		}
 	}
