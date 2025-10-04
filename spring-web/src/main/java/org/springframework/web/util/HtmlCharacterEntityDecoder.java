@@ -124,7 +124,10 @@ class HtmlCharacterEntityDecoder {
 			int value = (!isHexNumberedReference ?
 					Integer.parseInt(getReferenceSubstring(2)) :
 					Integer.parseInt(getReferenceSubstring(3), 16));
-			this.decodedMessage.append((char) value);
+			if (value > Character.MAX_CODE_POINT) {
+				return false;
+			}
+			this.decodedMessage.appendCodePoint(value);
 			return true;
 		}
 		catch (NumberFormatException ex) {
