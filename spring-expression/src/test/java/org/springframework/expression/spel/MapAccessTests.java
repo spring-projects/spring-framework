@@ -23,8 +23,11 @@ import org.junit.jupiter.api.Test;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
+import org.springframework.expression.spel.support.MapAccessor;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.springframework.expression.spel.SpelMessage.PROPERTY_OR_FIELD_NOT_READABLE;
 
 /**
  * Testing variations on map access.
@@ -41,6 +44,11 @@ class MapAccessTests extends AbstractExpressionTests {
 	@Test
 	void mapAccessThroughIndexer() {
 		evaluate("testMap['monday']", "montag", String.class);
+	}
+
+	@Test
+	void mapAccessThroughIndexerForNonexistentKey() {
+		evaluate("testMap['bogus']", null, String.class);
 	}
 
 	@Test
@@ -80,10 +88,48 @@ class MapAccessTests extends AbstractExpressionTests {
 
 		var expr1 = parser.parseExpression("testMap.monday");
 		assertThat(expr1.getValue(ctx, String.class)).isEqualTo("montag");
+
+		var expr2 = parser.parseExpression("testMap.bogus");
+		assertThatExceptionOfType(SpelEvaluationException.class)
+				.isThrownBy(() -> expr2.getValue(ctx, String.class))
+				.satisfies(ex -> assertThat(ex.getMessageCode()).isEqualTo(PROPERTY_OR_FIELD_NOT_READABLE));
+	}
+
+	@Test
+	void nullAwareMapAccessor() {
+		var parser = new SpelExpressionParser();
+		var ctx = TestScenarioCreator.getTestEvaluationContext();
+		ctx.addPropertyAccessor(new NullAwareMapAccessor());
+
+		var expr = parser.parseExpression("testMap.monday");
+		assertThat(expr.getValue(ctx, String.class)).isEqualTo("montag");
+
+		// Unlike MapAccessor, NullAwareMapAccessor returns null for a nonexistent key.
+		expr = parser.parseExpression("testMap.bogus");
+		assertThat(expr.getValue(ctx, String.class)).isNull();
 	}
 
 
 	record TestBean(Map<String, String> properties, TestBean nestedBean) {
+	}
+
+
+	/**
+	 * In contrast to the standard {@link MapAccessor}, {@code NullAwareMapAccessor}
+	 * reports that it can read any map (ignoring whether the map actually contains
+	 * an entry for the given key) and returns {@code null} for a nonexistent key.
+	 */
+	private static class NullAwareMapAccessor extends MapAccessor {
+
+		@Override
+		public boolean canRead(EvaluationContext context, Object target, String name) {
+			return (target instanceof Map);
+		}
+
+		@Override
+		public TypedValue read(EvaluationContext context, Object target, String name) {
+			return new TypedValue(((Map<?, ?>) target).get(name));
+		}
 	}
 
 }
