@@ -42,7 +42,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
  * @since 6.2
  */
 @SpringJUnitConfig
-public class MockitoSpyBeanForByTypeLookupIntegrationTests {
+public class MockitoSpyBeanByTypeLookupIntegrationTests {
 
 	@MockitoSpyBean
 	ExampleService anyNameForService;

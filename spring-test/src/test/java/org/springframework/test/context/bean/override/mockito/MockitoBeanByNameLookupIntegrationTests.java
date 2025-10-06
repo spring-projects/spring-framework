@@ -40,7 +40,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @since 6.2
  */
 @SpringJUnitConfig
-public class MockitoBeanForByNameLookupIntegrationTests {
+public class MockitoBeanByNameLookupIntegrationTests {
 
 	@MockitoBean("field")
 	ExampleService field;

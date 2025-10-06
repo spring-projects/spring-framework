@@ -47,7 +47,7 @@ import static org.springframework.test.mockito.MockitoAssertions.assertIsMock;
  * @since 6.2
  */
 @SpringJUnitConfig
-public class MockitoBeanForByTypeLookupIntegrationTests {
+public class MockitoBeanByTypeLookupIntegrationTests {
 
 	@MockitoBean
 	AnotherService serviceIsNotABean;
