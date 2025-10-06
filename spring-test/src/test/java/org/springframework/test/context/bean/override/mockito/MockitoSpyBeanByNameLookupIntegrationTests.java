@@ -27,7 +27,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.bean.override.example.ExampleService;
 import org.springframework.test.context.bean.override.example.RealExampleService;
-import org.springframework.test.context.bean.override.mockito.MockitoSpyBeanForByNameLookupIntegrationTests.Config;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBeanByNameLookupIntegrationTests.Config;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import org.springframework.test.mockito.MockitoAssertions;
 
@@ -41,7 +41,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @since 6.2
  */
 @SpringJUnitConfig(Config.class)
-public class MockitoSpyBeanForByNameLookupIntegrationTests {
+public class MockitoSpyBeanByNameLookupIntegrationTests {
 
 	@MockitoSpyBean("field1")
 	ExampleService field;

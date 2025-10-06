@@ -35,7 +35,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @since 6.2
  */
 @SpringJUnitConfig
-public class TestBeanForByNameLookupIntegrationTests {
+public class TestBeanByNameLookupIntegrationTests {
 
 	@TestBean(name = "field")
 	String field;

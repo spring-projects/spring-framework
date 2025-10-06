@@ -37,7 +37,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @since 6.2
  */
 @SpringJUnitConfig
-public class TestBeanForByTypeLookupIntegrationTests {
+public class TestBeanByTypeLookupIntegrationTests {
 
 	@TestBean
 	MessageService messageService;
