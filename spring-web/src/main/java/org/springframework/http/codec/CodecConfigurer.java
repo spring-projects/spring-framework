@@ -206,7 +206,7 @@ public interface CodecConfigurer {
 		@Deprecated(since = "7.0", forRemoval = true)
 		default void jackson2SmileEncoder(Encoder<?> encoder) {
 			jacksonSmileEncoder(encoder);
-		};
+		}
 
 		/**
 		 * Override the default Protobuf {@code Decoder}.

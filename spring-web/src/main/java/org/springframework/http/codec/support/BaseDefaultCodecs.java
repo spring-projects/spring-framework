@@ -827,7 +827,7 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs, CodecConfigure
 
 	/**
 	 * Get or initialize a Jackson JSON decoder.
-	 * @deprecated in favor of {@link #getJacksonJsonEncoder()}
+	 * @deprecated in favor of {@link #getJacksonJsonDecoder()}
 	 */
 	@Deprecated(since = "7.0", forRemoval = true)
 	protected Decoder<?> getJackson2JsonDecoder() {
