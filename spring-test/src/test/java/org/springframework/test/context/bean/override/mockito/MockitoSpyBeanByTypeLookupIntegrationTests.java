@@ -20,8 +20,10 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Scope;
 import org.springframework.core.annotation.Order;
 import org.springframework.test.context.bean.override.example.CustomQualifier;
 import org.springframework.test.context.bean.override.example.ExampleService;
@@ -54,6 +56,9 @@ public class MockitoSpyBeanByTypeLookupIntegrationTests {
 	@MockitoSpyBean
 	@CustomQualifier
 	StringHolder ambiguousMeta;
+
+	@MockitoSpyBean
+	AnotherService prototypeService;
 
 
 	@Test
@@ -102,6 +107,19 @@ public class MockitoSpyBeanByTypeLookupIntegrationTests {
 		verifyNoMoreInteractions(this.ambiguousMeta);
 	}
 
+	@Test
+	void overrideIsFoundByTypeForPrototype(ConfigurableApplicationContext ctx) {
+		assertThat(this.prototypeService)
+				.satisfies(MockitoAssertions::assertIsSpy)
+				.isSameAs(ctx.getBean("anotherService"))
+				.isSameAs(ctx.getBean(AnotherService.class));
+		assertThat(ctx.getBeanFactory().getBeanDefinition("anotherService").isSingleton()).as("isSingleton").isTrue();
+
+		assertThat(this.prototypeService.hello()).isEqualTo("Production Hello");
+		verify(this.prototypeService).hello();
+		verifyNoMoreInteractions(this.prototypeService);
+	}
+
 
 	@Configuration(proxyBeanMethods = false)
 	static class Config {
@@ -124,6 +142,12 @@ public class MockitoSpyBeanByTypeLookupIntegrationTests {
 		StringHolder bean3() {
 			return new StringHolder("bean3");
 		}
+
+		@Bean("anotherService")
+		@Scope("prototype")
+		AnotherService bean4() {
+			return new DefaultAnotherService("Production Hello");
+		}
 	}
 
 	static class StringHolder {
@@ -140,6 +164,19 @@ public class MockitoSpyBeanByTypeLookupIntegrationTests {
 
 		public int size() {
 			return this.value.length();
+		}
+	}
+
+	public interface AnotherService {
+
+		String hello();
+	}
+
+	record DefaultAnotherService(String message) implements AnotherService {
+
+		@Override
+		public String hello() {
+			return this.message;
 		}
 	}
 

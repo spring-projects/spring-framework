@@ -21,8 +21,10 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Scope;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -43,6 +45,10 @@ public class TestBeanByNameLookupIntegrationTests {
 	@TestBean(name = "methodRenamed1", methodName = "field")
 	String methodRenamed1;
 
+	@TestBean("prototypeScoped")
+	String prototypeScoped;
+
+
 	static String field() {
 		return "fieldOverride";
 	}
@@ -50,6 +56,11 @@ public class TestBeanByNameLookupIntegrationTests {
 	static String nestedField() {
 		return "nestedFieldOverride";
 	}
+
+	static String prototypeScoped() {
+		return "prototypeScopedOverride";
+	}
+
 
 	@Test
 	void fieldHasOverride(ApplicationContext ctx) {
@@ -61,6 +72,13 @@ public class TestBeanByNameLookupIntegrationTests {
 	void fieldWithMethodNameHasOverride(ApplicationContext ctx) {
 		assertThat(ctx.getBean("methodRenamed1")).as("applicationContext").isEqualTo("fieldOverride");
 		assertThat(methodRenamed1).as("injection point").isEqualTo("fieldOverride");
+	}
+
+	@Test
+	void fieldForPrototypeHasOverride(ConfigurableApplicationContext ctx) {
+		assertThat(ctx.getBeanFactory().getBeanDefinition("prototypeScoped").isSingleton()).as("isSingleton").isTrue();
+		assertThat(ctx.getBean("prototypeScoped")).as("applicationContext").isEqualTo("prototypeScopedOverride");
+		assertThat(prototypeScoped).as("injection point").isEqualTo("prototypeScopedOverride");
 	}
 
 
@@ -179,6 +197,12 @@ public class TestBeanByNameLookupIntegrationTests {
 		@Bean("methodRenamed2")
 		String bean4() {
 			return "NestedProd";
+		}
+
+		@Bean("prototypeScoped")
+		@Scope("prototype")
+		String bean5() {
+			return "PrototypeProd";
 		}
 	}
 

@@ -321,7 +321,7 @@ class BeanOverrideBeanFactoryPostProcessorTests {
 	}
 
 	@Test
-	void replaceBeanByNameWithMatchingBeanDefinitionWithPrototypeScopeFails() {
+	void replaceBeanByNameWithMatchingBeanDefinitionWithPrototypeScope() {
 		String beanName = "descriptionBean";
 
 		AnnotationConfigApplicationContext context = createContext(ByNameTestCase.class);
@@ -329,13 +329,13 @@ class BeanOverrideBeanFactoryPostProcessorTests {
 		definition.setScope(BeanDefinition.SCOPE_PROTOTYPE);
 		context.registerBeanDefinition(beanName, definition);
 
-		assertThatIllegalStateException()
-				.isThrownBy(context::refresh)
-				.withMessage("Unable to override bean 'descriptionBean': only singleton beans can be overridden.");
+		assertThatNoException().isThrownBy(context::refresh);
+		assertThat(context.isSingleton(beanName)).as("isSingleton").isTrue();
+		assertThat(context.getBean(beanName, String.class)).isEqualTo("overridden");
 	}
 
 	@Test
-	void replaceBeanByNameWithMatchingBeanDefinitionWithCustomScopeFails() {
+	void replaceBeanByNameWithMatchingBeanDefinitionWithCustomScope() {
 		String beanName = "descriptionBean";
 		String scope = "customScope";
 
@@ -346,22 +346,22 @@ class BeanOverrideBeanFactoryPostProcessorTests {
 		definition.setScope(scope);
 		context.registerBeanDefinition(beanName, definition);
 
-		assertThatIllegalStateException()
-				.isThrownBy(context::refresh)
-				.withMessage("Unable to override bean 'descriptionBean': only singleton beans can be overridden.");
+		assertThatNoException().isThrownBy(context::refresh);
+		assertThat(context.isSingleton(beanName)).as("isSingleton").isTrue();
+		assertThat(context.getBean(beanName, String.class)).isEqualTo("overridden");
 	}
 
 	@Test
-	void replaceBeanByNameWithMatchingBeanDefinitionForPrototypeScopedFactoryBeanFails() {
+	void replaceBeanByNameWithMatchingBeanDefinitionForPrototypeScopedFactoryBean() {
 		String beanName = "messageServiceBean";
 		AnnotationConfigApplicationContext context = createContext(MessageServiceTestCase.class);
 		RootBeanDefinition factoryBeanDefinition = new RootBeanDefinition(SingletonMessageServiceFactoryBean.class);
 		factoryBeanDefinition.setScope(BeanDefinition.SCOPE_PROTOTYPE);
 		context.registerBeanDefinition(beanName, factoryBeanDefinition);
 
-		assertThatIllegalStateException()
-				.isThrownBy(context::refresh)
-				.withMessage("Unable to override bean 'messageServiceBean': only singleton beans can be overridden.");
+		assertThatNoException().isThrownBy(context::refresh);
+		assertThat(context.isSingleton(beanName)).as("isSingleton").isTrue();
+		assertThat(context.getBean(beanName, MessageService.class).getMessage()).isEqualTo("overridden");
 	}
 
 	@Test

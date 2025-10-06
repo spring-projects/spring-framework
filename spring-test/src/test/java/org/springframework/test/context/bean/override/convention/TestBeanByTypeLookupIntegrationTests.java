@@ -20,8 +20,10 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Scope;
 import org.springframework.test.context.bean.override.example.CustomQualifier;
 import org.springframework.test.context.bean.override.example.ExampleService;
 import org.springframework.test.context.bean.override.example.RealExampleService;
@@ -53,6 +55,9 @@ public class TestBeanByTypeLookupIntegrationTests {
 	@CustomQualifier
 	StringBuilder anyNameForStringBuilder2;
 
+	@TestBean
+	Number prototypeNumber;
+
 
 	static MessageService messageService() {
 		return () -> "mocked nonexistent bean definition";
@@ -70,6 +75,9 @@ public class TestBeanByTypeLookupIntegrationTests {
 		return new StringBuilder("CustomQualifier TestBean String");
 	}
 
+	static Number prototypeNumber() {
+		return 42;
+	}
 
 	@Test
 	void overrideIsFoundByTypeForNonexistentBeanDefinition(ApplicationContext ctx) {
@@ -101,6 +109,13 @@ public class TestBeanByTypeLookupIntegrationTests {
 		assertThat(ctx.getBean("one")).as("no qualifier needed").hasToString("Prod One");
 	}
 
+	@Test
+	void overrideIsFoundByTypeForPrototypeBeanDefinition(ConfigurableApplicationContext ctx) {
+		assertThat(ctx.getBeanFactory().getBeanDefinition("prototypeNumber").isSingleton()).as("isSingleton").isTrue();
+		assertThat(this.prototypeNumber).isSameAs(ctx.getBean(Number.class));
+		assertThat(this.prototypeNumber).isEqualTo(42);
+	}
+
 
 	@Configuration(proxyBeanMethods = false)
 	static class Config {
@@ -125,6 +140,12 @@ public class TestBeanByTypeLookupIntegrationTests {
 		@CustomQualifier
 		StringBuilder beanString3() {
 			return new StringBuilder("Prod Three");
+		}
+
+		@Bean
+		@Scope("prototype")
+		Number prototypeNumber() {
+			return -999;
 		}
 	}
 

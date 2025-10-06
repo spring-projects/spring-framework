@@ -86,11 +86,13 @@ import org.springframework.test.context.bean.override.BeanOverride;
  * See the Javadoc for {@link org.springframework.test.context.ContextHierarchy @ContextHierarchy}
  * for further details and examples.
  *
- * <p><strong>NOTE</strong>: Only <em>singleton</em> beans can be spied. Any attempt
- * to create a spy for a non-singleton bean will result in an exception. When
- * creating a spy for a {@link org.springframework.beans.factory.FactoryBean FactoryBean},
- * a spy will be created for the object created by the {@code FactoryBean}, not
- * for the {@code FactoryBean} itself.
+ * <p><strong>NOTE</strong>: When creating a spy for a non-singleton bean, the
+ * corresponding bean definition will be converted to a singleton. Consequently,
+ * if you create a spy for a prototype or scoped bean, the spy will be treated as
+ * a singleton. Similarly, when creating a spy for a
+ * {@link org.springframework.beans.factory.FactoryBean FactoryBean}, a spy will
+ * be created for the object created by the {@code FactoryBean}, not for the
+ * {@code FactoryBean} itself.
  *
  * <p>There are no restrictions on the visibility of a {@code @MockitoSpyBean} field.
  * Such fields can therefore be {@code public}, {@code protected}, package-private

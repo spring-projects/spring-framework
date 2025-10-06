@@ -21,8 +21,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.NoUniqueBeanDefinitionException;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Scope;
 import org.springframework.core.annotation.Order;
 import org.springframework.test.context.bean.override.example.CustomQualifier;
 import org.springframework.test.context.bean.override.example.ExampleService;
@@ -62,6 +64,10 @@ public class MockitoBeanByTypeLookupIntegrationTests {
 	@MockitoBean
 	@CustomQualifier
 	StringBuilder ambiguousMeta;
+
+	@MockitoBean
+	YetAnotherService yetAnotherService;
+
 
 	@Test
 	void mockIsCreatedWhenNoCandidateIsFound() {
@@ -122,11 +128,30 @@ public class MockitoBeanByTypeLookupIntegrationTests {
 		verifyNoMoreInteractions(this.ambiguousMeta);
 	}
 
+	@Test
+	void overrideIsFoundByTypeForPrototype(ConfigurableApplicationContext ctx) {
+		assertThat(this.yetAnotherService)
+				.satisfies(MockitoAssertions::assertIsMock)
+				.isSameAs(ctx.getBean("YAS"))
+				.isSameAs(ctx.getBean(YetAnotherService.class));
+		assertThat(ctx.getBeanFactory().getBeanDefinition("YAS").isSingleton()).as("isSingleton").isTrue();
+
+		when(this.yetAnotherService.hello()).thenReturn("Mocked greeting");
+
+		assertThat(this.yetAnotherService.hello()).isEqualTo("Mocked greeting");
+		verify(this.yetAnotherService, times(1)).hello();
+		verifyNoMoreInteractions(this.yetAnotherService);
+	}
+
 
 	public interface AnotherService {
 
 		String hello();
+	}
 
+	public interface YetAnotherService {
+
+		String hello();
 	}
 
 	@Configuration(proxyBeanMethods = false)
@@ -149,6 +174,12 @@ public class MockitoBeanByTypeLookupIntegrationTests {
 		@Qualifier("prefer")
 		StringBuilder bean3() {
 			return new StringBuilder("bean3");
+		}
+
+		@Bean("YAS")
+		@Scope("prototype")
+		YetAnotherService bean4() {
+			return () -> "Production Hello";
 		}
 	}
 

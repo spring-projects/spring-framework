@@ -109,11 +109,14 @@ import org.springframework.test.context.bean.override.BeanOverride;
  * See the Javadoc for {@link org.springframework.test.context.ContextHierarchy @ContextHierarchy}
  * for further details and examples.
  *
- * <p><strong>NOTE</strong>: Only <em>singleton</em> beans can be overridden.
- * Any attempt to override a non-singleton bean will result in an exception. When
- * overriding a bean created by a {@link org.springframework.beans.factory.FactoryBean
- * FactoryBean}, the {@code FactoryBean} will be replaced with a singleton bean
- * corresponding to the value returned from the {@code @TestBean} factory method.
+ * <p><strong>NOTE</strong>: When overriding a non-singleton bean, the non-singleton
+ * bean will be replaced with a singleton bean corresponding to the value returned
+ * from the {@code @TestBean} factory method, and the corresponding bean definition
+ * will be converted to a singleton. Consequently, if you override a prototype or
+ * scoped bean, it will be treated as a singleton. Similarly, when overriding a bean
+ * created by a {@link org.springframework.beans.factory.FactoryBean FactoryBean},
+ * the {@code FactoryBean} will be replaced with a singleton bean corresponding to
+ * the value returned from the {@code @TestBean} factory method.
  *
  * <p>There are no restrictions on the visibility of {@code @TestBean} fields or
  * factory methods. Such fields and methods can therefore be {@code public},

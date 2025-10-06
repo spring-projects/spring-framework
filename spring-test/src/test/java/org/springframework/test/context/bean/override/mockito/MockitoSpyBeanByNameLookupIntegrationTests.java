@@ -23,8 +23,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Scope;
 import org.springframework.test.context.bean.override.example.ExampleService;
 import org.springframework.test.context.bean.override.example.RealExampleService;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBeanByNameLookupIntegrationTests.Config;
@@ -46,6 +48,9 @@ public class MockitoSpyBeanByNameLookupIntegrationTests {
 	@MockitoSpyBean("field1")
 	ExampleService field;
 
+	@MockitoSpyBean("field3")
+	ExampleService prototypeScoped;
+
 
 	@Test
 	void fieldHasOverride(ApplicationContext ctx) {
@@ -57,6 +62,16 @@ public class MockitoSpyBeanByNameLookupIntegrationTests {
 		assertThat(field.greeting()).isEqualTo("bean1");
 	}
 
+	@Test
+	void fieldForPrototypeHasOverride(ConfigurableApplicationContext ctx) {
+		assertThat(ctx.getBean("field3"))
+				.isInstanceOf(ExampleService.class)
+				.satisfies(MockitoAssertions::assertIsSpy)
+				.isSameAs(prototypeScoped);
+		assertThat(ctx.getBeanFactory().getBeanDefinition("field3").isSingleton()).as("isSingleton").isTrue();
+
+		assertThat(prototypeScoped.greeting()).isEqualTo("bean3");
+	}
 
 	@Nested
 	@DisplayName("With @MockitoSpyBean in enclosing class and in @Nested class")
@@ -101,6 +116,12 @@ public class MockitoSpyBeanByNameLookupIntegrationTests {
 		@Bean("field2")
 		ExampleService bean2() {
 			return new RealExampleService("bean2");
+		}
+
+		@Bean("field3")
+		@Scope("prototype")
+		ExampleService bean3() {
+			return new RealExampleService("bean3");
 		}
 	}
 

@@ -23,8 +23,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Scope;
 import org.springframework.test.context.bean.override.example.ExampleService;
 import org.springframework.test.context.bean.override.example.RealExampleService;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
@@ -48,6 +50,9 @@ public class MockitoBeanByNameLookupIntegrationTests {
 	@MockitoBean("nonExistingBean")
 	ExampleService nonExisting;
 
+	@MockitoBean("prototypeScoped")
+	ExampleService prototypeScoped;
+
 
 	@Test
 	void fieldAndRenamedFieldHaveSameOverride(ApplicationContext ctx) {
@@ -67,6 +72,17 @@ public class MockitoBeanByNameLookupIntegrationTests {
 				.isSameAs(nonExisting);
 
 		assertThat(nonExisting.greeting()).as("mocked greeting").isNull();
+	}
+
+	@Test
+	void fieldForPrototypeHasOverride(ConfigurableApplicationContext ctx) {
+		assertThat(ctx.getBean("prototypeScoped"))
+				.isInstanceOf(ExampleService.class)
+				.satisfies(MockitoAssertions::assertIsMock)
+				.isSameAs(prototypeScoped);
+		assertThat(ctx.getBeanFactory().getBeanDefinition("prototypeScoped").isSingleton()).as("isSingleton").isTrue();
+
+		assertThat(prototypeScoped.greeting()).as("mocked greeting").isNull();
 	}
 
 
@@ -138,6 +154,12 @@ public class MockitoBeanByNameLookupIntegrationTests {
 		@Bean("nestedField")
 		ExampleService bean2() {
 			return new RealExampleService("Hello Nested Field");
+		}
+
+		@Bean("prototypeScoped")
+		@Scope("prototype")
+		ExampleService bean3() {
+			return new RealExampleService("Hello Prototype Field");
 		}
 	}
 

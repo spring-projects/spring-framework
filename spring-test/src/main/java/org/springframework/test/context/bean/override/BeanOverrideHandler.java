@@ -64,13 +64,29 @@ import static org.springframework.core.annotation.MergedAnnotations.SearchStrate
  * creation} &mdash; for example, based on further processing of the annotation,
  * the annotated field, or the annotated class.
  *
- * <p><strong>NOTE</strong>: Only <em>singleton</em> beans can be overridden.
- * Any attempt to override a non-singleton bean will result in an exception.
+ * <h3>Singleton Semantics</h3>
+ *
+ * <p>When replacing a non-singleton bean, the non-singleton bean will be replaced
+ * with a singleton bean corresponding to bean override instance created by the
+ * handler, and the corresponding bean definition will be converted to a singleton.
+ * Consequently, if a handler overrides a prototype or custom scoped bean, the
+ * overridden bean will be treated as a singleton.
+ *
+ * <p>When replacing a bean created by a
+ * {@link org.springframework.beans.factory.FactoryBean FactoryBean}, the
+ * {@code FactoryBean} itself will be replaced with a singleton bean corresponding
+ * to bean override instance created by the handler.
+ *
+ * <p>When wrapping a bean created by a
+ * {@link org.springframework.beans.factory.FactoryBean FactoryBean}, the object
+ * created by the {@code FactoryBean} will be wrapped, not the {@code FactoryBean}
+ * itself.
  *
  * @author Simon Baslé
  * @author Stephane Nicoll
  * @author Sam Brannen
  * @since 6.2
+ * @see BeanOverrideStrategy
  */
 public abstract class BeanOverrideHandler {
 

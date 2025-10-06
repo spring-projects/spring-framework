@@ -88,14 +88,20 @@ To avoid such undesired side effects, consider using
 
 [NOTE]
 ====
-Only _singleton_ beans can be overridden. Any attempt to override a non-singleton bean
-will result in an exception.
+When using `@MockitoBean` to mock a non-singleton bean, the non-singleton bean will be
+replaced with a singleton mock, and the corresponding bean definition will be converted
+to a `singleton`. Consequently, if you mock a `prototype` or scoped bean, the mock will
+be treated as a `singleton`.
+
+Similarly, when using `@MockitoSpyBean` to create a spy for a non-singleton bean, the
+corresponding bean definition will be converted to a `singleton`. Consequently, if you
+create a spy for a `prototype` or scoped bean, the spy will be treated as a `singleton`.
 
 When using `@MockitoBean` to mock a bean created by a `FactoryBean`, the `FactoryBean`
 will be replaced with a singleton mock of the type of object created by the `FactoryBean`.
 
-When using `@MockitoSpyBean` to create a spy for a `FactoryBean`, a spy will be created
-for the object created by the `FactoryBean`, not for the `FactoryBean` itself.
+Similarly, when using `@MockitoSpyBean` to create a spy for a `FactoryBean`, a spy will
+be created for the object created by the `FactoryBean`, not for the `FactoryBean` itself.
 ====
 
 [NOTE]

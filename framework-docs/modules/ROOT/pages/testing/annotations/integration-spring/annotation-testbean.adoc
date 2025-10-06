@@ -116,12 +116,15 @@ fully-qualified method name following the syntax `<fully-qualified class name>#<
 – for example, `methodName = "org.example.TestUtils#createCustomService"`.
 ====
 
-[TIP]
+[NOTE]
 ====
-Only _singleton_ beans can be overridden. Any attempt to override a non-singleton bean
-will result in an exception.
+When overriding a non-singleton bean, the non-singleton bean will be replaced with a
+singleton bean corresponding to the value returned from the `@TestBean` factory method,
+and the corresponding bean definition will be converted to a `singleton`. Consequently,
+if `@TestBean` is used to override a `prototype` or scoped bean, the overridden bean will
+be treated as a `singleton`.
 
-When overriding a bean created by a `FactoryBean`, the `FactoryBean` will be replaced
-with a singleton bean corresponding to the value returned from the `@TestBean` factory
-method.
+Similarly, when overriding a bean created by a `FactoryBean`, the `FactoryBean` will be
+replaced with a singleton bean corresponding to the value returned from the `@TestBean`
+factory method.
 ====
