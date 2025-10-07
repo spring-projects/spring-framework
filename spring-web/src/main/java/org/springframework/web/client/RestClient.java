@@ -449,31 +449,43 @@ public interface RestClient {
 
 		/**
 		 * Configure the message converters for the {@code RestClient} to use.
-		 * @param configurer the configurer to apply on the list of default
-		 * {@link HttpMessageConverter} pre-initialized
-		 * @return this builder
-		 * @see #messageConverters(Iterable)
-		 * @deprecated since 7.0 in favor of {@link #configureMessageConverters(Consumer)}
-		 */
-		@Deprecated(since = "7.0", forRemoval = true)
-		Builder messageConverters(Consumer<List<HttpMessageConverter<?>>> configurer);
-
-		/**
-		 * Set the message converters for the {@code RestClient} to use.
-		 * @param messageConverters the list of {@link HttpMessageConverter} to use
-		 * @return this builder
-		 * @since 6.2
-		 * @see #configureMessageConverters(Consumer)
-		 */
-		Builder messageConverters(Iterable<HttpMessageConverter<?>> messageConverters);
-
-		/**
-		 * Configure the message converters for the {@code RestClient} to use.
+		 * Multiple consumers are composed together and applied to a single
+		 * {@link HttpMessageConverters.ClientBuilder} instance.
 		 * @param configurer the configurer to apply on an empty {@link HttpMessageConverters.ClientBuilder}.
 		 * @return this builder
 		 * @since 7.0
 		 */
 		Builder configureMessageConverters(Consumer<HttpMessageConverters.ClientBuilder> configurer);
+
+		/**
+		 * Set the message converters to use.
+		 * <p><strong>Note:</strong> As of 7.0, the converters provided here
+		 * populate a {@link HttpMessageConverters.ClientBuilder} initially, and
+		 * after that the same builder is initialized further through the
+		 * configurers provided via {@link #configureMessageConverters(Consumer)}.
+		 * @param messageConverters the converters to use
+		 * @return this builder
+		 * @since 6.2
+		 * @deprecated since 7.0 in favor of {@link #configureMessageConverters(Consumer)}
+		 */
+		@Deprecated(since = "7.0", forRemoval = true)
+		Builder messageConverters(Iterable<HttpMessageConverter<?>> messageConverters);
+
+		/**
+		 * Customize the message converters to use, which is either the default
+		 * converters, or those provided via {@link #messageConverters(Iterable)}.
+		 * The consumer is applied immediately to the internal list
+		 * <p><strong>Note:</strong> As of 7.0, the list of converters customized
+		 * here is used to populate a {@link HttpMessageConverters.ClientBuilder}
+		 * initially, and after that the same builder is initialized further
+		 * through the configurers provided via {@link #configureMessageConverters(Consumer)}.
+		 * @param configurer the configurer to apply on the list of default
+		 * {@link HttpMessageConverter} pre-initialized
+		 * @return this builder
+		 * @deprecated since 7.0 in favor of {@link #configureMessageConverters(Consumer)}
+		 */
+		@Deprecated(since = "7.0", forRemoval = true)
+		Builder messageConverters(Consumer<List<HttpMessageConverter<?>>> configurer);
 
 		/**
 		 * Configure the {@link io.micrometer.observation.ObservationRegistry} to use

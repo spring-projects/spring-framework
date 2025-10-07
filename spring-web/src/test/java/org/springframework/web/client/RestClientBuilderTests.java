@@ -112,6 +112,7 @@ public class RestClientBuilderTests {
 		assertThat(fieldValue("baseUrl", defaultBuilder)).isEqualTo(baseUrl.toString());
 	}
 
+	@SuppressWarnings("removal")
 	@Test
 	void messageConvertersList() {
 		StringHttpMessageConverter stringConverter = new StringHttpMessageConverter();
@@ -126,6 +127,7 @@ public class RestClientBuilderTests {
 				.containsExactly(stringConverter);
 	}
 
+	@SuppressWarnings("removal")
 	@Test
 	void messageConvertersListEmpty() {
 		RestClient.Builder builder = RestClient.builder();
@@ -133,6 +135,7 @@ public class RestClientBuilderTests {
 		assertThatIllegalArgumentException().isThrownBy(() -> builder.messageConverters(converters));
 	}
 
+	@SuppressWarnings("removal")
 	@Test
 	void messageConvertersListWithNullElement() {
 		RestClient.Builder builder = RestClient.builder();
@@ -147,9 +150,9 @@ public class RestClientBuilderTests {
 		RestClient.Builder builder = RestClient.builder();
 		builder.configureMessageConverters(clientBuilder -> clientBuilder.stringMessageConverter(stringConverter));
 		assertThat(builder).isInstanceOf(DefaultRestClientBuilder.class);
-		DefaultRestClientBuilder defaultBuilder = (DefaultRestClientBuilder) builder;
+		DefaultRestClient restClient = (DefaultRestClient) builder.build();
 
-		assertThat(fieldValue("messageConverters", defaultBuilder))
+		assertThat(fieldValue("messageConverters", restClient))
 				.asInstanceOf(InstanceOfAssertFactories.LIST)
 				.hasExactlyElementsOfTypes(StringHttpMessageConverter.class, AllEncompassingFormHttpMessageConverter.class);
 	}
