@@ -161,7 +161,7 @@ public abstract class AbstractJacksonEncoder<T extends ObjectMapper> extends Jac
 					throw new IllegalStateException("No ObjectMapper for " + elementType);
 				}
 
-				ObjectWriter writer = createObjectWriter(mapper, elementType, mimeType, null, hintsToUse);
+				ObjectWriter writer = createObjectWriter(mapper, elementType, mimeType, hintsToUse);
 				ByteArrayBuilder byteBuilder = new ByteArrayBuilder(writer.generatorFactory()._getBufferRecycler());
 				JsonEncoding encoding = getJsonEncoding(mimeType);
 				JsonGenerator generator = mapper.createGenerator(byteBuilder, encoding);
@@ -219,22 +219,12 @@ public abstract class AbstractJacksonEncoder<T extends ObjectMapper> extends Jac
 	public DataBuffer encodeValue(Object value, DataBufferFactory bufferFactory,
 			ResolvableType valueType, @Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
-		Class<?> jsonView = null;
-		FilterProvider filters = null;
-		if (hints != null) {
-			jsonView = (Class<?>) hints.get(JSON_VIEW_HINT);
-			filters = (FilterProvider) hints.get(FILTER_PROVIDER_HINT);
-		}
-
 		T mapper = selectMapper(valueType, mimeType);
 		if (mapper == null) {
 			throw new IllegalStateException("No ObjectMapper for " + valueType);
 		}
 
-		ObjectWriter writer = createObjectWriter(mapper, valueType, mimeType, jsonView, hints);
-		if (filters != null) {
-			writer = writer.with(filters);
-		}
+		ObjectWriter writer = createObjectWriter(mapper, valueType, mimeType, hints);
 
 		ByteArrayBuilder byteBuilder = new ByteArrayBuilder(writer.generatorFactory()._getBufferRecycler());
 		try {
@@ -321,13 +311,19 @@ public abstract class AbstractJacksonEncoder<T extends ObjectMapper> extends Jac
 
 	private ObjectWriter createObjectWriter(
 			T mapper, ResolvableType valueType, @Nullable MimeType mimeType,
-			@Nullable Class<?> jsonView, @Nullable Map<String, Object> hints) {
+			@Nullable Map<String, Object> hints) {
 
 		JavaType javaType = getJavaType(valueType.getType(), null);
-		if (jsonView == null && hints != null) {
+		Class<?> jsonView = null;
+		FilterProvider filters = null;
+		if (hints != null) {
 			jsonView = (Class<?>) hints.get(JacksonCodecSupport.JSON_VIEW_HINT);
+			filters = (FilterProvider) hints.get(FILTER_PROVIDER_HINT);
 		}
 		ObjectWriter writer = (jsonView != null ? mapper.writerWithView(jsonView) : mapper.writer());
+		if (filters != null) {
+			writer = writer.with(filters);
+		}
 		if (javaType.isContainerType()) {
 			writer = writer.forType(javaType);
 		}
