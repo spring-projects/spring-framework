@@ -118,6 +118,13 @@ class ExceptionHandlerMethodResolverTests {
 	}
 
 	@Test
+	void shouldKeepProduceMediaTypesOrder() {
+		ExceptionHandlerMethodResolver resolver = new ExceptionHandlerMethodResolver(MediaTypeController.class);
+		assertThat(resolver.resolveExceptionMapping(new IllegalArgumentException(), MediaType.TEXT_HTML).getProducibleTypes().toString()).isEqualTo("[text/html, */*]");
+	}
+	
+	
+	@Test
 	void shouldResolveMethodWithCompatibleMediaType() {
 		ExceptionHandlerMethodResolver resolver = new ExceptionHandlerMethodResolver(MediaTypeController.class);
 		assertThat(resolver.resolveExceptionMapping(new IllegalArgumentException(), MediaType.parseMediaType("application/*")).getHandlerMethod().getName()).isEqualTo("handleJson");
