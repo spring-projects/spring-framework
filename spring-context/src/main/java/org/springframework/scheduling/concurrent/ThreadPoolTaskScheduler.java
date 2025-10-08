@@ -19,11 +19,13 @@ package org.springframework.scheduling.concurrent;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Delayed;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.RejectedExecutionHandler;
@@ -34,6 +36,7 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.jspecify.annotations.Nullable;
 
@@ -94,6 +97,69 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 
 	private @Nullable ScheduledExecutorService scheduledExecutor;
 
+	private @Nullable ScheduledExecutorService delayMonitorExecutor;
+
+	private boolean enableDelayMonitoring = true;
+
+	private long delayMonitoringInterval = 5000;
+
+	private long delayWarningThreshold = 1000;
+
+	private static final int MAX_QUEUE_CHECK_SIZE = 100;
+
+	private static final long WARNING_RATE_LIMIT_MS = 30000;
+
+	private volatile long lastWarningTime = 0;
+
+	private final AtomicInteger delayedTaskWarningCount = new AtomicInteger();
+
+
+	/**
+	 * Enable or disable task delay monitoring.
+	 * <p>When enabled (default), a separate monitoring thread will periodically check
+	 * if scheduled tasks are unable to execute due to thread pool exhaustion and log warnings.
+	 * <p>This helps diagnose situations where the pool size is insufficient for the workload.
+	 * @param enableDelayMonitoring whether to enable delay monitoring
+	 * @since 6.2
+	 * @see #setDelayMonitoringInterval
+	 * @see #setDelayWarningThreshold
+	 */
+	public void setEnableDelayMonitoring(boolean enableDelayMonitoring) {
+		this.enableDelayMonitoring = enableDelayMonitoring;
+	}
+
+	/**
+	 * Set the interval for checking delayed tasks (in milliseconds).
+	 * <p>Default is 5000ms (5 seconds).
+	 * @param delayMonitoringInterval the monitoring interval in milliseconds
+	 * @since 6.2
+	 */
+	public void setDelayMonitoringInterval(long delayMonitoringInterval) {
+		Assert.isTrue(delayMonitoringInterval > 0, "delayMonitoringInterval must be positive");
+		this.delayMonitoringInterval = delayMonitoringInterval;
+	}
+
+	/**
+	 * Set the threshold for logging warnings about delayed tasks (in milliseconds).
+	 * <p>Tasks that are delayed by more than this threshold will trigger a warning.
+	 * <p>Default is 1000ms (1 second).
+	 * @param delayWarningThreshold the warning threshold in milliseconds
+	 * @since 6.2
+	 */
+	public void setDelayWarningThreshold(long delayWarningThreshold) {
+		Assert.isTrue(delayWarningThreshold > 0, "delayWarningThreshold must be positive");
+		this.delayWarningThreshold = delayWarningThreshold;
+	}
+
+	/**
+	 * Reset the rate limit timer for delay warnings.
+	 * <p>This is primarily useful for testing to allow immediate warnings without waiting
+	 * for the rate limit period to expire.
+	 * @since 6.2
+	 */
+	void resetWarningRateLimit() {
+		this.lastWarningTime = 0;
+	}
 
 	/**
 	 * Set the ScheduledExecutorService's pool size.
@@ -206,6 +272,10 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 			if (!this.executeExistingDelayedTasksAfterShutdownPolicy) {
 				threadPoolExecutor.setExecuteExistingDelayedTasksAfterShutdownPolicy(false);
 			}
+		}
+
+		if (this.enableDelayMonitoring) {
+			startDelayMonitor(this.scheduledExecutor);
 		}
 
 		return this.scheduledExecutor;
@@ -424,6 +494,161 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 		catch (RejectedExecutionException ex) {
 			throw new TaskRejectedException(executor, task, ex);
 		}
+	}
+
+	/**
+	 * Start the delay monitoring thread that periodically checks for tasks
+	 * that are delayed due to thread pool exhaustion.
+	 * @param executor the scheduled executor to monitor
+	 * @since 6.2
+	 */
+	private void startDelayMonitor(ScheduledExecutorService executor) {
+		if (!(executor instanceof ScheduledThreadPoolExecutor)) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Delay monitoring is only supported for ScheduledThreadPoolExecutor");
+			}
+			return;
+		}
+
+		if (this.delayMonitorExecutor != null) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Stopping existing delay monitor before starting a new one");
+			}
+			this.delayMonitorExecutor.shutdownNow();
+		}
+
+		this.delayMonitorExecutor = Executors.newSingleThreadScheduledExecutor(runnable -> {
+			Thread thread = new Thread(runnable, getThreadNamePrefix() + "delay-monitor");
+			thread.setDaemon(true);
+			return thread;
+		});
+
+		this.delayMonitorExecutor.scheduleAtFixedRate(
+				() -> checkForDelayedTasks((ScheduledThreadPoolExecutor) executor),
+				this.delayMonitoringInterval,
+				this.delayMonitoringInterval,
+				TimeUnit.MILLISECONDS);
+
+		if (logger.isDebugEnabled()) {
+			logger.debug("Started delay monitoring thread with interval: " + this.delayMonitoringInterval + "ms");
+		}
+	}
+
+	/**
+	 * Check the task queue for tasks whose scheduled execution time has passed
+	 * but have not yet started executing due to thread pool exhaustion.
+	 * @param executor the scheduled thread pool executor to monitor
+	 * @since 6.2
+	 */
+	private void checkForDelayedTasks(ScheduledThreadPoolExecutor executor) {
+		try {
+			BlockingQueue<Runnable> queue = executor.getQueue();
+			if (queue.isEmpty()) {
+				return;
+			}
+
+			int poolSize = executor.getPoolSize();
+			int activeCount = executor.getActiveCount();
+			int queueSize = queue.size();
+
+			// Only warn if all threads are busy (thread pool exhaustion)
+			boolean poolExhausted = (activeCount >= poolSize);
+
+			if (!poolExhausted) {
+				// No exhaustion, no need to check
+				return;
+			}
+
+			// Rate limiting: warn at most once per WARNING_RATE_LIMIT_MS
+			long now = System.currentTimeMillis();
+			if (now - this.lastWarningTime < WARNING_RATE_LIMIT_MS) {
+				return;
+			}
+
+			// For large queues, skip detailed iteration and warn immediately
+			if (queueSize > MAX_QUEUE_CHECK_SIZE) {
+				if (logger.isWarnEnabled()) {
+					logger.warn(String.format(
+							"Thread pool exhaustion detected with large queue size (%d). " +
+									"Pool size: %d, Active threads: %d. " +
+									"Consider significantly increasing the pool size via " +
+									"ThreadPoolTaskScheduler.setPoolSize() or spring.task.scheduling.pool.size property, " +
+									"or enable virtual threads via ThreadPoolTaskScheduler.setVirtualThreads(true).",
+							queueSize, poolSize, activeCount
+					));
+				}
+				this.lastWarningTime = now;
+				delayedTaskWarningCount.incrementAndGet();
+				return;
+			}
+
+			// Count delayed tasks and find maximum delay
+			int delayedCount = 0;
+			long maxDelay = 0;
+
+			for (Runnable runnable : queue) {
+				if (runnable instanceof RunnableScheduledFuture<?> future) {
+					long delayMs = future.getDelay(TimeUnit.MILLISECONDS);
+
+					// Task is delayed AND pool is exhausted = thread starvation
+					if (delayMs < -this.delayWarningThreshold) {
+						delayedCount++;
+						long delayedBy = Math.abs(delayMs);
+						maxDelay = Math.max(maxDelay, delayedBy);
+					}
+				}
+			}
+
+			// Log grouped warning for all delayed tasks
+			if (delayedCount > 0 && logger.isWarnEnabled()) {
+				String message = String.format(
+						"%d scheduled task%s delayed (max delay: %dms) due to thread pool exhaustion. " +
+								"Pool size: %d, Active threads: %d, Queue size: %d. " +
+								"Consider increasing the pool size via ThreadPoolTaskScheduler.setPoolSize() " +
+								"or spring.task.scheduling.pool.size property, or enable virtual threads " +
+								"via ThreadPoolTaskScheduler.setVirtualThreads(true).",
+						delayedCount, (delayedCount == 1 ? " is" : "s are"), maxDelay,
+						poolSize, activeCount, queueSize
+				);
+
+				// Add extra hint if pool size is 1 (default)
+				if (poolSize == 1) {
+					message += " Note: Pool size is 1 (default), which is often insufficient for multiple scheduled tasks.";
+				}
+
+				logger.warn(message);
+				this.lastWarningTime = now;
+				delayedTaskWarningCount.addAndGet(delayedCount);
+			}
+		}
+		catch (Exception ex) {
+			// Don't let monitoring failures affect the scheduler
+			if (logger.isDebugEnabled()) {
+				logger.debug("Error during delay monitoring", ex);
+			}
+		}
+	}
+
+	@Override
+	public void shutdown() {
+		if (this.delayMonitorExecutor != null) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Shutting down delay monitoring thread");
+			}
+			this.delayMonitorExecutor.shutdownNow();
+			this.delayMonitorExecutor = null;
+		}
+		super.shutdown();
+	}
+
+	/**
+	 * Return the total number of delayed task warnings that have been logged.
+	 * <p>This can be used for monitoring and alerting purposes.
+	 * @return the count of delayed task warnings
+	 * @since 6.2
+	 */
+	public int getDelayedTaskWarningCount() {
+		return this.delayedTaskWarningCount.get();
 	}
 
 
