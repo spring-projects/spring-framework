@@ -26,6 +26,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.function.Consumer;
 
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.http.Cookie;
@@ -535,6 +536,21 @@ class MockHttpServletRequestBuilderTests {
 		httpHeaders.setContentType(MediaType.APPLICATION_JSON);
 		httpHeaders.put("foo", Arrays.asList("bar", "baz"));
 		this.builder.headers(httpHeaders);
+
+		MockHttpServletRequest request = this.builder.buildRequest(this.servletContext);
+		List<String> headers = Collections.list(request.getHeaders("foo"));
+
+		assertThat(headers).containsExactly("bar", "baz");
+		assertThat(request.getHeader("Content-Type")).isEqualTo(MediaType.APPLICATION_JSON.toString());
+	}
+
+	@Test
+	void headersConsumer() {
+		Consumer<HttpHeaders> httpHeadersConsumer = httpHeaders -> {
+			httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+			httpHeaders.put("foo", Arrays.asList("bar", "baz"));
+		};
+		this.builder.headers(httpHeadersConsumer);
 
 		MockHttpServletRequest request = this.builder.buildRequest(this.servletContext);
 		List<String> headers = Collections.list(request.getHeaders("foo"));

@@ -31,6 +31,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.function.Consumer;
 
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletRequest;
@@ -109,7 +110,7 @@ public abstract class AbstractMockHttpServletRequestBuilder<B extends AbstractMo
 
 	private @Nullable String contentType;
 
-	private final MultiValueMap<String, Object> headers = new LinkedMultiValueMap<>();
+	private final HttpHeaders headers = new HttpHeaders();
 
 	private final MultiValueMap<String, String> parameters = new LinkedMultiValueMap<>();
 
@@ -342,7 +343,7 @@ public abstract class AbstractMockHttpServletRequestBuilder<B extends AbstractMo
 	 * @param values one or more header values
 	 */
 	public B header(String name, Object... values) {
-		this.headers.addAll(name, Arrays.asList(values));
+		this.headers.addAll(name, Arrays.stream(values).map(String::valueOf).toList());
 		return self();
 	}
 
@@ -352,6 +353,20 @@ public abstract class AbstractMockHttpServletRequestBuilder<B extends AbstractMo
 	 */
 	public B headers(HttpHeaders httpHeaders) {
 		httpHeaders.forEach(this.headers::addAll);
+		return self();
+	}
+
+	/**
+	 * Manipulate this builder's headers with the given consumer. The
+	 * headers provided to the consumer are "live", so that the consumer can be used to
+	 * {@linkplain HttpHeaders#set(String, String) overwrite} existing header values,
+	 * {@linkplain HttpHeaders#remove(String) remove} values, or use any of the other
+	 * {@link HttpHeaders} methods.
+	 * @param headersConsumer a function that consumes the {@code HttpHeaders}
+	 * @return this builder
+	 */
+	public B headers(Consumer<HttpHeaders> headersConsumer){
+		headersConsumer.accept(this.headers);
 		return self();
 	}
 
@@ -665,12 +680,11 @@ public abstract class AbstractMockHttpServletRequestBuilder<B extends AbstractMo
 			this.contentType = parentBuilder.contentType;
 		}
 
-		for (Map.Entry<String, List<Object>> entry : parentBuilder.headers.entrySet()) {
-			String headerName = entry.getKey();
-			if (!this.headers.containsKey(headerName)) {
-				this.headers.put(headerName, entry.getValue());
+		parentBuilder.headers.forEach((name, values) -> {
+			if (!this.headers.containsHeader(name)) {
+				this.headers.put(name, values);
 			}
-		}
+		});
 		for (Map.Entry<String, List<String>> entry : parentBuilder.parameters.entrySet()) {
 			String paramName = entry.getKey();
 			if (!this.parameters.containsKey(paramName)) {
@@ -808,8 +822,8 @@ public abstract class AbstractMockHttpServletRequestBuilder<B extends AbstractMo
 		});
 
 		if (!ObjectUtils.isEmpty(this.content) &&
-				!this.headers.containsKey(HttpHeaders.CONTENT_LENGTH) &&
-				!this.headers.containsKey(HttpHeaders.TRANSFER_ENCODING)) {
+				!this.headers.containsHeader(HttpHeaders.CONTENT_LENGTH) &&
+				!this.headers.containsHeader(HttpHeaders.TRANSFER_ENCODING)) {
 
 			request.addHeader(HttpHeaders.CONTENT_LENGTH, this.content.length);
 		}
