@@ -371,7 +371,7 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 				int startupPhase = getPhase(bean);
 				phases.computeIfAbsent(
 						startupPhase, phase -> new LifecycleGroup(phase, lifecycleBeans, autoStartupOnly, false))
-						.add(beanName, bean);
+							.add(beanName, bean);
 			}
 		});
 
@@ -441,7 +441,7 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 			int shutdownPhase = getPhase(bean);
 			phases.computeIfAbsent(
 					shutdownPhase, phase -> new LifecycleGroup(phase, lifecycleBeans, false, pauseableOnly))
-					.add(beanName, bean);
+						.add(beanName, bean);
 		});
 
 		if (!phases.isEmpty()) {
