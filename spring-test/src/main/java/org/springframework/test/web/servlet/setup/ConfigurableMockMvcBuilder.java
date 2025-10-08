@@ -86,7 +86,7 @@ public interface ConfigurableMockMvcBuilder<B extends ConfigurableMockMvcBuilder
 	 * @param versionInserter the inserter to use
 	 * @since 7.0
 	 */
-	<T extends B> T apiVersionInserter(ApiVersionInserter versionInserter);
+	<T extends B> T apiVersionInserter(@Nullable ApiVersionInserter versionInserter);
 
 	/**
 	 * Define default request properties that should be merged into all

@@ -502,7 +502,7 @@ public abstract class AbstractMockHttpServletRequestBuilder<B extends AbstractMo
 	 * @param versionInserter the inserter to use
 	 * @since 7.0
 	 */
-	public B apiVersionInserter(ApiVersionInserter versionInserter) {
+	public B apiVersionInserter(@Nullable ApiVersionInserter versionInserter) {
 		this.versionInserter = versionInserter;
 		return self();
 	}

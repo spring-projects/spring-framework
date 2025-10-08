@@ -118,7 +118,7 @@ class DefaultRestTestClientBuilder<B extends RestTestClient.Builder<B>> implemen
 	}
 
 	@Override
-	public <T extends B> T apiVersionInserter(ApiVersionInserter apiVersionInserter) {
+	public <T extends B> T apiVersionInserter(@Nullable ApiVersionInserter apiVersionInserter) {
 		this.restClientBuilder.apiVersionInserter(apiVersionInserter);
 		return self();
 	}

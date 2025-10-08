@@ -271,7 +271,7 @@ public interface WebClient {
 		 * @param apiVersionInserter the inserter to use
 		 * @since 7.0
 		 */
-		Builder apiVersionInserter(ApiVersionInserter apiVersionInserter);
+		Builder apiVersionInserter(@Nullable ApiVersionInserter apiVersionInserter);
 
 		/**
 		 * Provide a consumer to customize every request being built.

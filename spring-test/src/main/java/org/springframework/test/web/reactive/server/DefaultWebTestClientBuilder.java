@@ -215,7 +215,7 @@ class DefaultWebTestClientBuilder implements WebTestClient.Builder {
 	}
 
 	@Override
-	public WebTestClient.Builder apiVersionInserter(ApiVersionInserter apiVersionInserter) {
+	public WebTestClient.Builder apiVersionInserter(@Nullable ApiVersionInserter apiVersionInserter) {
 		this.apiVersionInserter = apiVersionInserter;
 		return this;
 	}

@@ -453,7 +453,7 @@ public interface WebTestClient {
 		 * @param apiVersionInserter the inserter to use
 		 * @since 7.0
 		 */
-		Builder apiVersionInserter(ApiVersionInserter apiVersionInserter);
+		Builder apiVersionInserter(@Nullable ApiVersionInserter apiVersionInserter);
 
 		/**
 		 * Add the given filter to the filter chain.

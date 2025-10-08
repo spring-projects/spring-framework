@@ -279,7 +279,7 @@ final class DefaultRestClientBuilder implements RestClient.Builder {
 	}
 
 	@Override
-	public RestClient.Builder apiVersionInserter(ApiVersionInserter apiVersionInserter) {
+	public RestClient.Builder apiVersionInserter(@Nullable ApiVersionInserter apiVersionInserter) {
 		this.apiVersionInserter = apiVersionInserter;
 		return this;
 	}

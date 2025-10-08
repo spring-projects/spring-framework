@@ -268,7 +268,7 @@ public interface RestTestClient {
 		 * of {@link ApiVersionInserter} for a list of choices.
 		 * @param apiVersionInserter the inserter to use
 		 */
-		<T extends B> T apiVersionInserter(ApiVersionInserter apiVersionInserter);
+		<T extends B> T apiVersionInserter(@Nullable ApiVersionInserter apiVersionInserter);
 
 		/**
 		 * Add the given request interceptor to the end of the interceptor chain.
