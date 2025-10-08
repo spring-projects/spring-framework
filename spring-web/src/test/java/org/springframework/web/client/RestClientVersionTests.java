@@ -108,6 +108,15 @@ public class RestClientVersionTests {
 		expectRequest(request -> assertThat(request.getHeaders().get("API-Version")).isEqualTo("1.2"));
 	}
 
+	@Test
+	void noVersion() {
+		ApiVersionInserter inserter = ApiVersionInserter.useHeader("API-Version");
+		RestClient restClient = restClientBuilder.defaultApiVersion(1.2).apiVersionInserter(inserter).build();
+		restClient.get().uri("/path").apiVersion(null).retrieve().body(String.class);
+
+		expectRequest(request -> assertThat(request.getHeaders().get("API-Version")).isNull());
+	}
+
 	private void performRequest(ApiVersionInserter versionInserter) {
 		restClientBuilder.apiVersionInserter(versionInserter).build()
 				.post().uri("/path")

@@ -479,14 +479,19 @@ public interface RestTestClient {
 
 		/**
 		 * Set an API version for the request. The version is inserted into the
-		 * request by the {@linkplain Builder#apiVersionInserter(ApiVersionInserter)
+		 * request through the {@link Builder#apiVersionInserter(ApiVersionInserter)
 		 * configured} {@code ApiVersionInserter}.
-		 * @param version the API version of the request; this can be a String or
-		 * some Object that can be formatted by the inserter &mdash; for example,
-		 * through an {@link ApiVersionFormatter}
+		 * <p>If no version is set, the
+		 * {@link Builder#defaultApiVersion(Object) defaultApiVersion} is used,
+		 * if configured.
+		 * <p>If {@code null} is passed, then an API version is not inserted
+		 * irrespective of default version settings.
+		 * @param version the API version for the request; this can be a String
+		 * or some Object that can be formatted the inserter, e.g. through an
+		 * {@link ApiVersionFormatter}.
 		 * @return this spec for further declaration of the request
 		 */
-		S apiVersion(Object version);
+		S apiVersion(@Nullable Object version);
 
 		/**
 		 * Set the attribute with the given name to the given value.

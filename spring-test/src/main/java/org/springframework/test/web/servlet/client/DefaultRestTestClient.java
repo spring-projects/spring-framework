@@ -248,7 +248,7 @@ class DefaultRestTestClient implements RestTestClient {
 		}
 
 		@Override
-		public RequestBodySpec apiVersion(Object version) {
+		public RequestBodySpec apiVersion(@Nullable Object version) {
 			this.requestHeadersUriSpec.apiVersion(version);
 			return this;
 		}

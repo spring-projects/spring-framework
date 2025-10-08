@@ -293,6 +293,8 @@ final class DefaultRestClient implements RestClient {
 
 	private class DefaultRequestBodyUriSpec implements RequestBodyUriSpec {
 
+		private static final Object NO_VERSION = new Object();
+
 		private final HttpMethod httpMethod;
 
 		private @Nullable URI uri;
@@ -430,8 +432,8 @@ final class DefaultRestClient implements RestClient {
 		}
 
 		@Override
-		public RequestBodySpec apiVersion(Object version) {
-			this.apiVersion = version;
+		public RequestBodySpec apiVersion(@Nullable Object version) {
+			this.apiVersion = (version != null ? version : NO_VERSION);
 			return this;
 		}
 
@@ -646,7 +648,15 @@ final class DefaultRestClient implements RestClient {
 		}
 
 		private @Nullable Object getApiVersionOrDefault() {
-			return (this.apiVersion != null ? this.apiVersion : DefaultRestClient.this.defaultApiVersion);
+			if (this.apiVersion == null) {
+				return DefaultRestClient.this.defaultApiVersion;
+			}
+			else if (this.apiVersion == NO_VERSION) {
+				return null;
+			}
+			else {
+				return this.apiVersion;
+			}
 		}
 
 		private @Nullable String serializeCookies() {

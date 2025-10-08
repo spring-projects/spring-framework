@@ -99,6 +99,15 @@ public class WebClientVersionTests {
 		expectRequest(request -> assertThat(request.getHeaders().get("API-Version")).isEqualTo("1.2"));
 	}
 
+	@Test
+	void noVersion() {
+		ApiVersionInserter inserter = ApiVersionInserter.useHeader("API-Version");
+		WebClient webClient = webClientBuilder.defaultApiVersion(1.2).apiVersionInserter(inserter).build();
+		webClient.get().uri("/path").apiVersion(null).retrieve().bodyToMono(String.class).block();
+
+		expectRequest(request -> assertThat(request.getHeaders().get("API-Version")).isNull());
+	}
+
 	private void performRequest(ApiVersionInserter versionInserter) {
 		WebClient webClient = webClientBuilder.apiVersionInserter(versionInserter).build();
 		webClient.get().uri("/path").apiVersion(1.2).retrieve().bodyToMono(String.class).block();
