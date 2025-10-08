@@ -496,6 +496,9 @@ public abstract class AbstractMockHttpServletRequestBuilder<B extends AbstractMo
 	 * An inserter may typically be set once (more centrally) via
 	 * {@link org.springframework.test.web.servlet.setup.ConfigurableMockMvcBuilder#defaultRequest(RequestBuilder)}, or
 	 * {@link org.springframework.test.web.servlet.setup.ConfigurableMockMvcBuilder#apiVersionInserter(ApiVersionInserter)}.
+	 * <p>{@code ApiVersionInserter} exposes shortcut methods for several
+	 * built-in inserter implementation types. See the class-level Javadoc
+	 * of {@link ApiVersionInserter} for a list of choices.
 	 * @param versionInserter the inserter to use
 	 * @since 7.0
 	 */

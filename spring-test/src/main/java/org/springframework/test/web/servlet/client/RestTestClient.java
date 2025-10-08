@@ -263,6 +263,9 @@ public interface RestTestClient {
 		 * Configure an {@link ApiVersionInserter} to abstract how an API version
 		 * specified via {@link RequestHeadersSpec#apiVersion(Object)}
 		 * is inserted into the request.
+		 * <p>{@code ApiVersionInserter} exposes shortcut methods for several
+		 * built-in inserter implementation types. See the class-level Javadoc
+		 * of {@link ApiVersionInserter} for a list of choices.
 		 * @param apiVersionInserter the inserter to use
 		 */
 		<T extends B> T apiVersionInserter(ApiVersionInserter apiVersionInserter);

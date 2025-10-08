@@ -80,6 +80,9 @@ public interface ConfigurableMockMvcBuilder<B extends ConfigurableMockMvcBuilder
 	/**
 	 * Set the {@link ApiVersionInserter} to use to apply to versions specified via
 	 * {@link org.springframework.test.web.servlet.request.AbstractMockHttpServletRequestBuilder#apiVersion(Object)}.
+	 * <p>{@code ApiVersionInserter} exposes shortcut methods for several
+	 * built-in inserter implementation types. See the class-level Javadoc
+	 * of {@link ApiVersionInserter} for a list of choices.
 	 * @param versionInserter the inserter to use
 	 * @since 7.0
 	 */
