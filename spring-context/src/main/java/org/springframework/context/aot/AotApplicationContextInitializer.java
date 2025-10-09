@@ -63,13 +63,13 @@ public interface AotApplicationContextInitializer<C extends ConfigurableApplicat
 
 	private static <C extends ConfigurableApplicationContext> void initialize(
 			C applicationContext, String... initializerClassNames) {
+
 		Log logger = LogFactory.getLog(AotApplicationContextInitializer.class);
 		ClassLoader classLoader = applicationContext.getClassLoader();
 		logger.debug("Initializing ApplicationContext with AOT");
 		for (String initializerClassName : initializerClassNames) {
 			logger.trace(LogMessage.format("Applying %s", initializerClassName));
-			instantiateInitializer(initializerClassName, classLoader)
-					.initialize(applicationContext);
+			instantiateInitializer(initializerClassName, classLoader).initialize(applicationContext);
 		}
 	}
 
