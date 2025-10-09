@@ -66,6 +66,9 @@ public final class TableMetaDataProviderFactory {
 				else if ("HSQL Database Engine".equals(databaseProductName)) {
 					provider = new HsqlTableMetaDataProvider(databaseMetaData);
 				}
+				else if ("MySQL".equals(databaseProductName) || "MariaDB".equals(databaseProductName)) {
+					provider = new MySQLTableMetaDataProvider(databaseMetaData);
+				}
 				else {
 					provider = new GenericTableMetaDataProvider(databaseMetaData);
 				}
