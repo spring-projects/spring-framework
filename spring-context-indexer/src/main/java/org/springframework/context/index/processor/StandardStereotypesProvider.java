@@ -25,8 +25,8 @@ import javax.lang.model.element.ElementKind;
 
 /**
  * A {@link StereotypesProvider} that extracts a stereotype for each
- * {@code jakarta.*} or {@code javax.*} annotation <i>present</i> on a class or
- * interface.
+ * {@code jakarta.*} or {@code javax.*} annotation <i>present</i>
+ * on a class or interface.
  *
  * @author Stephane Nicoll
  * @since 5.0

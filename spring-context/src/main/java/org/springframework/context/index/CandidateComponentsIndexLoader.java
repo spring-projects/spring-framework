@@ -38,10 +38,7 @@ import org.springframework.util.ConcurrentReferenceHashMap;
  *
  * @author Stephane Nicoll
  * @since 5.0
- * @deprecated as of 6.1, in favor of the AOT engine.
  */
-@Deprecated(since = "6.1", forRemoval = true)
-@SuppressWarnings("removal")
 public final class CandidateComponentsIndexLoader {
 
 	/**

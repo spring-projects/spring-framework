@@ -45,9 +45,7 @@ import org.springframework.util.MultiValueMap;
  *
  * @author Stephane Nicoll
  * @since 5.0
- * @deprecated as of 6.1, in favor of the AOT engine.
  */
-@Deprecated(since = "6.1", forRemoval = true)
 public class CandidateComponentsIndex {
 
 	private static final AntPathMatcher pathMatcher = new AntPathMatcher(".");
@@ -83,7 +81,7 @@ public class CandidateComponentsIndex {
 	public Set<String> getCandidateTypes(String basePackage, String stereotype) {
 		List<Entry> candidates = this.index.get(stereotype);
 		if (candidates != null) {
-			return candidates.parallelStream()
+			return candidates.stream()
 					.filter(t -> t.match(basePackage))
 					.map(t -> t.type)
 					.collect(Collectors.toSet());
@@ -94,7 +92,7 @@ public class CandidateComponentsIndex {
 
 	private static class Entry {
 
-		private final String type;
+		final String type;
 
 		private final String packageName;
 
