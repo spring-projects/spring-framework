@@ -214,7 +214,7 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 				Package methodPackage = declaringClass.getPackage();
 				Package handlerPackage = handlerType.getPackage();
 
-				if (Objects.equals(methodPackage, handlerPackage)) {
+				if (!Objects.equals(methodPackage, handlerPackage)) {
 					String methodPackageName = (methodPackage != null) ? methodPackage.getName() : "default package";
 					String handlerPackageName = (handlerPackage != null) ? handlerPackage.getName() : "default package";
 
