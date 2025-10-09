@@ -82,7 +82,7 @@ public class ConcurrencyLimitBeanPostProcessor extends AbstractBeanFactoryAwareA
 			Object target = invocation.getThis();
 			Class<?> targetClass = (target != null ? target.getClass() : method.getDeclaringClass());
 			if (target == null && invocation instanceof ProxyMethodInvocation methodInvocation) {
-				// Allow validation for AOP proxy without a target
+				// Support concurrency throttling for AOP proxy without a target
 				target = methodInvocation.getProxy();
 			}
 			Assert.state(target != null, "Target must not be null");

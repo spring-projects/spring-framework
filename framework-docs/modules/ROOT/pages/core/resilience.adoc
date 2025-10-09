@@ -40,6 +40,17 @@ public void sendNotification() {
 NOTE: `@Retryable(MessageDeliveryException.class)` is a shortcut for
 `@Retryable(includes{nbsp}={nbsp}MessageDeliveryException.class)`.
 
+[TIP]
+====
+For advanced use cases, you can specify a custom `MethodRetryPredicate` via the
+`predicate` attribute in `@Retryable`, and the predicate will be used to determine whether
+to retry a failed method invocation based on a `Method` and a given `Throwable` – for
+example, by checking the message of the `Throwable`.
+
+Custom predicates can be combined with `includes` and `excludes`; however, custom
+predicates will always be applied after `includes` and `excludes` have been applied.
+====
+
 Or for 5 retry attempts and an exponential back-off strategy with a bit of jitter:
 
 [source,java,indent=0,subs="verbatim,quotes"]

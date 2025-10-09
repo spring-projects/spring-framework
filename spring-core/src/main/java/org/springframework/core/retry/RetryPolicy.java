@@ -80,8 +80,8 @@ public interface RetryPolicy {
 
 	/**
 	 * Create a {@link RetryPolicy} configured with a maximum number of retry attempts.
-	 * <p>The returned policy uses a fixed backoff of {@value Builder#DEFAULT_DELAY}
-	 * milliseconds.
+	 * <p>The returned policy applies to all exception types and uses a fixed backoff
+	 * of {@value Builder#DEFAULT_DELAY} milliseconds.
 	 * @param maxAttempts the maximum number of retry attempts;
 	 * must be positive (or zero for no retry)
 	 * @see Builder#maxAttempts(long)
