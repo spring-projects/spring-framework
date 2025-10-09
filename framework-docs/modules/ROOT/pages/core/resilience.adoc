@@ -26,8 +26,10 @@ public void sendNotification() {
 By default, the method invocation will be retried for any exception thrown: with at most 3
 retry attempts after an initial failure, and a delay of 1 second between attempts.
 
-This can be specifically adapted for every method if necessary – for example, by narrowing
-the exceptions to retry:
+This can be specifically adapted for every method if necessary — for example, by narrowing
+the exceptions to retry via the `includes` and `excludes` attributes. The supplied
+exception types will be matched against an exception thrown by a failed invocation as well
+as nested causes.
 
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
@@ -182,7 +184,8 @@ If you only need to customize the number of retry attempts, you can use the
 <1> Explicitly uses `RetryPolicy.withMaxAttempts(5)`.
 
 If you need to narrow the types of exceptions to retry, that can be achieved via the
-`includes()` and `excludes()` builder methods.
+`includes()` and `excludes()` builder methods. The supplied exception types will be
+matched against an exception thrown by a failed operation as well as nested causes.
 
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
@@ -204,7 +207,7 @@ If you need to narrow the types of exceptions to retry, that can be achieved via
 For advanced use cases, you can specify a custom `Predicate<Throwable>` via the
 `predicate()` method in the `RetryPolicy.Builder`, and the predicate will be used to
 determine whether to retry a failed operation based on a given `Throwable` – for example,
-by checking the cause or the message of the `Throwable`.
+by checking the message of the `Throwable`.
 
 Custom predicates can be combined with `includes` and `excludes`; however, custom
 predicates will always be applied after `includes` and `excludes` have been applied.

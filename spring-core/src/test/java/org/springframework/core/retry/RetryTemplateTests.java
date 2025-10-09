@@ -369,7 +369,7 @@ class RetryTemplateTests {
 			public String execute() throws Exception {
 				return switch (invocationCount.incrementAndGet()) {
 					case 1 -> throw new IOException();
-					case 2 -> throw new IOException();
+					case 2 -> throw new RuntimeException(new IOException());
 					case 3 -> throw new CustomFileNotFoundException();
 					default -> "success";
 				};
@@ -388,14 +388,15 @@ class RetryTemplateTests {
 				.withCauseExactlyInstanceOf(CustomFileNotFoundException.class)
 				.satisfies(hasSuppressedExceptionsSatisfyingExactly(
 					suppressed1 -> assertThat(suppressed1).isExactlyInstanceOf(IOException.class),
-					suppressed2 -> assertThat(suppressed2).isExactlyInstanceOf(IOException.class)
+					suppressed2 -> assertThat(suppressed2).isExactlyInstanceOf(RuntimeException.class)
+							.hasCauseExactlyInstanceOf(IOException.class)
 				))
 				.satisfies(throwable -> assertThat(throwable.getRetryCount()).isEqualTo(2))
 				.satisfies(throwable -> {
-					repeat(2, () -> {
-						inOrder.verify(retryListener).beforeRetry(retryPolicy, retryable);
-						inOrder.verify(retryListener).onRetryFailure(eq(retryPolicy), eq(retryable), any(IOException.class));
-					});
+					inOrder.verify(retryListener).beforeRetry(retryPolicy, retryable);
+					inOrder.verify(retryListener).onRetryFailure(eq(retryPolicy), eq(retryable), any(RuntimeException.class));
+					inOrder.verify(retryListener).beforeRetry(retryPolicy, retryable);
+					inOrder.verify(retryListener).onRetryFailure(eq(retryPolicy), eq(retryable), any(CustomFileNotFoundException.class));
 					inOrder.verify(retryListener).onRetryPolicyExhaustion(retryPolicy, retryable, throwable);
 				});
 		// 3 = 1 initial invocation + 2 retry attempts

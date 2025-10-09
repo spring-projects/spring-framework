@@ -17,7 +17,7 @@
 package org.springframework.resilience;
 
 import java.io.IOException;
-import java.lang.reflect.Method;
+import java.nio.charset.MalformedInputException;
 import java.nio.file.AccessDeniedException;
 import java.nio.file.FileSystemException;
 import java.time.Duration;
@@ -35,7 +35,6 @@ import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.resilience.annotation.RetryAnnotationBeanPostProcessor;
 import org.springframework.resilience.annotation.Retryable;
-import org.springframework.resilience.retry.MethodRetryPredicate;
 import org.springframework.resilience.retry.MethodRetrySpec;
 import org.springframework.resilience.retry.SimpleRetryInterceptor;
 
@@ -96,13 +95,16 @@ class ReactiveRetryInterceptorTests {
 		// Exact includes match: IOException
 		assertThatRuntimeException()
 				.isThrownBy(() -> proxy.ioOperation().block())
-				// Does NOT throw a RetryExhaustedException, because IOException3Predicate
-				// returns false once the exception's message is "3".
+				// Does NOT throw a RetryExhaustedException, because RejectMalformedInputException3Predicate
+				// rejects a retry if the last exception was a MalformedInputException with message "3".
 				.satisfies(isReactiveException())
 				.havingCause()
-					.isInstanceOf(IOException.class)
-					.withMessage("3");
-		// 1 initial attempt + 2 retries
+					.isInstanceOf(MalformedInputException.class)
+					.withMessageContaining("3");
+
+		// 3 = 1 initial invocation + 2 retry attempts
+		// Not 3 retry attempts, because RejectMalformedInputException3Predicate rejects
+		// a retry if the last exception was a MalformedInputException with message "3".
 		assertThat(target.counter.get()).isEqualTo(3);
 	}
 
@@ -116,6 +118,22 @@ class ReactiveRetryInterceptorTests {
 				.isThrownBy(() -> proxy.fileSystemOperation().block())
 				.satisfies(isRetryExhaustedException())
 				.withCauseInstanceOf(FileSystemException.class);
+		// 1 initial attempt + 3 retries
+		assertThat(target.counter.get()).isEqualTo(4);
+	}
+
+	@Test  // gh-35583
+	void withPostProcessorForClassWithCauseIncludesMatch() {
+		AnnotatedClassBean proxy = getProxiedAnnotatedClassBean();
+		AnnotatedClassBean target = (AnnotatedClassBean) AopProxyUtils.getSingletonTarget(proxy);
+
+		// Subtype includes match: FileSystemException
+		assertThatRuntimeException()
+				.isThrownBy(() -> proxy.fileSystemOperationWithNestedException().block())
+				.satisfies(isRetryExhaustedException())
+				.havingCause()
+					.isExactlyInstanceOf(RuntimeException.class)
+					.withCauseExactlyInstanceOf(FileSystemException.class);
 		// 1 initial attempt + 3 retries
 		assertThat(target.counter.get()).isEqualTo(4);
 	}
@@ -350,7 +368,7 @@ class ReactiveRetryInterceptorTests {
 
 	@Retryable(delay = 10, jitter = 5, multiplier = 2.0, maxDelay = 40,
 			includes = IOException.class, excludes = AccessDeniedException.class,
-			predicate = IOException3Predicate.class)
+			predicate = RejectMalformedInputException3Predicate.class)
 	static class AnnotatedClassBean {
 
 		AtomicInteger counter = new AtomicInteger();
@@ -358,6 +376,9 @@ class ReactiveRetryInterceptorTests {
 		public Mono<Object> ioOperation() {
 			return Mono.fromCallable(() -> {
 				counter.incrementAndGet();
+				if (counter.get() == 3) {
+					throw new MalformedInputException(counter.get());
+				}
 				throw new IOException(counter.toString());
 			});
 		}
@@ -366,6 +387,13 @@ class ReactiveRetryInterceptorTests {
 			return Mono.fromCallable(() -> {
 				counter.incrementAndGet();
 				throw new FileSystemException(counter.toString());
+			});
+		}
+
+		public Mono<Object> fileSystemOperationWithNestedException() {
+			return Mono.fromCallable(() -> {
+				counter.incrementAndGet();
+				throw new RuntimeException(new FileSystemException(counter.toString()));
 			});
 		}
 
@@ -393,13 +421,7 @@ class ReactiveRetryInterceptorTests {
 	}
 
 
-	private static class IOException3Predicate implements MethodRetryPredicate {
 
-		@Override
-		public boolean shouldRetry(Method method, Throwable throwable) {
-			return !(throwable.getClass() == IOException.class && "3".equals(throwable.getMessage()));
-		}
-	}
 
 
 	// Bean classes for boundary testing

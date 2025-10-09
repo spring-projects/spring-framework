@@ -18,7 +18,7 @@ package org.springframework.resilience;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
+import java.nio.charset.MalformedInputException;
 import java.nio.file.AccessDeniedException;
 import java.time.Duration;
 import java.util.Properties;
@@ -42,15 +42,16 @@ import org.springframework.resilience.annotation.ConcurrencyLimit;
 import org.springframework.resilience.annotation.EnableResilientMethods;
 import org.springframework.resilience.annotation.RetryAnnotationBeanPostProcessor;
 import org.springframework.resilience.annotation.Retryable;
-import org.springframework.resilience.retry.MethodRetryPredicate;
 import org.springframework.resilience.retry.MethodRetrySpec;
 import org.springframework.resilience.retry.SimpleRetryInterceptor;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIOException;
+import static org.assertj.core.api.Assertions.assertThatRuntimeException;
 
 /**
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 7.0
  */
 class RetryInterceptorTests {
@@ -187,12 +188,22 @@ class RetryInterceptorTests {
 		AnnotatedClassBean proxy = bf.getBean(AnnotatedClassBean.class);
 		AnnotatedClassBean target = (AnnotatedClassBean) AopProxyUtils.getSingletonTarget(proxy);
 
-		assertThatIOException().isThrownBy(proxy::retryOperation).withMessage("3");
+		// 3 = 1 initial invocation + 2 retry attempts
+		// Not 3 retry attempts, because RejectMalformedInputException3Predicate rejects
+		// a retry if the last exception was a MalformedInputException with message "3".
+		assertThatIOException().isThrownBy(proxy::retryOperation).withMessageContaining("3");
 		assertThat(target.counter).isEqualTo(3);
+		// 7 = 3 + 1 initial invocation + 3 retry attempts
+		assertThatRuntimeException()
+				.isThrownBy(proxy::retryOperationWithNestedException)
+				.havingCause()
+					.isExactlyInstanceOf(IOException.class)
+					.withMessage("7");
+		assertThat(target.counter).isEqualTo(7);
 		assertThatIOException().isThrownBy(proxy::otherOperation);
-		assertThat(target.counter).isEqualTo(4);
+		assertThat(target.counter).isEqualTo(8);
 		assertThatIOException().isThrownBy(proxy::overrideOperation);
-		assertThat(target.counter).isEqualTo(6);
+		assertThat(target.counter).isEqualTo(10);
 	}
 
 	@Test
@@ -212,7 +223,10 @@ class RetryInterceptorTests {
 		AnnotatedClassBeanWithStrings proxy = ctx.getBean(AnnotatedClassBeanWithStrings.class);
 		AnnotatedClassBeanWithStrings target = (AnnotatedClassBeanWithStrings) AopProxyUtils.getSingletonTarget(proxy);
 
-		assertThatIOException().isThrownBy(proxy::retryOperation).withMessage("3");
+		// 3 = 1 initial invocation + 2 retry attempts
+		// Not 3 retry attempts, because RejectMalformedInputException3Predicate rejects
+		// a retry if the last exception was a MalformedInputException with message "3".
+		assertThatIOException().isThrownBy(proxy::retryOperation).withMessageContaining("3");
 		assertThat(target.counter).isEqualTo(3);
 		assertThatIOException().isThrownBy(proxy::otherOperation);
 		assertThat(target.counter).isEqualTo(4);
@@ -237,7 +251,10 @@ class RetryInterceptorTests {
 		AnnotatedClassBeanWithStrings proxy = ctx.getBean(AnnotatedClassBeanWithStrings.class);
 		AnnotatedClassBeanWithStrings target = (AnnotatedClassBeanWithStrings) AopProxyUtils.getSingletonTarget(proxy);
 
-		assertThatIOException().isThrownBy(proxy::retryOperation).withMessage("3");
+		// 3 = 1 initial invocation + 2 retry attempts
+		// Not 3 retry attempts, because RejectMalformedInputException3Predicate rejects
+		// a retry if the last exception was a MalformedInputException with message "3".
+		assertThatIOException().isThrownBy(proxy::retryOperation).withMessageContaining("3");
 		assertThat(target.counter).isEqualTo(3);
 		assertThatIOException().isThrownBy(proxy::otherOperation);
 		assertThat(target.counter).isEqualTo(4);
@@ -267,6 +284,7 @@ class RetryInterceptorTests {
 
 		int counter = 0;
 
+		@Override
 		public void retryOperation() throws IOException {
 			counter++;
 			throw new IOException(Integer.toString(counter));
@@ -314,14 +332,22 @@ class RetryInterceptorTests {
 
 	@Retryable(delay = 10, jitter = 5, multiplier = 2.0, maxDelay = 40,
 			includes = IOException.class, excludes = AccessDeniedException.class,
-			predicate = CustomPredicate.class)
+			predicate = RejectMalformedInputException3Predicate.class)
 	static class AnnotatedClassBean {
 
 		int counter = 0;
 
 		public void retryOperation() throws IOException {
 			counter++;
+			if (counter == 3) {
+				throw new MalformedInputException(counter);
+			}
 			throw new IOException(Integer.toString(counter));
+		}
+
+		public void retryOperationWithNestedException() {
+			counter++;
+			throw new RuntimeException(new IOException(Integer.toString(counter)));
 		}
 
 		public void otherOperation() throws IOException {
@@ -340,13 +366,16 @@ class RetryInterceptorTests {
 	@Retryable(delayString = "${delay}", jitterString = "${jitter}",
 			multiplierString = "${multiplier}", maxDelayString = "${maxDelay}",
 			includes = IOException.class, excludes = AccessDeniedException.class,
-			predicate = CustomPredicate.class)
+			predicate = RejectMalformedInputException3Predicate.class)
 	static class AnnotatedClassBeanWithStrings {
 
 		int counter = 0;
 
 		public void retryOperation() throws IOException {
 			counter++;
+			if (counter == 3) {
+				throw new MalformedInputException(counter);
+			}
 			throw new IOException(Integer.toString(counter));
 		}
 
@@ -359,15 +388,6 @@ class RetryInterceptorTests {
 		public void overrideOperation() throws IOException {
 			counter++;
 			throw new AccessDeniedException(Integer.toString(counter));
-		}
-	}
-
-
-	private static class CustomPredicate implements MethodRetryPredicate {
-
-		@Override
-		public boolean shouldRetry(Method method, Throwable throwable) {
-			return !"3".equals(throwable.getMessage());
 		}
 	}
 

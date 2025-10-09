@@ -40,6 +40,7 @@ import org.springframework.resilience.retry.MethodRetryPredicate;
  * project but redesigned as a minimal core retry feature in the Spring Framework.
  *
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 7.0
  * @see EnableResilientMethods
  * @see RetryAnnotationBeanPostProcessor
@@ -64,6 +65,9 @@ public @interface Retryable {
 	/**
 	 * Applicable exception types to attempt a retry for. This attribute
 	 * allows for the convenient specification of assignable exception types.
+	 * <p>The supplied exception types will be matched against an exception
+	 * thrown by a failed invocation as well as nested
+	 * {@linkplain Throwable#getCause() causes}.
 	 * <p>This can optionally be combined with {@link #excludes() excludes} or
 	 * a custom {@link #predicate() predicate}.
 	 * <p>The default is empty, leading to a retry attempt for any exception.
@@ -76,6 +80,9 @@ public @interface Retryable {
 	/**
 	 * Non-applicable exception types to avoid a retry for. This attribute
 	 * allows for the convenient specification of assignable exception types.
+	 * <p>The supplied exception types will be matched against an exception
+	 * thrown by a failed invocation as well as nested
+	 * {@linkplain Throwable#getCause() causes}.
 	 * <p>This can optionally be combined with {@link #includes() includes} or
 	 * a custom {@link #predicate() predicate}.
 	 * <p>The default is empty, leading to a retry attempt for any exception.
