@@ -9,6 +9,5 @@ example.scannable.ScopedProxyTestBean=example.scannable.FooService
 example.scannable.ServiceInvocationCounter=org.springframework.stereotype.Component
 example.scannable.StubFooDao=org.springframework.stereotype.Component
 example.scannable.sub.BarComponent=org.springframework.stereotype.Component
-example.scannable.JakartaManagedBeanComponent=jakarta.annotation.ManagedBean
 example.scannable.JakartaNamedComponent=jakarta.inject.Named
 example.indexed.IndexedJakartaNamedComponent=jakarta.inject.Named

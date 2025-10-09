@@ -25,8 +25,7 @@ import javax.lang.model.element.ElementKind;
 
 /**
  * A {@link StereotypesProvider} that extracts a stereotype for each
- * {@code jakarta.*} or {@code javax.*} annotation <i>present</i> on a class or
- * interface.
+ * {@code jakarta.*} annotation <i>present</i> on a class or interface.
  *
  * @author Stephane Nicoll
  * @since 5.0
@@ -50,7 +49,7 @@ class StandardStereotypesProvider implements StereotypesProvider {
 		}
 		for (AnnotationMirror annotation : this.typeHelper.getAllAnnotationMirrors(element)) {
 			String type = this.typeHelper.getType(annotation);
-			if (type.startsWith("jakarta.") || type.startsWith("javax.")) {
+			if (type.startsWith("jakarta.")) {
 				stereotypes.add(type);
 			}
 		}

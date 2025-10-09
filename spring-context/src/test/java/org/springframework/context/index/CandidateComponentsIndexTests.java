@@ -30,8 +30,6 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Stephane Nicoll
  */
-@Deprecated
-@SuppressWarnings("removal")
 public class CandidateComponentsIndexTests {
 
 	@Test

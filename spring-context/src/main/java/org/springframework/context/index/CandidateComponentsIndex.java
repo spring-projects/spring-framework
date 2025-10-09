@@ -17,6 +17,7 @@
 package org.springframework.context.index;
 
 import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
@@ -44,34 +45,87 @@ import org.springframework.util.MultiValueMap;
  * a target type but it can be any marker really.
  *
  * @author Stephane Nicoll
+ * @author Juergen Hoeller
  * @since 5.0
- * @deprecated as of 6.1, in favor of the AOT engine.
  */
-@Deprecated(since = "6.1", forRemoval = true)
 public class CandidateComponentsIndex {
 
 	private static final AntPathMatcher pathMatcher = new AntPathMatcher(".");
 
-	private final MultiValueMap<String, Entry> index;
+	private final Set<String> registeredScans = new LinkedHashSet<>();
+
+	private final MultiValueMap<String, Entry> index = new LinkedMultiValueMap<>();
+
+	private final boolean complete;
 
 
+	/**
+	 * Create a new index instance from parsed components index files.
+	 */
 	CandidateComponentsIndex(List<Properties> content) {
-		this.index = parseIndex(content);
-	}
-
-	private static MultiValueMap<String, Entry> parseIndex(List<Properties> content) {
-		MultiValueMap<String, Entry> index = new LinkedMultiValueMap<>();
 		for (Properties entry : content) {
 			entry.forEach((type, values) -> {
 				String[] stereotypes = ((String) values).split(",");
 				for (String stereotype : stereotypes) {
-					index.add(stereotype, new Entry((String) type));
+					this.index.add(stereotype, new Entry((String) type));
 				}
 			});
 		}
-		return index;
+		this.complete = true;
 	}
 
+	/**
+	 * Create a new index instance for programmatic population.
+	 * @since 7.0
+	 */
+	public CandidateComponentsIndex() {
+		this.complete = false;
+	}
+
+
+	/**
+	 * Register the given base packages (or base package patterns) as scanned.
+	 * @since 7.0
+	 */
+	public void registerScan(String... basePackages) {
+		Collections.addAll(this.registeredScans, basePackages);
+	}
+
+	/**
+	 * Return the registered base packages (or base package patterns).
+	 * @since 7.0
+	 */
+	public Set<String> getRegisteredScans() {
+		return this.registeredScans;
+	}
+
+	/**
+	 * Determine whether this index contains entries for the given base package
+	 * (or base package pattern).
+	 * @since 7.0
+	 */
+	public boolean hasScannedPackage(String packageName) {
+		return (this.complete ||
+				this.registeredScans.stream().anyMatch(basePackage -> matchPackage(basePackage, packageName)));
+	}
+
+	/**
+	 * Programmatically register one or more stereotypes for the given candidate type.
+	 * @since 7.0
+	 */
+	public void registerCandidateType(String type, String... stereotypes) {
+		for (String stereotype : stereotypes) {
+			this.index.add(stereotype, new Entry(type));
+		}
+	}
+
+	/**
+	 * Return the registered stereotypes packages (or base package patterns).
+	 * @since 7.0
+	 */
+	public Set<String> getRegisteredStereotypes() {
+		return this.index.keySet();
+	}
 
 	/**
 	 * Return the candidate types that are associated with the specified stereotype.
@@ -83,7 +137,7 @@ public class CandidateComponentsIndex {
 	public Set<String> getCandidateTypes(String basePackage, String stereotype) {
 		List<Entry> candidates = this.index.get(stereotype);
 		if (candidates != null) {
-			return candidates.parallelStream()
+			return candidates.stream()
 					.filter(t -> t.match(basePackage))
 					.map(t -> t.type)
 					.collect(Collectors.toSet());
@@ -91,10 +145,19 @@ public class CandidateComponentsIndex {
 		return Collections.emptySet();
 	}
 
+	private static boolean matchPackage(String basePackage, String packageName) {
+		if (pathMatcher.isPattern(basePackage)) {
+			return pathMatcher.match(basePackage, packageName);
+		}
+		else {
+			return packageName.startsWith(basePackage);
+		}
+	}
+
 
 	private static class Entry {
 
-		private final String type;
+		final String type;
 
 		private final String packageName;
 
@@ -104,12 +167,7 @@ public class CandidateComponentsIndex {
 		}
 
 		public boolean match(String basePackage) {
-			if (pathMatcher.isPattern(basePackage)) {
-				return pathMatcher.match(basePackage, this.packageName);
-			}
-			else {
-				return this.type.startsWith(basePackage);
-			}
+			return matchPackage(basePackage, this.packageName);
 		}
 	}
 
