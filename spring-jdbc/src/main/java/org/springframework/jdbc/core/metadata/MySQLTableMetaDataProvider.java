@@ -14,27 +14,23 @@
  * limitations under the License.
  */
 
-package org.springframework.context.annotation;
+package org.springframework.jdbc.core.metadata;
+
+import java.sql.DatabaseMetaData;
+import java.sql.SQLException;
 
 /**
- * Enumeration used to determine whether JDK/CGLIB proxy-based or
- * AspectJ weaving-based advice should be applied.
+ * The MySQL/MariaDB specific implementation of {@link TableMetaDataProvider}.
+ * Sets {@link #setGeneratedKeysColumnNameArraySupported} to {@code false}.
  *
- * @author Chris Beams
- * @since 3.1
- * @see org.springframework.scheduling.annotation.AsyncConfigurationSelector#selectImports
- * @see org.springframework.scheduling.annotation.EnableAsync#mode()
+ * @author Juergen Hoeller
+ * @since 6.2.12
  */
-public enum AdviceMode {
+public class MySQLTableMetaDataProvider extends GenericTableMetaDataProvider {
 
-	/**
-	 * JDK/CGLIB proxy-based advice.
-	 */
-	PROXY,
-
-	/**
-	 * AspectJ weaving-based advice.
-	 */
-	ASPECTJ
+	public MySQLTableMetaDataProvider(DatabaseMetaData databaseMetaData) throws SQLException {
+		super(databaseMetaData);
+		setGeneratedKeysColumnNameArraySupported(false);
+	}
 
 }

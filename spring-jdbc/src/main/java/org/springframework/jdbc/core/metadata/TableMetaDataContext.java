@@ -409,8 +409,7 @@ public class TableMetaDataContext {
 	}
 
 	/**
-	 * Does this database support a column name String array for retrieving generated
-	 * keys?
+	 * Does this database support a column name String array for retrieving generated keys?
 	 * @see java.sql.Connection#createStruct(String, Object[])
 	 */
 	public boolean isGeneratedKeysColumnNameArraySupported() {
