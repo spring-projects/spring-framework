@@ -44,6 +44,7 @@ import org.springframework.util.StringUtils;
  * @author Phillip Webb
  * @author Stephane Nicoll
  * @author Sam Brannen
+ * @author Kamil Krzywański
  * @since 3.1
  */
 @SuppressWarnings("serial")
@@ -93,14 +94,20 @@ public class SpringCacheAnnotationParser implements CacheAnnotationParser, Seria
 		}
 
 		Collection<CacheOperation> ops = new ArrayList<>(1);
-		annotations.stream().filter(Cacheable.class::isInstance).map(Cacheable.class::cast).forEach(
-				cacheable -> ops.add(parseCacheableAnnotation(ae, cachingConfig, cacheable)));
-		annotations.stream().filter(CacheEvict.class::isInstance).map(CacheEvict.class::cast).forEach(
-				cacheEvict -> ops.add(parseEvictAnnotation(ae, cachingConfig, cacheEvict)));
-		annotations.stream().filter(CachePut.class::isInstance).map(CachePut.class::cast).forEach(
-				cachePut -> ops.add(parsePutAnnotation(ae, cachingConfig, cachePut)));
-		annotations.stream().filter(Caching.class::isInstance).map(Caching.class::cast).forEach(
-				caching -> parseCachingAnnotation(ae, cachingConfig, caching, ops));
+		for (Annotation annotation : annotations) {
+			if (annotation instanceof Cacheable cacheable) {
+				ops.add(parseCacheableAnnotation(ae, cachingConfig, cacheable));
+			}
+			if (annotation instanceof CacheEvict cacheEvict) {
+				ops.add(parseEvictAnnotation(ae, cachingConfig, cacheEvict));
+			}
+			if (annotation instanceof CachePut cachePut) {
+				ops.add(parsePutAnnotation(ae, cachingConfig, cachePut));
+			}
+			if (annotation instanceof Caching caching) {
+				parseCachingAnnotation(ae, cachingConfig, caching, ops);
+			}
+		}
 		return ops;
 	}
 
