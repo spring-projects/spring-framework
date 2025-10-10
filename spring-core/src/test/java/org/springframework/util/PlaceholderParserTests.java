@@ -26,8 +26,6 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InOrder;
 
-import org.springframework.util.PlaceholderParser.ParsedValue;
-import org.springframework.util.PlaceholderParser.TextPart;
 import org.springframework.util.PropertyPlaceholderHelper.PlaceholderResolver;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -43,10 +41,11 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
  *
  * @author Stephane Nicoll
  * @author Sam Brannen
+ * @author Juergen Hoeller
  */
 class PlaceholderParserTests {
 
-	@Nested // Tests with only the basic placeholder feature enabled
+	@Nested  // Tests with only the basic placeholder feature enabled
 	class OnlyPlaceholderTests {
 
 		private final PlaceholderParser parser = new PlaceholderParser("${", "}", null, null, true);
@@ -82,7 +81,7 @@ class PlaceholderParserTests {
 			Map<String, String> properties = Map.of(
 					"p1", "v1",
 					"p2", "v2",
-					"p3", "${p1}:${p2}",              // nested placeholders
+					"p3", "${p1}:${p2}",          // nested placeholders
 					"p4", "${p3}",                    // deeply nested placeholders
 					"p5", "${p1}:${p2}:${bogus}");    // unresolvable placeholder
 			assertThat(this.parser.replacePlaceholders(text, properties::get)).isEqualTo(expected);
@@ -154,14 +153,13 @@ class PlaceholderParserTests {
 		@Test
 		void textWithInvalidPlaceholderSyntaxIsMerged() {
 			String text = "test${of${with${and${";
-			ParsedValue parsedValue = this.parser.parse(text);
-			assertThat(parsedValue.parts()).singleElement().isInstanceOfSatisfying(TextPart.class,
-					textPart -> assertThat(textPart.text()).isEqualTo(text));
+			assertThat(this.parser.replacePlaceholders(text,
+					placeholder -> {throw new UnsupportedOperationException();})).isEqualTo(text);
 		}
-
 	}
 
-	@Nested // Tests with the use of a separator
+
+	@Nested  // Tests with the use of a separator
 	class DefaultValueTests {
 
 		private final PlaceholderParser parser = new PlaceholderParser("${", "}", ":", null, true);
@@ -195,7 +193,7 @@ class PlaceholderParserTests {
 			Map<String, String> properties = Map.of(
 					"p1", "v1",
 					"p2", "v2",
-					"p3", "${p1}:${p2}",               // nested placeholders
+					"p3", "${p1}:${p2}",           // nested placeholders
 					"p4", "${p3}",                     // deeply nested placeholders
 					"p5", "${p1}:${p2}:${bogus}",      // unresolvable placeholder
 					"p6", "${p1}:${p2}:${bogus:def}"); // unresolvable w/ default
@@ -259,8 +257,8 @@ class PlaceholderParserTests {
 			assertThat(this.parser.replacePlaceholders("${invalid:${firstName}}", resolver)).isEqualTo("John");
 			verifyPlaceholderResolutions(resolver, "invalid", "firstName");
 		}
-
 	}
+
 
 	/**
 	 * Tests that use the escape character.
@@ -341,8 +339,8 @@ class PlaceholderParserTests {
 					Arguments.of("${service/host/${app.environment}/name:\\value}", "https://example.com/qa/name"),
 					Arguments.of("${service/host/${name\\:value}/}", "${service/host/${name:value}/}"));
 		}
-
 	}
+
 
 	@Nested
 	class ExceptionTests {
@@ -378,7 +376,6 @@ class PlaceholderParserTests {
 					.withMessage("Could not resolve placeholder 'bogus' in value \"${p1}:${p2}:${bogus}\" <-- \"${p3}\"")
 					.withNoCause();
 		}
-
 	}
 
 
