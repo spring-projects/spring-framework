@@ -381,7 +381,8 @@ class InvocableHandlerMethodKotlinTests {
 		StepVerifier.create(mono)
 				.consumeNextWith {
 					if (it.returnValue is Mono<*>) {
-						StepVerifier.create(it.returnValue as Mono<*>).expectNext(expected).verifyComplete()
+						StepVerifier.create(it.returnValue as Mono<*>).expectNext(requireNotNull(expected))
+							.verifyComplete()
 					} else {
 						assertThat(it.returnValue).isEqualTo(expected)
 					}
