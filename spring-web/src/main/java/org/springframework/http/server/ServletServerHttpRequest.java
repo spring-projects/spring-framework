@@ -220,7 +220,7 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 
 	@Override
 	public InetSocketAddress getRemoteAddress() {
-		return new InetSocketAddress(this.servletRequest.getRemoteHost(), this.servletRequest.getRemotePort());
+		return new InetSocketAddress(this.servletRequest.getRemoteAddr(), this.servletRequest.getRemotePort());
 	}
 
 	@Override
