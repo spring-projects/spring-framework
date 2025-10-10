@@ -97,22 +97,21 @@ class ResponseEntityExceptionHandlerTests {
 	private WebRequest request = new ServletWebRequest(this.servletRequest, this.servletResponse);
 
 
-	@SuppressWarnings("unchecked")
 	@Test
 	void supportsAllDefaultHandlerExceptionResolverExceptionTypes() throws Exception {
-
 		ExceptionHandler annotation = ResponseEntityExceptionHandler.class
 				.getMethod("handleException", Exception.class, WebRequest.class)
 				.getAnnotation(ExceptionHandler.class);
+		Class<?>[] exceptionTypes = annotation.value();
 
 		Arrays.stream(DefaultHandlerExceptionResolver.class.getDeclaredMethods())
 				.filter(method -> method.getName().startsWith("handle") && (method.getParameterCount() == 4))
 				.filter(method -> !method.getName().equals("handleErrorResponse"))
 				.filter(method -> !method.getName().equals("handleDisconnectedClientException"))
 				.map(method -> method.getParameterTypes()[0])
-				.forEach(exceptionType -> assertThat(annotation.value())
+				.forEach(exceptionType -> assertThat(exceptionTypes)
 						.as("@ExceptionHandler is missing declaration for " + exceptionType.getName())
-						.contains((Class<Exception>) exceptionType));
+						.contains(exceptionType));
 	}
 
 	@Test

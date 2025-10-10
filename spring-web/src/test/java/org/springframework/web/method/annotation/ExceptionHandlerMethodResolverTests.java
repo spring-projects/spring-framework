@@ -208,14 +208,12 @@ class ExceptionHandlerMethodResolverTests {
 	@Controller
 	static class MediaTypeController {
 
-		@ExceptionHandler(exception = {IllegalArgumentException.class}, produces = "application/json")
+		@ExceptionHandler(exception = IllegalArgumentException.class, produces = "application/json")
 		public void handleJson() {
-
 		}
 
-		@ExceptionHandler(exception = {IllegalArgumentException.class}, produces = {"text/html", "*/*"})
+		@ExceptionHandler(exception = IllegalArgumentException.class, produces = {"text/html", "*/*"})
 		public void handleHtml() {
-
 		}
 
 	}
@@ -223,14 +221,12 @@ class ExceptionHandlerMethodResolverTests {
 	@Controller
 	static class AmbiguousMediaTypeController {
 
-		@ExceptionHandler(exception = {IllegalArgumentException.class}, produces = "application/json")
+		@ExceptionHandler(exception = IllegalArgumentException.class, produces = "application/json")
 		public void handleJson() {
-
 		}
 
-		@ExceptionHandler(exception = {IllegalArgumentException.class}, produces = "application/json")
+		@ExceptionHandler(exception = IllegalArgumentException.class, produces = "application/json")
 		public void handleJsonToo() {
-
 		}
 
 	}
@@ -238,14 +234,12 @@ class ExceptionHandlerMethodResolverTests {
 	@Controller
 	static class MixedController {
 
-		@ExceptionHandler(exception = {IllegalArgumentException.class}, produces = "application/json")
+		@ExceptionHandler(exception = IllegalArgumentException.class, produces = "application/json")
 		public void handleJson() {
-
 		}
 
 		@ExceptionHandler(IllegalArgumentException.class)
 		public void handleOther() {
-
 		}
 
 	}
@@ -253,9 +247,8 @@ class ExceptionHandlerMethodResolverTests {
 	@Controller
 	static class InvalidMediaTypeController {
 
-		@ExceptionHandler(exception = {IllegalArgumentException.class}, produces = "invalid-mediatype")
+		@ExceptionHandler(exception = IllegalArgumentException.class, produces = "invalid-mediatype")
 		public void handle() {
-
 		}
 	}
 
