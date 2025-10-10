@@ -310,7 +310,7 @@ Java::
 			Flux<String> source = ... ;
 			Mono<Void> output = session.send(source.map(session::textMessage));	<2>
 
-			return Mono.zip(input, output).then();								<3>
+			return input.and(output);											<3>
 		}
 	}
 ----
@@ -338,7 +338,7 @@ Kotlin::
 			val source: Flux<String> = ...
 			val output = session.send(source.map(session::textMessage))		// <2>
 
-			return Mono.zip(input, output).then()							// <3>
+			return input.and(output)										// <3>
 		}
 	}
 ----
