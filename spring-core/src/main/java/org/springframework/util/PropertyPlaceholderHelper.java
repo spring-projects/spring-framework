@@ -96,11 +96,6 @@ public class PropertyPlaceholderHelper {
 		return this.parser.replacePlaceholders(value, placeholderResolver);
 	}
 
-	@Deprecated(since = "6.2.12", forRemoval = true)
-	protected String parseStringValue(String value, PlaceholderResolver placeholderResolver) {
-		return this.parser.replacePlaceholders(value, placeholderResolver);
-	}
-
 
 	/**
 	 * Strategy interface used to resolve replacement values for placeholders contained in Strings.

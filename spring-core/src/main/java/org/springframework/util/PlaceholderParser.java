@@ -314,14 +314,14 @@ final class PlaceholderParser {
 
 		private final boolean ignoreUnresolvablePlaceholders;
 
-		private final Function<String, List<Part>> parser;
+		private final Function<String, @Nullable List<Part>> parser;
 
 		private final PlaceholderResolver resolver;
 
 		private @Nullable Set<String> visitedPlaceholders;
 
 		PartResolutionContext(PlaceholderResolver resolver, String prefix, String suffix,
-				boolean ignoreUnresolvablePlaceholders, Function<String, List<Part>> parser) {
+				boolean ignoreUnresolvablePlaceholders, Function<String, @Nullable List<Part>> parser) {
 			this.prefix = prefix;
 			this.suffix = suffix;
 			this.ignoreUnresolvablePlaceholders = ignoreUnresolvablePlaceholders;
