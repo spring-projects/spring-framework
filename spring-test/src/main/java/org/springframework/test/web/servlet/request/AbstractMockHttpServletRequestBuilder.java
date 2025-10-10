@@ -110,7 +110,7 @@ public abstract class AbstractMockHttpServletRequestBuilder<B extends AbstractMo
 
 	private @Nullable String contentType;
 
-	private final HttpHeaders headers = new HttpHeaders();
+	private final MultiValueMap<String, Object> headers = new LinkedMultiValueMap<>();
 
 	private final MultiValueMap<String, String> parameters = new LinkedMultiValueMap<>();
 
@@ -343,7 +343,7 @@ public abstract class AbstractMockHttpServletRequestBuilder<B extends AbstractMo
 	 * @param values one or more header values
 	 */
 	public B header(String name, Object... values) {
-		this.headers.addAll(name, Arrays.stream(values).map(String::valueOf).toList());
+		this.headers.addAll(name, Arrays.asList(values));
 		return self();
 	}
 
@@ -366,8 +366,9 @@ public abstract class AbstractMockHttpServletRequestBuilder<B extends AbstractMo
 	 * @return this builder
 	 */
 	public B headers(Consumer<HttpHeaders> headersConsumer){
-		headersConsumer.accept(this.headers);
-		return self();
+		HttpHeaders httpHeaders = new HttpHeaders();
+		headersConsumer.accept(httpHeaders);
+		return headers(httpHeaders);
 	}
 
 	/**
@@ -680,11 +681,12 @@ public abstract class AbstractMockHttpServletRequestBuilder<B extends AbstractMo
 			this.contentType = parentBuilder.contentType;
 		}
 
-		parentBuilder.headers.forEach((name, values) -> {
-			if (!this.headers.containsHeader(name)) {
-				this.headers.put(name, values);
+		for (Map.Entry<String, List<Object>> entry : parentBuilder.headers.entrySet()) {
+			String headerName = entry.getKey();
+			if (!this.headers.containsKey(headerName)) {
+				this.headers.put(headerName, entry.getValue());
 			}
-		});
+		}
 		for (Map.Entry<String, List<String>> entry : parentBuilder.parameters.entrySet()) {
 			String paramName = entry.getKey();
 			if (!this.parameters.containsKey(paramName)) {
@@ -822,8 +824,8 @@ public abstract class AbstractMockHttpServletRequestBuilder<B extends AbstractMo
 		});
 
 		if (!ObjectUtils.isEmpty(this.content) &&
-				!this.headers.containsHeader(HttpHeaders.CONTENT_LENGTH) &&
-				!this.headers.containsHeader(HttpHeaders.TRANSFER_ENCODING)) {
+				!this.headers.containsKey(HttpHeaders.CONTENT_LENGTH) &&
+				!this.headers.containsKey(HttpHeaders.TRANSFER_ENCODING)) {
 
 			request.addHeader(HttpHeaders.CONTENT_LENGTH, this.content.length);
 		}
