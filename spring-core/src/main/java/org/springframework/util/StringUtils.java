@@ -1139,7 +1139,8 @@ public abstract class StringUtils {
 	 * @return a {@code Properties} instance representing the array contents,
 	 * or {@code null} if the array to process was {@code null} or empty
 	 */
-	public static @Nullable Properties splitArrayElementsIntoProperties(String[] array, String delimiter) {
+	@Contract("null, _ -> null")
+	public static @Nullable Properties splitArrayElementsIntoProperties(String @Nullable [] array, String delimiter) {
 		return splitArrayElementsIntoProperties(array, delimiter, null);
 	}
 
