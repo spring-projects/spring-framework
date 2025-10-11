@@ -59,7 +59,8 @@ class ConcurrencyLimitTests {
 			futures.add(CompletableFuture.runAsync(proxy::concurrentOperation));
 		}
 		CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
-		assertThat(target.counter).hasValue(0);
+		assertThat(target.current).hasValue(0);
+		assertThat(target.counter).hasValue(10);
 	}
 
 	@Test
@@ -166,10 +167,12 @@ class ConcurrencyLimitTests {
 
 	static class NonAnnotatedBean {
 
+		final AtomicInteger current = new AtomicInteger();
+
 		final AtomicInteger counter = new AtomicInteger();
 
 		public void concurrentOperation() {
-			if (counter.incrementAndGet() > 2) {
+			if (current.incrementAndGet() > 2) {
 				throw new IllegalStateException();
 			}
 			try {
@@ -178,7 +181,8 @@ class ConcurrencyLimitTests {
 			catch (InterruptedException ex) {
 				throw new IllegalStateException(ex);
 			}
-			counter.decrementAndGet();
+			current.decrementAndGet();
+			counter.incrementAndGet();
 		}
 	}
 

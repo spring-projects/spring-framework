@@ -19,12 +19,13 @@ package org.springframework.core.task;
 import java.io.Serializable;
 
 import org.springframework.util.Assert;
+import org.springframework.util.ConcurrencyThrottleSupport;
 
 /**
  * {@link TaskExecutor} implementation that executes each task <i>synchronously</i>
- * in the calling thread.
- *
- * <p>Mainly intended for testing scenarios.
+ * in the calling thread. This can be used for testing purposes but also for
+ * bounded execution in a Virtual Threads setup, relying on concurrency throttling
+ * as inherited from the base class: see {@link #setConcurrencyLimit} (as of 7.0).
  *
  * <p>Execution in the calling thread does have the advantage of participating
  * in its thread context, for example the thread context class loader or the
@@ -37,17 +38,52 @@ import org.springframework.util.Assert;
  * @see SimpleAsyncTaskExecutor
  */
 @SuppressWarnings("serial")
-public class SyncTaskExecutor implements TaskExecutor, Serializable {
+public class SyncTaskExecutor extends ConcurrencyThrottleSupport implements TaskExecutor, Serializable {
 
 	/**
-	 * Executes the given {@code task} synchronously, through direct
-	 * invocation of it's {@link Runnable#run() run()} method.
-	 * @throws IllegalArgumentException if the given {@code task} is {@code null}
+	 * Execute the given {@code task} synchronously, through direct
+	 * invocation of its {@link Runnable#run() run()} method.
+	 * @throws RuntimeException if propagated from the given {@code Runnable}
 	 */
 	@Override
 	public void execute(Runnable task) {
-		Assert.notNull(task, "Runnable must not be null");
-		task.run();
+		Assert.notNull(task, "Task must not be null");
+		if (isThrottleActive()) {
+			beforeAccess();
+			try {
+				task.run();
+			}
+			finally {
+				afterAccess();
+			}
+		}
+		else {
+			task.run();
+		}
+	}
+
+	/**
+	 * Execute the given {@code task} synchronously, through direct
+	 * invocation of its {@link TaskCallback#call() call()} method.
+	 * @param <V> the returned value type, if any
+	 * @param <E> the exception propagated, if any
+	 * @throws E if propagated from the given {@code TaskCallback}
+	 * @since 7.0
+	 */
+	public <V, E extends Exception> V execute(TaskCallback<V, E> task) throws E {
+		Assert.notNull(task, "Task must not be null");
+		if (isThrottleActive()) {
+			beforeAccess();
+			try {
+				return task.call();
+			}
+			finally {
+				afterAccess();
+			}
+		}
+		else {
+			return task.call();
+		}
 	}
 
 }

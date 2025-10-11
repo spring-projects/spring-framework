@@ -38,9 +38,11 @@ import org.springframework.core.annotation.AliasFor;
  *
  * <p>This is particularly useful with Virtual Threads where there is generally
  * no thread pool limit in place. For asynchronous tasks, this can be constrained
- * on {@link org.springframework.core.task.SimpleAsyncTaskExecutor}; for
+ * on {@link org.springframework.core.task.SimpleAsyncTaskExecutor}. For
  * synchronous invocations, this annotation provides equivalent behavior through
- * {@link org.springframework.aop.interceptor.ConcurrencyThrottleInterceptor}.
+ * {@link org.springframework.aop.interceptor.ConcurrencyThrottleInterceptor}
+ * Alternatively, consider {@link org.springframework.core.task.SyncTaskExecutor}
+ * and its inherited concurrency throttle (new as of 7.0) for programmatic use.
  *
  * @author Juergen Hoeller
  * @author Hyunsang Han
@@ -49,6 +51,7 @@ import org.springframework.core.annotation.AliasFor;
  * @see EnableResilientMethods
  * @see ConcurrencyLimitBeanPostProcessor
  * @see org.springframework.aop.interceptor.ConcurrencyThrottleInterceptor
+ * @see org.springframework.core.task.SyncTaskExecutor#setConcurrencyLimit
  * @see org.springframework.core.task.SimpleAsyncTaskExecutor#setConcurrencyLimit
  */
 @Target({ElementType.TYPE, ElementType.METHOD})
