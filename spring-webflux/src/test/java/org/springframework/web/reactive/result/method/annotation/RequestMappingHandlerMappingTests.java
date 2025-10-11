@@ -53,6 +53,7 @@ import org.springframework.web.service.annotation.HttpExchange;
 import org.springframework.web.service.annotation.PostExchange;
 import org.springframework.web.service.annotation.PutExchange;
 import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest;
+import org.springframework.web.testfixture.method.PackagePrivateMethodController;
 import org.springframework.web.testfixture.server.MockServerWebExchange;
 import org.springframework.web.util.pattern.PathPattern;
 import org.springframework.web.util.pattern.PathPatternParser;
@@ -62,8 +63,6 @@ import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.mockito.Mockito.mock;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 import static org.springframework.web.reactive.result.method.RequestMappingInfo.paths;
-import static org.springframework.web.testfixture.method.VisibilityTestHandler.PackagePrivateController;
-import static org.springframework.web.testfixture.method.VisibilityTestHandler.ProtectedController;
 
 /**
  * Tests for {@link RequestMappingHandlerMapping}.
@@ -414,25 +413,26 @@ class RequestMappingHandlerMappingTests {
 		assertThat(matchingInfo).isEqualTo(paths(path).methods(POST).consumes(mediaType.toString()).build());
 	}
 
-	@Test
+	@Test  // gh-35352
 	void privateMethodOnCglibProxyShouldThrowException() throws Exception {
 		RequestMappingHandlerMapping mapping = new RequestMappingHandlerMapping();
 
 		Class<?> handlerType = PrivateMethodController.class;
-		Method method = handlerType.getDeclaredMethod("privateMethod");
-
+		String methodName = "privateMethod";
+		Method method = handlerType.getDeclaredMethod(methodName);
 		Class<?> proxyClass = createProxyClass(handlerType);
 
 		assertThatIllegalStateException()
 				.isThrownBy(() -> mapping.getMappingForMethod(method, proxyClass))
-				.withMessageContainingAll(
-						"Private method [privateMethod]",
-						"cannot be used as a request handler method"
-				);
+				.withMessage("""
+						Private method [%s] on CGLIB proxy class [%s] cannot be used as a request \
+						handler method, because private methods cannot be overridden. \
+						Change the method to non-private visibility, or use interface-based JDK \
+						proxying instead.""", methodName, proxyClass.getName());
 	}
 
-	@Test
-	void protectedMethodShouldNotThrowException() throws Exception {
+	@Test  // gh-35352
+	void protectedMethodOnCglibProxyShouldNotThrowException() throws Exception {
 		RequestMappingHandlerMapping mapping = new RequestMappingHandlerMapping();
 
 		Class<?> handlerType = ProtectedMethodController.class;
@@ -444,62 +444,32 @@ class RequestMappingHandlerMappingTests {
 		assertThat(info.getPatternsCondition().getDirectPaths()).containsOnly("/protected");
 	}
 
-	@Test
-	void differentPackagePackagePrivateMethodShouldThrowException() throws Exception {
+	@Test  // gh-35352
+	void differentPackagePackagePrivateMethodOnCglibProxyShouldThrowException() throws Exception {
 		RequestMappingHandlerMapping mapping = new RequestMappingHandlerMapping();
 
-		Class<?> handlerType = ControllerWithPackagePrivateClass.class;
-		Method method = PackagePrivateController.class.getDeclaredMethod("packagePrivateMethod");
-
+		Class<?> handlerType = LocalPackagePrivateMethodControllerSubclass.class;
+		Class<?> declaringClass = PackagePrivateMethodController.class;
+		String methodName = "packagePrivateMethod";
+		Method method = declaringClass.getDeclaredMethod(methodName);
 		Class<?> proxyClass = createProxyClass(handlerType);
 
 		assertThatIllegalStateException()
 				.isThrownBy(() -> mapping.getMappingForMethod(method, proxyClass))
-				.withMessageContainingAll(
-						"Package-private method [packagePrivateMethod]",
-						"cannot be advised when used by handler class"
-				);
-	}
-
-	@Test
-	void differentPackageProtectedMethodShouldNotThrowException() throws Exception {
-		RequestMappingHandlerMapping mapping = new RequestMappingHandlerMapping();
-
-		Class<?> handlerType = ControllerWithProtectedClass.class;
-		Method method = ProtectedController.class.getDeclaredMethod("protectedMethod");
-
-		Class<?> proxyClass = createProxyClass(handlerType);
-
-		RequestMappingInfo info = mapping.getMappingForMethod(method, proxyClass);
-		assertThat(info.getPatternsCondition().getDirectPaths()).containsOnly("/protected");
+				.withMessage("""
+						Package-private method [%s] declared in class [%s] cannot be advised by \
+						CGLIB-proxied handler class [%s], because it is effectively private. Either \
+						make the method public or protected, or use interface-based JDK proxying instead.""",
+							methodName, declaringClass.getName(), proxyClass.getName());
 	}
 
 
-	private Class<?> createProxyClass(Class<?> targetClass) {
+	private static Class<?> createProxyClass(Class<?> targetClass) {
 		Enhancer enhancer = new Enhancer();
 		enhancer.setSuperclass(targetClass);
 		enhancer.setCallbackTypes(new Class[]{NoOp.class});
-
 		return enhancer.createClass();
 	}
-
-	@Controller
-	static class PrivateMethodController {
-		@RequestMapping("/private")
-		private void privateMethod() {}
-	}
-
-	@Controller
-	static class ProtectedMethodController {
-		@RequestMapping("/protected")
-		protected void protectedMethod() {}
-	}
-
-	@Controller
-	static class ControllerWithPackagePrivateClass extends PackagePrivateController { }
-
-	@Controller
-	static class ControllerWithProtectedClass extends ProtectedController { }
 
 	private RequestMappingInfo assertComposedAnnotationMapping(RequestMethod requestMethod) {
 		String methodName = requestMethod.name().toLowerCase();
@@ -703,6 +673,23 @@ class RequestMappingHandlerMappingTests {
 	@Target(ElementType.TYPE)
 	@Retention(RetentionPolicy.RUNTIME)
 	@interface ExtraHttpExchange {
+	}
+
+	@Controller
+	static class PrivateMethodController {
+
+		@RequestMapping("/private")
+		private void privateMethod() {}
+	}
+
+	@Controller
+	static class ProtectedMethodController {
+
+		@RequestMapping("/protected")
+		protected void protectedMethod() {}
+	}
+
+	static class LocalPackagePrivateMethodControllerSubclass extends PackagePrivateMethodController {
 	}
 
 }

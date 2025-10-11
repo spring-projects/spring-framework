@@ -161,11 +161,13 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	 * Uses type-level and method-level {@link RequestMapping @RequestMapping}
 	 * and {@link HttpExchange @HttpExchange} annotations to create the
 	 * {@link RequestMappingInfo}.
-	 * <p>For CGLIB proxy classes, additional validation is performed based on method visibility:
+	 * <p>For CGLIB proxy classes, additional validation is performed based on
+	 * method visibility:
 	 * <ul>
-	 * <li>Private methods cannot be overridden and therefore cannot be used as handler methods.</li>
-	 * <li>Package-private methods from different packages are inaccessible and must be
-	 * changed to public or protected.</li>
+	 * <li>Private methods cannot be overridden and therefore cannot be used as
+	 * handler methods.</li>
+	 * <li>Package-private methods from different packages are inaccessible and
+	 * must be changed to public or protected.</li>
 	 * </ul>
 	 * @return the created {@code RequestMappingInfo}, or {@code null} if the method
 	 * does not have a {@code @RequestMapping} or {@code @HttpExchange} annotation
@@ -200,35 +202,36 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 		return info;
 	}
 
-	private void validateCglibProxyMethodVisibility(Method method, Class<?> handlerType) {
-		if (isCglibProxy(handlerType)) {
+	/**
+	 * Validate the method visibility requirements specified in {@link #getMappingForMethod(Method, Class)}.
+	 * @since 7.0
+	 */
+	private static void validateCglibProxyMethodVisibility(Method method, Class<?> handlerType) {
+		if (handlerType.getName().contains(ClassUtils.CGLIB_CLASS_SEPARATOR)) {
 			int modifiers = method.getModifiers();
 
 			if (Modifier.isPrivate(modifiers)) {
-				throw new IllegalStateException(
-						"Private method [" + method.getName() + "] on CGLIB proxy class [" + handlerType.getName() +
-								"] cannot be used as a request handler method because private methods cannot be overridden. " +
-								"Change the method to non-private visibility or use interface-based JDK proxying instead.");
+				throw new IllegalStateException("""
+						Private method [%s] on CGLIB proxy class [%s] cannot be used as a request \
+						handler method, because private methods cannot be overridden. \
+						Change the method to non-private visibility, or use interface-based JDK \
+						proxying instead.""".formatted(method.getName(), handlerType.getName()));
 			}
 
 			if (!Modifier.isPublic(modifiers) && !Modifier.isProtected(modifiers)) {
 				Class<?> declaringClass = method.getDeclaringClass();
-				Package methodPackage = declaringClass.getPackage();
-				Package handlerPackage = handlerType.getPackage();
+				String declaringPackage = declaringClass.getPackage().getName();
+				String handlerPackage = handlerType.getPackage().getName();
 
-				if (!Objects.equals(methodPackage, handlerPackage)) {
-					throw new IllegalStateException(
-							"Package-private method [" + method.getName() + "] on CGLIB proxy class [" + declaringClass.getName() +
-									"] from package [" + methodPackage.getName() + "] cannot be advised when used by handler class [" +
-									handlerType.getName() + "] from package [" + handlerPackage.getName() + "] because it is effectively private. " +
-									"Either make the method public/protected or use interface-based JDK proxying instead.");
+				if (!Objects.equals(declaringPackage, handlerPackage)) {
+					throw new IllegalStateException("""
+							Package-private method [%s] declared in class [%s] cannot be advised by \
+							CGLIB-proxied handler class [%s], because it is effectively private. Either \
+							make the method public or protected, or use interface-based JDK proxying instead."""
+								.formatted(method.getName(), declaringClass.getName(), handlerType.getName()));
 				}
 			}
 		}
-	}
-
-	private boolean isCglibProxy(Class<?> beanType) {
-		return beanType.getName().contains(ClassUtils.CGLIB_CLASS_SEPARATOR);
 	}
 
 	private @Nullable RequestMappingInfo createRequestMappingInfo(AnnotatedElement element) {

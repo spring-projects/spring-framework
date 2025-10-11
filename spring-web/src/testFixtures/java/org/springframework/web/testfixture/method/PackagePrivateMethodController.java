@@ -19,19 +19,11 @@ package org.springframework.web.testfixture.method;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-public class VisibilityTestHandler {
+@Controller
+public class PackagePrivateMethodController {
 
-	@Controller
-	public static class PackagePrivateController {
-		@RequestMapping("/package-private")
-		void packagePrivateMethod() {
-		}
+	@RequestMapping("/package-private")
+	void packagePrivateMethod() {
 	}
 
-	@Controller
-	public static class ProtectedController {
-		@RequestMapping("/protected")
-		protected void protectedMethod() {
-		}
-	}
 }
