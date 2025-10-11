@@ -475,8 +475,10 @@ class RequestMappingHandlerMappingTests {
 
 		assertThatIllegalStateException()
 				.isThrownBy(() -> mapping.getMappingForMethod(method, proxyClass))
-				.withMessageContaining("Private method")
-				.withMessageContaining("cannot be used as a request handler method");
+				.withMessageContainingAll(
+					"Private method [privateMethod]",
+					"cannot be used as a request handler method"
+				);
 	}
 
 	@Test
