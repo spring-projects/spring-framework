@@ -32,7 +32,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
  *
  * @author Stephane Nicoll
  */
-public class CandidateComponentsIndexLoaderTests {
+class CandidateComponentsIndexLoaderTests {
 
 	@Test
 	void validateIndexIsDisabledByDefault() {

@@ -138,8 +138,8 @@ public class CandidateComponentsIndex {
 		List<Entry> candidates = this.index.get(stereotype);
 		if (candidates != null) {
 			return candidates.stream()
-					.filter(t -> t.match(basePackage))
-					.map(t -> t.type)
+					.filter(entry -> entry.match(basePackage))
+					.map(entry -> entry.type)
 					.collect(Collectors.toSet());
 		}
 		return Collections.emptySet();

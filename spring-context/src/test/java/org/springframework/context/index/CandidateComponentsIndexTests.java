@@ -16,8 +16,7 @@
 
 package org.springframework.context.index;
 
-import java.util.Arrays;
-import java.util.Collections;
+import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 
@@ -30,51 +29,46 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Stephane Nicoll
  */
-public class CandidateComponentsIndexTests {
+class CandidateComponentsIndexTests {
 
 	@Test
 	void getCandidateTypes() {
-		CandidateComponentsIndex index = new CandidateComponentsIndex(
-				Collections.singletonList(createSampleProperties()));
+		CandidateComponentsIndex index = new CandidateComponentsIndex(List.of(createSampleProperties()));
 		Set<String> actual = index.getCandidateTypes("com.example.service", "service");
 		assertThat(actual).contains("com.example.service.One",
 				"com.example.service.sub.Two", "com.example.service.Three");
 	}
 
 	@Test
+	void getCandidateTypesNoMatch() {
+		CandidateComponentsIndex index = new CandidateComponentsIndex(List.of(createSampleProperties()));
+		Set<String> actual = index.getCandidateTypes("com.example.service", "entity");
+		assertThat(actual).isEmpty();
+	}
+
+	@Test
 	void getCandidateTypesSubPackage() {
-		CandidateComponentsIndex index = new CandidateComponentsIndex(
-				Collections.singletonList(createSampleProperties()));
+		CandidateComponentsIndex index = new CandidateComponentsIndex(List.of(createSampleProperties()));
 		Set<String> actual = index.getCandidateTypes("com.example.service.sub", "service");
 		assertThat(actual).contains("com.example.service.sub.Two");
 	}
 
 	@Test
 	void getCandidateTypesSubPackageNoMatch() {
-		CandidateComponentsIndex index = new CandidateComponentsIndex(
-				Collections.singletonList(createSampleProperties()));
+		CandidateComponentsIndex index = new CandidateComponentsIndex(List.of(createSampleProperties()));
 		Set<String> actual = index.getCandidateTypes("com.example.service.none", "service");
 		assertThat(actual).isEmpty();
 	}
 
 	@Test
-	void getCandidateTypesNoMatch() {
-		CandidateComponentsIndex index = new CandidateComponentsIndex(
-				Collections.singletonList(createSampleProperties()));
-		Set<String> actual = index.getCandidateTypes("com.example.service", "entity");
-		assertThat(actual).isEmpty();
-	}
-
-	@Test
 	void mergeCandidateStereotypes() {
-		CandidateComponentsIndex index = new CandidateComponentsIndex(Arrays.asList(
+		CandidateComponentsIndex index = new CandidateComponentsIndex(List.of(
 				createProperties("com.example.Foo", "service"),
 				createProperties("com.example.Foo", "entity")));
-		assertThat(index.getCandidateTypes("com.example", "service"))
-				.contains("com.example.Foo");
-		assertThat(index.getCandidateTypes("com.example", "entity"))
-				.contains("com.example.Foo");
+		assertThat(index.getCandidateTypes("com.example", "service")).contains("com.example.Foo");
+		assertThat(index.getCandidateTypes("com.example", "entity")).contains("com.example.Foo");
 	}
+
 
 	private static Properties createProperties(String key, String stereotypes) {
 		Properties properties = new Properties();
