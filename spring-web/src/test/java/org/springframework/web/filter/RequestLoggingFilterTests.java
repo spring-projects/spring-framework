@@ -108,14 +108,14 @@ class RequestLoggingFilterTests {
 
 	@Test
 	void queryStringIncluded() throws Exception {
-		request.setQueryString("booking=42&code=73&category=hotel&code=37&category=resort");
+		request.setQueryString("booking=42&code=73&category=hotel&code=37&category=resort&ignore=enigma&code=99");
 		filter.setIncludeQueryString(true);
 		filter.setQueryParamPredicate(name -> !name.equals("code") && !name.equals("ignore"));
 
 		applyFilter();
 
-		assertThat(filter.beforeRequestMessage).contains("/hotels?booking=42&code=masked&category=hotel&category=resort");
-		assertThat(filter.afterRequestMessage).contains("/hotels?booking=42&code=masked&category=hotel&category=resort");
+		assertThat(filter.beforeRequestMessage).contains("/hotels?booking=42&code=masked&category=hotel&category=resort&ignore=masked");
+		assertThat(filter.afterRequestMessage).contains("/hotels?booking=42&code=masked&category=hotel&category=resort&ignore=masked");
 	}
 
 	@Test

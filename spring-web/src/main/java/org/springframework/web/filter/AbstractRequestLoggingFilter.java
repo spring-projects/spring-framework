@@ -188,14 +188,13 @@ public abstract class AbstractRequestLoggingFilter extends OncePerRequestFilter 
 	}
 
 	/**
-	 * Configure a predicate for selecting which query params should be logged if
-	 * {@link #setIncludeQueryString(boolean)} is set to {@code true}.
-	 * <p>By default this is not set in which case all query params are logged
-	 *
-	 * <p>If there are multiple values for the same query param,
-	 * the predicate will be applied once per query param name.
-	 * As a result, the use of this predicate may result in a different query string
-	 * than the one returned by {@link HttpServletRequest#getQueryString()}.
+	 * Configure a predicate for selecting which query parameters should be logged
+	 * if {@link #setIncludeQueryString(boolean)} is set to {@code true}.
+	 * <p>By default this is not set, in which case all query parameters are logged.
+	 * <p>The predicate will be applied once per query parameter name. Thus, if
+	 * there are multiple values for the same query parameter name, the logged query
+	 * string will contain fewer {@code name=value} mappings than the one returned by
+	 * {@link HttpServletRequest#getQueryString()}.
 	 * @param queryParamPredicate the predicate to use
 	 * @since 7.0
 	 */
@@ -214,7 +213,7 @@ public abstract class AbstractRequestLoggingFilter extends OncePerRequestFilter 
 	/**
 	 * Configure a predicate for selecting which headers should be logged if
 	 * {@link #setIncludeHeaders(boolean)} is set to {@code true}.
-	 * <p>By default this is not set in which case all headers are logged.
+	 * <p>By default this is not set, in which case all headers are logged.
 	 * @param headerPredicate the predicate to use
 	 * @since 5.2
 	 */
@@ -364,7 +363,6 @@ public abstract class AbstractRequestLoggingFilter extends OncePerRequestFilter 
 					for (String name : queryParams.keySet()) {
 						if (!getQueryParamPredicate().test(name)) {
 							updatedQueryParams.set(name, "masked");
-							break;
 						}
 					}
 
