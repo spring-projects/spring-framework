@@ -465,7 +465,7 @@ class RequestMappingHandlerMappingTests {
 	}
 
 	@Test
-	void privateMethodOnCglibProxyShouldThrowException() {
+	void privateMethodOnCglibProxyShouldThrowException() throws Exception {
 		RequestMappingHandlerMapping mapping = createMapping();
 
 		Class<?> handlerType = PrivateMethodController.class;
