@@ -62,6 +62,8 @@ import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.mockito.Mockito.mock;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 import static org.springframework.web.reactive.result.method.RequestMappingInfo.paths;
+import static org.springframework.web.testfixture.method.VisibilityTestHandler.PackagePrivateController;
+import static org.springframework.web.testfixture.method.VisibilityTestHandler.ProtectedController;
 
 /**
  * Tests for {@link RequestMappingHandlerMapping}.
@@ -442,6 +444,37 @@ class RequestMappingHandlerMappingTests {
 		assertThat(info.getPatternsCondition().getDirectPaths()).containsOnly("/protected");
 	}
 
+	@Test
+	void differentPackagePackagePrivateMethodShouldThrowException() throws Exception {
+		RequestMappingHandlerMapping mapping = new RequestMappingHandlerMapping();
+
+		Class<?> handlerType = ControllerWithPackagePrivateClass.class;
+		Method method = PackagePrivateController.class.getDeclaredMethod("packagePrivateMethod");
+
+		Class<?> proxyClass = createProxyClass(handlerType);
+
+		assertThatIllegalStateException()
+				.isThrownBy(() -> mapping.getMappingForMethod(method, proxyClass))
+				.withMessageContainingAll(
+						"Package-private method [packagePrivateMethod]",
+						"cannot be advised when used by handler class"
+				);
+	}
+
+	@Test
+	void differentPackageProtectedMethodShouldNotThrowException() throws Exception {
+		RequestMappingHandlerMapping mapping = new RequestMappingHandlerMapping();
+
+		Class<?> handlerType = ControllerWithProtectedClass.class;
+		Method method = ProtectedController.class.getDeclaredMethod("protectedMethod");
+
+		Class<?> proxyClass = createProxyClass(handlerType);
+
+		RequestMappingInfo info = mapping.getMappingForMethod(method, proxyClass);
+		assertThat(info.getPatternsCondition().getDirectPaths()).containsOnly("/protected");
+	}
+
+
 	private Class<?> createProxyClass(Class<?> targetClass) {
 		Enhancer enhancer = new Enhancer();
 		enhancer.setSuperclass(targetClass);
@@ -461,6 +494,12 @@ class RequestMappingHandlerMappingTests {
 		@RequestMapping("/protected")
 		protected void protectedMethod() {}
 	}
+
+	@Controller
+	static class ControllerWithPackagePrivateClass extends PackagePrivateController { }
+
+	@Controller
+	static class ControllerWithProtectedClass extends ProtectedController { }
 
 	private RequestMappingInfo assertComposedAnnotationMapping(RequestMethod requestMethod) {
 		String methodName = requestMethod.name().toLowerCase();
