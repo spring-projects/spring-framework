@@ -67,7 +67,9 @@ final class DefaultWebClientBuilder implements WebClient.Builder {
 		ClassLoader loader = DefaultWebClientBuilder.class.getClassLoader();
 		reactorNettyClientPresent = ClassUtils.isPresent("reactor.netty.http.client.HttpClient", loader);
 		reactorNetty2ClientPresent = ClassUtils.isPresent("reactor.netty5.http.client.HttpClient", loader);
-		jettyClientPresent = ClassUtils.isPresent("org.eclipse.jetty.client.HttpClient", loader);
+		jettyClientPresent =
+				ClassUtils.isPresent("org.eclipse.jetty.client.HttpClient", loader) &&
+						ClassUtils.isPresent("org.eclipse.jetty.reactive.client.ReactiveRequest", loader);
 		httpComponentsClientPresent =
 				ClassUtils.isPresent("org.apache.hc.client5.http.impl.async.CloseableHttpAsyncClient", loader) &&
 						ClassUtils.isPresent("org.apache.hc.core5.reactive.ReactiveDataConsumer", loader);
