@@ -29,7 +29,9 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
 /**
- * Provide access to the candidates that are defined in {@code META-INF/spring.components}.
+ * Provide access to the candidates that are defined in {@code META-INF/spring.components}
+ * component index files (see {@link #CandidateComponentsIndex(List)}) or registered
+ * programmatically (see {@link #CandidateComponentsIndex()}).
  *
  * <p>An arbitrary number of stereotypes can be registered (and queried) on the index: a
  * typical example is the fully qualified name of an annotation that flags the class for
@@ -42,7 +44,7 @@ import org.springframework.util.MultiValueMap;
  *
  * <p>The {@code type} is usually the fully qualified name of a class, though this is
  * not a rule. Similarly, the {@code stereotype} is usually the fully qualified name of
- * a target type but it can be any marker really.
+ * an annotation type, but it can be any marker really.
  *
  * @author Stephane Nicoll
  * @author Juergen Hoeller
@@ -60,7 +62,7 @@ public class CandidateComponentsIndex {
 
 
 	/**
-	 * Create a new index instance from parsed components index files.
+	 * Create a new index instance from parsed component index files.
 	 */
 	CandidateComponentsIndex(List<Properties> content) {
 		for (Properties entry : content) {
@@ -77,6 +79,8 @@ public class CandidateComponentsIndex {
 	/**
 	 * Create a new index instance for programmatic population.
 	 * @since 7.0
+	 * @see #registerScan(String...)
+	 * @see #registerCandidateType(String, String...)
 	 */
 	public CandidateComponentsIndex() {
 		this.complete = false;
@@ -84,8 +88,10 @@ public class CandidateComponentsIndex {
 
 
 	/**
-	 * Register the given base packages (or base package patterns) as scanned.
+	 * Programmatically register the given base packages (or base package patterns)
+	 * as scanned.
 	 * @since 7.0
+	 * @see #registerCandidateType(String, String...)
 	 */
 	public void registerScan(String... basePackages) {
 		Collections.addAll(this.registeredScans, basePackages);
@@ -94,13 +100,14 @@ public class CandidateComponentsIndex {
 	/**
 	 * Return the registered base packages (or base package patterns).
 	 * @since 7.0
+	 * @see #registerScan(String...)
 	 */
 	public Set<String> getRegisteredScans() {
 		return this.registeredScans;
 	}
 
 	/**
-	 * Determine whether this index contains entries for the given base package
+	 * Determine whether this index contains an entry for the given base package
 	 * (or base package pattern).
 	 * @since 7.0
 	 */
@@ -111,7 +118,11 @@ public class CandidateComponentsIndex {
 
 	/**
 	 * Programmatically register one or more stereotypes for the given candidate type.
+	 * <p>Note that the containing packages for candidates are not automatically
+	 * considered scanned packages. Make sure to call {@link #registerScan(String...)}
+	 * with the scan-specific base package accordingly.
 	 * @since 7.0
+	 * @see #registerScan(String...)
 	 */
 	public void registerCandidateType(String type, String... stereotypes) {
 		for (String stereotype : stereotypes) {
@@ -120,7 +131,7 @@ public class CandidateComponentsIndex {
 	}
 
 	/**
-	 * Return the registered stereotypes packages (or base package patterns).
+	 * Return the registered stereotype packages (or base package patterns).
 	 * @since 7.0
 	 */
 	public Set<String> getRegisteredStereotypes() {
@@ -144,6 +155,7 @@ public class CandidateComponentsIndex {
 		}
 		return Collections.emptySet();
 	}
+
 
 	private static boolean matchPackage(String basePackage, String packageName) {
 		if (pathMatcher.isPattern(basePackage)) {
