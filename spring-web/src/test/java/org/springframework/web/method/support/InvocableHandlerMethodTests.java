@@ -179,6 +179,8 @@ class InvocableHandlerMethodTests {
 		return (StubArgumentResolver) this.composite.getResolvers().get(index);
 	}
 
+
+
 	@SuppressWarnings("unused")
 	private static class Handler {
 
@@ -197,6 +199,7 @@ class InvocableHandlerMethodTests {
 			return "success";
 		}
 	}
+
 
 	private static class ExceptionRaisingArgumentResolver implements HandlerMethodArgumentResolver {
 
