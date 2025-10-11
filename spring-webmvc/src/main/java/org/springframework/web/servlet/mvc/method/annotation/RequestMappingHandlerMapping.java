@@ -246,7 +246,7 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 
 
 	private boolean isCglibProxy(Class<?> beanType) {
-		return beanType.getName().contains("$$");
+		return beanType.getName().contains(ClassUtils.CGLIB_CLASS_SEPARATOR);
 	}
 
 
