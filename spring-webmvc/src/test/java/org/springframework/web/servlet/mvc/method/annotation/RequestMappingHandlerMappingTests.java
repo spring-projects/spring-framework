@@ -471,7 +471,7 @@ class RequestMappingHandlerMappingTests {
 		Class<?> handlerType = PrivateMethodController.class;
 		Method method = handlerType.getDeclaredMethod("privateMethod");
 
-		final Class<?> proxyClass = createProxyClass(handlerType);
+		Class<?> proxyClass = createProxyClass(handlerType);
 
 		assertThatIllegalStateException()
 				.isThrownBy(() -> mapping.getMappingForMethod(method, proxyClass))
