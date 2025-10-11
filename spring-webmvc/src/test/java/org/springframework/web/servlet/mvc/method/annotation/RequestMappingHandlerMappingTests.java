@@ -487,7 +487,7 @@ class RequestMappingHandlerMappingTests {
 
 		Class<?> handlerType = ProtectedMethodController.class;
 		Method method = handlerType.getDeclaredMethod("protectedMethod");
-		final Class<?> proxyClass = createProxyClass(handlerType);
+		Class<?> proxyClass = createProxyClass(handlerType);
 
 		RequestMappingInfo info = mapping.getMappingForMethod(method, proxyClass);
 
