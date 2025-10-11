@@ -31,6 +31,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.function.Consumer;
 
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletRequest;
@@ -353,6 +354,21 @@ public abstract class AbstractMockHttpServletRequestBuilder<B extends AbstractMo
 	public B headers(HttpHeaders httpHeaders) {
 		httpHeaders.forEach(this.headers::addAll);
 		return self();
+	}
+
+	/**
+	 * Manipulate this builder's headers with the given consumer. The
+	 * headers provided to the consumer are "live", so that the consumer can be used to
+	 * {@linkplain HttpHeaders#set(String, String) overwrite} existing header values,
+	 * {@linkplain HttpHeaders#remove(String) remove} values, or use any of the other
+	 * {@link HttpHeaders} methods.
+	 * @param headersConsumer a function that consumes the {@code HttpHeaders}
+	 * @return this builder
+	 */
+	public B headers(Consumer<HttpHeaders> headersConsumer){
+		HttpHeaders httpHeaders = new HttpHeaders();
+		headersConsumer.accept(httpHeaders);
+		return headers(httpHeaders);
 	}
 
 	/**
