@@ -21,6 +21,10 @@ import java.util.Properties;
 import java.util.Set;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
+
+import org.springframework.util.ClassUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -28,6 +32,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * Tests for {@link CandidateComponentsIndex}.
  *
  * @author Stephane Nicoll
+ * @author Sam Brannen
  */
 class CandidateComponentsIndexTests {
 
@@ -67,6 +72,36 @@ class CandidateComponentsIndexTests {
 				createProperties("com.example.Foo", "entity")));
 		assertThat(index.getCandidateTypes("com.example", "service")).contains("com.example.Foo");
 		assertThat(index.getCandidateTypes("com.example", "entity")).contains("com.example.Foo");
+	}
+
+	@ParameterizedTest  // gh-35601
+	@ValueSource(strings = {
+		"com.example.service",
+		"com.example.service.sub",
+		"com.example.service.subX",
+		"com.example.domain",
+		"com.example.domain.X"
+	})
+	void hasScannedPackage(String packageName) {
+		CandidateComponentsIndex index = new CandidateComponentsIndex();
+		createSampleProperties().keySet()
+				.forEach(key -> index.registerScan(ClassUtils.getPackageName((String) key)));
+		assertThat(index.hasScannedPackage(packageName)).isTrue();
+	}
+
+	@ParameterizedTest  // gh-35601
+	@ValueSource(strings = {
+		"com.example",
+		"com.exampleX",
+		"com.exampleX.service",
+		"com.example.serviceX",
+		"com.example.domainX"
+	})
+	void hasScannedPackageWithNoMatch(String packageName) {
+		CandidateComponentsIndex index = new CandidateComponentsIndex();
+		createSampleProperties().keySet()
+				.forEach(key -> index.registerScan(ClassUtils.getPackageName((String) key)));
+		assertThat(index.hasScannedPackage(packageName)).isFalse();
 	}
 
 
