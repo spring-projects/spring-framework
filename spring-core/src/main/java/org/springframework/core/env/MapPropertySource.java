@@ -16,6 +16,8 @@
 
 package org.springframework.core.env;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import org.jspecify.annotations.Nullable;
@@ -44,10 +46,43 @@ public class MapPropertySource extends EnumerablePropertySource<Map<String, Obje
 		super(name, source);
 	}
 
-
+	/**
+	 * Returns the value associated with the given property name.
+	 * <p>
+	 * First, this method checks for an exact match in the underlying {@code source} map.
+	 * If not found, it attempts to reconstruct a {@link List} from sequentially indexed keys
+	 * (e.g. {@code name[0]}, {@code name[1]}, ...), stopping at the first missing index.
+	 * <p>
+	 * Values that implement {@link CharSequence} are converted to plain {@link String} instances.
+	 *
+	 * @param name the property name to resolve
+	 * @return the resolved value, or {@code null} if not found
+	 */
 	@Override
 	public @Nullable Object getProperty(String name) {
-		return this.source.get(name);
+		Object directMatch = this.source.get(name);
+
+		if (directMatch != null) {
+			return directMatch;
+		}
+
+		List<Object> collectedValues = new ArrayList<>();
+		for (int index = 0; ; index++) {
+			String indexedKey = name + "[" + index + "]";
+			if (!this.source.containsKey(indexedKey)) {
+				break;
+			}
+
+			Object rawIndexedValue = this.source.get(indexedKey);
+
+			if (rawIndexedValue instanceof CharSequence cs) {
+				collectedValues.add(cs.toString());
+			} else {
+				collectedValues.add(rawIndexedValue);
+			}
+		}
+
+		return collectedValues.isEmpty() ? null : collectedValues;
 	}
 
 	@Override
