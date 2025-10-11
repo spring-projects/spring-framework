@@ -469,13 +469,7 @@ class RequestMappingHandlerMappingTests {
 		RequestMappingHandlerMapping mapping = createMapping();
 
 		Class<?> handlerType = PrivateMethodController.class;
-		Method method;
-		try {
-			method = handlerType.getDeclaredMethod("privateMethod");
-		}
-		catch (NoSuchMethodException ex) {
-			throw new IllegalStateException(ex);
-		}
+		Method method = handlerType.getDeclaredMethod("privateMethod");
 
 		final Class<?> proxyClass = createProxyClass(handlerType);
 
