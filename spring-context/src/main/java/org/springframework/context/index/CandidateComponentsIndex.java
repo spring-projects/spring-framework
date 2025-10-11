@@ -150,7 +150,7 @@ public class CandidateComponentsIndex {
 			return pathMatcher.match(basePackage, packageName);
 		}
 		else {
-			return packageName.startsWith(basePackage);
+			return packageName.equals(basePackage) || packageName.startsWith(basePackage + ".");
 		}
 	}
 
