@@ -54,7 +54,6 @@ import org.springframework.util.ResourceUtils;
  * @author Stephane Nicoll
  * @since 6.0
  */
-@SuppressWarnings("removal") // components index
 public final class PersistenceManagedTypesScanner {
 
 	private static final String CLASS_RESOURCE_PATTERN = "/**/*.class";
