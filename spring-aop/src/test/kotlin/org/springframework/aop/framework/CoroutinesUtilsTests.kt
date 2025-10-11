@@ -18,6 +18,7 @@ package org.springframework.aop.framework
 
 import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
@@ -66,6 +67,18 @@ class CoroutinesUtilsTests {
 		val value1 = "foo"
 		val value2 = "bar"
 		val values = Flux.just(value1, value2)
+		val flow = CoroutinesUtils.asFlow(values) as Flow<String>
+		runBlocking {
+			assertThat(flow.toList()).containsExactly(value1, value2)
+		}
+	}
+
+	@Test
+	@Suppress("UNCHECKED_CAST")
+	fun flowAsFlow() {
+		val value1 = "foo"
+		val value2 = "bar"
+		val values = flowOf(value1, value2)
 		val flow = CoroutinesUtils.asFlow(values) as Flow<String>
 		runBlocking {
 			assertThat(flow.toList()).containsExactly(value1, value2)
