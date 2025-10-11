@@ -31,8 +31,11 @@ import org.jspecify.annotations.Nullable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.util.Assert;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
 import org.springframework.web.util.ContentCachingRequestWrapper;
+import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.web.util.WebUtils;
 
 /**
@@ -98,6 +101,8 @@ public abstract class AbstractRequestLoggingFilter extends OncePerRequestFilter 
 	private boolean includeHeaders = false;
 
 	private boolean includePayload = false;
+
+	private @Nullable Predicate<String> queryParamPredicate;
 
 	private @Nullable Predicate<String> headerPredicate;
 
@@ -180,6 +185,30 @@ public abstract class AbstractRequestLoggingFilter extends OncePerRequestFilter 
 	 */
 	protected boolean isIncludePayload() {
 		return this.includePayload;
+	}
+
+	/**
+	 * Configure a predicate for selecting which query params should be logged if
+	 * {@link #setIncludeQueryString(boolean)} is set to {@code true}.
+	 * <p>By default this is not set in which case all query params are logged
+	 *
+	 * <p>If there are multiple values for the same query param,
+	 * the predicate will be applied once per query param name.
+	 * As a result, the use of this predicate may result in a different query string
+	 * than the one returned by {@link HttpServletRequest#getQueryString()}.
+	 * @param queryParamPredicate the predicate to use
+	 * @since 7.0
+	 */
+	public void setQueryParamPredicate(@Nullable Predicate<String> queryParamPredicate) {
+		this.queryParamPredicate = queryParamPredicate;
+	}
+
+	/**
+	 * The configured {@link #setQueryParamPredicate(Predicate) queryParamPredicate}.
+	 * @since 7.0
+	 */
+	protected @Nullable Predicate<String> getQueryParamPredicate() {
+		return this.queryParamPredicate;
 	}
 
 	/**
@@ -326,6 +355,24 @@ public abstract class AbstractRequestLoggingFilter extends OncePerRequestFilter 
 		if (isIncludeQueryString()) {
 			String queryString = request.getQueryString();
 			if (queryString != null) {
+				if (getQueryParamPredicate() != null) {
+					MultiValueMap<String, String> queryParams = UriComponentsBuilder.fromUriString("?" + queryString)
+							.build()
+							.getQueryParams();
+
+					MultiValueMap<String, String> updatedQueryParams = new LinkedMultiValueMap<>(queryParams);
+					for (String name : queryParams.keySet()) {
+						if (!getQueryParamPredicate().test(name)) {
+							updatedQueryParams.set(name, "masked");
+							break;
+						}
+					}
+
+					queryString = UriComponentsBuilder.newInstance()
+							.queryParams(updatedQueryParams)
+							.build()
+							.getQuery();
+				}
 				msg.append('?').append(queryString);
 			}
 		}
