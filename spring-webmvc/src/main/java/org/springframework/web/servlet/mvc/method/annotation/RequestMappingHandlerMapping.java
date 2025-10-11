@@ -225,7 +225,7 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 
 			if (Modifier.isPrivate(modifiers)) {
 				throw new IllegalStateException(
-						"Private method [" + method + "] on CGLIB proxy class [" + handlerType.getName() +
+						"Private method [" + method.getName() + "] on CGLIB proxy class [" + handlerType.getName() +
 								"] cannot be used as a request handler method because private methods cannot be overridden. " +
 								"Change the method to non-private visibility or use interface-based JDK proxying instead.");
 			}
@@ -237,7 +237,7 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 
 				if (!Objects.equals(methodPackage, handlerPackage)) {
 					throw new IllegalStateException(
-							"Package-private method [" + method + "] on CGLIB proxy class [" + declaringClass.getName() +
+							"Package-private method [" + method.getName() + "] on CGLIB proxy class [" + declaringClass.getName() +
 									"] from package [" + methodPackage.getName() + "] cannot be advised when used by handler class [" +
 									handlerType.getName() + "] from package [" + handlerPackage.getName() + "] because it is effectively private. " +
 									"Either make the method public/protected or use interface-based JDK proxying instead.");

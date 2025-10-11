@@ -28,6 +28,8 @@ import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import org.springframework.cglib.proxy.Enhancer;
+import org.springframework.cglib.proxy.NoOp;
 import org.springframework.core.annotation.AliasFor;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
@@ -67,6 +69,7 @@ import static org.springframework.web.reactive.result.method.RequestMappingInfo.
  * @author Rossen Stoyanchev
  * @author Olga Maciaszek-Sharma
  * @author Sam Brannen
+ * @author Yongjun Hong
  */
 class RequestMappingHandlerMappingTests {
 
@@ -407,6 +410,56 @@ class RequestMappingHandlerMappingTests {
 		ServerWebExchange exchange = MockServerWebExchange.from(request);
 		RequestMappingInfo matchingInfo = info.getMatchingCondition(exchange);
 		assertThat(matchingInfo).isEqualTo(paths(path).methods(POST).consumes(mediaType.toString()).build());
+	}
+
+	@Test
+	void privateMethodOnCglibProxyShouldThrowException() throws Exception {
+		RequestMappingHandlerMapping mapping = new RequestMappingHandlerMapping();
+
+		Class<?> handlerType = PrivateMethodController.class;
+		Method method = handlerType.getDeclaredMethod("privateMethod");
+
+		Class<?> proxyClass = createProxyClass(handlerType);
+
+		assertThatIllegalStateException()
+				.isThrownBy(() -> mapping.getMappingForMethod(method, proxyClass))
+				.withMessageContainingAll(
+						"Private method [privateMethod]",
+						"cannot be used as a request handler method"
+				);
+	}
+
+	@Test
+	void protectedMethodShouldNotThrowException() throws Exception {
+		RequestMappingHandlerMapping mapping = new RequestMappingHandlerMapping();
+
+		Class<?> handlerType = ProtectedMethodController.class;
+		Method method = handlerType.getDeclaredMethod("protectedMethod");
+		Class<?> proxyClass = createProxyClass(handlerType);
+
+		RequestMappingInfo info = mapping.getMappingForMethod(method, proxyClass);
+
+		assertThat(info.getPatternsCondition().getDirectPaths()).containsOnly("/protected");
+	}
+
+	private Class<?> createProxyClass(Class<?> targetClass) {
+		Enhancer enhancer = new Enhancer();
+		enhancer.setSuperclass(targetClass);
+		enhancer.setCallbackTypes(new Class[]{NoOp.class});
+
+		return enhancer.createClass();
+	}
+
+	@Controller
+	static class PrivateMethodController {
+		@RequestMapping("/private")
+		private void privateMethod() {}
+	}
+
+	@Controller
+	static class ProtectedMethodController {
+		@RequestMapping("/protected")
+		protected void protectedMethod() {}
 	}
 
 	private RequestMappingInfo assertComposedAnnotationMapping(RequestMethod requestMethod) {
