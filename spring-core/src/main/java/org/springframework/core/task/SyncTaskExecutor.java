@@ -22,9 +22,7 @@ import org.springframework.util.Assert;
 
 /**
  * {@link TaskExecutor} implementation that executes each task <i>synchronously</i>
- * in the calling thread.
- *
- * <p>Mainly intended for testing scenarios.
+ * in the calling thread. Mainly intended for testing scenarios.
  *
  * <p>Execution in the calling thread does have the advantage of participating
  * in its thread context, for example the thread context class loader or the
@@ -40,13 +38,13 @@ import org.springframework.util.Assert;
 public class SyncTaskExecutor implements TaskExecutor, Serializable {
 
 	/**
-	 * Executes the given {@code task} synchronously, through direct
-	 * invocation of it's {@link Runnable#run() run()} method.
-	 * @throws IllegalArgumentException if the given {@code task} is {@code null}
+	 * Execute the given {@code task} synchronously, through direct
+	 * invocation of its {@link Runnable#run() run()} method.
+	 * @throws RuntimeException if propagated from the given {@code Runnable}
 	 */
 	@Override
 	public void execute(Runnable task) {
-		Assert.notNull(task, "Runnable must not be null");
+		Assert.notNull(task, "Task must not be null");
 		task.run();
 	}
 
