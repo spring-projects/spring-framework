@@ -113,6 +113,10 @@ public class MvcAnnotationPredicates {
 		return new RequestMappingPredicate(path).method(RequestMethod.HEAD);
 	}
 
+	public static RequestMappingPredicate queryMapping(String... path) {
+		return new RequestMappingPredicate(path).method(RequestMethod.QUERY);
+	}
+
 
 
 	public static class ModelAttributePredicate implements Predicate<MethodParameter> {
