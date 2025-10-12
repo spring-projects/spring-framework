@@ -135,9 +135,11 @@ class OncePerRequestFilterTests {
 		return Stream.of(
 				Arguments.of("/skip", false),
 				Arguments.of("/skip/something", false),
+				Arguments.of("//skip", true),
 				Arguments.of("", true),
 				Arguments.of("/", true),
-				Arguments.of("/do_not_skip", true)
+				Arguments.of("/do_not_skip", true),
+				Arguments.of("//do_not_skip", true)
 		);
 	}
 
@@ -157,9 +159,12 @@ class OncePerRequestFilterTests {
 		return Stream.of(
 				Arguments.of("/skip", false),
 				Arguments.of("/skip/something", false),
+				Arguments.of("//skip", false),
 				Arguments.of("", false),
 				Arguments.of("/", false),
-				Arguments.of("/do_not_skip", true)
+				Arguments.of("/do_not_skip", true),
+				Arguments.of("//do_not_skip", false),
+				Arguments.of("/do_not_skip/something", true)
 		);
 	}
 
