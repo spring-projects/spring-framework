@@ -134,7 +134,7 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 	private static final long CPU_CHECK_INTERVAL_MS = 30000;  // 30 seconds
 
 	// Deprecated - kept for compatibility
-	@Deprecated
+	@Deprecated(since = "6.2")
 	private final AtomicLong lastWarningTime = new AtomicLong(0);
 
 	private final AtomicInteger delayedTaskWarningCount = new AtomicInteger();
@@ -145,15 +145,6 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 	private final AtomicInteger poolExhaustionCount = new AtomicInteger(0);
 
 	// Circuit breaker for graceful degradation
-	/**
-	 * Circuit breaker states.
-	 */
-	private enum CircuitBreakerState {
-		CLOSED,    // Normal operation
-		OPEN,      // Monitoring disabled due to errors
-		HALF_OPEN  // Testing if errors are resolved
-	}
-
 	private final AtomicReference<CircuitBreakerState> circuitBreakerState =
 			new AtomicReference<>(CircuitBreakerState.CLOSED);
 
@@ -170,7 +161,7 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 	private final AtomicLong circuitBreakerOpenTime = new AtomicLong(0);
 
 	// Deprecated - kept for compatibility
-	@Deprecated
+	@Deprecated(since = "6.2")
 	private final AtomicBoolean circuitBreakerOpen = new AtomicBoolean(false);
 
 	// CPU monitoring for monitoring thread
@@ -183,10 +174,6 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 	private volatile long lastCpuCheckTime = 0;
 
 	// Logging configuration
-	public enum WarningLogLevel {
-		DEBUG, INFO, WARN, ERROR
-	}
-
 	private volatile WarningLogLevel warningLogLevel = WarningLogLevel.WARN;
 
 	private volatile boolean structuredLoggingEnabled = false;
@@ -394,7 +381,7 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 	public void setWarningLogLevel(String level) {
 		Assert.hasText(level, "Log level must not be empty");
 		try {
-			this.warningLogLevel = WarningLogLevel.valueOf(level.toUpperCase());
+			this.warningLogLevel = WarningLogLevel.valueOf(level.toUpperCase(java.util.Locale.ROOT));
 		}
 		catch (IllegalArgumentException ex) {
 			throw new IllegalArgumentException("Invalid log level: " + level +
@@ -913,16 +900,6 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 	}
 
 	/**
-	 * Pool state information record.
-	 */
-	private record PoolState(int poolSize, int activeCount, int queueSize, boolean poolExhausted) {}
-
-	/**
-	 * Delay analysis result record.
-	 */
-	private record DelayAnalysis(int delayedCount, long maxDelay) {}
-
-	/**
 	 * Check the task queue for tasks whose scheduled execution time has passed
 	 * but have not yet started executing due to thread pool exhaustion.
 	 * @param executor the scheduled thread pool executor to monitor
@@ -970,7 +947,7 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 				this.poolExhaustionCount.incrementAndGet();
 				logWarning(buildDelayedTasksMessage(analysis.delayedCount(), analysis.maxDelay(),
 						poolState.poolSize(), poolState.activeCount(), poolState.queueSize()));
-				delayedTaskWarningCount.addAndGet(analysis.delayedCount());
+				this.delayedTaskWarningCount.addAndGet(analysis.delayedCount());
 			}
 
 			// Record successful monitoring execution for circuit breaker state machine
@@ -1080,7 +1057,7 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 	private void handleLargeQueue(PoolState poolState) {
 		this.poolExhaustionCount.incrementAndGet();
 		logWarning(buildLargeQueueMessage(poolState.queueSize(), poolState.poolSize(), poolState.activeCount()));
-		delayedTaskWarningCount.incrementAndGet();
+		this.delayedTaskWarningCount.incrementAndGet();
 	}
 
 	/**
@@ -1115,7 +1092,7 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 
 	/**
 	 * Analyze queue to find delayed tasks.
-	 * @return DelayAnalysis with count and max delay
+	 * @return delay analysis with count and max delay
 	 */
 	private DelayAnalysis analyzeDelayedTasks(BlockingQueue<Runnable> queue) {
 		int delayedCount = 0;
@@ -1225,7 +1202,7 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 	 * Logs a warning if CPU usage is excessive.
 	 */
 	private void monitorCpuUsage() {
-		if (!threadMXBean.isThreadCpuTimeSupported() || this.monitorThreadId < 0) {
+		if (!this.threadMXBean.isThreadCpuTimeSupported() || this.monitorThreadId < 0) {
 			return;
 		}
 
@@ -1235,7 +1212,7 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 			return;
 		}
 
-		long currentCpuTime = threadMXBean.getThreadCpuTime(this.monitorThreadId);
+		long currentCpuTime = this.threadMXBean.getThreadCpuTime(this.monitorThreadId);
 		if (this.lastMonitorCpuTime > 0) {
 			long cpuTimeDelta = currentCpuTime - this.lastMonitorCpuTime;
 			long wallTimeDelta = (now - this.lastCpuCheckTime) * 1_000_000; // Convert to nanos
@@ -1371,6 +1348,41 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 	private Runnable errorHandlingTask(Runnable task, boolean isRepeatingTask) {
 		return TaskUtils.decorateTaskWithErrorHandler(task, this.errorHandler, isRepeatingTask);
 	}
+
+
+	/**
+	 * Circuit breaker states.
+	 */
+	private enum CircuitBreakerState {
+		CLOSED,    // Normal operation
+		OPEN,      // Monitoring disabled due to errors
+		HALF_OPEN  // Testing if errors are resolved
+	}
+
+	/**
+	 * Warning log levels for delay monitoring messages.
+	 * @since 6.2
+	 */
+	public enum WarningLogLevel {
+		/** Debug level logging. */
+		DEBUG,
+		/** Info level logging. */
+		INFO,
+		/** Warn level logging. */
+		WARN,
+		/** Error level logging. */
+		ERROR
+	}
+
+	/**
+	 * Pool state information record.
+	 */
+	private record PoolState(int poolSize, int activeCount, int queueSize, boolean poolExhausted) {}
+
+	/**
+	 * Delay analysis result record.
+	 */
+	private record DelayAnalysis(int delayedCount, long maxDelay) {}
 
 
 	private static class DelegatingRunnableScheduledFuture<V> implements RunnableScheduledFuture<V> {

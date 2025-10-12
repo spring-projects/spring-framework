@@ -62,7 +62,8 @@ class ThreadPoolTaskSchedulerDelayMonitoringTests {
 			try {
 				// Block for 3 seconds
 				Thread.sleep(3000);
-			} catch (InterruptedException e) {
+			}
+			catch (InterruptedException e) {
 				Thread.currentThread().interrupt();
 			}
 		}, Duration.ofMillis(100));
@@ -76,9 +77,7 @@ class ThreadPoolTaskSchedulerDelayMonitoringTests {
 		// Schedule a quick task slightly in the past so it's immediately delayed
 		CountDownLatch quickTaskExecuted = new CountDownLatch(1);
 		Instant scheduledTime = scheduler.getClock().instant().minusMillis(200);
-		scheduler.schedule(() -> {
-			quickTaskExecuted.countDown();
-		}, scheduledTime);
+		scheduler.schedule(() -> quickTaskExecuted.countDown(), scheduledTime);
 
 		// Wait for delay monitoring to detect the issue
 		// The monitor runs every 500ms, task is already delayed by 200ms > threshold (100ms)
@@ -117,7 +116,8 @@ class ThreadPoolTaskSchedulerDelayMonitoringTests {
 			longTaskStarted.countDown();
 			try {
 				Thread.sleep(2000);
-			} catch (InterruptedException e) {
+			}
+			catch (InterruptedException e) {
 				Thread.currentThread().interrupt();
 			}
 		}, Duration.ofMillis(100));
@@ -127,7 +127,6 @@ class ThreadPoolTaskSchedulerDelayMonitoringTests {
 
 		// Schedule another task
 		scheduler.schedule(() -> {
-			// Quick task
 		}, scheduler.getClock().instant());
 
 		// Wait
@@ -157,7 +156,8 @@ class ThreadPoolTaskSchedulerDelayMonitoringTests {
 				allTasksStarted.countDown();
 				try {
 					Thread.sleep(500);
-				} catch (InterruptedException e) {
+				}
+				catch (InterruptedException e) {
 					Thread.currentThread().interrupt();
 				}
 			}, Duration.ofMillis(100));
@@ -186,9 +186,7 @@ class ThreadPoolTaskSchedulerDelayMonitoringTests {
 
 		// Schedule a task
 		CountDownLatch taskExecuted = new CountDownLatch(1);
-		scheduler.schedule(() -> {
-			taskExecuted.countDown();
-		}, scheduler.getClock().instant());
+		scheduler.schedule(() -> taskExecuted.countDown(), scheduler.getClock().instant());
 
 		// Wait for task to execute
 		assertThat(taskExecuted.await(2, TimeUnit.SECONDS)).isTrue();
@@ -218,7 +216,8 @@ class ThreadPoolTaskSchedulerDelayMonitoringTests {
 			longTaskStarted.countDown();
 			try {
 				Thread.sleep(3000);
-			} catch (InterruptedException e) {
+			}
+			catch (InterruptedException e) {
 				Thread.currentThread().interrupt();
 			}
 		}, Duration.ofMillis(100));
@@ -228,7 +227,6 @@ class ThreadPoolTaskSchedulerDelayMonitoringTests {
 
 		// Schedule another task
 		scheduler.schedule(() -> {
-			// Quick task
 		}, scheduler.getClock().instant());
 
 		// Wait for 1 second (less than threshold)
@@ -268,7 +266,8 @@ class ThreadPoolTaskSchedulerDelayMonitoringTests {
 			longTaskStarted.countDown();
 			try {
 				Thread.sleep(2000);
-			} catch (InterruptedException e) {
+			}
+			catch (InterruptedException e) {
 				Thread.currentThread().interrupt();
 			}
 		}, Duration.ofMillis(100));
@@ -277,7 +276,8 @@ class ThreadPoolTaskSchedulerDelayMonitoringTests {
 		Thread.sleep(200);
 
 		scheduler.resetWarningRateLimit();
-		scheduler.schedule(() -> {}, scheduler.getClock().instant().minusMillis(500));
+		scheduler.schedule(() -> {
+		}, scheduler.getClock().instant().minusMillis(500));
 
 		// Wait longer for monitoring to detect and log warnings (monitor interval + processing time)
 		Thread.sleep(1500);
@@ -308,7 +308,8 @@ class ThreadPoolTaskSchedulerDelayMonitoringTests {
 			longTaskStarted.countDown();
 			try {
 				Thread.sleep(2000);
-			} catch (InterruptedException e) {
+			}
+			catch (InterruptedException e) {
 				Thread.currentThread().interrupt();
 			}
 		}, Duration.ofMillis(100));
@@ -316,7 +317,8 @@ class ThreadPoolTaskSchedulerDelayMonitoringTests {
 		assertThat(longTaskStarted.await(2, TimeUnit.SECONDS)).isTrue();
 		Thread.sleep(200);
 
-		scheduler.schedule(() -> {}, scheduler.getClock().instant().minusMillis(500));
+		scheduler.schedule(() -> {
+		}, scheduler.getClock().instant().minusMillis(500));
 		Thread.sleep(700);
 
 		// Verify metrics are collected
@@ -490,7 +492,8 @@ class ThreadPoolTaskSchedulerDelayMonitoringTests {
 			blockingTaskStarted.countDown();
 			try {
 				Thread.sleep(5000);  // Long block
-			} catch (InterruptedException e) {
+			}
+			catch (InterruptedException e) {
 				Thread.currentThread().interrupt();
 			}
 		}, Duration.ofMillis(10));
@@ -500,8 +503,8 @@ class ThreadPoolTaskSchedulerDelayMonitoringTests {
 
 		// Schedule many delayed tasks to trigger concurrent monitoring
 		for (int i = 0; i < 50; i++) {
-			scheduler.schedule(() -> {},
-				scheduler.getClock().instant().minusMillis(200));
+			scheduler.schedule(() -> {
+			}, scheduler.getClock().instant().minusMillis(200));
 		}
 
 		// Wait for monitoring to run multiple times
@@ -535,7 +538,8 @@ class ThreadPoolTaskSchedulerDelayMonitoringTests {
 			blockingTaskStarted.countDown();
 			try {
 				Thread.sleep(10000);
-			} catch (InterruptedException e) {
+			}
+			catch (InterruptedException e) {
 				Thread.currentThread().interrupt();
 			}
 		}, Duration.ofMillis(10));
@@ -545,8 +549,8 @@ class ThreadPoolTaskSchedulerDelayMonitoringTests {
 
 		// Schedule MORE than MAX_QUEUE_CHECK_SIZE (100) delayed tasks
 		for (int i = 0; i < 150; i++) {
-			scheduler.schedule(() -> {},
-				scheduler.getClock().instant().minusMillis(500));
+			scheduler.schedule(() -> {
+			}, scheduler.getClock().instant().minusMillis(500));
 		}
 
 		// Wait for monitoring to run
@@ -581,7 +585,8 @@ class ThreadPoolTaskSchedulerDelayMonitoringTests {
 			blockingStarted.countDown();
 			try {
 				Thread.sleep(10000);
-			} catch (InterruptedException e) {
+			}
+			catch (InterruptedException e) {
 				Thread.currentThread().interrupt();
 			}
 		}, Duration.ofMillis(10));
@@ -590,8 +595,8 @@ class ThreadPoolTaskSchedulerDelayMonitoringTests {
 		Thread.sleep(200);
 
 		// Schedule delayed task
-		scheduler.schedule(() -> {},
-			scheduler.getClock().instant().minusMillis(200));
+		scheduler.schedule(() -> {
+		}, scheduler.getClock().instant().minusMillis(200));
 
 		// Wait for first warning
 		Thread.sleep(600);
@@ -628,7 +633,8 @@ class ThreadPoolTaskSchedulerDelayMonitoringTests {
 			blockingStarted.countDown();
 			try {
 				Thread.sleep(10000);
-			} catch (InterruptedException e) {
+			}
+			catch (InterruptedException e) {
 				Thread.currentThread().interrupt();
 			}
 		}, Duration.ofMillis(10));
@@ -638,8 +644,8 @@ class ThreadPoolTaskSchedulerDelayMonitoringTests {
 
 		// Schedule exactly 100 tasks (at MAX_QUEUE_CHECK_SIZE boundary)
 		for (int i = 0; i < 100; i++) {
-			scheduler.schedule(() -> {},
-				scheduler.getClock().instant().minusMillis(500));
+			scheduler.schedule(() -> {
+			}, scheduler.getClock().instant().minusMillis(500));
 		}
 
 		Thread.sleep(1000);
@@ -654,8 +660,8 @@ class ThreadPoolTaskSchedulerDelayMonitoringTests {
 
 		// Now schedule 120 tasks (exceeds MAX_QUEUE_CHECK_SIZE)
 		for (int i = 0; i < 120; i++) {
-			scheduler.schedule(() -> {},
-				scheduler.getClock().instant().minusMillis(500));
+			scheduler.schedule(() -> {
+			}, scheduler.getClock().instant().minusMillis(500));
 		}
 
 		Thread.sleep(1000);
@@ -681,9 +687,7 @@ class ThreadPoolTaskSchedulerDelayMonitoringTests {
 		CountDownLatch taskExecuted = new CountDownLatch(1);
 
 		// Should not throw NPE - should fall back to original task
-		scheduler.schedule(() -> {
-			taskExecuted.countDown();
-		}, scheduler.getClock().instant());
+		scheduler.schedule(() -> taskExecuted.countDown(), scheduler.getClock().instant());
 
 		// Task should still execute (fallback to original)
 		assertThat(taskExecuted.await(2, TimeUnit.SECONDS)).isTrue();
@@ -714,9 +718,11 @@ class ThreadPoolTaskSchedulerDelayMonitoringTests {
 				try {
 					// Simulate concurrent state changes
 					Thread.sleep(10);
-				} catch (InterruptedException e) {
+				}
+				catch (InterruptedException e) {
 					Thread.currentThread().interrupt();
-				} finally {
+				}
+				finally {
 					allThreadsComplete.countDown();
 				}
 			});
@@ -753,7 +759,8 @@ class ThreadPoolTaskSchedulerDelayMonitoringTests {
 			blockingStarted.countDown();
 			try {
 				Thread.sleep(10000);
-			} catch (InterruptedException e) {
+			}
+			catch (InterruptedException e) {
 				Thread.currentThread().interrupt();
 			}
 		}, Duration.ofMillis(10));
@@ -763,7 +770,8 @@ class ThreadPoolTaskSchedulerDelayMonitoringTests {
 
 		// Schedule many tasks to trigger multiple warning attempts
 		for (int i = 0; i < 100; i++) {
-			scheduler.schedule(() -> {}, scheduler.getClock().instant().minusMillis(200));
+			scheduler.schedule(() -> {
+			}, scheduler.getClock().instant().minusMillis(200));
 			Thread.sleep(10);  // Small delay between schedules
 		}
 
@@ -816,9 +824,11 @@ class ThreadPoolTaskSchedulerDelayMonitoringTests {
 			scheduler.execute(() -> {
 				try {
 					Thread.sleep(50);
-				} catch (InterruptedException e) {
+				}
+				catch (InterruptedException e) {
 					Thread.currentThread().interrupt();
-				} finally {
+				}
+				finally {
 					allOperationsComplete.countDown();
 				}
 			});
@@ -831,9 +841,11 @@ class ThreadPoolTaskSchedulerDelayMonitoringTests {
 					scheduler.setDelayMonitoringEnabled(false);
 					Thread.sleep(50);
 					scheduler.setDelayMonitoringEnabled(true);
-				} catch (InterruptedException e) {
+				}
+				catch (InterruptedException e) {
 					Thread.currentThread().interrupt();
-				} finally {
+				}
+				finally {
 					allOperationsComplete.countDown();
 				}
 			}).start();
@@ -846,9 +858,11 @@ class ThreadPoolTaskSchedulerDelayMonitoringTests {
 					scheduler.setDelayMonitoringInterval(200);
 					Thread.sleep(50);
 					scheduler.setDelayMonitoringInterval(100);
-				} catch (InterruptedException e) {
+				}
+				catch (InterruptedException e) {
 					Thread.currentThread().interrupt();
-				} finally {
+				}
+				finally {
 					allOperationsComplete.countDown();
 				}
 			}).start();
@@ -878,7 +892,8 @@ class ThreadPoolTaskSchedulerDelayMonitoringTests {
 			blockingStarted.countDown();
 			try {
 				Thread.sleep(10000);
-			} catch (InterruptedException e) {
+			}
+			catch (InterruptedException e) {
 				Thread.currentThread().interrupt();
 			}
 		}, Duration.ofMillis(10));
@@ -888,7 +903,8 @@ class ThreadPoolTaskSchedulerDelayMonitoringTests {
 
 		// Reset and log first warning
 		scheduler.resetWarningRateLimit();
-		scheduler.schedule(() -> {}, scheduler.getClock().instant().minusMillis(200));
+		scheduler.schedule(() -> {
+		}, scheduler.getClock().instant().minusMillis(200));
 		Thread.sleep(500);
 
 		int firstCount = scheduler.getPoolExhaustionCount();
@@ -926,9 +942,11 @@ class ThreadPoolTaskSchedulerDelayMonitoringTests {
 				try {
 					// Mix of successful and failing operations
 					Thread.sleep(10);
-				} catch (InterruptedException e) {
+				}
+				catch (InterruptedException e) {
 					Thread.currentThread().interrupt();
-				} finally {
+				}
+				finally {
 					operationsComplete.countDown();
 				}
 			});
@@ -964,7 +982,8 @@ class ThreadPoolTaskSchedulerDelayMonitoringTests {
 		try {
 			scheduler.setWarningRateLimitMs(86400001);  // > 24 hours
 			assertThat(false).withFailMessage("Expected IllegalArgumentException for rate limit > 24 hours").isTrue();
-		} catch (IllegalArgumentException e) {
+		}
+		catch (IllegalArgumentException e) {
 			assertThat(e.getMessage()).contains("86400000");
 		}
 
@@ -972,7 +991,8 @@ class ThreadPoolTaskSchedulerDelayMonitoringTests {
 		try {
 			scheduler.setWarningRateLimitMs(-1);
 			assertThat(false).withFailMessage("Expected IllegalArgumentException for negative rate limit").isTrue();
-		} catch (IllegalArgumentException e) {
+		}
+		catch (IllegalArgumentException e) {
 			assertThat(e.getMessage()).contains("between 0 and");
 		}
 	}
