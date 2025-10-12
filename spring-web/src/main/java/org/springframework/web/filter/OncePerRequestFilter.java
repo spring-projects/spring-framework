@@ -65,6 +65,7 @@ import org.springframework.web.util.WebUtils;
  * @author Juergen Hoeller
  * @author Rossen Stoyanchev
  * @author Sam Brannen
+ * @author Simone Conte
  * @since 06.12.2003
  */
 public abstract class OncePerRequestFilter extends GenericFilterBean {
@@ -83,6 +84,7 @@ public abstract class OncePerRequestFilter extends GenericFilterBean {
 	 * attribute is already there.
 	 * @see #getAlreadyFilteredAttributeName
 	 * @see #shouldNotFilter
+	 * @see #shouldFilter
 	 * @see #doFilterInternal
 	 */
 	@Override
@@ -109,7 +111,7 @@ public abstract class OncePerRequestFilter extends GenericFilterBean {
 			// Proceed without invoking this filter...
 			filterChain.doFilter(request, response);
 		}
-		else {
+		else if (shouldFilter(httpRequest)) {
 			// Do invoke this filter...
 			request.setAttribute(alreadyFilteredAttributeName, Boolean.TRUE);
 			try {
@@ -171,6 +173,24 @@ public abstract class OncePerRequestFilter extends GenericFilterBean {
 			name = getClass().getName();
 		}
 		return name + ALREADY_FILTERED_SUFFIX;
+	}
+
+	/**
+	 * Can be overridden in subclasses for custom filtering control,
+	 * returning {@code true} to allow filtering of the given request.
+	 * <p>This method is called after {@link #shouldNotFilter(HttpServletRequest)}
+	 * and only if that method returns {@code false}. Both methods provide
+	 * complementary ways to control filter execution.
+	 * <p>The default implementation always returns {@code true}, meaning
+	 * all requests will be filtered unless explicitly excluded by
+	 * {@link #shouldNotFilter(HttpServletRequest)}.
+	 * @param request current HTTP request
+	 * @return whether the given request should be filtered
+	 * @throws ServletException in case of errors
+	 * @since 7.0
+	 */
+	protected boolean shouldFilter(HttpServletRequest request) throws ServletException {
+		return true;
 	}
 
 	/**

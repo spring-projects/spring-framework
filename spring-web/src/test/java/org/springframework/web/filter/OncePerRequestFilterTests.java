@@ -24,9 +24,13 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.web.testfixture.servlet.MockFilterChain;
 import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
@@ -38,6 +42,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * Tests for {@link OncePerRequestFilter}.
  *
  * @author Rossen Stoyanchev
+ * @author Simone Conte
  * @since 5.1.9
  */
 class OncePerRequestFilterTests {
@@ -114,6 +119,50 @@ class OncePerRequestFilterTests {
 		assertThat(this.filter.didFilterNestedErrorDispatch).isTrue();
 	}
 
+	@ParameterizedTest
+	@MethodSource
+	public void shouldNotFilterForUri(String uri, boolean shouldFilter) throws ServletException, IOException {
+		ShouldNotFilterRequestFilter filter = new ShouldNotFilterRequestFilter();
+
+		this.request.setRequestURI(uri);
+
+		filter.doFilter(this.request, new MockHttpServletResponse(), this.filterChain);
+
+		assertThat(filter.didFilter).isEqualTo(shouldFilter);
+	}
+
+	static Stream<Arguments> shouldNotFilterForUri() {
+		return Stream.of(
+				Arguments.of("/skip", false),
+				Arguments.of("/skip/something", false),
+				Arguments.of("", true),
+				Arguments.of("/", true),
+				Arguments.of("/do_not_skip", true)
+		);
+	}
+
+	@ParameterizedTest
+	@MethodSource
+	public void shouldFilterForUri(String uri, boolean shouldFilter) throws ServletException, IOException {
+		ShouldFilterRequestFilter filter = new ShouldFilterRequestFilter();
+
+		this.request.setRequestURI(uri);
+
+		filter.doFilter(this.request, new MockHttpServletResponse(), this.filterChain);
+
+		assertThat(filter.didFilter).isEqualTo(shouldFilter);
+	}
+
+	static Stream<Arguments> shouldFilterForUri() {
+		return Stream.of(
+				Arguments.of("/skip", false),
+				Arguments.of("/skip/something", false),
+				Arguments.of("", false),
+				Arguments.of("/", false),
+				Arguments.of("/do_not_skip", true)
+		);
+	}
+
 	private void initErrorDispatch() {
 		this.request.setDispatcherType(DispatcherType.ERROR);
 		this.request.setAttribute(WebUtils.ERROR_REQUEST_URI_ATTRIBUTE, "/error");
@@ -171,6 +220,40 @@ class OncePerRequestFilterTests {
 
 			this.didFilterNestedErrorDispatch = true;
 			super.doFilterNestedErrorDispatch(request, response, filterChain);
+		}
+	}
+
+	private static class ShouldNotFilterRequestFilter extends OncePerRequestFilter {
+
+		private boolean didFilter;
+
+		@Override
+		protected boolean shouldNotFilter(HttpServletRequest request) {
+			return request.getRequestURI().startsWith("/skip");
+		}
+
+		@Override
+		protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
+				FilterChain filterChain) {
+
+			this.didFilter = true;
+		}
+	}
+
+	private static class ShouldFilterRequestFilter extends OncePerRequestFilter {
+
+		private boolean didFilter;
+
+		@Override
+		protected boolean shouldFilter(HttpServletRequest request) {
+			return request.getRequestURI().startsWith("/do_not_skip");
+		}
+
+		@Override
+		protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
+				FilterChain filterChain) {
+
+			this.didFilter = true;
 		}
 	}
 
