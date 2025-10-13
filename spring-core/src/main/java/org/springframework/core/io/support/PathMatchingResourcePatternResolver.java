@@ -858,6 +858,8 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 				Set<Resource> result = new LinkedHashSet<>(64);
 				// Clean root entry path to match jar entries format without "!" separators
 				rootEntryPath = rootEntryPath.replace(ResourceUtils.JAR_URL_SEPARATOR, "/");
+				// Normalize to match cached entries (which have already been normalized)
+				rootEntryPath = normalizeJarEntryPath(rootEntryPath);
 				// Search sorted entries from first entry with rootEntryPath prefix
 				boolean rootEntryPathFound = false;
 				for (String entryPath : entriesCache.tailSet(rootEntryPath, false)) {
@@ -936,11 +938,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 			NavigableSet<String> entriesCache = new TreeSet<>();
 			Iterator<String> entryIterator = jarFile.stream().map(JarEntry::getName).sorted().iterator();
 			while (entryIterator.hasNext()) {
-				String entryPath = entryIterator.next();
-				int entrySeparatorIndex = entryPath.indexOf(ResourceUtils.JAR_URL_SEPARATOR);
-				if (entrySeparatorIndex >= 0) {
-					entryPath = entryPath.substring(entrySeparatorIndex + ResourceUtils.JAR_URL_SEPARATOR.length());
-				}
+				String entryPath = normalizeJarEntryPath(entryIterator.next());
 				entriesCache.add(entryPath);
 				if (entryPath.startsWith(rootEntryPath)) {
 					String relativePath = entryPath.substring(rootEntryPath.length());
@@ -978,6 +976,26 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 		else {
 			return new JarFile(jarFileUrl);
 		}
+	}
+
+	/**
+	 * Normalize a JAR entry path by stripping any prefixes that may prevent proper matching.
+	 * <p>This handles nested JAR separators and Spring Boot fat JAR structure where classes
+	 * are stored under {@code BOOT-INF/classes/}.
+	 * @param entryPath the raw JAR entry path to normalize
+	 * @return the normalized entry path suitable for pattern matching
+	 */
+	private String normalizeJarEntryPath(String entryPath) {
+		// Strip nested JAR separator if present
+		int entrySeparatorIndex = entryPath.indexOf(ResourceUtils.JAR_URL_SEPARATOR);
+		if (entrySeparatorIndex >= 0) {
+			entryPath = entryPath.substring(entrySeparatorIndex + ResourceUtils.JAR_URL_SEPARATOR.length());
+		}
+		// Strip Spring Boot fat JAR prefix (BOOT-INF/classes/)
+		if (entryPath.startsWith("BOOT-INF/classes/")) {
+			entryPath = entryPath.substring("BOOT-INF/classes/".length());
+		}
+		return entryPath;
 	}
 
 	/**
