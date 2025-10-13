@@ -134,7 +134,7 @@ public class DefaultPersistenceUnitManager
 
 	private final Set<String> persistenceUnitInfoNames = new HashSet<>();
 
-	private final Map<String, PersistenceUnitInfo> persistenceUnitInfos = new HashMap<>();
+	private final Map<String, SpringPersistenceUnitInfo> persistenceUnitInfos = new HashMap<>();
 
 
 	/**
@@ -620,26 +620,25 @@ public class DefaultPersistenceUnitManager
 
 
 	/**
-	 * Return the specified PersistenceUnitInfo from this manager's cache
-	 * of processed persistence units, keeping it in the cache (i.e. not
-	 * 'obtaining' it for use but rather just accessing it for post-processing).
+	 * Return the specified {@link MutablePersistenceUnitInfo} from this manager's cache
+	 * of processed persistence units, keeping it in the cache (i.e. not 'obtaining' it
+	 * for use but rather just accessing it for post-processing).
 	 * <p>This can be used in {@link #postProcessPersistenceUnitInfo} implementations,
 	 * detecting existing persistence units of the same name and potentially merging them.
 	 * @param persistenceUnitName the name of the desired persistence unit
 	 * @return the PersistenceUnitInfo in mutable form, or {@code null} if not available
 	 */
 	protected final @Nullable MutablePersistenceUnitInfo getPersistenceUnitInfo(String persistenceUnitName) {
-		PersistenceUnitInfo pui = this.persistenceUnitInfos.get(persistenceUnitName);
-		return (MutablePersistenceUnitInfo) pui;
+		return this.persistenceUnitInfos.get(persistenceUnitName);
 	}
 
 	/**
-	 * Hook method allowing subclasses to customize each PersistenceUnitInfo.
+	 * Hook method allowing subclasses to customize each {@link MutablePersistenceUnitInfo}.
 	 * <p>The default implementation delegates to all registered PersistenceUnitPostProcessors.
 	 * It is usually preferable to register further entity classes, jar files etc there
 	 * rather than in a subclass of this manager, to be able to reuse the post-processors.
-	 * @param pui the chosen PersistenceUnitInfo, as read from {@code persistence.xml}.
-	 * Passed in as MutablePersistenceUnitInfo.
+	 * @param pui the chosen persistence unit configuration, as read from
+	 * {@code persistence.xml}. Passed in as MutablePersistenceUnitInfo.
 	 * @see #setPersistenceUnitPostProcessors
 	 */
 	protected void postProcessPersistenceUnitInfo(MutablePersistenceUnitInfo pui) {
@@ -674,14 +673,14 @@ public class DefaultPersistenceUnitManager
 		if (this.persistenceUnitInfos.size() > 1 && this.defaultPersistenceUnitName != null) {
 			return obtainPersistenceUnitInfo(this.defaultPersistenceUnitName);
 		}
-		PersistenceUnitInfo pui = this.persistenceUnitInfos.values().iterator().next();
+		SpringPersistenceUnitInfo pui = this.persistenceUnitInfos.values().iterator().next();
 		this.persistenceUnitInfos.clear();
-		return pui;
+		return pui.toSmartPersistenceUnitInfo();
 	}
 
 	@Override
 	public PersistenceUnitInfo obtainPersistenceUnitInfo(String persistenceUnitName) {
-		PersistenceUnitInfo pui = this.persistenceUnitInfos.remove(persistenceUnitName);
+		SpringPersistenceUnitInfo pui = this.persistenceUnitInfos.remove(persistenceUnitName);
 		if (pui == null) {
 			if (!this.persistenceUnitInfoNames.contains(persistenceUnitName)) {
 				throw new IllegalArgumentException(
@@ -692,7 +691,7 @@ public class DefaultPersistenceUnitManager
 						"Persistence unit with name '" + persistenceUnitName + "' already obtained");
 			}
 		}
-		return pui;
+		return pui.toSmartPersistenceUnitInfo();
 	}
 
 }

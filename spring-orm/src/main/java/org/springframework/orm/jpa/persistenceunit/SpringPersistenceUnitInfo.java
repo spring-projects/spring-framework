@@ -16,6 +16,11 @@
 
 package org.springframework.orm.jpa.persistenceunit;
 
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
+
+import jakarta.persistence.PersistenceUnitTransactionType;
 import jakarta.persistence.spi.ClassTransformer;
 import org.apache.commons.logging.LogFactory;
 import org.jspecify.annotations.Nullable;
@@ -24,6 +29,7 @@ import org.springframework.core.DecoratingClassLoader;
 import org.springframework.instrument.classloading.LoadTimeWeaver;
 import org.springframework.instrument.classloading.SimpleThrowawayClassLoader;
 import org.springframework.util.Assert;
+import org.springframework.util.ReflectionUtils;
 
 /**
  * Subclass of {@link MutablePersistenceUnitInfo} that adds instrumentation hooks based on
@@ -67,7 +73,6 @@ class SpringPersistenceUnitInfo extends MutablePersistenceUnitInfo {
 	 * This implementation returns the LoadTimeWeaver's instrumentable ClassLoader,
 	 * if specified.
 	 */
-	@Override
 	public @Nullable ClassLoader getClassLoader() {
 		return this.classLoader;
 	}
@@ -75,7 +80,6 @@ class SpringPersistenceUnitInfo extends MutablePersistenceUnitInfo {
 	/**
 	 * This implementation delegates to the LoadTimeWeaver, if specified.
 	 */
-	@Override
 	public void addTransformer(ClassTransformer classTransformer) {
 		if (this.loadTimeWeaver != null) {
 			this.loadTimeWeaver.addTransformer(new ClassFileTransformerAdapter(classTransformer));
@@ -88,7 +92,6 @@ class SpringPersistenceUnitInfo extends MutablePersistenceUnitInfo {
 	/**
 	 * This implementation delegates to the LoadTimeWeaver, if specified.
 	 */
-	@Override
 	public ClassLoader getNewTempClassLoader() {
 		ClassLoader tcl = (this.loadTimeWeaver != null ? this.loadTimeWeaver.getThrowawayClassLoader() :
 				new SimpleThrowawayClassLoader(this.classLoader));
@@ -97,6 +100,44 @@ class SpringPersistenceUnitInfo extends MutablePersistenceUnitInfo {
 			dcl.excludePackage(packageToExclude);
 		}
 		return tcl;
+	}
+
+
+	/**
+	 * Expose a {@link SmartPersistenceUnitInfo} proxy for the persistence unit
+	 * configuration in this {@link MutablePersistenceUnitInfo} instance.
+	 * @since 7.0
+	 */
+	public SmartPersistenceUnitInfo toSmartPersistenceUnitInfo() {
+		return (SmartPersistenceUnitInfo) Proxy.newProxyInstance(getClass().getClassLoader(),
+				new Class<?>[] {SmartPersistenceUnitInfo.class},
+				new JpaPersistenceUnitInfoInvocationHandler());
+	}
+
+
+	private class JpaPersistenceUnitInfoInvocationHandler implements InvocationHandler {
+
+		@SuppressWarnings("unchecked")
+		@Override
+		public @Nullable Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+			// Fast path for SmartPersistenceUnitInfo JTA check
+			if (method.getName().equals("isConfiguredForJta")) {
+				return (getTransactionType() == PersistenceUnitTransactionType.JTA);
+			}
+
+			// Regular methods to be delegated to SpringPersistenceUnitInfo
+			Method targetMethod = SpringPersistenceUnitInfo.class.getMethod(method.getName(), method.getParameterTypes());
+			ReflectionUtils.makeAccessible(targetMethod);
+			Object returnValue = ReflectionUtils.invokeMethod(targetMethod, SpringPersistenceUnitInfo.this, args);
+
+			// Special handling for JPA 3.2 vs 4.0 getTransactionType() return type
+			Class<?> returnType = method.getReturnType();
+			if (returnType.isEnum() && returnValue != null && !returnType.isInstance(returnValue)) {
+				return Enum.valueOf((Class<Enum>) returnType, returnValue.toString());
+			}
+
+			return returnValue;
+		}
 	}
 
 }

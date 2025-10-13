@@ -25,9 +25,9 @@ import jakarta.persistence.EntityTransaction;
 import jakarta.persistence.OptimisticLockException;
 import jakarta.persistence.PersistenceConfiguration;
 import jakarta.persistence.PersistenceException;
+import jakarta.persistence.PersistenceUnitTransactionType;
 import jakarta.persistence.spi.PersistenceProvider;
 import jakarta.persistence.spi.PersistenceUnitInfo;
-import jakarta.persistence.spi.PersistenceUnitTransactionType;
 import jakarta.persistence.spi.ProviderUtil;
 import org.junit.jupiter.api.Test;
 
@@ -36,7 +36,7 @@ import org.springframework.core.testfixture.io.SerializationTestUtils;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.instrument.classloading.InstrumentationLoadTimeWeaver;
-import org.springframework.orm.jpa.persistenceunit.MutablePersistenceUnitInfo;
+import org.springframework.orm.jpa.persistenceunit.PersistenceUnitPostProcessor;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.interceptor.DefaultTransactionAttribute;
 
@@ -215,9 +215,8 @@ class LocalContainerEntityManagerFactoryBeanTests extends AbstractEntityManagerF
 
 		given(mockEmf.createEntityManager()).willReturn(sharedEm, mockEm);
 
-		LocalContainerEntityManagerFactoryBean cefb = parseValidPersistenceUnit();
-		MutablePersistenceUnitInfo pui = ((MutablePersistenceUnitInfo) cefb.getPersistenceUnitInfo());
-		pui.setTransactionType(PersistenceUnitTransactionType.JTA);
+		LocalContainerEntityManagerFactoryBean cefb = parseValidPersistenceUnit(
+				pui -> pui.setTransactionType(PersistenceUnitTransactionType.JTA));
 
 		JpaTransactionManager jpatm = new JpaTransactionManager();
 		jpatm.setEntityManagerFactory(cefb.getObject());
@@ -241,10 +240,12 @@ class LocalContainerEntityManagerFactoryBeanTests extends AbstractEntityManagerF
 		verify(mockEmf).close();
 	}
 
-	public LocalContainerEntityManagerFactoryBean parseValidPersistenceUnit() throws Exception {
+	public LocalContainerEntityManagerFactoryBean parseValidPersistenceUnit(
+			PersistenceUnitPostProcessor... postProcessors) {
+
 		return createEntityManagerFactoryBean(
 				"org/springframework/orm/jpa/domain/persistence.xml", null,
-				"Person");
+				"Person", postProcessors);
 	}
 
 	@Test
@@ -255,7 +256,8 @@ class LocalContainerEntityManagerFactoryBeanTests extends AbstractEntityManagerF
 
 	@SuppressWarnings("unchecked")
 	protected LocalContainerEntityManagerFactoryBean createEntityManagerFactoryBean(
-			String persistenceXml, Properties props, String entityManagerName) {
+			String persistenceXml, Properties props, String entityManagerName,
+			PersistenceUnitPostProcessor... postProcessors) {
 
 		// This will be set by DummyPersistenceProvider
 		actualPui = null;
@@ -270,6 +272,7 @@ class LocalContainerEntityManagerFactoryBeanTests extends AbstractEntityManagerF
 		}
 		containerEmfb.setLoadTimeWeaver(new InstrumentationLoadTimeWeaver());
 		containerEmfb.setPersistenceXmlLocation(persistenceXml);
+		containerEmfb.setPersistenceUnitPostProcessors(postProcessors);
 		containerEmfb.afterPropertiesSet();
 
 		assertThat(actualPui.getPersistenceUnitName()).isEqualTo(entityManagerName);
