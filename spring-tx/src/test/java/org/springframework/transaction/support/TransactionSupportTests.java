@@ -233,6 +233,7 @@ class TransactionSupportTests {
 	}
 
 	@Test
+	@SuppressWarnings("deprecation")
 	void transactionTemplate() {
 		TestTransactionManager tm = new TestTransactionManager(false, true);
 		TransactionTemplate template = new TransactionTemplate(tm);
@@ -249,6 +250,7 @@ class TransactionSupportTests {
 	}
 
 	@Test
+	@SuppressWarnings("deprecation")
 	void transactionTemplateWithCallbackPreference() {
 		MockCallbackPreferringTransactionManager ptm = new MockCallbackPreferringTransactionManager();
 		TransactionTemplate template = new TransactionTemplate(ptm);
@@ -263,6 +265,7 @@ class TransactionSupportTests {
 	}
 
 	@Test
+	@SuppressWarnings("deprecation")
 	void transactionTemplateWithException() {
 		TestTransactionManager tm = new TestTransactionManager(false, true);
 		TransactionTemplate template = new TransactionTemplate(tm);
@@ -281,10 +284,10 @@ class TransactionSupportTests {
 		assertThat(tm.rollbackOnly).as("no rollbackOnly").isFalse();
 	}
 
-	@SuppressWarnings("serial")
 	@Test
 	void transactionTemplateWithRollbackException() {
 		final TransactionSystemException tex = new TransactionSystemException("system exception");
+		@SuppressWarnings("serial")
 		TestTransactionManager tm = new TestTransactionManager(false, true) {
 			@Override
 			protected void doRollback(DefaultTransactionStatus status) {
