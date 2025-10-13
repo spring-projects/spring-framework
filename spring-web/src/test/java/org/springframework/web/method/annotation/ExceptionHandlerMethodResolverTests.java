@@ -101,14 +101,14 @@ class ExceptionHandlerMethodResolverTests {
 
 	@Test
 	void shouldThrowExceptionWhenAmbiguousExceptionMapping() {
-		assertThatIllegalStateException().isThrownBy(() ->
-				new ExceptionHandlerMethodResolver(AmbiguousController.class));
+		assertThatIllegalStateException()
+				.isThrownBy(() -> new ExceptionHandlerMethodResolver(AmbiguousController.class));
 	}
 
 	@Test
 	void shouldThrowExceptionWhenNoExceptionMapping() {
-		assertThatIllegalStateException().isThrownBy(() ->
-				new ExceptionHandlerMethodResolver(NoExceptionController.class));
+		assertThatIllegalStateException()
+				.isThrownBy(() -> new ExceptionHandlerMethodResolver(NoExceptionController.class));
 	}
 
 	@Test  // gh-35587
@@ -139,15 +139,15 @@ class ExceptionHandlerMethodResolverTests {
 
 	@Test
 	void shouldThrowExceptionWhenInvalidMediaTypeMapping() {
-		assertThatIllegalStateException().isThrownBy(() ->
-				new ExceptionHandlerMethodResolver(InvalidMediaTypeController.class))
+		assertThatIllegalStateException()
+				.isThrownBy(() -> new ExceptionHandlerMethodResolver(InvalidMediaTypeController.class))
 				.withMessageContaining("Invalid media type [invalid-mediatype] declared on @ExceptionHandler");
 	}
 
 	@Test
 	void shouldThrowExceptionWhenAmbiguousMediaTypeMapping() {
-		assertThatIllegalStateException().isThrownBy(() ->
-				new ExceptionHandlerMethodResolver(AmbiguousMediaTypeController.class))
+		assertThatIllegalStateException()
+				.isThrownBy(() -> new ExceptionHandlerMethodResolver(AmbiguousMediaTypeController.class))
 				.withMessageContaining("Ambiguous @ExceptionHandler method mapped for [ExceptionHandler{exceptionType=java.lang.IllegalArgumentException, mediaType=application/json}]")
 				.withMessageContaining("AmbiguousMediaTypeController.handleJson()")
 				.withMessageContaining("AmbiguousMediaTypeController.handleJsonToo()");
