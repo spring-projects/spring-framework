@@ -190,7 +190,7 @@ public abstract class JdbcTransactionObjectSupport implements SavepointManager, 
 			}
 			// ignore Microsoft SQLServerException: This operation is not supported.
 			String msg = ex.getMessage();
-			if (msg == null || !msg.contains("not supported")) {
+			if (msg == null || (!msg.contains("not supported") && !msg.contains("3B001"))) {
 				throw new TransactionSystemException("Could not explicitly release JDBC savepoint", ex);
 			}
 		}
