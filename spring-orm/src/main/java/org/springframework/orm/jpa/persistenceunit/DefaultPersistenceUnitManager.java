@@ -675,7 +675,7 @@ public class DefaultPersistenceUnitManager
 		}
 		SpringPersistenceUnitInfo pui = this.persistenceUnitInfos.values().iterator().next();
 		this.persistenceUnitInfos.clear();
-		return pui.toSmartPersistenceUnitInfo();
+		return pui.asStandardPersistenceUnitInfo();
 	}
 
 	@Override
@@ -691,7 +691,7 @@ public class DefaultPersistenceUnitManager
 						"Persistence unit with name '" + persistenceUnitName + "' already obtained");
 			}
 		}
-		return pui.toSmartPersistenceUnitInfo();
+		return pui.asStandardPersistenceUnitInfo();
 	}
 
 }

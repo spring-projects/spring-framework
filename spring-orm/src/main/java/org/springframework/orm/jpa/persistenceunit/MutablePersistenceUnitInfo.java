@@ -34,6 +34,7 @@ import org.springframework.util.Assert;
  * Spring's mutable equivalent of the JPA
  * {@link jakarta.persistence.spi.PersistenceUnitInfo} interface,
  * used to bootstrap an {@code EntityManagerFactory} in a container.
+ * This is the type exposed to {@link PersistenceUnitPostProcessor}.
  *
  * <p>This implementation is largely a JavaBean, offering mutators
  * for all standard {@code PersistenceUnitInfo} properties.
@@ -42,10 +43,16 @@ import org.springframework.util.Assert;
  * (for achieving compatibility between JPA 3.2 and 4.0 and for preventing
  * late mutation attempts through {@code PersistenceUnitInfo} downcasts).
  *
+ * <p>For custom bootstrapping purposes, use {@link SpringPersistenceUnitInfo}
+ * instead, turning it into a {@code jakarta.persistence.spi.PersistenceUnitInfo}
+ * through {@link SpringPersistenceUnitInfo#asStandardPersistenceUnitInfo()}.
+ *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Costin Leau
  * @since 2.0
+ * @see PersistenceUnitPostProcessor#postProcessPersistenceUnitInfo
+ * @see SpringPersistenceUnitInfo#asStandardPersistenceUnitInfo()
  */
 public class MutablePersistenceUnitInfo {
 

@@ -22,6 +22,7 @@ import java.lang.reflect.Proxy;
 
 import jakarta.persistence.PersistenceUnitTransactionType;
 import jakarta.persistence.spi.ClassTransformer;
+import jakarta.persistence.spi.PersistenceUnitInfo;
 import org.apache.commons.logging.LogFactory;
 import org.jspecify.annotations.Nullable;
 
@@ -35,15 +36,20 @@ import org.springframework.util.ReflectionUtils;
  * Subclass of {@link MutablePersistenceUnitInfo} that adds instrumentation hooks based on
  * Spring's {@link org.springframework.instrument.classloading.LoadTimeWeaver} abstraction.
  *
- * <p>This class is restricted to package visibility, in contrast to its superclass.
+ * <p>As of 7.0, this class is public for custom bootstrapping purposes. A fully configured
+ * {@code SpringPersistenceUnitInfo} instance can be turned into a standard JPA descriptor
+ * through {@link #asStandardPersistenceUnitInfo} (returning a JPA 3.2/4.0 adapted proxy).
+ *
+ * <p>Note: For post-processing within a {@code LocalContainerEntityManagerFactoryBean}
+ * bootstrap, the base type {@code MutablePersistenceUnitInfo} is entirely sufficient.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Costin Leau
- * @since 2.0
- * @see PersistenceUnitManager
+ * @since 7.0
+ * @see DefaultPersistenceUnitManager
  */
-class SpringPersistenceUnitInfo extends MutablePersistenceUnitInfo {
+public class SpringPersistenceUnitInfo extends MutablePersistenceUnitInfo {
 
 	private @Nullable LoadTimeWeaver loadTimeWeaver;
 
@@ -51,10 +57,35 @@ class SpringPersistenceUnitInfo extends MutablePersistenceUnitInfo {
 
 
 	/**
+	 * Construct a new SpringPersistenceUnitInfo for custom purposes.
+	 * @param loadTimeWeaver the LoadTimeWeaver to use
+	 */
+	public SpringPersistenceUnitInfo(LoadTimeWeaver loadTimeWeaver) {
+		init(loadTimeWeaver);
+	}
+
+	/**
+	 * Construct a new SpringPersistenceUnitInfo for custom purposes.
+	 * @param classLoader the ClassLoader to use
+	 */
+	public SpringPersistenceUnitInfo(ClassLoader classLoader) {
+		init(classLoader);
+	}
+
+	/**
+	 * Construct a SpringPersistenceUnitInfo for internal purposes.
+	 * @see #init(LoadTimeWeaver)
+	 * @see #init(ClassLoader)
+	 */
+	SpringPersistenceUnitInfo() {
+	}
+
+
+	/**
 	 * Initialize this PersistenceUnitInfo with the LoadTimeWeaver SPI interface
 	 * used by Spring to add instrumentation to the current class loader.
 	 */
-	public void init(LoadTimeWeaver loadTimeWeaver) {
+	void init(LoadTimeWeaver loadTimeWeaver) {
 		Assert.notNull(loadTimeWeaver, "LoadTimeWeaver must not be null");
 		this.loadTimeWeaver = loadTimeWeaver;
 		this.classLoader = loadTimeWeaver.getInstrumentableClassLoader();
@@ -64,10 +95,9 @@ class SpringPersistenceUnitInfo extends MutablePersistenceUnitInfo {
 	 * Initialize this PersistenceUnitInfo with the current class loader
 	 * (instead of with a LoadTimeWeaver).
 	 */
-	public void init(@Nullable ClassLoader classLoader) {
+	void init(@Nullable ClassLoader classLoader) {
 		this.classLoader = classLoader;
 	}
-
 
 	/**
 	 * This implementation returns the LoadTimeWeaver's instrumentable ClassLoader,
@@ -102,20 +132,26 @@ class SpringPersistenceUnitInfo extends MutablePersistenceUnitInfo {
 		return tcl;
 	}
 
-
 	/**
-	 * Expose a {@link SmartPersistenceUnitInfo} proxy for the persistence unit
-	 * configuration in this {@link MutablePersistenceUnitInfo} instance.
-	 * @since 7.0
+	 * Expose a standard {@code jakarta.persistence.spi.PersistenceUnitInfo} proxy for the
+	 * persistence unit configuration in this {@code SpringPersistenceUnitInfo} instance.
+	 * <p>The returned proxy implements {@code jakarta.persistence.spi.PersistenceUnitInfo}
+	 * (and its extended variant {@link SmartPersistenceUnitInfo}) for use with persistence
+	 * provider bootstrapping. Note that the returned proxy is effectively unmodifiable and
+	 * cannot be downcast to {@code Mutable/SpringPersistenceUnitInfo}.
 	 */
-	public SmartPersistenceUnitInfo toSmartPersistenceUnitInfo() {
-		return (SmartPersistenceUnitInfo) Proxy.newProxyInstance(getClass().getClassLoader(),
+	public PersistenceUnitInfo asStandardPersistenceUnitInfo() {
+		return (PersistenceUnitInfo) Proxy.newProxyInstance(getClass().getClassLoader(),
 				new Class<?>[] {SmartPersistenceUnitInfo.class},
-				new JpaPersistenceUnitInfoInvocationHandler());
+				new SmartPersistenceUnitInfoInvocationHandler());
 	}
 
 
-	private class JpaPersistenceUnitInfoInvocationHandler implements InvocationHandler {
+	/**
+	 * Invocation handler for a JPA-compliant {@link SmartPersistenceUnitInfo} proxy,
+	 * delegating to the corresponding methods on {@link SpringPersistenceUnitInfo}.
+	 */
+	private class SmartPersistenceUnitInfoInvocationHandler implements InvocationHandler {
 
 		@SuppressWarnings("unchecked")
 		@Override
@@ -127,7 +163,6 @@ class SpringPersistenceUnitInfo extends MutablePersistenceUnitInfo {
 
 			// Regular methods to be delegated to SpringPersistenceUnitInfo
 			Method targetMethod = SpringPersistenceUnitInfo.class.getMethod(method.getName(), method.getParameterTypes());
-			ReflectionUtils.makeAccessible(targetMethod);
 			Object returnValue = ReflectionUtils.invokeMethod(targetMethod, SpringPersistenceUnitInfo.this, args);
 
 			// Special handling for JPA 3.2 vs 4.0 getTransactionType() return type
