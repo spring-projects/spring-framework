@@ -175,14 +175,18 @@ public abstract class AbstractCharSequenceDecoder<T extends CharSequence> extend
 	public final T decode(DataBuffer dataBuffer, ResolvableType elementType,
 			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
-		Charset charset = getCharset(mimeType);
-		T value = decodeInternal(dataBuffer, charset);
-		DataBufferUtils.release(dataBuffer);
-		LogFormatUtils.traceDebug(logger, traceOn -> {
-			String formatted = LogFormatUtils.formatValue(value, !traceOn);
-			return Hints.getLogPrefix(hints) + "Decoded " + formatted;
-		});
-		return value;
+		try {
+			Charset charset = getCharset(mimeType);
+			T value = decodeInternal(dataBuffer, charset);
+			LogFormatUtils.traceDebug(logger, traceOn -> {
+				String formatted = LogFormatUtils.formatValue(value, !traceOn);
+				return Hints.getLogPrefix(hints) + "Decoded " + formatted;
+			});
+			return value;
+		}
+		finally {
+			DataBufferUtils.release(dataBuffer);
+		}
 	}
 
 	private Charset getCharset(@Nullable MimeType mimeType) {
