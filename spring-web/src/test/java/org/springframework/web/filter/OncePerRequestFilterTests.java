@@ -40,6 +40,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 
 /**
  * Tests for {@link OncePerRequestFilter}.
@@ -54,6 +55,8 @@ class OncePerRequestFilterTests {
 
 	private MockHttpServletRequest request;
 
+	private MockHttpServletResponse response = new MockHttpServletResponse();
+
 	private MockFilterChain filterChain;
 
 
@@ -64,9 +67,17 @@ class OncePerRequestFilterTests {
 		this.request.setScheme("http");
 		this.request.setServerName("localhost");
 		this.request.setServerPort(80);
-		this.filterChain = new MockFilterChain(new HttpServlet() {});
+		this.filterChain = spy(new MockFilterChain(new HttpServlet() {}));
 	}
 
+	@Test
+	void filterInternal() throws ServletException, IOException {
+		this.filter.doFilter(this.request, this.response, this.filterChain);
+
+		assertThat(this.filter.didFilter).isTrue();
+		assertThat(this.filter.didFilterNestedErrorDispatch).isFalse();
+		verifyNoInteractions(this.filterChain);
+	}
 
 	@Test
 	void filterOnce() throws ServletException, IOException {
@@ -74,17 +85,19 @@ class OncePerRequestFilterTests {
 		// Already filtered
 		this.request.setAttribute(this.filter.getAlreadyFilteredAttributeName(), Boolean.TRUE);
 
-		this.filter.doFilter(this.request, new MockHttpServletResponse(), this.filterChain);
+		this.filter.doFilter(this.request, this.response, this.filterChain);
 		assertThat(this.filter.didFilter).isFalse();
 		assertThat(this.filter.didFilterNestedErrorDispatch).isFalse();
+		verify(this.filterChain).doFilter(this.request, this.response);
 
 		// Remove already filtered
 		this.request.removeAttribute(this.filter.getAlreadyFilteredAttributeName());
 		this.filter.reset();
 
-		this.filter.doFilter(this.request, new MockHttpServletResponse(), this.filterChain);
+		this.filter.doFilter(this.request, this.response, this.filterChain);
 		assertThat(this.filter.didFilter).isTrue();
 		assertThat(this.filter.didFilterNestedErrorDispatch).isFalse();
+		verify(this.filterChain).doFilter(this.request, this.response);
 	}
 
 	@Test
@@ -92,9 +105,10 @@ class OncePerRequestFilterTests {
 
 		initErrorDispatch();
 
-		this.filter.doFilter(this.request, new MockHttpServletResponse(), this.filterChain);
+		this.filter.doFilter(this.request, this.response, this.filterChain);
 		assertThat(this.filter.didFilter).isFalse();
 		assertThat(this.filter.didFilterNestedErrorDispatch).isFalse();
+		verify(this.filterChain).doFilter(this.request, this.response);
 	}
 
 	@Test
@@ -103,9 +117,10 @@ class OncePerRequestFilterTests {
 		initErrorDispatch();
 		this.request.setAttribute(this.filter.getAlreadyFilteredAttributeName(), Boolean.TRUE);
 
-		this.filter.doFilter(this.request, new MockHttpServletResponse(), this.filterChain);
+		this.filter.doFilter(this.request, this.response, this.filterChain);
 		assertThat(this.filter.didFilter).isFalse();
 		assertThat(this.filter.didFilterNestedErrorDispatch).isFalse();
+		verify(this.filterChain).doFilter(this.request, this.response);
 	}
 
 	@Test // gh-23196
@@ -117,25 +132,23 @@ class OncePerRequestFilterTests {
 		this.request.setAttribute(this.filter.getAlreadyFilteredAttributeName(), Boolean.TRUE);
 		initErrorDispatch();
 
-		this.filter.doFilter(this.request, new MockHttpServletResponse(), this.filterChain);
+		this.filter.doFilter(this.request, this.response, this.filterChain);
 		assertThat(this.filter.didFilter).isFalse();
 		assertThat(this.filter.didFilterNestedErrorDispatch).isTrue();
+		verify(this.filterChain).doFilter(this.request, this.response);
 	}
 
 	@ParameterizedTest
 	@MethodSource
 	public void shouldNotFilterForUri(String uri, boolean shouldFilterInternal) throws ServletException, IOException {
-		MockHttpServletResponse response = new MockHttpServletResponse();
-		MockFilterChain filterChain = spy(new MockFilterChain(new HttpServlet() {}));
-
 		ShouldNotFilterRequestFilter filter = new ShouldNotFilterRequestFilter();
 
 		this.request.setRequestURI(uri);
 
-		filter.doFilter(this.request, response, filterChain);
+		filter.doFilter(this.request, this.response, this.filterChain);
 
 		assertThat(filter.didFilter).isEqualTo(shouldFilterInternal);
-		verify(filterChain, times(shouldFilterInternal ? 0 : 1)).doFilter(this.request, response);
+		verify(this.filterChain, times(shouldFilterInternal ? 0 : 1)).doFilter(this.request, this.response);
 	}
 
 	static Stream<Arguments> shouldNotFilterForUri() {
@@ -153,17 +166,14 @@ class OncePerRequestFilterTests {
 	@ParameterizedTest
 	@MethodSource
 	public void shouldFilterForUri(String uri, boolean shouldFilterInternal) throws ServletException, IOException {
-		MockHttpServletResponse response = new MockHttpServletResponse();
-		MockFilterChain filterChain = spy(new MockFilterChain(new HttpServlet() {}));
-
 		ShouldFilterRequestFilter filter = new ShouldFilterRequestFilter();
 
 		this.request.setRequestURI(uri);
 
-		filter.doFilter(this.request, response, filterChain);
+		filter.doFilter(this.request, this.response, this.filterChain);
 
 		assertThat(filter.didFilter).isEqualTo(shouldFilterInternal);
-		verify(filterChain, times(shouldFilterInternal ? 0 : 1)).doFilter(this.request, response);
+		verify(this.filterChain, times(shouldFilterInternal ? 0 : 1)).doFilter(this.request, this.response);
 	}
 
 	static Stream<Arguments> shouldFilterForUri() {
