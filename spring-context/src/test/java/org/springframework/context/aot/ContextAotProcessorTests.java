@@ -113,7 +113,9 @@ class ContextAotProcessorTests {
 					Args = -H:Class=org.springframework.context.aot.ContextAotProcessorTests$SampleApplication \\
 					--report-unsupported-elements-at-runtime \\
 					--no-fallback \\
-					--install-exit-handlers
+					--install-exit-handlers \\
+					--future-defaults=all \\
+					--exact-reachability-metadata
 					""");
 		};
 	}
