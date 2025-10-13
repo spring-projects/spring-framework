@@ -187,6 +187,28 @@ public interface DataBuffer {
 	byte getByte(int index);
 
 	/**
+	 * Process a range of bytes from the current buffer using a
+	 * {@link ByteProcessor}.
+	 * @param index the index at which the processing will start
+	 * @param length the maximum number of bytes to be processed
+	 * @param processor the processor that consumes bytes
+	 * @return the position that was reached when processing was stopped,
+	 * or {@code -1} if the entire byte range was processed.
+	 * @throws IndexOutOfBoundsException when {@code index} is out of bounds
+	 * @since 6.2.12
+	 */
+	default int forEachByte(int index, int length, ByteProcessor processor) {
+		Assert.isTrue(length >= 0, "Length must be >= 0");
+		for (int position = index; position < index + length; position++) {
+			byte b = getByte(position);
+			if(!processor.process(b)) {
+				return position;
+			}
+		}
+		return -1;
+	}
+
+	/**
 	 * Read a single byte from the current reading position from this data buffer.
 	 * @return the byte at this buffer's current reading position
 	 */
@@ -529,6 +551,24 @@ public interface DataBuffer {
 
 		@Override
 		void close();
+	}
+
+	/**
+	 * Process a range of bytes one by one.
+	 * @since 6.2.12
+	 */
+	@FunctionalInterface
+	interface ByteProcessor {
+
+		/**
+		 * Process the given {@code byte} and indicate whether processing
+		 * should continue further.
+		 * @param b a byte from the {@link DataBuffer}
+		 * @return {@code true} if processing should continue,
+		 * or {@code false} if processing should stop at this element.
+		 */
+		boolean process(byte b);
+
 	}
 
 }
