@@ -25,12 +25,15 @@ import java.net.URI;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.security.Principal;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.TemporalAccessor;
+import java.util.*;
 import java.util.function.Consumer;
 
 import jakarta.servlet.ServletContext;
@@ -110,7 +113,7 @@ public abstract class AbstractMockHttpServletRequestBuilder<B extends AbstractMo
 
 	private @Nullable String contentType;
 
-	private final MultiValueMap<String, Object> headers = new LinkedMultiValueMap<>();
+	private final HttpHeaders headers = new HttpHeaders();
 
 	private final MultiValueMap<String, String> parameters = new LinkedMultiValueMap<>();
 
@@ -343,7 +346,13 @@ public abstract class AbstractMockHttpServletRequestBuilder<B extends AbstractMo
 	 * @param values one or more header values
 	 */
 	public B header(String name, Object... values) {
-		this.headers.addAll(name, Arrays.asList(values));
+		/*
+		TODO ask how it should behave if values is omitted. Currently the header is added with value
+		 'null'. But, usually 'null' means the header is not present. Add list with 1 null element?
+		*/
+		var stringValues =
+			Arrays.stream(values).map(AbstractMockHttpServletRequestBuilder::objectToString).toList();
+		this.headers.addAll(name, stringValues);
 		return self();
 	}
 
@@ -362,13 +371,12 @@ public abstract class AbstractMockHttpServletRequestBuilder<B extends AbstractMo
 	 * {@linkplain HttpHeaders#set(String, String) overwrite} existing header values,
 	 * {@linkplain HttpHeaders#remove(String) remove} values, or use any of the other
 	 * {@link HttpHeaders} methods.
-	 * @param headersConsumer a function that consumes the {@code HttpHeaders}
+	 * @param httpHeadersConsumer a function that consumes the {@code HttpHeaders}
 	 * @return this builder
 	 */
-	public B headers(Consumer<HttpHeaders> headersConsumer){
-		HttpHeaders httpHeaders = new HttpHeaders();
-		headersConsumer.accept(httpHeaders);
-		return headers(httpHeaders);
+	public B headers(Consumer<HttpHeaders> httpHeadersConsumer) {
+		httpHeadersConsumer.accept(this.headers);
+		return self();
 	}
 
 	/**
@@ -681,12 +689,12 @@ public abstract class AbstractMockHttpServletRequestBuilder<B extends AbstractMo
 			this.contentType = parentBuilder.contentType;
 		}
 
-		for (Map.Entry<String, List<Object>> entry : parentBuilder.headers.entrySet()) {
-			String headerName = entry.getKey();
-			if (!this.headers.containsKey(headerName)) {
-				this.headers.put(headerName, entry.getValue());
-			}
-		}
+		parentBuilder.headers.forEach(
+			(name, values) -> {
+				if (!this.headers.containsHeader(name)) {
+					this.headers.put(name, values);
+				}
+			});
 		for (Map.Entry<String, List<String>> entry : parentBuilder.parameters.entrySet()) {
 			String paramName = entry.getKey();
 			if (!this.parameters.containsKey(paramName)) {
@@ -758,6 +766,57 @@ public abstract class AbstractMockHttpServletRequestBuilder<B extends AbstractMo
 	}
 
 	/**
+	 * Convert an object to a RFC7231-compliant string when needed.
+	 *
+	 * @param o the object to convert
+	 * @return the object's {@code toString()} value by default; if {@code o} is a {@link TemporalAccessor},
+	 *         it is formatted to an RFC7231-compliant string.
+	 */
+	private static String objectToString(Object o) {
+		Assert.notNull(o, "'o' must not be null");
+		if (o instanceof TemporalAccessor ta) {
+			return temporalToString(ta);
+		} else {
+			return o.toString();
+		}
+	}
+
+	/**
+	 * Try to convert a temporal value to an RFC7231-compliant Internet Message Format (IMF-fixdate)
+	 * string (preferred pattern): {@code EEE, dd MMM yyyy HH:mm:ss zzz}.
+	 * <p>
+	 * This method supports {@link Instant}, {@link ZonedDateTime}, {@link OffsetDateTime},
+	 * {@link LocalDateTime}, {@link LocalDate}, and {@link Date}.
+	 * <p>
+	 * If an exact conversion cannot be performed, the object's {@code toString()} value is returned
+	 * as a fallback; that representation is typically ISO‑8601, which is not RFC7231 compliant.
+	 *
+	 * @param temporalAccessor the value to convert
+	 * @return an RFC7231-compliant string when possible, otherwise {@code TemporalAccessor.toString()}
+	 */
+	private static String temporalToString(TemporalAccessor temporalAccessor) {
+		Assert.notNull(temporalAccessor, "'temporalAccessor' must not be null");
+		var rfc7231 = DateTimeFormatter.RFC_1123_DATE_TIME;
+		var utc = ZoneOffset.UTC;
+
+		if (temporalAccessor instanceof Instant instant) {
+			return rfc7231.format(instant.atZone(utc));
+		} else if (temporalAccessor instanceof ZonedDateTime zonedDateTime) {
+			return  rfc7231.format(zonedDateTime.withZoneSameInstant(utc));
+		} else if (temporalAccessor instanceof OffsetDateTime offsetDateTime) {
+			return rfc7231.format(offsetDateTime.atZoneSameInstant(utc));
+		} else if (temporalAccessor instanceof LocalDateTime localDateTime) {
+			return rfc7231.format(localDateTime.atZone(utc));
+		} else if (temporalAccessor instanceof LocalDate localDate) {
+			return rfc7231.format(localDate.atStartOfDay(utc));
+		} else if(temporalAccessor instanceof Date date) {
+			return rfc7231.format(Instant.ofEpochMilli(date.getTime()).atZone(utc));
+		} else  {
+			return temporalAccessor.toString();
+		}
+	}
+
+	/**
 	 * Build a {@link MockHttpServletRequest}.
 	 */
 	@Override
@@ -817,15 +876,11 @@ public abstract class AbstractMockHttpServletRequestBuilder<B extends AbstractMo
 			httpHeaders.forEach((name, values) -> values.forEach(value -> this.headers.add(name, value)));
 		}
 
-		this.headers.forEach((name, values) -> {
-			for (Object value : values) {
-				request.addHeader(name, value);
-			}
-		});
+    	this.headers.forEach((name, values) -> values.forEach(value -> request.addHeader(name, value)));
 
-		if (!ObjectUtils.isEmpty(this.content) &&
-				!this.headers.containsKey(HttpHeaders.CONTENT_LENGTH) &&
-				!this.headers.containsKey(HttpHeaders.TRANSFER_ENCODING)) {
+		if (!ObjectUtils.isEmpty(this.content)
+			&& !this.headers.containsHeader(HttpHeaders.CONTENT_LENGTH)
+			&& !this.headers.containsHeader(HttpHeaders.TRANSFER_ENCODING)) {
 
 			request.addHeader(HttpHeaders.CONTENT_LENGTH, this.content.length);
 		}

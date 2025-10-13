@@ -19,6 +19,11 @@ package org.springframework.test.web.servlet.request;
 import java.io.IOException;
 import java.net.URI;
 import java.security.Principal;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -26,7 +31,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.function.Consumer;
 
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.http.Cookie;
@@ -546,17 +550,40 @@ class MockHttpServletRequestBuilderTests {
 
 	@Test
 	void headersConsumer() {
-		Consumer<HttpHeaders> httpHeadersConsumer = httpHeaders -> {
-			httpHeaders.setContentType(MediaType.APPLICATION_JSON);
-			httpHeaders.put("foo", Arrays.asList("bar", "baz"));
-		};
-		this.builder.headers(httpHeadersConsumer);
+		this.builder.header("X-Foo-String", "bar");
+		this.builder.header("X-Foo-Date", LocalDate.now());
+		this.builder.header("X-Foo-List-Int", List.of(1, 2, 3));
+
+		this.builder.headers(httpHeaders -> {
+			httpHeaders.put("X-Baz", Arrays.asList("qux", "quux"));
+			httpHeaders.remove("X-Foo-Date");
+		});
 
 		MockHttpServletRequest request = this.builder.buildRequest(this.servletContext);
-		List<String> headers = Collections.list(request.getHeaders("foo"));
+		List<String> headerNames = Collections.list(request.getHeaderNames());
 
-		assertThat(headers).containsExactly("bar", "baz");
-		assertThat(request.getHeader("Content-Type")).isEqualTo(MediaType.APPLICATION_JSON.toString());
+		assertThat(headerNames).containsExactly("X-Foo-String", "X-Foo-List-Int", "X-Baz");
+	}
+
+	@Test
+	void headersTemporal() {
+		this.builder.header(
+				"X-Foo",
+				Instant.parse("2024-03-01T00:00:00+01:00"),
+				ZonedDateTime.parse("2024-03-01T00:00:00+01:00"),
+				OffsetDateTime.parse("2024-03-01T00:00:00+01:00"),
+				LocalDateTime.of(2024, 2, 29, 23, 0, 0),
+				LocalDate.of(2024, 2, 29));
+
+		MockHttpServletRequest request = this.builder.buildRequest(this.servletContext);
+		List<String> headers = Collections.list(request.getHeaders("X-Foo"));
+
+		assertThat(headers).containsExactly(
+				"Thu, 29 Feb 2024 23:00:00 GMT",
+				"Thu, 29 Feb 2024 23:00:00 GMT",
+				"Thu, 29 Feb 2024 23:00:00 GMT",
+				"Thu, 29 Feb 2024 23:00:00 GMT",
+				"Thu, 29 Feb 2024 00:00:00 GMT");
 	}
 
 	@Test
