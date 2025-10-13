@@ -45,6 +45,7 @@ import kotlinx.coroutines.reactor.ReactorFlowKt;
 import org.jspecify.annotations.Nullable;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Hooks;
 import reactor.core.publisher.Mono;
 
 import org.springframework.util.Assert;
@@ -85,7 +86,9 @@ public abstract class CoroutinesUtils {
 
 	/**
 	 * Invoke a suspending function and convert it to {@link Mono} or {@link Flux}.
-	 * Uses an {@linkplain Dispatchers#getUnconfined() unconfined} dispatcher.
+	 * Uses an {@linkplain Dispatchers#getUnconfined() unconfined} dispatcher, augmented with
+	 * {@link PropagationContextElement} if
+	 * {@linkplain Hooks#isAutomaticContextPropagationEnabled() Reactor automatic context propagation} is enabled.
 	 * @param method the suspending function to invoke
 	 * @param target the target to invoke {@code method} on
 	 * @param args the function arguments. If the {@code Continuation} argument is specified as the last argument
@@ -94,7 +97,9 @@ public abstract class CoroutinesUtils {
 	 * @throws IllegalArgumentException if {@code method} is not a suspending function
 	 */
 	public static Publisher<?> invokeSuspendingFunction(Method method, Object target, @Nullable Object... args) {
-		return invokeSuspendingFunction(Dispatchers.getUnconfined(), method, target, args);
+		CoroutineContext context = Hooks.isAutomaticContextPropagationEnabled() ?
+				Dispatchers.getUnconfined().plus(new PropagationContextElement()) : Dispatchers.getUnconfined();
+		return invokeSuspendingFunction(context, method, target, args);
 	}
 
 	/**
