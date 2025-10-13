@@ -20,6 +20,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.BindException;
 import java.net.SocketException;
+import java.util.Set;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -110,6 +111,13 @@ class ExceptionHandlerMethodResolverTests {
 				new ExceptionHandlerMethodResolver(NoExceptionController.class));
 	}
 
+	@Test  // gh-35587
+	void shouldRetainOriginalOrderOfProducibleMediaTypes() {
+		ExceptionHandlerMethodResolver resolver = new ExceptionHandlerMethodResolver(MediaTypeController.class);
+		Set<MediaType> producibleTypes = resolver.resolveExceptionMapping(new IllegalArgumentException(), MediaType.TEXT_HTML).getProducibleTypes();
+		assertThat(MediaType.toString(producibleTypes)).isEqualTo("text/html, */*");
+	}
+
 	@Test
 	void shouldResolveMethodWithMediaType() {
 		ExceptionHandlerMethodResolver resolver = new ExceptionHandlerMethodResolver(MediaTypeController.class);
@@ -117,13 +125,6 @@ class ExceptionHandlerMethodResolverTests {
 		assertThat(resolver.resolveExceptionMapping(new IllegalArgumentException(), MediaType.TEXT_HTML).getHandlerMethod().getName()).isEqualTo("handleHtml");
 	}
 
-	@Test
-	void shouldKeepProduceMediaTypesOrder() {
-		ExceptionHandlerMethodResolver resolver = new ExceptionHandlerMethodResolver(MediaTypeController.class);
-		assertThat(resolver.resolveExceptionMapping(new IllegalArgumentException(), MediaType.TEXT_HTML).getProducibleTypes().toString()).isEqualTo("[text/html, */*]");
-	}
-	
-	
 	@Test
 	void shouldResolveMethodWithCompatibleMediaType() {
 		ExceptionHandlerMethodResolver resolver = new ExceptionHandlerMethodResolver(MediaTypeController.class);
