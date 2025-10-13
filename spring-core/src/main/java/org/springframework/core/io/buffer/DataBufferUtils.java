@@ -832,13 +832,9 @@ public abstract class DataBufferUtils {
 
 		@Override
 		public int match(DataBuffer dataBuffer) {
-			for (int pos = dataBuffer.readPosition(); pos < dataBuffer.writePosition(); pos++) {
-				byte b = dataBuffer.getByte(pos);
-				if (match(b)) {
-					return pos;
-				}
-			}
-			return -1;
+			int start = dataBuffer.readPosition();
+			int end = dataBuffer.writePosition();
+			return dataBuffer.forEachByte(start, end - start, b -> !this.match(b));
 		}
 
 		@Override
@@ -881,14 +877,13 @@ public abstract class DataBufferUtils {
 
 		@Override
 		public int match(DataBuffer dataBuffer) {
-			for (int pos = dataBuffer.readPosition(); pos < dataBuffer.writePosition(); pos++) {
-				byte b = dataBuffer.getByte(pos);
-				if (match(b)) {
-					reset();
-					return pos;
-				}
+			int start = dataBuffer.readPosition();
+			int end = dataBuffer.writePosition();
+			int matchPosition = dataBuffer.forEachByte(start, end - start, b -> !this.match(b));
+			if (matchPosition != -1) {
+				reset();
 			}
-			return -1;
+			return matchPosition;
 		}
 
 		@Override
