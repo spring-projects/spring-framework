@@ -37,6 +37,9 @@ import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
 import org.springframework.web.util.WebUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 /**
  * Tests for {@link OncePerRequestFilter}.
@@ -121,14 +124,18 @@ class OncePerRequestFilterTests {
 
 	@ParameterizedTest
 	@MethodSource
-	public void shouldNotFilterForUri(String uri, boolean shouldFilter) throws ServletException, IOException {
+	public void shouldNotFilterForUri(String uri, boolean shouldFilterInternal) throws ServletException, IOException {
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		MockFilterChain filterChain = spy(new MockFilterChain(new HttpServlet() {}));
+
 		ShouldNotFilterRequestFilter filter = new ShouldNotFilterRequestFilter();
 
 		this.request.setRequestURI(uri);
 
-		filter.doFilter(this.request, new MockHttpServletResponse(), this.filterChain);
+		filter.doFilter(this.request, response, filterChain);
 
-		assertThat(filter.didFilter).isEqualTo(shouldFilter);
+		assertThat(filter.didFilter).isEqualTo(shouldFilterInternal);
+		verify(filterChain, times(shouldFilterInternal ? 0 : 1)).doFilter(this.request, response);
 	}
 
 	static Stream<Arguments> shouldNotFilterForUri() {
@@ -145,14 +152,18 @@ class OncePerRequestFilterTests {
 
 	@ParameterizedTest
 	@MethodSource
-	public void shouldFilterForUri(String uri, boolean shouldFilter) throws ServletException, IOException {
+	public void shouldFilterForUri(String uri, boolean shouldFilterInternal) throws ServletException, IOException {
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		MockFilterChain filterChain = spy(new MockFilterChain(new HttpServlet() {}));
+
 		ShouldFilterRequestFilter filter = new ShouldFilterRequestFilter();
 
 		this.request.setRequestURI(uri);
 
-		filter.doFilter(this.request, new MockHttpServletResponse(), this.filterChain);
+		filter.doFilter(this.request, response, filterChain);
 
-		assertThat(filter.didFilter).isEqualTo(shouldFilter);
+		assertThat(filter.didFilter).isEqualTo(shouldFilterInternal);
+		verify(filterChain, times(shouldFilterInternal ? 0 : 1)).doFilter(this.request, response);
 	}
 
 	static Stream<Arguments> shouldFilterForUri() {

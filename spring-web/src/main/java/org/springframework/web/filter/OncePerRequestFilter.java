@@ -121,6 +121,9 @@ public abstract class OncePerRequestFilter extends GenericFilterBean {
 				// Remove the "already filtered" request attribute for this request.
 				request.removeAttribute(alreadyFilteredAttributeName);
 			}
+		} else {
+			// Proceed without invoking this filter...
+			filterChain.doFilter(request, response);
 		}
 	}
 
