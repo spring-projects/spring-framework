@@ -607,9 +607,6 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 			}
 			resetSchemeSpecificPart();
 		}
-		else {
-			this.queryParams.clear();
-		}
 		return this;
 	}
 
