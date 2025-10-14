@@ -383,7 +383,8 @@ public class NettyDataBuffer implements PooledDataBuffer {
 			return this.byteBuf.toString();
 		}
 		catch (OutOfMemoryError ex) {
-			throw new DataBufferLimitException("Failed to convert data buffer to string: " + ex.getMessage(), ex);
+			throw new DataBufferLimitException(
+					"Failed to convert data buffer to string: " + ex.getMessage(), ex);
 		}
 	}
 
