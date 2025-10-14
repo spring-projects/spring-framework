@@ -269,6 +269,11 @@ class DefaultRestTestClient implements RestTestClient {
 							}, false),
 					DefaultRestTestClient.this.entityResultConsumer);
 		}
+
+		@Override
+		public ResponseSpec exchangeSuccessfully() {
+			return exchange().expectStatus().is2xxSuccessful();
+		}
 	}
 
 

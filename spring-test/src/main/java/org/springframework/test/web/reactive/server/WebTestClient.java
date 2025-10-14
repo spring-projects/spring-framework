@@ -700,10 +700,21 @@ public interface WebTestClient {
 		S attributes(Consumer<Map<String, Object>> attributesConsumer);
 
 		/**
-		 * Perform the exchange without a request body.
-		 * @return a spec for decoding the response
+		 * Perform the exchange.
+		 * @return a spec for expectations on the response
 		 */
 		ResponseSpec exchange();
+
+		/**
+		 * Variant of {@link #exchange()} that expects a successful response.
+		 * Effectively, a shortcut for:
+		 * <pre class="code">
+		 * exchange().is2xxSuccessful()
+		 * </pre>
+		 * @return a spec for expectations on the response
+		 * @since 7.0
+		 */
+		ResponseSpec exchangeSuccessfully();
 	}
 
 

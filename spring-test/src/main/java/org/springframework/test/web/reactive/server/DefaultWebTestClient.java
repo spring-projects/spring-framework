@@ -381,6 +381,11 @@ class DefaultWebTestClient implements WebTestClient {
 					DefaultWebTestClient.this.entityResultConsumer, getResponseTimeout());
 		}
 
+		@Override
+		public ResponseSpec exchangeSuccessfully() {
+			return exchange().expectStatus().is2xxSuccessful();
+		}
+
 		private ClientRequest.Builder initRequestBuilder() {
 			return ClientRequest.create(this.httpMethod, initUri())
 					.headers(headersToUse -> {
