@@ -35,4 +35,8 @@ public class DataBufferLimitException extends IllegalStateException {
 		super(message);
 	}
 
+	public DataBufferLimitException(String message, Throwable cause) {
+		super(message, cause);
+	}
+
 }
