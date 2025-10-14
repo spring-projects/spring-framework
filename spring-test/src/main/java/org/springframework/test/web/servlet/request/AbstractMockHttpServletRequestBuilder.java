@@ -25,12 +25,16 @@ import java.net.URI;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.security.Principal;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.TimeZone;
 
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletRequest;
@@ -83,6 +87,14 @@ import org.springframework.web.util.UrlPathHelper;
 public abstract class AbstractMockHttpServletRequestBuilder<B extends AbstractMockHttpServletRequestBuilder<B>>
 		implements ConfigurableSmartRequestBuilder<B>, Mergeable {
 
+	private static final SimpleDateFormat simpleDateFormat;
+
+	static {
+		simpleDateFormat = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz", Locale.US);
+		simpleDateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
+	}
+
+
 	private final HttpMethod method;
 
 	private @Nullable String uriTemplate;
@@ -109,7 +121,7 @@ public abstract class AbstractMockHttpServletRequestBuilder<B extends AbstractMo
 
 	private @Nullable String contentType;
 
-	private final MultiValueMap<String, Object> headers = new LinkedMultiValueMap<>();
+	private final HttpHeaders headers = new HttpHeaders();
 
 	private final MultiValueMap<String, String> parameters = new LinkedMultiValueMap<>();
 
@@ -320,7 +332,7 @@ public abstract class AbstractMockHttpServletRequestBuilder<B extends AbstractMo
 	 */
 	public B accept(MediaType... mediaTypes) {
 		Assert.notEmpty(mediaTypes, "'mediaTypes' must not be empty");
-		this.headers.set("Accept", MediaType.toString(Arrays.asList(mediaTypes)));
+		this.headers.setAccept(Arrays.asList(mediaTypes));
 		return self();
 	}
 
@@ -342,7 +354,26 @@ public abstract class AbstractMockHttpServletRequestBuilder<B extends AbstractMo
 	 * @param values one or more header values
 	 */
 	public B header(String name, Object... values) {
-		this.headers.addAll(name, Arrays.asList(values));
+
+		// Prior to 7.0, header values were passed as Objects to MockHttpServletRequest.
+		// Here we add some formatting for backwards compatibility.
+
+		if (values.length == 1) {
+			Object value = values[0];
+			if (value instanceof Collection<?> collection) {
+				values = collection.toArray();
+			}
+		}
+
+		for (Object value : values) {
+			if (value instanceof Date date) {
+				this.headers.add(name, simpleDateFormat.format(date));
+			}
+			else {
+				this.headers.add(name, String.valueOf(value));
+			}
+		}
+
 		return self();
 	}
 
@@ -665,12 +696,13 @@ public abstract class AbstractMockHttpServletRequestBuilder<B extends AbstractMo
 			this.contentType = parentBuilder.contentType;
 		}
 
-		for (Map.Entry<String, List<Object>> entry : parentBuilder.headers.entrySet()) {
-			String headerName = entry.getKey();
-			if (!this.headers.containsKey(headerName)) {
-				this.headers.put(headerName, entry.getValue());
-			}
-		}
+		parentBuilder.headers.forEach((headerName, values) -> {
+			values.forEach(value -> {
+				if (!this.headers.containsHeader(headerName)) {
+					this.headers.put(headerName, values);
+				}
+			});
+		});
 		for (Map.Entry<String, List<String>> entry : parentBuilder.parameters.entrySet()) {
 			String paramName = entry.getKey();
 			if (!this.parameters.containsKey(paramName)) {
@@ -796,9 +828,7 @@ public abstract class AbstractMockHttpServletRequestBuilder<B extends AbstractMo
 
 		if (this.version != null) {
 			Assert.state(this.versionInserter != null, "No ApiVersionInserter");
-			HttpHeaders httpHeaders = new HttpHeaders();
-			this.versionInserter.insertVersion(this.version, httpHeaders);
-			httpHeaders.forEach((name, values) -> values.forEach(value -> this.headers.add(name, value)));
+			this.versionInserter.insertVersion(this.version, this.headers);
 		}
 
 		this.headers.forEach((name, values) -> {
@@ -808,8 +838,8 @@ public abstract class AbstractMockHttpServletRequestBuilder<B extends AbstractMo
 		});
 
 		if (!ObjectUtils.isEmpty(this.content) &&
-				!this.headers.containsKey(HttpHeaders.CONTENT_LENGTH) &&
-				!this.headers.containsKey(HttpHeaders.TRANSFER_ENCODING)) {
+				!this.headers.containsHeader(HttpHeaders.CONTENT_LENGTH) &&
+				!this.headers.containsHeader(HttpHeaders.TRANSFER_ENCODING)) {
 
 			request.addHeader(HttpHeaders.CONTENT_LENGTH, this.content.length);
 		}
