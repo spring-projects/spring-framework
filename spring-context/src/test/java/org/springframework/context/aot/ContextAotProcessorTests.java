@@ -112,8 +112,7 @@ class ContextAotProcessorTests {
 			assertThat(nativeImagePropertiesFile).exists().isRegularFile().hasContent("""
 					Args = -H:Class=org.springframework.context.aot.ContextAotProcessorTests$SampleApplication \\
 					--report-unsupported-elements-at-runtime \\
-					--no-fallback \\
-					--install-exit-handlers
+					--no-fallback
 					""");
 		};
 	}

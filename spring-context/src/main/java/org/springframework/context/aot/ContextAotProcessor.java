@@ -138,7 +138,6 @@ public abstract class ContextAotProcessor extends AbstractAotProcessor<ClassName
 		args.add("-H:Class=" + applicationClassName);
 		args.add("--report-unsupported-elements-at-runtime");
 		args.add("--no-fallback");
-		args.add("--install-exit-handlers");
 		return args;
 	}
 
