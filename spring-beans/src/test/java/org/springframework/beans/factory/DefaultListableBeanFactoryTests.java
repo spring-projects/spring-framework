@@ -87,6 +87,7 @@ import org.springframework.core.convert.support.GenericConversionService;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.core.testfixture.io.SerializationTestUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.util.StringValueResolver;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -3232,6 +3233,10 @@ class DefaultListableBeanFactoryTests {
 		assertThat(lbf.getBeanNamesForType(DerivedTestBean.class)).containsExactly("bd1");
 		assertThat(lbf.getBeanNamesForType(NestedTestBean.class)).isSameAs(nestedBeanNames);
 		assertThat(lbf.getBeanNamesForType(Object.class)).isSameAs(allBeanNames);
+
+		lbf.registerSingleton("bd3", new Object());
+		assertThat(lbf.getBeanNamesForType(NestedTestBean.class)).isSameAs(nestedBeanNames);
+		assertThat(lbf.getBeanNamesForType(Object.class)).containsExactly(StringUtils.addStringToArray(allBeanNames, "bd3"));
 	}
 
 
