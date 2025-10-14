@@ -30,11 +30,11 @@ import org.springframework.beans.factory.support.SimpleBeanDefinitionRegistry;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
-
 /**
  * Tests for {@link ScopedProxyUtils}.
  *
  * @author Sam Brannen
+ * @author Juergen Hoeller
  * @since 5.1.10
  */
 class ScopedProxyUtilsTests {
@@ -63,58 +63,58 @@ class ScopedProxyUtilsTests {
 	@Test
 	void getOriginalBeanNameForNullTargetBean() {
 		assertThatIllegalArgumentException()
-			.isThrownBy(() -> ScopedProxyUtils.getOriginalBeanName(null))
-			.withMessage("bean name 'null' does not refer to the target of a scoped proxy");
+				.isThrownBy(() -> ScopedProxyUtils.getOriginalBeanName(null))
+				.withMessage("bean name 'null' does not refer to the target of a scoped proxy");
 	}
 
 	@Test
 	void getOriginalBeanNameForNonScopedTarget() {
 		assertThatIllegalArgumentException()
-			.isThrownBy(() -> ScopedProxyUtils.getOriginalBeanName("myBean"))
-			.withMessage("bean name 'myBean' does not refer to the target of a scoped proxy");
+				.isThrownBy(() -> ScopedProxyUtils.getOriginalBeanName("myBean"))
+				.withMessage("bean name 'myBean' does not refer to the target of a scoped proxy");
 	}
 
 	@Test
-	void createScopedProxyTargetOvertakesAutowireSettingsToProxyBeanDefinition() {
-		final AbstractBeanDefinition targetDefinition = new GenericBeanDefinition();
+	void createScopedProxyTargetAppliesAutowireSettingsToProxyBeanDefinition() {
+		AbstractBeanDefinition targetDefinition = new GenericBeanDefinition();
 		// Opposite of defaults
 		targetDefinition.setAutowireCandidate(false);
 		targetDefinition.setDefaultCandidate(false);
 		targetDefinition.setPrimary(true);
+		targetDefinition.setFallback(true);
 
-		final BeanDefinitionRegistry registry = new SimpleBeanDefinitionRegistry();
-		final BeanDefinitionHolder proxyHolder = ScopedProxyUtils.createScopedProxy(new BeanDefinitionHolder(targetDefinition, "myBean"), registry, false);
-		assertThat(proxyHolder).isNotNull();
-		final BeanDefinition proxyBeanDefinition = proxyHolder.getBeanDefinition();
-		assertThat(proxyBeanDefinition).isNotNull();
-		assertThat(proxyBeanDefinition).isInstanceOf(RootBeanDefinition.class);
+		BeanDefinitionRegistry registry = new SimpleBeanDefinitionRegistry();
+		BeanDefinitionHolder proxyHolder = ScopedProxyUtils.createScopedProxy(
+				new BeanDefinitionHolder(targetDefinition, "myBean"), registry, false);
+		AbstractBeanDefinition proxyBeanDefinition = (AbstractBeanDefinition) proxyHolder.getBeanDefinition();
 
 		assertThat(proxyBeanDefinition.isAutowireCandidate()).isFalse();
+		assertThat(proxyBeanDefinition.isDefaultCandidate()).isFalse();
 		assertThat(proxyBeanDefinition.isPrimary()).isTrue();
-		assertThat(((RootBeanDefinition)proxyBeanDefinition).isDefaultCandidate()).isFalse();
+		assertThat(proxyBeanDefinition.isFallback()).isTrue();
 	}
 
 	@Test
-	void createScopedProxyTargetOvertakesBeanAttributesToProxyBeanDefinition() {
-		final GenericBeanDefinition targetDefinition = new GenericBeanDefinition();
+	void createScopedProxyTargetAppliesBeanAttributesToProxyBeanDefinition() {
+		GenericBeanDefinition targetDefinition = new GenericBeanDefinition();
 		// Opposite of defaults
 		targetDefinition.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
 		targetDefinition.setSource("theSource");
 		targetDefinition.addQualifier(new AutowireCandidateQualifier("myQualifier"));
 
-		final BeanDefinitionRegistry registry = new SimpleBeanDefinitionRegistry();
-		final BeanDefinitionHolder proxyHolder = ScopedProxyUtils.createScopedProxy(new BeanDefinitionHolder(targetDefinition, "myBean"), registry, false);
-		assertThat(proxyHolder).isNotNull();
-		final BeanDefinition proxyBeanDefinition = proxyHolder.getBeanDefinition();
-		assertThat(proxyBeanDefinition).isNotNull();
+		BeanDefinitionRegistry registry = new SimpleBeanDefinitionRegistry();
+		BeanDefinitionHolder proxyHolder = ScopedProxyUtils.createScopedProxy(
+				new BeanDefinitionHolder(targetDefinition, "myBean"), registry, false);
+		BeanDefinition proxyBeanDefinition = proxyHolder.getBeanDefinition();
 
 		assertThat(proxyBeanDefinition.getRole()).isEqualTo(BeanDefinition.ROLE_INFRASTRUCTURE);
 		assertThat(proxyBeanDefinition).isInstanceOf(RootBeanDefinition.class);
 		assertThat(proxyBeanDefinition.getPropertyValues()).hasSize(2);
 		assertThat(proxyBeanDefinition.getPropertyValues().get("proxyTargetClass")).isEqualTo(false);
-		assertThat(proxyBeanDefinition.getPropertyValues().get("targetBeanName")).isEqualTo(ScopedProxyUtils.getTargetBeanName("myBean"));
+		assertThat(proxyBeanDefinition.getPropertyValues().get("targetBeanName")).isEqualTo(
+				ScopedProxyUtils.getTargetBeanName("myBean"));
 
-		final RootBeanDefinition rootBeanDefinition = (RootBeanDefinition) proxyBeanDefinition;
+		RootBeanDefinition rootBeanDefinition = (RootBeanDefinition) proxyBeanDefinition;
 		assertThat(rootBeanDefinition.getQualifiers()).hasSize(1);
 		assertThat(rootBeanDefinition.hasQualifier("myQualifier")).isTrue();
 		assertThat(rootBeanDefinition.getSource()).isEqualTo("theSource");
@@ -122,19 +122,20 @@ class ScopedProxyUtilsTests {
 
 	@Test
 	void createScopedProxyTargetCleansAutowireSettingsInTargetDefinition() {
-		final AbstractBeanDefinition targetDefinition = new GenericBeanDefinition();
+		AbstractBeanDefinition targetDefinition = new GenericBeanDefinition();
 		targetDefinition.setAutowireCandidate(true);
 		targetDefinition.setDefaultCandidate(true);
 		targetDefinition.setPrimary(true);
+		targetDefinition.setFallback(true);
 
-		final BeanDefinitionRegistry registry = new SimpleBeanDefinitionRegistry();
-		final BeanDefinitionHolder proxyHolder = ScopedProxyUtils.createScopedProxy(new BeanDefinitionHolder(targetDefinition, "myBean"), registry, false);
-		assertThat(proxyHolder).isNotNull();
-		final BeanDefinition proxyBeanDefinition = proxyHolder.getBeanDefinition();
-		assertThat(proxyBeanDefinition).isNotNull();
+		BeanDefinitionRegistry registry = new SimpleBeanDefinitionRegistry();
+		ScopedProxyUtils.createScopedProxy(
+				new BeanDefinitionHolder(targetDefinition, "myBean"), registry, false);
 
 		assertThat(targetDefinition.isAutowireCandidate()).isFalse();
 		assertThat(targetDefinition.isDefaultCandidate()).isFalse();
 		assertThat(targetDefinition.isPrimary()).isFalse();
+		assertThat(targetDefinition.isFallback()).isFalse();
 	}
+
 }
