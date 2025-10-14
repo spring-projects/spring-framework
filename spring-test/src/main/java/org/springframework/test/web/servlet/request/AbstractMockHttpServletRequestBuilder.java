@@ -26,6 +26,7 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.security.Principal;
 import java.text.SimpleDateFormat;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -35,6 +36,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
+import java.util.function.Consumer;
 
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletRequest;
@@ -349,6 +351,37 @@ public abstract class AbstractMockHttpServletRequestBuilder<B extends AbstractMo
 	}
 
 	/**
+	 * Set the list of acceptable {@linkplain Charset charsets}, as specified
+	 * by the {@code Accept-Charset} header.
+	 * @param acceptableCharsets the acceptable charsets
+	 * @since 7.0
+	 */
+	public B acceptCharset(Charset... acceptableCharsets) {
+		this.headers.setAcceptCharset(Arrays.asList(acceptableCharsets));
+		return self();
+	}
+
+	/**
+	 * Set the value of the {@code If-Modified-Since} header.
+	 * @param ifModifiedSince the new value of the header
+	 * @since 7.0
+	 */
+	public B ifModifiedSince(ZonedDateTime ifModifiedSince) {
+		this.headers.setIfModifiedSince(ifModifiedSince);
+		return self();
+	}
+
+	/**
+	 * Set the values of the {@code If-None-Match} header.
+	 * @param ifNoneMatches the new value of the header
+	 * @since 7.0
+	 */
+	public B ifNoneMatch(String... ifNoneMatches) {
+		this.headers.setIfNoneMatch(Arrays.asList(ifNoneMatches));
+		return self();
+	}
+
+	/**
 	 * Add a header to the request. Values are always added.
 	 * @param name the header name
 	 * @param values one or more header values
@@ -383,6 +416,18 @@ public abstract class AbstractMockHttpServletRequestBuilder<B extends AbstractMo
 	 */
 	public B headers(HttpHeaders httpHeaders) {
 		httpHeaders.forEach(this.headers::addAll);
+		return self();
+	}
+
+	/**
+	 * Provides access to every header declared so far with the possibility
+	 * to add, replace, or remove values.
+	 * @param headersConsumer the consumer to provide access to
+	 * @return this builder
+	 * @since 7.0
+	 */
+	public B headers(Consumer<HttpHeaders> headersConsumer) {
+		headersConsumer.accept(this.headers);
 		return self();
 	}
 
