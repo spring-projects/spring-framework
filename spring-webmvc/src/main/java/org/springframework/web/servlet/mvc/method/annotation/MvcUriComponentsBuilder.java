@@ -629,16 +629,29 @@ public class MvcUriComponentsBuilder {
 	}
 
 	private static String resolveEmbeddedValue(String value) {
-		WebApplicationContext webApplicationContext = getWebApplicationContext();
-		if (webApplicationContext != null &&
-				webApplicationContext.getAutowireCapableBeanFactory() instanceof ConfigurableBeanFactory cbf) {
-			EmbeddedValueResolver embeddedValueResolver = new EmbeddedValueResolver(cbf);
-			String resolvedEmbeddedValue = embeddedValueResolver.resolveStringValue(value);
-			if (resolvedEmbeddedValue != null) {
-				return resolvedEmbeddedValue;
+		if (hasPlaceholderOrExpression(value)) {
+			WebApplicationContext wac = getWebApplicationContext();
+			if (wac != null && wac.getAutowireCapableBeanFactory() instanceof ConfigurableBeanFactory cbf) {
+				EmbeddedValueResolver valueResolver = new EmbeddedValueResolver(cbf);
+				String resolvedValue = valueResolver.resolveStringValue(value);
+				if (resolvedValue != null) {
+					return resolvedValue;
+				}
 			}
 		}
 		return value;
+	}
+
+	private static boolean hasPlaceholderOrExpression(String value) {
+		char prev = 0;
+		for (int i = 0; i < value.length(); i++) {
+			char c = value.charAt(i);
+			if (c == '{' && (prev == '$' || prev == '#')) {
+				return true;
+			}
+			prev = c;
+		}
+		return false;
 	}
 
 	private static @Nullable WebApplicationContext getWebApplicationContext() {

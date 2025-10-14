@@ -335,20 +335,18 @@ public class MvcUriComponentsBuilderTests {
 		assertThat(uriComponents.toUriString()).isEqualTo("http://localhost/something/custom/1/foo");
 	}
 
-	@Test
+	@Test // gh-35348
 	void fromMethodNameConfigurablePathSpEL() {
 		try {
 			System.setProperty("customMapping", "custom");
 			StandardEnvironment environment = new StandardEnvironment();
 			initWebApplicationContext(WebConfig.class, environment);
-			UriComponents uriComponents = fromMethodName(ControllerWithMethods.class,
-					"methodWithConfigurableMappingThroughSpEL", "1").build();
-			assertThat(uriComponents.toUriString()).isEqualTo("http://localhost/something/custom/1/foo");
+			UriComponents uric = fromMethodName(ControllerWithMethods.class, "methodWithSpEL", "1").build();
+			assertThat(uric.toUriString()).isEqualTo("http://localhost/something/custom/1/foo");
 		}
 		finally {
 			System.clearProperty("customMapping");
 		}
-
 	}
 
 	@Test
@@ -721,7 +719,7 @@ public class MvcUriComponentsBuilderTests {
 		}
 
 		@RequestMapping("/#{systemProperties.customMapping}/{id}/foo")
-		HttpEntity<Void> methodWithConfigurableMappingThroughSpEL(@PathVariable String id) {
+		HttpEntity<Void> methodWithSpEL(@PathVariable String id) {
 			return null;
 		}
 	}
