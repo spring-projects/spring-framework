@@ -523,7 +523,7 @@ public interface RestTestClient {
 		 * Variant of {@link #exchange()} that expects a successful response.
 		 * Effectively, a shortcut for:
 		 * <pre class="code">
-		 * exchange().is2xxSuccessful()
+		 * exchange().expectStatus().is2xxSuccessful()
 		 * </pre>
 		 * @return a spec for expectations on the response
 		 */
