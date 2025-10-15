@@ -423,35 +423,28 @@ class ConfigurationClassPostProcessorTests {
 		beanFactory.setAllowBeanDefinitionOverriding(false);
 		ConfigurationClassPostProcessor pp = new ConfigurationClassPostProcessor();
 
-		assertThatIllegalStateException()
+		assertThatExceptionOfType(BeanDefinitionStoreException.class)
 				.isThrownBy(() -> pp.postProcessBeanFactory(beanFactory))
-				.withMessage("Failed to load bean definitions for configuration class '%s'", SingletonBeanConfig.class.getName())
-				.havingCause()
-					.isInstanceOf(BeanDefinitionStoreException.class)
-					.withMessageContainingAll(
-						"bar",
-						"SingletonBeanConfig",
-						TestBean.class.getName()
-					);
+				.withMessageContainingAll(
+					"bar",
+					"SingletonBeanConfig",
+					TestBean.class.getName()
+				);
 	}
 
 	@Test  // gh-25430
 	void detectAliasOverride() {
-		Class<?> configClass = SecondConfiguration.class;
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
 		DefaultListableBeanFactory beanFactory = context.getDefaultListableBeanFactory();
 		beanFactory.setAllowBeanDefinitionOverriding(false);
-		context.register(FirstConfiguration.class, configClass);
+		context.register(FirstConfiguration.class, SecondConfiguration.class);
 
 		assertThatIllegalStateException().isThrownBy(context::refresh)
-				.withMessage("Failed to load bean definitions for configuration class '%s'", configClass.getName())
-				.havingCause()
-					.isExactlyInstanceOf(IllegalStateException.class)
-					.withMessageContainingAll(
-						"alias 'taskExecutor'",
-						"name 'applicationTaskExecutor'",
-						"bean definition 'taskExecutor'"
-					);
+				.withMessageContainingAll(
+					"alias 'taskExecutor'",
+					"name 'applicationTaskExecutor'",
+					"bean definition 'taskExecutor'"
+				);
 		context.close();
 	}
 
@@ -1245,11 +1238,8 @@ class ConfigurationClassPostProcessorTests {
 
 	@Test
 	void nameClashBetweenConfigurationClassAndBean() {
-		assertThatIllegalStateException()
-				.isThrownBy(() -> new AnnotationConfigApplicationContext(MyTestBean.class))
-				.withMessage("Failed to load bean definitions for configuration class '%s'", MyTestBean.class.getName())
-				.havingCause()
-					.isInstanceOf(BeanDefinitionStoreException.class);
+		assertThatExceptionOfType(BeanDefinitionStoreException.class)
+				.isThrownBy(() -> new AnnotationConfigApplicationContext(MyTestBean.class));
 	}
 
 	@Test
