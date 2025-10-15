@@ -28,45 +28,53 @@ import org.springframework.util.Assert;
 /**
  * A Jackson 3.x codec for encoding and decoding SockJS messages.
  *
- * <p>The default constructor loads {@link tools.jackson.databind.JacksonModule}s
- * found by {@link MapperBuilder#findModules(ClassLoader)}.
- *
  * @author Sebastien Deleuze
  * @since 7.0
  */
 public class JacksonJsonSockJsMessageCodec extends AbstractSockJsMessageCodec {
 
-	private final JsonMapper jsonMapper;
+	private final JsonMapper mapper;
 
 
 	/**
 	 * Construct a new instance with a {@link JsonMapper} customized with the
 	 * {@link tools.jackson.databind.JacksonModule}s found by
 	 * {@link MapperBuilder#findModules(ClassLoader)}.
+	 * @see JsonMapper#builder()
 	 */
 	public JacksonJsonSockJsMessageCodec() {
-		this.jsonMapper = JsonMapper.builder().findAndAddModules(JacksonJsonSockJsMessageCodec.class.getClassLoader()).build();
+		this(JsonMapper.builder());
+	}
+
+	/**
+	 * Construct a new instance with the provided {@link JsonMapper.Builder}
+	 * customized with the {@link tools.jackson.databind.JacksonModule}s found by
+	 * {@link MapperBuilder#findModules(ClassLoader)}.
+	 * @see JsonMapper#builder()
+	 */
+	public JacksonJsonSockJsMessageCodec(JsonMapper.Builder builder) {
+		Assert.notNull(builder, "JsonMapper.Builder must not be null");
+		this.mapper = builder.findAndAddModules(JacksonJsonSockJsMessageCodec.class.getClassLoader()).build();
 	}
 
 	/**
 	 * Construct a new instance with the provided {@link JsonMapper}.
 	 * @see JsonMapper#builder()
-	 * @see MapperBuilder#findAndAddModules(ClassLoader)
 	 */
-	public JacksonJsonSockJsMessageCodec(JsonMapper jsonMapper) {
-		Assert.notNull(jsonMapper, "JsonMapper must not be null");
-		this.jsonMapper = jsonMapper;
+	public JacksonJsonSockJsMessageCodec(JsonMapper mapper) {
+		Assert.notNull(mapper, "JsonMapper must not be null");
+		this.mapper = mapper;
 	}
 
 
 	@Override
 	public String @Nullable [] decode(String content) {
-		return this.jsonMapper.readValue(content, String[].class);
+		return this.mapper.readValue(content, String[].class);
 	}
 
 	@Override
 	public String @Nullable [] decodeInputStream(InputStream content) {
-		return this.jsonMapper.readValue(content, String[].class);
+		return this.mapper.readValue(content, String[].class);
 	}
 
 	@Override

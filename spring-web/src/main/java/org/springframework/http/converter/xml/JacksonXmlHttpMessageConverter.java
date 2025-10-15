@@ -39,9 +39,6 @@ import org.springframework.util.xml.StaxUtils;
  * {@code application/*+xml} with {@code UTF-8} character set. This can be overridden by
  * setting the {@link #setSupportedMediaTypes supportedMediaTypes} property.
  *
- * <p>The default constructor loads {@link tools.jackson.databind.JacksonModule}s
- * found by {@link MapperBuilder#findModules(ClassLoader)}.
- *
  * <p>The following hint entries are supported:
  * <ul>
  *     <li>A JSON view with a <code>com.fasterxml.jackson.annotation.JsonView</code>
@@ -80,6 +77,7 @@ public class JacksonXmlHttpMessageConverter extends AbstractJacksonHttpMessageCo
 	 * customized with the {@link tools.jackson.databind.JacksonModule}s found by
 	 * {@link MapperBuilder#findModules(ClassLoader)} and
 	 * {@link ProblemDetailJacksonXmlMixin}.
+	 * @see XmlMapper#builder()
 	 */
 	public JacksonXmlHttpMessageConverter(XmlMapper.Builder builder) {
 		super(builder.addMixIn(ProblemDetail.class, ProblemDetailJacksonXmlMixin.class), DEFAULT_XML_MIME_TYPES);
@@ -88,7 +86,6 @@ public class JacksonXmlHttpMessageConverter extends AbstractJacksonHttpMessageCo
 	/**
 	 * Construct a new instance with the provided {@link XmlMapper}.
 	 * @see XmlMapper#builder()
-	 * @see MapperBuilder#findModules(ClassLoader)
 	 */
 	public JacksonXmlHttpMessageConverter(XmlMapper xmlMapper) {
 		super(xmlMapper, DEFAULT_XML_MIME_TYPES);

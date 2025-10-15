@@ -65,7 +65,7 @@ public abstract class AbstractJacksonView extends AbstractView {
 	private static volatile @Nullable List<JacksonModule> modules;
 
 
-	private final ObjectMapper objectMapper;
+	private final ObjectMapper mapper;
 
 	private JsonEncoding encoding = JsonEncoding.UTF8;
 
@@ -75,13 +75,13 @@ public abstract class AbstractJacksonView extends AbstractView {
 
 
 	protected AbstractJacksonView(MapperBuilder<?, ?> builder, String contentType) {
-		this.objectMapper = builder.addModules(initModules()).build();
+		this.mapper = builder.addModules(initModules()).build();
 		setContentType(contentType);
 		setExposePathVariables(false);
 	}
 
-	protected AbstractJacksonView(ObjectMapper objectMapper, String contentType) {
-		this.objectMapper = objectMapper;
+	protected AbstractJacksonView(ObjectMapper mapper, String contentType) {
+		this.mapper = mapper;
 		setContentType(contentType);
 		setExposePathVariables(false);
 	}
@@ -185,7 +185,7 @@ public abstract class AbstractJacksonView extends AbstractView {
 	 * @throws IOException if writing failed
 	 */
 	protected void writeContent(OutputStream stream, Object object, @Nullable Map<String, Object> hints) throws IOException {
-		try (JsonGenerator generator = this.objectMapper.createGenerator(stream, this.encoding)) {
+		try (JsonGenerator generator = this.mapper.createGenerator(stream, this.encoding)) {
 			writePrefix(generator, object);
 
 			Class<?> serializationView = null;
@@ -196,7 +196,7 @@ public abstract class AbstractJacksonView extends AbstractView {
 			}
 
 			ObjectWriter objectWriter = (serializationView != null ?
-					this.objectMapper.writerWithView(serializationView) : this.objectMapper.writer());
+					this.mapper.writerWithView(serializationView) : this.mapper.writer());
 			if (filters != null) {
 				objectWriter = objectWriter.with(filters);
 			}

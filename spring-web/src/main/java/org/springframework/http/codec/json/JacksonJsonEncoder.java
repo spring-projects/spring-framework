@@ -43,9 +43,6 @@ import org.springframework.util.MimeType;
  * use cases, {@link Flux} elements are collected into a {@link List} before
  * serialization for performance reason.
  *
- * <p>The default constructor loads {@link tools.jackson.databind.JacksonModule}s
- * found by {@link MapperBuilder#findModules(ClassLoader)}.
- *
  * @author Sebastien Deleuze
  * @since 7.0
  * @see JacksonJsonDecoder
@@ -72,26 +69,44 @@ public class JacksonJsonEncoder extends AbstractJacksonEncoder<JsonMapper> {
 	 * {@link ProblemDetailJacksonMixin}.
 	 */
 	public JacksonJsonEncoder() {
-		super(JsonMapper.builder().addMixIn(ProblemDetail.class, ProblemDetailJacksonMixin.class),
-				DEFAULT_JSON_MIME_TYPES);
-		setStreamingMediaTypes(List.of(MediaType.APPLICATION_NDJSON));
-		this.ssePrettyPrinter = initSsePrettyPrinter();
+		this(JsonMapper.builder(), DEFAULT_JSON_MIME_TYPES);
+	}
+
+	/**
+	 * Construct a new instance with a {@link JsonMapper.Builder} customized
+	 * with the {@link tools.jackson.databind.JacksonModule}s found by
+	 * {@link MapperBuilder#findModules(ClassLoader)} and
+	 * {@link ProblemDetailJacksonMixin}.
+	 * @see JsonMapper#builder()
+	 */
+	public JacksonJsonEncoder(JsonMapper.Builder builder) {
+		this(builder, DEFAULT_JSON_MIME_TYPES);
 	}
 
 	/**
 	 * Construct a new instance with the provided {@link JsonMapper}.
-	 * @see JsonMapper#builder()
-	 * @see MapperBuilder#findModules(ClassLoader)
 	 */
 	public JacksonJsonEncoder(JsonMapper mapper) {
 		this(mapper, DEFAULT_JSON_MIME_TYPES);
 	}
 
 	/**
+	 * Construct a new instance with the provided {@link JsonMapper.Builder} customized
+	 * with the {@link tools.jackson.databind.JacksonModule}s found by
+	 * {@link MapperBuilder#findModules(ClassLoader)} and
+	 * {@link ProblemDetailJacksonMixin}, and {@link MimeType}s.
+	 * @see JsonMapper#builder()
+	 */
+	public JacksonJsonEncoder(JsonMapper.Builder builder, MimeType... mimeTypes) {
+		super(builder.addMixIn(ProblemDetail.class, ProblemDetailJacksonMixin.class), mimeTypes);
+		setStreamingMediaTypes(List.of(MediaType.APPLICATION_NDJSON));
+		this.ssePrettyPrinter = initSsePrettyPrinter();
+	}
+
+	/**
 	 * Construct a new instance with the provided {@link JsonMapper} and
 	 * {@link MimeType}s.
 	 * @see JsonMapper#builder()
-	 * @see MapperBuilder#findModules(ClassLoader)
 	 */
 	public JacksonJsonEncoder(JsonMapper mapper, MimeType... mimeTypes) {
 		super(mapper, mimeTypes);

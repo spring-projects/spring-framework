@@ -78,11 +78,23 @@ public class JacksonJsonView extends AbstractJacksonView {
 	}
 
 	/**
+	 * Construct a new instance using the provided {@link JsonMapper.Builder}
+	 * customized with the {@link tools.jackson.databind.JacksonModule}s
+	 * found by {@link MapperBuilder#findModules(ClassLoader)} and setting
+	 * the content type to {@code application/json}.
+	 * @see JsonMapper#builder()
+	 */
+	public JacksonJsonView(JsonMapper.Builder builder) {
+		super(builder, DEFAULT_CONTENT_TYPE);
+	}
+
+	/**
 	 * Construct a new instance using the provided {@link JsonMapper}
 	 * and setting the content type to {@value #DEFAULT_CONTENT_TYPE}.
+	 * @see JsonMapper#builder()
 	 */
-	public JacksonJsonView(JsonMapper jsonMapper) {
-		super(jsonMapper, DEFAULT_CONTENT_TYPE);
+	public JacksonJsonView(JsonMapper mapper) {
+		super(mapper, DEFAULT_CONTENT_TYPE);
 	}
 
 
