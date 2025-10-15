@@ -20,7 +20,7 @@ ext {
 dependencies {
 	checkstyle "io.spring.javaformat:spring-javaformat-checkstyle:${javaFormatVersion}"
 	implementation "org.jetbrains.kotlin:kotlin-gradle-plugin:${kotlinVersion}"
-	implementation "org.jetbrains.dokka:dokka-gradle-plugin:2.1.0-Beta"
+	implementation "org.jetbrains.dokka:dokka-gradle-plugin:2.1.0"
 	implementation "com.tngtech.archunit:archunit:1.4.1"
 	implementation "org.gradle:test-retry-gradle-plugin:1.6.2"
 	implementation "io.spring.javaformat:spring-javaformat-gradle-plugin:${javaFormatVersion}"
