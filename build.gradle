@@ -6,7 +6,7 @@ plugins {
 	id 'com.github.bjornvester.xjc' version '1.8.2' apply false
 	id 'com.gradleup.shadow' version "9.2.2" apply false
 	id 'me.champeau.jmh' version '0.7.2' apply false
-	id 'io.spring.nullability' version '0.0.4' apply false
+	id 'io.spring.nullability' version '0.0.6' apply false
 }
 
 ext {
