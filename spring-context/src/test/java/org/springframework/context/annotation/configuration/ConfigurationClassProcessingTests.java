@@ -60,6 +60,7 @@ import org.springframework.context.support.GenericApplicationContext;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 
 /**
  * Miscellaneous system tests covering {@link Bean} naming, aliases, scoping and
@@ -222,8 +223,12 @@ class ConfigurationClassProcessingTests {
 
 	@Test  // gh-33330
 	void configurationWithMethodNameMismatch() {
-		assertThatExceptionOfType(BeanDefinitionOverrideException.class)
-				.isThrownBy(() -> initBeanFactory(false, ConfigWithMethodNameMismatch.class));
+		Class<?> configClass = ConfigWithMethodNameMismatch.class;
+		assertThatIllegalStateException()
+				.isThrownBy(() -> initBeanFactory(false, configClass))
+				.withMessage("Failed to load bean definitions for configuration class '%s'", configClass.getName())
+				.havingCause()
+					.isInstanceOf(BeanDefinitionOverrideException.class);
 	}
 
 	@Test  // gh-33920

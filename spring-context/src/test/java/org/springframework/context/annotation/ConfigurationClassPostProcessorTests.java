@@ -409,23 +409,36 @@ class ConfigurationClassPostProcessorTests {
 		beanFactory.registerBeanDefinition("config", new RootBeanDefinition(SingletonBeanConfig.class));
 		beanFactory.setAllowBeanDefinitionOverriding(false);
 		ConfigurationClassPostProcessor pp = new ConfigurationClassPostProcessor();
-		assertThatExceptionOfType(BeanDefinitionStoreException.class)
+
+		assertThatIllegalStateException()
 				.isThrownBy(() -> pp.postProcessBeanFactory(beanFactory))
-				.withMessageContaining("bar")
-				.withMessageContaining("SingletonBeanConfig")
-				.withMessageContaining(TestBean.class.getName());
+				.withMessage("Failed to load bean definitions for configuration class '%s'", SingletonBeanConfig.class.getName())
+				.havingCause()
+					.isInstanceOf(BeanDefinitionStoreException.class)
+					.withMessageContainingAll(
+						"bar",
+						"SingletonBeanConfig",
+						TestBean.class.getName()
+					);
 	}
 
 	@Test  // gh-25430
 	void detectAliasOverride() {
+		Class<?> configClass = SecondConfiguration.class;
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
 		DefaultListableBeanFactory beanFactory = context.getDefaultListableBeanFactory();
 		beanFactory.setAllowBeanDefinitionOverriding(false);
-		context.register(FirstConfiguration.class, SecondConfiguration.class);
+		context.register(FirstConfiguration.class, configClass);
+
 		assertThatIllegalStateException().isThrownBy(context::refresh)
-				.withMessageContaining("alias 'taskExecutor'")
-				.withMessageContaining("name 'applicationTaskExecutor'")
-				.withMessageContaining("bean definition 'taskExecutor'");
+				.withMessage("Failed to load bean definitions for configuration class '%s'", configClass.getName())
+				.havingCause()
+					.isExactlyInstanceOf(IllegalStateException.class)
+					.withMessageContainingAll(
+						"alias 'taskExecutor'",
+						"name 'applicationTaskExecutor'",
+						"bean definition 'taskExecutor'"
+					);
 		context.close();
 	}
 
@@ -1158,8 +1171,11 @@ class ConfigurationClassPostProcessorTests {
 
 	@Test
 	void testNameClashBetweenConfigurationClassAndBean() {
-		assertThatExceptionOfType(BeanDefinitionStoreException.class)
-				.isThrownBy(() -> new AnnotationConfigApplicationContext(MyTestBean.class).getBean("myTestBean", TestBean.class));
+		assertThatIllegalStateException()
+				.isThrownBy(() -> new AnnotationConfigApplicationContext(MyTestBean.class))
+				.withMessage("Failed to load bean definitions for configuration class '%s'", MyTestBean.class.getName())
+				.havingCause()
+					.isInstanceOf(BeanDefinitionStoreException.class);
 	}
 
 	@Test
