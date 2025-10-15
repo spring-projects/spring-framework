@@ -479,20 +479,18 @@ class UriComponentsBuilderTests {
 
 	@ParameterizedTest
 	@EnumSource
-	void query(final ParserType parserType) {
-		final UriComponents uriComponents = UriComponentsBuilder.fromUriString("https://example.com/foo?foo=bar", parserType)
-			.query("baz=qux")
-			.build();
-		assertThat(uriComponents.getQueryParams()).isEqualTo(Map.of("foo", List.of("bar"), "baz", List.of("qux")));
+	void query(ParserType parserType) {
+		String url = "https://example.com/foo?foo=bar";
+		UriComponents uric = UriComponentsBuilder.fromUriString(url, parserType).query("baz=qux").build();
+		assertThat(uric.getQueryParams()).isEqualTo(Map.of("foo", List.of("bar"), "baz", List.of("qux")));
 	}
 
 	@ParameterizedTest
-	@EnumSource
-	void queryWithNullDoesRetainQueryParameters(final ParserType parserType) {
-		final UriComponents uriComponents = UriComponentsBuilder.fromUriString("https://example.com/foo?foo=bar", parserType)
-			.query(null)
-			.build();
-		assertThat(uriComponents.getQueryParams()).isEqualTo(Map.of("foo", List.of("bar")));
+	@EnumSource // gh-35628
+	void queryWithNull(ParserType parserType) {
+		String url = "https://example.com/foo?foo=bar";
+		UriComponents uric = UriComponentsBuilder.fromUriString(url, parserType).query(null).build();
+		assertThat(uric.getQueryParams()).isEqualTo(Map.of("foo", List.of("bar")));
 	}
 
 	@ParameterizedTest
