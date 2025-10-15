@@ -87,7 +87,6 @@ public class AsyncAnnotationBeanPostProcessor extends AbstractBeanFactoryAwareAd
 	private Class<? extends Annotation> asyncAnnotationType;
 
 
-
 	public AsyncAnnotationBeanPostProcessor() {
 		setBeforeExistingAdvisors(true);
 	}
