@@ -120,7 +120,13 @@ class ConfigurationClassBeanDefinitionReader {
 	public void loadBeanDefinitions(Set<ConfigurationClass> configurationModel) {
 		TrackedConditionEvaluator trackedConditionEvaluator = new TrackedConditionEvaluator();
 		for (ConfigurationClass configClass : configurationModel) {
-			loadBeanDefinitionsForConfigurationClass(configClass, trackedConditionEvaluator);
+			try {
+				loadBeanDefinitionsForConfigurationClass(configClass, trackedConditionEvaluator);
+			}
+			catch (Exception ex) {
+				throw new IllegalStateException("Failed to load bean definitions for configuration class '" +
+						configClass.getMetadata().getClassName() + "'", ex);
+			}
 		}
 	}
 
