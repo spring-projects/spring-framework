@@ -424,11 +424,10 @@ public class XsltView extends AbstractUrlBasedView {
 	private Templates loadTemplates() throws ApplicationContextException {
 		Source stylesheetSource = getStylesheetSource();
 		try {
-			Templates templates = getTransformerFactory().newTemplates(stylesheetSource);
-			return templates;
+			return getTransformerFactory().newTemplates(stylesheetSource);
 		}
 		catch (TransformerConfigurationException ex) {
-			throw new ApplicationContextException("Can't load stylesheet from '" + getUrl() + "'", ex);
+			throw new ApplicationContextException("Cannot load stylesheet from '" + getUrl() + "'", ex);
 		}
 		finally {
 			closeSourceIfNecessary(stylesheetSource);
@@ -467,7 +466,7 @@ public class XsltView extends AbstractUrlBasedView {
 			return new StreamSource(resource.getInputStream(), resource.getURI().toASCIIString());
 		}
 		catch (IOException ex) {
-			throw new ApplicationContextException("Can't load XSLT stylesheet from '" + url + "'", ex);
+			throw new ApplicationContextException("Cannot load XSLT stylesheet from '" + url + "'", ex);
 		}
 	}
 
