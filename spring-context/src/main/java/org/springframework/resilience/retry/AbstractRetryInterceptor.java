@@ -17,6 +17,7 @@
 package org.springframework.resilience.retry;
 
 import java.lang.reflect.Method;
+import java.util.concurrent.Future;
 
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
@@ -77,7 +78,7 @@ public abstract class AbstractRetryInterceptor implements MethodInterceptor {
 			return invocation.proceed();
 		}
 
-		if (this.reactiveAdapterRegistry != null) {
+		if (this.reactiveAdapterRegistry != null && !Future.class.isAssignableFrom(method.getReturnType())) {
 			ReactiveAdapter adapter = this.reactiveAdapterRegistry.getAdapter(method.getReturnType());
 			if (adapter != null) {
 				Object result = invocation.proceed();
