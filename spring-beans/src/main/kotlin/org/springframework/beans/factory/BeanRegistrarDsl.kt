@@ -168,12 +168,8 @@ open class BeanRegistrarDsl(private val init: BeanRegistrarDsl.() -> Unit): Bean
 			if (prototype) {
 				it.prototype()
 			}
-			val resolvableType = ResolvableType.forType(object: ParameterizedTypeReference<T>() {});
-			if (resolvableType.hasGenerics()) {
-				it.targetType(resolvableType)
-			}
 		}
-		registry.registerBean(name, T::class.java, customizer)
+		registry.registerBean(name, object: ParameterizedTypeReference<T>() {}, customizer)
 	}
 
 	/**
@@ -234,12 +230,8 @@ open class BeanRegistrarDsl(private val init: BeanRegistrarDsl.() -> Unit): Bean
 			if (prototype) {
 				it.prototype()
 			}
-			val resolvableType = ResolvableType.forType(object: ParameterizedTypeReference<T>() {});
-			if (resolvableType.hasGenerics()) {
-				it.targetType(resolvableType)
-			}
 		}
-		return registry.registerBean(T::class.java, customizer)
+		return registry.registerBean(object: ParameterizedTypeReference<T>() {}, customizer)
 	}
 
 	/**
@@ -304,12 +296,8 @@ open class BeanRegistrarDsl(private val init: BeanRegistrarDsl.() -> Unit): Bean
 			it.supplier {
 				SupplierContextDsl<T>(it, env).supplier()
 			}
-			val resolvableType = ResolvableType.forType(object: ParameterizedTypeReference<T>() {});
-			if (resolvableType.hasGenerics()) {
-				it.targetType(resolvableType)
-			}
 		}
-		registry.registerBean(name, T::class.java, customizer)
+		registry.registerBean(name, object: ParameterizedTypeReference<T>() {}, customizer)
 	}
 
 	inline fun <reified T : Any> registerBean(autowirable: Boolean = true,
@@ -372,12 +360,8 @@ open class BeanRegistrarDsl(private val init: BeanRegistrarDsl.() -> Unit): Bean
 			it.supplier {
 				SupplierContextDsl<T>(it, env).supplier()
 			}
-			val resolvableType = ResolvableType.forType(object: ParameterizedTypeReference<T>() {});
-			if (resolvableType.hasGenerics()) {
-				it.targetType(resolvableType)
-			}
 		}
-		return registry.registerBean(T::class.java, customizer)
+		return registry.registerBean(object: ParameterizedTypeReference<T>() {}, customizer)
 	}
 
 	// Function with 0 parameter
@@ -1094,7 +1078,7 @@ open class BeanRegistrarDsl(private val init: BeanRegistrarDsl.() -> Unit): Bean
 		 * @return a corresponding provider handle
 		 */
 		inline fun <reified T : Any> beanProvider() : ObjectProvider<T> =
-			context.beanProvider(ResolvableType.forType((object : ParameterizedTypeReference<T>() {}).type))
+			context.beanProvider(object : ParameterizedTypeReference<T>() {})
 	}
 
 	override fun register(registry: BeanRegistry, env: Environment) {

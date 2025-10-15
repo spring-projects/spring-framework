@@ -27,9 +27,8 @@ public class GenericBeanRegistrar implements BeanRegistrar {
 
 	@Override
 	public void register(BeanRegistry registry, Environment env) {
-		ParameterizedTypeReference<Supplier<Foo>> type = new ParameterizedTypeReference<>() {};
-		registry.registerBean("fooSupplier", Supplier.class, spec -> spec.targetType(type)
-				.supplier(context-> (Supplier<Foo>) Foo::new));
+		registry.registerBean("fooSupplier", new ParameterizedTypeReference<Supplier<Foo>>() {}, spec ->
+				spec.supplier(context-> (Supplier<Foo>) Foo::new));
 	}
 
 	public record Foo() {}
