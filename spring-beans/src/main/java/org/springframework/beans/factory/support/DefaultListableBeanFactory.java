@@ -78,6 +78,7 @@ import org.springframework.beans.factory.config.NamedBeanHolder;
 import org.springframework.core.NamedThreadLocal;
 import org.springframework.core.OrderComparator;
 import org.springframework.core.Ordered;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.SpringProperties;
 import org.springframework.core.annotation.MergedAnnotation;
@@ -396,6 +397,10 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	@Override
 	public <T> ObjectProvider<T> getBeanProvider(ResolvableType requiredType) {
 		return getBeanProvider(requiredType, true);
+	}
+
+	public <T> ObjectProvider<T> getBeanProvider(ParameterizedTypeReference<T> requiredType) {
+		return getBeanProvider(ResolvableType.forType(requiredType), true);
 	}
 
 

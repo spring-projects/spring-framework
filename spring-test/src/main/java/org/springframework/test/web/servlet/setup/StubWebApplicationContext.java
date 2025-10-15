@@ -43,6 +43,7 @@ import org.springframework.context.MessageSource;
 import org.springframework.context.MessageSourceResolvable;
 import org.springframework.context.NoSuchMessageException;
 import org.springframework.context.support.DelegatingMessageSource;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.StandardEnvironment;
@@ -189,6 +190,11 @@ class StubWebApplicationContext implements WebApplicationContext {
 
 	@Override
 	public <T> ObjectProvider<T> getBeanProvider(ResolvableType requiredType) {
+		return this.beanFactory.getBeanProvider(requiredType);
+	}
+
+	@Override
+	public <T> ObjectProvider<T> getBeanProvider(ParameterizedTypeReference<T> requiredType) {
 		return this.beanFactory.getBeanProvider(requiredType);
 	}
 

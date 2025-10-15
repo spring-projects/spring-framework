@@ -34,6 +34,7 @@ import org.springframework.beans.factory.BeanNotOfRequiredTypeException;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.NoUniqueBeanDefinitionException;
 import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.ResolvableType;
 import org.springframework.jndi.JndiLocatorSupport;
 import org.springframework.jndi.TypeMismatchNamingException;
@@ -193,6 +194,12 @@ public class SimpleJndiBeanFactory extends JndiLocatorSupport implements BeanFac
 	public <T> ObjectProvider<T> getBeanProvider(ResolvableType requiredType) {
 		throw new UnsupportedOperationException(
 				"SimpleJndiBeanFactory does not support resolution by ResolvableType");
+	}
+
+	@Override
+	public <T> ObjectProvider<T> getBeanProvider(ParameterizedTypeReference<T> requiredType) {
+		throw new UnsupportedOperationException(
+				"SimpleJndiBeanFactory does not support resolution by ParameterizedTypeReference");
 	}
 
 	@Override
