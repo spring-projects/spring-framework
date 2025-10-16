@@ -33,7 +33,11 @@ import org.apache.poi.xssf.streaming.SXSSFWorkbook;
  *
  * @author Juergen Hoeller
  * @since 4.2
+ * @deprecated since 7.0. Libraries or applications can provide their own {@code View}
+ * class or perform rendering in web handlers directly.
  */
+@Deprecated(since = "7.0", forRemoval = true)
+@SuppressWarnings("removal")
 public abstract class AbstractXlsxStreamingView extends AbstractXlsxView {
 
 	/**

@@ -41,14 +41,11 @@ import org.springframework.http.converter.AbstractJacksonHttpMessageConverter;
  * can be overridden by setting the {@link #setSupportedMediaTypes supportedMediaTypes}
  * property.
  *
- * <p>The default constructor loads {@link tools.jackson.databind.JacksonModule}s
- * found by {@link MapperBuilder#findModules(ClassLoader)}.
- *
  * <p>The following hints entries are supported:
  * <ul>
- *     <li>A JSON view with a <code>com.fasterxml.jackson.annotation.JsonView</code>
+ *     <li>A JSON view with a <code>"com.fasterxml.jackson.annotation.JsonView"</code>
  *         key and the class name of the JSON view as value.</li>
- *     <li>A filter provider with a <code>tools.jackson.databind.ser.FilterProvider</code>
+ *     <li>A filter provider with a <code>"tools.jackson.databind.ser.FilterProvider"</code>
  *         key and the filter provider class name as value.</li>
  * </ul>
  *
@@ -74,16 +71,26 @@ public class JacksonJsonHttpMessageConverter extends AbstractJacksonHttpMessageC
 	 * {@link ProblemDetailJacksonMixin}.
 	 */
 	public JacksonJsonHttpMessageConverter() {
-		super(JsonMapper.builder().addMixIn(ProblemDetail.class, ProblemDetailJacksonMixin.class), DEFAULT_JSON_MIME_TYPES);
+		this(JsonMapper.builder());
+	}
+
+	/**
+	 * Construct a new instance with the provided {@link JsonMapper.Builder}
+	 * customized with the {@link tools.jackson.databind.JacksonModule}s found
+	 * by {@link MapperBuilder#findModules(ClassLoader)} and
+	 * {@link ProblemDetailJacksonMixin}.
+	 * @see JsonMapper#builder()
+	 */
+	public JacksonJsonHttpMessageConverter(JsonMapper.Builder builder) {
+		super(builder.addMixIn(ProblemDetail.class, ProblemDetailJacksonMixin.class), DEFAULT_JSON_MIME_TYPES);
 	}
 
 	/**
 	 * Construct a new instance with the provided {@link JsonMapper}.
 	 * @see JsonMapper#builder()
-	 * @see MapperBuilder#findModules(ClassLoader)
 	 */
-	public JacksonJsonHttpMessageConverter(JsonMapper objectMapper) {
-		super(objectMapper, DEFAULT_JSON_MIME_TYPES);
+	public JacksonJsonHttpMessageConverter(JsonMapper mapper) {
+		super(mapper, DEFAULT_JSON_MIME_TYPES);
 	}
 
 

@@ -32,8 +32,13 @@ import org.springframework.http.converter.AbstractJacksonHttpMessageConverter;
  * media type. This can be overridden by setting the
  * {@link #setSupportedMediaTypes supportedMediaTypes} property.
  *
- * <p>The default constructor loads {@link tools.jackson.databind.JacksonModule}s
- * found by {@link MapperBuilder#findModules(ClassLoader)}.
+ * <p>The following hints entries are supported:
+ * <ul>
+ *     <li>A JSON view with a <code>"com.fasterxml.jackson.annotation.JsonView"</code>
+ *         key and the class name of the JSON view as value.</li>
+ *     <li>A filter provider with a <code>"tools.jackson.databind.ser.FilterProvider"</code>
+ *         key and the filter provider class name as value.</li>
+ * </ul>
  *
  * @author Sebastien Deleuze
  * @since 7.0
@@ -52,9 +57,18 @@ public class JacksonSmileHttpMessageConverter extends AbstractJacksonHttpMessage
 	}
 
 	/**
+	 * Construct a new instance with the provided {@link SmileMapper} customized
+	 * with the {@link tools.jackson.databind.JacksonModule}s found by
+	 * {@link MapperBuilder#findModules(ClassLoader)}.
+	 * @see SmileMapper#builder()
+	 */
+	public JacksonSmileHttpMessageConverter(SmileMapper.Builder builder) {
+		super(builder, DEFAULT_SMILE_MIME_TYPES);
+	}
+
+	/**
 	 * Construct a new instance with the provided {@link SmileMapper}.
 	 * @see SmileMapper#builder()
-	 * @see MapperBuilder#findAndAddModules(ClassLoader)
 	 */
 	public JacksonSmileHttpMessageConverter(SmileMapper mapper) {
 		super(mapper, DEFAULT_SMILE_MIME_TYPES);

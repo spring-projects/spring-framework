@@ -60,10 +60,10 @@ public @interface EnableResilientMethods {
 	/**
 	 * Indicate the order in which the {@link RetryAnnotationBeanPostProcessor}
 	 * and {@link ConcurrencyLimitBeanPostProcessor} should be applied.
-	 * <p>The default is {@link Ordered#LOWEST_PRECEDENCE} in order to run
-	 * after all other post-processors, so that they can add advisors to
-	 * existing proxies rather than double-proxy.
+	 * <p>The default is {@link Ordered#LOWEST_PRECEDENCE - 1} in order to run
+	 * after all common post-processors, except for {@code @EnableAsync}.
+	 * @see org.springframework.scheduling.annotation.EnableAsync#order()
 	 */
-	int order() default Ordered.LOWEST_PRECEDENCE;
+	int order() default Ordered.LOWEST_PRECEDENCE - 1;
 
 }

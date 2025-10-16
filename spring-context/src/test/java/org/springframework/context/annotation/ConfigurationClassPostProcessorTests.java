@@ -422,11 +422,14 @@ class ConfigurationClassPostProcessorTests {
 		beanFactory.registerBeanDefinition("config", new RootBeanDefinition(SingletonBeanConfig.class));
 		beanFactory.setAllowBeanDefinitionOverriding(false);
 		ConfigurationClassPostProcessor pp = new ConfigurationClassPostProcessor();
+
 		assertThatExceptionOfType(BeanDefinitionStoreException.class)
 				.isThrownBy(() -> pp.postProcessBeanFactory(beanFactory))
-				.withMessageContaining("bar")
-				.withMessageContaining("SingletonBeanConfig")
-				.withMessageContaining(TestBean.class.getName());
+				.withMessageContainingAll(
+					"bar",
+					"SingletonBeanConfig",
+					TestBean.class.getName()
+				);
 	}
 
 	@Test  // gh-25430
@@ -435,10 +438,13 @@ class ConfigurationClassPostProcessorTests {
 		DefaultListableBeanFactory beanFactory = context.getDefaultListableBeanFactory();
 		beanFactory.setAllowBeanDefinitionOverriding(false);
 		context.register(FirstConfiguration.class, SecondConfiguration.class);
+
 		assertThatIllegalStateException().isThrownBy(context::refresh)
-				.withMessageContaining("alias 'taskExecutor'")
-				.withMessageContaining("name 'applicationTaskExecutor'")
-				.withMessageContaining("bean definition 'taskExecutor'");
+				.withMessageContainingAll(
+					"alias 'taskExecutor'",
+					"name 'applicationTaskExecutor'",
+					"bean definition 'taskExecutor'"
+				);
 		context.close();
 	}
 
@@ -1052,7 +1058,7 @@ class ConfigurationClassPostProcessorTests {
 	}
 
 	@Test
-	void testSelfReferenceExclusionForFactoryMethodOnSameBean() {
+	void selfReferenceExclusionForFactoryMethodOnSameBean() {
 		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
 		bpp.setBeanFactory(beanFactory);
 		beanFactory.addBeanPostProcessor(bpp);
@@ -1066,7 +1072,7 @@ class ConfigurationClassPostProcessorTests {
 	}
 
 	@Test
-	void testConfigWithDefaultMethods() {
+	void configWithDefaultMethods() {
 		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
 		bpp.setBeanFactory(beanFactory);
 		beanFactory.addBeanPostProcessor(bpp);
@@ -1080,7 +1086,7 @@ class ConfigurationClassPostProcessorTests {
 	}
 
 	@Test
-	void testConfigWithDefaultMethodsUsingAsm() {
+	void configWithDefaultMethodsUsingAsm() {
 		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
 		bpp.setBeanFactory(beanFactory);
 		beanFactory.addBeanPostProcessor(bpp);
@@ -1094,7 +1100,7 @@ class ConfigurationClassPostProcessorTests {
 	}
 
 	@Test
-	void testConfigWithFailingInit() {  // gh-23343
+	void configWithFailingInit() {  // gh-23343
 		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
 		bpp.setBeanFactory(beanFactory);
 		beanFactory.addBeanPostProcessor(bpp);
@@ -1108,7 +1114,7 @@ class ConfigurationClassPostProcessorTests {
 	}
 
 	@Test
-	void testCircularDependency() {
+	void circularDependency() {
 		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
 		bpp.setBeanFactory(beanFactory);
 		beanFactory.addBeanPostProcessor(bpp);
@@ -1122,42 +1128,42 @@ class ConfigurationClassPostProcessorTests {
 	}
 
 	@Test
-	void testCircularDependencyWithApplicationContext() {
+	void circularDependencyWithApplicationContext() {
 		assertThatExceptionOfType(BeanCreationException.class)
 				.isThrownBy(() -> new AnnotationConfigApplicationContext(A.class, AStrich.class))
 				.withMessageContaining("Circular reference");
 	}
 
 	@Test
-	void testPrototypeArgumentThroughBeanMethodCall() {
+	void prototypeArgumentThroughBeanMethodCall() {
 		ConfigurableApplicationContext ctx = new AnnotationConfigApplicationContext(BeanArgumentConfigWithPrototype.class);
 		ctx.getBean(FooFactory.class).createFoo(new BarArgument());
 		ctx.close();
 	}
 
 	@Test
-	void testSingletonArgumentThroughBeanMethodCall() {
+	void singletonArgumentThroughBeanMethodCall() {
 		ConfigurableApplicationContext ctx = new AnnotationConfigApplicationContext(BeanArgumentConfigWithSingleton.class);
 		ctx.getBean(FooFactory.class).createFoo(new BarArgument());
 		ctx.close();
 	}
 
 	@Test
-	void testNullArgumentThroughBeanMethodCall() {
+	void nullArgumentThroughBeanMethodCall() {
 		ConfigurableApplicationContext ctx = new AnnotationConfigApplicationContext(BeanArgumentConfigWithNull.class);
 		ctx.getBean("aFoo");
 		ctx.close();
 	}
 
 	@Test
-	void testInjectionPointMatchForNarrowTargetReturnType() {
+	void injectionPointMatchForNarrowTargetReturnType() {
 		ConfigurableApplicationContext ctx = new AnnotationConfigApplicationContext(FooBarConfiguration.class);
 		assertThat(ctx.getBean(FooImpl.class).bar).isSameAs(ctx.getBean(BarImpl.class));
 		ctx.close();
 	}
 
 	@Test
-	void testVarargOnBeanMethod() {
+	void varargOnBeanMethod() {
 		ConfigurableApplicationContext ctx = new AnnotationConfigApplicationContext(VarargConfiguration.class, TestBean.class);
 		VarargConfiguration bean = ctx.getBean(VarargConfiguration.class);
 		assertThat(bean.testBeans).isNotNull();
@@ -1167,7 +1173,7 @@ class ConfigurationClassPostProcessorTests {
 	}
 
 	@Test
-	void testEmptyVarargOnBeanMethod() {
+	void emptyVarargOnBeanMethod() {
 		ConfigurableApplicationContext ctx = new AnnotationConfigApplicationContext(VarargConfiguration.class);
 		VarargConfiguration bean = ctx.getBean(VarargConfiguration.class);
 		assertThat(bean.testBeans).isNotNull();
@@ -1176,7 +1182,7 @@ class ConfigurationClassPostProcessorTests {
 	}
 
 	@Test
-	void testCollectionArgumentOnBeanMethod() {
+	void collectionArgumentOnBeanMethod() {
 		ConfigurableApplicationContext ctx = new AnnotationConfigApplicationContext(CollectionArgumentConfiguration.class, TestBean.class);
 		CollectionArgumentConfiguration bean = ctx.getBean(CollectionArgumentConfiguration.class);
 		assertThat(bean.testBeans).containsExactly(ctx.getBean(TestBean.class));
@@ -1184,7 +1190,7 @@ class ConfigurationClassPostProcessorTests {
 	}
 
 	@Test
-	void testEmptyCollectionArgumentOnBeanMethod() {
+	void emptyCollectionArgumentOnBeanMethod() {
 		ConfigurableApplicationContext ctx = new AnnotationConfigApplicationContext(CollectionArgumentConfiguration.class);
 		CollectionArgumentConfiguration bean = ctx.getBean(CollectionArgumentConfiguration.class);
 		assertThat(bean.testBeans).isEmpty();
@@ -1192,7 +1198,7 @@ class ConfigurationClassPostProcessorTests {
 	}
 
 	@Test
-	void testMapArgumentOnBeanMethod() {
+	void mapArgumentOnBeanMethod() {
 		ConfigurableApplicationContext ctx = new AnnotationConfigApplicationContext(MapArgumentConfiguration.class, DummyRunnable.class);
 		MapArgumentConfiguration bean = ctx.getBean(MapArgumentConfiguration.class);
 		assertThat(bean.testBeans).hasSize(1).containsValue(ctx.getBean(Runnable.class));
@@ -1200,7 +1206,7 @@ class ConfigurationClassPostProcessorTests {
 	}
 
 	@Test
-	void testEmptyMapArgumentOnBeanMethod() {
+	void emptyMapArgumentOnBeanMethod() {
 		ConfigurableApplicationContext ctx = new AnnotationConfigApplicationContext(MapArgumentConfiguration.class);
 		MapArgumentConfiguration bean = ctx.getBean(MapArgumentConfiguration.class);
 		assertThat(bean.testBeans).isEmpty();
@@ -1208,7 +1214,7 @@ class ConfigurationClassPostProcessorTests {
 	}
 
 	@Test
-	void testCollectionInjectionFromSameConfigurationClass() {
+	void collectionInjectionFromSameConfigurationClass() {
 		ConfigurableApplicationContext ctx = new AnnotationConfigApplicationContext(CollectionInjectionConfiguration.class);
 		CollectionInjectionConfiguration bean = ctx.getBean(CollectionInjectionConfiguration.class);
 		assertThat(bean.testBeans).containsExactly(ctx.getBean(TestBean.class));
@@ -1216,7 +1222,7 @@ class ConfigurationClassPostProcessorTests {
 	}
 
 	@Test
-	void testMapInjectionFromSameConfigurationClass() {
+	void mapInjectionFromSameConfigurationClass() {
 		ConfigurableApplicationContext ctx = new AnnotationConfigApplicationContext(MapInjectionConfiguration.class);
 		MapInjectionConfiguration bean = ctx.getBean(MapInjectionConfiguration.class);
 		assertThat(bean.testBeans).containsOnly(Map.entry("testBean", ctx.getBean(Runnable.class)));
@@ -1224,20 +1230,20 @@ class ConfigurationClassPostProcessorTests {
 	}
 
 	@Test
-	void testBeanLookupFromSameConfigurationClass() {
+	void beanLookupFromSameConfigurationClass() {
 		ConfigurableApplicationContext ctx = new AnnotationConfigApplicationContext(BeanLookupConfiguration.class);
 		assertThat(ctx.getBean(BeanLookupConfiguration.class).getTestBean()).isSameAs(ctx.getBean(TestBean.class));
 		ctx.close();
 	}
 
 	@Test
-	void testNameClashBetweenConfigurationClassAndBean() {
+	void nameClashBetweenConfigurationClassAndBean() {
 		assertThatExceptionOfType(BeanDefinitionStoreException.class)
-				.isThrownBy(() -> new AnnotationConfigApplicationContext(MyTestBean.class).getBean("myTestBean", TestBean.class));
+				.isThrownBy(() -> new AnnotationConfigApplicationContext(MyTestBean.class));
 	}
 
 	@Test
-	void testBeanDefinitionRegistryPostProcessorConfig() {
+	void beanDefinitionRegistryPostProcessorConfig() {
 		ConfigurableApplicationContext ctx = new AnnotationConfigApplicationContext(BeanDefinitionRegistryPostProcessorConfig.class);
 		assertThat(ctx.getBean("myTestBean")).isInstanceOf(TestBean.class);
 		ctx.close();

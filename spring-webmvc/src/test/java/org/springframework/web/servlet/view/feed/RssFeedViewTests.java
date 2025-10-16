@@ -37,6 +37,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * @author Arjen Poutsma
  */
+@SuppressWarnings("removal")
 class RssFeedViewTests {
 
 	private final AbstractRssFeedView view = new MyRssFeedView();

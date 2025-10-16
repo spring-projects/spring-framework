@@ -161,9 +161,17 @@ class ConfigurationClassBeanDefinitionReader {
 
 		ScopeMetadata scopeMetadata = scopeMetadataResolver.resolveScopeMetadata(configBeanDef);
 		configBeanDef.setScope(scopeMetadata.getScopeName());
-		String configBeanName = this.importBeanNameGenerator.generateBeanName(configBeanDef, this.registry);
-		AnnotationConfigUtils.processCommonDefinitionAnnotations(configBeanDef, metadata);
 
+		String configBeanName;
+		try {
+			configBeanName = this.importBeanNameGenerator.generateBeanName(configBeanDef, this.registry);
+		}
+		catch (IllegalArgumentException ex) {
+			throw new IllegalStateException("Failed to generate bean name for imported class '" +
+					configClass.getMetadata().getClassName() + "'", ex);
+		}
+
+		AnnotationConfigUtils.processCommonDefinitionAnnotations(configBeanDef, metadata);
 		BeanDefinitionHolder definitionHolder = new BeanDefinitionHolder(configBeanDef, configBeanName);
 		definitionHolder = AnnotationConfigUtils.applyScopedProxyMode(scopeMetadata, definitionHolder, this.registry);
 		this.registry.registerBeanDefinition(definitionHolder.getBeanName(), definitionHolder.getBeanDefinition());

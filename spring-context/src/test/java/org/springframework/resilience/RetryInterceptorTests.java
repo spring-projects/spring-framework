@@ -22,6 +22,8 @@ import java.nio.charset.MalformedInputException;
 import java.nio.file.AccessDeniedException;
 import java.time.Duration;
 import java.util.Properties;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.aopalliance.intercept.MethodInterceptor;
@@ -44,8 +46,11 @@ import org.springframework.resilience.annotation.RetryAnnotationBeanPostProcesso
 import org.springframework.resilience.annotation.Retryable;
 import org.springframework.resilience.retry.MethodRetrySpec;
 import org.springframework.resilience.retry.SimpleRetryInterceptor;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.EnableAsync;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIOException;
 import static org.assertj.core.api.Assertions.assertThatRuntimeException;
 
@@ -265,11 +270,11 @@ class RetryInterceptorTests {
 	@Test
 	void withEnableAnnotation() throws Exception {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
-		ctx.registerBeanDefinition("bean", new RootBeanDefinition(DoubleAnnotatedBean.class));
+		ctx.registerBeanDefinition("bean", new RootBeanDefinition(ConcurrencyLimitAnnotatedBean.class));
 		ctx.registerBeanDefinition("config", new RootBeanDefinition(EnablingConfig.class));
 		ctx.refresh();
-		DoubleAnnotatedBean proxy = ctx.getBean(DoubleAnnotatedBean.class);
-		DoubleAnnotatedBean target = (DoubleAnnotatedBean) AopProxyUtils.getSingletonTarget(proxy);
+		ConcurrencyLimitAnnotatedBean proxy = ctx.getBean(ConcurrencyLimitAnnotatedBean.class);
+		ConcurrencyLimitAnnotatedBean target = (ConcurrencyLimitAnnotatedBean) AopProxyUtils.getSingletonTarget(proxy);
 
 		Thread thread = new Thread(() -> assertThatIOException().isThrownBy(proxy::retryOperation));
 		thread.start();
@@ -277,6 +282,20 @@ class RetryInterceptorTests {
 		thread.join();
 		assertThat(target.counter).hasValue(6);
 		assertThat(target.threadChange).hasValue(2);
+	}
+
+	@Test
+	void withAsyncAnnotation() {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+		ctx.registerBeanDefinition("bean", new RootBeanDefinition(AsyncAnnotatedBean.class));
+		ctx.registerBeanDefinition("config", new RootBeanDefinition(EnablingConfigWithAsync.class));
+		ctx.refresh();
+		AsyncAnnotatedBean proxy = ctx.getBean(AsyncAnnotatedBean.class);
+		AsyncAnnotatedBean target = (AsyncAnnotatedBean) AopProxyUtils.getSingletonTarget(proxy);
+
+		assertThatExceptionOfType(CompletionException.class).isThrownBy(() -> proxy.retryOperation().join())
+				.withCauseInstanceOf(IllegalStateException.class);
+		assertThat(target.counter).hasValue(3);
 	}
 
 
@@ -392,7 +411,7 @@ class RetryInterceptorTests {
 	}
 
 
-	static class DoubleAnnotatedBean {
+	static class ConcurrencyLimitAnnotatedBean {
 
 		AtomicInteger current = new AtomicInteger();
 
@@ -419,8 +438,26 @@ class RetryInterceptorTests {
 	}
 
 
+	static class AsyncAnnotatedBean {
+
+		AtomicInteger counter = new AtomicInteger();
+
+		@Async
+		@Retryable(maxAttempts = 2, delay = 10)
+		public CompletableFuture<Void> retryOperation() {
+			throw new IllegalStateException(Integer.toString(counter.incrementAndGet()));
+		}
+	}
+
+
 	@EnableResilientMethods
 	static class EnablingConfig {
+	}
+
+
+	@EnableAsync
+	@EnableResilientMethods
+	static class EnablingConfigWithAsync {
 	}
 
 }

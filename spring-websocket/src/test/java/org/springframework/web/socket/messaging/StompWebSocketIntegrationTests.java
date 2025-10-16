@@ -89,9 +89,10 @@ class StompWebSocketIntegrationTests extends AbstractWebSocketIntegrationTests {
 
 		super.setup(server, webSocketClient, testInfo);
 
-		TextMessage message = create(StompCommand.SEND).headers("destination:/app/simple").build();
+		TextMessage m1 = create(StompCommand.CONNECT).headers("accept-version:1.1").build();
+		TextMessage m2 = create(StompCommand.SEND).headers("destination:/app/simple").build();
 
-		try (WebSocketSession session = execute(new TestClientWebSocketHandler(0, message), "/ws").get()) {
+		try (WebSocketSession session = execute(new TestClientWebSocketHandler(0, m1, m2), "/ws").get()) {
 			assertThat(session).isNotNull();
 			SimpleController controller = this.wac.getBean(SimpleController.class);
 			assertThat(controller.latch.await(TIMEOUT, TimeUnit.SECONDS)).isTrue();

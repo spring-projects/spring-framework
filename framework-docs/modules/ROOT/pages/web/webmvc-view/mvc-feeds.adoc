@@ -1,6 +1,10 @@
 [[mvc-view-feeds]]
 = RSS and Atom
 
+WARNING: As of Spring Framework 7.0, view classes in the `org.springframework.web.servlet.view.feed`
+package are deprecated. Instead, libraries can adapt this existing code to provide support with their own `*View` types.
+As an alternative, applications can perform direct rendering in web handlers.
+
 Both `AbstractAtomFeedView` and `AbstractRssFeedView` inherit from the
 `AbstractFeedView` base class and are used to provide Atom and RSS Feed views, respectively. They
 are based on https://rometools.github.io/rome/[ROME] project and are located in the

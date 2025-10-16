@@ -45,6 +45,7 @@ import org.springframework.beans.testfixture.beans.GenericIntegerBean;
 import org.springframework.beans.testfixture.beans.GenericSetOfIntegerBean;
 import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.core.OverridingClassLoader;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.annotation.Order;
@@ -792,9 +793,9 @@ class BeanFactoryGenericsTests {
 		assertThat(doubleStoreNames).containsExactly("store1");
 		assertThat(floatStoreNames).containsExactly("store2");
 
-		ObjectProvider<NumberStore<?>> numberStoreProvider = bf.getBeanProvider(ResolvableType.forClass(NumberStore.class));
-		ObjectProvider<NumberStore<Double>> doubleStoreProvider = bf.getBeanProvider(ResolvableType.forClassWithGenerics(NumberStore.class, Double.class));
-		ObjectProvider<NumberStore<Float>> floatStoreProvider = bf.getBeanProvider(ResolvableType.forClassWithGenerics(NumberStore.class, Float.class));
+		ObjectProvider<NumberStore<?>> numberStoreProvider = bf.getBeanProvider(new ParameterizedTypeReference<>() {});
+		ObjectProvider<NumberStore<Double>> doubleStoreProvider = bf.getBeanProvider(new ParameterizedTypeReference<>() {});
+		ObjectProvider<NumberStore<Float>> floatStoreProvider = bf.getBeanProvider(new ParameterizedTypeReference<>() {});
 		assertThatExceptionOfType(NoUniqueBeanDefinitionException.class).isThrownBy(numberStoreProvider::getObject);
 		assertThatExceptionOfType(NoUniqueBeanDefinitionException.class).isThrownBy(numberStoreProvider::getIfAvailable);
 		assertThat(numberStoreProvider.getIfUnique()).isNull();

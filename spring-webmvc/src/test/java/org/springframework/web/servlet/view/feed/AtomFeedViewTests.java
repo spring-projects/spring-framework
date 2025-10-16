@@ -37,6 +37,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * @author Arjen Poutsma
  */
+@SuppressWarnings("removal")
 class AtomFeedViewTests {
 
 	private final AbstractAtomFeedView view = new MyAtomFeedView();

@@ -46,7 +46,10 @@ import org.springframework.web.servlet.view.AbstractView;
  * @param <T> the {@link WireFeed} type
  * @see AbstractRssFeedView
  * @see AbstractAtomFeedView
+ * @deprecated since 7.0. Libraries or applications can provide their own {@code View}
+ * class or perform rendering in web handlers directly.
  */
+@Deprecated(since = "7.0", forRemoval = true)
 public abstract class AbstractFeedView<T extends WireFeed> extends AbstractView {
 
 	@Override

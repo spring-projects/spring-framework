@@ -34,9 +34,6 @@ import org.springframework.util.MimeType;
  * <p>For non-streaming use cases, {@link Flux} elements are collected into a {@link List}
  * before serialization for performance reasons.
  *
- * <p>The default constructor loads {@link tools.jackson.databind.JacksonModule}s
- * found by {@link MapperBuilder#findModules(ClassLoader)}.
- *
  * @author Sebastien Deleuze
  * @since 7.0
  * @see JacksonSmileDecoder
@@ -59,24 +56,42 @@ public class JacksonSmileEncoder extends AbstractJacksonEncoder<SmileMapper> {
 	 * {@link MapperBuilder#findModules(ClassLoader)}.
 	 */
 	public JacksonSmileEncoder() {
-		super(SmileMapper.builder(), DEFAULT_SMILE_MIME_TYPES);
-		setStreamingMediaTypes(Collections.singletonList(DEFAULT_SMILE_STREAMING_MEDIA_TYPE));
+		this(SmileMapper.builder(), DEFAULT_SMILE_MIME_TYPES);
+	}
+
+	/**
+	 * Construct a new instance with the provided {@link SmileMapper.Builder}
+	 * customized with the {@link tools.jackson.databind.JacksonModule}s
+	 * found by {@link MapperBuilder#findModules(ClassLoader)}.
+	 * @see SmileMapper#builder()
+	 */
+	public JacksonSmileEncoder(SmileMapper.Builder builder) {
+		this(builder, DEFAULT_SMILE_MIME_TYPES);
 	}
 
 	/**
 	 * Construct a new instance with the provided {@link SmileMapper}.
 	 * @see SmileMapper#builder()
-	 * @see MapperBuilder#findAndAddModules(ClassLoader)
 	 */
 	public JacksonSmileEncoder(SmileMapper mapper) {
-		super(mapper, DEFAULT_SMILE_MIME_TYPES);
+		this(mapper, DEFAULT_SMILE_MIME_TYPES);
+	}
+
+	/**
+	 * Construct a new instance with the provided {@link SmileMapper}
+	 * customized with the {@link tools.jackson.databind.JacksonModule}s
+	 * found by {@link MapperBuilder#findModules(ClassLoader)}, and
+	 * {@link MimeType}s.
+	 * @see SmileMapper#builder()
+	 */
+	public JacksonSmileEncoder(SmileMapper.Builder builder, MimeType... mimeTypes) {
+		super(builder, mimeTypes);
 		setStreamingMediaTypes(Collections.singletonList(DEFAULT_SMILE_STREAMING_MEDIA_TYPE));
 	}
 
 	/**
 	 * Construct a new instance with the provided {@link SmileMapper} and {@link MimeType}s.
 	 * @see SmileMapper#builder()
-	 * @see MapperBuilder#findAndAddModules(ClassLoader)
 	 */
 	public JacksonSmileEncoder(SmileMapper mapper, MimeType... mimeTypes) {
 		super(mapper, mimeTypes);

@@ -56,7 +56,6 @@ public class SpringConstraintValidatorFactory implements ConstraintValidatorFact
 		return this.beanFactory.createBean(key);
 	}
 
-	// Bean Validation 1.1 releaseInstance method
 	@Override
 	public void releaseInstance(ConstraintValidator<?, ?> instance) {
 		this.beanFactory.destroyBean(instance);

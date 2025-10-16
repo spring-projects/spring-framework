@@ -4,9 +4,13 @@
 Spring offers ways to return output other than HTML, including PDF and Excel spreadsheets.
 This section describes how to use those features.
 
+WARNING: As of Spring Framework 7.0, view classes in the `org.springframework.web.servlet.view.document`
+package are deprecated. Instead, libraries can adapt this existing code to provide support with their own `*View` types.
+As an alternative, applications can perform direct rendering in web handlers.
 
 [[mvc-view-document-intro]]
 == Introduction to Document Views
+
 
 An HTML page is not always the best way for the user to view the model output,
 and Spring makes it simple to generate a PDF document or an Excel spreadsheet
