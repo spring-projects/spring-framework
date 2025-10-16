@@ -511,7 +511,7 @@ public class ConfigurationClassPostProcessorAotContributionTests {
 				initializer.accept(freshContext);
 				freshContext.refresh();
 				assertThat(freshContext.getBean(ClassNameHolder.class).className())
-						.isEqualTo(ImportAwareBeanRegistrarConfiguration.class.getName());
+						.isEqualTo(ImportAwareBeanRegistrar.class.getName());
 				freshContext.close();
 			});
 		}

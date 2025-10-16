@@ -615,7 +615,7 @@ class ConfigurationClassParser {
 						if (registrar instanceof ImportAware importAware) {
 							importAware.setImportMetadata(metadata);
 						}
-						configClass.addBeanRegistrar(metadata.getClassName(), registrar);
+						configClass.addBeanRegistrar(candidateClass.getName(), registrar);
 					}
 					else if (candidate.isAssignable(ImportBeanDefinitionRegistrar.class)) {
 						// Candidate class is an ImportBeanDefinitionRegistrar ->
