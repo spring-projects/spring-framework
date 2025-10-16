@@ -24,6 +24,7 @@ import org.springframework.beans.factory.InitializingBean
 import org.springframework.beans.factory.NoSuchBeanDefinitionException
 import org.springframework.beans.factory.config.BeanDefinition
 import org.springframework.beans.factory.getBean
+import org.springframework.beans.factory.getBeanProvider
 import org.springframework.beans.factory.support.RootBeanDefinition
 import org.springframework.mock.env.MockEnvironment
 import java.util.function.Supplier
@@ -77,6 +78,13 @@ class BeanRegistrarDslConfigurationTests {
 		assertThat(context.getBean<Bar>().foo).isEqualTo(context.getBean<Foo>())
 	}
 
+	@Test
+	fun multipleBeanRegistrars() {
+		val context = AnnotationConfigApplicationContext(MultipleBeanRegistrarsKotlinConfiguration::class.java)
+		assertThat(context.getBeanProvider<Foo>().singleOrNull()).isNotNull
+		assertThat(context.getBeanProvider<Bar>().singleOrNull()).isNotNull
+	}
+
 	class Foo
 	data class Bar(val foo: Foo)
 	data class Baz(val message: String = "")
@@ -89,6 +97,18 @@ class BeanRegistrarDslConfigurationTests {
 		}
 
 	}
+
+	@Configuration
+	@Import(value = [FooRegistrar::class, BarRegistrar::class])
+	internal class MultipleBeanRegistrarsKotlinConfiguration
+
+	private class FooRegistrar : BeanRegistrarDsl({
+		registerBean<Foo>()
+	})
+
+	private class BarRegistrar : BeanRegistrarDsl({
+		registerBean<Bar>()
+	})
 
 	@Configuration
 	@Import(SampleBeanRegistrar::class)
