@@ -221,6 +221,13 @@ public enum HttpStatus implements HttpStatusCode {
 	 */
 	PRECONDITION_FAILED(412, Series.CLIENT_ERROR, "Precondition Failed"),
 	/**
+	 * {@code 413 Content Too Large}.
+	 * @since 7.0
+	 * @see <a href="https://datatracker.ietf.org/doc/html/rfc9110#name-413-content-too-large">
+	 *     HTTP Semantics, section 15.5.14</a>
+	 */
+	CONTENT_TOO_LARGE(413, Series.CLIENT_ERROR, "Content Too Large"),
+	/**
 	 * {@code 413 Payload Too Large}.
 	 * @since 4.1
 	 * @see <a href="https://tools.ietf.org/html/rfc7231#section-6.5.11">
@@ -229,13 +236,6 @@ public enum HttpStatus implements HttpStatusCode {
 	 */
 	@Deprecated(since = "7.0")
 	PAYLOAD_TOO_LARGE(413, Series.CLIENT_ERROR, "Payload Too Large"),
-	/**
-	 * {@code 413 Content Too Large}.
-	 * @since 7.0
-	 * @see <a href="https://datatracker.ietf.org/doc/html/rfc9110#name-413-content-too-large">
-	 *     HTTP Semantics, section 15.5.14</a>
-	 */
-	CONTENT_TOO_LARGE(413, Series.CLIENT_ERROR, "Content Too Large"),
 	/**
 	 * {@code 414 URI Too Long}.
 	 * @since 4.1
