@@ -76,7 +76,8 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	 * supplied by the advisors.
 	 */
 	public static final TargetSource EMPTY_TARGET_SOURCE = EmptyTargetSource.INSTANCE;
-
+	/** Empty advisor array constant. */
+	public static final Advisor[] EMPTY_ADVISORS = new Advisor[0];
 
 	/** Package-protected to allow direct access for efficiency. */
 	@SuppressWarnings("serial")
@@ -288,7 +289,7 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 
 	@Override
 	public final Advisor[] getAdvisors() {
-		return this.advisors.toArray(new Advisor[0]);
+		return this.advisors.toArray(EMPTY_ADVISORS);
 	}
 
 	@Override
