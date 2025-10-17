@@ -16,23 +16,18 @@
 
 package org.springframework.web.util;
 
-import java.net.URI;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.function.BiConsumer;
-
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.EnumSource;
-
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.util.UriComponentsBuilder.ParserType;
+
+import java.net.URI;
+import java.util.*;
+import java.util.function.BiConsumer;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
@@ -928,6 +923,52 @@ class UriComponentsBuilderTests {
 				.buildAndExpand(7777, "test")
 				.toUri();
 		assertThat(uri.toString()).isEqualTo("ws://localhost:7777/test");
+	}
+
+	@ParameterizedTest(name = "{0} for {3}, {4}, {5} with parser {1}") //gh 34788
+	@CsvSource(textBlock = """
+			#testedPattern                       parserType  urlExpected                    p1  p2   p3
+			'http://myhost?a={p1}&b={p2}&a={p3}',RFC,       'http://myhost?a=a1&b=b1&a=a2','a1','b1','a2'
+			'http://myhost?a={p1}&b={p2}&a={p3}',WHAT_WG,   'http://myhost?a=a1&b=b1&a=a2','a1','b1','a2'
+			'http://myhost?a={p1}&b={p2}&a={p1}',RFC,       'http://myhost?a=a1&b=b1&a=a1','a1','b1','a1'
+			'http://myhost?a={p1}&a={p1}&b={p3}',RFC,       'http://myhost?a=a1&a=a1&b=b1','a1','a1','b1',
+			'http://myhost?a={p1}&a={p2}&b={p3}',RFC,       'http://myhost?a=a1&a=a2&b=b1','a1','a2','b1'
+			'http://myhost?a={p1}&b={p2}&a={p1}',RFC,       'http://myhost?a=a1&b=&a=a1','a1','','a1'
+			'http://myhost?a={p1}&b=&a={p2}',    RFC,       'http://myhost?a=a1&b=&a=a2','a1','a2',
+			'http://myhost?a={p1}&b=t&a={p2}',   RFC,       'http://myhost?a=a1&b=t&a=a2','a1','a2',
+			'http://myhost?a=t&b={p1}&a={p2}',   RFC,       'http://myhost?a=t&b=b1&a=a1','b1','a1',
+			'http://myhost?a={p1}&b={p2}&a={p1}',WHAT_WG,   'http://myhost?a=a1&b=b1&a=a1','a1','b1','a1'
+			'http://myhost?a={p1}&a={p1}&b={p3}',WHAT_WG,   'http://myhost?a=a1&a=a1&b=b1','a1','a1','b1',
+			'http://myhost?a={p1}&a={p2}&b={p3}',WHAT_WG,   'http://myhost?a=a1&a=a2&b=b1','a1','a2','b1'
+			'http://myhost?a={p1}&b={p2}&a={p1}',WHAT_WG,   'http://myhost?a=a1&b=&a=a1','a1','','a1'
+			'http://myhost?a={p1}&b=&a={p2}',    WHAT_WG,   'http://myhost?a=a1&b=&a=a2','a1','a2',
+			'http://myhost?a={p1}&b=t&a={p2}',   WHAT_WG,   'http://myhost?a=a1&b=t&a=a2','a1','a2',
+			'http://myhost?a=t&b={p1}&a={p2}',   WHAT_WG,   'http://myhost?a=t&b=b1&a=a1','b1','a1',
+			""")
+	void queryParamOrderShouldBeKept(String testedPattern, ParserType parserType, String urlexpected, String p1, String p2, String p3){
+		ArrayList<String> params = new ArrayList<>();
+		Stream.of(p1, p2, p3).forEach(p->addIfNotNull(p, params));
+		Map<String, String> paramsMap = new HashMap<>();
+		putIfNotNull("p1", p1, paramsMap);
+		putIfNotNull("p2", p2, paramsMap);
+		putIfNotNull("p3", p3, paramsMap);
+		UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.fromUriString(testedPattern, parserType);
+		assertThat(uriComponentsBuilder).satisfies(
+				ucb -> assertThat(ucb.buildAndExpand(params.toArray())).as("with params as varags").hasToString(urlexpected),
+				ucb -> assertThat(ucb.buildAndExpand(paramsMap)).as("with params as Map").hasToString(urlexpected)
+		);
+	}
+
+	private static void putIfNotNull(String key, String param, Map<String, String> paramsMap) {
+		if (param != null) {
+			paramsMap.put(key, param);
+		}
+	}
+
+	private static void addIfNotNull(String param, ArrayList<String> params) {
+		if (param !=null){
+			params.add(param);
+		}
 	}
 
 }

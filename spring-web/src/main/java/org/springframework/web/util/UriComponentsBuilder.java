@@ -34,7 +34,6 @@ import org.jspecify.annotations.Nullable;
 
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
-import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
@@ -89,7 +88,7 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 
 	private CompositePathComponentBuilder pathBuilder;
 
-	private final MultiValueMap<String, String> queryParams = new LinkedMultiValueMap<>();
+	private final List<HierarchicalUriComponents.QueryParam> queryParams = new ArrayList<>();
 
 	private @Nullable String fragment;
 
@@ -286,7 +285,7 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 			result = new OpaqueUriComponents(this.scheme, this.ssp, this.fragment);
 		}
 		else {
-			MultiValueMap<String, String> queryParams = new LinkedMultiValueMap<>(this.queryParams);
+			List<HierarchicalUriComponents.QueryParam> queryParams = new ArrayList<>(this.queryParams);
 			HierarchicalUriComponents uric = new HierarchicalUriComponents(this.scheme, this.fragment,
 					this.userInfo, this.host, this.port, this.pathBuilder.build(), queryParams,
 					hint == EncodingHint.FULLY_ENCODED);
@@ -575,11 +574,11 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 		if (!ObjectUtils.isEmpty(values)) {
 			for (Object value : values) {
 				String valueAsString = getQueryParamValue(value);
-				this.queryParams.add(name, valueAsString);
+				this.queryParams.add(new HierarchicalUriComponents.QueryParam(name, valueAsString));
 			}
 		}
 		else {
-			this.queryParams.add(name, null);
+			this.queryParams.add(new HierarchicalUriComponents.QueryParam(name, null));
 		}
 		resetSchemeSpecificPart();
 		return this;
@@ -619,16 +618,20 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 	@Override
 	public UriComponentsBuilder queryParams(@Nullable MultiValueMap<String, String> params) {
 		if (params != null) {
-			this.queryParams.addAll(params);
+			addAllToQueryParams(params);
 			resetSchemeSpecificPart();
 		}
 		return this;
 	}
 
+	private void addAllToQueryParams(MultiValueMap<String, String> params) {
+		params.forEach((key, values) -> values.forEach(v -> this.queryParam(key, v)));
+	}
+
 	@Override
 	public UriComponentsBuilder replaceQueryParam(String name, Object... values) {
 		Assert.notNull(name, "Name must not be null");
-		this.queryParams.remove(name);
+		this.queryParams.removeIf(qp->qp.hasName(name));
 		if (!ObjectUtils.isEmpty(values)) {
 			queryParam(name, values);
 		}
@@ -649,7 +652,7 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 	public UriComponentsBuilder replaceQueryParams(@Nullable MultiValueMap<String, String> params) {
 		this.queryParams.clear();
 		if (params != null) {
-			this.queryParams.putAll(params);
+			addAllToQueryParams(params);
 		}
 		return this;
 	}
