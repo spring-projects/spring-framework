@@ -826,6 +826,7 @@ public interface RestTestClient {
 		 *			   .extracting("id", "name", "email")
 		 *			   .containsExactly(123, "John Doe", "john@example.com");
 		 *	   });
+		 * }
 		 * </pre>
 		 * @param jsonAssertConsumer the consumer for the response body
 		 */
