@@ -44,6 +44,8 @@ import org.springframework.util.StringUtils;
 @SuppressWarnings("serial")
 public class MutablePropertyValues implements PropertyValues, Serializable {
 
+	private static final PropertyValue[] EMPTY_PROPERTY_VALUES = new PropertyValue[0];
+
 	private final List<PropertyValue> propertyValueList;
 
 	private @Nullable Set<String> processedProperties;
@@ -264,7 +266,7 @@ public class MutablePropertyValues implements PropertyValues, Serializable {
 
 	@Override
 	public PropertyValue[] getPropertyValues() {
-		return this.propertyValueList.toArray(new PropertyValue[0]);
+		return this.propertyValueList.toArray(EMPTY_PROPERTY_VALUES);
 	}
 
 	@Override
