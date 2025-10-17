@@ -16,21 +16,29 @@
 
 package org.springframework.web.util;
 
-import org.jspecify.annotations.Nullable;
-import org.springframework.util.*;
-
 import java.io.ByteArrayOutputStream;
 import java.io.Serializable;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.Charset;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.StringJoiner;
 import java.util.function.BiFunction;
 import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 
-import static java.util.stream.Collectors.mapping;
-import static java.util.stream.Collectors.toList;
+import org.jspecify.annotations.Nullable;
+
+import org.springframework.util.Assert;
+import org.springframework.util.MultiValueMap;
+import org.springframework.util.ObjectUtils;
+import org.springframework.util.StreamUtils;
+import org.springframework.util.StringUtils;
 
 /**
  * Extension of {@link UriComponents} for hierarchical URIs.
@@ -40,8 +48,9 @@ import static java.util.stream.Collectors.toList;
  * @author Rossen Stoyanchev
  * @author Phillip Webb
  * @author Sam Brannen
- * @see <a href="https://tools.ietf.org/html/rfc3986#section-1.2.3">Hierarchical URIs</a>
  * @since 3.1.3
+ * @see <a href="https://tools.ietf.org/html/rfc3986#section-1.2.3">Hierarchical URIs</a>
+ *
  */
 @SuppressWarnings("serial")
 final class HierarchicalUriComponents extends UriComponents {
@@ -125,8 +134,8 @@ final class HierarchicalUriComponents extends UriComponents {
 	 * @param encoded  whether the components are already encoded
 	 */
 	HierarchicalUriComponents(@Nullable String scheme, @Nullable String fragment, @Nullable String userInfo,
-							  @Nullable String host, @Nullable String port, @Nullable PathComponent path,
-							  @Nullable List<QueryParam> query, boolean encoded) {
+							@Nullable String host, @Nullable String port, @Nullable PathComponent path,
+							@Nullable List<QueryParam> query, boolean encoded) {
 
 		super(scheme, fragment);
 
@@ -144,9 +153,9 @@ final class HierarchicalUriComponents extends UriComponents {
 	}
 
 	private HierarchicalUriComponents(@Nullable String scheme, @Nullable String fragment,
-									  @Nullable String userInfo, @Nullable String host, @Nullable String port,
-									  PathComponent path, List<QueryParam> queryParams,
-									  EncodeState encodeState, @Nullable UnaryOperator<String> variableEncoder) {
+									@Nullable String userInfo, @Nullable String host, @Nullable String port,
+									PathComponent path, List<QueryParam> queryParams,
+									EncodeState encodeState, @Nullable UnaryOperator<String> variableEncoder) {
 
 		super(scheme, fragment);
 
@@ -181,13 +190,15 @@ final class HierarchicalUriComponents extends UriComponents {
 	public int getPort() {
 		if (this.port == null) {
 			return -1;
-		} else if (this.port.contains("{")) {
+		}
+		else if (this.port.contains("{")) {
 			throw new IllegalStateException(
 					"The port contains a URI variable but has not been expanded yet: " + this.port);
 		}
 		try {
 			return Integer.parseInt(this.port);
-		} catch (NumberFormatException ex) {
+		}
+		catch (NumberFormatException ex) {
 			throw new IllegalStateException("The port must be an integer: " + this.port);
 		}
 	}
@@ -208,7 +219,8 @@ final class HierarchicalUriComponents extends UriComponents {
 			return this.queryParams.stream()
 					.map(QueryParam::toUriString)
 					.collect(Collectors.joining("&"));
-		} else {
+		}
+		else {
 			return null;
 		}
 	}
@@ -219,7 +231,7 @@ final class HierarchicalUriComponents extends UriComponents {
 	@Override
 	public MultiValueMap<String, String> getQueryParams() {
 		Map<String, List<String>> collected = this.queryParams.stream().collect(Collectors.groupingBy(QueryParam::name,
-				mapping(QueryParam::value, toList())));
+				Collectors.mapping(QueryParam::value, Collectors.toList())));
 		return MultiValueMap.fromMultiValue(collected);
 	}
 
@@ -277,7 +289,6 @@ final class HierarchicalUriComponents extends UriComponents {
 	/**
 	 * Encode the given source into an encoded String using the rules specified
 	 * by the given component and with the given options.
-	 *
 	 * @param source   the source String
 	 * @param encoding the encoding of the source String
 	 * @param type     the URI component for the source
@@ -291,7 +302,6 @@ final class HierarchicalUriComponents extends UriComponents {
 	/**
 	 * Encode the given source into an encoded String using the rules specified
 	 * by the given component and with the given options.
-	 *
 	 * @param source  the source String
 	 * @param charset the encoding of the source String
 	 * @param type    the URI component for the source
@@ -321,7 +331,8 @@ final class HierarchicalUriComponents extends UriComponents {
 		for (byte b : bytes) {
 			if (type.isAllowed(b)) {
 				baos.write(b);
-			} else {
+			}
+			else {
 				baos.write('%');
 				char hex1 = Character.toUpperCase(Character.forDigit((b >> 4) & 0xF, 16));
 				char hex2 = Character.toUpperCase(Character.forDigit(b & 0xF, 16));
@@ -340,7 +351,6 @@ final class HierarchicalUriComponents extends UriComponents {
 
 	/**
 	 * Check if any of the URI components contain any illegal characters.
-	 *
 	 * @throws IllegalArgumentException if any component has illegal characters
 	 */
 	private void verify() {
@@ -370,11 +380,13 @@ final class HierarchicalUriComponents extends UriComponents {
 								source.substring(i) + "\"");
 					}
 					i += 2;
-				} else {
+				}
+				else {
 					throw new IllegalArgumentException("Invalid encoded sequence \"" +
 							source.substring(i) + "\"");
 				}
-			} else if (!type.isAllowed(ch)) {
+			}
+			else if (!type.isAllowed(ch)) {
 				throw new IllegalArgumentException("Invalid character '" + ch + "' for " +
 						type.name() + " in \"" + source + "\"");
 			}
@@ -405,7 +417,7 @@ final class HierarchicalUriComponents extends UriComponents {
 	private List<QueryParam> expandQueryParams(UriTemplateVariables variables) {
 		UriTemplateVariables queryVariables = new QueryUriTemplateVariables(variables);
 		return this.queryParams.stream()
-				.map(qp->qp.expandUriComponent(queryVariables, this.variableEncoder))
+				.map(qp -> qp.expandUriComponent(queryVariables, this.variableEncoder))
 				.toList();
 	}
 
@@ -460,7 +472,8 @@ final class HierarchicalUriComponents extends UriComponents {
 		try {
 			if (this.encodeState.isEncoded()) {
 				return new URI(toUriString());
-			} else {
+			}
+			else {
 				String path = getPath();
 				if (StringUtils.hasLength(path) && path.charAt(0) != PATH_DELIMITER) {
 					// Only prefix the path delimiter if something exists before it
@@ -470,7 +483,8 @@ final class HierarchicalUriComponents extends UriComponents {
 				}
 				return new URI(getScheme(), getUserInfo(), getHost(), getPort(), path, getQuery(), getFragment());
 			}
-		} catch (URISyntaxException ex) {
+		}
+		catch (URISyntaxException ex) {
 			throw new IllegalStateException("Could not create URI object: " + ex.getMessage(), ex);
 		}
 	}
@@ -588,7 +602,8 @@ final class HierarchicalUriComponents extends UriComponents {
 			public boolean isAllowed(int c) {
 				if ('=' == c || '&' == c) {
 					return false;
-				} else {
+				}
+				else {
 					return (isPchar(c) || '/' == c || '?' == c);
 				}
 			}
@@ -617,14 +632,12 @@ final class HierarchicalUriComponents extends UriComponents {
 
 		/**
 		 * Indicates whether the given character is allowed in this URI component.
-		 *
 		 * @return {@code true} if the character is allowed; {@code false} otherwise
 		 */
 		public abstract boolean isAllowed(int c);
 
 		/**
 		 * Indicates whether the given character is in the {@code ALPHA} set.
-		 *
 		 * @see <a href="https://www.ietf.org/rfc/rfc3986.txt">RFC 3986, appendix A</a>
 		 */
 		protected boolean isAlpha(int c) {
@@ -633,7 +646,6 @@ final class HierarchicalUriComponents extends UriComponents {
 
 		/**
 		 * Indicates whether the given character is in the {@code DIGIT} set.
-		 *
 		 * @see <a href="https://www.ietf.org/rfc/rfc3986.txt">RFC 3986, appendix A</a>
 		 */
 		protected boolean isDigit(int c) {
@@ -642,7 +654,6 @@ final class HierarchicalUriComponents extends UriComponents {
 
 		/**
 		 * Indicates whether the given character is in the {@code gen-delims} set.
-		 *
 		 * @see <a href="https://www.ietf.org/rfc/rfc3986.txt">RFC 3986, appendix A</a>
 		 */
 		protected boolean isGenericDelimiter(int c) {
@@ -651,7 +662,6 @@ final class HierarchicalUriComponents extends UriComponents {
 
 		/**
 		 * Indicates whether the given character is in the {@code sub-delims} set.
-		 *
 		 * @see <a href="https://www.ietf.org/rfc/rfc3986.txt">RFC 3986, appendix A</a>
 		 */
 		protected boolean isSubDelimiter(int c) {
@@ -661,7 +671,6 @@ final class HierarchicalUriComponents extends UriComponents {
 
 		/**
 		 * Indicates whether the given character is in the {@code reserved} set.
-		 *
 		 * @see <a href="https://www.ietf.org/rfc/rfc3986.txt">RFC 3986, appendix A</a>
 		 */
 		protected boolean isReserved(int c) {
@@ -670,7 +679,6 @@ final class HierarchicalUriComponents extends UriComponents {
 
 		/**
 		 * Indicates whether the given character is in the {@code unreserved} set.
-		 *
 		 * @see <a href="https://www.ietf.org/rfc/rfc3986.txt">RFC 3986, appendix A</a>
 		 */
 		protected boolean isUnreserved(int c) {
@@ -679,7 +687,6 @@ final class HierarchicalUriComponents extends UriComponents {
 
 		/**
 		 * Indicates whether the given character is in the {@code pchar} set.
-		 *
 		 * @see <a href="https://www.ietf.org/rfc/rfc3986.txt">RFC 3986, appendix A</a>
 		 */
 		protected boolean isPchar(int c) {
@@ -770,13 +777,16 @@ final class HierarchicalUriComponents extends UriComponents {
 					if (level == 0) {
 						boolean encode = !isUriVariable(this.currentVariable);
 						append(this.currentVariable, encode, type);
-					} else if (!this.variableWithNameAndRegex) {
+					}
+					else if (!this.variableWithNameAndRegex) {
 						append(this.currentVariable, true, type);
 						level = 0;
 					}
-				} else if (level > 0) {
+				}
+				else if (level > 0) {
 					this.currentVariable.append(c);
-				} else {
+				}
+				else {
 					this.currentLiteral.append(c);
 				}
 			}
@@ -1050,31 +1060,32 @@ final class HierarchicalUriComponents extends UriComponents {
 			Object value = this.delegate.getValue(name);
 			if (ObjectUtils.isArray(value)) {
 				value = StringUtils.arrayToCommaDelimitedString(ObjectUtils.toObjectArray(value));
-			} else if (value instanceof Collection<?> collection) {
+			}
+			else if (value instanceof Collection<?> collection) {
 				value = StringUtils.collectionToCommaDelimitedString(collection);
 			}
 			return value;
 		}
 	}
 
-	record QueryParam(String name, @Nullable String value) {
+	record QueryParam(String name, @Nullable String value) implements Serializable{
 		public String toUriString() {
-			return name + (value == null ? "" : "=" + value);
+			return this.name + (this.value == null ? "" : "=" + this.value);
 		}
 
 		public QueryParam encodeQueryParam(BiFunction<String, Type, String> encoder) {
-			return new QueryParam(encoder.apply(name, Type.QUERY_PARAM),
-					value != null ? encoder.apply(value, Type.QUERY_PARAM) : null);
+			return new QueryParam(encoder.apply(this.name, Type.QUERY_PARAM),
+					this.value != null ? encoder.apply(this.value, Type.QUERY_PARAM) : null);
 		}
 
 		public void verifyUriComponent() {
-			HierarchicalUriComponents.verifyUriComponent(name, Type.QUERY_PARAM);
-			HierarchicalUriComponents.verifyUriComponent(value, Type.QUERY_PARAM);
+			HierarchicalUriComponents.verifyUriComponent(this.name, Type.QUERY_PARAM);
+			HierarchicalUriComponents.verifyUriComponent(this.value, Type.QUERY_PARAM);
 		}
 
 		public QueryParam expandUriComponent(UriTemplateVariables queryVariables, @Nullable UnaryOperator<String> variableEncoder) {
-			return new QueryParam(Objects.requireNonNull(UriComponents.expandUriComponent(name, queryVariables, variableEncoder)),
-					UriComponents.expandUriComponent(value, queryVariables, variableEncoder));
+			return new QueryParam(Objects.requireNonNull(UriComponents.expandUriComponent(this.name, queryVariables, variableEncoder)),
+					UriComponents.expandUriComponent(this.value, queryVariables, variableEncoder));
 		}
 
 		public boolean hasName(String name) {
