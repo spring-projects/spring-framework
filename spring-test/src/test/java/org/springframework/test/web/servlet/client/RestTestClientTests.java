@@ -287,6 +287,20 @@ class RestTestClientTests {
 					.exchange()
 					.expectCookie().value("session", Matchers.equalTo("abc"));
 		}
+
+		@Test
+		void testConsumeWithJsonAssert() {
+			var bodyContentSpec = RestTestClientTests.this.client.get().uri("/test")
+				.exchangeSuccessfully()
+				.expectBody()
+				.consumeWithJsonAssert(jsonContentAssert -> {
+					jsonContentAssert
+						.hasPath("method")
+						.hasPathSatisfying("uri", uri -> assertThat(uri).isEqualTo("/test"))
+						.extractingPath("headers").asMap().hasSize(2);
+				});
+			assertThat(bodyContentSpec).isNotNull();
+		}
 	}
 
 

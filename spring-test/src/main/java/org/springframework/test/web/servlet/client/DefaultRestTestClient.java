@@ -40,9 +40,12 @@ import org.springframework.http.MediaType;
 import org.springframework.http.client.ClientHttpRequestExecution;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.ClientHttpResponse;
+import org.springframework.test.json.AbstractJsonContentAssert;
 import org.springframework.test.json.JsonAssert;
 import org.springframework.test.json.JsonComparator;
 import org.springframework.test.json.JsonCompareMode;
+import org.springframework.test.json.JsonContent;
+import org.springframework.test.json.JsonContentAssert;
 import org.springframework.test.util.AssertionErrors;
 import org.springframework.test.util.ExceptionCollector;
 import org.springframework.test.util.XmlExpectationsHelper;
@@ -487,6 +490,15 @@ class DefaultRestTestClient implements RestTestClient {
 		@Override
 		public BodyContentSpec consumeWith(Consumer<EntityExchangeResult<byte[]>> consumer) {
 			this.result.assertWithDiagnostics(() -> consumer.accept(this.result));
+			return this;
+		}
+
+		@Override
+		public BodyContentSpec consumeWithJsonAssert(Consumer<AbstractJsonContentAssert<?>> jsonAssertConsumer) {
+			this.result.assertWithDiagnostics(() -> {
+				JsonContentAssert jsonContentAssert = new JsonContent(getBodyAsString()).assertThat();
+				jsonAssertConsumer.accept(jsonContentAssert);
+			});
 			return this;
 		}
 

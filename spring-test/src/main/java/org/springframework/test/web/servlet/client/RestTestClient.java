@@ -34,6 +34,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.converter.HttpMessageConverters;
+import org.springframework.test.json.AbstractJsonContentAssert;
 import org.springframework.test.json.JsonComparator;
 import org.springframework.test.json.JsonCompareMode;
 import org.springframework.test.json.JsonComparison;
@@ -809,6 +810,26 @@ public interface RestTestClient {
 		 * {@code byte[]} may be {@code null} if there was no response body.
 		 */
 		BodyContentSpec consumeWith(Consumer<EntityExchangeResult<byte[]>> consumer);
+
+		/**
+		 * Assert the response body content with the given {@link Consumer}.
+		 * This consumer provides a {@link AbstractJsonContentAssert} that supports
+		 * making fine-grained assertions about the JSON response body, e.g.
+		 * <pre>
+		 * {@code
+		 * restTestClient.get().uri("/test")
+		 *     .exchangeSuccessfully()
+		 *     .expectBody()
+		 *     .consumeWithJsonAssert(jsonContentAssert -> {
+		 *	       jsonContentAssert.extractingPath("$.users")
+		 *		       .asArray().singleElement()
+		 *			   .extracting("id", "name", "email")
+		 *			   .containsExactly(123, "John Doe", "john@example.com");
+		 *	   });
+		 * </pre>
+		 * @param jsonAssertConsumer the consumer for the response body
+		 */
+		BodyContentSpec consumeWithJsonAssert(Consumer<AbstractJsonContentAssert<?>> jsonAssertConsumer);
 
 		/**
 		 * Exit the chained API and return an {@code ExchangeResult} with the
