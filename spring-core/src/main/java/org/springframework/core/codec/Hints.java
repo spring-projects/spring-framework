@@ -50,7 +50,7 @@ public abstract class Hints {
 
 
 	/**
-	 * Create a map wit a single hint via {@link Collections#singletonMap}.
+	 * Create a map with a single hint via {@link Collections#singletonMap}.
 	 * @param hintName the hint name
 	 * @param value the hint value
 	 * @return the created map

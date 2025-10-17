@@ -472,7 +472,7 @@ abstract class AbstractPropertyAccessorTests {
 		assertThat(target.getAge()).as("age is OK").isEqualTo(age);
 		assertThat(name).as("name is OK").isEqualTo(target.getName());
 		accessor.setPropertyValues(new MutablePropertyValues());
-		// Check its unchanged
+		// Check it's unchanged
 		assertThat(target.getAge()).as("age is OK").isEqualTo(age);
 		assertThat(name).as("name is OK").isEqualTo(target.getName());
 	}
