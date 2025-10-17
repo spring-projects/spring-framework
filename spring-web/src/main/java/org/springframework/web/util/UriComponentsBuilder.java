@@ -625,7 +625,14 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 	}
 
 	private void addAllToQueryParams(MultiValueMap<String, String> params) {
-		params.forEach((key, values) -> values.forEach(v -> this.queryParam(key, v)));
+		params.forEach((key, values) -> {
+			if (values.isEmpty()) {
+				this.queryParams.add(new HierarchicalUriComponents.QueryParam(key, null));
+			}
+			else{
+				values.forEach(v -> this.queryParams.add(new HierarchicalUriComponents.QueryParam(key, v)));
+			}
+		});
 	}
 
 	@Override
