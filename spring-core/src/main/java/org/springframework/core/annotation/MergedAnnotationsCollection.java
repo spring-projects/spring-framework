@@ -40,7 +40,8 @@ import org.springframework.util.Assert;
  */
 final class MergedAnnotationsCollection implements MergedAnnotations {
 
-	private static final MergedAnnotation<?> [] EMPTY_ANNOTATIONS = new MergedAnnotation<?>[0];
+	private static final MergedAnnotation<?>[] EMPTY_MERGED_ANNOTATION_ARRAY = new MergedAnnotation<?>[0];
+
 
 	private final MergedAnnotation<?>[] annotations;
 
@@ -49,7 +50,7 @@ final class MergedAnnotationsCollection implements MergedAnnotations {
 
 	private MergedAnnotationsCollection(Collection<MergedAnnotation<?>> annotations) {
 		Assert.notNull(annotations, "Annotations must not be null");
-		this.annotations = annotations.toArray(EMPTY_ANNOTATIONS);
+		this.annotations = annotations.toArray(EMPTY_MERGED_ANNOTATION_ARRAY);
 		this.mappings = new AnnotationTypeMappings[this.annotations.length];
 		for (int i = 0; i < this.annotations.length; i++) {
 			MergedAnnotation<?> annotation = this.annotations[i];

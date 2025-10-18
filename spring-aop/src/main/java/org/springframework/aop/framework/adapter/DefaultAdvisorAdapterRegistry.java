@@ -39,7 +39,9 @@ import org.springframework.aop.support.DefaultPointcutAdvisor;
  */
 @SuppressWarnings("serial")
 public class DefaultAdvisorAdapterRegistry implements AdvisorAdapterRegistry, Serializable {
-	private static final MethodInterceptor [] EMPTY_INTERCEPTOR_ARRAY = new MethodInterceptor[0];
+
+	private static final MethodInterceptor[] EMPTY_METHOD_INTERCEPTOR_ARRAY = new MethodInterceptor[0];
+
 
 	private final List<AdvisorAdapter> adapters = new ArrayList<>(3);
 
@@ -90,7 +92,7 @@ public class DefaultAdvisorAdapterRegistry implements AdvisorAdapterRegistry, Se
 		if (interceptors.isEmpty()) {
 			throw new UnknownAdviceTypeException(advisor.getAdvice());
 		}
-		return interceptors.toArray(EMPTY_INTERCEPTOR_ARRAY);
+		return interceptors.toArray(EMPTY_METHOD_INTERCEPTOR_ARRAY);
 	}
 
 	@Override
