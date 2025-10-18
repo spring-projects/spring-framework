@@ -56,6 +56,7 @@ public interface PersistenceManagedTypes {
 	 */
 	@Nullable URL getPersistenceUnitRootUrl();
 
+
 	/**
 	 * Create an instance using the specified managed class names.
 	 * @param managedClassNames the managed class names
