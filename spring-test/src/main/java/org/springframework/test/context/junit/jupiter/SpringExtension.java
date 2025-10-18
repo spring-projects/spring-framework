@@ -52,7 +52,6 @@ import org.springframework.core.annotation.MergedAnnotations;
 import org.springframework.core.annotation.MergedAnnotations.SearchStrategy;
 import org.springframework.core.annotation.RepeatableContainers;
 import org.springframework.test.context.MethodInvoker;
-import org.springframework.test.context.TestConstructor;
 import org.springframework.test.context.TestContextAnnotationUtils;
 import org.springframework.test.context.TestContextManager;
 import org.springframework.test.context.event.ApplicationEvents;
@@ -291,7 +290,8 @@ public class SpringExtension implements BeforeAllCallback, AfterAllCallback, Tes
 	 * <li>{@link ParameterResolutionDelegate#isAutowirable} returns {@code true}.</li>
 	 * </ol>
 	 * <p><strong>WARNING</strong>: If a test class {@code Constructor} is annotated
-	 * with {@code @Autowired} or automatically autowirable (see {@link TestConstructor}),
+	 * with {@code @Autowired} or automatically autowirable (see
+	 * {@link org.springframework.test.context.TestConstructor @TestConstructor}),
 	 * Spring will assume the responsibility for resolving all parameters in the
 	 * constructor. Consequently, no other registered {@link ParameterResolver}
 	 * will be able to resolve parameters.
