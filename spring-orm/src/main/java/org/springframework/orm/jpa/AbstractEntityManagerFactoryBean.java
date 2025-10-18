@@ -71,7 +71,9 @@ import org.springframework.util.CollectionUtils;
  * making {@code EntityManager} available for dependency injection as well.
  *
  * <p>Encapsulates the common functionality between the different JPA bootstrap
- * contracts (standalone as well as container).
+ * contracts: standalone as well as container. Note that as of 7.0, the JPA 3.2
+ * {@link LocalEntityManagerFactoryBean#setPersistenceConfiguration PersistenceConfiguration}
+ * mechanism is supported as well, allowing for much richer standalone bootstrap options.
  *
  * <p>Implements support for standard JPA configuration conventions as well as
  * Spring's customizable {@link JpaVendorAdapter} mechanism, and controls the

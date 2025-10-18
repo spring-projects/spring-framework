@@ -60,15 +60,11 @@ public class MutablePersistenceUnitInfo {
 
 	private @Nullable String persistenceProviderClassName;
 
-	private @Nullable String scopeAnnotationName;
-
-	private final List<String> qualifierAnnotationNames = new ArrayList<>();
-
 	private @Nullable PersistenceUnitTransactionType transactionType;
 
-	private @Nullable DataSource nonJtaDataSource;
-
 	private @Nullable DataSource jtaDataSource;
+
+	private @Nullable DataSource nonJtaDataSource;
 
 	private final List<String> mappingFileNames = new ArrayList<>();
 
@@ -107,22 +103,6 @@ public class MutablePersistenceUnitInfo {
 
 	public @Nullable String getPersistenceProviderClassName() {
 		return this.persistenceProviderClassName;
-	}
-
-	public void setScopeAnnotationName(@Nullable String scopeAnnotationName) {
-		this.scopeAnnotationName = scopeAnnotationName;
-	}
-
-	public @Nullable String getScopeAnnotationName() {
-		return this.scopeAnnotationName;
-	}
-
-	public void addQualifierAnnotationName(String qualifierAnnotationName) {
-		this.qualifierAnnotationNames.add(qualifierAnnotationName);
-	}
-
-	public List<String> getQualifierAnnotationNames() {
-		return this.qualifierAnnotationNames;
 	}
 
 	public void setTransactionType(PersistenceUnitTransactionType transactionType) {

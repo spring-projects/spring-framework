@@ -46,7 +46,6 @@ import static org.assertj.core.api.Assertions.assertThatRuntimeException;
  * @author Juergen Hoeller
  * @author Nicholas Williams
  */
-@SuppressWarnings("removal")
 class PersistenceXmlParsingTests {
 
 	@Test

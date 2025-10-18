@@ -27,6 +27,7 @@ import java.util.Set;
 
 import javax.sql.DataSource;
 
+import jakarta.persistence.PersistenceConfiguration;
 import jakarta.persistence.PersistenceException;
 import jakarta.persistence.SharedCacheMode;
 import jakarta.persistence.ValidationMode;
@@ -108,6 +109,8 @@ public class DefaultPersistenceUnitManager
 
 	private @Nullable String defaultPersistenceUnitName = ORIGINAL_DEFAULT_PERSISTENCE_UNIT_NAME;
 
+	private @Nullable PersistenceConfiguration persistenceConfiguration;
+
 	private @Nullable PersistenceManagedTypes managedTypes;
 
 	private String @Nullable [] packagesToScan;
@@ -180,8 +183,18 @@ public class DefaultPersistenceUnitManager
 	}
 
 	/**
+	 * Set a JPA 3.2 {@link PersistenceConfiguration} to apply to the default
+	 * persistence unit. The contained configuration will be merged with the
+	 * common settings specified on this {@code DefaultPersistenceUnitManager}.
+	 * @since 7.0
+	 */
+	public void setPersistenceConfiguration(PersistenceConfiguration configuration) {
+		this.persistenceConfiguration = configuration;
+	}
+
+	/**
 	 * Set the {@link PersistenceManagedTypes} to use to build the list of managed types
-	 * as an alternative to entity scanning.
+	 * for the default persistence unit, as an alternative to entity scanning.
 	 * @param managedTypes the managed types
 	 * @since 6.0
 	 */
@@ -492,7 +505,8 @@ public class DefaultPersistenceUnitManager
 	private List<SpringPersistenceUnitInfo> readPersistenceUnitInfos() {
 		List<SpringPersistenceUnitInfo> infos = new ArrayList<>(1);
 		String defaultName = this.defaultPersistenceUnitName;
-		boolean buildDefaultUnit = (this.managedTypes != null || this.packagesToScan != null || this.mappingResources != null);
+		boolean buildDefaultUnit = (this.persistenceConfiguration != null || this.managedTypes != null ||
+				this.packagesToScan != null || this.mappingResources != null);
 		boolean foundDefaultUnit = false;
 
 		PersistenceUnitReader reader = new PersistenceUnitReader(this.resourcePatternResolver, this.dataSourceLookup);
@@ -507,8 +521,9 @@ public class DefaultPersistenceUnitManager
 		if (buildDefaultUnit) {
 			if (foundDefaultUnit) {
 				if (logger.isWarnEnabled()) {
-					logger.warn("Found explicit default persistence unit with name '" + defaultName + "' in persistence.xml - " +
-							"overriding local default persistence unit settings ('managedTypes', 'packagesToScan' or 'mappingResources')");
+					logger.warn("Found explicit default persistence unit with name '" + defaultName +
+							"' in persistence.xml - overriding local default persistence unit settings " +
+							"(`persistenceConfiguration`, 'managedTypes', 'packagesToScan' or 'mappingResources')");
 				}
 			}
 			else {
@@ -523,33 +538,37 @@ public class DefaultPersistenceUnitManager
 	 * @see #setPackagesToScan
 	 */
 	private SpringPersistenceUnitInfo buildDefaultPersistenceUnitInfo() {
-		SpringPersistenceUnitInfo scannedUnit = new SpringPersistenceUnitInfo();
+		SpringPersistenceUnitInfo defaultUnit = new SpringPersistenceUnitInfo();
 		if (this.defaultPersistenceUnitName != null) {
-			scannedUnit.setPersistenceUnitName(this.defaultPersistenceUnitName);
+			defaultUnit.setPersistenceUnitName(this.defaultPersistenceUnitName);
 		}
-		scannedUnit.setExcludeUnlistedClasses(true);
+		defaultUnit.setExcludeUnlistedClasses(true);
+
+		if (this.persistenceConfiguration != null) {
+			defaultUnit.apply(this.persistenceConfiguration, this.dataSourceLookup);
+		}
 
 		if (this.managedTypes != null) {
-			applyManagedTypes(scannedUnit, this.managedTypes);
+			defaultUnit.apply(this.managedTypes);
 		}
 		else if (this.packagesToScan != null) {
 			PersistenceManagedTypesScanner scanner = new PersistenceManagedTypesScanner(
 					this.resourcePatternResolver, this.managedClassNameFilter);
-			applyManagedTypes(scannedUnit, scanner.scan(this.packagesToScan));
+			defaultUnit.apply(scanner.scan(this.packagesToScan));
 		}
 
 		if (this.mappingResources != null) {
 			for (String mappingFileName : this.mappingResources) {
-				scannedUnit.addMappingFileName(mappingFileName);
+				defaultUnit.addMappingFileName(mappingFileName);
 			}
 		}
 		else {
 			Resource ormXml = getOrmXmlForDefaultPersistenceUnit();
 			if (ormXml != null) {
-				scannedUnit.addMappingFileName(DEFAULT_ORM_XML_RESOURCE);
-				if (scannedUnit.getPersistenceUnitRootUrl() == null) {
+				defaultUnit.addMappingFileName(DEFAULT_ORM_XML_RESOURCE);
+				if (defaultUnit.getPersistenceUnitRootUrl() == null) {
 					try {
-						scannedUnit.setPersistenceUnitRootUrl(
+						defaultUnit.setPersistenceUnitRootUrl(
 								PersistenceUnitReader.determinePersistenceUnitRootUrl(ormXml));
 					}
 					catch (IOException ex) {
@@ -559,16 +578,7 @@ public class DefaultPersistenceUnitManager
 			}
 		}
 
-		return scannedUnit;
-	}
-
-	private void applyManagedTypes(SpringPersistenceUnitInfo scannedUnit, PersistenceManagedTypes managedTypes) {
-		managedTypes.getManagedClassNames().forEach(scannedUnit::addManagedClassName);
-		managedTypes.getManagedPackages().forEach(scannedUnit::addManagedPackage);
-		URL persistenceUnitRootUrl = managedTypes.getPersistenceUnitRootUrl();
-		if (scannedUnit.getPersistenceUnitRootUrl() == null && persistenceUnitRootUrl != null) {
-			scannedUnit.setPersistenceUnitRootUrl(persistenceUnitRootUrl);
-		}
+		return defaultUnit;
 	}
 
 	/**

@@ -20,9 +20,13 @@ import javax.sql.DataSource;
 
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.Persistence;
+import jakarta.persistence.PersistenceConfiguration;
 import jakarta.persistence.PersistenceException;
 import jakarta.persistence.spi.PersistenceProvider;
 import org.jspecify.annotations.Nullable;
+
+import org.springframework.orm.jpa.persistenceunit.DefaultPersistenceUnitManager;
+import org.springframework.util.Assert;
 
 /**
  * {@link org.springframework.beans.factory.FactoryBean} that creates a JPA
@@ -62,6 +66,80 @@ public class LocalEntityManagerFactoryBean extends AbstractEntityManagerFactoryB
 
 	private static final String DATASOURCE_PROPERTY = "jakarta.persistence.dataSource";
 
+	private @Nullable PersistenceConfiguration configuration;
+
+
+	/**
+	 * Create a {@code LocalEntityManagerFactoryBean}.
+	 * <p>As of 7.0, This uses "default" for the default persistence unit name.
+	 * @see #setPersistenceUnitName
+	 * @see #setPersistenceConfiguration
+	 */
+	public LocalEntityManagerFactoryBean() {
+		setPersistenceUnitName(DefaultPersistenceUnitManager.ORIGINAL_DEFAULT_PERSISTENCE_UNIT_NAME);
+	}
+
+	/**
+	 * Create a {@code LocalEntityManagerFactoryBean} for the given persistence unit.
+	 * @param persistenceUnitName the name of the persistence unit
+	 * @since 7.0
+	 */
+	public LocalEntityManagerFactoryBean(String persistenceUnitName) {
+		setPersistenceUnitName(persistenceUnitName);
+	}
+
+	/**
+	 * Create a {@code LocalEntityManagerFactoryBean} for the given persistence unit.
+	 * @param configuration the configuration for the persistence unit
+	 * @since 7.0
+	 */
+	public LocalEntityManagerFactoryBean(PersistenceConfiguration configuration) {
+		setPersistenceConfiguration(configuration);
+	}
+
+
+	/**
+	 * Set a local JPA 3.2 {@link PersistenceConfiguration} to use for creating
+	 * the EntityManagerFactory. This can be a provider-specific subclass such as
+	 * {@link org.hibernate.jpa.HibernatePersistenceConfiguration}, exposing a
+	 * complete programmatic persistence unit configuration which replaces
+	 * {@code persistence.xml} (including provider-specific classpath scanning).
+	 * <p>Note: {@link PersistenceConfiguration} includes a persistence unit name,
+	 * so this effectively overrides the {@link #setPersistenceUnitName} method.
+	 * In contrast, locally specified JPA properties ({@link #setJpaProperties})
+	 * will get merged into the given {@code PersistenceConfiguration} instance.
+	 * @since 7.0
+	 * @see #getPersistenceConfiguration()
+	 * @see #getPersistenceUnitName()
+	 */
+	public void setPersistenceConfiguration(PersistenceConfiguration configuration) {
+		Assert.notNull(configuration, "PersistenceConfiguration must not be null");
+		this.configuration = configuration;
+		setPersistenceUnitName(configuration.name());
+	}
+
+	/**
+	 * Set a local JPA 3.2 {@link PersistenceConfiguration} to use for creating
+	 * the EntityManagerFactory. If none is in use yet, a new plain
+	 * {@link PersistenceConfiguration} for the configured persistence unit name
+	 * will be created and returned.
+	 * @since 7.0
+	 * @see #setPersistenceConfiguration
+	 * @see #setPersistenceUnitName
+	 */
+	public PersistenceConfiguration getPersistenceConfiguration() {
+		if (this.configuration == null) {
+			this.configuration = new PersistenceConfiguration(getPersistenceUnitName());
+		}
+		return this.configuration;
+	}
+
+	@Override
+	public void setPersistenceUnitName(@Nullable String persistenceUnitName) {
+		Assert.state(this.configuration == null || this.configuration.name().equals(persistenceUnitName),
+				"Cannot change setPersistenceUnitName when PersistenceConfiguration has been set");
+		super.setPersistenceUnitName(persistenceUnitName);
+	}
 
 	/**
 	 * Specify the JDBC DataSource that the JPA persistence provider is supposed
@@ -104,10 +182,17 @@ public class LocalEntityManagerFactoryBean extends AbstractEntityManagerFactoryB
 		if (logger.isDebugEnabled()) {
 			logger.debug("Building JPA EntityManagerFactory for persistence unit '" + getPersistenceUnitName() + "'");
 		}
+
+		if (this.configuration != null) {
+			this.configuration.properties(getJpaPropertyMap());
+		}
+
 		PersistenceProvider provider = getPersistenceProvider();
 		if (provider != null) {
 			// Create EntityManagerFactory directly through PersistenceProvider.
-			EntityManagerFactory emf = provider.createEntityManagerFactory(getPersistenceUnitName(), getJpaPropertyMap());
+			EntityManagerFactory emf = (this.configuration != null ?
+					provider.createEntityManagerFactory(this.configuration) :
+					provider.createEntityManagerFactory(getPersistenceUnitName(), getJpaPropertyMap()));
 			if (emf == null) {
 				throw new IllegalStateException(
 						"PersistenceProvider [" + provider + "] did not return an EntityManagerFactory for name '" +
@@ -117,7 +202,9 @@ public class LocalEntityManagerFactoryBean extends AbstractEntityManagerFactoryB
 		}
 		else {
 			// Let JPA perform its standard PersistenceProvider autodetection.
-			return Persistence.createEntityManagerFactory(getPersistenceUnitName(), getJpaPropertyMap());
+			return (this.configuration != null ?
+					Persistence.createEntityManagerFactory(this.configuration) :
+					Persistence.createEntityManagerFactory(getPersistenceUnitName(), getJpaPropertyMap()));
 		}
 	}
 
