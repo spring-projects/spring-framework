@@ -581,8 +581,17 @@ class JpaTransactionManagerTests {
 		tt.setIsolationLevel(TransactionDefinition.ISOLATION_SERIALIZABLE);
 
 		assertThatExceptionOfType(InvalidIsolationLevelException.class).isThrownBy(() ->
-			tt.executeWithoutResult(status -> {}));
+				tt.executeWithoutResult(status -> {}));
 
+		verify(manager).close();
+	}
+
+	@Test
+	void testTransactionTimeout() {
+		tt.setTimeout(1000);
+		tt.executeWithoutResult(status -> {});
+
+		verify(tx).setTimeout(1000);
 		verify(manager).close();
 	}
 

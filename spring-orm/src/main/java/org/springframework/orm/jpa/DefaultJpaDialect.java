@@ -59,11 +59,16 @@ public class DefaultJpaDialect implements JpaDialect, Serializable {
 	public @Nullable Object beginTransaction(EntityManager entityManager, TransactionDefinition definition)
 			throws PersistenceException, SQLException, TransactionException {
 
+		if (definition.getTimeout() != TransactionDefinition.TIMEOUT_DEFAULT) {
+			entityManager.getTransaction().setTimeout(definition.getTimeout());
+		}
+
 		if (definition.getIsolationLevel() != TransactionDefinition.ISOLATION_DEFAULT) {
 			throw new InvalidIsolationLevelException(getClass().getSimpleName() +
 					" does not support custom isolation levels due to limitations in standard JPA. " +
 					"Specific arrangements may be implemented in custom JpaDialect variants.");
 		}
+
 		entityManager.getTransaction().begin();
 		return null;
 	}
