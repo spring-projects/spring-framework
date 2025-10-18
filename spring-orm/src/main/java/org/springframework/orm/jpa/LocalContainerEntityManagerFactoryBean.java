@@ -398,15 +398,16 @@ public class LocalContainerEntityManagerFactoryBean extends AbstractEntityManage
 	 * Determine the PersistenceUnitInfo to use for the EntityManagerFactory
 	 * created by this bean.
 	 * <p>The default implementation reads in all persistence unit infos from
-	 * {@code persistence.xml}, as defined in the JPA specification.
-	 * If no entity manager name was specified, it takes the first info in the
-	 * array as returned by the reader. Otherwise, it checks for a matching name.
+	 * {@code persistence.xml}, as defined in the JPA specification, selecting a unit
+	 * by name. If no persistence unit name was specified, it takes the default one
+	 * if configured, or otherwise the first persistence unit as found by the reader.
 	 * @param persistenceUnitManager the PersistenceUnitManager to obtain from
 	 * @return the chosen PersistenceUnitInfo
 	 */
 	protected PersistenceUnitInfo determinePersistenceUnitInfo(PersistenceUnitManager persistenceUnitManager) {
-		if (getPersistenceUnitName() != null) {
-			return persistenceUnitManager.obtainPersistenceUnitInfo(getPersistenceUnitName());
+		String persistenceUnitName = getPersistenceUnitName();
+		if (persistenceUnitName != null) {
+			return persistenceUnitManager.obtainPersistenceUnitInfo(persistenceUnitName);
 		}
 		else {
 			return persistenceUnitManager.obtainDefaultPersistenceUnitInfo();

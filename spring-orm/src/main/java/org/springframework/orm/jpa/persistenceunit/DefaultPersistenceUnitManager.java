@@ -193,7 +193,7 @@ public class DefaultPersistenceUnitManager
 
 	/**
 	 * Set the {@link PersistenceManagedTypes} to use to build the list of managed types
-	 * as an alternative to entity scanning.
+	 * for the default persistence unit, as an alternative to entity scanning.
 	 * @param managedTypes the managed types
 	 * @since 6.0
 	 */
@@ -540,33 +540,33 @@ public class DefaultPersistenceUnitManager
 	 * @see #setPackagesToScan
 	 */
 	private SpringPersistenceUnitInfo buildDefaultPersistenceUnitInfo() {
-		SpringPersistenceUnitInfo scannedUnit = new SpringPersistenceUnitInfo();
+		SpringPersistenceUnitInfo defaultUnit = new SpringPersistenceUnitInfo();
 		if (this.defaultPersistenceUnitName != null) {
-			scannedUnit.setPersistenceUnitName(this.defaultPersistenceUnitName);
+			defaultUnit.setPersistenceUnitName(this.defaultPersistenceUnitName);
 		}
-		scannedUnit.setExcludeUnlistedClasses(true);
+		defaultUnit.setExcludeUnlistedClasses(true);
 
 		if (this.managedTypes != null) {
-			applyManagedTypes(scannedUnit, this.managedTypes);
+			applyManagedTypes(defaultUnit, this.managedTypes);
 		}
 		else if (this.packagesToScan != null) {
 			PersistenceManagedTypesScanner scanner = new PersistenceManagedTypesScanner(
 					this.resourcePatternResolver, this.managedClassNameFilter);
-			applyManagedTypes(scannedUnit, scanner.scan(this.packagesToScan));
+			applyManagedTypes(defaultUnit, scanner.scan(this.packagesToScan));
 		}
 
 		if (this.mappingResources != null) {
 			for (String mappingFileName : this.mappingResources) {
-				scannedUnit.addMappingFileName(mappingFileName);
+				defaultUnit.addMappingFileName(mappingFileName);
 			}
 		}
 		else {
 			Resource ormXml = getOrmXmlForDefaultPersistenceUnit();
 			if (ormXml != null) {
-				scannedUnit.addMappingFileName(DEFAULT_ORM_XML_RESOURCE);
-				if (scannedUnit.getPersistenceUnitRootUrl() == null) {
+				defaultUnit.addMappingFileName(DEFAULT_ORM_XML_RESOURCE);
+				if (defaultUnit.getPersistenceUnitRootUrl() == null) {
 					try {
-						scannedUnit.setPersistenceUnitRootUrl(
+						defaultUnit.setPersistenceUnitRootUrl(
 								PersistenceUnitReader.determinePersistenceUnitRootUrl(ormXml));
 					}
 					catch (IOException ex) {
@@ -576,7 +576,7 @@ public class DefaultPersistenceUnitManager
 			}
 		}
 
-		return scannedUnit;
+		return defaultUnit;
 	}
 
 	private void applyManagedTypes(SpringPersistenceUnitInfo scannedUnit, PersistenceManagedTypes managedTypes) {
@@ -639,9 +639,9 @@ public class DefaultPersistenceUnitManager
 
 
 	/**
-	 * Return the specified PersistenceUnitInfo from this manager's cache
-	 * of processed persistence units, keeping it in the cache (i.e. not
-	 * 'obtaining' it for use but rather just accessing it for post-processing).
+	 * Return the specified {@link MutablePersistenceUnitInfo} from this manager's cache
+	 * of processed persistence units, keeping it in the cache (i.e. not 'obtaining' it
+	 * for use but rather just accessing it for post-processing).
 	 * <p>This can be used in {@link #postProcessPersistenceUnitInfo} implementations,
 	 * detecting existing persistence units of the same name and potentially merging them.
 	 * @param persistenceUnitName the name of the desired persistence unit
@@ -654,12 +654,12 @@ public class DefaultPersistenceUnitManager
 	}
 
 	/**
-	 * Hook method allowing subclasses to customize each PersistenceUnitInfo.
+	 * Hook method allowing subclasses to customize each {@link MutablePersistenceUnitInfo}.
 	 * <p>The default implementation delegates to all registered PersistenceUnitPostProcessors.
 	 * It is usually preferable to register further entity classes, jar files etc there
 	 * rather than in a subclass of this manager, to be able to reuse the post-processors.
-	 * @param pui the chosen PersistenceUnitInfo, as read from {@code persistence.xml}.
-	 * Passed in as MutablePersistenceUnitInfo.
+	 * @param pui the chosen persistence unit configuration, as read from
+	 * {@code persistence.xml}. Passed in as MutablePersistenceUnitInfo.
 	 * @see #setPersistenceUnitPostProcessors
 	 */
 	protected void postProcessPersistenceUnitInfo(MutablePersistenceUnitInfo pui) {

@@ -40,6 +40,7 @@ class SimplePersistenceManagedTypes implements PersistenceManagedTypes {
 
 	SimplePersistenceManagedTypes(List<String> managedClassNames, List<String> managedPackages,
 			@Nullable URL persistenceUnitRootUrl) {
+
 		this.managedClassNames = managedClassNames;
 		this.managedPackages = managedPackages;
 		this.persistenceUnitRootUrl = persistenceUnitRootUrl;
@@ -48,6 +49,7 @@ class SimplePersistenceManagedTypes implements PersistenceManagedTypes {
 	SimplePersistenceManagedTypes(List<String> managedClassNames, List<String> managedPackages) {
 		this(managedClassNames, managedPackages, null);
 	}
+
 
 	@Override
 	public List<String> getManagedClassNames() {

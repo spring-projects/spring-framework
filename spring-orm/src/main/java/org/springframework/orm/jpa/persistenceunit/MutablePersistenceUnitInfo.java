@@ -33,9 +33,10 @@ import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
 /**
- * Spring's base implementation of the JPA
+ * Spring's mutable equivalent of the JPA
  * {@link jakarta.persistence.spi.PersistenceUnitInfo} interface,
  * used to bootstrap an {@code EntityManagerFactory} in a container.
+ * This is the type exposed to {@link PersistenceUnitPostProcessor}.
  *
  * <p>This implementation is largely a JavaBean, offering mutators
  * for all standard {@code PersistenceUnitInfo} properties.
@@ -57,10 +58,10 @@ public class MutablePersistenceUnitInfo implements SmartPersistenceUnitInfo {
 	private PersistenceUnitTransactionType transactionType;
 
 	@Nullable
-	private DataSource nonJtaDataSource;
+	private DataSource jtaDataSource;
 
 	@Nullable
-	private DataSource jtaDataSource;
+	private DataSource nonJtaDataSource;
 
 	private final List<String> mappingFileNames = new ArrayList<>();
 
