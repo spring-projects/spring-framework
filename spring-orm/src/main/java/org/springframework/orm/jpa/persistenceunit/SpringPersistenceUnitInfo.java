@@ -153,7 +153,7 @@ public class SpringPersistenceUnitInfo extends MutablePersistenceUnitInfo {
 	 */
 	private class SmartPersistenceUnitInfoInvocationHandler implements InvocationHandler {
 
-		@SuppressWarnings("unchecked")
+		@SuppressWarnings({ "unchecked", "rawtypes" })
 		@Override
 		public @Nullable Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 			// Fast path for SmartPersistenceUnitInfo JTA check
