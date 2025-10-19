@@ -209,7 +209,7 @@ public class SpringPersistenceUnitInfo extends MutablePersistenceUnitInfo {
 		setValidationMode(config.validationMode());
 		getProperties().putAll(config.properties());
 
-		// Further relevant settings from HibernatePersistenceConfiguration
+		// Further relevant settings from HibernatePersistenceConfiguration on Hibernate 7.1+
 		Method rootUrl = ClassUtils.getMethodIfAvailable(config.getClass(), "rootUrl");
 		if (rootUrl != null) {
 			setPersistenceUnitRootUrl((URL) ReflectionUtils.invokeMethod(rootUrl, config));

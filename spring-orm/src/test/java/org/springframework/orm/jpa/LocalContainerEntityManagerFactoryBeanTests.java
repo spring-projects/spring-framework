@@ -16,6 +16,7 @@
 
 package org.springframework.orm.jpa;
 
+import java.net.URL;
 import java.util.Map;
 import java.util.Properties;
 
@@ -29,9 +30,11 @@ import jakarta.persistence.PersistenceUnitTransactionType;
 import jakarta.persistence.spi.PersistenceProvider;
 import jakarta.persistence.spi.PersistenceUnitInfo;
 import jakarta.persistence.spi.ProviderUtil;
+import org.hibernate.jpa.HibernatePersistenceConfiguration;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.testfixture.io.SerializationTestUtils;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.OptimisticLockingFailureException;
@@ -253,7 +256,7 @@ class LocalContainerEntityManagerFactoryBeanTests extends AbstractEntityManagerF
 	}
 
 	@Test
-	void acceptsPersistenceConfiguration() {
+	void acceptsStandardPersistenceConfiguration() {
 		DummyContainerPersistenceProvider persistenceProvider = new DummyContainerPersistenceProvider();
 		LocalContainerEntityManagerFactoryBean emfb = new LocalContainerEntityManagerFactoryBean();
 		emfb.setPersistenceProvider(persistenceProvider);
@@ -264,6 +267,26 @@ class LocalContainerEntityManagerFactoryBeanTests extends AbstractEntityManagerF
 
 		emfb.afterPropertiesSet();
 		assertThat(persistenceProvider.actualPui.getPersistenceUnitName()).isEqualTo(entityManagerName);
+		assertThat(persistenceProvider.actualPui.getManagedClassNames()).containsExactly(
+				DriversLicense.class.getName(), Person.class.getName());
+	}
+
+	@Test
+	void acceptsHibernatePersistenceConfiguration() throws Exception {
+		DummyContainerPersistenceProvider persistenceProvider = new DummyContainerPersistenceProvider();
+		LocalContainerEntityManagerFactoryBean emfb = new LocalContainerEntityManagerFactoryBean();
+		emfb.setPersistenceProvider(persistenceProvider);
+
+		String entityManagerName = "call me Bob";
+		URL rootUrl = new ClassPathResource("", getClass()).getURL();
+		URL jarUrl = new ClassPathResource("jpa-archive.jar", getClass()).getURL();
+		emfb.setPersistenceConfiguration(new HibernatePersistenceConfiguration(entityManagerName, rootUrl).
+				jarFileUrl(jarUrl).managedClass(DriversLicense.class).managedClass(Person.class));
+
+		emfb.afterPropertiesSet();
+		assertThat(persistenceProvider.actualPui.getPersistenceUnitName()).isEqualTo(entityManagerName);
+		assertThat(persistenceProvider.actualPui.getPersistenceUnitRootUrl()).isEqualTo(rootUrl);
+		assertThat(persistenceProvider.actualPui.getJarFileUrls()).containsExactly(jarUrl);
 		assertThat(persistenceProvider.actualPui.getManagedClassNames()).containsExactly(
 				DriversLicense.class.getName(), Person.class.getName());
 	}
