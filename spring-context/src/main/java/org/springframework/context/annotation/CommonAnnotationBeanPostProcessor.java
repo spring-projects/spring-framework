@@ -145,11 +145,11 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 	private static final boolean JNDI_PRESENT = ClassUtils.isPresent(
 			"javax.naming.InitialContext", CommonAnnotationBeanPostProcessor.class.getClassLoader());
 
-	private static final Set<Class<? extends Annotation>> resourceAnnotationTypes = CollectionUtils.newLinkedHashSet(3);
-
 	private static final @Nullable Class<? extends Annotation> JAKARTA_RESOURCE_TYPE;
 
 	private static final @Nullable Class<? extends Annotation> EJB_ANNOTATION_TYPE;
+
+	private static final Set<Class<? extends Annotation>> resourceAnnotationTypes = CollectionUtils.newLinkedHashSet(2);
 
 	static {
 		JAKARTA_RESOURCE_TYPE = loadAnnotationType("jakarta.annotation.Resource");
