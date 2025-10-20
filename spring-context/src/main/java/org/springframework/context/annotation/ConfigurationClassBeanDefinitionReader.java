@@ -56,6 +56,7 @@ import org.springframework.core.type.StandardAnnotationMetadata;
 import org.springframework.core.type.StandardMethodMetadata;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
 
 /**
@@ -421,13 +422,13 @@ class ConfigurationClassBeanDefinitionReader {
 				registrar.registerBeanDefinitions(metadata, this.registry, this.importBeanNameGenerator));
 	}
 
-	private void loadBeanDefinitionsFromBeanRegistrars(Map<String, BeanRegistrar> registrars) {
+	private void loadBeanDefinitionsFromBeanRegistrars(MultiValueMap<String, BeanRegistrar> registrars) {
 		if (!(this.registry instanceof ListableBeanFactory beanFactory)) {
 			throw new IllegalStateException("Cannot support bean registrars since " +
 					this.registry.getClass().getName() + " does not implement ListableBeanFactory");
 		}
-		registrars.values().forEach(registrar -> registrar.register(new BeanRegistryAdapter(
-				this.registry, beanFactory, this.environment, registrar.getClass()), this.environment));
+		registrars.values().forEach(registrarList -> registrarList.forEach(registrar -> registrar.register(new BeanRegistryAdapter(
+				this.registry, beanFactory, this.environment, registrar.getClass()), this.environment)));
 	}
 
 
