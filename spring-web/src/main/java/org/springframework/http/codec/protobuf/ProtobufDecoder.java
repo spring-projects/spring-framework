@@ -129,8 +129,7 @@ public class ProtobufDecoder extends ProtobufCodecSupport implements Decoder<Mes
 	public Flux<Message> decode(Publisher<DataBuffer> inputStream, ResolvableType elementType,
 			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
-		MessageDecoderFunction decoderFunction =
-				new MessageDecoderFunction(elementType, this.maxMessageSize);
+		MessageDecoderFunction decoderFunction = new MessageDecoderFunction(elementType, this.maxMessageSize);
 
 		return Flux.from(inputStream)
 				.flatMapIterable(decoderFunction)

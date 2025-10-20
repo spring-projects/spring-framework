@@ -257,6 +257,7 @@ public class ProtobufHttpMessageConverter extends AbstractHttpMessageConverter<M
 		return true;
 	}
 
+
 	/**
 	 * Protobuf format support.
 	 */

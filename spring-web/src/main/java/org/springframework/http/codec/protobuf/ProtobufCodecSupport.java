@@ -47,8 +47,8 @@ public abstract class ProtobufCodecSupport {
 		if (mimeType == null) {
 			return true;
 		}
-		for (MimeType m : MIME_TYPES) {
-			if (m.isCompatibleWith(mimeType)) {
+		for (MimeType supportedMimeType : MIME_TYPES) {
+			if (supportedMimeType.isCompatibleWith(mimeType)) {
 				return true;
 			}
 		}
