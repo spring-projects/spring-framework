@@ -653,7 +653,6 @@ class DefaultServerRequest implements ServerRequest {
 			return this.headers.keySet();
 		}
 
-
 		// Unsupported
 
 		@Override
@@ -705,7 +704,6 @@ class DefaultServerRequest implements ServerRequest {
 		public void addIntHeader(String name, int value) {
 			throw new UnsupportedOperationException();
 		}
-
 
 		@Override
 		public String getCharacterEncoding() {

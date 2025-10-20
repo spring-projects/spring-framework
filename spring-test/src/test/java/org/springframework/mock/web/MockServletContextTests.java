@@ -200,8 +200,8 @@ class MockServletContextTests {
 			assertThat(filterRegistrations).isNotNull();
 			assertThat(filterRegistrations).isEmpty();
 		}
-
 	}
+
 
 	/**
 	 * @since 5.1.11
@@ -242,7 +242,6 @@ class MockServletContextTests {
 				assertThat(realPath).isNotNull();
 			}
 		}
-
 	}
 
 }

@@ -149,8 +149,6 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 	private static final boolean jndiPresent = ClassUtils.isPresent(
 			"javax.naming.InitialContext", CommonAnnotationBeanPostProcessor.class.getClassLoader());
 
-	private static final Set<Class<? extends Annotation>> resourceAnnotationTypes = CollectionUtils.newLinkedHashSet(3);
-
 	@Nullable
 	private static final Class<? extends Annotation> jakartaResourceType;
 
@@ -159,6 +157,8 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 
 	@Nullable
 	private static final Class<? extends Annotation> ejbAnnotationType;
+
+	private static final Set<Class<? extends Annotation>> resourceAnnotationTypes = CollectionUtils.newLinkedHashSet(3);
 
 	static {
 		jakartaResourceType = loadAnnotationType("jakarta.annotation.Resource");
