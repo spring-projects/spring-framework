@@ -59,9 +59,7 @@ public abstract class AbstractAnnotationConfigDispatcherServletInitializer
 			context.register(configClasses);
 			return context;
 		}
-		else {
-			return null;
-		}
+		return null;
 	}
 
 	/**
