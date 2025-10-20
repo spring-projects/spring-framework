@@ -55,7 +55,7 @@ import org.springframework.web.util.WebUtils;
 /**
  * Mock implementation of the {@link jakarta.servlet.http.HttpServletResponse} interface.
  *
- * <p>As of Spring 6.0, this set of mocks is designed on a Servlet 6.0 baseline.
+ * <p>As of Spring 7.0, this set of mocks is designed on a Servlet 6.1 baseline.
  *
  * @author Juergen Hoeller
  * @author Rod Johnson
@@ -825,6 +825,10 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	 */
 	public @Nullable String getErrorMessage() {
 		return this.errorMessage;
+	}
+
+	// @Override - on Servlet 6.2
+	public void sendEarlyHints() {
 	}
 
 
