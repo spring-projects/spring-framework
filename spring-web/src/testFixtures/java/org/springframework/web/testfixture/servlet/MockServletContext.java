@@ -61,11 +61,11 @@ import org.springframework.web.util.WebUtils;
 /**
  * Mock implementation of the {@link jakarta.servlet.ServletContext} interface.
  *
- * <p>As of Spring 6.0, this set of mocks is designed on a Servlet 6.0 baseline.
+ * <p>As of Spring 7.0, this set of mocks is designed on a Servlet 6.1 baseline.
  *
- * <p>Compatible with Servlet 3.1 but can be configured to expose a specific version
- * through {@link #setMajorVersion}/{@link #setMinorVersion}; default is 3.1.
- * Note that Servlet 3.1 support is limited: servlet, filter and listener
+ * <p>Compatible with Servlet 6.1 but can be configured to expose a specific version
+ * through {@link #setMajorVersion}/{@link #setMinorVersion}; default is 6.1.
+ * Note that some Servlet SPI support is limited: servlet, filter and listener
  * registration methods are not supported; neither is JSP configuration.
  * We generally do not recommend to unit test your ServletContainerInitializers and
  * WebApplicationInitializers which is where those registration methods would be used.
@@ -114,11 +114,11 @@ public class MockServletContext implements ServletContext {
 
 	private int majorVersion = 6;
 
-	private int minorVersion = 0;
+	private int minorVersion = 1;
 
 	private int effectiveMajorVersion = 6;
 
-	private int effectiveMinorVersion = 0;
+	private int effectiveMinorVersion = 1;
 
 	private final Map<String, RequestDispatcher> namedRequestDispatchers = new HashMap<>();
 

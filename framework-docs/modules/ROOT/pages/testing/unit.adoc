@@ -46,8 +46,8 @@ mock objects that are useful for testing web contexts, controllers, and filters.
 mock objects are targeted at usage with Spring's Web MVC framework and are generally more
 convenient to use than dynamic mock objects (such as https://easymock.org/[EasyMock]).
 
-TIP: Since Spring Framework 6.0, the mock objects in `org.springframework.mock.web` are
-based on the Servlet 6.0 API.
+TIP: Since Spring Framework 7.0, the mock objects in `org.springframework.mock.web` are
+based on the Servlet 6.1 API.
 
 MockMvc builds on the mock Servlet API objects to provide an integration testing
 framework for Spring MVC. See xref:testing/mockmvc.adoc[MockMvc].
