@@ -26,6 +26,8 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 import org.hamcrest.Matcher;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.NullUnmarked;
 import org.jspecify.annotations.Nullable;
 import org.reactivestreams.Publisher;
 
@@ -956,14 +958,16 @@ public interface WebTestClient {
 		 * Assert the extracted body with a {@link Matcher}.
 		 * @since 5.1
 		 */
-		<T extends S> T value(Matcher<? super @Nullable B> matcher);
+		@NullUnmarked // To avoid a "Cannot attach type annotations" error when org.hamcrest.Matcher is not in the classpath
+		<T extends S> T value(Matcher<? super B> matcher);
 
 		/**
 		 * Transform the extracted the body with a function, for example, extracting a
 		 * property, and assert the mapped value with a {@link Matcher}.
 		 * @since 5.1
 		 */
-		<T extends S, R> T value(Function<@Nullable B, @Nullable R> bodyMapper, Matcher<? super @Nullable R> matcher);
+		@NullUnmarked // To avoid a "Cannot attach type annotations" error when org.hamcrest.Matcher is not in the classpath
+		<T extends S, R> T value(@NonNull Function<@Nullable B, @Nullable R> bodyMapper, Matcher<? super R> matcher);
 
 		/**
 		 * Assert the extracted body with a {@link Consumer}.
