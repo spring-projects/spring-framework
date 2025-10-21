@@ -5,7 +5,7 @@ The Spring Framework provides the following choices for making calls to REST end
 
 * xref:integration/rest-clients.adoc#rest-restclient[`RestClient`] -- synchronous client with a fluent API
 * xref:integration/rest-clients.adoc#rest-webclient[`WebClient`] -- non-blocking, reactive client with fluent API
-* xref:integration/rest-clients.adoc#rest-resttemplate[`RestTemplate`] -- synchronous client with template method API
+* xref:integration/rest-clients.adoc#rest-resttemplate[`RestTemplate`] -- synchronous client with template method API, now deprecated in favor of `RestClient`
 * xref:integration/rest-clients.adoc#rest-http-service-client[HTTP Service Clients] -- annotated interface backed by generated proxy
 
 
@@ -479,7 +479,8 @@ See xref:web/webflux-webclient.adoc[WebClient] for more details.
 The `RestTemplate` provides a high-level API over HTTP client libraries in the form of a classic Spring Template class.
 It exposes the following groups of overloaded methods:
 
-NOTE: The xref:integration/rest-clients.adoc#rest-restclient[`RestClient`] offers a more modern API for synchronous HTTP access.
+WARNING: As of Spring Framework 7.0, `RestTemplate` is deprecated in favor of `RestClient` and will be removed in a future version,
+please use the xref:integration/rest-clients.adoc#migrating-to-restclient["Migrating to RestClient"] guide.
 For asynchronous and streaming scenarios, consider the reactive xref:web/webflux-webclient.adoc[WebClient].
 
 [[rest-overview-of-resttemplate-methods-tbl]]
@@ -547,10 +548,26 @@ See the xref:integration/observability.adoc#http-client.resttemplate[RestTemplat
 Objects passed into and returned from `RestTemplate` methods are converted to and from HTTP messages
 with the help of an `HttpMessageConverter`, see <<rest-message-conversion>>.
 
-=== Migrating from `RestTemplate` to `RestClient`
+[[migrating-to-restclient]]
+=== Migrating to `RestClient`
+
+Applications can adopt `RestClient` in a gradual fashion, first focusing on API usage and then on infrastructure setup.
+You can consider the following steps:
+
+1. Create one or more `RestClient` from existing `RestTemplate` instances, like: `RestClient restClient = RestClient.create(restTemplate)`.
+  Gradually replace `RestTemplate` usage in your application, component by component, by focusing first on issuing requests.
+  See the table below for API equivalents.
+2. Once all client requests go through `RestClient` instances, you can now work on replicating your existing
+  `RestTemplate` instance creations by using `RestClient.Builder`. Because `RestTemplate` and `RestClient`
+  share the same infrastructure, you can reuse custom `ClientHttpRequestFactory` or `ClientHttpRequestInterceptor`
+  in your setup. See xref:integration/rest-clients.adoc#rest-restclient[the `RestClient` builder API].
+
+If no other library is available on the classpath, `RestClient` will choose the `JdkClientHttpRequestFactory`
+powered by the modern JDK `HttpClient`, whereas `RestTemplate` would pick the `SimpleClientHttpRequestFactory` that
+uses `HttpURLConnection`. This can explain subtle behavior difference at runtime at the HTTP level.
+
 
 The following table shows `RestClient` equivalents for `RestTemplate` methods.
-It can be used to migrate from the latter to the former.
 
 .RestClient equivalents for RestTemplate methods
 [cols="1,1", options="header"]
@@ -853,6 +870,11 @@ It can be used to migrate from the latter to the former.
 .exchange(ExchangeFunction)`
 
 |===
+
+`RestClient` and `RestTemplate` instances share the same behavior when it comes to throwing exceptions
+(with the `RestClientException` type being at the top of the hierarchy).
+When `RestTemplate` consistently throws `HttpClientErrorException` for "4xx" response statues,
+`RestClient` allows for more flexibility with custom xref:integration/rest-clients.adoc#rest-http-service-client-exceptions["status handlers"].
 
 
 [[rest-http-service-client]]
