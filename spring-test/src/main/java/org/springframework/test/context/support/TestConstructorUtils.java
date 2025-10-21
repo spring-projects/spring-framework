@@ -173,9 +173,8 @@ public abstract class TestConstructorUtils {
 	 * conditions is {@code true}.
 	 *
 	 * <ol>
-	 * <li>The constructor is annotated with {@link Autowired @Autowired},
-	 * {@link jakarta.inject.Inject @jakarta.inject.Inject}, or
-	 * {@link javax.inject.Inject @javax.inject.Inject}.</li>
+	 * <li>The constructor is annotated with {@link Autowired @Autowired} or
+	 * {@link jakarta.inject.Inject @jakarta.inject.Inject}.</li>
 	 * <li>{@link TestConstructor @TestConstructor} is <em>present</em> or
 	 * <em>meta-present</em> on the test class with
 	 * {@link TestConstructor#autowireMode() autowireMode} set to
