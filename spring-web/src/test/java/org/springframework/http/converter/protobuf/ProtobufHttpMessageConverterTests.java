@@ -107,7 +107,7 @@ class ProtobufHttpMessageConverterTests {
 	@Test
 	void writeJsonWithGoogleProtobuf() throws IOException {
 		this.converter = new ProtobufHttpMessageConverter(
-				new ProtobufHttpMessageConverter.ProtobufJavaUtilSupport(null, null),
+				new ProtobufHttpMessageConverter.ProtobufJavaUtilDelegate(null, null),
 				this.extensionRegistry);
 		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
 		MediaType contentType = MediaType.APPLICATION_JSON;
