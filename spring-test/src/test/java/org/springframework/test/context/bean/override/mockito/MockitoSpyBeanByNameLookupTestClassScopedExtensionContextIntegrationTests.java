@@ -19,6 +19,7 @@ package org.springframework.test.context.bean.override.mockito;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.TestInstantiationAwareExtension.ExtensionContextScope;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -27,21 +28,22 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.bean.override.example.ExampleService;
 import org.springframework.test.context.bean.override.example.RealExampleService;
-import org.springframework.test.context.bean.override.mockito.MockitoSpyBeanByNameLookupIntegrationTests.Config;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBeanByNameLookupTestClassScopedExtensionContextIntegrationTests.Config;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import org.springframework.test.mockito.MockitoAssertions;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Integration tests for {@link MockitoSpyBean} that use by-name lookup.
+ * Integration tests for {@link MockitoSpyBean} that use by-name lookup with test class
+ * {@link ExtensionContextScope}.
  *
  * @author Simon Baslé
  * @author Sam Brannen
  * @since 6.2
  */
 @SpringJUnitConfig(Config.class)
-public class MockitoSpyBeanByNameLookupIntegrationTests {
+public class MockitoSpyBeanByNameLookupTestClassScopedExtensionContextIntegrationTests {
 
 	@MockitoSpyBean("field1")
 	ExampleService field;

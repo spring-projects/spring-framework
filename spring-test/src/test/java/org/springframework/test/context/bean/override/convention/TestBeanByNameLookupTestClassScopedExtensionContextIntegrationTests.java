@@ -19,6 +19,7 @@ package org.springframework.test.context.bean.override.convention;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.TestInstantiationAwareExtension.ExtensionContextScope;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -28,14 +29,15 @@ import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Integration tests for {@link TestBean} that use by-name lookup.
+ * Integration tests for {@link TestBean} that use by-name lookup with test class
+ * {@link ExtensionContextScope}.
  *
  * @author Simon Baslé
  * @author Sam Brannen
  * @since 6.2
  */
 @SpringJUnitConfig
-public class TestBeanByNameLookupIntegrationTests {
+public class TestBeanByNameLookupTestClassScopedExtensionContextIntegrationTests {
 
 	@TestBean(name = "field")
 	String field;
