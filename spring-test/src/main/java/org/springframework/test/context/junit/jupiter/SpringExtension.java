@@ -282,7 +282,7 @@ public class SpringExtension implements BeforeAllCallback, AfterAllCallback, Tes
 	 * <ol>
 	 * <li>The {@linkplain ParameterContext#getDeclaringExecutable() declaring
 	 * executable} is a {@link Constructor} and
-	 * {@link TestConstructorUtils#isAutowirableConstructor(Constructor, Class, PropertyProvider)}
+	 * {@link TestConstructorUtils#isAutowirableConstructor(Executable, PropertyProvider)}
 	 * returns {@code true}. Note that {@code isAutowirableConstructor()} will be
 	 * invoked with a fallback {@link PropertyProvider} that delegates its lookup
 	 * to {@link ExtensionContext#getConfigurationParameter(String)}.</li>
@@ -296,17 +296,16 @@ public class SpringExtension implements BeforeAllCallback, AfterAllCallback, Tes
 	 * constructor. Consequently, no other registered {@link ParameterResolver}
 	 * will be able to resolve parameters.
 	 * @see #resolveParameter
-	 * @see TestConstructorUtils#isAutowirableConstructor(Constructor, Class)
+	 * @see TestConstructorUtils#isAutowirableConstructor(Executable, PropertyProvider)
 	 * @see ParameterResolutionDelegate#isAutowirable
 	 */
 	@Override
 	public boolean supportsParameter(ParameterContext parameterContext, ExtensionContext extensionContext) {
 		Parameter parameter = parameterContext.getParameter();
 		Executable executable = parameter.getDeclaringExecutable();
-		Class<?> testClass = extensionContext.getRequiredTestClass();
 		PropertyProvider junitPropertyProvider = propertyName ->
 				extensionContext.getConfigurationParameter(propertyName).orElse(null);
-		return (TestConstructorUtils.isAutowirableConstructor(executable, testClass, junitPropertyProvider) ||
+		return (TestConstructorUtils.isAutowirableConstructor(executable, junitPropertyProvider) ||
 				ApplicationContext.class.isAssignableFrom(parameter.getType()) ||
 				supportsApplicationEvents(parameterContext) ||
 				ParameterResolutionDelegate.isAutowirable(parameter, parameterContext.getIndex()));
