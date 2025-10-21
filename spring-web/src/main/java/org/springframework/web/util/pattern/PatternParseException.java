@@ -22,6 +22,7 @@ import java.text.MessageFormat;
  * Exception that is thrown when there is a problem with the pattern being parsed.
  *
  * @author Andy Clement
+ * @author Brian Clozel
  * @since 5.0
  */
 @SuppressWarnings("serial")
@@ -98,12 +99,14 @@ public class PatternParseException extends IllegalArgumentException {
 		CANNOT_HAVE_ADJACENT_CAPTURES("Adjacent captures are not allowed"),
 		ILLEGAL_CHARACTER_AT_START_OF_CAPTURE_DESCRIPTOR("Char ''{0}'' not allowed at start of captured variable name"),
 		ILLEGAL_CHARACTER_IN_CAPTURE_DESCRIPTOR("Char ''{0}'' is not allowed in a captured variable name"),
-		NO_MORE_DATA_EXPECTED_AFTER_CAPTURE_THE_REST("No more pattern data allowed after '{*...}' or '**' pattern element"),
+		CANNOT_HAVE_MANY_MULTISEGMENT_PATHELEMENTS("Multiple '{*...}' or '**' pattern elements are not allowed"),
+		INVALID_LOCATION_FOR_MULTISEGMENT_PATHELEMENT("'{*...}' or '**' pattern elements should be placed at the start or end of the pattern"),
+		MULTISEGMENT_PATHELEMENT_NOT_FOLLOWED_BY_LITERAL("'{*...}' or '**' pattern elements should be followed by a literal path element"),
 		BADLY_FORMED_CAPTURE_THE_REST("Expected form when capturing the rest of the path is simply '{*...}'"),
 		MISSING_REGEX_CONSTRAINT("Missing regex constraint on capture"),
 		ILLEGAL_DOUBLE_CAPTURE("Not allowed to capture ''{0}'' twice in the same pattern"),
 		REGEX_PATTERN_SYNTAX_EXCEPTION("Exception occurred in regex pattern compilation"),
-		CAPTURE_ALL_IS_STANDALONE_CONSTRUCT("'{*...}' can only be preceded by a path separator");
+		CAPTURE_ALL_IS_STANDALONE_CONSTRUCT("'{*...}' cannot be mixed with other path elements in the same path segment");
 
 		private final String message;
 
