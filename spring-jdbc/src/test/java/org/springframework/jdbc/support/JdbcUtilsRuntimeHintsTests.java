@@ -48,7 +48,7 @@ class JdbcUtilsRuntimeHintsTests {
 	void sqlTypesShouldHaveFieldAccess() {
 		for (Field field : Types.class.getFields()) {
 			assertThat(RuntimeHintsPredicates.reflection()
-					.onFieldAccess(field)).accepts(this.hints);
+					.onField(field)).accepts(this.hints);
 		}
 	}
 
