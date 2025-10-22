@@ -19,6 +19,7 @@ package org.springframework.test.context.junit.jupiter.nested;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.extension.TestInstantiationAwareExtension.ExtensionContextScope;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -30,7 +31,7 @@ import org.springframework.test.context.ContextHierarchy;
 import org.springframework.test.context.NestedTestConfiguration;
 import org.springframework.test.context.aot.DisabledInAotMode;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.test.context.junit.jupiter.nested.ContextHierarchyNestedTests.ParentConfig;
+import org.springframework.test.context.junit.jupiter.nested.ContextHierarchyTestClassScopedExtensionContextNestedTests.ParentConfig;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.context.NestedTestConfiguration.EnclosingConfiguration.INHERIT;
@@ -39,7 +40,8 @@ import static org.springframework.test.context.NestedTestConfiguration.Enclosing
 /**
  * Integration tests that verify support for {@code @Nested} test classes using
  * {@link ContextHierarchy @ContextHierarchy} in conjunction with the
- * {@link SpringExtension} in a JUnit Jupiter environment.
+ * {@link SpringExtension} in a JUnit Jupiter environment with test class
+ * {@link ExtensionContextScope}.
  *
  * @author Sam Brannen
  * @since 5.3
@@ -48,7 +50,7 @@ import static org.springframework.test.context.NestedTestConfiguration.Enclosing
 @ContextHierarchy(@ContextConfiguration(classes = ParentConfig.class))
 @NestedTestConfiguration(OVERRIDE) // since INHERIT is now the global default
 @DisabledInAotMode("@ContextHierarchy is not supported in AOT")
-class ContextHierarchyNestedTests {
+class ContextHierarchyTestClassScopedExtensionContextNestedTests {
 
 	private static final String FOO = "foo";
 	private static final String BAR = "bar";
@@ -97,7 +99,7 @@ class ContextHierarchyNestedTests {
 	@Nested
 	@NestedTestConfiguration(INHERIT)
 	@ContextConfiguration(classes = Child1Config.class)
-	class NestedTestCaseWithInheritedConfigTests {
+	class NestedInheritedCfgTests {
 
 		@Autowired
 		String bar;
@@ -125,7 +127,7 @@ class ContextHierarchyNestedTests {
 			@ContextConfiguration(classes = ParentConfig.class),
 			@ContextConfiguration(classes = Child2Config.class)
 		})
-		class DoubleNestedTestCaseWithOverriddenConfigTests {
+		class DoubleNestedOverriddenCfgTests {
 
 			@Autowired
 			String bar;
@@ -146,7 +148,7 @@ class ContextHierarchyNestedTests {
 
 			@Nested
 			@NestedTestConfiguration(INHERIT)
-			class TripleNestedWithInheritedConfigAndTestInterfaceTests implements TestInterface {
+			class TripleNestedInheritedCfgAndTestInterfaceTests implements TestInterface {
 
 				@Autowired
 				@Qualifier("foo")

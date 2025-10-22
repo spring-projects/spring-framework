@@ -40,7 +40,8 @@ import static org.springframework.test.context.NestedTestConfiguration.Enclosing
  *
  * @author Sam Brannen
  * @since 5.0
- * @see ConstructorInjectionNestedTests
+ * @see ConstructorInjectionTestClassScopedExtensionContextNestedTests
+ * @see ConstructorInjectionTestMethodScopedExtensionContextNestedTests
  * @see org.springframework.test.context.junit4.nested.NestedTestsWithSpringRulesTests
  */
 @SpringJUnitWebConfig(Config.class)

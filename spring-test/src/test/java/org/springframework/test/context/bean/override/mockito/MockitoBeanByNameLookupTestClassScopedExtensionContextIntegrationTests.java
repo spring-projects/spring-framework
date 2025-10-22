@@ -19,6 +19,7 @@ package org.springframework.test.context.bean.override.mockito;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.TestInstantiationAwareExtension.ExtensionContextScope;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -35,14 +36,15 @@ import org.springframework.test.mockito.MockitoAssertions;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Integration tests for {@link MockitoBean} that use by-name lookup.
+ * Integration tests for {@link MockitoBean} that use by-name lookup with test class
+ * {@link ExtensionContextScope}.
  *
  * @author Simon Baslé
  * @author Sam Brannen
  * @since 6.2
  */
 @SpringJUnitConfig
-public class MockitoBeanByNameLookupIntegrationTests {
+public class MockitoBeanByNameLookupTestClassScopedExtensionContextIntegrationTests {
 
 	@MockitoBean("field")
 	ExampleService field;
