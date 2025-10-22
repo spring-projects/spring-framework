@@ -17,6 +17,7 @@
 package org.springframework.http.codec.protobuf;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -57,10 +58,32 @@ import org.springframework.util.MimeType;
  */
 public class ProtobufEncoder extends ProtobufCodecSupport implements HttpMessageEncoder<Message> {
 
-	private static final List<MediaType> streamingMediaTypes = Arrays.stream(MIME_TYPES)
-			.map(mimeType -> new MediaType(mimeType.getType(), mimeType.getSubtype(),
-					Collections.singletonMap(DELIMITED_KEY, DELIMITED_VALUE)))
-			.toList();
+	private List<MediaType> mediaTypes = iniMediaTypes(Arrays.asList(MIME_TYPES));
+
+
+	@Override
+	protected void setMimeTypes(List<MimeType> mimeTypes) {
+		super.setMimeTypes(mimeTypes);
+		this.mediaTypes = iniMediaTypes(mimeTypes);
+	}
+
+	private static List<MediaType> iniMediaTypes(List<MimeType> mimeTypes) {
+		return mimeTypes.stream()
+				.map(mimeType -> new MediaType(mimeType.getType(), mimeType.getSubtype(),
+						Collections.singletonMap(DELIMITED_KEY, DELIMITED_VALUE)))
+				.toList();
+	}
+
+
+	@Override
+	public List<MediaType> getStreamingMediaTypes() {
+		return this.mediaTypes;
+	}
+
+	@Override
+	public List<MimeType> getEncodableMimeTypes() {
+		return getMimeTypes();
+	}
 
 
 	@Override
@@ -84,14 +107,13 @@ public class ProtobufEncoder extends ProtobufCodecSupport implements HttpMessage
 	}
 
 	private DataBuffer encodeValue(Message message, DataBufferFactory bufferFactory, boolean delimited) {
-
 		FastByteArrayOutputStream bos = new FastByteArrayOutputStream();
 		try {
 			if (delimited) {
-				message.writeDelimitedTo(bos);
+				message.writeDelimitedTo((OutputStream) bos);
 			}
 			else {
-				message.writeTo(bos);
+				message.writeTo((OutputStream) bos);
 			}
 			byte[] bytes = bos.toByteArrayUnsafe();
 			return bufferFactory.wrap(bytes);
@@ -99,16 +121,6 @@ public class ProtobufEncoder extends ProtobufCodecSupport implements HttpMessage
 		catch (IOException ex) {
 			throw new IllegalStateException("Unexpected I/O error while writing to data buffer", ex);
 		}
-	}
-
-	@Override
-	public List<MediaType> getStreamingMediaTypes() {
-		return streamingMediaTypes;
-	}
-
-	@Override
-	public List<MimeType> getEncodableMimeTypes() {
-		return getMimeTypes();
 	}
 
 }
