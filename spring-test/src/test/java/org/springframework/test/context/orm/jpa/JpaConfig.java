@@ -59,7 +59,7 @@ class JpaConfig {
 		emfb.setPackagesToScan(Person.class.getPackage().getName());
 		HibernateJpaVendorAdapter hibernateJpaVendorAdapter = new HibernateJpaVendorAdapter();
 		hibernateJpaVendorAdapter.setGenerateDdl(true);
-		hibernateJpaVendorAdapter.setDatabase(Database.H2);
+		hibernateJpaVendorAdapter.setDatabase(Database.HSQL);
 		emfb.setJpaVendorAdapter(hibernateJpaVendorAdapter);
 		return emfb;
 	}
