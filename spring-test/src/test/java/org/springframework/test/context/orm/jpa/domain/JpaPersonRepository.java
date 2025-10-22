@@ -16,6 +16,8 @@
 
 package org.springframework.test.context.orm.jpa.domain;
 
+import java.util.List;
+
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 
@@ -34,6 +36,12 @@ public class JpaPersonRepository implements PersonRepository {
 
 	@PersistenceContext
 	private EntityManager entityManager;
+
+
+	@Override
+	public List<Person> findAll() {
+		return this.entityManager.createQuery("from Person", Person.class).getResultList();
+	}
 
 	@Override
 	public Person findById(Long id) {
