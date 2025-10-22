@@ -107,19 +107,29 @@ public class ProtobufEncoder extends ProtobufCodecSupport implements HttpMessage
 	}
 
 	private DataBuffer encodeValue(Message message, DataBufferFactory bufferFactory, boolean delimited) {
-		FastByteArrayOutputStream bos = new FastByteArrayOutputStream();
+		FastByteArrayOutputStream outputStream = new FastByteArrayOutputStream();
 		try {
-			if (delimited) {
-				message.writeDelimitedTo((OutputStream) bos);
-			}
-			else {
-				message.writeTo((OutputStream) bos);
-			}
-			byte[] bytes = bos.toByteArrayUnsafe();
+			writeMessage(message, delimited, outputStream);
+			byte[] bytes = outputStream.toByteArrayUnsafe();
 			return bufferFactory.wrap(bytes);
 		}
 		catch (IOException ex) {
 			throw new IllegalStateException("Unexpected I/O error while writing to data buffer", ex);
+		}
+	}
+
+	/**
+	 * Use write methods on {@link Message} to write to the given {@code OutputStream}.
+	 * @since 7.0
+	 */
+	protected void writeMessage(
+			Message message, boolean delimited, OutputStream outputStream) throws IOException {
+
+		if (delimited) {
+			message.writeDelimitedTo(outputStream);
+		}
+		else {
+			message.writeTo(outputStream);
 		}
 	}
 
