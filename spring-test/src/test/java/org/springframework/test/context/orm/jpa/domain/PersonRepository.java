@@ -16,6 +16,8 @@
 
 package org.springframework.test.context.orm.jpa.domain;
 
+import java.util.List;
+
 /**
  * Person repository API.
  *
@@ -23,6 +25,8 @@ package org.springframework.test.context.orm.jpa.domain;
  * @since 5.3.18
  */
 public interface PersonRepository {
+
+	List<Person> findAll();
 
 	Person findById(Long id);
 
