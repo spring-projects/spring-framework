@@ -30,6 +30,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
 import org.springframework.test.context.bean.override.example.ExampleService;
 import org.springframework.test.context.bean.override.example.RealExampleService;
+import org.springframework.test.context.junit.jupiter.SpringExtensionConfig;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import org.springframework.test.mockito.MockitoAssertions;
 
@@ -44,6 +45,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @since 6.2
  */
 @SpringJUnitConfig
+@SpringExtensionConfig(useTestClassScopedExtensionContext = true)
 public class MockitoBeanByNameLookupTestClassScopedExtensionContextIntegrationTests {
 
 	@MockitoBean("field")

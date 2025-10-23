@@ -21,7 +21,6 @@ import java.util.List;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.TestInstantiationAwareExtension.ExtensionContextScope;
-import org.junit.platform.testkit.engine.EngineTestKit;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -32,11 +31,9 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.NestedTestConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
+import org.springframework.test.context.junit.jupiter.nested.ActiveProfilesTestMethodScopedExtensionContextNestedTests.Config1;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.extension.TestInstantiationAwareExtension.ExtensionContextScope.DEFAULT_SCOPE_PROPERTY_NAME;
-import static org.junit.jupiter.api.extension.TestInstantiationAwareExtension.ExtensionContextScope.TEST_METHOD;
-import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClass;
 import static org.springframework.test.context.NestedTestConfiguration.EnclosingConfiguration.INHERIT;
 import static org.springframework.test.context.NestedTestConfiguration.EnclosingConfiguration.OVERRIDE;
 
@@ -49,37 +46,77 @@ import static org.springframework.test.context.NestedTestConfiguration.Enclosing
  * @author Sam Brannen
  * @since 6.2.13
  */
+@SpringJUnitConfig(Config1.class)
+@ActiveProfiles("1")
+@NestedTestConfiguration(OVERRIDE) // since INHERIT is now the global default
 class ActiveProfilesTestMethodScopedExtensionContextNestedTests {
 
+	@Autowired
+	List<String> strings;
+
+
 	@Test
-	void runTests() {
-		EngineTestKit.engine("junit-jupiter")
-				.configurationParameter(DEFAULT_SCOPE_PROPERTY_NAME, TEST_METHOD.name())
-				.selectors(selectClass(TestCase.class))
-				.execute()
-				.testEvents()
-				.assertStatistics(stats -> stats.started(7).succeeded(7).failed(0));
+	void test() {
+		assertThat(this.strings).containsExactlyInAnyOrder("X", "A1");
 	}
 
 
-	@SpringJUnitConfig(Config1.class)
-	@ActiveProfiles("1")
-	@NestedTestConfiguration(OVERRIDE) // since INHERIT is now the global default
-	static class TestCase {
+	@Nested
+	@NestedTestConfiguration(INHERIT)
+	class InheritedConfigTests {
 
 		@Autowired
-		List<String> strings;
+		List<String> localStrings;
 
 
 		@Test
 		void test() {
-			assertThat(this.strings).containsExactlyInAnyOrder("X", "A1");
+			assertThat(strings)
+					.isEqualTo(this.localStrings)
+					.containsExactlyInAnyOrder("X", "A1");
+		}
+	}
+
+	@Nested
+	@SpringJUnitConfig(Config2.class)
+	@ActiveProfiles("2")
+	class ConfigOverriddenByDefaultTests {
+
+		@Autowired
+		List<String> localStrings;
+
+
+		@Test
+		void test() {
+			assertThat(strings)
+					.isEqualTo(this.localStrings)
+					.containsExactlyInAnyOrder("Y", "A2");
+		}
+	}
+
+	@Nested
+	@NestedTestConfiguration(INHERIT)
+	@ContextConfiguration(classes = Config2.class)
+	@ActiveProfiles("2")
+	class InheritedAndExtendedConfigTests {
+
+		@Autowired
+		List<String> localStrings;
+
+
+		@Test
+		void test() {
+			assertThat(strings)
+					.isEqualTo(this.localStrings)
+					.containsExactlyInAnyOrder("X", "A1", "Y", "A2");
 		}
 
 
 		@Nested
-		@NestedTestConfiguration(INHERIT)
-		class InheritedConfigTestCase {
+		@NestedTestConfiguration(OVERRIDE)
+		@SpringJUnitConfig({ Config1.class, Config2.class, Config3.class })
+		@ActiveProfiles("3")
+		class DoubleNestedWithOverriddenConfigTests {
 
 			@Autowired
 			List<String> localStrings;
@@ -89,50 +126,14 @@ class ActiveProfilesTestMethodScopedExtensionContextNestedTests {
 			void test() {
 				assertThat(strings)
 						.isEqualTo(this.localStrings)
-						.containsExactlyInAnyOrder("X", "A1");
-			}
-		}
-
-		@Nested
-		@SpringJUnitConfig(Config2.class)
-		@ActiveProfiles("2")
-		class ConfigOverriddenByDefaultTestCase {
-
-			@Autowired
-			List<String> localStrings;
-
-
-			@Test
-			void test() {
-				assertThat(strings)
-						.isEqualTo(this.localStrings)
-						.containsExactlyInAnyOrder("Y", "A2");
-			}
-		}
-
-		@Nested
-		@NestedTestConfiguration(INHERIT)
-		@ContextConfiguration(classes = Config2.class)
-		@ActiveProfiles("2")
-		class InheritedAndExtendedConfigTestCase {
-
-			@Autowired
-			List<String> localStrings;
-
-
-			@Test
-			void test() {
-				assertThat(strings)
-						.isEqualTo(this.localStrings)
-						.containsExactlyInAnyOrder("X", "A1", "Y", "A2");
+						.containsExactlyInAnyOrder("X", "Y", "Z", "A3");
 			}
 
 
 			@Nested
-			@NestedTestConfiguration(OVERRIDE)
-			@SpringJUnitConfig({ Config1.class, Config2.class, Config3.class })
-			@ActiveProfiles("3")
-			class DoubleNestedWithOverriddenConfigTestCase {
+			@NestedTestConfiguration(INHERIT)
+			@ActiveProfiles(profiles = "2", inheritProfiles = false)
+			class TripleNestedWithInheritedConfigButOverriddenProfilesTests {
 
 				@Autowired
 				List<String> localStrings;
@@ -142,41 +143,23 @@ class ActiveProfilesTestMethodScopedExtensionContextNestedTests {
 				void test() {
 					assertThat(strings)
 							.isEqualTo(this.localStrings)
-							.containsExactlyInAnyOrder("X", "Y", "Z", "A3");
+							.containsExactlyInAnyOrder("X", "Y", "Z", "A2");
 				}
+			}
+
+			@Nested
+			@NestedTestConfiguration(INHERIT)
+			class TripleNestedWithInheritedConfigAndTestInterfaceTests implements TestInterface {
+
+				@Autowired
+				List<String> localStrings;
 
 
-				@Nested
-				@NestedTestConfiguration(INHERIT)
-				@ActiveProfiles(profiles = "2", inheritProfiles = false)
-				class TripleNestedWithInheritedConfigButOverriddenProfilesTestCase {
-
-					@Autowired
-					List<String> localStrings;
-
-
-					@Test
-					void test() {
-						assertThat(strings)
-								.isEqualTo(this.localStrings)
-								.containsExactlyInAnyOrder("X", "Y", "Z", "A2");
-					}
-				}
-
-				@Nested
-				@NestedTestConfiguration(INHERIT)
-				class TripleNestedWithInheritedConfigAndTestInterfaceTestCase implements TestInterface {
-
-					@Autowired
-					List<String> localStrings;
-
-
-					@Test
-					void test() {
-						assertThat(strings)
-								.isEqualTo(this.localStrings)
-								.containsExactlyInAnyOrder("X", "Y", "Z", "A2", "A3");
-					}
+				@Test
+				void test() {
+					assertThat(strings)
+							.isEqualTo(this.localStrings)
+							.containsExactlyInAnyOrder("X", "Y", "Z", "A2", "A3");
 				}
 			}
 		}

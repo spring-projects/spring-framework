@@ -169,6 +169,7 @@ public interface TestExecutionListener {
 	 * concrete classes as necessary.
 	 * @param testContext the test context for the test; never {@code null}
 	 * @throws Exception allows any exception to propagate
+	 * @see org.springframework.test.context.junit.jupiter.SpringExtensionConfig @SpringExtensionConfig
 	 */
 	default void prepareTestInstance(TestContext testContext) throws Exception {
 	}

@@ -31,6 +31,7 @@ import org.springframework.test.context.ContextHierarchy;
 import org.springframework.test.context.NestedTestConfiguration;
 import org.springframework.test.context.aot.DisabledInAotMode;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.test.context.junit.jupiter.SpringExtensionConfig;
 import org.springframework.test.context.junit.jupiter.nested.ContextHierarchyTestClassScopedExtensionContextNestedTests.ParentConfig;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -47,6 +48,7 @@ import static org.springframework.test.context.NestedTestConfiguration.Enclosing
  * @since 5.3
  */
 @ExtendWith(SpringExtension.class)
+@SpringExtensionConfig(useTestClassScopedExtensionContext = true)
 @ContextHierarchy(@ContextConfiguration(classes = ParentConfig.class))
 @NestedTestConfiguration(OVERRIDE) // since INHERIT is now the global default
 @DisabledInAotMode("@ContextHierarchy is not supported in AOT")

@@ -18,55 +18,68 @@ package org.springframework.test.context.junit.jupiter.nested;
 
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.TestInstantiationAwareExtension.ExtensionContextScope;
+import org.junit.jupiter.params.Parameter;
+import org.junit.jupiter.params.ParameterizedClass;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.NestedTestConfiguration;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.test.context.junit.jupiter.SpringExtensionConfig;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
-import org.springframework.test.context.junit.jupiter.nested.ContextConfigurationTestMethodScopedExtensionContextNestedTests.TopLevelConfig;
+import org.springframework.test.context.junit.jupiter.nested.ParameterizedCtxConfigTestClassScopedExtensionContextNestedTests.TopLevelConfig;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.context.NestedTestConfiguration.EnclosingConfiguration.INHERIT;
 import static org.springframework.test.context.NestedTestConfiguration.EnclosingConfiguration.OVERRIDE;
 
 /**
- * Integration tests that verify support for {@code @Nested} test classes using
- * {@link ContextConfiguration @ContextConfiguration} in conjunction with the
- * {@link SpringExtension} in a JUnit Jupiter environment with
- * {@link ExtensionContextScope#TEST_METHOD}.
+ * Parameterized variant of {@link ContextConfigurationTestClassScopedExtensionContextNestedTests}
+ * which tests {@link ParameterizedClass @ParameterizedClass} support.
  *
  * @author Sam Brannen
- * @since 6.2.13
- * @see ConstructorInjectionTestClassScopedExtensionContextNestedTests
- * @see org.springframework.test.context.junit4.nested.NestedTestsWithSpringRulesTests
+ * @since 7.0
  */
 @SpringJUnitConfig(TopLevelConfig.class)
+@SpringExtensionConfig(useTestClassScopedExtensionContext = true)
 @NestedTestConfiguration(OVERRIDE) // since INHERIT is now the global default
-class ContextConfigurationTestMethodScopedExtensionContextNestedTests {
+@ParameterizedClass
+@ValueSource(strings = {"foo", "bar"})
+class ParameterizedCtxConfigTestClassScopedExtensionContextNestedTests {
 
 	private static final String FOO = "foo";
 	private static final String BAR = "bar";
 	private static final String BAZ = "baz";
 
-	@Autowired(required = false)
-	@Qualifier("foo")
+	@Parameter
+	String beanName;
+
+	@Autowired
+	ApplicationContext context;
+
+	@Autowired
 	String foo;
 
 
 	@Test
 	void topLevelTest() {
 		assertThat(foo).isEqualTo(FOO);
+		if (beanName.equals(FOO)) {
+			assertThat(context.getBean(beanName, String.class)).isEqualTo(beanName);
+		}
 	}
 
 
 	@Nested
 	@SpringJUnitConfig(NestedConfig.class)
 	class NestedTests {
+
+		@Autowired
+		ApplicationContext localContext;
 
 		@Autowired(required = false)
 		@Qualifier("foo")
@@ -78,15 +91,24 @@ class ContextConfigurationTestMethodScopedExtensionContextNestedTests {
 
 		@Test
 		void test() {
-			assertThat(foo).as("foo bean should not be present").isNull();
-			assertThat(this.localFoo).as("local foo bean should not be present").isNull();
+			// In contrast to nested test classes running in JUnit 4, the foo
+			// field in the outer instance should have been injected from the
+			// test ApplicationContext for the outer instance.
+			assertThat(foo).isEqualTo(FOO);
+			assertThat(this.localFoo).as("foo bean should not be present").isNull();
 			assertThat(this.bar).isEqualTo(BAR);
+			if (beanName.equals(BAR)) {
+				assertThat(localContext.getBean(beanName, String.class)).isEqualTo(beanName);
+			}
 		}
 	}
 
 	@Nested
 	@NestedTestConfiguration(INHERIT)
-	class NestedTestsWithInheritedConfigTests {
+	class NestedWithInheritedConfigTests {
+
+		@Autowired
+		ApplicationContext localContext;
 
 		@Autowired(required = false)
 		@Qualifier("foo")
@@ -104,6 +126,9 @@ class ContextConfigurationTestMethodScopedExtensionContextNestedTests {
 			assertThat(foo).isEqualTo(FOO);
 			assertThat(this.localFoo).isEqualTo(FOO);
 			assertThat(this.bar).isEqualTo(FOO);
+			if (beanName.equals(FOO)) {
+				assertThat(localContext.getBean(beanName, String.class)).isEqualTo(beanName);
+			}
 		}
 
 
@@ -111,6 +136,9 @@ class ContextConfigurationTestMethodScopedExtensionContextNestedTests {
 		@NestedTestConfiguration(OVERRIDE)
 		@SpringJUnitConfig(NestedConfig.class)
 		class DoubleNestedWithOverriddenConfigTests {
+
+			@Autowired
+			ApplicationContext localContext;
 
 			@Autowired(required = false)
 			@Qualifier("foo")
@@ -122,15 +150,26 @@ class ContextConfigurationTestMethodScopedExtensionContextNestedTests {
 
 			@Test
 			void test() {
-				assertThat(foo).as("foo bean should not be present").isNull();
-				assertThat(this.localFoo).as("local foo bean should not be present").isNull();
+				// In contrast to nested test classes running in JUnit 4, the foo
+				// field in the outer instance should have been injected from the
+				// test ApplicationContext for the outer instance.
+				assertThat(foo).isEqualTo(FOO);
+				assertThat(this.localFoo).as("foo bean should not be present").isNull();
 				assertThat(this.bar).isEqualTo(BAR);
+				if (beanName.equals(BAR)) {
+					assertThat(localContext.getBean(beanName, String.class)).isEqualTo(beanName);
+				}
 			}
 
 
 			@Nested
 			@NestedTestConfiguration(INHERIT)
+			@ParameterizedClass
+			@ValueSource(ints = {1, 2})
 			class TripleNestedWithInheritedConfigTests {
+
+				@Autowired
+				ApplicationContext localContext;
 
 				@Autowired(required = false)
 				@Qualifier("foo")
@@ -142,9 +181,12 @@ class ContextConfigurationTestMethodScopedExtensionContextNestedTests {
 
 				@Test
 				void test() {
-					assertThat(foo).as("foo bean should not be present").isNull();
-					assertThat(this.localFoo).as("local foo bean should not be present").isNull();
+					assertThat(foo).isEqualTo(FOO);
+					assertThat(this.localFoo).as("foo bean should not be present").isNull();
 					assertThat(this.bar).isEqualTo(BAR);
+					if (beanName.equals(BAR)) {
+						assertThat(localContext.getBean(beanName, String.class)).isEqualTo(beanName);
+					}
 				}
 			}
 
@@ -152,12 +194,14 @@ class ContextConfigurationTestMethodScopedExtensionContextNestedTests {
 			@NestedTestConfiguration(INHERIT)
 			class TripleNestedWithInheritedConfigAndTestInterfaceTests implements TestInterface {
 
+				@Autowired
+				ApplicationContext localContext;
+
 				@Autowired(required = false)
 				@Qualifier("foo")
 				String localFoo;
 
 				@Autowired
-				@Qualifier("bar")
 				String bar;
 
 				@Autowired
@@ -166,18 +210,20 @@ class ContextConfigurationTestMethodScopedExtensionContextNestedTests {
 
 				@Test
 				void test() {
-					assertThat(foo).as("foo bean should not be present").isNull();
-					assertThat(this.localFoo).as("local foo bean should not be present").isNull();
+					assertThat(foo).isEqualTo(FOO);
+					assertThat(this.localFoo).as("foo bean should not be present").isNull();
 					assertThat(this.bar).isEqualTo(BAR);
 					assertThat(this.baz).isEqualTo(BAZ);
+					if (beanName.equals(BAR)) {
+						assertThat(localContext.getBean(beanName, String.class)).isEqualTo(beanName);
+					}
 				}
 			}
 		}
 	}
 
-	// -------------------------------------------------------------------------
 
-	@Configuration
+	@Configuration(proxyBeanMethods = false)
 	static class TopLevelConfig {
 
 		@Bean
@@ -186,7 +232,7 @@ class ContextConfigurationTestMethodScopedExtensionContextNestedTests {
 		}
 	}
 
-	@Configuration
+	@Configuration(proxyBeanMethods = false)
 	static class NestedConfig {
 
 		@Bean
@@ -195,7 +241,7 @@ class ContextConfigurationTestMethodScopedExtensionContextNestedTests {
 		}
 	}
 
-	@Configuration
+	@Configuration(proxyBeanMethods = false)
 	static class TestInterfaceConfig {
 
 		@Bean

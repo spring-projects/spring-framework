@@ -19,45 +19,57 @@ package org.springframework.test.context.junit.jupiter.nested;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
-import org.junit.jupiter.api.extension.TestInstantiationAwareExtension.ExtensionContextScope;
+import org.junit.jupiter.params.ParameterizedClass;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.NestedTestConfiguration;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.test.context.junit.jupiter.SpringExtensionConfig;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
-import org.springframework.test.context.junit.jupiter.nested.ConstructorInjectionTestMethodScopedExtensionContextNestedTests.TopLevelConfig;
+import org.springframework.test.context.junit.jupiter.nested.ParameterizedConstructorInjectionTestClassScopedExtensionContextNestedTests.TopLevelConfig;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.context.NestedTestConfiguration.EnclosingConfiguration.OVERRIDE;
 
 /**
- * Integration tests that verify support for {@code @Nested} test classes in conjunction
- * with the {@link SpringExtension} in a JUnit Jupiter environment with
- * {@link ExtensionContextScope#TEST_METHOD} ... when using constructor injection
- * as opposed to field injection (see SPR-16653).
+ * Parameterized variant of {@link ConstructorInjectionTestClassScopedExtensionContextNestedTests}
+ * which tests {@link ParameterizedClass @ParameterizedClass} support.
  *
  * @author Sam Brannen
- * @since 6.2.13
- * @see ContextConfigurationTestClassScopedExtensionContextNestedTests
- * @see org.springframework.test.context.junit4.nested.NestedTestsWithSpringRulesTests
+ * @since 7.0
  */
 @SpringJUnitConfig(TopLevelConfig.class)
+@SpringExtensionConfig(useTestClassScopedExtensionContext = true)
 @NestedTestConfiguration(OVERRIDE) // since INHERIT is now the global default
-class ConstructorInjectionTestMethodScopedExtensionContextNestedTests {
+@ParameterizedClass
+@ValueSource(strings = {"foo", "bar"})
+class ParameterizedConstructorInjectionTestClassScopedExtensionContextNestedTests {
 
+	final String beanName;
 	final String foo;
+	final ApplicationContext context;
 
-	ConstructorInjectionTestMethodScopedExtensionContextNestedTests(TestInfo testInfo, @Autowired String foo) {
+
+	ParameterizedConstructorInjectionTestClassScopedExtensionContextNestedTests(
+			String beanName, TestInfo testInfo, @Autowired String foo, ApplicationContext context) {
+
+		this.context = context;
+		this.beanName = beanName;
 		this.foo = foo;
 	}
+
 
 	@Test
 	void topLevelTest() {
 		assertThat(foo).isEqualTo("foo");
+		if (beanName.equals("foo")) {
+			assertThat(context.getBean(beanName, String.class)).isEqualTo(beanName);
+		}
 	}
 
 	@Nested
@@ -65,16 +77,21 @@ class ConstructorInjectionTestMethodScopedExtensionContextNestedTests {
 	class AutowiredConstructorTests {
 
 		final String bar;
+		final ApplicationContext localContext;
 
 		@Autowired
-		AutowiredConstructorTests(String bar) {
+		AutowiredConstructorTests(String bar, ApplicationContext context) {
 			this.bar = bar;
+			this.localContext = context;
 		}
 
 		@Test
 		void nestedTest() {
-			assertThat(foo).isEqualTo("bar");
+			assertThat(foo).isEqualTo("foo");
 			assertThat(bar).isEqualTo("bar");
+			if (beanName.equals("bar")) {
+				assertThat(localContext.getBean(beanName, String.class)).isEqualTo(beanName);
+			}
 		}
 	}
 
@@ -83,15 +100,20 @@ class ConstructorInjectionTestMethodScopedExtensionContextNestedTests {
 	class AutowiredConstructorParameterTests {
 
 		final String bar;
+		final ApplicationContext localContext;
 
-		AutowiredConstructorParameterTests(@Autowired String bar) {
+		AutowiredConstructorParameterTests(@Autowired String bar, ApplicationContext context) {
 			this.bar = bar;
+			this.localContext = context;
 		}
 
 		@Test
 		void nestedTest() {
-			assertThat(foo).isEqualTo("bar");
+			assertThat(foo).isEqualTo("foo");
 			assertThat(bar).isEqualTo("bar");
+			if (beanName.equals("bar")) {
+				assertThat(localContext.getBean(beanName, String.class)).isEqualTo(beanName);
+			}
 		}
 	}
 
@@ -100,15 +122,20 @@ class ConstructorInjectionTestMethodScopedExtensionContextNestedTests {
 	class QualifiedConstructorParameterTests {
 
 		final String bar;
+		final ApplicationContext localContext;
 
-		QualifiedConstructorParameterTests(TestInfo testInfo, @Qualifier("bar") String s) {
+		QualifiedConstructorParameterTests(TestInfo testInfo, @Qualifier("bar") String s, ApplicationContext context) {
 			this.bar = s;
+			this.localContext = context;
 		}
 
 		@Test
 		void nestedTest() {
-			assertThat(foo).isEqualTo("bar");
+			assertThat(foo).isEqualTo("foo");
 			assertThat(bar).isEqualTo("bar");
+			if (beanName.equals("bar")) {
+				assertThat(localContext.getBean(beanName, String.class)).isEqualTo(beanName);
+			}
 		}
 	}
 
@@ -118,23 +145,27 @@ class ConstructorInjectionTestMethodScopedExtensionContextNestedTests {
 
 		final String bar;
 		final int answer;
+		final ApplicationContext localContext;
 
-		SpelConstructorParameterTests(@Autowired String bar, TestInfo testInfo, @Value("#{ 6 * 7 }") int answer) {
+		SpelConstructorParameterTests(@Autowired String bar, TestInfo testInfo, @Value("#{ 6 * 7 }") int answer, ApplicationContext context) {
 			this.bar = bar;
 			this.answer = answer;
+			this.localContext = context;
 		}
 
 		@Test
 		void nestedTest() {
-			assertThat(foo).isEqualTo("bar");
+			assertThat(foo).isEqualTo("foo");
 			assertThat(bar).isEqualTo("bar");
 			assertThat(answer).isEqualTo(42);
+			if (beanName.equals("bar")) {
+				assertThat(localContext.getBean(beanName, String.class)).isEqualTo(beanName);
+			}
 		}
 	}
 
-	// -------------------------------------------------------------------------
 
-	@Configuration
+	@Configuration(proxyBeanMethods = false)
 	static class TopLevelConfig {
 
 		@Bean
@@ -143,7 +174,7 @@ class ConstructorInjectionTestMethodScopedExtensionContextNestedTests {
 		}
 	}
 
-	@Configuration
+	@Configuration(proxyBeanMethods = false)
 	static class NestedConfig {
 
 		@Bean

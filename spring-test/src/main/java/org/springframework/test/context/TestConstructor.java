@@ -61,6 +61,7 @@ import org.jspecify.annotations.Nullable;
  * @see org.springframework.beans.factory.annotation.Autowired @Autowired
  * @see jakarta.inject.Inject @jakarta.inject.Inject
  * @see org.springframework.test.context.junit.jupiter.SpringExtension SpringExtension
+ * @see org.springframework.test.context.junit.jupiter.SpringExtensionConfig @SpringExtensionConfig
  * @see org.springframework.test.context.junit.jupiter.SpringJUnitConfig @SpringJUnitConfig
  * @see org.springframework.test.context.junit.jupiter.web.SpringJUnitWebConfig @SpringJUnitWebConfig
  * @see ContextConfiguration @ContextConfiguration

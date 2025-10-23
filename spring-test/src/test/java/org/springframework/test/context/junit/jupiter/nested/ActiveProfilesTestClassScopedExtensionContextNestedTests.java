@@ -30,6 +30,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.NestedTestConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.test.context.junit.jupiter.SpringExtensionConfig;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import org.springframework.test.context.junit.jupiter.nested.ActiveProfilesTestClassScopedExtensionContextNestedTests.Config1;
 
@@ -47,6 +48,7 @@ import static org.springframework.test.context.NestedTestConfiguration.Enclosing
  * @since 5.3
  */
 @SpringJUnitConfig(Config1.class)
+@SpringExtensionConfig(useTestClassScopedExtensionContext = true)
 @ActiveProfiles("1")
 @NestedTestConfiguration(OVERRIDE) // since INHERIT is now the global default
 class ActiveProfilesTestClassScopedExtensionContextNestedTests {

@@ -117,6 +117,7 @@ public interface TestContext extends AttributeAccessor, Serializable {
 	 * invoke {@code testContext.getTestInstance().getClass()} instead of
 	 * {@code testContext.getTestClass()}.
 	 * @return the test class (never {@code null})
+	 * @see org.springframework.test.context.junit.jupiter.SpringExtensionConfig @SpringExtensionConfig
 	 */
 	Class<?> getTestClass();
 

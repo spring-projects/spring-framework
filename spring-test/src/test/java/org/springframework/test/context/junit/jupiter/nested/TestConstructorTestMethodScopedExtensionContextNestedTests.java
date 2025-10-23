@@ -19,7 +19,6 @@ package org.springframework.test.context.junit.jupiter.nested;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.TestInstantiationAwareExtension.ExtensionContextScope;
-import org.junit.platform.testkit.engine.EngineTestKit;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -30,9 +29,6 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.extension.TestInstantiationAwareExtension.ExtensionContextScope.DEFAULT_SCOPE_PROPERTY_NAME;
-import static org.junit.jupiter.api.extension.TestInstantiationAwareExtension.ExtensionContextScope.TEST_METHOD;
-import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClass;
 import static org.springframework.test.context.NestedTestConfiguration.EnclosingConfiguration.INHERIT;
 import static org.springframework.test.context.NestedTestConfiguration.EnclosingConfiguration.OVERRIDE;
 import static org.springframework.test.context.TestConstructor.AutowireMode.ALL;
@@ -47,25 +43,40 @@ import static org.springframework.test.context.TestConstructor.AutowireMode.ANNO
  * @author Sam Brannen
  * @since 6.2.13
  */
+@SpringJUnitConfig
+@TestConstructor(autowireMode = ALL)
+@NestedTestConfiguration(OVERRIDE) // since INHERIT is now the global default
 class TestConstructorTestMethodScopedExtensionContextNestedTests {
 
+	TestConstructorTestMethodScopedExtensionContextNestedTests(String text) {
+		assertThat(text).isEqualTo("enigma");
+	}
+
 	@Test
-	void runTests() {
-		EngineTestKit.engine("junit-jupiter")
-				.configurationParameter(DEFAULT_SCOPE_PROPERTY_NAME, TEST_METHOD.name())
-				.selectors(selectClass(TestCase.class))
-				.execute()
-				.testEvents()
-				.assertStatistics(stats -> stats.started(8).succeeded(8).failed(0));
+	void test() {
 	}
 
 
+	@Nested
 	@SpringJUnitConfig(Config.class)
-	@TestConstructor(autowireMode = ALL)
-	@NestedTestConfiguration(OVERRIDE) // since INHERIT is now the global default
-	static class TestCase {
+	@TestConstructor(autowireMode = ANNOTATED)
+	class ConfigOverriddenByDefaultTests {
 
-		TestCase(String text) {
+		@Autowired
+		ConfigOverriddenByDefaultTests(String text) {
+			assertThat(text).isEqualTo("enigma");
+		}
+
+		@Test
+		void test() {
+		}
+	}
+
+	@Nested
+	@NestedTestConfiguration(INHERIT)
+	class InheritedConfigTests {
+
+		InheritedConfigTests(String text) {
 			assertThat(text).isEqualTo("enigma");
 		}
 
@@ -75,25 +86,37 @@ class TestConstructorTestMethodScopedExtensionContextNestedTests {
 
 
 		@Nested
-		@SpringJUnitConfig(Config.class)
-		@TestConstructor(autowireMode = ANNOTATED)
-		class ConfigOverriddenByDefaultTestCase {
+		class DoubleNestedWithImplicitlyInheritedConfigTests {
 
-			@Autowired
-			ConfigOverriddenByDefaultTestCase(String text) {
+			DoubleNestedWithImplicitlyInheritedConfigTests(String text) {
 				assertThat(text).isEqualTo("enigma");
 			}
 
 			@Test
 			void test() {
+			}
+
+
+			@Nested
+			class TripleNestedWithImplicitlyInheritedConfigTests {
+
+				TripleNestedWithImplicitlyInheritedConfigTests(String text) {
+					assertThat(text).isEqualTo("enigma");
+				}
+
+				@Test
+				void test() {
+				}
 			}
 		}
 
 		@Nested
-		@NestedTestConfiguration(INHERIT)
-		class InheritedConfigTestCase {
+		@NestedTestConfiguration(OVERRIDE)
+		@SpringJUnitConfig(Config.class)
+		@TestConstructor(autowireMode = ANNOTATED)
+		class DoubleNestedWithOverriddenConfigTests {
 
-			InheritedConfigTestCase(String text) {
+			DoubleNestedWithOverriddenConfigTests(@Autowired String text) {
 				assertThat(text).isEqualTo("enigma");
 			}
 
@@ -103,70 +126,29 @@ class TestConstructorTestMethodScopedExtensionContextNestedTests {
 
 
 			@Nested
-			class DoubleNestedWithImplicitlyInheritedConfigTestCase {
+			@NestedTestConfiguration(INHERIT)
+			class TripleNestedWithInheritedConfigTests {
 
-				DoubleNestedWithImplicitlyInheritedConfigTestCase(String text) {
+				@Autowired
+				TripleNestedWithInheritedConfigTests(String text) {
 					assertThat(text).isEqualTo("enigma");
 				}
 
 				@Test
 				void test() {
-				}
-
-
-				@Nested
-				class TripleNestedWithImplicitlyInheritedConfigTestCase {
-
-					TripleNestedWithImplicitlyInheritedConfigTestCase(String text) {
-						assertThat(text).isEqualTo("enigma");
-					}
-
-					@Test
-					void test() {
-					}
 				}
 			}
 
 			@Nested
-			@NestedTestConfiguration(OVERRIDE)
-			@SpringJUnitConfig(Config.class)
-			@TestConstructor(autowireMode = ANNOTATED)
-			class DoubleNestedWithOverriddenConfigTestCase {
+			@NestedTestConfiguration(INHERIT)
+			class TripleNestedWithInheritedConfigAndTestInterfaceTests implements TestInterface {
 
-				DoubleNestedWithOverriddenConfigTestCase(@Autowired String text) {
+				TripleNestedWithInheritedConfigAndTestInterfaceTests(String text) {
 					assertThat(text).isEqualTo("enigma");
 				}
 
 				@Test
 				void test() {
-				}
-
-
-				@Nested
-				@NestedTestConfiguration(INHERIT)
-				class TripleNestedWithInheritedConfigTestCase {
-
-					@Autowired
-					TripleNestedWithInheritedConfigTestCase(String text) {
-						assertThat(text).isEqualTo("enigma");
-					}
-
-					@Test
-					void test() {
-					}
-				}
-
-				@Nested
-				@NestedTestConfiguration(INHERIT)
-				class TripleNestedWithInheritedConfigAndTestInterfaceTestCase implements TestInterface {
-
-					TripleNestedWithInheritedConfigAndTestInterfaceTestCase(String text) {
-						assertThat(text).isEqualTo("enigma");
-					}
-
-					@Test
-					void test() {
-					}
 				}
 			}
 		}

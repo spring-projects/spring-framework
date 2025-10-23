@@ -20,7 +20,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.TestInstantiationAwareExtension.ExtensionContextScope;
-import org.junit.platform.testkit.engine.EngineTestKit;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -33,9 +32,6 @@ import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import org.springframework.test.mockito.MockitoAssertions;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.extension.TestInstantiationAwareExtension.ExtensionContextScope.DEFAULT_SCOPE_PROPERTY_NAME;
-import static org.junit.jupiter.api.extension.TestInstantiationAwareExtension.ExtensionContextScope.TEST_METHOD;
-import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClass;
 
 /**
  * Integration tests for {@link MockitoBean} that use by-name lookup with
@@ -45,27 +41,54 @@ import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClass
  * @author Sam Brannen
  * @since 6.2.13
  */
+@SpringJUnitConfig
 public class MockitoBeanByNameLookupTestMethodScopedExtensionContextIntegrationTests {
 
+	@MockitoBean("field")
+	ExampleService field;
+
+	@MockitoBean("nonExistingBean")
+	ExampleService nonExisting;
+
+
 	@Test
-	void runTests() {
-		EngineTestKit.engine("junit-jupiter")
-				.configurationParameter(DEFAULT_SCOPE_PROPERTY_NAME, TEST_METHOD.name())
-				.selectors(selectClass(TestCase.class))
-				.execute()
-				.testEvents()
-				.assertStatistics(stats -> stats.started(6).succeeded(6).failed(0));
+	void fieldAndRenamedFieldHaveSameOverride(ApplicationContext ctx) {
+		assertThat(ctx.getBean("field"))
+				.isInstanceOf(ExampleService.class)
+				.satisfies(MockitoAssertions::assertIsMock)
+				.isSameAs(field);
+
+		assertThat(field.greeting()).as("mocked greeting").isNull();
+	}
+
+	@Test
+	void fieldIsMockedWhenNoOriginalBean(ApplicationContext ctx) {
+		assertThat(ctx.getBean("nonExistingBean"))
+				.isInstanceOf(ExampleService.class)
+				.satisfies(MockitoAssertions::assertIsMock)
+				.isSameAs(nonExisting);
+
+		assertThat(nonExisting.greeting()).as("mocked greeting").isNull();
 	}
 
 
-	@SpringJUnitConfig
-	public static class TestCase {
+	@Nested
+	@DisplayName("With @MockitoBean in enclosing class and in @Nested class")
+	public class MockitoBeanNestedTests {
 
-		@MockitoBean("field")
-		ExampleService field;
+		@Autowired
+		@Qualifier("field")
+		ExampleService localField;
 
-		@MockitoBean("nonExistingBean")
-		ExampleService nonExisting;
+		@Autowired
+		@Qualifier("nonExistingBean")
+		ExampleService localNonExisting;
+
+		@MockitoBean("nestedField")
+		ExampleService nestedField;
+
+		@MockitoBean("nestedNonExistingBean")
+		ExampleService nestedNonExisting;
 
 
 		@Test
@@ -73,9 +96,9 @@ public class MockitoBeanByNameLookupTestMethodScopedExtensionContextIntegrationT
 			assertThat(ctx.getBean("field"))
 					.isInstanceOf(ExampleService.class)
 					.satisfies(MockitoAssertions::assertIsMock)
-					.isSameAs(field);
+					.isSameAs(localField);
 
-			assertThat(field.greeting()).as("mocked greeting").isNull();
+			assertThat(localField.greeting()).as("mocked greeting").isNull();
 		}
 
 		@Test
@@ -83,66 +106,25 @@ public class MockitoBeanByNameLookupTestMethodScopedExtensionContextIntegrationT
 			assertThat(ctx.getBean("nonExistingBean"))
 					.isInstanceOf(ExampleService.class)
 					.satisfies(MockitoAssertions::assertIsMock)
-					.isSameAs(nonExisting);
+					.isSameAs(localNonExisting);
 
-			assertThat(nonExisting.greeting()).as("mocked greeting").isNull();
+			assertThat(localNonExisting.greeting()).as("mocked greeting").isNull();
 		}
 
+		@Test
+		void nestedFieldAndRenamedFieldHaveSameOverride(ApplicationContext ctx) {
+			assertThat(ctx.getBean("nestedField"))
+					.isInstanceOf(ExampleService.class)
+					.satisfies(MockitoAssertions::assertIsMock)
+					.isSameAs(nestedField);
+		}
 
-		@Nested
-		@DisplayName("With @MockitoBean in enclosing class and in @Nested class")
-		public class MockitoBeanNestedTestCase {
-
-			@Autowired
-			@Qualifier("field")
-			ExampleService localField;
-
-			@Autowired
-			@Qualifier("nonExistingBean")
-			ExampleService localNonExisting;
-
-			@MockitoBean("nestedField")
-			ExampleService nestedField;
-
-			@MockitoBean("nestedNonExistingBean")
-			ExampleService nestedNonExisting;
-
-
-			@Test
-			void fieldAndRenamedFieldHaveSameOverride(ApplicationContext ctx) {
-				assertThat(ctx.getBean("field"))
-						.isInstanceOf(ExampleService.class)
-						.satisfies(MockitoAssertions::assertIsMock)
-						.isSameAs(localField);
-
-				assertThat(localField.greeting()).as("mocked greeting").isNull();
-			}
-
-			@Test
-			void fieldIsMockedWhenNoOriginalBean(ApplicationContext ctx) {
-				assertThat(ctx.getBean("nonExistingBean"))
-						.isInstanceOf(ExampleService.class)
-						.satisfies(MockitoAssertions::assertIsMock)
-						.isSameAs(localNonExisting);
-
-				assertThat(localNonExisting.greeting()).as("mocked greeting").isNull();
-			}
-
-			@Test
-			void nestedFieldAndRenamedFieldHaveSameOverride(ApplicationContext ctx) {
-				assertThat(ctx.getBean("nestedField"))
-						.isInstanceOf(ExampleService.class)
-						.satisfies(MockitoAssertions::assertIsMock)
-						.isSameAs(nestedField);
-			}
-
-			@Test
-			void nestedFieldIsMockedWhenNoOriginalBean(ApplicationContext ctx) {
-				assertThat(ctx.getBean("nestedNonExistingBean"))
-						.isInstanceOf(ExampleService.class)
-						.satisfies(MockitoAssertions::assertIsMock)
-						.isSameAs(nestedNonExisting);
-			}
+		@Test
+		void nestedFieldIsMockedWhenNoOriginalBean(ApplicationContext ctx) {
+			assertThat(ctx.getBean("nestedNonExistingBean"))
+					.isInstanceOf(ExampleService.class)
+					.satisfies(MockitoAssertions::assertIsMock)
+					.isSameAs(nestedNonExisting);
 		}
 	}
 

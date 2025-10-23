@@ -20,7 +20,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.TestInstantiationAwareExtension.ExtensionContextScope;
-import org.junit.platform.testkit.engine.EngineTestKit;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -33,9 +32,6 @@ import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import org.springframework.test.mockito.MockitoAssertions;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.extension.TestInstantiationAwareExtension.ExtensionContextScope.DEFAULT_SCOPE_PROPERTY_NAME;
-import static org.junit.jupiter.api.extension.TestInstantiationAwareExtension.ExtensionContextScope.TEST_METHOD;
-import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClass;
 
 /**
  * Integration tests for {@link MockitoSpyBean} that use by-name lookup with
@@ -45,69 +41,56 @@ import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClass
  * @author Sam Brannen
  * @since 6.2.13
  */
+@SpringJUnitConfig
 public class MockitoSpyBeanByNameLookupTestMethodScopedExtensionContextIntegrationTests {
 
+	@MockitoSpyBean("field1")
+	ExampleService field;
+
+
 	@Test
-	void runTests() {
-		EngineTestKit.engine("junit-jupiter")
-				.configurationParameter(DEFAULT_SCOPE_PROPERTY_NAME, TEST_METHOD.name())
-				.selectors(selectClass(TestCase.class))
-				.execute()
-				.testEvents()
-				.assertStatistics(stats -> stats.started(3).succeeded(3).failed(0));
+	void fieldHasOverride(ApplicationContext ctx) {
+		assertThat(ctx.getBean("field1"))
+				.isInstanceOf(ExampleService.class)
+				.satisfies(MockitoAssertions::assertIsSpy)
+				.isSameAs(field);
+
+		assertThat(field.greeting()).isEqualTo("bean1");
 	}
 
 
-	@SpringJUnitConfig(Config.class)
-	public static class TestCase {
+	@Nested
+	@DisplayName("With @MockitoSpyBean in enclosing class and in @Nested class")
+	public class MockitoSpyBeanNestedTests {
 
-		@MockitoSpyBean("field1")
-		ExampleService field;
+		@Autowired
+		@Qualifier("field1")
+		ExampleService localField;
 
+		@MockitoSpyBean("field2")
+		ExampleService nestedField;
 
 		@Test
 		void fieldHasOverride(ApplicationContext ctx) {
 			assertThat(ctx.getBean("field1"))
 					.isInstanceOf(ExampleService.class)
 					.satisfies(MockitoAssertions::assertIsSpy)
-					.isSameAs(field);
+					.isSameAs(localField);
 
-			assertThat(field.greeting()).isEqualTo("bean1");
+			assertThat(localField.greeting()).isEqualTo("bean1");
 		}
 
+		@Test
+		void nestedFieldHasOverride(ApplicationContext ctx) {
+			assertThat(ctx.getBean("field2"))
+					.isInstanceOf(ExampleService.class)
+					.satisfies(MockitoAssertions::assertIsSpy)
+					.isSameAs(nestedField);
 
-		@Nested
-		@DisplayName("With @MockitoSpyBean in enclosing class and in @Nested class")
-		public class MockitoSpyBeanNestedTestCase {
-
-			@Autowired
-			@Qualifier("field1")
-			ExampleService localField;
-
-			@MockitoSpyBean("field2")
-			ExampleService nestedField;
-
-			@Test
-			void fieldHasOverride(ApplicationContext ctx) {
-				assertThat(ctx.getBean("field1"))
-						.isInstanceOf(ExampleService.class)
-						.satisfies(MockitoAssertions::assertIsSpy)
-						.isSameAs(localField);
-
-				assertThat(localField.greeting()).isEqualTo("bean1");
-			}
-
-			@Test
-			void nestedFieldHasOverride(ApplicationContext ctx) {
-				assertThat(ctx.getBean("field2"))
-						.isInstanceOf(ExampleService.class)
-						.satisfies(MockitoAssertions::assertIsSpy)
-						.isSameAs(nestedField);
-
-				assertThat(nestedField.greeting()).isEqualTo("bean2");
-			}
+			assertThat(nestedField.greeting()).isEqualTo("bean2");
 		}
 	}
+
 
 	@Configuration(proxyBeanMethods = false)
 	static class Config {

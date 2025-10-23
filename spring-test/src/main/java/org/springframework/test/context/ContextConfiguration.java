@@ -80,6 +80,8 @@ import org.springframework.core.annotation.AliasFor;
  *
  * @author Sam Brannen
  * @since 2.5
+ * @see org.springframework.test.context.junit.jupiter.SpringExtension SpringExtension
+ * @see org.springframework.test.context.junit.jupiter.SpringExtensionConfig @SpringExtensionConfig
  * @see org.springframework.test.context.junit.jupiter.SpringJUnitConfig @SpringJUnitConfig
  * @see org.springframework.test.context.junit.jupiter.web.SpringJUnitWebConfig @SpringJUnitWebConfig
  * @see ContextHierarchy @ContextHierarchy

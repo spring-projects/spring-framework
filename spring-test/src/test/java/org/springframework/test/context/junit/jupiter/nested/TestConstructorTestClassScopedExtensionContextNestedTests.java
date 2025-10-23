@@ -26,6 +26,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.NestedTestConfiguration;
 import org.springframework.test.context.TestConstructor;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.test.context.junit.jupiter.SpringExtensionConfig;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -44,6 +45,7 @@ import static org.springframework.test.context.TestConstructor.AutowireMode.ANNO
  * @since 5.3
  */
 @SpringJUnitConfig
+@SpringExtensionConfig(useTestClassScopedExtensionContext = true)
 @TestConstructor(autowireMode = ALL)
 @NestedTestConfiguration(OVERRIDE) // since INHERIT is now the global default
 class TestConstructorTestClassScopedExtensionContextNestedTests {
