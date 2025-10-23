@@ -16,6 +16,8 @@
 
 package org.springframework.validation;
 
+import java.util.HexFormat;
+
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
@@ -126,8 +128,18 @@ public class FieldError extends ObjectError {
 		// We would preferably use ObjectUtils.nullSafeConciseToString(rejectedValue) here but
 		// keep including the full nullSafeToString representation for backwards compatibility.
 		return "Field error in object '" + getObjectName() + "' on field '" + this.field +
-				"': rejected value [" + ObjectUtils.nullSafeToString(this.rejectedValue) + "]; " +
+				"': rejected value [" + formatRejectedValue() + "]; " +
 				resolvableToString();
+	}
+
+	private String formatRejectedValue() {
+
+		// Special handling of byte[], to be moved into ObjectUtils in 7.0
+		if (this.rejectedValue instanceof byte[] bytes && bytes.length != 0) {
+			return "{" + HexFormat.of().formatHex(bytes) + "}";
+		}
+
+		return ObjectUtils.nullSafeToString(this.rejectedValue);
 	}
 
 }
