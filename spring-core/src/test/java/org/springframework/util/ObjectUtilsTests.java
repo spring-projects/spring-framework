@@ -630,8 +630,8 @@ class ObjectUtilsTests {
 
 	@Test
 	void nullSafeToStringWithByteArray() {
-		byte[] array = {5, 8};
-		assertThat(ObjectUtils.nullSafeToString(array)).isEqualTo("{5, 8}");
+		byte[] array = {5, 38};
+		assertThat(ObjectUtils.nullSafeToString(array)).isEqualTo("{0526}");
 	}
 
 	@Test
