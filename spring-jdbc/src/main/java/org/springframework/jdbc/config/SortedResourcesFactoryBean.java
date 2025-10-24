@@ -18,8 +18,10 @@ package org.springframework.jdbc.config;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.config.AbstractFactoryBean;
@@ -72,17 +74,26 @@ public class SortedResourcesFactoryBean extends AbstractFactoryBean<Resource[]> 
 	protected Resource[] createInstance() throws Exception {
 		List<Resource> scripts = new ArrayList<>();
 		for (String location : this.locations) {
-			List<Resource> resources = new ArrayList<>(
-					Arrays.asList(this.resourcePatternResolver.getResources(location)));
-			resources.sort((r1, r2) -> {
+			Resource[] resources = this.resourcePatternResolver.getResources(location);
+
+			// Cache URLs to avoid repeated I/O during sorting
+			Map<Resource, String> urlCache = new LinkedHashMap<>(resources.length);
+			for (Resource resource : resources) {
 				try {
-					return r1.getURL().toString().compareTo(r2.getURL().toString());
+					urlCache.put(resource, resource.getURL().toString());
 				}
 				catch (IOException ex) {
-					return 0;
+					throw new IllegalStateException(
+							"Failed to resolve URL for resource [" + resource +
+									"] from location pattern [" + location + "]", ex);
 				}
-			});
-			scripts.addAll(resources);
+			}
+
+			// Sort using cached URLs
+			List<Resource> sortedResources = new ArrayList<>(urlCache.keySet());
+			sortedResources.sort(Comparator.comparing(urlCache::get));
+
+			scripts.addAll(sortedResources);
 		}
 		return scripts.toArray(new Resource[0]);
 	}
