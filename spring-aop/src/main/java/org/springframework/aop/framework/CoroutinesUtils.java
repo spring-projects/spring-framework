@@ -17,6 +17,7 @@
 package org.springframework.aop.framework;
 
 import kotlin.coroutines.Continuation;
+import kotlinx.coroutines.flow.Flow;
 import kotlinx.coroutines.reactive.ReactiveFlowKt;
 import kotlinx.coroutines.reactor.MonoKt;
 import org.jspecify.annotations.Nullable;
@@ -34,6 +35,9 @@ abstract class CoroutinesUtils {
 	static Object asFlow(@Nullable Object publisher) {
 		if (publisher instanceof Publisher<?> rsPublisher) {
 			return ReactiveFlowKt.asFlow(rsPublisher);
+		}
+		else if (publisher instanceof Flow<?>) {
+			return publisher;
 		}
 		else {
 			throw new IllegalArgumentException("Not a Reactive Streams Publisher: " + publisher);
