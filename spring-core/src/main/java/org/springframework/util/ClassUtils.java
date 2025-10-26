@@ -1483,15 +1483,16 @@ public abstract class ClassUtils {
 	}
 
 	/**
-	 * Get the closest publicly accessible (and exported) method in the supplied method's type
-	 * hierarchy that has a method signature equivalent to the supplied method, if possible.
-	 * <p>Otherwise, this method recursively searches the class hierarchy and implemented
-	 * interfaces for an equivalent method that is {@code public} and declared in a
-	 * {@code public} type.
-	 * <p>If a publicly accessible equivalent method cannot be found, the supplied method
-	 * will be returned, indicating that no such equivalent method exists. Consequently,
-	 * callers of this method must manually validate the accessibility of the returned method
-	 * if public access is a requirement.
+	 * Get the closest publicly accessible method in the supplied method's type hierarchy that
+	 * has a method signature equivalent to the supplied method, if possible.
+	 * <p>This method recursively searches the class hierarchy and implemented interfaces for
+	 * an equivalent method that is {@code public}, declared in a {@code public} type, and
+	 * {@linkplain Module#isExported(String, Module) exported} to {@code spring-core}.
+	 * <p>If the supplied method is not {@code public} or is {@code static}, or if a publicly
+	 * accessible equivalent method cannot be found, the supplied method will be returned,
+	 * indicating that no such equivalent method exists. Consequently, callers of this method
+	 * must manually validate the accessibility of the returned method if public access is a
+	 * requirement.
 	 * <p>This is particularly useful for arriving at a public exported type on the Java
 	 * Module System which allows the method to be invoked via reflection without an illegal
 	 * access warning. This is also useful for invoking methods via a public API in bytecode
@@ -1508,10 +1509,11 @@ public abstract class ClassUtils {
 	 */
 	public static Method getPubliclyAccessibleMethodIfPossible(Method method, @Nullable Class<?> targetClass) {
 		Class<?> declaringClass = method.getDeclaringClass();
-		// If the method is not public or its declaring class is public and exported already,
-		// we can abort the search immediately (avoiding reflection as well as cache access).
-		if (!Modifier.isPublic(method.getModifiers()) || (Modifier.isPublic(declaringClass.getModifiers()) &&
-				declaringClass.getModule().isExported(declaringClass.getPackageName(), ClassUtils.class.getModule()))) {
+		// If the method is not public, or it's static, or its declaring class is public and exported
+		// already, we can abort the search immediately (avoiding reflection as well as cache access).
+		if (!Modifier.isPublic(method.getModifiers()) || Modifier.isStatic(method.getModifiers()) ||
+				(Modifier.isPublic(declaringClass.getModifiers()) &&
+						declaringClass.getModule().isExported(declaringClass.getPackageName(), ClassUtils.class.getModule()))) {
 			return method;
 		}
 

@@ -21,6 +21,15 @@ package org.springframework.util;
  */
 public class PublicSuperclass {
 
+	/**
+	 * This method intentionally has the exact same signature as
+	 * {@link org.springframework.util.ClassUtilsTests.PublicSubclass#getCacheKey()} and
+	 * {@link org.springframework.util.ClassUtilsTests.PrivateSubclass#getCacheKey()}.
+	 */
+	public static String getCacheKey() {
+		return "parent";
+	}
+
 	public String getMessage() {
 		return "goodbye";
 	}
