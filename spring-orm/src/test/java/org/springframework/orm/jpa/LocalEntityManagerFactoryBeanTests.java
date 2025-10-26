@@ -37,7 +37,7 @@ import static org.mockito.Mockito.verify;
  * @author Juergen Hoeller
  * @author Phillip Webb
  */
-@SuppressWarnings("rawtypes")
+@SuppressWarnings({"rawtypes", "unchecked"})
 class LocalEntityManagerFactoryBeanTests extends AbstractEntityManagerFactoryBeanTests {
 
 	@AfterEach
