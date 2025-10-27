@@ -27,7 +27,6 @@ import org.springframework.test.context.NestedTestConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
-import org.springframework.test.context.junit.jupiter.nested.TestPropertySourceTestClassScopedExtensionContextNestedTests.Config;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.context.NestedTestConfiguration.EnclosingConfiguration.INHERIT;
@@ -42,7 +41,7 @@ import static org.springframework.test.context.NestedTestConfiguration.Enclosing
  * @author Sam Brannen
  * @since 5.3
  */
-@SpringJUnitConfig(Config.class)
+@SpringJUnitConfig
 @TestPropertySource(properties = "p1 = v1")
 @NestedTestConfiguration(OVERRIDE) // since INHERIT is now the global default
 class TestPropertySourceTestClassScopedExtensionContextNestedTests {

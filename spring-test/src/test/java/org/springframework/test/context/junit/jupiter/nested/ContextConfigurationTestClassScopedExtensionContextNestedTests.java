@@ -88,7 +88,7 @@ class ContextConfigurationTestClassScopedExtensionContextNestedTests {
 
 	@Nested
 	@NestedTestConfiguration(INHERIT)
-	class NestedTestCaseWithInheritedConfigTests {
+	class NestedWithInheritedConfigTests {
 
 		@Autowired(required = false)
 		@Qualifier("foo")
