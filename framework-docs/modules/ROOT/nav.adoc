@@ -449,7 +449,7 @@
 *** xref:languages/kotlin/null-safety.adoc[]
 *** xref:languages/kotlin/classes-interfaces.adoc[]
 *** xref:languages/kotlin/annotations.adoc[]
-*** xref:languages/kotlin/bean-definition-dsl.adoc[]
+*** xref:languages/kotlin/bean-registration-dsl.adoc[]
 *** xref:languages/kotlin/web.adoc[]
 *** xref:languages/kotlin/coroutines.adoc[]
 *** xref:languages/kotlin/spring-projects-in.adoc[]

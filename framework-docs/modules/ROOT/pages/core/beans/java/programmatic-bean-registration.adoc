@@ -9,28 +9,7 @@ efficient way.
 Those bean registrar implementations are typically imported with an `@Import` annotation
 on `@Configuration` classes.
 
-[tabs]
-======
-Java::
-+
-[source,java,indent=0,subs="verbatim,quotes"]
-----
-     @Configuration
-     @Import(MyBeanRegistrar.class)
-     class MyConfiguration {
-     }
-----
-
-Kotlin::
-+
-[source,kotlin,indent=0,subs="verbatim,quotes"]
-----
-    @Configuration
-    @Import(MyBeanRegistrar::class)
-    class MyConfiguration {
-    }
-----
-======
+include-code::./MyConfiguration[tag=snippet,indent=0]
 
 NOTE: You can leverage type-level conditional annotations ({spring-framework-api}/context/annotation/Conditional.html[`@Conditional`],
 but also other variants) to conditionally import the related bean registrars.
@@ -40,49 +19,7 @@ The bean registrar implementation uses {spring-framework-api}/beans/factory/Bean
 and flexible way. For example, it allows custom registration through an `if` expression, a
 `for` loop, etc.
 
-[tabs]
-======
-Java::
-+
-[source,java,indent=0,subs="verbatim,quotes"]
-----
-    class MyBeanRegistrar implements BeanRegistrar {
-
-        @Override
-        public void register(BeanRegistry registry, Environment env) {
-            registry.registerBean("foo", Foo.class);
-            registry.registerBean("bar", Bar.class, spec -> spec
-                    .prototype()
-                    .lazyInit()
-                    .description("Custom description")
-                    .supplier(context -> new Bar(context.bean(Foo.class))));
-            if (env.matchesProfiles("baz")) {
-                registry.registerBean(Baz.class, spec -> spec
-                        .supplier(context -> new Baz("Hello World!")));
-            }
-        }
-    }
-----
-
-Kotlin::
-+
-[source,kotlin,indent=0,subs="verbatim,quotes"]
-----
-    class MyBeanRegistrar : BeanRegistrarDsl({
-        registerBean<Foo>()
-        registerBean(
-            name = "bar",
-            prototype = true,
-            lazyInit = true,
-            description = "Custom description") {
-                Bar(bean<Foo>())
-        }
-        profile("baz") {
-            registerBean { Baz("Hello World!") }
-        }
-    })
-----
-======
+include-code::./MyBeanRegistrar[tag=snippet,indent=0]
 
 NOTE: Bean registrars are supported with xref:core/aot.adoc[Ahead of Time Optimizations],
 either on the JVM or with GraalVM native images, including when instance suppliers are used.
