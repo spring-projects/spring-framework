@@ -34,12 +34,12 @@ class ContextPropagationSample {
 	// tag::context[]
 	fun main() {
 		runBlocking(Dispatchers.IO + PropagationContextElement()) {
-			suspendingFunction()
+			waitAndLog()
 		}
 	}
 
-	suspend fun suspendingFunction() {
-		delay(1)
+	suspend fun waitAndLog() {
+		delay(10)
 		logger.info("Suspending function with traceId")
 	}
 	// end::context[]

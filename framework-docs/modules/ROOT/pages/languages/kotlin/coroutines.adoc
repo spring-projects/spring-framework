@@ -264,9 +264,11 @@ The {spring-framework-api-kdoc}/spring-core/org.springframework.core/-propagatio
 {micrometer-context-propagation-docs}/[Micrometer Context Propagation library] works with Kotlin Coroutines.
 
 It requires the `io.micrometer:context-propagation` dependency and optionally the
-`org.jetbrains.kotlinx:kotlinx-coroutines-reactor` one.
+`org.jetbrains.kotlinx:kotlinx-coroutines-reactor` one. Automatic context propagation via
+`CoroutinesUtils#invokeSuspendingFunction` (used by Spring to adapt Coroutines to Reactor `Flux` or `Mono`) can be
+enabled by invoking `Hooks.enableAutomaticContextPropagation()`.
 
-Applications can then use the `PropagationContextElement` to augment the `CoroutineContext`
+Applications can also use `PropagationContextElement` explicitly to augment the `CoroutineContext`
 with the context propagation mechanism:
 
 include-code::./ContextPropagationSample[tag=context,indent=0]
