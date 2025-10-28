@@ -45,6 +45,8 @@ import org.springframework.util.ClassUtils;
  */
 public final class ParameterResolutionDelegate {
 
+	private static final Annotation[] EMPTY_ANNOTATION_ARRAY = new Annotation[0];
+
 	private static final AnnotatedElement EMPTY_ANNOTATED_ELEMENT = new AnnotatedElement() {
 		@Override
 		public <T extends Annotation> @Nullable T getAnnotation(Class<T> annotationClass) {
@@ -52,11 +54,11 @@ public final class ParameterResolutionDelegate {
 		}
 		@Override
 		public Annotation[] getAnnotations() {
-			return new Annotation[0];
+			return EMPTY_ANNOTATION_ARRAY;
 		}
 		@Override
 		public Annotation[] getDeclaredAnnotations() {
-			return new Annotation[0];
+			return EMPTY_ANNOTATION_ARRAY;
 		}
 	};
 
