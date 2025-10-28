@@ -426,10 +426,6 @@ class ValidatorFactoryTests {
 		private Environment environment;
 
 		@Override
-		public void initialize(NameAddressValid constraintAnnotation) {
-		}
-
-		@Override
 		public boolean isValid(ValidPerson value, ConstraintValidatorContext context) {
 			if (value.expectsAutowiredValidator) {
 				assertThat(this.environment).isNotNull();
@@ -496,10 +492,6 @@ class ValidatorFactoryTests {
 	public static class InnerValidator implements ConstraintValidator<InnerValid, InnerBean> {
 
 		@Override
-		public void initialize(InnerValid constraintAnnotation) {
-		}
-
-		@Override
 		public boolean isValid(InnerBean bean, ConstraintValidatorContext context) {
 			context.disableDefaultConstraintViolation();
 			if (bean.getValue() == null) {
@@ -541,10 +533,6 @@ class ValidatorFactoryTests {
 
 
 	public static class NotXListValidator implements ConstraintValidator<NotXList, List<String>> {
-
-		@Override
-		public void initialize(NotXList constraintAnnotation) {
-		}
 
 		@Override
 		public boolean isValid(List<String> list, ConstraintValidatorContext context) {

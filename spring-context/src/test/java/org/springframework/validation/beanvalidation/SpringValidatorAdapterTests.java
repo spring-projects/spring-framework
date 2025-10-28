@@ -504,10 +504,6 @@ class SpringValidatorAdapterTests {
 		private static final String ID = "id";
 
 		@Override
-		public void initialize(AnythingValid constraintAnnotation) {
-		}
-
-		@Override
 		public boolean isValid(Object value, ConstraintValidatorContext context) {
 			List<Field> fieldsErrors = new ArrayList<>();
 			Arrays.asList(value.getClass().getDeclaredFields()).forEach(field -> {
