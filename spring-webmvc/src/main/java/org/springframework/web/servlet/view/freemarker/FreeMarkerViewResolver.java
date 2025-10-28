@@ -36,10 +36,9 @@ import org.springframework.web.servlet.view.AbstractUrlBasedView;
  * <p><b>Note:</b> To ensure that the correct encoding is used when the rendering
  * the response, set the {@linkplain #setContentType(String) content type} with an
  * appropriate {@code charset} attribute &mdash; for example,
- * {@code "text/html;charset=UTF-8"}; however, as of Spring Framework 6.2, it is
- * no longer strictly necessary to explicitly set the content type in the
- * {@code FreeMarkerViewResolver} if you have set an explicit encoding via either
- * {@link FreeMarkerView#setEncoding(String)},
+ * {@code "text/html;charset=UTF-8"}; however, it is not necessary to explicitly set
+ * the content type in the {@code FreeMarkerViewResolver} if you have set an explicit
+ * encoding via either {@link FreeMarkerView#setEncoding(String)},
  * {@link FreeMarkerConfigurer#setDefaultEncoding(String)}, or
  * {@link Configuration#setDefaultEncoding(String)}.
  *

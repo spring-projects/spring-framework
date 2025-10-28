@@ -81,7 +81,7 @@ public interface BeanPostProcessor {
 	 * or a custom init-method). The bean will already be populated with property values.
 	 * The returned bean instance may be a wrapper around the original.
 	 * <p>In case of a FactoryBean, this callback will be invoked for both the FactoryBean
-	 * instance and the objects created by the FactoryBean (as of Spring 2.0). The
+	 * instance and the objects created by the FactoryBean. The
 	 * post-processor can decide whether to apply to either the FactoryBean or created
 	 * objects or both through corresponding {@code bean instanceof FactoryBean} checks.
 	 * <p>This callback will also be invoked after a short-circuiting triggered by a

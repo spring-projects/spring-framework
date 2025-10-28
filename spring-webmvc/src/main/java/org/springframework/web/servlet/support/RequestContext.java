@@ -392,7 +392,7 @@ public class RequestContext {
 	/**
 	 * Is HTML escaping using the response encoding by default?
 	 * If enabled, only XML markup significant characters will be escaped with UTF-* encodings.
-	 * <p>Falls back to {@code true} in case of no explicit default given, as of Spring 4.2.
+	 * <p>Falls back to {@code true} in case of no explicit default given.
 	 * @since 4.1.2
 	 */
 	public boolean isResponseEncodedHtmlEscape() {

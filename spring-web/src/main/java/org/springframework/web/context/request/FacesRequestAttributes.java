@@ -40,7 +40,7 @@ import org.springframework.web.util.WebUtils;
  * callbacks, consider defining a Spring {@link RequestContextListener} in your
  * {@code web.xml}.
  *
- * <p>Requires JSF 2.0 or higher, as of Spring 4.0.
+ * <p>Requires JSF 2.0 or higher.
  *
  * @author Juergen Hoeller
  * @since 2.5.2

@@ -28,7 +28,7 @@ import org.springframework.util.ReflectionUtils;
  * {@link JobFactory} implementation that supports {@link java.lang.Runnable}
  * objects as well as standard Quartz {@link org.quartz.Job} instances.
  *
- * <p>Compatible with Quartz 2.1.4 and higher, as of Spring 4.1.
+ * <p>Compatible with Quartz 2.1.4 and higher.
  *
  * @author Juergen Hoeller
  * @since 2.0

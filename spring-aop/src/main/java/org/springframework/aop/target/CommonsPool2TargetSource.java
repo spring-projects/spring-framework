@@ -46,8 +46,6 @@ import org.springframework.util.Assert;
  * meaningful validation. All exposed Commons Pool properties use the
  * corresponding Commons Pool defaults.
  *
- * <p>Compatible with Apache Commons Pool 2.4, as of Spring 4.2.
- *
  * @author Rod Johnson
  * @author Rob Harrop
  * @author Juergen Hoeller

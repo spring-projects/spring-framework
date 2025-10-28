@@ -75,7 +75,7 @@ import org.springframework.core.CollectionFactory;
  * servers[1]=foo.bar.com
  * </pre>
  *
- * <p>Requires SnakeYAML 2.0 or higher, as of Spring Framework 6.1.
+ * <p>Requires SnakeYAML 2.0 or higher.
  *
  * @author Dave Syer
  * @author Stephane Nicoll
