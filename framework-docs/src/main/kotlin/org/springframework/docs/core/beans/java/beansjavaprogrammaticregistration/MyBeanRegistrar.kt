@@ -33,7 +33,9 @@ class MyBeanRegistrar : BeanRegistrarDsl({
 		registerBean { Baz("Hello World!") }
 	}
 	registerBean<MyRepository>()
-	registerBean(::myRouter)
+	registerBean {
+		myRouter(bean<MyRepository>()) // Also possible with just myRouter(bean())
+	}
 })
 
 fun myRouter(myRepository: MyRepository) = router {
