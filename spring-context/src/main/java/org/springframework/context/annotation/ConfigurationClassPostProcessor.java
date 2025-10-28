@@ -928,13 +928,6 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 			if (!beanDefinition.getQualifiers().isEmpty()) {
 				throw new UnsupportedOperationException("AOT post processing of qualifiers is not supported yet with BeanRegistrar");
 			}
-			for (String attributeName : beanDefinition.attributeNames()) {
-				if (!attributeName.equals(AbstractBeanDefinition.ORDER_ATTRIBUTE) &&
-						!attributeName.equals("aotProcessingIgnoreRegistration")) {
-					throw new UnsupportedOperationException("AOT post processing of attribute " + attributeName +
-							" is not supported yet with BeanRegistrar");
-				}
-			}
 		}
 
 		private CodeBlock generateCustomizerMap() {
