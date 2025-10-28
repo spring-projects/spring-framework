@@ -313,7 +313,15 @@ public class SimpleAsyncTaskExecutor extends CustomizableThreadCreator
 		Runnable taskToUse = (this.taskDecorator != null ? this.taskDecorator.decorate(task) : task);
 		if (isThrottleActive() && startTimeout > TIMEOUT_IMMEDIATE) {
 			this.concurrencyThrottle.beforeAccess();
-			doExecute(new TaskTrackingRunnable(taskToUse));
+			try {
+				doExecute(new TaskTrackingRunnable(taskToUse));
+			}
+			catch (Throwable ex) {
+				// Release concurrency permit if thread creation fails
+				this.concurrencyThrottle.afterAccess();
+				throw new TaskRejectedException(
+						"Failed to start execution thread for task: " + task, ex);
+			}
 		}
 		else if (this.activeThreads != null) {
 			doExecute(new TaskTrackingRunnable(taskToUse));
