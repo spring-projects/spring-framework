@@ -254,9 +254,8 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * <p>This will only be used as a last resort in case of a circular reference
 	 * that cannot be resolved otherwise: essentially, preferring a raw instance
 	 * getting injected over a failure of the entire bean wiring process.
-	 * <p>Default is "false", as of Spring 2.0. Turn this on to allow for non-wrapped
-	 * raw beans injected into some of your references, which was Spring 1.2's
-	 * (arguably unclean) default behavior.
+	 * <p>Default is "false". Turn this on to allow for non-wrapped
+	 * raw beans injected into some of your references.
 	 * <p><b>NOTE:</b> It is generally recommended to not rely on circular references
 	 * between your beans, in particular with auto-proxying involved.
 	 * @see #setAllowCircularReferences

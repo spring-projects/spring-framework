@@ -57,7 +57,7 @@ import static org.springframework.http.MediaType.TEXT_PLAIN;
  * The {@code "application/json"} format is also supported with the {@code "com.google.protobuf:protobuf-java-util"}
  * dependency. See {@link ProtobufJsonFormatHttpMessageConverter} for a configurable variant.
  *
- * <p>This converter requires Protobuf 3 or higher as of Spring Framework 6.1.
+ * <p>This converter requires Protobuf 3 or higher.
  *
  * @author Alex Antonov
  * @author Brian Clozel

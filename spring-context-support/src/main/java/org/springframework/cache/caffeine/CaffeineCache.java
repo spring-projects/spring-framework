@@ -36,7 +36,7 @@ import org.springframework.util.Assert;
  * operations through Caffeine's {@link AsyncCache}, when provided via the
  * {@link #CaffeineCache(String, AsyncCache, boolean)} constructor.
  *
- * <p>Requires Caffeine 3.0 or higher, as of Spring Framework 6.1.
+ * <p>Requires Caffeine 3.0 or higher.
  *
  * @author Ben Manes
  * @author Juergen Hoeller

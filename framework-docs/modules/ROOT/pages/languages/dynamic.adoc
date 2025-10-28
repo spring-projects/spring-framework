@@ -9,8 +9,7 @@ objects.
 
 Spring's scripting support primarily targets Groovy and BeanShell. Beyond those
 specifically supported languages, the JSR-223 scripting mechanism is supported
-for integration with any JSR-223 capable language provider (as of Spring 4.2),
-for example, JRuby.
+for integration with any JSR-223 capable language provider, for example, JRuby.
 
 You can find fully working examples of where this dynamic language support can be
 immediately useful in xref:languages/dynamic.adoc#dynamic-language-scenarios[Scenarios].

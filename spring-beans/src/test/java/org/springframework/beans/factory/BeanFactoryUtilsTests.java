@@ -195,7 +195,7 @@ class BeanFactoryUtilsTests {
 		assertThat(beans.get("t2")).isEqualTo(t2);
 		assertThat(beans.get("t3")).isEqualTo(t3.getObject());
 		assertThat(beans.get("t4")).isInstanceOf(TestBean.class);
-		// t3 and t4 are found here as of Spring 2.0, since they are pre-registered
+		// t3 and t4 are found here, since they are pre-registered
 		// singleton instances, while testFactory1 and testFactory are *not* found
 		// because they are FactoryBean definitions that haven't been initialized yet.
 

@@ -86,11 +86,11 @@ import org.springframework.web.servlet.view.AbstractTemplateView;
  * {@code "text/html;charset=UTF-8"}. When using {@link FreeMarkerViewResolver}
  * to create the view for you, set the
  * {@linkplain FreeMarkerViewResolver#setContentType(String) content type}
- * directly in the {@code FreeMarkerViewResolver}; however, as of Spring Framework
- * 6.2, it is no longer necessary to explicitly set the content type in the
- * {@code FreeMarkerViewResolver} if you have set an explicit encoding via either
- * {@link #setEncoding(String)}, {@link FreeMarkerConfigurer#setDefaultEncoding(String)},
- * or {@link Configuration#setDefaultEncoding(String)}.
+ * directly in the {@code FreeMarkerViewResolver}; however, it is not necessary to
+ * explicitly set the content type in the {@code FreeMarkerViewResolver} if you have
+ * set an explicit encoding via either {@link #setEncoding(String)},
+ * {@link FreeMarkerConfigurer#setDefaultEncoding(String)}, or
+ * {@link Configuration#setDefaultEncoding(String)}.
  *
  * <p>Note: Spring's FreeMarker support requires FreeMarker 2.3.33 or higher.
  *

@@ -327,9 +327,8 @@ Kotlin::
 ----
 ======
 
-TIP: Constructor injection in `@Configuration` classes is only supported as of Spring
-Framework 4.3. Note also that there is no need to specify `@Autowired` if the target
-bean defines only one constructor.
+TIP: Note that there is no need to specify `@Autowired` if the target bean defines
+only one constructor.
 
 [discrete]
 [[beans-java-injecting-imported-beans-fq]]

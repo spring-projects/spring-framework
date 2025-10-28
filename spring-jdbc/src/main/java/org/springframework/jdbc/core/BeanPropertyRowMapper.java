@@ -214,8 +214,8 @@ public class BeanPropertyRowMapper<T> implements RowMapper<T> {
 	/**
 	 * Set a {@link ConversionService} for binding JDBC values to bean properties,
 	 * or {@code null} for none.
-	 * <p>Default is a {@link DefaultConversionService}, as of Spring 4.3. This
-	 * provides support for {@code java.time} conversion and other special types.
+	 * <p>Default is a {@link DefaultConversionService}. This provides support for
+	 * {@code java.time} conversion and other special types.
 	 * @since 4.3
 	 * @see #initBeanWrapper(BeanWrapper)
 	 */

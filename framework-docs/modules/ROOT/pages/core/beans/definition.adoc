@@ -99,7 +99,7 @@ the `@Bean` factory method in favor of any pre-declared constructor on the bean 
 ****
 
 NOTE: We acknowledge that overriding beans in test scenarios is convenient, and there is
-explicit support for this as of Spring Framework 6.2. Please refer to
+explicit support for this. Please refer to
 xref:testing/testcontext-framework/bean-overriding.adoc[this section] for more details.
 
 

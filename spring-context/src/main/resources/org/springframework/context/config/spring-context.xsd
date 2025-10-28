@@ -95,13 +95,6 @@
 	"local properties", if any, and against the Spring Environment's current set of
 	PropertySources.
 
-	Note that as of Spring 3.1 the system-properties-mode attribute has been removed in
-	favor of the more flexible PropertySources mechanism. However, applications may
-	continue to use the 3.0 (and older) versions of the spring-context schema in order
-	to preserve system-properties-mode behavior. In this case, the traditional
-	PropertyPlaceholderConfigurer component will be registered instead of the newer
-	PropertySourcesPlaceholderConfigurer.
-
 	See ConfigurableEnvironment javadoc for more information on usage.
 			]]></xsd:documentation>
 			<xsd:appinfo>

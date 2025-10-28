@@ -303,7 +303,7 @@ public abstract class AbstractPlatformTransactionManager
 	 * outermost transaction boundary. Switch this flag on to cause an
 	 * UnexpectedRollbackException as early as the global rollback-only marker
 	 * has been first detected, even from within an inner transaction boundary.
-	 * <p>Note that, as of Spring 2.0, the fail-early behavior for global
+	 * <p>Note that the fail-early behavior for global
 	 * rollback-only markers has been unified: All transaction managers will by
 	 * default only cause UnexpectedRollbackException at the outermost transaction
 	 * boundary. This allows, for example, to continue unit tests even after an

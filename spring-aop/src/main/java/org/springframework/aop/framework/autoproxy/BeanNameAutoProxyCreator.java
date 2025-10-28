@@ -57,9 +57,8 @@ public class BeanNameAutoProxyCreator extends AbstractAutoProxyCreator {
 	 * A name can specify a prefix to match by ending with "*", for example, "myBean,tx*"
 	 * will match the bean named "myBean" and all beans whose name start with "tx".
 	 * <p><b>NOTE:</b> In case of a FactoryBean, only the objects created by the
-	 * FactoryBean will get proxied. This default behavior applies as of Spring 2.0.
-	 * If you intend to proxy a FactoryBean instance itself (a rare use case, but
-	 * Spring 1.2's default behavior), specify the bean name of the FactoryBean
+	 * FactoryBean will get proxied. If you intend to proxy a FactoryBean instance
+	 * itself (a rare use case), specify the bean name of the FactoryBean
 	 * including the factory-bean prefix "&amp;": for example, "&amp;myFactoryBean".
 	 * @see org.springframework.beans.factory.FactoryBean
 	 * @see org.springframework.beans.factory.BeanFactory#FACTORY_BEAN_PREFIX

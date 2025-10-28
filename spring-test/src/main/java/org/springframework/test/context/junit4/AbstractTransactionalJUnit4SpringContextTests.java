@@ -57,7 +57,7 @@ import org.springframework.util.Assert;
  * {@link SpringRunner}, {@link ContextConfiguration @ContextConfiguration},
  * {@link TestExecutionListeners @TestExecutionListeners}, etc.</li>
  * <li>If you wish to extend this class and use a runner other than the
- * {@link SpringRunner}, as of Spring Framework 4.2 you can use
+ * {@link SpringRunner}, you can use
  * {@link org.springframework.test.context.junit4.rules.SpringClassRule SpringClassRule} and
  * {@link org.springframework.test.context.junit4.rules.SpringMethodRule SpringMethodRule}
  * and specify your runner of choice via {@link org.junit.runner.RunWith @RunWith(...)}.</li>

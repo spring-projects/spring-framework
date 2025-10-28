@@ -53,7 +53,7 @@ import org.springframework.util.ObjectUtils;
  * {@link AsyncCache}, when configured via {@link #setAsyncCacheMode},
  * with early-determined cache misses.
  *
- * <p>Requires Caffeine 3.0 or higher, as of Spring Framework 6.1.
+ * <p>Requires Caffeine 3.0 or higher.
  *
  * @author Ben Manes
  * @author Juergen Hoeller
