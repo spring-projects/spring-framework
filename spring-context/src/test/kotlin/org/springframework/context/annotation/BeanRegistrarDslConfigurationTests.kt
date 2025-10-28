@@ -50,7 +50,6 @@ class BeanRegistrarDslConfigurationTests {
 		assertThat(beanDefinition.scope).isEqualTo(BeanDefinition.SCOPE_PROTOTYPE)
 		assertThat(beanDefinition.isLazyInit).isTrue()
 		assertThat(beanDefinition.description).isEqualTo("Custom description")
-		assertThat(context.getBean<Boo>()).isEqualTo(Boo("booFactory"))
 	}
 
 	@Test
@@ -88,7 +87,6 @@ class BeanRegistrarDslConfigurationTests {
 	class Foo
 	data class Bar(val foo: Foo)
 	data class Baz(val message: String = "")
-	data class Boo(val message: String = "")
 	class Init  : InitializingBean {
 		var initialized: Boolean = false
 
@@ -128,7 +126,6 @@ class BeanRegistrarDslConfigurationTests {
 			registerBean { Baz(env.getRequiredProperty("hello.world")) }
 		}
 		registerBean<Init>()
-		registerBean(::booFactory, "fooFactory")
 	})
 
 	@Configuration
@@ -149,5 +146,3 @@ class BeanRegistrarDslConfigurationTests {
 		register(SampleBeanRegistrar())
 	})
 }
-
-fun booFactory() = BeanRegistrarDslConfigurationTests.Boo("booFactory")
