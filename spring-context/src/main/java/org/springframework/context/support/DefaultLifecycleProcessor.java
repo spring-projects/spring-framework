@@ -714,14 +714,8 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 	 */
 	private class CracResourceAdapter implements org.crac.Resource {
 
-		private CyclicBarrier stepToRestore = new CyclicBarrier(2);
-		private CyclicBarrier finishRestore = new CyclicBarrier(2);
-
-		private void preventShutdown() {
-			waitBarrier(this.stepToRestore);
-			// Checkpoint happens here
-			waitBarrier(this.finishRestore);
-		}
+		private final CyclicBarrier beforeCheckpointBarrier = new CyclicBarrier(2);
+		private final CyclicBarrier afterRestoreBarrier = new CyclicBarrier(2);
 
 		@Override
 		public void beforeCheckpoint(org.crac.Context<? extends org.crac.Resource> context) {
@@ -733,26 +727,22 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 			stopForRestart();
 		}
 
+		private void preventShutdown() {
+			awaitBarrier(this.beforeCheckpointBarrier);
+			// Checkpoint happens here
+			awaitBarrier(this.afterRestoreBarrier);
+		}
+
 		@Override
 		public void afterRestore(org.crac.Context<? extends org.crac.Resource> context) {
 			// Unlock barrier for beforeCheckpoint
-			try {
-				this.stepToRestore.await();
-			}
-			catch (Exception ex) {
-				logger.trace("Exception from stepToRestore barrier", ex);
-			}
+			awaitBarrier(this.beforeCheckpointBarrier);
 
 			logger.info("Restarting Spring-managed lifecycle beans after JVM restore");
 			restartAfterStop();
 
 			// Unlock barrier for afterRestore to shutdown "prevent-shutdown" thread
-			try {
-				this.finishRestore.await();
-			}
-			catch (Exception ex) {
-				logger.trace("Exception from stepToRestore barrier", ex);
-			}
+			awaitBarrier(this.afterRestoreBarrier);
 
 			if (!checkpointOnRefresh) {
 				logger.info("Spring-managed lifecycle restart completed (restored JVM running for " +
@@ -760,12 +750,12 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 			}
 		}
 
-		private void waitBarrier(CyclicBarrier barrier) {
+		private void awaitBarrier(CyclicBarrier barrier) {
 			try {
 				barrier.await();
 			}
 			catch (Exception ex) {
-				logger.trace("Exception from prevent-shutdown barrier", ex);
+				logger.trace("Exception from barrier", ex);
 			}
 		}
 	}
