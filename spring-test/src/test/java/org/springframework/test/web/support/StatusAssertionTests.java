@@ -16,6 +16,7 @@
 
 package org.springframework.test.web.support;
 
+import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.http.HttpStatus;
@@ -141,16 +142,17 @@ class StatusAssertionTests {
 		TestStatusAssertions assertions = new TestStatusAssertions(HttpStatus.CONFLICT);
 
 		// Success
-		assertions.value(equalTo(409));
-		assertions.value(greaterThan(400));
+		assertions.value(v -> MatcherAssert.assertThat(v, equalTo(409)));
+		assertions.value(v -> MatcherAssert.assertThat(v, greaterThan(400)));
 
 		// Wrong status
-		assertThatExceptionOfType(AssertionError.class).isThrownBy(() -> assertions.value(equalTo(200)));
+		assertThatExceptionOfType(AssertionError.class)
+				.isThrownBy(() -> assertions.value(v -> MatcherAssert.assertThat(v, equalTo(200))));
 	}
 
 	@Test
 	void matchesCustomStatusValue() {
-		new TestStatusAssertions(600).value(equalTo(600));
+		new TestStatusAssertions(600).value(v -> MatcherAssert.assertThat(v, equalTo(600)));
 	}
 
 	@Test

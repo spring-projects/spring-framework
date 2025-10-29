@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.time.Duration;
 import java.util.Map;
 
+import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -67,8 +68,9 @@ public class CookieAssertionsTests {
 
 	@Test
 	void value() {
-		assertions.value("foo", equalTo("bar"));
-		assertThatExceptionOfType(AssertionError.class).isThrownBy(() -> assertions.value("foo", equalTo("what?!")));
+		assertions.value("foo", v -> MatcherAssert.assertThat(v, equalTo("bar")));
+		assertThatExceptionOfType(AssertionError.class)
+				.isThrownBy(() -> assertions.value("foo", v -> MatcherAssert.assertThat(v, equalTo("what?!"))));
 	}
 
 	@Test
@@ -96,9 +98,9 @@ public class CookieAssertionsTests {
 		assertThatExceptionOfType(AssertionError.class)
 				.isThrownBy(() -> assertions.maxAge("foo", Duration.ofMinutes(29)));
 
-		assertions.maxAge("foo", equalTo(Duration.ofMinutes(30).getSeconds()));
-		assertThatExceptionOfType(AssertionError.class)
-				.isThrownBy(() -> assertions.maxAge("foo", equalTo(Duration.ofMinutes(29).getSeconds())));
+		assertions.maxAge("foo", v -> MatcherAssert.assertThat(v, equalTo(Duration.ofMinutes(30).getSeconds())));
+		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
+				assertions.maxAge("foo", v -> MatcherAssert.assertThat(v, equalTo(Duration.ofMinutes(29).getSeconds()))));
 	}
 
 	@Test
@@ -106,8 +108,9 @@ public class CookieAssertionsTests {
 		assertions.domain("foo", "foo.com");
 		assertThatExceptionOfType(AssertionError.class).isThrownBy(() -> assertions.domain("foo", "what.com"));
 
-		assertions.domain("foo", equalTo("foo.com"));
-		assertThatExceptionOfType(AssertionError.class).isThrownBy(() -> assertions.domain("foo", equalTo("what.com")));
+		assertions.domain("foo", v -> MatcherAssert.assertThat(v, equalTo("foo.com")));
+		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
+				assertions.domain("foo", v -> MatcherAssert.assertThat(v, equalTo("what.com"))));
 	}
 
 	@Test
@@ -115,8 +118,9 @@ public class CookieAssertionsTests {
 		assertions.path("foo", "/foo");
 		assertThatExceptionOfType(AssertionError.class).isThrownBy(() -> assertions.path("foo", "/what"));
 
-		assertions.path("foo", equalTo("/foo"));
-		assertThatExceptionOfType(AssertionError.class).isThrownBy(() -> assertions.path("foo", equalTo("/what")));
+		assertions.path("foo", v -> MatcherAssert.assertThat(v, equalTo("/foo")));
+		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
+				assertions.path("foo", v -> MatcherAssert.assertThat(v, equalTo("/what"))));
 	}
 
 	@Test

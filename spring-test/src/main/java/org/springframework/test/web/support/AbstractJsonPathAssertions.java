@@ -19,7 +19,6 @@ package org.springframework.test.web.support;
 import java.util.function.Consumer;
 
 import com.jayway.jsonpath.Configuration;
-import org.hamcrest.Matcher;
 import org.jspecify.annotations.Nullable;
 
 import org.springframework.core.ParameterizedTypeReference;
@@ -52,6 +51,19 @@ public abstract class AbstractJsonPathAssertions<B> {
 		this.bodySpec = spec;
 		this.content = content;
 		this.pathHelper = new JsonPathExpectationsHelper(expression, configuration);
+	}
+
+
+	protected B getBodySpec() {
+		return this.bodySpec;
+	}
+
+	protected String getContent() {
+		return this.content;
+	}
+
+	protected JsonPathExpectationsHelper getPathHelper() {
+		return this.pathHelper;
 	}
 
 
@@ -140,30 +152,6 @@ public abstract class AbstractJsonPathAssertions<B> {
 	 */
 	public B isMap() {
 		this.pathHelper.assertValueIsMap(this.content);
-		return this.bodySpec;
-	}
-
-	/**
-	 * Delegates to {@link JsonPathExpectationsHelper#assertValue(String, Matcher)}.
-	 */
-	public <T> B value(Matcher<? super T> matcher) {
-		this.pathHelper.assertValue(this.content, matcher);
-		return this.bodySpec;
-	}
-
-	/**
-	 * Delegates to {@link JsonPathExpectationsHelper#assertValue(String, Matcher, Class)}.
-	 */
-	public <T> B value(Class<T> targetType, Matcher<? super T> matcher) {
-		this.pathHelper.assertValue(this.content, matcher, targetType);
-		return this.bodySpec;
-	}
-
-	/**
-	 * Delegates to {@link JsonPathExpectationsHelper#assertValue(String, Matcher, ParameterizedTypeReference)}.
-	 */
-	public <T> B value(ParameterizedTypeReference<T> targetType, Matcher<? super T> matcher) {
-		this.pathHelper.assertValue(this.content, matcher, targetType);
 		return this.bodySpec;
 	}
 

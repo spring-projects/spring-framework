@@ -18,9 +18,6 @@ package org.springframework.test.web.support;
 
 import java.util.function.Consumer;
 
-import org.hamcrest.Matcher;
-import org.hamcrest.MatcherAssert;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.test.util.AssertionErrors;
@@ -54,6 +51,10 @@ public abstract class AbstractStatusAssertions<E, R> {
 	 */
 	protected E getExchangeResult() {
 		return this.exchangeResult;
+	}
+
+	protected R getResponseSpec() {
+		return this.responseSpec;
 	}
 
 	/**
@@ -227,16 +228,6 @@ public abstract class AbstractStatusAssertions<E, R> {
 	 */
 	public R is5xxServerError() {
 		return assertSeriesAndReturn(HttpStatus.Series.SERVER_ERROR);
-	}
-
-	/**
-	 * Match the response status value with a Hamcrest matcher.
-	 * @param matcher the matcher to use
-	 */
-	public R value(Matcher<? super Integer> matcher) {
-		int actual = getStatus().value();
-		assertWithDiagnostics(() -> MatcherAssert.assertThat("Response status", actual, matcher));
-		return this.responseSpec;
 	}
 
 	/**

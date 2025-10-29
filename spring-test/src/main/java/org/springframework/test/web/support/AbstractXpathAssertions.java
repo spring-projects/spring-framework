@@ -23,8 +23,8 @@ import java.util.function.Consumer;
 
 import javax.xml.xpath.XPathExpressionException;
 
-import org.hamcrest.Matcher;
 import org.jspecify.annotations.Nullable;
+import org.w3c.dom.NodeList;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.test.util.XpathExpectationsHelper;
@@ -69,6 +69,13 @@ public abstract class AbstractXpathAssertions<B> {
 	 */
 	protected B getBodySpec() {
 		return this.bodySpec;
+	}
+
+	/**
+	 * Return the XpathExpectationsHelper.
+	 */
+	protected XpathExpectationsHelper getXpathHelper() {
+		return this.xpathHelper;
 	}
 
 	/**
@@ -125,27 +132,6 @@ public abstract class AbstractXpathAssertions<B> {
 	}
 
 	/**
-	 * Delegates to {@link XpathExpectationsHelper#assertString(byte[], String, Matcher)}.
-	 */
-	public B string(Matcher<? super String> matcher){
-		return assertWith(() -> this.xpathHelper.assertString(getContent(), getCharset(), matcher));
-	}
-
-	/**
-	 * Delegates to {@link XpathExpectationsHelper#assertNumber(byte[], String, Matcher)}.
-	 */
-	public B number(Matcher<? super Double> matcher){
-		return assertWith(() -> this.xpathHelper.assertNumber(getContent(), getCharset(), matcher));
-	}
-
-	/**
-	 * Delegates to {@link XpathExpectationsHelper#assertNodeCount(byte[], String, Matcher)}.
-	 */
-	public B nodeCount(Matcher<? super Integer> matcher){
-		return assertWith(() -> this.xpathHelper.assertNodeCount(getContent(), getCharset(), matcher));
-	}
-
-	/**
 	 * Consume the result of the XPath evaluation as a String.
 	 */
 	public B string(Consumer<String> consumer){
@@ -170,12 +156,13 @@ public abstract class AbstractXpathAssertions<B> {
 	 */
 	public B nodeCount(Consumer<Integer> consumer){
 		return assertWith(() -> {
-			Integer value = this.xpathHelper.evaluateXpath(getContent(), getCharset(), Integer.class);
+			NodeList nodeList = this.xpathHelper.evaluateXpath(getContent(), getCharset(), NodeList.class);
+			Integer value = (nodeList != null ? nodeList.getLength() : null);
 			consumer.accept(value);
 		});
 	}
 
-	private B assertWith(CheckedExceptionTask task) {
+	protected B assertWith(CheckedExceptionTask task) {
 		try {
 			task.run();
 		}
@@ -185,7 +172,7 @@ public abstract class AbstractXpathAssertions<B> {
 		return this.bodySpec;
 	}
 
-	private String getCharset() {
+	protected String getCharset() {
 		return getResponseHeaders()
 				.map(HttpHeaders::getContentType)
 				.map(MimeType::getCharset)
@@ -210,7 +197,7 @@ public abstract class AbstractXpathAssertions<B> {
 	 * Lets us be able to use lambda expressions that could throw checked exceptions, since
 	 * {@link XpathExpectationsHelper} throws {@link Exception} on its methods.
 	 */
-	private interface CheckedExceptionTask {
+	protected interface CheckedExceptionTask {
 
 		void run() throws Exception;
 

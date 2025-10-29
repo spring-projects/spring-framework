@@ -19,9 +19,11 @@ package org.springframework.test.web.reactive.server;
 import java.util.Map;
 import java.util.Optional;
 
+import org.hamcrest.Matcher;
 import org.jspecify.annotations.Nullable;
 
 import org.springframework.http.HttpHeaders;
+import org.springframework.test.util.XpathExpectationsHelper;
 import org.springframework.test.web.support.AbstractXpathAssertions;
 import org.springframework.util.Assert;
 
@@ -55,4 +57,26 @@ public class XpathAssertions extends AbstractXpathAssertions<WebTestClient.BodyC
 		Assert.notNull(body, "Expected body content");
 		return body;
 	}
+
+	/**
+	 * Delegates to {@link XpathExpectationsHelper#assertString(byte[], String, Matcher)}.
+	 */
+	public WebTestClient.BodyContentSpec string(Matcher<? super String> matcher){
+		return assertWith(() -> getXpathHelper().assertString(getContent(), getCharset(), matcher));
+	}
+
+	/**
+	 * Delegates to {@link XpathExpectationsHelper#assertNumber(byte[], String, Matcher)}.
+	 */
+	public WebTestClient.BodyContentSpec number(Matcher<? super Double> matcher){
+		return assertWith(() -> getXpathHelper().assertNumber(getContent(), getCharset(), matcher));
+	}
+
+	/**
+	 * Delegates to {@link XpathExpectationsHelper#assertNodeCount(byte[], String, Matcher)}.
+	 */
+	public WebTestClient.BodyContentSpec nodeCount(Matcher<? super Integer> matcher){
+		return assertWith(() -> getXpathHelper().assertNodeCount(getContent(), getCharset(), matcher));
+	}
+
 }

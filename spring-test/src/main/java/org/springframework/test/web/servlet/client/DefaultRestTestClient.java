@@ -28,8 +28,6 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-import org.hamcrest.Matcher;
-import org.hamcrest.MatcherAssert;
 import org.jspecify.annotations.Nullable;
 
 import org.springframework.core.ParameterizedTypeReference;
@@ -380,23 +378,17 @@ class DefaultRestTestClient implements RestTestClient {
 		}
 
 		@Override
-		public <T extends S> T value(Matcher<? super @Nullable B> matcher) {
-			this.result.assertWithDiagnostics(() -> MatcherAssert.assertThat(this.result.getResponseBody(), matcher));
-			return self();
-		}
-
-		@Override
-		public <T extends S, R> T value(Function<@Nullable B, @Nullable R> bodyMapper, Matcher<? super @Nullable R> matcher) {
-			this.result.assertWithDiagnostics(() -> {
-				B body = this.result.getResponseBody();
-				MatcherAssert.assertThat(bodyMapper.apply(body), matcher);
-			});
-			return self();
-		}
-
-		@Override
 		public <T extends S> T value(Consumer<@Nullable B> consumer) {
 			this.result.assertWithDiagnostics(() -> consumer.accept(this.result.getResponseBody()));
+			return self();
+		}
+
+		@Override
+		public <T extends S, R> T value(Function<@Nullable B, @Nullable R> bodyMapper, Consumer<? super @Nullable R> consumer) {
+			this.result.assertWithDiagnostics(() -> {
+				B body = this.result.getResponseBody();
+				consumer.accept(bodyMapper.apply(body));
+			});
 			return self();
 		}
 

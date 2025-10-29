@@ -19,6 +19,7 @@ package org.springframework.test.web.servlet.samples.client.standalone.resultmat
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
+import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 
@@ -71,7 +72,8 @@ class StatusAssertionTests {
 
 	@Test
 	void matcher() {
-		testClient.get().uri("/badRequest").exchange().expectStatus().value(equalTo(BAD_REQUEST.value()));
+		testClient.get().uri("/badRequest").exchange().expectStatus()
+				.value(status -> MatcherAssert.assertThat(status, equalTo(BAD_REQUEST.value())));
 	}
 
 

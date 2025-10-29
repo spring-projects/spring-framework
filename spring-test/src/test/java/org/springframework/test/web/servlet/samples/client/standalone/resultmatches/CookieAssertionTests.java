@@ -18,6 +18,7 @@ package org.springframework.test.web.servlet.samples.client.standalone.resultmat
 
 import java.time.Duration;
 
+import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -75,12 +76,14 @@ public class CookieAssertionTests {
 	@Test
 	public void testEqualTo() {
 		client.get().uri("/").exchange().expectCookie().valueEquals(COOKIE_NAME, "en-US");
-		client.get().uri("/").exchange().expectCookie().value(COOKIE_NAME, equalTo("en-US"));
+		client.get().uri("/").exchange().expectCookie()
+				.value(COOKIE_NAME, v -> MatcherAssert.assertThat(v, equalTo("en-US")));
 	}
 
 	@Test
 	public void testMatcher() {
-		client.get().uri("/").exchange().expectCookie().value(COOKIE_NAME, startsWith("en-US"));
+		client.get().uri("/").exchange().expectCookie()
+				.value(COOKIE_NAME, v -> MatcherAssert.assertThat(v, startsWith("en-US")));
 	}
 
 	@Test

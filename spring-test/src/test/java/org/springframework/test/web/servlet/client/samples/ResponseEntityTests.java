@@ -21,6 +21,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.core.ParameterizedTypeReference;
@@ -64,7 +65,7 @@ class ResponseEntityTests {
 				.exchange()
 				.expectStatus().isOk()
 				.expectHeader().contentType(MediaType.APPLICATION_JSON)
-				.expectBody(Person.class).value(Person::getName, startsWith("Joh"));
+				.expectBody(Person.class).value(Person::getName, name -> MatcherAssert.assertThat(name, startsWith("Joh")));
 	}
 
 	@Test

@@ -25,7 +25,7 @@ import java.util.Map;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.hamcrest.Matchers;
+import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -44,6 +44,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.equalTo;
 
 /**
  * Tests using the {@link RestTestClient} API.
@@ -285,7 +286,7 @@ class RestTestClientTests {
 		void testExpectCookie() {
 			RestTestClientTests.this.client.get().uri("/test")
 					.exchange()
-					.expectCookie().value("session", Matchers.equalTo("abc"));
+					.expectCookie().value("session", v -> MatcherAssert.assertThat(v, equalTo("abc")));
 		}
 	}
 

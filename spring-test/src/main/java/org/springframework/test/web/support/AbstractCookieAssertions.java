@@ -19,14 +19,10 @@ package org.springframework.test.web.support;
 import java.time.Duration;
 import java.util.function.Consumer;
 
-import org.hamcrest.Matcher;
-import org.hamcrest.MatcherAssert;
-
 import org.springframework.http.ResponseCookie;
 import org.springframework.test.util.AssertionErrors;
 import org.springframework.util.MultiValueMap;
 
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.springframework.test.util.AssertionErrors.assertEquals;
 import static org.springframework.test.util.AssertionErrors.fail;
 
@@ -60,6 +56,13 @@ public abstract class AbstractCookieAssertions<E, R> {
 	}
 
 	/**
+	 * Return the response spec.
+	 */
+	protected R getResponseSpec() {
+		return this.responseSpec;
+	}
+
+	/**
 	 * Subclasses must implement this to provide access to response cookies.
 	 */
 	protected abstract MultiValueMap<String, ResponseCookie> getResponseCookies();
@@ -79,19 +82,6 @@ public abstract class AbstractCookieAssertions<E, R> {
 		assertWithDiagnostics(() -> {
 			String message = getMessage(name);
 			AssertionErrors.assertEquals(message, value, cookieValue);
-		});
-		return this.responseSpec;
-	}
-
-	/**
-	 * Assert the value of the response cookie with the given name with a Hamcrest
-	 * {@link Matcher}.
-	 */
-	public R value(String name, Matcher<? super String> matcher) {
-		String value = getCookie(name).getValue();
-		assertWithDiagnostics(() -> {
-			String message = getMessage(name);
-			MatcherAssert.assertThat(message, value, matcher);
 		});
 		return this.responseSpec;
 	}
@@ -138,14 +128,11 @@ public abstract class AbstractCookieAssertions<E, R> {
 	}
 
 	/**
-	 * Assert a cookie's "Max-Age" attribute with a Hamcrest {@link Matcher}.
+	 * Assert a cookie's "Max-Age" attribute with a {@link Consumer}.
 	 */
-	public R maxAge(String name, Matcher<? super Long> matcher) {
+	public R maxAge(String name, Consumer<Long> consumer) {
 		long maxAge = getCookie(name).getMaxAge().getSeconds();
-		assertWithDiagnostics(() -> {
-			String message = getMessage(name) + " maxAge";
-			assertThat(message, maxAge, matcher);
-		});
+		assertWithDiagnostics(() -> consumer.accept(maxAge));
 		return this.responseSpec;
 	}
 
@@ -161,17 +148,12 @@ public abstract class AbstractCookieAssertions<E, R> {
 		return this.responseSpec;
 	}
 
-
-
 	/**
-	 * Assert a cookie's "Path" attribute with a Hamcrest {@link Matcher}.
+	 * Assert a cookie's "Path" attribute with a {@link Consumer}.
 	 */
-	public R path(String name, Matcher<? super String> matcher) {
+	public R path(String name, Consumer<String> consumer) {
 		String path = getCookie(name).getPath();
-		assertWithDiagnostics(() -> {
-			String message = getMessage(name) + " path";
-			assertThat(message, path, matcher);
-		});
+		assertWithDiagnostics(() -> consumer.accept(path));
 		return this.responseSpec;
 	}
 
@@ -188,14 +170,11 @@ public abstract class AbstractCookieAssertions<E, R> {
 	}
 
 	/**
-	 * Assert a cookie's "Domain" attribute with a Hamcrest {@link Matcher}.
+	 * Assert a cookie's "Domain" attribute with a {@link Consumer}.
 	 */
-	public R domain(String name, Matcher<? super String> matcher) {
+	public R domain(String name, Consumer<String> consumer) {
 		String domain = getCookie(name).getDomain();
-		assertWithDiagnostics(() -> {
-			String message = getMessage(name) + " domain";
-			assertThat(message, domain, matcher);
-		});
+		assertWithDiagnostics(() -> consumer.accept(domain));
 		return this.responseSpec;
 	}
 
@@ -247,7 +226,7 @@ public abstract class AbstractCookieAssertions<E, R> {
 		return this.responseSpec;
 	}
 
-	private ResponseCookie getCookie(String name) {
+	protected ResponseCookie getCookie(String name) {
 		ResponseCookie cookie = getResponseCookies().getFirst(name);
 		if (cookie != null) {
 			return cookie;
@@ -258,7 +237,7 @@ public abstract class AbstractCookieAssertions<E, R> {
 		throw new IllegalStateException("This code path should not be reachable");
 	}
 
-	private static String getMessage(String cookie) {
+	protected String getMessage(String cookie) {
 		return "Response cookie '" + cookie + "'";
 	}
 }

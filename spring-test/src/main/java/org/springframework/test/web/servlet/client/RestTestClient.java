@@ -24,7 +24,6 @@ import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-import org.hamcrest.Matcher;
 import org.jspecify.annotations.Nullable;
 
 import org.springframework.core.ParameterizedTypeReference;
@@ -682,20 +681,15 @@ public interface RestTestClient {
 		<T extends S> T isEqualTo(@Nullable B expected);
 
 		/**
-		 * Assert the extracted body with a {@link Matcher}.
-		 */
-		<T extends S> T value(Matcher<? super @Nullable B> matcher);
-
-		/**
-		 * Transform the extracted the body with a function, for example, extracting a
-		 * property, and assert the mapped value with a {@link Matcher}.
-		 */
-		<T extends S, R> T value(Function<@Nullable B, @Nullable R> bodyMapper, Matcher<? super @Nullable R> matcher);
-
-		/**
 		 * Assert the extracted body with a {@link Consumer}.
 		 */
 		<T extends S> T value(Consumer<@Nullable B> consumer);
+
+		/**
+		 * Transform the extracted the body with a function, for example, extracting a
+		 * property, and assert the mapped value with a {@link Consumer}.
+		 */
+		<T extends S, R> T value(Function<@Nullable B, @Nullable R> bodyMapper, Consumer<? super @Nullable R> consumer);
 
 		/**
 		 * Assert the exchange result with the given {@link Consumer}.
