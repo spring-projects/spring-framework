@@ -957,7 +957,9 @@ public interface WebTestClient {
 		/**
 		 * Assert the extracted body with a {@link Matcher}.
 		 * @since 5.1
+		 * @deprecated in favor of {@link Consumer}-based variants
 		 */
+		@Deprecated(since = "7.0", forRemoval = true)
 		@NullUnmarked // To avoid a "Cannot attach type annotations" error when org.hamcrest.Matcher is not in the classpath
 		<T extends S> T value(Matcher<? super B> matcher);
 
@@ -965,7 +967,9 @@ public interface WebTestClient {
 		 * Transform the extracted the body with a function, for example, extracting a
 		 * property, and assert the mapped value with a {@link Matcher}.
 		 * @since 5.1
+		 * @deprecated in favor of {@link Consumer}-based variants
 		 */
+		@Deprecated(since = "7.0", forRemoval = true)
 		@NullUnmarked // To avoid a "Cannot attach type annotations" error when org.hamcrest.Matcher is not in the classpath
 		<T extends S, R> T value(@NonNull Function<@Nullable B, @Nullable R> bodyMapper, Matcher<? super R> matcher);
 
@@ -974,6 +978,13 @@ public interface WebTestClient {
 		 * @since 5.1
 		 */
 		<T extends S> T value(Consumer<@Nullable B> consumer);
+
+		/**
+		 * Transform the extracted the body with a function, for example, extracting a
+		 * property, and assert the mapped value with a {@link Consumer}.
+		 * @since 7.0
+		 */
+		<T extends S, R> T value(@NonNull Function<@Nullable B, @Nullable R> bodyMapper, Consumer<? super R> consumer);
 
 		/**
 		 * Assert the exchange result with the given {@link Consumer}.

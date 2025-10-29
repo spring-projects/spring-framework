@@ -16,6 +16,8 @@
 
 package org.springframework.test.web.reactive.server;
 
+import java.util.function.Consumer;
+
 import org.hamcrest.Matcher;
 
 import org.springframework.http.ResponseCookie;
@@ -53,7 +55,9 @@ public class CookieAssertions extends AbstractCookieAssertions<ExchangeResult, W
 	/**
 	 * Assert the value of the response cookie with the given name with a Hamcrest
 	 * {@link Matcher}.
+	 * @deprecated in favor of {@link Consumer}-based variants
 	 */
+	@Deprecated(since = "7.0", forRemoval = true)
 	public WebTestClient.ResponseSpec value(String name, Matcher<? super String> matcher) {
 		String value = getCookie(name).getValue();
 		assertWithDiagnostics(() -> {
@@ -66,7 +70,9 @@ public class CookieAssertions extends AbstractCookieAssertions<ExchangeResult, W
 
 	/**
 	 * Assert a cookie's "Max-Age" attribute with a Hamcrest {@link Matcher}.
+	 * @deprecated in favor of {@link Consumer}-based variants
 	 */
+	@Deprecated(since = "7.0", forRemoval = true)
 	public WebTestClient.ResponseSpec maxAge(String name, Matcher<? super Long> matcher) {
 		long maxAge = getCookie(name).getMaxAge().getSeconds();
 		assertWithDiagnostics(() -> {
@@ -78,7 +84,9 @@ public class CookieAssertions extends AbstractCookieAssertions<ExchangeResult, W
 
 	/**
 	 * Assert a cookie's "Path" attribute with a Hamcrest {@link Matcher}.
+	 * @deprecated in favor of {@link Consumer}-based variants
 	 */
+	@Deprecated(since = "7.0", forRemoval = true)
 	public WebTestClient.ResponseSpec path(String name, Matcher<? super String> matcher) {
 		String path = getCookie(name).getPath();
 		assertWithDiagnostics(() -> {
@@ -90,7 +98,9 @@ public class CookieAssertions extends AbstractCookieAssertions<ExchangeResult, W
 
 	/**
 	 * Assert a cookie's "Domain" attribute with a Hamcrest {@link Matcher}.
+	 * @deprecated in favor of {@link Consumer}-based variants
 	 */
+	@Deprecated(since = "7.0", forRemoval = true)
 	public WebTestClient.ResponseSpec domain(String name, Matcher<? super String> matcher) {
 		String domain = getCookie(name).getDomain();
 		assertWithDiagnostics(() -> {

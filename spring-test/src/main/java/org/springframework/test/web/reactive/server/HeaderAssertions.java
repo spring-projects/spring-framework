@@ -17,6 +17,7 @@
 package org.springframework.test.web.reactive.server;
 
 import java.util.List;
+import java.util.function.Consumer;
 
 import org.hamcrest.Matcher;
 
@@ -59,7 +60,9 @@ public class HeaderAssertions extends AbstractHeaderAssertions<ExchangeResult, W
 	 * Assert the first value of the response header with a Hamcrest {@link Matcher}.
 	 * @param name the header name
 	 * @param matcher the matcher to use
+	 * @deprecated in favor of {@link Consumer}-based variants
 	 */
+	@Deprecated(since = "7.0", forRemoval = true)
 	public WebTestClient.ResponseSpec value(String name, Matcher<? super String> matcher) {
 		String value = getResponseHeaders().getFirst(name);
 		assertWithDiagnostics(() -> {
@@ -73,7 +76,9 @@ public class HeaderAssertions extends AbstractHeaderAssertions<ExchangeResult, W
 	 * Assert all values of the response header with a Hamcrest {@link Matcher}.
 	 * @param name the header name
 	 * @param matcher the matcher to use
+	 * @deprecated in favor of {@link Consumer}-based variants
 	 */
+	@Deprecated(since = "7.0", forRemoval = true)
 	public WebTestClient.ResponseSpec values(String name, Matcher<? super Iterable<String>> matcher) {
 		List<String> values = getResponseHeaders().get(name);
 		assertWithDiagnostics(() -> {
@@ -82,6 +87,5 @@ public class HeaderAssertions extends AbstractHeaderAssertions<ExchangeResult, W
 		});
 		return getResponseSpec();
 	}
-
 
 }

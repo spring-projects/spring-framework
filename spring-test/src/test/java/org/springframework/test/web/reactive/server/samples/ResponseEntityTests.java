@@ -22,6 +22,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 import reactor.test.StepVerifier;
@@ -72,7 +73,7 @@ class ResponseEntityTests {
 				.exchange()
 				.expectStatus().isOk()
 				.expectHeader().contentType(MediaType.APPLICATION_JSON)
-				.expectBody(Person.class).value(Person::getName, startsWith("Joh"));
+				.expectBody(Person.class).value(Person::getName, v -> MatcherAssert.assertThat(v, startsWith("Joh")));
 	}
 
 	@Test

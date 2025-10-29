@@ -25,6 +25,7 @@ import jakarta.xml.bind.annotation.XmlAccessType;
 import jakarta.xml.bind.annotation.XmlAccessorType;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlRootElement;
+import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.http.HttpHeaders;
@@ -93,7 +94,7 @@ class XmlContentTests {
 				.exchange()
 				.expectStatus().isOk()
 				.expectBody()
-				.xpath("//person/name").string(startsWith("J"));
+				.xpath("//person/name").string(v -> MatcherAssert.assertThat(v, startsWith("J")));
 	}
 
 	@Test

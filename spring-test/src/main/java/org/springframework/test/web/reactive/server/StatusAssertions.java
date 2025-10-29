@@ -16,6 +16,8 @@
 
 package org.springframework.test.web.reactive.server;
 
+import java.util.function.Consumer;
+
 import org.hamcrest.Matcher;
 import org.hamcrest.MatcherAssert;
 
@@ -51,7 +53,9 @@ public class StatusAssertions extends AbstractStatusAssertions<ExchangeResult, W
 	/**
 	 * Match the response status value with a Hamcrest matcher.
 	 * @param matcher the matcher to use
+	 * @deprecated in favor of {@link Consumer}-based variants
 	 */
+	@Deprecated(since = "7.0", forRemoval = true)
 	public WebTestClient.ResponseSpec value(Matcher<? super Integer> matcher) {
 		int actual = getStatus().value();
 		assertWithDiagnostics(() -> MatcherAssert.assertThat("Response status", actual, matcher));

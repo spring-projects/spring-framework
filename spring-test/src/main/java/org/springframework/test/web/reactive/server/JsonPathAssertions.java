@@ -16,6 +16,8 @@
 
 package org.springframework.test.web.reactive.server;
 
+import java.util.function.Consumer;
+
 import com.jayway.jsonpath.Configuration;
 import org.hamcrest.Matcher;
 import org.jspecify.annotations.Nullable;
@@ -45,10 +47,11 @@ public class JsonPathAssertions extends AbstractJsonPathAssertions<WebTestClient
 	}
 
 
-
 	/**
 	 * Delegates to {@link JsonPathExpectationsHelper#assertValue(String, Matcher)}.
+	 * @deprecated in favor of {@link Consumer}-based variants
 	 */
+	@Deprecated(since = "7.0", forRemoval = true)
 	public <T> WebTestClient.BodyContentSpec value(Matcher<? super T> matcher) {
 		getPathHelper().assertValue(getContent(), matcher);
 		return getBodySpec();
@@ -56,7 +59,9 @@ public class JsonPathAssertions extends AbstractJsonPathAssertions<WebTestClient
 
 	/**
 	 * Delegates to {@link JsonPathExpectationsHelper#assertValue(String, Matcher, Class)}.
+	 * @deprecated in favor of {@link Consumer}-based variants
 	 */
+	@Deprecated(since = "7.0", forRemoval = true)
 	public <T> WebTestClient.BodyContentSpec value(Class<T> targetType, Matcher<? super T> matcher) {
 		getPathHelper().assertValue(getContent(), matcher, targetType);
 		return getBodySpec();
@@ -64,7 +69,9 @@ public class JsonPathAssertions extends AbstractJsonPathAssertions<WebTestClient
 
 	/**
 	 * Delegates to {@link JsonPathExpectationsHelper#assertValue(String, Matcher, ParameterizedTypeReference)}.
+	 * @deprecated in favor of {@link Consumer}-based variants
 	 */
+	@Deprecated(since = "7.0", forRemoval = true)
 	public <T> WebTestClient.BodyContentSpec value(ParameterizedTypeReference<T> targetType, Matcher<? super T> matcher) {
 		getPathHelper().assertValue(getContent(), matcher, targetType);
 		return getBodySpec();

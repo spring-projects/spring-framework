@@ -18,6 +18,7 @@ package org.springframework.test.web.reactive.server;
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Consumer;
 
 import org.hamcrest.Matcher;
 import org.jspecify.annotations.Nullable;
@@ -60,21 +61,27 @@ public class XpathAssertions extends AbstractXpathAssertions<WebTestClient.BodyC
 
 	/**
 	 * Delegates to {@link XpathExpectationsHelper#assertString(byte[], String, Matcher)}.
+	 * @deprecated in favor of {@link Consumer}-based variants
 	 */
+	@Deprecated(since = "7.0", forRemoval = true)
 	public WebTestClient.BodyContentSpec string(Matcher<? super String> matcher){
 		return assertWith(() -> getXpathHelper().assertString(getContent(), getCharset(), matcher));
 	}
 
 	/**
 	 * Delegates to {@link XpathExpectationsHelper#assertNumber(byte[], String, Matcher)}.
+	 * @deprecated in favor of {@link Consumer}-based variants
 	 */
+	@Deprecated(since = "7.0", forRemoval = true)
 	public WebTestClient.BodyContentSpec number(Matcher<? super Double> matcher){
 		return assertWith(() -> getXpathHelper().assertNumber(getContent(), getCharset(), matcher));
 	}
 
 	/**
 	 * Delegates to {@link XpathExpectationsHelper#assertNodeCount(byte[], String, Matcher)}.
+	 * @deprecated in favor of {@link Consumer}-based variants
 	 */
+	@Deprecated(since = "7.0", forRemoval = true)
 	public WebTestClient.BodyContentSpec nodeCount(Matcher<? super Integer> matcher){
 		return assertWith(() -> getXpathHelper().assertNodeCount(getContent(), getCharset(), matcher));
 	}
