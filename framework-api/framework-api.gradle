@@ -98,12 +98,9 @@ tasks.register('schemaZip', Zip) {
 	moduleProjects.each { module ->
 		def Properties schemas = new Properties();
 
-		def schemaFile = module.sourceSets.main.resources.find {
+		module.sourceSets.main.resources.find {
 			(it.path.endsWith("META-INF/spring.schemas") || it.path.endsWith("META-INF\\spring.schemas"))
-		}
-		if (schemaFile != null) {
-			schemaFile.withInputStream { schemas.load(it) }
-		}
+		}?.withInputStream { schemas.load(it) }
 
 		for (def key : schemas.keySet()) {
 			def shortName = key.replaceAll(/http.*schema.(.*).spring-.*/, '$1')
