@@ -904,7 +904,7 @@ public interface RestClient {
 		/**
 		 * Provide a function to map specific error status codes to an error handler.
 		 * <p>By default, if there are no matching status handlers, responses with
-		 * status codes &gt;= 400 wil throw a {@link RestClientResponseException}.
+		 * status codes &gt;= 400 will throw a {@link RestClientResponseException}.
 		 * <p>Note that {@link IOException IOExceptions},
 		 * {@link java.io.UncheckedIOException UncheckedIOExceptions}, and
 		 * {@link org.springframework.http.converter.HttpMessageNotReadableException HttpMessageNotReadableExceptions}
@@ -921,7 +921,7 @@ public interface RestClient {
 		/**
 		 * Provide a function to map specific error status codes to an error handler.
 		 * <p>By default, if there are no matching status handlers, responses with
-		 * status codes &gt;= 400 wil throw a {@link RestClientResponseException}.
+		 * status codes &gt;= 400 will throw a {@link RestClientResponseException}.
 		 * <p>Note that {@link IOException IOExceptions},
 		 * {@link java.io.UncheckedIOException UncheckedIOExceptions}, and
 		 * {@link org.springframework.http.converter.HttpMessageNotReadableException HttpMessageNotReadableExceptions}
