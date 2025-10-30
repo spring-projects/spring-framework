@@ -173,13 +173,20 @@ Kotlin::
 [[resttestclient-tests]]
 == Writing Tests
 
-`RestTestClient` provides an API identical to xref:integration/rest-clients.adoc#rest-restclient[`RestClient`]
-up to the point of performing a request by using `exchange()`.
+xref:integration/rest-clients.adoc#rest-restclient[`RestClient`] and `RestTestClient` have
+the same API up to the point of the call to `exchange()`. After that, `RestTestClient`
+provides two alternative ways to verify the response:
 
-After the call to `exchange()`, `RestTestClient` diverges from `RestClient`, and
-instead continues with a workflow to verify responses.
+1. xref:resttestclient-workflow[Built-in Assertions] extend the request workflow with a chain of expectations
+2. xref:resttestclient-assertj[AssertJ Integration] to verify the response via `assertThat()` statements
 
-To assert the response status and headers, use the following:
+
+
+[[resttestclient-workflow]]
+=== Built-in Assertions
+
+To use the built-in assertions, remain in the workflow after the call to `exchange()`, and
+use one of the expectation methods. For example:
 
 [tabs]
 ======
@@ -243,7 +250,7 @@ Kotlin::
 You can then choose to decode the response body through one of the following:
 
 * `expectBody(Class<T>)`: Decode to single object.
-* `expectBody()`: Decode to `byte[]` for xref:testing/resttestclient.adoc#resttestclient-json[JSON Content] or an empty body.
+* `expectBody()`: Decode to `byte[]` for xref:testing/resttestclient.adoc#resttestclient-workflow-json[JSON Content] or an empty body.
 
 
 If the built-in assertions are insufficient, you can consume the object instead and
@@ -310,9 +317,8 @@ that accept {spring-framework-api}/core/ParameterizedTypeReference.html[`Paramet
 instead of `Class<T>`.
 
 
-
-[[resttestclient-no-content]]
-=== No Content
+[[resttestclient-workflow-no-content]]
+==== No Content
 
 If the response is not expected to have content, you can assert that as follows:
 
@@ -367,9 +373,8 @@ Kotlin::
 ======
 
 
-
-[[resttestclient-json]]
-=== JSON Content
+[[resttestclient-workflow-json]]
+==== JSON Content
 
 You can use `expectBody()` without a target type to perform assertions on the raw
 content rather than through higher level Object(s).
@@ -432,3 +437,70 @@ Kotlin::
 
 
 
+[[resttestclient-assertj]]
+=== AssertJ Integration
+
+`RestTestClientResponse` is the main entry point for the AssertJ integration.
+It is an `AssertProvider` that wraps the `ResponseSpec` of an exchange in order to enable
+use of `assertThat()` statements. For example:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	ResponseSpec spec = client.get().uri("/persons").exchange();
+
+	RestTestClientResponse response = RestTestClientResponse.from(spec);
+	assertThat(response).hasStatusOk();
+	assertThat(response).hasContentTypeCompatibleWith(MediaType.TEXT_PLAIN);
+	// ...
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes"]
+----
+	val spec = client.get().uri("/persons").exchange()
+
+	val response = RestTestClientResponse.from(spec)
+	assertThat(response).hasStatusOk()
+	assertThat(response).hasContentTypeCompatibleWith(MediaType.TEXT_PLAIN)
+	// ...
+----
+======
+
+You can also use the built-in workflow first, and then obtain an `ExchangeResult` to wrap
+and continue with AssertJ. For example:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	ExchangeResult result = client.get().uri("/persons").exchange()
+			. // ...
+			.returnResult();
+
+	RestTestClientResponse response = RestTestClientResponse.from(result);
+	assertThat(response).hasStatusOk();
+	assertThat(response).hasContentTypeCompatibleWith(MediaType.TEXT_PLAIN);
+	// ...
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes"]
+----
+	val result = client.get().uri("/persons").exchange()
+			. // ...
+			.returnResult()
+
+	val response = RestTestClientResponse.from(spec)
+	assertThat(response).hasStatusOk()
+	assertThat(response).hasContentTypeCompatibleWith(MediaType.TEXT_PLAIN)
+	// ...
+----
+======

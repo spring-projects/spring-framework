@@ -514,6 +514,14 @@ public interface RestTestClient {
 
 		/**
 		 * Perform the exchange.
+		 * <p>The returned spec may be used in one of two alternative ways:
+		 * <ul>
+		 * <li>Use methods on the spec to extend the request workflow with a
+		 * chain of response expectations
+		 * <li>Wrap the spec with
+		 * {@link org.springframework.test.web.servlet.client.assertj.RestTestClientResponse#from(ResponseSpec)}
+		 * and verify the response with AssertJ statements
+		 * </ul>
 		 * @return a spec for expectations on the response
 		 */
 		ResponseSpec exchange();
