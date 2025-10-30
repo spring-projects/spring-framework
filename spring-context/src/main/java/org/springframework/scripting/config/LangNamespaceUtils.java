@@ -27,7 +27,9 @@ import org.springframework.scripting.support.ScriptFactoryPostProcessor;
  * @author Rob Harrop
  * @author Mark Fisher
  * @since 2.5
+ * @deprecated with no replacement as not actively maintained anymore
  */
+@Deprecated(since = "7.0")
 public abstract class LangNamespaceUtils {
 
 	/**

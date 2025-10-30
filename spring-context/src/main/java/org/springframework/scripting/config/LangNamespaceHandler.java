@@ -36,7 +36,9 @@ import org.springframework.beans.factory.xml.NamespaceHandlerSupport;
  * @author Juergen Hoeller
  * @author Mark Fisher
  * @since 2.0
+ * @deprecated with no replacement as not actively maintained anymore
  */
+@Deprecated(since = "7.0")
 public class LangNamespaceHandler extends NamespaceHandlerSupport {
 
 	@Override

@@ -194,8 +194,7 @@ The following `beans` element uses the `InstantiationTracingBeanPostProcessor`:
 Notice how the `InstantiationTracingBeanPostProcessor` is merely defined. It does not
 even have a name, and, because it is a bean, it can be dependency-injected as you would any
 other bean. (The preceding configuration also defines a bean that is backed by a Groovy
-script. The Spring dynamic language support is detailed in the chapter entitled
-xref:languages/dynamic.adoc[Dynamic Language Support].)
+script.)
 
 The following Java application runs the preceding code and configuration:
 

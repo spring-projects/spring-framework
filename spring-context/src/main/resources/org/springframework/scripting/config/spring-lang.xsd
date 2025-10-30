@@ -11,7 +11,8 @@
 		<xsd:documentation><![CDATA[
 	Defines the elements used in the Spring Framework's dynamic language
 	support, which allows bean definitions that are backed by classes
-	written in a language other than Java.
+	written in a language other than Java. Deprecated as of Spring
+	Framework 7.0.
 		]]></xsd:documentation>
 	</xsd:annotation>
 
