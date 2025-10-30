@@ -53,8 +53,7 @@ public class DefaultFragmentsRenderingTests {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		MockHttpServletResponse response = new MockHttpServletResponse();
 
-		FragmentsRendering view = FragmentsRendering
-				.fragment("fragment1", Map.of("foo", "Foo"))
+		FragmentsRendering view = FragmentsRendering.fragment("fragment1", Map.of("foo", "Foo"))
 				.fragment("fragment2", Map.of("bar", "Bar"))
 				.header("headerName", "headerValue")
 				.build();
