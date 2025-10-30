@@ -45,8 +45,8 @@ import org.springframework.test.context.ContextLoader;
  * @see org.junit.jupiter.api.extension.ExtendWith @ExtendWith
  * @see org.springframework.test.context.junit.jupiter.SpringExtension SpringExtension
  * @see org.springframework.test.context.junit.jupiter.SpringExtensionConfig @SpringExtensionConfig
- * @see org.springframework.test.context.junit.ContextConfiguration @ContextConfiguration
  * @see org.springframework.test.context.junit.jupiter.web.SpringJUnitWebConfig @SpringJUnitWebConfig
+ * @see org.springframework.test.context.ContextConfiguration @ContextConfiguration
  */
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration
