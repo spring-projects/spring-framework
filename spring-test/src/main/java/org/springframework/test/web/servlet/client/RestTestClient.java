@@ -647,13 +647,24 @@ public interface RestTestClient {
 		BodyContentSpec expectBody();
 
 		/**
-		 * Exit the chained flow in order to consume the response body externally.
+		 * Return an {@link ExchangeResult} with the raw content. Effectively, a shortcut for:
+		 * <pre class="code">
+		 * .returnResult(byte[].class)
+		 * </pre>
+		 */
+		default ExchangeResult returnResult() {
+			return returnResult(byte[].class);
+		}
+
+		/**
+		 * Convert the response content to the given target type, and return an
+		 * {@link ExchangeResult} that represents the exchange.
 		 */
 		<T> EntityExchangeResult<T> returnResult(Class<T> elementClass);
 
 		/**
-		 * Alternative to {@link #returnResult(Class)} that accepts information
-		 * about a target type with generics.
+		 * Alternative to {@link #returnResult(Class)} that allows specifying a
+		 * response body type with generics.
 		 */
 		<T> EntityExchangeResult<T> returnResult(ParameterizedTypeReference<T> elementTypeRef);
 
