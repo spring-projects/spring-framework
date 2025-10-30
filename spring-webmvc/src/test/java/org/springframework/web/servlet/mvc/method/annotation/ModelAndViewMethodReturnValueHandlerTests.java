@@ -91,7 +91,7 @@ class ModelAndViewMethodReturnValueHandlerTests {
 
 	@Test
 	void handleFragmentsRendering() throws Exception {
-		FragmentsRendering rendering = FragmentsRendering.with("viewName").build();
+		FragmentsRendering rendering = FragmentsRendering.fragment("viewName").build();
 
 		handler.handleReturnValue(rendering, returnParamModelAndView, mavContainer, webRequest);
 		assertThat(mavContainer.getView()).isInstanceOf(SmartView.class);

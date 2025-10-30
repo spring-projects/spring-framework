@@ -49,8 +49,8 @@ class DefaultFragmentsRenderingBuilder implements FragmentsRendering.Builder {
 	@Nullable
 	private HttpHeaders headers;
 
-	DefaultFragmentsRenderingBuilder(Collection<Fragment> fragments) {
-		this.fragmentsCollection = new ArrayList<>(fragments);
+	DefaultFragmentsRenderingBuilder() {
+		this.fragmentsCollection = null;
 		this.fragmentsFlux = null;
 	}
 
@@ -85,18 +85,24 @@ class DefaultFragmentsRenderingBuilder implements FragmentsRendering.Builder {
 	}
 
 	@Override
-	public FragmentsRendering.Builder fragment(String viewName, Map<String, Object> model) {
-		return fragment(Fragment.create(viewName, model));
-	}
-
-	@Override
 	public FragmentsRendering.Builder fragment(String viewName) {
 		return fragment(Fragment.create(viewName));
 	}
 
 	@Override
+	public FragmentsRendering.Builder fragment(String viewName, Map<String, Object> model) {
+		return fragment(Fragment.create(viewName, model));
+	}
+
+	@Override
 	public FragmentsRendering.Builder fragment(Fragment fragment) {
 		initFragmentsCollection().add(fragment);
+		return this;
+	}
+
+	@Override
+	public FragmentsRendering.Builder fragments(Collection<Fragment> fragments) {
+		initFragmentsCollection().addAll(fragments);
 		return this;
 	}
 

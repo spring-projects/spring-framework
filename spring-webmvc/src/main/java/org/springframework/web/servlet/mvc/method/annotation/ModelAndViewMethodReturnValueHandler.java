@@ -92,7 +92,7 @@ public class ModelAndViewMethodReturnValueHandler implements HandlerMethodReturn
 		}
 
 		if (returnValue instanceof Collection<?> mavs) {
-			returnValue = FragmentsRendering.with((Collection<ModelAndView>) mavs).build();
+			returnValue = FragmentsRendering.fragments((Collection<ModelAndView>) mavs).build();
 		}
 
 		if (returnValue instanceof FragmentsRendering rendering) {
