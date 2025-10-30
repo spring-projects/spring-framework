@@ -131,35 +131,35 @@ public class SQLStateSQLExceptionTranslator extends AbstractFallbackSQLException
 				logger.debug("Extracted SQL state class '" + classCode + "' from value '" + sqlState + "'");
 			}
 			if (BAD_SQL_GRAMMAR_CODES.contains(classCode)) {
-				return new BadSqlGrammarException(task, (sql != null ? sql : ""), sqlEx);
+				return new BadSqlGrammarException(task, (sql != null ? sql : ""), ex);
 			}
 			else if (DATA_INTEGRITY_VIOLATION_CODES.contains(classCode)) {
 				if (indicatesDuplicateKey(sqlState, sqlEx.getErrorCode())) {
-					return new DuplicateKeyException(buildMessage(task, sql, sqlEx), sqlEx);
+					return new DuplicateKeyException(buildMessage(task, sql, sqlEx), ex);
 				}
-				return new DataIntegrityViolationException(buildMessage(task, sql, sqlEx), sqlEx);
+				return new DataIntegrityViolationException(buildMessage(task, sql, sqlEx), ex);
 			}
 			else if (PESSIMISTIC_LOCKING_FAILURE_CODES.contains(classCode)) {
 				if (indicatesCannotAcquireLock(sqlState)) {
-					return new CannotAcquireLockException(buildMessage(task, sql, sqlEx), sqlEx);
+					return new CannotAcquireLockException(buildMessage(task, sql, sqlEx), ex);
 				}
-				return new PessimisticLockingFailureException(buildMessage(task, sql, sqlEx), sqlEx);
+				return new PessimisticLockingFailureException(buildMessage(task, sql, sqlEx), ex);
 			}
 			else if (DATA_ACCESS_RESOURCE_FAILURE_CODES.contains(classCode)) {
 				if (indicatesQueryTimeout(sqlState)) {
-					return new QueryTimeoutException(buildMessage(task, sql, sqlEx), sqlEx);
+					return new QueryTimeoutException(buildMessage(task, sql, sqlEx), ex);
 				}
-				return new DataAccessResourceFailureException(buildMessage(task, sql, sqlEx), sqlEx);
+				return new DataAccessResourceFailureException(buildMessage(task, sql, sqlEx), ex);
 			}
 			else if (TRANSIENT_DATA_ACCESS_RESOURCE_CODES.contains(classCode)) {
-				return new TransientDataAccessResourceException(buildMessage(task, sql, sqlEx), sqlEx);
+				return new TransientDataAccessResourceException(buildMessage(task, sql, sqlEx), ex);
 			}
 		}
 
 		// For MySQL: exception class name indicating a timeout?
 		// (since MySQL doesn't throw the JDBC 4 SQLTimeoutException)
 		if (sqlEx.getClass().getName().contains("Timeout")) {
-			return new QueryTimeoutException(buildMessage(task, sql, sqlEx), sqlEx);
+			return new QueryTimeoutException(buildMessage(task, sql, sqlEx), ex);
 		}
 
 		// Couldn't resolve anything proper - resort to UncategorizedSQLException.

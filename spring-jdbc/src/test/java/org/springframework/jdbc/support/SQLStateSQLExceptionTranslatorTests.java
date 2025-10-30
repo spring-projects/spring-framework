@@ -181,8 +181,7 @@ class SQLStateSQLExceptionTranslatorTests {
 	static void assertTranslation(DataAccessException dae, SQLException ex, Class<?> dataAccessExceptionType) {
 		assertThat(dae).as("Specific translation must not result in null").isNotNull();
 		assertThat(dae).as("Wrong DataAccessException type returned").isExactlyInstanceOf(dataAccessExceptionType);
-		assertThat(dae.getCause()).as("The exact same original SQLException must be preserved").isSameAs(
-				ex instanceof BatchUpdateException bue ? bue.getNextException() : ex);
+		assertThat(dae.getCause()).as("The exact same original SQLException must be preserved").isSameAs(ex);
 	}
 
 	static BatchUpdateException buildBatchUpdateException(@Nullable String sqlState, SQLException next) {
