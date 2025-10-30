@@ -39,7 +39,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 
 /**
@@ -191,7 +190,7 @@ class SQLErrorCodeSQLExceptionTranslatorTests {
 	}
 
 	@Test
-	void dataSourceInitialization() throws Exception {
+	void dataSourceInitializationWhenConnectionCannotBeObtained() throws Exception {
 		SQLException connectionException = new SQLException();
 		SQLException duplicateKeyException = new SQLException("test", "", 1);
 
@@ -200,6 +199,11 @@ class SQLErrorCodeSQLExceptionTranslatorTests {
 
 		translator = new SQLErrorCodeSQLExceptionTranslator(dataSource);
 		assertThat(translator.translate("test", null, duplicateKeyException)).isNull();
+	}
+
+	@Test
+	void dataSourceInitialization() throws Exception {
+		SQLException duplicateKeyException = new SQLException("test", "", 1);
 
 		DatabaseMetaData databaseMetaData = mock();
 		given(databaseMetaData.getDatabaseProductName()).willReturn("Oracle");
@@ -207,8 +211,9 @@ class SQLErrorCodeSQLExceptionTranslatorTests {
 		Connection connection = mock();
 		given(connection.getMetaData()).willReturn(databaseMetaData);
 
-		reset(dataSource);
+		DataSource dataSource = mock();
 		given(dataSource.getConnection()).willReturn(connection);
+
 		translator = new SQLErrorCodeSQLExceptionTranslator(dataSource);
 		assertThat(translator.translate("test", null, duplicateKeyException))
 				.isInstanceOf(DuplicateKeyException.class);
