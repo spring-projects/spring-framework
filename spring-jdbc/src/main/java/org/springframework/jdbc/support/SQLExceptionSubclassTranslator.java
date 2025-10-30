@@ -80,43 +80,43 @@ public class SQLExceptionSubclassTranslator extends AbstractFallbackSQLException
 
 		if (sqlEx instanceof SQLTransientException) {
 			if (sqlEx instanceof SQLTransientConnectionException) {
-				return new TransientDataAccessResourceException(buildMessage(task, sql, sqlEx), sqlEx);
+				return new TransientDataAccessResourceException(buildMessage(task, sql, sqlEx), ex);
 			}
 			if (sqlEx instanceof SQLTransactionRollbackException) {
 				if (SQLStateSQLExceptionTranslator.indicatesCannotAcquireLock(sqlEx.getSQLState())) {
-					return new CannotAcquireLockException(buildMessage(task, sql, sqlEx), sqlEx);
+					return new CannotAcquireLockException(buildMessage(task, sql, sqlEx), ex);
 				}
-				return new PessimisticLockingFailureException(buildMessage(task, sql, sqlEx), sqlEx);
+				return new PessimisticLockingFailureException(buildMessage(task, sql, sqlEx), ex);
 			}
 			if (sqlEx instanceof SQLTimeoutException) {
-				return new QueryTimeoutException(buildMessage(task, sql, sqlEx), sqlEx);
+				return new QueryTimeoutException(buildMessage(task, sql, sqlEx), ex);
 			}
 		}
 		else if (sqlEx instanceof SQLNonTransientException) {
 			if (sqlEx instanceof SQLNonTransientConnectionException) {
-				return new DataAccessResourceFailureException(buildMessage(task, sql, sqlEx), sqlEx);
+				return new DataAccessResourceFailureException(buildMessage(task, sql, sqlEx), ex);
 			}
 			if (sqlEx instanceof SQLDataException) {
-				return new DataIntegrityViolationException(buildMessage(task, sql, sqlEx), sqlEx);
+				return new DataIntegrityViolationException(buildMessage(task, sql, sqlEx), ex);
 			}
 			if (sqlEx instanceof SQLIntegrityConstraintViolationException) {
 				if (SQLStateSQLExceptionTranslator.indicatesDuplicateKey(sqlEx.getSQLState(), sqlEx.getErrorCode())) {
-					return new DuplicateKeyException(buildMessage(task, sql, sqlEx), sqlEx);
+					return new DuplicateKeyException(buildMessage(task, sql, sqlEx), ex);
 				}
-				return new DataIntegrityViolationException(buildMessage(task, sql, sqlEx), sqlEx);
+				return new DataIntegrityViolationException(buildMessage(task, sql, sqlEx), ex);
 			}
 			if (sqlEx instanceof SQLInvalidAuthorizationSpecException) {
-				return new PermissionDeniedDataAccessException(buildMessage(task, sql, sqlEx), sqlEx);
+				return new PermissionDeniedDataAccessException(buildMessage(task, sql, sqlEx), ex);
 			}
 			if (sqlEx instanceof SQLSyntaxErrorException) {
-				return new BadSqlGrammarException(task, (sql != null ? sql : ""), sqlEx);
+				return new BadSqlGrammarException(task, (sql != null ? sql : ""), ex);
 			}
 			if (sqlEx instanceof SQLFeatureNotSupportedException) {
-				return new InvalidDataAccessApiUsageException(buildMessage(task, sql, sqlEx), sqlEx);
+				return new InvalidDataAccessApiUsageException(buildMessage(task, sql, sqlEx), ex);
 			}
 		}
 		else if (sqlEx instanceof SQLRecoverableException) {
-			return new RecoverableDataAccessException(buildMessage(task, sql, sqlEx), sqlEx);
+			return new RecoverableDataAccessException(buildMessage(task, sql, sqlEx), ex);
 		}
 
 		// Fallback to Spring's own SQL state translation...
