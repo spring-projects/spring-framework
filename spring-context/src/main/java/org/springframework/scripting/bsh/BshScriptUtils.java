@@ -38,7 +38,9 @@ import org.springframework.util.ReflectionUtils;
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @since 2.0
+ * @deprecated with no replacement as not actively maintained anymore
  */
+@Deprecated(since = "7.0")
 public abstract class BshScriptUtils {
 
 	/**
