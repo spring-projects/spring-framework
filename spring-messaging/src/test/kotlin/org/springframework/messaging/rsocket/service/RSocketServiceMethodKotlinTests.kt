@@ -37,6 +37,7 @@ import reactor.core.publisher.Mono
  * Kotlin tests for [RSocketServiceMethod].
  *
  * @author Dmitry Sulman
+ * @author Sebastien Deleuze
  */
 class RSocketServiceMethodKotlinTests {
 
@@ -96,6 +97,23 @@ class RSocketServiceMethodKotlinTests {
 	}
 
 	@Test
+	fun nonSuspendingRequestStream(): Unit = runBlocking {
+		val service = proxyFactory.createClient(NonSuspendingFunctionsService::class.java)
+
+		val requestPayload = "request"
+		val responsePayload1 = "response1"
+		val responsePayload2 = "response2"
+		rsocket.setPayloadFluxToReturn(
+			Flux.just(DefaultPayload.create(responsePayload1), DefaultPayload.create(responsePayload2)))
+		val response = service.requestStream(requestPayload).toList()
+
+		assertThat(response).containsExactly(responsePayload1, responsePayload2)
+		assertThat(rsocket.savedMethodName).isEqualTo("requestStream")
+		assertThat(rsocket.savedPayload?.metadataUtf8).isEqualTo("rs")
+		assertThat(rsocket.savedPayload?.dataUtf8).isEqualTo(requestPayload)
+	}
+
+	@Test
 	fun requestChannel(): Unit = runBlocking {
 		val service = proxyFactory.createClient(SuspendingFunctionsService::class.java)
 
@@ -131,4 +149,11 @@ class RSocketServiceMethodKotlinTests {
 		@RSocketExchange("rc")
 		suspend fun requestChannel(input: Flow<String>): Flow<String>
 	}
+
+	private interface NonSuspendingFunctionsService {
+
+		@RSocketExchange("rs")
+		fun requestStream(input: String): Flow<String>
+	}
+
 }

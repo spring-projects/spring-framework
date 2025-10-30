@@ -137,13 +137,11 @@ final class RSocketServiceMethod {
 
 		MethodParameter returnParam = new MethodParameter(method, -1);
 		Class<?> returnType = returnParam.getParameterType();
-		boolean isFlowReturnType = COROUTINES_FLOW_CLASS_NAME.equals(returnType.getName());
-		boolean isUnwrapped = KotlinDetector.isSuspendingFunction(method) && !isFlowReturnType;
-		if (isUnwrapped) {
-			returnType = Mono.class;
-		}
-		else if (isFlowReturnType) {
-			returnType = Flux.class;
+		boolean isSuspending = KotlinDetector.isSuspendingFunction(method);
+		boolean hasFlowReturnType = COROUTINES_FLOW_CLASS_NAME.equals(returnType.getName());
+		boolean isUnwrapped = isSuspending && !hasFlowReturnType;
+		if (isSuspending) {
+			returnType = (hasFlowReturnType ? Flux.class : Mono.class);
 		}
 
 		ReactiveAdapter reactiveAdapter = reactiveRegistry.getAdapter(returnType);
