@@ -29,23 +29,22 @@ import java.util.function.Consumer;
  */
 public interface HttpMessageConverters extends Iterable<HttpMessageConverter<?>> {
 
-
 	/**
 	 * Create a builder instance, tailored for HTTP client usage.
 	 * <p>The following HTTP message converters can be detected and registered if available, in order:
 	 * <ol>
-	 *     <li>All custom message converters configured with the builder
-	 *     <li>{@link ByteArrayHttpMessageConverter}
-	 *     <li>{@link StringHttpMessageConverter} with the {@link java.nio.charset.StandardCharsets#ISO_8859_1} charset
-	 *     <li>{@link ResourceHttpMessageConverter}, with resource streaming support disabled
-	 *     <li>a Multipart converter, using all detected and custom converters for part conversion
-	 *     <li>A JSON converter
-	 *     <li>A Smile converter
-	 *     <li>A CBOR converter
-	 *     <li>A YAML converter
-	 *     <li>An XML converter
-	 *     <li>A ProtoBuf converter
-	 *     <li>ATOM and RSS converters
+	 * <li>All custom message converters configured with the builder
+	 * <li>{@link ByteArrayHttpMessageConverter}
+	 * <li>{@link StringHttpMessageConverter} with the {@link java.nio.charset.StandardCharsets#ISO_8859_1} charset
+	 * <li>{@link ResourceHttpMessageConverter}, with resource streaming support disabled
+	 * <li>a Multipart converter, using all detected and custom converters for part conversion
+	 * <li>A JSON converter
+	 * <li>A Smile converter
+	 * <li>A CBOR converter
+	 * <li>A YAML converter
+	 * <li>An XML converter
+	 * <li>A ProtoBuf converter
+	 * <li>ATOM and RSS converters
 	 * </ol>
 	 */
 	static ClientBuilder forClient() {
@@ -74,6 +73,7 @@ public interface HttpMessageConverters extends Iterable<HttpMessageConverter<?>>
 	static ServerBuilder forServer() {
 		return new DefaultHttpMessageConverters.DefaultServerBuilder();
 	}
+
 
 	interface Builder<T extends Builder<T>> {
 
@@ -150,18 +150,18 @@ public interface HttpMessageConverters extends Iterable<HttpMessageConverter<?>>
 		HttpMessageConverters build();
 	}
 
+
 	/**
 	 * Client builder for an {@link HttpMessageConverters} instance.
 	 */
 	interface ClientBuilder extends Builder<ClientBuilder> {
-
 	}
+
 
 	/**
 	 * Server builder for an {@link HttpMessageConverters} instance.
 	 */
 	interface ServerBuilder extends Builder<ServerBuilder> {
-
 	}
 
 }
