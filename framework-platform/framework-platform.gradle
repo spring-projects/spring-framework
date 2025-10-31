@@ -37,7 +37,7 @@ dependencies {
 		api("com.networknt:json-schema-validator:1.5.3")
 		api("com.oracle.database.jdbc:ojdbc11:21.9.0.0")
 		api("com.rometools:rome:1.19.0")
-		api("com.squareup.okhttp3:mockwebserver3:5.1.0")
+		api("com.squareup.okhttp3:mockwebserver3:5.3.0")
 		api("com.sun.activation:jakarta.activation:2.0.1")
 		api("com.sun.xml.bind:jaxb-core:3.0.2")
 		api("com.sun.xml.bind:jaxb-impl:3.0.2")
