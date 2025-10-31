@@ -337,6 +337,21 @@ class PathMatchingResourcePatternResolverTests {
 			assertThat(result.replace("\\", "/")).contains("!!!!").contains("/lib/asset.jar!/assets/file.txt");
 		}
 
+		@Test
+		void javaDashJarFindsAbsoluteClassPathManifestEntries() throws Exception {
+			Path assetJar = this.temp.resolve("dependency").resolve("asset.jar");
+			Files.createDirectories(assetJar.getParent());
+			writeAssetJar(assetJar);
+			writeApplicationJarWithAbsolutePath(this.temp.resolve("app.jar"), assetJar);
+			String java = ProcessHandle.current().info().command().get();
+			Process process = new ProcessBuilder(java, "-jar", "app.jar")
+					.directory(this.temp.toFile())
+					.start();
+			assertThat(process.waitFor()).isZero();
+			String result = StreamUtils.copyToString(process.getInputStream(), StandardCharsets.UTF_8);
+			assertThat(result.replace("\\", "/")).contains("!!!!").contains("asset.jar!/assets/file.txt");
+		}
+
 		private void writeAssetJar(Path path) throws Exception {
 			try (JarOutputStream jar = new JarOutputStream(new FileOutputStream(path.toFile()))) {
 				jar.putNextEntry(new ZipEntry("assets/"));
@@ -367,6 +382,35 @@ class PathMatchingResourcePatternResolverTests {
 			Manifest manifest = new Manifest();
 			Attributes mainAttributes = manifest.getMainAttributes();
 			mainAttributes.put(Name.CLASS_PATH, buildSpringClassPath() + "lib/asset.jar");
+			mainAttributes.put(Name.MAIN_CLASS, ClassPathManifestEntriesTestApplication.class.getName());
+			mainAttributes.put(Name.MANIFEST_VERSION, "1.0");
+			try (JarOutputStream jar = new JarOutputStream(new FileOutputStream(path.toFile()), manifest)) {
+				String appClassResource = ClassUtils.convertClassNameToResourcePath(
+						ClassPathManifestEntriesTestApplication.class.getName()) + ClassUtils.CLASS_FILE_SUFFIX;
+				String folder = "";
+				for (String name : appClassResource.split("/")) {
+					if (!name.endsWith(ClassUtils.CLASS_FILE_SUFFIX)) {
+						folder += name + "/";
+						jar.putNextEntry(new ZipEntry(folder));
+						jar.closeEntry();
+					}
+					else {
+						jar.putNextEntry(new ZipEntry(folder + name));
+						try (InputStream in = getClass().getResourceAsStream(name)) {
+							in.transferTo(jar);
+						}
+						jar.closeEntry();
+					}
+				}
+			}
+			assertThat(new FileSystemResource(path).exists()).isTrue();
+			assertThat(new UrlResource(ResourceUtils.JAR_URL_PREFIX + ResourceUtils.FILE_URL_PREFIX + path + ResourceUtils.JAR_URL_SEPARATOR).exists()).isTrue();
+		}
+
+		private void writeApplicationJarWithAbsolutePath(Path path, Path assetJar) throws Exception {
+			Manifest manifest = new Manifest();
+			Attributes mainAttributes = manifest.getMainAttributes();
+			mainAttributes.put(Name.CLASS_PATH, buildSpringClassPath() + assetJar.toAbsolutePath());
 			mainAttributes.put(Name.MAIN_CLASS, ClassPathManifestEntriesTestApplication.class.getName());
 			mainAttributes.put(Name.MANIFEST_VERSION, "1.0");
 			try (JarOutputStream jar = new JarOutputStream(new FileOutputStream(path.toFile()), manifest)) {
