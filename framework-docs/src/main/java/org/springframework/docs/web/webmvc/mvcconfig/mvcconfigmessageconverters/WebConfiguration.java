@@ -44,8 +44,8 @@ public class WebConfiguration implements WebMvcConfigurer {
 				.findAndAddModules()
 				.defaultUseWrapper(false)
 				.build();
-		builder.jsonMessageConverter(new JacksonJsonHttpMessageConverter(jsonMapper))
-				.xmlMessageConverter(new JacksonXmlHttpMessageConverter(xmlMapper));
+		builder.withJsonConverter(new JacksonJsonHttpMessageConverter(jsonMapper))
+				.withXmlConverter(new JacksonXmlHttpMessageConverter(xmlMapper));
 	}
 }
 // end::snippet[]

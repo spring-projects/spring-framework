@@ -82,7 +82,7 @@ class RestClientObservationTests {
 	RestClient.Builder createBuilder() {
 		return RestClient.builder()
 				.baseUrl("https://example.com/base")
-				.configureMessageConverters(converters -> converters.customMessageConverter(new StringHttpMessageConverter()))
+				.configureMessageConverters(converters -> converters.addCustomConverter(new StringHttpMessageConverter()))
 				.requestFactory(this.requestFactory)
 				.observationRegistry(this.observationRegistry);
 	}

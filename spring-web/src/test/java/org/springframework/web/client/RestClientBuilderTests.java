@@ -148,7 +148,7 @@ public class RestClientBuilderTests {
 	void configureMessageConverters() {
 		StringHttpMessageConverter stringConverter = new StringHttpMessageConverter();
 		RestClient.Builder builder = RestClient.builder();
-		builder.configureMessageConverters(clientBuilder -> clientBuilder.stringMessageConverter(stringConverter));
+		builder.configureMessageConverters(clientBuilder -> clientBuilder.addCustomConverter(stringConverter));
 		assertThat(builder).isInstanceOf(DefaultRestClientBuilder.class);
 		DefaultRestClient restClient = (DefaultRestClient) builder.build();
 

@@ -498,7 +498,7 @@ final class DefaultRestClientBuilder implements RestClient.Builder {
 		}
 		else {
 			if (this.messageConverters != null) {
-				this.messageConverters.forEach(builder::customMessageConverter);
+				this.messageConverters.forEach(builder::addCustomConverter);
 			}
 			if (this.convertersConfigurer != null) {
 				this.convertersConfigurer.accept(builder);

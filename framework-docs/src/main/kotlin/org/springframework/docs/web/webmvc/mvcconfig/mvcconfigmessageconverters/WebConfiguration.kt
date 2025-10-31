@@ -26,8 +26,8 @@ class WebConfiguration : WebMvcConfigurer {
 			.findAndAddModules()
 			.defaultUseWrapper(false)
 			.build()
-		builder.jsonMessageConverter(JacksonJsonHttpMessageConverter(jsonMapper))
-			.xmlMessageConverter(JacksonXmlHttpMessageConverter(xmlMapper))
+		builder.withJsonConverter(JacksonJsonHttpMessageConverter(jsonMapper))
+			.withXmlConverter(JacksonXmlHttpMessageConverter(xmlMapper))
 	}
 }
 // end::snippet[]
