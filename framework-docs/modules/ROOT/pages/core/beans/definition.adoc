@@ -63,6 +63,54 @@ supports this registration through the `registerSingleton(..)` and `registerBean
 methods. However, typical applications work solely with beans defined through regular
 bean definition metadata.
 
+[[beans-factory-register-singleton]]
+=== Registering an Existing Object as a Singleton Bean
+
+In some cases, you might need to register an object that was created outside of the Spring container as a bean. You can achieve this using the `ConfigurableListableBeanFactory`:
+
+[source,java]
+----
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+
+public class DynamicBeanRegistrationExample {
+
+    public static void main(String[] args) {
+        AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
+
+        // Refresh context (required before accessing BeanFactory)
+        context.refresh();
+
+        // Create an object outside Spring
+        MyService myService = new MyService("Hello from custom object!");
+
+        // Get BeanFactory and register the object as a singleton bean
+        ConfigurableListableBeanFactory beanFactory = context.getBeanFactory();
+        beanFactory.registerSingleton("myServiceBean", myService);
+
+        // Retrieve the bean from the context
+        MyService bean = context.getBean("myServiceBean", MyService.class);
+        System.out.println(bean.getMessage());
+
+        context.close();
+    }
+
+    static class MyService {
+        private final String message;
+
+        public MyService(String message) {
+            this.message = message;
+        }
+
+        public String getMessage() {
+            return message;
+        }
+    }
+}
+----
+This approach is useful when integrating legacy code or dynamically adding beans at runtime.
+
+
 [NOTE]
 ====
 Bean metadata and manually supplied singleton instances need to be registered as early
