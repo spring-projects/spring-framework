@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-package org.springframework.test.http;
+package org.springframework.test.json;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.StreamSupport;
 
@@ -33,44 +32,26 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.SmartHttpMessageConverter;
 import org.springframework.mock.http.MockHttpInputMessage;
 import org.springframework.mock.http.MockHttpOutputMessage;
-import org.springframework.test.json.JsonConverterDelegate;
 import org.springframework.util.Assert;
 import org.springframework.util.function.SingletonSupplier;
 
 /**
- * Convert HTTP message content for testing purposes.
+ * Default {@link JsonConverterDelegate} based on {@link HttpMessageConverter}s.
  *
  * @author Stephane Nicoll
- * @since 6.2
- * @deprecated in favor of static factory methods in {@link JsonConverterDelegate}
+ * @author Rossen Stoyanchev
+ * @since 7.0
  */
-@Deprecated(since = "7.0", forRemoval = true)
-public class HttpMessageContentConverter implements JsonConverterDelegate {
+final class DefaultJsonConverterDelegate implements JsonConverterDelegate {
 
 	private static final MediaType JSON = MediaType.APPLICATION_JSON;
 
 	private final List<HttpMessageConverter<?>> messageConverters;
 
-	HttpMessageContentConverter(Iterable<HttpMessageConverter<?>> messageConverters) {
+
+	DefaultJsonConverterDelegate(Iterable<HttpMessageConverter<?>> messageConverters) {
 		this.messageConverters = StreamSupport.stream(messageConverters.spliterator(), false).toList();
 		Assert.notEmpty(this.messageConverters, "At least one message converter needs to be specified");
-	}
-
-
-	/**
-	 * Create an instance with an iterable of the candidates to use.
-	 * @param candidates the candidates
-	 */
-	public static HttpMessageContentConverter of(Iterable<HttpMessageConverter<?>> candidates) {
-		return new HttpMessageContentConverter(candidates);
-	}
-
-	/**
-	 * Create an instance with a vararg of the candidates to use.
-	 * @param candidates the candidates
-	 */
-	public static HttpMessageContentConverter of(HttpMessageConverter<?>... candidates) {
-		return new HttpMessageContentConverter(Arrays.asList(candidates));
 	}
 
 
@@ -78,14 +59,8 @@ public class HttpMessageContentConverter implements JsonConverterDelegate {
 	public <T> T read(String content, ResolvableType targetType) throws IOException{
 		HttpInputMessage message = new MockHttpInputMessage(content.getBytes(StandardCharsets.UTF_8));
 		message.getHeaders().add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
-		return convert(message, MediaType.APPLICATION_JSON, targetType);
+		return read(message, MediaType.APPLICATION_JSON, targetType);
 	}
-
-	@Override
-	public <T> T map(Object value, ResolvableType targetType) throws IOException {
-		return convertViaJson(value, targetType);
-	}
-
 
 	/**
 	 * Convert the given {@link HttpInputMessage} whose content must match the
@@ -97,8 +72,9 @@ public class HttpMessageContentConverter implements JsonConverterDelegate {
 	 * @return a value of the given {@code targetType}
 	 */
 	@SuppressWarnings("unchecked")
-	public <T> T convert(HttpInputMessage message, MediaType mediaType, ResolvableType targetType)
+	<T> T read(HttpInputMessage message, MediaType mediaType, ResolvableType targetType)
 			throws IOException, HttpMessageNotReadableException {
+
 		Class<?> contextClass = targetType.getRawClass();
 		SingletonSupplier<Type> javaType = SingletonSupplier.of(targetType::getType);
 		for (HttpMessageConverter<?> messageConverter : this.messageConverters) {
@@ -133,13 +109,14 @@ public class HttpMessageContentConverter implements JsonConverterDelegate {
 	 * @param <T> the converted object type
 	 * @return a value of the given {@code targetType}
 	 */
-	public <T> T convertViaJson(Object value, ResolvableType targetType) throws IOException {
-		MockHttpOutputMessage outputMessage = convertToJson(value, ResolvableType.forInstance(value));
-		return convert(fromHttpOutputMessage(outputMessage), JSON, targetType);
+	@Override
+	public <T> T map(Object value, ResolvableType targetType) throws IOException {
+		MockHttpOutputMessage outputMessage = writeToJson(value, ResolvableType.forInstance(value));
+		return read(fromHttpOutputMessage(outputMessage), JSON, targetType);
 	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	private MockHttpOutputMessage convertToJson(Object value, ResolvableType valueType) throws IOException {
+	private MockHttpOutputMessage writeToJson(Object value, ResolvableType valueType) throws IOException {
 		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
 		Class<?> valueClass = value.getClass();
 		SingletonSupplier<Type> javaType = SingletonSupplier.of(valueType::getType);

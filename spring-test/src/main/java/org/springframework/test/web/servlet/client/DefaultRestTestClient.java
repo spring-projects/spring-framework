@@ -39,10 +39,10 @@ import org.springframework.http.client.ClientHttpRequestExecution;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.http.converter.HttpMessageConverters;
-import org.springframework.test.http.HttpMessageContentConverter;
 import org.springframework.test.json.JsonAssert;
 import org.springframework.test.json.JsonComparator;
 import org.springframework.test.json.JsonCompareMode;
+import org.springframework.test.json.JsonConverterDelegate;
 import org.springframework.test.util.AssertionErrors;
 import org.springframework.test.util.ExceptionCollector;
 import org.springframework.test.util.XmlExpectationsHelper;
@@ -69,7 +69,7 @@ class DefaultRestTestClient implements RestTestClient {
 
 	private final DefaultRestTestClientBuilder<?> restTestClientBuilder;
 
-	private final @Nullable HttpMessageContentConverter messageContentConverter;
+	private final @Nullable JsonConverterDelegate converterDelegate;
 
 	private final AtomicLong requestIndex = new AtomicLong();
 
@@ -81,7 +81,7 @@ class DefaultRestTestClient implements RestTestClient {
 		this.restClient = builder.requestInterceptor(this.wiretapInterceptor).build();
 		this.entityResultConsumer = entityResultConsumer;
 		this.restTestClientBuilder = restTestClientBuilder;
-		this.messageContentConverter = new ConverterCallback(this.restClient).getConverter();
+		this.converterDelegate = new ConverterCallback(this.restClient).getConverter();
 	}
 
 
@@ -138,20 +138,20 @@ class DefaultRestTestClient implements RestTestClient {
 
 	private static class ConverterCallback {
 
-		private @Nullable HttpMessageContentConverter converter;
+		private @Nullable JsonConverterDelegate converter;
 
 		ConverterCallback(RestClient client) {
 			client.mutate()
 					.configureMessageConverters(convertersBuilder -> {
 						HttpMessageConverters converters = convertersBuilder.build();
 						if (converters.iterator().hasNext()) {
-							this.converter = HttpMessageContentConverter.of(converters);
+							this.converter = JsonConverterDelegate.of(converters);
 						}
 					})
 					.build();
 		}
 
-		public @Nullable HttpMessageContentConverter getConverter() {
+		public @Nullable JsonConverterDelegate getConverter() {
 			return this.converter;
 		}
 	}
@@ -290,7 +290,7 @@ class DefaultRestTestClient implements RestTestClient {
 							(request, response) -> {
 								byte[] requestBody = wiretapInterceptor.getRequestContent(this.requestId);
 								return new ExchangeResult(
-										request, response, this.uriTemplate, requestBody, messageContentConverter);
+										request, response, this.uriTemplate, requestBody, converterDelegate);
 							}, false),
 					DefaultRestTestClient.this.entityResultConsumer);
 		}

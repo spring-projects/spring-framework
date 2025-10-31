@@ -30,7 +30,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockMultipartHttpServletRequest;
-import org.springframework.test.http.HttpMessageContentConverter;
+import org.springframework.test.json.JsonConverterDelegate;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.RequestBuilder;
@@ -132,13 +132,13 @@ public final class MockMvcTester {
 
 	private final MockMvc mockMvc;
 
-	private final @Nullable HttpMessageContentConverter contentConverter;
+	private final @Nullable JsonConverterDelegate converterDelegate;
 
 
-	private MockMvcTester(MockMvc mockMvc, @Nullable HttpMessageContentConverter contentConverter) {
+	private MockMvcTester(MockMvc mockMvc, @Nullable JsonConverterDelegate converter) {
 		Assert.notNull(mockMvc, "mockMVC should not be null");
 		this.mockMvc = mockMvc;
-		this.contentConverter = contentConverter;
+		this.converterDelegate = converter;
 	}
 
 	/**
@@ -232,7 +232,7 @@ public final class MockMvcTester {
 	 * @return a new instance using the specified converters
 	 */
 	public MockMvcTester withHttpMessageConverters(Iterable<HttpMessageConverter<?>> httpMessageConverters) {
-		return new MockMvcTester(this.mockMvc, HttpMessageContentConverter.of(httpMessageConverters));
+		return new MockMvcTester(this.mockMvc, JsonConverterDelegate.of(httpMessageConverters));
 	}
 
 	/**
@@ -374,10 +374,10 @@ public final class MockMvcTester {
 	public MvcTestResult perform(RequestBuilder requestBuilder) {
 		Object result = getMvcResultOrFailure(requestBuilder);
 		if (result instanceof MvcResult mvcResult) {
-			return new DefaultMvcTestResult(mvcResult, null, this.contentConverter);
+			return new DefaultMvcTestResult(mvcResult, null, this.converterDelegate);
 		}
 		else {
-			return new DefaultMvcTestResult(null, (Exception) result, this.contentConverter);
+			return new DefaultMvcTestResult(null, (Exception) result, this.converterDelegate);
 		}
 	}
 
@@ -483,7 +483,7 @@ public final class MockMvcTester {
 
 		@Override
 		public MvcTestResultAssert assertThat() {
-			return new MvcTestResultAssert(exchange(), MockMvcTester.this.contentConverter);
+			return new MvcTestResultAssert(exchange(), MockMvcTester.this.converterDelegate);
 		}
 	}
 
@@ -541,7 +541,7 @@ public final class MockMvcTester {
 
 		@Override
 		public MvcTestResultAssert assertThat() {
-			return new MvcTestResultAssert(exchange(), MockMvcTester.this.contentConverter);
+			return new MvcTestResultAssert(exchange(), MockMvcTester.this.converterDelegate);
 		}
 	}
 

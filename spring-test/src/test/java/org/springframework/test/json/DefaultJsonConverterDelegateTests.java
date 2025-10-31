@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.test.http;
+package org.springframework.test.json;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -46,11 +46,11 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 
 /**
- * Tests for {@link HttpMessageContentConverter}.
+ * Tests for {@link DefaultJsonConverterDelegate}.
  *
  * @author Stephane Nicoll
  */
-class HttpMessageContentConverterTests {
+class DefaultJsonConverterDelegateTests {
 
 	private static final MediaType JSON = MediaType.APPLICATION_JSON;
 
@@ -58,17 +58,18 @@ class HttpMessageContentConverterTests {
 
 	private static final JacksonJsonHttpMessageConverter jacksonMessageConverter = new JacksonJsonHttpMessageConverter();
 
+
 	@Test
 	void createInstanceWithEmptyIterable() {
 		assertThatIllegalArgumentException()
-				.isThrownBy(() -> HttpMessageContentConverter.of(List.of()))
+				.isThrownBy(() -> new DefaultJsonConverterDelegate(List.of()))
 				.withMessage("At least one message converter needs to be specified");
 	}
 
 	@Test
 	void createInstanceWithEmptyVarArg() {
 		assertThatIllegalArgumentException()
-				.isThrownBy(HttpMessageContentConverter::of)
+				.isThrownBy(() -> new DefaultJsonConverterDelegate(List.of()))
 				.withMessage("At least one message converter needs to be specified");
 	}
 
@@ -79,9 +80,9 @@ class HttpMessageContentConverterTests {
 				listOfIntegers, JSON, message, List.of(1, 2, 3));
 		SmartHttpMessageConverter<?> secondConverter = mockSmartConverterForRead(
 				listOfIntegers, JSON, message, List.of(3, 2, 1));
-		HttpMessageContentConverter contentConverter = HttpMessageContentConverter.of(
-				List.of(firstConverter, secondConverter));
-		List<Integer> data = contentConverter.convert(message, JSON, listOfIntegers);
+		DefaultJsonConverterDelegate converter =
+				new DefaultJsonConverterDelegate(List.of(firstConverter, secondConverter));
+		List<Integer> data = converter.read(message, JSON, listOfIntegers);
 		assertThat(data).containsExactly(1, 2, 3);
 		verify(firstConverter).canRead(listOfIntegers, JSON);
 		verifyNoInteractions(secondConverter);
@@ -90,9 +91,9 @@ class HttpMessageContentConverterTests {
 	@Test
 	void convertInvokesGenericHttpMessageConverter() throws IOException {
 		GenericHttpMessageConverter<?> firstConverter = mock(GenericHttpMessageConverter.class);
-		HttpMessageContentConverter contentConverter = HttpMessageContentConverter.of(
-				List.of(firstConverter, jacksonMessageConverter));
-		List<Integer> data = contentConverter.convert(createMessage("[2,3,4]"), JSON, listOfIntegers);
+		DefaultJsonConverterDelegate converter =
+				new DefaultJsonConverterDelegate(List.of(firstConverter, jacksonMessageConverter));
+		List<Integer> data = converter.read(createMessage("[2,3,4]"), JSON, listOfIntegers);
 		assertThat(data).containsExactly(2, 3, 4);
 		verify(firstConverter).canRead(listOfIntegers.getType(), List.class, JSON);
 	}
@@ -103,9 +104,9 @@ class HttpMessageContentConverterTests {
 		GenericHttpMessageConverter<?> firstConverter = mock(GenericHttpMessageConverter.class);
 		SmartHttpMessageConverter<?> smartConverter = mockSmartConverterForRead(
 				listOfIntegers, JSON, message, List.of(1, 2, 3));
-		HttpMessageContentConverter contentConverter = HttpMessageContentConverter.of(
-				List.of(firstConverter, smartConverter));
-		List<Integer> data = contentConverter.convert(message, JSON, listOfIntegers);
+		DefaultJsonConverterDelegate converter =
+				new DefaultJsonConverterDelegate(List.of(firstConverter, smartConverter));
+		List<Integer> data = converter.read(message, JSON, listOfIntegers);
 		assertThat(data).containsExactly(1, 2, 3);
 		verify(smartConverter).canRead(listOfIntegers, JSON);
 	}
@@ -117,9 +118,9 @@ class HttpMessageContentConverterTests {
 				listOfIntegers, JSON, message, List.of(1, 2, 3));
 		HttpMessageConverter<?> thirdConverter = mockSimpleConverterForRead(
 				List.class, MediaType.TEXT_PLAIN, message, List.of(1, 2, 3));
-		HttpMessageContentConverter contentConverter = HttpMessageContentConverter.of(
-				List.of(jacksonMessageConverter, secondConverter, thirdConverter));
-		List<Integer> data = contentConverter.convert(message, MediaType.TEXT_PLAIN, listOfIntegers);
+		DefaultJsonConverterDelegate converter =
+				new DefaultJsonConverterDelegate(List.of(jacksonMessageConverter, secondConverter, thirdConverter));
+		List<Integer> data = converter.read(message, MediaType.TEXT_PLAIN, listOfIntegers);
 		assertThat(data).containsExactly(1, 2, 3);
 		verify(secondConverter).canRead(listOfIntegers, MediaType.TEXT_PLAIN);
 		verify(thirdConverter).canRead(List.class, MediaType.TEXT_PLAIN);
@@ -132,10 +133,9 @@ class HttpMessageContentConverterTests {
 				listOfIntegers, MediaType.TEXT_PLAIN, message, List.of(1, 2, 3));
 		SmartHttpMessageConverter<?> htmlConverter = mockSmartConverterForRead(
 				listOfIntegers, MediaType.TEXT_HTML, message, List.of(3, 2, 1));
-		HttpMessageContentConverter contentConverter = HttpMessageContentConverter.of(
-				List.of(textConverter, htmlConverter));
+		DefaultJsonConverterDelegate converter = new DefaultJsonConverterDelegate(List.of(textConverter, htmlConverter));
 		assertThatIllegalStateException()
-				.isThrownBy(() -> contentConverter.convert(message, JSON, listOfIntegers))
+				.isThrownBy(() -> converter.read(message, JSON, listOfIntegers))
 				.withMessage("No converter found to read [application/json] to [java.util.List<java.lang.Integer>]");
 		verify(textConverter).canRead(listOfIntegers, JSON);
 		verify(htmlConverter).canRead(listOfIntegers, JSON);
@@ -148,9 +148,9 @@ class HttpMessageContentConverterTests {
 		SmartHttpMessageConverter<?> readConverter = mockSmartConverterForRead(listOfIntegers, JSON, null, List.of(1, 2, 3));
 		SmartHttpMessageConverter<?> firstWriteJsonConverter = mockSmartConverterForWritingJson(value, valueType, "[1,2,3]");
 		SmartHttpMessageConverter<?> secondWriteJsonConverter = mockSmartConverterForWritingJson(value, valueType, "[3,2,1]");
-		HttpMessageContentConverter contentConverter = HttpMessageContentConverter.of(
-				List.of(readConverter, firstWriteJsonConverter, secondWriteJsonConverter));
-		List<Integer> data = contentConverter.convertViaJson(value, listOfIntegers);
+		JsonConverterDelegate converter =
+				new DefaultJsonConverterDelegate(List.of(readConverter, firstWriteJsonConverter, secondWriteJsonConverter));
+		List<Integer> data = converter.map(value, listOfIntegers);
 		assertThat(data).containsExactly(1, 2, 3);
 		verify(readConverter).canRead(listOfIntegers, JSON);
 		verify(firstWriteJsonConverter).canWrite(valueType, String.class, JSON);
@@ -163,9 +163,9 @@ class HttpMessageContentConverterTests {
 		ResolvableType valueType = ResolvableType.forInstance(value);
 		SmartHttpMessageConverter<?> readConverter = mockSmartConverterForRead(listOfIntegers, JSON, null, List.of(1, 2, 3));
 		GenericHttpMessageConverter<?> writeConverter = mockGenericConverterForWritingJson(value, valueType, "[3,2,1]");
-		HttpMessageContentConverter contentConverter = HttpMessageContentConverter.of(
-				List.of(readConverter, writeConverter, jacksonMessageConverter));
-		List<Integer> data = contentConverter.convertViaJson("[1, 2, 3]", listOfIntegers);
+		JsonConverterDelegate converter =
+				new DefaultJsonConverterDelegate(List.of(readConverter, writeConverter, jacksonMessageConverter));
+		List<Integer> data = converter.map("[1, 2, 3]", listOfIntegers);
 		assertThat(data).containsExactly(1, 2, 3);
 		verify(readConverter).canRead(listOfIntegers, JSON);
 		verify(writeConverter).canWrite(valueType.getType(), value.getClass(), JSON);
@@ -177,9 +177,9 @@ class HttpMessageContentConverterTests {
 		ResolvableType valueType = ResolvableType.forInstance(value);
 		SmartHttpMessageConverter<?> readConverter = mockSmartConverterForRead(listOfIntegers, JSON, null, List.of(1, 2, 3));
 		SmartHttpMessageConverter<?> writeConverter = mockSmartConverterForWritingJson(value, valueType, "[3,2,1]");
-		HttpMessageContentConverter contentConverter = HttpMessageContentConverter.of(
-				List.of(readConverter, writeConverter, jacksonMessageConverter));
-		List<Integer> data = contentConverter.convertViaJson("[1, 2, 3]", listOfIntegers);
+		JsonConverterDelegate converter =
+				new DefaultJsonConverterDelegate(List.of(readConverter, writeConverter, jacksonMessageConverter));
+		List<Integer> data = converter.map("[1, 2, 3]", listOfIntegers);
 		assertThat(data).containsExactly(1, 2, 3);
 		verify(readConverter).canRead(listOfIntegers, JSON);
 		verify(writeConverter).canWrite(valueType, value.getClass(), JSON);
@@ -190,9 +190,9 @@ class HttpMessageContentConverterTests {
 		String value = "1,2,3";
 		SmartHttpMessageConverter<?> readConverter = mockSmartConverterForRead(listOfIntegers, JSON, null, List.of(1, 2, 3));
 		HttpMessageConverter<?> writeConverter = mockSimpleConverterForWritingJson(value, "[3,2,1]");
-		HttpMessageContentConverter contentConverter = HttpMessageContentConverter.of(
-				List.of(readConverter, writeConverter, jacksonMessageConverter));
-		List<Integer> data = contentConverter.convertViaJson("[1, 2, 3]", listOfIntegers);
+		JsonConverterDelegate converterDelegate =
+				new DefaultJsonConverterDelegate(List.of(readConverter, writeConverter, jacksonMessageConverter));
+		List<Integer> data = converterDelegate.map("[1, 2, 3]", listOfIntegers);
 		assertThat(data).containsExactly(1, 2, 3);
 		verify(readConverter).canRead(listOfIntegers, JSON);
 		verify(writeConverter).canWrite(value.getClass(), JSON);
@@ -203,9 +203,9 @@ class HttpMessageContentConverterTests {
 		String value = "1,2,3";
 		ResolvableType valueType = ResolvableType.forInstance(value);
 		SmartHttpMessageConverter<?> readConverter = mockSmartConverterForRead(listOfIntegers, JSON, null, List.of(1, 2, 3));
-		HttpMessageContentConverter contentConverter = HttpMessageContentConverter.of(List.of(readConverter));
+		JsonConverterDelegate converter = new DefaultJsonConverterDelegate(List.of(readConverter));
 		assertThatIllegalStateException()
-				.isThrownBy(() -> contentConverter.convertViaJson(value, listOfIntegers))
+				.isThrownBy(() -> converter.map(value, listOfIntegers))
 				.withMessage("No converter found to convert [java.lang.String] to JSON");
 		verify(readConverter).canWrite(valueType, value.getClass(), JSON);
 	}

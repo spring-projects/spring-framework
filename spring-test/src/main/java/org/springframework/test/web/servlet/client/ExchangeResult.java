@@ -38,7 +38,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseCookie;
-import org.springframework.test.http.HttpMessageContentConverter;
+import org.springframework.test.json.JsonConverterDelegate;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -75,7 +75,7 @@ public class ExchangeResult {
 
 	private final byte[] requestBody;
 
-	private final @Nullable HttpMessageContentConverter messageContentConverter;
+	private final @Nullable JsonConverterDelegate converterDelegate;
 
 	/** Ensure single logging; for example, for expectAll. */
 	private boolean diagnosticsLogged;
@@ -83,7 +83,7 @@ public class ExchangeResult {
 
 	ExchangeResult(
 			HttpRequest request, ConvertibleClientHttpResponse response, @Nullable String uriTemplate,
-			byte[] requestBody, @Nullable HttpMessageContentConverter messageContentConverter) {
+			byte[] requestBody, @Nullable JsonConverterDelegate converter) {
 
 		Assert.notNull(request, "HttpRequest must not be null");
 		Assert.notNull(response, "ClientHttpResponse must not be null");
@@ -91,11 +91,11 @@ public class ExchangeResult {
 		this.clientResponse = response;
 		this.uriTemplate = uriTemplate;
 		this.requestBody = requestBody;
-		this.messageContentConverter = messageContentConverter;
+		this.converterDelegate = converter;
 	}
 
 	ExchangeResult(ExchangeResult result) {
-		this(result.request, result.clientResponse, result.uriTemplate, result.requestBody, result.messageContentConverter);
+		this(result.request, result.clientResponse, result.uriTemplate, result.requestBody, result.converterDelegate);
 		this.diagnosticsLogged = result.diagnosticsLogged;
 	}
 
@@ -202,11 +202,11 @@ public class ExchangeResult {
 	}
 
 	/**
-	 * Return a content converter that delegates to the configured HTTP message converters.
+	 * Return a {@link JsonConverterDelegate} based on the configured HTTP message converters.
 	 * Mainly for internal use from AssertJ support.
 	 */
-	public @Nullable HttpMessageContentConverter getMessageContentConverter() {
-		return this.messageContentConverter;
+	public @Nullable JsonConverterDelegate getConverterDelegate() {
+		return this.converterDelegate;
 	}
 
 	/**
