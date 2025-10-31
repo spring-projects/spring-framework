@@ -29,6 +29,7 @@ import org.springframework.aot.generate.ValueCodeGenerator.Delegate;
 import org.springframework.aot.generate.ValueCodeGeneratorDelegates;
 import org.springframework.aot.generate.ValueCodeGeneratorDelegates.CollectionDelegate;
 import org.springframework.aot.generate.ValueCodeGeneratorDelegates.MapDelegate;
+import org.springframework.beans.factory.config.AutowiredPropertyMarker;
 import org.springframework.beans.factory.config.BeanReference;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.config.TypedStringValue;
@@ -57,6 +58,7 @@ abstract class BeanDefinitionPropertyValueCodeGeneratorDelegates {
 	 * <li>{@link LinkedHashMap}</li>
 	 * <li>{@link BeanReference}</li>
 	 * <li>{@link TypedStringValue}</li>
+	 * <li>{@link AutowiredPropertyMarker}</li>
 	 * </ul>
 	 * When combined with {@linkplain ValueCodeGeneratorDelegates#INSTANCES the
 	 * delegates for common value types}, this should be added first as they have
@@ -68,7 +70,8 @@ abstract class BeanDefinitionPropertyValueCodeGeneratorDelegates {
 			new ManagedMapDelegate(),
 			new LinkedHashMapDelegate(),
 			new BeanReferenceDelegate(),
-			new TypedStringValueDelegate()
+			new TypedStringValueDelegate(),
+			new AutowiredPropertyMarkerDelegate()
 	);
 
 
@@ -216,4 +219,20 @@ abstract class BeanDefinitionPropertyValueCodeGeneratorDelegates {
 			return valueCodeGenerator.generateCode(value);
 		}
 	}
+
+	/**
+	 * {@link Delegate} for {@link AutowiredPropertyMarker} types.
+	 */
+	private static class AutowiredPropertyMarkerDelegate implements Delegate {
+
+		@Override
+		@Nullable
+		public CodeBlock generateCode(ValueCodeGenerator valueCodeGenerator, Object value) {
+			if (value instanceof AutowiredPropertyMarker) {
+				return CodeBlock.of("$T.INSTANCE", AutowiredPropertyMarker.class);
+			}
+			return null;
+		}
+	}
+
 }
