@@ -166,7 +166,7 @@ class DefaultRestTestClientBuilder<B extends RestTestClient.Builder<B>> implemen
 		}
 
 		return new DefaultRestTestClient(
-				this.restClientBuilder, this.entityResultConsumer, new DefaultRestTestClientBuilder<>(this));
+				this.restClientBuilder, this.entityResultConsumer, this);
 	}
 
 
