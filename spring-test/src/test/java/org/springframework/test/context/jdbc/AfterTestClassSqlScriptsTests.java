@@ -72,6 +72,7 @@ class AfterTestClassSqlScriptsTests extends AbstractTransactionalTests {
 	}
 
 	@Nested
+	@TestMethodOrder(OrderAnnotation.class)
 	@Sql(scripts = "recreate-schema.sql", executionPhase = BEFORE_TEST_CLASS)
 	@Sql(scripts = "drop-schema.sql", executionPhase = AFTER_TEST_CLASS)
 	class NestedAfterTestClassSqlScriptsTests {
