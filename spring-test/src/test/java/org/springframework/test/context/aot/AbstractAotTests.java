@@ -30,61 +30,95 @@ import java.util.stream.Stream;
 abstract class AbstractAotTests {
 
 	static final String[] expectedSourceFilesForBasicSpringTests = {
+
+		// BasicSpringJupiterSharedConfigTests -- not generated b/c already generated for AbstractSpringJupiterParameterizedClassTests.InheritedNestedTests.
+		// BasicSpringJupiterTests -- not generated b/c already generated for AbstractSpringJupiterParameterizedClassTests.InheritedNestedTests.
+		// BasicSpringJupiterTests.NestedTests -- not generated b/c already generated for BasicSpringJupiterParameterizedClassTests.NestedTests.
+
 		// Global
 		"org/springframework/test/context/aot/AotTestContextInitializers__Generated.java",
 		"org/springframework/test/context/aot/AotTestAttributes__Generated.java",
-		// BasicSpringJupiterImportedConfigTests
+
+		// AbstractSpringJupiterParameterizedClassTests.InheritedNestedTests
 		"org/springframework/context/event/DefaultEventListenerFactory__TestContext001_BeanDefinitions.java",
 		"org/springframework/context/event/EventListenerMethodProcessor__TestContext001_BeanDefinitions.java",
-		"org/springframework/test/context/aot/samples/basic/BasicSpringJupiterImportedConfigTests__TestContext001_ApplicationContextInitializer.java",
-		"org/springframework/test/context/aot/samples/basic/BasicSpringJupiterImportedConfigTests__TestContext001_BeanDefinitions.java",
-		"org/springframework/test/context/aot/samples/basic/BasicSpringJupiterImportedConfigTests__TestContext001_BeanFactoryRegistrations.java",
+		"org/springframework/test/context/aot/samples/basic/AbstractSpringJupiterParameterizedClassTests_InheritedNestedTests__TestContext001_ApplicationContextInitializer.java",
+		"org/springframework/test/context/aot/samples/basic/AbstractSpringJupiterParameterizedClassTests_InheritedNestedTests__TestContext001_BeanFactoryRegistrations.java",
+		"org/springframework/test/context/aot/samples/basic/AbstractSpringJupiterParameterizedClassTests_InheritedNestedTests__TestContext001_ManagementApplicationContextInitializer.java",
+		"org/springframework/test/context/aot/samples/basic/AbstractSpringJupiterParameterizedClassTests_InheritedNestedTests__TestContext001_ManagementBeanFactoryRegistrations.java",
 		"org/springframework/test/context/aot/samples/basic/BasicTestConfiguration__TestContext001_BeanDefinitions.java",
+		"org/springframework/test/context/aot/samples/management/ManagementConfiguration__TestContext001_BeanDefinitions.java",
+		"org/springframework/test/context/aot/samples/management/ManagementMessageService__TestContext001_ManagementBeanDefinitions.java",
 		"org/springframework/test/context/support/DynamicPropertyRegistrarBeanInitializer__TestContext001_BeanDefinitions.java",
-		// BasicSpringJupiterSharedConfigTests
+
+		// AbstractSpringJupiterParameterizedClassTests.InheritedNestedTests.InheritedDoublyNestedTests
 		"org/springframework/context/event/DefaultEventListenerFactory__TestContext002_BeanDefinitions.java",
 		"org/springframework/context/event/EventListenerMethodProcessor__TestContext002_BeanDefinitions.java",
-		"org/springframework/test/context/aot/samples/basic/BasicSpringJupiterSharedConfigTests__TestContext002_ApplicationContextInitializer.java",
-		"org/springframework/test/context/aot/samples/basic/BasicSpringJupiterSharedConfigTests__TestContext002_BeanFactoryRegistrations.java",
-		"org/springframework/test/context/aot/samples/basic/BasicSpringJupiterSharedConfigTests__TestContext002_ManagementApplicationContextInitializer.java",
-		"org/springframework/test/context/aot/samples/basic/BasicSpringJupiterSharedConfigTests__TestContext002_ManagementBeanFactoryRegistrations.java",
+		"org/springframework/test/context/aot/samples/basic/AbstractSpringJupiterParameterizedClassTests_InheritedNestedTests_InheritedDoublyNestedTests__TestContext002_ApplicationContextInitializer.java",
+		"org/springframework/test/context/aot/samples/basic/AbstractSpringJupiterParameterizedClassTests_InheritedNestedTests_InheritedDoublyNestedTests__TestContext002_BeanFactoryRegistrations.java",
+		"org/springframework/test/context/aot/samples/basic/AbstractSpringJupiterParameterizedClassTests_InheritedNestedTests_InheritedDoublyNestedTests__TestContext002_ManagementApplicationContextInitializer.java",
+		"org/springframework/test/context/aot/samples/basic/AbstractSpringJupiterParameterizedClassTests_InheritedNestedTests_InheritedDoublyNestedTests__TestContext002_ManagementBeanFactoryRegistrations.java",
 		"org/springframework/test/context/aot/samples/basic/BasicTestConfiguration__TestContext002_BeanDefinitions.java",
 		"org/springframework/test/context/aot/samples/management/ManagementConfiguration__TestContext002_BeanDefinitions.java",
 		"org/springframework/test/context/aot/samples/management/ManagementMessageService__TestContext002_ManagementBeanDefinitions.java",
 		"org/springframework/test/context/support/DynamicPropertyRegistrarBeanInitializer__TestContext002_BeanDefinitions.java",
-		// BasicSpringJupiterTests -- not generated b/c already generated for BasicSpringJupiterSharedConfigTests.
-		// BasicSpringJupiterTests.NestedTests
+
+		// BasicSpringJupiterImportedConfigTests
 		"org/springframework/context/event/DefaultEventListenerFactory__TestContext003_BeanDefinitions.java",
 		"org/springframework/context/event/EventListenerMethodProcessor__TestContext003_BeanDefinitions.java",
-		"org/springframework/test/context/aot/samples/basic/BasicSpringJupiterTests_NestedTests__TestContext003_ApplicationContextInitializer.java",
-		"org/springframework/test/context/aot/samples/basic/BasicSpringJupiterTests_NestedTests__TestContext003_BeanFactoryRegistrations.java",
-		"org/springframework/test/context/aot/samples/basic/BasicSpringJupiterTests_NestedTests__TestContext003_ManagementApplicationContextInitializer.java",
-		"org/springframework/test/context/aot/samples/basic/BasicSpringJupiterTests_NestedTests__TestContext003_ManagementBeanFactoryRegistrations.java",
+		"org/springframework/test/context/aot/samples/basic/BasicSpringJupiterImportedConfigTests__TestContext003_ApplicationContextInitializer.java",
+		"org/springframework/test/context/aot/samples/basic/BasicSpringJupiterImportedConfigTests__TestContext003_BeanDefinitions.java",
+		"org/springframework/test/context/aot/samples/basic/BasicSpringJupiterImportedConfigTests__TestContext003_BeanFactoryRegistrations.java",
 		"org/springframework/test/context/aot/samples/basic/BasicTestConfiguration__TestContext003_BeanDefinitions.java",
-		"org/springframework/test/context/aot/samples/management/ManagementConfiguration__TestContext003_BeanDefinitions.java",
-		"org/springframework/test/context/aot/samples/management/ManagementMessageService__TestContext003_ManagementBeanDefinitions.java",
 		"org/springframework/test/context/support/DynamicPropertyRegistrarBeanInitializer__TestContext003_BeanDefinitions.java",
-		// BasicSpringTestNGTests
+
+		// BasicSpringJupiterParameterizedClassTests.NestedTests
 		"org/springframework/context/event/DefaultEventListenerFactory__TestContext004_BeanDefinitions.java",
 		"org/springframework/context/event/EventListenerMethodProcessor__TestContext004_BeanDefinitions.java",
-		"org/springframework/test/context/aot/samples/basic/BasicSpringTestNGTests__TestContext004_ApplicationContextInitializer.java",
-		"org/springframework/test/context/aot/samples/basic/BasicSpringTestNGTests__TestContext004_BeanFactoryRegistrations.java",
+		"org/springframework/test/context/aot/samples/basic/BasicSpringJupiterParameterizedClassTests_NestedTests__TestContext004_ApplicationContextInitializer.java",
+		"org/springframework/test/context/aot/samples/basic/BasicSpringJupiterParameterizedClassTests_NestedTests__TestContext004_BeanFactoryRegistrations.java",
+		"org/springframework/test/context/aot/samples/basic/BasicSpringJupiterParameterizedClassTests_NestedTests__TestContext004_ManagementApplicationContextInitializer.java",
+		"org/springframework/test/context/aot/samples/basic/BasicSpringJupiterParameterizedClassTests_NestedTests__TestContext004_ManagementBeanFactoryRegistrations.java",
 		"org/springframework/test/context/aot/samples/basic/BasicTestConfiguration__TestContext004_BeanDefinitions.java",
+		"org/springframework/test/context/aot/samples/management/ManagementConfiguration__TestContext004_BeanDefinitions.java",
+		"org/springframework/test/context/aot/samples/management/ManagementMessageService__TestContext004_ManagementBeanDefinitions.java",
 		"org/springframework/test/context/support/DynamicPropertyRegistrarBeanInitializer__TestContext004_BeanDefinitions.java",
-		// BasicSpringVintageTests
+
+		// BasicSpringJupiterParameterizedClassTests.NestedTests.DoublyNestedTests
 		"org/springframework/context/event/DefaultEventListenerFactory__TestContext005_BeanDefinitions.java",
 		"org/springframework/context/event/EventListenerMethodProcessor__TestContext005_BeanDefinitions.java",
-		"org/springframework/test/context/aot/samples/basic/BasicSpringVintageTests__TestContext005_ApplicationContextInitializer.java",
-		"org/springframework/test/context/aot/samples/basic/BasicSpringVintageTests__TestContext005_BeanFactoryRegistrations.java",
+		"org/springframework/test/context/aot/samples/basic/BasicSpringJupiterParameterizedClassTests_NestedTests_DoublyNestedTests__TestContext005_ApplicationContextInitializer.java",
+		"org/springframework/test/context/aot/samples/basic/BasicSpringJupiterParameterizedClassTests_NestedTests_DoublyNestedTests__TestContext005_BeanFactoryRegistrations.java",
+		"org/springframework/test/context/aot/samples/basic/BasicSpringJupiterParameterizedClassTests_NestedTests_DoublyNestedTests__TestContext005_ManagementApplicationContextInitializer.java",
+		"org/springframework/test/context/aot/samples/basic/BasicSpringJupiterParameterizedClassTests_NestedTests_DoublyNestedTests__TestContext005_ManagementBeanFactoryRegistrations.java",
 		"org/springframework/test/context/aot/samples/basic/BasicTestConfiguration__TestContext005_BeanDefinitions.java",
+		"org/springframework/test/context/aot/samples/management/ManagementConfiguration__TestContext005_BeanDefinitions.java",
+		"org/springframework/test/context/aot/samples/management/ManagementMessageService__TestContext005_ManagementBeanDefinitions.java",
 		"org/springframework/test/context/support/DynamicPropertyRegistrarBeanInitializer__TestContext005_BeanDefinitions.java",
-		// DisabledInAotRuntimeMethodLevelTests
+
+		// BasicSpringTestNGTests
 		"org/springframework/context/event/DefaultEventListenerFactory__TestContext006_BeanDefinitions.java",
 		"org/springframework/context/event/EventListenerMethodProcessor__TestContext006_BeanDefinitions.java",
-		"org/springframework/test/context/aot/samples/basic/DisabledInAotRuntimeMethodLevelTests__TestContext006_ApplicationContextInitializer.java",
-		"org/springframework/test/context/aot/samples/basic/DisabledInAotRuntimeMethodLevelTests__TestContext006_BeanDefinitions.java",
-		"org/springframework/test/context/aot/samples/basic/DisabledInAotRuntimeMethodLevelTests__TestContext006_BeanFactoryRegistrations.java",
-		"org/springframework/test/context/support/DynamicPropertyRegistrarBeanInitializer__TestContext006_BeanDefinitions.java"
+		"org/springframework/test/context/aot/samples/basic/BasicSpringTestNGTests__TestContext006_ApplicationContextInitializer.java",
+		"org/springframework/test/context/aot/samples/basic/BasicSpringTestNGTests__TestContext006_BeanFactoryRegistrations.java",
+		"org/springframework/test/context/aot/samples/basic/BasicTestConfiguration__TestContext006_BeanDefinitions.java",
+		"org/springframework/test/context/support/DynamicPropertyRegistrarBeanInitializer__TestContext006_BeanDefinitions.java",
+
+		// BasicSpringVintageTests
+		"org/springframework/context/event/DefaultEventListenerFactory__TestContext007_BeanDefinitions.java",
+		"org/springframework/context/event/EventListenerMethodProcessor__TestContext007_BeanDefinitions.java",
+		"org/springframework/test/context/aot/samples/basic/BasicSpringVintageTests__TestContext007_ApplicationContextInitializer.java",
+		"org/springframework/test/context/aot/samples/basic/BasicSpringVintageTests__TestContext007_BeanFactoryRegistrations.java",
+		"org/springframework/test/context/aot/samples/basic/BasicTestConfiguration__TestContext007_BeanDefinitions.java",
+		"org/springframework/test/context/support/DynamicPropertyRegistrarBeanInitializer__TestContext007_BeanDefinitions.java",
+
+		// DisabledInAotRuntimeMethodLevelTests
+		"org/springframework/context/event/DefaultEventListenerFactory__TestContext008_BeanDefinitions.java",
+		"org/springframework/context/event/EventListenerMethodProcessor__TestContext008_BeanDefinitions.java",
+		"org/springframework/test/context/aot/samples/basic/DisabledInAotRuntimeMethodLevelTests__TestContext008_ApplicationContextInitializer.java",
+		"org/springframework/test/context/aot/samples/basic/DisabledInAotRuntimeMethodLevelTests__TestContext008_BeanDefinitions.java",
+		"org/springframework/test/context/aot/samples/basic/DisabledInAotRuntimeMethodLevelTests__TestContext008_BeanFactoryRegistrations.java",
+		"org/springframework/test/context/support/DynamicPropertyRegistrarBeanInitializer__TestContext008_BeanDefinitions.java"
 	};
 
 	Stream<Class<?>> scan() {
