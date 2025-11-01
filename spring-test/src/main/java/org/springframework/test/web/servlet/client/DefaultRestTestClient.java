@@ -132,7 +132,7 @@ class DefaultRestTestClient implements RestTestClient {
 	@SuppressWarnings("unchecked")
 	@Override
 	public <B extends Builder<B>> Builder<B> mutate() {
-		return new DefaultRestTestClientBuilder<B>((DefaultRestTestClientBuilder<B>) this.restTestClientBuilder);
+		return new DefaultRestTestClientBuilder<>((DefaultRestTestClientBuilder<B>) this.restTestClientBuilder);
 	}
 
 
