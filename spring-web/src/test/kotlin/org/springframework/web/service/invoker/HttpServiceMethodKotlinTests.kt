@@ -56,6 +56,10 @@ class KotlinHttpServiceMethodTests {
 		assertThat(flowBody.toList()).containsExactly("exchange", "For", "Body", "Flux")
 		verifyClientInvocation("exchangeForBodyFlux", object : ParameterizedTypeReference<String>() {})
 
+		val suspendingFlowBody = service.suspendingFlowBody()
+		assertThat(suspendingFlowBody.toList()).containsExactly("exchange", "For", "Body", "Flux")
+		verifyClientInvocation("exchangeForBodyFlux", object : ParameterizedTypeReference<String>() {})
+
 		val stringEntity = service.stringEntity()
 		assertThat(stringEntity).isEqualTo(ResponseEntity.ok<String>("exchangeForEntityMono"))
 		verifyClientInvocation("exchangeForEntityMono", object : ParameterizedTypeReference<String>() {})
@@ -126,6 +130,9 @@ class KotlinHttpServiceMethodTests {
 
 		@GetExchange
 		suspend fun listBody(): MutableList<String>
+
+		@GetExchange
+		suspend fun suspendingFlowBody(): Flow<String>
 
 		@GetExchange
 		suspend fun stringEntity(): ResponseEntity<String>
