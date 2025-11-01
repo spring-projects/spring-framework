@@ -380,7 +380,7 @@ class UtilNamespaceHandlerTests {
 
 
 	// For DependencyDescriptor resolution
-	private Map<String, TestBean> mapWithRef;
-	private Map<String, TestBean> mapWithTypes;
+	Map<String, TestBean> mapWithRef;
+	Map<String, TestBean> mapWithTypes;
 
 }
