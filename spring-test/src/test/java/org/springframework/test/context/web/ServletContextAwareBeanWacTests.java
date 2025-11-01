@@ -17,10 +17,7 @@
 package org.springframework.test.context.web;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.platform.testkit.engine.EngineTestKit;
-
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClass;
 
@@ -32,7 +29,6 @@ import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClass
  * @author Sam Brannen
  * @since 4.0.2
  */
-@ExtendWith(SpringExtension.class)
 class ServletContextAwareBeanWacTests {
 
 	@Test
