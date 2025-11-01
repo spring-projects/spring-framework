@@ -142,7 +142,12 @@ class TestClassScanner {
 		if (packageNames.length > 0) {
 			builder.filters(includePackageNames(packageNames));
 		}
-		LauncherDiscoveryRequest request = builder.build();
+		LauncherDiscoveryRequest request = builder
+				// In case junit.platform.discovery.issue.severity.critical=INFO has been configured,
+				// we do not want scanning to fail due to the deprecation of the Vintage test engine.
+				// So, we disable reporting of the deprecation discovery issue.
+				.configurationParameter("junit.vintage.discovery.issue.reporting.enabled", "false")
+				.build();
 		Launcher launcher = LauncherFactory.create();
 		TestPlan testPlan = launcher.discover(request);
 

@@ -110,9 +110,10 @@ test {
 	// `include` test filters and system properties are configured in
 	// org.springframework.build.TestConventions in buildSrc.
 	filter.excludeTestsMatching("*TestCase")
-	// Override critical severity defined in TestConventions, since spring-test
-	// relies on the Vintage test engine for JUnit 4 support.
-	systemProperty("junit.platform.discovery.issue.severity.critical", "WARNING")
+	// Since spring-test relies on the Vintage test engine for JUnit 4 support,
+	// we disable reporting of the "deprecated" discovery issue, because that
+	// would otherwise fail the build.
+	systemProperty("junit.vintage.discovery.issue.reporting.enabled", "false")
 	// Optionally configure Java Util Logging for the JUnit Platform.
 	// systemProperty("java.util.logging.manager", "org.apache.logging.log4j.jul.LogManager")
 }
