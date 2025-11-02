@@ -36,7 +36,7 @@ import java.lang.annotation.Target;
  * annotation instance (the one most convenient one for your formatting needs).
  * When the {@link #pattern} attribute is specified, it takes precedence over
  * the {@link #style} attribute. When no annotation attributes are specified,
- * the default format applied is style-based for either number of currency,
+ * the default format applied is style-based for either number or currency,
  * depending on the annotated field or method parameter type.
  *
  * @author Keith Donald
