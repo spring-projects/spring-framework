@@ -30,6 +30,7 @@ import org.springframework.util.StreamUtils;
  * into memory, thus allowing for multiple invocations of {@link #getBody()}.
  *
  * @author Arjen Poutsma
+ * @author Juergen Hoeller
  * @since 3.1
  */
 final class BufferingClientHttpResponseWrapper implements ClientHttpResponse {
@@ -37,7 +38,7 @@ final class BufferingClientHttpResponseWrapper implements ClientHttpResponse {
 	private final ClientHttpResponse response;
 
 	@Nullable
-	private byte[] body;
+	private volatile byte[] body;
 
 
 	BufferingClientHttpResponseWrapper(ClientHttpResponse response) {
@@ -62,10 +63,17 @@ final class BufferingClientHttpResponseWrapper implements ClientHttpResponse {
 
 	@Override
 	public InputStream getBody() throws IOException {
-		if (this.body == null) {
-			this.body = StreamUtils.copyToByteArray(this.response.getBody());
+		byte[] body = this.body;
+		if (body == null) {
+			synchronized (this) {
+				body = this.body;
+				if (body == null) {
+					body = StreamUtils.copyToByteArray(this.response.getBody());
+					this.body = body;
+				}
+			}
 		}
-		return new ByteArrayInputStream(this.body);
+		return new ByteArrayInputStream(body);
 	}
 
 	@Override
