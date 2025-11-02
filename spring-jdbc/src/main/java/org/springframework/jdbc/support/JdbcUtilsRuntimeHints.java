@@ -27,6 +27,7 @@ import org.springframework.aot.hint.RuntimeHintsRegistrar;
 /**
  * {@link RuntimeHintsRegistrar} implementation that registers runtime hints for
  * {@link JdbcUtils}.
+ *
  * @author Brian Clozel
  * @since 6.2.13
  */
