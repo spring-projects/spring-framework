@@ -98,36 +98,35 @@ public class DataSourceTransactionManagerTests {
 
 	@Test
 	void transactionCommitWithAutoCommitTrue() throws Exception {
-		doTestTransactionCommitRestoringAutoCommit(true, false, false);
+		testTransactionCommitRestoringAutoCommit(true, false, false);
 	}
 
 	@Test
 	void transactionCommitWithAutoCommitFalse() throws Exception {
-		doTestTransactionCommitRestoringAutoCommit(false, false, false);
+		testTransactionCommitRestoringAutoCommit(false, false, false);
 	}
 
 	@Test
 	void transactionCommitWithAutoCommitTrueAndLazyConnection() throws Exception {
-		doTestTransactionCommitRestoringAutoCommit(true, true, false);
+		testTransactionCommitRestoringAutoCommit(true, true, false);
 	}
 
 	@Test
 	void transactionCommitWithAutoCommitFalseAndLazyConnection() throws Exception {
-		doTestTransactionCommitRestoringAutoCommit(false, true, false);
+		testTransactionCommitRestoringAutoCommit(false, true, false);
 	}
 
 	@Test
 	void transactionCommitWithAutoCommitTrueAndLazyConnectionAndStatementCreated() throws Exception {
-		doTestTransactionCommitRestoringAutoCommit(true, true, true);
+		testTransactionCommitRestoringAutoCommit(true, true, true);
 	}
 
 	@Test
 	void transactionCommitWithAutoCommitFalseAndLazyConnectionAndStatementCreated() throws Exception {
-		doTestTransactionCommitRestoringAutoCommit(false, true, true);
+		testTransactionCommitRestoringAutoCommit(false, true, true);
 	}
 
-	@SuppressWarnings("deprecation")
-	private void doTestTransactionCommitRestoringAutoCommit(
+	private void testTransactionCommitRestoringAutoCommit(
 			boolean autoCommit, boolean lazyConnection, boolean createStatement) throws Exception {
 
 		given(con.getAutoCommit()).willReturn(autoCommit);
@@ -183,36 +182,35 @@ public class DataSourceTransactionManagerTests {
 
 	@Test
 	void transactionRollbackWithAutoCommitTrue() throws Exception {
-		doTestTransactionRollbackRestoringAutoCommit(true, false, false);
+		testTransactionRollbackRestoringAutoCommit(true, false, false);
 	}
 
 	@Test
 	void transactionRollbackWithAutoCommitFalse() throws Exception {
-		doTestTransactionRollbackRestoringAutoCommit(false, false, false);
+		testTransactionRollbackRestoringAutoCommit(false, false, false);
 	}
 
 	@Test
 	void transactionRollbackWithAutoCommitTrueAndLazyConnection() throws Exception {
-		doTestTransactionRollbackRestoringAutoCommit(true, true, false);
+		testTransactionRollbackRestoringAutoCommit(true, true, false);
 	}
 
 	@Test
 	void transactionRollbackWithAutoCommitFalseAndLazyConnection() throws Exception {
-		doTestTransactionRollbackRestoringAutoCommit(false, true, false);
+		testTransactionRollbackRestoringAutoCommit(false, true, false);
 	}
 
 	@Test
 	void transactionRollbackWithAutoCommitTrueAndLazyConnectionAndCreateStatement() throws Exception {
-		doTestTransactionRollbackRestoringAutoCommit(true, true, true);
+		testTransactionRollbackRestoringAutoCommit(true, true, true);
 	}
 
 	@Test
 	void transactionRollbackWithAutoCommitFalseAndLazyConnectionAndCreateStatement() throws Exception {
-		doTestTransactionRollbackRestoringAutoCommit(false, true, true);
+		testTransactionRollbackRestoringAutoCommit(false, true, true);
 	}
 
-	@SuppressWarnings("deprecation")
-	private void doTestTransactionRollbackRestoringAutoCommit(
+	private void testTransactionRollbackRestoringAutoCommit(
 			boolean autoCommit, boolean lazyConnection, boolean createStatement) throws Exception {
 
 		given(con.getAutoCommit()).willReturn(autoCommit);
@@ -263,7 +261,6 @@ public class DataSourceTransactionManagerTests {
 		}
 	}
 
-	@SuppressWarnings("deprecation")
 	@Test
 	void transactionRollbackOnly() {
 		tm.setTransactionSynchronization(DataSourceTransactionManager.SYNCHRONIZATION_NEVER);
@@ -297,16 +294,15 @@ public class DataSourceTransactionManagerTests {
 
 	@Test
 	void participatingTransactionWithRollbackOnly() throws Exception {
-		doTestParticipatingTransactionWithRollbackOnly(false);
+		testParticipatingTransactionWithRollbackOnly(false);
 	}
 
 	@Test
 	void participatingTransactionWithRollbackOnlyAndFailEarly() throws Exception {
-		doTestParticipatingTransactionWithRollbackOnly(true);
+		testParticipatingTransactionWithRollbackOnly(true);
 	}
 
-	@SuppressWarnings("deprecation")
-	private void doTestParticipatingTransactionWithRollbackOnly(boolean failEarly) throws Exception {
+	private void testParticipatingTransactionWithRollbackOnly(boolean failEarly) throws Exception {
 		given(con.isReadOnly()).willReturn(false);
 		if (failEarly) {
 			tm.setFailEarlyOnGlobalRollbackOnly(true);
@@ -364,7 +360,6 @@ public class DataSourceTransactionManagerTests {
 		verify(con).close();
 	}
 
-	@SuppressWarnings("deprecation")
 	@Test
 	void participatingTransactionWithIncompatibleIsolationLevel() throws Exception {
 		tm.setValidateExistingTransaction(true);
@@ -764,10 +759,12 @@ public class DataSourceTransactionManagerTests {
 	void transactionWithIsolationAndReadOnly() throws Exception {
 		given(con.getTransactionIsolation()).willReturn(Connection.TRANSACTION_READ_UNCOMMITTED);
 		given(con.getAutoCommit()).willReturn(true);
+		given(con.isReadOnly()).willReturn(false);
 
-		doTestTransactionReadOnly(TransactionDefinition.ISOLATION_REPEATABLE_READ, false);
+		testTransactionReadOnly(TransactionDefinition.ISOLATION_REPEATABLE_READ, false);
 
 		InOrder ordered = inOrder(con);
+		ordered.verify(con).isReadOnly();
 		ordered.verify(con).setReadOnly(true);
 		ordered.verify(con).getTransactionIsolation();
 		ordered.verify(con).setTransactionIsolation(Connection.TRANSACTION_REPEATABLE_READ);
@@ -782,16 +779,35 @@ public class DataSourceTransactionManagerTests {
 	}
 
 	@Test
+	void transactionWithDefaultReadOnly() throws Exception {
+		given(con.getAutoCommit()).willReturn(true);
+		given(con.isReadOnly()).willReturn(true);
+
+		testTransactionReadOnly(TransactionDefinition.ISOLATION_DEFAULT, false);
+
+		InOrder ordered = inOrder(con);
+		ordered.verify(con).isReadOnly();
+		ordered.verify(con).getAutoCommit();
+		ordered.verify(con).setAutoCommit(false);
+		ordered.verify(con).commit();
+		ordered.verify(con).setAutoCommit(true);
+		ordered.verify(con).close();
+		verifyNoMoreInteractions(con);
+	}
+
+	@Test
 	void transactionWithEnforceReadOnly() throws Exception {
 		tm.setEnforceReadOnly(true);
 
 		given(con.getAutoCommit()).willReturn(true);
+		given(con.isReadOnly()).willReturn(false);
 		Statement stmt = mock();
 		given(con.createStatement()).willReturn(stmt);
 
-		doTestTransactionReadOnly(TransactionDefinition.ISOLATION_DEFAULT, false);
+		testTransactionReadOnly(TransactionDefinition.ISOLATION_DEFAULT, false);
 
 		InOrder ordered = inOrder(con, stmt);
+		ordered.verify(con).isReadOnly();
 		ordered.verify(con).setReadOnly(true);
 		ordered.verify(con).getAutoCommit();
 		ordered.verify(con).setAutoCommit(false);
@@ -811,9 +827,13 @@ public class DataSourceTransactionManagerTests {
 		dsProxy.setTargetDataSource(ds);
 		dsProxy.setDefaultAutoCommit(true);
 		dsProxy.setDefaultTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
+		dsProxy.afterPropertiesSet();
 		tm = createTransactionManager(dsProxy);
 
-		doTestTransactionReadOnly(TransactionDefinition.ISOLATION_SERIALIZABLE, true);
+		try (Connection con = dsProxy.getConnection()) {
+			assertThat(con.isReadOnly()).isFalse();
+		}
+		testTransactionReadOnly(TransactionDefinition.ISOLATION_SERIALIZABLE, true);
 
 		InOrder ordered = inOrder(con);
 		ordered.verify(con).setReadOnly(true);
@@ -829,14 +849,18 @@ public class DataSourceTransactionManagerTests {
 	}
 
 	@Test
-	void transactionWithLazyConnectionDataSourceNoStatement() {
+	void transactionWithLazyConnectionDataSourceNoStatement() throws Exception {
 		LazyConnectionDataSourceProxy dsProxy = new LazyConnectionDataSourceProxy();
 		dsProxy.setTargetDataSource(ds);
 		dsProxy.setDefaultAutoCommit(true);
 		dsProxy.setDefaultTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
+		dsProxy.afterPropertiesSet();
 		tm = createTransactionManager(dsProxy);
 
-		doTestTransactionReadOnly(TransactionDefinition.ISOLATION_SERIALIZABLE, false);
+		try (Connection con = dsProxy.getConnection()) {
+			assertThat(con.isReadOnly()).isFalse();
+		}
+		testTransactionReadOnly(TransactionDefinition.ISOLATION_SERIALIZABLE, false);
 
 		verifyNoMoreInteractions(con);
 	}
@@ -847,9 +871,13 @@ public class DataSourceTransactionManagerTests {
 		dsProxy.setReadOnlyDataSource(ds);
 		dsProxy.setDefaultAutoCommit(false);
 		dsProxy.setDefaultTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
+		dsProxy.afterPropertiesSet();
 		tm = createTransactionManager(dsProxy);
 
-		doTestTransactionReadOnly(TransactionDefinition.ISOLATION_SERIALIZABLE, true);
+		try (Connection con = dsProxy.getConnection()) {
+			assertThat(con.isReadOnly()).isTrue();
+		}
+		testTransactionReadOnly(TransactionDefinition.ISOLATION_SERIALIZABLE, true);
 
 		InOrder ordered = inOrder(con);
 		ordered.verify(con).setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
@@ -861,19 +889,23 @@ public class DataSourceTransactionManagerTests {
 	}
 
 	@Test
-	void transactionWithReadOnlyDataSourceNoStatement() {
+	void transactionWithReadOnlyDataSourceNoStatement() throws Exception {
 		LazyConnectionDataSourceProxy dsProxy = new LazyConnectionDataSourceProxy();
 		dsProxy.setReadOnlyDataSource(ds);
 		dsProxy.setDefaultAutoCommit(false);
 		dsProxy.setDefaultTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
+		dsProxy.afterPropertiesSet();
 		tm = createTransactionManager(dsProxy);
 
-		doTestTransactionReadOnly(TransactionDefinition.ISOLATION_SERIALIZABLE, false);
+		try (Connection con = dsProxy.getConnection()) {
+			assertThat(con.isReadOnly()).isTrue();
+		}
+		testTransactionReadOnly(TransactionDefinition.ISOLATION_SERIALIZABLE, false);
 
 		verifyNoMoreInteractions(con);
 	}
 
-	private void doTestTransactionReadOnly(int isolationLevel, boolean withStatement) {
+	private void testTransactionReadOnly(int isolationLevel, boolean withStatement) {
 		TransactionTemplate tt = new TransactionTemplate(tm);
 		tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
 		tt.setIsolationLevel(isolationLevel);
@@ -1286,15 +1318,15 @@ public class DataSourceTransactionManagerTests {
 
 	@Test
 	void existingTransactionWithPropagationNested() throws Exception {
-		doTestExistingTransactionWithPropagationNested(1);
+		testExistingTransactionWithPropagationNested(1);
 	}
 
 	@Test
 	void existingTransactionWithPropagationNestedTwice() throws Exception {
-		doTestExistingTransactionWithPropagationNested(2);
+		testExistingTransactionWithPropagationNested(2);
 	}
 
-	private void doTestExistingTransactionWithPropagationNested(int count) throws Exception {
+	private void testExistingTransactionWithPropagationNested(int count) throws Exception {
 		DatabaseMetaData md = mock();
 		Savepoint sp = mock();
 
