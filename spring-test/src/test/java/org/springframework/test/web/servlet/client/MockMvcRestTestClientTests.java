@@ -20,12 +20,8 @@ import java.io.IOException;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 
-import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.test.web.client.MockMvcClientHttpRequestFactory;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.bind.annotation.CookieValue;
@@ -33,25 +29,25 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * Tests that use a {@link RestTestClient} configured with a
- * {@link MockMvcClientHttpRequestFactory} that is in turn configured with a
- * {@link MockMvc} instance that uses a standalone controller
+ * Tests that use a {@link RestTestClient} configured with a {@link MockMvc} instance
+ * that uses a standalone controller.
  *
  * @author Rob Worsnop
+ * @author Sam Brannen
+ * @since 7.0
  */
-@ExtendWith(SpringExtension.class)
-public class MockMvcClientHttpRequestFactoryTests {
+class MockMvcRestTestClientTests {
 
-	private RestTestClient client;
+	private final RestTestClient client;
 
-	@BeforeEach
-	public void setup() {
+	MockMvcRestTestClientTests() {
 		MockMvc mockMvc = MockMvcBuilders.standaloneSetup(new TestController()).build();
 		this.client = RestTestClient.bindTo(mockMvc).build();
 	}
 
+
 	@Test
-	public void withResult() {
+	void withResult() {
 		client.get()
 				.uri("/foo")
 				.cookie("session", "12345")
@@ -62,7 +58,7 @@ public class MockMvcClientHttpRequestFactoryTests {
 	}
 
 	@Test
-	public void withError() {
+	void withError() {
 		client.get()
 				.uri("/error")
 				.exchange()
@@ -71,7 +67,7 @@ public class MockMvcClientHttpRequestFactoryTests {
 	}
 
 	@Test
-	public void withErrorAndBody() {
+	void withErrorAndBody() {
 		client.get().uri("/errorbody")
 				.exchange()
 				.expectStatus().isBadRequest()
@@ -82,19 +78,19 @@ public class MockMvcClientHttpRequestFactoryTests {
 	@RestController
 	static class TestController {
 
-		@GetMapping(value = "/foo")
-		public void foo(@CookieValue("session") String session, HttpServletResponse response) throws IOException {
+		@GetMapping("/foo")
+		void foo(@CookieValue("session") String session, HttpServletResponse response) throws IOException {
 			response.getWriter().write("bar");
 			response.addCookie(new Cookie("session", session));
 		}
 
-		@GetMapping(value = "/error")
-		public void handleError(HttpServletResponse response) throws Exception {
+		@GetMapping("/error")
+		void handleError(HttpServletResponse response) throws Exception {
 			response.sendError(400);
 		}
 
-		@GetMapping(value = "/errorbody")
-		public void handleErrorWithBody(HttpServletResponse response) throws Exception {
+		@GetMapping("/errorbody")
+		void handleErrorWithBody(HttpServletResponse response) throws Exception {
 			response.sendError(400);
 			response.getWriter().write("some really bad request");
 		}
