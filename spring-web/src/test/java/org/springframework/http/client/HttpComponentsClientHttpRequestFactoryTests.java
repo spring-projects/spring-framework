@@ -61,11 +61,9 @@ class HttpComponentsClientHttpRequestFactoryTests extends AbstractHttpRequestFac
 	}
 
 	@Test
-	@SuppressWarnings("deprecation")
 	void assertCustomConfig() throws Exception {
 		HttpClient httpClient = HttpClientBuilder.create().build();
 		HttpComponentsClientHttpRequestFactory hrf = new HttpComponentsClientHttpRequestFactory(httpClient);
-		hrf.setConnectTimeout(1234);
 		hrf.setConnectionRequestTimeout(4321);
 		hrf.setReadTimeout(5678);
 
@@ -76,7 +74,6 @@ class HttpComponentsClientHttpRequestFactoryTests extends AbstractHttpRequestFac
 		assertThat(config).as("Request config should be set").isNotNull();
 		assertThat(config).as("Wrong request config type " + config.getClass().getName()).isInstanceOf(RequestConfig.class);
 		RequestConfig requestConfig = (RequestConfig) config;
-		assertThat(requestConfig.getConnectTimeout()).as("Wrong custom connection timeout").isEqualTo(Timeout.of(1234, MILLISECONDS));
 		assertThat(requestConfig.getConnectionRequestTimeout()).as("Wrong custom connection request timeout").isEqualTo(Timeout.of(4321, MILLISECONDS));
 		assertThat(requestConfig.getResponseTimeout()).as("Wrong custom response timeout").isEqualTo(Timeout.of(5678, MILLISECONDS));
 	}
@@ -103,10 +100,8 @@ class HttpComponentsClientHttpRequestFactoryTests extends AbstractHttpRequestFac
 	}
 
 	@Test
-	@SuppressWarnings("deprecation")
 	void localSettingsOverrideClientDefaultSettings() throws Exception {
 		RequestConfig defaultConfig = RequestConfig.custom()
-				.setConnectTimeout(1234, MILLISECONDS)
 				.setConnectionRequestTimeout(6789, MILLISECONDS)
 				.setResponseTimeout(4321, MILLISECONDS)
 				.build();
@@ -116,11 +111,9 @@ class HttpComponentsClientHttpRequestFactoryTests extends AbstractHttpRequestFac
 		given(configurable.getConfig()).willReturn(defaultConfig);
 
 		HttpComponentsClientHttpRequestFactory hrf = new HttpComponentsClientHttpRequestFactory(client);
-		hrf.setConnectTimeout(5000);
 		hrf.setReadTimeout(Duration.ofMillis(4000));
 
 		RequestConfig requestConfig = retrieveRequestConfig(hrf);
-		assertThat(requestConfig.getConnectTimeout()).isEqualTo(Timeout.of(5000, MILLISECONDS));
 		assertThat(requestConfig.getConnectionRequestTimeout()).isEqualTo(Timeout.of(6789, MILLISECONDS));
 		assertThat(requestConfig.getResponseTimeout()).isEqualTo(Timeout.of(4000, MILLISECONDS));
 	}
