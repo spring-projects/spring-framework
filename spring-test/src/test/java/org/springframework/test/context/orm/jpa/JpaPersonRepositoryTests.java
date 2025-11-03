@@ -17,7 +17,6 @@
 package org.springframework.test.context.orm.jpa;
 
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -44,7 +43,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Sql(statements = "insert into person(id, name) values(0, 'Jane')")
 class JpaPersonRepositoryTests {
 
-	@PersistenceContext
+	@Autowired
 	EntityManager em;
 
 	@Autowired
