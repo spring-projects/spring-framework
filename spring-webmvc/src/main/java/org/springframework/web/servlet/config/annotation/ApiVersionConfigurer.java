@@ -33,6 +33,7 @@ import org.springframework.web.accept.ApiVersionParser;
 import org.springframework.web.accept.ApiVersionResolver;
 import org.springframework.web.accept.ApiVersionStrategy;
 import org.springframework.web.accept.DefaultApiVersionStrategy;
+import org.springframework.web.accept.HeaderApiVersionResolver;
 import org.springframework.web.accept.InvalidApiVersionException;
 import org.springframework.web.accept.MediaTypeParamApiVersionResolver;
 import org.springframework.web.accept.PathApiVersionResolver;
@@ -70,7 +71,7 @@ public class ApiVersionConfigurer {
 	 * @param headerName the header name to check
 	 */
 	public ApiVersionConfigurer useRequestHeader(String headerName) {
-		this.versionResolvers.add(request -> request.getHeader(headerName));
+		this.versionResolvers.add(new HeaderApiVersionResolver(headerName));
 		return this;
 	}
 
