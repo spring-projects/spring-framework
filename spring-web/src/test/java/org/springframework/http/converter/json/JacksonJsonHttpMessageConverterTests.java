@@ -605,6 +605,12 @@ class JacksonJsonHttpMessageConverterTests {
 		assertThat(result).contains("\"string\":\"Foo\"");
 	}
 
+	@Test
+	void readEmptyAsNull() throws IOException {
+		MockHttpInputMessage inputMessage = new MockHttpInputMessage("null".getBytes(StandardCharsets.UTF_8));
+		inputMessage.getHeaders().setContentType(new MediaType("application", "json"));
+		assertThat(this.converter.read(Map.class, inputMessage)).isNull();
+	}
 
 
 	interface MyInterface {

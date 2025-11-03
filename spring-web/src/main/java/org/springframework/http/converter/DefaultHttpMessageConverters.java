@@ -104,33 +104,35 @@ class DefaultHttpMessageConverters implements HttpMessageConverters {
 
 		boolean registerDefaults;
 
-		@Nullable ByteArrayHttpMessageConverter byteArrayMessageConverter;
+		@Nullable ByteArrayHttpMessageConverter byteArrayConverter;
 
-		@Nullable HttpMessageConverter<?> stringMessageConverter;
+		@Nullable HttpMessageConverter<?> stringConverter;
 
-		@Nullable HttpMessageConverter<?> resourceMessageConverter;
+		@Nullable HttpMessageConverter<?> resourceConverter;
 
-		@Nullable HttpMessageConverter<?> resourceRegionMessageConverter;
+		@Nullable HttpMessageConverter<?> resourceRegionConverter;
 
 		@Nullable Consumer<HttpMessageConverter<?>> configurer;
 
-		@Nullable HttpMessageConverter<?> jsonMessageConverter;
+		@Nullable HttpMessageConverter<?> kotlinJsonConverter;
 
-		@Nullable HttpMessageConverter<?> xmlMessageConverter;
+		@Nullable HttpMessageConverter<?> jsonConverter;
 
-		@Nullable HttpMessageConverter<?> smileMessageConverter;
+		@Nullable HttpMessageConverter<?> xmlConverter;
 
-		@Nullable HttpMessageConverter<?> cborMessageConverter;
+		@Nullable HttpMessageConverter<?> smileConverter;
 
-		@Nullable HttpMessageConverter<?> yamlMessageConverter;
+		@Nullable HttpMessageConverter<?> cborConverter;
 
-		@Nullable HttpMessageConverter<?> protobufMessageConverter;
+		@Nullable HttpMessageConverter<?> yamlConverter;
 
-		@Nullable HttpMessageConverter<?> atomMessageConverter;
+		@Nullable HttpMessageConverter<?> protobufConverter;
 
-		@Nullable HttpMessageConverter<?> rssMessageConverter;
+		@Nullable HttpMessageConverter<?> atomConverter;
 
-		final List<HttpMessageConverter<?>> customMessageConverters = new ArrayList<>();
+		@Nullable HttpMessageConverter<?> rssConverter;
+
+		final List<HttpMessageConverter<?>> customConverters = new ArrayList<>();
 
 
 		static {
@@ -156,45 +158,50 @@ class DefaultHttpMessageConverters implements HttpMessageConverters {
 		}
 
 
-		void setStringMessageConverter(HttpMessageConverter<?> stringMessageConverter) {
-			Assert.isTrue(stringMessageConverter.getSupportedMediaTypes().contains(MediaType.TEXT_PLAIN),
-			"stringMessageConverter should support 'text/plain'");
-			this.stringMessageConverter = stringMessageConverter;
+		void setStringConverter(HttpMessageConverter<?> stringConverter) {
+			Assert.isTrue(stringConverter.getSupportedMediaTypes().contains(MediaType.TEXT_PLAIN),
+			"stringConverter should support 'text/plain'");
+			this.stringConverter = stringConverter;
 		}
 
-		void setJsonMessageConverter(HttpMessageConverter<?> jsonMessageConverter) {
-			Assert.isTrue(jsonMessageConverter.getSupportedMediaTypes().contains(MediaType.APPLICATION_JSON),
-					"jsonMessageConverter should support 'application/json'");
-			this.jsonMessageConverter = jsonMessageConverter;
+		void setKotlinSerializationJsonConverter(HttpMessageConverter<?> kotlinJsonConverter) {
+			Assert.notNull(kotlinJsonConverter, "kotlinJsonConverter must not be null");
+			this.kotlinJsonConverter = kotlinJsonConverter;
 		}
 
-		void setXmlMessageConverter(HttpMessageConverter<?> xmlMessageConverter) {
-			Assert.isTrue(xmlMessageConverter.getSupportedMediaTypes().contains(MediaType.TEXT_XML),
-					"xmlMessageConverter should support 'text/xml'");
-			this.xmlMessageConverter = xmlMessageConverter;
+		void setJsonConverter(HttpMessageConverter<?> jsonConverter) {
+			Assert.isTrue(jsonConverter.getSupportedMediaTypes().contains(MediaType.APPLICATION_JSON),
+					"jsonConverter should support 'application/json'");
+			this.jsonConverter = jsonConverter;
 		}
 
-		void setSmileMessageConverter(HttpMessageConverter<?> smileMessageConverter) {
-			Assert.isTrue(smileMessageConverter.getSupportedMediaTypes().contains(new MediaType("application", "x-jackson-smile")),
-					"smileMessageConverter should support 'application/x-jackson-smile'");
-			this.smileMessageConverter = smileMessageConverter;
+		void setXmlConverter(HttpMessageConverter<?> xmlConverter) {
+			Assert.isTrue(xmlConverter.getSupportedMediaTypes().contains(MediaType.TEXT_XML),
+					"xmlConverter should support 'text/xml'");
+			this.xmlConverter = xmlConverter;
 		}
 
-		void setCborMessageConverter(HttpMessageConverter<?> cborMessageConverter) {
-			Assert.isTrue(cborMessageConverter.getSupportedMediaTypes().contains(MediaType.APPLICATION_CBOR),
-					"cborMessageConverter should support 'application/cbor'");
-			this.cborMessageConverter = cborMessageConverter;
+		void setSmileConverter(HttpMessageConverter<?> smileConverter) {
+			Assert.isTrue(smileConverter.getSupportedMediaTypes().contains(new MediaType("application", "x-jackson-smile")),
+					"smileConverter should support 'application/x-jackson-smile'");
+			this.smileConverter = smileConverter;
 		}
 
-		void setYamlMessageConverter(HttpMessageConverter<?> yamlMessageConverter) {
-			Assert.isTrue(yamlMessageConverter.getSupportedMediaTypes().contains(MediaType.APPLICATION_YAML),
-					"yamlMessageConverter should support 'application/yaml'");
-			this.yamlMessageConverter = yamlMessageConverter;
+		void setCborConverter(HttpMessageConverter<?> cborConverter) {
+			Assert.isTrue(cborConverter.getSupportedMediaTypes().contains(MediaType.APPLICATION_CBOR),
+					"cborConverter should support 'application/cbor'");
+			this.cborConverter = cborConverter;
+		}
+
+		void setYamlConverter(HttpMessageConverter<?> yamlConverter) {
+			Assert.isTrue(yamlConverter.getSupportedMediaTypes().contains(MediaType.APPLICATION_YAML),
+					"yamlConverter should support 'application/yaml'");
+			this.yamlConverter = yamlConverter;
 		}
 
 		void addCustomMessageConverter(HttpMessageConverter<?> customConverter) {
 			Assert.notNull(customConverter, "'customConverter' must not be null");
-			this.customMessageConverters.add(customConverter);
+			this.customConverters.add(customConverter);
 		}
 
 		void addMessageConverterConfigurer(Consumer<HttpMessageConverter<?>> configurer) {
@@ -203,126 +210,131 @@ class DefaultHttpMessageConverters implements HttpMessageConverters {
 
 		List<HttpMessageConverter<?>> getBaseConverters() {
 			List<HttpMessageConverter<?>> converters = new ArrayList<>();
-			if (this.byteArrayMessageConverter != null) {
-				converters.add(this.byteArrayMessageConverter);
+			if (this.byteArrayConverter != null) {
+				converters.add(this.byteArrayConverter);
 			}
-			if (this.stringMessageConverter != null) {
-				converters.add(this.stringMessageConverter);
+			if (this.stringConverter != null) {
+				converters.add(this.stringConverter);
 			}
 			return converters;
 		}
 
 		List<HttpMessageConverter<?>> getCoreConverters() {
 			List<HttpMessageConverter<?>> converters = new ArrayList<>();
-			if (this.jsonMessageConverter != null) {
-				converters.add(this.jsonMessageConverter);
+			if (this.kotlinJsonConverter != null) {
+				converters.add(this.kotlinJsonConverter);
 			}
-			if (this.smileMessageConverter != null) {
-				converters.add(this.smileMessageConverter);
+			if (this.jsonConverter != null) {
+				converters.add(this.jsonConverter);
 			}
-			if (this.cborMessageConverter!= null) {
-				converters.add(this.cborMessageConverter);
+			if (this.smileConverter != null) {
+				converters.add(this.smileConverter);
 			}
-			if (this.yamlMessageConverter!= null) {
-				converters.add(this.yamlMessageConverter);
+			if (this.cborConverter != null) {
+				converters.add(this.cborConverter);
 			}
-			if (this.xmlMessageConverter!= null) {
-				converters.add(this.xmlMessageConverter);
+			if (this.yamlConverter != null) {
+				converters.add(this.yamlConverter);
 			}
-			if (this.protobufMessageConverter != null) {
-				converters.add(this.protobufMessageConverter);
+			if (this.xmlConverter != null) {
+				converters.add(this.xmlConverter);
 			}
-			if (this.atomMessageConverter != null) {
-				converters.add(this.atomMessageConverter);
+			if (this.protobufConverter != null) {
+				converters.add(this.protobufConverter);
 			}
-			if (this.rssMessageConverter != null) {
-				converters.add(this.rssMessageConverter);
+			if (this.atomConverter != null) {
+				converters.add(this.atomConverter);
+			}
+			if (this.rssConverter != null) {
+				converters.add(this.rssConverter);
 			}
 			return converters;
 		}
 
 		List<HttpMessageConverter<?>> getCustomConverters() {
-			return this.customMessageConverters;
+			return this.customConverters;
 		}
 
 		void detectMessageConverters() {
-			this.byteArrayMessageConverter = new ByteArrayHttpMessageConverter();
+			this.byteArrayConverter = new ByteArrayHttpMessageConverter();
 
-			if (this.stringMessageConverter == null) {
-				this.stringMessageConverter = new StringHttpMessageConverter();
+			if (this.stringConverter == null) {
+				this.stringConverter = new StringHttpMessageConverter();
 			}
-			if (this.jsonMessageConverter == null) {
+			if (this.kotlinJsonConverter == null) {
+				if (KOTLIN_SERIALIZATION_JSON_PRESENT) {
+					this.kotlinJsonConverter = new KotlinSerializationJsonHttpMessageConverter();
+				}
+			}
+			if (this.jsonConverter == null) {
 				if (JACKSON_PRESENT) {
-					this.jsonMessageConverter = new JacksonJsonHttpMessageConverter();
+					this.jsonConverter = new JacksonJsonHttpMessageConverter();
 				}
 				else if (JACKSON_2_PRESENT) {
-					this.jsonMessageConverter = new MappingJackson2HttpMessageConverter();
+					this.jsonConverter = new MappingJackson2HttpMessageConverter();
 				}
 				else if (GSON_PRESENT) {
-					this.jsonMessageConverter = new GsonHttpMessageConverter();
+					this.jsonConverter = new GsonHttpMessageConverter();
 				}
 				else if (JSONB_PRESENT) {
-					this.jsonMessageConverter = new JsonbHttpMessageConverter();
-				}
-				else if (KOTLIN_SERIALIZATION_JSON_PRESENT) {
-					this.jsonMessageConverter = new KotlinSerializationJsonHttpMessageConverter();
+					this.jsonConverter = new JsonbHttpMessageConverter();
 				}
 			}
 
-			if (this.xmlMessageConverter == null) {
+			if (this.xmlConverter == null) {
 				if (JACKSON_XML_PRESENT) {
-					this.xmlMessageConverter = new JacksonXmlHttpMessageConverter();
+					this.xmlConverter = new JacksonXmlHttpMessageConverter();
 				}
 				else if (JACKSON_2_XML_PRESENT) {
-					this.xmlMessageConverter = new MappingJackson2XmlHttpMessageConverter();
+					this.xmlConverter = new MappingJackson2XmlHttpMessageConverter();
 				}
 				else if (JAXB_2_PRESENT) {
-					this.xmlMessageConverter = new Jaxb2RootElementHttpMessageConverter();
+					this.xmlConverter = new Jaxb2RootElementHttpMessageConverter();
 				}
 			}
 
-			if (this.smileMessageConverter == null) {
+			if (this.smileConverter == null) {
 				if (JACKSON_SMILE_PRESENT) {
-					this.smileMessageConverter = new JacksonSmileHttpMessageConverter();
+					this.smileConverter = new JacksonSmileHttpMessageConverter();
 				}
 				else if (JACKSON_2_SMILE_PRESENT) {
-					this.smileMessageConverter = new MappingJackson2SmileHttpMessageConverter();
+					this.smileConverter = new MappingJackson2SmileHttpMessageConverter();
 				}
 			}
 
-			if (this.cborMessageConverter == null) {
+			if (this.cborConverter == null) {
 				if (JACKSON_CBOR_PRESENT) {
-					this.cborMessageConverter = new JacksonCborHttpMessageConverter();
+					this.cborConverter = new JacksonCborHttpMessageConverter();
 				}
 				else if (JACKSON_2_CBOR_PRESENT) {
-					this.cborMessageConverter = new MappingJackson2CborHttpMessageConverter();
+					this.cborConverter = new MappingJackson2CborHttpMessageConverter();
 				}
 				else if (KOTLIN_SERIALIZATION_CBOR_PRESENT) {
-					this.cborMessageConverter = new KotlinSerializationCborHttpMessageConverter();
+					this.cborConverter = new KotlinSerializationCborHttpMessageConverter();
 				}
 			}
 
-			if (this.yamlMessageConverter == null) {
+			if (this.yamlConverter == null) {
 				if (JACKSON_YAML_PRESENT) {
-					this.yamlMessageConverter = new JacksonYamlHttpMessageConverter();
+					this.yamlConverter = new JacksonYamlHttpMessageConverter();
 				}
 				else if (JACKSON_2_YAML_PRESENT) {
-					this.yamlMessageConverter = new MappingJackson2YamlHttpMessageConverter();
+					this.yamlConverter = new MappingJackson2YamlHttpMessageConverter();
 				}
 			}
 
-			if (this.protobufMessageConverter == null) {
+			if (this.protobufConverter == null) {
 				if (KOTLIN_SERIALIZATION_PROTOBUF_PRESENT) {
-					this.protobufMessageConverter = new KotlinSerializationProtobufHttpMessageConverter();
+					this.protobufConverter = new KotlinSerializationProtobufHttpMessageConverter();
 				}
 			}
 
 			if (ROME_PRESENT) {
-				if (this.atomMessageConverter == null) {
-					this.atomMessageConverter = new AtomFeedHttpMessageConverter();
+				if (this.atomConverter == null) {
+					this.atomConverter = new AtomFeedHttpMessageConverter();
 				}
-				if (this.rssMessageConverter == null) {
-					this.rssMessageConverter = new RssChannelHttpMessageConverter();
+				if (this.rssConverter == null) {
+					this.rssConverter = new RssChannelHttpMessageConverter();
 				}
 			}
 		}
@@ -338,38 +350,44 @@ class DefaultHttpMessageConverters implements HttpMessageConverters {
 		}
 
 		@Override
-		public ClientBuilder withStringConverter(HttpMessageConverter<?> stringMessageConverter) {
-			setStringMessageConverter(stringMessageConverter);
+		public ClientBuilder withStringConverter(HttpMessageConverter<?> stringConverter) {
+			setStringConverter(stringConverter);
 			return this;
 		}
 
 		@Override
-		public ClientBuilder withJsonConverter(HttpMessageConverter<?> jsonMessageConverter) {
-			setJsonMessageConverter(jsonMessageConverter);
+		public ClientBuilder withKotlinSerializationJsonConverter(HttpMessageConverter<?> kotlinSerializationJsonConverter) {
+			setKotlinSerializationJsonConverter(kotlinSerializationJsonConverter);
 			return this;
 		}
 
 		@Override
-		public ClientBuilder withXmlConverter(HttpMessageConverter<?> xmlMessageConverter) {
-			setXmlMessageConverter(xmlMessageConverter);
+		public ClientBuilder withJsonConverter(HttpMessageConverter<?> jsonConverter) {
+			setJsonConverter(jsonConverter);
 			return this;
 		}
 
 		@Override
-		public ClientBuilder withSmileConverter(HttpMessageConverter<?> smileMessageConverter) {
-			setSmileMessageConverter(smileMessageConverter);
+		public ClientBuilder withXmlConverter(HttpMessageConverter<?> xmlConverter) {
+			setXmlConverter(xmlConverter);
 			return this;
 		}
 
 		@Override
-		public ClientBuilder withCborConverter(HttpMessageConverter<?> cborMessageConverter) {
-			setCborMessageConverter(cborMessageConverter);
+		public ClientBuilder withSmileConverter(HttpMessageConverter<?> smileConverter) {
+			setSmileConverter(smileConverter);
 			return this;
 		}
 
 		@Override
-		public ClientBuilder withYamlConverter(HttpMessageConverter<?> yamlMessageConverter) {
-			setYamlMessageConverter(yamlMessageConverter);
+		public ClientBuilder withCborConverter(HttpMessageConverter<?> cborConverter) {
+			setCborConverter(cborConverter);
+			return this;
+		}
+
+		@Override
+		public ClientBuilder withYamlConverter(HttpMessageConverter<?> yamlConverter) {
+			setYamlConverter(yamlConverter);
 			return this;
 		}
 
@@ -388,7 +406,7 @@ class DefaultHttpMessageConverters implements HttpMessageConverters {
 		@Override
 		public HttpMessageConverters build() {
 			if (this.registerDefaults) {
-				this.resourceMessageConverter = new ResourceHttpMessageConverter(false);
+				this.resourceConverter = new ResourceHttpMessageConverter(false);
 				detectMessageConverters();
 			}
 			List<HttpMessageConverter<?>> partConverters = new ArrayList<>(this.getCustomConverters());
@@ -396,8 +414,8 @@ class DefaultHttpMessageConverters implements HttpMessageConverters {
 			if (this.registerDefaults) {
 				partConverters.addAll(this.getCoreConverters());
 				allConverters.addAll(this.getBaseConverters());
-				if (this.resourceMessageConverter != null) {
-					allConverters.add(this.resourceMessageConverter);
+				if (this.resourceConverter != null) {
+					allConverters.add(this.resourceConverter);
 				}
 			}
 			if (!partConverters.isEmpty() || !allConverters.isEmpty()) {
@@ -423,38 +441,44 @@ class DefaultHttpMessageConverters implements HttpMessageConverters {
 		}
 
 		@Override
-		public ServerBuilder withStringConverter(HttpMessageConverter<?> stringMessageConverter) {
-			setStringMessageConverter(stringMessageConverter);
+		public ServerBuilder withStringConverter(HttpMessageConverter<?> stringConverter) {
+			setStringConverter(stringConverter);
 			return this;
 		}
 
 		@Override
-		public ServerBuilder withJsonConverter(HttpMessageConverter<?> jsonMessageConverter) {
-			setJsonMessageConverter(jsonMessageConverter);
+		public ServerBuilder withKotlinSerializationJsonConverter(HttpMessageConverter<?> kotlinSerializationJsonConverter) {
+			setKotlinSerializationJsonConverter(kotlinSerializationJsonConverter);
 			return this;
 		}
 
 		@Override
-		public ServerBuilder withXmlConverter(HttpMessageConverter<?> xmlMessageConverter) {
-			setXmlMessageConverter(xmlMessageConverter);
+		public ServerBuilder withJsonConverter(HttpMessageConverter<?> jsonConverter) {
+			setJsonConverter(jsonConverter);
 			return this;
 		}
 
 		@Override
-		public ServerBuilder withSmileConverter(HttpMessageConverter<?> smileMessageConverter) {
-			setSmileMessageConverter(smileMessageConverter);
+		public ServerBuilder withXmlConverter(HttpMessageConverter<?> xmlConverter) {
+			setXmlConverter(xmlConverter);
 			return this;
 		}
 
 		@Override
-		public ServerBuilder withCborConverter(HttpMessageConverter<?> cborMessageConverter) {
-			setCborMessageConverter(cborMessageConverter);
+		public ServerBuilder withSmileConverter(HttpMessageConverter<?> smileConverter) {
+			setSmileConverter(smileConverter);
 			return this;
 		}
 
 		@Override
-		public ServerBuilder withYamlConverter(HttpMessageConverter<?> yamlMessageConverter) {
-			setYamlMessageConverter(yamlMessageConverter);
+		public ServerBuilder withCborConverter(HttpMessageConverter<?> cborConverter) {
+			setCborConverter(cborConverter);
+			return this;
+		}
+
+		@Override
+		public ServerBuilder withYamlConverter(HttpMessageConverter<?> yamlConverter) {
+			setYamlConverter(yamlConverter);
 			return this;
 		}
 
@@ -473,8 +497,8 @@ class DefaultHttpMessageConverters implements HttpMessageConverters {
 		@Override
 		public HttpMessageConverters build() {
 			if (this.registerDefaults) {
-				this.resourceMessageConverter = new ResourceHttpMessageConverter();
-				this.resourceRegionMessageConverter = new ResourceRegionHttpMessageConverter();
+				this.resourceConverter = new ResourceHttpMessageConverter();
+				this.resourceRegionConverter = new ResourceRegionHttpMessageConverter();
 				detectMessageConverters();
 			}
 			List<HttpMessageConverter<?>> partConverters = new ArrayList<>(this.getCustomConverters());
@@ -482,11 +506,11 @@ class DefaultHttpMessageConverters implements HttpMessageConverters {
 			if (this.registerDefaults) {
 				partConverters.addAll(this.getCoreConverters());
 				allConverters.addAll(this.getBaseConverters());
-				if (this.resourceMessageConverter != null) {
-					allConverters.add(this.resourceMessageConverter);
+				if (this.resourceConverter != null) {
+					allConverters.add(this.resourceConverter);
 				}
-				if (this.resourceRegionMessageConverter != null) {
-					allConverters.add(this.resourceRegionMessageConverter);
+				if (this.resourceRegionConverter != null) {
+					allConverters.add(this.resourceRegionConverter);
 				}
 			}
 			if (!partConverters.isEmpty() || !allConverters.isEmpty()) {

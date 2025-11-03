@@ -25,7 +25,6 @@ import java.lang.annotation.Target;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
-import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Stream;
@@ -337,24 +336,6 @@ class RestClientIntegrationTests {
 			assertThat(request.getTarget()).isEqualTo("/json");
 			assertThat(request.getHeaders().get(HttpHeaders.ACCEPT)).isEqualTo("application/json");
 		});
-	}
-
-	@ParameterizedRestClientTest
-	@SuppressWarnings({ "rawtypes", "unchecked" })
-	void retrieveJsonNull(ClientHttpRequestFactory requestFactory) throws IOException {
-		startServer(requestFactory);
-
-		prepareResponse(builder -> builder
-				.code(200)
-				.setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-				.body("null"));
-
-		Map result = this.restClient.get()
-				.uri("/null")
-				.retrieve()
-				.body(Map.class);
-
-		assertThat(result).isNull();
 	}
 
 	@ParameterizedRestClientTest
