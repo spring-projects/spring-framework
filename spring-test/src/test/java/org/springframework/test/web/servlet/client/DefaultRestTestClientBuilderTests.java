@@ -20,13 +20,24 @@ import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+/**
+ * Unit tests for {@link RestTestClient.Builder}.
+ */
 class DefaultRestTestClientBuilderTests {
 
 	@Test
-	void testMutateHasNoSideEffects() {
-		RestTestClient baseTestClient = new DefaultRestTestClientBuilder().baseUrl("http://localhost").build();
-		baseTestClient.mutate().defaultHeader("foo", "bar").build();
-		baseTestClient.mutate().defaultHeaders(headers -> assertThat(headers.containsHeader("foo")).isFalse());
+	void mutateOriginalBuilderHasNoSideEffects() {
+		RestTestClient.Builder<?> builder = new DefaultRestTestClientBuilder<>().baseUrl("http://localhost");
+		RestTestClient client = builder.build();
+		builder.defaultHeader("foo", "bar");
+		client.mutate().defaultHeaders(headers -> assertThat(headers.containsHeader("foo")).isFalse());
+	}
+
+	@Test
+	void mutateSameClientTwiceHasNoSideEffects() {
+		RestTestClient client = new DefaultRestTestClientBuilder<>().baseUrl("http://localhost").build();
+		client.mutate().defaultHeader("foo", "bar").build();
+		client.mutate().defaultHeaders(headers -> assertThat(headers.containsHeader("foo")).isFalse());
 	}
 
 }
