@@ -21,7 +21,7 @@ import org.jspecify.annotations.Nullable;
 import org.springframework.web.server.ServerWebExchange;
 
 /**
- * {@link ApiVersionResolver} that extract the version from a query parameter.
+ * {@link ApiVersionResolver} that extracts the version from a query parameter.
  *
  * @author Rossen Stoyanchev
  * @since 7.0

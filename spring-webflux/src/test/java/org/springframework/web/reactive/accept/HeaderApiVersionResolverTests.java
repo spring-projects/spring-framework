@@ -16,7 +16,6 @@
 
 package org.springframework.web.reactive.accept;
 
-
 import org.junit.jupiter.api.Test;
 
 import org.springframework.web.server.ServerWebExchange;
@@ -27,9 +26,10 @@ import static org.springframework.web.testfixture.http.server.reactive.MockServe
 
 /**
  * Unit tests for {@link HeaderApiVersionResolver}.
+ *
  * @author Rossen Stoyanchev
  */
-public class HeaderApiVersionResolverTests {
+class HeaderApiVersionResolverTests {
 
 	private final String headerName = "Api-Version";
 

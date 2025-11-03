@@ -16,7 +16,6 @@
 
 package org.springframework.web.reactive.accept;
 
-
 import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 
@@ -28,9 +27,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Unit tests for {@link QueryApiVersionResolver}.
+ *
  * @author Rossen Stoyanchev
  */
-public class QueryApiVersionResolverTests {
+class QueryApiVersionResolverTests {
 
 	private final String queryParamName = "api-version";
 

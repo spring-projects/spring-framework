@@ -16,7 +16,6 @@
 
 package org.springframework.web.accept;
 
-
 import org.junit.jupiter.api.Test;
 
 import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
@@ -25,9 +24,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Unit tests for {@link HeaderApiVersionResolver}.
+ *
  * @author Rossen Stoyanchev
  */
-public class HeaderApiVersionResolverTests {
+class HeaderApiVersionResolverTests {
 
 	private final String headerName = "Api-Version";
 

@@ -21,7 +21,7 @@ import org.jspecify.annotations.Nullable;
 import org.springframework.web.server.ServerWebExchange;
 
 /**
- * {@link ApiVersionResolver} that extract the version from a request header.
+ * {@link ApiVersionResolver} that extracts the version from a request header.
  *
  * @author Rossen Stoyanchev
  * @since 7.0

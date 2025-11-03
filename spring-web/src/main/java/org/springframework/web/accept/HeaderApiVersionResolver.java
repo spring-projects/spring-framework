@@ -16,12 +16,11 @@
 
 package org.springframework.web.accept;
 
-
 import jakarta.servlet.http.HttpServletRequest;
 import org.jspecify.annotations.Nullable;
 
 /**
- * {@link ApiVersionResolver} that extract the version from a header.
+ * {@link ApiVersionResolver} that extracts the version from a header.
  *
  * @author Rossen Stoyanchev
  * @since 7.0
