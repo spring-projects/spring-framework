@@ -33,8 +33,10 @@ import org.apache.hc.client5.http.classic.methods.HttpPost;
 import org.apache.hc.client5.http.classic.methods.HttpPut;
 import org.apache.hc.client5.http.classic.methods.HttpTrace;
 import org.apache.hc.client5.http.config.Configurable;
+import org.apache.hc.client5.http.config.ConnectionConfig;
 import org.apache.hc.client5.http.config.RequestConfig;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.apache.hc.client5.http.impl.io.BasicHttpClientConnectionManager;
 import org.apache.hc.client5.http.io.HttpClientConnectionManager;
 import org.apache.hc.client5.http.protocol.HttpClientContext;
 import org.apache.hc.core5.http.ClassicHttpRequest;
@@ -123,7 +125,12 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 	 * @param connectTimeout the timeout value in milliseconds
 	 * @see RequestConfig#getConnectTimeout()
 	 * @see SocketConfig#getSoTimeout
+	 * @deprecated as of 6.2.13 in favor of setting it on
+	 * {@link BasicHttpClientConnectionManager#setConnectionConfig(ConnectionConfig) the connection configuration}
+	 * for the {@link org.apache.hc.client5.http.impl.classic.HttpClientBuilder#setConnectionManager(HttpClientConnectionManager)
+	 * connection manager}.
 	 */
+	@Deprecated(since = "6.2.13", forRemoval = true)
 	public void setConnectTimeout(int connectTimeout) {
 		Assert.isTrue(connectTimeout >= 0, "Timeout must be a non-negative value");
 		this.connectTimeout = connectTimeout;
@@ -142,7 +149,12 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 	 * @since 6.1
 	 * @see RequestConfig#getConnectTimeout()
 	 * @see SocketConfig#getSoTimeout
+	 * @deprecated as of 6.2.13 in favor of setting it on
+	 * {@link BasicHttpClientConnectionManager#setConnectionConfig(ConnectionConfig) the connection configuration}
+	 * for the {@link org.apache.hc.client5.http.impl.classic.HttpClientBuilder#setConnectionManager(HttpClientConnectionManager)
+	 * connection manager}.
 	 */
+	@Deprecated(since = "6.2.13", forRemoval = true)
 	public void setConnectTimeout(Duration connectTimeout) {
 		Assert.notNull(connectTimeout, "ConnectTimeout must not be null");
 		Assert.isTrue(!connectTimeout.isNegative(), "Timeout must be a non-negative value");
