@@ -40,8 +40,7 @@ final class DefaultRestTestClientResponse implements RestTestClientResponse {
 	}
 
 	/**
-	 * Use AssertJ's {@link org.assertj.core.api.Assertions#assertThat assertThat}
-	 * instead.
+	 * Use AssertJ's {@link org.assertj.core.api.Assertions#assertThat assertThat} instead.
 	 */
 	@Override
 	public RestTestClientResponseAssert assertThat() {

@@ -342,7 +342,7 @@ public class RestTestClientResponseAssert
 	 * </code></pre>
 	 */
 	public AbstractJsonContentAssert<?> bodyJson() {
-		return new JsonContentAssert(new JsonContent(readBody(), getExchangeResult().getConverterDelegate()));
+		return new JsonContentAssert(new JsonContent(readBody(), getExchangeResult().getJsonConverterDelegate()));
 	}
 
 	private String readBody() {

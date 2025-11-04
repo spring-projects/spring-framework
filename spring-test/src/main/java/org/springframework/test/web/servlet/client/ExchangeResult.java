@@ -203,9 +203,9 @@ public class ExchangeResult {
 
 	/**
 	 * Return a {@link JsonConverterDelegate} based on the configured HTTP message converters.
-	 * Mainly for internal use from AssertJ support.
+	 * Mainly for internal use from AssertJ support classes.
 	 */
-	public @Nullable JsonConverterDelegate getConverterDelegate() {
+	public @Nullable JsonConverterDelegate getJsonConverterDelegate() {
 		return this.converterDelegate;
 	}
 
