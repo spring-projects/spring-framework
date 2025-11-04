@@ -94,6 +94,12 @@ import org.springframework.test.context.bean.override.BeanOverride;
  * be created for the object created by the {@code FactoryBean}, not for the
  * {@code FactoryBean} itself.
  *
+ * <p><strong>WARNING</strong>: {@code @MockitoSpyBean} cannot be used to spy on
+ * a scoped proxy &mdash; for example, a bean annotated with
+ * {@link org.springframework.context.annotation.Scope
+ * &#64;Scope(proxyMode = ScopedProxyMode.TARGET_CLASS)}. Any attempt to do so will
+ * fail with an exception.
+ *
  * <p>There are no restrictions on the visibility of a {@code @MockitoSpyBean} field.
  * Such fields can therefore be {@code public}, {@code protected}, package-private
  * (default visibility), or {@code private} depending on the needs or coding

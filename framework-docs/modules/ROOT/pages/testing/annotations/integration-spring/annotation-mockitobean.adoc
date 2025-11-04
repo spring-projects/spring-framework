@@ -102,6 +102,10 @@ will be replaced with a singleton mock of the type of object created by the `Fac
 
 Similarly, when using `@MockitoSpyBean` to create a spy for a `FactoryBean`, a spy will
 be created for the object created by the `FactoryBean`, not for the `FactoryBean` itself.
+
+Furthermore, `@MockitoSpyBean` cannot be used to spy on a scoped proxy — for example, a
+bean annotated with `@Scope(proxyMode = ScopedProxyMode.TARGET_CLASS)`. Any attempt to do
+so will fail with an exception.
 ====
 
 [NOTE]
