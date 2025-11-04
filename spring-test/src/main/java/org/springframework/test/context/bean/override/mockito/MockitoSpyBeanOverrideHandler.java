@@ -69,9 +69,11 @@ class MockitoSpyBeanOverrideHandler extends AbstractMockitoBeanOverrideHandler {
 	}
 
 	private Object createSpy(String name, Object instance) {
+		SpringMockResolver.rejectUnsupportedSpyTarget(name, instance);
 		Class<?> resolvedTypeToOverride = getBeanType().resolve();
 		Assert.notNull(resolvedTypeToOverride, "Failed to resolve type to override");
 		Assert.isInstanceOf(resolvedTypeToOverride, instance);
+
 		if (Mockito.mockingDetails(instance).isSpy()) {
 			return instance;
 		}

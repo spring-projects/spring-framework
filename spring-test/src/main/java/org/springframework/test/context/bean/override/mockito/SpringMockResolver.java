@@ -79,4 +79,25 @@ public class SpringMockResolver implements MockResolver {
 		return candidate;
 	}
 
+	/**
+	 * Reject the supplied bean if it is not a supported candidate to spy on.
+	 * <p>Specifically, this method ensures that the bean is not a Spring AOP proxy
+	 * with a non-static {@link TargetSource}.
+	 * @param beanName the name of the bean to spy on
+	 * @param bean the bean to spy on
+	 * @since 7.0
+	 * @see #getUltimateTargetObject(Object)
+	 */
+	static void rejectUnsupportedSpyTarget(String beanName, Object bean) throws IllegalStateException {
+		if (SPRING_AOP_PRESENT) {
+			if (AopUtils.isAopProxy(bean) && bean instanceof Advised advised &&
+					!advised.getTargetSource().isStatic()) {
+				throw new IllegalStateException("""
+					@MockitoSpyBean cannot be applied to bean '%s', because it is a Spring AOP proxy \
+					with a non-static TargetSource. Perhaps you have attempted to spy on a scoped proxy, \
+					which is not supported.""".formatted(beanName));
+			}
+		}
+	}
+
 }
