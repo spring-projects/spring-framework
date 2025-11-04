@@ -16,6 +16,7 @@
 
 package org.springframework.test.web.reactive.server;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.Map;
 import java.util.stream.Stream;
@@ -25,11 +26,17 @@ import org.jspecify.annotations.Nullable;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.Decoder;
 import org.springframework.core.codec.Encoder;
+import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DataBufferUtils;
+import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.DecoderHttpMessageReader;
 import org.springframework.http.codec.EncoderHttpMessageWriter;
 import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.codec.HttpMessageWriter;
+import org.springframework.test.json.JsonConverterDelegate;
+import org.springframework.util.Assert;
+import org.springframework.util.MimeTypeUtils;
 
 /**
  * {@link Encoder} and {@link Decoder} that is able to encode and decode
@@ -47,6 +54,14 @@ import org.springframework.http.codec.HttpMessageWriter;
 record JsonEncoderDecoder(Encoder<?> encoder, Decoder<?> decoder) {
 
 	private static final ResolvableType MAP_TYPE = ResolvableType.forClass(Map.class);
+
+
+	/**
+	 * Return a {@link JsonConverterDelegate} that uses the encoder and decoder.
+	 */
+	public JsonConverterDelegate createJsonConverterDelegate() {
+		return new CodecsJsonConverterDelegate();
+	}
 
 
 	/**
@@ -105,6 +120,36 @@ record JsonEncoderDecoder(Encoder<?> encoder, Decoder<?> decoder) {
 				.filter(decoder -> decoder.canDecode(MAP_TYPE, MediaType.APPLICATION_JSON))
 				.findFirst()
 				.orElse(null);
+	}
+
+
+	/**
+	 * Implementation that delegates to the contained Encoder and Decoder.
+	 */
+	private class CodecsJsonConverterDelegate implements JsonConverterDelegate {
+
+		@SuppressWarnings("unchecked")
+		@Override
+		public <T> T read(String content, ResolvableType targetType) {
+			byte[] bytes = content.getBytes(StandardCharsets.UTF_8);
+			DataBuffer buffer = DefaultDataBufferFactory.sharedInstance.wrap(bytes);
+			Object value = decoder().decode(buffer, targetType, MediaType.APPLICATION_JSON, null);
+			Assert.state(value != null, () -> "Could not decode JSON content: " + content);
+			return (T) value;
+		}
+
+		@SuppressWarnings("unchecked")
+		@Override
+		public <T> T map(Object value, ResolvableType targetType) {
+			DataBuffer buffer = ((Encoder<T>) encoder()).encodeValue((T) value,
+					DefaultDataBufferFactory.sharedInstance, targetType, MimeTypeUtils.APPLICATION_JSON, null);
+			try {
+				return read(buffer.toString(StandardCharsets.UTF_8), targetType);
+			}
+			finally {
+				DataBufferUtils.release(buffer);
+			}
+		}
 	}
 
 }

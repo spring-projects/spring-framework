@@ -111,9 +111,10 @@ class DefaultWebTestClient implements WebTestClient {
 			Consumer<EntityExchangeResult<?>> entityResultConsumer,
 			@Nullable Duration responseTimeout, DefaultWebTestClientBuilder clientBuilder) {
 
-		this.wiretapConnector = new WiretapConnector(connector);
 		this.jsonEncoderDecoder = JsonEncoderDecoder.from(
 				exchangeStrategies.messageWriters(), exchangeStrategies.messageReaders());
+
+		this.wiretapConnector = new WiretapConnector(connector, this.jsonEncoderDecoder);
 		this.exchangeFunction = exchangeFactory.apply(this.wiretapConnector);
 		this.uriBuilderFactory = uriBuilderFactory;
 		this.defaultHeaders = headers;

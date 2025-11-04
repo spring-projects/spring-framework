@@ -53,7 +53,7 @@ public class WiretapConnectorTests {
 		ClientRequest clientRequest = ClientRequest.create(HttpMethod.GET, URI.create("/test"))
 				.header(WebTestClient.WEBTESTCLIENT_REQUEST_ID, "1").build();
 
-		WiretapConnector wiretapConnector = new WiretapConnector(connector);
+		WiretapConnector wiretapConnector = new WiretapConnector(connector, null);
 		ExchangeFunction function = ExchangeFunctions.create(wiretapConnector);
 		function.exchange(clientRequest).block(ofMillis(0));
 

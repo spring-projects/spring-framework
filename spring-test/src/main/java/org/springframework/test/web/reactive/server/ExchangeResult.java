@@ -36,6 +36,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.client.reactive.ClientHttpRequest;
 import org.springframework.http.client.reactive.ClientHttpResponse;
+import org.springframework.test.json.JsonConverterDelegate;
 import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
 
@@ -78,6 +79,8 @@ public class ExchangeResult {
 
 	private final @Nullable Object mockServerResult;
 
+	private final @Nullable JsonConverterDelegate converterDelegate;
+
 	/** Ensure single logging, for example, for expectAll. */
 	private boolean diagnosticsLogged;
 
@@ -93,10 +96,11 @@ public class ExchangeResult {
 	 * @param timeout how long to wait for content to materialize
 	 * @param uriTemplate the URI template used to set up the request, if any
 	 * @param serverResult the result of a mock server exchange if applicable.
+	 * @param converterDelegate for JSON decoding in AssertJ support
 	 */
 	ExchangeResult(ClientHttpRequest request, ClientHttpResponse response,
 			Mono<byte[]> requestBody, Mono<byte[]> responseBody, Duration timeout, @Nullable String uriTemplate,
-			@Nullable Object serverResult) {
+			@Nullable Object serverResult, @Nullable JsonConverterDelegate converterDelegate) {
 
 		Assert.notNull(request, "ClientHttpRequest is required");
 		Assert.notNull(response, "ClientHttpResponse is required");
@@ -110,6 +114,7 @@ public class ExchangeResult {
 		this.timeout = timeout;
 		this.uriTemplate = uriTemplate;
 		this.mockServerResult = serverResult;
+		this.converterDelegate = converterDelegate;
 	}
 
 	/**
@@ -123,6 +128,7 @@ public class ExchangeResult {
 		this.timeout = other.timeout;
 		this.uriTemplate = other.uriTemplate;
 		this.mockServerResult = other.mockServerResult;
+		this.converterDelegate = other.converterDelegate;
 		this.diagnosticsLogged = other.diagnosticsLogged;
 	}
 
@@ -204,6 +210,15 @@ public class ExchangeResult {
 	 */
 	public @Nullable Object getMockServerResult() {
 		return this.mockServerResult;
+	}
+
+	/**
+	 * Return a {@link JsonConverterDelegate} based on the configured codecs.
+	 * Mainly for internal use from AssertJ support classes.
+	 * @since 7.0
+	 */
+	public @Nullable JsonConverterDelegate getJsonConverterDelegate() {
+		return this.converterDelegate;
 	}
 
 	/**
