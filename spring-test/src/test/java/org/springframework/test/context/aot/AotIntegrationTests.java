@@ -147,7 +147,9 @@ class AotIntegrationTests extends AbstractAotTests {
 				// We only include test classes named *Tests so that we don't pick up
 				// internal TestCase classes that aren't really tests.
 				.filter(clazz -> clazz.getSimpleName().endsWith("Tests"))
-				// TestNG EJB tests use @PersistenceContext which is not yet supported in tests in AOT mode.
+				// TestNG EJB tests use @EJB which is not supported in tests in AOT mode, and
+				// since @DisabledInAotMode is not able to disable TestNG tests at runtime,
+				// we have to filter out those tests here.
 				.filter(clazz -> !clazz.getPackageName().contains("testng.transaction.ejb"))
 				// AOT processing works for ParameterizedDependencyInjectionTests by itself
 				// but fails for an unknown reason within the entire spring-test module.
