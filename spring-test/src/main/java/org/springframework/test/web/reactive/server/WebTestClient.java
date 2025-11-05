@@ -915,6 +915,17 @@ public interface WebTestClient {
 		BodyContentSpec expectBody();
 
 		/**
+		 * Return an {@link ExchangeResult} with the raw content. Effectively, a shortcut for:
+		 * <pre class="code">
+		 * .returnResult(byte[].class)
+		 * </pre>
+		 * @since 7.0
+		 */
+		default ExchangeResult returnResult() {
+			return returnResult(byte[].class);
+		}
+
+		/**
 		 * Exit the chained flow in order to consume the response body externally,
 		 * for example, via {@link reactor.test.StepVerifier}.
 		 * <p>Note that when {@code Void.class} is passed in, the response body
