@@ -101,7 +101,6 @@ public class PatternParseException extends IllegalArgumentException {
 		ILLEGAL_CHARACTER_IN_CAPTURE_DESCRIPTOR("Char ''{0}'' is not allowed in a captured variable name"),
 		CANNOT_HAVE_MANY_MULTISEGMENT_PATHELEMENTS("Multiple '{*...}' or '**' pattern elements are not allowed"),
 		INVALID_LOCATION_FOR_MULTISEGMENT_PATHELEMENT("'{*...}' or '**' pattern elements should be placed at the start or end of the pattern"),
-		MULTISEGMENT_PATHELEMENT_NOT_FOLLOWED_BY_LITERAL("'{*...}' or '**' pattern elements should be followed by a literal path element"),
 		BADLY_FORMED_CAPTURE_THE_REST("Expected form when capturing the rest of the path is simply '{*...}'"),
 		MISSING_REGEX_CONSTRAINT("Missing regex constraint on capture"),
 		ILLEGAL_DOUBLE_CAPTURE("Not allowed to capture ''{0}'' twice in the same pattern"),

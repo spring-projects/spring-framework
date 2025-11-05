@@ -186,6 +186,16 @@ class PathPatternTests {
 		}
 
 		@Test
+		void wildcardSegmentsThenNonLiteral() {
+			checkMatches("/**/*.js", "/script.js");
+			checkMatches("/**/*.js", "/js/script.js");
+			checkMatches("/**/*.js", "/files/js/script.js");
+			checkMatches("/**/{type}/*.js", "/files/js/script.js");
+
+			checkNoMatch("/**/*.js", "/files/style.css");
+		}
+
+		@Test
 		void antPathMatcherTests() {
 			// test exact matching
 			checkMatches("test", "test");
