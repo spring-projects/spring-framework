@@ -27,9 +27,8 @@ import org.springframework.lang.Nullable;
  * instance used to process exceptions thrown from async methods with a {@code void}
  * return type.
  *
- * <p>Typically implemented by
- * @{@link org.springframework.context.annotation.Configuration Configuration}
- * classes annotated with @{@link EnableAsync}.
+ * <p>Typically implemented by @{@link org.springframework.context.annotation.Configuration
+ * Configuration} classes annotated with @{@link EnableAsync}.
  * See the @{@link EnableAsync} javadoc for usage examples.
  *
  * <p><b>NOTE: An {@code AsyncConfigurer} will get initialized early.</b>

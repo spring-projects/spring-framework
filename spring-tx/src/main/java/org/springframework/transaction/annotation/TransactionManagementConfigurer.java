@@ -27,9 +27,8 @@ import org.springframework.transaction.TransactionManager;
  * if there are two {@code PlatformTransactionManager} beans (or two
  * {@code ReactiveTransactionManager} beans) present in the container.
  *
- * <p>Typically implemented by
- * @{@link org.springframework.context.annotation.Configuration Configuration}
- * classes annotated with @{@link EnableTransactionManagement}.
+ * <p>Typically implemented by @{@link org.springframework.context.annotation.Configuration
+ * Configuration} classes annotated with @{@link EnableTransactionManagement}.
  * See @{@link EnableTransactionManagement} for general examples and context;
  * see {@link #annotationDrivenTransactionManager()} for detailed instructions.
  *

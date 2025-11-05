@@ -26,9 +26,8 @@ import org.springframework.lang.Nullable;
  * Interface to be implemented for explicitly specifying how caches are resolved
  * and how keys are generated for annotation-driven cache management.
  *
- * <p>Typically implemented by
- * @{@link org.springframework.context.annotation.Configuration Configuration}
- * classes annotated with @{@link EnableCaching}.
+ * <p>Typically implemented by @{@link org.springframework.context.annotation.Configuration
+ * Configuration} classes annotated with @{@link EnableCaching}.
  * See @{@link EnableCaching} for general examples and context; see
  * {@link #cacheManager()}, {@link #cacheResolver()}, {@link #keyGenerator()},
  * and {@link #errorHandler()} for detailed instructions.
