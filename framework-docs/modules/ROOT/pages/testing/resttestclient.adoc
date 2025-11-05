@@ -250,7 +250,7 @@ Kotlin::
 You can then choose to decode the response body through one of the following:
 
 * `expectBody(Class<T>)`: Decode to single object.
-* `expectBody()`: Decode to `byte[]` for xref:testing/resttestclient.adoc#resttestclient-workflow-json[JSON Content] or an empty body.
+* `expectBody()`: Decode to `byte[]` for xref:testing/resttestclient.adoc#resttestclient-json[JSON Content] or an empty body.
 
 
 If the built-in assertions are insufficient, you can consume the object instead and
@@ -317,7 +317,7 @@ that accept {spring-framework-api}/core/ParameterizedTypeReference.html[`Paramet
 instead of `Class<T>`.
 
 
-[[resttestclient-workflow-no-content]]
+[[resttestclient-no-content]]
 ==== No Content
 
 If the response is not expected to have content, you can assert that as follows:
@@ -373,7 +373,7 @@ Kotlin::
 ======
 
 
-[[resttestclient-workflow-json]]
+[[resttestclient-json]]
 ==== JSON Content
 
 You can use `expectBody()` without a target type to perform assertions on the raw
