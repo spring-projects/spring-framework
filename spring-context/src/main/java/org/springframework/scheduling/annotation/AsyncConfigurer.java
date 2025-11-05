@@ -22,13 +22,19 @@ import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
 import org.springframework.lang.Nullable;
 
 /**
- * Interface to be implemented by @{@link org.springframework.context.annotation.Configuration
- * Configuration} classes annotated with @{@link EnableAsync} that wish to customize the
- * {@link Executor} instance used when processing async method invocations or the
- * {@link AsyncUncaughtExceptionHandler} instance used to process exception thrown from
- * async method with {@code void} return type.
+ * Interface to be implemented for customizing the {@link Executor} instance used when
+ * processing async method invocations or the {@link AsyncUncaughtExceptionHandler}
+ * instance used to process exceptions thrown from async methods with a {@code void}
+ * return type.
  *
- * <p>See @{@link EnableAsync} for usage examples.
+ * <p>Typically implemented by
+ * @{@link org.springframework.context.annotation.Configuration Configuration}
+ * classes annotated with @{@link EnableAsync}.
+ * See the @{@link EnableAsync} javadoc for usage examples.
+ *
+ * <p><b>NOTE: An {@code AsyncConfigurer} will get initialized early.</b>
+ * Do not inject common dependencies into autowired fields directly; instead, consider
+ * declaring a lazy {@link org.springframework.beans.factory.ObjectProvider} for those.
  *
  * @author Chris Beams
  * @author Stephane Nicoll
