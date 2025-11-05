@@ -803,7 +803,7 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 
 		@Override
 		public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
-			this.versionStrategy.handleDeprecations(this.version, request, response);
+			this.versionStrategy.handleDeprecations(this.version, handler, request, response);
 			return true;
 		}
 	}

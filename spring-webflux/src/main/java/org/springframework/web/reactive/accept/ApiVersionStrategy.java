@@ -93,9 +93,10 @@ public interface ApiVersionStrategy {
 	 * accordingly, e.g. by setting response headers to signal the deprecation,
 	 * to specify relevant dates and provide links to further details.
 	 * @param version the resolved and parsed request version
+	 * @param handler the handler chosen for the exchange
 	 * @param exchange the current exchange
 	 * @see ApiVersionDeprecationHandler
 	 */
-	void handleDeprecations(Comparable<?> version, ServerWebExchange exchange);
+	void handleDeprecations(Comparable<?> version, Object handler, ServerWebExchange exchange);
 
 }

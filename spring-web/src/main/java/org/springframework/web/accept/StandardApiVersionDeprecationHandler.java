@@ -87,7 +87,8 @@ public class StandardApiVersionDeprecationHandler implements ApiVersionDeprecati
 
 	@Override
 	public void handleVersion(
-			Comparable<?> requestVersion, HttpServletRequest request, HttpServletResponse response) {
+			Comparable<?> requestVersion, Object handler,
+			HttpServletRequest request, HttpServletResponse response) {
 
 		for (VersionInfo info : this.infos.values()) {
 			if (info.match(requestVersion, request)) {

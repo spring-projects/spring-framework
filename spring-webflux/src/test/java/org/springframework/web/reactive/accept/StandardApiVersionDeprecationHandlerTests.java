@@ -54,7 +54,7 @@ public class StandardApiVersionDeprecationHandlerTests {
 				.setSunsetDate(getDate(sunsetDate))
 				.setSunsetLink(URI.create(sunsetUrl));
 
-		handler.handleVersion("1.1", exchange);
+		handler.handleVersion("1.1", handler, exchange);
 
 		HttpHeaders headers = exchange.getResponse().getHeaders();
 		assertThat(headers.getFirst("Deprecation")).isEqualTo("@1688169599");

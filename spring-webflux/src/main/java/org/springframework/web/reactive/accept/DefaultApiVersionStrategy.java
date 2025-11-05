@@ -181,9 +181,9 @@ public class DefaultApiVersionStrategy implements ApiVersionStrategy {
 	}
 
 	@Override
-	public void handleDeprecations(Comparable<?> version, ServerWebExchange exchange) {
+	public void handleDeprecations(Comparable<?> version, Object handler, ServerWebExchange exchange) {
 		if (this.deprecationHandler != null) {
-			this.deprecationHandler.handleVersion(version, exchange);
+			this.deprecationHandler.handleVersion(version, handler, exchange);
 		}
 	}
 
