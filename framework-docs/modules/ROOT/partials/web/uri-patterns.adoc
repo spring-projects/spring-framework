@@ -26,9 +26,6 @@
 
 `+"/resources/**/file.png"+` is invalid as `+**+` is not allowed in the middle of the path.
 
-`+"/**/{name}/resources"+` is invalid as only a literal pattern is allowed right after `+**+`.
-`+"/**/project/{project}/resources"+` is allowed.
-
 `+"/**/spring/**"+` is not allowed, as only a single `+**+`/`+{*path}+` instance is allowed per pattern.
 
 | `+{name}+`
@@ -48,9 +45,6 @@
 `+"{*path}/resources"+` matches `+"/spring/framework/resources"+` and captures `+path=/spring/framework+`
 
 `+"/resources/{*path}/file.png"+` is invalid as `{*path}` is not allowed in the middle of the path.
-
-`+"/{*path}/{name}/resources"+` is invalid as only a literal pattern is allowed right after `{*path}`.
-`+"/{*path}/project/{project}/resources"+` is allowed.
 
 `+"/{*path}/spring/**"+` is not allowed, as only a single `+**+`/`+{*path}+` instance is allowed per pattern.
 
