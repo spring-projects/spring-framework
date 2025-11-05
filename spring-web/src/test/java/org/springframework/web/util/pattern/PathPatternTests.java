@@ -149,14 +149,14 @@ class PathPatternTests {
 			checkMatches("/*/bar", "/foo/bar");
 			checkNoMatch("/*/bar", "/foo/baz");
 			checkNoMatch("/*/bar", "//bar");
+			checkNoMatch("/*/bar", "/bar");
 			checkMatches("/f*/bar", "/foo/bar");
-			checkMatches("/*/bar", "/foo/bar");
 			checkMatches("a/*","a/");
 			checkMatches("/*","/");
 			checkMatches("/*/bar", "/foo/bar");
 			checkNoMatch("/*/bar", "/foo/baz");
+			checkNoMatch("/*/bar", "/bar");
 			checkMatches("/f*/bar", "/foo/bar");
-			checkMatches("/*/bar", "/foo/bar");
 			checkMatches("/a*b*c*d/bar", "/abcd/bar");
 			checkMatches("*a*", "testa");
 			checkMatches("a/*", "a/");
