@@ -24,14 +24,14 @@ import org.springframework.cache.interceptor.CacheResolver;
 import org.springframework.cache.interceptor.KeyGenerator;
 
 /**
- * Interface to be implemented by @{@link org.springframework.context.annotation.Configuration
- * Configuration} classes annotated with @{@link EnableCaching} that wish or need to specify
- * explicitly how caches are resolved and how keys are generated for annotation-driven
- * cache management.
+ * Interface to be implemented for explicitly specifying how caches are resolved
+ * and how keys are generated for annotation-driven cache management.
  *
- * <p>See @{@link EnableCaching} for general examples and context; see
- * {@link #cacheManager()}, {@link #cacheResolver()}, {@link #keyGenerator()}, and
- * {@link #errorHandler()} for detailed instructions.
+ * <p>Typically implemented by @{@link org.springframework.context.annotation.Configuration
+ * Configuration} classes annotated with @{@link EnableCaching}.
+ * See @{@link EnableCaching} for general examples and context; see
+ * {@link #cacheManager()}, {@link #cacheResolver()}, {@link #keyGenerator()},
+ * and {@link #errorHandler()} for detailed instructions.
  *
  * <p><b>NOTE: A {@code CachingConfigurer} will get initialized early.</b>
  * Do not inject common dependencies into autowired fields directly; instead, consider
