@@ -303,10 +303,15 @@ public class TransportHandlingSockJsService extends AbstractSockJsService implem
 			}
 			else {
 				Principal principal = session.getPrincipal();
-				if (principal != null && !principal.equals(request.getPrincipal())) {
-					logger.debug("The user for the session does not match the user for the request.");
-					response.setStatusCode(HttpStatus.NOT_FOUND);
-					return;
+				if (principal != null) {
+					// Compare usernames, not full equality (different login timestamps)
+					Principal currentPrincipal = request.getPrincipal();
+					if (!principal.equals(currentPrincipal) &&
+							(currentPrincipal == null || !principal.getName().equals(currentPrincipal.getName()))) {
+						logger.debug("The user for the session does not match the user for the request.");
+						response.setStatusCode(HttpStatus.NOT_FOUND);
+						return;
+					}
 				}
 				if (!transportHandler.checkSessionType(session)) {
 					logger.debug("Session type does not match the transport type for the request.");
