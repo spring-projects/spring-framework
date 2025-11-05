@@ -53,6 +53,14 @@ class MappingMediaTypeFileExtensionResolverTests {
 				.resolveFileExtensions(MediaType.TEXT_HTML)).isEmpty();
 	}
 
+	@Test
+	void resolveExtensionsWithQualityParameter() {
+		List<String> extensions = new MappingMediaTypeFileExtensionResolver(DEFAULT_MAPPINGS)
+				.resolveFileExtensions(MediaType.parseMediaType("application/json;q=0.9"));
+
+		assertThat(extensions).containsExactly("json");
+	}
+
 	@Test // SPR-13747
 	public void lookupMediaTypeCaseInsensitive() {
 		assertThat(new MappingMediaTypeFileExtensionResolver(DEFAULT_MAPPINGS).lookupMediaType("JSON"))
