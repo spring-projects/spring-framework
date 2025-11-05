@@ -70,6 +70,7 @@ class HttpComponentsClientHttpRequestFactoryTests extends AbstractHttpRequestFac
 		URI uri = URI.create(baseUrl + "/status/ok");
 		HttpComponentsClientHttpRequest request = (HttpComponentsClientHttpRequest) hrf.createRequest(uri, HttpMethod.GET);
 
+		@SuppressWarnings("deprecation")  // HttpClientContext.REQUEST_CONFIG
 		Object config = request.getHttpContext().getAttribute(HttpClientContext.REQUEST_CONFIG);
 		assertThat(config).as("Request config should be set").isNotNull();
 		assertThat(config).as("Wrong request config type " + config.getClass().getName()).isInstanceOf(RequestConfig.class);
@@ -184,7 +185,7 @@ class HttpComponentsClientHttpRequestFactoryTests extends AbstractHttpRequestFac
 		return Stream.of(HttpMethod.GET, HttpMethod.OPTIONS, HttpMethod.TRACE);
 	}
 
-	@SuppressWarnings("deprecation")
+	@SuppressWarnings("deprecation")  // HttpClientContext.REQUEST_CONFIG
 	private RequestConfig retrieveRequestConfig(HttpComponentsClientHttpRequestFactory factory) throws Exception {
 		URI uri = URI.create(baseUrl + "/status/ok");
 		HttpComponentsClientHttpRequest request = (HttpComponentsClientHttpRequest)
