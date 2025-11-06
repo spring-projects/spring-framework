@@ -42,7 +42,9 @@ import org.springframework.util.StringUtils;
 /**
  * {@link AnnotationMetadata} implementation that leverages
  * the {@link java.lang.classfile.ClassFile} API.
+ *
  * @author Brian Clozel
+ * @since 7.0
  */
 class ClassFileClassMetadata implements AnnotationMetadata {
 
@@ -66,9 +68,11 @@ class ClassFileClassMetadata implements AnnotationMetadata {
 
 	private @Nullable Set<String> annotationTypes;
 
+
 	ClassFileClassMetadata(String className, AccessFlags accessFlags, @Nullable String enclosingClassName,
 				@Nullable String superClassName, boolean independentInnerClass, Set<String> interfaceNames,
 				Set<String> memberClassNames, Set<MethodMetadata> declaredMethods, MergedAnnotations mergedAnnotations) {
+
 		this.className = className;
 		this.accessFlags = accessFlags;
 		this.enclosingClassName = enclosingClassName;
@@ -79,6 +83,7 @@ class ClassFileClassMetadata implements AnnotationMetadata {
 		this.declaredMethods = declaredMethods;
 		this.mergedAnnotations = mergedAnnotations;
 	}
+
 
 	@Override
 	public String getClassName() {
@@ -215,6 +220,7 @@ class ClassFileClassMetadata implements AnnotationMetadata {
 		return builder.build();
 	}
 
+
 	static class Builder {
 
 		private final ClassLoader clasLoader;
@@ -297,7 +303,6 @@ class ClassFileClassMetadata implements AnnotationMetadata {
 			return new ClassFileClassMetadata(this.className, this.accessFlags, this.enclosingClassName, this.superClassName,
 					independentInnerClass, this.interfaceNames, this.memberClassNames, this.declaredMethods, this.mergedAnnotations);
 		}
-
 	}
 
 }

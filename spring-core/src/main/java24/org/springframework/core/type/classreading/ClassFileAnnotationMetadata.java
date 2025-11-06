@@ -16,7 +16,6 @@
 
 package org.springframework.core.type.classreading;
 
-
 import java.lang.classfile.Annotation;
 import java.lang.classfile.AnnotationElement;
 import java.lang.classfile.AnnotationValue;
@@ -42,11 +41,15 @@ import org.springframework.util.ClassUtils;
 /**
  * Parse {@link RuntimeVisibleAnnotationsAttribute} into {@link MergedAnnotations}
  * instances.
+ *
  * @author Brian Clozel
+ * @since 7.0
  */
 abstract class ClassFileAnnotationMetadata {
 
-	static MergedAnnotations createMergedAnnotations(String className, RuntimeVisibleAnnotationsAttribute annotationAttribute, @Nullable ClassLoader classLoader) {
+	static MergedAnnotations createMergedAnnotations(
+			String className, RuntimeVisibleAnnotationsAttribute annotationAttribute, @Nullable ClassLoader classLoader) {
+
 		Set<MergedAnnotation<?>> annotations = annotationAttribute.annotations()
 				.stream()
 				.map(ann -> createMergedAnnotation(className, ann, classLoader))
@@ -56,7 +59,9 @@ abstract class ClassFileAnnotationMetadata {
 	}
 
 	@SuppressWarnings("unchecked")
-	private static <A extends java.lang.annotation.Annotation> @Nullable MergedAnnotation<A> createMergedAnnotation(String className, Annotation annotation, @Nullable ClassLoader classLoader) {
+	private static <A extends java.lang.annotation.Annotation> @Nullable MergedAnnotation<A> createMergedAnnotation(
+			String className, Annotation annotation, @Nullable ClassLoader classLoader) {
+
 		String typeName = fromTypeDescriptor(annotation.className().stringValue());
 		if (AnnotationFilter.PLAIN.matches(typeName)) {
 			return null;
@@ -78,7 +83,9 @@ abstract class ClassFileAnnotationMetadata {
 		}
 	}
 
-	private static @Nullable Object readAnnotationValue(String className, AnnotationValue elementValue, @Nullable ClassLoader classLoader) {
+	private static @Nullable Object readAnnotationValue(
+			String className, AnnotationValue elementValue, @Nullable ClassLoader classLoader) {
+
 		switch (elementValue) {
 			case AnnotationValue.OfConstant constantValue -> {
 				return constantValue.resolvedValue();
@@ -168,7 +175,6 @@ abstract class ClassFileAnnotationMetadata {
 
 
 	record Source(Annotation entryName) {
-
 	}
 
 }

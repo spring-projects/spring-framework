@@ -31,6 +31,7 @@ import org.springframework.core.type.ClassMetadata;
  * {@link MetadataReader} implementation based on the {@link ClassFile} API.
  *
  * @author Brian Clozel
+ * @since 7.0
  */
 final class ClassFileMetadataReader implements MetadataReader {
 
@@ -50,6 +51,7 @@ final class ClassFileMetadataReader implements MetadataReader {
 			return ClassFile.of().parse(bytes);
 		}
 	}
+
 
 	@Override
 	public Resource getResource() {

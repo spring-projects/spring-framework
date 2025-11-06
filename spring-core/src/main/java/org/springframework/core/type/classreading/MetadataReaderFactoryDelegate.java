@@ -37,4 +37,5 @@ abstract class MetadataReaderFactoryDelegate {
 	static MetadataReaderFactory create(@Nullable ClassLoader classLoader) {
 		return new SimpleMetadataReaderFactory(classLoader);
 	}
+
 }

@@ -25,6 +25,7 @@ import org.springframework.core.io.ResourceLoader;
  * For JDK >= 24, the {@link ClassFileMetadataReaderFactory} is being used.
  *
  * @author Brian Clozel
+ * @since 7.0
  * @see MetadataReaderFactory
  */
 abstract class MetadataReaderFactoryDelegate {
@@ -36,4 +37,5 @@ abstract class MetadataReaderFactoryDelegate {
 	static MetadataReaderFactory create(@Nullable ClassLoader classLoader) {
 		return new ClassFileMetadataReaderFactory(classLoader);
 	}
+
 }
