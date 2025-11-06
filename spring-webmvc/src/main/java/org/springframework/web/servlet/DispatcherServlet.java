@@ -1340,10 +1340,6 @@ public class DispatcherServlet extends FrameworkServlet {
 	protected ModelAndView processHandlerException(HttpServletRequest request, HttpServletResponse response,
 			@Nullable Object handler, Exception ex) throws Exception {
 
-		// Success and error responses may use different content types
-		request.removeAttribute(HandlerMapping.PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE);
-		// Reset the response content-type header and body buffer if the response is not committed already,
-		// leaving the other response headers in place.
 		try {
 			response.setHeader(HttpHeaders.CONTENT_TYPE, null);
 			response.setHeader(HttpHeaders.CONTENT_DISPOSITION, null);
