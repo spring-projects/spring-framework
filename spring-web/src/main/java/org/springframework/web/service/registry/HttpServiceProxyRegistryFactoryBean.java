@@ -131,16 +131,16 @@ public final class HttpServiceProxyRegistryFactoryBean
 
 	private static class GroupAdapterInitializer {
 
-		private static final String REST_CLIENT_HTTP_SERVICE_GROUP_ADAPTER = "org.springframework.web.client.support.RestClientHttpServiceGroupAdapter";
+		private static final String REST_CLIENT_HTTP_SERVICE_GROUP_ADAPTER =
+				"org.springframework.web.client.support.RestClientHttpServiceGroupAdapter";
 
-		private static final String WEB_CLIENT_HTTP_SERVICE_GROUP_ADAPTER = "org.springframework.web.reactive.function.client.support.WebClientHttpServiceGroupAdapter";
+		private static final String WEB_CLIENT_HTTP_SERVICE_GROUP_ADAPTER =
+				"org.springframework.web.reactive.function.client.support.WebClientHttpServiceGroupAdapter";
 
 		static Map<HttpServiceGroup.ClientType, HttpServiceGroupAdapter<?>> initGroupAdapters() {
 			Map<HttpServiceGroup.ClientType, HttpServiceGroupAdapter<?>> map = new LinkedHashMap<>(2);
-
 			addGroupAdapter(map, HttpServiceGroup.ClientType.REST_CLIENT, REST_CLIENT_HTTP_SERVICE_GROUP_ADAPTER);
 			addGroupAdapter(map, HttpServiceGroup.ClientType.WEB_CLIENT, WEB_CLIENT_HTTP_SERVICE_GROUP_ADAPTER);
-
 			return map;
 		}
 
@@ -167,14 +167,13 @@ public final class HttpServiceProxyRegistryFactoryBean
 
 		private final HttpServiceGroupAdapter<?> groupAdapter;
 
-		private final Object clientBuilder;
+		private @Nullable Object clientBuilder;
 
 		private final HttpServiceProxyFactory.Builder proxyFactoryBuilder = HttpServiceProxyFactory.builder();
 
 		ConfigurableGroup(HttpServiceGroup group) {
 			this.group = group;
 			this.groupAdapter = getGroupAdapter(group.clientType());
-			this.clientBuilder = this.groupAdapter.createClientBuilder();
 		}
 
 		private static HttpServiceGroupAdapter<?> getGroupAdapter(HttpServiceGroup.ClientType clientType) {
@@ -191,30 +190,37 @@ public final class HttpServiceProxyRegistryFactoryBean
 			return this.group;
 		}
 
-		@SuppressWarnings("unchecked")
 		public <CB> void applyClientCallback(HttpServiceGroupConfigurer.ClientCallback<CB> callback) {
-			callback.withClient(this.group, (CB) this.clientBuilder);
+			callback.withClient(this.group, getClientBuilder());
+		}
+
+		public <CB> void applyClientCallback(HttpServiceGroupConfigurer.InitializingClientCallback<CB> callback) {
+			Assert.state(this.clientBuilder == null, "Client builder already initialized");
+			this.clientBuilder = callback.initClient(this.group);
 		}
 
 		public void applyProxyFactoryCallback(HttpServiceGroupConfigurer.ProxyFactoryCallback callback) {
 			callback.withProxyFactory(this.group, this.proxyFactoryBuilder);
 		}
 
-		@SuppressWarnings("unchecked")
 		public <CB> void applyGroupCallback(HttpServiceGroupConfigurer.GroupCallback<CB> callback) {
-			callback.withGroup(this.group, (CB) this.clientBuilder, this.proxyFactoryBuilder);
+			callback.withGroup(this.group, getClientBuilder(), this.proxyFactoryBuilder);
+		}
+
+		@SuppressWarnings("unchecked")
+		private <CB> CB getClientBuilder() {
+			if (this.clientBuilder == null) {
+				this.clientBuilder = this.groupAdapter.createClientBuilder();
+			}
+			return (CB) this.clientBuilder;
 		}
 
 		public Map<Class<?>, Object> createProxies() {
 			Map<Class<?>, Object> map = new LinkedHashMap<>(this.group.httpServiceTypes().size());
-			HttpServiceProxyFactory factory = this.proxyFactoryBuilder.exchangeAdapter(initExchangeAdapter()).build();
+			HttpExchangeAdapter adapter = this.groupAdapter.createExchangeAdapter(getClientBuilder());
+			HttpServiceProxyFactory factory = this.proxyFactoryBuilder.exchangeAdapter(adapter).build();
 			this.group.httpServiceTypes().forEach(type -> map.put(type, factory.createClient(type)));
 			return map;
-		}
-
-		@SuppressWarnings("unchecked")
-		private <CB> HttpExchangeAdapter initExchangeAdapter() {
-			return ((HttpServiceGroupAdapter<CB>) this.groupAdapter).createExchangeAdapter((CB) this.clientBuilder);
 		}
 
 		@Override
@@ -255,6 +261,11 @@ public final class HttpServiceProxyRegistryFactoryBean
 
 		@Override
 		public void forEachClient(HttpServiceGroupConfigurer.ClientCallback<CB> callback) {
+			filterAndReset().forEach(group -> group.applyClientCallback(callback));
+		}
+
+		@Override
+		public void forEachClient(HttpServiceGroupConfigurer.InitializingClientCallback<CB> callback) {
 			filterAndReset().forEach(group -> group.applyClientCallback(callback));
 		}
 
