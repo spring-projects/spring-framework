@@ -38,8 +38,9 @@ import org.springframework.web.testfixture.http.client.MockClientHttpResponse;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 import static org.springframework.web.service.registry.HttpServiceGroup.ClientType.REST_CLIENT;
 
 /**
@@ -83,7 +84,7 @@ public class HttpServiceProxyRegistryFactoryBeanTests {
 		ClientHttpRequestFactory requestFactory = Mockito.mock(ClientHttpRequestFactory.class);
 		MockClientHttpRequest request = new MockClientHttpRequest();
 		request.setResponse(new MockClientHttpResponse());
-		when(requestFactory.createRequest(any(), any())).thenReturn(request);
+		given(requestFactory.createRequest(any(), any())).willReturn(request);
 
 		RestClient.Builder clientBuilder = RestClient.builder().baseUrl("/").requestFactory(requestFactory);
 		RestClientHttpServiceGroupConfigurer groupConfigurer = groups -> groups.forEachClient(group -> clientBuilder);
@@ -91,7 +92,7 @@ public class HttpServiceProxyRegistryFactoryBeanTests {
 		HttpServiceProxyRegistry registry = initProxyRegistry(groupConfigurer, groupsMetadata);
 		registry.getClient(EchoA.class).handle("foo");
 
-		verify(requestFactory);
+		verify(requestFactory, atLeastOnce()).createRequest(any(), any());
 	}
 
 	private HttpServiceProxyRegistry initProxyRegistry(
