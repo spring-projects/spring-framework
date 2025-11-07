@@ -30,6 +30,10 @@ final class VirtualThreadDelegate {
 
 	private final Thread.Builder threadBuilder = Thread.ofVirtual();
 
+	public VirtualThreadDelegate() {
+
+	}
+
 	public ThreadFactory virtualThreadFactory() {
 		return this.threadBuilder.factory();
 	}
