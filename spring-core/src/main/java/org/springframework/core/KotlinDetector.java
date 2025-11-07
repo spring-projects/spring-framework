@@ -38,6 +38,8 @@ public abstract class KotlinDetector {
 
 	private static final @Nullable Class<? extends Annotation> KOTLIN_JVM_INLINE;
 
+	private static final @Nullable Class<? extends Annotation> KOTLIN_SERIALIZABLE;
+
 	private static final @Nullable Class<?> KOTLIN_COROUTINE_CONTINUATION;
 
 	// For ConstantFieldFeature compliance, otherwise could be deduced from kotlinMetadata
@@ -49,6 +51,7 @@ public abstract class KotlinDetector {
 		ClassLoader classLoader = KotlinDetector.class.getClassLoader();
 		Class<?> metadata = null;
 		Class<?> jvmInline = null;
+		Class<?> serializable = null;
 		Class<?> coroutineContinuation = null;
 		try {
 			metadata = ClassUtils.forName("kotlin.Metadata", classLoader);
@@ -57,6 +60,12 @@ public abstract class KotlinDetector {
 			}
 			catch (ClassNotFoundException ex) {
 				// JVM inline support not available
+			}
+			try {
+				serializable = ClassUtils.forName("kotlinx.serialization.Serializable", classLoader);
+			}
+			catch (ClassNotFoundException ex) {
+				// Kotlin Serialization not available
 			}
 			try {
 				coroutineContinuation = ClassUtils.forName("kotlin.coroutines.Continuation", classLoader);
@@ -72,6 +81,7 @@ public abstract class KotlinDetector {
 		KOTLIN_PRESENT = (KOTLIN_METADATA != null);
 		KOTLIN_REFLECT_PRESENT = ClassUtils.isPresent("kotlin.reflect.full.KClasses", classLoader);
 		KOTLIN_JVM_INLINE = (Class<? extends Annotation>) jvmInline;
+		KOTLIN_SERIALIZABLE = (Class<? extends Annotation>) serializable;
 		KOTLIN_COROUTINE_CONTINUATION = coroutineContinuation;
 	}
 
@@ -123,6 +133,28 @@ public abstract class KotlinDetector {
 	 */
 	public static boolean isInlineClass(Class<?> clazz) {
 		return (KOTLIN_JVM_INLINE != null && clazz.getDeclaredAnnotation(KOTLIN_JVM_INLINE) != null);
+	}
+
+	/**
+	 * Determine whether the given {@code ResolvableType} is annotated with {@code @kotlinx.serialization.Serializable}
+	 * at type or generics level.
+	 * @since 7.0
+	 */
+	public static boolean hasSerializableAnnotation(ResolvableType type) {
+		Class<?> resolvedClass = type.resolve();
+		if (KOTLIN_SERIALIZABLE == null || resolvedClass == null) {
+			return false;
+		}
+		if (resolvedClass.isAnnotationPresent(KOTLIN_SERIALIZABLE)) {
+			return true;
+		}
+		@Nullable Class<?>[] resolvedGenerics = type.resolveGenerics();
+		for (Class<?> resolvedGeneric : resolvedGenerics) {
+			if (resolvedGeneric != null && resolvedGeneric.isAnnotationPresent(KOTLIN_SERIALIZABLE)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 }
