@@ -109,7 +109,7 @@ class RequestResponseBodyMethodProcessorKotlinTests {
 		val handlerMethod = HandlerMethod(SampleController(), method)
 		val methodReturnType = handlerMethod.returnType
 
-		val converters = listOf(KotlinSerializationJsonHttpMessageConverter())
+		val converters = listOf(KotlinSerializationJsonHttpMessageConverter { true })
 		val processor = RequestResponseBodyMethodProcessor(converters, null, listOf(KotlinResponseBodyAdvice()))
 
 		val returnValue: Any = SampleController().writeNullableMap()
@@ -179,7 +179,7 @@ class RequestResponseBodyMethodProcessorKotlinTests {
 		this.servletRequest.setContent(content.toByteArray(StandardCharsets.UTF_8))
 		this.servletRequest.setContentType("application/json")
 
-		val converters = listOf(StringHttpMessageConverter(), KotlinSerializationJsonHttpMessageConverter())
+		val converters = listOf(StringHttpMessageConverter(), KotlinSerializationJsonHttpMessageConverter { true })
 		val processor = RequestResponseBodyMethodProcessor(converters, null, listOf(KotlinRequestBodyAdvice()))
 
 		val method = SampleController::readNullableMap::javaMethod.get()!!
