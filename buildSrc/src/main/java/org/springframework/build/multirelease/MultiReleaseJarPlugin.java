@@ -41,6 +41,8 @@ import org.gradle.jvm.toolchain.JavaToolchainService;
  */
 public class MultiReleaseJarPlugin implements Plugin<Project> {
 
+	public static String VALIDATE_JAR_TASK_NAME = "validateMultiReleaseJar";
+
 	@Inject
 	protected JavaToolchainService getToolchains() {
 		throw new UnsupportedOperationException();
@@ -60,7 +62,7 @@ public class MultiReleaseJarPlugin implements Plugin<Project> {
 				tasks,
 				dependencies,
 				objects);
-		TaskProvider<MultiReleaseJarValidateTask> validateJarTask = tasks.register("validateJar", MultiReleaseJarValidateTask.class, (task) -> {
+		TaskProvider<MultiReleaseJarValidateTask> validateJarTask = tasks.register(VALIDATE_JAR_TASK_NAME, MultiReleaseJarValidateTask.class, (task) -> {
 			task.getJar().set(tasks.named("jar", Jar.class).flatMap(AbstractArchiveTask::getArchiveFile));
 		});
 		tasks.named("check", task -> task.dependsOn(validateJarTask));

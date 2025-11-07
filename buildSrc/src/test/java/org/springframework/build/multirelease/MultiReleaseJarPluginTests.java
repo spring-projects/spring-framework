@@ -26,11 +26,13 @@ import java.util.jar.Attributes;
 import java.util.jar.JarFile;
 import org.gradle.testkit.runner.BuildResult;
 import org.gradle.testkit.runner.GradleRunner;
+import org.gradle.testkit.runner.UnexpectedBuildFailure;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * Tests for {@link MultiReleaseJarPlugin}
@@ -114,6 +116,31 @@ public class MultiReleaseJarPluginTests {
 			assertThat(jar.entries().asIterator()).toIterable()
 					.anyMatch(entry -> entry.getName().equals("META-INF/versions/17/Main.class"));
 		}
+	}
+
+	@Test
+	void validateJar() throws IOException {
+		writeBuildFile("""
+				plugins {
+					id 'java'
+					id 'org.springframework.build.multiReleaseJar'
+				}
+				version = '1.2.3'
+				multiRelease { releaseVersions 17 }
+				""");
+		writeClass("src/main/java17", "Main.java", """
+				public class Main {
+				
+					public void method() {}
+				
+				}
+				""");
+		writeClass("src/main/java", "Main.java", """
+				public class Main {}
+				""");
+		assertThatThrownBy(() ->runGradle("validateMultiReleaseJar"))
+				.isInstanceOf(UnexpectedBuildFailure.class)
+				.hasMessageContaining("entry: META-INF/versions/17/Main.class, has a class version incompatible with an earlier version");
 	}
 
 	private void writeBuildFile(String buildContent) throws IOException {

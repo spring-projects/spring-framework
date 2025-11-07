@@ -27,11 +27,14 @@ import java.util.List;
 
 @CacheableTask
 public abstract class MultiReleaseJarValidateTask extends JavaExec {
+
 	@InputFile
 	@PathSensitive(PathSensitivity.RELATIVE)
 	public abstract RegularFileProperty getJar();
+
 	public MultiReleaseJarValidateTask() {
 		getMainModule().set("jdk.jartool");
 		getArgumentProviders().add(() -> List.of("--validate", "--file", getJar().get().getAsFile().getAbsolutePath()));
 	}
+
 }
