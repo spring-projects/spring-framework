@@ -18,6 +18,7 @@ package org.springframework.http.codec;
 
 import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
 
 import kotlinx.serialization.BinaryFormat;
 import kotlinx.serialization.KSerializer;
@@ -37,9 +38,11 @@ import org.springframework.util.MimeType;
  * Abstract base class for {@link Decoder} implementations that defer to Kotlin
  * {@linkplain BinaryFormat binary serializers}.
  *
- * <p>As of Spring Framework 7.0,
- * <a href="https://github.com/Kotlin/kotlinx.serialization/blob/master/docs/polymorphism.md#open-polymorphism">open polymorphism</a>
- * is supported.
+ * <p>As of Spring Framework 7.0, by default it only decodes types annotated with
+ * {@link kotlinx.serialization.Serializable @Serializable} at type or generics level
+ * since it allows combined usage with other general purpose decoders without conflicts.
+ * Alternative constructors with a {@code Predicate<ResolvableType>} parameter can be used
+ * to customize this behavior.
  *
  * @author Sebastien Deleuze
  * @author Iain Henderson
@@ -54,8 +57,24 @@ public abstract class KotlinSerializationBinaryDecoder<T extends BinaryFormat> e
 	private final ByteArrayDecoder byteArrayDecoder = new ByteArrayDecoder();
 
 
+	/**
+	 * Creates a new instance with the given format and supported mime types
+	 * which only decodes types annotated with
+	 * {@link kotlinx.serialization.Serializable @Serializable} at type or
+	 * generics level.
+	 */
 	public KotlinSerializationBinaryDecoder(T format, MimeType... supportedMimeTypes) {
 		super(format, supportedMimeTypes);
+	}
+
+	/**
+	 * Creates a new instance with the given format and supported mime types
+	 * which only decodes types for which the specified predicate returns
+	 * {@code true}.
+	 * @since 7.0
+	 */
+	public KotlinSerializationBinaryDecoder(T format, Predicate<ResolvableType> typePredicate, MimeType... supportedMimeTypes) {
+		super(format, typePredicate, supportedMimeTypes);
 	}
 
 	/**

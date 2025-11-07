@@ -34,7 +34,7 @@ import java.math.BigDecimal
  * @author Sebastien Deleuze
  */
 class CustomKotlinSerializationJsonEncoderTests :
-		AbstractEncoderTests<KotlinSerializationJsonEncoder>(KotlinSerializationJsonEncoder(customJson)) {
+		AbstractEncoderTests<KotlinSerializationJsonEncoder>(KotlinSerializationJsonEncoder(customJson) { true }) {
 
 	@Test
 	override fun canEncode() {

@@ -40,7 +40,7 @@ import reactor.test.StepVerifier.FirstStep
  * @author Iain Henderson
  */
 @ExperimentalSerializationApi
-class KotlinSerializationProtobufDecoderTests : AbstractDecoderTests<KotlinSerializationProtobufDecoder>(KotlinSerializationProtobufDecoder()) {
+class KotlinSerializationProtobufDecoderTests : AbstractDecoderTests<KotlinSerializationProtobufDecoder>(KotlinSerializationProtobufDecoder { true }) {
 
 	@Test
 	override fun canDecode() {
@@ -56,7 +56,7 @@ class KotlinSerializationProtobufDecoderTests : AbstractDecoderTests<KotlinSeria
 			assertThat(decoder.canDecode(ResolvableType.forClass(OrderedImpl::class.java), mimeType)).isFalse()
 		}
 		assertThat(decoder.canDecode(ResolvableType.forClass(Pojo::class.java), null)).isTrue()
-		assertThat(decoder.canDecode(ResolvableType.forClass(String::class.java), null)).isFalse()
+		assertThat(decoder.canDecode(ResolvableType.forClass(String::class.java), null)).isTrue()
 		assertThat(decoder.canDecode(ResolvableType.forClass(Pojo::class.java), MediaType.APPLICATION_XML)).isFalse()
 		assertThat(decoder.canDecode(ResolvableType.forClassWithGenerics(ArrayList::class.java, Int::class.java), MediaType.APPLICATION_PDF)).isFalse()
 	}
@@ -106,7 +106,7 @@ class KotlinSerializationProtobufDecoderTests : AbstractDecoderTests<KotlinSeria
 
 	private fun byteBuffer(value: Any): Mono<DataBuffer> {
 		return Mono.defer {
-			val bytes = ProtoBuf.Default.encodeToByteArray(serializer(Pojo::class.java), value)
+			val bytes = ProtoBuf.encodeToByteArray(serializer(Pojo::class.java), value)
 			val buffer = bufferFactory.allocateBuffer(bytes.size)
 			buffer.write(bytes)
 			Mono.just(buffer)
