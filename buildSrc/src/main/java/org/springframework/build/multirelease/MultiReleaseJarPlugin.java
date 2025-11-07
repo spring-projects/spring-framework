@@ -27,6 +27,9 @@ import org.gradle.api.plugins.ExtensionContainer;
 import org.gradle.api.plugins.JavaPlugin;
 import org.gradle.api.plugins.JavaPluginExtension;
 import org.gradle.api.tasks.TaskContainer;
+import org.gradle.api.tasks.TaskProvider;
+import org.gradle.api.tasks.bundling.AbstractArchiveTask;
+import org.gradle.jvm.tasks.Jar;
 import org.gradle.jvm.toolchain.JavaToolchainService;
 
 /**
@@ -57,5 +60,9 @@ public class MultiReleaseJarPlugin implements Plugin<Project> {
 				tasks,
 				dependencies,
 				objects);
+		TaskProvider<MultiReleaseJarValidateTask> validateJarTask = tasks.register("validateJar", MultiReleaseJarValidateTask.class, (task) -> {
+			task.getJar().set(tasks.named("jar", Jar.class).flatMap(AbstractArchiveTask::getArchiveFile));
+		});
+		tasks.named("check", task -> task.dependsOn(validateJarTask));
 	}
 }
