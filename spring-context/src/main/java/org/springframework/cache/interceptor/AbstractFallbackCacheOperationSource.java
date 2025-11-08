@@ -141,7 +141,7 @@ public abstract class AbstractFallbackCacheOperationSource implements CacheOpera
 			return null;
 		}
 		// Skip methods declared on BeanFactoryAware and co.
-		if (Aware.class.isAssignableFrom(method.getDeclaringClass())) {
+		if (method.getDeclaringClass().isInterface() && Aware.class.isAssignableFrom(method.getDeclaringClass())) {
 			return null;
 		}
 
