@@ -429,14 +429,14 @@ class BridgeMethodResolverTests {
 	}
 
 
-	public abstract static class AbstractDateAdder implements Adder<Date> {
+	public abstract static class AbstractAdder<T extends Serializable> implements Adder<T> {
 
 		@Override
-		public abstract void add(Date date);
+		public abstract void add(T item);
 	}
 
 
-	public static class DateAdder extends AbstractDateAdder {
+	public static class DateAdder extends AbstractAdder<Date> {
 
 		@Override
 		public void add(Date date) {

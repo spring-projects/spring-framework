@@ -25,6 +25,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.aop.support.AopUtils;
+import org.springframework.beans.factory.Aware;
 import org.springframework.context.EmbeddedValueResolverAware;
 import org.springframework.core.MethodClassKey;
 import org.springframework.lang.Nullable;
@@ -164,6 +165,10 @@ public abstract class AbstractFallbackTransactionAttributeSource
 	protected TransactionAttribute computeTransactionAttribute(Method method, @Nullable Class<?> targetClass) {
 		// Don't allow non-public methods, as configured.
 		if (allowPublicMethodsOnly() && !Modifier.isPublic(method.getModifiers())) {
+			return null;
+		}
+		// Skip methods declared on BeanFactoryAware and co.
+		if (Aware.class.isAssignableFrom(method.getDeclaringClass())) {
 			return null;
 		}
 
