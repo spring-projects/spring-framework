@@ -28,6 +28,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.converter.cbor.JacksonCborHttpMessageConverter;
+import org.springframework.http.converter.cbor.KotlinSerializationCborHttpMessageConverter;
 import org.springframework.http.converter.feed.AtomFeedHttpMessageConverter;
 import org.springframework.http.converter.feed.RssChannelHttpMessageConverter;
 import org.springframework.http.converter.json.JacksonJsonHttpMessageConverter;
@@ -113,9 +114,10 @@ class DefaultHttpMessageConvertersTests {
 					StringHttpMessageConverter.class, ResourceHttpMessageConverter.class,
 					AllEncompassingFormHttpMessageConverter.class, KotlinSerializationJsonHttpMessageConverter.class,
 					JacksonJsonHttpMessageConverter.class, JacksonSmileHttpMessageConverter.class,
-					JacksonCborHttpMessageConverter.class, JacksonYamlHttpMessageConverter.class,
-					JacksonXmlHttpMessageConverter.class, KotlinSerializationProtobufHttpMessageConverter.class,
-					AtomFeedHttpMessageConverter.class, RssChannelHttpMessageConverter.class);
+					KotlinSerializationCborHttpMessageConverter.class, JacksonCborHttpMessageConverter.class,
+					JacksonYamlHttpMessageConverter.class, JacksonXmlHttpMessageConverter.class,
+					KotlinSerializationProtobufHttpMessageConverter.class, AtomFeedHttpMessageConverter.class,
+					RssChannelHttpMessageConverter.class);
 		}
 
 		@Test
@@ -127,9 +129,10 @@ class DefaultHttpMessageConvertersTests {
 					ByteArrayHttpMessageConverter.class, StringHttpMessageConverter.class,
 					ResourceHttpMessageConverter.class, KotlinSerializationJsonHttpMessageConverter.class,
 					JacksonJsonHttpMessageConverter.class, JacksonSmileHttpMessageConverter.class,
-					JacksonCborHttpMessageConverter.class, JacksonYamlHttpMessageConverter.class,
-					JacksonXmlHttpMessageConverter.class, KotlinSerializationProtobufHttpMessageConverter.class,
-					AtomFeedHttpMessageConverter.class, RssChannelHttpMessageConverter.class);
+					KotlinSerializationCborHttpMessageConverter.class, JacksonCborHttpMessageConverter.class,
+					JacksonYamlHttpMessageConverter.class, JacksonXmlHttpMessageConverter.class,
+					KotlinSerializationProtobufHttpMessageConverter.class, AtomFeedHttpMessageConverter.class,
+					RssChannelHttpMessageConverter.class);
 		}
 
 		@Test
@@ -148,9 +151,10 @@ class DefaultHttpMessageConvertersTests {
 					StringHttpMessageConverter.class, ResourceHttpMessageConverter.class,
 					AllEncompassingFormHttpMessageConverter.class, KotlinSerializationJsonHttpMessageConverter.class,
 					JacksonJsonHttpMessageConverter.class, JacksonSmileHttpMessageConverter.class,
-					JacksonCborHttpMessageConverter.class, JacksonYamlHttpMessageConverter.class,
-					JacksonXmlHttpMessageConverter.class, KotlinSerializationProtobufHttpMessageConverter.class,
-					AtomFeedHttpMessageConverter.class, RssChannelHttpMessageConverter.class);
+					KotlinSerializationCborHttpMessageConverter.class, JacksonCborHttpMessageConverter.class,
+					JacksonYamlHttpMessageConverter.class, JacksonXmlHttpMessageConverter.class,
+					KotlinSerializationProtobufHttpMessageConverter.class, AtomFeedHttpMessageConverter.class,
+					RssChannelHttpMessageConverter.class);
 		}
 
 		@Test
@@ -216,9 +220,10 @@ class DefaultHttpMessageConvertersTests {
 					ResourceHttpMessageConverter.class, ResourceRegionHttpMessageConverter.class,
 					AllEncompassingFormHttpMessageConverter.class, KotlinSerializationJsonHttpMessageConverter.class,
 					JacksonJsonHttpMessageConverter.class, JacksonSmileHttpMessageConverter.class,
-					JacksonCborHttpMessageConverter.class, JacksonYamlHttpMessageConverter.class,
-					JacksonXmlHttpMessageConverter.class, KotlinSerializationProtobufHttpMessageConverter.class,
-					AtomFeedHttpMessageConverter.class, RssChannelHttpMessageConverter.class);
+					KotlinSerializationCborHttpMessageConverter.class, JacksonCborHttpMessageConverter.class,
+					JacksonYamlHttpMessageConverter.class, JacksonXmlHttpMessageConverter.class,
+					KotlinSerializationProtobufHttpMessageConverter.class, AtomFeedHttpMessageConverter.class,
+					RssChannelHttpMessageConverter.class);
 		}
 
 		@Test
@@ -230,9 +235,10 @@ class DefaultHttpMessageConvertersTests {
 					ByteArrayHttpMessageConverter.class, StringHttpMessageConverter.class,
 					ResourceHttpMessageConverter.class, KotlinSerializationJsonHttpMessageConverter.class,
 					JacksonJsonHttpMessageConverter.class, JacksonSmileHttpMessageConverter.class,
-					JacksonCborHttpMessageConverter.class, JacksonYamlHttpMessageConverter.class,
-					JacksonXmlHttpMessageConverter.class, KotlinSerializationProtobufHttpMessageConverter.class,
-					AtomFeedHttpMessageConverter.class, RssChannelHttpMessageConverter.class);
+					KotlinSerializationCborHttpMessageConverter.class, JacksonCborHttpMessageConverter.class,
+					JacksonYamlHttpMessageConverter.class, JacksonXmlHttpMessageConverter.class,
+					KotlinSerializationProtobufHttpMessageConverter.class, AtomFeedHttpMessageConverter.class,
+					RssChannelHttpMessageConverter.class);
 		}
 
 		@Test
@@ -252,9 +258,10 @@ class DefaultHttpMessageConvertersTests {
 					ResourceHttpMessageConverter.class, ResourceRegionHttpMessageConverter.class,
 					AllEncompassingFormHttpMessageConverter.class, KotlinSerializationJsonHttpMessageConverter.class,
 					JacksonJsonHttpMessageConverter.class, JacksonSmileHttpMessageConverter.class,
-					JacksonCborHttpMessageConverter.class, JacksonYamlHttpMessageConverter.class,
-					JacksonXmlHttpMessageConverter.class, KotlinSerializationProtobufHttpMessageConverter.class,
-					AtomFeedHttpMessageConverter.class, RssChannelHttpMessageConverter.class);
+					KotlinSerializationCborHttpMessageConverter.class, JacksonCborHttpMessageConverter.class,
+					JacksonYamlHttpMessageConverter.class, JacksonXmlHttpMessageConverter.class,
+					KotlinSerializationProtobufHttpMessageConverter.class, AtomFeedHttpMessageConverter.class,
+					RssChannelHttpMessageConverter.class);
 		}
 
 		@Test

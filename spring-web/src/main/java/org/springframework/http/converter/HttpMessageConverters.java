@@ -27,6 +27,7 @@ import java.util.function.Consumer;
  * Finally, {@link Builder#configureMessageConverters(Consumer) default and custom converters can be configured}.
  *
  * @author Brian Clozel
+ * @author Sebastien Deleuze
  * @since 7.0
  */
 public interface HttpMessageConverters extends Iterable<HttpMessageConverter<?>> {
@@ -40,9 +41,10 @@ public interface HttpMessageConverters extends Iterable<HttpMessageConverter<?>>
 	 * <li>{@link StringHttpMessageConverter} with the {@link java.nio.charset.StandardCharsets#ISO_8859_1} charset
 	 * <li>{@link ResourceHttpMessageConverter}, with resource streaming support disabled
 	 * <li>a Multipart converter, using all detected and custom converters for part conversion
-	 * <li>A Kotlin Serialization converter
+	 * <li>A Kotlin Serialization JSON converter
 	 * <li>A JSON converter
 	 * <li>A Smile converter
+	 * <li>A Kotlin Serialization CBOR converter
 	 * <li>A CBOR converter
 	 * <li>A YAML converter
 	 * <li>An XML converter
@@ -63,9 +65,10 @@ public interface HttpMessageConverters extends Iterable<HttpMessageConverter<?>>
 	 *     <li>{@link StringHttpMessageConverter} with the {@link java.nio.charset.StandardCharsets#ISO_8859_1} charset
 	 *     <li>{@link ResourceHttpMessageConverter}
 	 *     <li>{@link ResourceRegionHttpMessageConverter}
-	 *     <li>A Kotlin Serialization converter
+	 *     <li>A Kotlin Serialization JSON converter
 	 *     <li>A JSON converter
 	 *     <li>A Smile converter
+	 *     <li>A Kotlin Serialization CBOR converter
 	 *     <li>A CBOR converter
 	 *     <li>A YAML converter
 	 *     <li>An XML converter
@@ -127,6 +130,14 @@ public interface HttpMessageConverters extends Iterable<HttpMessageConverter<?>>
 		 * @see org.springframework.http.converter.smile.JacksonSmileHttpMessageConverter
 		 */
 		T withSmileConverter(HttpMessageConverter<?> smileMessageConverter);
+
+		/**
+		 * Override the default String {@code HttpMessageConverter}
+		 * with any converter supporting the Kotlin Serialization conversion for CBOR.
+		 * @param kotlinSerializationConverter the converter instance to use
+		 * @see org.springframework.http.converter.cbor.KotlinSerializationCborHttpMessageConverter
+		 */
+		T withKotlinSerializationCborConverter(HttpMessageConverter<?> kotlinSerializationConverter);
 
 		/**
 		 * Override the default Jackson 3.x CBOR {@code HttpMessageConverter}

@@ -50,6 +50,7 @@ import org.springframework.util.ClassUtils;
  * Default implementation for {@link HttpMessageConverters}.
  *
  * @author Brian Clozel
+ * @author Sebastien Deleuze
  */
 @SuppressWarnings("removal")
 class DefaultHttpMessageConverters implements HttpMessageConverters {
@@ -122,6 +123,8 @@ class DefaultHttpMessageConverters implements HttpMessageConverters {
 
 		@Nullable HttpMessageConverter<?> smileConverter;
 
+		@Nullable HttpMessageConverter<?> kotlinCborConverter;
+
 		@Nullable HttpMessageConverter<?> cborConverter;
 
 		@Nullable HttpMessageConverter<?> yamlConverter;
@@ -187,6 +190,11 @@ class DefaultHttpMessageConverters implements HttpMessageConverters {
 			this.smileConverter = smileConverter;
 		}
 
+		void setKotlinSerializationCborConverter(HttpMessageConverter<?> kotlinCborConverter) {
+			Assert.notNull(kotlinCborConverter, "kotlinCborConverter must not be null");
+			this.kotlinCborConverter = kotlinCborConverter;
+		}
+
 		void setCborConverter(HttpMessageConverter<?> cborConverter) {
 			Assert.isTrue(cborConverter.getSupportedMediaTypes().contains(MediaType.APPLICATION_CBOR),
 					"cborConverter should support 'application/cbor'");
@@ -230,6 +238,9 @@ class DefaultHttpMessageConverters implements HttpMessageConverters {
 			if (this.smileConverter != null) {
 				converters.add(this.smileConverter);
 			}
+			if (this.kotlinCborConverter != null) {
+				converters.add(this.kotlinCborConverter);
+			}
 			if (this.cborConverter != null) {
 				converters.add(this.cborConverter);
 			}
@@ -263,7 +274,12 @@ class DefaultHttpMessageConverters implements HttpMessageConverters {
 			}
 			if (this.kotlinJsonConverter == null) {
 				if (KOTLIN_SERIALIZATION_JSON_PRESENT) {
-					this.kotlinJsonConverter = new KotlinSerializationJsonHttpMessageConverter();
+					if (this.jsonConverter != null || JACKSON_PRESENT || JACKSON_2_PRESENT || GSON_PRESENT || JSONB_PRESENT) {
+						this.kotlinJsonConverter = new KotlinSerializationJsonHttpMessageConverter();
+					}
+					else {
+						this.kotlinJsonConverter = new KotlinSerializationJsonHttpMessageConverter(type -> true);
+					}
 				}
 			}
 			if (this.jsonConverter == null) {
@@ -302,15 +318,22 @@ class DefaultHttpMessageConverters implements HttpMessageConverters {
 				}
 			}
 
+			if (this.kotlinCborConverter == null) {
+				if (KOTLIN_SERIALIZATION_CBOR_PRESENT) {
+					if (this.cborConverter != null || JACKSON_CBOR_PRESENT || JACKSON_2_CBOR_PRESENT) {
+						this.kotlinCborConverter = new KotlinSerializationCborHttpMessageConverter();
+					}
+					else {
+						this.kotlinCborConverter = new KotlinSerializationCborHttpMessageConverter(type -> true);
+					}
+				}
+			}
 			if (this.cborConverter == null) {
 				if (JACKSON_CBOR_PRESENT) {
 					this.cborConverter = new JacksonCborHttpMessageConverter();
 				}
 				else if (JACKSON_2_CBOR_PRESENT) {
 					this.cborConverter = new MappingJackson2CborHttpMessageConverter();
-				}
-				else if (KOTLIN_SERIALIZATION_CBOR_PRESENT) {
-					this.cborConverter = new KotlinSerializationCborHttpMessageConverter();
 				}
 			}
 
@@ -325,7 +348,7 @@ class DefaultHttpMessageConverters implements HttpMessageConverters {
 
 			if (this.protobufConverter == null) {
 				if (KOTLIN_SERIALIZATION_PROTOBUF_PRESENT) {
-					this.protobufConverter = new KotlinSerializationProtobufHttpMessageConverter();
+					this.protobufConverter = new KotlinSerializationProtobufHttpMessageConverter(type -> true);
 				}
 			}
 
@@ -376,6 +399,12 @@ class DefaultHttpMessageConverters implements HttpMessageConverters {
 		@Override
 		public ClientBuilder withSmileConverter(HttpMessageConverter<?> smileConverter) {
 			setSmileConverter(smileConverter);
+			return this;
+		}
+
+		@Override
+		public ClientBuilder withKotlinSerializationCborConverter(HttpMessageConverter<?> kotlinSerializationCborConverter) {
+			setKotlinSerializationCborConverter(kotlinSerializationCborConverter);
 			return this;
 		}
 
@@ -467,6 +496,12 @@ class DefaultHttpMessageConverters implements HttpMessageConverters {
 		@Override
 		public ServerBuilder withSmileConverter(HttpMessageConverter<?> smileConverter) {
 			setSmileConverter(smileConverter);
+			return this;
+		}
+
+		@Override
+		public ServerBuilder withKotlinSerializationCborConverter(HttpMessageConverter<?> kotlinSerializationCborConverter) {
+			setKotlinSerializationCborConverter(kotlinSerializationCborConverter);
 			return this;
 		}
 
