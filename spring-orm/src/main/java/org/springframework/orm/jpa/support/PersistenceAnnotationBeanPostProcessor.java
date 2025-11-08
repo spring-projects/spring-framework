@@ -20,7 +20,6 @@ import java.beans.PropertyDescriptor;
 import java.io.Serializable;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Member;
-import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -423,7 +422,7 @@ public class PersistenceAnnotationBeanPostProcessor implements InstantiationAwar
 		}
 
 		List<InjectionMetadata.InjectedElement> elements = new ArrayList<>();
-		Class<?> targetClass = clazz;
+		Class<?> targetClass = ClassUtils.getUserClass(clazz);
 
 		do {
 			final List<InjectionMetadata.InjectedElement> currElements = new ArrayList<>();
@@ -439,21 +438,20 @@ public class PersistenceAnnotationBeanPostProcessor implements InstantiationAwar
 			});
 
 			ReflectionUtils.doWithLocalMethods(targetClass, method -> {
-				Method bridgedMethod = BridgeMethodResolver.findBridgedMethod(method);
-				if (!BridgeMethodResolver.isVisibilityBridgeMethodPair(method, bridgedMethod)) {
+				if (method.isBridge()) {
 					return;
 				}
-				if ((bridgedMethod.isAnnotationPresent(PersistenceContext.class) ||
-						bridgedMethod.isAnnotationPresent(PersistenceUnit.class)) &&
-						method.equals(ClassUtils.getMostSpecificMethod(method, clazz))) {
+				if ((method.isAnnotationPresent(PersistenceContext.class) ||
+						method.isAnnotationPresent(PersistenceUnit.class)) &&
+						method.equals(BridgeMethodResolver.getMostSpecificMethod(method, clazz))) {
 					if (Modifier.isStatic(method.getModifiers())) {
 						throw new IllegalStateException("Persistence annotations are not supported on static methods");
 					}
 					if (method.getParameterCount() != 1) {
 						throw new IllegalStateException("Persistence annotation requires a single-arg method: " + method);
 					}
-					PropertyDescriptor pd = BeanUtils.findPropertyForMethod(bridgedMethod, clazz);
-					currElements.add(new PersistenceElement(method, bridgedMethod, pd));
+					PropertyDescriptor pd = BeanUtils.findPropertyForMethod(method, clazz);
+					currElements.add(new PersistenceElement(method, method, pd));
 				}
 			});
 

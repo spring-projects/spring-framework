@@ -399,7 +399,7 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 		}
 
 		List<InjectionMetadata.InjectedElement> elements = new ArrayList<>();
-		Class<?> targetClass = clazz;
+		Class<?> targetClass = ClassUtils.getUserClass(clazz);
 
 		do {
 			final List<InjectionMetadata.InjectedElement> currElements = new ArrayList<>();
@@ -422,24 +422,23 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 			});
 
 			ReflectionUtils.doWithLocalMethods(targetClass, method -> {
-				Method bridgedMethod = BridgeMethodResolver.findBridgedMethod(method);
-				if (!BridgeMethodResolver.isVisibilityBridgeMethodPair(method, bridgedMethod)) {
+				if (method.isBridge()) {
 					return;
 				}
-				if (EJB_ANNOTATION_TYPE != null && bridgedMethod.isAnnotationPresent(EJB_ANNOTATION_TYPE)) {
-					if (method.equals(ClassUtils.getMostSpecificMethod(method, clazz))) {
+				if (EJB_ANNOTATION_TYPE != null && method.isAnnotationPresent(EJB_ANNOTATION_TYPE)) {
+					if (method.equals(BridgeMethodResolver.getMostSpecificMethod(method, clazz))) {
 						if (Modifier.isStatic(method.getModifiers())) {
 							throw new IllegalStateException("@EJB annotation is not supported on static methods");
 						}
 						if (method.getParameterCount() != 1) {
 							throw new IllegalStateException("@EJB annotation requires a single-arg method: " + method);
 						}
-						PropertyDescriptor pd = BeanUtils.findPropertyForMethod(bridgedMethod, clazz);
-						currElements.add(new EjbRefElement(method, bridgedMethod, pd));
+						PropertyDescriptor pd = BeanUtils.findPropertyForMethod(method, clazz);
+						currElements.add(new EjbRefElement(method, method, pd));
 					}
 				}
-				else if (JAKARTA_RESOURCE_TYPE != null && bridgedMethod.isAnnotationPresent(JAKARTA_RESOURCE_TYPE)) {
-					if (method.equals(ClassUtils.getMostSpecificMethod(method, clazz))) {
+				else if (JAKARTA_RESOURCE_TYPE != null && method.isAnnotationPresent(JAKARTA_RESOURCE_TYPE)) {
+					if (method.equals(BridgeMethodResolver.getMostSpecificMethod(method, clazz))) {
 						if (Modifier.isStatic(method.getModifiers())) {
 							throw new IllegalStateException("@Resource annotation is not supported on static methods");
 						}
@@ -448,8 +447,8 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 							throw new IllegalStateException("@Resource annotation requires a single-arg method: " + method);
 						}
 						if (!this.ignoredResourceTypes.contains(paramTypes[0].getName())) {
-							PropertyDescriptor pd = BeanUtils.findPropertyForMethod(bridgedMethod, clazz);
-							currElements.add(new ResourceElement(method, bridgedMethod, pd));
+							PropertyDescriptor pd = BeanUtils.findPropertyForMethod(method, clazz);
+							currElements.add(new ResourceElement(method, method, pd));
 						}
 					}
 				}
