@@ -113,7 +113,7 @@ public @interface Retryable {
 
 	/**
 	 * The maximum number of retry attempts, as a configurable String.
-	 * A non-empty value specified here overrides the {@link #maxAttempts()} attribute.
+	 * <p>A non-empty value specified here overrides the {@link #maxRetries()} attribute.
 	 * <p>This supports Spring-style "${...}" placeholders as well as SpEL expressions.
 	 * @see #maxAttempts()
 	 */
@@ -133,7 +133,7 @@ public @interface Retryable {
 
 	/**
 	 * The base delay after the initial invocation, as a duration String.
-	 * A non-empty value specified here overrides the {@link #delay()} attribute.
+	 * <p>A non-empty value specified here overrides the {@link #delay()} attribute.
 	 * <p>The duration String can be in several formats:
 	 * <ul>
 	 * <li>a plain integer &mdash; which is interpreted to represent a duration in
@@ -169,7 +169,7 @@ public @interface Retryable {
 
 	/**
 	 * A jitter value for the base retry attempt, as a duration String.
-	 * A non-empty value specified here overrides the {@link #jitter()} attribute.
+	 * <p>A non-empty value specified here overrides the {@link #jitter()} attribute.
 	 * <p>The duration String can be in several formats:
 	 * <ul>
 	 * <li>a plain integer &mdash; which is interpreted to represent a duration in
@@ -201,7 +201,7 @@ public @interface Retryable {
 
 	/**
 	 * A multiplier for a delay for the next retry attempt, as a configurable String.
-	 * A non-empty value specified here overrides the {@link #multiplier()} attribute.
+	 * <p>A non-empty value specified here overrides the {@link #multiplier()} attribute.
 	 * <p>This supports Spring-style "${...}" placeholders as well as SpEL expressions.
 	 * @see #multiplier()
 	 */
@@ -221,7 +221,7 @@ public @interface Retryable {
 
 	/**
 	 * The maximum delay for any retry attempt, as a duration String.
-	 * A non-empty value specified here overrides the {@link #maxDelay()} attribute.
+	 * <p>A non-empty value specified here overrides the {@link #maxDelay()} attribute.
 	 * <p>The duration String can be in several formats:
 	 * <ul>
 	 * <li>a plain integer &mdash; which is interpreted to represent a duration in
