@@ -29,17 +29,17 @@ import static org.springframework.core.retry.RetryPolicy.Builder.DEFAULT_DELAY;
 import static org.springframework.util.backoff.BackOffExecution.STOP;
 
 /**
- * Max attempts {@link RetryPolicy} tests.
+ * Max retries {@link RetryPolicy} tests.
  *
  * @author Mahmoud Ben Hassine
  * @author Sam Brannen
  * @since 7.0
  */
-class MaxAttemptsRetryPolicyTests {
+class MaxRetriesRetryPolicyTests {
 
 	@Test
-	void maxAttempts() {
-		var retryPolicy = RetryPolicy.builder().maxAttempts(2).delay(Duration.ZERO).build();
+	void maxRetries() {
+		var retryPolicy = RetryPolicy.builder().maxRetries(2).delay(Duration.ZERO).build();
 		var backOffExecution = retryPolicy.getBackOff().start();
 		var throwable = mock(Throwable.class);
 
@@ -55,8 +55,8 @@ class MaxAttemptsRetryPolicyTests {
 	}
 
 	@Test
-	void maxAttemptsZero() {
-		var retryPolicy = RetryPolicy.builder().maxAttempts(0).delay(Duration.ZERO).build();
+	void maxRetriesZero() {
+		var retryPolicy = RetryPolicy.builder().maxRetries(0).delay(Duration.ZERO).build();
 		var backOffExecution = retryPolicy.getBackOff().start();
 		var throwable = mock(Throwable.class);
 
@@ -67,9 +67,9 @@ class MaxAttemptsRetryPolicyTests {
 	}
 
 	@Test
-	void maxAttemptsAndPredicate() {
+	void maxRetriesAndPredicate() {
 		var retryPolicy = RetryPolicy.builder()
-				.maxAttempts(4)
+				.maxRetries(4)
 				.delay(Duration.ofMillis(1))
 				.predicate(NumberFormatException.class::isInstance)
 				.build();
@@ -94,9 +94,9 @@ class MaxAttemptsRetryPolicyTests {
 	}
 
 	@Test
-	void maxAttemptsWithIncludesAndExcludes() {
+	void maxRetriesWithIncludesAndExcludes() {
 		var retryPolicy = RetryPolicy.builder()
-				.maxAttempts(6)
+				.maxRetries(6)
 				.includes(RuntimeException.class, IOException.class)
 				.excludes(FileNotFoundException.class, CustomFileSystemException.class)
 				.build();

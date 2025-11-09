@@ -31,8 +31,8 @@ import org.springframework.util.backoff.BackOffExecution;
  * A basic implementation of {@link RetryOperations} that executes and potentially
  * retries a {@link Retryable} operation based on a configured {@link RetryPolicy}.
  *
- * <p>By default, a retryable operation will be retried at most 3 times with a
- * fixed backoff of 1 second.
+ * <p>By default, a retryable operation will be executed once and potentially
+ * retried at most 3 times with a fixed backoff of 1 second.
  *
  * <p>A {@link RetryListener} can be {@linkplain #setRetryListener(RetryListener)
  * registered} to react to events published during key retry phases (before a
@@ -83,7 +83,7 @@ public class RetryTemplate implements RetryOperations {
 	 * <p>Defaults to {@code RetryPolicy.withDefaults()}.
 	 * @param retryPolicy the retry policy to use
 	 * @see RetryPolicy#withDefaults()
-	 * @see RetryPolicy#withMaxAttempts(long)
+	 * @see RetryPolicy#withMaxRetries(long)
 	 * @see RetryPolicy#builder()
 	 */
 	public void setRetryPolicy(RetryPolicy retryPolicy) {

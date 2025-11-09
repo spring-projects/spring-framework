@@ -106,18 +106,21 @@ public @interface Retryable {
 	Class<? extends MethodRetryPredicate> predicate() default MethodRetryPredicate.class;
 
 	/**
-	 * The maximum number of retry attempts, in addition to the initial invocation.
+	 * The maximum number of retry attempts.
+	 * <p>Note that {@code total attempts = 1 initial attempt + maxRetries attempts}.
+	 * Thus, if {@code maxRetries} is set to 4, the annotated method will be invoked
+	 * at least once and at most 5 times.
 	 * <p>The default is 3.
 	 */
-	long maxAttempts() default 3;
+	long maxRetries() default 3;
 
 	/**
 	 * The maximum number of retry attempts, as a configurable String.
-	 * <p>A non-empty value specified here overrides the {@link #maxAttempts()} attribute.
+	 * <p>A non-empty value specified here overrides the {@link #maxRetries()} attribute.
 	 * <p>This supports Spring-style "${...}" placeholders as well as SpEL expressions.
-	 * @see #maxAttempts()
+	 * @see #maxRetries()
 	 */
-	String maxAttemptsString() default "";
+	String maxRetriesString() default "";
 
 	/**
 	 * The base delay after the initial invocation. If a multiplier is specified,

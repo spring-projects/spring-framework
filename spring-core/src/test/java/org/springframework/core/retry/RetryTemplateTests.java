@@ -57,7 +57,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
  */
 class RetryTemplateTests {
 
-	private final RetryPolicy retryPolicy = RetryPolicy.builder().maxAttempts(3).delay(Duration.ZERO).build();
+	private final RetryPolicy retryPolicy = RetryPolicy.builder().maxRetries(3).delay(Duration.ZERO).build();
 
 	private final RetryTemplate retryTemplate = new RetryTemplate(retryPolicy);
 
@@ -116,7 +116,7 @@ class RetryTemplateTests {
 
 	@Test
 	void retryWithInitialFailureAndZeroRetriesFixedBackOffPolicy() {
-		RetryPolicy retryPolicy = RetryPolicy.withMaxAttempts(0);
+		RetryPolicy retryPolicy = RetryPolicy.withMaxRetries(0);
 
 		RetryTemplate retryTemplate = new RetryTemplate(retryPolicy);
 		retryTemplate.setRetryListener(retryListener);
@@ -138,7 +138,7 @@ class RetryTemplateTests {
 
 	@Test
 	void retryWithInitialFailureAndZeroRetriesBackOffPolicyFromBuilder() {
-		RetryPolicy retryPolicy = RetryPolicy.builder().maxAttempts(0).build();
+		RetryPolicy retryPolicy = RetryPolicy.builder().maxRetries(0).build();
 
 		RetryTemplate retryTemplate = new RetryTemplate(retryPolicy);
 		retryTemplate.setRetryListener(retryListener);
@@ -263,7 +263,7 @@ class RetryTemplateTests {
 		};
 
 		var retryPolicy = RetryPolicy.builder()
-				.maxAttempts(5)
+				.maxRetries(5)
 				.delay(Duration.ofMillis(1))
 				.predicate(NumberFormatException.class::isInstance)
 				.predicate(t -> t.getMessage().equals("Boom!"))
@@ -311,7 +311,7 @@ class RetryTemplateTests {
 		};
 
 		var retryPolicy = RetryPolicy.builder()
-				.maxAttempts(Integer.MAX_VALUE)
+				.maxRetries(Integer.MAX_VALUE)
 				.delay(Duration.ZERO)
 				.includes(IOException.class)
 				.build();
@@ -344,13 +344,13 @@ class RetryTemplateTests {
 	static final List<ArgumentSet> includesAndExcludesRetryPolicies = List.of(
 			argumentSet("Excludes",
 						RetryPolicy.builder()
-							.maxAttempts(Integer.MAX_VALUE)
+							.maxRetries(Integer.MAX_VALUE)
 							.delay(Duration.ZERO)
 							.excludes(FileNotFoundException.class)
 							.build()),
 			argumentSet("Includes & Excludes",
 						RetryPolicy.builder()
-							.maxAttempts(Integer.MAX_VALUE)
+							.maxRetries(Integer.MAX_VALUE)
 							.delay(Duration.ZERO)
 							.includes(IOException.class)
 							.excludes(FileNotFoundException.class)

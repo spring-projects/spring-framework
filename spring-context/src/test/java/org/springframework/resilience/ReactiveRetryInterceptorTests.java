@@ -189,7 +189,7 @@ class ReactiveRetryInterceptorTests {
 
 	@Test
 	void adaptReactiveResultWithMinimalRetrySpec() {
-		// Test minimal retry configuration: maxAttempts=1, delay=0, jitter=0, multiplier=1.0, maxDelay=0
+		// Test minimal retry configuration: maxRetries=1, delay=0, jitter=0, multiplier=1.0, maxDelay=0
 		MinimalRetryBean target = new MinimalRetryBean();
 		ProxyFactory pf = new ProxyFactory();
 		pf.setTarget(target);
@@ -197,7 +197,7 @@ class ReactiveRetryInterceptorTests {
 				new MethodRetrySpec((m, t) -> true, 1, Duration.ZERO, Duration.ZERO, 1.0, Duration.ZERO)));
 		MinimalRetryBean proxy = (MinimalRetryBean) pf.getProxy();
 
-		// Should execute only 2 times, because maxAttempts=1 means 1 call + 1 retry
+		// Should execute only 2 times, because maxRetries=1 means 1 call + 1 retry
 		assertThatIllegalStateException()
 				.isThrownBy(() -> proxy.retryOperation().block())
 				.satisfies(isRetryExhaustedException())
@@ -209,7 +209,7 @@ class ReactiveRetryInterceptorTests {
 
 	@Test
 	void adaptReactiveResultWithZeroAttempts() {
-		// Test minimal retry configuration: maxAttempts=1, delay=0, jitter=0, multiplier=1.0, maxDelay=0
+		// Test minimal retry configuration: maxRetries=1, delay=0, jitter=0, multiplier=1.0, maxDelay=0
 		MinimalRetryBean target = new MinimalRetryBean();
 		ProxyFactory pf = new ProxyFactory();
 		pf.setTarget(target);
@@ -217,7 +217,7 @@ class ReactiveRetryInterceptorTests {
 				new MethodRetrySpec((m, t) -> true, 0, Duration.ZERO, Duration.ZERO, 1.0, Duration.ZERO)));
 		MinimalRetryBean proxy = (MinimalRetryBean) pf.getProxy();
 
-		// Should execute only 1 time, because maxAttempts=0 means initial call only
+		// Should execute only 1 time, because maxRetries=0 means initial call only
 		assertThatIllegalStateException()
 				.isThrownBy(() -> proxy.retryOperation().block())
 				.satisfies(isRetryExhaustedException())
@@ -302,7 +302,7 @@ class ReactiveRetryInterceptorTests {
 
 	@Test
 	void adaptReactiveResultWithAlwaysFailingOperation() {
-		// Test "always fails" case, ensuring retry mechanism stops after maxAttempts (3)
+		// Test "always fails" case, ensuring retry mechanism stops after maxRetries (3)
 		AlwaysFailsBean target = new AlwaysFailsBean();
 		ProxyFactory pf = new ProxyFactory();
 		pf.setTarget(target);
@@ -356,7 +356,7 @@ class ReactiveRetryInterceptorTests {
 
 		AtomicInteger counter = new AtomicInteger();
 
-		@Retryable(maxAttempts = 5, delay = 10)
+		@Retryable(maxRetries = 5, delay = 10)
 		public Mono<Object> retryOperation() {
 			return Mono.fromCallable(() -> {
 				counter.incrementAndGet();
@@ -411,7 +411,7 @@ class ReactiveRetryInterceptorTests {
 			});
 		}
 
-		@Retryable(includes = IOException.class, maxAttempts = 1, delay = 10)
+		@Retryable(includes = IOException.class, maxRetries = 1, delay = 10)
 		public Flux<Object> overrideOperation() {
 			return Flux.from(Mono.fromCallable(() -> {
 				counter.incrementAndGet();

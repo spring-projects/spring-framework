@@ -218,7 +218,7 @@ class RetryInterceptorTests {
 		props.setProperty("jitter", "5");
 		props.setProperty("multiplier", "2.0");
 		props.setProperty("maxDelay", "40");
-		props.setProperty("limitedAttempts", "1");
+		props.setProperty("limitedRetries", "1");
 
 		GenericApplicationContext ctx = new GenericApplicationContext();
 		ctx.getEnvironment().getPropertySources().addFirst(new PropertiesPropertySource("props", props));
@@ -246,7 +246,7 @@ class RetryInterceptorTests {
 		props.setProperty("jitter", "5");
 		props.setProperty("multiplier", "2.0");
 		props.setProperty("maxDelay", "40");
-		props.setProperty("limitedAttempts", "0");
+		props.setProperty("limitedRetries", "0");
 
 		GenericApplicationContext ctx = new GenericApplicationContext();
 		ctx.getEnvironment().getPropertySources().addFirst(new PropertiesPropertySource("props", props));
@@ -321,7 +321,7 @@ class RetryInterceptorTests {
 
 		int counter = 0;
 
-		@Retryable(maxAttempts = 5, delay = 10)
+		@Retryable(maxRetries = 5, delay = 10)
 		public void retryOperation() throws IOException {
 			counter++;
 			throw new IOException(Integer.toString(counter));
@@ -333,7 +333,7 @@ class RetryInterceptorTests {
 
 		int counter = 0;
 
-		@Retryable(maxAttempts = 5, delay = 10)
+		@Retryable(maxRetries = 5, delay = 10)
 		@Override
 		public void retryOperation() throws IOException {
 			counter++;
@@ -344,7 +344,7 @@ class RetryInterceptorTests {
 
 	interface AnnotatedInterface {
 
-		@Retryable(maxAttempts = 5, delay = 10)
+		@Retryable(maxRetries = 5, delay = 10)
 		void retryOperation() throws IOException;
 	}
 
@@ -374,7 +374,7 @@ class RetryInterceptorTests {
 			throw new AccessDeniedException(Integer.toString(counter));
 		}
 
-		@Retryable(value = IOException.class, maxAttempts = 1, delay = 10)
+		@Retryable(value = IOException.class, maxRetries = 1, delay = 10)
 		public void overrideOperation() throws IOException {
 			counter++;
 			throw new AccessDeniedException(Integer.toString(counter));
@@ -403,7 +403,7 @@ class RetryInterceptorTests {
 			throw new AccessDeniedException(Integer.toString(counter));
 		}
 
-		@Retryable(value = IOException.class, maxAttemptsString = "${limitedAttempts}", delayString = "10ms")
+		@Retryable(value = IOException.class, maxRetriesString = "${limitedRetries}", delayString = "10ms")
 		public void overrideOperation() throws IOException {
 			counter++;
 			throw new AccessDeniedException(Integer.toString(counter));
@@ -422,7 +422,7 @@ class RetryInterceptorTests {
 		volatile String lastThreadName;
 
 		@ConcurrencyLimit(1)
-		@Retryable(maxAttempts = 2, delay = 10)
+		@Retryable(maxRetries = 2, delay = 10)
 		public void retryOperation() throws IOException, InterruptedException {
 			if (current.incrementAndGet() > 1) {
 				throw new IllegalStateException();
@@ -443,7 +443,7 @@ class RetryInterceptorTests {
 		AtomicInteger counter = new AtomicInteger();
 
 		@Async
-		@Retryable(maxAttempts = 2, delay = 10)
+		@Retryable(maxRetries = 2, delay = 10)
 		public CompletableFuture<Void> retryOperation() {
 			throw new IllegalStateException(Integer.toString(counter.incrementAndGet()));
 		}

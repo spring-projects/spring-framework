@@ -23,8 +23,19 @@ public void sendNotification() {
 }
 ----
 
-By default, the method invocation will be retried for any exception thrown: with at most 3
-retry attempts after an initial failure, and a delay of 1 second between attempts.
+By default, the method invocation will be retried for any exception thrown: with at most
+3 retry attempts (`maxRetries = 3`) after an initial failure, and a delay of 1 second
+between attempts.
+
+[NOTE]
+====
+A `@Retryable` method will be invoked at least once and retried at most `maxRetries`
+times, where `maxRetries` is the maximum number of retry attempts. Specifically,
+`total attempts = 1 initial attempt + maxRetries attempts`.
+
+For example, if `maxRetries` is set to `4`, the `@Retryable` method will be invoked at
+least once and at most 5 times.
+====
 
 This can be specifically adapted for every method if necessary — for example, by narrowing
 the exceptions to retry via the `includes` and `excludes` attributes. The supplied
@@ -53,13 +64,13 @@ Custom predicates can be combined with `includes` and `excludes`; however, custo
 predicates will always be applied after `includes` and `excludes` have been applied.
 ====
 
-Or for 5 retry attempts and an exponential back-off strategy with a bit of jitter:
+Or for 4 retry attempts and an exponential back-off strategy with a bit of jitter:
 
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
 @Retryable(
   includes = MessageDeliveryException.class,
-  maxAttempts = 5,
+  maxRetries = 4,
   delay = 100,
   jitter = 10,
   multiplier = 2,
@@ -74,7 +85,7 @@ type, decorating the pipeline with Reactor's retry capabilities:
 
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
-@Retryable(maxAttempts = 5, delay = 100)
+@Retryable(maxRetries = 4, delay = 100)
 public Mono<Void> sendNotification() {
     return Mono.from(...); // <1>
 }
@@ -168,20 +179,31 @@ configured {spring-framework-api}/core/retry/RetryPolicy.html[`RetryPolicy`].
 ----
 <1> Implicitly uses `RetryPolicy.withDefaults()`.
 
-By default, a retryable operation will be retried for any exception thrown: with at most 3
-retry attempts after an initial failure, and a delay of 1 second between attempts.
+By default, a retryable operation will be retried for any exception thrown: with at most
+3 retry attempts (`maxRetries = 3`) after an initial failure, and a delay of 1 second
+between attempts.
 
 If you only need to customize the number of retry attempts, you can use the
-`RetryPolicy.withMaxAttempts()` factory method as demonstrated below.
+`RetryPolicy.withMaxRetries()` factory method as demonstrated below.
+
+[NOTE]
+====
+A retryable operation will be executed at least once and retried at most `maxRetries`
+times, where `maxRetries` is the maximum number of retry attempts. Specifically,
+`total attempts = 1 initial attempt + maxRetries attempts`.
+
+For example, if `maxRetries` is set to `4`, the retryable operation will be invoked at
+least once and at most 5 times.
+====
 
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
-    var retryTemplate = new RetryTemplate(RetryPolicy.withMaxAttempts(5)); // <1>
+    var retryTemplate = new RetryTemplate(RetryPolicy.withMaxRetries(4)); // <1>
 
     retryTemplate.execute(
             () -> jmsClient.destination("notifications").send(...));
 ----
-<1> Explicitly uses `RetryPolicy.withMaxAttempts(5)`.
+<1> Explicitly uses `RetryPolicy.withMaxRetries(4)`.
 
 If you need to narrow the types of exceptions to retry, that can be achieved via the
 `includes()` and `excludes()` builder methods. The supplied exception types will be
@@ -213,14 +235,14 @@ Custom predicates can be combined with `includes` and `excludes`; however, custo
 predicates will always be applied after `includes` and `excludes` have been applied.
 ====
 
-The following example demonstrates how to configure a `RetryPolicy` with 5 retry attempts
+The following example demonstrates how to configure a `RetryPolicy` with 4 retry attempts
 and an exponential back-off strategy with a bit of jitter.
 
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
     var retryPolicy = RetryPolicy.builder()
             .includes(MessageDeliveryException.class)
-            .maxAttempts(5)
+            .maxRetries(4)
             .delay(Duration.ofMillis(100))
             .jitter(Duration.ofMillis(10))
             .multiplier(2)

@@ -93,7 +93,7 @@ public abstract class AbstractRetryInterceptor implements MethodInterceptor {
 				.includes(spec.includes())
 				.excludes(spec.excludes())
 				.predicate(spec.predicate().forMethod(method))
-				.maxAttempts(spec.maxAttempts())
+				.maxRetries(spec.maxRetries())
 				.delay(spec.delay())
 				.jitter(spec.jitter())
 				.multiplier(spec.multiplier())
@@ -137,7 +137,7 @@ public abstract class AbstractRetryInterceptor implements MethodInterceptor {
 				Object result, ReactiveAdapter adapter, MethodRetrySpec spec, Method method) {
 
 			Publisher<?> publisher = adapter.toPublisher(result);
-			Retry retry = Retry.backoff(spec.maxAttempts(), spec.delay())
+			Retry retry = Retry.backoff(spec.maxRetries(), spec.delay())
 					.jitter(calculateJitterFactor(spec))
 					.multiplier(spec.multiplier())
 					.maxBackoff(spec.maxDelay())

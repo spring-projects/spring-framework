@@ -35,7 +35,7 @@ import org.springframework.util.backoff.FixedBackOff;
  *
  * <p>Also provides factory methods and a fluent builder API for creating retry
  * policies with common configurations. See {@link #withDefaults()},
- * {@link #withMaxAttempts(long)}, {@link #builder()}, and the configuration
+ * {@link #withMaxRetries(long)}, {@link #builder()}, and the configuration
  * options in {@link Builder} for details.
  *
  * @author Sam Brannen
@@ -58,12 +58,15 @@ public interface RetryPolicy {
 	/**
 	 * Get the {@link BackOff} strategy to use for this retry policy.
 	 * <p>Defaults to a fixed backoff of {@value Builder#DEFAULT_DELAY} milliseconds
-	 * and maximum {@value Builder#DEFAULT_MAX_ATTEMPTS} retry attempts.
+	 * and maximum {@value Builder#DEFAULT_MAX_RETRIES} retries.
+	 * <p>Note that {@code total attempts = 1 initial attempt + maxRetries attempts}.
+	 * Thus, when {@code maxRetries} is set to 3, a retryable operation will be
+	 * invoked at least once and at most 4 times.
 	 * @return the {@code BackOff} strategy to use
 	 * @see FixedBackOff
 	 */
 	default BackOff getBackOff() {
-		return new FixedBackOff(Builder.DEFAULT_DELAY, Builder.DEFAULT_MAX_ATTEMPTS);
+		return new FixedBackOff(Builder.DEFAULT_DELAY, Builder.DEFAULT_MAX_RETRIES);
 	}
 
 
@@ -71,7 +74,10 @@ public interface RetryPolicy {
 	 * Create a {@link RetryPolicy} with default configuration.
 	 * <p>The returned policy applies to all exception types, uses a fixed backoff
 	 * of {@value Builder#DEFAULT_DELAY} milliseconds, and supports maximum
-	 * {@value Builder#DEFAULT_MAX_ATTEMPTS} retry attempts.
+	 * {@value Builder#DEFAULT_MAX_RETRIES} retries.
+	 * <p>Note that {@code total attempts = 1 initial attempt + maxRetries attempts}.
+	 * Thus, when {@code maxRetries} is set to 3, a retryable operation will be
+	 * invoked at least once and at most 4 times.
 	 * @see FixedBackOff
 	 */
 	static RetryPolicy withDefaults() {
@@ -80,16 +86,19 @@ public interface RetryPolicy {
 
 	/**
 	 * Create a {@link RetryPolicy} configured with a maximum number of retry attempts.
+	 * <p>Note that {@code total attempts = 1 initial attempt + maxRetries attempts}.
+	 * Thus, if {@code maxRetries} is set to 4, a retryable operation will be invoked
+	 * at least once and at most 5 times.
 	 * <p>The returned policy applies to all exception types and uses a fixed backoff
 	 * of {@value Builder#DEFAULT_DELAY} milliseconds.
-	 * @param maxAttempts the maximum number of retry attempts;
+	 * @param maxRetries the maximum number of retry attempts;
 	 * must be positive (or zero for no retry)
-	 * @see Builder#maxAttempts(long)
+	 * @see Builder#maxRetries(long)
 	 * @see FixedBackOff
 	 */
-	static RetryPolicy withMaxAttempts(long maxAttempts) {
-		assertMaxAttemptsIsNotNegative(maxAttempts);
-		return builder().backOff(new FixedBackOff(Builder.DEFAULT_DELAY, maxAttempts)).build();
+	static RetryPolicy withMaxRetries(long maxRetries) {
+		assertMaxRetriesIsNotNegative(maxRetries);
+		return builder().backOff(new FixedBackOff(Builder.DEFAULT_DELAY, maxRetries)).build();
 	}
 
 	/**
@@ -101,9 +110,9 @@ public interface RetryPolicy {
 	}
 
 
-	private static void assertMaxAttemptsIsNotNegative(long maxAttempts) {
-		Assert.isTrue(maxAttempts >= 0,
-				() -> "Invalid maxAttempts (%d): must be positive or zero for no retry.".formatted(maxAttempts));
+	private static void assertMaxRetriesIsNotNegative(long maxRetries) {
+		Assert.isTrue(maxRetries >= 0,
+				() -> "Invalid maxRetries (%d): must be positive or zero for no retry.".formatted(maxRetries));
 	}
 
 	private static void assertIsNotNegative(String name, Duration duration) {
@@ -124,9 +133,9 @@ public interface RetryPolicy {
 	final class Builder {
 
 		/**
-		 * The default {@linkplain #maxAttempts(long) max attempts}: {@value}.
+		 * The default {@linkplain #maxRetries(long) max retries}: {@value}.
 		 */
-		public static final long DEFAULT_MAX_ATTEMPTS = 3;
+		public static final long DEFAULT_MAX_RETRIES = 3;
 
 		/**
 		 * The default {@linkplain #delay(Duration) delay}: {@value} ms.
@@ -147,7 +156,7 @@ public interface RetryPolicy {
 
 		private @Nullable BackOff backOff;
 
-		private @Nullable Long maxAttempts;
+		private @Nullable Long maxRetries;
 
 		private @Nullable Duration delay;
 
@@ -174,7 +183,7 @@ public interface RetryPolicy {
 		 * <p>The supplied value will override any previously configured value.
 		 * <p><strong>WARNING</strong>: If you configure a custom {@code BackOff}
 		 * strategy, you should not configure any of the following:
-		 * {@link #maxAttempts(long) maxAttempts}, {@link #delay(Duration) delay},
+		 * {@link #maxRetries(long) maxRetries}, {@link #delay(Duration) delay},
 		 * {@link #jitter(Duration) jitter}, {@link #multiplier(double) multiplier},
 		 * or {@link #maxDelay(Duration) maxDelay}.
 		 * @param backOff the {@code BackOff} strategy
@@ -188,17 +197,20 @@ public interface RetryPolicy {
 
 		/**
 		 * Specify the maximum number of retry attempts.
-		 * <p>The default is {@value #DEFAULT_MAX_ATTEMPTS}.
+		 * <p>Note that {@code total attempts = 1 initial attempt + maxRetries attempts}.
+		 * Thus, if {@code maxRetries} is set to 4, a retryable operation will be
+		 * invoked at least once and at most 5 times.
+		 * <p>The default is {@value #DEFAULT_MAX_RETRIES}.
 		 * <p>The supplied value will override any previously configured value.
 		 * <p>You should not specify this configuration option if you have
 		 * configured a custom {@link #backOff(BackOff) BackOff} strategy.
-		 * @param maxAttempts the maximum number of retry attempts;
+		 * @param maxRetries the maximum number of retry attempts;
 		 * must be positive (or zero for no retry)
 		 * @return this {@code Builder} instance for chained method invocations
 		 */
-		public Builder maxAttempts(long maxAttempts) {
-			assertMaxAttemptsIsNotNegative(maxAttempts);
-			this.maxAttempts = maxAttempts;
+		public Builder maxRetries(long maxRetries) {
+			assertMaxRetriesIsNotNegative(maxRetries);
+			this.maxRetries = maxRetries;
 			return this;
 		}
 
@@ -412,15 +424,15 @@ public interface RetryPolicy {
 		public RetryPolicy build() {
 			BackOff backOff = this.backOff;
 			if (backOff != null) {
-				boolean misconfigured = (this.maxAttempts != null || this.delay != null || this.jitter != null ||
+				boolean misconfigured = (this.maxRetries != null || this.delay != null || this.jitter != null ||
 						this.multiplier != null || this.maxDelay != null);
 				Assert.state(!misconfigured, """
 						The following configuration options are not supported with a custom BackOff strategy: \
-						maxAttempts, delay, jitter, multiplier, or maxDelay.""");
+						maxRetries, delay, jitter, multiplier, or maxDelay.""");
 			}
 			else {
 				ExponentialBackOff exponentialBackOff = new ExponentialBackOff();
-				exponentialBackOff.setMaxAttempts(this.maxAttempts != null ? this.maxAttempts : DEFAULT_MAX_ATTEMPTS);
+				exponentialBackOff.setMaxAttempts(this.maxRetries != null ? this.maxRetries : DEFAULT_MAX_RETRIES);
 				exponentialBackOff.setInitialInterval(this.delay != null ? this.delay.toMillis() : DEFAULT_DELAY);
 				exponentialBackOff.setMaxInterval(this.maxDelay != null ? this.maxDelay.toMillis() : DEFAULT_MAX_DELAY);
 				exponentialBackOff.setMultiplier(this.multiplier != null ? this.multiplier : DEFAULT_MULTIPLIER);
