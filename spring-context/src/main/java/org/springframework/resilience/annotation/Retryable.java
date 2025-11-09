@@ -113,7 +113,7 @@ public @interface Retryable {
 
 	/**
 	 * The maximum number of retry attempts, as a configurable String.
-	 * <p>A non-empty value specified here overrides the {@link #maxRetries()} attribute.
+	 * <p>A non-empty value specified here overrides the {@link #maxAttempts()} attribute.
 	 * <p>This supports Spring-style "${...}" placeholders as well as SpEL expressions.
 	 * @see #maxAttempts()
 	 */
