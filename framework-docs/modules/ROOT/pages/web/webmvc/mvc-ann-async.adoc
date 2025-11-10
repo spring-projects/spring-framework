@@ -422,7 +422,7 @@ reactive types from the controller method.
 Reactive return values are handled as follows:
 
 * A single-value promise is adapted to, similar to using `DeferredResult`. Examples
-include `CompletionStage` (JDK), Mono` (Reactor), and `Single` (RxJava).
+include `CompletionStage` (JDK), `Mono` (Reactor), and `Single` (RxJava).
 * A multi-value stream with a streaming media type (such as `application/x-ndjson`
 or `text/event-stream`) is adapted to, similar to using `ResponseBodyEmitter` or
 `SseEmitter`. Examples include `Flux` (Reactor) or `Observable` (RxJava).
