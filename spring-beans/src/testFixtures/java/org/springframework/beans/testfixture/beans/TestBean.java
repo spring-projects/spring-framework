@@ -59,6 +59,8 @@ public class TestBean implements BeanNameAware, BeanFactoryAware, ITestBean, IOt
 
 	private boolean jedi;
 
+	private String favoriteCafé;
+
 	private ITestBean spouse;
 
 	private String touchy;
@@ -207,6 +209,14 @@ public class TestBean implements BeanNameAware, BeanFactoryAware, ITestBean, IOt
 
 	public void setJedi(boolean jedi) {
 		this.jedi = jedi;
+	}
+
+	public String getFavoriteCafé() {
+		return this.favoriteCafé;
+	}
+
+	public void setFavoriteCafé(String favoriteCafé) {
+		this.favoriteCafé = favoriteCafé;
 	}
 
 	@Override
