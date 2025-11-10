@@ -235,6 +235,7 @@ import org.springframework.web.servlet.support.BindStatus;
  *
  * @author Rob Harrop
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 2.0
  * @see OptionTag
  */
@@ -407,8 +408,12 @@ public class SelectTag extends AbstractHtmlInputElementTag {
 							ObjectUtils.getDisplayString(evaluate("itemValue", getItemValue())) : null);
 					String labelProperty = (getItemLabel() != null ?
 							ObjectUtils.getDisplayString(evaluate("itemLabel", getItemLabel())) : null);
+					String encodingToUse = (isResponseEncodedHtmlEscape() ?
+							this.pageContext.getResponse().getCharacterEncoding() : null);
 					OptionWriter optionWriter =
-							new OptionWriter(itemsObject, getBindStatus(), valueProperty, labelProperty, isHtmlEscape()) {
+							new OptionWriter(itemsObject, getBindStatus(), valueProperty, labelProperty,
+									isHtmlEscape(), encodingToUse) {
+
 								@Override
 								protected String processOptionValue(String resolvedValue) {
 									return processFieldValue(selectName, resolvedValue, "option");

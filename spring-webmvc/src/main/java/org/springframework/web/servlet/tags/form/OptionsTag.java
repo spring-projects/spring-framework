@@ -187,6 +187,7 @@ import org.springframework.web.util.TagUtils;
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @author Scott Andrews
+ * @author Sam Brannen
  * @since 2.0
  */
 @SuppressWarnings("serial")
@@ -306,7 +307,10 @@ public class OptionsTag extends AbstractHtmlElementTag {
 					(itemValue != null ? ObjectUtils.getDisplayString(evaluate("itemValue", itemValue)) : null);
 			String labelProperty =
 					(itemLabel != null ? ObjectUtils.getDisplayString(evaluate("itemLabel", itemLabel)) : null);
-			OptionsWriter optionWriter = new OptionsWriter(selectName, itemsObject, valueProperty, labelProperty);
+			String encodingToUse =
+					(isResponseEncodedHtmlEscape() ? this.pageContext.getResponse().getCharacterEncoding() : null);
+			OptionsWriter optionWriter =
+					new OptionsWriter(selectName, itemsObject, valueProperty, labelProperty, encodingToUse);
 			optionWriter.writeOptions(tagWriter);
 		}
 		return SKIP_BODY;
@@ -345,9 +349,9 @@ public class OptionsTag extends AbstractHtmlElementTag {
 		private final @Nullable String selectName;
 
 		public OptionsWriter(@Nullable String selectName, Object optionSource,
-				@Nullable String valueProperty, @Nullable String labelProperty) {
+				@Nullable String valueProperty, @Nullable String labelProperty, @Nullable String encoding) {
 
-			super(optionSource, getBindStatus(), valueProperty, labelProperty, isHtmlEscape());
+			super(optionSource, getBindStatus(), valueProperty, labelProperty, isHtmlEscape(), encoding);
 			this.selectName = selectName;
 		}
 
