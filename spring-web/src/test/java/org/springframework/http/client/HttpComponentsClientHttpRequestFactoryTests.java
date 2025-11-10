@@ -61,7 +61,7 @@ class HttpComponentsClientHttpRequestFactoryTests extends AbstractHttpRequestFac
 	}
 
 	@Test
-	@SuppressWarnings("removal")
+	@SuppressWarnings({ "removal", "deprecation" })
 	void assertCustomConfig() throws Exception {
 		HttpClient httpClient = HttpClientBuilder.create().build();
 		HttpComponentsClientHttpRequestFactory hrf = new HttpComponentsClientHttpRequestFactory(httpClient);
@@ -103,7 +103,7 @@ class HttpComponentsClientHttpRequestFactoryTests extends AbstractHttpRequestFac
 	}
 
 	@Test
-	@SuppressWarnings("removal")
+	@SuppressWarnings({ "removal", "deprecation" })
 	void localSettingsOverrideClientDefaultSettings() throws Exception {
 		RequestConfig defaultConfig = RequestConfig.custom()
 				.setConnectTimeout(1234, MILLISECONDS)
