@@ -126,6 +126,9 @@ public class MultiReleaseJarPluginTests {
 					id 'org.springframework.build.multiReleaseJar'
 				}
 				version = '1.2.3'
+				tasks.withType(JavaCompile).configureEach {
+					options.release = 11
+				}
 				multiRelease { releaseVersions 17 }
 				""");
 		writeClass("src/main/java17", "Main.java", """
@@ -140,7 +143,7 @@ public class MultiReleaseJarPluginTests {
 				""");
 		assertThatThrownBy(() ->runGradle("validateMultiReleaseJar"))
 				.isInstanceOf(UnexpectedBuildFailure.class)
-				.hasMessageContaining("entry: META-INF/versions/17/Main.class, has a class version incompatible with an earlier version");
+				.hasMessageContaining("entry: META-INF/versions/17/Main.class, contains a class with different api from earlier version");
 	}
 
 	private void writeBuildFile(String buildContent) throws IOException {

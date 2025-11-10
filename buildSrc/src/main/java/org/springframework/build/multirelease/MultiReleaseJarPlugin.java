@@ -30,6 +30,7 @@ import org.gradle.api.tasks.TaskContainer;
 import org.gradle.api.tasks.TaskProvider;
 import org.gradle.api.tasks.bundling.AbstractArchiveTask;
 import org.gradle.jvm.tasks.Jar;
+import org.gradle.jvm.toolchain.JavaLanguageVersion;
 import org.gradle.jvm.toolchain.JavaToolchainService;
 
 /**
@@ -62,8 +63,10 @@ public class MultiReleaseJarPlugin implements Plugin<Project> {
 				tasks,
 				dependencies,
 				objects);
+
 		TaskProvider<MultiReleaseJarValidateTask> validateJarTask = tasks.register(VALIDATE_JAR_TASK_NAME, MultiReleaseJarValidateTask.class, (task) -> {
 			task.getJar().set(tasks.named("jar", Jar.class).flatMap(AbstractArchiveTask::getArchiveFile));
+			task.getJavaLauncher().set(task.getJavaToolchainService().launcherFor(spec -> spec.getLanguageVersion().set(JavaLanguageVersion.of(25))));
 		});
 		tasks.named("check", task -> task.dependsOn(validateJarTask));
 	}

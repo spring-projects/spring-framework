@@ -22,19 +22,26 @@ import org.gradle.api.tasks.InputFile;
 import org.gradle.api.tasks.JavaExec;
 import org.gradle.api.tasks.PathSensitive;
 import org.gradle.api.tasks.PathSensitivity;
+import org.gradle.jvm.toolchain.JavaToolchainService;
 
 import java.util.List;
+
+import javax.inject.Inject;
 
 @CacheableTask
 public abstract class MultiReleaseJarValidateTask extends JavaExec {
 
-	@InputFile
-	@PathSensitive(PathSensitivity.RELATIVE)
-	public abstract RegularFileProperty getJar();
 
 	public MultiReleaseJarValidateTask() {
 		getMainModule().set("jdk.jartool");
 		getArgumentProviders().add(() -> List.of("--validate", "--file", getJar().get().getAsFile().getAbsolutePath()));
 	}
+
+	@Inject
+	protected abstract JavaToolchainService getJavaToolchainService();
+
+	@InputFile
+	@PathSensitive(PathSensitivity.RELATIVE)
+	public abstract RegularFileProperty getJar();
 
 }
