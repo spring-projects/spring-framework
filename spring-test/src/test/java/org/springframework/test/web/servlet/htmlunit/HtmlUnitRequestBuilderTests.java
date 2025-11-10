@@ -897,11 +897,12 @@ public class HtmlUnitRequestBuilderTests {
 	private static void assertUrlAndPorts(HttpServletRequest request, String url, int serverPort, boolean secure) {
 		assertThat(request.getRequestURL()).asString().as("url").isEqualTo(url);
 		assertThat(request.getServerPort()).as("server port").isEqualTo(serverPort);
-		// In a mocked request, the local port is always the same as the server port.
-		assertThat(request.getLocalPort()).as("local port").isEqualTo(serverPort);
-		// Remote port is always 80 (MockHttpServletRequest.DEFAULT_SERVER_PORT),
+		// Local port is always MockHttpServletRequest.DEFAULT_SERVER_PORT,
+		// since a mocked request does not influence the local port.
+		assertThat(request.getLocalPort()).as("local port").isEqualTo(MockHttpServletRequest.DEFAULT_SERVER_PORT);
+		// Remote port is always MockHttpServletRequest.DEFAULT_SERVER_PORT,
 		// since a mocked request does not influence the remote host, port, or address.
-		assertThat(request.getRemotePort()).as("remote port").isEqualTo(80);
+		assertThat(request.getRemotePort()).as("remote port").isEqualTo(MockHttpServletRequest.DEFAULT_SERVER_PORT);
 
 		if (secure) {
 			assertThat(request.isSecure()).as("secure").isTrue();

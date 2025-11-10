@@ -216,7 +216,6 @@ final class HtmlUnitRequestBuilder implements RequestBuilder, Mergeable {
 		}
 		if (serverPort != -1) {
 			request.setServerPort(serverPort);
-			request.setLocalPort(serverPort);
 		}
 	}
 
