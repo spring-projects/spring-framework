@@ -21,13 +21,13 @@ import java.io.UncheckedIOException;
 import java.net.URI;
 import java.time.Duration;
 import java.util.concurrent.Executor;
-import java.util.concurrent.atomic.AtomicReference;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
 import org.reactivestreams.FlowAdapters;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 import reactor.netty.NettyOutbound;
 import reactor.netty.http.client.HttpClient;
 import reactor.netty.http.client.HttpClientRequest;
@@ -43,6 +43,7 @@ import org.springframework.util.StreamUtils;
  *
  * @author Arjen Poutsma
  * @author Juergen Hoeller
+ * @author Brian Clozel
  * @since 6.1
  */
 final class ReactorClientHttpRequest extends AbstractStreamingClientHttpRequest {
@@ -52,6 +53,8 @@ final class ReactorClientHttpRequest extends AbstractStreamingClientHttpRequest 
 	private final HttpMethod method;
 
 	private final URI uri;
+
+	private final Executor executor;
 
 	@Nullable
 	private final Duration exchangeTimeout;
@@ -65,19 +68,31 @@ final class ReactorClientHttpRequest extends AbstractStreamingClientHttpRequest 
 	 * @since 6.2
 	 */
 	public ReactorClientHttpRequest(HttpClient httpClient, HttpMethod method, URI uri) {
-		this.httpClient = httpClient;
-		this.method = method;
-		this.uri = uri;
-		this.exchangeTimeout = null;
+		this(httpClient, method, uri, null);
+	}
+
+	/**
+	 * Create an instance.
+	 * <p>If no executor is provided, the request will use an {@link Schedulers#boundedElastic() elastic scheduler}
+	 * for performing blocking I/O operations.
+	 * @param httpClient the client to perform the request with
+	 * @param executor the executor to use
+	 * @param method the HTTP method
+	 * @param uri the URI for the request
+	 * @since 6.2.13
+	 */
+	public ReactorClientHttpRequest(HttpClient httpClient, HttpMethod method, URI uri, @Nullable Executor executor) {
+		this(httpClient, method, uri, executor, null);
 	}
 
 	/**
 	 * Package private constructor for use until exchangeTimeout is removed.
 	 */
-	ReactorClientHttpRequest(HttpClient httpClient, HttpMethod method, URI uri, @Nullable Duration exchangeTimeout) {
+	ReactorClientHttpRequest(HttpClient httpClient, HttpMethod method, URI uri, @Nullable Executor executor, @Nullable Duration exchangeTimeout) {
 		this.httpClient = httpClient;
 		this.method = method;
 		this.uri = uri;
+		this.executor = (executor != null) ? executor : Schedulers.boundedElastic()::schedule;
 		this.exchangeTimeout = exchangeTimeout;
 	}
 
@@ -92,11 +107,7 @@ final class ReactorClientHttpRequest extends AbstractStreamingClientHttpRequest 
 	public ReactorClientHttpRequest(
 			HttpClient httpClient, URI uri, HttpMethod method,
 			@Nullable Duration exchangeTimeout, @Nullable Duration readTimeout) {
-
-		this.httpClient = httpClient;
-		this.method = method;
-		this.uri = uri;
-		this.exchangeTimeout = exchangeTimeout;
+		this(httpClient, method, uri, null, exchangeTimeout);
 	}
 
 
@@ -150,13 +161,10 @@ final class ReactorClientHttpRequest extends AbstractStreamingClientHttpRequest 
 			return Mono.empty();
 		}
 
-		AtomicReference<Executor> executorRef = new AtomicReference<>();
-
 		return outbound
-				.withConnection(connection -> executorRef.set(connection.channel().eventLoop()))
 				.send(FlowAdapters.toPublisher(new OutputStreamPublisher<>(
 						os -> body.writeTo(StreamUtils.nonClosing(os)), new ByteBufMapper(outbound),
-						executorRef.getAndSet(null), null)));
+						this.executor, null)));
 	}
 
 	static IOException convertException(RuntimeException ex) {
