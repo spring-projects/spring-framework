@@ -3,7 +3,10 @@
 
 [.small]#xref:web/webflux/reactive-spring.adoc#webflux-filters[See equivalent in the Reactive stack]#
 
-The `spring-web` module provides some useful filters:
+In the Servlet API, you can add a `jakarta.servlet.Filter` to apply interception-style logic
+before and after the rest of the processing chain of filters and the target `Servlet`.
+
+The `spring-web` module has a number of built-in `Filter` implementations:
 
 * xref:web/webmvc/filters.adoc#filters-http-put[Form Data]
 * xref:web/webmvc/filters.adoc#filters-forwarded-headers[Forwarded Headers]
@@ -11,9 +14,19 @@ The `spring-web` module provides some useful filters:
 * xref:web/webmvc/filters.adoc#filters-cors[CORS]
 * xref:web/webmvc/filters.adoc#filters.url-handler[URL Handler]
 
-Servlet filters can be configured in the `web.xml` configuration file or using Servlet annotations.
-If you are using Spring Boot, you can
-{spring-boot-docs}/how-to/webserver.html#howto.webserver.add-servlet-filter-listener.spring-bean[declare them as beans and configure them as part of your application].
+There are also base class implementations for use in Spring applications:
+
+* `GenericFilterBean` -- base class for a `Filter` configured as a Spring bean;
+integrates with the Spring `ApplicationContext` lifecycle.
+* `OncePerRequestFilter` -- extension of `GenericFilterBean` that supports a single
+invocation at the start of a request, i.e. during the `REQUEST` dispatch phase, and
+ignoring further handling via `FORWARD` dispatches. The filter also provides control
+over whether the `Filter` gets involved in `ASYNC` and `ERROR` dispatches.
+
+Servlet filters can be configured in `web.xml` or via Servlet annotations.
+In a Spring Boot application , you can
+{spring-boot-docs}/how-to/webserver.html#howto.webserver.add-servlet-filter-listener.spring-bean[declare Filter's as beans]
+and Boot will have them configured.
 
 
 [[filters-http-put]]
