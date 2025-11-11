@@ -92,6 +92,10 @@ public class DefaultApiVersionStrategy implements ApiVersionStrategy {
 		this.detectSupportedVersions = detectSupportedVersions;
 		this.supportedVersionPredicate = initSupportedVersionPredicate(supportedVersionPredicate);
 		this.deprecationHandler = deprecationHandler;
+
+		if (defaultVersion != null) {
+			addSupportedVersion(defaultVersion);
+		}
 	}
 
 	private Predicate<Comparable<?>> initSupportedVersionPredicate(@Nullable Predicate<Comparable<?>> predicate) {

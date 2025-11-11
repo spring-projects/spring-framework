@@ -50,7 +50,7 @@ public class DefaultApiVersionStrategiesTests {
 
 	@Test
 	void missingRequiredVersion() {
-		assertThatThrownBy(() -> validateVersion(null, apiVersionStrategy()))
+		assertThatThrownBy(() -> testValidate(null, apiVersionStrategy()))
 				.isInstanceOf(MissingApiVersionException.class)
 				.hasMessage("400 BAD_REQUEST \"API version is required.\"");
 	}
@@ -60,12 +60,19 @@ public class DefaultApiVersionStrategiesTests {
 		String version = "1.2";
 		DefaultApiVersionStrategy strategy = apiVersionStrategy();
 		strategy.addSupportedVersion(version);
-		validateVersion(version, strategy);
+		testValidate(version, strategy);
+	}
+
+	@Test
+	void validateSupportedVersionForDefaultVersion() {
+		String defaultVersion = "1.2";
+		DefaultApiVersionStrategy strategy = apiVersionStrategy(defaultVersion, false, null);
+		testValidate(defaultVersion, strategy);
 	}
 
 	@Test
 	void validateUnsupportedVersion() {
-		assertThatThrownBy(() -> validateVersion("1.2", apiVersionStrategy()))
+		assertThatThrownBy(() -> testValidate("1.2", apiVersionStrategy()))
 				.isInstanceOf(InvalidApiVersionException.class)
 				.hasMessage("400 BAD_REQUEST \"Invalid API version: '1.2.0'.\"");
 	}
@@ -75,7 +82,7 @@ public class DefaultApiVersionStrategiesTests {
 		String version = "1.2";
 		DefaultApiVersionStrategy strategy = apiVersionStrategy(null, true, null);
 		strategy.addMappedVersion(version);
-		validateVersion(version, strategy);
+		testValidate(version, strategy);
 	}
 
 	@Test
@@ -83,19 +90,19 @@ public class DefaultApiVersionStrategiesTests {
 		String version = "1.2";
 		DefaultApiVersionStrategy strategy = apiVersionStrategy();
 		strategy.addMappedVersion(version);
-		assertThatThrownBy(() -> validateVersion(version, strategy)).isInstanceOf(InvalidApiVersionException.class);
+		assertThatThrownBy(() -> testValidate(version, strategy)).isInstanceOf(InvalidApiVersionException.class);
 	}
 
 	@Test
 	void validateSupportedWithPredicate() {
 		SemanticApiVersionParser.Version parsedVersion = parser.parseVersion("1.2");
-		validateVersion("1.2", apiVersionStrategy(null, false, version -> version.equals(parsedVersion)));
+		testValidate("1.2", apiVersionStrategy(null, false, version -> version.equals(parsedVersion)));
 	}
 
 	@Test
 	void validateUnsupportedWithPredicate() {
 		DefaultApiVersionStrategy strategy = apiVersionStrategy(null, false, version -> version.equals("1.2"));
-		assertThatThrownBy(() -> validateVersion("1.2", strategy)).isInstanceOf(InvalidApiVersionException.class);
+		assertThatThrownBy(() -> testValidate("1.2", strategy)).isInstanceOf(InvalidApiVersionException.class);
 	}
 
 	@Test
@@ -121,7 +128,7 @@ public class DefaultApiVersionStrategiesTests {
 				parser, null, defaultVersion, detectSupportedVersions, supportedVersionPredicate, null);
 	}
 
-	private void validateVersion(@Nullable String version, DefaultApiVersionStrategy strategy) {
+	private void testValidate(@Nullable String version, DefaultApiVersionStrategy strategy) {
 		MockServerHttpRequest.BaseBuilder<?> requestBuilder = MockServerHttpRequest.get("/");
 		if (version != null) {
 			requestBuilder.queryParam("api-version", version);
