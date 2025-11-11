@@ -33,11 +33,13 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 
 import org.jspecify.annotations.Nullable;
 
 /**
- * A {@link ConcurrentHashMap} that uses {@link ReferenceType#SOFT soft} or
+ * A {@link ConcurrentHashMap} variant that uses {@link ReferenceType#SOFT soft} or
  * {@linkplain ReferenceType#WEAK weak} references for both {@code keys} and {@code values}.
  *
  * <p>This class can be used as an alternative to
@@ -320,7 +322,7 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 				return false;
 			}
 		});
-		return (Boolean.TRUE.equals(result));
+		return Boolean.TRUE.equals(result);
 	}
 
 	@Override
@@ -335,7 +337,7 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 				return false;
 			}
 		});
-		return (Boolean.TRUE.equals(result));
+		return Boolean.TRUE.equals(result);
 	}
 
 	@Override
@@ -349,6 +351,114 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 					return oldValue;
 				}
 				return null;
+			}
+		});
+	}
+
+	@Override
+	public @Nullable V computeIfAbsent(@Nullable K key, Function<@Nullable ? super K, @Nullable ? extends V> mappingFunction) {
+		return doTask(key, new Task<V>(TaskOption.RESTRUCTURE_BEFORE, TaskOption.RESIZE) {
+			@Override
+			protected @Nullable V execute(@Nullable Reference<K, V> ref, @Nullable Entry<K, V> entry, @Nullable Entries<V> entries) {
+				if (entry != null) {
+					return entry.getValue();
+				}
+				V value = mappingFunction.apply(key);
+				// Add entry only if not null
+				if (value != null) {
+					Assert.state(entries != null, "No entries segment");
+					entries.add(value);
+				}
+				return value;
+			}
+		});
+	}
+
+	@Override
+	public @Nullable V computeIfPresent(@Nullable K key, BiFunction<@Nullable ? super K, @Nullable ? super V, @Nullable ? extends V> remappingFunction) {
+		return doTask(key, new Task<V>(TaskOption.RESTRUCTURE_BEFORE, TaskOption.RESIZE) {
+			@Override
+			protected @Nullable V execute(@Nullable Reference<K, V> ref, @Nullable Entry<K, V> entry, @Nullable Entries<V> entries) {
+				if (entry != null) {
+					V oldValue = entry.getValue();
+					V value = remappingFunction.apply(key, oldValue);
+					if (value != null) {
+						// Replace entry
+						entry.setValue(value);
+						return value;
+					}
+					else {
+						// Remove entry
+						if (ref != null) {
+							ref.release();
+						}
+					}
+				}
+				return null;
+			}
+		});
+	}
+
+	@Override
+	public @Nullable V compute(@Nullable K key, BiFunction<@Nullable ? super K, @Nullable ? super V, @Nullable ? extends V> remappingFunction) {
+		return doTask(key, new Task<V>(TaskOption.RESTRUCTURE_BEFORE, TaskOption.RESIZE) {
+			@Override
+			protected @Nullable V execute(@Nullable Reference<K, V> ref, @Nullable Entry<K, V> entry, @Nullable Entries<V> entries) {
+				V oldValue = null;
+				if (entry != null) {
+					oldValue = entry.getValue();
+				}
+				V value = remappingFunction.apply(key, oldValue);
+				if (value != null) {
+					if (entry != null) {
+						// Replace entry
+						entry.setValue(value);
+					}
+					else {
+						// Add entry
+						Assert.state(entries != null, "No entries segment");
+						entries.add(value);
+					}
+					return value;
+				}
+				else {
+					// Remove entry
+					if (ref != null) {
+						ref.release();
+					}
+				}
+				return null;
+			}
+		});
+	}
+
+	@Override
+	public @Nullable V merge(@Nullable K key, @Nullable V value, BiFunction<@Nullable ? super V, @Nullable ? super V, @Nullable ? extends V> remappingFunction) {
+		return doTask(key, new Task<V>(TaskOption.RESTRUCTURE_BEFORE, TaskOption.RESIZE) {
+			@Override
+			protected @Nullable V execute(@Nullable Reference<K, V> ref, @Nullable Entry<K, V> entry, @Nullable Entries<V> entries) {
+				if (entry != null) {
+					V oldValue = entry.getValue();
+					V newValue = remappingFunction.apply(oldValue, value);
+					if (newValue != null) {
+						// Replace entry
+						entry.setValue(newValue);
+						return newValue;
+					}
+					else {
+						// Remove entry
+						if (ref != null) {
+							ref.release();
+						}
+						return null;
+					}
+				}
+				else {
+					// Add entry
+					Assert.state(entries != null, "No entries segment");
+					entries.add(value);
+					return value;
+				}
 			}
 		});
 	}

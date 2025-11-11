@@ -19,6 +19,7 @@ package org.springframework.resilience.annotation;
 import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
@@ -73,7 +74,7 @@ public class ConcurrencyLimitBeanPostProcessor extends AbstractBeanFactoryAwareA
 
 	private class ConcurrencyLimitInterceptor implements MethodInterceptor {
 
-		private final Map<Object, ConcurrencyThrottleCache> cachePerInstance =
+		private final ConcurrentMap<Object, ConcurrencyThrottleCache> cachePerInstance =
 				new ConcurrentReferenceHashMap<>(16, ConcurrentReferenceHashMap.ReferenceType.WEAK);
 
 		@Override
@@ -87,8 +88,11 @@ public class ConcurrencyLimitBeanPostProcessor extends AbstractBeanFactoryAwareA
 			}
 			Assert.state(target != null, "Target must not be null");
 
+			// Build unique ConcurrencyThrottleCache instance per target object
 			ConcurrencyThrottleCache cache = this.cachePerInstance.computeIfAbsent(target,
 					k -> new ConcurrencyThrottleCache());
+
+			// Determine method-specific interceptor instance with isolated concurrency count
 			MethodInterceptor interceptor = cache.methodInterceptors.get(method);
 			if (interceptor == null) {
 				synchronized (cache) {
