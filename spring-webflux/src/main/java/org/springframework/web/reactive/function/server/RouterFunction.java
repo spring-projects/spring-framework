@@ -43,6 +43,9 @@ public interface RouterFunction<T extends ServerResponse> {
 	 */
 	Mono<HandlerFunction<T>> route(ServerRequest request);
 
+
+	// Default methods for composition and filtering
+
 	/**
 	 * Return a composed routing function that first invokes this function,
 	 * and then invokes the {@code other} function (of the same response type {@code T})
@@ -100,28 +103,6 @@ public interface RouterFunction<T extends ServerResponse> {
 	}
 
 	/**
-	 * Filter all {@linkplain HandlerFunction handler functions} routed by this function with the given
-	 * {@linkplain HandlerFilterFunction filter function}.
-	 * @param <S> the filter return type
-	 * @param filterFunction the filter to apply
-	 * @return the filtered routing function
-	 */
-	default <S extends ServerResponse> RouterFunction<S> filter(HandlerFilterFunction<T, S> filterFunction) {
-		return new RouterFunctions.FilteredRouterFunction<>(this, filterFunction);
-	}
-
-	/**
-	 * Accept the given visitor. Default implementation calls
-	 * {@link RouterFunctions.Visitor#unknown(RouterFunction)}; composed {@code RouterFunction}
-	 * implementations are expected to call {@code accept} for all components that make up this
-	 * router function.
-	 * @param visitor the visitor to accept
-	 */
-	default void accept(RouterFunctions.Visitor visitor) {
-		visitor.unknown(this);
-	}
-
-	/**
 	 * Return a new routing function with the given attribute.
 	 * @param name the attribute name
 	 * @param value the attribute value
@@ -155,5 +136,27 @@ public interface RouterFunction<T extends ServerResponse> {
 		return new RouterFunctions.AttributesRouterFunction<>(this, attributes);
 	}
 
+	/**
+	 * Filter all {@linkplain HandlerFunction handler functions} routed by this function
+	 * with the given {@linkplain HandlerFilterFunction filter function}.
+	 * @param <S> the filter return type
+	 * @param filterFunction the filter to apply
+	 * @return the filtered routing function
+	 */
+	default <S extends ServerResponse> RouterFunction<S> filter(HandlerFilterFunction<T, S> filterFunction) {
+		return new RouterFunctions.FilteredRouterFunction<>(this, filterFunction);
+	}
+
+	/**
+	 * Accept the given visitor.
+	 * <p>The default implementation calls
+	 * {@link RouterFunctions.Visitor#unknown(RouterFunction)}; composed {@code RouterFunction}
+	 * implementations are expected to call {@code accept} for all components that make up this
+	 * router function.
+	 * @param visitor the visitor to accept
+	 */
+	default void accept(RouterFunctions.Visitor visitor) {
+		visitor.unknown(this);
+	}
 
 }
