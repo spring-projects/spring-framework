@@ -21,18 +21,19 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.BiConsumer;
 
 import org.jspecify.annotations.Nullable;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.MultiValueMap;
 
 /**
  * An {@link org.springframework.http.HttpHeaders} variant that adds support for
  * the HTTP headers defined by the WebSocket specification RFC 6455.
  *
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
  * @since 4.0
  */
 public class WebSocketHttpHeaders extends HttpHeaders {
@@ -181,40 +182,40 @@ public class WebSocketHttpHeaders extends HttpHeaders {
 		return getFirst(SEC_WEBSOCKET_VERSION);
 	}
 
+	@Override
+	public @Nullable List<String> get(String headerName) {
+		return this.headers.get(headerName);
+	}
 
-	// Single string methods
-
-	/**
-	 * Return the first header value for the given header name, if any.
-	 * @param headerName the header name
-	 * @return the first header value; or {@code null}
-	 */
 	@Override
 	public @Nullable String getFirst(String headerName) {
 		return this.headers.getFirst(headerName);
 	}
 
-	/**
-	 * Add the given, single header value under the given name.
-	 * @param headerName  the header name
-	 * @param headerValue the header value
-	 * @throws UnsupportedOperationException if adding headers is not supported
-	 * @see #put(String, List)
-	 * @see #set(String, String)
-	 */
+	@Override
+	public @Nullable List<String> put(String key, List<String> value) {
+		return this.headers.put(key, value);
+	}
+
+	@Override
+	public @Nullable List<String> putIfAbsent(String headerName, List<String> headerValues) {
+		return this.headers.putIfAbsent(headerName, headerValues);
+	}
+
 	@Override
 	public void add(String headerName, @Nullable String headerValue) {
 		this.headers.add(headerName, headerValue);
 	}
 
 	/**
-	 * Set the given, single header value under the given name.
-	 * @param headerName  the header name
-	 * @param headerValue the header value
-	 * @throws UnsupportedOperationException if adding headers is not supported
-	 * @see #put(String, List)
-	 * @see #add(String, String)
+	 * {@inheritDoc}
+	 * @since 7.0
 	 */
+	@Override
+	public void addAll(String headerName, List<? extends String> headerValues) {
+		this.headers.addAll(headerName, headerValues);
+	}
+
 	@Override
 	public void set(String headerName, @Nullable String headerValue) {
 		this.headers.set(headerName, headerValue);
@@ -230,16 +231,32 @@ public class WebSocketHttpHeaders extends HttpHeaders {
 		return this.headers.toSingleValueMap();
 	}
 
-	// Map implementation
-
+	/**
+	 * {@inheritDoc}
+	 * @since 7.0
+	 * @deprecated in favor of {@link #toSingleValueMap()} which performs a copy but
+	 * ensures that collection-iterating methods like {@code entrySet()} are
+	 * case-insensitive
+	 */
 	@Override
-	public int size() {
-		return this.headers.size();
+	@Deprecated(since = "7.0", forRemoval = true)
+	@SuppressWarnings("removal")
+	public Map<String, String> asSingleValueMap() {
+		return this.headers.asSingleValueMap();
 	}
 
+	/**
+	 * {@inheritDoc}
+	 * @since 7.0
+	 * @deprecated This method is provided for backward compatibility with APIs
+	 * that would only accept maps. Generally avoid using HttpHeaders as a Map
+	 * or MultiValueMap.
+	 */
 	@Override
-	public boolean isEmpty() {
-		return this.headers.isEmpty();
+	@Deprecated(since = "7.0", forRemoval = true)
+	@SuppressWarnings("removal")
+	public MultiValueMap<String, String> asMultiValueMap() {
+		return this.headers.asMultiValueMap();
 	}
 
 	@Override
@@ -248,28 +265,18 @@ public class WebSocketHttpHeaders extends HttpHeaders {
 	}
 
 	@Override
-	public @Nullable List<String> get(String headerName) {
-		return this.headers.get(headerName);
+	public boolean isEmpty() {
+		return this.headers.isEmpty();
 	}
 
 	@Override
-	public @Nullable List<String> put(String key, List<String> value) {
-		return this.headers.put(key, value);
+	public int size() {
+		return this.headers.size();
 	}
 
 	@Override
 	public @Nullable List<String> remove(String key) {
 		return this.headers.remove(key);
-	}
-
-	@Override
-	public void putAll(HttpHeaders headers) {
-		this.headers.putAll(headers);
-	}
-
-	@Override
-	public void putAll(Map<? extends String, ? extends List<String>> m) {
-		this.headers.putAll(m);
 	}
 
 	@Override
@@ -286,17 +293,6 @@ public class WebSocketHttpHeaders extends HttpHeaders {
 	public Set<Map.Entry<String, List<String>>> headerSet() {
 		return this.headers.headerSet();
 	}
-
-	@Override
-	public void forEach(BiConsumer<? super String, ? super List<String>> action) {
-		this.headers.forEach(action);
-	}
-
-	@Override
-	public @Nullable List<String> putIfAbsent(String headerName, List<String> headerValues) {
-		return this.headers.putIfAbsent(headerName, headerValues);
-	}
-
 
 	@Override
 	public boolean equals(@Nullable Object other) {

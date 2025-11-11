@@ -1686,13 +1686,13 @@ public class HttpHeaders implements Serializable {
 	 * @since 5.2.3
 	 */
 	public void clearContentHeaders() {
-		this.headers.remove(HttpHeaders.CONTENT_DISPOSITION);
-		this.headers.remove(HttpHeaders.CONTENT_ENCODING);
-		this.headers.remove(HttpHeaders.CONTENT_LANGUAGE);
-		this.headers.remove(HttpHeaders.CONTENT_LENGTH);
-		this.headers.remove(HttpHeaders.CONTENT_LOCATION);
-		this.headers.remove(HttpHeaders.CONTENT_RANGE);
-		this.headers.remove(HttpHeaders.CONTENT_TYPE);
+		remove(HttpHeaders.CONTENT_DISPOSITION);
+		remove(HttpHeaders.CONTENT_ENCODING);
+		remove(HttpHeaders.CONTENT_LANGUAGE);
+		remove(HttpHeaders.CONTENT_LENGTH);
+		remove(HttpHeaders.CONTENT_LOCATION);
+		remove(HttpHeaders.CONTENT_RANGE);
+		remove(HttpHeaders.CONTENT_TYPE);
 	}
 
 	/**
@@ -1807,7 +1807,7 @@ public class HttpHeaders implements Serializable {
 	 * @see #putAll(HttpHeaders)
 	 */
 	public void addAll(HttpHeaders headers) {
-		this.headers.addAll(headers.headers);
+		headers.forEach(this::addAll);
 	}
 
 	/**
@@ -1909,7 +1909,7 @@ public class HttpHeaders implements Serializable {
 	 * @since 7.0
 	 */
 	public boolean hasHeaderValues(String headerName, List<String> values) {
-		return ObjectUtils.nullSafeEquals(this.headers.get(headerName), values);
+		return ObjectUtils.nullSafeEquals(get(headerName), values);
 	}
 
 	/**
@@ -1920,7 +1920,7 @@ public class HttpHeaders implements Serializable {
 	 * @since 7.0
 	 */
 	public boolean containsHeaderValue(String headerName, String value) {
-		final List<String> values = this.headers.get(headerName);
+		List<String> values = get(headerName);
 		if (values == null) {
 			return false;
 		}
@@ -1969,7 +1969,7 @@ public class HttpHeaders implements Serializable {
 	 * @see #put(String, List)
 	 */
 	public void putAll(HttpHeaders headers) {
-		this.headers.putAll(headers.headers);
+		headers.forEach(this::put);
 	}
 
 	/**
@@ -1978,7 +1978,7 @@ public class HttpHeaders implements Serializable {
 	 * @see #put(String, List)
 	 */
 	public void putAll(Map<? extends String, ? extends List<String>> headers) {
-		this.headers.putAll(headers);
+		headers.forEach(this::put);
 	}
 
 	/**
