@@ -38,6 +38,7 @@ import org.springframework.core.test.tools.Compiled;
 import org.springframework.core.test.tools.TestCompiler;
 import org.springframework.orm.jpa.JpaVendorAdapter;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
+import org.springframework.orm.jpa.domain.Car;
 import org.springframework.orm.jpa.domain.DriversLicense;
 import org.springframework.orm.jpa.domain.Employee;
 import org.springframework.orm.jpa.domain.EmployeeCategoryConverter;
@@ -71,7 +72,7 @@ class PersistenceManagedTypesBeanRegistrationAotProcessorTests {
 					"persistenceManagedTypes", PersistenceManagedTypes.class);
 			assertThat(persistenceManagedTypes.getManagedClassNames()).containsExactlyInAnyOrder(
 					DriversLicense.class.getName(), Person.class.getName(), Employee.class.getName(),
-					EmployeeLocationConverter.class.getName());
+					EmployeeLocationConverter.class.getName(), Car.class.getName());
 			assertThat(persistenceManagedTypes.getManagedPackages()).isEmpty();
 			assertThat(freshApplicationContext.getBean(
 					JpaDomainConfiguration.class).scanningInvoked).isFalse();
@@ -104,6 +105,14 @@ class PersistenceManagedTypesBeanRegistrationAotProcessorTests {
 					.withMemberCategories(MemberCategory.INVOKE_DECLARED_CONSTRUCTORS)).accepts(hints);
 			assertThat(RuntimeHintsPredicates.reflection().onType(EmployeeLocation.class)
 					.withMemberCategories(MemberCategory.ACCESS_DECLARED_FIELDS)).accepts(hints);
+			assertThat(RuntimeHintsPredicates.reflection().onMethod(Car.class, "setId")
+					.invoke()).accepts(hints);
+			assertThat(RuntimeHintsPredicates.reflection().onMethod(Car.class, "getId")
+					.invoke()).accepts(hints);
+			assertThat(RuntimeHintsPredicates.reflection().onMethod(Car.class, "setModel")
+					.invoke()).accepts(hints);
+			assertThat(RuntimeHintsPredicates.reflection().onMethod(Car.class, "getModel")
+					.invoke()).accepts(hints);
 		});
 	}
 
