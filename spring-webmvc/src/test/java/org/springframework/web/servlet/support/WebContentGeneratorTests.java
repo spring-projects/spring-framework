@@ -39,7 +39,7 @@ class WebContentGeneratorTests {
 	@Test
 	void getAllowHeaderWithConstructorFalse() {
 		WebContentGenerator generator = new TestWebContentGenerator(false);
-		assertThat(generator.getAllowHeader()).isEqualTo("GET,HEAD,POST,PUT,PATCH,DELETE,OPTIONS");
+		assertThat(generator.getAllowHeader()).isEqualTo("GET,HEAD,POST,PUT,PATCH,DELETE,OPTIONS,QUERY");
 	}
 
 	@Test
@@ -59,7 +59,7 @@ class WebContentGeneratorTests {
 	void getAllowHeaderWithSupportedMethodsSetterEmpty() {
 		WebContentGenerator generator = new TestWebContentGenerator();
 		generator.setSupportedMethods();
-		assertThat(generator.getAllowHeader()).as("Effectively \"no restriction\" on supported methods").isEqualTo("GET,HEAD,POST,PUT,PATCH,DELETE,OPTIONS");
+		assertThat(generator.getAllowHeader()).as("Effectively \"no restriction\" on supported methods").isEqualTo("GET,HEAD,POST,PUT,PATCH,DELETE,OPTIONS,QUERY");
 	}
 
 	@Test

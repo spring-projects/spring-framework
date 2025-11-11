@@ -611,6 +611,57 @@ public abstract class RouterFunctions {
 		Builder OPTIONS(String pattern, RequestPredicate predicate, HandlerFunction<ServerResponse> handlerFunction);
 
 		/**
+		 * Adds a route to the given handler function that handles HTTP {@code QUERY} requests.
+		 * @param handlerFunction the handler function to handle all {@code QUERY} requests
+		 * @return this builder
+		 * @since x.x.x
+		 */
+		Builder QUERY(HandlerFunction<ServerResponse> handlerFunction);
+
+		/**
+		 * Adds a route to the given handler function that handles all HTTP {@code QUERY} requests
+		 * that match the given pattern.
+		 * @param pattern the pattern to match to
+		 * @param handlerFunction the handler function to handle all {@code QUERY} requests that
+		 * match {@code pattern}
+		 * @return this builder
+		 * @see org.springframework.web.util.pattern.PathPattern
+		 */
+		Builder QUERY(String pattern, HandlerFunction<ServerResponse> handlerFunction);
+
+		/**
+		 * Adds a route to the given handler function that handles all HTTP {@code QUERY} requests
+		 * that match the given predicate.
+		 * @param predicate predicate to match
+		 * @param handlerFunction the handler function to handle all {@code QUERY} requests that
+		 * match {@code predicate}
+		 * @return this builder
+		 * @since x.x.x
+		 * @see RequestPredicates
+		 */
+		Builder QUERY(RequestPredicate predicate, HandlerFunction<ServerResponse> handlerFunction);
+
+		/**
+		 * Adds a route to the given handler function that handles all HTTP {@code QUERY} requests
+		 * that match the given pattern and predicate.
+		 * <p>For instance, the following example routes QUERY requests for "/user" that contain JSON
+		 * to the {@code addUser} method in {@code userController}:
+		 * <pre class="code">
+		 * RouterFunction&lt;ServerResponse&gt; route =
+		 *   RouterFunctions.route()
+		 *     .QUERY("/user", RequestPredicates.contentType(MediaType.APPLICATION_JSON), userController::addUser)
+		 *     .build();
+		 * </pre>
+		 * @param pattern the pattern to match to
+		 * @param predicate additional predicate to match
+		 * @param handlerFunction the handler function to handle all {@code QUERY} requests that
+		 * match {@code pattern}
+		 * @return this builder
+		 * @see org.springframework.web.util.pattern.PathPattern
+		 */
+		Builder QUERY(String pattern, RequestPredicate predicate, HandlerFunction<ServerResponse> handlerFunction);
+
+		/**
 		 * Adds a route to the given handler function that handles all requests that match the
 		 * given predicate.
 		 * @param predicate the request predicate to match

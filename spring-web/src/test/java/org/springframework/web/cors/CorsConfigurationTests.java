@@ -140,7 +140,7 @@ class CorsConfigurationTests {
 		assertThat(config.getAllowedHeaders()).containsExactly("*");
 		assertThat(combinedConfig).isNotNull();
 		assertThat(combinedConfig.getAllowedMethods())
-				.containsExactly(HttpMethod.GET.name(), HttpMethod.HEAD.name(), HttpMethod.POST.name());
+				.containsExactly(HttpMethod.GET.name(), HttpMethod.QUERY.name(), HttpMethod.HEAD.name(), HttpMethod.POST.name());
 		assertThat(combinedConfig.getExposedHeaders()).isEmpty();
 
 		combinedConfig = new CorsConfiguration().combine(config);
@@ -148,7 +148,7 @@ class CorsConfigurationTests {
 		assertThat(config.getAllowedHeaders()).containsExactly("*");
 		assertThat(combinedConfig).isNotNull();
 		assertThat(combinedConfig.getAllowedMethods())
-				.containsExactly(HttpMethod.GET.name(), HttpMethod.HEAD.name(), HttpMethod.POST.name());
+				.containsExactly(HttpMethod.GET.name(), HttpMethod.QUERY.name(), HttpMethod.HEAD.name(), HttpMethod.POST.name());
 		assertThat(combinedConfig.getExposedHeaders()).isEmpty();
 	}
 
@@ -394,7 +394,9 @@ class CorsConfigurationTests {
 	@Test
 	void checkMethodAllowed() {
 		CorsConfiguration config = new CorsConfiguration();
-		assertThat(config.checkHttpMethod(HttpMethod.GET)).containsExactly(HttpMethod.GET, HttpMethod.HEAD);
+		assertThat(config.checkHttpMethod(HttpMethod.GET)).containsExactly(HttpMethod.GET, HttpMethod.QUERY, HttpMethod.HEAD);
+		assertThat(config.checkHttpMethod(HttpMethod.QUERY)).containsExactly(HttpMethod.GET, HttpMethod.QUERY, HttpMethod.HEAD);
+
 
 		config.addAllowedMethod("GET");
 		assertThat(config.checkHttpMethod(HttpMethod.GET)).containsExactly(HttpMethod.GET);
@@ -450,7 +452,7 @@ class CorsConfigurationTests {
 
 		assertThat(config.getAllowedOrigins()).containsExactly("*", "https://domain.com");
 		assertThat(config.getAllowedHeaders()).containsExactly("*", "header1");
-		assertThat(config.getAllowedMethods()).containsExactly("GET", "HEAD", "POST", "PATCH");
+		assertThat(config.getAllowedMethods()).containsExactly("GET", "QUERY", "HEAD", "POST", "PATCH");
 	}
 
 	@Test

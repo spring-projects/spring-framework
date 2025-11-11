@@ -51,6 +51,7 @@ import org.springframework.web.util.UriBuilderFactory;
  * <li>{@link PutExchange}
  * <li>{@link PatchExchange}
  * <li>{@link DeleteExchange}
+ * <li>{@link QueryExchange}
  * </ul>
  *
  * <p>Supported method arguments:
