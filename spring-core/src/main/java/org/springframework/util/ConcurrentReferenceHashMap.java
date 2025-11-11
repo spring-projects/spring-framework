@@ -609,7 +609,7 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 		 * @param task the update operation
 		 * @return the result of the operation
 		 */
-		public <T> @Nullable T doTask(final int hash, final @Nullable Object key, final Task<T> task) {
+		private <T> @Nullable T doTask(final int hash, final @Nullable Object key, final Task<T> task) {
 			boolean resize = task.hasOption(TaskOption.RESIZE);
 			if (task.hasOption(TaskOption.RESTRUCTURE_BEFORE)) {
 				restructureIfNecessary(resize);
@@ -674,7 +674,6 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 		}
 
 		private void restructure(boolean allowResize, @Nullable Reference<K, V> ref) {
-			boolean needsResize;
 			lock();
 			try {
 				int expectedCount = this.count.get();
@@ -690,7 +689,7 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 
 				// Estimate new count, taking into account count inside lock and items that
 				// will be purged.
-				needsResize = (expectedCount > 0 && expectedCount >= this.resizeThreshold);
+				boolean needsResize = (expectedCount > 0 && expectedCount >= this.resizeThreshold);
 				boolean resizing = false;
 				int restructureSize = this.references.length;
 				if (allowResize && needsResize && restructureSize < MAXIMUM_SEGMENT_SIZE) {
@@ -731,8 +730,8 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 						while (ref != null) {
 							if (!toPurge.contains(ref)) {
 								Entry<K, V> entry = ref.get();
-								// Also filter out null references that are now null
-								// they should be polled from the queue in a later restructure call.
+								// Also filter out null references that are now null:
+								// They should be polled from the queue in a later restructure call.
 								if (entry != null) {
 									purgedRef = this.referenceManager.createReference(
 											entry, ref.getHash(), purgedRef);
@@ -744,7 +743,7 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 						this.references[i] = purgedRef;
 					}
 				}
-				this.count.set(Math.max(newCount, 0));
+				this.count.set(newCount);
 			}
 			finally {
 				unlock();
