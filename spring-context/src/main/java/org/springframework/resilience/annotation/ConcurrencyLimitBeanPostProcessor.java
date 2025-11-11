@@ -17,9 +17,10 @@
 package org.springframework.resilience.annotation;
 
 import java.lang.reflect.Method;
+import java.util.Collections;
+import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
@@ -35,7 +36,6 @@ import org.springframework.aop.support.annotation.AnnotationMatchingPointcut;
 import org.springframework.context.EmbeddedValueResolverAware;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.util.Assert;
-import org.springframework.util.ConcurrentReferenceHashMap;
 import org.springframework.util.StringUtils;
 import org.springframework.util.StringValueResolver;
 
@@ -74,29 +74,29 @@ public class ConcurrencyLimitBeanPostProcessor extends AbstractBeanFactoryAwareA
 
 	private class ConcurrencyLimitInterceptor implements MethodInterceptor {
 
-		private final ConcurrentMap<Object, ConcurrencyThrottleCache> cachePerInstance =
-				new ConcurrentReferenceHashMap<>(16, ConcurrentReferenceHashMap.ReferenceType.WEAK);
+		private final Map<Object, ConcurrencyThrottleHolder> holderPerInstance =
+				Collections.synchronizedMap(new IdentityHashMap<>(16));
 
 		@Override
 		public @Nullable Object invoke(MethodInvocation invocation) throws Throwable {
 			Method method = invocation.getMethod();
-			Object target = invocation.getThis();
-			Class<?> targetClass = (target != null ? target.getClass() : method.getDeclaringClass());
-			if (target == null && invocation instanceof ProxyMethodInvocation methodInvocation) {
-				// Support concurrency throttling for AOP proxy without a target
-				target = methodInvocation.getProxy();
+			Object instance = invocation.getThis();
+			Class<?> targetClass = (instance != null ? instance.getClass() : method.getDeclaringClass());
+			if (invocation instanceof ProxyMethodInvocation methodInvocation) {
+				// Apply concurrency throttling at the AOP proxy level (independent of target instance)
+				instance = methodInvocation.getProxy();
 			}
-			Assert.state(target != null, "Target must not be null");
+			Assert.state(instance != null, "Unique instance required - use a ProxyMethodInvocation");
 
-			// Build unique ConcurrencyThrottleCache instance per target object
-			ConcurrencyThrottleCache cache = this.cachePerInstance.computeIfAbsent(target,
-					k -> new ConcurrencyThrottleCache());
+			// Build unique ConcurrencyThrottleHolder instance per target object
+			ConcurrencyThrottleHolder holder = this.holderPerInstance.computeIfAbsent(instance,
+					k -> new ConcurrencyThrottleHolder());
 
 			// Determine method-specific interceptor instance with isolated concurrency count
-			MethodInterceptor interceptor = cache.methodInterceptors.get(method);
+			MethodInterceptor interceptor = holder.methodInterceptors.get(method);
 			if (interceptor == null) {
-				synchronized (cache) {
-					interceptor = cache.methodInterceptors.get(method);
+				synchronized (holder) {
+					interceptor = holder.methodInterceptors.get(method);
 					if (interceptor == null) {
 						boolean perMethod = false;
 						ConcurrencyLimit annotation = AnnotatedElementUtils.getMergedAnnotation(method, ConcurrencyLimit.class);
@@ -104,7 +104,7 @@ public class ConcurrencyLimitBeanPostProcessor extends AbstractBeanFactoryAwareA
 							perMethod = true;
 						}
 						else {
-							interceptor = cache.classInterceptor;
+							interceptor = holder.classInterceptor;
 							if (interceptor == null) {
 								annotation = AnnotatedElementUtils.getMergedAnnotation(targetClass, ConcurrencyLimit.class);
 							}
@@ -117,10 +117,10 @@ public class ConcurrencyLimitBeanPostProcessor extends AbstractBeanFactoryAwareA
 							}
 							interceptor = new ConcurrencyThrottleInterceptor(concurrencyLimit);
 							if (!perMethod) {
-								cache.classInterceptor = interceptor;
+								holder.classInterceptor = interceptor;
 							}
 						}
-						cache.methodInterceptors.put(method, interceptor);
+						holder.methodInterceptors.put(method, interceptor);
 					}
 				}
 			}
@@ -141,7 +141,7 @@ public class ConcurrencyLimitBeanPostProcessor extends AbstractBeanFactoryAwareA
 	}
 
 
-	private static class ConcurrencyThrottleCache {
+	private static class ConcurrencyThrottleHolder {
 
 		final Map<Method, MethodInterceptor> methodInterceptors = new ConcurrentHashMap<>();
 
