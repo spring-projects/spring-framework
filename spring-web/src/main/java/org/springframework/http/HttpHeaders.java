@@ -1798,7 +1798,7 @@ public class HttpHeaders implements Serializable {
 	}
 
 	/**
-	 * Add all the values of the given {@code HttpHeaders} to the current header.
+	 * Add all name-value pairs of the given {@code HttpHeaders}.
 	 * <p>As values are represented as a {@code List}, duplicate values can be
 	 * introduced. See {@link #putAll(HttpHeaders)} to replace the list of
 	 * values of each individual header name instead.
@@ -1823,8 +1823,8 @@ public class HttpHeaders implements Serializable {
 	}
 
 	/**
-	 * Set all single header value from the given Map under each of their
-	 * corresponding name.
+	 * Set all single header values from the given Map under each of their
+	 * corresponding names.
 	 * @param values the name-single-value pairs
 	 * @see #putAll(Map)
 	 */
@@ -1973,8 +1973,7 @@ public class HttpHeaders implements Serializable {
 	}
 
 	/**
-	 * Put all the entries from the given {@code MultiValueMap} into this
-	 * HttpHeaders.
+	 * Put all the entries from the given {@code Map} into this HttpHeaders.
 	 * @param headers the given headers
 	 * @see #put(String, List)
 	 */
@@ -2014,7 +2013,7 @@ public class HttpHeaders implements Serializable {
 	 * @param action the action to be performed for each entry
 	 */
 	public void forEach(BiConsumer<? super String, ? super List<String>> action) {
-		this.headerSet().forEach(e -> action.accept(e.getKey(), e.getValue()));
+		headerSet().forEach(e -> action.accept(e.getKey(), e.getValue()));
 	}
 
 	/**
