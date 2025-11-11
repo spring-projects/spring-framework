@@ -137,6 +137,7 @@ class PersistenceManagedTypesBeanRegistrationAotProcessor implements BeanRegistr
 					contributeConverterHints(hints, managedClass);
 					contributeCallbackHints(hints, managedClass);
 					contributeHibernateHints(hints, classLoader, managedClass);
+					contributePackagePrivateHints(hints, managedClass);
 				}
 				catch (ClassNotFoundException ex) {
 					throw new IllegalArgumentException("Failed to instantiate JPA managed class: " + managedClassName, ex);
@@ -232,6 +233,18 @@ class PersistenceManagedTypesBeanRegistrationAotProcessor implements BeanRegistr
 				ReflectionUtils.doWithMethods(managedClass, method -> registerForReflection(reflection,
 						AnnotationUtils.findAnnotation(method, attributeBinderTypeClass), "binder"));
 			}
+		}
+
+		private void contributePackagePrivateHints(RuntimeHints hints, Class<?> managedClass) {
+			ReflectionHints reflection = hints.reflection();
+			ReflectionUtils.doWithMethods(managedClass, method ->
+							reflection.registerMethod(method, ExecutableMode.INVOKE),
+					method -> {
+						int modifiers = method.getModifiers();
+						return !(java.lang.reflect.Modifier.isProtected(modifiers) ||
+								java.lang.reflect.Modifier.isPrivate(modifiers) ||
+								java.lang.reflect.Modifier.isPublic(modifiers));
+					});
 		}
 
 		@SuppressWarnings("unchecked")
