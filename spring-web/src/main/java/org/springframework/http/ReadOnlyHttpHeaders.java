@@ -32,9 +32,10 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.MultiValueMap;
 
 /**
- * {@code HttpHeaders} object that can only be read, not written to.
- * <p>This caches the parsed representations of the "Accept" and "Content-Type" headers
- * and will get out of sync with the backing map it is mutated at runtime.
+ * {@code HttpHeaders} variant that can only be read, not written to.
+ *
+ * <p>This caches the parsed representations of the "Accept" and "Content-Type"
+ * headers and will get out of sync with the backing map if it is mutated at runtime.
  *
  * @author Brian Clozel
  * @author Sam Brannen
@@ -44,10 +45,12 @@ class ReadOnlyHttpHeaders extends HttpHeaders {
 
 	private static final long serialVersionUID = -8578554704772377436L;
 
+
 	private @Nullable MediaType cachedContentType;
 
 	@SuppressWarnings("serial")
 	private @Nullable List<MediaType> cachedAccept;
+
 
 	ReadOnlyHttpHeaders(MultiValueMap<String, String> headers) {
 		super(headers);
@@ -137,7 +140,6 @@ class ReadOnlyHttpHeaders extends HttpHeaders {
 	public Set<String> headerNames() {
 		return Collections.unmodifiableSet(super.headerNames());
 	}
-
 
 	@Override
 	public List<String> put(String key, List<String> value) {

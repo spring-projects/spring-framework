@@ -468,9 +468,9 @@ public class HttpHeaders implements Serializable {
 	 * <p>If the supplied {@code HttpHeaders} instance is a
 	 * {@linkplain #readOnlyHttpHeaders(HttpHeaders) read-only}
 	 * {@code HttpHeaders} wrapper, it will be unwrapped to ensure that the
-	 * {@code HttpHeaders} instance created by this constructor is mutable.
-	 * Once the writable instance is mutated, the read-only instance is
-	 * likely to be out of sync and should be discarded.
+	 * {@code HttpHeaders} instance created by this constructor is mutable. Once
+	 * the writable instance is mutated, the read-only instance is likely to be
+	 * out of sync and should be discarded.
 	 * @param httpHeaders the headers to expose
 	 * @since 7.0
 	 * @see #copyOf(HttpHeaders)
