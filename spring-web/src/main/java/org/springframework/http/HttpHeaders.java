@@ -57,11 +57,11 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 /**
- * A data structure representing HTTP request or response headers, mapping String header names
- * to a list of String values, also offering accessors for common application-level data types.
+ * A data structure representing HTTP request or response headers, mapping String
+ * header names to a list of String values and also offering accessors for common
+ * application-level data types.
  *
- * <p>In addition to the regular methods defined by {@link Map}, this class offers many common
- * convenience methods, for example:
+ * <p>This class offers many common convenience methods, for example:
  * <ul>
  * <li>{@link #getFirst(String)} returns the first value associated with a given header name</li>
  * <li>{@link #add(String, String)} adds a header value to the list of values for a header name</li>
@@ -69,12 +69,12 @@ import org.springframework.util.StringUtils;
  * </ul>
  *
  * <p>Note that {@code HttpHeaders} instances created by the default constructor
- * treat header names in a case-insensitive manner. Instances created with the
- * {@link #HttpHeaders(MultiValueMap)} constructor like those instantiated
+ * treat header names in a case-insensitive manner; whereas, instances created with
+ * the {@link #HttpHeaders(MultiValueMap)} constructor &mdash; like those instantiated
  * internally by the framework to adapt to existing HTTP headers data structures
- * do guarantee per-header get/set/add operations to be case-insensitive as
+ * &mdash; guarantee per-header get/set/add operations to be case-insensitive as
  * mandated by the HTTP specification. However, it is not necessarily how
- * entries are actually stored, and this can lead to the reported {@code size()}
+ * entries are actually stored, and this can lead to the reported {@link #size()}
  * being inflated. Prefer using {@link #headerSet()} or {@link #headerNames()}
  * to ensure a case-insensitive view.
  *
@@ -82,8 +82,7 @@ import org.springframework.util.StringUtils;
  * Framework. If your application or library relies on other headers defined in RFCs,
  * please use methods that accept the header name as a parameter.
  *
- * <p>Since 7.0, this class no longer implements the {@code MultiValueMap}
- * contract.
+ * <p>Since 7.0, this class no longer implements the {@code MultiValueMap} contract.
  *
  * @author Arjen Poutsma
  * @author Sebastien Deleuze
