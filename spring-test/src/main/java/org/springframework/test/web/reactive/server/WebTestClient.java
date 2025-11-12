@@ -968,7 +968,9 @@ public interface WebTestClient {
 		/**
 		 * Assert the extracted body with a {@link Matcher}.
 		 * @since 5.1
-		 * @deprecated in favor of {@link Consumer}-based variants
+		 * @deprecated in favor of {@link Consumer}-based variants, and
+		 * AssertJ support via
+		 * {@link org.springframework.test.web.reactive.server.assertj.WebTestClientResponse}
 		 */
 		@Deprecated(since = "7.0", forRemoval = true)
 		@NullUnmarked // To avoid a "Cannot attach type annotations" error when org.hamcrest.Matcher is not in the classpath
@@ -978,7 +980,9 @@ public interface WebTestClient {
 		 * Transform the extracted the body with a function, for example, extracting a
 		 * property, and assert the mapped value with a {@link Matcher}.
 		 * @since 5.1
-		 * @deprecated in favor of {@link Consumer}-based variants
+		 * @deprecated in favor of {@link Consumer}-based variants, and
+		 * AssertJ support via
+		 * {@link org.springframework.test.web.reactive.server.assertj.WebTestClientResponse}
 		 */
 		@Deprecated(since = "7.0", forRemoval = true)
 		@NullUnmarked // To avoid a "Cannot attach type annotations" error when org.hamcrest.Matcher is not in the classpath
