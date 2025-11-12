@@ -162,8 +162,7 @@ class DefaultHttpMessageConverters implements HttpMessageConverters {
 
 
 		void setStringConverter(HttpMessageConverter<?> stringConverter) {
-			Assert.isTrue(stringConverter.getSupportedMediaTypes().contains(MediaType.TEXT_PLAIN),
-			"stringConverter should support 'text/plain'");
+			checkConverterSupports(stringConverter, MediaType.TEXT_PLAIN);
 			this.stringConverter = stringConverter;
 		}
 
@@ -173,20 +172,17 @@ class DefaultHttpMessageConverters implements HttpMessageConverters {
 		}
 
 		void setJsonConverter(HttpMessageConverter<?> jsonConverter) {
-			Assert.isTrue(jsonConverter.getSupportedMediaTypes().contains(MediaType.APPLICATION_JSON),
-					"jsonConverter should support 'application/json'");
+			checkConverterSupports(jsonConverter, MediaType.APPLICATION_JSON);
 			this.jsonConverter = jsonConverter;
 		}
 
 		void setXmlConverter(HttpMessageConverter<?> xmlConverter) {
-			Assert.isTrue(xmlConverter.getSupportedMediaTypes().contains(MediaType.TEXT_XML),
-					"xmlConverter should support 'text/xml'");
+			checkConverterSupports(xmlConverter, MediaType.TEXT_XML);
 			this.xmlConverter = xmlConverter;
 		}
 
 		void setSmileConverter(HttpMessageConverter<?> smileConverter) {
-			Assert.isTrue(smileConverter.getSupportedMediaTypes().contains(new MediaType("application", "x-jackson-smile")),
-					"smileConverter should support 'application/x-jackson-smile'");
+			checkConverterSupports(smileConverter, new MediaType("application", "x-jackson-smile"));
 			this.smileConverter = smileConverter;
 		}
 
@@ -196,15 +192,22 @@ class DefaultHttpMessageConverters implements HttpMessageConverters {
 		}
 
 		void setCborConverter(HttpMessageConverter<?> cborConverter) {
-			Assert.isTrue(cborConverter.getSupportedMediaTypes().contains(MediaType.APPLICATION_CBOR),
-					"cborConverter should support 'application/cbor'");
+			checkConverterSupports(cborConverter, MediaType.APPLICATION_CBOR);
 			this.cborConverter = cborConverter;
 		}
 
 		void setYamlConverter(HttpMessageConverter<?> yamlConverter) {
-			Assert.isTrue(yamlConverter.getSupportedMediaTypes().contains(MediaType.APPLICATION_YAML),
-					"yamlConverter should support 'application/yaml'");
+			checkConverterSupports(yamlConverter, MediaType.APPLICATION_YAML);
 			this.yamlConverter = yamlConverter;
+		}
+
+		private void checkConverterSupports(HttpMessageConverter<?> converter, MediaType mediaType) {
+			for (MediaType supportedMediaType : converter.getSupportedMediaTypes()) {
+				if (mediaType.equalsTypeAndSubtype(supportedMediaType)) {
+					return;
+				}
+			}
+			throw new IllegalArgumentException("converter should support '" + mediaType + "'");
 		}
 
 		void addCustomMessageConverter(HttpMessageConverter<?> customConverter) {

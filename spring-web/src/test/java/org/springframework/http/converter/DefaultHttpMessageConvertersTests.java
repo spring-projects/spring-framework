@@ -65,42 +65,47 @@ class DefaultHttpMessageConvertersTests {
 	void failsWhenStringConverterDoesNotSupportMediaType() {
 		assertThatIllegalArgumentException()
 				.isThrownBy(() -> HttpMessageConverters.forClient().withStringConverter(new CustomHttpMessageConverter()).build())
-				.withMessage("stringConverter should support 'text/plain'");
+				.withMessage("converter should support 'text/plain'");
 	}
 
 	@Test
 	void failsWhenJsonConverterDoesNotSupportMediaType() {
 		assertThatIllegalArgumentException()
 				.isThrownBy(() -> HttpMessageConverters.forClient().withJsonConverter(new CustomHttpMessageConverter()).build())
-				.withMessage("jsonConverter should support 'application/json'");
+				.withMessage("converter should support 'application/json'");
+	}
+
+	@Test
+	void canConfigureXmlConverterWithCharset() {
+		HttpMessageConverters.forClient().withXmlConverter(new JacksonXmlHttpMessageConverter()).build();
 	}
 
 	@Test
 	void failsWhenXmlConverterDoesNotSupportMediaType() {
 		assertThatIllegalArgumentException()
 				.isThrownBy(() -> HttpMessageConverters.forClient().withXmlConverter(new CustomHttpMessageConverter()).build())
-				.withMessage("xmlConverter should support 'text/xml'");
+				.withMessage("converter should support 'text/xml'");
 	}
 
 	@Test
 	void failsWhenSmileConverterDoesNotSupportMediaType() {
 		assertThatIllegalArgumentException()
 				.isThrownBy(() -> HttpMessageConverters.forClient().withSmileConverter(new CustomHttpMessageConverter()).build())
-				.withMessage("smileConverter should support 'application/x-jackson-smile'");
+				.withMessage("converter should support 'application/x-jackson-smile'");
 	}
 
 	@Test
 	void failsWhenCborConverterDoesNotSupportMediaType() {
 		assertThatIllegalArgumentException()
 				.isThrownBy(() -> HttpMessageConverters.forClient().withCborConverter(new CustomHttpMessageConverter()).build())
-				.withMessage("cborConverter should support 'application/cbor'");
+				.withMessage("converter should support 'application/cbor'");
 	}
 
 	@Test
 	void failsWhenYamlConverterDoesNotSupportMediaType() {
 		assertThatIllegalArgumentException()
 				.isThrownBy(() -> HttpMessageConverters.forClient().withYamlConverter(new CustomHttpMessageConverter()).build())
-				.withMessage("yamlConverter should support 'application/yaml'");
+				.withMessage("converter should support 'application/yaml'");
 	}
 
 
