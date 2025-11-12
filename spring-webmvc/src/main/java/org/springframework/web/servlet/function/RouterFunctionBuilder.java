@@ -38,6 +38,7 @@ import org.springframework.util.Assert;
  *
  * @author Arjen Poutsma
  * @author Sebastien Deleuze
+ * @author Rossen Stoyanchev
  * @since 5.2
  */
 class RouterFunctionBuilder implements RouterFunctions.Builder {
@@ -49,38 +50,38 @@ class RouterFunctionBuilder implements RouterFunctions.Builder {
 	private final List<HandlerFilterFunction<ServerResponse, ServerResponse>> errorHandlers = new ArrayList<>();
 
 
+	@SuppressWarnings("unchecked")
 	@Override
-	public RouterFunctions.Builder add(RouterFunction<ServerResponse> routerFunction) {
+	public <T extends ServerResponse> RouterFunctions.Builder add(RouterFunction<T> routerFunction) {
 		Assert.notNull(routerFunction, "RouterFunction must not be null");
-		this.routerFunctions.add(routerFunction);
+		this.routerFunctions.add((RouterFunction<ServerResponse>) routerFunction);
 		return this;
 	}
 
-	private RouterFunctions.Builder add(RequestPredicate predicate, HandlerFunction<ServerResponse> handlerFunction) {
-		this.routerFunctions.add(RouterFunctions.route(predicate, handlerFunction));
-		return this;
+	private <T extends ServerResponse> RouterFunctions.Builder add(RequestPredicate predicate, HandlerFunction<T> handlerFunction) {
+		return add(RouterFunctions.route(predicate, handlerFunction));
 	}
 
 	// GET
 
 	@Override
-	public RouterFunctions.Builder GET(HandlerFunction<ServerResponse> handlerFunction) {
+	public <T extends ServerResponse> RouterFunctions.Builder GET(HandlerFunction<T> handlerFunction) {
 		return add(RequestPredicates.method(HttpMethod.GET), handlerFunction);
 	}
 
 	@Override
-	public RouterFunctions.Builder GET(RequestPredicate predicate, HandlerFunction<ServerResponse> handlerFunction) {
+	public <T extends ServerResponse> RouterFunctions.Builder GET(RequestPredicate predicate, HandlerFunction<T> handlerFunction) {
 		return add(RequestPredicates.method(HttpMethod.GET).and(predicate), handlerFunction);
 	}
 
 	@Override
-	public RouterFunctions.Builder GET(String pattern, HandlerFunction<ServerResponse> handlerFunction) {
+	public <T extends ServerResponse> RouterFunctions.Builder GET(String pattern, HandlerFunction<T> handlerFunction) {
 		return add(RequestPredicates.GET(pattern), handlerFunction);
 	}
 
 	@Override
-	public RouterFunctions.Builder GET(String pattern, RequestPredicate predicate,
-			HandlerFunction<ServerResponse> handlerFunction) {
+	public <T extends ServerResponse> RouterFunctions.Builder GET(String pattern, RequestPredicate predicate,
+			HandlerFunction<T> handlerFunction) {
 
 		return add(RequestPredicates.GET(pattern).and(predicate), handlerFunction);
 	}
@@ -88,23 +89,23 @@ class RouterFunctionBuilder implements RouterFunctions.Builder {
 	// HEAD
 
 	@Override
-	public RouterFunctions.Builder HEAD(HandlerFunction<ServerResponse> handlerFunction) {
+	public <T extends ServerResponse> RouterFunctions.Builder HEAD(HandlerFunction<T> handlerFunction) {
 		return add(RequestPredicates.method(HttpMethod.HEAD), handlerFunction);
 	}
 
 	@Override
-	public RouterFunctions.Builder HEAD(RequestPredicate predicate, HandlerFunction<ServerResponse> handlerFunction) {
+	public <T extends ServerResponse> RouterFunctions.Builder HEAD(RequestPredicate predicate, HandlerFunction<T> handlerFunction) {
 		return add(RequestPredicates.method(HttpMethod.HEAD).and(predicate), handlerFunction);
 	}
 
 	@Override
-	public RouterFunctions.Builder HEAD(String pattern, HandlerFunction<ServerResponse> handlerFunction) {
+	public <T extends ServerResponse> RouterFunctions.Builder HEAD(String pattern, HandlerFunction<T> handlerFunction) {
 		return add(RequestPredicates.HEAD(pattern), handlerFunction);
 	}
 
 	@Override
-	public RouterFunctions.Builder HEAD(String pattern, RequestPredicate predicate,
-			HandlerFunction<ServerResponse> handlerFunction) {
+	public <T extends ServerResponse> RouterFunctions.Builder HEAD(String pattern, RequestPredicate predicate,
+			HandlerFunction<T> handlerFunction) {
 
 		return add(RequestPredicates.HEAD(pattern).and(predicate), handlerFunction);
 	}
@@ -112,23 +113,23 @@ class RouterFunctionBuilder implements RouterFunctions.Builder {
 	// POST
 
 	@Override
-	public RouterFunctions.Builder POST(HandlerFunction<ServerResponse> handlerFunction) {
+	public <T extends ServerResponse> RouterFunctions.Builder POST(HandlerFunction<T> handlerFunction) {
 		return add(RequestPredicates.method(HttpMethod.POST), handlerFunction);
 	}
 
 	@Override
-	public RouterFunctions.Builder POST(RequestPredicate predicate, HandlerFunction<ServerResponse> handlerFunction) {
+	public <T extends ServerResponse> RouterFunctions.Builder POST(RequestPredicate predicate, HandlerFunction<T> handlerFunction) {
 		return add(RequestPredicates.method(HttpMethod.POST).and(predicate), handlerFunction);
 	}
 
 	@Override
-	public RouterFunctions.Builder POST(String pattern, HandlerFunction<ServerResponse> handlerFunction) {
+	public <T extends ServerResponse> RouterFunctions.Builder POST(String pattern, HandlerFunction<T> handlerFunction) {
 		return add(RequestPredicates.POST(pattern), handlerFunction);
 	}
 
 	@Override
-	public RouterFunctions.Builder POST(String pattern, RequestPredicate predicate,
-			HandlerFunction<ServerResponse> handlerFunction) {
+	public <T extends ServerResponse> RouterFunctions.Builder POST(String pattern, RequestPredicate predicate,
+			HandlerFunction<T> handlerFunction) {
 
 		return add(RequestPredicates.POST(pattern).and(predicate), handlerFunction);
 	}
@@ -136,23 +137,23 @@ class RouterFunctionBuilder implements RouterFunctions.Builder {
 	// PUT
 
 	@Override
-	public RouterFunctions.Builder PUT(HandlerFunction<ServerResponse> handlerFunction) {
+	public <T extends ServerResponse> RouterFunctions.Builder PUT(HandlerFunction<T> handlerFunction) {
 		return add(RequestPredicates.method(HttpMethod.PUT), handlerFunction);
 	}
 
 	@Override
-	public RouterFunctions.Builder PUT(RequestPredicate predicate, HandlerFunction<ServerResponse> handlerFunction) {
+	public <T extends ServerResponse> RouterFunctions.Builder PUT(RequestPredicate predicate, HandlerFunction<T> handlerFunction) {
 		return add(RequestPredicates.method(HttpMethod.PUT).and(predicate), handlerFunction);
 	}
 
 	@Override
-	public RouterFunctions.Builder PUT(String pattern, HandlerFunction<ServerResponse> handlerFunction) {
+	public <T extends ServerResponse> RouterFunctions.Builder PUT(String pattern, HandlerFunction<T> handlerFunction) {
 		return add(RequestPredicates.PUT(pattern), handlerFunction);
 	}
 
 	@Override
-	public RouterFunctions.Builder PUT(String pattern, RequestPredicate predicate,
-			HandlerFunction<ServerResponse> handlerFunction) {
+	public <T extends ServerResponse> RouterFunctions.Builder PUT(String pattern, RequestPredicate predicate,
+			HandlerFunction<T> handlerFunction) {
 
 		return add(RequestPredicates.PUT(pattern).and(predicate), handlerFunction);
 	}
@@ -160,23 +161,23 @@ class RouterFunctionBuilder implements RouterFunctions.Builder {
 	// PATCH
 
 	@Override
-	public RouterFunctions.Builder PATCH(HandlerFunction<ServerResponse> handlerFunction) {
+	public <T extends ServerResponse> RouterFunctions.Builder PATCH(HandlerFunction<T> handlerFunction) {
 		return add(RequestPredicates.method(HttpMethod.PATCH), handlerFunction);
 	}
 
 	@Override
-	public RouterFunctions.Builder PATCH(RequestPredicate predicate, HandlerFunction<ServerResponse> handlerFunction) {
+	public <T extends ServerResponse> RouterFunctions.Builder PATCH(RequestPredicate predicate, HandlerFunction<T> handlerFunction) {
 		return add(RequestPredicates.method(HttpMethod.PATCH).and(predicate), handlerFunction);
 	}
 
 	@Override
-	public RouterFunctions.Builder PATCH(String pattern, HandlerFunction<ServerResponse> handlerFunction) {
+	public <T extends ServerResponse> RouterFunctions.Builder PATCH(String pattern, HandlerFunction<T> handlerFunction) {
 		return add(RequestPredicates.PATCH(pattern), handlerFunction);
 	}
 
 	@Override
-	public RouterFunctions.Builder PATCH(String pattern, RequestPredicate predicate,
-			HandlerFunction<ServerResponse> handlerFunction) {
+	public <T extends ServerResponse> RouterFunctions.Builder PATCH(String pattern, RequestPredicate predicate,
+			HandlerFunction<T> handlerFunction) {
 
 		return add(RequestPredicates.PATCH(pattern).and(predicate), handlerFunction);
 	}
@@ -184,23 +185,23 @@ class RouterFunctionBuilder implements RouterFunctions.Builder {
 	// DELETE
 
 	@Override
-	public RouterFunctions.Builder DELETE(HandlerFunction<ServerResponse> handlerFunction) {
+	public <T extends ServerResponse> RouterFunctions.Builder DELETE(HandlerFunction<T> handlerFunction) {
 		return add(RequestPredicates.method(HttpMethod.DELETE), handlerFunction);
 	}
 
 	@Override
-	public RouterFunctions.Builder DELETE(RequestPredicate predicate, HandlerFunction<ServerResponse> handlerFunction) {
+	public <T extends ServerResponse> RouterFunctions.Builder DELETE(RequestPredicate predicate, HandlerFunction<T> handlerFunction) {
 		return add(RequestPredicates.method(HttpMethod.DELETE).and(predicate), handlerFunction);
 	}
 
 	@Override
-	public RouterFunctions.Builder DELETE(String pattern, HandlerFunction<ServerResponse> handlerFunction) {
+	public <T extends ServerResponse> RouterFunctions.Builder DELETE(String pattern, HandlerFunction<T> handlerFunction) {
 		return add(RequestPredicates.DELETE(pattern), handlerFunction);
 	}
 
 	@Override
-	public RouterFunctions.Builder DELETE(String pattern, RequestPredicate predicate,
-			HandlerFunction<ServerResponse> handlerFunction) {
+	public <T extends ServerResponse> RouterFunctions.Builder DELETE(String pattern, RequestPredicate predicate,
+			HandlerFunction<T> handlerFunction) {
 
 		return add(RequestPredicates.DELETE(pattern).and(predicate), handlerFunction);
 	}
@@ -208,23 +209,23 @@ class RouterFunctionBuilder implements RouterFunctions.Builder {
 	// OPTIONS
 
 	@Override
-	public RouterFunctions.Builder OPTIONS(HandlerFunction<ServerResponse> handlerFunction) {
+	public <T extends ServerResponse> RouterFunctions.Builder OPTIONS(HandlerFunction<T> handlerFunction) {
 		return add(RequestPredicates.method(HttpMethod.OPTIONS), handlerFunction);
 	}
 
 	@Override
-	public RouterFunctions.Builder OPTIONS(RequestPredicate predicate, HandlerFunction<ServerResponse> handlerFunction) {
+	public <T extends ServerResponse> RouterFunctions.Builder OPTIONS(RequestPredicate predicate, HandlerFunction<T> handlerFunction) {
 		return add(RequestPredicates.method(HttpMethod.OPTIONS).and(predicate), handlerFunction);
 	}
 
 	@Override
-	public RouterFunctions.Builder OPTIONS(String pattern, HandlerFunction<ServerResponse> handlerFunction) {
+	public <T extends ServerResponse> RouterFunctions.Builder OPTIONS(String pattern, HandlerFunction<T> handlerFunction) {
 		return add(RequestPredicates.OPTIONS(pattern), handlerFunction);
 	}
 
 	@Override
-	public RouterFunctions.Builder OPTIONS(String pattern, RequestPredicate predicate,
-			HandlerFunction<ServerResponse> handlerFunction) {
+	public <T extends ServerResponse> RouterFunctions.Builder OPTIONS(String pattern, RequestPredicate predicate,
+			HandlerFunction<T> handlerFunction) {
 
 		return add(RequestPredicates.OPTIONS(pattern).and(predicate), handlerFunction);
 	}
@@ -232,8 +233,8 @@ class RouterFunctionBuilder implements RouterFunctions.Builder {
 	// other
 
 	@Override
-	public RouterFunctions.Builder route(RequestPredicate predicate,
-			HandlerFunction<ServerResponse> handlerFunction) {
+	public <T extends ServerResponse> RouterFunctions.Builder route(RequestPredicate predicate,
+			HandlerFunction<T> handlerFunction) {
 		return add(RouterFunctions.route(predicate, handlerFunction));
 	}
 
@@ -285,13 +286,14 @@ class RouterFunctionBuilder implements RouterFunctions.Builder {
 		return this;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
-	public RouterFunctions.Builder nest(RequestPredicate predicate,
-			Supplier<RouterFunction<ServerResponse>> routerFunctionSupplier) {
+	public <T extends ServerResponse> RouterFunctions.Builder nest(RequestPredicate predicate,
+			Supplier<RouterFunction<T>> routerFunctionSupplier) {
 
 		Assert.notNull(routerFunctionSupplier, "RouterFunction Supplier must not be null");
 
-		RouterFunction<ServerResponse> nestedRoute = routerFunctionSupplier.get();
+		RouterFunction<ServerResponse> nestedRoute = (RouterFunction<ServerResponse>) routerFunctionSupplier.get();
 		this.routerFunctions.add(RouterFunctions.nest(predicate, nestedRoute));
 		return this;
 	}
@@ -304,17 +306,18 @@ class RouterFunctionBuilder implements RouterFunctions.Builder {
 	}
 
 	@Override
-	public RouterFunctions.Builder path(String pattern,
-			Supplier<RouterFunction<ServerResponse>> routerFunctionSupplier) {
+	public <T extends ServerResponse> RouterFunctions.Builder path(String pattern,
+			Supplier<RouterFunction<T>> routerFunctionSupplier) {
 
 		return nest(RequestPredicates.path(pattern), routerFunctionSupplier);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
-	public RouterFunctions.Builder filter(HandlerFilterFunction<ServerResponse, ServerResponse> filterFunction) {
+	public <T extends ServerResponse, R extends ServerResponse> RouterFunctions.Builder filter(HandlerFilterFunction<T, R> filterFunction) {
 		Assert.notNull(filterFunction, "HandlerFilterFunction must not be null");
 
-		this.filterFunctions.add(filterFunction);
+		this.filterFunctions.add((HandlerFilterFunction<ServerResponse, ServerResponse>) filterFunction);
 		return this;
 	}
 
@@ -325,27 +328,29 @@ class RouterFunctionBuilder implements RouterFunctions.Builder {
 	}
 
 	@Override
-	public RouterFunctions.Builder after(
-			BiFunction<ServerRequest, ServerResponse, ServerResponse> responseProcessor) {
+	public <T extends ServerResponse, R extends ServerResponse> RouterFunctions.Builder after(
+			BiFunction<ServerRequest, T, R> responseProcessor) {
 
 		Assert.notNull(responseProcessor, "ResponseProcessor must not be null");
 		return filter(HandlerFilterFunction.ofResponseProcessor(responseProcessor));
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
-	public RouterFunctions.Builder onError(Predicate<Throwable> predicate,
-			BiFunction<Throwable, ServerRequest, ServerResponse> responseProvider) {
+	public <T extends ServerResponse> RouterFunctions.Builder onError(Predicate<Throwable> predicate,
+			BiFunction<Throwable, ServerRequest, T> responseProvider) {
 
 		Assert.notNull(predicate, "Predicate must not be null");
 		Assert.notNull(responseProvider, "ResponseProvider must not be null");
 
-		this.errorHandlers.add(0, HandlerFilterFunction.ofErrorHandler(predicate, responseProvider));
+		HandlerFilterFunction<T, T> filter = HandlerFilterFunction.ofErrorHandler(predicate, responseProvider);
+		this.errorHandlers.add(0, (HandlerFilterFunction<ServerResponse, ServerResponse>) filter);
 		return this;
 	}
 
 	@Override
-	public RouterFunctions.Builder onError(Class<? extends Throwable> exceptionType,
-			BiFunction<Throwable, ServerRequest, ServerResponse> responseProvider) {
+	public <T extends ServerResponse> RouterFunctions.Builder onError(Class<? extends Throwable> exceptionType,
+			BiFunction<Throwable, ServerRequest, T> responseProvider) {
 		Assert.notNull(exceptionType, "ExceptionType must not be null");
 		Assert.notNull(responseProvider, "ResponseProvider must not be null");
 

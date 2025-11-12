@@ -46,6 +46,7 @@ import org.springframework.web.util.pattern.PathPatternParser;
  *
  * @author Arjen Poutsma
  * @author Sebastien Deleuze
+ * @author Rossen Stoyanchev
  * @since 5.2
  */
 public abstract class RouterFunctions {
@@ -282,7 +283,7 @@ public abstract class RouterFunctions {
 		 * @return this builder
 		 * @since 5.3
 		 */
-		Builder GET(HandlerFunction<ServerResponse> handlerFunction);
+		<T extends ServerResponse> Builder GET(HandlerFunction<T> handlerFunction);
 
 		/**
 		 * Adds a route to the given handler function that handles all HTTP {@code GET} requests
@@ -293,7 +294,7 @@ public abstract class RouterFunctions {
 		 * @return this builder
 		 * @see org.springframework.web.util.pattern.PathPattern
 		 */
-		Builder GET(String pattern, HandlerFunction<ServerResponse> handlerFunction);
+		<T extends ServerResponse> Builder GET(String pattern, HandlerFunction<T> handlerFunction);
 
 		/**
 		 * Adds a route to the given handler function that handles all HTTP {@code GET} requests
@@ -305,7 +306,7 @@ public abstract class RouterFunctions {
 		 * @since 5.3
 		 * @see RequestPredicates
 		 */
-		Builder GET(RequestPredicate predicate, HandlerFunction<ServerResponse> handlerFunction);
+		<T extends ServerResponse> Builder GET(RequestPredicate predicate, HandlerFunction<T> handlerFunction);
 
 		/**
 		 * Adds a route to the given handler function that handles all HTTP {@code GET} requests
@@ -326,7 +327,7 @@ public abstract class RouterFunctions {
 		 * @see org.springframework.web.util.pattern.PathPattern
 		 * @see RequestPredicates
 		 */
-		Builder GET(String pattern, RequestPredicate predicate, HandlerFunction<ServerResponse> handlerFunction);
+		<T extends ServerResponse> Builder GET(String pattern, RequestPredicate predicate, HandlerFunction<T> handlerFunction);
 
 		/**
 		 * Adds a route to the given handler function that handles HTTP {@code HEAD} requests.
@@ -334,7 +335,7 @@ public abstract class RouterFunctions {
 		 * @return this builder
 		 * @since 5.3
 		 */
-		Builder HEAD(HandlerFunction<ServerResponse> handlerFunction);
+		<T extends ServerResponse> Builder HEAD(HandlerFunction<T> handlerFunction);
 
 		/**
 		 * Adds a route to the given handler function that handles all HTTP {@code HEAD} requests
@@ -345,7 +346,7 @@ public abstract class RouterFunctions {
 		 * @return this builder
 		 * @see org.springframework.web.util.pattern.PathPattern
 		 */
-		Builder HEAD(String pattern, HandlerFunction<ServerResponse> handlerFunction);
+		<T extends ServerResponse> Builder HEAD(String pattern, HandlerFunction<T> handlerFunction);
 
 		/**
 		 * Adds a route to the given handler function that handles all HTTP {@code HEAD} requests
@@ -357,7 +358,7 @@ public abstract class RouterFunctions {
 		 * @since 5.3
 		 * @see RequestPredicates
 		 */
-		Builder HEAD(RequestPredicate predicate, HandlerFunction<ServerResponse> handlerFunction);
+		<T extends ServerResponse> Builder HEAD(RequestPredicate predicate, HandlerFunction<T> handlerFunction);
 
 		/**
 		 * Adds a route to the given handler function that handles all HTTP {@code HEAD} requests
@@ -369,7 +370,7 @@ public abstract class RouterFunctions {
 		 * @return this builder
 		 * @see org.springframework.web.util.pattern.PathPattern
 		 */
-		Builder HEAD(String pattern, RequestPredicate predicate, HandlerFunction<ServerResponse> handlerFunction);
+		<T extends ServerResponse> Builder HEAD(String pattern, RequestPredicate predicate, HandlerFunction<T> handlerFunction);
 
 		/**
 		 * Adds a route to the given handler function that handles HTTP {@code POST} requests.
@@ -377,7 +378,7 @@ public abstract class RouterFunctions {
 		 * @return this builder
 		 * @since 5.3
 		 */
-		Builder POST(HandlerFunction<ServerResponse> handlerFunction);
+		<T extends ServerResponse> Builder POST(HandlerFunction<T> handlerFunction);
 
 		/**
 		 * Adds a route to the given handler function that handles all HTTP {@code POST} requests
@@ -388,7 +389,7 @@ public abstract class RouterFunctions {
 		 * @return this builder
 		 * @see org.springframework.web.util.pattern.PathPattern
 		 */
-		Builder POST(String pattern, HandlerFunction<ServerResponse> handlerFunction);
+		<T extends ServerResponse> Builder POST(String pattern, HandlerFunction<T> handlerFunction);
 
 		/**
 		 * Adds a route to the given handler function that handles all HTTP {@code POST} requests
@@ -400,7 +401,7 @@ public abstract class RouterFunctions {
 		 * @since 5.3
 		 * @see RequestPredicates
 		 */
-		Builder POST(RequestPredicate predicate, HandlerFunction<ServerResponse> handlerFunction);
+		<T extends ServerResponse> Builder POST(RequestPredicate predicate, HandlerFunction<T> handlerFunction);
 
 		/**
 		 * Adds a route to the given handler function that handles all HTTP {@code POST} requests
@@ -420,7 +421,7 @@ public abstract class RouterFunctions {
 		 * @return this builder
 		 * @see org.springframework.web.util.pattern.PathPattern
 		 */
-		Builder POST(String pattern, RequestPredicate predicate, HandlerFunction<ServerResponse> handlerFunction);
+		<T extends ServerResponse> Builder POST(String pattern, RequestPredicate predicate, HandlerFunction<T> handlerFunction);
 
 		/**
 		 * Adds a route to the given handler function that handles HTTP {@code PUT} requests.
@@ -428,7 +429,7 @@ public abstract class RouterFunctions {
 		 * @return this builder
 		 * @since 5.3
 		 */
-		Builder PUT(HandlerFunction<ServerResponse> handlerFunction);
+		<T extends ServerResponse> Builder PUT(HandlerFunction<T> handlerFunction);
 
 		/**
 		 * Adds a route to the given handler function that handles all HTTP {@code PUT} requests
@@ -439,7 +440,7 @@ public abstract class RouterFunctions {
 		 * @return this builder
 		 * @see org.springframework.web.util.pattern.PathPattern
 		 */
-		Builder PUT(String pattern, HandlerFunction<ServerResponse> handlerFunction);
+		<T extends ServerResponse> Builder PUT(String pattern, HandlerFunction<T> handlerFunction);
 
 		/**
 		 * Adds a route to the given handler function that handles all HTTP {@code PUT} requests
@@ -451,7 +452,7 @@ public abstract class RouterFunctions {
 		 * @since 5.3
 		 * @see RequestPredicates
 		 */
-		Builder PUT(RequestPredicate predicate, HandlerFunction<ServerResponse> handlerFunction);
+		<T extends ServerResponse> Builder PUT(RequestPredicate predicate, HandlerFunction<T> handlerFunction);
 
 		/**
 		 * Adds a route to the given handler function that handles all HTTP {@code PUT} requests
@@ -471,7 +472,7 @@ public abstract class RouterFunctions {
 		 * @return this builder
 		 * @see org.springframework.web.util.pattern.PathPattern
 		 */
-		Builder PUT(String pattern, RequestPredicate predicate, HandlerFunction<ServerResponse> handlerFunction);
+		<T extends ServerResponse> Builder PUT(String pattern, RequestPredicate predicate, HandlerFunction<T> handlerFunction);
 
 		/**
 		 * Adds a route to the given handler function that handles HTTP {@code PATCH} requests.
@@ -479,7 +480,7 @@ public abstract class RouterFunctions {
 		 * @return this builder
 		 * @since 5.3
 		 */
-		Builder PATCH(HandlerFunction<ServerResponse> handlerFunction);
+		<T extends ServerResponse> Builder PATCH(HandlerFunction<T> handlerFunction);
 
 		/**
 		 * Adds a route to the given handler function that handles all HTTP {@code PATCH} requests
@@ -490,7 +491,7 @@ public abstract class RouterFunctions {
 		 * @return this builder
 		 * @see org.springframework.web.util.pattern.PathPattern
 		 */
-		Builder PATCH(String pattern, HandlerFunction<ServerResponse> handlerFunction);
+		<T extends ServerResponse> Builder PATCH(String pattern, HandlerFunction<T> handlerFunction);
 
 		/**
 		 * Adds a route to the given handler function that handles all HTTP {@code PATCH} requests
@@ -502,7 +503,7 @@ public abstract class RouterFunctions {
 		 * @since 5.3
 		 * @see RequestPredicates
 		 */
-		Builder PATCH(RequestPredicate predicate, HandlerFunction<ServerResponse> handlerFunction);
+		<T extends ServerResponse> Builder PATCH(RequestPredicate predicate, HandlerFunction<T> handlerFunction);
 
 		/**
 		 * Adds a route to the given handler function that handles all HTTP {@code PATCH} requests
@@ -522,7 +523,7 @@ public abstract class RouterFunctions {
 		 * @return this builder
 		 * @see org.springframework.web.util.pattern.PathPattern
 		 */
-		Builder PATCH(String pattern, RequestPredicate predicate, HandlerFunction<ServerResponse> handlerFunction);
+		<T extends ServerResponse> Builder PATCH(String pattern, RequestPredicate predicate, HandlerFunction<T> handlerFunction);
 
 		/**
 		 * Adds a route to the given handler function that handles HTTP {@code DELETE} requests.
@@ -530,7 +531,7 @@ public abstract class RouterFunctions {
 		 * @return this builder
 		 * @since 5.3
 		 */
-		Builder DELETE(HandlerFunction<ServerResponse> handlerFunction);
+		<T extends ServerResponse> Builder DELETE(HandlerFunction<T> handlerFunction);
 
 		/**
 		 * Adds a route to the given handler function that handles all HTTP {@code DELETE} requests
@@ -541,7 +542,7 @@ public abstract class RouterFunctions {
 		 * @return this builder
 		 * @see org.springframework.web.util.pattern.PathPattern
 		 */
-		Builder DELETE(String pattern, HandlerFunction<ServerResponse> handlerFunction);
+		<T extends ServerResponse> Builder DELETE(String pattern, HandlerFunction<T> handlerFunction);
 
 		/**
 		 * Adds a route to the given handler function that handles all HTTP {@code DELETE} requests
@@ -553,7 +554,7 @@ public abstract class RouterFunctions {
 		 * @since 5.3
 		 * @see RequestPredicates
 		 */
-		Builder DELETE(RequestPredicate predicate, HandlerFunction<ServerResponse> handlerFunction);
+		<T extends ServerResponse> Builder DELETE(RequestPredicate predicate, HandlerFunction<T> handlerFunction);
 
 		/**
 		 * Adds a route to the given handler function that handles all HTTP {@code DELETE} requests
@@ -565,7 +566,7 @@ public abstract class RouterFunctions {
 		 * @return this builder
 		 * @see org.springframework.web.util.pattern.PathPattern
 		 */
-		Builder DELETE(String pattern, RequestPredicate predicate, HandlerFunction<ServerResponse> handlerFunction);
+		<T extends ServerResponse> Builder DELETE(String pattern, RequestPredicate predicate, HandlerFunction<T> handlerFunction);
 
 		/**
 		 * Adds a route to the given handler function that handles HTTP {@code OPTIONS} requests.
@@ -573,7 +574,7 @@ public abstract class RouterFunctions {
 		 * @return this builder
 		 * @since 5.3
 		 */
-		Builder OPTIONS(HandlerFunction<ServerResponse> handlerFunction);
+		<T extends ServerResponse> Builder OPTIONS(HandlerFunction<T> handlerFunction);
 
 		/**
 		 * Adds a route to the given handler function that handles all HTTP {@code OPTIONS} requests
@@ -584,7 +585,7 @@ public abstract class RouterFunctions {
 		 * @return this builder
 		 * @see org.springframework.web.util.pattern.PathPattern
 		 */
-		Builder OPTIONS(String pattern, HandlerFunction<ServerResponse> handlerFunction);
+		<T extends ServerResponse> Builder OPTIONS(String pattern, HandlerFunction<T> handlerFunction);
 
 		/**
 		 * Adds a route to the given handler function that handles all HTTP {@code OPTIONS} requests
@@ -596,7 +597,7 @@ public abstract class RouterFunctions {
 		 * @since 5.3
 		 * @see RequestPredicates
 		 */
-		Builder OPTIONS(RequestPredicate predicate, HandlerFunction<ServerResponse> handlerFunction);
+		<T extends ServerResponse> Builder OPTIONS(RequestPredicate predicate, HandlerFunction<T> handlerFunction);
 
 		/**
 		 * Adds a route to the given handler function that handles all HTTP {@code OPTIONS} requests
@@ -608,7 +609,7 @@ public abstract class RouterFunctions {
 		 * @return this builder
 		 * @see org.springframework.web.util.pattern.PathPattern
 		 */
-		Builder OPTIONS(String pattern, RequestPredicate predicate, HandlerFunction<ServerResponse> handlerFunction);
+		<T extends ServerResponse> Builder OPTIONS(String pattern, RequestPredicate predicate, HandlerFunction<T> handlerFunction);
 
 		/**
 		 * Adds a route to the given handler function that handles all requests that match the
@@ -618,7 +619,7 @@ public abstract class RouterFunctions {
 		 * @return this builder
 		 * @see RequestPredicates
 		 */
-		Builder route(RequestPredicate predicate, HandlerFunction<ServerResponse> handlerFunction);
+		<T extends ServerResponse> Builder route(RequestPredicate predicate, HandlerFunction<T> handlerFunction);
 
 		/**
 		 * Adds the given route to this builder. Can be used to merge externally defined router
@@ -639,7 +640,7 @@ public abstract class RouterFunctions {
 		 * @return this builder
 		 * @see RequestPredicates
 		 */
-		Builder add(RouterFunction<ServerResponse> routerFunction);
+		<T extends ServerResponse> Builder add(RouterFunction<T> routerFunction);
 
 		/**
 		 * Route requests that match the given predicate to the given resource.
@@ -743,7 +744,7 @@ public abstract class RouterFunctions {
 		 * @return this builder
 		 * @see RequestPredicates
 		 */
-		Builder nest(RequestPredicate predicate, Supplier<RouterFunction<ServerResponse>> routerFunctionSupplier);
+		<T extends ServerResponse> Builder nest(RequestPredicate predicate, Supplier<RouterFunction<T>> routerFunctionSupplier);
 
 		/**
 		 * Route to a built router function if the given request predicate applies.
@@ -789,7 +790,7 @@ public abstract class RouterFunctions {
 		 * @return this builder
 		 * @see org.springframework.web.util.pattern.PathPattern
 		 */
-		Builder path(String pattern, Supplier<RouterFunction<ServerResponse>> routerFunctionSupplier);
+		<T extends ServerResponse> Builder path(String pattern, Supplier<RouterFunction<T>> routerFunctionSupplier);
 
 		/**
 		 * Route to a built router function if the given path prefix pattern applies.
@@ -838,7 +839,7 @@ public abstract class RouterFunctions {
 		 * @param filterFunction the function to filter all routes built by this builder
 		 * @return this builder
 		 */
-		Builder filter(HandlerFilterFunction<ServerResponse, ServerResponse> filterFunction);
+		<T extends ServerResponse, R extends ServerResponse> Builder filter(HandlerFilterFunction<T, R> filterFunction);
 
 		/**
 		 * Filter the request object for all routes created by this builder with the given request
@@ -880,7 +881,7 @@ public abstract class RouterFunctions {
 		 * @param responseProcessor a function that transforms the response
 		 * @return this builder
 		 */
-		Builder after(BiFunction<ServerRequest, ServerResponse, ServerResponse> responseProcessor);
+		<T extends ServerResponse, R extends ServerResponse> Builder after(BiFunction<ServerRequest, T, R> responseProcessor);
 
 		/**
 		 * Filters all exceptions that match the predicate by applying the given response provider
@@ -899,8 +900,8 @@ public abstract class RouterFunctions {
 		 * @param responseProvider a function that creates a response
 		 * @return this builder
 		 */
-		Builder onError(Predicate<Throwable> predicate,
-				BiFunction<Throwable, ServerRequest, ServerResponse> responseProvider);
+		<T extends ServerResponse> Builder onError(Predicate<Throwable> predicate,
+				BiFunction<Throwable, ServerRequest, T> responseProvider);
 
 		/**
 		 * Filters all exceptions of the given type by applying the given response provider
@@ -919,8 +920,8 @@ public abstract class RouterFunctions {
 		 * @param responseProvider a function that creates a response
 		 * @return this builder
 		 */
-		Builder onError(Class<? extends Throwable> exceptionType,
-				BiFunction<Throwable, ServerRequest, ServerResponse> responseProvider);
+		<T extends ServerResponse> Builder onError(Class<? extends Throwable> exceptionType,
+				BiFunction<Throwable, ServerRequest, T> responseProvider);
 
 		/**
 		 * Add an attribute with the given name and value to the last route built with this builder.
