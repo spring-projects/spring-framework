@@ -1614,7 +1614,6 @@ public class HttpHeaders implements Serializable {
 					// ignore
 				}
 			}
-
 		}
 		if (rejectInvalid) {
 			throw new IllegalArgumentException("Cannot parse date value \"" + headerValue +
@@ -1900,7 +1899,7 @@ public class HttpHeaders implements Serializable {
 	// Map-like implementation
 
 	/**
-	 * Returns {@code true} if this HttpHeaders contains no header entry.
+	 * Returns {@code true} if this HttpHeaders contains no header entries.
 	 */
 	public boolean isEmpty() {
 		return this.headers.isEmpty();
@@ -1944,7 +1943,7 @@ public class HttpHeaders implements Serializable {
 
 	/**
 	 * Get the list of values associated with the given header name, or null.
-	 * <p>To ensure support for double-quoted values, see also
+	 * <p>To ensure support for double-quoted values, use
 	 * {@link #getValuesAsList(String)}.
 	 * @param headerName the header name
 	 * @since 7.0
@@ -2000,7 +1999,7 @@ public class HttpHeaders implements Serializable {
 	 * Remove a header from this HttpHeaders instance, and return the associated
 	 * value list or {@code null} if that header wasn't present.
 	 * @param key the name of the header to remove
-	 * @return the value list associated with the removed header name
+	 * @return the value list associated with the removed header name or {@code null}
 	 * @since 7.0
 	 */
 	public @Nullable List<String> remove(String key) {
@@ -2015,8 +2014,9 @@ public class HttpHeaders implements Serializable {
 	}
 
 	/**
-	 * Return the number of headers in the collection. This can be inflated,
-	 * see {@link HttpHeaders class level javadoc}.
+	 * Return the number of headers in the collection.
+	 * <p>This can be inflated: see the {@link HttpHeaders class level javadoc}
+	 * for details.
 	 */
 	public int size() {
 		return this.headers.size();
@@ -2033,7 +2033,7 @@ public class HttpHeaders implements Serializable {
 
 	/**
 	 * Return a view of the headers as an entry {@code Set} of key-list pairs.
-	 * Both {@link Iterator#remove()} and {@link Entry#setValue}
+	 * <p>Both {@link Iterator#remove()} and {@link Entry#setValue}
 	 * are supported and mutate the headers.
 	 * <p>This collection is guaranteed to contain one entry per header name
 	 * even if the backing structure stores multiple casing variants of names,
@@ -2048,8 +2048,9 @@ public class HttpHeaders implements Serializable {
 	}
 
 	/**
-	 * Return the set of header names. Both {@link Set#remove(Object)} and
-	 * {@link Set#clear()} operations are supported and mutate the headers.
+	 * Return the set of header names.
+	 * <p>Both {@link Set#remove(Object)} and {@link Set#clear()} operations are
+	 * supported and mutate the headers.
 	 * <p>This collection is guaranteed to contain only one casing variant
 	 * of each header name even if the backing structure stores multiple casing
 	 * variants of names. The first encountered variant is the one that is
@@ -2230,7 +2231,6 @@ public class HttpHeaders implements Serializable {
 	}
 
 	private static class HeaderNamesIterator implements Iterator<String> {
-
 
 		private @Nullable String currentName;
 
