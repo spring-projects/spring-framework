@@ -2089,14 +2089,14 @@ public class HttpHeaders implements Serializable {
 
 	/**
 	 * Helps to format HTTP header values, as HTTP header values themselves can
-	 * contain comma-separated values, can become confusing with regular
+	 * contain comma-separated values which can become confusing with regular
 	 * {@link Map} formatting that also uses commas between entries.
 	 * <p>Additionally, this method displays the native list of header names
-	 * with the mention {@code with native header names} if the underlying
+	 * and includes the text "with native header names" if the underlying
 	 * implementation stores multiple casing variants of header names (see
 	 * {@link HttpHeaders class level javadoc}).
 	 * @param headers the headers to format
-	 * @return the headers to a String
+	 * @return a String representation of the headers
 	 * @since 5.1.4
 	 */
 	public static String formatHeaders(MultiValueMap<String, String> headers) {
