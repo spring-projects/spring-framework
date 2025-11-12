@@ -439,15 +439,15 @@ public class HttpHeaders implements Serializable {
 
 
 	/**
-	 * Construct a new, empty instance of the {@code HttpHeaders} object
-	 * using an underlying case-insensitive map.
+	 * Construct a new, empty {@code HttpHeaders} instance using an underlying
+	 * case-insensitive map.
 	 */
 	public HttpHeaders() {
 		this(CollectionUtils.toMultiValueMap(new LinkedCaseInsensitiveMap<>(8, Locale.ROOT)));
 	}
 
 	/**
-	 * Construct a new {@code HttpHeaders} instance backed by an existing map.
+	 * Construct a new {@code HttpHeaders} instance backed by the supplied map.
 	 * <p>This constructor is available as an optimization for adapting to existing
 	 * headers map structures, primarily for internal use within the framework.
 	 * @param headers the headers map (expected to operate with case-insensitive keys)
@@ -459,13 +459,21 @@ public class HttpHeaders implements Serializable {
 	}
 
 	/**
-	 * Construct a new {@code HttpHeaders} instance by removing any read-only
-	 * wrapper that may have been previously applied around the given
-	 * {@code HttpHeaders} via {@link #readOnlyHttpHeaders(HttpHeaders)}.
-	 * <p>Once the writable instance is mutated, the read-only instance is
+	 * Construct a new {@code HttpHeaders} instance backed by the supplied
+	 * {@code HttpHeaders}.
+	 * <p>Changes to the {@code HttpHeaders} created by this constructor will
+	 * write through to the supplied {@code HttpHeaders}. If you wish to copy
+	 * an existing {@code HttpHeaders} instance, use {@link #copyOf(HttpHeaders)}
+	 * instead.
+	 * <p>If the supplied {@code HttpHeaders} instance is a
+	 * {@linkplain #readOnlyHttpHeaders(HttpHeaders) read-only}
+	 * {@code HttpHeaders} wrapper, it will be unwrapped to ensure that the
+	 * {@code HttpHeaders} instance created by this constructor is mutable.
+	 * Once the writable instance is mutated, the read-only instance is
 	 * likely to be out of sync and should be discarded.
 	 * @param httpHeaders the headers to expose
 	 * @since 7.0
+	 * @see #copyOf(HttpHeaders)
 	 */
 	public HttpHeaders(HttpHeaders httpHeaders) {
 		Assert.notNull(httpHeaders, "HttpHeaders must not be null");
@@ -481,7 +489,10 @@ public class HttpHeaders implements Serializable {
 	}
 
 	/**
-	 * Create a new {@code HttpHeaders} mutable instance and copy all header values given as a parameter.
+	 * Create a new, mutable {@code HttpHeaders} instance and copy the supplied
+	 * headers to that new instance.
+	 * <p>Changes to the returned {@code HttpHeaders} will not affect the
+	 * supplied headers map.
 	 * @param headers the headers to copy
 	 * @since 7.0
 	 */
@@ -492,9 +503,13 @@ public class HttpHeaders implements Serializable {
 	}
 
 	/**
-	 * Create a new {@code HttpHeaders} mutable instance and copy all header values given as a parameter.
+	 * Create a new, mutable {@code HttpHeaders} instance and copy the supplied
+	 * headers to that new instance.
+	 * <p>Changes to the returned {@code HttpHeaders} will not affect the
+	 * supplied {@code HttpHeaders}.
 	 * @param httpHeaders the headers to copy
 	 * @since 7.0
+	 * @see #HttpHeaders(HttpHeaders)
 	 */
 	public static HttpHeaders copyOf(HttpHeaders httpHeaders) {
 		return copyOf(httpHeaders.headers);

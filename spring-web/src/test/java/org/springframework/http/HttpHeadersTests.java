@@ -67,6 +67,9 @@ class HttpHeadersTests {
 		// content-type value is cached by ReadOnlyHttpHeaders
 		assertThat(readOnly.getContentType()).isEqualTo(MediaType.APPLICATION_JSON);
 		assertThat(writable.getContentType()).isEqualTo(MediaType.TEXT_PLAIN);
+		// The HttpHeaders "copy constructor" creates an HttpHeaders instance
+		// that mutates the state of the original HttpHeaders instance.
+		assertThat(headers.getContentType()).isEqualTo(MediaType.TEXT_PLAIN);
 	}
 
 	@Test
