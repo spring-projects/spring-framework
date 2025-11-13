@@ -154,7 +154,7 @@ class InstrumentedMethodTests {
 		}
 
 		@Test
-		void classGetConstructorsShouldNotMatchWhemMissingTypeHint() {
+		void classGetConstructorsShouldNotMatchWhenMissingTypeHint() {
 			assertThatInvocationDoesNotMatch(InstrumentedMethod.CLASS_GETCONSTRUCTORS, this.stringGetConstructors);
 		}
 

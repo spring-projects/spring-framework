@@ -46,14 +46,14 @@ class YamlMapFactoryBeanTests {
 	@Test
 	void testSetIgnoreResourceNotFound() {
 		this.factory.setResolutionMethod(YamlMapFactoryBean.ResolutionMethod.OVERRIDE_AND_IGNORE);
-		this.factory.setResources(new FileSystemResource("non-exsitent-file.yml"));
+		this.factory.setResources(new FileSystemResource("non-existent-file.yml"));
 		assertThat(this.factory.getObject()).isEmpty();
 	}
 
 	@Test
 	void testSetBarfOnResourceNotFound() {
 		assertThatIllegalStateException().isThrownBy(() -> {
-				this.factory.setResources(new FileSystemResource("non-exsitent-file.yml"));
+				this.factory.setResources(new FileSystemResource("non-existent-file.yml"));
 				this.factory.getObject().size();
 		});
 	}
