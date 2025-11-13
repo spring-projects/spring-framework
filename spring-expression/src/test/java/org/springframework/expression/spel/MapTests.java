@@ -81,7 +81,7 @@ class MapTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	void inelineMapIsInstanceOfMap() {
+	void inlineMapIsInstanceOfMap() {
 		evaluate("{a:1, b:2} instanceof T(java.util.Map)", "true", Boolean.class);
 	}
 

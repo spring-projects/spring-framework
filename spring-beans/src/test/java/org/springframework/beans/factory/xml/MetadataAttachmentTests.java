@@ -51,7 +51,7 @@ class MetadataAttachmentTests {
 	void metadataIsInherited() {
 		BeanDefinition beanDefinition = this.beanFactory.getMergedBeanDefinition("testBean2");
 		assertThat(beanDefinition.getAttribute("foo")).as("Metadata not inherited").isEqualTo("bar");
-		assertThat(beanDefinition.getAttribute("abc")).as("Child metdata not attached").isEqualTo("123");
+		assertThat(beanDefinition.getAttribute("abc")).as("Child metadata not attached").isEqualTo("123");
 	}
 
 	@Test
