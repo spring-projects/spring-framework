@@ -20,8 +20,10 @@ import java.lang.ref.ReferenceQueue;
 import java.lang.ref.SoftReference;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Array;
+import java.util.AbstractCollection;
 import java.util.AbstractMap;
 import java.util.AbstractSet;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashSet;
@@ -29,6 +31,8 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
+import java.util.Spliterator;
+import java.util.Spliterators;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -101,7 +105,17 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 	/**
 	 * Late binding entry set.
 	 */
-	private volatile @Nullable Set<Map.Entry<K, V>> entrySet;
+	private @Nullable Set<Map.Entry<K, V>> entrySet;
+
+	/**
+	 * Late binding key set.
+	 */
+	private @Nullable Set<K> keySet;
+
+	/**
+	 * Late binding values collection.
+	 */
+	private @Nullable Collection<V> values;
 
 
 	/**
@@ -510,6 +524,26 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 			this.entrySet = entrySet;
 		}
 		return entrySet;
+	}
+
+	@Override
+	public Set<K> keySet() {
+		Set<K> keySet = this.keySet;
+		if (keySet == null) {
+			keySet = new KeySet();
+			this.keySet = keySet;
+		}
+		return keySet;
+	}
+
+	@Override
+	public Collection<V> values() {
+		Collection<V> values = this.values;
+		if (values == null) {
+			values = new Values();
+			this.values = values;
+		}
+		return values;
 	}
 
 	private <T> @Nullable T doTask(@Nullable Object key, Task<T> task) {
@@ -940,7 +974,7 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 	/**
 	 * Internal entry-set implementation.
 	 */
-	private class EntrySet extends AbstractSet<Map.Entry<K, V>> {
+	private final class EntrySet extends AbstractSet<Map.Entry<K, V>> {
 
 		@Override
 		public Iterator<Map.Entry<K, V>> iterator() {
@@ -976,13 +1010,133 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 		public void clear() {
 			ConcurrentReferenceHashMap.this.clear();
 		}
+
+		@Override
+		public Spliterator<Map.Entry<K, V>> spliterator() {
+			return Spliterators.spliterator(this, Spliterator.DISTINCT | Spliterator.CONCURRENT);
+		}
 	}
 
+	/**
+	 * Internal key-set implementation.
+	 */
+	private final class KeySet extends AbstractSet<K> {
+		@Override
+		public Iterator<K> iterator() {
+			return new KeyIterator();
+		}
+
+		@Override
+		public int size() {
+			return ConcurrentReferenceHashMap.this.size();
+		}
+
+		@Override
+		public boolean isEmpty() {
+			return ConcurrentReferenceHashMap.this.isEmpty();
+		}
+
+		@Override
+		public void clear() {
+			ConcurrentReferenceHashMap.this.clear();
+		}
+
+		@Override
+		public boolean contains(Object k) {
+			return ConcurrentReferenceHashMap.this.containsKey(k);
+		}
+
+		@Override
+		public Spliterator<K> spliterator() {
+			return Spliterators.spliterator(this, Spliterator.DISTINCT | Spliterator.CONCURRENT);
+		}
+	}
+
+	/**
+	 * Internal key iterator implementation.
+	 */
+	private final class KeyIterator implements Iterator<K> {
+
+		private final Iterator<Map.Entry<K, V>> iterator = entrySet().iterator();
+
+		@Override
+		public boolean hasNext() {
+			return this.iterator.hasNext();
+		}
+
+		@Override
+		public void remove() {
+			this.iterator.remove();
+		}
+
+		@Override
+		public K next() {
+			return this.iterator.next().getKey();
+		}
+	}
+
+	/**
+	 * Internal values collection implementation.
+	 */
+	private final class Values extends AbstractCollection<V> {
+		@Override
+		public Iterator<V> iterator() {
+			return new ValueIterator();
+		}
+
+		@Override
+		public int size() {
+			return ConcurrentReferenceHashMap.this.size();
+		}
+
+		@Override
+		public boolean isEmpty() {
+			return ConcurrentReferenceHashMap.this.isEmpty();
+		}
+
+		@Override
+		public void clear() {
+			ConcurrentReferenceHashMap.this.clear();
+		}
+
+		@Override
+		public boolean contains(Object v) {
+			return ConcurrentReferenceHashMap.this.containsValue(v);
+		}
+
+		@Override
+		public Spliterator<V> spliterator() {
+			return Spliterators.spliterator(this, Spliterator.CONCURRENT);
+		}
+	}
+
+	/**
+	 * Internal value iterator implementation.
+	 */
+	private final class ValueIterator implements Iterator<V> {
+
+		private final Iterator<Map.Entry<K, V>> iterator = entrySet().iterator();
+
+		@Override
+		public boolean hasNext() {
+			return this.iterator.hasNext();
+		}
+
+		@Override
+		public void remove() {
+			this.iterator.remove();
+		}
+
+		@Override
+		public V next() {
+			return this.iterator.next().getValue();
+		}
+	}
 
 	/**
 	 * Internal entry iterator implementation.
 	 */
-	private class EntryIterator implements Iterator<Map.Entry<K, V>> {
+	private final class EntryIterator implements Iterator<Map.Entry<K, V>> {
 
 		private int segmentIndex;
 
