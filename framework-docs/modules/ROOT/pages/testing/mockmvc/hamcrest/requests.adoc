@@ -157,7 +157,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes"]
+[source,kotlin,indent=0,subs="verbatim,quotes,attributes"]
 ----
 	// Not possible in Kotlin until {kotlin-issues}/KT-22208 is fixed
 ----
