@@ -16,6 +16,8 @@
 
 package org.springframework.cache.caffeine;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 import com.github.benmanes.caffeine.cache.CacheLoader;
@@ -282,6 +284,68 @@ class CaffeineCacheManagerTests {
 		assertThat(cm.getCache("someCache")).isNull();
 		cm.setCacheNames(null);
 		assertThat(cm.getCache("someCache")).isNotNull();
+	}
+
+	@Test
+	void setCacheNameShouldRemovePreviousDynamicCaches() {
+		CaffeineCacheManager manager = new CaffeineCacheManager();
+
+		// Given: Dynamic mode with some caches
+		manager.getCache("dynamicCache1");
+		manager.getCache("dynamicCache2");
+		assertThat(manager.getCacheNames())
+				.containsExactlyInAnyOrder("dynamicCache1", "dynamicCache2");
+
+		// When: Switch to static mode
+		manager.setCacheNames(Arrays.asList("staticCache1", "staticCache2"));
+
+		// Then: Only static caches should exist
+		assertThat(manager.getCacheNames())
+				.containsExactlyInAnyOrder("staticCache1", "staticCache2")
+				.as("Dynamic caches should be removed when switching to static mode");
+
+		// And: Dynamic caches should not be accessible
+		assertThat(manager.getCache("dynamicCache1")).isNull();
+		assertThat(manager.getCache("dynamicCache2")).isNull();
+	}
+
+	@Test
+	void setCacheNamesShouldPreserveCustomCaches() {
+		CaffeineCacheManager manager = new CaffeineCacheManager();
+
+		// Given: Custom cache registered
+		com.github.benmanes.caffeine.cache.Cache<Object, Object> customNativeCache = Caffeine.newBuilder().maximumSize(100).build();
+		manager.registerCustomCache("customCache", customNativeCache);
+
+		// And: Dynamic cache created
+		manager.getCache("dynamicCache");
+
+		// When: Switch to static mode
+		manager.setCacheNames(List.of("staticCache"));
+
+		// Then: Custom cache preserved, dynamic cache removed
+		assertThat(manager.getCacheNames())
+				.contains("customCache", "staticCache")
+				.doesNotContain("dynamicCache");
+	}
+
+	@Test
+	void switchingBetweenDynamicAndStaticMode() {
+		CaffeineCacheManager manager = new CaffeineCacheManager();
+
+		// Dynamic → Static
+		manager.getCache("dynamicCache1");
+		manager.setCacheNames(List.of("staticCache1"));
+		assertThat(manager.getCacheNames()).containsExactly("staticCache1");
+
+		// Static → Dynamic
+		manager.setCacheNames(null); // Re-enable dynamic mode
+		manager.getCache("dynamicCache2");
+		assertThat(manager.getCacheNames()).contains("staticCache1", "dynamicCache2");
+
+		// Dynamic → Static again
+		manager.setCacheNames(List.of("staticCache2"));
+		assertThat(manager.getCacheNames()).containsExactly("staticCache2");
 	}
 
 	@Test

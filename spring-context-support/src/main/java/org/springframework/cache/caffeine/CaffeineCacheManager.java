@@ -106,9 +106,16 @@ public class CaffeineCacheManager implements CacheManager {
 	 * with no creation of further cache regions at runtime.
 	 * <p>Calling this with a {@code null} collection argument resets the
 	 * mode to 'dynamic', allowing for further creation of caches again.
+	 * <p><b>Note:</b> Switching to static mode will remove all dynamically created
+	 * caches, while preserving custom caches registered via
+	 * {@link #registerCustomCache(String, com.github.benmanes.caffeine.cache.Cache)}.
 	 */
 	public void setCacheNames(@Nullable Collection<String> cacheNames) {
 		if (cacheNames != null) {
+			// Remove all non-custom caches before setting up static caches
+			this.cacheMap.keySet().retainAll(this.customCacheNames);
+
+			// Add the specified static caches
 			for (String name : cacheNames) {
 				this.cacheMap.put(name, createCaffeineCache(name));
 			}
