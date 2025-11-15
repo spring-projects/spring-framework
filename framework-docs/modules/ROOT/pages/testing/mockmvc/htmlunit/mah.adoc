@@ -267,7 +267,19 @@ Kotlin::
 +
 [source,kotlin,indent=0,subs="verbatim,quotes,attributes"]
 ----
-	// Not possible in Kotlin until {kotlin-issues}/KT-22208 is fixed
+	val mockMvc = MockMvcBuilders
+			.webAppContextSetup(context)
+			.apply(springSecurity())
+			.build()
+
+	webClient = MockMvcWebClientBuilder
+			.mockMvcSetup(mockMvc)
+			// for illustration only - defaults to ""
+			.contextPath("")
+			// By default MockMvc is used for localhost only;
+			// the following will use MockMvc for example.com and example.org as well
+			.useMockMvcForHosts("example.com", "example.org")
+			.build()
 ----
 ======
 
