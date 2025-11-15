@@ -15,6 +15,7 @@
  */
 package org.springframework.cglib.core;
 
+@FunctionalInterface
 public interface Transformer {
     Object transform(Object value);
 }
