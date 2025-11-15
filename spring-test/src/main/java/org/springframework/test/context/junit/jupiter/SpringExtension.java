@@ -153,7 +153,7 @@ public class SpringExtension implements BeforeAllCallback, AfterAllCallback, Tes
 	 * Returns {@link ExtensionContextScope#TEST_METHOD ExtensionContextScope.TEST_METHOD}.
 	 * <p>This can be effectively overridden by annotating a test class with
 	 * {@code @SpringExtensionConfig(useTestClassScopedExtensionContext = true)}.
-	 * See the {@link SpringExtension class-level Javadoc} for further details.
+	 * See the {@linkplain SpringExtension class-level Javadoc} for further details.
 	 * @since 7.0
 	 * @see SpringExtensionConfig#useTestClassScopedExtensionContext()
 	 */
@@ -391,7 +391,7 @@ public class SpringExtension implements BeforeAllCallback, AfterAllCallback, Tes
 
 
 	/**
-	 * Get the {@link ApplicationContext} associated with the supplied {@code ExtensionContext}.
+	 * Get the {@link ApplicationContext} associated with the supplied {@link ExtensionContext}.
 	 * @param context the current {@code ExtensionContext} (never {@code null})
 	 * @return the application context
 	 * @throws IllegalStateException if an error occurs while retrieving the application context
@@ -402,7 +402,7 @@ public class SpringExtension implements BeforeAllCallback, AfterAllCallback, Tes
 	}
 
 	/**
-	 * Get the {@link TestContextManager} associated with the supplied {@code ExtensionContext}.
+	 * Get the {@link TestContextManager} associated with the supplied {@link ExtensionContext}.
 	 * @return the {@code TestContextManager} (never {@code null})
 	 */
 	static TestContextManager getTestContextManager(ExtensionContext context) {
