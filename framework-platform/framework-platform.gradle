@@ -129,7 +129,7 @@ dependencies {
 		api("org.jboss.logging:jboss-logging:3.6.1.Final")
 		api("org.jruby:jruby:10.0.2.0")
 		api("org.jspecify:jspecify:1.0.0")
-		api("org.junit.support:testng-engine:1.0.5")
+		api("org.junit.support:testng-engine:1.1.0")
 		api("org.mozilla:rhino:1.7.15")
 		api("org.ogce:xpp3:1.1.6")
 		api("org.python:jython-standalone:2.7.4")
