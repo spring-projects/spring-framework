@@ -182,7 +182,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes,attributes"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	standaloneSetup(SimpleController())
 		.alwaysExpect<StandaloneMockMvcBuilder>(MockMvcResultMatchers.status().isOk())

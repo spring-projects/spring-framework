@@ -157,7 +157,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes,attributes"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	class MyWebTests {
 

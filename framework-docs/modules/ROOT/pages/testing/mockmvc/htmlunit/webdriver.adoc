@@ -560,7 +560,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes,attributes"]
+[source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	val mockMvc: MockMvc = MockMvcBuilders
 			.webAppContextSetup(context)
