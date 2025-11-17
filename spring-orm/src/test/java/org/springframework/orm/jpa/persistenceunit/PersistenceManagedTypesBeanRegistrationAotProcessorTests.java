@@ -105,14 +105,10 @@ class PersistenceManagedTypesBeanRegistrationAotProcessorTests {
 					.withMemberCategories(MemberCategory.INVOKE_DECLARED_CONSTRUCTORS)).accepts(hints);
 			assertThat(RuntimeHintsPredicates.reflection().onType(EmployeeLocation.class)
 					.withMemberCategories(MemberCategory.ACCESS_DECLARED_FIELDS)).accepts(hints);
-			assertThat(RuntimeHintsPredicates.reflection().onMethod(Car.class, "setId")
-					.invoke()).accepts(hints);
-			assertThat(RuntimeHintsPredicates.reflection().onMethod(Car.class, "getId")
-					.invoke()).accepts(hints);
-			assertThat(RuntimeHintsPredicates.reflection().onMethod(Car.class, "setModel")
-					.invoke()).accepts(hints);
-			assertThat(RuntimeHintsPredicates.reflection().onMethod(Car.class, "getModel")
-					.invoke()).accepts(hints);
+			assertThat(RuntimeHintsPredicates.reflection().onMethodInvocation(Car.class, "setId")).accepts(hints);
+			assertThat(RuntimeHintsPredicates.reflection().onMethodInvocation(Car.class, "getId")).accepts(hints);
+			assertThat(RuntimeHintsPredicates.reflection().onMethodInvocation(Car.class, "setModel")).accepts(hints);
+			assertThat(RuntimeHintsPredicates.reflection().onMethodInvocation(Car.class, "getModel")).accepts(hints);
 		});
 	}
 
