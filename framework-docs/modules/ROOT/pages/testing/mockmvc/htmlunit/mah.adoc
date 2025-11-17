@@ -269,7 +269,7 @@ Kotlin::
 ----
 	val mockMvc = MockMvcBuilders
 			.webAppContextSetup(context)
-			.apply(springSecurity())
+			.apply<DefaultMockMvcBuilder>(springSecurity())
 			.build()
 
 	webClient = MockMvcWebClientBuilder

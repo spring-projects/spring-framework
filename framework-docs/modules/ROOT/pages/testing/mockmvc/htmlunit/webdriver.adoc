@@ -564,7 +564,7 @@ Kotlin::
 ----
 	val mockMvc: MockMvc = MockMvcBuilders
 			.webAppContextSetup(context)
-			.apply(springSecurity())
+			.apply<DefaultMockMvcBuilder>(springSecurity())
 			.build()
 
 	driver = MockMvcHtmlUnitDriverBuilder

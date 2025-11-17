@@ -165,7 +165,7 @@ Kotlin::
 
 		@BeforeEach
 		fun setup() {
-			mockMvc = MockMvcBuilders.standaloneSetup(AccountController())
+			mockMvc = standaloneSetup(AccountController())
 				.defaultRequest<StandaloneMockMvcBuilder>(get("/")
 				.contextPath("/app").servletPath("/main")
 				.accept(MediaType.APPLICATION_JSON)).build()

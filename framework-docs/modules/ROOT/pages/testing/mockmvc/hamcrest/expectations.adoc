@@ -185,8 +185,8 @@ Kotlin::
 [source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	standaloneSetup(SimpleController())
-		.alwaysExpect<StandaloneMockMvcBuilder>(MockMvcResultMatchers.status().isOk())
-		.alwaysExpect<StandaloneMockMvcBuilder>(MockMvcResultMatchers.content().contentType("application/json;charset=UTF-8"))
+		.alwaysExpect<StandaloneMockMvcBuilder>(status().isOk())
+		.alwaysExpect<StandaloneMockMvcBuilder>(content().contentType("application/json;charset=UTF-8"))
 		.build()
 ----
 ======
