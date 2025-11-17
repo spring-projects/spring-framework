@@ -1021,6 +1021,7 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 	 * Internal key-set implementation.
 	 */
 	private final class KeySet extends AbstractSet<K> {
+
 		@Override
 		public Iterator<K> iterator() {
 			return new KeyIterator();
@@ -1079,6 +1080,7 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 	 * Internal values collection implementation.
 	 */
 	private final class Values extends AbstractCollection<V> {
+
 		@Override
 		public Iterator<V> iterator() {
 			return new ValueIterator();
