@@ -45,7 +45,6 @@ import mockwebserver3.MockWebServer;
 import mockwebserver3.RecordedRequest;
 import org.eclipse.jetty.client.Request;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -72,14 +71,12 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.client.MultipartBodyBuilder;
 import org.springframework.http.client.reactive.ClientHttpConnector;
 import org.springframework.http.client.reactive.HttpComponentsClientHttpConnector;
 import org.springframework.http.client.reactive.JdkClientHttpConnector;
 import org.springframework.http.client.reactive.JettyClientHttpConnector;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.web.reactive.function.BodyExtractors;
-import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient.ResponseSpec;
 import org.springframework.web.testfixture.xml.Pojo;
 
@@ -1321,35 +1318,6 @@ class WebClientIntegrationTests {
 				.expectNext("Hey now")
 				.expectComplete()
 				.verify(Duration.ofSeconds(3));
-	}
-
-	@Disabled("Disabled until the test is no longer flaky")
-	@ParameterizedWebClientTest  // gh-35678
-	void failWhileSendingMultipartRequest(ClientHttpConnector connector) throws IOException {
-		startServer(connector);
-		prepareResponse(response -> response
-				.setHeader("Content-Type", "text/plain").body("Hello"));
-
-		MultipartBodyBuilder data = new MultipartBodyBuilder();
-		data.part("first", "success");
-		data.asyncPart("second",
-				Mono.delay(Duration.ofMillis(500)).then(Mono.error(new IllegalStateException("multipart client error"))),
-				String.class);
-
-		Mono<ResponseEntity<String>> result = this.webClient.post()
-				.uri("/multipart").accept(MediaType.TEXT_PLAIN)
-				.body(BodyInserters.fromMultipartData(data.build()))
-				.retrieve()
-				.toEntity(String.class)
-				.log();
-
-		StepVerifier.create(result)
-				.expectErrorSatisfies(error -> assertThat(error)
-						.isInstanceOf(WebClientRequestException.class)
-						.hasMessageContaining("multipart client error"))
-				.verify(Duration.ofSeconds(5));
-
-		expectRequestCount(0);
 	}
 
 	private <T> Mono<T> doMalformedChunkedResponseTest(
