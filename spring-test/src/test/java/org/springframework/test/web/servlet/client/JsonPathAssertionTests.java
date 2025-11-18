@@ -23,6 +23,7 @@ import java.util.Map;
 import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.Test;
 
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.Person;
@@ -104,6 +105,19 @@ class JsonPathAssertionTests {
 				.expectBody()
 				.jsonPath("$.composers[0].name").value(v -> MatcherAssert.assertThat(v, equalTo("Johann Sebastian Bach")))
 				.jsonPath("$.performers[1].name").value(v -> MatcherAssert.assertThat(v, equalTo("Yehudi Menuhin")));
+	}
+
+	@Test
+	void valueConsumer() {
+		client.get().uri("/music/people")
+				.exchange()
+				.expectBody()
+				.jsonPath("$.composers[0].name").value(
+						String.class,
+						name -> assertThat(name).isEqualTo("Johann Sebastian Bach"))
+				.jsonPath("$.composers[0].name").value(
+						ParameterizedTypeReference.forType(String.class),
+						name -> assertThat(name).isEqualTo("Johann Sebastian Bach"));
 	}
 
 	@Test

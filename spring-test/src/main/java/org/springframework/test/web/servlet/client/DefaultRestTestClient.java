@@ -28,9 +28,13 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+import com.jayway.jsonpath.Configuration;
+import com.jayway.jsonpath.TypeRef;
+import com.jayway.jsonpath.spi.mapper.MappingProvider;
 import org.jspecify.annotations.Nullable;
 
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.core.ResolvableType;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpRequest;
@@ -486,7 +490,8 @@ class DefaultRestTestClient implements RestTestClient {
 
 		@Override
 		public JsonPathAssertions jsonPath(String expression) {
-			return new JsonPathAssertions(this, getBodyAsString(), expression, null);
+			Configuration config = JsonPathConfigurationProvider.getConfiguration(this.result);
+			return new JsonPathAssertions(this, getBodyAsString(), expression, config);
 		}
 
 		@Override
@@ -537,6 +542,39 @@ class DefaultRestTestClient implements RestTestClient {
 			Assert.state(bytes != null, () ->
 					"No match for %s=%s".formatted(RestTestClient.RESTTESTCLIENT_REQUEST_ID, requestId));
 			return bytes;
+		}
+	}
+
+
+	private static class JsonPathConfigurationProvider {
+
+		static Configuration getConfiguration(EntityExchangeResult<?> result) {
+			Configuration config = Configuration.defaultConfiguration();
+			JsonConverterDelegate delegate = result.getJsonConverterDelegate();
+			return (delegate != null ? config.mappingProvider(new MessageConverterMappingProvider(delegate)) : config);
+		}
+	}
+
+
+	private record MessageConverterMappingProvider(JsonConverterDelegate delegate) implements MappingProvider {
+
+		@Override
+		public <T> T map(Object value, Class<T> targetType, Configuration configuration) {
+			return mapToTargetType(value, ResolvableType.forClass(targetType));
+		}
+
+		@Override
+		public <T> T map(Object value, TypeRef<T> targetType, Configuration configuration) {
+			return mapToTargetType(value, ResolvableType.forType(targetType.getType()));
+		}
+
+		private <T> T mapToTargetType(Object value, ResolvableType targetType) {
+			try {
+				return delegate().map(value, targetType);
+			}
+			catch (IOException ex) {
+				throw new IllegalStateException("Failed to map " + value + " to " + targetType, ex);
+			}
 		}
 	}
 
