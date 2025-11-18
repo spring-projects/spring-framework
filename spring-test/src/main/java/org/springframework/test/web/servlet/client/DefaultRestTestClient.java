@@ -144,9 +144,10 @@ class DefaultRestTestClient implements RestTestClient {
 			client.mutate()
 					.configureMessageConverters(convertersBuilder -> {
 						HttpMessageConverters converters = convertersBuilder.build();
-						if (converters.iterator().hasNext()) {
-							this.converter = JsonConverterDelegate.of(converters);
+						if (converters.isEmpty()) {
+							converters = HttpMessageConverters.forClient().registerDefaults().build();
 						}
+						this.converter = JsonConverterDelegate.of(converters);
 					})
 					.build();
 		}
