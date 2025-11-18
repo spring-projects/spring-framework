@@ -32,6 +32,7 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.framework.ProxyFactory;
+import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.core.annotation.AliasFor;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.testfixture.io.SerializationTestUtils;
@@ -58,6 +59,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class AnnotationTransactionAttributeSourceTests {
 
 	private final AnnotationTransactionAttributeSource attributeSource = new AnnotationTransactionAttributeSource();
+
 
 	@Test
 	void serializable() throws Exception {
@@ -122,6 +124,10 @@ class AnnotationTransactionAttributeSourceTests {
 	@Test
 	void transactionAttributeDeclaredOnInterfaceMethodOnly() {
 		TransactionAttribute actual = getTransactionAttribute(TestBean2.class, ITestBean2.class, "getAge");
+		assertThat(actual).satisfies(hasNoRollbackRule());
+		actual = getTransactionAttribute(TestBean2.class, ITestBean2X.class, "getAge");
+		assertThat(actual).satisfies(hasNoRollbackRule());
+		actual = getTransactionAttribute(ITestBean2X.class, ITestBean2X.class, "getAge");
 		assertThat(actual).satisfies(hasNoRollbackRule());
 	}
 
@@ -249,6 +255,7 @@ class AnnotationTransactionAttributeSourceTests {
 		assertThat(actual.isReadOnly()).isTrue();
 	}
 
+
 	@Nested
 	class JtaAttributeTests {
 
@@ -275,6 +282,7 @@ class AnnotationTransactionAttributeSourceTests {
 			TransactionAttribute getNameAttr = getTransactionAttribute(JtaAnnotatedBean3.class, ITestJta.class, "getName");
 			assertThat(getNameAttr.getPropagationBehavior()).isEqualTo(TransactionAttribute.PROPAGATION_SUPPORTS);
 		}
+
 
 		static class JtaAnnotatedBean1 implements ITestBean1 {
 
@@ -304,7 +312,6 @@ class AnnotationTransactionAttributeSourceTests {
 				this.age = age;
 			}
 		}
-
 
 		@jakarta.transaction.Transactional(jakarta.transaction.Transactional.TxType.SUPPORTS)
 		static class JtaAnnotatedBean2 implements ITestBean1 {
@@ -362,7 +369,6 @@ class AnnotationTransactionAttributeSourceTests {
 			}
 		}
 
-
 		@jakarta.transaction.Transactional(jakarta.transaction.Transactional.TxType.SUPPORTS)
 		interface ITestJta {
 
@@ -375,8 +381,8 @@ class AnnotationTransactionAttributeSourceTests {
 
 			void setName(String name);
 		}
-
 	}
+
 
 	@Nested
 	class Ejb3AttributeTests {
@@ -448,7 +454,6 @@ class AnnotationTransactionAttributeSourceTests {
 			}
 		}
 
-
 		@jakarta.ejb.TransactionAttribute(TransactionAttributeType.SUPPORTS)
 		static class Ejb3AnnotatedBean2 implements ITestBean1 {
 
@@ -506,6 +511,7 @@ class AnnotationTransactionAttributeSourceTests {
 		}
 	}
 
+
 	@Nested
 	class GroovyTests {
 
@@ -518,6 +524,7 @@ class AnnotationTransactionAttributeSourceTests {
 			Method getMetaClassMethod = getMethod(GroovyObject.class, "getMetaClass");
 			assertThat(attributeSource.getTransactionAttribute(getMetaClassMethod, GroovyTestBean.class)).isNull();
 		}
+
 
 		@Transactional
 		static class GroovyTestBean implements ITestBean1, GroovyObject {
@@ -570,6 +577,7 @@ class AnnotationTransactionAttributeSourceTests {
 			}
 		}
 	}
+
 
 	private Consumer<TransactionAttribute> hasRollbackRules(RollbackRuleAttribute... rollbackRuleAttributes) {
 		return transactionAttribute -> {
@@ -626,7 +634,12 @@ class AnnotationTransactionAttributeSourceTests {
 	}
 
 
-	interface ITestBean2X extends ITestBean2 {
+	interface ITestBean2X extends ITestBean2, BeanNameAware {
+
+		@Transactional
+		int getAge();
+
+		void setAge(int age);
 
 		String getName();
 
@@ -733,6 +746,10 @@ class AnnotationTransactionAttributeSourceTests {
 		public TestBean2(String name, int age) {
 			this.name = name;
 			this.age = age;
+		}
+
+		@Override
+		public void setBeanName(String name) {
 		}
 
 		@Override
@@ -916,6 +933,7 @@ class AnnotationTransactionAttributeSourceTests {
 			return 10;
 		}
 	}
+
 
 	@Transactional(label = {"retryable", "long-running"})
 	static class TestBean11 {

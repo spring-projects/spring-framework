@@ -25,7 +25,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.aop.support.AopUtils;
-import org.springframework.beans.factory.Aware;
+import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.core.MethodClassKey;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ReflectionUtils;
@@ -98,8 +98,8 @@ public abstract class AbstractFallbackJCacheOperationSource implements JCacheOpe
 		if (allowPublicMethodsOnly() && !Modifier.isPublic(method.getModifiers())) {
 			return null;
 		}
-		// Skip methods declared on BeanFactoryAware and co.
-		if (method.getDeclaringClass().isInterface() && Aware.class.isAssignableFrom(method.getDeclaringClass())) {
+		// Skip setBeanFactory method on BeanFactoryAware.
+		if (method.getDeclaringClass() == BeanFactoryAware.class) {
 			return null;
 		}
 
