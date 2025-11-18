@@ -79,6 +79,7 @@ import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.beans.testfixture.beans.factory.DummyFactory;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.Ordered;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.annotation.Order;
@@ -1680,6 +1681,29 @@ class DefaultListableBeanFactoryTests {
 
 		assertThatExceptionOfType(NoUniqueBeanDefinitionException.class).isThrownBy(() ->
 				lbf.getBean(TestBean.class));
+	}
+
+	@Test
+	void getBeanByNameWithTypeReference() {
+		RootBeanDefinition bd1 = new RootBeanDefinition(StringTemplate.class);
+		RootBeanDefinition bd2 = new RootBeanDefinition(NumberTemplate.class);
+		lbf.registerBeanDefinition("bd1", bd1);
+		lbf.registerBeanDefinition("bd2", bd2);
+
+		Template<String> stringTemplate = lbf.getBean("bd1", new ParameterizedTypeReference<>() {});
+		Template<Number> numberTemplate = lbf.getBean("bd2", new ParameterizedTypeReference<>() {});
+
+		assertThat(stringTemplate).isInstanceOf(StringTemplate.class);
+		assertThat(numberTemplate).isInstanceOf(NumberTemplate.class);
+
+		assertThatExceptionOfType(BeanNotOfRequiredTypeException.class)
+				.isThrownBy(() -> lbf.getBean("bd2", new ParameterizedTypeReference<Template<String>>() {}))
+				.satisfies(ex -> {
+					assertThat(ex.getBeanName()).isEqualTo("bd2");
+					assertThat(ex.getRequiredType()).isEqualTo(Template.class);
+					assertThat(ex.getActualType()).isEqualTo(NumberTemplate.class);
+					assertThat(ex.getRequiredGenericType().toString()).endsWith("Template<java.lang.String>");
+				});
 	}
 
 	@Test
@@ -3870,6 +3894,18 @@ class DefaultListableBeanFactoryTests {
 		public Class<?> getObjectType() {
 			return TestBean.class;
 		}
+	}
+
+	private static class Template<T> {
+
+	}
+
+	private static class StringTemplate extends Template<String> {
+
+	}
+
+	private static class NumberTemplate extends Template<Number> {
+
 	}
 
 }

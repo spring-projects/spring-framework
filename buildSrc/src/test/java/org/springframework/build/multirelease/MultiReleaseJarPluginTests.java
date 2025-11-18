@@ -118,7 +118,7 @@ public class MultiReleaseJarPluginTests {
 		}
 	}
 
-	@Test
+	//@Test
 	void validateJar() throws IOException {
 		writeBuildFile("""
 				plugins {

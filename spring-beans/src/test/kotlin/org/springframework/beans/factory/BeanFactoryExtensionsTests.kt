@@ -21,6 +21,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import org.springframework.core.ParameterizedTypeReference
 import org.springframework.core.ResolvableType
 
 /**
@@ -53,7 +54,16 @@ class BeanFactoryExtensionsTests {
 	fun `getBean with String and reified type parameters`() {
 		val name = "foo"
 		bf.getBean<Foo>(name)
-		verify { bf.getBean(name, Foo::class.java) }
+		verify { bf.getBean(name, ofType<ParameterizedTypeReference<Foo>>()) }
+	}
+
+	@Test
+	fun `getBean with String and reified generic type parameters`() {
+		val name = "foo"
+		val foo = listOf(Foo())
+		every { bf.getBean(name, ofType<ParameterizedTypeReference<List<Foo>>>()) } returns foo
+		assertThat(bf.getBean<List<Foo>>("foo")).isSameAs(foo)
+		verify { bf.getBean(name, ofType<ParameterizedTypeReference<List<Foo>>>()) }
 	}
 
 	@Test
