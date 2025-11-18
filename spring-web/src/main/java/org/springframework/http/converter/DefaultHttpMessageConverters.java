@@ -42,7 +42,6 @@ import org.springframework.http.converter.xml.JacksonXmlHttpMessageConverter;
 import org.springframework.http.converter.xml.Jaxb2RootElementHttpMessageConverter;
 import org.springframework.http.converter.xml.MappingJackson2XmlHttpMessageConverter;
 import org.springframework.http.converter.yaml.JacksonYamlHttpMessageConverter;
-import org.springframework.http.converter.yaml.MappingJackson2YamlHttpMessageConverter;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
@@ -343,9 +342,6 @@ class DefaultHttpMessageConverters implements HttpMessageConverters {
 			if (this.yamlConverter == null) {
 				if (JACKSON_YAML_PRESENT) {
 					this.yamlConverter = new JacksonYamlHttpMessageConverter();
-				}
-				else if (JACKSON_2_YAML_PRESENT) {
-					this.yamlConverter = new MappingJackson2YamlHttpMessageConverter();
 				}
 			}
 

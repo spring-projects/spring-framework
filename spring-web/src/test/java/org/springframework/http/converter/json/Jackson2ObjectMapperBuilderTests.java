@@ -80,7 +80,6 @@ import com.fasterxml.jackson.dataformat.cbor.CBORFactory;
 import com.fasterxml.jackson.dataformat.smile.SmileFactory;
 import com.fasterxml.jackson.dataformat.xml.XmlFactory;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import kotlin.ranges.IntRange;
 import org.junit.jupiter.api.Test;
@@ -589,13 +588,6 @@ class Jackson2ObjectMapperBuilderTests {
 		ObjectMapper objectMapper = new Jackson2ObjectMapperBuilder().factory(new SmileFactory()).build();
 		assertThat(objectMapper).isNotNull();
 		assertThat(objectMapper.getFactory().getClass()).isEqualTo(SmileFactory.class);
-	}
-
-	@Test
-	void yaml() {
-		ObjectMapper objectMapper = Jackson2ObjectMapperBuilder.yaml().build();
-		assertThat(objectMapper).isNotNull();
-		assertThat(objectMapper.getFactory().getClass()).isEqualTo(YAMLFactory.class);
 	}
 
 	@Test

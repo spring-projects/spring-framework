@@ -21,7 +21,6 @@ import java.util.Properties;
 
 import com.fasterxml.jackson.dataformat.cbor.CBORFactory;
 import com.fasterxml.jackson.dataformat.smile.SmileFactory;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import org.jspecify.annotations.Nullable;
 import org.w3c.dom.Element;
 
@@ -62,7 +61,6 @@ import org.springframework.http.converter.xml.JacksonXmlHttpMessageConverter;
 import org.springframework.http.converter.xml.Jaxb2RootElementHttpMessageConverter;
 import org.springframework.http.converter.xml.MappingJackson2XmlHttpMessageConverter;
 import org.springframework.http.converter.yaml.JacksonYamlHttpMessageConverter;
-import org.springframework.http.converter.yaml.MappingJackson2YamlHttpMessageConverter;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.xml.DomUtils;
@@ -192,8 +190,6 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 
 	private static final boolean JACKSON_YAML_PRESENT;
 
-	private static final boolean JACKSON_2_YAML_PRESENT;
-
 	private static final boolean GSON_PRESENT;
 
 	static {
@@ -211,7 +207,6 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 		JACKSON_CBOR_PRESENT = JACKSON_PRESENT && ClassUtils.isPresent("tools.jackson.dataformat.cbor.CBORMapper", classLoader);
 		JACKSON_2_CBOR_PRESENT = JACKSON_2_PRESENT && ClassUtils.isPresent("com.fasterxml.jackson.dataformat.cbor.CBORFactory", classLoader);
 		JACKSON_YAML_PRESENT = JACKSON_PRESENT && ClassUtils.isPresent("tools.jackson.dataformat.yaml.YAMLMapper", classLoader);
-		JACKSON_2_YAML_PRESENT = JACKSON_2_PRESENT && ClassUtils.isPresent("com.fasterxml.jackson.dataformat.yaml.YAMLFactory", classLoader);
 		GSON_PRESENT = ClassUtils.isPresent("com.google.gson.Gson", classLoader);
 	}
 
@@ -479,7 +474,7 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 		if (JACKSON_CBOR_PRESENT || JACKSON_2_CBOR_PRESENT) {
 			defaultMediaTypes.put("cbor", MediaType.APPLICATION_CBOR_VALUE);
 		}
-		if (JACKSON_YAML_PRESENT || JACKSON_2_YAML_PRESENT) {
+		if (JACKSON_YAML_PRESENT) {
 			defaultMediaTypes.put("yaml", MediaType.APPLICATION_YAML_VALUE);
 		}
 		return defaultMediaTypes;
@@ -645,14 +640,6 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 
 			if (JACKSON_YAML_PRESENT) {
 				messageConverters.add(createConverterDefinition(JacksonYamlHttpMessageConverter.class, source));
-			}
-			else if (JACKSON_2_YAML_PRESENT) {
-				Class<?> type = MappingJackson2YamlHttpMessageConverter.class;
-				RootBeanDefinition jacksonConverterDef = createConverterDefinition(type, source);
-				GenericBeanDefinition jacksonFactoryDef = createObjectMapperFactoryDefinition(source);
-				jacksonFactoryDef.getPropertyValues().add("factory", new RootBeanDefinition(YAMLFactory.class));
-				jacksonConverterDef.getConstructorArgumentValues().addIndexedArgumentValue(0, jacksonFactoryDef);
-				messageConverters.add(jacksonConverterDef);
 			}
 		}
 		return messageConverters;
