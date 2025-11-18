@@ -57,8 +57,15 @@ class DefaultHttpMessageConverters implements HttpMessageConverters {
 
 	private final List<HttpMessageConverter<?>> messageConverters;
 
+
 	DefaultHttpMessageConverters(List<HttpMessageConverter<?>> messageConverters) {
 		this.messageConverters = messageConverters;
+	}
+
+
+	@Override
+	public boolean isEmpty() {
+		return this.messageConverters.isEmpty();
 	}
 
 	@Override

@@ -33,6 +33,11 @@ import java.util.function.Consumer;
 public interface HttpMessageConverters extends Iterable<HttpMessageConverter<?>> {
 
 	/**
+	 * Return true if this instance does not contain any message converters.
+	 */
+	boolean isEmpty();
+
+	/**
 	 * Create a builder instance, tailored for HTTP client usage.
 	 * <p>The following HTTP message converters can be detected and registered if available, in order:
 	 * <ol>
