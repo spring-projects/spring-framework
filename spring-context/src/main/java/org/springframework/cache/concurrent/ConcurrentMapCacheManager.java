@@ -55,7 +55,7 @@ public class ConcurrentMapCacheManager implements CacheManager, BeanClassLoaderA
 
 	private final ConcurrentMap<String, Cache> cacheMap = new ConcurrentHashMap<>(16);
 
-	private boolean dynamic = true;
+	private volatile boolean dynamic = true;
 
 	private boolean allowNullValues = true;
 
@@ -82,10 +82,15 @@ public class ConcurrentMapCacheManager implements CacheManager, BeanClassLoaderA
 
 	/**
 	 * Specify the set of cache names for this CacheManager's 'static' mode.
-	 * <p>The number of caches and their names will be fixed after a call to this method,
-	 * with no creation of further cache regions at runtime.
-	 * <p>Calling this with a {@code null} collection argument resets the
-	 * mode to 'dynamic', allowing for further creation of caches again.
+	 * <p>The number of caches and their names will be fixed after a call
+	 * to this method, with no creation of further cache regions at runtime.
+	 * <p>Note that this method replaces existing caches of the given names
+	 * and prevents the creation of further cache regions from here on - but
+	 * does <i>not</i> remove unrelated existing caches. For a full reset,
+	 * consider calling {@link #resetCaches()} before calling this method.
+	 * <p>Calling this method with a {@code null} collection argument resets
+	 * the mode to 'dynamic', allowing for further creation of caches again.
+	 * @see #resetCaches()
 	 */
 	public void setCacheNames(@Nullable Collection<String> cacheNames) {
 		if (cacheNames != null) {
@@ -161,17 +166,29 @@ public class ConcurrentMapCacheManager implements CacheManager, BeanClassLoaderA
 
 
 	@Override
-	public Collection<String> getCacheNames() {
-		return Collections.unmodifiableSet(this.cacheMap.keySet());
-	}
-
-	@Override
 	public @Nullable Cache getCache(String name) {
 		Cache cache = this.cacheMap.get(name);
 		if (cache == null && this.dynamic) {
 			cache = this.cacheMap.computeIfAbsent(name, this::createConcurrentMapCache);
 		}
 		return cache;
+	}
+
+	@Override
+	public Collection<String> getCacheNames() {
+		return Collections.unmodifiableSet(this.cacheMap.keySet());
+	}
+
+	/**
+	 * Reset this cache manager's caches, removing them completely for on-demand
+	 * re-creation in 'dynamic' mode, or simply clearing their entries otherwise.
+	 * @since 6.2.14
+	 */
+	public void resetCaches() {
+		this.cacheMap.values().forEach(Cache::clear);
+		if (this.dynamic) {
+			this.cacheMap.clear();
+		}
 	}
 
 	/**
