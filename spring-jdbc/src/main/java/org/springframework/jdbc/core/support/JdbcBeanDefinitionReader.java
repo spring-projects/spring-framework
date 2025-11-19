@@ -41,9 +41,8 @@ import org.springframework.util.Assert;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @see #loadBeanDefinitions
- * @see org.springframework.beans.factory.support.PropertiesBeanDefinitionReader
- * @deprecated in favor of Spring's common bean definition formats and/or custom
- * reader implementations
+ * @deprecated in favor of Spring's common bean definition formats and/or
+ * custom BeanDefinitionReader implementations
  */
 @Deprecated(since = "5.3")
 public class JdbcBeanDefinitionReader {
