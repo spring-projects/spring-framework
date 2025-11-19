@@ -74,10 +74,10 @@ import org.springframework.util.StringUtils;
  * @author Rob Harrop
  * @since 26.11.2003
  * @see DefaultListableBeanFactory
- * @deprecated as of 5.3, in favor of Spring's common bean definition formats
- * and/or custom reader implementations
+ * @deprecated in favor of Spring's common bean definition formats and/or
+ * custom BeanDefinitionReader implementations
  */
-@Deprecated
+@Deprecated(since = "5.3")
 public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader {
 
 	/**
