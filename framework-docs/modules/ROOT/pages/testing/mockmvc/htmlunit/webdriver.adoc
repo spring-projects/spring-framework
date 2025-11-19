@@ -259,9 +259,11 @@ Kotlin::
 ======
 --
 
-This improves on the design of our xref:testing/mockmvc/htmlunit/mah.adoc#mockmvc-server-htmlunit-mah-usage[HtmlUnit test]
-by leveraging the Page Object Pattern. As we mentioned in <<mockmvc-server-htmlunit-webdriver-why>>, we can use the Page Object Pattern
-with HtmlUnit, but it is much easier with WebDriver. Consider the following
+This improves on the design of our
+xref:testing/mockmvc/htmlunit/mah.adoc#mockmvc-server-htmlunit-mah-usage[HtmlUnit test]
+by leveraging the Page Object Pattern. As we mentioned in
+<<mockmvc-server-htmlunit-webdriver-why>>, we can use the Page Object Pattern with
+HtmlUnit, but it is much easier with WebDriver. Consider the following
 `CreateMessagePage` implementation:
 
 --
