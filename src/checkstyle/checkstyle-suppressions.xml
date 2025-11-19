@@ -113,6 +113,7 @@
 	<suppress files="PatternParseException" checks="JavadocVariable"/>
 	<suppress files="web[\\/]reactive[\\/]socket[\\/]CloseStatus" checks="JavadocStyle"/>
 	<suppress files="RestClientResponseException" checks="MutableException"/>
+	<suppress files="ServletRequestBindingException" checks="MutableException"/>
 
 	<!-- spring-webflux -->
 	<suppress files="src[\\/]test[\\/]java[\\/]org[\\/]springframework[\\/]web[\\/]reactive[\\/]resource[\\/]GzipSupport" checks="IllegalImport" id="bannedJUnitJupiterImports"/>

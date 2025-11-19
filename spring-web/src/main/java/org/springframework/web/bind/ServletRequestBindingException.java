@@ -25,8 +25,8 @@ import org.springframework.http.ProblemDetail;
 import org.springframework.web.ErrorResponse;
 
 /**
- * Fatal binding exception, thrown when we want to
- * treat binding exceptions as unrecoverable.
+ * Fatal binding exception, thrown when we want to treat binding exceptions
+ * as unrecoverable.
  *
  * <p>Extends ServletException for convenient throwing in any Servlet resource
  * (such as a Filter), and NestedServletException for proper root cause handling
@@ -38,11 +38,11 @@ import org.springframework.web.ErrorResponse;
 @SuppressWarnings("serial")
 public class ServletRequestBindingException extends ServletException implements ErrorResponse {
 
-	private final ProblemDetail body = ProblemDetail.forStatus(getStatusCode());
-
 	private final String messageDetailCode;
 
 	private final Object @Nullable [] messageDetailArguments;
+
+	private @Nullable ProblemDetail body;
 
 
 	/**
@@ -107,7 +107,10 @@ public class ServletRequestBindingException extends ServletException implements 
 	}
 
 	@Override
-	public ProblemDetail getBody() {
+	public synchronized ProblemDetail getBody() {
+		if (this.body == null) {
+			this.body = ProblemDetail.forStatus(getStatusCode());
+		}
 		return this.body;
 	}
 
