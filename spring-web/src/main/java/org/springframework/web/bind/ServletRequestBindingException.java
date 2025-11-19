@@ -25,12 +25,11 @@ import org.springframework.http.ProblemDetail;
 import org.springframework.web.ErrorResponse;
 
 /**
- * Fatal binding exception, thrown when we want to treat binding exceptions
- * as unrecoverable.
+ * Fatal binding exception, thrown when we want to treat binding exceptions as
+ * unrecoverable.
  *
- * <p>Extends ServletException for convenient throwing in any Servlet resource
- * (such as a Filter), and NestedServletException for proper root cause handling
- * (as the plain ServletException doesn't expose its root cause at all).
+ * <p>Extends {@link ServletException} for convenient throwing in any Servlet
+ * resource (such as a Filter).
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -94,6 +93,7 @@ public class ServletRequestBindingException extends ServletException implements 
 		this.messageDetailCode = initMessageDetailCode(messageDetailCode);
 		this.messageDetailArguments = messageDetailArguments;
 	}
+
 
 	private String initMessageDetailCode(@Nullable String messageDetailCode) {
 		return (messageDetailCode != null ?
