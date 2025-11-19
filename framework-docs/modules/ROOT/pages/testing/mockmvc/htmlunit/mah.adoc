@@ -143,10 +143,10 @@ Kotlin::
 ======
 
 The preceding code improves on our
-xref:testing/mockmvc/htmlunit/why.adoc#mockmvc-server-htmlunit-mock-mvc-test[MockMvc test] in a number of ways.
-First, we no longer have to explicitly verify our form and then create a request that
-looks like the form. Instead, we request the form, fill it out, and submit it, thereby
-significantly reducing the overhead.
+xref:testing/mockmvc/htmlunit/why.adoc#mockmvc-server-htmlunit-why[MockMvc test] in a
+number of ways. First, we no longer have to explicitly verify our form and then create a
+request that looks like the form. Instead, we request the form, fill it out, and submit
+it, thereby significantly reducing the overhead.
 
 Another important factor is that https://htmlunit.sourceforge.io/javascript.html[HtmlUnit
 uses the Mozilla Rhino engine] to evaluate JavaScript. This means that we can also test
