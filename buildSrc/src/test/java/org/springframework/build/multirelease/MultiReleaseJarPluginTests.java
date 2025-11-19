@@ -43,10 +43,13 @@ public class MultiReleaseJarPluginTests {
 
 	private File buildFile;
 
+	private File propertiesFile;
+
 	@BeforeEach
 	void setup(@TempDir File projectDir) {
 		this.projectDir = projectDir;
 		this.buildFile = new File(this.projectDir, "build.gradle");
+		this.propertiesFile = new File(this.projectDir, "gradle.properties");
 	}
 
 	@Test
@@ -131,6 +134,9 @@ public class MultiReleaseJarPluginTests {
 				}
 				multiRelease { releaseVersions 17 }
 				""");
+		writeGradleProperties("""
+				org.gradle.jvmargs=-Duser.language=en
+				""");
 		writeClass("src/main/java17", "Main.java", """
 				public class Main {
 				
@@ -149,6 +155,12 @@ public class MultiReleaseJarPluginTests {
 	private void writeBuildFile(String buildContent) throws IOException {
 		try (PrintWriter out = new PrintWriter(new FileWriter(this.buildFile))) {
 			out.print(buildContent);
+		}
+	}
+
+	private void writeGradleProperties(String properties) throws IOException {
+		try (PrintWriter out = new PrintWriter(new FileWriter(this.propertiesFile))) {
+			out.print(properties);
 		}
 	}
 
