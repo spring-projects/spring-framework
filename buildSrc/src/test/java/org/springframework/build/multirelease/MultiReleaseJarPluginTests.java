@@ -29,6 +29,8 @@ import org.gradle.testkit.runner.GradleRunner;
 import org.gradle.testkit.runner.UnexpectedBuildFailure;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledForJreRange;
+import org.junit.jupiter.api.condition.JRE;
 import org.junit.jupiter.api.io.TempDir;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -122,6 +124,7 @@ public class MultiReleaseJarPluginTests {
 	}
 
 	@Test
+	@DisabledForJreRange(max = JRE.JAVA_24, disabledReason = "'jar --validate' is available as of Java 25")
 	void validateJar() throws IOException {
 		writeBuildFile("""
 				plugins {

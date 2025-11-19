@@ -18,6 +18,7 @@ package org.springframework.build.multirelease;
 
 import javax.inject.Inject;
 
+import org.gradle.api.JavaVersion;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.artifacts.ConfigurationContainer;
@@ -64,10 +65,12 @@ public class MultiReleaseJarPlugin implements Plugin<Project> {
 				dependencies,
 				objects);
 
-		TaskProvider<MultiReleaseJarValidateTask> validateJarTask = tasks.register(VALIDATE_JAR_TASK_NAME, MultiReleaseJarValidateTask.class, (task) -> {
-			task.getJar().set(tasks.named("jar", Jar.class).flatMap(AbstractArchiveTask::getArchiveFile));
-			task.getJavaLauncher().set(task.getJavaToolchainService().launcherFor(spec -> spec.getLanguageVersion().set(JavaLanguageVersion.of(25))));
-		});
-		tasks.named("check", task -> task.dependsOn(validateJarTask));
+		if (JavaVersion.current().isCompatibleWith(JavaVersion.VERSION_25)) {
+			TaskProvider<MultiReleaseJarValidateTask> validateJarTask = tasks.register(VALIDATE_JAR_TASK_NAME, MultiReleaseJarValidateTask.class, (task) -> {
+				task.getJar().set(tasks.named("jar", Jar.class).flatMap(AbstractArchiveTask::getArchiveFile));
+				task.getJavaLauncher().set(task.getJavaToolchainService().launcherFor(spec -> spec.getLanguageVersion().set(JavaLanguageVersion.of(25))));
+			});
+			tasks.named("check", task -> task.dependsOn(validateJarTask));
+		}
 	}
 }
