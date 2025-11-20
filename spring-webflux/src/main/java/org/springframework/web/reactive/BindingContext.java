@@ -82,7 +82,7 @@ public class BindingContext {
 	 */
 	public BindingContext(@Nullable WebBindingInitializer initializer, ReactiveAdapterRegistry registry) {
 		this.initializer = initializer;
-		this.reactiveAdapterRegistry = new ReactiveAdapterRegistry();
+		this.reactiveAdapterRegistry = registry;
 	}
 
 
