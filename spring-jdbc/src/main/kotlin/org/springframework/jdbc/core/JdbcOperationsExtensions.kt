@@ -55,7 +55,7 @@ inline fun <reified T> JdbcOperations.queryForObject(sql: String, args: Array<ou
  * @since 5.0
  */
 @Suppress("DEPRECATION")
-// TODO Replace by the vararg variant in Spring Framework 6
+// TODO Replace by the vararg variant in Spring Framework 7
 inline fun <reified T> JdbcOperations.queryForObject(sql: String, args: Array<out Any>): T? =
 		queryForObject(sql, args, T::class.java) as T
 
@@ -89,7 +89,7 @@ inline fun <reified T> JdbcOperations.queryForList(sql: String, args: Array<out 
  * @since 5.0
  */
 @Suppress("DEPRECATION")
-// TODO Replace by the vararg variant in Spring Framework 6
+// TODO Replace by the vararg variant in Spring Framework 7
 inline fun <reified T> JdbcOperations.queryForList(sql: String, args: Array<out Any>): List<T> =
 		queryForList(sql, args, T::class.java)
 
