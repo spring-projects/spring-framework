@@ -33,6 +33,8 @@ Kotlin::
 ----
 ======
 
+A `ResponseEntity<Resource>` can be returned for file content, as same as in Spring MVC,
+
 WebFlux supports using a single value xref:web-reactive.adoc#webflux-reactive-libraries[reactive type] to
 produce the `ResponseEntity` asynchronously, and/or single and multi-value reactive types
 for the body. This allows a variety of async responses with `ResponseEntity` as follows:

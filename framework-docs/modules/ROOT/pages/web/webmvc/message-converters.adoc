@@ -83,4 +83,9 @@ content type. This requires the `com.google.protobuf:protobuf-java` dependency.
 | An `HttpMessageConverter` implementation that can read and write JSON documents to and from Protobuf messages.
 This requires the `com.google.protobuf:protobuf-java-util` dependency.
 
+| `ResourceHttpMessageConverter`
+| An `HttpMessageConverter` implementation that can read and write `org.springframework.core.io.Resource` instances from the HTTP request and response.
+
+Notice, the `ResourceHttpMessageWriter` automatically detects the media type by the filename of the `Resource` and uses it to override your response's `Content-Type` header. If the detection fails, `application/octet-stream` is used as a fallback. Don't return `Resource` type if you want to control the media type of the response.
+
 |===

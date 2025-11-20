@@ -84,6 +84,13 @@ Reactor provides a dedicated operator for that, `Flux#collectList()`.
   to be written (however, `text/event-stream` must be requested or declared in the mapping
   through the `produces` attribute).
 
+| `Flux<DataBuffer>`
+| Write raw data buffers to the response, for example, when handling file
+  downloads or proxying data.
+
+| `Resource`
+| Return a single resource that is written to the response using xref:web/webflux/reactive-spring.adoc#webflux-codecs-resource[ResourceHttpMessageWriter].
+
 | Other return values
 | If a return value remains unresolved in any other way, it is treated as a model
   attribute, unless it is a simple type as determined by
