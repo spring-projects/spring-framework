@@ -59,3 +59,8 @@ runs:
         version=$(sed -n 's/version=\(.*\)/\1/p' gradle.properties)
         echo "Version is $version"
         echo "version=$version" >> $GITHUB_OUTPUT
+    - name: SanityCheck
+      id: build
+      if: ${{ inputs.publish == 'false' }}
+      shell: bash
+      run: ./gradlew rewriteDryRun -Dorg.gradle.jvmargs=-Xmx8G

@@ -16,7 +16,7 @@
 
 package org.springframework.test.web.servlet.result;
 
-import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 
 import org.junit.jupiter.api.Test;
@@ -45,7 +45,7 @@ public class HeaderResultMatchersTests {
 	@Test // SPR-17330
 	public void matchDateFormattedWithHttpHeaders() throws Exception {
 
-		long epochMilli = ZonedDateTime.of(2018, 10, 5, 0, 0, 0, 0, ZoneId.of("GMT")).toInstant().toEpochMilli();
+		long epochMilli = ZonedDateTime.of(2018, 10, 5, 0, 0, 0, 0, ZoneOffset.UTC).toInstant().toEpochMilli();
 		HttpHeaders headers = new HttpHeaders();
 		headers.setDate("myDate", epochMilli);
 		this.response.setHeader("d", headers.getFirst("myDate"));

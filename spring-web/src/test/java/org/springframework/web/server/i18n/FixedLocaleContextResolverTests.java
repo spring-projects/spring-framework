@@ -16,7 +16,7 @@
 
 package org.springframework.web.server.i18n;
 
-import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.Locale;
 import java.util.TimeZone;
 
@@ -61,7 +61,7 @@ class FixedLocaleContextResolverTests {
 
 	@Test
 	void resolveCustomizedAndTimeZoneLocale() {
-		TimeZone timeZone = TimeZone.getTimeZone(ZoneId.of("UTC"));
+		TimeZone timeZone = TimeZone.getTimeZone(ZoneOffset.UTC);
 		FixedLocaleContextResolver resolver = new FixedLocaleContextResolver(FRANCE, timeZone);
 		TimeZoneAwareLocaleContext context = (TimeZoneAwareLocaleContext) resolver.resolveLocaleContext(exchange());
 		assertThat(context.getLocale()).isEqualTo(FRANCE);

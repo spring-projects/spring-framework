@@ -17,7 +17,7 @@
 package org.springframework.test.web.support;
 
 import java.net.URI;
-import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.concurrent.TimeUnit;
 
@@ -272,7 +272,7 @@ class HeaderAssertionTests {
 	@Test
 	void expires() {
 		HttpHeaders headers = new HttpHeaders();
-		ZonedDateTime expires = ZonedDateTime.of(2018, 1, 1, 0, 0, 0, 0, ZoneId.of("UTC"));
+		ZonedDateTime expires = ZonedDateTime.of(2018, 1, 1, 0, 0, 0, 0, ZoneOffset.UTC);
 		headers.setExpires(expires);
 		TestHeaderAssertions assertions = new TestHeaderAssertions(headers);
 		assertions.expires(expires.toInstant().toEpochMilli());
@@ -285,7 +285,7 @@ class HeaderAssertionTests {
 	@Test
 	void lastModified() {
 		HttpHeaders headers = new HttpHeaders();
-		ZonedDateTime lastModified = ZonedDateTime.of(2018, 1, 1, 0, 0, 0, 0, ZoneId.of("UTC"));
+		ZonedDateTime lastModified = ZonedDateTime.of(2018, 1, 1, 0, 0, 0, 0, ZoneOffset.UTC);
 		headers.setLastModified(lastModified.toInstant().toEpochMilli());
 		TestHeaderAssertions assertions = new TestHeaderAssertions(headers);
 		assertions.lastModified(lastModified.toInstant().toEpochMilli());

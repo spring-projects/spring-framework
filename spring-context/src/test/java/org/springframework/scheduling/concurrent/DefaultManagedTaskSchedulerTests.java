@@ -18,7 +18,6 @@ package org.springframework.scheduling.concurrent;
 
 import java.time.Duration;
 import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 
 import org.assertj.core.api.ThrowableAssert.ThrowingCallable;
 import org.junit.jupiter.api.Test;
@@ -53,28 +52,28 @@ class DefaultManagedTaskSchedulerTests {
 	void scheduleAtFixedRateWithStartTimeAndDurationAndNoScheduledExecutorProvidesDedicatedException() {
 		DefaultManagedTaskScheduler scheduler = new DefaultManagedTaskScheduler();
 		assertNoExecutorException(() -> scheduler.scheduleAtFixedRate(
-				NO_OP, Instant.now(), Duration.of(1, ChronoUnit.MINUTES)));
+				NO_OP, Instant.now(), Duration.ofMinutes(1)));
 	}
 
 	@Test
 	void scheduleAtFixedRateWithDurationAndNoScheduledExecutorProvidesDedicatedException() {
 		DefaultManagedTaskScheduler scheduler = new DefaultManagedTaskScheduler();
 		assertNoExecutorException(() -> scheduler.scheduleAtFixedRate(
-				NO_OP, Duration.of(1, ChronoUnit.MINUTES)));
+				NO_OP, Duration.ofMinutes(1)));
 	}
 
 	@Test
 	void scheduleWithFixedDelayWithStartTimeAndDurationAndNoScheduledExecutorProvidesDedicatedException() {
 		DefaultManagedTaskScheduler scheduler = new DefaultManagedTaskScheduler();
 		assertNoExecutorException(() -> scheduler.scheduleWithFixedDelay(
-				NO_OP, Instant.now(), Duration.of(1, ChronoUnit.MINUTES)));
+				NO_OP, Instant.now(), Duration.ofMinutes(1)));
 	}
 
 	@Test
 	void scheduleWithFixedDelayWithDurationAndNoScheduledExecutorProvidesDedicatedException() {
 		DefaultManagedTaskScheduler scheduler = new DefaultManagedTaskScheduler();
 		assertNoExecutorException(() -> scheduler.scheduleWithFixedDelay(
-				NO_OP, Duration.of(1, ChronoUnit.MINUTES)));
+				NO_OP, Duration.ofMinutes(1)));
 	}
 
 	private void assertNoExecutorException(ThrowingCallable callable) {

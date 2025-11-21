@@ -7,6 +7,7 @@ plugins {
 	id 'com.gradleup.shadow' version "9.2.2" apply false
 	id 'me.champeau.jmh' version '0.7.2' apply false
 	id 'io.spring.nullability' version '0.0.8' apply false
+    id 'org.openrewrite.rewrite' version '7.20.0' apply false
 }
 
 ext {
@@ -15,6 +16,8 @@ ext {
 }
 
 description = "Spring Framework"
+
+apply from: "$rootDir/gradle/rewrite.gradle"
 
 configure(allprojects) { project ->
 	apply plugin: "org.springframework.build.localdev"
