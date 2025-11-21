@@ -56,6 +56,7 @@ import org.springframework.util.StringUtils;
  * @author Juergen Hoeller
  * @author Sam Brannen
  * @author Brian Clozel
+ * @author Mengqi Xu
  * @since 4.1
  */
 public abstract class YamlProcessor {
@@ -244,13 +245,7 @@ public abstract class YamlProcessor {
 			if (value instanceof Map) {
 				value = asMap(value);
 			}
-			if (key instanceof CharSequence) {
-				result.put(key.toString(), value);
-			}
-			else {
-				// It has to be a map key in this case
-				result.put("[" + key.toString() + "]", value);
-			}
+			result.put(key.toString(), value);
 		});
 		return result;
 	}
@@ -305,16 +300,19 @@ public abstract class YamlProcessor {
 	 */
 	protected final Map<String, Object> getFlattenedMap(Map<String, Object> source) {
 		Map<String, Object> result = new LinkedHashMap<>();
-		buildFlattenedMap(result, source, null);
+		buildFlattenedMap(result, source, null, false);
 		return result;
 	}
 
 	@SuppressWarnings({"rawtypes", "unchecked"})
-	private void buildFlattenedMap(Map<String, Object> result, Map<String, Object> source, @Nullable String path) {
+	private void buildFlattenedMap(Map<String, Object> result, Map<String, Object> source, @Nullable String path, boolean isIndexedKey) {
 		source.forEach((key, value) -> {
 			if (StringUtils.hasText(path)) {
-				if (key.startsWith("[")) {
+				if (isIndexedKey) {
 					key = path + key;
+				}
+				else if (key.startsWith("[") || key.endsWith("]")) {
+					key = path + '[' + key + ']';
 				}
 				else {
 					key = path + '.' + key;
@@ -325,7 +323,7 @@ public abstract class YamlProcessor {
 			}
 			else if (value instanceof Map map) {
 				// Need a compound key
-				buildFlattenedMap(result, map, key);
+				buildFlattenedMap(result, map, key, false);
 			}
 			else if (value instanceof Collection collection) {
 				// Need a compound key
@@ -336,7 +334,7 @@ public abstract class YamlProcessor {
 					int count = 0;
 					for (Object object : collection) {
 						buildFlattenedMap(result, Collections.singletonMap(
-								"[" + (count++) + "]", object), key);
+								"[" + (count++) + "]", object), key, true);
 					}
 				}
 			}
