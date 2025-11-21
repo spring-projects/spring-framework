@@ -43,12 +43,12 @@ class KotlinScheduledAnnotationReactiveSupportTests {
 
 	@Test
 	fun ensureReactor() {
-		assertThat(ScheduledAnnotationReactiveSupport.reactorPresent).isTrue
+		assertThat(ScheduledAnnotationReactiveSupport.REACTOR_PRESENT).isTrue
 	}
 
 	@Test
 	fun ensureKotlinCoroutineReactorBridge() {
-		assertThat(ScheduledAnnotationReactiveSupport.coroutinesReactorPresent).isTrue
+		assertThat(ScheduledAnnotationReactiveSupport.COROUTINES_REACTOR_PRESENT).isTrue
 	}
 
 	@ParameterizedTest

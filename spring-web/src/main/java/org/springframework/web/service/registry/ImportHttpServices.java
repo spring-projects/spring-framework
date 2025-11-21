@@ -78,9 +78,6 @@ public @interface ImportHttpServices {
 	/**
 	 * Detect HTTP Services in the packages of the specified classes, looking
 	 * for interfaces with type or method {@link HttpExchange} annotations.
-	 * <p>The performed scan, however, filters out interfaces annotated with
-	 * {@link HttpServiceClient} that are instead supported by
-	 * {@link AbstractClientHttpServiceRegistrar}.
 	 */
 	Class<?>[] basePackageClasses() default {};
 

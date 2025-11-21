@@ -77,28 +77,45 @@ public class ProtobufHttpMessageWriter extends EncoderHttpMessageWriter<Message>
 	@SuppressWarnings("unchecked")
 	@Override
 	public Mono<Void> write(Publisher<? extends Message> inputStream, ResolvableType elementType,
-			@Nullable MediaType mediaType, ReactiveHttpOutputMessage message, Map<String, Object> hints) {
+			@Nullable MediaType mediaType, ReactiveHttpOutputMessage outputMessage, Map<String, Object> hints) {
 
 		try {
 			Message.Builder builder = getMessageBuilder(elementType.toClass());
 			Descriptors.Descriptor descriptor = builder.getDescriptorForType();
-			message.getHeaders().add(X_PROTOBUF_SCHEMA_HEADER, descriptor.getFile().getName());
-			message.getHeaders().add(X_PROTOBUF_MESSAGE_HEADER, descriptor.getFullName());
+			outputMessage.getHeaders().add(X_PROTOBUF_SCHEMA_HEADER, descriptor.getFile().getName());
+			outputMessage.getHeaders().add(X_PROTOBUF_MESSAGE_HEADER, descriptor.getFullName());
 			if (inputStream instanceof Flux) {
-				if (mediaType == null) {
-					message.getHeaders().setContentType(((HttpMessageEncoder<?>)getEncoder()).getStreamingMediaTypes().get(0));
-				}
-				else if (!ProtobufEncoder.DELIMITED_VALUE.equals(mediaType.getParameters().get(ProtobufEncoder.DELIMITED_KEY))) {
-					Map<String, String> parameters = new HashMap<>(mediaType.getParameters());
-					parameters.put(ProtobufEncoder.DELIMITED_KEY, ProtobufEncoder.DELIMITED_VALUE);
-					message.getHeaders().setContentType(new MediaType(mediaType.getType(), mediaType.getSubtype(), parameters));
-				}
+				outputMessage.getHeaders().setContentType(getStreamingContentType(mediaType));
 			}
-			return super.write(inputStream, elementType, mediaType, message, hints);
+			extendHeaders(outputMessage, hints);
+			return super.write(inputStream, elementType, mediaType, outputMessage, hints);
 		}
 		catch (Exception ex) {
 			return Mono.error(new EncodingException("Could not write Protobuf message: " + ex.getMessage(), ex));
 		}
+	}
+
+	/**
+	 * Return the {@code MediaType} to use when the input Publisher is multivalued.
+	 * @since 7.0
+	 */
+	protected MediaType getStreamingContentType(@Nullable MediaType mediaType) {
+		if (mediaType == null) {
+			return ((HttpMessageEncoder<?>) getEncoder()).getStreamingMediaTypes().get(0);
+		}
+		Map<String, String> params = new HashMap<>(mediaType.getParameters());
+		if (!ProtobufEncoder.DELIMITED_VALUE.equals(params.get(ProtobufEncoder.DELIMITED_KEY))) {
+			params.put(ProtobufEncoder.DELIMITED_KEY, ProtobufEncoder.DELIMITED_VALUE);
+			mediaType = new MediaType(mediaType, params);
+		}
+		return mediaType;
+	}
+
+	/**
+	 * Make further updates to headers.
+	 * @since 7.0
+	 */
+	protected void extendHeaders(ReactiveHttpOutputMessage message, Map<String, Object> hints) {
 	}
 
 	/**

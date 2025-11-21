@@ -30,8 +30,7 @@ import org.springframework.core.io.ResourceLoader;
  * @author Brian Clozel
  * @since 7.0
  */
-public class ClassFileMetadataReaderFactory extends AbstractMetadataReaderFactory {
-
+class ClassFileMetadataReaderFactory extends AbstractMetadataReaderFactory {
 
 	/**
 	 * Create a new ClassFileMetadataReaderFactory for the default class loader.
@@ -57,8 +56,10 @@ public class ClassFileMetadataReaderFactory extends AbstractMetadataReaderFactor
 		super(classLoader);
 	}
 
+
 	@Override
 	public MetadataReader getMetadataReader(Resource resource) throws IOException {
 		return new ClassFileMetadataReader(resource, getResourceLoader().getClassLoader());
 	}
+
 }

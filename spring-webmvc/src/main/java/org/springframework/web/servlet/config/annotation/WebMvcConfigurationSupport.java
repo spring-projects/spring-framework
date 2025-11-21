@@ -36,6 +36,7 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.core.KotlinDetector;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.format.Formatter;
 import org.springframework.format.FormatterRegistry;
@@ -180,19 +181,22 @@ import org.springframework.web.util.pattern.PathPatternParser;
  */
 public class WebMvcConfigurationSupport implements ApplicationContextAware, ServletContextAware {
 
-	private static final boolean jacksonPresent;
+	private static final boolean JACKSON_PRESENT;
 
-	private static final boolean jackson2Present;
+	private static final boolean JACKSON_2_PRESENT;
 
-	private static final boolean kotlinSerializationPresent;
+	private static final boolean KOTLIN_REFLECT_PRESENT;
+
+	private static final boolean KOTLIN_SERIALIZATION_PRESENT;
 
 
 	static {
 		ClassLoader classLoader = WebMvcConfigurationSupport.class.getClassLoader();
-		jacksonPresent = ClassUtils.isPresent("tools.jackson.databind.ObjectMapper", classLoader);
-		jackson2Present = ClassUtils.isPresent("com.fasterxml.jackson.databind.ObjectMapper", classLoader) &&
+		JACKSON_PRESENT = ClassUtils.isPresent("tools.jackson.databind.ObjectMapper", classLoader);
+		JACKSON_2_PRESENT = ClassUtils.isPresent("com.fasterxml.jackson.databind.ObjectMapper", classLoader) &&
 				ClassUtils.isPresent("com.fasterxml.jackson.core.JsonGenerator", classLoader);
-		kotlinSerializationPresent = ClassUtils.isPresent("kotlinx.serialization.Serializable", classLoader);
+		KOTLIN_REFLECT_PRESENT = KotlinDetector.isKotlinReflectPresent();
+		KOTLIN_SERIALIZATION_PRESENT = ClassUtils.isPresent("kotlinx.serialization.Serializable", classLoader);
 	}
 
 
@@ -652,14 +656,14 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 		adapter.setCustomReturnValueHandlers(getReturnValueHandlers());
 		adapter.setErrorResponseInterceptors(getErrorResponseInterceptors());
 
-		if (jacksonPresent || jackson2Present || kotlinSerializationPresent) {
+		if (JACKSON_PRESENT || JACKSON_2_PRESENT || KOTLIN_SERIALIZATION_PRESENT) {
 			List<RequestBodyAdvice> requestBodyAdvices = new ArrayList<>(2);
 			List<ResponseBodyAdvice<?>> responseBodyAdvices = new ArrayList<>(2);
-			if (jacksonPresent || jackson2Present) {
+			if (JACKSON_PRESENT || JACKSON_2_PRESENT) {
 				requestBodyAdvices.add(new JsonViewRequestBodyAdvice());
 				responseBodyAdvices.add(new JsonViewResponseBodyAdvice());
 			}
-			if (kotlinSerializationPresent) {
+			if (KOTLIN_REFLECT_PRESENT && KOTLIN_SERIALIZATION_PRESENT) {
 				requestBodyAdvices.add(new KotlinRequestBodyAdvice());
 				responseBodyAdvices.add(new KotlinResponseBodyAdvice());
 			}
@@ -1032,12 +1036,12 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 		exceptionHandlerResolver.setCustomArgumentResolvers(getArgumentResolvers());
 		exceptionHandlerResolver.setCustomReturnValueHandlers(getReturnValueHandlers());
 		exceptionHandlerResolver.setErrorResponseInterceptors(getErrorResponseInterceptors());
-		if (jacksonPresent || jackson2Present || kotlinSerializationPresent) {
+		if (JACKSON_PRESENT || JACKSON_2_PRESENT || KOTLIN_SERIALIZATION_PRESENT) {
 			List<ResponseBodyAdvice<?>> responseBodyAdvices = new ArrayList<>(2);
-			if (jacksonPresent || jackson2Present) {
+			if (JACKSON_PRESENT || JACKSON_2_PRESENT) {
 				responseBodyAdvices.add(new JsonViewResponseBodyAdvice());
 			}
-			if (kotlinSerializationPresent) {
+			if (KOTLIN_SERIALIZATION_PRESENT) {
 				responseBodyAdvices.add(new KotlinResponseBodyAdvice());
 			}
 			exceptionHandlerResolver.setResponseBodyAdvice(responseBodyAdvices);

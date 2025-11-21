@@ -138,6 +138,7 @@ class DefaultServerResponseBuilderTests {
 	}
 
 	@Test
+	@SuppressWarnings("deprecation")
 	void unprocessableEntity() {
 		ServerResponse response = ServerResponse.unprocessableEntity().build();
 		assertThat(response.statusCode()).isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY);

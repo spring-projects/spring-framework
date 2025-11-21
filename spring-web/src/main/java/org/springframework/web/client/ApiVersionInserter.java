@@ -23,8 +23,19 @@ import org.jspecify.annotations.Nullable;
 import org.springframework.http.HttpHeaders;
 
 /**
- * Contract to determine how to insert an API version into the URI or headers
- * of a request.
+ * Contract to insert an API version into the URI or headers of a request.
+ *
+ * <p>Use shortcut, static factory methods on this interface to create one of
+ * the built-in inserter type implementations:
+ * <ul>
+ * <li>{@link #useHeader(String)}
+ * <li>{@link #useQueryParam(String)}
+ * <li>{@link #useMediaTypeParam(String)}
+ * <li>{@link #usePathSegment(Integer)}
+ * </ul>
+ *
+ * <p>Use the {@link #builder()} for further options such as if you want to also
+ * configure an {@link ApiVersionFormatter}.
  *
  * @author Rossen Stoyanchev
  * @since 7.0

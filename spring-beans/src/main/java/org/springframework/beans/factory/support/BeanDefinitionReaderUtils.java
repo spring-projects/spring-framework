@@ -33,7 +33,6 @@ import org.springframework.util.StringUtils;
  * @author Juergen Hoeller
  * @author Rob Harrop
  * @since 1.1
- * @see PropertiesBeanDefinitionReader
  * @see org.springframework.beans.factory.xml.DefaultBeanDefinitionDocumentReader
  */
 public abstract class BeanDefinitionReaderUtils {

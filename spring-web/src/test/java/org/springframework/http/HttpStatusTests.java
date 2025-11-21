@@ -28,7 +28,9 @@ import org.springframework.util.MultiValueMap;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
+ * Tests for {@link HttpStatus}.
  * @author Arjen Poutsma
+ * @author Brian Clozel
  */
 class HttpStatusTests {
 
@@ -109,12 +111,18 @@ class HttpStatusTests {
 
 
 	@Test
-	void fromMapToEnum() {
+	void fromMapToEnum() throws Exception {
 		for (Map.Entry<Integer, List<String>> entry : statusCodes.entrySet()) {
 			int value = entry.getKey();
 			HttpStatus status = HttpStatus.valueOf(value);
 			assertThat(status.value()).as("Invalid value").isEqualTo(value);
 			assertThat(entry.getValue()).as("Invalid name for [" + value + "]").contains(status.name());
+			Deprecated deprecatedAnnotation = HttpStatus.class.getField(status.name()).getAnnotation(Deprecated.class);
+			if (deprecatedAnnotation != null) {
+				assertThat(statusCodes.get(entry.getKey()))
+						.as("Should not resolve deprecated enum value when non-deprecated exists")
+						.hasSize(1);
+			}
 		}
 	}
 

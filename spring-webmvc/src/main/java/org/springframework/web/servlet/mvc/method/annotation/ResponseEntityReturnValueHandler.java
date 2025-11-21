@@ -39,7 +39,7 @@ import org.springframework.web.method.support.ModelAndViewContainer;
  * provide enough information to decide via {@link #supportsReturnType}.
  *
  * @author Rossen Stoyanchev
- * @since 7.0
+ * @since 6.2.9
  */
 public class ResponseEntityReturnValueHandler implements HandlerMethodReturnValueHandler {
 

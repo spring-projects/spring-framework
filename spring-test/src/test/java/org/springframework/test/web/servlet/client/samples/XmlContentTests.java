@@ -25,6 +25,7 @@ import jakarta.xml.bind.annotation.XmlAccessType;
 import jakarta.xml.bind.annotation.XmlAccessorType;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlRootElement;
+import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.http.HttpHeaders;
@@ -104,7 +105,7 @@ class XmlContentTests {
 				.expectStatus().isOk()
 				.expectBody()
 				.xpath("/persons/person").nodeCount(3)
-				.xpath("/persons/person").nodeCount(equalTo(3));
+				.xpath("/persons/person").nodeCount(count -> MatcherAssert.assertThat(count, equalTo(3)));
 	}
 
 	@Test
@@ -114,10 +115,10 @@ class XmlContentTests {
 				.exchange()
 				.expectStatus().isOk()
 				.expectBody()
-				.xpath("//person/name").string(startsWith("J"))
-				.xpath("//person/name").string(s -> {
-					if (!s.startsWith("J")) {
-						throw new AssertionError("Name does not start with J: " + s);
+				.xpath("//person/name").string(name -> MatcherAssert.assertThat(name, startsWith("J")))
+				.xpath("//person/name").string(name -> {
+					if (!name.startsWith("J")) {
+						throw new AssertionError("Name does not start with J: " + name);
 					}
 				});
 	}

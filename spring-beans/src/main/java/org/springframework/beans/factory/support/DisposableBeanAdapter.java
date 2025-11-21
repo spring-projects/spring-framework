@@ -76,7 +76,7 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 
 	private static final Log logger = LogFactory.getLog(DisposableBeanAdapter.class);
 
-	private static final boolean reactiveStreamsPresent = ClassUtils.isPresent(
+	private static final boolean REACTIVE_STREAMS_PRESENT = ClassUtils.isPresent(
 			"org.reactivestreams.Publisher", DisposableBeanAdapter.class.getClassLoader());
 
 
@@ -320,7 +320,7 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 				future.get();
 				logDestroyMethodCompletion(destroyMethod, true);
 			}
-			else if (!reactiveStreamsPresent || !new ReactiveDestroyMethodHandler().await(destroyMethod, returnValue)) {
+			else if (!REACTIVE_STREAMS_PRESENT || !new ReactiveDestroyMethodHandler().await(destroyMethod, returnValue)) {
 				if (logger.isDebugEnabled()) {
 					logger.debug("Unknown return value type from custom destroy method '" + destroyMethod.getName() +
 							"' on bean with name '" + this.beanName + "': " + returnValue.getClass());

@@ -360,7 +360,10 @@ public class SpringFactoriesLoader {
 	 */
 	static final class FactoryInstantiator<T> {
 
+		private static final boolean KOTLIN_REFLECT_PRESENT = KotlinDetector.isKotlinReflectPresent();
+
 		private final Constructor<T> constructor;
+
 
 		private FactoryInstantiator(Constructor<T> constructor) {
 			ReflectionUtils.makeAccessible(constructor);
@@ -369,7 +372,7 @@ public class SpringFactoriesLoader {
 
 		T instantiate(@Nullable ArgumentResolver argumentResolver) throws Exception {
 			Object[] args = resolveArgs(argumentResolver);
-			if (KotlinDetector.isKotlinType(this.constructor.getDeclaringClass())) {
+			if (KOTLIN_REFLECT_PRESENT && KotlinDetector.isKotlinType(this.constructor.getDeclaringClass())) {
 				return KotlinDelegate.instantiate(this.constructor, args);
 			}
 			return this.constructor.newInstance(args);

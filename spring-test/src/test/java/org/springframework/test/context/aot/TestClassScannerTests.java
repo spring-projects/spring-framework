@@ -18,7 +18,9 @@ package org.springframework.test.context.aot;
 
 import org.junit.jupiter.api.Test;
 
+import org.springframework.test.context.aot.samples.basic.AbstractSpringJupiterParameterizedClassTests;
 import org.springframework.test.context.aot.samples.basic.BasicSpringJupiterImportedConfigTests;
+import org.springframework.test.context.aot.samples.basic.BasicSpringJupiterParameterizedClassTests;
 import org.springframework.test.context.aot.samples.basic.BasicSpringJupiterSharedConfigTests;
 import org.springframework.test.context.aot.samples.basic.BasicSpringJupiterTests;
 import org.springframework.test.context.aot.samples.basic.BasicSpringTestNGTests;
@@ -45,6 +47,11 @@ class TestClassScannerTests extends AbstractAotTests {
 				BasicSpringJupiterSharedConfigTests.class,
 				BasicSpringJupiterTests.class,
 				BasicSpringJupiterTests.NestedTests.class,
+				BasicSpringJupiterParameterizedClassTests.class,
+				AbstractSpringJupiterParameterizedClassTests.InheritedNestedTests.class,
+				AbstractSpringJupiterParameterizedClassTests.InheritedNestedTests.InheritedDoublyNestedTests.class,
+				BasicSpringJupiterParameterizedClassTests.NestedTests.class,
+				BasicSpringJupiterParameterizedClassTests.NestedTests.DoublyNestedTests.class,
 				BasicSpringTestNGTests.class,
 				BasicSpringVintageTests.class,
 				DisabledInAotProcessingTests.class,
@@ -61,6 +68,11 @@ class TestClassScannerTests extends AbstractAotTests {
 				BasicSpringJupiterSharedConfigTests.class,
 				BasicSpringJupiterTests.class,
 				BasicSpringJupiterTests.NestedTests.class,
+				BasicSpringJupiterParameterizedClassTests.class,
+				AbstractSpringJupiterParameterizedClassTests.InheritedNestedTests.class,
+				AbstractSpringJupiterParameterizedClassTests.InheritedNestedTests.InheritedDoublyNestedTests.class,
+				BasicSpringJupiterParameterizedClassTests.NestedTests.class,
+				BasicSpringJupiterParameterizedClassTests.NestedTests.DoublyNestedTests.class,
 				DisabledInAotProcessingTests.class,
 				DisabledInAotRuntimeClassLevelTests.class,
 				DisabledInAotRuntimeMethodLevelTests.class
@@ -87,6 +99,11 @@ class TestClassScannerTests extends AbstractAotTests {
 				BasicSpringJupiterSharedConfigTests.class,
 				BasicSpringJupiterTests.class,
 				BasicSpringJupiterTests.NestedTests.class,
+				BasicSpringJupiterParameterizedClassTests.class,
+				AbstractSpringJupiterParameterizedClassTests.InheritedNestedTests.class,
+				AbstractSpringJupiterParameterizedClassTests.InheritedNestedTests.InheritedDoublyNestedTests.class,
+				BasicSpringJupiterParameterizedClassTests.NestedTests.class,
+				BasicSpringJupiterParameterizedClassTests.NestedTests.DoublyNestedTests.class,
 				BasicSpringVintageTests.class,
 				BasicSpringTestNGTests.class,
 				DisabledInAotProcessingTests.class,
@@ -103,6 +120,11 @@ class TestClassScannerTests extends AbstractAotTests {
 				BasicSpringJupiterSharedConfigTests.class,
 				BasicSpringJupiterTests.class,
 				BasicSpringJupiterTests.NestedTests.class,
+				BasicSpringJupiterParameterizedClassTests.class,
+				AbstractSpringJupiterParameterizedClassTests.InheritedNestedTests.class,
+				AbstractSpringJupiterParameterizedClassTests.InheritedNestedTests.InheritedDoublyNestedTests.class,
+				BasicSpringJupiterParameterizedClassTests.NestedTests.class,
+				BasicSpringJupiterParameterizedClassTests.NestedTests.DoublyNestedTests.class,
 				BasicSpringVintageTests.class,
 				DisabledInAotProcessingTests.class,
 				DisabledInAotRuntimeClassLevelTests.class,

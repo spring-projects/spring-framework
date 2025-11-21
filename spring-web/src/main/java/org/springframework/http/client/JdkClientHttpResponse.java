@@ -21,17 +21,14 @@ import java.io.InputStream;
 import java.net.http.HttpClient;
 import java.net.http.HttpResponse;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
+import java.util.function.Consumer;
 
 import org.jspecify.annotations.Nullable;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
-import org.springframework.util.CollectionUtils;
-import org.springframework.util.LinkedCaseInsensitiveMap;
-import org.springframework.util.MultiValueMap;
 import org.springframework.util.StreamUtils;
 
 /**
@@ -50,18 +47,18 @@ class JdkClientHttpResponse implements ClientHttpResponse {
 	private final InputStream body;
 
 
-	public JdkClientHttpResponse(HttpResponse<InputStream> response, @Nullable InputStream body) {
+	JdkClientHttpResponse(HttpResponse<InputStream> response, Consumer<HttpHeaders> headersConsumer, @Nullable InputStream body) {
 		this.response = response;
-		this.headers = adaptHeaders(response);
+		this.headers = adaptHeaders(response, headersConsumer);
 		this.body = (body != null ? body : InputStream.nullInputStream());
 	}
 
-	private static HttpHeaders adaptHeaders(HttpResponse<?> response) {
+	private static HttpHeaders adaptHeaders(HttpResponse<?> response, Consumer<HttpHeaders> headersConsumer) {
 		Map<String, List<String>> rawHeaders = response.headers().map();
-		Map<String, List<String>> map = new LinkedCaseInsensitiveMap<>(rawHeaders.size(), Locale.ROOT);
-		MultiValueMap<String, String> multiValueMap = CollectionUtils.toMultiValueMap(map);
-		multiValueMap.putAll(rawHeaders);
-		return HttpHeaders.readOnlyHttpHeaders(multiValueMap);
+		HttpHeaders headers = new HttpHeaders();
+		rawHeaders.forEach(headers::put);
+		headersConsumer.accept(headers);
+		return HttpHeaders.readOnlyHttpHeaders(headers);
 	}
 
 

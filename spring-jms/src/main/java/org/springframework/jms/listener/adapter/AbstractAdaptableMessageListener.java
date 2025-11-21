@@ -39,7 +39,7 @@ import org.springframework.jms.support.converter.MessagingMessageConverter;
 import org.springframework.jms.support.converter.SimpleMessageConverter;
 import org.springframework.jms.support.converter.SmartMessageConverter;
 import org.springframework.jms.support.destination.DestinationResolver;
-import org.springframework.jms.support.destination.DynamicDestinationResolver;
+import org.springframework.jms.support.destination.SimpleDestinationResolver;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.util.Assert;
 
@@ -61,7 +61,7 @@ public abstract class AbstractAdaptableMessageListener
 
 	private @Nullable Object defaultResponseDestination;
 
-	private DestinationResolver destinationResolver = new DynamicDestinationResolver();
+	private DestinationResolver destinationResolver = new SimpleDestinationResolver();
 
 	private @Nullable MessageConverter messageConverter = new SimpleMessageConverter();
 
@@ -113,9 +113,9 @@ public abstract class AbstractAdaptableMessageListener
 	/**
 	 * Set the DestinationResolver that should be used to resolve response
 	 * destination names for this adapter.
-	 * <p>The default resolver is a DynamicDestinationResolver. Specify a
+	 * <p>The default resolver is a SimpleDestinationResolver. Specify a
 	 * JndiDestinationResolver for resolving destination names as JNDI locations.
-	 * @see org.springframework.jms.support.destination.DynamicDestinationResolver
+	 * @see org.springframework.jms.support.destination.SimpleDestinationResolver
 	 * @see org.springframework.jms.support.destination.JndiDestinationResolver
 	 */
 	public void setDestinationResolver(DestinationResolver destinationResolver) {

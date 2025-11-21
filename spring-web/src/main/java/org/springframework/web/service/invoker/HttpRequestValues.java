@@ -127,7 +127,7 @@ public class HttpRequestValues {
 	/**
 	 * Return the {@link UriBuilderFactory} to expand
 	 * the {@link HttpRequestValues#uriTemplate} and {@link #getUriVariables()} with.
-	 * <p>The {@link UriBuilderFactory} is passed into the HTTP interface method
+	 * <p>The {@link UriBuilderFactory} is passed into the HTTP Service client method
 	 * in order to override the UriBuilderFactory (and its baseUrl) used by the
 	 * underlying client.
 	 * @since 6.1

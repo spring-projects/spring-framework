@@ -22,10 +22,16 @@ import java.io.OutputStream;
 import org.springframework.util.StreamUtils;
 
 /**
- * Represents an HTTP output message that allows for setting a streaming body.
- * Note that such messages typically do not support {@link #getBody()} access.
+ * Contract for {@code HttpOutputMessage} implementations to expose the ability
+ * to stream request body content by writing to an {@link OutputStream} from
+ * a callback.
+ *
+ * <p>The {@link #setBody(Body)} method provides the option to stream, and is
+ * mutually exclusive use of {@link #getBody()}, which instead returns an
+ * {@code OutputStream} that aggregates the request body before sending it.
  *
  * @author Arjen Poutsma
+ * @author Rossen Stoyanchev
  * @since 4.0
  * @see #setBody
  */
@@ -33,6 +39,8 @@ public interface StreamingHttpOutputMessage extends HttpOutputMessage {
 
 	/**
 	 * Set the streaming body callback for this message.
+	 * <p>Note that this is mutually exclusive with {@link #getBody()}, which
+	 * may instead aggregate the request body before sending it.
 	 * @param body the streaming body callback
 	 */
 	void setBody(Body body);
@@ -60,9 +68,9 @@ public interface StreamingHttpOutputMessage extends HttpOutputMessage {
 
 
 	/**
-	 * Defines the contract for bodies that can be written directly to an
-	 * {@link OutputStream}. Useful with HTTP client libraries that provide
-	 * indirect access to an {@link OutputStream} via a callback mechanism.
+	 * Contract to stream request body content to an {@link OutputStream}.
+	 * In some HTTP client libraries this is only possible indirectly through a
+	 * callback mechanism.
 	 */
 	@FunctionalInterface
 	interface Body {

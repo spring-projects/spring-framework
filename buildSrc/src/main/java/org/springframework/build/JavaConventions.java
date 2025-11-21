@@ -45,7 +45,7 @@ public class JavaConventions {
 	 * <p>NOTE: If you update this value, you should also update the value used in
 	 * the {@code javadoc} task in {@code framework-api.gradle}.
 	 */
-	private static final JavaLanguageVersion DEFAULT_LANGUAGE_VERSION = JavaLanguageVersion.of(24);
+	private static final JavaLanguageVersion DEFAULT_LANGUAGE_VERSION = JavaLanguageVersion.of(25);
 
 	/**
 	 * The Java version we should use as the baseline for the compiled bytecode

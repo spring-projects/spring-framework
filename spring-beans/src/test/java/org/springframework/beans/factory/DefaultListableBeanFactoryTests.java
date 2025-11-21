@@ -87,6 +87,7 @@ import org.springframework.core.convert.support.GenericConversionService;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.core.testfixture.io.SerializationTestUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.util.StringValueResolver;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -1807,7 +1808,7 @@ class DefaultListableBeanFactoryTests {
 
 		assertThatExceptionOfType(NoUniqueBeanDefinitionException.class)
 				.isThrownBy(() -> lbf.getBean(TestBean.class))
-				.withMessageContaining("more than one 'primary'");
+				.withMessageEndingWith("more than one 'primary' bean found among candidates: [bd1, bd2]");
 	}
 
 	@Test
@@ -2131,7 +2132,7 @@ class DefaultListableBeanFactoryTests {
 
 		assertThatExceptionOfType(NoUniqueBeanDefinitionException.class)
 				.isThrownBy(() -> lbf.getBean(ConstructorDependency.class, 42))
-				.withMessageContaining("more than one 'primary'");
+				.withMessageEndingWith("more than one 'primary' bean found among candidates: [bd1, bd2]");
 	}
 
 	@Test
@@ -3232,6 +3233,10 @@ class DefaultListableBeanFactoryTests {
 		assertThat(lbf.getBeanNamesForType(DerivedTestBean.class)).containsExactly("bd1");
 		assertThat(lbf.getBeanNamesForType(NestedTestBean.class)).isSameAs(nestedBeanNames);
 		assertThat(lbf.getBeanNamesForType(Object.class)).isSameAs(allBeanNames);
+
+		lbf.registerSingleton("bd3", new Object());
+		assertThat(lbf.getBeanNamesForType(NestedTestBean.class)).isSameAs(nestedBeanNames);
+		assertThat(lbf.getBeanNamesForType(Object.class)).containsExactly(StringUtils.addStringToArray(allBeanNames, "bd3"));
 	}
 
 

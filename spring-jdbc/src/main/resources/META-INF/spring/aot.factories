@@ -1,2 +1,3 @@
 org.springframework.aot.hint.RuntimeHintsRegistrar=\
-org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseFactoryRuntimeHints
+org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseFactoryRuntimeHints,\
+org.springframework.jdbc.support.JdbcUtilsRuntimeHints

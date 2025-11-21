@@ -54,7 +54,7 @@ class DefaultMvcResult implements MvcResult {
 
 	private @Nullable Exception resolvedException;
 
-	private final AtomicReference<Object> asyncResult = new AtomicReference<>(RESULT_NONE);
+	private final AtomicReference<@Nullable Object> asyncResult = new AtomicReference<>(RESULT_NONE);
 
 	private @Nullable CountDownLatch asyncDispatchLatch;
 

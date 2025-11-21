@@ -66,13 +66,59 @@ public class ExceptionTypeFilter extends InstanceFilter<Class<? extends Throwabl
 
 	/**
 	 * Determine if the type of the supplied {@code exception} matches this filter.
+	 * @param exception the exception to match against
+	 * @return {@code true} if this filter matches the supplied exception
+	 * @since 7.0
+	 * @see #match(Throwable, boolean)
+	 */
+	public boolean match(Throwable exception) {
+		return match(exception, false);
+	}
+
+	/**
+	 * Determine if the type of the supplied {@code exception} matches this filter,
+	 * potentially matching against nested causes.
+	 * @param exception the exception to match against
+	 * @param traverseCauses whether the matching algorithm should recursively
+	 * match against nested causes of the exception
+	 * @return {@code true} if this filter matches the supplied exception or one
+	 * of its nested causes
 	 * @since 7.0
 	 * @see InstanceFilter#match(Object)
 	 */
-	public boolean match(Throwable exception) {
-		return match(exception.getClass());
+	public boolean match(Throwable exception, boolean traverseCauses) {
+		return (traverseCauses ? matchTraversingCauses(exception) : match(exception.getClass()));
 	}
 
+	private boolean matchTraversingCauses(Throwable exception) {
+		Assert.notNull(exception, "Throwable to match must not be null");
+
+		boolean emptyIncludes = super.includes.isEmpty();
+		boolean emptyExcludes = super.excludes.isEmpty();
+
+		if (emptyIncludes && emptyExcludes) {
+			return super.matchIfEmpty;
+		}
+		if (!emptyExcludes && matchTraversingCauses(exception, super.excludes)) {
+			return false;
+		}
+		return (emptyIncludes || matchTraversingCauses(exception, super.includes));
+	}
+
+	private boolean matchTraversingCauses(
+			Throwable exception, Collection<? extends Class<? extends Throwable>> candidateTypes) {
+
+		for (Class<? extends Throwable> candidateType : candidateTypes) {
+			Throwable current = exception;
+			while (current != null) {
+				if (match(current.getClass(), candidateType)) {
+					return true;
+				}
+				current = current.getCause();
+			}
+		}
+		return false;
+	}
 
 	/**
 	 * Determine if the specified {@code instance} matches the specified

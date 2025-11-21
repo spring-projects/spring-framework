@@ -21,6 +21,7 @@ import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
 
 import kotlin.reflect.KFunction;
 import kotlin.reflect.KType;
@@ -42,9 +43,11 @@ import org.springframework.util.MimeType;
  * Base class providing support methods for encoding and decoding with Kotlin
  * serialization.
  *
- * <p>As of Spring Framework 7.0,
- * <a href="https://github.com/Kotlin/kotlinx.serialization/blob/master/docs/polymorphism.md#open-polymorphism">open polymorphism</a>
- * is supported.
+ * <p>As of Spring Framework 7.0, by default it only handles types annotated with
+ * {@link kotlinx.serialization.Serializable @Serializable} at type or generics level
+ * since it allows combined usage with other general purpose decoders without conflicts.
+ * Alternative constructors with a {@code Predicate<ResolvableType>} parameter can be used
+ * to customize this behavior.
  *
  * @author Sebastien Deleuze
  * @author Iain Henderson
@@ -63,12 +66,29 @@ public abstract class KotlinSerializationSupport<T extends SerialFormat> {
 
 	private final List<MimeType> supportedMimeTypes;
 
+	private final Predicate<ResolvableType> typePredicate;
+
 	/**
-	 * Creates a new instance of this support class with the given format
-	 * and supported mime types.
+	 * Creates a new instance with the given format and supported mime types
+	 * which only handle types annotated with
+	 * {@link kotlinx.serialization.Serializable @Serializable} at type or
+	 * generics level.
 	 */
 	protected KotlinSerializationSupport(T format, MimeType... supportedMimeTypes) {
 		this.format = format;
+		this.typePredicate = KotlinDetector::hasSerializableAnnotation;
+		this.supportedMimeTypes = Arrays.asList(supportedMimeTypes);
+	}
+
+	/**
+	 * Creates a new instance with the given format and supported mime types
+	 * which only encode types for which the specified predicate returns
+	 * {@code true}.
+	 * @since 7.0
+	 */
+	protected KotlinSerializationSupport(T format, Predicate<ResolvableType> typePredicate, MimeType... supportedMimeTypes) {
+		this.format = format;
+		this.typePredicate = typePredicate;
 		this.supportedMimeTypes = Arrays.asList(supportedMimeTypes);
 	}
 
@@ -94,15 +114,10 @@ public abstract class KotlinSerializationSupport<T extends SerialFormat> {
 	 * @return {@code true} if {@code type} can be serialized; false otherwise
 	 */
 	protected final boolean canSerialize(ResolvableType type, @Nullable MimeType mimeType) {
-		KSerializer<Object> serializer = serializer(type);
-		if (serializer == null) {
+		if (!this.typePredicate.test(type) || ResolvableType.NONE.equals(type)) {
 			return false;
 		}
-		else {
-			return (supports(mimeType) && !String.class.isAssignableFrom(type.toClass()) &&
-					!ServerSentEvent.class.isAssignableFrom(type.toClass()));
-		}
-
+		return serializer(type) != null && supports(mimeType);
 	}
 
 	private boolean supports(@Nullable MimeType mimeType) {

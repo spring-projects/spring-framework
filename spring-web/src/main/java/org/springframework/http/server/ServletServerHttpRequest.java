@@ -216,7 +216,9 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 
 	@Override
 	public InetSocketAddress getRemoteAddress() {
-		return new InetSocketAddress(this.servletRequest.getRemoteHost(), this.servletRequest.getRemotePort());
+		String addressOrHost = this.servletRequest.getRemoteAddr();
+		addressOrHost = (addressOrHost != null ? addressOrHost : this.servletRequest.getRemoteHost());
+		return new InetSocketAddress(addressOrHost, this.servletRequest.getRemotePort());
 	}
 
 	@Override

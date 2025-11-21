@@ -30,7 +30,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments.ArgumentSet;
 import org.junit.jupiter.params.provider.FieldSource;
+import org.junit.platform.commons.util.ExceptionUtils;
 import org.mockito.InOrder;
+
+import org.springframework.util.backoff.BackOff;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -54,7 +57,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
  */
 class RetryTemplateTests {
 
-	private final RetryPolicy retryPolicy = RetryPolicy.builder().maxAttempts(3).delay(Duration.ZERO).build();
+	private final RetryPolicy retryPolicy = RetryPolicy.builder().maxRetries(3).delay(Duration.ZERO).build();
 
 	private final RetryTemplate retryTemplate = new RetryTemplate(retryPolicy);
 
@@ -113,7 +116,7 @@ class RetryTemplateTests {
 
 	@Test
 	void retryWithInitialFailureAndZeroRetriesFixedBackOffPolicy() {
-		RetryPolicy retryPolicy = RetryPolicy.withMaxAttempts(0);
+		RetryPolicy retryPolicy = RetryPolicy.withMaxRetries(0);
 
 		RetryTemplate retryTemplate = new RetryTemplate(retryPolicy);
 		retryTemplate.setRetryListener(retryListener);
@@ -135,7 +138,7 @@ class RetryTemplateTests {
 
 	@Test
 	void retryWithInitialFailureAndZeroRetriesBackOffPolicyFromBuilder() {
-		RetryPolicy retryPolicy = RetryPolicy.builder().maxAttempts(0).build();
+		RetryPolicy retryPolicy = RetryPolicy.builder().maxRetries(0).build();
 
 		RetryTemplate retryTemplate = new RetryTemplate(retryPolicy);
 		retryTemplate.setRetryListener(retryListener);
@@ -214,6 +217,34 @@ class RetryTemplateTests {
 	}
 
 	@Test
+	void retryWithInterruptionDuringSleep() {
+		Exception exception = new RuntimeException("Boom!");
+		InterruptedException interruptedException = new InterruptedException();
+
+		// Simulates interruption during sleep:
+		BackOff backOff = () -> () -> {
+			throw ExceptionUtils.throwAsUncheckedException(interruptedException);
+		};
+
+		RetryPolicy retryPolicy = RetryPolicy.builder().backOff(backOff).build();
+		RetryTemplate retryTemplate = new RetryTemplate(retryPolicy);
+		retryTemplate.setRetryListener(retryListener);
+		Retryable<String> retryable = () -> {
+			throw exception;
+		};
+
+		assertThatExceptionOfType(RetryException.class)
+				.isThrownBy(() -> retryTemplate.execute(retryable))
+				.withMessageMatching("Unable to back off for retryable operation '.+?'")
+				.withCause(interruptedException)
+				.satisfies(throwable -> assertThat(throwable.getSuppressed()).containsExactly(exception))
+				.satisfies(throwable -> assertThat(throwable.getRetryCount()).isZero())
+				.satisfies(throwable -> inOrder.verify(retryListener).onRetryPolicyInterruption(retryPolicy, retryable, throwable));
+
+		verifyNoMoreInteractions(retryListener);
+	}
+
+	@Test
 	void retryWithFailingRetryableAndMultiplePredicates() {
 		var invocationCount = new AtomicInteger();
 		var exception = new NumberFormatException("Boom!");
@@ -232,7 +263,7 @@ class RetryTemplateTests {
 		};
 
 		var retryPolicy = RetryPolicy.builder()
-				.maxAttempts(5)
+				.maxRetries(5)
 				.delay(Duration.ofMillis(1))
 				.predicate(NumberFormatException.class::isInstance)
 				.predicate(t -> t.getMessage().equals("Boom!"))
@@ -280,7 +311,7 @@ class RetryTemplateTests {
 		};
 
 		var retryPolicy = RetryPolicy.builder()
-				.maxAttempts(Integer.MAX_VALUE)
+				.maxRetries(Integer.MAX_VALUE)
 				.delay(Duration.ZERO)
 				.includes(IOException.class)
 				.build();
@@ -313,13 +344,13 @@ class RetryTemplateTests {
 	static final List<ArgumentSet> includesAndExcludesRetryPolicies = List.of(
 			argumentSet("Excludes",
 						RetryPolicy.builder()
-							.maxAttempts(Integer.MAX_VALUE)
+							.maxRetries(Integer.MAX_VALUE)
 							.delay(Duration.ZERO)
 							.excludes(FileNotFoundException.class)
 							.build()),
 			argumentSet("Includes & Excludes",
 						RetryPolicy.builder()
-							.maxAttempts(Integer.MAX_VALUE)
+							.maxRetries(Integer.MAX_VALUE)
 							.delay(Duration.ZERO)
 							.includes(IOException.class)
 							.excludes(FileNotFoundException.class)
@@ -338,7 +369,7 @@ class RetryTemplateTests {
 			public String execute() throws Exception {
 				return switch (invocationCount.incrementAndGet()) {
 					case 1 -> throw new IOException();
-					case 2 -> throw new IOException();
+					case 2 -> throw new RuntimeException(new IOException());
 					case 3 -> throw new CustomFileNotFoundException();
 					default -> "success";
 				};
@@ -357,14 +388,15 @@ class RetryTemplateTests {
 				.withCauseExactlyInstanceOf(CustomFileNotFoundException.class)
 				.satisfies(hasSuppressedExceptionsSatisfyingExactly(
 					suppressed1 -> assertThat(suppressed1).isExactlyInstanceOf(IOException.class),
-					suppressed2 -> assertThat(suppressed2).isExactlyInstanceOf(IOException.class)
+					suppressed2 -> assertThat(suppressed2).isExactlyInstanceOf(RuntimeException.class)
+							.hasCauseExactlyInstanceOf(IOException.class)
 				))
 				.satisfies(throwable -> assertThat(throwable.getRetryCount()).isEqualTo(2))
 				.satisfies(throwable -> {
-					repeat(2, () -> {
-						inOrder.verify(retryListener).beforeRetry(retryPolicy, retryable);
-						inOrder.verify(retryListener).onRetryFailure(eq(retryPolicy), eq(retryable), any(IOException.class));
-					});
+					inOrder.verify(retryListener).beforeRetry(retryPolicy, retryable);
+					inOrder.verify(retryListener).onRetryFailure(eq(retryPolicy), eq(retryable), any(RuntimeException.class));
+					inOrder.verify(retryListener).beforeRetry(retryPolicy, retryable);
+					inOrder.verify(retryListener).onRetryFailure(eq(retryPolicy), eq(retryable), any(CustomFileNotFoundException.class));
 					inOrder.verify(retryListener).onRetryPolicyExhaustion(retryPolicy, retryable, throwable);
 				});
 		// 3 = 1 initial invocation + 2 retry attempts

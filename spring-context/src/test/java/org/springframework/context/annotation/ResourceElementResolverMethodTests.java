@@ -134,20 +134,16 @@ class ResourceElementResolverMethodTests {
 
 		private String one;
 
-		private String test;
-
-		private Integer count;
-
 		public void setOne(String one) {
 			this.one = one;
 		}
 
 		public void setTest(String test) {
-			this.test = test;
+			// no-op
 		}
 
 		public void setCount(Integer count) {
-			this.count = count;
+			// no-op
 		}
 	}
 

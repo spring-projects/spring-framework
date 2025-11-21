@@ -293,6 +293,14 @@ public class FileSystemResource extends AbstractResource implements WritableReso
 	}
 
 	/**
+	 * This implementation returns the underlying NIO Path reference.
+	 */
+	@Override
+	public Path getFilePath() {
+		return this.filePath;
+	}
+
+	/**
 	 * This implementation opens a FileChannel for the underlying file.
 	 * @see java.nio.channels.FileChannel
 	 */

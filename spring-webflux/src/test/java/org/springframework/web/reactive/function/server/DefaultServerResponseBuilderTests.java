@@ -178,6 +178,7 @@ class DefaultServerResponseBuilderTests {
 	}
 
 	@Test
+	@SuppressWarnings("deprecation")
 	void unprocessableEntity() {
 		Mono<ServerResponse> result = ServerResponse.unprocessableEntity().build();
 		StepVerifier.create(result)

@@ -172,7 +172,6 @@ public class QualifierAnnotationAutowireCandidateResolver extends GenericTypeAwa
 	 * {@code true} if a qualifier has been found and matched,
 	 * {@code null} if no qualifier has been found at all
 	 */
-
 	protected @Nullable Boolean checkQualifiers(BeanDefinitionHolder bdHolder, Annotation[] annotationsToSearch) {
 		boolean qualifierFound = false;
 		if (!ObjectUtils.isEmpty(annotationsToSearch)) {
@@ -362,6 +361,14 @@ public class QualifierAnnotationAutowireCandidateResolver extends GenericTypeAwa
 		for (Annotation annotation : descriptor.getAnnotations()) {
 			if (isQualifier(annotation.annotationType())) {
 				return true;
+			}
+		}
+		MethodParameter methodParam = descriptor.getMethodParameter();
+		if (methodParam != null) {
+			for (Annotation annotation : methodParam.getMethodAnnotations()) {
+				if (isQualifier(annotation.annotationType())) {
+					return true;
+				}
 			}
 		}
 		return false;

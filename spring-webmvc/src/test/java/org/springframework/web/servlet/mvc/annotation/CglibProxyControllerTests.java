@@ -80,6 +80,7 @@ class CglibProxyControllerTests {
 	}
 
 
+	@SuppressWarnings("serial")
 	private void initServlet(final Class<?> controllerClass) throws ServletException {
 		servlet = new DispatcherServlet() {
 			@Override

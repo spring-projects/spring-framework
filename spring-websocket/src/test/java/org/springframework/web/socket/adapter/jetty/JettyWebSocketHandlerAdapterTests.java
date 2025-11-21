@@ -16,6 +16,7 @@
 
 package org.springframework.web.socket.adapter.jetty;
 
+import org.eclipse.jetty.websocket.api.Callback;
 import org.eclipse.jetty.websocket.api.Session;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -57,7 +58,7 @@ class JettyWebSocketHandlerAdapterTests {
 
 	@Test
 	void onClose() throws Exception {
-		this.adapter.onWebSocketClose(1000, "reason");
+		this.adapter.onWebSocketClose(1000, "reason", Callback.NOOP);
 		verify(this.webSocketHandler).afterConnectionClosed(this.webSocketSession, CloseStatus.NORMAL.withReason("reason"));
 	}
 

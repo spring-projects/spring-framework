@@ -293,6 +293,8 @@ final class DefaultRestClient implements RestClient {
 
 	private class DefaultRequestBodyUriSpec implements RequestBodyUriSpec {
 
+		private static final Object NO_VERSION = new Object();
+
 		private final HttpMethod httpMethod;
 
 		private @Nullable URI uri;
@@ -430,8 +432,8 @@ final class DefaultRestClient implements RestClient {
 		}
 
 		@Override
-		public RequestBodySpec apiVersion(Object version) {
-			this.apiVersion = version;
+		public RequestBodySpec apiVersion(@Nullable Object version) {
+			this.apiVersion = (version != null ? version : NO_VERSION);
 			return this;
 		}
 
@@ -646,7 +648,15 @@ final class DefaultRestClient implements RestClient {
 		}
 
 		private @Nullable Object getApiVersionOrDefault() {
-			return (this.apiVersion != null ? this.apiVersion : DefaultRestClient.this.defaultApiVersion);
+			if (this.apiVersion == null) {
+				return DefaultRestClient.this.defaultApiVersion;
+			}
+			else if (this.apiVersion == NO_VERSION) {
+				return null;
+			}
+			else {
+				return this.apiVersion;
+			}
 		}
 
 		private @Nullable String serializeCookies() {
@@ -803,13 +813,13 @@ final class DefaultRestClient implements RestClient {
 		}
 
 		@Override
-		@SuppressWarnings("NullAway") // See https://github.com/uber/NullAway/issues/1075
+		@SuppressWarnings("NullAway") // See https://github.com/uber/NullAway/issues/1290
 		public <T> @Nullable T body(Class<T> bodyType) {
 			return executeAndExtract((request, response) -> readBody(request, response, bodyType, bodyType, this.hints));
 		}
 
 		@Override
-		@SuppressWarnings("NullAway") // See https://github.com/uber/NullAway/issues/1075
+		@SuppressWarnings("NullAway") // See https://github.com/uber/NullAway/issues/1290
 		public <T> @Nullable T body(ParameterizedTypeReference<T> bodyType) {
 			Type type = bodyType.getType();
 			Class<T> bodyClass = bodyClass(type);

@@ -1280,88 +1280,6 @@ class AutowiredAnnotationBeanPostProcessorTests {
 	}
 
 	@Test
-	void fieldInjectionWithMap() {
-		RootBeanDefinition bd = new RootBeanDefinition(MapFieldInjectionBean.class);
-		bd.setScope(BeanDefinition.SCOPE_PROTOTYPE);
-		bf.registerBeanDefinition("annotatedBean", bd);
-		TestBean tb1 = new TestBean("tb1");
-		TestBean tb2 = new TestBean("tb2");
-		bf.registerSingleton("testBean1", tb1);
-		bf.registerSingleton("testBean2", tb2);
-		bf.registerAlias("testBean1", "testBean");
-
-		MapFieldInjectionBean bean = bf.getBean("annotatedBean", MapFieldInjectionBean.class);
-		assertThat(bean.getTestBeanMap()).hasSize(2);
-		assertThat(bean.getTestBeanMap()).containsKey("testBean1");
-		assertThat(bean.getTestBeanMap()).containsKey("testBean2");
-		assertThat(bean.getTestBeanMap()).containsValue(tb1);
-		assertThat(bean.getTestBeanMap()).containsValue(tb2);
-
-		bean = bf.getBean("annotatedBean", MapFieldInjectionBean.class);
-		assertThat(bean.getTestBeanMap()).hasSize(2);
-		assertThat(bean.getTestBeanMap()).containsKey("testBean1");
-		assertThat(bean.getTestBeanMap()).containsKey("testBean2");
-		assertThat(bean.getTestBeanMap()).containsValue(tb1);
-		assertThat(bean.getTestBeanMap()).containsValue(tb2);
-	}
-
-	@Test
-	void methodInjectionWithMap() {
-		RootBeanDefinition bd = new RootBeanDefinition(MapMethodInjectionBean.class);
-		bd.setScope(BeanDefinition.SCOPE_PROTOTYPE);
-		bf.registerBeanDefinition("annotatedBean", bd);
-		TestBean tb = new TestBean();
-		bf.registerSingleton("testBean", tb);
-
-		MapMethodInjectionBean bean = bf.getBean("annotatedBean", MapMethodInjectionBean.class);
-		assertThat(bean.getTestBeanMap()).hasSize(1);
-		assertThat(bean.getTestBeanMap()).containsKey("testBean");
-		assertThat(bean.getTestBeanMap()).containsValue(tb);
-		assertThat(bean.getTestBean()).isSameAs(tb);
-
-		bean = bf.getBean("annotatedBean", MapMethodInjectionBean.class);
-		assertThat(bean.getTestBeanMap()).hasSize(1);
-		assertThat(bean.getTestBeanMap()).containsKey("testBean");
-		assertThat(bean.getTestBeanMap()).containsValue(tb);
-		assertThat(bean.getTestBean()).isSameAs(tb);
-	}
-
-	@Test
-	void methodInjectionWithMapAndMultipleMatches() {
-		bf.registerBeanDefinition("annotatedBean", new RootBeanDefinition(MapMethodInjectionBean.class));
-		bf.registerBeanDefinition("testBean1", new RootBeanDefinition(TestBean.class));
-		bf.registerBeanDefinition("testBean2", new RootBeanDefinition(TestBean.class));
-		assertThatExceptionOfType(UnsatisfiedDependencyException.class).as("should have failed, more than one bean of type")
-				.isThrownBy(() -> bf.getBean("annotatedBean"))
-				.satisfies(methodParameterDeclaredOn(MapMethodInjectionBean.class));
-	}
-
-	@Test
-	void methodInjectionWithMapAndMultipleMatchesButOnlyOneAutowireCandidate() {
-		bf.registerBeanDefinition("annotatedBean", new RootBeanDefinition(MapMethodInjectionBean.class));
-		bf.registerBeanDefinition("testBean1", new RootBeanDefinition(TestBean.class));
-		RootBeanDefinition rbd2 = new RootBeanDefinition(TestBean.class);
-		rbd2.setAutowireCandidate(false);
-		bf.registerBeanDefinition("testBean2", rbd2);
-
-		MapMethodInjectionBean bean = bf.getBean("annotatedBean", MapMethodInjectionBean.class);
-		TestBean tb = bf.getBean("testBean1", TestBean.class);
-		assertThat(bean.getTestBeanMap()).hasSize(1);
-		assertThat(bean.getTestBeanMap()).containsKey("testBean1");
-		assertThat(bean.getTestBeanMap()).containsValue(tb);
-		assertThat(bean.getTestBean()).isSameAs(tb);
-	}
-
-	@Test
-	void methodInjectionWithMapAndNoMatches() {
-		bf.registerBeanDefinition("annotatedBean", new RootBeanDefinition(MapMethodInjectionBean.class));
-
-		MapMethodInjectionBean bean = bf.getBean("annotatedBean", MapMethodInjectionBean.class);
-		assertThat(bean.getTestBeanMap()).isNull();
-		assertThat(bean.getTestBean()).isNull();
-	}
-
-	@Test
 	void constructorInjectionWithTypedMapAsBean() {
 		RootBeanDefinition bd = new RootBeanDefinition(MapConstructorInjectionBean.class);
 		bd.setScope(BeanDefinition.SCOPE_PROTOTYPE);
@@ -1413,6 +1331,19 @@ class AutowiredAnnotationBeanPostProcessorTests {
 
 	@Test
 	void constructorInjectionWithPlainHashMapAsBean() {
+		RootBeanDefinition bd = new RootBeanDefinition(NamedMapConstructorInjectionBean.class);
+		bd.setScope(BeanDefinition.SCOPE_PROTOTYPE);
+		bf.registerBeanDefinition("annotatedBean", bd);
+		bf.registerBeanDefinition("testBeanMap", new RootBeanDefinition(HashMap.class));
+
+		NamedMapConstructorInjectionBean bean = bf.getBean("annotatedBean", NamedMapConstructorInjectionBean.class);
+		assertThat(bean.getTestBeanMap()).isSameAs(bf.getBean("testBeanMap"));
+		bean = bf.getBean("annotatedBean", NamedMapConstructorInjectionBean.class);
+		assertThat(bean.getTestBeanMap()).isSameAs(bf.getBean("testBeanMap"));
+	}
+
+	@Test
+	void constructorInjectionWithQualifiedPlainHashMapAsBean() {
 		RootBeanDefinition bd = new RootBeanDefinition(QualifiedMapConstructorInjectionBean.class);
 		bd.setScope(BeanDefinition.SCOPE_PROTOTYPE);
 		bf.registerBeanDefinition("annotatedBean", bd);
@@ -1499,6 +1430,114 @@ class AutowiredAnnotationBeanPostProcessorTests {
 
 		SortedSetConstructorInjectionBean bean = bf.getBean("annotatedBean", SortedSetConstructorInjectionBean.class);
 		assertThat(bean.getTestBeanSet()).contains(tb1, tb2);
+	}
+
+	@Test
+	void fieldInjectionWithMap() {
+		RootBeanDefinition bd = new RootBeanDefinition(MapFieldInjectionBean.class);
+		bd.setScope(BeanDefinition.SCOPE_PROTOTYPE);
+		bf.registerBeanDefinition("annotatedBean", bd);
+		TestBean tb1 = new TestBean("tb1");
+		TestBean tb2 = new TestBean("tb2");
+		bf.registerSingleton("testBean1", tb1);
+		bf.registerSingleton("testBean2", tb2);
+		bf.registerAlias("testBean1", "testBean");
+
+		MapFieldInjectionBean bean = bf.getBean("annotatedBean", MapFieldInjectionBean.class);
+		assertThat(bean.getTestBeanMap()).hasSize(2);
+		assertThat(bean.getTestBeanMap()).containsKey("testBean1");
+		assertThat(bean.getTestBeanMap()).containsKey("testBean2");
+		assertThat(bean.getTestBeanMap()).containsValue(tb1);
+		assertThat(bean.getTestBeanMap()).containsValue(tb2);
+
+		bean = bf.getBean("annotatedBean", MapFieldInjectionBean.class);
+		assertThat(bean.getTestBeanMap()).hasSize(2);
+		assertThat(bean.getTestBeanMap()).containsKey("testBean1");
+		assertThat(bean.getTestBeanMap()).containsKey("testBean2");
+		assertThat(bean.getTestBeanMap()).containsValue(tb1);
+		assertThat(bean.getTestBeanMap()).containsValue(tb2);
+	}
+
+	@Test
+	void methodInjectionWithMap() {
+		RootBeanDefinition bd = new RootBeanDefinition(MapMethodInjectionBean.class);
+		bd.setScope(BeanDefinition.SCOPE_PROTOTYPE);
+		bf.registerBeanDefinition("annotatedBean", bd);
+		TestBean tb = new TestBean();
+		bf.registerSingleton("testBean", tb);
+
+		MapMethodInjectionBean bean = bf.getBean("annotatedBean", MapMethodInjectionBean.class);
+		assertThat(bean.getTestBeanMap()).hasSize(1);
+		assertThat(bean.getTestBeanMap()).containsKey("testBean");
+		assertThat(bean.getTestBeanMap()).containsValue(tb);
+		assertThat(bean.getTestBean()).isSameAs(tb);
+
+		bean = bf.getBean("annotatedBean", MapMethodInjectionBean.class);
+		assertThat(bean.getTestBeanMap()).hasSize(1);
+		assertThat(bean.getTestBeanMap()).containsKey("testBean");
+		assertThat(bean.getTestBeanMap()).containsValue(tb);
+		assertThat(bean.getTestBean()).isSameAs(tb);
+	}
+
+	@Test
+	void methodInjectionWithMapAndMultipleMatches() {
+		bf.registerBeanDefinition("annotatedBean", new RootBeanDefinition(MapMethodInjectionBean.class));
+		bf.registerBeanDefinition("testBean1", new RootBeanDefinition(TestBean.class));
+		bf.registerBeanDefinition("testBean2", new RootBeanDefinition(TestBean.class));
+		assertThatExceptionOfType(UnsatisfiedDependencyException.class).as("should have failed, more than one bean of type")
+				.isThrownBy(() -> bf.getBean("annotatedBean"))
+				.satisfies(methodParameterDeclaredOn(MapMethodInjectionBean.class));
+	}
+
+	@Test
+	void methodInjectionWithMapAndMultipleMatchesButOnlyOneAutowireCandidate() {
+		bf.registerBeanDefinition("annotatedBean", new RootBeanDefinition(MapMethodInjectionBean.class));
+		bf.registerBeanDefinition("testBean1", new RootBeanDefinition(TestBean.class));
+		RootBeanDefinition rbd2 = new RootBeanDefinition(TestBean.class);
+		rbd2.setAutowireCandidate(false);
+		bf.registerBeanDefinition("testBean2", rbd2);
+
+		MapMethodInjectionBean bean = bf.getBean("annotatedBean", MapMethodInjectionBean.class);
+		TestBean tb = bf.getBean("testBean1", TestBean.class);
+		assertThat(bean.getTestBeanMap()).hasSize(1);
+		assertThat(bean.getTestBeanMap()).containsKey("testBean1");
+		assertThat(bean.getTestBeanMap()).containsValue(tb);
+		assertThat(bean.getTestBean()).isSameAs(tb);
+	}
+
+	@Test
+	void methodInjectionWithMapAndNoMatches() {
+		bf.registerBeanDefinition("annotatedBean", new RootBeanDefinition(MapMethodInjectionBean.class));
+
+		MapMethodInjectionBean bean = bf.getBean("annotatedBean", MapMethodInjectionBean.class);
+		assertThat(bean.getTestBeanMap()).isNull();
+		assertThat(bean.getTestBean()).isNull();
+	}
+
+	@Test
+	void methodInjectionWithPlainHashMapAsBean() {
+		RootBeanDefinition bd = new RootBeanDefinition(NamedMapMethodInjectionBean.class);
+		bd.setScope(BeanDefinition.SCOPE_PROTOTYPE);
+		bf.registerBeanDefinition("annotatedBean", bd);
+		bf.registerBeanDefinition("testBeanMap", new RootBeanDefinition(HashMap.class));
+
+		NamedMapMethodInjectionBean bean = bf.getBean("annotatedBean", NamedMapMethodInjectionBean.class);
+		assertThat(bean.getTestBeanMap()).isSameAs(bf.getBean("testBeanMap"));
+		bean = bf.getBean("annotatedBean", NamedMapMethodInjectionBean.class);
+		assertThat(bean.getTestBeanMap()).isSameAs(bf.getBean("testBeanMap"));
+	}
+
+	@Test
+	void methodInjectionWithQualifiedPlainHashMapAsBean() {
+		RootBeanDefinition bd = new RootBeanDefinition(QualifiedMapMethodInjectionBean.class);
+		bd.setScope(BeanDefinition.SCOPE_PROTOTYPE);
+		bf.registerBeanDefinition("annotatedBean", bd);
+		bf.registerBeanDefinition("myTestBeanMap", new RootBeanDefinition(HashMap.class));
+
+		QualifiedMapMethodInjectionBean bean = bf.getBean("annotatedBean", QualifiedMapMethodInjectionBean.class);
+		assertThat(bean.getTestBeanMap()).isSameAs(bf.getBean("myTestBeanMap"));
+		bean = bf.getBean("annotatedBean", QualifiedMapMethodInjectionBean.class);
+		assertThat(bean.getTestBeanMap()).isSameAs(bf.getBean("myTestBeanMap"));
 	}
 
 	@Test
@@ -3262,6 +3301,21 @@ class AutowiredAnnotationBeanPostProcessorTests {
 	}
 
 
+	public static class NamedMapConstructorInjectionBean {
+
+		private Map<String, TestBean> testBeanMap;
+
+		@Autowired
+		public NamedMapConstructorInjectionBean(Map<String, TestBean> testBeanMap) {
+			this.testBeanMap = testBeanMap;
+		}
+
+		public Map<String, TestBean> getTestBeanMap() {
+			return this.testBeanMap;
+		}
+	}
+
+
 	public static class QualifiedMapConstructorInjectionBean {
 
 		private Map<String, TestBean> testBeanMap;
@@ -3353,6 +3407,37 @@ class AutowiredAnnotationBeanPostProcessorTests {
 
 		public TestBean getTestBean() {
 			return this.testBean;
+		}
+
+		public Map<String, TestBean> getTestBeanMap() {
+			return this.testBeanMap;
+		}
+	}
+
+
+	public static class NamedMapMethodInjectionBean {
+
+		private Map<String, TestBean> testBeanMap;
+
+		@Autowired
+		public void setTestBeanMap(Map<String, TestBean> testBeanMap) {
+			this.testBeanMap = testBeanMap;
+		}
+
+		public Map<String, TestBean> getTestBeanMap() {
+			return this.testBeanMap;
+		}
+	}
+
+
+	public static class QualifiedMapMethodInjectionBean {
+
+		private Map<String, TestBean> testBeanMap;
+
+		@Autowired
+		@Qualifier("myTestBeanMap")
+		public void setTestBeanMap(Map<String, TestBean> testBeanMap) {
+			this.testBeanMap = testBeanMap;
 		}
 
 		public Map<String, TestBean> getTestBeanMap() {

@@ -26,7 +26,6 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.expression.Expression;
 import org.springframework.expression.IndexAccessor;
-import org.springframework.expression.spel.CompilableMapAccessor;
 import org.springframework.expression.spel.SpelEvaluationException;
 import org.springframework.expression.spel.SpelMessage;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
@@ -112,13 +111,13 @@ class SimpleEvaluationContextTests {
 	@Test
 	void forPropertyAccessorsInReadWriteMode() {
 		SimpleEvaluationContext context = SimpleEvaluationContext
-				.forPropertyAccessors(new CompilableMapAccessor(), DataBindingPropertyAccessor.forReadWriteAccess())
+				.forPropertyAccessors(new MapAccessor(), DataBindingPropertyAccessor.forReadWriteAccess())
 				.withIndexAccessors(colorsIndexAccessor)
 				.build();
 
 		assertReadWriteMode(context);
 
-		// Map -- with key as property name supported by CompilableMapAccessor
+		// Map -- with key as property name supported by MapAccessor
 
 		Expression expression;
 		expression = parser.parseExpression("map.yellow");
@@ -138,13 +137,13 @@ class SimpleEvaluationContextTests {
 	@Test
 	void forPropertyAccessorsInMixedReadOnlyMode() {
 		SimpleEvaluationContext context = SimpleEvaluationContext
-				.forPropertyAccessors(new CompilableMapAccessor(true), DataBindingPropertyAccessor.forReadOnlyAccess())
+				.forPropertyAccessors(new MapAccessor(true), DataBindingPropertyAccessor.forReadOnlyAccess())
 				.withIndexAccessors(colorsIndexAccessor)
 				.build();
 
 		assertCommonReadOnlyModeBehavior(context);
 
-		// Map -- with key as property name supported by CompilableMapAccessor with allowWrite = true.
+		// Map -- with key as property name supported by MapAccessor with allowWrite = true.
 
 		Expression expression;
 		expression = parser.parseExpression("map.yellow");
@@ -214,7 +213,7 @@ class SimpleEvaluationContextTests {
 	@Test
 	void forPropertyAccessorsWithAssignmentDisabled() {
 		SimpleEvaluationContext context = SimpleEvaluationContext
-				.forPropertyAccessors(new CompilableMapAccessor(false), DataBindingPropertyAccessor.forReadOnlyAccess())
+				.forPropertyAccessors(new MapAccessor(false), DataBindingPropertyAccessor.forReadOnlyAccess())
 				.withIndexAccessors(colorsIndexAccessor)
 				.withAssignmentDisabled()
 				.build();

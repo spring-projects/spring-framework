@@ -63,17 +63,17 @@ public class MockitoResetTestExecutionListener extends AbstractTestExecutionList
 	 * @see #mockitoInitialized
 	 * @see #isEnabled()
 	 */
-	private static final boolean mockitoPresent = ClassUtils.isPresent("org.mockito.Mockito",
+	private static final boolean MOCKITO_PRESENT = ClassUtils.isPresent("org.mockito.Mockito",
 			MockitoResetTestExecutionListener.class.getClassLoader());
 
 	/**
 	 * Boolean flag which tracks whether Mockito has been successfully initialized
 	 * in the current environment.
-	 * <p>Even if {@link #mockitoPresent} evaluates to {@code true}, this flag
+	 * <p>Even if {@link #MOCKITO_PRESENT} evaluates to {@code true}, this flag
 	 * may eventually evaluate to {@code false} &mdash; for example, in a GraalVM
 	 * native image if the necessary reachability metadata has not been registered
 	 * for the {@link org.mockito.plugins.MockMaker} in use.
-	 * @see #mockitoPresent
+	 * @see #MOCKITO_PRESENT
 	 * @see #isEnabled()
 	 */
 	private static volatile @Nullable Boolean mockitoInitialized;
@@ -158,11 +158,11 @@ public class MockitoResetTestExecutionListener extends AbstractTestExecutionList
 
 	/**
 	 * Determine if this listener is enabled in the current environment.
-	 * @see #mockitoPresent
+	 * @see #MOCKITO_PRESENT
 	 * @see #mockitoInitialized
 	 */
 	private static boolean isEnabled() {
-		if (!mockitoPresent) {
+		if (!MOCKITO_PRESENT) {
 			return false;
 		}
 		Boolean enabled = mockitoInitialized;

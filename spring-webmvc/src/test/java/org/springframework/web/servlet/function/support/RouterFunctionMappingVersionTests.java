@@ -74,7 +74,7 @@ public class RouterFunctionMappingVersionTests {
 
 	private void testGetHandler(String version, String expectedBody) throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/");
-		request.addHeader("X-API-Version", version);
+		request.addHeader("API-Version", version);
 		HandlerFunction<?> handler = (HandlerFunction<?>) this.mapping.getHandler(request).getHandler();
 		assertThat(((TestHandler) handler).body()).isEqualTo(expectedBody);
 	}
@@ -82,7 +82,7 @@ public class RouterFunctionMappingVersionTests {
 	@Test
 	void deprecation() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/");
-		request.addHeader("X-API-Version", "1");
+		request.addHeader("API-Version", "1");
 
 		HandlerExecutionChain chain = this.mapping.getHandler(request);
 		assertThat(chain).isNotNull();
@@ -107,7 +107,7 @@ public class RouterFunctionMappingVersionTests {
 			StandardApiVersionDeprecationHandler handler = new StandardApiVersionDeprecationHandler();
 			handler.configureVersion("1").setDeprecationLink(URI.create("https://example.org/deprecation"));
 
-			configurer.useRequestHeader("X-API-Version")
+			configurer.useRequestHeader("API-Version")
 					.addSupportedVersions("1", "1.1", "1.3")
 					.setDeprecationHandler(handler);
 		}

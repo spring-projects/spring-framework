@@ -43,7 +43,6 @@ import org.springframework.core.AliasRegistry;
  * @see DefaultListableBeanFactory
  * @see org.springframework.context.support.GenericApplicationContext
  * @see org.springframework.beans.factory.xml.XmlBeanDefinitionReader
- * @see PropertiesBeanDefinitionReader
  */
 public interface BeanDefinitionRegistry extends AliasRegistry {
 

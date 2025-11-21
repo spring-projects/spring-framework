@@ -95,6 +95,9 @@ import org.jspecify.annotations.Nullable;
  * <li>{@link TestConstructor @TestConstructor}</li>
  * </ul>
  *
+ * <p>Note that {@code @NestedTestConfiguration} does not apply to
+ * {@link org.springframework.test.context.junit.jupiter.SpringExtensionConfig @SpringExtensionConfig}.
+ *
  * @author Sam Brannen
  * @since 5.3
  * @see EnclosingConfiguration#INHERIT

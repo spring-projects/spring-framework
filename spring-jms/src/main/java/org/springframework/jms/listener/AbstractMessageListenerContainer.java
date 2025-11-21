@@ -151,7 +151,7 @@ import org.springframework.util.ErrorHandler;
 public abstract class AbstractMessageListenerContainer extends AbstractJmsListeningContainer
 		implements MessageListenerContainer {
 
-	private static final boolean micrometerJakartaPresent = ClassUtils.isPresent(
+	private static final boolean MICROMETER_JAKARTA_PRESENT = ClassUtils.isPresent(
 			"io.micrometer.jakarta9.instrument.jms.JmsInstrumentation",
 			AbstractMessageListenerContainer.class.getClassLoader());
 
@@ -700,7 +700,7 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 	 * @since 6.1
 	 */
 	protected Observation createObservation(Message message) {
-		if (micrometerJakartaPresent && this.observationRegistry != null) {
+		if (MICROMETER_JAKARTA_PRESENT && this.observationRegistry != null) {
 			return ObservationFactory.create(this.observationRegistry, message);
 		}
 		else {
@@ -785,7 +785,7 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 		Session sessionToClose = null;
 		try {
 			Session sessionToUse = session;
-			if (micrometerJakartaPresent && this.observationRegistry != null) {
+			if (MICROMETER_JAKARTA_PRESENT && this.observationRegistry != null) {
 				sessionToUse = MicrometerInstrumentation.instrumentSession(sessionToUse, this.observationRegistry);
 			}
 			if (!isExposeListenerSession()) {

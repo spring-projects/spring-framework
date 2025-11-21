@@ -88,7 +88,7 @@ import org.springframework.web.server.i18n.LocaleContextResolver;
  */
 public class WebFluxConfigurationSupport implements ApplicationContextAware {
 
-	private static final boolean jakartaValidatorPresent =
+	private static final boolean BEAN_VALIDATION_PRESENT =
 			ClassUtils.isPresent("jakarta.validation.Validator", WebFluxConfigurationSupport.class.getClassLoader());
 
 
@@ -429,7 +429,7 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 	public Validator webFluxValidator() {
 		Validator validator = getValidator();
 		if (validator == null) {
-			if (jakartaValidatorPresent) {
+			if (BEAN_VALIDATION_PRESENT) {
 				try {
 					validator = new OptionalValidatorFactoryBean();
 				}

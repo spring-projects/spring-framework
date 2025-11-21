@@ -43,6 +43,11 @@ class ExceptionTypeFilterTests {
 		assertMatches(new Error());
 		assertMatches(new Exception());
 		assertMatches(new RuntimeException());
+
+		assertMatchesCause(new Throwable());
+		assertMatchesCause(new Error());
+		assertMatchesCause(new Exception());
+		assertMatchesCause(new RuntimeException());
 	}
 
 	@Test
@@ -67,6 +72,20 @@ class ExceptionTypeFilterTests {
 		assertDoesNotMatch(new Exception());
 	}
 
+	@Test  // gh-35583
+	void includesCauseAndSubtypeMatching() {
+		filter = new ExceptionTypeFilter(List.of(IOException.class), null);
+
+		assertMatchesCause(new IOException());
+		assertMatchesCause(new FileNotFoundException());
+		assertMatchesCause(new RuntimeException(new IOException()));
+		assertMatchesCause(new RuntimeException(new FileNotFoundException()));
+		assertMatchesCause(new Exception(new RuntimeException(new IOException())));
+		assertMatchesCause(new Exception(new RuntimeException(new FileNotFoundException())));
+
+		assertDoesNotMatchCause(new Exception());
+	}
+
 	@Test
 	void excludes() {
 		filter = new ExceptionTypeFilter(null, List.of(FileNotFoundException.class, IllegalArgumentException.class));
@@ -89,6 +108,20 @@ class ExceptionTypeFilterTests {
 		assertMatches(new Throwable());
 	}
 
+	@Test  // gh-35583
+	void excludesCauseAndSubtypeMatching() {
+		filter = new ExceptionTypeFilter(null, List.of(IOException.class));
+
+		assertDoesNotMatchCause(new IOException());
+		assertDoesNotMatchCause(new FileNotFoundException());
+		assertDoesNotMatchCause(new RuntimeException(new IOException()));
+		assertDoesNotMatchCause(new RuntimeException(new FileNotFoundException()));
+		assertDoesNotMatchCause(new Exception(new RuntimeException(new IOException())));
+		assertDoesNotMatchCause(new Exception(new RuntimeException(new FileNotFoundException())));
+
+		assertMatchesCause(new Throwable());
+	}
+
 	@Test
 	void includesAndExcludes() {
 		filter = new ExceptionTypeFilter(List.of(IOException.class), List.of(FileNotFoundException.class));
@@ -109,6 +142,18 @@ class ExceptionTypeFilterTests {
 
 	private void assertDoesNotMatch(Throwable candidate) {
 		assertThat(this.filter.match(candidate))
+				.as("filter '" + this.filter + "' should not match " + candidate.getClass().getSimpleName())
+				.isFalse();
+	}
+
+	private void assertMatchesCause(Throwable candidate) {
+		assertThat(this.filter.match(candidate, true))
+				.as("filter '" + this.filter + "' should match " + candidate.getClass().getSimpleName())
+				.isTrue();
+	}
+
+	private void assertDoesNotMatchCause(Throwable candidate) {
+		assertThat(this.filter.match(candidate, true))
 				.as("filter '" + this.filter + "' should not match " + candidate.getClass().getSimpleName())
 				.isFalse();
 	}

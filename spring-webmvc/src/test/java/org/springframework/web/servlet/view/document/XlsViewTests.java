@@ -42,6 +42,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Juergen Hoeller
  * @since 4.2
  */
+@SuppressWarnings("removal")
 class XlsViewTests {
 
 	private final MockHttpServletRequest request = new MockHttpServletRequest();

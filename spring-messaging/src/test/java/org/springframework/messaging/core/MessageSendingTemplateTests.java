@@ -50,6 +50,7 @@ class MessageSendingTemplateTests {
 
 	private final TestMessagePostProcessor postProcessor = new TestMessagePostProcessor();
 
+	@SuppressWarnings("serial")
 	private final Map<String, Object> headers = new HashMap<>() {{
 		put("key", "value");
 	}};

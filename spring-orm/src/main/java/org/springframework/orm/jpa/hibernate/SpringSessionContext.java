@@ -42,6 +42,7 @@ import org.jspecify.annotations.Nullable;
 import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.orm.jpa.EntityManagerHolder;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
+import org.springframework.util.ClassUtils;
 
 /**
  * Implementation of Hibernate's {@link CurrentSessionContext} interface
@@ -56,6 +57,9 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  */
 @SuppressWarnings("serial")
 public class SpringSessionContext implements CurrentSessionContext {
+
+	private static final boolean DERIVE_STATELESS_FROM_SESSION =
+			ClassUtils.hasMethod(Session.class, "statelessWithOptions");  // Hibernate 7.2+
 
 	private final SessionFactoryImplementor sessionFactory;
 
@@ -89,13 +93,14 @@ public class SpringSessionContext implements CurrentSessionContext {
 	 */
 	@Override
 	public Session currentSession() throws HibernateException {
+		// Determine pre-bound Session
 		Object value = TransactionSynchronizationManager.getResource(this.sessionFactory);
 		SessionHolder holder = null;
 		if (value instanceof Session session) {
 			return session;
 		}
 		else if (value instanceof SessionHolder sessionHolder) {
-			// HibernateTransactionManager
+			// from HibernateTransactionManager
 			if (sessionHolder.hasSession()) {
 				Session session = sessionHolder.getSession();
 				if (!sessionHolder.isSynchronizedWithTransaction() &&
@@ -117,11 +122,12 @@ public class SpringSessionContext implements CurrentSessionContext {
 			holder = sessionHolder;
 		}
 		else if (value instanceof EntityManagerHolder entityManagerHolder) {
-			// JpaTransactionManager
+			// from JpaTransactionManager
 			return entityManagerHolder.getEntityManager().unwrap(Session.class);
 		}
 
 		if (this.transactionManager != null && this.jtaSessionContext != null) {
+			// Full JTA setup -> delegate to SpringJtaSessionContext
 			try {
 				if (this.transactionManager.getStatus() == Status.STATUS_ACTIVE) {
 					Session session = this.jtaSessionContext.currentSession();
@@ -138,6 +144,7 @@ public class SpringSessionContext implements CurrentSessionContext {
 		}
 
 		if (TransactionSynchronizationManager.isSynchronizationActive()) {
+			// Lazily create Session
 			Session session;
 			DataSource dataSource = determineDataSource(this.sessionFactory);
 			if (dataSource != null) {
@@ -148,9 +155,13 @@ public class SpringSessionContext implements CurrentSessionContext {
 			else {
 				session = this.sessionFactory.openSession();
 			}
+
+			// Apply read-only semantics
 			if (TransactionSynchronizationManager.isCurrentTransactionReadOnly()) {
 				session.setHibernateFlushMode(FlushMode.MANUAL);
 			}
+
+			// Bind transactional Session
 			if (holder != null) {
 				holder.setSession(session);
 			}
@@ -159,9 +170,8 @@ public class SpringSessionContext implements CurrentSessionContext {
 			}
 			return session;
 		}
-		else {
-			throw new HibernateException("Could not obtain transaction-synchronized Session for current thread");
-		}
+
+		throw new HibernateException("Could not obtain transaction-synchronized Session for current thread");
 	}
 
 
@@ -171,28 +181,42 @@ public class SpringSessionContext implements CurrentSessionContext {
 	 * @return the current StatelessSession
 	 */
 	public static StatelessSession currentStatelessSession(SessionFactory sessionFactory) {
-		if (!TransactionSynchronizationManager.isSynchronizationActive()) {
-			throw new HibernateException("Could not obtain transaction-synchronized Session for current thread");
-		}
+		// Determine pre-bound StatelessSession
 		Object value = TransactionSynchronizationManager.getResource(sessionFactory);
+		SessionHolder holder = null;
 		if (value instanceof StatelessSession statelessSession) {
 			return statelessSession;
 		}
-		SessionHolder holder = null;
 		if (value instanceof SessionHolder sessionHolder) {
 			if (sessionHolder.hasStatelessSession()) {
 				return sessionHolder.getStatelessSession();
 			}
 			holder = sessionHolder;
 		}
-		StatelessSession session = sessionFactory.openStatelessSession(determineConnection(sessionFactory, holder));
-		if (holder != null) {
-			holder.setStatelessSession(session);
+
+		if (TransactionSynchronizationManager.isSynchronizationActive()) {
+			// Lazily create StatelessSession
+			StatelessSession session;
+			if (holder != null && DERIVE_STATELESS_FROM_SESSION) {
+				// from HibernateTransactionManager on Hibernate 7.2+
+				session = holder.getSession().statelessWithOptions().connection().open();
+			}
+			else {
+				// from JdbcTransactionManager (or HibernateTransactionManager against Hibernate 7.0/7.1)
+				session = sessionFactory.openStatelessSession(determineConnection(sessionFactory, holder));
+			}
+
+			// Bind transactional StatelessSession
+			if (holder != null) {
+				holder.setStatelessSession(session);
+			}
+			else {
+				bindSessionHolder(sessionFactory, new SessionHolder(session));
+			}
+			return session;
 		}
-		else {
-			bindSessionHolder(sessionFactory, new SessionHolder(session));
-		}
-		return session;
+
+		throw new HibernateException("Could not obtain transaction-synchronized Session for current thread");
 	}
 
 	private static void bindSessionHolder(SessionFactory sessionFactory, SessionHolder holder) {

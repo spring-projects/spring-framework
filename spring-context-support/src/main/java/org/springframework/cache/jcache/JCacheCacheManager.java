@@ -32,8 +32,6 @@ import org.springframework.util.Assert;
  * {@link org.springframework.cache.CacheManager} implementation
  * backed by a JCache {@link CacheManager javax.cache.CacheManager}.
  *
- * <p>Note: This class has been updated for JCache 1.0, as of Spring 4.0.
- *
  * @author Juergen Hoeller
  * @author Stephane Nicoll
  * @since 3.2

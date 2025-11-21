@@ -18,30 +18,17 @@ package org.springframework.test.context.orm.jpa;
 
 import java.util.List;
 
-import javax.sql.DataSource;
-
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.EntityManagerFactory;
-import jakarta.persistence.PersistenceContext;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
-import org.springframework.orm.jpa.JpaTransactionManager;
-import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
-import org.springframework.orm.jpa.vendor.Database;
-import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
-import org.springframework.test.context.orm.jpa.domain.JpaPersonRepository;
 import org.springframework.test.context.orm.jpa.domain.Person;
 import org.springframework.test.context.orm.jpa.domain.PersonListener;
 import org.springframework.test.context.orm.jpa.domain.PersonRepository;
-import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.transaction.annotation.Transactional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -55,12 +42,12 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @see <a href="https://github.com/spring-projects/spring-framework/issues/28228">issue gh-28228</a>
  * @see org.springframework.test.context.orm.hibernate.HibernateSessionFlushingTests
  */
-@SpringJUnitConfig
+@SpringJUnitConfig(JpaConfig.class)
 @Transactional
 @Sql(statements = "insert into person(id, name) values(0, 'Jane')")
 class JpaEntityListenerTests {
 
-	@PersistenceContext
+	@Autowired
 	EntityManager entityManager;
 
 	@Autowired
@@ -154,45 +141,6 @@ class JpaEntityListenerTests {
 		else {
 			assertThat(names).containsExactlyInAnyOrder(expectedNames);
 		}
-	}
-
-
-	@Configuration(proxyBeanMethods = false)
-	@EnableTransactionManagement
-	static class Config {
-
-		@Bean
-		PersonRepository personRepository() {
-			return new JpaPersonRepository();
-		}
-
-		@Bean
-		DataSource dataSource() {
-			return new EmbeddedDatabaseBuilder().generateUniqueName(true).build();
-		}
-
-		@Bean
-		JdbcTemplate jdbcTemplate(DataSource dataSource) {
-			return new JdbcTemplate(dataSource);
-		}
-
-		@Bean
-		LocalContainerEntityManagerFactoryBean entityManagerFactory(DataSource dataSource) {
-			LocalContainerEntityManagerFactoryBean emfb = new LocalContainerEntityManagerFactoryBean();
-			emfb.setDataSource(dataSource);
-			emfb.setPackagesToScan(Person.class.getPackage().getName());
-			HibernateJpaVendorAdapter hibernateJpaVendorAdapter = new HibernateJpaVendorAdapter();
-			hibernateJpaVendorAdapter.setGenerateDdl(true);
-			hibernateJpaVendorAdapter.setDatabase(Database.HSQL);
-			emfb.setJpaVendorAdapter(hibernateJpaVendorAdapter);
-			return emfb;
-		}
-
-		@Bean
-		JpaTransactionManager transactionManager(EntityManagerFactory emf) {
-			return new JpaTransactionManager(emf);
-		}
-
 	}
 
 }

@@ -71,11 +71,23 @@ public class JacksonXmlView extends AbstractJacksonView {
 	}
 
 	/**
+	 * Construct a new instance using the provided {@link XmlMapper.Builder}
+	 * customized with the {@link tools.jackson.databind.JacksonModule}s
+	 * found by {@link MapperBuilder#findModules(ClassLoader)} and setting
+	 * the content type to {@code application/xml}.
+	 * @see XmlMapper#builder()
+	 */
+	public JacksonXmlView(XmlMapper.Builder builder) {
+		super(builder, DEFAULT_CONTENT_TYPE);
+	}
+
+	/**
 	 * Construct a new instance using the provided {@link XmlMapper}
 	 * and setting the content type to {@code application/xml}.
+	 * @see XmlMapper#builder()
 	 */
-	public JacksonXmlView(XmlMapper xmlMapper) {
-		super(xmlMapper, DEFAULT_CONTENT_TYPE);
+	public JacksonXmlView(XmlMapper mapper) {
+		super(mapper, DEFAULT_CONTENT_TYPE);
 	}
 
 

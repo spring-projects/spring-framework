@@ -33,6 +33,7 @@ import org.jspecify.annotations.Nullable;
 import org.springframework.aot.AotDetector;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.beans.factory.config.EmbeddedValueResolver;
 import org.springframework.cglib.core.SpringNamingPolicy;
 import org.springframework.cglib.proxy.Callback;
 import org.springframework.cglib.proxy.Enhancer;
@@ -54,7 +55,6 @@ import org.springframework.util.PathMatcher;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.ReflectionUtils.MethodFilter;
 import org.springframework.util.StringUtils;
-import org.springframework.util.SystemPropertyUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.request.RequestAttributes;
@@ -629,17 +629,29 @@ public class MvcUriComponentsBuilder {
 	}
 
 	private static String resolveEmbeddedValue(String value) {
-		if (value.contains(SystemPropertyUtils.PLACEHOLDER_PREFIX)) {
-			WebApplicationContext webApplicationContext = getWebApplicationContext();
-			if (webApplicationContext != null &&
-					webApplicationContext.getAutowireCapableBeanFactory() instanceof ConfigurableBeanFactory cbf) {
-				String resolvedEmbeddedValue = cbf.resolveEmbeddedValue(value);
-				if (resolvedEmbeddedValue != null) {
-					return resolvedEmbeddedValue;
+		if (hasPlaceholderOrExpression(value)) {
+			WebApplicationContext wac = getWebApplicationContext();
+			if (wac != null && wac.getAutowireCapableBeanFactory() instanceof ConfigurableBeanFactory cbf) {
+				EmbeddedValueResolver valueResolver = new EmbeddedValueResolver(cbf);
+				String resolvedValue = valueResolver.resolveStringValue(value);
+				if (resolvedValue != null) {
+					return resolvedValue;
 				}
 			}
 		}
 		return value;
+	}
+
+	private static boolean hasPlaceholderOrExpression(String value) {
+		char prev = 0;
+		for (int i = 0; i < value.length(); i++) {
+			char c = value.charAt(i);
+			if (c == '{' && (prev == '$' || prev == '#')) {
+				return true;
+			}
+			prev = c;
+		}
+		return false;
 	}
 
 	private static @Nullable WebApplicationContext getWebApplicationContext() {

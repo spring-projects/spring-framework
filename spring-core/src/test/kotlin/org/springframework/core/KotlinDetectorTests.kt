@@ -15,6 +15,7 @@
  */
 package org.springframework.core
 
+import kotlinx.serialization.Serializable
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
 
@@ -46,7 +47,26 @@ class KotlinDetectorTests {
 		Assertions.assertThat(KotlinDetector.isInlineClass(KotlinDetectorTests::class.java)).isFalse()
 	}
 
+	@Test
+	fun hasSerializableAnnotation() {
+		Assertions.assertThat(KotlinDetector.hasSerializableAnnotation(ResolvableType.forClass(WithoutSerializable::class.java))).isFalse()
+		Assertions.assertThat(KotlinDetector.hasSerializableAnnotation(ResolvableType.forClass(WithSerializable::class.java))).isTrue()
+
+		Assertions.assertThat(KotlinDetector.hasSerializableAnnotation(ResolvableType.forClassWithGenerics(List::class.java, WithoutSerializable::class.java))).isFalse()
+		Assertions.assertThat(KotlinDetector.hasSerializableAnnotation(ResolvableType.forClassWithGenerics(List::class.java, WithSerializable::class.java))).isTrue()
+
+		Assertions.assertThat(KotlinDetector.hasSerializableAnnotation(ResolvableType.forClassWithGenerics(Map::class.java, String::class.java, WithoutSerializable::class.java))).isFalse()
+		Assertions.assertThat(KotlinDetector.hasSerializableAnnotation(ResolvableType.forClassWithGenerics(Map::class.java, String::class.java, WithSerializable::class.java))).isTrue()
+
+		Assertions.assertThat(KotlinDetector.hasSerializableAnnotation(ResolvableType.NONE)).isFalse()
+	}
+
 	@JvmInline
 	value class ValueClass(val value: String)
+
+	data class WithoutSerializable(val value: String)
+
+	@Serializable
+	data class WithSerializable(val value: String)
 
 }

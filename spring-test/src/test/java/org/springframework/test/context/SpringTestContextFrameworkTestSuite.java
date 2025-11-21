@@ -47,8 +47,13 @@ import org.junit.platform.suite.api.Suite;
 @IncludeClassNamePatterns(".*Tests?$")
 @ExcludeTags("failing-test-case")
 @ConfigurationParameter(
+		key = "junit.platform.discovery.issue.severity.critical",
+		value = "INFO")
+@ConfigurationParameter(
+		key = "junit.vintage.discovery.issue.reporting.enabled",
+		value = "false")
+@ConfigurationParameter(
 		key = ClassOrderer.DEFAULT_ORDER_PROPERTY_NAME,
-		value = "org.junit.jupiter.api.ClassOrderer$ClassName"
-	)
+		value = "org.junit.jupiter.api.ClassOrderer$ClassName")
 class SpringTestContextFrameworkTestSuite {
 }

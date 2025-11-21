@@ -26,10 +26,10 @@ import org.assertj.core.api.StringAssert;
 import org.jspecify.annotations.Nullable;
 
 import org.springframework.mock.web.MockHttpServletResponse;
-import org.springframework.test.http.HttpMessageContentConverter;
 import org.springframework.test.json.AbstractJsonContentAssert;
 import org.springframework.test.json.JsonContent;
 import org.springframework.test.json.JsonContentAssert;
+import org.springframework.test.json.JsonConverterDelegate;
 import org.springframework.test.web.UriAssert;
 
 /**
@@ -44,13 +44,23 @@ import org.springframework.test.web.UriAssert;
 public abstract class AbstractMockHttpServletResponseAssert<SELF extends AbstractMockHttpServletResponseAssert<SELF, ACTUAL>, ACTUAL>
 		extends AbstractHttpServletResponseAssert<MockHttpServletResponse, SELF, ACTUAL> {
 
-	private final @Nullable HttpMessageContentConverter contentConverter;
+	private final @Nullable JsonConverterDelegate converterDelegate;
+
 
 	protected AbstractMockHttpServletResponseAssert(
-			@Nullable HttpMessageContentConverter contentConverter, ACTUAL actual, Class<?> selfType) {
+			@Nullable JsonConverterDelegate converterDelegate, ACTUAL actual, Class<?> selfType) {
 
 		super(actual, selfType);
-		this.contentConverter = contentConverter;
+		this.converterDelegate = converterDelegate;
+	}
+
+	@SuppressWarnings("removal")
+	@Deprecated(since = "7.0", forRemoval = true)
+	protected AbstractMockHttpServletResponseAssert(
+			org.springframework.test.http.@Nullable HttpMessageContentConverter converter,
+			ACTUAL actual, Class<?> selfType) {
+
+		this((JsonConverterDelegate) converter, actual, selfType);
 	}
 
 
@@ -93,7 +103,7 @@ public abstract class AbstractMockHttpServletResponseAssert<SELF extends Abstrac
 	 * </code></pre>
 	 */
 	public AbstractJsonContentAssert<?> bodyJson() {
-		return new JsonContentAssert(new JsonContent(readBody(), this.contentConverter));
+		return new JsonContentAssert(new JsonContent(readBody(), this.converterDelegate));
 	}
 
 	private String readBody() {

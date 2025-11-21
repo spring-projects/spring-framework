@@ -62,8 +62,11 @@ defined by the corresponding `BeanOverrideStrategy`:
 
 [TIP]
 ====
-Only _singleton_ beans can be overridden. Any attempt to override a non-singleton bean
-will result in an exception.
+When replacing a non-singleton bean, the non-singleton bean will be replaced with a
+singleton bean corresponding to bean override instance created by the applicable
+`BeanOverrideHandler`, and the corresponding bean definition will be converted to a
+`singleton`. Consequently, if a handler overrides a `prototype` or scoped bean, the
+overridden bean will be treated as a `singleton`.
 
 When replacing a bean created by a `FactoryBean`, the `FactoryBean` itself will be
 replaced with a singleton bean corresponding to bean override instance created by the

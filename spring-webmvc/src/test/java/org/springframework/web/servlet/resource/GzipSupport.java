@@ -55,7 +55,7 @@ class GzipSupport implements ParameterResolver {
 
 	@Override
 	public Object resolveParameter(ParameterContext parameterContext, ExtensionContext extensionContext) {
-		return getStore(extensionContext).getOrComputeIfAbsent(GzippedFiles.class);
+		return getStore(extensionContext).computeIfAbsent(GzippedFiles.class);
 	}
 
 	private Store getStore(ExtensionContext extensionContext) {

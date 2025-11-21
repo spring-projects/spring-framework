@@ -21,6 +21,7 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.concurrent.TimeUnit;
 
+import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.http.CacheControl;
@@ -142,7 +143,7 @@ class HeaderAssertionTests {
 		headers.add("foo", "bar");
 		TestHeaderAssertions assertions = new TestHeaderAssertions(headers);
 
-		assertions.value("foo", containsString("a"));
+		assertions.value("foo", v -> MatcherAssert.assertThat(v, containsString("a")));
 	}
 
 	@Test
@@ -152,7 +153,7 @@ class HeaderAssertionTests {
 		headers.add("foo", "baz");
 		TestHeaderAssertions assertions = new TestHeaderAssertions(headers);
 
-		assertions.values("foo", hasItems("bar", "baz"));
+		assertions.values("foo", v -> MatcherAssert.assertThat(v, hasItems("bar", "baz")));
 	}
 
 	@Test

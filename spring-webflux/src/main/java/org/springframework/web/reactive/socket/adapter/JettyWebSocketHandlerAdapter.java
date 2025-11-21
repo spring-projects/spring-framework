@@ -98,9 +98,10 @@ public class JettyWebSocketHandlerAdapter implements Session.Listener {
 	}
 
 	@Override
-	public void onWebSocketClose(int statusCode, String reason) {
+	public void onWebSocketClose(int statusCode, String reason, Callback callback) {
 		Assert.state(this.delegateSession != null, "No delegate session available");
 		this.delegateSession.handleClose(CloseStatus.create(statusCode, reason));
+		callback.succeed();
 	}
 
 	@Override
@@ -115,7 +116,6 @@ public class JettyWebSocketHandlerAdapter implements Session.Listener {
 		private final DataBuffer delegate;
 
 		private final Callback callback;
-
 
 		public JettyCallbackDataBuffer(DataBuffer delegate, Callback callback) {
 			Assert.notNull(delegate, "'delegate` must not be null");

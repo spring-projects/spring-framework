@@ -23,6 +23,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
@@ -114,10 +115,10 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 	 */
 	public static final String IGNORE_REACTIVESTREAMS_PROPERTY_NAME = "spring.cache.reactivestreams.ignore";
 
-	private static final boolean shouldIgnoreReactiveStreams =
+	private static final boolean SHOULD_IGNORE_REACTIVE_STREAMS =
 			SpringProperties.getFlag(IGNORE_REACTIVESTREAMS_PROPERTY_NAME);
 
-	private static final boolean reactiveStreamsPresent = ClassUtils.isPresent(
+	private static final boolean REACTIVE_STREAMS_PRESENT = ClassUtils.isPresent(
 			"org.reactivestreams.Publisher", CacheAspectSupport.class.getClassLoader());
 
 
@@ -145,7 +146,7 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 
 	protected CacheAspectSupport() {
 		this.reactiveCachingHandler =
-				(reactiveStreamsPresent && !shouldIgnoreReactiveStreams ? new ReactiveCachingHandler() : null);
+				(REACTIVE_STREAMS_PRESENT && !SHOULD_IGNORE_REACTIVE_STREAMS ? new ReactiveCachingHandler() : null);
 	}
 
 
@@ -1170,7 +1171,7 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 						if (invokeFailure.get()) {
 							return Mono.error(ex);
 						}
-						return (Mono) invokeOperation(invoker);
+						return (Mono) Objects.requireNonNull(invokeOperation(invoker));
 					}
 					catch (RuntimeException exception) {
 						return Mono.error(exception);
@@ -1201,8 +1202,8 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 				}
 				if (adapter.isMultiValue()) {
 					return adapter.fromPublisher(Flux.from(Mono.fromFuture(cachedFuture))
-							.switchIfEmpty(Flux.defer(() -> (Flux) evaluate(null, invoker, method, contexts)))
-							.flatMap(v -> evaluate(valueToFlux(v, contexts), invoker, method, contexts))
+							.switchIfEmpty(Flux.defer(() -> (Flux) Objects.requireNonNull(evaluate(null, invoker, method, contexts))))
+							.flatMap(v -> Objects.requireNonNull(evaluate(valueToFlux(v, contexts), invoker, method, contexts)))
 							.onErrorResume(RuntimeException.class, ex -> {
 								try {
 									getErrorHandler().handleCacheGetError((RuntimeException) ex, cache, key);
@@ -1216,8 +1217,8 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 				}
 				else {
 					return adapter.fromPublisher(Mono.fromFuture(cachedFuture)
-							.switchIfEmpty(Mono.defer(() -> (Mono) evaluate(null, invoker, method, contexts)))
-							.flatMap(v -> evaluate(Mono.justOrEmpty(unwrapCacheValue(v)), invoker, method, contexts))
+							.switchIfEmpty(Mono.defer(() -> (Mono) Objects.requireNonNull(evaluate(null, invoker, method, contexts))))
+							.flatMap(v -> Objects.requireNonNull(evaluate(Mono.justOrEmpty(unwrapCacheValue(v)), invoker, method, contexts)))
 							.onErrorResume(RuntimeException.class, ex -> {
 								try {
 									getErrorHandler().handleCacheGetError((RuntimeException) ex, cache, key);

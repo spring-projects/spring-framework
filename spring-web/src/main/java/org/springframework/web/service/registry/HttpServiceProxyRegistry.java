@@ -33,7 +33,7 @@ public interface HttpServiceProxyRegistry {
 	 * Return an HTTP service client from any group as long as there is only one
 	 * client of this type across all groups.
 	 * @param httpServiceType the type of client
-	 * @param <P> the type of HTTP interface client
+	 * @param <P> the type of HTTP service client
 	 * @return the matched client
 	 * @throws IllegalArgumentException if there is no client of the given type,
 	 * or there is more than one client of the given type.
@@ -44,7 +44,7 @@ public interface HttpServiceProxyRegistry {
 	 * Return an HTTP service client from the named group.
 	 * @param groupName the name of the group
 	 * @param httpServiceType the type of client
-	 * @param <P> the type of HTTP interface client
+	 * @param <P> the type of HTTP service client
 	 * @return the matched client
 	 * @throws IllegalArgumentException if there is no matching client.
 	 */

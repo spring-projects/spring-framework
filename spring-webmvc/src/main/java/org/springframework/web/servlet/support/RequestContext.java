@@ -82,7 +82,7 @@ public class RequestContext {
 	public static final String WEB_APPLICATION_CONTEXT_ATTRIBUTE = RequestContext.class.getName() + ".CONTEXT";
 
 
-	protected static final boolean jstlPresent = ClassUtils.isPresent(
+	protected static final boolean JSTL_PRESENT = ClassUtils.isPresent(
 			"jakarta.servlet.jsp.jstl.core.Config", RequestContext.class.getClassLoader());
 
 	private final HttpServletRequest request;
@@ -305,7 +305,7 @@ public class RequestContext {
 	 * @see jakarta.servlet.http.HttpServletRequest#getLocale()
 	 */
 	protected Locale getFallbackLocale() {
-		if (jstlPresent) {
+		if (JSTL_PRESENT) {
 			Locale locale = JstlLocaleResolver.getJstlLocale(getRequest(), getServletContext());
 			if (locale != null) {
 				return locale;
@@ -321,7 +321,7 @@ public class RequestContext {
 	 * @return the fallback time zone (or {@code null} if none derivable from the request)
 	 */
 	protected @Nullable TimeZone getFallbackTimeZone() {
-		if (jstlPresent) {
+		if (JSTL_PRESENT) {
 			TimeZone timeZone = JstlLocaleResolver.getJstlTimeZone(getRequest(), getServletContext());
 			if (timeZone != null) {
 				return timeZone;
@@ -392,7 +392,7 @@ public class RequestContext {
 	/**
 	 * Is HTML escaping using the response encoding by default?
 	 * If enabled, only XML markup significant characters will be escaped with UTF-* encodings.
-	 * <p>Falls back to {@code true} in case of no explicit default given, as of Spring 4.2.
+	 * <p>Falls back to {@code true} in case of no explicit default given.
 	 * @since 4.1.2
 	 */
 	public boolean isResponseEncodedHtmlEscape() {

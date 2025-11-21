@@ -44,6 +44,9 @@ import org.springframework.util.Assert;
  */
 public abstract class TemplateAwareExpressionParser implements ExpressionParser {
 
+	private static final Expression[] EMPTY_EXPRESSION_ARRAY = new Expression[0];
+
+
 	@Override
 	public Expression parseExpression(String expressionString) throws ParseException {
 		return parseExpression(expressionString, null);
@@ -136,7 +139,7 @@ public abstract class TemplateAwareExpressionParser implements ExpressionParser 
 			}
 		}
 
-		return expressions.toArray(new Expression[0]);
+		return expressions.toArray(EMPTY_EXPRESSION_ARRAY);
 	}
 
 	/**

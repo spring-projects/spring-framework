@@ -347,10 +347,13 @@ public interface RestClient {
 		 * Configure an {@link ApiVersionInserter} to abstract how an API version
 		 * specified via {@link RequestHeadersSpec#apiVersion(Object)}
 		 * is inserted into the request.
+		 * <p>{@code ApiVersionInserter} exposes shortcut methods for several
+		 * built-in inserter implementation types. See the class-level Javadoc
+		 * of {@link ApiVersionInserter} for a list of choices.
 		 * @param apiVersionInserter the inserter to use
 		 * @since 7.0
 		 */
-		Builder apiVersionInserter(ApiVersionInserter apiVersionInserter);
+		Builder apiVersionInserter(@Nullable ApiVersionInserter apiVersionInserter);
 
 		/**
 		 * Provide a consumer to customize every request being built.
@@ -449,31 +452,43 @@ public interface RestClient {
 
 		/**
 		 * Configure the message converters for the {@code RestClient} to use.
-		 * @param configurer the configurer to apply on the list of default
-		 * {@link HttpMessageConverter} pre-initialized
-		 * @return this builder
-		 * @see #messageConverters(Iterable)
-		 * @deprecated since 7.0 in favor of {@link #configureMessageConverters(Consumer)}
-		 */
-		@Deprecated(since = "7.0", forRemoval = true)
-		Builder messageConverters(Consumer<List<HttpMessageConverter<?>>> configurer);
-
-		/**
-		 * Set the message converters for the {@code RestClient} to use.
-		 * @param messageConverters the list of {@link HttpMessageConverter} to use
-		 * @return this builder
-		 * @since 6.2
-		 * @see #configureMessageConverters(Consumer)
-		 */
-		Builder messageConverters(Iterable<HttpMessageConverter<?>> messageConverters);
-
-		/**
-		 * Configure the message converters for the {@code RestClient} to use.
+		 * Multiple consumers are composed together and applied to a single
+		 * {@link HttpMessageConverters.ClientBuilder} instance.
 		 * @param configurer the configurer to apply on an empty {@link HttpMessageConverters.ClientBuilder}.
 		 * @return this builder
 		 * @since 7.0
 		 */
 		Builder configureMessageConverters(Consumer<HttpMessageConverters.ClientBuilder> configurer);
+
+		/**
+		 * Set the message converters to use.
+		 * <p><strong>Note:</strong> As of 7.0, the converters provided here
+		 * populate a {@link HttpMessageConverters.ClientBuilder} initially, and
+		 * after that the same builder is initialized further through the
+		 * configurers provided via {@link #configureMessageConverters(Consumer)}.
+		 * @param messageConverters the converters to use
+		 * @return this builder
+		 * @since 6.2
+		 * @deprecated since 7.0 in favor of {@link #configureMessageConverters(Consumer)}
+		 */
+		@Deprecated(since = "7.0", forRemoval = true)
+		Builder messageConverters(Iterable<HttpMessageConverter<?>> messageConverters);
+
+		/**
+		 * Customize the message converters to use, which is either the default
+		 * converters, or those provided via {@link #messageConverters(Iterable)}.
+		 * The consumer is applied immediately to the internal list
+		 * <p><strong>Note:</strong> As of 7.0, the list of converters customized
+		 * here is used to populate a {@link HttpMessageConverters.ClientBuilder}
+		 * initially, and after that the same builder is initialized further
+		 * through the configurers provided via {@link #configureMessageConverters(Consumer)}.
+		 * @param configurer the configurer to apply on the list of default
+		 * {@link HttpMessageConverter} pre-initialized
+		 * @return this builder
+		 * @deprecated since 7.0 in favor of {@link #configureMessageConverters(Consumer)}
+		 */
+		@Deprecated(since = "7.0", forRemoval = true)
+		Builder messageConverters(Consumer<List<HttpMessageConverter<?>>> configurer);
 
 		/**
 		 * Configure the {@link io.micrometer.observation.ObservationRegistry} to use
@@ -630,14 +645,19 @@ public interface RestClient {
 
 		/**
 		 * Set an API version for the request. The version is inserted into the
-		 * request by the {@link Builder#apiVersionInserter(ApiVersionInserter)
+		 * request through the {@link Builder#apiVersionInserter(ApiVersionInserter)
 		 * configured} {@code ApiVersionInserter}.
-		 * @param version the API version of the request; this can be a String or
-		 * some Object that can be formatted the inserter, e.g. through an
+		 * <p>If no version is set, the
+		 * {@link Builder#defaultApiVersion(Object) defaultApiVersion} is used,
+		 * if configured.
+		 * <p>If {@code null} is passed, then an API version is not inserted
+		 * irrespective of default version settings.
+		 * @param version the API version for the request; this can be a String
+		 * or some Object that can be formatted the inserter, e.g. through an
 		 * {@link ApiVersionFormatter}.
 		 * @since 7.0
 		 */
-		S apiVersion(Object version);
+		S apiVersion(@Nullable Object version);
 
 		/**
 		 * Set the attribute with the given name to the given value.
@@ -970,7 +990,7 @@ public interface RestClient {
 		/**
 		 * Provide a function to map specific error status codes to an error handler.
 		 * <p>By default, if there are no matching status handlers, responses with
-		 * status codes &gt;= 400 wil throw a {@link RestClientResponseException}.
+		 * status codes &gt;= 400 will throw a {@link RestClientResponseException}.
 		 * <p>Note that {@link IOException IOExceptions},
 		 * {@link java.io.UncheckedIOException UncheckedIOExceptions}, and
 		 * {@link org.springframework.http.converter.HttpMessageNotReadableException HttpMessageNotReadableExceptions}
@@ -987,7 +1007,7 @@ public interface RestClient {
 		/**
 		 * Provide a function to map specific error status codes to an error handler.
 		 * <p>By default, if there are no matching status handlers, responses with
-		 * status codes &gt;= 400 wil throw a {@link RestClientResponseException}.
+		 * status codes &gt;= 400 will throw a {@link RestClientResponseException}.
 		 * <p>Note that {@link IOException IOExceptions},
 		 * {@link java.io.UncheckedIOException UncheckedIOExceptions}, and
 		 * {@link org.springframework.http.converter.HttpMessageNotReadableException HttpMessageNotReadableExceptions}

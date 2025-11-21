@@ -16,30 +16,41 @@
 
 package org.springframework.test.web.servlet.client;
 
+import java.io.IOException;
 import java.net.URI;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.time.ZonedDateTime;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-import org.hamcrest.Matcher;
-import org.hamcrest.MatcherAssert;
+import com.jayway.jsonpath.Configuration;
+import com.jayway.jsonpath.TypeRef;
+import com.jayway.jsonpath.spi.mapper.MappingProvider;
 import org.jspecify.annotations.Nullable;
 
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.core.ResolvableType;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpRequest;
 import org.springframework.http.MediaType;
+import org.springframework.http.client.ClientHttpRequestExecution;
+import org.springframework.http.client.ClientHttpRequestInterceptor;
+import org.springframework.http.client.ClientHttpResponse;
+import org.springframework.http.converter.HttpMessageConverters;
 import org.springframework.test.json.JsonAssert;
 import org.springframework.test.json.JsonComparator;
 import org.springframework.test.json.JsonCompareMode;
+import org.springframework.test.json.JsonConverterDelegate;
 import org.springframework.test.util.AssertionErrors;
 import org.springframework.test.util.ExceptionCollector;
 import org.springframework.test.util.XmlExpectationsHelper;
+import org.springframework.util.Assert;
 import org.springframework.util.MimeType;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestClient;
@@ -56,9 +67,13 @@ class DefaultRestTestClient implements RestTestClient {
 
 	private final RestClient restClient;
 
+	private final WiretapInterceptor wiretapInterceptor = new WiretapInterceptor();
+
 	private final Consumer<EntityExchangeResult<?>> entityResultConsumer;
 
 	private final DefaultRestTestClientBuilder<?> restTestClientBuilder;
+
+	private final @Nullable JsonConverterDelegate converterDelegate;
 
 	private final AtomicLong requestIndex = new AtomicLong();
 
@@ -67,9 +82,10 @@ class DefaultRestTestClient implements RestTestClient {
 			RestClient.Builder builder, Consumer<EntityExchangeResult<?>> entityResultConsumer,
 			DefaultRestTestClientBuilder<?> restTestClientBuilder) {
 
-		this.restClient = builder.build();
+		this.restClient = builder.requestInterceptor(this.wiretapInterceptor).build();
 		this.entityResultConsumer = entityResultConsumer;
 		this.restTestClientBuilder = restTestClientBuilder;
+		this.converterDelegate = new ConverterCallback(this.restClient).getConverter();
 	}
 
 
@@ -120,7 +136,29 @@ class DefaultRestTestClient implements RestTestClient {
 	@SuppressWarnings("unchecked")
 	@Override
 	public <B extends Builder<B>> Builder<B> mutate() {
-		return (Builder<B>) this.restTestClientBuilder;
+		return new DefaultRestTestClientBuilder<>((DefaultRestTestClientBuilder<B>) this.restTestClientBuilder);
+	}
+
+
+	private static class ConverterCallback {
+
+		private @Nullable JsonConverterDelegate converter;
+
+		ConverterCallback(RestClient client) {
+			client.mutate()
+					.configureMessageConverters(convertersBuilder -> {
+						HttpMessageConverters converters = convertersBuilder.build();
+						if (converters.isEmpty()) {
+							converters = HttpMessageConverters.forClient().registerDefaults().build();
+						}
+						this.converter = JsonConverterDelegate.of(converters);
+					})
+					.build();
+		}
+
+		public @Nullable JsonConverterDelegate getConverter() {
+			return this.converter;
+		}
 	}
 
 
@@ -128,12 +166,14 @@ class DefaultRestTestClient implements RestTestClient {
 
 		private final RestClient.RequestBodyUriSpec requestHeadersUriSpec;
 
+		private final String requestId;
+
 		private @Nullable String uriTemplate;
 
 		DefaultRequestBodyUriSpec(RestClient.RequestBodyUriSpec spec) {
 			this.requestHeadersUriSpec = spec;
-			String requestId = String.valueOf(requestIndex.incrementAndGet());
-			this.requestHeadersUriSpec.header(RESTTESTCLIENT_REQUEST_ID, requestId);
+			this.requestId = String.valueOf(requestIndex.incrementAndGet());
+			this.requestHeadersUriSpec.header(RESTTESTCLIENT_REQUEST_ID, this.requestId);
 		}
 
 		@Override
@@ -237,7 +277,7 @@ class DefaultRestTestClient implements RestTestClient {
 		}
 
 		@Override
-		public RequestBodySpec apiVersion(Object version) {
+		public RequestBodySpec apiVersion(@Nullable Object version) {
 			this.requestHeadersUriSpec.apiVersion(version);
 			return this;
 		}
@@ -252,8 +292,17 @@ class DefaultRestTestClient implements RestTestClient {
 		public ResponseSpec exchange() {
 			return new DefaultResponseSpec(
 					this.requestHeadersUriSpec.exchangeForRequiredValue(
-							(request, response) -> new ExchangeResult(request, response, this.uriTemplate), false),
+							(request, response) -> {
+								byte[] requestBody = wiretapInterceptor.getRequestContent(this.requestId);
+								return new ExchangeResult(
+										request, response, this.uriTemplate, requestBody, converterDelegate);
+							}, false),
 					DefaultRestTestClient.this.entityResultConsumer);
+		}
+
+		@Override
+		public ResponseSpec exchangeSuccessfully() {
+			return exchange().expectStatus().is2xxSuccessful();
 		}
 	}
 
@@ -361,25 +410,17 @@ class DefaultRestTestClient implements RestTestClient {
 		}
 
 		@Override
-		public <T extends S> T value(Matcher<? super @Nullable B> matcher) {
-			this.result.assertWithDiagnostics(() -> MatcherAssert.assertThat(this.result.getResponseBody(), matcher));
-			return self();
-		}
-
-		@Override
-		@SuppressWarnings("NullAway") // https://github.com/uber/NullAway/issues/1129
-		public <T extends S, R> T value(Function<@Nullable B, @Nullable R> bodyMapper, Matcher<? super @Nullable R> matcher) {
-			this.result.assertWithDiagnostics(() -> {
-				B body = this.result.getResponseBody();
-				MatcherAssert.assertThat(bodyMapper.apply(body), matcher);
-			});
-			return self();
-		}
-
-		@Override
-		@SuppressWarnings("NullAway") // https://github.com/uber/NullAway/issues/1129
 		public <T extends S> T value(Consumer<@Nullable B> consumer) {
 			this.result.assertWithDiagnostics(() -> consumer.accept(this.result.getResponseBody()));
+			return self();
+		}
+
+		@Override
+		public <T extends S, R> T value(Function<@Nullable B, @Nullable R> bodyMapper, Consumer<? super @Nullable R> consumer) {
+			this.result.assertWithDiagnostics(() -> {
+				B body = this.result.getResponseBody();
+				consumer.accept(bodyMapper.apply(body));
+			});
 			return self();
 		}
 
@@ -449,7 +490,8 @@ class DefaultRestTestClient implements RestTestClient {
 
 		@Override
 		public JsonPathAssertions jsonPath(String expression) {
-			return new JsonPathAssertions(this, getBodyAsString(), expression, null);
+			Configuration config = JsonPathConfigurationProvider.getConfiguration(this.result);
+			return new JsonPathAssertions(this, getBodyAsString(), expression, config);
 		}
 
 		@Override
@@ -478,4 +520,62 @@ class DefaultRestTestClient implements RestTestClient {
 			return this.result;
 		}
 	}
+
+
+	private static class WiretapInterceptor implements ClientHttpRequestInterceptor {
+
+		private final Map<String, byte[]> requestContentMap = new ConcurrentHashMap<>();
+
+		@Override
+		public ClientHttpResponse intercept(
+				HttpRequest request, byte[] body, ClientHttpRequestExecution execution) throws IOException {
+
+			String header = RestTestClient.RESTTESTCLIENT_REQUEST_ID;
+			String requestId = request.getHeaders().getFirst(header);
+			Assert.state(requestId != null, () -> "No \"" + header + "\" header");
+			this.requestContentMap.put(requestId, body);
+			return execution.execute(request, body);
+		}
+
+		public byte[] getRequestContent(String requestId) {
+			byte[] bytes = this.requestContentMap.remove(requestId);
+			Assert.state(bytes != null, () ->
+					"No match for %s=%s".formatted(RestTestClient.RESTTESTCLIENT_REQUEST_ID, requestId));
+			return bytes;
+		}
+	}
+
+
+	private static class JsonPathConfigurationProvider {
+
+		static Configuration getConfiguration(EntityExchangeResult<?> result) {
+			Configuration config = Configuration.defaultConfiguration();
+			JsonConverterDelegate delegate = result.getJsonConverterDelegate();
+			return (delegate != null ? config.mappingProvider(new MessageConverterMappingProvider(delegate)) : config);
+		}
+	}
+
+
+	private record MessageConverterMappingProvider(JsonConverterDelegate delegate) implements MappingProvider {
+
+		@Override
+		public <T> T map(Object value, Class<T> targetType, Configuration configuration) {
+			return mapToTargetType(value, ResolvableType.forClass(targetType));
+		}
+
+		@Override
+		public <T> T map(Object value, TypeRef<T> targetType, Configuration configuration) {
+			return mapToTargetType(value, ResolvableType.forType(targetType.getType()));
+		}
+
+		private <T> T mapToTargetType(Object value, ResolvableType targetType) {
+			try {
+				return delegate().map(value, targetType);
+			}
+			catch (IOException ex) {
+				throw new IllegalStateException("Failed to map " + value + " to " + targetType, ex);
+			}
+		}
+	}
+
 }

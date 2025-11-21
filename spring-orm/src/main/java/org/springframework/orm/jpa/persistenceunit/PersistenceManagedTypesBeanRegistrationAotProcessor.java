@@ -65,15 +65,14 @@ import org.springframework.util.ReflectionUtils;
  * @author Sebastien Deleuze
  * @since 6.0
  */
-@SuppressWarnings("unchecked")
 class PersistenceManagedTypesBeanRegistrationAotProcessor implements BeanRegistrationAotProcessor {
 
-	private static final boolean jpaPresent = ClassUtils.isPresent("jakarta.persistence.Entity",
+	private static final boolean JPA_PRESENT = ClassUtils.isPresent("jakarta.persistence.Entity",
 			PersistenceManagedTypesBeanRegistrationAotProcessor.class.getClassLoader());
 
 	@Override
 	public @Nullable BeanRegistrationAotContribution processAheadOfTime(RegisteredBean registeredBean) {
-		if (jpaPresent) {
+		if (JPA_PRESENT) {
 			if (PersistenceManagedTypes.class.isAssignableFrom(registeredBean.getBeanClass())) {
 				return BeanRegistrationAotContribution.withCustomCodeFragments(codeFragments ->
 						new JpaManagedTypesBeanRegistrationCodeFragments(codeFragments, registeredBean));
@@ -82,11 +81,11 @@ class PersistenceManagedTypesBeanRegistrationAotProcessor implements BeanRegistr
 		return null;
 	}
 
+
 	private static final class JpaManagedTypesBeanRegistrationCodeFragments extends BeanRegistrationCodeFragmentsDecorator {
 
 		private static final List<Class<? extends Annotation>> CALLBACK_TYPES = List.of(PreUpdate.class,
 				PostUpdate.class, PrePersist.class, PostPersist.class, PreRemove.class, PostRemove.class, PostLoad.class);
-
 
 		private static final ParameterizedTypeName LIST_OF_STRINGS_TYPE = ParameterizedTypeName.get(List.class, String.class);
 
@@ -102,8 +101,8 @@ class PersistenceManagedTypesBeanRegistrationAotProcessor implements BeanRegistr
 
 		@Override
 		public CodeBlock generateInstanceSupplierCode(GenerationContext generationContext,
-				BeanRegistrationCode beanRegistrationCode,
-				boolean allowDirectSupplierShortcut) {
+				BeanRegistrationCode beanRegistrationCode, boolean allowDirectSupplierShortcut) {
+
 			PersistenceManagedTypes persistenceManagedTypes = this.registeredBean.getBeanFactory()
 					.getBean(this.registeredBean.getBeanName(), PersistenceManagedTypes.class);
 			contributeHints(generationContext.getRuntimeHints(),
@@ -138,9 +137,10 @@ class PersistenceManagedTypesBeanRegistrationAotProcessor implements BeanRegistr
 					contributeConverterHints(hints, managedClass);
 					contributeCallbackHints(hints, managedClass);
 					contributeHibernateHints(hints, classLoader, managedClass);
+					contributePackagePrivateHints(hints, managedClass);
 				}
 				catch (ClassNotFoundException ex) {
-					throw new IllegalArgumentException("Failed to instantiate the managed class: " + managedClassName, ex);
+					throw new IllegalArgumentException("Failed to instantiate JPA managed class: " + managedClassName, ex);
 				}
 			}
 		}
@@ -149,7 +149,8 @@ class PersistenceManagedTypesBeanRegistrationAotProcessor implements BeanRegistr
 			EntityListeners entityListeners = AnnotationUtils.findAnnotation(managedClass, EntityListeners.class);
 			if (entityListeners != null) {
 				for (Class<?> entityListener : entityListeners.value()) {
-					hints.reflection().registerType(entityListener, MemberCategory.INVOKE_DECLARED_CONSTRUCTORS, MemberCategory.INVOKE_PUBLIC_METHODS);
+					hints.reflection().registerType(entityListener,
+							MemberCategory.INVOKE_DECLARED_CONSTRUCTORS, MemberCategory.INVOKE_PUBLIC_METHODS);
 				}
 			}
 		}
@@ -169,12 +170,14 @@ class PersistenceManagedTypesBeanRegistrationAotProcessor implements BeanRegistr
 			}
 			Convert convertClassAnnotation = AnnotationUtils.findAnnotation(managedClass, Convert.class);
 			if (convertClassAnnotation != null) {
-				reflectionHints.registerType(convertClassAnnotation.converter(), MemberCategory.INVOKE_DECLARED_CONSTRUCTORS);
+				reflectionHints.registerType(convertClassAnnotation.converter(),
+						MemberCategory.INVOKE_DECLARED_CONSTRUCTORS);
 			}
 			ReflectionUtils.doWithFields(managedClass, field -> {
 				Convert convertFieldAnnotation = AnnotationUtils.findAnnotation(field, Convert.class);
 				if (convertFieldAnnotation != null && convertFieldAnnotation.converter() != AttributeConverter.class) {
-					reflectionHints.registerType(convertFieldAnnotation.converter(), MemberCategory.INVOKE_DECLARED_CONSTRUCTORS);
+					reflectionHints.registerType(convertFieldAnnotation.converter(),
+							MemberCategory.INVOKE_DECLARED_CONSTRUCTORS);
 				}
 			});
 		}
@@ -186,11 +189,11 @@ class PersistenceManagedTypesBeanRegistrationAotProcessor implements BeanRegistr
 					method -> CALLBACK_TYPES.stream().anyMatch(method::isAnnotationPresent));
 		}
 
-		@SuppressWarnings("unchecked")
 		private void contributeHibernateHints(RuntimeHints hints, @Nullable ClassLoader classLoader, Class<?> managedClass) {
 			ReflectionHints reflection = hints.reflection();
 
-			Class<? extends Annotation> embeddableInstantiatorClass = loadClass("org.hibernate.annotations.EmbeddableInstantiator", classLoader);
+			Class<? extends Annotation> embeddableInstantiatorClass =
+					loadClass("org.hibernate.annotations.EmbeddableInstantiator", classLoader);
 			if (embeddableInstantiatorClass != null) {
 				registerForReflection(reflection,
 						AnnotationUtils.findAnnotation(managedClass, embeddableInstantiatorClass), "value");
@@ -204,7 +207,8 @@ class PersistenceManagedTypesBeanRegistrationAotProcessor implements BeanRegistr
 						AnnotationUtils.findAnnotation(method, embeddableInstantiatorClass), "value"));
 			}
 
-			Class<? extends Annotation> valueGenerationTypeClass = loadClass("org.hibernate.annotations.ValueGenerationType", classLoader);
+			Class<? extends Annotation> valueGenerationTypeClass =
+					loadClass("org.hibernate.annotations.ValueGenerationType", classLoader);
 			if (valueGenerationTypeClass != null) {
 				ReflectionUtils.doWithFields(managedClass, field -> registerForReflection(reflection,
 						AnnotationUtils.findAnnotation(field, valueGenerationTypeClass), "generatedBy"));
@@ -212,7 +216,8 @@ class PersistenceManagedTypesBeanRegistrationAotProcessor implements BeanRegistr
 						AnnotationUtils.findAnnotation(method, valueGenerationTypeClass), "generatedBy"));
 			}
 
-			Class<? extends Annotation> idGeneratorTypeClass = loadClass("org.hibernate.annotations.IdGeneratorType", classLoader);
+			Class<? extends Annotation> idGeneratorTypeClass =
+					loadClass("org.hibernate.annotations.IdGeneratorType", classLoader);
 			if (idGeneratorTypeClass != null) {
 				ReflectionUtils.doWithFields(managedClass, field -> registerForReflection(reflection,
 						AnnotationUtils.findAnnotation(field, idGeneratorTypeClass), "value"));
@@ -220,7 +225,8 @@ class PersistenceManagedTypesBeanRegistrationAotProcessor implements BeanRegistr
 						AnnotationUtils.findAnnotation(method, idGeneratorTypeClass), "value"));
 			}
 
-			Class<? extends Annotation> attributeBinderTypeClass = loadClass("org.hibernate.annotations.AttributeBinderType", classLoader);
+			Class<? extends Annotation> attributeBinderTypeClass =
+					loadClass("org.hibernate.annotations.AttributeBinderType", classLoader);
 			if (attributeBinderTypeClass != null) {
 				ReflectionUtils.doWithFields(managedClass, field -> registerForReflection(reflection,
 						AnnotationUtils.findAnnotation(field, attributeBinderTypeClass), "binder"));
@@ -229,6 +235,19 @@ class PersistenceManagedTypesBeanRegistrationAotProcessor implements BeanRegistr
 			}
 		}
 
+		private void contributePackagePrivateHints(RuntimeHints hints, Class<?> managedClass) {
+			ReflectionHints reflection = hints.reflection();
+			ReflectionUtils.doWithMethods(managedClass, method ->
+							reflection.registerMethod(method, ExecutableMode.INVOKE),
+					method -> {
+						int modifiers = method.getModifiers();
+						return !(java.lang.reflect.Modifier.isProtected(modifiers) ||
+								java.lang.reflect.Modifier.isPrivate(modifiers) ||
+								java.lang.reflect.Modifier.isPublic(modifiers));
+					});
+		}
+
+		@SuppressWarnings("unchecked")
 		private static @Nullable Class<? extends Annotation> loadClass(String className, @Nullable ClassLoader classLoader) {
 			try {
 				return (Class<? extends Annotation>) ClassUtils.forName(className, classLoader);
@@ -238,7 +257,7 @@ class PersistenceManagedTypesBeanRegistrationAotProcessor implements BeanRegistr
 			}
 		}
 
-		@SuppressWarnings("NullAway") // Not null assertion performed in ReflectionHints.registerType
+		@SuppressWarnings("NullAway")  // Not-null assertion performed in ReflectionHints.registerType
 		private void registerForReflection(ReflectionHints reflection, @Nullable Annotation annotation, String attribute) {
 			if (annotation == null) {
 				return;
@@ -247,4 +266,5 @@ class PersistenceManagedTypesBeanRegistrationAotProcessor implements BeanRegistr
 			reflection.registerType(type, MemberCategory.INVOKE_DECLARED_CONSTRUCTORS);
 		}
 	}
+
 }

@@ -17,6 +17,11 @@
 package org.springframework.util;
 
 import java.io.File;
+import java.net.URI;
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystems;
+import java.nio.file.Path;
+import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -28,6 +33,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Rob Harrop
  * @author Sam Brannen
+ * @author Juergen Hoeller
  */
 class FileSystemUtilsTests {
 
@@ -75,8 +81,23 @@ class FileSystemUtilsTests {
 		FileSystemUtils.copyRecursively(src, dest);
 
 		assertThat(dest).exists();
-		assertThat(new File(dest, child.getName())).exists();
+		assertThat(new File(dest, "child")).exists();
+		assertThat(new File(dest, "child/bar.txt")).exists();
 
+		String destPath = dest.toString().replace('\\', '/');
+		if (!destPath.startsWith("/")) {
+			destPath = "/" + destPath;
+		}
+		URI uri = URI.create("jar:file:" + destPath + "/archive.zip");
+		Map<String, String> env = Map.of("create", "true");
+		FileSystem zipfs = FileSystems.newFileSystem(uri, env);
+		Path ziproot = zipfs.getPath("/");
+		FileSystemUtils.copyRecursively(src.toPath(), ziproot);
+
+		assertThat(zipfs.getPath("/child")).exists();
+		assertThat(zipfs.getPath("/child/bar.txt")).exists();
+
+		zipfs.close();
 		FileSystemUtils.deleteRecursively(src);
 		assertThat(src).doesNotExist();
 	}

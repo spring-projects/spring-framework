@@ -16,8 +16,6 @@
 
 package org.springframework.test.context.cache;
 
-import java.util.Arrays;
-
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.ClassOrderer;
@@ -25,8 +23,6 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestClassOrder;
-import org.junit.platform.engine.discovery.ClassSelector;
-import org.junit.platform.engine.discovery.DiscoverySelectors;
 import org.junit.platform.testkit.engine.EngineTestKit;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -38,6 +34,7 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClasses;
 import static org.springframework.test.context.NestedTestConfiguration.EnclosingConfiguration.INHERIT;
 import static org.springframework.test.context.NestedTestConfiguration.EnclosingConfiguration.OVERRIDE;
 
@@ -207,10 +204,6 @@ class UnusedContextsIntegrationTests {
 			.execute()
 			.testEvents()
 			.assertStatistics(stats -> stats.started(expectedTestCount).succeeded(expectedTestCount));
-	}
-
-	private static ClassSelector[] selectClasses(Class<?>... classes) {
-		return Arrays.stream(classes).map(DiscoverySelectors::selectClass).toArray(ClassSelector[]::new);
 	}
 
 

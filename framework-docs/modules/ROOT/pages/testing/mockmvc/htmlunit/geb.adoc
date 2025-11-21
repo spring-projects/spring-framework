@@ -8,9 +8,9 @@ use https://www.gebish.org/[Geb] to make our tests even Groovy-er.
 == Why Geb and MockMvc?
 
 Geb is backed by WebDriver, so it offers many of the
-xref:testing/mockmvc/htmlunit/webdriver.adoc#spring-mvc-test-server-htmlunit-webdriver-why[same benefits] that we get from
-WebDriver. However, Geb makes things even easier by taking care of some of the
-boilerplate code for us.
+xref:testing/mockmvc/htmlunit/webdriver.adoc#mockmvc-server-htmlunit-webdriver-why[same benefits]
+that we get from WebDriver. However, Geb makes things even easier by taking care of some
+of the boilerplate code for us.
 
 [[mockmvc-server-htmlunit-geb-setup]]
 == MockMvc and Geb Setup
@@ -28,7 +28,8 @@ def setup() {
 ----
 
 NOTE: This is a simple example of using `MockMvcHtmlUnitDriverBuilder`. For more advanced
-usage, see xref:testing/mockmvc/htmlunit/webdriver.adoc#spring-mvc-test-server-htmlunit-webdriver-advanced-builder[Advanced `MockMvcHtmlUnitDriverBuilder`].
+usage, see
+xref:testing/mockmvc/htmlunit/webdriver.adoc#mockmvc-server-htmlunit-webdriver-advanced-builder[Advanced `MockMvcHtmlUnitDriverBuilder`].
 
 This ensures that any URL referencing `localhost` as the server is directed to our
 `MockMvc` instance without the need for a real HTTP connection. Any other URL is
@@ -62,10 +63,10 @@ forwarded to the current page object. This removes a lot of the boilerplate code
 needed when using WebDriver directly.
 
 As with direct WebDriver usage, this improves on the design of our
-xref:testing/mockmvc/htmlunit/mah.adoc#spring-mvc-test-server-htmlunit-mah-usage[HtmlUnit test] by using the Page Object
-Pattern. As mentioned previously, we can use the Page Object Pattern with HtmlUnit and
-WebDriver, but it is even easier with Geb. Consider our new Groovy-based
-`CreateMessagePage` implementation:
+xref:testing/mockmvc/htmlunit/mah.adoc#mockmvc-server-htmlunit-mah-usage[HtmlUnit test]
+by using the Page Object Pattern. As mentioned previously, we can use the Page Object
+Pattern with HtmlUnit and WebDriver, but it is even easier with Geb. Consider our new
+Groovy-based `CreateMessagePage` implementation:
 
 [source,groovy]
 ----

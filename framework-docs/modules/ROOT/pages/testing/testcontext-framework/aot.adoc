@@ -43,6 +43,16 @@ alternative, you can set the same property via the
 xref:appendix.adoc#appendix-spring-properties[`SpringProperties`] mechanism.
 ====
 
+[TIP]
+====
+JPA's `@PersistenceContext` and `@PersistenceUnit` annotations cannot be used to perform
+dependency injection within test classes in AOT mode.
+
+However, as of Spring Framework 7.0, you can inject an `EntityManager` or
+`EntityManagerFactory` into tests using `@Autowired` instead of `@PersistenceContext` and
+`@PersistenceUnit`, respectively.
+====
+
 [NOTE]
 ====
 The `@ContextHierarchy` annotation is not supported in AOT mode.

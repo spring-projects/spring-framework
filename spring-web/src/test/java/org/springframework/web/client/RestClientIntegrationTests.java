@@ -25,7 +25,6 @@ import java.lang.annotation.Target;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
-import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Stream;
@@ -340,24 +339,6 @@ class RestClientIntegrationTests {
 	}
 
 	@ParameterizedRestClientTest
-	@SuppressWarnings({ "rawtypes", "unchecked" })
-	void retrieveJsonNull(ClientHttpRequestFactory requestFactory) throws IOException {
-		startServer(requestFactory);
-
-		prepareResponse(builder -> builder
-				.code(200)
-				.setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-				.body("null"));
-
-		Map result = this.restClient.get()
-				.uri("/null")
-				.retrieve()
-				.body(Map.class);
-
-		assertThat(result).isNull();
-	}
-
-	@ParameterizedRestClientTest
 	void retrieveJsonEmpty(ClientHttpRequestFactory requestFactory) throws IOException {
 		startServer(requestFactory);
 
@@ -528,7 +509,7 @@ class RestClientIntegrationTests {
 		expectRequestCount(1);
 		expectRequest(request -> {
 			assertThat(request.getTarget()).isEqualTo("/pojo/capitalize");
-			assertThat(request.getBody().utf8()).isEqualTo("{\"bar\":\"barbar\",\"foo\":\"foofoo\"}");
+			assertThat(request.getBody().utf8()).isEqualTo("{\"foo\":\"foofoo\",\"bar\":\"barbar\"}");
 			assertThat(request.getHeaders().get(HttpHeaders.ACCEPT)).isEqualTo("application/json");
 			assertThat(request.getHeaders().get(HttpHeaders.CONTENT_TYPE)).isEqualTo("application/json");
 		});

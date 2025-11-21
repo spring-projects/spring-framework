@@ -17,11 +17,13 @@
 package org.springframework.http.converter;
 
 import java.io.IOException;
+import java.util.function.Predicate;
 
 import kotlinx.serialization.BinaryFormat;
 import kotlinx.serialization.KSerializer;
 import kotlinx.serialization.SerializationException;
 
+import org.springframework.core.ResolvableType;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
@@ -31,9 +33,11 @@ import org.springframework.util.StreamUtils;
  * Abstract base class for {@link HttpMessageConverter} implementations that
  * defer to Kotlin {@linkplain BinaryFormat binary serializers}.
  *
- * <p>As of Spring Framework 7.0,
- * <a href="https://github.com/Kotlin/kotlinx.serialization/blob/master/docs/polymorphism.md#open-polymorphism">open polymorphism</a>
- * is supported.
+ * <p>As of Spring Framework 7.0, by default it only encodes types annotated with
+ * {@link kotlinx.serialization.Serializable @Serializable} at type or generics level
+ * since it allows combined usage with other general purpose converters without conflicts.
+ * Alternative constructors with a {@code Predicate<ResolvableType>} parameter can be used
+ * to customize this behavior.
  *
  * @author Andreas Ahlenstorf
  * @author Sebastien Deleuze
@@ -47,10 +51,23 @@ public abstract class KotlinSerializationBinaryHttpMessageConverter<T extends Bi
 		extends AbstractKotlinSerializationHttpMessageConverter<T> {
 
 	/**
-	 * Construct an {@code KotlinSerializationBinaryHttpMessageConverter} with format and supported media types.
+	 * Creates a new instance with the given format and supported mime types
+	 * which only converters types annotated with
+	 * {@link kotlinx.serialization.Serializable @Serializable} at type or
+	 * generics level.
 	 */
 	protected KotlinSerializationBinaryHttpMessageConverter(T format, MediaType... supportedMediaTypes) {
 		super(format, supportedMediaTypes);
+	}
+
+	/**
+	 * Creates a new instance with the given format and supported mime types
+	 * which only converts types for which the specified predicate returns
+	 * {@code true}.
+	 * @since 7.0
+	 */
+	protected KotlinSerializationBinaryHttpMessageConverter(T format, Predicate<ResolvableType> typePredicate, MediaType... supportedMediaTypes) {
+		super(format, typePredicate, supportedMediaTypes);
 	}
 
 	@Override

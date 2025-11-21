@@ -98,7 +98,7 @@ public class RetryAnnotationBeanPostProcessor extends AbstractBeanFactoryAwareAd
 			retrySpec = new MethodRetrySpec(
 					Arrays.asList(retryable.includes()), Arrays.asList(retryable.excludes()),
 					instantiatePredicate(retryable.predicate()),
-					parseLong(retryable.maxAttempts(), retryable.maxAttemptsString()),
+					parseLong(retryable.maxRetries(), retryable.maxRetriesString()),
 					parseDuration(retryable.delay(), retryable.delayString(), timeUnit),
 					parseDuration(retryable.jitter(), retryable.jitterString(), timeUnit),
 					parseDouble(retryable.multiplier(), retryable.multiplierString()),

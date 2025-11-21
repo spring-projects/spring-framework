@@ -38,6 +38,7 @@ import org.springframework.http.client.reactive.ClientHttpRequest;
 import org.springframework.http.client.reactive.ClientHttpRequestDecorator;
 import org.springframework.http.client.reactive.ClientHttpResponse;
 import org.springframework.http.client.reactive.ClientHttpResponseDecorator;
+import org.springframework.test.json.JsonConverterDelegate;
 import org.springframework.util.Assert;
 
 /**
@@ -53,11 +54,14 @@ class WiretapConnector implements ClientHttpConnector {
 
 	private final ClientHttpConnector delegate;
 
+	private final @Nullable JsonConverterDelegate converterDelegate;
+
 	private final Map<String, ClientExchangeInfo> exchanges = new ConcurrentHashMap<>();
 
 
-	WiretapConnector(ClientHttpConnector delegate) {
+	WiretapConnector(ClientHttpConnector delegate, @Nullable JsonEncoderDecoder encoderDecoder) {
 		this.delegate = delegate;
+		this.converterDelegate = (encoderDecoder != null ? encoderDecoder.createJsonConverterDelegate() : null);
 	}
 
 
@@ -96,7 +100,8 @@ class WiretapConnector implements ClientHttpConnector {
 				clientInfo.getRequest().getRecorder().getContent(),
 				clientInfo.getResponse().getRecorder().getContent(),
 				timeout, uriTemplate,
-				clientInfo.getResponse().getMockServerResult());
+				clientInfo.getResponse().getMockServerResult(),
+				this.converterDelegate);
 	}
 
 

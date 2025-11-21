@@ -29,7 +29,7 @@ import java.lang.annotation.Target;
  * annotation.
  *
  * <p>Generally speaking, {@code @AfterTransaction} methods must not accept any
- * arguments. However, as of Spring Framework 6.1, for tests using the
+ * arguments. However, for tests using the
  * {@link org.springframework.test.context.junit.jupiter.SpringExtension SpringExtension}
  * with JUnit Jupiter, {@code @AfterTransaction} methods may optionally accept
  * arguments which will be resolved by any registered JUnit

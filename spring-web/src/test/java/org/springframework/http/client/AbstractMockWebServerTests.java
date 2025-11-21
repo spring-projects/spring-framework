@@ -136,6 +136,7 @@ public abstract class AbstractMockWebServerTests {
 							.body(buffer)
 							.code(200);
 					builder.setHeader(HttpHeaders.CONTENT_ENCODING, encoding);
+					builder.setHeader(HttpHeaders.CONTENT_LENGTH, buffer.size());
 					return builder.build();
 				}
 				return new MockResponse.Builder().code(404).build();

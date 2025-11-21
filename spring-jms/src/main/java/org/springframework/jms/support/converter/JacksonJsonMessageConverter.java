@@ -48,9 +48,6 @@ import org.springframework.util.ClassUtils;
  * {@link #setTargetType targetType} is set to {@link MessageType#TEXT}.
  * Converts from a {@link TextMessage} or {@link BytesMessage} to an object.
  *
- * <p>The default constructor loads {@link tools.jackson.databind.JacksonModule}s
- * found by {@link MapperBuilder#findModules(ClassLoader)}.
- *
  * @author Sebastien Deleuze
  * @since 7.0
  */
@@ -62,7 +59,7 @@ public class JacksonJsonMessageConverter implements SmartMessageConverter, BeanC
 	public static final String DEFAULT_ENCODING = "UTF-8";
 
 
-	private final JsonMapper jsonMapper;
+	private final JsonMapper mapper;
 
 	private MessageType targetType = MessageType.BYTES;
 
@@ -85,17 +82,27 @@ public class JacksonJsonMessageConverter implements SmartMessageConverter, BeanC
 	 * {@link MapperBuilder#findModules(ClassLoader)}.
 	 */
 	public JacksonJsonMessageConverter() {
-		this.jsonMapper = JsonMapper.builder().findAndAddModules(JacksonJsonMessageConverter.class.getClassLoader()).build();
+		this(JsonMapper.builder());
+	}
+
+	/**
+	 * Construct a new instance with the provided {@link JsonMapper.Builder}
+	 * customized with the {@link tools.jackson.databind.JacksonModule}s found
+	 * by {@link MapperBuilder#findModules(ClassLoader)}.
+	 * @see JsonMapper#builder()
+	 */
+	public JacksonJsonMessageConverter(JsonMapper.Builder builder) {
+		Assert.notNull(builder, "JsonMapper.Builder must not be null");
+		this.mapper = builder.findAndAddModules(JacksonJsonMessageConverter.class.getClassLoader()).build();
 	}
 
 	/**
 	 * Construct a new instance with the provided {@link JsonMapper}.
 	 * @see JsonMapper#builder()
-	 * @see MapperBuilder#findModules(ClassLoader)
 	 */
-	public JacksonJsonMessageConverter(JsonMapper jsonMapper) {
-		Assert.notNull(jsonMapper, "JsonMapper must not be null");
-		this.jsonMapper = jsonMapper;
+	public JacksonJsonMessageConverter(JsonMapper mapper) {
+		Assert.notNull(mapper, "JsonMapper must not be null");
+		this.mapper = mapper;
 	}
 
 	/**
@@ -172,9 +179,9 @@ public class JacksonJsonMessageConverter implements SmartMessageConverter, BeanC
 		Message message;
 		try {
 			message = switch (this.targetType) {
-				case TEXT -> mapToTextMessage(object, session, this.jsonMapper.writer());
-				case BYTES -> mapToBytesMessage(object, session, this.jsonMapper.writer());
-				default -> mapToMessage(object, session, this.jsonMapper.writer(), this.targetType);
+				case TEXT -> mapToTextMessage(object, session, this.mapper.writer());
+				case BYTES -> mapToBytesMessage(object, session, this.mapper.writer());
+				default -> mapToMessage(object, session, this.mapper.writer(), this.targetType);
 			};
 		}
 		catch (IOException ex) {
@@ -205,10 +212,10 @@ public class JacksonJsonMessageConverter implements SmartMessageConverter, BeanC
 			throws JMSException, MessageConversionException {
 
 		if (jsonView != null) {
-			return toMessage(object, session, this.jsonMapper.writerWithView(jsonView));
+			return toMessage(object, session, this.mapper.writerWithView(jsonView));
 		}
 		else {
-			return toMessage(object, session, this.jsonMapper.writer());
+			return toMessage(object, session, this.mapper.writer());
 		}
 	}
 
@@ -362,7 +369,7 @@ public class JacksonJsonMessageConverter implements SmartMessageConverter, BeanC
 			throws JMSException, IOException {
 
 		String body = message.getText();
-		return this.jsonMapper.readValue(body, targetJavaType);
+		return this.mapper.readValue(body, targetJavaType);
 	}
 
 	/**
@@ -385,7 +392,7 @@ public class JacksonJsonMessageConverter implements SmartMessageConverter, BeanC
 		if (encoding != null) {
 			try {
 				String body = new String(bytes, encoding);
-				return this.jsonMapper.readValue(body, targetJavaType);
+				return this.mapper.readValue(body, targetJavaType);
 			}
 			catch (UnsupportedEncodingException ex) {
 				throw new MessageConversionException("Cannot convert bytes to String", ex);
@@ -393,7 +400,7 @@ public class JacksonJsonMessageConverter implements SmartMessageConverter, BeanC
 		}
 		else {
 			// Jackson internally performs encoding detection, falling back to UTF-8.
-			return this.jsonMapper.readValue(bytes, targetJavaType);
+			return this.mapper.readValue(bytes, targetJavaType);
 		}
 	}
 
@@ -436,11 +443,11 @@ public class JacksonJsonMessageConverter implements SmartMessageConverter, BeanC
 		}
 		Class<?> mappedClass = this.idClassMappings.get(typeId);
 		if (mappedClass != null) {
-			return this.jsonMapper.constructType(mappedClass);
+			return this.mapper.constructType(mappedClass);
 		}
 		try {
 			Class<?> typeClass = ClassUtils.forName(typeId, this.beanClassLoader);
-			return this.jsonMapper.constructType(typeClass);
+			return this.mapper.constructType(typeClass);
 		}
 		catch (Throwable ex) {
 			throw new MessageConversionException("Failed to resolve type id [" + typeId + "]", ex);

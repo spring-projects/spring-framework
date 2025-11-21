@@ -55,7 +55,7 @@ public class BindingReflectionHintsRegistrar {
 
 	private static final String JACKSON_ANNOTATION = "com.fasterxml.jackson.annotation.JacksonAnnotation";
 
-	private static final boolean jacksonAnnotationPresent =
+	private static final boolean JACKSON_ANNOTATION_PRESENT =
 			ClassUtils.isPresent(JACKSON_ANNOTATION, BindingReflectionHintsRegistrar.class.getClassLoader());
 
 
@@ -113,7 +113,7 @@ public class BindingReflectionHintsRegistrar {
 							registerPropertyHints(hints, seen, method, -1);
 						}
 					}
-					if (jacksonAnnotationPresent) {
+					if (JACKSON_ANNOTATION_PRESENT) {
 						registerJacksonHints(hints, clazz);
 					}
 				}

@@ -110,7 +110,7 @@ class BridgeMethodResolver {
                                 && currentMethod != null) {
                             Signature target = new Signature(name, desc);
                             // If the target signature is the same as the current,
-                            // we shouldn't change our bridge becaues invokespecial
+                            // we shouldn't change our bridge because invokespecial
                             // is the only way to make progress (otherwise we'll
                             // get infinite recursion).  This would typically
                             // only happen when a bridge method is created to widen

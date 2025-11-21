@@ -5,8 +5,8 @@ The Spring Framework provides the following choices for making calls to REST end
 
 * xref:integration/rest-clients.adoc#rest-restclient[`RestClient`] -- synchronous client with a fluent API
 * xref:integration/rest-clients.adoc#rest-webclient[`WebClient`] -- non-blocking, reactive client with fluent API
-* xref:integration/rest-clients.adoc#rest-resttemplate[`RestTemplate`] -- synchronous client with template method API
-* xref:integration/rest-clients.adoc#rest-http-interface[HTTP Interface Clients] -- annotated interface backed by generated proxy
+* xref:integration/rest-clients.adoc#rest-resttemplate[`RestTemplate`] -- synchronous client with template method API, now deprecated in favor of `RestClient`
+* xref:integration/rest-clients.adoc#rest-http-service-client[HTTP Service Clients] -- annotated interface backed by generated proxy
 
 
 [[rest-restclient]]
@@ -479,7 +479,8 @@ See xref:web/webflux-webclient.adoc[WebClient] for more details.
 The `RestTemplate` provides a high-level API over HTTP client libraries in the form of a classic Spring Template class.
 It exposes the following groups of overloaded methods:
 
-NOTE: The xref:integration/rest-clients.adoc#rest-restclient[`RestClient`] offers a more modern API for synchronous HTTP access.
+WARNING: As of Spring Framework 7.0, `RestTemplate` is deprecated in favor of `RestClient` and will be removed in a future version,
+please use the xref:integration/rest-clients.adoc#migrating-to-restclient["Migrating to RestClient"] guide.
 For asynchronous and streaming scenarios, consider the reactive xref:web/webflux-webclient.adoc[WebClient].
 
 [[rest-overview-of-resttemplate-methods-tbl]]
@@ -547,10 +548,26 @@ See the xref:integration/observability.adoc#http-client.resttemplate[RestTemplat
 Objects passed into and returned from `RestTemplate` methods are converted to and from HTTP messages
 with the help of an `HttpMessageConverter`, see <<rest-message-conversion>>.
 
-=== Migrating from `RestTemplate` to `RestClient`
+[[migrating-to-restclient]]
+=== Migrating to `RestClient`
+
+Applications can adopt `RestClient` in a gradual fashion, first focusing on API usage and then on infrastructure setup.
+You can consider the following steps:
+
+1. Create one or more `RestClient` from existing `RestTemplate` instances, like: `RestClient restClient = RestClient.create(restTemplate)`.
+  Gradually replace `RestTemplate` usage in your application, component by component, by focusing first on issuing requests.
+  See the table below for API equivalents.
+2. Once all client requests go through `RestClient` instances, you can now work on replicating your existing
+  `RestTemplate` instance creations by using `RestClient.Builder`. Because `RestTemplate` and `RestClient`
+  share the same infrastructure, you can reuse custom `ClientHttpRequestFactory` or `ClientHttpRequestInterceptor`
+  in your setup. See xref:integration/rest-clients.adoc#rest-restclient[the `RestClient` builder API].
+
+If no other library is available on the classpath, `RestClient` will choose the `JdkClientHttpRequestFactory`
+powered by the modern JDK `HttpClient`, whereas `RestTemplate` would pick the `SimpleClientHttpRequestFactory` that
+uses `HttpURLConnection`. This can explain subtle behavior difference at runtime at the HTTP level.
+
 
 The following table shows `RestClient` equivalents for `RestTemplate` methods.
-It can be used to migrate from the latter to the former.
 
 .RestClient equivalents for RestTemplate methods
 [cols="1,1", options="header"]
@@ -854,9 +871,14 @@ It can be used to migrate from the latter to the former.
 
 |===
 
+`RestClient` and `RestTemplate` instances share the same behavior when it comes to throwing exceptions
+(with the `RestClientException` type being at the top of the hierarchy).
+When `RestTemplate` consistently throws `HttpClientErrorException` for "4xx" response statues,
+`RestClient` allows for more flexibility with custom xref:integration/rest-clients.adoc#rest-http-service-client-exceptions["status handlers"].
 
-[[rest-http-interface]]
-== HTTP Interface Clients
+
+[[rest-http-service-client]]
+== HTTP Service Clients
 
 You can define an HTTP Service as a Java interface with `@HttpExchange` methods, and use
 `HttpServiceProxyFactory` to create a client proxy from it for remote access over HTTP via
@@ -928,7 +950,14 @@ Now, you're ready to create client proxies:
 	// Use service methods for remote calls...
 ----
 
-[[rest-http-interface-method-parameters]]
+HTTP service clients is a powerful and expressive choice for remote access over HTTP.
+It allows one team to own the knowledge of how a REST API works, what parts are relevant
+to a client application, what input and output types to create, what endpoint method
+signatures are needed, what Javadoc to have, and so on. The resulting Java API guides and
+is ready to use.
+
+
+[[rest-http-service-client-method-parameters]]
 === Method Parameters
 
 `@HttpExchange` methods support flexible method signatures with the following inputs:
@@ -1000,13 +1029,13 @@ parameter annotation) is set to `false`, or the parameter is marked optional as 
 `StreamingHttpOutputMessage.Body` that allows sending the request body by writing to an
 `OutputStream`.
 
-[[rest-http-interface.custom-resolver]]
+[[rest-http-service-client.custom-resolver]]
 === Custom Arguments
 
 You can configure a custom `HttpServiceArgumentResolver`. The example interface below
 uses a custom `Search` method parameter type:
 
-include-code::./CustomHttpServiceArgumentResolver[tag=httpinterface,indent=0]
+include-code::./CustomHttpServiceArgumentResolver[tag=httpserviceclient,indent=0]
 
 A custom argument resolver could be implemented like this:
 
@@ -1021,7 +1050,7 @@ the use of more fine-grained method parameters for individual parts of the reque
 
 
 
-[[rest-http-interface-return-values]]
+[[rest-http-service-client-return-values]]
 === Return Values
 
 The supported return values depend on the underlying client.
@@ -1097,7 +1126,7 @@ underlying HTTP client, which operates at a lower level and provides more contro
 `InputStream` or `ResponseEntity<InputStream>` that provides access to the raw response
 body content.
 
-[[rest-http-interface-exceptions]]
+[[rest-http-service-client-exceptions]]
 === Error Handling
 
 To customize error handling for HTTP Service client proxies, you can configure the
@@ -1134,7 +1163,7 @@ documentation for each client, as well as the Javadoc of `defaultStatusHandler` 
 
 
 
-[[rest-http-interface-adapter-decorator]]
+[[rest-http-service-client-adapter-decorator]]
 === Decorating the Adapter
 
 `HttpExchangeAdapter` and `ReactorHttpExchangeAdapter` are contracts that decouple HTTP
@@ -1162,8 +1191,8 @@ built-in decorators to suppress 404 exceptions and return a `ResponseEntity` wit
 
 
 
-[[rest-http-interface-group-config]]
-=== HTTP Interface Groups
+[[rest-http-service-client-group-config]]
+=== HTTP Service Groups
 
 It's trivial to create client proxies with `HttpServiceProxyFactory`, but to have them
 declared as beans leads to repetitive configuration. You may also have multiple
@@ -1194,46 +1223,6 @@ One way to declare HTTP Service groups is via `@ImportHttpServices` annotations 
 ----
 <1> Manually list interfaces for group "echo"
 <2> Detect interfaces for group "greeting" under a base package
-
-The above lets you declare HTTP Services and groups. As an alternative, you can also
-annotate HTTP interfaces as follows:
-
-[source,java,indent=0,subs="verbatim,quotes"]
-----
-	@HttpServiceClient("echo")
-	public interface EchoServiceA {
-		// ...
-	}
-
-	@HttpServiceClient("echo")
-	public interface EchoServiceB {
-		// ...
-	}
-----
-
-The above requires a dedicated import registrar as follows:
-
-[source,java,indent=0,subs="verbatim,quotes"]
-----
-	public class MyClientHttpServiceRegistrar implements AbstractClientHttpServiceRegistrar { // <1>
-
-		@Override
-		protected void registerHttpServices(GroupRegistry registry, AnnotationMetadata metadata) {
-			findAndRegisterHttpServiceClients(groupRegistry, List.of("org.example.echo")); // <2>
-		}
-	}
-
-	@Configuration
-	@Import(MyClientHttpServiceRegistrar.class) // <3>
-	public class ClientConfig {
-	}
-----
-<1> Extend dedicated `AbstractClientHttpServiceRegistrar`
-<2> Specify base packages where to find client interfaces
-<3> Import the registrar
-
-TIP: `@HttpServiceClient` interfaces are excluded from `@ImportHttpServices` scans, so there
-is no overlap with scans for client interfaces when pointed at the same package.
 
 It is also possible to declare groups programmatically by creating an HTTP Service
 registrar and then importing it:

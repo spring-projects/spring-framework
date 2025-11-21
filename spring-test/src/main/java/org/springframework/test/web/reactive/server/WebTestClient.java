@@ -26,6 +26,8 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 import org.hamcrest.Matcher;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.NullUnmarked;
 import org.jspecify.annotations.Nullable;
 import org.reactivestreams.Publisher;
 
@@ -447,10 +449,13 @@ public interface WebTestClient {
 		 * Configure an {@link ApiVersionInserter} to abstract how an API version
 		 * specified via {@link RequestHeadersSpec#apiVersion(Object)}
 		 * is inserted into the request.
+		 * <p>{@code ApiVersionInserter} exposes shortcut methods for several
+		 * built-in inserter implementation types. See the class-level Javadoc
+		 * of {@link ApiVersionInserter} for a list of choices.
 		 * @param apiVersionInserter the inserter to use
 		 * @since 7.0
 		 */
-		Builder apiVersionInserter(ApiVersionInserter apiVersionInserter);
+		Builder apiVersionInserter(@Nullable ApiVersionInserter apiVersionInserter);
 
 		/**
 		 * Add the given filter to the filter chain.
@@ -601,7 +606,7 @@ public interface WebTestClient {
 		 * Set the list of acceptable {@linkplain MediaType media types}, as
 		 * specified by the {@code Accept} header.
 		 * @param acceptableMediaTypes the acceptable media types
-		 * @return the same instance
+		 * @return this spec for further declaration of the request
 		 */
 		S accept(MediaType... acceptableMediaTypes);
 
@@ -609,7 +614,7 @@ public interface WebTestClient {
 		 * Set the list of acceptable {@linkplain Charset charsets}, as specified
 		 * by the {@code Accept-Charset} header.
 		 * @param acceptableCharsets the acceptable charsets
-		 * @return the same instance
+		 * @return this spec for further declaration of the request
 		 */
 		S acceptCharset(Charset... acceptableCharsets);
 
@@ -617,7 +622,7 @@ public interface WebTestClient {
 		 * Add a cookie with the given name and value.
 		 * @param name the cookie name
 		 * @param value the cookie value
-		 * @return the same instance
+		 * @return this spec for further declaration of the request
 		 */
 		S cookie(String name, String value);
 
@@ -628,7 +633,7 @@ public interface WebTestClient {
 		 * {@linkplain MultiValueMap#remove(Object) remove} values, or use any of the other
 		 * {@link MultiValueMap} methods.
 		 * @param cookiesConsumer a function that consumes the cookies map
-		 * @return this builder
+		 * @return this spec for further declaration of the request
 		 */
 		S cookies(Consumer<MultiValueMap<String, String>> cookiesConsumer);
 
@@ -637,14 +642,14 @@ public interface WebTestClient {
 		 * <p>The date should be specified as the number of milliseconds since
 		 * January 1, 1970 GMT.
 		 * @param ifModifiedSince the new value of the header
-		 * @return the same instance
+		 * @return this spec for further declaration of the request
 		 */
 		S ifModifiedSince(ZonedDateTime ifModifiedSince);
 
 		/**
 		 * Set the values of the {@code If-None-Match} header.
 		 * @param ifNoneMatches the new value of the header
-		 * @return the same instance
+		 * @return this spec for further declaration of the request
 		 */
 		S ifNoneMatch(String... ifNoneMatches);
 
@@ -652,7 +657,7 @@ public interface WebTestClient {
 		 * Add the given, single header value under the given name.
 		 * @param headerName  the header name
 		 * @param headerValues the header value(s)
-		 * @return the same instance
+		 * @return this spec for further declaration of the request
 		 */
 		S header(String headerName, String... headerValues);
 
@@ -663,7 +668,7 @@ public interface WebTestClient {
 		 * {@linkplain HttpHeaders#remove(String) remove} values, or use any of the other
 		 * {@link HttpHeaders} methods.
 		 * @param headersConsumer a function that consumes the {@code HttpHeaders}
-		 * @return this builder
+		 * @return this spec for further declaration of the request
 		 */
 		S headers(Consumer<HttpHeaders> headersConsumer);
 
@@ -674,6 +679,7 @@ public interface WebTestClient {
 		 * @param version the API version of the request; this can be a String or
 		 * some Object that can be formatted by the inserter &mdash; for example,
 		 * through an {@link ApiVersionFormatter}
+		 * @return this spec for further declaration of the request
 		 * @since 7.0
 		 */
 		S apiVersion(Object version);
@@ -682,7 +688,7 @@ public interface WebTestClient {
 		 * Set the attribute with the given name to the given value.
 		 * @param name the name of the attribute to add
 		 * @param value the value of the attribute to add
-		 * @return this builder
+		 * @return this spec for further declaration of the request
 		 */
 		S attribute(String name, Object value);
 
@@ -691,20 +697,31 @@ public interface WebTestClient {
 		 * the consumer are "live", so that the consumer can be used to inspect attributes,
 		 * remove attributes, or use any of the other map-provided methods.
 		 * @param attributesConsumer a function that consumes the attributes
-		 * @return this builder
+		 * @return this spec for further declaration of the request
 		 */
 		S attributes(Consumer<Map<String, Object>> attributesConsumer);
 
 		/**
-		 * Perform the exchange without a request body.
-		 * @return spec for decoding the response
+		 * Perform the exchange.
+		 * @return a spec for expectations on the response
 		 */
 		ResponseSpec exchange();
+
+		/**
+		 * Variant of {@link #exchange()} that expects a successful response.
+		 * Effectively, a shortcut for:
+		 * <pre class="code">
+		 * exchange().expectStatus().is2xxSuccessful()
+		 * </pre>
+		 * @return a spec for expectations on the response
+		 * @since 7.0
+		 */
+		ResponseSpec exchangeSuccessfully();
 	}
 
 
 	/**
-	 * Specification for providing body of a request.
+	 * Specification for providing the body of a request.
 	 */
 	interface RequestBodySpec extends RequestHeadersSpec<RequestBodySpec> {
 
@@ -712,7 +729,7 @@ public interface WebTestClient {
 		 * Set the length of the body in bytes, as specified by the
 		 * {@code Content-Length} header.
 		 * @param contentLength the content length
-		 * @return the same instance
+		 * @return this spec for further declaration of the request
 		 * @see HttpHeaders#setContentLength(long)
 		 */
 		RequestBodySpec contentLength(long contentLength);
@@ -721,7 +738,7 @@ public interface WebTestClient {
 		 * Set the {@linkplain MediaType media type} of the body, as specified
 		 * by the {@code Content-Type} header.
 		 * @param contentType the content type
-		 * @return the same instance
+		 * @return this spec for further declaration of the request
 		 * @see HttpHeaders#setContentType(MediaType)
 		 */
 		RequestBodySpec contentType(MediaType contentType);
@@ -731,7 +748,7 @@ public interface WebTestClient {
 		 * {@link WebClient.RequestBodySpec#bodyValue(Object)
 		 * bodyValue} method on the underlying {@code WebClient}.
 		 * @param body the value to write to the request body
-		 * @return spec for further declaration of the request
+		 * @return this spec for further declaration of the request
 		 * @since 5.2
 		 */
 		RequestHeadersSpec<?> bodyValue(Object body);
@@ -744,7 +761,7 @@ public interface WebTestClient {
 		 * @param elementClass the class of elements contained in the publisher
 		 * @param <T> the type of the elements contained in the publisher
 		 * @param <S> the type of the {@code Publisher}
-		 * @return spec for further declaration of the request
+		 * @return this spec for further declaration of the request
 		 */
 		<T, S extends Publisher<T>> RequestHeadersSpec<?> body(S publisher, Class<T> elementClass);
 
@@ -755,7 +772,7 @@ public interface WebTestClient {
 		 * @param elementTypeRef the type reference of elements contained in the publisher
 		 * @param <T> the type of the elements contained in the publisher
 		 * @param <S> the type of the {@code Publisher}
-		 * @return spec for further declaration of the request
+		 * @return this spec for further declaration of the request
 		 * @since 5.2
 		 */
 		<T, S extends Publisher<T>> RequestHeadersSpec<?> body(
@@ -769,7 +786,7 @@ public interface WebTestClient {
 		 * {@link Publisher} or another producer adaptable to a
 		 * {@code Publisher} via {@link ReactiveAdapterRegistry}
 		 * @param elementClass the class of elements contained in the producer
-		 * @return spec for further declaration of the request
+		 * @return this spec for further declaration of the request
 		 * @since 5.2
 		 */
 		RequestHeadersSpec<?> body(Object producer, Class<?> elementClass);
@@ -782,18 +799,18 @@ public interface WebTestClient {
 		 * {@link Publisher} or another producer adaptable to a
 		 * {@code Publisher} via {@link ReactiveAdapterRegistry}
 		 * @param elementTypeRef the type reference of elements contained in the producer
-		 * @return spec for further declaration of the request
+		 * @return this spec for further declaration of the request
 		 * @since 5.2
 		 */
 		RequestHeadersSpec<?> body(Object producer, ParameterizedTypeReference<?> elementTypeRef);
 
 		/**
 		 * Set the body of the request to the given {@code BodyInserter}.
-		 * This method invokes the
+		 * <p>This method invokes the
 		 * {@link WebClient.RequestBodySpec#body(BodyInserter)
 		 * body(BodyInserter)} method on the underlying {@code WebClient}.
 		 * @param inserter the body inserter to use
-		 * @return spec for further declaration of the request
+		 * @return this spec for further declaration of the request
 		 * @see org.springframework.web.reactive.function.BodyInserters
 		 */
 		RequestHeadersSpec<?> body(BodyInserter<?, ? super ClientHttpRequest> inserter);
@@ -898,6 +915,17 @@ public interface WebTestClient {
 		BodyContentSpec expectBody();
 
 		/**
+		 * Return an {@link ExchangeResult} with the raw content. Effectively, a shortcut for:
+		 * <pre class="code">
+		 * .returnResult(byte[].class)
+		 * </pre>
+		 * @since 7.0
+		 */
+		default ExchangeResult returnResult() {
+			return returnResult(byte[].class);
+		}
+
+		/**
 		 * Exit the chained flow in order to consume the response body externally,
 		 * for example, via {@link reactor.test.StepVerifier}.
 		 * <p>Note that when {@code Void.class} is passed in, the response body
@@ -940,21 +968,38 @@ public interface WebTestClient {
 		/**
 		 * Assert the extracted body with a {@link Matcher}.
 		 * @since 5.1
+		 * @deprecated in favor of {@link Consumer}-based variants, and
+		 * AssertJ support via
+		 * {@link org.springframework.test.web.reactive.server.assertj.WebTestClientResponse}
 		 */
-		<T extends S> T value(Matcher<? super @Nullable B> matcher);
+		@Deprecated(since = "7.0", forRemoval = true)
+		@NullUnmarked // To avoid a "Cannot attach type annotations" error when org.hamcrest.Matcher is not in the classpath
+		<T extends S> T value(Matcher<? super B> matcher);
 
 		/**
 		 * Transform the extracted the body with a function, for example, extracting a
 		 * property, and assert the mapped value with a {@link Matcher}.
 		 * @since 5.1
+		 * @deprecated in favor of {@link Consumer}-based variants, and
+		 * AssertJ support via
+		 * {@link org.springframework.test.web.reactive.server.assertj.WebTestClientResponse}
 		 */
-		<T extends S, R> T value(Function<@Nullable B, @Nullable R> bodyMapper, Matcher<? super @Nullable R> matcher);
+		@Deprecated(since = "7.0", forRemoval = true)
+		@NullUnmarked // To avoid a "Cannot attach type annotations" error when org.hamcrest.Matcher is not in the classpath
+		<T extends S, R> T value(@NonNull Function<@Nullable B, @Nullable R> bodyMapper, Matcher<? super R> matcher);
 
 		/**
 		 * Assert the extracted body with a {@link Consumer}.
 		 * @since 5.1
 		 */
 		<T extends S> T value(Consumer<@Nullable B> consumer);
+
+		/**
+		 * Transform the extracted the body with a function, for example, extracting a
+		 * property, and assert the mapped value with a {@link Consumer}.
+		 * @since 7.0
+		 */
+		<T extends S, R> T value(@NonNull Function<@Nullable B, @Nullable R> bodyMapper, Consumer<? super R> consumer);
 
 		/**
 		 * Assert the exchange result with the given {@link Consumer}.
@@ -974,7 +1019,7 @@ public interface WebTestClient {
 	 *
 	 * @param <E> the body list element type
 	 */
-	interface ListBodySpec<E> extends BodySpec<List<@Nullable E>, ListBodySpec<E>> {
+	interface ListBodySpec<E extends @Nullable Object> extends BodySpec<List<E>, ListBodySpec<E>> {
 
 		/**
 		 * Assert the extracted list of values is of the given size.
@@ -987,14 +1032,14 @@ public interface WebTestClient {
 		 * @param elements the elements to check
 		 */
 		@SuppressWarnings("unchecked")
-		ListBodySpec<E> contains(@Nullable E... elements);
+		ListBodySpec<E> contains(E... elements);
 
 		/**
 		 * Assert the extracted list of values doesn't contain the given elements.
 		 * @param elements the elements to check
 		 */
 		@SuppressWarnings("unchecked")
-		ListBodySpec<E> doesNotContain(@Nullable E... elements);
+		ListBodySpec<E> doesNotContain(E... elements);
 	}
 
 

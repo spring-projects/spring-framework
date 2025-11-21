@@ -130,45 +130,41 @@ public abstract class FactoryBeanRegistrySupport extends DefaultSingletonBeanReg
 				locked = (lockFlag && this.singletonLock.tryLock());
 			}
 			try {
-				// A SmartFactoryBean may return multiple object types -> do not cache.
-				boolean smart = (factory instanceof SmartFactoryBean<?>);
-				Object object = (!smart ? this.factoryBeanObjectCache.get(beanName) : null);
-				if (object == null) {
-					object = doGetObjectFromFactoryBean(factory, requiredType, beanName);
-					// Only post-process and store if not put there already during getObject() call above
-					// (for example, because of circular reference processing triggered by custom getBean calls)
-					Object alreadyThere = (!smart ? this.factoryBeanObjectCache.get(beanName) : null);
-					if (alreadyThere != null) {
-						object = alreadyThere;
+				if (factory instanceof SmartFactoryBean<?>) {
+					// A SmartFactoryBean may return multiple object types -> do not cache.
+					// Also, a SmartFactoryBean needs to be thread-safe -> no synchronization necessary.
+					Object object = doGetObjectFromFactoryBean(factory, requiredType, beanName);
+					if (shouldPostProcess) {
+						object = postProcessObjectFromSingletonFactoryBean(object, beanName, locked);
 					}
-					else {
-						if (shouldPostProcess) {
-							if (locked) {
-								if (isSingletonCurrentlyInCreation(beanName)) {
-									// Temporarily return non-post-processed object, not storing it yet
-									return object;
+					return object;
+				}
+				else {
+					// Defensively synchronize against non-thread-safe FactoryBean.getObject() implementations,
+					// potentially to be called from a background thread while the main thread currently calls
+					// the same getObject() method within the singleton lock.
+					synchronized (factory) {
+						Object object = this.factoryBeanObjectCache.get(beanName);
+						if (object == null) {
+							object = doGetObjectFromFactoryBean(factory, requiredType, beanName);
+							// Only post-process and store if not put there already during getObject() call above
+							// (for example, because of circular reference processing triggered by custom getBean calls)
+							Object alreadyThere = this.factoryBeanObjectCache.get(beanName);
+							if (alreadyThere != null) {
+								object = alreadyThere;
+							}
+							else {
+								if (shouldPostProcess) {
+									object = postProcessObjectFromSingletonFactoryBean(object, beanName, locked);
 								}
-								beforeSingletonCreation(beanName);
-							}
-							try {
-								object = postProcessObjectFromFactoryBean(object, beanName);
-							}
-							catch (Throwable ex) {
-								throw new BeanCreationException(beanName,
-										"Post-processing of FactoryBean's singleton object failed", ex);
-							}
-							finally {
-								if (locked) {
-									afterSingletonCreation(beanName);
+								if (containsSingleton(beanName)) {
+									this.factoryBeanObjectCache.put(beanName, object);
 								}
 							}
 						}
-						if (!smart && containsSingleton(beanName)) {
-							this.factoryBeanObjectCache.put(beanName, object);
-						}
+						return object;
 					}
 				}
-				return object;
 			}
 			finally {
 				if (locked) {
@@ -223,6 +219,31 @@ public abstract class FactoryBeanRegistrySupport extends DefaultSingletonBeanReg
 			object = new NullBean();
 		}
 		return object;
+	}
+
+	/**
+	 * Post-process the given object instance produced by a singleton FactoryBean.
+	 */
+	private Object postProcessObjectFromSingletonFactoryBean(Object object, String beanName, boolean locked) {
+		if (locked) {
+			if (isSingletonCurrentlyInCreation(beanName)) {
+				// Temporarily return non-post-processed object, not storing it yet
+				return object;
+			}
+			beforeSingletonCreation(beanName);
+		}
+		try {
+			return postProcessObjectFromFactoryBean(object, beanName);
+		}
+		catch (Throwable ex) {
+			throw new BeanCreationException(beanName,
+					"Post-processing of FactoryBean's singleton object failed", ex);
+		}
+		finally {
+			if (locked) {
+				afterSingletonCreation(beanName);
+			}
+		}
 	}
 
 	/**

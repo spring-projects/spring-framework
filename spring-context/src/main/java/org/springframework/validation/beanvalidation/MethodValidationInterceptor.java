@@ -69,8 +69,6 @@ import org.springframework.validation.method.ParameterValidationResult;
  * at the type level of the containing target class, applying to all public service methods
  * of that class. By default, JSR-303 will validate against its default group only.
  *
- * <p>This functionality requires a Bean Validation 1.1+ provider.
- *
  * @author Juergen Hoeller
  * @author Rossen Stoyanchev
  * @since 3.1
@@ -79,7 +77,7 @@ import org.springframework.validation.method.ParameterValidationResult;
  */
 public class MethodValidationInterceptor implements MethodInterceptor {
 
-	private static final boolean reactorPresent = ClassUtils.isPresent(
+	private static final boolean REACTOR_PRESENT = ClassUtils.isPresent(
 			"reactor.core.publisher.Mono", MethodValidationInterceptor.class.getClassLoader());
 
 
@@ -152,7 +150,7 @@ public class MethodValidationInterceptor implements MethodInterceptor {
 		@Nullable Object[] arguments = invocation.getArguments();
 		Class<?>[] groups = determineValidationGroups(invocation);
 
-		if (reactorPresent) {
+		if (REACTOR_PRESENT) {
 			arguments = ReactorValidationHelper.insertAsyncValidation(
 					this.validationAdapter.getSpringValidatorAdapter(), this.adaptViolations,
 					target, method, arguments);

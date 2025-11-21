@@ -117,10 +117,11 @@ public class ExpressionException extends RuntimeException {
 
 	/**
 	 * Return the exception message.
-	 * As of Spring 4.0, this method returns the same result as {@link #toDetailedString()}.
+	 * <p>This method returns the same result as {@link #toDetailedString()}.
 	 * @see #getSimpleMessage()
 	 * @see java.lang.Throwable#getMessage()
 	 */
+	@Override
 	public String getMessage() {
 		return toDetailedString();
 	}

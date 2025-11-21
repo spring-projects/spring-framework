@@ -51,7 +51,9 @@ public class Task {
 
 
 	/**
-	 * Return the underlying task.
+	 * Return a {@link Runnable} that executes the underlying task.
+	 * <p>Note, this does not necessarily return the {@link Task#Task(Runnable) original runnable}
+	 * as it can be wrapped by the Framework for additional support.
 	 */
 	public Runnable getRunnable() {
 		return this.runnable;

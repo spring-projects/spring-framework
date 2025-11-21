@@ -22,6 +22,8 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.jspecify.annotations.Nullable;
 
 import org.springframework.aop.scope.ScopedProxyUtils;
@@ -66,6 +68,8 @@ import org.springframework.util.Assert;
 class BeanOverrideBeanFactoryPostProcessor implements BeanFactoryPostProcessor, Ordered {
 
 	private static final String PSEUDO_BEAN_NAME_PLACEHOLDER = "<<< PSEUDO BEAN NAME PLACEHOLDER >>>";
+
+	private static final Log logger = LogFactory.getLog(BeanOverrideBeanFactoryPostProcessor.class);
 
 	private static final BeanNameGenerator beanNameGenerator = DefaultBeanNameGenerator.INSTANCE;
 
@@ -182,10 +186,10 @@ class BeanOverrideBeanFactoryPostProcessor implements BeanFactoryPostProcessor, 
 		}
 
 		if (existingBeanDefinition != null) {
-			// Validate the existing bean definition.
+			// Process the existing bean definition.
 			//
 			// Applies during "JVM runtime", "AOT processing", and "AOT runtime".
-			validateBeanDefinition(beanFactory, beanName);
+			convertToSingletonIfNecessary(existingBeanDefinition, beanName);
 		}
 		else if (Boolean.getBoolean(AbstractAotProcessor.AOT_PROCESSING)) {
 			// There was no existing bean definition, but during "AOT processing" we
@@ -289,7 +293,8 @@ class BeanOverrideBeanFactoryPostProcessor implements BeanFactoryPostProcessor, 
 			}
 		}
 
-		validateBeanDefinition(beanFactory, beanName);
+		BeanDefinition beanDefinition = beanFactory.getBeanDefinition(beanName);
+		convertToSingletonIfNecessary(beanDefinition, beanName);
 		this.beanOverrideRegistry.registerBeanOverrideHandler(handler, beanName);
 	}
 
@@ -470,19 +475,20 @@ class BeanOverrideBeanFactoryPostProcessor implements BeanFactoryPostProcessor, 
 	}
 
 	/**
-	 * Validate that the {@link BeanDefinition} for the supplied bean name is suitable
-	 * for being replaced by a bean override.
-	 * <p>If there is no registered {@code BeanDefinition} for the supplied bean name,
-	 * no validation is performed.
+	 * Convert the supplied {@link BeanDefinition} for the supplied bean name to
+	 * a singleton, if necessary.
+	 * @since 7.0
 	 */
-	private static void validateBeanDefinition(ConfigurableListableBeanFactory beanFactory, String beanName) {
+	private static void convertToSingletonIfNecessary(BeanDefinition beanDefinition, String beanName) {
 		// Due to https://github.com/spring-projects/spring-framework/issues/33800, we do NOT invoke
 		// beanFactory.isSingleton(beanName), since doing so can result in a BeanCreationException for
 		// certain beans -- for example, a Spring Data FactoryBean for a JpaRepository.
-		if (beanFactory.containsBeanDefinition(beanName)) {
-			BeanDefinition beanDefinition = beanFactory.getBeanDefinition(beanName);
-			Assert.state(beanDefinition.isSingleton(),
-					() -> "Unable to override bean '" + beanName + "': only singleton beans can be overridden.");
+		if (!beanDefinition.isSingleton()) {
+			if (logger.isWarnEnabled()) {
+				logger.warn("Converting '%s' scoped bean definition '%s' to a singleton."
+						.formatted(beanDefinition.getScope(), beanName));
+			}
+			beanDefinition.setScope(BeanDefinition.SCOPE_SINGLETON);
 		}
 	}
 

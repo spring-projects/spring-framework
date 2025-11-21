@@ -53,7 +53,7 @@ public class StandardApiVersionDeprecationHandlerTests {
 				.setSunsetDate(getDate(sunsetDate))
 				.setSunsetLink(URI.create(sunsetUrl));
 
-		handler.handleVersion("1.1", request, response);
+		handler.handleVersion("1.1", new Object(), request, response);
 
 		assertThat(response.getHeader("Deprecation")).isEqualTo("@1688169599");
 		assertThat(response.getHeader("Sunset")).isEqualTo(sunsetDate);

@@ -90,13 +90,12 @@ public abstract class FileSystemUtils {
 
 		Files.walkFileTree(root, new SimpleFileVisitor<>() {
 			@Override
-			public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+			public FileVisitResult visitFile(Path file, BasicFileAttributes attr) throws IOException {
 				Files.delete(file);
 				return FileVisitResult.CONTINUE;
 			}
-
 			@Override
-			public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+			public FileVisitResult postVisitDirectory(Path dir, IOException ex) throws IOException {
 				Files.delete(dir);
 				return FileVisitResult.CONTINUE;
 			}
@@ -131,19 +130,34 @@ public abstract class FileSystemUtils {
 		BasicFileAttributes srcAttr = Files.readAttributes(src, BasicFileAttributes.class);
 
 		if (srcAttr.isDirectory()) {
-			Files.walkFileTree(src, EnumSet.of(FOLLOW_LINKS), Integer.MAX_VALUE, new SimpleFileVisitor<>() {
-				@Override
-				public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
-					Files.createDirectories(dest.resolve(src.relativize(dir)));
-					return FileVisitResult.CONTINUE;
-				}
-
-				@Override
-				public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-					Files.copy(file, dest.resolve(src.relativize(file)), StandardCopyOption.REPLACE_EXISTING);
-					return FileVisitResult.CONTINUE;
-				}
-			});
+			if (src.getClass() == dest.getClass()) {  // dest.resolve(Path) only works for same Path type
+				Files.walkFileTree(src, EnumSet.of(FOLLOW_LINKS), Integer.MAX_VALUE, new SimpleFileVisitor<>() {
+					@Override
+					public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attr) throws IOException {
+						Files.createDirectories(dest.resolve(src.relativize(dir)));
+						return FileVisitResult.CONTINUE;
+					}
+					@Override
+					public FileVisitResult visitFile(Path file, BasicFileAttributes attr) throws IOException {
+						Files.copy(file, dest.resolve(src.relativize(file)), StandardCopyOption.REPLACE_EXISTING);
+						return FileVisitResult.CONTINUE;
+					}
+				});
+			}
+			else {  // use dest.resolve(String) for different Path types
+				Files.walkFileTree(src, EnumSet.of(FOLLOW_LINKS), Integer.MAX_VALUE, new SimpleFileVisitor<>() {
+					@Override
+					public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attr) throws IOException {
+						Files.createDirectories(dest.resolve(src.relativize(dir).toString()));
+						return FileVisitResult.CONTINUE;
+					}
+					@Override
+					public FileVisitResult visitFile(Path file, BasicFileAttributes attr) throws IOException {
+						Files.copy(file, dest.resolve(src.relativize(file).toString()), StandardCopyOption.REPLACE_EXISTING);
+						return FileVisitResult.CONTINUE;
+					}
+				});
+			}
 		}
 		else if (srcAttr.isRegularFile()) {
 			Files.copy(src, dest);

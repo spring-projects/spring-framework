@@ -1,0 +1,4 @@
+[[kotlin-bean-registration-dsl]]
+= Bean Registration DSL
+
+See xref:core/beans/java/programmatic-bean-registration.adoc[Programmatic Bean Registration].

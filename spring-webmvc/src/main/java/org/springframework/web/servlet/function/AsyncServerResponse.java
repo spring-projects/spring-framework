@@ -100,7 +100,7 @@ public interface AsyncServerResponse extends ServerResponse {
 		if (obj instanceof CompletableFuture<?> futureResponse) {
 			return (CompletableFuture<ServerResponse>) futureResponse;
 		}
-		else if (DefaultAsyncServerResponse.reactiveStreamsPresent) {
+		else if (DefaultAsyncServerResponse.REACTIVE_STREAMS_PRESENT) {
 			ReactiveAdapterRegistry registry = ReactiveAdapterRegistry.getSharedInstance();
 			ReactiveAdapter publisherAdapter = registry.getAdapter(obj.getClass());
 			if (publisherAdapter != null) {

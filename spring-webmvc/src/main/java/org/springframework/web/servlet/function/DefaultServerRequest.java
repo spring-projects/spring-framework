@@ -660,7 +660,6 @@ class DefaultServerRequest implements ServerRequest {
 			return this.headers.headerNames();
 		}
 
-
 		// Unsupported
 
 		@Override
@@ -693,7 +692,7 @@ class DefaultServerRequest implements ServerRequest {
 			throw new UnsupportedOperationException();
 		}
 
-		// @Override - on Servlet 6.1
+		@Override
 		public void sendRedirect(String location, int sc, boolean clearBuffer) throws IOException {
 			throw new UnsupportedOperationException();
 		}
@@ -712,7 +711,6 @@ class DefaultServerRequest implements ServerRequest {
 		public void addIntHeader(String name, int value) {
 			throw new UnsupportedOperationException();
 		}
-
 
 		@Override
 		public String getCharacterEncoding() {
@@ -791,6 +789,11 @@ class DefaultServerRequest implements ServerRequest {
 
 		@Override
 		public Locale getLocale() {
+			throw new UnsupportedOperationException();
+		}
+
+		// @Override - on Servlet 6.2
+		public void sendEarlyHints() {
 			throw new UnsupportedOperationException();
 		}
 	}

@@ -39,6 +39,7 @@ import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.NoUniqueBeanDefinitionException;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.SmartFactoryBean;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.util.Assert;
@@ -197,6 +198,11 @@ public class StaticListableBeanFactory implements ListableBeanFactory {
 	@Override
 	public <T> ObjectProvider<T> getBeanProvider(ResolvableType requiredType) {
 		return getBeanProvider(requiredType, true);
+	}
+
+	@Override
+	public <T> ObjectProvider<T> getBeanProvider(ParameterizedTypeReference<T> requiredType) {
+		return getBeanProvider(ResolvableType.forType(requiredType), true);
 	}
 
 	@Override

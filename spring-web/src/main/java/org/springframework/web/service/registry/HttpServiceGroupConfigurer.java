@@ -64,20 +64,30 @@ public interface HttpServiceGroupConfigurer<CB> extends Ordered {
 		Groups<CB> filter(Predicate<HttpServiceGroup> predicate);
 
 		/**
-		 * Configure the client builder for each
-		 * {@link #filter(Predicate) filtered} group.
+		 * Callback to customize the client builder for every group matched by
+		 * the specified name or predicate filters, or to all groups
+		 * if no filters are specified.
 		 */
 		void forEachClient(ClientCallback<CB> callback);
 
 		/**
-		 * Configure the {@code HttpServiceProxyFactory} for each
-		 * {@link #filter(Predicate) filtered} group.
+		 * Callback to supply the client builder for every group matched by
+		 * the specified name or predicate filters, or to all groups
+		 * if no filters are specified.
+		 */
+		void forEachClient(InitializingClientCallback<CB> callback);
+
+		/**
+		 * Callback to customize the proxy factory for every group matched by
+		 * the specified name or predicate filters, or to all groups
+		 * if no filters are specified.
 		 */
 		void forEachProxyFactory(ProxyFactoryCallback callback);
 
 		/**
-		 * Configure the client builder and {@code HttpServiceProxyFactory} for each
-		 * {@link #filter(Predicate) filtered} group.
+		 * Callback to customize the client builder and the proxy factory for
+		 * every group matched by the specified name or predicate filters,
+		 * or to all groups if no filters are specified.
 		 */
 		void forEachGroup(GroupCallback<CB> callback);
 	}
@@ -91,6 +101,17 @@ public interface HttpServiceGroupConfigurer<CB> extends Ordered {
 	interface ClientCallback<CB> {
 
 		void withClient(HttpServiceGroup group, CB clientBuilder);
+	}
+
+
+	/**
+	 * Callback to provide the client builder rather than customize it.
+	 * @param <CB> the type of client builder, i.e. {@code RestClient} or {@code WebClient} builder.
+	 */
+	@FunctionalInterface
+	interface InitializingClientCallback<CB> {
+
+		CB initClient(HttpServiceGroup group);
 	}
 
 

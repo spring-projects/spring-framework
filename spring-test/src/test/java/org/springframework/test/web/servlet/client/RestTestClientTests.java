@@ -25,7 +25,7 @@ import java.util.Map;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.hamcrest.Matchers;
+import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -36,12 +36,15 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.equalTo;
 
 /**
  * Tests using the {@link RestTestClient} API.
@@ -283,7 +286,7 @@ class RestTestClientTests {
 		void testExpectCookie() {
 			RestTestClientTests.this.client.get().uri("/test")
 					.exchange()
-					.expectCookie().value("session", Matchers.equalTo("abc"));
+					.expectCookie().value("session", v -> MatcherAssert.assertThat(v, equalTo("abc")));
 		}
 	}
 
@@ -317,6 +320,19 @@ class RestTestClientTests {
 					});
 			assertThat(result.getResponseBody().get("uri")).isEqualTo("/test");
 		}
+
+		@Test
+		void testResultContent() {
+			String body = "body-in";
+			EntityExchangeResult<String> result = RestTestClientTests.this.client.post().uri("/body")
+					.body(body)
+					.exchange()
+					.expectStatus().isOk()
+					.expectBody(String.class)
+					.returnResult();
+			assertThat(result.getRequestBodyContent()).isEqualTo(body.getBytes(StandardCharsets.UTF_8));
+			assertThat(result.getResponseBodyContent()).isEqualTo((body + "-out").getBytes(StandardCharsets.UTF_8));
+		}
 	}
 
 
@@ -325,14 +341,20 @@ class RestTestClientTests {
 
 		@RequestMapping(path = {"/test", "/test/*"}, produces = "application/json")
 		public Map<String, Object> handle(
-				@RequestHeader HttpHeaders headers,
-				HttpServletRequest request, HttpServletResponse response) {
+				@RequestHeader HttpHeaders headers, HttpServletRequest request, HttpServletResponse response) {
+
 			response.addCookie(new Cookie("session", "abc"));
+
 			return Map.of(
 					"method", request.getMethod(),
 					"uri", request.getRequestURI(),
 					"headers", headers.toSingleValueMap()
 			);
+		}
+
+		@PostMapping("/body")
+		public String echoBody(@RequestBody String body) {
+			return body + "-out";
 		}
 	}
 }

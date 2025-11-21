@@ -41,6 +41,9 @@ import static org.springframework.test.context.TestConstructor.AutowireMode.ANNO
  */
 class TestConstructorUtilsTests {
 
+	private static final PropertyProvider propertyProvider = name -> null;
+
+
 	@AfterEach
 	void clearGlobalFlag() {
 		setGlobalFlag(null);
@@ -100,12 +103,12 @@ class TestConstructorUtilsTests {
 
 	private void assertAutowirable(Class<?> testClass) throws NoSuchMethodException {
 		Constructor<?> constructor = testClass.getDeclaredConstructor();
-		assertThat(TestConstructorUtils.isAutowirableConstructor(constructor, testClass)).isTrue();
+		assertThat(TestConstructorUtils.isAutowirableConstructor(constructor, propertyProvider)).isTrue();
 	}
 
 	private void assertNotAutowirable(Class<?> testClass) throws NoSuchMethodException {
 		Constructor<?> constructor = testClass.getDeclaredConstructor();
-		assertThat(TestConstructorUtils.isAutowirableConstructor(constructor, testClass)).isFalse();
+		assertThat(TestConstructorUtils.isAutowirableConstructor(constructor, propertyProvider)).isFalse();
 	}
 
 	private void setGlobalFlag() {

@@ -20,6 +20,7 @@ import java.lang.annotation.Annotation;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Consumer;
 
 import org.apache.commons.logging.Log;
@@ -227,7 +228,7 @@ public class PayloadMethodArgumentResolver implements HandlerMethodArgumentResol
 				if (adapter != null && adapter.isMultiValue()) {
 					Flux<?> flux = content
 							.filter(this::nonEmptyDataBuffer)
-							.map(buffer -> decoder.decode(buffer, elementType, mimeType, hints))
+							.map(buffer -> Objects.requireNonNull(decoder.decode(buffer, elementType, mimeType, hints)))
 							.onErrorMap(ex -> handleReadError(parameter, message, ex));
 					if (isContentRequired) {
 						flux = flux.switchIfEmpty(Flux.error(() -> handleMissingBody(parameter, message)));
@@ -241,7 +242,7 @@ public class PayloadMethodArgumentResolver implements HandlerMethodArgumentResol
 					// Single-value (with or without reactive type wrapper)
 					Mono<?> mono = content.next()
 							.filter(this::nonEmptyDataBuffer)
-							.map(buffer -> decoder.decode(buffer, elementType, mimeType, hints))
+							.map(buffer -> Objects.requireNonNull(decoder.decode(buffer, elementType, mimeType, hints)))
 							.onErrorMap(ex -> handleReadError(parameter, message, ex));
 					if (isContentRequired) {
 						mono = mono.switchIfEmpty(Mono.error(() -> handleMissingBody(parameter, message)));

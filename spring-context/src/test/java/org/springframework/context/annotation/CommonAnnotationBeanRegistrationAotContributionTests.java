@@ -92,7 +92,7 @@ class CommonAnnotationBeanRegistrationAotContributionTests {
 
 	@Test
 	@CompileWithForkedClassLoader
-	void contributeWhenPackagePrivateFieldInjectionInjectsUsingFieldAssignement() {
+	void contributeWhenPackagePrivateFieldInjectionInjectsUsingFieldAssignment() {
 		this.beanFactory.registerSingleton("one", "1");
 		this.beanFactory.registerSingleton("two", "2");
 		RegisteredBean registeredBean = getAndApplyContribution(

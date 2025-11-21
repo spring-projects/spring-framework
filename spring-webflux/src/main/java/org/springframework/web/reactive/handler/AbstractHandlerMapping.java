@@ -206,7 +206,7 @@ public abstract class AbstractHandlerMapping extends ApplicationObjectSupport
 			if (getApiVersionStrategy() != null) {
 				Comparable<?> version = exchange.getAttribute(API_VERSION_ATTRIBUTE);
 				if (version != null) {
-					getApiVersionStrategy().handleDeprecations(version, exchange);
+					getApiVersionStrategy().handleDeprecations(version, handler, exchange);
 				}
 			}
 			return handler;

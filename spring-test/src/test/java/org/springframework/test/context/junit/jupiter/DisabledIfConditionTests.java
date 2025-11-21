@@ -112,7 +112,7 @@ class DisabledIfConditionTests {
 		Class<?> testClass = SpringTestCase.class;
 		Method method = ReflectionUtils.findMethod(getClass(), methodName);
 		Store store = mock();
-		given(store.getOrComputeIfAbsent(any(), any(), any())).willReturn(new TestContextManager(testClass));
+		given(store.computeIfAbsent(any(), any(), any())).willReturn(new TestContextManager(testClass));
 
 		ExtensionContext extensionContext = mock();
 		given(extensionContext.getTestClass()).willReturn(Optional.of(testClass));

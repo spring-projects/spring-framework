@@ -35,8 +35,11 @@ package org.springframework.core;
  */
 public class DefaultParameterNameDiscoverer extends PrioritizedParameterNameDiscoverer {
 
+	private static final boolean KOTLIN_REFLECT_PRESENT = KotlinDetector.isKotlinReflectPresent();
+
+
 	public DefaultParameterNameDiscoverer() {
-		if (KotlinDetector.isKotlinReflectPresent()) {
+		if (KOTLIN_REFLECT_PRESENT) {
 			addDiscoverer(new KotlinReflectionParameterNameDiscoverer());
 		}
 

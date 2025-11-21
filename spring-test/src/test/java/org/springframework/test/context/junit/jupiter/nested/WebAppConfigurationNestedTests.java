@@ -24,7 +24,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.NestedTestConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
-import org.springframework.test.context.junit.jupiter.nested.WebAppConfigurationNestedTests.Config;
 import org.springframework.test.context.junit.jupiter.web.SpringJUnitWebConfig;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.web.context.WebApplicationContext;
@@ -40,10 +39,11 @@ import static org.springframework.test.context.NestedTestConfiguration.Enclosing
  *
  * @author Sam Brannen
  * @since 5.0
- * @see ConstructorInjectionNestedTests
+ * @see ConstructorInjectionTestClassScopedExtensionContextNestedTests
+ * @see ConstructorInjectionTestMethodScopedExtensionContextNestedTests
  * @see org.springframework.test.context.junit4.nested.NestedTestsWithSpringRulesTests
  */
-@SpringJUnitWebConfig(Config.class)
+@SpringJUnitWebConfig
 @NestedTestConfiguration(OVERRIDE) // since INHERIT is now the global default
 class WebAppConfigurationNestedTests {
 

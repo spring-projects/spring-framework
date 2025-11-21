@@ -37,7 +37,7 @@ import org.springframework.util.Assert;
  * @since 7.0
  * @see HibernateTransactionManager
  */
-class SessionHolder extends EntityManagerHolder {
+public class SessionHolder extends EntityManagerHolder {
 
 	private @Nullable StatelessSession statelessSession;
 
@@ -50,13 +50,13 @@ class SessionHolder extends EntityManagerHolder {
 		super(session);
 	}
 
-	public SessionHolder(StatelessSession session) {
+	SessionHolder(StatelessSession session) {
 		super(null);
 		this.statelessSession = session;
 	}
 
 
-	public void setSession(Session session) {
+	void setSession(Session session) {
 		this.entityManager = session;
 	}
 
@@ -64,37 +64,37 @@ class SessionHolder extends EntityManagerHolder {
 		return (Session) getEntityManager();
 	}
 
-	public boolean hasSession() {
+	boolean hasSession() {
 		return (this.entityManager != null);
 	}
 
-	public void setStatelessSession(StatelessSession statelessSession) {
+	void setStatelessSession(StatelessSession statelessSession) {
 		this.statelessSession = statelessSession;
 	}
 
-	public StatelessSession getStatelessSession() {
+	StatelessSession getStatelessSession() {
 		Assert.state(this.statelessSession != null, "No StatelessSession available");
 		return this.statelessSession;
 	}
 
-	public boolean hasStatelessSession() {
+	boolean hasStatelessSession() {
 		return (this.statelessSession != null);
 	}
 
-	public void setTransaction(@Nullable Transaction transaction) {
+	void setTransaction(@Nullable Transaction transaction) {
 		this.transaction = transaction;
 		setTransactionActive(transaction != null);
 	}
 
-	public @Nullable Transaction getTransaction() {
+	@Nullable Transaction getTransaction() {
 		return this.transaction;
 	}
 
-	public void setPreviousFlushMode(@Nullable FlushMode previousFlushMode) {
+	void setPreviousFlushMode(@Nullable FlushMode previousFlushMode) {
 		this.previousFlushMode = previousFlushMode;
 	}
 
-	public @Nullable FlushMode getPreviousFlushMode() {
+	@Nullable FlushMode getPreviousFlushMode() {
 		return this.previousFlushMode;
 	}
 

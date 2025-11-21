@@ -57,6 +57,7 @@ import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
+import org.springframework.web.accept.SemanticApiVersionParser;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.InitBinder;
@@ -147,7 +148,8 @@ class RequestMappingHandlerAdapterIntegrationTests {
 		Class<?>[] parameterTypes = new Class<?>[] {int.class, String.class, String.class, String.class, Map.class,
 				Date.class, Map.class, String.class, String.class, TestBean.class, Errors.class, TestBean.class,
 				Color.class, HttpServletRequest.class, HttpServletResponse.class, TestBean.class, TestBean.class,
-				User.class, OtherUser.class, Principal.class, Model.class, UriComponentsBuilder.class};
+				User.class, OtherUser.class, Principal.class, Model.class,
+				SemanticApiVersionParser.Version.class, UriComponentsBuilder.class};
 
 		String datePattern = "yyyy.MM.dd";
 		String formattedDate = "2011.03.16";
@@ -173,6 +175,8 @@ class RequestMappingHandlerAdapterIntegrationTests {
 		request.setAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE, uriTemplateVars);
 		request.getSession().setAttribute("sessionAttribute", sessionAttribute);
 		request.setAttribute("requestAttribute", requestAttribute);
+		SemanticApiVersionParser.Version version = new SemanticApiVersionParser().parseVersion("1.2");
+		request.setAttribute(HandlerMapping.API_VERSION_ATTRIBUTE, version);
 
 		HandlerMethod handlerMethod = handlerMethod("handle", parameterTypes);
 		ModelAndView mav = handlerAdapter.handle(request, response, handlerMethod);
@@ -221,6 +225,7 @@ class RequestMappingHandlerAdapterIntegrationTests {
 		assertThat(model.get("sessionAttribute")).isSameAs(sessionAttribute);
 		assertThat(model.get("requestAttribute")).isSameAs(requestAttribute);
 
+		assertThat(model.get("version")).isSameAs(version);
 		assertThat(model.get("url")).isEqualTo(URI.create("http://localhost/contextPath/main/path"));
 	}
 
@@ -483,6 +488,7 @@ class RequestMappingHandlerAdapterIntegrationTests {
 				@ModelAttribute OtherUser otherUser,
 				@AuthenticationPrincipal Principal customUser, // gh-25780
 				Model model,
+				SemanticApiVersionParser.Version version,
 				UriComponentsBuilder builder) {
 
 			model.addAttribute("cookie", cookieV)
@@ -499,6 +505,7 @@ class RequestMappingHandlerAdapterIntegrationTests {
 					.addAttribute("customUser", customUser)
 					.addAttribute("sessionAttribute", sessionAttribute)
 					.addAttribute("requestAttribute", requestAttribute)
+					.addAttribute("version", version)
 					.addAttribute("url", builder.path("/path").build().toUri());
 
 			assertThat(request).isNotNull();

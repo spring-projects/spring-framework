@@ -76,6 +76,7 @@ import org.springframework.context.expression.StandardBeanExpressionResolver;
 import org.springframework.context.weaving.LoadTimeWeaverAware;
 import org.springframework.context.weaving.LoadTimeWeaverAwareProcessor;
 import org.springframework.core.NativeDetector;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.convert.ConversionService;
@@ -943,6 +944,9 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 */
 	@SuppressWarnings("unchecked")
 	protected void finishBeanFactoryInitialization(ConfigurableListableBeanFactory beanFactory) {
+		// Mark current thread for singleton instantiation with applied bootstrap locking.
+		beanFactory.prepareSingletonBootstrap();
+
 		// Initialize bootstrap executor for this context.
 		if (beanFactory.containsBean(BOOTSTRAP_EXECUTOR_BEAN_NAME) &&
 				beanFactory.isTypeMatch(BOOTSTRAP_EXECUTOR_BEAN_NAME, Executor.class)) {
@@ -1328,6 +1332,12 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 	@Override
 	public <T> ObjectProvider<T> getBeanProvider(ResolvableType requiredType) {
+		assertBeanFactoryActive();
+		return getBeanFactory().getBeanProvider(requiredType);
+	}
+
+	@Override
+	public <T> ObjectProvider<T> getBeanProvider(ParameterizedTypeReference<T> requiredType) {
 		assertBeanFactoryActive();
 		return getBeanFactory().getBeanProvider(requiredType);
 	}

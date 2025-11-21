@@ -20,15 +20,22 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
+import org.springframework.beans.factory.BeanCreationException;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.context.annotation.Scope;
+import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.context.support.GenericApplicationContext;
+import org.springframework.stereotype.Component;
 import org.springframework.test.context.bean.override.BeanOverrideContextCustomizerTestUtils;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 
 /**
  * Tests for {@link MockitoSpyBean @MockitoSpyBean}.
  *
  * @author Stephane Nicoll
+ * @author Sam Brannen
  */
 class MockitoSpyBeanConfigurationErrorTests {
 
@@ -73,6 +80,39 @@ class MockitoSpyBeanConfigurationErrorTests {
 						List.of("bean1", "bean2"));
 	}
 
+	@Test  // gh-35722
+	void mockitoSpyBeanCannotSpyOnScopedProxy() {
+		var context = new AnnotationConfigApplicationContext();
+		context.register(MyScopedProxy.class);
+		BeanOverrideContextCustomizerTestUtils.customizeApplicationContext(ScopedProxyTestCase.class, context);
+		context.refresh();
+
+		assertThatExceptionOfType(BeanCreationException.class)
+				.isThrownBy(() -> context.getBean(MyScopedProxy.class))
+				.havingRootCause()
+					.isInstanceOf(IllegalStateException.class)
+					.withMessage("""
+						@MockitoSpyBean cannot be applied to bean 'myScopedProxy', because it is a \
+						Spring AOP proxy with a non-static TargetSource. Perhaps you have attempted \
+						to spy on a scoped proxy, which is not supported.""");
+	}
+
+	@Test  // gh-35722
+	void mockitoSpyBeanCannotSpyOnSelfInjectionScopedProxy() {
+		var context = new AnnotationConfigApplicationContext();
+		context.register(MySelfInjectionScopedProxy.class);
+		BeanOverrideContextCustomizerTestUtils.customizeApplicationContext(SelfInjectionScopedProxyTestCase.class, context);
+
+		assertThatExceptionOfType(BeanCreationException.class)
+				.isThrownBy(context::refresh)
+				.havingRootCause()
+					.isInstanceOf(IllegalStateException.class)
+					.withMessage("""
+						@MockitoSpyBean cannot be applied to bean 'mySelfInjectionScopedProxy', because it \
+						is a Spring AOP proxy with a non-static TargetSource. Perhaps you have attempted \
+						to spy on a scoped proxy, which is not supported.""");
+	}
+
 
 	static class ByTypeSingleLookup {
 
@@ -86,6 +126,33 @@ class MockitoSpyBeanConfigurationErrorTests {
 		@MockitoSpyBean("beanToSpy")
 		String example;
 
+	}
+
+	static class ScopedProxyTestCase {
+
+		@MockitoSpyBean
+		MyScopedProxy myScopedProxy;
+
+	}
+
+	static class SelfInjectionScopedProxyTestCase {
+
+		@MockitoSpyBean
+		MySelfInjectionScopedProxy mySelfInjectionScopedProxy;
+
+	}
+
+	@Component("myScopedProxy")
+	@Scope(proxyMode = ScopedProxyMode.TARGET_CLASS)
+	static class MyScopedProxy {
+	}
+
+	@Component("mySelfInjectionScopedProxy")
+	@Scope(proxyMode = ScopedProxyMode.TARGET_CLASS)
+	static class MySelfInjectionScopedProxy {
+
+		MySelfInjectionScopedProxy(MySelfInjectionScopedProxy self) {
+		}
 	}
 
 }

@@ -88,6 +88,8 @@ public class InstanceSupplierCodeGenerator {
 
 	private static final CodeBlock NO_ARGS = CodeBlock.of("");
 
+	private static final boolean KOTLIN_REFLECT_PRESENT = KotlinDetector.isKotlinReflectPresent();
+
 
 	private final GenerationContext generationContext;
 
@@ -161,7 +163,7 @@ public class InstanceSupplierCodeGenerator {
 				registeredBean.getBeanName(), constructor, registeredBean.getBeanClass());
 
 		Class<?> publicType = descriptor.publicType();
-		if (KotlinDetector.isKotlinType(publicType) && KotlinDelegate.hasConstructorWithOptionalParameter(publicType)) {
+		if (KOTLIN_REFLECT_PRESENT && KotlinDetector.isKotlinType(publicType) && KotlinDelegate.hasConstructorWithOptionalParameter(publicType)) {
 			return generateCodeForInaccessibleConstructor(descriptor,
 					hints -> hints.registerType(publicType, MemberCategory.INVOKE_DECLARED_CONSTRUCTORS));
 		}
@@ -293,9 +295,12 @@ public class InstanceSupplierCodeGenerator {
 
 		this.generationContext.getRuntimeHints().reflection().registerMethod(factoryMethod, ExecutableMode.INVOKE);
 		GeneratedMethod getInstanceMethod = generateGetInstanceSupplierMethod(method -> {
+			CodeWarnings codeWarnings = new CodeWarnings();
 			Class<?> suppliedType = ClassUtils.resolvePrimitiveIfNecessary(factoryMethod.getReturnType());
+			codeWarnings.detectDeprecation(suppliedType, factoryMethod);
 			method.addJavadoc("Get the bean instance supplier for '$L'.", beanName);
 			method.addModifiers(PRIVATE_STATIC);
+			codeWarnings.suppress(method);
 			method.returns(ParameterizedTypeName.get(BeanInstanceSupplier.class, suppliedType));
 			method.addStatement(generateInstanceSupplierForFactoryMethod(
 					factoryMethod, suppliedType, targetClass, factoryMethod.getName()));

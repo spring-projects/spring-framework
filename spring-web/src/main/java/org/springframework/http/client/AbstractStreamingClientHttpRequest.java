@@ -22,16 +22,23 @@ import java.io.OutputStream;
 import org.jspecify.annotations.Nullable;
 
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.StreamingHttpOutputMessage;
 import org.springframework.util.Assert;
 import org.springframework.util.FastByteArrayOutputStream;
 
 /**
- * Abstract base for {@link ClientHttpRequest} that also implement
- * {@link StreamingHttpOutputMessage}. Ensures that headers and
- * body are not written multiple times.
+ * Extension of {@link AbstractClientHttpRequest} that adds the ability to stream
+ * request body content directly to the underlying HTTP client library through
+ * the {@link StreamingHttpOutputMessage} contract.
+ *
+ * <p>It is necessary to call {@link #setBody} and stream the request body through
+ * a callback for access to the {@code OutputStream}. The alternative to call
+ * {@link #getBody()} is also supported as a fallback, but that does not stream,
+ * and returns an aggregating {@code OutputStream} instead.
  *
  * @author Arjen Poutsma
+ * @author Rossen Stoyanchev
  * @since 6.1
  */
 abstract class AbstractStreamingClientHttpRequest extends AbstractClientHttpRequest
@@ -42,6 +49,12 @@ abstract class AbstractStreamingClientHttpRequest extends AbstractClientHttpRequ
 	private @Nullable FastByteArrayOutputStream bodyStream;
 
 
+	/**
+	 * Implements the {@link HttpOutputMessage} contract for request body content.
+	 * <p>Note that this method does not result in streaming, and the returned
+	 * {@code OutputStream} aggregates the full content in a byte[] before
+	 * sending. To use streaming, call {@link #setBody} instead.
+	 */
 	@Override
 	protected final OutputStream getBodyInternal(HttpHeaders headers) {
 		Assert.state(this.body == null, "Invoke either getBody or setBody; not both");
@@ -52,6 +65,10 @@ abstract class AbstractStreamingClientHttpRequest extends AbstractClientHttpRequ
 		return this.bodyStream;
 	}
 
+	/**
+	 * Implements the {@link StreamingHttpOutputMessage} contract for writing
+	 * request body by streaming directly to the underlying HTTP client.
+	 */
 	@Override
 	public final void setBody(Body body) {
 		Assert.notNull(body, "Body must not be null");
@@ -72,12 +89,14 @@ abstract class AbstractStreamingClientHttpRequest extends AbstractClientHttpRequ
 
 
 	/**
-	 * Abstract template method that writes the given headers and content to the HTTP request.
-	 * @param headers the HTTP headers
+	 * Abstract method for concrete implementations to write the headers and
+	 * {@link StreamingHttpOutputMessage.Body} to the HTTP request.
+	 * @param headers the HTTP headers for the request
 	 * @param body the HTTP body, may be {@code null} if no body was {@linkplain #setBody(Body) set}
 	 * @return the response object for the executed request
 	 * @since 6.1
 	 */
-	protected abstract ClientHttpResponse executeInternal(HttpHeaders headers, @Nullable Body body) throws IOException;
+	protected abstract ClientHttpResponse executeInternal(
+			HttpHeaders headers, @Nullable Body body) throws IOException;
 
 }

@@ -98,61 +98,7 @@ challenge for dealing effectively with encoding and other issues with URLs.
 
 You can map requests by using glob patterns and wildcards:
 
-[cols="2,3,5"]
-|===
-|Pattern |Description |Example
-
-| `spring`
-| Literal pattern
-| `+"/spring"+` matches `+"/spring"+`
-
-| `+?+`
-| Matches one character
-| `+"/pages/t?st.html"+` matches `+"/pages/test.html"+` and `+"/pages/t3st.html"+`
-
-| `+*+`
-| Matches zero or more characters within a path segment
-| `+"/resources/*.png"+` matches `+"/resources/file.png"+`
-
-`+"/projects/*/versions"+` matches `+"/projects/spring/versions"+` but does not match `+"/projects/spring/boot/versions"+`
-
-| `+**+`
-| Matches zero or more path segments
-| `+"/resources/**"+` matches `+"/resources/file.png"+` and `+"/resources/images/file.png"+`
-
-`+"/**/resources"+` matches `+"/spring/resources"+` and `+"/spring/framework/resources"+`
-
-`+"/resources/**/file.png"+` is invalid as `+**+` is not allowed in the middle of the path.
-
-`+"/**/{name}/resources"+` is invalid as only a literal pattern is allowed right after `+**+`.
-`+"/**/project/{project}/resources"+` is allowed.
-
-`+"/**/spring/**"+` is not allowed, as only a single `+**+`/`+{*path}+` instance is allowed per pattern.
-
-| `+{name}+`
-| Matches a path segment and captures it as a variable named "name"
-| `+"/projects/{project}/versions"+` matches `+"/projects/spring/versions"+` and captures `+project=spring+`
-
-`+"/projects/{project}/versions"+` does not match `+"/projects/spring/framework/versions"+` as it captures a single path segment.
-
-| `+{name:[a-z]+}+`
-| Matches the regexp `+"[a-z]+"+` as a path variable named "name"
-| `+"/projects/{project:[a-z]+}/versions"+` matches `+"/projects/spring/versions"+` but not `+"/projects/spring1/versions"+`
-
-| `+{*path}+`
-| Matches zero or more path segments and captures it as a variable named "path"
-| `+"/resources/{*file}"+` matches `+"/resources/images/file.png"+` and captures `+file=/images/file.png+`
-
-`+"{*path}/resources"+` matches `+"/spring/framework/resources"+` and captures `+path=/spring/framework+`
-
-`+"/resources/{*path}/file.png"+` is invalid as `{*path}` is not allowed in the middle of the path.
-
-`+"/{*path}/{name}/resources"+` is invalid as only a literal pattern is allowed right after `{*path}`.
-`+"/{*path}/project/{project}/resources"+` is allowed.
-
-`+"/{*path}/spring/**"+` is not allowed, as only a single `+**+`/`+{*path}+` instance is allowed per pattern.
-
-|===
+include::partial$web/uri-patterns.adoc[leveloffset=+1]
 
 Captured URI variables can be accessed with `@PathVariable`. For example:
 
@@ -659,10 +605,9 @@ Kotlin::
 [.small]#xref:web/webflux/controller/ann-requestmapping.adoc#webflux-ann-httpexchange-annotation[See equivalent in the Reactive stack]#
 
 While the main purpose of `@HttpExchange` is to abstract HTTP client code with a
-generated proxy, the
-xref:integration/rest-clients.adoc#rest-http-interface[HTTP Interface] on which
-such annotations are placed is a contract neutral to client vs server use.
-In addition to simplifying client code, there are also cases where an HTTP Interface
+generated proxy, the interface on which such annotations are placed is a contract neutral
+to client vs server use. In addition to simplifying client code, there are also cases
+where an xref:integration/rest-clients.adoc#rest-http-service-client[HTTP Service Client]
 may be a convenient way for servers to expose their API for client access. This leads
 to increased coupling between client and server and is often not a good choice,
 especially for public API's, but may be exactly the goal for an internal API.
@@ -739,7 +684,7 @@ path, and content types.
 For method parameters and returns values, generally, `@HttpExchange` supports a
 subset of the method parameters that `@RequestMapping` does. Notably, it excludes any
 server-side specific parameter types. For details, see the list for
-xref:integration/rest-clients.adoc#rest-http-interface-method-parameters[@HttpExchange] and
+xref:integration/rest-clients.adoc#rest-http-service-client-method-parameters[@HttpExchange] and
 xref:web/webmvc/mvc-controller/ann-methods/arguments.adoc[@RequestMapping].
 
 `@HttpExchange` also supports a `headers()` parameter which accepts `"name=value"`-like

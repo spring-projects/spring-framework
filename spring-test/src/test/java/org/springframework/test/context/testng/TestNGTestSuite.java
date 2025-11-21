@@ -16,6 +16,7 @@
 
 package org.springframework.test.context.testng;
 
+import org.junit.platform.suite.api.IncludeClassNamePatterns;
 import org.junit.platform.suite.api.IncludeEngines;
 import org.junit.platform.suite.api.SelectPackages;
 import org.junit.platform.suite.api.Suite;
@@ -40,7 +41,8 @@ import org.junit.platform.suite.api.Suite;
  * @since 5.3.11
  */
 @Suite
-@IncludeEngines("testng")
+@IncludeEngines({"testng", "junit-jupiter"})
 @SelectPackages("org.springframework.test.context.testng")
+@IncludeClassNamePatterns(".*Tests?$")
 class TestNGTestSuite {
 }

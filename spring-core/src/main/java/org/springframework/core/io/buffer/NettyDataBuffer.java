@@ -130,6 +130,11 @@ public class NettyDataBuffer implements PooledDataBuffer {
 	}
 
 	@Override
+	public int forEachByte(int index, int length, ByteProcessor processor) {
+		return this.byteBuf.forEachByte(index, length, processor::process);
+	}
+
+	@Override
 	public int capacity() {
 		return this.byteBuf.capacity();
 	}
@@ -374,7 +379,13 @@ public class NettyDataBuffer implements PooledDataBuffer {
 
 	@Override
 	public String toString() {
-		return this.byteBuf.toString();
+		try {
+			return this.byteBuf.toString();
+		}
+		catch (OutOfMemoryError ex) {
+			throw new DataBufferLimitException(
+					"Failed to convert data buffer to string: " + ex.getMessage(), ex);
+		}
 	}
 
 

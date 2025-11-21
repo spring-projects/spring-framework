@@ -35,7 +35,7 @@ import org.springframework.util.function.ThrowingFunction;
  * Thanks to Ales Justin and Marius Bogoevici for the initial prototype.
  *
  * <p>This weaver supports WildFly 13-23 (DelegatingClassFileTransformer) as well as
- * WildFly 24+ (DelegatingClassTransformer), as of Spring Framework 6.1.15.
+ * WildFly 24+ (DelegatingClassTransformer).
  *
  * @author Costin Leau
  * @author Juergen Hoeller

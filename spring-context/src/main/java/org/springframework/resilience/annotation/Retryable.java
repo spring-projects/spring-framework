@@ -40,6 +40,7 @@ import org.springframework.resilience.retry.MethodRetryPredicate;
  * project but redesigned as a minimal core retry feature in the Spring Framework.
  *
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 7.0
  * @see EnableResilientMethods
  * @see RetryAnnotationBeanPostProcessor
@@ -64,6 +65,11 @@ public @interface Retryable {
 	/**
 	 * Applicable exception types to attempt a retry for. This attribute
 	 * allows for the convenient specification of assignable exception types.
+	 * <p>The supplied exception types will be matched against an exception
+	 * thrown by a failed invocation as well as nested
+	 * {@linkplain Throwable#getCause() causes}.
+	 * <p>This can optionally be combined with {@link #excludes() excludes} or
+	 * a custom {@link #predicate() predicate}.
 	 * <p>The default is empty, leading to a retry attempt for any exception.
 	 * @see #excludes()
 	 * @see #predicate()
@@ -74,6 +80,11 @@ public @interface Retryable {
 	/**
 	 * Non-applicable exception types to avoid a retry for. This attribute
 	 * allows for the convenient specification of assignable exception types.
+	 * <p>The supplied exception types will be matched against an exception
+	 * thrown by a failed invocation as well as nested
+	 * {@linkplain Throwable#getCause() causes}.
+	 * <p>This can optionally be combined with {@link #includes() includes} or
+	 * a custom {@link #predicate() predicate}.
 	 * <p>The default is empty, leading to a retry attempt for any exception.
 	 * @see #includes()
 	 * @see #predicate()
@@ -81,30 +92,35 @@ public @interface Retryable {
 	Class<? extends Throwable>[] excludes() default {};
 
 	/**
-	 * A predicate for filtering applicable exceptions for which
-	 * an invocation can be retried.
-	 * <p>The default is a retry attempt for any exception.
+	 * A predicate for filtering applicable exceptions for which an invocation can
+	 * be retried.
 	 * <p>A specified {@link MethodRetryPredicate} implementation will be instantiated
 	 * per method. It can use dependency injection at the constructor level or through
 	 * autowiring annotations, in case it needs access to other beans or facilities.
+	 * <p>This can optionally be combined with {@link #includes() includes} or
+	 * {@link #excludes() excludes}.
+	 * <p>The default is a retry attempt for any exception.
 	 * @see #includes()
 	 * @see #excludes()
 	 */
 	Class<? extends MethodRetryPredicate> predicate() default MethodRetryPredicate.class;
 
 	/**
-	 * The maximum number of retry attempts, in addition to the initial invocation.
+	 * The maximum number of retry attempts.
+	 * <p>Note that {@code total attempts = 1 initial attempt + maxRetries attempts}.
+	 * Thus, if {@code maxRetries} is set to 4, the annotated method will be invoked
+	 * at least once and at most 5 times.
 	 * <p>The default is 3.
 	 */
-	long maxAttempts() default 3;
+	long maxRetries() default 3;
 
 	/**
 	 * The maximum number of retry attempts, as a configurable String.
-	 * A non-empty value specified here overrides the {@link #maxAttempts()} attribute.
+	 * <p>A non-empty value specified here overrides the {@link #maxRetries()} attribute.
 	 * <p>This supports Spring-style "${...}" placeholders as well as SpEL expressions.
-	 * @see #maxAttempts()
+	 * @see #maxRetries()
 	 */
-	String maxAttemptsString() default "";
+	String maxRetriesString() default "";
 
 	/**
 	 * The base delay after the initial invocation. If a multiplier is specified,
@@ -120,7 +136,7 @@ public @interface Retryable {
 
 	/**
 	 * The base delay after the initial invocation, as a duration String.
-	 * A non-empty value specified here overrides the {@link #delay()} attribute.
+	 * <p>A non-empty value specified here overrides the {@link #delay()} attribute.
 	 * <p>The duration String can be in several formats:
 	 * <ul>
 	 * <li>a plain integer &mdash; which is interpreted to represent a duration in
@@ -156,7 +172,7 @@ public @interface Retryable {
 
 	/**
 	 * A jitter value for the base retry attempt, as a duration String.
-	 * A non-empty value specified here overrides the {@link #jitter()} attribute.
+	 * <p>A non-empty value specified here overrides the {@link #jitter()} attribute.
 	 * <p>The duration String can be in several formats:
 	 * <ul>
 	 * <li>a plain integer &mdash; which is interpreted to represent a duration in
@@ -188,7 +204,7 @@ public @interface Retryable {
 
 	/**
 	 * A multiplier for a delay for the next retry attempt, as a configurable String.
-	 * A non-empty value specified here overrides the {@link #multiplier()} attribute.
+	 * <p>A non-empty value specified here overrides the {@link #multiplier()} attribute.
 	 * <p>This supports Spring-style "${...}" placeholders as well as SpEL expressions.
 	 * @see #multiplier()
 	 */
@@ -208,7 +224,7 @@ public @interface Retryable {
 
 	/**
 	 * The maximum delay for any retry attempt, as a duration String.
-	 * A non-empty value specified here overrides the {@link #maxDelay()} attribute.
+	 * <p>A non-empty value specified here overrides the {@link #maxDelay()} attribute.
 	 * <p>The duration String can be in several formats:
 	 * <ul>
 	 * <li>a plain integer &mdash; which is interpreted to represent a duration in

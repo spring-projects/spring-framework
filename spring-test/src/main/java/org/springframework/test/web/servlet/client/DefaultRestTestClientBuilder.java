@@ -19,6 +19,8 @@ package org.springframework.test.web.servlet.client;
 import java.util.List;
 import java.util.function.Consumer;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
@@ -53,6 +55,8 @@ class DefaultRestTestClientBuilder<B extends RestTestClient.Builder<B>> implemen
 
 	private final RestClient.Builder restClientBuilder;
 
+	private @Nullable Consumer<HttpMessageConverters.ClientBuilder> convertersConfigurer;
+
 	private Consumer<EntityExchangeResult<?>> entityResultConsumer = result -> {};
 
 
@@ -61,11 +65,12 @@ class DefaultRestTestClientBuilder<B extends RestTestClient.Builder<B>> implemen
 	}
 
 	DefaultRestTestClientBuilder(RestClient.Builder restClientBuilder) {
-		this.restClientBuilder = restClientBuilder;
+		this.restClientBuilder = restClientBuilder.bufferContent((uri, httpMethod) -> true);
 	}
 
 	DefaultRestTestClientBuilder(DefaultRestTestClientBuilder<B> other) {
 		this.restClientBuilder = other.restClientBuilder.clone();
+		this.convertersConfigurer = other.convertersConfigurer;
 		this.entityResultConsumer = other.entityResultConsumer;
 	}
 
@@ -113,7 +118,7 @@ class DefaultRestTestClientBuilder<B extends RestTestClient.Builder<B>> implemen
 	}
 
 	@Override
-	public <T extends B> T apiVersionInserter(ApiVersionInserter apiVersionInserter) {
+	public <T extends B> T apiVersionInserter(@Nullable ApiVersionInserter apiVersionInserter) {
 		this.restClientBuilder.apiVersionInserter(apiVersionInserter);
 		return self();
 	}
@@ -132,7 +137,8 @@ class DefaultRestTestClientBuilder<B extends RestTestClient.Builder<B>> implemen
 
 	@Override
 	public <T extends B> T configureMessageConverters(Consumer<HttpMessageConverters.ClientBuilder> configurer) {
-		this.restClientBuilder.configureMessageConverters(configurer);
+		this.convertersConfigurer = (this.convertersConfigurer != null ?
+				this.convertersConfigurer.andThen(configurer) : configurer);
 		return self();
 	}
 
@@ -154,6 +160,11 @@ class DefaultRestTestClientBuilder<B extends RestTestClient.Builder<B>> implemen
 
 	@Override
 	public RestTestClient build() {
+
+		if (this.convertersConfigurer != null) {
+			this.restClientBuilder.configureMessageConverters(this.convertersConfigurer);
+		}
+
 		return new DefaultRestTestClient(
 				this.restClientBuilder, this.entityResultConsumer, new DefaultRestTestClientBuilder<>(this));
 	}
@@ -173,6 +184,7 @@ class DefaultRestTestClientBuilder<B extends RestTestClient.Builder<B>> implemen
 			this.mockMvcBuilder = mockMvcBuilder;
 		}
 
+		@Override
 		public <T extends S> T configureServer(Consumer<M> consumer) {
 			consumer.accept(this.mockMvcBuilder);
 			return self();

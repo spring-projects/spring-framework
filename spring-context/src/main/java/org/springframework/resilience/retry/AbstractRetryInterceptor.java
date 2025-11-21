@@ -17,6 +17,7 @@
 package org.springframework.resilience.retry;
 
 import java.lang.reflect.Method;
+import java.util.concurrent.Future;
 
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
@@ -51,14 +52,14 @@ public abstract class AbstractRetryInterceptor implements MethodInterceptor {
 	/**
 	 * Reactive Streams API present on the classpath?
 	 */
-	private static final boolean reactiveStreamsPresent = ClassUtils.isPresent(
+	private static final boolean REACTIVE_STREAMS_PRESENT = ClassUtils.isPresent(
 			"org.reactivestreams.Publisher", AbstractRetryInterceptor.class.getClassLoader());
 
 	private final @Nullable ReactiveAdapterRegistry reactiveAdapterRegistry;
 
 
 	public AbstractRetryInterceptor() {
-		if (reactiveStreamsPresent) {
+		if (REACTIVE_STREAMS_PRESENT) {
 			this.reactiveAdapterRegistry = ReactiveAdapterRegistry.getSharedInstance();
 		}
 		else {
@@ -77,7 +78,7 @@ public abstract class AbstractRetryInterceptor implements MethodInterceptor {
 			return invocation.proceed();
 		}
 
-		if (this.reactiveAdapterRegistry != null) {
+		if (this.reactiveAdapterRegistry != null && !Future.class.isAssignableFrom(method.getReturnType())) {
 			ReactiveAdapter adapter = this.reactiveAdapterRegistry.getAdapter(method.getReturnType());
 			if (adapter != null) {
 				Object result = invocation.proceed();
@@ -92,7 +93,7 @@ public abstract class AbstractRetryInterceptor implements MethodInterceptor {
 				.includes(spec.includes())
 				.excludes(spec.excludes())
 				.predicate(spec.predicate().forMethod(method))
-				.maxAttempts(spec.maxAttempts())
+				.maxRetries(spec.maxRetries())
 				.delay(spec.delay())
 				.jitter(spec.jitter())
 				.multiplier(spec.multiplier())
@@ -101,7 +102,7 @@ public abstract class AbstractRetryInterceptor implements MethodInterceptor {
 		RetryTemplate retryTemplate = new RetryTemplate(retryPolicy);
 
 		try {
-			return retryTemplate.execute(new Retryable<>() {
+			return retryTemplate.execute(new Retryable<@Nullable Object>() {
 				@Override
 				public @Nullable Object execute() throws Throwable {
 					return (invocation instanceof ProxyMethodInvocation pmi ?
@@ -136,7 +137,7 @@ public abstract class AbstractRetryInterceptor implements MethodInterceptor {
 				Object result, ReactiveAdapter adapter, MethodRetrySpec spec, Method method) {
 
 			Publisher<?> publisher = adapter.toPublisher(result);
-			Retry retry = Retry.backoff(spec.maxAttempts(), spec.delay())
+			Retry retry = Retry.backoff(spec.maxRetries(), spec.delay())
 					.jitter(calculateJitterFactor(spec))
 					.multiplier(spec.multiplier())
 					.maxBackoff(spec.maxDelay())

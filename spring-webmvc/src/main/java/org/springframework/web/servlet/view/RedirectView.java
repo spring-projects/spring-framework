@@ -70,9 +70,6 @@ import org.springframework.web.util.WebUtils;
  * actually is, they are much better off setting this flag to true, and submitting
  * paths which are to be considered relative to the web application root.
  *
- * <p><b>NOTE when using this redirect view in a Portlet environment:</b> Make sure
- * that your controller respects the Portlet {@code sendRedirect} constraints.
- *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Colin Sampaleanu

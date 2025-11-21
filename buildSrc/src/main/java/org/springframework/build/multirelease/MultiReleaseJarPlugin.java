@@ -18,6 +18,7 @@ package org.springframework.build.multirelease;
 
 import javax.inject.Inject;
 
+import org.gradle.api.JavaVersion;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.artifacts.ConfigurationContainer;
@@ -27,6 +28,10 @@ import org.gradle.api.plugins.ExtensionContainer;
 import org.gradle.api.plugins.JavaPlugin;
 import org.gradle.api.plugins.JavaPluginExtension;
 import org.gradle.api.tasks.TaskContainer;
+import org.gradle.api.tasks.TaskProvider;
+import org.gradle.api.tasks.bundling.AbstractArchiveTask;
+import org.gradle.jvm.tasks.Jar;
+import org.gradle.jvm.toolchain.JavaLanguageVersion;
 import org.gradle.jvm.toolchain.JavaToolchainService;
 
 /**
@@ -37,6 +42,8 @@ import org.gradle.jvm.toolchain.JavaToolchainService;
  * @see <a href="https://github.com/melix/mrjar-gradle-plugin">original project</a>
  */
 public class MultiReleaseJarPlugin implements Plugin<Project> {
+
+	public static String VALIDATE_JAR_TASK_NAME = "validateMultiReleaseJar";
 
 	@Inject
 	protected JavaToolchainService getToolchains() {
@@ -57,5 +64,13 @@ public class MultiReleaseJarPlugin implements Plugin<Project> {
 				tasks,
 				dependencies,
 				objects);
+
+		if (JavaVersion.current().isCompatibleWith(JavaVersion.VERSION_25)) {
+			TaskProvider<MultiReleaseJarValidateTask> validateJarTask = tasks.register(VALIDATE_JAR_TASK_NAME, MultiReleaseJarValidateTask.class, (task) -> {
+				task.getJar().set(tasks.named("jar", Jar.class).flatMap(AbstractArchiveTask::getArchiveFile));
+				task.getJavaLauncher().set(task.getJavaToolchainService().launcherFor(spec -> spec.getLanguageVersion().set(JavaLanguageVersion.of(25))));
+			});
+			tasks.named("check", task -> task.dependsOn(validateJarTask));
+		}
 	}
 }

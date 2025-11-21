@@ -67,6 +67,7 @@ public abstract class AbstractServletHandlerMethodTests {
 		return initDispatcherServlet(controllerClass, usePathPatterns, null);
 	}
 
+	@SuppressWarnings("serial")
 	WebApplicationContext initDispatcherServlet(
 			@Nullable Class<?> controllerClass, boolean usePathPatterns,
 			@Nullable ApplicationContextInitializer<GenericWebApplicationContext> initializer)

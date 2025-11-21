@@ -4,9 +4,9 @@ plugins {
 	id 'org.jetbrains.kotlin.plugin.serialization' version "${kotlinVersion}" apply false
 	id 'org.jetbrains.dokka'
 	id 'com.github.bjornvester.xjc' version '1.8.2' apply false
-	id 'io.github.goooler.shadow' version '8.1.8' apply false
+	id 'com.gradleup.shadow' version "9.2.2" apply false
 	id 'me.champeau.jmh' version '0.7.2' apply false
-	id 'io.spring.nullability' version '0.0.4' apply false
+	id 'io.spring.nullability' version '0.0.8' apply false
 }
 
 ext {
@@ -69,23 +69,16 @@ configure([rootProject] + javaProjects) { project ->
 
 	ext.javadocLinks = [
 			"https://docs.oracle.com/en/java/javase/17/docs/api/",
-			"https://jakarta.ee/specifications/platform/11/apidocs/",
-			"https://docs.jboss.org/hibernate/orm/5.6/javadocs/",
+			//"https://jakarta.ee/specifications/platform/11/apidocs/",
+			"https://docs.hibernate.org/orm/5.6/javadocs/",
 			"https://www.quartz-scheduler.org/api/2.3.0/",
 			"https://hc.apache.org/httpcomponents-client-5.5.x/current/httpclient5/apidocs/",
 			"https://projectreactor.io/docs/test/release/api/",
 			"https://junit.org/junit4/javadoc/4.13.2/",
-			"https://docs.junit.org/5.13.4/api/",
+			"https://docs.junit.org/6.0.1/api/",
 			"https://www.reactive-streams.org/reactive-streams-1.0.3-javadoc/",
-			//"https://javadoc.io/static/io.rsocket/rsocket-core/1.1.1/",
 			"https://r2dbc.io/spec/1.0.0.RELEASE/api/",
-			// Previously there could be a split-package issue between JSR250 and JSR305 javax.annotation packages,
-			// but since 6.0 JSR 250 annotations such as @Resource and @PostConstruct have been replaced by their
-			// JakartaEE equivalents in the jakarta.annotation package.
-			//"https://www.javadoc.io/doc/com.google.code.findbugs/jsr305/3.0.2/",
-			"https://jspecify.dev/docs/api/",
-			"https://www.javadoc.io/doc/tools.jackson.core/jackson-databind/3.0.0-rc4/"
-
+			"https://jspecify.dev/docs/api/"
 	] as String[]
 }
 

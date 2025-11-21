@@ -35,6 +35,7 @@ class HiddenInputTagTests extends AbstractFormTagTests {
 	private TestBean bean;
 
 	@Override
+	@SuppressWarnings("serial")
 	protected void onSetUp() {
 		this.tag = new HiddenInputTag() {
 			@Override

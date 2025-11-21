@@ -19,9 +19,6 @@ package org.springframework.web.socket;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.function.BiConsumer;
 
 import org.jspecify.annotations.Nullable;
 
@@ -29,10 +26,11 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.util.CollectionUtils;
 
 /**
- * An {@link org.springframework.http.HttpHeaders} variant that adds support for
- * the HTTP headers defined by the WebSocket specification RFC 6455.
+ * An {@link HttpHeaders} variant that adds support for the HTTP headers defined
+ * by the WebSocket specification RFC 6455.
  *
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
  * @since 4.0
  */
 public class WebSocketHttpHeaders extends HttpHeaders {
@@ -50,23 +48,32 @@ public class WebSocketHttpHeaders extends HttpHeaders {
 	private static final long serialVersionUID = -6644521016187828916L;
 
 
-	private final HttpHeaders headers;
-
-
 	/**
-	 * Create a new instance.
+	 * Construct a new, empty {@code WebSocketHttpHeaders} instance.
 	 */
 	public WebSocketHttpHeaders() {
-		this(new HttpHeaders());
+		super();
 	}
 
 	/**
-	 * Create an instance that wraps the given pre-existing HttpHeaders and also
-	 * propagate all changes to it.
-	 * @param headers the HTTP headers to wrap
+	 * Construct a new {@code WebSocketHttpHeaders} instance backed by the supplied
+	 * {@code HttpHeaders}.
+	 * <p>Changes to the {@code WebSocketHttpHeaders} created by this constructor
+	 * will write through to the supplied {@code HttpHeaders}. If you wish to copy
+	 * an existing {@code HttpHeaders} or {@code WebSocketHttpHeaders} instance,
+	 * use {@link #copyOf(HttpHeaders)} instead. Note, however, that {@code copyOf()}
+	 * does not create an instance of {@code WebSocketHttpHeaders}.
+	 * <p>If the supplied {@code HttpHeaders} instance is a
+	 * {@linkplain #readOnlyHttpHeaders(HttpHeaders) read-only}
+	 * {@code HttpHeaders} wrapper, it will be unwrapped to ensure that the
+	 * {@code WebSocketHttpHeaders} instance created by this constructor is mutable.
+	 * Once the writable instance is mutated, the read-only instance is likely to
+	 * be out of sync and should be discarded.
+	 * @param httpHeaders the headers to expose
+	 * @see #copyOf(HttpHeaders)
 	 */
-	public WebSocketHttpHeaders(HttpHeaders headers) {
-		this.headers = headers;
+	public WebSocketHttpHeaders(HttpHeaders httpHeaders) {
+		super(httpHeaders);
 	}
 
 
@@ -179,139 +186,6 @@ public class WebSocketHttpHeaders extends HttpHeaders {
 	 */
 	public @Nullable String getSecWebSocketVersion() {
 		return getFirst(SEC_WEBSOCKET_VERSION);
-	}
-
-
-	// Single string methods
-
-	/**
-	 * Return the first header value for the given header name, if any.
-	 * @param headerName the header name
-	 * @return the first header value; or {@code null}
-	 */
-	@Override
-	public @Nullable String getFirst(String headerName) {
-		return this.headers.getFirst(headerName);
-	}
-
-	/**
-	 * Add the given, single header value under the given name.
-	 * @param headerName  the header name
-	 * @param headerValue the header value
-	 * @throws UnsupportedOperationException if adding headers is not supported
-	 * @see #put(String, List)
-	 * @see #set(String, String)
-	 */
-	@Override
-	public void add(String headerName, @Nullable String headerValue) {
-		this.headers.add(headerName, headerValue);
-	}
-
-	/**
-	 * Set the given, single header value under the given name.
-	 * @param headerName  the header name
-	 * @param headerValue the header value
-	 * @throws UnsupportedOperationException if adding headers is not supported
-	 * @see #put(String, List)
-	 * @see #add(String, String)
-	 */
-	@Override
-	public void set(String headerName, @Nullable String headerValue) {
-		this.headers.set(headerName, headerValue);
-	}
-
-	@Override
-	public void setAll(Map<String, String> values) {
-		this.headers.setAll(values);
-	}
-
-	@Override
-	public Map<String, String> toSingleValueMap() {
-		return this.headers.toSingleValueMap();
-	}
-
-	// Map implementation
-
-	@Override
-	public int size() {
-		return this.headers.size();
-	}
-
-	@Override
-	public boolean isEmpty() {
-		return this.headers.isEmpty();
-	}
-
-	@Override
-	public boolean containsHeader(String key) {
-		return this.headers.containsHeader(key);
-	}
-
-	@Override
-	public @Nullable List<String> get(String headerName) {
-		return this.headers.get(headerName);
-	}
-
-	@Override
-	public @Nullable List<String> put(String key, List<String> value) {
-		return this.headers.put(key, value);
-	}
-
-	@Override
-	public @Nullable List<String> remove(String key) {
-		return this.headers.remove(key);
-	}
-
-	@Override
-	public void putAll(HttpHeaders headers) {
-		this.headers.putAll(headers);
-	}
-
-	@Override
-	public void putAll(Map<? extends String, ? extends List<String>> m) {
-		this.headers.putAll(m);
-	}
-
-	@Override
-	public void clear() {
-		this.headers.clear();
-	}
-
-	@Override
-	public Set<String> headerNames() {
-		return this.headers.headerNames();
-	}
-
-	@Override
-	public Set<Map.Entry<String, List<String>>> headerSet() {
-		return this.headers.headerSet();
-	}
-
-	@Override
-	public void forEach(BiConsumer<? super String, ? super List<String>> action) {
-		this.headers.forEach(action);
-	}
-
-	@Override
-	public @Nullable List<String> putIfAbsent(String headerName, List<String> headerValues) {
-		return this.headers.putIfAbsent(headerName, headerValues);
-	}
-
-
-	@Override
-	public boolean equals(@Nullable Object other) {
-		return (this == other || (other instanceof WebSocketHttpHeaders that &&
-				this.headers.equals(that.headers)));
-	}
-
-	@Override
-	public int hashCode() {
-		return this.headers.hashCode();
-	}
-
-	@Override
-	public String toString() {
-		return this.headers.toString();
 	}
 
 }

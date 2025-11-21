@@ -59,7 +59,7 @@ import static org.springframework.test.context.TestExecutionListeners.MergeMode.
  */
 class TestExecutionListenersTests {
 
-	private static final Class<?> micrometerListenerClass =
+	private static final Class<?> MICROMETER_LISTENER_CLASS =
 			ClassUtils.resolveClassName("org.springframework.test.context.observation.MicrometerObservationRegistryTestExecutionListener", null);
 
 	@Test
@@ -70,7 +70,7 @@ class TestExecutionListenersTests {
 				ApplicationEventsTestExecutionListener.class,//
 				BeanOverrideTestExecutionListener.class,//
 				DependencyInjectionTestExecutionListener.class,//
-				micrometerListenerClass,//
+				MICROMETER_LISTENER_CLASS,//
 				DirtiesContextTestExecutionListener.class,//
 				CommonCachesTestExecutionListener.class, //
 				TransactionalTestExecutionListener.class,//
@@ -93,7 +93,7 @@ class TestExecutionListenersTests {
 				ApplicationEventsTestExecutionListener.class,//
 				BeanOverrideTestExecutionListener.class,//
 				DependencyInjectionTestExecutionListener.class,//
-				micrometerListenerClass,//
+				MICROMETER_LISTENER_CLASS,//
 				DirtiesContextTestExecutionListener.class,//
 				CommonCachesTestExecutionListener.class, //
 				TransactionalTestExecutionListener.class,//
@@ -115,7 +115,7 @@ class TestExecutionListenersTests {
 				ApplicationEventsTestExecutionListener.class,//
 				BeanOverrideTestExecutionListener.class,//
 				DependencyInjectionTestExecutionListener.class,//
-				micrometerListenerClass,//
+				MICROMETER_LISTENER_CLASS,//
 				DirtiesContextTestExecutionListener.class,//
 				CommonCachesTestExecutionListener.class, //
 				TransactionalTestExecutionListener.class,
@@ -139,7 +139,7 @@ class TestExecutionListenersTests {
 				BeanOverrideTestExecutionListener.class,//
 				DependencyInjectionTestExecutionListener.class,//
 				BarTestExecutionListener.class,//
-				micrometerListenerClass,//
+				MICROMETER_LISTENER_CLASS,//
 				DirtiesContextTestExecutionListener.class,//
 				CommonCachesTestExecutionListener.class, //
 				TransactionalTestExecutionListener.class,//

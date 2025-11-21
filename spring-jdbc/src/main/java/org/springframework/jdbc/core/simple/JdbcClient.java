@@ -391,7 +391,6 @@ public interface JdbcClient {
 		 * @see #optionalValue()
 		 * @see DataAccessUtils#requiredSingleResult(Collection)
 		 */
-		@SuppressWarnings("NullAway") // See https://github.com/uber/NullAway/issues/1075
 		default Object singleValue() {
 			return DataAccessUtils.requiredSingleResult(singleColumn());
 		}
@@ -403,7 +402,6 @@ public interface JdbcClient {
 		 * @see #singleValue()
 		 * @see DataAccessUtils#optionalResult(Collection)
 		 */
-		@SuppressWarnings("NullAway") // See https://github.com/uber/NullAway/issues/1075
 		default Optional<Object> optionalValue() {
 			return DataAccessUtils.optionalResult(singleColumn());
 		}

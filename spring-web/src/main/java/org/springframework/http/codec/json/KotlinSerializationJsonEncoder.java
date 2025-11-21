@@ -18,6 +18,7 @@ package org.springframework.http.codec.json;
 
 import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
 
 import kotlinx.serialization.json.Json;
 import org.jspecify.annotations.Nullable;
@@ -38,23 +39,64 @@ import org.springframework.util.MimeType;
  * It supports {@code application/json}, {@code application/x-ndjson} and {@code application/*+json} with
  * various character sets, {@code UTF-8} being the default.
  *
- * <p>As of Spring Framework 7.0,
- * <a href="https://github.com/Kotlin/kotlinx.serialization/blob/master/docs/polymorphism.md#open-polymorphism">open polymorphism</a>
- * is supported.
+ * <p>As of Spring Framework 7.0, by default it only encodes types annotated with
+ * {@link kotlinx.serialization.Serializable @Serializable} at type or generics
+ * level.
+ *
+ * <p>Alternative constructors with a {@code Predicate<ResolvableType>}
+ * parameter can be used to customize this behavior. For example,
+ * {@code new KotlinSerializationJsonEncoder(type -> true)} will encode all types
+ * supported by Kotlin Serialization, including unannotated Kotlin enumerations,
+ * numbers, characters, booleans and strings.
  *
  * @author Sebastien Deleuze
  * @author Iain Henderson
  * @since 5.3
+ * @see KotlinSerializationJsonDecoder
  */
 public class KotlinSerializationJsonEncoder extends KotlinSerializationStringEncoder<Json> {
 
+	private static final MimeType[] DEFAULT_JSON_MIME_TYPES = new MimeType[] {
+			MediaType.APPLICATION_JSON,
+			new MediaType("application", "*+json"),
+			MediaType.APPLICATION_NDJSON
+	};
+
+	/**
+	 * Construct a new encoder using {@link Json.Default} instance which
+	 * only encodes types annotated with {@link kotlinx.serialization.Serializable @Serializable}
+	 * at type or generics level.
+	 */
 	public KotlinSerializationJsonEncoder() {
 		this(Json.Default);
 	}
 
+	/**
+	 * Construct a new encoder using {@link Json.Default} instance which
+	 * only encodes types for which the specified predicate returns {@code true}.
+	 * @since 7.0
+	 */
+	public KotlinSerializationJsonEncoder(Predicate<ResolvableType> typePredicate) {
+		this(Json.Default, typePredicate);
+	}
+
+	/**
+	 * Construct a new encoder using the provided {@link Json} instance which
+	 * only encodes types annotated with {@link kotlinx.serialization.Serializable @Serializable}
+	 * at type or generics level.
+	 */
 	public KotlinSerializationJsonEncoder(Json json) {
-		super(json, MediaType.APPLICATION_JSON, new MediaType("application", "*+json"),
-				MediaType.APPLICATION_NDJSON);
+		super(json, DEFAULT_JSON_MIME_TYPES);
+		setStreamingMediaTypes(List.of(MediaType.APPLICATION_NDJSON));
+	}
+
+	/**
+	 * Construct a new encoder using the provided {@link Json} instance which
+	 * only encodes types for which the specified predicate returns {@code true}.
+	 * @since 7.0
+	 */
+	public KotlinSerializationJsonEncoder(Json json, Predicate<ResolvableType> typePredicate) {
+		super(json, typePredicate, DEFAULT_JSON_MIME_TYPES);
 		setStreamingMediaTypes(List.of(MediaType.APPLICATION_NDJSON));
 	}
 

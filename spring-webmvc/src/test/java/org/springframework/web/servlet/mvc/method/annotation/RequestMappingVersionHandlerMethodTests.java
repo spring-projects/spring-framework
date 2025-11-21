@@ -80,7 +80,7 @@ public class RequestMappingVersionHandlerMethodTests {
 
 	private MockHttpServletResponse requestWithVersion(String version) throws ServletException, IOException {
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/");
-		request.addHeader("X-API-VERSION", version);
+		request.addHeader("API-Version", version);
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		this.dispatcherServlet.service(request, response);
 		return response;
@@ -96,7 +96,7 @@ public class RequestMappingVersionHandlerMethodTests {
 			StandardApiVersionDeprecationHandler handler = new StandardApiVersionDeprecationHandler();
 			handler.configureVersion("1").setDeprecationLink(URI.create("https://example.org/deprecation"));
 
-			configurer.useRequestHeader("X-API-Version")
+			configurer.useRequestHeader("API-Version")
 					.addSupportedVersions("1", "1.1", "1.3", "1.6")
 					.setDeprecationHandler(handler);
 		}

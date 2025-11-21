@@ -55,7 +55,7 @@ import org.springframework.web.util.WebUtils;
 /**
  * Mock implementation of the {@link jakarta.servlet.http.HttpServletResponse} interface.
  *
- * <p>As of Spring 6.0, this set of mocks is designed on a Servlet 6.0 baseline.
+ * <p>As of Spring 7.0, this set of mocks is designed on a Servlet 6.1 baseline.
  *
  * @author Juergen Hoeller
  * @author Rod Johnson
@@ -642,7 +642,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 		sendRedirect(url, HttpServletResponse.SC_MOVED_TEMPORARILY, true);
 	}
 
-	// @Override - on Servlet 6.1
+	@Override
 	public void sendRedirect(String url, int sc, boolean clearBuffer) throws IOException {
 		Assert.state(!isCommitted(), "Cannot send redirect - response is already committed");
 		Assert.notNull(url, "Redirect URL must not be null");
@@ -825,6 +825,10 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	 */
 	public @Nullable String getErrorMessage() {
 		return this.errorMessage;
+	}
+
+	// @Override - on Servlet 6.2
+	public void sendEarlyHints() {
 	}
 
 

@@ -81,7 +81,7 @@ class ResourcesBeanDefinitionParser implements BeanDefinitionParser {
 
 	private static final String RESOURCE_URL_PROVIDER = "mvcResourceUrlProvider";
 
-	private static final boolean webJarsPresent = ClassUtils.isPresent(
+	private static final boolean WEB_JARS_PRESENT = ClassUtils.isPresent(
 			"org.webjars.WebJarVersionLocator", ResourcesBeanDefinitionParser.class.getClassLoader());
 
 
@@ -325,7 +325,7 @@ class ResourcesBeanDefinitionParser implements BeanDefinitionParser {
 		}
 
 		if (isAutoRegistration) {
-			if (webJarsPresent) {
+			if (WEB_JARS_PRESENT) {
 				RootBeanDefinition webJarsResolverDef = new RootBeanDefinition(LiteWebJarsResourceResolver.class);
 				webJarsResolverDef.setSource(source);
 				webJarsResolverDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);

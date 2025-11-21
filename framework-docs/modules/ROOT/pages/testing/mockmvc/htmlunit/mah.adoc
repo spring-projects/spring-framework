@@ -7,8 +7,7 @@ to use the raw HtmlUnit libraries.
 [[mockmvc-server-htmlunit-mah-setup]]
 == MockMvc and HtmlUnit Setup
 
-First, make sure that you have included a test dependency on
-`org.htmlunit:htmlunit`.
+First, make sure that you have included a test dependency on `org.htmlunit:htmlunit`.
 
 We can easily create an HtmlUnit `WebClient` that integrates with MockMvc by using the
 `MockMvcWebClientBuilder`, as follows:
@@ -45,7 +44,7 @@ Kotlin::
 ======
 
 NOTE: This is a simple example of using `MockMvcWebClientBuilder`. For advanced usage,
-see xref:testing/mockmvc/htmlunit/mah.adoc#spring-mvc-test-server-htmlunit-mah-advanced-builder[Advanced `MockMvcWebClientBuilder`].
+see <<mockmvc-server-htmlunit-mah-advanced-builder>>.
 
 This ensures that any URL that references `localhost` as the server is directed to our
 `MockMvc` instance without the need for a real HTTP connection. Any other URL is
@@ -77,7 +76,7 @@ Kotlin::
 ======
 
 NOTE: The default context path is `""`. Alternatively, we can specify the context path,
-as described in xref:testing/mockmvc/htmlunit/mah.adoc#spring-mvc-test-server-htmlunit-mah-advanced-builder[Advanced `MockMvcWebClientBuilder`].
+as described in <<mockmvc-server-htmlunit-mah-advanced-builder>>.
 
 Once we have a reference to the `HtmlPage`, we can then fill out the form and submit it
 to create a message, as the following example shows:
@@ -144,10 +143,10 @@ Kotlin::
 ======
 
 The preceding code improves on our
-xref:testing/mockmvc/htmlunit/why.adoc#spring-mvc-test-server-htmlunit-mock-mvc-test[MockMvc test] in a number of ways.
-First, we no longer have to explicitly verify our form and then create a request that
-looks like the form. Instead, we request the form, fill it out, and submit it, thereby
-significantly reducing the overhead.
+xref:testing/mockmvc/htmlunit/why.adoc#mockmvc-server-htmlunit-why[MockMvc test] in a
+number of ways. First, we no longer have to explicitly verify our form and then create a
+request that looks like the form. Instead, we request the form, fill it out, and submit
+it, thereby significantly reducing the overhead.
 
 Another important factor is that https://htmlunit.sourceforge.io/javascript.html[HtmlUnit
 uses the Mozilla Rhino engine] to evaluate JavaScript. This means that we can also test
@@ -267,7 +266,19 @@ Kotlin::
 +
 [source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
-	// Not possible in Kotlin until {kotlin-issues}/KT-22208 is fixed
+	val mockMvc = MockMvcBuilders
+			.webAppContextSetup(context)
+			.apply<DefaultMockMvcBuilder>(springSecurity())
+			.build()
+
+	webClient = MockMvcWebClientBuilder
+			.mockMvcSetup(mockMvc)
+			// for illustration only - defaults to ""
+			.contextPath("")
+			// By default MockMvc is used for localhost only;
+			// the following will use MockMvc for example.com and example.org as well
+			.useMockMvcForHosts("example.com", "example.org")
+			.build()
 ----
 ======
 

@@ -55,7 +55,7 @@ class DefaultRenderingResponseTests {
 
 	@Test
 	void status() throws Exception {
-		HttpStatus status = HttpStatus.I_AM_A_TEAPOT;
+		HttpStatus status = HttpStatus.ALREADY_REPORTED;
 		RenderingResponse result = RenderingResponse.create("foo").status(status).build();
 
 		MockHttpServletRequest request = new MockHttpServletRequest();

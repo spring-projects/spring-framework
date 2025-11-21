@@ -99,6 +99,10 @@ public class EclipseLinkJpaDialect extends DefaultJpaDialect {
 	public @Nullable Object beginTransaction(EntityManager entityManager, TransactionDefinition definition)
 			throws PersistenceException, SQLException, TransactionException {
 
+		if (definition.getTimeout() != TransactionDefinition.TIMEOUT_DEFAULT) {
+			entityManager.getTransaction().setTimeout(definition.getTimeout());
+		}
+
 		int currentIsolationLevel = definition.getIsolationLevel();
 		if (currentIsolationLevel != TransactionDefinition.ISOLATION_DEFAULT) {
 			// Pass custom isolation level on to EclipseLink's DatabaseLogin configuration.

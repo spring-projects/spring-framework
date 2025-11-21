@@ -31,8 +31,19 @@ package org.springframework.core.io.buffer;
 public class DataBufferLimitException extends IllegalStateException {
 
 
+	/**
+	 * Create an instance with the given message.
+	 */
 	public DataBufferLimitException(String message) {
 		super(message);
+	}
+
+	/**
+	 * Create an instance with a message and a cause, e.g. {@link OutOfMemoryError}.
+	 * @since 6.2.12
+	 */
+	public DataBufferLimitException(String message, Throwable cause) {
+		super(message, cause);
 	}
 
 }

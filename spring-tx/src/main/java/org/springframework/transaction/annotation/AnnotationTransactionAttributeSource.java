@@ -60,14 +60,14 @@ import org.springframework.util.CollectionUtils;
 public class AnnotationTransactionAttributeSource extends AbstractFallbackTransactionAttributeSource
 		implements Serializable {
 
-	private static final boolean jtaPresent;
+	private static final boolean JTA_PRESENT;
 
-	private static final boolean ejb3Present;
+	private static final boolean EJB_3_PRESENT;
 
 	static {
 		ClassLoader classLoader = AnnotationTransactionAttributeSource.class.getClassLoader();
-		jtaPresent = ClassUtils.isPresent("jakarta.transaction.Transactional", classLoader);
-		ejb3Present = ClassUtils.isPresent("jakarta.ejb.TransactionAttribute", classLoader);
+		JTA_PRESENT = ClassUtils.isPresent("jakarta.transaction.Transactional", classLoader);
+		EJB_3_PRESENT = ClassUtils.isPresent("jakarta.ejb.TransactionAttribute", classLoader);
 	}
 
 	private final Set<TransactionAnnotationParser> annotationParsers;
@@ -83,13 +83,13 @@ public class AnnotationTransactionAttributeSource extends AbstractFallbackTransa
 	 * or the EJB3 {@link jakarta.ejb.TransactionAttribute} annotation.
 	 */
 	public AnnotationTransactionAttributeSource() {
-		if (jtaPresent || ejb3Present) {
+		if (JTA_PRESENT || EJB_3_PRESENT) {
 			this.annotationParsers = CollectionUtils.newLinkedHashSet(3);
 			this.annotationParsers.add(new SpringTransactionAnnotationParser());
-			if (jtaPresent) {
+			if (JTA_PRESENT) {
 				this.annotationParsers.add(new JtaTransactionAnnotationParser());
 			}
-			if (ejb3Present) {
+			if (EJB_3_PRESENT) {
 				this.annotationParsers.add(new Ejb3TransactionAnnotationParser());
 			}
 		}

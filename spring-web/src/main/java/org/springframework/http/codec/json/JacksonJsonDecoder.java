@@ -42,9 +42,6 @@ import org.springframework.util.MimeTypeUtils;
  * <a href="https://github.com/FasterXML/jackson">Jackson 3.x</a>
  * leveraging non-blocking parsing.
  *
- * <p>The default constructor loads {@link tools.jackson.databind.JacksonModule}s
- * found by {@link MapperBuilder#findModules(ClassLoader)}.
- *
  * @author Sebastien Deleuze
  * @since 7.0
  * @see JacksonJsonEncoder
@@ -72,18 +69,36 @@ public class JacksonJsonDecoder extends AbstractJacksonDecoder<JsonMapper> {
 	}
 
 	/**
+	 * Construct a new instance with the provided {@link JsonMapper.Builder}
+	 * customized with the {@link tools.jackson.databind.JacksonModule}s
+	 * found by {@link MapperBuilder#findModules(ClassLoader)}.
+	 * @see JsonMapper#builder()
+	 */
+	public JacksonJsonDecoder(JsonMapper.Builder builder) {
+		super(builder, DEFAULT_JSON_MIME_TYPES);
+	}
+
+	/**
 	 * Construct a new instance with the provided {@link JsonMapper}.
 	 * @see JsonMapper#builder()
-	 * @see MapperBuilder#findModules(ClassLoader)
 	 */
 	public JacksonJsonDecoder(JsonMapper mapper) {
-		this(mapper, DEFAULT_JSON_MIME_TYPES);
+		super(mapper, DEFAULT_JSON_MIME_TYPES);
+	}
+
+	/**
+	 * Construct a new instance with the provided {@link JsonMapper.Builder}
+	 * customized with the {@link tools.jackson.databind.JacksonModule}s
+	 * found by {@link MapperBuilder#findModules(ClassLoader)}, and
+	 * {@link MimeType}s.
+	 * @see JsonMapper#builder()
+	 */
+	public JacksonJsonDecoder(JsonMapper.Builder builder, MimeType... mimeTypes) {
+		super(builder, mimeTypes);
 	}
 
 	/**
 	 * Construct a new instance with the provided {@link JsonMapper} and {@link MimeType}s.
-	 * @see JsonMapper#builder()
-	 * @see MapperBuilder#findModules(ClassLoader)
 	 */
 	public JacksonJsonDecoder(JsonMapper mapper, MimeType... mimeTypes) {
 		super(mapper, mimeTypes);

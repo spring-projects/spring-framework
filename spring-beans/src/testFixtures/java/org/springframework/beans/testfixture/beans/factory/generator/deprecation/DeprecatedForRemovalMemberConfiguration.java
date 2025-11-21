@@ -33,4 +33,14 @@ public class DeprecatedForRemovalMemberConfiguration {
 		return bean.toString();
 	}
 
+	@SuppressWarnings("removal")
+	public DeprecatedForRemovalBean deprecatedReturnType() {
+		return new DeprecatedForRemovalBean();
+	}
+
+	@SuppressWarnings("removal")
+	DeprecatedForRemovalBean deprecatedReturnTypeProtected() {
+		return new DeprecatedForRemovalBean();
+	}
+
 }

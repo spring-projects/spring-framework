@@ -9,7 +9,7 @@ annotations. Even in those examples, however, the "base" bean definitions are ex
 defined in the XML file, while the annotations drive only the dependency injection.
 
 This section describes an option for implicitly detecting the candidate components by
-scanning the classpath. Candidate components are classes that match against a filter
+scanning the classpath. Candidate components are classes that match against filter
 criteria and have a corresponding bean definition registered with the container.
 This removes the need to use XML to perform bean registration. Instead, you can use
 annotations (for example, `@Component`), AspectJ type expressions, or your own
@@ -70,7 +70,7 @@ Java::
 		// ...
 	}
 ----
-<1> The `@Component` causes `@Service` to be treated in the same way as `@Component`.
+<1> The `@Component` meta-annotation causes `@Service` to be treated in the same way as `@Component`.
 
 Kotlin::
 +
@@ -85,7 +85,7 @@ Kotlin::
 		// ...
 	}
 ----
-<1> The `@Component` causes `@Service` to be treated in the same way as `@Component`.
+<1> The `@Component` meta-annotation causes `@Service` to be treated in the same way as `@Component`.
 ======
 
 You can also combine meta-annotations to create "`composed annotations`". For example,
@@ -97,7 +97,7 @@ meta-annotations to allow customization. This can be particularly useful when yo
 want to only expose a subset of the meta-annotation's attributes. For example, Spring's
 `@SessionScope` annotation hard codes the scope name to `session` but still allows
 customization of the `proxyMode`. The following listing shows the definition of the
-`SessionScope` annotation:
+`@SessionScope` annotation:
 
 [tabs]
 ======
@@ -211,7 +211,7 @@ Java::
 	@Service
 	public class SimpleMovieLister {
 
-		private MovieFinder movieFinder;
+		private final MovieFinder movieFinder;
 
 		public SimpleMovieLister(MovieFinder movieFinder) {
 			this.movieFinder = movieFinder;
@@ -251,11 +251,11 @@ Kotlin::
 ----
 ======
 
-
 To autodetect these classes and register the corresponding beans, you need to add
-`@ComponentScan` to your `@Configuration` class, where the `basePackages` attribute
-is a common parent package for the two classes. (Alternatively, you can specify a
-comma- or semicolon- or space-separated list that includes the parent package of each class.)
+`@ComponentScan` to your `@Configuration` class, where the `basePackages` attribute is
+configured with a common parent package for the two classes. Alternatively, you can
+specify a comma-, semicolon-, or space-separated list that includes the parent package
+of each class.
 
 [tabs]
 ======
@@ -282,10 +282,10 @@ Kotlin::
 ----
 ======
 
-NOTE: For brevity, the preceding example could have used the `value` attribute of the
-annotation (that is, `@ComponentScan("org.example")`).
+TIP: For brevity, the preceding example could have used the implicit `value` attribute of
+the annotation instead: `@ComponentScan("org.example")`
 
-The following alternative uses XML:
+The following example uses XML configuration:
 
 [source,xml,indent=0,subs="verbatim,quotes"]
 ----
@@ -325,16 +325,68 @@ sure that they are 'opened' (that is, that they use an `opens` declaration inste
 
 Furthermore, the `AutowiredAnnotationBeanPostProcessor` and
 `CommonAnnotationBeanPostProcessor` are both implicitly included when you use the
-component-scan element. That means that the two components are autodetected and
-wired together -- all without any bean configuration metadata provided in XML.
+`<context:component-scan>` element. That means that the two components are autodetected
+and wired together -- all without any bean configuration metadata provided in XML.
 
 NOTE: You can disable the registration of `AutowiredAnnotationBeanPostProcessor` and
 `CommonAnnotationBeanPostProcessor` by including the `annotation-config` attribute
 with a value of `false`.
 
 
+[[beans-scanning-placeholders-and-patterns]]
+=== Property Placeholders and Ant-style Patterns
+
+The `basePackages` and `value` attributes in `@ComponentScan` support `${...}` property
+placeholders which are resolved against the `Environment` as well as Ant-style package
+patterns such as `"org.example.+++**+++"`.
+
+In addition, multiple packages or patterns may be specified, either separately or within
+a single String — for example, `{"org.example.config", "org.example.service.+++**+++"}`
+or `"org.example.config, org.example.service.+++**+++"`.
+
+The following example specifies the `app.scan.packages` property placeholder for the
+implicit `value` attribute in `@ComponentScan`.
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+@Configuration
+@ComponentScan("${app.scan.packages}") // <1>
+public class AppConfig {
+	// ...
+}
+----
+<1> `app.scan.packages` property placeholder to be resolved against the `Environment`
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes"]
+----
+@Configuration
+@ComponentScan(["\${app.scan.packages}"]) // <1>
+class AppConfig {
+	// ...
+}
+----
+<1> `app.scan.packages` property placeholder to be resolved against the `Environment`
+======
+
+The following listing represents a properties file which defines the `app.scan.packages`
+property. In the preceding example, it is assumed that this properties file has been
+registered with the `Environment` – for example, via `@PropertySource` or a similar
+mechanism.
+
+[source,properties,indent=0,subs="verbatim,quotes"]
+----
+app.scan.packages=org.example.config, org.example.service.**
+----
+
+
 [[beans-scanning-filters]]
-== Using Filters to Customize Scanning
+=== Using Filters to Customize Scanning
 
 By default, classes annotated with `@Component`, `@Repository`, `@Service`, `@Controller`,
 `@Configuration`, or a custom annotation that itself is annotated with `@Component` are
@@ -371,8 +423,8 @@ The following table describes the filtering options:
 | A custom implementation of the `org.springframework.core.type.TypeFilter` interface.
 |===
 
-The following example shows the configuration ignoring all `@Repository` annotations
-and using "`stub`" repositories instead:
+The following example shows `@ComponentScan` configuration that excludes all
+`@Repository` annotations and includes "`Stub`" repositories instead:
 
 [tabs]
 ======
@@ -422,6 +474,353 @@ annotation or by providing `use-default-filters="false"` as an attribute of the
 `<component-scan/>` element. This effectively disables automatic detection of classes
 annotated or meta-annotated with `@Component`, `@Repository`, `@Service`, `@Controller`,
 `@RestController`, or `@Configuration`.
+
+
+[[beans-scanning-name-generator]]
+=== Naming Autodetected Components
+
+When a component is autodetected as part of the scanning process, its bean name is
+generated by the `BeanNameGenerator` strategy known to that scanner.
+
+By default, the `AnnotationBeanNameGenerator` is used. For Spring
+xref:core/beans/classpath-scanning.adoc#beans-stereotype-annotations[stereotype annotations],
+if you supply a name via the annotation's `value` attribute that name will be used as
+the name in the corresponding bean definition. This convention also applies when the
+`@jakarta.inject.Named` annotation is used instead of Spring stereotype annotations.
+
+As of Spring Framework 6.1, the name of the annotation attribute that is used to specify
+the bean name is no longer required to be `value`. Custom stereotype annotations can
+declare an attribute with a different name (such as `name`) and annotate that attribute
+with `@AliasFor(annotation = Component.class, attribute = "value")`. See the source code
+declaration of `ControllerAdvice#name()` for a concrete example.
+
+[WARNING]
+====
+As of Spring Framework 6.1, support for convention-based stereotype names is deprecated
+and will be removed in a future version of the framework. Consequently, custom stereotype
+annotations must use `@AliasFor` to declare an explicit alias for the `value` attribute
+in `@Component`. See the source code declaration of `Repository#value()` and
+`ControllerAdvice#name()` for concrete examples.
+====
+
+If an explicit bean name cannot be derived from such an annotation or for any other
+detected component (such as those discovered by custom filters), the default bean name
+generator returns the uncapitalized non-qualified class name. For example, if the
+following component classes were detected, the names would be `myMovieLister` and
+`movieFinderImpl`.
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	@Service("myMovieLister")
+	public class SimpleMovieLister {
+		// ...
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes"]
+----
+	@Service("myMovieLister")
+	class SimpleMovieLister {
+		// ...
+	}
+----
+======
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	@Repository
+	public class MovieFinderImpl implements MovieFinder {
+		// ...
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes"]
+----
+	@Repository
+	class MovieFinderImpl : MovieFinder {
+		// ...
+	}
+----
+======
+
+If you do not want to rely on the default bean-naming strategy, you can provide a custom
+bean-naming strategy. First, implement the
+{spring-framework-api}/beans/factory/support/BeanNameGenerator.html[`BeanNameGenerator`]
+interface, and be sure to include a default no-arg constructor. Then, provide the fully
+qualified class name when configuring the scanner, as the following example annotation
+and bean definition show.
+
+TIP: If you run into naming conflicts due to multiple autodetected components having the
+same non-qualified class name (i.e., classes with identical names but residing in
+different packages), you may need to configure a `BeanNameGenerator` that defaults to the
+fully qualified class name for the generated bean name. The
+`FullyQualifiedAnnotationBeanNameGenerator` located in package
+`org.springframework.context.annotation` can be used for such purposes.
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	@Configuration
+	@ComponentScan(basePackages = "org.example", nameGenerator = MyNameGenerator.class)
+	public class AppConfig {
+		// ...
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes"]
+----
+	@Configuration
+	@ComponentScan(basePackages = ["org.example"], nameGenerator = MyNameGenerator::class)
+	class AppConfig {
+		// ...
+	}
+----
+======
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<beans>
+		<context:component-scan base-package="org.example"
+			name-generator="org.example.MyNameGenerator" />
+	</beans>
+----
+
+As a general rule, consider specifying the name with the annotation whenever other
+components may be making explicit references to it. On the other hand, the
+auto-generated names are adequate whenever the container is responsible for wiring.
+
+
+[[beans-scanning-scope-resolver]]
+=== Providing a Scope for Autodetected Components
+
+As with Spring-managed components in general, the default and most common scope for
+autodetected components is `singleton`. However, sometimes you need a different scope
+that can be specified by the `@Scope` annotation. You can provide the name of the
+scope within the annotation, as the following example shows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	@Scope("prototype")
+	@Repository
+	public class MovieFinderImpl implements MovieFinder {
+		// ...
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes"]
+----
+	@Scope("prototype")
+	@Repository
+	class MovieFinderImpl : MovieFinder {
+		// ...
+	}
+----
+======
+
+NOTE: `@Scope` annotations are only introspected on the concrete bean class (for annotated
+components) or the factory method (for `@Bean` methods). In contrast to XML bean
+definitions, there is no notion of bean definition inheritance, and inheritance
+hierarchies at the class level are irrelevant for metadata purposes.
+
+For details on web-specific scopes such as "`request`" or "`session`" in a Spring context,
+see xref:core/beans/factory-scopes.adoc#beans-factory-scopes-other[Request, Session, Application, and WebSocket Scopes].
+As with the pre-built annotations for those scopes, you may also compose your own scoping
+annotations by using Spring's meta-annotation approach: for example, a custom annotation
+meta-annotated with `@Scope("prototype")`, possibly also declaring a custom scoped-proxy mode.
+
+NOTE: To provide a custom strategy for scope resolution rather than relying on the
+annotation-based approach, you can implement the
+{spring-framework-api}/context/annotation/ScopeMetadataResolver.html[`ScopeMetadataResolver`]
+interface. Be sure to include a default no-arg constructor. Then you can provide the
+fully qualified class name when configuring the scanner, as the following example of both
+an annotation and a bean definition shows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	@Configuration
+	@ComponentScan(basePackages = "org.example", scopeResolver = MyScopeResolver.class)
+	public class AppConfig {
+		// ...
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes"]
+----
+	@Configuration
+	@ComponentScan(basePackages = ["org.example"], scopeResolver = MyScopeResolver::class)
+	class AppConfig {
+		// ...
+	}
+----
+======
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<beans>
+		<context:component-scan base-package="org.example" scope-resolver="org.example.MyScopeResolver"/>
+	</beans>
+----
+
+When using certain non-singleton scopes, it may be necessary to generate proxies for the
+scoped objects. The reasoning is described in
+xref:core/beans/factory-scopes.adoc#beans-factory-scopes-other-injection[Scoped Beans as Dependencies].
+For this purpose, a scoped-proxy attribute is available on the component-scan
+element. The three possible values are: `no`, `interfaces`, and `targetClass`. For example,
+the following configuration results in standard JDK dynamic proxies:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	@Configuration
+	@ComponentScan(basePackages = "org.example", scopedProxy = ScopedProxyMode.INTERFACES)
+	public class AppConfig {
+		// ...
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes"]
+----
+	@Configuration
+	@ComponentScan(basePackages = ["org.example"], scopedProxy = ScopedProxyMode.INTERFACES)
+	class AppConfig {
+		// ...
+	}
+----
+======
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<beans>
+		<context:component-scan base-package="org.example" scoped-proxy="interfaces"/>
+	</beans>
+----
+
+
+[[beans-scanning-qualifiers]]
+=== Providing Qualifier Metadata with Annotations
+
+The `@Qualifier` annotation is discussed in
+xref:core/beans/annotation-config/autowired-qualifiers.adoc[Fine-tuning Annotation-based Autowiring with Qualifiers].
+The examples in that section demonstrate the use of the `@Qualifier` annotation and
+custom qualifier annotations to provide fine-grained control when you resolve autowire
+candidates. Because those examples were based on XML bean definitions, the qualifier
+metadata was provided on the candidate bean definitions by using the `qualifier` or `meta`
+child elements of the `bean` element in the XML. When relying upon classpath scanning for
+auto-detection of components, you can provide the qualifier metadata with type-level
+annotations on the candidate class. The following three examples demonstrate this
+technique:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	@Component
+	@Qualifier("Action")
+	public class ActionMovieCatalog implements MovieCatalog {
+		// ...
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes"]
+----
+	@Component
+	@Qualifier("Action")
+	class ActionMovieCatalog : MovieCatalog
+----
+======
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	@Component
+	@Genre("Action")
+	public class ActionMovieCatalog implements MovieCatalog {
+		// ...
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes"]
+----
+	@Component
+	@Genre("Action")
+	class ActionMovieCatalog : MovieCatalog {
+		// ...
+	}
+----
+======
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	@Component
+	@Offline
+	public class CachingMovieCatalog implements MovieCatalog {
+		// ...
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes"]
+----
+@Component
+@Offline
+class CachingMovieCatalog : MovieCatalog {
+	// ...
+}
+----
+======
+
+NOTE: As with most annotation-based alternatives, keep in mind that the annotation metadata is
+bound to the class definition itself, while the use of XML allows for multiple beans
+of the same type to provide variations in their qualifier metadata, because that
+metadata is provided per-instance rather than per-class.
 
 
 [[beans-factorybeans-annotations]]
@@ -646,10 +1045,10 @@ methods anywhere. However, regular `@Bean` methods in `@Configuration` classes n
 to be overridable -- that is, they must not be declared as `private` or `final`.
 
 `@Bean` methods are also discovered on base classes of a given component or
-configuration class, as well as on Java 8 default methods declared in interfaces
+configuration class, as well as on Java default methods declared in interfaces
 implemented by the component or configuration class. This allows for a lot of
 flexibility in composing complex configuration arrangements, with even multiple
-inheritance being possible through Java 8 default methods as of Spring 4.2.
+inheritance being possible through Java default methods.
 
 Finally, a single class may hold multiple `@Bean` methods for the same
 bean, as an arrangement of multiple factory methods to use depending on available
@@ -658,350 +1057,3 @@ constructor or factory method in other configuration scenarios: The variant with
 the largest number of satisfiable dependencies is picked at construction time,
 analogous to how the container selects between multiple `@Autowired` constructors.
 ====
-
-
-[[beans-scanning-name-generator]]
-== Naming Autodetected Components
-
-When a component is autodetected as part of the scanning process, its bean name is
-generated by the `BeanNameGenerator` strategy known to that scanner.
-
-By default, the `AnnotationBeanNameGenerator` is used. For Spring
-xref:core/beans/classpath-scanning.adoc#beans-stereotype-annotations[stereotype annotations],
-if you supply a name via the annotation's `value` attribute that name will be used as
-the name in the corresponding bean definition. This convention also applies when the
-`@jakarta.inject.Named` annotation is used instead of Spring stereotype annotations.
-
-As of Spring Framework 6.1, the name of the annotation attribute that is used to specify
-the bean name is no longer required to be `value`. Custom stereotype annotations can
-declare an attribute with a different name (such as `name`) and annotate that attribute
-with `@AliasFor(annotation = Component.class, attribute = "value")`. See the source code
-declaration of `ControllerAdvice#name()` for a concrete example.
-
-[WARNING]
-====
-As of Spring Framework 6.1, support for convention-based stereotype names is deprecated
-and will be removed in a future version of the framework. Consequently, custom stereotype
-annotations must use `@AliasFor` to declare an explicit alias for the `value` attribute
-in `@Component`. See the source code declaration of `Repository#value()` and
-`ControllerAdvice#name()` for concrete examples.
-====
-
-If an explicit bean name cannot be derived from such an annotation or for any other
-detected component (such as those discovered by custom filters), the default bean name
-generator returns the uncapitalized non-qualified class name. For example, if the
-following component classes were detected, the names would be `myMovieLister` and
-`movieFinderImpl`.
-
-[tabs]
-======
-Java::
-+
-[source,java,indent=0,subs="verbatim,quotes"]
-----
-	@Service("myMovieLister")
-	public class SimpleMovieLister {
-		// ...
-	}
-----
-
-Kotlin::
-+
-[source,kotlin,indent=0,subs="verbatim,quotes"]
-----
-	@Service("myMovieLister")
-	class SimpleMovieLister {
-		// ...
-	}
-----
-======
-
-[tabs]
-======
-Java::
-+
-[source,java,indent=0,subs="verbatim,quotes"]
-----
-	@Repository
-	public class MovieFinderImpl implements MovieFinder {
-		// ...
-	}
-----
-
-Kotlin::
-+
-[source,kotlin,indent=0,subs="verbatim,quotes"]
-----
-	@Repository
-	class MovieFinderImpl : MovieFinder {
-		// ...
-	}
-----
-======
-
-If you do not want to rely on the default bean-naming strategy, you can provide a custom
-bean-naming strategy. First, implement the
-{spring-framework-api}/beans/factory/support/BeanNameGenerator.html[`BeanNameGenerator`]
-interface, and be sure to include a default no-arg constructor. Then, provide the fully
-qualified class name when configuring the scanner, as the following example annotation
-and bean definition show.
-
-TIP: If you run into naming conflicts due to multiple autodetected components having the
-same non-qualified class name (i.e., classes with identical names but residing in
-different packages), you may need to configure a `BeanNameGenerator` that defaults to the
-fully qualified class name for the generated bean name. The
-`FullyQualifiedAnnotationBeanNameGenerator` located in package
-`org.springframework.context.annotation` can be used for such purposes.
-
-[tabs]
-======
-Java::
-+
-[source,java,indent=0,subs="verbatim,quotes"]
-----
-	@Configuration
-	@ComponentScan(basePackages = "org.example", nameGenerator = MyNameGenerator.class)
-	public class AppConfig {
-		// ...
-	}
-----
-
-Kotlin::
-+
-[source,kotlin,indent=0,subs="verbatim,quotes"]
-----
-	@Configuration
-	@ComponentScan(basePackages = ["org.example"], nameGenerator = MyNameGenerator::class)
-	class AppConfig {
-		// ...
-	}
-----
-======
-
-[source,xml,indent=0,subs="verbatim,quotes"]
-----
-	<beans>
-		<context:component-scan base-package="org.example"
-			name-generator="org.example.MyNameGenerator" />
-	</beans>
-----
-
-As a general rule, consider specifying the name with the annotation whenever other
-components may be making explicit references to it. On the other hand, the
-auto-generated names are adequate whenever the container is responsible for wiring.
-
-
-[[beans-scanning-scope-resolver]]
-== Providing a Scope for Autodetected Components
-
-As with Spring-managed components in general, the default and most common scope for
-autodetected components is `singleton`. However, sometimes you need a different scope
-that can be specified by the `@Scope` annotation. You can provide the name of the
-scope within the annotation, as the following example shows:
-
-[tabs]
-======
-Java::
-+
-[source,java,indent=0,subs="verbatim,quotes"]
-----
-	@Scope("prototype")
-	@Repository
-	public class MovieFinderImpl implements MovieFinder {
-		// ...
-	}
-----
-
-Kotlin::
-+
-[source,kotlin,indent=0,subs="verbatim,quotes"]
-----
-	@Scope("prototype")
-	@Repository
-	class MovieFinderImpl : MovieFinder {
-		// ...
-	}
-----
-======
-
-NOTE: `@Scope` annotations are only introspected on the concrete bean class (for annotated
-components) or the factory method (for `@Bean` methods). In contrast to XML bean
-definitions, there is no notion of bean definition inheritance, and inheritance
-hierarchies at the class level are irrelevant for metadata purposes.
-
-For details on web-specific scopes such as "`request`" or "`session`" in a Spring context,
-see xref:core/beans/factory-scopes.adoc#beans-factory-scopes-other[Request, Session, Application, and WebSocket Scopes].
-As with the pre-built annotations for those scopes, you may also compose your own scoping
-annotations by using Spring's meta-annotation approach: for example, a custom annotation
-meta-annotated with `@Scope("prototype")`, possibly also declaring a custom scoped-proxy mode.
-
-NOTE: To provide a custom strategy for scope resolution rather than relying on the
-annotation-based approach, you can implement the
-{spring-framework-api}/context/annotation/ScopeMetadataResolver.html[`ScopeMetadataResolver`]
-interface. Be sure to include a default no-arg constructor. Then you can provide the
-fully qualified class name when configuring the scanner, as the following example of both
-an annotation and a bean definition shows:
-
-[tabs]
-======
-Java::
-+
-[source,java,indent=0,subs="verbatim,quotes"]
-----
-	@Configuration
-	@ComponentScan(basePackages = "org.example", scopeResolver = MyScopeResolver.class)
-	public class AppConfig {
-		// ...
-	}
-----
-
-Kotlin::
-+
-[source,kotlin,indent=0,subs="verbatim,quotes"]
-----
-	@Configuration
-	@ComponentScan(basePackages = ["org.example"], scopeResolver = MyScopeResolver::class)
-	class AppConfig {
-		// ...
-	}
-----
-======
-
-[source,xml,indent=0,subs="verbatim,quotes"]
-----
-	<beans>
-		<context:component-scan base-package="org.example" scope-resolver="org.example.MyScopeResolver"/>
-	</beans>
-----
-
-When using certain non-singleton scopes, it may be necessary to generate proxies for the
-scoped objects. The reasoning is described in
-xref:core/beans/factory-scopes.adoc#beans-factory-scopes-other-injection[Scoped Beans as Dependencies].
-For this purpose, a scoped-proxy attribute is available on the component-scan
-element. The three possible values are: `no`, `interfaces`, and `targetClass`. For example,
-the following configuration results in standard JDK dynamic proxies:
-
-[tabs]
-======
-Java::
-+
-[source,java,indent=0,subs="verbatim,quotes"]
-----
-	@Configuration
-	@ComponentScan(basePackages = "org.example", scopedProxy = ScopedProxyMode.INTERFACES)
-	public class AppConfig {
-		// ...
-	}
-----
-
-Kotlin::
-+
-[source,kotlin,indent=0,subs="verbatim,quotes"]
-----
-	@Configuration
-	@ComponentScan(basePackages = ["org.example"], scopedProxy = ScopedProxyMode.INTERFACES)
-	class AppConfig {
-		// ...
-	}
-----
-======
-
-[source,xml,indent=0,subs="verbatim,quotes"]
-----
-	<beans>
-		<context:component-scan base-package="org.example" scoped-proxy="interfaces"/>
-	</beans>
-----
-
-
-[[beans-scanning-qualifiers]]
-== Providing Qualifier Metadata with Annotations
-
-The `@Qualifier` annotation is discussed in
-xref:core/beans/annotation-config/autowired-qualifiers.adoc[Fine-tuning Annotation-based Autowiring with Qualifiers].
-The examples in that section demonstrate the use of the `@Qualifier` annotation and
-custom qualifier annotations to provide fine-grained control when you resolve autowire
-candidates. Because those examples were based on XML bean definitions, the qualifier
-metadata was provided on the candidate bean definitions by using the `qualifier` or `meta`
-child elements of the `bean` element in the XML. When relying upon classpath scanning for
-auto-detection of components, you can provide the qualifier metadata with type-level
-annotations on the candidate class. The following three examples demonstrate this
-technique:
-
-[tabs]
-======
-Java::
-+
-[source,java,indent=0,subs="verbatim,quotes"]
-----
-	@Component
-	@Qualifier("Action")
-	public class ActionMovieCatalog implements MovieCatalog {
-		// ...
-	}
-----
-
-Kotlin::
-+
-[source,kotlin,indent=0,subs="verbatim,quotes"]
-----
-	@Component
-	@Qualifier("Action")
-	class ActionMovieCatalog : MovieCatalog
-----
-======
-
-[tabs]
-======
-Java::
-+
-[source,java,indent=0,subs="verbatim,quotes"]
-----
-	@Component
-	@Genre("Action")
-	public class ActionMovieCatalog implements MovieCatalog {
-		// ...
-	}
-----
-
-Kotlin::
-+
-[source,kotlin,indent=0,subs="verbatim,quotes"]
-----
-	@Component
-	@Genre("Action")
-	class ActionMovieCatalog : MovieCatalog {
-		// ...
-	}
-----
-======
-
-[tabs]
-======
-Java::
-+
-[source,java,indent=0,subs="verbatim,quotes"]
-----
-	@Component
-	@Offline
-	public class CachingMovieCatalog implements MovieCatalog {
-		// ...
-	}
-----
-
-Kotlin::
-+
-[source,kotlin,indent=0,subs="verbatim,quotes"]
-----
-@Component
-@Offline
-class CachingMovieCatalog : MovieCatalog {
-	// ...
-}
-----
-======
-
-NOTE: As with most annotation-based alternatives, keep in mind that the annotation metadata is
-bound to the class definition itself, while the use of XML allows for multiple beans
-of the same type to provide variations in their qualifier metadata, because that
-metadata is provided per-instance rather than per-class.

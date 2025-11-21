@@ -26,6 +26,7 @@ import org.apache.commons.logging.LogFactory;
 import org.jspecify.annotations.Nullable;
 
 import org.springframework.aop.support.AopUtils;
+import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.core.MethodClassKey;
 import org.springframework.util.ReflectionUtils;
 
@@ -92,6 +93,10 @@ public abstract class AbstractFallbackJCacheOperationSource implements JCacheOpe
 	private @Nullable JCacheOperation<?> computeCacheOperation(Method method, @Nullable Class<?> targetClass) {
 		// Don't allow non-public methods, as configured.
 		if (allowPublicMethodsOnly() && !Modifier.isPublic(method.getModifiers())) {
+			return null;
+		}
+		// Skip setBeanFactory method on BeanFactoryAware.
+		if (method.getDeclaringClass() == BeanFactoryAware.class) {
 			return null;
 		}
 

@@ -80,7 +80,7 @@ import org.springframework.util.CollectionUtils;
  * automatically apply to Scheduler operations performed within those scopes.
  * Alternatively, you may add transactional advice for the Scheduler itself.
  *
- * <p>Compatible with Quartz 2.1.4 and higher, as of Spring 4.1.
+ * <p>Compatible with Quartz 2.1.4 and higher.
  *
  * @author Juergen Hoeller
  * @since 18.02.2004
@@ -446,8 +446,7 @@ public class SchedulerFactoryBean extends SchedulerAccessor implements FactoryBe
 	 * Scheduler is usually exclusively intended for access within the Spring context.
 	 * <p>Switch this flag to "true" in order to expose the Scheduler globally.
 	 * This is not recommended unless you have an existing Spring application that
-	 * relies on this behavior. Note that such global exposure was the accidental
-	 * default in earlier Spring versions; this has been fixed as of Spring 2.5.6.
+	 * relies on this behavior.
 	 */
 	public void setExposeSchedulerInRepository(boolean exposeSchedulerInRepository) {
 		this.exposeSchedulerInRepository = exposeSchedulerInRepository;

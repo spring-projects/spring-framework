@@ -30,7 +30,6 @@ import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.EntityTransaction;
 import jakarta.persistence.TransactionRequiredException;
 import jakarta.persistence.spi.PersistenceUnitInfo;
-import jakarta.persistence.spi.PersistenceUnitTransactionType;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jspecify.annotations.Nullable;
@@ -38,6 +37,7 @@ import org.jspecify.annotations.Nullable;
 import org.springframework.core.Ordered;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.support.PersistenceExceptionTranslator;
+import org.springframework.orm.jpa.persistenceunit.SmartPersistenceUnitInfo;
 import org.springframework.transaction.support.ResourceHolderSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.Assert;
@@ -192,14 +192,13 @@ public abstract class ExtendedEntityManagerCreator {
 	 * transactions (according to the JPA 2.1 SynchronizationType rules)
 	 * @return the EntityManager proxy
 	 */
-	@SuppressWarnings("removal")
 	private static EntityManager createProxy(EntityManager rawEntityManager,
 			EntityManagerFactoryInfo emfInfo, boolean containerManaged, boolean synchronizedWithTransaction) {
 
 		Assert.notNull(emfInfo, "EntityManagerFactoryInfo must not be null");
 		JpaDialect jpaDialect = emfInfo.getJpaDialect();
 		PersistenceUnitInfo pui = emfInfo.getPersistenceUnitInfo();
-		Boolean jta = (pui != null ? pui.getTransactionType() == PersistenceUnitTransactionType.JTA : null);
+		Boolean jta = (pui instanceof SmartPersistenceUnitInfo spui ? spui.isConfiguredForJta() : null);
 		return createProxy(rawEntityManager, emfInfo.getEntityManagerInterface(),
 				emfInfo.getBeanClassLoader(), jpaDialect, jta, containerManaged, synchronizedWithTransaction);
 	}

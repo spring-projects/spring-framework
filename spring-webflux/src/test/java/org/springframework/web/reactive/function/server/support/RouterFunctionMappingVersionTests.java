@@ -70,7 +70,7 @@ public class RouterFunctionMappingVersionTests {
 
 	private void testGetHandler(String version, String expectedBody) {
 		MockServerWebExchange exchange = MockServerWebExchange.from(
-				MockServerHttpRequest.get("/").header("X-API-Version", version));
+				MockServerHttpRequest.get("/").header("API-Version", version));
 
 		Mono<?> result = this.mapping.getHandler(exchange);
 
@@ -82,7 +82,7 @@ public class RouterFunctionMappingVersionTests {
 	@Test
 	void deprecation() {
 		MockServerWebExchange exchange = MockServerWebExchange.from(
-				MockServerHttpRequest.get("/").header("X-API-Version", "1"));
+				MockServerHttpRequest.get("/").header("API-Version", "1"));
 
 		Mono<?> result = this.mapping.getHandler(exchange);
 
@@ -105,7 +105,7 @@ public class RouterFunctionMappingVersionTests {
 			StandardApiVersionDeprecationHandler handler = new StandardApiVersionDeprecationHandler();
 			handler.configureVersion("1").setDeprecationLink(URI.create("https://example.org/deprecation"));
 
-			configurer.useRequestHeader("X-API-Version")
+			configurer.useRequestHeader("API-Version")
 					.addSupportedVersions("1", "1.1", "1.3")
 					.setDeprecationHandler(handler);
 		}

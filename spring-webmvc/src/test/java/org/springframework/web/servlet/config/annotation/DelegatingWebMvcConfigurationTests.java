@@ -127,7 +127,7 @@ public class DelegatingWebMvcConfigurationTests {
 
 			@Override
 			public void configureMessageConverters(HttpMessageConverters.ServerBuilder builder) {
-				builder.customMessageConverter(customConverter);
+				builder.addCustomConverter(customConverter);
 			}
 		};
 		webMvcConfig.setConfigurers(Collections.singletonList(configurer));

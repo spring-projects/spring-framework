@@ -40,7 +40,7 @@ public class ApiVersionTests {
 
 	@Test
 	void header() {
-		String header = "X-API-Version";
+		String header = "API-Version";
 
 		Map<String, String> result = performRequest(
 				configurer -> configurer.useRequestHeader(header),
@@ -92,7 +92,7 @@ public class ApiVersionTests {
 	@RestController
 	static class TestController {
 
-		private static final String HEADER = "X-API-Version";
+		private static final String HEADER = "API-Version";
 
 		@GetMapping(path = "/**", version = "1.2")
 		Map<String, String> handle(ServerHttpRequest request) {

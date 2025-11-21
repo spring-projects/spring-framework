@@ -85,6 +85,7 @@ class ButtonTagTests extends AbstractFormTagTests {
 		assertThat(output).as("Tag not opened properly").startsWith("<button ");
 	}
 
+	@SuppressWarnings("serial")
 	protected ButtonTag createTag(final Writer writer) {
 		return new ButtonTag() {
 			@Override

@@ -31,8 +31,11 @@ import org.jspecify.annotations.Nullable;
  * <p>As of 7.0, this interface also allows for exposing additional object
  * types for dependency injection through implementing a pair of methods:
  * {@link #getObject(Class)} as well as {@link #supportsType(Class)}.
- * The primary {@link #getObjectType()} will be exposed for regular access.
- * Only if a specific type is requested, additional types are considered.
+ * The primary {@link #getObjectType()} will be exposed for regular access;
+ * only if a specific type is requested, additional types are considered.
+ * The container will not cache {@code SmartFactoryBean}-produced objects;
+ * make sure that the {@code getObject} implementation is thread-safe for
+ * repeated invocations.
  *
  * <p><b>NOTE:</b> This interface is a special purpose interface, mainly for
  * internal use within the framework and within collaborating frameworks.

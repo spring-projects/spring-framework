@@ -61,14 +61,14 @@ class AnnotationDrivenCacheBeanDefinitionParser implements BeanDefinitionParser 
 	private static final String JCACHE_ASPECT_CLASS_NAME =
 			"org.springframework.cache.aspectj.JCacheCacheAspect";
 
-	private static final boolean jsr107Present;
+	private static final boolean JSR_107_PRESENT;
 
-	private static final boolean jcacheImplPresent;
+	private static final boolean JCACHE_IMPL_PRESENT;
 
 	static {
 		ClassLoader classLoader = AnnotationDrivenCacheBeanDefinitionParser.class.getClassLoader();
-		jsr107Present = ClassUtils.isPresent("javax.cache.Cache", classLoader);
-		jcacheImplPresent = ClassUtils.isPresent(
+		JSR_107_PRESENT = ClassUtils.isPresent("javax.cache.Cache", classLoader);
+		JCACHE_IMPL_PRESENT = ClassUtils.isPresent(
 				"org.springframework.cache.jcache.interceptor.DefaultJCacheOperationSource", classLoader);
 	}
 
@@ -95,7 +95,7 @@ class AnnotationDrivenCacheBeanDefinitionParser implements BeanDefinitionParser 
 
 	private void registerCacheAspect(Element element, ParserContext parserContext) {
 		SpringCachingConfigurer.registerCacheAspect(element, parserContext);
-		if (jsr107Present && jcacheImplPresent) {
+		if (JSR_107_PRESENT && JCACHE_IMPL_PRESENT) {
 			JCacheCachingConfigurer.registerCacheAspect(element, parserContext);
 		}
 	}
@@ -103,7 +103,7 @@ class AnnotationDrivenCacheBeanDefinitionParser implements BeanDefinitionParser 
 	private void registerCacheAdvisor(Element element, ParserContext parserContext) {
 		AopNamespaceUtils.registerAutoProxyCreatorIfNecessary(parserContext, element);
 		SpringCachingConfigurer.registerCacheAdvisor(element, parserContext);
-		if (jsr107Present && jcacheImplPresent) {
+		if (JSR_107_PRESENT && JCACHE_IMPL_PRESENT) {
 			JCacheCachingConfigurer.registerCacheAdvisor(element, parserContext);
 		}
 	}

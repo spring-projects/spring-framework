@@ -81,7 +81,9 @@ class ReactiveTypeHandler {
 
 	private static final MediaType WILDCARD_SUBTYPE_SUFFIXED_BY_NDJSON = MediaType.valueOf("application/*+x-ndjson");
 
-	private static final boolean isContextPropagationPresent = ClassUtils.isPresent(
+	private static final MediaType APPLICATION_GRPC = MediaType.valueOf("application/grpc");
+
+	private static final boolean CONTEXT_PROPAGATION_PRESENT = ClassUtils.isPresent(
 			"io.micrometer.context.ContextSnapshot", ReactiveTypeHandler.class.getClassLoader());
 
 	private static final Log logger = LogFactory.getLog(ReactiveTypeHandler.class);
@@ -114,7 +116,7 @@ class ReactiveTypeHandler {
 	}
 
 	private static @Nullable Object initContextSnapshotHelper(@Nullable Object snapshotFactory) {
-		if (isContextPropagationPresent) {
+		if (CONTEXT_PROPAGATION_PRESENT) {
 			return new ContextSnapshotHelper((ContextSnapshotFactory) snapshotFactory);
 		}
 		return null;
@@ -145,7 +147,7 @@ class ReactiveTypeHandler {
 		Assert.state(adapter != null, () -> "Unexpected return value type: " + clazz);
 
 		TaskDecorator taskDecorator = null;
-		if (isContextPropagationPresent) {
+		if (CONTEXT_PROPAGATION_PRESENT) {
 			ContextSnapshotHelper helper = (ContextSnapshotHelper) this.contextSnapshotHelper;
 			Assert.notNull(helper, "No ContextSnapshotHelper");
 			returnValue = helper.writeReactorContext(returnValue);
@@ -165,9 +167,14 @@ class ReactiveTypeHandler {
 				new SseEmitterSubscriber(emitter, this.taskExecutor, taskDecorator).connect(adapter, returnValue);
 				return emitter;
 			}
+			if (mediaTypes.stream().anyMatch(APPLICATION_GRPC::includes)) {
+				ResponseBodyEmitter emitter = getEmitter(mediaType.orElse(APPLICATION_GRPC));
+				new BasicEmitterSubscriber(emitter, APPLICATION_GRPC, this.taskExecutor).connect(adapter, returnValue);
+				return emitter;
+			}
 			if (CharSequence.class.isAssignableFrom(elementClass)) {
 				ResponseBodyEmitter emitter = getEmitter(mediaType.orElse(MediaType.TEXT_PLAIN));
-				new TextEmitterSubscriber(emitter, this.taskExecutor).connect(adapter, returnValue);
+				new BasicEmitterSubscriber(emitter, MediaType.TEXT_PLAIN, this.taskExecutor).connect(adapter, returnValue);
 				return emitter;
 			}
 			MediaType streamingResponseType = findConcreteJsonStreamMediaType(mediaTypes);
@@ -249,7 +256,7 @@ class ReactiveTypeHandler {
 
 		private @Nullable Subscription subscription;
 
-		private final AtomicReference<Object> elementRef = new AtomicReference<>();
+		private final AtomicReference<@Nullable Object> elementRef = new AtomicReference<>();
 
 		private @Nullable Throwable error;
 
@@ -475,15 +482,18 @@ class ReactiveTypeHandler {
 	}
 
 
-	private static class TextEmitterSubscriber extends AbstractEmitterSubscriber {
+	private static class BasicEmitterSubscriber extends AbstractEmitterSubscriber {
 
-		TextEmitterSubscriber(ResponseBodyEmitter emitter, TaskExecutor executor) {
+		private final MediaType mediaType;
+
+		BasicEmitterSubscriber(ResponseBodyEmitter emitter, MediaType mediaType, TaskExecutor executor) {
 			super(emitter, executor, null);
+			this.mediaType = mediaType;
 		}
 
 		@Override
 		protected void send(Object element) throws IOException {
-			getEmitter().send(element, MediaType.TEXT_PLAIN);
+			getEmitter().send(element, this.mediaType);
 		}
 	}
 

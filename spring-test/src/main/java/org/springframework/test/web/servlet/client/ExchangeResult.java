@@ -19,6 +19,8 @@ package org.springframework.test.web.servlet.client;
 import java.io.IOException;
 import java.net.HttpCookie;
 import java.net.URI;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
 import java.util.regex.Matcher;
@@ -34,10 +36,13 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseCookie;
+import org.springframework.test.json.JsonConverterDelegate;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.util.StreamUtils;
 import org.springframework.web.client.RestClient.RequestHeadersSpec.ConvertibleClientHttpResponse;
 
 /**
@@ -54,6 +59,10 @@ public class ExchangeResult {
 
 	private static final Pattern PARTITIONED_PATTERN = Pattern.compile("(?i).*;\\s*Partitioned(\\s*;.*|\\s*)$");
 
+	private static final List<MediaType> PRINTABLE_MEDIA_TYPES = List.of(
+			MediaType.parseMediaType("application/*+json"), MediaType.APPLICATION_XML,
+			MediaType.parseMediaType("text/*"), MediaType.APPLICATION_FORM_URLENCODED);
+
 
 	private static final Log logger = LogFactory.getLog(ExchangeResult.class);
 
@@ -64,22 +73,29 @@ public class ExchangeResult {
 
 	private final @Nullable String uriTemplate;
 
+	private final byte[] requestBody;
+
+	private final @Nullable JsonConverterDelegate converterDelegate;
+
 	/** Ensure single logging; for example, for expectAll. */
 	private boolean diagnosticsLogged;
 
 
 	ExchangeResult(
-			HttpRequest request, ConvertibleClientHttpResponse response, @Nullable String uriTemplate) {
+			HttpRequest request, ConvertibleClientHttpResponse response, @Nullable String uriTemplate,
+			byte[] requestBody, @Nullable JsonConverterDelegate converter) {
 
 		Assert.notNull(request, "HttpRequest must not be null");
 		Assert.notNull(response, "ClientHttpResponse must not be null");
 		this.request = request;
 		this.clientResponse = response;
 		this.uriTemplate = uriTemplate;
+		this.requestBody = requestBody;
+		this.converterDelegate = converter;
 	}
 
 	ExchangeResult(ExchangeResult result) {
-		this(result.request, result.clientResponse, result.uriTemplate);
+		this(result.request, result.clientResponse, result.uriTemplate, result.requestBody, result.converterDelegate);
 		this.diagnosticsLogged = result.diagnosticsLogged;
 	}
 
@@ -160,10 +176,37 @@ public class ExchangeResult {
 	}
 
 	/**
+	 * Return the raw request body content written through the request.
+	 */
+	public byte[] getRequestBodyContent() {
+		return this.requestBody;
+	}
+
+	/**
 	 * Provide access to the response. For internal use to decode the body.
 	 */
 	ConvertibleClientHttpResponse getClientResponse() {
 		return this.clientResponse;
+	}
+
+	/**
+	 * Return the raw response body read through the response.
+	 */
+	public byte[] getResponseBodyContent() {
+		try {
+			return StreamUtils.copyToByteArray(this.clientResponse.getBody());
+		}
+		catch (IOException ex) {
+			throw new IllegalStateException("Failed to get response content: " + ex);
+		}
+	}
+
+	/**
+	 * Return a {@link JsonConverterDelegate} based on the configured HTTP message converters.
+	 * Mainly for internal use from AssertJ support classes.
+	 */
+	public @Nullable JsonConverterDelegate getJsonConverterDelegate() {
+		return this.converterDelegate;
 	}
 
 	/**
@@ -190,8 +233,12 @@ public class ExchangeResult {
 				"> " + getMethod() + " " + getUrl() + "\n" +
 				"> " + formatHeaders(getRequestHeaders(), "\n> ") + "\n" +
 				"\n" +
+				formatBody(getRequestHeaders().getContentType(), this.requestBody) + "\n" +
+				"\n" +
 				"< " + formatStatus(getStatus()) + "\n" +
-				"< " + formatHeaders(getResponseHeaders(), "\n< ") + "\n";
+				"< " + formatHeaders(getResponseHeaders(), "\n< ") + "\n" +
+				"\n" +
+				formatBody(getResponseHeaders().getContentType(), getResponseBodyContent()) +"\n";
 	}
 
 	private String formatStatus(HttpStatusCode statusCode) {
@@ -206,6 +253,20 @@ public class ExchangeResult {
 		return headers.headerSet().stream()
 				.map(entry -> entry.getKey() + ": " + entry.getValue())
 				.collect(Collectors.joining(delimiter));
+	}
+
+	private String formatBody(@Nullable MediaType contentType, byte[] bytes) {
+		if (contentType == null) {
+			return bytes.length + " bytes of content (unknown content-type).";
+		}
+		Charset charset = contentType.getCharset();
+		if (charset != null) {
+			return new String(bytes, charset);
+		}
+		if (PRINTABLE_MEDIA_TYPES.stream().anyMatch(contentType::isCompatibleWith)) {
+			return new String(bytes, StandardCharsets.UTF_8);
+		}
+		return bytes.length + " bytes of content.";
 	}
 
 }

@@ -65,7 +65,7 @@ import org.springframework.beans.factory.InitializingBean;
  * Note that the value of "foo" in the first document is not simply replaced
  * with the value in the second, but its nested values are merged.
  *
- * <p>Requires SnakeYAML 2.0 or higher, as of Spring Framework 6.1.
+ * <p>Requires SnakeYAML 2.0 or higher.
  *
  * @author Dave Syer
  * @author Juergen Hoeller

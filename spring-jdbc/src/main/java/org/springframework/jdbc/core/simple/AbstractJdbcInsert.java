@@ -448,7 +448,6 @@ public abstract class AbstractJdbcInsert {
 	/**
 	 * Delegate method to execute the insert, generating any number of keys.
 	 */
-	@SuppressWarnings("NullAway") // See https://github.com/uber/NullAway/issues/1075
 	private KeyHolder executeInsertAndReturnKeyHolderInternal(List<?> values) {
 		if (logger.isDebugEnabled()) {
 			logger.debug("The following parameters are used for call " + getInsertString() + " with: " + values);

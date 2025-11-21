@@ -270,16 +270,26 @@ Kotlin::
 ======
 
 
+
+
 [[webtestclient-tests]]
 == Writing Tests
 
-`WebTestClient` provides an API identical to xref:web/webflux-webclient.adoc[WebClient]
-up to the point of performing a request by using `exchange()`. See the
-xref:web/webflux-webclient/client-body.adoc[WebClient] documentation for examples on how to
-prepare a request with any content including form data, multipart data, and more.
+xref:web/webflux-webclient.adoc[WebClient] and `WebTestClient` have
+the same API up to the point of the call to `exchange()`. After that, `WebTestClient`
+provides two alternative ways to verify the response:
 
-After the call to `exchange()`, `WebTestClient` diverges from the `WebClient` and
-instead continues with a workflow to verify responses.
+1. xref:webtestclient-workflow[Built-in Assertions] extend the request workflow with a chain of expectations
+2. xref:webtestclient-assertj[AssertJ Integration] to verify the response via `assertThat()` statements
+
+TIP: See the xref:web/webflux-webclient/client-body.adoc[WebClient] documentation for
+examples on how to prepare a request with any content including form data,
+multipart data, and more.
+
+
+
+[[webtestclient-workflow]]
+=== Built-in Assertions
 
 To assert the response status and headers, use the following:
 
@@ -443,8 +453,10 @@ that accept
 {spring-framework-api}/core/ParameterizedTypeReference.html[`ParameterizedTypeReference`]
 instead of `Class<T>`.
 
+
+
 [[webtestclient-no-content]]
-=== No Content
+==== No Content
 
 If the response is not expected to have content, you can assert that as follows:
 
@@ -499,8 +511,10 @@ Kotlin::
 ----
 ======
 
+
+
 [[webtestclient-json]]
-=== JSON Content
+==== JSON Content
 
 You can use `expectBody()` without a target type to perform assertions on the raw
 content rather than through higher level Object(s).
@@ -561,8 +575,10 @@ Kotlin::
 ----
 ======
 
+
+
 [[webtestclient-stream]]
-=== Streaming Responses
+==== Streaming Responses
 
 To test potentially infinite streams such as `"text/event-stream"` or
 `"application/x-ndjson"`, start by verifying the response status and headers, and then
@@ -628,6 +644,78 @@ Kotlin::
 			.verify()
 ----
 ======
+
+
+
+[[webtestclient-assertj]]
+=== AssertJ Integration
+
+`WebTestClientResponse` is the main entry point for the AssertJ integration.
+It is an `AssertProvider` that wraps the `ResponseSpec` of an exchange in order to enable
+use of `assertThat()` statements. For example:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	ResponseSpec spec = client.get().uri("/persons").exchange();
+
+	WebTestClientResponse response = WebTestClientResponse.from(spec);
+	assertThat(response).hasStatusOk();
+	assertThat(response).hasContentTypeCompatibleWith(MediaType.TEXT_PLAIN);
+	// ...
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes"]
+----
+	val spec = client.get().uri("/persons").exchange()
+
+	val response = WebTestClientResponse.from(spec)
+	assertThat(response).hasStatusOk()
+	assertThat(response).hasContentTypeCompatibleWith(MediaType.TEXT_PLAIN)
+	// ...
+----
+======
+
+You can also use the built-in workflow first, and then obtain an `ExchangeResult` to wrap
+and continue with AssertJ. For example:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	ExchangeResult result = client.get().uri("/persons").exchange()
+			. // ...
+			.returnResult();
+
+	WebTestClientResponse response = WebTestClientResponse.from(result);
+	assertThat(response).hasStatusOk();
+	assertThat(response).hasContentTypeCompatibleWith(MediaType.TEXT_PLAIN);
+	// ...
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes"]
+----
+	val result = client.get().uri("/persons").exchange()
+			. // ...
+			.returnResult()
+
+	val response = WebTestClientResponse.from(spec)
+	assertThat(response).hasStatusOk()
+	assertThat(response).hasContentTypeCompatibleWith(MediaType.TEXT_PLAIN)
+	// ...
+----
+======
+
+
 
 [[webtestclient-mockmvc]]
 === MockMvc Assertions

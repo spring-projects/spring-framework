@@ -48,6 +48,7 @@ import static org.mockito.Mockito.mock;
  * @author Rick Evans
  * @author Juergen Hoeller
  */
+@SuppressWarnings("deprecation")
 class BshScriptFactoryTests {
 
 	@Test

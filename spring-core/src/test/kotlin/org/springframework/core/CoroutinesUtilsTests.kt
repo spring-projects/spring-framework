@@ -16,20 +16,26 @@
 
 package org.springframework.core
 
+import io.micrometer.observation.Observation
+import io.micrometer.observation.tck.TestObservationRegistry
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.reactor.awaitSingle
 import kotlinx.coroutines.reactor.awaitSingleOrNull
 import org.assertj.core.api.Assertions
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import org.reactivestreams.Publisher
 import reactor.core.publisher.Flux
+import reactor.core.publisher.Hooks
 import reactor.core.publisher.Mono
 import reactor.test.StepVerifier
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.coroutineContext
 import kotlin.reflect.full.primaryConstructor
 import kotlin.reflect.jvm.isAccessible
+import kotlin.reflect.jvm.javaMethod
 
 /**
  * Kotlin tests for [CoroutinesUtils].
@@ -37,6 +43,8 @@ import kotlin.reflect.jvm.isAccessible
  * @author Sebastien Deleuze
  */
 class CoroutinesUtilsTests {
+
+	private val observationRegistry = TestObservationRegistry.create()
 
 	@Test
 	fun deferredToMono() {
@@ -285,6 +293,21 @@ class CoroutinesUtilsTests {
 		}
 	}
 
+	@Test
+	@Suppress("UNCHECKED_CAST")
+	fun invokeSuspendingFunctionWithObservation() {
+		Hooks.enableAutomaticContextPropagation()
+		val method = CoroutinesUtilsTests::suspendingObservationFunction::javaMethod.get()!!
+		val publisher = CoroutinesUtils.invokeSuspendingFunction(method, this, "test", null) as Publisher<String>
+		val observation = Observation.createNotStarted("coroutine", observationRegistry)
+		observation.observe {
+			val mono = Mono.from<String>(publisher)
+			val result = mono.block()
+			assertThat(result).isEqualTo("coroutine")
+		}
+		Hooks.disableAutomaticContextPropagation()
+	}
+
 	suspend fun suspendingFunction(value: String): String {
 		delay(1)
 		return value
@@ -416,5 +439,12 @@ class CoroutinesUtilsTests {
 	}
 
 	class CustomException(message: String) : Throwable(message)
+
+	suspend fun suspendingObservationFunction(value: String): String? {
+		delay(1)
+		val currentObservation = observationRegistry.currentObservation
+		assertThat(currentObservation).isNotNull
+		return currentObservation?.context?.name
+	}
 
 }

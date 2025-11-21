@@ -111,7 +111,7 @@ public abstract class AbstractMockMvcBuilder<B extends AbstractMockMvcBuilder<B>
 	}
 
 	@Override
-	public <T extends B> T apiVersionInserter(ApiVersionInserter versionInserter) {
+	public <T extends B> T apiVersionInserter(@Nullable ApiVersionInserter versionInserter) {
 		this.apiVersionInserter = versionInserter;
 		return self();
 	}

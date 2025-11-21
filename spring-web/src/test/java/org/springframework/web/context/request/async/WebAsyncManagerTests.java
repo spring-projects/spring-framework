@@ -137,6 +137,7 @@ class WebAsyncManagerTests {
 	}
 
 	@Test // gh-30232
+	@SuppressWarnings("serial")
 	void startCallableProcessingSubmitException() throws Exception {
 		RuntimeException ex = new RuntimeException();
 

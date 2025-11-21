@@ -549,7 +549,7 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 		}
 
 		final List<InjectionMetadata.InjectedElement> elements = new ArrayList<>();
-		Class<?> targetClass = clazz;
+		Class<?> targetClass = ClassUtils.getUserClass(clazz);
 
 		do {
 			final List<InjectionMetadata.InjectedElement> fieldElements = new ArrayList<>();
@@ -569,12 +569,11 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 
 			final List<InjectionMetadata.InjectedElement> methodElements = new ArrayList<>();
 			ReflectionUtils.doWithLocalMethods(targetClass, method -> {
-				Method bridgedMethod = BridgeMethodResolver.findBridgedMethod(method);
-				if (!BridgeMethodResolver.isVisibilityBridgeMethodPair(method, bridgedMethod)) {
+				if (method.isBridge()) {
 					return;
 				}
-				MergedAnnotation<?> ann = findAutowiredAnnotation(bridgedMethod);
-				if (ann != null && method.equals(ClassUtils.getMostSpecificMethod(method, clazz))) {
+				MergedAnnotation<?> ann = findAutowiredAnnotation(method);
+				if (ann != null && method.equals(BridgeMethodResolver.getMostSpecificMethod(method, clazz))) {
 					if (Modifier.isStatic(method.getModifiers())) {
 						if (logger.isInfoEnabled()) {
 							logger.info("Autowired annotation is not supported on static methods: " + method);
@@ -592,7 +591,7 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 						}
 					}
 					boolean required = determineRequiredStatus(ann);
-					PropertyDescriptor pd = BeanUtils.findPropertyForMethod(bridgedMethod, clazz);
+					PropertyDescriptor pd = BeanUtils.findPropertyForMethod(method, clazz);
 					methodElements.add(new AutowiredMethodElement(method, required, pd));
 				}
 			});

@@ -150,6 +150,9 @@ public class LazyConnectionDataSourceProxy extends DelegatingDataSource {
 	 */
 	public void setReadOnlyDataSource(@Nullable DataSource readOnlyDataSource) {
 		this.readOnlyDataSource = readOnlyDataSource;
+		if (getTargetDataSource() == null) {
+			setTargetDataSource(readOnlyDataSource);
+		}
 	}
 
 	/**
@@ -384,7 +387,7 @@ public class LazyConnectionDataSourceProxy extends DelegatingDataSource {
 						return null;
 					}
 					case "isReadOnly" -> {
-						return this.readOnly;
+						return (this.readOnly || getTargetDataSource() == readOnlyDataSource);
 					}
 					case "setReadOnly" -> {
 						this.readOnly = (Boolean) args[0];

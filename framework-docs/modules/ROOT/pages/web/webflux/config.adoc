@@ -691,7 +691,7 @@ Java::
 
 		@Override
 		public void configureApiVersioning(ApiVersionConfigurer configurer) {
-			configurer.useRequestHeader("X-API-Version");
+			configurer.useRequestHeader("API-Version");
 		}
 	}
 ----
@@ -704,7 +704,7 @@ Kotlin::
 	class WebConfiguration : WebMvcConfigurer {
 
 		override fun configureApiVersioning(configurer: ApiVersionConfigurer) {
-			configurer.useRequestHeader("X-API-Version")
+			configurer.useRequestHeader("API-Version")
 		}
 	}
 ----
@@ -718,8 +718,12 @@ alternatively use a custom `ApiVersionResolver`:
 - Path segment
 - Media type parameter
 
-TIP: When using a path segment, consider configuring a shared path prefix externally
-in xref:web/webmvc/mvc-config/path-matching.adoc[Path Matching] options.
+To resolve from a path segment, you need to specify the index of the path segment expected
+to contain the version. The path segment must be declared as a URI variable, e.g.
+"/\{version}", "/api/\{version}", etc. where the actual name is not important.
+As the version is typically at the start of the path, consider configuring it externally
+as a common path prefix for all handlers through the
+xref:web/webflux/config.adoc#webflux-config-path-matching[Path Matching] options.
 
 By default, the version is parsed with `SemanticVersionParser`, but you can also configure
 a custom xref:web/webflux-versioning.adoc#webflux-versioning-parser[ApiVersionParser].

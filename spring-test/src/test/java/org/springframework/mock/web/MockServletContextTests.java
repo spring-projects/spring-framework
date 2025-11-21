@@ -106,9 +106,9 @@ class MockServletContextTests {
 		@Test
 		void servletVersion() {
 			assertThat(servletContext.getMajorVersion()).isEqualTo(6);
-			assertThat(servletContext.getMinorVersion()).isEqualTo(0);
+			assertThat(servletContext.getMinorVersion()).isEqualTo(1);
 			assertThat(servletContext.getEffectiveMajorVersion()).isEqualTo(6);
-			assertThat(servletContext.getEffectiveMinorVersion()).isEqualTo(0);
+			assertThat(servletContext.getEffectiveMinorVersion()).isEqualTo(1);
 
 			servletContext.setMajorVersion(4);
 			servletContext.setMinorVersion(0);
@@ -200,8 +200,8 @@ class MockServletContextTests {
 			assertThat(filterRegistrations).isNotNull();
 			assertThat(filterRegistrations).isEmpty();
 		}
-
 	}
+
 
 	/**
 	 * @since 5.1.11
@@ -242,7 +242,6 @@ class MockServletContextTests {
 				assertThat(realPath).isNotNull();
 			}
 		}
-
 	}
 
 }

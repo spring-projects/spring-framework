@@ -19,7 +19,6 @@ package org.springframework.web.client;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -66,21 +65,21 @@ final class DefaultRestClientBuilder implements RestClient.Builder {
 
 	// request factories
 
-	private static final boolean httpComponentsClientPresent;
+	private static final boolean HTTP_COMPONENTS_CLIENT_PRESENT;
 
-	private static final boolean jettyClientPresent;
+	private static final boolean JETTY_CLIENT_PRESENT;
 
-	private static final boolean reactorNettyClientPresent;
+	private static final boolean REACTOR_NETTY_CLIENT_PRESENT;
 
-	private static final boolean jdkClientPresent;
+	private static final boolean JDK_CLIENT_PRESENT;
 
 	static {
 		ClassLoader loader = DefaultRestClientBuilder.class.getClassLoader();
 
-		httpComponentsClientPresent = ClassUtils.isPresent("org.apache.hc.client5.http.classic.HttpClient", loader);
-		jettyClientPresent = ClassUtils.isPresent("org.eclipse.jetty.client.HttpClient", loader);
-		reactorNettyClientPresent = ClassUtils.isPresent("reactor.netty.http.client.HttpClient", loader);
-		jdkClientPresent = ClassUtils.isPresent("java.net.http.HttpClient", loader);
+		HTTP_COMPONENTS_CLIENT_PRESENT = ClassUtils.isPresent("org.apache.hc.client5.http.classic.HttpClient", loader);
+		JETTY_CLIENT_PRESENT = ClassUtils.isPresent("org.eclipse.jetty.client.HttpClient", loader);
+		REACTOR_NETTY_CLIENT_PRESENT = ClassUtils.isPresent("reactor.netty.http.client.HttpClient", loader);
+		JDK_CLIENT_PRESENT = ClassUtils.isPresent("java.net.http.HttpClient", loader);
 	}
 
 	private @Nullable String baseUrl;
@@ -110,6 +109,8 @@ final class DefaultRestClientBuilder implements RestClient.Builder {
 	private @Nullable ClientHttpRequestFactory requestFactory;
 
 	private @Nullable List<HttpMessageConverter<?>> messageConverters;
+
+	private @Nullable Consumer<HttpMessageConverters.ClientBuilder> convertersConfigurer;
 
 	private ObservationRegistry observationRegistry = ObservationRegistry.NOOP;
 
@@ -142,6 +143,7 @@ final class DefaultRestClientBuilder implements RestClient.Builder {
 		this.initializers = (other.initializers != null) ? new ArrayList<>(other.initializers) : null;
 		this.requestFactory = other.requestFactory;
 		this.messageConverters = (other.messageConverters != null ? new ArrayList<>(other.messageConverters) : null);
+		this.convertersConfigurer = other.convertersConfigurer;
 		this.observationRegistry = other.observationRegistry;
 		this.observationConvention = other.observationConvention;
 	}
@@ -277,7 +279,7 @@ final class DefaultRestClientBuilder implements RestClient.Builder {
 	}
 
 	@Override
-	public RestClient.Builder apiVersionInserter(ApiVersionInserter apiVersionInserter) {
+	public RestClient.Builder apiVersionInserter(@Nullable ApiVersionInserter apiVersionInserter) {
 		this.apiVersionInserter = apiVersionInserter;
 		return this;
 	}
@@ -363,25 +365,30 @@ final class DefaultRestClientBuilder implements RestClient.Builder {
 	@Override
 	@SuppressWarnings("removal")
 	public RestClient.Builder messageConverters(Consumer<List<HttpMessageConverter<?>>> configurer) {
-		configurer.accept(initMessageConverters());
+		if (this.messageConverters == null) {
+			this.messageConverters = new ArrayList<>();
+			HttpMessageConverters.forClient().registerDefaults().build().forEach(this.messageConverters::add);
+		}
+		configurer.accept(this.messageConverters);
 		validateConverters(this.messageConverters);
 		return this;
 	}
 
 	@Override
+	@SuppressWarnings("removal")
 	public RestClient.Builder messageConverters(Iterable<HttpMessageConverter<?>> messageConverters) {
 		validateConverters(messageConverters);
 		List<HttpMessageConverter<?>> converters = new ArrayList<>();
-		messageConverters.forEach(converter -> converters.add(converter));
-		this.messageConverters = Collections.unmodifiableList(converters);
+		messageConverters.forEach(converters::add);
+		this.messageConverters = converters;
 		return this;
 	}
 
 	@Override
 	public RestClient.Builder configureMessageConverters(Consumer<HttpMessageConverters.ClientBuilder> configurer) {
-		HttpMessageConverters.ClientBuilder clientBuilder = HttpMessageConverters.forClient();
-		configurer.accept(clientBuilder);
-		return messageConverters(clientBuilder.build());
+		this.convertersConfigurer = (this.convertersConfigurer != null ?
+				this.convertersConfigurer.andThen(configurer) : configurer);
+		return this;
 	}
 
 	@Override
@@ -403,20 +410,11 @@ final class DefaultRestClientBuilder implements RestClient.Builder {
 		return this;
 	}
 
-	@SuppressWarnings("removal")
-	private List<HttpMessageConverter<?>> initMessageConverters() {
-		if (this.messageConverters == null) {
-			this.messageConverters = new ArrayList<>();
-			HttpMessageConverters.forClient().registerDefaults().build().forEach(this.messageConverters::add);
-		}
-		return this.messageConverters;
-	}
-
-	private void validateConverters(@Nullable Iterable<HttpMessageConverter<?>> messageConverters) {
-		Assert.notNull(messageConverters, "At least one HttpMessageConverter is required");
-		Assert.isTrue(messageConverters.iterator().hasNext(), "At least one HttpMessageConverter is required");
-		messageConverters.forEach(converter ->
-				Assert.notNull(converter, "The HttpMessageConverter list must not contain null elements"));
+	private void validateConverters(@Nullable Iterable<HttpMessageConverter<?>> converters) {
+		Assert.notNull(converters, "At least one HttpMessageConverter is required");
+		Assert.isTrue(converters.iterator().hasNext(), "At least one HttpMessageConverter is required");
+		converters.forEach(converter -> Assert.notNull(converter,
+				"The HttpMessageConverter list must not contain null elements"));
 	}
 
 
@@ -427,14 +425,12 @@ final class DefaultRestClientBuilder implements RestClient.Builder {
 
 	@Override
 	public RestClient build() {
+
 		ClientHttpRequestFactory requestFactory = initRequestFactory();
 		UriBuilderFactory uriBuilderFactory = initUriBuilderFactory();
-
 		HttpHeaders defaultHeaders = copyDefaultHeaders();
 		MultiValueMap<String, String> defaultCookies = copyDefaultCookies();
-
-		List<HttpMessageConverter<?>> converters =
-				(this.messageConverters != null ? this.messageConverters : initMessageConverters());
+		List<HttpMessageConverter<?>> converters = initMessageConverters();
 
 		return new DefaultRestClient(
 				requestFactory, this.interceptors, this.bufferingPredicate, this.initializers,
@@ -449,16 +445,16 @@ final class DefaultRestClientBuilder implements RestClient.Builder {
 		if (this.requestFactory != null) {
 			return this.requestFactory;
 		}
-		else if (httpComponentsClientPresent) {
+		else if (HTTP_COMPONENTS_CLIENT_PRESENT) {
 			return new HttpComponentsClientHttpRequestFactory();
 		}
-		else if (jettyClientPresent) {
+		else if (JETTY_CLIENT_PRESENT) {
 			return new JettyClientHttpRequestFactory();
 		}
-		else if (reactorNettyClientPresent) {
+		else if (REACTOR_NETTY_CLIENT_PRESENT) {
 			return new ReactorClientHttpRequestFactory();
 		}
-		else if (jdkClientPresent) {
+		else if (JDK_CLIENT_PRESENT) {
 			// java.net.http module might not be loaded, so we can't default to the JDK HttpClient
 			return new JdkClientHttpRequestFactory();
 		}
@@ -493,6 +489,24 @@ final class DefaultRestClientBuilder implements RestClient.Builder {
 		MultiValueMap<String, String> copy = new LinkedMultiValueMap<>(this.defaultCookies.size());
 		this.defaultCookies.forEach((key, values) -> copy.put(key, new ArrayList<>(values)));
 		return CollectionUtils.unmodifiableMultiValueMap(copy);
+	}
+
+	private List<HttpMessageConverter<?>> initMessageConverters() {
+		HttpMessageConverters.ClientBuilder builder = HttpMessageConverters.forClient();
+		if (this.messageConverters == null && this.convertersConfigurer == null) {
+			builder.registerDefaults();
+		}
+		else {
+			if (this.messageConverters != null) {
+				this.messageConverters.forEach(builder::addCustomConverter);
+			}
+			if (this.convertersConfigurer != null) {
+				this.convertersConfigurer.accept(builder);
+			}
+		}
+		List<HttpMessageConverter<?>> result = new ArrayList<>();
+		builder.build().forEach(result::add);
+		return result;
 	}
 
 }

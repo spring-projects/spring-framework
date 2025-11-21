@@ -30,6 +30,7 @@ import org.junit.jupiter.api.io.CleanupMode;
 import org.junit.jupiter.api.io.TempDir;
 
 import org.springframework.test.context.aot.samples.basic.BasicSpringJupiterImportedConfigTests;
+import org.springframework.test.context.aot.samples.basic.BasicSpringJupiterParameterizedClassTests;
 import org.springframework.test.context.aot.samples.basic.BasicSpringJupiterSharedConfigTests;
 import org.springframework.test.context.aot.samples.basic.BasicSpringJupiterTests;
 import org.springframework.test.context.aot.samples.basic.BasicSpringTestNGTests;
@@ -55,9 +56,9 @@ class TestAotProcessorTests extends AbstractAotTests {
 		Path classpathRoot = Files.createDirectories(tempDir.resolve("build/classes"));
 		Stream.of(
 				BasicSpringJupiterImportedConfigTests.class,
+				BasicSpringJupiterParameterizedClassTests.class,
 				BasicSpringJupiterSharedConfigTests.class,
 				BasicSpringJupiterTests.class,
-				BasicSpringJupiterTests.NestedTests.class,
 				BasicSpringTestNGTests.class,
 				BasicSpringVintageTests.class,
 				DisabledInAotProcessingTests.class,

@@ -36,6 +36,7 @@ class OptionTagEnumTests extends AbstractHtmlElementTagTests {
 	private SelectTag parentTag;
 
 	@Override
+	@SuppressWarnings("serial")
 	protected void onSetUp() {
 		this.tag = new OptionTag() {
 			@Override

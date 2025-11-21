@@ -66,7 +66,7 @@ import org.springframework.util.ReflectionUtils;
  */
 public abstract class AopUtils {
 
-	private static final boolean coroutinesReactorPresent = ClassUtils.isPresent(
+	private static final boolean COROUTINES_REACTOR_PRESENT = ClassUtils.isPresent(
 			"kotlinx.coroutines.reactor.MonoKt", AopUtils.class.getClassLoader());
 
 
@@ -355,7 +355,7 @@ public abstract class AopUtils {
 		try {
 			Method originalMethod = BridgeMethodResolver.findBridgedMethod(method);
 			ReflectionUtils.makeAccessible(originalMethod);
-			return (coroutinesReactorPresent && KotlinDetector.isSuspendingFunction(originalMethod) ?
+			return (COROUTINES_REACTOR_PRESENT && KotlinDetector.isSuspendingFunction(originalMethod) ?
 					KotlinDelegate.invokeSuspendingFunction(originalMethod, target, args) : originalMethod.invoke(target, args));
 		}
 		catch (InvocationTargetException ex) {

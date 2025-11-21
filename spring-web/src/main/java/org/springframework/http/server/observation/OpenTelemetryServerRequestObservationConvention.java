@@ -69,13 +69,6 @@ public class OpenTelemetryServerRequestObservationConvention implements ServerRe
 	private static final Set<String> HTTP_METHODS = Stream.of(HttpMethod.values()).map(HttpMethod::name).collect(Collectors.toUnmodifiableSet());
 
 
-	/**
-	 * Create a convention.
-	 */
-	public OpenTelemetryServerRequestObservationConvention() {
-	}
-
-
 	@Override
 	public String getName() {
 		return NAME;
@@ -87,7 +80,7 @@ public class OpenTelemetryServerRequestObservationConvention implements ServerRe
 	 * SHOULD be {@code {method}}.
 	 * <p>
 	 * The {@code {method}} MUST be {@code {http.request.method}} if the method represents the original
-	 * method known to the instrumentation. In other cases (when Customize Toolbar… is
+	 * method known to the instrumentation. In other cases (when {@code {http.request.method}} is
 	 * set to {@code _OTHER}), {@code {method}} MUST be HTTP.
 	 * <p>
 	 * The {@code target} SHOULD be the {@code {http.route}}.

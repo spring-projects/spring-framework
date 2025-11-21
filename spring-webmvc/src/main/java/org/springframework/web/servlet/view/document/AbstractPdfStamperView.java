@@ -45,7 +45,10 @@ import org.springframework.web.servlet.view.AbstractUrlBasedView;
  * @author Juergen Hoeller
  * @since 2.5.4
  * @see AbstractPdfView
+ * @deprecated since 7.0. Libraries or applications can provide their own {@code View}
+ * class or perform rendering in web handlers directly.
  */
+@Deprecated(since = "7.0", forRemoval = true)
 public abstract class AbstractPdfStamperView extends AbstractUrlBasedView {
 
 	public AbstractPdfStamperView(){

@@ -33,6 +33,7 @@ import org.springframework.web.accept.ApiVersionParser;
 import org.springframework.web.accept.ApiVersionResolver;
 import org.springframework.web.accept.ApiVersionStrategy;
 import org.springframework.web.accept.DefaultApiVersionStrategy;
+import org.springframework.web.accept.HeaderApiVersionResolver;
 import org.springframework.web.accept.InvalidApiVersionException;
 import org.springframework.web.accept.MediaTypeParamApiVersionResolver;
 import org.springframework.web.accept.PathApiVersionResolver;
@@ -70,7 +71,7 @@ public class ApiVersionConfigurer {
 	 * @param headerName the header name to check
 	 */
 	public ApiVersionConfigurer useRequestHeader(String headerName) {
-		this.versionResolvers.add(request -> request.getHeader(headerName));
+		this.versionResolvers.add(new HeaderApiVersionResolver(headerName));
 		return this;
 	}
 
@@ -100,7 +101,7 @@ public class ApiVersionConfigurer {
 	 * <p>Note that this resolver never returns {@code null}, and therefore
 	 * cannot yield to other resolvers, see {@link PathApiVersionResolver}.
 	 * @param index the index of the path segment to check; e.g. for URL's like
-	 * "/{version}/..." use index 0, for "/api/{version}/..." index 1.
+	 * {@code "/{version}/..."} use index 0, for {@code "/api/{version}/..."} index 1.
 	 */
 	public ApiVersionConfigurer usePathSegment(int index) {
 		this.versionResolvers.add(new PathApiVersionResolver(index));

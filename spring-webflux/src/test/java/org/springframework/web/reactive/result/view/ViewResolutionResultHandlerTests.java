@@ -199,6 +199,7 @@ class ViewResolutionResultHandlerTests {
 		testHandle("/account", returnType, 99L, "account: {id=123, myLong=99}", resolver);
 
 		returnType = on(Handler.class).resolveReturnType(Rendering.class);
+		@SuppressWarnings("deprecation")
 		HttpStatus status = HttpStatus.UNPROCESSABLE_ENTITY;
 		returnValue = Rendering.view("account").modelAttribute("a", "a1").status(status).header("h", "h1").build();
 		String expected = "account: {a=a1, id=123}";

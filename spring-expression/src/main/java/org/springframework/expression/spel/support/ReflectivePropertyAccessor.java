@@ -75,6 +75,9 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 
 	private static final Set<Class<?>> BOOLEAN_TYPES = Set.of(Boolean.class, boolean.class);
 
+	private static final boolean KOTLIN_REFLECT_PRESENT = KotlinDetector.isKotlinReflectPresent();
+
+
 	private final boolean allowWrite;
 
 	private final Map<PropertyCacheKey, InvokerPair> readerCache = new ConcurrentHashMap<>(64);
@@ -558,7 +561,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 
 	private static boolean isKotlinProperty(Method method, String methodSuffix) {
 		Class<?> clazz = method.getDeclaringClass();
-		return KotlinDetector.isKotlinType(clazz) &&
+		return KOTLIN_REFLECT_PRESENT && KotlinDetector.isKotlinType(clazz) &&
 				KotlinDelegate.isKotlinProperty(method, methodSuffix);
 	}
 

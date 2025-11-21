@@ -18,6 +18,7 @@ package org.springframework.util;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Set;
 
 import org.jspecify.annotations.Nullable;
 
@@ -35,11 +36,11 @@ import org.jspecify.annotations.Nullable;
  */
 public class InstanceFilter<T> {
 
-	private final Collection<? extends T> includes;
+	protected final Collection<? extends T> includes;
 
-	private final Collection<? extends T> excludes;
+	protected final Collection<? extends T> excludes;
 
-	private final boolean matchIfEmpty;
+	protected final boolean matchIfEmpty;
 
 
 	/**
@@ -74,8 +75,8 @@ public class InstanceFilter<T> {
 	public InstanceFilter(@Nullable Collection<? extends T> includes,
 			@Nullable Collection<? extends T> excludes, boolean matchIfEmpty) {
 
-		this.includes = (includes != null ? includes : Collections.emptyList());
-		this.excludes = (excludes != null ? excludes : Collections.emptyList());
+		this.includes = (includes != null ? Collections.unmodifiableCollection(includes) : Set.of());
+		this.excludes = (excludes != null ? Collections.unmodifiableCollection(excludes) : Set.of());
 		this.matchIfEmpty = matchIfEmpty;
 	}
 

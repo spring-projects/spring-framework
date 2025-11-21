@@ -50,14 +50,22 @@ import org.springframework.util.ClassUtils;
  * Default implementation for {@link HttpMessageConverters}.
  *
  * @author Brian Clozel
+ * @author Sebastien Deleuze
  */
 @SuppressWarnings("removal")
 class DefaultHttpMessageConverters implements HttpMessageConverters {
 
 	private final List<HttpMessageConverter<?>> messageConverters;
 
+
 	DefaultHttpMessageConverters(List<HttpMessageConverter<?>> messageConverters) {
 		this.messageConverters = messageConverters;
+	}
+
+
+	@Override
+	public boolean isEmpty() {
+		return this.messageConverters.isEmpty();
 	}
 
 	@Override
@@ -68,133 +76,150 @@ class DefaultHttpMessageConverters implements HttpMessageConverters {
 
 	abstract static class DefaultBuilder {
 
-		private static final boolean isJacksonPresent;
+		private static final boolean JACKSON_PRESENT;
 
-		private static final boolean isJackson2Present;
+		private static final boolean JACKSON_2_PRESENT;
 
-		private static final boolean isGsonPresent;
+		private static final boolean GSON_PRESENT;
 
-		private static final boolean isJsonbPresent;
+		private static final boolean JSONB_PRESENT;
 
-		private static final boolean isKotlinSerializationJsonPresent;
+		private static final boolean KOTLIN_SERIALIZATION_JSON_PRESENT;
 
-		private static final boolean isJacksonXmlPresent;
+		private static final boolean JACKSON_XML_PRESENT;
 
-		private static final boolean isJackson2XmlPresent;
+		private static final boolean JACKSON_2_XML_PRESENT;
 
-		private static final boolean isJaxb2Present;
+		private static final boolean JAXB_2_PRESENT;
 
-		private static final boolean isJacksonSmilePresent;
+		private static final boolean JACKSON_SMILE_PRESENT;
 
-		private static final boolean isJackson2SmilePresent;
+		private static final boolean JACKSON_2_SMILE_PRESENT;
 
-		private static final boolean isJacksonCborPresent;
+		private static final boolean JACKSON_CBOR_PRESENT;
 
-		private static final boolean isJackson2CborPresent;
+		private static final boolean JACKSON_2_CBOR_PRESENT;
 
-		private static final boolean isKotlinSerializationCborPresent;
+		private static final boolean KOTLIN_SERIALIZATION_CBOR_PRESENT;
 
-		private static final boolean isJacksonYamlPresent;
+		private static final boolean JACKSON_YAML_PRESENT;
 
-		private static final boolean isJackson2YamlPresent;
+		private static final boolean JACKSON_2_YAML_PRESENT;
 
-		private static final boolean isKotlinSerializationProtobufPresent;
+		private static final boolean KOTLIN_SERIALIZATION_PROTOBUF_PRESENT;
 
-		private static final boolean isRomePresent;
+		private static final boolean ROME_PRESENT;
 
 		boolean registerDefaults;
 
-		@Nullable ByteArrayHttpMessageConverter byteArrayMessageConverter;
+		@Nullable ByteArrayHttpMessageConverter byteArrayConverter;
 
-		@Nullable HttpMessageConverter<?> stringMessageConverter;
+		@Nullable HttpMessageConverter<?> stringConverter;
 
-		@Nullable HttpMessageConverter<?> resourceMessageConverter;
+		@Nullable HttpMessageConverter<?> resourceConverter;
 
-		@Nullable HttpMessageConverter<?> resourceRegionMessageConverter;
+		@Nullable HttpMessageConverter<?> resourceRegionConverter;
 
 		@Nullable Consumer<HttpMessageConverter<?>> configurer;
 
-		@Nullable HttpMessageConverter<?> jsonMessageConverter;
+		@Nullable HttpMessageConverter<?> kotlinJsonConverter;
 
-		@Nullable HttpMessageConverter<?> xmlMessageConverter;
+		@Nullable HttpMessageConverter<?> jsonConverter;
 
-		@Nullable HttpMessageConverter<?> smileMessageConverter;
+		@Nullable HttpMessageConverter<?> xmlConverter;
 
-		@Nullable HttpMessageConverter<?> cborMessageConverter;
+		@Nullable HttpMessageConverter<?> smileConverter;
 
-		@Nullable HttpMessageConverter<?> yamlMessageConverter;
+		@Nullable HttpMessageConverter<?> kotlinCborConverter;
 
-		@Nullable HttpMessageConverter<?> protobufMessageConverter;
+		@Nullable HttpMessageConverter<?> cborConverter;
 
-		@Nullable HttpMessageConverter<?> atomMessageConverter;
+		@Nullable HttpMessageConverter<?> yamlConverter;
 
-		@Nullable HttpMessageConverter<?> rssMessageConverter;
+		@Nullable HttpMessageConverter<?> protobufConverter;
 
-		final List<HttpMessageConverter<?>> customMessageConverters = new ArrayList<>();
+		@Nullable HttpMessageConverter<?> atomConverter;
+
+		@Nullable HttpMessageConverter<?> rssConverter;
+
+		final List<HttpMessageConverter<?>> customConverters = new ArrayList<>();
 
 
 		static {
 			ClassLoader classLoader = DefaultBuilder.class.getClassLoader();
-			isJacksonPresent = ClassUtils.isPresent("tools.jackson.databind.ObjectMapper", classLoader);
-			isJackson2Present = ClassUtils.isPresent("com.fasterxml.jackson.databind.ObjectMapper", classLoader) &&
+			JACKSON_PRESENT = ClassUtils.isPresent("tools.jackson.databind.ObjectMapper", classLoader);
+			JACKSON_2_PRESENT = ClassUtils.isPresent("com.fasterxml.jackson.databind.ObjectMapper", classLoader) &&
 						ClassUtils.isPresent("com.fasterxml.jackson.core.JsonGenerator", classLoader);
-			isGsonPresent = ClassUtils.isPresent("com.google.gson.Gson", classLoader);
-			isJsonbPresent = ClassUtils.isPresent("jakarta.json.bind.Jsonb", classLoader);
-			isKotlinSerializationJsonPresent = ClassUtils.isPresent("kotlinx.serialization.json.Json", classLoader);
-			isJacksonSmilePresent = isJacksonPresent && ClassUtils.isPresent("tools.jackson.dataformat.smile.SmileMapper", classLoader);
-			isJackson2SmilePresent = ClassUtils.isPresent("com.fasterxml.jackson.dataformat.smile.SmileFactory", classLoader);
-			isJaxb2Present = ClassUtils.isPresent("jakarta.xml.bind.Binder", classLoader);
-			isJacksonXmlPresent = isJacksonPresent && ClassUtils.isPresent("tools.jackson.dataformat.xml.XmlMapper", classLoader);
-			isJackson2XmlPresent = ClassUtils.isPresent("com.fasterxml.jackson.dataformat.xml.XmlMapper", classLoader);
-			isJacksonCborPresent = isJacksonPresent && ClassUtils.isPresent("tools.jackson.dataformat.cbor.CBORMapper", classLoader);
-			isJackson2CborPresent = ClassUtils.isPresent("com.fasterxml.jackson.dataformat.cbor.CBORFactory", classLoader);
-			isJacksonYamlPresent = isJacksonPresent && ClassUtils.isPresent("tools.jackson.dataformat.yaml.YAMLMapper", classLoader);
-			isJackson2YamlPresent = ClassUtils.isPresent("com.fasterxml.jackson.dataformat.yaml.YAMLFactory", classLoader);
-			isKotlinSerializationCborPresent = ClassUtils.isPresent("kotlinx.serialization.cbor.Cbor", classLoader);
-			isKotlinSerializationProtobufPresent = ClassUtils.isPresent("kotlinx.serialization.protobuf.ProtoBuf", classLoader);
-			isRomePresent = ClassUtils.isPresent("com.rometools.rome.feed.WireFeed", classLoader);
+			GSON_PRESENT = ClassUtils.isPresent("com.google.gson.Gson", classLoader);
+			JSONB_PRESENT = ClassUtils.isPresent("jakarta.json.bind.Jsonb", classLoader);
+			KOTLIN_SERIALIZATION_JSON_PRESENT = ClassUtils.isPresent("kotlinx.serialization.json.Json", classLoader);
+			JACKSON_SMILE_PRESENT = JACKSON_PRESENT && ClassUtils.isPresent("tools.jackson.dataformat.smile.SmileMapper", classLoader);
+			JACKSON_2_SMILE_PRESENT = ClassUtils.isPresent("com.fasterxml.jackson.dataformat.smile.SmileFactory", classLoader);
+			JAXB_2_PRESENT = ClassUtils.isPresent("jakarta.xml.bind.Binder", classLoader);
+			JACKSON_XML_PRESENT = JACKSON_PRESENT && ClassUtils.isPresent("tools.jackson.dataformat.xml.XmlMapper", classLoader);
+			JACKSON_2_XML_PRESENT = ClassUtils.isPresent("com.fasterxml.jackson.dataformat.xml.XmlMapper", classLoader);
+			JACKSON_CBOR_PRESENT = JACKSON_PRESENT && ClassUtils.isPresent("tools.jackson.dataformat.cbor.CBORMapper", classLoader);
+			JACKSON_2_CBOR_PRESENT = ClassUtils.isPresent("com.fasterxml.jackson.dataformat.cbor.CBORFactory", classLoader);
+			JACKSON_YAML_PRESENT = JACKSON_PRESENT && ClassUtils.isPresent("tools.jackson.dataformat.yaml.YAMLMapper", classLoader);
+			JACKSON_2_YAML_PRESENT = ClassUtils.isPresent("com.fasterxml.jackson.dataformat.yaml.YAMLFactory", classLoader);
+			KOTLIN_SERIALIZATION_CBOR_PRESENT = ClassUtils.isPresent("kotlinx.serialization.cbor.Cbor", classLoader);
+			KOTLIN_SERIALIZATION_PROTOBUF_PRESENT = ClassUtils.isPresent("kotlinx.serialization.protobuf.ProtoBuf", classLoader);
+			ROME_PRESENT = ClassUtils.isPresent("com.rometools.rome.feed.WireFeed", classLoader);
 		}
 
 
-		void setStringMessageConverter(HttpMessageConverter<?> stringMessageConverter) {
-			Assert.isTrue(stringMessageConverter.getSupportedMediaTypes().contains(MediaType.TEXT_PLAIN),
-			"stringMessageConverter should support 'text/plain'");
-			this.stringMessageConverter = stringMessageConverter;
+		void setStringConverter(HttpMessageConverter<?> stringConverter) {
+			checkConverterSupports(stringConverter, MediaType.TEXT_PLAIN);
+			this.stringConverter = stringConverter;
 		}
 
-		void setJsonMessageConverter(HttpMessageConverter<?> jsonMessageConverter) {
-			Assert.isTrue(jsonMessageConverter.getSupportedMediaTypes().contains(MediaType.APPLICATION_JSON),
-					"jsonMessageConverter should support 'application/json'");
-			this.jsonMessageConverter = jsonMessageConverter;
+		void setKotlinSerializationJsonConverter(HttpMessageConverter<?> kotlinJsonConverter) {
+			Assert.notNull(kotlinJsonConverter, "kotlinJsonConverter must not be null");
+			this.kotlinJsonConverter = kotlinJsonConverter;
 		}
 
-		void setXmlMessageConverter(HttpMessageConverter<?> xmlMessageConverter) {
-			Assert.isTrue(xmlMessageConverter.getSupportedMediaTypes().contains(MediaType.TEXT_XML),
-					"xmlMessageConverter should support 'text/xml'");
-			this.xmlMessageConverter = xmlMessageConverter;
+		void setJsonConverter(HttpMessageConverter<?> jsonConverter) {
+			checkConverterSupports(jsonConverter, MediaType.APPLICATION_JSON);
+			this.jsonConverter = jsonConverter;
 		}
 
-		void setSmileMessageConverter(HttpMessageConverter<?> smileMessageConverter) {
-			Assert.isTrue(smileMessageConverter.getSupportedMediaTypes().contains(new MediaType("application", "x-jackson-smile")),
-					"smileMessageConverter should support 'application/x-jackson-smile'");
-			this.smileMessageConverter = smileMessageConverter;
+		void setXmlConverter(HttpMessageConverter<?> xmlConverter) {
+			checkConverterSupports(xmlConverter, MediaType.TEXT_XML);
+			this.xmlConverter = xmlConverter;
 		}
 
-		void setCborMessageConverter(HttpMessageConverter<?> cborMessageConverter) {
-			Assert.isTrue(cborMessageConverter.getSupportedMediaTypes().contains(MediaType.APPLICATION_CBOR),
-					"cborMessageConverter should support 'application/cbor'");
-			this.cborMessageConverter = cborMessageConverter;
+		void setSmileConverter(HttpMessageConverter<?> smileConverter) {
+			checkConverterSupports(smileConverter, new MediaType("application", "x-jackson-smile"));
+			this.smileConverter = smileConverter;
 		}
 
-		void setYamlMessageConverter(HttpMessageConverter<?> yamlMessageConverter) {
-			Assert.isTrue(yamlMessageConverter.getSupportedMediaTypes().contains(MediaType.APPLICATION_YAML),
-					"yamlMessageConverter should support 'application/yaml'");
-			this.yamlMessageConverter = yamlMessageConverter;
+		void setKotlinSerializationCborConverter(HttpMessageConverter<?> kotlinCborConverter) {
+			Assert.notNull(kotlinCborConverter, "kotlinCborConverter must not be null");
+			this.kotlinCborConverter = kotlinCborConverter;
+		}
+
+		void setCborConverter(HttpMessageConverter<?> cborConverter) {
+			checkConverterSupports(cborConverter, MediaType.APPLICATION_CBOR);
+			this.cborConverter = cborConverter;
+		}
+
+		void setYamlConverter(HttpMessageConverter<?> yamlConverter) {
+			checkConverterSupports(yamlConverter, MediaType.APPLICATION_YAML);
+			this.yamlConverter = yamlConverter;
+		}
+
+		private void checkConverterSupports(HttpMessageConverter<?> converter, MediaType mediaType) {
+			for (MediaType supportedMediaType : converter.getSupportedMediaTypes()) {
+				if (mediaType.equalsTypeAndSubtype(supportedMediaType)) {
+					return;
+				}
+			}
+			throw new IllegalArgumentException("converter should support '" + mediaType + "'");
 		}
 
 		void addCustomMessageConverter(HttpMessageConverter<?> customConverter) {
 			Assert.notNull(customConverter, "'customConverter' must not be null");
-			this.customMessageConverters.add(customConverter);
+			this.customConverters.add(customConverter);
 		}
 
 		void addMessageConverterConfigurer(Consumer<HttpMessageConverter<?>> configurer) {
@@ -203,124 +228,146 @@ class DefaultHttpMessageConverters implements HttpMessageConverters {
 
 		List<HttpMessageConverter<?>> getBaseConverters() {
 			List<HttpMessageConverter<?>> converters = new ArrayList<>();
-			if (this.byteArrayMessageConverter != null) {
-				converters.add(this.byteArrayMessageConverter);
+			if (this.byteArrayConverter != null) {
+				converters.add(this.byteArrayConverter);
 			}
-			if (this.stringMessageConverter != null) {
-				converters.add(this.stringMessageConverter);
+			if (this.stringConverter != null) {
+				converters.add(this.stringConverter);
 			}
 			return converters;
 		}
 
 		List<HttpMessageConverter<?>> getCoreConverters() {
 			List<HttpMessageConverter<?>> converters = new ArrayList<>();
-			if (this.jsonMessageConverter != null) {
-				converters.add(this.jsonMessageConverter);
+			if (this.kotlinJsonConverter != null) {
+				converters.add(this.kotlinJsonConverter);
 			}
-			if (this.smileMessageConverter != null) {
-				converters.add(this.smileMessageConverter);
+			if (this.jsonConverter != null) {
+				converters.add(this.jsonConverter);
 			}
-			if (this.cborMessageConverter!= null) {
-				converters.add(this.cborMessageConverter);
+			if (this.smileConverter != null) {
+				converters.add(this.smileConverter);
 			}
-			if (this.yamlMessageConverter!= null) {
-				converters.add(this.yamlMessageConverter);
+			if (this.kotlinCborConverter != null) {
+				converters.add(this.kotlinCborConverter);
 			}
-			if (this.xmlMessageConverter!= null) {
-				converters.add(this.xmlMessageConverter);
+			if (this.cborConverter != null) {
+				converters.add(this.cborConverter);
 			}
-			if (this.protobufMessageConverter != null) {
-				converters.add(this.protobufMessageConverter);
+			if (this.yamlConverter != null) {
+				converters.add(this.yamlConverter);
 			}
-			if (this.atomMessageConverter != null) {
-				converters.add(this.atomMessageConverter);
+			if (this.xmlConverter != null) {
+				converters.add(this.xmlConverter);
 			}
-			if (this.rssMessageConverter != null) {
-				converters.add(this.rssMessageConverter);
+			if (this.protobufConverter != null) {
+				converters.add(this.protobufConverter);
+			}
+			if (this.atomConverter != null) {
+				converters.add(this.atomConverter);
+			}
+			if (this.rssConverter != null) {
+				converters.add(this.rssConverter);
 			}
 			return converters;
 		}
 
 		List<HttpMessageConverter<?>> getCustomConverters() {
-			return this.customMessageConverters;
+			return this.customConverters;
 		}
 
 		void detectMessageConverters() {
-			this.byteArrayMessageConverter = new ByteArrayHttpMessageConverter();
-			this.stringMessageConverter = new StringHttpMessageConverter();
+			this.byteArrayConverter = new ByteArrayHttpMessageConverter();
 
-			if (this.jsonMessageConverter == null) {
-				if (isJacksonPresent) {
-					this.jsonMessageConverter = new JacksonJsonHttpMessageConverter();
+			if (this.stringConverter == null) {
+				this.stringConverter = new StringHttpMessageConverter();
+			}
+			if (this.kotlinJsonConverter == null) {
+				if (KOTLIN_SERIALIZATION_JSON_PRESENT) {
+					if (this.jsonConverter != null || JACKSON_PRESENT || JACKSON_2_PRESENT || GSON_PRESENT || JSONB_PRESENT) {
+						this.kotlinJsonConverter = new KotlinSerializationJsonHttpMessageConverter();
+					}
+					else {
+						this.kotlinJsonConverter = new KotlinSerializationJsonHttpMessageConverter(type -> true);
+					}
 				}
-				else if (isJackson2Present) {
-					this.jsonMessageConverter = new MappingJackson2HttpMessageConverter();
+			}
+			if (this.jsonConverter == null) {
+				if (JACKSON_PRESENT) {
+					this.jsonConverter = new JacksonJsonHttpMessageConverter();
 				}
-				else if (isGsonPresent) {
-					this.jsonMessageConverter = new GsonHttpMessageConverter();
+				else if (JACKSON_2_PRESENT) {
+					this.jsonConverter = new MappingJackson2HttpMessageConverter();
 				}
-				else if (isJsonbPresent) {
-					this.jsonMessageConverter = new JsonbHttpMessageConverter();
+				else if (GSON_PRESENT) {
+					this.jsonConverter = new GsonHttpMessageConverter();
 				}
-				else if (isKotlinSerializationJsonPresent) {
-					this.jsonMessageConverter = new KotlinSerializationJsonHttpMessageConverter();
+				else if (JSONB_PRESENT) {
+					this.jsonConverter = new JsonbHttpMessageConverter();
 				}
 			}
 
-			if (this.xmlMessageConverter == null) {
-				if (isJacksonXmlPresent) {
-					this.xmlMessageConverter = new JacksonXmlHttpMessageConverter();
+			if (this.xmlConverter == null) {
+				if (JACKSON_XML_PRESENT) {
+					this.xmlConverter = new JacksonXmlHttpMessageConverter();
 				}
-				else if (isJackson2XmlPresent) {
-					this.xmlMessageConverter = new MappingJackson2XmlHttpMessageConverter();
+				else if (JACKSON_2_XML_PRESENT) {
+					this.xmlConverter = new MappingJackson2XmlHttpMessageConverter();
 				}
-				else if (isJaxb2Present) {
-					this.xmlMessageConverter = new Jaxb2RootElementHttpMessageConverter();
-				}
-			}
-
-			if (this.smileMessageConverter == null) {
-				if (isJacksonSmilePresent) {
-					this.smileMessageConverter = new JacksonSmileHttpMessageConverter();
-				}
-				else if (isJackson2SmilePresent) {
-					this.smileMessageConverter = new MappingJackson2SmileHttpMessageConverter();
+				else if (JAXB_2_PRESENT) {
+					this.xmlConverter = new Jaxb2RootElementHttpMessageConverter();
 				}
 			}
 
-			if (this.cborMessageConverter == null) {
-				if (isJacksonCborPresent) {
-					this.cborMessageConverter = new JacksonCborHttpMessageConverter();
+			if (this.smileConverter == null) {
+				if (JACKSON_SMILE_PRESENT) {
+					this.smileConverter = new JacksonSmileHttpMessageConverter();
 				}
-				else if (isJackson2CborPresent) {
-					this.cborMessageConverter = new MappingJackson2CborHttpMessageConverter();
-				}
-				else if (isKotlinSerializationCborPresent) {
-					this.cborMessageConverter = new KotlinSerializationCborHttpMessageConverter();
+				else if (JACKSON_2_SMILE_PRESENT) {
+					this.smileConverter = new MappingJackson2SmileHttpMessageConverter();
 				}
 			}
 
-			if (this.yamlMessageConverter == null) {
-				if (isJacksonYamlPresent) {
-					this.yamlMessageConverter = new JacksonYamlHttpMessageConverter();
+			if (this.kotlinCborConverter == null) {
+				if (KOTLIN_SERIALIZATION_CBOR_PRESENT) {
+					if (this.cborConverter != null || JACKSON_CBOR_PRESENT || JACKSON_2_CBOR_PRESENT) {
+						this.kotlinCborConverter = new KotlinSerializationCborHttpMessageConverter();
+					}
+					else {
+						this.kotlinCborConverter = new KotlinSerializationCborHttpMessageConverter(type -> true);
+					}
 				}
-				else if (isJackson2YamlPresent) {
-					this.yamlMessageConverter = new MappingJackson2YamlHttpMessageConverter();
+			}
+			if (this.cborConverter == null) {
+				if (JACKSON_CBOR_PRESENT) {
+					this.cborConverter = new JacksonCborHttpMessageConverter();
+				}
+				else if (JACKSON_2_CBOR_PRESENT) {
+					this.cborConverter = new MappingJackson2CborHttpMessageConverter();
 				}
 			}
 
-			if (this.protobufMessageConverter == null) {
-				if (isKotlinSerializationProtobufPresent) {
-					this.protobufMessageConverter = new KotlinSerializationProtobufHttpMessageConverter();
+			if (this.yamlConverter == null) {
+				if (JACKSON_YAML_PRESENT) {
+					this.yamlConverter = new JacksonYamlHttpMessageConverter();
+				}
+				else if (JACKSON_2_YAML_PRESENT) {
+					this.yamlConverter = new MappingJackson2YamlHttpMessageConverter();
 				}
 			}
 
-			if (isRomePresent) {
-				if (this.atomMessageConverter == null) {
-					this.atomMessageConverter = new AtomFeedHttpMessageConverter();
+			if (this.protobufConverter == null) {
+				if (KOTLIN_SERIALIZATION_PROTOBUF_PRESENT) {
+					this.protobufConverter = new KotlinSerializationProtobufHttpMessageConverter(type -> true);
 				}
-				if (this.rssMessageConverter == null) {
-					this.rssMessageConverter = new RssChannelHttpMessageConverter();
+			}
+
+			if (ROME_PRESENT) {
+				if (this.atomConverter == null) {
+					this.atomConverter = new AtomFeedHttpMessageConverter();
+				}
+				if (this.rssConverter == null) {
+					this.rssConverter = new RssChannelHttpMessageConverter();
 				}
 			}
 		}
@@ -336,43 +383,55 @@ class DefaultHttpMessageConverters implements HttpMessageConverters {
 		}
 
 		@Override
-		public ClientBuilder stringMessageConverter(HttpMessageConverter<?> stringMessageConverter) {
-			setStringMessageConverter(stringMessageConverter);
+		public ClientBuilder withStringConverter(HttpMessageConverter<?> stringConverter) {
+			setStringConverter(stringConverter);
 			return this;
 		}
 
 		@Override
-		public ClientBuilder jsonMessageConverter(HttpMessageConverter<?> jsonMessageConverter) {
-			setJsonMessageConverter(jsonMessageConverter);
+		public ClientBuilder withKotlinSerializationJsonConverter(HttpMessageConverter<?> kotlinSerializationJsonConverter) {
+			setKotlinSerializationJsonConverter(kotlinSerializationJsonConverter);
 			return this;
 		}
 
 		@Override
-		public ClientBuilder xmlMessageConverter(HttpMessageConverter<?> xmlMessageConverter) {
-			setXmlMessageConverter(xmlMessageConverter);
+		public ClientBuilder withJsonConverter(HttpMessageConverter<?> jsonConverter) {
+			setJsonConverter(jsonConverter);
 			return this;
 		}
 
 		@Override
-		public ClientBuilder smileMessageConverter(HttpMessageConverter<?> smileMessageConverter) {
-			setSmileMessageConverter(smileMessageConverter);
+		public ClientBuilder withXmlConverter(HttpMessageConverter<?> xmlConverter) {
+			setXmlConverter(xmlConverter);
 			return this;
 		}
 
 		@Override
-		public ClientBuilder cborMessageConverter(HttpMessageConverter<?> cborMessageConverter) {
-			setCborMessageConverter(cborMessageConverter);
+		public ClientBuilder withSmileConverter(HttpMessageConverter<?> smileConverter) {
+			setSmileConverter(smileConverter);
 			return this;
 		}
 
 		@Override
-		public ClientBuilder yamlMessageConverter(HttpMessageConverter<?> yamlMessageConverter) {
-			setYamlMessageConverter(yamlMessageConverter);
+		public ClientBuilder withKotlinSerializationCborConverter(HttpMessageConverter<?> kotlinSerializationCborConverter) {
+			setKotlinSerializationCborConverter(kotlinSerializationCborConverter);
 			return this;
 		}
 
 		@Override
-		public ClientBuilder customMessageConverter(HttpMessageConverter<?> customConverter) {
+		public ClientBuilder withCborConverter(HttpMessageConverter<?> cborConverter) {
+			setCborConverter(cborConverter);
+			return this;
+		}
+
+		@Override
+		public ClientBuilder withYamlConverter(HttpMessageConverter<?> yamlConverter) {
+			setYamlConverter(yamlConverter);
+			return this;
+		}
+
+		@Override
+		public ClientBuilder addCustomConverter(HttpMessageConverter<?> customConverter) {
 			addCustomMessageConverter(customConverter);
 			return this;
 		}
@@ -386,23 +445,24 @@ class DefaultHttpMessageConverters implements HttpMessageConverters {
 		@Override
 		public HttpMessageConverters build() {
 			if (this.registerDefaults) {
-				this.resourceMessageConverter = new ResourceHttpMessageConverter(false);
+				this.resourceConverter = new ResourceHttpMessageConverter(false);
 				detectMessageConverters();
 			}
-			List<HttpMessageConverter<?>> allConverters = new ArrayList<>();
-			List<HttpMessageConverter<?>> partConverters = new ArrayList<>();
-			partConverters.addAll(this.getCustomConverters());
-			partConverters.addAll(this.getCoreConverters());
-
-			allConverters.addAll(this.getCustomConverters());
-			allConverters.addAll(this.getBaseConverters());
-			if (this.resourceMessageConverter != null) {
-				allConverters.add(this.resourceMessageConverter);
+			List<HttpMessageConverter<?>> partConverters = new ArrayList<>(this.getCustomConverters());
+			List<HttpMessageConverter<?>> allConverters = new ArrayList<>(this.getCustomConverters());
+			if (this.registerDefaults) {
+				partConverters.addAll(this.getCoreConverters());
+				allConverters.addAll(this.getBaseConverters());
+				if (this.resourceConverter != null) {
+					allConverters.add(this.resourceConverter);
+				}
 			}
 			if (!partConverters.isEmpty() || !allConverters.isEmpty()) {
 				allConverters.add(new AllEncompassingFormHttpMessageConverter(partConverters));
 			}
-			allConverters.addAll(this.getCoreConverters());
+			if (this.registerDefaults) {
+				allConverters.addAll(this.getCoreConverters());
+			}
 			if (this.configurer != null) {
 				allConverters.forEach(this.configurer);
 			}
@@ -420,43 +480,55 @@ class DefaultHttpMessageConverters implements HttpMessageConverters {
 		}
 
 		@Override
-		public ServerBuilder stringMessageConverter(HttpMessageConverter<?> stringMessageConverter) {
-			setStringMessageConverter(stringMessageConverter);
+		public ServerBuilder withStringConverter(HttpMessageConverter<?> stringConverter) {
+			setStringConverter(stringConverter);
 			return this;
 		}
 
 		@Override
-		public ServerBuilder jsonMessageConverter(HttpMessageConverter<?> jsonMessageConverter) {
-			setJsonMessageConverter(jsonMessageConverter);
+		public ServerBuilder withKotlinSerializationJsonConverter(HttpMessageConverter<?> kotlinSerializationJsonConverter) {
+			setKotlinSerializationJsonConverter(kotlinSerializationJsonConverter);
 			return this;
 		}
 
 		@Override
-		public ServerBuilder xmlMessageConverter(HttpMessageConverter<?> xmlMessageConverter) {
-			setXmlMessageConverter(xmlMessageConverter);
+		public ServerBuilder withJsonConverter(HttpMessageConverter<?> jsonConverter) {
+			setJsonConverter(jsonConverter);
 			return this;
 		}
 
 		@Override
-		public ServerBuilder smileMessageConverter(HttpMessageConverter<?> smileMessageConverter) {
-			setSmileMessageConverter(smileMessageConverter);
+		public ServerBuilder withXmlConverter(HttpMessageConverter<?> xmlConverter) {
+			setXmlConverter(xmlConverter);
 			return this;
 		}
 
 		@Override
-		public ServerBuilder cborMessageConverter(HttpMessageConverter<?> cborMessageConverter) {
-			setCborMessageConverter(cborMessageConverter);
+		public ServerBuilder withSmileConverter(HttpMessageConverter<?> smileConverter) {
+			setSmileConverter(smileConverter);
 			return this;
 		}
 
 		@Override
-		public ServerBuilder yamlMessageConverter(HttpMessageConverter<?> yamlMessageConverter) {
-			setYamlMessageConverter(yamlMessageConverter);
+		public ServerBuilder withKotlinSerializationCborConverter(HttpMessageConverter<?> kotlinSerializationCborConverter) {
+			setKotlinSerializationCborConverter(kotlinSerializationCborConverter);
 			return this;
 		}
 
 		@Override
-		public ServerBuilder customMessageConverter(HttpMessageConverter<?> customConverter) {
+		public ServerBuilder withCborConverter(HttpMessageConverter<?> cborConverter) {
+			setCborConverter(cborConverter);
+			return this;
+		}
+
+		@Override
+		public ServerBuilder withYamlConverter(HttpMessageConverter<?> yamlConverter) {
+			setYamlConverter(yamlConverter);
+			return this;
+		}
+
+		@Override
+		public ServerBuilder addCustomConverter(HttpMessageConverter<?> customConverter) {
 			addCustomMessageConverter(customConverter);
 			return this;
 		}
@@ -470,28 +542,28 @@ class DefaultHttpMessageConverters implements HttpMessageConverters {
 		@Override
 		public HttpMessageConverters build() {
 			if (this.registerDefaults) {
-				this.resourceMessageConverter = new ResourceHttpMessageConverter();
-				this.resourceRegionMessageConverter = new ResourceRegionHttpMessageConverter();
+				this.resourceConverter = new ResourceHttpMessageConverter();
+				this.resourceRegionConverter = new ResourceRegionHttpMessageConverter();
 				detectMessageConverters();
 			}
-			List<HttpMessageConverter<?>> allConverters = new ArrayList<>();
-			List<HttpMessageConverter<?>> partConverters = new ArrayList<>();
-
-			partConverters.addAll(this.getCustomConverters());
-			partConverters.addAll(this.getCoreConverters());
-
-			allConverters.addAll(this.getCustomConverters());
-			allConverters.addAll(this.getBaseConverters());
-			if (this.resourceMessageConverter != null) {
-				allConverters.add(this.resourceMessageConverter);
-			}
-			if (this.resourceRegionMessageConverter != null) {
-				allConverters.add(this.resourceRegionMessageConverter);
+			List<HttpMessageConverter<?>> partConverters = new ArrayList<>(this.getCustomConverters());
+			List<HttpMessageConverter<?>> allConverters = new ArrayList<>(this.getCustomConverters());
+			if (this.registerDefaults) {
+				partConverters.addAll(this.getCoreConverters());
+				allConverters.addAll(this.getBaseConverters());
+				if (this.resourceConverter != null) {
+					allConverters.add(this.resourceConverter);
+				}
+				if (this.resourceRegionConverter != null) {
+					allConverters.add(this.resourceRegionConverter);
+				}
 			}
 			if (!partConverters.isEmpty() || !allConverters.isEmpty()) {
 				allConverters.add(new AllEncompassingFormHttpMessageConverter(partConverters));
 			}
-			allConverters.addAll(this.getCoreConverters());
+			if (this.registerDefaults) {
+				allConverters.addAll(this.getCoreConverters());
+			}
 			if (this.configurer != null) {
 				allConverters.forEach(this.configurer);
 			}

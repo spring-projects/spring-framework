@@ -50,11 +50,11 @@ import org.springframework.util.function.SupplierUtils;
 public class DefaultJCacheOperationSource extends AnnotationJCacheOperationSource
 		implements BeanFactoryAware, SmartInitializingSingleton {
 
-	private @Nullable SingletonSupplier<CacheManager> cacheManager;
+	private @Nullable SingletonSupplier<@Nullable CacheManager> cacheManager;
 
-	private @Nullable SingletonSupplier<CacheResolver> cacheResolver;
+	private @Nullable SingletonSupplier<@Nullable CacheResolver> cacheResolver;
 
-	private @Nullable SingletonSupplier<CacheResolver> exceptionCacheResolver;
+	private @Nullable SingletonSupplier<@Nullable CacheResolver> exceptionCacheResolver;
 
 	private SingletonSupplier<KeyGenerator> keyGenerator;
 

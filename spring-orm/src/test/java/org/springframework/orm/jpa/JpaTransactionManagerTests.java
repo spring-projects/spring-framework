@@ -28,9 +28,7 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.transaction.InvalidIsolationLevelException;
 import org.springframework.transaction.TransactionDefinition;
-import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.TransactionSystemException;
-import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -583,12 +581,17 @@ class JpaTransactionManagerTests {
 		tt.setIsolationLevel(TransactionDefinition.ISOLATION_SERIALIZABLE);
 
 		assertThatExceptionOfType(InvalidIsolationLevelException.class).isThrownBy(() ->
-			tt.execute(new TransactionCallbackWithoutResult() {
-				@Override
-				protected void doInTransactionWithoutResult(TransactionStatus status) {
-				}
-			}));
+				tt.executeWithoutResult(status -> {}));
 
+		verify(manager).close();
+	}
+
+	@Test
+	void testTransactionTimeout() {
+		tt.setTimeout(1000);
+		tt.executeWithoutResult(status -> {});
+
+		verify(tx).setTimeout(1000);
 		verify(manager).close();
 	}
 
@@ -597,12 +600,9 @@ class JpaTransactionManagerTests {
 		assertThat(TransactionSynchronizationManager.hasResource(factory)).isFalse();
 		assertThat(TransactionSynchronizationManager.isSynchronizationActive()).isFalse();
 
-		tt.execute(new TransactionCallbackWithoutResult() {
-			@Override
-			public void doInTransactionWithoutResult(TransactionStatus status) {
-				assertThat(TransactionSynchronizationManager.hasResource(factory)).isTrue();
-				status.flush();
-			}
+		tt.executeWithoutResult(status -> {
+			assertThat(TransactionSynchronizationManager.hasResource(factory)).isTrue();
+			status.flush();
 		});
 
 		assertThat(TransactionSynchronizationManager.hasResource(factory)).isFalse();

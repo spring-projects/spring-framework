@@ -86,7 +86,7 @@ public class StandardApiVersionDeprecationHandler implements ApiVersionDeprecati
 	}
 
 	@Override
-	public void handleVersion(Comparable<?> requestVersion, ServerWebExchange exchange) {
+	public void handleVersion(Comparable<?> requestVersion, Object handler, ServerWebExchange exchange) {
 		for (VersionInfo info : this.infos.values()) {
 			if (info.match(requestVersion, exchange)) {
 				HttpHeaders headers = exchange.getResponse().getHeaders();

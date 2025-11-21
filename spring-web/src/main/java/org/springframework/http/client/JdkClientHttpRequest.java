@@ -43,6 +43,7 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Flow;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Consumer;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.InflaterInputStream;
 
@@ -113,16 +114,15 @@ class JdkClientHttpRequest extends AbstractStreamingClientHttpRequest {
 		try {
 			HttpRequest request = buildRequest(headers, body);
 			responseFuture = this.httpClient.sendAsync(request, this.compression ? new DecompressingBodyHandler() : HttpResponse.BodyHandlers.ofInputStream());
-
 			if (this.timeout != null) {
 				timeoutHandler = new TimeoutHandler(responseFuture, this.timeout);
 				HttpResponse<InputStream> response = responseFuture.get();
 				InputStream inputStream = timeoutHandler.wrapInputStream(response);
-				return new JdkClientHttpResponse(response, inputStream);
+				return new JdkClientHttpResponse(response, processResponseHeaders(), inputStream);
 			}
 			else {
 				HttpResponse<InputStream> response = responseFuture.get();
-				return new JdkClientHttpResponse(response, response.body());
+				return new JdkClientHttpResponse(response, processResponseHeaders(), response.body());
 			}
 		}
 		catch (InterruptedException ex) {
@@ -231,6 +231,19 @@ class JdkClientHttpRequest extends AbstractStreamingClientHttpRequest {
 		return Collections.unmodifiableSet(headers);
 	}
 
+	private Consumer<HttpHeaders> processResponseHeaders() {
+		if (this.compression) {
+			return headers -> {
+				String encoding = headers.getFirst(HttpHeaders.CONTENT_ENCODING);
+				if (encoding != null && SUPPORTED_ENCODINGS.contains(encoding)) {
+					headers.remove(HttpHeaders.CONTENT_ENCODING);
+					headers.remove(HttpHeaders.CONTENT_LENGTH);
+				}
+			};
+		}
+		return headers -> {};
+	}
+
 
 	private static final class ByteBufferMapper implements OutputStreamPublisher.ByteMapper<ByteBuffer> {
 
@@ -254,7 +267,7 @@ class JdkClientHttpRequest extends AbstractStreamingClientHttpRequest {
 
 	/**
 	 * Temporary workaround to use instead of {@link HttpRequest.Builder#timeout(Duration)}
-	 * until <a href="https://bugs.openjdk.org/browse/JDK-8258397">JDK-8258397</a>
+	 * until <a href="https://bugs.openjdk.org/browse/JDK-8208693">JDK-8208693</a>
 	 * is fixed. Essentially, create a future with a timeout handler, and use it
 	 * to close the response.
 	 * @see <a href="https://mail.openjdk.org/pipermail/net-dev/2021-October/016672.html">OpenJDK discussion thread</a>

@@ -74,19 +74,19 @@ public class HandshakeWebSocketService implements WebSocketService, Lifecycle {
 	private static final Mono<Map<String, Object>> EMPTY_ATTRIBUTES = Mono.just(Collections.emptyMap());
 
 
-	private static final boolean jettyWsPresent;
+	private static final boolean JETTY_WS_PRESENT;
 
-	private static final boolean jettyCoreWsPresent;
+	private static final boolean JETTY_CORE_WS_PRESENT;
 
-	private static final boolean reactorNettyPresent;
+	private static final boolean REACTOR_NETTY_PRESENT;
 
 	static {
 		ClassLoader classLoader = HandshakeWebSocketService.class.getClassLoader();
-		jettyWsPresent = ClassUtils.isPresent(
+		JETTY_WS_PRESENT = ClassUtils.isPresent(
 				"org.eclipse.jetty.ee11.websocket.server.JettyWebSocketServerContainer", classLoader);
-		jettyCoreWsPresent = ClassUtils.isPresent(
+		JETTY_CORE_WS_PRESENT = ClassUtils.isPresent(
 				"org.eclipse.jetty.websocket.server.ServerWebSocketContainer", classLoader);
-		reactorNettyPresent = ClassUtils.isPresent(
+		REACTOR_NETTY_PRESENT = ClassUtils.isPresent(
 				"reactor.netty.http.server.HttpServerResponse", classLoader);
 	}
 
@@ -265,13 +265,13 @@ public class HandshakeWebSocketService implements WebSocketService, Lifecycle {
 
 
 	static RequestUpgradeStrategy initUpgradeStrategy() {
-		if (jettyWsPresent) {
+		if (JETTY_WS_PRESENT) {
 			return new JettyRequestUpgradeStrategy();
 		}
-		else if (jettyCoreWsPresent) {
+		else if (JETTY_CORE_WS_PRESENT) {
 			return new JettyCoreRequestUpgradeStrategy();
 		}
-		else if (reactorNettyPresent) {
+		else if (REACTOR_NETTY_PRESENT) {
 			return new ReactorNettyRequestUpgradeStrategy();
 		}
 		else {

@@ -37,7 +37,6 @@ import static org.mockito.Mockito.verify;
  * Tests for {@link AsyncExecutionInterceptor}.
  *
  * @author Bao Ngo
- * @since 7.0
  */
 class AsyncExecutionInterceptorTests {
 
@@ -62,11 +61,13 @@ class AsyncExecutionInterceptorTests {
 		O run();
 	}
 
+
 	static class FutureRunner implements GenericRunner<Future<Void>> {
+
 		@Override
 		public Future<Void> run() {
-			return CompletableFuture.runAsync(() -> {
-			});
+			return CompletableFuture.runAsync(() -> {});
 		}
 	}
+
 }

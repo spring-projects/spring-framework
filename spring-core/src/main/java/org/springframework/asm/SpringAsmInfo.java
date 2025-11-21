@@ -31,7 +31,7 @@ public final class SpringAsmInfo {
 
 	/**
 	 * The ASM compatibility version for Spring's ASM visitor implementations:
-	 * currently {@link Opcodes#ASM10_EXPERIMENTAL}, as of Spring Framework 5.3.
+	 * currently {@link Opcodes#ASM10_EXPERIMENTAL}.
 	 */
 	public static final int ASM_VERSION = Opcodes.ASM10_EXPERIMENTAL;
 

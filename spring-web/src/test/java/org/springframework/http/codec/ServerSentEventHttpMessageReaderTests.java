@@ -67,7 +67,9 @@ class ServerSentEventHttpMessageReaderTests extends AbstractLeakCheckingTests {
 		MockServerHttpRequest request = MockServerHttpRequest.post("/")
 				.body(Mono.just(stringBuffer(
 						"id:c42\nevent:foo\nretry:123\n:bla\n:bla bla\n:bla bla bla\ndata:bar\n\n" +
-						"id:c43\nevent:bar\nretry:456\ndata:baz\n\ndata:\n\ndata: \n\n")));
+								"id:c43\nevent:bar\nretry:456\ndata:baz\n\n" +
+								"data:\n\n" +
+								"data: \n\n")));
 
 		Flux<ServerSentEvent> events = this.reader
 				.read(ResolvableType.forClassWithGenerics(ServerSentEvent.class, String.class),
@@ -78,8 +80,8 @@ class ServerSentEventHttpMessageReaderTests extends AbstractLeakCheckingTests {
 						.retry(Duration.ofMillis(123)).comment("bla\nbla bla\nbla bla bla").data("bar").build())
 				.expectNext(ServerSentEvent.builder().id("c43").event("bar")
 						.retry(Duration.ofMillis(456)).data("baz").build())
-				.consumeNextWith(event -> assertThat(event.data()).isNull())
-				.consumeNextWith(event -> assertThat(event.data()).isNull())
+				.consumeNextWith(event -> assertThat(event.data()).isEqualTo(""))
+				.consumeNextWith(event -> assertThat(event.data()).isEqualTo(""))
 				.expectComplete()
 				.verify();
 	}
@@ -133,6 +135,18 @@ class ServerSentEventHttpMessageReaderTests extends AbstractLeakCheckingTests {
 				.expectNext("\tfoo \nbar\t")
 				.expectComplete()
 				.verify();
+	}
+
+	@Test // gh-35412
+	void emptyLines() {
+		MockServerHttpRequest request = MockServerHttpRequest.post("/")
+				.body(Mono.just(stringBuffer("id:1\nevent:message\ndata:\ndata:\ndata:\n\n")));
+
+		Flux<String> data = new ServerSentEventHttpMessageReader()
+				.read(ResolvableType.forClass(String.class), request, Collections.emptyMap())
+				.cast(String.class);
+
+		StepVerifier.create(data).expectNext("\n\n").verifyComplete();
 	}
 
 	@Test

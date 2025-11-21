@@ -28,6 +28,7 @@ import org.springframework.beans.PropertyAccessorFactory;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.servlet.support.BindStatus;
+import org.springframework.web.util.HtmlUtils;
 
 /**
  * Provides supporting functionality to render a list of '{@code option}'
@@ -100,18 +101,25 @@ class OptionWriter {
 
 	private final boolean htmlEscape;
 
+	private final @Nullable String encoding;
+
 
 	/**
-	 * Create a new {@code OptionWriter} for the supplied {@code objectSource}.
+	 * Create a new {@code OptionWriter} for the supplied {@code optionSource}.
 	 * @param optionSource the source of the {@code options} (never {@code null})
 	 * @param bindStatus the {@link BindStatus} for the bound value (never {@code null})
 	 * @param valueProperty the name of the property used to render {@code option} values
 	 * (optional)
 	 * @param labelProperty the name of the property used to render {@code option} labels
 	 * (optional)
+	 * @param htmlEscape whether special characters should be converted into HTML
+	 * character references
+	 * @param encoding the character encoding to use, or {@code null} if response
+	 * encoding should not be used with HTML escaping
 	 */
 	public OptionWriter(Object optionSource, BindStatus bindStatus,
-			@Nullable String valueProperty, @Nullable String labelProperty, boolean htmlEscape) {
+			@Nullable String valueProperty, @Nullable String labelProperty,
+			boolean htmlEscape, @Nullable String encoding) {
 
 		Assert.notNull(optionSource, "'optionSource' must not be null");
 		Assert.notNull(bindStatus, "'bindStatus' must not be null");
@@ -120,6 +128,7 @@ class OptionWriter {
 		this.valueProperty = valueProperty;
 		this.labelProperty = labelProperty;
 		this.htmlEscape = htmlEscape;
+		this.encoding = encoding;
 	}
 
 
@@ -248,7 +257,14 @@ class OptionWriter {
 	 */
 	private String getDisplayString(@Nullable Object value) {
 		PropertyEditor editor = (value != null ? this.bindStatus.findEditor(value.getClass()) : null);
-		return ValueFormatter.getDisplayString(value, editor, this.htmlEscape);
+		String displayString = ValueFormatter.getDisplayString(value, editor, false);
+		return (this.htmlEscape ? htmlEscape(displayString) : displayString);
+	}
+
+	private String htmlEscape(String content) {
+		return (this.encoding != null ?
+				HtmlUtils.htmlEscape(content, this.encoding) :
+				HtmlUtils.htmlEscape(content));
 	}
 
 	/**

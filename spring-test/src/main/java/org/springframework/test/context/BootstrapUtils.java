@@ -60,7 +60,7 @@ public abstract class BootstrapUtils {
 	private static final String WEB_APP_CONFIGURATION_ANNOTATION_CLASS_NAME =
 			"org.springframework.test.context.web.WebAppConfiguration";
 
-	private static final Class<? extends Annotation> webAppConfigurationClass = loadWebAppConfigurationClass();
+	private static final Class<? extends Annotation> WEB_APP_CONFIGURATION_CLASS = loadWebAppConfigurationClass();
 
 	private static final Log logger = LogFactory.getLog(BootstrapUtils.class);
 
@@ -196,7 +196,7 @@ public abstract class BootstrapUtils {
 	}
 
 	private static Class<?> resolveDefaultTestContextBootstrapper(Class<?> testClass) throws Exception {
-		boolean webApp = TestContextAnnotationUtils.hasAnnotation(testClass, webAppConfigurationClass);
+		boolean webApp = TestContextAnnotationUtils.hasAnnotation(testClass, WEB_APP_CONFIGURATION_CLASS);
 		String bootstrapperClassName = (webApp ? DEFAULT_WEB_TEST_CONTEXT_BOOTSTRAPPER_CLASS_NAME :
 				DEFAULT_TEST_CONTEXT_BOOTSTRAPPER_CLASS_NAME);
 		return ClassUtils.forName(bootstrapperClassName, BootstrapUtils.class.getClassLoader());

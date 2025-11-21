@@ -86,6 +86,8 @@ public interface JmsClient {
 	 * Provide an operation handle for the given JMS destination.
 	 * @param destination the JMS {@code Destination} object
 	 * @return a reusable operation handle bound to the destination
+	 * @see jakarta.jms.Queue
+	 * @see jakarta.jms.Topic
 	 */
 	OperationSpec destination(Destination destination);
 
@@ -93,7 +95,8 @@ public interface JmsClient {
 	 * Provide an operation handle for the specified JMS destination.
 	 * @param destinationName a name resolving to a JMS {@code Destination}
 	 * @return a reusable operation handle bound to the destination
-	 * @see org.springframework.jms.support.destination.DestinationResolver
+	 * @see org.springframework.jms.support.destination.SimpleDestinationResolver
+	 * @see JmsTemplate#setDestinationResolver
 	 */
 	OperationSpec destination(String destinationName);
 
@@ -138,6 +141,7 @@ public interface JmsClient {
 		return new DefaultJmsClientBuilder(jmsTemplate);
 	}
 
+
 	/**
 	 * A mutable builder for creating a {@link JmsClient}.
 	 */
@@ -163,7 +167,6 @@ public interface JmsClient {
 		 * Build the {@code JmsClient} instance.
 		 */
 		JmsClient build();
-
 	}
 
 

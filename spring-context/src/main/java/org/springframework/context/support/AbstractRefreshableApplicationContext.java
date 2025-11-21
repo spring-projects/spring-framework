@@ -225,7 +225,6 @@ public abstract class AbstractRefreshableApplicationContext extends AbstractAppl
 	 * @param beanFactory the bean factory to load bean definitions into
 	 * @throws BeansException if parsing of the bean definitions failed
 	 * @throws IOException if loading of bean definition files failed
-	 * @see org.springframework.beans.factory.support.PropertiesBeanDefinitionReader
 	 * @see org.springframework.beans.factory.xml.XmlBeanDefinitionReader
 	 */
 	protected abstract void loadBeanDefinitions(DefaultListableBeanFactory beanFactory)

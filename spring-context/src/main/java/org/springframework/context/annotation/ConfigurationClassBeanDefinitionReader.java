@@ -56,6 +56,7 @@ import org.springframework.core.type.StandardAnnotationMetadata;
 import org.springframework.core.type.StandardMethodMetadata;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
 
 /**
@@ -161,9 +162,17 @@ class ConfigurationClassBeanDefinitionReader {
 
 		ScopeMetadata scopeMetadata = scopeMetadataResolver.resolveScopeMetadata(configBeanDef);
 		configBeanDef.setScope(scopeMetadata.getScopeName());
-		String configBeanName = this.importBeanNameGenerator.generateBeanName(configBeanDef, this.registry);
-		AnnotationConfigUtils.processCommonDefinitionAnnotations(configBeanDef, metadata);
 
+		String configBeanName;
+		try {
+			configBeanName = this.importBeanNameGenerator.generateBeanName(configBeanDef, this.registry);
+		}
+		catch (IllegalArgumentException ex) {
+			throw new IllegalStateException("Failed to generate bean name for imported class '" +
+					configClass.getMetadata().getClassName() + "'", ex);
+		}
+
+		AnnotationConfigUtils.processCommonDefinitionAnnotations(configBeanDef, metadata);
 		BeanDefinitionHolder definitionHolder = new BeanDefinitionHolder(configBeanDef, configBeanName);
 		definitionHolder = AnnotationConfigUtils.applyScopedProxyMode(scopeMetadata, definitionHolder, this.registry);
 		this.registry.registerBeanDefinition(definitionHolder.getBeanName(), definitionHolder.getBeanDefinition());
@@ -197,21 +206,15 @@ class ConfigurationClassBeanDefinitionReader {
 
 		// Consider name and any aliases.
 		String[] explicitNames = bean.getStringArray("name");
-		String beanName;
-		String localBeanName;
-		if (explicitNames.length > 0 && StringUtils.hasText(explicitNames[0])) {
-			beanName = explicitNames[0];
-			localBeanName = beanName;
+		String beanName = (explicitNames.length > 0 && StringUtils.hasText(explicitNames[0])) ? explicitNames[0] : null;
+		String localBeanName = defaultBeanName(beanName, methodName);
+		beanName = (this.importBeanNameGenerator instanceof ConfigurationBeanNameGenerator cbng ?
+				cbng.deriveBeanName(metadata, beanName) : defaultBeanName(beanName, methodName));
+		if (explicitNames.length > 0) {
 			// Register aliases even when overridden below.
 			for (int i = 1; i < explicitNames.length; i++) {
 				this.registry.registerAlias(beanName, explicitNames[i]);
 			}
-		}
-		else {
-			// Default bean name derived from method name.
-			beanName = (this.importBeanNameGenerator instanceof ConfigurationBeanNameGenerator cbng ?
-					cbng.deriveBeanName(metadata) : methodName);
-			localBeanName = methodName;
 		}
 
 		ConfigurationClassBeanDefinition beanDef =
@@ -304,6 +307,10 @@ class ConfigurationClassBeanDefinitionReader {
 					.formatted(configClass.getMetadata().getClassName(), beanName));
 		}
 		this.registry.registerBeanDefinition(beanName, beanDefToRegister);
+	}
+
+	private static String defaultBeanName(@Nullable String beanName, String methodName) {
+		return (beanName != null ? beanName : methodName);
 	}
 
 	@SuppressWarnings("NullAway") // Reflection
@@ -415,13 +422,13 @@ class ConfigurationClassBeanDefinitionReader {
 				registrar.registerBeanDefinitions(metadata, this.registry, this.importBeanNameGenerator));
 	}
 
-	private void loadBeanDefinitionsFromBeanRegistrars(Map<String, BeanRegistrar> registrars) {
+	private void loadBeanDefinitionsFromBeanRegistrars(MultiValueMap<String, BeanRegistrar> registrars) {
 		if (!(this.registry instanceof ListableBeanFactory beanFactory)) {
 			throw new IllegalStateException("Cannot support bean registrars since " +
 					this.registry.getClass().getName() + " does not implement ListableBeanFactory");
 		}
-		registrars.values().forEach(registrar -> registrar.register(new BeanRegistryAdapter(
-				this.registry, beanFactory, this.environment, registrar.getClass()), this.environment));
+		registrars.values().forEach(registrarList -> registrarList.forEach(registrar -> registrar.register(new BeanRegistryAdapter(
+				this.registry, beanFactory, this.environment, registrar.getClass()), this.environment)));
 	}
 
 

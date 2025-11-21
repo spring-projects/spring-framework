@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
 
 import kotlin.reflect.KType;
 import kotlinx.serialization.KSerializer;
@@ -27,6 +28,7 @@ import kotlinx.serialization.SerialFormat;
 import kotlinx.serialization.SerializersKt;
 import org.jspecify.annotations.Nullable;
 
+import org.springframework.core.KotlinDetector;
 import org.springframework.core.ResolvableType;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
@@ -38,9 +40,11 @@ import org.springframework.util.ConcurrentReferenceHashMap;
  * Abstract base class for {@link HttpMessageConverter} implementations that
  * use Kotlin serialization.
  *
- * <p>As of Spring Framework 7.0,
- * <a href="https://github.com/Kotlin/kotlinx.serialization/blob/master/docs/polymorphism.md#open-polymorphism">open polymorphism</a>
- * is supported.
+ * <p>As of Spring Framework 7.0, by default it only encodes types annotated with
+ * {@link kotlinx.serialization.Serializable @Serializable} at type or generics level
+ * since it allows combined usage with other general purpose converters without conflicts.
+ * Alternative constructors with a {@code Predicate<ResolvableType>} parameter can be used
+ * to customize this behavior.
  *
  * @author Andreas Ahlenstorf
  * @author Sebastien Deleuze
@@ -58,15 +62,30 @@ public abstract class AbstractKotlinSerializationHttpMessageConverter<T extends 
 
 	private final T format;
 
+	private final Predicate<ResolvableType> typePredicate;
+
 
 	/**
-	 * Construct an {@code AbstractKotlinSerializationHttpMessageConverter} with multiple supported media type and
-	 * format.
-	 * @param format the format
-	 * @param supportedMediaTypes the supported media types
+	 * Creates a new instance with the given format and supported mime types
+	 * which only converters types annotated with
+	 * {@link kotlinx.serialization.Serializable @Serializable} at type or
+	 * generics level.
 	 */
 	protected AbstractKotlinSerializationHttpMessageConverter(T format, MediaType... supportedMediaTypes) {
 		super(supportedMediaTypes);
+		this.typePredicate = KotlinDetector::hasSerializableAnnotation;
+		this.format = format;
+	}
+
+	/**
+	 * Creates a new instance with the given format and supported mime types
+	 * which only converts types for which the specified predicate returns
+	 * {@code true}.
+	 * @since 7.0
+	 */
+	protected AbstractKotlinSerializationHttpMessageConverter(T format, Predicate<ResolvableType> typePredicate, MediaType... supportedMediaTypes) {
+		super(supportedMediaTypes);
+		this.typePredicate = typePredicate;
 		this.format = format;
 	}
 
@@ -77,27 +96,27 @@ public abstract class AbstractKotlinSerializationHttpMessageConverter<T extends 
 
 	@Override
 	protected boolean supports(Class<?> clazz) {
-		return serializer(ResolvableType.forClass(clazz), null) != null;
+		ResolvableType type = ResolvableType.forClass(clazz);
+		if (!this.typePredicate.test(type)) {
+			return false;
+		}
+		return serializer(type, null) != null;
 	}
 
 	@Override
 	public boolean canRead(ResolvableType type, @Nullable MediaType mediaType) {
-		if (!ResolvableType.NONE.equals(type) && serializer(type, null) != null) {
-			return canRead(mediaType);
-		}
-		else {
+		if (!this.typePredicate.test(type) || ResolvableType.NONE.equals(type)) {
 			return false;
 		}
+		return serializer(type, null) != null && canRead(mediaType);
 	}
 
 	@Override
 	public boolean canWrite(ResolvableType type, Class<?> clazz, @Nullable MediaType mediaType) {
-		if (!ResolvableType.NONE.equals(type) && serializer(type, null) != null) {
-			return canWrite(mediaType);
-		}
-		else {
+		if (!this.typePredicate.test(type) || ResolvableType.NONE.equals(type)) {
 			return false;
 		}
+		return serializer(type, null) != null && canWrite(mediaType);
 	}
 
 	@Override

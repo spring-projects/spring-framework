@@ -40,6 +40,7 @@ import org.springframework.aot.generate.GeneratedClass;
 import org.springframework.aot.generate.ValueCodeGenerator;
 import org.springframework.aot.generate.ValueCodeGeneratorDelegates;
 import org.springframework.aot.test.generate.TestGenerationContext;
+import org.springframework.beans.factory.config.AutowiredPropertyMarker;
 import org.springframework.beans.factory.config.BeanReference;
 import org.springframework.beans.factory.config.RuntimeBeanNameReference;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
@@ -482,6 +483,18 @@ class BeanDefinitionPropertyValueCodeGeneratorDelegatesTests {
 				RuntimeBeanReference actual = (RuntimeBeanReference) instance;
 				assertThat(actual.getBeanType()).isEqualTo(String.class);
 			});
+		}
+
+	}
+
+	@Nested
+	class AutowiredPropertyMarkerTests {
+
+		@Test
+		void generateWhenAutowiredPropertyMarker() {
+			compile(AutowiredPropertyMarker.INSTANCE, (instance, compiler) ->
+					assertThat(instance).isInstanceOf(AutowiredPropertyMarker.class)
+							.isSameAs(AutowiredPropertyMarker.INSTANCE));
 		}
 
 	}

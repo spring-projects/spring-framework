@@ -190,7 +190,7 @@ This observation uses the `io.micrometer.jakarta9.instrument.jms.DefaultJmsProce
 == HTTP Server instrumentation
 
 HTTP server exchange observations are created with the name `"http.server.requests"` for Servlet and Reactive applications,
-or "http.server.request.duration" if using the OpenTelemetry convention.
+or `"http.server.request.duration"` if using the OpenTelemetry convention.
 
 [[observability.http-server.servlet]]
 === Servlet applications

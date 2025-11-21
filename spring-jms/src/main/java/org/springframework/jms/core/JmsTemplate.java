@@ -60,7 +60,7 @@ import org.springframework.util.ClassUtils;
  * the "sessionTransacted" and "sessionAcknowledgeMode" bean properties.
  *
  * <p>This template uses a
- * {@link org.springframework.jms.support.destination.DynamicDestinationResolver}
+ * {@link org.springframework.jms.support.destination.SimpleDestinationResolver}
  * and a {@link org.springframework.jms.support.converter.SimpleMessageConverter}
  * as default strategies for resolving a destination name or converting a message,
  * respectively. These defaults can be overridden through the "destinationResolver"
@@ -94,7 +94,7 @@ import org.springframework.util.ClassUtils;
  */
 public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations {
 
-	private static final boolean micrometerJakartaPresent = ClassUtils.isPresent(
+	private static final boolean MICROMETER_JAKARTA_PRESENT = ClassUtils.isPresent(
 			"io.micrometer.jakarta9.instrument.jms.JmsInstrumentation", JmsTemplate.class.getClassLoader());
 
 	/** Internal ResourceFactory adapter for interacting with ConnectionFactoryUtils. */
@@ -530,7 +530,7 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 			if (logger.isDebugEnabled()) {
 				logger.debug("Executing callback on JMS Session: " + sessionToUse);
 			}
-			if (micrometerJakartaPresent && this.observationRegistry != null) {
+			if (MICROMETER_JAKARTA_PRESENT && this.observationRegistry != null) {
 				sessionToUse = MicrometerInstrumentation.instrumentSession(sessionToUse, this.observationRegistry);
 			}
 			return action.doInJms(sessionToUse);
@@ -952,7 +952,7 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 		try {
 			con = createConnection();
 			session = con.createSession(false, Session.AUTO_ACKNOWLEDGE);
-			if (micrometerJakartaPresent && this.observationRegistry != null) {
+			if (MICROMETER_JAKARTA_PRESENT && this.observationRegistry != null) {
 				session = MicrometerInstrumentation.instrumentSession(session, this.observationRegistry);
 			}
 			if (startConnection) {

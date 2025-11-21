@@ -49,6 +49,7 @@ class FormTagTests extends AbstractHtmlElementTagTests {
 
 
 	@Override
+	@SuppressWarnings("serial")
 	protected void onSetUp() {
 		this.tag = new FormTag() {
 			@Override

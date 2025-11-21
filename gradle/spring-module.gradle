@@ -78,7 +78,7 @@ javadoc {
 		// Change modularity mismatch from warn to info.
 		// See https://github.com/spring-projects/spring-framework/issues/27497
 		addStringOption("-link-modularity-mismatch", "info")
-		// With the javadoc tool on Java 24, it appears that the 'reference'
+		// With the javadoc tool on Java 25, it appears that the 'reference'
 		// group is always active and the '-reference' flag is not honored.
 		// Thus, we do NOT fail the build on Javadoc warnings due to
 		// cross-module @see and @link references which are only reachable
@@ -118,4 +118,3 @@ publishing {
 // Disable publication of test fixture artifacts.
 components.java.withVariantsFromConfiguration(configurations.testFixturesApiElements) { skip() }
 components.java.withVariantsFromConfiguration(configurations.testFixturesRuntimeElements) { skip() }
-

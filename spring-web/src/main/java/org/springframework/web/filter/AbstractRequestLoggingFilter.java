@@ -31,8 +31,11 @@ import org.jspecify.annotations.Nullable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.util.Assert;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
 import org.springframework.web.util.ContentCachingRequestWrapper;
+import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.web.util.WebUtils;
 
 /**
@@ -98,6 +101,8 @@ public abstract class AbstractRequestLoggingFilter extends OncePerRequestFilter 
 	private boolean includeHeaders = false;
 
 	private boolean includePayload = false;
+
+	private @Nullable Predicate<String> queryParamPredicate;
 
 	private @Nullable Predicate<String> headerPredicate;
 
@@ -183,9 +188,32 @@ public abstract class AbstractRequestLoggingFilter extends OncePerRequestFilter 
 	}
 
 	/**
+	 * Configure a predicate for selecting which query parameters should be logged
+	 * if {@link #setIncludeQueryString(boolean)} is set to {@code true}.
+	 * <p>By default this is not set, in which case all query parameters are logged.
+	 * <p>The predicate will be applied once per query parameter name. Thus, if
+	 * there are multiple values for the same query parameter name, the logged query
+	 * string will contain fewer {@code name=value} mappings than the one returned by
+	 * {@link HttpServletRequest#getQueryString()}.
+	 * @param queryParamPredicate the predicate to use
+	 * @since 7.0
+	 */
+	public void setQueryParamPredicate(@Nullable Predicate<String> queryParamPredicate) {
+		this.queryParamPredicate = queryParamPredicate;
+	}
+
+	/**
+	 * The configured {@link #setQueryParamPredicate(Predicate) queryParamPredicate}.
+	 * @since 7.0
+	 */
+	protected @Nullable Predicate<String> getQueryParamPredicate() {
+		return this.queryParamPredicate;
+	}
+
+	/**
 	 * Configure a predicate for selecting which headers should be logged if
 	 * {@link #setIncludeHeaders(boolean)} is set to {@code true}.
-	 * <p>By default this is not set in which case all headers are logged.
+	 * <p>By default this is not set, in which case all headers are logged.
 	 * @param headerPredicate the predicate to use
 	 * @since 5.2
 	 */
@@ -326,6 +354,23 @@ public abstract class AbstractRequestLoggingFilter extends OncePerRequestFilter 
 		if (isIncludeQueryString()) {
 			String queryString = request.getQueryString();
 			if (queryString != null) {
+				if (getQueryParamPredicate() != null) {
+					MultiValueMap<String, String> queryParams = UriComponentsBuilder.fromUriString("?" + queryString)
+							.build()
+							.getQueryParams();
+
+					MultiValueMap<String, String> updatedQueryParams = new LinkedMultiValueMap<>(queryParams);
+					for (String name : queryParams.keySet()) {
+						if (!getQueryParamPredicate().test(name)) {
+							updatedQueryParams.set(name, "masked");
+						}
+					}
+
+					queryString = UriComponentsBuilder.newInstance()
+							.queryParams(updatedQueryParams)
+							.build()
+							.getQuery();
+				}
 				msg.append('?').append(queryString);
 			}
 		}

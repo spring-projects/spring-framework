@@ -181,7 +181,7 @@ class JacksonJsonMessageConverterTests {
 	@Test
 	void toTextMessageWithNullReturnType() throws JMSException, NoSuchMethodException {
 		testToTextMessageWithReturnType(null);
-		verify(sessionMock).createTextMessage("{\"description\":\"lengthy description\",\"name\":\"test\"}");
+		verify(sessionMock).createTextMessage("{\"name\":\"test\",\"description\":\"lengthy description\"}");
 	}
 
 	@Test
@@ -190,7 +190,7 @@ class JacksonJsonMessageConverterTests {
 		MethodParameter returnType = new MethodParameter(method, -1);
 
 		testToTextMessageWithReturnType(returnType);
-		verify(sessionMock).createTextMessage("{\"description\":\"lengthy description\",\"name\":\"test\"}");
+		verify(sessionMock).createTextMessage("{\"name\":\"test\",\"description\":\"lengthy description\"}");
 	}
 
 	@Test
@@ -237,7 +237,7 @@ class JacksonJsonMessageConverterTests {
 
 		converter.toMessage(bean, sessionMock, Full.class);
 		verify(textMessageMock).setStringProperty("__typeid__", MyAnotherBean.class.getName());
-		verify(sessionMock).createTextMessage("{\"description\":\"lengthy description\",\"name\":\"test\"}");
+		verify(sessionMock).createTextMessage("{\"name\":\"test\",\"description\":\"lengthy description\"}");
 	}
 
 

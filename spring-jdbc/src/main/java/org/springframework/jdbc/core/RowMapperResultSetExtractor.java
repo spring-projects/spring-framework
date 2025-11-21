@@ -21,8 +21,6 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.jspecify.annotations.Nullable;
-
 import org.springframework.util.Assert;
 
 /**
@@ -61,7 +59,7 @@ import org.springframework.util.Assert;
  * @see JdbcTemplate
  * @see org.springframework.jdbc.object.MappingSqlQuery
  */
-public class RowMapperResultSetExtractor<T extends @Nullable Object> implements ResultSetExtractor<List<T>> {
+public class RowMapperResultSetExtractor<T> implements ResultSetExtractor<List<T>> {
 
 	private final RowMapper<T> rowMapper;
 

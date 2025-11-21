@@ -186,10 +186,11 @@ class PathResourceTests {
 	}
 
 	@Test
-	void getFile() throws IOException {
+	void getFile() {
 		PathResource resource = new PathResource(TEST_FILE);
 		File file = new File(TEST_FILE);
 		assertThat(resource.getFile().getAbsoluteFile()).isEqualTo(file.getAbsoluteFile());
+		assertThat(resource.getFilePath()).isEqualTo(file.toPath());
 	}
 
 	@Test
@@ -198,7 +199,7 @@ class PathResourceTests {
 		given(path.normalize()).willReturn(path);
 		given(path.toFile()).willThrow(new UnsupportedOperationException());
 		PathResource resource = new PathResource(path);
-		assertThatExceptionOfType(FileNotFoundException.class).isThrownBy(resource::getFile);
+		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(resource::getFile);
 	}
 
 	@Test
@@ -236,13 +237,13 @@ class PathResourceTests {
 
 	@Test
 	void filename() {
-		Resource resource = new PathResource(TEST_FILE);
+		PathResource resource = new PathResource(TEST_FILE);
 		assertThat(resource.getFilename()).isEqualTo("example.properties");
 	}
 
 	@Test
 	void description() {
-		Resource resource = new PathResource(TEST_FILE);
+		PathResource resource = new PathResource(TEST_FILE);
 		assertThat(resource.getDescription()).contains("path [");
 		assertThat(resource.getDescription()).contains(TEST_FILE);
 	}
@@ -261,9 +262,9 @@ class PathResourceTests {
 
 	@Test
 	void equalsAndHashCode() {
-		Resource resource1 = new PathResource(TEST_FILE);
-		Resource resource2 = new PathResource(TEST_FILE);
-		Resource resource3 = new PathResource(TEST_DIR);
+		PathResource resource1 = new PathResource(TEST_FILE);
+		PathResource resource2 = new PathResource(TEST_FILE);
+		PathResource resource3 = new PathResource(TEST_DIR);
 		assertThat(resource1).isEqualTo(resource1);
 		assertThat(resource1).isEqualTo(resource2);
 		assertThat(resource2).isEqualTo(resource1);

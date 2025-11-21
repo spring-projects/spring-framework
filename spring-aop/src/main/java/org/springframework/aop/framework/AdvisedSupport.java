@@ -70,6 +70,8 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	/** use serialVersionUID from Spring 2.0 for interoperability. */
 	private static final long serialVersionUID = 2651364800145442165L;
 
+	private static final Advisor[] EMPTY_ADVISOR_ARRAY = new Advisor[0];
+
 
 	/**
 	 * Canonical TargetSource when there's no target, and behavior is
@@ -288,7 +290,7 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 
 	@Override
 	public final Advisor[] getAdvisors() {
-		return this.advisors.toArray(new Advisor[0]);
+		return this.advisors.toArray(EMPTY_ADVISOR_ARRAY);
 	}
 
 	@Override

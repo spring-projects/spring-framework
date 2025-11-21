@@ -27,6 +27,7 @@ import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Proxy;
+import java.net.URLConnection;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -687,13 +688,13 @@ class ClassUtilsTests {
 		}
 
 		@Test
-		void publicMethodInObjectClass() throws Exception {
+		void publicMethodInPublicClass() throws Exception {
 			Class<?> originalType = String.class;
-			Method originalMethod = originalType.getDeclaredMethod("hashCode");
+			Method originalMethod = originalType.getDeclaredMethod("toString");
 
 			Method publiclyAccessibleMethod = ClassUtils.getPubliclyAccessibleMethodIfPossible(originalMethod, null);
-			assertThat(publiclyAccessibleMethod.getDeclaringClass()).isEqualTo(Object.class);
-			assertThat(publiclyAccessibleMethod.getName()).isEqualTo("hashCode");
+			assertThat(publiclyAccessibleMethod.getDeclaringClass()).isEqualTo(originalType);
+			assertThat(publiclyAccessibleMethod).isSameAs(originalMethod);
 			assertPubliclyAccessible(publiclyAccessibleMethod);
 		}
 
@@ -703,9 +704,20 @@ class ClassUtilsTests {
 			Method originalMethod = originalType.getDeclaredMethod("size");
 
 			Method publiclyAccessibleMethod = ClassUtils.getPubliclyAccessibleMethodIfPossible(originalMethod, null);
-			// Should find the interface method in List.
-			assertThat(publiclyAccessibleMethod.getDeclaringClass()).isEqualTo(List.class);
-			assertThat(publiclyAccessibleMethod.getName()).isEqualTo("size");
+			// Should not find the interface method in List.
+			assertThat(publiclyAccessibleMethod.getDeclaringClass()).isEqualTo(originalType);
+			assertThat(publiclyAccessibleMethod).isSameAs(originalMethod);
+			assertPubliclyAccessible(publiclyAccessibleMethod);
+		}
+
+		@Test
+		void publicMethodInNonExportedClass() throws Exception {
+			Class<?> originalType = getClass().getClassLoader().loadClass("sun.net.www.protocol.http.HttpURLConnection");
+			Method originalMethod = originalType.getDeclaredMethod("getOutputStream");
+
+			Method publiclyAccessibleMethod = ClassUtils.getPubliclyAccessibleMethodIfPossible(originalMethod, null);
+			assertThat(publiclyAccessibleMethod.getDeclaringClass()).isEqualTo(URLConnection.class);
+			assertThat(publiclyAccessibleMethod.getName()).isSameAs(originalMethod.getName());
 			assertPubliclyAccessible(publiclyAccessibleMethod);
 		}
 
@@ -856,6 +868,49 @@ class ClassUtilsTests {
 			assertPubliclyAccessible(publiclyAccessibleMethod);
 		}
 
+		@Test  // gh-35667
+		void staticMethodInPublicClass() throws Exception {
+			Method originalMethod = PublicSuperclass.class.getMethod("getCacheKey");
+
+			// Prerequisite: method must be public static for this use case.
+			assertPublic(originalMethod);
+			assertStatic(originalMethod);
+
+			Method publiclyAccessibleMethod = ClassUtils.getPubliclyAccessibleMethodIfPossible(originalMethod, null);
+			assertThat(publiclyAccessibleMethod).isSameAs(originalMethod);
+			assertPubliclyAccessible(publiclyAccessibleMethod);
+		}
+
+		@Test  // gh-35667
+		void publicSubclassHidesStaticMethodInPublicSuperclass() throws Exception {
+			Method originalMethod = PublicSubclass.class.getMethod("getCacheKey");
+
+			// Prerequisite: type must be public for this use case.
+			assertPublic(originalMethod.getDeclaringClass());
+			// Prerequisite: method must be public static for this use case.
+			assertPublic(originalMethod);
+			assertStatic(originalMethod);
+
+			Method publiclyAccessibleMethod = ClassUtils.getPubliclyAccessibleMethodIfPossible(originalMethod, null);
+			assertThat(publiclyAccessibleMethod).isSameAs(originalMethod);
+			assertPubliclyAccessible(publiclyAccessibleMethod);
+		}
+
+		@Test  // gh-35667
+		void privateSubclassHidesStaticMethodInPublicSuperclass() throws Exception {
+			Method originalMethod = PrivateSubclass.class.getMethod("getCacheKey");
+
+			// Prerequisite: type must not be public for this use case.
+			assertNotPublic(originalMethod.getDeclaringClass());
+			// Prerequisite: method must be public static for this use case.
+			assertPublic(originalMethod);
+			assertStatic(originalMethod);
+
+			Method publiclyAccessibleMethod = ClassUtils.getPubliclyAccessibleMethodIfPossible(originalMethod, null);
+			assertThat(publiclyAccessibleMethod).isSameAs(originalMethod);
+			assertNotPubliclyAccessible(publiclyAccessibleMethod);
+		}
+
 	}
 
 
@@ -900,6 +955,10 @@ class ClassUtilsTests {
 
 	private static boolean isPublic(Member member) {
 		return Modifier.isPublic(member.getModifiers());
+	}
+
+	private static void assertStatic(Member member) {
+		assertThat(Modifier.isStatic(member.getModifiers())).as("%s must be static", member).isTrue();
 	}
 
 
@@ -1036,7 +1095,26 @@ class ClassUtilsTests {
 		String greet(String name);
 	}
 
+	public static class PublicSubclass extends PublicSuperclass {
+
+		/**
+		 * This method intentionally has the exact same signature as
+		 * {@link PublicSuperclass#getCacheKey()}.
+		 */
+		public static String getCacheKey() {
+			return "child";
+		}
+	}
+
 	private static class PrivateSubclass extends PublicSuperclass implements PublicInterface, PrivateInterface {
+
+		/**
+		 * This method intentionally has the exact same signature as
+		 * {@link PublicSuperclass#getCacheKey()}.
+		 */
+		public static String getCacheKey() {
+			return "child";
+		}
 
 		@Override
 		public int getNumber() {

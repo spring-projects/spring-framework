@@ -24,7 +24,6 @@ import com.github.benmanes.caffeine.cache.CaffeineSpec;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.cache.Cache;
-import org.springframework.cache.CacheManager;
 import org.springframework.cache.support.SimpleValueWrapper;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -42,7 +41,7 @@ class CaffeineCacheManagerTests {
 	@Test
 	@SuppressWarnings("cast")
 	void dynamicMode() {
-		CacheManager cm = new CaffeineCacheManager();
+		CaffeineCacheManager cm = new CaffeineCacheManager();
 
 		Cache cache1 = cm.getCache("c1");
 		assertThat(cache1).isInstanceOf(CaffeineCache.class);
@@ -76,6 +75,14 @@ class CaffeineCacheManagerTests {
 		cache1.evict("key3");
 		assertThat(cache1.get("key3", () -> (String) null)).isNull();
 		assertThat(cache1.get("key3", () -> (String) null)).isNull();
+
+		cm.removeCache("c1");
+		assertThat(cm.getCache("c1")).isNotSameAs(cache1);
+		assertThat(cm.getCache("c2")).isSameAs(cache2);
+
+		cm.resetCaches();
+		assertThat(cm.getCache("c1")).isNotSameAs(cache1);
+		assertThat(cm.getCache("c2")).isNotSameAs(cache2);
 	}
 
 	@Test
@@ -131,11 +138,24 @@ class CaffeineCacheManagerTests {
 
 		cm.setAllowNullValues(true);
 		Cache cache1y = cm.getCache("c1");
+		Cache cache2y = cm.getCache("c2");
 
 		cache1y.put("key3", null);
 		assertThat(cache1y.get("key3").get()).isNull();
 		cache1y.evict("key3");
 		assertThat(cache1y.get("key3")).isNull();
+		cache2y.put("key4", "value4");
+		assertThat(cache2y.get("key4").get()).isEqualTo("value4");
+
+		cm.removeCache("c1");
+		assertThat(cm.getCache("c1")).isNull();
+		assertThat(cm.getCache("c2")).isSameAs(cache2y);
+		assertThat(cache2y.get("key4").get()).isEqualTo("value4");
+
+		cm.resetCaches();
+		assertThat(cm.getCache("c1")).isNull();
+		assertThat(cm.getCache("c2")).isSameAs(cache2y);
+		assertThat(cache2y.get("key4")).isNull();
 	}
 
 	@Test

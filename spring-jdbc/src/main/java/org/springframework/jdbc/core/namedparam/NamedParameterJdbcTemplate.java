@@ -294,7 +294,6 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 	}
 
 	@Override
-	@SuppressWarnings("NullAway") // See https://github.com/uber/NullAway/issues/1075
 	public <T> List<@Nullable T> queryForList(String sql, SqlParameterSource paramSource, Class<T> elementType)
 			throws DataAccessException {
 
@@ -302,7 +301,6 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 	}
 
 	@Override
-	@SuppressWarnings("NullAway") // See https://github.com/uber/NullAway/issues/1075
 	public <T> List<@Nullable T> queryForList(String sql, Map<String, ?> paramMap, Class<T> elementType)
 			throws DataAccessException {
 

@@ -68,7 +68,7 @@ public interface FragmentsRendering {
 	 * the shared model for the request.
 	 * @param viewName the name of the view for the fragment
 	 * @return this builder
-	 * @since 6.2.1
+	 * @since 6.2.13
 	 */
 	static Builder fragment(String viewName) {
 		return new DefaultFragmentsRenderingBuilder().fragment(viewName);
@@ -80,7 +80,7 @@ public interface FragmentsRendering {
 	 * @param model attributes for the fragment, in addition to attributes from the
 	 * shared model for the request
 	 * @return this builder
-	 * @since 6.2.1
+	 * @since 6.2.13
 	 */
 	static Builder fragment(String viewName, Map<String, Object> model) {
 		return new DefaultFragmentsRenderingBuilder().fragment(viewName, model);
@@ -91,7 +91,7 @@ public interface FragmentsRendering {
 	 * @param fragments the fragments to add; each fragment also inherits
 	 * attributes from the shared model for the request
 	 * @return the created builder
-	 * @since 6.2.1
+	 * @since 6.2.13
 	 */
 	static Builder fragments(Collection<Fragment> fragments) {
 		return new DefaultFragmentsRenderingBuilder().fragments(fragments);
@@ -102,7 +102,7 @@ public interface FragmentsRendering {
 	 * @param fragmentsPublisher the fragments to add; each fragment also
 	 * inherits model attributes from the shared model for the request
 	 * @return the created builder
-	 * @since 6.2.1
+	 * @since 6.2.13
 	 */
 	static <P extends Publisher<Fragment>> Builder fragmentsPublisher(P fragmentsPublisher) {
 		return new DefaultFragmentsRenderingBuilder(fragmentsPublisher);
@@ -112,13 +112,59 @@ public interface FragmentsRendering {
 	 * Variant of {@link #fragmentsPublisher(Publisher)} that allows using any
 	 * producer that can be resolved to {@link Publisher} via
 	 * {@link ReactiveAdapterRegistry}.
-	 * @since 6.2.1
+	 * @since 6.2.13
 	 */
 	static Builder fragmentsProducer(Object fragmentsProducer) {
 		ReactiveAdapter adapter = ReactiveAdapterRegistry.getSharedInstance().getAdapter(fragmentsProducer.getClass());
 		Assert.isTrue(adapter != null, "Unknown producer " + fragmentsProducer.getClass());
 		Publisher<Fragment> publisher = adapter.toPublisher(fragmentsProducer);
 		return fragmentsPublisher(publisher);
+	}
+
+
+	/**
+	 * The same as {@link #fragment(String, Map)}.
+	 * @deprecated in favor of {@link #fragment(String, Map)}
+	 */
+	@Deprecated(since = "6.2.13", forRemoval = true)
+	static Builder with(String viewName, Map<String, Object> model) {
+		return fragment(viewName, model);
+	}
+
+	/**
+	 * The same as {@link #fragments(Collection)}.
+	 * @deprecated in favor of {@link #fragments(Collection)}
+	 */
+	@Deprecated(since = "6.2.13", forRemoval = true)
+	static Builder with(String viewName) {
+		return fragment(viewName);
+	}
+
+	/**
+	 * The same as {@link #fragments(Collection)}.
+	 * @deprecated in favor of {@link #fragments(Collection)}
+	 */
+	@Deprecated(since = "6.2.13", forRemoval = true)
+	static Builder withCollection(Collection<Fragment> fragments) {
+		return fragments(fragments);
+	}
+
+	/**
+	 * The same as {@link #fragmentsPublisher(Publisher)}.
+	 * @deprecated in favor of {@link #fragmentsPublisher(Publisher)}
+	 */
+	@Deprecated(since = "6.2.13", forRemoval = true)
+	static <P extends Publisher<Fragment>> Builder withPublisher(P fragmentsPublisher) {
+		return fragmentsPublisher(fragmentsPublisher);
+	}
+
+	/**
+	 * The same as {@link #fragmentsProducer(Object)}.
+	 * @deprecated in favor of {@link #fragmentsProducer(Object)}
+	 */
+	@Deprecated(since = "6.2.13", forRemoval = true)
+	static Builder withProducer(Object fragmentsProducer) {
+		return fragmentsProducer(fragmentsProducer);
 	}
 
 
@@ -180,7 +226,7 @@ public interface FragmentsRendering {
 		 * @param fragments the fragments to add; each fragment also inherits
 		 * attributes from the shared model for the request
 		 * @return this builder
-		 * @since 6.2.1
+		 * @since 6.2.13
 		 */
 		Builder fragments(Collection<Fragment> fragments);
 

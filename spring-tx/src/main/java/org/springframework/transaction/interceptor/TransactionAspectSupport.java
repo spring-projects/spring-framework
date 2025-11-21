@@ -17,6 +17,7 @@
 package org.springframework.transaction.interceptor;
 
 import java.lang.reflect.Method;
+import java.util.Objects;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
@@ -104,13 +105,13 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 	/**
 	 * Reactive Streams API present on the classpath?
 	 */
-	private static final boolean reactiveStreamsPresent = ClassUtils.isPresent(
+	private static final boolean REACTIVE_STREAMS_PRESENT = ClassUtils.isPresent(
 			"org.reactivestreams.Publisher", TransactionAspectSupport.class.getClassLoader());
 
 	/**
 	 * Vavr library present on the classpath?
 	 */
-	private static final boolean vavrPresent = ClassUtils.isPresent(
+	private static final boolean VAVR_PRESENT = ClassUtils.isPresent(
 			"io.vavr.control.Try", TransactionAspectSupport.class.getClassLoader());
 
 	/**
@@ -187,7 +188,7 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 
 
 	protected TransactionAspectSupport() {
-		if (reactiveStreamsPresent) {
+		if (REACTIVE_STREAMS_PRESENT) {
 			this.reactiveAdapterRegistry = ReactiveAdapterRegistry.getSharedInstance();
 		}
 		else {
@@ -395,7 +396,7 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 							Thread.currentThread().interrupt();
 						}
 					}
-					else if (vavrPresent && VavrDelegate.isVavrTry(retVal)) {
+					else if (VAVR_PRESENT && VavrDelegate.isVavrTry(retVal)) {
 						// Set rollback-only in case of Vavr failure matching our rollback rules...
 						retVal = VavrDelegate.evaluateTryFailure(retVal, txAttr, status);
 					}
@@ -412,11 +413,11 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 
 			// It's a CallbackPreferringPlatformTransactionManager: pass a TransactionCallback in.
 			try {
-				result = cpptm.execute(txAttr, status -> {
+				result = cpptm.<@Nullable Object> execute(txAttr, status -> {
 					TransactionInfo txInfo = prepareTransactionInfo(ptm, txAttr, joinpointIdentification, status);
 					try {
 						Object retVal = invocation.proceedWithInvocation();
-						if (retVal != null && vavrPresent && VavrDelegate.isVavrTry(retVal)) {
+						if (retVal != null && VAVR_PRESENT && VavrDelegate.isVavrTry(retVal)) {
 							// Set rollback-only in case of Vavr failure matching our rollback rules...
 							retVal = VavrDelegate.evaluateTryFailure(retVal, txAttr, status);
 						}
@@ -903,7 +904,7 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 								createTransactionIfNecessary(rtm, txAttr, joinpointIdentification),
 								tx -> {
 									try {
-										return (Mono<?>) invocation.proceedWithInvocation();
+										return (Mono<?>) Objects.requireNonNull(invocation.proceedWithInvocation());
 									}
 									catch (Throwable ex) {
 										return Mono.error(ex);

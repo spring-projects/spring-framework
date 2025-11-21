@@ -29,6 +29,7 @@ import org.springframework.core.io.buffer.DataBufferUtils
 import org.springframework.core.testfixture.codec.AbstractEncoderTests
 import org.springframework.http.MediaType
 import org.springframework.http.codec.ServerSentEvent
+import org.springframework.http.codec.cbor.KotlinSerializationCborEncoder
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import reactor.test.StepVerifier.FirstStep
@@ -57,12 +58,31 @@ class KotlinSerializationProtobufEncoderTests : AbstractEncoderTests<KotlinSeria
 			val mediaType = MediaType(mimeType)
 			assertThat(encoder.canEncode(pojoType, mediaType)).isTrue()
 
-			assertThat(encoder.canEncode(ResolvableType.forClassWithGenerics(List::class.java, Int::class.java), mimeType)).isTrue()
-			assertThat(encoder.canEncode(ResolvableType.forClassWithGenerics(List::class.java, Ordered::class.java), mimeType)).isTrue()
+			assertThat(encoder.canEncode(ResolvableType.forClassWithGenerics(List::class.java, Int::class.java), mimeType)).isFalse()
+			assertThat(encoder.canEncode(ResolvableType.forClassWithGenerics(List::class.java, Ordered::class.java), mimeType)).isFalse()
 			assertThat(encoder.canEncode(ResolvableType.forClassWithGenerics(List::class.java, Pojo::class.java), mimeType)).isTrue()
-			assertThat(encoder.canEncode(ResolvableType.forClassWithGenerics(ArrayList::class.java, Int::class.java), mimeType)).isTrue()
+			assertThat(encoder.canEncode(ResolvableType.forClassWithGenerics(ArrayList::class.java, Int::class.java), mimeType)).isFalse()
 		}
 		assertThat(encoder.canEncode(ResolvableType.forClassWithGenerics(ArrayList::class.java, Int::class.java), MediaType.APPLICATION_PDF)).isFalse()
+	}
+
+	@Test
+	fun canEncodeForAllTypes() {
+		val encoderForAllTypes = KotlinSerializationProtobufEncoder { true }
+
+		val pojoType = ResolvableType.forClass(Pojo::class.java)
+		assertThat(encoderForAllTypes.canEncode(pojoType, null)).isTrue()
+
+		for (mimeType in ProtobufCodecSupport.MIME_TYPES) {
+			val mediaType = MediaType(mimeType)
+			assertThat(encoderForAllTypes.canEncode(pojoType, mediaType)).isTrue()
+
+			assertThat(encoderForAllTypes.canEncode(ResolvableType.forClassWithGenerics(List::class.java, Int::class.java), mimeType)).isTrue()
+			assertThat(encoderForAllTypes.canEncode(ResolvableType.forClassWithGenerics(List::class.java, Ordered::class.java), mimeType)).isTrue()
+			assertThat(encoderForAllTypes.canEncode(ResolvableType.forClassWithGenerics(List::class.java, Pojo::class.java), mimeType)).isTrue()
+			assertThat(encoderForAllTypes.canEncode(ResolvableType.forClassWithGenerics(ArrayList::class.java, Int::class.java), mimeType)).isTrue()
+		}
+		assertThat(encoderForAllTypes.canEncode(ResolvableType.forClassWithGenerics(ArrayList::class.java, Int::class.java), MediaType.APPLICATION_PDF)).isFalse()
 	}
 
 	@Test
@@ -75,11 +95,11 @@ class KotlinSerializationProtobufEncoderTests : AbstractEncoderTests<KotlinSeria
 				pojo2,
 				pojo3
 		)
-		val pojoBytes = ProtoBuf.Default.encodeToByteArray(arrayOf(pojo1, pojo2, pojo3))
-		testEncode(input, Pojo::class.java) { step: FirstStep<DataBuffer?> ->
+		val pojoBytes = ProtoBuf.encodeToByteArray(arrayOf(pojo1, pojo2, pojo3))
+		testEncode(input, Pojo::class.java) { step: FirstStep<DataBuffer> ->
 			step
 				.consumeNextWith(expectBytes(pojoBytes)
-					.andThen { dataBuffer: DataBuffer? -> DataBufferUtils.release(dataBuffer) })
+					.andThen { dataBuffer: DataBuffer -> DataBufferUtils.release(dataBuffer) })
 				.verifyComplete()
 		}
 	}
@@ -88,10 +108,10 @@ class KotlinSerializationProtobufEncoderTests : AbstractEncoderTests<KotlinSeria
 	fun encodeMono() {
 		val pojo = Pojo("foo", "bar")
 		val input = Mono.just(pojo)
-		testEncode(input, Pojo::class.java) { step: FirstStep<DataBuffer?> ->
+		testEncode(input, Pojo::class.java) { step: FirstStep<DataBuffer> ->
 			step
-				.consumeNextWith(expectBytes(ProtoBuf.Default.encodeToByteArray(pojo))
-					.andThen { dataBuffer: DataBuffer? -> DataBufferUtils.release(dataBuffer) })
+				.consumeNextWith(expectBytes(ProtoBuf.encodeToByteArray(pojo))
+					.andThen { dataBuffer: DataBuffer -> DataBufferUtils.release(dataBuffer) })
 				.verifyComplete()
 		}
 	}

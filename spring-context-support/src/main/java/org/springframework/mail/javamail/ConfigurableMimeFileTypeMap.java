@@ -19,6 +19,7 @@ package org.springframework.mail.javamail;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Path;
 
 import jakarta.activation.FileTypeMap;
 import jakarta.activation.MimetypesFileTypeMap;
@@ -176,6 +177,11 @@ public class ConfigurableMimeFileTypeMap extends FileTypeMap implements Initiali
 	@Override
 	public String getContentType(String fileName) {
 		return getFileTypeMap().getContentType(fileName);
+	}
+
+	// @Override - on Activation 2.2
+	public String getContentType(Path path) {
+		return getFileTypeMap().getContentType(path.getFileName().toString());
 	}
 
 }

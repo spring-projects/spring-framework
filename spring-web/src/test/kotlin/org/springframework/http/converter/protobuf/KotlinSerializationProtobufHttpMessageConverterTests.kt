@@ -27,6 +27,7 @@ import org.springframework.core.Ordered
 import org.springframework.core.ResolvableType
 import org.springframework.http.MediaType
 import org.springframework.http.converter.HttpMessageNotReadableException
+import org.springframework.http.converter.cbor.KotlinSerializationCborHttpMessageConverter
 import org.springframework.web.testfixture.http.MockHttpInputMessage
 import org.springframework.web.testfixture.http.MockHttpOutputMessage
 import java.lang.reflect.ParameterizedType
@@ -59,26 +60,27 @@ class KotlinSerializationProtobufHttpMessageConverterTests {
 			fraction = 42f
 	)
 	private val serializableBeanArray = arrayOf(serializableBean)
-	private val serializableBeanArrayBody = ProtoBuf.Default.encodeToByteArray(serializableBeanArray)
+	private val serializableBeanArrayBody = ProtoBuf.encodeToByteArray(serializableBeanArray)
+
 	@Test
 	fun canReadProtobuf() {
 		for (mimeType in mediaTypes) {
 			assertThat(converter.canRead(SerializableBean::class.java, mimeType)).isTrue()
-			assertThat(converter.canRead(String::class.java, mimeType)).isTrue()
+			assertThat(converter.canRead(String::class.java, mimeType)).isFalse()
 			assertThat(converter.canRead(NotSerializableBean::class.java, mimeType)).isFalse()
 
-			assertThat(converter.canRead(Map::class.java, mimeType)).isTrue()
+			assertThat(converter.canRead(Map::class.java, mimeType)).isFalse()
 			assertThat(converter.canRead(resolvableTypeOf<Map<String, SerializableBean>>(), mimeType)).isTrue()
-			assertThat(converter.canRead(List::class.java, mimeType)).isTrue()
+			assertThat(converter.canRead(List::class.java, mimeType)).isFalse()
 			assertThat(converter.canRead(resolvableTypeOf<List<SerializableBean>>(), mimeType)).isTrue()
-			assertThat(converter.canRead(Set::class.java, mimeType)).isTrue()
+			assertThat(converter.canRead(Set::class.java, mimeType)).isFalse()
 			assertThat(converter.canRead(resolvableTypeOf<Set<SerializableBean>>(), mimeType)).isTrue()
 
-			assertThat(converter.canRead(resolvableTypeOf<List<Int>>(), mimeType)).isTrue()
-			assertThat(converter.canRead(resolvableTypeOf<ArrayList<Int>>(),mimeType)).isTrue()
+			assertThat(converter.canRead(resolvableTypeOf<List<Int>>(), mimeType)).isFalse()
+			assertThat(converter.canRead(resolvableTypeOf<ArrayList<Int>>(),mimeType)).isFalse()
 
-			assertThat(converter.canRead(resolvableTypeOf<Ordered>(), mimeType)).isTrue()
-			assertThat(converter.canRead(resolvableTypeOf<List<Ordered>>(), mimeType)).isTrue()
+			assertThat(converter.canRead(resolvableTypeOf<Ordered>(), mimeType)).isFalse()
+			assertThat(converter.canRead(resolvableTypeOf<List<Ordered>>(), mimeType)).isFalse()
 			assertThat(converter.canRead(resolvableTypeOf<OrderedImpl>(), mimeType)).isFalse()
 			assertThat(converter.canRead(resolvableTypeOf<List<OrderedImpl>>(), mimeType)).isFalse()
 		}
@@ -87,28 +89,83 @@ class KotlinSerializationProtobufHttpMessageConverterTests {
 	}
 
 	@Test
+	fun canReadProtobufForAllTypes() {
+		val converterWithAllTypes = KotlinSerializationProtobufHttpMessageConverter { true }
+
+		for (mimeType in mediaTypes) {
+			assertThat(converterWithAllTypes.canRead(SerializableBean::class.java, mimeType)).isTrue()
+			assertThat(converterWithAllTypes.canRead(String::class.java, mimeType)).isTrue()
+			assertThat(converterWithAllTypes.canRead(NotSerializableBean::class.java, mimeType)).isFalse()
+
+			assertThat(converterWithAllTypes.canRead(Map::class.java, mimeType)).isTrue()
+			assertThat(converterWithAllTypes.canRead(resolvableTypeOf<Map<String, SerializableBean>>(), mimeType)).isTrue()
+			assertThat(converterWithAllTypes.canRead(List::class.java, mimeType)).isTrue()
+			assertThat(converterWithAllTypes.canRead(resolvableTypeOf<List<SerializableBean>>(), mimeType)).isTrue()
+			assertThat(converterWithAllTypes.canRead(Set::class.java, mimeType)).isTrue()
+			assertThat(converterWithAllTypes.canRead(resolvableTypeOf<Set<SerializableBean>>(), mimeType)).isTrue()
+
+			assertThat(converterWithAllTypes.canRead(resolvableTypeOf<List<Int>>(), mimeType)).isTrue()
+			assertThat(converterWithAllTypes.canRead(resolvableTypeOf<ArrayList<Int>>(),mimeType)).isTrue()
+
+			assertThat(converterWithAllTypes.canRead(resolvableTypeOf<Ordered>(), mimeType)).isTrue()
+			assertThat(converterWithAllTypes.canRead(resolvableTypeOf<List<Ordered>>(), mimeType)).isTrue()
+			assertThat(converterWithAllTypes.canRead(resolvableTypeOf<OrderedImpl>(), mimeType)).isFalse()
+			assertThat(converterWithAllTypes.canRead(resolvableTypeOf<List<OrderedImpl>>(), mimeType)).isFalse()
+		}
+		assertThat(converterWithAllTypes.canRead(SerializableBean::class.java, MediaType.APPLICATION_JSON)).isFalse()
+		assertThat(converterWithAllTypes.canRead(resolvableTypeOf<List<Int>>(), MediaType.APPLICATION_JSON)).isFalse()
+	}
+
+	@Test
 	fun canWriteProtobuf() {
 		for (mimeType in mediaTypes) {
 			assertThat(converter.canWrite(SerializableBean::class.java, mimeType)).isTrue()
-			assertThat(converter.canWrite(String::class.java, mimeType)).isTrue()
+			assertThat(converter.canWrite(String::class.java, mimeType)).isFalse()
 			assertThat(converter.canWrite(NotSerializableBean::class.java, mimeType)).isFalse()
 
-			assertThat(converter.canWrite(Map::class.java, mimeType)).isTrue()
+			assertThat(converter.canWrite(Map::class.java, mimeType)).isFalse()
 			assertThat(converter.canWrite(resolvableTypeOf<Map<String, SerializableBean>>(), Map::class.java, mimeType)).isTrue()
-			assertThat(converter.canWrite(List::class.java, mimeType)).isTrue()
+			assertThat(converter.canWrite(List::class.java, mimeType)).isFalse()
 			assertThat(converter.canWrite(resolvableTypeOf<List<SerializableBean>>(), List::class.java, mimeType)).isTrue()
-			assertThat(converter.canWrite(Set::class.java, mimeType)).isTrue()
+			assertThat(converter.canWrite(Set::class.java, mimeType)).isFalse()
 			assertThat(converter.canWrite(resolvableTypeOf<Set<SerializableBean>>(), Set::class.java, mimeType)).isTrue()
 
-			assertThat(converter.canWrite(resolvableTypeOf<List<Int>>(), List::class.java, mimeType)).isTrue()
-			assertThat(converter.canWrite(resolvableTypeOf<ArrayList<Int>>(), List::class.java, mimeType)).isTrue()
+			assertThat(converter.canWrite(resolvableTypeOf<List<Int>>(), List::class.java, mimeType)).isFalse()
+			assertThat(converter.canWrite(resolvableTypeOf<ArrayList<Int>>(), List::class.java, mimeType)).isFalse()
 
-			assertThat(converter.canWrite(resolvableTypeOf<Ordered>(), Ordered::class.java, mimeType)).isTrue()
-			assertThat(converter.canWrite(resolvableTypeOf<Ordered>(), OrderedImpl::class.java, mimeType)).isTrue()
+			assertThat(converter.canWrite(resolvableTypeOf<Ordered>(), Ordered::class.java, mimeType)).isFalse()
+			assertThat(converter.canWrite(resolvableTypeOf<Ordered>(), OrderedImpl::class.java, mimeType)).isFalse()
 		}
 
 		assertThat(converter.canWrite(SerializableBean::class.java, MediaType.APPLICATION_JSON)).isFalse()
 		assertThat(converter.canWrite(resolvableTypeOf<List<Int>>(), List::class.java, MediaType.APPLICATION_JSON)).isFalse()
+	}
+
+	@Test
+	fun canWriteProtobufForAllTypes() {
+		val converterWithAllTypes = KotlinSerializationProtobufHttpMessageConverter { true }
+
+		for (mimeType in mediaTypes) {
+			assertThat(converterWithAllTypes.canWrite(SerializableBean::class.java, mimeType)).isTrue()
+			assertThat(converterWithAllTypes.canWrite(String::class.java, mimeType)).isTrue()
+			assertThat(converterWithAllTypes.canWrite(NotSerializableBean::class.java, mimeType)).isFalse()
+
+			assertThat(converterWithAllTypes.canWrite(Map::class.java, mimeType)).isTrue()
+			assertThat(converterWithAllTypes.canWrite(resolvableTypeOf<Map<String, SerializableBean>>(), Map::class.java, mimeType)).isTrue()
+			assertThat(converterWithAllTypes.canWrite(List::class.java, mimeType)).isTrue()
+			assertThat(converterWithAllTypes.canWrite(resolvableTypeOf<List<SerializableBean>>(), List::class.java, mimeType)).isTrue()
+			assertThat(converterWithAllTypes.canWrite(Set::class.java, mimeType)).isTrue()
+			assertThat(converterWithAllTypes.canWrite(resolvableTypeOf<Set<SerializableBean>>(), Set::class.java, mimeType)).isTrue()
+
+			assertThat(converterWithAllTypes.canWrite(resolvableTypeOf<List<Int>>(), List::class.java, mimeType)).isTrue()
+			assertThat(converterWithAllTypes.canWrite(resolvableTypeOf<ArrayList<Int>>(), List::class.java, mimeType)).isTrue()
+
+			assertThat(converterWithAllTypes.canWrite(resolvableTypeOf<Ordered>(), Ordered::class.java, mimeType)).isTrue()
+			assertThat(converterWithAllTypes.canWrite(resolvableTypeOf<Ordered>(), OrderedImpl::class.java, mimeType)).isTrue()
+		}
+
+		assertThat(converterWithAllTypes.canWrite(SerializableBean::class.java, MediaType.APPLICATION_JSON)).isFalse()
+		assertThat(converterWithAllTypes.canWrite(resolvableTypeOf<List<Int>>(), List::class.java, MediaType.APPLICATION_JSON)).isFalse()
 	}
 
 	@Test

@@ -17,19 +17,18 @@
 package org.springframework.context.annotation;
 
 /**
- * Enumeration used to determine whether JDK proxy-based or
+ * Enumeration used to determine whether JDK/CGLIB proxy-based or
  * AspectJ weaving-based advice should be applied.
  *
  * @author Chris Beams
  * @since 3.1
- * @see org.springframework.scheduling.annotation.EnableAsync#mode()
  * @see org.springframework.scheduling.annotation.AsyncConfigurationSelector#selectImports
- * @see org.springframework.transaction.annotation.EnableTransactionManagement#mode()
+ * @see org.springframework.scheduling.annotation.EnableAsync#mode()
  */
 public enum AdviceMode {
 
 	/**
-	 * JDK proxy-based advice.
+	 * JDK/CGLIB proxy-based advice.
 	 */
 	PROXY,
 

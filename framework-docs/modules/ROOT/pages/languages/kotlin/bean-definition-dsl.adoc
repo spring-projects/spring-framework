@@ -1,4 +1,0 @@
-[[kotlin-bean-definition-dsl]]
-= Bean Definition DSL
-
-See xref:core/beans/java/programmatic-bean-registration.adoc[Programmatic Bean Registration].

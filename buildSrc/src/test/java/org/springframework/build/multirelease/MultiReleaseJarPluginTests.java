@@ -26,11 +26,15 @@ import java.util.jar.Attributes;
 import java.util.jar.JarFile;
 import org.gradle.testkit.runner.BuildResult;
 import org.gradle.testkit.runner.GradleRunner;
+import org.gradle.testkit.runner.UnexpectedBuildFailure;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledForJreRange;
+import org.junit.jupiter.api.condition.JRE;
 import org.junit.jupiter.api.io.TempDir;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * Tests for {@link MultiReleaseJarPlugin}
@@ -41,10 +45,13 @@ public class MultiReleaseJarPluginTests {
 
 	private File buildFile;
 
+	private File propertiesFile;
+
 	@BeforeEach
 	void setup(@TempDir File projectDir) {
 		this.projectDir = projectDir;
 		this.buildFile = new File(this.projectDir, "build.gradle");
+		this.propertiesFile = new File(this.projectDir, "gradle.properties");
 	}
 
 	@Test
@@ -116,9 +123,47 @@ public class MultiReleaseJarPluginTests {
 		}
 	}
 
+	@Test
+	@DisabledForJreRange(max = JRE.JAVA_24, disabledReason = "'jar --validate' is available as of Java 25")
+	void validateJar() throws IOException {
+		writeBuildFile("""
+				plugins {
+					id 'java'
+					id 'org.springframework.build.multiReleaseJar'
+				}
+				version = '1.2.3'
+				tasks.withType(JavaCompile).configureEach {
+					options.release = 11
+				}
+				multiRelease { releaseVersions 17 }
+				""");
+		writeGradleProperties("""
+				org.gradle.jvmargs=-Duser.language=en
+				""");
+		writeClass("src/main/java17", "Main.java", """
+				public class Main {
+				
+					public void method() {}
+				
+				}
+				""");
+		writeClass("src/main/java", "Main.java", """
+				public class Main {}
+				""");
+		assertThatThrownBy(() ->runGradle("validateMultiReleaseJar"))
+				.isInstanceOf(UnexpectedBuildFailure.class)
+				.hasMessageContaining("entry: META-INF/versions/17/Main.class, contains a class with different api from earlier version");
+	}
+
 	private void writeBuildFile(String buildContent) throws IOException {
 		try (PrintWriter out = new PrintWriter(new FileWriter(this.buildFile))) {
 			out.print(buildContent);
+		}
+	}
+
+	private void writeGradleProperties(String properties) throws IOException {
+		try (PrintWriter out = new PrintWriter(new FileWriter(this.propertiesFile))) {
+			out.print(properties);
 		}
 	}
 

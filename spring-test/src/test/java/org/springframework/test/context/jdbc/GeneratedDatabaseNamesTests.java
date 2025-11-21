@@ -29,7 +29,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClass;
+import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClasses;
 
 /**
  * Test suite to investigate claims raised in
@@ -66,12 +66,7 @@ class GeneratedDatabaseNamesTests {
 	@Test
 	void runTestsWithGeneratedDatabaseNames() {
 		EngineTestKit.engine("junit-jupiter")
-			.selectors(
-					selectClass(TestClass1A.class),
-					selectClass(TestClass1B.class),
-					selectClass(TestClass2A.class),
-					selectClass(TestClass2B.class)
-				)
+			.selectors(selectClasses(TestClass1A.class, TestClass1B.class, TestClass2A.class, TestClass2B.class))
 			.execute()
 			.testEvents()
 			.assertStatistics(stats -> stats.started(4).succeeded(4).failed(0));

@@ -16,6 +16,8 @@
 
 package org.springframework.transaction.support;
 
+import java.util.function.Consumer;
+
 import org.jspecify.annotations.Nullable;
 
 import org.springframework.transaction.TransactionStatus;
@@ -28,8 +30,10 @@ import org.springframework.transaction.TransactionStatus;
  * @author Juergen Hoeller
  * @since 28.03.2003
  * @see TransactionTemplate
+ * @deprecated as of 7.0, superseded by {@link TransactionOperations#executeWithoutResult(Consumer)}
  */
-public abstract class TransactionCallbackWithoutResult implements TransactionCallback<Object> {
+@Deprecated(since = "7.0")
+public abstract class TransactionCallbackWithoutResult implements TransactionCallback<@Nullable Object> {
 
 	@Override
 	public final @Nullable Object doInTransaction(TransactionStatus status) {

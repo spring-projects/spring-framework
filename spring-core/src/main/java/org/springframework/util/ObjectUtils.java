@@ -21,6 +21,7 @@ import java.nio.charset.Charset;
 import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HexFormat;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -695,9 +696,9 @@ public abstract class ObjectUtils {
 
 	/**
 	 * Return a String representation of the contents of the specified array.
-	 * <p>The String representation consists of a list of the array's elements,
-	 * enclosed in curly braces ({@code "{}"}). Adjacent elements are separated
-	 * by the characters {@code ", "} (a comma followed by a space).
+	 * <p>As of 7.0, the String representation is a hex-encoded string enclosed
+	 * in curly braces ({@code "{}"}). The String consists of 2 hexadecimal
+	 * chars per element, and without a delimiter between adjacent elements.
 	 * Returns a {@code "null"} String if {@code array} is {@code null}.
 	 * @param array the array to build a String representation for
 	 * @return a String representation of {@code array}
@@ -709,11 +710,7 @@ public abstract class ObjectUtils {
 		if (array.length == 0) {
 			return EMPTY_ARRAY;
 		}
-		StringJoiner stringJoiner = new StringJoiner(ARRAY_ELEMENT_SEPARATOR, ARRAY_START, ARRAY_END);
-		for (byte b : array) {
-			stringJoiner.add(String.valueOf(b));
-		}
-		return stringJoiner.toString();
+		return ARRAY_START + HexFormat.of().formatHex(array) + ARRAY_END;
 	}
 
 	/**

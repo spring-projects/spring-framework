@@ -19,6 +19,7 @@ package org.springframework.test.web.servlet.samples.client.standalone.resultmat
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
+import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 
@@ -35,8 +36,8 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.CREATED;
+import static org.springframework.http.HttpStatus.EXPECTATION_FAILED;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
-import static org.springframework.http.HttpStatus.I_AM_A_TEAPOT;
 import static org.springframework.http.HttpStatus.NOT_IMPLEMENTED;
 
 /**
@@ -55,11 +56,11 @@ class StatusAssertionTests {
 
 	@Test
 	void statusInt() {
-		testClient.get().uri("/teaPot").exchange().expectStatus().isEqualTo(I_AM_A_TEAPOT.value());
+		testClient.get().uri("/teaPot").exchange().expectStatus().isEqualTo(EXPECTATION_FAILED.value());
 		testClient.get().uri("/created").exchange().expectStatus().isEqualTo(CREATED.value());
 		testClient.get().uri("/createdWithComposedAnnotation").exchange().expectStatus().isEqualTo(CREATED.value());
 		testClient.get().uri("/badRequest").exchange().expectStatus().isEqualTo(BAD_REQUEST.value());
-		testClient.get().uri("/throwsException").exchange().expectStatus().isEqualTo(I_AM_A_TEAPOT.value());
+		testClient.get().uri("/throwsException").exchange().expectStatus().isEqualTo(EXPECTATION_FAILED.value());
 	}
 
 	@Test
@@ -71,7 +72,8 @@ class StatusAssertionTests {
 
 	@Test
 	void matcher() {
-		testClient.get().uri("/badRequest").exchange().expectStatus().value(equalTo(BAD_REQUEST.value()));
+		testClient.get().uri("/badRequest").exchange().expectStatus()
+				.value(status -> MatcherAssert.assertThat(status, equalTo(BAD_REQUEST.value())));
 	}
 
 
@@ -88,7 +90,7 @@ class StatusAssertionTests {
 	}
 
 	@RestController
-	@ResponseStatus(I_AM_A_TEAPOT)
+	@ResponseStatus(EXPECTATION_FAILED)
 	private static class StatusController {
 
 		@RequestMapping("/teaPot")

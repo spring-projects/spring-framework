@@ -151,9 +151,8 @@ public class ReloadableResourceBundleMessageSource extends AbstractResourceBased
 	 * locked in a refresh attempt for a specific cached properties file whereas
 	 * other threads keep returning the old properties for the time being, until
 	 * the refresh attempt has completed.
-	 * <p>Default is "true": this behavior is new as of Spring Framework 4.1,
-	 * minimizing contention between threads. If you prefer the old behavior,
-	 * i.e. to fully block on refresh, switch this flag to "false".
+	 * <p>Default is "true", minimizing contention between threads. If you prefer
+	 * the old behavior, i.e. to fully block on refresh, switch this flag to "false".
 	 * @since 4.1
 	 * @see #setCacheSeconds
 	 */

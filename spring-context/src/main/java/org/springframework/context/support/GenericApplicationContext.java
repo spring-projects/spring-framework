@@ -81,8 +81,6 @@ import org.springframework.util.Assert;
  * GenericApplicationContext ctx = new GenericApplicationContext();
  * XmlBeanDefinitionReader xmlReader = new XmlBeanDefinitionReader(ctx);
  * xmlReader.loadBeanDefinitions(new ClassPathResource("applicationContext.xml"));
- * PropertiesBeanDefinitionReader propReader = new PropertiesBeanDefinitionReader(ctx);
- * propReader.loadBeanDefinitions(new ClassPathResource("otherBeans.properties"));
  * ctx.refresh();
  *
  * MyBean myBean = (MyBean) ctx.getBean("myBean");
@@ -104,7 +102,6 @@ import org.springframework.util.Assert;
  * @see #registerBeanDefinition
  * @see #refresh()
  * @see org.springframework.beans.factory.xml.XmlBeanDefinitionReader
- * @see org.springframework.beans.factory.support.PropertiesBeanDefinitionReader
  */
 public class GenericApplicationContext extends AbstractApplicationContext implements BeanDefinitionRegistry {
 

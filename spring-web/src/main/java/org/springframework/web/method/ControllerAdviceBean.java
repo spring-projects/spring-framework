@@ -228,14 +228,26 @@ public class ControllerAdviceBean implements Ordered {
 	 * instances.
 	 * <p>Note that the {@code ControllerAdviceBean} instances in the returned list
 	 * are sorted using {@link OrderComparator#sort(List)}.
+	 * @see #findAnnotatedBeans(ListableBeanFactory)
+	 */
+	public static List<ControllerAdviceBean> findAnnotatedBeans(ApplicationContext context) {
+		return findAnnotatedBeans((ListableBeanFactory) context);
+	}
+
+	/**
+	 * Find beans annotated with {@link ControllerAdvice @ControllerAdvice} in the
+	 * given {@link ListableBeanFactory} and wrap them as {@code ControllerAdviceBean}
+	 * instances.
+	 * <p>Note that the {@code ControllerAdviceBean} instances in the returned list
+	 * are sorted using {@link OrderComparator#sort(List)}.
+	 * @since 7.0
 	 * @see #getOrder()
 	 * @see OrderComparator
 	 * @see Ordered
 	 */
-	public static List<ControllerAdviceBean> findAnnotatedBeans(ApplicationContext context) {
-		ListableBeanFactory beanFactory = context;
-		if (context instanceof ConfigurableApplicationContext cac) {
-			// Use internal BeanFactory for potential downcast to ConfigurableBeanFactory above
+	public static List<ControllerAdviceBean> findAnnotatedBeans(ListableBeanFactory beanFactory) {
+		if (beanFactory instanceof ConfigurableApplicationContext cac) {
+			// Use internal BeanFactory for potential downcast to ConfigurableBeanFactory in getOrder().
 			beanFactory = cac.getBeanFactory();
 		}
 		List<ControllerAdviceBean> adviceBeans = new ArrayList<>();

@@ -78,7 +78,6 @@ class ErrorResponseExceptionTests {
 
 	@Test
 	void httpMediaTypeNotSupportedException() {
-
 		List<MediaType> mediaTypes =
 				Arrays.asList(MediaType.APPLICATION_JSON, MediaType.APPLICATION_CBOR);
 
@@ -96,7 +95,6 @@ class ErrorResponseExceptionTests {
 
 	@Test
 	void httpMediaTypeNotSupportedExceptionWithParseError() {
-
 		ErrorResponse ex = new HttpMediaTypeNotSupportedException(
 				"Could not parse Accept header: Invalid mime type \"foo\": does not contain '/'");
 
@@ -109,7 +107,6 @@ class ErrorResponseExceptionTests {
 
 	@Test
 	void httpMediaTypeNotAcceptableException() {
-
 		List<MediaType> mediaTypes = Arrays.asList(MediaType.APPLICATION_JSON, MediaType.APPLICATION_CBOR);
 		HttpMediaTypeNotAcceptableException ex = new HttpMediaTypeNotAcceptableException(mediaTypes);
 
@@ -123,7 +120,6 @@ class ErrorResponseExceptionTests {
 
 	@Test
 	void httpMediaTypeNotAcceptableExceptionWithParseError() {
-
 		ErrorResponse ex = new HttpMediaTypeNotAcceptableException(
 				"Could not parse Accept header: Invalid mime type \"foo\": does not contain '/'");
 
@@ -136,7 +132,6 @@ class ErrorResponseExceptionTests {
 
 	@Test
 	void asyncRequestTimeoutException() {
-
 		ErrorResponse ex = new AsyncRequestTimeoutException();
 		assertDetailMessageCode(ex, null, null);
 
@@ -148,7 +143,6 @@ class ErrorResponseExceptionTests {
 
 	@Test
 	void httpRequestMethodNotSupportedException() {
-
 		HttpRequestMethodNotSupportedException ex =
 				new HttpRequestMethodNotSupportedException("PUT", Arrays.asList("GET", "POST"));
 
@@ -162,7 +156,6 @@ class ErrorResponseExceptionTests {
 
 	@Test
 	void missingRequestHeaderException() {
-
 		MissingRequestHeaderException ex = new MissingRequestHeaderException("Authorization", this.methodParameter);
 
 		assertStatus(ex, HttpStatus.BAD_REQUEST);
@@ -174,7 +167,6 @@ class ErrorResponseExceptionTests {
 
 	@Test
 	void missingServletRequestParameterException() {
-
 		MissingServletRequestParameterException ex = new MissingServletRequestParameterException("query", "String");
 
 		assertStatus(ex, HttpStatus.BAD_REQUEST);
@@ -186,9 +178,7 @@ class ErrorResponseExceptionTests {
 
 	@Test
 	void missingMatrixVariableException() {
-
 		MissingMatrixVariableException ex = new MissingMatrixVariableException("region", this.methodParameter);
-
 
 		assertStatus(ex, HttpStatus.BAD_REQUEST);
 		assertDetail(ex, "Required path parameter 'region' is not present.");
@@ -199,7 +189,6 @@ class ErrorResponseExceptionTests {
 
 	@Test
 	void missingPathVariableException() {
-
 		MissingPathVariableException ex = new MissingPathVariableException("id", this.methodParameter);
 
 		assertStatus(ex, HttpStatus.INTERNAL_SERVER_ERROR);
@@ -210,8 +199,18 @@ class ErrorResponseExceptionTests {
 	}
 
 	@Test
-	void missingRequestCookieException() {
+	void missingPathVariableExceptionAfterConversion() {
+		MissingPathVariableException ex = new MissingPathVariableException("id", this.methodParameter, true);
 
+		assertStatus(ex, HttpStatus.BAD_REQUEST);
+		assertDetail(ex, "Required path variable 'id' is not present.");
+		assertDetailMessageCode(ex, null, new Object[] {ex.getVariableName()});
+
+		assertThat(ex.getHeaders().isEmpty()).isTrue();
+	}
+
+	@Test
+	void missingRequestCookieException() {
 		MissingRequestCookieException ex = new MissingRequestCookieException("oreo", this.methodParameter);
 
 		assertStatus(ex, HttpStatus.BAD_REQUEST);
@@ -223,7 +222,6 @@ class ErrorResponseExceptionTests {
 
 	@Test
 	void unsatisfiedServletRequestParameterException() {
-
 		UnsatisfiedServletRequestParameterException ex = new UnsatisfiedServletRequestParameterException(
 				new String[] { "foo=bar", "bar=baz" }, Collections.singletonMap("q", new String[] {"1"}));
 
@@ -236,7 +234,6 @@ class ErrorResponseExceptionTests {
 
 	@Test
 	void missingServletRequestPartException() {
-
 		MissingServletRequestPartException ex = new MissingServletRequestPartException("file");
 
 		assertStatus(ex, HttpStatus.BAD_REQUEST);
@@ -248,7 +245,6 @@ class ErrorResponseExceptionTests {
 
 	@Test
 	void methodArgumentNotValidException() {
-
 		ValidationTestHelper testHelper = new ValidationTestHelper(MethodArgumentNotValidException.class);
 		BindingResult result = testHelper.bindingResult();
 
@@ -280,7 +276,6 @@ class ErrorResponseExceptionTests {
 
 	@Test
 	void unsupportedMediaTypeStatusException() {
-
 		List<MediaType> mediaTypes =
 				Arrays.asList(MediaType.APPLICATION_JSON, MediaType.APPLICATION_CBOR);
 
@@ -298,7 +293,6 @@ class ErrorResponseExceptionTests {
 
 	@Test
 	void unsupportedMediaTypeStatusExceptionWithParseError() {
-
 		ErrorResponse ex = new UnsupportedMediaTypeStatusException(
 				"Could not parse Accept header: Invalid mime type \"foo\": does not contain '/'");
 
@@ -311,7 +305,6 @@ class ErrorResponseExceptionTests {
 
 	@Test
 	void notAcceptableStatusException() {
-
 		List<MediaType> mediaTypes = Arrays.asList(MediaType.APPLICATION_JSON, MediaType.APPLICATION_CBOR);
 		NotAcceptableStatusException ex = new NotAcceptableStatusException(mediaTypes);
 
@@ -325,7 +318,6 @@ class ErrorResponseExceptionTests {
 
 	@Test
 	void notAcceptableStatusExceptionWithParseError() {
-
 		ErrorResponse ex = new NotAcceptableStatusException(
 				"Could not parse Accept header: Invalid mime type \"foo\": does not contain '/'");
 
@@ -338,7 +330,6 @@ class ErrorResponseExceptionTests {
 
 	@Test
 	void serverErrorException() {
-
 		ServerErrorException ex = new ServerErrorException("Failure", null);
 
 		assertStatus(ex, HttpStatus.INTERNAL_SERVER_ERROR);
@@ -350,7 +341,6 @@ class ErrorResponseExceptionTests {
 
 	@Test
 	void missingRequestValueException() {
-
 		MissingRequestValueException ex =
 				new MissingRequestValueException("foo", String.class, "header", this.methodParameter);
 
@@ -363,7 +353,6 @@ class ErrorResponseExceptionTests {
 
 	@Test
 	void unsatisfiedRequestParameterException() {
-
 		UnsatisfiedRequestParameterException ex =
 				new UnsatisfiedRequestParameterException(
 						Arrays.asList("foo=bar", "bar=baz"),
@@ -378,7 +367,6 @@ class ErrorResponseExceptionTests {
 
 	@Test
 	void webExchangeBindException() {
-
 		ValidationTestHelper testHelper = new ValidationTestHelper(WebExchangeBindException.class);
 		BindingResult result = testHelper.bindingResult();
 
@@ -393,7 +381,6 @@ class ErrorResponseExceptionTests {
 
 	@Test
 	void methodNotAllowedException() {
-
 		List<HttpMethod> supportedMethods = Arrays.asList(HttpMethod.GET, HttpMethod.POST);
 		MethodNotAllowedException ex = new MethodNotAllowedException(HttpMethod.PUT, supportedMethods);
 
@@ -407,7 +394,6 @@ class ErrorResponseExceptionTests {
 
 	@Test
 	void methodNotAllowedExceptionWithoutSupportedMethods() {
-
 		MethodNotAllowedException ex = new MethodNotAllowedException(HttpMethod.PUT, Collections.emptyList());
 
 		assertStatus(ex, HttpStatus.METHOD_NOT_ALLOWED);
@@ -417,9 +403,8 @@ class ErrorResponseExceptionTests {
 		assertThat(ex.getHeaders().isEmpty()).isTrue();
 	}
 
-	@Test // gh-30300
+	@Test  // gh-30300
 	void responseStatusException() {
-
 		Locale locale = Locale.UK;
 		LocaleContextHolder.setLocale(locale);
 
@@ -519,7 +504,6 @@ class ErrorResponseExceptionTests {
 			assertThat(BindErrorUtils.resolve(errors, this.messageSource, Locale.UK)).hasSize(4)
 					.containsValues("Bean A message", "Bean B message", "name is required", "age is below minimum");
 		}
-
 	}
 
 }

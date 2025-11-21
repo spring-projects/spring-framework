@@ -18,6 +18,7 @@ package org.springframework.http.converter.json;
 
 import java.net.URI;
 
+import org.json.JSONException;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 import tools.jackson.databind.ObjectMapper;
@@ -42,7 +43,7 @@ class ProblemDetailJacksonMixinTests {
 
 
 	@Test
-	void writeStatusAndHeaders() {
+	void writeStatusAndHeaders() throws Exception {
 		ProblemDetail detail = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "Missing header");
 		testWrite(detail,
 				"""
@@ -54,7 +55,7 @@ class ProblemDetailJacksonMixinTests {
 	}
 
 	@Test
-	void writeCustomProperty() {
+	void writeCustomProperty() throws Exception {
 		ProblemDetail detail = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "Missing header");
 		detail.setProperty("host", "abc.org");
 		detail.setProperty("user", null);
@@ -109,7 +110,7 @@ class ProblemDetailJacksonMixinTests {
 		assertThat(detail.getProperties()).containsEntry("host", "abc.org");
 	}
 
-	private void testWrite(ProblemDetail problemDetail, String expected) {
+	private void testWrite(ProblemDetail problemDetail, String expected) throws JSONException {
 		String output = this.mapper.writeValueAsString(problemDetail);
 		JSONAssert.assertEquals(expected, output, false);
 	}

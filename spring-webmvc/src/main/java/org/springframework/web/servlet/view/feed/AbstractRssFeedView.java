@@ -44,7 +44,11 @@ import org.springframework.http.MediaType;
  * @since 3.0
  * @see #buildFeedMetadata
  * @see #buildFeedItems
+ * @deprecated since 7.0. Libraries or applications can provide their own {@code View}
+ * class or perform rendering in web handlers directly.
  */
+@Deprecated(since = "7.0", forRemoval = true)
+@SuppressWarnings("removal")
 public abstract class AbstractRssFeedView extends AbstractFeedView<Channel> {
 
 	public AbstractRssFeedView() {

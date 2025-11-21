@@ -46,7 +46,7 @@ public interface TransactionOperations {
 	 * @throws RuntimeException if thrown by the TransactionCallback
 	 * @see #executeWithoutResult(Consumer)
 	 */
-	<T> @Nullable T execute(TransactionCallback<T> action) throws TransactionException;
+	<T extends @Nullable Object> T execute(TransactionCallback<T> action) throws TransactionException;
 
 	/**
 	 * Execute the action specified by the given {@link Runnable} within a transaction.
@@ -64,7 +64,7 @@ public interface TransactionOperations {
 	 * @see TransactionCallbackWithoutResult
 	 */
 	default void executeWithoutResult(Consumer<TransactionStatus> action) throws TransactionException {
-		execute(status -> {
+		this.<@Nullable Object> execute(status -> {
 			action.accept(status);
 			return null;
 		});

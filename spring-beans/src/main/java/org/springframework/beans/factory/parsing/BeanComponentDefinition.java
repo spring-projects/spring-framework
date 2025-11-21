@@ -37,6 +37,11 @@ import org.springframework.beans.factory.config.BeanReference;
  */
 public class BeanComponentDefinition extends BeanDefinitionHolder implements ComponentDefinition {
 
+	private static final BeanDefinition[] EMPTY_BEAN_DEFINITION_ARRAY = new BeanDefinition[0];
+
+	private static final BeanReference[] EMPTY_BEAN_REFERENCE_ARRAY = new BeanReference[0];
+
+
 	private final BeanDefinition[] innerBeanDefinitions;
 
 	private final BeanReference[] beanReferences;
@@ -84,8 +89,8 @@ public class BeanComponentDefinition extends BeanDefinitionHolder implements Com
 				references.add(beanRef);
 			}
 		}
-		this.innerBeanDefinitions = innerBeans.toArray(new BeanDefinition[0]);
-		this.beanReferences = references.toArray(new BeanReference[0]);
+		this.innerBeanDefinitions = innerBeans.toArray(EMPTY_BEAN_DEFINITION_ARRAY);
+		this.beanReferences = references.toArray(EMPTY_BEAN_REFERENCE_ARRAY);
 	}
 
 

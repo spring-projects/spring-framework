@@ -206,6 +206,8 @@ final class DefaultWebClient implements WebClient {
 
 	private class DefaultRequestBodyUriSpec implements RequestBodyUriSpec {
 
+		private static final Object NO_VERSION = new Object();
+
 		private final HttpMethod httpMethod;
 
 		private @Nullable URI uri;
@@ -335,8 +337,8 @@ final class DefaultWebClient implements WebClient {
 		}
 
 		@Override
-		public DefaultRequestBodyUriSpec apiVersion(Object version) {
-			this.apiVersion = version;
+		public DefaultRequestBodyUriSpec apiVersion(@Nullable Object version) {
+			this.apiVersion = (version != null ? version : NO_VERSION);
 			return this;
 		}
 
@@ -503,7 +505,15 @@ final class DefaultWebClient implements WebClient {
 		}
 
 		private @Nullable Object getApiVersionOrDefault() {
-			return (this.apiVersion != null ? this.apiVersion : DefaultWebClient.this.defaultApiVersion);
+			if (this.apiVersion == null) {
+				return DefaultWebClient.this.defaultApiVersion;
+			}
+			else if (this.apiVersion == NO_VERSION) {
+				return null;
+			}
+			else {
+				return this.apiVersion;
+			}
 		}
 
 		private void initHeaders(HttpHeaders out) {

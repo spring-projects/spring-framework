@@ -21,7 +21,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
 
-import org.hamcrest.Matcher;
 import org.jspecify.annotations.Nullable;
 
 import org.springframework.http.CacheControl;
@@ -30,7 +29,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.util.CollectionUtils;
 
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.springframework.test.util.AssertionErrors.assertEquals;
 import static org.springframework.test.util.AssertionErrors.assertNotNull;
 import static org.springframework.test.util.AssertionErrors.assertTrue;
@@ -63,6 +61,10 @@ public abstract class AbstractHeaderAssertions <E, R> {
 	 */
 	protected E getExchangeResult() {
 		return this.exchangeResult;
+	}
+
+	protected R getResponseSpec() {
+		return this.responseSpec;
 	}
 
 	/**
@@ -155,40 +157,12 @@ public abstract class AbstractHeaderAssertions <E, R> {
 	}
 
 	/**
-	 * Assert the first value of the response header with a Hamcrest {@link Matcher}.
-	 * @param name the header name
-	 * @param matcher the matcher to use
-	 */
-	public R value(String name, Matcher<? super String> matcher) {
-		String value = getResponseHeaders().getFirst(name);
-		assertWithDiagnostics(() -> {
-			String message = getMessage(name);
-			assertThat(message, value, matcher);
-		});
-		return this.responseSpec;
-	}
-
-	/**
-	 * Assert all values of the response header with a Hamcrest {@link Matcher}.
-	 * @param name the header name
-	 * @param matcher the matcher to use
-	 */
-	public R values(String name, Matcher<? super Iterable<String>> matcher) {
-		List<String> values = getResponseHeaders().get(name);
-		assertWithDiagnostics(() -> {
-			String message = getMessage(name);
-			assertThat(message, values, matcher);
-		});
-		return this.responseSpec;
-	}
-
-	/**
 	 * Consume the first value of the named response header.
 	 * @param name the header name
 	 * @param consumer the consumer to use
 	 */
 	public R value(String name, Consumer<String> consumer) {
-		String value = getRequiredValue(name);
+		String value = getResponseHeaders().getFirst(name);
 		assertWithDiagnostics(() -> consumer.accept(value));
 		return this.responseSpec;
 	}
@@ -199,7 +173,7 @@ public abstract class AbstractHeaderAssertions <E, R> {
 	 * @param consumer the consumer to use
 	 */
 	public R values(String name, Consumer<List<String>> consumer) {
-		List<String> values = getRequiredValues(name);
+		List<String> values = getResponseHeaders().get(name);
 		assertWithDiagnostics(() -> consumer.accept(values));
 		return this.responseSpec;
 	}
@@ -323,7 +297,7 @@ public abstract class AbstractHeaderAssertions <E, R> {
 		throw new IllegalStateException("This code path should not be reachable");
 	}
 
-	private static String getMessage(String headerName) {
+	protected String getMessage(String headerName) {
 		return "Response header '" + headerName + "'";
 	}
 }

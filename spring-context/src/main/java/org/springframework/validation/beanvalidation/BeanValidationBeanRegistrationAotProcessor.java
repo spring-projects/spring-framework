@@ -61,7 +61,7 @@ import org.springframework.util.ReflectionUtils;
  */
 class BeanValidationBeanRegistrationAotProcessor implements BeanRegistrationAotProcessor {
 
-	private static final boolean beanValidationPresent = ClassUtils.isPresent(
+	private static final boolean BEAN_VALIDATION_PRESENT = ClassUtils.isPresent(
 			"jakarta.validation.Validation", BeanValidationBeanRegistrationAotProcessor.class.getClassLoader());
 
 	private static final Log logger = LogFactory.getLog(BeanValidationBeanRegistrationAotProcessor.class);
@@ -69,7 +69,7 @@ class BeanValidationBeanRegistrationAotProcessor implements BeanRegistrationAotP
 
 	@Override
 	public @Nullable BeanRegistrationAotContribution processAheadOfTime(RegisteredBean registeredBean) {
-		if (beanValidationPresent) {
+		if (BEAN_VALIDATION_PRESENT) {
 			return BeanValidationDelegate.processAheadOfTime(registeredBean);
 		}
 		return null;

@@ -17,6 +17,8 @@
 package org.springframework.resilience.annotation;
 
 import java.lang.reflect.Method;
+import java.util.Collections;
+import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -31,9 +33,11 @@ import org.springframework.aop.interceptor.ConcurrencyThrottleInterceptor;
 import org.springframework.aop.support.ComposablePointcut;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
 import org.springframework.aop.support.annotation.AnnotationMatchingPointcut;
+import org.springframework.context.EmbeddedValueResolverAware;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.util.Assert;
-import org.springframework.util.ConcurrentReferenceHashMap;
+import org.springframework.util.StringUtils;
+import org.springframework.util.StringValueResolver;
 
 /**
  * A convenient {@link org.springframework.beans.factory.config.BeanPostProcessor
@@ -41,10 +45,15 @@ import org.springframework.util.ConcurrentReferenceHashMap;
  * annotated with {@link ConcurrencyLimit @ConcurrencyLimit}.
  *
  * @author Juergen Hoeller
+ * @author Hyunsang Han
  * @since 7.0
  */
 @SuppressWarnings("serial")
-public class ConcurrencyLimitBeanPostProcessor extends AbstractBeanFactoryAwareAdvisingPostProcessor {
+public class ConcurrencyLimitBeanPostProcessor extends AbstractBeanFactoryAwareAdvisingPostProcessor
+		implements EmbeddedValueResolverAware {
+
+	private @Nullable StringValueResolver embeddedValueResolver;
+
 
 	public ConcurrencyLimitBeanPostProcessor() {
 		setBeforeExistingAdvisors(true);
@@ -57,57 +66,82 @@ public class ConcurrencyLimitBeanPostProcessor extends AbstractBeanFactoryAwareA
 	}
 
 
-	private static class ConcurrencyLimitInterceptor implements MethodInterceptor {
+	@Override
+	public void setEmbeddedValueResolver(StringValueResolver resolver) {
+		this.embeddedValueResolver = resolver;
+	}
 
-		private final Map<Object, ConcurrencyThrottleCache> cachePerInstance =
-				new ConcurrentReferenceHashMap<>(16, ConcurrentReferenceHashMap.ReferenceType.WEAK);
+
+	private class ConcurrencyLimitInterceptor implements MethodInterceptor {
+
+		private final Map<Object, ConcurrencyThrottleHolder> holderPerInstance =
+				Collections.synchronizedMap(new IdentityHashMap<>(16));
 
 		@Override
 		public @Nullable Object invoke(MethodInvocation invocation) throws Throwable {
 			Method method = invocation.getMethod();
-			Object target = invocation.getThis();
-			Class<?> targetClass = (target != null ? target.getClass() : method.getDeclaringClass());
-			if (target == null && invocation instanceof ProxyMethodInvocation methodInvocation) {
-				// Allow validation for AOP proxy without a target
-				target = methodInvocation.getProxy();
+			Object instance = invocation.getThis();
+			Class<?> targetClass = (instance != null ? instance.getClass() : method.getDeclaringClass());
+			if (invocation instanceof ProxyMethodInvocation methodInvocation) {
+				// Apply concurrency throttling at the AOP proxy level (independent of target instance)
+				instance = methodInvocation.getProxy();
 			}
-			Assert.state(target != null, "Target must not be null");
+			Assert.state(instance != null, "Unique instance required - use a ProxyMethodInvocation");
 
-			ConcurrencyThrottleCache cache = this.cachePerInstance.computeIfAbsent(target,
-					k -> new ConcurrencyThrottleCache());
-			MethodInterceptor interceptor = cache.methodInterceptors.get(method);
+			// Build unique ConcurrencyThrottleHolder instance per target object
+			ConcurrencyThrottleHolder holder = this.holderPerInstance.computeIfAbsent(instance,
+					k -> new ConcurrencyThrottleHolder());
+
+			// Determine method-specific interceptor instance with isolated concurrency count
+			MethodInterceptor interceptor = holder.methodInterceptors.get(method);
 			if (interceptor == null) {
-				synchronized (cache) {
-					interceptor = cache.methodInterceptors.get(method);
+				synchronized (holder) {
+					interceptor = holder.methodInterceptors.get(method);
 					if (interceptor == null) {
 						boolean perMethod = false;
-						ConcurrencyLimit limit = AnnotatedElementUtils.getMergedAnnotation(method, ConcurrencyLimit.class);
-						if (limit != null) {
+						ConcurrencyLimit annotation = AnnotatedElementUtils.getMergedAnnotation(method, ConcurrencyLimit.class);
+						if (annotation != null) {
 							perMethod = true;
 						}
 						else {
-							interceptor = cache.classInterceptor;
+							interceptor = holder.classInterceptor;
 							if (interceptor == null) {
-								limit = AnnotatedElementUtils.getMergedAnnotation(targetClass, ConcurrencyLimit.class);
+								annotation = AnnotatedElementUtils.getMergedAnnotation(targetClass, ConcurrencyLimit.class);
 							}
 						}
 						if (interceptor == null) {
-							Assert.state(limit != null, "No @ConcurrencyLimit annotation found");
-							interceptor = new ConcurrencyThrottleInterceptor(limit.value());
+							Assert.state(annotation != null, "No @ConcurrencyLimit annotation found");
+							int concurrencyLimit = parseInt(annotation.limit(), annotation.limitString());
+							if (concurrencyLimit < -1) {
+								throw new IllegalStateException(annotation + " must be configured with a valid limit");
+							}
+							interceptor = new ConcurrencyThrottleInterceptor(concurrencyLimit);
 							if (!perMethod) {
-								cache.classInterceptor = interceptor;
+								holder.classInterceptor = interceptor;
 							}
 						}
-						cache.methodInterceptors.put(method, interceptor);
+						holder.methodInterceptors.put(method, interceptor);
 					}
 				}
 			}
 			return interceptor.invoke(invocation);
 		}
+
+		private int parseInt(int value, String stringValue) {
+			if (StringUtils.hasText(stringValue)) {
+				if (embeddedValueResolver != null) {
+					stringValue = embeddedValueResolver.resolveStringValue(stringValue);
+				}
+				if (StringUtils.hasText(stringValue)) {
+					return Integer.parseInt(stringValue);
+				}
+			}
+			return value;
+		}
 	}
 
 
-	private static class ConcurrencyThrottleCache {
+	private static class ConcurrencyThrottleHolder {
 
 		final Map<Method, MethodInterceptor> methodInterceptors = new ConcurrentHashMap<>();
 

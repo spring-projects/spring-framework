@@ -61,7 +61,7 @@ public interface ProxyMethodInvocation extends MethodInvocation {
 	MethodInvocation invocableClone(@Nullable Object... arguments);
 
 	/**
-	 * Set the arguments to be used on subsequent invocations in the any advice
+	 * Set the arguments to be used on subsequent invocations in any advice
 	 * in this chain.
 	 * @param arguments the argument array
 	 */

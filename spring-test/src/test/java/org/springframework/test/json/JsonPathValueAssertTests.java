@@ -30,7 +30,6 @@ import org.junit.jupiter.api.Test;
 import tools.jackson.databind.json.JsonMapper;
 
 import org.springframework.http.converter.json.JacksonJsonHttpMessageConverter;
-import org.springframework.test.http.HttpMessageContentConverter;
 import org.springframework.util.StringUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -205,8 +204,8 @@ class JsonPathValueAssertTests {
 	@Nested
 	class ConvertToTests {
 
-		private static final HttpMessageContentConverter jsonContentConverter = HttpMessageContentConverter.of(
-				new JacksonJsonHttpMessageConverter(new JsonMapper()));
+		private static final JsonConverterDelegate jsonContentConverter =
+				JsonConverterDelegate.of(List.of(new JacksonJsonHttpMessageConverter(new JsonMapper())));
 
 		@Test
 		void convertToWithoutHttpMessageConverter() {

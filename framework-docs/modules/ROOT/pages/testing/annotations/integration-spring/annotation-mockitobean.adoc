@@ -77,14 +77,35 @@ exactly one candidate bean exists.
 
 [TIP]
 ====
-Only _singleton_ beans can be overridden. Any attempt to override a non-singleton bean
-will result in an exception.
+As stated in the documentation for Mockito, there are times when using `Mockito.when()` is
+inappropriate for stubbing a spy – for example, if calling a real method on a spy results
+in undesired side effects.
+
+To avoid such undesired side effects, consider using
+`Mockito.doReturn(...).when(spy)...`, `Mockito.doThrow(...).when(spy)...`,
+`Mockito.doNothing().when(spy)...`, and similar methods.
+====
+
+[NOTE]
+====
+When using `@MockitoBean` to mock a non-singleton bean, the non-singleton bean will be
+replaced with a singleton mock, and the corresponding bean definition will be converted
+to a `singleton`. Consequently, if you mock a `prototype` or scoped bean, the mock will
+be treated as a `singleton`.
+
+Similarly, when using `@MockitoSpyBean` to create a spy for a non-singleton bean, the
+corresponding bean definition will be converted to a `singleton`. Consequently, if you
+create a spy for a `prototype` or scoped bean, the spy will be treated as a `singleton`.
 
 When using `@MockitoBean` to mock a bean created by a `FactoryBean`, the `FactoryBean`
 will be replaced with a singleton mock of the type of object created by the `FactoryBean`.
 
-When using `@MockitoSpyBean` to create a spy for a `FactoryBean`, a spy will be created
-for the object created by the `FactoryBean`, not for the `FactoryBean` itself.
+Similarly, when using `@MockitoSpyBean` to create a spy for a `FactoryBean`, a spy will
+be created for the object created by the `FactoryBean`, not for the `FactoryBean` itself.
+
+Furthermore, `@MockitoSpyBean` cannot be used to spy on a scoped proxy — for example, a
+bean annotated with `@Scope(proxyMode = ScopedProxyMode.TARGET_CLASS)`. Any attempt to do
+so will fail with an exception.
 ====
 
 [NOTE]

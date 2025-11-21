@@ -36,6 +36,8 @@ import org.springframework.core.type.MethodMetadata;
 import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 
 /**
  * Represents a user-defined {@link Configuration @Configuration} class.
@@ -66,7 +68,7 @@ final class ConfigurationClass {
 	private final Map<String, Class<? extends BeanDefinitionReader>> importedResources =
 			new LinkedHashMap<>();
 
-	private final Map<String, BeanRegistrar> beanRegistrars = new LinkedHashMap<>();
+	private final MultiValueMap<String, BeanRegistrar> beanRegistrars = new LinkedMultiValueMap<>();
 
 	private final Map<ImportBeanDefinitionRegistrar, AnnotationMetadata> importBeanDefinitionRegistrars =
 			new LinkedHashMap<>();
@@ -224,10 +226,10 @@ final class ConfigurationClass {
 	}
 
 	void addBeanRegistrar(String sourceClassName, BeanRegistrar beanRegistrar) {
-		this.beanRegistrars.put(sourceClassName, beanRegistrar);
+		this.beanRegistrars.add(sourceClassName, beanRegistrar);
 	}
 
-	public Map<String, BeanRegistrar> getBeanRegistrars() {
+	public MultiValueMap<String, BeanRegistrar> getBeanRegistrars() {
 		return this.beanRegistrars;
 	}
 

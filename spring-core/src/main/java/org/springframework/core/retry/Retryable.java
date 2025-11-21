@@ -31,14 +31,14 @@ import org.jspecify.annotations.Nullable;
  * @see RetryOperations
  */
 @FunctionalInterface
-public interface Retryable<R> {
+public interface Retryable<R extends @Nullable Object> {
 
 	/**
 	 * Method to execute and retry if needed.
 	 * @return the result of the operation
 	 * @throws Throwable if an error occurs during the execution of the operation
 	 */
-	@Nullable R execute() throws Throwable;
+	R execute() throws Throwable;
 
 	/**
 	 * A unique, logical name for this retryable operation, used to distinguish

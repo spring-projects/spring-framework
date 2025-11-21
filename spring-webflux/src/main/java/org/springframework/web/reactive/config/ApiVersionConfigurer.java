@@ -35,8 +35,10 @@ import org.springframework.web.reactive.accept.ApiVersionDeprecationHandler;
 import org.springframework.web.reactive.accept.ApiVersionResolver;
 import org.springframework.web.reactive.accept.ApiVersionStrategy;
 import org.springframework.web.reactive.accept.DefaultApiVersionStrategy;
+import org.springframework.web.reactive.accept.HeaderApiVersionResolver;
 import org.springframework.web.reactive.accept.MediaTypeParamApiVersionResolver;
 import org.springframework.web.reactive.accept.PathApiVersionResolver;
+import org.springframework.web.reactive.accept.QueryApiVersionResolver;
 import org.springframework.web.reactive.accept.StandardApiVersionDeprecationHandler;
 
 /**
@@ -69,7 +71,7 @@ public class ApiVersionConfigurer {
 	 * @param headerName the header name to check
 	 */
 	public ApiVersionConfigurer useRequestHeader(String headerName) {
-		this.versionResolvers.add(exchange -> exchange.getRequest().getHeaders().getFirst(headerName));
+		this.versionResolvers.add(new HeaderApiVersionResolver(headerName));
 		return this;
 	}
 
@@ -78,7 +80,7 @@ public class ApiVersionConfigurer {
 	 * @param paramName the parameter name to check
 	 */
 	public ApiVersionConfigurer useQueryParam(String paramName) {
-		this.versionResolvers.add(exchange -> exchange.getRequest().getQueryParams().getFirst(paramName));
+		this.versionResolvers.add(new QueryApiVersionResolver(paramName));
 		return this;
 	}
 
@@ -99,7 +101,7 @@ public class ApiVersionConfigurer {
 	 * <p>Note that this resolver never returns {@code null}, and therefore
 	 * cannot yield to other resolvers, see {@link org.springframework.web.accept.PathApiVersionResolver}.
 	 * @param index the index of the path segment to check; e.g. for URL's like
-	 * "/{version}/..." use index 0, for "/api/{version}/..." index 1.
+	 * {@code "/{version}/..."} use index 0, for {@code "/api/{version}/..."} index 1.
 	 */
 	public ApiVersionConfigurer usePathSegment(int index) {
 		this.versionResolvers.add(new PathApiVersionResolver(index));

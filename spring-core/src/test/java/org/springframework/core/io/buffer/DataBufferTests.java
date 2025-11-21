@@ -21,7 +21,9 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import org.springframework.core.testfixture.io.buffer.AbstractDataBufferAllocatingTests;
 
@@ -1017,6 +1019,37 @@ class DataBufferTests extends AbstractDataBufferAllocatingTests {
 		String expected = name.repeat(repeatCount);
 		assertThat(result).isEqualTo(expected);
 
+		release(buffer);
+	}
+
+	@ParameterizedDataBufferAllocatingTest
+	void forEachByteProcessAll(DataBufferFactory bufferFactory) {
+		super.bufferFactory = bufferFactory;
+
+		List<Byte> result = new ArrayList<>();
+		DataBuffer buffer = byteBuffer(new byte[]{'a', 'b', 'c', 'd'});
+		int index = buffer.forEachByte(0, 4, b -> {
+			result.add(b);
+			return true;
+		});
+		assertThat(index).isEqualTo(-1);
+		assertThat(result).containsExactly((byte) 'a', (byte) 'b', (byte) 'c', (byte) 'd');
+		release(buffer);
+	}
+
+
+	@ParameterizedDataBufferAllocatingTest
+	void forEachByteProcessSome(DataBufferFactory bufferFactory) {
+		super.bufferFactory = bufferFactory;
+
+		List<Byte> result = new ArrayList<>();
+		DataBuffer buffer = byteBuffer(new byte[]{'a', 'b', 'c', 'd'});
+		int index = buffer.forEachByte(0, 4, b -> {
+			result.add(b);
+			return (b != 'c');
+		});
+		assertThat(index).isEqualTo(2);
+		assertThat(result).containsExactly((byte) 'a', (byte) 'b', (byte) 'c');
 		release(buffer);
 	}
 

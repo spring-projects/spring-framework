@@ -184,6 +184,26 @@ val map = request.params()
 ----
 ======
 
+The following shows how to bind request parameters, including an optional `DataBinder` customization:
+
+[tabs]
+======
+Java::
++
+[source,java]
+----
+Pet pet = request.bind(Pet.class, dataBinder -> dataBinder.setAllowedFields("name"));
+----
+
+Kotlin::
++
+[source,kotlin]
+----
+val pet = request.bind(Pet::class.java, {dataBinder -> dataBinder.setAllowedFields("name")})
+----
+======
+
+
 [[webmvc-fn-response]]
 === ServerResponse
 

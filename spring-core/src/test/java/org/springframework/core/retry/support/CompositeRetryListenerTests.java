@@ -92,4 +92,14 @@ class CompositeRetryListenerTests {
 		verify(listener3).onRetryPolicyExhaustion(retryPolicy, retryable, exception);
 	}
 
+	@Test
+	void onRetryPolicyInterruption() {
+		RetryException exception = new RetryException("", new Exception());
+		compositeRetryListener.onRetryPolicyInterruption(retryPolicy, retryable, exception);
+
+		verify(listener1).onRetryPolicyInterruption(retryPolicy, retryable, exception);
+		verify(listener2).onRetryPolicyInterruption(retryPolicy, retryable, exception);
+		verify(listener3).onRetryPolicyInterruption(retryPolicy, retryable, exception);
+	}
+
 }

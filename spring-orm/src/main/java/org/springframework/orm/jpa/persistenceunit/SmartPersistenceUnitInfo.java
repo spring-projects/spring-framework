@@ -47,4 +47,13 @@ public interface SmartPersistenceUnitInfo extends PersistenceUnitInfo {
 	 */
 	void setPersistenceProviderPackageName(String persistenceProviderPackageName);
 
+	/**
+	 * Determine whether this persistence unit is configured for JTA transactions.
+	 * <p>This allows for a quick check without referring to the JPA transaction type enum
+	 * (primarily for achieving compatibility between JPA 3.2 and 4.0).
+	 * @since 7.0
+	 * @see jakarta.persistence.PersistenceUnitTransactionType#JTA
+	 */
+	boolean isConfiguredForJta();
+
 }

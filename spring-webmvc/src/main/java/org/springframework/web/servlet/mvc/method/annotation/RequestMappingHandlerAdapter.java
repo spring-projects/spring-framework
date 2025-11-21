@@ -671,6 +671,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 		resolvers.add(new ErrorsMethodArgumentResolver());
 		resolvers.add(new SessionStatusMethodArgumentResolver());
 		resolvers.add(new UriComponentsBuilderMethodArgumentResolver());
+		resolvers.add(new ApiVersionMethodArgumentResolver());
 		if (KotlinDetector.isKotlinPresent()) {
 			resolvers.add(new ContinuationHandlerMethodArgumentResolver());
 		}

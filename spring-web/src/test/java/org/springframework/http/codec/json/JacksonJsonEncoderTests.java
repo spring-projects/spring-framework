@@ -22,6 +22,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonFilter;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import org.junit.jupiter.api.Test;
@@ -30,6 +31,9 @@ import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 import tools.jackson.databind.SerializationFeature;
 import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.databind.ser.FilterProvider;
+import tools.jackson.databind.ser.std.SimpleBeanPropertyFilter;
+import tools.jackson.databind.ser.std.SimpleFilterProvider;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.buffer.DataBuffer;
@@ -50,6 +54,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.http.MediaType.APPLICATION_NDJSON;
 import static org.springframework.http.MediaType.APPLICATION_OCTET_STREAM;
 import static org.springframework.http.MediaType.APPLICATION_XML;
+import static org.springframework.http.codec.JacksonCodecSupport.FILTER_PROVIDER_HINT;
 import static org.springframework.http.codec.JacksonCodecSupport.JSON_VIEW_HINT;
 
 /**
@@ -98,9 +103,9 @@ class JacksonJsonEncoderTests extends AbstractEncoderTests<JacksonJsonEncoder> {
 				new Pojo("foofoofoo", "barbarbar"));
 
 		testEncodeAll(input, ResolvableType.forClass(Pojo.class), APPLICATION_NDJSON, null, step -> step
-				.consumeNextWith(expectString("{\"bar\":\"bar\",\"foo\":\"foo\"}\n"))
-				.consumeNextWith(expectString("{\"bar\":\"barbar\",\"foo\":\"foofoo\"}\n"))
-				.consumeNextWith(expectString("{\"bar\":\"barbarbar\",\"foo\":\"foofoofoo\"}\n"))
+				.consumeNextWith(expectString("{\"foo\":\"foo\",\"bar\":\"bar\"}\n"))
+				.consumeNextWith(expectString("{\"foo\":\"foofoo\",\"bar\":\"barbar\"}\n"))
+				.consumeNextWith(expectString("{\"foo\":\"foofoofoo\",\"bar\":\"barbarbar\"}\n"))
 				.verifyComplete()
 		);
 	}
@@ -137,9 +142,9 @@ class JacksonJsonEncoderTests extends AbstractEncoderTests<JacksonJsonEncoder> {
 		);
 
 		testEncode(input, Pojo.class, step -> step
-				.consumeNextWith(expectString("[{\"bar\":\"bar\",\"foo\":\"foo\"}"))
-				.consumeNextWith(expectString(",{\"bar\":\"barbar\",\"foo\":\"foofoo\"}"))
-				.consumeNextWith(expectString(",{\"bar\":\"barbarbar\",\"foo\":\"foofoofoo\"}"))
+				.consumeNextWith(expectString("[{\"foo\":\"foo\",\"bar\":\"bar\"}"))
+				.consumeNextWith(expectString(",{\"foo\":\"foofoo\",\"bar\":\"barbar\"}"))
+				.consumeNextWith(expectString(",{\"foo\":\"foofoofoo\",\"bar\":\"barbarbar\"}"))
 				.consumeNextWith(expectString("]"))
 				.verifyComplete());
 	}
@@ -187,9 +192,9 @@ class JacksonJsonEncoderTests extends AbstractEncoderTests<JacksonJsonEncoder> {
 		);
 
 		testEncode(input, ResolvableType.forClass(Pojo.class), barMediaType, null, step -> step
-				.consumeNextWith(expectString("{\"bar\":\"bar\",\"foo\":\"foo\"}\n"))
-				.consumeNextWith(expectString("{\"bar\":\"barbar\",\"foo\":\"foofoo\"}\n"))
-				.consumeNextWith(expectString("{\"bar\":\"barbarbar\",\"foo\":\"foofoofoo\"}\n"))
+				.consumeNextWith(expectString("{\"foo\":\"foo\",\"bar\":\"bar\"}\n"))
+				.consumeNextWith(expectString("{\"foo\":\"foofoo\",\"bar\":\"barbar\"}\n"))
+				.consumeNextWith(expectString("{\"foo\":\"foofoofoo\",\"bar\":\"barbarbar\"}\n"))
 				.verifyComplete()
 		);
 	}
@@ -212,6 +217,24 @@ class JacksonJsonEncoderTests extends AbstractEncoderTests<JacksonJsonEncoder> {
 	}
 
 	@Test
+	void fieldLevelJsonViewStream() {
+		JacksonViewBean bean = new JacksonViewBean();
+		bean.setWithView1("with");
+		bean.setWithView2("with");
+		bean.setWithoutView("without");
+		Flux<JacksonViewBean> input = Flux.just(bean, bean);
+
+		ResolvableType type = ResolvableType.forClass(JacksonViewBean.class);
+		Map<String, Object> hints = singletonMap(JSON_VIEW_HINT, MyJacksonView1.class);
+
+		testEncodeAll(input, type, APPLICATION_NDJSON, hints, step -> step
+				.consumeNextWith(expectString("{\"withView1\":\"with\"}\n"))
+				.consumeNextWith(expectString("{\"withView1\":\"with\"}\n"))
+				.verifyComplete()
+		);
+	}
+
+	@Test
 	void classLevelJsonView() {
 		JacksonViewBean bean = new JacksonViewBean();
 		bean.setWithView1("with");
@@ -228,6 +251,33 @@ class JacksonJsonEncoderTests extends AbstractEncoderTests<JacksonJsonEncoder> {
 		);
 	}
 
+	@Test
+	void filterProvider() {
+		JacksonFilteredBean filteredBean = new JacksonFilteredBean("foo", "bar");
+		FilterProvider filters = new SimpleFilterProvider().addFilter("myJacksonFilter",
+				SimpleBeanPropertyFilter.serializeAllExcept("property2"));
+		Mono<JacksonFilteredBean> input = Mono.just(filteredBean);
+		Map<String, Object> hints = singletonMap(FILTER_PROVIDER_HINT, filters);
+		testEncode(input, ResolvableType.forClass(Pojo.class), APPLICATION_JSON, hints, step -> step
+				.consumeNextWith(expectString("{\"property1\":\"foo\"}"))
+				.verifyComplete()
+		);
+	}
+
+	@Test
+	void filterProviderStream() {
+		JacksonFilteredBean filteredBean = new JacksonFilteredBean("foo", "bar");
+		FilterProvider filters = new SimpleFilterProvider().addFilter("myJacksonFilter",
+				SimpleBeanPropertyFilter.serializeAllExcept("property2"));
+		Flux<JacksonFilteredBean> input = Flux.just(filteredBean, filteredBean);
+		Map<String, Object> hints = singletonMap(FILTER_PROVIDER_HINT, filters);
+		testEncodeAll(input, ResolvableType.forClass(Pojo.class), APPLICATION_NDJSON, hints, step -> step
+				.consumeNextWith(expectString("{\"property1\":\"foo\"}\n"))
+				.consumeNextWith(expectString("{\"property1\":\"foo\"}\n"))
+				.verifyComplete()
+		);
+	}
+
 	@Test  // gh-22771
 	public void encodeWithFlushAfterWriteOff() {
 		JsonMapper mapper = JsonMapper.builder().configure(SerializationFeature.FLUSH_AFTER_WRITE_VALUE, false).build();
@@ -237,7 +287,7 @@ class JacksonJsonEncoderTests extends AbstractEncoderTests<JacksonJsonEncoder> {
 				ResolvableType.forClass(Pojo.class), MimeTypeUtils.APPLICATION_JSON, Collections.emptyMap());
 
 		StepVerifier.create(result)
-				.consumeNextWith(expectString("[{\"bar\":\"bar\",\"foo\":\"foo\"}"))
+				.consumeNextWith(expectString("[{\"foo\":\"foo\",\"bar\":\"bar\"}"))
 				.consumeNextWith(expectString("]"))
 				.expectComplete()
 				.verify(Duration.ofSeconds(5));
@@ -249,7 +299,7 @@ class JacksonJsonEncoderTests extends AbstractEncoderTests<JacksonJsonEncoder> {
 		MimeType mimeType = new MimeType("application", "json", StandardCharsets.US_ASCII);
 
 		testEncode(input, ResolvableType.forClass(Pojo.class), mimeType, null, step -> step
-				.consumeNextWith(expectString("{\"bar\":\"bar\",\"foo\":\"foo\"}"))
+				.consumeNextWith(expectString("{\"foo\":\"foo\",\"bar\":\"bar\"}"))
 				.verifyComplete()
 		);
 	}
@@ -265,6 +315,10 @@ class JacksonJsonEncoderTests extends AbstractEncoderTests<JacksonJsonEncoder> {
 
 	@JsonTypeName("bar")
 	private static class Bar extends ParentClass {
+	}
+
+	@JsonFilter("myJacksonFilter")
+	record JacksonFilteredBean(String property1, String property2) {
 	}
 
 }

@@ -211,7 +211,7 @@ final class DefaultEntityResponseBuilder<T> implements EntityResponse.Builder<T>
 			return new CompletionStageEntityResponse(this.status, this.headers, this.cookies,
 					completionStage, this.entityType);
 		}
-		else if (DefaultAsyncServerResponse.reactiveStreamsPresent) {
+		else if (DefaultAsyncServerResponse.REACTIVE_STREAMS_PRESENT) {
 			ReactiveAdapter adapter = ReactiveAdapterRegistry.getSharedInstance().getAdapter(this.entity.getClass());
 			if (adapter != null) {
 				Publisher<T> publisher = adapter.toPublisher(this.entity);

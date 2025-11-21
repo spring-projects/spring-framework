@@ -18,6 +18,7 @@ package org.springframework.test.web.reactive.server.samples;
 
 import java.net.URI;
 
+import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 
@@ -113,7 +114,7 @@ class JsonContentTests {
 				.exchange()
 				.expectStatus().isOk()
 				.expectBody()
-				.jsonPath("$.firstName").value(containsString("oh"));
+				.jsonPath("$.firstName").value(String.class, v -> MatcherAssert.assertThat(v, containsString("oh")));
 	}
 
 	@Test

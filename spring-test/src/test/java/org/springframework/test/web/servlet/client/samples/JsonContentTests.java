@@ -19,6 +19,7 @@ package org.springframework.test.web.servlet.client.samples;
 import java.net.URI;
 import java.util.List;
 
+import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.http.MediaType;
@@ -111,7 +112,7 @@ class JsonContentTests {
 				.exchange()
 				.expectStatus().isOk()
 				.expectBody()
-				.jsonPath("$.firstName").value(containsString("oh"));
+				.jsonPath("$.firstName").value(String.class, v -> MatcherAssert.assertThat(v, containsString("oh")));
 	}
 
 	@Test
@@ -149,7 +150,7 @@ class JsonContentTests {
 	}
 
 
-	private static class Person {
+	static class Person {
 		private String firstName;
 		private String lastName;
 

@@ -135,7 +135,9 @@ class JdkClientHttpRequestFactoryTests extends AbstractHttpRequestFactoryTests {
 		try (ClientHttpResponse response = request.execute()) {
 			assertThat(response.getStatusCode()).as("Invalid response status").isEqualTo(HttpStatus.OK);
 			assertThat(response.getHeaders().getFirst("Content-Encoding"))
-					.as("Invalid content encoding").isEqualTo("gzip");
+					.as("Content Encoding should be removed").isNull();
+			assertThat(response.getHeaders().getFirst("Content-Length"))
+					.as("Content-Length should be removed").isNull();
 			assertThat(response.getBody()).as("Invalid request body").hasContent("Payload to compress");
 		}
 	}
@@ -150,7 +152,9 @@ class JdkClientHttpRequestFactoryTests extends AbstractHttpRequestFactoryTests {
 		try (ClientHttpResponse response = request.execute()) {
 			assertThat(response.getStatusCode()).as("Invalid response status").isEqualTo(HttpStatus.OK);
 			assertThat(response.getHeaders().getFirst("Content-Encoding"))
-					.as("Invalid content encoding").isEqualTo("deflate");
+					.as("Content Encoding should be removed").isNull();
+			assertThat(response.getHeaders().getFirst("Content-Length"))
+					.as("Content-Length should be removed").isNull();
 			assertThat(response.getBody()).as("Invalid request body").hasContent("Payload to compress");
 		}
 	}

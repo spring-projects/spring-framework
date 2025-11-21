@@ -164,7 +164,6 @@ final class StatusHandler {
 	private static Function<ResolvableType, ? extends @Nullable Object> initBodyConvertFunction(
 			ClientHttpResponse response, byte[] body, List<HttpMessageConverter<?>> messageConverters) {
 
-		Assert.state(!CollectionUtils.isEmpty(messageConverters), "Expected message converters");
 		return resolvableType -> {
 			try {
 				HttpMessageConverterExtractor<?> extractor =

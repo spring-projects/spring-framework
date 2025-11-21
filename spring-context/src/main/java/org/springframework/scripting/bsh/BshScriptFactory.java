@@ -42,7 +42,9 @@ import org.springframework.util.ReflectionUtils;
  * @since 2.0
  * @see BshScriptUtils
  * @see org.springframework.scripting.support.ScriptFactoryPostProcessor
+ * @deprecated with no replacement as not actively maintained anymore
  */
+@Deprecated(since = "7.0")
 public class BshScriptFactory implements ScriptFactory, BeanClassLoaderAware {
 
 	private final String scriptSourceLocator;

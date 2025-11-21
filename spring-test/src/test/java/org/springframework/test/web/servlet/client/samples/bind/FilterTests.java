@@ -29,11 +29,11 @@ import org.junit.jupiter.api.Test;
 import org.springframework.test.web.servlet.client.RestTestClient;
 import org.springframework.web.servlet.function.ServerResponse;
 
-import static org.springframework.http.HttpStatus.I_AM_A_TEAPOT;
-
+import static org.springframework.http.HttpStatus.EXPECTATION_FAILED;
 
 /**
  * Tests for a {@link Filter}.
+ *
  * @author Rob Worsnop
  */
 class FilterTests {
@@ -41,6 +41,7 @@ class FilterTests {
 	@Test
 	void filter() {
 
+		@SuppressWarnings("serial")
 		Filter filter = new HttpFilter() {
 			@Override
 			protected void doFilter(HttpServletRequest req, HttpServletResponse res, FilterChain chain) throws IOException {
@@ -49,7 +50,7 @@ class FilterTests {
 		};
 
 		RestTestClient client = RestTestClient.bindToRouterFunction(
-				request -> Optional.of(req -> ServerResponse.status(I_AM_A_TEAPOT).build()))
+				request -> Optional.of(req -> ServerResponse.status(EXPECTATION_FAILED).build()))
 				.configureServer(builder -> builder.addFilters(filter))
 				.build();
 

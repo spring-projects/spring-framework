@@ -90,7 +90,6 @@ import org.springframework.util.ClassUtils;
  * @see ScannedGenericBeanDefinition
  * @see CandidateComponentsIndex
  */
-@SuppressWarnings("removal") // components index
 public class ClassPathScanningCandidateComponentProvider implements EnvironmentCapable, ResourceLoaderAware {
 
 	static final String DEFAULT_RESOURCE_PATTERN = "**/*.class";
@@ -312,11 +311,14 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 	 */
 	public Set<BeanDefinition> findCandidateComponents(String basePackage) {
 		if (this.componentsIndex != null && indexSupportsIncludeFilters()) {
-			return addCandidateComponentsFromIndex(this.componentsIndex, basePackage);
+			if (this.componentsIndex.hasScannedPackage(basePackage)) {
+				return addCandidateComponentsFromIndex(this.componentsIndex, basePackage);
+			}
+			else {
+				this.componentsIndex.registerScan(basePackage);
+			}
 		}
-		else {
-			return scanCandidateComponents(basePackage);
-		}
+		return scanCandidateComponents(basePackage);
 	}
 
 	/**
@@ -339,20 +341,41 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 	 * @param filter the filter to check
 	 * @return whether the index supports this include filter
 	 * @since 5.0
+	 * @see #registerCandidateTypeForIncludeFilter(String, TypeFilter)
 	 * @see #extractStereotype(TypeFilter)
 	 */
 	private boolean indexSupportsIncludeFilter(TypeFilter filter) {
 		if (filter instanceof AnnotationTypeFilter annotationTypeFilter) {
 			Class<? extends Annotation> annotationType = annotationTypeFilter.getAnnotationType();
-			return (AnnotationUtils.isAnnotationDeclaredLocally(Indexed.class, annotationType) ||
-					annotationType.getName().startsWith("jakarta.") ||
-					annotationType.getName().startsWith("javax."));
+			return isStereotypeAnnotationForIndex(annotationType);
 		}
 		if (filter instanceof AssignableTypeFilter assignableTypeFilter) {
 			Class<?> target = assignableTypeFilter.getTargetType();
 			return AnnotationUtils.isAnnotationDeclaredLocally(Indexed.class, target);
 		}
 		return false;
+	}
+
+	/**
+	 * Register the given class as a candidate type with the runtime-populated index, if any.
+	 * @param className the fully-qualified class name of the candidate type
+	 * @param filter the include filter to introspect for the associated stereotype
+	 */
+	private void registerCandidateTypeForIncludeFilter(String className, TypeFilter filter) {
+		if (this.componentsIndex != null) {
+			if (filter instanceof AnnotationTypeFilter annotationTypeFilter) {
+				Class<? extends Annotation> annotationType = annotationTypeFilter.getAnnotationType();
+				if (isStereotypeAnnotationForIndex(annotationType)) {
+					this.componentsIndex.registerCandidateType(className, annotationType.getName());
+				}
+			}
+			else if (filter instanceof AssignableTypeFilter assignableTypeFilter) {
+				Class<?> target = assignableTypeFilter.getTargetType();
+				if (AnnotationUtils.isAnnotationDeclaredLocally(Indexed.class, target)) {
+					this.componentsIndex.registerCandidateType(className, target.getName());
+				}
+			}
+		}
 	}
 
 	/**
@@ -370,6 +393,11 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 			return assignableTypeFilter.getTargetType().getName();
 		}
 		return null;
+	}
+
+	private boolean isStereotypeAnnotationForIndex(Class<? extends Annotation> annotationType) {
+		return (AnnotationUtils.isAnnotationDeclaredLocally(Indexed.class, annotationType) ||
+				annotationType.getName().startsWith("jakarta."));
 	}
 
 	private Set<BeanDefinition> addCandidateComponentsFromIndex(CandidateComponentsIndex index, String basePackage) {
@@ -418,9 +446,9 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 	private Set<BeanDefinition> scanCandidateComponents(String basePackage) {
 		Set<BeanDefinition> candidates = new LinkedHashSet<>();
 		try {
-			String packageSearchPath = ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX +
+			String packageSearchPattern = ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX +
 					resolveBasePackage(basePackage) + '/' + this.resourcePattern;
-			Resource[] resources = getResourcePatternResolver().getResources(packageSearchPath);
+			Resource[] resources = getResourcePatternResolver().getResources(packageSearchPattern);
 			boolean traceEnabled = logger.isTraceEnabled();
 			boolean debugEnabled = logger.isDebugEnabled();
 			for (Resource resource : resources) {
@@ -503,13 +531,14 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 	 * @return whether the class qualifies as a candidate component
 	 */
 	protected boolean isCandidateComponent(MetadataReader metadataReader) throws IOException {
-		for (TypeFilter tf : this.excludeFilters) {
-			if (tf.match(metadataReader, getMetadataReaderFactory())) {
+		for (TypeFilter filter : this.excludeFilters) {
+			if (filter.match(metadataReader, getMetadataReaderFactory())) {
 				return false;
 			}
 		}
-		for (TypeFilter tf : this.includeFilters) {
-			if (tf.match(metadataReader, getMetadataReaderFactory())) {
+		for (TypeFilter filter : this.includeFilters) {
+			if (filter.match(metadataReader, getMetadataReaderFactory())) {
+				registerCandidateTypeForIncludeFilter(metadataReader.getClassMetadata().getClassName(), filter);
 				return isConditionMatch(metadataReader);
 			}
 		}

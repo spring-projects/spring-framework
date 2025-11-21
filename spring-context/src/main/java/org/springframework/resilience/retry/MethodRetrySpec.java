@@ -32,7 +32,7 @@ import org.springframework.util.ExceptionTypeFilter;
  * @param includes applicable exception types to attempt a retry for
  * @param excludes non-applicable exception types to avoid a retry for
  * @param predicate a predicate for filtering exceptions from applicable methods
- * @param maxAttempts the maximum number of retry attempts
+ * @param maxRetries the maximum number of retry attempts
  * @param delay the base delay after the initial invocation
  * @param jitter a jitter value for the next retry attempt
  * @param multiplier a multiplier for a delay for the next retry attempt
@@ -45,27 +45,27 @@ public record MethodRetrySpec(
 		Collection<Class<? extends Throwable>> includes,
 		Collection<Class<? extends Throwable>> excludes,
 		MethodRetryPredicate predicate,
-		long maxAttempts,
+		long maxRetries,
 		Duration delay,
 		Duration jitter,
 		double multiplier,
 		Duration maxDelay) {
 
-	public MethodRetrySpec(MethodRetryPredicate predicate, long maxAttempts, Duration delay) {
-		this(predicate, maxAttempts, delay, Duration.ZERO, 1.0, Duration.ofMillis(Long.MAX_VALUE));
+	public MethodRetrySpec(MethodRetryPredicate predicate, long maxRetries, Duration delay) {
+		this(predicate, maxRetries, delay, Duration.ZERO, 1.0, Duration.ofMillis(Long.MAX_VALUE));
 	}
 
-	public MethodRetrySpec(MethodRetryPredicate predicate, long maxAttempts, Duration delay,
+	public MethodRetrySpec(MethodRetryPredicate predicate, long maxRetries, Duration delay,
 			Duration jitter, double multiplier, Duration maxDelay) {
 
-		this(Collections.emptyList(), Collections.emptyList(), predicate, maxAttempts, delay,
+		this(Collections.emptyList(), Collections.emptyList(), predicate, maxRetries, delay,
 				jitter, multiplier, maxDelay);
 	}
 
 
 	MethodRetryPredicate combinedPredicate() {
 		ExceptionTypeFilter exceptionFilter = new ExceptionTypeFilter(this.includes, this.excludes);
-		return (method, throwable) -> exceptionFilter.match(throwable) &&
+		return (method, throwable) -> exceptionFilter.match(throwable, true) &&
 				this.predicate.shouldRetry(method, throwable);
 	}
 

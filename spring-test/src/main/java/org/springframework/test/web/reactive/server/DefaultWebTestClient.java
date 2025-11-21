@@ -34,6 +34,7 @@ import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.spi.mapper.MappingProvider;
 import org.hamcrest.Matcher;
 import org.hamcrest.MatcherAssert;
+import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
@@ -110,9 +111,10 @@ class DefaultWebTestClient implements WebTestClient {
 			Consumer<EntityExchangeResult<?>> entityResultConsumer,
 			@Nullable Duration responseTimeout, DefaultWebTestClientBuilder clientBuilder) {
 
-		this.wiretapConnector = new WiretapConnector(connector);
 		this.jsonEncoderDecoder = JsonEncoderDecoder.from(
 				exchangeStrategies.messageWriters(), exchangeStrategies.messageReaders());
+
+		this.wiretapConnector = new WiretapConnector(connector, this.jsonEncoderDecoder);
 		this.exchangeFunction = exchangeFactory.apply(this.wiretapConnector);
 		this.uriBuilderFactory = uriBuilderFactory;
 		this.defaultHeaders = headers;
@@ -381,6 +383,11 @@ class DefaultWebTestClient implements WebTestClient {
 					DefaultWebTestClient.this.entityResultConsumer, getResponseTimeout());
 		}
 
+		@Override
+		public ResponseSpec exchangeSuccessfully() {
+			return exchange().expectStatus().is2xxSuccessful();
+		}
+
 		private ClientRequest.Builder initRequestBuilder() {
 			return ClientRequest.create(this.httpMethod, initUri())
 					.headers(headersToUse -> {
@@ -579,6 +586,7 @@ class DefaultWebTestClient implements WebTestClient {
 			return self();
 		}
 
+		@SuppressWarnings("removal")
 		@Override
 		public <T extends S> T value(Matcher<? super @Nullable B> matcher) {
 			this.result.assertWithDiagnostics(() -> MatcherAssert.assertThat(this.result.getResponseBody(), matcher));
@@ -586,7 +594,7 @@ class DefaultWebTestClient implements WebTestClient {
 		}
 
 		@Override
-		@SuppressWarnings("NullAway") // https://github.com/uber/NullAway/issues/1129
+		@SuppressWarnings({"NullAway", "removal"}) // https://github.com/uber/NullAway/issues/1129
 		public <T extends S, R> T value(Function<@Nullable B, @Nullable R> bodyMapper, Matcher<? super @Nullable R> matcher) {
 			this.result.assertWithDiagnostics(() -> {
 				B body = this.result.getResponseBody();
@@ -596,9 +604,17 @@ class DefaultWebTestClient implements WebTestClient {
 		}
 
 		@Override
-		@SuppressWarnings("NullAway") // https://github.com/uber/NullAway/issues/1129
 		public <T extends S> T value(Consumer<@Nullable B> consumer) {
 			this.result.assertWithDiagnostics(() -> consumer.accept(this.result.getResponseBody()));
+			return self();
+		}
+
+		@Override
+		public <T extends S, R> T value(@NonNull Function<@Nullable B, @Nullable R> bodyMapper, Consumer<? super R> consumer) {
+			this.result.assertWithDiagnostics(() -> {
+				B body = this.result.getResponseBody();
+				consumer.accept(bodyMapper.apply(body));
+			});
 			return self();
 		}
 
@@ -620,7 +636,7 @@ class DefaultWebTestClient implements WebTestClient {
 	}
 
 
-	private static class DefaultListBodySpec<E> extends DefaultBodySpec<List<@Nullable E>, ListBodySpec<E>>
+	private static class DefaultListBodySpec<E extends @Nullable Object> extends DefaultBodySpec<List<E>, ListBodySpec<E>>
 			implements ListBodySpec<E> {
 
 		DefaultListBodySpec(EntityExchangeResult<List<E>> result) {
@@ -629,7 +645,7 @@ class DefaultWebTestClient implements WebTestClient {
 
 		@Override
 		public ListBodySpec<E> hasSize(int size) {
-			List<@Nullable E> actual = getResult().getResponseBody();
+			List<E> actual = getResult().getResponseBody();
 			String message = "Response body does not contain " + size + " elements";
 			getResult().assertWithDiagnostics(() ->
 					AssertionErrors.assertEquals(message, size, (actual != null ? actual.size() : 0)));
@@ -638,9 +654,9 @@ class DefaultWebTestClient implements WebTestClient {
 
 		@Override
 		@SuppressWarnings("unchecked")
-		public ListBodySpec<E> contains(@Nullable E... elements) {
+		public ListBodySpec<E> contains(E... elements) {
 			List<E> expected = Arrays.asList(elements);
-			List<@Nullable E> actual = getResult().getResponseBody();
+			List<E> actual = getResult().getResponseBody();
 			String message = "Response body does not contain " + expected;
 			getResult().assertWithDiagnostics(() ->
 					AssertionErrors.assertTrue(message, (actual != null && actual.containsAll(expected))));
@@ -649,9 +665,9 @@ class DefaultWebTestClient implements WebTestClient {
 
 		@Override
 		@SuppressWarnings("unchecked")
-		public ListBodySpec<E> doesNotContain(@Nullable E... elements) {
+		public ListBodySpec<E> doesNotContain(E... elements) {
 			List<E> expected = Arrays.asList(elements);
-			List<@Nullable E> actual = getResult().getResponseBody();
+			List<E> actual = getResult().getResponseBody();
 			String message = "Response body should not have contained " + expected;
 			getResult().assertWithDiagnostics(() ->
 					AssertionErrors.assertTrue(message, (actual == null || !actual.containsAll(expected))));
@@ -659,7 +675,7 @@ class DefaultWebTestClient implements WebTestClient {
 		}
 
 		@Override
-		public EntityExchangeResult<List<@Nullable E>> returnResult() {
+		public EntityExchangeResult<List<E>> returnResult() {
 			return getResult();
 		}
 	}

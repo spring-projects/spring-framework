@@ -60,8 +60,6 @@ import org.springframework.validation.method.MethodValidationResult;
  * inline constraint annotations. Validation groups can be specified through {@code @Validated}
  * as well. By default, JSR-303 will validate against its default group only.
  *
- * <p>This functionality requires a Bean Validation 1.1+ provider.
- *
  * @author Juergen Hoeller
  * @since 3.1
  * @see MethodValidationInterceptor

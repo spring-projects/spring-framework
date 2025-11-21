@@ -18,7 +18,7 @@ package org.springframework.test.web.servlet.assertj;
 
 import org.jspecify.annotations.Nullable;
 
-import org.springframework.test.http.HttpMessageContentConverter;
+import org.springframework.test.json.JsonConverterDelegate;
 import org.springframework.test.web.servlet.MvcResult;
 
 /**
@@ -33,15 +33,15 @@ final class DefaultMvcTestResult implements MvcTestResult {
 
 	private final @Nullable Exception unresolvedException;
 
-	private final @Nullable HttpMessageContentConverter contentConverter;
+	private final @Nullable JsonConverterDelegate converterDelegate;
 
 
 	DefaultMvcTestResult(@Nullable MvcResult mvcResult, @Nullable Exception unresolvedException,
-			@Nullable HttpMessageContentConverter contentConverter) {
+			@Nullable JsonConverterDelegate converterDelegate) {
 
 		this.mvcResult = mvcResult;
 		this.unresolvedException = unresolvedException;
-		this.contentConverter = contentConverter;
+		this.converterDelegate = converterDelegate;
 	}
 
 
@@ -70,7 +70,7 @@ final class DefaultMvcTestResult implements MvcTestResult {
 	 */
 	@Override
 	public MvcTestResultAssert assertThat() {
-		return new MvcTestResultAssert(this, this.contentConverter);
+		return new MvcTestResultAssert(this, this.converterDelegate);
 	}
 
 }

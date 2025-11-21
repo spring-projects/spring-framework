@@ -36,7 +36,7 @@ import org.springframework.transaction.TransactionStatus;
  * @see CallbackPreferringPlatformTransactionManager
  */
 @FunctionalInterface
-public interface TransactionCallback<T> {
+public interface TransactionCallback<T extends @Nullable Object> {
 
 	/**
 	 * Gets called by {@link TransactionTemplate#execute} within a transactional context.
@@ -53,6 +53,6 @@ public interface TransactionCallback<T> {
 	 * @see TransactionTemplate#execute
 	 * @see CallbackPreferringPlatformTransactionManager#execute
 	 */
-	@Nullable T doInTransaction(TransactionStatus status);
+	T doInTransaction(TransactionStatus status);
 
 }

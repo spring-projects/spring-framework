@@ -73,6 +73,9 @@ public class DefaultCorsProcessor implements CorsProcessor {
 			HttpServletResponse response) throws IOException {
 
 		if (config == null) {
+			if (logger.isDebugEnabled() && CorsUtils.isCorsRequest(request)) {
+				logger.debug("Skip: no CORS configuration has been provided");
+			}
 			return true;
 		}
 

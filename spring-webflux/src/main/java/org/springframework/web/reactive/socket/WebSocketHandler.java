@@ -63,7 +63,7 @@ import reactor.core.publisher.Mono;
  * </pre>
  *
  * <p>If processing inbound and sending outbound messages are independent
- * streams, they can be joined together with the "zip" operator:
+ * streams, they can be joined together with the "and" operator:
  *
  * <pre class="code">
  *	class ExampleHandler implements WebSocketHandler {
@@ -83,7 +83,7 @@ import reactor.core.publisher.Mono;
  *			Flux&lt;String&gt; source = ... ;
  * 			Mono&lt;Void&gt; output = session.send(source.map(session::textMessage));
  *
- * 			return Mono.zip(input, output).then();
+ * 			return input.and(output);
  *		}
  *	}
  * </pre>

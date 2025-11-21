@@ -297,6 +297,7 @@ public class WebClientResponseException extends WebClientException {
 	 * Create {@code WebClientResponseException} or an HTTP status specific subclass.
 	 * @since 6.0
 	 */
+	@SuppressWarnings("deprecation")
 	public static WebClientResponseException create(
 			HttpStatusCode statusCode, String statusText, HttpHeaders headers,
 			byte[] body, @Nullable Charset charset, @Nullable HttpRequest request) {
@@ -313,6 +314,7 @@ public class WebClientResponseException extends WebClientException {
 				case GONE -> new WebClientResponseException.Gone(statusText, headers, body, charset, request);
 				case UNSUPPORTED_MEDIA_TYPE -> new WebClientResponseException.UnsupportedMediaType(statusText, headers, body, charset, request);
 				case TOO_MANY_REQUESTS -> new WebClientResponseException.TooManyRequests(statusText, headers, body, charset, request);
+				case UNPROCESSABLE_CONTENT -> new WebClientResponseException.UnprocessableContent(statusText, headers, body, charset, request);
 				case UNPROCESSABLE_ENTITY -> new WebClientResponseException.UnprocessableEntity(statusText, headers, body, charset, request);
 				case INTERNAL_SERVER_ERROR -> new WebClientResponseException.InternalServerError(statusText, headers, body, charset, request);
 				case NOT_IMPLEMENTED -> new WebClientResponseException.NotImplemented(statusText, headers, body, charset, request);
@@ -339,7 +341,7 @@ public class WebClientResponseException extends WebClientException {
 				String statusText, HttpHeaders headers, byte[] body, @Nullable Charset charset,
 				@Nullable HttpRequest request) {
 
-			super(HttpStatus.BAD_REQUEST.value(), statusText, headers, body, charset, request);
+			super(HttpStatus.BAD_REQUEST, statusText, headers, body, charset, request);
 		}
 
 	}
@@ -355,7 +357,7 @@ public class WebClientResponseException extends WebClientException {
 				String statusText, HttpHeaders headers, byte[] body, @Nullable Charset charset,
 				@Nullable HttpRequest request) {
 
-			super(HttpStatus.UNAUTHORIZED.value(), statusText, headers, body, charset, request);
+			super(HttpStatus.UNAUTHORIZED, statusText, headers, body, charset, request);
 		}
 	}
 
@@ -370,7 +372,7 @@ public class WebClientResponseException extends WebClientException {
 				String statusText, HttpHeaders headers, byte[] body, @Nullable Charset charset,
 				@Nullable HttpRequest request) {
 
-			super(HttpStatus.FORBIDDEN.value(), statusText, headers, body, charset, request);
+			super(HttpStatus.FORBIDDEN, statusText, headers, body, charset, request);
 		}
 	}
 
@@ -385,7 +387,7 @@ public class WebClientResponseException extends WebClientException {
 				String statusText, HttpHeaders headers, byte[] body, @Nullable Charset charset,
 				@Nullable HttpRequest request) {
 
-			super(HttpStatus.NOT_FOUND.value(), statusText, headers, body, charset, request);
+			super(HttpStatus.NOT_FOUND, statusText, headers, body, charset, request);
 		}
 	}
 
@@ -400,7 +402,7 @@ public class WebClientResponseException extends WebClientException {
 				String statusText, HttpHeaders headers, byte[] body, @Nullable Charset charset,
 				@Nullable HttpRequest request) {
 
-			super(HttpStatus.METHOD_NOT_ALLOWED.value(), statusText, headers, body, charset, request);
+			super(HttpStatus.METHOD_NOT_ALLOWED, statusText, headers, body, charset, request);
 		}
 	}
 
@@ -415,7 +417,7 @@ public class WebClientResponseException extends WebClientException {
 				String statusText, HttpHeaders headers, byte[] body, @Nullable Charset charset,
 				@Nullable HttpRequest request) {
 
-			super(HttpStatus.NOT_ACCEPTABLE.value(), statusText, headers, body, charset, request);
+			super(HttpStatus.NOT_ACCEPTABLE, statusText, headers, body, charset, request);
 		}
 	}
 
@@ -430,7 +432,7 @@ public class WebClientResponseException extends WebClientException {
 				String statusText, HttpHeaders headers, byte[] body, @Nullable Charset charset,
 				@Nullable HttpRequest request) {
 
-			super(HttpStatus.CONFLICT.value(), statusText, headers, body, charset, request);
+			super(HttpStatus.CONFLICT, statusText, headers, body, charset, request);
 		}
 	}
 
@@ -445,7 +447,7 @@ public class WebClientResponseException extends WebClientException {
 				String statusText, HttpHeaders headers, byte[] body, @Nullable Charset charset,
 				@Nullable HttpRequest request) {
 
-			super(HttpStatus.GONE.value(), statusText, headers, body, charset, request);
+			super(HttpStatus.GONE, statusText, headers, body, charset, request);
 		}
 	}
 
@@ -460,7 +462,7 @@ public class WebClientResponseException extends WebClientException {
 				String statusText, HttpHeaders headers, byte[] body, @Nullable Charset charset,
 				@Nullable HttpRequest request) {
 
-			super(HttpStatus.UNSUPPORTED_MEDIA_TYPE.value(), statusText, headers, body, charset, request);
+			super(HttpStatus.UNSUPPORTED_MEDIA_TYPE, statusText, headers, body, charset, request);
 		}
 	}
 
@@ -475,7 +477,7 @@ public class WebClientResponseException extends WebClientException {
 				String statusText, HttpHeaders headers, byte[] body, @Nullable Charset charset,
 				@Nullable HttpRequest request) {
 
-			super(HttpStatus.UNPROCESSABLE_CONTENT.value(), statusText, headers, body, charset, request);
+			super(HttpStatus.UNPROCESSABLE_CONTENT, statusText, headers, body, charset, request);
 		}
 	}
 
@@ -493,7 +495,7 @@ public class WebClientResponseException extends WebClientException {
 				String statusText, HttpHeaders headers, byte[] body, @Nullable Charset charset,
 				@Nullable HttpRequest request) {
 
-			super(HttpStatus.UNPROCESSABLE_ENTITY.value(), statusText, headers, body, charset, request);
+			super(HttpStatus.UNPROCESSABLE_ENTITY, statusText, headers, body, charset, request);
 		}
 	}
 
@@ -508,7 +510,7 @@ public class WebClientResponseException extends WebClientException {
 				String statusText, HttpHeaders headers, byte[] body, @Nullable Charset charset,
 				@Nullable HttpRequest request) {
 
-			super(HttpStatus.TOO_MANY_REQUESTS.value(), statusText, headers, body, charset, request);
+			super(HttpStatus.TOO_MANY_REQUESTS, statusText, headers, body, charset, request);
 		}
 	}
 
@@ -527,7 +529,7 @@ public class WebClientResponseException extends WebClientException {
 				String statusText, HttpHeaders headers, byte[] body, @Nullable Charset charset,
 				@Nullable HttpRequest request) {
 
-			super(HttpStatus.INTERNAL_SERVER_ERROR.value(), statusText, headers, body, charset, request);
+			super(HttpStatus.INTERNAL_SERVER_ERROR, statusText, headers, body, charset, request);
 		}
 	}
 
@@ -542,7 +544,7 @@ public class WebClientResponseException extends WebClientException {
 				String statusText, HttpHeaders headers, byte[] body, @Nullable Charset charset,
 				@Nullable HttpRequest request) {
 
-			super(HttpStatus.NOT_IMPLEMENTED.value(), statusText, headers, body, charset, request);
+			super(HttpStatus.NOT_IMPLEMENTED, statusText, headers, body, charset, request);
 		}
 	}
 
@@ -557,7 +559,7 @@ public class WebClientResponseException extends WebClientException {
 				String statusText, HttpHeaders headers, byte[] body, @Nullable Charset charset,
 				@Nullable HttpRequest request) {
 
-			super(HttpStatus.BAD_GATEWAY.value(), statusText, headers, body, charset, request);
+			super(HttpStatus.BAD_GATEWAY, statusText, headers, body, charset, request);
 		}
 	}
 
@@ -572,7 +574,7 @@ public class WebClientResponseException extends WebClientException {
 				String statusText, HttpHeaders headers, byte[] body, @Nullable Charset charset,
 				@Nullable HttpRequest request) {
 
-			super(HttpStatus.SERVICE_UNAVAILABLE.value(), statusText, headers, body, charset, request);
+			super(HttpStatus.SERVICE_UNAVAILABLE, statusText, headers, body, charset, request);
 		}
 	}
 
@@ -587,7 +589,7 @@ public class WebClientResponseException extends WebClientException {
 				String statusText, HttpHeaders headers, byte[] body, @Nullable Charset charset,
 				@Nullable HttpRequest request) {
 
-			super(HttpStatus.GATEWAY_TIMEOUT.value(), statusText, headers, body, charset, request);
+			super(HttpStatus.GATEWAY_TIMEOUT, statusText, headers, body, charset, request);
 		}
 	}
 

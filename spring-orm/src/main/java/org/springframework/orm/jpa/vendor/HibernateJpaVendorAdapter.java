@@ -23,7 +23,6 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.spi.PersistenceProvider;
 import jakarta.persistence.spi.PersistenceUnitInfo;
-import jakarta.persistence.spi.PersistenceUnitTransactionType;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.AvailableSettings;
@@ -38,6 +37,8 @@ import org.hibernate.dialect.SQLServerDialect;
 import org.hibernate.dialect.SybaseDialect;
 import org.hibernate.resource.jdbc.spi.PhysicalConnectionHandlingMode;
 import org.jspecify.annotations.Nullable;
+
+import org.springframework.orm.jpa.persistenceunit.SmartPersistenceUnitInfo;
 
 /**
  * {@link org.springframework.orm.jpa.JpaVendorAdapter} implementation for Hibernate.
@@ -77,8 +78,8 @@ public class HibernateJpaVendorAdapter extends AbstractJpaVendorAdapter {
 
 	public HibernateJpaVendorAdapter() {
 		this.persistenceProvider = new SpringHibernateJpaPersistenceProvider();
-		this.entityManagerFactoryInterface = SessionFactory.class;  // as of Spring 5.3
-		this.entityManagerInterface = Session.class;  // as of Spring 5.3
+		this.entityManagerFactoryInterface = SessionFactory.class;
+		this.entityManagerInterface = Session.class;
 	}
 
 
@@ -120,11 +121,10 @@ public class HibernateJpaVendorAdapter extends AbstractJpaVendorAdapter {
 		return "org.hibernate";
 	}
 
-	@SuppressWarnings("removal")
 	@Override
 	public Map<String, Object> getJpaPropertyMap(PersistenceUnitInfo pui) {
 		return buildJpaPropertyMap(this.jpaDialect.prepareConnection &&
-				pui.getTransactionType() != PersistenceUnitTransactionType.JTA);
+				(pui instanceof SmartPersistenceUnitInfo spui && !spui.isConfiguredForJta()));
 	}
 
 	@Override

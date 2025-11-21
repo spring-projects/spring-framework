@@ -371,7 +371,7 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 				int startupPhase = getPhase(bean);
 				phases.computeIfAbsent(
 						startupPhase, phase -> new LifecycleGroup(phase, lifecycleBeans, autoStartupOnly, false))
-						.add(beanName, bean);
+							.add(beanName, bean);
 			}
 		});
 
@@ -441,7 +441,7 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 			int shutdownPhase = getPhase(bean);
 			phases.computeIfAbsent(
 					shutdownPhase, phase -> new LifecycleGroup(phase, lifecycleBeans, false, pauseableOnly))
-					.add(beanName, bean);
+						.add(beanName, bean);
 		});
 
 		if (!phases.isEmpty()) {
@@ -714,34 +714,35 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 	 */
 	private class CracResourceAdapter implements org.crac.Resource {
 
-		private @Nullable CyclicBarrier barrier;
+		private final CyclicBarrier beforeCheckpointBarrier = new CyclicBarrier(2);
+		private final CyclicBarrier afterRestoreBarrier = new CyclicBarrier(2);
 
 		@Override
 		public void beforeCheckpoint(org.crac.Context<? extends org.crac.Resource> context) {
-			// A non-daemon thread for preventing an accidental JVM shutdown before the checkpoint
-			this.barrier = new CyclicBarrier(2);
-
-			Thread thread = new Thread(() -> {
-				awaitPreventShutdownBarrier();
-				// Checkpoint happens here
-				awaitPreventShutdownBarrier();
-			}, "prevent-shutdown");
-
+			Thread thread = new Thread(this::preventShutdown, "prevent-shutdown");
 			thread.setDaemon(false);
 			thread.start();
-			awaitPreventShutdownBarrier();
 
 			logger.debug("Stopping Spring-managed lifecycle beans before JVM checkpoint");
 			stopForRestart();
 		}
 
+		private void preventShutdown() {
+			awaitBarrier(this.beforeCheckpointBarrier);
+			// Checkpoint happens here
+			awaitBarrier(this.afterRestoreBarrier);
+		}
+
 		@Override
 		public void afterRestore(org.crac.Context<? extends org.crac.Resource> context) {
+			// Unlock barrier for beforeCheckpoint
+			awaitBarrier(this.beforeCheckpointBarrier);
+
 			logger.info("Restarting Spring-managed lifecycle beans after JVM restore");
 			restartAfterStop();
 
-			// Barrier for prevent-shutdown thread not needed anymore
-			this.barrier = null;
+			// Unlock barrier for afterRestore to shutdown "prevent-shutdown" thread
+			awaitBarrier(this.afterRestoreBarrier);
 
 			if (!checkpointOnRefresh) {
 				logger.info("Spring-managed lifecycle restart completed (restored JVM running for " +
@@ -749,14 +750,12 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 			}
 		}
 
-		private void awaitPreventShutdownBarrier() {
+		private void awaitBarrier(CyclicBarrier barrier) {
 			try {
-				if (this.barrier != null) {
-					this.barrier.await();
-				}
+				barrier.await();
 			}
 			catch (Exception ex) {
-				logger.trace("Exception from prevent-shutdown barrier", ex);
+				logger.trace("Exception from barrier", ex);
 			}
 		}
 	}

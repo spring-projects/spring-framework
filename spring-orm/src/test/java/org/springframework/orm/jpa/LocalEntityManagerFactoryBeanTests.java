@@ -27,64 +27,138 @@ import jakarta.persistence.spi.ProviderUtil;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
+import org.springframework.orm.jpa.persistenceunit.DefaultPersistenceUnitManager;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
 
 /**
  * @author Rod Johnson
+ * @author Juergen Hoeller
  * @author Phillip Webb
  */
-@SuppressWarnings("rawtypes")
+@SuppressWarnings({"rawtypes", "unchecked"})
 class LocalEntityManagerFactoryBeanTests extends AbstractEntityManagerFactoryBeanTests {
-
-	// Static fields set by inner class DummyPersistenceProvider
-
-	private static String actualName;
-
-	private static Map actualProps;
 
 	@AfterEach
 	void verifyClosed() {
 		verify(mockEmf).close();
 	}
 
-	@Test
-	void testValidUsageWithDefaultProperties() throws Exception {
-		testValidUsage(null);
-	}
 
 	@Test
-	void testValidUsageWithExplicitProperties() throws Exception {
-		testValidUsage(new Properties());
+	void withDefault() {
+		DummyPersistenceProvider persistenceProvider = new DummyPersistenceProvider();
+		LocalEntityManagerFactoryBean emfb = new LocalEntityManagerFactoryBean();
+
+		emfb.setPersistenceProvider(persistenceProvider);
+		emfb.afterPropertiesSet();
+
+		assertThat(persistenceProvider.actualName).isSameAs(
+				DefaultPersistenceUnitManager.ORIGINAL_DEFAULT_PERSISTENCE_UNIT_NAME);
+		assertThat(persistenceProvider.actualProps).isEqualTo(emfb.getJpaPropertyMap());
+		checkInvariants(emfb);
+
+		emfb.destroy();
 	}
 
-	@SuppressWarnings("unchecked")
-	protected void testValidUsage(Properties props) {
-		// This will be set by DummyPersistenceProvider
-		actualName = null;
-		actualProps = null;
+	@Test
+	void withName() {
+		DummyPersistenceProvider persistenceProvider = new DummyPersistenceProvider();
+		LocalEntityManagerFactoryBean emfb = new LocalEntityManagerFactoryBean();
+		String name = "call me Bob";
 
-		LocalEntityManagerFactoryBean lemfb = new LocalEntityManagerFactoryBean();
-		String entityManagerName = "call me Bob";
+		emfb.setPersistenceUnitName(name);
+		emfb.setPersistenceProvider(persistenceProvider);
+		emfb.afterPropertiesSet();
 
-		lemfb.setPersistenceUnitName(entityManagerName);
-		lemfb.setPersistenceProviderClass(DummyPersistenceProvider.class);
-		if (props != null) {
-			lemfb.setJpaProperties(props);
-		}
-		lemfb.afterPropertiesSet();
+		assertThat(persistenceProvider.actualName).isSameAs(name);
+		assertThat(persistenceProvider.actualProps).isEqualTo(emfb.getJpaPropertyMap());
+		checkInvariants(emfb);
 
-		assertThat(actualName).isSameAs(entityManagerName);
-		if (props != null) {
-			assertThat(actualProps).isEqualTo(props);
-		}
-		checkInvariants(lemfb);
+		emfb.destroy();
+	}
 
-		lemfb.destroy();
+	@Test
+	void withNameAndExplicitProperties() {
+		DummyPersistenceProvider persistenceProvider = new DummyPersistenceProvider();
+		LocalEntityManagerFactoryBean emfb = new LocalEntityManagerFactoryBean();
+		String name = "call me Bob";
+		Properties props = new Properties();
+		props.setProperty("myProp", "myVal");
+
+		emfb.setPersistenceUnitName(name);
+		emfb.setPersistenceProvider(persistenceProvider);
+		emfb.setJpaProperties(props);
+		emfb.afterPropertiesSet();
+
+		assertThat(persistenceProvider.actualName).isSameAs(name);
+		assertThat(persistenceProvider.actualProps).isEqualTo(props);
+		checkInvariants(emfb);
+
+		emfb.destroy();
+	}
+
+	@Test
+	void withDefaultPersistenceConfiguration() {
+		DummyPersistenceProvider persistenceProvider = new DummyPersistenceProvider();
+		LocalEntityManagerFactoryBean emfb = new LocalEntityManagerFactoryBean();
+
+		emfb.getPersistenceConfiguration().property("myProp", "myVal");
+		emfb.setPersistenceProvider(persistenceProvider);
+		emfb.afterPropertiesSet();
+
+		assertThat(persistenceProvider.actualName).isSameAs(
+				DefaultPersistenceUnitManager.ORIGINAL_DEFAULT_PERSISTENCE_UNIT_NAME);
+		assertThat(persistenceProvider.actualProps).containsEntry("myProp", "myVal");
+		checkInvariants(emfb);
+
+		emfb.destroy();
+	}
+
+	@Test
+	void withNameAndDefaultPersistenceConfiguration() {
+		DummyPersistenceProvider persistenceProvider = new DummyPersistenceProvider();
+		LocalEntityManagerFactoryBean emfb = new LocalEntityManagerFactoryBean();
+		String name = "call me Bob";
+
+		emfb.setPersistenceUnitName(name);
+		emfb.getPersistenceConfiguration().property("myProp", "myVal");
+		emfb.setPersistenceProvider(persistenceProvider);
+		emfb.afterPropertiesSet();
+
+		assertThat(persistenceProvider.actualName).isSameAs(name);
+		assertThat(persistenceProvider.actualProps).containsEntry("myProp", "myVal");
+		checkInvariants(emfb);
+
+		emfb.destroy();
+	}
+
+	@Test
+	void withExplicitPersistenceConfiguration() {
+		DummyPersistenceProvider persistenceProvider = new DummyPersistenceProvider();
+		LocalEntityManagerFactoryBean emfb = new LocalEntityManagerFactoryBean();
+		String name = "call me Bob";
+		PersistenceConfiguration config = new PersistenceConfiguration(name);
+		config.property("myProp", "myVal");
+
+		emfb.setPersistenceConfiguration(config);
+		emfb.setPersistenceProvider(persistenceProvider);
+		emfb.afterPropertiesSet();
+
+		assertThat(persistenceProvider.actualName).isSameAs(name);
+		assertThat(persistenceProvider.actualProps).containsEntry("myProp", "myVal");
+		checkInvariants(emfb);
+
+		emfb.destroy();
 	}
 
 
-	protected static class DummyPersistenceProvider implements PersistenceProvider {
+	private static class DummyPersistenceProvider implements PersistenceProvider {
+
+		String actualName;
+
+		Map actualProps;
 
 		@Override
 		public EntityManagerFactory createContainerEntityManagerFactory(PersistenceUnitInfo pui, Map map) {
@@ -99,8 +173,10 @@ class LocalEntityManagerFactoryBeanTests extends AbstractEntityManagerFactoryBea
 		}
 
 		@Override
-		public EntityManagerFactory createEntityManagerFactory(PersistenceConfiguration persistenceConfiguration) {
-			throw new UnsupportedOperationException();
+		public EntityManagerFactory createEntityManagerFactory(PersistenceConfiguration config) {
+			actualName = config.name();
+			actualProps = config.properties();
+			return mockEmf;
 		}
 
 		@Override
@@ -108,13 +184,11 @@ class LocalEntityManagerFactoryBeanTests extends AbstractEntityManagerFactoryBea
 			throw new UnsupportedOperationException();
 		}
 
-		// JPA 2.1 method
 		@Override
 		public void generateSchema(PersistenceUnitInfo persistenceUnitInfo, Map map) {
 			throw new UnsupportedOperationException();
 		}
 
-		// JPA 2.1 method
 		@Override
 		public boolean generateSchema(String persistenceUnitName, Map map) {
 			throw new UnsupportedOperationException();

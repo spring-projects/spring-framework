@@ -36,7 +36,7 @@ import org.springframework.util.Assert;
 /**
  * Mock implementation of the {@link jakarta.servlet.http.HttpSession} interface.
  *
- * <p>As of Spring 6.0, this set of mocks is designed on a Servlet 6.0 baseline.
+ * <p>As of Spring 7.0, this set of mocks is designed on a Servlet 6.1 baseline.
  *
  * @author Juergen Hoeller
  * @author Rod Johnson

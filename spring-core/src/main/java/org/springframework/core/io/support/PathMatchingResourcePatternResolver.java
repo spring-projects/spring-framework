@@ -41,7 +41,6 @@ import java.nio.file.Path;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.NavigableSet;
@@ -392,7 +391,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 			}
 			else {
 				// a single resource with the given name
-				return new Resource[] {getResourceLoader().getResource(locationPattern)};
+				return new Resource[] {getResource(locationPattern)};
 			}
 		}
 	}
@@ -615,10 +614,12 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 	private Set<ClassPathManifestEntry> getClassPathManifestEntriesFromJar(File jar) throws IOException {
 		URL base = jar.toURI().toURL();
 		File parent = jar.getAbsoluteFile().getParentFile();
+
 		try (JarFile jarFile = new JarFile(jar)) {
 			Manifest manifest = jarFile.getManifest();
 			Attributes attributes = (manifest != null ? manifest.getMainAttributes() : null);
 			String classPath = (attributes != null ? attributes.getValue(Name.CLASS_PATH) : null);
+
 			Set<ClassPathManifestEntry> manifestEntries = new LinkedHashSet<>();
 			if (StringUtils.hasLength(classPath)) {
 				StringTokenizer tokenizer = new StringTokenizer(classPath);
@@ -628,8 +629,15 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 						// See jdk.internal.loader.URLClassPath.JarLoader.tryResolveFile(URL, String)
 						continue;
 					}
-					File candidate = new File(parent, path);
-					if (candidate.isFile() && candidate.getCanonicalPath().contains(parent.getCanonicalPath())) {
+
+					// Handle absolute paths correctly: do not apply parent to absolute paths.
+					File pathFile = new File(path);
+					File candidate = (pathFile.isAbsolute() ? pathFile : new File(parent, path));
+
+					// For relative paths, enforce security check: must be under parent.
+					// For absolute paths, just verify file exists (matching JVM behavior).
+					if (candidate.isFile() && (pathFile.isAbsolute() ||
+							candidate.getCanonicalPath().contains(parent.getCanonicalPath()))) {
 						manifestEntries.add(ClassPathManifestEntry.of(candidate, this.useCaches));
 					}
 				}
@@ -934,14 +942,10 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 			}
 			Set<Resource> result = new LinkedHashSet<>(64);
 			NavigableSet<String> entriesCache = new TreeSet<>();
-			Iterator<String> entryIterator = jarFile.stream().map(JarEntry::getName).sorted().iterator();
-			while (entryIterator.hasNext()) {
-				String entryPath = entryIterator.next();
-				int entrySeparatorIndex = entryPath.indexOf(ResourceUtils.JAR_URL_SEPARATOR);
-				if (entrySeparatorIndex >= 0) {
-					entryPath = entryPath.substring(entrySeparatorIndex + ResourceUtils.JAR_URL_SEPARATOR.length());
-				}
-				entriesCache.add(entryPath);
+			for (Enumeration<JarEntry> entries = jarFile.entries(); entries.hasMoreElements();) {
+				entriesCache.add(entries.nextElement().getName());
+			}
+			for (String entryPath : entriesCache) {
 				if (entryPath.startsWith(rootEntryPath)) {
 					String relativePath = entryPath.substring(rootEntryPath.length());
 					if (getPathMatcher().match(subPattern, relativePath)) {

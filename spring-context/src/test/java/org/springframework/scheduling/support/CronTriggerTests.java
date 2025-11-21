@@ -16,19 +16,16 @@
 
 package org.springframework.scheduling.support;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.List;
 import java.util.TimeZone;
-import java.util.stream.Stream;
 
-import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedClass;
 import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.FieldSource;
 
 import org.springframework.scheduling.TriggerContext;
 
@@ -44,51 +41,55 @@ import static org.junit.jupiter.params.provider.Arguments.arguments;
  * @author Juergen Hoeller
  * @author Sam Brannen
  */
+@ParameterizedClass
+@FieldSource("parameters")
 @SuppressWarnings("deprecation")
 class CronTriggerTests {
 
-	private final Calendar calendar = new GregorianCalendar();
+	static List<Arguments> parameters = List.of(
+			arguments(new Date(), TimeZone.getTimeZone("PST")),
+			arguments(new Date(), TimeZone.getTimeZone("CET")));
 
-	private void setup(Date localDateTime, TimeZone timeZone) {
+
+	private final Calendar calendar = new GregorianCalendar();
+	private final Date localDateTime;
+	private final TimeZone timeZone;
+
+
+	CronTriggerTests(Date localDateTime, TimeZone timeZone) {
 		this.calendar.setTime(localDateTime);
 		this.calendar.setTimeZone(timeZone);
 		roundup(this.calendar);
+		this.localDateTime = localDateTime;
+		this.timeZone = timeZone;
 	}
 
 
-	@ParameterizedCronTriggerTest
-	void matchAll(Date localDateTime, TimeZone timeZone) {
-		setup(localDateTime, timeZone);
-
+	@Test
+	void matchAll() {
 		CronTrigger trigger = new CronTrigger("* * * * * *", timeZone);
 		TriggerContext context = getTriggerContext(localDateTime);
 		assertThat(trigger.nextExecutionTime(context)).isEqualTo(this.calendar.getTime());
 	}
 
-	@ParameterizedCronTriggerTest
-	void matchLastSecond(Date localDateTime, TimeZone timeZone) {
-		setup(localDateTime, timeZone);
-
+	@Test
+	void matchLastSecond() {
 		CronTrigger trigger = new CronTrigger("* * * * * *", timeZone);
 		GregorianCalendar calendar = new GregorianCalendar();
 		calendar.set(Calendar.SECOND, 58);
 		assertMatchesNextSecond(trigger, calendar);
 	}
 
-	@ParameterizedCronTriggerTest
-	void matchSpecificSecond(Date localDateTime, TimeZone timeZone) {
-		setup(localDateTime, timeZone);
-
+	@Test
+	void matchSpecificSecond() {
 		CronTrigger trigger = new CronTrigger("10 * * * * *", timeZone);
 		GregorianCalendar calendar = new GregorianCalendar();
 		calendar.set(Calendar.SECOND, 9);
 		assertMatchesNextSecond(trigger, calendar);
 	}
 
-	@ParameterizedCronTriggerTest
-	void incrementSecondByOne(Date localDateTime, TimeZone timeZone) {
-		setup(localDateTime, timeZone);
-
+	@Test
+	void incrementSecondByOne() {
 		CronTrigger trigger = new CronTrigger("11 * * * * *", timeZone);
 		this.calendar.set(Calendar.SECOND, 10);
 		Date localDate = this.calendar.getTime();
@@ -97,10 +98,8 @@ class CronTriggerTests {
 		assertThat(trigger.nextExecutionTime(context)).isEqualTo(this.calendar.getTime());
 	}
 
-	@ParameterizedCronTriggerTest
-	void incrementSecondWithPreviousExecutionTooEarly(Date localDateTime, TimeZone timeZone) {
-		setup(localDateTime, timeZone);
-
+	@Test
+	void incrementSecondWithPreviousExecutionTooEarly() {
 		CronTrigger trigger = new CronTrigger("11 * * * * *", timeZone);
 		this.calendar.set(Calendar.SECOND, 11);
 		SimpleTriggerContext context = new SimpleTriggerContext();
@@ -110,10 +109,8 @@ class CronTriggerTests {
 		assertThat(trigger.nextExecutionTime(context)).isEqualTo(this.calendar.getTime());
 	}
 
-	@ParameterizedCronTriggerTest
-	void incrementSecondAndRollover(Date localDateTime, TimeZone timeZone) {
-		setup(localDateTime, timeZone);
-
+	@Test
+	void incrementSecondAndRollover() {
 		CronTrigger trigger = new CronTrigger("10 * * * * *", timeZone);
 		this.calendar.set(Calendar.SECOND, 11);
 		Date localDate = this.calendar.getTime();
@@ -122,10 +119,8 @@ class CronTriggerTests {
 		assertThat(trigger.nextExecutionTime(context)).isEqualTo(this.calendar.getTime());
 	}
 
-	@ParameterizedCronTriggerTest
-	void secondRange(Date localDateTime, TimeZone timeZone) {
-		setup(localDateTime, timeZone);
-
+	@Test
+	void secondRange() {
 		CronTrigger trigger = new CronTrigger("10-15 * * * * *", timeZone);
 		this.calendar.set(Calendar.SECOND, 9);
 		assertMatchesNextSecond(trigger, this.calendar);
@@ -133,10 +128,8 @@ class CronTriggerTests {
 		assertMatchesNextSecond(trigger, this.calendar);
 	}
 
-	@ParameterizedCronTriggerTest
-	void incrementMinute(Date localDateTime, TimeZone timeZone) {
-		setup(localDateTime, timeZone);
-
+	@Test
+	void incrementMinute() {
 		CronTrigger trigger = new CronTrigger("0 * * * * *", timeZone);
 		this.calendar.set(Calendar.MINUTE, 10);
 		Date localDate = this.calendar.getTime();
@@ -151,10 +144,8 @@ class CronTriggerTests {
 		assertThat(localDate).isEqualTo(this.calendar.getTime());
 	}
 
-	@ParameterizedCronTriggerTest
-	void incrementMinuteByOne(Date localDateTime, TimeZone timeZone) {
-		setup(localDateTime, timeZone);
-
+	@Test
+	void incrementMinuteByOne() {
 		CronTrigger trigger = new CronTrigger("0 11 * * * *", timeZone);
 		this.calendar.set(Calendar.MINUTE, 10);
 		TriggerContext context = getTriggerContext(this.calendar.getTime());
@@ -163,10 +154,8 @@ class CronTriggerTests {
 		assertThat(trigger.nextExecutionTime(context)).isEqualTo(this.calendar.getTime());
 	}
 
-	@ParameterizedCronTriggerTest
-	void incrementMinuteAndRollover(Date localDateTime, TimeZone timeZone) {
-		setup(localDateTime, timeZone);
-
+	@Test
+	void incrementMinuteAndRollover() {
 		CronTrigger trigger = new CronTrigger("0 10 * * * *", timeZone);
 		this.calendar.set(Calendar.MINUTE, 11);
 		this.calendar.set(Calendar.SECOND, 0);
@@ -176,10 +165,8 @@ class CronTriggerTests {
 		assertThat(trigger.nextExecutionTime(context)).isEqualTo(this.calendar.getTime());
 	}
 
-	@ParameterizedCronTriggerTest
-	void incrementHour(Date localDateTime, TimeZone timeZone) {
-		setup(localDateTime, timeZone);
-
+	@Test
+	void incrementHour() {
 		CronTrigger trigger = new CronTrigger("0 0 * * * *", timeZone);
 		this.calendar.set(Calendar.MONTH, 9);
 		this.calendar.set(Calendar.DAY_OF_MONTH, 30);
@@ -197,10 +184,8 @@ class CronTriggerTests {
 		assertThat(trigger.nextExecutionTime(context2)).isEqualTo(this.calendar.getTime());
 	}
 
-	@ParameterizedCronTriggerTest
-	void incrementHourAndRollover(Date localDateTime, TimeZone timeZone) {
-		setup(localDateTime, timeZone);
-
+	@Test
+	void incrementHourAndRollover() {
 		CronTrigger trigger = new CronTrigger("0 0 * * * *", timeZone);
 		this.calendar.set(Calendar.MONTH, 9);
 		this.calendar.set(Calendar.DAY_OF_MONTH, 10);
@@ -219,10 +204,8 @@ class CronTriggerTests {
 		assertThat(trigger.nextExecutionTime(context2)).isEqualTo(this.calendar.getTime());
 	}
 
-	@ParameterizedCronTriggerTest
-	void incrementDayOfMonth(Date localDateTime, TimeZone timeZone) {
-		setup(localDateTime, timeZone);
-
+	@Test
+	void incrementDayOfMonth() {
 		CronTrigger trigger = new CronTrigger("0 0 0 * * *", timeZone);
 		this.calendar.set(Calendar.DAY_OF_MONTH, 1);
 		Date localDate = this.calendar.getTime();
@@ -241,10 +224,8 @@ class CronTriggerTests {
 		assertThat(this.calendar.get(Calendar.DAY_OF_MONTH)).isEqualTo(3);
 	}
 
-	@ParameterizedCronTriggerTest
-	void incrementDayOfMonthByOne(Date localDateTime, TimeZone timeZone) {
-		setup(localDateTime, timeZone);
-
+	@Test
+	void incrementDayOfMonthByOne() {
 		CronTrigger trigger = new CronTrigger("* * * 10 * *", timeZone);
 		this.calendar.set(Calendar.DAY_OF_MONTH, 9);
 		Date localDate = this.calendar.getTime();
@@ -256,10 +237,8 @@ class CronTriggerTests {
 		assertThat(trigger.nextExecutionTime(context)).isEqualTo(this.calendar.getTime());
 	}
 
-	@ParameterizedCronTriggerTest
-	void incrementDayOfMonthAndRollover(Date localDateTime, TimeZone timeZone) {
-		setup(localDateTime, timeZone);
-
+	@Test
+	void incrementDayOfMonthAndRollover() {
 		CronTrigger trigger = new CronTrigger("* * * 10 * *", timeZone);
 		this.calendar.set(Calendar.DAY_OF_MONTH, 11);
 		Date localDate = this.calendar.getTime();
@@ -272,10 +251,8 @@ class CronTriggerTests {
 		assertThat(trigger.nextExecutionTime(context)).isEqualTo(this.calendar.getTime());
 	}
 
-	@ParameterizedCronTriggerTest
-	void dailyTriggerInShortMonth(Date localDateTime, TimeZone timeZone) {
-		setup(localDateTime, timeZone);
-
+	@Test
+	void dailyTriggerInShortMonth() {
 		CronTrigger trigger = new CronTrigger("0 0 0 * * *", timeZone);
 		this.calendar.set(Calendar.MONTH, 8); // September: 30 days
 		this.calendar.set(Calendar.DAY_OF_MONTH, 30);
@@ -293,10 +270,8 @@ class CronTriggerTests {
 		assertThat(trigger.nextExecutionTime(context2)).isEqualTo(this.calendar.getTime());
 	}
 
-	@ParameterizedCronTriggerTest
-	void dailyTriggerInLongMonth(Date localDateTime, TimeZone timeZone) {
-		setup(localDateTime, timeZone);
-
+	@Test
+	void dailyTriggerInLongMonth() {
 		CronTrigger trigger = new CronTrigger("0 0 0 * * *", timeZone);
 		this.calendar.set(Calendar.MONTH, 7); // August: 31 days and not a daylight saving boundary
 		this.calendar.set(Calendar.DAY_OF_MONTH, 30);
@@ -314,10 +289,8 @@ class CronTriggerTests {
 		assertThat(trigger.nextExecutionTime(context2)).isEqualTo(this.calendar.getTime());
 	}
 
-	@ParameterizedCronTriggerTest
-	void dailyTriggerOnDaylightSavingBoundary(Date localDateTime, TimeZone timeZone) {
-		setup(localDateTime, timeZone);
-
+	@Test
+	void dailyTriggerOnDaylightSavingBoundary() {
 		CronTrigger trigger = new CronTrigger("0 0 0 * * *", timeZone);
 		this.calendar.set(Calendar.MONTH, 9); // October: 31 days and a daylight saving boundary in CET
 		this.calendar.set(Calendar.DAY_OF_MONTH, 30);
@@ -335,10 +308,8 @@ class CronTriggerTests {
 		assertThat(trigger.nextExecutionTime(context2)).isEqualTo(this.calendar.getTime());
 	}
 
-	@ParameterizedCronTriggerTest
-	void incrementMonth(Date localDateTime, TimeZone timeZone) {
-		setup(localDateTime, timeZone);
-
+	@Test
+	void incrementMonth() {
 		CronTrigger trigger = new CronTrigger("0 0 0 1 * *", timeZone);
 		this.calendar.set(Calendar.MONTH, 9);
 		this.calendar.set(Calendar.DAY_OF_MONTH, 30);
@@ -356,10 +327,8 @@ class CronTriggerTests {
 		assertThat(trigger.nextExecutionTime(context2)).isEqualTo(this.calendar.getTime());
 	}
 
-	@ParameterizedCronTriggerTest
-	void incrementMonthAndRollover(Date localDateTime, TimeZone timeZone) {
-		setup(localDateTime, timeZone);
-
+	@Test
+	void incrementMonthAndRollover() {
 		CronTrigger trigger = new CronTrigger("0 0 0 1 * *", timeZone);
 		this.calendar.set(Calendar.MONTH, 11);
 		this.calendar.set(Calendar.DAY_OF_MONTH, 31);
@@ -379,10 +348,8 @@ class CronTriggerTests {
 		assertThat(trigger.nextExecutionTime(context2)).isEqualTo(this.calendar.getTime());
 	}
 
-	@ParameterizedCronTriggerTest
-	void monthlyTriggerInLongMonth(Date localDateTime, TimeZone timeZone) {
-		setup(localDateTime, timeZone);
-
+	@Test
+	void monthlyTriggerInLongMonth() {
 		CronTrigger trigger = new CronTrigger("0 0 0 31 * *", timeZone);
 		this.calendar.set(Calendar.MONTH, 9);
 		this.calendar.set(Calendar.DAY_OF_MONTH, 30);
@@ -395,10 +362,8 @@ class CronTriggerTests {
 		assertThat(trigger.nextExecutionTime(context)).isEqualTo(this.calendar.getTime());
 	}
 
-	@ParameterizedCronTriggerTest
-	void monthlyTriggerInShortMonth(Date localDateTime, TimeZone timeZone) {
-		setup(localDateTime, timeZone);
-
+	@Test
+	void monthlyTriggerInShortMonth() {
 		CronTrigger trigger = new CronTrigger("0 0 0 1 * *", timeZone);
 		this.calendar.set(Calendar.MONTH, 9);
 		this.calendar.set(Calendar.DAY_OF_MONTH, 30);
@@ -412,10 +377,8 @@ class CronTriggerTests {
 		assertThat(trigger.nextExecutionTime(context)).isEqualTo(this.calendar.getTime());
 	}
 
-	@ParameterizedCronTriggerTest
-	void incrementDayOfWeekByOne(Date localDateTime, TimeZone timeZone) {
-		setup(localDateTime, timeZone);
-
+	@Test
+	void incrementDayOfWeekByOne() {
 		CronTrigger trigger = new CronTrigger("* * * * * 2", timeZone);
 		this.calendar.set(Calendar.DAY_OF_WEEK, 2);
 		Date localDate = this.calendar.getTime();
@@ -428,10 +391,8 @@ class CronTriggerTests {
 		assertThat(this.calendar.get(Calendar.DAY_OF_WEEK)).isEqualTo(Calendar.TUESDAY);
 	}
 
-	@ParameterizedCronTriggerTest
-	void incrementDayOfWeekAndRollover(Date localDateTime, TimeZone timeZone) {
-		setup(localDateTime, timeZone);
-
+	@Test
+	void incrementDayOfWeekAndRollover() {
 		CronTrigger trigger = new CronTrigger("* * * * * 2", timeZone);
 		this.calendar.set(Calendar.DAY_OF_WEEK, 4);
 		Date localDate = this.calendar.getTime();
@@ -444,10 +405,8 @@ class CronTriggerTests {
 		assertThat(this.calendar.get(Calendar.DAY_OF_WEEK)).isEqualTo(Calendar.TUESDAY);
 	}
 
-	@ParameterizedCronTriggerTest
-	void specificMinuteSecond(Date localDateTime, TimeZone timeZone) {
-		setup(localDateTime, timeZone);
-
+	@Test
+	void specificMinuteSecond() {
 		CronTrigger trigger = new CronTrigger("55 5 * * * *", timeZone);
 		this.calendar.set(Calendar.MINUTE, 4);
 		this.calendar.set(Calendar.SECOND, 54);
@@ -463,10 +422,8 @@ class CronTriggerTests {
 		assertThat(actual).isEqualTo(this.calendar.getTime());
 	}
 
-	@ParameterizedCronTriggerTest
-	void specificHourSecond(Date localDateTime, TimeZone timeZone) {
-		setup(localDateTime, timeZone);
-
+	@Test
+	void specificHourSecond() {
 		CronTrigger trigger = new CronTrigger("55 * 10 * * *", timeZone);
 		this.calendar.set(Calendar.HOUR_OF_DAY, 9);
 		this.calendar.set(Calendar.SECOND, 54);
@@ -483,10 +440,8 @@ class CronTriggerTests {
 		assertThat(actual).isEqualTo(this.calendar.getTime());
 	}
 
-	@ParameterizedCronTriggerTest
-	void specificMinuteHour(Date localDateTime, TimeZone timeZone) {
-		setup(localDateTime, timeZone);
-
+	@Test
+	void specificMinuteHour() {
 		CronTrigger trigger = new CronTrigger("* 5 10 * * *", timeZone);
 		this.calendar.set(Calendar.MINUTE, 4);
 		this.calendar.set(Calendar.HOUR_OF_DAY, 9);
@@ -504,10 +459,8 @@ class CronTriggerTests {
 		assertThat(actual).isEqualTo(this.calendar.getTime());
 	}
 
-	@ParameterizedCronTriggerTest
-	void specificDayOfMonthSecond(Date localDateTime, TimeZone timeZone) {
-		setup(localDateTime, timeZone);
-
+	@Test
+	void specificDayOfMonthSecond() {
 		CronTrigger trigger = new CronTrigger("55 * * 3 * *", timeZone);
 		this.calendar.set(Calendar.DAY_OF_MONTH, 2);
 		this.calendar.set(Calendar.SECOND, 54);
@@ -525,10 +478,8 @@ class CronTriggerTests {
 		assertThat(actual).isEqualTo(this.calendar.getTime());
 	}
 
-	@ParameterizedCronTriggerTest
-	void specificDate(Date localDateTime, TimeZone timeZone) {
-		setup(localDateTime, timeZone);
-
+	@Test
+	void specificDate() {
 		CronTrigger trigger = new CronTrigger("* * * 3 11 *", timeZone);
 		this.calendar.set(Calendar.DAY_OF_MONTH, 2);
 		this.calendar.set(Calendar.MONTH, 9);
@@ -547,10 +498,8 @@ class CronTriggerTests {
 		assertThat(actual).isEqualTo(this.calendar.getTime());
 	}
 
-	@ParameterizedCronTriggerTest
-	void nonExistentSpecificDate(Date localDateTime, TimeZone timeZone) {
-		setup(localDateTime, timeZone);
-
+	@Test
+	void nonExistentSpecificDate() {
 		// TODO: maybe try and detect this as a special case in parser?
 		CronTrigger trigger = new CronTrigger("0 0 0 31 6 *", timeZone);
 		this.calendar.set(Calendar.DAY_OF_MONTH, 10);
@@ -560,10 +509,8 @@ class CronTriggerTests {
 		assertThat(trigger.nextExecutionTime(context1)).isNull();
 	}
 
-	@ParameterizedCronTriggerTest
-	void leapYearSpecificDate(Date localDateTime, TimeZone timeZone) {
-		setup(localDateTime, timeZone);
-
+	@Test
+	void leapYearSpecificDate() {
 		CronTrigger trigger = new CronTrigger("0 0 0 29 2 *", timeZone);
 		this.calendar.set(Calendar.YEAR, 2007);
 		this.calendar.set(Calendar.DAY_OF_MONTH, 10);
@@ -583,10 +530,8 @@ class CronTriggerTests {
 		assertThat(actual).isEqualTo(this.calendar.getTime());
 	}
 
-	@ParameterizedCronTriggerTest
-	void weekDaySequence(Date localDateTime, TimeZone timeZone) {
-		setup(localDateTime, timeZone);
-
+	@Test
+	void weekDaySequence() {
 		CronTrigger trigger = new CronTrigger("0 0 7 ? * MON-FRI", timeZone);
 		// This is a Saturday
 		this.calendar.set(2009, 8, 26);
@@ -611,184 +556,138 @@ class CronTriggerTests {
 		assertThat(actual).isEqualTo(this.calendar.getTime());
 	}
 
-	@ParameterizedCronTriggerTest
-	void dayOfWeekIndifferent(Date localDateTime, TimeZone timeZone) {
-		setup(localDateTime, timeZone);
-
+	@Test
+	void dayOfWeekIndifferent() {
 		CronTrigger trigger1 = new CronTrigger("* * * 2 * *", timeZone);
 		CronTrigger trigger2 = new CronTrigger("* * * 2 * ?", timeZone);
 		assertThat(trigger2).isEqualTo(trigger1);
 	}
 
-	@ParameterizedCronTriggerTest
-	void secondIncrementer(Date localDateTime, TimeZone timeZone) {
-		setup(localDateTime, timeZone);
-
+	@Test
+	void secondIncrementer() {
 		CronTrigger trigger1 = new CronTrigger("57,59 * * * * *", timeZone);
 		CronTrigger trigger2 = new CronTrigger("57/2 * * * * *", timeZone);
 		assertThat(trigger2).isEqualTo(trigger1);
 	}
 
-	@ParameterizedCronTriggerTest
-	void secondIncrementerWithRange(Date localDateTime, TimeZone timeZone) {
-		setup(localDateTime, timeZone);
-
+	@Test
+	void secondIncrementerWithRange() {
 		CronTrigger trigger1 = new CronTrigger("1,3,5 * * * * *", timeZone);
 		CronTrigger trigger2 = new CronTrigger("1-6/2 * * * * *", timeZone);
 		assertThat(trigger2).isEqualTo(trigger1);
 	}
 
-	@ParameterizedCronTriggerTest
-	void hourIncrementer(Date localDateTime, TimeZone timeZone) {
-		setup(localDateTime, timeZone);
-
+	@Test
+	void hourIncrementer() {
 		CronTrigger trigger1 = new CronTrigger("* * 4,8,12,16,20 * * *", timeZone);
 		CronTrigger trigger2 = new CronTrigger("* * 4/4 * * *", timeZone);
 		assertThat(trigger2).isEqualTo(trigger1);
 	}
 
-	@ParameterizedCronTriggerTest
-	void dayNames(Date localDateTime, TimeZone timeZone) {
-		setup(localDateTime, timeZone);
-
+	@Test
+	void dayNames() {
 		CronTrigger trigger1 = new CronTrigger("* * * * * 0-6", timeZone);
 		CronTrigger trigger2 = new CronTrigger("* * * * * TUE,WED,THU,FRI,SAT,SUN,MON", timeZone);
 		assertThat(trigger2).isEqualTo(trigger1);
 	}
 
-	@ParameterizedCronTriggerTest
-	void sundayIsZero(Date localDateTime, TimeZone timeZone) {
-		setup(localDateTime, timeZone);
-
+	@Test
+	void sundayIsZero() {
 		CronTrigger trigger1 = new CronTrigger("* * * * * 0", timeZone);
 		CronTrigger trigger2 = new CronTrigger("* * * * * SUN", timeZone);
 		assertThat(trigger2).isEqualTo(trigger1);
 	}
 
-	@ParameterizedCronTriggerTest
-	void sundaySynonym(Date localDateTime, TimeZone timeZone) {
-		setup(localDateTime, timeZone);
-
+	@Test
+	void sundaySynonym() {
 		CronTrigger trigger1 = new CronTrigger("* * * * * 0", timeZone);
 		CronTrigger trigger2 = new CronTrigger("* * * * * 7", timeZone);
 		assertThat(trigger2).isEqualTo(trigger1);
 	}
 
-	@ParameterizedCronTriggerTest
-	void monthNames(Date localDateTime, TimeZone timeZone) {
-		setup(localDateTime, timeZone);
-
+	@Test
+	void monthNames() {
 		CronTrigger trigger1 = new CronTrigger("* * * * 1-12 *", timeZone);
 		CronTrigger trigger2 = new CronTrigger("* * * * FEB,JAN,MAR,APR,MAY,JUN,JUL,AUG,SEP,OCT,NOV,DEC *", timeZone);
 		assertThat(trigger2).isEqualTo(trigger1);
 	}
 
-	@ParameterizedCronTriggerTest
-	void monthNamesMixedCase(Date localDateTime, TimeZone timeZone) {
-		setup(localDateTime, timeZone);
-
+	@Test
+	void monthNamesMixedCase() {
 		CronTrigger trigger1 = new CronTrigger("* * * * 2 *", timeZone);
 		CronTrigger trigger2 = new CronTrigger("* * * * Feb *", timeZone);
 		assertThat(trigger2).isEqualTo(trigger1);
 	}
 
-	@ParameterizedCronTriggerTest
-	void secondInvalid(Date localDateTime, TimeZone timeZone) {
-		setup(localDateTime, timeZone);
-
+	@Test
+	void secondInvalid() {
 		assertThatIllegalArgumentException().isThrownBy(() -> new CronTrigger("77 * * * * *", timeZone));
 	}
 
-	@ParameterizedCronTriggerTest
-	void secondRangeInvalid(Date localDateTime, TimeZone timeZone) {
-		setup(localDateTime, timeZone);
-
+	@Test
+	void secondRangeInvalid() {
 		assertThatIllegalArgumentException().isThrownBy(() -> new CronTrigger("44-77 * * * * *", timeZone));
 	}
 
-	@ParameterizedCronTriggerTest
-	void minuteInvalid(Date localDateTime, TimeZone timeZone) {
-		setup(localDateTime, timeZone);
-
+	@Test
+	void minuteInvalid() {
 		assertThatIllegalArgumentException().isThrownBy(() -> new CronTrigger("* 77 * * * *", timeZone));
 	}
 
-	@ParameterizedCronTriggerTest
-	void minuteRangeInvalid(Date localDateTime, TimeZone timeZone) {
-		setup(localDateTime, timeZone);
-
+	@Test
+	void minuteRangeInvalid() {
 		assertThatIllegalArgumentException().isThrownBy(() -> new CronTrigger("* 44-77 * * * *", timeZone));
 	}
 
-	@ParameterizedCronTriggerTest
-	void hourInvalid(Date localDateTime, TimeZone timeZone) {
-		setup(localDateTime, timeZone);
-
+	@Test
+	void hourInvalid() {
 		assertThatIllegalArgumentException().isThrownBy(() -> new CronTrigger("* * 27 * * *", timeZone));
 	}
 
-	@ParameterizedCronTriggerTest
-	void hourRangeInvalid(Date localDateTime, TimeZone timeZone) {
-		setup(localDateTime, timeZone);
-
+	@Test
+	void hourRangeInvalid() {
 		assertThatIllegalArgumentException().isThrownBy(() -> new CronTrigger("* * 23-28 * * *", timeZone));
 	}
 
-	@ParameterizedCronTriggerTest
-	void dayInvalid(Date localDateTime, TimeZone timeZone) {
-		setup(localDateTime, timeZone);
-
+	@Test
+	void dayInvalid() {
 		assertThatIllegalArgumentException().isThrownBy(() -> new CronTrigger("* * * 45 * *", timeZone));
 	}
 
-	@ParameterizedCronTriggerTest
-	void dayRangeInvalid(Date localDateTime, TimeZone timeZone) {
-		setup(localDateTime, timeZone);
-
+	@Test
+	void dayRangeInvalid() {
 		assertThatIllegalArgumentException().isThrownBy(() -> new CronTrigger("* * * 28-45 * *", timeZone));
 	}
 
-	@ParameterizedCronTriggerTest
-	void monthInvalid(Date localDateTime, TimeZone timeZone) {
-		setup(localDateTime, timeZone);
-
+	@Test
+	void monthInvalid() {
 		assertThatIllegalArgumentException().isThrownBy(() -> new CronTrigger("0 0 0 25 13 ?", timeZone));
 	}
 
-	@ParameterizedCronTriggerTest
-	void monthInvalidTooSmall(Date localDateTime, TimeZone timeZone) {
-		setup(localDateTime, timeZone);
-
+	@Test
+	void monthInvalidTooSmall() {
 		assertThatIllegalArgumentException().isThrownBy(() -> new CronTrigger("0 0 0 25 0 ?", timeZone));
 	}
 
-	@ParameterizedCronTriggerTest
-	void dayOfMonthInvalid(Date localDateTime, TimeZone timeZone) {
-		setup(localDateTime, timeZone);
-
+	@Test
+	void dayOfMonthInvalid() {
 		assertThatIllegalArgumentException().isThrownBy(() -> new CronTrigger("0 0 0 32 12 ?", timeZone));
 	}
 
-	@ParameterizedCronTriggerTest
-	void monthRangeInvalid(Date localDateTime, TimeZone timeZone) {
-		setup(localDateTime, timeZone);
-
+	@Test
+	void monthRangeInvalid() {
 		assertThatIllegalArgumentException().isThrownBy(() -> new CronTrigger("* * * * 11-13 *", timeZone));
 	}
 
-	@ParameterizedCronTriggerTest
-	void whitespace(Date localDateTime, TimeZone timeZone) {
-		setup(localDateTime, timeZone);
-
+	@Test
+	void whitespace() {
 		CronTrigger trigger1 = new CronTrigger("*  *  * *  1 *", timeZone);
 		CronTrigger trigger2 = new CronTrigger("* * * * 1 *", timeZone);
 		assertThat(trigger2).isEqualTo(trigger1);
 	}
 
-	@ParameterizedCronTriggerTest
-	void monthSequence(Date localDateTime, TimeZone timeZone) {
-		setup(localDateTime, timeZone);
-
+	@Test
+	void monthSequence() {
 		CronTrigger trigger = new CronTrigger("0 30 23 30 1/3 ?", timeZone);
 		this.calendar.set(2010, 11, 30);
 		Date localDate = this.calendar.getTime();
@@ -812,10 +711,8 @@ class CronTriggerTests {
 		assertThat(actual).isEqualTo(this.calendar.getTime());
 	}
 
-	@ParameterizedCronTriggerTest
-	void daylightSavingMissingHour(Date localDateTime, TimeZone timeZone) {
-		setup(localDateTime, timeZone);
-
+	@Test
+	void daylightSavingMissingHour() {
 		// This trigger has to be somewhere between 2:00 AM and 3:00 AM, so we
 		// use a cron expression for 2:10 AM every day.
 		CronTrigger trigger = new CronTrigger("0 10 2 * * *", timeZone);
@@ -863,21 +760,6 @@ class CronTriggerTests {
 
 	private static TriggerContext getTriggerContext(Date lastCompletionTime) {
 		return new SimpleTriggerContext(null, null, lastCompletionTime);
-	}
-
-
-	@Retention(RetentionPolicy.RUNTIME)
-	@Target(ElementType.METHOD)
-	@ParameterizedTest(name = "[{index}] localDateTime[{0}], time zone[{1}]")
-	@MethodSource("parameters")
-	@interface ParameterizedCronTriggerTest {
-	}
-
-	static Stream<Arguments> parameters() {
-		return Stream.of(
-			arguments(new Date(), TimeZone.getTimeZone("PST")),
-			arguments(new Date(), TimeZone.getTimeZone("CET"))
-		);
 	}
 
 }

@@ -36,7 +36,7 @@ import java.nio.charset.StandardCharsets
  * @author Sebastien Deleuze
  */
 class CustomKotlinSerializationJsonDecoderTests :
-		AbstractDecoderTests<KotlinSerializationJsonDecoder>(KotlinSerializationJsonDecoder(customJson)) {
+		AbstractDecoderTests<KotlinSerializationJsonDecoder>(KotlinSerializationJsonDecoder(customJson) { true }) {
 
 	@Test
 	override fun canDecode() {

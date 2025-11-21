@@ -53,7 +53,9 @@ import org.springframework.util.xml.DomUtils;
  * @author Juergen Hoeller
  * @author Mark Fisher
  * @since 2.0
+ * @deprecated with no replacement as not actively maintained anymore
  */
+@Deprecated(since = "7.0")
 class ScriptBeanDefinitionParser extends AbstractBeanDefinitionParser {
 
 	private static final String ENGINE_ATTRIBUTE = "engine";

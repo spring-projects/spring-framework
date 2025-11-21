@@ -75,7 +75,7 @@ final class JdkDynamicAopProxy implements AopProxy, InvocationHandler, Serializa
 
 	private static final String COROUTINES_FLOW_CLASS_NAME = "kotlinx.coroutines.flow.Flow";
 
-	private static final boolean coroutinesReactorPresent = ClassUtils.isPresent(
+	private static final boolean COROUTINES_REACTOR_PRESENT = ClassUtils.isPresent(
 			"kotlinx.coroutines.reactor.MonoKt", JdkDynamicAopProxy.class.getClassLoader());
 
 	/** We use a static Log to avoid serialization issues. */
@@ -270,7 +270,7 @@ final class JdkDynamicAopProxy implements AopProxy, InvocationHandler, Serializa
 						"Null return value from advice does not match primitive return type for: " + method);
 			}
 			// 对 Kotlin 协程的特殊处理
-			if (coroutinesReactorPresent && KotlinDetector.isSuspendingFunction(method)) {
+			if (COROUTINES_REACTOR_PRESENT && KotlinDetector.isSuspendingFunction(method)) {
 				return COROUTINES_FLOW_CLASS_NAME.equals(new MethodParameter(method, -1).getParameterType().getName()) ?
 						CoroutinesUtils.asFlow(retVal) : CoroutinesUtils.awaitSingleOrNull(retVal, args[args.length - 1]);
 			}

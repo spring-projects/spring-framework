@@ -41,13 +41,13 @@ import org.springframework.util.ClassUtils;
  */
 class AspectJBeanFactoryInitializationAotProcessor implements BeanFactoryInitializationAotProcessor {
 
-	private static final boolean aspectJPresent = ClassUtils.isPresent("org.aspectj.lang.annotation.Pointcut",
+	private static final boolean ASPECTJ_PRESENT = ClassUtils.isPresent("org.aspectj.lang.annotation.Pointcut",
 			AspectJBeanFactoryInitializationAotProcessor.class.getClassLoader());
 
 
 	@Override
 	public @Nullable BeanFactoryInitializationAotContribution processAheadOfTime(ConfigurableListableBeanFactory beanFactory) {
-		if (aspectJPresent) {
+		if (ASPECTJ_PRESENT) {
 			return AspectDelegate.processAheadOfTime(beanFactory);
 		}
 		return null;

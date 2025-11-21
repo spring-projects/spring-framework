@@ -81,7 +81,7 @@ final class SubscriberInputStream<T> extends InputStream implements Flow.Subscri
 
 	private final Queue<T> queue;
 
-	private final AtomicReference<Object> parkedThread = new AtomicReference<>();
+	private final AtomicReference<@Nullable Object> parkedThread = new AtomicReference<>();
 
 	private final AtomicInteger workAmount = new AtomicInteger();
 

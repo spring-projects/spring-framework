@@ -90,6 +90,10 @@ public class DefaultApiVersionStrategy implements ApiVersionStrategy {
 		this.detectSupportedVersions = detectSupportedVersions;
 		this.supportedVersionPredicate = initSupportedVersionPredicate(supportedVersionPredicate);
 		this.deprecationHandler = deprecationHandler;
+
+		if (defaultVersion != null) {
+			addSupportedVersion(defaultVersion);
+		}
 	}
 
 	private Predicate<Comparable<?>> initSupportedVersionPredicate(@Nullable Predicate<Comparable<?>> predicate) {
@@ -163,6 +167,7 @@ public class DefaultApiVersionStrategy implements ApiVersionStrategy {
 		return this.versionParser.parseVersion(version);
 	}
 
+	@Override
 	public void validateVersion(@Nullable Comparable<?> requestVersion, HttpServletRequest request)
 			throws MissingApiVersionException, InvalidApiVersionException {
 
@@ -179,9 +184,11 @@ public class DefaultApiVersionStrategy implements ApiVersionStrategy {
 	}
 
 	@Override
-	public void handleDeprecations(Comparable<?> version, HttpServletRequest request, HttpServletResponse response) {
+	public void handleDeprecations(
+			Comparable<?> version, Object handler, HttpServletRequest request, HttpServletResponse response) {
+
 		if (this.deprecationHandler != null) {
-			this.deprecationHandler.handleVersion(version, request, response);
+			this.deprecationHandler.handleVersion(version, handler, request, response);
 		}
 	}
 

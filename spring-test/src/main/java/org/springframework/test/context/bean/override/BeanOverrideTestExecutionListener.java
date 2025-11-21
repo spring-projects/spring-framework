@@ -93,15 +93,23 @@ public class BeanOverrideTestExecutionListener extends AbstractTestExecutionList
 	 * a corresponding bean override instance.
 	 */
 	private static void injectFields(TestContext testContext) {
-		List<BeanOverrideHandler> handlers = BeanOverrideHandler.forTestClass(testContext.getTestClass());
+		Object testInstance = testContext.getTestInstance();
+		// Since JUnit Jupiter 5.12, if the SpringExtension is used with Jupiter's
+		// TEST_METHOD ExtensionContextScope, the value returned from
+		// testContext.getTestClass() may refer to the declaring class of the test
+		// method which is about to be invoked (which may be in a @Nested class
+		// within the class for the test instance). Thus, we use the class for the
+		// test instance as the "test class".
+		Class<?> testClass = testInstance.getClass();
+
+		List<BeanOverrideHandler> handlers = BeanOverrideHandler.forTestClass(testClass);
 		if (!handlers.isEmpty()) {
-			Object testInstance = testContext.getTestInstance();
 			ApplicationContext applicationContext = testContext.getApplicationContext();
 
 			Assert.state(applicationContext.containsBean(BeanOverrideRegistry.BEAN_NAME), () -> """
 					Test class %s declares @BeanOverride fields %s, but no BeanOverrideHandler has been registered. \
 					If you are using @ContextHierarchy, ensure that context names for bean overrides match \
-					configured @ContextConfiguration names.""".formatted(testContext.getTestClass().getSimpleName(),
+					configured @ContextConfiguration names.""".formatted(testClass.getSimpleName(),
 							handlers.stream().map(BeanOverrideHandler::getField).filter(Objects::nonNull)
 								.map(Field::getName).toList()));
 			BeanOverrideRegistry beanOverrideRegistry = applicationContext.getBean(BeanOverrideRegistry.BEAN_NAME,

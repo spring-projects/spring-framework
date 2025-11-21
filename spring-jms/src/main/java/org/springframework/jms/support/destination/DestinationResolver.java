@@ -30,13 +30,13 @@ import org.jspecify.annotations.Nullable;
  *
  * <p>The default {@link DestinationResolver} implementation used by
  * {@link org.springframework.jms.core.JmsTemplate} instances is the
- * {@link DynamicDestinationResolver} class. Consider using the
+ * {@link SimpleDestinationResolver} class. Consider using the
  * {@link JndiDestinationResolver} for more advanced scenarios.
  *
  * @author Juergen Hoeller
  * @since 1.1
  * @see org.springframework.jms.core.JmsTemplate#setDestinationResolver
- * @see org.springframework.jms.support.destination.DynamicDestinationResolver
+ * @see org.springframework.jms.support.destination.SimpleDestinationResolver
  * @see org.springframework.jms.support.destination.JndiDestinationResolver
  */
 @FunctionalInterface
