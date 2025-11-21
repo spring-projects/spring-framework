@@ -1121,6 +1121,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 		if (!futures.isEmpty()) {
 			try {
+				// 等待所有后台初始化结束
 				CompletableFuture.allOf(futures.toArray(new CompletableFuture<?>[0])).join();
 			}
 			catch (CompletionException ex) {
@@ -1129,11 +1130,14 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		}
 
 		// Trigger post-initialization callback for all applicable beans...
+		// 触发 SmartInitializingSingleton 回调
 		for (String beanName : beanNames) {
+			// 从单例池 getSingleton(beanName, false) 拿到已创建好的实例（false 表示不允许早期引用，只取已真正创建完成的单例）
 			Object singletonInstance = getSingleton(beanName, false);
 			if (singletonInstance instanceof SmartInitializingSingleton smartSingleton) {
 				StartupStep smartInitialize = getApplicationStartup().start("spring.beans.smart-initialize")
 						.tag("beanName", beanName);
+				// 在单例预实例化阶段的最后被调用，并且可以保证所有常规的单例 Bean 已经创建完成。
 				smartSingleton.afterSingletonsInstantiated();
 				smartInitialize.end();
 			}
@@ -1150,17 +1154,28 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 						getBean(dep);
 					}
 				}
+				// 使用提供的线程池 executor 异步执行 bean 的实例化逻辑 instantiateSingletonInBackgroundThread(beanName)。
+				// 返回的 future 代表“后台实例化”的完成状态。
 				CompletableFuture<?> future = CompletableFuture.runAsync(
 						() -> instantiateSingletonInBackgroundThread(beanName), executor);
+				// 早期暴露
+				// 在 bean 完全创建前，如果有其他 bean 因循环依赖或提前访问而需要它，
+				// BeanFactory 可以通过这个工厂先拿到一个“占位对象”。
 				addSingletonFactory(beanName, () -> {
 					try {
+						// 正常路径：当 join 成功后，BeanFactory 的正式注册会把真正的 bean 放入 singletonObjects，随后访问者拿到的是正确的实例。
+						// 此时工厂会 join 等待后台创建完成；若失败会传播底层异常
 						future.join();
 					}
 					catch (CompletionException ex) {
 						ReflectionUtils.rethrowRuntimeException(ex.getCause());
 					}
+					// 提前路径：如果某些访问在“早期暴露”阶段直接取这个工厂的结果并尝试按目标类型使用，
+					// 就会拿到一个 CompletableFuture 而非 bean，发生类型不匹配（通常是 ClassCastException），
+					// 从而暴露出不正确的使用时机/路径。也就是说，这个“占位物”不是为了给业务用的，只是为了在不恰当的访问时快速失败。
 					return future;  // not to be exposed, just to lead to ClassCastException in case of mismatch
 				});
+				// 如果此 bean 不是 lazy-init，则返回该 future，表示本次预实例化需要等待它完成
 				return (!mbd.isLazyInit() ? future : null);
 			}
 			else if (logger.isInfoEnabled()) {

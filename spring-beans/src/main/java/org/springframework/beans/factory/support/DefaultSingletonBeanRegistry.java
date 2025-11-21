@@ -207,28 +207,46 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	 */
 	protected @Nullable Object getSingleton(String beanName, boolean allowEarlyReference) {
 		// Quick check for existing instance without full singleton lock.
+		// 1. 快速路径检查：首先检查一级缓存 (singletonObjects)，这里存放的是完全初始化好的单例 Bean。
+		//    这是一个无锁检查，为了提高性能。
 		Object singletonObject = this.singletonObjects.get(beanName);
+		// 2. 如果一级缓存中没有，并且当前 Bean 正在创建中（这是循环依赖的典型特征）
 		if (singletonObject == null && isSingletonCurrentlyInCreation(beanName)) {
+			// 3. 接着检查二级缓存 (earlySingletonObjects)，这里存放的是提前曝光的、未完全初始化的 Bean 实例（半成品）。
 			singletonObject = this.earlySingletonObjects.get(beanName);
+			// 4. 如果二级缓存中也没有，并且允许早期引用
 			if (singletonObject == null && allowEarlyReference) {
+				// 尝试获取单例锁，避免并发问题。非阻塞尝试，以避免非原始创建线程的干扰。
 				if (!this.singletonLock.tryLock()) {
 					// Avoid early singleton inference outside of original creation thread.
+					// 如果获取锁失败，表示有其他线程正在处理，当前线程直接返回 null。
 					return null;
 				}
 				try {
 					// Consistent creation of early reference within full singleton lock.
+					// 5. 【双重检查锁定】进入同步代码块后，再次检查一、二级缓存。
+					//    因为在等待锁的过程中，可能已有其他线程完成了 Bean 的创建。
 					singletonObject = this.singletonObjects.get(beanName);
 					if (singletonObject == null) {
 						singletonObject = this.earlySingletonObjects.get(beanName);
 						if (singletonObject == null) {
+							// 6. 如果一、二级缓存都没有，尝试从三级缓存 (singletonFactories) 中获取 ObjectFactory。
+							//    三级缓存存放的是能创建早期 Bean 引用的工厂。
 							ObjectFactory<?> singletonFactory = this.singletonFactories.get(beanName);
 							if (singletonFactory != null) {
+								// 7. 【核心】如果工厂存在，则调用 getObject() 方法创建早期引用。
+								//    这一步是 AOP 代理介入的关键点。如果需要代理，这里返回的就是代理对象。
 								singletonObject = singletonFactory.getObject();
 								// Singleton could have been added or removed in the meantime.
+								// 8. 【升级】将创建出的早期引用从三级缓存移动到二级缓存。
+								//    首先从三级缓存移除工厂，确保它只被使用一次。
 								if (this.singletonFactories.remove(beanName) != null) {
 									this.earlySingletonObjects.put(beanName, singletonObject);
 								}
 								else {
+									// 处理一个并发竞争的边缘情况：
+									// 如果在 getObject() 执行期间，另一个线程已经完成了该 Bean 的全部创建过程，
+									// 那么 singletonFactories 中可能已经被移除，此时应该直接去一级缓存获取最终成品。
 									singletonObject = this.singletonObjects.get(beanName);
 								}
 							}
@@ -236,10 +254,12 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 					}
 				}
 				finally {
+					// 9. 释放锁。
 					this.singletonLock.unlock();
 				}
 			}
 		}
+		// 10. 返回找到的 Bean 实例（可能来自一级、二级缓存，或由三级缓存创建）。
 		return singletonObject;
 	}
 

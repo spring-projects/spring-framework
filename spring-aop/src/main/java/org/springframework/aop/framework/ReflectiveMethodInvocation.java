@@ -154,28 +154,52 @@ public class ReflectiveMethodInvocation implements ProxyMethodInvocation, Clonea
 	@Override
 	public @Nullable Object proceed() throws Throwable {
 		// We start with an index of -1 and increment early.
+		// 1. 判断是否已执行完所有拦截器 (递归的终止条件)
+		// this.interceptorsAndDynamicMethodMatchers 是一个包含所有拦截器的列表
+		// currentInterceptorIndex 的初始值为-1
+		// 如果当前拦截器的索引等于拦截器列表的最后一个索引，说明所有拦截器都执行完了
 		if (this.currentInterceptorIndex == this.interceptorsAndDynamicMethodMatchers.size() - 1) {
+			// 调用原始的目标方法（例如，你自己的业务Service方法）
 			return invokeJoinpoint();
 		}
 
+		// 2. 获取下一个要执行的拦截器
+		// 使用 ++this.currentInterceptorIndex，先将索引加1，再从列表中获取元素
+		// 所以第一次调用时，索引从-1变为0，获取第一个拦截器
 		Object interceptorOrInterceptionAdvice =
 				this.interceptorsAndDynamicMethodMatchers.get(++this.currentInterceptorIndex);
+
+		// 3. 判断拦截器的类型
 		if (interceptorOrInterceptionAdvice instanceof InterceptorAndDynamicMethodMatcher dm) {
 			// Evaluate dynamic method matcher here: static part will already have
 			// been evaluated and found to match.
+			// 3.1 类型一：动态匹配的拦截器
+			// 这种拦截器的切点(Pointcut)不仅需要匹配方法签名（静态匹配），
+			// 还需要在运行时根据方法的【参数】来决定是否执行（动态匹配）。
+			// Spring在构建拦截器链时，静态匹配的部分已经完成了。
 			Class<?> targetClass = (this.targetClass != null ? this.targetClass : this.method.getDeclaringClass());
+
+			// 在这里进行动态匹配的检查，检查传入的参数是否满足条件
 			if (dm.matcher().matches(this.method, targetClass, this.arguments)) {
+				// 动态匹配成功，则执行该拦截器的 invoke 方法
+				// 拦截器的 invoke 方法内部会再次调用 proceed()，从而形成调用链
 				return dm.interceptor().invoke(this);
 			}
 			else {
 				// Dynamic matching failed.
 				// Skip this interceptor and invoke the next in the chain.
+				// 动态匹配失败，则跳过当前这个拦截器
+				// 直接递归调用 proceed()，去执行下一个拦截器
 				return proceed();
 			}
 		}
 		else {
 			// It's an interceptor, so we just invoke it: The pointcut will have
 			// been evaluated statically before this object was constructed.
+			// 3.2 类型二：静态匹配的拦截器
+			// 这是最常见的类型。它的切点在编译期或启动时就能确定，无需在运行时检查参数。
+			// 直接执行该拦截器的 invoke 方法。
+			// 同样，拦截器的 invoke 方法内部会再次调用 proceed()，将控制权交给下一个拦截器。
 			return ((MethodInterceptor) interceptorOrInterceptionAdvice).invoke(this);
 		}
 	}

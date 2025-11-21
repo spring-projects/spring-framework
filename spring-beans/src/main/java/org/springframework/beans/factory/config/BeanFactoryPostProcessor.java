@@ -70,6 +70,9 @@ public interface BeanFactoryPostProcessor {
 	 * @param beanFactory the bean factory used by the application context
 	 * @throws org.springframework.beans.BeansException in case of errors
 	 */
+	// 核心职责是在 Spring 容器加载了所有 BeanDefinition，但尚未创建任何 Bean 实例的时候，对这些 BeanDefinition 进行修改或添加。
+	// 执行时机: 在 refresh() 方法中，它由 invokeBeanFactoryPostProcessors(beanFactory) 这一步触发。
+	// 这个步骤紧跟在加载所有 Bean 定义之后，但在实例化任何 Bean 之前。
 	void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException;
 
 }

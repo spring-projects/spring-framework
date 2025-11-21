@@ -584,41 +584,56 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 			StartupStep contextRefresh = this.applicationStartup.start("spring.context.refresh");
 
 			// Prepare this context for refreshing.
+			// 1. 准备阶段：记录启动时间，设置启动标志等
 			prepareRefresh();
 
 			// Tell the subclass to refresh the internal bean factory.
+			// 2.【关键步骤】获取 BeanFactory：加载XML文件，解析成 BeanDefinition，并创建 BeanFactory
 			ConfigurableListableBeanFactory beanFactory = obtainFreshBeanFactory();
 
 			// Prepare the bean factory for use in this context.
+			// 3. 准备 BeanFactory：配置 BeanFactory，比如设置类加载器、添加一些默认的 BeanPostProcessor
 			prepareBeanFactory(beanFactory);
 
 			try {
 				// Allows post-processing of the bean factory in context subclasses.
+				// 4. BeanFactory 的后置处理：允许子类对 BeanFactory 进行扩展处理
 				postProcessBeanFactory(beanFactory);
 
 				StartupStep beanPostProcess = this.applicationStartup.start("spring.context.beans.post-process");
 				// Invoke factory processors registered as beans in the context.
+				// 5.【关键步骤】执行 BeanFactoryPostProcessor：在所有 BeanDefinition 加载完成，但 Bean 实例还未创建时，
+				// 对 BeanDefinition 进行修改或增强。
+				// org.springframework.beans.factory.config.BeanFactoryPostProcessor
 				invokeBeanFactoryPostProcessors(beanFactory);
 				// Register bean processors that intercept bean creation.
+				// 6.【关键步骤】注册 BeanPostProcessor：将 BeanPostProcessor 注册到 BeanFactory 中，
+				// 它们将在 Bean 实例化过程中被调用。
 				registerBeanPostProcessors(beanFactory);
 				beanPostProcess.end();
 
 				// Initialize message source for this context.
+				// 7. 初始化 MessageSource (国际化相关)
 				initMessageSource();
 
 				// Initialize event multicaster for this context.
+				// 8. 初始化事件广播器
 				initApplicationEventMulticaster();
 
 				// Initialize other special beans in specific context subclasses.
+				// 9. onRefresh()：留给子类实现的扩展点
 				onRefresh();
 
 				// Check for listener beans and register them.
+				// 10. 注册监听器
 				registerListeners();
 
 				// Instantiate all remaining (non-lazy-init) singletons.
+				// 11.【关键步骤】完成 BeanFactory 的初始化：实例化所有剩余的非懒加载的单例 Bean
 				finishBeanFactoryInitialization(beanFactory);
 
 				// Last step: publish corresponding event.
+				// 12. 完成刷新过程：发布容器刷新完成事件
 				finishRefresh();
 			}
 
@@ -976,6 +991,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		beanFactory.freezeConfiguration();
 
 		// Instantiate all remaining (non-lazy-init) singletons.
+		// 创建所有非懒加载的单例 Bean 实例
 		beanFactory.preInstantiateSingletons();
 	}
 
@@ -986,18 +1002,34 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 */
 	protected void finishRefresh() {
 		// Reset common introspection caches in Spring's core infrastructure.
+		// 1. 清理临时缓存
+		//    重置 Spring 核心基础结构中的通用反射缓存，例如 ClassUtils 和 ReflectionUtils 中的缓存。
+		//    这些缓存在 Bean 定义加载和解析期间被填充。
 		resetCommonCaches();
 
 		// Clear context-level resource caches (such as ASM metadata from scanning).
+		//    清除上下文级别的资源缓存（例如，在组件扫描期间生成的 ASM 元数据）。
+		//    这有助于释放启动过程中占用的内存。
 		clearResourceCaches();
 
 		// Initialize lifecycle processor for this context.
+		// 2. 初始化生命周期处理器
+		//    在容器中查找或创建一个名为 "lifecycleProcessor" 的 LifecycleProcessor 类型的 Bean。
+		//    这个处理器负责管理实现了 Lifecycle 接口的 Bean 的启动和停止。
 		initLifecycleProcessor();
 
 		// Propagate refresh to lifecycle processor first.
+		// 3. 触发 Lifecycle Bean 的启动
+		//    调用生命周期处理器的 onRefresh() 方法。
+		//    该方法会遍历容器中所有实现了 Lifecycle 接口的 Bean，并调用那些需要自动启动的 Bean 的 start() 方法。
+		//    例如，启动消息队列监听器、定时任务等。
 		getLifecycleProcessor().onRefresh();
 
 		// Publish the final event.
+		// 4. 发布“容器刷新完成”事件
+		//    向所有注册的监听器（ApplicationListener）广播一个 ContextRefreshedEvent 事件。
+		//    这是一个明确的信号，表示容器已经完全初始化并准备就绪。
+		//    其他组件可以监听此事件以执行启动后的初始化逻辑（如数据加载、缓存预热等）。
 		publishEvent(new ContextRefreshedEvent(this));
 	}
 

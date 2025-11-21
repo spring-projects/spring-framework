@@ -285,11 +285,49 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 	@Override
 	public @Nullable Object postProcessAfterInitialization(@Nullable Object bean, String beanName) {
 		if (bean != null) {
+			// 1. 生成一个 key，通常就是 beanName
 			Object cacheKey = getCacheKey(bean.getClass(), beanName);
+			/*
+			 * 2. --- 核心判断逻辑 ---
+			 * `earlyBeanReferences` 是一个临时缓存，它记录了所有为了解决循环依赖问题而
+			 * 被提前暴露的 Bean 的引用。这行代码是整个方法的分水岭
+			 */
 			if (this.earlyBeanReferences.remove(cacheKey) != bean) {
+				/*
+				 * 进入此 if 块，意味着以下两种情况之一：
+				 *
+				 * 情况 A：这是一个“普通 Bean”，没有参与循环依赖。
+				 * - 那么 `earlyBeanReferences` 缓存中就没有它的记录
+				 * - `remove(cacheKey)` 会返回 `null`
+				 * - 判断条件变为 `null != bean`，结果为 `true`
+				 * - 流程：进入标准的代理创建流程 `wrapIfNecessary`
+				 *
+				 * 情况 B：这是一个“参与了循环依赖的 Bean”，并且在提前暴露时就已经创建了代理
+				 * - 在 `getEarlyBeanReference` 阶段，一个代理对象被创建并放入了 `earlyBeanReferences` 缓存
+				 * - `remove(cacheKey)` 会返回那个【代理对象】
+				 * - `bean` 参数是当前初始化完成的【原始对象】
+				 * - 判断条件变为 `代理对象 != 原始对象`，结果为 `true`
+				 * - 流程：同样进入 `wrapIfNecessary`。这个方法足够智能，会发现代理已创建，并确保返回正确的代理实例
+				 */
+
+				// `wrapIfNecessary` 会检查所有已知的切面（Aspects），判断当前 bean 是否是其目标
+				// - 如果是，并且代理还未创建，则创建并返回一个新的代理对象来替换原始 bean
+				// - 如果不是，则直接返回原始的 bean 对象
 				return wrapIfNecessary(bean, beanName, cacheKey);
 			}
 		}
+		/*
+		 * 3. 如果代码执行到这里，说明上面的 `if` 条件不满足 (`false`)
+		 * 这只对应一种非常特殊且重要的情况：
+		 *
+		 * 情况 C：这是一个“参与了循环依赖的 Bean”，但在提前暴露时【没有】为它创建代理
+		 * - 在 `getEarlyBeanReference` 阶段，Spring 判断它不需要提前代理，于是将【原始对象】本身放入了 `earlyBeanReferences` 缓存
+		 * - `remove(cacheKey)` 会返回那个【原始对象】
+		 * - `bean` 参数也是这个【原始对象】
+		 * - 判断条件变为 `原始对象 != 原始对象`，结果为 `false`
+		 * - 流程：为了保证在整个容器中该 Bean 引用的绝对一致性（因为依赖它的其他 Bean 已经注入了原始对象），
+		 * Spring 决定在此阶段也【不再】为它创建代理，直接返回原始的 bean 实例
+		 */
 		return bean;
 	}
 
@@ -323,27 +361,50 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 	 * @return a proxy wrapping the bean, or the raw bean instance as-is
 	 */
 	protected Object wrapIfNecessary(Object bean, String beanName, Object cacheKey) {
+		// --- 第一部分：快速失败与跳过检查 ---
+		// 1. 如果这个 bean 已经被一个 TargetSource 处理，说明它有特殊的代理逻辑，这里就不再处理
 		if (StringUtils.hasLength(beanName) && this.targetSourcedBeans.contains(beanName)) {
 			return bean;
 		}
+		// 2. 检查缓存：如果之前已经判断过这个 bean 不需要被代理，就直接返回
+		//    advisedBeans 是一个缓存 Map，避免对同一个 Bean 重复进行 costly 的 AOP 匹配
 		if (Boolean.FALSE.equals(this.advisedBeans.get(cacheKey))) {
 			return bean;
 		}
+		// 3. 检查是否是“基础设施类”或应该被“跳过”
+		//    isInfrastructureClass: AOP 框架自身的组件（如 Advisor, Pointcut）不应该被自己代理，否则会无限循环
+		//    shouldSkip: 更通用的跳过逻辑，例如，避免代理 AOP 已经处理过的 Bean
 		if (isInfrastructureClass(bean.getClass()) || shouldSkip(bean.getClass(), beanName)) {
 			this.advisedBeans.put(cacheKey, Boolean.FALSE);
 			return bean;
 		}
 
 		// Create proxy if we have advice.
+		// --- 第二部分：核心代理创建逻辑 ---
+		// 如果 Bean 通过了所有豁免检查，就要进入真正的“安检扫描”环节
+
+		// 1. 【核心】为当前 Bean 查找匹配的通知（Advices）和顾问（Advisors）
+		//    这是 AOP 最关键的匹配步骤。Spring 会遍历所有已知的切面（@Aspect），
+		//    用它们的切点（Pointcut）去匹配当前 bean 的类和方法
 		Object[] specificInterceptors = getAdvicesAndAdvisorsForBean(bean.getClass(), beanName, null);
+		// 2. 判断是否有匹配的通知
+		//    如果返回的数组不是 DO_NOT_PROXY（一个空对象标记），说明找到了至少一个适用于此 bean 的通知
 		if (specificInterceptors != DO_NOT_PROXY) {
+			// 缓存标记，说明此 bean 需要被代理
 			this.advisedBeans.put(cacheKey, Boolean.TRUE);
+			// 3. 【执行】创建代理对象
+			//    这个方法会调用 ProxyFactory，使用 CGLIB 或 JDK 动态代理技术，
+			//    创建一个包装了原始 bean 实例并织入了相应通知（interceptors）的代理对象
 			Object proxy = createProxy(
 					bean.getClass(), beanName, specificInterceptors, new SingletonTargetSource(bean));
+			// 缓存代理的类型，用于后续的类型匹配
 			this.proxyTypes.put(cacheKey, proxy.getClass());
+			// 4. 返回创建好的代理对象。这个代理将替换掉原始的 bean 实例
 			return proxy;
 		}
 
+		// 如果没有找到任何匹配的通知，说明这个 Bean 不需要被代理
+		// 缓存这个结果，并返回原始的 bean 实例
 		this.advisedBeans.put(cacheKey, Boolean.FALSE);
 		return bean;
 	}
@@ -444,31 +505,51 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 	private Object buildProxy(Class<?> beanClass, @Nullable String beanName,
 			Object @Nullable [] specificInterceptors, TargetSource targetSource, boolean classOnly) {
 
+		// --- 准备阶段：配置装配工具 (ProxyFactory) ---
+
 		if (this.beanFactory instanceof ConfigurableListableBeanFactory clbf) {
+			// 在 BeanFactory 中暴露目标类的类型，方便其他组件解析（例如，按类型注入时能正确找到）
 			AutoProxyUtils.exposeTargetClass(clbf, beanName, beanClass);
 		}
 
+		// ProxyFactory 是创建代理的核心工具，就像装机的“工作台”
 		ProxyFactory proxyFactory = new ProxyFactory();
+		// 从 AutoProxyCreator 复制通用配置（如 exposeProxy=true 等）到工作台
 		proxyFactory.copyFrom(this);
+		// 暂时允许对配置进行修改
 		proxyFactory.setFrozen(false);
 
+
+		// --- 决策阶段：选择代理策略（用 CGLIB 还是 JDK 动态代理？）---
+		// 这就像决定是用一个“兼容主板”（JDK代理）还是一个“品牌定制主板”（CGLIB代理）。
+
+		// shouldProxyTargetClass 会检查全局配置或 bean 上的 @Scope(proxyMode=...) 等
 		if (shouldProxyTargetClass(beanClass, beanName)) {
+			// 强制使用 CGLIB 代理（基于类的代理），它通过创建子类来实现
 			proxyFactory.setProxyTargetClass(true);
 		}
 		else {
+			// 尝试使用 JDK 动态代理（基于接口的代理）
+			// 首先，检查 bean 是否暴露了特定的接口
 			Class<?>[] ifcs = (this.beanFactory instanceof ConfigurableListableBeanFactory clbf ?
 					AutoProxyUtils.determineExposedInterfaces(clbf, beanName) : null);
 			if (ifcs != null) {
+				// 如果有接口，就明确告诉工厂使用 JDK 代理模式
 				proxyFactory.setProxyTargetClass(false);
+				// 并将所有接口添加到代理配置中，代理将会实现这些接口
 				for (Class<?> ifc : ifcs) {
 					proxyFactory.addInterface(ifc);
 				}
 			}
+			// 如果没有找到明确的接口，或者即使找到了接口但策略仍不确定
 			if (ifcs != null ? ifcs.length == 0 : !proxyFactory.isProxyTargetClass()) {
+				// 再次评估 beanClass 本身实现的接口，这是一个备用策略
 				evaluateProxyInterfaces(beanClass, proxyFactory);
 			}
 		}
 
+		// 特殊处理：如果目标本身就是 JDK 代理或 Lambda 表达式，为了支持“引入增强”(Introduction)，
+		// 需要将其实现的接口也添加到新的代理中。
 		if (proxyFactory.isProxyTargetClass()) {
 			// Explicit handling of JDK proxy targets and lambdas (for introduction advice scenarios)
 			if (Proxy.isProxyClass(beanClass) || ClassUtils.isLambdaClass(beanClass)) {
@@ -479,21 +560,35 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 			}
 		}
 
+		// --- 组装阶段：将 AOP 组件装配到工厂 ---
+
+		// 将原始的拦截器（Interceptors）数组转换为标准的 Advisor 数组。
+		// Advisor = 通知(Advice) + 切点(Pointcut)，即“做什么”+“在哪里做”。
 		Advisor[] advisors = buildAdvisors(beanName, specificInterceptors);
+		// 将“增强功能”（如事务、日志 Advisor）安装到工作台上
 		proxyFactory.addAdvisors(advisors);
+		// 将“核心部件”（目标 bean 对象）安装到工作台上
 		proxyFactory.setTargetSource(targetSource);
+		// 提供一个钩子方法，允许子类对工作台进行最后的定制化修改
 		customizeProxyFactory(proxyFactory);
 
+		// --- 生产阶段：生成最终的代理对象 ---
+
+		// 锁定配置，不允许再修改
 		proxyFactory.setFrozen(isFrozen());
 		if (advisorsPreFiltered()) {
+			// 一个优化，告诉工厂 Advisor 已经预先过滤，无需再次检查
 			proxyFactory.setPreFiltered(true);
 		}
 
 		// Use original ClassLoader if bean class not locally loaded in overriding class loader
+		// 获取合适的 ClassLoader
 		ClassLoader classLoader = getProxyClassLoader();
 		if (classLoader instanceof SmartClassLoader smartClassLoader && classLoader != beanClass.getClassLoader()) {
 			classLoader = smartClassLoader.getOriginalClassLoader();
 		}
+		// 调用工厂的 getProxy() 或 getProxyClass() 方法，正式“生产”出代理。
+		// 工厂会根据之前设置的策略（CGLIB 或 JDK）来创建最终的产品。
 		return (classOnly ? proxyFactory.getProxyClass(classLoader) : proxyFactory.getProxy(classLoader));
 	}
 
