@@ -1,0 +1,12 @@
+apply plugin: 'org.openrewrite.rewrite'
+
+rewrite {
+  activeRecipe('org.springframework.openrewrite.SanityCheck')
+  setExportDatatables(true)
+  setFailOnDryRunResults(true)
+}
+
+dependencies {
+    rewrite(platform('org.openrewrite.recipe:rewrite-recipe-bom:3.18.0'))
+    rewrite('org.openrewrite.recipe:rewrite-rewrite:0.15.0')
+}

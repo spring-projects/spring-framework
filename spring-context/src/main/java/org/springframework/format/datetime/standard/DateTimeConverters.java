@@ -81,8 +81,7 @@ final class DateTimeConverters {
 			return gc.toZonedDateTime();
 		}
 		else {
-			return ZonedDateTime.ofInstant(Instant.ofEpochMilli(source.getTimeInMillis()),
-					source.getTimeZone().toZoneId());
+			return Instant.ofEpochMilli(source.getTimeInMillis()).atZone(source.getTimeZone().toZoneId());
 		}
 	}
 

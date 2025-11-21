@@ -24,7 +24,7 @@ import java.lang.annotation.Target;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
-import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -184,7 +184,7 @@ class ClientHttpConnectorTests {
 
 	@ParameterizedConnectorTest
 	void cookieExpireValueSetAsMaxAge(ClientHttpConnector connector) {
-		ZonedDateTime tomorrow = ZonedDateTime.now(ZoneId.of("UTC")).plusDays(1);
+		ZonedDateTime tomorrow = ZonedDateTime.now(ZoneOffset.UTC).plusDays(1);
 		String formattedDate = tomorrow.format(DateTimeFormatter.RFC_1123_DATE_TIME);
 
 		prepareResponse(builder -> builder
