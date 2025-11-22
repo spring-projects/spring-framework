@@ -28,6 +28,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import jakarta.servlet.DispatcherType;
@@ -455,22 +456,8 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * no multipart handling is provided.
 	 */
 	private void initMultipartResolver(ApplicationContext context) {
-		try {
-			this.multipartResolver = context.getBean(MULTIPART_RESOLVER_BEAN_NAME, MultipartResolver.class);
-			if (logger.isTraceEnabled()) {
-				logger.trace("Detected " + this.multipartResolver);
-			}
-			else if (logger.isDebugEnabled()) {
-				logger.debug("Detected " + this.multipartResolver.getClass().getSimpleName());
-			}
-		}
-		catch (NoSuchBeanDefinitionException ex) {
-			// Default is no multipart resolver.
-			this.multipartResolver = null;
-			if (logger.isTraceEnabled()) {
-				logger.trace("No MultipartResolver '" + MULTIPART_RESOLVER_BEAN_NAME + "' declared");
-			}
-		}
+		this.multipartResolver = initSingleBean(context, MULTIPART_RESOLVER_BEAN_NAME,
+				MultipartResolver.class, null, "No MultipartResolver '" + MULTIPART_RESOLVER_BEAN_NAME + "' declared");
 	}
 
 	/**
@@ -479,23 +466,12 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * we default to AcceptHeaderLocaleResolver.
 	 */
 	private void initLocaleResolver(ApplicationContext context) {
-		try {
-			this.localeResolver = context.getBean(LOCALE_RESOLVER_BEAN_NAME, LocaleResolver.class);
-			if (logger.isTraceEnabled()) {
-				logger.trace("Detected " + this.localeResolver);
-			}
-			else if (logger.isDebugEnabled()) {
-				logger.debug("Detected " + this.localeResolver.getClass().getSimpleName());
-			}
-		}
-		catch (NoSuchBeanDefinitionException ex) {
-			// We need to use the default.
-			this.localeResolver = getDefaultStrategy(context, LocaleResolver.class);
-			if (logger.isTraceEnabled()) {
-				logger.trace("No LocaleResolver '" + LOCALE_RESOLVER_BEAN_NAME +
-						"': using default [" + this.localeResolver.getClass().getSimpleName() + "]");
-			}
-		}
+		this.localeResolver = initSingleBean(context, LOCALE_RESOLVER_BEAN_NAME,
+				LocaleResolver.class, () -> getDefaultStrategy(context, LocaleResolver.class),
+				() -> {
+					LocaleResolver defaultResolver = getDefaultStrategy(context, LocaleResolver.class);
+					return "': using default [" + defaultResolver.getClass().getSimpleName() + "]";
+				});
 	}
 
 	/**
@@ -504,37 +480,10 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * we default to BeanNameUrlHandlerMapping.
 	 */
 	private void initHandlerMappings(ApplicationContext context) {
-		this.handlerMappings = null;
-
-		if (this.detectAllHandlerMappings) {
-			// Find all HandlerMappings in the ApplicationContext, including ancestor contexts.
-			Map<String, HandlerMapping> matchingBeans =
-					BeanFactoryUtils.beansOfTypeIncludingAncestors(context, HandlerMapping.class, true, false);
-			if (!matchingBeans.isEmpty()) {
-				this.handlerMappings = new ArrayList<>(matchingBeans.values());
-				// We keep HandlerMappings in sorted order.
-				AnnotationAwareOrderComparator.sort(this.handlerMappings);
-			}
-		}
-		else {
-			try {
-				HandlerMapping hm = context.getBean(HANDLER_MAPPING_BEAN_NAME, HandlerMapping.class);
-				this.handlerMappings = Collections.singletonList(hm);
-			}
-			catch (NoSuchBeanDefinitionException ex) {
-				// Ignore, we'll add a default HandlerMapping later.
-			}
-		}
-
-		// Ensure we have at least one HandlerMapping, by registering
-		// a default HandlerMapping if no other mappings are found.
-		if (this.handlerMappings == null) {
-			this.handlerMappings = getDefaultStrategies(context, HandlerMapping.class);
-			if (logger.isTraceEnabled()) {
-				logger.trace("No HandlerMappings declared for servlet '" + getServletName() +
-						"': using default strategies from DispatcherServlet.properties");
-			}
-		}
+		this.handlerMappings = initListBeans(context, this.detectAllHandlerMappings,
+				HANDLER_MAPPING_BEAN_NAME, HandlerMapping.class,
+				() -> getDefaultStrategies(context, HandlerMapping.class),
+				"HandlerMappings");
 
 		for (HandlerMapping mapping : this.handlerMappings) {
 			if (mapping.usesPathPatterns()) {
@@ -550,37 +499,10 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * we default to SimpleControllerHandlerAdapter.
 	 */
 	private void initHandlerAdapters(ApplicationContext context) {
-		this.handlerAdapters = null;
-
-		if (this.detectAllHandlerAdapters) {
-			// Find all HandlerAdapters in the ApplicationContext, including ancestor contexts.
-			Map<String, HandlerAdapter> matchingBeans =
-					BeanFactoryUtils.beansOfTypeIncludingAncestors(context, HandlerAdapter.class, true, false);
-			if (!matchingBeans.isEmpty()) {
-				this.handlerAdapters = new ArrayList<>(matchingBeans.values());
-				// We keep HandlerAdapters in sorted order.
-				AnnotationAwareOrderComparator.sort(this.handlerAdapters);
-			}
-		}
-		else {
-			try {
-				HandlerAdapter ha = context.getBean(HANDLER_ADAPTER_BEAN_NAME, HandlerAdapter.class);
-				this.handlerAdapters = Collections.singletonList(ha);
-			}
-			catch (NoSuchBeanDefinitionException ex) {
-				// Ignore, we'll add a default HandlerAdapter later.
-			}
-		}
-
-		// Ensure we have at least some HandlerAdapters, by registering
-		// default HandlerAdapters if no other adapters are found.
-		if (this.handlerAdapters == null) {
-			this.handlerAdapters = getDefaultStrategies(context, HandlerAdapter.class);
-			if (logger.isTraceEnabled()) {
-				logger.trace("No HandlerAdapters declared for servlet '" + getServletName() +
-						"': using default strategies from DispatcherServlet.properties");
-			}
-		}
+		this.handlerAdapters = initListBeans(context, this.detectAllHandlerAdapters,
+				HANDLER_ADAPTER_BEAN_NAME, HandlerAdapter.class,
+				() -> getDefaultStrategies(context, HandlerAdapter.class),
+				"HandlerAdapters");
 	}
 
 	/**
@@ -589,38 +511,10 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * we default to no exception resolver.
 	 */
 	private void initHandlerExceptionResolvers(ApplicationContext context) {
-		this.handlerExceptionResolvers = null;
-
-		if (this.detectAllHandlerExceptionResolvers) {
-			// Find all HandlerExceptionResolvers in the ApplicationContext, including ancestor contexts.
-			Map<String, HandlerExceptionResolver> matchingBeans = BeanFactoryUtils
-					.beansOfTypeIncludingAncestors(context, HandlerExceptionResolver.class, true, false);
-			if (!matchingBeans.isEmpty()) {
-				this.handlerExceptionResolvers = new ArrayList<>(matchingBeans.values());
-				// We keep HandlerExceptionResolvers in sorted order.
-				AnnotationAwareOrderComparator.sort(this.handlerExceptionResolvers);
-			}
-		}
-		else {
-			try {
-				HandlerExceptionResolver her =
-						context.getBean(HANDLER_EXCEPTION_RESOLVER_BEAN_NAME, HandlerExceptionResolver.class);
-				this.handlerExceptionResolvers = Collections.singletonList(her);
-			}
-			catch (NoSuchBeanDefinitionException ex) {
-				// Ignore, no HandlerExceptionResolver is fine too.
-			}
-		}
-
-		// Ensure we have at least some HandlerExceptionResolvers, by registering
-		// default HandlerExceptionResolvers if no other resolvers are found.
-		if (this.handlerExceptionResolvers == null) {
-			this.handlerExceptionResolvers = getDefaultStrategies(context, HandlerExceptionResolver.class);
-			if (logger.isTraceEnabled()) {
-				logger.trace("No HandlerExceptionResolvers declared in servlet '" + getServletName() +
-						"': using default strategies from DispatcherServlet.properties");
-			}
-		}
+		this.handlerExceptionResolvers = initListBeans(context, this.detectAllHandlerExceptionResolvers,
+				HANDLER_EXCEPTION_RESOLVER_BEAN_NAME, HandlerExceptionResolver.class,
+				() -> getDefaultStrategies(context, HandlerExceptionResolver.class),
+				"HandlerExceptionResolvers");
 	}
 
 	/**
@@ -628,24 +522,12 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * <p>If no implementation is configured then we default to DefaultRequestToViewNameTranslator.
 	 */
 	private void initRequestToViewNameTranslator(ApplicationContext context) {
-		try {
-			this.viewNameTranslator =
-					context.getBean(REQUEST_TO_VIEW_NAME_TRANSLATOR_BEAN_NAME, RequestToViewNameTranslator.class);
-			if (logger.isTraceEnabled()) {
-				logger.trace("Detected " + this.viewNameTranslator.getClass().getSimpleName());
-			}
-			else if (logger.isDebugEnabled()) {
-				logger.debug("Detected " + this.viewNameTranslator);
-			}
-		}
-		catch (NoSuchBeanDefinitionException ex) {
-			// We need to use the default.
-			this.viewNameTranslator = getDefaultStrategy(context, RequestToViewNameTranslator.class);
-			if (logger.isTraceEnabled()) {
-				logger.trace("No RequestToViewNameTranslator '" + REQUEST_TO_VIEW_NAME_TRANSLATOR_BEAN_NAME +
-						"': using default [" + this.viewNameTranslator.getClass().getSimpleName() + "]");
-			}
-		}
+		this.viewNameTranslator = initSingleBean(context, REQUEST_TO_VIEW_NAME_TRANSLATOR_BEAN_NAME,
+				RequestToViewNameTranslator.class, () -> getDefaultStrategy(context, RequestToViewNameTranslator.class),
+				() -> {
+					RequestToViewNameTranslator defaultTranslator = getDefaultStrategy(context, RequestToViewNameTranslator.class);
+					return "': using default [" + defaultTranslator.getClass().getSimpleName() + "]";
+				});
 	}
 
 	/**
@@ -654,37 +536,10 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * namespace, we default to InternalResourceViewResolver.
 	 */
 	private void initViewResolvers(ApplicationContext context) {
-		this.viewResolvers = null;
-
-		if (this.detectAllViewResolvers) {
-			// Find all ViewResolvers in the ApplicationContext, including ancestor contexts.
-			Map<String, ViewResolver> matchingBeans =
-					BeanFactoryUtils.beansOfTypeIncludingAncestors(context, ViewResolver.class, true, false);
-			if (!matchingBeans.isEmpty()) {
-				this.viewResolvers = new ArrayList<>(matchingBeans.values());
-				// We keep ViewResolvers in sorted order.
-				AnnotationAwareOrderComparator.sort(this.viewResolvers);
-			}
-		}
-		else {
-			try {
-				ViewResolver vr = context.getBean(VIEW_RESOLVER_BEAN_NAME, ViewResolver.class);
-				this.viewResolvers = Collections.singletonList(vr);
-			}
-			catch (NoSuchBeanDefinitionException ex) {
-				// Ignore, we'll add a default ViewResolver later.
-			}
-		}
-
-		// Ensure we have at least one ViewResolver, by registering
-		// a default ViewResolver if no other resolvers are found.
-		if (this.viewResolvers == null) {
-			this.viewResolvers = getDefaultStrategies(context, ViewResolver.class);
-			if (logger.isTraceEnabled()) {
-				logger.trace("No ViewResolvers declared for servlet '" + getServletName() +
-						"': using default strategies from DispatcherServlet.properties");
-			}
-		}
+		this.viewResolvers = initListBeans(context, this.detectAllViewResolvers,
+				VIEW_RESOLVER_BEAN_NAME, ViewResolver.class,
+				() -> getDefaultStrategies(context, ViewResolver.class),
+				"ViewResolvers");
 	}
 
 	/**
@@ -693,23 +548,12 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * {@code org.springframework.web.servlet.support.DefaultFlashMapManager}.
 	 */
 	private void initFlashMapManager(ApplicationContext context) {
-		try {
-			this.flashMapManager = context.getBean(FLASH_MAP_MANAGER_BEAN_NAME, FlashMapManager.class);
-			if (logger.isTraceEnabled()) {
-				logger.trace("Detected " + this.flashMapManager.getClass().getSimpleName());
-			}
-			else if (logger.isDebugEnabled()) {
-				logger.debug("Detected " + this.flashMapManager);
-			}
-		}
-		catch (NoSuchBeanDefinitionException ex) {
-			// We need to use the default.
-			this.flashMapManager = getDefaultStrategy(context, FlashMapManager.class);
-			if (logger.isTraceEnabled()) {
-				logger.trace("No FlashMapManager '" + FLASH_MAP_MANAGER_BEAN_NAME +
-						"': using default [" + this.flashMapManager.getClass().getSimpleName() + "]");
-			}
-		}
+		this.flashMapManager = initSingleBean(context, FLASH_MAP_MANAGER_BEAN_NAME,
+				FlashMapManager.class, () -> getDefaultStrategy(context, FlashMapManager.class),
+				() -> {
+					FlashMapManager defaultManager = getDefaultStrategy(context, FlashMapManager.class);
+					return "': using default [" + defaultManager.getClass().getSimpleName() + "]";
+				});
 	}
 
 	/**
@@ -733,6 +577,93 @@ public class DispatcherServlet extends FrameworkServlet {
 	 */
 	public final @Nullable List<HandlerMapping> getHandlerMappings() {
 		return (this.handlerMappings != null ? Collections.unmodifiableList(this.handlerMappings) : null);
+	}
+
+	/**
+	 * Initialize a single bean from the application context.
+	 * <p>Attempts to retrieve the bean by name, and if not found, uses the default supplier.
+	 * Logs the detection or default usage appropriately.
+	 * @param context the application context
+	 * @param beanName the name of the bean to retrieve
+	 * @param beanType the type of the bean
+	 * @param defaultSupplier supplier for the default value (null if no default)
+	 * @param defaultMessageSupplier supplier for the default message suffix (null if no message)
+	 * @return the initialized bean, or null if no bean found and no default supplier
+	 */
+	private <T> T initSingleBean(ApplicationContext context, String beanName, Class<T> beanType,
+								 @Nullable Supplier<T> defaultSupplier, @Nullable Supplier<String> defaultMessageSupplier) {
+		try {
+			T bean = context.getBean(beanName, beanType);
+			if (logger.isTraceEnabled()) {
+				logger.trace("Detected " + bean);
+			}
+			else if (logger.isDebugEnabled()) {
+				logger.debug("Detected " + bean.getClass().getSimpleName());
+			}
+			return bean;
+		}
+		catch (NoSuchBeanDefinitionException ex) {
+			T defaultBean = (defaultSupplier != null ? defaultSupplier.get() : null);
+			if (logger.isTraceEnabled()) {
+				if (defaultBean != null && defaultMessageSupplier != null) {
+					logger.trace("No " + beanType.getSimpleName() + " '" + beanName + defaultMessageSupplier.get());
+				}
+				else {
+					logger.trace("No " + beanType.getSimpleName() + " '" + beanName + "' declared");
+				}
+			}
+			return defaultBean;
+		}
+	}
+
+	/**
+	 * Initialize a list of beans from the application context.
+	 * <p>If detectAll is true, finds all beans of the given type. Otherwise, attempts to
+	 * retrieve a single bean by name. If no beans are found, uses the default supplier.
+	 * Logs the detection or default usage appropriately.
+	 * @param context the application context
+	 * @param detectAll whether to detect all beans of the type
+	 * @param beanName the name of the bean to retrieve (if detectAll is false)
+	 * @param beanType the type of the beans
+	 * @param defaultSupplier supplier for the default list (null if no default)
+	 * @param componentName the name of the component for logging purposes
+	 * @return the initialized list of beans, or null if no beans found and no default supplier
+	 */
+	@SuppressWarnings("unchecked")
+	private <T> List<T> initListBeans(ApplicationContext context, boolean detectAll, String beanName,
+									  Class<T> beanType, @Nullable Supplier<List<T>> defaultSupplier, String componentName) {
+		List<T> beans = null;
+
+		if (detectAll) {
+			// Find all beans of the given type in the ApplicationContext, including ancestor contexts.
+			Map<String, T> matchingBeans =
+					BeanFactoryUtils.beansOfTypeIncludingAncestors(context, beanType, true, false);
+			if (!matchingBeans.isEmpty()) {
+				beans = new ArrayList<>(matchingBeans.values());
+				// We keep beans in sorted order.
+				AnnotationAwareOrderComparator.sort(beans);
+			}
+		}
+		else {
+			try {
+				T bean = context.getBean(beanName, beanType);
+				beans = Collections.singletonList(bean);
+			}
+			catch (NoSuchBeanDefinitionException ex) {
+				// Ignore, we'll add a default list later.
+			}
+		}
+
+		// Ensure we have at least some beans, by registering default beans if no other beans are found.
+		if (beans == null && defaultSupplier != null) {
+			beans = defaultSupplier.get();
+			if (logger.isTraceEnabled()) {
+				logger.trace("No " + componentName + " declared for servlet '" + getServletName() +
+						"': using default strategies from DispatcherServlet.properties");
+			}
+		}
+
+		return beans;
 	}
 
 	/**
@@ -1020,8 +951,8 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * either a ModelAndView or an Exception to be resolved to a ModelAndView.
 	 */
 	private void processDispatchResult(HttpServletRequest request, HttpServletResponse response,
-			@Nullable HandlerExecutionChain mappedHandler, @Nullable ModelAndView mv,
-			@Nullable Exception exception) throws Exception {
+									   @Nullable HandlerExecutionChain mappedHandler, @Nullable ModelAndView mv,
+									   @Nullable Exception exception) throws Exception {
 
 		boolean errorView = false;
 
@@ -1205,7 +1136,7 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * @throws Exception if no error ModelAndView found
 	 */
 	protected @Nullable ModelAndView processHandlerException(HttpServletRequest request, HttpServletResponse response,
-			@Nullable Object handler, Exception ex) throws Exception {
+															 @Nullable Object handler, Exception ex) throws Exception {
 
 		// Success and error responses may use different content types
 		request.removeAttribute(HandlerMapping.PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE);
@@ -1337,7 +1268,7 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * @see ViewResolver#resolveViewName
 	 */
 	protected @Nullable View resolveViewName(String viewName, @Nullable Map<String, Object> model,
-			Locale locale, HttpServletRequest request) throws Exception {
+											 Locale locale, HttpServletRequest request) throws Exception {
 
 		return resolveViewNameInternal(viewName, locale);
 	}
@@ -1355,7 +1286,7 @@ public class DispatcherServlet extends FrameworkServlet {
 	}
 
 	private static void triggerAfterCompletion(HttpServletRequest request, HttpServletResponse response,
-			@Nullable HandlerExecutionChain mappedHandler, Exception ex) throws Exception {
+											   @Nullable HandlerExecutionChain mappedHandler, Exception ex) throws Exception {
 
 		if (mappedHandler != null) {
 			mappedHandler.triggerAfterCompletion(request, response, ex);
