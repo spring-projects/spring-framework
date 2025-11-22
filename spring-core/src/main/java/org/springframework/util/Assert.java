@@ -352,7 +352,7 @@ public abstract class Assert {
 	 * @param message the exception message to use if the assertion fails
 	 * @throws IllegalArgumentException if the object array contains a {@code null} element
 	 */
-	public static void noNullElements(Object @Nullable [] array, String message) {
+	public static void noNullElements(@Nullable Object @Nullable [] array, String message) {
 		if (array != null) {
 			for (Object element : array) {
 				if (element == null) {
@@ -374,7 +374,7 @@ public abstract class Assert {
 	 * @throws IllegalArgumentException if the object array contains a {@code null} element
 	 * @since 5.0
 	 */
-	public static void noNullElements(Object @Nullable [] array, Supplier<String> messageSupplier) {
+	public static void noNullElements(@Nullable Object @Nullable [] array, Supplier<String> messageSupplier) {
 		if (array != null) {
 			for (Object element : array) {
 				if (element == null) {
@@ -429,7 +429,7 @@ public abstract class Assert {
 	 * @throws IllegalArgumentException if the collection contains a {@code null} element
 	 * @since 5.2
 	 */
-	public static void noNullElements(@Nullable Collection<?> collection, String message) {
+	public static void noNullElements(@Nullable Collection<? extends @Nullable Object> collection, String message) {
 		if (collection != null) {
 			for (Object element : collection) {
 				if (element == null) {
@@ -451,7 +451,7 @@ public abstract class Assert {
 	 * @throws IllegalArgumentException if the collection contains a {@code null} element
 	 * @since 5.2
 	 */
-	public static void noNullElements(@Nullable Collection<?> collection, Supplier<String> messageSupplier) {
+	public static void noNullElements(@Nullable Collection<? extends @Nullable Object> collection, Supplier<String> messageSupplier) {
 		if (collection != null) {
 			for (Object element : collection) {
 				if (element == null) {
