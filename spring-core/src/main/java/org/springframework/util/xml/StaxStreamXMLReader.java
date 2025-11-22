@@ -28,6 +28,7 @@ import org.xml.sax.ContentHandler;
 import org.xml.sax.SAXException;
 import org.xml.sax.ext.Locator2;
 import org.xml.sax.helpers.AttributesImpl;
+import org.xml.sax.ext.LexicalHandler;
 
 import org.springframework.util.StringUtils;
 
@@ -227,22 +228,21 @@ class StaxStreamXMLReader extends AbstractStaxXMLReader {
 	}
 
 	private void handleDtd() throws SAXException {
-		if (getLexicalHandler() != null) {
-			Location location = this.reader.getLocation();
-			getLexicalHandler().startDTD(null, location.getPublicId(), location.getSystemId());
-		}
-		if (getLexicalHandler() != null) {
-			getLexicalHandler().endDTD();
-		}
+		LexicalHandler lexical = getLexicalHandler();
+		if (lexical == null) return;
+
+		Location loc = this.reader.getLocation();
+		lexical.startDTD(null, loc.getPublicId(), loc.getSystemId());
+		lexical.endDTD();
 	}
 
 	private void handleEntityReference() throws SAXException {
-		if (getLexicalHandler() != null) {
-			getLexicalHandler().startEntity(this.reader.getLocalName());
-		}
-		if (getLexicalHandler() != null) {
-			getLexicalHandler().endEntity(this.reader.getLocalName());
-		}
+		LexicalHandler lexical = getLexicalHandler();
+		if (lexical == null) return;
+
+		String name = this.reader.getLocalName();
+		lexical.startEntity(name);
+		lexical.endEntity(name);
 	}
 
 	private void handleEndDocument() throws SAXException {
