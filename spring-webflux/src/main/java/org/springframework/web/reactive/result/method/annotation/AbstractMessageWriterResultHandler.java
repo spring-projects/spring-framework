@@ -267,9 +267,9 @@ public abstract class AbstractMessageWriterResultHandler extends HandlerResultHa
 
 	private List<MediaType> getMediaTypesFor(ResolvableType elementType) {
 		List<MediaType> writableMediaTypes = new ArrayList<>();
-		for (HttpMessageWriter<?> converter : getMessageWriters()) {
-			if (converter.canWrite(elementType, null)) {
-				writableMediaTypes.addAll(converter.getWritableMediaTypes(elementType));
+		for (HttpMessageWriter<?> messageWriter : getMessageWriters()) {
+			if (messageWriter.canWrite(elementType, null)) {
+				writableMediaTypes.addAll(messageWriter.getWritableMediaTypes(elementType));
 			}
 		}
 		return writableMediaTypes;

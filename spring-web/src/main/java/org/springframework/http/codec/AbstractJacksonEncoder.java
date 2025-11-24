@@ -130,10 +130,10 @@ public abstract class AbstractJacksonEncoder<T extends ObjectMapper> extends Jac
 		if (clazz == null) {
 			return true;
 		}
-		if (MappingJacksonValue.class.isAssignableFrom(elementType.resolve(clazz))) {
+		if (MappingJacksonValue.class.isAssignableFrom(clazz)) {
 			throw new UnsupportedOperationException("MappingJacksonValue is not supported, use hints instead");
 		}
-		return !String.class.isAssignableFrom(elementType.resolve(clazz));
+		return !String.class.isAssignableFrom(clazz);
 	}
 
 	@Override

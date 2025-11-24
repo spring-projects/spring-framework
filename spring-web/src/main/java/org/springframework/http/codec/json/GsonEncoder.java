@@ -106,8 +106,7 @@ public class GsonEncoder extends AbstractEncoder<Object> implements HttpMessageE
 		if (!super.canEncode(elementType, mimeType)) {
 			return false;
 		}
-		Class<?> clazz = elementType.toClass();
-		return !String.class.isAssignableFrom(elementType.resolve(clazz));
+		return !String.class.isAssignableFrom(elementType.toClass());
 	}
 
 	@Override

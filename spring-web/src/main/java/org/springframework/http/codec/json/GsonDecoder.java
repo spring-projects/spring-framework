@@ -77,10 +77,7 @@ public class GsonDecoder extends AbstractDataBufferDecoder<Object> {
 
 	@Override
 	public boolean canDecode(ResolvableType elementType, @Nullable MimeType mimeType) {
-		if (!super.canDecode(elementType, mimeType)) {
-			return false;
-		}
-		return !CharSequence.class.isAssignableFrom(elementType.toClass());
+		return super.canDecode(elementType, mimeType) && !CharSequence.class.isAssignableFrom(elementType.toClass());
 	}
 
 	@Override
