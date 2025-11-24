@@ -57,7 +57,7 @@ class JacksonCborDecoderTests extends AbstractDecoderTests<JacksonCborDecoder> {
 		assertThat(decoder.canDecode(ResolvableType.forClass(Pojo.class), MediaType.APPLICATION_CBOR)).isTrue();
 		assertThat(decoder.canDecode(ResolvableType.forClass(Pojo.class), null)).isTrue();
 
-		assertThat(decoder.canDecode(ResolvableType.forClass(String.class), null)).isFalse();
+		assertThat(decoder.canDecode(ResolvableType.forClass(String.class), null)).isTrue();
 		assertThat(decoder.canDecode(ResolvableType.forClass(Pojo.class), APPLICATION_JSON)).isFalse();
 	}
 

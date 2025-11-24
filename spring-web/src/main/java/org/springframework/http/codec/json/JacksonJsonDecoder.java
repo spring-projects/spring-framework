@@ -105,6 +105,11 @@ public class JacksonJsonDecoder extends AbstractJacksonDecoder<JsonMapper> {
 	}
 
 	@Override
+	public boolean canDecode(ResolvableType elementType, @Nullable MimeType mimeType) {
+		return super.canDecode(elementType, mimeType) && !CharSequence.class.isAssignableFrom(elementType.toClass());
+	}
+
+	@Override
 	protected Flux<DataBuffer> processInput(Publisher<DataBuffer> input, ResolvableType elementType,
 			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 

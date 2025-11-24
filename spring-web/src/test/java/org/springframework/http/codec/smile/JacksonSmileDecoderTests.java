@@ -62,7 +62,7 @@ class JacksonSmileDecoderTests extends AbstractDecoderTests<JacksonSmileDecoder>
 		assertThat(decoder.canDecode(ResolvableType.forClass(Pojo.class), STREAM_SMILE_MIME_TYPE)).isTrue();
 		assertThat(decoder.canDecode(ResolvableType.forClass(Pojo.class), null)).isTrue();
 
-		assertThat(decoder.canDecode(ResolvableType.forClass(String.class), null)).isFalse();
+		assertThat(decoder.canDecode(ResolvableType.forClass(String.class), null)).isTrue();
 		assertThat(decoder.canDecode(ResolvableType.forClass(Pojo.class), APPLICATION_JSON)).isFalse();
 	}
 

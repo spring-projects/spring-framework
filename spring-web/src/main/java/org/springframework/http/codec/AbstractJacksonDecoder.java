@@ -102,14 +102,7 @@ public abstract class AbstractJacksonDecoder<T extends ObjectMapper> extends Jac
 
 	@Override
 	public boolean canDecode(ResolvableType elementType, @Nullable MimeType mimeType) {
-		if (!supportsMimeType(mimeType)) {
-			return false;
-		}
-		T mapper = selectMapper(elementType, mimeType);
-		if (mapper == null) {
-			return false;
-		}
-		return !CharSequence.class.isAssignableFrom(elementType.toClass());
+		return supportsMimeType(mimeType) && (selectMapper(elementType, mimeType) != null);
 	}
 
 	@Override

@@ -146,7 +146,6 @@ class SseIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 
 		Flux<ServerSentEvent<Person>> result = this.webClient.get()
 				.uri("/event")
-				.accept(TEXT_EVENT_STREAM)
 				.retrieve()
 				.bodyToFlux(new ParameterizedTypeReference<>() {});
 

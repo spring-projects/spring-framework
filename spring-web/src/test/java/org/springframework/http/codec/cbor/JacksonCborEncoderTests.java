@@ -59,6 +59,7 @@ class JacksonCborEncoderTests extends AbstractLeakCheckingTests {
 		ResolvableType pojoType = ResolvableType.forClass(Pojo.class);
 		assertThat(this.encoder.canEncode(pojoType, MediaType.APPLICATION_CBOR)).isTrue();
 		assertThat(this.encoder.canEncode(pojoType, null)).isTrue();
+		assertThat(this.encoder.canEncode(ResolvableType.forClass(String.class), null)).isTrue();
 
 		// SPR-15464
 		assertThat(this.encoder.canEncode(ResolvableType.NONE, null)).isTrue();
@@ -66,7 +67,6 @@ class JacksonCborEncoderTests extends AbstractLeakCheckingTests {
 
 	@Test
 	void canNotEncode() {
-		assertThat(this.encoder.canEncode(ResolvableType.forClass(String.class), null)).isFalse();
 		assertThat(this.encoder.canEncode(ResolvableType.forClass(Pojo.class), APPLICATION_XML)).isFalse();
 	}
 

@@ -122,6 +122,11 @@ public class JacksonJsonEncoder extends AbstractJacksonEncoder<JsonMapper> {
 
 
 	@Override
+	public boolean canEncode(ResolvableType elementType, @Nullable MimeType mimeType) {
+		return super.canEncode(elementType, mimeType) && !String.class.isAssignableFrom(elementType.toClass());
+	}
+
+	@Override
 	protected List<MimeType> getMediaTypesForProblemDetail() {
 		return problemDetailMimeTypes;
 	}

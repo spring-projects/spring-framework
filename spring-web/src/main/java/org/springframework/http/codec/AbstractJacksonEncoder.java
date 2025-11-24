@@ -126,14 +126,11 @@ public abstract class AbstractJacksonEncoder<T extends ObjectMapper> extends Jac
 		if (this.mapperRegistrations != null && selectMapper(elementType, mimeType) == null) {
 			return false;
 		}
-		Class<?> clazz = elementType.resolve();
-		if (clazz == null) {
-			return true;
-		}
-		if (MappingJacksonValue.class.isAssignableFrom(clazz)) {
+		Class<?> elementClass = elementType.toClass();
+		if (MappingJacksonValue.class.isAssignableFrom(elementClass)) {
 			throw new UnsupportedOperationException("MappingJacksonValue is not supported, use hints instead");
 		}
-		return !String.class.isAssignableFrom(clazz);
+		return !ServerSentEvent.class.isAssignableFrom(elementClass);
 	}
 
 	@Override
