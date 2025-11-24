@@ -101,7 +101,7 @@ public abstract class KotlinSerializationStringEncoder<T extends StringFormat> e
 
 	@Override
 	public boolean canEncode(ResolvableType elementType, @Nullable MimeType mimeType) {
-		return canSerialize(elementType, mimeType);
+		return canSerialize(elementType, mimeType) && !String.class.isAssignableFrom(elementType.toClass());
 	}
 
 	@Override

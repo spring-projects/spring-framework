@@ -91,7 +91,7 @@ class KotlinSerializationJsonEncoderTests : AbstractEncoderTests<KotlinSerializa
 
 		assertThat(encoderForAllTypes.canEncode(pojoType, MediaType.APPLICATION_NDJSON)).isTrue()
 
-		assertThat(encoderForAllTypes.canEncode(ResolvableType.forClass(String::class.java), null)).isTrue()
+		assertThat(encoderForAllTypes.canEncode(ResolvableType.forClass(String::class.java), null)).isFalse()
 		assertThat(encoderForAllTypes.canEncode(ResolvableType.forClass(Pojo::class.java), MediaType.APPLICATION_XML)).isFalse()
 		val sseType = ResolvableType.forClass(ServerSentEvent::class.java)
 		assertThat(encoderForAllTypes.canEncode(sseType, MediaType.APPLICATION_JSON)).isFalse()

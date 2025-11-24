@@ -117,7 +117,7 @@ public abstract class KotlinSerializationSupport<T extends SerialFormat> {
 		if (!this.typePredicate.test(type) || ResolvableType.NONE.equals(type)) {
 			return false;
 		}
-		return serializer(type) != null && supports(mimeType);
+		return serializer(type) != null && supports(mimeType) && !ServerSentEvent.class.isAssignableFrom(type.toClass());
 	}
 
 	private boolean supports(@Nullable MimeType mimeType) {

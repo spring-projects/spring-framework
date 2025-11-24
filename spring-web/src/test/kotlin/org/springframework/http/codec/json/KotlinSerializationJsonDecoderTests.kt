@@ -80,7 +80,7 @@ class KotlinSerializationJsonDecoderTests : AbstractDecoderTests<KotlinSerializa
 		assertThat(decoderForAllTypes.canDecode(ResolvableType.forClass(Pojo::class.java), MediaType.APPLICATION_JSON)).isTrue()
 		assertThat(decoderForAllTypes.canDecode(ResolvableType.forClass(Pojo::class.java), jsonSubtype)).isTrue()
 		assertThat(decoderForAllTypes.canDecode(ResolvableType.forClass(Pojo::class.java), null)).isTrue()
-		assertThat(decoderForAllTypes.canDecode(ResolvableType.forClass(String::class.java), null)).isTrue()
+		assertThat(decoderForAllTypes.canDecode(ResolvableType.forClass(String::class.java), null)).isFalse()
 		assertThat(decoderForAllTypes.canDecode(ResolvableType.forClass(Pojo::class.java), MediaType.APPLICATION_XML)).isFalse()
 		assertThat(decoderForAllTypes.canDecode(ResolvableType.forClass(Pojo::class.java),
 			MediaType("application", "json", StandardCharsets.UTF_8))).isTrue()
