@@ -23,6 +23,7 @@ import reactor.test.StepVerifier;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.testfixture.codec.AbstractEncoderTests;
+import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.web.testfixture.xml.Pojo;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -42,7 +43,8 @@ class GsonEncoderTests extends AbstractEncoderTests<GsonEncoder> {
 		assertThat(this.encoder.canEncode(pojoType, APPLICATION_JSON)).isTrue();
 		assertThat(this.encoder.canEncode(pojoType, APPLICATION_NDJSON)).isTrue();
 		assertThat(this.encoder.canEncode(pojoType, null)).isTrue();
-
+		assertThat(this.encoder.canEncode(ResolvableType.forClass(ServerSentEvent.class), null)).isFalse();
+		assertThat(this.encoder.canEncode(ResolvableType.forClass(String.class), null)).isFalse();
 	}
 
 	@Test

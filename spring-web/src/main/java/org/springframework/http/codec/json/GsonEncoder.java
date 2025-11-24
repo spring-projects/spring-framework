@@ -37,6 +37,7 @@ import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.HttpMessageEncoder;
+import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.util.Assert;
 import org.springframework.util.FastByteArrayOutputStream;
 import org.springframework.util.MimeType;
@@ -106,7 +107,8 @@ public class GsonEncoder extends AbstractEncoder<Object> implements HttpMessageE
 		if (!super.canEncode(elementType, mimeType)) {
 			return false;
 		}
-		return !String.class.isAssignableFrom(elementType.toClass());
+		Class<?> elementClass = elementType.toClass();
+		return !(String.class.isAssignableFrom(elementClass) || ServerSentEvent.class.isAssignableFrom(elementClass));
 	}
 
 	@Override
