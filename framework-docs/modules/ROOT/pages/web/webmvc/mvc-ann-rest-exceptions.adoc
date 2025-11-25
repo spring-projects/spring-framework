@@ -175,7 +175,7 @@ Message codes and arguments for each error are also resolved via `MessageSource`
 
 | `TypeMismatchException`
 | (default)
-| `+{0}+` property name, `+{1}+` property value
+| `+{0}+` property name, `+{1}+` property value, `+{2}+` simple name of required type
 
 | `UnsatisfiedServletRequestParameterException`
 | (default)
