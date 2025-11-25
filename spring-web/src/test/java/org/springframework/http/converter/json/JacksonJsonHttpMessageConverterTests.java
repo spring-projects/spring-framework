@@ -70,11 +70,11 @@ class JacksonJsonHttpMessageConverterTests {
 
 	@Test
 	void canRead() {
-		assertThat(converter.canRead(MyBean.class, new MediaType("application", "json"))).isTrue();
-		assertThat(converter.canRead(Map.class, new MediaType("application", "json"))).isTrue();
-		assertThat(converter.canRead(MyBean.class, new MediaType("application", "json", StandardCharsets.UTF_8))).isTrue();
-		assertThat(converter.canRead(MyBean.class, new MediaType("application", "json", StandardCharsets.US_ASCII))).isTrue();
-		assertThat(converter.canRead(MyBean.class, new MediaType("application", "json", StandardCharsets.ISO_8859_1))).isTrue();
+		assertThat(this.converter.canRead(MyBean.class, MediaType.APPLICATION_JSON)).isTrue();
+		assertThat(this.converter.canRead(Map.class, MediaType.APPLICATION_JSON)).isTrue();
+		assertThat(this.converter.canRead(MyBean.class, new MediaType("application", "json", StandardCharsets.UTF_8))).isTrue();
+		assertThat(this.converter.canRead(MyBean.class, new MediaType("application", "json", StandardCharsets.US_ASCII))).isTrue();
+		assertThat(this.converter.canRead(MyBean.class, new MediaType("application", "json", StandardCharsets.ISO_8859_1))).isTrue();
 	}
 
 	@Test
@@ -82,52 +82,52 @@ class JacksonJsonHttpMessageConverterTests {
 		MediaType halJsonMediaType = MediaType.parseMediaType("application/hal+json");
 		MediaType halFormsJsonMediaType = MediaType.parseMediaType("application/prs.hal-forms+json");
 
-		assertThat(converter.canRead(MyBean.class, halJsonMediaType)).isTrue();
-		assertThat(converter.canRead(MyBean.class, MediaType.APPLICATION_JSON)).isTrue();
-		assertThat(converter.canRead(MyBean.class, halFormsJsonMediaType)).isTrue();
-		assertThat(converter.canRead(Map.class, MediaType.APPLICATION_JSON)).isTrue();
+		assertThat(this.converter.canRead(MyBean.class, halJsonMediaType)).isTrue();
+		assertThat(this.converter.canRead(MyBean.class, MediaType.APPLICATION_JSON)).isTrue();
+		assertThat(this.converter.canRead(MyBean.class, halFormsJsonMediaType)).isTrue();
+		assertThat(this.converter.canRead(Map.class, MediaType.APPLICATION_JSON)).isTrue();
 
-		converter.registerMappersForType(MyBean.class, map -> {
+		this.converter.registerMappersForType(MyBean.class, map -> {
 			map.put(halJsonMediaType, new JsonMapper());
 			map.put(MediaType.APPLICATION_JSON, new JsonMapper());
 		});
 
-		assertThat(converter.canRead(MyBean.class, halJsonMediaType)).isTrue();
-		assertThat(converter.canRead(MyBean.class, MediaType.APPLICATION_JSON)).isTrue();
-		assertThat(converter.canRead(Map.class, MediaType.APPLICATION_JSON)).isTrue();
+		assertThat(this.converter.canRead(MyBean.class, halJsonMediaType)).isTrue();
+		assertThat(this.converter.canRead(MyBean.class, MediaType.APPLICATION_JSON)).isTrue();
+		assertThat(this.converter.canRead(Map.class, MediaType.APPLICATION_JSON)).isTrue();
 	}
 
 	@Test
 	@SuppressWarnings("removal")
 	void canWrite() {
-		assertThat(converter.canWrite(MyBean.class, MediaType.APPLICATION_JSON)).isTrue();
-		assertThat(converter.canWrite(Map.class, MediaType.APPLICATION_JSON)).isTrue();
-		assertThat(converter.canWrite(MyBean.class, new MediaType("application", "json", StandardCharsets.UTF_8))).isTrue();
-		assertThat(converter.canWrite(MyBean.class, new MediaType("application", "json", StandardCharsets.US_ASCII))).isTrue();
-		assertThat(converter.canWrite(MyBean.class, new MediaType("application", "json", StandardCharsets.ISO_8859_1))).isFalse();
-		assertThatThrownBy(() -> converter.canWrite(MappingJacksonValue.class, MediaType.APPLICATION_JSON)).isInstanceOf(UnsupportedOperationException.class);
+		assertThat(this.converter.canWrite(MyBean.class, MediaType.APPLICATION_JSON)).isTrue();
+		assertThat(this.converter.canWrite(Map.class, MediaType.APPLICATION_JSON)).isTrue();
+		assertThat(this.converter.canWrite(MyBean.class, new MediaType("application", "json", StandardCharsets.UTF_8))).isTrue();
+		assertThat(this.converter.canWrite(MyBean.class, new MediaType("application", "json", StandardCharsets.US_ASCII))).isTrue();
+		assertThat(this.converter.canWrite(MyBean.class, new MediaType("application", "json", StandardCharsets.ISO_8859_1))).isFalse();
+		assertThatThrownBy(() -> this.converter.canWrite(MappingJacksonValue.class, MediaType.APPLICATION_JSON)).isInstanceOf(UnsupportedOperationException.class);
 	}
 
 	@Test  // SPR-7905
 	void canReadAndWriteMicroformats() {
-		assertThat(converter.canRead(MyBean.class, new MediaType("application", "vnd.test-micro-type+json"))).isTrue();
-		assertThat(converter.canWrite(MyBean.class, new MediaType("application", "vnd.test-micro-type+json"))).isTrue();
+		assertThat(this.converter.canRead(MyBean.class, new MediaType("application", "vnd.test-micro-type+json"))).isTrue();
+		assertThat(this.converter.canWrite(MyBean.class, new MediaType("application", "vnd.test-micro-type+json"))).isTrue();
 	}
 
 	@Test
 	void getSupportedMediaTypes() {
 		MediaType[] defaultMediaTypes = {MediaType.APPLICATION_JSON, MediaType.parseMediaType("application/*+json")};
-		assertThat(converter.getSupportedMediaTypes()).containsExactly(defaultMediaTypes);
-		assertThat(converter.getSupportedMediaTypes(MyBean.class)).containsExactly(defaultMediaTypes);
+		assertThat(this.converter.getSupportedMediaTypes()).containsExactly(defaultMediaTypes);
+		assertThat(this.converter.getSupportedMediaTypes(MyBean.class)).containsExactly(defaultMediaTypes);
 
 		MediaType halJson = MediaType.parseMediaType("application/hal+json");
-		converter.registerMappersForType(MyBean.class, map -> {
+		this.converter.registerMappersForType(MyBean.class, map -> {
 			map.put(halJson, new JsonMapper());
 			map.put(MediaType.APPLICATION_JSON, new JsonMapper());
 		});
 
-		assertThat(converter.getSupportedMediaTypes(MyBean.class)).containsExactly(halJson, MediaType.APPLICATION_JSON);
-		assertThat(converter.getSupportedMediaTypes(Map.class)).containsExactly(defaultMediaTypes);
+		assertThat(this.converter.getSupportedMediaTypes(MyBean.class)).containsExactly(halJson, MediaType.APPLICATION_JSON);
+		assertThat(this.converter.getSupportedMediaTypes(Map.class)).containsExactly(defaultMediaTypes);
 	}
 
 	@Test
@@ -141,7 +141,7 @@ class JacksonJsonHttpMessageConverterTests {
 				"\"fraction\":42.0}";
 		MockHttpInputMessage inputMessage = new MockHttpInputMessage(body.getBytes(StandardCharsets.UTF_8));
 		inputMessage.getHeaders().setContentType(new MediaType("application", "json"));
-		MyBean result = (MyBean) converter.read(MyBean.class, inputMessage);
+		MyBean result = (MyBean) this.converter.read(MyBean.class, inputMessage);
 		assertThat(result.getString()).isEqualTo("Foo");
 		assertThat(result.getNumber()).isEqualTo(42);
 		assertThat(result.getFraction()).isCloseTo(42F, within(0F));
@@ -162,7 +162,7 @@ class JacksonJsonHttpMessageConverterTests {
 				"\"fraction\":42.0}";
 		MockHttpInputMessage inputMessage = new MockHttpInputMessage(body.getBytes(StandardCharsets.UTF_8));
 		inputMessage.getHeaders().setContentType(new MediaType("application", "json"));
-		HashMap<String, Object> result = (HashMap<String, Object>) converter.read(HashMap.class, inputMessage);
+		HashMap<String, Object> result = (HashMap<String, Object>) this.converter.read(HashMap.class, inputMessage);
 		assertThat(result).containsEntry("string", "Foo");
 		assertThat(result).containsEntry("number", 42);
 		assertThat((Double) result.get("fraction")).isCloseTo(42D, within(0D));
@@ -184,7 +184,7 @@ class JacksonJsonHttpMessageConverterTests {
 		body.setArray(new String[] {"Foo", "Bar"});
 		body.setBool(true);
 		body.setBytes(new byte[] {0x1, 0x2});
-		converter.write(body, null, outputMessage);
+		this.converter.write(body, null, outputMessage);
 		String result = outputMessage.getBodyAsString(StandardCharsets.UTF_8);
 		assertThat(result).contains("\"string\":\"Foo\"");
 		assertThat(result).contains("\"number\":42");
@@ -206,7 +206,7 @@ class JacksonJsonHttpMessageConverterTests {
 		body.setArray(new String[] {"Foo", "Bar"});
 		body.setBool(true);
 		body.setBytes(new byte[] {0x1, 0x2});
-		converter.write(body, ResolvableType.forClass(MyBase.class), null, outputMessage, null);
+		this.converter.write(body, ResolvableType.forClass(MyBase.class), null, outputMessage, null);
 		String result = outputMessage.getBodyAsString(StandardCharsets.UTF_8);
 		assertThat(result).contains("\"string\":\"Foo\"");
 		assertThat(result).contains("\"number\":42");
@@ -223,7 +223,7 @@ class JacksonJsonHttpMessageConverterTests {
 		MediaType contentType = new MediaType("application", "json", StandardCharsets.UTF_16BE);
 		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
 		String body = "H\u00e9llo W\u00f6rld";
-		converter.write(body, contentType, outputMessage);
+		this.converter.write(body, contentType, outputMessage);
 		assertThat(outputMessage.getBodyAsString(StandardCharsets.UTF_16BE)).as("Invalid result").isEqualTo(("\"" + body + "\""));
 		assertThat(outputMessage.getHeaders().getContentType()).as("Invalid content-type").isEqualTo(contentType);
 	}
@@ -234,7 +234,7 @@ class JacksonJsonHttpMessageConverterTests {
 		MockHttpInputMessage inputMessage = new MockHttpInputMessage(body.getBytes(StandardCharsets.UTF_8));
 		inputMessage.getHeaders().setContentType(new MediaType("application", "json"));
 		assertThatExceptionOfType(HttpMessageNotReadableException.class)
-				.isThrownBy(() -> converter.read(MyBean.class, inputMessage));
+				.isThrownBy(() -> this.converter.read(MyBean.class, inputMessage));
 	}
 
 	@Test
@@ -242,14 +242,14 @@ class JacksonJsonHttpMessageConverterTests {
 		String body = "{\"string\":\"string\",\"unknownProperty\":\"value\"}";
 		MockHttpInputMessage inputMessage = new MockHttpInputMessage(body.getBytes(StandardCharsets.UTF_8));
 		inputMessage.getHeaders().setContentType(new MediaType("application", "json"));
-		converter.read(MyBean.class, inputMessage);
+		this.converter.read(MyBean.class, inputMessage);
 		// Assert no HttpMessageNotReadableException is thrown
 	}
 
 	@Test
 	@SuppressWarnings("unchecked")
 	void readAndWriteGenerics() throws Exception {
-		JacksonJsonHttpMessageConverter converter = new JacksonJsonHttpMessageConverter() {
+		JacksonJsonHttpMessageConverter customizedConverter = new JacksonJsonHttpMessageConverter() {
 			@Override
 			protected JavaType getJavaType(Type type, @Nullable Class<?> contextClass) {
 				if (type instanceof Class && List.class.isAssignableFrom((Class<?>)type)) {
@@ -270,7 +270,7 @@ class JacksonJsonHttpMessageConverterTests {
 		MockHttpInputMessage inputMessage = new MockHttpInputMessage(body.getBytes(StandardCharsets.UTF_8));
 		inputMessage.getHeaders().setContentType(new MediaType("application", "json"));
 
-		List<MyBean> results = (List<MyBean>) converter.read(List.class, inputMessage);
+		List<MyBean> results = (List<MyBean>) customizedConverter.read(List.class, inputMessage);
 		assertThat(results).hasSize(1);
 		MyBean result = results.get(0);
 		assertThat(result.getString()).isEqualTo("Foo");
@@ -281,7 +281,7 @@ class JacksonJsonHttpMessageConverterTests {
 		assertThat(result.getBytes()).isEqualTo(new byte[] {0x1, 0x2});
 
 		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
-		converter.write(results, MediaType.APPLICATION_JSON, outputMessage);
+		customizedConverter.write(results, MediaType.APPLICATION_JSON, outputMessage);
 		JSONAssert.assertEquals(body, outputMessage.getBodyAsString(StandardCharsets.UTF_8), true);
 	}
 
@@ -300,8 +300,7 @@ class JacksonJsonHttpMessageConverterTests {
 		MockHttpInputMessage inputMessage = new MockHttpInputMessage(body.getBytes(StandardCharsets.UTF_8));
 		inputMessage.getHeaders().setContentType(MediaType.APPLICATION_JSON);
 
-		JacksonJsonHttpMessageConverter converter = new JacksonJsonHttpMessageConverter();
-		List<MyBean> results = (List<MyBean>) converter.read(ResolvableType.forType(beansList), inputMessage, null);
+		List<MyBean> results = (List<MyBean>) this.converter.read(ResolvableType.forType(beansList), inputMessage, null);
 		assertThat(results).hasSize(1);
 		MyBean result = results.get(0);
 		assertThat(result.getString()).isEqualTo("Foo");
@@ -312,7 +311,7 @@ class JacksonJsonHttpMessageConverterTests {
 		assertThat(result.getBytes()).isEqualTo(new byte[] {0x1, 0x2});
 
 		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
-		converter.write(results, ResolvableType.forType(beansList), MediaType.APPLICATION_JSON, outputMessage, null);
+		this.converter.write(results, ResolvableType.forType(beansList), MediaType.APPLICATION_JSON, outputMessage, null);
 		JSONAssert.assertEquals(body, outputMessage.getBodyAsString(StandardCharsets.UTF_8), true);
 	}
 
@@ -332,8 +331,7 @@ class JacksonJsonHttpMessageConverterTests {
 		MockHttpInputMessage inputMessage = new MockHttpInputMessage(body.getBytes(StandardCharsets.UTF_8));
 		inputMessage.getHeaders().setContentType(MediaType.APPLICATION_JSON);
 
-		JacksonJsonHttpMessageConverter converter = new JacksonJsonHttpMessageConverter();
-		List<MyBean> results = (List<MyBean>) converter.read(ResolvableType.forType(beansList), inputMessage, null);
+		List<MyBean> results = (List<MyBean>) this.converter.read(ResolvableType.forType(beansList), inputMessage, null);
 		assertThat(results).hasSize(1);
 		MyBean result = results.get(0);
 		assertThat(result.getString()).isEqualTo("Foo");
@@ -344,7 +342,7 @@ class JacksonJsonHttpMessageConverterTests {
 		assertThat(result.getBytes()).isEqualTo(new byte[] {0x1, 0x2});
 
 		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
-		converter.write(results, ResolvableType.forType(baseList), MediaType.APPLICATION_JSON, outputMessage, null);
+		this.converter.write(results, ResolvableType.forType(baseList), MediaType.APPLICATION_JSON, outputMessage, null);
 		JSONAssert.assertEquals(body, outputMessage.getBodyAsString(StandardCharsets.UTF_8), true);
 	}
 
@@ -353,7 +351,7 @@ class JacksonJsonHttpMessageConverterTests {
 		ParameterizedTypeReference<Optional<MyParent>> optionalParent = new ParameterizedTypeReference<>() {};
 		Optional<MyParent> result = Optional.of(new Impl1());
 		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
-		converter.write(result, ResolvableType.forType(optionalParent.getType()),
+		this.converter.write(result, ResolvableType.forType(optionalParent.getType()),
 				MediaType.APPLICATION_JSON, outputMessage, null);
 
 		assertThat(outputMessage.getBodyAsString(StandardCharsets.UTF_8)).contains("@type");
@@ -550,7 +548,7 @@ class JacksonJsonHttpMessageConverterTests {
 		body.put("foo", "bar");
 		Charset charset = StandardCharsets.US_ASCII;
 		MediaType contentType = new MediaType("application", "json", charset);
-		converter.write(body, contentType, outputMessage);
+		this.converter.write(body, contentType, outputMessage);
 
 		String result = outputMessage.getBodyAsString(charset);
 		assertThat(result).isEqualTo("{\"foo\":\"bar\"}");
@@ -570,7 +568,7 @@ class JacksonJsonHttpMessageConverterTests {
 		assertThatExceptionOfType(HttpMessageNotReadableException.class)
 				.isThrownBy(() -> customizedConverter.read(MyCustomizedBean.class, inputMessage1));
 
-		MyCustomizedBean customizedResult = (MyCustomizedBean) converter.read(MyCustomizedBean.class, inputMessage2);
+		MyCustomizedBean customizedResult = (MyCustomizedBean) this.converter.read(MyCustomizedBean.class, inputMessage2);
 		assertThat(customizedResult.getProperty()).isEqualTo(MyCustomEnum.VAL1);
 	}
 
@@ -582,7 +580,7 @@ class JacksonJsonHttpMessageConverterTests {
 		MockHttpOutputMessage outputMessage2 = new MockHttpOutputMessage();
 		MyCustomizedBean body = new MyCustomizedBean();
 		body.setProperty(MyCustomEnum.VAL2);
-		converter.write(body, null, outputMessage1);
+		this.converter.write(body, null, outputMessage1);
 		customizedConverter.write(body, null, outputMessage2);
 		String result1 = outputMessage1.getBodyAsString(StandardCharsets.UTF_8);
 		assertThat(result1).contains("\"property\":\"Value2\"");
@@ -595,12 +593,12 @@ class JacksonJsonHttpMessageConverterTests {
 		MockHttpOutputMessage outputMessage1 = new MockHttpOutputMessage();
 		MyBean body = new MyBean();
 		body.setString("Foo");
-		converter.write(body, null, outputMessage1);
+		this.converter.write(body, null, outputMessage1);
 		String result = outputMessage1.getBodyAsString(StandardCharsets.UTF_8);
 		assertThat(result).contains("\"string\":\"Foo\"");
 
 		MockHttpOutputMessage outputMessage2 = new MockHttpOutputMessage();
-		converter.write(body, null, outputMessage2);
+		this.converter.write(body, null, outputMessage2);
 		result = outputMessage2.getBodyAsString(StandardCharsets.UTF_8);
 		assertThat(result).contains("\"string\":\"Foo\"");
 	}
