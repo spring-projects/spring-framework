@@ -30,6 +30,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.ContextConfigurationAttributes;
 import org.springframework.test.context.ContextHierarchy;
 import org.springframework.test.context.SmartContextLoader;
+import org.springframework.test.context.TestContextAnnotationUtils;
 import org.springframework.test.context.TestContextAnnotationUtils.AnnotationDescriptor;
 import org.springframework.test.context.TestContextAnnotationUtils.UntypedAnnotationDescriptor;
 import org.springframework.util.Assert;
@@ -92,6 +93,7 @@ abstract class ContextLoaderUtils {
 	 * {@code @ContextHierarchy} as top-level annotations.
 	 * @since 3.2.2
 	 * @see #buildContextHierarchyMap(Class)
+	 * @see #resolveDefaultContextConfigurationAttributes(Class)
 	 * @see #resolveContextConfigurationAttributes(Class)
 	 */
 	@SuppressWarnings("unchecked")
@@ -213,6 +215,44 @@ abstract class ContextLoaderUtils {
 		}
 
 		return map;
+	}
+
+	/**
+	 * Resolve the list of <em>default</em> {@linkplain ContextConfigurationAttributes
+	 * context configuration attributes} for the supplied {@linkplain Class test class}
+	 * and its superclasses and enclosing classes.
+	 * <p>Use this method instead of {@link #resolveContextConfigurationAttributes(Class)}
+	 * if neither {@link ContextConfiguration @ContextConfiguration} nor
+	 * {@link ContextHierarchy @ContextHierarchy} is present in the class hierarchy
+	 * of the supplied test class.
+	 * @param testClass the class for which to resolve the configuration attributes
+	 * (must not be {@code null})
+	 * @return the list of configuration attributes for the specified class, ordered
+	 * <em>bottom-up</em> (i.e., as if we were traversing up the class hierarchy
+	 * and enclosing class hierarchy); never {@code null}
+	 * @throws IllegalArgumentException if the supplied class is {@code null}
+	 * @since 7.0.2
+	 */
+	static List<ContextConfigurationAttributes> resolveDefaultContextConfigurationAttributes(Class<?> testClass) {
+		Assert.notNull(testClass, "Class must not be null");
+		List<ContextConfigurationAttributes> results = new ArrayList<>();
+		resolveDefaultContextConfigurationAttributes(results, testClass);
+		return results;
+	}
+
+	private static void resolveDefaultContextConfigurationAttributes(
+			List<ContextConfigurationAttributes> results, Class<?> testClass) {
+
+		results.add(0, new ContextConfigurationAttributes(testClass));
+
+		Class<?> superclass = testClass.getSuperclass();
+		if (superclass != null && superclass != Object.class) {
+			resolveDefaultContextConfigurationAttributes(results, superclass);
+		}
+
+		if (TestContextAnnotationUtils.searchEnclosingClass(testClass)) {
+			resolveDefaultContextConfigurationAttributes(results, testClass.getEnclosingClass());
+		}
 	}
 
 	/**

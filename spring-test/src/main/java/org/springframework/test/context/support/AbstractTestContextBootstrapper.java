@@ -250,7 +250,7 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 			CacheAwareContextLoaderDelegate cacheAwareContextLoaderDelegate) {
 
 		List<ContextConfigurationAttributes> defaultConfigAttributesList =
-				Collections.singletonList(new ContextConfigurationAttributes(testClass));
+				ContextLoaderUtils.resolveDefaultContextConfigurationAttributes(testClass);
 
 		ContextLoader contextLoader = resolveContextLoader(testClass, defaultConfigAttributesList);
 		if (logger.isTraceEnabled()) {
