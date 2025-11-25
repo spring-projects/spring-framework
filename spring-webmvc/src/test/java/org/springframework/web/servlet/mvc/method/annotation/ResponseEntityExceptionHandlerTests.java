@@ -245,7 +245,7 @@ class ResponseEntityExceptionHandlerTests {
 			StaticMessageSource messageSource = new StaticMessageSource();
 			messageSource.addMessage(
 					ErrorResponse.getDefaultDetailMessageCode(TypeMismatchException.class, null), locale,
-					"Failed to set {0} to value: {1}");
+					"Failed to set {0} to value: {1} for type {2}");
 
 			this.exceptionHandler.setMessageSource(messageSource);
 
@@ -253,7 +253,7 @@ class ResponseEntityExceptionHandlerTests {
 					new TypeMismatchException(new PropertyChangeEvent(this, "name", "John", "James"), String.class));
 
 			ProblemDetail body = (ProblemDetail) entity.getBody();
-			assertThat(body.getDetail()).isEqualTo("Failed to set name to value: James");
+			assertThat(body.getDetail()).isEqualTo("Failed to set name to value: James for type String");
 		}
 		finally {
 			LocaleContextHolder.resetLocaleContext();

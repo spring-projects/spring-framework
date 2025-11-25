@@ -484,7 +484,7 @@ public abstract class ResponseEntityExceptionHandler implements MessageSourceAwa
 
 	/**
 	 * Customize the handling of {@link TypeMismatchException}.
-	 * <p>By default this method creates a {@link ProblemDetail} with the status
+	 * <p>By default, this method creates a {@link ProblemDetail} with the status
 	 * and a short detail message, and also looks up an override for the detail
 	 * via {@link MessageSource}, before delegating to
 	 * {@link #handleExceptionInternal}.
@@ -499,7 +499,8 @@ public abstract class ResponseEntityExceptionHandler implements MessageSourceAwa
 	protected ResponseEntity<Object> handleTypeMismatch(
 			TypeMismatchException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
 
-		Object[] args = {ex.getPropertyName(), ex.getValue()};
+		Object[] args = {ex.getPropertyName(), ex.getValue(),
+				(ex.getRequiredType() != null ? ex.getRequiredType().getSimpleName() : "")};
 		String defaultDetail = "Failed to convert '" + args[0] + "' with value: '" + args[1] + "'";
 		String messageCode = ErrorResponse.getDefaultDetailMessageCode(TypeMismatchException.class, null);
 		ProblemDetail body = createProblemDetail(ex, status, defaultDetail, messageCode, args, request);
