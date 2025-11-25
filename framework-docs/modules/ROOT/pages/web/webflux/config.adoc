@@ -690,7 +690,7 @@ Kotlin::
 [source,kotlin,indent=0,subs="verbatim"]
 ----
 	@Configuration
-	class WebConfiguration : WebMvcConfigurer {
+	class WebConfiguration : WebFluxConfigurer {
 
 		override fun configureApiVersioning(configurer: ApiVersionConfigurer) {
 			configurer.useRequestHeader("API-Version")
