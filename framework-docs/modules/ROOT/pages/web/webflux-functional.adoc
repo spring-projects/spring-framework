@@ -374,14 +374,14 @@ Java::
 +
 [source,java]
 ----
-ServerResponse.ok().hint(Jackson2CodecSupport.JSON_VIEW_HINT, MyJacksonView.class).body(...);
+ServerResponse.ok().hint(JacksonCodecSupport.JSON_VIEW_HINT, MyJacksonView.class).body(...);
 ----
 
 Kotlin::
 +
 [source,kotlin]
 ----
-ServerResponse.ok().hint(Jackson2CodecSupport.JSON_VIEW_HINT, MyJacksonView::class.java).body(...)
+ServerResponse.ok().hint(JacksonCodecSupport.JSON_VIEW_HINT, MyJacksonView::class.java).body(...)
 ----
 ======
 

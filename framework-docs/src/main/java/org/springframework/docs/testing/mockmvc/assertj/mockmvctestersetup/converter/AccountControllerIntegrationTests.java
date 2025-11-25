@@ -20,7 +20,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.docs.testing.mockmvc.assertj.mockmvctestersetup.ApplicationWebConfiguration;
-import org.springframework.http.converter.json.AbstractJackson2HttpMessageConverter;
+import org.springframework.http.converter.AbstractJacksonHttpMessageConverter ;
 import org.springframework.test.context.junit.jupiter.web.SpringJUnitWebConfig;
 import org.springframework.test.web.servlet.assertj.MockMvcTester;
 import org.springframework.web.context.WebApplicationContext;
@@ -34,7 +34,7 @@ class AccountControllerIntegrationTests {
 
 	AccountControllerIntegrationTests(@Autowired WebApplicationContext wac) {
 		this.mockMvc = MockMvcTester.from(wac).withHttpMessageConverters(
-				List.of(wac.getBean(AbstractJackson2HttpMessageConverter.class)));
+				List.of(wac.getBean(AbstractJacksonHttpMessageConverter.class)));
 	}
 
 	// ...

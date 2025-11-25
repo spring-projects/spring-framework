@@ -482,7 +482,7 @@ purposes, it is useful to be able to alternate between rendering a model with an
 or as other formats (such as JSON or XML), depending on the content type requested by the client.
 To support doing so, Spring WebFlux provides the `HttpMessageWriterView`, which you can use to
 plug in any of the available xref:web/webflux/reactive-spring.adoc#webflux-codecs[Codecs] from
-`spring-web`, such as `Jackson2JsonEncoder`, `Jackson2SmileEncoder`, or `Jaxb2XmlEncoder`.
+`spring-web`, such as `JacksonJsonEncoder`, `JacksonSmileEncoder`, or `Jaxb2XmlEncoder`.
 
 Unlike other view technologies, `HttpMessageWriterView` does not require a `ViewResolver` but is
 instead xref:web/webflux/config.adoc#webflux-config-view-resolvers[configured] as a default view.

@@ -334,19 +334,8 @@ Kotlin::
 `ServerCodecConfigurer` provides a set of default readers and writers. You can use it to add
 more readers and writers, customize the default ones, or replace the default ones completely.
 
-For Jackson JSON and XML, consider using
-{spring-framework-api}/http/converter/json/Jackson2ObjectMapperBuilder.html[`Jackson2ObjectMapperBuilder`],
-which customizes Jackson's default properties with the following ones:
-
-* {jackson-docs}/jackson-databind/javadoc/2.6/com/fasterxml/jackson/databind/DeserializationFeature.html#FAIL_ON_UNKNOWN_PROPERTIES[`DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES`] is disabled.
-* {jackson-docs}/jackson-databind/javadoc/2.6/com/fasterxml/jackson/databind/MapperFeature.html#DEFAULT_VIEW_INCLUSION[`MapperFeature.DEFAULT_VIEW_INCLUSION`] is disabled.
-
-It also automatically registers the following well-known modules if they are detected on the classpath:
-
-* {jackson-github-org}/jackson-datatype-jsr310[`jackson-datatype-jsr310`]: Support for Java 8 Date and Time API types.
-* {jackson-github-org}/jackson-datatype-jdk8[`jackson-datatype-jdk8`]: Support for other Java 8 types, such as `Optional`.
-* {jackson-github-org}/jackson-module-kotlin[`jackson-module-kotlin`]: Support for Kotlin classes and data classes.
-
+For Jackson, consider using a Jackson format-specific builder like `JsonMapper.Builder` to configure Jackson's default
+properties.
 
 [[webflux-config-view-resolvers]]
 == View Resolvers
@@ -489,7 +478,7 @@ Java::
 		public void configureViewResolvers(ViewResolverRegistry registry) {
 			registry.freeMarker();
 
-			Jackson2JsonEncoder encoder = new Jackson2JsonEncoder();
+			JacksonJsonEncoder encoder = new JacksonJsonEncoder();
 			registry.defaultViews(new HttpMessageWriterView(encoder));
 		}
 
@@ -508,7 +497,7 @@ Kotlin::
 		override fun configureViewResolvers(registry: ViewResolverRegistry) {
 			registry.freeMarker()
 
-			val encoder = Jackson2JsonEncoder()
+			val encoder = JacksonJsonEncoder()
 			registry.defaultViews(HttpMessageWriterView(encoder))
 		}
 

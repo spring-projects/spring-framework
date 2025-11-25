@@ -237,8 +237,8 @@ Java::
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
 	RSocketStrategies strategies = RSocketStrategies.builder()
-		.encoders(encoders -> encoders.add(new Jackson2CborEncoder()))
-		.decoders(decoders -> decoders.add(new Jackson2CborDecoder()))
+		.encoders(encoders -> encoders.add(new JacksonCborEncoder()))
+		.decoders(decoders -> decoders.add(new JacksonCborDecoder()))
 		.build();
 
 	RSocketRequester requester = RSocketRequester.builder()
@@ -251,8 +251,8 @@ Kotlin::
 [source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	val strategies = RSocketStrategies.builder()
-			.encoders { it.add(Jackson2CborEncoder()) }
-			.decoders { it.add(Jackson2CborDecoder()) }
+			.encoders { it.add(JacksonCborEncoder()) }
+			.decoders { it.add(JacksonCborDecoder()) }
 			.build()
 
 	val requester = RSocketRequester.builder()
@@ -681,8 +681,8 @@ Java::
 		@Bean
 		public RSocketStrategies rsocketStrategies() {
 			return RSocketStrategies.builder()
-				.encoders(encoders -> encoders.add(new Jackson2CborEncoder()))
-				.decoders(decoders -> decoders.add(new Jackson2CborDecoder()))
+				.encoders(encoders -> encoders.add(new JacksonCborEncoder()))
+				.decoders(decoders -> decoders.add(new JacksonCborDecoder()))
 				.routeMatcher(new PathPatternRouteMatcher())
 				.build();
 		}
@@ -703,8 +703,8 @@ Kotlin::
 
 		@Bean
 		fun rsocketStrategies() = RSocketStrategies.builder()
-				.encoders { it.add(Jackson2CborEncoder()) }
-				.decoders { it.add(Jackson2CborDecoder()) }
+				.encoders { it.add(JacksonCborEncoder()) }
+				.decoders { it.add(JacksonCborDecoder()) }
 				.routeMatcher(PathPatternRouteMatcher())
 				.build()
 	}

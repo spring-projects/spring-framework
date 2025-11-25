@@ -19,7 +19,7 @@ package org.springframework.docs.web.webmvc.mvcconfig.mvcconfigviewresolvers;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.ViewResolverRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-import org.springframework.web.servlet.view.json.MappingJackson2JsonView;
+import org.springframework.web.servlet.view.json.JacksonJsonView;
 
 @SuppressWarnings("removal")
 // tag::snippet[]
@@ -28,7 +28,7 @@ public class WebConfiguration implements WebMvcConfigurer {
 
 	@Override
 	public void configureViewResolvers(ViewResolverRegistry registry) {
-		registry.enableContentNegotiation(new MappingJackson2JsonView());
+		registry.enableContentNegotiation(new JacksonJsonView());
 		registry.jsp();
 	}
 }
