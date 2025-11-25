@@ -48,6 +48,7 @@ import tools.jackson.databind.ser.std.SimpleFilterProvider;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.ResolvableType;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.testfixture.http.MockHttpInputMessage;
 import org.springframework.web.testfixture.http.MockHttpOutputMessage;
@@ -67,6 +68,8 @@ class JacksonJsonHttpMessageConverterTests {
 
 	private JacksonJsonHttpMessageConverter converter = new JacksonJsonHttpMessageConverter();
 
+	private final ResolvableType unresolvableType = ResolvableType.forClass(ResponseEntity.class).getNested(2);
+
 
 	@Test
 	void canRead() {
@@ -75,6 +78,7 @@ class JacksonJsonHttpMessageConverterTests {
 		assertThat(this.converter.canRead(MyBean.class, new MediaType("application", "json", StandardCharsets.UTF_8))).isTrue();
 		assertThat(this.converter.canRead(MyBean.class, new MediaType("application", "json", StandardCharsets.US_ASCII))).isTrue();
 		assertThat(this.converter.canRead(MyBean.class, new MediaType("application", "json", StandardCharsets.ISO_8859_1))).isTrue();
+		assertThat(this.converter.canRead(this.unresolvableType, MediaType.APPLICATION_JSON)).isTrue();
 	}
 
 	@Test
@@ -163,6 +167,29 @@ class JacksonJsonHttpMessageConverterTests {
 		MockHttpInputMessage inputMessage = new MockHttpInputMessage(body.getBytes(StandardCharsets.UTF_8));
 		inputMessage.getHeaders().setContentType(new MediaType("application", "json"));
 		HashMap<String, Object> result = (HashMap<String, Object>) this.converter.read(HashMap.class, inputMessage);
+		assertThat(result).containsEntry("string", "Foo");
+		assertThat(result).containsEntry("number", 42);
+		assertThat((Double) result.get("fraction")).isCloseTo(42D, within(0D));
+		List<String> array = new ArrayList<>();
+		array.add("Foo");
+		array.add("Bar");
+		assertThat(result).containsEntry("array", array);
+		assertThat(result).containsEntry("bool", Boolean.TRUE);
+		assertThat(result).containsEntry("bytes", "AQI=");
+	}
+	@Test
+	@SuppressWarnings("unchecked")
+	void readUnresolable() throws IOException {
+		String body = "{" +
+				"\"bytes\":\"AQI=\"," +
+				"\"array\":[\"Foo\",\"Bar\"]," +
+				"\"number\":42," +
+				"\"string\":\"Foo\"," +
+				"\"bool\":true," +
+				"\"fraction\":42.0}";
+		MockHttpInputMessage inputMessage = new MockHttpInputMessage(body.getBytes(StandardCharsets.UTF_8));
+		inputMessage.getHeaders().setContentType(new MediaType("application", "json"));
+		HashMap<String, Object> result = (HashMap<String, Object>) this.converter.read(this.unresolvableType, inputMessage, null);
 		assertThat(result).containsEntry("string", "Foo");
 		assertThat(result).containsEntry("number", 42);
 		assertThat((Double) result.get("fraction")).isCloseTo(42D, within(0D));

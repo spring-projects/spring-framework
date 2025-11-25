@@ -264,11 +264,7 @@ public abstract class AbstractJacksonHttpMessageConverter<T extends ObjectMapper
 		if (!canRead(mediaType)) {
 			return false;
 		}
-		Class<?> clazz = type.resolve();
-		if (clazz == null) {
-			return false;
-		}
-		return this.mapperRegistrations == null || selectMapper(clazz, mediaType) != null;
+		return this.mapperRegistrations == null || selectMapper(type.toClass(), mediaType) != null;
 	}
 
 	@Override
