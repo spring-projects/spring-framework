@@ -54,5 +54,4 @@ public @interface Proxyable {
 	 */
 	Class<?>[] interfaces() default {};
 
-
 }

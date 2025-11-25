@@ -48,12 +48,14 @@ public @interface EnableResilientMethods {
 	 * Indicate whether subclass-based (CGLIB) proxies are to be created as opposed
 	 * to standard Java interface-based proxies.
 	 * <p>The default is {@code false}.
-	 * <p>Note that setting this attribute to {@code true} will affect <em>all</em>
-	 * Spring-managed beans requiring proxying, not just those marked with {@code @Retryable}
-	 * or {@code @ConcurrencyLimit}. For example, other beans marked with Spring's
-	 * {@code @Transactional} annotation will be upgraded to subclass proxying at
-	 * the same time. This approach has no negative impact in practice unless one is
-	 * explicitly expecting one type of proxy vs. another &mdash; for example, in tests.
+	 * <p>Note that setting this attribute to {@code true} will only affect
+	 * {@link RetryAnnotationBeanPostProcessor} and
+	 * {@link ConcurrencyLimitBeanPostProcessor}.
+	 * <p>It is usually recommendable to rely on a global default proxy configuration
+	 * instead, with specific proxy requirements for certain beans expressed through
+	 * a {@link org.springframework.context.annotation.Proxyable} annotation on
+	 * the affected bean classes.
+	 * @see org.springframework.aop.config.AopConfigUtils#forceAutoProxyCreatorToUseClassProxying
 	 */
 	boolean proxyTargetClass() default false;
 

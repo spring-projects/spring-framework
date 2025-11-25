@@ -177,6 +177,11 @@ public @interface EnableCaching {
 	 * be upgraded to subclass proxying at the same time. This approach has no negative
 	 * impact in practice unless one is explicitly expecting one type of proxy vs another,
 	 * for example, in tests.
+	 * <p>It is usually recommendable to rely on a global default proxy configuration
+	 * instead, with specific proxy requirements for certain beans expressed through
+	 * a {@link org.springframework.context.annotation.Proxyable} annotation on
+	 * the affected bean classes.
+	 * @see org.springframework.aop.config.AopConfigUtils#forceAutoProxyCreatorToUseClassProxying
 	 */
 	boolean proxyTargetClass() default false;
 
