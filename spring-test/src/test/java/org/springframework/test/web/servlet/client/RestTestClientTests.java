@@ -18,7 +18,7 @@ package org.springframework.test.web.servlet.client;
 
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
-import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.Map;
 
@@ -263,7 +263,7 @@ class RestTestClientTests {
 		@Test
 		void testIfModifiedSince() {
 			RestTestClientTests.this.client.get().uri("/test")
-					.ifModifiedSince(ZonedDateTime.of(1970, 1, 1, 0, 0, 0, 0, ZoneId.of("GMT")))
+					.ifModifiedSince(ZonedDateTime.of(1970, 1, 1, 0, 0, 0, 0, ZoneOffset.UTC))
 					.exchange()
 					.expectStatus().isOk()
 					.expectBody().jsonPath("$.headers.If-Modified-Since").isEqualTo("Thu, 01 Jan 1970 00:00:00 GMT");

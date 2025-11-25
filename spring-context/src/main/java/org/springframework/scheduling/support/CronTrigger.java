@@ -115,7 +115,7 @@ public class CronTrigger implements Trigger {
 	public @Nullable Instant nextExecution(TriggerContext triggerContext) {
 		Instant timestamp = determineLatestTimestamp(triggerContext);
 		ZoneId zone = (this.zoneId != null ? this.zoneId : triggerContext.getClock().getZone());
-		ZonedDateTime zonedTimestamp = ZonedDateTime.ofInstant(timestamp, zone);
+		ZonedDateTime zonedTimestamp = timestamp.atZone(zone);
 		ZonedDateTime nextTimestamp = this.expression.next(zonedTimestamp);
 		return (nextTimestamp != null ? nextTimestamp.toInstant() : null);
 	}

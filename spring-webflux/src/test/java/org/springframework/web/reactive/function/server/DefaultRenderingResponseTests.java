@@ -19,7 +19,6 @@ package org.springframework.web.reactive.function.server;
 import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -165,7 +164,7 @@ class DefaultRenderingResponseTests {
 		RenderingResponse renderingResponse = RenderingResponse.create("view")
 				.status(HttpStatus.FOUND)
 				.modelAttributes(model)
-				.build().block(Duration.of(5, ChronoUnit.MILLIS));
+				.build().block(Duration.ofMillis(5));
 		assertThat(renderingResponse).isNotNull();
 
 		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("http://localhost"));
