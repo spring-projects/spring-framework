@@ -20,7 +20,7 @@ import java.net.InetSocketAddress;
 import java.net.URI;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -370,7 +370,7 @@ class HttpHeadersTests {
 
 	@Test
 	void expiresZonedDateTime() {
-		ZonedDateTime zonedDateTime = ZonedDateTime.of(2008, 12, 18, 10, 20, 0, 0, ZoneId.of("GMT"));
+		ZonedDateTime zonedDateTime = ZonedDateTime.of(2008, 12, 18, 10, 20, 0, 0, ZoneOffset.UTC);
 		headers.setExpires(zonedDateTime);
 		assertThat(headers.getExpires()).as("Invalid Expires header").isEqualTo(zonedDateTime.toInstant().toEpochMilli());
 		assertThat(headers.getFirst("expires")).as("Invalid Expires header").isEqualTo("Thu, 18 Dec 2008 10:20:00 GMT");
@@ -605,7 +605,7 @@ class HttpHeadersTests {
 
 	@Test
 	void firstZonedDateTime() {
-		ZonedDateTime date = ZonedDateTime.of(2017, 6, 2, 2, 22, 0, 0, ZoneId.of("GMT"));
+		ZonedDateTime date = ZonedDateTime.of(2017, 6, 2, 2, 22, 0, 0, ZoneOffset.UTC);
 		headers.setZonedDateTime(HttpHeaders.DATE, date);
 		assertThat(headers.getFirst(HttpHeaders.DATE)).isEqualTo("Fri, 02 Jun 2017 02:22:00 GMT");
 		assertThat(headers.getFirstZonedDateTime(HttpHeaders.DATE).isEqual(date)).isTrue();

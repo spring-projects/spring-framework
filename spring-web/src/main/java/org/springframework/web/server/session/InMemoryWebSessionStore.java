@@ -19,7 +19,6 @@ package org.springframework.web.server.session;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
-import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.Collections;
 import java.util.Iterator;
@@ -51,7 +50,7 @@ public class InMemoryWebSessionStore implements WebSessionStore {
 
 	private int maxSessions = 10000;
 
-	private Clock clock = Clock.system(ZoneId.of("GMT"));
+	private Clock clock = Clock.systemUTC();
 
 	private final Map<String, InMemoryWebSession> sessions = new ConcurrentHashMap<>();
 

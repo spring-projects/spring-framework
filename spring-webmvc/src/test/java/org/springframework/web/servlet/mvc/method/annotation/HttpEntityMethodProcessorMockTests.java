@@ -23,6 +23,7 @@ import java.lang.reflect.Method;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.Collections;
@@ -97,7 +98,7 @@ import static org.springframework.web.servlet.HandlerMapping.PRODUCIBLE_MEDIA_TY
  */
 class HttpEntityMethodProcessorMockTests {
 
-	private static final ZoneId GMT = ZoneId.of("GMT");
+	private static final ZoneId GMT = ZoneOffset.UTC;
 
 
 	private HttpEntityMethodProcessor processor;
