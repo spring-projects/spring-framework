@@ -19,6 +19,7 @@ package org.springframework.context.annotation.configuration;
 import java.io.IOException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -29,6 +30,7 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.parsing.BeanDefinitionParsingException;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
@@ -94,6 +96,16 @@ class AutowiredConfigurationTests {
 	void testAutowiredConfigurationMethodDependenciesWithOptionalAndNotAvailable() {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(
 				OptionalAutowiredMethodConfig.class);
+
+		assertThat(context.getBeansOfType(Colour.class)).isEmpty();
+		assertThat(context.getBean(TestBean.class).getName()).isEmpty();
+		context.close();
+	}
+
+	@Test
+	void testAutowiredConfigurationMethodDependenciesWithQualifier() {
+		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(
+				QualifiedAutowiredMethodConfig.class);
 
 		assertThat(context.getBeansOfType(Colour.class)).isEmpty();
 		assertThat(context.getBean(TestBean.class).getName()).isEmpty();
@@ -293,6 +305,25 @@ class AutowiredConfigurationTests {
 			else {
 				return new TestBean(colour.get() + "-" + colours.get().get(0).toString());
 			}
+		}
+	}
+
+
+	@Configuration
+	static class QualifiedAutowiredMethodConfig {
+
+		@Bean
+		@Qualifier("testBean")
+		public TestBean testBean(Optional<Colour> colour, Optional<List<Colour>> colours) {
+			if (!colour.isEmpty() || !colours.isEmpty()) {
+				throw new IllegalStateException("Unexpected match: " + colour + " " + colours);
+			}
+			return new TestBean("");
+		}
+
+		@Bean
+		public List<?> someList() {
+			return Collections.singletonList(new TestBean("shouldNotMatch"));
 		}
 	}
 
