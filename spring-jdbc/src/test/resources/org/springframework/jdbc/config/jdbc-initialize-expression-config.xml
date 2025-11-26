@@ -5,11 +5,11 @@
 		http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
 		http://www.springframework.org/schema/util https://www.springframework.org/schema/util/spring-util-3.1.xsd">
 
-	<jdbc:embedded-database id="dataSource" type="HSQL" />
+	<jdbc:embedded-database id="dataSource" type="HSQL"/>
 
 	<jdbc:initialize-database data-source="dataSource" enabled="#{properties['data.source.init']}">
-		<jdbc:script location="#{properties['schema.scripts']}" />
-		<jdbc:script location="#{properties['insert.scripts']}" />
+		<jdbc:script location="#{properties['schema.scripts']}"/>
+		<jdbc:script location="#{properties['insert.scripts']}"/>
 	</jdbc:initialize-database>
 
 	<util:properties id="properties">
