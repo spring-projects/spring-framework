@@ -4,15 +4,14 @@
 	xsi:schemaLocation="http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
 		http://www.springframework.org/schema/jdbc https://www.springframework.org/schema/jdbc/spring-jdbc-3.0.xsd">
 
-	<jdbc:embedded-database id="dataSource" type="HSQL" />
+	<jdbc:embedded-database id="dataSource" type="HSQL"/>
 
 	<jdbc:initialize-database data-source="dataSource" enabled="${data.source.init}">
-		<jdbc:script location="${schema.scripts}" />
-		<jdbc:script location="${insert.scripts}" />
+		<jdbc:script location="${schema.scripts}"/>
+		<jdbc:script location="${insert.scripts}"/>
 	</jdbc:initialize-database>
 
-	<bean
-		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+	<bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
 		<property name="properties">
 			<value>
 				schema.scripts=classpath:org/springframework/jdbc/config/db-schema.sql
