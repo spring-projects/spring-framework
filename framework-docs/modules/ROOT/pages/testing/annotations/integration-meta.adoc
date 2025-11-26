@@ -2,11 +2,12 @@
 = Meta-Annotation Support for Testing
 
 You can use most test-related annotations as
-xref:core/beans/classpath-scanning.adoc#beans-meta-annotations[meta-annotations] to create custom composed
-annotations and reduce configuration duplication across a test suite.
+xref:core/beans/classpath-scanning.adoc#beans-meta-annotations[meta-annotations] to
+create custom composed annotations and reduce configuration duplication across a test
+suite.
 
-You can use each of the following as a meta-annotation in conjunction with the
-xref:testing/testcontext-framework.adoc[TestContext framework].
+For example, you can use each of the following as a meta-annotation in conjunction with
+the xref:testing/testcontext-framework.adoc[TestContext framework].
 
 * `@BootstrapWith`
 * `@ContextConfiguration`
@@ -37,111 +38,7 @@ xref:testing/testcontext-framework.adoc[TestContext framework].
 * `@EnabledIf` _(only supported on JUnit Jupiter)_
 * `@DisabledIf` _(only supported on JUnit Jupiter)_
 
-Consider the following example:
-
-[tabs]
-======
-Java::
-+
-[source,java,indent=0,subs="verbatim,quotes"]
-----
-	@RunWith(SpringRunner.class)
-	@ContextConfiguration({"/app-config.xml", "/test-data-access-config.xml"})
-	@ActiveProfiles("dev")
-	@Transactional
-	public class OrderRepositoryTests { }
-
-	@RunWith(SpringRunner.class)
-	@ContextConfiguration({"/app-config.xml", "/test-data-access-config.xml"})
-	@ActiveProfiles("dev")
-	@Transactional
-	public class UserRepositoryTests { }
-----
-
-Kotlin::
-+
-[source,kotlin,indent=0,subs="verbatim,quotes"]
-----
-	@RunWith(SpringRunner::class)
-	@ContextConfiguration("/app-config.xml", "/test-data-access-config.xml")
-	@ActiveProfiles("dev")
-	@Transactional
-	class OrderRepositoryTests { }
-
-	@RunWith(SpringRunner::class)
-	@ContextConfiguration("/app-config.xml", "/test-data-access-config.xml")
-	@ActiveProfiles("dev")
-	@Transactional
-	class UserRepositoryTests { }
-----
-======
-
-If we discover that we are repeating the preceding configuration across our JUnit 4-based
-test suite, we can reduce the duplication by introducing a custom composed annotation
-that centralizes the common test configuration for Spring, as follows:
-
-[tabs]
-======
-Java::
-+
-[source,java,indent=0,subs="verbatim,quotes"]
-----
-	@Target(ElementType.TYPE)
-	@Retention(RetentionPolicy.RUNTIME)
-	@ContextConfiguration({"/app-config.xml", "/test-data-access-config.xml"})
-	@ActiveProfiles("dev")
-	@Transactional
-	public @interface TransactionalDevTestConfig { }
-----
-
-Kotlin::
-+
-[source,kotlin,indent=0,subs="verbatim,quotes"]
-----
-	@Target(AnnotationTarget.TYPE)
-	@Retention(AnnotationRetention.RUNTIME)
-	@ContextConfiguration("/app-config.xml", "/test-data-access-config.xml")
-	@ActiveProfiles("dev")
-	@Transactional
-	annotation class TransactionalDevTestConfig { }
-----
-======
-
-Then we can use our custom `@TransactionalDevTestConfig` annotation to simplify the
-configuration of individual JUnit 4 based test classes, as follows:
-
-[tabs]
-======
-Java::
-+
-[source,java,indent=0,subs="verbatim,quotes"]
-----
-	@RunWith(SpringRunner.class)
-	@TransactionalDevTestConfig
-	public class OrderRepositoryTests { }
-
-	@RunWith(SpringRunner.class)
-	@TransactionalDevTestConfig
-	public class UserRepositoryTests { }
-----
-
-Kotlin::
-+
-[source,kotlin,indent=0,subs="verbatim,quotes"]
-----
-	@RunWith(SpringRunner::class)
-	@TransactionalDevTestConfig
-	class OrderRepositoryTests
-
-	@RunWith(SpringRunner::class)
-	@TransactionalDevTestConfig
-	class UserRepositoryTests
-----
-======
-
-If we write tests that use JUnit Jupiter, we can reduce code duplication even further,
-since annotations in JUnit Jupiter can also be used as meta-annotations. Consider the
-following example:
+Consider the following test classes that use the `SpringExtension` with JUnit Jupiter:
 
 [tabs]
 ======
@@ -150,13 +47,13 @@ Java::
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@ExtendWith(SpringExtension.class)
-	@ContextConfiguration({"/app-config.xml", "/test-data-access-config.xml"})
+	@ContextConfiguration(classes = {AppConfig.class, TestDataAccessConfig.class})
 	@ActiveProfiles("dev")
 	@Transactional
 	class OrderRepositoryTests { }
 
 	@ExtendWith(SpringExtension.class)
-	@ContextConfiguration({"/app-config.xml", "/test-data-access-config.xml"})
+	@ContextConfiguration(classes = {AppConfig.class, TestDataAccessConfig.class})
 	@ActiveProfiles("dev")
 	@Transactional
 	class UserRepositoryTests { }
@@ -167,23 +64,22 @@ Kotlin::
 [source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@ExtendWith(SpringExtension::class)
-	@ContextConfiguration("/app-config.xml", "/test-data-access-config.xml")
+	@ContextConfiguration(classes = [AppConfig::class, TestDataAccessConfig::class])
 	@ActiveProfiles("dev")
 	@Transactional
 	class OrderRepositoryTests { }
 
 	@ExtendWith(SpringExtension::class)
-	@ContextConfiguration("/app-config.xml", "/test-data-access-config.xml")
+	@ContextConfiguration(classes = [AppConfig::class, TestDataAccessConfig::class])
 	@ActiveProfiles("dev")
 	@Transactional
 	class UserRepositoryTests { }
 ----
 ======
 
-If we discover that we are repeating the preceding configuration across our JUnit
-Jupiter-based test suite, we can reduce the duplication by introducing a custom composed
-annotation that centralizes the common test configuration for Spring and JUnit Jupiter,
-as follows:
+If we discover that we are repeating the preceding configuration across our test suite,
+we can reduce the duplication by introducing a custom composed annotation that
+centralizes the common test configuration for Spring and JUnit Jupiter, as follows:
 
 [tabs]
 ======
@@ -194,7 +90,7 @@ Java::
 	@Target(ElementType.TYPE)
 	@Retention(RetentionPolicy.RUNTIME)
 	@ExtendWith(SpringExtension.class)
-	@ContextConfiguration({"/app-config.xml", "/test-data-access-config.xml"})
+	@ContextConfiguration(classes = {AppConfig.class, TestDataAccessConfig.class})
 	@ActiveProfiles("dev")
 	@Transactional
 	public @interface TransactionalDevTestConfig { }
@@ -207,7 +103,7 @@ Kotlin::
 	@Target(AnnotationTarget.TYPE)
 	@Retention(AnnotationRetention.RUNTIME)
 	@ExtendWith(SpringExtension::class)
-	@ContextConfiguration("/app-config.xml", "/test-data-access-config.xml")
+	@ContextConfiguration(classes = [AppConfig::class, TestDataAccessConfig::class])
 	@ActiveProfiles("dev")
 	@Transactional
 	annotation class TransactionalDevTestConfig { }
