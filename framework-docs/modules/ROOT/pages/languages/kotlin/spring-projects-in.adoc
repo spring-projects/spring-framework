@@ -352,7 +352,7 @@ file with a `spring.test.constructor.autowire.mode = all` property.
 [[per_class-lifecycle]]
 === `PER_CLASS` Lifecycle
 
-Kotlin lets you specify meaningful test function names between backticks (```).
+Kotlin lets you specify meaningful test function names between backticks (+++```+++).
 With JUnit Jupiter, Kotlin test classes can use the `@TestInstance(TestInstance.Lifecycle.PER_CLASS)`
 annotation to enable single instantiation of test classes, which allows the use of `@BeforeAll`
 and `@AfterAll` annotations on non-static methods, which is a good fit for Kotlin.
