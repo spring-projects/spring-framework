@@ -365,9 +365,12 @@ public class QualifierAnnotationAutowireCandidateResolver extends GenericTypeAwa
 		}
 		MethodParameter methodParam = descriptor.getMethodParameter();
 		if (methodParam != null) {
-			for (Annotation annotation : methodParam.getMethodAnnotations()) {
-				if (isQualifier(annotation.annotationType())) {
-					return true;
+			Method method = methodParam.getMethod();
+			if (method == null || void.class == method.getReturnType()) {
+				for (Annotation annotation : methodParam.getMethodAnnotations()) {
+					if (isQualifier(annotation.annotationType())) {
+						return true;
+					}
 				}
 			}
 		}
