@@ -20,6 +20,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.RecordComponent;
 import java.lang.reflect.Type;
 import java.util.HashSet;
@@ -116,6 +117,7 @@ public class BindingReflectionHintsRegistrar {
 					if (JACKSON_ANNOTATION_PRESENT) {
 						registerJacksonHints(hints, clazz);
 					}
+					registerObjectToObjectConverterHints(hints, clazz);
 				}
 				if (KotlinDetector.isKotlinType(clazz)) {
 					KotlinDelegate.registerComponentHints(hints, clazz);
@@ -154,6 +156,25 @@ public class BindingReflectionHintsRegistrar {
 				hints.registerMethod(serializerMethod, ExecutableMode.INVOKE);
 			}
 		}
+	}
+
+	// See also the static hints registered by ObjectToObjectConverterRuntimeHints
+	private void registerObjectToObjectConverterHints(ReflectionHints hints, Class<?> clazz) {
+		for (Method method : clazz.getMethods()) {
+			String name = method.getName();
+			boolean isStatic = Modifier.isStatic(method.getModifiers());
+			if (isStatic && (clazz != String.class) && areRelatedTypes(method.getReturnType(), clazz) &&
+					(name.equals("valueOf") || name.equals("of") || name.equals("from"))) {
+					hints.registerMethod(method, ExecutableMode.INVOKE);
+			}
+			if (!isStatic && (method.getReturnType() != String.class) && name.equals("to" + method.getReturnType().getSimpleName())) {
+				hints.registerMethod(method, ExecutableMode.INVOKE);
+			}
+		}
+	}
+
+	private static boolean areRelatedTypes(Class<?> type1, Class<?> type2) {
+		return (ClassUtils.isAssignable(type1, type2) || ClassUtils.isAssignable(type2, type1));
 	}
 
 	private void collectReferencedTypes(Set<Class<?>> types, ResolvableType resolvableType) {

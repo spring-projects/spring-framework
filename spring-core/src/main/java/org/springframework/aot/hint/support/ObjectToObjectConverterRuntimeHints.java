@@ -23,6 +23,7 @@ import java.util.List;
 
 import org.jspecify.annotations.Nullable;
 
+import org.springframework.aot.hint.BindingReflectionHintsRegistrar;
 import org.springframework.aot.hint.ExecutableMode;
 import org.springframework.aot.hint.MemberCategory;
 import org.springframework.aot.hint.ReflectionHints;
@@ -33,6 +34,7 @@ import org.springframework.aot.hint.TypeReference;
 /**
  * {@link RuntimeHintsRegistrar} to register hints for popular conventions in
  * {@code org.springframework.core.convert.support.ObjectToObjectConverter}.
+ * Some dynamic hints registered by {@link BindingReflectionHintsRegistrar}.
  *
  * @author Sebastien Deleuze
  * @author Sam Brannen

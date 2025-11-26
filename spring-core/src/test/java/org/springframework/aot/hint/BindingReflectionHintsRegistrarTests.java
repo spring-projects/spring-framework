@@ -31,6 +31,7 @@ import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import org.junit.jupiter.api.Test;
 
+import org.springframework.aot.hint.predicate.ReflectionHintsPredicates;
 import org.springframework.aot.hint.predicate.RuntimeHintsPredicates;
 import org.springframework.core.ResolvableType;
 
@@ -301,6 +302,16 @@ class BindingReflectionHintsRegistrarTests {
 				.accepts(this.hints);
 	}
 
+	@Test
+	void registerTypeForObjectToObjectConverter() {
+		bindingRegistrar.registerReflectionHints(this.hints.reflection(), Source.class);
+		ReflectionHintsPredicates reflection = RuntimeHintsPredicates.reflection();
+		assertThat(reflection.onMethodInvocation(Source.class, "valueOf")).accepts(this.hints);
+		assertThat(reflection.onMethodInvocation(Source.class, "of")).accepts(this.hints);
+		assertThat(reflection.onMethodInvocation(Source.class, "from")).accepts(this.hints);
+		assertThat(reflection.onMethodInvocation(Source.class, "toData")).accepts(this.hints);
+	}
+
 
 	static class SampleEmptyClass {
 	}
@@ -459,5 +470,32 @@ class BindingReflectionHintsRegistrarTests {
 			return null;
 		}
 	}
+
+	static class Source {
+
+		private final String value;
+
+		private Source(String value) {
+			this.value = value;
+		}
+
+		public static Source valueOf(String value) {
+			return new Source(value);
+		}
+
+		public static Source of(String value) {
+			return new Source(value);
+		}
+
+		public static Source from(String value) {
+			return new Source(value);
+		}
+
+		public Data toData() {
+			return new Data(this.value);
+		}
+	}
+
+	record Data(String value) { }
 
 }
