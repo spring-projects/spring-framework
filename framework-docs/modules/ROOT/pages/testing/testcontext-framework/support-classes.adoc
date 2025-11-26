@@ -8,12 +8,15 @@ in JUnit and TestNG.
 [[testcontext-junit-jupiter-extension]]
 == SpringExtension for JUnit Jupiter
 
-The Spring TestContext Framework offers full integration with the JUnit Jupiter testing
-framework, originally introduced in JUnit 5. By annotating test classes with
-`@ExtendWith(SpringExtension.class)`, you can implement standard JUnit Jupiter-based unit
-and integration tests and simultaneously reap the benefits of the TestContext framework,
-such as support for loading application contexts, dependency injection of test instances,
-transactional test method execution, and so on.
+The `SpringExtension` integrates the Spring TestContext Framework into the JUnit Jupiter
+testing framework.
+
+NOTE: As of Spring Framework 7.0, the `SpringExtension` requires JUnit Jupiter 6.0 or higher.
+
+By annotating test classes with `@ExtendWith(SpringExtension.class)`, you can implement
+standard JUnit Jupiter-based unit and integration tests and simultaneously reap the
+benefits of the TestContext framework, such as support for loading application contexts,
+dependency injection of test instances, transactional test method execution, and so on.
 
 Furthermore, thanks to the rich extension API in JUnit Jupiter, Spring provides the
 following features above and beyond the feature set that Spring supports for JUnit 4 and

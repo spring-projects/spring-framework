@@ -90,6 +90,8 @@ import org.springframework.util.ReflectionUtils.MethodFilter;
  * {@link SpringExtensionConfig#useTestClassScopedExtensionContext()
  * &#64;SpringExtensionConfig(useTestClassScopedExtensionContext = true)}.
  *
+ * <p><strong>NOTE:</strong> This class requires JUnit Jupiter 6.0 or higher.
+ *
  * @author Sam Brannen
  * @author Simon Baslé
  * @since 5.0
