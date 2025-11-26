@@ -64,8 +64,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 /**
- * Tests for {@link DefaultServerRequest}.
- *
+ * Unit tests for {@link DefaultServerRequest}.
  * @author Arjen Poutsma
  */
 class DefaultServerRequestTests {
@@ -350,7 +349,7 @@ class DefaultServerRequestTests {
 	void bindToConstructor() throws BindException {
 		MockHttpServletRequest servletRequest = PathPatternsTestUtils.initRequest("GET", "/", true);
 		servletRequest.addParameter("foo", "FOO");
-		servletRequest.addParameter("bar", "BAR");
+		servletRequest.addHeader("bar", "BAR");
 
 		DefaultServerRequest request = new DefaultServerRequest(servletRequest, this.messageConverters);
 
@@ -363,7 +362,7 @@ class DefaultServerRequestTests {
 	void bindToProperties() throws BindException {
 		MockHttpServletRequest servletRequest = PathPatternsTestUtils.initRequest("GET", "/", true);
 		servletRequest.addParameter("foo", "FOO");
-		servletRequest.addParameter("bar", "BAR");
+		servletRequest.addHeader("bar", "BAR");
 
 		DefaultServerRequest request = new DefaultServerRequest(servletRequest, this.messageConverters);
 
@@ -376,7 +375,7 @@ class DefaultServerRequestTests {
 	void bindToMixed() throws BindException {
 		MockHttpServletRequest servletRequest = PathPatternsTestUtils.initRequest("GET", "/", true);
 		servletRequest.addParameter("foo", "FOO");
-		servletRequest.addParameter("bar", "BAR");
+		servletRequest.addHeader("bar", "BAR");
 
 		DefaultServerRequest request = new DefaultServerRequest(servletRequest, this.messageConverters);
 

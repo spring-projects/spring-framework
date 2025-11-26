@@ -30,6 +30,7 @@ import org.springframework.web.testfixture.http.server.reactive.bootstrap.HttpSe
 import static org.springframework.web.reactive.function.server.RouterFunctions.route;
 
 /**
+ * Integration tests with data binding in fn handlers.
  * @author Arjen Poutsma
  */
 class BindingFunctionIntegrationTests extends AbstractRouterFunctionIntegrationTests {
@@ -65,7 +66,8 @@ class BindingFunctionIntegrationTests extends AbstractRouterFunctionIntegrationT
 		startServer(httpServer);
 
 		Mono<String> result = this.webClient.get()
-				.uri("/constructor?foo=FOO&bar=BAR")
+				.uri("/constructor?foo=FOO")
+				.header("bar", "BAR")
 				.retrieve()
 				.bodyToMono(String.class);
 
@@ -80,7 +82,8 @@ class BindingFunctionIntegrationTests extends AbstractRouterFunctionIntegrationT
 		startServer(httpServer);
 
 		Mono<String> result = this.webClient.get()
-				.uri("/property?foo=FOO&bar=BAR")
+				.uri("/property?foo=FOO")
+				.header("bar", "BAR")
 				.retrieve()
 				.bodyToMono(String.class);
 
@@ -95,7 +98,8 @@ class BindingFunctionIntegrationTests extends AbstractRouterFunctionIntegrationT
 			startServer(httpServer);
 
 			Mono<String> result = this.webClient.get()
-					.uri("/mixed?foo=FOO&bar=BAR")
+					.uri("/mixed?foo=FOO")
+					.header("bar", "BAR")
 					.retrieve()
 					.bodyToMono(String.class);
 

@@ -296,7 +296,8 @@ allPartsEvents.windowUntil(PartEvent::isLast)
 
 NOTE: The body contents of the `PartEvent` objects must be completely consumed, relayed, or released to avoid memory leaks.
 
-The following shows how to bind request parameters, including an optional `DataBinder` customization:
+The following shows how to bind request parameters, URI variables, or headers via `DataBinder`,
+and also shows how to customize the `DataBinder`:
 
 [tabs]
 ======

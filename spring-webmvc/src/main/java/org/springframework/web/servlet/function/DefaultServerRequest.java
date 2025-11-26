@@ -76,6 +76,7 @@ import org.springframework.web.bind.ServletRequestDataBinder;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.servlet.mvc.method.annotation.ExtendedServletRequestDataBinder;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.springframework.web.util.ServletRequestPathUtils;
 import org.springframework.web.util.UriBuilder;
@@ -258,7 +259,7 @@ class DefaultServerRequest implements ServerRequest {
 		Assert.notNull(bindType, "BindType must not be null");
 		Assert.notNull(dataBinderCustomizer, "DataBinderCustomizer must not be null");
 
-		ServletRequestDataBinder dataBinder = new ServletRequestDataBinder(null);
+		ServletRequestDataBinder dataBinder = new ExtendedServletRequestDataBinder(null);
 		dataBinder.setTargetType(ResolvableType.forClass(bindType));
 		dataBinderCustomizer.accept(dataBinder);
 

@@ -51,6 +51,17 @@ public class ExtendedWebExchangeDataBinder extends WebExchangeDataBinder {
 	private Predicate<String> headerPredicate = name -> !FILTERED_HEADER_NAMES.contains(name.toLowerCase(Locale.ROOT));
 
 
+	/**
+	 * Create a new instance, with default object name.
+	 * @param target the target object to bind onto (or {@code null} if the
+	 * binder is just used to convert a plain parameter value)
+	 * @since 7.0.2
+	 * @see #DEFAULT_OBJECT_NAME
+	 */
+	public ExtendedWebExchangeDataBinder(@Nullable Object target) {
+		super(target);
+	}
+
 	public ExtendedWebExchangeDataBinder(@Nullable Object target, String objectName) {
 		super(target, objectName);
 	}

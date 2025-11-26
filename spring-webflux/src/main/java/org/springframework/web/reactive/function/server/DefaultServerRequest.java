@@ -61,6 +61,7 @@ import org.springframework.web.reactive.accept.ApiVersionStrategy;
 import org.springframework.web.reactive.function.BodyExtractor;
 import org.springframework.web.reactive.function.BodyExtractors;
 import org.springframework.web.reactive.function.UnsupportedMediaTypeException;
+import org.springframework.web.reactive.result.method.annotation.ExtendedWebExchangeDataBinder;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.ServerWebInputException;
 import org.springframework.web.server.UnsupportedMediaTypeStatusException;
@@ -244,7 +245,7 @@ class DefaultServerRequest implements ServerRequest {
 		Assert.notNull(dataBinderCustomizer, "DataBinderCustomizer must not be null");
 
 		return Mono.defer(() -> {
-			WebExchangeDataBinder dataBinder = new WebExchangeDataBinder(null);
+			WebExchangeDataBinder dataBinder = new ExtendedWebExchangeDataBinder(null);
 			dataBinder.setTargetType(ResolvableType.forClass(bindType));
 			dataBinderCustomizer.accept(dataBinder);
 
