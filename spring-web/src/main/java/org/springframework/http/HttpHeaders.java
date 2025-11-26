@@ -27,7 +27,6 @@ import java.text.DecimalFormatSymbols;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneId;
-import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -415,7 +414,7 @@ public class HttpHeaders implements Serializable {
 
 	private static final DecimalFormatSymbols DECIMAL_FORMAT_SYMBOLS = new DecimalFormatSymbols(Locale.ROOT);
 
-	private static final ZoneId GMT = ZoneOffset.UTC;
+	private static final ZoneId GMT = ZoneId.of("GMT");
 
 	/**
 	 * Date formats with time zone as specified in the HTTP RFC to use for formatting.
