@@ -71,7 +71,7 @@ rejected. No CORS headers are added to the responses of simple and actual CORS r
 and, consequently, browsers reject them.
 
 Each `HandlerMapping` can be
-{spring-framework-api}/web/servlet/handler/AbstractHandlerMapping.html#setCorsConfigurations-java.util.Map-[configured]
+{spring-framework-api}/web/servlet/handler/AbstractHandlerMapping.html#setCorsConfigurations(java.util.Map)[configured]
 individually with URL pattern-based `CorsConfiguration` mappings. In most cases, applications
 use the MVC Java configuration or the XML namespace to declare such mappings, which results
 in a single global map being passed to all `HandlerMapping` instances.
@@ -84,7 +84,7 @@ class- or method-level `@CrossOrigin` annotations (other handlers can implement
 The rules for combining global and local configuration are generally additive -- for example,
 all global and all local origins. For those attributes where only a single value can be
 accepted, for example, `allowCredentials` and `maxAge`, the local overrides the global value. See
-{spring-framework-api}/web/cors/CorsConfiguration.html#combine-org.springframework.web.cors.CorsConfiguration-[`CorsConfiguration#combine(CorsConfiguration)`]
+{spring-framework-api}/web/cors/CorsConfiguration.html#combine(org.springframework.web.cors.CorsConfiguration)[`CorsConfiguration#combine(CorsConfiguration)`]
 for more details.
 
 [TIP]
