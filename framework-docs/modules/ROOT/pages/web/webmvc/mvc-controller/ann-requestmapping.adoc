@@ -214,7 +214,7 @@ When multiple patterns match a URL, the best match must be selected. This is don
 one of the following depending on whether use of parsed `PathPattern` is enabled for use or not:
 
 * {spring-framework-api}/web/util/pattern/PathPattern.html#SPECIFICITY_COMPARATOR[`PathPattern.SPECIFICITY_COMPARATOR`]
-* {spring-framework-api}/util/AntPathMatcher.html#getPatternComparator-java.lang.String-[`AntPathMatcher.getPatternComparator(String path)`]
+* {spring-framework-api}/util/AntPathMatcher.html#getPatternComparator(java.lang.String)[`AntPathMatcher.getPatternComparator(String path)`]
 
 Both help to sort patterns with more specific ones on top. A pattern is more specific if
 it has a lower count of URI variables (counted as 1), single wildcards (counted as 1),

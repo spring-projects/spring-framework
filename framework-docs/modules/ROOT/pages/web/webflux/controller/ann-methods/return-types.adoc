@@ -87,6 +87,6 @@ Reactor provides a dedicated operator for that, `Flux#collectList()`.
 | Other return values
 | If a return value remains unresolved in any other way, it is treated as a model
   attribute, unless it is a simple type as determined by
-  {spring-framework-api}/beans/BeanUtils.html#isSimpleProperty-java.lang.Class-[BeanUtils#isSimpleProperty],
+  {spring-framework-api}/beans/BeanUtils.html#isSimpleProperty(java.lang.Class)[BeanUtils#isSimpleProperty],
   in which case it remains unresolved.
 |===

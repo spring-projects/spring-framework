@@ -207,7 +207,7 @@ was not provided (for example, model attribute was returned) or an async return 
 view resolution scenarios. Explore the options in your IDE with code completion.
 * `Model`, `Map`: Extra model attributes to be added to the model for the request.
 * Any other: Any other return value (except for simple types, as determined by
-{spring-framework-api}/beans/BeanUtils.html#isSimpleProperty-java.lang.Class-[BeanUtils#isSimpleProperty])
+{spring-framework-api}/beans/BeanUtils.html#isSimpleProperty(java.lang.Class)[BeanUtils#isSimpleProperty])
 is treated as a model attribute to be added to the model. The attribute name is derived
 from the class name by using {spring-framework-api}/core/Conventions.html[conventions],
 unless a handler method `@ModelAttribute` annotation is present.

@@ -75,7 +75,7 @@ infrastructure and controller declarations and use it to handle requests via moc
 and response objects, without a running server.
 
 For WebFlux, use the following where the Spring `ApplicationContext` is passed to
-{spring-framework-api}/web/server/adapter/WebHttpHandlerBuilder.html#applicationContext-org.springframework.context.ApplicationContext-[WebHttpHandlerBuilder]
+{spring-framework-api}/web/server/adapter/WebHttpHandlerBuilder.html#applicationContext(org.springframework.context.ApplicationContext)[WebHttpHandlerBuilder]
 to create the xref:web/webflux/reactive-spring.adoc#webflux-web-handler-api[WebHandler chain] to handle
 requests:
 
