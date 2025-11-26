@@ -5,24 +5,25 @@ It is important to be able to perform some integration testing without requiring
 deployment to your application server or connecting to other enterprise infrastructure.
 Doing so lets you test things such as:
 
-* The correct wiring of your Spring IoC container contexts.
-* Data access using JDBC or an ORM tool. This can include such things as the correctness
-  of SQL statements, Hibernate queries, JPA entity mappings, and so forth.
+* The correct wiring of your Spring components.
+* Data access using JDBC or an ORM tool.
+  ** This can include such things as the correctness of SQL statements, Hibernate queries,
+     JPA entity mappings, and so forth.
 
 The Spring Framework provides first-class support for integration testing in the
-`spring-test` module. The name of the actual JAR file might include the release version
-and might also be in the long `org.springframework.test` form, depending on where you get
-it from (see the xref:core/beans/dependencies.adoc[section on Dependency Management]
-for an explanation). This library includes the `org.springframework.test` package, which
+`spring-test` module. The name of the actual JAR file might include the release version,
+depending on where you get it from (see the
+{spring-framework-wiki}/Spring-Framework-Artifacts[Spring Framework Artifacts] wiki page
+for details). This library includes the `org.springframework.test` package, which
 contains valuable classes for integration testing with a Spring container. This testing
 does not rely on an application server or other deployment environment. Such tests are
 slower to run than unit tests but much faster than the equivalent Selenium tests or
 remote tests that rely on deployment to an application server.
 
 Unit and integration testing support is provided in the form of the annotation-driven
-xref:testing/testcontext-framework.adoc[Spring TestContext Framework]. The TestContext framework is
-agnostic of the actual testing framework in use, which allows instrumentation of tests
-in various environments, including JUnit, TestNG, and others.
+xref:testing/testcontext-framework.adoc[Spring TestContext Framework]. The TestContext
+framework is agnostic of the actual testing framework in use, which allows
+instrumentation of tests in various environments, including JUnit, TestNG, and others.
 
 The following section provides an overview of the high-level goals of Spring's
 integration support, and the rest of this chapter then focuses on dedicated topics:
