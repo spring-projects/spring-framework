@@ -21,6 +21,7 @@ import javax.sql.DataSource;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.PropertyValue;
+import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
@@ -32,6 +33,7 @@ import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.AbstractDriverBasedDataSource;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseFactoryBean;
+import org.springframework.jdbc.datasource.init.CannotReadScriptException;
 import org.springframework.jdbc.datasource.init.DataSourceInitializer;
 import org.springframework.lang.Nullable;
 
@@ -65,6 +67,13 @@ class JdbcNamespaceIntegrationTests {
 	@Test
 	void createWithResourcePattern() {
 		assertCorrectSetup("jdbc-config-pattern.xml", "dataSource");
+	}
+
+	@Test
+	void createWithNonExistentResource() {
+		assertThatExceptionOfType(BeanCreationException.class)
+				.isThrownBy(() -> assertCorrectSetup("jdbc-config-nonexistent.xml", "dataSource"))
+				.withCauseInstanceOf(CannotReadScriptException.class);
 	}
 
 	@Test
