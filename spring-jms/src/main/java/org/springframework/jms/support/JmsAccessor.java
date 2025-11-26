@@ -100,12 +100,6 @@ public abstract class JmsAccessor implements InitializingBean {
 	/**
 	 * Set the transaction mode that is used when creating a JMS {@link Session}.
 	 * Default is "false".
-	 * <p>Note that within a JTA transaction, the parameters passed to
-	 * {@code create(Queue/Topic)Session(boolean transacted, int acknowledgeMode)}
-	 * method are not taken into account. Depending on the Jakarta EE transaction context,
-	 * the container makes its own decisions on these values. Analogously, these
-	 * parameters are not taken into account within a locally managed transaction
-	 * either, since the accessor operates on an existing JMS Session in this case.
 	 * <p>Setting this flag to "true" will use a short local JMS transaction
 	 * when running outside a managed transaction, and a synchronized local
 	 * JMS transaction in case of a managed transaction (other than an XA
@@ -113,6 +107,11 @@ public abstract class JmsAccessor implements InitializingBean {
 	 * transaction being managed alongside the main transaction (which might
 	 * be a native JDBC transaction), with the JMS transaction committing
 	 * right after the main transaction.
+	 * <p>Note that this flag is meant to remain at its default value "false" for
+	 * participating in a global JTA/XA transaction in a Jakarta EE environment.
+	 * While the server may leniently ignore local Session-level transaction
+	 * management in such a scenario, it may also throw unexpected exceptions
+	 * on commit/rollback in case of this Session-level flag being set to "true".
 	 * @see jakarta.jms.Connection#createSession(boolean, int)
 	 */
 	public void setSessionTransacted(boolean sessionTransacted) {
