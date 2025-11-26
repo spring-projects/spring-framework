@@ -338,11 +338,11 @@ In the preceding scenario, using `@Autowired` works well and provides the desire
 modularity, but determining exactly where the autowired bean definitions are declared is
 still somewhat ambiguous. For example, as a developer looking at `ServiceConfig`, how do
 you know exactly where the `@Autowired AccountRepository` bean is declared? It is not
-explicit in the code, and this may be just fine. Remember that the
-{spring-site-tools}[Spring Tools for Eclipse] provides tooling that
-can render graphs showing how everything is wired, which may be all you need. Also,
-your Java IDE can easily find all declarations and uses of the `AccountRepository` type
-and quickly show you the location of `@Bean` methods that return that type.
+explicit in the code, and this may be just fine. Note that the
+{spring-site-tools}[Spring Tools] IDE support provides tooling that can render graphs
+showing how everything is wired, which may be all you need. Also, your Java IDE can
+easily find all declarations and uses of the `AccountRepository` type and quickly show
+you the location of `@Bean` methods that return that type.
 
 In cases where this ambiguity is not acceptable and you wish to have direct navigation
 from within your IDE from one `@Configuration` class to another, consider autowiring the
