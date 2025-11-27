@@ -19,8 +19,6 @@ package org.springframework.transaction.jta;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Properties;
 
@@ -54,8 +52,6 @@ import org.springframework.transaction.support.AbstractPlatformTransactionManage
 import org.springframework.transaction.support.DefaultTransactionStatus;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.util.Assert;
-import org.springframework.util.ClassUtils;
-import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -142,10 +138,6 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 	public static final String DEFAULT_TRANSACTION_SYNCHRONIZATION_REGISTRY_NAME =
 			"java:comp/TransactionSynchronizationRegistry";
 
-
-	// JTA 2.1 UserTransaction#setReadOnly(boolean) method available?
-	private static final @Nullable Method setReadOnlyMethod =
-			ClassUtils.getMethodIfAvailable(UserTransaction.class, "setReadOnly", boolean.class);
 
 	private transient JndiTemplate jndiTemplate = new JndiTemplate();
 
@@ -866,12 +858,6 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 		applyIsolationLevel(txObject, definition.getIsolationLevel());
 		int timeout = determineTimeout(definition);
 		applyTimeout(txObject, timeout);
-
-		if (definition.isReadOnly()) {
-			setReadOnlyIfPossible(txObject.getUserTransaction(), true);
-			txObject.resetReadOnly = true;
-		}
-
 		txObject.getUserTransaction().begin();
 	}
 
@@ -914,21 +900,6 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 			txObject.getUserTransaction().setTransactionTimeout(timeout);
 			if (timeout > 0) {
 				txObject.resetTransactionTimeout = true;
-			}
-		}
-	}
-
-	private void setReadOnlyIfPossible(UserTransaction ut, boolean readOnly) throws SystemException {
-		if (setReadOnlyMethod != null) {
-			try {
-				setReadOnlyMethod.invoke(ut, readOnly);
-			}
-			catch (Exception ex) {
-				if (ex instanceof InvocationTargetException ute &&
-						ute.getTargetException() instanceof SystemException se) {
-					throw se;
-				}
-				ReflectionUtils.handleReflectionException(ex);
 			}
 		}
 	}
@@ -1190,14 +1161,6 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 	@Override
 	protected void doCleanupAfterCompletion(Object transaction) {
 		JtaTransactionObject txObject = (JtaTransactionObject) transaction;
-		if (txObject.resetReadOnly) {
-			try {
-				setReadOnlyIfPossible(txObject.getUserTransaction(), false);
-			}
-			catch (SystemException ex) {
-				logger.debug("Failed to reset read-only flag after after JTA completion", ex);
-			}
-		}
 		if (txObject.resetTransactionTimeout) {
 			try {
 				txObject.getUserTransaction().setTransactionTimeout(0);

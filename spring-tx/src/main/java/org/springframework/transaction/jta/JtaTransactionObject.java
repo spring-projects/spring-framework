@@ -41,8 +41,6 @@ public class JtaTransactionObject implements SmartTransactionObject {
 
 	boolean resetTransactionTimeout = false;
 
-	boolean resetReadOnly = false;
-
 
 	/**
 	 * Create a new JtaTransactionObject for the given JTA UserTransaction.
