@@ -69,14 +69,13 @@ public abstract class AbstractSmartHttpMessageConverter<T> extends AbstractHttpM
 	}
 
 	@Override
-	public boolean canRead(ResolvableType type, @Nullable MediaType mediaType) {
-		Class<?> clazz = type.resolve();
-		return (clazz != null ? canRead(clazz, mediaType) : canRead(mediaType));
+	public boolean canRead(Class<?> clazz, @Nullable MediaType mediaType) {
+		return canRead(ResolvableType.forClass(clazz), mediaType);
 	}
 
 	@Override
-	public boolean canWrite(ResolvableType type, Class<?> clazz, @Nullable MediaType mediaType) {
-		return canWrite(clazz, mediaType);
+	public boolean canWrite(Class<?> clazz, @Nullable MediaType mediaType) {
+		return canWrite(ResolvableType.forClass(clazz), clazz, mediaType);
 	}
 
 	/**
