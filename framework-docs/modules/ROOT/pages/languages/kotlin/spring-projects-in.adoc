@@ -322,6 +322,14 @@ This section addresses testing with the combination of Kotlin and Spring Framewo
 The recommended testing framework is https://junit.org/[JUnit] along with
 https://mockk.io/[Mockk] for mocking.
 
+[TIP]
+====
+Kotlin lets you specify meaningful test function names between backticks (```).
+
+For a concrete example, see the `+++`Find all users on HTML page`()+++` test function later
+in this section.
+====
+
 NOTE: If you are using Spring Boot, see
 {spring-boot-docs-ref}/features/kotlin.html#features.kotlin.testing[this related documentation].
 
@@ -352,7 +360,6 @@ file with a `spring.test.constructor.autowire.mode = all` property.
 [[per_class-lifecycle]]
 === `PER_CLASS` Lifecycle
 
-Kotlin lets you specify meaningful test function names between backticks (+++```+++).
 With JUnit Jupiter, Kotlin test classes can use the `@TestInstance(TestInstance.Lifecycle.PER_CLASS)`
 annotation to enable single instantiation of test classes, which allows the use of `@BeforeAll`
 and `@AfterAll` annotations on non-static methods, which is a good fit for Kotlin.
