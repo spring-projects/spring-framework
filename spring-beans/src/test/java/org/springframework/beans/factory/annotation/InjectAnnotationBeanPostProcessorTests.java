@@ -444,8 +444,8 @@ class InjectAnnotationBeanPostProcessorTests {
 		bf.registerBeanDefinition("factoryBeanDependentBean", new RootBeanDefinition(FactoryBeanDependentBean.class));
 		bf.registerSingleton("stringFactoryBean", new StringFactoryBean());
 
-		final StringFactoryBean factoryBean = (StringFactoryBean) bf.getBean("&stringFactoryBean");
-		final FactoryBeanDependentBean bean = (FactoryBeanDependentBean) bf.getBean("factoryBeanDependentBean");
+		StringFactoryBean factoryBean = (StringFactoryBean) bf.getBean("&stringFactoryBean");
+		FactoryBeanDependentBean bean = (FactoryBeanDependentBean) bf.getBean("factoryBeanDependentBean");
 
 		assertThat(factoryBean).as("The singleton StringFactoryBean should have been registered.").isNotNull();
 		assertThat(bean).as("The factoryBeanDependentBean should have been registered.").isNotNull();
@@ -787,7 +787,6 @@ class InjectAnnotationBeanPostProcessorTests {
 		private NestedTestBean nestedTestBean;
 
 		private ConfigurableListableBeanFactory beanFactory;
-
 
 		public ConstructorResourceInjectionBean() {
 			throw new UnsupportedOperationException();

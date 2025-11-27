@@ -2112,8 +2112,8 @@ class AutowiredAnnotationBeanPostProcessorTests {
 		bf.registerBeanDefinition("factoryBeanDependentBean", new RootBeanDefinition(FactoryBeanDependentBean.class));
 		bf.registerSingleton("stringFactoryBean", new StringFactoryBean());
 
-		final StringFactoryBean factoryBean = (StringFactoryBean) bf.getBean("&stringFactoryBean");
-		final FactoryBeanDependentBean bean = (FactoryBeanDependentBean) bf.getBean("factoryBeanDependentBean");
+		StringFactoryBean factoryBean = (StringFactoryBean) bf.getBean("&stringFactoryBean");
+		FactoryBeanDependentBean bean = (FactoryBeanDependentBean) bf.getBean("factoryBeanDependentBean");
 
 		assertThat(factoryBean).as("The singleton StringFactoryBean should have been registered.").isNotNull();
 		assertThat(bean).as("The factoryBeanDependentBean should have been registered.").isNotNull();
@@ -2724,6 +2724,7 @@ class AutowiredAnnotationBeanPostProcessorTests {
 		bf.registerSingleton("nonNullBean", "Test");
 		bf.registerBeanDefinition("mixedNullableInjectionBean",
 				new RootBeanDefinition(MixedNullableInjectionBean.class));
+
 		MixedNullableInjectionBean mixedNullableInjectionBean = bf.getBean(MixedNullableInjectionBean.class);
 		assertThat(mixedNullableInjectionBean.nonNullBean).isNotNull();
 		assertThat(mixedNullableInjectionBean.nullableBean).isNull();
@@ -2734,6 +2735,7 @@ class AutowiredAnnotationBeanPostProcessorTests {
 		bf.registerSingleton("nonNullBean", "Test");
 		bf.registerBeanDefinition("mixedOptionalInjectionBean",
 				new RootBeanDefinition(MixedOptionalInjectionBean.class));
+
 		MixedOptionalInjectionBean mixedOptionalInjectionBean = bf.getBean(MixedOptionalInjectionBean.class);
 		assertThat(mixedOptionalInjectionBean.nonNullBean).isNotNull();
 		assertThat(mixedOptionalInjectionBean.nullableBean).isNull();
