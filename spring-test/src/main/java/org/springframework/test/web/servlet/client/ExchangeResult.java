@@ -92,6 +92,8 @@ public class ExchangeResult {
 		this.uriTemplate = uriTemplate;
 		this.requestBody = requestBody;
 		this.converterDelegate = converter;
+		// buffer response body in all cases, or connections might leak if expectations do not read the response
+		bufferResponseBody();
 	}
 
 	ExchangeResult(ExchangeResult result) {
@@ -239,6 +241,15 @@ public class ExchangeResult {
 				"< " + formatHeaders(getResponseHeaders(), "\n< ") + "\n" +
 				"\n" +
 				formatBody(getResponseHeaders().getContentType(), getResponseBodyContent()) +"\n";
+	}
+
+	private void bufferResponseBody() {
+		try {
+			StreamUtils.drain(this.clientResponse.getBody());
+		}
+		catch (IOException ex) {
+			throw new IllegalStateException("Failed to get response content: " + ex);
+		}
 	}
 
 	private String formatStatus(HttpStatusCode statusCode) {

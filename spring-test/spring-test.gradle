@@ -64,6 +64,7 @@ dependencies {
 	testImplementation(testFixtures(project(":spring-web")))
 	testImplementation("com.fasterxml.jackson.core:jackson-databind")
 	testImplementation("com.rometools:rome")
+	testImplementation("com.squareup.okhttp3:mockwebserver3")
 	testImplementation("com.thoughtworks.xstream:xstream")
 	testImplementation("de.bechte.junit:junit-hierarchicalcontextrunner")
 	testImplementation("io.projectreactor.netty:reactor-netty-http")
@@ -73,11 +74,10 @@ dependencies {
 	testImplementation("jakarta.mail:jakarta.mail-api")
 	testImplementation("jakarta.validation:jakarta.validation-api")
 	testImplementation("javax.cache:cache-api")
-	testImplementation("org.apache.httpcomponents:httpclient") {
-		exclude group: "commons-logging", module: "commons-logging"
-	}
+	testImplementation("org.apache.httpcomponents.client5:httpclient5")
 	testImplementation("org.awaitility:awaitility")
 	testImplementation("org.easymock:easymock")
+	testImplementation("org.eclipse.jetty:jetty-reactive-httpclient")
 	testImplementation("org.hibernate.orm:hibernate-core")
 	testImplementation("org.hibernate.validator:hibernate-validator")
 	testImplementation("org.hsqldb:hsqldb")
