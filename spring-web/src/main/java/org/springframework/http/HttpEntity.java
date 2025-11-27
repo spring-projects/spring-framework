@@ -102,7 +102,7 @@ public class HttpEntity<T> {
 	 */
 	public HttpEntity(@Nullable T body, @Nullable HttpHeaders headers) {
 		this.body = body;
-		this.headers = HttpHeaders.readOnlyHttpHeaders(headers != null ? headers : new HttpHeaders());
+		this.headers = (headers != null) ? headers : new HttpHeaders();
 	}
 
 	/**
@@ -123,8 +123,7 @@ public class HttpEntity<T> {
 	 */
 	@Deprecated(since = "7.0", forRemoval = true)
 	public HttpEntity(@Nullable T body, @Nullable MultiValueMap<String, String> headers) {
-		this.body = body;
-		this.headers = HttpHeaders.readOnlyHttpHeaders(headers != null ? new HttpHeaders(headers) : new HttpHeaders());
+		this(body, (headers != null) ? new HttpHeaders(headers) : new HttpHeaders());
 	}
 
 

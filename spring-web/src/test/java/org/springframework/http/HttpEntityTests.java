@@ -136,4 +136,14 @@ class HttpEntityTests {
 				.isEmpty();
 	}
 
+	@Test
+	void headerAreMutable() {
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.TEXT_PLAIN);
+		String body = "foo";
+		HttpEntity<String> httpEntity = new HttpEntity<>(body, headers);
+		httpEntity.getHeaders().setContentType(MediaType.APPLICATION_JSON);
+
+	}
+
 }
