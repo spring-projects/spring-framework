@@ -1632,7 +1632,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 		descriptor.initParameterNameDiscovery(getParameterNameDiscoverer());
 		if (Optional.class == descriptor.getDependencyType()) {
-			return createOptionalDependency(descriptor, requestingBeanName);
+			return createOptionalDependency(descriptor, requestingBeanName, autowiredBeanNames, null);
 		}
 		else if (ObjectFactory.class == descriptor.getDependencyType() ||
 				ObjectProvider.class == descriptor.getDependencyType()) {
@@ -2330,8 +2330,8 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	/**
 	 * Create an {@link Optional} wrapper for the specified dependency.
 	 */
-	private Optional<?> createOptionalDependency(
-			DependencyDescriptor descriptor, @Nullable String beanName, final @Nullable Object... args) {
+	private Optional<?> createOptionalDependency(DependencyDescriptor descriptor, @Nullable String beanName,
+			@Nullable Set<String> autowiredBeanNames, @Nullable Object @Nullable [] args) {
 
 		DependencyDescriptor descriptorToUse = new NestedDependencyDescriptor(descriptor) {
 			@Override
@@ -2348,7 +2348,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 				return ObjectUtils.isEmpty(args);
 			}
 		};
-		Object result = doResolveDependency(descriptorToUse, beanName, null, null);
+		Object result = doResolveDependency(descriptorToUse, beanName, autowiredBeanNames, null);
 		return (result instanceof Optional<?> optional ? optional : Optional.ofNullable(result));
 	}
 
@@ -2501,11 +2501,17 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	 */
 	private class DependencyObjectProvider implements BeanObjectProvider<Object> {
 
+		private static final Object NOT_CACHEABLE = new Object();
+
+		private static final Object NULL_VALUE = new Object();
+
 		private final DependencyDescriptor descriptor;
 
 		private final boolean optional;
 
 		private final @Nullable String beanName;
+
+		private transient volatile @Nullable Object cachedValue;
 
 		public DependencyObjectProvider(DependencyDescriptor descriptor, @Nullable String beanName) {
 			this.descriptor = new NestedDependencyDescriptor(descriptor);
@@ -2515,22 +2521,17 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 		@Override
 		public Object getObject() throws BeansException {
-			if (this.optional) {
-				return createOptionalDependency(this.descriptor, this.beanName);
+			Object result = getValue();
+			if (result == null) {
+				throw new NoSuchBeanDefinitionException(this.descriptor.getResolvableType());
 			}
-			else {
-				Object result = doResolveDependency(this.descriptor, this.beanName, null, null);
-				if (result == null) {
-					throw new NoSuchBeanDefinitionException(this.descriptor.getResolvableType());
-				}
-				return result;
-			}
+			return result;
 		}
 
 		@Override
 		public Object getObject(final @Nullable Object... args) throws BeansException {
 			if (this.optional) {
-				return createOptionalDependency(this.descriptor, this.beanName, args);
+				return createOptionalDependency(this.descriptor, this.beanName, null, args);
 			}
 			else {
 				DependencyDescriptor descriptorToUse = new DependencyDescriptor(this.descriptor) {
@@ -2551,7 +2552,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		public @Nullable Object getIfAvailable() throws BeansException {
 			try {
 				if (this.optional) {
-					return createOptionalDependency(this.descriptor, this.beanName);
+					return createOptionalDependency(this.descriptor, this.beanName, null, null);
 				}
 				else {
 					DependencyDescriptor descriptorToUse = new DependencyDescriptor(this.descriptor) {
@@ -2604,7 +2605,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			};
 			try {
 				if (this.optional) {
-					return createOptionalDependency(descriptorToUse, this.beanName);
+					return createOptionalDependency(descriptorToUse, this.beanName, null, null);
 				}
 				else {
 					return doResolveDependency(descriptorToUse, this.beanName, null, null);
@@ -2630,11 +2631,41 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		}
 
 		protected @Nullable Object getValue() throws BeansException {
+			Object value = this.cachedValue;
+			if (value == null) {
+				if (isConfigurationFrozen()) {
+					Set<String> autowiredBeanNames = new LinkedHashSet<>(2);
+					value = resolveValue(autowiredBeanNames);
+					boolean cacheable = false;
+					if (!autowiredBeanNames.isEmpty()) {
+						cacheable = true;
+						for (String autowiredBeanName : autowiredBeanNames) {
+							if (!containsBean(autowiredBeanName) || !isSingleton(autowiredBeanName)) {
+								cacheable = false;
+							}
+						}
+					}
+					this.cachedValue = (cacheable ? (value != null ? value : NULL_VALUE) : NOT_CACHEABLE);
+					return value;
+				}
+			}
+			else if (value == NULL_VALUE) {
+				return null;
+			}
+			else if (value != NOT_CACHEABLE) {
+				return value;
+			}
+
+			// Not cacheable -> fresh resolution.
+			return resolveValue(null);
+		}
+
+		private @Nullable Object resolveValue(@Nullable Set<String> autowiredBeanNames) {
 			if (this.optional) {
-				return createOptionalDependency(this.descriptor, this.beanName);
+				return createOptionalDependency(this.descriptor, this.beanName, autowiredBeanNames, null);
 			}
 			else {
-				return doResolveDependency(this.descriptor, this.beanName, null, null);
+				return doResolveDependency(this.descriptor, this.beanName, autowiredBeanNames, null);
 			}
 		}
 
