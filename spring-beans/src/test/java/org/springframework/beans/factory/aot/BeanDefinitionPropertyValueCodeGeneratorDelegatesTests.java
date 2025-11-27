@@ -458,30 +458,42 @@ class BeanDefinitionPropertyValueCodeGeneratorDelegatesTests {
 	class BeanReferenceTests {
 
 		@Test
-		void generatedWhenBeanNameReference() {
-			RuntimeBeanNameReference beanReference = new RuntimeBeanNameReference("test");
+		void generatedWhenRuntimeBeanNameReference() {
+			BeanReference beanReference = new RuntimeBeanNameReference("test");
 			compile(beanReference, (instance, compiler) -> {
 				RuntimeBeanReference actual = (RuntimeBeanReference) instance;
-				assertThat(actual.getBeanName()).isEqualTo(beanReference.getBeanName());
+				assertThat(actual.getBeanName()).as("name").isEqualTo("test");
+				assertThat(actual.getBeanType()).as("type").isNull();
 			});
 		}
 
 		@Test
-		void generatedWhenBeanReferenceByName() {
-			RuntimeBeanReference beanReference = new RuntimeBeanReference("test");
+		void generatedWhenRuntimeBeanReferenceByName() {
+			BeanReference beanReference = new RuntimeBeanReference("test");
 			compile(beanReference, (instance, compiler) -> {
 				RuntimeBeanReference actual = (RuntimeBeanReference) instance;
-				assertThat(actual.getBeanName()).isEqualTo(beanReference.getBeanName());
-				assertThat(actual.getBeanType()).isEqualTo(beanReference.getBeanType());
+				assertThat(actual.getBeanName()).as("name").isEqualTo("test");
+				assertThat(actual.getBeanType()).as("type").isNull();
 			});
 		}
 
 		@Test
-		void generatedWhenBeanReferenceByType() {
+		void generatedWhenRuntimeBeanReferenceByType() {
 			BeanReference beanReference = new RuntimeBeanReference(String.class);
 			compile(beanReference, (instance, compiler) -> {
 				RuntimeBeanReference actual = (RuntimeBeanReference) instance;
-				assertThat(actual.getBeanType()).isEqualTo(String.class);
+				assertThat(actual.getBeanName()).as("name").isEqualTo(String.class.getName());
+				assertThat(actual.getBeanType()).as("type").isEqualTo(String.class);
+			});
+		}
+
+		@Test  // gh-35913
+		void generatedWhenRuntimeBeanReferenceByNameAndType() {
+			BeanReference beanReference = new RuntimeBeanReference("test", String.class);
+			compile(beanReference, (instance, compiler) -> {
+				RuntimeBeanReference actual = (RuntimeBeanReference) instance;
+				assertThat(actual.getBeanName()).as("name").isEqualTo("test");
+				assertThat(actual.getBeanType()).as("type").isEqualTo(String.class);
 			});
 		}
 

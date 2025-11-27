@@ -203,8 +203,8 @@ public abstract class BeanDefinitionPropertyValueCodeGeneratorDelegates {
 		public @Nullable CodeBlock generateCode(ValueCodeGenerator valueCodeGenerator, Object value) {
 			if (value instanceof RuntimeBeanReference runtimeBeanReference &&
 					runtimeBeanReference.getBeanType() != null) {
-				return CodeBlock.of("new $T($T.class)", RuntimeBeanReference.class,
-						runtimeBeanReference.getBeanType());
+				return CodeBlock.of("new $T($S, $T.class)", RuntimeBeanReference.class,
+						runtimeBeanReference.getBeanName(), runtimeBeanReference.getBeanType());
 			}
 			else if (value instanceof BeanReference beanReference) {
 				return CodeBlock.of("new $T($S)", RuntimeBeanReference.class,
