@@ -18,10 +18,10 @@ package org.springframework.transaction.reactive;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Mono;
@@ -192,7 +192,7 @@ public class TransactionSynchronizationManager {
 		if (isSynchronizationActive()) {
 			throw new IllegalStateException("Cannot activate transaction synchronization - already active");
 		}
-		this.transactionContext.setSynchronizations(new LinkedHashSet<>());
+		this.transactionContext.setSynchronizations(new CopyOnWriteArraySet<>());
 	}
 
 	/**
