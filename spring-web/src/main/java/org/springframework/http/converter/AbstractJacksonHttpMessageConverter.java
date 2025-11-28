@@ -269,7 +269,7 @@ public abstract class AbstractJacksonHttpMessageConverter<T extends ObjectMapper
 
 	@Override
 	@SuppressWarnings("removal")
-	public boolean canWrite(Class<?> clazz, @Nullable MediaType mediaType) {
+	public boolean canWrite(ResolvableType type, Class<?> valueClass, @Nullable MediaType mediaType) {
 		if (!canWrite(mediaType)) {
 			return false;
 		}
@@ -279,10 +279,10 @@ public abstract class AbstractJacksonHttpMessageConverter<T extends ObjectMapper
 				return false;
 			}
 		}
-		if (MappingJacksonValue.class.isAssignableFrom(clazz)) {
+		if (MappingJacksonValue.class.isAssignableFrom(valueClass)) {
 			throw new UnsupportedOperationException("MappingJacksonValue is not supported, use hints instead");
 		}
-		return this.mapperRegistrations == null || selectMapper(clazz, mediaType) != null;
+		return this.mapperRegistrations == null || selectMapper(valueClass, mediaType) != null;
 	}
 
 	/**

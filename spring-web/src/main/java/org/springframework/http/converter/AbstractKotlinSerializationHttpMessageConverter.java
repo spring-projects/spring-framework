@@ -112,11 +112,12 @@ public abstract class AbstractKotlinSerializationHttpMessageConverter<T extends 
 	}
 
 	@Override
-	public boolean canWrite(ResolvableType type, Class<?> clazz, @Nullable MediaType mediaType) {
-		if (!this.typePredicate.test(type) || ResolvableType.NONE.equals(type)) {
+	public boolean canWrite(ResolvableType type, Class<?> valueClass, @Nullable MediaType mediaType) {
+		ResolvableType resolvableType = (ResolvableType.NONE.equals(type) ? ResolvableType.forClass(valueClass) : type);
+		if (!this.typePredicate.test(resolvableType)) {
 			return false;
 		}
-		return serializer(type, null) != null && canWrite(mediaType);
+		return serializer(resolvableType, null) != null && canWrite(mediaType);
 	}
 
 	@Override

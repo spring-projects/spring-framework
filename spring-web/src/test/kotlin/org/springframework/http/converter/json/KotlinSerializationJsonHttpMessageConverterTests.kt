@@ -128,7 +128,7 @@ class KotlinSerializationJsonHttpMessageConverterTests {
 		assertThat(converter.canWrite(resolvableTypeOf<Ordered>(), Ordered::class.java, MediaType.APPLICATION_JSON)).isFalse()
 		assertThat(converter.canWrite(resolvableTypeOf<OrderedImpl>(), OrderedImpl::class.java, MediaType.APPLICATION_JSON)).isFalse()
 
-		assertThat(converter.canWrite(ResolvableType.NONE, SerializableBean::class.java, MediaType.APPLICATION_JSON)).isFalse()
+		assertThat(converter.canWrite(ResolvableType.NONE, SerializableBean::class.java, MediaType.APPLICATION_JSON)).isTrue()
 
 		assertThat(converter.canWrite(ResolvableType.forType(BigDecimal::class.java), BigDecimal::class.java, MediaType.APPLICATION_JSON)).isFalse()
 	}
@@ -156,7 +156,7 @@ class KotlinSerializationJsonHttpMessageConverterTests {
 		assertThat(converterWithAllTypes.canWrite(resolvableTypeOf<Ordered>(), Ordered::class.java, MediaType.APPLICATION_JSON)).isTrue()
 		assertThat(converterWithAllTypes.canWrite(resolvableTypeOf<OrderedImpl>(), OrderedImpl::class.java, MediaType.APPLICATION_JSON)).isFalse()
 
-		assertThat(converterWithAllTypes.canWrite(ResolvableType.NONE, SerializableBean::class.java, MediaType.APPLICATION_JSON)).isFalse()
+		assertThat(converterWithAllTypes.canWrite(ResolvableType.NONE, SerializableBean::class.java, MediaType.APPLICATION_JSON)).isTrue()
 
 		assertThat(converterWithAllTypes.canWrite(ResolvableType.forType(BigDecimal::class.java), BigDecimal::class.java, MediaType.APPLICATION_JSON)).isFalse()
 	}
