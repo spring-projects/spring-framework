@@ -209,6 +209,7 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 	}
 
 	@Override
+	@Nullable
 	public Principal getPrincipal() {
 		return this.servletRequest.getUserPrincipal();
 	}
@@ -328,7 +329,6 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 
 		@Nullable
 		private transient Set<Entry<String, Object>> entrySet;
-
 
 		@Override
 		public int size() {
@@ -464,4 +464,5 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 			return entrySet;
 		}
 	}
+
 }
