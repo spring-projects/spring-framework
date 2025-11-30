@@ -75,7 +75,7 @@ class MockitoSpyBeanWithGenericsOnTestFieldForExistingGenericBeanProducedByFacto
 
 			RootBeanDefinition definition = new RootBeanDefinition(ExampleGenericServiceFactoryBean.class);
 			ResolvableType targetType = ResolvableType.forClassWithGenerics(
-					ExampleGenericServiceFactoryBean.class, null, ExampleGenericService.class);
+					ExampleGenericServiceFactoryBean.class, Object.class, ExampleGenericService.class);
 			definition.setTargetType(targetType);
 			registry.registerBeanDefinition("exampleService", definition);
 		}
