@@ -322,7 +322,6 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 
 		private @Nullable transient Set<Entry<String, Object>> entrySet;
 
-
 		@Override
 		public int size() {
 			int size = 0;
@@ -454,4 +453,5 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 			return entrySet;
 		}
 	}
+
 }

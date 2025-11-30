@@ -22,7 +22,7 @@ import org.springframework.core.ResolvableType;
 import org.springframework.http.converter.HttpMessageConverter;
 
 /**
- * Delegate to abstract JSON type conversion in AssertJ support clases.
+ * Delegate to abstract JSON type conversion in AssertJ support classes.
  *
  * @author Rossen Stoyanchev
  * @since 7.0

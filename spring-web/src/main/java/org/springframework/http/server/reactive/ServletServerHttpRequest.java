@@ -161,7 +161,6 @@ class ServletServerHttpRequest extends AbstractServerHttpRequest {
 
 	@SuppressWarnings("NullAway") // Dataflow analysis limitation
 	private static HttpHeaders initHeaders(HttpHeaders headerValues, HttpServletRequest request) {
-
 		HttpHeaders headers = null;
 		MediaType contentType = null;
 		if (!StringUtils.hasLength(headerValues.getFirst(HttpHeaders.CONTENT_TYPE))) {
