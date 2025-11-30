@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.web.servlet.mvc.method.annotation;
+package org.springframework.web.servlet.support;
 
 import java.util.Map;
 

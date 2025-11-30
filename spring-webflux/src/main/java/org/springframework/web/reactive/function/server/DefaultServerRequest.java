@@ -61,7 +61,7 @@ import org.springframework.web.reactive.accept.ApiVersionStrategy;
 import org.springframework.web.reactive.function.BodyExtractor;
 import org.springframework.web.reactive.function.BodyExtractors;
 import org.springframework.web.reactive.function.UnsupportedMediaTypeException;
-import org.springframework.web.reactive.result.method.annotation.ExtendedWebExchangeDataBinder;
+import org.springframework.web.reactive.result.ExtendedWebExchangeDataBinder;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.ServerWebInputException;
 import org.springframework.web.server.UnsupportedMediaTypeStatusException;

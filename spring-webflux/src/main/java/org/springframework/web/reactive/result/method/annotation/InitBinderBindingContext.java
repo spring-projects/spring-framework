@@ -72,12 +72,12 @@ class InitBinderBindingContext extends BindingContext {
 
 
 	/**
-	 * Returns an instance of {@link ExtendedWebExchangeDataBinder}.
+	 * Returns an instance of {@link org.springframework.web.reactive.result.ExtendedWebExchangeDataBinder}.
 	 * @since 6.2.1
 	 */
 	@Override
 	protected WebExchangeDataBinder createBinderInstance(@Nullable Object target, String name) {
-		return new ExtendedWebExchangeDataBinder(target, name);
+		return new org.springframework.web.reactive.result.ExtendedWebExchangeDataBinder(target, name);
 	}
 
 	@Override

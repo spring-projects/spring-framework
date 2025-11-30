@@ -215,7 +215,9 @@ class InitBinderBindingContextTests {
 		MockServerWebExchange exchange = MockServerWebExchange.from(request);
 
 		BindingContext context = createBindingContext("initBinderWithAttributeName", WebDataBinder.class);
-		ExtendedWebExchangeDataBinder binder = (ExtendedWebExchangeDataBinder) context.createDataBinder(exchange, null, "", null);
+		org.springframework.web.reactive.result.ExtendedWebExchangeDataBinder binder =
+				(org.springframework.web.reactive.result.ExtendedWebExchangeDataBinder)
+						context.createDataBinder(exchange, null, "", null);
 		binder.addHeaderPredicate(name -> !name.equalsIgnoreCase("Another-Int-Array"));
 
 		Map<String, Object> map = binder.getValuesToBind(exchange).block();
@@ -233,7 +235,9 @@ class InitBinderBindingContextTests {
 		MockServerWebExchange exchange = MockServerWebExchange.from(request);
 
 		BindingContext context = createBindingContext("initBinderWithAttributeName", WebDataBinder.class);
-		ExtendedWebExchangeDataBinder binder = (ExtendedWebExchangeDataBinder) context.createDataBinder(exchange, null, "", null);
+		org.springframework.web.reactive.result.ExtendedWebExchangeDataBinder binder =
+				(org.springframework.web.reactive.result.ExtendedWebExchangeDataBinder)
+						context.createDataBinder(exchange, null, "", null);
 
 		Map<String, Object> map = binder.getValuesToBind(exchange).block();
 		assertThat(map).isEmpty();
