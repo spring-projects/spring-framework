@@ -757,10 +757,8 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 				}
 				waitCount++;
 			}
-			// Clear remaining scheduled invokers, possibly left over as paused tasks
-			for (AsyncMessageListenerInvoker scheduledInvoker : this.scheduledInvokers) {
-				scheduledInvoker.clearResources();
-			}
+			// Clear remaining scheduled invokers, possibly left over as paused tasks.
+			clearResourcesInScheduledInvokers();
 			this.scheduledInvokers.clear();
 		}
 		catch (InterruptedException ex) {
@@ -907,6 +905,15 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 		if (rescheduleTaskIfNecessary(invoker)) {
 			// This should always be true, since we're only calling this when active.
 			this.scheduledInvokers.add(invoker);
+		}
+	}
+
+	/**
+	 * Clear resources in scheduled invokers, even in case of paused tasks.
+	 */
+	private void clearResourcesInScheduledInvokers() {
+		for (AsyncMessageListenerInvoker scheduledInvoker : this.scheduledInvokers) {
+			scheduledInvoker.clearResources();
 		}
 	}
 
@@ -1427,6 +1434,7 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 			if (activeInvokerCount == 0) {
 				if (!isRunning()) {
 					// Proactively release shared Connection when stopped.
+					clearResourcesInScheduledInvokers();
 					releaseSharedConnection();
 				}
 				if (stopCallback != null) {
