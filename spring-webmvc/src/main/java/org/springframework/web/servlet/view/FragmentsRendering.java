@@ -53,6 +53,12 @@ public interface FragmentsRendering extends SmartView {
 	 */
 	HttpHeaders headers();
 
+	/**
+	 * Return the {@code ModelAndView} for each fragment.
+	 * @since 6.2.15
+	 */
+	Collection<ModelAndView> fragments();
+
 
 	/**
 	 * Create a builder with one HTML fragment, also inheriting attributes from
