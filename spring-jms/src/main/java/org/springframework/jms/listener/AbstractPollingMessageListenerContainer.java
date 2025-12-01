@@ -318,7 +318,7 @@ public abstract class AbstractPollingMessageListenerContainer extends AbstractMe
 				Observation observation = createObservation(message).start();
 				Observation.Scope scope = observation.openScope();
 				if (logger.isDebugEnabled()) {
-					logger.debug("Received message of type [" + message.getClass() + "] from consumer [" +
+					logger.debug("Received message of type [" + message.getClass().getName() + "] from consumer [" +
 							consumerToUse + "] of " + (transactional ? "transactional " : "") + "session [" +
 							sessionToUse + "]");
 				}
