@@ -19,6 +19,7 @@ package org.springframework.web.servlet.view;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Locale;
 import java.util.Map;
 
@@ -58,7 +59,7 @@ final class DefaultFragmentsRendering implements FragmentsRendering {
 
 		this.status = status;
 		this.headers = headers;
-		this.modelAndViews = new ArrayList<>(fragments);
+		this.modelAndViews = Collections.unmodifiableCollection(new ArrayList<>(fragments));
 	}
 
 
@@ -76,6 +77,12 @@ final class DefaultFragmentsRendering implements FragmentsRendering {
 	public boolean isRedirectView() {
 		return false;
 	}
+
+	@Override
+	public Collection<ModelAndView> fragments() {
+		return this.modelAndViews;
+	}
+
 
 	@Override
 	public void resolveNestedViews(ViewResolver resolver, Locale locale) throws Exception {
