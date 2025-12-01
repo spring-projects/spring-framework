@@ -28,7 +28,6 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ConcurrentReferenceHashMap;
 import org.springframework.util.ReflectionUtils;
-import org.springframework.util.ReflectionUtils.MethodFilter;
 
 /**
  * Helper for resolving synthetic {@link Method#isBridge bridge Methods} to the
@@ -114,8 +113,8 @@ public final class BridgeMethodResolver {
 		if (bridgedMethod == null) {
 			// Gather all methods with matching name and parameter size.
 			List<Method> candidateMethods = new ArrayList<>();
-			MethodFilter filter = (candidateMethod -> isBridgedCandidateFor(candidateMethod, bridgeMethod));
-			ReflectionUtils.doWithMethods(userClass, candidateMethods::add, filter);
+			ReflectionUtils.doWithMethods(userClass, candidateMethods::add,
+					candidateMethod -> isBridgedCandidateFor(candidateMethod, bridgeMethod));
 			if (!candidateMethods.isEmpty()) {
 				bridgedMethod = (candidateMethods.size() == 1 ? candidateMethods.get(0) :
 						searchCandidates(candidateMethods, bridgeMethod, targetClass));
@@ -152,9 +151,6 @@ public final class BridgeMethodResolver {
 	private static Method searchCandidates(
 			List<Method> candidateMethods, Method bridgeMethod, Class<?> targetClass) {
 
-		if (candidateMethods.isEmpty()) {
-			return null;
-		}
 		Method previousMethod = null;
 		boolean sameSig = true;
 		for (Method candidateMethod : candidateMethods) {
@@ -204,18 +200,16 @@ public final class BridgeMethodResolver {
 	}
 
 	private static boolean checkResolvedTypeMatch(Method genericMethod, Method candidateMethod, Class<?> clazz) {
+		// First, compare return type.
+		ResolvableType genericReturnType = ResolvableType.forMethodReturnType(genericMethod, clazz);
+		if (!ClassUtils.resolvePrimitiveIfNecessary(candidateMethod.getReturnType()).equals(
+				ClassUtils.resolvePrimitiveIfNecessary(genericReturnType.toClass()))) {
+			return false;
+		}
 		Class<?>[] candidateParameters = candidateMethod.getParameterTypes();
 		for (int i = 0; i < candidateParameters.length; i++) {
 			ResolvableType genericParameter = ResolvableType.forMethodParameter(genericMethod, i, clazz);
-			Class<?> candidateParameter = candidateParameters[i];
-			if (candidateParameter.isArray()) {
-				// An array type: compare the component type.
-				if (!candidateParameter.componentType().equals(genericParameter.getComponentType().toClass())) {
-					return false;
-				}
-			}
-			// A non-array type: compare the type itself.
-			if (!ClassUtils.resolvePrimitiveIfNecessary(candidateParameter).equals(
+			if (!ClassUtils.resolvePrimitiveIfNecessary(candidateParameters[i]).equals(
 					ClassUtils.resolvePrimitiveIfNecessary(genericParameter.toClass()))) {
 				return false;
 			}
