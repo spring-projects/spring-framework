@@ -120,7 +120,7 @@ source code into your IDE.
 The wiki pages
 [Code Style](https://github.com/spring-projects/spring-framework/wiki/Code-Style) and
 [IntelliJ IDEA Editor Settings](https://github.com/spring-projects/spring-framework/wiki/IntelliJ-IDEA-Editor-Settings)
-define the source file coding standards we use along with some IDEA editor settings we customize.
+define the source file coding standards we use along with some IntelliJ editor settings we customize.
 
 ### Reference Docs
 
