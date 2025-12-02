@@ -219,7 +219,7 @@ public abstract class TestContextAnnotationUtils {
 	 * @see #findAnnotationDescriptorForTypes(Class, Class...)
 	 */
 	public static <T extends Annotation> @Nullable AnnotationDescriptor<T> findAnnotationDescriptor(
-			Class<?> clazz, Class<T> annotationType) {
+			@Nullable Class<?> clazz, Class<T> annotationType) {
 
 		Assert.notNull(annotationType, "Annotation type must not be null");
 		return findAnnotationDescriptor(clazz, annotationType, TestContextAnnotationUtils::searchEnclosingClass,
