@@ -76,6 +76,7 @@ final class AnnotationTypeMappings {
 
 	private void addAllMappings(Class<? extends Annotation> annotationType,
 			Set<Class<? extends Annotation>> visitedAnnotationTypes) {
+
 		Deque<AnnotationTypeMapping> queue = new ArrayDeque<>();
 		addIfPossible(queue, null, annotationType, null, visitedAnnotationTypes);
 		while (!queue.isEmpty()) {
@@ -270,11 +271,19 @@ final class AnnotationTypeMappings {
 		 */
 		AnnotationTypeMappings get(Class<? extends Annotation> annotationType,
 				Set<Class<? extends Annotation>> visitedAnnotationTypes) {
-			return this.mappings.computeIfAbsent(annotationType, key -> createMappings(key, visitedAnnotationTypes));
+
+			AnnotationTypeMappings result = this.mappings.get(annotationType);
+			if (result != null) {
+				return result;
+			}
+			result = createMappings(annotationType, visitedAnnotationTypes);
+			AnnotationTypeMappings existing = this.mappings.putIfAbsent(annotationType, result);
+			return (existing != null ? existing : result);
 		}
 
 		private AnnotationTypeMappings createMappings(Class<? extends Annotation> annotationType,
 				Set<Class<? extends Annotation>> visitedAnnotationTypes) {
+
 			return new AnnotationTypeMappings(this.repeatableContainers, this.filter, annotationType,
 					visitedAnnotationTypes);
 		}
