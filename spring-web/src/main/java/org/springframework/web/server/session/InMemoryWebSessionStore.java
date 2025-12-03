@@ -81,17 +81,21 @@ public class InMemoryWebSessionStore implements WebSessionStore {
 	}
 
 	/**
-	 * Set the default maximum idle time for sessions.
-	 * <p>By default, set to 30 minutes.
-	 * @param maxIdleTime the default max idle time
+	 * Set the default value for {@link WebSession#getMaxIdleTime() maxIdleTime}
+	 * for new sessions.
+	 * <p>By default, this is set to 30 minutes.
+	 * @param defaultMaxIdleTime the default max idle time
+	 * @since 7.0.2
 	 */
-	public void setDefaultMaxIdleTime(Duration maxIdleTime) {
-		Assert.notNull(maxIdleTime, "maxIdleTime is required");
-		this.defaultMaxIdleTime = maxIdleTime;
+	public void setDefaultMaxIdleTime(Duration defaultMaxIdleTime) {
+		Assert.notNull(defaultMaxIdleTime, "maxIdleTime is required");
+		this.defaultMaxIdleTime = defaultMaxIdleTime;
 	}
 
 	/**
-	 * Return the default maximum idle time for sessions.
+	 * Return the {@link #setDefaultMaxIdleTime(Duration) configured} default
+	 * maximum idle time for sessions.
+	 * @since 7.0.2
 	 */
 	public Duration getDefaultMaxIdleTime() {
 		return this.defaultMaxIdleTime;
