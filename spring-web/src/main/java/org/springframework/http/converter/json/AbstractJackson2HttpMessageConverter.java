@@ -174,7 +174,7 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 			this.objectMapperRegistrations = new LinkedHashMap<>();
 		}
 		Map<MediaType, ObjectMapper> registrations =
-				this.objectMapperRegistrations.computeIfAbsent(clazz, c -> new LinkedHashMap<>());
+				this.objectMapperRegistrations.computeIfAbsent(clazz, key -> new LinkedHashMap<>());
 		registrar.accept(registrations);
 	}
 

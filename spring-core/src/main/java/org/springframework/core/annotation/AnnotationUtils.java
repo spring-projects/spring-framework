@@ -885,8 +885,7 @@ public abstract class AnnotationUtils {
 	private static Map<String, DefaultValueHolder> getDefaultValues(
 			Class<? extends Annotation> annotationType) {
 
-		return defaultValuesCache.computeIfAbsent(annotationType,
-				AnnotationUtils::computeDefaultValues);
+		return defaultValuesCache.computeIfAbsent(annotationType, AnnotationUtils::computeDefaultValues);
 	}
 
 	private static Map<String, DefaultValueHolder> computeDefaultValues(

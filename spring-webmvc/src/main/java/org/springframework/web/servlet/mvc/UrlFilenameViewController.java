@@ -126,7 +126,8 @@ public class UrlFilenameViewController extends AbstractUrlViewController {
 	 * @see #postProcessViewName
 	 */
 	protected String getViewNameForUrlPath(String uri) {
-		return this.viewNameCache.computeIfAbsent(uri, u -> postProcessViewName(extractViewNameFromUrlPath(u)));
+		return this.viewNameCache.computeIfAbsent(uri,
+				key -> postProcessViewName(extractViewNameFromUrlPath(key)));
 	}
 
 	/**

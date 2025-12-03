@@ -387,7 +387,6 @@ class ServletServerHttpRequest extends AbstractServerHttpRequest {
 			@Override
 			public void onError(Throwable throwable) {
 				RequestBodyPublisher.this.onError(throwable);
-
 			}
 		}
 	}

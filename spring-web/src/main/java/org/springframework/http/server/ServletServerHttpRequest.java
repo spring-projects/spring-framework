@@ -73,7 +73,6 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 
 	private @Nullable Map<String, Object> attributes;
 
-
 	private @Nullable ServerHttpAsyncRequestControl asyncRequestControl;
 
 
@@ -377,7 +376,6 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 					public Iterator<String> iterator() {
 						return servletRequest.getAttributeNames().asIterator();
 					}
-
 					@Override
 					public int size() {
 						return AttributesMap.this.size();
@@ -401,7 +399,6 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 							public boolean hasNext() {
 								return e.hasMoreElements();
 							}
-
 							@Override
 							public Object next() {
 								String name = e.nextElement();
@@ -409,7 +406,6 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 							}
 						};
 					}
-
 					@Override
 					public int size() {
 						return AttributesMap.this.size();
@@ -433,7 +429,6 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 							public boolean hasNext() {
 								return e.hasMoreElements();
 							}
-
 							@Override
 							public Entry<String, Object> next() {
 								String name = e.nextElement();
@@ -442,7 +437,6 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 							}
 						};
 					}
-
 					@Override
 					public int size() {
 						return AttributesMap.this.size();

@@ -236,7 +236,7 @@ public class DefaultContextCache implements ContextCache {
 	}
 
 	private Set<Class<?>> getActiveTestClasses(MergedContextConfiguration mergedConfig) {
-		return this.contextUsageMap.computeIfAbsent(mergedConfig, mcc -> new HashSet<>());
+		return this.contextUsageMap.computeIfAbsent(mergedConfig, key -> new HashSet<>());
 	}
 
 	@Override

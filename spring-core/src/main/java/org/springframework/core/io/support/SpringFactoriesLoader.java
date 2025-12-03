@@ -321,8 +321,8 @@ public class SpringFactoriesLoader {
 				SpringFactoriesLoader.class.getClassLoader());
 		Map<String, Factories> factoriesCache = cache.computeIfAbsent(
 				resourceClassLoader, key -> new ConcurrentReferenceHashMap<>());
-		Factories factories = factoriesCache.computeIfAbsent(resourceLocation, key ->
-				new Factories(loadFactoriesResource(resourceClassLoader, resourceLocation)));
+		Factories factories = factoriesCache.computeIfAbsent(resourceLocation,
+				key -> new Factories(loadFactoriesResource(resourceClassLoader, resourceLocation)));
 		return new SpringFactoriesLoader(classLoader, factories.byType());
 	}
 

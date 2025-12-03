@@ -377,7 +377,7 @@ public class ScheduledAnnotationBeanPostProcessor
 		try {
 			task = ScheduledAnnotationReactiveSupport.createSubscriptionRunnable(method, bean, scheduled,
 					this.registrar::getObservationRegistry,
-					this.reactiveSubscriptions.computeIfAbsent(bean, k -> new CopyOnWriteArrayList<>()));
+					this.reactiveSubscriptions.computeIfAbsent(bean, key -> new CopyOnWriteArrayList<>()));
 		}
 		catch (IllegalArgumentException ex) {
 			throw new IllegalStateException("Could not create recurring task for @Scheduled method '" +

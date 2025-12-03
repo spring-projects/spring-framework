@@ -155,7 +155,7 @@ public class JmsResourceHolder extends ResourceHolderSupport {
 			this.sessions.add(session);
 			if (connection != null) {
 				Deque<Session> sessions =
-						this.sessionsPerConnection.computeIfAbsent(connection, k -> new ArrayDeque<>());
+						this.sessionsPerConnection.computeIfAbsent(connection, key -> new ArrayDeque<>());
 				sessions.add(session);
 			}
 		}

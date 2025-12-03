@@ -434,13 +434,13 @@ public class StompHeaders implements MultiValueMap<String, String>, Serializable
 	 */
 	@Override
 	public void add(String headerName, @Nullable String headerValue) {
-		List<String> headerValues = this.headers.computeIfAbsent(headerName, k -> new ArrayList<>(1));
+		List<String> headerValues = this.headers.computeIfAbsent(headerName, key -> new ArrayList<>(1));
 		headerValues.add(headerValue);
 	}
 
 	@Override
 	public void addAll(String headerName, List<? extends String> headerValues) {
-		List<String> currentValues = this.headers.computeIfAbsent(headerName, k -> new ArrayList<>(1));
+		List<String> currentValues = this.headers.computeIfAbsent(headerName, key -> new ArrayList<>(1));
 		currentValues.addAll(headerValues);
 	}
 
