@@ -113,7 +113,7 @@ final class AttributeMethods {
 					// TypeNotPresentException etc. -> annotation type not actually loadable.
 					if (failureLogger.isEnabled()) {
 						failureLogger.log("Failed to introspect meta-annotation @" +
-								getName(annotation.annotationType()), source, ex);
+								annotation.annotationType().getSimpleName(), source, ex);
 					}
 					return false;
 				}
