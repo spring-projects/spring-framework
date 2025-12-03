@@ -18,9 +18,9 @@ package org.springframework.test.context.aot;
 
 import org.jspecify.annotations.Nullable;
 
-import org.springframework.aot.generate.ClassNameGenerator;
 import org.springframework.aot.generate.DefaultGenerationContext;
 import org.springframework.aot.generate.GeneratedFiles;
+import org.springframework.aot.generate.NameGenerator;
 import org.springframework.aot.hint.RuntimeHints;
 
 /**
@@ -37,16 +37,17 @@ class TestContextGenerationContext extends DefaultGenerationContext {
 
 	/**
 	 * Create a new {@link TestContextGenerationContext} instance backed by the
-	 * specified {@link ClassNameGenerator}, {@link GeneratedFiles}, and
+	 * specified {@link NameGenerator}, {@link GeneratedFiles}, and
 	 * {@link RuntimeHints}.
-	 * @param classNameGenerator the naming convention to use for generated class names
+	 * @param nameGenerator the naming convention to use for generated classes
+	 * and resources
 	 * @param generatedFiles the generated files
 	 * @param runtimeHints the runtime hints
 	 */
 	TestContextGenerationContext(
-			ClassNameGenerator classNameGenerator, GeneratedFiles generatedFiles, RuntimeHints runtimeHints) {
+			NameGenerator nameGenerator, GeneratedFiles generatedFiles, RuntimeHints runtimeHints) {
 
-		super(classNameGenerator, generatedFiles, runtimeHints);
+		super(nameGenerator, generatedFiles, runtimeHints);
 		this.featureName = null;
 	}
 
