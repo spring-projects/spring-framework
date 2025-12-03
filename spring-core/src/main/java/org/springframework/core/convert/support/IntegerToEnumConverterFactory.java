@@ -31,7 +31,11 @@ final class IntegerToEnumConverterFactory implements ConverterFactory<Integer, E
 
 	@Override
 	public <T extends Enum> Converter<Integer, T> getConverter(Class<T> targetType) {
-		return new IntegerToEnum(ConversionUtils.getEnumType(targetType));
+		Class<?> enumType = ConversionUtils.getEnumType(targetType);
+		if (enumType == null) {
+			return new ConversionUtils.NonConvertableToEnum(targetType);
+		}
+		return new IntegerToEnum(enumType);
 	}
 
 

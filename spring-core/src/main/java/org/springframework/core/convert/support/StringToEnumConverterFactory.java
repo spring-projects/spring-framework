@@ -33,9 +33,12 @@ final class StringToEnumConverterFactory implements ConverterFactory<String, Enu
 
 	@Override
 	public <T extends Enum> Converter<String, T> getConverter(Class<T> targetType) {
-		return new StringToEnum(ConversionUtils.getEnumType(targetType));
+		Class<?> enumType = ConversionUtils.getEnumType(targetType);
+		if (enumType == null) {
+			return new ConversionUtils.NonConvertableToEnum(targetType);
+		}
+		return new StringToEnum(enumType);
 	}
-
 
 	private static class StringToEnum<T extends Enum> implements Converter<String, T> {
 
