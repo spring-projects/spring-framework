@@ -125,7 +125,7 @@ public class SimpleNamespaceContext implements NamespaceContext {
 		else {
 			this.prefixToNamespaceUri.put(prefix, namespaceUri);
 			Set<String> prefixes =
-					this.namespaceUriToPrefixes.computeIfAbsent(namespaceUri, k -> new LinkedHashSet<>());
+					this.namespaceUriToPrefixes.computeIfAbsent(namespaceUri, key -> new LinkedHashSet<>());
 			prefixes.add(prefix);
 		}
 	}
