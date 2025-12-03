@@ -130,4 +130,17 @@ public class JCacheCacheManager extends AbstractTransactionSupportingCacheManage
 		return null;
 	}
 
+	@Override
+	public void resetCaches() {
+		CacheManager cacheManager = getCacheManager();
+		if (cacheManager != null && !cacheManager.isClosed()) {
+			for (String cacheName : cacheManager.getCacheNames()) {
+				javax.cache.Cache<Object, Object> jcache = cacheManager.getCache(cacheName);
+				if (jcache != null && !jcache.isClosed()) {
+					jcache.clear();
+				}
+			}
+		}
+	}
+
 }
