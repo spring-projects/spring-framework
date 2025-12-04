@@ -78,14 +78,18 @@ public class UrlHandlerFilterTests {
 		UrlHandlerFilter filter = UrlHandlerFilter.trailingSlashHandler("/path/*").redirect(status).build();
 
 		String path = "/path/123";
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", path + "/");
 		MockHttpServletResponse response = new MockHttpServletResponse();
-
 		MockFilterChain chain = new MockFilterChain();
-		filter.doFilterInternal(new MockHttpServletRequest("GET", path + "/"), response, chain);
+
+		String queryString = "foo=bar";
+		request.setQueryString(queryString);
+
+		filter.doFilterInternal(request, response, chain);
 
 		assertThat(chain.getRequest()).isNull();
 		assertThat(response.getStatus()).isEqualTo(status.value());
-		assertThat(response.getHeader(HttpHeaders.LOCATION)).isEqualTo(path);
+		assertThat(response.getHeader(HttpHeaders.LOCATION)).isEqualTo(path + "?" + queryString);
 		assertThat(response.isCommitted()).isTrue();
 	}
 

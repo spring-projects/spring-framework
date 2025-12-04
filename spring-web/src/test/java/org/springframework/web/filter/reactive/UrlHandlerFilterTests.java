@@ -64,14 +64,15 @@ public class UrlHandlerFilterTests {
 		UrlHandlerFilter filter = UrlHandlerFilter.trailingSlashHandler("/path/*").redirect(status).build();
 
 		String path = "/path/123";
-		MockServerHttpRequest original = MockServerHttpRequest.get(path + "/").build();
+		String queryString = "foo=bar";
+		MockServerHttpRequest original = MockServerHttpRequest.get(path + "/?" + queryString).build();
 		ServerWebExchange exchange = MockServerWebExchange.from(original);
 
 		assertThatThrownBy(() -> invokeFilter(filter, exchange))
 				.hasMessageContaining("No argument value was captured");
 
 		assertThat(exchange.getResponse().getStatusCode()).isEqualTo(status);
-		assertThat(exchange.getResponse().getHeaders().getLocation()).isEqualTo(URI.create(path));
+		assertThat(exchange.getResponse().getHeaders().getLocation()).isEqualTo(URI.create(path + "?" + queryString));
 	}
 
 	@Test
