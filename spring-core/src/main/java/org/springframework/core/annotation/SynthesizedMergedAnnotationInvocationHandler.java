@@ -167,31 +167,8 @@ final class SynthesizedMergedAnnotationInvocationHandler<A extends Annotation> i
 	 * @return the formatted string representation
 	 */
 	private String toString(Object value) {
-		if (value instanceof String str) {
-			return '"' + str + '"';
-		}
-		if (value instanceof Character) {
-			return '\'' + value.toString() + '\'';
-		}
-		if (value instanceof Byte) {
-			return String.format("(byte) 0x%02X", value);
-		}
-		if (value instanceof Long longValue) {
-			return Long.toString(longValue) + 'L';
-		}
-		if (value instanceof Float floatValue) {
-			return Float.toString(floatValue) + 'f';
-		}
-		if (value instanceof Double doubleValue) {
-			return Double.toString(doubleValue) + 'd';
-		}
-		if (value instanceof Enum<?> e) {
-			return e.name();
-		}
-		if (value instanceof Class<?> clazz) {
-			return getName(clazz) + ".class";
-		}
-		if (value.getClass().isArray()) {
+		Class<?> type = value.getClass();
+		if (type.isArray()) {
 			StringBuilder builder = new StringBuilder("{");
 			for (int i = 0; i < Array.getLength(value); i++) {
 				if (i > 0) {
@@ -201,6 +178,30 @@ final class SynthesizedMergedAnnotationInvocationHandler<A extends Annotation> i
 			}
 			builder.append('}');
 			return builder.toString();
+		}
+		if (type == String.class) {
+			return '"' + ((String) value) + '"';
+		}
+		if (type == Character.class) {
+			return '\'' + value.toString() + '\'';
+		}
+		if (type == Byte.class) {
+			return String.format("(byte) 0x%02X", value);
+		}
+		if (type == Long.class) {
+			return Long.toString((Long) value) + 'L';
+		}
+		if (type == Float.class) {
+			return Float.toString((Float) value) + 'f';
+		}
+		if (type == Double.class) {
+			return Double.toString((Double) value) + 'd';
+		}
+		if (value instanceof Enum<?> e) {
+			return e.name();
+		}
+		if (type == Class.class) {
+			return getName((Class<?>) value) + ".class";
 		}
 		return String.valueOf(value);
 	}
@@ -226,29 +227,30 @@ final class SynthesizedMergedAnnotationInvocationHandler<A extends Annotation> i
 	 * @param array the array to clone
 	 */
 	private Object cloneArray(Object array) {
-		if (array instanceof boolean[] booleans) {
-			return booleans.clone();
+		Class<?> type = array.getClass();
+		if (type == boolean[].class) {
+			return ((boolean[]) array).clone();
 		}
-		if (array instanceof byte[] bytes) {
-			return bytes.clone();
+		if (type == byte[].class) {
+			return ((byte[]) array).clone();
 		}
-		if (array instanceof char[] chars) {
-			return chars.clone();
+		if (type == char[].class) {
+			return ((char[]) array).clone();
 		}
-		if (array instanceof double[] doubles) {
-			return doubles.clone();
+		if (type == double[].class) {
+			return ((double[]) array).clone();
 		}
-		if (array instanceof float[] floats) {
-			return floats.clone();
+		if (type == float[].class) {
+			return ((float[]) array).clone();
 		}
-		if (array instanceof int[] ints) {
-			return ints.clone();
+		if (type == int[].class) {
+			return ((int[]) array).clone();
 		}
-		if (array instanceof long[] longs) {
-			return longs.clone();
+		if (type == long[].class) {
+			return ((long[]) array).clone();
 		}
-		if (array instanceof short[] shorts) {
-			return shorts.clone();
+		if (type == short[].class) {
+			return ((short[]) array).clone();
 		}
 
 		// else

@@ -267,6 +267,13 @@ class ObjectUtilsTests {
 	void nullSafeEqualsWithArrays() {
 		assertThat(ObjectUtils.nullSafeEquals(new String[] {"a", "b", "c"}, new String[] {"a", "b", "c"})).isTrue();
 		assertThat(ObjectUtils.nullSafeEquals(new int[] {1, 2, 3}, new int[] {1, 2, 3})).isTrue();
+		assertThat(ObjectUtils.nullSafeEquals(new long[] {1, 2, 3}, new long[] {1, 2, 3})).isTrue();
+		assertThat(ObjectUtils.nullSafeEquals(new short[] {1, 2, 3}, new short[] {1, 2, 3})).isTrue();
+		assertThat(ObjectUtils.nullSafeEquals(new byte[] {1, 2, 3}, new byte[] {1, 2, 3})).isTrue();
+		assertThat(ObjectUtils.nullSafeEquals(new float[] {1, 2, 3}, new float[] {1, 2, 3})).isTrue();
+		assertThat(ObjectUtils.nullSafeEquals(new double[] {1, 2, 3}, new double[] {1, 2, 3})).isTrue();
+		assertThat(ObjectUtils.nullSafeEquals(new char[] {1, 2, 3}, new char[] {1, 2, 3})).isTrue();
+		assertThat(ObjectUtils.nullSafeEquals(new boolean[] {true, false, true}, new boolean[] {true, false, true})).isTrue();
 	}
 
 	@Test
