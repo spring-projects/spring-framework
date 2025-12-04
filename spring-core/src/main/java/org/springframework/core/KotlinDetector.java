@@ -148,9 +148,8 @@ public abstract class KotlinDetector {
 		if (resolvedClass.isAnnotationPresent(KOTLIN_SERIALIZABLE)) {
 			return true;
 		}
-		@Nullable Class<?>[] resolvedGenerics = type.resolveGenerics();
-		for (Class<?> resolvedGeneric : resolvedGenerics) {
-			if (resolvedGeneric != null && resolvedGeneric.isAnnotationPresent(KOTLIN_SERIALIZABLE)) {
+		for (ResolvableType genericType : type.getGenerics()) {
+			if (hasSerializableAnnotation(genericType)) {
 				return true;
 			}
 		}

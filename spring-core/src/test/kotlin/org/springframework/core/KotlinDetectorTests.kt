@@ -57,6 +57,13 @@ class KotlinDetectorTests {
 
 		Assertions.assertThat(KotlinDetector.hasSerializableAnnotation(ResolvableType.forClassWithGenerics(Map::class.java, String::class.java, WithoutSerializable::class.java))).isFalse()
 		Assertions.assertThat(KotlinDetector.hasSerializableAnnotation(ResolvableType.forClassWithGenerics(Map::class.java, String::class.java, WithSerializable::class.java))).isTrue()
+		Assertions.assertThat(KotlinDetector.hasSerializableAnnotation(
+			ResolvableType.forClassWithGenerics(Map::class.java,
+				ResolvableType.forClass(String::class.java),
+				ResolvableType.forClassWithGenerics(List::class.java, WithSerializable::class.java)))).isTrue()
+		Assertions.assertThat(KotlinDetector.hasSerializableAnnotation(
+			ResolvableType.forClassWithGenerics(List::class.java,
+			ResolvableType.forClassWithGenerics(List::class.java, WithSerializable::class.java)))).isTrue()
 
 		Assertions.assertThat(KotlinDetector.hasSerializableAnnotation(ResolvableType.NONE)).isFalse()
 	}
