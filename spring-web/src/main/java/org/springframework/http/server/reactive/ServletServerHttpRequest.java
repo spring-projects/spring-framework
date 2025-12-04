@@ -165,8 +165,8 @@ class ServletServerHttpRequest extends AbstractServerHttpRequest {
 	}
 
 	@SuppressWarnings("NullAway") // Dataflow analysis limitation
-		private static MultiValueMap<String, String> initHeaders(
-				MultiValueMap<String, String> headerValues, HttpServletRequest request) {
+	private static MultiValueMap<String, String> initHeaders(
+			MultiValueMap<String, String> headerValues, HttpServletRequest request) {
 
 		HttpHeaders headers = null;
 		MediaType contentType = null;
