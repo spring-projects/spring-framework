@@ -352,7 +352,7 @@ class ControllerMethodResolver {
 
 		this.initBinderMethodCache
 				.computeIfAbsent(handlerType,
-						clazz -> MethodIntrospector.selectMethods(handlerType, INIT_BINDER_METHODS))
+						key -> MethodIntrospector.selectMethods(key, INIT_BINDER_METHODS))
 				.forEach(method -> {
 					Object bean = handlerMethod.getBean();
 					result.add(getInitBinderMethod(bean, method));
@@ -385,7 +385,7 @@ class ControllerMethodResolver {
 
 		this.modelAttributeMethodCache
 				.computeIfAbsent(handlerType,
-						clazz -> MethodIntrospector.selectMethods(handlerType, MODEL_ATTRIBUTE_METHODS))
+						key -> MethodIntrospector.selectMethods(key, MODEL_ATTRIBUTE_METHODS))
 				.forEach(method -> {
 					Object bean = handlerMethod.getBean();
 					result.add(createAttributeMethod(bean, method));

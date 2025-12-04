@@ -51,8 +51,7 @@ class JCacheEhCacheApiTests extends AbstractValueAdaptingCacheTests<JCacheCache>
 		this.cacheManager.createCache(CACHE_NAME_NO_NULL, new MutableConfiguration<>());
 		this.nativeCache = this.cacheManager.getCache(CACHE_NAME);
 		this.cache = new JCacheCache(this.nativeCache);
-		Cache<Object, Object> nativeCacheNoNull =
-				this.cacheManager.getCache(CACHE_NAME_NO_NULL);
+		Cache<Object, Object> nativeCacheNoNull = this.cacheManager.getCache(CACHE_NAME_NO_NULL);
 		this.cacheNoNull = new JCacheCache(nativeCacheNoNull, false);
 	}
 
@@ -98,6 +97,20 @@ class JCacheEhCacheApiTests extends AbstractValueAdaptingCacheTests<JCacheCache>
 		assertThat(wrapper.get()).isNull();
 		// not changed
 		assertThat(cache.get(key).get()).isEqualTo(value);
+	}
+
+	@Test
+	void resetCaches() {
+		JCacheCacheManager cm = new JCacheCacheManager(cacheManager);
+		org.springframework.cache.Cache cache = cm.getCache(CACHE_NAME);
+		cache.put("key", "value");
+		assertThat(cm.getCacheNames()).contains(CACHE_NAME);
+		assertThat(cm.getCache(CACHE_NAME)).isNotNull().isSameAs(cache);
+		assertThat(cacheManager.getCache(CACHE_NAME).iterator()).hasNext();
+		cm.resetCaches();
+		assertThat(cm.getCacheNames()).contains(CACHE_NAME);
+		assertThat(cm.getCache(CACHE_NAME)).isNotNull().isSameAs(cache);
+		assertThat(cacheManager.getCache(CACHE_NAME).iterator()).isExhausted();
 	}
 
 }

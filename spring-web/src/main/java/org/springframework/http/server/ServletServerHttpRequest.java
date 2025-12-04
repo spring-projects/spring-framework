@@ -50,7 +50,6 @@ import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedCaseInsensitiveMap;
 import org.springframework.util.StringUtils;
-import org.springframework.web.util.UriComponentsBuilder;
 
 /**
  * {@link ServerHttpRequest} implementation that is based on a {@link HttpServletRequest}.
@@ -72,7 +71,6 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 	private @Nullable HttpHeaders headers;
 
 	private @Nullable Map<String, Object> attributes;
-
 
 	private @Nullable ServerHttpAsyncRequestControl asyncRequestControl;
 
@@ -130,15 +128,15 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 		}
 		catch (URISyntaxException ex) {
 			if (hasQuery) {
+				String requestURL = servletRequest.getRequestURL().toString();
 				try {
-					// Maybe malformed query, try to parse and encode it
-					query = UriComponentsBuilder.fromUriString("?" + query).build().toUri().getRawQuery();
-					return new URI(servletRequest.getRequestURL().toString() + "?" + query);
+					// Maybe malformed query, try to encode it
+					return new URI(requestURL + "?" + encodeQuery(query));
 				}
 				catch (URISyntaxException ex2) {
 					try {
 						// Try leaving it out
-						return new URI(servletRequest.getRequestURL().toString());
+						return new URI(requestURL);
 					}
 					catch (URISyntaxException ex3) {
 						// ignore
@@ -148,6 +146,11 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 			throw new IllegalStateException(
 					"Could not resolve HttpServletRequest as URI: " + urlString, ex);
 		}
+	}
+
+	private static String encodeQuery(String query) throws URISyntaxException {
+		// Avoid package cycle with web.utils
+		return new URI(null, null, "", query, null).getRawQuery();
 	}
 
 	@Override
@@ -377,7 +380,6 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 					public Iterator<String> iterator() {
 						return servletRequest.getAttributeNames().asIterator();
 					}
-
 					@Override
 					public int size() {
 						return AttributesMap.this.size();
@@ -401,7 +403,6 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 							public boolean hasNext() {
 								return e.hasMoreElements();
 							}
-
 							@Override
 							public Object next() {
 								String name = e.nextElement();
@@ -409,7 +410,6 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 							}
 						};
 					}
-
 					@Override
 					public int size() {
 						return AttributesMap.this.size();
@@ -433,7 +433,6 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 							public boolean hasNext() {
 								return e.hasMoreElements();
 							}
-
 							@Override
 							public Entry<String, Object> next() {
 								String name = e.nextElement();
@@ -442,7 +441,6 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 							}
 						};
 					}
-
 					@Override
 					public int size() {
 						return AttributesMap.this.size();

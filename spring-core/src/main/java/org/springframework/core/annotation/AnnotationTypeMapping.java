@@ -88,9 +88,7 @@ final class AnnotationTypeMapping {
 		this.root = (source != null ? source.getRoot() : this);
 		this.distance = (source == null ? 0 : source.getDistance() + 1);
 		this.annotationType = annotationType;
-		this.metaTypes = merge(
-				source != null ? source.getMetaTypes() : null,
-				annotationType);
+		this.metaTypes = merge((source != null ? source.getMetaTypes() : null), annotationType);
 		this.annotation = annotation;
 		this.attributes = AttributeMethods.forAnnotationType(annotationType);
 		this.mirrorSets = new MirrorSets();

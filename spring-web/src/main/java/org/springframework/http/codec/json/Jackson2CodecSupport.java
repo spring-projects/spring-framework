@@ -141,7 +141,7 @@ public abstract class Jackson2CodecSupport {
 			this.objectMapperRegistrations = new LinkedHashMap<>();
 		}
 		Map<MimeType, ObjectMapper> registrations =
-				this.objectMapperRegistrations.computeIfAbsent(clazz, c -> new LinkedHashMap<>());
+				this.objectMapperRegistrations.computeIfAbsent(clazz, key -> new LinkedHashMap<>());
 		registrar.accept(registrations);
 	}
 

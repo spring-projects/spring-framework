@@ -17,6 +17,7 @@
 package org.springframework.core.annotation;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -37,6 +38,8 @@ import org.springframework.util.ReflectionUtils;
  * @since 5.2
  */
 final class AttributeMethods {
+
+	private static final IntrospectionFailureLogger failureLogger = IntrospectionFailureLogger.WARN;
 
 	static final AttributeMethods NONE = new AttributeMethods(null, new Method[0]);
 
@@ -91,10 +94,11 @@ final class AttributeMethods {
 	 * exceptions for {@code Class} values (instead of the more typical early
 	 * {@code Class.getAnnotations() failure} on a regular JVM).
 	 * @param annotation the annotation to check
+	 * @param source the element that the supplied annotation is declared on
 	 * @return {@code true} if all values are present
 	 * @see #validate(Annotation)
 	 */
-	boolean canLoad(Annotation annotation) {
+	boolean canLoad(Annotation annotation, AnnotatedElement source) {
 		assertAnnotation(annotation);
 		for (int i = 0; i < size(); i++) {
 			if (canThrowTypeNotPresentException(i)) {
@@ -107,6 +111,10 @@ final class AttributeMethods {
 				}
 				catch (Throwable ex) {
 					// TypeNotPresentException etc. -> annotation type not actually loadable.
+					if (failureLogger.isEnabled()) {
+						failureLogger.log("Failed to introspect meta-annotation @" +
+								annotation.annotationType().getSimpleName(), source, ex);
+					}
 					return false;
 				}
 			}

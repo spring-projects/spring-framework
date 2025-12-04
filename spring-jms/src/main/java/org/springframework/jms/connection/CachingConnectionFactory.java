@@ -245,7 +245,7 @@ public class CachingConnectionFactory extends SingleConnectionFactory {
 			return null;
 		}
 
-		Deque<Session> sessionList = this.cachedSessions.computeIfAbsent(mode, k -> new ArrayDeque<>());
+		Deque<Session> sessionList = this.cachedSessions.computeIfAbsent(mode, key -> new ArrayDeque<>());
 		Session session = null;
 		synchronized (sessionList) {
 			if (!sessionList.isEmpty()) {

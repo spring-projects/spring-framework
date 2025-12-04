@@ -115,6 +115,13 @@ public abstract class AbstractCacheManager implements CacheManager, Initializing
 		return this.cacheNames;
 	}
 
+	@Override
+	public void resetCaches() {
+		synchronized (this.cacheMap) {
+			this.cacheMap.values().forEach(Cache::clear);
+		}
+	}
+
 
 	// Common cache initialization delegates for subclasses
 

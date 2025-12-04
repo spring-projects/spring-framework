@@ -119,4 +119,11 @@ public class CompositeCacheManager implements CacheManager, InitializingBean {
 		return Collections.unmodifiableSet(names);
 	}
 
+	@Override
+	public void resetCaches() {
+		for (CacheManager manager : this.cacheManagers) {
+			manager.resetCaches();
+		}
+	}
+
 }

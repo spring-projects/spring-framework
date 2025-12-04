@@ -178,8 +178,8 @@ public abstract class AbstractHandshakeHandler implements HandshakeHandler, Life
 			if (HttpMethod.GET != httpMethod && !CONNECT_METHOD.equals(httpMethod)) {
 				response.setStatusCode(HttpStatus.METHOD_NOT_ALLOWED);
 				response.getHeaders().setAllow(Set.of(HttpMethod.GET, CONNECT_METHOD));
-				if (logger.isErrorEnabled()) {
-					logger.error("Handshake failed due to unexpected HTTP method: " + httpMethod);
+				if (logger.isDebugEnabled()) {
+					logger.debug("Handshake failed due to unexpected HTTP method: " + httpMethod);
 				}
 				return false;
 			}
@@ -195,8 +195,8 @@ public abstract class AbstractHandshakeHandler implements HandshakeHandler, Life
 				}
 				String key = headers.getSecWebSocketKey();
 				if (key == null) {
-					if (logger.isErrorEnabled()) {
-						logger.error("Missing \"Sec-WebSocket-Key\" header");
+					if (logger.isDebugEnabled()) {
+						logger.debug("Missing \"Sec-WebSocket-Key\" header");
 					}
 					response.setStatusCode(HttpStatus.BAD_REQUEST);
 					return false;
@@ -230,8 +230,8 @@ public abstract class AbstractHandshakeHandler implements HandshakeHandler, Life
 	}
 
 	protected void handleInvalidUpgradeHeader(ServerHttpRequest request, ServerHttpResponse response) throws IOException {
-		if (logger.isErrorEnabled()) {
-			logger.error(LogFormatUtils.formatValue(
+		if (logger.isDebugEnabled()) {
+			logger.debug(LogFormatUtils.formatValue(
 					"Handshake failed due to invalid Upgrade header: " + request.getHeaders().getUpgrade(), -1, true));
 		}
 		response.setStatusCode(HttpStatus.BAD_REQUEST);
@@ -239,8 +239,8 @@ public abstract class AbstractHandshakeHandler implements HandshakeHandler, Life
 	}
 
 	protected void handleInvalidConnectHeader(ServerHttpRequest request, ServerHttpResponse response) throws IOException {
-		if (logger.isErrorEnabled()) {
-			logger.error(LogFormatUtils.formatValue(
+		if (logger.isDebugEnabled()) {
+			logger.debug(LogFormatUtils.formatValue(
 					"Handshake failed due to invalid Connection header" + request.getHeaders().getConnection(), -1, true));
 		}
 		response.setStatusCode(HttpStatus.BAD_REQUEST);
@@ -263,9 +263,9 @@ public abstract class AbstractHandshakeHandler implements HandshakeHandler, Life
 	}
 
 	protected void handleWebSocketVersionNotSupported(ServerHttpRequest request, ServerHttpResponse response) {
-		if (logger.isErrorEnabled()) {
+		if (logger.isDebugEnabled()) {
 			String version = request.getHeaders().getFirst(WebSocketHttpHeaders.SEC_WEBSOCKET_VERSION);
-			logger.error(LogFormatUtils.formatValue(
+			logger.debug(LogFormatUtils.formatValue(
 					"Handshake failed due to unsupported WebSocket version: " + version +
 							". Supported versions: " + Arrays.toString(getSupportedVersions()), -1, true));
 		}
