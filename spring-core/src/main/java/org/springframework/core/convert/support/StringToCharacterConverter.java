@@ -26,7 +26,7 @@ import org.springframework.core.convert.converter.Converter;
  * @author Keith Donald
  * @since 3.0
  */
-final class StringToCharacterConverter implements Converter<String, Character> {
+final class StringToCharacterConverter implements Converter<String, @Nullable Character> {
 
 	@Override
 	public @Nullable Character convert(String source) {

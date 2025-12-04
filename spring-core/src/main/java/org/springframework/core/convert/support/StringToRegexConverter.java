@@ -28,7 +28,7 @@ import org.springframework.core.convert.converter.Converter;
  * @author Sebastien Deleuze
  * @since 6.1
  */
-final class StringToRegexConverter implements Converter<String, Regex> {
+final class StringToRegexConverter implements Converter<String, @Nullable Regex> {
 
 	@Override
 	public @Nullable Regex convert(String source) {

@@ -29,7 +29,7 @@ import org.springframework.core.convert.converter.Converter;
  * @author Stephane Nicoll
  * @since 6.1
  */
-final class StringToPatternConverter implements Converter<String, Pattern> {
+final class StringToPatternConverter implements Converter<String, @Nullable Pattern> {
 
 	@Override
 	public @Nullable Pattern convert(String source) {

@@ -30,7 +30,7 @@ import org.springframework.util.StringUtils;
  * @since 3.2
  * @see UUID#fromString
  */
-final class StringToUUIDConverter implements Converter<String, UUID> {
+final class StringToUUIDConverter implements Converter<String, @Nullable UUID> {
 
 	@Override
 	public @Nullable UUID convert(String source) {

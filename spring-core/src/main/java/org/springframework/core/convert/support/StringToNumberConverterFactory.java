@@ -48,7 +48,7 @@ final class StringToNumberConverterFactory implements ConverterFactory<String, N
 	}
 
 
-	private static final class StringToNumber<T extends Number> implements Converter<String, T> {
+	private static final class StringToNumber<T extends Number> implements Converter<String, @Nullable T> {
 
 		private final Class<T> targetType;
 

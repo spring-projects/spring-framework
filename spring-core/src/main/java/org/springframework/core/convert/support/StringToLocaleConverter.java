@@ -34,7 +34,7 @@ import org.springframework.util.StringUtils;
  * @since 3.0
  * @see StringUtils#parseLocale
  */
-final class StringToLocaleConverter implements Converter<String, Locale> {
+final class StringToLocaleConverter implements Converter<String, @Nullable Locale> {
 
 	@Override
 	public @Nullable Locale convert(String source) {

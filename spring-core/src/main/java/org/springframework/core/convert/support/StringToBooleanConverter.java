@@ -31,7 +31,7 @@ import org.springframework.core.convert.converter.Converter;
  * @author Sam Brannen
  * @since 3.0
  */
-final class StringToBooleanConverter implements Converter<String, Boolean> {
+final class StringToBooleanConverter implements Converter<String, @Nullable Boolean> {
 
 	private static final Set<String> trueValues = Set.of("true", "on", "yes", "1");
 
