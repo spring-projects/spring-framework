@@ -26,7 +26,7 @@ import java.util.stream.Stream;
 
 import mockwebserver3.MockResponse;
 import mockwebserver3.MockWebServer;
-import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.AutoClose;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -45,8 +45,6 @@ import static org.junit.jupiter.params.provider.Arguments.argumentSet;
  */
 class RestTestClientIntegrationTests {
 
-	private RestTestClient client;
-
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.METHOD)
 	@ParameterizedTest
@@ -64,13 +62,13 @@ class RestTestClientIntegrationTests {
 		);
 	}
 
-	private MockWebServer server;
+	@AutoClose
+	private MockWebServer server = new MockWebServer();
 
 	private RestTestClient testClient;
 
 
 	private void startServer(ClientHttpRequestFactory requestFactory) throws IOException {
-		this.server = new MockWebServer();
 		this.server.start();
 		this.testClient = RestTestClient.bindToServer(requestFactory)
 				.baseUrl(this.server.url("/").toString())
@@ -90,13 +88,6 @@ class RestTestClientIntegrationTests {
 	private void prepareResponse(Function<MockResponse.Builder, MockResponse.Builder> f) {
 		MockResponse.Builder builder = new MockResponse.Builder();
 		this.server.enqueue(f.apply(builder).build());
-	}
-
-	@AfterEach
-	void shutdown() throws IOException {
-		if (server != null) {
-			this.server.close();
-		}
 	}
 
 }
