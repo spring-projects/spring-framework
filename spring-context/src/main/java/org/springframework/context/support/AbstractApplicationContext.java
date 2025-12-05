@@ -630,7 +630,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 				finishRefresh();
 			}
 
-			catch (RuntimeException | Error ex ) {
+			catch (RuntimeException | Error ex) {
 				if (logger.isWarnEnabled()) {
 					logger.warn("Exception encountered during context initialization - " +
 							"cancelling refresh attempt: " + ex);
