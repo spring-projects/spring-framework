@@ -42,16 +42,20 @@ import org.apache.commons.logging.LogFactory;
 import org.jspecify.annotations.Nullable;
 
 import org.springframework.aop.framework.autoproxy.AutoProxyUtils;
+import org.springframework.aot.generate.AccessControl;
+import org.springframework.aot.generate.GeneratedClass;
 import org.springframework.aot.generate.GeneratedMethod;
 import org.springframework.aot.generate.GeneratedMethods;
 import org.springframework.aot.generate.GenerationContext;
 import org.springframework.aot.generate.MethodReference;
+import org.springframework.aot.generate.MethodReference.ArgumentCodeGenerator;
 import org.springframework.aot.hint.ExecutableMode;
 import org.springframework.aot.hint.MemberCategory;
 import org.springframework.aot.hint.ReflectionHints;
 import org.springframework.aot.hint.ResourceHints;
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.TypeReference;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.PropertyValues;
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
@@ -872,11 +876,14 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 		@Override
 		public void applyTo(GenerationContext generationContext, BeanFactoryInitializationCode beanFactoryInitializationCode) {
 			GeneratedMethod generatedMethod = beanFactoryInitializationCode.getMethods().add(
-					"applyBeanRegistrars", builder -> this.generateApplyBeanRegistrarsMethod(builder, generationContext));
+					"applyBeanRegistrars", builder -> this.generateApplyBeanRegistrarsMethod(builder,
+							generationContext, beanFactoryInitializationCode.getClassName()));
 			beanFactoryInitializationCode.addInitializer(generatedMethod.toMethodReference());
 		}
 
-		private void generateApplyBeanRegistrarsMethod(MethodSpec.Builder method, GenerationContext generationContext) {
+		private void generateApplyBeanRegistrarsMethod(MethodSpec.Builder method, GenerationContext generationContext,
+				ClassName className) {
+
 			ReflectionHints reflectionHints = generationContext.getRuntimeHints().reflection();
 			method.addJavadoc("Apply bean registrars.");
 			method.addModifiers(Modifier.PRIVATE);
@@ -915,7 +922,7 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 					}
 				}
 			}
-			method.addCode(generateRegisterCode());
+			method.addCode(generateRegisterCode(className, generationContext));
 		}
 
 		private void checkUnsupportedFeatures(AbstractBeanDefinition beanDefinition) {
@@ -937,35 +944,77 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 			return code.build();
 		}
 
-		private CodeBlock generateRegisterCode() {
+		private CodeBlock generateRegisterCode(ClassName className, GenerationContext generationContext) {
 			Builder code = CodeBlock.builder();
 			Builder metadataReaderFactoryCode = null;
 			NameAllocator nameAllocator = new NameAllocator();
 			for (Map.Entry<String, List<BeanRegistrar>> beanRegistrarEntry : this.beanRegistrars.entrySet()) {
 				for (BeanRegistrar beanRegistrar : beanRegistrarEntry.getValue()) {
 					String beanRegistrarName = nameAllocator.newName(StringUtils.uncapitalize(beanRegistrar.getClass().getSimpleName()));
-					code.addStatement("$T $L = new $T()", beanRegistrar.getClass(), beanRegistrarName, beanRegistrar.getClass());
+					Constructor<?> constructor = BeanUtils.getResolvableConstructor(beanRegistrar.getClass());
+					boolean visible = isVisible(constructor, className);
+					if (visible) {
+						code.addStatement("$T $L = new $T()", beanRegistrar.getClass(), beanRegistrarName, beanRegistrar.getClass());
+					}
+					else {
+						try {
+							Class<?> configClass = ClassUtils.forName(beanRegistrarEntry.getKey(), beanRegistrar.getClass().getClassLoader());
+							GeneratedClass generatedClass = generationContext.getGeneratedClasses()
+									.getOrAddForFeatureComponent("BeanRegistrars", configClass, type ->
+											type.addJavadoc("Bean registrars for {@link $T}.", configClass)
+													.addModifiers(Modifier.PUBLIC));
+							GeneratedMethod generatedMethod = generatedClass.getMethods().add(
+									"get" + beanRegistrar.getClass().getSimpleName(),
+									method -> method
+											.addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+											.returns(BeanRegistrar.class)
+											.addStatement("return new $T()", beanRegistrar.getClass()));
+							code.addStatement("$T $L = $L", BeanRegistrar.class, beanRegistrarName,
+									generatedMethod.toMethodReference().toInvokeCodeBlock(ArgumentCodeGenerator.none()));
+						}
+						catch (ClassNotFoundException ex) {
+							throw new IllegalStateException(ex);
+						}
+					}
 					if (beanRegistrar instanceof ImportAware) {
 						if (metadataReaderFactoryCode == null) {
 							metadataReaderFactoryCode = CodeBlock.builder();
 							metadataReaderFactoryCode.addStatement("$T metadataReaderFactory = new $T()",
 									MetadataReaderFactory.class, CachingMetadataReaderFactory.class);
 						}
+						CodeBlock setImportMetadataCode;
+						if (visible) {
+							setImportMetadataCode = CodeBlock.builder()
+									.addStatement("$L.setImportMetadata(metadataReaderFactory.getMetadataReader($S).getAnnotationMetadata())",
+									beanRegistrarName, beanRegistrarEntry.getKey()).build();
+						}
+						else {
+							setImportMetadataCode = CodeBlock.builder()
+									.addStatement("(($T)$L).setImportMetadata(metadataReaderFactory.getMetadataReader($S).getAnnotationMetadata())",
+									ImportAware.class, beanRegistrarName, beanRegistrarEntry.getKey()).build();
+						}
 						code.beginControlFlow("try")
-								.addStatement("$L.setImportMetadata(metadataReaderFactory.getMetadataReader($S).getAnnotationMetadata())",
-										beanRegistrarName, beanRegistrarEntry.getKey())
+								.add(setImportMetadataCode)
 								.nextControlFlow("catch ($T ex)", IOException.class)
 								.addStatement("throw new $T(\"Failed to read metadata for '$L'\", ex)",
 										IllegalStateException.class, beanRegistrarEntry.getKey())
 								.endControlFlow();
 					}
-					code.addStatement("$L.register(new $T(($T)$L, $L, $L, $T.class, $L), $L)", beanRegistrarName,
+					code.addStatement("$L.register(new $T(($T)$L, $L, $L, $L.getClass(), $L), $L)", beanRegistrarName,
 							BeanRegistryAdapter.class, BeanDefinitionRegistry.class, BeanFactoryInitializationCode.BEAN_FACTORY_VARIABLE,
-							BeanFactoryInitializationCode.BEAN_FACTORY_VARIABLE, ENVIRONMENT_VARIABLE, beanRegistrar.getClass(),
+							BeanFactoryInitializationCode.BEAN_FACTORY_VARIABLE, ENVIRONMENT_VARIABLE, beanRegistrarName,
 							CUSTOMIZER_MAP_VARIABLE, ENVIRONMENT_VARIABLE);
 				}
 			}
 			return (metadataReaderFactoryCode == null ? code.build() : metadataReaderFactoryCode.add(code.build()).build());
+		}
+
+		private boolean isVisible(Constructor<?> ctor, ClassName className) {
+			AccessControl classAccessControl = AccessControl.forClass(ctor.getDeclaringClass());
+			AccessControl memberAccessControl = AccessControl.forMember(ctor);
+			AccessControl.Visibility visibility = AccessControl.lowest(classAccessControl, memberAccessControl).getVisibility();
+			return (visibility == AccessControl.Visibility.PUBLIC || (visibility != AccessControl.Visibility.PRIVATE &&
+					ctor.getDeclaringClass().getPackageName().equals(className.packageName())));
 		}
 
 		private CodeBlock generateInitDestroyMethods(String beanName, AbstractBeanDefinition beanDefinition,

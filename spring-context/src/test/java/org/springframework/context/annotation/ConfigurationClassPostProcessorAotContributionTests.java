@@ -62,6 +62,7 @@ import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.DefaultPropertySourceFactory;
+import org.springframework.core.test.tools.CompileWithForkedClassLoader;
 import org.springframework.core.test.tools.Compiled;
 import org.springframework.core.test.tools.TestCompiler;
 import org.springframework.core.type.AnnotationMetadata;
@@ -503,7 +504,7 @@ public class ConfigurationClassPostProcessorAotContributionTests {
 		@Test
 		void applyToWhenIsImportAware() {
 			BeanFactoryInitializationAotContribution contribution = getContribution(CommonAnnotationBeanPostProcessor.class,
-					ImportAwareBeanRegistrarConfiguration.class);
+					ImportAwareConfiguration.class);
 			assertThat(contribution).isNotNull();
 			contribution.applyTo(generationContext, beanFactoryInitializationCode);
 			compile((initializer, compiled) -> {
@@ -511,7 +512,42 @@ public class ConfigurationClassPostProcessorAotContributionTests {
 				initializer.accept(freshContext);
 				freshContext.refresh();
 				assertThat(freshContext.getBean(ClassNameHolder.class).className())
-						.isEqualTo(ImportAwareBeanRegistrarConfiguration.class.getName());
+						.isEqualTo(ImportAwareConfiguration.class.getName());
+				freshContext.close();
+			});
+		}
+
+		@Test
+		@CompileWithForkedClassLoader
+		void applyToWhenIsPackagePrivate() throws NoSuchMethodException {
+			BeanFactoryInitializationAotContribution contribution = getContribution(PackagePrivateConfiguration.class);
+			assertThat(contribution).isNotNull();
+			contribution.applyTo(generationContext, beanFactoryInitializationCode);
+			Constructor<Foo> fooConstructor = Foo.class.getDeclaredConstructor();
+			compile((initializer, compiled) -> {
+				GenericApplicationContext freshContext = new GenericApplicationContext();
+				initializer.accept(freshContext);
+				freshContext.refresh();
+				assertThat(freshContext.getBean(Foo.class)).isNotNull();
+				assertThat(RuntimeHintsPredicates.reflection().onConstructorInvocation(fooConstructor))
+						.accepts(generationContext.getRuntimeHints());
+				freshContext.close();
+			});
+		}
+
+		@Test
+		@CompileWithForkedClassLoader
+		void applyToWhenIsPackagePrivateAndImportAware() {
+			BeanFactoryInitializationAotContribution contribution = getContribution(CommonAnnotationBeanPostProcessor.class,
+					PackagePrivateAndImportAwareConfiguration.class);
+			assertThat(contribution).isNotNull();
+			contribution.applyTo(generationContext, beanFactoryInitializationCode);
+			compile((initializer, compiled) -> {
+				GenericApplicationContext freshContext = new GenericApplicationContext();
+				initializer.accept(freshContext);
+				freshContext.refresh();
+				assertThat(freshContext.getBean(ClassNameHolder.class).className())
+						.isEqualTo(PackagePrivateAndImportAwareConfiguration.class.getName());
 				freshContext.close();
 			});
 		}
@@ -578,7 +614,7 @@ public class ConfigurationClassPostProcessorAotContributionTests {
 		}
 
 		@Import(ImportAwareBeanRegistrar.class)
-		public static class ImportAwareBeanRegistrarConfiguration {
+		public static class ImportAwareConfiguration {
 		}
 
 		public static class ImportAwareBeanRegistrar implements BeanRegistrar, ImportAware {
@@ -596,9 +632,39 @@ public class ConfigurationClassPostProcessorAotContributionTests {
 			public void setImportMetadata(AnnotationMetadata importMetadata) {
 				this.importMetadata = importMetadata;
 			}
+		}
 
-			public @Nullable AnnotationMetadata getImportMetadata() {
-				return this.importMetadata;
+		@Configuration
+		@Import(PackagePrivateBeanRegistrar.class)
+		static class PackagePrivateConfiguration {
+		}
+
+		static class PackagePrivateBeanRegistrar implements BeanRegistrar {
+
+			@Override
+			public void register(BeanRegistry registry, Environment env) {
+				registry.registerBean(Foo.class);
+			}
+		}
+
+		@Import(PackagePrivateAndImportAwareBeanRegistrar.class)
+		static class PackagePrivateAndImportAwareConfiguration {
+		}
+
+		static class PackagePrivateAndImportAwareBeanRegistrar implements BeanRegistrar, ImportAware {
+
+			@Nullable
+			private AnnotationMetadata importMetadata;
+
+			@Override
+			public void register(BeanRegistry registry, Environment env) {
+				registry.registerBean(ClassNameHolder.class, spec -> spec.supplier(context ->
+						new ClassNameHolder(this.importMetadata == null ? null : this.importMetadata.getClassName())));
+			}
+
+			@Override
+			public void setImportMetadata(AnnotationMetadata importMetadata) {
+				this.importMetadata = importMetadata;
 			}
 		}
 
