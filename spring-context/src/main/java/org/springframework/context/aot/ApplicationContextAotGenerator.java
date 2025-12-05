@@ -57,7 +57,7 @@ public class ApplicationContextAotGenerator {
 					new ApplicationContextInitializationCodeGenerator(applicationContext, generationContext);
 			DefaultListableBeanFactory beanFactory = applicationContext.getDefaultListableBeanFactory();
 			new BeanFactoryInitializationAotContributions(beanFactory).applyTo(generationContext, codeGenerator);
-			return codeGenerator.getGeneratedClass().getName();
+			return codeGenerator.getClassName();
 		});
 	}
 

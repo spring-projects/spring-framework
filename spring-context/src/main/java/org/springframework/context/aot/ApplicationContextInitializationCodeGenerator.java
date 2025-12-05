@@ -127,8 +127,9 @@ class ApplicationContextInitializationCodeGenerator implements BeanFactoryInitia
 		return ArgumentCodeGenerator.from(new InitializerMethodArgumentCodeGenerator());
 	}
 
-	GeneratedClass getGeneratedClass() {
-		return this.generatedClass;
+	@Override
+	public ClassName getClassName() {
+		return this.generatedClass.getName();
 	}
 
 	@Override
