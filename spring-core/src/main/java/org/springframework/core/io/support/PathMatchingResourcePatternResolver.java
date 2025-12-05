@@ -631,12 +631,26 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 					}
 
 					// Handle absolute paths correctly: do not apply parent to absolute paths.
-					File pathFile = new File(path);
-					File candidate = (pathFile.isAbsolute() ? pathFile : new File(parent, path));
+					File pathFile = null;
+					boolean absolute = false;
+					if (path.startsWith(ResourceUtils.FILE_URL_PREFIX)) {
+						try {
+							pathFile = new File(ResourceUtils.toURI(path));
+							absolute = true;
+						}
+						catch (URISyntaxException | IllegalArgumentException ex) {
+							// Fall back to plain String constructor below.
+						}
+					}
+					if (pathFile == null) {
+						pathFile = new File(path);
+						absolute = pathFile.isAbsolute();
+					}
+					File candidate = (absolute ? pathFile : new File(parent, path));
 
 					// For relative paths, enforce security check: must be under parent.
 					// For absolute paths, just verify file exists (matching JVM behavior).
-					if (candidate.isFile() && (pathFile.isAbsolute() ||
+					if (candidate.isFile() && (absolute ||
 							candidate.getCanonicalPath().contains(parent.getCanonicalPath()))) {
 						manifestEntries.add(ClassPathManifestEntry.of(candidate, this.useCaches));
 					}
