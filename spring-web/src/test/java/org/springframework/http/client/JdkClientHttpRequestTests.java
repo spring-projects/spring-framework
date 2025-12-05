@@ -38,6 +38,14 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import java.net.InetSocketAddress;
+
+import org.springframework.http.client.JdkClientHttpRequestFactory;
+import org.springframework.web.client.RestClient;
+
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+
+
 
 /**
  * Unit tests for {@link JdkClientHttpRequest}.
@@ -74,5 +82,42 @@ class JdkClientHttpRequestTests {
 	private JdkClientHttpRequest createRequest(Duration timeout) {
 		return new JdkClientHttpRequest(client, URI.create("https://abc.com"), HttpMethod.GET, executor, timeout, false);
 	}
+	@Test
+	void headRequestWithGzipContentEncodingShouldNotFail() throws Exception {
+		com.sun.net.httpserver.HttpServer server =
+				com.sun.net.httpserver.HttpServer.create(new InetSocketAddress(0), 0);
+
+		server.createContext("/test", exchange -> {
+			// Simulate HEAD-like response: gzip header + no body
+			exchange.getResponseHeaders().add("Content-Encoding", "gzip");
+			exchange.getResponseHeaders().add("Content-Length", "0");
+			exchange.sendResponseHeaders(200, 0);  // no body
+			exchange.close();
+		});
+
+		server.start();
+		int port = server.getAddress().getPort();
+
+		try {
+			RestClient client = RestClient.builder()
+					.requestFactory(new JdkClientHttpRequestFactory())
+					.build();
+
+			// The original bug: this line used to blow up with gzip + empty body.
+			assertDoesNotThrow(() ->
+					client.head()
+							.uri("http://localhost:" + port + "/test")
+							.retrieve()
+							.toBodilessEntity()
+			);
+		}
+		finally {
+			server.stop(0);
+		}
+	}
+
+
+
+
 
 }
