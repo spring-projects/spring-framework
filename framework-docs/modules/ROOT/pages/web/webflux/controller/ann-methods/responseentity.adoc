@@ -33,7 +33,7 @@ Kotlin::
 ----
 ======
 
-WebFlux supports using a single value xref:web-reactive.adoc#webflux-reactive-libraries[reactive type] to
+WebFlux supports using a single value xref:web/webflux-reactive-libraries.adoc[reactive type] to
 produce the `ResponseEntity` asynchronously, and/or single and multi-value reactive types
 for the body. This allows a variety of async responses with `ResponseEntity` as follows:
 

@@ -77,7 +77,7 @@ as input, adapts it to a Reactor type internally, uses that, and returns either 
 `Flux` or a `Mono` as output. So, you can pass any `Publisher` as input and you can apply
 operations on the output, but you need to adapt the output for use with another reactive library.
 Whenever feasible (for example, annotated controllers), WebFlux adapts transparently to the use
-of RxJava or another reactive library. See xref:web-reactive.adoc#webflux-reactive-libraries[Reactive Libraries] for more details.
+of RxJava or another reactive library. See xref:web/webflux-reactive-libraries.adoc[Reactive Libraries] for more details.
 
 NOTE: In addition to Reactive APIs, WebFlux can also be used with
 xref:languages/kotlin/coroutines.adoc[Coroutines] APIs in Kotlin which provides a more imperative style of programming.
@@ -148,7 +148,7 @@ RxJava to perform blocking calls on a separate thread but you would not be makin
 most of a non-blocking web stack.
 
 * If you have a Spring MVC application with calls to remote services, try the reactive `WebClient`.
-You can return reactive types (Reactor, RxJava, xref:web-reactive.adoc#webflux-reactive-libraries[or other])
+You can return reactive types (Reactor, RxJava, xref:web/webflux-reactive-libraries.adoc[or other])
 directly from Spring MVC controller methods. The greater the latency per call or the
 interdependency among calls, the more dramatic the benefits. Spring MVC controllers
 can call other reactive components too.

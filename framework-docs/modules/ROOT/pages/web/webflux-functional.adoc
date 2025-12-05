@@ -123,7 +123,7 @@ Both request and response provide {reactive-streams-site}[Reactive Streams] back
 against the body streams.
 The request body is represented with a Reactor `Flux` or `Mono`.
 The response body is represented with any Reactive Streams `Publisher`, including `Flux` and `Mono`.
-For more on that, see xref:web-reactive.adoc#webflux-reactive-libraries[Reactive Libraries].
+For more on that, see xref:web/webflux-reactive-libraries.adoc[Reactive Libraries].
 
 [[webflux-fn-request]]
 === ServerRequest
