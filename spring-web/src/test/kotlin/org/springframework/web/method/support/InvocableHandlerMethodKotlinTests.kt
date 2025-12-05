@@ -239,6 +239,22 @@ class InvocableHandlerMethodKotlinTests {
 	}
 
 	@Test
+	fun contextParameter() {
+		composite.addResolver(StubArgumentResolver(CustomException::class.java, CustomException("foo")))
+		val value = getInvocable(ReflectionUtils.findMethod(ContextParameterHandler::class.java, "handle", CustomException::class.java)!!).invokeForRequest(request, null)
+		Assertions.assertThat(value).isEqualTo("foo")
+	}
+
+	@Test
+	fun contextParameterWithParameter() {
+		composite.addResolver(StubArgumentResolver(CustomException::class.java, CustomException("foo")))
+		composite.addResolver(StubArgumentResolver(Int::class.java, 20))
+		val value = getInvocable(ReflectionUtils.findMethod(ContextParameterHandler::class.java, "handleWithParameter", CustomException::class.java, Int::class.java)!!)
+			.invokeForRequest(request, null)
+		Assertions.assertThat(value).isEqualTo("foo-20")
+	}
+
+	@Test
 	fun genericParameter() {
 		val horse = Animal("horse")
 		composite.addResolver(StubArgumentResolver(Animal::class.java, horse))
@@ -356,6 +372,19 @@ class InvocableHandlerMethodKotlinTests {
 
 		fun CustomException.handleWithParameter(limit: Int): String {
 			return "${this.message}-$limit"
+		}
+	}
+
+	private class ContextParameterHandler {
+
+		context(exception: CustomException)
+		fun handle(): String {
+			return "${exception.message}"
+		}
+
+		context(exception: CustomException)
+		fun handleWithParameter(limit: Int): String {
+			return "${exception.message}-$limit"
 		}
 	}
 
