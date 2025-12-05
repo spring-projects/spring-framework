@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *	  https://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -32,11 +32,11 @@ import java.util.stream.Collector;
  * <br/>
  * Moved from {@code org.springframework.data.util.MultiValueMapCollector}.
  *
+ * @author Jens Schauder
+ *
  * @param <T> – the type of input elements to the reduction operation
  * @param <K> – the type of the key elements
  * @param <V> – the type of the value elements
- *
- * @author Jens Schauder
  */
 public class MultiValueMapCollector<T, K, V> implements Collector<T, MultiValueMap<K, V>, MultiValueMap<K, V>> {
 	private final Function<T, K> keyFunction;

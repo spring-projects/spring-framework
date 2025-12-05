@@ -18,16 +18,16 @@ package org.springframework.util;
 
 import java.util.stream.Stream;
 
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Tests for {@link MultiValueMapCollector}.
- * 
+ *
  * @author Florian Hof
  */
-class MultiValueMapCollectorTest {
+class MultiValueMapCollectorTests {
 
 	@Test
 	void indexingBy() {
