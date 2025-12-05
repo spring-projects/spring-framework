@@ -114,8 +114,9 @@ class RequestLoggingFilterTests {
 
 		applyFilter();
 
-		assertThat(filter.beforeRequestMessage).contains("/hotels?booking=42&code=masked&category=hotel&category=resort&ignore=masked");
-		assertThat(filter.afterRequestMessage).contains("/hotels?booking=42&code=masked&category=hotel&category=resort&ignore=masked");
+		String expectedRequest = "/hotels?booking=42&code=masked&ignore=masked&category=hotel&category=resort";
+		assertThat(filter.beforeRequestMessage).contains(expectedRequest);
+		assertThat(filter.afterRequestMessage).contains(expectedRequest);
 	}
 
 	@Test
