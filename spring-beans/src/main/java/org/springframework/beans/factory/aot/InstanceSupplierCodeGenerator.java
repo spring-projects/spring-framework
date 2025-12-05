@@ -384,7 +384,7 @@ public class InstanceSupplierCodeGenerator {
 		Visibility visibility = AccessControl.lowest(classAccessControl, memberAccessControl).getVisibility();
 		return (visibility == Visibility.PUBLIC || (visibility != Visibility.PRIVATE &&
 				member.getDeclaringClass().getPackageName().equals(this.className.packageName())));
-		}
+	}
 
 	private CodeBlock generateParameterTypesCode(Class<?>[] parameterTypes) {
 		CodeBlock.Builder code = CodeBlock.builder();
