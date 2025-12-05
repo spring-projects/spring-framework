@@ -113,7 +113,7 @@ class JdkClientHttpRequest extends AbstractStreamingClientHttpRequest {
 		TimeoutHandler timeoutHandler = null;
 		try {
 			HttpRequest request = buildRequest(headers, body);
-			responseFuture = this.httpClient.sendAsync(request, this.compression ? new DecompressingBodyHandler() : HttpResponse.BodyHandlers.ofInputStream());
+			responseFuture = this.httpClient.sendAsync(request, this.compression ? new DecompressingBodyHandler(this.method) : HttpResponse.BodyHandlers.ofInputStream());
 			if (this.timeout != null) {
 				timeoutHandler = new TimeoutHandler(responseFuture, this.timeout);
 				HttpResponse<InputStream> response = responseFuture.get();
@@ -325,13 +325,37 @@ class JdkClientHttpRequest extends AbstractStreamingClientHttpRequest {
 	 */
 	private static final class DecompressingBodyHandler implements BodyHandler<InputStream> {
 
+		private final HttpMethod method;
+
+		private DecompressingBodyHandler(HttpMethod method) {
+			this.method = method;
+		}
+
 		@Override
 		public BodySubscriber<InputStream> apply(ResponseInfo responseInfo) {
-			String contentEncoding = responseInfo.headers().firstValue(HttpHeaders.CONTENT_ENCODING).orElse("");
+
+			String contentEncoding = responseInfo.headers()
+					.firstValue(HttpHeaders.CONTENT_ENCODING)
+					.orElse("");
+
+			// Skip gzip/deflate if HEAD request (HEAD has no body)
+			if (this.method == HttpMethod.HEAD) {
+				return BodySubscribers.replacing(InputStream.nullInputStream());
+			}
+
+			// Skip if Content-Length = 0 (empty body)
+			String contentLength = responseInfo.headers()
+					.firstValue(HttpHeaders.CONTENT_LENGTH)
+					.orElse(null);
+
+			if ("0".equals(contentLength)) {
+				return BodySubscribers.replacing(InputStream.nullInputStream());
+			}
+
 			if (contentEncoding.equalsIgnoreCase("gzip")) {
 				return BodySubscribers.mapping(
 						BodySubscribers.ofInputStream(),
-						(InputStream is) -> {
+						is -> {
 							try {
 								return new GZIPInputStream(is);
 							}
@@ -340,15 +364,16 @@ class JdkClientHttpRequest extends AbstractStreamingClientHttpRequest {
 							}
 						});
 			}
-			else if (contentEncoding.equalsIgnoreCase("deflate")) {
+
+			if (contentEncoding.equalsIgnoreCase("deflate")) {
 				return BodySubscribers.mapping(
 						BodySubscribers.ofInputStream(),
 						InflaterInputStream::new);
 			}
-			else {
-				return BodySubscribers.ofInputStream();
-			}
+
+			return BodySubscribers.ofInputStream();
 		}
 	}
+
 
 }
