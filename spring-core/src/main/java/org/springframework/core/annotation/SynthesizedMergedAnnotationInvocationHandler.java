@@ -170,7 +170,8 @@ final class SynthesizedMergedAnnotationInvocationHandler<A extends Annotation> i
 		Class<?> type = value.getClass();
 		if (type.isArray()) {
 			StringBuilder builder = new StringBuilder("{");
-			for (int i = 0; i < Array.getLength(value); i++) {
+			int arrayLength = Array.getLength(value);
+			for (int i = 0; i < arrayLength; i++) {
 				if (i > 0) {
 					builder.append(", ");
 				}
