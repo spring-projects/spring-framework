@@ -37,10 +37,18 @@ import org.springframework.core.annotation.MergedAnnotations;
 import org.springframework.util.MultiValueMap;
 
 /**
- * Defines access to the annotations of a specific type ({@link AnnotationMetadata class}
- * or {@link MethodMetadata method}), in a form that does not necessarily require
+ * Defines access to the annotations on a specific {@link AnnotationMetadata class}
+ * or {@link MethodMetadata method}, in a form that does not necessarily require
  * class loading of the types being inspected. Note, however, that classes for
  * encountered annotations will be loaded.
+ *
+ * <p><strong>WARNING</strong>: If an annotation cannot be loaded because one of
+ * its attributes references a {@link Class} or {@link Enum}
+ * {@linkplain TypeNotPresentException that is not present in the classpath}, that
+ * annotation will not be accessible via the {@code AnnotatedTypeMetadata} API.
+ * To assist with diagnosing such scenarios, you can set the log level for
+ * {@code "org.springframework.core.annotation.MergedAnnotation"} to {@code DEBUG},
+ * {@code INFO}, or {@code WARN}.
  *
  * @author Juergen Hoeller
  * @author Mark Fisher

@@ -19,8 +19,16 @@ package org.springframework.core.type;
 import java.lang.reflect.Method;
 
 /**
- * Interface that defines abstract access to the annotations of a specific
+ * Interface that defines abstract access to the annotations on a specific
  * method, in a form that does not require that method's class to be loaded yet.
+ *
+ * <p><strong>WARNING</strong>: If an annotation cannot be loaded because one of
+ * its attributes references a {@link Class} or {@link Enum}
+ * {@linkplain TypeNotPresentException that is not present in the classpath},
+ * that annotation will not be accessible via the {@code MethodMetadata} API.
+ * To assist with diagnosing such scenarios, you can set the log level for
+ * {@code "org.springframework.core.annotation.MergedAnnotation"} to {@code DEBUG},
+ * {@code INFO}, or {@code WARN}.
  *
  * @author Juergen Hoeller
  * @author Mark Pollack
