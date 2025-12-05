@@ -16,6 +16,7 @@
 
 package org.springframework.core.retry.support;
 
+import java.time.Duration;
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -100,6 +101,17 @@ class CompositeRetryListenerTests {
 		verify(listener1).onRetryPolicyInterruption(retryPolicy, retryable, exception);
 		verify(listener2).onRetryPolicyInterruption(retryPolicy, retryable, exception);
 		verify(listener3).onRetryPolicyInterruption(retryPolicy, retryable, exception);
+	}
+
+	@Test
+	void onRetryPolicyTimeout() {
+		Duration elapsedTime = Duration.ofMillis(100);
+		RetryException exception = new RetryException("", new Exception());
+		compositeRetryListener.onRetryPolicyTimeout(retryPolicy, retryable, exception);
+
+		verify(listener1).onRetryPolicyTimeout(retryPolicy, retryable, exception);
+		verify(listener2).onRetryPolicyTimeout(retryPolicy, retryable, exception);
+		verify(listener3).onRetryPolicyTimeout(retryPolicy, retryable, exception);
 	}
 
 }

@@ -26,6 +26,7 @@ import java.util.function.Consumer;
 
 import org.assertj.core.api.ThrowingConsumer;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments.ArgumentSet;
@@ -404,6 +405,185 @@ class RetryTemplateTests {
 		assertThat(invocationCount).hasValue(3);
 
 		verifyNoMoreInteractions(retryListener);
+	}
+
+
+	@Nested
+	class TimeoutTests {
+
+		@Test
+		void retryWithImmediateSuccessAndTimeoutExceeded() throws Exception {
+			RetryPolicy retryPolicy = RetryPolicy.builder().timeout(Duration.ofMillis(5)).build();
+			RetryTemplate retryTemplate = new RetryTemplate(retryPolicy);
+			retryTemplate.setRetryListener(retryListener);
+
+			AtomicInteger invocationCount = new AtomicInteger();
+			Retryable<String> retryable = () -> {
+				invocationCount.incrementAndGet();
+				Thread.sleep(10);
+				return "always succeeds";
+			};
+
+			assertThat(invocationCount).hasValue(0);
+			assertThat(retryTemplate.execute(retryable)).isEqualTo("always succeeds");
+			assertThat(invocationCount).hasValue(1);
+
+			// RetryListener interactions:
+			verifyNoInteractions(retryListener);
+		}
+
+		@Test
+		void retryWithInitialFailureAndZeroRetriesRetryPolicyAndTimeoutExceeded() {
+			RetryPolicy retryPolicy = RetryPolicy.builder()
+					.timeout(Duration.ofMillis(5))
+					.predicate(throwable -> false) // Zero retries
+					.build();
+			RetryTemplate retryTemplate = new RetryTemplate(retryPolicy);
+			retryTemplate.setRetryListener(retryListener);
+
+			Exception exception = new RuntimeException("Boom!");
+			Retryable<String> retryable = () -> {
+				Thread.sleep(10);
+				throw exception;
+			};
+
+			assertThatExceptionOfType(RetryException.class)
+					.isThrownBy(() -> retryTemplate.execute(retryable))
+					.withMessageMatching("Retry policy for operation '.+?' exhausted; aborting execution")
+					.withCause(exception)
+					.satisfies(throwable -> assertThat(throwable.getSuppressed()).isEmpty())
+					.satisfies(throwable -> assertThat(throwable.getRetryCount()).isZero())
+					.satisfies(throwable -> inOrder.verify(retryListener).onRetryPolicyExhaustion(retryPolicy, retryable, throwable));
+
+			verifyNoMoreInteractions(retryListener);
+		}
+
+		@Test
+		void retryWithTimeoutExceededAfterInitialFailure() throws Exception {
+			RetryPolicy retryPolicy = RetryPolicy.builder()
+					.timeout(Duration.ofMillis(5))
+					.delay(Duration.ZERO)
+					.build();
+			RetryTemplate retryTemplate = new RetryTemplate(retryPolicy);
+			retryTemplate.setRetryListener(retryListener);
+
+			AtomicInteger invocationCount = new AtomicInteger();
+			Retryable<String> retryable = () -> {
+				Thread.sleep(10);
+				throw new CustomException("Boom " + invocationCount.incrementAndGet());
+			};
+
+			assertThat(invocationCount).hasValue(0);
+			assertThatExceptionOfType(RetryException.class)
+					.isThrownBy(() -> retryTemplate.execute(retryable))
+					.withMessageMatching("Retry policy for operation '.+?' exceeded timeout \\(5 ms\\); aborting execution")
+					.withCause(new CustomException("Boom 1"))
+					.satisfies(throwable -> inOrder.verify(retryListener).onRetryPolicyTimeout(
+							eq(retryPolicy), eq(retryable), eq(throwable)));
+			assertThat(invocationCount).hasValue(1);
+
+			verifyNoMoreInteractions(retryListener);
+		}
+
+		@Test
+		void retryWithTimeoutExceededAfterFirstDelayButBeforeFirstRetry() throws Exception {
+			RetryPolicy retryPolicy = RetryPolicy.builder()
+					.timeout(Duration.ofMillis(5))
+					.delay(Duration.ofMillis(10)) // Delay > Timeout
+					.build();
+			RetryTemplate retryTemplate = new RetryTemplate(retryPolicy);
+			retryTemplate.setRetryListener(retryListener);
+
+			AtomicInteger invocationCount = new AtomicInteger();
+			Retryable<String> retryable = () -> {
+				throw new CustomException("Boom " + invocationCount.incrementAndGet());
+			};
+
+			assertThat(invocationCount).hasValue(0);
+			assertThatExceptionOfType(RetryException.class)
+					.isThrownBy(() -> retryTemplate.execute(retryable))
+					.withMessageMatching("Retry policy for operation '.+?' exceeded timeout \\(5 ms\\); aborting execution")
+					.withCause(new CustomException("Boom 1"))
+					.satisfies(throwable -> inOrder.verify(retryListener).onRetryPolicyTimeout(
+							eq(retryPolicy), eq(retryable), eq(throwable)));
+			assertThat(invocationCount).hasValue(1);
+
+			verifyNoMoreInteractions(retryListener);
+		}
+
+		@Test
+		void retryWithTimeoutExceededAfterFirstRetry() throws Exception {
+			RetryPolicy retryPolicy = RetryPolicy.builder()
+					.timeout(Duration.ofMillis(5))
+					.delay(Duration.ZERO)
+					.build();
+			RetryTemplate retryTemplate = new RetryTemplate(retryPolicy);
+			retryTemplate.setRetryListener(retryListener);
+
+			AtomicInteger invocationCount = new AtomicInteger();
+			Retryable<String> retryable = () -> {
+				int currentInvocation = invocationCount.incrementAndGet();
+				if (currentInvocation == 2) {
+					Thread.sleep(10);
+				}
+				throw new CustomException("Boom " + currentInvocation);
+			};
+
+			assertThat(invocationCount).hasValue(0);
+			assertThatExceptionOfType(RetryException.class)
+					.isThrownBy(() -> retryTemplate.execute(retryable))
+					.withMessageMatching("Retry policy for operation '.+?' exceeded timeout \\(5 ms\\); aborting execution")
+					.withCause(new CustomException("Boom 2"))
+					.satisfies(throwable -> {
+						inOrder.verify(retryListener).beforeRetry(retryPolicy, retryable);
+						inOrder.verify(retryListener).onRetryFailure(retryPolicy, retryable, new CustomException("Boom 2"));
+
+						inOrder.verify(retryListener).onRetryPolicyTimeout(
+								eq(retryPolicy), eq(retryable), eq(throwable));
+					});
+			assertThat(invocationCount).hasValue(2);
+
+			verifyNoMoreInteractions(retryListener);
+		}
+
+		@Test
+		void retryWithTimeoutExceededAfterSecondRetry() throws Exception {
+			RetryPolicy retryPolicy = RetryPolicy.builder()
+					.timeout(Duration.ofMillis(5))
+					.delay(Duration.ZERO)
+					.build();
+			RetryTemplate retryTemplate = new RetryTemplate(retryPolicy);
+			retryTemplate.setRetryListener(retryListener);
+
+			AtomicInteger invocationCount = new AtomicInteger();
+			Retryable<String> retryable = () -> {
+				int currentInvocation = invocationCount.incrementAndGet();
+				if (currentInvocation == 3) {
+					Thread.sleep(10);
+				}
+				throw new CustomException("Boom " + currentInvocation);
+			};
+
+			assertThat(invocationCount).hasValue(0);
+			assertThatExceptionOfType(RetryException.class)
+					.isThrownBy(() -> retryTemplate.execute(retryable))
+					.withMessageMatching("Retry policy for operation '.+?' exceeded timeout \\(5 ms\\); aborting execution")
+					.withCause(new CustomException("Boom 3"))
+					.satisfies(throwable -> {
+						var counter = new AtomicInteger(1);
+						repeat(2, () -> {
+							inOrder.verify(retryListener).beforeRetry(retryPolicy, retryable);
+							inOrder.verify(retryListener).onRetryFailure(retryPolicy, retryable,
+									new CustomException("Boom " + counter.incrementAndGet()));
+						});
+						inOrder.verify(retryListener).onRetryPolicyTimeout(
+								eq(retryPolicy), eq(retryable), eq(throwable));
+					});
+			assertThat(invocationCount).hasValue(3);
+
+			verifyNoMoreInteractions(retryListener);
+		}
+
 	}
 
 

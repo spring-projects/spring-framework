@@ -123,6 +123,39 @@ public @interface Retryable {
 	String maxRetriesString() default "";
 
 	/**
+	 * The maximum amount of elapsed time allowed for the initial invocation and
+	 * any subsequent retry attempts, including delays.
+	 * <p>The default is {@code 0}, which signals that no timeout should be applied.
+	 * <p>The time unit is milliseconds by default but can be overridden via
+	 * {@link #timeUnit}.
+	 * <p>Must be greater than or equal to zero.
+	 * @since 7.0.2
+	 */
+	long timeout() default 0;
+
+	/**
+	 * The timeout, as a duration String.
+	 * <p>A non-empty value specified here overrides the {@link #timeout()} attribute.
+	 * <p>The duration String can be in several formats:
+	 * <ul>
+	 * <li>a plain integer &mdash; which is interpreted to represent a duration in
+	 * milliseconds by default unless overridden via {@link #timeUnit()} (prefer
+	 * using {@link #delay()} in that case)</li>
+	 * <li>any of the known {@link org.springframework.format.annotation.DurationFormat.Style
+	 * DurationFormat.Style}: the {@link org.springframework.format.annotation.DurationFormat.Style#ISO8601 ISO8601}
+	 * style or the {@link org.springframework.format.annotation.DurationFormat.Style#SIMPLE SIMPLE} style
+	 * &mdash; using the {@link #timeUnit()} as fallback if the string doesn't contain an explicit unit</li>
+	 * <li>one of the above, with Spring-style "${...}" placeholders as well as SpEL expressions</li>
+	 * </ul>
+	 * @return the timeout as a String value &mdash; for example, a placeholder, a
+	 * {@link org.springframework.format.annotation.DurationFormat.Style#ISO8601 java.time.Duration} compliant value,
+	 * or a {@link org.springframework.format.annotation.DurationFormat.Style#SIMPLE simple format} compliant value
+	 * @since 7.0.2
+	 * @see #timeout()
+	 */
+	String timeoutString() default "";
+
+	/**
 	 * The base delay after the initial invocation. If a multiplier is specified,
 	 * this serves as the initial delay to multiply from.
 	 * <p>The time unit is milliseconds by default but can be overridden via

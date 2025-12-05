@@ -99,6 +99,7 @@ public class RetryAnnotationBeanPostProcessor extends AbstractBeanFactoryAwareAd
 					Arrays.asList(retryable.includes()), Arrays.asList(retryable.excludes()),
 					instantiatePredicate(retryable.predicate()),
 					parseLong(retryable.maxRetries(), retryable.maxRetriesString()),
+					parseDuration(retryable.timeout(), retryable.timeoutString(), timeUnit),
 					parseDuration(retryable.delay(), retryable.delayString(), timeUnit),
 					parseDuration(retryable.jitter(), retryable.jitterString(), timeUnit),
 					parseDouble(retryable.multiplier(), retryable.multiplierString()),

@@ -16,6 +16,7 @@
 
 package org.springframework.core.retry;
 
+import java.time.Duration;
 import java.util.Set;
 import java.util.StringJoiner;
 import java.util.function.Predicate;
@@ -42,16 +43,19 @@ class DefaultRetryPolicy implements RetryPolicy {
 
 	private final @Nullable Predicate<Throwable> predicate;
 
+	private final Duration timeout;
+
 	private final BackOff backOff;
 
 
 	DefaultRetryPolicy(Set<Class<? extends Throwable>> includes, Set<Class<? extends Throwable>> excludes,
-			@Nullable Predicate<Throwable> predicate, BackOff backOff) {
+			@Nullable Predicate<Throwable> predicate, Duration timeout, BackOff backOff) {
 
 		this.includes = includes;
 		this.excludes = excludes;
 		this.exceptionFilter = new ExceptionTypeFilter(this.includes, this.excludes);
 		this.predicate = predicate;
+		this.timeout = timeout;
 		this.backOff = backOff;
 	}
 
@@ -60,6 +64,11 @@ class DefaultRetryPolicy implements RetryPolicy {
 	public boolean shouldRetry(Throwable throwable) {
 		return (this.exceptionFilter.match(throwable, true) &&
 				(this.predicate == null || this.predicate.test(throwable)));
+	}
+
+	@Override
+	public Duration getTimeout() {
+		return this.timeout;
 	}
 
 	@Override

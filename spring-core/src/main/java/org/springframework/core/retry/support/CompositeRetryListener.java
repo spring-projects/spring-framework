@@ -95,4 +95,9 @@ public class CompositeRetryListener implements RetryListener {
 		this.listeners.forEach(listener -> listener.onRetryPolicyInterruption(retryPolicy, retryable, exception));
 	}
 
+	@Override
+	public void onRetryPolicyTimeout(RetryPolicy retryPolicy, Retryable<?> retryable, RetryException exception) {
+		this.listeners.forEach(listener -> listener.onRetryPolicyTimeout(retryPolicy, retryable, exception));
+	}
+
 }

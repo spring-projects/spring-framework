@@ -21,9 +21,11 @@ import java.nio.charset.MalformedInputException;
 import java.nio.file.AccessDeniedException;
 import java.nio.file.FileSystemException;
 import java.time.Duration;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.assertj.core.api.ThrowingConsumer;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import reactor.core.Exceptions;
 import reactor.core.publisher.Flux;
@@ -316,6 +318,83 @@ class ReactiveRetryInterceptorTests {
 	}
 
 
+	@Nested
+	class TimeoutTests {
+
+		private final AnnotatedMethodBean proxy = getProxiedAnnotatedMethodBean();
+		private final AnnotatedMethodBean target = (AnnotatedMethodBean) AopProxyUtils.getSingletonTarget(proxy);
+
+		@Test
+		void timeoutNotExceededAfterInitialSuccess() {
+			String result = proxy.retryOperationWithTimeoutNotExceededAfterInitialSuccess().block();
+			assertThat(result).isEqualTo("success");
+			// 1 initial attempt + 0 retries
+			assertThat(target.counter).hasValue(1);
+		}
+
+		@Test
+		void timeoutNotExceededAndRetriesExhausted() {
+			assertThatIllegalStateException()
+					.isThrownBy(() -> proxy.retryOperationWithTimeoutNotExceededAndRetriesExhausted().block())
+					.satisfies(isRetryExhaustedException())
+					.havingCause()
+						.isInstanceOf(IOException.class)
+						.withMessage("4");
+			// 1 initial attempt + 3 retries
+			assertThat(target.counter).hasValue(4);
+		}
+
+		@Test
+		void timeoutExceededAfterInitialFailure() {
+			assertThatRuntimeException()
+					.isThrownBy(() -> proxy.retryOperationWithTimeoutExceededAfterInitialFailure().block())
+					.satisfies(isReactiveException())
+					.havingCause()
+						.isInstanceOf(TimeoutException.class)
+						.withMessageContaining("within 5ms");
+			// 1 initial attempt + 0 retries
+			assertThat(target.counter).hasValue(1);
+		}
+
+		@Test
+		void timeoutExceededAfterFirstDelayButBeforeFirstRetry() {
+			assertThatRuntimeException()
+					.isThrownBy(() -> proxy.retryOperationWithTimeoutExceededAfterFirstDelayButBeforeFirstRetry().block())
+					.satisfies(isReactiveException())
+					.havingCause()
+						.isInstanceOf(TimeoutException.class)
+						.withMessageContaining("within 5ms");
+			// 1 initial attempt + 0 retries
+			assertThat(target.counter).hasValue(1);
+		}
+
+		@Test
+		void timeoutExceededAfterFirstRetry() {
+			assertThatRuntimeException()
+					.isThrownBy(() -> proxy.retryOperationWithTimeoutExceededAfterFirstRetry().block())
+					.satisfies(isReactiveException())
+					.havingCause()
+						.isInstanceOf(TimeoutException.class)
+						.withMessageContaining("within 5ms");
+			// 1 initial attempt + 1 retry
+			assertThat(target.counter).hasValue(2);
+		}
+
+		@Test
+		void timeoutExceededAfterSecondRetry() {
+			assertThatRuntimeException()
+					.isThrownBy(() -> proxy.retryOperationWithTimeoutExceededAfterSecondRetry().block())
+					.satisfies(isReactiveException())
+					.havingCause()
+						.isInstanceOf(TimeoutException.class)
+						.withMessageContaining("within 5ms");
+			// 1 initial attempt + 2 retries
+			assertThat(target.counter).hasValue(3);
+		}
+
+	}
+
+
 	private static ThrowingConsumer<? super Throwable> isReactiveException() {
 		return ex -> assertThat(ex.getClass().getName()).isEqualTo("reactor.core.Exceptions$ReactiveException");
 	}
@@ -365,6 +444,61 @@ class ReactiveRetryInterceptorTests {
 		public Mono<Object> retryOperation() {
 			return Mono.fromCallable(() -> {
 				counter.incrementAndGet();
+				throw new IOException(counter.toString());
+			});
+		}
+
+		@Retryable(timeout = 555, delay = 10)
+		public Mono<String> retryOperationWithTimeoutNotExceededAfterInitialSuccess() {
+			return Mono.fromCallable(() -> {
+				counter.incrementAndGet();
+				return "success";
+			});
+		}
+
+		@Retryable(timeout = 555, delay = 10)
+		public Mono<Object> retryOperationWithTimeoutNotExceededAndRetriesExhausted() {
+			return Mono.fromCallable(() -> {
+				counter.incrementAndGet();
+				throw new IOException(counter.toString());
+			});
+		}
+
+		@Retryable(timeout = 5, delay = 10)
+		public Mono<Object> retryOperationWithTimeoutExceededAfterInitialFailure() {
+			return Mono.fromCallable(() -> {
+				counter.incrementAndGet();
+				Thread.sleep(10);
+				throw new IOException(counter.toString());
+			});
+		}
+
+		@Retryable(timeout = 5, delay = 10)
+		public Mono<Object> retryOperationWithTimeoutExceededAfterFirstDelayButBeforeFirstRetry() {
+			return Mono.fromCallable(() -> {
+				counter.incrementAndGet();
+				throw new IOException(counter.toString());
+			});
+		}
+
+		@Retryable(timeout = 5, delay = 0)
+		public Mono<Object> retryOperationWithTimeoutExceededAfterFirstRetry() {
+			return Mono.fromCallable(() -> {
+				counter.incrementAndGet();
+				if (counter.get() == 2) {
+					Thread.sleep(10);
+				}
+				throw new IOException(counter.toString());
+			});
+		}
+
+		@Retryable(timeout = 5, delay = 0)
+		public Mono<Object> retryOperationWithTimeoutExceededAfterSecondRetry() {
+			return Mono.fromCallable(() -> {
+				counter.incrementAndGet();
+				if (counter.get() == 3) {
+					Thread.sleep(10);
+				}
 				throw new IOException(counter.toString());
 			});
 		}

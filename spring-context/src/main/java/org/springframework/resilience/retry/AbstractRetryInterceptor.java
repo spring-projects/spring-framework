@@ -17,6 +17,7 @@
 package org.springframework.resilience.retry;
 
 import java.lang.reflect.Method;
+import java.time.Duration;
 import java.util.concurrent.Future;
 
 import org.aopalliance.intercept.MethodInterceptor;
@@ -94,6 +95,7 @@ public abstract class AbstractRetryInterceptor implements MethodInterceptor {
 				.excludes(spec.excludes())
 				.predicate(spec.predicate().forMethod(method))
 				.maxRetries(spec.maxRetries())
+				.timeout(spec.timeout())
 				.delay(spec.delay())
 				.jitter(spec.jitter())
 				.multiplier(spec.multiplier())
@@ -142,8 +144,20 @@ public abstract class AbstractRetryInterceptor implements MethodInterceptor {
 					.multiplier(spec.multiplier())
 					.maxBackoff(spec.maxDelay())
 					.filter(spec.combinedPredicate().forMethod(method));
-			publisher = (adapter.isMultiValue() ? Flux.from(publisher).retryWhen(retry) :
-					Mono.from(publisher).retryWhen(retry));
+
+			Duration timeout = spec.timeout();
+			boolean timeoutIsPositive = (!timeout.isNegative() && !timeout.isZero());
+			if (adapter.isMultiValue()) {
+				publisher = (timeoutIsPositive ?
+						Flux.from(publisher).retryWhen(retry).timeout(timeout) :
+						Flux.from(publisher).retryWhen(retry));
+			}
+			else {
+				publisher = (timeoutIsPositive ?
+						Mono.from(publisher).retryWhen(retry).timeout(timeout) :
+						Mono.from(publisher).retryWhen(retry));
+			}
+
 			return adapter.fromPublisher(publisher);
 		}
 

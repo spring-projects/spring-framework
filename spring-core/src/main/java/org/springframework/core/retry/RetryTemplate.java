@@ -136,6 +136,7 @@ public class RetryTemplate implements RetryOperations {
 	@Override
 	public <R extends @Nullable Object> R execute(Retryable<R> retryable) throws RetryException {
 		String retryableName = retryable.getName();
+		long startTime = System.currentTimeMillis();
 		// Initial attempt
 		try {
 			logger.debug(() -> "Preparing to execute retryable operation '%s'".formatted(retryableName));
@@ -153,12 +154,15 @@ public class RetryTemplate implements RetryOperations {
 			exceptions.add(initialException);
 
 			Throwable lastException = initialException;
+			long timeout = this.retryPolicy.getTimeout().toMillis();
 			while (this.retryPolicy.shouldRetry(lastException)) {
+				checkIfTimeoutExceeded(timeout, startTime, 0, retryable, exceptions);
 				try {
 					long sleepTime = backOffExecution.nextBackOff();
 					if (sleepTime == BackOffExecution.STOP) {
 						break;
 					}
+					checkIfTimeoutExceeded(timeout, startTime, sleepTime, retryable, exceptions);
 					logger.debug(() -> "Backing off for %dms after retryable operation '%s'"
 							.formatted(sleepTime, retryableName));
 					Thread.sleep(sleepTime);
@@ -198,6 +202,24 @@ public class RetryTemplate implements RetryOperations {
 			exceptions.forEach(retryException::addSuppressed);
 			this.retryListener.onRetryPolicyExhaustion(this.retryPolicy, retryable, retryException);
 			throw retryException;
+		}
+	}
+
+	private void checkIfTimeoutExceeded(long timeout, long startTime, long sleepTime, Retryable<?> retryable,
+			Deque<Throwable> exceptions) throws RetryException {
+
+		if (timeout != 0) {
+			// If sleepTime > 0, we are predicting what the effective elapsed time
+			// would be if we were to sleep for sleepTime milliseconds.
+			long elapsedTime = System.currentTimeMillis() + sleepTime - startTime;
+			if (elapsedTime >= timeout) {
+				RetryException retryException = new RetryException(
+						"Retry policy for operation '%s' exceeded timeout (%d ms); aborting execution"
+						.formatted(retryable.getName(), timeout), exceptions.removeLast());
+				exceptions.forEach(retryException::addSuppressed);
+				this.retryListener.onRetryPolicyTimeout(this.retryPolicy, retryable, retryException);
+				throw retryException;
+			}
 		}
 	}
 

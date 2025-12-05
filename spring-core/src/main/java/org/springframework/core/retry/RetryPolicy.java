@@ -56,6 +56,21 @@ public interface RetryPolicy {
 	boolean shouldRetry(Throwable throwable);
 
 	/**
+	 * Get the timeout to use for this retry policy.
+	 * <p>The returned {@link Duration} represents the maximum amount of elapsed
+	 * time allowed for the initial invocation and any subsequent retry attempts,
+	 * including delays.
+	 * <p>Defaults to {@link Duration#ZERO} which signals that no timeout should
+	 * be applied.
+	 * @return the timeout to apply
+	 * @since 7.0.2
+	 * @see Builder#timeout(Duration)
+	 */
+	default Duration getTimeout() {
+		return Duration.ZERO;
+	}
+
+	/**
 	 * Get the {@link BackOff} strategy to use for this retry policy.
 	 * <p>Defaults to a fixed backoff of {@value Builder#DEFAULT_DELAY} milliseconds
 	 * and maximum {@value Builder#DEFAULT_MAX_RETRIES} retries.
@@ -158,6 +173,8 @@ public interface RetryPolicy {
 
 		private @Nullable Long maxRetries;
 
+		private Duration timeout = Duration.ZERO;
+
 		private @Nullable Duration delay;
 
 		private @Nullable Duration jitter;
@@ -211,6 +228,24 @@ public interface RetryPolicy {
 		public Builder maxRetries(long maxRetries) {
 			assertMaxRetriesIsNotNegative(maxRetries);
 			this.maxRetries = maxRetries;
+			return this;
+		}
+
+		/**
+		 * Specify a timeout for the maximum amount of elapsed time allowed for
+		 * the initial invocation and any subsequent retry attempts, including
+		 * delays.
+		 * <p>The default is {@link Duration#ZERO}, which signals that no timeout
+		 * should be applied.
+		 * <p>The supplied value will override any previously configured value.
+		 * @param timeout the timeout, typically in milliseconds or seconds;
+		 * must be greater than or equal to zero
+		 * @return this {@code Builder} instance for chained method invocations
+		 * @since 7.0.2
+		 */
+		public Builder timeout(Duration timeout) {
+			assertIsNotNegative("timeout", timeout);
+			this.timeout = timeout;
 			return this;
 		}
 
@@ -441,7 +476,7 @@ public interface RetryPolicy {
 				}
 				backOff = exponentialBackOff;
 			}
-			return new DefaultRetryPolicy(this.includes, this.excludes, this.predicate, backOff);
+			return new DefaultRetryPolicy(this.includes, this.excludes, this.predicate, this.timeout, backOff);
 		}
 	}
 
