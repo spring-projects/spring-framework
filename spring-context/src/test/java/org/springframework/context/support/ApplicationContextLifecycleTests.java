@@ -99,6 +99,29 @@ class ApplicationContextLifecycleTests {
 	}
 
 	@Test
+	void stopOrder() {
+		AbstractApplicationContext context = new ClassPathXmlApplicationContext("lifecycleTests.xml", getClass());
+
+		context.start();
+		context.stop();
+		LifecycleTestBean bean1 = (LifecycleTestBean) context.getBean("bean1");
+		LifecycleTestBean bean2 = (LifecycleTestBean) context.getBean("bean2");
+		LifecycleTestBean bean3 = (LifecycleTestBean) context.getBean("bean3");
+		LifecycleTestBean bean4 = (LifecycleTestBean) context.getBean("bean4");
+		String notStoppedError = "bean was not stopped";
+		assertThat(bean1.getStopOrder()).as(notStoppedError).isGreaterThan(0);
+		assertThat(bean2.getStopOrder()).as(notStoppedError).isGreaterThan(0);
+		assertThat(bean3.getStopOrder()).as(notStoppedError).isGreaterThan(0);
+		assertThat(bean4.getStopOrder()).as(notStoppedError).isGreaterThan(0);
+		String orderError = "dependent bean must stop before the bean it depends on";
+		assertThat(bean2.getStopOrder()).as(orderError).isLessThan(bean1.getStopOrder());
+		assertThat(bean3.getStopOrder()).as(orderError).isLessThan(bean2.getStopOrder());
+		assertThat(bean4.getStopOrder()).as(orderError).isLessThan(bean2.getStopOrder());
+
+		context.close();
+	}
+
+	@Test
 	void autoStartup() {
 		GenericApplicationContext context = new GenericApplicationContext();
 		new XmlBeanDefinitionReader(context).loadBeanDefinitions(new ClassPathResource("smartLifecycleTests.xml", getClass()));
