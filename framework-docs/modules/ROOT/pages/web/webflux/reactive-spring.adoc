@@ -611,6 +611,12 @@ and from higher level objects, or unless they choose to create custom codecs. Fo
 cases please review the information in xref:core/databuffer-codec.adoc[Data Buffers and Codecs],
 especially the section on xref:core/databuffer-codec.adoc#databuffers-using[Using DataBuffer].
 
+[[webflux-codecs-resource]]
+=== `Resource`
+
+`Resource` is a general abstraction for file-like resources in Spring. WebFlux applications can use the `ResourceHttpMessageReader` and `ResourceHttpMessageWriter` to read and write `Resource` instances to and from HTTP requests and responses.
+
+Notice, the `ResourceHttpMessageWriter` automatically detects the media type by the filename of the `Resource` and uses it to override your response's `Content-Type` header. If the detection fails, `application/octet-stream` is used as a fallback. Don't return `Resource` type if you want to control the media type of the response.
 
 [[webflux-logging]]
 == Logging
