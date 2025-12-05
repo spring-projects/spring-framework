@@ -414,7 +414,7 @@ customize the status and headers of the response.
 [.small]#xref:web/webflux/reactive-spring.adoc#webflux-codecs-streaming[See equivalent in the Reactive stack]#
 
 Spring MVC supports use of reactive client libraries in a controller (also read
-xref:web-reactive.adoc#webflux-reactive-libraries[Reactive Libraries] in the WebFlux section).
+xref:web/webflux-reactive-libraries.adoc[Reactive Libraries] in the WebFlux section).
 This includes the `WebClient` from `spring-webflux` and others, such as Spring Data
 reactive data repositories. In such scenarios, it is convenient to be able to return
 reactive types from the controller method.

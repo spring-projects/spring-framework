@@ -5,7 +5,7 @@
 
 The following table shows the supported controller method arguments.
 
-Reactive types (Reactor, RxJava, xref:web-reactive.adoc#webflux-reactive-libraries[or other]) are
+Reactive types (Reactor, RxJava, xref:web/webflux-reactive-libraries.adoc[or other]) are
 supported on arguments that require blocking I/O (for example, reading the request body) to
 be resolved. This is marked in the Description column. Reactive types are not expected
 on arguments that do not require blocking.
