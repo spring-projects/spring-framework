@@ -33,9 +33,10 @@ import org.apache.commons.logging.LogFactory;
 import org.jspecify.annotations.Nullable;
 
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.server.PathContainer;
 import org.springframework.http.server.RequestPath;
+import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
@@ -146,11 +147,11 @@ public final class UrlHandlerFilter extends OncePerRequestFilter {
 			/**
 			 * Handle requests by sending a redirect to the same URL but the
 			 * trailing slash trimmed.
-			 * @param status the redirect status to use
+			 * @param statusCode the redirect status to use
 			 * @return the top level {@link Builder}, which allows adding more
 			 * handlers and then building the Filter instance.
 			 */
-			Builder redirect(HttpStatus status);
+			Builder redirect(HttpStatusCode statusCode);
 
 			/**
 			 * Handle the request by wrapping it in order to trim the trailing
@@ -207,8 +208,8 @@ public final class UrlHandlerFilter extends OncePerRequestFilter {
 			}
 
 			@Override
-			public Builder redirect(HttpStatus status) {
-				Handler handler = new RedirectTrailingSlashHandler(status, this.interceptor);
+			public Builder redirect(HttpStatusCode statusCode) {
+				Handler handler = new RedirectTrailingSlashHandler(statusCode, this.interceptor);
 				return DefaultBuilder.this.addHandler(this.pathPatterns, handler);
 			}
 
@@ -288,11 +289,13 @@ public final class UrlHandlerFilter extends OncePerRequestFilter {
 	 */
 	private static final class RedirectTrailingSlashHandler extends AbstractTrailingSlashHandler {
 
-		private final HttpStatus httpStatus;
+		private final HttpStatusCode statusCode;
 
-		RedirectTrailingSlashHandler(HttpStatus httpStatus, @Nullable Consumer<HttpServletRequest> interceptor) {
+		RedirectTrailingSlashHandler(HttpStatusCode statusCode, @Nullable Consumer<HttpServletRequest> interceptor) {
 			super(interceptor);
-			this.httpStatus = httpStatus;
+			Assert.isTrue(statusCode.is3xxRedirection(), "HTTP status code for redirect handlers " +
+					"must be in the Redirection class (3xx)");
+			this.statusCode = statusCode;
 		}
 
 		@Override
@@ -305,7 +308,7 @@ public final class UrlHandlerFilter extends OncePerRequestFilter {
 			}
 
 			response.resetBuffer();
-			response.setStatus(this.httpStatus.value());
+			response.setStatus(this.statusCode.value());
 			response.setHeader(HttpHeaders.LOCATION, location);
 			response.flushBuffer();
 		}

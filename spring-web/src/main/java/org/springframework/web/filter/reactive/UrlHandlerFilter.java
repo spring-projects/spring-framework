@@ -34,6 +34,7 @@ import org.springframework.http.server.PathContainer;
 import org.springframework.http.server.RequestPath;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
+import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
@@ -285,6 +286,8 @@ public final class UrlHandlerFilter implements WebFilter {
 				HttpStatusCode statusCode, @Nullable List<Function<ServerHttpRequest, Mono<Void>>> interceptors) {
 
 			super(interceptors);
+			Assert.isTrue(statusCode.is3xxRedirection(), "HTTP status code for redirect handlers " +
+					"must be in the Redirection class (3xx)");
 			this.statusCode = statusCode;
 		}
 
