@@ -20,6 +20,7 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 
+import io.micrometer.observation.transport.Propagator;
 import io.micrometer.observation.transport.RequestReplyReceiverContext;
 import org.jspecify.annotations.Nullable;
 
@@ -46,6 +47,7 @@ public class ServerRequestObservationContext extends RequestReplyReceiverContext
 	 */
 	public static final String CURRENT_OBSERVATION_CONTEXT_ATTRIBUTE = ServerRequestObservationContext.class.getName();
 
+	private static final HeaderGetter GETTER = new HeaderGetter();
 
 	private final Map<String, Object> attributes;
 
@@ -63,7 +65,7 @@ public class ServerRequestObservationContext extends RequestReplyReceiverContext
 	public ServerRequestObservationContext(
 			ServerHttpRequest request, ServerHttpResponse response, Map<String, Object> attributes) {
 
-		super((req, key) -> req.getHeaders().getFirst(key));
+		super(GETTER);
 		setCarrier(request);
 		setResponse(response);
 		this.attributes = Collections.unmodifiableMap(attributes);
@@ -127,6 +129,19 @@ public class ServerRequestObservationContext extends RequestReplyReceiverContext
 	public static Optional<ServerRequestObservationContext> findCurrent(Map<String, Object> attributes) {
 		return Optional.ofNullable(
 				(ServerRequestObservationContext) attributes.get(CURRENT_OBSERVATION_CONTEXT_ATTRIBUTE));
+	}
+
+	static final class HeaderGetter implements Propagator.Getter<ServerHttpRequest> {
+
+		@Override
+		public @Nullable String get(ServerHttpRequest carrier, String key) {
+			return carrier.getHeaders().getFirst(key);
+		}
+
+		@Override
+		public Iterable<String> getAll(ServerHttpRequest carrier, String key) {
+			return carrier.getHeaders().getOrEmpty(key);
+		}
 	}
 
 }
