@@ -114,6 +114,14 @@ class BridgeMethodResolverTests {
 	}
 
 	@Test
+	void findBridgedMethodForCovariantReturnType() throws Exception {
+		Method originalMethod = OuterSubclass.class.getDeclaredMethod("getInner");
+		for (Method method: OuterSubclass.class.getDeclaredMethods()) {
+			assertThat(BridgeMethodResolver.findBridgedMethod(method)).isEqualTo(originalMethod);
+		}
+	}
+
+	@Test
 	void findBridgedMethodInHierarchyWithBoundedGenerics() throws Exception {
 		Method originalMethod = Bar.class.getDeclaredMethod("someMethod", Object.class, Object.class);
 		assertThat(originalMethod.isBridge()).isFalse();
@@ -425,6 +433,7 @@ class BridgeMethodResolverTests {
 	public abstract static class SubBar<T extends StringProducer> extends InterBar<T> {
 	}
 
+
 	public interface StringProducer extends CharSequence {
 	}
 
@@ -503,6 +512,31 @@ class BridgeMethodResolverTests {
 
 
 	static class ConcreteMethods implements DefaultMethods {
+	}
+
+
+	static class Outer {
+
+		Inner getInner() {
+			return new Inner();
+		}
+	}
+
+
+	static class OuterSubclass extends Outer {
+
+		@Override
+		InnerSubclass getInner() {
+			return new InnerSubclass();
+		}
+	}
+
+
+	static class Inner {
+	}
+
+
+	static class InnerSubclass extends Inner {
 	}
 
 
@@ -899,22 +933,18 @@ class BridgeMethodResolverTests {
 
 
 	public interface MessageBroadcaster extends Receiver<MessageEvent> {
-
 	}
 
 
 	public static class RemovedMessageEvent extends MessageEvent {
-
 	}
 
 
 	public static class NewMessageEvent extends MessageEvent {
-
 	}
 
 
 	public static class ModifiedMessageEvent extends MessageEvent {
-
 	}
 
 
