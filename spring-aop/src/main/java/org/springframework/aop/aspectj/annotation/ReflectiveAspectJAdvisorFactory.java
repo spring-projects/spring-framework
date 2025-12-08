@@ -17,6 +17,7 @@
 package org.springframework.aop.aspectj.annotation;
 
 import java.io.Serializable;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -82,8 +83,7 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 		// @AfterThrowing methods due to the fact that AspectJAfterAdvice.invoke(MethodInvocation)
 		// invokes proceed() in a `try` block and only invokes the @After advice method
 		// in a corresponding `finally` block.
-		@SuppressWarnings("NullAway")
-		Comparator<Method> adviceKindComparator = new ConvertingComparator<>(
+		Comparator<Method> adviceKindComparator = new ConvertingComparator<Method, @Nullable Annotation>(
 				new InstanceComparator<>(
 						Around.class, Before.class, After.class, AfterReturning.class, AfterThrowing.class),
 				method -> {
