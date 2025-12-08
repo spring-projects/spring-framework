@@ -114,6 +114,7 @@ class RetryTemplateTests {
 		verifyNoMoreInteractions(retryListener);
 	}
 
+
 	@Test
 	void retryWithInitialFailureAndZeroRetriesFixedBackOffPolicy() {
 		RetryPolicy retryPolicy = RetryPolicy.withMaxRetries(0);
@@ -202,11 +203,11 @@ class RetryTemplateTests {
 				.withMessage("Retry policy for operation 'test' exhausted; aborting execution")
 				.withCause(new CustomException("Boom 4"))
 				.satisfies(throwable -> {
-					invocationCount.set(1);
+					var counter = new AtomicInteger(1);
 					repeat(3, () -> {
 						inOrder.verify(retryListener).beforeRetry(retryPolicy, retryable);
 						inOrder.verify(retryListener).onRetryFailure(retryPolicy, retryable,
-								new CustomException("Boom " + invocationCount.incrementAndGet()));
+								new CustomException("Boom " + counter.incrementAndGet()));
 					});
 					inOrder.verify(retryListener).onRetryPolicyExhaustion(retryPolicy, retryable, throwable);
 				});
