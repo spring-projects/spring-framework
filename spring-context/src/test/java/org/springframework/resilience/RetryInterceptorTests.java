@@ -99,11 +99,7 @@ class RetryInterceptorTests {
 
 	@Test
 	void withPostProcessorForMethod() {
-		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
-		bf.registerBeanDefinition("bean", new RootBeanDefinition(AnnotatedMethodBean.class));
-		RetryAnnotationBeanPostProcessor bpp = new RetryAnnotationBeanPostProcessor();
-		bpp.setBeanFactory(bf);
-		bf.addBeanPostProcessor(bpp);
+		DefaultListableBeanFactory bf = createBeanFactoryFor(AnnotatedMethodBean.class);
 		AnnotatedMethodBean proxy = bf.getBean(AnnotatedMethodBean.class);
 		AnnotatedMethodBean target = (AnnotatedMethodBean) AopProxyUtils.getSingletonTarget(proxy);
 
@@ -113,11 +109,7 @@ class RetryInterceptorTests {
 
 	@Test
 	void withPostProcessorForMethodWithInterface() {
-		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
-		bf.registerBeanDefinition("bean", new RootBeanDefinition(AnnotatedMethodBeanWithInterface.class));
-		RetryAnnotationBeanPostProcessor bpp = new RetryAnnotationBeanPostProcessor();
-		bpp.setBeanFactory(bf);
-		bf.addBeanPostProcessor(bpp);
+		DefaultListableBeanFactory bf = createBeanFactoryFor(AnnotatedMethodBeanWithInterface.class);
 		AnnotatedInterface proxy = bf.getBean(AnnotatedInterface.class);
 		AnnotatedMethodBeanWithInterface target = (AnnotatedMethodBeanWithInterface) AopProxyUtils.getSingletonTarget(proxy);
 
@@ -179,11 +171,7 @@ class RetryInterceptorTests {
 
 	@Test
 	void withPostProcessorForClass() {
-		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
-		bf.registerBeanDefinition("bean", new RootBeanDefinition(AnnotatedClassBean.class));
-		RetryAnnotationBeanPostProcessor bpp = new RetryAnnotationBeanPostProcessor();
-		bpp.setBeanFactory(bf);
-		bf.addBeanPostProcessor(bpp);
+		DefaultListableBeanFactory bf = createBeanFactoryFor(AnnotatedClassBean.class);
 		AnnotatedClassBean proxy = bf.getBean(AnnotatedClassBean.class);
 		AnnotatedClassBean target = (AnnotatedClassBean) AopProxyUtils.getSingletonTarget(proxy);
 
@@ -321,6 +309,16 @@ class RetryInterceptorTests {
 		assertThatExceptionOfType(CompletionException.class).isThrownBy(() -> proxy.retryOperation().join())
 				.withCauseInstanceOf(IllegalStateException.class);
 		assertThat(target.counter).hasValue(3);
+	}
+
+
+	private static DefaultListableBeanFactory createBeanFactoryFor(Class<?> beanClass) {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		bf.registerBeanDefinition("bean", new RootBeanDefinition(beanClass));
+		RetryAnnotationBeanPostProcessor bpp = new RetryAnnotationBeanPostProcessor();
+		bpp.setBeanFactory(bf);
+		bf.addBeanPostProcessor(bpp);
+		return bf;
 	}
 
 

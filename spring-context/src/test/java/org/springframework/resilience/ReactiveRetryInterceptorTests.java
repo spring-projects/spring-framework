@@ -70,12 +70,7 @@ class ReactiveRetryInterceptorTests {
 
 	@Test
 	void withPostProcessorForMethod() {
-		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
-		bf.registerBeanDefinition("bean", new RootBeanDefinition(AnnotatedMethodBean.class));
-		RetryAnnotationBeanPostProcessor bpp = new RetryAnnotationBeanPostProcessor();
-		bpp.setBeanFactory(bf);
-		bf.addBeanPostProcessor(bpp);
-		AnnotatedMethodBean proxy = bf.getBean(AnnotatedMethodBean.class);
+		AnnotatedMethodBean proxy = getProxiedAnnotatedMethodBean();
 		AnnotatedMethodBean target = (AnnotatedMethodBean) AopProxyUtils.getSingletonTarget(proxy);
 
 		assertThatIllegalStateException()
@@ -329,13 +324,23 @@ class ReactiveRetryInterceptorTests {
 		return ex -> assertThat(ex).matches(Exceptions::isRetryExhausted, "is RetryExhaustedException");
 	}
 
+	private static AnnotatedMethodBean getProxiedAnnotatedMethodBean() {
+		DefaultListableBeanFactory bf = createBeanFactoryFor(AnnotatedMethodBean.class);
+		return bf.getBean(AnnotatedMethodBean.class);
+	}
+
 	private static AnnotatedClassBean getProxiedAnnotatedClassBean() {
+		DefaultListableBeanFactory bf = createBeanFactoryFor(AnnotatedClassBean.class);
+		return bf.getBean(AnnotatedClassBean.class);
+	}
+
+	private static DefaultListableBeanFactory createBeanFactoryFor(Class<?> beanClass) {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
-		bf.registerBeanDefinition("bean", new RootBeanDefinition(AnnotatedClassBean.class));
+		bf.registerBeanDefinition("bean", new RootBeanDefinition(beanClass));
 		RetryAnnotationBeanPostProcessor bpp = new RetryAnnotationBeanPostProcessor();
 		bpp.setBeanFactory(bf);
 		bf.addBeanPostProcessor(bpp);
-		return bf.getBean(AnnotatedClassBean.class);
+		return bf;
 	}
 
 

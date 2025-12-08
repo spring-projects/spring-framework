@@ -155,13 +155,13 @@ public class RetryTemplate implements RetryOperations {
 			Throwable lastException = initialException;
 			while (this.retryPolicy.shouldRetry(lastException)) {
 				try {
-					long duration = backOffExecution.nextBackOff();
-					if (duration == BackOffExecution.STOP) {
+					long sleepTime = backOffExecution.nextBackOff();
+					if (sleepTime == BackOffExecution.STOP) {
 						break;
 					}
 					logger.debug(() -> "Backing off for %dms after retryable operation '%s'"
-							.formatted(duration, retryableName));
-					Thread.sleep(duration);
+							.formatted(sleepTime, retryableName));
+					Thread.sleep(sleepTime);
 				}
 				catch (InterruptedException interruptedException) {
 					Thread.currentThread().interrupt();
