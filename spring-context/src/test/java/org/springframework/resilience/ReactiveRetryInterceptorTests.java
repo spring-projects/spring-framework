@@ -464,11 +464,11 @@ class ReactiveRetryInterceptorTests {
 			});
 		}
 
-		@Retryable(timeout = 5, delay = 10)
+		@Retryable(timeout = 5, delay = 0)
 		public Mono<Object> retryOperationWithTimeoutExceededAfterInitialFailure() {
 			return Mono.fromCallable(() -> {
 				counter.incrementAndGet();
-				Thread.sleep(10);
+				Thread.sleep(20);
 				throw new IOException(counter.toString());
 			});
 		}
