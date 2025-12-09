@@ -32,4 +32,9 @@
 
 	<bean class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator"/>
 
+	<bean class="org.springframework.aop.support.DefaultPointcutAdvisor">
+		<property name="pointcut"><bean class="org.springframework.orm.jpa.EntityManagerPointcut"/></property>
+		<property name="advice"><bean class="org.springframework.aop.interceptor.SimpleTraceInterceptor"/></property>
+	</bean>
+
 </beans>
