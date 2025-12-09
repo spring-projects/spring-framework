@@ -439,20 +439,20 @@ class RetryInterceptorTests {
 			throw new IOException(Integer.toString(counter));
 		}
 
-		@Retryable(timeout = 5, delay = 0)
+		@Retryable(timeout = 20, delay = 0)
 		public void retryOperationWithTimeoutExceededAfterFirstRetry() throws Exception {
 			counter++;
 			if (counter == 2) {
-				Thread.sleep(10);
+				Thread.sleep(50);
 			}
 			throw new IOException(Integer.toString(counter));
 		}
 
-		@Retryable(timeout = 5, delay = 0)
+		@Retryable(timeout = 20, delay = 0)
 		public void retryOperationWithTimeoutExceededAfterSecondRetry() throws Exception {
 			counter++;
 			if (counter == 3) {
-				Thread.sleep(10);
+				Thread.sleep(50);
 			}
 			throw new IOException(Integer.toString(counter));
 		}

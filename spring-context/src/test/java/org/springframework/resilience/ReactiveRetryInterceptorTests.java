@@ -481,23 +481,23 @@ class ReactiveRetryInterceptorTests {
 			});
 		}
 
-		@Retryable(timeout = 5, delay = 0)
+		@Retryable(timeout = 20, delay = 0)
 		public Mono<Object> retryOperationWithTimeoutExceededAfterFirstRetry() {
 			return Mono.fromCallable(() -> {
 				counter.incrementAndGet();
 				if (counter.get() == 2) {
-					Thread.sleep(10);
+					Thread.sleep(50);
 				}
 				throw new IOException(counter.toString());
 			});
 		}
 
-		@Retryable(timeout = 5, delay = 0)
+		@Retryable(timeout = 20, delay = 0)
 		public Mono<Object> retryOperationWithTimeoutExceededAfterSecondRetry() {
 			return Mono.fromCallable(() -> {
 				counter.incrementAndGet();
 				if (counter.get() == 3) {
-					Thread.sleep(10);
+					Thread.sleep(50);
 				}
 				throw new IOException(counter.toString());
 			});
