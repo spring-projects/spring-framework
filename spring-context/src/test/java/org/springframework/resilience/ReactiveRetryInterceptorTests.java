@@ -65,7 +65,7 @@ class ReactiveRetryInterceptorTests {
 				.havingCause()
 					.isInstanceOf(IOException.class)
 					.withMessage("6");
-		assertThat(target.counter.get()).isEqualTo(6);
+		assertThat(target.counter).hasValue(6);
 	}
 
 	@Test
@@ -79,7 +79,7 @@ class ReactiveRetryInterceptorTests {
 				.havingCause()
 					.isInstanceOf(IOException.class)
 					.withMessage("6");
-		assertThat(target.counter.get()).isEqualTo(6);
+		assertThat(target.counter).hasValue(6);
 	}
 
 	@Test
@@ -100,7 +100,7 @@ class ReactiveRetryInterceptorTests {
 		// 3 = 1 initial invocation + 2 retry attempts
 		// Not 3 retry attempts, because RejectMalformedInputException3Predicate rejects
 		// a retry if the last exception was a MalformedInputException with message "3".
-		assertThat(target.counter.get()).isEqualTo(3);
+		assertThat(target.counter).hasValue(3);
 	}
 
 	@Test
@@ -114,7 +114,7 @@ class ReactiveRetryInterceptorTests {
 				.satisfies(isRetryExhaustedException())
 				.withCauseInstanceOf(FileSystemException.class);
 		// 1 initial attempt + 3 retries
-		assertThat(target.counter.get()).isEqualTo(4);
+		assertThat(target.counter).hasValue(4);
 	}
 
 	@Test  // gh-35583
@@ -130,7 +130,7 @@ class ReactiveRetryInterceptorTests {
 					.isExactlyInstanceOf(RuntimeException.class)
 					.withCauseExactlyInstanceOf(FileSystemException.class);
 		// 1 initial attempt + 3 retries
-		assertThat(target.counter.get()).isEqualTo(4);
+		assertThat(target.counter).hasValue(4);
 	}
 
 	@Test
@@ -146,7 +146,7 @@ class ReactiveRetryInterceptorTests {
 				.satisfies(isReactiveException())
 				.withCauseInstanceOf(AccessDeniedException.class);
 		// 1 initial attempt + 0 retries
-		assertThat(target.counter.get()).isEqualTo(1);
+		assertThat(target.counter).hasValue(1);
 	}
 
 	@Test
@@ -165,7 +165,7 @@ class ReactiveRetryInterceptorTests {
 				.isThrownBy(() -> proxy.arithmeticOperation().block())
 				.withMessage("1");
 		// 1 initial attempt + 0 retries
-		assertThat(target.counter.get()).isEqualTo(1);
+		assertThat(target.counter).hasValue(1);
 	}
 
 	@Test
@@ -179,7 +179,7 @@ class ReactiveRetryInterceptorTests {
 				.satisfies(isRetryExhaustedException())
 				.withCauseInstanceOf(IOException.class);
 		// 1 initial attempt + 1 retry
-		assertThat(target.counter.get()).isEqualTo(2);
+		assertThat(target.counter).hasValue(2);
 	}
 
 	@Test
@@ -199,7 +199,7 @@ class ReactiveRetryInterceptorTests {
 				.havingCause()
 					.isInstanceOf(IOException.class)
 					.withMessage("2");
-		assertThat(target.counter.get()).isEqualTo(2);
+		assertThat(target.counter).hasValue(2);
 	}
 
 	@Test
@@ -219,7 +219,7 @@ class ReactiveRetryInterceptorTests {
 				.havingCause()
 				.isInstanceOf(IOException.class)
 				.withMessage("1");
-		assertThat(target.counter.get()).isEqualTo(1);
+		assertThat(target.counter).hasValue(1);
 	}
 
 	@Test
@@ -238,7 +238,7 @@ class ReactiveRetryInterceptorTests {
 				.havingCause()
 					.isInstanceOf(IOException.class)
 					.withMessage("4");
-		assertThat(target.counter.get()).isEqualTo(4);
+		assertThat(target.counter).hasValue(4);
 	}
 
 	@Test
@@ -257,7 +257,7 @@ class ReactiveRetryInterceptorTests {
 				.havingCause()
 					.isInstanceOf(IOException.class)
 					.withMessage("4");
-		assertThat(target.counter.get()).isEqualTo(4);
+		assertThat(target.counter).hasValue(4);
 	}
 
 	@Test
@@ -276,7 +276,7 @@ class ReactiveRetryInterceptorTests {
 				.havingCause()
 					.isInstanceOf(IOException.class)
 					.withMessage("4");
-		assertThat(target.counter.get()).isEqualTo(4);
+		assertThat(target.counter).hasValue(4);
 	}
 
 	@Test
@@ -292,7 +292,7 @@ class ReactiveRetryInterceptorTests {
 		String result = proxy.retryOperation().block();
 		assertThat(result).isEqualTo("success");
 		// Should execute only once because of successful return
-		assertThat(target.counter.get()).isEqualTo(1);
+		assertThat(target.counter).hasValue(1);
 	}
 
 	@Test
@@ -312,7 +312,7 @@ class ReactiveRetryInterceptorTests {
 					.isInstanceOf(NumberFormatException.class)
 					.withMessage("always fails");
 		// 1 initial attempt + 3 retries
-		assertThat(target.counter.get()).isEqualTo(4);
+		assertThat(target.counter).hasValue(4);
 	}
 
 
