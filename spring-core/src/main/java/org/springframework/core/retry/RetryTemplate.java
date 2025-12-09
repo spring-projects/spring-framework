@@ -213,9 +213,13 @@ public class RetryTemplate implements RetryOperations {
 			// would be if we were to sleep for sleepTime milliseconds.
 			long elapsedTime = System.currentTimeMillis() + sleepTime - startTime;
 			if (elapsedTime >= timeout) {
-				RetryException retryException = new RetryException(
+				String message = (sleepTime > 0 ? """
+						Retry policy for operation '%s' would exceed timeout (%d ms) due \
+						to pending sleep time (%d ms); preemptively aborting execution"""
+								.formatted(retryable.getName(), timeout, sleepTime) :
 						"Retry policy for operation '%s' exceeded timeout (%d ms); aborting execution"
-						.formatted(retryable.getName(), timeout), exceptions.removeLast());
+								.formatted(retryable.getName(), timeout));
+				RetryException retryException = new RetryException(message, exceptions.removeLast());
 				exceptions.forEach(retryException::addSuppressed);
 				this.retryListener.onRetryPolicyTimeout(this.retryPolicy, retryable, retryException);
 				throw retryException;
