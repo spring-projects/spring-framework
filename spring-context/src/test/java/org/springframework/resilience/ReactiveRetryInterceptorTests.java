@@ -375,7 +375,7 @@ class ReactiveRetryInterceptorTests {
 					.satisfies(isReactiveException())
 					.havingCause()
 						.isInstanceOf(TimeoutException.class)
-						.withMessageContaining("within 5ms");
+						.withMessageContaining("within 20ms");
 			// 1 initial attempt + 1 retry
 			assertThat(target.counter).hasValue(2);
 		}
@@ -387,7 +387,7 @@ class ReactiveRetryInterceptorTests {
 					.satisfies(isReactiveException())
 					.havingCause()
 						.isInstanceOf(TimeoutException.class)
-						.withMessageContaining("within 5ms");
+						.withMessageContaining("within 20ms");
 			// 1 initial attempt + 2 retries
 			assertThat(target.counter).hasValue(3);
 		}
