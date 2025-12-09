@@ -460,48 +460,56 @@ public class LazyConnectionDataSourceProxy extends DelegatingDataSource {
 		/**
 		 * Return the target Connection, fetching it and initializing it if necessary.
 		 */
-		private Connection getTargetConnection(Method operation) throws SQLException {
-			if (this.target == null) {
-				// No target Connection held -> fetch one.
-				if (logger.isTraceEnabled()) {
-					logger.trace("Connecting to database for operation '" + operation.getName() + "'");
-				}
-
-				// Fetch physical Connection from DataSource.
-				DataSource dataSource = getDataSourceToUse();
-				this.target = (this.username != null ? dataSource.getConnection(this.username, this.password) :
-						dataSource.getConnection());
-				if (this.target == null) {
-					throw new IllegalStateException("DataSource returned null from getConnection(): " + dataSource);
-				}
-
-				// Apply kept transaction settings, if any.
-				if (this.readOnly && readOnlyDataSource == null) {
-					try {
-						this.target.setReadOnly(true);
-					}
-					catch (Exception ex) {
-						// "read-only not supported" -> ignore, it's just a hint anyway
-						logger.debug("Could not set JDBC Connection read-only", ex);
-					}
-				}
-				if (this.transactionIsolation != null &&
-						!this.transactionIsolation.equals(defaultTransactionIsolation())) {
-					this.target.setTransactionIsolation(this.transactionIsolation);
-				}
-				if (this.autoCommit != null && this.autoCommit != defaultAutoCommit()) {
-					this.target.setAutoCommit(this.autoCommit);
-				}
-			}
-
-			else {
+		private Connection getTargetConnection(Method operation) throws Throwable {
+			Connection target = this.target;
+			if (target != null) {
 				// Target Connection already held -> return it.
 				if (logger.isTraceEnabled()) {
 					logger.trace("Using existing database connection for operation '" + operation.getName() + "'");
 				}
+				return target;
 			}
 
-			return this.target;
+			// No target Connection held -> fetch one.
+			if (logger.isTraceEnabled()) {
+				logger.trace("Connecting to database for operation '" + operation.getName() + "'");
+			}
+
+			// Fetch physical Connection from DataSource.
+			DataSource dataSource = getDataSourceToUse();
+			target = (this.username != null ? dataSource.getConnection(this.username, this.password) :
+					dataSource.getConnection());
+			if (target == null) {
+				throw new IllegalStateException("DataSource returned null from getConnection(): " + dataSource);
+			}
+
+			// Apply kept transaction settings, if any.
+			try {
+				if (this.readOnly && readOnlyDataSource == null) {
+					DataSourceUtils.setReadOnlyIfPossible(target);
+				}
+				if (this.transactionIsolation != null &&
+						!this.transactionIsolation.equals(defaultTransactionIsolation())) {
+					target.setTransactionIsolation(this.transactionIsolation);
+				}
+				if (this.autoCommit != null && this.autoCommit != defaultAutoCommit()) {
+					target.setAutoCommit(this.autoCommit);
+				}
+			}
+			catch (Throwable settingsEx) {
+				logger.debug("Failed to apply transaction settings to JDBC Connection", settingsEx);
+				// Close Connection and do not set it as target.
+				try {
+					target.close();
+				}
+				catch (Throwable closeEx) {
+					logger.debug("Could not close JDBC Connection after failed settings", closeEx);
+				}
+				throw settingsEx;
+			}
+
+			this.target = target;
+			return target;
 		}
 
 		private DataSource getDataSourceToUse() {
