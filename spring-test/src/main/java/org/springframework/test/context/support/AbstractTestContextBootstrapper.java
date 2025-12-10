@@ -231,7 +231,7 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 				Class<?> declaringClass = reversedList.get(0).getDeclaringClass();
 
 				mergedConfig = buildMergedContextConfiguration(
-						declaringClass, reversedList, parentConfig, cacheAwareContextLoaderDelegate, true);
+						declaringClass, reversedList, null, parentConfig, cacheAwareContextLoaderDelegate, true);
 				parentConfig = mergedConfig;
 			}
 
@@ -242,7 +242,7 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 		else {
 			return buildMergedContextConfiguration(testClass,
 					ContextLoaderUtils.resolveContextConfigurationAttributes(testClass),
-					null, cacheAwareContextLoaderDelegate, true);
+					null, null, cacheAwareContextLoaderDelegate, true);
 		}
 	}
 
@@ -263,7 +263,7 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 					"Neither @ContextConfiguration nor @ContextHierarchy found for test class [%s]: using %s",
 					testClass.getSimpleName(), contextLoader.getClass().getSimpleName()));
 		}
-		return buildMergedContextConfiguration(testClass, defaultConfigAttributesList, null,
+		return buildMergedContextConfiguration(testClass, defaultConfigAttributesList, contextLoader, null,
 				cacheAwareContextLoaderDelegate, false);
 	}
 
@@ -277,6 +277,7 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 	 * specified test class, ordered <em>bottom-up</em> (i.e., as if we were
 	 * traversing up the class hierarchy and enclosing class hierarchy); never
 	 * {@code null} or empty
+	 * @param contextLoader a pre-resolved {@link ContextLoader} to use; may be {@code null}
 	 * @param parentConfig the merged context configuration for the parent application
 	 * context in a context hierarchy, or {@code null} if there is no parent
 	 * @param cacheAwareContextLoaderDelegate the cache-aware context loader delegate to
@@ -294,13 +295,16 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 	 * @see MergedContextConfiguration
 	 */
 	private MergedContextConfiguration buildMergedContextConfiguration(Class<?> testClass,
-			List<ContextConfigurationAttributes> configAttributesList, @Nullable MergedContextConfiguration parentConfig,
+			List<ContextConfigurationAttributes> configAttributesList, @Nullable ContextLoader contextLoader,
+			@Nullable MergedContextConfiguration parentConfig,
 			CacheAwareContextLoaderDelegate cacheAwareContextLoaderDelegate,
 			boolean requireLocationsClassesOrInitializers) {
 
 		Assert.notEmpty(configAttributesList, "ContextConfigurationAttributes list must not be null or empty");
 
-		ContextLoader contextLoader = resolveContextLoader(testClass, configAttributesList);
+		if (contextLoader == null) {
+			contextLoader = resolveContextLoader(testClass, configAttributesList);
+		}
 		List<String> locations = new ArrayList<>();
 		List<Class<?>> classes = new ArrayList<>();
 		List<Class<?>> initializers = new ArrayList<>();
@@ -331,11 +335,12 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 		Set<ContextCustomizer> contextCustomizers = getContextCustomizers(testClass,
 				Collections.unmodifiableList(configAttributesList));
 
+		ContextLoader effectivelyFinalContextLoader = contextLoader;
 		Assert.state(!(requireLocationsClassesOrInitializers &&
-				areAllEmpty(locations, classes, initializers, contextCustomizers)), () -> String.format(
-				"%s was unable to detect defaults, and no ApplicationContextInitializers " +
-				"or ContextCustomizers were declared for context configuration attributes %s",
-				contextLoader.getClass().getSimpleName(), configAttributesList));
+				areAllEmpty(locations, classes, initializers, contextCustomizers)), () -> """
+					%s was unable to detect defaults, and no ApplicationContextInitializers \
+					or ContextCustomizers were declared for context configuration attributes %s\
+					""".formatted(effectivelyFinalContextLoader.getClass().getSimpleName(), configAttributesList));
 
 		MergedTestPropertySources mergedTestPropertySources =
 				TestPropertySourceUtils.buildMergedTestPropertySources(testClass);
