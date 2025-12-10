@@ -413,14 +413,14 @@ class RetryTemplateTests {
 
 		@Test
 		void retryWithImmediateSuccessAndTimeoutExceeded() throws Exception {
-			RetryPolicy retryPolicy = RetryPolicy.builder().timeout(Duration.ofMillis(5)).build();
+			RetryPolicy retryPolicy = RetryPolicy.builder().timeout(Duration.ofMillis(10)).build();
 			RetryTemplate retryTemplate = new RetryTemplate(retryPolicy);
 			retryTemplate.setRetryListener(retryListener);
 
 			AtomicInteger invocationCount = new AtomicInteger();
 			Retryable<String> retryable = () -> {
 				invocationCount.incrementAndGet();
-				Thread.sleep(10);
+				Thread.sleep(100);
 				return "always succeeds";
 			};
 
@@ -435,7 +435,7 @@ class RetryTemplateTests {
 		@Test
 		void retryWithInitialFailureAndZeroRetriesRetryPolicyAndTimeoutExceeded() {
 			RetryPolicy retryPolicy = RetryPolicy.builder()
-					.timeout(Duration.ofMillis(5))
+					.timeout(Duration.ofMillis(10))
 					.predicate(throwable -> false) // Zero retries
 					.build();
 			RetryTemplate retryTemplate = new RetryTemplate(retryPolicy);
@@ -443,7 +443,7 @@ class RetryTemplateTests {
 
 			Exception exception = new RuntimeException("Boom!");
 			Retryable<String> retryable = () -> {
-				Thread.sleep(10);
+				Thread.sleep(100);
 				throw exception;
 			};
 
@@ -461,7 +461,7 @@ class RetryTemplateTests {
 		@Test
 		void retryWithTimeoutExceededAfterInitialFailure() throws Exception {
 			RetryPolicy retryPolicy = RetryPolicy.builder()
-					.timeout(Duration.ofMillis(5))
+					.timeout(Duration.ofMillis(10))
 					.delay(Duration.ZERO)
 					.build();
 			RetryTemplate retryTemplate = new RetryTemplate(retryPolicy);
@@ -469,14 +469,14 @@ class RetryTemplateTests {
 
 			AtomicInteger invocationCount = new AtomicInteger();
 			Retryable<String> retryable = () -> {
-				Thread.sleep(10);
+				Thread.sleep(100);
 				throw new CustomException("Boom " + invocationCount.incrementAndGet());
 			};
 
 			assertThat(invocationCount).hasValue(0);
 			assertThatExceptionOfType(RetryException.class)
 					.isThrownBy(() -> retryTemplate.execute(retryable))
-					.withMessageMatching("Retry policy for operation '.+?' exceeded timeout \\(5ms\\); aborting execution")
+					.withMessageMatching("Retry policy for operation '.+?' exceeded timeout \\(10ms\\); aborting execution")
 					.withCause(new CustomException("Boom 1"))
 					.satisfies(throwable -> inOrder.verify(retryListener).onRetryPolicyTimeout(
 							eq(retryPolicy), eq(retryable), eq(throwable)));
@@ -488,8 +488,8 @@ class RetryTemplateTests {
 		@Test
 		void retryWithTimeoutExceededAfterFirstDelayButBeforeFirstRetry() throws Exception {
 			RetryPolicy retryPolicy = RetryPolicy.builder()
-					.timeout(Duration.ofMillis(5))
-					.delay(Duration.ofMillis(10)) // Delay > Timeout
+					.timeout(Duration.ofMillis(20))
+					.delay(Duration.ofMillis(100)) // Delay > Timeout
 					.build();
 			RetryTemplate retryTemplate = new RetryTemplate(retryPolicy);
 			retryTemplate.setRetryListener(retryListener);
@@ -503,8 +503,8 @@ class RetryTemplateTests {
 			assertThatExceptionOfType(RetryException.class)
 					.isThrownBy(() -> retryTemplate.execute(retryable))
 					.withMessageMatching("""
-							Retry policy for operation '.+?' would exceed timeout \\(5ms\\) \
-							due to pending sleep time \\(10ms\\); preemptively aborting execution\
+							Retry policy for operation '.+?' would exceed timeout \\(20ms\\) \
+							due to pending sleep time \\(100ms\\); preemptively aborting execution\
 							""")
 					.withCause(new CustomException("Boom 1"))
 					.satisfies(throwable -> inOrder.verify(retryListener).onRetryPolicyTimeout(
@@ -527,7 +527,7 @@ class RetryTemplateTests {
 			Retryable<String> retryable = () -> {
 				int currentInvocation = invocationCount.incrementAndGet();
 				if (currentInvocation == 2) {
-					Thread.sleep(50);
+					Thread.sleep(100);
 				}
 				throw new CustomException("Boom " + currentInvocation);
 			};
@@ -562,7 +562,7 @@ class RetryTemplateTests {
 			Retryable<String> retryable = () -> {
 				int currentInvocation = invocationCount.incrementAndGet();
 				if (currentInvocation == 3) {
-					Thread.sleep(50);
+					Thread.sleep(100);
 				}
 				throw new CustomException("Boom " + currentInvocation);
 			};

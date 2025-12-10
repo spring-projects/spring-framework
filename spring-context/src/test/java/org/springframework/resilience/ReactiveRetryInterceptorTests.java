@@ -351,7 +351,7 @@ class ReactiveRetryInterceptorTests {
 					.satisfies(isReactiveException())
 					.havingCause()
 						.isInstanceOf(TimeoutException.class)
-						.withMessageContaining("within 5ms");
+						.withMessageContaining("within 20ms");
 			// 1 initial attempt + 0 retries
 			assertThat(target.counter).hasValue(1);
 		}
@@ -363,7 +363,7 @@ class ReactiveRetryInterceptorTests {
 					.satisfies(isReactiveException())
 					.havingCause()
 						.isInstanceOf(TimeoutException.class)
-						.withMessageContaining("within 5ms");
+						.withMessageContaining("within 20ms");
 			// 1 initial attempt + 0 retries
 			assertThat(target.counter).hasValue(1);
 		}
@@ -464,16 +464,16 @@ class ReactiveRetryInterceptorTests {
 			});
 		}
 
-		@Retryable(timeout = 5, delay = 0)
+		@Retryable(timeout = 20, delay = 0)
 		public Mono<Object> retryOperationWithTimeoutExceededAfterInitialFailure() {
 			return Mono.fromCallable(() -> {
 				counter.incrementAndGet();
-				Thread.sleep(20);
+				Thread.sleep(100);
 				throw new IOException(counter.toString());
 			});
 		}
 
-		@Retryable(timeout = 5, delay = 10)
+		@Retryable(timeout = 20, delay = 100) // Delay > Timeout
 		public Mono<Object> retryOperationWithTimeoutExceededAfterFirstDelayButBeforeFirstRetry() {
 			return Mono.fromCallable(() -> {
 				counter.incrementAndGet();
@@ -486,7 +486,7 @@ class ReactiveRetryInterceptorTests {
 			return Mono.fromCallable(() -> {
 				counter.incrementAndGet();
 				if (counter.get() == 2) {
-					Thread.sleep(50);
+					Thread.sleep(100);
 				}
 				throw new IOException(counter.toString());
 			});
@@ -497,7 +497,7 @@ class ReactiveRetryInterceptorTests {
 			return Mono.fromCallable(() -> {
 				counter.incrementAndGet();
 				if (counter.get() == 3) {
-					Thread.sleep(50);
+					Thread.sleep(100);
 				}
 				throw new IOException(counter.toString());
 			});

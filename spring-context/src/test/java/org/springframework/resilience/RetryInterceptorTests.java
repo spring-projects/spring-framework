@@ -426,14 +426,14 @@ class RetryInterceptorTests {
 			throw new IOException(Integer.toString(counter));
 		}
 
-		@Retryable(timeout = 5, delay = 10)
+		@Retryable(timeout = 20, delay = 0)
 		public void retryOperationWithTimeoutExceededAfterInitialFailure() throws Exception {
 			counter++;
-			Thread.sleep(10);
+			Thread.sleep(100);
 			throw new IOException(Integer.toString(counter));
 		}
 
-		@Retryable(timeout = 5, delay = 10)
+		@Retryable(timeout = 20, delay = 100) // Delay > Timeout
 		public void retryOperationWithTimeoutExceededAfterFirstDelayButBeforeFirstRetry() throws IOException {
 			counter++;
 			throw new IOException(Integer.toString(counter));
@@ -443,7 +443,7 @@ class RetryInterceptorTests {
 		public void retryOperationWithTimeoutExceededAfterFirstRetry() throws Exception {
 			counter++;
 			if (counter == 2) {
-				Thread.sleep(50);
+				Thread.sleep(100);
 			}
 			throw new IOException(Integer.toString(counter));
 		}
@@ -452,7 +452,7 @@ class RetryInterceptorTests {
 		public void retryOperationWithTimeoutExceededAfterSecondRetry() throws Exception {
 			counter++;
 			if (counter == 3) {
-				Thread.sleep(50);
+				Thread.sleep(100);
 			}
 			throw new IOException(Integer.toString(counter));
 		}
