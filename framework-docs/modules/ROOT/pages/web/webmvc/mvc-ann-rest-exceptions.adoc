@@ -171,7 +171,7 @@ Message codes and arguments for each error are also resolved via `MessageSource`
 
 | `NoResourceFoundException`
 | (default)
-| `+{0}+` the resource
+| `+{0}+` the request path (or portion of) used to find a resource
 
 | `TypeMismatchException`
 | (default)

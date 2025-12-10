@@ -80,6 +80,6 @@ public class NoResourceFoundException extends ServletException implements ErrorR
 
 	@Override
 	public Object[] getDetailMessageArguments() {
-		return new String[]{this.resourcePath};
+		return new String[] { this.resourcePath };
 	}
 }

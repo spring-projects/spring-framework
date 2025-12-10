@@ -135,6 +135,10 @@ Message codes and arguments for each error are also resolved via `MessageSource`
 | `+{0}+` the list of global errors, `+{1}+` the list of field errors.
 Message codes and arguments for each error are also resolved via `MessageSource`.
 
+| `NoResourceFoundException`
+| (default)
+| `+{0}+` the request path (or portion of) used to find a resource
+
 |===
 
 NOTE: Unlike other exceptions, the message arguments for
