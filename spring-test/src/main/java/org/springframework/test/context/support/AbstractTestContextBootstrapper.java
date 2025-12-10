@@ -152,7 +152,9 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 					listeners.addAll(getDefaultTestExecutionListeners());
 				}
 
-				listeners.addAll(0, instantiateListeners(testExecutionListeners.listeners()));
+				if (testExecutionListeners.listeners().length > 0) {
+					listeners.addAll(0, instantiateListeners(testExecutionListeners.listeners()));
+				}
 
 				descriptor = (inheritListeners ? parentDescriptor : null);
 			}
@@ -316,17 +318,25 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 			}
 			if (contextLoader instanceof SmartContextLoader smartContextLoader) {
 				smartContextLoader.processContextConfiguration(configAttributes);
-				locations.addAll(0, Arrays.asList(configAttributes.getLocations()));
-				classes.addAll(0, Arrays.asList(configAttributes.getClasses()));
+				if (configAttributes.getLocations().length > 0) {
+					locations.addAll(0, Arrays.asList(configAttributes.getLocations()));
+				}
+				if (configAttributes.getClasses().length > 0) {
+					classes.addAll(0, Arrays.asList(configAttributes.getClasses()));
+				}
 			}
 			else {
 				@SuppressWarnings("deprecation")
 				String[] processedLocations = contextLoader.processLocations(
 						configAttributes.getDeclaringClass(), configAttributes.getLocations());
-				locations.addAll(0, Arrays.asList(processedLocations));
+				if (processedLocations.length > 0) {
+					locations.addAll(0, Arrays.asList(processedLocations));
+				}
 				// Legacy ContextLoaders don't know how to process classes
 			}
-			initializers.addAll(0, Arrays.asList(configAttributes.getInitializers()));
+			if (configAttributes.getInitializers().length > 0) {
+				initializers.addAll(0, Arrays.asList(configAttributes.getInitializers()));
+			}
 			if (!configAttributes.isInheritLocations()) {
 				break;
 			}
@@ -401,7 +411,9 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 
 				boolean inheritFactories = annotation.inheritFactories();
 				AnnotationDescriptor<ContextCustomizerFactories> parentDescriptor = descriptor.next();
-				factories.addAll(0, instantiateCustomizerFactories(annotation.factories()));
+				if (annotation.factories().length > 0) {
+					factories.addAll(0, instantiateCustomizerFactories(annotation.factories()));
+				}
 
 				// If there are no factories to inherit, we might need to merge the
 				// locally declared factories with the defaults.
