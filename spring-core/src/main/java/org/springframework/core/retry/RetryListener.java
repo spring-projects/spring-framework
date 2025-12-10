@@ -99,9 +99,9 @@ public interface RetryListener {
 	 * Called if the {@link RetryPolicy} is interrupted between retry attempts.
 	 * @param retryPolicy the {@code RetryPolicy}
 	 * @param retryable the {@link Retryable} operation
-	 * @param exception the resulting {@link RetryException}, with an
-	 * {@link InterruptedException} as the cause and any exceptions from previous
-	 * invocations of the {@code Retryable} operation as suppressed exceptions
+	 * @param exception the resulting {@link RetryException}, with the last
+	 * exception thrown by the {@code Retryable} operation as the cause and any
+	 * exceptions from previous attempts as suppressed exceptions
 	 * @see RetryException#getExceptions()
 	 * @see RetryException#getRetryCount()
 	 */

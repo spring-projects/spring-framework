@@ -70,9 +70,7 @@ public class RetryException extends Exception implements RetryState {
 
 
 	/**
-	 * Get the last exception thrown by the {@link Retryable} operation, or an
-	 * {@link InterruptedException} thrown while sleeping for the current
-	 * {@code BackOff} duration.
+	 * Get the last exception thrown by the {@link Retryable} operation.
 	 */
 	@Override
 	public final Throwable getCause() {
@@ -102,7 +100,8 @@ public class RetryException extends Exception implements RetryState {
 	}
 
 	/**
-	 * Return the exception from the last invocation (also exposed as a cause).
+	 * Return the exception from the last invocation (also exposed as the
+	 * {@linkplain #getCause() cause}).
 	 * @since 7.0.2
 	 */
 	@Override
