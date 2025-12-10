@@ -1,0 +1,35 @@
+[[jms-jca-message-endpoint-manager]]
+= Support for JCA Message Endpoints
+
+Beginning with version 2.5, Spring also provides support for a JCA-based
+`MessageListener` container. The `JmsMessageEndpointManager` tries to
+automatically determine the `ActivationSpec` class name from the provider's
+`ResourceAdapter` class name. Therefore, it is typically possible to provide
+Spring's generic `JmsActivationSpecConfig`, as the following example shows:
+
+include-code::./JmsConfiguration[tag=snippet,indent=0]
+
+Alternatively, you can set up a `JmsMessageEndpointManager` with a given
+`ActivationSpec` object. The `ActivationSpec` object may also come from a JNDI lookup
+(using `<jee:jndi-lookup>`). The following example shows how to do so:
+
+include-code::./AlternativeJmsConfiguration[tag=snippet,indent=0]
+
+See the javadoc for {spring-framework-api}/jms/listener/endpoint/JmsMessageEndpointManager.html[`JmsMessageEndpointManager`],
+{spring-framework-api}/jms/listener/endpoint/JmsActivationSpecConfig.html[`JmsActivationSpecConfig`],
+and {spring-framework-api}/jca/support/ResourceAdapterFactoryBean.html[`ResourceAdapterFactoryBean`]
+for more details.
+
+Spring also provides a generic JCA message endpoint manager that is not tied to JMS:
+`org.springframework.jca.endpoint.GenericMessageEndpointManager`. This component allows
+for using any message listener type (such as a JMS `MessageListener`) and any
+provider-specific `ActivationSpec` object. See your JCA provider's documentation to
+find out about the actual capabilities of your connector, and see the
+{spring-framework-api}/jca/endpoint/GenericMessageEndpointManager.html[`GenericMessageEndpointManager`]
+javadoc for the Spring-specific configuration details.
+
+NOTE: JCA-based message endpoint management is very analogous to EJB 2.1 Message-Driven Beans.
+It uses the same underlying resource provider contract. As with EJB 2.1 MDBs, you can use any
+message listener interface supported by your JCA provider in the Spring context as well.
+Spring nevertheless provides explicit "`convenience`" support for JMS, because JMS is the
+most common endpoint API used with the JCA endpoint management contract.

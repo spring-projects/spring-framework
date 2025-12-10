@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN"
+				"https://www.springframework.org/dtd/spring-beans-2.0.dtd">
+
+<beans>
+
+	<bean id="invalidClass" class="some.class.that.does.not.Exist"/>
+
+	<bean id="invalidMapDefinition" class="org.springframework.beans.testfixture.beans.TestBean">
+		<property name="someMap">
+			<map>
+				<entry/>
+			</map>
+		</property>
+	</bean>
+
+	<bean id="nestedBeanErrors" class="org.springframework.beans.testfixture.beans.TestBean">
+		<property name="spouse">
+			<bean class="org.springframework.beans.testfixture.beans.TestBean">
+				<property name="someMap">
+				    <map>
+				        <entry/>
+				    </map>
+				</property>
+			</bean>
+		</property>
+	</bean>
+
+	<bean id="validBean" class="org.springframework.beans.testfixture.beans.TestBean"/>
+
+</beans>

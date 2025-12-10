@@ -1,0 +1,23 @@
+[[mvc-config-conversion]]
+= Type Conversion
+
+[.small]#xref:web/webflux/config.adoc#webflux-config-conversion[See equivalent in the Reactive stack]#
+
+By default, formatters for various number and date types are installed, along with support
+for customization via `@NumberFormat`, `@DurationFormat`, and `@DateTimeFormat` on fields
+and parameters.
+
+To register custom formatters and converters, use the following:
+
+include-code::./WebConfiguration[tag=snippet,indent=0]
+
+By default Spring MVC considers the request Locale when parsing and formatting date
+values. This works for forms where dates are represented as Strings with "input" form
+fields. For "date" and "time" form fields, however, browsers use a fixed format defined
+in the HTML spec. For such cases date and time formatting can be customized as follows:
+
+include-code::./DateTimeWebConfiguration[tag=snippet,indent=0]
+
+NOTE: See xref:core/validation/format.adoc#format-FormatterRegistrar-SPI[the `FormatterRegistrar` SPI]
+and the `FormattingConversionServiceFactoryBean` for more information on when to use
+FormatterRegistrar implementations.

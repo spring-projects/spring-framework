@@ -1,0 +1,10 @@
+<persistence xmlns="https://jakarta.ee/xml/ns/persistence" version="3.2">
+
+	<persistence-unit name="Person" transaction-type="RESOURCE_LOCAL">
+		<class>org.springframework.orm.jpa.domain.DriversLicense</class>
+		<class>org.springframework.orm.jpa.domain.Person</class>
+		<exclude-unlisted-classes/>
+		<qualifier>org.springframework.orm.jpa.domain.MyDomain</qualifier>
+	</persistence-unit>
+
+</persistence>

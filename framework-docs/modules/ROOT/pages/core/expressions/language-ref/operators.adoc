@@ -1,0 +1,611 @@
+[[expressions-operators]]
+= Operators
+
+The Spring Expression Language supports the following kinds of operators:
+
+* xref:core/expressions/language-ref/operators.adoc#expressions-operators-relational[Relational Operators]
+* xref:core/expressions/language-ref/operators.adoc#expressions-operators-logical[Logical Operators]
+* xref:core/expressions/language-ref/operators.adoc#expressions-operators-string[String Operators]
+* xref:core/expressions/language-ref/operators.adoc#expressions-operators-mathematical[Mathematical Operators]
+* xref:core/expressions/language-ref/operators.adoc#expressions-assignment[The Assignment Operator]
+* xref:core/expressions/language-ref/operators.adoc#expressions-operators-overloaded[Overloaded Operators]
+
+
+
+[[expressions-operators-relational]]
+== Relational Operators
+
+The relational operators (equal, not equal, less than, less than or equal, greater than,
+and greater than or equal) are supported by using standard operator notation.
+These operators work on `Number` types as well as types implementing `Comparable`.
+The following listing shows a few examples of relational operators:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	// evaluates to true
+	boolean trueValue = parser.parseExpression("2 == 2").getValue(Boolean.class);
+
+	// evaluates to false
+	boolean falseValue = parser.parseExpression("2 < -5.0").getValue(Boolean.class);
+
+	// evaluates to true
+	boolean trueValue = parser.parseExpression("'black' < 'block'").getValue(Boolean.class);
+
+	// uses CustomValue:::compareTo
+	boolean trueValue = parser.parseExpression("new CustomValue(1) < new CustomValue(2)").getValue(Boolean.class);
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes"]
+----
+	// evaluates to true
+	val trueValue = parser.parseExpression("2 == 2").getValue(Boolean::class.java)
+
+	// evaluates to false
+	val falseValue = parser.parseExpression("2 < -5.0").getValue(Boolean::class.java)
+
+	// evaluates to true
+	val trueValue = parser.parseExpression("'black' < 'block'").getValue(Boolean::class.java)
+
+	// uses CustomValue:::compareTo
+	val trueValue = parser.parseExpression("new CustomValue(1) < new CustomValue(2)").getValue(Boolean::class.java);
+----
+======
+
+[NOTE]
+====
+Greater-than and less-than comparisons against `null` follow a simple rule: `null` is treated as
+nothing (that is NOT as zero). As a consequence, any other value is always greater
+than `null` (`X > null` is always `true`) and no other value is ever less than nothing
+(`X < null` is always `false`).
+
+If you prefer numeric comparisons instead, avoid number-based `null` comparisons
+in favor of comparisons against zero (for example, `X > 0` or `X < 0`).
+====
+
+Each symbolic operator can also be specified as a purely textual equivalent. This avoids
+problems where the symbols used have special meaning for the document type in which the
+expression is embedded (such as in an XML document). The textual equivalents are:
+
+* `lt` (`<`)
+* `gt` (`>`)
+* `le` (`\<=`)
+* `ge` (`>=`)
+* `eq` (`==`)
+* `ne` (`!=`)
+
+All of the textual operators are case-insensitive.
+
+In addition to the standard relational operators, SpEL supports the `between`,
+`instanceof`, and regular expression-based `matches` operators. The following listing
+shows examples of all three:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	boolean result;
+
+	// evaluates to true
+	result = parser.parseExpression(
+			"1 between {1, 5}").getValue(Boolean.class);
+
+	// evaluates to false
+	result = parser.parseExpression(
+			"1 between {10, 15}").getValue(Boolean.class);
+
+	// evaluates to true
+	result = parser.parseExpression(
+			"'elephant' between {'aardvark', 'zebra'}").getValue(Boolean.class);
+
+	// evaluates to false
+	result = parser.parseExpression(
+			"'elephant' between {'aardvark', 'cobra'}").getValue(Boolean.class);
+
+	// evaluates to true
+	result = parser.parseExpression(
+			"123 instanceof T(Integer)").getValue(Boolean.class);
+
+	// evaluates to false
+	result = parser.parseExpression(
+			"'xyz' instanceof T(Integer)").getValue(Boolean.class);
+
+	// evaluates to true
+	result = parser.parseExpression(
+			"'5.00' matches '^-?\\d+(\\.\\d{2})?$'").getValue(Boolean.class);
+
+	// evaluates to false
+	result = parser.parseExpression(
+			"'5.0067' matches '^-?\\d+(\\.\\d{2})?$'").getValue(Boolean.class);
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes"]
+----
+	// evaluates to true
+	var result = parser.parseExpression(
+			"1 between {1, 5}").getValue(Boolean::class.java)
+
+	// evaluates to false
+	result = parser.parseExpression(
+			"1 between {10, 15}").getValue(Boolean::class.java)
+
+	// evaluates to true
+	result = parser.parseExpression(
+			"'elephant' between {'aardvark', 'zebra'}").getValue(Boolean::class.java)
+
+	// evaluates to false
+	result = parser.parseExpression(
+			"'elephant' between {'aardvark', 'cobra'}").getValue(Boolean::class.java)
+
+	// evaluates to true
+	result = parser.parseExpression(
+			"123 instanceof T(Integer)").getValue(Boolean::class.java)
+
+	// evaluates to false
+	result = parser.parseExpression(
+			"'xyz' instanceof T(Integer)").getValue(Boolean::class.java)
+
+	// evaluates to true
+	result = parser.parseExpression(
+			"'5.00' matches '^-?\\d+(\\.\\d{2})?$'").getValue(Boolean::class.java)
+
+	// evaluates to false
+	result = parser.parseExpression(
+			"'5.0067' matches '^-?\\d+(\\.\\d{2})?$'").getValue(Boolean::class.java)
+----
+======
+
+[CAUTION]
+====
+The syntax for the `between` operator is `<input> between {<range_begin>, <range_end>}`,
+which is effectively a shortcut for `<input> >= <range_begin> && <input> \<= <range_end>}`.
+
+Consequently, `1 between {1, 5}` evaluates to `true`, while `1 between {5, 1}` evaluates
+to `false`.
+====
+
+CAUTION: Be careful with primitive types, as they are immediately boxed up to their
+wrapper types. For example, `1 instanceof T(int)` evaluates to `false`, while
+`1 instanceof T(Integer)` evaluates to `true`.
+
+
+[[expressions-operators-logical]]
+== Logical Operators
+
+SpEL supports the following logical (`boolean`) operators:
+
+* `and` (`&&`)
+* `or` (`||`)
+* `not` (`!`)
+
+All of the textual operators are case-insensitive.
+
+The following example shows how to use the logical operators:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	// -- AND --
+
+	// evaluates to false
+	boolean falseValue = parser.parseExpression("true and false").getValue(Boolean.class);
+
+	// evaluates to true
+	String expression = "isMember('Nikola Tesla') and isMember('Mihajlo Pupin')";
+	boolean trueValue = parser.parseExpression(expression).getValue(societyContext, Boolean.class);
+
+	// -- OR --
+
+	// evaluates to true
+	boolean trueValue = parser.parseExpression("true or false").getValue(Boolean.class);
+
+	// evaluates to true
+	String expression = "isMember('Nikola Tesla') or isMember('Albert Einstein')";
+	boolean trueValue = parser.parseExpression(expression).getValue(societyContext, Boolean.class);
+
+	// -- NOT --
+
+	// evaluates to false
+	boolean falseValue = parser.parseExpression("!true").getValue(Boolean.class);
+
+	// -- AND and NOT --
+
+	String expression = "isMember('Nikola Tesla') and !isMember('Mihajlo Pupin')";
+	boolean falseValue = parser.parseExpression(expression).getValue(societyContext, Boolean.class);
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes"]
+----
+	// -- AND --
+
+	// evaluates to false
+	val falseValue = parser.parseExpression("true and false").getValue(Boolean::class.java)
+
+	// evaluates to true
+	val expression = "isMember('Nikola Tesla') and isMember('Mihajlo Pupin')"
+	val trueValue = parser.parseExpression(expression).getValue(societyContext, Boolean::class.java)
+
+	// -- OR --
+
+	// evaluates to true
+	val trueValue = parser.parseExpression("true or false").getValue(Boolean::class.java)
+
+	// evaluates to true
+	val expression = "isMember('Nikola Tesla') or isMember('Albert Einstein')"
+	val trueValue = parser.parseExpression(expression).getValue(societyContext, Boolean::class.java)
+
+	// -- NOT --
+
+	// evaluates to false
+	val falseValue = parser.parseExpression("!true").getValue(Boolean::class.java)
+
+	// -- AND and NOT --
+
+	val expression = "isMember('Nikola Tesla') and !isMember('Mihajlo Pupin')"
+	val falseValue = parser.parseExpression(expression).getValue(societyContext, Boolean::class.java)
+----
+======
+
+
+[[expressions-operators-string]]
+== String Operators
+
+You can use the following operators on strings.
+
+* concatenation (`+`)
+* subtraction (`-`)
+  - for use with a string containing a single character
+* repeat (`*`)
+
+The following example shows the `String` operators in use:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	// -- Concatenation --
+
+	// evaluates to "hello world"
+	String helloWorld = parser.parseExpression("'hello' + ' ' + 'world'")
+			.getValue(String.class);
+
+	// -- Character Subtraction --
+
+	// evaluates to 'a'
+	char ch = parser.parseExpression("'d' - 3")
+			.getValue(char.class);
+
+	// -- Repeat --
+
+	// evaluates to "abcabc"
+	String repeated = parser.parseExpression("'abc' * 2")
+			.getValue(String.class);
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes"]
+----
+	// -- Concatenation --
+
+	// evaluates to "hello world"
+	val helloWorld = parser.parseExpression("'hello' + ' ' + 'world'")
+			.getValue(String::class.java)
+
+	// -- Character Subtraction --
+
+	// evaluates to 'a'
+	val ch = parser.parseExpression("'d' - 3")
+			.getValue(Character::class.java);
+
+	// -- Repeat --
+
+	// evaluates to "abcabc"
+	val repeated = parser.parseExpression("'abc' * 2")
+			.getValue(String::class.java);
+----
+======
+
+[[expressions-operators-mathematical]]
+== Mathematical Operators
+
+You can use the following operators on numbers, and standard operator precedence is enforced.
+
+* addition (`+`)
+* subtraction (`-`)
+* increment (`{pp}`)
+* decrement (`--`)
+* multiplication (`*`)
+* division (`/`)
+* modulus (`%`)
+* exponential power (`^`)
+
+The division and modulus operators can also be specified as a purely textual equivalent.
+This avoids problems where the symbols used have special meaning for the document type in
+which the expression is embedded (such as in an XML document). The textual equivalents
+are:
+
+* `div` (`/`)
+* `mod` (`%`)
+
+All of the textual operators are case-insensitive.
+
+[NOTE]
+====
+The increment and decrement operators can be used with either prefix (`{pp}A`, `--A`) or
+postfix (`A{pp}`, `A--`) notation with variables or properties that can be written to.
+====
+
+The following example shows the mathematical operators in use:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	Inventor inventor = new Inventor();
+	EvaluationContext context = SimpleEvaluationContext.forReadWriteDataBinding().build();
+
+	// -- Addition --
+
+	int two = parser.parseExpression("1 + 1").getValue(int.class);  // 2
+
+	// -- Subtraction --
+
+	int four = parser.parseExpression("1 - -3").getValue(int.class);  // 4
+
+	double d = parser.parseExpression("1000.00 - 1e4").getValue(double.class);  // -9000
+
+	// -- Increment --
+
+	// The counter property in Inventor has an initial value of 0.
+
+	// evaluates to 2; counter is now 1
+	two = parser.parseExpression("counter++ + 2").getValue(context, inventor, int.class);
+
+	// evaluates to 5; counter is now 2
+	int five = parser.parseExpression("3 + ++counter").getValue(context, inventor, int.class);
+
+	// -- Decrement --
+
+	// The counter property in Inventor has a value of 2.
+
+	// evaluates to 6; counter is now 1
+	int six = parser.parseExpression("counter-- + 4").getValue(context, inventor, int.class);
+
+	// evaluates to 5; counter is now 0
+	five = parser.parseExpression("5 + --counter").getValue(context, inventor, int.class);
+
+	// -- Multiplication --
+
+	six = parser.parseExpression("-2 * -3").getValue(int.class);  // 6
+
+	double twentyFour = parser.parseExpression("2.0 * 3e0 * 4").getValue(double.class);  // 24.0
+
+	// -- Division --
+
+	int minusTwo = parser.parseExpression("6 / -3").getValue(int.class);  // -2
+
+	double one = parser.parseExpression("8.0 / 4e0 / 2").getValue(double.class);  // 1.0
+
+	// -- Modulus --
+
+	int three = parser.parseExpression("7 % 4").getValue(int.class);  // 3
+
+	int oneInt = parser.parseExpression("8 / 5 % 2").getValue(int.class);  // 1
+
+	// -- Exponential power --
+
+	int maxInt = parser.parseExpression("(2^31) - 1").getValue(int.class);  // Integer.MAX_VALUE
+
+	int minInt = parser.parseExpression("-2^31").getValue(int.class);  // Integer.MIN_VALUE
+
+	// -- Operator precedence --
+
+	int minusTwentyOne = parser.parseExpression("1+2-3*8").getValue(int.class);  // -21
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes"]
+----
+	val inventor = Inventor()
+	val context = SimpleEvaluationContext.forReadWriteDataBinding().build()
+
+	// -- Addition --
+
+	var two = parser.parseExpression("1 + 1").getValue(Int::class.java)  // 2
+
+	// -- Subtraction --
+
+	val four = parser.parseExpression("1 - -3").getValue(Int::class.java)  // 4
+
+	val d = parser.parseExpression("1000.00 - 1e4").getValue(Double::class.java)  // -9000
+
+	// -- Increment --
+
+	// The counter property in Inventor has an initial value of 0.
+
+	// evaluates to 2; counter is now 1
+	two = parser.parseExpression("counter++ + 2").getValue(context, inventor, Int::class.java)
+
+	// evaluates to 5; counter is now 2
+	var five = parser.parseExpression("3 + ++counter").getValue(context, inventor, Int::class.java)
+
+	// -- Decrement --
+
+	// The counter property in Inventor has a value of 2.
+
+	// evaluates to 6; counter is now 1
+	var six = parser.parseExpression("counter-- + 4").getValue(context, inventor, Int::class.java)
+
+	// evaluates to 5; counter is now 0
+	five = parser.parseExpression("5 + --counter").getValue(context, inventor, Int::class.java)
+
+	// -- Multiplication --
+
+	six = parser.parseExpression("-2 * -3").getValue(Int::class.java)  // 6
+
+	val twentyFour = parser.parseExpression("2.0 * 3e0 * 4").getValue(Double::class.java)  // 24.0
+
+	// -- Division --
+
+	val minusTwo = parser.parseExpression("6 / -3").getValue(Int::class.java)  // -2
+
+	val one = parser.parseExpression("8.0 / 4e0 / 2").getValue(Double::class.java)  // 1.0
+
+	// -- Modulus --
+
+	val three = parser.parseExpression("7 % 4").getValue(Int::class.java)  // 3
+
+	val oneInt = parser.parseExpression("8 / 5 % 2").getValue(Int::class.java)  // 1
+
+	// -- Exponential power --
+
+	val maxInt = parser.parseExpression("(2^31) - 1").getValue(Int::class.java)  // Integer.MAX_VALUE
+
+	val minInt = parser.parseExpression("-2^31").getValue(Int::class.java)  // Integer.MIN_VALUE
+
+	// -- Operator precedence --
+
+	val minusTwentyOne = parser.parseExpression("1+2-3*8").getValue(Int::class.java)  // -21	
+----
+======
+
+
+[[expressions-assignment]]
+== The Assignment Operator
+
+To set a property, use the assignment operator (`=`). This is typically done within a
+call to `setValue` but can also be done inside a call to `getValue`. The following
+listing shows both ways to use the assignment operator:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	Inventor inventor = new Inventor();
+	EvaluationContext context = SimpleEvaluationContext.forReadWriteDataBinding().build();
+
+	parser.parseExpression("name").setValue(context, inventor, "Aleksandar Seovic");
+
+	// alternatively
+	String aleks = parser.parseExpression(
+			"name = 'Aleksandar Seovic'").getValue(context, inventor, String.class);
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes"]
+----
+	val inventor = Inventor()
+	val context = SimpleEvaluationContext.forReadWriteDataBinding().build()
+
+	parser.parseExpression("name").setValue(context, inventor, "Aleksandar Seovic")
+
+	// alternatively
+	val aleks = parser.parseExpression(
+			"name = 'Aleksandar Seovic'").getValue(context, inventor, String::class.java)
+----
+======
+
+
+[[expressions-operators-overloaded]]
+== Overloaded Operators
+
+By default, the mathematical operations defined in SpEL's `Operation` enum (`ADD`,
+`SUBTRACT`, `DIVIDE`, `MULTIPLY`, `MODULUS`, and `POWER`) support simple types like
+numbers. By providing an implementation of `OperatorOverloader`, the expression language
+can support these operations on other types.
+
+For example, if we want to overload the `ADD` operator to allow two lists to be
+concatenated using the `+` sign, we can implement a custom `OperatorOverloader` as
+follows.
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	pubic class ListConcatenation implements OperatorOverloader {
+
+		@Override
+		public boolean overridesOperation(Operation operation, Object left, Object right) {
+			return (operation == Operation.ADD &&
+					left instanceof List && right instanceof List);
+		}
+
+		@Override
+		@SuppressWarnings("unchecked")
+		public Object operate(Operation operation, Object left, Object right) {
+			if (operation == Operation.ADD &&
+					left instanceof List list1 && right instanceof List list2) {
+
+				List result = new ArrayList(list1);
+				result.addAll(list2);
+				return result;
+			}
+			throw new UnsupportedOperationException(
+				"No overload for operation %s and operands [%s] and [%s]"
+					.formatted(operation, left, right));
+		}
+	}
+----
+
+If we register `ListConcatenation` as the `OperatorOverloader` in a
+`StandardEvaluationContext`, we can then evaluate expressions like `{1, 2, 3} + {4, 5}`
+as demonstrated in the following example.
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	StandardEvaluationContext context = new StandardEvaluationContext();
+	context.setOperatorOverloader(new ListConcatenation());
+
+	// evaluates to a new list: [1, 2, 3, 4, 5]
+	parser.parseExpression("{1, 2, 3} + {2 + 2, 5}").getValue(context, List.class);
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes"]
+----
+	StandardEvaluationContext context = StandardEvaluationContext()
+	context.setOperatorOverloader(ListConcatenation())
+
+	// evaluates to a new list: [1, 2, 3, 4, 5]
+	parser.parseExpression("{1, 2, 3} + {2 + 2, 5}").getValue(context, List::class.java)
+----
+======
+
+[NOTE]
+====
+An `OperatorOverloader` does not change the default semantics for an operator. For
+example, `2 + 2` in the above example still evaluates to `4`.
+====
+
+[CAUTION]
+====
+Any expression that uses an overloaded operator cannot be compiled. See
+xref:core/expressions/evaluation.adoc#expressions-compiler-limitations[Compiler Limitations]
+for details.
+====

@@ -1,0 +1,26 @@
+[[websocket-stomp-interceptors]]
+= Interception
+
+xref:web/websocket/stomp/application-context-events.adoc[Events] provide notifications for the lifecycle
+of a STOMP connection but not for every client message. Applications can also register a
+`ChannelInterceptor` to intercept any message and in any part of the processing chain.
+The following example shows how to intercept inbound messages from clients:
+
+include-code::./WebSocketConfiguration[tag=snippet,indent=0]
+
+A custom `ChannelInterceptor` can use `StompHeaderAccessor` or `SimpMessageHeaderAccessor`
+to access information about the message, as the following example shows:
+
+include-code::./MyChannelInterceptor[tag=snippet,indent=0]
+
+Applications can also implement `ExecutorChannelInterceptor`, which is a sub-interface
+of `ChannelInterceptor` with callbacks in the thread in which the messages are handled.
+While a `ChannelInterceptor` is invoked once for each message sent to a channel, the
+`ExecutorChannelInterceptor` provides hooks in the thread of each `MessageHandler`
+subscribed to messages from the channel.
+
+Note that, as with the `SessionDisconnectEvent` described earlier, a DISCONNECT message
+can be from the client or it can also be automatically generated when
+the WebSocket session is closed. In some cases, an interceptor may intercept this
+message more than once for each session. Components should be idempotent with regard to
+multiple disconnect events.

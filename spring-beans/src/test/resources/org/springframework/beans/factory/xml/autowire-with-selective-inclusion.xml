@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xsi:schemaLocation="http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans-2.5.xsd"
+		default-autowire-candidates="props*,*ly">
+
+	<bean id="rob" class="org.springframework.beans.testfixture.beans.TestBean" autowire="byType"/>
+
+	<bean id="sally" class="org.springframework.beans.testfixture.beans.TestBean"/>
+
+	<bean id="props1" class="org.springframework.beans.factory.config.PropertiesFactoryBean">
+	  <property name="properties">
+			<value>name=props1</value>
+	  </property>
+	</bean>
+
+	<bean id="props2" class="org.springframework.beans.factory.config.PropertiesFactoryBean" autowire-candidate="false">
+	  <property name="properties">
+			<value>name=props2</value>
+	  </property>
+	</bean>
+
+	<bean id="someProps" class="org.springframework.beans.factory.config.PropertiesFactoryBean">
+	  <property name="properties">
+			<value>name=someProps</value>
+	  </property>
+	</bean>
+
+	<bean class="org.springframework.beans.factory.xml.CountingFactory">
+		<property name="testBean" ref="rob"/>
+	</bean>
+
+</beans>

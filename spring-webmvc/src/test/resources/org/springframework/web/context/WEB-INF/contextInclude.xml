@@ -1,0 +1,6 @@
+<!-- Include snippet to be loaded via entity reference in applicationContext.xml -->
+
+	<bean id="father" class="org.springframework.beans.testfixture.beans.TestBean">
+		<property name="name"><value>yetanotherdummy</value></property>
+	</bean>
+

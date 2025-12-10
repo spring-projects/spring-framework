@@ -1,0 +1,24 @@
+description = "Spring WebSocket"
+
+dependencies {
+	api(project(":spring-context"))
+	api(project(":spring-core"))
+	api(project(":spring-web"))
+	optional(project(":spring-messaging"))
+	optional(project(":spring-webmvc"))
+	optional("com.fasterxml.jackson.core:jackson-databind")
+	optional("jakarta.servlet:jakarta.servlet-api")
+	optional("jakarta.websocket:jakarta.websocket-api")
+	optional("jakarta.websocket:jakarta.websocket-client-api")
+	optional("org.eclipse.jetty.ee11.websocket:jetty-ee11-websocket-jetty-server") {
+		exclude group: "jakarta.servlet", module: "jakarta.servlet-api"
+	}
+	optional("org.eclipse.jetty.websocket:jetty-websocket-jetty-api")
+	optional("org.eclipse.jetty:jetty-client")
+	optional("tools.jackson.core:jackson-databind")
+	testImplementation(testFixtures(project(":spring-core")))
+	testImplementation(testFixtures(project(":spring-web")))
+	testImplementation("io.projectreactor.netty:reactor-netty-http")
+	testImplementation("org.apache.tomcat.embed:tomcat-embed-core")
+	testImplementation("org.apache.tomcat.embed:tomcat-embed-websocket")
+}

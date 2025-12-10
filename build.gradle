@@ -1,0 +1,87 @@
+plugins {
+	id 'io.freefair.aspectj' version '8.13.1' apply false
+	// kotlinVersion is managed in gradle.properties
+	id 'org.jetbrains.kotlin.plugin.serialization' version "${kotlinVersion}" apply false
+	id 'org.jetbrains.dokka'
+	id 'com.github.bjornvester.xjc' version '1.8.2' apply false
+	id 'com.gradleup.shadow' version "9.2.2" apply false
+	id 'me.champeau.jmh' version '0.7.2' apply false
+	id 'io.spring.nullability' version '0.0.8' apply false
+}
+
+ext {
+	moduleProjects = subprojects.findAll { it.name.startsWith("spring-") }
+	javaProjects = subprojects.findAll { !it.name.startsWith("framework-") }
+}
+
+description = "Spring Framework"
+
+configure(allprojects) { project ->
+	apply plugin: "org.springframework.build.localdev"
+	group = "org.springframework"
+	repositories {
+		mavenCentral()
+		if (version.contains('-')) {
+			maven { url = "https://repo.spring.io/milestone" }
+		}
+		if (version.endsWith('-SNAPSHOT')) {
+			maven { url = "https://repo.spring.io/snapshot" }
+		}
+	}
+	configurations.all {
+		resolutionStrategy {
+			cacheChangingModulesFor 0, "seconds"
+			cacheDynamicVersionsFor 0, "seconds"
+		}
+	}
+}
+
+configure(allprojects - project(":framework-platform")) {
+	configurations {
+		dependencyManagement {
+			canBeConsumed = false
+			canBeResolved = false
+			visible = false
+		}
+		matching { it.name.endsWith("Classpath") }.all { it.extendsFrom(dependencyManagement) }
+	}
+	dependencies {
+		dependencyManagement(enforcedPlatform(dependencies.project(path: ":framework-platform")))
+	}
+}
+
+configure([rootProject] + javaProjects) { project ->
+	apply plugin: "java"
+	apply plugin: "java-test-fixtures"
+	apply plugin: 'org.springframework.build.conventions'
+	apply from: "${rootDir}/gradle/ide.gradle"
+
+	dependencies {
+		testImplementation("org.junit.jupiter:junit-jupiter")
+		testImplementation("org.junit.platform:junit-platform-suite")
+		testImplementation("org.mockito:mockito-core")
+		testImplementation("org.mockito:mockito-junit-jupiter")
+		testImplementation("io.mockk:mockk")
+		testImplementation("org.assertj:assertj-core")
+		testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+		testRuntimeOnly("org.apache.logging.log4j:log4j-core")
+	}
+
+	ext.javadocLinks = [
+			"https://docs.oracle.com/en/java/javase/17/docs/api/",
+			//"https://jakarta.ee/specifications/platform/11/apidocs/",
+			"https://docs.hibernate.org/orm/5.6/javadocs/",
+			"https://www.quartz-scheduler.org/api/2.3.0/",
+			"https://hc.apache.org/httpcomponents-client-5.5.x/current/httpclient5/apidocs/",
+			"https://projectreactor.io/docs/test/release/api/",
+			"https://junit.org/junit4/javadoc/4.13.2/",
+			"https://docs.junit.org/6.0.1/api/",
+			"https://www.reactive-streams.org/reactive-streams-1.0.3-javadoc/",
+			"https://r2dbc.io/spec/1.0.0.RELEASE/api/",
+			"https://jspecify.dev/docs/api/"
+	] as String[]
+}
+
+configure(moduleProjects) { project ->
+	apply from: "${rootDir}/gradle/spring-module.gradle"
+}

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xsi:schemaLocation="http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
+
+	<import resource="ClassPathXmlApplicationContextTests-resourceIm*.xml"/>
+
+	<bean id="resource2" class="org.springframework.tests.sample.beans.ResourceTestBean">
+		<constructor-arg name="inputStream">
+			<value>classpath:org/springframework/beans/factory/xml/test.properties</value>
+		</constructor-arg>
+		<constructor-arg name="resource">
+			<value>test.properties</value>
+		</constructor-arg>
+	</bean>
+
+</beans>

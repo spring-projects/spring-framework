@@ -1,0 +1,22 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xsi:schemaLocation="http://www.springframework.org/schema/beans
+	   https://www.springframework.org/schema/beans/spring-beans.xsd">
+
+	<!-- tag::snippet[] -->
+	<!-- this is the Message Driven POJO (MDP) -->
+	<bean id="messageListener" class="org.springframework.jms.listener.adapter.MessageListenerAdapter">
+		<constructor-arg>
+			<bean class="jmsexample.DefaultMessageDelegate"/>
+		</constructor-arg>
+	</bean>
+
+	<!-- and this is the message listener container... -->
+	<bean id="jmsContainer" class="org.springframework.jms.listener.DefaultMessageListenerContainer">
+		<property name="connectionFactory" ref="connectionFactory"/>
+		<property name="destination" ref="destination"/>
+		<property name="messageListener" ref="messageListener"/>
+	</bean>
+	<!-- end::snippet[] -->
+
+</beans>

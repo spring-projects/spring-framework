@@ -1,0 +1,120 @@
+apply plugin: 'java-library'
+apply plugin: 'org.springframework.build.conventions'
+apply plugin: 'org.springframework.build.optional-dependencies'
+// Uncomment the following for Shadow support in the jmhJar block.
+// Currently commented out due to ZipException: archive is not a ZIP archive
+// apply plugin: 'io.github.goooler.shadow'
+apply plugin: 'me.champeau.jmh'
+apply from: "$rootDir/gradle/publications.gradle"
+apply plugin: "io.spring.nullability"
+
+dependencies {
+	jmh 'org.openjdk.jmh:jmh-core:1.37'
+	jmh 'org.openjdk.jmh:jmh-generator-annprocess:1.37'
+	jmh 'org.openjdk.jmh:jmh-generator-bytecode:1.37'
+	jmh 'net.sf.jopt-simple:jopt-simple'
+}
+
+jmh {
+	duplicateClassesStrategy = DuplicatesStrategy.EXCLUDE
+}
+
+tasks.findByName("processJmhResources").configure {
+	duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
+
+jmhJar {
+	// Uncomment the following for Shadow's Transformer support.
+	// mergeServiceFiles()
+	// append('META-INF/spring.handlers')
+	// append('META-INF/spring.schemas')
+	// append('META-INF/spring.tooling')
+	exclude 'LICENSE'
+	exclude 'THIRD-PARTY'
+	exclude 'META-INF/license.txt'
+	exclude 'META-INF/notice.txt'
+	exclude 'META-INF/DEPENDENCIES'
+	exclude 'META-INF/LICENSE*'
+	exclude 'META-INF/NOTICE'
+	exclude 'META-INF/THIRD-PARTY'
+}
+
+jar {
+	manifest.attributes["Implementation-Title"] = project.name
+	manifest.attributes["Implementation-Version"] = project.version
+	manifest.attributes["Automatic-Module-Name"] = project.name.replace('-', '.')  // for Jigsaw
+	manifest.attributes["Created-By"] =
+			"${System.getProperty("java.version")} (${System.getProperty("java.specification.vendor")})"
+
+	from("${rootDir}/framework-docs/src/docs/dist") {
+		include "license.txt"
+		include "notice.txt"
+		into "META-INF"
+		expand(copyright: new Date().format("yyyy"), version: project.version)
+	}
+}
+
+normalization {
+	runtimeClasspath {
+		ignore "META-INF/MANIFEST.MF"
+	}
+}
+
+javadoc {
+	description = "Generates project-level javadoc for use in -javadoc jar"
+	failOnError = true
+	options {
+		encoding = "UTF-8"
+		memberLevel = JavadocMemberLevel.PROTECTED
+		author = true
+		header = project.name
+		use = true
+		links(project.ext.javadocLinks)
+		setOutputLevel(JavadocOutputLevel.QUIET)
+		// Check for 'syntax' during linting. Note that the global
+		// 'framework-api:javadoc' task checks for 'reference' in addition
+		// to 'syntax'.
+		addBooleanOption("Xdoclint:syntax,-reference", true)
+		// Change modularity mismatch from warn to info.
+		// See https://github.com/spring-projects/spring-framework/issues/27497
+		addStringOption("-link-modularity-mismatch", "info")
+		// With the javadoc tool on Java 25, it appears that the 'reference'
+		// group is always active and the '-reference' flag is not honored.
+		// Thus, we do NOT fail the build on Javadoc warnings due to
+		// cross-module @see and @link references which are only reachable
+		// when running the global 'framework-api:javadoc' task.
+		addBooleanOption('Werror', false)
+	}
+
+	// Attempt to suppress warnings due to cross-module @see and @link references.
+	// Note that the global 'framework-api:javadoc' task displays all warnings.
+	logging.captureStandardError LogLevel.INFO
+	logging.captureStandardOutput LogLevel.INFO  // suppress "## warnings" message
+}
+
+tasks.register('sourcesJar', Jar) {
+	dependsOn classes
+	duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+	archiveClassifier.set("sources")
+	from sourceSets.main.allSource
+	// Don't include or exclude anything explicitly by default. See SPR-12085.
+}
+
+tasks.register('javadocJar', Jar) {
+	archiveClassifier.set("javadoc")
+	from javadoc
+}
+
+publishing {
+	publications {
+		mavenJava(MavenPublication) {
+			from components.java
+			artifact sourcesJar
+			artifact javadocJar
+		}
+	}
+}
+
+// Disable publication of test fixture artifacts.
+components.java.withVariantsFromConfiguration(configurations.testFixturesApiElements) { skip() }
+components.java.withVariantsFromConfiguration(configurations.testFixturesRuntimeElements) { skip() }

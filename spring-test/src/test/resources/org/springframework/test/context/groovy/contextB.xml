@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd">
+
+	<bean id="employee" class="org.springframework.beans.testfixture.beans.Employee">
+		<property name="name" value="Dilbert" />
+		<property name="age" value="42" />
+		<property name="company" value="???" />
+	</bean>
+
+	<bean id="pet" class="org.springframework.beans.testfixture.beans.Pet">
+		<constructor-arg value="Dogbert" />
+	</bean>
+
+	<bean id="bar" class="java.lang.String">
+		<constructor-arg value="XML Bar" />
+	</bean>
+
+</beans>

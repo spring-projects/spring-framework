@@ -1,0 +1,36 @@
+{
+  "familyMembers": [
+    {
+      "name": "Homer"
+    },
+    {
+      "name": "Marge"
+    },
+    {
+      "name": "Bart"
+    },
+    {
+      "name": "Lisa"
+    },
+    {
+      "name": "Maggie"
+    }
+  ],
+  "indexedFamilyMembers": {
+    "father": {
+      "name": "Homer"
+    },
+    "mother": {
+      "name": "Marge"
+    },
+    "son": {
+      "name": "Bart"
+    },
+    "daughter": {
+      "name": "Lisa"
+    },
+    "baby": {
+      "name": "Maggie"
+    }
+  }
+}

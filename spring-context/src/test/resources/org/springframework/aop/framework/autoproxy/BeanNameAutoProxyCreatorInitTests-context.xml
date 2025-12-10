@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "https://www.springframework.org/dtd/spring-beans-2.0.dtd">
+
+<beans>
+
+	<bean class="org.springframework.aop.framework.autoproxy.BeanNameAutoProxyCreator">
+		<property name="beanNames" value="pet*"/>
+		<property name="proxyTargetClass" value="true"/>
+		<property name="interceptorNames" value="checker"/>
+	</bean>
+
+	<bean id="checker" class="org.springframework.aop.support.RegexpMethodPointcutAdvisor">
+		<property name="advice">
+			<bean class="org.springframework.aop.framework.autoproxy.NullChecker"/>
+		</property>
+		<property name="patterns">
+			<bean class="org.springframework.beans.factory.config.ListFactoryBean">
+				<property name="sourceList">
+					<list>
+						<value>.*\.setName*(.*)</value>
+					</list>
+				</property>
+			</bean>
+		</property>
+	</bean>
+
+	<bean id="pet" class="org.springframework.beans.testfixture.beans.Pet">
+		<constructor-arg value="Simba" />
+	</bean>
+
+</beans>	

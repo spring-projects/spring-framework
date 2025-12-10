@@ -1,0 +1,8 @@
+[[spring-testing-annotation-bootstrapwith]]
+= `@BootstrapWith`
+:page-section-summary-toc: 1
+
+`@BootstrapWith` is an annotation that can be applied to a test class to configure how
+the Spring TestContext Framework is bootstrapped. Specifically, you can use
+`@BootstrapWith` to specify a custom `TestContextBootstrapper`. See the section on
+xref:testing/testcontext-framework/bootstrapping.adoc[bootstrapping the TestContext framework] for further details.

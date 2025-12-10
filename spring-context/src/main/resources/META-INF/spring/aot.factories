@@ -1,0 +1,9 @@
+org.springframework.aot.hint.RuntimeHintsRegistrar= \
+org.springframework.format.support.FormattingConversionServiceRuntimeHints
+
+org.springframework.beans.factory.aot.BeanFactoryInitializationAotProcessor= \
+org.springframework.context.aot.ReflectiveProcessorBeanFactoryInitializationAotProcessor
+
+org.springframework.beans.factory.aot.BeanRegistrationAotProcessor=\
+org.springframework.context.aot.KotlinReflectionBeanRegistrationAotProcessor, \
+org.springframework.validation.beanvalidation.BeanValidationBeanRegistrationAotProcessor

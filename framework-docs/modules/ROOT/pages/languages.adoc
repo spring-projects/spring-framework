@@ -1,0 +1,3 @@
+[[languages]]
+= Language Support
+:page-section-summary-toc: 1

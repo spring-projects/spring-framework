@@ -1,0 +1,34 @@
+[[expressions-beandef]]
+= Expressions in Bean Definitions
+
+You can use SpEL expressions with configuration metadata for defining bean instances. In both
+cases, the syntax to define the expression is of the form `#{ <expression string> }`.
+
+All beans in the application context are available as predefined variables with their
+common bean name. This includes standard context beans such as `environment` (of type
+`org.springframework.core.env.Environment`) as well as `systemProperties` and
+`systemEnvironment` (of type `Map<String, Object>`) for access to the runtime environment.
+
+To specify a default value, you can place the `@Value` annotation on fields, methods,
+and method or constructor parameters (or XML equivalent).
+
+The following example sets the default value of a field:
+
+include-code::./FieldValueTestBean[tag=snippet,indent=0]
+
+Note that you do not have to prefix the predefined variable with the `#` symbol here.
+
+The following example shows the equivalent but on a property setter method:
+
+include-code::./PropertyValueTestBean[tag=snippet,indent=0]
+
+Autowired methods and constructors can also use the `@Value` annotation, as the following
+examples show:
+
+include-code::./SimpleMovieLister[tag=snippet,indent=0]
+
+include-code::./MovieRecommender[tag=snippet,indent=0]
+
+You can also refer to other bean properties by name, as the following example shows:
+
+include-code::./ShapeGuess[tag=snippet,indent=0]

@@ -1,0 +1,339 @@
+/*
+ * Copyright 2002-present the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.springframework.http.client;
+
+import java.io.Closeable;
+import java.io.IOException;
+import java.net.URI;
+import java.time.Duration;
+import java.util.concurrent.TimeUnit;
+import java.util.function.BiFunction;
+
+import org.apache.hc.client5.http.classic.HttpClient;
+import org.apache.hc.client5.http.classic.methods.HttpDelete;
+import org.apache.hc.client5.http.classic.methods.HttpGet;
+import org.apache.hc.client5.http.classic.methods.HttpHead;
+import org.apache.hc.client5.http.classic.methods.HttpOptions;
+import org.apache.hc.client5.http.classic.methods.HttpPatch;
+import org.apache.hc.client5.http.classic.methods.HttpPost;
+import org.apache.hc.client5.http.classic.methods.HttpPut;
+import org.apache.hc.client5.http.classic.methods.HttpTrace;
+import org.apache.hc.client5.http.config.Configurable;
+import org.apache.hc.client5.http.config.RequestConfig;
+import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.apache.hc.client5.http.io.HttpClientConnectionManager;
+import org.apache.hc.client5.http.protocol.HttpClientContext;
+import org.apache.hc.core5.http.ClassicHttpRequest;
+import org.apache.hc.core5.http.protocol.HttpContext;
+import org.jspecify.annotations.Nullable;
+
+import org.springframework.beans.factory.DisposableBean;
+import org.springframework.http.HttpMethod;
+import org.springframework.util.Assert;
+
+/**
+ * {@link org.springframework.http.client.ClientHttpRequestFactory} implementation that
+ * uses <a href="https://hc.apache.org/httpcomponents-client-ga/">Apache HttpComponents
+ * HttpClient</a> to create requests.
+ *
+ * <p>Allows to use a pre-configured {@link HttpClient} instance -
+ * potentially with authentication, HTTP connection pooling, etc.
+ *
+ * <p><b>NOTE:</b> Requires Apache HttpComponents 5.1 or higher.
+ *
+ * @author Oleg Kalnichevski
+ * @author Arjen Poutsma
+ * @author Stephane Nicoll
+ * @author Juergen Hoeller
+ * @since 3.1
+ */
+public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequestFactory, DisposableBean {
+
+	private HttpClient httpClient;
+
+	private @Nullable BiFunction<HttpMethod, URI, HttpContext> httpContextFactory;
+
+	private long connectionRequestTimeout = -1;
+
+	private long readTimeout = -1;
+
+
+	/**
+	 * Create a new instance of the {@code HttpComponentsClientHttpRequestFactory}
+	 * with a default {@link HttpClient} based on system properties.
+	 */
+	public HttpComponentsClientHttpRequestFactory() {
+		this.httpClient = HttpClients.createSystem();
+	}
+
+	/**
+	 * Create a new instance of the {@code HttpComponentsClientHttpRequestFactory}
+	 * with the given {@link HttpClient} instance.
+	 * @param httpClient the HttpClient instance to use for this request factory
+	 */
+	public HttpComponentsClientHttpRequestFactory(HttpClient httpClient) {
+		this.httpClient = httpClient;
+	}
+
+
+	/**
+	 * Set the {@code HttpClient} used for
+	 * {@linkplain #createRequest(URI, HttpMethod) synchronous execution}.
+	 */
+	public void setHttpClient(HttpClient httpClient) {
+		Assert.notNull(httpClient, "HttpClient must not be null");
+		this.httpClient = httpClient;
+	}
+
+	/**
+	 * Return the {@code HttpClient} used for
+	 * {@linkplain #createRequest(URI, HttpMethod) synchronous execution}.
+	 */
+	public HttpClient getHttpClient() {
+		return this.httpClient;
+	}
+
+	/**
+	 * Set the timeout in milliseconds used when requesting a connection
+	 * from the connection manager using the underlying {@link RequestConfig}.
+	 * A timeout value of 0 specifies an infinite timeout.
+	 * <p>Additional properties can be configured by specifying a
+	 * {@link RequestConfig} instance on a custom {@link HttpClient}.
+	 * @param connectionRequestTimeout the timeout value to request a connection
+	 * in milliseconds
+	 * @see RequestConfig#getConnectionRequestTimeout()
+	 */
+	public void setConnectionRequestTimeout(int connectionRequestTimeout) {
+		Assert.isTrue(connectionRequestTimeout >= 0, "Timeout must be a non-negative value");
+		this.connectionRequestTimeout = connectionRequestTimeout;
+	}
+
+	/**
+	 * Set the timeout in milliseconds used when requesting a connection
+	 * from the connection manager using the underlying {@link RequestConfig}.
+	 * A timeout value of 0 specifies an infinite timeout.
+	 * <p>Additional properties can be configured by specifying a
+	 * {@link RequestConfig} instance on a custom {@link HttpClient}.
+	 * @param connectionRequestTimeout the timeout value to request a connection
+	 * as a {@code Duration}.
+	 * @since 6.1
+	 * @see RequestConfig#getConnectionRequestTimeout()
+	 */
+	public void setConnectionRequestTimeout(Duration connectionRequestTimeout) {
+		Assert.notNull(connectionRequestTimeout, "ConnectionRequestTimeout must not be null");
+		Assert.isTrue(!connectionRequestTimeout.isNegative(), "Timeout must be a non-negative value");
+		this.connectionRequestTimeout = connectionRequestTimeout.toMillis();
+	}
+
+	/**
+	 * Set the response timeout for the underlying {@link RequestConfig}.
+	 * A timeout value of 0 specifies an infinite timeout.
+	 * <p>Additional properties can be configured by specifying a
+	 * {@link RequestConfig} instance on a custom {@link HttpClient}.
+	 * @param readTimeout the timeout value in milliseconds
+	 * @since 6.2
+	 * @see RequestConfig#getResponseTimeout()
+	 */
+	public void setReadTimeout(int readTimeout) {
+		Assert.isTrue(readTimeout >= 0, "Timeout must be a non-negative value");
+		this.readTimeout = readTimeout;
+	}
+
+	/**
+	 * Set the response timeout for the underlying {@link RequestConfig}.
+	 * A timeout value of 0 specifies an infinite timeout.
+	 * <p>Additional properties can be configured by specifying a
+	 * {@link RequestConfig} instance on a custom {@link HttpClient}.
+	 * @param readTimeout the timeout as a {@code Duration}.
+	 * @since 6.2
+	 * @see RequestConfig#getResponseTimeout()
+	 */
+	public void setReadTimeout(Duration readTimeout) {
+		Assert.notNull(readTimeout, "ReadTimeout must not be null");
+		Assert.isTrue(!readTimeout.isNegative(), "Timeout must be a non-negative value");
+		this.readTimeout = readTimeout.toMillis();
+	}
+
+	/**
+	 * Configure a factory to pre-create the {@link HttpContext} for each request.
+	 * <p>This may be useful for example in mutual TLS authentication where a
+	 * different {@code RestTemplate} for each client certificate such that
+	 * all calls made through a given {@code RestTemplate} instance as associated
+	 * for the same client identity. {@link HttpClientContext#setUserToken(Object)}
+	 * can be used to specify a fixed user token for all requests.
+	 * @param httpContextFactory the context factory to use
+	 * @since 5.2.7
+	 */
+	public void setHttpContextFactory(BiFunction<HttpMethod, URI, HttpContext> httpContextFactory) {
+		this.httpContextFactory = httpContextFactory;
+	}
+
+
+	@Override
+	@SuppressWarnings("deprecation")  // HttpClientContext.REQUEST_CONFIG
+	public ClientHttpRequest createRequest(URI uri, HttpMethod httpMethod) throws IOException {
+		HttpClient client = getHttpClient();
+
+		ClassicHttpRequest httpRequest = createHttpUriRequest(httpMethod, uri);
+		postProcessHttpRequest(httpRequest);
+		HttpContext context = createHttpContext(httpMethod, uri);
+		if (context == null) {
+			context = HttpClientContext.create();
+		}
+
+		// No custom request configuration was set
+		if (!hasCustomRequestConfig(context)) {
+			RequestConfig config = null;
+			// Use request configuration given by the user, when available
+			if (httpRequest instanceof Configurable configurable) {
+				config = configurable.getConfig();
+			}
+			if (config == null) {
+				config = createRequestConfig(client);
+			}
+			if (config != null) {
+				if (context instanceof HttpClientContext clientContext) {
+					clientContext.setRequestConfig(config);
+				}
+				context.setAttribute(HttpClientContext.REQUEST_CONFIG, config);
+			}
+		}
+		return new HttpComponentsClientHttpRequest(client, httpRequest, context);
+	}
+
+	@SuppressWarnings("deprecation")  // HttpClientContext.REQUEST_CONFIG
+	private static boolean hasCustomRequestConfig(HttpContext context) {
+		if (context instanceof HttpClientContext clientContext) {
+			// Prior to 5.4, the default config was set to RequestConfig.DEFAULT
+			// As of 5.4, it is set to null
+			RequestConfig requestConfig = clientContext.getRequestConfig();
+			return requestConfig != null && !requestConfig.equals(RequestConfig.DEFAULT);
+		}
+		// Prior to 5.4, the config was stored as an attribute
+		return context.getAttribute(HttpClientContext.REQUEST_CONFIG) != null;
+	}
+
+
+	/**
+	 * Create a default {@link RequestConfig} to use with the given client.
+	 * Can return {@code null} to indicate that no custom request config should
+	 * be set and the defaults of the {@link HttpClient} should be used.
+	 * <p>The default implementation tries to merge the defaults of the client
+	 * with the local customizations of this factory instance, if any.
+	 * @param client the {@link HttpClient} (or {@code HttpAsyncClient}) to check
+	 * @return the actual RequestConfig to use (may be {@code null})
+	 * @since 4.2
+	 * @see #mergeRequestConfig(RequestConfig)
+	 */
+	protected @Nullable RequestConfig createRequestConfig(Object client) {
+		if (client instanceof Configurable configurableClient) {
+			RequestConfig clientRequestConfig = configurableClient.getConfig();
+			return mergeRequestConfig(clientRequestConfig);
+		}
+		return mergeRequestConfig(RequestConfig.DEFAULT);
+	}
+
+	/**
+	 * Merge the given {@link HttpClient}-level {@link RequestConfig} with
+	 * the factory-level configuration, if necessary.
+	 * @param clientConfig the config held by the current
+	 * @return the merged request config
+	 * @since 4.2
+	 */
+	protected RequestConfig mergeRequestConfig(RequestConfig clientConfig) {
+		if (this.connectionRequestTimeout == -1 && this.readTimeout == -1) {  // nothing to merge
+			return clientConfig;
+		}
+
+		RequestConfig.Builder builder = RequestConfig.copy(clientConfig);
+		if (this.connectionRequestTimeout >= 0) {
+			builder.setConnectionRequestTimeout(this.connectionRequestTimeout, TimeUnit.MILLISECONDS);
+		}
+		if (this.readTimeout >= 0) {
+			builder.setResponseTimeout(this.readTimeout, TimeUnit.MILLISECONDS);
+		}
+		return builder.build();
+	}
+
+	/**
+	 * Create a Commons HttpMethodBase object for the given HTTP method and URI specification.
+	 * @param httpMethod the HTTP method
+	 * @param uri the URI
+	 * @return the Commons HttpMethodBase object
+	 */
+	protected ClassicHttpRequest createHttpUriRequest(HttpMethod httpMethod, URI uri) {
+		if (HttpMethod.GET.equals(httpMethod)) {
+			return new HttpGet(uri);
+		}
+		else if (HttpMethod.HEAD.equals(httpMethod)) {
+			return new HttpHead(uri);
+		}
+		else if (HttpMethod.POST.equals(httpMethod)) {
+			return new HttpPost(uri);
+		}
+		else if (HttpMethod.PUT.equals(httpMethod)) {
+			return new HttpPut(uri);
+		}
+		else if (HttpMethod.PATCH.equals(httpMethod)) {
+			return new HttpPatch(uri);
+		}
+		else if (HttpMethod.DELETE.equals(httpMethod)) {
+			return new HttpDelete(uri);
+		}
+		else if (HttpMethod.OPTIONS.equals(httpMethod)) {
+			return new HttpOptions(uri);
+		}
+		else if (HttpMethod.TRACE.equals(httpMethod)) {
+			return new HttpTrace(uri);
+		}
+		throw new IllegalArgumentException("Invalid HTTP method: " + httpMethod);
+	}
+
+	/**
+	 * Template method that allows for manipulating the {@link ClassicHttpRequest}
+	 * before it is returned as part of a {@link HttpComponentsClientHttpRequest}.
+	 * <p>The default implementation is empty.
+	 * @param request the request to process
+	 */
+	protected void postProcessHttpRequest(ClassicHttpRequest request) {
+	}
+
+	/**
+	 * Template method that creates a {@link HttpContext} for the given HTTP method and URI.
+	 * <p>The default implementation returns {@code null}.
+	 * @param httpMethod the HTTP method
+	 * @param uri the URI
+	 * @return the http context
+	 */
+	protected @Nullable HttpContext createHttpContext(HttpMethod httpMethod, URI uri) {
+		return (this.httpContextFactory != null ? this.httpContextFactory.apply(httpMethod, uri) : null);
+	}
+
+
+	/**
+	 * Shutdown hook that closes the underlying {@link HttpClientConnectionManager}'s
+	 * connection pool, if any.
+	 */
+	@Override
+	public void destroy() throws Exception {
+		HttpClient httpClient = getHttpClient();
+		if (httpClient instanceof Closeable closeable) {
+			closeable.close();
+		}
+	}
+
+}

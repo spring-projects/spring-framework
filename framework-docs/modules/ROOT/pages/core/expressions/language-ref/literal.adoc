@@ -1,0 +1,100 @@
+[[expressions-ref-literal]]
+= Literal Expressions
+
+SpEL supports the following types of literal expressions.
+
+String ::
+  Strings can be delimited by single quotation marks (`'`) or double quotation marks
+  (`"`). To include a single quotation mark within a string literal enclosed in single
+  quotation marks, use two adjacent single quotation mark characters. Similarly, to
+  include a double quotation mark within a string literal enclosed in double quotation
+  marks, use two adjacent double quotation mark characters.
+Number ::
+  Numbers support the use of the negative sign, exponential notation, and decimal points.
+  * Integer: `int` or `long`
+  * Hexadecimal: `int` or `long`
+  * Real: `float` or `double`
+  ** By default, real numbers are parsed using `Double.parseDouble()`.
+Boolean ::
+  `true` or `false`
+Null ::
+  `null`
+
+[NOTE]
+====
+Due to the design and implementation of the Spring Expression Language, literal numbers
+are always stored internally as positive numbers.
+
+For example, `-2` is stored internally as a positive `2` which is then negated while
+evaluating the expression (by calculating the value of `0 - 2`).
+
+This means that it is not possible to represent a negative literal number equal to the
+minimum value of that type of number in Java. For example, the minimum supported value
+for an `int` in Java is `Integer.MIN_VALUE` which has a value of `-2147483648`. However,
+if you include `-2147483648` in a SpEL expression, an exception will be thrown informing
+you that the value `2147483648` cannot be parsed as an `int` (because it exceeds the
+value of `Integer.MAX_VALUE` which is `2147483647`).
+
+If you need to use the minimum value for a particular type of number within a SpEL
+expression, you can either reference the `MIN_VALUE` constant for the respective wrapper
+type (such as `Integer.MIN_VALUE`, `Long.MIN_VALUE`, etc.) or calculate the minimum
+value. For example, to use the minimum integer value:
+
+- `T(Integer).MIN_VALUE` -- requires a `StandardEvaluationContext`
+- `-2^31` -- can be used with any type of `EvaluationContext`
+====
+
+The following listing shows simple usage of literals. Typically, they are not used in
+isolation like this but, rather, as part of a more complex expression -- for example,
+using a literal on one side of a logical comparison operator or as an argument to a
+method.
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	ExpressionParser parser = new SpelExpressionParser();
+
+	// evaluates to "Hello World"
+	String helloWorld = (String) parser.parseExpression("'Hello World'").getValue();
+
+	// evaluates to "Tony's Pizza"
+	String pizzaParlor = (String) parser.parseExpression("'Tony''s Pizza'").getValue();
+
+	double avogadrosNumber = (Double) parser.parseExpression("6.0221415E+23").getValue();
+
+	// evaluates to 2147483647
+	int maxValue = (Integer) parser.parseExpression("0x7FFFFFFF").getValue();
+
+	boolean trueValue = (Boolean) parser.parseExpression("true").getValue();
+
+	Object nullValue = parser.parseExpression("null").getValue();
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes"]
+----
+	val parser = SpelExpressionParser()
+
+	// evaluates to "Hello World"
+	val helloWorld = parser.parseExpression("'Hello World'").value as String
+
+	// evaluates to "Tony's Pizza"
+	val pizzaParlor = parser.parseExpression("'Tony''s Pizza'").value as String
+
+	val avogadrosNumber = parser.parseExpression("6.0221415E+23").value as Double
+
+	// evaluates to 2147483647
+	val maxValue = parser.parseExpression("0x7FFFFFFF").value as Int
+
+	val trueValue = parser.parseExpression("true").value as Boolean
+
+	val nullValue = parser.parseExpression("null").value
+----
+======
+
+
+

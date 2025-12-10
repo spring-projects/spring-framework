@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "https://www.springframework.org/dtd/spring-beans-2.0.dtd">
+
+<beans>
+
+	<bean id="rod1" class="org.springframework.beans.testfixture.beans.DependenciesBean" autowire="byType">
+		<!-- Should pick up spouse automatically -->
+	</bean>
+
+	<bean id="rod1a" class="org.springframework.beans.testfixture.beans.DependenciesBean" autowire="autodetect">
+		<!-- Should pick up spouse automatically -->
+	</bean>
+
+	<bean id="rod2" class="org.springframework.beans.testfixture.beans.DependenciesBean" autowire="byName">
+		<!-- Should pick up spouse automatically -->
+	</bean>
+
+	<bean id="rod2a" class="org.springframework.beans.testfixture.beans.DependenciesBean" autowire="byName">
+		<property name="spouse" ref="spouse"/>
+	</bean>
+
+	<bean id="rod3" class="org.springframework.beans.factory.xml.ConstructorDependenciesBean" autowire="constructor">
+		<!-- Should pick up spouse automatically -->
+	</bean>
+
+	<bean id="rod3a" class="org.springframework.beans.factory.xml.ConstructorDependenciesBean" autowire="autodetect">
+		<!-- Should pick up spouse automatically -->
+	</bean>
+
+	<bean id="rod4" class="org.springframework.beans.factory.xml.ConstructorDependenciesBean" scope="prototype">
+		<!-- Should not pick up spouse automatically -->
+	</bean>
+
+	<bean id="rod5" class="org.springframework.beans.testfixture.beans.DependenciesBean"
+			scope="prototype" autowire="constructor">
+		<!-- Should pick up spouse automatically -->
+	</bean>
+
+	<bean id="other" class="org.springframework.beans.testfixture.beans.IndexedTestBean"/>
+
+	<bean id="parentAppCtx" class="org.springframework.context.support.ClassPathXmlApplicationContext">
+		<constructor-arg>
+			<value>/org/springframework/beans/factory/xml/XmlBeanFactoryTests-collections.xml</value>
+		</constructor-arg>
+	</bean>
+
+	<bean id="childAppCtx" class="org.springframework.context.support.ClassPathXmlApplicationContext">
+		<constructor-arg>
+			<list>
+				<value>/org/springframework/beans/factory/xml/XmlBeanFactoryTests-constructorArg.xml</value>
+				<value>/org/springframework/beans/factory/xml/XmlBeanFactoryTests-initializers.xml</value>
+			</list>
+		</constructor-arg>
+		<constructor-arg><ref bean="parentAppCtx"/></constructor-arg>
+	</bean>
+
+</beans>

@@ -1,0 +1,16 @@
+[[mvc-config-view-resolvers]]
+= View Resolvers
+
+[.small]#xref:web/webflux/config.adoc#webflux-config-view-resolvers[See equivalent in the Reactive stack]#
+
+The MVC configuration simplifies the registration of view resolvers.
+
+The following example configures content negotiation view resolution by using JSP and Jackson as a
+default `View` for JSON rendering:
+
+include-code::./WebConfiguration[tag=snippet,indent=0]
+
+Note, however, that FreeMarker, Groovy Markup, and script templates also require
+configuration of the underlying view technology. The following example works with FreeMarker:
+
+include-code::./FreeMarkerConfiguration[tag=snippet,indent=0]

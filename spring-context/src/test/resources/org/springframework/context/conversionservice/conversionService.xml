@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xmlns:context="http://www.springframework.org/schema/context"
+	   xsi:schemaLocation="http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+				http://www.springframework.org/schema/context https://www.springframework.org/schema/context/spring-context-3.0.xsd">
+
+	<bean id="conversionService" class="org.springframework.context.support.ConversionServiceFactoryBean">
+		<property name="converters">
+			<bean class="org.springframework.context.conversionservice.StringToBarConverter" />
+		</property>
+	</bean>
+
+	<bean id="testClient" class="org.springframework.context.conversionservice.TestClient">
+		<property name="bool" value="true"/>
+		<property name="stringList">
+			<list>
+				<value>#{'test-' + strValue + '-end'}</value>
+				<value>#{'test-' + strValue}</value>
+				<value>#{'test-' + numValue+ '-end'}</value>
+				<value>#{'test-' + numValue}</value>
+			</list>
+		</property>
+		<property name="resourceArray">
+			<value>classpath:test.xml</value>
+		</property>
+		<property name="resourceList">
+			<list>
+				<value>classpath:test.xml</value>
+			</list>
+		</property>
+		<property name="resourceMap">
+			<map>
+				<entry key="res1" value="classpath:test1.xml"/>
+				<entry key="res2" value="classpath:test2.xml"/>
+			</map>
+		</property>
+	</bean>
+
+	<bean class="org.springframework.context.conversionservice.Bar">
+		<constructor-arg value ="value1" />
+	</bean>
+
+	<bean class="org.springframework.context.conversionservice.Bar">
+		<constructor-arg value ="value2" />
+	</bean>
+
+	<bean id="numValue" class="java.lang.Integer">
+		<constructor-arg value="111"/>
+	</bean>
+
+	<bean id="strValue" class="java.lang.String">
+		<constructor-arg value="222"/>
+	</bean>
+
+	<context:annotation-config />
+
+</beans>

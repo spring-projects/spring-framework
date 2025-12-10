@@ -1,0 +1,474 @@
+[[validation-beanvalidation]]
+= Java Bean Validation
+
+The Spring Framework provides support for the
+{bean-validation-site}[Java Bean Validation] API.
+
+
+[[validation-beanvalidation-overview]]
+== Overview of Bean Validation
+
+Bean Validation provides a common way of validation through constraint declaration and
+metadata for Java applications. To use it, you annotate domain model properties with
+declarative validation constraints which are then enforced by the runtime. There are
+built-in constraints, and you can also define your own custom constraints.
+
+Consider the following example, which shows a simple `PersonForm` model with two properties:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	public class PersonForm {
+		private String name;
+		private int age;
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes"]
+----
+	class PersonForm(
+			private val name: String,
+			private val age: Int
+	)
+----
+======
+
+Bean Validation lets you declare constraints as the following example shows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	public class PersonForm {
+
+		@NotNull
+		@Size(max=64)
+		private String name;
+
+		@Min(0)
+		private int age;
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes"]
+----
+	class PersonForm(
+		@get:NotNull @get:Size(max=64)
+		private val name: String,
+		@get:Min(0)
+		private val age: Int
+	)
+----
+======
+
+A Bean Validation validator then validates instances of this class based on the declared
+constraints. See {bean-validation-site}[Bean Validation] for general information about
+the API. See the https://hibernate.org/validator/[Hibernate Validator] documentation for
+specific constraints. To learn how to set up a bean validation provider as a Spring
+bean, keep reading.
+
+
+[[validation-beanvalidation-spring]]
+== Configuring a Bean Validation Provider
+
+Spring provides full support for the Bean Validation API including the bootstrapping of a
+Bean Validation provider as a Spring bean. This lets you inject a
+`jakarta.validation.ValidatorFactory` or `jakarta.validation.Validator` wherever validation
+is needed in your application.
+
+You can use the `LocalValidatorFactoryBean` to configure a default Validator as a Spring
+bean, as the following example shows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
+
+	@Configuration
+	public class AppConfig {
+
+		@Bean
+		public LocalValidatorFactoryBean validator() {
+			return new LocalValidatorFactoryBean();
+		}
+	}
+----
+
+XML::
++
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<bean id="validator"
+		class="org.springframework.validation.beanvalidation.LocalValidatorFactoryBean"/>
+----
+======
+
+The basic configuration in the preceding example triggers bean validation to initialize by
+using its default bootstrap mechanism. A Bean Validation provider, such as the Hibernate
+Validator, is expected to be present in the classpath and is automatically detected.
+
+[[validation-beanvalidation-spring-inject]]
+=== Inject Jakarta Validator
+
+`LocalValidatorFactoryBean` implements both `jakarta.validation.ValidatorFactory` and
+`jakarta.validation.Validator`, so you can inject a reference to the latter to
+apply validation logic if you prefer to work with the Bean Validation API directly,
+as the following example shows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	import jakarta.validation.Validator;
+
+	@Service
+	public class MyService {
+
+		@Autowired
+		private Validator validator;
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes"]
+----
+	import jakarta.validation.Validator;
+
+	@Service
+	class MyService(@Autowired private val validator: Validator)
+----
+======
+
+[[validation-beanvalidation-spring-inject-adapter]]
+=== Inject Spring Validator
+
+In addition to implementing `jakarta.validation.Validator`, `LocalValidatorFactoryBean`
+also adapts to `org.springframework.validation.Validator`, so you can inject a reference
+to the latter if your bean requires the Spring Validation API.
+
+For example:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	import org.springframework.validation.Validator;
+
+	@Service
+	public class MyService {
+
+		@Autowired
+		private Validator validator;
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes"]
+----
+	import org.springframework.validation.Validator
+
+	@Service
+	class MyService(@Autowired private val validator: Validator)
+----
+======
+
+When used as `org.springframework.validation.Validator`, `LocalValidatorFactoryBean`
+invokes the underlying `jakarta.validation.Validator`, and then adapts
+``ConstraintViolation``s to ``FieldError``s, and registers them with the `Errors` object
+passed into the `validate` method.
+
+[[validation-beanvalidation-spring-constraints]]
+=== Configure Custom Constraints
+
+Each bean validation constraint consists of two parts:
+
+* A `@Constraint` annotation that declares the constraint and its configurable properties.
+* An implementation of the `jakarta.validation.ConstraintValidator` interface that implements
+the constraint's behavior.
+
+To associate a declaration with an implementation, each `@Constraint` annotation
+references a corresponding `ConstraintValidator` implementation class. At runtime, a
+`ConstraintValidatorFactory` instantiates the referenced implementation when the
+constraint annotation is encountered in your domain model.
+
+By default, the `LocalValidatorFactoryBean` configures a `SpringConstraintValidatorFactory`
+that uses Spring to create `ConstraintValidator` instances. This lets your custom
+`ConstraintValidators` benefit from dependency injection like any other Spring bean.
+
+The following example shows a custom `@Constraint` declaration followed by an associated
+`ConstraintValidator` implementation that uses Spring for dependency injection:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	@Target({ElementType.METHOD, ElementType.FIELD})
+	@Retention(RetentionPolicy.RUNTIME)
+	@Constraint(validatedBy=MyConstraintValidator.class)
+	public @interface MyConstraint {
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes"]
+----
+	@Target(AnnotationTarget.FUNCTION, AnnotationTarget.FIELD)
+	@Retention(AnnotationRetention.RUNTIME)
+	@Constraint(validatedBy = MyConstraintValidator::class)
+	annotation class MyConstraint
+----
+======
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	import jakarta.validation.ConstraintValidator;
+
+	public class MyConstraintValidator implements ConstraintValidator {
+
+		@Autowired;
+		private Foo aDependency;
+
+		// ...
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes"]
+----
+	import jakarta.validation.ConstraintValidator
+
+	class MyConstraintValidator(private val aDependency: Foo) : ConstraintValidator {
+
+		// ...
+	}
+----
+======
+
+As the preceding example shows, a `ConstraintValidator` implementation can have its dependencies
+`@Autowired` as any other Spring bean.
+
+
+[[validation-beanvalidation-spring-method]]
+== Spring-driven Method Validation
+
+You can integrate the method validation feature of Bean Validation into a
+Spring context through a `MethodValidationPostProcessor` bean definition:
+
+include-code::./ApplicationConfiguration[tag=snippet,indent=0]
+
+To be eligible for Spring-driven method validation, target classes need to be annotated
+with Spring's `@Validated` annotation, which can optionally also declare the validation
+groups to use. See
+{spring-framework-api}/validation/beanvalidation/MethodValidationPostProcessor.html[`MethodValidationPostProcessor`]
+for setup details with the Hibernate Validator and Bean Validation providers.
+
+[TIP]
+====
+Method validation relies on xref:core/aop/introduction-proxies.adoc[AOP Proxies] around the
+target classes, either JDK dynamic proxies for methods on interfaces or CGLIB proxies.
+There are certain limitations with the use of proxies, some of which are described in
+xref:core/aop/proxying.adoc#aop-understanding-aop-proxies[Understanding AOP Proxies]. In addition remember
+to always use methods and accessors on proxied classes; direct field access will not work.
+====
+
+Spring MVC and WebFlux have built-in support for the same underlying method validation but without
+the need for AOP. Therefore, do check the rest of this section, and also see the Spring MVC
+xref:web/webmvc/mvc-controller/ann-validation.adoc[Validation] and
+xref:web/webmvc/mvc-ann-rest-exceptions.adoc[Error Responses] sections, and the WebFlux
+xref:web/webflux/controller/ann-validation.adoc[Validation] and
+xref:web/webflux/ann-rest-exceptions.adoc[Error Responses] sections.
+
+[[validation-beanvalidation-spring-method-exceptions]]
+=== Method Validation Exceptions
+
+By default, `jakarta.validation.ConstraintViolationException` is raised with the set of
+``ConstraintViolation``s returned by `jakarta.validation.Validator`. As an alternative,
+you can have `MethodValidationException` raised instead with ``ConstraintViolation``s
+adapted to `MessageSourceResolvable` errors. To enable set the following flag:
+
+include-code::./ApplicationConfiguration[tag=snippet,indent=0]
+
+`MethodValidationException` contains a list of ``ParameterValidationResult``s which
+group errors by method parameter, and each exposes a `MethodParameter`, the argument
+value, and a list of `MessageSourceResolvable` errors adapted from
+``ConstraintViolation``s. For `@Valid` method parameters with cascaded violations on
+fields and properties, the `ParameterValidationResult` is `ParameterErrors` which
+implements `org.springframework.validation.Errors` and exposes validation errors as
+``FieldError``s.
+
+[[validation-beanvalidation-spring-method-i18n]]
+=== Customizing Validation Errors
+
+The adapted `MessageSourceResolvable` errors can be turned into error messages to
+display to users through the configured `MessageSource` with locale and language specific
+resource bundles. This section provides an example for illustration.
+
+Given the following class declarations:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	record Person(@Size(min = 1, max = 10) String name) {
+	}
+
+	@Validated
+	public class MyService {
+
+		void addStudent(@Valid Person person, @Max(2) int degrees) {
+			// ...
+		}
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes"]
+----
+	@JvmRecord
+	internal data class Person(@Size(min = 1, max = 10) val name: String)
+
+	@Validated
+	class MyService {
+
+		fun addStudent(person: @Valid Person?, degrees: @Max(2) Int) {
+			// ...
+		}
+	}
+----
+======
+
+A `ConstraintViolation` on `Person.name()` is adapted to a `FieldError` with the following:
+
+- Error codes `"Size.person.name"`, `"Size.name"`, `"Size.java.lang.String"`, and `"Size"`
+- Message arguments `"name"`, `10`, and `1` (the field name and the constraint attributes)
+- Default message "size must be between 1 and 10"
+
+To customize the default message, you can add properties to
+xref:core/beans/context-introduction.adoc#context-functionality-messagesource[MessageSource]
+resource bundles using any of the above errors codes and message arguments. Note also that the
+message argument `"name"` is itself a `MessageSourceResolvable` with error codes
+`"person.name"` and `"name"` and can be customized too. For example:
+
+Properties::
++
+[source,properties,indent=0,subs="verbatim,quotes"]
+----
+Size.person.name=Please, provide a {0} that is between {2} and {1} characters long
+person.name=username
+----
+
+A `ConstraintViolation` on the `degrees` method parameter is adapted to a
+`MessageSourceResolvable` with the following:
+
+- Error codes `"Max.myService#addStudent.degrees"`, `"Max.degrees"`, `"Max.int"`, `"Max"`
+- Message arguments "degrees" and 2 (the field name and the constraint attribute)
+- Default message "must be less than or equal to 2"
+
+To customize the above default message, you can add a property such as:
+
+Properties::
++
+[source,properties,indent=0,subs="verbatim,quotes"]
+----
+Max.degrees=You cannot provide more than {1} {0}
+----
+
+[[validation-beanvalidation-spring-other]]
+=== Additional Configuration Options
+
+The default `LocalValidatorFactoryBean` configuration suffices for most
+cases. There are a number of configuration options for various Bean Validation
+constructs, from message interpolation to traversal resolution. See the
+{spring-framework-api}/validation/beanvalidation/LocalValidatorFactoryBean.html[`LocalValidatorFactoryBean`]
+javadoc for more information on these options.
+
+
+[[validation-binder]]
+== Configuring a `DataBinder`
+
+You can configure a `DataBinder` instance with a `Validator`. Once configured, you can
+invoke the `Validator` by calling `binder.validate()`. Any validation `Errors` are
+automatically added to the binder's `BindingResult`.
+
+The following example shows how to use a `DataBinder` programmatically to invoke validation
+logic after binding to a target object:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	Foo target = new Foo();
+	DataBinder binder = new DataBinder(target);
+	binder.setValidator(new FooValidator());
+
+	// bind to the target object
+	binder.bind(propertyValues);
+
+	// validate the target object
+	binder.validate();
+
+	// get BindingResult that includes any validation errors
+	BindingResult results = binder.getBindingResult();
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes"]
+----
+	val target = Foo()
+	val binder = DataBinder(target)
+	binder.validator = FooValidator()
+
+	// bind to the target object
+	binder.bind(propertyValues)
+
+	// validate the target object
+	binder.validate()
+
+	// get BindingResult that includes any validation errors
+	val results = binder.bindingResult
+----
+======
+
+You can also configure a `DataBinder` with multiple `Validator` instances through
+`dataBinder.addValidators` and `dataBinder.replaceValidators`. This is useful when
+combining globally configured bean validation with a Spring `Validator` configured
+locally on a DataBinder instance. See
+xref:web/webmvc/mvc-config/validation.adoc[Spring MVC Validation Configuration].
+
+
+[[validation-mvc]]
+== Spring MVC Validation
+
+See xref:web/webmvc/mvc-config/validation.adoc[Validation] in the Spring MVC chapter.

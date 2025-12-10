@@ -1,0 +1,15 @@
+[[kotlin-null-safety]]
+= Null-safety
+
+One of Kotlin's key features is {kotlin-docs}/null-safety.html[null-safety],
+which cleanly deals with `null` values at compile time rather than bumping into the famous
+`NullPointerException` at runtime. This makes applications safer through nullability
+declarations and expressing "`value or no value`" semantics without paying the cost of wrappers, such as `Optional`.
+Kotlin allows using functional constructs with nullable values. See this
+{baeldung-blog}/kotlin-null-safety[comprehensive guide to Kotlin null-safety].
+
+Although Java does not let you express null-safety in its type-system, the Spring Framework
+provides xref:core/null-safety.adoc[null-safety of the whole Spring Framework API]
+via tooling-friendly https://jspecify.dev/[JSpecify] annotations.
+
+As of Kotlin 2.1, Kotlin enforces strict handling of nullability annotations from `org.jspecify.annotations` package.

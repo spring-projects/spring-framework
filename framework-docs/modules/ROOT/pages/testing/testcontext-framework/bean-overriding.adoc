@@ -1,0 +1,92 @@
+[[testcontext-bean-overriding]]
+= Bean Overriding in Tests
+
+Bean overriding in tests refers to the ability to override specific beans in the
+`ApplicationContext` for a test class, by annotating the test class or one or more
+non-static fields in the test class.
+
+NOTE: This feature is intended as a less risky alternative to the practice of registering
+a bean via `@Bean` with the `DefaultListableBeanFactory`
+`setAllowBeanDefinitionOverriding` flag set to `true`.
+
+The Spring TestContext framework provides two sets of annotations for bean overriding.
+
+* xref:testing/annotations/integration-spring/annotation-testbean.adoc[`@TestBean`]
+* xref:testing/annotations/integration-spring/annotation-mockitobean.adoc[`@MockitoBean` and `@MockitoSpyBean`]
+
+The former relies purely on Spring, while the latter set relies on the
+https://site.mockito.org/[Mockito] third-party library.
+
+[[testcontext-bean-overriding-custom]]
+== Custom Bean Override Support
+
+The three annotations mentioned above build upon the `@BeanOverride` meta-annotation and
+associated infrastructure, which allows one to define custom bean overriding variants.
+
+To implement custom bean override support, the following is needed:
+
+* An annotation meta-annotated with `@BeanOverride` that defines the
+  `BeanOverrideProcessor` to use
+* A custom `BeanOverrideProcessor` implementation
+* One or more concrete `BeanOverrideHandler` implementations created by the processor
+
+The Spring TestContext framework includes implementations of the following APIs that
+support bean overriding and are responsible for setting up the rest of the infrastructure.
+
+* a `BeanFactoryPostProcessor`
+* a `ContextCustomizerFactory`
+* a `TestExecutionListener`
+
+The `spring-test` module registers implementations of the latter two
+(`BeanOverrideContextCustomizerFactory` and `BeanOverrideTestExecutionListener`) in its
+{spring-framework-code}/spring-test/src/main/resources/META-INF/spring.factories[`META-INF/spring.factories`
+properties file].
+
+The bean overriding infrastructure searches for annotations on test classes as well as
+annotations on non-static fields in test classes that are meta-annotated with
+`@BeanOverride` and instantiates the corresponding `BeanOverrideProcessor` which is
+responsible for creating an appropriate `BeanOverrideHandler`.
+
+The internal `BeanOverrideBeanFactoryPostProcessor` then uses bean override handlers to
+alter the test's `ApplicationContext` by creating, replacing, or wrapping beans as
+defined by the corresponding `BeanOverrideStrategy`:
+
+[[testcontext-bean-overriding-strategy]]
+`REPLACE`::
+  Replaces the bean. Throws an exception if a corresponding bean does not exist.
+`REPLACE_OR_CREATE`::
+  Replaces the bean if it exists. Creates a new bean if a corresponding bean does not
+  exist.
+`WRAP`::
+  Retrieves the original bean and wraps it.
+
+[TIP]
+====
+When replacing a non-singleton bean, the non-singleton bean will be replaced with a
+singleton bean corresponding to bean override instance created by the applicable
+`BeanOverrideHandler`, and the corresponding bean definition will be converted to a
+`singleton`. Consequently, if a handler overrides a `prototype` or scoped bean, the
+overridden bean will be treated as a `singleton`.
+
+When replacing a bean created by a `FactoryBean`, the `FactoryBean` itself will be
+replaced with a singleton bean corresponding to bean override instance created by the
+applicable `BeanOverrideHandler`.
+
+When wrapping a bean created by a `FactoryBean`, the object created by the `FactoryBean`
+will be wrapped, not the `FactoryBean` itself.
+====
+
+[NOTE]
+====
+In contrast to Spring's autowiring mechanism (for example, resolution of an `@Autowired`
+field), the bean overriding infrastructure in the TestContext framework has limited
+heuristics it can perform to locate a bean. Either the `BeanOverrideProcessor` can compute
+the name of the bean to override, or it can be unambiguously selected given the type of
+the annotated field and its qualifying annotations.
+
+Typically, the bean is selected "by type" by the `BeanOverrideFactoryPostProcessor`.
+Alternatively, the user can directly provide the bean name in the custom annotation.
+
+`BeanOverrideProcessor` implementations may also internally compute a bean name based on
+a convention or some other method.
+====

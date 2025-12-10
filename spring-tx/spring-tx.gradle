@@ -1,0 +1,28 @@
+description = "Spring Transaction"
+
+apply plugin: "kotlin"
+
+dependencies {
+	api(project(":spring-beans"))
+	api(project(":spring-core"))
+	optional(project(":spring-aop"))
+	optional(project(":spring-context"))  // for JCA, @EnableTransactionManagement
+	optional("io.projectreactor:reactor-core")
+	optional("io.vavr:vavr")
+	optional("jakarta.ejb:jakarta.ejb-api")
+	optional("jakarta.interceptor:jakarta.interceptor-api")
+	optional("jakarta.resource:jakarta.resource-api")
+	optional("jakarta.transaction:jakarta.transaction-api")
+	optional("org.jetbrains.kotlin:kotlin-reflect")
+	optional("org.jetbrains.kotlin:kotlin-stdlib")
+	optional("org.jetbrains.kotlinx:kotlinx-coroutines-core")
+	optional("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
+	testImplementation(project(":spring-core-test"))
+	testImplementation(testFixtures(project(":spring-beans")))
+	testImplementation(testFixtures(project(":spring-context")))
+	testImplementation(testFixtures(project(":spring-core")))
+	testImplementation("org.apache.groovy:groovy")
+	testImplementation("org.aspectj:aspectjweaver")
+	testImplementation("io.projectreactor:reactor-test")
+	testImplementation("jakarta.persistence:jakarta.persistence-api")
+}

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+		https://www.springframework.org/schema/beans/spring-beans-3.1.xsd">
+
+	<bean id="foo" class="java.lang.String"/>
+
+	<beans profile="dev">
+		<!-- should override the 'foo' bean above when the 'dev' profile is active -->
+		<bean name="foo" class="java.lang.Integer">
+			<constructor-arg value="42"/>
+		</bean>
+
+		<!-- should only be available when the 'dev' profile is active -->
+		<bean name="devOnlyBean" class="java.lang.Object"/>
+	</beans>
+
+</beans>

@@ -1,0 +1,18 @@
+[[websocket-stomp-server-config]]
+= WebSocket Transport
+
+This section explains how to configure the underlying WebSocket server transport.
+
+For Jakarta WebSocket servers, add a `ServletServerContainerFactoryBean` to your
+configuration. For examples, see
+xref:web/websocket/server.adoc#websocket-server-runtime-configuration[Configuring the Server]
+under the WebSocket section.
+
+For Jetty WebSocket servers, customize the `JettyRequestUpgradeStrategy` as follows:
+
+include-code::./JettyWebSocketConfiguration[tag=snippet,indent=0]
+
+In addition to WebSocket server properties, there are also STOMP WebSocket transport properties
+to customize as follows:
+
+include-code::./WebSocketConfiguration[tag=snippet,indent=0]

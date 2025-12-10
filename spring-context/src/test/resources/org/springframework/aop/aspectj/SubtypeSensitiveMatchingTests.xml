@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xmlns:aop="http://www.springframework.org/schema/aop"
+	   xsi:schemaLocation="http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+       http://www.springframework.org/schema/aop https://www.springframework.org/schema/aop/spring-aop-2.0.xsd">
+
+
+	<aop:config>
+		<aop:aspect id="thisMatcher" ref="testAspect">
+		  <aop:before pointcut="execution(* *(..)) and this(java.io.Serializable)" method="toString"/>
+		</aop:aspect>
+		<aop:aspect id="targetMatcher" ref="testAspect">
+		  <aop:before pointcut="execution(* *(..)) and target(java.io.Serializable)" method="toString"/>
+		</aop:aspect>
+		<aop:aspect id="argsMatcher" ref="testAspect">
+		  <aop:before pointcut="execution(* bar(..)) and args(java.io.Serializable)" method="toString"/>
+		</aop:aspect>
+	</aop:config>
+
+	<!--  should not be proxied -->
+	<bean id="testClassA" class="org.springframework.aop.aspectj.SubtypeMatchingTestClassA"/>
+
+	<!--  should be proxied -->
+	<bean id="testClassB" class="org.springframework.aop.aspectj.SubtypeMatchingTestClassB"/>
+
+	<!--  should be proxied -->
+	<bean id="testClassC" class="org.springframework.aop.aspectj.SubtypeMatchingTestClassC"/>
+
+	<bean id="testAspect" class="java.lang.Object"/>
+</beans>

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "https://www.springframework.org/dtd/spring-beans-2.0.dtd">
+
+<beans>
+
+	<bean id="target" class="org.springframework.beans.testfixture.beans.TestBean" lazy-init="true">
+		<property name="age"><value>10</value></property>
+	</bean>
+
+	<!--
+		This will create a proxy that lazily fetches its target bean (with name "target").
+	-->
+	<bean id="proxy" class="org.springframework.aop.framework.ProxyFactoryBean">
+		<property name="targetSource">
+			<bean class="org.springframework.aop.target.LazyInitTargetSourceTests$CustomLazyInitTargetSource">
+				<property name="targetBeanName"><idref bean="target"/></property>
+			</bean>
+		</property>
+	</bean>
+
+</beans>

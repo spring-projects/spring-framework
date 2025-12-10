@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "https://www.springframework.org/dtd/spring-beans-2.0.dtd">
+
+<beans>
+
+
+	<bean id="jenny" class="org.springframework.beans.testfixture.beans.TestBean">
+		<property name="name"><value>Jenny</value></property>
+		<property name="age"><value>30</value></property>
+		<property name="spouse">
+		<!-- Could use id and href -->
+			<ref bean="david"/>
+		</property>
+	</bean>
+
+	<bogus></bogus>
+
+</beans>
+

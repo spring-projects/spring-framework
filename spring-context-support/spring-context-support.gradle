@@ -1,0 +1,30 @@
+description = "Spring Context Support"
+
+dependencies {
+	api(project(":spring-beans"))
+	api(project(":spring-context"))
+	api(project(":spring-core"))
+	optional(project(":spring-jdbc"))  // for Quartz support
+	optional(project(":spring-tx"))  // for Quartz support
+	optional("com.github.ben-manes.caffeine:caffeine")
+	optional("jakarta.activation:jakarta.activation-api")
+	optional("jakarta.mail:jakarta.mail-api")
+	optional("javax.cache:cache-api")
+	optional("org.freemarker:freemarker")
+	optional("org.quartz-scheduler:quartz")
+	testFixturesApi("org.junit.jupiter:junit-jupiter-api")
+	testFixturesImplementation("org.assertj:assertj-core")
+	testFixturesImplementation("org.mockito:mockito-core")
+	testImplementation(project(":spring-context"))
+	testImplementation(testFixtures(project(":spring-beans")))
+	testImplementation(testFixtures(project(":spring-context")))
+	testImplementation(testFixtures(project(":spring-core")))
+	testImplementation(testFixtures(project(":spring-tx")))
+	testImplementation("io.projectreactor:reactor-core")
+	testImplementation("jakarta.annotation:jakarta.annotation-api")
+	testImplementation("org.hsqldb:hsqldb")
+	testRuntimeOnly("org.eclipse.angus:angus-mail")
+	testRuntimeOnly("org.ehcache:ehcache")
+	testRuntimeOnly("org.ehcache:jcache")
+	testRuntimeOnly("org.glassfish:jakarta.el")
+}

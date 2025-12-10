@@ -1,0 +1,19 @@
+description = "Spring Core Test"
+
+dependencies {
+	api(project(":spring-core"))
+	optional("org.assertj:assertj-core")
+	optional("org.junit.jupiter:junit-jupiter-api")
+	compileOnly("org.junit.jupiter:junit-jupiter-params") // Used in CompileWithForkedClassLoaderExtension Javadoc
+	compileOnly("org.junit.platform:junit-platform-launcher") // Used in CompileWithForkedClassLoaderExtension
+	implementation("com.thoughtworks.qdox:qdox")
+}
+
+jar {
+	manifest {
+		attributes(
+				'Premain-Class': 'org.springframework.aot.agent.RuntimeHintsAgent',
+				'Can-Redefine-Classes': 'true'
+		)
+	}
+}

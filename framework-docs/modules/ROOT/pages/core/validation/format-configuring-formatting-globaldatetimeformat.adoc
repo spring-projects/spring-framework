@@ -1,0 +1,21 @@
+[[format-configuring-formatting-globaldatetimeformat]]
+= Configuring a Global Date and Time Format
+
+By default, date and time fields not annotated with `@DateTimeFormat` are converted from
+strings by using the `DateFormat.SHORT` style. If you prefer, you can change this by
+defining your own global format.
+
+To do that, ensure that Spring does not register default formatters. Instead, register
+formatters manually with the help of:
+
+* `org.springframework.format.datetime.standard.DateTimeFormatterRegistrar`
+* `org.springframework.format.datetime.DateFormatterRegistrar`
+
+For example, the following configuration registers a global `yyyyMMdd` format:
+
+include-code::./ApplicationConfiguration[tag=snippet,indent=0]
+
+Note there are extra considerations when configuring date and time formats in web
+applications. Please see
+xref:web/webmvc/mvc-config/conversion.adoc[WebMVC Conversion and Formatting] or
+xref:web/webflux/config.adoc#webflux-config-conversion[WebFlux Conversion and Formatting].

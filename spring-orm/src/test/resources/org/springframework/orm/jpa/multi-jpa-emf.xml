@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xsi:schemaLocation="http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
+
+	<bean id="persistenceUnitManager" class="org.springframework.orm.jpa.persistenceunit.DefaultPersistenceUnitManager">
+		<property name="persistenceXmlLocations" value="org/springframework/orm/jpa/domain/persistence-multi.xml"/>
+		<property name="defaultDataSource" ref="dataSource"/>
+	</bean>
+
+	<bean id="abstractEMF" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean" abstract="true">
+		<property name="persistenceUnitManager" ref="persistenceUnitManager"/>
+		<property name="jpaVendorAdapter" ref="jpaVendorAdapter"/>
+		<property name="jpaProperties" ref="jpaProperties"/>
+	</bean>
+
+	<bean id="entityManagerFactory" parent="abstractEMF">
+		<property name="persistenceUnitName" value="Drivers"/>
+		<qualifier type="org.springframework.orm.jpa.domain.MyDomain"/>
+	</bean>
+
+	<bean id="entityManagerFactory2" parent="abstractEMF">
+		<property name="persistenceUnitName" value="Test"/>
+	</bean>
+
+</beans>

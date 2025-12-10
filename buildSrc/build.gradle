@@ -1,0 +1,68 @@
+plugins {
+	id 'java-gradle-plugin'
+	id 'checkstyle'
+}
+
+repositories {
+	mavenCentral()
+	gradlePluginPortal()
+}
+
+ext {
+	def propertiesFile = new File(new File("$projectDir").parentFile, "gradle.properties")
+	propertiesFile.withInputStream {
+		def properties = new Properties()
+		properties.load(it)
+		set("kotlinVersion", properties["kotlinVersion"])
+	}
+}
+
+dependencies {
+	checkstyle "io.spring.javaformat:spring-javaformat-checkstyle:${javaFormatVersion}"
+	implementation "org.jetbrains.kotlin:kotlin-gradle-plugin:${kotlinVersion}"
+	implementation "org.jetbrains.dokka:dokka-gradle-plugin:2.1.0"
+	implementation "com.tngtech.archunit:archunit:1.4.1"
+	implementation "org.gradle:test-retry-gradle-plugin:1.6.2"
+	implementation "io.spring.javaformat:spring-javaformat-gradle-plugin:${javaFormatVersion}"
+	implementation "io.spring.nohttp:nohttp-gradle:0.0.11"
+
+	testImplementation("org.assertj:assertj-core:${assertjVersion}")
+	testImplementation(platform("org.junit:junit-bom:${junitVersion}"))
+	testImplementation("org.junit.jupiter:junit-jupiter")
+	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+}
+
+gradlePlugin {
+	plugins {
+		architecturePlugin {
+			id = "org.springframework.architecture"
+			implementationClass = "org.springframework.build.architecture.ArchitecturePlugin"
+		}
+		conventionsPlugin {
+			id = "org.springframework.build.conventions"
+			implementationClass = "org.springframework.build.ConventionsPlugin"
+		}
+		localDevPlugin {
+			id = "org.springframework.build.localdev"
+			implementationClass = "org.springframework.build.dev.LocalDevelopmentPlugin"
+		}
+		multiReleasePlugin {
+			id = "org.springframework.build.multiReleaseJar"
+			implementationClass = "org.springframework.build.multirelease.MultiReleaseJarPlugin"
+		}
+		optionalDependenciesPlugin {
+			id = "org.springframework.build.optional-dependencies"
+			implementationClass = "org.springframework.build.optional.OptionalDependenciesPlugin"
+		}
+		runtimeHintsAgentPlugin {
+			id = "org.springframework.build.runtimehints-agent"
+			implementationClass = "org.springframework.build.hint.RuntimeHintsAgentPlugin"
+		}
+	}
+}
+
+test {
+	useJUnitPlatform()
+}
+
+jar.dependsOn check

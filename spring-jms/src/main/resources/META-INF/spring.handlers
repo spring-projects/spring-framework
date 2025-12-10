@@ -1,0 +1,1 @@
+http\://www.springframework.org/schema/jms=org.springframework.jms.config.JmsNamespaceHandler

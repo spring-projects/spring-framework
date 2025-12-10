@@ -1,0 +1,362 @@
+{
+  "$schema": "https://json-schema.org/draft/2019-09/schema",
+  "$id": "https://www.graalvm.org/reachability-metadata-schema-v1.0.0.json",
+  "title": "JSON schema for the reachability metadata used by GraalVM Native Image",
+  "type": "object",
+  "default": {},
+  "properties": {
+    "comment": {
+      "title": "A comment applying to the whole file (e.g., generation date, author, etc.)",
+      "oneOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      ],
+      "default": ""
+    },
+    "reflection": {
+      "title": "Metadata to ensure elements are reachable through reflection",
+      "$ref": "#/$defs/reflection"
+    },
+    "jni": {
+      "title": "Metadata to ensure elements are reachable through JNI",
+      "$ref": "#/$defs/reflection"
+    },
+    "serialization": {
+      "title": "Metadata for types that are serialized or deserialized at run time. The types must extend 'java.io.Serializable'.",
+      "type": "array",
+      "default": [],
+      "items": {
+        "title": "Enables serializing and deserializing objects of the class specified by <type>",
+        "type": "object",
+        "properties": {
+          "reason": {
+            "title": "Reason for the type's inclusion in the serialization metadata",
+            "$ref": "#/$defs/reason"
+          },
+          "condition": {
+            "title": "Condition under which the class should be registered for serialization",
+            "$ref": "#/$defs/condition"
+          },
+          "type": {
+            "title": "Type descriptor of the class that should be registered for serialization",
+            "$ref": "#/$defs/type"
+          },
+          "customTargetConstructorClass": {
+            "title": "Fully qualified name of the class whose constructor should be used to serialize the class specified by <type>",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "resources": {
+      "title": "Metadata to ensure resources are available",
+      "type": "array",
+      "default": [],
+      "items": {
+        "title": "Resource that should be available",
+        "type": "object",
+        "properties": {
+          "reason": {
+            "title": "Reason for the resource's inclusion in the metadata",
+            "$ref": "#/$defs/reason"
+          },
+          "condition": {
+            "title": "Condition under which the resource should be registered for runtime access",
+            "$ref": "#/$defs/condition"
+          },
+          "module": {
+            "title": "Module containing the resource",
+            "type": "string",
+            "default": ""
+          },
+          "glob": {
+            "title": "Resource name or pattern matching multiple resources (accepts * and ** wildcards)",
+            "type": "string"
+          }
+        },
+        "required": [
+          "glob"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "bundles": {
+      "title": "Metadata to ensure resource bundles are available",
+      "type": "array",
+      "default": [],
+      "items": {
+        "title": "Resource bundle that should be available",
+        "type": "object",
+        "properties": {
+          "reason": {
+            "title": "Reason for the resource bundle's inclusion in the metadata",
+            "$ref": "#/$defs/reason"
+          },
+          "condition": {
+            "title": "Condition under which the resource bundle should be registered for runtime access",
+            "$ref": "#/$defs/condition"
+          },
+          "name": {
+            "title": "Name of the resource bundle",
+            "type": "string"
+          },
+          "locales": {
+            "title": "List of locales that should be registered for this resource bundle",
+            "type": "array",
+            "default": [],
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [],
+  "additionalProperties": false,
+
+  "$defs": {
+    "reflection": {
+      "type": "array",
+      "default": [],
+      "items": {
+        "title": "Elements that should be registered for reflection for a specified type",
+        "type": "object",
+        "properties": {
+          "reason": {
+            "title": "Reason for the element's inclusion",
+            "$ref": "#/$defs/reason"
+          },
+          "condition": {
+            "title": "Condition under which the class should be registered for reflection",
+            "$ref": "#/$defs/condition"
+          },
+          "type": {
+            "title": "Type descriptor of the class that should be registered for reflection",
+            "$ref": "#/$defs/type"
+          },
+          "methods": {
+            "title": "List of methods that should be registered for the type declared in <type>",
+            "type": "array",
+            "default": [],
+            "items": {
+              "title": "Method descriptor of the method that should be registered for reflection",
+              "$ref": "#/$defs/method"
+            }
+          },
+          "fields": {
+            "title": "List of class fields that can be read or written to for the type declared in <type>",
+            "type": "array",
+            "default": [],
+            "items": {
+              "title": "Field descriptor of the field that should be registered for reflection",
+              "$ref": "#/$defs/field"
+            }
+          },
+          "allDeclaredMethods": {
+            "title": "Register all declared methods from the type for reflective invocation",
+            "type": "boolean",
+            "default": false
+          },
+          "allDeclaredFields": {
+            "title": "Register all declared fields from the type for reflective access",
+            "type": "boolean",
+            "default": false
+          },
+          "allDeclaredConstructors": {
+            "title": "Register all declared constructors from the type for reflective invocation",
+            "type": "boolean",
+            "default": false
+          },
+          "allPublicMethods": {
+            "title": "Register all public methods from the type for reflective invocation",
+            "type": "boolean",
+            "default": false
+          },
+          "allPublicFields": {
+            "title": "Register all public fields from the type for reflective access",
+            "type": "boolean",
+            "default": false
+          },
+          "allPublicConstructors": {
+            "title": "Register all public constructors from the type for reflective invocation",
+            "type": "boolean",
+            "default": false
+          },
+          "unsafeAllocated": {
+            "title": "Allow objects of this class to be instantiated with a call to jdk.internal.misc.Unsafe#allocateInstance or JNI's AllocObject",
+            "type": "boolean",
+            "default": false
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "jni": {
+      "type": "array",
+      "default": [],
+      "items": {
+        "title": "Elements that should be registered for JNI for a specified type",
+        "type": "object",
+        "properties": {
+          "reason": {
+            "title": "Reason for the element's inclusion",
+            "$ref": "#/$defs/reason"
+          },
+          "condition": {
+            "title": "Condition under which the class should be registered for JNI",
+            "$ref": "#/$defs/condition"
+          },
+          "type": {
+            "title": "Type descriptor of the class that should be registered for JNI",
+            "$ref": "#/$defs/type"
+          },
+          "methods": {
+            "title": "List of methods that should be registered for the type declared in <type>",
+            "type": "array",
+            "default": [],
+            "items": {
+              "title": "Method descriptor of the method that should be registered for JNI",
+              "$ref": "#/$defs/method"
+            }
+          },
+          "fields": {
+            "title": "List of class fields that can be read or written to for the type declared in <type>",
+            "type": "array",
+            "default": [],
+            "items": {
+              "title": "Field descriptor of the field that should be registered for JNI",
+              "$ref": "#/$defs/field"
+            }
+          },
+          "allDeclaredMethods": {
+            "title": "Register all declared methods from the type for JNI access",
+            "type": "boolean",
+            "default": false
+          },
+          "allDeclaredFields": {
+            "title": "Register all declared fields from the type for JNI access",
+            "type": "boolean",
+            "default": false
+          },
+          "allDeclaredConstructors": {
+            "title": "Register all declared constructors from the type for JNI access",
+            "type": "boolean",
+            "default": false
+          },
+          "allPublicMethods": {
+            "title": "Register all public methods from the type for JNI access",
+            "type": "boolean",
+            "default": false
+          },
+          "allPublicFields": {
+            "title": "Register all public fields from the type for JNI access",
+            "type": "boolean",
+            "default": false
+          },
+          "allPublicConstructors": {
+            "title": "Register all public constructors from the type for JNI access",
+            "type": "boolean",
+            "default": false
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "reason": {
+      "type": "string",
+      "default": []
+    },
+    "condition": {
+      "title": "Condition used by GraalVM Native Image metadata files",
+      "type": "object",
+      "properties": {
+        "typeReached": {
+          "title": "Type descriptor of a class that must be reached in order to enable the corresponding registration",
+          "$ref": "#/$defs/type"
+        }
+      },
+      "required": [
+        "typeReached"
+      ],
+      "additionalProperties": false
+    },
+    "type": {
+      "title": "Type descriptors used by GraalVM Native Image metadata files",
+      "oneOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "proxy": {
+              "title": "List of interfaces defining the proxy class",
+              "type": "array",
+              "default": [],
+              "items": {
+                "title": "Fully qualified name of the interface defining the proxy class",
+                "type": "string"
+              }
+            }
+          },
+          "required": [
+            "proxy"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "method": {
+      "title": "Method descriptors used by GraalVM Native Image metadata files",
+      "type": "object",
+      "properties": {
+        "name": {
+          "title": "Method name that should be registered for this class",
+          "type": "string"
+        },
+        "parameterTypes": {
+          "default": [],
+          "items": {
+            "title": "List of the method's parameter types",
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "additionalProperties": false
+    },
+    "field": {
+      "title": "Field descriptors used by GraalVM Native Image metadata files",
+      "type": "object",
+      "properties": {
+        "name": {
+          "title": "Name of the field that should be registered for reflection",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "additionalProperties": false
+    }
+  }
+}

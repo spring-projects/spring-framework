@@ -1,0 +1,3 @@
+org.springframework.context.index.Sample1=foo
+org.springframework.context.index.Sample2=bar,foo
+org.springframework.context.index.Sample3=biz

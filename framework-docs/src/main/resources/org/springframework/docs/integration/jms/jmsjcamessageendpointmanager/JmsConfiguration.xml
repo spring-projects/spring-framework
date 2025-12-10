@@ -1,0 +1,18 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xsi:schemaLocation="http://www.springframework.org/schema/beans
+	   https://www.springframework.org/schema/beans/spring-beans.xsd">
+
+	<!-- tag::snippet[] -->
+	<bean class="org.springframework.jms.listener.endpoint.JmsMessageEndpointManager">
+		<property name="resourceAdapter" ref="resourceAdapter"/>
+		<property name="activationSpecConfig">
+			<bean class="org.springframework.jms.listener.endpoint.JmsActivationSpecConfig">
+				<property name="destinationName" value="myQueue"/>
+			</bean>
+		</property>
+		<property name="messageListener" ref="myMessageListener"/>
+	</bean>
+	<!-- end::snippet[] -->
+
+</beans>

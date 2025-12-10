@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xsi:schemaLocation="http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans-2.0.xsd">
+
+	<bean class="org.springframework.aop.framework.autoproxy.BeanNameAutoProxyCreator">
+		<property name="beanNames" value="adrian"/>
+		<property name="interceptorNames" value="trace"/>
+		<property name="proxyTargetClass" value="true"/>
+	</bean>
+
+	<bean id="trace" class="org.springframework.aop.interceptor.SimpleTraceInterceptor"/>
+
+	<bean class="org.springframework.aop.aspectj.annotation.AnnotationAwareAspectJAutoProxyCreator">
+		<property name="proxyTargetClass" value="true"/>
+	</bean>
+
+	<bean class="org.springframework.aop.aspectj.autoproxy.MultiplyReturnValueForMarker">
+		<property name="multiple" value="2"/>
+	</bean>
+
+	<bean class="org.springframework.aop.aspectj.autoproxy.DummyAspect"/>
+
+	<bean class="org.springframework.aop.aspectj.autoproxy.DummyAspectWithParameter"/>
+
+	<bean id="adrianParent" abstract="true">
+		<property name="name" value="adrian"/>
+	</bean>
+
+	<bean id="adrian" class="org.springframework.aop.aspectj.autoproxy.MarkerTestBean" parent="adrianParent">
+		<property name="age" value="34"/>
+	</bean>
+
+</beans>

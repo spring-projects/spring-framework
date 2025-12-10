@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "https://www.springframework.org/dtd/spring-beans-2.0.dtd">
+
+<beans default-lazy-init="true">
+
+	<bean class="org.springframework.scripting.support.ScriptFactoryPostProcessor"/>
+
+	<bean id="calculator" class="org.springframework.scripting.bsh.BshScriptFactory">
+		<constructor-arg>
+			<value>inline:
+int add(int x, int y) {
+  return x + y;
+}
+			</value>
+ 		</constructor-arg>
+		<constructor-arg value="org.springframework.scripting.Calculator"/>
+	</bean>
+
+	<bean id="messenger" class="org.springframework.scripting.bsh.BshScriptFactory"
+			init-method="init" destroy-method="destroy">
+		<constructor-arg value="classpath:org/springframework/scripting/bsh/Messenger.bsh"/>
+		<constructor-arg value="org.springframework.scripting.Messenger"/>
+		<property name="message" value="Hello World!"/>
+	</bean>
+
+	<bean id="messengerWithConfig" class="org.springframework.scripting.bsh.BshScriptFactory"
+			init-method="init" destroy-method="destroy">
+		<constructor-arg value="classpath:org/springframework/scripting/bsh/Messenger.bsh"/>
+		<constructor-arg value="org.springframework.scripting.ConfigurableMessenger"/>
+		<property name="message" value="Hello World!"/>
+	</bean>
+
+	<bean id="messengerWithConfigExtra" class="org.springframework.scripting.bsh.BshScriptFactory"
+			init-method="init" destroy-method="destroy">
+		<constructor-arg value="classpath:org/springframework/scripting/bsh/Messenger.bsh"/>
+		<constructor-arg value="org.springframework.scripting.Messenger,org.springframework.scripting.ConfigurableMessenger"/>
+		<property name="message" value="Hello World!"/>
+	</bean>
+
+	<bean id="messengerInstance" class="org.springframework.scripting.bsh.BshScriptFactory"
+			init-method="init" destroy-method="destroy">
+		<constructor-arg value="classpath:org/springframework/scripting/bsh/MessengerInstance.bsh"/>
+		<property name="message" value="Hello World!"/>
+	</bean>
+
+	<bean id="messengerInstanceWithExplicitInterface" class="org.springframework.scripting.bsh.BshScriptFactory">
+		<constructor-arg value="classpath:org/springframework/scripting/bsh/MessengerInstance.bsh"/>
+		<constructor-arg value="org.springframework.scripting.Messenger"/>
+		<property name="message" value="Hello World!"/>
+	</bean>
+
+	<bean id="messengerImpl" class="org.springframework.scripting.bsh.BshScriptFactory"
+			init-method="init" destroy-method="destroy">
+		<constructor-arg value="classpath:org/springframework/scripting/bsh/MessengerImpl.bsh"/>
+		<property name="message" value="Hello World!"/>
+	</bean>
+
+	<bean id="messengerImplWithExplicitInterface" class="org.springframework.scripting.bsh.BshScriptFactory"
+			init-method="init">
+		<constructor-arg value="classpath:org/springframework/scripting/bsh/MessengerImpl.bsh"/>
+		<constructor-arg value="org.springframework.scripting.Messenger"/>
+		<property name="message" value="Hello World!"/>
+	</bean>
+
+	<bean id="messengerPrototype" class="org.springframework.scripting.bsh.BshScriptFactory" scope="prototype"
+			 init-method="init">
+		<constructor-arg value="classpath:org/springframework/scripting/bsh/MessengerImpl.bsh"/>
+		<property name="message" value="Hello World!"/>
+	</bean>
+
+</beans>

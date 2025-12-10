@@ -1,0 +1,5 @@
+org.springframework.aot.hint.RuntimeHintsRegistrar=\
+org.springframework.test.context.hint.TestContextRuntimeHints
+
+org.springframework.test.context.aot.TestRuntimeHintsRegistrar=\
+org.springframework.test.context.hint.StandardTestRuntimeHints

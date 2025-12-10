@@ -1,0 +1,26 @@
+description = "Spring JMS"
+
+dependencies {
+	api(project(":spring-beans"))
+	api(project(":spring-core"))
+	api(project(":spring-messaging"))
+	api(project(":spring-tx"))
+	api("io.micrometer:micrometer-observation")
+	compileOnly("jakarta.jms:jakarta.jms-api")
+	optional(project(":spring-aop"))
+	optional(project(":spring-context"))
+	optional(project(":spring-oxm"))
+	optional("com.fasterxml.jackson.core:jackson-databind")
+	optional("io.micrometer:micrometer-jakarta9")
+	optional("jakarta.resource:jakarta.resource-api")
+	optional("jakarta.transaction:jakarta.transaction-api")
+	optional("tools.jackson.core:jackson-databind")
+	testImplementation(testFixtures(project(":spring-beans")))
+	testImplementation(testFixtures(project(":spring-tx")))
+	testImplementation("jakarta.jms:jakarta.jms-api")
+	testImplementation('io.micrometer:context-propagation')
+	testImplementation("io.micrometer:micrometer-jakarta9")
+	testImplementation("io.micrometer:micrometer-observation-test")
+	testImplementation("org.apache.activemq:artemis-junit-5")
+	testImplementation("org.apache.activemq:artemis-jakarta-client")
+}

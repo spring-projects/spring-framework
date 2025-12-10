@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "https://www.springframework.org/dtd/spring-beans-2.0.dtd">
+
+<beans>
+
+	<!-- Same effect as noInterceptor names: also invalid -->
+	<bean id="emptyInterceptorNames" class="org.springframework.aop.framework.ProxyFactoryBean">
+		<property name="interfaces"><value>org.springframework.beans.testfixture.beans.ITestBean</value></property>
+		<property name="interceptorNames"><value></value></property>
+	</bean>
+
+	<!--
+		Invalid test for global pointcuts.
+		Must have target after *.
+	-->
+	<bean id="globalsWithoutTarget" class="org.springframework.aop.framework.ProxyFactoryBean">
+		<property name="interfaces"><value>org.springframework.beans.testfixture.beans.ITestBean</value></property>
+		<property name="interceptorNames"><value>global*</value></property>
+	</bean>
+
+</beans>

@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "https://www.springframework.org/dtd/spring-beans-2.0.dtd">
+
+<!--
+	Tests for independent prototype behaviour.
+-->
+
+<beans>
+
+	<!-- Simple target -->
+	<bean id="target" class="org.springframework.beans.testfixture.beans.TestBean">
+		<!-- initial value :-) -->
+		<property name="name"><value>Adam</value></property>
+	</bean>
+
+	<bean id="nopInterceptor" class="org.springframework.aop.testfixture.interceptor.NopInterceptor">
+	</bean>
+
+	<bean id="countingBeforeAdvice"
+		class="org.springframework.aop.testfixture.advice.CountingBeforeAdvice"
+	/>
+
+	<!--
+		Note that there's normally no reason to create objects of this type
+		in a BeanFactory. If for some strange reason you want to, use Type 3 IoC.
+	-->
+	<bean id="targetSource" class="org.springframework.aop.target.SingletonTargetSource">
+		<constructor-arg><ref bean="target"/></constructor-arg>
+	</bean>
+
+	<bean id="directTarget"
+		class="org.springframework.aop.framework.ProxyFactoryBean">
+		<property name="interceptorNames" value="countingBeforeAdvice,nopInterceptor,target"/>
+		<property name="proxyTargetClass" value="true"/>
+	</bean>
+
+	<bean id="viaTargetSource"
+		class="org.springframework.aop.framework.ProxyFactoryBean">
+		<property name="interceptorNames"><value>nopInterceptor,targetSource</value></property>
+		<property name="proxyTargetClass" value="true"/>
+	</bean>
+
+	<bean id ="unsupportedInterceptor"
+		class="org.springframework.aop.framework.UnsupportedInterceptor"
+	/>
+
+	<!--
+		No target or target source, just the interceptor
+	-->
+	<bean id="noTarget"
+		class="org.springframework.aop.framework.ProxyFactoryBean">
+		<property name="proxyInterfaces"><value>org.springframework.beans.testfixture.beans.ITestBean</value></property>
+		<property name="interceptorNames"><value>nopInterceptor,unsupportedInterceptor</value></property>
+	</bean>
+
+</beans>
+
+

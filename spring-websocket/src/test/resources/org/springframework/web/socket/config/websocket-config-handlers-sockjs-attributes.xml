@@ -1,0 +1,26 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xmlns:websocket="http://www.springframework.org/schema/websocket"
+	   xsi:schemaLocation="
+        http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/websocket https://www.springframework.org/schema/websocket/spring-websocket.xsd">
+
+	<websocket:handlers allowed-origins="https://mydomain1.example, https://mydomain2.example" allowed-origin-patterns="https://*.mydomain.example">
+		<websocket:mapping path="/test" handler="testHandler"/>
+		<websocket:sockjs name="testSockJsService" scheduler="testTaskScheduler" websocket-enabled="false"
+						  session-cookie-needed="false" stream-bytes-limit="2048" disconnect-delay="256"
+						  message-cache-size="1024" heartbeat-time="20" message-codec="messageCodec"
+						  client-library-url="/js/sockjs.min.js" suppress-cors="true">
+			<websocket:transport-handlers register-defaults="false">
+				<bean class="org.springframework.web.socket.sockjs.transport.handler.XhrPollingTransportHandler"/>
+				<ref bean="xhrStreamingTransportHandler"/>
+			</websocket:transport-handlers>
+		</websocket:sockjs>
+	</websocket:handlers>
+
+	<bean id="testHandler" class="org.springframework.web.socket.config.TestWebSocketHandler"/>
+	<bean id="testTaskScheduler" class="org.springframework.web.socket.config.TestTaskScheduler"/>
+	<bean id="xhrStreamingTransportHandler" class="org.springframework.web.socket.sockjs.transport.handler.XhrStreamingTransportHandler"/>
+	<bean id="messageCodec" class="org.springframework.web.socket.config.TestMessageCodec" />
+
+</beans>

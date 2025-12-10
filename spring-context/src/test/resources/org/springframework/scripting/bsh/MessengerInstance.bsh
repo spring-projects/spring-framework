@@ -1,0 +1,28 @@
+import org.springframework.scripting.Messenger;
+
+public class MyMessenger implements Messenger {
+
+	private String message;
+
+	private boolean active;
+
+	public void init() {
+		active = true;
+	}
+
+	public String getMessage() {
+		if (!active && message != null) throw new java.lang.IllegalStateException();
+		return message;
+	}
+
+	public void setMessage(String aMessage) {
+		message = aMessage;
+	}
+
+	public void destroy() {
+		message = null;
+		active = false;
+	}
+}
+
+return new MyMessenger() ;

@@ -1,0 +1,58 @@
+name: Build and Deploy Snapshot
+on:
+  push:
+    branches:
+      - main
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+jobs:
+  build-and-deploy-snapshot:
+    name: Build and Deploy Snapshot
+    if: ${{ github.repository == 'spring-projects/spring-framework' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Check Out Code
+        uses: actions/checkout@v4
+      - name: Build and Publish
+        id: build-and-publish
+        uses: ./.github/actions/build
+        with:
+          develocity-access-key: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
+          publish: true
+      - name: Deploy
+        uses: spring-io/artifactory-deploy-action@dc1913008c0599f0c4b1fdafb6ff3c502b3565ea # v0.0.2
+        with:
+          artifact-properties: |
+            /**/framework-api-*.zip::zip.name=spring-framework,zip.deployed=false
+            /**/framework-api-*-docs.zip::zip.type=docs
+            /**/framework-api-*-schema.zip::zip.type=schema
+          build-name: 'spring-framework-7.0.x'
+          folder: 'deployment-repository'
+          password: ${{ secrets.ARTIFACTORY_PASSWORD }}
+          repository: 'libs-snapshot-local'
+          signing-key: ${{ secrets.GPG_PRIVATE_KEY }}
+          signing-passphrase: ${{ secrets.GPG_PASSPHRASE }}
+          uri: 'https://repo.spring.io'
+          username: ${{ secrets.ARTIFACTORY_USERNAME }}
+      - name: Send Notification
+        if: always()
+        uses: ./.github/actions/send-notification
+        with:
+          build-scan-url: ${{ steps.build-and-publish.outputs.build-scan-url }}
+          run-name: ${{ format('{0} | Linux | Java 17', github.ref_name) }}
+          status: ${{ job.status }}
+          webhook-url: ${{ secrets.GOOGLE_CHAT_WEBHOOK_URL }}
+    outputs:
+      version: ${{ steps.build-and-publish.outputs.version }}
+  verify:
+    name: Verify
+    needs: build-and-deploy-snapshot
+    uses: ./.github/workflows/verify.yml
+    secrets:
+      google-chat-webhook-url: ${{ secrets.GOOGLE_CHAT_WEBHOOK_URL }}
+      repository-password: ${{ secrets.ARTIFACTORY_PASSWORD }}
+      repository-username: ${{ secrets.ARTIFACTORY_USERNAME }}
+      token: ${{ secrets.GH_ACTIONS_REPO_TOKEN }}
+    with:
+      version: ${{ needs.build-and-deploy-snapshot.outputs.version }}

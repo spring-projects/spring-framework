@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beansProjectDescription>
+	<version>1</version>
+	<pluginVersion><![CDATA[3.5.0.201402030809-M2]]></pluginVersion>
+	<configSuffixes>
+		<configSuffix><![CDATA[xml]]></configSuffix>
+	</configSuffixes>
+	<enableImports><![CDATA[false]]></enableImports>
+	<configs>
+		<config>src/test/java/org/springframework/test/context/junit4/profile/xml/DefaultProfileXmlConfigTests-context.xml</config>
+		<config>src/test/java/org/springframework/test/context/junit4/aci/xml/MultipleInitializersXmlConfigTests-context.xml</config>
+		<config>src/test/resources/org/springframework/test/context/web/RequestAndSessionScopedBeansWacTests-context.xml</config>
+		<config>src/test/resources/org/springframework/test/context/hierarchies/web/DispatcherWacRootWacEarTests-context.xml</config>
+		<config>src/test/java/org/springframework/test/context/junit4/hybrid/hybrid-config.xml</config>
+	</configs>
+	<autoconfigs>
+	</autoconfigs>
+	<configSets>
+	</configSets>
+</beansProjectDescription>

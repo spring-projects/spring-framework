@@ -1,0 +1,130 @@
+[[spring-testing-annotation-beanoverriding-testbean]]
+= `@TestBean`
+
+{spring-framework-api}/test/context/bean/override/convention/TestBean.html[`@TestBean`]
+is used on a non-static field in a test class to override a specific bean in the test's
+`ApplicationContext` with an instance provided by a factory method.
+
+The associated factory method name is derived from the annotated field's name, or the
+bean name if specified. The factory method must be `static`, accept no arguments, and
+have a return type compatible with the type of the bean to override. To make things more
+explicit, or if you'd rather use a different name, the annotation allows for a specific
+method name to be provided.
+
+By default, the annotated field's type is used to search for candidate beans to override.
+If multiple candidates match, `@Qualifier` can be provided to narrow the candidate to
+override. Alternatively, a candidate whose bean name matches the name of the field will
+match.
+
+A bean will be created if a corresponding bean does not exist. However, if you would like
+for the test to fail when a corresponding bean does not exist, you can set the
+`enforceOverride` attribute to `true` – for example, `@TestBean(enforceOverride = true)`.
+
+To use a by-name override rather than a by-type override, specify the `name` attribute
+of the annotation.
+
+[WARNING]
+====
+Qualifiers, including the name of the field, are used to determine if a separate
+`ApplicationContext` needs to be created. If you are using this feature to override the
+same bean in several tests, make sure to name the field consistently to avoid creating
+unnecessary contexts.
+====
+
+[WARNING]
+====
+Using `@TestBean` in conjunction with `@ContextHierarchy` can lead to undesirable results
+since each `@TestBean` will be applied to all context hierarchy levels by default. To
+ensure that a particular `@TestBean` is applied to a single context hierarchy level, set
+the `contextName` attribute to match a configured `@ContextConfiguration` name – for
+example, `@TestBean(contextName = "app-config")`.
+
+See
+xref:testing/testcontext-framework/ctx-management/hierarchies.adoc#testcontext-ctx-management-ctx-hierarchies-with-bean-overrides[context
+hierarchies with bean overrides] for further details and examples.
+====
+
+[NOTE]
+====
+There are no restrictions on the visibility of `@TestBean` fields or factory methods.
+
+Such fields and methods can therefore be `public`, `protected`, package-private (default
+visibility), or `private` depending on the needs or coding practices of the project.
+====
+
+The following example shows how to use the default behavior of the `@TestBean` annotation:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	class OverrideBeanTests {
+		@TestBean // <1>
+		CustomService customService;
+
+		// test case body...
+
+		static CustomService customService() { // <2>
+			return new MyFakeCustomService();
+		}
+	}
+----
+<1> Mark a field for overriding the bean with type `CustomService`.
+<2> The result of this static method will be used as the instance and injected into the field.
+======
+
+In the example above, we are overriding the bean with type `CustomService`. If more than
+one bean of that type exists, the bean named `customService` is considered. Otherwise,
+the test will fail, and you will need to provide a qualifier of some sort to identify
+which of the `CustomService` beans you want to override.
+
+The following example uses a by-name lookup, rather than a by-type lookup:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	class OverrideBeanTests {
+		@TestBean(name = "service", methodName = "createCustomService") // <1>
+		CustomService customService;
+
+		// test case body...
+
+		static CustomService createCustomService() { // <2>
+			return new MyFakeCustomService();
+		}
+	}
+----
+<1> Mark a field for overriding the bean with name `service`, and specify that the
+    factory method is named `createCustomService`.
+<2> The result of this static method will be used as the instance and injected into the field.
+======
+
+[TIP]
+====
+To locate the factory method to invoke, Spring searches in the class in which the
+`@TestBean` field is declared, in one of its superclasses, or in any implemented
+interfaces. If the `@TestBean` field is declared in a `@Nested` test class, the enclosing
+class hierarchy will also be searched.
+
+Alternatively, a factory method in an external class can be referenced via its
+fully-qualified method name following the syntax `<fully-qualified class name>#<method name>`
+– for example, `methodName = "org.example.TestUtils#createCustomService"`.
+====
+
+[NOTE]
+====
+When overriding a non-singleton bean, the non-singleton bean will be replaced with a
+singleton bean corresponding to the value returned from the `@TestBean` factory method,
+and the corresponding bean definition will be converted to a `singleton`. Consequently,
+if `@TestBean` is used to override a `prototype` or scoped bean, the overridden bean will
+be treated as a `singleton`.
+
+Similarly, when overriding a bean created by a `FactoryBean`, the `FactoryBean` will be
+replaced with a singleton bean corresponding to the value returned from the `@TestBean`
+factory method.
+====

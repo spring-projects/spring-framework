@@ -1,0 +1,5 @@
+key1: local file
+environments:
+  dev:
+    url: https://dev.example.com
+    name: Developer Setup

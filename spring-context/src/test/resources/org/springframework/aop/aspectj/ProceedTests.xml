@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xmlns:aop="http://www.springframework.org/schema/aop"
+		xsi:schemaLocation="http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+				http://www.springframework.org/schema/aop https://www.springframework.org/schema/aop/spring-aop-2.0.xsd">
+
+	<aop:config>
+		<aop:aspect id="aspectOne" ref="firstTestAspect">
+			<aop:around pointcut="execution(* setName(..)) and args(value)" method="capitalize"/>
+			<aop:around pointcut="execution(* setAge(..))" method="doubleOrQuits"/>
+			<aop:around pointcut="execution(* setMyFloat(..)) and args(value)" method="addOne"/>
+			<aop:before pointcut="execution(* setMyFloat(..)) and args(arg)" method="captureFloatArgument"/>
+			<aop:around pointcut="execution(* setSex(..)) and args(value)" method="capitalize"/>
+		</aop:aspect>
+		<aop:aspect id="aspectTwo" ref="secondTestAspect">
+			<aop:before pointcut="execution(* setSex(..)) and args(arg)" method="captureStringArgument"/>
+			<aop:around pointcut="execution(* setSex(..)) and args(arg)" method="captureStringArgumentInAround"/>
+		</aop:aspect>
+	</aop:config>
+
+	<bean id="testBean" class="org.springframework.aop.aspectj.SimpleBeanImpl"/>
+
+	<bean id="firstTestAspect"  class="org.springframework.aop.aspectj.ProceedTestingAspect">
+	   <property name="order" value="1"/>
+	</bean>
+
+	<bean id="secondTestAspect" class="org.springframework.aop.aspectj.ProceedTestingAspect">
+	   <property name="order" value="2"/>
+	</bean>
+
+</beans>

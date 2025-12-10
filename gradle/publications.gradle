@@ -1,0 +1,64 @@
+apply plugin: "maven-publish"
+
+publishing {
+	publications {
+		mavenJava(MavenPublication) {
+			pom {
+				afterEvaluate {
+					name = project.description
+					description = project.description
+				}
+				url = "https://github.com/spring-projects/spring-framework"
+				organization {
+					name = "Spring IO"
+					url = "https://spring.io/projects/spring-framework"
+				}
+				licenses {
+					license {
+						name = "Apache License, Version 2.0"
+						url = "https://www.apache.org/licenses/LICENSE-2.0"
+						distribution = "repo"
+					}
+				}
+				scm {
+					url = "https://github.com/spring-projects/spring-framework"
+					connection = "scm:git:git://github.com/spring-projects/spring-framework"
+					developerConnection = "scm:git:git://github.com/spring-projects/spring-framework"
+				}
+				developers {
+					developer {
+						id = "jhoeller"
+						name = "Juergen Hoeller"
+						email = "juergen.hoeller@broadcom.com"
+					}
+				}
+				issueManagement {
+					system = "GitHub"
+					url = "https://github.com/spring-projects/spring-framework/issues"
+				}
+			}
+			versionMapping {
+				usage('java-api') {
+					fromResolutionResult()
+				}
+				usage('java-runtime') {
+					fromResolutionResult()
+				}
+			}
+		}
+	}
+}
+
+configureDeploymentRepository(project)
+
+void configureDeploymentRepository(Project project) {
+	project.plugins.withType(MavenPublishPlugin.class).all {
+		PublishingExtension publishing = project.getExtensions().getByType(PublishingExtension.class);
+		if (project.hasProperty("deploymentRepository")) {
+			publishing.repositories.maven {
+				it.url = project.property("deploymentRepository")
+				it.name = "deployment"
+			}
+		}
+	}
+}

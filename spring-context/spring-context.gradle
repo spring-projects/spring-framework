@@ -1,0 +1,59 @@
+plugins {
+	id 'org.springframework.build.runtimehints-agent'
+}
+
+description = "Spring Context"
+
+apply plugin: "kotlin"
+
+dependencies {
+	api(project(":spring-aop"))
+	api(project(":spring-beans"))
+	api(project(":spring-core"))
+	api(project(":spring-expression"))
+	api("io.micrometer:micrometer-observation")
+	compileOnly("com.google.code.findbugs:jsr305") // for Micrometer context-propagation
+	optional(project(":spring-instrument"))
+	optional("io.micrometer:context-propagation")
+	optional("io.projectreactor:reactor-core")
+	optional("jakarta.annotation:jakarta.annotation-api")
+	optional("jakarta.ejb:jakarta.ejb-api")
+	optional("jakarta.enterprise.concurrent:jakarta.enterprise.concurrent-api")
+	optional("jakarta.inject:jakarta.inject-api")
+	optional("jakarta.interceptor:jakarta.interceptor-api")
+	optional("jakarta.validation:jakarta.validation-api")
+	optional("javax.money:money-api")
+	optional("org.apache.groovy:groovy")
+	optional("org.apache-extras.beanshell:bsh")
+	optional("org.aspectj:aspectjweaver")
+	optional("org.crac:crac")
+	optional("org.hibernate.validator:hibernate-validator")
+	optional("org.jetbrains.kotlin:kotlin-reflect")
+	optional("org.jetbrains.kotlin:kotlin-stdlib")
+	optional("org.jetbrains.kotlinx:kotlinx-coroutines-core")
+	optional("org.reactivestreams:reactive-streams")
+	testFixturesApi("org.junit.jupiter:junit-jupiter-api")
+	testFixturesImplementation(testFixtures(project(":spring-beans")))
+	testFixturesImplementation("io.projectreactor:reactor-test")
+	testFixturesImplementation("org.assertj:assertj-core")
+	testImplementation(project(":spring-core-test"))
+	testImplementation(testFixtures(project(":spring-aop")))
+	testImplementation(testFixtures(project(":spring-beans")))
+	testImplementation(testFixtures(project(":spring-core")))
+	testImplementation("jakarta.inject:jakarta.inject-tck")
+	testImplementation("org.apache.commons:commons-pool2")
+	testImplementation("org.apache.groovy:groovy-jsr223")
+	testImplementation("org.apache.groovy:groovy-xml")
+	testImplementation("org.awaitility:awaitility")
+	testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-core")
+	testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
+	testImplementation("io.projectreactor:reactor-test")
+	testImplementation("io.reactivex.rxjava3:rxjava")
+	testImplementation('io.micrometer:context-propagation')
+	testImplementation("io.micrometer:micrometer-observation-test")
+	testRuntimeOnly("jakarta.xml.bind:jakarta.xml.bind-api")
+	testRuntimeOnly("org.glassfish:jakarta.el")
+	// Substitute for javax.management:jmxremote_optional:1.0.1_04 (not available on Maven Central)
+	testRuntimeOnly("org.glassfish.external:opendmk_jmxremote_optional_jar")
+	testRuntimeOnly("org.javamoney:moneta")
+}

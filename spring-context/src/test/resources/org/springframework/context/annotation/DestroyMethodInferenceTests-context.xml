@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xsi:schemaLocation="http://www.springframework.org/schema/beans
+	                    https://www.springframework.org/schema/beans/spring-beans-3.1.xsd">
+
+	<bean id="x1"
+	      class="org.springframework.context.annotation.DestroyMethodInferenceTests$WithLocalCloseMethod"/>
+
+	<bean id="x2"
+	      class="org.springframework.context.annotation.DestroyMethodInferenceTests$WithLocalCloseMethod"
+	      destroy-method="(inferred)"/>
+
+	<bean id="x8"
+		  class="org.springframework.context.annotation.DestroyMethodInferenceTests.WithInheritedCloseMethod"
+		  destroy-method=""/>
+
+	<bean id="x9"
+		  class="org.springframework.context.annotation.DestroyMethodInferenceTests.WithDisposableBean"
+		  destroy-method=""/>
+
+	<bean id="x10"
+		  class="org.springframework.context.annotation.DestroyMethodInferenceTests.WithAutoCloseable"/>
+
+	<beans default-destroy-method="(inferred)">
+		<bean id="x3"
+		      class="org.springframework.context.annotation.DestroyMethodInferenceTests$WithLocalCloseMethod"/>
+		<bean id="x4"
+		      class="org.springframework.context.annotation.DestroyMethodInferenceTests$WithNoCloseMethod"/>
+	</beans>
+
+</beans>

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "https://www.springframework.org/dtd/spring-beans-2.0.dtd">
+
+<beans>
+
+	<bean id="urlMapping" class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping">
+		<property name="defaultHandler"><ref bean="starController"/></property>
+		<property name="urlMap">
+			<map>
+				<entry key="/welcome.html"><ref bean="mainController"/></entry>
+				<entry key="/show.html"><ref bean="mainController"/></entry>
+				<entry key="/bookseats.html"><ref bean="mainController"/></entry>
+				<entry key="/reservation.html"><ref bean="mainControlle"/></entry>
+				<entry key="/payment.html"><ref bean="mainController"/></entry>
+				<entry key="/confirmation.html"><ref bean="mainController"/></entry>
+			</map>
+		</property>
+	</bean>
+
+	<bean id="urlMappingWithProps" class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping">
+		<property name="defaultHandler"><ref bean="starController"/></property>
+		<property name="mappings"><ref bean="propsForUrlMapping2"/></property>
+	</bean>
+
+	<bean id="propsForUrlMapping2" class="org.springframework.beans.factory.config.PropertiesFactoryBean">
+		<property name="location"><value>/org/springframework/web/servlet/handler/map2.properties</value></property>
+	</bean>
+
+	<bean id="mainController" class="java.lang.Object"/>
+
+	<bean id="starController"	class="java.lang.Object"/>
+
+</beans>	

@@ -1,0 +1,12 @@
+[[mvc-config-message-converters]]
+= Message Converters
+
+[.small]#xref:web/webflux/config.adoc#webflux-config-message-codecs[See equivalent in the Reactive stack]#
+
+You can configure the `HttpMessageConverter` instances to use by overriding
+{spring-framework-api}/web/servlet/config/annotation/WebMvcConfigurer.html#configureMessageConverters(org.springframework.http.converter.HttpMessageConverters.Builder)[`configureMessageConverters()`].
+
+The following example configures custom Jackson JSON and XML converters with customized mappers instead of the default
+ones:
+
+include-code::./WebConfiguration[tag=snippet,indent=0]

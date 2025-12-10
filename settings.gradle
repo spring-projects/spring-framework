@@ -1,0 +1,52 @@
+plugins {
+	id "io.spring.develocity.conventions" version "0.0.22"
+}
+
+include "spring-aop"
+include "spring-aspects"
+include "spring-beans"
+include "spring-context"
+include "spring-context-indexer"
+include "spring-context-support"
+include "spring-core"
+include "spring-core-test"
+include "spring-expression"
+include "spring-instrument"
+include "spring-jdbc"
+include "spring-jms"
+include "spring-messaging"
+include "spring-orm"
+include "spring-oxm"
+include "spring-r2dbc"
+include "spring-test"
+include "spring-tx"
+include "spring-web"
+include "spring-webflux"
+include "spring-webmvc"
+include "spring-websocket"
+include "framework-api"
+include "framework-bom"
+include "framework-docs"
+include "framework-platform"
+include "integration-tests"
+
+rootProject.name = "spring"
+rootProject.children.each {project ->
+	project.buildFileName = "${project.name}.gradle"
+}
+
+settings.gradle.projectsLoaded {
+	develocity {
+		buildScan {
+			File buildDir = settings.gradle.rootProject
+					.getLayout().getBuildDirectory().getAsFile().get()
+			buildDir.mkdirs()
+			new File(buildDir, "build-scan-uri.txt").text = "(build scan not generated)"
+			buildScanPublished { scan ->
+				if (buildDir.exists()) {
+					new File(buildDir, "build-scan-uri.txt").text = "${scan.buildScanUri}\n"
+				}
+			}
+		}
+	}
+}

@@ -1,0 +1,166 @@
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+import org.springframework.build.shadow.ShadowSource
+
+plugins {
+	id 'org.springframework.build.multiReleaseJar'
+}
+
+description = "Spring Core"
+
+apply plugin: "kotlin"
+apply plugin: "kotlinx-serialization"
+
+multiRelease {
+	releaseVersions 21, 24
+}
+
+def javapoetVersion = "0.7.0"
+def objenesisVersion = "3.4"
+
+configurations {
+	java21Api.extendsFrom(api)
+	java21Implementation.extendsFrom(implementation)
+	java24Api.extendsFrom(api)
+	javapoet
+	objenesis
+	graalvm
+}
+
+tasks.register('javapoetRepackJar', ShadowJar) {
+	archiveBaseName = 'spring-javapoet-repack'
+	archiveVersion = javapoetVersion
+	configurations = [project.configurations.javapoet]
+	relocate('com.palantir.javapoet', 'org.springframework.javapoet')
+}
+
+tasks.register('javapoetSource', ShadowSource) {
+	configurations = [project.configurations.javapoet]
+	relocate('com.palantir.javapoet', 'org.springframework.javapoet')
+	outputDirectory = file("build/shadow-source/javapoet")
+}
+
+tasks.register('javapoetSourceJar', Jar) {
+	archiveBaseName = 'spring-javapoet-repack'
+	archiveVersion = javapoetVersion
+	archiveClassifier = 'sources'
+	from javapoetSource
+}
+
+tasks.register('objenesisRepackJar', ShadowJar) {
+	archiveBaseName = 'spring-objenesis-repack'
+	archiveVersion = objenesisVersion
+	configurations = [project.configurations.objenesis]
+	relocate('org.objenesis', 'org.springframework.objenesis')
+}
+
+tasks.register('objenesisSource', ShadowSource) {
+	configurations = [project.configurations.objenesis]
+	relocate('org.objenesis', 'org.springframework.objenesis')
+	outputDirectory = file("build/shadow-source/objenesis")
+}
+
+tasks.register('objenesisSourceJar', Jar) {
+	archiveBaseName = 'spring-objenesis-repack'
+	archiveVersion = objenesisVersion
+	archiveClassifier = 'sources'
+	from objenesisSource
+}
+
+dependencies {
+	javapoet("com.palantir.javapoet:javapoet:${javapoetVersion}@jar")
+	objenesis("org.objenesis:objenesis:${objenesisVersion}@jar")
+	api(files(javapoetRepackJar))
+	api(files(objenesisRepackJar))
+	api("commons-logging:commons-logging")
+	api("org.jspecify:jspecify")
+	compileOnly("com.google.code.findbugs:jsr305")
+	compileOnly("io.projectreactor.tools:blockhound")
+	compileOnly("org.graalvm.sdk:graal-sdk")
+	optional("io.micrometer:context-propagation")
+	optional("io.netty:netty-buffer")
+	optional("io.projectreactor:reactor-core")
+	optional("io.reactivex.rxjava3:rxjava")
+	optional("io.smallrye.reactive:mutiny")
+	optional("net.sf.jopt-simple:jopt-simple")
+	optional("org.aspectj:aspectjweaver")
+	optional("org.eclipse.jetty:jetty-io")
+	optional("org.jetbrains.kotlin:kotlin-reflect")
+	optional("org.jetbrains.kotlin:kotlin-stdlib")
+	optional("org.jetbrains.kotlinx:kotlinx-coroutines-core")
+	optional("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
+    testCompileOnly("com.github.ben-manes.caffeine:caffeine")
+	testFixturesImplementation("io.projectreactor:reactor-test")
+	testFixturesImplementation("org.assertj:assertj-core")
+	testFixturesImplementation("org.junit.jupiter:junit-jupiter")
+	testFixturesImplementation("org.junit.platform:junit-platform-launcher")
+	testFixturesImplementation("org.xmlunit:xmlunit-assertj")
+	testImplementation("com.fasterxml.jackson.core:jackson-databind")
+	testImplementation("com.fasterxml.woodstox:woodstox-core")
+	testImplementation("com.google.code.findbugs:jsr305")
+	testImplementation("com.squareup.okhttp3:mockwebserver3")
+	testImplementation("io.projectreactor:reactor-test")
+	testImplementation("io.projectreactor.tools:blockhound")
+	testImplementation("jakarta.annotation:jakarta.annotation-api")
+	testImplementation("jakarta.xml.bind:jakarta.xml.bind-api")
+	testImplementation("org.jetbrains.kotlinx:kotlinx-serialization-json")
+	testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
+	testImplementation("io.micrometer:context-propagation")
+	testImplementation("io.micrometer:micrometer-observation-test")
+	testImplementation("org.mockito:mockito-core")
+	testImplementation("com.networknt:json-schema-validator");
+	testImplementation("org.skyscreamer:jsonassert")
+	testImplementation("org.xmlunit:xmlunit-assertj")
+	testImplementation("org.xmlunit:xmlunit-matchers")
+}
+
+jar {
+	manifest.attributes["Dependencies"] = "jdk.unsupported,org.jboss.vfs" // for WildFly (Objenesis and VfsUtils)
+
+	dependsOn javapoetRepackJar
+	from(zipTree(javapoetRepackJar.archiveFile)) {
+		include "org/springframework/javapoet/**"
+	}
+
+	dependsOn objenesisRepackJar
+	from(zipTree(objenesisRepackJar.archiveFile)) {
+		include "org/springframework/objenesis/**"
+	}
+}
+
+test {
+	// Make sure the classes dir is used on the test classpath (required by ResourceTests).
+	// When test fixtures are involved, the JAR is used by default.
+	classpath = sourceSets.main.output.classesDirs + files(sourceSets.main.output.resourcesDir) + classpath - files(jar.archiveFile)
+
+	// Ensure that BlockHound tests run on JDK 13+. For details, see:
+	// https://github.com/reactor/BlockHound/issues/33
+	jvmArgs += [
+		"-XX:+AllowRedefinitionToAddDeleteMethods"
+	]
+}
+
+sourcesJar {
+	dependsOn javapoetSourceJar
+	dependsOn objenesisSourceJar
+	from javapoetSource
+	from objenesisSource
+}
+
+eclipse {
+	synchronizationTasks javapoetSourceJar, objenesisSourceJar
+	classpath {
+		file {
+			whenMerged {
+				def pattern = ~/\/spring-\w+-repack-/
+				entries.forEach {
+					if (pattern.matcher(it.path).find()) {
+						def sourcesJar = it.path.replace('.jar', '-sources.jar')
+						it.sourcePath = fileReference(file(sourcesJar))
+					}
+				}
+			}
+		}
+	}
+}
+
+tasks['eclipse'].dependsOn(javapoetRepackJar, javapoetSourceJar, objenesisRepackJar, objenesisSourceJar)

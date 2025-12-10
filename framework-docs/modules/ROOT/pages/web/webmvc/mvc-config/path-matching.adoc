@@ -1,0 +1,12 @@
+[[mvc-config-path-matching]]
+= Path Matching
+
+[.small]#xref:web/webflux/config.adoc#webflux-config-path-matching[See equivalent in the Reactive stack]#
+
+You can customize options related to path matching and treatment of the URL.
+For details on the individual options, see the
+{spring-framework-api}/web/servlet/config/annotation/PathMatchConfigurer.html[`PathMatchConfigurer`] javadoc.
+
+The following example shows how to customize path matching:
+
+include-code::./WebConfiguration[tag=snippet,indent=0]

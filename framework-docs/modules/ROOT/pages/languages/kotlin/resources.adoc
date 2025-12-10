@@ -1,0 +1,25 @@
+[[kotlin-resources]]
+= Resources
+
+We recommend the following resources for people learning how to build applications with
+Kotlin and the Spring Framework:
+
+* {kotlin-docs}[Kotlin language reference]
+* https://slack.kotlinlang.org/[Kotlin Slack] (with a dedicated #spring channel)
+* {stackoverflow-spring-kotlin-tags}[Stackoverflow, with `spring` and `kotlin` tags]
+* https://play.kotlinlang.org/[Try Kotlin in your browser]
+* https://blog.jetbrains.com/kotlin/[Kotlin blog]
+* https://kotlin.link/[Awesome Kotlin]
+
+
+[[examples]]
+== Examples
+
+The following Github projects offer examples that you can learn from and possibly even extend:
+
+* https://github.com/spring-guides/tut-spring-boot-kotlin[tut-spring-boot-kotlin]: Sources of {spring-site}/guides/tutorials/spring-boot-kotlin/[the official Spring + Kotlin tutorial]
+* https://github.com/sdeleuze/spring-boot-kotlin-demo[spring-boot-kotlin-demo]: Regular Spring Boot and Spring Data JPA project
+* https://github.com/mixitconf/mixit[mixit]: Spring Boot, WebFlux, and Reactive Spring Data MongoDB
+* https://github.com/sdeleuze/spring-kotlin-functional[spring-kotlin-functional]: Standalone WebFlux and functional bean definition DSL
+* https://github.com/sdeleuze/spring-kotlin-fullstack[spring-kotlin-fullstack]: WebFlux Kotlin fullstack example with Kotlin2js for frontend instead of JavaScript or TypeScript
+* https://github.com/spring-petclinic/spring-petclinic-kotlin[spring-petclinic-kotlin]: Kotlin version of the Spring PetClinic Sample Application

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+ <!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "https://www.springframework.org/dtd/spring-beans-2.0.dtd">
+
+<beans>
+
+	<bean id="server" class="org.springframework.jmx.support.MBeanServerFactoryBean"/>
+
+	<bean id="exporter" class="org.springframework.jmx.export.MBeanExporter">
+		<property name="server">
+			<ref bean="server"/>
+		</property>
+		<property name="autodetect">
+			<value>true</value>
+		</property>
+		<property name="excludedBeans" value="spring:mbean=false"/>
+	</bean>
+
+	<bean name="spring:mbean=true" class="org.springframework.jmx.export.TestDynamicMBean"/>
+	<bean name="spring:mbean=false" class="org.springframework.jmx.export.TestDynamicMBean"/>
+
+	<bean id="connector" class="org.springframework.jmx.support.ConnectorServerFactoryBean">
+		<property name="server">
+			<ref bean="server"/>
+		</property>
+	</bean>
+
+</beans>

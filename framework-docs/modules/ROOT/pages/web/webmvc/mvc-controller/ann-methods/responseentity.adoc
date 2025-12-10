@@ -1,0 +1,57 @@
+[[mvc-ann-responseentity]]
+= ResponseEntity
+
+[.small]#xref:web/webflux/controller/ann-methods/responseentity.adoc[See equivalent in the Reactive stack]#
+
+`ResponseEntity` is like xref:web/webmvc/mvc-controller/ann-methods/responsebody.adoc[`@ResponseBody`]
+but with status and headers. For example:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	@GetMapping("/something")
+	public ResponseEntity<String> handle() {
+		String body = ... ;
+		String etag = ... ;
+		return ResponseEntity.ok().eTag(etag).body(body);
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes"]
+----
+	@GetMapping("/something")
+	fun handle(): ResponseEntity<String> {
+		val body = ...
+		val etag = ...
+		return ResponseEntity.ok().eTag(etag).build(body)
+	}
+----
+======
+
+The body will usually be provided as a value object to be rendered to a corresponding
+response representation (for example, JSON) by one of the registered `HttpMessageConverters`.
+
+A `ResponseEntity<Resource>` can be returned for file content, copying the `InputStream`
+content of the provided resource to the response `OutputStream`. Note that the
+`InputStream` should be lazily retrieved by the `Resource` handle in order to reliably
+close it after it has been copied to the response. If you are using `InputStreamResource`
+for such a purpose, make sure to construct it with an on-demand `InputStreamSource`
+(for example, through a lambda expression that retrieves the actual `InputStream`). Also, custom
+subclasses of `InputStreamResource` are only supported in combination with a custom
+`contentLength()` implementation which avoids consuming the stream for that purpose.
+
+Spring MVC supports using a single value xref:web/webmvc/mvc-ann-async.adoc#mvc-ann-async-reactive-types[reactive type]
+to produce the `ResponseEntity` asynchronously, and/or single and multi-value reactive
+types for the body. This allows the following types of async responses:
+
+* `ResponseEntity<Mono<T>>` or `ResponseEntity<Flux<T>>` make the response status and
+  headers known immediately while the body is provided asynchronously at a later point.
+  Use `Mono` if the body consists of 0..1 values or `Flux` if it can produce multiple values.
+* `Mono<ResponseEntity<T>>` provides all three -- response status, headers, and body,
+  asynchronously at a later point. This allows the response status and headers to vary
+  depending on the outcome of asynchronous request handling.

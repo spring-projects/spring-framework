@@ -1,0 +1,1 @@
+Spring Framework test resource content.

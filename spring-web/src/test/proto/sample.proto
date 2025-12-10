@@ -1,0 +1,12 @@
+option java_package = "org.springframework.protobuf";
+option java_outer_classname = "OuterSample";
+option java_multiple_files = true;
+
+message Msg {
+    optional string foo = 1;
+    optional SecondMsg blah = 2;
+}
+
+message SecondMsg {
+    optional int32 blah = 1;
+}

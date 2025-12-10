@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
+
+	<bean id="overrideOneMethod" class="org.springframework.beans.factory.xml.OverrideOneMethod">
+
+		<lookup-method name="getPrototypeDependency" bean="jenny"/>
+
+		<lookup-method name="protectedOverrideSingleton" bean="david"/>
+
+		<!-- Arbitrary method replacer -->
+		<replaced-method name="replaceMe" replacer="reverseReplacer">
+			<arg-type>String</arg-type>
+		</replaced-method>
+
+		<replaced-method name="replaceMe" replacer="fixedReplacer"/>
+
+	</bean>
+
+	<bean id="someParent" abstract="true">
+
+		<lookup-method name="getPrototypeDependency" bean="jenny"/>
+
+		<lookup-method name="protectedOverrideSingleton" bean="david"/>
+
+		<!-- This method is not overloaded, so we don't need to specify any arg types -->
+		<replaced-method name="doSomething" replacer="doSomethingReplacer"/>
+
+	</bean>
+
+	<bean id="replaceVoidMethod" parent="someParent" class="org.springframework.beans.factory.xml.OverrideOneMethodSubclass"/>
+
+	<bean id="replaceEchoMethod" class="org.springframework.beans.factory.xml.EchoService">
+		<!-- This method is not overloaded, so we don't need to specify any arg types -->
+		<replaced-method name="echo" replacer="reverseArrayReplacer" />
+	</bean>
+
+	<bean id="reverseReplacer" class="org.springframework.beans.factory.xml.ReverseMethodReplacer"/>
+
+	<bean id="reverseArrayReplacer" class="org.springframework.beans.factory.xml.ReverseArrayMethodReplacer"/>
+
+	<bean id="fixedReplacer" class="org.springframework.beans.factory.xml.FixedMethodReplacer"/>
+
+	<bean id="doSomethingReplacer" class="org.springframework.beans.factory.xml.XmlBeanFactoryTests$DoSomethingReplacer"/>
+
+	<bean id="serializableReplacer" class="org.springframework.beans.factory.xml.SerializableMethodReplacerCandidate">
+		<!-- Arbitrary method replacer -->
+		<replaced-method name="replaceMe" replacer="reverseReplacer">
+			<arg-type>String</arg-type>
+		</replaced-method>
+	</bean>
+
+	<bean id="jenny" class="org.springframework.beans.testfixture.beans.TestBean" scope="prototype">
+		<property name="name"><value>Jenny</value></property>
+		<property name="age"><value>30</value></property>
+		<property name="spouse">
+		<!-- Could use id and href -->
+			<ref bean="david"/>
+		</property>
+	</bean>
+
+	<bean id="david" class="org.springframework.beans.testfixture.beans.TestBean" scope="singleton">
+		<description>
+			Simple bean, without any collections.
+		</description>
+		<property name="name">
+			<description>The name of the user</description>
+			<value>David</value>
+		</property>
+		<property name="age"><value>27</value></property>
+	</bean>
+
+	<bean id="overrideOneMethodByAttribute" class="org.springframework.beans.factory.xml.OverrideOneMethod">
+		<replaced-method name="replaceMe" replacer="reverseReplacer">
+			<arg-type match="String"/>
+		</replaced-method>
+	</bean>
+
+	<bean id="overrideOneMethodByElement" class="org.springframework.beans.factory.xml.OverrideOneMethod">
+		<replaced-method name="replaceMe" replacer="reverseReplacer">
+			<arg-type>String</arg-type>
+		</replaced-method>
+	</bean>
+
+</beans>

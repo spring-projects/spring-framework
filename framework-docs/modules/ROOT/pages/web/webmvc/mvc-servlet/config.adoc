@@ -1,0 +1,21 @@
+[[mvc-servlet-config]]
+= Web MVC Config
+:page-section-summary-toc: 1
+
+[.small]#xref:web/webflux/dispatcher-handler.adoc#webflux-framework-config[See equivalent in the Reactive stack]#
+
+Applications can declare the infrastructure beans listed in xref:web/webmvc/mvc-servlet/special-bean-types.adoc[Special Bean Types]
+that are required to process requests. The `DispatcherServlet` checks the
+`WebApplicationContext` for each special bean. If there are no matching bean types,
+it falls back on the default types listed in
+{spring-framework-code}/spring-webmvc/src/main/resources/org/springframework/web/servlet/DispatcherServlet.properties[`DispatcherServlet.properties`].
+
+In most cases, the xref:web/webmvc/mvc-config.adoc[MVC Config] is the best starting point. It declares the required
+beans in either Java or XML and provides a higher-level configuration callback API to
+customize it.
+
+NOTE: Spring Boot relies on the MVC Java configuration to configure Spring MVC and
+provides many extra convenient options.
+
+
+

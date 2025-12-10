@@ -1,0 +1,6 @@
+[[beans-java]]
+= Java-based Container Configuration
+:page-section-summary-toc: 1
+
+This section covers how to use annotations in your Java code to configure the Spring
+container.

@@ -1,0 +1,105 @@
+[[aot-cache]]
+= JVM AOT Cache
+:page-aliases: integration/class-data-sharing.adoc
+:page-aliases: integration/cds.adoc
+
+The ahead-of-time cache is a JVM feature introduced in Java 24 via the
+https://openjdk.org/jeps/483[JEP 483] that can help reduce the startup time and memory
+footprint of Java applications. AOT cache is a natural evolution of https://docs.oracle.com/en/java/javase/17/vm/class-data-sharing.html[Class Data Sharing (CDS)].
+Spring Framework supports both CDS and AOT cache, and it is recommended that you use the
+later if available in the JVM version your are using (Java 24+).
+
+To use this feature, an AOT cache should be created for the particular classpath of the
+application. It is possible to create this cache on the deployed instance, or during a
+training run performed for example when packaging the application thanks to an hook-point
+provided by the Spring Framework to ease such use case. Once the cache is available, users
+should opt in to use it via a JVM flag.
+
+NOTE: If you are using Spring Boot, it is highly recommended to leverage its
+{spring-boot-docs-ref}/packaging/efficient.html#packaging.efficient.unpacking[executable JAR unpacking support]
+which is designed to fulfill the class loading requirements of both AOT cache and CDS.
+
+== Creating the cache
+
+An AOT cache can typically be created when the application exits. The Spring Framework
+provides a mode of operation where the process can exit automatically once the
+`ApplicationContext` has refreshed. In this mode, all non-lazy initialized singletons
+have been instantiated, and `InitializingBean#afterPropertiesSet` callbacks have been
+invoked; but the lifecycle has not started, and the `ContextRefreshedEvent` has not yet
+been published.
+
+To create the cache during the training run, it is possible to specify the `-Dspring.context.exit=onRefresh`
+JVM flag to start then exit your Spring application once the
+`ApplicationContext` has refreshed:
+
+
+--
+[tabs]
+======
+AOT cache::
++
+[source,bash,subs="verbatim,quotes"]
+----
+# Both commands need to be run with the same classpath
+java -XX:AOTMode=record -XX:AOTConfiguration=app.aotconf -Dspring.context.exit=onRefresh ...
+java -XX:AOTMode=create -XX:AOTConfiguration=app.aotconf -XX:AOTCache=app.aot ...
+----
+
+CDS::
++
+[source,bash,subs="verbatim,quotes"]
+----
+# To create a CDS archive, your JDK/JRE must have a base image
+java -XX:ArchiveClassesAtExit=app.jsa -Dspring.context.exit=onRefresh ...
+----
+======
+--
+
+== Using the cache
+
+Once the cache file has been created, you can use it to start your application faster:
+
+--
+[tabs]
+======
+AOT cache::
++
+[source,bash,subs="verbatim"]
+----
+# With the same classpath (or a superset) tan the training run
+java -XX:AOTCache=app.aot ...
+----
+
+CDS::
++
+[source,bash,subs="verbatim"]
+----
+# With the same classpath (or a superset) tan the training run
+java -XX:SharedArchiveFile=app.jsa ...
+----
+======
+--
+
+Pay attention to the logs and the startup time to check if the AOT cache is used successfully.
+To figure out how effective the cache is, you can enable class loading logs by adding
+an extra attribute: `-Xlog:class+load:file=aot-cache.log`. This creates a `aot-cache.log` with
+every attempt to load a class and its source. Classes that are loaded from the cache should have
+a "shared objects file" source, as shown in the following example:
+
+[source,shell,subs="verbatim"]
+----
+[0.151s][info][class,load] org.springframework.core.env.EnvironmentCapable source: shared objects file
+[0.151s][info][class,load] org.springframework.beans.factory.BeanFactory source: shared objects file
+[0.151s][info][class,load] org.springframework.beans.factory.ListableBeanFactory source: shared objects file
+[0.151s][info][class,load] org.springframework.beans.factory.HierarchicalBeanFactory source: shared objects file
+[0.151s][info][class,load] org.springframework.context.MessageSource source: shared objects file
+----
+
+If the AOT cache can't be enabled or if you have a large number of classes that are not loaded from
+the cache, make sure that the following conditions are fulfilled when creating and using the cache:
+
+ - The very same JVM must be used.
+ - The classpath must be specified as a JAR or a list of JARs, and avoid the usage of directories and `*` wildcard characters.
+ - The timestamps of the JARs must be preserved.
+ - When using the cache, the classpath must be the same than the one used to create it, in the same order.
+Additional JARs or directories can be specified *at the end* (but won't be cached).

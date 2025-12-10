@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- $Id: beans1.xml,v 1.3 2006/08/20 19:08:40 jhoeller Exp $ -->
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "https://www.springframework.org/dtd/spring-beans-2.0.dtd">
+
+<beans>
+
+  <bean id="beans1.bean1" class="org.springframework.beans.factory.access.TestBean">
+    <property name="name"><value>beans1.bean1</value></property>
+  </bean>
+
+  <bean id="beans1.bean2" class="org.springframework.beans.factory.access.TestBean">
+    <property name="name"><value>bean2</value></property>
+    <property name="objRef"><ref bean="beans1.bean2"/></property>
+  </bean>
+
+</beans>
