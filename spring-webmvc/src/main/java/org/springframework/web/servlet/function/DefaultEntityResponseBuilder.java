@@ -264,7 +264,7 @@ final class DefaultEntityResponseBuilder<T> implements EntityResponse.Builder<T>
 				HttpServletResponse servletResponse, Context context)
 				throws ServletException, IOException {
 
-			writeEntityWithMessageConverters(this.entity, servletRequest,servletResponse, context);
+			writeEntityWithMessageConverters(this.entity, servletRequest, servletResponse, context);
 			return null;
 		}
 
