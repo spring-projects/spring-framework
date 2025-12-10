@@ -214,10 +214,10 @@ public class RetryTemplate implements RetryOperations {
 			long elapsedTime = System.currentTimeMillis() + sleepTime - startTime;
 			if (elapsedTime >= timeout) {
 				String message = (sleepTime > 0 ? """
-						Retry policy for operation '%s' would exceed timeout (%d ms) due \
-						to pending sleep time (%d ms); preemptively aborting execution"""
+						Retry policy for operation '%s' would exceed timeout (%dms) due \
+						to pending sleep time (%dms); preemptively aborting execution"""
 								.formatted(retryable.getName(), timeout, sleepTime) :
-						"Retry policy for operation '%s' exceeded timeout (%d ms); aborting execution"
+						"Retry policy for operation '%s' exceeded timeout (%dms); aborting execution"
 								.formatted(retryable.getName(), timeout));
 				RetryException retryException = new RetryException(message, exceptions.removeLast());
 				exceptions.forEach(retryException::addSuppressed);

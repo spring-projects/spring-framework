@@ -532,7 +532,7 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 
 	/**
 	 * Callback before singleton creation.
-	 * <p>The default implementation register the singleton as currently in creation.
+	 * <p>The default implementation registers the singleton as currently in creation.
 	 * @param beanName the name of the singleton about to be created
 	 * @see #isSingletonCurrentlyInCreation
 	 */

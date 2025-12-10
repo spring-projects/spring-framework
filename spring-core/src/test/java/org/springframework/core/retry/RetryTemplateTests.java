@@ -476,7 +476,7 @@ class RetryTemplateTests {
 			assertThat(invocationCount).hasValue(0);
 			assertThatExceptionOfType(RetryException.class)
 					.isThrownBy(() -> retryTemplate.execute(retryable))
-					.withMessageMatching("Retry policy for operation '.+?' exceeded timeout \\(5 ms\\); aborting execution")
+					.withMessageMatching("Retry policy for operation '.+?' exceeded timeout \\(5ms\\); aborting execution")
 					.withCause(new CustomException("Boom 1"))
 					.satisfies(throwable -> inOrder.verify(retryListener).onRetryPolicyTimeout(
 							eq(retryPolicy), eq(retryable), eq(throwable)));
@@ -503,8 +503,8 @@ class RetryTemplateTests {
 			assertThatExceptionOfType(RetryException.class)
 					.isThrownBy(() -> retryTemplate.execute(retryable))
 					.withMessageMatching("""
-							Retry policy for operation '.+?' would exceed timeout \\(5 ms\\) \
-							due to pending sleep time \\(10 ms\\); preemptively aborting execution\
+							Retry policy for operation '.+?' would exceed timeout \\(5ms\\) \
+							due to pending sleep time \\(10ms\\); preemptively aborting execution\
 							""")
 					.withCause(new CustomException("Boom 1"))
 					.satisfies(throwable -> inOrder.verify(retryListener).onRetryPolicyTimeout(
@@ -535,7 +535,7 @@ class RetryTemplateTests {
 			assertThat(invocationCount).hasValue(0);
 			assertThatExceptionOfType(RetryException.class)
 					.isThrownBy(() -> retryTemplate.execute(retryable))
-					.withMessageMatching("Retry policy for operation '.+?' exceeded timeout \\(20 ms\\); aborting execution")
+					.withMessageMatching("Retry policy for operation '.+?' exceeded timeout \\(20ms\\); aborting execution")
 					.withCause(new CustomException("Boom 2"))
 					.satisfies(throwable -> {
 						inOrder.verify(retryListener).beforeRetry(retryPolicy, retryable);
@@ -570,7 +570,7 @@ class RetryTemplateTests {
 			assertThat(invocationCount).hasValue(0);
 			assertThatExceptionOfType(RetryException.class)
 					.isThrownBy(() -> retryTemplate.execute(retryable))
-					.withMessageMatching("Retry policy for operation '.+?' exceeded timeout \\(20 ms\\); aborting execution")
+					.withMessageMatching("Retry policy for operation '.+?' exceeded timeout \\(20ms\\); aborting execution")
 					.withCause(new CustomException("Boom 3"))
 					.satisfies(throwable -> {
 						var counter = new AtomicInteger(1);
