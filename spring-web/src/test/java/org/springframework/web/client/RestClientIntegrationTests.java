@@ -1024,6 +1024,29 @@ class RestClientIntegrationTests {
 		expectRequest(request -> assertThat(request.getHeaders().get("foo")).isEqualTo("bar"));
 	}
 
+
+	@ParameterizedRestClientTest
+	void sendNullHeaderValue(ClientHttpRequestFactory requestFactory) throws IOException {
+		startServer(requestFactory);
+
+		prepareResponse(builder -> builder
+				.setHeader("Content-Type", "text/plain").body("Hello Spring!"));
+
+		String result = this.restClient.get()
+				.uri("/greeting")
+				.httpRequest(request -> request.getHeaders().add("X-Test-Header", null))
+				.retrieve()
+				.body(String.class);
+
+		assertThat(result).isEqualTo("Hello Spring!");
+
+		expectRequestCount(1);
+		expectRequest(request -> {
+			assertThat(request.getHeaders().get("X-Test-Header")).isNullOrEmpty();
+			assertThat(request.getTarget()).isEqualTo("/greeting");
+		});
+	}
+
 	@ParameterizedRestClientTest
 	void defaultRequest(ClientHttpRequestFactory requestFactory) throws IOException {
 		startServer(requestFactory);
