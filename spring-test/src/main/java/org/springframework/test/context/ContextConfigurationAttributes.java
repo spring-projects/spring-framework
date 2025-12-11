@@ -76,7 +76,7 @@ public class ContextConfigurationAttributes {
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public ContextConfigurationAttributes(Class<?> declaringClass) {
-		this(declaringClass, EMPTY_LOCATIONS, EMPTY_CLASSES, false, (Class[]) EMPTY_CLASSES, true, ContextLoader.class);
+		this(declaringClass, EMPTY_LOCATIONS, EMPTY_CLASSES, true, (Class[]) EMPTY_CLASSES, true, ContextLoader.class);
 	}
 
 	/**
