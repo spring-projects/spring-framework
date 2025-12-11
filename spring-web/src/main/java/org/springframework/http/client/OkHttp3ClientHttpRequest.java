@@ -90,7 +90,7 @@ class OkHttp3ClientHttpRequest extends AbstractStreamingClientHttpRequest {
 		builder.method(this.method.name(), requestBody);
 		headers.forEach((headerName, headerValues) -> {
 			for (String headerValue : headerValues) {
-				builder.addHeader(headerName, headerValue);
+				builder.addHeader(headerName, (headerValue != null) ? headerValue : "");
 			}
 		});
 		Request request = builder.build();

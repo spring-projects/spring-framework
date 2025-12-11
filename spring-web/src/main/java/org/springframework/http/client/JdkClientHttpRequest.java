@@ -155,7 +155,7 @@ class JdkClientHttpRequest extends AbstractStreamingClientHttpRequest {
 		headers.forEach((headerName, headerValues) -> {
 			if (!DISALLOWED_HEADERS.contains(headerName.toLowerCase(Locale.ROOT))) {
 				for (String headerValue : headerValues) {
-					builder.header(headerName, headerValue);
+					builder.header(headerName, (headerValue != null) ? headerValue : "");
 				}
 			}
 		});
