@@ -16,7 +16,6 @@
 
 package org.springframework.test.context.junit.jupiter.nested;
 
-import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -43,6 +42,7 @@ class DefaultContextConfigurationDetectionWithNestedTests {
 	@Autowired
 	String greeting;
 
+
 	@Test
 	void test(@Autowired String localGreeting) {
 		// This class must NOT be annotated with @SpringJUnitConfig or @ContextConfiguration.
@@ -52,6 +52,8 @@ class DefaultContextConfigurationDetectionWithNestedTests {
 		assertThat(localGreeting).isEqualTo("TEST");
 	}
 
+
+	/** for 7.1:
 	@Nested
 	class NestedTests {
 
@@ -61,6 +63,8 @@ class DefaultContextConfigurationDetectionWithNestedTests {
 			assertThat(localGreeting).isEqualTo("TEST");
 		}
 	}
+	*/
+
 
 	@Configuration
 	static class DefaultConfig {

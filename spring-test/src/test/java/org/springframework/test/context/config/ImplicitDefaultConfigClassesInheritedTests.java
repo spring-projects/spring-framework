@@ -40,6 +40,13 @@ class ImplicitDefaultConfigClassesInheritedTests extends ImplicitDefaultConfigCl
 	@Autowired
 	String greeting2;
 
+
+	// To be removed in favor of base class method in 7.1
+	@Test
+	void greeting1() {
+		assertThat(greeting1).isEqualTo("TEST 2");
+	}
+
 	@Test
 	void greeting2() {
 		// This class must NOT be annotated with @SpringJUnitConfig or @ContextConfiguration.
@@ -50,8 +57,10 @@ class ImplicitDefaultConfigClassesInheritedTests extends ImplicitDefaultConfigCl
 
 	@Test
 	void greetings(@Autowired List<String> greetings) {
-		assertThat(greetings).containsExactly("TEST 1", "TEST 2");
+		assertThat(greetings).containsExactly("TEST 2");
+		// for 7.1: assertThat(greetings).containsExactly("TEST 1", "TEST 2");
 	}
+
 
 	@Configuration
 	static class DefaultConfig {

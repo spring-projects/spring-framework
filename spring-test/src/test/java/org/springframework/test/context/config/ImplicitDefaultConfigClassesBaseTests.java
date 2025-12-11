@@ -41,6 +41,7 @@ class ImplicitDefaultConfigClassesBaseTests {
 	@Autowired
 	String greeting1;
 
+
 	@Test
 	void greeting1() {
 		// This class must NOT be annotated with @SpringJUnitConfig or @ContextConfiguration.
@@ -48,6 +49,7 @@ class ImplicitDefaultConfigClassesBaseTests {
 
 		assertThat(greeting1).isEqualTo("TEST 1");
 	}
+
 
 	@Configuration
 	static class DefaultConfig {
