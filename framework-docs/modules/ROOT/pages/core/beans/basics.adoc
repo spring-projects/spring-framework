@@ -50,6 +50,13 @@ xref:core/beans/java.adoc[Java-based configuration] for their Spring application
   {spring-framework-api}/context/annotation/Import.html[`@Import`],
   and {spring-framework-api}/context/annotation/DependsOn.html[`@DependsOn`] annotations.
 
+[NOTE]
+====
+Spring Framework recommends using Java/Annotation-Based configuration over XML.
+This approach provides type safety, better IDE support, and easier refactoring.
+XML configuration is still supported for legacy scenarios.
+====
+
 Spring configuration consists of at least one and typically more than one bean definition
 that the container must manage. Java configuration typically uses `@Bean`-annotated
 methods within a `@Configuration` class, each corresponding to one bean definition.
