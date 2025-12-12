@@ -28,13 +28,20 @@ import java.lang.annotation.Target;
  * to define metadata that is used to determine how to bootstrap the
  * <em>Spring TestContext Framework</em>.
  *
- * <p>This annotation may also be used as a <em>meta-annotation</em> to create
- * custom <em>composed annotations</em>. Note, however, that a locally
+ * <p>
+ * This annotation may also be used as a <em>meta-annotation</em> to create
  * declared {@code @BootstrapWith} annotation (i.e., one that is <em>directly
  * present</em> on the current test class) will override any meta-present
  * declarations of {@code @BootstrapWith}.
  *
- * <p>This annotation will be inherited from an enclosing test class by default.
+ * <p>
+ * <strong>Note:</strong> Multiple instances of this annotation on the same test
+ * class
+ * are not supported. When using nested test classes or inheritance, ensure that
+ * only one instance is present to avoid unexpected behavior.
+ *
+ * <p>
+ * This annotation will be inherited from an enclosing test class by default.
  * See {@link NestedTestConfiguration @NestedTestConfiguration} for details.
  *
  * @author Sam Brannen
