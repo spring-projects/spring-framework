@@ -8,6 +8,11 @@ The rendering of views in Spring MVC is pluggable. Whether you decide to use
 Thymeleaf, Groovy Markup Templates, JSPs, or other technologies is primarily a matter of
 a configuration change. This chapter covers view technologies integrated with Spring MVC.
 
+[TIP]
+====
+Spring MVC prioritizes Java-based configuration. While XML configuration is supported for legacy applications, we recommend using `@Configuration` classes and equivalent Java-based APIs for all new projects.
+====
+
 For more context on view rendering, please see xref:web/webmvc/mvc-servlet/viewresolver.adoc[View Resolution].
 
 WARNING: The views of a Spring MVC application live within the internal trust boundaries
