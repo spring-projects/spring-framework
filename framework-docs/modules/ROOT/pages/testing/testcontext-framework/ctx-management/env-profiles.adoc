@@ -543,3 +543,101 @@ Kotlin::
 ----
 ======
 
+
+[[testcontext-ctx-management-env-profiles-conditional-test-execution]]
+== Conditional Test Execution Based on Active Profiles
+
+In some scenarios, you may want to enable or disable entire test classes or individual
+test methods based on active Spring profiles. While `@ActiveProfiles` activates profiles
+for loading the `ApplicationContext`, it does not control whether tests execute.
+
+When using JUnit Jupiter (JUnit 5), you can conditionally enable or disable tests based
+on active profiles in two ways:
+
+1. **Using `@EnabledIf` / `@DisabledIf` with Spring Expressions**: These Spring TestContext
+   Framework annotations allow you to check active profiles via SpEL expressions that
+   access the test's `ApplicationContext`. Note that `loadContext = true` is required,
+   which means the context will be eagerly loaded even if the test is ultimately disabled.
+
+2. **Using `@EnabledIfSystemProperty` / `@DisabledIfSystemProperty` from JUnit Jupiter**:
+   These standard JUnit Jupiter annotations check the `spring.profiles.active` system
+   property without loading the Spring context. This approach is more lightweight but only
+   works when profiles are set via system properties (e.g., `-Dspring.profiles.active=oracle`).
+
+The following example demonstrates both approaches:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	import org.junit.jupiter.api.Test;
+	import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
+	import org.springframework.test.context.ActiveProfiles;
+	import org.springframework.test.context.junit.jupiter.EnabledIf;
+	import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
+
+	@SpringJUnitConfig
+	@ActiveProfiles("oracle")
+	class ProfileBasedTestExecutionTests {
+
+		// Approach 1: Using Spring's @EnabledIf with SpEL
+		// Requires loading the ApplicationContext (loadContext = true)
+		@Test
+		@EnabledIf(expression = "#{environment.matchesProfiles('oracle')}", loadContext = true)
+		void testOnlyForOracleProfile() {
+			// This test runs only when the 'oracle' profile is active
+		}
+
+		// Approach 2: Using JUnit Jupiter's @EnabledIfSystemProperty
+		// Lightweight approach that checks system property without loading context
+		// Run with: -Dspring.profiles.active=oracle
+		@Test
+		@EnabledIfSystemProperty(named = "spring.profiles.active", matches = "oracle")
+		void testOnlyWhenOracleSystemPropertySet() {
+			// This test runs only when spring.profiles.active system property matches "oracle"
+		}
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes"]
+----
+	import org.junit.jupiter.api.Test
+	import org.junit.jupiter.api.condition.EnabledIfSystemProperty
+	import org.springframework.test.context.ActiveProfiles
+	import org.springframework.test.context.junit.jupiter.EnabledIf
+	import org.springframework.test.context.junit.jupiter.SpringJUnitConfig
+
+	@SpringJUnitConfig
+	@ActiveProfiles("oracle")
+	class ProfileBasedTestExecutionTests {
+
+		// Approach 1: Using Spring's @EnabledIf with SpEL
+		// Requires loading the ApplicationContext (loadContext = true)
+		@Test
+		@EnabledIf(expression = "#{environment.matchesProfiles('oracle')}", loadContext = true)
+		fun testOnlyForOracleProfile() {
+			// This test runs only when the 'oracle' profile is active
+		}
+
+		// Approach 2: Using JUnit Jupiter's @EnabledIfSystemProperty
+		// Lightweight approach that checks system property without loading context
+		// Run with: -Dspring.profiles.active=oracle
+		@Test
+		@EnabledIfSystemProperty(named = "spring.profiles.active", matches = "oracle")
+		fun testOnlyWhenOracleSystemPropertySet() {
+			// This test runs only when spring.profiles.active system property matches "oracle"
+		}
+	}
+----
+======
+
+NOTE: `Environment.matchesProfiles(String...)` supports profile expressions such as
+`!oracle` to match when a profile is NOT active. You can use `@EnabledIf` with
+`!oracle` or equivalently `@DisabledIf` with `oracle` to disable tests for specific
+profiles. See the {spring-framework-api}/core/env/Environment.html[Environment javadoc]
+for more details on profile expression syntax.
+

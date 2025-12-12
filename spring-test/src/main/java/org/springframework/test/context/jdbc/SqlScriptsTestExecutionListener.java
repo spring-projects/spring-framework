@@ -208,7 +208,38 @@ public class SqlScriptsTestExecutionListener extends AbstractTestExecutionListen
 	 */
 	private void executeClassLevelSqlScripts(TestContext testContext, ExecutionPhase executionPhase) {
 		Class<?> testClass = testContext.getTestClass();
-		executeSqlScripts(getSqlAnnotationsFor(testClass), testContext, executionPhase, true);
+		
+		// Check if we should exclude inherited execution phase scripts
+		if (shouldExcludeInheritedExecutionPhaseScripts(testClass)) {
+			// Only execute scripts declared directly on this class, not inherited ones
+			Set<Sql> sqlAnnotations = getSqlAnnotationsFor(testClass).stream()
+					.filter(sql -> sql.executionPhase() == executionPhase)
+					.filter(sql -> isDeclaredOnClass(sql, testClass))
+					.collect(java.util.stream.Collectors.toSet());
+			executeSqlScripts(sqlAnnotations, testContext, executionPhase, true);
+		}
+		else {
+			executeSqlScripts(getSqlAnnotationsFor(testClass), testContext, executionPhase, true);
+		}
+	}
+
+	/**
+	 * Determine if inherited execution phase scripts should be excluded for the given class.
+	 */
+	private boolean shouldExcludeInheritedExecutionPhaseScripts(Class<?> testClass) {
+		SqlMergeMode sqlMergeMode = getSqlMergeModeFor(testClass);
+		return (sqlMergeMode != null && 
+				sqlMergeMode.value() == MergeMode.OVERRIDE_AND_EXCLUDE_INHERITED_EXECUTION_PHASE_SCRIPTS);
+	}
+
+	/**
+	 * Determine if the given {@code @Sql} annotation is declared directly on the specified class
+	 * (not inherited from a superclass or enclosing class).
+	 */
+	private boolean isDeclaredOnClass(Sql sql, Class<?> testClass) {
+		Set<Sql> directAnnotations = AnnotatedElementUtils.getMergedRepeatableAnnotations(
+				testClass, Sql.class, SqlGroup.class);
+		return directAnnotations.contains(sql);
 	}
 
 	/**
