@@ -47,6 +47,12 @@ Situations in which this can occur include but are not limited to the following.
 * TestNG's `@Test(timeOut = ...)` support
 ====
 
+[NOTE]
+====
+When combining `@Retryable` with other proxy-based features (e.g., `@Transactional` or AOP advice), ensure that the order of proxies is correct.
+Improper ordering may result in retries not being applied as expected.
+====
+
 
 [[testcontext-tx-enabling-transactions]]
 == Enabling and Disabling Transactions
