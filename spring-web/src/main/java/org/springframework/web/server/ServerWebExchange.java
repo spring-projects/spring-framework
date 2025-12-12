@@ -34,7 +34,8 @@ import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
 
 /**
- * Contract for an HTTP request-response interaction. Provides access to the HTTP
+ * Contract for an HTTP request-response interaction. Provides access to the
+ * HTTP
  * request and response and also exposes additional server-side processing
  * related properties and features such as request attributes.
  *
@@ -47,11 +48,11 @@ public interface ServerWebExchange {
 	 * Name of {@link #getAttributes() attribute} whose value can be used to
 	 * correlate log messages for this exchange. Use {@link #getLogPrefix()} to
 	 * obtain a consistently formatted prefix based on this attribute.
+	 * 
 	 * @since 5.1
 	 * @see #getLogPrefix()
 	 */
 	String LOG_ID_ATTRIBUTE = ServerWebExchange.class.getName() + ".LOG_ID";
-
 
 	/**
 	 * Return the current HTTP request.
@@ -70,8 +71,9 @@ public interface ServerWebExchange {
 
 	/**
 	 * Return the request attribute value if present.
+	 * 
 	 * @param name the attribute name
-	 * @param <T> the attribute type
+	 * @param <T>  the attribute type
 	 * @return the attribute value
 	 */
 	@SuppressWarnings("unchecked")
@@ -82,9 +84,11 @@ public interface ServerWebExchange {
 	/**
 	 * Return the request attribute value or if not present raise an
 	 * {@link IllegalArgumentException}.
+	 * 
 	 * @param name the attribute name
-	 * @param <T> the attribute type
+	 * @param <T>  the attribute type
 	 * @return the attribute value
+	 * @since 5.3
 	 */
 	@SuppressWarnings("unchecked")
 	default <T> T getRequiredAttribute(String name) {
@@ -95,10 +99,12 @@ public interface ServerWebExchange {
 
 	/**
 	 * Return the request attribute value, or a default, fallback value.
-	 * @param name the attribute name
+	 * 
+	 * @param name         the attribute name
 	 * @param defaultValue a default value to return instead
-	 * @param <T> the attribute type
+	 * @param <T>          the attribute type
 	 * @return the attribute value
+	 * @since 5.3
 	 */
 	@SuppressWarnings("unchecked")
 	default <T> T getAttributeOrDefault(String name, T defaultValue) {
@@ -107,10 +113,12 @@ public interface ServerWebExchange {
 
 	/**
 	 * Return the web session for the current request.
-	 * <p>Always guaranteed to return either an instance matching the session id
+	 * <p>
+	 * Always guaranteed to return either an instance matching the session id
 	 * requested by the client, or a new session either because the client did not
 	 * specify a session id or because the underlying session expired.
-	 * <p>Use of this method does not automatically create a session. See
+	 * <p>
+	 * Use of this method does not automatically create a session. See
 	 * {@link WebSession} for more details.
 	 */
 	Mono<WebSession> getSession();
@@ -123,7 +131,8 @@ public interface ServerWebExchange {
 	/**
 	 * Return the form data from the body of the request if the Content-Type is
 	 * {@code "application/x-www-form-urlencoded"} or an empty map otherwise.
-	 * <p><strong>Note:</strong> calling this method causes the request body to
+	 * <p>
+	 * <strong>Note:</strong> calling this method causes the request body to
 	 * be read and parsed in full and the resulting {@code MultiValueMap} is
 	 * cached so that this method is safe to call more than once.
 	 */
@@ -132,22 +141,25 @@ public interface ServerWebExchange {
 	/**
 	 * Return the parts of a multipart request if the Content-Type is
 	 * {@code "multipart/form-data"} or an empty map otherwise.
-	 * <p><strong>Note:</strong> calling this method causes the request body to
+	 * <p>
+	 * <strong>Note:</strong> calling this method causes the request body to
 	 * be read and parsed in full and the resulting {@code MultiValueMap} is
 	 * cached so that this method is safe to call more than once.
-	 * <p><strong>Note:</strong>the {@linkplain Part#content() contents} of each
+	 * <p>
+	 * <strong>Note:</strong>the {@linkplain Part#content() contents} of each
 	 * part is not cached, and can only be read once.
 	 */
 	Mono<MultiValueMap<String, Part>> getMultipartData();
 
 	/**
 	 * Cleans up any storage used for multipart handling.
+	 * 
 	 * @since 6.0.10
 	 * @see Part#delete()
 	 */
 	default Mono<Void> cleanupMultipart() {
 		return getMultipartData()
-				.onErrorComplete()  // ignore errors reading multipart data
+				.onErrorComplete() // ignore errors reading multipart data
 				.flatMapIterable(Map::values)
 				.flatMapIterable(Function.identity())
 				.flatMap(part -> part.delete().onErrorComplete())
@@ -164,10 +176,12 @@ public interface ServerWebExchange {
 	 * Return the {@link ApplicationContext} associated with the web application,
 	 * if it was initialized with one via
 	 * {@link org.springframework.web.server.adapter.WebHttpHandlerBuilder#applicationContext(ApplicationContext)}.
+	 * 
 	 * @since 5.0.3
 	 * @see org.springframework.web.server.adapter.WebHttpHandlerBuilder#applicationContext(ApplicationContext)
 	 */
-	@Nullable ApplicationContext getApplicationContext();
+	@Nullable
+	ApplicationContext getApplicationContext();
 
 	/**
 	 * Returns {@code true} if the one of the {@code checkNotModified} methods
@@ -178,16 +192,20 @@ public interface ServerWebExchange {
 	/**
 	 * An overloaded variant of {@link #checkNotModified(String, Instant)} with
 	 * a last-modified timestamp only.
+	 * 
 	 * @param lastModified the last-modified time
 	 * @return whether the request qualifies as not modified
+	 * @since 5.3
 	 */
 	boolean checkNotModified(Instant lastModified);
 
 	/**
 	 * An overloaded variant of {@link #checkNotModified(String, Instant)} with
 	 * an {@code ETag} (entity tag) value only.
+	 * 
 	 * @param etag the entity tag for the underlying resource.
 	 * @return true if the request does not require further processing.
+	 * @since 5.3
 	 */
 	boolean checkNotModified(String etag);
 
@@ -198,34 +216,47 @@ public interface ServerWebExchange {
 	 * status, and adding "ETag" and "Last-Modified" headers when applicable.
 	 * This method works with conditional GET/HEAD requests as well as with
 	 * conditional POST/PUT/DELETE requests.
-	 * <p><strong>Note:</strong> The HTTP specification recommends setting both
+	 * <p>
+	 * <strong>Note:</strong> The HTTP specification recommends setting both
 	 * ETag and Last-Modified values, but you can also use
 	 * {@code #checkNotModified(String)} or
 	 * {@link #checkNotModified(Instant)}.
-	 * @param etag the entity tag that the application determined for the
-	 * underlying resource. This parameter will be padded with quotes (")
-	 * if necessary.
+	 * 
+	 * @param etag         the entity tag that the application determined for the
+	 *                     underlying resource. This parameter will be padded with
+	 *                     quotes (")
+	 *                     if necessary.
 	 * @param lastModified the last-modified timestamp that the application
-	 * determined for the underlying resource
+	 *                     determined for the underlying resource
 	 * @return true if the request does not require further processing.
+	 * @since 5.3
 	 */
 	boolean checkNotModified(@Nullable String etag, Instant lastModified);
 
 	/**
-	 * Transform the given url according to the registered transformation function(s).
+	 * Transform the given url according to the registered transformation
+	 * function(s).
 	 * By default, this method returns the given {@code url}, though additional
 	 * transformation functions can be registered with {@link #addUrlTransformer}
+	 * 
 	 * @param url the URL to transform
 	 * @return the transformed URL
+	 * @since 5.3
 	 */
 	String transformUrl(String url);
 
 	/**
-	 * Register an additional URL transformation function for use with {@link #transformUrl}.
-	 * The given function can be used to insert an id for authentication, a nonce for CSRF
+	 * Register an additional URL transformation function for use with
+	 * {@link #transformUrl}.
+	 * The given function can be used to insert an id for authentication, a nonce
+	 * for CSRF
 	 * protection, etc.
-	 * <p>Note that the given function is applied after any previously registered functions.
+	 * <p>
+	 * Note that the given function is applied after any previously registered
+	 * functions.
+	 * 
 	 * @param transformer a URL transformation function to add
+	 * @since 5.3
 	 */
 	void addUrlTransformer(Function<String, String> transformer);
 
@@ -234,8 +265,9 @@ public interface ServerWebExchange {
 	 * The prefix is based on the value of the attribute {@link #LOG_ID_ATTRIBUTE}
 	 * along with some extra formatting so that the prefix can be conveniently
 	 * prepended with no further formatting no separators required.
+	 * 
 	 * @return the log message prefix or an empty String if the
-	 * {@link #LOG_ID_ATTRIBUTE} is not set.
+	 *         {@link #LOG_ID_ATTRIBUTE} is not set.
 	 * @since 5.1
 	 */
 	String getLogPrefix();
@@ -249,7 +281,6 @@ public interface ServerWebExchange {
 		return new DefaultServerWebExchangeBuilder(this);
 	}
 
-
 	/**
 	 * Builder for mutating an existing {@link ServerWebExchange}.
 	 * Removes the need
@@ -258,18 +289,21 @@ public interface ServerWebExchange {
 
 		/**
 		 * Configure a consumer to modify the current request using a builder.
-		 * <p>Effectively this:
+		 * <p>
+		 * Effectively this:
+		 * 
 		 * <pre>
 		 * exchange.mutate().request(builder -&gt; builder.method(HttpMethod.PUT));
 		 *
 		 * // vs...
 		 *
 		 * ServerHttpRequest request = exchange.getRequest().mutate()
-		 *     .method(HttpMethod.PUT)
-		 *     .build();
+		 * 		.method(HttpMethod.PUT)
+		 * 		.build();
 		 *
 		 * exchange.mutate().request(request);
 		 * </pre>
+		 * 
 		 * @see ServerHttpRequest#mutate()
 		 */
 		Builder request(Consumer<ServerHttpRequest.Builder> requestBuilderConsumer);
@@ -278,12 +312,14 @@ public interface ServerWebExchange {
 		 * Set the request to use especially when there is a need to override
 		 * {@link ServerHttpRequest} methods. To simply mutate request properties
 		 * see {@link #request(Consumer)} instead.
+		 * 
 		 * @see org.springframework.http.server.reactive.ServerHttpRequestDecorator
 		 */
 		Builder request(ServerHttpRequest request);
 
 		/**
 		 * Set the response to use.
+		 * 
 		 * @see org.springframework.http.server.reactive.ServerHttpResponseDecorator
 		 */
 		Builder response(ServerHttpResponse response);

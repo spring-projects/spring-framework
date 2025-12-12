@@ -217,6 +217,8 @@ public class EncoderHttpMessageWriter<T> implements HttpMessageWriter<T> {
 	 * Get additional hints for encoding for example based on the server request
 	 * or annotations from controller method parameters. By default, delegate to
 	 * the encoder if it is an instance of {@link HttpMessageEncoder}.
+	 * 
+	 * @since 5.3
 	 */
 	protected Map<String, Object> getWriteHints(ResolvableType streamType, ResolvableType elementType,
 			@Nullable MediaType mediaType, ServerHttpRequest request, ServerHttpResponse response) {
