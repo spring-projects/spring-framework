@@ -101,6 +101,11 @@ Each implementation can return an AOT contribution, based on the state of the be
 An AOT contribution is a component that contributes generated code which reproduces a particular behavior.
 It can also contribute `RuntimeHints` to indicate the need for reflection, resource loading, serialization, or JDK proxies.
 
+[NOTE]
+====
+AOT contributions are required to be deterministic. Code generation and runtime hints must be consistent across multiple invocations for the same input state. Avoid using non-deterministic data structures (like `HashSet` iteration order) when generating code.
+====
+
 A `BeanFactoryInitializationAotProcessor` implementation can be registered in `META-INF/spring/aot.factories` with a key equal to the fully-qualified name of the interface.
 
 The `BeanFactoryInitializationAotProcessor` interface can also be implemented directly by a bean.
