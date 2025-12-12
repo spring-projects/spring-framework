@@ -43,6 +43,7 @@ class ImplicitDefaultConfigClassesInheritedTests extends ImplicitDefaultConfigCl
 
 	// To be removed in favor of base class method in 7.1
 	@Test
+	@Override
 	void greeting1() {
 		assertThat(greeting1).isEqualTo("TEST 2");
 	}
