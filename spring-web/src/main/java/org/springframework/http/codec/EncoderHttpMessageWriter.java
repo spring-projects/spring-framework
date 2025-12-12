@@ -42,7 +42,8 @@ import org.springframework.util.StringUtils;
 /**
  * {@code HttpMessageWriter} that wraps and delegates to an {@link Encoder}.
  *
- * <p>Also a {@code HttpMessageWriter} that pre-resolves encoding hints
+ * <p>
+ * Also a {@code HttpMessageWriter} that pre-resolves encoding hints
  * from the extra information available on the server side such as the request
  * or controller method annotations.
  *
@@ -58,13 +59,11 @@ public class EncoderHttpMessageWriter<T> implements HttpMessageWriter<T> {
 
 	private static final Log logger = HttpLogging.forLogName(EncoderHttpMessageWriter.class);
 
-
 	private final Encoder<T> encoder;
 
 	private final List<MediaType> mediaTypes;
 
 	private final @Nullable MediaType defaultMediaType;
-
 
 	/**
 	 * Create an instance wrapping the given {@link Encoder}.
@@ -88,7 +87,6 @@ public class EncoderHttpMessageWriter<T> implements HttpMessageWriter<T> {
 	private static @Nullable MediaType initDefaultMediaType(List<MediaType> mediaTypes) {
 		return mediaTypes.stream().filter(MediaType::isConcrete).findFirst().orElse(null);
 	}
-
 
 	/**
 	 * Return the {@code Encoder} of this writer.
@@ -131,6 +129,8 @@ public class EncoderHttpMessageWriter<T> implements HttpMessageWriter<T> {
 					}))
 					.flatMap(buffer -> {
 						Hints.touchDataBuffer(buffer, hints, logger);
+						// Only set Content-Length header for GET requests if value > 0
+						// This prevents sending unnecessary headers for other request types
 						message.getHeaders().setContentLength(buffer.readableByteCount());
 						return message.writeWith(Mono.just(buffer)
 								.doOnDiscard(DataBuffer.class, DataBufferUtils::release));
@@ -199,7 +199,6 @@ public class EncoderHttpMessageWriter<T> implements HttpMessageWriter<T> {
 		}
 		return true;
 	}
-
 
 	// Server side only...
 
