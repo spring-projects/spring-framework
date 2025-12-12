@@ -35,6 +35,11 @@ dependency injection altogether by explicitly configuring your class with
 `@TestExecutionListeners` and omitting `DependencyInjectionTestExecutionListener.class`
 from the list of listeners.
 
+[NOTE]
+====
+If you are using Spring Boot's `@LocalServerPort` annotation in tests, be aware that it may not be injected correctly when using nested test classes with inheritance (see https://github.com/spring-projects/spring-framework/issues/35906[gh-35906]).
+====
+
 Consider the scenario of testing a `HibernateTitleRepository` class, as outlined in the
 xref:testing/integration.adoc#integration-testing-goals[Goals] section. The next two code
 listings demonstrate the use of `@Autowired` on fields and setter methods. The application
