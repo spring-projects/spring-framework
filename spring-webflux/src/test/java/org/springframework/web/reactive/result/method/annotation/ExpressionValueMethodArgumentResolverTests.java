@@ -48,6 +48,7 @@ class ExpressionValueMethodArgumentResolverTests {
 	private MethodParameter paramSystemProperty;
 	private MethodParameter paramNotSupported;
 	private MethodParameter paramAlsoNotSupported;
+	private MethodParameter paramCustomProperty;
 
 
 	@BeforeEach
@@ -61,6 +62,7 @@ class ExpressionValueMethodArgumentResolverTests {
 		this.paramSystemProperty = new MethodParameter(method, 0);
 		this.paramNotSupported = new MethodParameter(method, 1);
 		this.paramAlsoNotSupported = new MethodParameter(method, 2);
+		this.paramCustomProperty = new MethodParameter(method, 3);
 	}
 
 
@@ -93,14 +95,32 @@ class ExpressionValueMethodArgumentResolverTests {
 
 	}
 
-	// TODO: test with expression for ServerWebExchange
+	@Test
+	void resolveWithServerWebExchange() {
+		System.setProperty("customProperty", "42");
+		try {
+			// Configure the exchange
+			MockServerHttpRequest request = MockServerHttpRequest.get("/test").build();
+			MockServerWebExchange exchange = MockServerWebExchange.from(request);
+
+			Mono<Object> mono = this.resolver.resolveArgument(
+					this.paramCustomProperty, new BindingContext(), exchange);
+
+			Object value = mono.block();
+			assertThat(value).isEqualTo(42);
+		}
+		finally {
+			System.clearProperty("customProperty");
+		}
+	}
 
 
 	@SuppressWarnings("unused")
 	public void params(
 			@Value("#{systemProperties.systemProperty}") int param1,
 			String notSupported,
-			@Value("#{systemProperties.foo}") Mono<String> alsoNotSupported) {
+			@Value("#{systemProperties.foo}") Mono<String> alsoNotSupported,
+			@Value("#{systemProperties.customProperty}") int param4) {
 	}
 
 }
