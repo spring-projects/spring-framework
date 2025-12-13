@@ -7,7 +7,7 @@ The ahead-of-time cache is a JVM feature introduced in Java 24 via the
 https://openjdk.org/jeps/483[JEP 483] that can help reduce the startup time and memory
 footprint of Java applications. AOT cache is a natural evolution of https://docs.oracle.com/en/java/javase/17/vm/class-data-sharing.html[Class Data Sharing (CDS)].
 Spring Framework supports both CDS and AOT cache, and it is recommended that you use the
-later if available in the JVM version your are using (Java 24+).
+later if available in the JVM version you are using (Java 24+).
 
 To use this feature, an AOT cache should be created for the particular classpath of the
 application. It is possible to create this cache on the deployed instance, or during a
