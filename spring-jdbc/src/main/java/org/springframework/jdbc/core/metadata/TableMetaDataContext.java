@@ -36,6 +36,7 @@ import org.springframework.jdbc.core.namedparam.SqlParameterSourceUtils;
 import org.springframework.jdbc.support.JdbcUtils;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.LinkedCaseInsensitiveMap;
 import org.springframework.util.StringUtils;
 
 /**
@@ -265,18 +266,17 @@ public class TableMetaDataContext {
 	 * @param inParameters the parameter names and values
 	 */
 	public List<Object> matchInParameterValuesWithInsertColumns(Map<String, ?> inParameters) {
-		List<Object> values = new ArrayList<>(inParameters.size());
+		List<Object> values = new ArrayList<>(this.tableColumns.size());
+		
+		LinkedCaseInsensitiveMap<Object> caseInsensitiveLookup = new LinkedCaseInsensitiveMap<>(inParameters.size());
+		caseInsensitiveLookup.putAll(inParameters);
+		
 		for (String column : this.tableColumns) {
 			Object value = inParameters.get(column);
 			if (value == null) {
 				value = inParameters.get(column.toLowerCase(Locale.ROOT));
 				if (value == null) {
-					for (Map.Entry<String, ?> entry : inParameters.entrySet()) {
-						if (column.equalsIgnoreCase(entry.getKey())) {
-							value = entry.getValue();
-							break;
-						}
-					}
+					value = caseInsensitiveLookup.get(column);
 				}
 			}
 			values.add(value);
