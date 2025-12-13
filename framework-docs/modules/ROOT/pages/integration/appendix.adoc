@@ -1,15 +1,10 @@
 [[appendix]]
 = Appendix
 
-
-
-
 [[appendix.xsd-schemas]]
 == XML Schemas
 
 This part of the appendix lists XML schemas related to integration technologies.
-
-
 
 [[appendix.xsd-schemas-jee]]
 === The `jee` Schema
