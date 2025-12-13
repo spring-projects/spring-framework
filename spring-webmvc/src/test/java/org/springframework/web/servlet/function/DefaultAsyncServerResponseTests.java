@@ -39,16 +39,10 @@ class DefaultAsyncServerResponseTests {
 	@Test
 	void blockNotCompleted() {
 		ServerResponse wrappee = ServerResponse.ok().build();
-		CompletableFuture<ServerResponse> future = CompletableFuture.supplyAsync(() -> {
-			try {
-				Thread.sleep(500);
-				return wrappee;
-			}
-			catch (InterruptedException ex) {
-				throw new RuntimeException(ex);
-			}
-		});
+		CompletableFuture<ServerResponse> future = new CompletableFuture<>();
 		AsyncServerResponse response = AsyncServerResponse.create(future);
+
+		new Thread(() -> future.complete(wrappee)).start();
 
 		assertThat(response.block()).isSameAs(wrappee);
 	}
