@@ -104,7 +104,7 @@ Note that pointcut definitions are generally matched against any intercepted met
 If a pointcut is strictly meant to be public-only, even in a CGLIB proxy scenario with
 potential non-public interactions through proxies, it needs to be defined accordingly.
 
-If your interception needs include method calls or even constructors within the target
+If your interception needs to include method calls or even constructors within the target
 class, consider the use of Spring-driven xref:core/aop/using-aspectj.adoc#aop-aj-ltw[native AspectJ weaving] instead
 of Spring's proxy-based AOP framework. This constitutes a different mode of AOP usage
 with different characteristics, so be sure to make yourself familiar with weaving
