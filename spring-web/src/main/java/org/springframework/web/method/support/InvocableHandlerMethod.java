@@ -318,7 +318,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 			for (KParameter parameter : function.getParameters()) {
 				switch (parameter.getKind()) {
 					case INSTANCE -> argMap.put(parameter, target);
-					case VALUE, EXTENSION_RECEIVER -> {
+					case VALUE, EXTENSION_RECEIVER, CONTEXT -> {
 						Object arg = args[index];
 						if (!(parameter.isOptional() && arg == null)) {
 							KType type = parameter.getType();
