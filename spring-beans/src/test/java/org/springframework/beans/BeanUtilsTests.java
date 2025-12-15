@@ -39,6 +39,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import org.springframework.beans.PropertyDescriptorUtilsPropertyResolutionTests.ServiceWithOverriddenGetterAndOverloadedSetter;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.propertyeditors.CustomDateEditor;
 import org.springframework.beans.testfixture.beans.DerivedTestBean;
@@ -540,6 +541,17 @@ class BeanUtilsTests {
 			assertThat(target.getName()).isEqualTo("name");
 			assertThat((boolean) target.getFlag1()).isTrue();
 			assertThat(target.getFlag2()).isTrue();
+		}
+
+		@Test  // gh-36019
+		void copyPropertiesHonorsGenericsInTypeHieararchyAndIgnoresOverloadedSetterMethod() {
+			var source = new ServiceWithOverriddenGetterAndOverloadedSetter();
+			var target = new ServiceWithOverriddenGetterAndOverloadedSetter();
+
+			source.setId(1);
+			BeanUtils.copyProperties(source, target);
+
+			assertThat(target.getId()).isEqualTo(source.getId()).isEqualTo("1");
 		}
 	}
 
