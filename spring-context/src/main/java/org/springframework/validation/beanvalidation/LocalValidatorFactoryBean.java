@@ -285,8 +285,9 @@ public class LocalValidatorFactoryBean extends SpringValidatorAdapter
 
 		ConstraintValidatorFactory targetConstraintValidatorFactory = this.constraintValidatorFactory;
 		if (targetConstraintValidatorFactory == null && this.applicationContext != null) {
-			targetConstraintValidatorFactory =
-					new SpringConstraintValidatorFactory(this.applicationContext.getAutowireCapableBeanFactory());
+			targetConstraintValidatorFactory = new SpringConstraintValidatorFactory(
+					this.applicationContext.getAutowireCapableBeanFactory(),
+					configuration.getDefaultConstraintValidatorFactory());
 		}
 		if (targetConstraintValidatorFactory != null) {
 			configuration.constraintValidatorFactory(targetConstraintValidatorFactory);
