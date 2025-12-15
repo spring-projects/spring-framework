@@ -16,13 +16,15 @@
 
 package org.springframework.util;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.util.StopWatch.TaskInfo;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.when;
 
 /**
  * Tests for {@link StopWatch}.
@@ -31,6 +33,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
  * @author Juergen Hoeller
  * @author Sam Brannen
  */
+@ExtendWith(MockitoExtension.class)
 class StopWatchTests {
 
 	private static final String ID = "myId";
@@ -38,12 +41,15 @@ class StopWatchTests {
 	private static final String name1 = "Task 1";
 	private static final String name2 = "Task 2";
 
-	private static final long duration1 = 200;
-	private static final long duration2 = 100;
-	// private static final long fudgeFactor = 100;
+	private StopWatch stopWatch;
 
-	private final StopWatch stopWatch = new StopWatch(ID);
+	@Mock
+	private StopWatch.NanoClock nanoClock;
 
+	@BeforeEach
+	void setUp() {
+		stopWatch = new StopWatch(ID, nanoClock);
+	}
 
 	@Test
 	void failureToStartBeforeGettingTimings() {
@@ -57,6 +63,8 @@ class StopWatchTests {
 
 	@Test
 	void rejectsStartTwice() {
+		when(nanoClock.nanoTime()).thenAnswer(invocation -> System.nanoTime());
+
 		stopWatch.start();
 		assertThat(stopWatch.isRunning()).isTrue();
 		stopWatch.stop();
@@ -68,52 +76,46 @@ class StopWatchTests {
 	}
 
 	@Test
-	void validUsage() throws Exception {
+	void validUsage() {
+		when(nanoClock.nanoTime())
+				.thenReturn(1_000_000_000L) // start task 1
+				.thenReturn(2_000_000_000L) // stop task 1 (duration = 1 second)
+				.thenReturn(3_000_000_000L) // start task 2
+				.thenReturn(5_123_456_789L); // stop task 2 (duration = 2.123456789 seconds)
+
 		assertThat(stopWatch.isRunning()).isFalse();
 
 		stopWatch.start(name1);
-		Thread.sleep(duration1);
 		assertThat(stopWatch.isRunning()).isTrue();
 		assertThat(stopWatch.currentTaskName()).isEqualTo(name1);
 		stopWatch.stop();
 		assertThat(stopWatch.isRunning()).isFalse();
 
-		/* Flaky StopWatch time assertions...
-		assertThat(stopWatch.getLastTaskTimeNanos())
+		assertThat(stopWatch.lastTaskInfo().getTimeNanos())
 				.as("last task time in nanoseconds for task #1")
-				.isGreaterThanOrEqualTo(TimeUnit.MILLISECONDS.toNanos(duration1 - fudgeFactor))
-				.isLessThanOrEqualTo(TimeUnit.MILLISECONDS.toNanos(duration1 + fudgeFactor));
+				.isEqualTo(1_000_000_000L);;
 		assertThat(stopWatch.getTotalTimeMillis())
-				.as("total time in milliseconds for task #1")
-				.isGreaterThanOrEqualTo(duration1 - fudgeFactor)
-				.isLessThanOrEqualTo(duration1 + fudgeFactor);
+				.as("total time in milliseconds")
+				.isEqualTo(1_000L);
 		assertThat(stopWatch.getTotalTimeSeconds())
-				.as("total time in seconds for task #1")
-				.isGreaterThanOrEqualTo((duration1 - fudgeFactor) / 1000.0)
-				.isLessThanOrEqualTo((duration1 + fudgeFactor) / 1000.0);
-		*/
+				.as("total time in seconds")
+				.isEqualTo(1.0);
 
 		stopWatch.start(name2);
-		Thread.sleep(duration2);
 		assertThat(stopWatch.isRunning()).isTrue();
 		assertThat(stopWatch.currentTaskName()).isEqualTo(name2);
 		stopWatch.stop();
 		assertThat(stopWatch.isRunning()).isFalse();
 
-		/* Flaky StopWatch time assertions...
-		assertThat(stopWatch.getLastTaskTimeNanos())
+		assertThat(stopWatch.lastTaskInfo().getTimeNanos())
 				.as("last task time in nanoseconds for task #2")
-				.isGreaterThanOrEqualTo(TimeUnit.MILLISECONDS.toNanos(duration2))
-				.isLessThanOrEqualTo(TimeUnit.MILLISECONDS.toNanos(duration2 + fudgeFactor));
+				.isEqualTo(2_123_456_789L);
 		assertThat(stopWatch.getTotalTimeMillis())
-				.as("total time in milliseconds for tasks #1 and #2")
-				.isGreaterThanOrEqualTo(duration1 + duration2 - fudgeFactor)
-				.isLessThanOrEqualTo(duration1 + duration2 + fudgeFactor);
+				.as("total time in milliseconds")
+				.isEqualTo(3_123L);
 		assertThat(stopWatch.getTotalTimeSeconds())
-				.as("total time in seconds for task #2")
-				.isGreaterThanOrEqualTo((duration1 + duration2 - fudgeFactor) / 1000.0)
-				.isLessThanOrEqualTo((duration1 + duration2 + fudgeFactor) / 1000.0);
-		*/
+				.as("total time in seconds")
+				.isEqualTo(3.123456789);
 
 		assertThat(stopWatch.getTaskCount()).isEqualTo(2);
 		assertThat(stopWatch.prettyPrint()).contains(name1, name2);
@@ -123,16 +125,15 @@ class StopWatchTests {
 	}
 
 	@Test
-	void validUsageDoesNotKeepTaskList() throws Exception {
+	void validUsageDoesNotKeepTaskList() {
+		when(nanoClock.nanoTime()).thenAnswer(invocation -> System.nanoTime());
 		stopWatch.setKeepTaskList(false);
 
 		stopWatch.start(name1);
-		Thread.sleep(duration1);
 		assertThat(stopWatch.currentTaskName()).isEqualTo(name1);
 		stopWatch.stop();
 
 		stopWatch.start(name2);
-		Thread.sleep(duration2);
 		assertThat(stopWatch.currentTaskName()).isEqualTo(name2);
 		stopWatch.stop();
 

@@ -75,6 +75,12 @@ public class StopWatch {
 	/** Total running time. */
 	private long totalTimeNanos;
 
+	/**
+	 * The {@link NanoClock} to compute execution times of tasks.
+	 * <br/>
+	 * Defaults to {@link System#nanoTime()}, other implementations can be injected for unit testing.
+	 */
+	private final NanoClock nanoClock;
 
 	/**
 	 * Construct a new {@code StopWatch}.
@@ -92,9 +98,21 @@ public class StopWatch {
 	 * @param id identifier for this stop watch
 	 */
 	public StopWatch(String id) {
-		this.id = id;
+		this(id, System::nanoTime);
 	}
 
+	/**
+	 * Construct a new {@code StopWatch} with the given id.
+	 * <p>The id is handy when we have output from multiple stop watches and need
+	 * to distinguish between them.
+	 * <p>Does not start any task.
+	 * @param id identifier for this stop watch
+	 * @param nanoClock the {@link NanoClock} to compute execution times of tasks
+	 */
+	public StopWatch(String id, NanoClock nanoClock) {
+		this.id = id;
+		this.nanoClock = nanoClock;
+	}
 
 	/**
 	 * Get the id of this {@code StopWatch}, as specified on construction.
@@ -141,7 +159,7 @@ public class StopWatch {
 			throw new IllegalStateException("Can't start StopWatch: it's already running");
 		}
 		this.currentTaskName = taskName;
-		this.startTimeNanos = System.nanoTime();
+		this.startTimeNanos = nanoClock.nanoTime();
 	}
 
 	/**
@@ -155,7 +173,7 @@ public class StopWatch {
 		if (this.currentTaskName == null) {
 			throw new IllegalStateException("Can't stop StopWatch: it's not running");
 		}
-		long lastTime = System.nanoTime() - this.startTimeNanos;
+		long lastTime = nanoClock.nanoTime() - this.startTimeNanos;
 		this.totalTimeNanos += lastTime;
 		this.lastTaskInfo = new TaskInfo(this.currentTaskName, lastTime);
 		if (this.taskList != null) {
@@ -389,6 +407,14 @@ public class StopWatch {
 		return sb.toString();
 	}
 
+	/**
+	 * An abstraction of a clock that provides nanosecond precision and that can be used to compute relative times.
+	 */
+	public interface NanoClock {
+
+		long nanoTime();
+
+	}
 
 	/**
 	 * Nested class to hold data about one task executed within the {@code StopWatch}.
