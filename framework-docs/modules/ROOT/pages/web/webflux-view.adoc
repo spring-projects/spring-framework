@@ -210,13 +210,8 @@ The following table shows the templating libraries that we have tested on differ
 [%header]
 |===
 |Scripting Library |Scripting Engine
-|https://handlebarsjs.com/[Handlebars] |https://openjdk.java.net/projects/nashorn/[Nashorn]
-|https://mustache.github.io/[Mustache] |https://openjdk.java.net/projects/nashorn/[Nashorn]
-|https://react.dev/[React] |https://openjdk.java.net/projects/nashorn/[Nashorn]
-|https://ejs.co/[EJS] |https://openjdk.java.net/projects/nashorn/[Nashorn]
 |https://docs.ruby-lang.org/en/master/ERB.html[ERB] |https://www.jruby.org[JRuby]
 |https://docs.python.org/2/library/string.html#template-strings[String templates] |https://www.jython.org/[Jython]
-|https://github.com/sdeleuze/kotlin-script-templating[Kotlin Script templating] |{kotlin-site}[Kotlin]
 |===
 
 TIP: The basic rule for integrating any other script engine is that it must implement the
@@ -228,17 +223,8 @@ TIP: The basic rule for integrating any other script engine is that it must impl
 
 You need to have the script engine on your classpath, the details of which vary by script engine:
 
-* The https://openjdk.java.net/projects/nashorn/[Nashorn] JavaScript engine is provided with
-Java 8+. Using the latest update release available is highly recommended.
 * https://www.jruby.org[JRuby] should be added as a dependency for Ruby support.
 * https://www.jython.org[Jython] should be added as a dependency for Python support.
-* `org.jetbrains.kotlin:kotlin-script-util` dependency and a `META-INF/services/javax.script.ScriptEngineFactory`
- file containing a `org.jetbrains.kotlin.script.jsr223.KotlinJsr223JvmLocalScriptEngineFactory`
- line should be added for Kotlin script support. See
- https://github.com/sdeleuze/kotlin-script-templating[this example] for more detail.
-
-You need to have the script templating library. One way to do that for JavaScript is
-through https://www.webjars.org/[WebJars].
 
 [[webflux-view-script-integrate]]
 === Script Templates
@@ -246,7 +232,7 @@ through https://www.webjars.org/[WebJars].
 
 You can declare a `ScriptTemplateConfigurer` bean to specify the script engine to use,
 the script files to load, what function to call to render templates, and so on.
-The following example uses Mustache templates and the Nashorn JavaScript engine:
+The following example uses the Jython Python engine:
 
 [tabs]
 ======
@@ -255,7 +241,6 @@ Java::
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Configuration
-	@EnableWebFlux
 	public class WebConfig implements WebFluxConfigurer {
 
 		@Override
@@ -266,9 +251,8 @@ Java::
 		@Bean
 		public ScriptTemplateConfigurer configurer() {
 			ScriptTemplateConfigurer configurer = new ScriptTemplateConfigurer();
-			configurer.setEngineName("nashorn");
-			configurer.setScripts("mustache.js");
-			configurer.setRenderObject("Mustache");
+			configurer.setEngineName("jython");
+			configurer.setScripts("render.py");
 			configurer.setRenderFunction("render");
 			return configurer;
 		}
@@ -280,7 +264,6 @@ Kotlin::
 [source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@Configuration
-	@EnableWebFlux
 	class WebConfig : WebFluxConfigurer {
 
 		override fun configureViewResolvers(registry: ViewResolverRegistry) {
@@ -289,9 +272,8 @@ Kotlin::
 
 		@Bean
 		fun configurer() = ScriptTemplateConfigurer().apply {
-			engineName = "nashorn"
-			setScripts("mustache.js")
-			renderObject = "Mustache"
+			engineName = "jython"
+			setScripts("render.py")
 			renderFunction = "render"
 		}
 	}
@@ -305,94 +287,7 @@ The `render` function is called with the following parameters:
 * `RenderingContext renderingContext`: The
   {spring-framework-api}/web/servlet/view/script/RenderingContext.html[`RenderingContext`]
   that gives access to the application context, the locale, the template loader, and the
-  URL (since 5.0)
-
-`Mustache.render()` is natively compatible with this signature, so you can call it directly.
-
-If your templating technology requires some customization, you can provide a script that
-implements a custom render function. For example, https://handlebarsjs.com[Handlerbars]
-needs to compile templates before using them and requires a
-https://en.wikipedia.org/wiki/Polyfill[polyfill] in order to emulate some
-browser facilities not available in the server-side script engine.
-The following example shows how to set a custom render function:
-
-[tabs]
-======
-Java::
-+
-[source,java,indent=0,subs="verbatim,quotes"]
-----
-	@Configuration
-	@EnableWebFlux
-	public class WebConfig implements WebFluxConfigurer {
-
-		@Override
-		public void configureViewResolvers(ViewResolverRegistry registry) {
-			registry.scriptTemplate();
-		}
-
-		@Bean
-		public ScriptTemplateConfigurer configurer() {
-			ScriptTemplateConfigurer configurer = new ScriptTemplateConfigurer();
-			configurer.setEngineName("nashorn");
-			configurer.setScripts("polyfill.js", "handlebars.js", "render.js");
-			configurer.setRenderFunction("render");
-			configurer.setSharedEngine(false);
-			return configurer;
-		}
-	}
-----
-
-Kotlin::
-+
-[source,kotlin,indent=0,subs="verbatim,quotes"]
-----
-	@Configuration
-	@EnableWebFlux
-	class WebConfig : WebFluxConfigurer {
-
-		override fun configureViewResolvers(registry: ViewResolverRegistry) {
-			registry.scriptTemplate()
-		}
-
-		@Bean
-		fun configurer() = ScriptTemplateConfigurer().apply {
-			engineName = "nashorn"
-			setScripts("polyfill.js", "handlebars.js", "render.js")
-			renderFunction = "render"
-			isSharedEngine = false
-		}
-	}
-----
-======
-
-NOTE: Setting the `sharedEngine` property to `false` is required when using non-thread-safe
-script engines with templating libraries not designed for concurrency, such as Handlebars or
-React running on Nashorn. In that case, Java SE 8 update 60 is required, due to
-https://bugs.openjdk.java.net/browse/JDK-8076099[this bug], but it is generally
-recommended to use a recent Java SE patch release in any case.
-
-`polyfill.js` defines only the `window` object needed by Handlebars to run properly,
-as the following snippet shows:
-
-[source,javascript,indent=0,subs="verbatim,quotes"]
-----
-	var window = {};
-----
-
-This basic `render.js` implementation compiles the template before using it. A production
-ready implementation should also store and reused cached templates or pre-compiled templates.
-This can be done on the script side, as well as any customization you need (managing
-template engine configuration for example).
-The following example shows how compile a template:
-
-[source,javascript,indent=0,subs="verbatim,quotes"]
-----
-	function render(template, model) {
-		var compiledTemplate = Handlebars.compile(template);
-		return compiledTemplate(model);
-	}
-----
+  URL
 
 Check out the Spring Framework unit tests,
 {spring-framework-code}/spring-webflux/src/test/java/org/springframework/web/reactive/result/view/script[Java], and

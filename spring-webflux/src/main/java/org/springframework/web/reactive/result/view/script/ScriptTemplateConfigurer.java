@@ -42,8 +42,8 @@ import org.jspecify.annotations.Nullable;
  * </pre>
  *
  * <p><b>NOTE:</b> It is possible to use non thread-safe script engines with
- * templating libraries not designed for concurrency, like Handlebars or React running on
- * Nashorn, by setting the {@link #setSharedEngine sharedEngine} property to {@code false}.
+ * templating libraries not designed for concurrency by setting the
+ * {@link #setSharedEngine sharedEngine} property to {@code false}.
  *
  * @author Sebastien Deleuze
  * @since 5.0
@@ -143,7 +143,7 @@ public class ScriptTemplateConfigurer implements ScriptTemplateConfig {
 	 * for each request, else the same instance will be reused.
 	 * This flag should be set to {@code false} for those using non thread-safe script
 	 * engines with templating libraries not designed for
-	 * concurrency, like Handlebars or React running on Nashorn for example.
+	 * concurrency.
 	 * <p>When this flag is set to {@code false}, the script engine must be specified using
 	 * {@link #setEngineName(String)}. Using {@link #setEngine(ScriptEngine)} is not
 	 * possible because multiple instances of the script engine need to be created for
