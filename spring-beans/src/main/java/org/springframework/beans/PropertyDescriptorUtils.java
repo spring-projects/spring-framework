@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import org.springframework.core.ResolvableType;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
@@ -35,6 +36,7 @@ import org.springframework.util.StringUtils;
  *
  * @author Chris Beams
  * @author Juergen Hoeller
+ * @author Sam Brannen
  */
 abstract class PropertyDescriptorUtils {
 
@@ -99,14 +101,13 @@ abstract class PropertyDescriptorUtils {
 				}
 				else {
 					Method readMethod = pd.getReadMethod();
-					if (readMethod == null ||
-							(readMethod.getReturnType() == method.getReturnType() && method.getName().startsWith("is"))) {
+					if (readMethod == null || readMethod.getReturnType().isAssignableFrom(method.getReturnType())) {
 						pd.setReadMethod(method);
 					}
 				}
 			}
 			else {
-				pd = new BasicPropertyDescriptor(propertyName, (!setter ? method : null), (setter ? method : null));
+				pd = new BasicPropertyDescriptor(propertyName, beanClass, (!setter ? method : null), (setter ? method : null));
 				pdMap.put(propertyName, pd);
 			}
 		}
@@ -264,6 +265,8 @@ abstract class PropertyDescriptorUtils {
 	 */
 	private static class BasicPropertyDescriptor extends PropertyDescriptor {
 
+		private final Class<?> beanClass;
+
 		@Nullable
 		private Method readMethod;
 
@@ -272,10 +275,11 @@ abstract class PropertyDescriptorUtils {
 
 		private final List<Method> alternativeWriteMethods = new ArrayList<>();
 
-		public BasicPropertyDescriptor(String propertyName, @Nullable Method readMethod, @Nullable Method writeMethod)
+		public BasicPropertyDescriptor(String propertyName, Class<?> beanClass, @Nullable Method readMethod, @Nullable Method writeMethod)
 				throws IntrospectionException {
 
 			super(propertyName, readMethod, writeMethod);
+			this.beanClass = beanClass;
 		}
 
 		@Override
@@ -307,13 +311,23 @@ abstract class PropertyDescriptorUtils {
 		public Method getWriteMethod() {
 			if (this.writeMethod == null && !this.alternativeWriteMethods.isEmpty()) {
 				if (this.readMethod == null) {
-					return this.alternativeWriteMethods.get(0);
+					this.writeMethod = this.alternativeWriteMethods.get(0);
 				}
 				else {
 					for (Method method : this.alternativeWriteMethods) {
+						// Check subtype match first.
 						if (this.readMethod.getReturnType().isAssignableFrom(method.getParameterTypes()[0])) {
 							this.writeMethod = method;
 							break;
+						}
+						// Check exact match against resolved generic parameter type as a fallback.
+						if (!(method.getGenericParameterTypes()[0] instanceof Class<?>)) {
+							Class<?> resolvedParameterType =
+									ResolvableType.forMethodParameter(method, 0, this.beanClass).toClass();
+							if (this.readMethod.getReturnType().equals(resolvedParameterType)) {
+								this.writeMethod = method;
+								break;
+							}
 						}
 					}
 				}
@@ -321,6 +335,5 @@ abstract class PropertyDescriptorUtils {
 			return this.writeMethod;
 		}
 	}
-
 
 }
