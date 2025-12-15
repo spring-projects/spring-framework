@@ -61,18 +61,13 @@ class BshScriptFactoryTests {
 		Calculator calc = (Calculator) ctx.getBean("calculator");
 		Messenger messenger = (Messenger) ctx.getBean("messenger");
 
-		boolean condition3 = calc instanceof Refreshable;
-		assertThat(condition3).as("Scripted object should not be instance of Refreshable").isFalse();
-		boolean condition2 = messenger instanceof Refreshable;
-		assertThat(condition2).as("Scripted object should not be instance of Refreshable").isFalse();
+		assertThat(calc).as("Scripted object should not be instance of Refreshable").isNotInstanceOf(Refreshable.class);
+		assertThat(messenger).as("Scripted object should not be instance of Refreshable").isNotInstanceOf(Refreshable.class);
 
 		assertThat(calc).isEqualTo(calc);
 		assertThat(messenger).isEqualTo(messenger);
-		boolean condition1 = !messenger.equals(calc);
-		assertThat(condition1).isTrue();
 		assertThat(messenger.hashCode()).isNotEqualTo(calc.hashCode());
-		boolean condition = !messenger.toString().equals(calc.toString());
-		assertThat(condition).isTrue();
+		assertThat(messenger.toString()).isNotEqualTo(calc.toString());
 
 		assertThat(calc.add(2, 3)).isEqualTo(5);
 
@@ -145,8 +140,7 @@ class BshScriptFactoryTests {
 		ConfigurableMessenger messenger2 = (ConfigurableMessenger) ctx.getBean("messengerPrototype");
 
 		assertThat(AopUtils.isAopProxy(messenger)).as("Shouldn't get proxy when refresh is disabled").isFalse();
-		boolean condition = messenger instanceof Refreshable;
-		assertThat(condition).as("Scripted object should not be instance of Refreshable").isFalse();
+		assertThat(messenger).as("Scripted object should not be instance of Refreshable").isNotInstanceOf(Refreshable.class);
 
 		assertThat(messenger2).isNotSameAs(messenger);
 		assertThat(messenger2.getClass()).isSameAs(messenger.getClass());
@@ -165,8 +159,7 @@ class BshScriptFactoryTests {
 		Messenger messenger = (Messenger) ctx.getBean("messenger");
 
 		assertThat(AopUtils.isAopProxy(messenger)).as("Should be a proxy for refreshable scripts").isTrue();
-		boolean condition = messenger instanceof Refreshable;
-		assertThat(condition).as("Should be an instance of Refreshable").isTrue();
+		assertThat(messenger).as("Should be an instance of Refreshable").isInstanceOf(Refreshable.class);
 
 		String desiredMessage = "Hello World!";
 		assertThat(messenger.getMessage()).as("Message is incorrect").isEqualTo(desiredMessage);
@@ -186,8 +179,7 @@ class BshScriptFactoryTests {
 		ConfigurableMessenger messenger2 = (ConfigurableMessenger) ctx.getBean("messengerPrototype");
 
 		assertThat(AopUtils.isAopProxy(messenger)).as("Should be a proxy for refreshable scripts").isTrue();
-		boolean condition = messenger instanceof Refreshable;
-		assertThat(condition).as("Should be an instance of Refreshable").isTrue();
+		assertThat(messenger).as("Should be an instance of Refreshable").isInstanceOf(Refreshable.class);
 
 		assertThat(messenger.getMessage()).isEqualTo("Hello World!");
 		assertThat(messenger2.getMessage()).isEqualTo("Hello World!");
@@ -207,9 +199,9 @@ class BshScriptFactoryTests {
 
 	@Test
 	void scriptCompilationException() {
-		assertThatExceptionOfType(NestedRuntimeException.class).isThrownBy(() ->
-				new ClassPathXmlApplicationContext("org/springframework/scripting/bsh/bshBrokenContext.xml"))
-			.matches(ex -> ex.contains(ScriptCompilationException.class));
+		assertThatExceptionOfType(NestedRuntimeException.class)
+				.isThrownBy(() -> new ClassPathXmlApplicationContext("org/springframework/scripting/bsh/bshBrokenContext.xml"))
+				.matches(ex -> ex.contains(ScriptCompilationException.class));
 	}
 
 	@Test
@@ -228,20 +220,17 @@ class BshScriptFactoryTests {
 
 	@Test
 	void ctorWithNullScriptSourceLocator() {
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				new BshScriptFactory(null, Messenger.class));
+		assertThatIllegalArgumentException().isThrownBy(() -> new BshScriptFactory(null, Messenger.class));
 	}
 
 	@Test
 	void ctorWithEmptyScriptSourceLocator() {
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				new BshScriptFactory("", Messenger.class));
+		assertThatIllegalArgumentException().isThrownBy(() -> new BshScriptFactory("", Messenger.class));
 	}
 
 	@Test
 	void ctorWithWhitespacedScriptSourceLocator() {
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				new BshScriptFactory("\n   ", Messenger.class));
+		assertThatIllegalArgumentException().isThrownBy(() -> new BshScriptFactory("\n   ", Messenger.class));
 	}
 
 	@Test
@@ -256,8 +245,7 @@ class BshScriptFactoryTests {
 
 		Messenger messenger = (Messenger) ctx.getBean("messenger");
 		assertThat(messenger.getMessage()).isEqualTo("Hello World!");
-		boolean condition = messenger instanceof Refreshable;
-		assertThat(condition).isFalse();
+		assertThat(messenger).isNotInstanceOf(Refreshable.class);
 
 		Messenger messengerImpl = (Messenger) ctx.getBean("messengerImpl");
 		assertThat(messengerImpl.getMessage()).isEqualTo("Hello World!");
@@ -306,8 +294,7 @@ class BshScriptFactoryTests {
 		ConfigurableApplicationContext ctx = new ClassPathXmlApplicationContext("bsh-with-xsd.xml", getClass());
 		Calculator calculator = (Calculator) ctx.getBean("calculator");
 		assertThat(calculator).isNotNull();
-		boolean condition = calculator instanceof Refreshable;
-		assertThat(condition).isFalse();
+		assertThat(calculator).isNotInstanceOf(Refreshable.class);
 		ctx.close();
 	}
 
@@ -316,8 +303,7 @@ class BshScriptFactoryTests {
 		ConfigurableApplicationContext ctx = new ClassPathXmlApplicationContext("bsh-with-xsd.xml", getClass());
 		Messenger messenger = (Messenger) ctx.getBean("refreshableMessenger");
 		assertThat(messenger.getMessage()).isEqualTo("Hello World!");
-		boolean condition = messenger instanceof Refreshable;
-		assertThat(condition).as("Messenger should be Refreshable").isTrue();
+		assertThat(messenger).as("Messenger should be Refreshable").isInstanceOf(Refreshable.class);
 		ctx.close();
 	}
 
