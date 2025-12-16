@@ -605,14 +605,20 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 						rowsAffected = stmt.executeBatch();
 					}
 					catch (BatchUpdateException ex) {
-						String batchExceptionSql = null;
-						for (int i = 0; i < ex.getUpdateCounts().length; i++) {
-							if (ex.getUpdateCounts()[i] == Statement.EXECUTE_FAILED) {
-								batchExceptionSql = appendSql(batchExceptionSql, sql[i]);
+						int[] updateCounts = ex.getUpdateCounts();
+						StringBuilder batchExceptionSql = new StringBuilder();
+
+						for (int i = 0; i < Math.min(updateCounts.length, sql.length); i++) {
+							if (updateCounts[i] == Statement.EXECUTE_FAILED) {
+								if (batchExceptionSql.length() > 0) {
+									batchExceptionSql.append("; ");
+								}
+								batchExceptionSql.append(sql[i]);
 							}
 						}
-						if (StringUtils.hasLength(batchExceptionSql)) {
-							this.currSql = batchExceptionSql;
+
+						if (batchExceptionSql.length() > 0) {
+							this.currSql = batchExceptionSql.toString();
 						}
 						throw ex;
 					}
