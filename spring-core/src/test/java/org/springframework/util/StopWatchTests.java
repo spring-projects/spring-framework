@@ -95,7 +95,7 @@ class StopWatchTests {
 
 		assertThat(stopWatch.lastTaskInfo().getTimeNanos())
 				.as("last task time in nanoseconds for task #1")
-				.isEqualTo(1_000_000_000L);;
+				.isEqualTo(1_000_000_000L);
 		assertThat(stopWatch.getTotalTimeMillis())
 				.as("total time in milliseconds")
 				.isEqualTo(1_000L);
