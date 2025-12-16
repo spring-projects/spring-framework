@@ -27,6 +27,7 @@ import org.springframework.aop.Pointcut;
 /**
  * @author Juergen Hoeller
  */
+@SuppressWarnings("serial")
 public class EntityManagerPointcut implements Pointcut, Serializable {
 
 	@Override
