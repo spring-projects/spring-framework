@@ -76,7 +76,7 @@ public class StopWatch {
 	private long totalTimeNanos;
 
 	/**
-	 * The {@link NanoClock} to compute execution times of tasks.
+	 * The {@link NanoClock} used to compute execution times of tasks.
 	 * <br/>
 	 * Defaults to {@link System#nanoTime()}, other implementations can be injected for unit testing.
 	 */
@@ -107,7 +107,7 @@ public class StopWatch {
 	 * to distinguish between them.
 	 * <p>Does not start any task.
 	 * @param id identifier for this stop watch
-	 * @param nanoClock the {@link NanoClock} to compute execution times of tasks
+	 * @param nanoClock the {@link NanoClock} used to compute execution times of tasks
 	 */
 	public StopWatch(String id, NanoClock nanoClock) {
 		this.id = id;
