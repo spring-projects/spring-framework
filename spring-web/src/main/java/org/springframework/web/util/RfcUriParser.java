@@ -563,7 +563,7 @@ abstract class RfcUriParser {
 		}
 
 		public void captureFragmentIfNotEmpty() {
-			if (this.index > this.componentIndex + 1) {
+			if (this.index > this.componentIndex) {
 				this.fragment = captureComponent("fragment");
 			}
 		}
