@@ -365,9 +365,11 @@ public final class TestCompiler {
 			if (diagnostic.getSource() != null) {
 				message.append(' ');
 				message.append(diagnostic.getSource().getName());
-				message.append(' ');
-				message.append(diagnostic.getLineNumber()).append(':')
-						.append(diagnostic.getColumnNumber());
+				if (diagnostic.getLineNumber() != -1 && diagnostic.getColumnNumber() != -1) {
+					message.append(' ');
+					message.append(diagnostic.getLineNumber()).append(':')
+							.append(diagnostic.getColumnNumber());
+				}
 			}
 			return message.toString();
 		}
