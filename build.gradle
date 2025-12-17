@@ -70,13 +70,14 @@ configure([rootProject] + javaProjects) { project ->
 	ext.javadocLinks = [
 			"https://docs.oracle.com/en/java/javase/17/docs/api/",
 			//"https://jakarta.ee/specifications/platform/11/apidocs/",
-			"https://docs.hibernate.org/orm/5.6/javadocs/",
+			"https://docs.hibernate.org/orm/7.2/javadocs/",
 			"https://www.quartz-scheduler.org/api/2.3.0/",
 			"https://hc.apache.org/httpcomponents-client-5.5.x/current/httpclient5/apidocs/",
+			"https://projectreactor.io/docs/core/release/api/",
 			"https://projectreactor.io/docs/test/release/api/",
 			"https://junit.org/junit4/javadoc/4.13.2/",
-			"https://docs.junit.org/6.0.1/api/",
-			"https://www.reactive-streams.org/reactive-streams-1.0.3-javadoc/",
+			"https://docs.junit.org/current/api/",
+			"https://www.reactive-streams.org/reactive-streams-1.0.4-javadoc/",
 			"https://r2dbc.io/spec/1.0.0.RELEASE/api/",
 			"https://jspecify.dev/docs/api/"
 	] as String[]
