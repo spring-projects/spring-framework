@@ -29,7 +29,6 @@ import org.jspecify.annotations.Nullable;
 
 import org.springframework.aop.ProxyMethodInvocation;
 import org.springframework.core.DefaultParameterNameDiscoverer;
-import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.util.Assert;
 
 /**
@@ -50,8 +49,6 @@ import org.springframework.util.Assert;
  * @since 2.0
  */
 public class MethodInvocationProceedingJoinPoint implements ProceedingJoinPoint, JoinPoint.StaticPart {
-
-	private static final ParameterNameDiscoverer parameterNameDiscoverer = new DefaultParameterNameDiscoverer();
 
 	private final ProxyMethodInvocation methodInvocation;
 
@@ -217,7 +214,7 @@ public class MethodInvocationProceedingJoinPoint implements ProceedingJoinPoint,
 		public @Nullable String @Nullable [] getParameterNames() {
 			@Nullable String[] parameterNames = this.parameterNames;
 			if (parameterNames == null) {
-				parameterNames = parameterNameDiscoverer.getParameterNames(getMethod());
+				parameterNames = DefaultParameterNameDiscoverer.getSharedInstance().getParameterNames(getMethod());
 				this.parameterNames = parameterNames;
 			}
 			return parameterNames;

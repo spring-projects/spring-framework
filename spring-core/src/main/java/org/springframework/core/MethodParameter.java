@@ -89,7 +89,8 @@ public class MethodParameter {
 
 	private volatile Annotation @Nullable [] parameterAnnotations;
 
-	private volatile @Nullable ParameterNameDiscoverer parameterNameDiscoverer;
+	private volatile @Nullable ParameterNameDiscoverer parameterNameDiscoverer =
+			DefaultParameterNameDiscoverer.getSharedInstance();
 
 	volatile @Nullable String parameterName;
 
@@ -667,6 +668,10 @@ public class MethodParameter {
 	 * <p>This method does not actually try to retrieve the parameter name at
 	 * this point; it just allows discovery to happen when the application calls
 	 * {@link #getParameterName()} (if ever).
+	 * <p>Note: As of 7.0.3, a default parameter name discoverer is available.
+	 * This init method can be used to override the default discoverer or to
+	 * suppress discovery (passing {@code null}).
+	 * @see DefaultParameterNameDiscoverer#getSharedInstance()
 	 */
 	public void initParameterNameDiscovery(@Nullable ParameterNameDiscoverer parameterNameDiscoverer) {
 		this.parameterNameDiscoverer = parameterNameDiscoverer;

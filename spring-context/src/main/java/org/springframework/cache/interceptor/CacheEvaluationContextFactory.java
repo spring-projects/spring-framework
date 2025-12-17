@@ -39,9 +39,11 @@ class CacheEvaluationContextFactory {
 
 	private @Nullable Supplier<ParameterNameDiscoverer> parameterNameDiscoverer;
 
+
 	CacheEvaluationContextFactory(StandardEvaluationContext originalContext) {
 		this.originalContext = originalContext;
 	}
+
 
 	public void setParameterNameDiscoverer(Supplier<ParameterNameDiscoverer> parameterNameDiscoverer) {
 		this.parameterNameDiscoverer = parameterNameDiscoverer;
@@ -49,10 +51,11 @@ class CacheEvaluationContextFactory {
 
 	public ParameterNameDiscoverer getParameterNameDiscoverer() {
 		if (this.parameterNameDiscoverer == null) {
-			this.parameterNameDiscoverer = SingletonSupplier.of(new DefaultParameterNameDiscoverer());
+			this.parameterNameDiscoverer = SingletonSupplier.of(DefaultParameterNameDiscoverer.getSharedInstance());
 		}
 		return this.parameterNameDiscoverer.get();
 	}
+
 
 	/**
 	 * Creates a {@link CacheEvaluationContext} for the specified operation.

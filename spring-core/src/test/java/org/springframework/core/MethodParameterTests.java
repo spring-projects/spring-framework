@@ -253,6 +253,12 @@ class MethodParameterTests {
 	}
 
 	@Test
+	void parameterNames() {
+		assertThat(stringParameter.getParameterName()).isEqualTo("str");
+		assertThat(longParameter.getParameterName()).isEqualTo("lng");
+	}
+
+	@Test
 	void jspecifyNullableParameter() {
 		assertThat(jspecifyNullableParameter.isOptional()).isTrue();
 	}
@@ -272,7 +278,8 @@ class MethodParameterTests {
 		assertThat(springNonNullParameter.isOptional()).isFalse();
 	}
 
-	public int method(String p1, long p2) {
+
+	public int method(String str, long lng) {
 		return 42;
 	}
 

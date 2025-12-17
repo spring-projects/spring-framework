@@ -117,21 +117,18 @@ class MethodParameterKotlinTests {
 	@Test
 	fun `Parameter name for regular function`() {
 		val methodParameter = returnMethodParameter("nullable", 0)
-		methodParameter.initParameterNameDiscovery(KotlinReflectionParameterNameDiscoverer())
 		assertThat(methodParameter.getParameterName()).isEqualTo("nullable")
 	}
 
 	@Test
 	fun `Parameter name for suspending function`() {
 		val methodParameter = returnMethodParameter("suspendFun", 0)
-		methodParameter.initParameterNameDiscovery(KotlinReflectionParameterNameDiscoverer())
 		assertThat(methodParameter.getParameterName()).isEqualTo("p1")
 	}
 
 	@Test
 	fun `Continuation parameter name for suspending function`() {
 		val methodParameter = returnMethodParameter("suspendFun", 1)
-		methodParameter.initParameterNameDiscovery(KotlinReflectionParameterNameDiscoverer())
 		assertThat(methodParameter.getParameterName()).isNull()
 	}
 

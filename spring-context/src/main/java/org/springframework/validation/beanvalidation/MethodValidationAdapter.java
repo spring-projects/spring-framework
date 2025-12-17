@@ -87,7 +87,7 @@ public class MethodValidationAdapter implements MethodValidator {
 
 	private MessageCodesResolver messageCodesResolver = new DefaultMessageCodesResolver();
 
-	private ParameterNameDiscoverer parameterNameDiscoverer = new DefaultParameterNameDiscoverer();
+	private ParameterNameDiscoverer parameterNameDiscoverer = DefaultParameterNameDiscoverer.getSharedInstance();
 
 	private ObjectNameResolver objectNameResolver = defaultObjectNameResolver;
 

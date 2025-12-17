@@ -40,10 +40,8 @@ import org.springframework.cglib.proxy.Enhancer;
 import org.springframework.cglib.proxy.Factory;
 import org.springframework.cglib.proxy.MethodInterceptor;
 import org.springframework.cglib.proxy.MethodProxy;
-import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.MethodIntrospector;
 import org.springframework.core.MethodParameter;
-import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.annotation.AnnotatedMethod;
 import org.springframework.objenesis.ObjenesisException;
@@ -111,8 +109,6 @@ public class MvcUriComponentsBuilder {
 	private static final SpringObjenesis objenesis = new SpringObjenesis();
 
 	private static final PathMatcher pathMatcher = new AntPathMatcher();
-
-	private static final ParameterNameDiscoverer parameterNameDiscoverer = new DefaultParameterNameDiscoverer();
 
 	private static final CompositeUriComponentsContributor defaultUriComponentsContributor;
 
@@ -608,7 +604,6 @@ public class MvcUriComponentsBuilder {
 		final Map<String, Object> uriVars = new HashMap<>();
 		for (int i = 0; i < paramCount; i++) {
 			MethodParameter param = annotatedMethod.getMethodParameters()[i];
-			param.initParameterNameDiscovery(parameterNameDiscoverer);
 			contributor.contributeMethodArgument(param, args[i], builder, uriVars);
 		}
 
