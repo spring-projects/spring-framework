@@ -268,9 +268,9 @@ response to a browser.
 
 `UriComponentsBuilder` exposes encoding options at two levels:
 
-* {spring-framework-api}/web/util/UriComponentsBuilder.html#encode--[UriComponentsBuilder#encode()]:
+* {spring-framework-api}/web/util/UriComponentsBuilder.html#encode()[UriComponentsBuilder#encode()]:
 Pre-encodes the URI template first and then strictly encodes URI variables when expanded.
-* {spring-framework-api}/web/util/UriComponents.html#encode--[UriComponents#encode()]:
+* {spring-framework-api}/web/util/UriComponents.html#encode()[UriComponents#encode()]:
 Encodes URI components _after_ URI variables are expanded.
 
 Both options replace non-ASCII and illegal characters with escaped octets. However, the first option
