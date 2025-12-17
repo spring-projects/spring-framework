@@ -39,9 +39,11 @@ class CacheEvaluationContextFactory {
 	@Nullable
 	private Supplier<ParameterNameDiscoverer> parameterNameDiscoverer;
 
+
 	CacheEvaluationContextFactory(StandardEvaluationContext originalContext) {
 		this.originalContext = originalContext;
 	}
+
 
 	public void setParameterNameDiscoverer(Supplier<ParameterNameDiscoverer> parameterNameDiscoverer) {
 		this.parameterNameDiscoverer = parameterNameDiscoverer;
@@ -53,6 +55,7 @@ class CacheEvaluationContextFactory {
 		}
 		return this.parameterNameDiscoverer.get();
 	}
+
 
 	/**
 	 * Creates a {@link CacheEvaluationContext} for the specified operation.

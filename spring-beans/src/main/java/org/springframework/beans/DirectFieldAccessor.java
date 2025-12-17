@@ -73,7 +73,7 @@ public class DirectFieldAccessor extends AbstractNestablePropertyAccessor {
 
 	@Override
 	@Nullable
-	protected FieldPropertyHandler getLocalPropertyHandler(String propertyName) {
+	protected PropertyHandler getLocalPropertyHandler(String propertyName) {
 		FieldPropertyHandler propertyHandler = this.fieldMap.get(propertyName);
 		if (propertyHandler == null) {
 			Field field = ReflectionUtils.findField(getWrappedClass(), propertyName);

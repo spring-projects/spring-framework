@@ -237,7 +237,8 @@ class MethodParameterTests {
 		assertThat(m3.getTypeIndexForCurrentLevel()).isEqualTo(3);
 	}
 
-	public int method(String p1, long p2) {
+
+	public int method(String str, long lng) {
 		return 42;
 	}
 
