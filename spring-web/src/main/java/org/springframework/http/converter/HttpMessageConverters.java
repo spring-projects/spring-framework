@@ -166,6 +166,13 @@ public interface HttpMessageConverters extends Iterable<HttpMessageConverter<?>>
 		 */
 		T addCustomConverter(HttpMessageConverter<?> customConverter);
 
+
+		/**
+		 * Add a custom {@code HttpMessageConverter} to the list of converters, at the specified index, pushing all existing message converters forward one.
+		 * @param customConverter the converter instance to add
+		 */
+		T addCustomConverter(int index, HttpMessageConverter<?> customConverter);
+
 		/**
 		 * Add a consumer for configuring the selected message converters.
 		 * @param configurer the configurer to use
