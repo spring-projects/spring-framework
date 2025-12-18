@@ -118,6 +118,7 @@ public final class CallMetaDataProviderFactory {
 					}
 				}
 
+				@SuppressWarnings("removal")
 				CallMetaDataProvider provider = switch (databaseProductName) {
 					case ORACLE -> new OracleCallMetaDataProvider(databaseMetaData);
 					case POSTGRES -> new PostgresCallMetaDataProvider(databaseMetaData);
