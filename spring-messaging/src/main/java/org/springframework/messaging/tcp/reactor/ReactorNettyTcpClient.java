@@ -172,7 +172,7 @@ public class ReactorNettyTcpClient<P> implements TcpOperations<P> {
 
 
 	@Override
-	public CompletableFuture<Void> connectAsync(TcpConnectionHandler<P> handler) {
+	public CompletableFuture<@Nullable Void> connectAsync(TcpConnectionHandler<P> handler) {
 		Assert.notNull(handler, "TcpConnectionHandler is required");
 
 		if (this.stopping) {
@@ -200,7 +200,7 @@ public class ReactorNettyTcpClient<P> implements TcpOperations<P> {
 	}
 
 	@Override
-	public CompletableFuture<Void> connectAsync(TcpConnectionHandler<P> handler, ReconnectStrategy strategy) {
+	public CompletableFuture<@Nullable Void> connectAsync(TcpConnectionHandler<P> handler, ReconnectStrategy strategy) {
 		Assert.notNull(handler, "TcpConnectionHandler is required");
 		Assert.notNull(strategy, "ReconnectStrategy is required");
 
@@ -209,7 +209,7 @@ public class ReactorNettyTcpClient<P> implements TcpOperations<P> {
 		}
 
 		// Report first connect to the ListenableFuture
-		CompletableFuture<Void> connectFuture = new CompletableFuture<>();
+		CompletableFuture<@Nullable Void> connectFuture = new CompletableFuture<>();
 
 		extendTcpClient(this.tcpClient, handler)
 				.handle(new ReactorNettyHandler(handler))
@@ -228,7 +228,7 @@ public class ReactorNettyTcpClient<P> implements TcpOperations<P> {
 		return connectFuture;
 	}
 
-	private CompletableFuture<Void> handleShuttingDownConnectFailure(TcpConnectionHandler<P> handler) {
+	private CompletableFuture<@Nullable Void> handleShuttingDownConnectFailure(TcpConnectionHandler<P> handler) {
 		IllegalStateException ex = new IllegalStateException("Shutting down.");
 		handler.afterConnectFailure(ex);
 		return Mono.<Void>error(ex).toFuture();
@@ -240,7 +240,7 @@ public class ReactorNettyTcpClient<P> implements TcpOperations<P> {
 	}
 
 	@Override
-	public CompletableFuture<Void> shutdownAsync() {
+	public CompletableFuture<@Nullable Void> shutdownAsync() {
 		if (this.stopping) {
 			return CompletableFuture.completedFuture(null);
 		}
