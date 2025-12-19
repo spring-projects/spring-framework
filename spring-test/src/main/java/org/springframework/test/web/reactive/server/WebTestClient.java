@@ -702,7 +702,7 @@ public interface WebTestClient {
 		S attributes(Consumer<Map<String, Object>> attributesConsumer);
 
 		/**
-		 * Perform the exchange.
+		 * Perform the HTTP exchange and .
 		 * @return a spec for expectations on the response
 		 */
 		ResponseSpec exchange();
