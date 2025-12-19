@@ -437,7 +437,7 @@ class DefaultHttpMessageConverters implements HttpMessageConverters {
 
 		@Override
 		public ClientBuilder addCustomConverter(HttpMessageConverter<?> customConverter) {
-			addCustomConverter(customConverter);
+			addCustomMessageConverter(customConverter);
 			return this;
 		}
 
