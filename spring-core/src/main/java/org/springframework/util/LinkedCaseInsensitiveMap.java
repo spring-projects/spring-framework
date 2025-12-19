@@ -448,7 +448,18 @@ public class LinkedCaseInsensitiveMap<V> implements Map<String, V>, Serializable
 
 		@Override
 		public boolean contains(Object o) {
-			return this.delegate.contains(o);
+			if (!(o instanceof Map.Entry<?, ?> entry)) {
+				return false;
+			}
+			Object key = entry.getKey();
+			if (!(key instanceof String stringKey)) {
+				return false;
+			}
+			if (!LinkedCaseInsensitiveMap.this.containsKey(stringKey)) {
+				return false;
+			}
+			V value = LinkedCaseInsensitiveMap.this.get(stringKey);
+			return ObjectUtils.nullSafeEquals(value, entry.getValue());
 		}
 
 		@Override
@@ -457,13 +468,23 @@ public class LinkedCaseInsensitiveMap<V> implements Map<String, V>, Serializable
 		}
 
 		@Override
-		@SuppressWarnings("unchecked")
 		public boolean remove(Object o) {
-			if (this.delegate.remove(o)) {
-				removeCaseInsensitiveKey(((Map.Entry<String, V>) o).getKey());
-				return true;
+			if (!(o instanceof Map.Entry<?, ?> entry)) {
+				return false;
 			}
-			return false;
+			Object key = entry.getKey();
+			if (!(key instanceof String stringKey)) {
+				return false;
+			}
+			if (!LinkedCaseInsensitiveMap.this.containsKey(stringKey)) {
+				return false;
+			}
+			V value = LinkedCaseInsensitiveMap.this.get(stringKey);
+			if (!ObjectUtils.nullSafeEquals(value, entry.getValue())) {
+				return false;
+			}
+			LinkedCaseInsensitiveMap.this.remove(stringKey);
+			return true;
 		}
 
 		@Override
