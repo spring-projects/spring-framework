@@ -217,6 +217,11 @@ class DefaultHttpMessageConverters implements HttpMessageConverters {
 			throw new IllegalArgumentException("converter should support '" + mediaType + "'");
 		}
 
+		void addCustomMessageConverter(int index, HttpMessageConverter<?> customConverter) {
+			Assert.notNull(customConverter, "'customConverter' must not be null");
+			this.customConverters.add(index, customConverter);
+		}
+
 		void addCustomMessageConverter(HttpMessageConverter<?> customConverter) {
 			Assert.notNull(customConverter, "'customConverter' must not be null");
 			this.customConverters.add(customConverter);
@@ -432,7 +437,13 @@ class DefaultHttpMessageConverters implements HttpMessageConverters {
 
 		@Override
 		public ClientBuilder addCustomConverter(HttpMessageConverter<?> customConverter) {
-			addCustomMessageConverter(customConverter);
+			addCustomConverter(customConverter);
+			return this;
+		}
+
+		@Override
+		public ClientBuilder addCustomConverter(int index, HttpMessageConverter<?> customConverter) {
+			addCustomMessageConverter(index, customConverter);
 			return this;
 		}
 
@@ -530,6 +541,12 @@ class DefaultHttpMessageConverters implements HttpMessageConverters {
 		@Override
 		public ServerBuilder addCustomConverter(HttpMessageConverter<?> customConverter) {
 			addCustomMessageConverter(customConverter);
+			return this;
+		}
+
+		@Override
+		public ServerBuilder addCustomConverter(int index, HttpMessageConverter<?> customConverter) {
+			addCustomMessageConverter(index, customConverter);
 			return this;
 		}
 

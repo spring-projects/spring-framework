@@ -148,6 +148,22 @@ class DefaultHttpMessageConvertersTests {
 		}
 
 		@Test
+		void registerCustomMessageConverterAtIndex() {
+			var clientBuilder = HttpMessageConverters.forClient()
+					.addCustomConverter(0, new CustomHttpMessageConverter());
+			var converters = clientBuilder.build();
+
+			assertThat(converters).hasExactlyElementsOfTypes(CustomHttpMessageConverter.class, AllEncompassingFormHttpMessageConverter.class);
+
+			clientBuilder.addCustomConverter(0, new CustomHttpMessageConverter());
+			converters = clientBuilder.build();
+
+			assertThat(converters).hasExactlyElementsOfTypes(
+					CustomHttpMessageConverter.class, CustomHttpMessageConverter.class,
+					AllEncompassingFormHttpMessageConverter.class);
+		}
+
+		@Test
 		void registerCustomMessageConverterAheadOfDefaults() {
 			var converters = HttpMessageConverters.forClient().registerDefaults()
 					.addCustomConverter(new CustomHttpMessageConverter()).build();
