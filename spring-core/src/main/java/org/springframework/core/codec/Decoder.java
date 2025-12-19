@@ -93,7 +93,7 @@ public interface Decoder<T> {
 	default @Nullable T decode(DataBuffer buffer, ResolvableType targetType,
 			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) throws DecodingException {
 
-		CompletableFuture<T> future = decodeToMono(Mono.just(buffer), targetType, mimeType, hints).toFuture();
+		CompletableFuture<@Nullable T> future = decodeToMono(Mono.just(buffer), targetType, mimeType, hints).toFuture();
 		Assert.state(future.isDone(), "DataBuffer decoding should have completed");
 
 		try {
