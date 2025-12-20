@@ -18,6 +18,8 @@ package org.springframework.core.task;
 
 import java.util.concurrent.Callable;
 
+import org.jspecify.annotations.Nullable;
+
 /**
  * Variant of {@link Callable} with a flexible exception signature
  * that can be adapted in the {@link SyncTaskExecutor#execute(TaskCallback)}
@@ -34,7 +36,7 @@ import java.util.concurrent.Callable;
  * @param <E> the exception propagated, if any
  * @see SyncTaskExecutor#execute(TaskCallback)
  */
-public interface TaskCallback<V, E extends Exception> extends Callable<V> {
+public interface TaskCallback<V extends @Nullable Object, E extends Exception> extends Callable<V> {
 
 	@Override
 	V call() throws E;
