@@ -16,9 +16,11 @@
 
 package org.springframework.core.retry;
 
+import java.lang.reflect.UndeclaredThrowableException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Supplier;
 
 import org.jspecify.annotations.Nullable;
 
@@ -120,19 +122,6 @@ public class RetryTemplate implements RetryOperations {
 	}
 
 
-	/**
-	 * Execute the supplied {@link Retryable} operation according to the configured
-	 * {@link RetryPolicy}.
-	 * <p>If the {@code Retryable} succeeds, its result will be returned. Otherwise, a
-	 * {@link RetryException} will be thrown to the caller. The {@code RetryException}
-	 * will contain the last exception thrown by the {@code Retryable} operation as the
-	 * {@linkplain RetryException#getCause() cause} and any exceptions from previous
-	 * attempts as {@linkplain RetryException#getSuppressed() suppressed exceptions}.
-	 * @param retryable the {@code Retryable} to execute and retry if needed
-	 * @param <R> the type of the result
-	 * @return the result of the {@code Retryable}, if any
-	 * @throws RetryException if the {@code RetryPolicy} is exhausted
-	 */
 	@Override
 	public <R extends @Nullable Object> R execute(Retryable<R> retryable) throws RetryException {
 		long startTime = System.currentTimeMillis();
@@ -236,6 +225,32 @@ public class RetryTemplate implements RetryOperations {
 				this.retryListener.onRetryPolicyTimeout(this.retryPolicy, retryable, retryException);
 				throw retryException;
 			}
+		}
+	}
+
+	@Override
+	public <R extends @Nullable Object> R invoke(Supplier<R> retryable) {
+		try {
+			return execute(new Retryable<>() {
+				@Override
+				public R execute() {
+					return retryable.get();
+				}
+				@Override
+				public String getName() {
+					return retryable.getClass().getName();
+				}
+			});
+		}
+		catch (RetryException retryException) {
+			Throwable ex = retryException.getCause();
+			if (ex instanceof RuntimeException runtimeException) {
+				throw runtimeException;
+			}
+			if (ex instanceof Error error) {
+				throw error;
+			}
+			throw new UndeclaredThrowableException(ex);
 		}
 	}
 
