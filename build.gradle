@@ -76,7 +76,7 @@ configure([rootProject] + javaProjects) { project ->
 			"https://projectreactor.io/docs/core/release/api/",
 			"https://projectreactor.io/docs/test/release/api/",
 			"https://junit.org/junit4/javadoc/4.13.2/",
-			"https://docs.junit.org/current/api/",
+			"https://docs.junit.org/6.0.1/api/",
 			"https://www.reactive-streams.org/reactive-streams-1.0.4-javadoc/",
 			"https://r2dbc.io/spec/1.0.0.RELEASE/api/",
 			"https://jspecify.dev/docs/api/"
