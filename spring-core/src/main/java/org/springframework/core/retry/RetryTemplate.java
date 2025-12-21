@@ -254,6 +254,33 @@ public class RetryTemplate implements RetryOperations {
 		}
 	}
 
+	@Override
+	public void invoke(Runnable retryable) {
+		try {
+			execute(new Retryable<>() {
+				@Override
+				public Void execute() {
+					retryable.run();
+					return null;
+				}
+				@Override
+				public String getName() {
+					return retryable.getClass().getName();
+				}
+			});
+		}
+		catch (RetryException retryException) {
+			Throwable ex = retryException.getCause();
+			if (ex instanceof RuntimeException runtimeException) {
+				throw runtimeException;
+			}
+			if (ex instanceof Error error) {
+				throw error;
+			}
+			throw new UndeclaredThrowableException(ex);
+		}
+	}
+
 
 	private static class MutableRetryState implements RetryState {
 

@@ -66,4 +66,14 @@ public interface RetryOperations {
 	 */
 	<R extends @Nullable Object> R invoke(Supplier<R> retryable);
 
+	/**
+	 * Invoke the given {@link Runnable} according to the {@link RetryPolicy},
+	 * returning successfully or throwing the last {@code Runnable} exception
+	 * to the caller in case of retry policy exhaustion.
+	 * @param retryable the {@code Runnable} to invoke and retry if needed
+	 * @throws RuntimeException if thrown by the {@code Runnable}
+	 * @since 7.0.3
+	 */
+	void invoke(Runnable retryable);
+
 }
