@@ -48,18 +48,14 @@ import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.http.server.ServletServerHttpResponse;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.ControllerAdvice;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.SessionAttributes;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.async.AsyncRequestNotUsableException;
 import org.springframework.web.context.request.async.StandardServletAsyncWebRequest;
 import org.springframework.web.context.request.async.WebAsyncManager;
 import org.springframework.web.context.request.async.WebAsyncUtils;
 import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.method.HandlerMethod;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.method.annotation.ModelMethodProcessor;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
@@ -130,6 +126,32 @@ class RequestMappingHandlerAdapterTests {
 		this.handlerAdapter.handle(this.request, this.response, handlerMethod);
 		assertThat(response.getHeader("Cache-Control")).contains("max-age");
 	}
+
+	@Test
+	void invalidBooleanRequestParamResultsInBadRequest() throws Exception {
+		this.handlerAdapter.afterPropertiesSet();
+
+		this.request.setRequestURI("/test");
+		this.request.setParameter("bool", "dummy");
+
+		HandlerMethod handlerMethod =
+				handlerMethod(new BooleanParamController(), "test", boolean.class);
+
+		assertThatThrownBy(() -> {
+			try {
+				this.handlerAdapter.handle(this.request, this.response, handlerMethod);
+			}
+			catch (Exception ex) {
+				throw new RuntimeException(ex);
+			}
+		})
+				.hasCauseInstanceOf(MethodArgumentTypeMismatchException.class);
+
+	}
+
+
+
+
 
 	@Test
 	void cacheControlWithSessionAttributes() throws Exception {
@@ -409,6 +431,15 @@ class RequestMappingHandlerAdapterTests {
 		}
 
 	}
+
+	@RestController
+	static class BooleanParamController {
+
+		@GetMapping("/test")
+		void test(@RequestParam boolean bool) {
+		}
+	}
+
 
 
 	@ControllerAdvice
