@@ -290,9 +290,10 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 			throw new MethodArgumentConversionNotSupportedException(arg, ex.getRequiredType(),
 					namedValueInfo.name, parameter, ex.getCause());
 		}
-		catch (TypeMismatchException ex) {
-			throw new MethodArgumentTypeMismatchException(arg, ex.getRequiredType(),
-					namedValueInfo.name, parameter, ex.getCause());
+		catch (TypeMismatchException | IllegalArgumentException ex) {
+			throw new MethodArgumentTypeMismatchException(arg, ex instanceof TypeMismatchException tme ?
+					tme.getRequiredType() : parameterType,
+					namedValueInfo.name, parameter, ex);
 		}
 		return arg;
 	}
