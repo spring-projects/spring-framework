@@ -257,6 +257,23 @@ class RequestMappingHandlerAdapterTests {
 	}
 
 	@Test
+	void primitiveBooleanRequiredFalseShouldNotThrowTypeMismatch() throws Exception {
+		this.handlerAdapter.afterPropertiesSet();
+
+		this.request.setRequestURI("/test");
+
+		HandlerMethod handlerMethod =
+				handlerMethod(new PrimitiveBooleanController(), "test", boolean.class);
+
+		this.handlerAdapter.handle(this.request, this.response, handlerMethod);
+
+		assertThat(this.response.getContentAsString()).isEqualTo("false");
+	}
+
+
+
+
+	@Test
 	void prototypeControllerAdvice() throws Exception {
 		this.webAppContext.registerPrototype("maa", ModelAttributeAdvice.class);
 		this.webAppContext.refresh();
@@ -439,6 +456,17 @@ class RequestMappingHandlerAdapterTests {
 		void test(@RequestParam boolean bool) {
 		}
 	}
+
+	@RestController
+	static class PrimitiveBooleanController {
+
+		@GetMapping("/test")
+		public String test(@RequestParam(required = false) boolean flag) {
+			return String.valueOf(flag);
+		}
+	}
+
+
 
 
 

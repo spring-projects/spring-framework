@@ -115,6 +115,8 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 		}
 
 		Object arg = resolveName(resolvedName.toString(), nestedParameter, webRequest);
+		boolean valueMissing =
+				(resolveName(resolvedName.toString(), nestedParameter, webRequest) == null);
 		if (arg == null) {
 			if (namedValueInfo.defaultValue != null) {
 				arg = resolveEmbeddedValuesAndExpressions(namedValueInfo.defaultValue);
@@ -130,19 +132,31 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 			arg = resolveEmbeddedValuesAndExpressions(namedValueInfo.defaultValue);
 		}
 
-		if (binderFactory != null && (arg != null || !hasDefaultValue)) {
+
+		boolean skipConversion =
+				valueMissing &&
+						parameter.getParameterType().isPrimitive() &&
+						!namedValueInfo.required &&
+						!hasDefaultValue;
+
+
+
+		if (binderFactory != null && !skipConversion && (arg != null || !hasDefaultValue)) {
 			arg = convertIfNecessary(parameter, webRequest, binderFactory, namedValueInfo, arg);
-			// Check for null value after conversion of incoming argument value
 			if (arg == null) {
 				if (namedValueInfo.defaultValue != null) {
 					arg = resolveEmbeddedValuesAndExpressions(namedValueInfo.defaultValue);
-					arg = convertIfNecessary(parameter, webRequest, binderFactory, namedValueInfo, arg);
 				}
 				else if (namedValueInfo.required && !nestedParameter.isOptional()) {
-					handleMissingValueAfterConversion(resolvedName.toString(), nestedParameter, webRequest);
+					handleMissingValue(resolvedName.toString(), nestedParameter, webRequest);
+				}
+				else if (parameter.getParameterType().isPrimitive()) {
+					arg = handleNullValue(resolvedName.toString(), null, parameter.getParameterType());
 				}
 			}
+
 		}
+
 
 		handleResolvedValue(arg, namedValueInfo.name, parameter, mavContainer, webRequest);
 
