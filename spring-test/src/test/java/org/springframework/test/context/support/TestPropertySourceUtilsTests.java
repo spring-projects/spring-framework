@@ -16,11 +16,7 @@
 
 package org.springframework.test.context.support;
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.util.List;
-import java.util.stream.Stream;
-
+import org.assertj.core.api.InstanceOfAssertFactories;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
 
@@ -37,11 +33,16 @@ import org.springframework.mock.env.MockEnvironment;
 import org.springframework.mock.env.MockPropertySource;
 import org.springframework.test.context.TestPropertySource;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
-import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
-import static org.assertj.core.api.Assertions.entry;
+import java.io.Serial;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Stream;
+
+import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
@@ -306,6 +307,84 @@ class TestPropertySourceUtilsTests {
 			.withMessageContaining("'inlinedProperties' must not be null");
 	}
 
+	@Test
+	void returnsListOfStringsFromIndexedKeys() {
+		Map<String, Object> source = Collections.unmodifiableMap(new HashMap<>() {
+			@Serial
+			private static final long serialVersionUID = 5698617178562090885L;
+
+			{
+				put("first.second[0]", "i");
+				put("first.second[1]", "love");
+				put("first.second[2]", "spring");
+			}
+		});
+
+		PropertySource<?> propertySource = new MapPropertySource("test", source);
+
+		Object result = propertySource.getProperty("first.second");
+
+		assertThat(result)
+				.isInstanceOf(List.class)
+				.asInstanceOf(InstanceOfAssertFactories.LIST)
+				.containsExactly("i", "love", "spring");
+	}
+
+	@Test
+	void returnsListOfMixedTypesFromIndexedKeys() {
+		Map<String, Object> source = Collections.unmodifiableMap(new HashMap<>() {
+			@Serial
+			private static final long serialVersionUID = 5698617178562090885L;
+
+			{
+				put("first.second[0]", "i");
+				put("first.second[1]", "love");
+				put("first.second[2]", "spring");
+				put("first.second[3]", 7);
+			}
+		});
+
+		PropertySource<?> propertySource = new MapPropertySource("test", source);
+
+		Object result = propertySource.getProperty("first.second");
+
+		assertThat(result)
+				.isInstanceOf(List.class)
+				.asInstanceOf(InstanceOfAssertFactories.LIST)
+				.containsExactly("i", "love", "spring", 7);
+	}
+
+	@Test
+	void returnsListOfIntegersFromIndexedKeys() {
+		Map<String, Object> source = Collections.unmodifiableMap(new HashMap<>() {
+			@Serial
+			private static final long serialVersionUID = 5698617178562090885L;
+
+			{
+				put("first.second[0]", 1);
+				put("first.second[1]", 2);
+				put("first.second[2]", 3);
+			}
+		});
+
+		PropertySource<?> propertySource = new MapPropertySource("test", source);
+
+		Object result = propertySource.getProperty("first.second");
+
+		assertThat(result)
+				.isInstanceOf(List.class)
+				.asInstanceOf(InstanceOfAssertFactories.LIST)
+				.containsExactly(1, 2, 3);
+	}
+
+	@Test
+	void returnsNullWhenNoDirectMatchAndNoIndexedKeys() {
+		Map<String, Object> sourceMap = new HashMap<>();
+		PropertySource<?> ps = new MapPropertySource("test", sourceMap);
+		Object result = ps.getProperty("first.second");
+
+		assertThat(result).isNull();
+	}
 
 	private static void assertMergedTestPropertySources(Class<?> testClass, String[] expectedLocations,
 			String[] expectedProperties) {
