@@ -25,14 +25,12 @@ import org.jspecify.annotations.Nullable;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.style.DefaultToStringStyler;
 import org.springframework.core.style.SimpleValueStyler;
 import org.springframework.core.style.ToStringCreator;
 import org.springframework.test.annotation.DirtiesContext.HierarchyMode;
-import org.springframework.test.context.CacheAwareContextLoaderDelegate;
-import org.springframework.test.context.MergedContextConfiguration;
-import org.springframework.test.context.MethodInvoker;
-import org.springframework.test.context.TestContext;
+import org.springframework.test.context.*;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -145,15 +143,27 @@ public class DefaultTestContext implements TestContext {
 	 * with this test context as <em>unused</em> so that it can be safely
 	 * {@linkplain org.springframework.context.ConfigurableApplicationContext#pause() paused}
 	 * if no other test classes are actively using the same application context.
+	 *
+	 * <p>When a test class is annotated with {@link RetainApplicationContext}, the
+	 * application context will <em>not</em> be marked as unused and will be retained
+	 * between test classes. This is intended for tests that rely on expensive
+	 * {@link org.springframework.context.SmartLifecycle} components whose stop/start
+	 * cycles significantly impact test performance.
+	 *
 	 * <p>The default implementation delegates to the {@link CacheAwareContextLoaderDelegate}
 	 * that was supplied when this {@code TestContext} was constructed.
+	 *
 	 * @since 7.0
 	 * @see CacheAwareContextLoaderDelegate#unregisterContextUsage(MergedContextConfiguration, Class)
+	 * @see RetainApplicationContext
 	 */
 	@Override
 	public void markApplicationContextUnused() {
-		this.cacheAwareContextLoaderDelegate.unregisterContextUsage(this.mergedConfig, this.testClass);
+		if (!AnnotatedElementUtils.hasAnnotation(this.testClass, RetainApplicationContext.class)) {
+			this.cacheAwareContextLoaderDelegate.unregisterContextUsage(this.mergedConfig, this.testClass);
+		}
 	}
+
 
 	/**
 	 * Mark the {@linkplain ApplicationContext application context} associated
