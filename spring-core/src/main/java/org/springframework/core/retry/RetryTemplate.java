@@ -146,7 +146,7 @@ public class RetryTemplate implements RetryOperations {
 			Throwable lastException = initialException;
 			long timeout = this.retryPolicy.getTimeout().toMillis();
 
-			while (this.retryPolicy.shouldRetry(lastException)) {
+			while (this.retryPolicy.shouldRetry(lastException) && retryState.getRetryCount() < Integer.MAX_VALUE) {
 				checkIfTimeoutExceeded(timeout, startTime, 0, retryable, retryState);
 
 				try {
@@ -161,9 +161,8 @@ public class RetryTemplate implements RetryOperations {
 				}
 				catch (InterruptedException interruptedException) {
 					Thread.currentThread().interrupt();
-					RetryException retryException = new RetryException(
-							"Interrupted during back-off for retryable operation '%s'".formatted(retryableName),
-							retryState);
+					RetryException retryException = new RetryException("Interrupted during back-off for " +
+							"retryable operation '%s'; aborting execution".formatted(retryableName), retryState);
 					this.retryListener.onRetryPolicyInterruption(this.retryPolicy, retryable, retryException);
 					throw retryException;
 				}

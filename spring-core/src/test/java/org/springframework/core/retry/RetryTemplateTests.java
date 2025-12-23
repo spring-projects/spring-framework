@@ -258,7 +258,7 @@ class RetryTemplateTests {
 
 		assertThatExceptionOfType(RetryException.class)
 				.isThrownBy(() -> retryTemplate.execute(retryable))
-				.withMessageMatching("Interrupted during back-off for retryable operation '.+?'")
+				.withMessageMatching("Interrupted during back-off for retryable operation '.+?'; aborting execution")
 				.withCause(exception)
 				.satisfies(throwable -> assertThat(throwable.getSuppressed()).isEmpty())
 				.satisfies(throwable -> assertThat(throwable.getRetryCount()).isZero())

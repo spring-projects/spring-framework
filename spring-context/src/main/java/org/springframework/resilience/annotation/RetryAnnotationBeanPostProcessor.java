@@ -30,6 +30,8 @@ import org.springframework.aop.framework.autoproxy.AbstractBeanFactoryAwareAdvis
 import org.springframework.aop.support.ComposablePointcut;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
 import org.springframework.aop.support.annotation.AnnotationMatchingPointcut;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.context.EmbeddedValueResolverAware;
 import org.springframework.core.MethodClassKey;
 import org.springframework.core.annotation.AnnotatedElementUtils;
@@ -52,7 +54,9 @@ import org.springframework.util.StringValueResolver;
  */
 @SuppressWarnings("serial")
 public class RetryAnnotationBeanPostProcessor extends AbstractBeanFactoryAwareAdvisingPostProcessor
-		implements EmbeddedValueResolverAware {
+		implements ApplicationEventPublisherAware, EmbeddedValueResolverAware {
+
+	private final RetryAnnotationInterceptor interceptor = new RetryAnnotationInterceptor();
 
 	private @Nullable StringValueResolver embeddedValueResolver;
 
@@ -62,15 +66,18 @@ public class RetryAnnotationBeanPostProcessor extends AbstractBeanFactoryAwareAd
 
 		Pointcut cpc = new AnnotationMatchingPointcut(Retryable.class, true);
 		Pointcut mpc = new AnnotationMatchingPointcut(null, Retryable.class, true);
-		this.advisor = new DefaultPointcutAdvisor(
-				new ComposablePointcut(cpc).union(mpc),
-				new RetryAnnotationInterceptor());
+		this.advisor = new DefaultPointcutAdvisor(new ComposablePointcut(cpc).union(mpc), this.interceptor);
 	}
 
 
 	@Override
 	public void setEmbeddedValueResolver(StringValueResolver resolver) {
 		this.embeddedValueResolver = resolver;
+	}
+
+	@Override
+	public void setApplicationEventPublisher(ApplicationEventPublisher applicationEventPublisher) {
+		this.interceptor.setApplicationEventPublisher(applicationEventPublisher);
 	}
 
 

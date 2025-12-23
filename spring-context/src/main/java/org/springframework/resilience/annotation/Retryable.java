@@ -34,7 +34,10 @@ import org.springframework.resilience.retry.MethodRetryPredicate;
  *
  * <p>Aligned with {@link org.springframework.core.retry.RetryTemplate}
  * as well as Reactor's retry support, either re-invoking an imperative
- * target method or decorating a reactive result accordingly.
+ * target method or decorating a returned reactive publisher accordingly.
+ *
+ * <p>For tracking the exceptions encountered by method-level retry processing,
+ * consider a {@link org.springframework.resilience.retry.MethodRetryEvent} listener.
  *
  * <p>Inspired by the <a href="https://github.com/spring-projects/spring-retry">Spring Retry</a>
  * project but redesigned as a minimal core retry feature in the Spring Framework.

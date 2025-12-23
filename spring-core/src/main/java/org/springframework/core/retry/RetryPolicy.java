@@ -219,6 +219,9 @@ public interface RetryPolicy {
 		 * invoked at least once and at most 5 times.
 		 * <p>The default is {@value #DEFAULT_MAX_RETRIES}.
 		 * <p>The supplied value will override any previously configured value.
+		 * Note that {@link RetryTemplate} effectively only supports an integer
+		 * range since it stores all exceptions, so it will always exhaust at
+		 * {@code Integer#MAX_VALUE} even if a larger value is specified here.
 		 * <p>You should not specify this configuration option if you have
 		 * configured a custom {@link #backOff(BackOff) BackOff} strategy.
 		 * @param maxRetries the maximum number of retry attempts;

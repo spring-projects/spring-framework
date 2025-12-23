@@ -18,6 +18,7 @@ package org.springframework.resilience;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.nio.charset.MalformedInputException;
 import java.nio.file.AccessDeniedException;
 import java.time.Duration;
@@ -41,6 +42,7 @@ import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.env.PropertiesPropertySource;
+import org.springframework.core.retry.RetryException;
 import org.springframework.resilience.annotation.ConcurrencyLimit;
 import org.springframework.resilience.annotation.EnableResilientMethods;
 import org.springframework.resilience.annotation.RetryAnnotationBeanPostProcessor;
@@ -53,6 +55,7 @@ import org.springframework.scheduling.annotation.EnableAsync;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIOException;
+import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.assertj.core.api.Assertions.assertThatRuntimeException;
 
 /**
@@ -312,6 +315,50 @@ class RetryInterceptorTests {
 		assertThat(target.counter).hasValue(3);
 	}
 
+	@Test
+	void withMethodRetryEventListener() throws Exception {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+		ctx.registerBeanDefinition("bean", new RootBeanDefinition(AnnotatedMethodBean.class));
+		ctx.registerBeanDefinition("config", new RootBeanDefinition(EnablingConfig.class));
+		MethodRetryEventListener listener = new MethodRetryEventListener();
+		ctx.addApplicationListener(listener);
+		ctx.refresh();
+		AnnotatedMethodBean proxy = ctx.getBean(AnnotatedMethodBean.class);
+		AnnotatedMethodBean target = (AnnotatedMethodBean) AopProxyUtils.getSingletonTarget(proxy);
+
+		Method method1 = AnnotatedMethodBean.class.getMethod("retryOperation");
+		assertThatIOException().isThrownBy(proxy::retryOperation).withMessage("6");
+		assertThat(target.counter).isEqualTo(6);
+		assertThat(listener.events).hasSize(7);
+		for (int i = 0; i < 6; i++) {
+			String msg = Integer.toString(i + 1);
+			assertThat(listener.events.get(i))
+					.satisfies(event -> assertThat(event.getMethod()).isEqualTo(method1))
+					.satisfies(event -> assertThat(event.getFailure()).hasMessage(msg).isInstanceOf(IOException.class))
+					.satisfies(event -> assertThat(event.isRetryAborted()).isFalse());
+		}
+		assertThat(listener.events.get(6))
+				.satisfies(event -> assertThat(event.getMethod()).isEqualTo(method1))
+				.satisfies(event -> assertThat(event.getFailure()).isInstanceOf(RetryException.class))
+				.satisfies(event -> assertThat(event.isRetryAborted()).isTrue());
+
+		listener.events.clear();
+		target.counter = 0;
+		assertThatNoException().isThrownBy(proxy::retryOperationWithInitialSuccess);
+		assertThat(target.counter).isEqualTo(1);
+		assertThat(listener.events).isEmpty();
+
+		target.counter = 0;
+		Method method2 = AnnotatedMethodBean.class.getMethod("retryOperationWithSuccessAfterInitialFailure");
+		assertThatNoException().isThrownBy(proxy::retryOperationWithSuccessAfterInitialFailure);
+		assertThat(target.counter).isEqualTo(2);
+		assertThat(listener.events).hasSize(1);
+		assertThat(listener.events.get(0))
+				.satisfies(event -> assertThat(event.getMethod()).isEqualTo(method2))
+				.satisfies(event -> assertThat(event.getFailure()).hasMessage("1").isInstanceOf(IOException.class))
+				.satisfies(event -> assertThat(event.isRetryAborted()).isFalse());
+	}
+
 
 	@Nested
 	class TimeoutTests {
@@ -372,7 +419,6 @@ class RetryInterceptorTests {
 			// 1 initial attempt + 2 retries
 			assertThat(target.counter).isEqualTo(3);
 		}
-
 	}
 
 
@@ -412,6 +458,20 @@ class RetryInterceptorTests {
 		public void retryOperation() throws IOException {
 			counter++;
 			throw new IOException(Integer.toString(counter));
+		}
+
+		@Retryable(maxRetries = 5, delay = 10)
+		public String retryOperationWithInitialSuccess() {
+			counter++;
+			return "success";
+		}
+
+		@Retryable(maxRetries = 5, delay = 10)
+		public String retryOperationWithSuccessAfterInitialFailure() throws IOException{
+			if (++counter == 1) {
+				throw new IOException(Integer.toString(counter));
+			}
+			return "success";
 		}
 
 		@Retryable(timeout = 555, delay = 10)

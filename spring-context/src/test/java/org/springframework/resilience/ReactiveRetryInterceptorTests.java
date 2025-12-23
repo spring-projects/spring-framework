@@ -17,6 +17,7 @@
 package org.springframework.resilience;
 
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.nio.charset.MalformedInputException;
 import java.nio.file.AccessDeniedException;
 import java.nio.file.FileSystemException;
@@ -33,8 +34,11 @@ import reactor.core.publisher.Mono;
 
 import org.springframework.aop.framework.AopProxyUtils;
 import org.springframework.aop.framework.ProxyFactory;
-import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.context.support.GenericApplicationContext;
+import org.springframework.resilience.annotation.EnableResilientMethods;
 import org.springframework.resilience.annotation.RetryAnnotationBeanPostProcessor;
 import org.springframework.resilience.annotation.Retryable;
 import org.springframework.resilience.retry.MethodRetrySpec;
@@ -43,6 +47,7 @@ import org.springframework.resilience.retry.SimpleRetryInterceptor;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
+import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.assertj.core.api.Assertions.assertThatRuntimeException;
 
 /**
@@ -182,6 +187,52 @@ class ReactiveRetryInterceptorTests {
 				.withCauseInstanceOf(IOException.class);
 		// 1 initial attempt + 1 retry
 		assertThat(target.counter).hasValue(2);
+	}
+
+	@Test
+	void withMethodRetryEventListener() throws Exception {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+		ctx.registerBeanDefinition("bean", new RootBeanDefinition(AnnotatedMethodBean.class));
+		ctx.registerBeanDefinition("config", new RootBeanDefinition(EnablingConfig.class));
+		MethodRetryEventListener listener = new MethodRetryEventListener();
+		ctx.addApplicationListener(listener);
+		ctx.refresh();
+		AnnotatedMethodBean proxy = ctx.getBean(AnnotatedMethodBean.class);
+		AnnotatedMethodBean target = (AnnotatedMethodBean) AopProxyUtils.getSingletonTarget(proxy);
+
+		Method method1 = AnnotatedMethodBean.class.getMethod("retryOperation");
+		assertThatIllegalStateException()
+				.isThrownBy(() -> proxy.retryOperation().block())
+				.satisfies(isRetryExhaustedException());
+		assertThat(target.counter).hasValue(6);
+		assertThat(listener.events).hasSize(7);
+		for (int i = 0; i < 6; i++) {
+			String msg = Integer.toString(i + 1);
+			assertThat(listener.events.get(i))
+					.satisfies(event -> assertThat(event.getMethod()).isEqualTo(method1))
+					.satisfies(event -> assertThat(event.getFailure()).hasMessage(msg).isInstanceOf(IOException.class))
+					.satisfies(event -> assertThat(event.isRetryAborted()).isFalse());
+		}
+		assertThat(listener.events.get(6))
+				.satisfies(event -> assertThat(event.getMethod()).isEqualTo(method1))
+				.satisfies(event -> assertThat(event.getFailure()).satisfies(isRetryExhaustedException()))
+				.satisfies(event -> assertThat(event.isRetryAborted()).isTrue());
+
+		listener.events.clear();
+		target.counter.set(0);
+		assertThatNoException().isThrownBy(() -> proxy.retryOperationWithInitialSuccess().block());
+		assertThat(target.counter).hasValue(1);
+		assertThat(listener.events).isEmpty();
+
+		target.counter.set(0);
+		Method method2 = AnnotatedMethodBean.class.getMethod("retryOperationWithSuccessAfterInitialFailure");
+		assertThatNoException().isThrownBy(() -> proxy.retryOperationWithSuccessAfterInitialFailure().block());
+		assertThat(target.counter).hasValue(2);
+		assertThat(listener.events).hasSize(1);
+		assertThat(listener.events.get(0))
+				.satisfies(event -> assertThat(event.getMethod()).isEqualTo(method2))
+				.satisfies(event -> assertThat(event.getFailure()).hasMessage("1").isInstanceOf(IOException.class))
+				.satisfies(event -> assertThat(event.isRetryAborted()).isFalse());
 	}
 
 	@Test
@@ -391,7 +442,6 @@ class ReactiveRetryInterceptorTests {
 			// 1 initial attempt + 2 retries
 			assertThat(target.counter).hasValue(3);
 		}
-
 	}
 
 
@@ -404,21 +454,29 @@ class ReactiveRetryInterceptorTests {
 	}
 
 	private static AnnotatedMethodBean getProxiedAnnotatedMethodBean() {
-		DefaultListableBeanFactory bf = createBeanFactoryFor(AnnotatedMethodBean.class);
+		BeanFactory bf = createBeanFactoryFor(AnnotatedMethodBean.class);
 		return bf.getBean(AnnotatedMethodBean.class);
 	}
 
 	private static AnnotatedClassBean getProxiedAnnotatedClassBean() {
-		DefaultListableBeanFactory bf = createBeanFactoryFor(AnnotatedClassBean.class);
+		BeanFactory bf = createBeanFactoryFor(AnnotatedClassBean.class);
 		return bf.getBean(AnnotatedClassBean.class);
 	}
 
-	private static DefaultListableBeanFactory createBeanFactoryFor(Class<?> beanClass) {
+	private static BeanFactory createBeanFactoryFor(Class<?> beanClass) {
+		/*
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		bf.registerBeanDefinition("bean", new RootBeanDefinition(beanClass));
 		RetryAnnotationBeanPostProcessor bpp = new RetryAnnotationBeanPostProcessor();
 		bpp.setBeanFactory(bf);
 		bf.addBeanPostProcessor(bpp);
+		*/
+		GenericApplicationContext bf = new GenericApplicationContext();
+		bf.registerBeanDefinition("bean", new RootBeanDefinition(beanClass));
+		bf.registerBeanDefinition("processor", new RootBeanDefinition(RetryAnnotationBeanPostProcessor.class));
+		bf.registerBeanDefinition("listener", new RootBeanDefinition(MethodRetryEventListener.class));
+		bf.refresh();
+
 		return bf;
 	}
 
@@ -445,6 +503,24 @@ class ReactiveRetryInterceptorTests {
 			return Mono.fromCallable(() -> {
 				counter.incrementAndGet();
 				throw new IOException(counter.toString());
+			});
+		}
+
+		@Retryable(maxRetries = 5, delay = 10)
+		public Mono<String> retryOperationWithInitialSuccess() {
+			return Mono.fromCallable(() -> {
+				counter.incrementAndGet();
+				return "success";
+			});
+		}
+
+		@Retryable(maxRetries = 5, delay = 10)
+		public Mono<String> retryOperationWithSuccessAfterInitialFailure() {
+			return Mono.fromCallable(() -> {
+				if (counter.incrementAndGet() == 1) {
+					throw new IOException(counter.toString());
+				}
+				return "success";
 			});
 		}
 
@@ -560,7 +636,9 @@ class ReactiveRetryInterceptorTests {
 	}
 
 
-
+	@EnableResilientMethods
+	static class EnablingConfig {
+	}
 
 
 	// Bean classes for boundary testing
