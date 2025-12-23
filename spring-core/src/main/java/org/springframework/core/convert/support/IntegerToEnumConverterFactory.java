@@ -16,6 +16,8 @@
 
 package org.springframework.core.convert.support;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.convert.converter.ConverterFactory;
 
@@ -30,7 +32,7 @@ import org.springframework.core.convert.converter.ConverterFactory;
 final class IntegerToEnumConverterFactory implements ConverterFactory<Integer, Enum> {
 
 	@Override
-	public <T extends Enum> Converter<Integer, T> getConverter(Class<T> targetType) {
+	public <T extends Enum> Converter<Integer, @Nullable T> getConverter(Class<T> targetType) {
 		return new IntegerToEnum(ConversionUtils.getEnumType(targetType));
 	}
 
