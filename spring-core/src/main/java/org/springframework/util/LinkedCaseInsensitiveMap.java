@@ -437,7 +437,7 @@ public class LinkedCaseInsensitiveMap<V> implements Map<String, V>, Serializable
 
 		private final Set<Entry<String, V>> delegate;
 
-		public EntrySet(Set<Entry<String, V>> delegate) {
+		EntrySet(Set<Entry<String, V>> delegate) {
 			this.delegate = delegate;
 		}
 
@@ -452,13 +452,10 @@ public class LinkedCaseInsensitiveMap<V> implements Map<String, V>, Serializable
 				return false;
 			}
 			Object key = entry.getKey();
-			if (!(key instanceof String stringKey)) {
+			if (!LinkedCaseInsensitiveMap.this.containsKey(key)) {
 				return false;
 			}
-			if (!LinkedCaseInsensitiveMap.this.containsKey(stringKey)) {
-				return false;
-			}
-			V value = LinkedCaseInsensitiveMap.this.get(stringKey);
+			V value = LinkedCaseInsensitiveMap.this.get(key);
 			return ObjectUtils.nullSafeEquals(value, entry.getValue());
 		}
 
@@ -473,24 +470,20 @@ public class LinkedCaseInsensitiveMap<V> implements Map<String, V>, Serializable
 				return false;
 			}
 			Object key = entry.getKey();
-			if (!(key instanceof String stringKey)) {
+			if (!LinkedCaseInsensitiveMap.this.containsKey(key)) {
 				return false;
 			}
-			if (!LinkedCaseInsensitiveMap.this.containsKey(stringKey)) {
-				return false;
-			}
-			V value = LinkedCaseInsensitiveMap.this.get(stringKey);
+			V value = LinkedCaseInsensitiveMap.this.get(key);
 			if (!ObjectUtils.nullSafeEquals(value, entry.getValue())) {
 				return false;
 			}
-			LinkedCaseInsensitiveMap.this.remove(stringKey);
+			LinkedCaseInsensitiveMap.this.remove(key);
 			return true;
 		}
 
 		@Override
 		public void clear() {
-			this.delegate.clear();
-			caseInsensitiveKeys.clear();
+			LinkedCaseInsensitiveMap.this.clear();
 		}
 
 		@Override
