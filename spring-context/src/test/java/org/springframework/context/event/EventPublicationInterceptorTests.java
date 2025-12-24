@@ -53,14 +53,16 @@ class EventPublicationInterceptorTests {
 
 
 	@Test
-	void withNoApplicationEventClassSupplied() {
+	void withNoApplicationEventPublisherSupplied() {
+		this.interceptor.setApplicationEventPublisher(null);
 		assertThatIllegalArgumentException().isThrownBy(interceptor::afterPropertiesSet);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Test
 	void withNonApplicationEventClassSupplied() {
 		assertThatIllegalArgumentException().isThrownBy(() -> {
-				interceptor.setApplicationEventClass(getClass());
+				interceptor.setApplicationEventClass((Class) getClass());
 				interceptor.afterPropertiesSet();
 		});
 	}

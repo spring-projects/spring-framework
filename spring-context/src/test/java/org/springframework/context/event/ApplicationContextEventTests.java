@@ -59,6 +59,7 @@ import org.springframework.scheduling.support.TaskUtils;
 import org.springframework.util.ReflectionUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.assertj.core.api.Assertions.assertThatRuntimeException;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.BDDMockito.given;
@@ -298,7 +299,7 @@ class ApplicationContextEventTests extends AbstractApplicationEventListenerTests
 	}
 
 	@Test
-	void testEventPublicationInterceptor() throws Throwable {
+	void testEventPublicationInterceptorWithEventClass() throws Throwable {
 		MethodInvocation invocation = mock();
 		ApplicationContext ctx = mock();
 
@@ -311,6 +312,36 @@ class ApplicationContextEventTests extends AbstractApplicationEventListenerTests
 		given(invocation.getThis()).willReturn(new Object());
 		interceptor.invoke(invocation);
 		verify(ctx).publishEvent(isA(MyEvent.class));
+	}
+
+	@Test
+	void testEventPublicationInterceptorWithEventFactory() throws Throwable {
+		MethodInvocation invocation = mock();
+		ApplicationContext ctx = mock();
+
+		EventPublicationInterceptor interceptor = new EventPublicationInterceptor();
+		interceptor.setApplicationEventFactory(inv -> new MyEvent(invocation.getThis()));
+		interceptor.setApplicationEventPublisher(ctx);
+		interceptor.afterPropertiesSet();
+
+		given(invocation.proceed()).willReturn(new Object());
+		given(invocation.getThis()).willReturn(new Object());
+		interceptor.invoke(invocation);
+		verify(ctx).publishEvent(isA(MyEvent.class));
+	}
+
+	@Test
+	void testEventPublicationInterceptorWithMethodFailure() throws Throwable {
+		MethodInvocation invocation = mock();
+		ApplicationContext ctx = mock();
+
+		EventPublicationInterceptor interceptor = new EventPublicationInterceptor();
+		interceptor.setApplicationEventPublisher(ctx);
+		interceptor.afterPropertiesSet();
+
+		given(invocation.proceed()).willThrow(new IllegalStateException());
+		assertThatIllegalStateException().isThrownBy(() -> interceptor.invoke(invocation));
+		verify(ctx).publishEvent(isA(MethodFailureEvent.class));
 	}
 
 	@Test

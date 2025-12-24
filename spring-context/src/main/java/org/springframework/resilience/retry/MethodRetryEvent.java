@@ -16,11 +16,9 @@
 
 package org.springframework.resilience.retry;
 
-import java.lang.reflect.Method;
-
 import org.aopalliance.intercept.MethodInvocation;
 
-import org.springframework.context.ApplicationEvent;
+import org.springframework.context.event.MethodFailureEvent;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -36,9 +34,7 @@ import org.springframework.util.ClassUtils;
  * @see org.springframework.context.event.EventListener
  */
 @SuppressWarnings("serial")
-public class MethodRetryEvent extends ApplicationEvent {
-
-	private final Throwable failure;
+public class MethodRetryEvent extends MethodFailureEvent {
 
 	private final boolean retryAborted;
 
@@ -50,26 +46,10 @@ public class MethodRetryEvent extends ApplicationEvent {
 	 * @param retryAborted whether the current failure led to the retry execution getting aborted
 	 */
 	public MethodRetryEvent(MethodInvocation invocation, Throwable failure, boolean retryAborted) {
-		super(invocation);
-		this.failure = failure;
+		super(invocation, failure);
 		this.retryAborted = retryAborted;
 	}
 
-
-	/**
-	 * Return the method invocation that triggered this event.
-	 */
-	@Override
-	public MethodInvocation getSource() {
-		return (MethodInvocation) super.getSource();
-	}
-
-	/**
-	 * Return the method that triggered this event.
-	 */
-	public Method getMethod() {
-		return getSource().getMethod();
-	}
 
 	/**
 	 * Return the exception encountered.
@@ -87,7 +67,7 @@ public class MethodRetryEvent extends ApplicationEvent {
 	 * @see java.util.concurrent.TimeoutException
 	 */
 	public Throwable getFailure() {
-		return this.failure;
+		return super.getFailure();
 	}
 
 	/**

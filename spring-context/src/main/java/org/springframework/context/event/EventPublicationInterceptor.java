@@ -17,11 +17,13 @@
 package org.springframework.context.event;
 
 import java.lang.reflect.Constructor;
+import java.util.function.Function;
 
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.jspecify.annotations.Nullable;
 
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationEventPublisher;
@@ -29,14 +31,19 @@ import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.util.Assert;
 
 /**
- * {@link MethodInterceptor Interceptor} that publishes an
- * {@code ApplicationEvent} to all {@code ApplicationListeners}
- * registered with an {@code ApplicationEventPublisher} after each
- * <i>successful</i> method invocation.
+ * {@link MethodInterceptor Interceptor} that publishes an {@code ApplicationEvent}
+ * to all {@code ApplicationListeners} registered with an {@code ApplicationEventPublisher}.
+ * after each <i>successful</i> method invocation.
  *
- * <p>Note that this interceptor is only capable of publishing <i>stateless</i>
- * events configured via the
- * {@link #setApplicationEventClass "applicationEventClass"} property.
+ * <p>Note that this interceptor is capable of publishing a custom event after each
+ * <i>successful</i> method invocation, configured via the
+ * {@link #setApplicationEventClass "applicationEventClass"} property. As of 7.0.3,
+ * you can configure a {@link #setApplicationEventFactory factory function} instead.
+ *
+ * <p>As of 7.0.3, this interceptor publishes a {@link MethodFailureEvent} for
+ * every exception encountered from a method invocation. This can be conveniently
+ * tracked via an {@code ApplicationListener<MethodFailureEvent>} class or an
+ * {@code @EventListener(MethodFailureEvent.class)} method.
  *
  * @author Dmitriy Kopylenko
  * @author Juergen Hoeller
@@ -50,7 +57,7 @@ import org.springframework.util.Assert;
 public class EventPublicationInterceptor
 		implements MethodInterceptor, ApplicationEventPublisherAware, InitializingBean {
 
-	private @Nullable Constructor<?> applicationEventClassConstructor;
+	private @Nullable Function<MethodInvocation, ? extends ApplicationEvent> applicationEventFactory;
 
 	private @Nullable ApplicationEventPublisher applicationEventPublisher;
 
@@ -63,19 +70,31 @@ public class EventPublicationInterceptor
 	 * @throws IllegalArgumentException if the supplied {@code Class} is
 	 * {@code null} or if it is not an {@code ApplicationEvent} subclass or
 	 * if it does not expose a constructor that takes a single {@code Object} argument
+	 * @see #setApplicationEventFactory
 	 */
-	public void setApplicationEventClass(Class<?> applicationEventClass) {
+	public void setApplicationEventClass(Class<? extends ApplicationEvent> applicationEventClass) {
 		if (ApplicationEvent.class == applicationEventClass ||
 				!ApplicationEvent.class.isAssignableFrom(applicationEventClass)) {
 			throw new IllegalArgumentException("'applicationEventClass' needs to extend ApplicationEvent");
 		}
 		try {
-			this.applicationEventClassConstructor = applicationEventClass.getConstructor(Object.class);
+			Constructor<? extends ApplicationEvent> ctor = applicationEventClass.getConstructor(Object.class);
+			this.applicationEventFactory = (invocation -> BeanUtils.instantiateClass(ctor, invocation.getThis()));
 		}
 		catch (NoSuchMethodException ex) {
 			throw new IllegalArgumentException("ApplicationEvent class [" +
 					applicationEventClass.getName() + "] does not have the required Object constructor: " + ex);
 		}
+	}
+
+	/**
+	 * Specify a factory function for {@link ApplicationEvent} instances built from a
+	 * {@link MethodInvocation}, representing a <i>successful</i> method invocation.
+	 * @since 7.0.3
+	 * @see #setApplicationEventClass
+	 */
+	public void setApplicationEventFactory(Function<MethodInvocation, ? extends ApplicationEvent> factoryFunction) {
+		this.applicationEventFactory = factoryFunction;
 	}
 
 	@Override
@@ -85,23 +104,28 @@ public class EventPublicationInterceptor
 
 	@Override
 	public void afterPropertiesSet() throws Exception {
-		if (this.applicationEventClassConstructor == null) {
-			throw new IllegalArgumentException("Property 'applicationEventClass' is required");
+		if (this.applicationEventPublisher == null) {
+			throw new IllegalArgumentException("Property 'applicationEventPublisher' is required");
 		}
 	}
 
 
 	@Override
 	public @Nullable Object invoke(MethodInvocation invocation) throws Throwable {
-		Object retVal = invocation.proceed();
-
-		Assert.state(this.applicationEventClassConstructor != null, "No ApplicationEvent class set");
-		ApplicationEvent event = (ApplicationEvent)
-				this.applicationEventClassConstructor.newInstance(invocation.getThis());
-
 		Assert.state(this.applicationEventPublisher != null, "No ApplicationEventPublisher available");
-		this.applicationEventPublisher.publishEvent(event);
 
+		Object retVal;
+		try {
+			retVal = invocation.proceed();
+		}
+		catch (Throwable ex) {
+			this.applicationEventPublisher.publishEvent(new MethodFailureEvent(invocation, ex));
+			throw ex;
+		}
+
+		if (this.applicationEventFactory != null) {
+			this.applicationEventPublisher.publishEvent(this.applicationEventFactory.apply(invocation));
+		}
 		return retVal;
 	}
 
