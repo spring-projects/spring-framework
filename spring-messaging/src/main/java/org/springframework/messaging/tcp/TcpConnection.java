@@ -19,6 +19,8 @@ package org.springframework.messaging.tcp;
 import java.io.Closeable;
 import java.util.concurrent.CompletableFuture;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.messaging.Message;
 
 /**
@@ -37,7 +39,7 @@ public interface TcpConnection<P> extends Closeable {
 	 * message was successfully sent
 	 * @since 6.0
 	 */
-	CompletableFuture<Void> sendAsync(Message<P> message);
+	CompletableFuture<@Nullable Void> sendAsync(Message<P> message);
 
 	/**
 	 * Register a task to invoke after a period of read inactivity.

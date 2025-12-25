@@ -96,7 +96,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 
 	private static final byte[] EMPTY_PAYLOAD = new byte[0];
 
-	private static final CompletableFuture<Void> EMPTY_TASK = CompletableFuture.completedFuture(null);
+	private static final CompletableFuture<@Nullable Void> EMPTY_TASK = CompletableFuture.completedFuture(null);
 
 	private static final StompHeaderAccessor HEART_BEAT_ACCESSOR;
 
@@ -851,7 +851,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 		 * @return a future to wait for the result
 		 */
 		@SuppressWarnings("unchecked")
-		public CompletableFuture<Void> forward(final Message<?> message, final StompHeaderAccessor accessor) {
+		public CompletableFuture<@Nullable Void> forward(final Message<?> message, final StompHeaderAccessor accessor) {
 			TcpConnection<byte[]> conn = this.tcpConnection;
 
 			if (!this.isStompConnected || conn == null) {
@@ -887,7 +887,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 				logger.trace("Forwarding " + accessor.getDetailedLogMessage(message.getPayload()));
 			}
 
-			CompletableFuture<Void> future = conn.sendAsync((Message<byte[]>) messageToSend);
+			CompletableFuture<@Nullable Void> future = conn.sendAsync((Message<byte[]>) messageToSend);
 			future.whenComplete((unused, throwable) -> {
 				if (throwable == null) {
 					if (accessor.getCommand() == StompCommand.DISCONNECT) {
@@ -1067,9 +1067,9 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 		}
 
 		@Override
-		public CompletableFuture<Void> forward(Message<?> message, StompHeaderAccessor accessor) {
+		public CompletableFuture<@Nullable Void> forward(Message<?> message, StompHeaderAccessor accessor) {
 			try {
-				CompletableFuture<Void> future = super.forward(message, accessor);
+				CompletableFuture<@Nullable Void> future = super.forward(message, accessor);
 				if (message.getHeaders().get(SimpMessageHeaderAccessor.IGNORE_ERROR) == null) {
 					future.get();
 				}

@@ -19,6 +19,7 @@ package org.springframework.messaging.tcp.reactor;
 import java.util.concurrent.CompletableFuture;
 
 import io.netty.buffer.ByteBuf;
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.Sinks;
 import reactor.netty.NettyInbound;
@@ -56,7 +57,7 @@ public class ReactorNettyTcpConnection<P> implements TcpConnection<P> {
 
 
 	@Override
-	public CompletableFuture<Void> sendAsync(Message<P> message) {
+	public CompletableFuture<@Nullable Void> sendAsync(Message<P> message) {
 		ByteBuf byteBuf = this.outbound.alloc().buffer();
 		this.codec.encode(message, byteBuf);
 		return this.outbound.send(Mono.just(byteBuf))

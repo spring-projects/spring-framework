@@ -387,9 +387,9 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 		// TcpConnection implementation
 
 		@Override
-		public CompletableFuture<Void> sendAsync(Message<byte[]> message) {
+		public CompletableFuture<@Nullable Void> sendAsync(Message<byte[]> message) {
 			updateLastWriteTime();
-			CompletableFuture<Void> future = new CompletableFuture<>();
+			CompletableFuture<@Nullable Void> future = new CompletableFuture<>();
 			try {
 				WebSocketSession session = this.session;
 				Assert.state(session != null, "No WebSocketSession available");

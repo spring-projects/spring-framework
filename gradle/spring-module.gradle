@@ -105,6 +105,10 @@ tasks.register('javadocJar', Jar) {
 	from javadoc
 }
 
+nullability {
+    nullAwayVersion = "0.12.15"
+}
+
 publishing {
 	publications {
 		mavenJava(MavenPublication) {
