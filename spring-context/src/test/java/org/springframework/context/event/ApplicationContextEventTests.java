@@ -24,6 +24,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
 import org.aopalliance.intercept.MethodInvocation;
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
@@ -320,7 +321,7 @@ class ApplicationContextEventTests extends AbstractApplicationEventListenerTests
 		ApplicationContext ctx = mock();
 
 		EventPublicationInterceptor interceptor = new EventPublicationInterceptor();
-		interceptor.setApplicationEventFactory(inv -> new MyEvent(invocation.getThis()));
+		interceptor.setApplicationEventFactory((inv, retVal) -> new MyEvent(inv.getThis()));
 		interceptor.setApplicationEventPublisher(ctx);
 		interceptor.afterPropertiesSet();
 
@@ -342,6 +343,30 @@ class ApplicationContextEventTests extends AbstractApplicationEventListenerTests
 		given(invocation.proceed()).willThrow(new IllegalStateException());
 		assertThatIllegalStateException().isThrownBy(() -> interceptor.invoke(invocation));
 		verify(ctx).publishEvent(isA(MethodFailureEvent.class));
+	}
+
+	@Test
+	void testEventPublicationInterceptorWithCustomFailure() throws Throwable {
+		MethodInvocation invocation = mock();
+		ApplicationContext ctx = mock();
+
+		EventPublicationInterceptor interceptor = new EventPublicationInterceptor();
+		interceptor.setApplicationEventFactory(new EventPublicationInterceptor.ApplicationEventFactory() {
+			@Override
+			public ApplicationEvent onSuccess(MethodInvocation invocation, @Nullable Object returnValue) {
+				return new MyEvent(returnValue);
+			}
+			@Override
+			public ApplicationEvent onFailure(MethodInvocation invocation, Throwable failure) {
+				return new MyOtherEvent(failure);
+			}
+		});
+		interceptor.setApplicationEventPublisher(ctx);
+		interceptor.afterPropertiesSet();
+
+		given(invocation.proceed()).willThrow(new IllegalStateException());
+		assertThatIllegalStateException().isThrownBy(() -> interceptor.invoke(invocation));
+		verify(ctx).publishEvent(isA(MyOtherEvent.class));
 	}
 
 	@Test
