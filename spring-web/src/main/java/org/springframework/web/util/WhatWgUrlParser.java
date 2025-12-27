@@ -2019,7 +2019,7 @@ final class WhatWgUrlParser {
 		}
 
 		@Override
-		public boolean equals(Object obj) {
+		public boolean equals(@Nullable Object obj) {
 			if (obj == this) {
 				return true;
 			}
@@ -2160,7 +2160,7 @@ final class WhatWgUrlParser {
 		}
 
 		@Override
-		public boolean equals(Object o) {
+		public boolean equals(@Nullable Object o) {
 			if (o == this) {
 				return true;
 			}
@@ -2207,7 +2207,7 @@ final class WhatWgUrlParser {
 		}
 
 		@Override
-		public boolean equals(Object obj) {
+		public boolean equals(@Nullable Object obj) {
 			if (obj == this) {
 				return true;
 			}
@@ -2271,7 +2271,7 @@ final class WhatWgUrlParser {
 		}
 
 		@Override
-		public boolean equals(Object obj) {
+		public boolean equals(@Nullable Object obj) {
 			if (obj == this) {
 				return true;
 			}
@@ -2304,7 +2304,7 @@ final class WhatWgUrlParser {
 		}
 
 		@Override
-		public boolean equals(Object obj) {
+		public boolean equals(@Nullable Object obj) {
 			return obj == this || obj != null && getClass() == obj.getClass();
 		}
 
@@ -2503,7 +2503,7 @@ final class WhatWgUrlParser {
 
 
 		@Override
-		public boolean equals(Object o) {
+		public boolean equals(@Nullable Object o) {
 			if (o == this) {
 				return true;
 			}
@@ -2812,7 +2812,7 @@ final class WhatWgUrlParser {
 		}
 
 		@Override
-		public boolean equals(Object obj) {
+		public boolean equals(@Nullable Object obj) {
 			if (obj == this) {
 				return true;
 			}
@@ -2978,7 +2978,7 @@ final class WhatWgUrlParser {
 		}
 
 		@Override
-		public boolean equals(Object o) {
+		public boolean equals(@Nullable Object o) {
 			if (o == this) {
 				return true;
 			}
@@ -3073,7 +3073,7 @@ final class WhatWgUrlParser {
 		}
 
 		@Override
-		public boolean equals(Object o) {
+		public boolean equals(@Nullable Object o) {
 			if (o == this) {
 				return true;
 			}

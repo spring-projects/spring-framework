@@ -19,6 +19,8 @@ package org.springframework.web.accept;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.util.Assert;
 
 /**
@@ -106,7 +108,7 @@ public class SemanticApiVersionParser implements ApiVersionParser<SemanticApiVer
 		}
 
 		@Override
-		public boolean equals(Object other) {
+		public boolean equals(@Nullable Object other) {
 			return (this == other || (other instanceof Version otherVersion &&
 					this.major == otherVersion.major &&
 					this.minor == otherVersion.minor &&
