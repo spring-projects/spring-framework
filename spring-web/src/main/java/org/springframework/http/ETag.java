@@ -21,6 +21,7 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.util.StringUtils;
 
@@ -68,7 +69,7 @@ public record ETag(String tag, boolean weak) {
 	}
 
 	@Override
-	public boolean equals(Object other) {
+	public boolean equals(@Nullable Object other) {
 		return (this == other ||
 				(other instanceof ETag oet && this.tag.equals(oet.tag) && this.weak == oet.weak));
 	}

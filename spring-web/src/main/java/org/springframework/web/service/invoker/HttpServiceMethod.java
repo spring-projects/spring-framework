@@ -364,7 +364,7 @@ final class HttpServiceMethod {
 			}
 
 			@Override
-			public boolean equals(Object obj) {
+			public boolean equals(@Nullable Object obj) {
 				return (obj instanceof AnnotationDescriptor that && this.httpExchange.equals(that.httpExchange));
 			}
 
