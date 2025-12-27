@@ -29,6 +29,7 @@ import jdk.jfr.Label;
  * as a single {@code String}, since Flight Recorder events do not support complex types.
  *
  * @author Brian Clozel
+ * @author Huang Xiao
  * @since 5.3
  */
 @Category("Spring Application")
@@ -36,9 +37,11 @@ import jdk.jfr.Label;
 @Description("Spring Application Startup")
 class FlightRecorderStartupEvent extends Event {
 
-	public final long eventId;
+	@Label("EventId")
+	public final String eventId;
 
-	public final long parentId;
+	@Label("ParentId")
+	public final String parentId;
 
 	@Label("Name")
 	public final String name;
@@ -48,8 +51,8 @@ class FlightRecorderStartupEvent extends Event {
 
 	public FlightRecorderStartupEvent(long eventId, String name, long parentId) {
 		this.name = name;
-		this.eventId = eventId;
-		this.parentId = parentId;
+		this.eventId = String.valueOf(eventId);
+		this.parentId = String.valueOf(parentId);
 	}
 
 	public void setTags(String tags) {

@@ -55,12 +55,12 @@ class FlightRecorderStartupStep implements StartupStep {
 
 	@Override
 	public long getId() {
-		return this.event.eventId;
+		return Long.parseLong(this.event.eventId);
 	}
 
 	@Override
 	public Long getParentId() {
-		return this.event.parentId;
+		return Long.parseLong(this.event.parentId);
 	}
 
 	@Override
