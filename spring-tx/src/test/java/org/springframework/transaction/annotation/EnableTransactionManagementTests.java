@@ -373,8 +373,6 @@ class EnableTransactionManagementTests {
 		TestServiceWithRollback bean = ctx.getBean("testBean", TestServiceWithRollback.class);
 		CallCountingTransactionManager txManager = ctx.getBean(CallCountingTransactionManager.class);
 
-		Method method1 = TestServiceWithRollback.class.getMethod("methodOne");
-		Method method2 = TestServiceWithRollback.class.getMethod("methodTwo");
 		assertThatException().isThrownBy(bean::methodOne);
 		assertThatException().isThrownBy(bean::methodTwo);
 		assertThat(txManager.begun).isEqualTo(2);
