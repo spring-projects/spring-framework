@@ -9,3 +9,7 @@ jar {
 	manifest.attributes["Can-Retransform-Classes"] = "true"
 	manifest.attributes["Can-Set-Native-Method-Prefix"] = "false"
 }
+
+nullability {
+	requireExplicitNullMarking = false
+}
