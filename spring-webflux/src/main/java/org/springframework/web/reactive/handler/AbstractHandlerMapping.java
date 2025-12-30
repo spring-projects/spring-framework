@@ -185,38 +185,51 @@ public abstract class AbstractHandlerMapping extends ApplicationObjectSupport
 
 	@Override
 	public Mono<Object> getHandler(ServerWebExchange exchange) {
-		ApiVersionHolder versionHolder = initApiVersion(exchange);
-		return getHandlerInternal(exchange).map(handler -> {
-			if (logger.isDebugEnabled()) {
-				logger.debug(exchange.getLogPrefix() + "Mapped to " + handler);
-			}
-			if (versionHolder.hasError()) {
-				throw versionHolder.getError();
-			}
-			ServerHttpRequest request = exchange.getRequest();
-			if (hasCorsConfigurationSource(handler) || CorsUtils.isPreFlightRequest(request)) {
-				CorsConfiguration config = (this.corsConfigurationSource != null ?
-						this.corsConfigurationSource.getCorsConfiguration(exchange) : null);
-				CorsConfiguration handlerConfig = getCorsConfiguration(handler, exchange);
-				config = (config != null ? config.combine(handlerConfig) : handlerConfig);
-				if (config != null) {
-					config.validateAllowCredentials();
-					config.validateAllowPrivateNetwork();
-				}
-				if (!this.corsProcessor.process(config, exchange) || CorsUtils.isPreFlightRequest(request)) {
-					return NO_OP_HANDLER;
-				}
-			}
-			if (getApiVersionStrategy() != null) {
-				if (versionHolder.hasVersion()) {
-					Comparable<?> version = versionHolder.getVersion();
-					getApiVersionStrategy().handleDeprecations(version, handler, exchange);
-				}
-			}
-			return handler;
-		});
+		final var versionHolder = this.initApiVersion(exchange);
+		return this.initApiVersionAsync(exchange).flatMap( versionHolderAsync->
+				getHandlerInternal(exchange)
+						.handle((handler, sink)->{
+							if (logger.isDebugEnabled()) {
+								logger.debug(exchange.getLogPrefix() + "Mapped to " + handler);
+							}
+							if (versionHolder.hasError()){
+								sink.error(versionHolder.getError());
+							}
+							else if (versionHolderAsync.hasError()) {
+								sink.error(versionHolderAsync.getError());
+							}
+							else {
+								sink.next(handler);
+							}
+						})
+						.map(handler -> {
+					ServerHttpRequest request = exchange.getRequest();
+					if (hasCorsConfigurationSource(handler) || CorsUtils.isPreFlightRequest(request)) {
+						CorsConfiguration config = (this.corsConfigurationSource != null ?
+													this.corsConfigurationSource.getCorsConfiguration(exchange) :
+													null);
+						CorsConfiguration handlerConfig = getCorsConfiguration(handler, exchange);
+						config = (config != null ? config.combine(handlerConfig) : handlerConfig);
+						if (config != null) {
+							config.validateAllowCredentials();
+							config.validateAllowPrivateNetwork();
+						}
+						if (!this.corsProcessor.process(config, exchange) || CorsUtils.isPreFlightRequest(request)) {
+							return NO_OP_HANDLER;
+						}
+					}
+					if (getApiVersionStrategy() != null) {
+						if (versionHolder.hasVersion()) {
+							Comparable<?> version = versionHolder.getVersion();
+							getApiVersionStrategy().handleDeprecations(version, handler, exchange);
+						}
+					}
+					return handler;
+				}));
 	}
 
+	@Deprecated(since = "7.0.3", forRemoval = true)
+	@SuppressWarnings({"removal", "DeprecatedIsStillUsed"})
 	private ApiVersionHolder initApiVersion(ServerWebExchange exchange) {
 		ApiVersionHolder versionHolder;
 		if (this.apiVersionStrategy == null) {
@@ -233,6 +246,21 @@ public abstract class AbstractHandlerMapping extends ApplicationObjectSupport
 		}
 		exchange.getAttributes().put(API_VERSION_ATTRIBUTE, versionHolder);
 		return versionHolder;
+	}
+
+	private Mono<ApiVersionHolder> initApiVersionAsync(ServerWebExchange exchange) {
+		if (this.apiVersionStrategy != null) {
+			if (exchange.getAttribute(API_VERSION_ATTRIBUTE) == null) {
+				return this.apiVersionStrategy
+						.resolveParseAndValidateVersionAsync(exchange)
+						.map(ApiVersionHolder::fromVersion)
+						.onErrorResume(ex -> Mono.just(ApiVersionHolder.fromError(new RuntimeException(ex))))
+						.doOnNext(holder -> exchange.getAttributes()
+													.put(API_VERSION_ATTRIBUTE, holder));
+
+			}
+		}
+		return Mono.just(ApiVersionHolder.EMPTY);
 	}
 
 	/**
