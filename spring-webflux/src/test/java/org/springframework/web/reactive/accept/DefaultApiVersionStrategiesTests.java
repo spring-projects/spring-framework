@@ -21,6 +21,7 @@ import java.util.function.Predicate;
 
 import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
+import reactor.test.StepVerifier;
 
 import org.springframework.web.accept.InvalidApiVersionException;
 import org.springframework.web.accept.MissingApiVersionException;
@@ -35,6 +36,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 /**
  * Unit tests for {@link org.springframework.web.accept.DefaultApiVersionStrategy}.
  * @author Rossen Stoyanchev
+ * @author Jonathan Kaplan
  */
 public class DefaultApiVersionStrategiesTests {
 
@@ -46,6 +48,116 @@ public class DefaultApiVersionStrategiesTests {
 		String version = "1.2.3";
 		ApiVersionStrategy strategy = apiVersionStrategy(version, false, null);
 		assertThat(strategy.getDefaultVersion()).isEqualTo(parser.parseVersion(version));
+	}
+
+	@Test
+	void missingRequiredVersionReactively() {
+
+		testValidateReactively(null, apiVersionStrategy())
+				.expectErrorSatisfies(throwable ->
+											assertThat(throwable).isInstanceOf(MissingApiVersionException.class)
+																.hasMessage(("400 BAD_REQUEST \"API version is " +
+																				"required.\"")
+																			))
+				.verify();
+	}
+
+	@Test
+	void validateSupportedVersionReactively() {
+		String version = "1.2";
+		DefaultApiVersionStrategy strategy = apiVersionStrategy();
+		strategy.addSupportedVersion(version);
+		testValidateReactively(version, strategy)
+				.expectNextMatches(next -> next.toString().equals("1.2.0"))
+				.verifyComplete();
+	}
+
+	@Test
+	void validateSupportedVersionForDefaultVersionReactively() {
+		String defaultVersion = "1.2";
+		DefaultApiVersionStrategy strategy = apiVersionStrategy(defaultVersion, false, null);
+
+		testValidateReactively(defaultVersion, strategy)
+				.expectNextMatches(next -> next.toString().equals("1.2.0"))
+				.verifyComplete();
+	}
+
+	@Test
+	void validateUnsupportedVersionReactively() {
+		testValidateReactively("1.2", apiVersionStrategy())
+				.expectErrorSatisfies(throwable ->
+											assertThat(throwable).isInstanceOf(InvalidApiVersionException.class)
+																.hasMessage(("400 BAD_REQUEST \"Invalid API " +
+																				"version: '1.2.0'.\"")
+																			))
+				.verify();
+
+	}
+
+	@Test
+	void validateDetectedVersionReactively() {
+		String version = "1.2";
+		DefaultApiVersionStrategy strategy = apiVersionStrategy(null, true, null);
+		strategy.addMappedVersion(version);
+		testValidateReactively(version, strategy)
+				.expectNextMatches(next -> next.toString().equals("1.2.0"))
+				.verifyComplete();
+	}
+
+	@Test
+	void validateWhenDetectedVersionOffReactively() {
+		String version = "1.2";
+		DefaultApiVersionStrategy strategy = apiVersionStrategy();
+		strategy.addMappedVersion(version);
+		testValidateReactively(version, strategy)
+				.expectError(InvalidApiVersionException.class)
+				.verify();
+	}
+
+	@Test
+	void validateSupportedWithPredicateReactively() {
+		SemanticApiVersionParser.Version parsedVersion = parser.parseVersion("1.2");
+		testValidateReactively("1.2", apiVersionStrategy(null, false, version -> version.equals(parsedVersion)))
+				.expectNextMatches(next -> next.toString().equals("1.2.0"))
+				.verifyComplete();
+	}
+
+	@Test
+	void validateUnsupportedWithPredicateReactively() {
+		DefaultApiVersionStrategy strategy = apiVersionStrategy(null, false, version -> version.equals("1.2"));
+		testValidateReactively("1.2", strategy)
+				.verifyError(InvalidApiVersionException.class);
+	}
+
+	@Test
+	void versionRequiredAndDefaultVersionSetReactively() {
+		assertThatIllegalArgumentException()
+				.isThrownBy(() ->
+						new org.springframework.web.accept.DefaultApiVersionStrategy(
+								List.of(request -> request.getParameter("api-version")), new SemanticApiVersionParser(),
+								true, "1.2", true, version -> true, null))
+				.withMessage("versionRequired cannot be set to true if a defaultVersion is also configured");
+	}
+
+	private static DefaultApiVersionStrategy apiVersionStrategy() {
+		return apiVersionStrategy(null, false, null);
+	}
+
+	private static DefaultApiVersionStrategy apiVersionStrategy(
+			@Nullable String defaultVersion, boolean detectSupportedVersions,
+			@Nullable Predicate<Comparable<?>> supportedVersionPredicate) {
+
+			return new DefaultApiVersionStrategy(
+				List.of(exchange -> exchange.getRequest().getQueryParams().getFirst("api-version")),
+				parser, null, defaultVersion, detectSupportedVersions, supportedVersionPredicate, null);
+	}
+
+	private StepVerifier.FirstStep<Comparable<?>> testValidateReactively(@Nullable String version, DefaultApiVersionStrategy strategy) {
+		MockServerHttpRequest.BaseBuilder<?> requestBuilder = MockServerHttpRequest.get("/");
+		if (version != null) {
+			requestBuilder.queryParam("api-version", version);
+		}
+		return StepVerifier.create(strategy.resolveParseAndValidateVersionAsync(MockServerWebExchange.builder(requestBuilder).build()));
 	}
 
 	@Test
@@ -109,25 +221,13 @@ public class DefaultApiVersionStrategiesTests {
 	void versionRequiredAndDefaultVersionSet() {
 		assertThatIllegalArgumentException()
 				.isThrownBy(() ->
-						new org.springframework.web.accept.DefaultApiVersionStrategy(
-								List.of(request -> request.getParameter("api-version")), new SemanticApiVersionParser(),
-								true, "1.2", true, version -> true, null))
+									new org.springframework.web.accept.DefaultApiVersionStrategy(
+											List.of(request -> request.getParameter("api-version")), new SemanticApiVersionParser(),
+											true, "1.2", true, version -> true, null))
 				.withMessage("versionRequired cannot be set to true if a defaultVersion is also configured");
 	}
 
-	private static DefaultApiVersionStrategy apiVersionStrategy() {
-		return apiVersionStrategy(null, false, null);
-	}
-
-	private static DefaultApiVersionStrategy apiVersionStrategy(
-			@Nullable String defaultVersion, boolean detectSupportedVersions,
-			@Nullable Predicate<Comparable<?>> supportedVersionPredicate) {
-
-			return new DefaultApiVersionStrategy(
-				List.of(exchange -> exchange.getRequest().getQueryParams().getFirst("api-version")),
-				parser, null, defaultVersion, detectSupportedVersions, supportedVersionPredicate, null);
-	}
-
+	@SuppressWarnings("removal")
 	private void testValidate(@Nullable String version, DefaultApiVersionStrategy strategy) {
 		MockServerHttpRequest.BaseBuilder<?> requestBuilder = MockServerHttpRequest.get("/");
 		if (version != null) {
