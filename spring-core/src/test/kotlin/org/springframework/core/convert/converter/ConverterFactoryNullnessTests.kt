@@ -22,19 +22,37 @@ import kotlin.reflect.full.primaryConstructor
 
 /**
  * @author Brian Clozel
+ * @author Sebastien Deleuze
  */
 class ConverterFactoryNullnessTests {
 
 	@Test
 	fun converterFactoryWithNullableTypes() {
-		val factory = StringToIdConverterFactory
+		val factory = StringToNullableIdConverterFactory
 
-		val userIdConverter = factory.getConverter(UserId::class.java)
+		val userIdConverter: Converter<String, UserId?> = factory.getConverter(UserId::class.java)
 		assertThat(userIdConverter.convert("42")).isEqualTo(UserId("42"))
 	}
 
-	object StringToIdConverterFactory : ConverterFactory<String, Id> {
+	@Test
+	fun converterFactoryWithNonNullableTypes() {
+		val factory = StringToIdConverterFactory
+
+		val userIdConverter: Converter<String, UserId> = factory.getConverter(UserId::class.java)
+		assertThat(userIdConverter.convert("42")).isEqualTo(UserId("42"))
+	}
+
+	object StringToNullableIdConverterFactory : ConverterFactory<String, Id> {
 		override fun <T : Id> getConverter(targetType: Class<T>): Converter<String, T?> {
+			val constructor = checkNotNull(targetType.kotlin.primaryConstructor)
+			return Converter { source ->
+				constructor.call(source)
+			}
+		}
+	}
+
+	object StringToIdConverterFactory : ConverterFactory<String, Id> {
+		override fun <T : Id> getConverter(targetType: Class<T>): Converter<String, T> {
 			val constructor = checkNotNull(targetType.kotlin.primaryConstructor)
 			return Converter { source ->
 				constructor.call(source)
@@ -47,7 +65,5 @@ class ConverterFactoryNullnessTests {
 	}
 
 	data class UserId(override val value: String) : Id()
-
-	data class ProductId(override val value: String) : Id()
 
 }
