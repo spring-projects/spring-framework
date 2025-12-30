@@ -16,6 +16,7 @@
 
 package org.springframework.http.converter;
 
+import java.util.List;
 import java.util.function.Consumer;
 
 /**
@@ -171,6 +172,12 @@ public interface HttpMessageConverters extends Iterable<HttpMessageConverter<?>>
 		 * @param configurer the configurer to use
 		 */
 		T configureMessageConverters(Consumer<HttpMessageConverter<?>> configurer);
+
+		/**
+		 * Add a consumer for configuring the message converters list just before it's returned.
+		 * @param configurer the configurer to use
+		 */
+		T configureMessageConvertersList(Consumer<List<HttpMessageConverter<?>>> configurer);
 
 		/**
 		 * Build and return the {@link HttpMessageConverters} instance configured by this builder.
