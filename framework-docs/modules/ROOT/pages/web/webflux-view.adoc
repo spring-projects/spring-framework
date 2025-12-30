@@ -56,8 +56,7 @@ Java::
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Configuration
-	@EnableWebFlux
-	public class WebConfig implements WebFluxConfigurer {
+	public class WebConfiguration implements WebFluxConfigurer {
 
 		@Override
 		public void configureViewResolvers(ViewResolverRegistry registry) {
@@ -80,8 +79,7 @@ Kotlin::
 [source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@Configuration
-	@EnableWebFlux
-	class WebConfig : WebFluxConfigurer {
+	class WebConfiguration : WebFluxConfigurer {
 
 		override fun configureViewResolvers(registry: ViewResolverRegistry) {
 			registry.freeMarker()
@@ -119,8 +117,7 @@ Java::
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Configuration
-	@EnableWebFlux
-	public class WebConfig implements WebFluxConfigurer {
+	public class WebConfiguration implements WebFluxConfigurer {
 
 		// ...
 
@@ -142,8 +139,7 @@ Kotlin::
 [source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@Configuration
-	@EnableWebFlux
-	class WebConfig : WebFluxConfigurer {
+	class WebConfiguration : WebFluxConfigurer {
 
 		// ...
 
@@ -241,7 +237,7 @@ Java::
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Configuration
-	public class WebConfig implements WebFluxConfigurer {
+	public class WebConfiguration implements WebFluxConfigurer {
 
 		@Override
 		public void configureViewResolvers(ViewResolverRegistry registry) {
@@ -264,7 +260,7 @@ Kotlin::
 [source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@Configuration
-	class WebConfig : WebFluxConfigurer {
+	class WebConfiguration : WebFluxConfigurer {
 
 		override fun configureViewResolvers(registry: ViewResolverRegistry) {
 			registry.scriptTemplate()

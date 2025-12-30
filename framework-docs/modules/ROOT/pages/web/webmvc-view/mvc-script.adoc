@@ -36,66 +36,7 @@ You can declare a `ScriptTemplateConfigurer` bean to specify the script engine t
 the script files to load, what function to call to render templates, and so on.
 The following example uses the Jython Python engine:
 
-[tabs]
-======
-Java::
-+
-[source,java,indent=0,subs="verbatim,quotes"]
-----
-	@Configuration
-	public class WebConfig implements WebMvcConfigurer {
-
-		@Override
-		public void configureViewResolvers(ViewResolverRegistry registry) {
-			registry.scriptTemplate();
-		}
-
-		@Bean
-		public ScriptTemplateConfigurer configurer() {
-			ScriptTemplateConfigurer configurer = new ScriptTemplateConfigurer();
-			configurer.setEngineName("jython");
-			configurer.setScripts("render.py");
-			configurer.setRenderFunction("render");
-			return configurer;
-		}
-	}
-----
-
-Kotlin::
-+
-[source,kotlin,indent=0,subs="verbatim,quotes"]
-----
-	@Configuration
-	class WebConfig : WebMvcConfigurer {
-
-		override fun configureViewResolvers(registry: ViewResolverRegistry) {
-			registry.scriptTemplate()
-		}
-
-		@Bean
-		fun configurer() = ScriptTemplateConfigurer().apply {
-			engineName = "jython"
-			setScripts("render.py")
-			renderFunction = "render"
-		}
-	}
-----
-
-XML::
-+
-[source,xml,indent=0,subs="verbatim,quotes"]
-----
-	<mvc:annotation-driven/>
-
-	<mvc:view-resolvers>
-		<mvc:script-template/>
-	</mvc:view-resolvers>
-
-	<mvc:script-template-configurer engine-name="jython" render-function="render">
-		<mvc:script location="render.py"/>
-	</mvc:script-template-configurer>
-----
-======
+include-code::./WebConfiguration[tag=snippet,indent=0]
 
 The render function is called with the following parameters:
 
