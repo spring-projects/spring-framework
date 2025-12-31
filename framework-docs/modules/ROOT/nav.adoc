@@ -261,7 +261,6 @@
 **** xref:web/websocket/stomp/configuration-performance.adoc[]
 **** xref:web/websocket/stomp/stats.adoc[]
 **** xref:web/websocket/stomp/testing.adoc[]
-** xref:web/integration.adoc[]
 * xref:web-reactive.adoc[]
 ** xref:web/webflux.adoc[]
 *** xref:web/webflux/new-framework.adoc[]
