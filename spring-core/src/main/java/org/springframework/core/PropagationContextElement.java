@@ -103,9 +103,8 @@ public final class PropagationContextElement extends AbstractCoroutineContextEle
 
 	private static final class ReactorDelegate {
 
-		@Nullable
 		@SuppressWarnings({"unchecked", "rawtypes"})
-		public static ContextSnapshot captureFrom(CoroutineContext context) {
+		public static @Nullable ContextSnapshot captureFrom(CoroutineContext context) {
 			ReactorContext reactorContext = (ReactorContext)context.get((CoroutineContext.Key)ReactorContext.Key);
 			ContextView contextView = reactorContext != null ? reactorContext.getContext() : null;
 			if (contextView != null) {
