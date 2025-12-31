@@ -78,10 +78,12 @@ public final class PropagationContextElement extends AbstractCoroutineContextEle
 		this.threadLocalContextSnapshot = contextSnapshotFactory.captureAll();
 	}
 
+	@Override
 	public void restoreThreadContext(CoroutineContext context, ContextSnapshot.Scope oldState) {
 		oldState.close();
 	}
 
+	@Override
 	public ContextSnapshot.Scope updateThreadContext(CoroutineContext context) {
 		ContextSnapshot contextSnapshot;
 		if (coroutinesReactorPresent) {
