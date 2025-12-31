@@ -550,53 +550,7 @@ You can programmatically register handler methods, which you can use for dynamic
 registrations or for advanced cases, such as different instances of the same handler
 under different URLs. The following example registers a handler method:
 
-[tabs]
-======
-Java::
-+
-[source,java,indent=0,subs="verbatim,quotes"]
-----
-	@Configuration
-	public class MyConfig {
-
-		@Autowired
-		public void setHandlerMapping(RequestMappingHandlerMapping mapping, UserHandler handler) // <1>
-				throws NoSuchMethodException {
-
-			RequestMappingInfo info = RequestMappingInfo
-					.paths("/user/{id}").methods(RequestMethod.GET).build(); // <2>
-
-			Method method = UserHandler.class.getMethod("getUser", Long.class); // <3>
-
-			mapping.registerMapping(info, handler, method); // <4>
-		}
-	}
-----
-<1> Inject the target handler and the handler mapping for controllers.
-<2> Prepare the request mapping meta data.
-<3> Get the handler method.
-<4> Add the registration.
-
-Kotlin::
-+
-[source,kotlin,indent=0,subs="verbatim,quotes"]
-----
-	@Configuration
-	class MyConfig {
-
-		@Autowired
-		fun setHandlerMapping(mapping: RequestMappingHandlerMapping, handler: UserHandler) { // <1>
-			val info = RequestMappingInfo.paths("/user/{id}").methods(RequestMethod.GET).build() // <2>
-			val method = UserHandler::class.java.getMethod("getUser", Long::class.java) // <3>
-			mapping.registerMapping(info, handler, method) // <4>
-		}
-	}
-----
-<1> Inject the target handler and the handler mapping for controllers.
-<2> Prepare the request mapping meta data.
-<3> Get the handler method.
-<4> Add the registration.
-======
+include-code::./MyConfiguration[tag=snippet,indent=0]
 
 
 
