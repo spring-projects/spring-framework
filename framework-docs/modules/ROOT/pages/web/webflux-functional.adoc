@@ -241,7 +241,7 @@ Java::
 +
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
-Flux<PartEvent> allPartEvents = request.bodyToFlux(PartEvent.class);
+Flux<PartEvent> allPartsEvents = request.bodyToFlux(PartEvent.class);
 allPartsEvents.windowUntil(PartEvent::isLast)
       .concatMap(p -> p.switchOnFirst((signal, partEvents) -> {
           if (signal.hasValue()) {
@@ -269,28 +269,27 @@ Kotlin::
 +
 [source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
-val parts = request.bodyToFlux<PartEvent>()
+val allPartsEvents = request.bodyToFlux<PartEvent>()
 allPartsEvents.windowUntil(PartEvent::isLast)
     .concatMap {
         it.switchOnFirst { signal, partEvents ->
             if (signal.hasValue()) {
                 val event = signal.get()
                 if (event is FormPartEvent) {
-                    val value: String = event.value();
+                    val value: String = event.value()
                     // handle form field
                 } else if (event is FilePartEvent) {
-                    val filename: String = event.filename();
-                    val contents: Flux<DataBuffer> = partEvents.map(PartEvent::content);
+                    val filename: String = event.filename()
+                    val contents: Flux<DataBuffer> = partEvents.map(PartEvent::content)
                     // handle file upload
                 } else {
-                    return Mono.error(RuntimeException("Unexpected event: " + event));
+                    return@switchOnFirst Mono.error(RuntimeException("Unexpected event: $event"))
                 }
             } else {
-                return partEvents; // either complete or error signal
+                return@switchOnFirst partEvents // either complete or error signal
             }
         }
     }
-}
 ----
 ======
 
@@ -312,7 +311,7 @@ Kotlin::
 +
 [source,kotlin]
 ----
-val pet = request.bind(Pet::class.java, {dataBinder -> dataBinder.setAllowedFields("name")})
+val pet = request.bind(Pet::class.java) { dataBinder -> dataBinder.setAllowedFields("name") }
 ----
 ======
 
@@ -340,8 +339,8 @@ Kotlin::
 +
 [source,kotlin]
 ----
-val person: Person = ...
-ServerResponse.ok().contentType(MediaType.APPLICATION_JSON).bodyValue(person)
+val person: Mono<Person> = ...
+ServerResponse.ok().contentType(MediaType.APPLICATION_JSON).body(person, Person::class.java)
 ----
 ======
 
@@ -472,7 +471,7 @@ Kotlin::
 
 		suspend fun listPeople(request: ServerRequest): ServerResponse { // <1>
 			val people: Flow<Person> = repository.allPeople()
-			return ok().contentType(APPLICATION_JSON).bodyAndAwait(people);
+			return ok().contentType(APPLICATION_JSON).bodyAndAwait(people)
 		}
 
 		suspend fun createPerson(request: ServerRequest): ServerResponse { // <2>
@@ -554,8 +553,8 @@ Kotlin::
 		}
 
 		private fun validate(person: Person) {
-			val errors: Errors = BeanPropertyBindingResult(person, "person");
-			validator.validate(person, errors);
+			val errors: Errors = BeanPropertyBindingResult(person, "person")
+			validator.validate(person, errors)
 			if (errors.hasErrors()) {
 				throw ServerWebInputException(errors.toString()) // <3>
 			}
@@ -619,7 +618,7 @@ Kotlin::
 [source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	val route = coRouter {
-		GET("/hello-world", accept(TEXT_PLAIN)) {
+		GET("/hello-world", accept(MediaType.TEXT_PLAIN)) {
 			ServerResponse.ok().bodyValueAndAwait("Hello World")
 		}
 	}
@@ -696,7 +695,7 @@ Kotlin::
 	import org.springframework.http.MediaType.APPLICATION_JSON
 
 	val repository: PersonRepository = ...
-	val handler = PersonHandler(repository);
+	val handler = PersonHandler(repository)
 
 	val otherRoute: RouterFunction<ServerResponse> = coRouter {  }
 
@@ -811,7 +810,7 @@ Java::
 ----
 	RouterFunction<ServerResponse> route = RouterFunctions.route()
 		.GET("/hello-world", version("1.2"),
-			request -> ServerResponse.ok().body("Hello World")).build();
+			request -> ServerResponse.ok().bodyValue("Hello World")).build();
 ----
 
 Kotlin::
@@ -1049,9 +1048,9 @@ Kotlin::
 [source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	val route = router {
-		"/person".nest {
+		("/person" and accept(APPLICATION_JSON)).nest {
 			GET("/{id}", handler::getPerson)
-			GET("", handler::listPeople)
+			GET(handler::listPeople)
 			before { // <1>
 				ServerRequest.from(it)
 						.header("X-RequestHeader", "Value").build()
@@ -1112,14 +1111,14 @@ Kotlin::
 	val route = router {
 			("/person" and accept(APPLICATION_JSON)).nest {
 				GET("/{id}", handler::getPerson)
-				GET("", handler::listPeople)
+				GET(handler::listPeople)
 				POST(handler::createPerson)
 				filter { request, next ->
 					if (securityManager.allowAccessTo(request.path())) {
 						next(request)
 					}
 					else {
-						status(UNAUTHORIZED).build();
+						status(UNAUTHORIZED).build()
 					}
 				}
 			}

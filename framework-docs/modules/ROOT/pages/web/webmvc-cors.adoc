@@ -208,6 +208,7 @@ Kotlin::
 		fun remove(@PathVariable id: Long) {
 			// ...
 		}
+	}
 ----
 ======
 
