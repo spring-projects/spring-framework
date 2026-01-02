@@ -241,8 +241,8 @@ Java::
 +
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
-Flux<PartEvent> allPartsEvents = request.bodyToFlux(PartEvent.class);
-allPartsEvents.windowUntil(PartEvent::isLast)
+Flux<PartEvent> allPartEvents = request.bodyToFlux(PartEvent.class);
+allPartEvents.windowUntil(PartEvent::isLast)
       .concatMap(p -> p.switchOnFirst((signal, partEvents) -> {
           if (signal.hasValue()) {
               PartEvent event = signal.get();
@@ -269,8 +269,8 @@ Kotlin::
 +
 [source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
-val allPartsEvents = request.bodyToFlux<PartEvent>()
-allPartsEvents.windowUntil(PartEvent::isLast)
+val allPartEvents = request.bodyToFlux<PartEvent>()
+allPartEvents.windowUntil(PartEvent::isLast)
     .concatMap {
         it.switchOnFirst { signal, partEvents ->
             if (signal.hasValue()) {
