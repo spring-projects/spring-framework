@@ -305,7 +305,6 @@ Java::
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Configuration
-	@EnableWebFlux
 	public class WebConfig implements WebFluxConfigurer {
 
 		@Override
@@ -328,7 +327,6 @@ Kotlin::
 [source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@Configuration
-	@EnableWebFlux
 	class WebConfig : WebFluxConfigurer {
 
 		override fun addCorsMappings(registry: CorsRegistry) {

@@ -658,7 +658,6 @@ Java::
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Configuration
-	@EnableWebFlux
 	class MyConfig implements WebFluxConfigurer {
 
 		@Override
@@ -673,7 +672,6 @@ Kotlin::
 [source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@Configuration
-	@EnableWebFlux
 	class MyConfig : WebFluxConfigurer {
 
 		override fun configureHttpMessageCodecs(configurer: ServerCodecConfigurer) {
