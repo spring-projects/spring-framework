@@ -20,9 +20,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.function.Function;
 import java.util.function.Predicate;
 
 import org.jspecify.annotations.Nullable;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import org.springframework.util.Assert;
 import org.springframework.web.accept.ApiVersionParser;
@@ -161,6 +164,14 @@ public class DefaultApiVersionStrategy implements ApiVersionStrategy {
 			}
 		}
 		return null;
+	}
+
+	@Override
+	public Mono<String> resolveVersionReactively(ServerWebExchange exchange) {
+		return Flux.fromIterable(this.versionResolvers)
+				.mapNotNull(resolver -> resolver.resolveVersionReactively(exchange))
+				.flatMap(Function.identity())
+				.next();
 	}
 
 	@Override

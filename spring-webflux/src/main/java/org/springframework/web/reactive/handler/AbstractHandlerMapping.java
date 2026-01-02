@@ -184,8 +184,8 @@ public abstract class AbstractHandlerMapping extends ApplicationObjectSupport
 
 	@Override
 	public Mono<Object> getHandler(ServerWebExchange exchange) {
-		initApiVersion(exchange);
-		return getHandlerInternal(exchange).map(handler -> {
+		return this.initApiVersion(exchange).then(
+				getHandlerInternal(exchange).map(handler -> {
 			if (logger.isDebugEnabled()) {
 				logger.debug(exchange.getLogPrefix() + "Mapped to " + handler);
 			}
@@ -210,19 +210,19 @@ public abstract class AbstractHandlerMapping extends ApplicationObjectSupport
 				}
 			}
 			return handler;
-		});
+		}));
 	}
 
-	private void initApiVersion(ServerWebExchange exchange) {
+	private Mono<Comparable<?>> initApiVersion(ServerWebExchange exchange) {
 		if (this.apiVersionStrategy != null) {
-			Comparable<?> version = exchange.getAttribute(API_VERSION_ATTRIBUTE);
-			if (version == null) {
-				version = this.apiVersionStrategy.resolveParseAndValidateVersion(exchange);
-				if (version != null) {
-					exchange.getAttributes().put(API_VERSION_ATTRIBUTE, version);
-				}
+			if (exchange.getAttribute(API_VERSION_ATTRIBUTE) == null) {
+				return this.apiVersionStrategy
+						.resolveParseAndValidateVersion(exchange)
+						.doOnNext(version -> exchange.getAttributes()
+													.put(API_VERSION_ATTRIBUTE, version));
 			}
 		}
+		return Mono.empty();
 	}
 
 	/**
