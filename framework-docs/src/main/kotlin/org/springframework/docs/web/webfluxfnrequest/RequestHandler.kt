@@ -17,13 +17,13 @@
 package org.springframework.docs.web.webfluxfnrequest
 
 import org.springframework.web.reactive.function.server.ServerRequest
-import reactor.core.publisher.Mono
+import org.springframework.web.reactive.function.server.bindAndAwait
 
 class RequestHandler {
 
-	fun bind(request: ServerRequest) {
+	suspend fun bind(request: ServerRequest) {
 		// tag::snippet[]
-		val pet: Mono<Pet> = request.bind(Pet::class.java) { dataBinder -> dataBinder.setAllowedFields("name") }
+		val pet: Pet? = request.bindAndAwait<Pet>{ dataBinder -> dataBinder.setAllowedFields("name") }
 		// end::snippet[]
 	}
 
