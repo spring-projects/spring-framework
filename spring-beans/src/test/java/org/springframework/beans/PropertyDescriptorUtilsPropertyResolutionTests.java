@@ -18,12 +18,14 @@ package org.springframework.beans;
 
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Named;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.Parameter;
 import org.junit.jupiter.params.ParameterizedClass;
@@ -58,58 +60,118 @@ class PropertyDescriptorUtilsPropertyResolutionTests {
 	PropertiesResolver resolver;
 
 
-	@Test
-	void determineBasicPropertiesWithUnresolvedGenericsInInterface() {
-		var pdMap = resolver.resolve(GenericService.class);
+	@Nested
+	class UnboundedGenericsTests {
 
-		assertThat(pdMap).containsOnlyKeys("id");
-		assertReadAndWriteMethodsForId(pdMap.get("id"), Object.class, Object.class);
+		@Test
+		void determineBasicPropertiesWithUnresolvedGenericsInInterface() {
+			var pdMap = resolver.resolve(GenericService.class);
+
+			assertThat(pdMap).containsOnlyKeys("id");
+			assertReadAndWriteMethodsForId(pdMap.get("id"), Object.class, Object.class);
+		}
+
+		@Test
+		void determineBasicPropertiesWithUnresolvedGenericsInSubInterface() {
+			// FYI: java.beans.Introspector does not resolve properties for sub-interfaces.
+			assumeThat(resolver).isNotInstanceOf(StandardPropertiesResolver.class);
+
+			var pdMap = resolver.resolve(SubGenericService.class);
+
+			assertThat(pdMap).containsOnlyKeys("id");
+			assertReadAndWriteMethodsForId(pdMap.get("id"), Object.class, Object.class);
+		}
+
+		@Test
+		void resolvePropertiesWithUnresolvedGenericsInClass() {
+			var pdMap = resolver.resolve(BaseService.class);
+
+			assertReadAndWriteMethodsForClassAndId(pdMap, Object.class, Object.class);
+		}
+
+		@Test  // gh-36019
+		void resolvePropertiesInSubclassWithOverriddenGetterAndSetter() {
+			var pdMap = resolver.resolve(ServiceWithOverriddenGetterAndSetter.class);
+
+			assertReadAndWriteMethodsForClassAndId(pdMap, String.class, String.class);
+		}
+
+		@Test  // gh-36019
+		void resolvePropertiesWithUnresolvedGenericsInSubclassWithOverloadedSetter() {
+			var pdMap = resolver.resolve(ServiceWithOverloadedSetter.class);
+
+			assertReadAndWriteMethodsForClassAndId(pdMap, Object.class, Object.class);
+		}
+
+		@Test  // gh-36019
+		void resolvePropertiesWithPartiallyUnresolvedGenericsInSubclassWithOverriddenGetter() {
+			var pdMap = resolver.resolve(ServiceWithOverriddenGetter.class);
+
+			assertReadAndWriteMethodsForClassAndId(pdMap, String.class, Object.class);
+		}
+
+		@Test  // gh-36019
+		void resolvePropertiesWithPartiallyUnresolvedGenericsInSubclassWithOverriddenGetterAndOverloadedSetter() {
+			var pdMap = resolver.resolve(ServiceWithOverriddenGetterAndOverloadedSetter.class);
+
+			assertReadAndWriteMethodsForClassAndId(pdMap, String.class, Object.class);
+		}
 	}
 
-	@Test
-	void determineBasicPropertiesWithUnresolvedGenericsInSubInterface() {
-		// FYI: java.beans.Introspector does not resolve properties for sub-interfaces.
-		assumeThat(resolver).isNotInstanceOf(StandardPropertiesResolver.class);
+	@Nested
+	class BoundedGenericsTests {
 
-		var pdMap = resolver.resolve(SubGenericService.class);
+		@Test
+		void determineBasicPropertiesWithUnresolvedGenericsInInterface() {
+			var pdMap = resolver.resolve(Entity.class);
 
-		assertThat(pdMap).containsOnlyKeys("id");
-		assertReadAndWriteMethodsForId(pdMap.get("id"), Object.class, Object.class);
-	}
+			assertThat(pdMap).containsOnlyKeys("id");
+			assertReadAndWriteMethodsForId(pdMap.get("id"), Serializable.class, Serializable.class);
+		}
 
-	@Test
-	void resolvePropertiesWithUnresolvedGenericsInClass() {
-		var pdMap = resolver.resolve(BaseService.class);
+		@Test
+		void resolvePropertiesWithUnresolvedGenericsInClass() {
+			var pdMap = resolver.resolve(BaseEntity.class);
 
-		assertReadAndWriteMethodsForClassAndId(pdMap, Object.class, Object.class);
-	}
+			assertReadAndWriteMethodsForClassAndId(pdMap, Number.class, Number.class);
+		}
 
-	@Test  // gh-36019
-	void resolvePropertiesInSubclassWithOverriddenGetterAndSetter() {
-		var pdMap = resolver.resolve(ServiceWithOverriddenGetterAndSetter.class);
+		@Test
+		void resolvePropertiesWithUnresolvedGenericsInSubclass() {
+			var pdMap = resolver.resolve(Person.class);
 
-		assertReadAndWriteMethodsForClassAndId(pdMap, String.class, String.class);
-	}
+			assertReadAndWriteMethodsForClassAndId(pdMap, Number.class, Number.class);
+		}
 
-	@Test  // gh-36019
-	void resolvePropertiesWithUnresolvedGenericsInSubclassWithOverloadedSetter() {
-		var pdMap = resolver.resolve(ServiceWithOverloadedSetter.class);
+		@Test  // gh-36019
+		void resolvePropertiesWithUnresolvedGenericsInSubclassWithOverriddenGetter() {
+			var pdMap = resolver.resolve(PersonWithOverriddenGetter.class);
 
-		assertReadAndWriteMethodsForClassAndId(pdMap, Object.class, Object.class);
-	}
+			assertReadAndWriteMethodsForClassAndId(pdMap, Long.class, Number.class);
+		}
 
-	@Test  // gh-36019
-	void resolvePropertiesWithPartiallyUnresolvedGenericsInSubclassWithOverriddenGetter() {
-		var pdMap = resolver.resolve(ServiceWithOverriddenGetter.class);
+		@Test  // gh-36019
+		void resolvePropertiesWithUnresolvedGenericsInSubclassWithOverriddenSetter() {
+			var pdMap = resolver.resolve(PersonWithOverriddenSetter.class);
 
-		assertReadAndWriteMethodsForClassAndId(pdMap, String.class, Object.class);
-	}
+			assertReadAndWriteMethodsForClassAndId(pdMap, Number.class, Long.class);
+		}
 
-	@Test  // gh-36019
-	void resolvePropertiesWithPartiallyUnresolvedGenericsInSubclassWithOverriddenGetterAndOverloadedSetter() {
-		var pdMap = resolver.resolve(ServiceWithOverriddenGetterAndOverloadedSetter.class);
+		@Test  // gh-36019
+		void resolvePropertiesWithUnresolvedGenericsInSubclassWithOverloadedSetter() {
+			var pdMap = resolver.resolve(PersonWithOverloadedSetter.class);
 
-		assertReadAndWriteMethodsForClassAndId(pdMap, String.class, Object.class);
+			// TODO Determine if we want to align PropertyDescriptorUtils with java.beans.Introspector.
+			Class<?> writeType = Number.class;
+			if (resolver instanceof BasicPropertiesResolver) {
+				// PropertyDescriptorUtils currently incorrectly resolves setId(Integer)
+				// as the write method instead of setId(Number) (where Number is the
+				// unresolved generic for Long).
+				writeType = Integer.class;
+			}
+
+			assertReadAndWriteMethodsForClassAndId(pdMap, Number.class, writeType);
+		}
 	}
 
 
@@ -262,4 +324,62 @@ class PropertyDescriptorUtilsPropertyResolutionTests {
 		}
 	}
 
+	interface Entity<T extends Serializable> {
+
+		T getId();
+
+		void setId(T id);
+	}
+
+	abstract static class BaseEntity<T extends Number> implements Entity<T> {
+
+		private T id;
+
+		@Override
+		public T getId() {
+			return this.id;
+		}
+
+		@Override
+		public void setId(T id) {
+			this.id = id;
+		}
+	}
+
+	static class Person extends BaseEntity<Long> {
+	}
+
+	static class PersonWithOverriddenGetter extends BaseEntity<Long> {
+
+		/**
+		 * Overrides super implementation to ensure that the JavaBeans read method
+		 * is of type {@link Long}, while leaving the type for the write method
+		 * ({@link #setId}) set to {@link Number}.
+		 */
+		@Override
+		public Long getId() {
+			return super.getId();
+		}
+	}
+
+	static class PersonWithOverriddenSetter extends BaseEntity<Long> {
+
+		/**
+		 * Overrides super implementation to ensure that the JavaBeans write method
+		 * is of type {@link Long}, while leaving the type for the read method
+		 * ({@link #getId()}) set to {@link Number}.
+		 */
+		@Override
+		public void setId(Long id) {
+			super.setId(id);
+		}
+	}
+
+	static class PersonWithOverloadedSetter extends BaseEntity<Long> {
+
+		// Intentionally chose Integer, since it's a subtype of Long and Number.
+		public void setId(Integer id) {
+			setId(id.longValue());
+		}
+	}
 }
