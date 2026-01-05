@@ -47,12 +47,15 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
  * @author Rob Worsnop
  * @since 7.0
  */
-class MockMvcClientHttpRequestFactory implements ClientHttpRequestFactory {
+public class MockMvcClientHttpRequestFactory implements ClientHttpRequestFactory {
 
 	private final MockMvc mockMvc;
 
 
-	MockMvcClientHttpRequestFactory(MockMvc mockMvc) {
+	/**
+	 * Constructor with a MockMvc instance to perform requests with.
+	 */
+	public MockMvcClientHttpRequestFactory(MockMvc mockMvc) {
 		Assert.notNull(mockMvc, "MockMvc must not be null");
 		this.mockMvc = mockMvc;
 	}
