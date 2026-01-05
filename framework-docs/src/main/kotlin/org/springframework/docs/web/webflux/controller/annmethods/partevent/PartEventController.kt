@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      https://www.apache.org/licenses/LICENSE-2.0
+ *	  https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -31,19 +31,29 @@ class PartEventController {
 
 	// tag::snippet[]
 	@PostMapping("/")
-	fun handle(@RequestBody allPartsEvents: Flux<PartEvent>) { // <1>
-		allPartsEvents.windowUntil(PartEvent::isLast) // <2>
+	fun handle(@RequestBody allPartsEvents: Flux<PartEvent>) { // Using @RequestBody.
+
+		//	The final PartEvent for a particular part will have isLast() set to true, and can be
+		//	followed by additional events belonging to subsequent parts.
+		//	This makes the isLast property suitable as a predicate for the Flux::windowUntil operator, to
+		//	split events from all parts into windows that each belong to a single part.
+		allPartsEvents.windowUntil(PartEvent::isLast)
 				.concatMap {
-					it.switchOnFirst { signal, partEvents -> // <3>
+
+					//	The Flux::switchOnFirst operator allows you to see whether you are handling
+					//	a form field or file upload.
+					it.switchOnFirst { signal, partEvents ->
 						if (signal.hasValue()) {
 							val event = signal.get()
-							if (event is FormPartEvent) { // <4>
+							if (event is FormPartEvent) {
 								val value: String = event.value()
-								// handle form field
-							} else if (event is FilePartEvent) { // <5>
+								// Handling the form field.
+							} else if (event is FilePartEvent) {
 								val filename: String = event.filename()
-								val contents: Flux<DataBuffer> = partEvents.map(PartEvent::content) // <6>
-								// handle file upload
+
+								// The body contents must be completely consumed, relayed, or released to avoid memory leaks.
+								val contents: Flux<DataBuffer> = partEvents.map(PartEvent::content)
+								// Handling the file upload.
 							} else {
 								return@switchOnFirst Mono.error(RuntimeException("Unexpected event: $event"))
 							}

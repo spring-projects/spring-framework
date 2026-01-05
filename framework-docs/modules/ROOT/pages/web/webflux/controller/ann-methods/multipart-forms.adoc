@@ -103,8 +103,8 @@ Kotlin::
 [source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@PostMapping("/")
-	fun handle(@RequestPart("meta-data") metadata: MetaData, // <1>
-		@RequestPart("file-data") file: MultipartFile): String { // <2>
+	fun handle(@RequestPart("meta-data") metadata: Part, // <1>
+		@RequestPart("file-data") file: FilePart): String { // <2>
 		// ...
 	}
 ----
@@ -228,16 +228,6 @@ when uploading. If the file is large enough to be split across multiple buffers,
 For example:
 
 include-code::./PartEventController[tag=snippet,indent=0]
-<1> Using `@RequestBody`.
-<2> The final `PartEvent` for a particular part will have `isLast()` set to `true`, and can be
-followed by additional events belonging to subsequent parts.
-This makes the `isLast` property suitable as a predicate for the `Flux::windowUntil` operator, to
-split events from all parts into windows that each belong to a single part.
-<3> The `Flux::switchOnFirst` operator allows you to see whether you are handling a form field or
-file upload.
-<4> Handling the form field.
-<5> Handling the file upload.
-<6> The body contents must be completely consumed, relayed, or released to avoid memory leaks.
 
 Received part events can also be relayed to another service by using the `WebClient`.
 See xref:web/webflux-webclient/client-body.adoc#webflux-client-body-multipart[Multipart Data].
