@@ -33,6 +33,7 @@ import org.springframework.web.util.UriComponentsBuilder;
  * Default implementation of {@link ApiVersionInserter}.
  *
  * @author Rossen Stoyanchev
+ * @author Nabil Fawwaz Elqayyim
  * @since 7.0
  * @see DefaultApiVersionInserterBuilder
  */
@@ -81,7 +82,7 @@ final class DefaultApiVersionInserter implements ApiVersionInserter {
 			builder.replacePath(null);
 			pathSegments.forEach(builder::pathSegment);
 		}
-		return builder.build().toUri();
+		return builder.build(true).toUri();
 	}
 
 	private void assertPathSegmentIndex(Integer index, int pathSegmentsSize, URI uri) {
