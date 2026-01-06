@@ -35,7 +35,8 @@ import org.springframework.util.MimeType;
 
 /**
  * Encode from an {@code Object} to bytes of CBOR objects using Jackson 2.x.
- * Stream encoding is not supported yet.
+ *
+ * <p><a href="https://github.com/FasterXML/jackson-dataformats-binary/issues/110">Stream encoding is currently not supported</a>.
  *
  * @author Sebastien Deleuze
  * @since 5.2

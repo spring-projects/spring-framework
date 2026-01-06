@@ -34,12 +34,12 @@ import org.springframework.util.MimeType;
 
 /**
  * Decode bytes into CBOR and convert to Object's with Jackson 2.x.
- * Stream decoding is not supported yet.
+ *
+ * <p><a href="https://github.com/FasterXML/jackson-dataformats-binary/issues/110">Stream decoding is currently not supported</a>.
  *
  * @author Sebastien Deleuze
  * @since 5.2
  * @see Jackson2CborEncoder
- * @see <a href="https://github.com/spring-projects/spring-framework/issues/20513">Add CBOR support to WebFlux</a>
  * @deprecated since 7.0 in favor of {@link JacksonCborDecoder}
  */
 @Deprecated(since = "7.0", forRemoval = true)
