@@ -652,6 +652,10 @@ public abstract class RequestPredicates {
 			PathPattern.PathMatchInfo info = this.pattern.matchAndExtract(pathContainer);
 			traceMatch("Pattern", this.pattern.getPatternString(), request.path(), info != null);
 			if (info != null) {
+				RuntimeException error = (RuntimeException) request.attribute(HandlerMapping.API_VERSION_VALIDATION_ERROR_ATTRIBUTE).orElse(null);
+				if (error != null) {
+					throw error;
+				}
 				return Result.of(true, attributes -> modifyAttributes(attributes, request, info.getUriVariables()));
 			}
 			else {

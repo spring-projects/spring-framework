@@ -216,8 +216,14 @@ public abstract class AbstractHandlerMapping extends ApplicationObjectSupport
 	private void initApiVersion(ServerWebExchange exchange) {
 		if (this.apiVersionStrategy != null) {
 			Comparable<?> version = exchange.getAttribute(API_VERSION_ATTRIBUTE);
-			if (version == null) {
-				version = this.apiVersionStrategy.resolveParseAndValidateVersion(exchange);
+			if (version == null && exchange.getAttribute(API_VERSION_VALIDATION_ERROR_ATTRIBUTE) == null) {
+				try {
+					version = this.apiVersionStrategy.resolveParseAndValidateVersion(exchange);
+				}
+				catch (RuntimeException ex) {
+					exchange.getAttributes().put(API_VERSION_VALIDATION_ERROR_ATTRIBUTE, ex);
+					return;
+				}
 				if (version != null) {
 					exchange.getAttributes().put(API_VERSION_ATTRIBUTE, version);
 				}

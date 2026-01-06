@@ -90,6 +90,13 @@ public interface HandlerMapping {
 	 */
 	String API_VERSION_ATTRIBUTE = HandlerMapping.class.getName() + ".apiVersion";
 
+	/**
+	 * Name of the {@link ServerWebExchange#getAttributes() attribute} containing
+	 * the {@link RuntimeException} raised during API version validation.
+	 * @since 7.0.3
+	 */
+	String API_VERSION_VALIDATION_ERROR_ATTRIBUTE = HandlerMapping.class.getName() + ".apiVersionValidationError";
+
 
 	/**
 	 * Return a handler for this request.

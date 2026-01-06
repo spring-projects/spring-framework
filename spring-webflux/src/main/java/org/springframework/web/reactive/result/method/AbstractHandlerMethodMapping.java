@@ -320,6 +320,10 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 		List<Match> matches = new ArrayList<>();
 		List<T> directPathMatches = this.mappingRegistry.getMappingsByDirectPath(exchange);
 		if (directPathMatches != null) {
+			RuntimeException error = exchange.getAttribute(HandlerMapping.API_VERSION_VALIDATION_ERROR_ATTRIBUTE);
+			if (error != null) {
+				throw error;
+			}
 			addMatchingMappings(directPathMatches, matches, exchange);
 		}
 		if (matches.isEmpty()) {
