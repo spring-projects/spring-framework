@@ -66,6 +66,13 @@ from an existing `ProblemDetail`. This could be done centrally, for example, fro
 `@ControllerAdvice` such as `ResponseEntityExceptionHandler` that re-creates the
 `ProblemDetail` of an exception into a subclass with the additional non-standard fields.
 
+TIP: In Spring Boot, the `spring.webflux.problemdetails.enabled` property autoconfigures
+a `ResponseEntityExceptionHandler` that handles built-in exceptions with problem details.
+In that case, you may prefer to create another `@ControllerAdvice` instead of extending
+`ResponseEntityExceptionHandler` if you want to take over the handling of a specific
+built-in exception. You'll need to ensure your handler is ordered ahead of the one
+configured by Spring Boot whose order is 0.
+
 
 [[webflux-ann-rest-exceptions-i18n]]
 == Customization and i18n
