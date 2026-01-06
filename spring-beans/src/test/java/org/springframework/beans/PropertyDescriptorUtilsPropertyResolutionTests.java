@@ -387,15 +387,7 @@ class PropertyDescriptorUtilsPropertyResolutionTests {
 		void resolvePropertiesWithUnresolvedGenericsInSubclassWithOverloadedSetter() {
 			var pdMap = resolver.resolve(PersonWithOverloadedSetter.class);
 
-			Class<?> writeType = Number.class;
-			if (resolver instanceof BasicPropertiesResolver) {
-				// TODO: PropertyDescriptorUtils currently incorrectly resolves setId(Integer)
-				// as the write method instead of setId(Number) (where Number is the
-				// unresolved generic for Long).
-				writeType = Integer.class;
-			}
-
-			assertReadAndWriteMethodsForClassAndId(pdMap, Number.class, writeType);
+			assertReadAndWriteMethodsForClassAndId(pdMap, Number.class, Number.class);
 		}
 
 

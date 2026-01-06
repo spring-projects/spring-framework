@@ -91,14 +91,7 @@ abstract class PropertyDescriptorUtils {
 			BasicPropertyDescriptor pd = pdMap.get(propertyName);
 			if (pd != null) {
 				if (setter) {
-					Method writeMethod = pd.getWriteMethod();
-					if (writeMethod == null ||
-							writeMethod.getParameterTypes()[0].isAssignableFrom(method.getParameterTypes()[0])) {
-						pd.setWriteMethod(method);
-					}
-					else {
-						pd.addWriteMethod(method);
-					}
+					pd.addWriteMethod(method);
 				}
 				else {
 					Method readMethod = pd.getReadMethod();
@@ -270,7 +263,7 @@ abstract class PropertyDescriptorUtils {
 
 		private @Nullable Method writeMethod;
 
-		private final List<Method> alternativeWriteMethods = new ArrayList<>();
+		private final List<Method> candidateWriteMethods = new ArrayList<>();
 
 		public BasicPropertyDescriptor(String propertyName, Class<?> beanClass, @Nullable Method readMethod, @Nullable Method writeMethod)
 				throws IntrospectionException {
@@ -294,34 +287,46 @@ abstract class PropertyDescriptorUtils {
 			this.writeMethod = writeMethod;
 		}
 
-		public void addWriteMethod(Method writeMethod) {
+		void addWriteMethod(Method writeMethod) {
+			// Since setWriteMethod() is invoked from the PropertyDescriptor(String, Method, Method)
+			// constructor, this.writeMethod may be non-null.
 			if (this.writeMethod != null) {
-				this.alternativeWriteMethods.add(this.writeMethod);
+				this.candidateWriteMethods.add(this.writeMethod);
 				this.writeMethod = null;
 			}
-			this.alternativeWriteMethods.add(writeMethod);
+			this.candidateWriteMethods.add(writeMethod);
 		}
 
 		@Override
 		public @Nullable Method getWriteMethod() {
-			if (this.writeMethod == null && !this.alternativeWriteMethods.isEmpty()) {
-				if (this.readMethod == null) {
-					this.writeMethod = this.alternativeWriteMethods.get(0);
+			if (this.writeMethod == null && !this.candidateWriteMethods.isEmpty()) {
+				if (this.readMethod == null || this.candidateWriteMethods.size() == 1) {
+					this.writeMethod = this.candidateWriteMethods.get(0);
 				}
 				else {
-					for (Method method : this.alternativeWriteMethods) {
-						// Check subtype match first.
-						if (this.readMethod.getReturnType().isAssignableFrom(method.getParameterTypes()[0])) {
+					Class<?> resolvedReadType =
+							ResolvableType.forMethodReturnType(this.readMethod, this.beanClass).toClass();
+					for (Method method : this.candidateWriteMethods) {
+						// 1) Check for an exact match against the resolved types.
+						Class<?> resolvedWriteType =
+								ResolvableType.forMethodParameter(method, 0, this.beanClass).toClass();
+						if (resolvedReadType.equals(resolvedWriteType)) {
 							this.writeMethod = method;
 							break;
 						}
-						// Check exact match against resolved generic parameter type as a fallback.
-						if (!(method.getGenericParameterTypes()[0] instanceof Class<?>)) {
-							Class<?> resolvedParameterType =
-									ResolvableType.forMethodParameter(method, 0, this.beanClass).toClass();
-							if (this.readMethod.getReturnType().equals(resolvedParameterType)) {
+
+						// 2) Check if the candidate write method's parameter type is compatible with
+						// the read method's return type.
+						Class<?> parameterType = method.getParameterTypes()[0];
+						if (this.readMethod.getReturnType().isAssignableFrom(parameterType)) {
+							// If we haven't yet found a compatible write method, or if the current
+							// candidate's parameter type is a subtype of the previous candidate's
+							// parameter type, track the current candidate as the write method.
+							if (this.writeMethod == null ||
+									this.writeMethod.getParameterTypes()[0].isAssignableFrom(parameterType)) {
 								this.writeMethod = method;
-								break;
+								// We do not "break" here, since we need to compare the current candidate
+								// with all remaining candidates.
 							}
 						}
 					}
