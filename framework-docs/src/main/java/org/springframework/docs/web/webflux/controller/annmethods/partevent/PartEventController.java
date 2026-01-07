@@ -31,29 +31,28 @@ public class PartEventController {
 
 	// tag::snippet[]
 	@PostMapping("/")
-	public void handle(@RequestBody Flux<PartEvent> allPartsEvents) { // Using @RequestBody.
+	public void handle(@RequestBody Flux<PartEvent> allPartEvents) {
 
 		//	The final PartEvent for a particular part will have isLast() set to true, and can be
 		//	followed by additional events belonging to subsequent parts.
 		//	This makes the isLast property suitable as a predicate for the Flux::windowUntil operator, to
 		//	split events from all parts into windows that each belong to a single part.
-		allPartsEvents.windowUntil(PartEvent::isLast)
-
+		allPartEvents.windowUntil(PartEvent::isLast)
 				//	The Flux::switchOnFirst operator allows you to see whether you are handling
-				//	a form field or file upload.
+				//	a form field or file upload
 				.concatMap(p -> p.switchOnFirst((signal, partEvents) -> {
 						if (signal.hasValue()) {
 								PartEvent event = signal.get();
 								if (event instanceof FormPartEvent formEvent) {
 										String value = formEvent.value();
-										// Handling the form field.
+										// Handling of the form field
 								}
 								else if (event instanceof FilePartEvent fileEvent) {
 										String filename = fileEvent.filename();
 
-										// The body contents must be completely consumed, relayed, or released to avoid memory leaks.
+										// The body contents must be completely consumed, relayed, or released to avoid memory leaks
 										Flux<DataBuffer> contents = partEvents.map(PartEvent::content);
-										// Handling the file upload.
+										// Handling of the file upload
 						}
 						else {
 							return Mono.error(new RuntimeException("Unexpected event: " + event));

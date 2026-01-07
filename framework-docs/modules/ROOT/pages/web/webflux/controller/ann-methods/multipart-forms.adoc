@@ -41,8 +41,8 @@ Kotlin::
 [source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	class MyForm(
-			val name: String,
-			val file: FilePart)
+			private val name: String,
+			private val file: FilePart)
 
 	@Controller
 	class FileUploadController {
@@ -104,7 +104,7 @@ Kotlin::
 ----
 	@PostMapping("/")
 	fun handle(@RequestPart("meta-data") metadata: Part, // <1>
-		@RequestPart("file-data") file: FilePart): String { // <2>
+			@RequestPart("file-data") file: FilePart): String { // <2>
 		// ...
 	}
 ----
@@ -170,7 +170,7 @@ Kotlin::
 ----
 	@PostMapping("/")
 	fun handle(@Valid @RequestPart("meta-data") metadata: Mono<MetaData>): String {
-		// ...
+		// use one of the onError* operators...
 	}
 ----
 ======
