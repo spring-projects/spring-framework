@@ -168,16 +168,19 @@ public interface HttpMessageConverters extends Iterable<HttpMessageConverter<?>>
 		T addCustomConverter(HttpMessageConverter<?> customConverter);
 
 		/**
+		 * Add a consumer for mutating the list of selected message converters.
+		 * <p>This operation happens before converters are
+		 * {@link #configureMessageConverters(Consumer) configured individually}.</p>
+		 * @param configurer the configurer to use
+		 * @since 7.0.3
+		 */
+		T configureMessageConvertersList(Consumer<List<HttpMessageConverter<?>>> configurer);
+
+		/**
 		 * Add a consumer for configuring the selected message converters.
 		 * @param configurer the configurer to use
 		 */
 		T configureMessageConverters(Consumer<HttpMessageConverter<?>> configurer);
-
-		/**
-		 * Add a consumer for configuring the message converters list just before it's returned.
-		 * @param configurer the configurer to use
-		 */
-		T configureMessageConvertersList(Consumer<List<HttpMessageConverter<?>>> configurer);
 
 		/**
 		 * Build and return the {@link HttpMessageConverters} instance configured by this builder.

@@ -229,7 +229,8 @@ class DefaultHttpMessageConverters implements HttpMessageConverters {
 		}
 
 		void addMessageConvertersListConfigurer(Consumer<List<HttpMessageConverter<?>>> configurer) {
-			this.convertersListConfigurer = (this.convertersListConfigurer != null) ? this.convertersListConfigurer.andThen(this.convertersListConfigurer) : configurer;
+			this.convertersListConfigurer = (this.convertersListConfigurer != null) ?
+					this.convertersListConfigurer.andThen(this.convertersListConfigurer) : configurer;
 		}
 
 		List<HttpMessageConverter<?>> getBaseConverters() {
@@ -475,13 +476,12 @@ class DefaultHttpMessageConverters implements HttpMessageConverters {
 			if (this.registerDefaults) {
 				allConverters.addAll(this.getCoreConverters());
 			}
-			if (this.configurer != null) {
-				allConverters.forEach(this.configurer);
-			}
 			if (this.convertersListConfigurer != null) {
 				this.convertersListConfigurer.accept(allConverters);
 			}
-
+			if (this.configurer != null) {
+				allConverters.forEach(this.configurer);
+			}
 			return new DefaultHttpMessageConverters(allConverters);
 		}
 	}
@@ -586,13 +586,12 @@ class DefaultHttpMessageConverters implements HttpMessageConverters {
 			if (this.registerDefaults) {
 				allConverters.addAll(this.getCoreConverters());
 			}
-			if (this.configurer != null) {
-				allConverters.forEach(this.configurer);
-			}
 			if (this.convertersListConfigurer != null) {
 				this.convertersListConfigurer.accept(allConverters);
 			}
-
+			if (this.configurer != null) {
+				allConverters.forEach(this.configurer);
+			}
 			return new DefaultHttpMessageConverters(allConverters);
 		}
 	}

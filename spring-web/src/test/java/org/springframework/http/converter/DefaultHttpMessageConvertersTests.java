@@ -17,11 +17,9 @@
 package org.springframework.http.converter;
 
 import java.io.IOException;
-import java.util.Comparator;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-import org.assertj.core.util.Lists;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -214,24 +212,14 @@ class DefaultHttpMessageConvertersTests {
 		}
 
 		@Test
-		void shouldConfigureConverterOrder() {
+		void shouldAppendCustomConverterToList() {
 			var customConverter = new CustomHttpMessageConverter();
-			var converted = HttpMessageConverters.forClient()
-					.addCustomConverter(customConverter)
-					.configureMessageConvertersList(converter -> converter.sort(Comparator.comparing(s -> s.getClass().equals(CustomHttpMessageConverter.class) ? 1 : -1))).build();
+			var messageConverters = HttpMessageConverters.forClient()
+					.registerDefaults()
+					.configureMessageConvertersList(converters -> converters.add(customConverter))
+					.build();
 
-			var messageConvertersBack = Lists.newArrayList(converted);
-			assertThat(messageConvertersBack.size()).isGreaterThan(1);
-			assertThat(messageConvertersBack.get(messageConvertersBack.size() - 1).getClass()).isEqualTo(CustomHttpMessageConverter.class);
-
-			var convertedFront = HttpMessageConverters.forClient()
-					.addCustomConverter(customConverter)
-					.configureMessageConvertersList(converter -> converter.sort(Comparator.comparing(s -> s.getClass().equals(CustomHttpMessageConverter.class) ? -1 : 1))).build();
-
-			var messageConvertersFront = Lists.newArrayList(convertedFront);
-			assertThat(messageConvertersFront.get(0).getClass()).isEqualTo(CustomHttpMessageConverter.class);
-			assertThat(messageConvertersFront.size()).isGreaterThan(1);
-
+			assertThat(messageConverters).last().isInstanceOf(CustomHttpMessageConverter.class);
 		}
 
 	}
@@ -344,24 +332,14 @@ class DefaultHttpMessageConvertersTests {
 		}
 
 		@Test
-		void shouldConfigureConverterOrder() {
+		void shouldAppendCustomConverterToList() {
 			var customConverter = new CustomHttpMessageConverter();
-			var converted = HttpMessageConverters.forServer()
-					.addCustomConverter(customConverter)
-					.configureMessageConvertersList(converter -> converter.sort(Comparator.comparing(s -> s.getClass().equals(CustomHttpMessageConverter.class) ? 1 : -1))).build();
+			var messageConverters = HttpMessageConverters.forServer()
+					.registerDefaults()
+					.configureMessageConvertersList(converters -> converters.add(customConverter))
+					.build();
 
-			var messageConvertersBack = Lists.newArrayList(converted);
-			assertThat(messageConvertersBack.size()).isGreaterThan(1);
-			assertThat(messageConvertersBack.get(messageConvertersBack.size() - 1).getClass()).isEqualTo(CustomHttpMessageConverter.class);
-
-			var convertedFront = HttpMessageConverters.forServer()
-					.addCustomConverter(customConverter)
-					.configureMessageConvertersList(converter -> converter.sort(Comparator.comparing(s -> s.getClass().equals(CustomHttpMessageConverter.class) ? -1 : 1))).build();
-
-			var messageConvertersFront = Lists.newArrayList(convertedFront);
-			assertThat(messageConvertersFront.size()).isGreaterThan(1);
-			assertThat(messageConvertersFront.get(0).getClass()).isEqualTo(CustomHttpMessageConverter.class);
-
+			assertThat(messageConverters).last().isInstanceOf(CustomHttpMessageConverter.class);
 		}
 	}
 
