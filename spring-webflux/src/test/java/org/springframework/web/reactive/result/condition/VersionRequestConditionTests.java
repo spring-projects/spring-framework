@@ -24,6 +24,7 @@ import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import org.springframework.web.accept.ApiVersionHolder;
 import org.springframework.web.accept.NotAcceptableApiVersionException;
 import org.springframework.web.accept.SemanticApiVersionParser;
 import org.springframework.web.reactive.HandlerMapping;
@@ -179,13 +180,15 @@ public class VersionRequestConditionTests {
 	}
 
 	private static MockServerWebExchange exchange() {
-		return MockServerWebExchange.from(MockServerHttpRequest.get("/path"));
+		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/path"));
+		exchange.getAttributes().put(HandlerMapping.API_VERSION_ATTRIBUTE, ApiVersionHolder.EMPTY);
+		return exchange;
 	}
 
 	private ServerWebExchange exchangeWithVersion(String v) {
 		Comparable<?> version = this.strategy.parseVersion(v);
 		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/path"));
-		exchange.getAttributes().put(HandlerMapping.API_VERSION_ATTRIBUTE, version);
+		exchange.getAttributes().put(HandlerMapping.API_VERSION_ATTRIBUTE, ApiVersionHolder.fromVersion(version));
 		return exchange;
 	}
 

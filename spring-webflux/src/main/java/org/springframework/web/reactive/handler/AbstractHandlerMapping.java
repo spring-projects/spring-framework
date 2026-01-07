@@ -28,6 +28,7 @@ import org.springframework.core.Ordered;
 import org.springframework.core.log.LogDelegateFactory;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.util.Assert;
+import org.springframework.web.accept.ApiVersionHolder;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.reactive.CorsConfigurationSource;
 import org.springframework.web.cors.reactive.CorsProcessor;
@@ -184,10 +185,13 @@ public abstract class AbstractHandlerMapping extends ApplicationObjectSupport
 
 	@Override
 	public Mono<Object> getHandler(ServerWebExchange exchange) {
-		initApiVersion(exchange);
+		ApiVersionHolder versionHolder = initApiVersion(exchange);
 		return getHandlerInternal(exchange).map(handler -> {
 			if (logger.isDebugEnabled()) {
 				logger.debug(exchange.getLogPrefix() + "Mapped to " + handler);
+			}
+			if (versionHolder.hasError()) {
+				throw versionHolder.getError();
 			}
 			ServerHttpRequest request = exchange.getRequest();
 			if (hasCorsConfigurationSource(handler) || CorsUtils.isPreFlightRequest(request)) {
@@ -204,8 +208,8 @@ public abstract class AbstractHandlerMapping extends ApplicationObjectSupport
 				}
 			}
 			if (getApiVersionStrategy() != null) {
-				Comparable<?> version = exchange.getAttribute(API_VERSION_ATTRIBUTE);
-				if (version != null) {
+				if (versionHolder.hasVersion()) {
+					Comparable<?> version = versionHolder.getVersion();
 					getApiVersionStrategy().handleDeprecations(version, handler, exchange);
 				}
 			}
@@ -213,16 +217,25 @@ public abstract class AbstractHandlerMapping extends ApplicationObjectSupport
 		});
 	}
 
-	private void initApiVersion(ServerWebExchange exchange) {
-		if (this.apiVersionStrategy != null) {
-			Comparable<?> version = exchange.getAttribute(API_VERSION_ATTRIBUTE);
-			if (version == null) {
-				version = this.apiVersionStrategy.resolveParseAndValidateVersion(exchange);
-				if (version != null) {
-					exchange.getAttributes().put(API_VERSION_ATTRIBUTE, version);
+	private ApiVersionHolder initApiVersion(ServerWebExchange exchange) {
+		ApiVersionHolder versionHolder = exchange.getAttribute(API_VERSION_ATTRIBUTE);
+		if (versionHolder == null) {
+			if (this.apiVersionStrategy == null) {
+				versionHolder = ApiVersionHolder.EMPTY;
+			}
+			else {
+				Comparable<?> version;
+				try {
+					version = this.apiVersionStrategy.resolveParseAndValidateVersion(exchange);
+					versionHolder = ApiVersionHolder.fromVersion(version);
+				}
+				catch (RuntimeException ex) {
+					versionHolder = ApiVersionHolder.fromError(ex);
 				}
 			}
 		}
+		exchange.getAttributes().put(API_VERSION_ATTRIBUTE, versionHolder);
+		return versionHolder;
 	}
 
 	/**

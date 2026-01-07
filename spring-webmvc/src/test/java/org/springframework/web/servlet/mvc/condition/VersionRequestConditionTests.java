@@ -24,6 +24,7 @@ import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import org.springframework.web.accept.ApiVersionHolder;
 import org.springframework.web.accept.DefaultApiVersionStrategy;
 import org.springframework.web.accept.NotAcceptableApiVersionException;
 import org.springframework.web.accept.SemanticApiVersionParser;
@@ -125,7 +126,8 @@ public class VersionRequestConditionTests {
 		String version = "1.2";
 		this.strategy = initVersionStrategy(version);
 		VersionRequestCondition condition = condition(version);
-		VersionRequestCondition match = condition.getMatchingCondition(new MockHttpServletRequest("GET", "/path"));
+
+		VersionRequestCondition match = condition.getMatchingCondition(requestWithVersion(null));
 
 		assertThat(match).isSameAs(condition);
 	}
@@ -141,7 +143,7 @@ public class VersionRequestConditionTests {
 	private void testCompare(String expected, String... versions) {
 		List<VersionRequestCondition> list = Arrays.stream(versions)
 				.map(this::condition)
-				.sorted((c1, c2) -> c1.compareTo(c2, new MockHttpServletRequest()))
+				.sorted((c1, c2) -> c1.compareTo(c2, requestWithVersion(null)))
 				.toList();
 
 		assertThat(list.get(0)).isEqualTo(condition(expected));
@@ -150,7 +152,7 @@ public class VersionRequestConditionTests {
 	@Test
 	void compareWithoutRequestVersion() {
 		VersionRequestCondition condition = Stream.of(condition("1.1"), condition("1.2"), emptyCondition())
-				.min((c1, c2) -> c1.compareTo(c2, new MockHttpServletRequest()))
+				.min((c1, c2) -> c1.compareTo(c2, requestWithVersion(null)))
 				.get();
 
 		assertThat(condition).isEqualTo(emptyCondition());
@@ -158,7 +160,7 @@ public class VersionRequestConditionTests {
 
 	@Test // gh-35236
 	void noRequestVersion() {
-		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/path");
+		MockHttpServletRequest request = requestWithVersion(null);
 		VersionRequestCondition condition = condition("1.1");
 
 		VersionRequestCondition match = condition.getMatchingCondition(request);
@@ -178,7 +180,8 @@ public class VersionRequestConditionTests {
 
 	private MockHttpServletRequest requestWithVersion(String v) {
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/path");
-		request.setAttribute(HandlerMapping.API_VERSION_ATTRIBUTE, this.strategy.parseVersion(v));
+		Comparable<?> version = (v != null ? strategy.parseVersion(v) : null);
+		request.setAttribute(HandlerMapping.API_VERSION_ATTRIBUTE, ApiVersionHolder.fromVersion(version));
 		return request;
 	}
 

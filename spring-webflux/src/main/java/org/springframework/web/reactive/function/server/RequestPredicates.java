@@ -52,6 +52,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.accept.ApiVersionHolder;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.cors.reactive.CorsUtils;
 import org.springframework.web.reactive.HandlerMapping;
@@ -892,13 +893,16 @@ public abstract class RequestPredicates {
 				this.parsedVersion = strategy.parseVersion(this.version);
 			}
 
-			Comparable<?> requestVersion =
-					(Comparable<?>) request.attribute(HandlerMapping.API_VERSION_ATTRIBUTE).orElse(null);
+			ApiVersionHolder requestVersionHolder =
+					(ApiVersionHolder) request.attribute(HandlerMapping.API_VERSION_ATTRIBUTE)
+							.orElseThrow(() -> new IllegalStateException("Expect API version attribute"));
 
-			if (requestVersion == null) {
+			if (!requestVersionHolder.hasVersion()) {
 				traceMatch("Version", this.version, null, true);
 				return true;
 			}
+
+			Comparable<?> requestVersion = requestVersionHolder.getVersion();
 
 			int result = compareVersions(this.parsedVersion, requestVersion);
 			boolean match = (this.baselineVersion ? result <= 0 : result == 0);

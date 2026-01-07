@@ -21,6 +21,7 @@ import java.util.Optional;
 import org.jspecify.annotations.Nullable;
 
 import org.springframework.core.MethodParameter;
+import org.springframework.web.accept.ApiVersionHolder;
 import org.springframework.web.accept.MissingApiVersionException;
 import org.springframework.web.accept.SemanticApiVersionParser;
 import org.springframework.web.reactive.BindingContext;
@@ -45,7 +46,8 @@ public class ApiVersionMethodArgumentResolver implements SyncHandlerMethodArgume
 	public @Nullable Object resolveArgumentValue(
 			MethodParameter parameter, BindingContext bindingContext, ServerWebExchange exchange) {
 
-		Object version = exchange.getAttribute(HandlerMapping.API_VERSION_ATTRIBUTE);
+		ApiVersionHolder versionHolder = exchange.getRequiredAttribute(HandlerMapping.API_VERSION_ATTRIBUTE);
+		Object version = versionHolder.getVersionIfPresent();
 
 		if (parameter.getParameterType() == Optional.class) {
 			return Optional.ofNullable(version);

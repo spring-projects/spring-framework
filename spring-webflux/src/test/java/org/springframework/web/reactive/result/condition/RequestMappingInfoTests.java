@@ -26,7 +26,9 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.web.accept.ApiVersionHolder;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.reactive.HandlerMapping;
 import org.springframework.web.reactive.result.method.RequestMappingInfo;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest;
@@ -99,7 +101,7 @@ class RequestMappingInfoTests {
 
 	@Test
 	void matchPatternsCondition() {
-		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/foo"));
+		MockServerWebExchange exchange = initExchange(MockServerHttpRequest.get("/foo"));
 
 		RequestMappingInfo info = paths("/foo*", "/bar").build();
 		RequestMappingInfo expected = paths("/foo*").build();
@@ -114,7 +116,7 @@ class RequestMappingInfoTests {
 
 	@Test
 	void matchParamsCondition() {
-		ServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/foo?foo=bar"));
+		ServerWebExchange exchange = initExchange(MockServerHttpRequest.get("/foo?foo=bar"));
 
 		RequestMappingInfo info = paths("/foo").params("foo=bar").build();
 		RequestMappingInfo match = info.getMatchingCondition(exchange);
@@ -129,8 +131,7 @@ class RequestMappingInfoTests {
 
 	@Test
 	void matchHeadersCondition() {
-		MockServerHttpRequest request = MockServerHttpRequest.get("/foo").header("foo", "bar").build();
-		ServerWebExchange exchange = MockServerWebExchange.from(request);
+		ServerWebExchange exchange = initExchange(MockServerHttpRequest.get("/foo").header("foo", "bar"));
 
 		RequestMappingInfo info = paths("/foo").headers("foo=bar").build();
 		RequestMappingInfo match = info.getMatchingCondition(exchange);
@@ -145,8 +146,8 @@ class RequestMappingInfoTests {
 
 	@Test
 	void matchConsumesCondition() {
-		MockServerHttpRequest request = MockServerHttpRequest.post("/foo").contentType(MediaType.TEXT_PLAIN).build();
-		ServerWebExchange exchange = MockServerWebExchange.from(request);
+		ServerWebExchange exchange = initExchange(
+				MockServerHttpRequest.post("/foo").contentType(MediaType.TEXT_PLAIN));
 
 		RequestMappingInfo info = paths("/foo").consumes("text/plain").build();
 		RequestMappingInfo match = info.getMatchingCondition(exchange);
@@ -161,8 +162,7 @@ class RequestMappingInfoTests {
 
 	@Test
 	void matchProducesCondition() {
-		MockServerHttpRequest request = MockServerHttpRequest.get("/foo").accept(MediaType.TEXT_PLAIN).build();
-		ServerWebExchange exchange = MockServerWebExchange.from(request);
+		ServerWebExchange exchange = initExchange(MockServerHttpRequest.get("/foo").accept(MediaType.TEXT_PLAIN));
 
 		RequestMappingInfo info = paths("/foo").produces("text/plain").build();
 		RequestMappingInfo match = info.getMatchingCondition(exchange);
@@ -177,7 +177,7 @@ class RequestMappingInfoTests {
 
 	@Test
 	void matchCustomCondition() {
-		ServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/foo?foo=bar"));
+		ServerWebExchange exchange = initExchange(MockServerHttpRequest.get("/foo?foo=bar"));
 
 		RequestMappingInfo info = paths("/foo").params("foo=bar").build();
 		RequestMappingInfo match = info.getMatchingCondition(exchange);
@@ -198,7 +198,7 @@ class RequestMappingInfoTests {
 		RequestMappingInfo oneMethod = paths().methods(RequestMethod.GET).build();
 		RequestMappingInfo oneMethodOneParam = paths().methods(RequestMethod.GET).params("foo").build();
 
-		ServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/foo"));
+		ServerWebExchange exchange = initExchange(MockServerHttpRequest.get("/foo"));
 		Comparator<RequestMappingInfo> comparator = (info, otherInfo) -> info.compareTo(otherInfo, exchange);
 
 		List<RequestMappingInfo> list = asList(none, oneMethod, oneMethodOneParam);
@@ -325,6 +325,12 @@ class RequestMappingInfoTests {
 		assertThat(info2.getConsumesCondition()).isEqualTo(info1.getConsumesCondition());
 		assertThat(info2.getProducesCondition().getProducibleMediaTypes())
 				.containsOnly(MediaType.parseMediaType("application/hal+json"));
+	}
+
+	private static MockServerWebExchange initExchange(MockServerHttpRequest.BaseBuilder<?> requestBuilder) {
+		MockServerWebExchange exchange = MockServerWebExchange.from(requestBuilder.build());
+		exchange.getAttributes().put(HandlerMapping.API_VERSION_ATTRIBUTE, ApiVersionHolder.EMPTY);
+		return exchange;
 	}
 
 }
