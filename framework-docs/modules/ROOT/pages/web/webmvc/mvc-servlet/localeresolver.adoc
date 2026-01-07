@@ -83,4 +83,4 @@ that contain a parameter named `siteLanguage` now changes the locale. So, for ex
 a request for the URL `https://domain.com/home.view?siteLanguage=nl` changes the site
 language to Dutch. The following example shows how to intercept the locale:
 
-include-code::./WebConfiguration[tag=snippet,indent=0]
+include-code::./WebConfiguration[tag=snippet,indent=0,chomp=-tags]
