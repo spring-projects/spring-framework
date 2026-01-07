@@ -1479,11 +1479,8 @@ public class ResolvableType implements Serializable {
 	 * @see #forType(Type)
 	 */
 	public static ResolvableType forType(@Nullable Type type, @Nullable ResolvableType owner) {
-		VariableResolver variableResolver = null;
-		if (owner != null) {
-			variableResolver = owner.asVariableResolver();
-		}
-		return forType(type, variableResolver);
+		return (owner == null ? forType(type, null, null) :
+			forType(type, owner.typeProvider, owner.asVariableResolver()));
 	}
 
 	/**
