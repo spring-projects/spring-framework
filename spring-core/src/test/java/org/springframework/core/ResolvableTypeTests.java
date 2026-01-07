@@ -50,8 +50,6 @@ import org.mockito.Captor;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import org.springframework.core.ResolvableType.VariableResolver;
-import org.springframework.core.annotation.AnnotatedMethod;
-import org.springframework.util.ClassUtils;
 import org.springframework.util.MultiValueMap;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -501,18 +499,6 @@ class ResolvableTypeTests {
 		type = type.getNested(2);
 		assertThat(type.resolve()).isEqualTo(List.class);
 		assertThat(type.resolveGeneric()).isEqualTo(String.class);
-	}
-
-	@Test
-	void getNested() throws Exception {
-		Method method = MySimpleParameterizedController.class.getMethod("handleDto", List.class);
-		HandlerMethod handlerMethod = new HandlerMethod(new MySimpleParameterizedController(), method);
-		MethodParameter methodParam = handlerMethod.getMethodParameters()[0];
-
-		ResolvableType resolvable = ResolvableType.forMethodParameter(methodParam).getNested(2);
-
-		Class<?> contextClass = methodParam.getContainingClass();
-		assertThat(GenericTypeResolver.resolveType(resolvable.getType(), contextClass)).isEqualTo(SimpleBean.class);
 	}
 
 	@Test
@@ -1994,76 +1980,5 @@ class ResolvableTypeTests {
 			return type.getType() + ":" + type;
 		}
 	}
-
-
-	private static class HandlerMethod extends AnnotatedMethod {
-
-		private final Class<?> beanType;
-
-		/**
-		 * Create an instance from a bean instance and a method.
-		 */
-		public HandlerMethod(Object bean, Method method) {
-			super(method);
-			this.beanType = ClassUtils.getUserClass(bean);
-		}
-
-		@Override
-		protected Class<?> getContainingClass() {
-			return beanType;
-		}
-
-	}
-
-
-	@SuppressWarnings("unused")
-	private abstract static class MyParameterizedController<DTO extends Identifiable> {
-
-		public void handleDto(List<DTO> dto) {
-		}
-	}
-
-
-	@SuppressWarnings("unused")
-	private static class MySimpleParameterizedController extends MyParameterizedController<SimpleBean> {
-	}
-
-
-	private interface Identifiable extends Serializable {
-
-		Long getId();
-
-		void setId(Long id);
-	}
-
-
-	@SuppressWarnings({ "serial" })
-	private static class SimpleBean implements Identifiable {
-
-		private Long id;
-
-		private String name;
-
-		@Override
-		public Long getId() {
-			return id;
-		}
-
-		@Override
-		public void setId(Long id) {
-			this.id = id;
-		}
-
-		public String getName() {
-			return name;
-		}
-
-		@SuppressWarnings("unused")
-		public void setName(String name) {
-			this.name = name;
-		}
-	}
-
-
 
 }

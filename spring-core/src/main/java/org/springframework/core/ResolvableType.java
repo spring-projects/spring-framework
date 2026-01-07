@@ -802,7 +802,7 @@ public class ResolvableType implements Serializable {
 				if (actualTypeArguments.length > 0) {
 					generics = new ResolvableType[actualTypeArguments.length];
 					for (int i = 0; i < actualTypeArguments.length; i++) {
-						generics[i] = forType(actualTypeArguments[i], this.typeProvider, this.variableResolver);
+						generics[i] = forType(actualTypeArguments[i], this.variableResolver);
 					}
 				}
 				else {
