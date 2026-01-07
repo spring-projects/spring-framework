@@ -37,7 +37,7 @@ class WebConfiguration {
 		setInterceptors(LocaleChangeInterceptor().apply {
 			paramName = "siteLanguage"
 		})
-		/* @chomp:line urlMap = mapOf("/**/*.view" to "someController") */urlMap = mapOf("/**/*.view" to "someController")
+		urlMap = mapOf("/**/*.view" to "someController")
 	}
 }
 // end::snippet[]
