@@ -549,7 +549,7 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 			return null;
 		}
 
-		if (versionHolder.hasError()) {
+		if (versionHolder.hasError() && !request.getDispatcherType().equals(DispatcherType.ERROR)) {
 			throw versionHolder.getError();
 		}
 
