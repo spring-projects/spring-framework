@@ -32,7 +32,8 @@ import org.springframework.core.Ordered;
  * <p>Used by default in 6.0 through direct invocation from {@link CachedIntrospectionResults}.
  * Potentially configured via a {@code META-INF/spring.factories} file with the following content,
  * overriding other custom {@code org.springframework.beans.BeanInfoFactory} declarations:
- * {@code org.springframework.beans.BeanInfoFactory=org.springframework.beans.SimpleBeanInfoFactory}
+ *
+ * <p>{@code org.springframework.beans.BeanInfoFactory=org.springframework.beans.SimpleBeanInfoFactory}
  *
  * <p>Ordered at {@code Ordered.LOWEST_PRECEDENCE - 1} to override {@link ExtendedBeanInfoFactory}
  * (registered by default in 5.3) if necessary while still allowing other user-defined
