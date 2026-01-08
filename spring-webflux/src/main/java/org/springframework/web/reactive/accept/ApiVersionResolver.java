@@ -40,7 +40,7 @@ interface ApiVersionResolver {
 	 * @return {@code Mono} emitting the version value, or an empty {@code Mono}
 	 * @since 7.0.3
 	 */
-	default Mono<String> resolveVersionAsync(ServerWebExchange exchange){
+	default Mono<String> resolveApiVersion(ServerWebExchange exchange){
 		return Mono.justOrEmpty(this.resolveVersion(exchange));
 	}
 

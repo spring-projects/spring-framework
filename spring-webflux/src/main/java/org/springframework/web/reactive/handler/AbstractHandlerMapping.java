@@ -232,7 +232,7 @@ public abstract class AbstractHandlerMapping extends ApplicationObjectSupport
 		if (this.apiVersionStrategy != null) {
 			if (exchange.getAttribute(API_VERSION_ATTRIBUTE) == null) {
 				return this.apiVersionStrategy
-						.resolveParseAndValidate(exchange)
+						.resolveParseAndValidateApiVersion(exchange)
 						.doOnNext(version -> exchange.getAttributes()
 													.put(API_VERSION_ATTRIBUTE, version));
 			}

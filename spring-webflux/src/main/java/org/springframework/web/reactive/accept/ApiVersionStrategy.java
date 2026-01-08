@@ -42,7 +42,7 @@ public interface ApiVersionStrategy {
 	 * @since 7.0.3
 	 * @see ApiVersionResolver
 	 */
-	default Mono<String> resolveVersionAsync(ServerWebExchange exchange) {
+	default Mono<String> resolveApiVersion(ServerWebExchange exchange) {
 		return Mono.justOrEmpty(resolveVersion(exchange));
 	}
 
@@ -51,7 +51,7 @@ public interface ApiVersionStrategy {
 	 * @param exchange the current exchange
 	 * @return the version, if present or {@code null}
 	 * @see ApiVersionResolver
-	 * @deprecated as of 7.0.3, in favor of {@link #resolveVersionAsync(ServerWebExchange)}
+	 * @deprecated as of 7.0.3, in favor of {@link #resolveApiVersion(ServerWebExchange)}
 	 */
 	@Deprecated(since = "7.0.3", forRemoval = true)
 	@Nullable
@@ -89,8 +89,8 @@ public interface ApiVersionStrategy {
 	 * @since 7.0.3
 	 */
 	@SuppressWarnings("Convert2MethodRef")
-	default Mono<Comparable<?>> resolveParseAndValidate(ServerWebExchange exchange) {
-		return this.resolveVersionAsync(exchange)
+	default Mono<Comparable<?>> resolveParseAndValidateApiVersion(ServerWebExchange exchange) {
+		return this.resolveApiVersion(exchange)
 				.switchIfEmpty(Mono.justOrEmpty(this.getDefaultVersion())
 						.mapNotNull(comparable -> comparable.toString()))
 				.<Comparable<?>>handle((version, sink) -> {
@@ -129,7 +129,7 @@ public interface ApiVersionStrategy {
 	 * or the default version if configured.
 	 * @param exchange the current exchange
 	 * @return the parsed request version, or the default version
-	 * @deprecated in favor of {@link #resolveParseAndValidate(ServerWebExchange)}
+	 * @deprecated in favor of {@link #resolveParseAndValidateApiVersion(ServerWebExchange)}
 	 */
 	@Deprecated(since = "7.0.3", forRemoval = true)
 	default @Nullable Comparable<?> resolveParseAndValidateVersion(ServerWebExchange exchange) {

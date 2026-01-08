@@ -147,7 +147,7 @@ public class DefaultApiVersionStrategiesTests {
 			builder.queryParam("api-version", version);
 		}
 		MockServerWebExchange exchange = MockServerWebExchange.builder(builder).build();
-		return strategy.resolveParseAndValidate(exchange).map(Object::toString);
+		return strategy.resolveParseAndValidateApiVersion(exchange).map(Object::toString);
 	}
 
 }
