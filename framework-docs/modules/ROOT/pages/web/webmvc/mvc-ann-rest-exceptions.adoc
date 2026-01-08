@@ -191,7 +191,7 @@ Message codes and arguments for each error are also resolved via `MessageSource`
 |===
 
 NOTE: Unlike other exceptions, the message arguments for
-`MethodArgumentValidException` and `HandlerMethodValidationException` are based on a list of
+`MethodArgumentNotValidException` and `HandlerMethodValidationException` are based on a list of
 `MessageSourceResolvable` errors that can also be customized through a
 xref:core/beans/context-introduction.adoc#context-functionality-messagesource[MessageSource]
 resource bundle. See
