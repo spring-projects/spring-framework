@@ -42,6 +42,24 @@ import org.springframework.util.ConcurrencyThrottleSupport;
 @SuppressWarnings("serial")
 public class SyncTaskExecutor extends ConcurrencyThrottleSupport implements TaskExecutor, Serializable {
 
+	private boolean rejectTasksWhenLimitReached = false;
+
+
+	/**
+	 * Specify whether to reject tasks when the concurrency limit has been reached,
+	 * throwing {@link TaskRejectedException} (which extends the common
+	 * {@link java.util.concurrent.RejectedExecutionException})
+	 * on any further execution attempts.
+	 * <p>The default is {@code false}, blocking the caller until the submission can
+	 * be accepted. Switch this to {@code true} for immediate rejection instead.
+	 * @since 7.0.3
+	 * @see #setConcurrencyLimit
+	 */
+	public void setRejectTasksWhenLimitReached(boolean rejectTasksWhenLimitReached) {
+		this.rejectTasksWhenLimitReached = rejectTasksWhenLimitReached;
+	}
+
+
 	/**
 	 * Execute the given {@code task} synchronously, through direct
 	 * invocation of its {@link Runnable#run() run()} method.
@@ -86,6 +104,14 @@ public class SyncTaskExecutor extends ConcurrencyThrottleSupport implements Task
 		else {
 			return task.call();
 		}
+	}
+
+	@Override
+	protected void onLimitReached() {
+		if (this.rejectTasksWhenLimitReached) {
+			throw new TaskRejectedException("Concurrency limit reached: " + getConcurrencyLimit());
+		}
+		super.onLimitReached();
 	}
 
 }
