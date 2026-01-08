@@ -47,10 +47,7 @@ public class RequestMappingVersionIntegrationTests extends AbstractRequestMappin
 
 	@Override
 	protected ApplicationContext initApplicationContext() {
-		AnnotationConfigApplicationContext wac = new AnnotationConfigApplicationContext();
-		wac.register(WebConfig.class, TestController.class);
-		wac.refresh();
-		return wac;
+		return new AnnotationConfigApplicationContext(WebConfig.class, TestController.class);
 	}
 
 
@@ -77,9 +74,9 @@ public class RequestMappingVersionIntegrationTests extends AbstractRequestMappin
 				.isEqualTo("<https://example.org/deprecation>; rel=\"deprecation\"; type=\"text/html\"");
 	}
 
-	@Test// gh-36059
+	@Test  // gh-36059
 	void staticResourceWithInvalidApiVersion() throws Exception {
-		startServer((HttpServer) new TomcatHttpServer());
+		startServer(new TomcatHttpServer());
 
 		String url = "http://localhost:" + this.port + "/cp/test/foo.css";
 		RequestEntity<Void> requestEntity = RequestEntity.get(url).header("API-Version", "Invalid").build();
