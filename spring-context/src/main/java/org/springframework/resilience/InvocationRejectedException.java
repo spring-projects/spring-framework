@@ -23,9 +23,15 @@ import java.util.concurrent.RejectedExecutionException;
  * such as the concurrency limit having been reached for a class/method annotated with
  * {@link org.springframework.resilience.annotation.ConcurrencyLimit @ConcurrencyLimit}.
  *
+ * <p>Extends {@link RejectedExecutionException} as a common base class
+ * with {@link org.springframework.core.task.TaskRejectedException},
+ * allowing for custom catch blocks to cover both Spring scenarios and
+ * {@link java.util.concurrent.ExecutorService} rejection exceptions.
+ *
  * @author Juergen Hoeller
  * @since 7.0.3
- * @see org.springframework.resilience.annotation.ConcurrencyLimit#rejectOnExcess()
+ * @see org.springframework.resilience.annotation.ConcurrencyLimit.ThrottlePolicy#REJECT
+ * @see org.springframework.core.task.TaskRejectedException
  */
 @SuppressWarnings("serial")
 public class InvocationRejectedException extends RejectedExecutionException {
