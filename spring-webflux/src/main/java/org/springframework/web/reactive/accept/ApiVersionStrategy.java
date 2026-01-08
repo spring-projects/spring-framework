@@ -35,27 +35,27 @@ import org.springframework.web.server.ServerWebExchange;
 public interface ApiVersionStrategy {
 
 	/**
+	 * Resolve the version value from a request.
+	 * @param exchange the current exchange
+	 * @return a {@code Mono} emitting the raw version as a {@code String},
+	 * or an empty {@code Mono} if no version is found
+	 * @since 7.0.3
+	 * @see ApiVersionResolver
+	 */
+	default Mono<String> resolveVersionAsync(ServerWebExchange exchange) {
+		return Mono.justOrEmpty(resolveVersion(exchange));
+	}
+
+	/**
 	 * Resolve the version value from a request, e.g. from a request header.
 	 * @param exchange the current exchange
 	 * @return the version, if present or {@code null}
 	 * @see ApiVersionResolver
-	 * @deprecated as of 7.0.3, in favor of
-	 * {@link #resolveVersionAsync(ServerWebExchange)}
+	 * @deprecated as of 7.0.3, in favor of {@link #resolveVersionAsync(ServerWebExchange)}
 	 */
-	@Deprecated(forRemoval = true, since = "7.0.3")
+	@Deprecated(since = "7.0.3", forRemoval = true)
 	@Nullable
 	String resolveVersion(ServerWebExchange exchange);
-
-
-	/**
-	 * Resolve the version value from a request asynchronously.
-	 * @param exchange the current server exchange containing the request details
-	 * @return a {@code Mono} emitting the resolved version as a {@code String},
-	 *         or an empty {@code Mono} if no version is resolved
-	 */
-	default Mono<String> resolveVersionAsync(ServerWebExchange exchange) {
-		return Mono.justOrEmpty(this.resolveVersion(exchange));
-	}
 
 	/**
 	 * Parse the version of a request into an Object.
@@ -74,6 +74,36 @@ public interface ApiVersionStrategy {
 	 */
 	void validateVersion(@Nullable Comparable<?> requestVersion, ServerWebExchange exchange)
 			throws MissingApiVersionException, InvalidApiVersionException;
+
+	/**
+	 * Return a default version to use for requests that don't specify one.
+	 */
+	@Nullable Comparable<?> getDefaultVersion();
+
+	/**
+	 * Convenience method to resolve, parse, and validate the request version,
+	 * or return the default version if configured.
+	 * @param exchange the current exchange
+	 * @return a {@code Mono} emitting the request version, a validation error,
+	 * or an empty {@code Mono} if there is no version
+	 * @since 7.0.3
+	 */
+	@SuppressWarnings("Convert2MethodRef")
+	default Mono<Comparable<?>> resolveParseAndValidate(ServerWebExchange exchange) {
+		return this.resolveVersionAsync(exchange)
+				.switchIfEmpty(Mono.justOrEmpty(this.getDefaultVersion())
+						.mapNotNull(comparable -> comparable.toString()))
+				.<Comparable<?>>handle((version, sink) -> {
+					try {
+						sink.next(this.parseVersion(version));
+					}
+					catch (Exception ex) {
+						sink.error(new InvalidApiVersionException(version, null, ex));
+					}
+				})
+				.flatMap(version -> this.validateVersionAsync(version, exchange))
+				.switchIfEmpty(this.validateVersionAsync(null, exchange));
+	}
 
 	/**
 	 * Validates the provided request version against the requirements and constraints
@@ -95,18 +125,13 @@ public interface ApiVersionStrategy {
 	}
 
 	/**
-	 * Return a default version to use for requests that don't specify one.
-	 */
-	@Nullable Comparable<?> getDefaultVersion();
-
-	/**
 	 * Convenience method to return the parsed and validated request version,
 	 * or the default version if configured.
 	 * @param exchange the current exchange
 	 * @return the parsed request version, or the default version
+	 * @deprecated in favor of {@link #resolveParseAndValidate(ServerWebExchange)}
 	 */
-	@SuppressWarnings({"DeprecatedIsStillUsed", "DuplicatedCode"})
-	@Deprecated(forRemoval = true, since = "7.0.3")
+	@Deprecated(since = "7.0.3", forRemoval = true)
 	default @Nullable Comparable<?> resolveParseAndValidateVersion(ServerWebExchange exchange) {
 		String value = resolveVersion(exchange);
 		Comparable<?> version;
@@ -123,32 +148,6 @@ public interface ApiVersionStrategy {
 		}
 		validateVersion(version, exchange);
 		return version;
-	}
-
-	/**
-	 * Convenience method to return the API version from the given request exchange, parse and validate
-	 * the version, and return the result as a reactive {@code Mono} stream. If no version
-	 * is resolved, the default version is used.
-	 * @param exchange the current server exchange containing the request details
-	 * @return a {@code Mono} emitting the resolved, parsed, and validated version as a {@code Comparable<?>},
-	 * or an error in case parsing or validation fails
-	 */
-	@SuppressWarnings("Convert2MethodRef")
-	default Mono<Comparable<?>> resolveParseAndValidateVersionAsync(ServerWebExchange exchange) {
-		return this.resolveVersionAsync(exchange)
-				.switchIfEmpty(Mono.justOrEmpty(this.getDefaultVersion())
-									.mapNotNull(comparable -> comparable.toString()))
-				.<Comparable<?>>handle((version, sink) -> {
-					try {
-						sink.next(this.parseVersion(version));
-					}
-					catch (Exception ex) {
-						sink.error(new InvalidApiVersionException(version, null, ex));
-					}
-				})
-				.flatMap(version -> this.validateVersionAsync(version, exchange))
-				.switchIfEmpty(this.validateVersionAsync(null, exchange));
-
 	}
 
 	/**

@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.function.Function;
 import java.util.function.Predicate;
 
 import org.jspecify.annotations.Nullable;
@@ -170,8 +169,7 @@ public class DefaultApiVersionStrategy implements ApiVersionStrategy {
 	@Override
 	public Mono<String> resolveVersionAsync(ServerWebExchange exchange) {
 		return Flux.fromIterable(this.versionResolvers)
-				.mapNotNull(resolver -> resolver.resolveVersionAsync(exchange))
-				.flatMap(Function.identity())
+				.flatMap(resolver -> resolver.resolveVersionAsync(exchange))
 				.next();
 	}
 
