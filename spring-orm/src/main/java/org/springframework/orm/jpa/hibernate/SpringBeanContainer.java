@@ -27,6 +27,7 @@ import org.hibernate.resource.beans.spi.BeanInstanceProducer;
 import org.hibernate.type.spi.TypeBootstrapContext;
 import org.jspecify.annotations.Nullable;
 
+import org.springframework.aop.framework.AopProxyUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
@@ -262,7 +263,7 @@ public final class SpringBeanContainer implements BeanContainer {
 		@Override
 		@SuppressWarnings("unchecked")
 		public Class<B> getBeanClass() {
-			return (Class<B>) this.beanInstance.getClass();
+			return (Class<B>) AopProxyUtils.ultimateTargetClass(this.beanInstance);
 		}
 
 		public void destroyIfNecessary() {
