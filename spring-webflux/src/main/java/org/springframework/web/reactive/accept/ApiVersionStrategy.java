@@ -88,40 +88,31 @@ public interface ApiVersionStrategy {
 	 * or an empty {@code Mono} if there is no version
 	 * @since 7.0.3
 	 */
-	@SuppressWarnings("Convert2MethodRef")
 	default Mono<Comparable<?>> resolveParseAndValidateApiVersion(ServerWebExchange exchange) {
-		return this.resolveApiVersion(exchange)
-				.switchIfEmpty(Mono.justOrEmpty(this.getDefaultVersion())
-						.mapNotNull(comparable -> comparable.toString()))
-				.<Comparable<?>>handle((version, sink) -> {
+
+		Mono<Comparable<?>> result = resolveApiVersion(exchange)
+				.map(value -> {
+					Comparable<?> version;
 					try {
-						sink.next(this.parseVersion(version));
+						version = parseVersion(value);
 					}
 					catch (Exception ex) {
-						sink.error(new InvalidApiVersionException(version, null, ex));
+						throw new InvalidApiVersionException(value, null, ex);
 					}
-				})
-				.flatMap(version -> this.validateVersionAsync(version, exchange))
-				.switchIfEmpty(this.validateVersionAsync(null, exchange));
-	}
+					validateVersion(version, exchange);
+					return version;
+				});
 
-	/**
-	 * Validates the provided request version against the requirements and constraints
-	 * of the API. If the validation succeeds, the version is returned, otherwise an
-	 * error is emitted.
-	 * @param requestVersion the version to validate, which may be null
-	 * @param exchange the current server exchange representing the HTTP request and response
-	 * @return a {@code Mono} emitting the validated request version as a {@code Comparable<?>},
-	 *         or an error if validation fails
-	 */
-	default Mono<Comparable<?>> validateVersionAsync(@Nullable Comparable<?> requestVersion, ServerWebExchange exchange) {
-		try {
-			this.validateVersion(requestVersion, exchange);
-			return Mono.justOrEmpty(requestVersion);
-		}
-		catch (MissingApiVersionException | InvalidApiVersionException ex) {
-			return Mono.error(ex);
-		}
+		return result.switchIfEmpty(Mono.fromSupplier(() -> {
+			Comparable<?> defaultVersion = getDefaultVersion();
+			if (defaultVersion != null) {
+				return defaultVersion;
+			}
+			else {
+				validateVersion(null, exchange);
+				return null;
+			}
+		}));
 	}
 
 	/**

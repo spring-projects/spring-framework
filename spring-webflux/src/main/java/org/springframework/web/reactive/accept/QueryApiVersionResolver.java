@@ -26,7 +26,7 @@ import org.springframework.web.server.ServerWebExchange;
  * @author Rossen Stoyanchev
  * @since 7.0
  */
-public class QueryApiVersionResolver implements ApiVersionResolver {
+public class QueryApiVersionResolver implements SyncApiVersionResolver {
 
 	private final String queryParamName;
 
@@ -37,7 +37,7 @@ public class QueryApiVersionResolver implements ApiVersionResolver {
 
 
 	@Override
-	public @Nullable String resolveVersion(ServerWebExchange exchange) {
+	public @Nullable String resolveVersionValue(ServerWebExchange exchange) {
 		return exchange.getRequest().getQueryParams().getFirst(this.queryParamName);
 	}
 

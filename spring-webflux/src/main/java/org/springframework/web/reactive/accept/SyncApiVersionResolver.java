@@ -22,34 +22,36 @@ import reactor.core.publisher.Mono;
 import org.springframework.web.server.ServerWebExchange;
 
 /**
- * Contract to extract the version from a request.
+ * An extension of {@link ApiVersionResolver}s for implementations that can
+ * resolve the version in an imperative way without blocking.
  *
  * @author Rossen Stoyanchev
- * @author Jonathan Kaplan
- * @since 7.0
+ * @since 7.0.3
  */
 @FunctionalInterface
-public interface ApiVersionResolver {
+public interface SyncApiVersionResolver extends ApiVersionResolver {
 
 	/**
-	 * Resolve the version for the given exchange.
-	 * This method wraps the synchronous {@code resolveVersion} method
-	 * and provides a reactive alternative.
-	 * @param exchange the current exchange
-	 * @return {@code Mono} emitting the version value, or an empty {@code Mono}
-	 * @since 7.0.3
+	 * {@inheritDoc}
+	 * <p>This method delegates to the synchronous
+	 * {@link #resolveVersionValue} and wraps the result as {@code Mono}.
 	 */
-	Mono<String> resolveApiVersion(ServerWebExchange exchange);
+	@Override
+	default Mono<String> resolveApiVersion(ServerWebExchange exchange) {
+		return Mono.justOrEmpty(resolveVersionValue(exchange));
+	}
 
 	/**
-	 * Resolve the version for the given exchange.
+	 * Resolve the version for the given exchange imperatively without blocking.
 	 * @param exchange the current exchange
 	 * @return the version value, or {@code null} if not found
-	 * @deprecated in favor of {@link #resolveApiVersion(ServerWebExchange)}
 	 */
-	@Deprecated(since = "7.0.3", forRemoval = true)
+	@Nullable String resolveVersionValue(ServerWebExchange exchange);
+
+	@SuppressWarnings("removal")
+	@Override
 	default @Nullable String resolveVersion(ServerWebExchange exchange) {
-		return null;
+		return resolveVersionValue(exchange);
 	}
 
 }

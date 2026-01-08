@@ -137,7 +137,7 @@ public class DefaultApiVersionStrategiesTests {
 			@Nullable Predicate<Comparable<?>> supportedVersionPredicate) {
 
 			return new DefaultApiVersionStrategy(
-				List.of(exchange -> exchange.getRequest().getQueryParams().getFirst("api-version")),
+				List.of(new QueryApiVersionResolver("api-version")),
 				parser, null, defaultVersion, detectSupportedVersions, supportedVersionPredicate, null);
 	}
 
