@@ -36,8 +36,7 @@ import org.springframework.util.Assert;
  * or {@code @ExceptionHandler} method.
  *
  * <p>The serialization view specified in the annotation will be passed in to the
- * {@link org.springframework.http.converter.json.MappingJackson2HttpMessageConverter}
- * which will then use it to serialize the response body.
+ * Jackson converters which will then use it to serialize the response body.
  *
  * <p>Note that despite {@code @JsonView} allowing for more than one class to
  * be specified, the use for a response body advice is only supported with
