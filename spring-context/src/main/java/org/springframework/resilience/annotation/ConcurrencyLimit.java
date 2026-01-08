@@ -28,7 +28,9 @@ import org.springframework.core.annotation.AliasFor;
 /**
  * A common annotation specifying a concurrency limit for an individual method,
  * or for all proxy-invoked methods in a given class hierarchy if annotated at
- * the type level.
+ * the type level. The default behavior is to block further method invocations
+ * when the limit has been reached. Alternatively, further invocations can be
+ * rejected through configuring {@link #policy()} as {@code policy = REJECT}.
  *
  * <p>In the type-level case, all methods inheriting the concurrency limit
  * from the type level share a common concurrency throttle, with any mix
@@ -94,5 +96,36 @@ public @interface ConcurrencyLimit {
 	 * @see org.springframework.util.ConcurrencyThrottleSupport#UNBOUNDED_CONCURRENCY
 	 */
 	String limitString() default "";
+
+	/**
+	 * The policy for throttling method invocations when the limit has been reached.
+	 * <p>The default behavior is to block further concurrent invocations once the
+	 * specified limit has been reached: {@link ThrottlePolicy#BLOCK}.
+	 * <p>Switch this policy to {@code REJECT} for rejecting further invocations instead,
+	 * throwing {@link org.springframework.resilience.InvocationRejectedException}
+	 * (which extends the common {@link java.util.concurrent.RejectedExecutionException})
+	 * on any further concurrent invocation attempts: {@link ThrottlePolicy#REJECT}.
+	 * @since 7.0.3
+	 */
+	ThrottlePolicy policy() default ThrottlePolicy.BLOCK;
+
+
+	/**
+	 * Policy to apply for throttling method invocations when the limit has been reached.
+	 * @since 7.0.3
+	 */
+	enum ThrottlePolicy {
+
+		/**
+		 * The default: block until we can invoke the method within the configured limit.
+		 */
+		BLOCK,
+
+		/**
+		 * Alternative: reject further method invocations once the limit has been reached.
+		 * @see org.springframework.resilience.InvocationRejectedException
+		 */
+		REJECT
+	}
 
 }

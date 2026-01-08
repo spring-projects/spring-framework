@@ -35,7 +35,9 @@ import org.springframework.aop.support.DefaultPointcutAdvisor;
 import org.springframework.aop.support.annotation.AnnotationMatchingPointcut;
 import org.springframework.context.EmbeddedValueResolverAware;
 import org.springframework.core.annotation.AnnotatedElementUtils;
+import org.springframework.resilience.InvocationRejectedException;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.util.StringValueResolver;
 
@@ -115,7 +117,11 @@ public class ConcurrencyLimitBeanPostProcessor extends AbstractBeanFactoryAwareA
 							if (concurrencyLimit < -1) {
 								throw new IllegalStateException(annotation + " must be configured with a valid limit");
 							}
-							interceptor = new ConcurrencyThrottleInterceptor(concurrencyLimit);
+							interceptor = (annotation.policy() == ConcurrencyLimit.ThrottlePolicy.REJECT ?
+									new RejectingConcurrencyThrottleInterceptor(concurrencyLimit,
+											(perMethod ? ClassUtils.getQualifiedMethodName(method) : targetClass.getName()),
+											instance) :
+									new ConcurrencyThrottleInterceptor(concurrencyLimit));
 							if (!perMethod) {
 								holder.classInterceptor = interceptor;
 							}
@@ -146,6 +152,26 @@ public class ConcurrencyLimitBeanPostProcessor extends AbstractBeanFactoryAwareA
 		final Map<Method, MethodInterceptor> methodInterceptors = new ConcurrentHashMap<>();
 
 		@Nullable MethodInterceptor classInterceptor;
+	}
+
+
+	private static class RejectingConcurrencyThrottleInterceptor extends ConcurrencyThrottleInterceptor {
+
+		private final String identifier;
+
+		private final Object target;
+
+		public RejectingConcurrencyThrottleInterceptor(int concurrencyLimit, String identifier, Object target) {
+			super(concurrencyLimit);
+			this.identifier = identifier;
+			this.target = target;
+		}
+
+		@Override
+		protected void onLimitReached() {
+			throw new InvocationRejectedException(
+					"Concurrency limit reached for " + this.identifier + ": " + getConcurrencyLimit(), this.target);
+		}
 	}
 
 }

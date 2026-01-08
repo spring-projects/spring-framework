@@ -37,6 +37,7 @@ import org.springframework.resilience.annotation.EnableResilientMethods;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
+import static org.springframework.resilience.annotation.ConcurrencyLimit.ThrottlePolicy.REJECT;
 
 /**
  * @author Juergen Hoeller
@@ -90,6 +91,26 @@ class ConcurrencyLimitTests {
 	}
 
 	@Test
+	void withPostProcessorForMethodWithRejection() throws Exception{
+		AnnotatedMethodBean proxy = createProxy(AnnotatedMethodBean.class);
+		AnnotatedMethodBean target = (AnnotatedMethodBean) AopProxyUtils.getSingletonTarget(proxy);
+
+		List<CompletableFuture<?>> futures = new ArrayList<>(10);
+		for (int i = 0; i < 2; i++) {
+			futures.add(CompletableFuture.runAsync(proxy::rejectingOperation));
+		}
+		Thread.sleep(10);
+		for (int i = 2; i < 10; i++) {
+			futures.add(CompletableFuture.runAsync(() ->
+					assertThatExceptionOfType(InvocationRejectedException.class).isThrownBy(proxy::rejectingOperation)
+							.withMessageContaining(AnnotatedMethodBean.class.getName() + ".rejectingOperation")
+							.satisfies(ex -> assertThat(ex.getTarget() == target))));
+		}
+		CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
+		assertThat(target.current).hasValue(2);
+	}
+
+	@Test
 	void withPostProcessorForClass() {
 		AnnotatedClassBean proxy = createProxy(AnnotatedClassBean.class);
 		AnnotatedClassBean target = (AnnotatedClassBean) AopProxyUtils.getSingletonTarget(proxy);
@@ -101,6 +122,30 @@ class ConcurrencyLimitTests {
 		for (int i = 0; i < 10; i++) {
 			futures.add(CompletableFuture.runAsync(proxy::otherOperation));
 		}
+		for (int i = 0; i < 10; i++) {
+			futures.add(CompletableFuture.runAsync(proxy::overrideOperation));
+		}
+		CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
+		assertThat(target.current).hasValue(0);
+	}
+
+	@Test
+	void withPostProcessorForClassWithRejection() throws Exception {
+		AnnotatedClassBeanWithRejection proxy = createProxy(AnnotatedClassBeanWithRejection.class);
+		AnnotatedClassBeanWithRejection target = (AnnotatedClassBeanWithRejection) AopProxyUtils.getSingletonTarget(proxy);
+
+		List<CompletableFuture<?>> futures = new ArrayList<>(30);
+		futures.add(CompletableFuture.runAsync(proxy::concurrentOperation));
+		futures.add(CompletableFuture.runAsync(proxy::otherOperation));
+		Thread.sleep(10);
+		futures.add(CompletableFuture.runAsync(() ->
+				assertThatExceptionOfType(InvocationRejectedException.class).isThrownBy(proxy::concurrentOperation)
+						.withMessageContaining(AnnotatedClassBeanWithRejection.class.getName())
+						.satisfies(ex -> assertThat(ex.getTarget() == target))));
+		futures.add(CompletableFuture.runAsync(() ->
+				assertThatExceptionOfType(InvocationRejectedException.class).isThrownBy(proxy::otherOperation)
+						.withMessageContaining(AnnotatedClassBeanWithRejection.class.getName())
+						.satisfies(ex -> assertThat(ex.getTarget() == target))));
 		for (int i = 0; i < 10; i++) {
 			futures.add(CompletableFuture.runAsync(proxy::overrideOperation));
 		}
@@ -197,7 +242,7 @@ class ConcurrencyLimitTests {
 				throw new IllegalStateException();
 			}
 			try {
-				Thread.sleep(10);
+				Thread.sleep(100);
 			}
 			catch (InterruptedException ex) {
 				throw new IllegalStateException(ex);
@@ -209,7 +254,18 @@ class ConcurrencyLimitTests {
 		public void unboundedConcurrency() {
 			current.incrementAndGet();
 			try {
-				Thread.sleep(10);
+				Thread.sleep(100);
+			}
+			catch (InterruptedException ex) {
+				throw new IllegalStateException(ex);
+			}
+		}
+
+		@ConcurrencyLimit(limit = 2, policy = REJECT)
+		public void rejectingOperation() {
+			current.incrementAndGet();
+			try {
+				Thread.sleep(100);
 			}
 			catch (InterruptedException ex) {
 				throw new IllegalStateException(ex);
@@ -230,7 +286,7 @@ class ConcurrencyLimitTests {
 				throw new IllegalStateException();
 			}
 			try {
-				Thread.sleep(10);
+				Thread.sleep(100);
 			}
 			catch (InterruptedException ex) {
 				throw new IllegalStateException(ex);
@@ -243,7 +299,7 @@ class ConcurrencyLimitTests {
 				throw new IllegalStateException();
 			}
 			try {
-				Thread.sleep(10);
+				Thread.sleep(100);
 			}
 			catch (InterruptedException ex) {
 				throw new IllegalStateException(ex);
@@ -257,7 +313,56 @@ class ConcurrencyLimitTests {
 				throw new IllegalStateException();
 			}
 			try {
-				Thread.sleep(10);
+				Thread.sleep(100);
+			}
+			catch (InterruptedException ex) {
+				throw new IllegalStateException(ex);
+			}
+			currentOverride.decrementAndGet();
+		}
+	}
+
+
+	@ConcurrencyLimit(limit = 2, policy = REJECT)
+	static class AnnotatedClassBeanWithRejection {
+
+		final AtomicInteger current = new AtomicInteger();
+
+		final AtomicInteger currentOverride = new AtomicInteger();
+
+		public void concurrentOperation() {
+			if (current.incrementAndGet() > 2) {
+				throw new IllegalStateException();
+			}
+			try {
+				Thread.sleep(100);
+			}
+			catch (InterruptedException ex) {
+				throw new IllegalStateException(ex);
+			}
+			current.decrementAndGet();
+		}
+
+		public void otherOperation() {
+			if (current.incrementAndGet() > 2) {
+				throw new IllegalStateException();
+			}
+			try {
+				Thread.sleep(100);
+			}
+			catch (InterruptedException ex) {
+				throw new IllegalStateException(ex);
+			}
+			current.decrementAndGet();
+		}
+
+		@ConcurrencyLimit(limit = 1)
+		public void overrideOperation() {
+			if (currentOverride.incrementAndGet() > 1) {
+				throw new IllegalStateException();
+			}
+			try {
+				Thread.sleep(100);
 			}
 			catch (InterruptedException ex) {
 				throw new IllegalStateException(ex);
@@ -282,7 +387,7 @@ class ConcurrencyLimitTests {
 				throw new IllegalStateException();
 			}
 			try {
-				Thread.sleep(10);
+				Thread.sleep(100);
 			}
 			catch (InterruptedException ex) {
 				throw new IllegalStateException(ex);
