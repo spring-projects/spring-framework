@@ -218,20 +218,17 @@ public abstract class AbstractHandlerMapping extends ApplicationObjectSupport
 	}
 
 	private ApiVersionHolder initApiVersion(ServerWebExchange exchange) {
-		ApiVersionHolder versionHolder = exchange.getAttribute(API_VERSION_ATTRIBUTE);
-		if (versionHolder == null) {
-			if (this.apiVersionStrategy == null) {
-				versionHolder = ApiVersionHolder.EMPTY;
+		ApiVersionHolder versionHolder;
+		if (this.apiVersionStrategy == null) {
+			versionHolder = ApiVersionHolder.EMPTY;
+		}
+		else {
+			try {
+				Comparable<?> version = this.apiVersionStrategy.resolveParseAndValidateVersion(exchange);
+				versionHolder = ApiVersionHolder.fromVersion(version);
 			}
-			else {
-				Comparable<?> version;
-				try {
-					version = this.apiVersionStrategy.resolveParseAndValidateVersion(exchange);
-					versionHolder = ApiVersionHolder.fromVersion(version);
-				}
-				catch (RuntimeException ex) {
-					versionHolder = ApiVersionHolder.fromError(ex);
-				}
+			catch (RuntimeException ex) {
+				versionHolder = ApiVersionHolder.fromError(ex);
 			}
 		}
 		exchange.getAttributes().put(API_VERSION_ATTRIBUTE, versionHolder);
