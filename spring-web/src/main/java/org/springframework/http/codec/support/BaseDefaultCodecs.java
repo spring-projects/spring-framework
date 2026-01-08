@@ -81,6 +81,8 @@ import org.springframework.http.codec.protobuf.ProtobufEncoder;
 import org.springframework.http.codec.protobuf.ProtobufHttpMessageWriter;
 import org.springframework.http.codec.smile.JacksonSmileDecoder;
 import org.springframework.http.codec.smile.JacksonSmileEncoder;
+import org.springframework.http.codec.xml.JacksonXmlDecoder;
+import org.springframework.http.codec.xml.JacksonXmlEncoder;
 import org.springframework.http.codec.xml.Jaxb2XmlDecoder;
 import org.springframework.http.codec.xml.Jaxb2XmlEncoder;
 import org.springframework.util.ClassUtils;
@@ -109,6 +111,8 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs, CodecConfigure
 
 	private static final boolean JACKSON_2_CBOR_PRESENT;
 
+	private static final boolean JACKSON_XML_PRESENT;
+
 	private static final boolean JAXB_2_PRESENT;
 
 	private static final boolean PROTOBUF_PRESENT;
@@ -131,6 +135,7 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs, CodecConfigure
 		JACKSON_2_SMILE_PRESENT = JACKSON_2_PRESENT && ClassUtils.isPresent("com.fasterxml.jackson.dataformat.smile.SmileFactory", classLoader);
 		JACKSON_CBOR_PRESENT = JACKSON_PRESENT && ClassUtils.isPresent("tools.jackson.dataformat.cbor.CBORMapper", classLoader);
 		JACKSON_2_CBOR_PRESENT = JACKSON_2_PRESENT && ClassUtils.isPresent("com.fasterxml.jackson.dataformat.cbor.databind.CBORMapper", classLoader);
+		JACKSON_XML_PRESENT = JACKSON_PRESENT && ClassUtils.isPresent("tools.jackson.dataformat.xml.XmlMapper", classLoader);
 		JAXB_2_PRESENT = ClassUtils.isPresent("jakarta.xml.bind.Binder", classLoader);
 		PROTOBUF_PRESENT = ClassUtils.isPresent("com.google.protobuf.Message", classLoader);
 		NETTY_BYTE_BUF_PRESENT = ClassUtils.isPresent("io.netty.buffer.ByteBuf", classLoader);
@@ -155,6 +160,10 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs, CodecConfigure
 	private @Nullable Encoder<?> jacksonCborEncoder;
 
 	private @Nullable Decoder<?> jacksonCborDecoder;
+
+	private @Nullable Encoder<?> jacksonXmlEncoder;
+
+	private @Nullable Decoder<?> jacksonXmlDecoder;
 
 	private @Nullable Decoder<?> protobufDecoder;
 
@@ -237,6 +246,8 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs, CodecConfigure
 		this.jacksonSmileEncoder = other.jacksonSmileEncoder;
 		this.jacksonCborDecoder = other.jacksonCborDecoder;
 		this.jacksonCborEncoder = other.jacksonCborEncoder;
+		this.jacksonXmlDecoder = other.jacksonXmlDecoder;
+		this.jacksonXmlEncoder = other.jacksonXmlEncoder;
 		this.protobufDecoder = other.protobufDecoder;
 		this.protobufEncoder = other.protobufEncoder;
 		this.jaxb2Decoder = other.jaxb2Decoder;
@@ -308,6 +319,19 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs, CodecConfigure
 	@Override
 	public void jacksonCborEncoder(Encoder<?> encoder) {
 		this.jacksonCborEncoder = encoder;
+		initObjectWriters();
+		initTypedWriters();
+	}
+
+	@Override
+	public void jacksonXmlDecoder(Decoder<?> decoder) {
+		this.jacksonXmlDecoder = decoder;
+		initObjectReaders();
+	}
+
+	@Override
+	public void jacksonXmlEncoder(Encoder<?> encoder) {
+		this.jacksonXmlEncoder = encoder;
 		initObjectWriters();
 		initTypedWriters();
 	}
@@ -655,6 +679,9 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs, CodecConfigure
 			addCodec(this.objectReaders, new DecoderHttpMessageReader<>(this.jaxb2Decoder != null ?
 					(Jaxb2XmlDecoder) this.jaxb2Decoder : new Jaxb2XmlDecoder()));
 		}
+		else if(JACKSON_XML_PRESENT) {
+			addCodec(this.objectReaders, new DecoderHttpMessageReader<>(getJacksonXmlDecoder()));
+		}
 		if (KOTLIN_SERIALIZATION_PROTOBUF_PRESENT) {
 			addCodec(this.objectReaders,
 					new DecoderHttpMessageReader<>(getKotlinSerializationProtobufDecoder()));
@@ -793,6 +820,9 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs, CodecConfigure
 		if (JAXB_2_PRESENT) {
 			addCodec(writers, new EncoderHttpMessageWriter<>(this.jaxb2Encoder != null ?
 					(Jaxb2XmlEncoder) this.jaxb2Encoder : new Jaxb2XmlEncoder()));
+		}
+		else if (JACKSON_XML_PRESENT) {
+			addCodec(writers, new EncoderHttpMessageWriter<>(getJacksonXmlEncoder()));
 		}
 		if (KOTLIN_SERIALIZATION_PROTOBUF_PRESENT) {
 			addCodec(writers, new EncoderHttpMessageWriter<>(getKotlinSerializationProtobufEncoder()));
@@ -962,6 +992,30 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs, CodecConfigure
 			}
 		}
 		return this.jacksonCborEncoder;
+	}
+
+	protected Decoder<?> getJacksonXmlDecoder() {
+		if (this.jacksonXmlDecoder == null) {
+			if (JACKSON_XML_PRESENT) {
+				this.jacksonXmlDecoder = new JacksonXmlDecoder();
+			}
+			else {
+				throw new IllegalStateException("Jackson XML support not present");
+			}
+		}
+		return this.jacksonXmlDecoder;
+	}
+
+	protected Encoder<?> getJacksonXmlEncoder() {
+		if (this.jacksonXmlEncoder == null) {
+			if (JACKSON_XML_PRESENT) {
+				this.jacksonXmlEncoder = new JacksonXmlEncoder();
+			}
+			else {
+				throw new IllegalStateException("Jackson XML support not present");
+			}
+		}
+		return this.jacksonXmlEncoder;
 	}
 
 	protected Decoder<?> getKotlinSerializationJsonDecoder() {
