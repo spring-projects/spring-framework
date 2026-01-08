@@ -213,6 +213,7 @@ public class SimpleAsyncTaskExecutor extends CustomizableThreadCreator
 	 * Specify whether to reject tasks when the concurrency limit has been reached,
 	 * throwing {@link TaskRejectedException} (which extends the common
 	 * {@link java.util.concurrent.RejectedExecutionException})
+	 * on any further execution attempts.
 	 * <p>The default is {@code false}, blocking the caller until the submission can
 	 * be accepted. Switch this to {@code true} for immediate rejection instead.
 	 * @since 6.2.6
