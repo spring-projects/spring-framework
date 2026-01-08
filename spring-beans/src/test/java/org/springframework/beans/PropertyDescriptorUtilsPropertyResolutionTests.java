@@ -34,7 +34,6 @@ import org.junit.jupiter.params.provider.FieldSource;
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assumptions.assumeThat;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.junit.jupiter.api.Named.named;
 
@@ -228,13 +227,16 @@ class PropertyDescriptorUtilsPropertyResolutionTests {
 
 		@Test
 		void determineBasicPropertiesWithUnresolvedGenericsInSubInterface() {
-			// FYI: java.beans.Introspector does not resolve properties for sub-interfaces.
-			assumeThat(resolver).isNotInstanceOf(StandardPropertiesResolver.class);
-
 			var pdMap = resolver.resolve(SubGenericService.class);
 
-			assertThat(pdMap).containsOnlyKeys("id");
-			assertReadAndWriteMethodsForId(pdMap.get("id"), Object.class, Object.class);
+			if (resolver instanceof StandardPropertiesResolver) {
+				// java.beans.Introspector does not resolve properties for sub-interfaces.
+				assertThat(pdMap).isEmpty();
+			}
+			else {
+				assertThat(pdMap).containsOnlyKeys("id");
+				assertReadAndWriteMethodsForId(pdMap.get("id"), Object.class, Object.class);
+			}
 		}
 
 		@Test
@@ -271,7 +273,76 @@ class PropertyDescriptorUtilsPropertyResolutionTests {
 
 			assertReadAndWriteMethodsForClassAndId(pdMap, String.class, Object.class);
 		}
+
+
+		interface GenericService<T> {
+
+			void setId(T id);
+
+			T getId();
+		}
+
+		interface SubGenericService<T> extends GenericService<T> {
+		}
+
+		static class BaseService<T> {
+
+			private T id;
+
+			public T getId() {
+				return id;
+			}
+
+			public void setId(T id) {
+				this.id = id;
+			}
+		}
+
+		static class ServiceWithOverriddenGetterAndSetter extends BaseService<String>
+				implements SubGenericService<String> {
+
+			@Override
+			public String getId() {
+				return super.getId();
+			}
+
+			@Override
+			public void setId(String id) {
+				super.setId(id);
+			}
+		}
+
+		static class ServiceWithOverloadedSetter extends BaseService<String>
+				implements SubGenericService<String> {
+
+			public void setId(int id) {
+				setId(String.valueOf(id));
+			}
+		}
+
+		static class ServiceWithOverriddenGetter extends BaseService<String>
+				implements SubGenericService<String> {
+
+			@Override
+			public String getId() {
+				return super.getId();
+			}
+		}
+
+		static class ServiceWithOverriddenGetterAndOverloadedSetter extends BaseService<String>
+				implements SubGenericService<String> {
+
+			@Override
+			public String getId() {
+				return super.getId();
+			}
+
+			public void setId(int id) {
+				setId(String.valueOf(id));
+			}
+		}
 	}
+
 
 	@Nested
 	class BoundedGenericsTests {
@@ -312,20 +383,79 @@ class PropertyDescriptorUtilsPropertyResolutionTests {
 			assertReadAndWriteMethodsForClassAndId(pdMap, Number.class, Long.class);
 		}
 
-		@Test  // gh-36019
+		@Test
 		void resolvePropertiesWithUnresolvedGenericsInSubclassWithOverloadedSetter() {
 			var pdMap = resolver.resolve(PersonWithOverloadedSetter.class);
 
-			// TODO Determine if we want to align PropertyDescriptorUtils with java.beans.Introspector.
 			Class<?> writeType = Number.class;
 			if (resolver instanceof BasicPropertiesResolver) {
-				// PropertyDescriptorUtils currently incorrectly resolves setId(Integer)
+				// TODO: PropertyDescriptorUtils currently incorrectly resolves setId(Integer)
 				// as the write method instead of setId(Number) (where Number is the
 				// unresolved generic for Long).
 				writeType = Integer.class;
 			}
 
 			assertReadAndWriteMethodsForClassAndId(pdMap, Number.class, writeType);
+		}
+
+
+		interface Entity<T extends Serializable> {
+
+			T getId();
+
+			void setId(T id);
+		}
+
+		abstract static class BaseEntity<T extends Number> implements Entity<T> {
+
+			private T id;
+
+			@Override
+			public T getId() {
+				return this.id;
+			}
+
+			@Override
+			public void setId(T id) {
+				this.id = id;
+			}
+		}
+
+		static class Person extends BaseEntity<Long> {
+		}
+
+		static class PersonWithOverriddenGetter extends BaseEntity<Long> {
+
+			/**
+			 * Overrides super implementation to ensure that the JavaBeans read method
+			 * is of type {@link Long}, while leaving the type for the write method
+			 * ({@link #setId}) set to {@link Number}.
+			 */
+			@Override
+			public Long getId() {
+				return super.getId();
+			}
+		}
+
+		static class PersonWithOverriddenSetter extends BaseEntity<Long> {
+
+			/**
+			 * Overrides super implementation to ensure that the JavaBeans write method
+			 * is of type {@link Long}, while leaving the type for the read method
+			 * ({@link #getId()}) set to {@link Number}.
+			 */
+			@Override
+			public void setId(Long id) {
+				super.setId(id);
+			}
+		}
+
+		static class PersonWithOverloadedSetter extends BaseEntity<Long> {
+
+			// Intentionally chose Integer, since it's a subtype of Long and Number.
+			public void setId(Integer id) {
+				setId(id.longValue());
+			}
 		}
 	}
 
@@ -389,12 +519,12 @@ class PropertyDescriptorUtilsPropertyResolutionTests {
 	}
 
 
-	interface PropertiesResolver {
+	private interface PropertiesResolver {
 
 		Map<String, List<PropertyDescriptor>> resolve(Class<?> beanClass);
 	}
 
-	static class BasicPropertiesResolver implements PropertiesResolver {
+	private static class BasicPropertiesResolver implements PropertiesResolver {
 
 		@Override
 		public Map<String, List<PropertyDescriptor>> resolve(Class<?> beanClass) {
@@ -408,7 +538,7 @@ class PropertyDescriptorUtilsPropertyResolutionTests {
 		}
 	}
 
-	static class StandardPropertiesResolver implements PropertiesResolver {
+	private static class StandardPropertiesResolver implements PropertiesResolver {
 
 		@Override
 		public Map<String, List<PropertyDescriptor>> resolve(Class<?> beanClass) {
@@ -422,129 +552,4 @@ class PropertyDescriptorUtilsPropertyResolutionTests {
 		}
 	}
 
-	interface GenericService<T> {
-
-		void setId(T id);
-
-		T getId();
-	}
-
-	interface SubGenericService<T> extends GenericService<T> {
-	}
-
-	static class BaseService<T> {
-
-		private T id;
-
-		public T getId() {
-			return id;
-		}
-
-		public void setId(T id) {
-			this.id = id;
-		}
-	}
-
-	static class ServiceWithOverriddenGetterAndSetter extends BaseService<String>
-			implements SubGenericService<String> {
-
-		@Override
-		public String getId() {
-			return super.getId();
-		}
-
-		@Override
-		public void setId(String id) {
-			super.setId(id);
-		}
-	}
-
-	static class ServiceWithOverloadedSetter extends BaseService<String>
-			implements SubGenericService<String> {
-
-		public void setId(int id) {
-			setId(String.valueOf(id));
-		}
-	}
-
-	static class ServiceWithOverriddenGetter extends BaseService<String>
-			implements SubGenericService<String> {
-
-		@Override
-		public String getId() {
-			return super.getId();
-		}
-	}
-
-	static class ServiceWithOverriddenGetterAndOverloadedSetter extends BaseService<String>
-			implements SubGenericService<String> {
-
-		@Override
-		public String getId() {
-			return super.getId();
-		}
-
-		public void setId(int id) {
-			setId(String.valueOf(id));
-		}
-	}
-
-	interface Entity<T extends Serializable> {
-
-		T getId();
-
-		void setId(T id);
-	}
-
-	abstract static class BaseEntity<T extends Number> implements Entity<T> {
-
-		private T id;
-
-		@Override
-		public T getId() {
-			return this.id;
-		}
-
-		@Override
-		public void setId(T id) {
-			this.id = id;
-		}
-	}
-
-	static class Person extends BaseEntity<Long> {
-	}
-
-	static class PersonWithOverriddenGetter extends BaseEntity<Long> {
-
-		/**
-		 * Overrides super implementation to ensure that the JavaBeans read method
-		 * is of type {@link Long}, while leaving the type for the write method
-		 * ({@link #setId}) set to {@link Number}.
-		 */
-		@Override
-		public Long getId() {
-			return super.getId();
-		}
-	}
-
-	static class PersonWithOverriddenSetter extends BaseEntity<Long> {
-
-		/**
-		 * Overrides super implementation to ensure that the JavaBeans write method
-		 * is of type {@link Long}, while leaving the type for the read method
-		 * ({@link #getId()}) set to {@link Number}.
-		 */
-		@Override
-		public void setId(Long id) {
-			super.setId(id);
-		}
-	}
-
-	static class PersonWithOverloadedSetter extends BaseEntity<Long> {
-
-		// Intentionally chose Integer, since it's a subtype of Long and Number.
-		public void setId(Integer id) {
-			setId(id.longValue());
-		}
-	}
 }

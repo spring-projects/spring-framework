@@ -39,7 +39,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
-import org.springframework.beans.PropertyDescriptorUtilsPropertyResolutionTests.ServiceWithOverriddenGetterAndOverloadedSetter;
+import org.springframework.beans.PropertyDescriptorUtilsPropertyResolutionTests.UnboundedGenericsTests.ServiceWithOverriddenGetterAndOverloadedSetter;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.propertyeditors.CustomDateEditor;
 import org.springframework.beans.testfixture.beans.DerivedTestBean;
