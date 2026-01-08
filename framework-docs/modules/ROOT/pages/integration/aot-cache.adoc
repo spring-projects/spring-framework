@@ -36,13 +36,20 @@ JVM flag to start then exit your Spring application once the
 --
 [tabs]
 ======
-AOT cache::
+AOT cache (Java 24)::
 +
 [source,bash,subs="verbatim,quotes"]
 ----
 # Both commands need to be run with the same classpath
 java -XX:AOTMode=record -XX:AOTConfiguration=app.aotconf -Dspring.context.exit=onRefresh ...
 java -XX:AOTMode=create -XX:AOTConfiguration=app.aotconf -XX:AOTCache=app.aot ...
+----
+
+AOT cache (Java 25+)::
++
+[source,bash,subs="verbatim,quotes"]
+----
+java -XX:AOTCacheOutput=app.aot -Dspring.context.exit=onRefresh -jar application.jar ...
 ----
 
 CDS::
@@ -54,6 +61,10 @@ java -XX:ArchiveClassesAtExit=app.jsa -Dspring.context.exit=onRefresh ...
 ----
 ======
 --
+
+NOTE: Note, however, that AOT cache among other things stores the method profiling information.
+Therefore, it is generally recommended to create an AOT cache for an application that experienced
+a portion of a production-like workflow. This way you can ensure that created AOT cache is more accurate.
 
 == Using the cache
 
