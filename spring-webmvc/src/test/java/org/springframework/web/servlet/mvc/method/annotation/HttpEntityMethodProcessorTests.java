@@ -30,7 +30,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.core.MethodParameter;
@@ -152,7 +151,6 @@ public class HttpEntityMethodProcessorTests {
 	}
 
 	@Test
-	@Disabled("Determine why this fails with JacksonJsonHttpMessageConverter but passes with MappingJackson2HttpMessageConverter")
 	void resolveArgumentTypeVariable() throws Exception {
 		Method method = MySimpleParameterizedController.class.getMethod("handleDto", HttpEntity.class);
 		HandlerMethod handlerMethod = new HandlerMethod(new MySimpleParameterizedController(), method);
@@ -164,7 +162,9 @@ public class HttpEntityMethodProcessorTests {
 
 		List<HttpMessageConverter<?>> converters = new ArrayList<>();
 		converters.add(new JacksonJsonHttpMessageConverter());
-		HttpEntityMethodProcessor processor = new HttpEntityMethodProcessor(converters);
+		List<Object> requestResponseBodyAdvice = new ArrayList<>();
+		requestResponseBodyAdvice.add(new ContextClassRequestBodyAdvice());
+		HttpEntityMethodProcessor processor = new HttpEntityMethodProcessor(converters, requestResponseBodyAdvice);
 
 		@SuppressWarnings("unchecked")
 		HttpEntity<SimpleBean> result = (HttpEntity<SimpleBean>)

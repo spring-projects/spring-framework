@@ -83,6 +83,7 @@ import org.springframework.web.servlet.mvc.Controller;
 import org.springframework.web.servlet.mvc.HttpRequestHandlerAdapter;
 import org.springframework.web.servlet.mvc.SimpleControllerHandlerAdapter;
 import org.springframework.web.servlet.mvc.annotation.ResponseStatusExceptionResolver;
+import org.springframework.web.servlet.mvc.method.annotation.ContextClassRequestBodyAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.ExceptionHandlerExceptionResolver;
 import org.springframework.web.servlet.mvc.method.annotation.JsonViewRequestBodyAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.JsonViewResponseBodyAdvice;
@@ -661,6 +662,7 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 			List<ResponseBodyAdvice<?>> responseBodyAdvices = new ArrayList<>(2);
 			if (JACKSON_PRESENT || JACKSON_2_PRESENT) {
 				requestBodyAdvices.add(new JsonViewRequestBodyAdvice());
+				requestBodyAdvices.add(new ContextClassRequestBodyAdvice());
 				responseBodyAdvices.add(new JsonViewResponseBodyAdvice());
 			}
 			if (KOTLIN_REFLECT_PRESENT && KOTLIN_SERIALIZATION_PRESENT) {
