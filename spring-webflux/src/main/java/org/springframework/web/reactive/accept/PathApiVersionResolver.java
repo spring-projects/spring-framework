@@ -32,7 +32,7 @@ import org.springframework.web.server.ServerWebExchange;
  * @author Rossen Stoyanchev
  * @since 7.0
  */
-public class PathApiVersionResolver implements ApiVersionResolver {
+public class PathApiVersionResolver implements SyncApiVersionResolver {
 
 	private final int pathSegmentIndex;
 
@@ -49,7 +49,7 @@ public class PathApiVersionResolver implements ApiVersionResolver {
 
 
 	@Override
-	public String resolveVersion(ServerWebExchange exchange) {
+	public String resolveVersionValue(ServerWebExchange exchange) {
 		int i = 0;
 		for (PathContainer.Element e : exchange.getRequest().getPath().pathWithinApplication().elements()) {
 			if (e instanceof PathContainer.PathSegment && i++ == this.pathSegmentIndex) {

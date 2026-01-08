@@ -26,7 +26,7 @@ import org.springframework.web.server.ServerWebExchange;
  * @author Rossen Stoyanchev
  * @since 7.0
  */
-public class HeaderApiVersionResolver implements ApiVersionResolver {
+public class HeaderApiVersionResolver implements SyncApiVersionResolver {
 
 	private final String headerName;
 
@@ -37,7 +37,7 @@ public class HeaderApiVersionResolver implements ApiVersionResolver {
 
 
 	@Override
-	public @Nullable String resolveVersion(ServerWebExchange exchange) {
+	public @Nullable String resolveVersionValue(ServerWebExchange exchange) {
 		return exchange.getRequest().getHeaders().getFirst(this.headerName);
 	}
 

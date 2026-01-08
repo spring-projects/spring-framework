@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.function.Function;
 
 import org.junit.jupiter.api.Test;
+import reactor.core.publisher.Mono;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -381,7 +382,7 @@ class RequestPredicatesTests {
 
 	private static DefaultApiVersionStrategy apiVersionStrategy() {
 		return new DefaultApiVersionStrategy(
-				List.of(exchange -> null), new SemanticApiVersionParser(), true, null, false, null, null);
+				List.of(exchange -> Mono.empty()), new SemanticApiVersionParser(), true, null, false, null, null);
 	}
 
 }

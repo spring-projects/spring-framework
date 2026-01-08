@@ -185,54 +185,48 @@ public abstract class AbstractHandlerMapping extends ApplicationObjectSupport
 
 	@Override
 	public Mono<Object> getHandler(ServerWebExchange exchange) {
-		ApiVersionHolder versionHolder = initApiVersion(exchange);
-		return getHandlerInternal(exchange).map(handler -> {
-			if (logger.isDebugEnabled()) {
-				logger.debug(exchange.getLogPrefix() + "Mapped to " + handler);
-			}
-			if (versionHolder.hasError()) {
-				throw versionHolder.getError();
-			}
-			ServerHttpRequest request = exchange.getRequest();
-			if (hasCorsConfigurationSource(handler) || CorsUtils.isPreFlightRequest(request)) {
-				CorsConfiguration config = (this.corsConfigurationSource != null ?
-						this.corsConfigurationSource.getCorsConfiguration(exchange) : null);
-				CorsConfiguration handlerConfig = getCorsConfiguration(handler, exchange);
-				config = (config != null ? config.combine(handlerConfig) : handlerConfig);
-				if (config != null) {
-					config.validateAllowCredentials();
-					config.validateAllowPrivateNetwork();
-				}
-				if (!this.corsProcessor.process(config, exchange) || CorsUtils.isPreFlightRequest(request)) {
-					return NO_OP_HANDLER;
-				}
-			}
-			if (getApiVersionStrategy() != null) {
-				if (versionHolder.hasVersion()) {
-					Comparable<?> version = versionHolder.getVersion();
-					getApiVersionStrategy().handleDeprecations(version, handler, exchange);
-				}
-			}
-			return handler;
-		});
+		return initApiVersion(exchange).flatMap(versionHolder ->
+				getHandlerInternal(exchange).map(handler -> {
+					if (logger.isDebugEnabled()) {
+						logger.debug(exchange.getLogPrefix() + "Mapped to " + handler);
+					}
+					if (versionHolder.hasError()) {
+						throw versionHolder.getError();
+					}
+					ServerHttpRequest request = exchange.getRequest();
+					if (hasCorsConfigurationSource(handler) || CorsUtils.isPreFlightRequest(request)) {
+						CorsConfiguration config = (this.corsConfigurationSource != null ?
+								this.corsConfigurationSource.getCorsConfiguration(exchange) : null);
+						CorsConfiguration handlerConfig = getCorsConfiguration(handler, exchange);
+						config = (config != null ? config.combine(handlerConfig) : handlerConfig);
+						if (config != null) {
+							config.validateAllowCredentials();
+							config.validateAllowPrivateNetwork();
+						}
+						if (!this.corsProcessor.process(config, exchange) || CorsUtils.isPreFlightRequest(request)) {
+							return NO_OP_HANDLER;
+						}
+					}
+					if (getApiVersionStrategy() != null) {
+						if (versionHolder.hasVersion()) {
+							Comparable<?> version = versionHolder.getVersion();
+							getApiVersionStrategy().handleDeprecations(version, handler, exchange);
+						}
+					}
+					return handler;
+				}));
 	}
 
-	private ApiVersionHolder initApiVersion(ServerWebExchange exchange) {
-		ApiVersionHolder versionHolder;
-		if (this.apiVersionStrategy == null) {
-			versionHolder = ApiVersionHolder.EMPTY;
-		}
-		else {
-			try {
-				Comparable<?> version = this.apiVersionStrategy.resolveParseAndValidateVersion(exchange);
-				versionHolder = ApiVersionHolder.fromVersion(version);
-			}
-			catch (RuntimeException ex) {
-				versionHolder = ApiVersionHolder.fromError(ex);
-			}
-		}
-		exchange.getAttributes().put(API_VERSION_ATTRIBUTE, versionHolder);
-		return versionHolder;
+	private Mono<ApiVersionHolder> initApiVersion(ServerWebExchange exchange) {
+
+		Mono<ApiVersionHolder> holderMono = (this.apiVersionStrategy != null ?
+				this.apiVersionStrategy.resolveParseAndValidateApiVersion(exchange)
+						.map(ApiVersionHolder::fromVersion)
+						.onErrorResume(RuntimeException.class, ex -> Mono.just(ApiVersionHolder.fromError(ex))) :
+				Mono.just(ApiVersionHolder.EMPTY));
+
+		return holderMono.doOnNext(holder ->
+				exchange.getAttributes().put(HandlerMapping.API_VERSION_ATTRIBUTE, holder));
 	}
 
 	/**
