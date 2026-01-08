@@ -21,7 +21,6 @@ import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
 import java.beans.PropertyDescriptor;
 import java.beans.SimpleBeanInfo;
-import java.util.Collection;
 
 import org.springframework.core.Ordered;
 
@@ -48,8 +47,8 @@ class SimpleBeanInfoFactory implements BeanInfoFactory, Ordered {
 
 	@Override
 	public BeanInfo getBeanInfo(Class<?> beanClass) throws IntrospectionException {
-		Collection<? extends PropertyDescriptor> pds =
-				PropertyDescriptorUtils.determineBasicProperties(beanClass);
+		PropertyDescriptor[] pds = PropertyDescriptorUtils.determineBasicProperties(beanClass)
+				.toArray(PropertyDescriptorUtils.EMPTY_PROPERTY_DESCRIPTOR_ARRAY);
 
 		return new SimpleBeanInfo() {
 			@Override
@@ -58,7 +57,7 @@ class SimpleBeanInfoFactory implements BeanInfoFactory, Ordered {
 			}
 			@Override
 			public PropertyDescriptor[] getPropertyDescriptors() {
-				return pds.toArray(PropertyDescriptorUtils.EMPTY_PROPERTY_DESCRIPTOR_ARRAY);
+				return pds;
 			}
 		};
 	}
