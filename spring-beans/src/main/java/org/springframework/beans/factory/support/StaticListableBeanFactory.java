@@ -234,7 +234,8 @@ public class StaticListableBeanFactory implements ListableBeanFactory {
 		String beanName = BeanFactoryUtils.transformedBeanName(name);
 		Object bean = obtainBean(beanName);
 		if (bean instanceof FactoryBean<?> factoryBean && !BeanFactoryUtils.isFactoryDereference(name)) {
-			return isTypeMatch(factoryBean, typeToMatch.toClass());
+			Class<?> classToMatch = typeToMatch.resolve();
+			return (classToMatch != null && isTypeMatch(factoryBean, classToMatch));
 		}
 		return typeToMatch.isInstance(bean);
 	}
@@ -372,8 +373,8 @@ public class StaticListableBeanFactory implements ListableBeanFactory {
 	public String[] getBeanNamesForType(@Nullable ResolvableType type,
 			boolean includeNonSingletons, boolean allowEagerInit) {
 
-		Class<?> resolved = (type != null ? type.resolve() : null);
-		boolean isFactoryType = (resolved != null && FactoryBean.class.isAssignableFrom(resolved));
+		Class<?> clazz = (type != null ? type.resolve() : null);
+		boolean isFactoryType = (clazz != null && FactoryBean.class.isAssignableFrom(clazz));
 		List<String> matches = new ArrayList<>();
 
 		for (Map.Entry<String, Object> entry : this.beans.entrySet()) {
@@ -381,7 +382,7 @@ public class StaticListableBeanFactory implements ListableBeanFactory {
 			Object beanInstance = entry.getValue();
 			if (beanInstance instanceof FactoryBean<?> factoryBean && !isFactoryType) {
 				if ((includeNonSingletons || factoryBean.isSingleton()) &&
-						(type == null || isTypeMatch(factoryBean, type.toClass()))) {
+						(type == null || (clazz != null && isTypeMatch(factoryBean, clazz)))) {
 					matches.add(beanName);
 				}
 			}
