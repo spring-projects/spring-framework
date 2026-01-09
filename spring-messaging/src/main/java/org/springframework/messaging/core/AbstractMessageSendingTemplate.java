@@ -148,7 +148,7 @@ public abstract class AbstractMessageSendingTemplate<D> implements MessageSendin
 	public void convertAndSend(Object payload, @Nullable Map<String, Object> headers,
 			@Nullable MessagePostProcessor postProcessor) throws MessagingException {
 
-		convertAndSend(getRequiredDefaultDestination(), payload, null, postProcessor);
+		convertAndSend(getRequiredDefaultDestination(), payload, headers, postProcessor);
 	}
 
 	@Override
