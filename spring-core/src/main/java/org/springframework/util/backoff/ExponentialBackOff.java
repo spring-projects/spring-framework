@@ -52,7 +52,7 @@ import org.springframework.util.Assert;
  * should accumulate before returning {@link BackOffExecution#STOP}.
  * Alternatively, use {@link #setMaxAttempts} to limit the number of back-off
  * attempts (in a retry scenario, this is equivalent to the maximum number of
- * retries in addition to the original invocation).
+ * retries excluding the original invocation).
  * The execution stops when either of those two limits is reached.
  *
  * @author Stephane Nicoll
@@ -231,7 +231,7 @@ public class ExponentialBackOff implements BackOff {
 	 * The maximum number of back-off attempts after which a call to
 	 * {@link BackOffExecution#nextBackOff()} returns {@link BackOffExecution#STOP}.
 	 * <p>Note that in a retry scenario, this is equivalent to the maximum number
-	 * of retries in addition to the original invocation.
+	 * of retries excluding the original invocation.
 	 * @param maxAttempts the maximum number of attempts
 	 * @since 6.1
 	 * @see #setMaxElapsedTime
@@ -244,7 +244,7 @@ public class ExponentialBackOff implements BackOff {
 	 * Return the maximum number of back-off attempts after which a call to
 	 * {@link BackOffExecution#nextBackOff()} returns {@link BackOffExecution#STOP}.
 	 * <p>Note that in a retry scenario, this is equivalent to the maximum number
-	 * of retries in addition to the original invocation.
+	 * of retries excluding the original invocation.
 	 * @return the maximum number of attempts
 	 * @since 6.1
 	 * @see #getMaxElapsedTime()

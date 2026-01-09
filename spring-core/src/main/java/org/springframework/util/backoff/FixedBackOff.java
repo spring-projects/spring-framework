@@ -20,7 +20,7 @@ package org.springframework.util.backoff;
  * A simple {@link BackOff} implementation that provides a fixed interval
  * between two attempts and a maximum number of back-off attempts (in a
  * retry scenario, this is equivalent to the maximum number of retries
- * in addition to the original invocation).
+ * excluding the original invocation).
  *
  * @author Stephane Nicoll
  * @author Sam Brannen
@@ -92,7 +92,7 @@ public class FixedBackOff implements BackOff {
 	/**
 	 * Set the maximum number of back-off attempts.
 	 * <p>Note that in a retry scenario, this is equivalent to the maximum number
-	 * of retries in addition to the original invocation.
+	 * of retries excluding the original invocation.
 	 */
 	public void setMaxAttempts(long maxAttempts) {
 		this.maxAttempts = maxAttempts;
@@ -101,7 +101,7 @@ public class FixedBackOff implements BackOff {
 	/**
 	 * Return the maximum number of back-off attempts.
 	 * <p>Note that in a retry scenario, this is equivalent to the maximum number
-	 * of retries in addition to the original invocation.
+	 * of retries excluding the original invocation.
 	 */
 	public long getMaxAttempts() {
 		return this.maxAttempts;
