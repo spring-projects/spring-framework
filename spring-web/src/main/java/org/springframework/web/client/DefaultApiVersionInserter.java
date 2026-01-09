@@ -33,7 +33,6 @@ import org.springframework.web.util.UriComponentsBuilder;
  * Default implementation of {@link ApiVersionInserter}.
  *
  * @author Rossen Stoyanchev
- * @author Nabil Fawwaz Elqayyim
  * @since 7.0
  * @see DefaultApiVersionInserterBuilder
  */
