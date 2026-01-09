@@ -17,7 +17,6 @@
 package org.springframework.web.reactive.accept;
 
 import org.jspecify.annotations.Nullable;
-import reactor.core.publisher.Mono;
 
 import org.springframework.web.server.ServerWebExchange;
 
@@ -25,7 +24,6 @@ import org.springframework.web.server.ServerWebExchange;
  * Contract to extract the version from a request.
  *
  * @author Rossen Stoyanchev
- * @author Jonathan Kaplan
  * @since 7.0
  */
 @FunctionalInterface
@@ -33,21 +31,12 @@ public interface ApiVersionResolver {
 
 	/**
 	 * Resolve the version for the given exchange.
-	 * @param exchange the current exchange
-	 * @return {@code Mono} emitting the version value, or an empty {@code Mono}
-	 * @since 7.0.3
-	 */
-	Mono<String> resolveApiVersion(ServerWebExchange exchange);
-
-	/**
-	 * Resolve the version for the given exchange.
+	 * <p>Implementations of this method are expected to be non-blocking.
+	 * If you need to resolve the version asynchronously, please implement the
+	 * {@link AsyncApiVersionResolver} subinterface instead.
 	 * @param exchange the current exchange
 	 * @return the version value, or {@code null} if not found
-	 * @deprecated in favor of {@link #resolveApiVersion(ServerWebExchange)}
 	 */
-	@Deprecated(since = "7.0.3", forRemoval = true)
-	default @Nullable String resolveVersion(ServerWebExchange exchange) {
-		return null;
-	}
+	@Nullable String resolveVersion(ServerWebExchange exchange);
 
 }

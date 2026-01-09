@@ -29,7 +29,7 @@ import org.springframework.web.server.ServerWebExchange;
  * @author Rossen Stoyanchev
  * @since 7.0
  */
-public class MediaTypeParamApiVersionResolver implements SyncApiVersionResolver {
+public class MediaTypeParamApiVersionResolver implements ApiVersionResolver {
 
 	private final MediaType compatibleMediaType;
 
@@ -49,7 +49,7 @@ public class MediaTypeParamApiVersionResolver implements SyncApiVersionResolver 
 
 
 	@Override
-	public @Nullable String resolveVersionValue(ServerWebExchange exchange) {
+	public @Nullable String resolveVersion(ServerWebExchange exchange) {
 		HttpHeaders headers = exchange.getRequest().getHeaders();
 		for (MediaType mediaType : headers.getAccept()) {
 			if (this.compatibleMediaType.isCompatibleWith(mediaType)) {

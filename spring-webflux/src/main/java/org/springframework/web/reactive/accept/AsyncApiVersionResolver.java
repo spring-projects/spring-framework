@@ -23,35 +23,26 @@ import org.springframework.web.server.ServerWebExchange;
 
 /**
  * Extension of {@link ApiVersionResolver} for implementations that resolve the
- * version in an imperative way without blocking.
+ * version in an asynchronous way.
  *
  * @author Rossen Stoyanchev
+ * @author Jonathan Kaplan
  * @since 7.0.3
  */
 @FunctionalInterface
-public interface SyncApiVersionResolver extends ApiVersionResolver {
+public interface AsyncApiVersionResolver extends ApiVersionResolver {
 
 	/**
-	 * {@inheritDoc}
-	 * <p>This method delegates to the synchronous
-	 * {@link #resolveVersionValue} and wraps the result as {@code Mono}.
-	 */
-	@Override
-	default Mono<String> resolveApiVersion(ServerWebExchange exchange) {
-		return Mono.justOrEmpty(resolveVersionValue(exchange));
-	}
-
-	/**
-	 * Resolve the version for the given exchange imperatively without blocking.
+	 * Resolve the version for the given exchange.
 	 * @param exchange the current exchange
-	 * @return the version value, or {@code null} if not found
+	 * @return {@code Mono} emitting the version value, or an empty {@code Mono}
 	 */
-	@Nullable String resolveVersionValue(ServerWebExchange exchange);
+	Mono<String> resolveVersionAsync(ServerWebExchange exchange);
 
-	@SuppressWarnings("removal")
 	@Override
 	default @Nullable String resolveVersion(ServerWebExchange exchange) {
-		return resolveVersionValue(exchange);
+		throw new UnsupportedOperationException(
+				"Async resolver does not support blocking resolution");
 	}
 
 }
