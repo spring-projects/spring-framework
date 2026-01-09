@@ -18,6 +18,7 @@ package org.springframework.test.context.cache;
 
 import org.springframework.core.SpringProperties;
 import org.springframework.test.context.CacheAwareContextLoaderDelegate;
+import org.springframework.test.context.cache.ContextCache.PauseMode;
 import org.springframework.util.StringUtils;
 
 /**
@@ -58,6 +59,29 @@ public abstract class ContextCacheUtils {
 		String propertyName = CacheAwareContextLoaderDelegate.CONTEXT_FAILURE_THRESHOLD_PROPERTY_NAME;
 		int defaultValue = CacheAwareContextLoaderDelegate.DEFAULT_CONTEXT_FAILURE_THRESHOLD;
 		return retrieveProperty(propertyName, defaultValue);
+	}
+
+	/**
+	 * Retrieve the {@link PauseMode} for the {@link ContextCache}.
+	 * <p>Uses {@link SpringProperties} to retrieve a system property or Spring
+	 * property named {@value ContextCache#CONTEXT_CACHE_PAUSE_PROPERTY_NAME}.
+	 * <p>Defaults to {@link PauseMode#ALWAYS} if no such property has been set.
+	 * @return the configured or default {@code PauseMode}
+	 * @since 7.0.3
+	 * @see ContextCache#CONTEXT_CACHE_PAUSE_PROPERTY_NAME
+	 * @see PauseMode#from(String)
+	 */
+	public static PauseMode retrievePauseMode() {
+		String value = SpringProperties.getProperty(ContextCache.CONTEXT_CACHE_PAUSE_PROPERTY_NAME);
+		if (StringUtils.hasText(value)) {
+			PauseMode pauseMode = PauseMode.from(value);
+			if (pauseMode == null) {
+				throw new IllegalArgumentException("Unsupported value '%s' for property '%s'"
+						.formatted(value, ContextCache.CONTEXT_CACHE_PAUSE_PROPERTY_NAME));
+			}
+			return pauseMode;
+		}
+		return PauseMode.ALWAYS;
 	}
 
 	private static int retrieveProperty(String key, int defaultValue) {

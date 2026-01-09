@@ -71,6 +71,8 @@ class ContextCacheTests {
 		assertContextCacheStatistics(contextCache, testClass.getName(), expectedSize, expectedActiveContextsCount,
 				expectedHitCount, expectedMissCount);
 		testContext.markApplicationContextUnused();
+		assertThat(contextCache.getContextUsageCount())
+				.as("active contexts in cache (%s)", testClass.getSimpleName()).isZero();
 	}
 
 

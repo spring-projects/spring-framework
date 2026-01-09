@@ -49,10 +49,15 @@ import org.springframework.util.Assert;
  * constructor argument} or set via a system property or Spring property named
  * {@value ContextCache#MAX_CONTEXT_CACHE_SIZE_PROPERTY_NAME}.
  *
+ * <p>The {@link PauseMode} may be supplied as a {@linkplain #DefaultContextCache(int, PauseMode)
+ * constructor argument} or set via a system property or Spring property named
+ * {@value ContextCache#CONTEXT_CACHE_PAUSE_PROPERTY_NAME}.
+ *
  * @author Sam Brannen
  * @author Juergen Hoeller
  * @since 2.5
  * @see ContextCacheUtils#retrieveMaxCacheSize()
+ * @see ContextCacheUtils#retrievePauseMode()
  */
 public class DefaultContextCache implements ContextCache {
 
@@ -91,6 +96,8 @@ public class DefaultContextCache implements ContextCache {
 
 	private final int maxSize;
 
+	private final PauseMode pauseMode;
+
 	private final AtomicInteger hitCount = new AtomicInteger();
 
 	private final AtomicInteger missCount = new AtomicInteger();
@@ -98,10 +105,13 @@ public class DefaultContextCache implements ContextCache {
 
 	/**
 	 * Create a new {@code DefaultContextCache} using the maximum cache size
-	 * obtained via {@link ContextCacheUtils#retrieveMaxCacheSize()}.
+	 * obtained via {@link ContextCacheUtils#retrieveMaxCacheSize()} and the
+	 * {@link PauseMode} obtained via {@link ContextCacheUtils#retrievePauseMode()}.
 	 * @since 4.3
 	 * @see #DefaultContextCache(int)
+	 * @see #DefaultContextCache(int, PauseMode)
 	 * @see ContextCacheUtils#retrieveMaxCacheSize()
+	 * @see ContextCacheUtils#retrievePauseMode()
 	 */
 	public DefaultContextCache() {
 		this(ContextCacheUtils.retrieveMaxCacheSize());
@@ -109,16 +119,35 @@ public class DefaultContextCache implements ContextCache {
 
 	/**
 	 * Create a new {@code DefaultContextCache} using the supplied maximum
-	 * cache size.
+	 * cache size and the {@link PauseMode} obtained via
+	 * {@link ContextCacheUtils#retrievePauseMode()}.
 	 * @param maxSize the maximum cache size
 	 * @throws IllegalArgumentException if the supplied {@code maxSize} value
 	 * is not positive
 	 * @since 4.3
 	 * @see #DefaultContextCache()
+	 * @see #DefaultContextCache(int, PauseMode)
+	 * @see ContextCacheUtils#retrievePauseMode()
 	 */
 	public DefaultContextCache(int maxSize) {
+		this(maxSize, ContextCacheUtils.retrievePauseMode());
+	}
+
+	/**
+	 * Create a new {@code DefaultContextCache} using the supplied maximum
+	 * cache size and {@link PauseMode}.
+	 * @param maxSize the maximum cache size
+	 * @param pauseMode the {@code PauseMode} to use
+	 * @throws IllegalArgumentException if the supplied {@code maxSize} value
+	 * is not positive or if the supplied {@code PauseMode} is {@code null}
+	 * @since 7.0.3
+	 * @see #DefaultContextCache()
+	 */
+	public DefaultContextCache(int maxSize, PauseMode pauseMode) {
 		Assert.isTrue(maxSize > 0, "'maxSize' must be positive");
+		Assert.notNull(pauseMode, "'pauseMode' must not be null");
 		this.maxSize = maxSize;
+		this.pauseMode = pauseMode;
 	}
 
 
@@ -222,7 +251,8 @@ public class DefaultContextCache implements ContextCache {
 		Set<Class<?>> activeTestClasses = getActiveTestClasses(mergedConfig);
 		activeTestClasses.remove(testClass);
 		if (activeTestClasses.isEmpty()) {
-			if (context instanceof ConfigurableApplicationContext cac && cac.isRunning()) {
+			if ((this.pauseMode == PauseMode.ALWAYS) &&
+					(context instanceof ConfigurableApplicationContext cac && cac.isRunning())) {
 				cac.pause();
 			}
 			this.contextUsageMap.remove(mergedConfig);

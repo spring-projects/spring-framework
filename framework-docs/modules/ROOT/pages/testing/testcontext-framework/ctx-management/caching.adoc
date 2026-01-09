@@ -73,6 +73,22 @@ will be in a "stopped" state until the context is used again by a test. Note, ho
 that `SmartLifecycle` components can opt out of pausing by returning `false` from
 `SmartLifecycle#isPauseable()`.
 
+[TIP]
+====
+If you encounter issues with `Lifecycle` components that cannot or should not opt out of
+pausing, or if you discover that your test suite runs more slowly due to the pausing and
+restarting of application contexts, you can disable the pausing feature from the command
+line or a build script by setting a JVM system property named
+`spring.test.context.cache.pause` to `never`. For example:
+
+```shell
+-Dspring.test.context.cache.pause=never
+```
+
+As an alternative, you can set the same property via the
+xref:appendix.adoc#appendix-spring-properties[`SpringProperties`] mechanism.
+====
+
 Since having a large number of application contexts loaded within a given test suite can
 cause the suite to take an unnecessarily long time to run, it is often beneficial to
 know exactly how many contexts have been loaded and cached. To view the statistics for
