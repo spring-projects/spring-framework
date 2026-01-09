@@ -65,6 +65,7 @@ import static org.mockito.Mockito.verify;
  *
  * @author Stephane Nicoll
  * @author Juergen Hoeller
+ * @author Sam Brannen
  */
 @ExtendWith(MockitoExtension.class)
 class JmsMessagingTemplateTests {
@@ -565,7 +566,7 @@ class JmsMessagingTemplateTests {
 	}
 
 	@Test
-	void convertSendAndReceivePayload() {
+	void convertSendAndReceivePayloadWithDestination() {
 		Destination destination = new Destination() {};
 		jakarta.jms.Message replyJmsMessage = createJmsTextMessage("My reply");
 		given(this.jmsTemplate.sendAndReceive(eq(destination), any())).willReturn(replyJmsMessage);
@@ -576,7 +577,7 @@ class JmsMessagingTemplateTests {
 	}
 
 	@Test
-	void convertSendAndReceivePayloadName() {
+	void convertSendAndReceivePayloadWithDestinationName() {
 		jakarta.jms.Message replyJmsMessage = createJmsTextMessage("My reply");
 		given(this.jmsTemplate.sendAndReceive(eq("myQueue"), any())).willReturn(replyJmsMessage);
 
@@ -586,7 +587,7 @@ class JmsMessagingTemplateTests {
 	}
 
 	@Test
-	void convertSendAndReceiveDefaultDestination() {
+	void convertSendAndReceiveWithDefaultDestination() {
 		Destination destination = new Destination() {};
 		this.messagingTemplate.setDefaultDestination(destination);
 		jakarta.jms.Message replyJmsMessage = createJmsTextMessage("My reply");
@@ -597,14 +598,45 @@ class JmsMessagingTemplateTests {
 		assertThat(reply).isEqualTo("My reply");
 	}
 
+	@Test  // gh-36118
+	void convertSendAndReceiveWithDefaultDestinationAndHeaders() {
+		Map<String, Object> headers = Map.of("foo", "bar");
+		Object payload = "Hello";
+
+		Destination destination = new Destination() {};
+		this.messagingTemplate.setDefaultDestination(destination);
+		jakarta.jms.Message replyJmsMessage = createJmsTextMessage("My reply");
+		given(this.jmsTemplate.sendAndReceive(eq(destination), any())).willReturn(replyJmsMessage);
+
+		String reply = this.messagingTemplate.convertSendAndReceive(payload, headers, String.class);
+		verify(this.jmsTemplate, times(1)).sendAndReceive(eq(destination), this.messageCreator.capture());
+		assertTextMessage(this.messageCreator.getValue());
+		assertThat(reply).isEqualTo("My reply");
+	}
+
 	@Test
-	void convertSendAndReceiveDefaultDestinationName() {
+	void convertSendAndReceiveWithDefaultDestinationName() {
 		this.messagingTemplate.setDefaultDestinationName("myQueue");
 		jakarta.jms.Message replyJmsMessage = createJmsTextMessage("My reply");
 		given(this.jmsTemplate.sendAndReceive(eq("myQueue"), any())).willReturn(replyJmsMessage);
 
 		String reply = this.messagingTemplate.convertSendAndReceive("my Payload", String.class);
 		verify(this.jmsTemplate, times(1)).sendAndReceive(eq("myQueue"), any());
+		assertThat(reply).isEqualTo("My reply");
+	}
+
+	@Test  // gh-36118
+	void convertSendAndReceiveWithDefaultDestinationNameAndHeaders() {
+		Map<String, Object> headers = Map.of("foo", "bar");
+		Object payload = "Hello";
+
+		this.messagingTemplate.setDefaultDestinationName("myQueue");
+		jakarta.jms.Message replyJmsMessage = createJmsTextMessage("My reply");
+		given(this.jmsTemplate.sendAndReceive(eq("myQueue"), any())).willReturn(replyJmsMessage);
+
+		String reply = this.messagingTemplate.convertSendAndReceive(payload, headers, String.class);
+		verify(this.jmsTemplate, times(1)).sendAndReceive(eq("myQueue"), this.messageCreator.capture());
+		assertTextMessage(this.messageCreator.getValue());
 		assertThat(reply).isEqualTo("My reply");
 	}
 
