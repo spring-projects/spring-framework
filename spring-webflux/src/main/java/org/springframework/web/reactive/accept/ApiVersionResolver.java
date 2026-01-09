@@ -33,8 +33,6 @@ public interface ApiVersionResolver {
 
 	/**
 	 * Resolve the version for the given exchange.
-	 * This method wraps the synchronous {@code resolveVersion} method
-	 * and provides a reactive alternative.
 	 * @param exchange the current exchange
 	 * @return {@code Mono} emitting the version value, or an empty {@code Mono}
 	 * @since 7.0.3

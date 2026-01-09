@@ -22,8 +22,8 @@ import reactor.core.publisher.Mono;
 import org.springframework.web.server.ServerWebExchange;
 
 /**
- * An extension of {@link ApiVersionResolver}s for implementations that can
- * resolve the version in an imperative way without blocking.
+ * Extension of {@link ApiVersionResolver} for implementations that resolve the
+ * version in an imperative way without blocking.
  *
  * @author Rossen Stoyanchev
  * @since 7.0.3
