@@ -16,18 +16,23 @@
 
 package org.springframework.web.service.registry;
 
+import java.net.URI;
 import java.util.List;
 import java.util.function.Predicate;
 
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.util.StringValueResolver;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.support.RestClientHttpServiceGroupConfigurer;
+import org.springframework.web.service.annotation.GetExchange;
+import org.springframework.web.service.annotation.HttpExchange;
 import org.springframework.web.service.invoker.HttpServiceProxyFactory;
 import org.springframework.web.service.registry.echo.EchoA;
 import org.springframework.web.service.registry.echo.EchoB;
@@ -37,6 +42,7 @@ import org.springframework.web.testfixture.http.client.MockClientHttpRequest;
 import org.springframework.web.testfixture.http.client.MockClientHttpResponse;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.atLeastOnce;
@@ -95,6 +101,87 @@ public class HttpServiceProxyRegistryFactoryBeanTests {
 		verify(requestFactory, atLeastOnce()).createRequest(any(), any());
 	}
 
+	@Test
+	void propertyPlaceholderInHttpExchangeUrlIsResolved() throws Exception {
+		GroupsMetadata groupsMetadata = new GroupsMetadata();
+		groupsMetadata.getOrCreateGroup("testGroup", REST_CLIENT)
+				.httpServiceTypeNames()
+				.add(PlaceholderService.class.getName());
+
+		ClientHttpRequestFactory requestFactory = Mockito.mock(ClientHttpRequestFactory.class);
+		MockClientHttpRequest mockRequest = new MockClientHttpRequest();
+		mockRequest.setResponse(new MockClientHttpResponse());
+
+		ArgumentCaptor<URI> uriCaptor = ArgumentCaptor.forClass(URI.class);
+		given(requestFactory.createRequest(uriCaptor.capture(), any())).willReturn(mockRequest);
+
+		StringValueResolver resolver = value -> {
+			if (value.contains("${test.base.url}")) {
+				return value.replace("${test.base.url}", "https://api.example.com");
+			}
+			return value;
+		};
+
+		RestClient.Builder clientBuilder = RestClient.builder().requestFactory(requestFactory);
+
+		RestClientHttpServiceGroupConfigurer configurer = groups -> groups.forEachClient(group -> clientBuilder);
+
+		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
+		context.registerBean(RestClientHttpServiceGroupConfigurer.class, () -> configurer);
+		context.refresh();
+
+		HttpServiceProxyRegistryFactoryBean factoryBean = new HttpServiceProxyRegistryFactoryBean(groupsMetadata);
+
+		factoryBean.setApplicationContext(context);
+		factoryBean.setBeanClassLoader(getClass().getClassLoader());
+		factoryBean.setEmbeddedValueResolver(resolver);
+		factoryBean.afterPropertiesSet();
+
+		HttpServiceProxyRegistry registry = factoryBean.getObject();
+		PlaceholderService service = registry.getClient(PlaceholderService.class);
+		service.callEndpoint();
+
+		URI requestedUri = uriCaptor.getValue();
+
+		assertThat(requestedUri.toString())
+				.startsWith("https://api.example.com")
+				.doesNotContain("${")
+				.contains("/endpoint");
+	}
+
+	@Test
+	void withoutResolverPlaceholderRemainsUnresolved() throws Exception {
+		GroupsMetadata groupsMetadata = new GroupsMetadata();
+		groupsMetadata.getOrCreateGroup("testGroup", REST_CLIENT)
+				.httpServiceTypeNames()
+				.add(PlaceholderService.class.getName());
+
+		ClientHttpRequestFactory requestFactory = Mockito.mock(ClientHttpRequestFactory.class);
+		MockClientHttpRequest capturedRequest = new MockClientHttpRequest();
+		capturedRequest.setResponse(new MockClientHttpResponse());
+		given(requestFactory.createRequest(any(), any())).willReturn(capturedRequest);
+
+		RestClient.Builder clientBuilder = RestClient.builder().requestFactory(requestFactory);
+		RestClientHttpServiceGroupConfigurer configurer = groups ->
+				groups.forEachClient(group -> clientBuilder);
+
+		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
+		context.registerBean(RestClientHttpServiceGroupConfigurer.class, () -> configurer);
+		context.refresh();
+
+		HttpServiceProxyRegistryFactoryBean factoryBean = new HttpServiceProxyRegistryFactoryBean(groupsMetadata);
+		factoryBean.setApplicationContext(context);
+		factoryBean.setBeanClassLoader(getClass().getClassLoader());
+		factoryBean.afterPropertiesSet();
+
+		HttpServiceProxyRegistry registry = factoryBean.getObject();
+		PlaceholderService service = registry.getClient(PlaceholderService.class);
+
+		assertThatThrownBy(service::callEndpoint)
+				.isInstanceOf(IllegalArgumentException.class)
+				.hasMessageContaining("test.base.url");
+	}
+
 	private HttpServiceProxyRegistry initProxyRegistry(
 			RestClientHttpServiceGroupConfigurer groupConfigurer, GroupsMetadata groupsMetadata) {
 
@@ -136,4 +223,10 @@ public class HttpServiceProxyRegistryFactoryBeanTests {
 		}
 	}
 
+	@HttpExchange(url = "${test.base.url}")
+	interface PlaceholderService {
+
+		@GetExchange("/endpoint")
+		String callEndpoint();
+	}
 }
