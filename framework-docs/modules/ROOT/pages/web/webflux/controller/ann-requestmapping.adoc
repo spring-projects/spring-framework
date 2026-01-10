@@ -393,7 +393,7 @@ is used to map requests.
 Once API versioning is enabled, you can begin to map requests with versions.
 The `@RequestMapping` `version` attribute supports the following:
 
-- No value -- matches any version
+- No value -- matches any version, unless the request is superseded by a more specific version match.
 - Fixed version ("1.2") -- matches the given version only
 - Baseline version ("1.2+") -- matches the given version and above
 
