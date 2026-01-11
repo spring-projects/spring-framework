@@ -117,6 +117,35 @@ public abstract class CoroutinesUtils {
 	@SuppressWarnings({"DataFlowIssue", "NullAway"})
 	public static Publisher<?> invokeSuspendingFunction(
 			CoroutineContext context, Method method, @Nullable Object target, @Nullable Object... args) {
+		return invokeSuspendingFunctionCore(context, method, target, args, false);
+	}
+
+	/**
+	 * Invoke a suspending function and convert it to {@link Mono} or
+	 * {@link Flux}.
+	 * @param context the coroutine context to use
+	 * @param method the suspending function to invoke
+	 * @param target the target to invoke {@code method} on
+	 * @param args the function arguments. If the {@code Continuation} argument is specified as the last argument
+	 * (typically {@code null}), it is ignored.
+	 * @return the method invocation result as reactive stream
+	 * @throws IllegalArgumentException if {@code method} is not a suspending function
+	 * @since 6.0
+	 * This function preservers the null parameter passed in argument
+	 */
+	@SuppressWarnings({"DataFlowIssue", "NullAway"})
+	public static Publisher<?> invokeSuspendingFunctionPreserveNulls(
+			CoroutineContext context, Method method, @Nullable Object target, @Nullable Object... args) {
+		return invokeSuspendingFunctionCore(context, method, target, args, true);
+	}
+
+	private static Publisher<?> invokeSuspendingFunctionCore(
+			CoroutineContext context,
+			Method method,
+			@Nullable Object target,
+			@Nullable Object[] args,
+			boolean preserveNulls)
+	{
 
 		Assert.isTrue(KotlinDetector.isSuspendingFunction(method), "Method must be a suspending function");
 		KFunction<?> function = ReflectJvmMapping.getKotlinFunction(method);
@@ -125,26 +154,7 @@ public abstract class CoroutinesUtils {
 			KCallablesJvm.setAccessible(function, true);
 		}
 		Mono<Object> mono = MonoKt.mono(context, (scope, continuation) -> {
-					Map<KParameter, Object> argMap = CollectionUtils.newHashMap(args.length + 1);
-					int index = 0;
-					for (KParameter parameter : function.getParameters()) {
-						switch (parameter.getKind()) {
-							case INSTANCE -> argMap.put(parameter, target);
-							case VALUE, EXTENSION_RECEIVER -> {
-								Object arg = args[index];
-								if (!(parameter.isOptional() && arg == null)) {
-									KType type = parameter.getType();
-									if (!(type.isMarkedNullable() && arg == null) &&
-											type.getClassifier() instanceof KClass<?> kClass &&
-											KotlinDetector.isInlineClass(JvmClassMappingKt.getJavaClass(kClass))) {
-										arg = box(kClass, arg);
-									}
-									argMap.put(parameter, arg);
-								}
-								index++;
-							}
-						}
-					}
+					Map<KParameter, Object> argMap = buildArgMap(function, target, args, preserveNulls);
 					return KCallables.callSuspendBy(function, argMap, continuation);
 				})
 				.filter(result -> result != Unit.INSTANCE)
@@ -162,6 +172,40 @@ public abstract class CoroutinesUtils {
 		}
 		return mono;
 	}
+
+	private static Map<KParameter, Object> buildArgMap(
+			KFunction<?> function,
+			@Nullable Object target,
+			@Nullable Object[] args,
+			boolean preserveNulls) {
+
+		Map<KParameter, Object> argMap = CollectionUtils.newHashMap(args.length + 1);
+		int index = 0;
+
+		for (KParameter parameter : function.getParameters()) {
+			switch (parameter.getKind()) {
+				case INSTANCE -> argMap.put(parameter, target);
+				case VALUE, EXTENSION_RECEIVER -> {
+					Object arg = args[index];
+
+					if (!(parameter.isOptional() && arg == null)) {
+						KType type = parameter.getType();
+						if (!(type.isMarkedNullable() && arg == null) &&
+								type.getClassifier() instanceof KClass<?> kClass &&
+								KotlinDetector.isInlineClass(JvmClassMappingKt.getJavaClass(kClass))) {
+							arg = box(kClass, arg);
+						}
+						argMap.put(parameter, arg);
+					} else if(preserveNulls) {
+						argMap.put(parameter, arg);
+					}
+					index++;
+				}
+			}
+		}
+		return argMap;
+	}
+
 
 	private static Object box(KClass<?> kClass, @Nullable Object arg) {
 		KFunction<?> constructor = Objects.requireNonNull(KClasses.getPrimaryConstructor(kClass));
