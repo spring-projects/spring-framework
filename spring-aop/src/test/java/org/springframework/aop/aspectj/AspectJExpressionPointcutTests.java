@@ -23,7 +23,11 @@ import java.util.Map;
 
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
+import org.aspectj.lang.ProceedingJoinPoint;
+import org.aspectj.lang.annotation.Around;
+import org.aspectj.lang.annotation.Aspect;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import test.annotation.EmptySpringAnnotation;
 import test.annotation.transaction.Tx;
@@ -31,6 +35,7 @@ import test.annotation.transaction.Tx;
 import org.springframework.aop.ClassFilter;
 import org.springframework.aop.MethodMatcher;
 import org.springframework.aop.Pointcut;
+import org.springframework.aop.aspectj.annotation.AspectJProxyFactory;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
 import org.springframework.beans.testfixture.beans.IOther;
@@ -513,6 +518,27 @@ class AspectJExpressionPointcutTests {
 				ProcessesSpringAnnotatedParameters.class)).isFalse();
 	}
 
+	@Test
+	void testAnnotationOnInterfaceMethodWithFQN() throws Exception {
+		String expression = "@annotation(test.annotation.transaction.Tx)";
+		AspectJExpressionPointcut ajexp = new AspectJExpressionPointcut();
+		ajexp.setExpression(expression);
+
+		assertThat(ajexp.matches(BeanC.class.getMethod("getAge"), BeanC.class)).isTrue();
+	}
+
+	@Disabled("WIP gh-22311")
+	@Test
+	void testAnnotationOnInterfaceMethodWithAnnotationArgument() {
+		AspectJProxyFactory proxyFactory = new AspectJProxyFactory(new BeanC());
+		proxyFactory.addAspect(PointcutWithTxAnnotationArgument.class);
+		IBeanC proxiedTestBean = proxyFactory.getProxy();
+
+		assertThatIllegalStateException()
+				.isThrownBy(proxiedTestBean::getAge)
+				.withMessage("Invoked with @Tx");
+	}
+
 
 	public static class OtherIOther implements IOther {
 
@@ -599,6 +625,29 @@ class AspectJExpressionPointcutTests {
 
 		public void setName(String name) {
 			this.name = name;
+		}
+	}
+
+	interface IBeanC {
+
+		@Tx
+		int getAge();
+	}
+
+	static class BeanC implements IBeanC {
+
+		@Override
+		public int getAge() {
+			return 0;
+		}
+	}
+
+	@Aspect
+	static class PointcutWithTxAnnotationArgument {
+
+		@Around("@annotation(tx)")
+		public Object around(ProceedingJoinPoint pjp, Tx tx) {
+			throw new IllegalStateException("Invoked with @Tx");
 		}
 	}
 
