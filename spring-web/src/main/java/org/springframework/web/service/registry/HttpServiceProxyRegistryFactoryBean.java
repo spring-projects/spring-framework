@@ -39,10 +39,12 @@ import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.context.EmbeddedValueResolverAware;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.util.StringValueResolver;
 import org.springframework.web.service.invoker.HttpExchangeAdapter;
 import org.springframework.web.service.invoker.HttpServiceProxyFactory;
 
@@ -61,8 +63,8 @@ import org.springframework.web.service.invoker.HttpServiceProxyFactory;
  * @see AbstractHttpServiceRegistrar
  */
 public final class HttpServiceProxyRegistryFactoryBean
-		implements ApplicationContextAware, BeanClassLoaderAware, InitializingBean,
-		FactoryBean<HttpServiceProxyRegistry> {
+		implements ApplicationContextAware, BeanClassLoaderAware, EmbeddedValueResolverAware,
+		InitializingBean, FactoryBean<HttpServiceProxyRegistry> {
 
 	private static final Map<HttpServiceGroup.ClientType, HttpServiceGroupAdapter<?>> groupAdapters =
 			GroupAdapterInitializer.initGroupAdapters();
@@ -76,6 +78,7 @@ public final class HttpServiceProxyRegistryFactoryBean
 
 	private @Nullable HttpServiceProxyRegistry proxyRegistry;
 
+	private @Nullable StringValueResolver embeddedValueResolver;
 
 	HttpServiceProxyRegistryFactoryBean(GroupsMetadata groupsMetadata) {
 		this.groupsMetadata = groupsMetadata;
@@ -93,6 +96,11 @@ public final class HttpServiceProxyRegistryFactoryBean
 	}
 
 	@Override
+	public void setEmbeddedValueResolver(StringValueResolver resolver) {
+		this.embeddedValueResolver = resolver;
+	}
+
+	@Override
 	public Class<?> getObjectType() {
 		return HttpServiceProxyRegistry.class;
 	}
@@ -105,7 +113,7 @@ public final class HttpServiceProxyRegistryFactoryBean
 
 		// Create the groups from the metadata
 		Set<ConfigurableGroup> groups = this.groupsMetadata.groups(this.beanClassLoader).stream()
-				.map(ConfigurableGroup::new)
+				.map(group -> new ConfigurableGroup(group, this.embeddedValueResolver))
 				.collect(Collectors.toSet());
 
 		// Apply group configurers
@@ -169,11 +177,14 @@ public final class HttpServiceProxyRegistryFactoryBean
 
 		private @Nullable Object clientBuilder;
 
+		private final @Nullable StringValueResolver embeddedValueResolver;
+
 		private final HttpServiceProxyFactory.Builder proxyFactoryBuilder = HttpServiceProxyFactory.builder();
 
-		ConfigurableGroup(HttpServiceGroup group) {
+		ConfigurableGroup(HttpServiceGroup group, @Nullable StringValueResolver embeddedValueResolver) {
 			this.group = group;
 			this.groupAdapter = getGroupAdapter(group.clientType());
+			this.embeddedValueResolver = embeddedValueResolver;
 		}
 
 		private static HttpServiceGroupAdapter<?> getGroupAdapter(HttpServiceGroup.ClientType clientType) {
@@ -218,6 +229,9 @@ public final class HttpServiceProxyRegistryFactoryBean
 		public Map<Class<?>, Object> createProxies() {
 			Map<Class<?>, Object> map = new LinkedHashMap<>(this.group.httpServiceTypes().size());
 			HttpExchangeAdapter adapter = this.groupAdapter.createExchangeAdapter(getClientBuilder());
+			if (this.embeddedValueResolver != null) {
+				this.proxyFactoryBuilder.embeddedValueResolver(this.embeddedValueResolver);
+			}
 			HttpServiceProxyFactory factory = this.proxyFactoryBuilder.exchangeAdapter(adapter).build();
 			this.group.httpServiceTypes().forEach(type -> map.put(type, factory.createClient(type)));
 			return map;
