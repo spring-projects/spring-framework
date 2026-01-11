@@ -34,8 +34,9 @@ import org.springframework.util.Assert;
  *
  * <p>A {@code ContextCache} maintains a cache of {@code ApplicationContexts}
  * keyed by {@link MergedContextConfiguration} instances, potentially configured
- * with a {@linkplain ContextCacheUtils#retrieveMaxCacheSize maximum size} and
- * a custom eviction policy.
+ * with a {@linkplain ContextCacheUtils#retrieveMaxCacheSize maximum size},
+ * {@linkplain ContextCacheUtils#retrievePauseMode() pause mode}, and custom
+ * eviction policy.
  *
  * <p>As of Spring Framework 6.1, this SPI includes optional support for
  * {@linkplain #getFailureCount(MergedContextConfiguration) tracking} and
@@ -58,6 +59,7 @@ import org.springframework.util.Assert;
  * @author Juergen Hoeller
  * @since 4.2
  * @see ContextCacheUtils#retrieveMaxCacheSize()
+ * @see ContextCacheUtils#retrievePauseMode()
  */
 public interface ContextCache {
 
@@ -90,8 +92,9 @@ public interface ContextCache {
 	/**
 	 * System property used to configure whether inactive application contexts
 	 * stored in the {@link ContextCache} should be paused: {@value}.
-	 * <p>Defaults to {@code always}. Set this property to {@code never} to
-	 * disable pausing of inactive application contexts &mdash; for example:
+	 * <p>Defaults to {@code on_context_switch}. Can be set to {@code always} or
+	 * {@code never} to disable pausing of inactive application contexts &mdash;
+	 * for example:
 	 * <p>{@code -Dspring.test.context.cache.pause=never}
 	 * <p>May alternatively be configured via the
 	 * {@link org.springframework.core.SpringProperties} mechanism.
@@ -366,6 +369,7 @@ public interface ContextCache {
 	 *
 	 * @since 7.0.3
 	 * @see #ALWAYS
+	 * @see #ON_CONTEXT_SWITCH
 	 * @see #NEVER
 	 * @see ContextCache#CONTEXT_CACHE_PAUSE_PROPERTY_NAME
 	 */
@@ -375,6 +379,12 @@ public interface ContextCache {
 		 * Always pause inactive application contexts.
 		 */
 		ALWAYS,
+
+		/**
+		 * Only pause inactive application contexts if the next context
+		 * retrieved from the cache is a different context.
+		 */
+		ON_CONTEXT_SWITCH,
 
 		/**
 		 * Never pause inactive application contexts, effectively disabling the

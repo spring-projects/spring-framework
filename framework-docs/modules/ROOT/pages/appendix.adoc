@@ -126,7 +126,7 @@ xref:testing/testcontext-framework/ctx-management/caching.adoc[Context Caching].
 
 | `spring.test.context.cache.pause`
 | The pause mode for the context cache in the _Spring TestContext Framework_. See
-xref:testing/testcontext-framework/ctx-management/caching.adoc[Context Caching].
+xref:testing/testcontext-framework/ctx-management/context-pausing.adoc[Context Pausing].
 
 | `spring.test.context.failure.threshold`
 | The failure threshold for errors encountered while attempting to load an `ApplicationContext`

@@ -104,6 +104,55 @@ class ContextCachePauseModeTests {
 	}
 
 	@Test
+	void topLevelTestClassesWithPauseModeOnContextSwitch() {
+		this.contextCache = new DefaultContextCache(DEFAULT_MAX_CONTEXT_CACHE_SIZE, PauseMode.ON_CONTEXT_SWITCH);
+
+		loadCtxAndAssertStats(TestCase1A.class, 1, 1, 0, 1);
+		assertThat(EventTracker.events).containsExactly("ContextRefreshed:TestCase1A");
+		clearApplicationEvents();
+
+		loadCtxAndAssertStats(TestCase1A.class, 1, 1, 1, 1);
+		assertThat(EventTracker.events).isEmpty();
+		clearApplicationEvents();
+
+		loadCtxAndAssertStats(TestCase1B.class, 1, 1, 2, 1);
+		assertThat(EventTracker.events).isEmpty();
+		clearApplicationEvents();
+
+		loadCtxAndAssertStats(TestCase1A.class, 1, 1, 3, 1);
+		assertThat(EventTracker.events).isEmpty();
+		clearApplicationEvents();
+
+		loadCtxAndAssertStats(TestCase2.class, 2, 1, 3, 2);
+		assertThat(EventTracker.events).containsExactly("ContextPaused:TestCase1A", "ContextRefreshed:TestCase2");
+		clearApplicationEvents();
+
+		loadCtxAndAssertStats(TestCase1B.class, 2, 1, 4, 2);
+		assertThat(EventTracker.events).containsExactly("ContextPaused:TestCase2", "ContextRestarted:TestCase1A");
+		clearApplicationEvents();
+
+		loadCtxAndAssertStats(TestCase1A.class, 2, 1, 5, 2);
+		assertThat(EventTracker.events).isEmpty();
+		clearApplicationEvents();
+
+		loadCtxAndAssertStats(TestCase2.class, 2, 1, 6, 2);
+		assertThat(EventTracker.events).containsExactly("ContextPaused:TestCase1A", "ContextRestarted:TestCase2");
+		clearApplicationEvents();
+
+		loadCtxAndAssertStats(TestCase2.class, 2, 1, 7, 2);
+		assertThat(EventTracker.events).isEmpty();
+		clearApplicationEvents();
+
+		markContextDirty(TestCase2.class);
+		assertThat(EventTracker.events).containsExactly("ContextClosed:TestCase2");
+		clearApplicationEvents();
+
+		loadCtxAndAssertStats(TestCase2.class, 2, 1, 7, 3);
+		assertThat(EventTracker.events).containsExactly("ContextRefreshed:TestCase2");
+		clearApplicationEvents();
+	}
+
+	@Test
 	void topLevelTestClassesWithPauseModeNever() {
 		this.contextCache = new DefaultContextCache(DEFAULT_MAX_CONTEXT_CACHE_SIZE, PauseMode.NEVER);
 

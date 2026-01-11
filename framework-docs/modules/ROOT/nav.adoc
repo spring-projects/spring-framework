@@ -343,6 +343,7 @@
 **** xref:testing/testcontext-framework/ctx-management/web.adoc[]
 **** xref:testing/testcontext-framework/ctx-management/web-mocks.adoc[]
 **** xref:testing/testcontext-framework/ctx-management/caching.adoc[]
+**** xref:testing/testcontext-framework/ctx-management/context-pausing.adoc[]
 **** xref:testing/testcontext-framework/ctx-management/failure-threshold.adoc[]
 **** xref:testing/testcontext-framework/ctx-management/hierarchies.adoc[]
 *** xref:testing/testcontext-framework/fixture-di.adoc[]

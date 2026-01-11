@@ -21,6 +21,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -85,6 +86,13 @@ public class DefaultContextCache implements ContextCache {
 	 * @since 7.0
 	 */
 	private final Map<MergedContextConfiguration, Set<Class<?>>> contextUsageMap = new ConcurrentHashMap<>(32);
+
+	/**
+	 * Set of keys for contexts that are currently unused and are therefore
+	 * candidates for pausing on context switch.
+	 * @since 7.0.3
+	 */
+	private final Set<MergedContextConfiguration> unusedContexts = new LinkedHashSet<>(4);
 
 	/**
 	 * Map of context keys to context load failure counts.
@@ -166,6 +174,7 @@ public class DefaultContextCache implements ContextCache {
 		}
 		else {
 			this.hitCount.incrementAndGet();
+			pauseOnContextSwitchIfNecessary(key);
 			restartContextIfNecessary(context);
 		}
 		return context;
@@ -191,6 +200,7 @@ public class DefaultContextCache implements ContextCache {
 		Assert.notNull(context, "ApplicationContext must not be null");
 
 		evictLruContextIfNecessary();
+		pauseOnContextSwitchIfNecessary(key);
 		putInternal(key, context);
 	}
 
@@ -200,6 +210,7 @@ public class DefaultContextCache implements ContextCache {
 		Assert.notNull(loadFunction, "LoadFunction must not be null");
 
 		evictLruContextIfNecessary();
+		pauseOnContextSwitchIfNecessary(key);
 		ApplicationContext context = loadFunction.loadContext(key);
 		Assert.state(context != null, "LoadFunction must return a non-null ApplicationContext");
 		putInternal(key, context);
@@ -253,9 +264,9 @@ public class DefaultContextCache implements ContextCache {
 		Set<Class<?>> activeTestClasses = getActiveTestClasses(mergedConfig);
 		activeTestClasses.remove(testClass);
 		if (activeTestClasses.isEmpty()) {
-			if ((this.pauseMode == PauseMode.ALWAYS) &&
-					(context instanceof ConfigurableApplicationContext cac && cac.isRunning())) {
-				cac.pause();
+			switch (this.pauseMode) {
+				case ALWAYS -> pauseIfNecessary(context);
+				case ON_CONTEXT_SWITCH -> this.unusedContexts.add(mergedConfig);
 			}
 			this.contextUsageMap.remove(mergedConfig);
 		}
@@ -269,6 +280,38 @@ public class DefaultContextCache implements ContextCache {
 
 	private Set<Class<?>> getActiveTestClasses(MergedContextConfiguration mergedConfig) {
 		return this.contextUsageMap.computeIfAbsent(mergedConfig, key -> new HashSet<>());
+	}
+
+	private boolean pauseOnContextSwitch() {
+		return (this.pauseMode == PauseMode.ON_CONTEXT_SWITCH);
+	}
+
+	private void pauseOnContextSwitchIfNecessary(MergedContextConfiguration activeContextKey) {
+		if (pauseOnContextSwitch()) {
+			removeFromUnusedContexts(activeContextKey);
+			for (MergedContextConfiguration unusedContextKey : this.unusedContexts) {
+				pauseIfNecessary(this.contextMap.get(unusedContextKey));
+			}
+			this.unusedContexts.clear();
+		}
+	}
+
+	/**
+	 * Remove the supplied key and any keys for parent contexts from the unused
+	 * contexts set. This effectively stops tracking the context (or context
+	 * hierarchy) as unused.
+	 */
+	private void removeFromUnusedContexts(MergedContextConfiguration key) {
+		do {
+			this.unusedContexts.remove(key);
+			key = key.getParent();
+		} while (key != null);
+	}
+
+	private static void pauseIfNecessary(@Nullable ApplicationContext context) {
+		if (context instanceof ConfigurableApplicationContext cac && cac.isRunning()) {
+			cac.pause();
+		}
 	}
 
 	@Override
@@ -322,6 +365,9 @@ public class DefaultContextCache implements ContextCache {
 		// stack as opposed to prior to the recursive call).
 		ApplicationContext context = this.contextMap.remove(key);
 		this.contextUsageMap.remove(key);
+		if (pauseOnContextSwitch()) {
+			this.unusedContexts.remove(key);
+		}
 		if (context instanceof ConfigurableApplicationContext cac) {
 			cac.close();
 		}
@@ -387,6 +433,7 @@ public class DefaultContextCache implements ContextCache {
 			this.contextMap.clear();
 			this.hierarchyMap.clear();
 			this.contextUsageMap.clear();
+			this.unusedContexts.clear();
 		}
 	}
 

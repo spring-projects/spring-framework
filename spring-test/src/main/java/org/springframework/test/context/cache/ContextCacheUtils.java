@@ -65,7 +65,8 @@ public abstract class ContextCacheUtils {
 	 * Retrieve the {@link PauseMode} for the {@link ContextCache}.
 	 * <p>Uses {@link SpringProperties} to retrieve a system property or Spring
 	 * property named {@value ContextCache#CONTEXT_CACHE_PAUSE_PROPERTY_NAME}.
-	 * <p>Defaults to {@link PauseMode#ALWAYS} if no such property has been set.
+	 * <p>Defaults to {@link PauseMode#ON_CONTEXT_SWITCH} if no such property has
+	 * been set.
 	 * @return the configured or default {@code PauseMode}
 	 * @since 7.0.3
 	 * @see ContextCache#CONTEXT_CACHE_PAUSE_PROPERTY_NAME
@@ -81,7 +82,7 @@ public abstract class ContextCacheUtils {
 			}
 			return pauseMode;
 		}
-		return PauseMode.ALWAYS;
+		return PauseMode.ON_CONTEXT_SWITCH;
 	}
 
 	private static int retrieveProperty(String key, int defaultValue) {

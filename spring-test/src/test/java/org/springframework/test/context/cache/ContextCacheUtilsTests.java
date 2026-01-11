@@ -112,6 +112,13 @@ class ContextCacheUtilsTests {
 				"\talways\u000B"
 			};
 
+		static final String[] ON_CONTEXT_SWITCH_VALUES = {
+				"on_context_switch",
+				"On_Context_Switch",
+				"ON_CONTEXT_SWITCH",
+				"\ton_context_switch\u000B"
+			};
+
 		static final String[] NEVER_VALUES = {
 				"never",
 				"Never",
@@ -129,7 +136,7 @@ class ContextCacheUtilsTests {
 
 		@Test
 		void retrievePauseModeFromDefault() {
-			assertThat(retrievePauseMode()).isEqualTo(PauseMode.ALWAYS);
+			assertThat(retrievePauseMode()).isEqualTo(PauseMode.ON_CONTEXT_SWITCH);
 		}
 
 		@Test
@@ -152,6 +159,13 @@ class ContextCacheUtilsTests {
 		}
 
 		@ParameterizedTest
+		@FieldSource("ON_CONTEXT_SWITCH_VALUES")
+		void retrievePauseModeFromSystemPropertyWithValueOnContextSwitch(String value) {
+			System.setProperty(CONTEXT_CACHE_PAUSE_PROPERTY_NAME, value);
+			assertThat(retrievePauseMode()).isEqualTo(PauseMode.ON_CONTEXT_SWITCH);
+		}
+
+		@ParameterizedTest
 		@FieldSource("NEVER_VALUES")
 		void retrievePauseModeFromSystemPropertyWithValueNever(String value) {
 			System.setProperty(CONTEXT_CACHE_PAUSE_PROPERTY_NAME, value);
@@ -163,6 +177,13 @@ class ContextCacheUtilsTests {
 		void retrievePauseModeFromSpringPropertyWithValueAlways(String value) {
 			SpringProperties.setProperty(CONTEXT_CACHE_PAUSE_PROPERTY_NAME, value);
 			assertThat(retrievePauseMode()).isEqualTo(PauseMode.ALWAYS);
+		}
+
+		@ParameterizedTest
+		@FieldSource("ON_CONTEXT_SWITCH_VALUES")
+		void retrievePauseModeFromSpringPropertyWithValueOnContextSwitch(String value) {
+			SpringProperties.setProperty(CONTEXT_CACHE_PAUSE_PROPERTY_NAME, value);
+			assertThat(retrievePauseMode()).isEqualTo(PauseMode.ON_CONTEXT_SWITCH);
 		}
 
 		@ParameterizedTest
