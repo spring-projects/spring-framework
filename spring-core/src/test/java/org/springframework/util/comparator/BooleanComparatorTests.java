@@ -37,28 +37,36 @@ class BooleanComparatorTests {
 	void shouldCompareWithTrueLow() {
 		Comparator<Boolean> c = new BooleanComparator(true);
 		assertThat(c.compare(true, false)).isLessThan(0);
+		assertThat(c.compare(false, true)).isGreaterThan(0);
 		assertThat(c.compare(Boolean.TRUE, Boolean.TRUE)).isEqualTo(0);
+		assertThat(c.compare(Boolean.FALSE, Boolean.FALSE)).isEqualTo(0);
 	}
 
 	@Test
 	void shouldCompareWithTrueHigh() {
 		Comparator<Boolean> c = new BooleanComparator(false);
 		assertThat(c.compare(true, false)).isGreaterThan(0);
+		assertThat(c.compare(false, true)).isLessThan(0);
 		assertThat(c.compare(Boolean.TRUE, Boolean.TRUE)).isEqualTo(0);
+		assertThat(c.compare(Boolean.FALSE, Boolean.FALSE)).isEqualTo(0);
 	}
 
 	@Test
 	void shouldCompareFromTrueLow() {
 		Comparator<Boolean> c = BooleanComparator.TRUE_LOW;
 		assertThat(c.compare(true, false)).isLessThan(0);
+		assertThat(c.compare(false, true)).isGreaterThan(0);
 		assertThat(c.compare(Boolean.TRUE, Boolean.TRUE)).isEqualTo(0);
+		assertThat(c.compare(Boolean.FALSE, Boolean.FALSE)).isEqualTo(0);
 	}
 
 	@Test
 	void shouldCompareFromTrueHigh() {
 		Comparator<Boolean> c = BooleanComparator.TRUE_HIGH;
 		assertThat(c.compare(true, false)).isGreaterThan(0);
+		assertThat(c.compare(false, true)).isLessThan(0);
 		assertThat(c.compare(Boolean.TRUE, Boolean.TRUE)).isEqualTo(0);
+		assertThat(c.compare(Boolean.FALSE, Boolean.FALSE)).isEqualTo(0);
 	}
 
 }
