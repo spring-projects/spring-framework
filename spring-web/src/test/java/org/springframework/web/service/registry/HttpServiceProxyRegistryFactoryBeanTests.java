@@ -20,6 +20,7 @@ import java.net.URI;
 import java.util.List;
 import java.util.function.Predicate;
 
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
@@ -42,7 +43,6 @@ import org.springframework.web.testfixture.http.client.MockClientHttpRequest;
 import org.springframework.web.testfixture.http.client.MockClientHttpResponse;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.atLeastOnce;
@@ -59,19 +59,20 @@ public class HttpServiceProxyRegistryFactoryBeanTests {
 	void twoGroups() {
 		String echoName = "echo";
 		String greetingName = "greeting";
-		GroupsMetadata groupsMetadata = new GroupsMetadata();
+		GroupsMetadata metadata = new GroupsMetadata();
 
 		List<String> echoServices = List.of(EchoA.class.getName(), EchoB.class.getName());
-		groupsMetadata.getOrCreateGroup(echoName, REST_CLIENT).httpServiceTypeNames().addAll(echoServices);
+		metadata.getOrCreateGroup(echoName, REST_CLIENT).httpServiceTypeNames().addAll(echoServices);
 
 		List<String> greetingServices = List.of(GreetingA.class.getName(), GreetingB.class.getName());
-		groupsMetadata.getOrCreateGroup(greetingName, REST_CLIENT).httpServiceTypeNames().addAll(greetingServices);
+		metadata.getOrCreateGroup(greetingName, REST_CLIENT).httpServiceTypeNames().addAll(greetingServices);
 
 		Predicate<HttpServiceGroup> echoFilter = group -> group.name().equals(echoName);
 		Predicate<HttpServiceGroup> greetingFilter = group -> group.name().equals(greetingName);
 		TestConfigurer groupConfigurer = new TestConfigurer(List.of(echoFilter, greetingFilter));
 
-		HttpServiceProxyRegistry registry = initProxyRegistry(groupConfigurer, groupsMetadata);
+		HttpServiceProxyRegistry registry = initProxyRegistry(groupConfigurer, metadata, null);
+
 		assertThat(registry.getGroupNames()).containsExactlyInAnyOrder(echoName, greetingName);
 		assertThat(registry.getClientTypesInGroup(echoName)).containsExactlyInAnyOrder(EchoA.class, EchoB.class);
 		assertThat(registry.getClientTypesInGroup(greetingName)).containsExactlyInAnyOrder(GreetingA.class, GreetingB.class);
@@ -84,9 +85,6 @@ public class HttpServiceProxyRegistryFactoryBeanTests {
 
 	@Test
 	void initializeClientBuilder() throws Exception {
-		GroupsMetadata groupsMetadata = new GroupsMetadata();
-		groupsMetadata.getOrCreateGroup("echo", REST_CLIENT).httpServiceTypeNames().add(EchoA.class.getName());
-
 		ClientHttpRequestFactory requestFactory = Mockito.mock(ClientHttpRequestFactory.class);
 		MockClientHttpRequest request = new MockClientHttpRequest();
 		request.setResponse(new MockClientHttpResponse());
@@ -95,95 +93,47 @@ public class HttpServiceProxyRegistryFactoryBeanTests {
 		RestClient.Builder clientBuilder = RestClient.builder().baseUrl("/").requestFactory(requestFactory);
 		RestClientHttpServiceGroupConfigurer groupConfigurer = groups -> groups.forEachClient(group -> clientBuilder);
 
-		HttpServiceProxyRegistry registry = initProxyRegistry(groupConfigurer, groupsMetadata);
+		GroupsMetadata metadata = new GroupsMetadata();
+		metadata.getOrCreateGroup("echo", REST_CLIENT).httpServiceTypeNames().add(EchoA.class.getName());
+
+		HttpServiceProxyRegistry registry = initProxyRegistry(groupConfigurer, metadata, null);
 		registry.getClient(EchoA.class).handle("foo");
 
 		verify(requestFactory, atLeastOnce()).createRequest(any(), any());
 	}
 
 	@Test
-	void propertyPlaceholderInHttpExchangeUrlIsResolved() throws Exception {
-		GroupsMetadata groupsMetadata = new GroupsMetadata();
-		groupsMetadata.getOrCreateGroup("testGroup", REST_CLIENT)
-				.httpServiceTypeNames()
-				.add(PlaceholderService.class.getName());
+	void propertyPlaceholder() throws Exception {
+		GroupsMetadata metadata = new GroupsMetadata();
+		metadata.getOrCreateGroup("group", REST_CLIENT).httpServiceTypeNames().add(PlaceholderService.class.getName());
 
 		ClientHttpRequestFactory requestFactory = Mockito.mock(ClientHttpRequestFactory.class);
-		MockClientHttpRequest mockRequest = new MockClientHttpRequest();
-		mockRequest.setResponse(new MockClientHttpResponse());
+		MockClientHttpRequest request = new MockClientHttpRequest();
+		request.setResponse(new MockClientHttpResponse());
 
 		ArgumentCaptor<URI> uriCaptor = ArgumentCaptor.forClass(URI.class);
-		given(requestFactory.createRequest(uriCaptor.capture(), any())).willReturn(mockRequest);
-
-		StringValueResolver resolver = value -> {
-			if (value.contains("${test.base.url}")) {
-				return value.replace("${test.base.url}", "https://api.example.com");
-			}
-			return value;
-		};
+		given(requestFactory.createRequest(uriCaptor.capture(), any())).willReturn(request);
 
 		RestClient.Builder clientBuilder = RestClient.builder().requestFactory(requestFactory);
-
 		RestClientHttpServiceGroupConfigurer configurer = groups -> groups.forEachClient(group -> clientBuilder);
 
-		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
-		context.registerBean(RestClientHttpServiceGroupConfigurer.class, () -> configurer);
-		context.refresh();
+		String baseUrl = "https://api.example.com";
+		HttpServiceProxyRegistry registry = initProxyRegistry(configurer, metadata, value -> {
+			if (value.contains("${test.base.url}")) {
+				return value.replace("${test.base.url}", baseUrl);
+			}
+			return value;
+		});
 
-		HttpServiceProxyRegistryFactoryBean factoryBean = new HttpServiceProxyRegistryFactoryBean(groupsMetadata);
-
-		factoryBean.setApplicationContext(context);
-		factoryBean.setBeanClassLoader(getClass().getClassLoader());
-		factoryBean.setEmbeddedValueResolver(resolver);
-		factoryBean.afterPropertiesSet();
-
-		HttpServiceProxyRegistry registry = factoryBean.getObject();
 		PlaceholderService service = registry.getClient(PlaceholderService.class);
-		service.callEndpoint();
+		service.invoke();
 
-		URI requestedUri = uriCaptor.getValue();
-
-		assertThat(requestedUri.toString())
-				.startsWith("https://api.example.com")
-				.doesNotContain("${")
-				.contains("/endpoint");
-	}
-
-	@Test
-	void withoutResolverPlaceholderRemainsUnresolved() throws Exception {
-		GroupsMetadata groupsMetadata = new GroupsMetadata();
-		groupsMetadata.getOrCreateGroup("testGroup", REST_CLIENT)
-				.httpServiceTypeNames()
-				.add(PlaceholderService.class.getName());
-
-		ClientHttpRequestFactory requestFactory = Mockito.mock(ClientHttpRequestFactory.class);
-		MockClientHttpRequest capturedRequest = new MockClientHttpRequest();
-		capturedRequest.setResponse(new MockClientHttpResponse());
-		given(requestFactory.createRequest(any(), any())).willReturn(capturedRequest);
-
-		RestClient.Builder clientBuilder = RestClient.builder().requestFactory(requestFactory);
-		RestClientHttpServiceGroupConfigurer configurer = groups ->
-				groups.forEachClient(group -> clientBuilder);
-
-		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
-		context.registerBean(RestClientHttpServiceGroupConfigurer.class, () -> configurer);
-		context.refresh();
-
-		HttpServiceProxyRegistryFactoryBean factoryBean = new HttpServiceProxyRegistryFactoryBean(groupsMetadata);
-		factoryBean.setApplicationContext(context);
-		factoryBean.setBeanClassLoader(getClass().getClassLoader());
-		factoryBean.afterPropertiesSet();
-
-		HttpServiceProxyRegistry registry = factoryBean.getObject();
-		PlaceholderService service = registry.getClient(PlaceholderService.class);
-
-		assertThatThrownBy(service::callEndpoint)
-				.isInstanceOf(IllegalArgumentException.class)
-				.hasMessageContaining("test.base.url");
+		assertThat(uriCaptor.getValue().toString()).isEqualTo(baseUrl);
 	}
 
 	private HttpServiceProxyRegistry initProxyRegistry(
-			RestClientHttpServiceGroupConfigurer groupConfigurer, GroupsMetadata groupsMetadata) {
+			RestClientHttpServiceGroupConfigurer groupConfigurer, GroupsMetadata groupsMetadata,
+			@Nullable StringValueResolver valueResolver) {
 
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
 		context.registerBean(RestClientHttpServiceGroupConfigurer.class, () -> groupConfigurer);
@@ -192,6 +142,7 @@ public class HttpServiceProxyRegistryFactoryBeanTests {
 		HttpServiceProxyRegistryFactoryBean factoryBean = new HttpServiceProxyRegistryFactoryBean(groupsMetadata);
 		factoryBean.setApplicationContext(context);
 		factoryBean.setBeanClassLoader(getClass().getClassLoader());
+		factoryBean.setEmbeddedValueResolver(valueResolver);
 		factoryBean.afterPropertiesSet();
 
 		return factoryBean.getObject();
@@ -226,7 +177,7 @@ public class HttpServiceProxyRegistryFactoryBeanTests {
 	@HttpExchange(url = "${test.base.url}")
 	interface PlaceholderService {
 
-		@GetExchange("/endpoint")
-		String callEndpoint();
+		@GetExchange
+		String invoke();
 	}
 }

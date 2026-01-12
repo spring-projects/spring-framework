@@ -177,14 +177,14 @@ public final class HttpServiceProxyRegistryFactoryBean
 
 		private @Nullable Object clientBuilder;
 
-		private final @Nullable StringValueResolver embeddedValueResolver;
-
 		private final HttpServiceProxyFactory.Builder proxyFactoryBuilder = HttpServiceProxyFactory.builder();
 
-		ConfigurableGroup(HttpServiceGroup group, @Nullable StringValueResolver embeddedValueResolver) {
+		ConfigurableGroup(HttpServiceGroup group, @Nullable StringValueResolver valueResolver) {
 			this.group = group;
 			this.groupAdapter = getGroupAdapter(group.clientType());
-			this.embeddedValueResolver = embeddedValueResolver;
+			if (valueResolver != null) {
+				this.proxyFactoryBuilder.embeddedValueResolver(valueResolver);
+			}
 		}
 
 		private static HttpServiceGroupAdapter<?> getGroupAdapter(HttpServiceGroup.ClientType clientType) {
@@ -229,9 +229,6 @@ public final class HttpServiceProxyRegistryFactoryBean
 		public Map<Class<?>, Object> createProxies() {
 			Map<Class<?>, Object> map = new LinkedHashMap<>(this.group.httpServiceTypes().size());
 			HttpExchangeAdapter adapter = this.groupAdapter.createExchangeAdapter(getClientBuilder());
-			if (this.embeddedValueResolver != null) {
-				this.proxyFactoryBuilder.embeddedValueResolver(this.embeddedValueResolver);
-			}
 			HttpServiceProxyFactory factory = this.proxyFactoryBuilder.exchangeAdapter(adapter).build();
 			this.group.httpServiceTypes().forEach(type -> map.put(type, factory.createClient(type)));
 			return map;
