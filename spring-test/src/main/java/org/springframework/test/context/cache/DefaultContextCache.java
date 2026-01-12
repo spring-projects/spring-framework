@@ -172,13 +172,15 @@ public class DefaultContextCache implements ContextCache {
 	}
 
 	private void restartContextIfNecessary(ApplicationContext context) {
-		// Recurse up the context hierarchy first.
-		ApplicationContext parent = context.getParent();
-		if (parent != null) {
-			restartContextIfNecessary(parent);
-		}
-		if (context instanceof ConfigurableApplicationContext cac && !cac.isRunning()) {
-			cac.restart();
+		if (this.pauseMode != PauseMode.NEVER) {
+			// Recurse up the context hierarchy first.
+			ApplicationContext parent = context.getParent();
+			if (parent != null) {
+				restartContextIfNecessary(parent);
+			}
+			if (context instanceof ConfigurableApplicationContext cac && !cac.isRunning()) {
+				cac.restart();
+			}
 		}
 	}
 
