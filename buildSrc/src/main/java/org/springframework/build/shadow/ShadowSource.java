@@ -78,7 +78,7 @@ public class ShadowSource extends DefaultTask {
 	}
 
 	@OutputDirectory
-	DirectoryProperty getOutputDirectory() {
+	public DirectoryProperty getOutputDirectory() {
 		return this.outputDirectory;
 	}
 

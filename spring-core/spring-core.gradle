@@ -26,17 +26,19 @@ configurations {
 	graalvm
 }
 
+def javaPoetConfig = configurations.javapoet
 tasks.register('javapoetRepackJar', ShadowJar) {
 	archiveBaseName = 'spring-javapoet-repack'
 	archiveVersion = javapoetVersion
-	configurations = [project.configurations.javapoet]
+	configurations = [javaPoetConfig]
 	relocate('com.palantir.javapoet', 'org.springframework.javapoet')
 }
 
+def javaPoetDir = project.file("build/shadow-source/javapoet")
 tasks.register('javapoetSource', ShadowSource) {
-	configurations = [project.configurations.javapoet]
+	configurations = [javaPoetConfig]
 	relocate('com.palantir.javapoet', 'org.springframework.javapoet')
-	outputDirectory = file("build/shadow-source/javapoet")
+	outputDirectory = javaPoetDir
 }
 
 tasks.register('javapoetSourceJar', Jar) {
@@ -46,17 +48,19 @@ tasks.register('javapoetSourceJar', Jar) {
 	from javapoetSource
 }
 
+def objenesisConfig = configurations.objenesis
 tasks.register('objenesisRepackJar', ShadowJar) {
 	archiveBaseName = 'spring-objenesis-repack'
 	archiveVersion = objenesisVersion
-	configurations = [project.configurations.objenesis]
+	configurations = [objenesisConfig]
 	relocate('org.objenesis', 'org.springframework.objenesis')
 }
 
+def objenesisDir = project.file("build/shadow-source/objenesis")
 tasks.register('objenesisSource', ShadowSource) {
-	configurations = [project.configurations.objenesis]
+	configurations = [objenesisConfig]
 	relocate('org.objenesis', 'org.springframework.objenesis')
-	outputDirectory = file("build/shadow-source/objenesis")
+	outputDirectory = objenesisDir
 }
 
 tasks.register('objenesisSourceJar', Jar) {

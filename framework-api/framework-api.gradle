@@ -20,6 +20,7 @@ dependencies {
 	}
 }
 
+def springAspectsOutput = project(":spring-aspects").sourceSets.main.output
 javadoc {
 	javadocTool.set(javaToolchains.javadocToolFor({
 		languageVersion = JavaLanguageVersion.of(25)
@@ -49,7 +50,7 @@ javadoc {
 	doFirst {
 		classpath += files(
 				// ensure the javadoc process can resolve types compiled from .aj sources
-				project(":spring-aspects").sourceSets.main.output
+                springAspectsOutput
 		)
 		classpath += files(moduleProjects.collect { it.sourceSets.main.compileClasspath })
 	}
