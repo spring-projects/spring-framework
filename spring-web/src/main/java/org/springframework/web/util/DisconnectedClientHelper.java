@@ -56,6 +56,8 @@ public class DisconnectedClientHelper {
 					"org.springframework.web.client.RestClientException", classLoader));
 			CLIENT_EXCEPTION_TYPES.add(ClassUtils.forName(
 					"org.springframework.web.reactive.function.client.WebClientException", classLoader));
+			CLIENT_EXCEPTION_TYPES.add(ClassUtils.forName(
+				    "org.springframework.dao.DataAccessResourceFailureException", classLoader));
 		}
 		catch (ClassNotFoundException ex) {
 			// ignore
