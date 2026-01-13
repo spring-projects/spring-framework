@@ -28,6 +28,8 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Keith Donald
  * @author Chris Beams
  */
+@Deprecated(since = "7.0.3", forRemoval = true)
+@SuppressWarnings("removal")
 class PropertyComparatorTests {
 
 	@Test
