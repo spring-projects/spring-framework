@@ -1515,7 +1515,7 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 		/**
 		 * Apply the back-off time once. In a regular scenario, the back-off is only applied if we
 		 * failed to recover with the broker. This additional wait period avoids a burst retry
-		 * scenario when the broker is actually up but something else if failing (i.e. listener
+		 * scenario when the broker is actually up but something else is failing (i.e. listener
 		 * specific).
 		 */
 		private void waitBeforeRecoveryAttempt() {
