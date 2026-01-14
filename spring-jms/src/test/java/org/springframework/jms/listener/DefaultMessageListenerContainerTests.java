@@ -17,8 +17,10 @@
 package org.springframework.jms.listener;
 
 import java.lang.reflect.Field;
+import java.util.ArrayDeque;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -28,10 +30,13 @@ import jakarta.jms.Connection;
 import jakarta.jms.ConnectionFactory;
 import jakarta.jms.Destination;
 import jakarta.jms.JMSException;
+import jakarta.jms.MessageConsumer;
+import jakarta.jms.Session;
 import org.junit.jupiter.api.Test;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
+import org.springframework.core.task.TaskExecutor;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.backoff.BackOff;
 import org.springframework.util.backoff.BackOffExecution;
@@ -108,6 +113,29 @@ class DefaultMessageListenerContainerTests {
 		assertThat(container.isRunning()).isTrue();
 		verify(backOff).start();
 		verify(execution, times(1)).nextBackOff();  // only on attempt as the second one lead to a recovery
+
+		container.destroy();
+	}
+
+	@Test
+	void listenerSetupFailureBackOffStopsContainer() {
+		BackOff backOff = mock();
+		BackOffExecution execution = mock();
+		given(execution.nextBackOff()).willReturn(0L, 0L, BackOffExecution.STOP);
+		given(backOff.start()).willReturn(execution);
+
+		QueueingTaskExecutor taskExecutor = new QueueingTaskExecutor();
+		DefaultMessageListenerContainer container = createListenerSetupFailingContainer();
+		container.setBackOff(backOff);
+		container.setCacheLevel(DefaultMessageListenerContainer.CACHE_CONSUMER);
+		container.setTaskExecutor(taskExecutor);
+		container.afterPropertiesSet();
+		container.start();
+		taskExecutor.runUntilIdle(10);
+
+		assertThat(container.isRunning()).isFalse();
+		verify(backOff).start();
+		verify(execution, times(3)).nextBackOff();
 
 		container.destroy();
 	}
@@ -265,6 +293,60 @@ class DefaultMessageListenerContainerTests {
 		}
 		catch (JMSException ex) {
 			throw new IllegalStateException(ex);  // never happen
+		}
+	}
+
+	private static DefaultMessageListenerContainer createListenerSetupFailingContainer() {
+		ConnectionFactory connectionFactory = mock();
+		try {
+			given(connectionFactory.createConnection()).willReturn(mock(Connection.class));
+		}
+		catch (JMSException ex) {
+			throw new IllegalStateException(ex);  // never happen
+		}
+		Destination destination = new Destination() {};
+
+		return new DefaultMessageListenerContainer() {
+			@Override
+			protected Session createSession(Connection con) {
+				return mock(Session.class);
+			}
+
+			@Override
+			protected MessageConsumer createListenerConsumer(Session session) throws JMSException {
+				throw new JMSException("Listener setup failed");
+			}
+
+			@Override
+			protected void refreshConnectionUntilSuccessful() {
+				// Keep focus on listener setup back-off behavior.
+			}
+
+			{
+				setConnectionFactory(connectionFactory);
+				setDestination(destination);
+			}
+		};
+	}
+
+	private static final class QueueingTaskExecutor implements TaskExecutor {
+
+		private final Queue<Runnable> tasks = new ArrayDeque<>();
+
+		@Override
+		public void execute(Runnable task) {
+			this.tasks.add(task);
+		}
+
+		void runUntilIdle(int maxRuns) {
+			for (int i = 0; i < maxRuns; i++) {
+				Runnable task = this.tasks.poll();
+				if (task == null) {
+					return;
+				}
+				task.run();
+			}
+			throw new IllegalStateException("QueueingTaskExecutor did not drain within the limit");
 		}
 	}
 

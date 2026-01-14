@@ -1265,6 +1265,8 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 
 		private volatile boolean idle = true;
 
+		private @Nullable BackOffExecution recoveryBackOffExecution;
+
 		private volatile @Nullable Thread currentReceiveThread;
 
 		@Override
@@ -1306,7 +1308,10 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 				if (!this.lastMessageSucceeded) {
 					// We failed more than once in a row or on startup -
 					// wait before first recovery attempt.
-					waitBeforeRecoveryAttempt();
+					if (!waitBeforeRecoveryAttempt()) {
+						this.lastMessageSucceeded = false;
+						return;
+					}
 				}
 				this.lastMessageSucceeded = false;
 				boolean alreadyRecovered = false;
@@ -1422,6 +1427,7 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 				initResourcesIfNecessary();
 				boolean messageReceived = receiveAndExecute(this, this.session, this.consumer);
 				this.lastMessageSucceeded = true;
+				this.recoveryBackOffExecution = null;
 				return messageReceived;
 			}
 			finally {
@@ -1518,9 +1524,17 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 		 * scenario when the broker is actually up but something else if failing (i.e. listener
 		 * specific).
 		 */
-		private void waitBeforeRecoveryAttempt() {
-			BackOffExecution execution = DefaultMessageListenerContainer.this.backOff.start();
-			applyBackOffTime(execution);
+		private boolean waitBeforeRecoveryAttempt() {
+			if (this.recoveryBackOffExecution == null) {
+				this.recoveryBackOffExecution = DefaultMessageListenerContainer.this.backOff.start();
+			}
+			if (!applyBackOffTime(this.recoveryBackOffExecution)) {
+				logger.error("Stopping container for destination '" + getDestinationDescription() +
+						"': back-off policy does not allow for further attempts.");
+				stop();
+				return false;
+			}
+			return true;
 		}
 
 		@Override
