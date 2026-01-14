@@ -36,6 +36,7 @@ import org.springframework.util.ClassUtils;
  * error stacktrace at TRACE level.
  *
  * @author Rossen Stoyanchev
+ * @author Yanming Zhou
  * @since 6.1
  */
 public class DisconnectedClientHelper {
@@ -50,16 +51,8 @@ public class DisconnectedClientHelper {
 	private static final Set<Class<?>> CLIENT_EXCEPTION_TYPES = new HashSet<>(2);
 
 	static {
-		try {
-			ClassLoader classLoader = DisconnectedClientHelper.class.getClassLoader();
-			CLIENT_EXCEPTION_TYPES.add(ClassUtils.forName(
-					"org.springframework.web.client.RestClientException", classLoader));
-			CLIENT_EXCEPTION_TYPES.add(ClassUtils.forName(
-					"org.springframework.web.reactive.function.client.WebClientException", classLoader));
-		}
-		catch (ClassNotFoundException ex) {
-			// ignore
-		}
+		registerClientExceptionType("org.springframework.web.client.RestClientException");
+		registerClientExceptionType("org.springframework.web.reactive.function.client.WebClientException");
 	}
 
 
@@ -133,6 +126,16 @@ public class DisconnectedClientHelper {
 		}
 
 		return false;
+	}
+
+	private static void registerClientExceptionType(String type) {
+		try {
+			ClassLoader classLoader = DisconnectedClientHelper.class.getClassLoader();
+			CLIENT_EXCEPTION_TYPES.add(ClassUtils.forName(type, classLoader));
+		}
+		catch (ClassNotFoundException ex) {
+			// ignore
+		}
 	}
 
 }
