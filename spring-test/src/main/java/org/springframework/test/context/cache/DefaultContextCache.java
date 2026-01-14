@@ -341,11 +341,7 @@ public class DefaultContextCache implements ContextCache {
 		}
 
 		// Remove empty entries from the hierarchy map.
-		for (Map.Entry<MergedContextConfiguration, Set<MergedContextConfiguration>> entry : this.hierarchyMap.entrySet()) {
-			if (entry.getValue().isEmpty()) {
-				this.hierarchyMap.remove(entry.getKey());
-			}
-		}
+		this.hierarchyMap.entrySet().removeIf(entry -> entry.getValue().isEmpty());
 	}
 
 	private void remove(List<MergedContextConfiguration> removedContexts, MergedContextConfiguration key) {
