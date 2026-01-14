@@ -16,7 +16,7 @@
 
 package org.springframework.web.util;
 
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Locale;
 import java.util.Set;
 
@@ -48,11 +48,13 @@ public class DisconnectedClientHelper {
 			Set.of("AbortedException", "ClientAbortException",
 					"EOFException", "EofException", "AsyncRequestNotUsableException");
 
-	private static final Set<Class<?>> CLIENT_EXCEPTION_TYPES = new HashSet<>(2);
+	private static final Set<Class<?>> EXCLUDED_EXCEPTION_TYPES = new LinkedHashSet<>(4);
 
 	static {
-		registerClientExceptionType("org.springframework.web.client.RestClientException");
-		registerClientExceptionType("org.springframework.web.reactive.function.client.WebClientException");
+		addExcludedExceptionType("org.springframework.web.client.RestClientException");
+		addExcludedExceptionType("org.springframework.web.reactive.function.client.WebClientException");
+		addExcludedExceptionType("org.springframework.dao.DataAccessException");
+		addExcludedExceptionType("org.springframework.messaging.MessagingException");
 	}
 
 
@@ -103,7 +105,7 @@ public class DisconnectedClientHelper {
 		Throwable lastEx = null;
 		while (currentEx != null && currentEx != lastEx) {
 			// Ignore onward connection issues to other servers (500 error)
-			for (Class<?> exceptionType : CLIENT_EXCEPTION_TYPES) {
+			for (Class<?> exceptionType : EXCLUDED_EXCEPTION_TYPES) {
 				if (exceptionType.isInstance(currentEx)) {
 					return false;
 				}
@@ -128,10 +130,10 @@ public class DisconnectedClientHelper {
 		return false;
 	}
 
-	private static void registerClientExceptionType(String type) {
+	private static void addExcludedExceptionType(String type) {
 		try {
 			ClassLoader classLoader = DisconnectedClientHelper.class.getClassLoader();
-			CLIENT_EXCEPTION_TYPES.add(ClassUtils.forName(type, classLoader));
+			EXCLUDED_EXCEPTION_TYPES.add(ClassUtils.forName(type, classLoader));
 		}
 		catch (ClassNotFoundException ex) {
 			// ignore
