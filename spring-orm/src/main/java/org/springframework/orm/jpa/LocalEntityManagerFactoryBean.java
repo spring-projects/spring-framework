@@ -64,8 +64,6 @@ import org.springframework.util.Assert;
 @SuppressWarnings("serial")
 public class LocalEntityManagerFactoryBean extends AbstractEntityManagerFactoryBean {
 
-	private static final String DATASOURCE_PROPERTY = "jakarta.persistence.dataSource";
-
 	private @Nullable PersistenceConfiguration configuration;
 
 
@@ -154,10 +152,10 @@ public class LocalEntityManagerFactoryBean extends AbstractEntityManagerFactoryB
 	 */
 	public void setDataSource(@Nullable DataSource dataSource) {
 		if (dataSource != null) {
-			getJpaPropertyMap().put(DATASOURCE_PROPERTY, dataSource);
+			getJpaPropertyMap().put(PersistenceConfiguration.JDBC_DATASOURCE, dataSource);
 		}
 		else {
-			getJpaPropertyMap().remove(DATASOURCE_PROPERTY);
+			getJpaPropertyMap().remove(PersistenceConfiguration.JDBC_DATASOURCE);
 		}
 	}
 
@@ -169,7 +167,7 @@ public class LocalEntityManagerFactoryBean extends AbstractEntityManagerFactoryB
 	 */
 	@Override
 	public @Nullable DataSource getDataSource() {
-		return (DataSource) getJpaPropertyMap().get(DATASOURCE_PROPERTY);
+		return (DataSource) getJpaPropertyMap().get(PersistenceConfiguration.JDBC_DATASOURCE);
 	}
 
 

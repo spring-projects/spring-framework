@@ -192,9 +192,7 @@ public abstract class AbstractJmsListeningContainer extends JmsDestinationAccess
 
 	/**
 	 * Initialize this container.
-	 * <p>Creates a JMS Connection, starts the {@link jakarta.jms.Connection}
-	 * (if {@link #setAutoStartup(boolean) "autoStartup"} hasn't been turned off),
-	 * and calls {@link #doInitialize()}.
+	 * <p>Marks the container as active and calls {@link #doInitialize()}.
 	 * @throws org.springframework.jms.JmsException if startup failed
 	 */
 	public void initialize() throws JmsException {
@@ -484,7 +482,7 @@ public abstract class AbstractJmsListeningContainer extends JmsDestinationAccess
 	/**
 	 * Stop the shared Connection.
 	 * @throws JMSException if thrown by JMS API methods
-	 * @see jakarta.jms.Connection#start()
+	 * @see jakarta.jms.Connection#stop()
 	 */
 	protected void stopSharedConnection() throws JMSException {
 		this.sharedConnectionLock.lock();
