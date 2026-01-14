@@ -280,8 +280,8 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	 * between recovery attempts. If the {@link BackOffExecution} implementation
 	 * returns {@link BackOffExecution#STOP}, this listener container will not further
 	 * attempt to recover.
-	 * <p>The {@link #setRecoveryInterval(long) recovery interval} is ignored
-	 * when this property is set.
+	 * <p>Note that setting the {@linkplain #setRecoveryInterval(long) recovery
+	 * interval} overrides this property.
 	 * @since 4.1
 	 */
 	public void setBackOff(BackOff backOff) {
@@ -290,10 +290,12 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 
 	/**
 	 * Specify the interval between recovery attempts, in <b>milliseconds</b>.
-	 * The default is 5000 ms, that is, 5 seconds. This is a convenience method
-	 * to create a {@link FixedBackOff} with the specified interval.
-	 * <p>For more recovery options, consider specifying a {@link BackOff}
-	 * instance instead.
+	 * <p>The default is 5000 ms, that is, 5 seconds.
+	 * <p>This is a convenience method to create a {@link FixedBackOff} with the
+	 * specified interval. For more recovery options, consider specifying a
+	 * {@link #setBackOff(BackOff) BackOff} instance instead. Note, however, that
+	 * explicitly setting the {@link #setBackOff(BackOff) BackOff} overrides this
+	 * property.
 	 * @see #setBackOff(BackOff)
 	 * @see #handleListenerSetupFailure
 	 */
@@ -1085,7 +1087,7 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 			}
 		}
 		else {
-			// Recovery during active operation..
+			// Recovery during active operation...
 			if (alreadyRecovered) {
 				logger.debug("Setup of JMS message listener invoker failed - already recovered by other invoker", ex);
 			}
@@ -1519,7 +1521,7 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 		/**
 		 * Apply the back-off time once. In a regular scenario, the back-off is only applied if we
 		 * failed to recover with the broker. This additional wait period avoids a burst retry
-		 * scenario when the broker is actually up but something else if failing (i.e. listener
+		 * scenario when the broker is actually up but something else is failing (i.e. listener
 		 * specific).
 		 */
 		private void waitBeforeRecoveryAttempt() {
