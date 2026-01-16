@@ -66,12 +66,8 @@ import org.springframework.util.Assert;
  *
  * @author Juergen Hoeller
  * @since 6.2.16
- * @see org.springframework.transaction.TransactionDefinition#getName
- * @see org.springframework.transaction.TransactionDefinition#getIsolationLevel
- * @see weblogic.transaction.UserTransaction#begin(String)
- * @see weblogic.transaction.Transaction#setProperty
- * @see weblogic.transaction.TransactionManager#forceResume
- * @see weblogic.transaction.TransactionHelper
+ * @see org.springframework.transaction.TransactionDefinition#getName()
+ * @see org.springframework.transaction.TransactionDefinition#getIsolationLevel()
  */
 @SuppressWarnings("serial")
 public class WebLogicJtaTransactionManager extends JtaTransactionManager {
