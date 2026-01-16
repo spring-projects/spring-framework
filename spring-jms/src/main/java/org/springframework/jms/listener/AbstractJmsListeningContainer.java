@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.function.Consumer;
 
 import jakarta.jms.Connection;
 import jakarta.jms.JMSException;
@@ -403,15 +404,34 @@ public abstract class AbstractJmsListeningContainer extends JmsDestinationAccess
 
 	/**
 	 * Refresh the shared Connection that this container holds.
-	 * <p>Called on startup and also after an infrastructure exception
-	 * that occurred during invoker setup and/or execution.
+	 * <p>Called on startup.
 	 * @throws JMSException if thrown by JMS API methods
 	 */
 	protected final void refreshSharedConnection() throws JMSException {
+		refreshSharedConnection(con -> {});
+	}
+
+	/**
+	 * Refresh the shared Connection that this container holds.
+	 * <p>Called after an infrastructure exception that occurred during
+	 * invoker setup and/or execution.
+	 * @param connectionValidator a callback to test the refreshed connection
+	 * @throws JMSException if thrown by JMS API methods
+	 * @since 7.0.4
+	 */
+	void refreshSharedConnection(Consumer<Connection> connectionValidator) throws JMSException {
 		this.sharedConnectionLock.lock();
 		try {
 			releaseSharedConnection();
-			this.sharedConnection = createSharedConnection();
+			Connection con = createSharedConnection();
+			try {
+				connectionValidator.accept(con);
+			}
+			catch (RuntimeException | Error ex) {
+				JmsUtils.closeConnection(con);
+				throw ex;
+			}
+			this.sharedConnection = con;
 			if (this.sharedConnectionStarted) {
 				this.sharedConnection.start();
 			}
