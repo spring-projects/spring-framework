@@ -21,11 +21,14 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 
+import io.netty.channel.Channel;
+import io.netty.util.Attribute;
 import io.netty.util.AttributeKey;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import reactor.core.publisher.Mono;
 import reactor.netty.NettyOutbound;
+import reactor.netty.channel.ChannelOperations;
 import reactor.netty.http.client.HttpClient;
 import reactor.netty.http.client.HttpClientRequest;
 import reactor.netty.resources.ConnectionProvider;
@@ -163,10 +166,14 @@ public class ReactorClientHttpConnector implements ClientHttpConnector, SmartLif
 				.request(io.netty.handler.codec.http.HttpMethod.valueOf(method.name()));
 
 		requestSender = setUri(requestSender, uri);
+		AtomicReference<Channel> channelRef = new AtomicReference<>();
 		AtomicReference<ReactorClientHttpResponse> responseRef = new AtomicReference<>();
 
 		return requestSender
-				.send((request, outbound) -> requestCallback.apply(adaptRequest(method, uri, request, outbound)))
+				.send((request, outbound) -> {
+					channelRef.set(((ChannelOperations<?, ?>) request).channel());
+					return requestCallback.apply(adaptRequest(method, uri, request, outbound));
+				})
 				.responseConnection((response, connection) -> {
 					responseRef.set(new ReactorClientHttpResponse(response, connection));
 					return Mono.just((ClientHttpResponse) responseRef.get());
@@ -176,6 +183,15 @@ public class ReactorClientHttpConnector implements ClientHttpConnector, SmartLif
 					ReactorClientHttpResponse response = responseRef.get();
 					if (response != null) {
 						response.releaseAfterCancel(method);
+					}
+				})
+				.doOnTerminate(() -> {
+					Channel channel = channelRef.get();
+					if (channel != null) {
+						Attribute<Map<String, Object>> attribute = channel.attr(ATTRIBUTES_KEY);
+						if (attribute != null) {
+							attribute.set(null);
+						}
 					}
 				});
 	}
