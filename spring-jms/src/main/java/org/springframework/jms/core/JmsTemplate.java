@@ -899,6 +899,11 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	}
 
 	@Override
+	public @Nullable Message sendAndReceive(Destination destination, Destination responseQueue, MessageCreator messageCreator) throws JmsException {
+		return executeLocal(session -> doSendAndReceive(session, destination, responseQueue, messageCreator), true);
+	}
+
+	@Override
 	public @Nullable Message sendAndReceive(String destinationName, MessageCreator messageCreator) throws JmsException {
 		return executeLocal(session -> {
 			Destination destination = resolveDestinationName(session, destinationName);
@@ -906,8 +911,17 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 		}, true);
 	}
 
+	@Override
+	public @Nullable Message sendAndReceive(String destinationName, String responseQueueName, MessageCreator messageCreator) throws JmsException {
+		return executeLocal(session -> {
+			Destination destination = resolveDestinationName(session, destinationName);
+			Destination responseQueue = resolveDestinationName(session, responseQueueName);
+			return doSendAndReceive(session, destination, responseQueue, messageCreator);
+		}, true);
+	}
+
 	/**
-	 * Send a request message to the given {@link Destination} and block until
+	 * Send a request message to the given {@link Destination destination} and block until
 	 * a reply has been received on a temporary queue created on-the-fly.
 	 * <p>Return the response message or {@code null} if no message has
 	 * @throws JMSException if thrown by JMS API methods
@@ -915,13 +929,32 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	protected @Nullable Message doSendAndReceive(Session session, Destination destination, MessageCreator messageCreator)
 			throws JMSException {
 
-		Assert.notNull(messageCreator, "MessageCreator must not be null");
 		TemporaryQueue responseQueue = null;
+		try {
+			responseQueue = session.createTemporaryQueue();
+			return doSendAndReceive(session, destination, responseQueue, messageCreator);
+		}
+		finally {
+			if (responseQueue != null) {
+				responseQueue.delete();
+			}
+		}
+	}
+
+	/**
+	 * Send a request message to the given {@link Destination destination} and block until
+	 * a reply has been received on a {@link Destination responseQueue} queue.
+	 * <p>Return the response message or {@code null} if no message has
+	 * @throws JMSException if thrown by JMS API methods
+	 */
+	protected @Nullable Message doSendAndReceive(Session session, Destination destination, Destination responseQueue, MessageCreator messageCreator)
+			throws JMSException {
+
+		Assert.notNull(messageCreator, "MessageCreator must not be null");
 		MessageProducer producer = null;
 		MessageConsumer consumer = null;
 		try {
 			Message requestMessage = messageCreator.createMessage(session);
-			responseQueue = session.createTemporaryQueue();
 			producer = session.createProducer(destination);
 			consumer = session.createConsumer(responseQueue);
 			requestMessage.setJMSReplyTo(responseQueue);
@@ -934,9 +967,6 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 		finally {
 			JmsUtils.closeMessageConsumer(consumer);
 			JmsUtils.closeMessageProducer(producer);
-			if (responseQueue != null) {
-				responseQueue.delete();
-			}
 		}
 	}
 
