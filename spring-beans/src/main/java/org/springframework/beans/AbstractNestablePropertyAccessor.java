@@ -652,11 +652,14 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 						value = list.get(index);
 					}
 					else if (value instanceof Map map) {
-						Class<?> mapKeyType = ph.getResolvableType().getNested(i + 1).asMap().resolveGeneric(0);
+						ResolvableType mapResolvableType = ph.getResolvableType().getNested(i + 1).asMap();
+						Class<?> mapKeyType = mapResolvableType.resolveGeneric(0);
+						Class<?> mapValueType = mapResolvableType.resolveGeneric(1);
 						// IMPORTANT: Do not pass full property name in here - property editors
 						// must not kick in for map keys but rather only for map values.
 						TypeDescriptor typeDescriptor = TypeDescriptor.valueOf(mapKeyType);
 						Object convertedMapKey = convertIfNecessary(null, null, key, mapKeyType, typeDescriptor);
+						growMapIfNecessary(map, convertedMapKey, mapValueType, indexedPropertyName.toString());
 						value = map.get(convertedMapKey);
 					}
 					else if (value instanceof Iterable iterable) {
@@ -792,6 +795,17 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 					collection.add(newValue(elementType, null, name));
 				}
 			}
+		}
+	}
+
+	private void growMapIfNecessary(Map<Object, Object> map, @Nullable Object convertedMapKey,
+			@Nullable Class<?> mapValueType, String name) {
+
+		if (mapValueType == null || !isAutoGrowNestedPaths()) {
+			return;
+		}
+		if (!map.containsKey(convertedMapKey) && map.size() < this.autoGrowCollectionLimit) {
+			map.put(convertedMapKey, newValue(mapValueType, null, name));
 		}
 	}
 
