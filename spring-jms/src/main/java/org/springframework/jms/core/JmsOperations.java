@@ -401,6 +401,36 @@ public interface JmsOperations {
 	 */
 	@Nullable Message sendAndReceive(String destinationName, MessageCreator messageCreator) throws JmsException;
 
+	/**
+	 * Send a message and receive the reply from the specified destination. The
+	 * {@link MessageCreator} callback creates the message given a Session. A given
+	 * responseQueue is set in the {@code JMSReplyTO} header of the message.
+	 * @param destination the destination to send this message to
+	 * @param responseQueue the destination to receive the reply from
+	 * @param messageCreator callback to create a message
+	 * @return the reply, possibly {@code null} if the message could not be received,
+	 * for example due to a timeout
+	 * @throws JmsException checked JMSException converted to unchecked
+	 * @since 7.0.4
+	 */
+	@Nullable Message sendAndReceive(Destination destination, Destination responseQueue, MessageCreator messageCreator) throws JmsException;
+
+	/**
+	 * Send a message and receive the reply from the specified destination. The
+	 * {@link MessageCreator} callback creates the message given a Session. A given
+	 * responseQueue is set in the {@code JMSReplyTO} header of the message.
+	 * @param destinationName the name of the destination to send this message to
+	 * (to be resolved to an actual destination by a DestinationResolver)
+	 * @param responseQueueName the name of the destination to receive the reply from
+	 * (to be resolved to an actual destination by a DestinationResolver)
+	 * @param messageCreator callback to create a message
+	 * @return the reply, possibly {@code null} if the message could not be received,
+	 * for example due to a timeout
+	 * @throws JmsException checked JMSException converted to unchecked
+	 * @since 7.0.4
+	 */
+	@Nullable Message sendAndReceive(String destinationName, String responseQueueName, MessageCreator messageCreator) throws JmsException;
+
 
 	//---------------------------------------------------------------------------------------
 	// Convenience methods for browsing messages

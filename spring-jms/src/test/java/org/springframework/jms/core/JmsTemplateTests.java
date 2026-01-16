@@ -688,6 +688,69 @@ class JmsTemplateTests {
 	}
 
 	@Test
+	void testSendAndReceiveDestinationWithResponseQueue() throws Exception {
+		doTestSendAndReceiveWithResponseQueue(true, 1000L);
+	}
+
+	@Test
+	void testSendAndReceiveDestinationNameWithResponseQueueName() throws Exception {
+		doTestSendAndReceiveWithResponseQueue(false, 1000L);
+	}
+
+	private void doTestSendAndReceiveWithResponseQueue(boolean explicitDestination, long timeout)
+			throws Exception {
+
+		JmsTemplate template = createTemplate();
+		template.setConnectionFactory(this.connectionFactory);
+		template.setReceiveTimeout(timeout);
+
+		String destinationName = "testDestination";
+		String responseQueueName = "responseQueue";
+
+		Queue responseQueue = mock();
+		given(this.jndiContext.lookup(responseQueueName)).willReturn(responseQueue);
+
+		Session localSession = getLocalSession();
+		MessageProducer messageProducer = mock();
+		given(localSession.createProducer(this.queue)).willReturn(messageProducer);
+
+		MessageConsumer messageConsumer = mock();
+		given(localSession.createConsumer(responseQueue)).willReturn(messageConsumer);
+
+		TextMessage request = mock();
+		MessageCreator messageCreator = mock();
+		given(messageCreator.createMessage(localSession)).willReturn(request);
+
+		TextMessage reply = mock();
+		if (timeout == JmsTemplate.RECEIVE_TIMEOUT_NO_WAIT) {
+			given(messageConsumer.receiveNoWait()).willReturn(reply);
+		}
+		else if (timeout == JmsTemplate.RECEIVE_TIMEOUT_INDEFINITE_WAIT) {
+			given(messageConsumer.receive()).willReturn(reply);
+		}
+		else {
+			given(messageConsumer.receive(timeout)).willReturn(reply);
+		}
+
+		Message message;
+		if (explicitDestination) {
+			message = template.sendAndReceive(this.queue, responseQueue, messageCreator);
+		}
+		else {
+			message = template.sendAndReceive(destinationName, responseQueueName, messageCreator);
+		}
+
+		// replyTO set on the request
+		verify(request).setJMSReplyTo(responseQueue);
+		assertThat(message).as("Reply message not received").isSameAs(reply);
+		verify(this.connection).start();
+		verify(this.connection).close();
+		verify(localSession).close();
+		verify(messageConsumer).close();
+		verify(messageProducer).close();
+	}
+
+	@Test
 	void testIllegalStateException() throws Exception {
 		doTestJmsException(new jakarta.jms.IllegalStateException(""), org.springframework.jms.IllegalStateException.class);
 	}
