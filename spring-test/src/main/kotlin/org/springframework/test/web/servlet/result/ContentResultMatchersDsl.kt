@@ -113,7 +113,13 @@ class ContentResultMatchersDsl internal constructor (private val actions: Result
 	/**
 	 * @see ContentResultMatchers.json
 	 */
-	@Deprecated(message = "Use JsonCompare mode instead")
+	@Deprecated(
+		message = "Use JsonCompare mode instead",
+		replaceWith = ReplaceWith(
+			expression = "json(jsonContent, if (strict) JsonCompareMode.STRICT else JsonCompareMode.LENIENT)",
+			imports = ["org.springframework.test.json.JsonCompareMode"],
+		),
+	)
 	fun json(jsonContent: String, strict: Boolean) {
 		val compareMode = (if (strict) JsonCompareMode.STRICT else JsonCompareMode.LENIENT)
 		actions.andExpect(matchers.json(jsonContent, compareMode))
