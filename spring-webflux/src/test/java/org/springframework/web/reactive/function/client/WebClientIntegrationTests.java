@@ -445,7 +445,7 @@ class WebClientIntegrationTests {
 		});
 	}
 
-	@Test // gh-24788
+	@Test  // gh-24788
 	void retrieveJsonArrayAsBodilessEntityShouldReleasesConnection() {
 
 		// Constrain connection pool and make consecutive requests.
@@ -726,7 +726,7 @@ class WebClientIntegrationTests {
 		});
 	}
 
-	@ParameterizedWebClientTest // gh-31202
+	@ParameterizedWebClientTest  // gh-31202
 	void retrieve929UnknownStatusCode(ClientHttpConnector connector) {
 		startServer(connector);
 
@@ -1330,12 +1330,12 @@ class WebClientIntegrationTests {
 				.verify(Duration.ofSeconds(3));
 	}
 
-	@Test // gh-36158
-	void reactorNettyAttributes() throws IOException {
+	@Test  // gh-36158
+	void reactorNettyAttributes() {
 		startServer(new ReactorClientHttpConnector());
 
 		prepareResponse(builder ->
-				builder.setHeader("Content-Type", "text/plain").body("Hello Spring!"));
+				builder.setHeader("Content-Type", "text/plain").setBody("Hello Spring!"));
 
 		AtomicReference<Channel> channelRef = new AtomicReference<>();
 
