@@ -18,14 +18,12 @@ package org.springframework.docs.web.webmvc.mvcservlet.mvccontainerconfig
 
 import jakarta.servlet.Filter
 import org.springframework.web.context.WebApplicationContext
-import org.springframework.web.context.support.AbstractDispatcherServletInitializer
 import org.springframework.web.filter.CharacterEncodingFilter
 import org.springframework.web.filter.HiddenHttpMethodFilter
+import org.springframework.web.servlet.support.AbstractDispatcherServletInitializer
 
 // tag::snippet[]
 class MyFilterDispatcherServletInitializer : AbstractDispatcherServletInitializer() {
-
-	// ...
 
 	override fun getServletFilters(): Array<Filter> {
 		return arrayOf(HiddenHttpMethodFilter(), CharacterEncodingFilter())
@@ -33,15 +31,15 @@ class MyFilterDispatcherServletInitializer : AbstractDispatcherServletInitialize
 
 	// @fold:on
 	override fun createServletApplicationContext(): WebApplicationContext {
-		TODO("Not yet implemented")
+		/**/TODO("Not yet implemented")
 	}
 
 	override fun getServletMappings(): Array<String> {
-		return arrayOf("/")
+		/**/TODO("Not yet implemented")
 	}
 
 	override fun createRootApplicationContext(): WebApplicationContext? {
-		return null
+		/**/TODO("Not yet implemented")
 	}
 	// @fold:off
 }
