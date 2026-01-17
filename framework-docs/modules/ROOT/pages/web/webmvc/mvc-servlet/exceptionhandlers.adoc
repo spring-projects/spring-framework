@@ -74,42 +74,7 @@ Servlet container makes an ERROR dispatch within the container to the configured
 to a `@Controller`, which could be implemented to return an error view name with a model
 or to render a JSON response, as the following example shows:
 
-[tabs]
-======
-Java::
-+
-[source,java,indent=0,subs="verbatim,quotes"]
-----
-	@RestController
-	public class ErrorController {
-
-		@RequestMapping(path = "/error")
-		public Map<String, Object> handle(HttpServletRequest request) {
-			Map<String, Object> map = new HashMap<>();
-			map.put("status", request.getAttribute("jakarta.servlet.error.status_code"));
-			map.put("reason", request.getAttribute("jakarta.servlet.error.message"));
-			return map;
-		}
-	}
-----
-
-Kotlin::
-+
-[source,kotlin,indent=0,subs="verbatim,quotes"]
-----
-	@RestController
-	class ErrorController {
-
-		@RequestMapping(path = ["/error"])
-		fun handle(request: HttpServletRequest): Map<String, Any> {
-			val map = HashMap<String, Any>()
-			map["status"] = request.getAttribute("jakarta.servlet.error.status_code")
-			map["reason"] = request.getAttribute("jakarta.servlet.error.message")
-			return map
-		}
-	}
-----
-======
+include-code::./ErrorController[tag=snippet,indent=0]
 
 TIP: The Servlet API does not provide a way to create error page mappings in Java. You can,
 however, use both a `WebApplicationInitializer` and a minimal `web.xml`.
