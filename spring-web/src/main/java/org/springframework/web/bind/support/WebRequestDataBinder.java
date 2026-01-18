@@ -68,7 +68,7 @@ import org.springframework.web.multipart.support.StandardServletPartUtils;
  * // trigger actual binding of request parameters
  * binder.bind(request);
  * // optionally evaluate binding errors
- * Errors errors = binder.getBindingResult();
+ * BindingResult bindingResult = binder.getBindingResult();
  * ...</pre>
  *
  * @author Juergen Hoeller
