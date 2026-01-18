@@ -51,8 +51,9 @@ import javax.sql.DataSource;
  *
  * @author Thomas Risberg
  * @author Juergen Hoeller
- * @since 2.5
+ * @deprecated Apache Derby is retired, switch to HSQLDB or H2
  */
+@Deprecated(forRemoval = true, since = "7.1")
 public class DerbyMaxValueIncrementer extends AbstractIdentityColumnMaxValueIncrementer {
 
 	/** The default for dummy name. */

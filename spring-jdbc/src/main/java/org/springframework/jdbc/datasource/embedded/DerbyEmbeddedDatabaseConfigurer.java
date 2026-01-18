@@ -16,6 +16,7 @@
 
 package org.springframework.jdbc.datasource.embedded;
 
+import java.io.OutputStream;
 import java.sql.SQLException;
 import java.util.Properties;
 
@@ -33,7 +34,9 @@ import org.jspecify.annotations.Nullable;
  * @author Oliver Gierke
  * @author Juergen Hoeller
  * @since 3.0
+ * @deprecated Apache Derby is retired, switch to H2 or HSQLDB
  */
+@Deprecated(forRemoval = true, since = "7.1")
 final class DerbyEmbeddedDatabaseConfigurer implements EmbeddedDatabaseConfigurer {
 
 	private static final String URL_TEMPLATE = "jdbc:derby:memory:%s;%s";
@@ -49,7 +52,7 @@ final class DerbyEmbeddedDatabaseConfigurer implements EmbeddedDatabaseConfigure
 		if (instance == null) {
 			// disable log file
 			System.setProperty("derby.stream.error.method",
-					OutputStreamFactory.class.getName() + ".getNoopOutputStream");
+					OutputStream.class.getName() + ".nullOutputStream");
 			instance = new DerbyEmbeddedDatabaseConfigurer();
 		}
 		return instance;
