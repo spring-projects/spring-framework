@@ -425,9 +425,14 @@ public class SimpleAsyncTaskExecutor extends CustomizableThreadCreator
 		@Override
 		protected void onLimitReached() {
 			if (rejectTasksWhenLimitReached) {
-				throw new TaskRejectedException("Concurrency limit reached: " + getConcurrencyLimit());
+				onAccessRejected("Concurrency limit reached: " + getConcurrencyLimit());
 			}
 			super.onLimitReached();
+		}
+
+		@Override
+		protected void onAccessRejected(String msg) {
+			throw new TaskRejectedException(msg);
 		}
 
 		@Override

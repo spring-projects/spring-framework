@@ -109,9 +109,14 @@ public class SyncTaskExecutor extends ConcurrencyThrottleSupport implements Task
 	@Override
 	protected void onLimitReached() {
 		if (this.rejectTasksWhenLimitReached) {
-			throw new TaskRejectedException("Concurrency limit reached: " + getConcurrencyLimit());
+			onAccessRejected("Concurrency limit reached: " + getConcurrencyLimit());
 		}
 		super.onLimitReached();
+	}
+
+	@Override
+	protected void onAccessRejected(String msg) {
+		throw new TaskRejectedException(msg);
 	}
 
 }

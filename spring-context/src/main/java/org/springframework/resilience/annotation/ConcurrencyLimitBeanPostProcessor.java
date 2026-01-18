@@ -117,11 +117,10 @@ public class ConcurrencyLimitBeanPostProcessor extends AbstractBeanFactoryAwareA
 							if (concurrencyLimit < -1) {
 								throw new IllegalStateException(annotation + " must be configured with a valid limit");
 							}
+							String name = (perMethod ? ClassUtils.getQualifiedMethodName(method) : targetClass.getName());
 							interceptor = (annotation.policy() == ConcurrencyLimit.ThrottlePolicy.REJECT ?
-									new RejectingConcurrencyThrottleInterceptor(concurrencyLimit,
-											(perMethod ? ClassUtils.getQualifiedMethodName(method) : targetClass.getName()),
-											instance) :
-									new ConcurrencyThrottleInterceptor(concurrencyLimit));
+									new RejectingConcurrencyThrottleInterceptor(concurrencyLimit, name, instance) :
+									new ResilienceConcurrencyThrottleInterceptor(concurrencyLimit, name, instance));
 							if (!perMethod) {
 								holder.classInterceptor = interceptor;
 							}
@@ -155,22 +154,34 @@ public class ConcurrencyLimitBeanPostProcessor extends AbstractBeanFactoryAwareA
 	}
 
 
-	private static class RejectingConcurrencyThrottleInterceptor extends ConcurrencyThrottleInterceptor {
+	private static class ResilienceConcurrencyThrottleInterceptor extends ConcurrencyThrottleInterceptor {
 
 		private final String identifier;
 
 		private final Object target;
 
-		public RejectingConcurrencyThrottleInterceptor(int concurrencyLimit, String identifier, Object target) {
+		public ResilienceConcurrencyThrottleInterceptor(int concurrencyLimit, String identifier, Object target) {
 			super(concurrencyLimit);
 			this.identifier = identifier;
 			this.target = target;
 		}
 
 		@Override
+		protected void onAccessRejected(String msg) {
+			throw new InvocationRejectedException(msg + " " + this.identifier, this.target);
+		}
+	}
+
+
+	private static class RejectingConcurrencyThrottleInterceptor extends ResilienceConcurrencyThrottleInterceptor {
+
+		public RejectingConcurrencyThrottleInterceptor(int concurrencyLimit, String identifier, Object target) {
+			super(concurrencyLimit, identifier, target);
+		}
+
+		@Override
 		protected void onLimitReached() {
-			throw new InvocationRejectedException(
-					"Concurrency limit reached for " + this.identifier + ": " + getConcurrencyLimit(), this.target);
+			onAccessRejected("Concurrency limit reached: " + getConcurrencyLimit() + " - not allowed to enter");
 		}
 	}
 
