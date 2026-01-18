@@ -923,7 +923,7 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	/**
 	 * Send a request message to the given {@link Destination destination} and block until
 	 * a reply has been received on a temporary queue created on-the-fly.
-	 * <p>Return the response message or {@code null} if no message has
+	 * <p>Return the response message or {@code null} if no message has been received.
 	 * @throws JMSException if thrown by JMS API methods
 	 */
 	protected @Nullable Message doSendAndReceive(Session session, Destination destination, MessageCreator messageCreator)
@@ -943,8 +943,8 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 
 	/**
 	 * Send a request message to the given {@link Destination destination} and block until
-	 * a reply has been received on a {@link Destination responseQueue} queue.
-	 * <p>Return the response message or {@code null} if no message has
+	 * a reply has been received on the specified {@link Destination responseQueue}.
+	 * <p>Return the response message or {@code null} if no message has been received.
 	 * @throws JMSException if thrown by JMS API methods
 	 */
 	protected @Nullable Message doSendAndReceive(Session session, Destination destination, Destination responseQueue, MessageCreator messageCreator)

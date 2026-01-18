@@ -51,7 +51,7 @@ public abstract class ConcurrencyThrottleSupport implements Serializable {
 
 	/**
 	 * Concurrency limit which signals unbounded concurrency: {@value}.
-	 * <p>Setting the limit to this value permits any number of concurrent access:
+	 * <p>Setting the limit to this value permits unbounded concurrent access:
 	 * that is, concurrency will not be throttled.
 	 * @see #NO_CONCURRENCY
 	 */
@@ -81,12 +81,13 @@ public abstract class ConcurrencyThrottleSupport implements Serializable {
 
 	/**
 	 * Set the maximum number of concurrent access attempts allowed.
-	 * The default of -1 indicates no concurrency limit at all.
+	 * The default of {@value #UNBOUNDED_CONCURRENCY} indicates no concurrency
+	 * limit at all.
 	 * <p>In principle, this limit can be changed at runtime,
 	 * although it is generally designed as a config time setting.
-	 * <p>NOTE: Do not switch between -1 and any concrete limit at runtime,
-	 * as this will lead to inconsistent concurrency counts: A limit
-	 * of -1 effectively turns off concurrency counting completely.
+	 * <p>NOTE: Do not switch between {@code -1} and any concrete limit at runtime,
+	 * as this will lead to inconsistent concurrency counts. A limit
+	 * of {@code -1} effectively turns off concurrency counting completely.
 	 */
 	public void setConcurrencyLimit(int concurrencyLimit) {
 		this.concurrencyLimit = concurrencyLimit;
