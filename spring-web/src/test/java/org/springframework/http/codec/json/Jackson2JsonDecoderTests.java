@@ -113,6 +113,12 @@ class Jackson2JsonDecoderTests extends AbstractDecoderTests<Jackson2JsonDecoder>
 
 	}
 
+	@Test
+	void canDecodeVendorSuffixedNdjson() {
+		MediaType vendorNdjson = MediaType.parseMediaType("application/vnd.example.v1+x-ndjson");
+		assertThat(decoder.canDecode(ResolvableType.forClass(Pojo.class), vendorNdjson)).isTrue();
+	}
+
 	@Test  // SPR-15866
 	void canDecodeWithProvidedMimeType() {
 		MimeType textJavascript = new MimeType("text", "javascript", StandardCharsets.UTF_8);

@@ -58,7 +58,8 @@ public class JacksonJsonHttpMessageConverter extends AbstractJacksonHttpMessageC
 			Collections.singletonList(MediaType.APPLICATION_PROBLEM_JSON);
 
 	private static final MediaType[] DEFAULT_JSON_MIME_TYPES = new MediaType[] {
-			MediaType.APPLICATION_JSON, new MediaType("application", "*+json") };
+			MediaType.APPLICATION_JSON, new MediaType("application", "*+json"),
+			MediaType.APPLICATION_NDJSON, new MediaType("application", "*+x-ndjson") };
 
 
 	private @Nullable String jsonPrefix;
