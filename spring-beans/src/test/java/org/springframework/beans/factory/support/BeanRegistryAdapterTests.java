@@ -187,6 +187,14 @@ public class BeanRegistryAdapterTests {
 	}
 
 	@Test
+	void customScope() {
+		BeanRegistryAdapter adapter = new BeanRegistryAdapter(this.beanFactory, this.beanFactory, this.env, ScopeBeanRegistrar.class);
+		new ScopeBeanRegistrar().register(adapter, env);
+		BeanDefinition beanDefinition = this.beanFactory.getBeanDefinition("foo");
+		assertThat(beanDefinition.getScope()).isEqualTo("custom");
+	}
+
+	@Test
 	void defaultSupplier() {
 		BeanRegistryAdapter adapter = new BeanRegistryAdapter(this.beanFactory, this.beanFactory, this.env, DefaultBeanRegistrar.class);
 		new DefaultBeanRegistrar().register(adapter, env);
@@ -305,6 +313,14 @@ public class BeanRegistryAdapterTests {
 		@Override
 		public void register(BeanRegistry registry, Environment env) {
 			registry.registerBean("foo", Foo.class, BeanRegistry.Spec::prototype);
+		}
+	}
+
+	private static class ScopeBeanRegistrar implements BeanRegistrar {
+
+		@Override
+		public void register(BeanRegistry registry, Environment env) {
+			registry.registerBean("foo", Foo.class, spec -> spec.scope("custom"));
 		}
 	}
 
