@@ -24,6 +24,7 @@ import java.util.stream.Stream;
 
 import javax.sql.DataSource;
 
+import io.r2dbc.spi.ConnectionFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jspecify.annotations.Nullable;
@@ -45,6 +46,7 @@ import org.springframework.test.context.jdbc.SqlConfig.TransactionMode;
 import org.springframework.test.context.jdbc.SqlMergeMode.MergeMode;
 import org.springframework.test.context.support.AbstractTestExecutionListener;
 import org.springframework.test.context.transaction.TestContextTransactionUtils;
+import org.springframework.test.context.transaction.reactive.TestContextReactiveTransactionUtils;
 import org.springframework.test.context.util.TestContextResourceUtils;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
@@ -343,8 +345,13 @@ public class SqlScriptsTestExecutionListener extends AbstractTestExecutionListen
 			Assert.state(!newTxRequired, () -> String.format("Failed to execute SQL scripts for test context %s: " +
 					"cannot execute SQL scripts using Transaction Mode " +
 					"[%s] without a PlatformTransactionManager.", testContext, TransactionMode.ISOLATED));
-			Assert.state(dataSource != null, () -> String.format("Failed to execute SQL scripts for test context %s: " +
-					"supply at least a DataSource or PlatformTransactionManager.", testContext));
+			if (dataSource == null) {
+				ConnectionFactory connectionFactory = TestContextReactiveTransactionUtils.retrieveConnectionFactory(testContext);
+				Assert.state(connectionFactory != null, () -> String.format("Failed to execute SQL scripts for test context %s: " +
+						"supply at least a DataSource or PlatformTransactionManager or ConnectionFactory.", testContext));
+				R2dbcPopulatorUtils.execute(mergedSqlConfig, connectionFactory, scriptResources);
+				return;
+			}
 			// Execute scripts directly against the DataSource
 			populator.execute(dataSource);
 		}
