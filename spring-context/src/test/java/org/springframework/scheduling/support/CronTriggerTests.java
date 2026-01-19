@@ -31,6 +31,7 @@ import org.springframework.scheduling.TriggerContext;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.junit.jupiter.api.Named.named;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 /**
@@ -47,8 +48,8 @@ import static org.junit.jupiter.params.provider.Arguments.arguments;
 class CronTriggerTests {
 
 	static List<Arguments> parameters = List.of(
-			arguments(new Date(), TimeZone.getTimeZone("PST")),
-			arguments(new Date(), TimeZone.getTimeZone("CET")));
+			arguments(new Date(), named("PST", TimeZone.getTimeZone("PST"))),
+			arguments(new Date(), named("CET", TimeZone.getTimeZone("CET"))));
 
 
 	private final Calendar calendar = new GregorianCalendar();
