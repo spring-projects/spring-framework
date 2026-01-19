@@ -32,7 +32,6 @@ import jakarta.jms.Queue;
 import jakarta.jms.QueueBrowser;
 import jakarta.jms.Session;
 import jakarta.jms.TemporaryQueue;
-import org.apache.activemq.artemis.reader.MessageUtil;
 import org.jspecify.annotations.Nullable;
 
 import org.springframework.jms.JmsException;
