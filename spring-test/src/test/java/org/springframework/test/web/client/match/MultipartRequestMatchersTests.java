@@ -23,6 +23,7 @@ import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
@@ -158,6 +159,20 @@ public class MultipartRequestMatchersTests {
 		this.expected.set(f1.getName(), f2.getBytes());
 
 		assertThatExceptionOfType(AssertionError.class).isThrownBy(this::writeAndAssert);
+	}
+
+	@Test // gh-36154
+	public void testHttpEntityMatch() throws Exception {
+		String contentType = "text/plain";
+		MultipartFile file = new MockMultipartFile("file", "foo.txt", contentType, "Foo Lorem ipsum".getBytes());
+
+		HttpHeaders headers = new HttpHeaders();
+		headers.set(HttpHeaders.CONTENT_TYPE, contentType);
+		this.input.add("foo.txt", new HttpEntity<>(file.getResource(), headers));
+
+		this.expected.addAll(this.input);
+
+		writeAndAssert();
 	}
 
 
