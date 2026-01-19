@@ -32,6 +32,7 @@ import jakarta.jms.Queue;
 import jakarta.jms.QueueBrowser;
 import jakarta.jms.Session;
 import jakarta.jms.TemporaryQueue;
+import org.apache.activemq.artemis.reader.MessageUtil;
 import org.jspecify.annotations.Nullable;
 
 import org.springframework.jms.JmsException;
@@ -974,7 +975,7 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 			if (selectorType == SelectorType.CORRELATION_ID) {
 				String correlationId = UUID.randomUUID().toString();
 				requestMessage.setJMSCorrelationID(correlationId);
-				messageSelector = "JMSCorrelationID = '" + correlationId + "'";
+				messageSelector = String.format("%s = '%s'", MessageUtil.CORRELATIONID_HEADER_NAME_STRING, correlationId);
 			}
 
 			requestMessage.setJMSReplyTo(responseQueue);
@@ -985,7 +986,7 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 
 			if (selectorType == SelectorType.MESSAGE_ID) {
 				String messageId = requestMessage.getJMSMessageID();
-				messageSelector = "JMSCorrelationID = '" + messageId + "'";
+				messageSelector = String.format("%s = '%s'", MessageUtil.CORRELATIONID_HEADER_NAME_STRING, messageId);
 			}
 
 			consumer = session.createConsumer(responseQueue, messageSelector);
