@@ -35,6 +35,7 @@ import jakarta.jms.TemporaryQueue;
 import jakarta.jms.TextMessage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 
 import org.springframework.jms.InvalidClientIDException;
 import org.springframework.jms.InvalidDestinationException;
@@ -62,6 +63,8 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.willThrow;
 import static org.mockito.Mockito.mock;
@@ -648,7 +651,7 @@ class JmsTemplateTests {
 		given(localSession.createTemporaryQueue()).willReturn(replyDestination);
 
 		MessageConsumer messageConsumer = mock();
-		given(localSession.createConsumer(replyDestination)).willReturn(messageConsumer);
+		given(localSession.createConsumer(replyDestination, null)).willReturn(messageConsumer);
 
 
 		TextMessage request = mock();
@@ -715,7 +718,8 @@ class JmsTemplateTests {
 		given(localSession.createProducer(this.queue)).willReturn(messageProducer);
 
 		MessageConsumer messageConsumer = mock();
-		given(localSession.createConsumer(responseQueue)).willReturn(messageConsumer);
+		// Default sendAndReceive with responseQueue uses MESSAGE_ID selector
+		given(localSession.createConsumer(eq(responseQueue), anyString())).willReturn(messageConsumer);
 
 		TextMessage request = mock();
 		MessageCreator messageCreator = mock();
@@ -748,6 +752,113 @@ class JmsTemplateTests {
 		verify(localSession).close();
 		verify(messageConsumer).close();
 		verify(messageProducer).close();
+	}
+
+	@Test
+	void testSendAndReceiveDestinationWithResponseQueueAndCorrelationIdSelector() throws Exception {
+		doTestSendAndReceiveWithResponseQueueAndSelectorType(true, 1000L, JmsOperations.SelectorType.CORRELATION_ID);
+	}
+
+	@Test
+	void testSendAndReceiveDestinationNameWithResponseQueueNameAndCorrelationIdSelector() throws Exception {
+		doTestSendAndReceiveWithResponseQueueAndSelectorType(false, 1000L, JmsOperations.SelectorType.CORRELATION_ID);
+	}
+
+	@Test
+	void testSendAndReceiveDestinationWithResponseQueueAndMessageIdSelector() throws Exception {
+		doTestSendAndReceiveWithResponseQueueAndSelectorType(true, 1000L, JmsOperations.SelectorType.MESSAGE_ID);
+	}
+
+	@Test
+	void testSendAndReceiveDestinationNameWithResponseQueueNameAndMessageIdSelector() throws Exception {
+		doTestSendAndReceiveWithResponseQueueAndSelectorType(false, 1000L, JmsOperations.SelectorType.MESSAGE_ID);
+	}
+
+	@Test
+	void testSendAndReceiveDestinationWithResponseQueueAndNoSelector() throws Exception {
+		doTestSendAndReceiveWithResponseQueueAndSelectorType(true, 1000L, JmsOperations.SelectorType.NONE);
+	}
+
+	@Test
+	void testSendAndReceiveDestinationNameWithResponseQueueNameAndNoSelector() throws Exception {
+		doTestSendAndReceiveWithResponseQueueAndSelectorType(false, 1000L, JmsOperations.SelectorType.NONE);
+	}
+
+	private void doTestSendAndReceiveWithResponseQueueAndSelectorType(boolean explicitDestination, long timeout,
+			JmsOperations.SelectorType selectorType) throws Exception {
+
+		JmsTemplate template = createTemplate();
+		template.setConnectionFactory(this.connectionFactory);
+		template.setReceiveTimeout(timeout);
+
+		String destinationName = "testDestination";
+		String responseQueueName = "responseQueue";
+
+		Queue responseQueue = mock();
+		given(this.jndiContext.lookup(responseQueueName)).willReturn(responseQueue);
+
+		Session localSession = getLocalSession();
+		MessageProducer messageProducer = mock();
+		given(localSession.createProducer(this.queue)).willReturn(messageProducer);
+
+		MessageConsumer messageConsumer = mock();
+		if (selectorType == JmsOperations.SelectorType.NONE) {
+			given(localSession.createConsumer(responseQueue, null)).willReturn(messageConsumer);
+		}
+		else {
+			given(localSession.createConsumer(eq(responseQueue), anyString()))
+					.willReturn(messageConsumer);
+		}
+
+		TextMessage request = mock();
+		MessageCreator messageCreator = mock();
+		given(messageCreator.createMessage(localSession)).willReturn(request);
+
+		if (selectorType == JmsOperations.SelectorType.MESSAGE_ID) {
+			given(request.getJMSMessageID()).willReturn("ID:test-message-id-12345");
+		}
+
+		TextMessage reply = mock();
+		if (timeout == JmsTemplate.RECEIVE_TIMEOUT_NO_WAIT) {
+			given(messageConsumer.receiveNoWait()).willReturn(reply);
+		}
+		else if (timeout == JmsTemplate.RECEIVE_TIMEOUT_INDEFINITE_WAIT) {
+			given(messageConsumer.receive()).willReturn(reply);
+		}
+		else {
+			given(messageConsumer.receive(timeout)).willReturn(reply);
+		}
+
+		Message message;
+		if (explicitDestination) {
+			message = template.sendAndReceive(this.queue, responseQueue, messageCreator, selectorType);
+		}
+		else {
+			message = template.sendAndReceive(destinationName, responseQueueName, messageCreator, selectorType);
+		}
+
+		// replyTO set on the request
+		verify(request).setJMSReplyTo(responseQueue);
+		assertThat(message).as("Reply message not received").isSameAs(reply);
+		verify(this.connection).start();
+		verify(this.connection).close();
+		verify(localSession).close();
+		verify(messageConsumer).close();
+		verify(messageProducer).close();
+
+		// Verify selector-specific behavior
+		if (selectorType == JmsOperations.SelectorType.CORRELATION_ID) {
+			ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
+			verify(request).setJMSCorrelationID(captor.capture());
+			verify(localSession).createConsumer(eq(responseQueue), eq("JMSCorrelationID = '" + captor.getValue() + "'"));
+		}
+		else if (selectorType == JmsOperations.SelectorType.MESSAGE_ID) {
+			verify(request).getJMSMessageID();
+			verify(localSession).createConsumer(eq(responseQueue), eq("JMSCorrelationID = 'ID:test-message-id-12345'"));
+		}
+		else {
+			verify(localSession).createConsumer(responseQueue, null);
+		}
 	}
 
 	@Test

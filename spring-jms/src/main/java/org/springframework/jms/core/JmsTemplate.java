@@ -16,6 +16,8 @@
 
 package org.springframework.jms.core;
 
+import java.util.UUID;
+
 import io.micrometer.jakarta9.instrument.jms.JmsInstrumentation;
 import io.micrometer.observation.ObservationRegistry;
 import jakarta.jms.Connection;
@@ -900,7 +902,12 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 
 	@Override
 	public @Nullable Message sendAndReceive(Destination destination, Destination responseQueue, MessageCreator messageCreator) throws JmsException {
-		return executeLocal(session -> doSendAndReceive(session, destination, responseQueue, messageCreator), true);
+		return sendAndReceive(destination, responseQueue, messageCreator, SelectorType.MESSAGE_ID);
+	}
+
+	@Override
+	public @Nullable Message sendAndReceive(Destination destination, Destination responseQueue, MessageCreator messageCreator, SelectorType selectorType) throws JmsException {
+		return executeLocal(session -> doSendAndReceive(session, destination, responseQueue, messageCreator, selectorType), true);
 	}
 
 	@Override
@@ -913,10 +920,15 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 
 	@Override
 	public @Nullable Message sendAndReceive(String destinationName, String responseQueueName, MessageCreator messageCreator) throws JmsException {
+		return sendAndReceive(destinationName, responseQueueName, messageCreator, SelectorType.MESSAGE_ID);
+	}
+
+	@Override
+	public @Nullable Message sendAndReceive(String destinationName, String responseQueueName, MessageCreator messageCreator, SelectorType selectorType) throws JmsException {
 		return executeLocal(session -> {
 			Destination destination = resolveDestinationName(session, destinationName);
 			Destination responseQueue = resolveDestinationName(session, responseQueueName);
-			return doSendAndReceive(session, destination, responseQueue, messageCreator);
+			return doSendAndReceive(session, destination, responseQueue, messageCreator, selectorType);
 		}, true);
 	}
 
@@ -932,7 +944,7 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 		TemporaryQueue responseQueue = null;
 		try {
 			responseQueue = session.createTemporaryQueue();
-			return doSendAndReceive(session, destination, responseQueue, messageCreator);
+			return doSendAndReceive(session, destination, responseQueue, messageCreator, SelectorType.NONE);
 		}
 		finally {
 			if (responseQueue != null) {
@@ -944,24 +956,39 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	/**
 	 * Send a request message to the given {@link Destination destination} and block until
 	 * a reply has been received on the specified {@link Destination responseQueue}.
+	 * <p>Use {@link SelectorType selectorType} to specify how the response message is correlated
+	 * to the request message.
 	 * <p>Return the response message or {@code null} if no message has been received.
 	 * @throws JMSException if thrown by JMS API methods
 	 */
-	protected @Nullable Message doSendAndReceive(Session session, Destination destination, Destination responseQueue, MessageCreator messageCreator)
+	protected @Nullable Message doSendAndReceive(Session session, Destination destination, Destination responseQueue, MessageCreator messageCreator, SelectorType selectorType)
 			throws JMSException {
-
 		Assert.notNull(messageCreator, "MessageCreator must not be null");
 		MessageProducer producer = null;
 		MessageConsumer consumer = null;
 		try {
 			Message requestMessage = messageCreator.createMessage(session);
 			producer = session.createProducer(destination);
-			consumer = session.createConsumer(responseQueue);
+
+			String messageSelector = null;
+			if (selectorType == SelectorType.CORRELATION_ID) {
+				String correlationId = UUID.randomUUID().toString();
+				requestMessage.setJMSCorrelationID(correlationId);
+				messageSelector = "JMSCorrelationID = '" + correlationId + "'";
+			}
+
 			requestMessage.setJMSReplyTo(responseQueue);
 			if (logger.isDebugEnabled()) {
 				logger.debug("Sending created message: " + requestMessage);
 			}
 			doSend(producer, requestMessage);
+
+			if (selectorType == SelectorType.MESSAGE_ID) {
+				String messageId = requestMessage.getJMSMessageID();
+				messageSelector = "JMSCorrelationID = '" + messageId + "'";
+			}
+
+			consumer = session.createConsumer(responseQueue, messageSelector);
 			return receiveFromConsumer(consumer, getReceiveTimeout());
 		}
 		finally {

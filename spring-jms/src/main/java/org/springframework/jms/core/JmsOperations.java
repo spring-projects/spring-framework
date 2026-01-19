@@ -407,6 +407,7 @@ public interface JmsOperations {
 	 * <p>The {@link MessageCreator} callback creates the message given a Session,
 	 * and the specified {@code responseQueue} is set in the {@code JMSReplyTO}
 	 * header of the message.
+	 * <p>A default {@link SelectorType#MESSAGE_ID} is used to correlate request and reply messages.
 	 * @param destination the destination to send the message to
 	 * @param responseQueue the destination to receive the reply from
 	 * @param messageCreator callback to create a message
@@ -422,8 +423,27 @@ public interface JmsOperations {
 	 * Send a message to the specified destination and receive the reply from the
 	 * specified response queue.
 	 * <p>The {@link MessageCreator} callback creates the message given a Session,
+	 * and the specified {@code responseQueue} is set in the {@code JMSReplyTO}
+	 * header of the message.
+	 * @param destination the destination to send the message to
+	 * @param responseQueue the destination to receive the reply from
+	 * @param messageCreator callback to create a message
+	 * @param selectorType the {@link SelectorType} to use for correlating request and reply messages
+	 * @return the reply, possibly {@code null} if the message could not be received,
+	 * for example due to a timeout
+	 * @throws JmsException checked JMSException converted to unchecked
+	 * @since 7.0.4
+	 */
+	@Nullable Message sendAndReceive(Destination destination, Destination responseQueue, MessageCreator messageCreator, SelectorType selectorType)
+			throws JmsException;
+
+	/**
+	 * Send a message to the specified destination and receive the reply from the
+	 * specified response queue.
+	 * <p>The {@link MessageCreator} callback creates the message given a Session,
 	 * and the destination with the specified {@code responseQueueName} is set in
 	 * the {@code JMSReplyTO} header of the message.
+	 * <p>A default {@link SelectorType#MESSAGE_ID} is used to correlate request and reply messages.
 	 * @param destinationName the name of the destination to send the message to
 	 * (to be resolved to an actual destination by a DestinationResolver)
 	 * @param responseQueueName the name of the destination to receive the reply from
@@ -437,6 +457,42 @@ public interface JmsOperations {
 	@Nullable Message sendAndReceive(String destinationName, String responseQueueName, MessageCreator messageCreator)
 			throws JmsException;
 
+	/**
+	 * Send a message to the specified destination and receive the reply from the
+	 * specified response queue.
+	 * <p>The {@link MessageCreator} callback creates the message given a Session,
+	 * and the destination with the specified {@code responseQueueName} is set in
+	 * the {@code JMSReplyTO} header of the message.
+	 * @param destinationName the name of the destination to send the message to
+	 * (to be resolved to an actual destination by a DestinationResolver)
+	 * @param responseQueueName the name of the destination to receive the reply from
+	 * (to be resolved to an actual destination by a DestinationResolver)
+	 * @param messageCreator callback to create a message
+	 * @param selectorType the {@link SelectorType} to use for correlating request and reply messages
+	 * @return the reply, possibly {@code null} if the message could not be received,
+	 * for example due to a timeout
+	 * @throws JmsException checked JMSException converted to unchecked
+	 * @since 7.0.4
+	 */
+	@Nullable Message sendAndReceive(String destinationName, String responseQueueName, MessageCreator messageCreator, SelectorType selectorType) throws JmsException;
+
+	/**
+	 * Enumeration of supported selector types.
+	 */
+	enum SelectorType {
+		/**
+		 * Use generated JMSCorrelationID to correlate request and reply messages.
+		 */
+		CORRELATION_ID,
+		/**
+		 * Use JMSMessageID of the request message to correlate request and reply messages.
+		 */
+		MESSAGE_ID,
+		/**
+		 * Do not use any selector to correlate request and reply messages.
+		 */
+		NONE
+	}
 
 	//---------------------------------------------------------------------------------------
 	// Convenience methods for browsing messages
