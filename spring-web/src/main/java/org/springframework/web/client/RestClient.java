@@ -1027,8 +1027,23 @@ public interface RestClient {
 		 * response with a status code of 4xx or 5xx. Use
 		 * {@link #onStatus(Predicate, ErrorHandler)} to customize error response
 		 * handling.
+		 * @see #requiredBody(Class)
 		 */
 		<T> @Nullable T body(Class<T> bodyType);
+
+		/**
+		 * Extract the body as an object of the given type.
+		 * @param bodyType the type of return value
+		 * @param <T> the body type
+		 * @return the body
+		 * @throws IllegalStateException if no response body was available
+		 * @throws RestClientResponseException by default when receiving a
+		 * response with a status code of 4xx or 5xx. Use
+		 * {@link #onStatus(Predicate, ErrorHandler)} to customize error response
+		 * handling.
+		 * @since 7.0.4
+		 */
+		<T> T requiredBody(Class<T> bodyType);
 
 		/**
 		 * Extract the body as an object of the given type.
@@ -1039,8 +1054,23 @@ public interface RestClient {
 		 * response with a status code of 4xx or 5xx. Use
 		 * {@link #onStatus(Predicate, ErrorHandler)} to customize error response
 		 * handling.
+		 * @see #requiredBody(ParameterizedTypeReference)
 		 */
 		<T> @Nullable T body(ParameterizedTypeReference<T> bodyType);
+
+		/**
+		 * Extract the body as an object of the given type.
+		 * @param bodyType the type of return value
+		 * @param <T> the body type
+		 * @return the body
+		 * @throws IllegalStateException if no response body was available
+		 * @throws RestClientResponseException by default when receiving a
+		 * response with a status code of 4xx or 5xx. Use
+		 * {@link #onStatus(Predicate, ErrorHandler)} to customize error response
+		 * handling.
+		 * @since 7.0.4
+		 */
+		<T> T requiredBody(ParameterizedTypeReference<T> bodyType);
 
 		/**
 		 * Return a {@code ResponseEntity} with the body decoded to an Object of
