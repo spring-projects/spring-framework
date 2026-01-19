@@ -17,8 +17,8 @@
 package org.springframework.docs.web.webmvc.mvcservlet.mvccontainerconfig
 
 import org.springframework.web.context.WebApplicationContext
-import org.springframework.web.context.support.AbstractDispatcherServletInitializer
 import org.springframework.web.context.support.XmlWebApplicationContext
+import org.springframework.web.servlet.support.AbstractDispatcherServletInitializer
 
 // tag::snippet[]
 class MyXmlDispatcherServletInitializer : AbstractDispatcherServletInitializer() {
