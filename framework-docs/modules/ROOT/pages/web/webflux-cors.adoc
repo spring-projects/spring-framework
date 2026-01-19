@@ -39,9 +39,9 @@ required CORS response headers set.
 
 In order to enable cross-origin requests (that is, the `Origin` header is present and
 differs from the host of the request), you need to have some explicitly declared CORS
-configuration. If no matching CORS configuration is found, preflight requests are
-rejected. No CORS headers are added to the responses of simple and actual CORS requests
-and, consequently, browsers reject them.
+configuration. If no matching CORS configuration is found, no CORS headers are added to
+the responses to preflight, simple and actual CORS requests and, consequently, browsers
+reject them.
 
 Each `HandlerMapping` can be
 {spring-framework-api}/web/reactive/handler/AbstractHandlerMapping.html#setCorsConfigurations(java.util.Map)[configured]
