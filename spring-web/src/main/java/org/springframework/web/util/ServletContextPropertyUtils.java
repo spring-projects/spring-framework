@@ -17,6 +17,8 @@
 package org.springframework.web.util;
 
 import jakarta.servlet.ServletContext;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.jspecify.annotations.Nullable;
 
 import org.springframework.util.PropertyPlaceholderHelper;
@@ -89,6 +91,8 @@ public abstract class ServletContextPropertyUtils {
 
 	private static class ServletContextPlaceholderResolver implements PropertyPlaceholderHelper.PlaceholderResolver {
 
+		private static final Log logger = LogFactory.getLog(ServletContextPlaceholderResolver.class);
+
 		private final String text;
 
 		private final ServletContext servletContext;
@@ -113,8 +117,10 @@ public abstract class ServletContextPropertyUtils {
 				return propVal;
 			}
 			catch (Throwable ex) {
-				System.err.println("Could not resolve placeholder '" + placeholderName + "' in [" +
-						this.text + "] as ServletContext init-parameter or system property: " + ex);
+				if (logger.isDebugEnabled()) {
+					logger.debug("Could not resolve placeholder '" + placeholderName + "' in [" +
+							this.text + "] as ServletContext init-parameter or system property", ex);
+				}
 				return null;
 			}
 		}
