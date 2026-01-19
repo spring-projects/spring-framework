@@ -975,7 +975,7 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 			if (selectorType == SelectorType.CORRELATION_ID) {
 				String correlationId = UUID.randomUUID().toString();
 				requestMessage.setJMSCorrelationID(correlationId);
-				messageSelector = String.format("%s = '%s'", MessageUtil.CORRELATIONID_HEADER_NAME_STRING, correlationId);
+				messageSelector = String.format("JMSCorrelationID = '%s'", correlationId);
 			}
 
 			requestMessage.setJMSReplyTo(responseQueue);
@@ -986,7 +986,7 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 
 			if (selectorType == SelectorType.MESSAGE_ID) {
 				String messageId = requestMessage.getJMSMessageID();
-				messageSelector = String.format("%s = '%s'", MessageUtil.CORRELATIONID_HEADER_NAME_STRING, messageId);
+				messageSelector = String.format("JMSCorrelationID = '%s'", messageId);
 			}
 
 			consumer = session.createConsumer(responseQueue, messageSelector);
