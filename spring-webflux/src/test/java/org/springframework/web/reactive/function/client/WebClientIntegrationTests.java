@@ -441,7 +441,7 @@ class WebClientIntegrationTests {
 	}
 
 	@Test // gh-24788
-	void retrieveJsonArrayAsBodilessEntityShouldReleasesConnection() throws IOException {
+	void retrieveJsonArrayAsBodilessEntityShouldReleaseConnection() throws IOException {
 
 		// Constrain connection pool and make consecutive requests.
 		// 2nd request should hang if response was not drained.
