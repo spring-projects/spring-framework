@@ -406,8 +406,10 @@ class RestClientIntegrationTests {
 		}
 		catch (HttpServerErrorException ex) {
 			assertThat(ex.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
-			assumeFalse(requestFactory instanceof JdkClientHttpRequestFactory, "JDK HttpClient does not expose status text");
-			assertThat(ex.getStatusText()).isEqualTo("Server Error");
+			// JDK HttpClient does not expose status text
+			if (!(requestFactory instanceof JdkClientHttpRequestFactory)) {
+				assertThat(ex.getStatusText()).isEqualTo("Server Error");
+			}
 			assertThat(ex.getResponseHeaders().getContentType()).isEqualTo(MediaType.TEXT_PLAIN);
 			assertThat(ex.getResponseBodyAsString()).isEqualTo(errorMessage);
 		}

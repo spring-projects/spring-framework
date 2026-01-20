@@ -24,6 +24,7 @@ import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -61,17 +62,11 @@ class DispatcherHandlerIntegrationTests extends AbstractHttpHandlerIntegrationTe
 
 	private final RestTemplate restTemplate = new RestTemplate();
 
-	private AnnotationConfigApplicationContext wac;
-
 
 	@Override
 	protected HttpHandler createHttpHandler() {
-		this.wac = new AnnotationConfigApplicationContext();
-		this.wac.register(TestConfiguration.class);
-		this.wac.refresh();
-
-		DispatcherHandler webHandler = new DispatcherHandler();
-		webHandler.setApplicationContext(this.wac);
+		ApplicationContext wac = new AnnotationConfigApplicationContext(TestConfiguration.class);
+		DispatcherHandler webHandler = new DispatcherHandler(wac);
 
 		return WebHttpHandlerBuilder.webHandler(webHandler).build();
 	}
