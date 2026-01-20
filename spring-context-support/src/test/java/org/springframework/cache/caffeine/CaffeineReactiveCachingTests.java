@@ -44,7 +44,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class CaffeineReactiveCachingTests {
 
 	@ParameterizedTest
-	@ValueSource(classes = {AsyncCacheModeConfig.class, AsyncCacheModeConfig.class})
+	@ValueSource(classes = {AsyncCacheModeConfig.class, AsyncCacheModeWithoutNullValuesConfig.class})
 	void cacheHitDetermination(Class<?> configClass) {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(configClass, ReactiveCacheableService.class);
 		ReactiveCacheableService service = ctx.getBean(ReactiveCacheableService.class);
@@ -106,9 +106,8 @@ class CaffeineReactiveCachingTests {
 		ctx.close();
 	}
 
-
 	@ParameterizedTest
-	@ValueSource(classes = {AsyncCacheModeConfig.class, AsyncCacheModeConfig.class})
+	@ValueSource(classes = {AsyncCacheModeConfig.class, AsyncCacheModeWithoutNullValuesConfig.class})
 	void fluxCacheDoesntDependOnFirstRequest(Class<?> configClass) {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(configClass, ReactiveCacheableService.class);
 		ReactiveCacheableService service = ctx.getBean(ReactiveCacheableService.class);
