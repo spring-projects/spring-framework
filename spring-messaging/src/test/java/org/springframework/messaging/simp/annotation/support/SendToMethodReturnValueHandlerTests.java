@@ -293,9 +293,60 @@ public class SendToMethodReturnValueHandlerTests {
 		assertResponse(parameter, sessionId, 1, "/dest4");
 	}
 
+	@Test
+	void sendToWithHeaderFilterSinglePredicate() throws Exception {
+		given(this.messageChannel.send(any(Message.class))).willReturn(true);
+
+		String sessionId = "sess1";
+		String customHeaderName = "x-custom-header";
+		String customHeaderValue = "custom-value";
+		Message<?> inputMessage = createMessage(sessionId, "sub1", null, null, null);
+		inputMessage = MessageBuilder.fromMessage(inputMessage)
+				.setHeader(customHeaderName, customHeaderValue)
+				.build();
+
+		SendToMethodReturnValueHandler handler = new SendToMethodReturnValueHandler(new SimpMessagingTemplate(this.messageChannel), true);
+		handler.addHeaderFilter(name -> name.equals(customHeaderName));
+
+		handler.handleReturnValue(PAYLOAD, this.sendToReturnType, inputMessage);
+
+		verify(this.messageChannel, times(2)).send(this.messageCaptor.capture());
+		for (Message<?> sent : this.messageCaptor.getAllValues()) {
+			MessageHeaders headers = sent.getHeaders();
+			assertThat(headers.get(customHeaderName)).isEqualTo(customHeaderValue);
+		}
+	}
+
+	@Test
+	void sendToWithHeaderFilterMultiplePredicates() throws Exception {
+		given(this.messageChannel.send(any(Message.class))).willReturn(true);
+
+		String sessionId = "sess1";
+		String headerA = "x-header-a";
+		String headerB = "x-header-b";
+		Message<?> inputMessage = createMessage(sessionId, "sub1", null, null, null);
+		inputMessage = MessageBuilder.fromMessage(inputMessage)
+				.setHeader(headerA, "A-value")
+				.setHeader(headerB, "B-value")
+				.build();
+
+		SendToMethodReturnValueHandler handler = new SendToMethodReturnValueHandler(new SimpMessagingTemplate(this.messageChannel), true);
+		handler.addHeaderFilter(name -> name.equals(headerA));
+		handler.addHeaderFilter(name -> name.equals(headerB));
+
+		handler.handleReturnValue(PAYLOAD, this.sendToReturnType, inputMessage);
+
+		verify(this.messageChannel, times(2)).send(this.messageCaptor.capture());
+		for (Message<?> sent : this.messageCaptor.getAllValues()) {
+			MessageHeaders headers = sent.getHeaders();
+			assertThat(headers.get(headerA)).isEqualTo("A-value");
+			assertThat(headers.get(headerB)).isEqualTo("B-value");
+		}
+	}
+
 
 	private void assertResponse(MethodParameter methodParameter, String sessionId,
-			int index, String destination) {
+								int index, String destination) {
 
 		SimpMessageHeaderAccessor accessor = getCapturedAccessor(index);
 		assertThat(accessor.getSessionId()).isEqualTo(sessionId);
