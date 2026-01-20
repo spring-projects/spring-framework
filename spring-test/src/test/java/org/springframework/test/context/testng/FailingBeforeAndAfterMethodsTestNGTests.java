@@ -18,8 +18,7 @@ package org.springframework.test.context.testng;
 
 import java.util.List;
 
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedClass;
+import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.testng.TestNG;
@@ -49,13 +48,13 @@ import static org.junit.jupiter.params.provider.Arguments.argumentSet;
  * @author Sam Brannen
  * @since 2.5
  */
-@ParameterizedClass
-@MethodSource("testData")
-record FailingBeforeAndAfterMethodsTestNGTests(Class<?> clazz, int expectedTestStartCount,
-		int expectedTestSuccessCount, int expectedFailureCount, int expectedFailedConfigurationsCount) {
+class FailingBeforeAndAfterMethodsTestNGTests {
 
-	@Test
-	void runTestAndAssertCounters() {
+	@ParameterizedTest
+	@MethodSource("testData")
+	void runTestAndAssertCounters(Class<?> clazz, int expectedTestStartCount, int expectedTestSuccessCount,
+			int expectedFailureCount, int expectedFailedConfigurationsCount) {
+
 		TrackingTestNGTestListener listener = new TrackingTestNGTestListener();
 		TestNG testNG = new TestNG();
 		testNG.addListener(listener);
