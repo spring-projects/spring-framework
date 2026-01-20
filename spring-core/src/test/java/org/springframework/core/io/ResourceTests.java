@@ -44,7 +44,7 @@ import mockwebserver3.RecordedRequest;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.ParameterizedClass;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -68,82 +68,88 @@ import static org.mockito.Mockito.mock;
  */
 class ResourceTests {
 
-	@ParameterizedTest
+	@Nested
+	@ParameterizedClass
 	@MethodSource("resource")
-	void resourceIsValid(Resource resource) throws Exception {
-		assertThat(resource.getFilename()).isEqualTo("ResourceTests.class");
-		assertThat(resource.getURL().getFile()).endsWith("ResourceTests.class");
-		assertThat(resource.exists()).isTrue();
-		assertThat(resource.isReadable()).isTrue();
-		assertThat(resource.contentLength()).isGreaterThan(0);
-		assertThat(resource.lastModified()).isGreaterThan(0);
-		assertThat(resource.getContentAsByteArray()).containsExactly(Files.readAllBytes(Path.of(resource.getURI())));
-	}
+	class ParameterizedResourceTests {
 
-	@ParameterizedTest
-	@MethodSource("resource")
-	void resourceCreateRelative(Resource resource) throws Exception {
-		Resource relative1 = resource.createRelative("ClassPathResourceTests.class");
-		assertThat(relative1.getFilename()).isEqualTo("ClassPathResourceTests.class");
-		assertThat(relative1.getURL().getFile().endsWith("ClassPathResourceTests.class")).isTrue();
-		assertThat(relative1.exists()).isTrue();
-		assertThat(relative1.isReadable()).isTrue();
-		assertThat(relative1.contentLength()).isGreaterThan(0);
-		assertThat(relative1.lastModified()).isGreaterThan(0);
-	}
+		private final Resource resource;
 
-	@ParameterizedTest
-	@MethodSource("resource")
-	void resourceCreateRelativeWithFolder(Resource resource) throws Exception {
-		Resource relative2 = resource.createRelative("support/PathMatchingResourcePatternResolverTests.class");
-		assertThat(relative2.getFilename()).isEqualTo("PathMatchingResourcePatternResolverTests.class");
-		assertThat(relative2.getURL().getFile()).endsWith("PathMatchingResourcePatternResolverTests.class");
-		assertThat(relative2.exists()).isTrue();
-		assertThat(relative2.isReadable()).isTrue();
-		assertThat(relative2.contentLength()).isGreaterThan(0);
-		assertThat(relative2.lastModified()).isGreaterThan(0);
-	}
+		public ParameterizedResourceTests(Resource resource) {
+			this.resource = resource;
+		}
 
-	@ParameterizedTest
-	@MethodSource("resource")
-	void resourceCreateRelativeWithDotPath(Resource resource) throws Exception {
-		Resource relative3 = resource.createRelative("../CollectionFactoryTests.class");
-		assertThat(relative3.getFilename()).isEqualTo("CollectionFactoryTests.class");
-		assertThat(relative3.getURL().getFile()).endsWith("CollectionFactoryTests.class");
-		assertThat(relative3.exists()).isTrue();
-		assertThat(relative3.isReadable()).isTrue();
-		assertThat(relative3.contentLength()).isGreaterThan(0);
-		assertThat(relative3.lastModified()).isGreaterThan(0);
-	}
+		@Test
+		void resourceIsValid() throws Exception {
+			assertThat(resource.getFilename()).isEqualTo("ResourceTests.class");
+			assertThat(resource.getURL().getFile()).endsWith("ResourceTests.class");
+			assertThat(resource.exists()).isTrue();
+			assertThat(resource.isReadable()).isTrue();
+			assertThat(resource.contentLength()).isGreaterThan(0);
+			assertThat(resource.lastModified()).isGreaterThan(0);
+			assertThat(resource.getContentAsByteArray()).containsExactly(Files.readAllBytes(Path.of(resource.getURI())));
+		}
 
-	@ParameterizedTest
-	@MethodSource("resource")
-	void resourceCreateRelativeUnknown(Resource resource) throws Exception {
-		Resource relative4 = resource.createRelative("X.class");
-		assertThat(relative4.exists()).isFalse();
-		assertThat(relative4.isReadable()).isFalse();
-		assertThatExceptionOfType(FileNotFoundException.class).isThrownBy(relative4::contentLength);
-		assertThatExceptionOfType(FileNotFoundException.class).isThrownBy(relative4::lastModified);
-		assertThatExceptionOfType(FileNotFoundException.class).isThrownBy(relative4::getInputStream);
-		assertThatExceptionOfType(FileNotFoundException.class).isThrownBy(relative4::readableChannel);
-		assertThatExceptionOfType(FileNotFoundException.class).isThrownBy(relative4::getContentAsByteArray);
-		assertThatExceptionOfType(FileNotFoundException.class).isThrownBy(() -> relative4.getContentAsString(UTF_8));
-	}
+		@Test
+		void resourceCreateRelative() throws Exception {
+			Resource relative1 = resource.createRelative("ClassPathResourceTests.class");
+			assertThat(relative1.getFilename()).isEqualTo("ClassPathResourceTests.class");
+			assertThat(relative1.getURL().getFile().endsWith("ClassPathResourceTests.class")).isTrue();
+			assertThat(relative1.exists()).isTrue();
+			assertThat(relative1.isReadable()).isTrue();
+			assertThat(relative1.contentLength()).isGreaterThan(0);
+			assertThat(relative1.lastModified()).isGreaterThan(0);
+		}
 
-	private static Stream<Arguments> resource() throws URISyntaxException {
-		URL resourceClass = ResourceTests.class.getResource("ResourceTests.class");
-		Path resourceClassFilePath = Paths.get(resourceClass.toURI());
-		return Stream.of(
-				argumentSet("ClassPathResource", new ClassPathResource("org/springframework/core/io/ResourceTests.class")),
-				argumentSet("ClassPathResource with ClassLoader", new ClassPathResource("org/springframework/core/io/ResourceTests.class", ResourceTests.class.getClassLoader())),
-				argumentSet("ClassPathResource with Class", new ClassPathResource("ResourceTests.class", ResourceTests.class)),
-				argumentSet("FileSystemResource", new FileSystemResource(resourceClass.getFile())),
-				argumentSet("FileSystemResource with File", new FileSystemResource(new File(resourceClass.getFile()))),
-				argumentSet("FileSystemResource with File path", new FileSystemResource(resourceClassFilePath)),
-				argumentSet("UrlResource", new UrlResource(resourceClass))
-		);
-	}
+		@Test
+		void resourceCreateRelativeWithFolder() throws Exception {
+			Resource relative2 = resource.createRelative("support/PathMatchingResourcePatternResolverTests.class");
+			assertThat(relative2.getFilename()).isEqualTo("PathMatchingResourcePatternResolverTests.class");
+			assertThat(relative2.getURL().getFile()).endsWith("PathMatchingResourcePatternResolverTests.class");
+			assertThat(relative2.exists()).isTrue();
+			assertThat(relative2.isReadable()).isTrue();
+			assertThat(relative2.contentLength()).isGreaterThan(0);
+			assertThat(relative2.lastModified()).isGreaterThan(0);
+		}
 
+		@Test
+		void resourceCreateRelativeWithDotPath() throws Exception {
+			Resource relative3 = resource.createRelative("../CollectionFactoryTests.class");
+			assertThat(relative3.getFilename()).isEqualTo("CollectionFactoryTests.class");
+			assertThat(relative3.getURL().getFile()).endsWith("CollectionFactoryTests.class");
+			assertThat(relative3.exists()).isTrue();
+			assertThat(relative3.isReadable()).isTrue();
+			assertThat(relative3.contentLength()).isGreaterThan(0);
+			assertThat(relative3.lastModified()).isGreaterThan(0);
+		}
+
+		@Test
+		void resourceCreateRelativeUnknown() throws Exception {
+			Resource relative4 = resource.createRelative("X.class");
+			assertThat(relative4.exists()).isFalse();
+			assertThat(relative4.isReadable()).isFalse();
+			assertThatExceptionOfType(FileNotFoundException.class).isThrownBy(relative4::contentLength);
+			assertThatExceptionOfType(FileNotFoundException.class).isThrownBy(relative4::lastModified);
+			assertThatExceptionOfType(FileNotFoundException.class).isThrownBy(relative4::getInputStream);
+			assertThatExceptionOfType(FileNotFoundException.class).isThrownBy(relative4::readableChannel);
+			assertThatExceptionOfType(FileNotFoundException.class).isThrownBy(relative4::getContentAsByteArray);
+			assertThatExceptionOfType(FileNotFoundException.class).isThrownBy(() -> relative4.getContentAsString(UTF_8));
+		}
+
+		private static Stream<Arguments> resource() throws URISyntaxException {
+			URL resourceClass = ResourceTests.class.getResource("ResourceTests.class");
+			Path resourceClassFilePath = Paths.get(resourceClass.toURI());
+			return Stream.of(
+					argumentSet("ClassPathResource", new ClassPathResource("org/springframework/core/io/ResourceTests.class")),
+					argumentSet("ClassPathResource with ClassLoader", new ClassPathResource("org/springframework/core/io/ResourceTests.class", ResourceTests.class.getClassLoader())),
+					argumentSet("ClassPathResource with Class", new ClassPathResource("ResourceTests.class", ResourceTests.class)),
+					argumentSet("FileSystemResource", new FileSystemResource(resourceClass.getFile())),
+					argumentSet("FileSystemResource with File", new FileSystemResource(new File(resourceClass.getFile()))),
+					argumentSet("FileSystemResource with File path", new FileSystemResource(resourceClassFilePath)),
+					argumentSet("UrlResource", new UrlResource(resourceClass))
+			);
+		}
+	}
 
 	@Nested
 	class ByteArrayResourceTests {
