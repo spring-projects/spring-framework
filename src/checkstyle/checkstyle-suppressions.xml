@@ -6,14 +6,15 @@
 	<suppress files="[\\/]build[\\/]generated[\\/]sources[\\/]" checks=".*"/>
 
 	<!-- Global: package-info.java -->
-	<suppress files="(^(?!.+[\\/]src[\\/]main[\\/]java[\\/]).*)|(.*framework-docs.*)" checks="JavadocPackage" />
-	<suppress files="(^(?!.+[\\/]src[\\/]main[\\/]java[\\/].*package-info\.java))|(.*framework-docs.*)|(.*spring-(context-indexer|instrument|jcl).*)" checks="RegexpSinglelineJava" id="packageLevelNonNullApiAnnotation" />
-	<suppress files="(^(?!.+[\\/]src[\\/]main[\\/]java[\\/].*package-info\.java))|(.*framework-docs.*)|(.*spring-(context-indexer|instrument|jcl).*)" checks="RegexpSinglelineJava" id="packageLevelNonNullFieldsAnnotation" />
+	<suppress files="(^(?!.+[\\/]src[\\/]main[\\/]java[\\/]).*)|(.*framework-docs.*)" checks="JavadocPackage"/>
+	<suppress files="(^(?!.+[\\/]src[\\/]main[\\/]java[\\/].*package-info\.java))|(.*framework-docs.*)|(.*spring-(context-indexer|instrument|jcl).*)" checks="RegexpSinglelineJava" id="packageLevelNonNullApiAnnotation"/>
+	<suppress files="(^(?!.+[\\/]src[\\/]main[\\/]java[\\/].*package-info\.java))|(.*framework-docs.*)|(.*spring-(context-indexer|instrument|jcl).*)" checks="RegexpSinglelineJava" id="packageLevelNonNullFieldsAnnotation"/>
 
 	<!-- Global: tests and test fixtures -->
 	<suppress files="[\\/]src[\\/](test|testFixtures)[\\/](java|java21)[\\/]" checks="AnnotationLocation|AnnotationUseStyle|AtclauseOrder|AvoidNestedBlocks|FinalClass|HideUtilityClassConstructor|InnerTypeLast|JavadocStyle|JavadocType|JavadocVariable|LeftCurly|MultipleVariableDeclarations|NeedBraces|OneTopLevelClass|OuterTypeFilename|RequireThis|SpringCatch|SpringJavadoc|SpringNoThis"/>
 	<suppress files="[\\/]src[\\/](test|testFixtures)[\\/](java|java21)[\\/]" checks="RegexpSinglelineJava" id="toLowerCaseWithoutLocale"/>
 	<suppress files="[\\/]src[\\/](test|testFixtures)[\\/](java|java21)[\\/]" checks="RegexpSinglelineJava" id="toUpperCaseWithoutLocale"/>
+	<suppress files="[\\/]src[\\/](test|testFixtures)[\\/](java|java21)[\\/]" checks="RegexpSinglelineJava" id="printStackTrace"/>
 	<suppress files="[\\/]src[\\/](test|testFixtures)[\\/](java|java21)[\\/]" checks="RegexpSinglelineJava" id="systemOutErrPrint"/>
 	<suppress files="[\\/]src[\\/](test|testFixtures)[\\/](java|java21)[\\/]" checks="SpringJUnit5" message="should not be public"/>
 	<suppress files="[\\/]src[\\/]test[\\/](java|java21)[\\/]org[\\/]springframework[\\/].+(Tests|Suite)" checks="IllegalImport" id="bannedJUnitJupiterImports"/>
@@ -23,7 +24,7 @@
 	<suppress files="[\\/]src[\\/]jmh[\\/]java[\\/]org[\\/]springframework[\\/]" checks="JavadocVariable|JavadocStyle|InnerTypeLast"/>
 
 	<!-- Framework docs -->
-	<suppress files="org[\\/]springframework[\\/]docs[\\/].+" checks="IllegalImport" id="bannedJUnitJupiterImports" />
+	<suppress files="org[\\/]springframework[\\/]docs[\\/].+" checks="IllegalImport" id="bannedJUnitJupiterImports"/>
 
 	<!-- spring-aop -->
 	<suppress files="[\\/]src[\\/]main[\\/]java[\\/]org[\\/]aopalliance[\\/]" checks="IllegalImport" id="bannedImports" message="javax"/>
@@ -47,8 +48,8 @@
 	<suppress files="[\\/]src[\\/]main[\\/]java[\\/]org[\\/]springframework[\\/]aot[\\/]nativex[\\/]feature[\\/]" checks="RegexpSinglelineJava" id="systemOutErrPrint"/>
 	<suppress files="[\\/]src[\\/]main[\\/]java[\\/]org[\\/]springframework[\\/](core|util)[\\/](SpringProperties|SystemPropertyUtils)" checks="RegexpSinglelineJava" id="systemOutErrPrint"/>
 	<suppress files="[\\/]src[\\/]main[\\/]java[\\/]org[\\/]springframework[\\/]lang[\\/]" checks="IllegalImport" id="bannedImports" message="javax"/>
-	<suppress files="[\\/]src[\\/]main[\\/]java[\\/]org[\\/]springframework[\\/]lang[\\/]" checks="RegexpSinglelineJava" id="packageLevelNonNullApiAnnotation" />
-	<suppress files="[\\/]src[\\/]main[\\/]java[\\/]org[\\/]springframework[\\/]lang[\\/]" checks="RegexpSinglelineJava" id="packageLevelNonNullFieldsAnnotation" />
+	<suppress files="[\\/]src[\\/]main[\\/]java[\\/]org[\\/]springframework[\\/]lang[\\/]" checks="RegexpSinglelineJava" id="packageLevelNonNullApiAnnotation"/>
+	<suppress files="[\\/]src[\\/]main[\\/]java[\\/]org[\\/]springframework[\\/]lang[\\/]" checks="RegexpSinglelineJava" id="packageLevelNonNullFieldsAnnotation"/>
 	<suppress files="[\\/]src[\\/]main[\\/]java[\\/]org[\\/]springframework[\\/]core[\\/]annotation[\\/]" checks="IllegalImport" id="bannedImports" message="javax"/>
 	<suppress files="[\\/]src[\\/]test[\\/]java[\\/]org[\\/]springframework[\\/]core[\\/]annotation[\\/]" checks="IllegalImport" id="bannedImports" message="javax"/>
 	<suppress files="ByteArrayEncoder" checks="SpringLambda"/>
@@ -58,8 +59,9 @@
 	<suppress files="StringDecoderBenchmark" checks="RegexpSinglelineJava" id="separatorSymbolLocation"/>
 
 	<!-- spring-core-test -->
-	<suppress files="CompileWithForkedClassLoader" checks="IllegalImport" id="bannedJUnitJupiterImports" />
-	<suppress files="org[\\/]springframework[\\/]aot[\\/]test[\\/]agent[\\/].+" checks="IllegalImport" id="bannedJUnitJupiterImports" />
+	<suppress files="CompileWithForkedClassLoader" checks="IllegalImport" id="bannedJUnitJupiterImports"/>
+	<suppress files="org[\\/]springframework[\\/]aot[\\/]agent[\\/].+" checks="RegexpSinglelineJava" id="systemOutErrPrint"/>
+	<suppress files="org[\\/]springframework[\\/]aot[\\/]test[\\/]agent[\\/].+" checks="IllegalImport" id="bannedJUnitJupiterImports"/>
 
 	<!-- spring-expression -->
 	<suppress files="ExpressionException" checks="MutableException"/>
