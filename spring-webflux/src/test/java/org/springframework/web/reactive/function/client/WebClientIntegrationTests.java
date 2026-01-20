@@ -440,7 +440,7 @@ class WebClientIntegrationTests {
 		});
 	}
 
-	@Test // gh-24788
+	@Test  // gh-24788
 	void retrieveJsonArrayAsBodilessEntityShouldReleaseConnection() throws IOException {
 
 		// Constrain connection pool and make consecutive requests.
@@ -724,7 +724,7 @@ class WebClientIntegrationTests {
 		});
 	}
 
-	@ParameterizedWebClientTest // gh-31202
+	@ParameterizedWebClientTest  // gh-31202
 	void retrieve929UnknownStatusCode(ClientHttpConnector connector) throws IOException {
 		startServer(connector);
 
@@ -1322,7 +1322,7 @@ class WebClientIntegrationTests {
 				.verify(Duration.ofSeconds(3));
 	}
 
-	@Test // gh-36158
+	@Test  // gh-36158
 	void reactorNettyAttributes() throws IOException {
 		startServer(new ReactorClientHttpConnector());
 
