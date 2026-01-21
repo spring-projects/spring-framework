@@ -63,13 +63,11 @@ public class WebFluxConfigurerComposite implements WebFluxConfigurer {
 	}
 
 	@Override
-	@SuppressWarnings("NullAway") // https://github.com/uber/NullAway/issues/1128
 	public @Nullable Validator getValidator() {
 		return createSingleBean(WebFluxConfigurer::getValidator, Validator.class);
 	}
 
 	@Override
-	@SuppressWarnings("NullAway") // https://github.com/uber/NullAway/issues/1128
 	public @Nullable MessageCodesResolver getMessageCodesResolver() {
 		return createSingleBean(WebFluxConfigurer::getMessageCodesResolver, MessageCodesResolver.class);
 	}
@@ -124,7 +122,6 @@ public class WebFluxConfigurerComposite implements WebFluxConfigurer {
 	}
 
 	@Override
-	@SuppressWarnings("NullAway") // https://github.com/uber/NullAway/issues/1128
 	public @Nullable WebSocketService getWebSocketService() {
 		return createSingleBean(WebFluxConfigurer::getWebSocketService, WebSocketService.class);
 	}

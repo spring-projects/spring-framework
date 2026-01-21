@@ -94,7 +94,6 @@ public abstract class AbstractCachingConfiguration implements ImportAware {
 	/**
 	 * Extract the configuration from the nominated {@link CachingConfigurer}.
 	 */
-	@SuppressWarnings("NullAway") // https://github.com/uber/NullAway/issues/1128
 	protected void useCachingConfigurer(CachingConfigurerSupplier cachingConfigurerSupplier) {
 		this.cacheManager = cachingConfigurerSupplier.adapt(CachingConfigurer::cacheManager);
 		this.cacheResolver = cachingConfigurerSupplier.adapt(CachingConfigurer::cacheResolver);

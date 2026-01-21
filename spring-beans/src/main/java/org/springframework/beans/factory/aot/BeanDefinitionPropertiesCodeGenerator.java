@@ -113,7 +113,6 @@ class BeanDefinitionPropertiesCodeGenerator {
 				.createValueCodeGenerator(generatedMethods, customDelegates);
 	}
 
-	@SuppressWarnings("NullAway") // https://github.com/uber/NullAway/issues/1128
 	CodeBlock generateCode(RootBeanDefinition beanDefinition) {
 		CodeBlock.Builder code = CodeBlock.builder();
 		addStatementForValue(code, beanDefinition, BeanDefinition::getScope,
