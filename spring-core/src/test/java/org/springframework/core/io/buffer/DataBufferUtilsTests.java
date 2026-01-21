@@ -44,8 +44,6 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.PooledByteBufAllocator;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedClass;
-import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.stubbing.Answer;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscription;
@@ -73,7 +71,7 @@ import static org.mockito.Mockito.mock;
  * @author Arjen Poutsma
  * @author Sam Brannen
  */
-class DataBufferUtilsTests extends AbstractDataBufferAllocatingTests {
+class DataBufferUtilsTests {
 
 	private final Resource resource;
 
@@ -86,13 +84,7 @@ class DataBufferUtilsTests extends AbstractDataBufferAllocatingTests {
 	}
 
 	@Nested
-	@ParameterizedClass
-	@MethodSource("org.springframework.core.testfixture.io.buffer.AbstractDataBufferAllocatingTests#dataBufferFactories()")
-	class ParameterizedDataBufferUtilsTests {
-
-		ParameterizedDataBufferUtilsTests(DataBufferFactory bufferFactory) {
-			DataBufferUtilsTests.this.bufferFactory = bufferFactory;
-		}
+	class ParameterizedDataBufferUtilsTests extends AbstractDataBufferAllocatingTests {
 
 		@Test
 		void readInputStream() {
@@ -206,8 +198,7 @@ class DataBufferUtilsTests extends AbstractDataBufferAllocatingTests {
 					.verify();
 		}
 
-		@Test
-			// gh-22107
+		@Test // gh-22107
 		void readAsynchronousFileChannelCancelWithoutDemand() throws Exception {
 			URI uri = resource.getURI();
 			Flux<DataBuffer> flux = DataBufferUtils.readAsynchronousFileChannel(

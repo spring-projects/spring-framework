@@ -22,6 +22,7 @@ import java.time.Duration;
 import java.util.Collections;
 import java.util.Map;
 
+import org.junit.jupiter.api.Test;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -30,7 +31,6 @@ import tools.jackson.databind.SerializationFeature;
 import tools.jackson.databind.json.JsonMapper;
 
 import org.springframework.core.ResolvableType;
-import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.core.testfixture.io.buffer.AbstractDataBufferAllocatingTests;
 import org.springframework.http.MediaType;
@@ -57,9 +57,8 @@ class ServerSentEventHttpMessageWriterTests extends AbstractDataBufferAllocating
 			new ServerSentEventHttpMessageWriter(new JacksonJsonEncoder());
 
 
-	@ParameterizedDataBufferAllocatingTest
-	void canWrite(DataBufferFactory bufferFactory) {
-		super.bufferFactory = bufferFactory;
+	@Test
+	void canWrite() {
 
 		assertThat(this.messageWriter.canWrite(forClass(Object.class), null)).isTrue();
 		assertThat(this.messageWriter.canWrite(forClass(Object.class), new MediaType("foo", "bar"))).isFalse();
@@ -72,14 +71,12 @@ class ServerSentEventHttpMessageWriterTests extends AbstractDataBufferAllocating
 		assertThat(this.messageWriter.canWrite(ResolvableType.NONE, new MediaType("foo", "bar"))).isFalse();
 	}
 
-	@ParameterizedDataBufferAllocatingTest
-	void writeServerSentEvent(DataBufferFactory bufferFactory) {
-		super.bufferFactory = bufferFactory;
-
+	@Test
+	void writeServerSentEvent() {
 		ServerSentEvent<?> event = ServerSentEvent.builder().data("bar").id("c42").event("foo")
 				.comment("bla\nbla bla\nbla bla bla").retry(Duration.ofMillis(123L)).build();
 
-		MockServerHttpResponse outputMessage = new MockServerHttpResponse(super.bufferFactory);
+		MockServerHttpResponse outputMessage = new MockServerHttpResponse(bufferFactory);
 		Mono<ServerSentEvent> source = Mono.just(event);
 		testWrite(source, outputMessage, ServerSentEvent.class);
 
@@ -90,11 +87,9 @@ class ServerSentEventHttpMessageWriterTests extends AbstractDataBufferAllocating
 				.verify();
 	}
 
-	@ParameterizedDataBufferAllocatingTest
-	void writeString(DataBufferFactory bufferFactory) {
-		super.bufferFactory = bufferFactory;
-
-		MockServerHttpResponse outputMessage = new MockServerHttpResponse(super.bufferFactory);
+	@Test
+	void writeString() {
+		MockServerHttpResponse outputMessage = new MockServerHttpResponse(bufferFactory);
 		Flux<String> source = Flux.just("foo", "bar");
 		testWrite(source, outputMessage, String.class);
 
@@ -105,11 +100,9 @@ class ServerSentEventHttpMessageWriterTests extends AbstractDataBufferAllocating
 				.verify();
 	}
 
-	@ParameterizedDataBufferAllocatingTest
-	void writeMultiLineString(DataBufferFactory bufferFactory) {
-		super.bufferFactory = bufferFactory;
-
-		MockServerHttpResponse outputMessage = new MockServerHttpResponse(super.bufferFactory);
+	@Test
+	void writeMultiLineString() {
+		MockServerHttpResponse outputMessage = new MockServerHttpResponse();
 		Flux<String> source = Flux.just("foo\nbar", "foo\nbaz");
 		testWrite(source, outputMessage, String.class);
 
@@ -120,11 +113,9 @@ class ServerSentEventHttpMessageWriterTests extends AbstractDataBufferAllocating
 				.verify();
 	}
 
-	@ParameterizedDataBufferAllocatingTest // SPR-16516
-	void writeStringWithCustomCharset(DataBufferFactory bufferFactory) {
-		super.bufferFactory = bufferFactory;
-
-		MockServerHttpResponse outputMessage = new MockServerHttpResponse(super.bufferFactory);
+	@Test // SPR-16516
+	void writeStringWithCustomCharset() {
+		MockServerHttpResponse outputMessage = new MockServerHttpResponse(bufferFactory);
 		Flux<String> source = Flux.just("\u00A3");
 		Charset charset = StandardCharsets.ISO_8859_1;
 		MediaType mediaType = new MediaType("text", "event-stream", charset);
@@ -141,11 +132,9 @@ class ServerSentEventHttpMessageWriterTests extends AbstractDataBufferAllocating
 				.verify();
 	}
 
-	@ParameterizedDataBufferAllocatingTest
-	void writePojo(DataBufferFactory bufferFactory) {
-		super.bufferFactory = bufferFactory;
-
-		MockServerHttpResponse outputMessage = new MockServerHttpResponse(super.bufferFactory);
+	@Test
+	void writePojo() {
+		MockServerHttpResponse outputMessage = new MockServerHttpResponse(bufferFactory);
 		Flux<Pojo> source = Flux.just(new Pojo("foofoo", "barbar"), new Pojo("foofoofoo", "barbarbar"));
 		testWrite(source, outputMessage, Pojo.class);
 
@@ -160,14 +149,12 @@ class ServerSentEventHttpMessageWriterTests extends AbstractDataBufferAllocating
 				.verify();
 	}
 
-	@ParameterizedDataBufferAllocatingTest  // SPR-14899
-	void writePojoWithPrettyPrint(DataBufferFactory bufferFactory) {
-		super.bufferFactory = bufferFactory;
-
+	@Test  // SPR-14899
+	void writePojoWithPrettyPrint() {
 		JsonMapper mapper = JsonMapper.builder().enable(SerializationFeature.INDENT_OUTPUT).build();
 		this.messageWriter = new ServerSentEventHttpMessageWriter(new JacksonJsonEncoder(mapper));
 
-		MockServerHttpResponse outputMessage = new MockServerHttpResponse(super.bufferFactory);
+		MockServerHttpResponse outputMessage = new MockServerHttpResponse(bufferFactory);
 		Flux<Pojo> source = Flux.just(new Pojo("foofoo", "barbar"), new Pojo("foofoofoo", "barbarbar"));
 		testWrite(source, outputMessage, Pojo.class);
 
@@ -190,11 +177,9 @@ class ServerSentEventHttpMessageWriterTests extends AbstractDataBufferAllocating
 				.verify();
 	}
 
-	@ParameterizedDataBufferAllocatingTest // SPR-16516, SPR-16539
-	void writePojoWithCustomEncoding(DataBufferFactory bufferFactory) {
-		super.bufferFactory = bufferFactory;
-
-		MockServerHttpResponse outputMessage = new MockServerHttpResponse(super.bufferFactory);
+	@Test // SPR-16516, SPR-16539
+	void writePojoWithCustomEncoding() {
+		MockServerHttpResponse outputMessage = new MockServerHttpResponse(bufferFactory);
 		Flux<Pojo> source = Flux.just(new Pojo("foo\uD834\uDD1E", "bar\uD834\uDD1E"));
 		Charset charset = StandardCharsets.UTF_16LE;
 		MediaType mediaType = new MediaType("text", "event-stream", charset);

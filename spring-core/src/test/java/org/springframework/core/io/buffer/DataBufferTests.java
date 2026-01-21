@@ -26,8 +26,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedClass;
-import org.junit.jupiter.params.provider.MethodSource;
 
 import org.springframework.core.testfixture.io.buffer.AbstractDataBufferAllocatingTests;
 
@@ -40,13 +38,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
  * @author Arjen Poutsma
  * @author Sam Brannen
  */
-@ParameterizedClass
-@MethodSource("org.springframework.core.testfixture.io.buffer.AbstractDataBufferAllocatingTests#dataBufferFactories()")
 class DataBufferTests extends AbstractDataBufferAllocatingTests {
-
-	DataBufferTests(DataBufferFactory bufferFactory) {
-		DataBufferTests.this.bufferFactory = bufferFactory;
-	}
 
 	@Test
 	void byteCountsAndPositions() {

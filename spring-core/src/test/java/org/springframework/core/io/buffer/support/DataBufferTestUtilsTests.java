@@ -19,11 +19,8 @@ package org.springframework.core.io.buffer.support;
 import java.nio.charset.StandardCharsets;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedClass;
-import org.junit.jupiter.params.provider.MethodSource;
 
 import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.testfixture.io.buffer.AbstractDataBufferAllocatingTests;
 import org.springframework.core.testfixture.io.buffer.DataBufferTestUtils;
 
@@ -33,13 +30,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Arjen Poutsma
  * @author Sam Brannen
  */
-@ParameterizedClass
-@MethodSource("org.springframework.core.testfixture.io.buffer.AbstractDataBufferAllocatingTests#dataBufferFactories()")
 class DataBufferTestUtilsTests extends AbstractDataBufferAllocatingTests {
-
-	DataBufferTestUtilsTests(DataBufferFactory bufferFactory) {
-		DataBufferTestUtilsTests.this.bufferFactory = bufferFactory;
-	}
 
 	@Test
 	void dumpBytes() {
