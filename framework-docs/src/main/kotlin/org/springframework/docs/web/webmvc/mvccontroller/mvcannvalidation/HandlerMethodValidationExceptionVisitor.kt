@@ -1,15 +1,18 @@
 package org.springframework.docs.web.webmvc.mvccontroller.mvcannvalidation
 
+import org.springframework.context.MessageSourceResolvable
+import org.springframework.validation.method.MethodValidationResult
 import org.springframework.validation.method.ParameterErrors
 import org.springframework.validation.method.ParameterValidationResult
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.method.annotation.HandlerMethodValidationException
+import java.lang.reflect.Method
 
 class HandlerMethodValidationExceptionVisitor {
 
 	fun main() {
 		// tag::snippet[]
-		val ex: HandlerMethodValidationException =  /**/ HandlerMethodValidationException(null)
+		val ex: HandlerMethodValidationException =  /**/ HandlerMethodValidationException(EmptyMethodValidationResult())
 
 		ex.visitResults(object : HandlerMethodValidationException.Visitor {
 
@@ -47,5 +50,31 @@ class HandlerMethodValidationExceptionVisitor {
 			}
 		})
 		// end::snippet[]
+	}
+
+	internal class EmptyMethodValidationResult : MethodValidationResult {
+		override fun getTarget(): Any {
+			TODO()
+		}
+
+		override fun getMethod(): Method {
+			TODO()
+		}
+
+		override fun isForReturnValue(): Boolean {
+			TODO()
+		}
+
+		override fun getParameterValidationResults(): List<ParameterValidationResult> {
+			TODO()
+		}
+
+		override fun getCrossParameterValidationResults(): List<MessageSourceResolvable> {
+			TODO()
+		}
+
+		override fun toString(): String {
+			TODO()
+		}
 	}
 }
