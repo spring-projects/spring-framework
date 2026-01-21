@@ -21,6 +21,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.util.concurrent.FutureUtils;
 
 /**
@@ -105,7 +107,7 @@ public interface AsyncTaskExecutor extends TaskExecutor {
 	 * @throws TaskRejectedException if the given task was not accepted
 	 * @since 3.0
 	 */
-	default <T> Future<T> submit(Callable<T> task) {
+	default <T extends @Nullable Object> Future<T> submit(Callable<T> task) {
 		FutureTask<T> future = new FutureTask<>(task);
 		execute(future, TIMEOUT_INDEFINITE);
 		return future;
@@ -132,7 +134,7 @@ public interface AsyncTaskExecutor extends TaskExecutor {
 	 * @throws TaskRejectedException if the given task was not accepted
 	 * @since 6.0
 	 */
-	default <T> CompletableFuture<T> submitCompletable(Callable<T> task) {
+	default <T extends @Nullable Object> CompletableFuture<T> submitCompletable(Callable<T> task) {
 		return FutureUtils.callAsync(task, this);
 	}
 
