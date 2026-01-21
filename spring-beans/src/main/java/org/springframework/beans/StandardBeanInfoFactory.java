@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,8 @@ import org.springframework.core.SpringProperties;
  * {@link java.beans.Introspector} inspection.
  *
  * <p>To be configured via a {@code META-INF/spring.factories} file with the following content:
- * {@code org.springframework.beans.BeanInfoFactory=org.springframework.beans.StandardBeanInfoFactory}
+ *
+ * <p>{@code org.springframework.beans.BeanInfoFactory=org.springframework.beans.StandardBeanInfoFactory}
  *
  * <p>Ordered at {@link Ordered#LOWEST_PRECEDENCE} to allow other user-defined
  * {@link BeanInfoFactory} types to take precedence.

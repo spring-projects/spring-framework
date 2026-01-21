@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,16 +46,15 @@ import static org.springframework.http.MediaType.APPLICATION_XML;
  *
  * @author Sebastien Deleuze
  */
+@SuppressWarnings("removal")
 class Jackson2SmileEncoderTests extends AbstractEncoderTests<Jackson2SmileEncoder> {
 
 	private static final MimeType SMILE_MIME_TYPE = new MimeType("application", "x-jackson-smile");
 	private static final MimeType STREAM_SMILE_MIME_TYPE = new MimeType("application", "stream+x-jackson-smile");
 
-	private final Jackson2SmileEncoder encoder = new Jackson2SmileEncoder();
-
 	private final ObjectMapper mapper = Jackson2ObjectMapperBuilder.smile().build();
 
-	public Jackson2SmileEncoderTests() {
+	Jackson2SmileEncoderTests() {
 		super(new Jackson2SmileEncoder());
 
 	}

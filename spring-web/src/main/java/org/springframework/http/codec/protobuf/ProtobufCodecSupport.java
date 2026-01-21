@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,18 +21,21 @@ import java.util.List;
 
 import org.jspecify.annotations.Nullable;
 
+import org.springframework.util.Assert;
 import org.springframework.util.MimeType;
 
 /**
  * Base class providing support methods for Protobuf encoding and decoding.
  *
  * @author Sebastien Deleuze
+ * @author Rossen Stoyanchev
  * @since 5.1
  */
 public abstract class ProtobufCodecSupport {
 
-	static final MimeType[] MIME_TYPES = new MimeType[]{
+	protected static final MimeType[] MIME_TYPES = new MimeType[] {
 			new MimeType("application", "x-protobuf"),
+			new MimeType("application", "*+x-protobuf"),
 			new MimeType("application", "octet-stream"),
 			new MimeType("application", "vnd.google.protobuf")
 	};
@@ -42,20 +45,28 @@ public abstract class ProtobufCodecSupport {
 	static final String DELIMITED_VALUE = "true";
 
 
+	private List<MimeType> mimeTypes = Arrays.asList(MIME_TYPES);
+
+
+	protected void setMimeTypes(List<MimeType> mimeTypes) {
+		Assert.notEmpty(mimeTypes, "MimeType List must not be empty");
+		this.mimeTypes = List.copyOf(mimeTypes);
+	}
+
+	protected List<MimeType> getMimeTypes() {
+		return this.mimeTypes;
+	}
+
 	protected boolean supportsMimeType(@Nullable MimeType mimeType) {
 		if (mimeType == null) {
 			return true;
 		}
-		for (MimeType m : MIME_TYPES) {
-			if (m.isCompatibleWith(mimeType)) {
+		for (MimeType supportedMimeType : MIME_TYPES) {
+			if (supportedMimeType.isCompatibleWith(mimeType)) {
 				return true;
 			}
 		}
 		return false;
-	}
-
-	protected List<MimeType> getMimeTypes() {
-		return Arrays.asList(MIME_TYPES);
 	}
 
 }

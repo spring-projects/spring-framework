@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -165,7 +165,6 @@ public class JettyWebSocketSession extends AbstractWebSocketSession<Session> {
 		return getNativeSession().isOpen();
 	}
 
-
 	@Override
 	public void initializeNativeSession(Session session) {
 		super.initializeNativeSession(session);
@@ -198,7 +197,6 @@ public class JettyWebSocketSession extends AbstractWebSocketSession<Session> {
 		}
 		return Collections.emptyList();
 	}
-
 
 	@Override
 	protected void sendTextMessage(TextMessage message) throws IOException {
@@ -233,7 +231,6 @@ public class JettyWebSocketSession extends AbstractWebSocketSession<Session> {
 		}
 		catch (ExecutionException ex) {
 			Throwable cause = ex.getCause();
-
 			if (cause instanceof IOException ioEx) {
 				throw ioEx;
 			}
@@ -248,6 +245,7 @@ public class JettyWebSocketSession extends AbstractWebSocketSession<Session> {
 			Thread.currentThread().interrupt();
 		}
 	}
+
 
 	@FunctionalInterface
 	private interface SessionConsumer {

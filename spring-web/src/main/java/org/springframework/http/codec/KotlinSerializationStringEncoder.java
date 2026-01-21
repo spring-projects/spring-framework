@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Predicate;
 
 import kotlinx.serialization.KSerializer;
 import kotlinx.serialization.StringFormat;
@@ -43,6 +44,12 @@ import org.springframework.util.MimeType;
  * Abstract base class for {@link Encoder} implementations that defer to Kotlin
  * {@linkplain StringFormat string serializers}.
  *
+ * <p>As of Spring Framework 7.0, by default it only encodes types annotated with
+ * {@link kotlinx.serialization.Serializable @Serializable} at type or generics level
+ * since it allows combined usage with other general purpose encoders without conflicts.
+ * Alternative constructors with a {@code Predicate<ResolvableType>} parameter can be used
+ * to customize this behavior.
+ *
  * @author Sebastien Deleuze
  * @author Iain Henderson
  * @author Arjen Poutsma
@@ -61,8 +68,25 @@ public abstract class KotlinSerializationStringEncoder<T extends StringFormat> e
 	private final CharSequenceEncoder charSequenceEncoder = CharSequenceEncoder.allMimeTypes();
 	private final Set<MimeType> streamingMediaTypes = new HashSet<>();
 
+
+	/**
+	 * Creates a new instance with the given format and supported mime types
+	 * which only encodes types annotated with
+	 * {@link kotlinx.serialization.Serializable @Serializable} at type or
+	 * generics level.
+	 */
 	protected KotlinSerializationStringEncoder(T format, MimeType... supportedMimeTypes) {
 		super(format, supportedMimeTypes);
+	}
+
+	/**
+	 * Creates a new instance with the given format and supported mime types
+	 * which only encodes types for which the specified predicate returns
+	 * {@code true}.
+	 * @since 7.0
+	 */
+	protected KotlinSerializationStringEncoder(T format, Predicate<ResolvableType> typePredicate, MimeType... supportedMimeTypes) {
+		super(format, typePredicate, supportedMimeTypes);
 	}
 
 	/**
@@ -77,7 +101,7 @@ public abstract class KotlinSerializationStringEncoder<T extends StringFormat> e
 
 	@Override
 	public boolean canEncode(ResolvableType elementType, @Nullable MimeType mimeType) {
-		return canSerialize(elementType, mimeType);
+		return canSerialize(elementType, mimeType) && !String.class.isAssignableFrom(elementType.toClass());
 	}
 
 	@Override

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,8 @@
 
 package org.springframework.r2dbc.core;
 
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import io.r2dbc.spi.Parameters;
@@ -29,8 +27,6 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 import org.springframework.r2dbc.core.binding.BindMarkersFactory;
 import org.springframework.r2dbc.core.binding.BindTarget;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
@@ -42,10 +38,13 @@ import static org.mockito.Mockito.verify;
  * @author Mark Paluch
  * @author Jens Schauder
  * @author Anton Naydenov
+ * @author Sam Brannen
  */
 class NamedParameterUtilsTests {
 
-	private final BindMarkersFactory BIND_MARKERS = BindMarkersFactory.indexed("$", 1);
+	private static final BindMarkersFactory INDEXED_MARKERS = BindMarkersFactory.indexed("$", 1);
+
+	private static final BindMarkersFactory ANONYMOUS_MARKERS = BindMarkersFactory.anonymous("?");
 
 
 	@Test
@@ -73,7 +72,7 @@ class NamedParameterUtilsTests {
 		namedParams.addValue("a", "a").addValue("b", "b").addValue("c", "c");
 
 		PreparedOperation<?> operation = NamedParameterUtils.substituteNamedParameters(
-				"xxx :a :b :c", BIND_MARKERS, namedParams);
+				"xxx :a :b :c", INDEXED_MARKERS, namedParams);
 
 		assertThat(operation.toQuery()).isEqualTo("xxx $1 $2 $3");
 
@@ -87,11 +86,11 @@ class NamedParameterUtilsTests {
 	void substituteObjectArray() {
 		MapBindParameterSource namedParams = new MapBindParameterSource(new HashMap<>());
 		namedParams.addValue("a",
-				Arrays.asList(new Object[] {"Walter", "Heisenberg"},
-				new Object[] {"Walt Jr.", "Flynn"}));
+				List.of(new Object[] {"Walter", "Heisenberg"},
+						new Object[] {"Walt Jr.", "Flynn"}));
 
 		PreparedOperation<?> operation = NamedParameterUtils.substituteNamedParameters(
-				"xxx :a", BIND_MARKERS, namedParams);
+				"xxx :a", INDEXED_MARKERS, namedParams);
 
 		assertThat(operation.toQuery()).isEqualTo("xxx ($1, $2), ($3, $4)");
 	}
@@ -100,13 +99,13 @@ class NamedParameterUtilsTests {
 	void shouldBindObjectArray() {
 		MapBindParameterSource namedParams = new MapBindParameterSource(new HashMap<>());
 		namedParams.addValue("a",
-				Arrays.asList(new Object[] {"Walter", "Heisenberg"},
-				new Object[] {"Walt Jr.", "Flynn"}));
+				List.of(new Object[] {"Walter", "Heisenberg"},
+						new Object[] {"Walt Jr.", "Flynn"}));
 
 		BindTarget bindTarget = mock();
 
 		PreparedOperation<?> operation = NamedParameterUtils.substituteNamedParameters(
-				"xxx :a", BIND_MARKERS, namedParams);
+				"xxx :a", INDEXED_MARKERS, namedParams);
 		operation.bindTo(bindTarget);
 
 		verify(bindTarget).bind(0, "Walter");
@@ -141,7 +140,7 @@ class NamedParameterUtilsTests {
 
 		ParsedSql parsedSql = NamedParameterUtils.parseSqlStatement(sql);
 		PreparedOperation<?> operation = NamedParameterUtils.substituteNamedParameters(
-				parsedSql, BIND_MARKERS, new MapBindParameterSource());
+				parsedSql, INDEXED_MARKERS, new MapBindParameterSource());
 
 		assertThat(operation.toQuery()).isEqualTo(expectedSql);
 	}
@@ -312,157 +311,139 @@ class NamedParameterUtilsTests {
 	void multipleEqualParameterReferencesBindsValueOnce() {
 		String sql = "SELECT * FROM person where name = :id or lastname = :id";
 
-		BindMarkersFactory factory = BindMarkersFactory.indexed("$", 0);
+		MapBindParameterSource source = new MapBindParameterSource(Map.of("id", Parameters.in("foo")));
+		PreparedOperation<String> operation = NamedParameterUtils.substituteNamedParameters(sql, INDEXED_MARKERS, source);
 
-		PreparedOperation<String> operation = NamedParameterUtils.substituteNamedParameters(
-				sql, factory, new MapBindParameterSource(
-						Collections.singletonMap("id", Parameters.in("foo"))));
+		assertThat(operation.toQuery())
+				.isEqualTo("SELECT * FROM person where name = $1 or lastname = $1");
 
-		assertThat(operation.toQuery()).isEqualTo(
-				"SELECT * FROM person where name = $0 or lastname = $0");
+		TrackingBindTarget trackingBindTarget = new TrackingBindTarget();
 
-		operation.bindTo(new BindTarget() {
-			@Override
-			public void bind(String identifier, Object value) {
-				throw new UnsupportedOperationException();
-			}
-			@Override
-			public void bind(int index, Object value) {
-				assertThat(index).isEqualTo(0);
-				assertThat(value).isEqualTo(Parameters.in("foo"));
-			}
-			@Override
-			public void bindNull(String identifier, Class<?> type) {
-				throw new UnsupportedOperationException();
-			}
-			@Override
-			public void bindNull(int index, Class<?> type) {
-				throw new UnsupportedOperationException();
-			}
-		});
+		operation.bindTo(trackingBindTarget);
+
+		assertThat(trackingBindTarget.bindings)
+				.hasSize(1)
+				.containsEntry(0, Parameters.in("foo"));
 	}
 
 	@Test
-	void multipleEqualCollectionParameterReferencesBindsValueOnce() {
+	void multipleEqualCollectionParameterReferencesForIndexedMarkersBindsValuesOnce() {
 		String sql = "SELECT * FROM person where name IN (:ids) or lastname IN (:ids)";
 
-		BindMarkersFactory factory = BindMarkersFactory.indexed("$", 0);
+		MapBindParameterSource source = new MapBindParameterSource(Map.of("ids",
+				Parameters.in(List.of("foo", "bar", "baz"))));
+		PreparedOperation<String> operation = NamedParameterUtils.substituteNamedParameters(sql, INDEXED_MARKERS, source);
 
-		MultiValueMap<Integer, Object> bindings = new LinkedMultiValueMap<>();
+		assertThat(operation.toQuery())
+				.isEqualTo("SELECT * FROM person where name IN ($1, $2, $3) or lastname IN ($1, $2, $3)");
 
-		PreparedOperation<String> operation = NamedParameterUtils.substituteNamedParameters(
-				sql, factory, new MapBindParameterSource(Collections.singletonMap("ids",
-						Parameters.in(Arrays.asList("foo", "bar", "baz")))));
+		TrackingBindTarget trackingBindTarget = new TrackingBindTarget();
 
-		assertThat(operation.toQuery()).isEqualTo(
-				"SELECT * FROM person where name IN ($0, $1, $2) or lastname IN ($0, $1, $2)");
+		operation.bindTo(trackingBindTarget);
 
-		operation.bindTo(new BindTarget() {
-			@Override
-			public void bind(String identifier, Object value) {
-				throw new UnsupportedOperationException();
-			}
-			@Override
-			public void bind(int index, Object value) {
-				assertThat(index).isIn(0, 1, 2);
-				assertThat(value).isIn("foo", "bar", "baz");
-				bindings.add(index, value);
-			}
-			@Override
-			public void bindNull(String identifier, Class<?> type) {
-				throw new UnsupportedOperationException();
-			}
-			@Override
-			public void bindNull(int index, Class<?> type) {
-				throw new UnsupportedOperationException();
-			}
-		});
+		assertThat(trackingBindTarget.bindings)
+				.hasSize(3)
+				.containsEntry(0, "foo")
+				.containsEntry(1, "bar")
+				.containsEntry(2, "baz");
+	}
 
-		assertThat(bindings).containsEntry(0, Collections.singletonList("foo")) //
-				.containsEntry(1, Collections.singletonList("bar")) //
-				.containsEntry(2, Collections.singletonList("baz"));
+	@Test  // gh-34768
+	void multipleEqualCollectionParameterReferencesForAnonymousMarkersBindsValuesTwice() {
+		String sql = "SELECT * FROM fund_info WHERE fund_code IN (:fundCodes) OR fund_code IN (:fundCodes)";
+
+		MapBindParameterSource source = new MapBindParameterSource(Map.of("fundCodes", Parameters.in(List.of("foo", "bar", "baz"))));
+		PreparedOperation<String> operation = NamedParameterUtils.substituteNamedParameters(sql, ANONYMOUS_MARKERS, source);
+
+		assertThat(operation.toQuery())
+				.isEqualTo("SELECT * FROM fund_info WHERE fund_code IN (?, ?, ?) OR fund_code IN (?, ?, ?)");
+
+		TrackingBindTarget trackingBindTarget = new TrackingBindTarget();
+
+		operation.bindTo(trackingBindTarget);
+
+		assertThat(trackingBindTarget.bindings)
+				.hasSize(6)
+				.containsEntry(0, "foo")
+				.containsEntry(1, "bar")
+				.containsEntry(2, "baz")
+				.containsEntry(3, "foo")
+				.containsEntry(4, "bar")
+				.containsEntry(5, "baz");
 	}
 
 	@Test
-	void multipleEqualParameterReferencesForAnonymousMarkersBindsValueMultipleTimes() {
+	void multipleEqualParameterReferencesForAnonymousMarkersBindsValueTwice() {
 		String sql = "SELECT * FROM person where name = :id or lastname = :id";
 
-		BindMarkersFactory factory = BindMarkersFactory.anonymous("?");
+		MapBindParameterSource source = new MapBindParameterSource(Map.of("id", Parameters.in("foo")));
+		PreparedOperation<String> operation = NamedParameterUtils.substituteNamedParameters(sql, ANONYMOUS_MARKERS, source);
 
-		PreparedOperation<String> operation = NamedParameterUtils.substituteNamedParameters(
-				sql, factory, new MapBindParameterSource(
-						Collections.singletonMap("id", Parameters.in("foo"))));
+		assertThat(operation.toQuery())
+				.isEqualTo("SELECT * FROM person where name = ? or lastname = ?");
 
-		assertThat(operation.toQuery()).isEqualTo(
-				"SELECT * FROM person where name = ? or lastname = ?");
+		TrackingBindTarget trackingBindTarget = new TrackingBindTarget();
 
-		Map<Integer, Object> bindValues = new LinkedHashMap<>();
+		operation.bindTo(trackingBindTarget);
 
-		operation.bindTo(new BindTarget() {
-			@Override
-			public void bind(String identifier, Object value) {
-				throw new UnsupportedOperationException();
-			}
-			@Override
-			public void bind(int index, Object value) {
-				bindValues.put(index, value);
-			}
-			@Override
-			public void bindNull(String identifier, Class<?> type) {
-				throw new UnsupportedOperationException();
-			}
-			@Override
-			public void bindNull(int index, Class<?> type) {
-				throw new UnsupportedOperationException();
-			}
-		});
-
-		assertThat(bindValues).hasSize(2).containsEntry(0, Parameters.in("foo")).containsEntry(1, Parameters.in("foo"));
+		assertThat(trackingBindTarget.bindings)
+				.hasSize(2)
+				.containsEntry(0, Parameters.in("foo"))
+				.containsEntry(1, Parameters.in("foo"));
 	}
 
 	@Test
 	void multipleEqualParameterReferencesBindsNullOnce() {
 		String sql = "SELECT * FROM person where name = :id or lastname = :id";
 
-		BindMarkersFactory factory = BindMarkersFactory.indexed("$", 0);
+		MapBindParameterSource source = new MapBindParameterSource(Map.of("id", Parameters.in(String.class)));
+		PreparedOperation<String> operation = NamedParameterUtils.substituteNamedParameters(sql, INDEXED_MARKERS, source);
 
-		PreparedOperation<String> operation = NamedParameterUtils.substituteNamedParameters(
-				sql, factory, new MapBindParameterSource(
-						Collections.singletonMap("id", Parameters.in(String.class))));
+		assertThat(operation.toQuery())
+				.isEqualTo("SELECT * FROM person where name = $1 or lastname = $1");
 
-		assertThat(operation.toQuery()).isEqualTo(
-				"SELECT * FROM person where name = $0 or lastname = $0");
+		TrackingBindTarget trackingBindTarget = new TrackingBindTarget();
 
-		operation.bindTo(new BindTarget() {
-			@Override
-			public void bind(String identifier, Object value) {
-				throw new UnsupportedOperationException();
-			}
-			@Override
-			public void bind(int index, Object value) {
-				assertThat(index).isEqualTo(0);
-				assertThat(value).isEqualTo(Parameters.in(String.class));
-			}
-			@Override
-			public void bindNull(String identifier, Class<?> type) {
-				throw new UnsupportedOperationException();
-			}
-			@Override
-			public void bindNull(int index, Class<?> type) {
-				throw new UnsupportedOperationException();
-			}
-		});
+		operation.bindTo(trackingBindTarget);
+
+		assertThat(trackingBindTarget.bindings)
+				.hasSize(1)
+				.containsEntry(0, Parameters.in(String.class));
 	}
 
 
-	private String expand(ParsedSql sql) {
-		return NamedParameterUtils.substituteNamedParameters(sql, BIND_MARKERS,
+	private static String expand(ParsedSql sql) {
+		return NamedParameterUtils.substituteNamedParameters(sql, INDEXED_MARKERS,
 				new MapBindParameterSource()).toQuery();
 	}
 
-	private String expand(String sql) {
-		return NamedParameterUtils.substituteNamedParameters(sql, BIND_MARKERS,
+	private static String expand(String sql) {
+		return NamedParameterUtils.substituteNamedParameters(sql, INDEXED_MARKERS,
 				new MapBindParameterSource()).toQuery();
+	}
+
+
+	private static class TrackingBindTarget implements BindTarget {
+
+		final Map<Integer, Object> bindings = new HashMap<>();
+
+		@Override
+		public void bind(String identifier, Object value) {}
+
+		@Override
+		public void bind(int index, Object value) {
+			this.bindings.put(index, value);
+		}
+
+		@Override
+		public void bindNull(String identifier, Class<?> type) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public void bindNull(int index, Class<?> type) {
+			throw new UnsupportedOperationException();
+		}
 	}
 
 }

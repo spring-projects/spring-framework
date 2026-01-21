@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,7 +37,6 @@ inline fun <reified T : Any> BeanFactory.getBean(): T =
  * @author Sebastien Deleuze
  * @since 5.0
  */
-@Suppress("EXTENSION_SHADOWED_BY_MEMBER")
 inline fun <reified T : Any> BeanFactory.getBean(name: String): T =
 		getBean(name, T::class.java)
 

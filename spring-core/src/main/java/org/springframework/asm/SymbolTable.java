@@ -1473,7 +1473,7 @@ final class SymbolTable {
 
     /**
      * Another entry (and so on recursively) having the same hash code (modulo the size of {@link
-     * SymbolTable#labelEntries}}) as this one.
+     * SymbolTable#labelEntries}) as this one.
      */
     LabelEntry next;
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,8 +41,7 @@ public interface BeanRegistrationAotContribution {
 	 * default code generation isn't suitable.
 	 * @param generationContext the generation context
 	 * @param codeFragments the existing code fragments
-	 * @return the code fragments to use, may be the original instance or a
-	 * wrapper
+	 * @return the code fragments to use, may be the original instance or a wrapper
 	 */
 	default BeanRegistrationCodeFragments customizeBeanRegistrationCodeFragments(
 			GenerationContext generationContext, BeanRegistrationCodeFragments codeFragments) {
@@ -78,8 +77,7 @@ public interface BeanRegistrationAotContribution {
 				return defaultCodeFragments.apply(codeFragments);
 			}
 			@Override
-			public void applyTo(GenerationContext generationContext,
-					BeanRegistrationCode beanRegistrationCode) {
+			public void applyTo(GenerationContext generationContext, BeanRegistrationCode beanRegistrationCode) {
 			}
 		};
 	}

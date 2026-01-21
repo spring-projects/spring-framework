@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,8 +29,6 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 
 import io.netty.handler.codec.http.DefaultHttpHeaders;
-import io.undertow.util.HeaderMap;
-import io.undertow.util.HttpString;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.tomcat.util.http.MimeHeaders;
 import org.eclipse.jetty.http.HttpFields;
@@ -42,7 +40,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.support.HttpComponentsHeadersAdapter;
 import org.springframework.http.support.JettyHeadersAdapter;
 import org.springframework.http.support.Netty4HeadersAdapter;
-import org.springframework.http.support.Netty5HeadersAdapter;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedCaseInsensitiveMap;
 import org.springframework.util.MultiValueMap;
@@ -273,9 +270,7 @@ class HeadersAdaptersTests {
 		return Stream.of(
 				argumentSet("Map", CollectionUtils.toMultiValueMap(new LinkedCaseInsensitiveMap<>(8, Locale.ENGLISH))),
 				argumentSet("Netty", new Netty4HeadersAdapter(new DefaultHttpHeaders())),
-				argumentSet("Netty5", new Netty5HeadersAdapter(io.netty5.handler.codec.http.headers.HttpHeaders.newHeaders())),
 				argumentSet("Tomcat", new TomcatHeadersAdapter(new MimeHeaders())),
-				argumentSet("Undertow", new UndertowHeadersAdapter(new HeaderMap())),
 				argumentSet("Jetty", new JettyHeadersAdapter(HttpFields.build())),
 				argumentSet("HttpComponents", new HttpComponentsHeadersAdapter(new HttpGet("https://example.com")))
 		);
@@ -291,12 +286,8 @@ class HeadersAdaptersTests {
 	static Stream<Arguments> nativeHeadersWithCasedEntries() {
 		return Stream.of(
 				argumentSet("Netty", new Netty4HeadersAdapter(withHeaders(new DefaultHttpHeaders(), h -> h::add))),
-				argumentSet("Netty5", new Netty5HeadersAdapter(withHeaders(io.netty5.handler.codec.http.headers.HttpHeaders.newHeaders(),
-						h -> h::add))),
 				argumentSet("Tomcat", new TomcatHeadersAdapter(withHeaders(new MimeHeaders(),
 						h -> (k, v) -> h.addValue(k).setString(v)))),
-				argumentSet("Undertow", new UndertowHeadersAdapter(withHeaders(new HeaderMap(),
-						h -> (k, v) -> h.add(HttpString.tryFromString(k), v)))),
 				argumentSet("Jetty", new JettyHeadersAdapter(withHeaders(HttpFields.build(), h -> h::add))),
 				argumentSet("HttpComponents", new HttpComponentsHeadersAdapter(withHeaders(new HttpGet("https://example.com"),
 						h -> h::addHeader)))

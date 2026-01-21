@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,7 +44,6 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.PropertyValues;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
-import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.config.SmartInstantiationAwareBeanPostProcessor;
@@ -117,12 +116,6 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 	/** Default is global AdvisorAdapterRegistry. */
 	private AdvisorAdapterRegistry advisorAdapterRegistry = GlobalAdvisorAdapterRegistry.getInstance();
 
-	/**
-	 * Indicates whether the proxy should be frozen. Overridden from super
-	 * to prevent the configuration from becoming frozen too early.
-	 */
-	private boolean freezeProxy = false;
-
 	/** Default is no common interceptors. */
 	private String[] interceptorNames = new String[0];
 
@@ -140,22 +133,6 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 
 	private final Map<Object, Boolean> advisedBeans = new ConcurrentHashMap<>(256);
 
-
-	/**
-	 * Set whether the proxy should be frozen, preventing advice
-	 * from being added to it once it is created.
-	 * <p>Overridden from the superclass to prevent the proxy configuration
-	 * from being frozen before the proxy is created.
-	 */
-	@Override
-	public void setFrozen(boolean frozen) {
-		this.freezeProxy = frozen;
-	}
-
-	@Override
-	public boolean isFrozen() {
-		return this.freezeProxy;
-	}
 
 	/**
 	 * Specify the {@link AdvisorAdapterRegistry} to use.
@@ -206,6 +183,7 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 	@Override
 	public void setBeanFactory(BeanFactory beanFactory) {
 		this.beanFactory = beanFactory;
+		AutoProxyUtils.applyDefaultProxyConfig(this, beanFactory);
 	}
 
 	/**
@@ -317,10 +295,8 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 
 	/**
 	 * Build a cache key for the given bean class and bean name.
-	 * <p>Note: As of 4.2.3, this implementation does not return a concatenated
-	 * class/name String anymore but rather the most efficient cache key possible:
-	 * a plain bean name, prepended with {@link BeanFactory#FACTORY_BEAN_PREFIX}
-	 * in case of a {@code FactoryBean}; or if no bean name specified, then the
+	 * <p>Note: As of 7.0.2, this implementation returns a composed cache key
+	 * for bean class plus bean name; or if no bean name specified, then the
 	 * given bean {@code Class} as-is.
 	 * @param beanClass the bean class
 	 * @param beanName the bean name
@@ -328,8 +304,7 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 	 */
 	protected Object getCacheKey(Class<?> beanClass, @Nullable String beanName) {
 		if (StringUtils.hasLength(beanName)) {
-			return (FactoryBean.class.isAssignableFrom(beanClass) ?
-					BeanFactory.FACTORY_BEAN_PREFIX + beanName : beanName);
+			return new ComposedCacheKey(beanClass, beanName);
 		}
 		else {
 			return beanClass;
@@ -471,6 +446,24 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 
 		ProxyFactory proxyFactory = new ProxyFactory();
 		proxyFactory.copyFrom(this);
+		proxyFactory.setFrozen(false);
+
+		if (shouldProxyTargetClass(beanClass, beanName)) {
+			proxyFactory.setProxyTargetClass(true);
+		}
+		else {
+			Class<?>[] ifcs = (this.beanFactory instanceof ConfigurableListableBeanFactory clbf ?
+					AutoProxyUtils.determineExposedInterfaces(clbf, beanName) : null);
+			if (ifcs != null) {
+				proxyFactory.setProxyTargetClass(false);
+				for (Class<?> ifc : ifcs) {
+					proxyFactory.addInterface(ifc);
+				}
+			}
+			if (ifcs != null ? ifcs.length == 0 : !proxyFactory.isProxyTargetClass()) {
+				evaluateProxyInterfaces(beanClass, proxyFactory);
+			}
+		}
 
 		if (proxyFactory.isProxyTargetClass()) {
 			// Explicit handling of JDK proxy targets and lambdas (for introduction advice scenarios)
@@ -481,22 +474,13 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 				}
 			}
 		}
-		else {
-			// No proxyTargetClass flag enforced, let's apply our default checks...
-			if (shouldProxyTargetClass(beanClass, beanName)) {
-				proxyFactory.setProxyTargetClass(true);
-			}
-			else {
-				evaluateProxyInterfaces(beanClass, proxyFactory);
-			}
-		}
 
 		Advisor[] advisors = buildAdvisors(beanName, specificInterceptors);
 		proxyFactory.addAdvisors(advisors);
 		proxyFactory.setTargetSource(targetSource);
 		customizeProxyFactory(proxyFactory);
 
-		proxyFactory.setFrozen(this.freezeProxy);
+		proxyFactory.setFrozen(isFrozen());
 		if (advisorsPreFiltered()) {
 			proxyFactory.setPreFiltered(true);
 		}
@@ -626,5 +610,13 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 	 */
 	protected abstract Object @Nullable [] getAdvicesAndAdvisorsForBean(Class<?> beanClass, String beanName,
 			@Nullable TargetSource customTargetSource) throws BeansException;
+
+
+	/**
+	 * Composed cache key for bean class plus bean name.
+	 * @see #getCacheKey(Class, String)
+	 */
+	private record ComposedCacheKey(Class<?> beanClass, String beanName) {
+	}
 
 }

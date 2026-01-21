@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ import java.lang.annotation.Target;
  * annotation.
  *
  * <p>Generally speaking, {@code @BeforeTransaction} methods must not accept any
- * arguments. However, as of Spring Framework 6.1, for tests using the
+ * arguments. However, for tests using the
  * {@link org.springframework.test.context.junit.jupiter.SpringExtension SpringExtension}
  * with JUnit Jupiter, {@code @BeforeTransaction} methods may optionally accept
  * arguments which will be resolved by any registered JUnit

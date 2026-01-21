@@ -7,7 +7,6 @@ implementations of special integration interfaces. The next few sections describ
 integration interfaces.
 
 
-
 [[beans-factory-extension-bpp]]
 == Customizing Beans by Using a `BeanPostProcessor`
 
@@ -109,7 +108,6 @@ Spring accesses other beans for matching them by type.
 The following examples show how to write, register, and use `BeanPostProcessor` instances
 in an `ApplicationContext`.
 
-
 [[beans-factory-extension-bpp-examples-hw]]
 === Example: Hello World, `BeanPostProcessor`-style
 
@@ -196,8 +194,7 @@ The following `beans` element uses the `InstantiationTracingBeanPostProcessor`:
 Notice how the `InstantiationTracingBeanPostProcessor` is merely defined. It does not
 even have a name, and, because it is a bean, it can be dependency-injected as you would any
 other bean. (The preceding configuration also defines a bean that is backed by a Groovy
-script. The Spring dynamic language support is detailed in the chapter entitled
-xref:languages/dynamic.adoc[Dynamic Language Support].)
+script.)
 
 The following Java application runs the preceding code and configuration:
 
@@ -226,7 +223,7 @@ Kotlin::
 +
 [source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
-    import org.springframework.beans.factory.getBean
+	import org.springframework.beans.factory.getBean
 
 	fun main() {
 		val ctx = ClassPathXmlApplicationContext("scripting/beans.xml")
@@ -244,7 +241,6 @@ Bean 'messenger' created : org.springframework.scripting.groovy.GroovyMessenger@
 org.springframework.scripting.groovy.GroovyMessenger@272961
 ----
 
-
 [[beans-factory-extension-bpp-examples-aabpp]]
 === Example: The `AutowiredAnnotationBeanPostProcessor`
 
@@ -253,7 +249,6 @@ implementation is a common means of extending the Spring IoC container. An examp
 Spring's `AutowiredAnnotationBeanPostProcessor` -- a `BeanPostProcessor` implementation
 that ships with the Spring distribution and autowires annotated fields, setter methods,
 and arbitrary config methods.
-
 
 
 [[beans-factory-extension-factory-postprocessors]]
@@ -312,9 +307,8 @@ Thus, marking it for lazy initialization will be ignored, and the
 `Bean(Factory)PostProcessor` will be instantiated eagerly even if you set the
 `default-lazy-init` attribute to `true` on the declaration of your `<beans />` element.
 
-
 [[beans-factory-placeholderconfigurer]]
-=== Example: The Class Name Substitution `PropertySourcesPlaceholderConfigurer`
+=== Example: Property Placeholder Substitution with `PropertySourcesPlaceholderConfigurer`
 
 You can use the `PropertySourcesPlaceholderConfigurer` to externalize property values
 from a bean definition in a separate file by using the standard Java `Properties` format.
@@ -341,8 +335,8 @@ with placeholder values is defined:
 
 The example shows properties configured from an external `Properties` file. At runtime,
 a `PropertySourcesPlaceholderConfigurer` is applied to the metadata that replaces some
-properties of the DataSource. The values to replace are specified as placeholders of the
-form pass:q[`${property-name}`], which follows the Ant and log4j and JSP EL style.
+properties of the `DataSource`. The values to replace are specified as placeholders of the
+form pass:q[`${property-name}`], which follows the Ant, log4j, and JSP EL style.
 
 The actual values come from another file in the standard Java `Properties` format:
 
@@ -355,11 +349,15 @@ jdbc.password=root
 ----
 
 Therefore, the `${jdbc.username}` string is replaced at runtime with the value, 'sa', and
-the same applies for other placeholder values that match keys in the properties file.
-The `PropertySourcesPlaceholderConfigurer` checks for placeholders in most properties and
-attributes of a bean definition. Furthermore, you can customize the placeholder prefix and suffix.
+the same applies for other placeholder values that match keys in the properties file. The
+`PropertySourcesPlaceholderConfigurer` checks for placeholders in most properties and
+attributes of a bean definition. Furthermore, you can customize the placeholder prefix,
+suffix, default value separator, and escape character. In addition, the default escape
+character can be changed or disabled globally by setting the
+`spring.placeholder.escapeCharacter.default` property via a JVM system property (or via
+the xref:appendix.adoc#appendix-spring-properties[`SpringProperties`] mechanism).
 
-With the `context` namespace introduced in Spring 2.5, you can configure property placeholders
+With the `context` namespace, you can configure property placeholders
 with a dedicated configuration element. You can provide one or more locations as a
 comma-separated list in the `location` attribute, as the following example shows:
 
@@ -407,7 +405,6 @@ If the class cannot be resolved at runtime to a valid class, resolution of the b
 fails when it is about to be created, which is during the `preInstantiateSingletons()`
 phase of an `ApplicationContext` for a non-lazy-init bean.
 =====
-
 
 [[beans-factory-overrideconfigurer]]
 === Example: The `PropertyOverrideConfigurer`
@@ -465,7 +462,6 @@ property overriding with a dedicated configuration element, as the following exa
 ----
 
 
-
 [[beans-factory-extension-factorybean]]
 == Customizing Instantiation Logic with a `FactoryBean`
 
@@ -498,6 +494,3 @@ calling the `getBean()` method of the `ApplicationContext`. So, for a given `Fac
 with an `id` of `myBean`, invoking `getBean("myBean")` on the container returns the
 product of the `FactoryBean`, whereas invoking `getBean("&myBean")` returns the
 `FactoryBean` instance itself.
-
-
-

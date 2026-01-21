@@ -468,6 +468,7 @@ Kotlin::
 ----
 ======
 
+
 [[beans-java-customizing-bean-naming]]
 == Customizing Bean Naming
 
@@ -585,6 +586,3 @@ Kotlin::
 	}
 ----
 ======
-
-
-

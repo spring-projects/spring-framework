@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,20 +16,26 @@
 
 package org.springframework.core
 
+import io.micrometer.observation.Observation
+import io.micrometer.observation.tck.TestObservationRegistry
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.reactor.awaitSingle
 import kotlinx.coroutines.reactor.awaitSingleOrNull
 import org.assertj.core.api.Assertions
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import org.reactivestreams.Publisher
 import reactor.core.publisher.Flux
+import reactor.core.publisher.Hooks
 import reactor.core.publisher.Mono
 import reactor.test.StepVerifier
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.coroutineContext
 import kotlin.reflect.full.primaryConstructor
 import kotlin.reflect.jvm.isAccessible
+import kotlin.reflect.jvm.javaMethod
 
 /**
  * Kotlin tests for [CoroutinesUtils].
@@ -37,6 +43,8 @@ import kotlin.reflect.jvm.isAccessible
  * @author Sebastien Deleuze
  */
 class CoroutinesUtilsTests {
+
+	private val observationRegistry = TestObservationRegistry.create()
 
 	@Test
 	fun deferredToMono() {
@@ -200,6 +208,15 @@ class CoroutinesUtilsTests {
 	}
 
 	@Test
+	fun invokeSuspendingFunctionWithNestedValueClassParameter() {
+		val method = CoroutinesUtilsTests::class.java.declaredMethods.first { it.name.startsWith("suspendingFunctionWithNestedValueClassParameter") }
+		val mono = CoroutinesUtils.invokeSuspendingFunction(method, this, "foo", null) as Mono
+		runBlocking {
+			Assertions.assertThat(mono.awaitSingle()).isEqualTo("foo")
+		}
+	}
+
+	@Test
 	fun invokeSuspendingFunctionWithValueClassReturnValue() {
 		val method = CoroutinesUtilsTests::class.java.declaredMethods.first { it.name.startsWith("suspendingFunctionWithValueClassReturnValue") }
 		val mono = CoroutinesUtils.invokeSuspendingFunction(method, this, null) as Mono
@@ -276,6 +293,21 @@ class CoroutinesUtilsTests {
 		}
 	}
 
+	@Test
+	@Suppress("UNCHECKED_CAST")
+	fun invokeSuspendingFunctionWithObservation() {
+		Hooks.enableAutomaticContextPropagation()
+		val method = CoroutinesUtilsTests::suspendingObservationFunction::javaMethod.get()!!
+		val publisher = CoroutinesUtils.invokeSuspendingFunction(method, this, "test", null) as Publisher<String>
+		val observation = Observation.createNotStarted("coroutine", observationRegistry)
+		observation.observe {
+			val mono = Mono.from<String>(publisher)
+			val result = mono.block()
+			assertThat(result).isEqualTo("coroutine")
+		}
+		Hooks.disableAutomaticContextPropagation()
+	}
+
 	suspend fun suspendingFunction(value: String): String {
 		delay(1)
 		return value
@@ -326,6 +358,11 @@ class CoroutinesUtilsTests {
 	suspend fun suspendingFunctionWithValueClassParameter(value: ValueClass): String {
 		delay(1)
 		return value.value
+	}
+
+	suspend fun suspendingFunctionWithNestedValueClassParameter(value: NestedValueClass): String {
+		delay(1)
+		return value.value.value
 	}
 
 	suspend fun suspendingFunctionWithValueClassReturnValue(): ValueClass {
@@ -383,6 +420,9 @@ class CoroutinesUtilsTests {
 	value class ValueClass(val value: String)
 
 	@JvmInline
+	value class NestedValueClass(val value: ValueClass)
+
+	@JvmInline
 	value class ValueClassWithInit(val value: String) {
 		 init {
 		     if (value.isEmpty()) {
@@ -399,5 +439,12 @@ class CoroutinesUtilsTests {
 	}
 
 	class CustomException(message: String) : Throwable(message)
+
+	suspend fun suspendingObservationFunction(value: String): String? {
+		delay(1)
+		val currentObservation = observationRegistry.currentObservation
+		assertThat(currentObservation).isNotNull
+		return currentObservation?.context?.name
+	}
 
 }

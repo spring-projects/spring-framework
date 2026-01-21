@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.messaging.rsocket;
 
 import java.util.Collections;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Consumer;
 
 import io.rsocket.Payload;
@@ -291,7 +292,7 @@ final class DefaultRSocketRequester implements RSocketRequester {
 
 			Decoder<?> decoder = strategies.decoder(elementType, dataMimeType);
 			return (Mono<T>) payloadMono.map(this::retainDataAndReleasePayload)
-					.map(dataBuffer -> decoder.decode(dataBuffer, elementType, dataMimeType, EMPTY_HINTS));
+					.map(dataBuffer -> Objects.requireNonNull(decoder.decode(dataBuffer, elementType, dataMimeType, EMPTY_HINTS)));
 		}
 
 		@Override
@@ -317,7 +318,7 @@ final class DefaultRSocketRequester implements RSocketRequester {
 
 			Decoder<?> decoder = strategies.decoder(elementType, dataMimeType);
 			return payloadFlux.map(this::retainDataAndReleasePayload).map(dataBuffer ->
-					(T) decoder.decode(dataBuffer, elementType, dataMimeType, EMPTY_HINTS));
+					(T) Objects.requireNonNull(decoder.decode(dataBuffer, elementType, dataMimeType, EMPTY_HINTS)));
 		}
 
 		private Mono<Payload> getPayloadMono() {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,7 +49,7 @@ import org.springframework.web.servlet.ModelAndView;
  */
 final class DefaultAsyncServerResponse extends ErrorHandlingServerResponse implements AsyncServerResponse {
 
-	static final boolean reactiveStreamsPresent = ClassUtils.isPresent(
+	static final boolean REACTIVE_STREAMS_PRESENT = ClassUtils.isPresent(
 			"org.reactivestreams.Publisher", DefaultAsyncServerResponse.class.getClassLoader());
 
 	private final CompletableFuture<ServerResponse> futureResponse;

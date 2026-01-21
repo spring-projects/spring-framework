@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -80,7 +80,7 @@ public class JspAwareRequestContext extends RequestContext {
 	 */
 	@Override
 	protected Locale getFallbackLocale() {
-		if (jstlPresent) {
+		if (JSTL_PRESENT) {
 			Locale locale = JstlPageLocaleResolver.getJstlLocale(getPageContext());
 			if (locale != null) {
 				return locale;
@@ -95,7 +95,7 @@ public class JspAwareRequestContext extends RequestContext {
 	 */
 	@Override
 	protected @Nullable TimeZone getFallbackTimeZone() {
-		if (jstlPresent) {
+		if (JSTL_PRESENT) {
 			TimeZone timeZone = JstlPageLocaleResolver.getJstlTimeZone(getPageContext());
 			if (timeZone != null) {
 				return timeZone;

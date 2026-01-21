@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,6 @@ import java.util.Objects;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 
@@ -470,13 +469,13 @@ class AnnotationsScannerTests {
 				new AnnotationsProcessor<Object, String>() {
 
 					@Override
-					public @NonNull String doWithAggregate(Object context, int aggregateIndex) {
+					public String doWithAggregate(Object context, int aggregateIndex) {
 						return "";
 					}
 
 					@Override
-					public @NonNull String doWithAnnotations(Object context, int aggregateIndex,
-							@Nullable Object source, @Nullable Annotation @Nullable [] annotations) {
+					public String doWithAnnotations(Object context, int aggregateIndex,
+							@Nullable Object source, @Nullable Annotation[] annotations) {
 						throw new IllegalStateException("Should not call");
 					}
 
@@ -502,13 +501,13 @@ class AnnotationsScannerTests {
 				new AnnotationsProcessor<Object, String>() {
 
 					@Override
-					public @NonNull String doWithAnnotations(Object context, int aggregateIndex,
-							@Nullable Object source, @Nullable Annotation @Nullable [] annotations) {
+					public String doWithAnnotations(Object context, int aggregateIndex,
+							@Nullable Object source, @Nullable Annotation[] annotations) {
 						return "K";
 					}
 
 					@Override
-					public @NonNull String finish(@Nullable String result) {
+					public String finish(@Nullable String result) {
 						return "O" + result;
 					}
 

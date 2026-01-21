@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,8 +33,6 @@ import org.springframework.beans.factory.InitializingBean;
  * {@link FactoryBean} for a JCache {@link CacheManager javax.cache.CacheManager},
  * obtaining a pre-defined {@code CacheManager} by name through the standard
  * JCache {@link Caching javax.cache.Caching} class.
- *
- * <p>Note: This class has been updated for JCache 1.0, as of Spring 4.0.
  *
  * @author Juergen Hoeller
  * @since 3.2

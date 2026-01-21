@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -90,7 +90,7 @@ class ScheduledTaskTests {
 
 	@Test
 	void singleExecutionShouldNotHaveNextExecution() {
-		ScheduledTask scheduledTask = taskRegistrar.scheduleOneTimeTask(new OneTimeTask(countingRunnable, Duration.ofSeconds(0)));
+		ScheduledTask scheduledTask = taskRegistrar.scheduleOneTimeTask(new OneTimeTask(countingRunnable, Duration.ZERO));
 		Awaitility.await().atMost(Duration.ofSeconds(5)).until(() -> countingRunnable.executionCount > 0);
 		assertThat(scheduledTask.nextExecution()).isNull();
 	}

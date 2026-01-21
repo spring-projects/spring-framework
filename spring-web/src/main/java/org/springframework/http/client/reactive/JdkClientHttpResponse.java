@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package org.springframework.http.client.reactive;
 
-import java.net.HttpCookie;
 import java.net.http.HttpClient;
 import java.net.http.HttpResponse;
 import java.nio.ByteBuffer;
@@ -25,10 +24,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.Flow;
 import java.util.function.Function;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
-import org.jspecify.annotations.Nullable;
 import reactor.adapter.JdkFlowAdapter;
 import reactor.core.publisher.Flux;
 
@@ -40,7 +36,6 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseCookie;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedCaseInsensitiveMap;
-import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
 /**
@@ -52,17 +47,12 @@ import org.springframework.util.MultiValueMap;
  */
 class JdkClientHttpResponse extends AbstractClientHttpResponse {
 
-	private static final Pattern SAME_SITE_PATTERN = Pattern.compile("(?i).*SameSite=(Strict|Lax|None).*");
-
-
-
-	public JdkClientHttpResponse(HttpResponse<Flow.Publisher<List<ByteBuffer>>> response,
-			DataBufferFactory bufferFactory) {
+	public JdkClientHttpResponse(
+			HttpResponse<Flow.Publisher<List<ByteBuffer>>> response,
+			DataBufferFactory bufferFactory, MultiValueMap<String, ResponseCookie> cookies) {
 
 		super(HttpStatusCode.valueOf(response.statusCode()),
-				adaptHeaders(response),
-				adaptCookies(response),
-				adaptBody(response, bufferFactory)
+				adaptHeaders(response), cookies, adaptBody(response, bufferFactory)
 		);
 	}
 
@@ -74,31 +64,15 @@ class JdkClientHttpResponse extends AbstractClientHttpResponse {
 		return HttpHeaders.readOnlyHttpHeaders(multiValueMap);
 	}
 
-	private static MultiValueMap<String, ResponseCookie> adaptCookies(HttpResponse<Flow.Publisher<List<ByteBuffer>>> response) {
-		return response.headers().allValues(HttpHeaders.SET_COOKIE).stream()
-				.flatMap(header -> {
-					Matcher matcher = SAME_SITE_PATTERN.matcher(header);
-					String sameSite = (matcher.matches() ? matcher.group(1) : null);
-					return HttpCookie.parse(header).stream().map(cookie -> toResponseCookie(cookie, sameSite));
-				})
-				.collect(LinkedMultiValueMap::new,
-						(cookies, cookie) -> cookies.add(cookie.getName(), cookie),
-						LinkedMultiValueMap::addAll);
-	}
+	private static Flux<DataBuffer> adaptBody(
+			HttpResponse<Flow.Publisher<List<ByteBuffer>>> response, DataBufferFactory bufferFactory) {
 
-	private static ResponseCookie toResponseCookie(HttpCookie cookie, @Nullable String sameSite) {
-		return ResponseCookie.from(cookie.getName(), cookie.getValue())
-				.domain(cookie.getDomain())
-				.httpOnly(cookie.isHttpOnly())
-				.maxAge(cookie.getMaxAge())
-				.path(cookie.getPath())
-				.secure(cookie.getSecure())
-				.sameSite(sameSite)
-				.build();
-	}
+		Flow.Publisher<List<ByteBuffer>> body = response.body();
+		if (body == null) {
+			return Flux.empty();
+		}
 
-	private static Flux<DataBuffer> adaptBody(HttpResponse<Flow.Publisher<List<ByteBuffer>>> response, DataBufferFactory bufferFactory) {
-		return JdkFlowAdapter.flowPublisherToFlux(response.body())
+		return JdkFlowAdapter.flowPublisherToFlux(body)
 				.flatMapIterable(Function.identity())
 				.map(bufferFactory::wrap)
 				.doOnDiscard(DataBuffer.class, DataBufferUtils::release)

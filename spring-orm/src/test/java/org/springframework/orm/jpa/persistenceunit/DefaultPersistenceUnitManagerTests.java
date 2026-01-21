@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.orm.jpa.persistenceunit;
 
+import jakarta.persistence.spi.PersistenceUnitInfo;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.context.testfixture.index.CandidateComponentsTestClassLoader;
@@ -25,16 +26,16 @@ import org.springframework.orm.jpa.domain.Person;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-
-
 /**
  * Tests for {@link DefaultPersistenceUnitManager}.
  *
  * @author Stephane Nicoll
+ * @author Juergen Hoeller
  */
 class DefaultPersistenceUnitManagerTests {
 
 	private final DefaultPersistenceUnitManager manager = new DefaultPersistenceUnitManager();
+
 
 	@Test
 	void defaultDomainWithScan() {
@@ -54,15 +55,11 @@ class DefaultPersistenceUnitManagerTests {
 	}
 
 	private void testDefaultDomain() {
-		SpringPersistenceUnitInfo puInfo = buildDefaultPersistenceUnitInfo();
-		assertThat(puInfo.getManagedClassNames()).contains(
+		this.manager.preparePersistenceUnitInfos();
+		PersistenceUnitInfo pui = this.manager.obtainDefaultPersistenceUnitInfo();
+		assertThat(pui.getManagedClassNames()).contains(
 				"org.springframework.orm.jpa.domain.Person",
 				"org.springframework.orm.jpa.domain.DriversLicense");
-	}
-
-	private SpringPersistenceUnitInfo buildDefaultPersistenceUnitInfo() {
-		this.manager.preparePersistenceUnitInfos();
-		return (SpringPersistenceUnitInfo) this.manager.obtainDefaultPersistenceUnitInfo();
 	}
 
 }

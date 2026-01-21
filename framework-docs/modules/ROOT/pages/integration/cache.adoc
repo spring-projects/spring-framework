@@ -9,6 +9,3 @@ minimal impact on the code.
 
 In Spring Framework 4.1, the cache abstraction was significantly extended with support
 for xref:integration/cache/jsr-107.adoc[JSR-107 annotations] and more customization options.
-
-
-

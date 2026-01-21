@@ -159,7 +159,18 @@ Kotlin::
 +
 [source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
-	// Not possible in Kotlin until {kotlin-issues}/KT-22208 is fixed
+	class MyWebTests {
+
+		lateinit var mockMvc: MockMvc
+
+		@BeforeEach
+		fun setup() {
+			mockMvc = standaloneSetup(AccountController())
+				.defaultRequest<StandaloneMockMvcBuilder>(get("/")
+				.contextPath("/app").servletPath("/main")
+				.accept(MediaType.APPLICATION_JSON)).build()
+		}
+	}
 ----
 ======
 
@@ -167,4 +178,3 @@ The preceding properties affect every request performed through the `MockMvc` in
 If the same property is also specified on a given request, it overrides the default
 value. That is why the HTTP method and URI in the default request do not matter, since
 they must be specified on every request.
-

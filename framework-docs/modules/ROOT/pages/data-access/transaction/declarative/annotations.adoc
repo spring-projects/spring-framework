@@ -364,6 +364,7 @@ Kotlin::
 ----
 ======
 
+
 [[transaction-declarative-attransactional-settings]]
 == `@Transactional` Settings
 
@@ -469,6 +470,7 @@ name of the transactionally advised class + `.` + the method name. For example, 
 `handlePayment(..)` method of the `BusinessService` class started a transaction, the
 name of the transaction would be `com.example.BusinessService.handlePayment`.
 
+
 [[tx-multiple-tx-mgrs-with-attransactional]]
 == Multiple Transaction Managers with `@Transactional`
 
@@ -571,6 +573,7 @@ definitions declare the same qualifier value. Such a qualifier value only needs
 to be unique within a set of type-matching beans, not having to serve as an ID.
 ====
 
+
 [[tx-custom-attributes]]
 == Custom Composed Annotations
 
@@ -658,5 +661,3 @@ Kotlin::
 In the preceding example, we used the syntax to define the transaction manager qualifier
 and transactional labels, but we could also have included propagation behavior,
 rollback rules, timeouts, and other features.
-
-

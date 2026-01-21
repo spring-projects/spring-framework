@@ -23,4 +23,3 @@ with parameters, you may need to use
 {kotlin-docs}/annotations.html#annotation-use-site-targets[annotation use-site targets],
 such as `@field:NotNull` or `@get:Size(min=5, max=15)`, as described in
 {stackoverflow-site}/a/35853200/1092077[this Stack Overflow response].
-

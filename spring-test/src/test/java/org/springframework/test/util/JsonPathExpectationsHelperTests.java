@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,13 +18,16 @@ package org.springframework.test.util;
 
 import java.util.List;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.Configuration;
-import com.jayway.jsonpath.spi.mapper.JacksonMappingProvider;
+import com.jayway.jsonpath.TypeRef;
+import com.jayway.jsonpath.spi.mapper.MappingException;
+import com.jayway.jsonpath.spi.mapper.MappingProvider;
 import org.hamcrest.CoreMatchers;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import tools.jackson.databind.JavaType;
+import tools.jackson.databind.json.JsonMapper;
 
 import org.springframework.core.ParameterizedTypeReference;
 
@@ -45,7 +48,7 @@ import static org.hamcrest.core.Is.is;
 class JsonPathExpectationsHelperTests {
 
 	private static final Configuration JACKSON_MAPPING_CONFIGURATION = Configuration.defaultConfiguration()
-			.mappingProvider(new JacksonMappingProvider(new ObjectMapper()));
+			.mappingProvider(new JacksonMappingProvider());
 
 	private static final String CONTENT = """
 			{
@@ -57,7 +60,8 @@ class JsonPathExpectationsHelperTests {
 				'whitespace':  '    ',
 				'emptyString': '',
 				'emptyArray':  [],
-				'emptyMap':    {}
+				'emptyMap':    {},
+				'nullValue':   null
 			}""";
 
 	private static final String SIMPSONS = """
@@ -249,6 +253,11 @@ class JsonPathExpectationsHelperTests {
 		new JsonPathExpectationsHelper("$.num").assertValue(CONTENT, 5);
 	}
 
+	@Test
+	void assertNullValue() {
+		new JsonPathExpectationsHelper("$.nullValue").assertValue(CONTENT, (Object) null);
+	}
+
 	@Test // SPR-14498
 	void assertValueWithNumberConversion() {
 		new JsonPathExpectationsHelper("$.num").assertValue(CONTENT, 5.0);
@@ -375,5 +384,54 @@ class JsonPathExpectationsHelperTests {
 
 
 	public record Member(String name) {}
+
+
+	/**
+	 * Jackson 3.x variant of {@link com.jayway.jsonpath.spi.mapper.JacksonMappingProvider}.
+	 */
+	private static class JacksonMappingProvider implements MappingProvider {
+
+		private final JsonMapper jsonMapper;
+
+		public JacksonMappingProvider() {
+			this(new JsonMapper());
+		}
+
+		public JacksonMappingProvider(JsonMapper jsonMapper) {
+			this.jsonMapper = jsonMapper;
+		}
+
+
+		@Override
+		public <T> T map(Object source, Class<T> targetType, Configuration configuration) {
+			if (source == null){
+				return null;
+			}
+			try {
+				return jsonMapper.convertValue(source, targetType);
+			}
+			catch (Exception ex) {
+				throw new MappingException(ex);
+			}
+
+		}
+
+		@Override
+		@SuppressWarnings("unchecked")
+		public <T> T map(Object source, final TypeRef<T> targetType, Configuration configuration) {
+			if (source == null){
+				return null;
+			}
+			JavaType type = jsonMapper.getTypeFactory().constructType(targetType.getType());
+
+			try {
+				return (T) jsonMapper.convertValue(source, type);
+			}
+			catch (Exception ex) {
+				throw new MappingException(ex);
+			}
+
+		}
+	}
 
 }

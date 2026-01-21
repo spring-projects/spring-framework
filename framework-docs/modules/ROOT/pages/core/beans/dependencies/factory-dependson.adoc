@@ -37,6 +37,3 @@ in the case of xref:core/beans/factory-scopes.adoc#beans-factory-scopes-singleto
 beans only, a corresponding destruction-time dependency. Dependent beans that define a
 `depends-on` relationship with a given bean are destroyed first, prior to the given bean
 itself being destroyed. Thus, `depends-on` can also control shutdown order.
-
-
-

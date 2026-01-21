@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ import org.springframework.util.comparator.Comparators;
  * @param <S> the source type
  * @param <T> the target type
  */
-public class ConvertingComparator<S, T> implements Comparator<S> {
+public class ConvertingComparator<S, T extends @Nullable Object> implements Comparator<S> {
 
 	private final Comparator<T> comparator;
 
@@ -107,7 +107,7 @@ public class ConvertingComparator<S, T> implements Comparator<S> {
 	/**
 	 * Adapts a {@link ConversionService} and {@code targetType} to a {@link Converter}.
 	 */
-	private static class ConversionServiceConverter<S, T> implements Converter<S, T> {
+	private static class ConversionServiceConverter<S, T> implements Converter<S, @Nullable T> {
 
 		private final ConversionService conversionService;
 

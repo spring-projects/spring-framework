@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class AnnotationBackCompatibilityTests {
 
 	@Test
-	void multiplRoutesToMetaAnnotation() {
+	void multipleRoutesToMetaAnnotation() {
 		Class<?> source = WithMetaMetaTestAnnotation1AndMetaTestAnnotation2.class;
 		// Merged annotation chooses lowest depth
 		MergedAnnotation<TestAnnotation> mergedAnnotation = MergedAnnotations.from(source).get(TestAnnotation.class);

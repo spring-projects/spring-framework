@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -99,11 +99,24 @@ import org.springframework.test.context.bean.override.BeanOverride;
  *     }
  * }</code></pre>
  *
- * <p><strong>NOTE</strong>: Only <em>singleton</em> beans can be overridden.
- * Any attempt to override a non-singleton bean will result in an exception. When
- * overriding a bean created by a {@link org.springframework.beans.factory.FactoryBean
- * FactoryBean}, the {@code FactoryBean} will be replaced with a singleton bean
- * corresponding to the value returned from the {@code @TestBean} factory method.
+ * <p><strong>WARNING</strong>: Using {@code @TestBean} in conjunction with
+ * {@code @ContextHierarchy} can lead to undesirable results since each
+ * {@code @TestBean} will be applied to all context hierarchy levels by default.
+ * To ensure that a particular {@code @TestBean} is applied to a single context
+ * hierarchy level, set the {@link #contextName() contextName} to match a
+ * configured {@code @ContextConfiguration}
+ * {@link org.springframework.test.context.ContextConfiguration#name() name}.
+ * See the Javadoc for {@link org.springframework.test.context.ContextHierarchy @ContextHierarchy}
+ * for further details and examples.
+ *
+ * <p><strong>NOTE</strong>: When overriding a non-singleton bean, the non-singleton
+ * bean will be replaced with a singleton bean corresponding to the value returned
+ * from the {@code @TestBean} factory method, and the corresponding bean definition
+ * will be converted to a singleton. Consequently, if you override a prototype or
+ * scoped bean, it will be treated as a singleton. Similarly, when overriding a bean
+ * created by a {@link org.springframework.beans.factory.FactoryBean FactoryBean},
+ * the {@code FactoryBean} will be replaced with a singleton bean corresponding to
+ * the value returned from the {@code @TestBean} factory method.
  *
  * <p>There are no restrictions on the visibility of {@code @TestBean} fields or
  * factory methods. Such fields and methods can therefore be {@code public},
@@ -163,6 +176,19 @@ public @interface TestBean {
 	 * of the bean.
 	 */
 	String methodName() default "";
+
+	/**
+	 * The name of the context hierarchy level in which this {@code @TestBean}
+	 * should be applied.
+	 * <p>Defaults to an empty string which indicates that this {@code @TestBean}
+	 * should be applied to all application contexts.
+	 * <p>If a context name is configured, it must match a name configured via
+	 * {@code @ContextConfiguration(name=...)}.
+	 * @since 6.2.6
+	 * @see org.springframework.test.context.ContextHierarchy @ContextHierarchy
+	 * @see org.springframework.test.context.ContextConfiguration#name() @ContextConfiguration(name=...)
+	 */
+	String contextName() default "";
 
 	/**
 	 * Whether to require the existence of the bean being overridden.

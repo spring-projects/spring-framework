@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -125,6 +125,8 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 	private @Nullable DataSource dataSource;
 
 	private boolean enforceReadOnly = false;
+
+	private volatile @Nullable Boolean defaultReadOnly;
 
 
 	/**
@@ -269,13 +271,18 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 				if (logger.isDebugEnabled()) {
 					logger.debug("Acquired Connection [" + newCon + "] for JDBC transaction");
 				}
+				if (definition.isReadOnly()) {
+					checkDefaultReadOnly(newCon);
+				}
 				txObject.setConnectionHolder(new ConnectionHolder(newCon), true);
 			}
 
 			txObject.getConnectionHolder().setSynchronizedWithTransaction(true);
 			con = txObject.getConnectionHolder().getConnection();
 
-			Integer previousIsolationLevel = DataSourceUtils.prepareConnectionForTransaction(con, definition);
+			Integer previousIsolationLevel = DataSourceUtils.prepareConnectionForTransaction(con,
+					definition.getIsolationLevel(),
+					(definition.isReadOnly() && !isDefaultReadOnly()));
 			txObject.setPreviousIsolationLevel(previousIsolationLevel);
 			txObject.setReadOnly(definition.isReadOnly());
 
@@ -380,8 +387,9 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 			if (txObject.isMustRestoreAutoCommit()) {
 				con.setAutoCommit(true);
 			}
-			DataSourceUtils.resetConnectionAfterTransaction(
-					con, txObject.getPreviousIsolationLevel(), txObject.isReadOnly());
+			DataSourceUtils.resetConnectionAfterTransaction(con,
+					txObject.getPreviousIsolationLevel(),
+					(txObject.isReadOnly() && !isDefaultReadOnly()));
 		}
 		catch (Throwable ex) {
 			logger.debug("Could not reset JDBC Connection after transaction", ex);
@@ -397,6 +405,37 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 		txObject.getConnectionHolder().clear();
 	}
 
+
+	/**
+	 * Check the default {@link Connection#isReadOnly()} flag on a freshly
+	 * obtained connection from the {@code DataSource}, assuming that the
+	 * same flag applies to all connections obtained from the given setup.
+	 * @param newCon the Connection to check
+	 * @since 6.2.13
+	 * @see #isDefaultReadOnly()
+	 */
+	private void checkDefaultReadOnly(Connection newCon) {
+		if (this.defaultReadOnly == null) {
+			try {
+				this.defaultReadOnly = newCon.isReadOnly();
+			}
+			catch (Throwable ex) {
+				logger.debug("Could not determine default JDBC Connection isReadOnly - assuming false", ex);
+				this.defaultReadOnly = false;
+			}
+		}
+	}
+
+	/**
+	 * Check whether the default read-only flag has been determined as {@code true},
+	 * assuming that all encountered connections will be read-only by default and
+	 * therefore do not need explicit {@link Connection#setReadOnly} (re)setting.
+	 * @since 6.2.13
+	 * @see #checkDefaultReadOnly(Connection)
+	 */
+	private boolean isDefaultReadOnly() {
+		return (this.defaultReadOnly == Boolean.TRUE);
+	}
 
 	/**
 	 * Prepare the transactional {@code Connection} right after transaction begin.

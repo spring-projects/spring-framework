@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,20 @@
 
 package org.springframework.expression.spel;
 
+import java.util.Set;
+
+import org.jspecify.annotations.Nullable;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import org.springframework.expression.spel.standard.SpelExpressionParser;
+import org.springframework.core.convert.TypeDescriptor;
+import org.springframework.core.convert.converter.GenericConverter;
+import org.springframework.core.convert.support.DefaultConversionService;
+import org.springframework.expression.Expression;
+import org.springframework.expression.spel.standard.SpelExpression;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
+import org.springframework.expression.spel.support.StandardTypeConverter;
 import org.springframework.expression.spel.support.StandardTypeLocator;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -266,17 +276,85 @@ class VariableAndFunctionTests extends AbstractExpressionTests {
 
 	@Test
 	void functionMethodMustBeStatic() throws Exception {
-		SpelExpressionParser parser = new SpelExpressionParser();
-		StandardEvaluationContext ctx = new StandardEvaluationContext();
-		ctx.setVariable("notStatic", this.getClass().getMethod("nonStatic"));
+		context.registerFunction("nonStatic", getClass().getMethod("nonStatic"));
+		SpelExpression expression = parser.parseRaw("#nonStatic()");
 		assertThatExceptionOfType(SpelEvaluationException.class)
-				.isThrownBy(() -> parser.parseRaw("#notStatic()").getValue(ctx))
+				.isThrownBy(() -> expression.getValue(context))
 				.satisfies(ex -> assertThat(ex.getMessageCode()).isEqualTo(FUNCTION_MUST_BE_STATIC));
 	}
 
 
 	// this method is used by the test above
 	public void nonStatic() {
+	}
+
+
+	@Nested  // gh-34371
+	class VarargsAndPojoToArrayConversionTests {
+
+		private final StandardEvaluationContext context = TestScenarioCreator.getTestEvaluationContext();
+
+		private final ArrayHolder arrayHolder = new ArrayHolder("a", "b", "c");
+
+
+		@BeforeEach
+		void setUp() {
+			DefaultConversionService conversionService = new DefaultConversionService();
+			conversionService.addConverter(new ArrayHolderConverter());
+			context.setTypeConverter(new StandardTypeConverter(conversionService));
+			context.setVariable("arrayHolder", arrayHolder);
+		}
+
+		@Test
+		void functionWithVarargsAndPojoToArrayConversion() {
+			// #varargsFunction: static String varargsFunction(String... strings) -> Arrays.toString(strings)
+			evaluate("#varargsFunction(#arrayHolder)", "[a, b, c]");
+
+			// #varargsObjectFunction: static String varargsObjectFunction(Object... args) -> Arrays.toString(args)
+			//
+			// Since ArrayHolder is an "instanceof Object" and Object is the varargs component type,
+			// we expect the ArrayHolder not to be converted to an array but rather to be passed
+			// "as is" as a single argument to the varargs method.
+			evaluate("#varargsObjectFunction(#arrayHolder)", "[" + arrayHolder.toString() + "]");
+		}
+
+		@Test
+		void functionWithVarargsAndPojoToArrayConversionViaMethodHandle() {
+			// #varargsFunctionHandle: static String varargsFunction(String... strings) -> Arrays.toString(strings)
+			evaluate("#varargsFunctionHandle(#arrayHolder)", "[a, b, c]");
+
+			// #varargsObjectFunctionHandle: static String varargsObjectFunction(Object... args) -> Arrays.toString(args)
+			//
+			// Since ArrayHolder is an "instanceof Object" and Object is the varargs component type,
+			// we expect the ArrayHolder not to be converted to an array but rather to be passed
+			// "as is" as a single argument to the varargs method.
+			evaluate("#varargsObjectFunctionHandle(#arrayHolder)", "[" + arrayHolder.toString() + "]");
+		}
+
+		private void evaluate(String expression, Object expectedValue) {
+			Expression expr = parser.parseExpression(expression);
+			assertThat(expr).as("expression").isNotNull();
+			Object value = expr.getValue(context);
+			assertThat(value).as("expression '" + expression + "'").isEqualTo(expectedValue);
+		}
+
+
+		record ArrayHolder(String... array) {
+		}
+
+		static class ArrayHolderConverter implements GenericConverter {
+
+			@Override
+			public @Nullable Set<ConvertiblePair> getConvertibleTypes() {
+				return Set.of(new ConvertiblePair(ArrayHolder.class, Object[].class));
+			}
+
+			@Override
+			public @Nullable String[] convert(@Nullable Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
+				return ((ArrayHolder) source).array();
+			}
+		}
+
 	}
 
 }

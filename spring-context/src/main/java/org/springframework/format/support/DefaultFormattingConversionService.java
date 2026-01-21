@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,11 +47,11 @@ import org.springframework.util.StringValueResolver;
  */
 public class DefaultFormattingConversionService extends FormattingConversionService {
 
-	private static final boolean jsr354Present;
+	private static final boolean JSR_354_PRESENT;
 
 	static {
 		ClassLoader classLoader = DefaultFormattingConversionService.class.getClassLoader();
-		jsr354Present = ClassUtils.isPresent("javax.money.MonetaryAmount", classLoader);
+		JSR_354_PRESENT = ClassUtils.isPresent("javax.money.MonetaryAmount", classLoader);
 	}
 
 	/**
@@ -107,7 +107,7 @@ public class DefaultFormattingConversionService extends FormattingConversionServ
 		formatterRegistry.addFormatterForFieldAnnotation(new NumberFormatAnnotationFormatterFactory());
 
 		// Default handling of monetary values
-		if (jsr354Present) {
+		if (JSR_354_PRESENT) {
 			formatterRegistry.addFormatter(new CurrencyUnitFormatter());
 			formatterRegistry.addFormatter(new MonetaryAmountFormatter());
 			formatterRegistry.addFormatterForFieldAnnotation(new Jsr354NumberFormatAnnotationFormatterFactory());

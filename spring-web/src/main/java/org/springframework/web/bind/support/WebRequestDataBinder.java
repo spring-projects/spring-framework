@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,7 +53,7 @@ import org.springframework.web.multipart.support.StandardServletPartUtils;
  * which include specifying allowed/required fields, and registering custom
  * property editors.
  *
- * <p>Can also used for manual data binding in custom web controllers or interceptors
+ * <p>Can also be used for manual data binding in custom web controllers or interceptors
  * that build on Spring's {@link org.springframework.web.context.request.WebRequest}
  * abstraction: for example, in a {@link org.springframework.web.context.request.WebRequestInterceptor}
  * implementation. Simply instantiate a WebRequestDataBinder for each binding
@@ -68,7 +68,7 @@ import org.springframework.web.multipart.support.StandardServletPartUtils;
  * // trigger actual binding of request parameters
  * binder.bind(request);
  * // optionally evaluate binding errors
- * Errors errors = binder.getErrors();
+ * BindingResult bindingResult = binder.getBindingResult();
  * ...</pre>
  *
  * @author Juergen Hoeller

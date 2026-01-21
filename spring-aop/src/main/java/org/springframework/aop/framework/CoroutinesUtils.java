@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,6 @@ import org.jspecify.annotations.Nullable;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
 
-
 /**
  * Package-visible class designed to avoid a hard dependency on Kotlin and Coroutines dependency at runtime.
  *
@@ -41,7 +40,7 @@ abstract class CoroutinesUtils {
 		}
 	}
 
-	@SuppressWarnings({"unchecked", "rawtypes"})
+	@SuppressWarnings({"rawtypes", "unchecked"})
 	static @Nullable Object awaitSingleOrNull(@Nullable Object value, Object continuation) {
 		return MonoKt.awaitSingleOrNull(value instanceof Mono mono ? mono : Mono.justOrEmpty(value),
 				(Continuation<Object>) continuation);

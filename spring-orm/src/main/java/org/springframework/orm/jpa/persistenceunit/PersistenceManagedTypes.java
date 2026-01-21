@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,6 +55,7 @@ public interface PersistenceManagedTypes {
 	 * @see PersistenceUnitInfo#getPersistenceUnitRootUrl()
 	 */
 	@Nullable URL getPersistenceUnitRootUrl();
+
 
 	/**
 	 * Create an instance using the specified managed class names.

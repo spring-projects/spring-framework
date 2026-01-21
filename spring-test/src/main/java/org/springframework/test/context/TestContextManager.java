@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -389,8 +389,8 @@ public class TestContextManager {
 	 * have executed, the first caught exception will be rethrown with any
 	 * subsequent exceptions {@linkplain Throwable#addSuppressed suppressed} in
 	 * the first exception.
-	 * <p>Note that registered listeners will be executed in the opposite
-	 * order in which they were registered.
+	 * <p>Note that listeners will be executed in the opposite order in which they
+	 * were registered.
 	 * @param testInstance the current test instance
 	 * @param testMethod the test method which has just been executed on the
 	 * test instance
@@ -459,7 +459,8 @@ public class TestContextManager {
 	 * have executed, the first caught exception will be rethrown with any
 	 * subsequent exceptions {@linkplain Throwable#addSuppressed suppressed} in
 	 * the first exception.
-	 * <p>Note that registered listeners will be executed in the opposite
+	 * <p>Note that listeners will be executed in the opposite order in which they
+	 * were registered.
 	 * @param testInstance the current test instance
 	 * @param testMethod the test method which has just been executed on the
 	 * test instance
@@ -517,11 +518,16 @@ public class TestContextManager {
 	 * have executed, the first caught exception will be rethrown with any
 	 * subsequent exceptions {@linkplain Throwable#addSuppressed suppressed} in
 	 * the first exception.
-	 * <p>Note that registered listeners will be executed in the opposite
+	 * <p>Note that listeners will be executed in the opposite order in which they
+	 * were registered.
+	 * <p>As of Spring Framework 7.0, this method also ensures that the application
+	 * context for the current {@link #getTestContext() TestContext} is marked as
+	 * {@linkplain TestContext#markApplicationContextUnused() unused}.
 	 * @throws Exception if a registered TestExecutionListener throws an exception
 	 * @since 3.0
 	 * @see #getTestExecutionListeners()
 	 * @see Throwable#addSuppressed(Throwable)
+	 * @see TestContext#markApplicationContextUnused()
 	 */
 	public void afterTestClass() throws Exception {
 		Class<?> testClass = getTestContext().getTestClass();
@@ -545,6 +551,20 @@ public class TestContextManager {
 				else {
 					afterTestClassException.addSuppressed(ex);
 				}
+			}
+		}
+
+		try {
+			if (getTestContext().hasApplicationContext()) {
+				getTestContext().markApplicationContextUnused();
+			}
+		}
+		catch (Throwable ex) {
+			if (afterTestClassException == null) {
+				afterTestClassException = ex;
+			}
+			else {
+				afterTestClassException.addSuppressed(ex);
 			}
 		}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ package org.springframework.r2dbc.core.binding;
 import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
 
 /**
- * Index-based bind marker. This implementation creates indexed bind
+ * Index-based bind markers. This implementation creates indexed bind
  * markers using a numeric index and an optional prefix for bind markers
  * to be represented within the query string.
  *
@@ -43,14 +43,15 @@ class IndexedBindMarkers implements BindMarkers {
 
 
 	/**
-	 * Create a new {@link IndexedBindMarker} instance given {@code prefix} and {@code beginWith}.
-	 * @param prefix bind parameter prefix
-	 * @param beginWith the first index to use
+	 * Create a new {@link IndexedBindMarker} instance for the given {@code prefix}
+	 * and {@code beginWith} value.
+	 * @param prefix the bind parameter prefix
+	 * @param beginIndex the first index to use
 	 */
-	IndexedBindMarkers(String prefix, int beginWith) {
+	IndexedBindMarkers(String prefix, int beginIndex) {
 		this.counter = 0;
 		this.prefix = prefix;
-		this.offset = beginWith;
+		this.offset = beginIndex;
 	}
 
 

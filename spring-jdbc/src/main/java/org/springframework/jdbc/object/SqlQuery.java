@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,8 @@ package org.springframework.jdbc.object;
 
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiFunction;
+import java.util.stream.Stream;
 
 import javax.sql.DataSource;
 
@@ -25,6 +27,7 @@ import org.jspecify.annotations.Nullable;
 
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.support.DataAccessUtils;
+import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterUtils;
@@ -52,14 +55,11 @@ import org.springframework.jdbc.core.namedparam.ParsedSql;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Thomas Risberg
+ * @author Yanming Zhou
  * @param <T> the result type
  * @see SqlUpdate
  */
-public abstract class SqlQuery<T> extends SqlOperation {
-
-	/** The number of rows to expect; if 0, unknown. */
-	private int rowsExpected = 0;
-
+public abstract class SqlQuery<T extends @Nullable Object> extends SqlOperation {
 
 	/**
 	 * Constructor to allow use as a JavaBean.
@@ -82,23 +82,6 @@ public abstract class SqlQuery<T> extends SqlOperation {
 
 
 	/**
-	 * Set the number of rows expected.
-	 * <p>This can be used to ensure efficient storage of results. The
-	 * default behavior is not to expect any specific number of rows.
-	 */
-	public void setRowsExpected(int rowsExpected) {
-		this.rowsExpected = rowsExpected;
-	}
-
-	/**
-	 * Get the number of rows expected.
-	 */
-	public int getRowsExpected() {
-		return this.rowsExpected;
-	}
-
-
-	/**
 	 * Central execution method. All un-named parameter execution goes through this method.
 	 * @param params parameters, similar to JDO query parameters.
 	 * Primitive parameters must be represented by their Object wrapper type.
@@ -116,6 +99,24 @@ public abstract class SqlQuery<T> extends SqlOperation {
 	}
 
 	/**
+	 * Central stream method. All un-named parameter execution goes through this method.
+	 * @param params parameters, similar to JDO query parameters.
+	 * Primitive parameters must be represented by their Object wrapper type.
+	 * The ordering of parameters is significant.
+	 * @param context the contextual information passed to the {@code mapRow}
+	 * callback method. The JDBC operation itself doesn't rely on this parameter,
+	 * but it can be useful for creating the objects of the result list.
+	 * @return a result Stream of objects, one per row of the ResultSet. Normally all these
+	 * will be of the same class, although it is possible to use different types.
+	 * @since 7.0
+	 */
+	public Stream<T> stream(Object @Nullable [] params, @Nullable Map<?, ?> context) throws DataAccessException {
+		validateParameters(params);
+		RowMapper<T> rowMapper = newRowMapper(params, context);
+		return getJdbcTemplate().queryForStream(newPreparedStatementCreator(params), rowMapper);
+	}
+
+	/**
 	 * Convenient method to execute without context.
 	 * @param params parameters for the query. Primitive parameters must
 	 * be represented by their Object wrapper type. The ordering of parameters is
@@ -123,6 +124,17 @@ public abstract class SqlQuery<T> extends SqlOperation {
 	 */
 	public List<T> execute(Object... params) throws DataAccessException {
 		return execute(params, null);
+	}
+
+	/**
+	 * Convenient method to stream without context.
+	 * @param params parameters for the query. Primitive parameters must
+	 * be represented by their Object wrapper type. The ordering of parameters is
+	 * significant.
+	 * @since 7.0
+	 */
+	public Stream<T> stream(Object... params) throws DataAccessException {
+		return stream(params, null);
 	}
 
 	/**
@@ -134,10 +146,27 @@ public abstract class SqlQuery<T> extends SqlOperation {
 	}
 
 	/**
+	 * Convenient method to stream without parameters.
+	 * @param context the contextual information for object creation
+	 * @since 7.0
+	 */
+	public Stream<T> stream(Map<?, ?> context) throws DataAccessException {
+		return stream(null, context);
+	}
+
+	/**
 	 * Convenient method to execute without parameters nor context.
 	 */
 	public List<T> execute() throws DataAccessException {
 		return execute((Object[]) null, null);
+	}
+
+	/**
+	 * Convenient method to stream without parameters nor context.
+	 * @since 7.0
+	 */
+	public Stream<T> stream() throws DataAccessException {
+		return stream(null, null);
 	}
 
 	/**
@@ -223,13 +252,24 @@ public abstract class SqlQuery<T> extends SqlOperation {
 	 * will be of the same class, although it is possible to use different types.
 	 */
 	public List<T> executeByNamedParam(Map<String, ?> paramMap, @Nullable Map<?, ?> context) throws DataAccessException {
-		validateNamedParameters(paramMap);
-		ParsedSql parsedSql = getParsedSql();
-		MapSqlParameterSource paramSource = new MapSqlParameterSource(paramMap);
-		String sqlToUse = NamedParameterUtils.substituteNamedParameters(parsedSql, paramSource);
-		@Nullable Object[] params = NamedParameterUtils.buildValueArray(parsedSql, paramSource, getDeclaredParameters());
-		RowMapper<T> rowMapper = newRowMapper(params, context);
-		return getJdbcTemplate().query(newPreparedStatementCreator(sqlToUse, params), rowMapper);
+		return queryByNamedParam(paramMap, context, getJdbcTemplate()::query);
+	}
+
+	/**
+	 * Central stream method. All named parameter execution goes through this method.
+	 * @param paramMap parameters associated with the name specified while declaring
+	 * the SqlParameters. Primitive parameters must be represented by their Object wrapper
+	 * type. The ordering of parameters is not significant since they are supplied in a
+	 * SqlParameterMap which is an implementation of the Map interface.
+	 * @param context the contextual information passed to the {@code mapRow}
+	 * callback method. The JDBC operation itself doesn't rely on this parameter,
+	 * but it can be useful for creating the objects of the result list.
+	 * @return a Stream of objects, one per row of the ResultSet. Normally all these
+	 * will be of the same class, although it is possible to use different types.
+	 * @since 7.0
+	 */
+	public Stream<T> streamByNamedParam(Map<String, ?> paramMap, @Nullable Map<?, ?> context) throws DataAccessException {
+		return queryByNamedParam(paramMap, context, getJdbcTemplate()::queryForStream);
 	}
 
 	/**
@@ -240,6 +280,27 @@ public abstract class SqlQuery<T> extends SqlOperation {
 	 */
 	public List<T> executeByNamedParam(Map<String, ? extends @Nullable Object> paramMap) throws DataAccessException {
 		return executeByNamedParam(paramMap, null);
+	}
+
+	/**
+	 * Convenient method to stream without context.
+	 * @param paramMap parameters associated with the name specified while declaring
+	 * the SqlParameters. Primitive parameters must be represented by their Object wrapper
+	 * type. The ordering of parameters is not significant.
+	 * @since 7.0
+	 */
+	public Stream<T> streamByNamedParam(Map<String, ? extends @Nullable Object> paramMap) throws DataAccessException {
+		return streamByNamedParam(paramMap, null);
+	}
+
+	private <R> R queryByNamedParam(Map<String, ?> paramMap, @Nullable Map<?, ?> context, BiFunction<PreparedStatementCreator, RowMapper<T>, R> queryFunction) {
+		validateNamedParameters(paramMap);
+		ParsedSql parsedSql = getParsedSql();
+		MapSqlParameterSource paramSource = new MapSqlParameterSource(paramMap);
+		String sqlToUse = NamedParameterUtils.substituteNamedParameters(parsedSql, paramSource);
+		@Nullable Object[] params = NamedParameterUtils.buildValueArray(parsedSql, paramSource, getDeclaredParameters());
+		RowMapper<T> rowMapper = newRowMapper(params, context);
+		return queryFunction.apply(newPreparedStatementCreator(sqlToUse, params), rowMapper);
 	}
 
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,10 +31,20 @@ public abstract class MockitoAssertions {
 
 	public static void assertIsMock(Object obj) {
 		assertThat(isMock(obj)).as("is a Mockito mock").isTrue();
+		assertIsNotSpy(obj);
 	}
 
 	public static void assertIsMock(Object obj, String message) {
 		assertThat(isMock(obj)).as("%s is a Mockito mock", message).isTrue();
+		assertIsNotSpy(obj, message);
+	}
+
+	public static void assertIsNotMock(Object obj) {
+		assertThat(isMock(obj)).as("is a Mockito mock").isFalse();
+	}
+
+	public static void assertIsNotMock(Object obj, String message) {
+		assertThat(isMock(obj)).as("%s is a Mockito mock", message).isFalse();
 	}
 
 	public static void assertIsSpy(Object obj) {

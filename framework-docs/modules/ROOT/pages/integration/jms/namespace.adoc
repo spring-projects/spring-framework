@@ -22,7 +22,6 @@ namespace elements, you need to reference the JMS schema, as the following examp
 ----
 <1> Referencing the JMS schema.
 
-
 The namespace consists of three top-level elements: `<annotation-driven/>`, `<listener-container/>`
 and `<jca-listener-container/>`. `<annotation-driven/>` enables the use of xref:integration/jms/annotated.adoc[annotation-driven listener endpoints]
 . `<listener-container/>` and `<jca-listener-container/>`

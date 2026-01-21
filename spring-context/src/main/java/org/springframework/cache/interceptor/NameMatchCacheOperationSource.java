@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -84,8 +84,8 @@ public class NameMatchCacheOperationSource implements CacheOperationSource, Seri
 			// Look for most specific name match.
 			String bestNameMatch = null;
 			for (String mappedName : this.nameMap.keySet()) {
-				if (isMatch(methodName, mappedName)
-						&& (bestNameMatch == null || bestNameMatch.length() <= mappedName.length())) {
+				if (isMatch(methodName, mappedName) &&
+						(bestNameMatch == null || bestNameMatch.length() <= mappedName.length())) {
 					ops = this.nameMap.get(mappedName);
 					bestNameMatch = mappedName;
 				}

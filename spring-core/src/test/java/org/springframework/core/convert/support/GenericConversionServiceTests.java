@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -570,15 +570,28 @@ class GenericConversionServiceTests {
 		conversionService.addConverter(new StringListToAListConverter());
 		conversionService.addConverter(new StringListToBListConverter());
 
-		List<ARaw> aList = (List<ARaw>) conversionService.convert(List.of("foo"),
+		List<?> aList = (List<?>) conversionService.convert(List.of("foo"),
 				TypeDescriptor.collection(List.class, TypeDescriptor.valueOf(String.class)),
 				TypeDescriptor.collection(List.class, TypeDescriptor.valueOf(ARaw.class)));
 		assertThat(aList).allMatch(e -> e instanceof ARaw);
 
-		List<BRaw> bList = (List<BRaw>) conversionService.convert(List.of("foo"),
+		List<?> bList = (List<?>) conversionService.convert(List.of("foo"),
 				TypeDescriptor.collection(List.class, TypeDescriptor.valueOf(String.class)),
 				TypeDescriptor.collection(List.class, TypeDescriptor.valueOf(BRaw.class)));
 		assertThat(bList).allMatch(e -> e instanceof BRaw);
+	}
+
+	@Test
+	@SuppressWarnings("unchecked")
+	void stringToListOfMapConverterWithFallbackMatch() {
+		conversionService.addConverter(new StringToListOfMapConverter());
+
+		List<Map<String, Object>> result = (List<Map<String, Object>>) conversionService.convert("foo",
+				TypeDescriptor.valueOf(String.class),
+				TypeDescriptor.collection(List.class, TypeDescriptor.valueOf(Map.class))
+		);
+
+		assertThat("foo").isEqualTo(result.get(0).get("bar"));
 	}
 
 
@@ -943,9 +956,11 @@ class GenericConversionServiceTests {
 	private static class GenericBaseClass<T> {
 	}
 
+	@SuppressWarnings("rawtypes")
 	private static class ARaw extends GenericBaseClass {
 	}
 
+	@SuppressWarnings("rawtypes")
 	private static class BRaw extends GenericBaseClass {
 	}
 
@@ -964,6 +979,15 @@ class GenericConversionServiceTests {
 		@Override
 		public List<BRaw> convert(List<String> source) {
 			return List.of(new BRaw());
+		}
+	}
+
+
+	private static class StringToListOfMapConverter implements Converter<String, List<? extends Map<String, ?>>> {
+
+		@Override
+		public List<? extends Map<String, ?>> convert(String source) {
+			return List.of(Map.of("bar", source));
 		}
 	}
 

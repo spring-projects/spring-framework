@@ -141,6 +141,3 @@ Ensuring that the database initializer is initialized first can also be easy. So
   parent context contains the `DataSource`, and the child context contains the business
   components). This structure is common in Spring web applications but can be more
   generally applied.
-
-
-

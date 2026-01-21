@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -124,7 +124,10 @@ class HtmlCharacterEntityDecoder {
 			int value = (!isHexNumberedReference ?
 					Integer.parseInt(getReferenceSubstring(2)) :
 					Integer.parseInt(getReferenceSubstring(3), 16));
-			this.decodedMessage.append((char) value);
+			if (value > Character.MAX_CODE_POINT) {
+				return false;
+			}
+			this.decodedMessage.appendCodePoint(value);
 			return true;
 		}
 		catch (NumberFormatException ex) {

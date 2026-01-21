@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,10 @@ import java.util.concurrent.RejectedExecutionException;
 /**
  * Exception thrown when a {@link TaskExecutor} rejects to accept
  * a given task for execution.
+ *
+ * <p>Extends {@link RejectedExecutionException} as a common base class,
+ * allowing for custom catch blocks to cover both Spring scenarios and
+ * {@link java.util.concurrent.ExecutorService} rejection exceptions.
  *
  * @author Juergen Hoeller
  * @since 2.0.1
@@ -69,7 +73,13 @@ public class TaskRejectedException extends RejectedExecutionException {
 
 	private static String executorDescription(Executor executor) {
 		if (executor instanceof ExecutorService executorService) {
-			return "ExecutorService in " + (executorService.isShutdown() ? "shutdown" : "active") + " state";
+			try {
+				return "ExecutorService in " + (executorService.isShutdown() ? "shutdown" : "active") + " state";
+			}
+			catch (Exception ex) {
+				// UnsupportedOperationException/IllegalStateException from ManagedExecutorService.isShutdown()
+				// Falling back to toString() below.
+			}
 		}
 		return executor.toString();
 	}

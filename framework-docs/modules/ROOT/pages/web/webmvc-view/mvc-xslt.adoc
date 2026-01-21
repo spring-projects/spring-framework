@@ -9,10 +9,9 @@ XSLT in a Spring Web MVC application.
 
 This example is a trivial Spring application that creates a list of words in the
 `Controller` and adds them to the model map. The map is returned, along with the view
-name of our XSLT view. See xref:web/webmvc/mvc-controller.adoc[Annotated Controllers] for details of Spring Web MVC's
-`Controller` interface. The XSLT controller turns the list of words into a simple XML
-document ready for transformation.
-
+name of our XSLT view. See xref:web/webmvc/mvc-controller.adoc[Annotated Controllers]
+for details of Spring Web MVC's `Controller` interface. The XSLT controller turns the
+list of words into a simple XML document ready for transformation.
 
 
 [[mvc-view-xslt-beandefs]]
@@ -22,45 +21,7 @@ Configuration is standard for a simple Spring web application: The MVC configura
 has to define an `XsltViewResolver` bean and regular MVC annotation configuration.
 The following example shows how to do so:
 
-[tabs]
-======
-Java::
-+
-[source,java,indent=0,subs="verbatim,quotes"]
-----
-	@EnableWebMvc
-	@ComponentScan
-	@Configuration
-	public class WebConfig implements WebMvcConfigurer {
-
-		@Bean
-		public XsltViewResolver xsltViewResolver() {
-			XsltViewResolver viewResolver = new XsltViewResolver();
-			viewResolver.setPrefix("/WEB-INF/xsl/");
-			viewResolver.setSuffix(".xslt");
-			return viewResolver;
-		}
-	}
-----
-
-Kotlin::
-+
-[source,kotlin,indent=0,subs="verbatim,quotes"]
-----
-	@EnableWebMvc
-	@ComponentScan
-	@Configuration
-	class WebConfig : WebMvcConfigurer {
-
-		@Bean
-		fun xsltViewResolver() = XsltViewResolver().apply {
-			setPrefix("/WEB-INF/xsl/")
-			setSuffix(".xslt")	
-		}
-	}
-----
-======
-
+include-code::./WebConfiguration[tag=snippet,indent=0]
 
 [[mvc-view-xslt-controllercode]]
 == Controller
@@ -135,7 +96,6 @@ an object graph, but, within Spring, you have complete flexibility to create the
 from your model in any way you choose. This prevents the transformation of XML playing
 too great a part in the structure of your model data, which is a danger when using tools
 to manage the DOMification process.
-
 
 
 [[mvc-view-xslt-transforming]]

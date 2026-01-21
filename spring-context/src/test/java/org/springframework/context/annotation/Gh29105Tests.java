@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,6 +43,9 @@ class Gh29105Tests {
 
 		Stream<Class<?>> orderedTypes = child.getBeanProvider(MyService.class).orderedStream().map(Object::getClass);
 		assertThat(orderedTypes).containsExactly(CustomService.class, DefaultService.class);
+
+		assertThat(child.getDefaultListableBeanFactory().getOrder("defaultService")).isEqualTo(0);
+		assertThat(child.getDefaultListableBeanFactory().getOrder("customService")).isEqualTo(-1);
 
 		child.close();
 		parent.close();

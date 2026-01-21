@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,13 @@
 
 package org.springframework.core.test.tools;
 
+import java.util.List;
+
+import javax.tools.Diagnostic;
+
 import org.junit.jupiter.api.Test;
+
+import org.springframework.core.test.tools.CompilationException.Problem;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -24,13 +30,58 @@ import static org.assertj.core.api.Assertions.assertThat;
  * Tests for {@link CompilationException}.
  *
  * @author Phillip Webb
+ * @author Stephane Nicoll
  */
 class CompilationExceptionTests {
 
 	@Test
-	void getMessageReturnsMessage() {
-		CompilationException exception = new CompilationException("message", SourceFiles.none(), ResourceFiles.none());
-		assertThat(exception).hasMessageContaining("message");
+	void exceptionMessageReportsSingleError() {
+		CompilationException exception = new CompilationException(
+				List.of(new Problem(Diagnostic.Kind.ERROR, "error message")),
+				SourceFiles.none(), ResourceFiles.none());
+		assertThat(exception.getMessage().lines()).containsExactly(
+				"Unable to compile source", "", "Errors:", "- error message");
+	}
+
+	@Test
+	void exceptionMessageReportsSingleWarning() {
+		CompilationException exception = new CompilationException(
+				List.of(new Problem(Diagnostic.Kind.MANDATORY_WARNING, "warning message")),
+				SourceFiles.none(), ResourceFiles.none());
+		assertThat(exception.getMessage().lines()).containsExactly(
+				"Unable to compile source", "", "Warnings:", "- warning message");
+	}
+
+	@Test
+	void exceptionMessageReportsProblems() {
+		CompilationException exception = new CompilationException(List.of(
+				new Problem(Diagnostic.Kind.MANDATORY_WARNING, "warning message"),
+				new Problem(Diagnostic.Kind.ERROR, "error message"),
+				new Problem(Diagnostic.Kind.WARNING, "warning message2"),
+				new Problem(Diagnostic.Kind.ERROR, "error message2")), SourceFiles.none(), ResourceFiles.none());
+		assertThat(exception.getMessage().lines()).containsExactly(
+				"Unable to compile source", "", "Errors:", "- error message", "- error message2", "" ,
+				"Warnings:", "- warning message","- warning message2");
+	}
+
+	@Test
+	void exceptionMessageReportsSourceCode() {
+		CompilationException exception = new CompilationException(
+				List.of(new Problem(Diagnostic.Kind.ERROR, "error message")),
+				SourceFiles.of(SourceFile.of("public class Hello {}")), ResourceFiles.none());
+		assertThat(exception.getMessage().lines()).containsExactly(
+				"Unable to compile source", "", "Errors:", "- error message", "",
+				"---- source: Hello.java", "public class Hello {}");
+	}
+
+	@Test
+	void exceptionMessageReportsResource() {
+		CompilationException exception = new CompilationException(
+				List.of(new Problem(Diagnostic.Kind.ERROR, "error message")),
+				SourceFiles.none(), ResourceFiles.of(ResourceFile.of("application.properties", "test=value")));
+		assertThat(exception.getMessage().lines()).containsExactly(
+				"Unable to compile source", "", "Errors:", "- error message", "",
+				"---- resource: application.properties", "test=value");
 	}
 
 }

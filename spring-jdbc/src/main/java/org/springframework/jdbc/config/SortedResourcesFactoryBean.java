@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,8 +18,10 @@ package org.springframework.jdbc.config;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.config.AbstractFactoryBean;
@@ -70,21 +72,33 @@ public class SortedResourcesFactoryBean extends AbstractFactoryBean<Resource[]> 
 
 	@Override
 	protected Resource[] createInstance() throws Exception {
-		List<Resource> scripts = new ArrayList<>();
+		List<Resource> result = new ArrayList<>();
 		for (String location : this.locations) {
-			List<Resource> resources = new ArrayList<>(
-					Arrays.asList(this.resourcePatternResolver.getResources(location)));
-			resources.sort((r1, r2) -> {
+			Resource[] resources = this.resourcePatternResolver.getResources(location);
+
+			// Cache URLs to avoid repeated I/O during sorting
+			Map<Resource, String> urlCache = new LinkedHashMap<>(resources.length);
+			List<Resource> failingResources = new ArrayList<>();
+			for (Resource resource : resources) {
 				try {
-					return r1.getURL().toString().compareTo(r2.getURL().toString());
+					urlCache.put(resource, resource.getURL().toString());
 				}
 				catch (IOException ex) {
-					return 0;
+					if (logger.isDebugEnabled()) {
+						logger.debug("Failed to resolve " + resource + " for sorting purposes: " + ex);
+					}
+					failingResources.add(resource);
 				}
-			});
-			scripts.addAll(resources);
+			}
+
+			// Sort using cached URLs
+			List<Resource> sortedResources = new ArrayList<>(urlCache.keySet());
+			sortedResources.sort(Comparator.comparing(urlCache::get));
+
+			result.addAll(sortedResources);
+			result.addAll(failingResources);
 		}
-		return scripts.toArray(new Resource[0]);
+		return result.toArray(new Resource[0]);
 	}
 
 }

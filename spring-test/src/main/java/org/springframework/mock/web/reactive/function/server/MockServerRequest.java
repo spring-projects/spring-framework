@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,6 +50,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.WebDataBinder;
+import org.springframework.web.reactive.accept.ApiVersionStrategy;
 import org.springframework.web.reactive.function.BodyExtractor;
 import org.springframework.web.reactive.function.server.HandlerStrategies;
 import org.springframework.web.reactive.function.server.ServerRequest;
@@ -94,6 +95,8 @@ public final class MockServerRequest implements ServerRequest {
 
 	private final List<HttpMessageReader<?>> messageReaders;
 
+	private final @Nullable ApiVersionStrategy versionStrategy;
+
 	private final @Nullable ServerWebExchange exchange;
 
 
@@ -102,7 +105,8 @@ public final class MockServerRequest implements ServerRequest {
 			Map<String, Object> attributes, MultiValueMap<String, String> queryParams,
 			Map<String, String> pathVariables, @Nullable WebSession session, @Nullable Principal principal,
 			@Nullable InetSocketAddress remoteAddress, @Nullable InetSocketAddress localAddress,
-			List<HttpMessageReader<?>> messageReaders, @Nullable ServerWebExchange exchange) {
+			List<HttpMessageReader<?>> messageReaders, @Nullable ApiVersionStrategy versionStrategy,
+			@Nullable ServerWebExchange exchange) {
 
 		this.method = method;
 		this.uri = uri;
@@ -118,6 +122,7 @@ public final class MockServerRequest implements ServerRequest {
 		this.remoteAddress = remoteAddress;
 		this.localAddress = localAddress;
 		this.messageReaders = messageReaders;
+		this.versionStrategy = versionStrategy;
 		this.exchange = exchange;
 	}
 
@@ -165,6 +170,11 @@ public final class MockServerRequest implements ServerRequest {
 	@Override
 	public List<HttpMessageReader<?>> messageReaders() {
 		return this.messageReaders;
+	}
+
+	@Override
+	public @Nullable ApiVersionStrategy apiVersionStrategy() {
+		return this.versionStrategy;
 	}
 
 	@Override
@@ -313,6 +323,8 @@ public final class MockServerRequest implements ServerRequest {
 
 		Builder messageReaders(List<HttpMessageReader<?>> messageReaders);
 
+		Builder apiVersionStrategy(@Nullable ApiVersionStrategy versionStrategy);
+
 		Builder exchange(ServerWebExchange exchange);
 
 		MockServerRequest body(Object body);
@@ -350,6 +362,8 @@ public final class MockServerRequest implements ServerRequest {
 		private @Nullable InetSocketAddress localAddress;
 
 		private List<HttpMessageReader<?>> messageReaders = HandlerStrategies.withDefaults().messageReaders();
+
+		private @Nullable ApiVersionStrategy versionStrategy;
 
 		private @Nullable ServerWebExchange exchange;
 
@@ -484,6 +498,12 @@ public final class MockServerRequest implements ServerRequest {
 		}
 
 		@Override
+		public Builder apiVersionStrategy(@Nullable ApiVersionStrategy versionStrategy) {
+			this.versionStrategy = versionStrategy;
+			return this;
+		}
+
+		@Override
 		public Builder exchange(ServerWebExchange exchange) {
 			Assert.notNull(exchange, "'exchange' must not be null");
 			this.exchange = exchange;
@@ -496,7 +516,7 @@ public final class MockServerRequest implements ServerRequest {
 			return new MockServerRequest(this.method, this.uri, this.contextPath, this.headers,
 					this.cookies, this.body, this.attributes, this.queryParams, this.pathVariables,
 					this.session, this.principal, this.remoteAddress, this.localAddress,
-					this.messageReaders, this.exchange);
+					this.messageReaders, this.versionStrategy, this.exchange);
 		}
 
 		@Override
@@ -504,7 +524,7 @@ public final class MockServerRequest implements ServerRequest {
 			return new MockServerRequest(this.method, this.uri, this.contextPath, this.headers,
 					this.cookies, null, this.attributes, this.queryParams, this.pathVariables,
 					this.session, this.principal, this.remoteAddress, this.localAddress,
-					this.messageReaders, this.exchange);
+					this.messageReaders, this.versionStrategy, this.exchange);
 		}
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,7 +44,7 @@ public class ResourceChainRegistration {
 
 	private static final String DEFAULT_CACHE_NAME = "spring-resource-chain-cache";
 
-	private static final boolean webJarsPresent = ClassUtils.isPresent(
+	private static final boolean WEB_JARS_PRESENT = ClassUtils.isPresent(
 			"org.webjars.WebJarVersionLocator", ResourceChainRegistration.class.getClassLoader());
 
 
@@ -113,7 +113,7 @@ public class ResourceChainRegistration {
 	protected List<ResourceResolver> getResourceResolvers() {
 		if (!this.hasPathResolver) {
 			List<ResourceResolver> result = new ArrayList<>(this.resolvers);
-			if (webJarsPresent && !this.hasWebjarsResolver) {
+			if (WEB_JARS_PRESENT && !this.hasWebjarsResolver) {
 				result.add(new LiteWebJarsResourceResolver());
 			}
 			result.add(new PathResourceResolver());

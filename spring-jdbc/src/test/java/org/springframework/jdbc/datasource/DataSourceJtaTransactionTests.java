@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -90,15 +90,16 @@ class DataSourceJtaTransactionTests {
 
 
 	@Test
-	void testJtaTransactionCommit() throws Exception {
+	void jtaTransactionCommit() throws Exception {
 		doTestJtaTransaction(false);
 	}
 
 	@Test
-	void testJtaTransactionRollback() throws Exception {
+	void jtaTransactionRollback() throws Exception {
 		doTestJtaTransaction(true);
 	}
 
+	@SuppressWarnings("deprecation")
 	private void doTestJtaTransaction(final boolean rollback) throws Exception {
 		if (rollback) {
 			given(userTransaction.getStatus()).willReturn(
@@ -145,55 +146,56 @@ class DataSourceJtaTransactionTests {
 	}
 
 	@Test
-	void testJtaTransactionCommitWithPropagationRequiresNew() throws Exception {
+	void jtaTransactionCommitWithPropagationRequiresNew() throws Exception {
 		doTestJtaTransactionWithPropagationRequiresNew(false, false, false, false);
 	}
 
 	@Test
-	void testJtaTransactionCommitWithPropagationRequiresNewWithAccessAfterResume() throws Exception {
+	void jtaTransactionCommitWithPropagationRequiresNewWithAccessAfterResume() throws Exception {
 		doTestJtaTransactionWithPropagationRequiresNew(false, false, true, false);
 	}
 
 	@Test
-	void testJtaTransactionCommitWithPropagationRequiresNewWithOpenOuterConnection() throws Exception {
+	void jtaTransactionCommitWithPropagationRequiresNewWithOpenOuterConnection() throws Exception {
 		doTestJtaTransactionWithPropagationRequiresNew(false, true, false, false);
 	}
 
 	@Test
-	void testJtaTransactionCommitWithPropagationRequiresNewWithOpenOuterConnectionAccessed() throws Exception {
+	void jtaTransactionCommitWithPropagationRequiresNewWithOpenOuterConnectionAccessed() throws Exception {
 		doTestJtaTransactionWithPropagationRequiresNew(false, true, true, false);
 	}
 
 	@Test
-	void testJtaTransactionCommitWithPropagationRequiresNewWithTransactionAwareDataSource() throws Exception {
+	void jtaTransactionCommitWithPropagationRequiresNewWithTransactionAwareDataSource() throws Exception {
 		doTestJtaTransactionWithPropagationRequiresNew(false, false, true, true);
 	}
 
 	@Test
-	void testJtaTransactionRollbackWithPropagationRequiresNew() throws Exception {
+	void jtaTransactionRollbackWithPropagationRequiresNew() throws Exception {
 		doTestJtaTransactionWithPropagationRequiresNew(true, false, false, false);
 	}
 
 	@Test
-	void testJtaTransactionRollbackWithPropagationRequiresNewWithAccessAfterResume() throws Exception {
+	void jtaTransactionRollbackWithPropagationRequiresNewWithAccessAfterResume() throws Exception {
 		doTestJtaTransactionWithPropagationRequiresNew(true, false, true, false);
 	}
 
 	@Test
-	void testJtaTransactionRollbackWithPropagationRequiresNewWithOpenOuterConnection() throws Exception {
+	void jtaTransactionRollbackWithPropagationRequiresNewWithOpenOuterConnection() throws Exception {
 		doTestJtaTransactionWithPropagationRequiresNew(true, true, false, false);
 	}
 
 	@Test
-	void testJtaTransactionRollbackWithPropagationRequiresNewWithOpenOuterConnectionAccessed() throws Exception {
+	void jtaTransactionRollbackWithPropagationRequiresNewWithOpenOuterConnectionAccessed() throws Exception {
 		doTestJtaTransactionWithPropagationRequiresNew(true, true, true, false);
 	}
 
 	@Test
-	void testJtaTransactionRollbackWithPropagationRequiresNewWithTransactionAwareDataSource() throws Exception {
+	void jtaTransactionRollbackWithPropagationRequiresNewWithTransactionAwareDataSource() throws Exception {
 		doTestJtaTransactionWithPropagationRequiresNew(true, false, true, true);
 	}
 
+	@SuppressWarnings("deprecation")
 	private void doTestJtaTransactionWithPropagationRequiresNew(
 			final boolean rollback, final boolean openOuterConnection, final boolean accessAfterResume,
 			final boolean useTransactionAwareDataSource) throws Exception {
@@ -316,25 +318,26 @@ class DataSourceJtaTransactionTests {
 	}
 
 	@Test
-	void testJtaTransactionCommitWithPropagationRequiredWithinSupports() throws Exception {
+	void jtaTransactionCommitWithPropagationRequiredWithinSupports() throws Exception {
 		doTestJtaTransactionCommitWithNewTransactionWithinEmptyTransaction(false, false);
 	}
 
 	@Test
-	void testJtaTransactionCommitWithPropagationRequiredWithinNotSupported() throws Exception {
+	void jtaTransactionCommitWithPropagationRequiredWithinNotSupported() throws Exception {
 		doTestJtaTransactionCommitWithNewTransactionWithinEmptyTransaction(false, true);
 	}
 
 	@Test
-	void testJtaTransactionCommitWithPropagationRequiresNewWithinSupports() throws Exception {
+	void jtaTransactionCommitWithPropagationRequiresNewWithinSupports() throws Exception {
 		doTestJtaTransactionCommitWithNewTransactionWithinEmptyTransaction(true, false);
 	}
 
 	@Test
-	void testJtaTransactionCommitWithPropagationRequiresNewWithinNotSupported() throws Exception {
+	void jtaTransactionCommitWithPropagationRequiresNewWithinNotSupported() throws Exception {
 		doTestJtaTransactionCommitWithNewTransactionWithinEmptyTransaction(true, true);
 	}
 
+	@SuppressWarnings("deprecation")
 	private void doTestJtaTransactionCommitWithNewTransactionWithinEmptyTransaction(
 			final boolean requiresNew, boolean notSupported) throws Exception {
 
@@ -405,45 +408,46 @@ class DataSourceJtaTransactionTests {
 	}
 
 	@Test
-	void testJtaTransactionCommitWithPropagationRequiresNewAndSuspendException() throws Exception {
+	void jtaTransactionCommitWithPropagationRequiresNewAndSuspendException() throws Exception {
 		doTestJtaTransactionWithPropagationRequiresNewAndBeginException(true, false, false);
 	}
 
 	@Test
-	void testJtaTransactionCommitWithPropagationRequiresNewWithOpenOuterConnectionAndSuspendException() throws Exception {
+	void jtaTransactionCommitWithPropagationRequiresNewWithOpenOuterConnectionAndSuspendException() throws Exception {
 		doTestJtaTransactionWithPropagationRequiresNewAndBeginException(true, true, false);
 	}
 
 	@Test
-	void testJtaTransactionCommitWithPropagationRequiresNewWithTransactionAwareDataSourceAndSuspendException() throws Exception {
+	void jtaTransactionCommitWithPropagationRequiresNewWithTransactionAwareDataSourceAndSuspendException() throws Exception {
 		doTestJtaTransactionWithPropagationRequiresNewAndBeginException(true, false, true);
 	}
 
 	@Test
-	void testJtaTransactionCommitWithPropagationRequiresNewWithOpenOuterConnectionAndTransactionAwareDataSourceAndSuspendException() throws Exception {
+	void jtaTransactionCommitWithPropagationRequiresNewWithOpenOuterConnectionAndTransactionAwareDataSourceAndSuspendException() throws Exception {
 		doTestJtaTransactionWithPropagationRequiresNewAndBeginException(true, true, true);
 	}
 
 	@Test
-	void testJtaTransactionCommitWithPropagationRequiresNewAndBeginException() throws Exception {
+	void jtaTransactionCommitWithPropagationRequiresNewAndBeginException() throws Exception {
 		doTestJtaTransactionWithPropagationRequiresNewAndBeginException(false, false, false);
 	}
 
 	@Test
-	void testJtaTransactionCommitWithPropagationRequiresNewWithOpenOuterConnectionAndBeginException() throws Exception {
+	void jtaTransactionCommitWithPropagationRequiresNewWithOpenOuterConnectionAndBeginException() throws Exception {
 		doTestJtaTransactionWithPropagationRequiresNewAndBeginException(false, true, false);
 	}
 
 	@Test
-	void testJtaTransactionCommitWithPropagationRequiresNewWithOpenOuterConnectionAndTransactionAwareDataSourceAndBeginException() throws Exception {
+	void jtaTransactionCommitWithPropagationRequiresNewWithOpenOuterConnectionAndTransactionAwareDataSourceAndBeginException() throws Exception {
 		doTestJtaTransactionWithPropagationRequiresNewAndBeginException(false, true, true);
 	}
 
 	@Test
-	void testJtaTransactionCommitWithPropagationRequiresNewWithTransactionAwareDataSourceAndBeginException() throws Exception {
+	void jtaTransactionCommitWithPropagationRequiresNewWithTransactionAwareDataSourceAndBeginException() throws Exception {
 		doTestJtaTransactionWithPropagationRequiresNewAndBeginException(false, false, true);
 	}
 
+	@SuppressWarnings("deprecation")
 	private void doTestJtaTransactionWithPropagationRequiresNewAndBeginException(boolean suspendException,
 			final boolean openOuterConnection, final boolean useTransactionAwareDataSource) throws Exception {
 
@@ -544,8 +548,9 @@ class DataSourceJtaTransactionTests {
 		}
 	}
 
+	@SuppressWarnings("deprecation")
 	@Test
-	void testJtaTransactionWithConnectionHolderStillBound() throws Exception {
+	void jtaTransactionWithConnectionHolderStillBound() throws Exception {
 		@SuppressWarnings("serial")
 		JtaTransactionManager ptm = new JtaTransactionManager(userTransaction) {
 
@@ -601,8 +606,9 @@ class DataSourceJtaTransactionTests {
 		verify(connection, times(3)).close();
 	}
 
+	@SuppressWarnings("deprecation")
 	@Test
-	void testJtaTransactionWithIsolationLevelDataSourceAdapter() throws Exception {
+	void jtaTransactionWithIsolationLevelDataSourceAdapter() throws Exception {
 		given(userTransaction.getStatus()).willReturn(
 				Status.STATUS_NO_TRANSACTION,
 				Status.STATUS_ACTIVE,
@@ -649,15 +655,16 @@ class DataSourceJtaTransactionTests {
 	}
 
 	@Test
-	void testJtaTransactionWithIsolationLevelDataSourceRouter() throws Exception {
+	void jtaTransactionWithIsolationLevelDataSourceRouter() throws Exception {
 		doTestJtaTransactionWithIsolationLevelDataSourceRouter(false);
 	}
 
 	@Test
-	void testJtaTransactionWithIsolationLevelDataSourceRouterWithDataSourceLookup() throws Exception {
+	void jtaTransactionWithIsolationLevelDataSourceRouterWithDataSourceLookup() throws Exception {
 		doTestJtaTransactionWithIsolationLevelDataSourceRouter(true);
 	}
 
+	@SuppressWarnings("deprecation")
 	private void doTestJtaTransactionWithIsolationLevelDataSourceRouter(boolean dataSourceLookup) throws Exception {
 		given(userTransaction.getStatus())
 			.willReturn(Status.STATUS_NO_TRANSACTION, Status.STATUS_ACTIVE, Status.STATUS_ACTIVE, Status.STATUS_NO_TRANSACTION, Status.STATUS_ACTIVE, Status.STATUS_ACTIVE);
@@ -717,4 +724,5 @@ class DataSourceJtaTransactionTests {
 		verify(connection1).close();
 		verify(connection2).close();
 	}
+
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,8 @@
  */
 
 package org.springframework.core;
+
+import org.jspecify.annotations.Nullable;
 
 /**
  * Default implementation of the {@link ParameterNameDiscoverer} strategy interface,
@@ -35,13 +37,39 @@ package org.springframework.core;
  */
 public class DefaultParameterNameDiscoverer extends PrioritizedParameterNameDiscoverer {
 
+	private static final boolean KOTLIN_REFLECT_PRESENT = KotlinDetector.isKotlinReflectPresent();
+
+	private static volatile @Nullable DefaultParameterNameDiscoverer sharedInstance;
+
+
 	public DefaultParameterNameDiscoverer() {
-		if (KotlinDetector.isKotlinReflectPresent()) {
+		if (KOTLIN_REFLECT_PRESENT) {
 			addDiscoverer(new KotlinReflectionParameterNameDiscoverer());
 		}
 
 		// Recommended approach on Java 8+: compilation with -parameters.
 		addDiscoverer(new StandardReflectionParameterNameDiscoverer());
+	}
+
+
+	/**
+	 * Return a shared default {@code ParameterNameDiscoverer} instance,
+	 * lazily building it once needed.
+	 * @return the shared {@code ParameterNameDiscoverer} instance
+	 * @since 7.0.3
+	 */
+	public static ParameterNameDiscoverer getSharedInstance() {
+		DefaultParameterNameDiscoverer pnd = sharedInstance;
+		if (pnd == null) {
+			synchronized (DefaultParameterNameDiscoverer.class) {
+				pnd = sharedInstance;
+				if (pnd == null) {
+					pnd = new DefaultParameterNameDiscoverer();
+					sharedInstance = pnd;
+				}
+			}
+		}
+		return pnd;
 	}
 
 }

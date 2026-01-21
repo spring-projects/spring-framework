@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -115,7 +115,7 @@ public class CronTrigger implements Trigger {
 	public @Nullable Instant nextExecution(TriggerContext triggerContext) {
 		Instant timestamp = determineLatestTimestamp(triggerContext);
 		ZoneId zone = (this.zoneId != null ? this.zoneId : triggerContext.getClock().getZone());
-		ZonedDateTime zonedTimestamp = ZonedDateTime.ofInstant(timestamp, zone);
+		ZonedDateTime zonedTimestamp = timestamp.atZone(zone);
 		ZonedDateTime nextTimestamp = this.expression.next(zonedTimestamp);
 		return (nextTimestamp != null ? nextTimestamp.toInstant() : null);
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import org.gradle.api.attributes.Usage;
 import org.gradle.api.attributes.java.TargetJvmVersion;
 import org.gradle.api.plugins.JavaPlugin;
 import org.gradle.api.plugins.jvm.JvmTestSuite;
+import org.gradle.api.tasks.TaskProvider;
 import org.gradle.api.tasks.testing.Test;
 import org.gradle.testing.base.TestingExtension;
 
@@ -52,7 +53,7 @@ public class RuntimeHintsAgentPlugin implements Plugin<Project> {
 			TestingExtension testing = project.getExtensions().getByType(TestingExtension.class);
 			JvmTestSuite jvmTestSuite = (JvmTestSuite) testing.getSuites().getByName("test");
 			RuntimeHintsAgentExtension agentExtension = createRuntimeHintsAgentExtension(project);
-			Test agentTest = project.getTasks().create(RUNTIMEHINTS_TEST_TASK, Test.class, test -> {
+			TaskProvider<Test> agentTest = project.getTasks().register(RUNTIMEHINTS_TEST_TASK, Test.class, test -> {
 				test.useJUnitPlatform(options -> {
 					options.includeTags("RuntimeHintsTests");
 				});
@@ -63,7 +64,7 @@ public class RuntimeHintsAgentPlugin implements Plugin<Project> {
 				test.setClasspath(jvmTestSuite.getSources().getRuntimeClasspath());
 				test.getJvmArgumentProviders().add(createRuntimeHintsAgentArgumentProvider(project, agentExtension));
 			});
-			project.getTasks().getByName("check", task -> task.dependsOn(agentTest));
+			project.getTasks().named("check", task -> task.dependsOn(agentTest));
 			project.getDependencies().add(CONFIGURATION_NAME, project.project(":spring-core-test"));
 		});
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -217,10 +217,10 @@ class ReflectionHintsTests {
 				typeHint -> typeHint.withMembers(MemberCategory.INTROSPECT_PUBLIC_METHODS));
 		assertThat(this.reflectionHints.typeHints()).hasSize(2)
 				.noneMatch(typeHint -> typeHint.getType().getCanonicalName().equals(Serializable.class.getCanonicalName()))
-				.anyMatch(typeHint -> typeHint.getType().getCanonicalName().equals(SecondInterface.class.getCanonicalName())
-						&& typeHint.getMemberCategories().contains(MemberCategory.INTROSPECT_PUBLIC_METHODS))
-				.anyMatch(typeHint -> typeHint.getType().getCanonicalName().equals(FirstInterface.class.getCanonicalName())
-						&& typeHint.getMemberCategories().contains(MemberCategory.INTROSPECT_PUBLIC_METHODS));
+				.anyMatch(typeHint -> typeHint.getType().getCanonicalName().equals(SecondInterface.class.getCanonicalName()) &&
+						typeHint.getMemberCategories().contains(MemberCategory.INTROSPECT_PUBLIC_METHODS))
+				.anyMatch(typeHint -> typeHint.getType().getCanonicalName().equals(FirstInterface.class.getCanonicalName()) &&
+						typeHint.getMemberCategories().contains(MemberCategory.INTROSPECT_PUBLIC_METHODS));
 	}
 
 	private void assertTestTypeMethodHints(Consumer<ExecutableHint> methodHint) {

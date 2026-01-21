@@ -676,7 +676,7 @@ provides `firstName` and `lastName` properties, such as the `Actor` class from a
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
 	this.jdbcClient.sql("insert into t_actor (first_name, last_name) values (:firstName, :lastName)")
-			.paramSource(new Actor("Leonor", "Watling")
+			.paramSource(new Actor("Leonor", "Watling"))
 			.update();
 ----
 
@@ -1081,6 +1081,3 @@ Kotlin::
 	// keyHolder.getKey() now contains the generated key
 ----
 ======
-
-
-

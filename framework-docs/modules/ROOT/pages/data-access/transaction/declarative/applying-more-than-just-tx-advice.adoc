@@ -218,5 +218,3 @@ aspect bean's `order` property so that it is higher than the transactional advic
 order value.
 
 You can configure additional aspects in similar fashion.
-
-

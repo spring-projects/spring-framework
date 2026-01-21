@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -65,7 +65,7 @@ import org.springframework.web.context.request.WebRequest;
  */
 public abstract class WebApplicationContextUtils {
 
-	private static final boolean jsfPresent =
+	private static final boolean JSF_PRESENT =
 			ClassUtils.isPresent("jakarta.faces.context.FacesContext", RequestContextHolder.class.getClassLoader());
 
 
@@ -193,7 +193,7 @@ public abstract class WebApplicationContextUtils {
 		beanFactory.registerResolvableDependency(ServletResponse.class, new ResponseObjectFactory());
 		beanFactory.registerResolvableDependency(HttpSession.class, new SessionObjectFactory());
 		beanFactory.registerResolvableDependency(WebRequest.class, new WebRequestObjectFactory());
-		if (jsfPresent) {
+		if (JSF_PRESENT) {
 			FacesDependencyRegistrar.registerFacesDependencies(beanFactory);
 		}
 	}

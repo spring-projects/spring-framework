@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,18 +30,18 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jspecify.annotations.Nullable;
 
+import org.springframework.aot.AotDetector;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.beans.factory.config.EmbeddedValueResolver;
 import org.springframework.cglib.core.SpringNamingPolicy;
 import org.springframework.cglib.proxy.Callback;
 import org.springframework.cglib.proxy.Enhancer;
 import org.springframework.cglib.proxy.Factory;
 import org.springframework.cglib.proxy.MethodInterceptor;
 import org.springframework.cglib.proxy.MethodProxy;
-import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.MethodIntrospector;
 import org.springframework.core.MethodParameter;
-import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.annotation.AnnotatedMethod;
 import org.springframework.objenesis.ObjenesisException;
@@ -53,7 +53,6 @@ import org.springframework.util.PathMatcher;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.ReflectionUtils.MethodFilter;
 import org.springframework.util.StringUtils;
-import org.springframework.util.SystemPropertyUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.request.RequestAttributes;
@@ -84,13 +83,12 @@ import org.springframework.web.util.pattern.PathPatternParser;
  * {@link #relativeTo(org.springframework.web.util.UriComponentsBuilder)}.
  * </ul>
  *
- * <p><strong>Note:</strong> This class uses values from "Forwarded"
- * (<a href="https://tools.ietf.org/html/rfc7239">RFC 7239</a>),
- * "X-Forwarded-Host", "X-Forwarded-Port", and "X-Forwarded-Proto" headers,
- * if present, in order to reflect the client-originated protocol and address.
- * Consider using the {@code ForwardedHeaderFilter} in order to choose from a
- * central place whether to extract and use, or to discard such headers.
- * See the Spring Framework reference for more on this filter.
+ * <p><strong>Note:</strong> As of 5.1, methods in this class do not extract
+ * {@code "Forwarded"} and {@code "X-Forwarded-*"} headers that specify the
+ * client-originated address. Please, use
+ * {@link org.springframework.web.filter.ForwardedHeaderFilter
+ * ForwardedHeaderFilter}, or similar from the underlying server, to extract
+ * and use such headers, or to discard them.
  *
  * @author Oliver Gierke
  * @author Rossen Stoyanchev
@@ -111,8 +109,6 @@ public class MvcUriComponentsBuilder {
 	private static final SpringObjenesis objenesis = new SpringObjenesis();
 
 	private static final PathMatcher pathMatcher = new AntPathMatcher();
-
-	private static final ParameterNameDiscoverer parameterNameDiscoverer = new DefaultParameterNameDiscoverer();
 
 	private static final CompositeUriComponentsContributor defaultUriComponentsContributor;
 
@@ -140,7 +136,7 @@ public class MvcUriComponentsBuilder {
 
 	/**
 	 * Create an instance of this class with a base URL. After that calls to one
-	 * of the instance based {@code withXxx(...}} methods will create URLs relative
+	 * of the instance based {@code withXxx(...)} methods will create URLs relative
 	 * to the given base URL.
 	 */
 	public static MvcUriComponentsBuilder relativeTo(UriComponentsBuilder baseUrl) {
@@ -152,8 +148,6 @@ public class MvcUriComponentsBuilder {
 	 * Create a {@link UriComponentsBuilder} from the mapping of a controller class
 	 * and current request information including Servlet mapping. If the controller
 	 * contains multiple mappings, only the first one is used.
-	 * <p><strong>Note:</strong> This method extracts values from "Forwarded"
-	 * and "X-Forwarded-*" headers if found. See class-level docs.
 	 * @param controllerType the controller to build a URI for
 	 * @return a UriComponentsBuilder instance (never {@code null})
 	 */
@@ -166,8 +160,6 @@ public class MvcUriComponentsBuilder {
 	 * {@code UriComponentsBuilder} representing the base URL. This is useful
 	 * when using MvcUriComponentsBuilder outside the context of processing a
 	 * request or to apply a custom baseUrl not matching the current request.
-	 * <p><strong>Note:</strong> This method extracts values from "Forwarded"
-	 * and "X-Forwarded-*" headers if found. See class-level docs.
 	 * @param builder the builder for the base URL; the builder will be cloned
 	 * and therefore not modified and may be re-used for further calls.
 	 * @param controllerType the controller to build a URI for
@@ -193,8 +185,6 @@ public class MvcUriComponentsBuilder {
 	 * Create a {@link UriComponentsBuilder} from the mapping of a controller
 	 * method and an array of method argument values. This method delegates
 	 * to {@link #fromMethod(Class, Method, Object...)}.
-	 * <p><strong>Note:</strong> This method extracts values from "Forwarded"
-	 * and "X-Forwarded-*" headers if found. See class-level docs.
 	 * @param controllerType the controller
 	 * @param methodName the method name
 	 * @param args the argument values
@@ -214,8 +204,6 @@ public class MvcUriComponentsBuilder {
 	 * accepts a {@code UriComponentsBuilder} representing the base URL. This is
 	 * useful when using MvcUriComponentsBuilder outside the context of processing
 	 * a request or to apply a custom baseUrl not matching the current request.
-	 * <p><strong>Note:</strong> This method extracts values from "Forwarded"
-	 * and "X-Forwarded-*" headers if found. See class-level docs.
 	 * @param builder the builder for the base URL; the builder will be cloned
 	 * and therefore not modified and may be re-used for further calls.
 	 * @param controllerType the controller
@@ -240,8 +228,6 @@ public class MvcUriComponentsBuilder {
 	 * {@link org.springframework.web.method.support.UriComponentsContributor
 	 * UriComponentsContributor}) while remaining argument values are ignored and
 	 * can be {@code null}.
-	 * <p><strong>Note:</strong> This method extracts values from "Forwarded"
-	 * and "X-Forwarded-*" headers if found. See class-level docs.
 	 * @param controllerType the controller type
 	 * @param method the controller method
 	 * @param args argument values for the controller method
@@ -258,8 +244,6 @@ public class MvcUriComponentsBuilder {
 	 * This is useful when using MvcUriComponentsBuilder outside the context of
 	 * processing a request or to apply a custom baseUrl not matching the
 	 * current request.
-	 * <p><strong>Note:</strong> This method extracts values from "Forwarded"
-	 * and "X-Forwarded-*" headers if found. See class-level docs.
 	 * @param baseUrl the builder for the base URL; the builder will be cloned
 	 * and therefore not modified and may be re-used for further calls.
 	 * @param controllerType the controller type
@@ -306,8 +290,6 @@ public class MvcUriComponentsBuilder {
 	 * controller.getAddressesForCountry("US")
 	 * builder = MvcUriComponentsBuilder.fromMethodCall(controller);
 	 * </pre>
-	 * <p><strong>Note:</strong> This method extracts values from "Forwarded"
-	 * and "X-Forwarded-*" headers if found. See class-level docs.
 	 * @param info either the value returned from a "mock" controller
 	 * invocation or the "mock" controller itself after an invocation
 	 * @return a UriComponents instance
@@ -328,8 +310,6 @@ public class MvcUriComponentsBuilder {
 	 * {@code UriComponentsBuilder} representing the base URL. This is useful
 	 * when using MvcUriComponentsBuilder outside the context of processing a
 	 * request or to apply a custom baseUrl not matching the current request.
-	 * <p><strong>Note:</strong> This method extracts values from "Forwarded"
-	 * and "X-Forwarded-*" headers if found. See class-level docs.
 	 * @param builder the builder for the base URL; the builder will be cloned
 	 * and therefore not modified and may be re-used for further calls.
 	 * @param info either the value returned from a "mock" controller
@@ -355,8 +335,6 @@ public class MvcUriComponentsBuilder {
 	 * <pre class="code">
 	 * MvcUriComponentsBuilder.fromMethodCall(on(FooController.class).getFoo(1)).build();
 	 * </pre>
-	 * <p><strong>Note:</strong> This method extracts values from "Forwarded"
-	 * and "X-Forwarded-*" headers if found. See class-level docs.
 	 * @param controllerType the target controller
 	 */
 	public static <T> T on(Class<T> controllerType) {
@@ -379,8 +357,6 @@ public class MvcUriComponentsBuilder {
 	 * fooController.saveFoo(2, null);
 	 * builder = MvcUriComponentsBuilder.fromMethodCall(fooController);
 	 * </pre>
-	 * <p><strong>Note:</strong> This method extracts values from "Forwarded"
-	 * and "X-Forwarded-*" headers if found. See class-level docs.
 	 * @param controllerType the target controller
 	 */
 	public static <T> T controller(Class<T> controllerType) {
@@ -423,9 +399,6 @@ public class MvcUriComponentsBuilder {
 	 * </pre>
 	 * <p>Note that it's not necessary to specify all arguments. Only the ones
 	 * required to prepare the URL, mainly {@code @RequestParam} and {@code @PathVariable}).
-	 *
-	 * <p><strong>Note:</strong> This method extracts values from "Forwarded"
-	 * and "X-Forwarded-*" headers if found. See class-level docs.
 	 * @param mappingName the mapping name
 	 * @return a builder to prepare the URI String
 	 * @throws IllegalArgumentException if the mapping name is not found or
@@ -441,8 +414,6 @@ public class MvcUriComponentsBuilder {
 	 * {@code UriComponentsBuilder} representing the base URL. This is useful
 	 * when using MvcUriComponentsBuilder outside the context of processing a
 	 * request or to apply a custom baseUrl not matching the current request.
-	 * <p><strong>Note:</strong> This method extracts values from "Forwarded"
-	 * and "X-Forwarded-*" headers if found. See class-level docs.
 	 * @param builder the builder for the base URL; the builder will be cloned
 	 * and therefore not modified and may be re-used for further calls.
 	 * @param name the mapping name
@@ -482,8 +453,6 @@ public class MvcUriComponentsBuilder {
 	/**
 	 * An alternative to {@link #fromController(Class)} for use with an instance
 	 * of this class created via a call to {@link #relativeTo}.
-	 * <p><strong>Note:</strong> This method extracts values from "Forwarded"
-	 * and "X-Forwarded-*" headers if found. See class-level docs.
 	 * @since 4.2
 	 */
 	public UriComponentsBuilder withController(Class<?> controllerType) {
@@ -491,10 +460,8 @@ public class MvcUriComponentsBuilder {
 	}
 
 	/**
-	 * An alternative to {@link #fromMethodName(Class, String, Object...)}} for
+	 * An alternative to {@link #fromMethodName(Class, String, Object...)} for
 	 * use with an instance of this class created via {@link #relativeTo}.
-	 * <p><strong>Note:</strong> This method extracts values from "Forwarded"
-	 * and "X-Forwarded-*" headers if found. See class-level docs.
 	 * @since 4.2
 	 */
 	public UriComponentsBuilder withMethodName(Class<?> controllerType, String methodName, Object... args) {
@@ -504,8 +471,6 @@ public class MvcUriComponentsBuilder {
 	/**
 	 * An alternative to {@link #fromMethodCall(Object)} for use with an instance
 	 * of this class created via {@link #relativeTo}.
-	 * <p><strong>Note:</strong> This method extracts values from "Forwarded"
-	 * and "X-Forwarded-*" headers if found. See class-level docs.
 	 * @since 4.2
 	 */
 	public UriComponentsBuilder withMethodCall(Object invocationInfo) {
@@ -515,8 +480,6 @@ public class MvcUriComponentsBuilder {
 	/**
 	 * An alternative to {@link #fromMappingName(String)} for use with an instance
 	 * of this class created via {@link #relativeTo}.
-	 * <p><strong>Note:</strong> This method extracts values from "Forwarded"
-	 * and "X-Forwarded-*" headers if found. See class-level docs.
 	 * @since 4.2
 	 */
 	public MethodArgumentBuilder withMappingName(String mappingName) {
@@ -526,8 +489,6 @@ public class MvcUriComponentsBuilder {
 	/**
 	 * An alternative to {@link #fromMethod(Class, Method, Object...)}
 	 * for use with an instance of this class created via {@link #relativeTo}.
-	 * <p><strong>Note:</strong> This method extracts values from "Forwarded"
-	 * and "X-Forwarded-*" headers if found. See class-level docs.
 	 * @since 4.2
 	 */
 	public UriComponentsBuilder withMethod(Class<?> controllerType, Method method, Object... args) {
@@ -643,7 +604,6 @@ public class MvcUriComponentsBuilder {
 		final Map<String, Object> uriVars = new HashMap<>();
 		for (int i = 0; i < paramCount; i++) {
 			MethodParameter param = annotatedMethod.getMethodParameters()[i];
-			param.initParameterNameDiscovery(parameterNameDiscoverer);
 			contributor.contributeMethodArgument(param, args[i], builder, uriVars);
 		}
 
@@ -657,25 +617,36 @@ public class MvcUriComponentsBuilder {
 			try {
 				return wac.getBean(MVC_URI_COMPONENTS_CONTRIBUTOR_BEAN_NAME, CompositeUriComponentsContributor.class);
 			}
-			catch (NoSuchBeanDefinitionException ex) {
-				// Ignore
+			catch (NoSuchBeanDefinitionException ignored) {
 			}
 		}
 		return defaultUriComponentsContributor;
 	}
 
 	private static String resolveEmbeddedValue(String value) {
-		if (value.contains(SystemPropertyUtils.PLACEHOLDER_PREFIX)) {
-			WebApplicationContext webApplicationContext = getWebApplicationContext();
-			if (webApplicationContext != null
-					&& webApplicationContext.getAutowireCapableBeanFactory() instanceof ConfigurableBeanFactory cbf) {
-				String resolvedEmbeddedValue = cbf.resolveEmbeddedValue(value);
-				if (resolvedEmbeddedValue != null) {
-					return resolvedEmbeddedValue;
+		if (hasPlaceholderOrExpression(value)) {
+			WebApplicationContext wac = getWebApplicationContext();
+			if (wac != null && wac.getAutowireCapableBeanFactory() instanceof ConfigurableBeanFactory cbf) {
+				EmbeddedValueResolver valueResolver = new EmbeddedValueResolver(cbf);
+				String resolvedValue = valueResolver.resolveStringValue(value);
+				if (resolvedValue != null) {
+					return resolvedValue;
 				}
 			}
 		}
 		return value;
+	}
+
+	private static boolean hasPlaceholderOrExpression(String value) {
+		char prev = 0;
+		for (int i = 0; i < value.length(); i++) {
+			char c = value.charAt(i);
+			if (c == '{' && (prev == '$' || prev == '#')) {
+				return true;
+			}
+			prev = c;
+		}
+		return false;
 	}
 
 	private static @Nullable WebApplicationContext getWebApplicationContext() {
@@ -824,7 +795,7 @@ public class MvcUriComponentsBuilder {
 				enhancer.setSuperclass(controllerType);
 				enhancer.setInterfaces(new Class<?>[] {MethodInvocationInfo.class});
 				enhancer.setNamingPolicy(SpringNamingPolicy.INSTANCE);
-				enhancer.setAttemptLoad(true);
+				enhancer.setAttemptLoad(AotDetector.useGeneratedArtifacts());
 				enhancer.setCallbackType(MethodInterceptor.class);
 
 				Class<?> proxyClass = enhancer.createClass();

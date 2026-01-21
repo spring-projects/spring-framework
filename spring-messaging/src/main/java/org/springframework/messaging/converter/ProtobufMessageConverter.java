@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -67,7 +67,7 @@ public class ProtobufMessageConverter extends AbstractMessageConverter {
 	 */
 	public static final MimeType PROTOBUF = new MimeType("application", "x-protobuf", DEFAULT_CHARSET);
 
-	private static final boolean protobufJsonFormatPresent =
+	private static final boolean PROTOBUF_JSON_FORMAT_PRESENT =
 			ClassUtils.isPresent("com.google.protobuf.util.JsonFormat", ProtobufMessageConverter.class.getClassLoader());
 
 	private static final Map<Class<?>, Method> methodCache = new ConcurrentReferenceHashMap<>();
@@ -100,7 +100,7 @@ public class ProtobufMessageConverter extends AbstractMessageConverter {
 		if (formatSupport != null) {
 			this.protobufFormatSupport = formatSupport;
 		}
-		else if (protobufJsonFormatPresent) {
+		else if (PROTOBUF_JSON_FORMAT_PRESENT) {
 			this.protobufFormatSupport = new ProtobufJavaUtilSupport(null, null);
 		}
 		else {

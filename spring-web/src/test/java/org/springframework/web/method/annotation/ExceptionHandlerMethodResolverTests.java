@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.BindException;
 import java.net.SocketException;
+import java.util.Set;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -100,14 +101,21 @@ class ExceptionHandlerMethodResolverTests {
 
 	@Test
 	void shouldThrowExceptionWhenAmbiguousExceptionMapping() {
-		assertThatIllegalStateException().isThrownBy(() ->
-				new ExceptionHandlerMethodResolver(AmbiguousController.class));
+		assertThatIllegalStateException()
+				.isThrownBy(() -> new ExceptionHandlerMethodResolver(AmbiguousController.class));
 	}
 
 	@Test
 	void shouldThrowExceptionWhenNoExceptionMapping() {
-		assertThatIllegalStateException().isThrownBy(() ->
-				new ExceptionHandlerMethodResolver(NoExceptionController.class));
+		assertThatIllegalStateException()
+				.isThrownBy(() -> new ExceptionHandlerMethodResolver(NoExceptionController.class));
+	}
+
+	@Test  // gh-35587
+	void shouldRetainOriginalOrderOfProducibleMediaTypes() {
+		ExceptionHandlerMethodResolver resolver = new ExceptionHandlerMethodResolver(MediaTypeController.class);
+		Set<MediaType> producibleTypes = resolver.resolveExceptionMapping(new IllegalArgumentException(), MediaType.TEXT_HTML).getProducibleTypes();
+		assertThat(MediaType.toString(producibleTypes)).isEqualTo("text/html, */*");
 	}
 
 	@Test
@@ -131,15 +139,15 @@ class ExceptionHandlerMethodResolverTests {
 
 	@Test
 	void shouldThrowExceptionWhenInvalidMediaTypeMapping() {
-		assertThatIllegalStateException().isThrownBy(() ->
-				new ExceptionHandlerMethodResolver(InvalidMediaTypeController.class))
+		assertThatIllegalStateException()
+				.isThrownBy(() -> new ExceptionHandlerMethodResolver(InvalidMediaTypeController.class))
 				.withMessageContaining("Invalid media type [invalid-mediatype] declared on @ExceptionHandler");
 	}
 
 	@Test
 	void shouldThrowExceptionWhenAmbiguousMediaTypeMapping() {
-		assertThatIllegalStateException().isThrownBy(() ->
-				new ExceptionHandlerMethodResolver(AmbiguousMediaTypeController.class))
+		assertThatIllegalStateException()
+				.isThrownBy(() -> new ExceptionHandlerMethodResolver(AmbiguousMediaTypeController.class))
 				.withMessageContaining("Ambiguous @ExceptionHandler method mapped for [ExceptionHandler{exceptionType=java.lang.IllegalArgumentException, mediaType=application/json}]")
 				.withMessageContaining("AmbiguousMediaTypeController.handleJson()")
 				.withMessageContaining("AmbiguousMediaTypeController.handleJsonToo()");
@@ -208,14 +216,12 @@ class ExceptionHandlerMethodResolverTests {
 	@Controller
 	static class MediaTypeController {
 
-		@ExceptionHandler(exception = {IllegalArgumentException.class}, produces = "application/json")
+		@ExceptionHandler(exception = IllegalArgumentException.class, produces = "application/json")
 		public void handleJson() {
-
 		}
 
-		@ExceptionHandler(exception = {IllegalArgumentException.class}, produces = {"text/html", "*/*"})
+		@ExceptionHandler(exception = IllegalArgumentException.class, produces = {"text/html", "*/*"})
 		public void handleHtml() {
-
 		}
 
 	}
@@ -223,14 +229,12 @@ class ExceptionHandlerMethodResolverTests {
 	@Controller
 	static class AmbiguousMediaTypeController {
 
-		@ExceptionHandler(exception = {IllegalArgumentException.class}, produces = "application/json")
+		@ExceptionHandler(exception = IllegalArgumentException.class, produces = "application/json")
 		public void handleJson() {
-
 		}
 
-		@ExceptionHandler(exception = {IllegalArgumentException.class}, produces = "application/json")
+		@ExceptionHandler(exception = IllegalArgumentException.class, produces = "application/json")
 		public void handleJsonToo() {
-
 		}
 
 	}
@@ -238,14 +242,12 @@ class ExceptionHandlerMethodResolverTests {
 	@Controller
 	static class MixedController {
 
-		@ExceptionHandler(exception = {IllegalArgumentException.class}, produces = "application/json")
+		@ExceptionHandler(exception = IllegalArgumentException.class, produces = "application/json")
 		public void handleJson() {
-
 		}
 
 		@ExceptionHandler(IllegalArgumentException.class)
 		public void handleOther() {
-
 		}
 
 	}
@@ -253,9 +255,8 @@ class ExceptionHandlerMethodResolverTests {
 	@Controller
 	static class InvalidMediaTypeController {
 
-		@ExceptionHandler(exception = {IllegalArgumentException.class}, produces = "invalid-mediatype")
+		@ExceptionHandler(exception = IllegalArgumentException.class, produces = "invalid-mediatype")
 		public void handle() {
-
 		}
 	}
 

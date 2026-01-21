@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -87,7 +87,7 @@ public abstract class ResponseEntityExceptionHandler implements MessageSourceAwa
 
 
 	/**
-	 * Handle all exceptions raised within Spring MVC handling of the request.
+	 * Handle all exceptions raised within Spring WebFlux handling of the request.
 	 * @param ex the exception to handle
 	 * @param exchange the current request-response
 	 */

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,14 +16,7 @@
 
 package org.springframework.http.client.reactive;
 
-import java.net.HttpCookie;
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import org.eclipse.jetty.http.HttpField;
 import org.eclipse.jetty.reactive.client.ReactiveResponse;
-import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Flux;
 
 import org.springframework.core.io.buffer.DataBuffer;
@@ -31,8 +24,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.support.JettyHeadersAdapter;
-import org.springframework.util.CollectionUtils;
-import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
 /**
@@ -45,41 +36,16 @@ import org.springframework.util.MultiValueMap;
  */
 class JettyClientHttpResponse extends AbstractClientHttpResponse {
 
-	private static final Pattern SAME_SITE_PATTERN = Pattern.compile("(?i).*SameSite=(Strict|Lax|None).*");
+	public JettyClientHttpResponse(
+			ReactiveResponse response, Flux<DataBuffer> content,
+			MultiValueMap<String, ResponseCookie> cookies) {
 
-
-	public JettyClientHttpResponse(ReactiveResponse reactiveResponse, Flux<DataBuffer> content) {
-
-		super(HttpStatusCode.valueOf(reactiveResponse.getStatus()),
-				adaptHeaders(reactiveResponse),
-				adaptCookies(reactiveResponse),
-				content);
+		super(HttpStatusCode.valueOf(response.getStatus()), adaptHeaders(response), cookies, content);
 	}
 
 	private static HttpHeaders adaptHeaders(ReactiveResponse response) {
 		MultiValueMap<String, String> headers = new JettyHeadersAdapter(response.getHeaders());
 		return HttpHeaders.readOnlyHttpHeaders(headers);
-	}
-	private static MultiValueMap<String, ResponseCookie> adaptCookies(ReactiveResponse response) {
-		MultiValueMap<String, ResponseCookie> result = new LinkedMultiValueMap<>();
-		List<HttpField> cookieHeaders = response.getHeaders().getFields(HttpHeaders.SET_COOKIE);
-		cookieHeaders.forEach(header ->
-					HttpCookie.parse(header.getValue()).forEach(cookie -> result.add(cookie.getName(),
-							ResponseCookie.fromClientResponse(cookie.getName(), cookie.getValue())
-									.domain(cookie.getDomain())
-									.path(cookie.getPath())
-									.maxAge(cookie.getMaxAge())
-									.secure(cookie.getSecure())
-									.httpOnly(cookie.isHttpOnly())
-									.sameSite(parseSameSite(header.getValue()))
-									.build()))
-			);
-		return CollectionUtils.unmodifiableMultiValueMap(result);
-	}
-
-	private static @Nullable String parseSameSite(String headerValue) {
-		Matcher matcher = SAME_SITE_PATTERN.matcher(headerValue);
-		return (matcher.matches() ? matcher.group(1) : null);
 	}
 
 }

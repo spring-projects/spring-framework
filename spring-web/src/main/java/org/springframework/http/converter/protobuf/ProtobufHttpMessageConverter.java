@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,7 @@
 package org.springframework.http.converter.protobuf;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.lang.reflect.Method;
 import java.nio.charset.Charset;
@@ -41,7 +39,6 @@ import org.springframework.http.converter.AbstractHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConversionException;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
-import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ConcurrentReferenceHashMap;
 
@@ -55,17 +52,18 @@ import static org.springframework.http.MediaType.TEXT_PLAIN;
  *
  * <p>To generate {@code Message} Java classes, you need to install the {@code protoc} binary.
  *
- * <p>This converter supports by default {@code "application/x-protobuf"} and {@code "text/plain"}
- * with the official {@code "com.google.protobuf:protobuf-java"} library.
+ * <p>This converter supports by default {@code "application/x-protobuf"}, {@code "application/*+x-protobuf"}
+ * and {@code "text/plain"} with the official {@code "com.google.protobuf:protobuf-java"} library.
  * The {@code "application/json"} format is also supported with the {@code "com.google.protobuf:protobuf-java-util"}
  * dependency. See {@link ProtobufJsonFormatHttpMessageConverter} for a configurable variant.
  *
- * <p>This converter requires Protobuf 3 or higher as of Spring Framework 6.1.
+ * <p>This converter requires Protobuf 3 or higher.
  *
  * @author Alex Antonov
  * @author Brian Clozel
  * @author Juergen Hoeller
  * @author Sebastien Deleuze
+ * @author Kamil Doroszkiewicz
  * @since 4.1
  * @see JsonFormat
  * @see ProtobufJsonFormatHttpMessageConverter
@@ -83,6 +81,11 @@ public class ProtobufHttpMessageConverter extends AbstractHttpMessageConverter<M
 	public static final MediaType PROTOBUF = new MediaType("application", "x-protobuf", DEFAULT_CHARSET);
 
 	/**
+	 * The media-type for protobuf {@code application/*+x-protobuf}.
+	 */
+	public static final MediaType PLUS_PROTOBUF = new MediaType("application", "*+x-protobuf", DEFAULT_CHARSET);
+
+	/**
 	 * The HTTP header containing the protobuf schema.
 	 */
 	public static final String X_PROTOBUF_SCHEMA_HEADER = "X-Protobuf-Schema";
@@ -92,14 +95,15 @@ public class ProtobufHttpMessageConverter extends AbstractHttpMessageConverter<M
 	 */
 	public static final String X_PROTOBUF_MESSAGE_HEADER = "X-Protobuf-Message";
 
-	private static final boolean protobufJsonFormatPresent = ClassUtils.isPresent("com.google.protobuf.util.JsonFormat", ProtobufHttpMessageConverter.class.getClassLoader());
+	private static final boolean PROTOBUF_JSON_FORMAT_PRESENT =
+			ClassUtils.isPresent("com.google.protobuf.util.JsonFormat", ProtobufHttpMessageConverter.class.getClassLoader());
 
 	private static final Map<Class<?>, Method> methodCache = new ConcurrentReferenceHashMap<>();
 
 
 	final ExtensionRegistry extensionRegistry;
 
-	private final @Nullable ProtobufFormatSupport protobufFormatSupport;
+	private final ProtobufHttpMessageConverter.@Nullable ProtobufFormatDelegate protobufFormatDelegate;
 
 
 	/**
@@ -118,21 +122,27 @@ public class ProtobufHttpMessageConverter extends AbstractHttpMessageConverter<M
 		this(null, extensionRegistry);
 	}
 
-	ProtobufHttpMessageConverter(@Nullable ProtobufFormatSupport formatSupport,
+	/**
+	 * Constructor for a subclass that supports additional formats.
+	 * @param formatDelegate delegate to read and write additional formats
+	 * @param extensionRegistry the registry to populate
+	 */
+	protected ProtobufHttpMessageConverter(
+			ProtobufHttpMessageConverter.@Nullable ProtobufFormatDelegate formatDelegate,
 			@Nullable ExtensionRegistry extensionRegistry) {
 
-		if (formatSupport != null) {
-			this.protobufFormatSupport = formatSupport;
+		if (formatDelegate != null) {
+			this.protobufFormatDelegate = formatDelegate;
 		}
-		else if (protobufJsonFormatPresent) {
-			this.protobufFormatSupport = new ProtobufJavaUtilSupport(null, null);
+		else if (PROTOBUF_JSON_FORMAT_PRESENT) {
+			this.protobufFormatDelegate = new ProtobufJavaUtilDelegate(null, null);
 		}
 		else {
-			this.protobufFormatSupport = null;
+			this.protobufFormatDelegate = null;
 		}
 
-		setSupportedMediaTypes(Arrays.asList(this.protobufFormatSupport != null ?
-				this.protobufFormatSupport.supportedMediaTypes() : new MediaType[] {PROTOBUF, TEXT_PLAIN}));
+		setSupportedMediaTypes(Arrays.asList(this.protobufFormatDelegate != null ?
+				this.protobufFormatDelegate.supportedMediaTypes() : new MediaType[] {PROTOBUF, PLUS_PROTOBUF, TEXT_PLAIN}));
 
 		this.extensionRegistry = (extensionRegistry == null ? ExtensionRegistry.newInstance() : extensionRegistry);
 	}
@@ -162,16 +172,17 @@ public class ProtobufHttpMessageConverter extends AbstractHttpMessageConverter<M
 		}
 
 		Message.Builder builder = getMessageBuilder(clazz);
-		if (PROTOBUF.isCompatibleWith(contentType)) {
+		if (PROTOBUF.isCompatibleWith(contentType) ||
+				PLUS_PROTOBUF.isCompatibleWith(contentType)) {
 			builder.mergeFrom(inputMessage.getBody(), this.extensionRegistry);
 		}
-		else if (TEXT_PLAIN.isCompatibleWith(contentType)) {
+		else if (MediaType.TEXT_PLAIN.isCompatibleWith(contentType)) {
 			InputStreamReader reader = new InputStreamReader(inputMessage.getBody(), charset);
 			TextFormat.merge(reader, this.extensionRegistry, builder);
 		}
-		else if (this.protobufFormatSupport != null) {
-			this.protobufFormatSupport.merge(
-					inputMessage.getBody(), charset, contentType, this.extensionRegistry, builder);
+		else if (this.protobufFormatDelegate != null) {
+			this.protobufFormatDelegate.merge(
+					inputMessage, contentType, charset, builder, this.extensionRegistry);
 		}
 		return builder.build();
 	}
@@ -199,7 +210,7 @@ public class ProtobufHttpMessageConverter extends AbstractHttpMessageConverter<M
 	@Override
 	protected boolean canWrite(@Nullable MediaType mediaType) {
 		return (super.canWrite(mediaType) ||
-				(this.protobufFormatSupport != null && this.protobufFormatSupport.supportsWriteOnly(mediaType)));
+				(this.protobufFormatDelegate != null && this.protobufFormatDelegate.supportsWriteOnly(mediaType)));
 	}
 
 	@Override
@@ -209,14 +220,14 @@ public class ProtobufHttpMessageConverter extends AbstractHttpMessageConverter<M
 		MediaType contentType = outputMessage.getHeaders().getContentType();
 		if (contentType == null) {
 			contentType = getDefaultContentType(message);
-			Assert.state(contentType != null, "No content type");
 		}
 		Charset charset = contentType.getCharset();
 		if (charset == null) {
 			charset = DEFAULT_CHARSET;
 		}
 
-		if (PROTOBUF.isCompatibleWith(contentType)) {
+		if (PROTOBUF.isCompatibleWith(contentType) ||
+				PLUS_PROTOBUF.isCompatibleWith(contentType)) {
 			setProtoHeader(outputMessage, message);
 			CodedOutputStream codedOutputStream = CodedOutputStream.newInstance(outputMessage.getBody());
 			message.writeTo(codedOutputStream);
@@ -228,8 +239,8 @@ public class ProtobufHttpMessageConverter extends AbstractHttpMessageConverter<M
 			outputStreamWriter.flush();
 			outputMessage.getBody().flush();
 		}
-		else if (this.protobufFormatSupport != null) {
-			this.protobufFormatSupport.print(message, outputMessage.getBody(), contentType, charset);
+		else if (this.protobufFormatDelegate != null) {
+			this.protobufFormatDelegate.print(message, outputMessage, contentType, charset);
 			outputMessage.getBody().flush();
 		}
 	}
@@ -250,42 +261,60 @@ public class ProtobufHttpMessageConverter extends AbstractHttpMessageConverter<M
 		return true;
 	}
 
-	/**
-	 * Protobuf format support.
-	 */
-	interface ProtobufFormatSupport {
 
+	/**
+	 * Contract to enable subclasses to plug in support for additional formats.
+	 */
+	protected interface ProtobufFormatDelegate {
+
+		/**
+		 * Return the supported media types for the converter.
+		 * <p>Note that {@link #PROTOBUF}, {@link #PLUS_PROTOBUF}, and {@link MediaType#TEXT_PLAIN}
+		 * have built-in support and can be listed in addition to formats
+		 * specific to this delegate.
+		 */
 		MediaType[] supportedMediaTypes();
 
+		/**
+		 * Whether the media type is supported for writing.
+		 */
 		boolean supportsWriteOnly(@Nullable MediaType mediaType);
 
-		void merge(InputStream input, Charset charset, MediaType contentType,
-				ExtensionRegistry extensionRegistry, Message.Builder builder)
+		/**
+		 * Use merge methods on {@link Message.Builder} to read a message from
+		 * the given {@code HttpInputMessage}.
+		 */
+		void merge(HttpInputMessage inputMessage, MediaType contentType, Charset charset,
+				Message.Builder builder, ExtensionRegistry extensionRegistry)
 				throws IOException, HttpMessageConversionException;
 
-		void print(Message message, OutputStream output, MediaType contentType, Charset charset)
+		/**
+		 * Use print methods on {@link Message.Builder} to write the message to
+		 * the given {@code HttpOutputMessage}.
+		 */
+		void print(Message message, HttpOutputMessage outputMessage, MediaType contentType, Charset charset)
 				throws IOException, HttpMessageConversionException;
 	}
 
 
 	/**
-	 * {@link ProtobufFormatSupport} implementation used when
+	 * {@link ProtobufFormatDelegate} implementation used when
 	 * {@code com.google.protobuf.util.JsonFormat} is available.
 	 */
-	static class ProtobufJavaUtilSupport implements ProtobufFormatSupport {
+	static class ProtobufJavaUtilDelegate implements ProtobufFormatDelegate {
 
 		private final JsonFormat.Parser parser;
 
 		private final JsonFormat.Printer printer;
 
-		public ProtobufJavaUtilSupport(JsonFormat.@Nullable Parser parser, JsonFormat.@Nullable Printer printer) {
+		public ProtobufJavaUtilDelegate(JsonFormat.@Nullable Parser parser, JsonFormat.@Nullable Printer printer) {
 			this.parser = (parser != null ? parser : JsonFormat.parser());
 			this.printer = (printer != null ? printer : JsonFormat.printer());
 		}
 
 		@Override
 		public MediaType[] supportedMediaTypes() {
-			return new MediaType[] {PROTOBUF, TEXT_PLAIN, APPLICATION_JSON};
+			return new MediaType[] {PROTOBUF, PLUS_PROTOBUF, TEXT_PLAIN, APPLICATION_JSON};
 		}
 
 		@Override
@@ -294,12 +323,12 @@ public class ProtobufHttpMessageConverter extends AbstractHttpMessageConverter<M
 		}
 
 		@Override
-		public void merge(InputStream input, Charset charset, MediaType contentType,
-				ExtensionRegistry extensionRegistry, Message.Builder builder)
+		public void merge(HttpInputMessage inputMessage, MediaType contentType, Charset charset,
+				Message.Builder builder, ExtensionRegistry extensionRegistry)
 				throws IOException, HttpMessageConversionException {
 
 			if (contentType.isCompatibleWith(APPLICATION_JSON)) {
-				InputStreamReader reader = new InputStreamReader(input, charset);
+				InputStreamReader reader = new InputStreamReader(inputMessage.getBody(), charset);
 				this.parser.merge(reader, builder);
 			}
 			else {
@@ -309,11 +338,11 @@ public class ProtobufHttpMessageConverter extends AbstractHttpMessageConverter<M
 		}
 
 		@Override
-		public void print(Message message, OutputStream output, MediaType contentType, Charset charset)
+		public void print(Message message, HttpOutputMessage outputMessage, MediaType contentType, Charset charset)
 				throws IOException, HttpMessageConversionException {
 
 			if (contentType.isCompatibleWith(APPLICATION_JSON)) {
-				OutputStreamWriter writer = new OutputStreamWriter(output, charset);
+				OutputStreamWriter writer = new OutputStreamWriter(outputMessage.getBody(), charset);
 				this.printer.appendTo(message, writer);
 				writer.flush();
 			}

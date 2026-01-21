@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,8 +57,8 @@ abstract class CoWebFilter : WebFilter {
 
 		/**
 		 * Name of the [ServerWebExchange] attribute that contains the
-		 * [kotlin.coroutines.CoroutineContext] to be passed to the
-		 * [org.springframework.web.reactive.result.method.InvocableHandlerMethod].
+		 * [kotlin.coroutines.CoroutineContext] to be passed to
+		 * `org.springframework.web.reactive.result.method.InvocableHandlerMethod`.
 		 */
 		@JvmField
 		val COROUTINE_CONTEXT_ATTRIBUTE = CoWebFilter::class.java.getName() + ".context"

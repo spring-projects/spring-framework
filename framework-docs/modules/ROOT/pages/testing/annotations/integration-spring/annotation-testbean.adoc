@@ -1,8 +1,9 @@
 [[spring-testing-annotation-beanoverriding-testbean]]
 = `@TestBean`
 
-`@TestBean` is used on a non-static field in a test class to override a specific bean in
-the test's `ApplicationContext` with an instance provided by a factory method.
+{spring-framework-api}/test/context/bean/override/convention/TestBean.html[`@TestBean`]
+is used on a non-static field in a test class to override a specific bean in the test's
+`ApplicationContext` with an instance provided by a factory method.
 
 The associated factory method name is derived from the annotated field's name, or the
 bean name if specified. The factory method must be `static`, accept no arguments, and
@@ -28,6 +29,19 @@ Qualifiers, including the name of the field, are used to determine if a separate
 `ApplicationContext` needs to be created. If you are using this feature to override the
 same bean in several tests, make sure to name the field consistently to avoid creating
 unnecessary contexts.
+====
+
+[WARNING]
+====
+Using `@TestBean` in conjunction with `@ContextHierarchy` can lead to undesirable results
+since each `@TestBean` will be applied to all context hierarchy levels by default. To
+ensure that a particular `@TestBean` is applied to a single context hierarchy level, set
+the `contextName` attribute to match a configured `@ContextConfiguration` name – for
+example, `@TestBean(contextName = "app-config")`.
+
+See
+xref:testing/testcontext-framework/ctx-management/hierarchies.adoc#testcontext-ctx-management-ctx-hierarchies-with-bean-overrides[context
+hierarchies with bean overrides] for further details and examples.
 ====
 
 [NOTE]
@@ -102,12 +116,15 @@ fully-qualified method name following the syntax `<fully-qualified class name>#<
 – for example, `methodName = "org.example.TestUtils#createCustomService"`.
 ====
 
-[TIP]
+[NOTE]
 ====
-Only _singleton_ beans can be overridden. Any attempt to override a non-singleton bean
-will result in an exception.
+When overriding a non-singleton bean, the non-singleton bean will be replaced with a
+singleton bean corresponding to the value returned from the `@TestBean` factory method,
+and the corresponding bean definition will be converted to a `singleton`. Consequently,
+if `@TestBean` is used to override a `prototype` or scoped bean, the overridden bean will
+be treated as a `singleton`.
 
-When overriding a bean created by a `FactoryBean`, the `FactoryBean` will be replaced
-with a singleton bean corresponding to the value returned from the `@TestBean` factory
-method.
+Similarly, when overriding a bean created by a `FactoryBean`, the `FactoryBean` will be
+replaced with a singleton bean corresponding to the value returned from the `@TestBean`
+factory method.
 ====

@@ -20,91 +20,15 @@ are effectively inherited and can be overridden (that is, re-declared) in the Se
 child `WebApplicationContext`, which typically contains beans local to the given `Servlet`.
 The following image shows this relationship:
 
-image::mvc-context-hierarchy.png[]
+image::mvc-context-hierarchy.png[width=60%,align="center"]
 
-The following example configures a `WebApplicationContext` hierarchy:
+The following example configures a `WebApplicationContext` hierarchy, and the equivalent `web.xml`:
 
-[tabs]
-======
-Java::
-+
-[source,java,indent=0,subs="verbatim,quotes"]
-----
-	public class MyWebAppInitializer extends AbstractAnnotationConfigDispatcherServletInitializer {
-
-		@Override
-		protected Class<?>[] getRootConfigClasses() {
-			return new Class<?>[] { RootConfig.class };
-		}
-
-		@Override
-		protected Class<?>[] getServletConfigClasses() {
-			return new Class<?>[] { App1Config.class };
-		}
-
-		@Override
-		protected String[] getServletMappings() {
-			return new String[] { "/app1/*" };
-		}
-	}
-----
-
-Kotlin::
-+
-[source,kotlin,indent=0,subs="verbatim,quotes"]
-----
-	class MyWebAppInitializer : AbstractAnnotationConfigDispatcherServletInitializer() {
-
-		override fun getRootConfigClasses(): Array<Class<*>> {
-			return arrayOf(RootConfig::class.java)
-		}
-
-		override fun getServletConfigClasses(): Array<Class<*>> {
-			return arrayOf(App1Config::class.java)
-		}
-
-		override fun getServletMappings(): Array<String> {
-			return arrayOf("/app1/*")
-		}
-	}
-----
-======
+include-code::./MyWebAppInitializer[tag=snippet,indent=0]
 
 TIP: If an application context hierarchy is not required, applications can return all
 configuration through `getRootConfigClasses()` and `null` from `getServletConfigClasses()`.
 
-The following example shows the `web.xml` equivalent:
-
-[source,xml,indent=0,subs="verbatim,quotes"]
-----
-<web-app>
-
-	<listener>
-		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
-	</listener>
-
-	<context-param>
-		<param-name>contextConfigLocation</param-name>
-		<param-value>/WEB-INF/root-context.xml</param-value>
-	</context-param>
-
-	<servlet>
-		<servlet-name>app1</servlet-name>
-		<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
-		<init-param>
-			<param-name>contextConfigLocation</param-name>
-			<param-value>/WEB-INF/app1-context.xml</param-value>
-		</init-param>
-		<load-on-startup>1</load-on-startup>
-	</servlet>
-
-	<servlet-mapping>
-		<servlet-name>app1</servlet-name>
-		<url-pattern>/app1/*</url-pattern>
-	</servlet-mapping>
-
-</web-app>
-----
 
 TIP: If an application context hierarchy is not required, applications may configure a
 "`root`" context only and leave the `contextConfigLocation` Servlet parameter empty.

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -127,7 +127,7 @@ public class ScheduledAnnotationBeanPostProcessor
 	/**
 	 * Reactive Streams API present on the classpath?
 	 */
-	private static final boolean reactiveStreamsPresent = ClassUtils.isPresent(
+	private static final boolean REACTIVE_STREAMS_PRESENT = ClassUtils.isPresent(
 			"org.reactivestreams.Publisher", ScheduledAnnotationBeanPostProcessor.class.getClassLoader());
 
 	protected final Log logger = LogFactory.getLog(getClass());
@@ -330,7 +330,7 @@ public class ScheduledAnnotationBeanPostProcessor
 	protected void processScheduled(Scheduled scheduled, Method method, Object bean) {
 		// Is the method a Kotlin suspending function? Throws if true and the reactor bridge isn't on the classpath.
 		// Does the method return a reactive type? Throws if true and it isn't a deferred Publisher type.
-		if (reactiveStreamsPresent && ScheduledAnnotationReactiveSupport.isReactive(method)) {
+		if (REACTIVE_STREAMS_PRESENT && ScheduledAnnotationReactiveSupport.isReactive(method)) {
 			processScheduledAsync(scheduled, method, bean);
 			return;
 		}
@@ -377,7 +377,7 @@ public class ScheduledAnnotationBeanPostProcessor
 		try {
 			task = ScheduledAnnotationReactiveSupport.createSubscriptionRunnable(method, bean, scheduled,
 					this.registrar::getObservationRegistry,
-					this.reactiveSubscriptions.computeIfAbsent(bean, k -> new CopyOnWriteArrayList<>()));
+					this.reactiveSubscriptions.computeIfAbsent(bean, key -> new CopyOnWriteArrayList<>()));
 		}
 		catch (IllegalArgumentException ex) {
 			throw new IllegalStateException("Could not create recurring task for @Scheduled method '" +
@@ -552,21 +552,6 @@ public class ScheduledAnnotationBeanPostProcessor
 		return null;
 	}
 
-	private static Duration toDuration(long value, TimeUnit timeUnit) {
-		try {
-			return Duration.of(value, timeUnit.toChronoUnit());
-		}
-		catch (Exception ex) {
-			throw new IllegalArgumentException(
-					"Unsupported unit " + timeUnit + " for value \"" + value + "\": " + ex.getMessage());
-		}
-	}
-
-	private static Duration toDuration(String value, TimeUnit timeUnit) {
-		DurationFormat.Unit unit = DurationFormat.Unit.fromChronoUnit(timeUnit.toChronoUnit());
-		return DurationFormatterUtils.detectAndParse(value, unit); // interpreting as long as fallback already
-	}
-
 	/**
 	 * Return all currently scheduled tasks, from {@link Scheduled} methods
 	 * as well as from programmatic {@link SchedulingConfigurer} interaction.
@@ -667,6 +652,16 @@ public class ScheduledAnnotationBeanPostProcessor
 				this.manualCancellationOnContextClose.clear();
 			}
 		}
+	}
+
+
+	private static Duration toDuration(long value, TimeUnit timeUnit) {
+		return Duration.of(value, timeUnit.toChronoUnit());
+	}
+
+	private static Duration toDuration(String value, TimeUnit timeUnit) {
+		DurationFormat.Unit unit = DurationFormat.Unit.fromChronoUnit(timeUnit.toChronoUnit());
+		return DurationFormatterUtils.detectAndParse(value, unit);
 	}
 
 }

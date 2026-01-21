@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,7 @@
 package org.springframework.test.http;
 
 import java.time.Instant;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
+import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.Collection;
@@ -41,9 +40,6 @@ import org.springframework.http.HttpHeaders;
  * @since 6.2
  */
 public class HttpHeadersAssert extends AbstractObjectAssert<HttpHeadersAssert, HttpHeaders> {
-
-	private static final ZoneId GMT = ZoneId.of("GMT");
-
 
 	private final AbstractCollectionAssert<?, Collection<? extends String>, String, ObjectAssert<String>> namesAssert;
 
@@ -173,7 +169,7 @@ public class HttpHeadersAssert extends AbstractObjectAssert<HttpHeadersAssert, H
 		containsHeader(name);
 		Assertions.assertThat(this.actual.getFirstZonedDateTime(name))
 				.as("check primary date value for HTTP header '%s'", name)
-				.isCloseTo(ZonedDateTime.ofInstant(value, GMT), Assertions.within(999, ChronoUnit.MILLIS));
+				.isCloseTo(value.atZone(ZoneOffset.UTC), Assertions.within(999, ChronoUnit.MILLIS));
 		return this.myself;
 	}
 

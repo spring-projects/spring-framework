@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,7 @@ import org.springframework.messaging.converter.ByteArrayMessageConverter;
 import org.springframework.messaging.converter.CompositeMessageConverter;
 import org.springframework.messaging.converter.DefaultContentTypeResolver;
 import org.springframework.messaging.converter.GsonMessageConverter;
+import org.springframework.messaging.converter.JacksonJsonMessageConverter;
 import org.springframework.messaging.converter.JsonbMessageConverter;
 import org.springframework.messaging.converter.KotlinSerializationJsonMessageConverter;
 import org.springframework.messaging.converter.MappingJackson2MessageConverter;
@@ -103,22 +104,25 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 
 	private static final String MVC_VALIDATOR_NAME = "mvcValidator";
 
-	private static final boolean jackson2Present;
+	private static final boolean JACKSON_PRESENT;
 
-	private static final boolean gsonPresent;
+	private static final boolean JACKSON_2_PRESENT;
 
-	private static final boolean jsonbPresent;
+	private static final boolean GSON_PRESENT;
 
-	private static final boolean kotlinSerializationJsonPresent;
+	private static final boolean JSONB_PRESENT;
+
+	private static final boolean KOTLIN_SERIALIZATION_JSON_PRESENT;
 
 
 	static {
 		ClassLoader classLoader = AbstractMessageBrokerConfiguration.class.getClassLoader();
-		jackson2Present = ClassUtils.isPresent("com.fasterxml.jackson.databind.ObjectMapper", classLoader) &&
+		JACKSON_PRESENT = ClassUtils.isPresent("tools.jackson.databind.ObjectMapper", classLoader);
+		JACKSON_2_PRESENT = ClassUtils.isPresent("com.fasterxml.jackson.databind.ObjectMapper", classLoader) &&
 				ClassUtils.isPresent("com.fasterxml.jackson.core.JsonGenerator", classLoader);
-		gsonPresent = ClassUtils.isPresent("com.google.gson.Gson", classLoader);
-		jsonbPresent = ClassUtils.isPresent("jakarta.json.bind.Jsonb", classLoader);
-		kotlinSerializationJsonPresent = ClassUtils.isPresent("kotlinx.serialization.json.Json", classLoader);
+		GSON_PRESENT = ClassUtils.isPresent("com.google.gson.Gson", classLoader);
+		JSONB_PRESENT = ClassUtils.isPresent("jakarta.json.bind.Jsonb", classLoader);
+		KOTLIN_SERIALIZATION_JSON_PRESENT = ClassUtils.isPresent("kotlinx.serialization.json.Json", classLoader);
 	}
 
 
@@ -498,22 +502,40 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 		if (registerDefaults) {
 			converters.add(new StringMessageConverter());
 			converters.add(new ByteArrayMessageConverter());
-			if (kotlinSerializationJsonPresent) {
+			if (KOTLIN_SERIALIZATION_JSON_PRESENT) {
 				converters.add(new KotlinSerializationJsonMessageConverter());
 			}
-			if (jackson2Present) {
+			if (JACKSON_PRESENT) {
+				converters.add(createJacksonJsonConverter());
+			}
+			else if (JACKSON_2_PRESENT) {
 				converters.add(createJacksonConverter());
 			}
-			else if (gsonPresent) {
+			else if (GSON_PRESENT) {
 				converters.add(new GsonMessageConverter());
 			}
-			else if (jsonbPresent) {
+			else if (JSONB_PRESENT) {
 				converters.add(new JsonbMessageConverter());
 			}
 		}
 		return new CompositeMessageConverter(converters);
 	}
 
+	/**
+	 * Allow to customize Jackson 3.x JSON converter.
+	 */
+	protected JacksonJsonMessageConverter createJacksonJsonConverter() {
+		DefaultContentTypeResolver resolver = new DefaultContentTypeResolver();
+		resolver.setDefaultMimeType(MimeTypeUtils.APPLICATION_JSON);
+		JacksonJsonMessageConverter converter = new JacksonJsonMessageConverter();
+		converter.setContentTypeResolver(resolver);
+		return converter;
+	}
+
+	/**
+	 * Allow to customize Jackson 2.x JSON converter.
+	 */
+	@SuppressWarnings("removal")
 	protected MappingJackson2MessageConverter createJacksonConverter() {
 		DefaultContentTypeResolver resolver = new DefaultContentTypeResolver();
 		resolver.setDefaultMimeType(MimeTypeUtils.APPLICATION_JSON);

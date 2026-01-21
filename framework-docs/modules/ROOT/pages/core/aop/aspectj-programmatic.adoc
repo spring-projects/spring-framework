@@ -53,7 +53,3 @@ Kotlin::
 ======
 
 See the {spring-framework-api}/aop/aspectj/annotation/AspectJProxyFactory.html[javadoc] for more information.
-
-
-
-

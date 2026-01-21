@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -242,7 +242,8 @@ public class BeanMethodPolymorphismTests {
 	@Configuration
 	static class OverridingConfig extends BaseConfig {
 
-		@Bean @Lazy
+		@Bean
+		@Lazy
 		@Override
 		public BaseTestBean testBean() {
 			return new BaseTestBean() {
@@ -258,7 +259,8 @@ public class BeanMethodPolymorphismTests {
 	@Configuration
 	static class OverridingConfigWithDifferentBeanName extends BaseConfig {
 
-		@Bean("myTestBean") @Lazy
+		@Bean("myTestBean")
+		@Lazy
 		@Override
 		public BaseTestBean testBean() {
 			return new BaseTestBean() {
@@ -274,7 +276,8 @@ public class BeanMethodPolymorphismTests {
 	@Configuration
 	static class NarrowedOverridingConfig extends BaseConfig {
 
-		@Bean @Lazy
+		@Bean
+		@Lazy
 		@Override
 		public ExtendedTestBean testBean() {
 			return new ExtendedTestBean() {
@@ -287,6 +290,7 @@ public class BeanMethodPolymorphismTests {
 	}
 
 
+	@SuppressWarnings("deprecation")
 	@Configuration(enforceUniqueMethods = false)
 	static class ConfigWithOverloading {
 
@@ -302,15 +306,18 @@ public class BeanMethodPolymorphismTests {
 	}
 
 
+	@SuppressWarnings("deprecation")
 	@Configuration(enforceUniqueMethods = false)
 	static class ConfigWithOverloadingAndAdditionalMetadata {
 
-		@Bean @Lazy
+		@Bean
+		@Lazy
 		String aString() {
 			return "regular";
 		}
 
-		@Bean @Lazy
+		@Bean
+		@Lazy
 		String aString(Integer dependency) {
 			return "overloaded" + dependency;
 		}
@@ -335,7 +342,8 @@ public class BeanMethodPolymorphismTests {
 			return 5;
 		}
 
-		@Bean @Lazy
+		@Bean
+		@Lazy
 		String aString(Integer dependency) {
 			return "overloaded" + dependency;
 		}
@@ -350,7 +358,8 @@ public class BeanMethodPolymorphismTests {
 			return 5;
 		}
 
-		@Bean @Lazy
+		@Bean
+		@Lazy
 		String aString(List<Integer> dependency) {
 			return "overloaded" + dependency.get(0);
 		}

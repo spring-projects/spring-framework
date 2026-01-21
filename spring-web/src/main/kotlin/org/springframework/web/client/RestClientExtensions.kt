@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,17 +18,23 @@ package org.springframework.web.client
 
 import org.springframework.core.ParameterizedTypeReference
 import org.springframework.http.ResponseEntity
+import kotlin.reflect.KType
+import kotlin.reflect.jvm.jvmName
+import kotlin.reflect.typeOf
 
 /**
  * Extension for [RestClient.RequestBodySpec.body] providing a `bodyWithType<Foo>(...)` variant
  * leveraging Kotlin reified type parameters. This extension is not subject to type
  * erasure and retains actual generic type arguments.
  *
+ * It also provides a [KType] hint for [org.springframework.http.converter.SmartHttpMessageConverter]s
+ * supporting them.
+ *
  * @author Sebastien Deleuze
  * @since 6.1
  */
 inline fun <reified T : Any> RestClient.RequestBodySpec.bodyWithType(body: T): RestClient.RequestBodySpec =
-	body(body, object : ParameterizedTypeReference<T>() {})
+	hint(KType::class.jvmName, typeOf<T>()).body(body, object : ParameterizedTypeReference<T>() {})
 
 
 /**
@@ -36,28 +42,39 @@ inline fun <reified T : Any> RestClient.RequestBodySpec.bodyWithType(body: T): R
  * leveraging Kotlin reified type parameters. This extension is not subject to type
  * erasure and retains actual generic type arguments.
  *
+ * It also provides a [KType] hint for [org.springframework.http.converter.SmartHttpMessageConverter]s
+ * supporting them.
+ *
  * @author Sebastien Deleuze
  * @since 6.1
  */
 inline fun <reified T : Any> RestClient.ResponseSpec.body(): T? =
-	body(object : ParameterizedTypeReference<T>() {})
+	hint(KType::class.jvmName, typeOf<T>()).body(object : ParameterizedTypeReference<T>() {})
 
 /**
  * Extension for [RestClient.ResponseSpec.body] providing a `requiredBody<Foo>()` variant with a non-nullable
  * return value.
+ *
+ * It also provides a [KType] hint for [org.springframework.http.converter.SmartHttpMessageConverter]s
+ * supporting them.
+ *
  * @throws NoSuchElementException if there is no response body
  * @since 6.2
  */
 inline fun <reified T : Any> RestClient.ResponseSpec.requiredBody(): T =
-    body(object : ParameterizedTypeReference<T>() {}) ?: throw NoSuchElementException("Response body is required")
+	hint(KType::class.jvmName, typeOf<T>()).body(object : ParameterizedTypeReference<T>() {}) ?:
+	throw NoSuchElementException("Response body is required")
 
 /**
  * Extension for [RestClient.ResponseSpec.toEntity] providing a `toEntity<Foo>()` variant
  * leveraging Kotlin reified type parameters. This extension is not subject to type
  * erasure and retains actual generic type arguments.
  *
+ * It also provides a [KType] hint for [org.springframework.http.converter.SmartHttpMessageConverter]s
+ * supporting them.
+ *
  * @author Sebastien Deleuze
  * @since 6.1
  */
 inline fun <reified T : Any> RestClient.ResponseSpec.toEntity(): ResponseEntity<T> =
-	toEntity(object : ParameterizedTypeReference<T>() {})
+	hint(KType::class.jvmName, typeOf<T>()).toEntity(object : ParameterizedTypeReference<T>() {})

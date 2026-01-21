@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import jakarta.xml.bind.annotation.XmlAccessorType;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlElementWrapper;
 import jakarta.xml.bind.annotation.XmlRootElement;
+import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.http.HttpHeaders;
@@ -80,7 +81,7 @@ public class XpathAssertionTests {
 				.xpath(composer, musicNamespace, 4).exists()
 				.xpath(performer, musicNamespace, 1).exists()
 				.xpath(performer, musicNamespace, 2).exists()
-				.xpath(composer, musicNamespace, 1).string(notNullValue());
+				.xpath(composer, musicNamespace, 1).string(v -> MatcherAssert.assertThat(v, notNullValue()));
 	}
 
 	@Test
@@ -112,9 +113,9 @@ public class XpathAssertionTests {
 				.xpath(composerName, musicNamespace, 4).isEqualTo("Robert Schumann")
 				.xpath(performerName, musicNamespace, 1).isEqualTo("Vladimir Ashkenazy")
 				.xpath(performerName, musicNamespace, 2).isEqualTo("Yehudi Menuhin")
-				.xpath(composerName, musicNamespace, 1).string(equalTo("Johann Sebastian Bach")) // Hamcrest..
-				.xpath(composerName, musicNamespace, 1).string(startsWith("Johann"))
-				.xpath(composerName, musicNamespace, 1).string(notNullValue());
+				.xpath(composerName, musicNamespace, 1).string(v -> MatcherAssert.assertThat(v, equalTo("Johann Sebastian Bach"))) // Hamcrest..
+				.xpath(composerName, musicNamespace, 1).string(v -> MatcherAssert.assertThat(v, startsWith("Johann")))
+				.xpath(composerName, musicNamespace, 1).string(v -> MatcherAssert.assertThat(v, notNullValue()));
 	}
 
 	@Test
@@ -128,8 +129,8 @@ public class XpathAssertionTests {
 				.xpath(expression, musicNamespace, 2).isEqualTo(.0025)
 				.xpath(expression, musicNamespace, 3).isEqualTo(1.6035)
 				.xpath(expression, musicNamespace, 4).isEqualTo(Double.NaN)
-				.xpath(expression, musicNamespace, 1).number(equalTo(21d))  // Hamcrest..
-				.xpath(expression, musicNamespace, 3).number(closeTo(1.6, .01));
+				.xpath(expression, musicNamespace, 1).number(v -> MatcherAssert.assertThat(v, equalTo(21d)))  // Hamcrest..
+				.xpath(expression, musicNamespace, 3).number(v -> MatcherAssert.assertThat(v, closeTo(1.6, .01)));
 	}
 
 	@Test
@@ -150,8 +151,8 @@ public class XpathAssertionTests {
 				.expectBody()
 				.xpath("/ns:people/composers/composer", musicNamespace).nodeCount(4)
 				.xpath("/ns:people/performers/performer", musicNamespace).nodeCount(2)
-				.xpath("/ns:people/composers/composer", musicNamespace).nodeCount(equalTo(4)) // Hamcrest..
-				.xpath("/ns:people/performers/performer", musicNamespace).nodeCount(equalTo(2));
+				.xpath("/ns:people/composers/composer", musicNamespace).nodeCount(v -> MatcherAssert.assertThat(v, equalTo(4))) // Hamcrest..
+				.xpath("/ns:people/performers/performer", musicNamespace).nodeCount(v -> MatcherAssert.assertThat(v, equalTo(2)));
 	}
 
 	@Test

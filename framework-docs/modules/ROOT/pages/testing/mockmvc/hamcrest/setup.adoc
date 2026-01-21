@@ -96,5 +96,5 @@ Kotlin::
 ======
 
 Or you can also use this setup when testing through the
-xref:testing/webtestclient.adoc#webtestclient-context-config[WebTestClient] which delegates to the same builder
-as shown above.
+xref:testing/webtestclient.adoc#webtestclient-context-config[WebTestClient]
+which delegates to the same builder as shown above.

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -211,14 +211,11 @@ final class HtmlUnitRequestBuilder implements RequestBuilder, Mergeable {
 
 	private void ports(UriComponents uriComponents, MockHttpServletRequest request) {
 		int serverPort = uriComponents.getPort();
-		request.setServerPort(serverPort);
 		if (serverPort == -1) {
-			int portConnection = this.webRequest.getUrl().getDefaultPort();
-			request.setLocalPort(serverPort);
-			request.setRemotePort(portConnection);
+			serverPort = this.webRequest.getUrl().getDefaultPort();
 		}
-		else {
-			request.setRemotePort(serverPort);
+		if (serverPort != -1) {
+			request.setServerPort(serverPort);
 		}
 	}
 

@@ -678,6 +678,8 @@ public class Enhancer extends AbstractClassGenerator {
 
 		ClassEmitter e = new ClassEmitter(v);
 		if (currentData == null) {
+			// Byte code level cannot be higher than 1.8 due to STATICHOOK methods
+			// which set static final fields outside the initializer method <clinit>.
 			e.begin_class(Constants.V1_8,
 					Constants.ACC_PUBLIC,
 					getClassName(),
@@ -688,6 +690,8 @@ public class Enhancer extends AbstractClassGenerator {
 					Constants.SOURCE_FILE);
 		}
 		else {
+			// Byte code level cannot be higher than 1.8 due to STATICHOOK methods
+			// which set static final fields outside the initializer method <clinit>.
 			e.begin_class(Constants.V1_8,
 					Constants.ACC_PUBLIC,
 					getClassName(),
@@ -1278,29 +1282,32 @@ public class Enhancer extends AbstractClassGenerator {
 				Signature bridgeTarget = (Signature) bridgeToTarget.get(method.getSignature());
 				if (bridgeTarget != null) {
 					// checkcast each argument against the target's argument types
-					for (int i = 0; i < bridgeTarget.getArgumentTypes().length; i++) {
+					Type[] argTypes = method.getSignature().getArgumentTypes();
+					Type[] targetTypes = bridgeTarget.getArgumentTypes();
+					for (int i = 0; i < targetTypes.length; i++) {
 						e.load_arg(i);
-						Type target = bridgeTarget.getArgumentTypes()[i];
-						if (!target.equals(method.getSignature().getArgumentTypes()[i])) {
+						Type argType = argTypes[i];
+						Type target = targetTypes[i];
+						if (!target.equals(argType)) {
+							if (!TypeUtils.isPrimitive(target)) {
+								e.box(argType);
+							}
 							e.checkcast(target);
 						}
 					}
 
 					e.invoke_virtual_this(bridgeTarget);
 
+					// Not necessary to cast if the target & bridge have the same return type.
 					Type retType = method.getSignature().getReturnType();
-					// Not necessary to cast if the target & bridge have
-					// the same return type.
-					// (This conveniently includes void and primitive types,
-					// which would fail if casted.  It's not possible to
-					// covariant from boxed to unbox (or vice versa), so no having
-					// to box/unbox for bridges).
-					// TODO: It also isn't necessary to checkcast if the return is
-					// assignable from the target.  (This would happen if a subclass
-					// used covariant returns to narrow the return type within a bridge
-					// method.)
-					if (!retType.equals(bridgeTarget.getReturnType())) {
-						e.checkcast(retType);
+					Type target = bridgeTarget.getReturnType();
+					if (!target.equals(retType)) {
+						if (!TypeUtils.isPrimitive(target)) {
+							e.unbox(retType);
+						}
+						else {
+							e.checkcast(retType);
+						}
 					}
 				}
 				else {

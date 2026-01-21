@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -103,12 +103,11 @@ public class ControllerAdviceBean implements Ordered {
 
 	/**
 	 * Get the order value for the contained bean.
-	 * <p>As of Spring Framework 5.3, the order value is lazily retrieved using
-	 * the following algorithm and cached. Note, however, that a
-	 * {@link ControllerAdvice @ControllerAdvice} bean that is configured as a
-	 * scoped bean &mdash; for example, as a request-scoped or session-scoped
-	 * bean &mdash; will not be eagerly resolved. Consequently, {@link Ordered} is
-	 * not honored for scoped {@code @ControllerAdvice} beans.
+	 * <p>The order value is lazily retrieved using the following algorithm and cached.
+	 * Note, however, that a {@link ControllerAdvice @ControllerAdvice} bean that is
+	 * configured as a scoped bean &mdash; for example, as a request-scoped or
+	 * session-scoped bean &mdash; will not be eagerly resolved. Consequently,
+	 * {@link Ordered} is not honored for scoped {@code @ControllerAdvice} beans.
 	 * <ul>
 	 * <li>If the {@linkplain #resolveBean resolved bean} implements {@link Ordered},
 	 * use the value returned by {@link Ordered#getOrder()}.</li>
@@ -229,14 +228,26 @@ public class ControllerAdviceBean implements Ordered {
 	 * instances.
 	 * <p>Note that the {@code ControllerAdviceBean} instances in the returned list
 	 * are sorted using {@link OrderComparator#sort(List)}.
+	 * @see #findAnnotatedBeans(ListableBeanFactory)
+	 */
+	public static List<ControllerAdviceBean> findAnnotatedBeans(ApplicationContext context) {
+		return findAnnotatedBeans((ListableBeanFactory) context);
+	}
+
+	/**
+	 * Find beans annotated with {@link ControllerAdvice @ControllerAdvice} in the
+	 * given {@link ListableBeanFactory} and wrap them as {@code ControllerAdviceBean}
+	 * instances.
+	 * <p>Note that the {@code ControllerAdviceBean} instances in the returned list
+	 * are sorted using {@link OrderComparator#sort(List)}.
+	 * @since 7.0
 	 * @see #getOrder()
 	 * @see OrderComparator
 	 * @see Ordered
 	 */
-	public static List<ControllerAdviceBean> findAnnotatedBeans(ApplicationContext context) {
-		ListableBeanFactory beanFactory = context;
-		if (context instanceof ConfigurableApplicationContext cac) {
-			// Use internal BeanFactory for potential downcast to ConfigurableBeanFactory above
+	public static List<ControllerAdviceBean> findAnnotatedBeans(ListableBeanFactory beanFactory) {
+		if (beanFactory instanceof ConfigurableApplicationContext cac) {
+			// Use internal BeanFactory for potential downcast to ConfigurableBeanFactory in getOrder().
 			beanFactory = cac.getBeanFactory();
 		}
 		List<ControllerAdviceBean> adviceBeans = new ArrayList<>();

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,16 @@
 
 package org.springframework.test.context.cache;
 
+import java.util.Locale;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.jspecify.annotations.Nullable;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.test.annotation.DirtiesContext.HierarchyMode;
 import org.springframework.test.context.MergedContextConfiguration;
+import org.springframework.util.Assert;
 
 /**
  * {@code ContextCache} defines the SPI for caching Spring
@@ -29,13 +34,17 @@ import org.springframework.test.context.MergedContextConfiguration;
  *
  * <p>A {@code ContextCache} maintains a cache of {@code ApplicationContexts}
  * keyed by {@link MergedContextConfiguration} instances, potentially configured
- * with a {@linkplain ContextCacheUtils#retrieveMaxCacheSize maximum size} and
- * a custom eviction policy.
+ * with a {@linkplain ContextCacheUtils#retrieveMaxCacheSize maximum size},
+ * {@linkplain ContextCacheUtils#retrievePauseMode() pause mode}, and custom
+ * eviction policy.
  *
  * <p>As of Spring Framework 6.1, this SPI includes optional support for
  * {@linkplain #getFailureCount(MergedContextConfiguration) tracking} and
  * {@linkplain #incrementFailureCount(MergedContextConfiguration) incrementing}
- * failure counts.
+ * failure counts. As of Spring Framework 7.0, this SPI includes optional support for
+ * {@linkplain #registerContextUsage(MergedContextConfiguration, Class) registering} and
+ * {@linkplain #unregisterContextUsage(MergedContextConfiguration, Class) unregistering}
+ * context usage.
  *
  * <h3>Rationale</h3>
  * <p>Context caching can have significant performance benefits if context
@@ -50,6 +59,7 @@ import org.springframework.test.context.MergedContextConfiguration;
  * @author Juergen Hoeller
  * @since 4.2
  * @see ContextCacheUtils#retrieveMaxCacheSize()
+ * @see ContextCacheUtils#retrievePauseMode()
  */
 public interface ContextCache {
 
@@ -79,32 +89,90 @@ public interface ContextCache {
 	 */
 	String MAX_CONTEXT_CACHE_SIZE_PROPERTY_NAME = "spring.test.context.cache.maxSize";
 
+	/**
+	 * System property used to configure whether inactive application contexts
+	 * stored in the {@link ContextCache} should be paused: {@value}.
+	 * <p>Defaults to {@code on_context_switch}. Can be set to {@code always} or
+	 * {@code never} to disable pausing of inactive application contexts &mdash;
+	 * for example:
+	 * <p>{@code -Dspring.test.context.cache.pause=never}
+	 * <p>May alternatively be configured via the
+	 * {@link org.springframework.core.SpringProperties} mechanism.
+	 * <p>Note that implementations of {@code ContextCache} are not required to
+	 * support context pausing. Consult the documentation of the corresponding
+	 * implementation for details.
+	 * @since 7.0.3
+	 * @see PauseMode
+	 * @see org.springframework.context.ConfigurableApplicationContext#pause()
+	 * @see #unregisterContextUsage(MergedContextConfiguration, Class)
+	 */
+	String CONTEXT_CACHE_PAUSE_PROPERTY_NAME = "spring.test.context.cache.pause";
+
 
 	/**
 	 * Determine whether there is a cached context for the given key.
-	 * @param key the context key (never {@code null})
+	 * @param key the context key; never {@code null}
 	 * @return {@code true} if the cache contains a context with the given key
 	 */
 	boolean contains(MergedContextConfiguration key);
 
 	/**
-	 * Obtain a cached {@code ApplicationContext} for the given key.
-	 * <p>The {@linkplain #getHitCount() hit} and {@linkplain #getMissCount() miss}
-	 * counts must be updated accordingly.
-	 * @param key the context key (never {@code null})
+	 * Obtain a cached {@link ApplicationContext} for the given key.
+	 * <p>If the cached application context was previously
+	 * {@linkplain org.springframework.context.ConfigurableApplicationContext#pause() paused},
+	 * it must be
+	 * {@linkplain org.springframework.context.support.AbstractApplicationContext#restart()
+	 * restarted}. This applies to parent contexts as well.
+	 * <p>In addition, the {@linkplain #getHitCount() hit} and
+	 * {@linkplain #getMissCount() miss} counts must be updated accordingly.
+	 * @param key the context key; never {@code null}
 	 * @return the corresponding {@code ApplicationContext} instance, or {@code null}
 	 * if not found in the cache
-	 * @see #remove
+	 * @see #put(MergedContextConfiguration, LoadFunction)
+	 * @see #unregisterContextUsage(MergedContextConfiguration, Class)
+	 * @see #remove(MergedContextConfiguration, HierarchyMode)
 	 */
 	@Nullable ApplicationContext get(MergedContextConfiguration key);
 
 	/**
-	 * Explicitly add an {@code ApplicationContext} instance to the cache
-	 * under the given key, potentially honoring a custom eviction policy.
-	 * @param key the context key (never {@code null})
-	 * @param context the {@code ApplicationContext} instance (never {@code null})
+	 * Explicitly add an {@link ApplicationContext} to the cache under the given
+	 * key, potentially honoring a custom eviction policy.
+	 * @param key the context key; never {@code null}
+	 * @param context the {@code ApplicationContext}; never {@code null}
+	 * @see #get(MergedContextConfiguration)
+	 * @see #put(MergedContextConfiguration, LoadFunction)
+	 * @deprecated since Spring Framework 7.0 in favor of
+	 * {@link #put(MergedContextConfiguration, LoadFunction)}
 	 */
+	@Deprecated(since = "7.0")
 	void put(MergedContextConfiguration key, ApplicationContext context);
+
+	/**
+	 * Explicitly add an {@link ApplicationContext} to the cache under the given
+	 * key, potentially honoring a custom eviction policy.
+	 * <p>The supplied {@link LoadFunction} will be invoked to load the
+	 * {@code ApplicationContext}.
+	 * <p>Concrete implementations which honor a custom eviction policy must
+	 * override this method to ensure that an evicted context is removed from the
+	 * cache and closed before a new context is loaded via the supplied
+	 * {@code LoadFunction}.
+	 * @param key the context key; never {@code null}
+	 * @param loadFunction a function which loads the context for the supplied key;
+	 * never {@code null}
+	 * @return the {@code ApplicationContext}; never {@code null}
+	 * @since 7.0
+	 * @see #get(MergedContextConfiguration)
+	 * @see #put(MergedContextConfiguration, ApplicationContext)
+	 */
+	default ApplicationContext put(MergedContextConfiguration key, LoadFunction loadFunction) {
+		Assert.notNull(key, "Key must not be null");
+		Assert.notNull(loadFunction, "LoadFunction must not be null");
+
+		ApplicationContext applicationContext = loadFunction.loadContext(key);
+		Assert.state(applicationContext != null, "LoadFunction must return a non-null ApplicationContext");
+		put(key, applicationContext);
+		return applicationContext;
+	}
 
 	/**
 	 * Remove the context with the given key from the cache and explicitly
@@ -151,6 +219,65 @@ public interface ContextCache {
 	 * @see #getFailureCount(MergedContextConfiguration)
 	 */
 	default void incrementFailureCount(MergedContextConfiguration key) {
+		/* no-op */
+	}
+
+	/**
+	 * Register usage of the {@link ApplicationContext} for the supplied
+	 * {@link MergedContextConfiguration} and any of its parents.
+	 * <p>The default implementation of this method does nothing. Concrete
+	 * implementations are therefore highly encouraged to override this
+	 * method, {@link #unregisterContextUsage(MergedContextConfiguration, Class)},
+	 * and {@link #getContextUsageCount()} with appropriate behavior. Note that
+	 * the standard {@code ContextContext} implementation in Spring overrides
+	 * these methods appropriately.
+	 * @param key the context key; never {@code null}
+	 * @param testClass the test class that is using the application context(s)
+	 * @since 7.0
+	 * @see #unregisterContextUsage(MergedContextConfiguration, Class)
+	 * @see #getContextUsageCount()
+	 */
+	default void registerContextUsage(MergedContextConfiguration key, Class<?> testClass) {
+		/* no-op */
+	}
+
+	/**
+	 * Unregister usage of the {@link ApplicationContext} for the supplied
+	 * {@link MergedContextConfiguration} and any of its parents.
+	 * <p>If no other test classes are actively using the same application
+	 * context(s), the application context(s) should be
+	 * {@linkplain org.springframework.context.ConfigurableApplicationContext#pause()
+	 * paused} according to the configured {@link PauseMode}.
+	 * <p>The default implementation of this method does nothing. Concrete
+	 * implementations are therefore highly encouraged to override this
+	 * method, {@link #registerContextUsage(MergedContextConfiguration, Class)},
+	 * and {@link #getContextUsageCount()} with appropriate behavior. Note that
+	 * the standard {@code ContextContext} implementation in Spring overrides
+	 * these methods appropriately.
+	 * @param key the context key; never {@code null}
+	 * @param testClass the test class that is no longer using the application context(s)
+	 * @since 7.0
+	 * @see #registerContextUsage(MergedContextConfiguration, Class)
+	 * @see #getContextUsageCount()
+	 */
+	default void unregisterContextUsage(MergedContextConfiguration key, Class<?> testClass) {
+		/* no-op */
+	}
+
+	/**
+	 * Determine the number of contexts within the cache that are currently in use.
+	 * <p>The default implementation of this method always returns {@code 0}.
+	 * Concrete implementations are therefore highly encouraged to override this
+	 * method, {@link #registerContextUsage(MergedContextConfiguration, Class)},
+	 * and {@link #unregisterContextUsage(MergedContextConfiguration, Class)} with
+	 * appropriate behavior. Note that the standard {@code ContextContext}
+	 * implementation in Spring overrides these methods appropriately.
+	 * @since 7.0
+	 * @see #registerContextUsage(MergedContextConfiguration, Class)
+	 * @see #unregisterContextUsage(MergedContextConfiguration, Class)
+	 */
+	default int getContextUsageCount() {
+		return 0;
 	}
 
 	/**
@@ -204,6 +331,7 @@ public interface ContextCache {
 	 * <ul>
 	 * <li>name of the concrete {@code ContextCache} implementation</li>
 	 * <li>{@linkplain #size}</li>
+	 * <li>{@linkplain #getContextUsageCount() context usage count}</li>
 	 * <li>{@linkplain #getParentContextCount() parent context count}</li>
 	 * <li>{@linkplain #getHitCount() hit count}</li>
 	 * <li>{@linkplain #getMissCount() miss count}</li>
@@ -211,5 +339,83 @@ public interface ContextCache {
 	 * </ul>
 	 */
 	void logStatistics();
+
+
+	/**
+	 * Represents a function that loads an {@link ApplicationContext}.
+	 *
+	 * @since 7.0
+	 */
+	@FunctionalInterface
+	interface LoadFunction {
+
+		/**
+		 * Load a new {@link ApplicationContext} based on the supplied
+		 * {@link MergedContextConfiguration} and return the context in a fully
+		 * <em>refreshed</em> state.
+		 * @param mergedConfig the merged context configuration to use to load the
+		 * application context
+		 * @return a new application context; never {@code null}
+		 * @see org.springframework.test.context.SmartContextLoader#loadContext(MergedContextConfiguration)
+		 */
+		ApplicationContext loadContext(MergedContextConfiguration mergedConfig);
+
+	}
+
+	/**
+	 * Enumeration of <em>modes</em> that dictate whether inactive application contexts
+	 * stored in the {@link ContextCache} should be
+	 * {@linkplain org.springframework.context.ConfigurableApplicationContext#pause() paused}.
+	 *
+	 * @since 7.0.3
+	 * @see #ALWAYS
+	 * @see #ON_CONTEXT_SWITCH
+	 * @see #NEVER
+	 * @see ContextCache#CONTEXT_CACHE_PAUSE_PROPERTY_NAME
+	 */
+	enum PauseMode {
+
+		/**
+		 * Always pause inactive application contexts.
+		 */
+		ALWAYS,
+
+		/**
+		 * Only pause inactive application contexts if the next context
+		 * retrieved from the cache is a different context.
+		 */
+		ON_CONTEXT_SWITCH,
+
+		/**
+		 * Never pause inactive application contexts, effectively disabling the
+		 * pausing feature of the {@link ContextCache}.
+		 */
+		NEVER;
+
+
+		/**
+		 * Get the {@code PauseMode} enum constant with the supplied name,
+		 * {@linkplain String#strip() stripped} and ignoring case.
+		 * @param name the name of the enum constant to retrieve
+		 * @return the corresponding enum constant or {@code null} if not found
+		 * @see PauseMode#valueOf(String)
+		 */
+		public static @Nullable PauseMode from(@Nullable String name) {
+			if (name == null) {
+				return null;
+			}
+			try {
+				return PauseMode.valueOf(name.strip().toUpperCase(Locale.ROOT));
+			}
+			catch (IllegalArgumentException ex) {
+				Log logger = LogFactory.getLog(PauseMode.class);
+				if (logger.isDebugEnabled()) {
+					logger.debug("Failed to parse PauseMode from '%s': %s"
+							.formatted(name, ex.getMessage()));
+				}
+				return null;
+			}
+		}
+	}
 
 }

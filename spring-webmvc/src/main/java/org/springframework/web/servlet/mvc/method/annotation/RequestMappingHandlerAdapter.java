@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -187,7 +187,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 
 	private SessionAttributeStore sessionAttributeStore = new DefaultSessionAttributeStore();
 
-	private ParameterNameDiscoverer parameterNameDiscoverer = new DefaultParameterNameDiscoverer();
+	private ParameterNameDiscoverer parameterNameDiscoverer = DefaultParameterNameDiscoverer.getSharedInstance();
 
 	private @Nullable ConfigurableBeanFactory beanFactory;
 
@@ -671,6 +671,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 		resolvers.add(new ErrorsMethodArgumentResolver());
 		resolvers.add(new SessionStatusMethodArgumentResolver());
 		resolvers.add(new UriComponentsBuilderMethodArgumentResolver());
+		resolvers.add(new ApiVersionMethodArgumentResolver());
 		if (KotlinDetector.isKotlinPresent()) {
 			resolvers.add(new ContinuationHandlerMethodArgumentResolver());
 		}
@@ -729,16 +730,21 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 	private List<HandlerMethodReturnValueHandler> getDefaultReturnValueHandlers() {
 		List<HandlerMethodReturnValueHandler> handlers = new ArrayList<>(20);
 
+		ResponseBodyEmitterReturnValueHandler responseBodyEmitterHandler =
+				new ResponseBodyEmitterReturnValueHandler(getMessageConverters(),
+						this.reactiveAdapterRegistry, this.taskExecutor, this.contentNegotiationManager,
+						initViewResolvers(), initLocaleResolver());
+
+		HttpEntityMethodProcessor httpEntityMethodProcessor = new HttpEntityMethodProcessor(getMessageConverters(),
+				this.contentNegotiationManager, this.requestResponseBodyAdvice, this.errorResponseInterceptors);
+
 		// Single-purpose return value types
 		handlers.add(new ModelAndViewMethodReturnValueHandler());
 		handlers.add(new ModelMethodProcessor());
 		handlers.add(new ViewMethodReturnValueHandler());
-		handlers.add(new ResponseBodyEmitterReturnValueHandler(getMessageConverters(),
-				this.reactiveAdapterRegistry, this.taskExecutor, this.contentNegotiationManager,
-				initViewResolvers(), initLocaleResolver()));
+		handlers.add(responseBodyEmitterHandler);
 		handlers.add(new StreamingResponseBodyReturnValueHandler());
-		handlers.add(new HttpEntityMethodProcessor(getMessageConverters(),
-				this.contentNegotiationManager, this.requestResponseBodyAdvice, this.errorResponseInterceptors));
+		handlers.add(new ResponseEntityReturnValueHandler(httpEntityMethodProcessor, responseBodyEmitterHandler));
 		handlers.add(new HttpHeadersReturnValueHandler());
 		handlers.add(new CallableMethodReturnValueHandler());
 		handlers.add(new DeferredResultMethodReturnValueHandler());
@@ -788,8 +794,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 				return getBeanFactory().getBean(
 						DispatcherServlet.LOCALE_RESOLVER_BEAN_NAME, LocaleResolver.class);
 			}
-			catch (NoSuchBeanDefinitionException ex) {
-				// ignore
+			catch (NoSuchBeanDefinitionException ignored) {
 			}
 		}
 		return null;

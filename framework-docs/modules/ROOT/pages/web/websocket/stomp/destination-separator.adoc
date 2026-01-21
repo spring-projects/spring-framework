@@ -24,6 +24,3 @@ the broker you use to see what conventions it supports for the destination heade
 The "`simple broker`", on the other hand, does rely on the configured `PathMatcher`, so, if
 you switch the separator, that change also applies to the broker and the way the broker matches
 destinations from a message to patterns in subscriptions.
-
-
-

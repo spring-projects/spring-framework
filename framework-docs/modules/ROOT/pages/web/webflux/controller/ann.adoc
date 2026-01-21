@@ -47,7 +47,6 @@ every method inherits the type-level `@ResponseBody` annotation and, therefore, 
 directly to the response body versus view resolution and rendering with an HTML template.
 
 
-
 [[webflux-ann-requestmapping-proxying]]
 == AOP Proxies
 [.small]#xref:web/webmvc/mvc-controller/ann.adoc#mvc-ann-requestmapping-proxying[See equivalent in the Servlet stack]#
@@ -67,7 +66,3 @@ NOTE: Keep in mind that as of 6.0, with interface proxying, Spring WebFlux no lo
 controllers based solely on a type-level `@RequestMapping` annotation on the interface.
 Please, enable class based proxying, or otherwise the interface must also have an
 `@Controller` annotation.
-
-
-
-

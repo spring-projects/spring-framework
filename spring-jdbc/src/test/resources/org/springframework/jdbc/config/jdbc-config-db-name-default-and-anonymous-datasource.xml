@@ -5,8 +5,8 @@
 		http://www.springframework.org/schema/jdbc https://www.springframework.org/schema/jdbc/spring-jdbc-4.2.xsd">
 
 	<jdbc:embedded-database>
-		<jdbc:script location="classpath:org/springframework/jdbc/config/db-schema.sql" />
-		<jdbc:script location="classpath:org/springframework/jdbc/config/db-test-data.sql" />
+		<jdbc:script location="classpath:org/springframework/jdbc/config/db-schema.sql"/>
+		<jdbc:script location="classpath:org/springframework/jdbc/config/db-test-data.sql"/>
 	</jdbc:embedded-database>
 
 </beans>

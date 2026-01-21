@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ import org.springframework.util.ClassUtils;
  * registration of custom {@link PropertyEditor property editors}.
  *
  * <p>In case you want to register {@link PropertyEditor} instances,
- * the recommended usage as of Spring 2.0 is to use custom
+ * the recommended usage is to use custom
  * {@link PropertyEditorRegistrar} implementations that in turn register any
  * desired editor instances on a given
  * {@link org.springframework.beans.PropertyEditorRegistry registry}. Each

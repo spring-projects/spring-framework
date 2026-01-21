@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,7 +53,8 @@ public interface TestContext extends AttributeAccessor, Serializable {
 	 * Determine if the {@linkplain ApplicationContext application context} for
 	 * this test context is known to be available.
 	 * <p>If this method returns {@code true}, a subsequent invocation of
-	 * {@link #getApplicationContext()} should succeed.
+	 * {@link #getApplicationContext()} or {@link #markApplicationContextUnused()}
+	 * should succeed.
 	 * <p>The default implementation of this method always returns {@code false}.
 	 * Custom {@code TestContext} implementations are therefore highly encouraged
 	 * to override this method with a more meaningful implementation. Note that
@@ -62,6 +63,7 @@ public interface TestContext extends AttributeAccessor, Serializable {
 	 * @return {@code true} if the application context has already been loaded
 	 * @since 5.2
 	 * @see #getApplicationContext()
+	 * @see #markApplicationContextUnused()
 	 */
 	default boolean hasApplicationContext() {
 		return false;
@@ -77,6 +79,7 @@ public interface TestContext extends AttributeAccessor, Serializable {
 	 * @throws IllegalStateException if an error occurs while retrieving the
 	 * application context
 	 * @see #hasApplicationContext()
+	 * @see #markApplicationContextUnused()
 	 */
 	ApplicationContext getApplicationContext();
 
@@ -99,7 +102,22 @@ public interface TestContext extends AttributeAccessor, Serializable {
 
 	/**
 	 * Get the {@linkplain Class test class} for this test context.
+	 * <p>Since JUnit Jupiter 5.12, if the
+	 * {@link org.springframework.test.context.junit.jupiter.SpringExtension
+	 * SpringExtension} is used with a {@linkplain
+	 * org.junit.jupiter.api.extension.TestInstantiationAwareExtension.ExtensionContextScope#TEST_METHOD
+	 * test-method scoped} {@link org.junit.jupiter.api.extension.ExtensionContext
+	 * ExtensionContext}, the {@code Class} returned from this method may refer
+	 * to the test class for the current {@linkplain #getTestMethod() test method},
+	 * which may be a {@link org.junit.jupiter.api.Nested @Nested} test class
+	 * within the class for the {@linkplain #getTestInstance() test instance}.
+	 * Thus, if you need consistent access to the class for the current test
+	 * instance within an implementation of
+	 * {@link TestExecutionListener#prepareTestInstance(TestContext)}, you should
+	 * invoke {@code testContext.getTestInstance().getClass()} instead of
+	 * {@code testContext.getTestClass()}.
 	 * @return the test class (never {@code null})
+	 * @see org.springframework.test.context.junit.jupiter.SpringExtensionConfig @SpringExtensionConfig
 	 */
 	Class<?> getTestClass();
 
@@ -127,6 +145,24 @@ public interface TestContext extends AttributeAccessor, Serializable {
 	 * @see #updateState(Object, Method, Throwable)
 	 */
 	@Nullable Throwable getTestException();
+
+	/**
+	 * Call this method to signal that the {@linkplain #getTestClass() test class}
+	 * is no longer using the {@linkplain ApplicationContext application context}
+	 * associated with this test context.
+	 * <p>This informs the context cache that the application context can be safely
+	 * {@linkplain org.springframework.context.ConfigurableApplicationContext#pause() paused}
+	 * if no other test classes are actively using the same application context.
+	 * <p>This method is intended to be invoked after execution of the test class
+	 * has ended and should not be invoked unless the application context for this
+	 * test context is known to be {@linkplain #hasApplicationContext() available}.
+	 * <p>This feature is primarily intended for use within the framework.
+	 * @since 7.0
+	 * @see TestContextManager#afterTestClass()
+	 */
+	default void markApplicationContextUnused() {
+		/* no-op */
+	}
 
 	/**
 	 * Call this method to signal that the {@linkplain ApplicationContext application

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,23 +61,23 @@ public class ReactiveAdapterRegistry {
 
 	private static volatile @Nullable ReactiveAdapterRegistry sharedInstance;
 
-	private static final boolean reactiveStreamsPresent;
+	private static final boolean REACTIVE_STREAMS_PRESENT;
 
-	private static final boolean reactorPresent;
+	private static final boolean REACTOR_PRESENT;
 
-	private static final boolean rxjava3Present;
+	private static final boolean RXJAVA_3_PRESENT;
 
-	private static final boolean kotlinCoroutinesPresent;
+	private static final boolean COROUTINES_REACTOR_PRESENT;
 
-	private static final boolean mutinyPresent;
+	private static final boolean MUTINY_PRESENT;
 
 	static {
 		ClassLoader classLoader = ReactiveAdapterRegistry.class.getClassLoader();
-		reactiveStreamsPresent = ClassUtils.isPresent("org.reactivestreams.Publisher", classLoader);
-		reactorPresent = ClassUtils.isPresent("reactor.core.publisher.Flux", classLoader);
-		rxjava3Present = ClassUtils.isPresent("io.reactivex.rxjava3.core.Flowable", classLoader);
-		kotlinCoroutinesPresent = ClassUtils.isPresent("kotlinx.coroutines.reactor.MonoKt", classLoader);
-		mutinyPresent = ClassUtils.isPresent("io.smallrye.mutiny.Multi", classLoader);
+		REACTIVE_STREAMS_PRESENT = ClassUtils.isPresent("org.reactivestreams.Publisher", classLoader);
+		REACTOR_PRESENT = ClassUtils.isPresent("reactor.core.publisher.Flux", classLoader);
+		RXJAVA_3_PRESENT = ClassUtils.isPresent("io.reactivex.rxjava3.core.Flowable", classLoader);
+		COROUTINES_REACTOR_PRESENT = ClassUtils.isPresent("kotlinx.coroutines.reactor.MonoKt", classLoader);
+		MUTINY_PRESENT = ClassUtils.isPresent("io.smallrye.mutiny.Multi", classLoader);
 	}
 
 	private final List<ReactiveAdapter> adapters = new ArrayList<>();
@@ -89,32 +89,32 @@ public class ReactiveAdapterRegistry {
 	 */
 	public ReactiveAdapterRegistry() {
 		// Defensive guard for the Reactive Streams API itself
-		if (!reactiveStreamsPresent) {
+		if (!REACTIVE_STREAMS_PRESENT) {
 			return;
 		}
 
 		// Reactor
-		if (reactorPresent) {
+		if (REACTOR_PRESENT) {
 			new ReactorRegistrar().registerAdapters(this);
 		}
 
 		// RxJava
-		if (rxjava3Present) {
+		if (RXJAVA_3_PRESENT) {
 			new RxJava3Registrar().registerAdapters(this);
 		}
 
 		// Kotlin Coroutines
-		if (reactorPresent && kotlinCoroutinesPresent) {
+		if (REACTOR_PRESENT && COROUTINES_REACTOR_PRESENT) {
 			new CoroutinesRegistrar().registerAdapters(this);
 		}
 
 		// SmallRye Mutiny
-		if (mutinyPresent) {
+		if (MUTINY_PRESENT) {
 			new MutinyRegistrar().registerAdapters(this);
 		}
 
 		// Simple Flow.Publisher bridge if Reactor is not present
-		if (!reactorPresent) {
+		if (!REACTOR_PRESENT) {
 			new FlowAdaptersRegistrar().registerAdapters(this);
 		}
 	}
@@ -161,7 +161,7 @@ public class ReactiveAdapterRegistry {
 	private ReactiveAdapter buildAdapter(ReactiveTypeDescriptor descriptor,
 			Function<Object, Publisher<?>> toAdapter, Function<Publisher<?>, Object> fromAdapter) {
 
-		return (reactorPresent ? new ReactorAdapter(descriptor, toAdapter, fromAdapter) :
+		return (REACTOR_PRESENT ? new ReactorAdapter(descriptor, toAdapter, fromAdapter) :
 				new ReactiveAdapter(descriptor, toAdapter, fromAdapter));
 	}
 

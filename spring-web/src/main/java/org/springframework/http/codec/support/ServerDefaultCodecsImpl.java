@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,8 +57,9 @@ class ServerDefaultCodecsImpl extends BaseDefaultCodecs implements ServerCodecCo
 
 	private @Nullable Encoder<?> getSseEncoder() {
 		return this.sseEncoder != null ? this.sseEncoder :
-				jackson2Present ? getJackson2JsonEncoder() :
-				kotlinSerializationJsonPresent ? getKotlinSerializationJsonEncoder() :
+				(JACKSON_PRESENT || JACKSON_2_PRESENT) ? getJacksonJsonEncoder() :
+				GSON_PRESENT ? getGsonEncoder() :
+				KOTLIN_SERIALIZATION_JSON_PRESENT ? getKotlinSerializationJsonEncoder() :
 				null;
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -175,14 +175,18 @@ public abstract class AbstractCharSequenceDecoder<T extends CharSequence> extend
 	public final T decode(DataBuffer dataBuffer, ResolvableType elementType,
 			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
-		Charset charset = getCharset(mimeType);
-		T value = decodeInternal(dataBuffer, charset);
-		DataBufferUtils.release(dataBuffer);
-		LogFormatUtils.traceDebug(logger, traceOn -> {
-			String formatted = LogFormatUtils.formatValue(value, !traceOn);
-			return Hints.getLogPrefix(hints) + "Decoded " + formatted;
-		});
-		return value;
+		try {
+			Charset charset = getCharset(mimeType);
+			T value = decodeInternal(dataBuffer, charset);
+			LogFormatUtils.traceDebug(logger, traceOn -> {
+				String formatted = LogFormatUtils.formatValue(value, !traceOn);
+				return Hints.getLogPrefix(hints) + "Decoded " + formatted;
+			});
+			return value;
+		}
+		finally {
+			DataBufferUtils.release(dataBuffer);
+		}
 	}
 
 	private Charset getCharset(@Nullable MimeType mimeType) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ import org.springframework.web.testfixture.http.server.reactive.bootstrap.HttpSe
 import static org.springframework.web.reactive.function.server.RouterFunctions.route;
 
 /**
+ * Integration tests with data binding in fn handlers.
  * @author Arjen Poutsma
  */
 class BindingFunctionIntegrationTests extends AbstractRouterFunctionIntegrationTests {
@@ -65,7 +66,8 @@ class BindingFunctionIntegrationTests extends AbstractRouterFunctionIntegrationT
 		startServer(httpServer);
 
 		Mono<String> result = this.webClient.get()
-				.uri("/constructor?foo=FOO&bar=BAR")
+				.uri("/constructor?foo=FOO")
+				.header("bar", "BAR")
 				.retrieve()
 				.bodyToMono(String.class);
 
@@ -80,7 +82,8 @@ class BindingFunctionIntegrationTests extends AbstractRouterFunctionIntegrationT
 		startServer(httpServer);
 
 		Mono<String> result = this.webClient.get()
-				.uri("/property?foo=FOO&bar=BAR")
+				.uri("/property?foo=FOO")
+				.header("bar", "BAR")
 				.retrieve()
 				.bodyToMono(String.class);
 
@@ -92,12 +95,13 @@ class BindingFunctionIntegrationTests extends AbstractRouterFunctionIntegrationT
 	@ParameterizedHttpServerTest
 	void bindToMixed(HttpServer httpServer) throws Exception {
 
-			startServer(httpServer);
+		startServer(httpServer);
 
-			Mono<String> result = this.webClient.get()
-					.uri("/mixed?foo=FOO&bar=BAR")
-					.retrieve()
-					.bodyToMono(String.class);
+		Mono<String> result = this.webClient.get()
+				.uri("/mixed?foo=FOO")
+				.header("bar", "BAR")
+				.retrieve()
+				.bodyToMono(String.class);
 
 		StepVerifier.create(result)
 				.expectNext("FOO:BAR")

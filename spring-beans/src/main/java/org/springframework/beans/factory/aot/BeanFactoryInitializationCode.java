@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.beans.factory.aot;
 
 import org.springframework.aot.generate.GeneratedMethods;
 import org.springframework.aot.generate.MethodReference;
+import org.springframework.javapoet.ClassName;
 
 /**
  * Interface that can be used to configure the code that will be generated to
@@ -25,6 +26,7 @@ import org.springframework.aot.generate.MethodReference;
  *
  * @author Phillip Webb
  * @author Stephane Nicoll
+ * @author Sebastien Deleuze
  * @since 6.0
  * @see BeanFactoryInitializationAotContribution
  */
@@ -40,6 +42,13 @@ public interface BeanFactoryInitializationCode {
 	 * @return the generated methods
 	 */
 	GeneratedMethods getMethods();
+
+	/**
+	 * Return the name of the class used by the initializing code.
+	 * @return the generated class name
+	 * @since 7.0.2
+	 */
+	ClassName getClassName();
 
 	/**
 	 * Add an initializer method call. An initializer can use a flexible signature,

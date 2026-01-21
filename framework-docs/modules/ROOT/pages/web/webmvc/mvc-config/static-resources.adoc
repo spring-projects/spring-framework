@@ -58,6 +58,3 @@ URLs to include the version of the jar and can also match against incoming URLs 
 
 TIP: The Java configuration based on `ResourceHandlerRegistry` provides further options
 for fine-grained control, for example, last-modified behavior and optimized resource resolution.
-
-
-

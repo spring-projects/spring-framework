@@ -19,5 +19,3 @@ include-code::./HotelControllerTests[tag=matches,indent=0]
 
 `MockMvc` also defines a `ResultHandler` contract that lets you execute arbitrary actions
 on `MvcResult`. If you have implemented this contract you can invoke it using `.apply`.
-
-

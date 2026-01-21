@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -409,8 +409,7 @@ public class TableMetaDataContext {
 	}
 
 	/**
-	 * Does this database support a column name String array for retrieving generated
-	 * keys?
+	 * Does this database support a column name String array for retrieving generated keys?
 	 * @see java.sql.Connection#createStruct(String, Object[])
 	 */
 	public boolean isGeneratedKeysColumnNameArraySupported() {

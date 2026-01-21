@@ -110,5 +110,3 @@ transactional settings:
 
 	</beans>
 ----
-
-

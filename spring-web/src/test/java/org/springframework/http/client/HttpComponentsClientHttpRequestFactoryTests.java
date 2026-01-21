@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.http.client;
 
 import java.io.InputStreamReader;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.stream.Stream;
 
@@ -32,9 +33,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.FileCopyUtils;
+import org.springframework.util.StreamUtils;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -61,22 +64,36 @@ class HttpComponentsClientHttpRequestFactoryTests extends AbstractHttpRequestFac
 	}
 
 	@Test
-	@SuppressWarnings("deprecation")
+	void shouldDecompressWithExpectedHeaders() throws Exception {
+		ClientHttpRequest request = factory.createRequest(URI.create(baseUrl + "/compress/gzip"), HttpMethod.POST);
+		String message = "Hello World";
+		final byte[] body = message.getBytes(StandardCharsets.UTF_8);
+		StreamUtils.copy(body, request.getBody());
+
+		try (ClientHttpResponse response = request.execute()) {
+			assertThat(response.getStatusCode()).as("Invalid status code").isEqualTo(HttpStatus.OK);
+			String result = FileCopyUtils.copyToString(new InputStreamReader(response.getBody()));
+			assertThat(result).as("Invalid body").isEqualTo(message);
+			assertThat(response.getHeaders().get(HttpHeaders.CONTENT_ENCODING)).isNull();
+			assertThat(response.getHeaders().getContentLength()).isEqualTo(-1);
+		}
+	}
+
+	@Test
 	void assertCustomConfig() throws Exception {
 		HttpClient httpClient = HttpClientBuilder.create().build();
 		HttpComponentsClientHttpRequestFactory hrf = new HttpComponentsClientHttpRequestFactory(httpClient);
-		hrf.setConnectTimeout(1234);
 		hrf.setConnectionRequestTimeout(4321);
 		hrf.setReadTimeout(5678);
 
 		URI uri = URI.create(baseUrl + "/status/ok");
 		HttpComponentsClientHttpRequest request = (HttpComponentsClientHttpRequest) hrf.createRequest(uri, HttpMethod.GET);
 
+		@SuppressWarnings("deprecation")  // HttpClientContext.REQUEST_CONFIG
 		Object config = request.getHttpContext().getAttribute(HttpClientContext.REQUEST_CONFIG);
 		assertThat(config).as("Request config should be set").isNotNull();
 		assertThat(config).as("Wrong request config type " + config.getClass().getName()).isInstanceOf(RequestConfig.class);
 		RequestConfig requestConfig = (RequestConfig) config;
-		assertThat(requestConfig.getConnectTimeout()).as("Wrong custom connection timeout").isEqualTo(Timeout.of(1234, MILLISECONDS));
 		assertThat(requestConfig.getConnectionRequestTimeout()).as("Wrong custom connection request timeout").isEqualTo(Timeout.of(4321, MILLISECONDS));
 		assertThat(requestConfig.getResponseTimeout()).as("Wrong custom response timeout").isEqualTo(Timeout.of(5678, MILLISECONDS));
 	}
@@ -103,10 +120,8 @@ class HttpComponentsClientHttpRequestFactoryTests extends AbstractHttpRequestFac
 	}
 
 	@Test
-	@SuppressWarnings("deprecation")
 	void localSettingsOverrideClientDefaultSettings() throws Exception {
 		RequestConfig defaultConfig = RequestConfig.custom()
-				.setConnectTimeout(1234, MILLISECONDS)
 				.setConnectionRequestTimeout(6789, MILLISECONDS)
 				.setResponseTimeout(4321, MILLISECONDS)
 				.build();
@@ -116,11 +131,9 @@ class HttpComponentsClientHttpRequestFactoryTests extends AbstractHttpRequestFac
 		given(configurable.getConfig()).willReturn(defaultConfig);
 
 		HttpComponentsClientHttpRequestFactory hrf = new HttpComponentsClientHttpRequestFactory(client);
-		hrf.setConnectTimeout(5000);
 		hrf.setReadTimeout(Duration.ofMillis(4000));
 
 		RequestConfig requestConfig = retrieveRequestConfig(hrf);
-		assertThat(requestConfig.getConnectTimeout()).isEqualTo(Timeout.of(5000, MILLISECONDS));
 		assertThat(requestConfig.getConnectionRequestTimeout()).isEqualTo(Timeout.of(6789, MILLISECONDS));
 		assertThat(requestConfig.getResponseTimeout()).isEqualTo(Timeout.of(4000, MILLISECONDS));
 	}
@@ -191,7 +204,7 @@ class HttpComponentsClientHttpRequestFactoryTests extends AbstractHttpRequestFac
 		return Stream.of(HttpMethod.GET, HttpMethod.OPTIONS, HttpMethod.TRACE);
 	}
 
-	@SuppressWarnings("deprecation")
+	@SuppressWarnings("deprecation")  // HttpClientContext.REQUEST_CONFIG
 	private RequestConfig retrieveRequestConfig(HttpComponentsClientHttpRequestFactory factory) throws Exception {
 		URI uri = URI.create(baseUrl + "/status/ok");
 		HttpComponentsClientHttpRequest request = (HttpComponentsClientHttpRequest)

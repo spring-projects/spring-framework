@@ -12,7 +12,6 @@ Kotlin and the Spring Framework:
 * https://kotlin.link/[Awesome Kotlin]
 
 
-
 [[examples]]
 == Examples
 

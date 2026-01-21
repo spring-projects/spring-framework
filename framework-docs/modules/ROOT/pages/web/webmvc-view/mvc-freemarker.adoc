@@ -8,95 +8,18 @@ kind of text output from HTML to email and others. The Spring Framework has buil
 integration for using Spring MVC with FreeMarker templates.
 
 
-
 [[mvc-view-freemarker-contextconfig]]
 == View Configuration
 [.small]#xref:web/webflux-view.adoc#webflux-view-freemarker-contextconfig[See equivalent in the Reactive stack]#
 
 The following example shows how to configure FreeMarker as a view technology:
 
-[tabs]
-======
-Java::
-+
-[source,java,indent=0,subs="verbatim,quotes"]
-----
-		@Configuration
-		@EnableWebMvc
-		public class WebConfig implements WebMvcConfigurer {
-
-			@Override
-			public void configureViewResolvers(ViewResolverRegistry registry) {
-				registry.freeMarker();
-			}
-
-			// Configure FreeMarker...
-
-			@Bean
-			public FreeMarkerConfigurer freeMarkerConfigurer() {
-				FreeMarkerConfigurer configurer = new FreeMarkerConfigurer();
-				configurer.setTemplateLoaderPath("/WEB-INF/freemarker");
-				configurer.setDefaultCharset(StandardCharsets.UTF_8);
-				return configurer;
-			}
-		}
-----
-
-Kotlin::
-+
-[source,kotlin,indent=0,subs="verbatim,quotes"]
-----
-	@Configuration
-	@EnableWebMvc
-	class WebConfig : WebMvcConfigurer {
-
-		override fun configureViewResolvers(registry: ViewResolverRegistry) {
-			registry.freeMarker()
-		}
-
-		// Configure FreeMarker...
-
-		@Bean
-		fun freeMarkerConfigurer() = FreeMarkerConfigurer().apply {
-			setTemplateLoaderPath("/WEB-INF/freemarker")
-			setDefaultCharset(StandardCharsets.UTF_8)
-		}
-	}
-----
-======
-
-The following example shows how to configure the same in XML:
-
-[source,xml,indent=0,subs="verbatim,quotes"]
-----
-	<mvc:annotation-driven/>
-
-	<mvc:view-resolvers>
-		<mvc:freemarker/>
-	</mvc:view-resolvers>
-
-	<!-- Configure FreeMarker... -->
-	<mvc:freemarker-configurer>
-		<mvc:template-loader-path location="/WEB-INF/freemarker"/>
-	</mvc:freemarker-configurer>
-----
-
-Alternatively, you can also declare the `FreeMarkerConfigurer` bean for full control over all
-properties, as the following example shows:
-
-[source,xml,indent=0,subs="verbatim,quotes"]
-----
-	<bean id="freemarkerConfig" class="org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer">
-		<property name="templateLoaderPath" value="/WEB-INF/freemarker/"/>
-		<property name="defaultEncoding" value="UTF-8"/>
-	</bean>
-----
+include-code::./WebConfiguration[tag=snippet,indent=0]
 
 Your templates need to be stored in the directory specified by the `FreeMarkerConfigurer`
 shown in the preceding example. Given the preceding configuration, if your controller
 returns a view name of `welcome`, the resolver looks for the
 `/WEB-INF/freemarker/welcome.ftl` template.
-
 
 
 [[mvc-views-freemarker]]
@@ -109,34 +32,21 @@ properties on the `FreeMarkerConfigurer` bean. The `freemarkerSettings` property
 a `java.util.Properties` object, and the `freemarkerVariables` property requires a
 `java.util.Map`. The following example shows how to use a `FreeMarkerConfigurer`:
 
-[source,xml,indent=0,subs="verbatim,quotes"]
-----
-	<bean id="freemarkerConfig" class="org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer">
-		<property name="templateLoaderPath" value="/WEB-INF/freemarker/"/>
-		<property name="freemarkerVariables">
-			<map>
-				<entry key="xml_escape" value-ref="fmXmlEscape"/>
-			</map>
-		</property>
-	</bean>
-
-	<bean id="fmXmlEscape" class="freemarker.template.utility.XmlEscape"/>
-----
+include-code::./WebConfiguration[tag=snippet,indent=0]
 
 See the FreeMarker documentation for details of settings and variables as they apply to
 the `Configuration` object.
 
 
-
 [[mvc-view-freemarker-forms]]
 == Form Handling
+[.small]#xref:web/webflux-view.adoc#webflux-view-freemarker-forms[See equivalent in the Reactive stack]#
 
 Spring provides a tag library for use in JSPs that contains, among others, a
 `<spring:bind/>` element. This element primarily lets forms display values from
 form-backing objects and show the results of failed validations from a `Validator` in the
 web or business tier. Spring also has support for the same functionality in FreeMarker,
 with additional convenience macros for generating form input elements themselves.
-
 
 [[mvc-view-bind-macros]]
 === The Bind Macros
@@ -151,7 +61,6 @@ to calling code and user templates. The following sections concentrate only on t
 you need to directly call from within your templates. If you wish to view the macro code
 directly, the file is called `spring.ftl` and is in the
 `org.springframework.web.servlet.view.freemarker` package.
-
 
 [[mvc-view-simple-binding]]
 === Simple Binding
@@ -195,7 +104,6 @@ that explicitly specifies whether HTML escaping should be used in the status err
 messages or values. You can set it to `true` or `false` as required. Additional form
 handling macros simplify the use of HTML escaping, and you should use these macros
 wherever possible. They are explained in the next section.
-
 
 [[mvc-views-form-macros]]
 === Input Macros
@@ -417,7 +325,6 @@ user still sees the more user-friendly city names, as follows:
 	<input type="radio" name="address.town" value="NYC">New York</input>
 ----
 
-
 [[mvc-views-form-macros-html-escaping]]
 === HTML Escaping
 
@@ -454,7 +361,3 @@ In similar fashion, you can specify HTML escaping per field, as the following ex
 	<#assign htmlEscape = false in spring>
 	<#-- all future fields will be bound with HTML escaping off -->
 ----
-
-
-
-

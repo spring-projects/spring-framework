@@ -2,7 +2,7 @@ import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import org.springframework.build.shadow.ShadowSource
 
 plugins {
-	id 'me.champeau.mrjar'
+	id 'org.springframework.build.multiReleaseJar'
 }
 
 description = "Spring Core"
@@ -11,54 +11,59 @@ apply plugin: "kotlin"
 apply plugin: "kotlinx-serialization"
 
 multiRelease {
-	targetVersions 17, 21
+	releaseVersions 21, 24
 }
 
-def javapoetVersion = "1.13.0"
+def javapoetVersion = "0.7.0"
 def objenesisVersion = "3.4"
 
 configurations {
 	java21Api.extendsFrom(api)
 	java21Implementation.extendsFrom(implementation)
+	java24Api.extendsFrom(api)
 	javapoet
 	objenesis
 	graalvm
 }
 
-task javapoetRepackJar(type: ShadowJar) {
+def javaPoetConfig = configurations.javapoet
+tasks.register('javapoetRepackJar', ShadowJar) {
 	archiveBaseName = 'spring-javapoet-repack'
 	archiveVersion = javapoetVersion
-	configurations = [project.configurations.javapoet]
-	relocate('com.squareup.javapoet', 'org.springframework.javapoet')
+	configurations = [javaPoetConfig]
+	relocate('com.palantir.javapoet', 'org.springframework.javapoet')
 }
 
-task javapoetSource(type: ShadowSource) {
-	configurations = [project.configurations.javapoet]
-	relocate('com.squareup.javapoet', 'org.springframework.javapoet')
-	outputDirectory = file("build/shadow-source/javapoet")
+def javaPoetDir = project.file("build/shadow-source/javapoet")
+tasks.register('javapoetSource', ShadowSource) {
+	configurations = [javaPoetConfig]
+	relocate('com.palantir.javapoet', 'org.springframework.javapoet')
+	outputDirectory = javaPoetDir
 }
 
-task javapoetSourceJar(type: Jar) {
+tasks.register('javapoetSourceJar', Jar) {
 	archiveBaseName = 'spring-javapoet-repack'
 	archiveVersion = javapoetVersion
 	archiveClassifier = 'sources'
 	from javapoetSource
 }
 
-task objenesisRepackJar(type: ShadowJar) {
+def objenesisConfig = configurations.objenesis
+tasks.register('objenesisRepackJar', ShadowJar) {
 	archiveBaseName = 'spring-objenesis-repack'
 	archiveVersion = objenesisVersion
-	configurations = [project.configurations.objenesis]
+	configurations = [objenesisConfig]
 	relocate('org.objenesis', 'org.springframework.objenesis')
 }
 
-task objenesisSource(type: ShadowSource) {
-	configurations = [project.configurations.objenesis]
+def objenesisDir = project.file("build/shadow-source/objenesis")
+tasks.register('objenesisSource', ShadowSource) {
+	configurations = [objenesisConfig]
 	relocate('org.objenesis', 'org.springframework.objenesis')
-	outputDirectory = file("build/shadow-source/objenesis")
+	outputDirectory = objenesisDir
 }
 
-task objenesisSourceJar(type: Jar) {
+tasks.register('objenesisSourceJar', Jar) {
 	archiveBaseName = 'spring-objenesis-repack'
 	archiveVersion = objenesisVersion
 	archiveClassifier = 'sources'
@@ -66,7 +71,7 @@ task objenesisSourceJar(type: Jar) {
 }
 
 dependencies {
-	javapoet("com.squareup:javapoet:${javapoetVersion}@jar")
+	javapoet("com.palantir.javapoet:javapoet:${javapoetVersion}@jar")
 	objenesis("org.objenesis:objenesis:${objenesisVersion}@jar")
 	api(files(javapoetRepackJar))
 	api(files(objenesisRepackJar))
@@ -77,7 +82,6 @@ dependencies {
 	compileOnly("org.graalvm.sdk:graal-sdk")
 	optional("io.micrometer:context-propagation")
 	optional("io.netty:netty-buffer")
-	optional("io.netty:netty5-buffer")
 	optional("io.projectreactor:reactor-core")
 	optional("io.reactivex.rxjava3:rxjava")
 	optional("io.smallrye.reactive:mutiny")
@@ -88,22 +92,24 @@ dependencies {
 	optional("org.jetbrains.kotlin:kotlin-stdlib")
 	optional("org.jetbrains.kotlinx:kotlinx-coroutines-core")
 	optional("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
+    testCompileOnly("com.github.ben-manes.caffeine:caffeine")
 	testFixturesImplementation("io.projectreactor:reactor-test")
 	testFixturesImplementation("org.assertj:assertj-core")
+	testFixturesImplementation("org.junit.jupiter:junit-jupiter")
 	testFixturesImplementation("org.junit.platform:junit-platform-launcher")
-	testFixturesImplementation("org.junit.jupiter:junit-jupiter-api")
-	testFixturesImplementation("org.junit.jupiter:junit-jupiter-params")
 	testFixturesImplementation("org.xmlunit:xmlunit-assertj")
 	testImplementation("com.fasterxml.jackson.core:jackson-databind")
 	testImplementation("com.fasterxml.woodstox:woodstox-core")
 	testImplementation("com.google.code.findbugs:jsr305")
-	testImplementation("com.squareup.okhttp3:mockwebserver")
+	testImplementation("com.squareup.okhttp3:mockwebserver3")
 	testImplementation("io.projectreactor:reactor-test")
 	testImplementation("io.projectreactor.tools:blockhound")
 	testImplementation("jakarta.annotation:jakarta.annotation-api")
 	testImplementation("jakarta.xml.bind:jakarta.xml.bind-api")
 	testImplementation("org.jetbrains.kotlinx:kotlinx-serialization-json")
 	testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
+	testImplementation("io.micrometer:context-propagation")
+	testImplementation("io.micrometer:micrometer-observation-test")
 	testImplementation("org.mockito:mockito-core")
 	testImplementation("com.networknt:json-schema-validator");
 	testImplementation("org.skyscreamer:jsonassert")

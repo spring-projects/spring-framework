@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ReactiveHttpOutputMessage;
 import org.springframework.http.client.MultipartBodyBuilder;
-import org.springframework.http.codec.json.Jackson2JsonEncoder;
+import org.springframework.http.codec.json.JacksonJsonEncoder;
 import org.springframework.http.codec.multipart.MultipartHttpMessageWriter;
 import org.springframework.http.codec.protobuf.ProtobufDecoder;
 import org.springframework.http.codec.protobuf.ProtobufEncoder;
@@ -76,7 +76,7 @@ class CancelWithoutDemandCodecTests {
 
 	@Test // gh-22107
 	public void cancelWithJackson() {
-		Jackson2JsonEncoder encoder = new Jackson2JsonEncoder();
+		JacksonJsonEncoder encoder = new JacksonJsonEncoder();
 
 		Flux<DataBuffer> flux = encoder.encode(Flux.just(new Pojo("foofoo", "barbar"), new Pojo("bar", "baz")),
 				this.bufferFactory, ResolvableType.forClass(Pojo.class),
@@ -150,7 +150,7 @@ class CancelWithoutDemandCodecTests {
 	@Test // gh-22107
 	public void cancelWithSse() {
 		ServerSentEvent<?> event = ServerSentEvent.builder().data("bar").id("c42").event("foo").build();
-		ServerSentEventHttpMessageWriter writer = new ServerSentEventHttpMessageWriter(new Jackson2JsonEncoder());
+		ServerSentEventHttpMessageWriter writer = new ServerSentEventHttpMessageWriter(new JacksonJsonEncoder());
 		CancellingOutputMessage outputMessage = new CancellingOutputMessage(this.bufferFactory);
 
 		writer.write(Mono.just(event), ResolvableType.forClass(ServerSentEvent.class), MediaType.TEXT_EVENT_STREAM,
@@ -229,4 +229,5 @@ class CancelWithoutDemandCodecTests {
 			// Just subscribe without requesting
 		}
 	}
+
 }

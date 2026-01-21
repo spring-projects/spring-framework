@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,11 +26,12 @@ import org.jspecify.annotations.Nullable;
 import org.springframework.util.Assert;
 
 /**
- * Simple {@link DestinationResolver} implementation resolving destination names
- * as dynamic destinations.
+ * A basic {@link DestinationResolver} implementation freshly resolving
+ * destination names as dynamic destinations against a given {@link Session}.
  *
  * @author Juergen Hoeller
  * @since 1.1
+ * @see SimpleDestinationResolver
  * @see jakarta.jms.Session#createQueue
  * @see jakarta.jms.Session#createTopic
  */

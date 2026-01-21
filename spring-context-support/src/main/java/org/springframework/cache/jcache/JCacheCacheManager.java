@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,8 +31,6 @@ import org.springframework.util.Assert;
 /**
  * {@link org.springframework.cache.CacheManager} implementation
  * backed by a JCache {@link CacheManager javax.cache.CacheManager}.
- *
- * <p>Note: This class has been updated for JCache 1.0, as of Spring 4.0.
  *
  * @author Juergen Hoeller
  * @author Stephane Nicoll
@@ -130,6 +128,19 @@ public class JCacheCacheManager extends AbstractTransactionSupportingCacheManage
 			return new JCacheCache(jcache, isAllowNullValues());
 		}
 		return null;
+	}
+
+	@Override
+	public void resetCaches() {
+		CacheManager cacheManager = getCacheManager();
+		if (cacheManager != null && !cacheManager.isClosed()) {
+			for (String cacheName : cacheManager.getCacheNames()) {
+				javax.cache.Cache<Object, Object> jcache = cacheManager.getCache(cacheName);
+				if (jcache != null && !jcache.isClosed()) {
+					jcache.clear();
+				}
+			}
+		}
 	}
 
 }

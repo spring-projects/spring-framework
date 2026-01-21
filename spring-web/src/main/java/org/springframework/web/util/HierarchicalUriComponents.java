@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -442,11 +443,10 @@ final class HierarchicalUriComponents extends UriComponents {
 		UriTemplateVariables queryVariables = new QueryUriTemplateVariables(variables);
 		this.queryParams.forEach((key, values) -> {
 			String name = expandUriComponent(key, queryVariables, this.variableEncoder);
-			List<String> expandedValues = new ArrayList<>(values.size());
+			List<String> expandedValues = result.computeIfAbsent(name, k -> new ArrayList<>(values.size()));
 			for (String value : values) {
 				expandedValues.add(expandUriComponent(value, queryVariables, this.variableEncoder));
 			}
-			result.put(name, expandedValues);
 		});
 		return CollectionUtils.unmodifiableMultiValueMap(result);
 	}
@@ -1089,6 +1089,9 @@ final class HierarchicalUriComponents extends UriComponents {
 			Object value = this.delegate.getValue(name);
 			if (ObjectUtils.isArray(value)) {
 				value = StringUtils.arrayToCommaDelimitedString(ObjectUtils.toObjectArray(value));
+			}
+			else if (value instanceof Collection<?> collection) {
+				value = StringUtils.collectionToCommaDelimitedString(collection);
 			}
 			return value;
 		}

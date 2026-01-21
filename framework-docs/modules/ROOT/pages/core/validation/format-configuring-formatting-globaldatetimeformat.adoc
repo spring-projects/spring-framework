@@ -19,6 +19,3 @@ Note there are extra considerations when configuring date and time formats in we
 applications. Please see
 xref:web/webmvc/mvc-config/conversion.adoc[WebMVC Conversion and Formatting] or
 xref:web/webflux/config.adoc#webflux-config-conversion[WebFlux Conversion and Formatting].
-
-
-

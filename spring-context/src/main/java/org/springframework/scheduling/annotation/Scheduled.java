@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -206,14 +206,14 @@ public @interface Scheduled {
 	 * {@link #fixedRate} or {@link #fixedDelay} task.
 	 * <p>The duration String can be in several formats:
 	 * <ul>
-	 *     <li>a plain integer &mdash; which is interpreted to represent a duration in
-	 *     milliseconds by default unless overridden via {@link #timeUnit()} (prefer
-	 *     using {@link #fixedDelay()} in that case)</li>
-	 *     <li>any of the known {@link org.springframework.format.annotation.DurationFormat.Style
-	 *     DurationFormat.Style}: the {@link org.springframework.format.annotation.DurationFormat.Style#ISO8601 ISO8601}
-	 *     style or the {@link org.springframework.format.annotation.DurationFormat.Style#SIMPLE SIMPLE} style
-	 *     &mdash; using the {@link #timeUnit()} as fallback if the string doesn't contain an explicit unit</li>
-	 *     <li>one of the above, with Spring-style "${...}" placeholders as well as SpEL expressions</li>
+	 * <li>a plain integer &mdash; which is interpreted to represent a duration in
+	 * milliseconds by default unless overridden via {@link #timeUnit()} (prefer
+	 * using {@link #fixedDelay()} in that case)</li>
+	 * <li>any of the known {@link org.springframework.format.annotation.DurationFormat.Style
+	 * DurationFormat.Style}: the {@link org.springframework.format.annotation.DurationFormat.Style#ISO8601 ISO8601}
+	 * style or the {@link org.springframework.format.annotation.DurationFormat.Style#SIMPLE SIMPLE} style
+	 * &mdash; using the {@link #timeUnit()} as fallback if the string doesn't contain an explicit unit</li>
+	 * <li>one of the above, with Spring-style "${...}" placeholders as well as SpEL expressions</li>
 	 * </ul>
 	 * @return the initial delay as a String value &mdash; for example a placeholder,
 	 * or a {@link org.springframework.format.annotation.DurationFormat.Style#ISO8601 java.time.Duration} compliant value
@@ -227,7 +227,7 @@ public @interface Scheduled {
 	 * The {@link TimeUnit} to use for {@link #fixedDelay}, {@link #fixedDelayString},
 	 * {@link #fixedRate}, {@link #fixedRateString}, {@link #initialDelay}, and
 	 * {@link #initialDelayString}.
-	 * <p>Defaults to {@link TimeUnit#MILLISECONDS}.
+	 * <p>The default is {@link TimeUnit#MILLISECONDS}.
 	 * <p>This attribute is ignored for {@linkplain #cron() cron expressions}
 	 * and for {@link java.time.Duration} values supplied via {@link #fixedDelayString},
 	 * {@link #fixedRateString}, or {@link #initialDelayString}.

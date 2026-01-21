@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.orm.jpa;
 
+import java.sql.Connection;
 import java.sql.SQLException;
 
 import jakarta.persistence.EntityManager;
@@ -78,7 +79,7 @@ public interface JpaDialect extends PersistenceExceptionTranslator {
 	 * @throws org.springframework.transaction.TransactionException in case of invalid arguments
 	 * @see #cleanupTransaction
 	 * @see jakarta.persistence.EntityTransaction#begin
-	 * @see org.springframework.jdbc.datasource.DataSourceUtils#prepareConnectionForTransaction
+	 * @see org.springframework.jdbc.datasource.DataSourceUtils#prepareConnectionForTransaction(Connection, TransactionDefinition)
 	 */
 	@Nullable Object beginTransaction(EntityManager entityManager, TransactionDefinition definition)
 			throws PersistenceException, SQLException, TransactionException;

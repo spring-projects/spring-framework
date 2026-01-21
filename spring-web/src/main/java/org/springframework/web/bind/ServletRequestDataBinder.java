@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -69,7 +69,7 @@ import org.springframework.web.util.WebUtils;
  * // trigger actual binding of request parameters
  * binder.bind(request);
  * // optionally evaluate binding errors
- * Errors errors = binder.getErrors();
+ * BindingResult bindingResult = binder.getBindingResult();
  * ...</pre>
  *
  * @author Rod Johnson
@@ -228,7 +228,7 @@ public class ServletRequestDataBinder extends WebDataBinder {
 		}
 
 		@Override
-		public @Nullable final Object resolveValue(String name, Class<?> paramType) {
+		public final @Nullable Object resolveValue(String name, Class<?> paramType) {
 			Object value = getRequestParameter(name, paramType);
 			if (value == null) {
 				value = this.dataBinder.resolvePrefixValue(name, paramType, this::getRequestParameter);
@@ -241,10 +241,6 @@ public class ServletRequestDataBinder extends WebDataBinder {
 
 		protected @Nullable Object getRequestParameter(String name, Class<?> type) {
 			Object value = this.request.getParameterValues(name);
-			if (value == null && !name.endsWith("[]") &&
-					(List.class.isAssignableFrom(type) || type.isArray())) {
-				value = this.request.getParameterValues(name + "[]");
-			}
 			return (ObjectUtils.isArray(value) && Array.getLength(value) == 1 ? Array.get(value, 0) : value);
 		}
 

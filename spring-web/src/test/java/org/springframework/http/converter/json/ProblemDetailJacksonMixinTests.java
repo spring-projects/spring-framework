@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,9 +18,12 @@ package org.springframework.http.converter.json;
 
 import java.net.URI;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import org.json.JSONException;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.dataformat.xml.XmlMapper;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
@@ -36,7 +39,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 class ProblemDetailJacksonMixinTests {
 
-	private final ObjectMapper mapper = new Jackson2ObjectMapperBuilder().build();
+	private final ObjectMapper mapper = JsonMapper.builder().addMixIn(ProblemDetail.class, ProblemDetailJacksonMixin.class).build();
 
 
 	@Test
@@ -45,7 +48,6 @@ class ProblemDetailJacksonMixinTests {
 		testWrite(detail,
 				"""
 				{
-					"type": "about:blank",
 					"title": "Bad Request",
 					"status": 400,
 					"detail": "Missing header"
@@ -60,7 +62,6 @@ class ProblemDetailJacksonMixinTests {
 
 		testWrite(detail, """
 				{
-					"type": "about:blank",
 					"title": "Bad Request",
 					"status": 400,
 					"detail": "Missing header",
@@ -70,7 +71,7 @@ class ProblemDetailJacksonMixinTests {
 	}
 
 	@Test
-	void readCustomProperty() throws Exception {
+	void readCustomProperty() {
 		ProblemDetail detail = this.mapper.readValue("""
 				{
 					"type": "about:blank",
@@ -91,8 +92,8 @@ class ProblemDetailJacksonMixinTests {
 	}
 
 	@Test
-	void readCustomPropertyFromXml() throws Exception {
-		ObjectMapper xmlMapper = new Jackson2ObjectMapperBuilder().createXmlMapper(true).build();
+	void readCustomPropertyFromXml() {
+		ObjectMapper xmlMapper = XmlMapper.builder().addMixIn(ProblemDetail.class, ProblemDetailJacksonMixin.class).build();
 		ProblemDetail detail = xmlMapper.readValue("""
 				<problem xmlns="urn:ietf:rfc:7807">
 					<type>about:blank</type>
@@ -109,7 +110,7 @@ class ProblemDetailJacksonMixinTests {
 		assertThat(detail.getProperties()).containsEntry("host", "abc.org");
 	}
 
-	private void testWrite(ProblemDetail problemDetail, String expected) throws Exception {
+	private void testWrite(ProblemDetail problemDetail, String expected) throws JSONException {
 		String output = this.mapper.writeValueAsString(problemDetail);
 		JSONAssert.assertEquals(expected, output, false);
 	}

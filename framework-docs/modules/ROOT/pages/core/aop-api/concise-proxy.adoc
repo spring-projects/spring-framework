@@ -65,7 +65,3 @@ that, if you have a (parent) bean definition that you intend to use only as a te
 and this definition specifies a class, you must make sure to set the `abstract`
 attribute to `true`. Otherwise, the application context actually tries to
 pre-instantiate it.
-
-
-
-

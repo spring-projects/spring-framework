@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,12 +37,13 @@ import javax.lang.model.element.TypeElement;
 
 /**
  * Annotation {@link Processor} that writes a {@link CandidateComponentsMetadata}
- * file for spring components.
+ * file for Spring components.
  *
  * @author Stephane Nicoll
  * @author Juergen Hoeller
  * @since 5.0
- * @deprecated as of 6.1, in favor of the AOT engine.
+ * @deprecated as of 6.1, in favor of the AOT engine and the forthcoming
+ * support for an AOT-generated Spring components index
  */
 @Deprecated(since = "6.1", forRemoval = true)
 public class CandidateComponentsIndexer implements Processor {

@@ -3,7 +3,8 @@
 
 [.small]#xref:web/webflux/controller/ann-methods/responseentity.adoc[See equivalent in the Reactive stack]#
 
-`ResponseEntity` is like xref:web/webmvc/mvc-controller/ann-methods/responsebody.adoc[`@ResponseBody`] but with status and headers. For example:
+`ResponseEntity` is like xref:web/webmvc/mvc-controller/ann-methods/responsebody.adoc[`@ResponseBody`]
+but with status and headers. For example:
 
 [tabs]
 ======
@@ -54,5 +55,3 @@ types for the body. This allows the following types of async responses:
 * `Mono<ResponseEntity<T>>` provides all three -- response status, headers, and body,
   asynchronously at a later point. This allows the response status and headers to vary
   depending on the outcome of asynchronous request handling.
-
-

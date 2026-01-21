@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,8 @@ package org.springframework.web.servlet;
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.http.HttpServletRequest;
 import org.jspecify.annotations.Nullable;
+
+import org.springframework.web.accept.ApiVersionHolder;
 
 /**
  * Interface to be implemented by objects that define a mapping between
@@ -68,13 +70,13 @@ public interface HandlerMapping {
 	 * {@link org.springframework.web.util.UrlPathHelper} could be the full path
 	 * or without the context path, decoded or not, etc.
 	 * @since 5.2
-	 * @deprecated as of 5.3 in favor of
+	 * @deprecated in favor of
 	 * {@link org.springframework.web.util.UrlPathHelper#PATH_ATTRIBUTE} and
 	 * {@link org.springframework.web.util.ServletRequestPathUtils#PATH_ATTRIBUTE}.
 	 * To access the cached path used for request mapping, use
 	 * {@link org.springframework.web.util.ServletRequestPathUtils#getCachedPathValue(ServletRequest)}.
 	 */
-	@Deprecated
+	@Deprecated(since = "5.3")
 	String LOOKUP_PATH = HandlerMapping.class.getName() + ".lookupPath";
 
 	/**
@@ -134,6 +136,14 @@ public interface HandlerMapping {
 	 * this request attribute to be present in all scenarios.
 	 */
 	String PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE = HandlerMapping.class.getName() + ".producibleMediaTypes";
+
+	/**
+	 * Name of the {@link HttpServletRequest} attribute that contains an
+	 * {@link ApiVersionHolder} with the
+	 * result of obtaining and parsing the API version of the request.
+	 * @since 7.0
+	 */
+	String API_VERSION_ATTRIBUTE = HandlerMapping.class.getName() + ".apiVersion";
 
 
 	/**

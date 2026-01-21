@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,6 +39,7 @@ class SimplePersistenceManagedTypes implements PersistenceManagedTypes {
 
 	SimplePersistenceManagedTypes(List<String> managedClassNames, List<String> managedPackages,
 			@Nullable URL persistenceUnitRootUrl) {
+
 		this.managedClassNames = managedClassNames;
 		this.managedPackages = managedPackages;
 		this.persistenceUnitRootUrl = persistenceUnitRootUrl;
@@ -47,6 +48,7 @@ class SimplePersistenceManagedTypes implements PersistenceManagedTypes {
 	SimplePersistenceManagedTypes(List<String> managedClassNames, List<String> managedPackages) {
 		this(managedClassNames, managedPackages, null);
 	}
+
 
 	@Override
 	public List<String> getManagedClassNames() {

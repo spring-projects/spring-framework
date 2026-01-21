@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -155,7 +155,7 @@ public class JmsResourceHolder extends ResourceHolderSupport {
 			this.sessions.add(session);
 			if (connection != null) {
 				Deque<Session> sessions =
-						this.sessionsPerConnection.computeIfAbsent(connection, k -> new ArrayDeque<>());
+						this.sessionsPerConnection.computeIfAbsent(connection, key -> new ArrayDeque<>());
 				sessions.add(session);
 			}
 		}

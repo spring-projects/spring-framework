@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ import java.net.InetSocketAddress;
 import java.net.URI;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -67,6 +67,9 @@ class HttpHeadersTests {
 		// content-type value is cached by ReadOnlyHttpHeaders
 		assertThat(readOnly.getContentType()).isEqualTo(MediaType.APPLICATION_JSON);
 		assertThat(writable.getContentType()).isEqualTo(MediaType.TEXT_PLAIN);
+		// The HttpHeaders "copy constructor" creates an HttpHeaders instance
+		// that mutates the state of the original HttpHeaders instance.
+		assertThat(headers.getContentType()).isEqualTo(MediaType.TEXT_PLAIN);
 	}
 
 	@Test
@@ -75,6 +78,22 @@ class HttpHeadersTests {
 		HttpHeaders firewallHeaders = new HttpHeaders(originalExchangeHeaders);
 		HttpHeaders writeable = new HttpHeaders(firewallHeaders);
 		writeable.setContentType(MediaType.APPLICATION_JSON);
+	}
+
+	@Test
+	void copyOfCopiesHeaders() {
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		headers.add("X-Project", "Spring");
+		headers.add("X-Project", "Framework");
+		HttpHeaders readOnly = HttpHeaders.readOnlyHttpHeaders(headers);
+		assertThat(readOnly.getContentType()).isEqualTo(MediaType.APPLICATION_JSON);
+
+		HttpHeaders writable = HttpHeaders.copyOf(readOnly);
+		writable.setContentType(MediaType.TEXT_PLAIN);
+		// content-type value is cached by ReadOnlyHttpHeaders
+		assertThat(readOnly.getContentType()).isEqualTo(MediaType.APPLICATION_JSON);
+		assertThat(writable.getContentType()).isEqualTo(MediaType.TEXT_PLAIN);
+		assertThat(writable.get("X-Project")).contains("Spring", "Framework");
 	}
 
 	@Test
@@ -351,7 +370,7 @@ class HttpHeadersTests {
 
 	@Test
 	void expiresZonedDateTime() {
-		ZonedDateTime zonedDateTime = ZonedDateTime.of(2008, 12, 18, 10, 20, 0, 0, ZoneId.of("GMT"));
+		ZonedDateTime zonedDateTime = ZonedDateTime.of(2008, 12, 18, 10, 20, 0, 0, ZoneOffset.UTC);
 		headers.setExpires(zonedDateTime);
 		assertThat(headers.getExpires()).as("Invalid Expires header").isEqualTo(zonedDateTime.toInstant().toEpochMilli());
 		assertThat(headers.getFirst("expires")).as("Invalid Expires header").isEqualTo("Thu, 18 Dec 2008 10:20:00 GMT");
@@ -586,7 +605,7 @@ class HttpHeadersTests {
 
 	@Test
 	void firstZonedDateTime() {
-		ZonedDateTime date = ZonedDateTime.of(2017, 6, 2, 2, 22, 0, 0, ZoneId.of("GMT"));
+		ZonedDateTime date = ZonedDateTime.of(2017, 6, 2, 2, 22, 0, 0, ZoneOffset.UTC);
 		headers.setZonedDateTime(HttpHeaders.DATE, date);
 		assertThat(headers.getFirst(HttpHeaders.DATE)).isEqualTo("Fri, 02 Jun 2017 02:22:00 GMT");
 		assertThat(headers.getFirstZonedDateTime(HttpHeaders.DATE).isEqual(date)).isTrue();

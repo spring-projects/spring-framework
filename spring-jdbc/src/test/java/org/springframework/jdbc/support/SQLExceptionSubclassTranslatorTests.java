@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,7 +43,7 @@ import org.springframework.dao.RecoverableDataAccessException;
 import org.springframework.dao.TransientDataAccessResourceException;
 import org.springframework.jdbc.BadSqlGrammarException;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.jdbc.support.SQLStateSQLExceptionTranslatorTests.buildBatchUpdateException;
 
 /**
  * @author Thomas Risberg
@@ -51,43 +51,50 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 class SQLExceptionSubclassTranslatorTests {
 
+	private final SQLExceptionTranslator translator = new SQLExceptionSubclassTranslator();
+
+
 	@Test
 	void exceptionClassTranslation() {
-		doTest(new SQLDataException("", "", 0), DataIntegrityViolationException.class);
-		doTest(new SQLFeatureNotSupportedException("", "", 0), InvalidDataAccessApiUsageException.class);
-		doTest(new SQLIntegrityConstraintViolationException("", "", 0), DataIntegrityViolationException.class);
-		doTest(new SQLIntegrityConstraintViolationException("", "23505", 0), DuplicateKeyException.class);
-		doTest(new SQLIntegrityConstraintViolationException("", "23000", 1), DuplicateKeyException.class);
-		doTest(new SQLIntegrityConstraintViolationException("", "23000", 1062), DuplicateKeyException.class);
-		doTest(new SQLIntegrityConstraintViolationException("", "23000", 2601), DuplicateKeyException.class);
-		doTest(new SQLIntegrityConstraintViolationException("", "23000", 2627), DuplicateKeyException.class);
-		doTest(new SQLInvalidAuthorizationSpecException("", "", 0), PermissionDeniedDataAccessException.class);
-		doTest(new SQLNonTransientConnectionException("", "", 0), DataAccessResourceFailureException.class);
-		doTest(new SQLRecoverableException("", "", 0), RecoverableDataAccessException.class);
-		doTest(new SQLSyntaxErrorException("", "", 0), BadSqlGrammarException.class);
-		doTest(new SQLTimeoutException("", "", 0), QueryTimeoutException.class);
-		doTest(new SQLTransactionRollbackException("", "", 0), PessimisticLockingFailureException.class);
-		doTest(new SQLTransactionRollbackException("", "40001", 0), CannotAcquireLockException.class);
-		doTest(new SQLTransientConnectionException("", "", 0), TransientDataAccessResourceException.class);
+		assertTranslation(new SQLDataException("", "", 0), DataIntegrityViolationException.class);
+		assertTranslation(new SQLFeatureNotSupportedException("", "", 0), InvalidDataAccessApiUsageException.class);
+		assertTranslation(new SQLIntegrityConstraintViolationException("", "", 0), DataIntegrityViolationException.class);
+		assertTranslation(new SQLIntegrityConstraintViolationException("", "23505", 0), DuplicateKeyException.class);
+		assertTranslation(new SQLIntegrityConstraintViolationException("", "23000", 1), DuplicateKeyException.class);
+		assertTranslation(new SQLIntegrityConstraintViolationException("", "23000", 1062), DuplicateKeyException.class);
+		assertTranslation(new SQLIntegrityConstraintViolationException("", "23000", 2601), DuplicateKeyException.class);
+		assertTranslation(new SQLIntegrityConstraintViolationException("", "23000", 2627), DuplicateKeyException.class);
+		assertTranslation(new SQLInvalidAuthorizationSpecException("", "", 0), PermissionDeniedDataAccessException.class);
+		assertTranslation(new SQLNonTransientConnectionException("", "", 0), DataAccessResourceFailureException.class);
+		assertTranslation(new SQLRecoverableException("", "", 0), RecoverableDataAccessException.class);
+		assertTranslation(new SQLSyntaxErrorException("", "", 0), BadSqlGrammarException.class);
+		assertTranslation(new SQLTimeoutException("", "", 0), QueryTimeoutException.class);
+		assertTranslation(new SQLTransactionRollbackException("", "", 0), PessimisticLockingFailureException.class);
+		assertTranslation(new SQLTransactionRollbackException("", "40001", 0), CannotAcquireLockException.class);
+		assertTranslation(new SQLTransientConnectionException("", "", 0), TransientDataAccessResourceException.class);
+	}
+
+	@Test
+	void batchExceptionTranslation() {
+		assertTranslation(buildBatchUpdateException("JZ", new SQLIntegrityConstraintViolationException("", "23505", 0)),
+				DuplicateKeyException.class);
+		assertTranslation(buildBatchUpdateException(null, new SQLIntegrityConstraintViolationException("", "23505", 0)),
+				DuplicateKeyException.class);
 	}
 
 	@Test
 	void fallbackStateTranslation() {
 		// Test fallback. We assume that no database will ever return this error code,
 		// but 07xxx will be bad grammar picked up by the fallback SQLState translator
-		doTest(new SQLException("", "07xxx", 666666666), BadSqlGrammarException.class);
+		assertTranslation(new SQLException("", "07xxx", 666666666), BadSqlGrammarException.class);
 		// and 08xxx will be data resource failure (non-transient) picked up by the fallback SQLState translator
-		doTest(new SQLException("", "08xxx", 666666666), DataAccessResourceFailureException.class);
+		assertTranslation(new SQLException("", "08xxx", 666666666), DataAccessResourceFailureException.class);
 	}
 
 
-	private void doTest(SQLException ex, Class<?> dataAccessExceptionType) {
-		SQLExceptionTranslator translator = new SQLExceptionSubclassTranslator();
-		DataAccessException dax = translator.translate("task", "SQL", ex);
-
-		assertThat(dax).as("Specific translation must not result in null").isNotNull();
-		assertThat(dax).as("Wrong DataAccessException type returned").isExactlyInstanceOf(dataAccessExceptionType);
-		assertThat(dax.getCause()).as("The exact same original SQLException must be preserved").isSameAs(ex);
+	private void assertTranslation(SQLException ex, Class<?> dataAccessExceptionType) {
+		DataAccessException dae = translator.translate("task", "SQL", ex);
+		SQLStateSQLExceptionTranslatorTests.assertTranslation(dae, ex, dataAccessExceptionType);
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,8 +21,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 import org.jspecify.annotations.Nullable;
 
@@ -35,7 +33,7 @@ import org.springframework.web.servlet.ModelAndView;
 
 /**
  * A specialization of {@link ResponseBodyEmitter} for sending
- * <a href="https://www.w3.org/TR/eventsource/">Server-Sent Events</a>.
+ * <a href="https://html.spec.whatwg.org/multipage/server-sent-events.html">Server-Sent Events</a>.
  *
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
@@ -47,10 +45,6 @@ public class SseEmitter extends ResponseBodyEmitter {
 
 	private static final MediaType TEXT_PLAIN = new MediaType("text", "plain", StandardCharsets.UTF_8);
 
-	/**
-	 * Guards access to write operations on the response.
-	 */
-	private final Lock writeLock = new ReentrantLock();
 
 	/**
 	 * Create a new SseEmitter instance.

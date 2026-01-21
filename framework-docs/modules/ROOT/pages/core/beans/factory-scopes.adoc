@@ -56,7 +56,6 @@ For instructions on how to register this or any other custom scope, see
 xref:core/beans/factory-scopes.adoc#beans-factory-scopes-custom-using[Using a Custom Scope].
 
 
-
 [[beans-factory-scopes-singleton]]
 == The Singleton Scope
 
@@ -89,7 +88,6 @@ following example:
 	<!-- the following is equivalent, though redundant (singleton scope is the default) -->
 	<bean id="accountService" class="com.something.DefaultAccountService" scope="singleton"/>
 ----
-
 
 
 [[beans-factory-scopes-prototype]]
@@ -134,7 +132,6 @@ be handled by the client. (For details on the lifecycle of a bean in the Spring
 container, see xref:core/beans/factory-nature.adoc#beans-factory-lifecycle[Lifecycle Callbacks].)
 
 
-
 [[beans-factory-scopes-sing-prot-interaction]]
 == Singleton Beans with Prototype-bean Dependencies
 
@@ -152,7 +149,6 @@ and injects its dependencies. If you need a new instance of a prototype bean at
 runtime more than once, see xref:core/beans/dependencies/factory-method-injection.adoc[Method Injection].
 
 
-
 [[beans-factory-scopes-other]]
 == Request, Session, Application, and WebSocket Scopes
 
@@ -161,8 +157,6 @@ if you use a web-aware Spring `ApplicationContext` implementation (such as
 `XmlWebApplicationContext`). If you use these scopes with regular Spring IoC containers,
 such as the `ClassPathXmlApplicationContext`, an `IllegalStateException` that complains
 about an unknown bean scope is thrown.
-
-
 
 [[beans-factory-scopes-other-web-configuration]]
 === Initial Web Configuration
@@ -223,8 +217,6 @@ the same thing, namely bind the HTTP request object to the `Thread` that is serv
 that request. This makes beans that are request- and session-scoped available further
 down the call chain.
 
-
-
 [[beans-factory-scopes-request]]
 === Request scope
 
@@ -271,8 +263,6 @@ Kotlin::
 	}
 ----
 ======
-
-
 
 [[beans-factory-scopes-session]]
 === Session Scope
@@ -322,8 +312,6 @@ Kotlin::
 ----
 ======
 
-
-
 [[beans-factory-scopes-application]]
 === Application Scope
 
@@ -371,16 +359,12 @@ Kotlin::
 ----
 ======
 
-
-
 [[beans-factory-scopes-websocket]]
 === WebSocket Scope
 
 WebSocket scope is associated with the lifecycle of a WebSocket session and applies to
 STOMP over WebSocket applications, see
 xref:web/websocket/stomp/scope.adoc[WebSocket scope] for more details.
-
-
 
 [[beans-factory-scopes-other-injection]]
 === Scoped Beans as Dependencies
@@ -539,8 +523,6 @@ interfaces. The following example shows a proxy based on an interface:
 For more detailed information about choosing class-based or interface-based proxying,
 see xref:core/aop/proxying.adoc[Proxying Mechanisms].
 
-
-
 [[beans-factory-scopes-injection]]
 === Injecting Request/Session References Directly
 
@@ -553,14 +535,12 @@ objects which has the advantage of working in singleton beans and serializable b
 as well, similar to scoped proxies for factory-scoped beans.
 
 
-
 [[beans-factory-scopes-custom]]
 == Custom Scopes
 
 The bean scoping mechanism is extensible. You can define your own
 scopes or even redefine existing scopes, although the latter is considered bad practice
 and you cannot override the built-in `singleton` and `prototype` scopes.
-
 
 [[beans-factory-scopes-custom-creating]]
 === Creating a Custom Scope
@@ -663,8 +643,6 @@ Kotlin::
 
 This identifier is different for each scope. For a session scoped implementation, this
 identifier can be the session identifier.
-
-
 
 [[beans-factory-scopes-custom-using]]
 === Using a Custom Scope
@@ -773,7 +751,3 @@ of the scope. You can also do the `Scope` registration declaratively, by using t
 NOTE: When you place `<aop:scoped-proxy/>` within a `<bean>` declaration for a
 `FactoryBean` implementation, it is the factory bean itself that is scoped, not the object
 returned from `getObject()`.
-
-
-
-

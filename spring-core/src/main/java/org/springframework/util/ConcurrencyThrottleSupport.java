@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,8 +34,8 @@ import org.apache.commons.logging.LogFactory;
  * appropriate points of its workflow. Note that {@code afterAccess}
  * should usually be called in a {@code finally} block!
  *
- * <p>The default concurrency limit of this support class is -1
- * ("unbounded concurrency"). Subclasses may override this default;
+ * <p>The default concurrency limit of this support class is
+ * {@link #UNBOUNDED_CONCURRENCY}. Subclasses may override this default;
  * check the javadoc of the concrete class that you're using.
  *
  * @author Juergen Hoeller
@@ -50,12 +50,19 @@ import org.apache.commons.logging.LogFactory;
 public abstract class ConcurrencyThrottleSupport implements Serializable {
 
 	/**
-	 * Permit any number of concurrent invocations: that is, don't throttle concurrency.
+	 * Concurrency limit which signals unbounded concurrency: {@value}.
+	 * <p>Setting the limit to this value permits unbounded concurrent access:
+	 * that is, concurrency will not be throttled.
+	 * @see #NO_CONCURRENCY
 	 */
 	public static final int UNBOUNDED_CONCURRENCY = -1;
 
 	/**
-	 * Switch concurrency 'off': that is, don't allow any concurrent invocations.
+	 * Concurrency limit which signals that concurrency throttling has been
+	 * disabled: {@value}.
+	 * <p>Setting the limit to this value prevents all access.
+	 * @see #beforeAccess()
+	 * @see #UNBOUNDED_CONCURRENCY
 	 */
 	public static final int NO_CONCURRENCY = 0;
 
@@ -74,12 +81,13 @@ public abstract class ConcurrencyThrottleSupport implements Serializable {
 
 	/**
 	 * Set the maximum number of concurrent access attempts allowed.
-	 * The default of -1 indicates no concurrency limit at all.
+	 * The default of {@value #UNBOUNDED_CONCURRENCY} indicates no concurrency
+	 * limit at all.
 	 * <p>In principle, this limit can be changed at runtime,
 	 * although it is generally designed as a config time setting.
-	 * <p>NOTE: Do not switch between -1 and any concrete limit at runtime,
-	 * as this will lead to inconsistent concurrency counts: A limit
-	 * of -1 effectively turns off concurrency counting completely.
+	 * <p>NOTE: Do not switch between {@code -1} and any concrete limit at runtime,
+	 * as this will lead to inconsistent concurrency counts. A limit
+	 * of {@code -1} effectively turns off concurrency counting completely.
 	 */
 	public void setConcurrencyLimit(int concurrencyLimit) {
 		this.concurrencyLimit = concurrencyLimit;
@@ -105,37 +113,20 @@ public abstract class ConcurrencyThrottleSupport implements Serializable {
 	/**
 	 * To be invoked before the main execution logic of concrete subclasses.
 	 * <p>This implementation applies the concurrency throttle.
+	 * @see #onLimitReached()
 	 * @see #afterAccess()
 	 */
 	protected void beforeAccess() {
 		if (this.concurrencyLimit == NO_CONCURRENCY) {
-			throw new IllegalStateException(
-					"Currently no invocations allowed - concurrency limit set to NO_CONCURRENCY");
+			onAccessRejected("Concurrency limit set to NO_CONCURRENCY - not allowed to enter");
 		}
 		if (this.concurrencyLimit > 0) {
-			boolean debug = logger.isDebugEnabled();
 			this.concurrencyLock.lock();
 			try {
-				boolean interrupted = false;
-				while (this.concurrencyCount >= this.concurrencyLimit) {
-					if (interrupted) {
-						throw new IllegalStateException("Thread was interrupted while waiting for invocation access, " +
-								"but concurrency limit still does not allow for entering");
-					}
-					if (debug) {
-						logger.debug("Concurrency count " + this.concurrencyCount +
-								" has reached limit " + this.concurrencyLimit + " - blocking");
-					}
-					try {
-						this.concurrencyCondition.await();
-					}
-					catch (InterruptedException ex) {
-						// Re-interrupt current thread, to allow other threads to react.
-						Thread.currentThread().interrupt();
-						interrupted = true;
-					}
+				if (this.concurrencyCount >= this.concurrencyLimit) {
+					onLimitReached();
 				}
-				if (debug) {
+				if (logger.isDebugEnabled()) {
 					logger.debug("Entering throttle at concurrency count " + this.concurrencyCount);
 				}
 				this.concurrencyCount++;
@@ -144,6 +135,48 @@ public abstract class ConcurrencyThrottleSupport implements Serializable {
 				this.concurrencyLock.unlock();
 			}
 		}
+	}
+
+	/**
+	 * Triggered by {@link #beforeAccess()} when the concurrency limit has been reached.
+	 * The default implementation blocks until the concurrency count allows for entering.
+	 * @since 6.2.6
+	 */
+	protected void onLimitReached() {
+		boolean interrupted = false;
+		while (this.concurrencyCount >= this.concurrencyLimit) {
+			if (interrupted) {
+				onAccessRejected("Thread was interrupted while waiting for access " +
+						"but concurrency limit still does not allow for entering");
+			}
+			if (logger.isDebugEnabled()) {
+				logger.debug("Concurrency count " + this.concurrencyCount +
+						" has reached limit " + this.concurrencyLimit + " - blocking");
+			}
+			try {
+				this.concurrencyCondition.await();
+			}
+			catch (InterruptedException ex) {
+				// Re-interrupt current thread, to allow other threads to react.
+				Thread.currentThread().interrupt();
+				interrupted = true;
+			}
+		}
+	}
+
+	/**
+	 * Triggered when access has been rejected due to the concurrency policy
+	 * or due to interruption.
+	 * <p>Implementations will typically throw a corresponding exception.
+	 * When returning normally, regular access will still be attempted.
+	 * <p>The default implementation throws an {@link IllegalStateException}.
+	 * @param msg the rejection message (common exception messages are designed
+	 * so that they can be appended with an identifier separated by a space
+	 * in custom subclasses)
+	 * @since 7.0.4
+	 */
+	protected void onAccessRejected(String msg) {
+		throw new IllegalStateException(msg);
 	}
 
 	/**

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,15 +19,17 @@ package org.springframework.transaction.annotation;
 import org.springframework.transaction.TransactionManager;
 
 /**
- * Interface to be implemented by @{@link org.springframework.context.annotation.Configuration
- * Configuration} classes annotated with @{@link EnableTransactionManagement} that wish to
- * (or need to) explicitly specify the default {@code PlatformTransactionManager} bean
- * (or {@code ReactiveTransactionManager} bean) to be used for annotation-driven
- * transaction management, as opposed to the default approach of a by-type lookup.
- * One reason this might be necessary is if there are two {@code PlatformTransactionManager}
- * beans (or two {@code ReactiveTransactionManager} beans) present in the container.
+ * Interface to be implemented for explicitly specifying the default
+ * {@link org.springframework.transaction.PlatformTransactionManager} bean
+ * (or {@link org.springframework.transaction.ReactiveTransactionManager} bean)
+ * to be used for annotation-driven transaction management, as opposed to the
+ * default approach of a by-type lookup. One reason this might be necessary is
+ * if there are two {@code PlatformTransactionManager} beans (or two
+ * {@code ReactiveTransactionManager} beans) present in the container.
  *
- * <p>See @{@link EnableTransactionManagement} for general examples and context;
+ * <p>Typically implemented by @{@link org.springframework.context.annotation.Configuration
+ * Configuration} classes annotated with @{@link EnableTransactionManagement}.
+ * See @{@link EnableTransactionManagement} for general examples and context;
  * see {@link #annotationDrivenTransactionManager()} for detailed instructions.
  *
  * <p><b>NOTE: A {@code TransactionManagementConfigurer} will get initialized early.</b>

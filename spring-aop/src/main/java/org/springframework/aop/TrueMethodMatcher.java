@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,8 @@ package org.springframework.aop;
 
 import java.io.Serializable;
 import java.lang.reflect.Method;
+
+import org.jspecify.annotations.Nullable;
 
 /**
  * Canonical MethodMatcher instance that matches all methods.
@@ -48,7 +50,7 @@ final class TrueMethodMatcher implements MethodMatcher, Serializable {
 	}
 
 	@Override
-	public boolean matches(Method method, Class<?> targetClass, Object... args) {
+	public boolean matches(Method method, Class<?> targetClass, @Nullable Object... args) {
 		// Should never be invoked as isRuntime returns false.
 		throw new UnsupportedOperationException();
 	}

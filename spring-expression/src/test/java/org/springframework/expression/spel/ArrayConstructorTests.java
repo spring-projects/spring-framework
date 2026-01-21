@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,7 +52,7 @@ class ArrayConstructorTests extends AbstractExpressionTests {
 		evaluateArrayBuildingExpression("new short[]{2,3,4,5,6}", "{2, 3, 4, 5, 6}");
 		evaluateArrayBuildingExpression("new double[]{1d,2d,3d,4d}", "{1.0, 2.0, 3.0, 4.0}");
 		evaluateArrayBuildingExpression("new float[]{1f,2f,3f,4f}", "{1.0, 2.0, 3.0, 4.0}");
-		evaluateArrayBuildingExpression("new byte[]{1,2,3,4}", "{1, 2, 3, 4}");
+		evaluateArrayBuildingExpression("new byte[]{1,2,3,4}", "{01020304}");
 
 		evaluate("new int[]{}.length", "0", Integer.class);
 	}

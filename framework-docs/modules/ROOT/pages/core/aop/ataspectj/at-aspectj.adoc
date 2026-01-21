@@ -32,6 +32,3 @@ stereotype annotation that qualifies, as per the rules of Spring's component sca
 NOTE: In Spring AOP, aspects themselves cannot be the targets of advice from other
 aspects. The `@Aspect` annotation on a class marks it as an aspect and, hence, excludes
 it from auto-proxying.
-
-
-

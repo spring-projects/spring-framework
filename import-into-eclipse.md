@@ -54,4 +54,4 @@ _When instructed to execute `./gradlew` from the command line, be sure to execut
 
 In any case, please do not check in your own generated `.classpath` file, `.project`
 file, or `.settings` folder. You'll notice these files are already intentionally in
-`.gitignore`. The same policy holds for IDEA metadata.
+`.gitignore`. The same policy holds for IntelliJ IDEA metadata.

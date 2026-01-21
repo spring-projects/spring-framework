@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.util;
 
 import java.util.Iterator;
+import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 
@@ -216,6 +217,21 @@ class LinkedCaseInsensitiveMapTests {
 		assertThat(map).isEmpty();
 		map.computeIfAbsent("key", k -> "newvalue");
 		assertThat(map.get("key")).isEqualTo("newvalue");
+	}
+
+	@Test
+	void entrySetContainsIsCaseInsensitive() {
+		map.put("Key", "value");
+		assertThat(map.entrySet().contains(Map.entry("KEY", "value"))).isTrue();
+		assertThat(map.entrySet().contains(Map.entry("key", "value"))).isTrue();
+		assertThat(map.entrySet().contains(Map.entry("Key", "value"))).isTrue();
+	}
+
+	@Test
+	void entrySetRemoveIsCaseInsensitive() {
+		map.put("Key", "value");
+		assertThat(map.entrySet().remove(Map.entry("KEY", "value"))).isTrue();
+		assertThat(map).isEmpty();
 	}
 
 	private void nextAndRemove(Iterator<?> iterator) {

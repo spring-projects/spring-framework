@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -65,9 +65,9 @@ public interface ClassMetadata {
 	boolean isFinal();
 
 	/**
-	 * Determine whether the underlying class is independent, i.e. whether
-	 * it is a top-level class or a nested class (static inner class) that
-	 * can be constructed independently of an enclosing class.
+	 * Determine whether the underlying class is independent, i.e. whether it is
+	 * a top-level class or a static nested class that can be constructed
+	 * independently of an enclosing class.
 	 */
 	boolean isIndependent();
 

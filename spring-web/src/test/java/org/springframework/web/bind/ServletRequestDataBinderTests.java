@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -91,32 +91,6 @@ class ServletRequestDataBinderTests {
 		request.removeParameter("postProcessed");
 		binder.bind(request);
 		assertThat(target.isPostProcessed()).isFalse();
-	}
-
-	@Test
-	public void testFieldWithArrayIndex() {
-		TestBean target = new TestBean();
-		ServletRequestDataBinder binder = new ServletRequestDataBinder(target);
-		binder.setIgnoreUnknownFields(false);
-
-		MockHttpServletRequest request = new MockHttpServletRequest();
-		request.addParameter("stringArray[0]", "ONE");
-		request.addParameter("stringArray[1]", "TWO");
-		binder.bind(request);
-		assertThat(target.getStringArray()).containsExactly("ONE", "TWO");
-	}
-
-	@Test
-	public void testFieldWithEmptyArrayIndex() {
-		TestBean target = new TestBean();
-		ServletRequestDataBinder binder = new ServletRequestDataBinder(target);
-		binder.setIgnoreUnknownFields(false);
-
-		MockHttpServletRequest request = new MockHttpServletRequest();
-		request.addParameter("stringArray[]", "ONE");
-		request.addParameter("stringArray[]", "TWO");
-		binder.bind(request);
-		assertThat(target.getStringArray()).containsExactly("ONE", "TWO");
 	}
 
 	@Test

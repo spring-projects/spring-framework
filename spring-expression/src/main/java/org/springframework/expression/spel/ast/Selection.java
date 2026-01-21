@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.EvaluationException;
@@ -35,13 +36,26 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 
 /**
- * Represents selection over a map or collection.
+ * Represents selection over a {@link Map}, {@link Iterable}, or array.
  *
  * <p>For example, <code>{1,2,3,4,5,6,7,8,9,10}.?[#isEven(#this)]</code> evaluates
  * to {@code [2, 4, 6, 8, 10]}.
  *
  * <p>Basically a subset of the input data is returned based on the evaluation of
  * the expression supplied as selection criteria.
+ *
+ * <h3>Null-safe Selection</h3>
+ *
+ * <p>Null-safe selection is supported via the {@code '?.?'} operator. For example,
+ * {@code 'names?.?[#this.length > 5]'} will evaluate to {@code null} if {@code names}
+ * is {@code null} and will otherwise evaluate to a sequence containing the names
+ * whose length is greater than 5. As of Spring Framework 7.0, null-safe selection
+ * also applies when performing selection on an {@link Optional} target. For example,
+ * if {@code names} is of type {@code Optional<List<String>>}, the expression
+ * {@code 'names?.?[#this.length > 5]'} will evaluate to {@code null} if {@code names}
+ * is {@code null} or {@link Optional#isEmpty() empty} and will otherwise evaluate
+ * to a sequence containing the names whose lengths are greater than 5, effectively
+ * {@code names.get().stream().filter(s -> s.length() > 5).toList()}.
  *
  * @author Andy Clement
  * @author Mark Fisher
@@ -94,8 +108,25 @@ public class Selection extends SpelNodeImpl {
 
 	@Override
 	protected ValueRef getValueRef(ExpressionState state) throws EvaluationException {
-		TypedValue op = state.getActiveContextObject();
-		Object operand = op.getValue();
+		TypedValue contextObject = state.getActiveContextObject();
+		Object operand = contextObject.getValue();
+
+		if (isNullSafe()) {
+			if (operand == null) {
+				return ValueRef.NullValueRef.INSTANCE;
+			}
+			if (operand instanceof Optional<?> optional) {
+				if (optional.isEmpty()) {
+					return ValueRef.NullValueRef.INSTANCE;
+				}
+				operand = optional.get();
+			}
+		}
+
+		if (operand == null) {
+			throw new SpelEvaluationException(getStartPosition(), SpelMessage.INVALID_TYPE_FOR_SELECTION, "null");
+		}
+
 		SpelNodeImpl selectionCriteria = this.children[0];
 
 		if (operand instanceof Map<?, ?> mapdata) {
@@ -151,9 +182,9 @@ public class Selection extends SpelNodeImpl {
 				try {
 					state.pushActiveContextObject(new TypedValue(element));
 					state.enterScope();
-					Object val = selectionCriteria.getValueInternal(state).getValue();
-					if (val instanceof Boolean b) {
-						if (b) {
+					Object criteria = selectionCriteria.getValueInternal(state).getValue();
+					if (criteria instanceof Boolean match) {
+						if (match) {
 							if (this.variant == FIRST) {
 								return new ValueRef.TypedValueHolderValueRef(new TypedValue(element), this);
 							}
@@ -184,7 +215,7 @@ public class Selection extends SpelNodeImpl {
 			}
 
 			Class<?> elementType = null;
-			TypeDescriptor typeDesc = op.getTypeDescriptor();
+			TypeDescriptor typeDesc = contextObject.getTypeDescriptor();
 			if (typeDesc != null) {
 				TypeDescriptor elementTypeDesc = typeDesc.getElementTypeDescriptor();
 				if (elementTypeDesc != null) {
@@ -196,13 +227,6 @@ public class Selection extends SpelNodeImpl {
 			Object resultArray = Array.newInstance(elementType, result.size());
 			System.arraycopy(result.toArray(), 0, resultArray, 0, result.size());
 			return new ValueRef.TypedValueHolderValueRef(new TypedValue(resultArray), this);
-		}
-
-		if (operand == null) {
-			if (this.nullSafe) {
-				return ValueRef.NullValueRef.INSTANCE;
-			}
-			throw new SpelEvaluationException(getStartPosition(), SpelMessage.INVALID_TYPE_FOR_SELECTION, "null");
 		}
 
 		throw new SpelEvaluationException(getStartPosition(), SpelMessage.INVALID_TYPE_FOR_SELECTION,

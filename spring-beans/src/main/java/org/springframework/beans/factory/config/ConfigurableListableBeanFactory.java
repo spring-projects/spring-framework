@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -154,12 +154,25 @@ public interface ConfigurableListableBeanFactory
 	boolean isConfigurationFrozen();
 
 	/**
+	 * Mark current thread as main bootstrap thread for singleton instantiation,
+	 * with lenient bootstrap locking applying for background threads.
+	 * <p>Any such marker is to be removed at the end of the managed bootstrap in
+	 * {@link #preInstantiateSingletons()}.
+	 * @since 6.2.12
+	 * @see #setBootstrapExecutor
+	 * @see #preInstantiateSingletons()
+	 */
+	default void prepareSingletonBootstrap() {
+	}
+
+	/**
 	 * Ensure that all non-lazy-init singletons are instantiated, also considering
 	 * {@link org.springframework.beans.factory.FactoryBean FactoryBeans}.
 	 * Typically invoked at the end of factory setup, if desired.
 	 * @throws BeansException if one of the singleton beans could not be created.
 	 * Note: This may have left the factory with some beans already initialized!
 	 * Call {@link #destroySingletons()} for full cleanup in this case.
+	 * @see #prepareSingletonBootstrap()
 	 * @see #destroySingletons()
 	 */
 	void preInstantiateSingletons() throws BeansException;

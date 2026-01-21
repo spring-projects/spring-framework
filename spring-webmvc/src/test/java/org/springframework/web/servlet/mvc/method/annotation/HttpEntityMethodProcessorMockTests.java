@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
-import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.Collections;
@@ -96,9 +96,6 @@ import static org.springframework.web.servlet.HandlerMapping.PRODUCIBLE_MEDIA_TY
  * @author Brian Clozel
  */
 class HttpEntityMethodProcessorMockTests {
-
-	private static final ZoneId GMT = ZoneId.of("GMT");
-
 
 	private HttpEntityMethodProcessor processor;
 
@@ -476,7 +473,7 @@ class HttpEntityMethodProcessorMockTests {
 	void shouldHandleLastModifiedWithHttp304() throws Exception {
 		long currentTime = new Date().getTime();
 		long oneMinuteAgo = currentTime - (1000 * 60);
-		ZonedDateTime dateTime = ofEpochMilli(currentTime).atZone(GMT);
+		ZonedDateTime dateTime = ofEpochMilli(currentTime).atZone(ZoneOffset.UTC);
 		servletRequest.addHeader(HttpHeaders.IF_MODIFIED_SINCE, RFC_1123_DATE_TIME.format(dateTime));
 		ResponseEntity<String> returnValue = ResponseEntity.ok().lastModified(oneMinuteAgo).body("body");
 
@@ -536,7 +533,7 @@ class HttpEntityMethodProcessorMockTests {
 		long currentTime = new Date().getTime();
 		long oneMinuteAgo = currentTime - (1000 * 60);
 		String etagValue = "\"deadb33f8badf00d\"";
-		ZonedDateTime dateTime = ofEpochMilli(currentTime).atZone(GMT);
+		ZonedDateTime dateTime = ofEpochMilli(currentTime).atZone(ZoneOffset.UTC);
 		servletRequest.addHeader(HttpHeaders.IF_MODIFIED_SINCE, RFC_1123_DATE_TIME.format(dateTime));
 		servletRequest.addHeader(HttpHeaders.IF_NONE_MATCH, etagValue);
 		ResponseEntity<String> returnValue = ResponseEntity.ok()
@@ -568,7 +565,7 @@ class HttpEntityMethodProcessorMockTests {
 		long oneMinuteAgo = currentTime - (1000 * 60);
 		String etagValue = "\"deadb33f8badf00d\"";
 		String changedEtagValue = "\"changed-etag-value\"";
-		ZonedDateTime dateTime = ofEpochMilli(currentTime).atZone(GMT);
+		ZonedDateTime dateTime = ofEpochMilli(currentTime).atZone(ZoneOffset.UTC);
 		servletRequest.addHeader(HttpHeaders.IF_MODIFIED_SINCE, RFC_1123_DATE_TIME.format(dateTime));
 		servletRequest.addHeader(HttpHeaders.IF_NONE_MATCH, etagValue);
 		ResponseEntity<String> returnValue = ResponseEntity.ok()
@@ -624,7 +621,7 @@ class HttpEntityMethodProcessorMockTests {
 	void shouldHandleIfNoneMatchIfUnmodifiedSince() throws Exception {
 		String etagValue = "\"some-etag\"";
 		servletRequest.addHeader(HttpHeaders.IF_NONE_MATCH, etagValue);
-		ZonedDateTime dateTime = ofEpochMilli(new Date().getTime()).atZone(GMT);
+		ZonedDateTime dateTime = ofEpochMilli(new Date().getTime()).atZone(ZoneOffset.UTC);
 		servletRequest.addHeader(HttpHeaders.IF_UNMODIFIED_SINCE, RFC_1123_DATE_TIME.format(dateTime));
 		ResponseEntity<String> returnValue = ResponseEntity.ok().eTag(etagValue).body("body");
 
@@ -731,7 +728,7 @@ class HttpEntityMethodProcessorMockTests {
 	@Test
 	void shouldNotFailPreconditionForPutRequests() throws Exception {
 		servletRequest.setMethod("PUT");
-		ZonedDateTime dateTime = ofEpochMilli(new Date().getTime()).atZone(GMT);
+		ZonedDateTime dateTime = ofEpochMilli(new Date().getTime()).atZone(ZoneOffset.UTC);
 		servletRequest.addHeader(HttpHeaders.IF_UNMODIFIED_SINCE, RFC_1123_DATE_TIME.format(dateTime));
 
 		long justModified = dateTime.plusSeconds(1).toEpochSecond() * 1000;

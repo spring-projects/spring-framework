@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import java.util.Locale;
 import java.util.TimeZone;
 import java.util.function.Consumer;
 
+import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -90,7 +91,7 @@ class HeaderAssertionTests {
 		testClient.get().uri("/persons/1").header(IF_MODIFIED_SINCE, minuteAgo)
 				.exchange()
 				.expectStatus().isOk()
-				.expectHeader().value(LAST_MODIFIED, equalTo(now));
+				.expectHeader().value(LAST_MODIFIED, v -> MatcherAssert.assertThat(v, equalTo(now)));
 	}
 
 	@Test
@@ -106,7 +107,8 @@ class HeaderAssertionTests {
 		testClient.get().uri("/persons/1")
 				.exchange()
 				.expectStatus().isOk()
-				.expectHeader().values(VARY, hasItems(containsString("foo"), startsWith("bar")));
+				.expectHeader().values(VARY, v ->
+						MatcherAssert.assertThat(v, hasItems(containsString("foo"), startsWith("bar"))));
 	}
 
 	@Test
@@ -140,7 +142,7 @@ class HeaderAssertionTests {
 		testClient.get().uri("/persons/1").header(IF_MODIFIED_SINCE, now)
 				.exchange()
 				.expectStatus().isNotModified()
-				.expectHeader().value("X-Custom-Header", nullValue());
+				.expectHeader().value("X-Custom-Header", v -> MatcherAssert.assertThat(v, nullValue()));
 	}
 
 	@Test
@@ -202,8 +204,11 @@ class HeaderAssertionTests {
 		long secondLater = this.currentTime + 1000;
 		String expected = this.dateFormat.format(new Date(secondLater));
 		assertIncorrectResponseHeader(spec -> spec.expectHeader().valueEquals(LAST_MODIFIED, expected), expected);
-		assertIncorrectResponseHeader(spec -> spec.expectHeader().value(LAST_MODIFIED, equalTo(expected)), expected);
-		// Comparison by date uses HttpHeaders to format the date in the error message.
+		assertIncorrectResponseHeader(spec -> spec.expectHeader().value(LAST_MODIFIED, value -> {
+			// Comparison by date uses HttpHeaders to format the date in the error message.
+			String reason = "Response header '" + LAST_MODIFIED + "'";
+			MatcherAssert.assertThat(reason, value, equalTo(expected));
+		}), expected);
 		HttpHeaders headers = new HttpHeaders();
 		headers.setDate("expected", secondLater);
 		assertIncorrectResponseHeader(spec -> spec.expectHeader().valueEqualsDate(LAST_MODIFIED, secondLater), expected);

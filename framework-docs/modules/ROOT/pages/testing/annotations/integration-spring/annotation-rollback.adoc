@@ -41,5 +41,3 @@ Kotlin::
 ----
 <1> Do not roll back the result.
 ======
-
-

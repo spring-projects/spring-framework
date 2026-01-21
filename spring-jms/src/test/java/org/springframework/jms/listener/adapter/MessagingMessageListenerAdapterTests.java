@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ import org.springframework.beans.factory.support.StaticListableBeanFactory;
 import org.springframework.jms.StubTextMessage;
 import org.springframework.jms.support.JmsHeaders;
 import org.springframework.jms.support.QosSettings;
-import org.springframework.jms.support.converter.MappingJackson2MessageConverter;
+import org.springframework.jms.support.converter.JacksonJsonMessageConverter;
 import org.springframework.jms.support.converter.MessageConverter;
 import org.springframework.jms.support.converter.MessageType;
 import org.springframework.jms.support.converter.MessagingMessageConverter;
@@ -70,7 +70,8 @@ class MessagingMessageListenerAdapterTests {
 
 	@BeforeEach
 	void setup() {
-		initializeFactory(factory);
+		factory.setBeanFactory(new StaticListableBeanFactory());
+		factory.afterPropertiesSet();
 	}
 
 	@Test
@@ -299,7 +300,7 @@ class MessagingMessageListenerAdapterTests {
 	@Test
 	void replyJackson() throws JMSException {
 		TextMessage reply = testReplyWithJackson("replyJackson",
-				"{\"counter\":42,\"name\":\"Response\",\"description\":\"lengthy description\"}");
+				"{\"name\":\"Response\",\"description\":\"lengthy description\",\"counter\":42}");
 		verify(reply).setObjectProperty("foo", "bar");
 	}
 
@@ -327,7 +328,7 @@ class MessagingMessageListenerAdapterTests {
 		given(session.createProducer(replyDestination)).willReturn(messageProducer);
 
 		MessagingMessageListenerAdapter listener = getPayloadInstance("Response", methodName, Message.class);
-		MappingJackson2MessageConverter messageConverter = new MappingJackson2MessageConverter();
+		JacksonJsonMessageConverter messageConverter = new JacksonJsonMessageConverter();
 		messageConverter.setTargetType(MessageType.TEXT);
 		listener.setMessageConverter(messageConverter);
 		listener.setDefaultResponseDestination(replyDestination);
@@ -403,11 +404,6 @@ class MessagingMessageListenerAdapterTests {
 		};
 		adapter.setHandlerMethod(factory.createInvocableHandlerMethod(sample, method));
 		return adapter;
-	}
-
-	private void initializeFactory(DefaultMessageHandlerMethodFactory factory) {
-		factory.setBeanFactory(new StaticListableBeanFactory());
-		factory.afterPropertiesSet();
 	}
 
 

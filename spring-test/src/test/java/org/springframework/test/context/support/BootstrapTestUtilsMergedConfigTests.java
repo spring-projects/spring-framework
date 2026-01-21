@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import org.assertj.core.api.AssertionsForClassTypes;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.context.annotation.Configuration;
@@ -271,10 +270,7 @@ class BootstrapTestUtilsMergedConfigTests extends AbstractContextConfigurationUt
 
 		MergedContextConfiguration parent = mergedConfig.getParent();
 		assertThat(parent).as("parent config").isNotNull();
-		// The following does not work -- at least not in Eclipse.
-		// assertThat(parent.getClasses())...
-		// So we use AssertionsForClassTypes directly.
-		AssertionsForClassTypes.assertThat(parent.getClasses()).containsExactly(FooConfig.class);
+		assertThat(parent.getClasses()).containsExactly(FooConfig.class);
 
 		assertMergedConfig(mergedConfig, testClass, EMPTY_STRING_ARRAY, expectedClasses,
 			AnnotationConfigContextLoader.class);
@@ -294,7 +290,7 @@ class BootstrapTestUtilsMergedConfigTests extends AbstractContextConfigurationUt
 
 		MergedContextConfiguration parent = mergedConfig.getParent();
 		assertThat(parent).as("parent config").isNotNull();
-		AssertionsForClassTypes.assertThat(parent.getClasses()).containsExactly(FooConfig.class);
+		assertThat(parent.getClasses()).containsExactly(FooConfig.class);
 
 		assertMergedConfig(mergedConfig, enclosingTestClass, EMPTY_STRING_ARRAY, expectedClasses,
 			AnnotationConfigContextLoader.class);
@@ -313,7 +309,7 @@ class BootstrapTestUtilsMergedConfigTests extends AbstractContextConfigurationUt
 
 		MergedContextConfiguration parent = mergedConfig.getParent();
 		assertThat(parent).as("parent config").isNotNull();
-		AssertionsForClassTypes.assertThat(parent.getClasses()).containsExactly(FooConfig.class);
+		assertThat(parent.getClasses()).containsExactly(FooConfig.class);
 
 		assertMergedConfig(mergedConfig, testClass, EMPTY_STRING_ARRAY, expectedClasses,
 			AnnotationConfigContextLoader.class);

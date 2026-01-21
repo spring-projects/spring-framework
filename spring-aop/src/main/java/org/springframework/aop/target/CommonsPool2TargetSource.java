@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,8 +46,6 @@ import org.springframework.util.Assert;
  * meaningful validation. All exposed Commons Pool properties use the
  * corresponding Commons Pool defaults.
  *
- * <p>Compatible with Apache Commons Pool 2.4, as of Spring 4.2.
- *
  * @author Rod Johnson
  * @author Rob Harrop
  * @author Juergen Hoeller
@@ -63,7 +61,7 @@ import org.springframework.util.Assert;
  * @see #setTimeBetweenEvictionRunsMillis
  * @see #setMinEvictableIdleTimeMillis
  */
-@SuppressWarnings({"rawtypes", "unchecked", "serial"})
+@SuppressWarnings({"rawtypes", "unchecked", "serial", "deprecation"})
 public class CommonsPool2TargetSource extends AbstractPoolingTargetSource implements PooledObjectFactory<Object> {
 
 	private int maxIdle = GenericObjectPoolConfig.DEFAULT_MAX_IDLE;

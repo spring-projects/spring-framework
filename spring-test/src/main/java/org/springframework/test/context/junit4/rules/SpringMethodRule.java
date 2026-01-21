@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -95,7 +95,11 @@ import org.springframework.test.context.junit4.statements.SpringRepeat;
  * @see SpringClassRule
  * @see org.springframework.test.context.TestContextManager
  * @see org.springframework.test.context.junit4.SpringJUnit4ClassRunner
+ * @deprecated since Spring Framework 7.0 in favor of the
+ * {@link org.springframework.test.context.junit.jupiter.SpringExtension SpringExtension}
+ * and JUnit Jupiter
  */
+@Deprecated(since = "7.0")
 public class SpringMethodRule implements MethodRule {
 
 	private static final Log logger = LogFactory.getLog(SpringMethodRule.class);

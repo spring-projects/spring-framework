@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import org.jspecify.annotations.Nullable;
 
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.framework.ReflectiveMethodInvocation;
+import org.springframework.core.KotlinDetector;
 import org.springframework.core.MethodIntrospector;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.annotation.AnnotatedElementUtils;
@@ -246,7 +247,9 @@ public final class RSocketServiceProxyFactory {
 			Method method = invocation.getMethod();
 			RSocketServiceMethod serviceMethod = this.serviceMethods.get(method);
 			if (serviceMethod != null) {
-				return serviceMethod.invoke(invocation.getArguments());
+				@Nullable Object[] arguments = KotlinDetector.isSuspendingFunction(method) ?
+						resolveCoroutinesArguments(invocation.getArguments()) : invocation.getArguments();
+				return serviceMethod.invoke(arguments);
 			}
 			if (method.isDefault()) {
 				if (invocation instanceof ReflectiveMethodInvocation reflectiveMethodInvocation) {
@@ -255,6 +258,12 @@ public final class RSocketServiceProxyFactory {
 				}
 			}
 			throw new IllegalStateException("Unexpected method invocation: " + method);
+		}
+
+		private static Object[] resolveCoroutinesArguments(@Nullable Object[] args) {
+			Object[] functionArgs = new Object[args.length - 1];
+			System.arraycopy(args, 0, functionArgs, 0, args.length - 1);
+			return functionArgs;
 		}
 	}
 

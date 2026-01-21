@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -144,9 +144,10 @@ public interface UriBuilder {
 	UriBuilder pathSegment(String... pathSegments) throws IllegalArgumentException;
 
 	/**
-	 * Parse the given query string into query parameters where parameters are
-	 * separated with {@code '&'} and their values, if any, with {@code '='}.
-	 * The query may contain URI template variables.
+	 * Parse the given query string into query parameters, and append them to
+	 * the query string. Query parameters are separated with {@code '&'} while
+	 * their values, if any, are separated with {@code '='}. The query string
+	 * may contain URI template variables.
 	 * <p><strong>Note: </strong> please, review the Javadoc of
 	 * {@link #queryParam(String, Object...)} for further notes on the treatment
 	 * and encoding of individual query parameters.

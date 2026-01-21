@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package org.springframework.messaging.core;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -38,29 +37,20 @@ import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
  */
 class DestinationResolvingMessagingTemplateTests {
 
-	private TestDestinationResolvingMessagingTemplate template;
+	private final TestDestinationResolvingMessagingTemplate template = new TestDestinationResolvingMessagingTemplate();
 
-	private ExecutorSubscribableChannel myChannel;
+	private final ExecutorSubscribableChannel myChannel = new ExecutorSubscribableChannel();
 
-	private Map<String, Object> headers;
+	private final Map<String, Object> headers = Map.of("key", "value");
 
-	private TestMessagePostProcessor postProcessor;
+	private final TestMessagePostProcessor postProcessor = new TestMessagePostProcessor();
 
 
 	@BeforeEach
 	void setup() {
-
 		TestMessageChannelDestinationResolver resolver = new TestMessageChannelDestinationResolver();
-
-		this.myChannel = new ExecutorSubscribableChannel();
 		resolver.registerMessageChannel("myChannel", this.myChannel);
-
-		this.template = new TestDestinationResolvingMessagingTemplate();
 		this.template.setDestinationResolver(resolver);
-
-		this.headers = Collections.singletonMap("key", "value");
-
-		this.postProcessor = new TestMessagePostProcessor();
 	}
 
 
@@ -76,8 +66,8 @@ class DestinationResolvingMessagingTemplateTests {
 	@Test
 	void sendNoDestinationResolver() {
 		TestDestinationResolvingMessagingTemplate template = new TestDestinationResolvingMessagingTemplate();
-		assertThatIllegalStateException().isThrownBy(() ->
-				template.send("myChannel", new GenericMessage<>("payload")));
+		assertThatIllegalStateException()
+				.isThrownBy(() -> template.send("myChannel", new GenericMessage<>("payload")));
 	}
 
 	@Test
@@ -240,19 +230,21 @@ class DestinationResolvingMessagingTemplateTests {
 		}
 	}
 
-}
 
-class TestMessageChannelDestinationResolver implements DestinationResolver<MessageChannel> {
+	private static class TestMessageChannelDestinationResolver implements DestinationResolver<MessageChannel> {
 
-	private final Map<String, MessageChannel> channels = new HashMap<>();
+		private final Map<String, MessageChannel> channels = new HashMap<>();
 
 
-	public void registerMessageChannel(String name, MessageChannel channel) {
-		this.channels.put(name, channel);
+		public void registerMessageChannel(String name, MessageChannel channel) {
+			this.channels.put(name, channel);
+		}
+
+		@Override
+		public MessageChannel resolveDestination(String name) throws DestinationResolutionException {
+			return this.channels.get(name);
+		}
+
 	}
 
-	@Override
-	public MessageChannel resolveDestination(String name) throws DestinationResolutionException {
-		return this.channels.get(name);
-	}
 }

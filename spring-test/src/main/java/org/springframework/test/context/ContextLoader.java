@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,12 +22,11 @@ import org.springframework.context.ApplicationContext;
  * Strategy interface for loading an {@link ApplicationContext} for an integration
  * test managed by the Spring TestContext Framework.
  *
- * <p><strong>NOTE</strong>: as of Spring Framework 6.0, {@code ContextLoader} is
- * effectively a marker interface and should not be implemented directly. Implement
- * {@link SmartContextLoader} instead of this interface in order to provide support
- * for annotated classes, active bean definition profiles, application context
- * initializers, and various other features not supported by methods defined in
- * the {@code ContextLoader} SPI.
+ * <p><strong>NOTE</strong>: {@code ContextLoader} is a marker interface and should
+ * not be implemented directly. Implement {@link SmartContextLoader} instead of this
+ * interface in order to provide support for annotated classes, active bean definition
+ * profiles, application context initializers, and various other features not supported
+ * by methods defined in the {@code ContextLoader} SPI.
  *
  * <p>Clients of a {@code ContextLoader} should call
  * {@link #processLocations(Class, String...) processLocations()} prior to

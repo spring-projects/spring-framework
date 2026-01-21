@@ -9,7 +9,6 @@ of a bean. This section groups them as follows:
 * xref:core/beans/factory-nature.adoc#aware-list[Other `Aware` Interfaces]
 
 
-
 [[beans-factory-lifecycle]]
 == Lifecycle Callbacks
 
@@ -40,8 +39,6 @@ also implement the `Lifecycle` interface so that those objects can participate i
 startup and shutdown process, as driven by the container's own lifecycle.
 
 The lifecycle callback interfaces are described in this section.
-
-
 
 [[beans-factory-lifecycle-initializingbean]]
 === Initialization Callbacks
@@ -156,8 +153,6 @@ the container's overall lifecycle management, including an auto-startup mechanis
 a pre-destroy stop step, and potential stop/restart callbacks (see below).
 ====
 
-
-
 [[beans-factory-lifecycle-disposablebean]]
 === Destruction Callbacks
 
@@ -267,8 +262,6 @@ You may also implement `SmartLifecycle` for a time-bound stop step where the con
 will wait for all such stop processing to complete before moving on to destroy methods.
 ====
 
-
-
 [[beans-factory-lifecycle-default-init-destroy-methods]]
 === Default Initialization and Destroy Methods
 
@@ -369,8 +362,6 @@ interceptors to the `init` method, because doing so would couple the lifecycle o
 target bean to its proxy or interceptors and leave strange semantics when your code
 interacts directly with the raw target bean.
 
-
-
 [[beans-factory-lifecycle-combined-effects]]
 === Combining Lifecycle Mechanisms
 
@@ -401,8 +392,6 @@ Destroy methods are called in the same order:
 . Methods annotated with `@PreDestroy`
 . `destroy()` as defined by the `DisposableBean` callback interface
 . A custom configured `destroy()` method
-
-
 
 [[beans-factory-lifecycle-processor]]
 === Startup and Shutdown Callbacks
@@ -526,8 +515,6 @@ its own `start()` method (unlike the context refresh, the context start does not
 automatically for a standard context implementation). The `phase` value and any
 "`depends-on`" relationships determine the startup order as described earlier.
 
-
-
 [[beans-factory-shutdown]]
 === Shutting Down the Spring IoC Container Gracefully in Non-Web Applications
 
@@ -590,8 +577,6 @@ Kotlin::
 ----
 ======
 
-
-
 [[beans-factory-thread-safety]]
 === Thread Safety and Visibility
 
@@ -623,7 +608,6 @@ there is a special case with the common stop before destroy arrangement: It is s
 recommended that the internal state in any such bean also allows for an immediate
 destroy callback without a preceding stop since this may happen during an extraordinary
 shutdown after a cancelled bootstrap or in case of a stop timeout caused by another bean.
-
 
 
 [[beans-factory-aware]]
@@ -680,7 +664,6 @@ shows the definition of the BeanNameAware interface:
 The callback is invoked after population of normal bean properties but before an
 initialization callback such as `InitializingBean.afterPropertiesSet()` or a custom
 init-method.
-
 
 
 [[aware-list]]
@@ -747,6 +730,3 @@ dependency type. The following table summarizes the most important `Aware` inter
 Note again that using these interfaces ties your code to the Spring API and does not
 follow the Inversion of Control style. As a result, we recommend them for infrastructure
 beans that require programmatic access to the container.
-
-
-

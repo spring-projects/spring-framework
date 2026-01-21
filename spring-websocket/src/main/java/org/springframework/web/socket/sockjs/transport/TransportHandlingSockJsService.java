@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,6 +51,7 @@ import org.springframework.web.socket.server.HandshakeInterceptor;
 import org.springframework.web.socket.server.support.HandshakeInterceptorChain;
 import org.springframework.web.socket.sockjs.SockJsException;
 import org.springframework.web.socket.sockjs.frame.Jackson2SockJsMessageCodec;
+import org.springframework.web.socket.sockjs.frame.JacksonJsonSockJsMessageCodec;
 import org.springframework.web.socket.sockjs.frame.SockJsMessageCodec;
 import org.springframework.web.socket.sockjs.support.AbstractSockJsService;
 
@@ -70,7 +71,10 @@ import org.springframework.web.socket.sockjs.support.AbstractSockJsService;
  */
 public class TransportHandlingSockJsService extends AbstractSockJsService implements SockJsServiceConfig, Lifecycle {
 
-	private static final boolean jackson2Present = ClassUtils.isPresent(
+	private static final boolean JACKSON_PRESENT = ClassUtils.isPresent(
+			"tools.jackson.databind.ObjectMapper", TransportHandlingSockJsService.class.getClassLoader());
+
+	private static final boolean JACKSON_2_PRESENT = ClassUtils.isPresent(
 			"com.fasterxml.jackson.databind.ObjectMapper", TransportHandlingSockJsService.class.getClassLoader());
 
 
@@ -105,6 +109,7 @@ public class TransportHandlingSockJsService extends AbstractSockJsService implem
 	 * initialized at start-up and shuts down when the application stops
 	 * @param handlers one or more {@link TransportHandler} implementations to use
 	 */
+	@SuppressWarnings("removal")
 	public TransportHandlingSockJsService(TaskScheduler scheduler, Collection<TransportHandler> handlers) {
 		super(scheduler);
 
@@ -118,7 +123,10 @@ public class TransportHandlingSockJsService extends AbstractSockJsService implem
 			}
 		}
 
-		if (jackson2Present) {
+		if (JACKSON_PRESENT) {
+			this.messageCodec = new JacksonJsonSockJsMessageCodec();
+		}
+		else if (JACKSON_2_PRESENT) {
 			this.messageCodec = new Jackson2SockJsMessageCodec();
 		}
 	}
@@ -295,10 +303,15 @@ public class TransportHandlingSockJsService extends AbstractSockJsService implem
 			}
 			else {
 				Principal principal = session.getPrincipal();
-				if (principal != null && !principal.equals(request.getPrincipal())) {
-					logger.debug("The user for the session does not match the user for the request.");
-					response.setStatusCode(HttpStatus.NOT_FOUND);
-					return;
+				if (principal != null) {
+					// Compare usernames, not full equality (different login timestamps)
+					Principal currentPrincipal = request.getPrincipal();
+					if (!principal.equals(currentPrincipal) &&
+							(currentPrincipal == null || !principal.getName().equals(currentPrincipal.getName()))) {
+						logger.debug("The user for the session does not match the user for the request.");
+						response.setStatusCode(HttpStatus.NOT_FOUND);
+						return;
+					}
 				}
 				if (!transportHandler.checkSessionType(session)) {
 					logger.debug("Session type does not match the transport type for the request.");

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,9 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import reactor.netty.channel.AbortedException;
 
+import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.messaging.MessagingException;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.context.request.async.AsyncRequestNotUsableException;
 import org.springframework.web.testfixture.http.MockHttpInputMessage;
@@ -78,16 +80,23 @@ public class DisconnectedClientHelperTests {
 		assertThat(DisconnectedClientHelper.isClientDisconnectedException(ex)).isTrue();
 	}
 
-	@Test // gh-34264
-	void onwardClientDisconnectedExceptionPhrase() {
-		Exception ex = new ResourceAccessException("I/O error", new EOFException("Connection reset by peer"));
+	@ParameterizedTest // gh-34264
+	@MethodSource("excludedExceptionsTypes")
+	void excludedExceptionTypes(Exception ex) {
 		assertThat(DisconnectedClientHelper.isClientDisconnectedException(ex)).isFalse();
 	}
 
-	@Test
-	void onwardClientDisconnectedExceptionType() {
-		Exception ex = new ResourceAccessException("I/O error", new EOFException());
-		assertThat(DisconnectedClientHelper.isClientDisconnectedException(ex)).isFalse();
+	static List<Exception> excludedExceptionsTypes() {
+		EOFException cause = new EOFException();
+		return List.of(
+				new ResourceAccessException("", cause),
+				new DataAccessResourceFailureException("", new EOFException()),
+				new MessagingException("", cause));
+	}
+
+	@Test // gh-34533
+	void nullException() {
+		assertThat(DisconnectedClientHelper.isClientDisconnectedException(null)).isFalse();
 	}
 
 }

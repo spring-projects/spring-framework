@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,10 @@ import org.jspecify.annotations.Nullable;
 
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.BeanFactory;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionExecution;
 import org.springframework.transaction.TransactionManager;
 
 /**
@@ -52,7 +55,11 @@ import org.springframework.transaction.TransactionManager;
  * @see org.springframework.aop.framework.ProxyFactory
  */
 @SuppressWarnings("serial")
-public class TransactionInterceptor extends TransactionAspectSupport implements MethodInterceptor, Serializable {
+public class TransactionInterceptor extends TransactionAspectSupport
+		implements MethodInterceptor, ApplicationEventPublisherAware, Serializable {
+
+	private @Nullable ApplicationEventPublisher applicationEventPublisher;
+
 
 	/**
 	 * Create a new TransactionInterceptor.
@@ -83,10 +90,10 @@ public class TransactionInterceptor extends TransactionAspectSupport implements 
 	 * @param tas the attribute source to be used to find transaction attributes
 	 * @see #setTransactionManager
 	 * @see #setTransactionAttributeSource
-	 * @deprecated as of 5.2.5, in favor of
+	 * @deprecated in favor of
 	 * {@link #TransactionInterceptor(TransactionManager, TransactionAttributeSource)}
 	 */
-	@Deprecated
+	@Deprecated(since = "5.2.5")
 	public TransactionInterceptor(PlatformTransactionManager ptm, TransactionAttributeSource tas) {
 		setTransactionManager(ptm);
 		setTransactionAttributeSource(tas);
@@ -98,14 +105,19 @@ public class TransactionInterceptor extends TransactionAspectSupport implements 
 	 * @param attributes the transaction attributes in properties format
 	 * @see #setTransactionManager
 	 * @see #setTransactionAttributes(java.util.Properties)
-	 * @deprecated as of 5.2.5, in favor of {@link #setTransactionAttributes(Properties)}
+	 * @deprecated in favor of {@link #setTransactionAttributes(Properties)}
 	 */
-	@Deprecated
+	@Deprecated(since = "5.2.5")
 	public TransactionInterceptor(PlatformTransactionManager ptm, Properties attributes) {
 		setTransactionManager(ptm);
 		setTransactionAttributes(attributes);
 	}
 
+
+	@Override
+	public void setApplicationEventPublisher(ApplicationEventPublisher applicationEventPublisher) {
+		this.applicationEventPublisher = applicationEventPublisher;
+	}
 
 	@Override
 	public @Nullable Object invoke(MethodInvocation invocation) throws Throwable {
@@ -115,7 +127,27 @@ public class TransactionInterceptor extends TransactionAspectSupport implements 
 		Class<?> targetClass = (invocation.getThis() != null ? AopUtils.getTargetClass(invocation.getThis()) : null);
 
 		// Adapt to TransactionAspectSupport's invokeWithinTransaction...
-		return invokeWithinTransaction(invocation.getMethod(), targetClass, invocation::proceed);
+		return invokeWithinTransaction(invocation.getMethod(), targetClass, new InvocationCallback() {
+			@Override
+			public @Nullable Object proceedWithInvocation() throws Throwable {
+				return invocation.proceed();
+			}
+			@Override
+			public void onRollback(Throwable failure, TransactionExecution execution) {
+				MethodRollbackEvent event = new MethodRollbackEvent(invocation, failure, execution);
+				logger.trace(event, failure);
+				if (applicationEventPublisher != null) {
+					try {
+						applicationEventPublisher.publishEvent(event);
+					}
+					catch (Throwable ex) {
+						if (logger.isWarnEnabled()) {
+							logger.warn("Failed to publish " + event, ex);
+						}
+					}
+				}
+			}
+		});
 	}
 
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -117,21 +117,18 @@ class MethodParameterKotlinTests {
 	@Test
 	fun `Parameter name for regular function`() {
 		val methodParameter = returnMethodParameter("nullable", 0)
-		methodParameter.initParameterNameDiscovery(KotlinReflectionParameterNameDiscoverer())
 		assertThat(methodParameter.getParameterName()).isEqualTo("nullable")
 	}
 
 	@Test
 	fun `Parameter name for suspending function`() {
 		val methodParameter = returnMethodParameter("suspendFun", 0)
-		methodParameter.initParameterNameDiscovery(KotlinReflectionParameterNameDiscoverer())
 		assertThat(methodParameter.getParameterName()).isEqualTo("p1")
 	}
 
 	@Test
 	fun `Continuation parameter name for suspending function`() {
 		val methodParameter = returnMethodParameter("suspendFun", 1)
-		methodParameter.initParameterNameDiscovery(KotlinReflectionParameterNameDiscoverer())
 		assertThat(methodParameter.getParameterName()).isNull()
 	}
 

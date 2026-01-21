@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.beans.factory;
 
 import java.util.Iterator;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
@@ -46,6 +47,21 @@ import org.springframework.core.OrderComparator;
  * Alternatively, you may implement the specific methods that your callers expect,
  * for example, just {@link #getObject()} or {@link #getIfAvailable()}.
  *
+ * <p>Note that {@link #getObject()} never returns {@code null} - it will throw a
+ * {@link NoSuchBeanDefinitionException} instead -, whereas {@link #getIfAvailable()}
+ * will return {@code null} if no matching bean is present at all. However, both
+ * methods will throw a {@link NoUniqueBeanDefinitionException} if more than one
+ * matching bean is found without a clear unique winner (see below). Last but not
+ * least, {@link #getIfUnique()} will return {@code null} both when no matching bean
+ * is found and when more than one matching bean is found without a unique winner.
+ *
+ * <p>Uniqueness is generally up to the container's candidate resolution algorithm
+ * but always honors the "primary" flag (with only one of the candidate beans marked
+ * as primary) and the "fallback" flag (with only one of the candidate beans not
+ * marked as fallback). The default-candidate flag is consistently taken into
+ * account as well, even for non-annotation-based injection points, with a single
+ * default candidate winning in case of no clear primary/fallback indication.
+ *
  * @author Juergen Hoeller
  * @since 4.3
  * @param <T> the object type
@@ -53,6 +69,18 @@ import org.springframework.core.OrderComparator;
  * @see org.springframework.beans.factory.annotation.Autowired
  */
 public interface ObjectProvider<T> extends ObjectFactory<T>, Iterable<T> {
+
+	/**
+	 * A predicate for unfiltered type matches, including non-default candidates
+	 * but still excluding non-autowire candidates when used on injection points.
+	 * @since 6.2.3
+	 * @see #stream(Predicate)
+	 * @see #orderedStream(Predicate)
+	 * @see org.springframework.beans.factory.config.BeanDefinition#isAutowireCandidate()
+	 * @see org.springframework.beans.factory.support.AbstractBeanDefinition#isDefaultCandidate()
+	 */
+	Predicate<Class<?>> UNFILTERED = (clazz -> true);
+
 
 	@Override
 	default T getObject() throws BeansException {
@@ -77,7 +105,7 @@ public interface ObjectProvider<T> extends ObjectFactory<T>, Iterable<T> {
 	 * @throws BeansException in case of creation errors
 	 * @see #getObject()
 	 */
-	default T getObject(Object... args) throws BeansException {
+	default T getObject(@Nullable Object... args) throws BeansException {
 		throw new UnsupportedOperationException("Retrieval with arguments not supported -" +
 				"for custom ObjectProvider classes, implement getObject(Object...) for your purposes");
 	}
@@ -174,7 +202,7 @@ public interface ObjectProvider<T> extends ObjectFactory<T>, Iterable<T> {
 	 * if unique (not called otherwise)
 	 * @throws BeansException in case of creation errors
 	 * @since 5.0
-	 * @see #getIfAvailable()
+	 * @see #getIfUnique()
 	 */
 	default void ifUnique(Consumer<T> dependencyConsumer) throws BeansException {
 		T dependency = getIfUnique();
@@ -197,6 +225,10 @@ public interface ObjectProvider<T> extends ObjectFactory<T>, Iterable<T> {
 	/**
 	 * Return a sequential {@link Stream} over all matching object instances,
 	 * without specific ordering guarantees (but typically in registration order).
+	 * <p>Note: The result may be filtered by default according to qualifiers on the
+	 * injection point versus target beans and the general autowire candidate status
+	 * of matching beans. For custom filtering against type-matching candidates, use
+	 * {@link #stream(Predicate)} instead (potentially with {@link #UNFILTERED}).
 	 * @since 5.1
 	 * @see #iterator()
 	 * @see #orderedStream()
@@ -218,12 +250,82 @@ public interface ObjectProvider<T> extends ObjectFactory<T>, Iterable<T> {
 	 * {@link #stream()} method. You may override this to apply an
 	 * {@link org.springframework.core.annotation.AnnotationAwareOrderComparator}
 	 * if necessary.
+	 * <p>Note: The result may be filtered by default according to qualifiers on the
+	 * injection point versus target beans and the general autowire candidate status
+	 * of matching beans. For custom filtering against type-matching candidates, use
+	 * {@link #stream(Predicate)} instead (potentially with {@link #UNFILTERED}).
 	 * @since 5.1
 	 * @see #stream()
 	 * @see org.springframework.core.OrderComparator
 	 */
 	default Stream<T> orderedStream() {
 		return stream().sorted(OrderComparator.INSTANCE);
+	}
+
+	/**
+	 * Return a custom-filtered {@link Stream} over all matching object instances,
+	 * without specific ordering guarantees (but typically in registration order).
+	 * @param customFilter a custom type filter for selecting beans among the raw
+	 * bean type matches (or {@link #UNFILTERED} for all raw type matches without
+	 * any default filtering)
+	 * @since 6.2.3
+	 * @see #stream()
+	 * @see #orderedStream(Predicate)
+	 */
+	default Stream<T> stream(Predicate<Class<?>> customFilter) {
+		return stream(customFilter, true);
+	}
+
+	/**
+	 * Return a custom-filtered {@link Stream} over all matching object instances,
+	 * pre-ordered according to the factory's common order comparator.
+	 * @param customFilter a custom type filter for selecting beans among the raw
+	 * bean type matches (or {@link #UNFILTERED} for all raw type matches without
+	 * any default filtering)
+	 * @since 6.2.3
+	 * @see #orderedStream()
+	 * @see #stream(Predicate)
+	 */
+	default Stream<T> orderedStream(Predicate<Class<?>> customFilter) {
+		return orderedStream(customFilter, true);
+	}
+
+	/**
+	 * Return a custom-filtered {@link Stream} over all matching object instances,
+	 * without specific ordering guarantees (but typically in registration order).
+	 * @param customFilter a custom type filter for selecting beans among the raw
+	 * bean type matches (or {@link #UNFILTERED} for all raw type matches without
+	 * any default filtering)
+	 * @param includeNonSingletons whether to include prototype or scoped beans too
+	 * or just singletons (also applies to FactoryBeans)
+	 * @since 6.2.5
+	 * @see #stream(Predicate)
+	 * @see #orderedStream(Predicate, boolean)
+	 */
+	default Stream<T> stream(Predicate<Class<?>> customFilter, boolean includeNonSingletons) {
+		if (!includeNonSingletons) {
+			throw new UnsupportedOperationException("Only supports includeNonSingletons=true by default");
+		}
+		return stream().filter(obj -> customFilter.test(obj.getClass()));
+	}
+
+	/**
+	 * Return a custom-filtered {@link Stream} over all matching object instances,
+	 * pre-ordered according to the factory's common order comparator.
+	 * @param customFilter a custom type filter for selecting beans among the raw
+	 * bean type matches (or {@link #UNFILTERED} for all raw type matches without
+	 * any default filtering)
+	 * @param includeNonSingletons whether to include prototype or scoped beans too
+	 * or just singletons (also applies to FactoryBeans)
+	 * @since 6.2.5
+	 * @see #orderedStream()
+	 * @see #stream(Predicate)
+	 */
+	default Stream<T> orderedStream(Predicate<Class<?>> customFilter, boolean includeNonSingletons) {
+		if (!includeNonSingletons) {
+			throw new UnsupportedOperationException("Only supports includeNonSingletons=true by default");
+		}
+		return orderedStream().filter(obj -> customFilter.test(obj.getClass()));
 	}
 
 }

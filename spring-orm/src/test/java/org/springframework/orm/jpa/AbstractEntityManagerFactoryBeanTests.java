@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,27 +39,27 @@ public abstract class AbstractEntityManagerFactoryBeanTests {
 
 	protected static EntityManagerFactory mockEmf;
 
+
 	@BeforeEach
-	void setUp() {
+	void setup() {
 		mockEmf = mock();
 	}
 
 	@AfterEach
-	void tearDown() {
+	void cleanup() {
 		assertThat(TransactionSynchronizationManager.getResourceMap()).isEmpty();
 		assertThat(TransactionSynchronizationManager.isSynchronizationActive()).isFalse();
 		assertThat(TransactionSynchronizationManager.isCurrentTransactionReadOnly()).isFalse();
 		assertThat(TransactionSynchronizationManager.isActualTransactionActive()).isFalse();
 	}
 
-	protected void checkInvariants(AbstractEntityManagerFactoryBean demf) {
-		assertThat(EntityManagerFactory.class.isAssignableFrom(demf.getObjectType())).isTrue();
-		Object gotObject = demf.getObject();
-		boolean condition = gotObject instanceof EntityManagerFactoryInfo;
-		assertThat(condition).as("Object created by factory implements EntityManagerFactoryInfo").isTrue();
-		EntityManagerFactoryInfo emfi = (EntityManagerFactoryInfo) demf.getObject();
-		assertThat(demf.getObject()).as("Successive invocations of getObject() return same object").isSameAs(emfi);
-		assertThat(demf.getObject()).isSameAs(emfi);
+	protected void checkInvariants(AbstractEntityManagerFactoryBean emfb) {
+		assertThat(EntityManagerFactory.class.isAssignableFrom(emfb.getObjectType())).isTrue();
+		EntityManagerFactory emf = emfb.getObject();
+		assertThat(emf instanceof EntityManagerFactoryInfo).as("Object created by factory implements EntityManagerFactoryInfo").isTrue();
+		EntityManagerFactoryInfo emfi = (EntityManagerFactoryInfo) emf;
+		assertThat(emfb.getObject()).as("Successive invocations of getObject() return same object").isSameAs(emfi);
+		assertThat(emfb.getObject()).isSameAs(emfi);
 		assertThat(mockEmf).isSameAs(emfi.getNativeEntityManagerFactory());
 	}
 

@@ -48,6 +48,8 @@ class MixinEmitter extends ClassEmitter {
     public MixinEmitter(ClassVisitor v, String className, Class[] classes, int[] route) {
         super(v);
 
+        // Byte code level cannot be higher than 1.8 due to STATICHOOK methods
+        // which set static final fields outside the initializer method <clinit>.
         begin_class(Constants.V1_8,
                     Constants.ACC_PUBLIC,
                     className,

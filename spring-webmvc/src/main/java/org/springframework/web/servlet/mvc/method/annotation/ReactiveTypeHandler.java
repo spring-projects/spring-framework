@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -81,7 +81,9 @@ class ReactiveTypeHandler {
 
 	private static final MediaType WILDCARD_SUBTYPE_SUFFIXED_BY_NDJSON = MediaType.valueOf("application/*+x-ndjson");
 
-	private static final boolean isContextPropagationPresent = ClassUtils.isPresent(
+	private static final MediaType APPLICATION_GRPC = MediaType.valueOf("application/grpc");
+
+	private static final boolean CONTEXT_PROPAGATION_PRESENT = ClassUtils.isPresent(
 			"io.micrometer.context.ContextSnapshot", ReactiveTypeHandler.class.getClassLoader());
 
 	private static final Log logger = LogFactory.getLog(ReactiveTypeHandler.class);
@@ -114,7 +116,7 @@ class ReactiveTypeHandler {
 	}
 
 	private static @Nullable Object initContextSnapshotHelper(@Nullable Object snapshotFactory) {
-		if (isContextPropagationPresent) {
+		if (CONTEXT_PROPAGATION_PRESENT) {
 			return new ContextSnapshotHelper((ContextSnapshotFactory) snapshotFactory);
 		}
 		return null;
@@ -135,7 +137,8 @@ class ReactiveTypeHandler {
 	 * @return an emitter for streaming, or {@code null} if handled internally
 	 * with a {@link DeferredResult}
 	 */
-	public @Nullable ResponseBodyEmitter handleValue(Object returnValue, MethodParameter returnType,
+	public @Nullable ResponseBodyEmitter handleValue(
+			Object returnValue, MethodParameter returnType, @Nullable MediaType presetMediaType,
 			ModelAndViewContainer mav, NativeWebRequest request) throws Exception {
 
 		Assert.notNull(returnValue, "Expected return value");
@@ -144,7 +147,7 @@ class ReactiveTypeHandler {
 		Assert.state(adapter != null, () -> "Unexpected return value type: " + clazz);
 
 		TaskDecorator taskDecorator = null;
-		if (isContextPropagationPresent) {
+		if (CONTEXT_PROPAGATION_PRESENT) {
 			ContextSnapshotHelper helper = (ContextSnapshotHelper) this.contextSnapshotHelper;
 			Assert.notNull(helper, "No ContextSnapshotHelper");
 			returnValue = helper.writeReactorContext(returnValue);
@@ -154,7 +157,7 @@ class ReactiveTypeHandler {
 		ResolvableType elementType = ResolvableType.forMethodParameter(returnType).getGeneric();
 		Class<?> elementClass = elementType.toClass();
 
-		Collection<MediaType> mediaTypes = getMediaTypes(request);
+		Collection<MediaType> mediaTypes = (presetMediaType != null ? List.of(presetMediaType) : getMediaTypes(request));
 		Optional<MediaType> mediaType = mediaTypes.stream().filter(MimeType::isConcrete).findFirst();
 
 		if (adapter.isMultiValue()) {
@@ -164,9 +167,14 @@ class ReactiveTypeHandler {
 				new SseEmitterSubscriber(emitter, this.taskExecutor, taskDecorator).connect(adapter, returnValue);
 				return emitter;
 			}
+			if (mediaTypes.stream().anyMatch(APPLICATION_GRPC::includes)) {
+				ResponseBodyEmitter emitter = getEmitter(mediaType.orElse(APPLICATION_GRPC));
+				new BasicEmitterSubscriber(emitter, APPLICATION_GRPC, this.taskExecutor).connect(adapter, returnValue);
+				return emitter;
+			}
 			if (CharSequence.class.isAssignableFrom(elementClass)) {
 				ResponseBodyEmitter emitter = getEmitter(mediaType.orElse(MediaType.TEXT_PLAIN));
-				new TextEmitterSubscriber(emitter, this.taskExecutor).connect(adapter, returnValue);
+				new BasicEmitterSubscriber(emitter, MediaType.TEXT_PLAIN, this.taskExecutor).connect(adapter, returnValue);
 				return emitter;
 			}
 			MediaType streamingResponseType = findConcreteJsonStreamMediaType(mediaTypes);
@@ -223,11 +231,11 @@ class ReactiveTypeHandler {
 	private Collection<MediaType> getMediaTypes(NativeWebRequest request)
 			throws HttpMediaTypeNotAcceptableException {
 
-		Collection<MediaType> mediaTypes = (Collection<MediaType>) request.getAttribute(
+		Collection<MediaType> producibleMediaTypes = (Collection<MediaType>) request.getAttribute(
 				HandlerMapping.PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE, RequestAttributes.SCOPE_REQUEST);
 
-		return CollectionUtils.isEmpty(mediaTypes) ?
-				this.contentNegotiationManager.resolveMediaTypes(request) : mediaTypes;
+		return (CollectionUtils.isEmpty(producibleMediaTypes) ?
+				this.contentNegotiationManager.resolveMediaTypes(request) : producibleMediaTypes);
 	}
 
 	private ResponseBodyEmitter getEmitter(MediaType mediaType) {
@@ -248,7 +256,7 @@ class ReactiveTypeHandler {
 
 		private @Nullable Subscription subscription;
 
-		private final AtomicReference<Object> elementRef = new AtomicReference<>();
+		private final AtomicReference<@Nullable Object> elementRef = new AtomicReference<>();
 
 		private @Nullable Throwable error;
 
@@ -474,15 +482,18 @@ class ReactiveTypeHandler {
 	}
 
 
-	private static class TextEmitterSubscriber extends AbstractEmitterSubscriber {
+	private static class BasicEmitterSubscriber extends AbstractEmitterSubscriber {
 
-		TextEmitterSubscriber(ResponseBodyEmitter emitter, TaskExecutor executor) {
+		private final MediaType mediaType;
+
+		BasicEmitterSubscriber(ResponseBodyEmitter emitter, MediaType mediaType, TaskExecutor executor) {
 			super(emitter, executor, null);
+			this.mediaType = mediaType;
 		}
 
 		@Override
 		protected void send(Object element) throws IOException {
-			getEmitter().send(element, MediaType.TEXT_PLAIN);
+			getEmitter().send(element, this.mediaType);
 		}
 	}
 

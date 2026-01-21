@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -215,7 +215,9 @@ class InitBinderBindingContextTests {
 		MockServerWebExchange exchange = MockServerWebExchange.from(request);
 
 		BindingContext context = createBindingContext("initBinderWithAttributeName", WebDataBinder.class);
-		ExtendedWebExchangeDataBinder binder = (ExtendedWebExchangeDataBinder) context.createDataBinder(exchange, null, "", null);
+		org.springframework.web.reactive.result.ExtendedWebExchangeDataBinder binder =
+				(org.springframework.web.reactive.result.ExtendedWebExchangeDataBinder)
+						context.createDataBinder(exchange, null, "", null);
 		binder.addHeaderPredicate(name -> !name.equalsIgnoreCase("Another-Int-Array"));
 
 		Map<String, Object> map = binder.getValuesToBind(exchange).block();
@@ -224,7 +226,7 @@ class InitBinderBindingContextTests {
 
 	@ParameterizedTest
 	@ValueSource(strings = {"Accept", "Authorization", "Connection",
-			"Cookie", "From", "Host", "Origin", "Priority", "Range", "Referer", "Upgrade"})
+			"Cookie", "From", "Host", "Origin", "Priority", "Range", "Referer", "Upgrade", "priority"})
 	void filteredHeaders(String headerName) throws Exception {
 		MockServerHttpRequest request = MockServerHttpRequest.get("/path")
 				.header(headerName, "u1")
@@ -233,7 +235,9 @@ class InitBinderBindingContextTests {
 		MockServerWebExchange exchange = MockServerWebExchange.from(request);
 
 		BindingContext context = createBindingContext("initBinderWithAttributeName", WebDataBinder.class);
-		ExtendedWebExchangeDataBinder binder = (ExtendedWebExchangeDataBinder) context.createDataBinder(exchange, null, "", null);
+		org.springframework.web.reactive.result.ExtendedWebExchangeDataBinder binder =
+				(org.springframework.web.reactive.result.ExtendedWebExchangeDataBinder)
+						context.createDataBinder(exchange, null, "", null);
 
 		Map<String, Object> map = binder.getValuesToBind(exchange).block();
 		assertThat(map).isEmpty();

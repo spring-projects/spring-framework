@@ -112,6 +112,3 @@ destination to broadcast unresolved messages so that other servers have a chance
 This can be done through the `userDestinationBroadcast` property of the
 `MessageBrokerRegistry` in Java configuration and the `user-destination-broadcast` attribute
 of the `message-broker` element in XML.
-
-
-

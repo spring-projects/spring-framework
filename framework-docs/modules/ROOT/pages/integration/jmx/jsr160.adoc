@@ -98,6 +98,3 @@ as the following example shows:
 
 In the preceding example, we used MX4J 3.0.0. See the official MX4J
 documentation for more information.
-
-
-

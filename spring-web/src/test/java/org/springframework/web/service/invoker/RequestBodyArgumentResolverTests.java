@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,6 +54,7 @@ class RequestBodyArgumentResolverTests {
 		this.service.execute(body);
 
 		assertThat(getBodyValue()).isEqualTo(body);
+		assertThat(getBodyValueType()).isEqualTo(new ParameterizedTypeReference<String>() {});
 		assertThat(getPublisherBody()).isNull();
 	}
 
@@ -170,6 +171,10 @@ class RequestBodyArgumentResolverTests {
 
 	private @Nullable Object getBodyValue() {
 		return getReactiveRequestValues().getBodyValue();
+	}
+
+	private @Nullable ParameterizedTypeReference<?> getBodyValueType() {
+		return getReactiveRequestValues().getBodyValueType();
 	}
 
 	private @Nullable Publisher<?> getPublisherBody() {

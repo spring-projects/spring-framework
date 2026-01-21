@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -133,7 +133,7 @@ public abstract class AbstractJsonHttpMessageConverter extends AbstractGenericHt
 	/**
 	 * Template method that reads the JSON-bound object from the given {@link Reader}.
 	 * @param resolvedType the resolved generic type
-	 * @param reader the {@code} Reader to use
+	 * @param reader the {@code Reader} to use
 	 * @return the JSON-bound object
 	 * @throws Exception in case of read/parse failures
 	 */
@@ -143,7 +143,7 @@ public abstract class AbstractJsonHttpMessageConverter extends AbstractGenericHt
 	 * Template method that writes the JSON-bound object to the given {@link Writer}.
 	 * @param object the object to write to the output message
 	 * @param type the type of object to write (may be {@code null})
-	 * @param writer the {@code} Writer to use
+	 * @param writer the {@code Writer} to use
 	 * @throws Exception in case of write failures
 	 */
 	protected abstract void writeInternal(Object object, @Nullable Type type, Writer writer) throws Exception;

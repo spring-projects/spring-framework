@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,8 @@ import java.util.EnumSet;
 
 import org.jspecify.annotations.Nullable;
 
+import org.springframework.lang.Contract;
+
 import static java.nio.file.FileVisitOption.FOLLOW_LINKS;
 
 /**
@@ -54,6 +56,7 @@ public abstract class FileSystemUtils {
 	 * @return {@code true} if the {@code File} was successfully deleted,
 	 * otherwise {@code false}
 	 */
+	@Contract("null -> false")
 	public static boolean deleteRecursively(@Nullable File root) {
 		if (root == null) {
 			return false;
@@ -76,6 +79,7 @@ public abstract class FileSystemUtils {
 	 * @throws IOException in the case of I/O errors
 	 * @since 5.0
 	 */
+	@Contract("null -> false")
 	public static boolean deleteRecursively(@Nullable Path root) throws IOException {
 		if (root == null) {
 			return false;
@@ -86,13 +90,12 @@ public abstract class FileSystemUtils {
 
 		Files.walkFileTree(root, new SimpleFileVisitor<>() {
 			@Override
-			public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+			public FileVisitResult visitFile(Path file, BasicFileAttributes attr) throws IOException {
 				Files.delete(file);
 				return FileVisitResult.CONTINUE;
 			}
-
 			@Override
-			public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+			public FileVisitResult postVisitDirectory(Path dir, IOException ex) throws IOException {
 				Files.delete(dir);
 				return FileVisitResult.CONTINUE;
 			}
@@ -127,19 +130,34 @@ public abstract class FileSystemUtils {
 		BasicFileAttributes srcAttr = Files.readAttributes(src, BasicFileAttributes.class);
 
 		if (srcAttr.isDirectory()) {
-			Files.walkFileTree(src, EnumSet.of(FOLLOW_LINKS), Integer.MAX_VALUE, new SimpleFileVisitor<>() {
-				@Override
-				public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
-					Files.createDirectories(dest.resolve(src.relativize(dir)));
-					return FileVisitResult.CONTINUE;
-				}
-
-				@Override
-				public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-					Files.copy(file, dest.resolve(src.relativize(file)), StandardCopyOption.REPLACE_EXISTING);
-					return FileVisitResult.CONTINUE;
-				}
-			});
+			if (src.getClass() == dest.getClass()) {  // dest.resolve(Path) only works for same Path type
+				Files.walkFileTree(src, EnumSet.of(FOLLOW_LINKS), Integer.MAX_VALUE, new SimpleFileVisitor<>() {
+					@Override
+					public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attr) throws IOException {
+						Files.createDirectories(dest.resolve(src.relativize(dir)));
+						return FileVisitResult.CONTINUE;
+					}
+					@Override
+					public FileVisitResult visitFile(Path file, BasicFileAttributes attr) throws IOException {
+						Files.copy(file, dest.resolve(src.relativize(file)), StandardCopyOption.REPLACE_EXISTING);
+						return FileVisitResult.CONTINUE;
+					}
+				});
+			}
+			else {  // use dest.resolve(String) for different Path types
+				Files.walkFileTree(src, EnumSet.of(FOLLOW_LINKS), Integer.MAX_VALUE, new SimpleFileVisitor<>() {
+					@Override
+					public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attr) throws IOException {
+						Files.createDirectories(dest.resolve(src.relativize(dir).toString()));
+						return FileVisitResult.CONTINUE;
+					}
+					@Override
+					public FileVisitResult visitFile(Path file, BasicFileAttributes attr) throws IOException {
+						Files.copy(file, dest.resolve(src.relativize(file).toString()), StandardCopyOption.REPLACE_EXISTING);
+						return FileVisitResult.CONTINUE;
+					}
+				});
+			}
 		}
 		else if (srcAttr.isRegularFile()) {
 			Files.copy(src, dest);

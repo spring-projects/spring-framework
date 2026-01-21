@@ -111,4 +111,3 @@ Kotlin::
 [.small]#xref:web/webmvc/mvc-controller/ann-initbinder.adoc#mvc-ann-initbinder-model-design[See equivalent in the Servlet stack]#
 
 include::partial$web/web-data-binding-model-design.adoc[]
-

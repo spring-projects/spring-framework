@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,33 +16,73 @@
 
 package org.springframework.http.codec.protobuf;
 
+import java.util.function.Predicate;
+
 import kotlinx.serialization.protobuf.ProtoBuf;
 
+import org.springframework.core.ResolvableType;
 import org.springframework.http.codec.KotlinSerializationBinaryDecoder;
 
 /**
  * Decode a byte stream into a protocol Buffer and convert to Objects with
  * <a href="https://github.com/Kotlin/kotlinx.serialization">kotlinx.serialization</a>.
- *
- * <p>This decoder can be used to bind {@code @Serializable} Kotlin classes,
- * <a href="https://github.com/Kotlin/kotlinx.serialization/blob/master/docs/polymorphism.md#open-polymorphism">open polymorphic serialization</a>
- * is not supported.
  * It supports {@code application/x-protobuf}, {@code application/octet-stream}, and {@code application/vnd.google.protobuf}.
+ *
+ * <p>As of Spring Framework 7.0, by default it only decodes types annotated with
+ * {@link kotlinx.serialization.Serializable @Serializable} at type or generics
+ * level.
+ *
+ * <p>Alternative constructors with a {@code Predicate<ResolvableType>}
+ * parameter can be used to customize this behavior. For example,
+ * {@code new KotlinSerializationProtobufDecoder(type -> true)} will decode all types
+ * supported by Kotlin Serialization, including unannotated Kotlin enumerations,
+ * numbers, characters, booleans and strings.
  *
  * <p>Decoding streams is not supported yet, see
  * <a href="https://github.com/Kotlin/kotlinx.serialization/issues/1073">kotlinx.serialization/issues/1073</a>
  * related issue.
  *
  * @author Iain Henderson
+ * @author Sebastien Deleuze
  * @since 6.0
+ * @see KotlinSerializationProtobufEncoder
  */
 public class KotlinSerializationProtobufDecoder extends KotlinSerializationBinaryDecoder<ProtoBuf> {
+
+	/**
+	 * Construct a new decoder using {@link ProtoBuf.Default} instance which
+	 * only decodes types annotated with {@link kotlinx.serialization.Serializable @Serializable}
+	 * at type or generics level.
+	 */
 
 	public KotlinSerializationProtobufDecoder() {
 		this(ProtoBuf.Default);
 	}
 
+	/**
+	 * Construct a new decoder using {@link ProtoBuf.Default} instance which
+	 * only decodes types for which the specified predicate returns {@code true}.
+	 * @since 7.0
+	 */
+	public KotlinSerializationProtobufDecoder(Predicate<ResolvableType> typePredicate) {
+		this(ProtoBuf.Default, typePredicate);
+	}
+
+	/**
+	 * Construct a new decoder using the provided {@link ProtoBuf} instance which
+	 * only decodes types annotated with {@link kotlinx.serialization.Serializable @Serializable}
+	 * at type or generics level.
+	 */
 	public KotlinSerializationProtobufDecoder(ProtoBuf protobuf) {
 		super(protobuf, ProtobufCodecSupport.MIME_TYPES);
+	}
+
+	/**
+	 * Construct a new decoder using the provided {@link ProtoBuf} instance which
+	 * only decodes types for which the specified predicate returns {@code true}.
+	 * @since 7.0
+	 */
+	public KotlinSerializationProtobufDecoder(ProtoBuf protobuf, Predicate<ResolvableType> typePredicate) {
+		super(protobuf, typePredicate, ProtobufCodecSupport.MIME_TYPES);
 	}
 }

@@ -49,5 +49,3 @@ transaction automatically on an application exception (that is, a checked except
 other than `java.rmi.RemoteException`). While the Spring default behavior for
 declarative transaction management follows EJB convention (roll back is automatic only
 on unchecked exceptions), it is often useful to customize this behavior.
-
-

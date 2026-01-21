@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,11 +18,13 @@ package org.springframework.test.http;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.StreamSupport;
 
 import org.springframework.core.ResolvableType;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.GenericHttpMessageConverter;
@@ -31,6 +33,7 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.SmartHttpMessageConverter;
 import org.springframework.mock.http.MockHttpInputMessage;
 import org.springframework.mock.http.MockHttpOutputMessage;
+import org.springframework.test.json.JsonConverterDelegate;
 import org.springframework.util.Assert;
 import org.springframework.util.function.SingletonSupplier;
 
@@ -39,8 +42,10 @@ import org.springframework.util.function.SingletonSupplier;
  *
  * @author Stephane Nicoll
  * @since 6.2
+ * @deprecated in favor of static factory methods in {@link JsonConverterDelegate}
  */
-public class HttpMessageContentConverter {
+@Deprecated(since = "7.0", forRemoval = true)
+public class HttpMessageContentConverter implements JsonConverterDelegate {
 
 	private static final MediaType JSON = MediaType.APPLICATION_JSON;
 
@@ -66,6 +71,19 @@ public class HttpMessageContentConverter {
 	 */
 	public static HttpMessageContentConverter of(HttpMessageConverter<?>... candidates) {
 		return new HttpMessageContentConverter(Arrays.asList(candidates));
+	}
+
+
+	@Override
+	public <T> T read(String content, ResolvableType targetType) throws IOException{
+		HttpInputMessage message = new MockHttpInputMessage(content.getBytes(StandardCharsets.UTF_8));
+		message.getHeaders().add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
+		return convert(message, MediaType.APPLICATION_JSON, targetType);
+	}
+
+	@Override
+	public <T> T map(Object value, ResolvableType targetType) throws IOException {
+		return convertViaJson(value, targetType);
 	}
 
 

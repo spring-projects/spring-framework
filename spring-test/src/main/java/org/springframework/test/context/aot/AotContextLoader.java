@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.test.context.aot;
 
+import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -25,9 +26,9 @@ import org.springframework.test.context.SmartContextLoader;
 
 /**
  * Strategy interface for loading an {@link ApplicationContext} for build-time
- * {@linkplain #loadContextForAotProcessing AOT processing} as well as run-time
- * {@linkplain #loadContextForAotRuntime AOT execution} for an integration test
- * managed by the Spring TestContext Framework.
+ * {@linkplain #loadContextForAotProcessing(MergedContextConfiguration, RuntimeHints)
+ * AOT processing} as well as run-time {@linkplain #loadContextForAotRuntime
+ * AOT execution} for an integration test managed by the Spring TestContext Framework.
  *
  * <p>{@code AotContextLoader} is an extension of the {@link SmartContextLoader}
  * SPI that allows a context loader to optionally provide ahead-of-time (AOT)
@@ -41,6 +42,30 @@ import org.springframework.test.context.SmartContextLoader;
  * @since 6.0
  */
 public interface AotContextLoader extends SmartContextLoader {
+
+	/**
+	 * Load a new {@link ApplicationContext} for AOT build-time processing based
+	 * on the supplied {@link MergedContextConfiguration}, configure the context,
+	 * and return the context.
+	 * <p>The default implementation of this method throws an
+	 * {@link UnsupportedOperationException}. Note, however, that the framework
+	 * invokes {@link #loadContextForAotProcessing(MergedContextConfiguration, RuntimeHints)}
+	 * as of Spring Framework 6.2.4.
+	 * @param mergedConfig the merged context configuration to use to load the
+	 * application context
+	 * @return a new {@code GenericApplicationContext}
+	 * @throws ContextLoadException if context loading failed
+	 * @see #loadContextForAotProcessing(MergedContextConfiguration, RuntimeHints)
+	 * @see #loadContextForAotRuntime(MergedContextConfiguration, ApplicationContextInitializer)
+	 * @deprecated as of Spring Framework 6.2.4, in favor of
+	 * {@link #loadContextForAotProcessing(MergedContextConfiguration, RuntimeHints)};
+	 * to be removed in Spring Framework 8.0
+	 */
+	@Deprecated(since = "6.2.4", forRemoval = true)
+	default ApplicationContext loadContextForAotProcessing(MergedContextConfiguration mergedConfig) throws Exception {
+		throw new UnsupportedOperationException(
+				"Invoke loadContextForAotProcessing(MergedContextConfiguration, RuntimeHints) instead");
+	}
 
 	/**
 	 * Load a new {@link ApplicationContext} for AOT build-time processing based
@@ -65,13 +90,23 @@ public interface AotContextLoader extends SmartContextLoader {
 	 *     throw new ContextLoadException(context, ex);
 	 * }
 	 * </pre>
+	 * <p>For backward compatibility, the default implementation of this method
+	 * delegates to {@link #loadContextForAotProcessing(MergedContextConfiguration)}.
+	 * Note, however, that the framework only invokes this method as of Spring
+	 * Framework 6.2.4.
 	 * @param mergedConfig the merged context configuration to use to load the
 	 * application context
+	 * @param runtimeHints the runtime hints
 	 * @return a new {@code GenericApplicationContext}
 	 * @throws ContextLoadException if context loading failed
+	 * @since 6.2.4
 	 * @see #loadContextForAotRuntime(MergedContextConfiguration, ApplicationContextInitializer)
 	 */
-	ApplicationContext loadContextForAotProcessing(MergedContextConfiguration mergedConfig) throws Exception;
+	default ApplicationContext loadContextForAotProcessing(MergedContextConfiguration mergedConfig,
+			RuntimeHints runtimeHints) throws Exception {
+
+		return loadContextForAotProcessing(mergedConfig);
+	}
 
 	/**
 	 * Load a new {@link ApplicationContext} for AOT run-time execution based on
@@ -98,7 +133,7 @@ public interface AotContextLoader extends SmartContextLoader {
 	 * be applied to the context in order to recreate bean definitions
 	 * @return a new {@code GenericApplicationContext}
 	 * @throws ContextLoadException if context loading failed
-	 * @see #loadContextForAotProcessing(MergedContextConfiguration)
+	 * @see #loadContextForAotProcessing(MergedContextConfiguration, RuntimeHints)
 	 */
 	ApplicationContext loadContextForAotRuntime(MergedContextConfiguration mergedConfig,
 			ApplicationContextInitializer<ConfigurableApplicationContext> initializer) throws Exception;

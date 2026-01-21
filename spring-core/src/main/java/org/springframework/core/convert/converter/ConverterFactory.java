@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,8 @@
  */
 
 package org.springframework.core.convert.converter;
+
+import org.jspecify.annotations.Nullable;
 
 /**
  * A factory for "ranged" converters that can convert objects from S to subtypes of R.
@@ -36,6 +38,6 @@ public interface ConverterFactory<S, R> {
 	 * @param targetType the target type to convert to
 	 * @return a converter from S to T
 	 */
-	<T extends R> Converter<S, T> getConverter(Class<T> targetType);
+	<T extends R> Converter<S, ? extends @Nullable T> getConverter(Class<T> targetType);
 
 }

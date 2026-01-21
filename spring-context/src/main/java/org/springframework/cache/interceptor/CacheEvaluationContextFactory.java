@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,9 +39,11 @@ class CacheEvaluationContextFactory {
 
 	private @Nullable Supplier<ParameterNameDiscoverer> parameterNameDiscoverer;
 
+
 	CacheEvaluationContextFactory(StandardEvaluationContext originalContext) {
 		this.originalContext = originalContext;
 	}
+
 
 	public void setParameterNameDiscoverer(Supplier<ParameterNameDiscoverer> parameterNameDiscoverer) {
 		this.parameterNameDiscoverer = parameterNameDiscoverer;
@@ -49,10 +51,11 @@ class CacheEvaluationContextFactory {
 
 	public ParameterNameDiscoverer getParameterNameDiscoverer() {
 		if (this.parameterNameDiscoverer == null) {
-			this.parameterNameDiscoverer = SingletonSupplier.of(new DefaultParameterNameDiscoverer());
+			this.parameterNameDiscoverer = SingletonSupplier.of(DefaultParameterNameDiscoverer.getSharedInstance());
 		}
 		return this.parameterNameDiscoverer.get();
 	}
+
 
 	/**
 	 * Creates a {@link CacheEvaluationContext} for the specified operation.

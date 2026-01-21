@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.http.codec;
 
 import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
 
 import kotlinx.serialization.BinaryFormat;
 import kotlinx.serialization.KSerializer;
@@ -38,6 +39,12 @@ import org.springframework.util.MimeType;
  * Abstract base class for {@link Encoder} implementations that defer to Kotlin
  * {@linkplain BinaryFormat binary serializers}.
  *
+ * <p>As of Spring Framework 7.0, by default it only encodes types annotated with
+ * {@link kotlinx.serialization.Serializable @Serializable} at type or generics level
+ * since it allows combined usage with other general purpose encoders without conflicts.
+ * Alternative constructors with a {@code Predicate<ResolvableType>} parameter can be used
+ * to customize this behavior.
+ *
  * @author Sebastien Deleuze
  * @author Iain Henderson
  * @author Arjen Poutsma
@@ -50,8 +57,24 @@ public abstract class KotlinSerializationBinaryEncoder<T extends BinaryFormat> e
 	// ByteArraySequence encoding needed for now, see https://github.com/Kotlin/kotlinx.serialization/issues/204 for more details
 	private final ByteArrayEncoder byteArrayEncoder = new ByteArrayEncoder();
 
+	/**
+	 * Creates a new instance with the given format and supported mime types
+	 * which only encodes types annotated with
+	 * {@link kotlinx.serialization.Serializable @Serializable} at type or
+	 * generics level.
+	 */
 	protected KotlinSerializationBinaryEncoder(T format, MimeType... supportedMimeTypes) {
 		super(format, supportedMimeTypes);
+	}
+
+	/**
+	 * Creates a new instance with the given format and supported mime types
+	 * which only encodes types for which the specified predicate returns
+	 * {@code true}.
+	 * @since 7.0
+	 */
+	protected KotlinSerializationBinaryEncoder(T format, Predicate<ResolvableType> typePredicate, MimeType... supportedMimeTypes) {
+		super(format, typePredicate, supportedMimeTypes);
 	}
 
 	@Override

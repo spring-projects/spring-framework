@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ public final class SpringAsmInfo {
 
 	/**
 	 * The ASM compatibility version for Spring's ASM visitor implementations:
-	 * currently {@link Opcodes#ASM10_EXPERIMENTAL}, as of Spring Framework 5.3.
+	 * currently {@link Opcodes#ASM10_EXPERIMENTAL}.
 	 */
 	public static final int ASM_VERSION = Opcodes.ASM10_EXPERIMENTAL;
 

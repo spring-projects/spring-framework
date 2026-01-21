@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,7 +51,7 @@ class MetadataAttachmentTests {
 	void metadataIsInherited() {
 		BeanDefinition beanDefinition = this.beanFactory.getMergedBeanDefinition("testBean2");
 		assertThat(beanDefinition.getAttribute("foo")).as("Metadata not inherited").isEqualTo("bar");
-		assertThat(beanDefinition.getAttribute("abc")).as("Child metdata not attached").isEqualTo("123");
+		assertThat(beanDefinition.getAttribute("abc")).as("Child metadata not attached").isEqualTo("123");
 	}
 
 	@Test

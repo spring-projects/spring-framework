@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,7 +44,11 @@ import org.gradle.api.tasks.PathSensitivity;
 import org.gradle.api.tasks.SkipWhenEmpty;
 import org.gradle.api.tasks.TaskAction;
 
-import static org.springframework.build.architecture.ArchitectureRules.*;
+import static org.springframework.build.architecture.ArchitectureRules.allPackagesShouldBeFreeOfTangles;
+import static org.springframework.build.architecture.ArchitectureRules.classesShouldNotImportForbiddenTypes;
+import static org.springframework.build.architecture.ArchitectureRules.javaClassesShouldNotImportKotlinAnnotations;
+import static org.springframework.build.architecture.ArchitectureRules.noClassesShouldCallStringToLowerCaseWithoutLocale;
+import static org.springframework.build.architecture.ArchitectureRules.noClassesShouldCallStringToUpperCaseWithoutLocale;
 
 /**
  * {@link Task} that checks for architecture problems.
@@ -59,8 +63,7 @@ public abstract class ArchitectureCheck extends DefaultTask {
 	public ArchitectureCheck() {
 		getOutputDirectory().convention(getProject().getLayout().getBuildDirectory().dir(getName()));
 		getProhibitObjectsRequireNonNull().convention(true);
-		getRules().addAll(packageInfoShouldBeNullMarked(),
-				classesShouldNotImportForbiddenTypes(),
+		getRules().addAll(classesShouldNotImportForbiddenTypes(),
 				javaClassesShouldNotImportKotlinAnnotations(),
 				allPackagesShouldBeFreeOfTangles(),
 				noClassesShouldCallStringToLowerCaseWithoutLocale(),

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,7 +59,7 @@ import org.springframework.jdbc.core.ResultSetExtractor;
  * in favor of {@link ResultSet#getBinaryStream}/{@link ResultSet#getCharacterStream} usage
  */
 @Deprecated(since = "6.2")
-public abstract class AbstractLobStreamingResultSetExtractor<T> implements ResultSetExtractor<T> {
+public abstract class AbstractLobStreamingResultSetExtractor<T> implements ResultSetExtractor<@Nullable T> {
 
 	/**
 	 * Delegates to handleNoRowFound, handleMultipleRowsFound and streamData,

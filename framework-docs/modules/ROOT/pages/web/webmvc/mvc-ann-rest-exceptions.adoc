@@ -22,7 +22,6 @@ xref:web/webmvc/mvc-controller/ann-advice.adoc[@ControllerAdvice] that handles a
 and any `ErrorResponseException`, and renders an error response with a body.
 
 
-
 [[mvc-ann-rest-exceptions-render]]
 == Render
 [.small]#xref:web/webflux/ann-rest-exceptions.adoc#webflux-ann-rest-exceptions-render[See equivalent in the Reactive stack]#
@@ -37,7 +36,7 @@ already set.
 "application/problem+json" over "application/json" when rendering a `ProblemDetail`,
 and also falls back on it if no compatible media type is found.
 
-To enable RFC 9457 responses for Spring WebFlux exceptions and for any
+To enable RFC 9457 responses for Spring MVC exceptions and for any
 `ErrorResponseException`, extend `ResponseEntityExceptionHandler` and declare it as an
 xref:web/webmvc/mvc-controller/ann-advice.adoc[@ControllerAdvice] in Spring configuration. The handler
 has an `@ExceptionHandler` method that handles any `ErrorResponse` exception, which
@@ -47,7 +46,6 @@ use a protected method to map any exception to a `ProblemDetail`.
 You can register `ErrorResponse` interceptors through the
 xref:web/webmvc/mvc-config.adoc[MVC Config] with a `WebMvcConfigurer`. Use that to intercept
 any RFC 9457 response and take some action.
-
 
 
 [[mvc-ann-rest-exceptions-non-standard]]
@@ -68,6 +66,12 @@ from an existing `ProblemDetail`. This could be done centrally, for example, fro
 `@ControllerAdvice` such as `ResponseEntityExceptionHandler` that re-creates the
 `ProblemDetail` of an exception into a subclass with the additional non-standard fields.
 
+TIP: In Spring Boot, the `spring.mvc.problemdetails.enabled` property autoconfigures
+a `ResponseEntityExceptionHandler` that handles built-in exceptions with problem details.
+In that case, you may prefer to create another `@ControllerAdvice` instead of extending
+`ResponseEntityExceptionHandler` if you want to take over the handling of a specific
+built-in exception. You'll need to ensure your handler is ordered ahead of the one
+configured by Spring Boot whose order is 0.
 
 
 [[mvc-ann-rest-exceptions-i18n]]
@@ -174,11 +178,11 @@ Message codes and arguments for each error are also resolved via `MessageSource`
 
 | `NoResourceFoundException`
 | (default)
-|
+| `+{0}+` the request path (or portion of) used to find a resource
 
 | `TypeMismatchException`
 | (default)
-| `+{0}+` property name, `+{1}+` property value
+| `+{0}+` property name, `+{1}+` property value, `+{2}+` simple name of required type
 
 | `UnsatisfiedServletRequestParameterException`
 | (default)
@@ -187,13 +191,12 @@ Message codes and arguments for each error are also resolved via `MessageSource`
 |===
 
 NOTE: Unlike other exceptions, the message arguments for
-`MethodArgumentValidException` and `HandlerMethodValidationException` are based on a list of
+`MethodArgumentNotValidException` and `HandlerMethodValidationException` are based on a list of
 `MessageSourceResolvable` errors that can also be customized through a
 xref:core/beans/context-introduction.adoc#context-functionality-messagesource[MessageSource]
 resource bundle. See
 xref:core/validation/beanvalidation.adoc#validation-beanvalidation-spring-method-i18n[Customizing Validation Errors]
 for more details.
-
 
 
 [[mvc-ann-rest-exceptions-client]]
@@ -204,6 +207,3 @@ A client application can catch `WebClientResponseException`, when using the `Web
 or `RestClientResponseException` when using the `RestTemplate`, and use their
 `getResponseBodyAs` methods to decode the error response body to any target type such as
 `ProblemDetail`, or a subclass of `ProblemDetail`.
-
-
-

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,8 @@ package org.springframework.messaging.tcp;
 import java.io.Closeable;
 import java.util.concurrent.CompletableFuture;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.messaging.Message;
 
 /**
@@ -37,7 +39,7 @@ public interface TcpConnection<P> extends Closeable {
 	 * message was successfully sent
 	 * @since 6.0
 	 */
-	CompletableFuture<Void> sendAsync(Message<P> message);
+	CompletableFuture<@Nullable Void> sendAsync(Message<P> message);
 
 	/**
 	 * Register a task to invoke after a period of read inactivity.

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -168,22 +168,25 @@ public class ContextAnnotationAutowireCandidateResolver extends QualifierAnnotat
 				}
 			}
 
-			boolean cacheable = true;
-			for (String autowiredBeanName : autowiredBeanNames) {
-				if (!this.beanFactory.containsBean(autowiredBeanName)) {
-					cacheable = false;
-				}
-				else {
-					if (this.beanName != null) {
-						this.beanFactory.registerDependentBean(autowiredBeanName, this.beanName);
-					}
-					if (!this.beanFactory.isSingleton(autowiredBeanName)) {
+			boolean cacheable = false;
+			if (!autowiredBeanNames.isEmpty()) {
+				cacheable = true;
+				for (String autowiredBeanName : autowiredBeanNames) {
+					if (!this.beanFactory.containsBean(autowiredBeanName)) {
 						cacheable = false;
 					}
+					else {
+						if (this.beanName != null) {
+							this.beanFactory.registerDependentBean(autowiredBeanName, this.beanName);
+						}
+						if (!this.beanFactory.isSingleton(autowiredBeanName)) {
+							cacheable = false;
+						}
+					}
 				}
-				if (cacheable) {
-					this.cachedTarget = target;
-				}
+			}
+			if (cacheable) {
+				this.cachedTarget = target;
 			}
 
 			return target;

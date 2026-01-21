@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,11 +18,12 @@ package org.springframework.context.event.test;
 
 /**
  * @author Stephane Nicoll
+ * @author Juergen Hoeller
  */
 @SuppressWarnings("serial")
 public class TestEvent extends IdentifiableApplicationEvent {
 
-	public final String msg;
+	public final Object msg;
 
 	public TestEvent(Object source, String id, String msg) {
 		super(source, id);
@@ -30,6 +31,11 @@ public class TestEvent extends IdentifiableApplicationEvent {
 	}
 
 	public TestEvent(Object source, String msg) {
+		super(source);
+		this.msg = msg;
+	}
+
+	public TestEvent(Object source, Integer msg) {
 		super(source);
 		this.msg = msg;
 	}

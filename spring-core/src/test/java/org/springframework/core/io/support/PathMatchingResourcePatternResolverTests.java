@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,6 +44,8 @@ import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 
 import org.apache.commons.logging.LogFactory;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -51,8 +53,10 @@ import org.junit.jupiter.api.io.TempDir;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.FileSystemUtils;
+import org.springframework.util.ResourceUtils;
 import org.springframework.util.StreamUtils;
 import org.springframework.util.StringUtils;
 
@@ -130,8 +134,10 @@ class PathMatchingResourcePatternResolverTests {
 			Path rootDir = Paths.get("src/test/resources/custom%23root").toAbsolutePath();
 			URL root = new URL("file:" + rootDir + "/");
 			resolver = new PathMatchingResourcePatternResolver(new DefaultResourceLoader(new URLClassLoader(new URL[] {root})));
+			resolver.setUseCaches(false);
 			assertExactFilenames("classpath*:scanned/*.txt", "resource#test1.txt", "resource#test2.txt");
 		}
+
 
 		@Nested
 		class WithHashtagsInTheirFilenames {
@@ -294,16 +300,27 @@ class PathMatchingResourcePatternResolverTests {
 		@Test
 		void rootPatternRetrievalInJarFiles() throws IOException {
 			assertThat(resolver.getResources("classpath*:aspectj*.dtd")).extracting(Resource::getFilename)
-				.as("Could not find aspectj_1_5_0.dtd in the root of the aspectjweaver jar")
-				.containsExactly("aspectj_1_5_0.dtd");
+					.as("Could not find aspectj_1_5_0.dtd in the root of the aspectjweaver jar")
+					.containsExactly("aspectj_1_5_0.dtd");
 		}
 	}
+
 
 	@Nested
 	class ClassPathManifestEntries {
 
 		@TempDir
 		Path temp;
+
+		@BeforeAll
+		static void suppressJarCaches() {
+			URLConnection.setDefaultUseCaches("jar", false);
+		}
+
+		@AfterAll
+		static void restoreJarCaches() {
+			URLConnection.setDefaultUseCaches("jar", true);
+		}
 
 		@Test
 		void javaDashJarFindsClassPathManifestEntries() throws Exception {
@@ -313,11 +330,26 @@ class PathMatchingResourcePatternResolverTests {
 			writeApplicationJar(this.temp.resolve("app.jar"));
 			String java = ProcessHandle.current().info().command().get();
 			Process process = new ProcessBuilder(java, "-jar", "app.jar")
-				.directory(this.temp.toFile())
-				.start();
+					.directory(this.temp.toFile())
+					.start();
 			assertThat(process.waitFor()).isZero();
 			String result = StreamUtils.copyToString(process.getInputStream(), StandardCharsets.UTF_8);
 			assertThat(result.replace("\\", "/")).contains("!!!!").contains("/lib/asset.jar!/assets/file.txt");
+		}
+
+		@Test
+		void javaDashJarFindsAbsoluteClassPathManifestEntries() throws Exception {
+			Path assetJar = this.temp.resolve("dependency").resolve("asset.jar");
+			Files.createDirectories(assetJar.getParent());
+			writeAssetJar(assetJar);
+			writeApplicationJarWithAbsolutePath(this.temp.resolve("app.jar"), assetJar);
+			String java = ProcessHandle.current().info().command().get();
+			Process process = new ProcessBuilder(java, "-jar", "app.jar")
+					.directory(this.temp.toFile())
+					.start();
+			assertThat(process.waitFor()).isZero();
+			String result = StreamUtils.copyToString(process.getInputStream(), StandardCharsets.UTF_8);
+			assertThat(result.replace("\\", "/")).contains("!!!!").contains("asset.jar!/assets/file.txt");
 		}
 
 		private void writeAssetJar(Path path) throws Exception {
@@ -327,6 +359,22 @@ class PathMatchingResourcePatternResolverTests {
 				jar.putNextEntry(new ZipEntry("assets/file.txt"));
 				StreamUtils.copy("test", StandardCharsets.UTF_8, jar);
 				jar.closeEntry();
+			}
+
+			assertThat(new FileSystemResource(path).exists()).isTrue();
+			assertThat(new UrlResource(ResourceUtils.JAR_URL_PREFIX + ResourceUtils.FILE_URL_PREFIX + path + ResourceUtils.JAR_URL_SEPARATOR).exists()).isTrue();
+			assertThat(new UrlResource(ResourceUtils.JAR_URL_PREFIX + ResourceUtils.FILE_URL_PREFIX + path + ResourceUtils.JAR_URL_SEPARATOR + "assets/file.txt").exists()).isTrue();
+			assertThat(new UrlResource(ResourceUtils.JAR_URL_PREFIX + ResourceUtils.FILE_URL_PREFIX + path + ResourceUtils.JAR_URL_SEPARATOR + "assets/none.txt").exists()).isFalse();
+			assertThat(new UrlResource(ResourceUtils.JAR_URL_PREFIX + ResourceUtils.FILE_URL_PREFIX + "X" + path + ResourceUtils.JAR_URL_SEPARATOR).exists()).isFalse();
+			assertThat(new UrlResource(ResourceUtils.JAR_URL_PREFIX + ResourceUtils.FILE_URL_PREFIX + "X" + path + ResourceUtils.JAR_URL_SEPARATOR + "assets/file.txt").exists()).isFalse();
+			assertThat(new UrlResource(ResourceUtils.JAR_URL_PREFIX + ResourceUtils.FILE_URL_PREFIX + "X" + path + ResourceUtils.JAR_URL_SEPARATOR + "assets/none.txt").exists()).isFalse();
+
+			Resource resource = new UrlResource(ResourceUtils.JAR_URL_PREFIX + ResourceUtils.FILE_URL_PREFIX + path + ResourceUtils.JAR_URL_SEPARATOR + "assets/file.txt");
+			try (InputStream is = resource.getInputStream()) {
+				assertThat(resource.exists()).isTrue();
+				assertThat(resource.createRelative("file.txt").exists()).isTrue();
+				assertThat(new UrlResource(ResourceUtils.JAR_URL_PREFIX + ResourceUtils.FILE_URL_PREFIX + path + ResourceUtils.JAR_URL_SEPARATOR).exists()).isTrue();
+				is.readAllBytes();
 			}
 		}
 
@@ -338,8 +386,7 @@ class PathMatchingResourcePatternResolverTests {
 			mainAttributes.put(Name.MANIFEST_VERSION, "1.0");
 			try (JarOutputStream jar = new JarOutputStream(new FileOutputStream(path.toFile()), manifest)) {
 				String appClassResource = ClassUtils.convertClassNameToResourcePath(
-						ClassPathManifestEntriesTestApplication.class.getName())
-						+ ClassUtils.CLASS_FILE_SUFFIX;
+						ClassPathManifestEntriesTestApplication.class.getName()) + ClassUtils.CLASS_FILE_SUFFIX;
 				String folder = "";
 				for (String name : appClassResource.split("/")) {
 					if (!name.endsWith(ClassUtils.CLASS_FILE_SUFFIX)) {
@@ -356,18 +403,48 @@ class PathMatchingResourcePatternResolverTests {
 					}
 				}
 			}
+			assertThat(new FileSystemResource(path).exists()).isTrue();
+			assertThat(new UrlResource(ResourceUtils.JAR_URL_PREFIX + ResourceUtils.FILE_URL_PREFIX + path + ResourceUtils.JAR_URL_SEPARATOR).exists()).isTrue();
+		}
+
+		private void writeApplicationJarWithAbsolutePath(Path path, Path assetJar) throws Exception {
+			Manifest manifest = new Manifest();
+			Attributes mainAttributes = manifest.getMainAttributes();
+			mainAttributes.put(Name.CLASS_PATH, buildSpringClassPath() + assetJar.toAbsolutePath());
+			mainAttributes.put(Name.MAIN_CLASS, ClassPathManifestEntriesTestApplication.class.getName());
+			mainAttributes.put(Name.MANIFEST_VERSION, "1.0");
+			try (JarOutputStream jar = new JarOutputStream(new FileOutputStream(path.toFile()), manifest)) {
+				String appClassResource = ClassUtils.convertClassNameToResourcePath(
+						ClassPathManifestEntriesTestApplication.class.getName()) + ClassUtils.CLASS_FILE_SUFFIX;
+				String folder = "";
+				for (String name : appClassResource.split("/")) {
+					if (!name.endsWith(ClassUtils.CLASS_FILE_SUFFIX)) {
+						folder += name + "/";
+						jar.putNextEntry(new ZipEntry(folder));
+						jar.closeEntry();
+					}
+					else {
+						jar.putNextEntry(new ZipEntry(folder + name));
+						try (InputStream in = getClass().getResourceAsStream(name)) {
+							in.transferTo(jar);
+						}
+						jar.closeEntry();
+					}
+				}
+			}
+			assertThat(new FileSystemResource(path).exists()).isTrue();
+			assertThat(new UrlResource(ResourceUtils.JAR_URL_PREFIX + ResourceUtils.FILE_URL_PREFIX + path + ResourceUtils.JAR_URL_SEPARATOR).exists()).isTrue();
 		}
 
 		private String buildSpringClassPath() throws Exception {
-			return copyClasses(PathMatchingResourcePatternResolver.class, "spring-core")
-					+ copyClasses(LogFactory.class, "commons-logging");
+			return copyClasses(PathMatchingResourcePatternResolver.class, "spring-core") +
+					copyClasses(LogFactory.class, "commons-logging");
 		}
 
-		private String copyClasses(Class<?> sourceClass, String destinationName)
-				throws URISyntaxException, IOException {
+		private String copyClasses(Class<?> sourceClass, String destinationName) throws URISyntaxException, IOException {
 			Path destination = this.temp.resolve(destinationName);
-			String resourcePath = ClassUtils.convertClassNameToResourcePath(sourceClass.getName())
-					+ ClassUtils.CLASS_FILE_SUFFIX;
+			String resourcePath = ClassUtils.convertClassNameToResourcePath(
+					sourceClass.getName()) + ClassUtils.CLASS_FILE_SUFFIX;
 			URL resource = getClass().getClassLoader().getResource(resourcePath);
 			URL url = new URL(resource.toString().replace(resourcePath, ""));
 			URLConnection connection = url.openConnection();
@@ -393,7 +470,6 @@ class PathMatchingResourcePatternResolverTests {
 			}
 			return destinationName + "/ ";
 		}
-
 	}
 
 

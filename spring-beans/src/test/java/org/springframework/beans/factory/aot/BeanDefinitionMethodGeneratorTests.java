@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,7 @@
  */
 
 package org.springframework.beans.factory.aot;
+
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -34,6 +35,7 @@ import org.springframework.aot.generate.GenerationContext;
 import org.springframework.aot.generate.MethodReference;
 import org.springframework.aot.generate.MethodReference.ArgumentCodeGenerator;
 import org.springframework.aot.test.generate.TestGenerationContext;
+import org.springframework.beans.factory.config.AutowiredPropertyMarker;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConstructorArgumentValues.ValueHolder;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
@@ -624,6 +626,22 @@ class BeanDefinitionMethodGeneratorTests {
 				assertThat(actual.getPropertyValues().get("customPropertyValue"))
 						.isInstanceOfSatisfying(CustomPropertyValue.class, customPropertyValue
 								-> assertThat(customPropertyValue.value()).isEqualTo("test")));
+	}
+
+	@Test
+	void generateBeanDefinitionMethodWhenHasAutowiredPropertyGeneratesMethod() {
+		RootBeanDefinition beanDefinition = (RootBeanDefinition) BeanDefinitionBuilder
+				.rootBeanDefinition(CustomBean.class).addAutowiredProperty("innerBean")
+				.getBeanDefinition();
+		RegisteredBean registeredBean = registerBean(beanDefinition);
+		BeanDefinitionMethodGenerator generator = new BeanDefinitionMethodGenerator(
+				this.methodGeneratorFactory, registeredBean, null,
+				Collections.emptyList());
+		MethodReference method = generator.generateBeanDefinitionMethod(
+				this.generationContext, this.beanRegistrationsCode);
+		compile(method, (actual, compiled) ->
+				assertThat(actual.getPropertyValues().get("innerBean"))
+						.isSameAs(AutowiredPropertyMarker.INSTANCE));
 	}
 
 	@Test

@@ -9,5 +9,3 @@ messaging that includes raw WebSocket interactions, WebSocket emulation through 
 publish-subscribe messaging through STOMP as a sub-protocol over WebSocket.
 
 include::partial$web/websocket-intro.adoc[leveloffset=+1]
-
-

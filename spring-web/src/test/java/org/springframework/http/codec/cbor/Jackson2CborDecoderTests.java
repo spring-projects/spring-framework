@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,6 +40,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON;
  *
  * @author Sebastien Deleuze
  */
+@SuppressWarnings("removal")
 class Jackson2CborDecoderTests extends AbstractDecoderTests<Jackson2CborDecoder> {
 
 	private static final MimeType CBOR_MIME_TYPE = new MimeType("application", "cbor");

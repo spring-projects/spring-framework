@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,10 +20,10 @@ package org.springframework.r2dbc.core.binding;
  * Bind markers represent placeholders in SQL queries for substitution
  * for an actual parameter. Using bind markers allows creating safe queries
  * so query strings are not required to contain escaped values but rather
- * the driver encodes parameter in the appropriate representation.
+ * the driver encodes the parameter in the appropriate representation.
  *
  * <p>{@link BindMarkers} is stateful and can be only used for a single binding
- * pass of one or more parameters. It maintains bind indexes/bind parameter names.
+ * pass of one or more parameters. It maintains bind indexes or bind parameter names.
  *
  * @author Mark Paluch
  * @since 5.3
@@ -41,7 +41,7 @@ public interface BindMarkers {
 
 	/**
 	 * Create a new {@link BindMarker} that accepts a {@code hint}.
-	 * Implementations are allowed to consider/ignore/filter
+	 * <p>Implementations are allowed to consider/ignore/filter
 	 * the name hint to create more expressive bind markers.
 	 * @param hint an optional name hint that can be used as part of the bind marker
 	 * @return a new {@link BindMarker}

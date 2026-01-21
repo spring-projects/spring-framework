@@ -75,5 +75,3 @@ Kotlin::
 	val usageTracked = context.getBean<UsageTracked>("myService")
 ----
 ======
-
-

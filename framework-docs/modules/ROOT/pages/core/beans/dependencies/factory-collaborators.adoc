@@ -16,8 +16,9 @@ not know the location or class of the dependencies. As a result, your classes be
 to test, particularly when the dependencies are on interfaces or abstract base classes,
 which allow for stub or mock implementations to be used in unit tests.
 
-DI exists in two major variants: xref:core/beans/dependencies/factory-collaborators.adoc#beans-constructor-injection[Constructor-based dependency injection]
- and xref:core/beans/dependencies/factory-collaborators.adoc#beans-setter-injection[Setter-based dependency injection].
+DI exists in two major variants:
+xref:core/beans/dependencies/factory-collaborators.adoc#beans-constructor-injection[Constructor-based dependency injection]
+and xref:core/beans/dependencies/factory-collaborators.adoc#beans-setter-injection[Setter-based dependency injection].
 
 
 [[beans-constructor-injection]]
@@ -606,6 +607,3 @@ contains the `static` factory method (although, in this example, it is). An inst
 (non-static) factory method can be used in an essentially identical fashion (aside
 from the use of the `factory-bean` attribute instead of the `class` attribute), so we
 do not discuss those details here.
-
-
-

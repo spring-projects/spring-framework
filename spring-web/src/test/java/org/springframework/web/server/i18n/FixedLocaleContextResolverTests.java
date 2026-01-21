@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 package org.springframework.web.server.i18n;
 
-import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.Locale;
 import java.util.TimeZone;
 
@@ -61,7 +61,7 @@ class FixedLocaleContextResolverTests {
 
 	@Test
 	void resolveCustomizedAndTimeZoneLocale() {
-		TimeZone timeZone = TimeZone.getTimeZone(ZoneId.of("UTC"));
+		TimeZone timeZone = TimeZone.getTimeZone(ZoneOffset.UTC);
 		FixedLocaleContextResolver resolver = new FixedLocaleContextResolver(FRANCE, timeZone);
 		TimeZoneAwareLocaleContext context = (TimeZoneAwareLocaleContext) resolver.resolveLocaleContext(exchange());
 		assertThat(context.getLocale()).isEqualTo(FRANCE);

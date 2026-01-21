@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,12 +19,14 @@ package org.springframework.http.client;
 import java.io.IOException;
 import java.net.URI;
 import java.time.Duration;
+import java.util.concurrent.Executor;
 import java.util.function.Function;
 
 import io.netty.channel.ChannelOption;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jspecify.annotations.Nullable;
+import reactor.core.scheduler.Schedulers;
 import reactor.netty.http.client.HttpClient;
 import reactor.netty.resources.ConnectionProvider;
 import reactor.netty.resources.LoopResources;
@@ -42,6 +44,7 @@ import org.springframework.util.Assert;
  * @author Arjen Poutsma
  * @author Juergen Hoeller
  * @author Sebastien Deleuze
+ * @author Brian Clozel
  * @since 6.2
  */
 public class ReactorClientHttpRequestFactory implements ClientHttpRequestFactory, SmartLifecycle {
@@ -49,12 +52,16 @@ public class ReactorClientHttpRequestFactory implements ClientHttpRequestFactory
 	private static final Log logger = LogFactory.getLog(ReactorClientHttpRequestFactory.class);
 
 	private static final Function<HttpClient, HttpClient> defaultInitializer =
-			client -> client.compress(true).responseTimeout(Duration.ofSeconds(10));
+			client -> client.compress(true)
+					.responseTimeout(Duration.ofSeconds(10))
+					.proxyWithSystemProperties();
 
 
 	private final @Nullable ReactorResourceFactory resourceFactory;
 
 	private final @Nullable Function<HttpClient, HttpClient> mapper;
+
+	private @Nullable Executor executor;
 
 	private @Nullable Integer connectTimeout;
 
@@ -69,7 +76,8 @@ public class ReactorClientHttpRequestFactory implements ClientHttpRequestFactory
 
 	/**
 	 * Constructor with default client, created via {@link HttpClient#create()},
-	 * and with {@link HttpClient#compress compression} enabled.
+	 * and with {@link HttpClient#compress compression} and
+	 * {@link HttpClient#proxyWithSystemProperties() proxyWithSystemProperties} enabled.
 	 */
 	public ReactorClientHttpRequestFactory() {
 		this(defaultInitializer.apply(HttpClient.create()));
@@ -123,6 +131,16 @@ public class ReactorClientHttpRequestFactory implements ClientHttpRequestFactory
 		return client;
 	}
 
+	/**
+	 * Set the {@code Executor} to use for performing blocking I/O operations.
+	 * <p>If no executor is provided, the request will use an {@link Schedulers#boundedElastic() elastic scheduler}.
+	 * @param executor the executor to use.
+	 * @since 6.2.13
+	 */
+	public void setExecutor(Executor executor) {
+		Assert.notNull(executor, "Executor must not be null");
+		this.executor = executor;
+	}
 
 	/**
 	 * Set the connect timeout value on the underlying client.
@@ -183,7 +201,7 @@ public class ReactorClientHttpRequestFactory implements ClientHttpRequestFactory
 					"Expected HttpClient or ResourceFactory and mapper");
 			client = createHttpClient(this.resourceFactory, this.mapper);
 		}
-		return new ReactorClientHttpRequest(client, httpMethod, uri, this.exchangeTimeout);
+		return new ReactorClientHttpRequest(client, httpMethod, uri, this.executor, this.exchangeTimeout);
 	}
 
 

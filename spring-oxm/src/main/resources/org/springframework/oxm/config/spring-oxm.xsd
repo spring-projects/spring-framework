@@ -46,40 +46,6 @@
 		</xsd:complexType>
 	</xsd:element>
 
-	<xsd:element name="jibx-marshaller">
-		<xsd:complexType>
-			<xsd:annotation>
-				<xsd:documentation source="java:org.springframework.oxm.jibx.JibxMarshaller">
-					Defines a JiBX Marshaller. Deprecated as of Spring Framework 5.1.5!
-				</xsd:documentation>
-				<xsd:appinfo>
-					<tool:annotation>
-						<tool:exports type="org.springframework.oxm.jibx.JibxMarshaller"/>
-					</tool:annotation>
-				</xsd:appinfo>
-			</xsd:annotation>
-			<xsd:complexContent>
-				<xsd:extension base="beans:identifiedType">
-					<xsd:attribute name="target-class" type="classType">
-						<xsd:annotation>
-							<xsd:documentation>The target class to be bound with JiBX.</xsd:documentation>
-						</xsd:annotation>
-					</xsd:attribute>
-					<xsd:attribute name="target-package" type="xsd:string">
-						<xsd:annotation>
-							<xsd:documentation>The target package for the JiBX binding.</xsd:documentation>
-						</xsd:annotation>
-					</xsd:attribute>
-					<xsd:attribute name="binding-name" type="xsd:string">
-						<xsd:annotation>
-							<xsd:documentation>The binding name used by this marshaller.</xsd:documentation>
-						</xsd:annotation>
-					</xsd:attribute>
-				</xsd:extension>
-			</xsd:complexContent>
-		</xsd:complexType>
-	</xsd:element>
-
 	<xsd:simpleType name="classType">
 		<xsd:annotation>
 			<xsd:documentation source="java:java.lang.Class">A class supported by a marshaller.</xsd:documentation>

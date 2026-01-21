@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,6 +39,7 @@ import static java.time.temporal.TemporalAdjusters.next;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
+ * Tests for {@link CronExpression}.
  * @author Arjen Poutsma
  */
 class CronExpressionTests {
@@ -1090,6 +1091,20 @@ class CronExpressionTests {
 		assertThat(actual).isNotNull();
 		assertThat(actual).isEqualTo(expected);
 		assertThat(actual.getDayOfWeek()).isEqualTo(FRIDAY);
+	}
+
+	@Test
+	void quartz5thMondayOfTheMonthDayName() {
+		CronExpression expression = CronExpression.parse("0 0 0 ? * MON#5");
+
+		LocalDateTime last = LocalDateTime.of(2025, 1, 1, 0, 0, 0);
+
+		// first occurrence of 5 mondays in a month from last
+		LocalDateTime expected = LocalDateTime.of(2025, 3, 31, 0, 0, 0);
+		LocalDateTime actual = expression.next(last);
+		assertThat(actual).isNotNull();
+		assertThat(actual).isEqualTo(expected);
+		assertThat(actual.getDayOfWeek()).isEqualTo(MONDAY);
 	}
 
 	@Test

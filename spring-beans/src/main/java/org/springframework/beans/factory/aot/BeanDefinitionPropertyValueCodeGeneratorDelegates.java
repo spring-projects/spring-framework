@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.beans.factory.aot;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -31,6 +32,7 @@ import org.springframework.aot.generate.ValueCodeGenerator.Delegate;
 import org.springframework.aot.generate.ValueCodeGeneratorDelegates;
 import org.springframework.aot.generate.ValueCodeGeneratorDelegates.CollectionDelegate;
 import org.springframework.aot.generate.ValueCodeGeneratorDelegates.MapDelegate;
+import org.springframework.beans.factory.config.AutowiredPropertyMarker;
 import org.springframework.beans.factory.config.BeanReference;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.config.TypedStringValue;
@@ -46,7 +48,7 @@ import org.springframework.javapoet.CodeBlock;
  * @author Stephane Nicoll
  * @since 6.1.2
  */
-abstract class BeanDefinitionPropertyValueCodeGeneratorDelegates {
+public abstract class BeanDefinitionPropertyValueCodeGeneratorDelegates {
 
 	/**
 	 * A list of {@link Delegate} implementations for the following common bean
@@ -58,6 +60,7 @@ abstract class BeanDefinitionPropertyValueCodeGeneratorDelegates {
 	 * <li>{@link LinkedHashMap}</li>
 	 * <li>{@link BeanReference}</li>
 	 * <li>{@link TypedStringValue}</li>
+	 * <li>{@link AutowiredPropertyMarker}</li>
 	 * </ul>
 	 * When combined with {@linkplain ValueCodeGeneratorDelegates#INSTANCES the
 	 * delegates for common value types}, this should be added first as they have
@@ -69,8 +72,29 @@ abstract class BeanDefinitionPropertyValueCodeGeneratorDelegates {
 			new ManagedMapDelegate(),
 			new LinkedHashMapDelegate(),
 			new BeanReferenceDelegate(),
-			new TypedStringValueDelegate()
+			new TypedStringValueDelegate(),
+			new AutowiredPropertyMarkerDelegate()
 	);
+
+
+	/**
+	 * Create a {@link ValueCodeGenerator} instance with both these
+	 * {@link #INSTANCES delegate} and the {@link ValueCodeGeneratorDelegates#INSTANCES
+	 * core delegates}.
+	 * @param generatedMethods the {@link GeneratedMethods} to use
+	 * @param customDelegates additional delegates that should be considered first
+	 * @return a configured value code generator
+	 * @since 7.0
+	 * @see ValueCodeGenerator#add(List)
+	 */
+	public static ValueCodeGenerator createValueCodeGenerator(
+			GeneratedMethods generatedMethods, List<Delegate> customDelegates) {
+		List<Delegate> allDelegates = new ArrayList<>();
+		allDelegates.addAll(customDelegates);
+		allDelegates.addAll(INSTANCES);
+		allDelegates.addAll(ValueCodeGeneratorDelegates.INSTANCES);
+		return ValueCodeGenerator.with(allDelegates).scoped(generatedMethods);
+	}
 
 
 	/**
@@ -155,6 +179,8 @@ abstract class BeanDefinitionPropertyValueCodeGeneratorDelegates {
 						.builder(SuppressWarnings.class)
 						.addMember("value", "{\"rawtypes\", \"unchecked\"}")
 						.build());
+				method.addModifiers(javax.lang.model.element.Modifier.PRIVATE,
+						javax.lang.model.element.Modifier.STATIC);
 				method.returns(Map.class);
 				method.addStatement("$T map = new $T($L)", Map.class,
 						LinkedHashMap.class, map.size());
@@ -177,8 +203,8 @@ abstract class BeanDefinitionPropertyValueCodeGeneratorDelegates {
 		public @Nullable CodeBlock generateCode(ValueCodeGenerator valueCodeGenerator, Object value) {
 			if (value instanceof RuntimeBeanReference runtimeBeanReference &&
 					runtimeBeanReference.getBeanType() != null) {
-				return CodeBlock.of("new $T($T.class)", RuntimeBeanReference.class,
-						runtimeBeanReference.getBeanType());
+				return CodeBlock.of("new $T($S, $T.class)", RuntimeBeanReference.class,
+						runtimeBeanReference.getBeanName(), runtimeBeanReference.getBeanType());
 			}
 			else if (value instanceof BeanReference beanReference) {
 				return CodeBlock.of("new $T($S)", RuntimeBeanReference.class,
@@ -211,4 +237,19 @@ abstract class BeanDefinitionPropertyValueCodeGeneratorDelegates {
 			return valueCodeGenerator.generateCode(value);
 		}
 	}
+
+	/**
+	 * {@link Delegate} for {@link AutowiredPropertyMarker} types.
+	 */
+	private static class AutowiredPropertyMarkerDelegate implements Delegate {
+
+		@Override
+		public @Nullable CodeBlock generateCode(ValueCodeGenerator valueCodeGenerator, Object value) {
+			if (value instanceof AutowiredPropertyMarker) {
+				return CodeBlock.of("$T.INSTANCE", AutowiredPropertyMarker.class);
+			}
+			return null;
+		}
+	}
+
 }

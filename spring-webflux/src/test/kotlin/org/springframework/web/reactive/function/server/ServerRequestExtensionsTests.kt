@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -227,6 +227,36 @@ class ServerRequestExtensionsTests {
 		every { request.pathVariables() } returns emptyMap()
 		assert(request.pathVariableOrNull("name") == null)
 		verify { request.pathVariables() }
+	}
+
+	@Test
+	suspend fun `bindAndAwait non-null`() {
+		val foo = Foo()
+		every { request.bind(Foo::class.java) } returns Mono.just(foo)
+		assertThat(request.bindAndAwait<Foo>()).isEqualTo(foo)
+		verify { request.bind(Foo::class.java) }
+	}
+
+	@Test
+	suspend fun `bindAndAwait null`() {
+		every { request.bind(Foo::class.java) } returns Mono.empty()
+		assertThat(request.bindAndAwait<Foo>()).isNull()
+		verify { request.bind(Foo::class.java) }
+	}
+
+	@Test
+	suspend fun `bindAndAwait non-null with customize`() {
+		val foo = Foo()
+		every { request.bind(Foo::class.java, any()) } returns Mono.just(foo)
+		assertThat(request.bindAndAwait<Foo> { it.setAllowedFields("name") }).isEqualTo(foo)
+		verify { request.bind(Foo::class.java, any()) }
+	}
+
+	@Test
+	suspend fun `bindAndAwait null with customize`() {
+		every { request.bind(Foo::class.java, any()) } returns Mono.empty()
+		assertThat(request.bindAndAwait<Foo> { it.setAllowedFields("name") }).isNull()
+		verify { request.bind(Foo::class.java, any()) }
 	}
 
 	class Foo

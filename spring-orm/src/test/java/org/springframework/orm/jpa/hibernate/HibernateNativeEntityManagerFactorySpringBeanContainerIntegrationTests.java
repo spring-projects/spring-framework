@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,7 @@ import org.springframework.orm.jpa.hibernate.beans.BeanSource;
 import org.springframework.orm.jpa.hibernate.beans.MultiplePrototypesInSpringContextTestBean;
 import org.springframework.orm.jpa.hibernate.beans.NoDefinitionInSpringContextTestBean;
 import org.springframework.orm.jpa.hibernate.beans.SinglePrototypeInSpringContextTestBean;
+import org.springframework.orm.jpa.hibernate.beans.TestBean;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -42,6 +43,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  *
  * @author Yoann Rodiere
  * @author Juergen Hoeller
+ * @author Yanming Zhou
  */
 class HibernateNativeEntityManagerFactorySpringBeanContainerIntegrationTests
 		extends AbstractEntityManagerFactoryIntegrationTests {
@@ -273,6 +275,20 @@ class HibernateNativeEntityManagerFactorySpringBeanContainerIntegrationTests
 			getBeanContainer().getBean("invalid", AttributeConverter.class,
 					NativeLifecycleOptions.INSTANCE, IneffectiveBeanInstanceProducer.INSTANCE
 			));
+	}
+
+	@Test
+	void testRetrieveBeanShouldRetainOriginalBeanType() {
+		BeanContainer beanContainer = getBeanContainer();
+		assertThat(beanContainer).isNotNull();
+
+		ContainedBean<TestBean> bean = beanContainer.getBean(
+				"single", TestBean.class,
+				NativeLifecycleOptions.INSTANCE, IneffectiveBeanInstanceProducer.INSTANCE
+		);
+
+		assertThat(bean).isNotNull();
+		assertThat(bean.getBeanClass()).isSameAs(TestBean.class);
 	}
 
 

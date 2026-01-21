@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.CharBufferDecoder;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
+import org.springframework.http.codec.AbstractJacksonDecoder;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
@@ -43,7 +44,10 @@ import org.springframework.util.MimeTypeUtils;
  * @author Rossen Stoyanchev
  * @since 5.0
  * @see Jackson2JsonEncoder
+ * @deprecated since 7.0 in favor of {@link AbstractJacksonDecoder}
  */
+@Deprecated(since = "7.0", forRemoval = true)
+@SuppressWarnings("removal")
 public class Jackson2JsonDecoder extends AbstractJackson2Decoder {
 
 	private static final CharBufferDecoder CHAR_BUFFER_DECODER = CharBufferDecoder.textPlainOnly(Arrays.asList(",", "\n"), false);

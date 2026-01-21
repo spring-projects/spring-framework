@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ import org.springframework.util.Assert;
  * Spring bean-style class for accessing a Quartz Scheduler, i.e. for registering jobs,
  * triggers and listeners on a given {@link org.quartz.Scheduler} instance.
  *
- * <p>Compatible with Quartz 2.1.4 and higher, as of Spring 4.1.
+ * <p>Compatible with Quartz 2.1.4 and higher.
  *
  * @author Juergen Hoeller
  * @since 2.5.6

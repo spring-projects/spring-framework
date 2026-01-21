@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,9 +59,10 @@ import org.springframework.util.ObjectUtils;
 public class HttpEntity<T> {
 
 	/**
-	 * The empty {@code HttpEntity}, with no body or headers.
+	 * An {@code HttpEntity} instance with a {@code null} body and
+	 * {@link HttpHeaders#EMPTY empty headers}.
 	 */
-	public static final HttpEntity<?> EMPTY = new HttpEntity<>();
+	public static final HttpEntity<?> EMPTY = new HttpEntity<>(HttpHeaders.EMPTY);
 
 
 	private final HttpHeaders headers;
@@ -101,7 +102,7 @@ public class HttpEntity<T> {
 	 */
 	public HttpEntity(@Nullable T body, @Nullable HttpHeaders headers) {
 		this.body = body;
-		this.headers = HttpHeaders.readOnlyHttpHeaders(headers != null ? headers : new HttpHeaders());
+		this.headers = (headers != null) ? headers : new HttpHeaders();
 	}
 
 	/**
@@ -122,8 +123,7 @@ public class HttpEntity<T> {
 	 */
 	@Deprecated(since = "7.0", forRemoval = true)
 	public HttpEntity(@Nullable T body, @Nullable MultiValueMap<String, String> headers) {
-		this.body = body;
-		this.headers = HttpHeaders.readOnlyHttpHeaders(headers != null ? new HttpHeaders(headers) : new HttpHeaders());
+		this(body, (headers != null) ? new HttpHeaders(headers) : new HttpHeaders());
 	}
 
 

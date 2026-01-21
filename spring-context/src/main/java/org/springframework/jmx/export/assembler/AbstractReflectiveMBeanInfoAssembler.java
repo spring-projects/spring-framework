@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -183,7 +183,8 @@ public abstract class AbstractReflectiveMBeanInfoAssembler extends AbstractMBean
 
 	private boolean exposeClassDescriptor = false;
 
-	private @Nullable ParameterNameDiscoverer parameterNameDiscoverer = new DefaultParameterNameDiscoverer();
+	private @Nullable ParameterNameDiscoverer parameterNameDiscoverer =
+			DefaultParameterNameDiscoverer.getSharedInstance();
 
 
 	/**
@@ -506,10 +507,9 @@ public abstract class AbstractReflectiveMBeanInfoAssembler extends AbstractMBean
 	 * of the {@code MBeanExporter}
 	 * @return the {@code MBeanParameterInfo} array
 	 */
-	@SuppressWarnings("NullAway") // https://github.com/uber/NullAway/issues/1127
 	protected MBeanParameterInfo[] getOperationParameters(Method method, String beanKey) {
-		ParameterNameDiscoverer paramNameDiscoverer = getParameterNameDiscoverer();
-		@Nullable String[] paramNames = (paramNameDiscoverer != null ? paramNameDiscoverer.getParameterNames(method) : null);
+		ParameterNameDiscoverer pnd = getParameterNameDiscoverer();
+		@Nullable String[] paramNames = (pnd != null ? pnd.getParameterNames(method) : null);
 		if (paramNames == null) {
 			return new MBeanParameterInfo[0];
 		}

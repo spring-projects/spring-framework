@@ -33,7 +33,6 @@ including error handling. It includes the following topics:
 * xref:data-access/r2dbc.adoc#r2dbc-DatabaseClient-filter[Statement Filters]
 * xref:data-access/r2dbc.adoc#r2dbc-auto-generated-keys[Retrieving Auto-generated Keys]
 
-
 [[r2dbc-DatabaseClient]]
 === Using `DatabaseClient`
 
@@ -136,7 +135,7 @@ Java::
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
 	Mono<Void> completion = client.sql("CREATE TABLE person (id VARCHAR(255) PRIMARY KEY, name VARCHAR(255), age INTEGER);")
-	        .then();
+			.then();
 ----
 
 Kotlin::
@@ -144,7 +143,7 @@ Kotlin::
 [source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	client.sql("CREATE TABLE person (id VARCHAR(255) PRIMARY KEY, name VARCHAR(255), age INTEGER);")
-	        .await()
+			.await()
 ----
 ======
 
@@ -173,7 +172,7 @@ Java::
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
 	Mono<Map<String, Object>> first = client.sql("SELECT id, name FROM person")
-	        .fetch().first();
+			.fetch().first();
 ----
 
 Kotlin::
@@ -181,7 +180,7 @@ Kotlin::
 [source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	val first = client.sql("SELECT id, name FROM person")
-	        .fetch().awaitSingle()
+			.fetch().awaitSingle()
 ----
 ======
 
@@ -194,8 +193,8 @@ Java::
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
 	Mono<Map<String, Object>> first = client.sql("SELECT id, name FROM person WHERE first_name = :fn")
-	        .bind("fn", "Joe")
-	        .fetch().first();
+			.bind("fn", "Joe")
+			.fetch().first();
 ----
 
 Kotlin::
@@ -203,8 +202,8 @@ Kotlin::
 [source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	val first = client.sql("SELECT id, name FROM person WHERE first_name = :fn")
-	        .bind("fn", "Joe")
-	        .fetch().awaitSingle()
+			.bind("fn", "Joe")
+			.fetch().awaitSingle()
 ----
 ======
 
@@ -240,8 +239,8 @@ Java::
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
 	Flux<String> names = client.sql("SELECT name FROM person")
-	        .map(row -> row.get("name", String.class))
-	        .all();
+			.map(row -> row.get("name", String.class))
+			.all();
 ----
 
 Kotlin::
@@ -249,8 +248,8 @@ Kotlin::
 [source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	val names = client.sql("SELECT name FROM person")
-	        .map{ row: Row -> row.get("name", String.class) }
-	        .flow()
+			.map{ row: Row -> row.get("name", String.class) }
+			.flow()
 ----
 ======
 
@@ -301,8 +300,8 @@ Java::
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
 	Mono<Integer> affectedRows = client.sql("UPDATE person SET first_name = :fn")
-	        .bind("fn", "Joe")
-	        .fetch().rowsUpdated();
+			.bind("fn", "Joe")
+			.fetch().rowsUpdated();
 ----
 
 Kotlin::
@@ -310,8 +309,8 @@ Kotlin::
 [source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	val affectedRows = client.sql("UPDATE person SET first_name = :fn")
-	        .bind("fn", "Joe")
-	        .fetch().awaitRowsUpdated()
+			.bind("fn", "Joe")
+			.fetch().awaitRowsUpdated()
 ----
 ======
 
@@ -337,9 +336,9 @@ The following example shows parameter binding for a query:
 
 [source,java]
 ----
-    db.sql("INSERT INTO person (id, name, age) VALUES(:id, :name, :age)")
-	    	.bind("id", "joe")
-	    	.bind("name", "Joe")
+	db.sql("INSERT INTO person (id, name, age) VALUES(:id, :name, :age)")
+			.bind("id", "joe")
+			.bind("name", "Joe")
 			.bind("age", 34);
 ----
 
@@ -369,9 +368,9 @@ Indices are zero based.
 
 [source,java]
 ----
-    db.sql("INSERT INTO person (id, name, age) VALUES(:id, :name, :age)")
-	    	.bind(0, "joe")
-	    	.bind(1, "Joe")
+	db.sql("INSERT INTO person (id, name, age) VALUES(:id, :name, :age)")
+			.bind(0, "joe")
+			.bind(1, "Joe")
 			.bind(2, 34);
 ----
 
@@ -379,9 +378,9 @@ In case your application is binding to many parameters, the same can be achieved
 
 [source,java]
 ----
-    List<?> values = List.of("joe", "Joe", 34);
-    db.sql("INSERT INTO person (id, name, age) VALUES(:id, :name, :age)")
-	    	.bindValues(values);
+	List<?> values = List.of("joe", "Joe", 34);
+	db.sql("INSERT INTO person (id, name, age) VALUES(:id, :name, :age)")
+			.bindValues(values);
 ----
 
 
@@ -428,7 +427,7 @@ Java::
 	tuples.add(new Object[] {"Ann",  50});
 
 	client.sql("SELECT id, name, state FROM table WHERE (name, age) IN (:tuples)")
-		    .bind("tuples", tuples);
+			.bind("tuples", tuples);
 ----
 
 Kotlin::
@@ -440,7 +439,7 @@ Kotlin::
 	tuples.add(arrayOf("Ann", 50))
 
 	client.sql("SELECT id, name, state FROM table WHERE (name, age) IN (:tuples)")
-		    .bind("tuples", tuples)
+			.bind("tuples", tuples)
 ----
 ======
 
@@ -455,7 +454,7 @@ Java::
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
 	client.sql("SELECT id, name, state FROM table WHERE age IN (:ages)")
-		    .bind("ages", Arrays.asList(35, 50));
+			.bind("ages", Arrays.asList(35, 50));
 ----
 
 Kotlin::
@@ -463,7 +462,7 @@ Kotlin::
 [source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	client.sql("SELECT id, name, state FROM table WHERE age IN (:ages)")
-		    .bind("ages", arrayOf(35, 50))
+			.bind("ages", arrayOf(35, 50))
 ----
 ======
 
@@ -490,9 +489,9 @@ Java::
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
 	client.sql("INSERT INTO table (name, state) VALUES(:name, :state)")
-		    .filter((s, next) -> next.execute(s.returnGeneratedValues("id")))
-		    .bind("name", …)
-		    .bind("state", …);
+			.filter((s, next) -> next.execute(s.returnGeneratedValues("id")))
+			.bind("name", …)
+			.bind("state", …);
 ----
 
 Kotlin::
@@ -516,10 +515,10 @@ Java::
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
 	client.sql("INSERT INTO table (name, state) VALUES(:name, :state)")
-		    .filter(statement -> s.returnGeneratedValues("id"));
+			.filter(statement -> s.returnGeneratedValues("id"));
 
 	client.sql("SELECT id, name, state FROM table")
-		    .filter(statement -> s.fetchSize(25));
+			.filter(statement -> s.fetchSize(25));
 ----
 
 Kotlin::
@@ -527,10 +526,10 @@ Kotlin::
 [source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	client.sql("INSERT INTO table (name, state) VALUES(:name, :state)")
-		    .filter { statement -> s.returnGeneratedValues("id") }
+			.filter { statement -> s.returnGeneratedValues("id") }
 
 	client.sql("SELECT id, name, state FROM table")
-		    .filter { statement -> s.fetchSize(25) }
+			.filter { statement -> s.fetchSize(25) }
 ----
 ======
 
@@ -639,6 +638,7 @@ databases, you may want multiple `DatabaseClient` instances, which requires mult
 `ConnectionFactory` and, subsequently, multiple differently configured `DatabaseClient`
 instances.
 
+
 [[r2dbc-auto-generated-keys]]
 == Retrieving Auto-generated Keys
 
@@ -686,7 +686,6 @@ This section covers:
 * xref:data-access/r2dbc.adoc#r2dbc-TransactionAwareConnectionFactoryProxy[Using `TransactionAwareConnectionFactoryProxy`]
 * xref:data-access/r2dbc.adoc#r2dbc-R2dbcTransactionManager[Using `R2dbcTransactionManager`]
 
-
 [[r2dbc-ConnectionFactory]]
 === Using `ConnectionFactory`
 
@@ -729,7 +728,6 @@ Kotlin::
 ----
 ======
 
-
 [[r2dbc-ConnectionFactoryUtils]]
 === Using `ConnectionFactoryUtils`
 
@@ -739,7 +737,6 @@ and close connections (if necessary).
 
 It supports subscriber ``Context``-bound connections with, for example
 `R2dbcTransactionManager`.
-
 
 [[r2dbc-SingleConnectionFactory]]
 === Using `SingleConnectionFactory`
@@ -757,7 +754,6 @@ such as pipelining if your R2DBC driver permits for such use.
 In contrast to a pooled `ConnectionFactory`, it reuses the same connection all the time, avoiding
 excessive creation of physical connections.
 
-
 [[r2dbc-TransactionAwareConnectionFactoryProxy]]
 === Using `TransactionAwareConnectionFactoryProxy`
 
@@ -773,7 +769,6 @@ for resource management.
 See the {spring-framework-api}/r2dbc/connection/TransactionAwareConnectionFactoryProxy.html[`TransactionAwareConnectionFactoryProxy`]
 javadoc for more details.
 
-
 [[r2dbc-R2dbcTransactionManager]]
 === Using `R2dbcTransactionManager`
 
@@ -787,6 +782,3 @@ Application code is required to retrieve the R2DBC `Connection` through
 `ConnectionFactory.create()`. All framework classes (such as `DatabaseClient`) use this
 strategy implicitly. If not used with a transaction manager, the lookup strategy behaves
 exactly like `ConnectionFactory.create()` and can therefore be used in any case.
-
-
-

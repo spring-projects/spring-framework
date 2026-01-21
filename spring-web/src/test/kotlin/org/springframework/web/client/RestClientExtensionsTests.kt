@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,9 @@ import io.mockk.verify
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.core.ParameterizedTypeReference
+import kotlin.reflect.KType
+import kotlin.reflect.jvm.jvmName
+import kotlin.reflect.typeOf
 
 /**
  * Mock object based tests for [RestClient] Kotlin extensions
@@ -38,31 +41,36 @@ class RestClientExtensionsTests {
 	fun `RequestBodySpec#body with reified type parameters`() {
 		val body = mockk<List<Foo>>()
 		requestBodySpec.bodyWithType(body)
-		verify { requestBodySpec.body(body, object : ParameterizedTypeReference<List<Foo>>() {}) }
+		verify { requestBodySpec.hint(KType::class.jvmName, typeOf<List<Foo>>())
+			.body(body, object : ParameterizedTypeReference<List<Foo>>() {})
+		}
 	}
 
 	@Test
 	fun `ResponseSpec#body with reified type parameters`() {
 		responseSpec.body<List<Foo>>()
-		verify { responseSpec.body(object : ParameterizedTypeReference<List<Foo>>() {}) }
+		verify { responseSpec.hint(KType::class.jvmName, typeOf<List<Foo>>())
+			.body(object : ParameterizedTypeReference<List<Foo>>() {}) }
 	}
 
 	@Test
 	fun `ResponseSpec#requiredBody with reified type parameters`() {
 		responseSpec.requiredBody<List<Foo>>()
-		verify { responseSpec.body(object : ParameterizedTypeReference<List<Foo>>() {}) }
+		verify { responseSpec.hint(KType::class.jvmName, typeOf<List<Foo>>())
+			.body(object : ParameterizedTypeReference<List<Foo>>() {}) }
 	}
 
 	@Test
 	fun `ResponseSpec#requiredBody with null response throws NoSuchElementException`() {
-		every { responseSpec.body(any<ParameterizedTypeReference<Foo>>()) } returns null
+		every { responseSpec.hint(KType::class.jvmName, any()).body(any<ParameterizedTypeReference<Foo>>()) } returns null
 		assertThrows<NoSuchElementException> { responseSpec.requiredBody<Foo>() }
 	}
 
 	@Test
 	fun `ResponseSpec#toEntity with reified type parameters`() {
 		responseSpec.toEntity<List<Foo>>()
-		verify { responseSpec.toEntity(object : ParameterizedTypeReference<List<Foo>>() {}) }
+		verify { responseSpec.hint(KType::class.jvmName, typeOf<List<Foo>>())
+			.toEntity(object : ParameterizedTypeReference<List<Foo>>() {}) }
 	}
 
 	private class Foo

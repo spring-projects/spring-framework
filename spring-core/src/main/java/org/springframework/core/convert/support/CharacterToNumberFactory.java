@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,8 @@
  */
 
 package org.springframework.core.convert.support;
+
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.convert.converter.ConverterFactory;
@@ -41,7 +43,7 @@ import org.springframework.util.NumberUtils;
 final class CharacterToNumberFactory implements ConverterFactory<Character, Number> {
 
 	@Override
-	public <T extends Number> Converter<Character, T> getConverter(Class<T> targetType) {
+	public <T extends Number> Converter<Character, @Nullable T> getConverter(Class<T> targetType) {
 		return new CharacterToNumber<>(targetType);
 	}
 

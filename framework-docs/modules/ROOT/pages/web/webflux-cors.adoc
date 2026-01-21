@@ -7,8 +7,6 @@ Spring WebFlux lets you handle CORS (Cross-Origin Resource Sharing). This sectio
 describes how to do so.
 
 
-
-
 [[webflux-cors-intro]]
 == Introduction
 [.small]#xref:web/webmvc-cors.adoc#mvc-cors-intro[See equivalent in the Servlet stack]#
@@ -22,8 +20,6 @@ Cross-Origin Resource Sharing (CORS) is a https://www.w3.org/TR/cors/[W3C specif
 implemented by https://caniuse.com/#feat=cors[most browsers] that lets you specify
 what kind of cross-domain requests are authorized, rather than using less secure and less
 powerful workarounds based on IFRAME or JSONP.
-
-
 
 
 [[webflux-cors-processing]]
@@ -43,12 +39,12 @@ required CORS response headers set.
 
 In order to enable cross-origin requests (that is, the `Origin` header is present and
 differs from the host of the request), you need to have some explicitly declared CORS
-configuration. If no matching CORS configuration is found, preflight requests are
-rejected. No CORS headers are added to the responses of simple and actual CORS requests
-and, consequently, browsers reject them.
+configuration. If no matching CORS configuration is found, no CORS headers are added to
+the responses to preflight, simple and actual CORS requests and, consequently, browsers
+reject them.
 
 Each `HandlerMapping` can be
-{spring-framework-api}/web/reactive/handler/AbstractHandlerMapping.html#setCorsConfigurations-java.util.Map-[configured]
+{spring-framework-api}/web/reactive/handler/AbstractHandlerMapping.html#setCorsConfigurations(java.util.Map)[configured]
 individually with URL pattern-based `CorsConfiguration` mappings. In most cases, applications
 use the WebFlux Java configuration to declare such mappings, which results in a single,
 global map passed to all `HandlerMapping` implementations.
@@ -61,7 +57,7 @@ class- or method-level `@CrossOrigin` annotations (other handlers can implement
 The rules for combining global and local configuration are generally additive -- for example,
 all global and all local origins. For those attributes where only a single value can be
 accepted, such as `allowCredentials` and `maxAge`, the local overrides the global value. See
-{spring-framework-api}/web/cors/CorsConfiguration.html#combine-org.springframework.web.cors.CorsConfiguration-[`CorsConfiguration#combine(CorsConfiguration)`]
+{spring-framework-api}/web/cors/CorsConfiguration.html#combine(org.springframework.web.cors.CorsConfiguration)[`CorsConfiguration#combine(CorsConfiguration)`]
 for more details.
 
 [TIP]
@@ -72,8 +68,6 @@ To learn more from the source or to make advanced customizations, see:
 * `CorsProcessor` and `DefaultCorsProcessor`
 * `AbstractHandlerMapping`
 ====
-
-
 
 
 [[webflux-cors-credentialed-requests]]
@@ -101,8 +95,6 @@ specified regardless of the value of the `allowCredentials` property.
 
 WARNING: While such wildcard configuration can be handy, it is recommended when possible to configure
 a finite set of values instead to provide a higher level of security.
-
-
 
 
 [[webflux-cors-controller]]
@@ -280,8 +272,6 @@ Kotlin::
 ======
 --
 
-
-
 [[webflux-cors-global]]
 == Global Configuration
 [.small]#xref:web/webmvc-cors.adoc#mvc-cors-global[See equivalent in the Servlet stack]#
@@ -315,7 +305,6 @@ Java::
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Configuration
-	@EnableWebFlux
 	public class WebConfig implements WebFluxConfigurer {
 
 		@Override
@@ -338,7 +327,6 @@ Kotlin::
 [source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@Configuration
-	@EnableWebFlux
 	class WebConfig : WebFluxConfigurer {
 
 		override fun addCorsMappings(registry: CorsRegistry) {
@@ -355,8 +343,6 @@ Kotlin::
 	}
 ----
 ======
-
-
 
 
 [[webflux-cors-webfilter]]

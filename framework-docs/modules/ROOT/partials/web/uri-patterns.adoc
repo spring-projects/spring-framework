@@ -1,0 +1,51 @@
+[cols="2,3,5"]
+|===
+|Pattern |Description |Example
+
+| `spring`
+| Literal pattern
+| `+"/spring"+` matches `+"/spring"+`
+
+| `+?+`
+| Matches one character
+| `+"/pages/t?st.html"+` matches `+"/pages/test.html"+` and `+"/pages/t3st.html"+`
+
+| `+*+`
+| Matches zero or more characters within a path segment
+| `+"/resources/*.png"+` matches `+"/resources/file.png"+`
+
+`+"/projects/*/versions"+` matches `+"/projects/spring/versions"+` but does not match `+"/projects/spring/boot/versions"+`.
+
+`+"/projects/*"+` matches `+"/projects/spring"+` but does not match `+"/projects"+` as the path segment is not present.
+
+| `+**+`
+| Matches zero or more path segments
+| `+"/resources/**"+` matches `+"/resources"+`, `+"/resources/file.png"+` and `+"/resources/images/file.png"+`
+
+`+"/**/info"+` matches `+"/info"+`, `+"/spring/info"+` and `+"/spring/framework/info"+`
+
+`+"/resources/**/file.png"+` is invalid as `+**+` is not allowed in the middle of the path.
+
+`+"/**/spring/**"+` is not allowed, as only a single `+**+`/`+{*path}+` instance is allowed per pattern.
+
+| `+{name}+`
+| Similar to `+*+`, but also captures the path segment as a variable named "name"
+| `+"/projects/{project}/versions"+` matches `+"/projects/spring/versions"+` and captures `+project=spring+`
+
+`+"/projects/{project}/versions"+` does not match `+"/projects/spring/framework/versions"+` as it captures a single path segment.
+
+| `{name:[a-z]+}`
+| Matches the regexp `"[a-z]+"` as a path variable named "name"
+| `"/projects/{project:[a-z]+}/versions"` matches `"/projects/spring/versions"` but not `"/projects/spring1/versions"`
+
+| `+{*path}+`
+| Similar to `+**+`, but also captures the path segments as a variable named "path"
+| `+"/resources/{*file}"+` matches `+"/resources/images/file.png"+` and captures `+file=/images/file.png+`
+
+`+"{*path}/resources"+` matches `+"/spring/framework/resources"+` and captures `+path=/spring/framework+`
+
+`+"/resources/{*path}/file.png"+` is invalid as `{*path}` is not allowed in the middle of the path.
+
+`+"/{*path}/spring/**"+` is not allowed, as only a single `+**+`/`+{*path}+` instance is allowed per pattern.
+
+|===

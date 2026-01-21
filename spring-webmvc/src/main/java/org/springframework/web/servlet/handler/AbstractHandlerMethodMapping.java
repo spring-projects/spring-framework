@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -605,17 +605,15 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 				HandlerMethod handlerMethod = createHandlerMethod(handler, method);
 				validateMethodMapping(handlerMethod, mapping);
 
-				// Enable method validation, if applicable
-				handlerMethod = handlerMethod.createWithValidateFlags();
-
-				Set<String> directPaths = AbstractHandlerMethodMapping.this.getDirectPaths(mapping);
+				Set<String> directPaths = getDirectPaths(mapping);
 				for (String path : directPaths) {
 					this.pathLookup.add(path, mapping);
 				}
 
 				String name = null;
-				if (getNamingStrategy() != null) {
-					name = getNamingStrategy().getName(handlerMethod, mapping);
+				HandlerMethodMappingNamingStrategy<T> namingStrategy = getNamingStrategy();
+				if (namingStrategy != null) {
+					name = namingStrategy.getName(handlerMethod, mapping);
 					addMappingName(name, handlerMethod);
 				}
 
@@ -625,6 +623,10 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 					corsConfig.validateAllowPrivateNetwork();
 					this.corsLookup.put(handlerMethod, corsConfig);
 				}
+
+				// Init validation flags
+				// We do this strictly after using the original instance in the CORS lookups
+				handlerMethod = handlerMethod.createWithValidateFlags();
 
 				this.registry.put(mapping,
 						new MappingRegistration<>(mapping, handlerMethod, directPaths, name, corsConfig != null));

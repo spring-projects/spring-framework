@@ -123,13 +123,17 @@ abstract public class AbstractClassGenerator<T> implements ClassGenerator {
 		}
 
 		public Object get(AbstractClassGenerator gen, boolean useCache) {
-			if (!useCache) {
-				return gen.generate(ClassLoaderData.this);
-			}
-			else {
+			// SPRING PATCH BEGIN
+			Object value = null;
+			if (useCache) {
 				Object cachedValue = generatedClasses.get(gen);
-				return gen.unwrapCachedValue(cachedValue);
+				value = gen.unwrapCachedValue(cachedValue);
 			}
+			if (value == null) {  // fallback when cached WeakReference returns null
+				value = gen.generate(ClassLoaderData.this);
+			}
+			return value;
+			// SPRING PATCH END
 		}
 	}
 
@@ -360,7 +364,7 @@ abstract public class AbstractClassGenerator<T> implements ClassGenerator {
 			// SPRING PATCH BEGIN
 			if (inNativeImage) {
 				throw new UnsupportedOperationException("CGLIB runtime enhancement not supported on native image. " +
-						"Make sure to include a pre-generated class on the classpath instead: " + getClassName());
+						"Make sure to enable Spring AOT processing to pre-generate '" + getClassName() + "' at build time.");
 			}
 			// SPRING PATCH END
 			byte[] b = strategy.generate(this);

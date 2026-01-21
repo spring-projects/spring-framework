@@ -56,5 +56,4 @@ dependencies {
 	// Substitute for javax.management:jmxremote_optional:1.0.1_04 (not available on Maven Central)
 	testRuntimeOnly("org.glassfish.external:opendmk_jmxremote_optional_jar")
 	testRuntimeOnly("org.javamoney:moneta")
-	testRuntimeOnly("org.junit.vintage:junit-vintage-engine") // for @Inject TCK
 }

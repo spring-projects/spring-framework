@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,14 +28,16 @@ import io.micrometer.context.ContextSnapshot;
 import io.micrometer.context.ContextSnapshot.Scope;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Sinks;
 import reactor.core.scheduler.Schedulers;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.http.converter.json.JacksonJsonHttpMessageConverter;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.async.AsyncWebRequest;
@@ -63,7 +65,7 @@ import static org.springframework.web.testfixture.method.ResolvableMethod.on;
 class ResponseBodyEmitterReturnValueHandlerTests {
 
 	private final ResponseBodyEmitterReturnValueHandler handler =
-			new ResponseBodyEmitterReturnValueHandler(List.of(new MappingJackson2HttpMessageConverter()));
+			new ResponseBodyEmitterReturnValueHandler(List.of(new JacksonJsonHttpMessageConverter()));
 
 	private final MockHttpServletRequest request = new MockHttpServletRequest();
 
@@ -342,6 +344,21 @@ class ResponseBodyEmitterReturnValueHandlerTests {
 		assertThat(this.response.isCommitted()).isFalse();
 	}
 
+	@Test // gh-35130
+	void responseEntityFluxSseWithPresetContentType() throws Exception {
+
+		ResponseEntity<Publisher<?>> entity =
+				ResponseEntity.ok().contentType(MediaType.TEXT_EVENT_STREAM).body(Flux.just("foo", "bar"));
+
+		MethodParameter type = on(TestController.class).resolveReturnType(ResponseEntity.class, Publisher.class);
+		this.handler.handleReturnValue(entity, type, this.mavContainer, this.webRequest);
+
+		assertThat(this.request.isAsyncStarted()).isTrue();
+		assertThat(this.response.getStatus()).isEqualTo(200);
+		assertThat(this.response.getContentType()).isEqualTo("text/event-stream");
+		assertThat(this.response.getContentAsString()).isEqualTo("data:foo\n\ndata:bar\n\n");
+	}
+
 
 	@SuppressWarnings({"unused", "ConstantConditions"})
 	private static class TestController {
@@ -365,6 +382,9 @@ class ResponseBodyEmitterReturnValueHandlerTests {
 		private ResponseEntity<Flux<String>> h9() { return null; }
 
 		private ResponseEntity<Flux<SimpleBean>> h10() { return null; }
+
+		private ResponseEntity<Publisher<?>> h11() { return null; }
+
 	}
 
 

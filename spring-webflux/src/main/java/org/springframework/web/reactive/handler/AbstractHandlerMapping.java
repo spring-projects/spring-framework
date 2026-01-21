@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import org.springframework.core.Ordered;
 import org.springframework.core.log.LogDelegateFactory;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.util.Assert;
+import org.springframework.web.accept.ApiVersionHolder;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.reactive.CorsConfigurationSource;
 import org.springframework.web.cors.reactive.CorsProcessor;
@@ -35,6 +36,7 @@ import org.springframework.web.cors.reactive.CorsUtils;
 import org.springframework.web.cors.reactive.DefaultCorsProcessor;
 import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource;
 import org.springframework.web.reactive.HandlerMapping;
+import org.springframework.web.reactive.accept.ApiVersionStrategy;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebHandler;
 import org.springframework.web.util.pattern.PathPatternParser;
@@ -63,6 +65,8 @@ public abstract class AbstractHandlerMapping extends ApplicationObjectSupport
 	private @Nullable CorsConfigurationSource corsConfigurationSource;
 
 	private CorsProcessor corsProcessor = new DefaultCorsProcessor();
+
+	private @Nullable ApiVersionStrategy apiVersionStrategy;
 
 	private int order = Ordered.LOWEST_PRECEDENCE;  // default: same as non-Ordered
 
@@ -139,6 +143,23 @@ public abstract class AbstractHandlerMapping extends ApplicationObjectSupport
 	}
 
 	/**
+	 * Configure a strategy to manage API versioning.
+	 * @param strategy the strategy to use
+	 * @since 7.0
+	 */
+	public void setApiVersionStrategy(@Nullable ApiVersionStrategy strategy) {
+		this.apiVersionStrategy = strategy;
+	}
+
+	/**
+	 * Return the configured {@link ApiVersionStrategy} strategy.
+	 * @since 7.0
+	 */
+	public @Nullable ApiVersionStrategy getApiVersionStrategy() {
+		return this.apiVersionStrategy;
+	}
+
+	/**
 	 * Specify the order value for this HandlerMapping bean.
 	 * <p>The default value is {@code Ordered.LOWEST_PRECEDENCE}, meaning non-ordered.
 	 * @see org.springframework.core.Ordered#getOrder()
@@ -164,26 +185,48 @@ public abstract class AbstractHandlerMapping extends ApplicationObjectSupport
 
 	@Override
 	public Mono<Object> getHandler(ServerWebExchange exchange) {
-		return getHandlerInternal(exchange).map(handler -> {
-			if (logger.isDebugEnabled()) {
-				logger.debug(exchange.getLogPrefix() + "Mapped to " + handler);
-			}
-			ServerHttpRequest request = exchange.getRequest();
-			if (hasCorsConfigurationSource(handler) || CorsUtils.isPreFlightRequest(request)) {
-				CorsConfiguration config = (this.corsConfigurationSource != null ?
-						this.corsConfigurationSource.getCorsConfiguration(exchange) : null);
-				CorsConfiguration handlerConfig = getCorsConfiguration(handler, exchange);
-				config = (config != null ? config.combine(handlerConfig) : handlerConfig);
-				if (config != null) {
-					config.validateAllowCredentials();
-					config.validateAllowPrivateNetwork();
-				}
-				if (!this.corsProcessor.process(config, exchange) || CorsUtils.isPreFlightRequest(request)) {
-					return NO_OP_HANDLER;
-				}
-			}
-			return handler;
-		});
+		return initApiVersion(exchange).flatMap(versionHolder ->
+				getHandlerInternal(exchange).map(handler -> {
+					if (logger.isDebugEnabled()) {
+						logger.debug(exchange.getLogPrefix() + "Mapped to " + handler);
+					}
+					if (versionHolder.hasError()) {
+						throw versionHolder.getError();
+					}
+					ServerHttpRequest request = exchange.getRequest();
+					if (hasCorsConfigurationSource(handler) || CorsUtils.isPreFlightRequest(request)) {
+						CorsConfiguration config = (this.corsConfigurationSource != null ?
+								this.corsConfigurationSource.getCorsConfiguration(exchange) : null);
+						CorsConfiguration handlerConfig = getCorsConfiguration(handler, exchange);
+						config = (config != null ? config.combine(handlerConfig) : handlerConfig);
+						if (config != null) {
+							config.validateAllowCredentials();
+							config.validateAllowPrivateNetwork();
+						}
+						if (!this.corsProcessor.process(config, exchange) || CorsUtils.isPreFlightRequest(request)) {
+							return NO_OP_HANDLER;
+						}
+					}
+					if (getApiVersionStrategy() != null) {
+						if (versionHolder.hasVersion()) {
+							Comparable<?> version = versionHolder.getVersion();
+							getApiVersionStrategy().handleDeprecations(version, handler, exchange);
+						}
+					}
+					return handler;
+				}));
+	}
+
+	private Mono<ApiVersionHolder> initApiVersion(ServerWebExchange exchange) {
+
+		Mono<ApiVersionHolder> holderMono = (this.apiVersionStrategy != null ?
+				this.apiVersionStrategy.resolveParseAndValidateApiVersion(exchange)
+						.map(ApiVersionHolder::fromVersion)
+						.onErrorResume(RuntimeException.class, ex -> Mono.just(ApiVersionHolder.fromError(ex))) :
+				Mono.just(ApiVersionHolder.EMPTY));
+
+		return holderMono.doOnNext(holder ->
+				exchange.getAttributes().put(HandlerMapping.API_VERSION_ATTRIBUTE, holder));
 	}
 
 	/**

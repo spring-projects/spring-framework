@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,9 +27,13 @@ import java.lang.reflect.Parameter;
 import java.util.Objects;
 import java.util.function.Predicate;
 
+import kotlin.jvm.JvmClassMappingKt;
+import kotlin.reflect.KClass;
 import kotlin.reflect.KFunction;
 import kotlin.reflect.KParameter;
 import kotlin.reflect.KProperty;
+import kotlin.reflect.KType;
+import kotlin.reflect.full.KClasses;
 import kotlin.reflect.jvm.ReflectJvmMapping;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.NullMarked;
@@ -37,13 +41,20 @@ import org.jspecify.annotations.NullUnmarked;
 import org.jspecify.annotations.Nullable;
 
 /**
- * Constants that indicate the nullness, as well as related utility methods.
+ * Constants that indicate nullness, as well as related utility methods.
  *
- * <p>The nullness applies to a type usage, a field, a method return type or a parameter.
- * <a href="https://jspecify.dev/docs/user-guide/">JSpecify annotations</a> are fully supported, as well as
- * <a href="https://kotlinlang.org/docs/null-safety.html">Kotlin null safety</a>, {@code @Nullable} annotations
- * regardless of their package (from Spring, JSR-305 or Jakarta set of annotations for example) and Java primitive
+ * <p>Nullness applies to type usage, a field, a method return type, or a parameter.
+ * <a href="https://jspecify.dev/docs/user-guide/">JSpecify annotations</a> are
+ * fully supported, as well as
+ * <a href="https://kotlinlang.org/docs/null-safety.html">Kotlin null safety</a>,
+ * {@code @Nullable} annotations regardless of their package, and Java primitive
  * types.
+ *
+ * <p>JSR-305 annotations as well as Spring null safety annotations in the
+ * {@code org.springframework.lang} package such as {@code @NonNullApi},
+ * {@code @NonNullFields}, and {@code @NonNull} are not supported by this API.
+ * However, {@code @Nullable} is supported via the package-less check. Migrating
+ * to JSpecify is recommended.
  *
  * @author Sebastien Deleuze
  * @since 7.0
@@ -51,7 +62,8 @@ import org.jspecify.annotations.Nullable;
 public enum Nullness {
 
 	/**
-	 * Unspecified nullness (Java default for non-primitive types and JSpecify {@code @NullUnmarked} code).
+	 * Unspecified nullness (Java default for non-primitive types and JSpecify
+	 * {@code @NullUnmarked} code).
 	 */
 	UNSPECIFIED,
 
@@ -65,14 +77,16 @@ public enum Nullness {
 	 */
 	NON_NULL;
 
+	private static final boolean KOTLIN_REFLECT_PRESENT = KotlinDetector.isKotlinReflectPresent();
+
 
 	/**
-	 * Return the nullness of the given method return type.
+	 * Return the nullness of the return type for the given method.
 	 * @param method the source for the method return type
 	 * @return the corresponding nullness
 	 */
 	public static Nullness forMethodReturnType(Method method) {
-		if (KotlinDetector.isKotlinType(method.getDeclaringClass())) {
+		if (KOTLIN_REFLECT_PRESENT && KotlinDetector.isKotlinType(method.getDeclaringClass())) {
 			return KotlinDelegate.forMethodReturnType(method);
 		}
 		return (hasNullableAnnotation(method) ? Nullness.NULLABLE :
@@ -85,7 +99,7 @@ public enum Nullness {
 	 * @return the corresponding nullness
 	 */
 	public static Nullness forParameter(Parameter parameter) {
-		if (KotlinDetector.isKotlinType(parameter.getDeclaringExecutable().getDeclaringClass())) {
+		if (KOTLIN_REFLECT_PRESENT && KotlinDetector.isKotlinType(parameter.getDeclaringExecutable().getDeclaringClass())) {
 			// TODO Optimize when kotlin-reflect provide a more direct Parameter to KParameter resolution
 			MethodParameter methodParameter = MethodParameter.forParameter(parameter);
 			return KotlinDelegate.forParameter(methodParameter.getExecutable(), methodParameter.getParameterIndex());
@@ -112,7 +126,7 @@ public enum Nullness {
 	 * @return the corresponding nullness
 	 */
 	public static Nullness forField(Field field) {
-		if (KotlinDetector.isKotlinType(field.getDeclaringClass())) {
+		if (KOTLIN_REFLECT_PRESENT && KotlinDetector.isKotlinType(field.getDeclaringClass())) {
 			return KotlinDelegate.forField(field);
 		}
 		return (hasNullableAnnotation(field) ? Nullness.NULLABLE :
@@ -120,7 +134,8 @@ public enum Nullness {
 	}
 
 
-	// Check method and parameter level @Nullable annotations regardless of the package (including Spring and JSR 305 annotations)
+	// Check method and parameter level @Nullable annotations regardless of the package
+	// (including Spring and JSR 305 annotations)
 	private static boolean hasNullableAnnotation(AnnotatedElement element) {
 		for (Annotation annotation : element.getDeclaredAnnotations()) {
 			if ("Nullable".equals(annotation.annotationType().getSimpleName())) {
@@ -130,7 +145,9 @@ public enum Nullness {
 		return false;
 	}
 
-	private static Nullness jSpecifyNullness(AnnotatedElement annotatedElement, Class<?> declaringClass, AnnotatedType annotatedType) {
+	private static Nullness jSpecifyNullness(
+			AnnotatedElement annotatedElement, Class<?> declaringClass, AnnotatedType annotatedType) {
+
 		if (annotatedType.getType() instanceof Class<?> clazz && clazz.isPrimitive()) {
 			return (clazz != void.class ? Nullness.NON_NULL : Nullness.UNSPECIFIED);
 		}
@@ -168,13 +185,27 @@ public enum Nullness {
 	 */
 	private static class KotlinDelegate {
 
-
 		public static Nullness forMethodReturnType(Method method) {
 			KFunction<?> function = ReflectJvmMapping.getKotlinFunction(method);
-			if (function != null && function.getReturnType().isMarkedNullable()) {
-				return Nullness.NULLABLE;
+			if (function == null) {
+				String methodName = method.getName();
+				if (methodName.startsWith("get")) {
+					String propertyName = accessorToPropertyName(methodName);
+					KClass<?> kClass = JvmClassMappingKt.getKotlinClass(method.getDeclaringClass());
+					for (KProperty<?> property : KClasses.getMemberProperties(kClass)) {
+						if (property.getName().equals(propertyName)) {
+							return (property.getReturnType().isMarkedNullable() ? Nullness.NULLABLE : Nullness.NON_NULL);
+						}
+					}
+				}
 			}
-			return Nullness.NON_NULL;
+			else {
+				KType type = function.getReturnType();
+				if (ReflectJvmMapping.getJavaType(type) != void.class) {
+					return (type.isMarkedNullable() ? Nullness.NULLABLE : Nullness.NON_NULL);
+				}
+			}
+			return Nullness.UNSPECIFIED;
 		}
 
 		public static Nullness forParameter(Executable executable, int parameterIndex) {
@@ -190,12 +221,23 @@ public enum Nullness {
 						KParameter.Kind.INSTANCE.equals(p.getKind()));
 			}
 			if (function == null) {
-				return Nullness.UNSPECIFIED;
+				String methodName = executable.getName();
+				if (methodName.startsWith("set")) {
+					String propertyName = accessorToPropertyName(methodName);
+					KClass<?> kClass = JvmClassMappingKt.getKotlinClass(executable.getDeclaringClass());
+					for (KProperty<?> property : KClasses.getMemberProperties(kClass)) {
+						if (property.getName().equals(propertyName)) {
+							return (property.getReturnType().isMarkedNullable() ? Nullness.NULLABLE : Nullness.NON_NULL);
+						}
+					}
+				}
 			}
-			int i = 0;
-			for (KParameter kParameter : function.getParameters()) {
-				if (predicate.test(kParameter) && parameterIndex == i++) {
-					return (kParameter.getType().isMarkedNullable() ? Nullness.NULLABLE : Nullness.NON_NULL);
+			else {
+				int i = 0;
+				for (KParameter kParameter : function.getParameters()) {
+					if (predicate.test(kParameter) && parameterIndex == i++) {
+						return (kParameter.getType().isMarkedNullable() ? Nullness.NULLABLE : Nullness.NON_NULL);
+					}
 				}
 			}
 			return Nullness.UNSPECIFIED;
@@ -203,10 +245,16 @@ public enum Nullness {
 
 		public static Nullness forField(Field field) {
 			KProperty<?> property = ReflectJvmMapping.getKotlinProperty(field);
-			if (property != null && property.getReturnType().isMarkedNullable()) {
-				return Nullness.NULLABLE;
+			if (property != null) {
+				return (property.getReturnType().isMarkedNullable() ? Nullness.NULLABLE : Nullness.NON_NULL);
 			}
-			return Nullness.NON_NULL;
+			return Nullness.UNSPECIFIED;
+		}
+
+		private static String accessorToPropertyName(String method) {
+			char[] methodNameChars = method.toCharArray();
+			methodNameChars[3] = Character.toLowerCase(methodNameChars[3]);
+			return new String(methodNameChars, 3, methodNameChars.length - 3);
 		}
 
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,6 +50,7 @@ import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.log.LogFormatUtils;
 import org.springframework.http.MediaType;
+import org.springframework.http.codec.AbstractJacksonEncoder;
 import org.springframework.http.codec.HttpMessageEncoder;
 import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.http.server.reactive.ServerHttpRequest;
@@ -66,7 +67,10 @@ import org.springframework.util.MimeType;
  * @author Sebastien Deleuze
  * @author Arjen Poutsma
  * @since 5.0
+ * @deprecated since 7.0 in favor of {@link AbstractJacksonEncoder}
  */
+@Deprecated(since = "7.0", forRemoval = true)
+@SuppressWarnings("removal")
 public abstract class AbstractJackson2Encoder extends Jackson2CodecSupport implements HttpMessageEncoder<Object> {
 
 	private static final byte[] NEWLINE_SEPARATOR = {'\n'};

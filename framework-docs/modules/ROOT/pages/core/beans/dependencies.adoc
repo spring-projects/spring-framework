@@ -7,6 +7,3 @@ Spring parlance). Even the simplest application has a few objects that work toge
 present what the end-user sees as a coherent application. This next section explains how
 you go from defining a number of bean definitions that stand alone to a fully realized
 application where objects collaborate to achieve a goal.
-
-
-

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ import org.jspecify.annotations.Nullable;
  * @author Brian Clozel
  * @since 5.3
  */
-public interface StartupStep {
+public interface StartupStep extends AutoCloseable {
 
 	/**
 	 * Return the name of the startup step.
@@ -83,6 +83,10 @@ public interface StartupStep {
 	 */
 	void end();
 
+	@Override
+	default void close() {
+		this.end();
+	}
 
 	/**
 	 * Immutable collection of {@link Tag}.

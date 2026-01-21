@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,29 +17,35 @@
 package org.springframework.docs.web.webmvc.mvcconfig.mvcconfigmessageconverters;
 
 import java.text.SimpleDateFormat;
-import java.util.List;
 
-import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
+import tools.jackson.dataformat.xml.XmlMapper;
+import tools.jackson.databind.SerializationFeature;
+import tools.jackson.databind.json.JsonMapper;
 
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.converter.HttpMessageConverter;
-import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
-import org.springframework.http.converter.xml.MappingJackson2XmlHttpMessageConverter;
+import org.springframework.http.converter.HttpMessageConverters;
+import org.springframework.http.converter.json.JacksonJsonHttpMessageConverter;
+import org.springframework.http.converter.xml.JacksonXmlHttpMessageConverter;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+@SuppressWarnings("removal")
 // tag::snippet[]
 @Configuration
 public class WebConfiguration implements WebMvcConfigurer {
 
 	@Override
-	public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
-		Jackson2ObjectMapperBuilder builder = new Jackson2ObjectMapperBuilder()
-				.indentOutput(true)
-				.dateFormat(new SimpleDateFormat("yyyy-MM-dd"))
-				.modulesToInstall(new ParameterNamesModule());
-		converters.add(new MappingJackson2HttpMessageConverter(builder.build()));
-		converters.add(new MappingJackson2XmlHttpMessageConverter(builder.createXmlMapper(true).build()));
+	public void configureMessageConverters(HttpMessageConverters.ServerBuilder builder) {
+		JsonMapper jsonMapper = JsonMapper.builder()
+				.findAndAddModules()
+				.enable(SerializationFeature.INDENT_OUTPUT)
+				.defaultDateFormat(new SimpleDateFormat("yyyy-MM-dd"))
+				.build();
+		XmlMapper xmlMapper = XmlMapper.builder()
+				.findAndAddModules()
+				.defaultUseWrapper(false)
+				.build();
+		builder.withJsonConverter(new JacksonJsonHttpMessageConverter(jsonMapper))
+				.withXmlConverter(new JacksonXmlHttpMessageConverter(xmlMapper));
 	}
 }
 // end::snippet[]

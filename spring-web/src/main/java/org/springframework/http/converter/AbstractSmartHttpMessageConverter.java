@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -69,14 +69,13 @@ public abstract class AbstractSmartHttpMessageConverter<T> extends AbstractHttpM
 	}
 
 	@Override
-	public boolean canRead(ResolvableType type, @Nullable MediaType mediaType) {
-		Class<?> clazz = type.resolve();
-		return (clazz != null ? canRead(clazz, mediaType) : canRead(mediaType));
+	public boolean canRead(Class<?> clazz, @Nullable MediaType mediaType) {
+		return canRead(ResolvableType.forClass(clazz), mediaType);
 	}
 
 	@Override
-	public boolean canWrite(ResolvableType type, Class<?> clazz, @Nullable MediaType mediaType) {
-		return canWrite(clazz, mediaType);
+	public boolean canWrite(Class<?> clazz, @Nullable MediaType mediaType) {
+		return canWrite(ResolvableType.forClass(clazz), clazz, mediaType);
 	}
 
 	/**

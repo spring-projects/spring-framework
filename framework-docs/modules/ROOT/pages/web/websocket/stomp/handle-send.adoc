@@ -30,6 +30,3 @@ type, as the following example shows:
 
 However, you can also qualify it by its name (`brokerMessagingTemplate`), if another
 bean of the same type exists.
-
-
-

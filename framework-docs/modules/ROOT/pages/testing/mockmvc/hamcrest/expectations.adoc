@@ -184,7 +184,10 @@ Kotlin::
 +
 [source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
-	// Not possible in Kotlin until {kotlin-issues}/KT-22208 is fixed
+	standaloneSetup(SimpleController())
+		.alwaysExpect<StandaloneMockMvcBuilder>(status().isOk())
+		.alwaysExpect<StandaloneMockMvcBuilder>(content().contentType("application/json;charset=UTF-8"))
+		.build()
 ----
 ======
 
@@ -248,4 +251,3 @@ Kotlin::
 	}
 ----
 ======
-

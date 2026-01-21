@@ -1,6 +1,7 @@
 [[mvc-view]]
 = View Technologies
 :page-section-summary-toc: 1
+
 [.small]#xref:web/webflux-view.adoc[See equivalent in the Reactive stack]#
 
 The rendering of views in Spring MVC is pluggable. Whether you decide to use
@@ -13,4 +14,3 @@ WARNING: The views of a Spring MVC application live within the internal trust bo
 of that application. Views have access to all the beans of your application context. As
 such, it is not recommended to use Spring MVC's template support in applications where
 the templates are editable by external sources, since this can have security implications.
-

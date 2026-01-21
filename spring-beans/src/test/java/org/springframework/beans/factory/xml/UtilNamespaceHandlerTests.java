@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import org.springframework.beans.factory.config.DependencyDescriptor;
 import org.springframework.beans.factory.config.FieldRetrievingFactoryBean;
 import org.springframework.beans.factory.config.PropertiesFactoryBean;
 import org.springframework.beans.factory.parsing.ComponentDefinition;
@@ -46,7 +47,6 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Juergen Hoeller
  * @author Mark Fisher
  */
-@SuppressWarnings("rawtypes")
 class UtilNamespaceHandlerTests {
 
 	private DefaultListableBeanFactory beanFactory;
@@ -55,7 +55,7 @@ class UtilNamespaceHandlerTests {
 
 
 	@BeforeEach
-	void setUp() {
+	void setup() {
 		this.beanFactory = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(this.beanFactory);
 		reader.setEventListener(this.listener);
@@ -109,17 +109,17 @@ class UtilNamespaceHandlerTests {
 
 	@Test
 	void testSimpleMap() {
-		Map<?, ?> map = (Map) this.beanFactory.getBean("simpleMap");
+		Map<?, ?> map = (Map<?, ?>) this.beanFactory.getBean("simpleMap");
 		assertThat(map.get("foo")).isEqualTo("bar");
-		Map<?, ?> map2 = (Map) this.beanFactory.getBean("simpleMap");
+		Map<?, ?> map2 = (Map<?, ?>) this.beanFactory.getBean("simpleMap");
 		assertThat(map).isSameAs(map2);
 	}
 
 	@Test
 	void testScopedMap() {
-		Map<?, ?> map = (Map) this.beanFactory.getBean("scopedMap");
+		Map<?, ?> map = (Map<?, ?>) this.beanFactory.getBean("scopedMap");
 		assertThat(map.get("foo")).isEqualTo("bar");
-		Map<?, ?> map2 = (Map) this.beanFactory.getBean("scopedMap");
+		Map<?, ?> map2 = (Map<?, ?>) this.beanFactory.getBean("scopedMap");
 		assertThat(map2.get("foo")).isEqualTo("bar");
 		assertThat(map).isNotSameAs(map2);
 	}
@@ -164,17 +164,23 @@ class UtilNamespaceHandlerTests {
 	}
 
 	@Test
-	void testMapWithRef() {
-		Map<?, ?> map = (Map) this.beanFactory.getBean("mapWithRef");
+	void testMapWithRef() throws Exception {
+		Map<?, ?> map = (Map<?, ?>) this.beanFactory.getBean("mapWithRef");
 		assertThat(map).isInstanceOf(TreeMap.class);
 		assertThat(map.get("bean")).isEqualTo(this.beanFactory.getBean("testBean"));
+		assertThat(this.beanFactory.resolveDependency(
+				new DependencyDescriptor(getClass().getDeclaredField("mapWithRef"), true), null))
+				.isSameAs(map);
 	}
 
 	@Test
-	void testMapWithTypes() {
-		Map<?, ?> map = (Map) this.beanFactory.getBean("mapWithTypes");
+	void testMapWithTypes() throws Exception {
+		Map<?, ?> map = (Map<?, ?>) this.beanFactory.getBean("mapWithTypes");
 		assertThat(map).isInstanceOf(LinkedCaseInsensitiveMap.class);
 		assertThat(map.get("bean")).isEqualTo(this.beanFactory.getBean("testBean"));
+		assertThat(this.beanFactory.resolveDependency(
+				new DependencyDescriptor(getClass().getDeclaredField("mapWithTypes"), true), null))
+				.isSameAs(map);
 	}
 
 	@Test
@@ -240,11 +246,11 @@ class UtilNamespaceHandlerTests {
 	void testCircularCollections() {
 		TestBean bean = (TestBean) this.beanFactory.getBean("circularCollectionsBean");
 
-		assertThat(bean.getSomeList()).singleElement().isEqualTo(bean);
-		assertThat(bean.getSomeSet()).singleElement().isEqualTo(bean);
+		assertThat(bean.getSomeList()).singleElement().isSameAs(bean);
+		assertThat(bean.getSomeSet()).singleElement().isSameAs(bean);
 		assertThat(bean.getSomeMap()).hasSize(1).allSatisfy((key, value) -> {
 			assertThat(key).isEqualTo("foo");
-			assertThat(value).isEqualTo(bean);
+			assertThat(value).isSameAs(bean);
 		});
 	}
 
@@ -255,17 +261,17 @@ class UtilNamespaceHandlerTests {
 
 		List<?> list = bean.getSomeList();
 		assertThat(Proxy.isProxyClass(list.getClass())).isTrue();
-		assertThat(list).singleElement().isEqualTo(bean);
+		assertThat(list).singleElement().isSameAs(bean);
 
 		Set<?> set = bean.getSomeSet();
 		assertThat(Proxy.isProxyClass(set.getClass())).isFalse();
-		assertThat(set).singleElement().isEqualTo(bean);
+		assertThat(set).singleElement().isSameAs(bean);
 
 		Map<?, ?> map = bean.getSomeMap();
 		assertThat(Proxy.isProxyClass(map.getClass())).isFalse();
 		assertThat(map).hasSize(1).allSatisfy((key, value) -> {
 			assertThat(key).isEqualTo("foo");
-			assertThat(value).isEqualTo(bean);
+			assertThat(value).isSameAs(bean);
 		});
 	}
 
@@ -276,17 +282,17 @@ class UtilNamespaceHandlerTests {
 
 		List<?> list = bean.getSomeList();
 		assertThat(Proxy.isProxyClass(list.getClass())).isFalse();
-		assertThat(list).singleElement().isEqualTo(bean);
+		assertThat(list).singleElement().isSameAs(bean);
 
 		Set<?> set = bean.getSomeSet();
 		assertThat(Proxy.isProxyClass(set.getClass())).isTrue();
-		assertThat(set).singleElement().isEqualTo(bean);
+		assertThat(set).singleElement().isSameAs(bean);
 
 		Map<?, ?> map = bean.getSomeMap();
 		assertThat(Proxy.isProxyClass(map.getClass())).isFalse();
 		assertThat(map).hasSize(1).allSatisfy((key, value) -> {
 			assertThat(key).isEqualTo("foo");
-			assertThat(value).isEqualTo(bean);
+			assertThat(value).isSameAs(bean);
 		});
 	}
 
@@ -297,17 +303,17 @@ class UtilNamespaceHandlerTests {
 
 		List<?> list = bean.getSomeList();
 		assertThat(Proxy.isProxyClass(list.getClass())).isFalse();
-		assertThat(list).singleElement().isEqualTo(bean);
+		assertThat(list).singleElement().isSameAs(bean);
 
 		Set<?> set = bean.getSomeSet();
 		assertThat(Proxy.isProxyClass(set.getClass())).isFalse();
-		assertThat(set).singleElement().isEqualTo(bean);
+		assertThat(set).singleElement().isSameAs(bean);
 
 		Map<?, ?> map = bean.getSomeMap();
 		assertThat(Proxy.isProxyClass(map.getClass())).isTrue();
 		assertThat(map).hasSize(1).allSatisfy((key, value) -> {
 			assertThat(key).isEqualTo("foo");
-			assertThat(value).isEqualTo(bean);
+			assertThat(value).isSameAs(bean);
 		});
 	}
 
@@ -371,5 +377,10 @@ class UtilNamespaceHandlerTests {
 		assertThat(props).as("Incorrect property value").containsEntry("foo", "local");
 		assertThat(props).as("Incorrect property value").containsEntry("foo2", "local2");
 	}
+
+
+	// For DependencyDescriptor resolution
+	Map<String, TestBean> mapWithRef;
+	Map<String, TestBean> mapWithTypes;
 
 }

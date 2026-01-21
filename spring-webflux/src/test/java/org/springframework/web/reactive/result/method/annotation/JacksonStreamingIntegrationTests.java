@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Flux;
 import reactor.test.StepVerifier;
 
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -46,18 +47,13 @@ import static org.springframework.http.MediaType.APPLICATION_NDJSON_VALUE;
  */
 class JacksonStreamingIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 
-	private AnnotationConfigApplicationContext wac;
-
 	private WebClient webClient;
 
 
 	@Override
 	protected HttpHandler createHttpHandler() {
-		this.wac = new AnnotationConfigApplicationContext();
-		this.wac.register(TestConfiguration.class);
-		this.wac.refresh();
-
-		return WebHttpHandlerBuilder.webHandler(new DispatcherHandler(this.wac)).build();
+		ApplicationContext wac = new AnnotationConfigApplicationContext(TestConfiguration.class);
+		return WebHttpHandlerBuilder.webHandler(new DispatcherHandler(wac)).build();
 	}
 
 	@Override

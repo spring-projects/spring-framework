@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -108,13 +108,14 @@ class RequestLoggingFilterTests {
 
 	@Test
 	void queryStringIncluded() throws Exception {
-		request.setQueryString("booking=42");
+		request.setQueryString("booking=42&code=73&category=hotel&code=37&category=resort&ignore=enigma&code=99");
 		filter.setIncludeQueryString(true);
+		filter.setQueryParamPredicate(name -> !name.equals("code") && !name.equals("ignore"));
 
 		applyFilter();
 
-		assertThat(filter.beforeRequestMessage).contains("/hotels?booking=42");
-		assertThat(filter.afterRequestMessage).contains("/hotels?booking=42");
+		assertThat(filter.beforeRequestMessage).contains("/hotels?booking=42&code=masked&category=hotel&category=resort&ignore=masked");
+		assertThat(filter.afterRequestMessage).contains("/hotels?booking=42&code=masked&category=hotel&category=resort&ignore=masked");
 	}
 
 	@Test
@@ -258,23 +259,25 @@ class RequestLoggingFilterTests {
 		filter.doFilter(request, response, filterChain);
 
 		assertThat(filter.beforeRequestMessage)
-				.isEqualTo("Before request ["
-						+ "POST /hotels?booking=42"
-						+ ", client=4.2.2.2"
-						+ ", session=42"
-						+ ", user=Arthur"
-						+ ", headers=[Content-Type:\"application/json;charset=ISO-8859-1\", Content-Length:\"22\"]"
-						+ "]");
+				.isEqualTo("""
+						Before request [\
+						POST /hotels?booking=42, \
+						client=4.2.2.2, \
+						session=42, \
+						user=Arthur, \
+						headers=[Content-Type:"application/json;charset=ISO-8859-1", Content-Length:"22"]\
+						]""");
 
 		assertThat(filter.afterRequestMessage)
-				.isEqualTo("After request ["
-						+ "POST /hotels?booking=42"
-						+ ", client=4.2.2.2"
-						+ ", session=42"
-						+ ", user=Arthur"
-						+ ", headers=[Content-Type:\"application/json;charset=ISO-8859-1\", Content-Length:\"22\"]"
-						+ ", payload={\"msg\": \"Hello World\"}"
-						+ "]");
+				.isEqualTo("""
+						After request [\
+						POST /hotels?booking=42, \
+						client=4.2.2.2, \
+						session=42, \
+						user=Arthur, \
+						headers=[Content-Type:"application/json;charset=ISO-8859-1", Content-Length:"22"], \
+						payload={"msg": "Hello World"}\
+						]""");
 	}
 
 	private void applyFilter() throws Exception {

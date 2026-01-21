@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Proxy;
+import java.net.URLConnection;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -228,7 +229,7 @@ class ClassUtilsTests {
 
 	@Test
 	void getShortNameAsProperty() {
-		String shortName = ClassUtils.getShortNameAsProperty(this.getClass());
+		String shortName = ClassUtils.getShortNameAsProperty(getClass());
 		assertThat(shortName).as("Class name did not match").isEqualTo("classUtilsTests");
 	}
 
@@ -710,6 +711,17 @@ class ClassUtilsTests {
 		}
 
 		@Test
+		void publicMethodInNonExportedClass() throws Exception {
+			Class<?> originalType = getClass().getClassLoader().loadClass("sun.net.www.protocol.http.HttpURLConnection");
+			Method originalMethod = originalType.getDeclaredMethod("getOutputStream");
+
+			Method publiclyAccessibleMethod = ClassUtils.getPubliclyAccessibleMethodIfPossible(originalMethod, null);
+			assertThat(publiclyAccessibleMethod.getDeclaringClass()).isEqualTo(URLConnection.class);
+			assertThat(publiclyAccessibleMethod.getName()).isSameAs(originalMethod.getName());
+			assertPubliclyAccessible(publiclyAccessibleMethod);
+		}
+
+		@Test
 		void publicMethodInJavaLangObjectDeclaredInNonPublicClass() throws Exception {
 			List<String> unmodifiableList = Collections.unmodifiableList(Arrays.asList("foo", "bar"));
 			Class<?> targetClass = unmodifiableList.getClass();
@@ -856,6 +868,49 @@ class ClassUtilsTests {
 			assertPubliclyAccessible(publiclyAccessibleMethod);
 		}
 
+		@Test  // gh-35667
+		void staticMethodInPublicClass() throws Exception {
+			Method originalMethod = PublicSuperclass.class.getMethod("getCacheKey");
+
+			// Prerequisite: method must be public static for this use case.
+			assertPublic(originalMethod);
+			assertStatic(originalMethod);
+
+			Method publiclyAccessibleMethod = ClassUtils.getPubliclyAccessibleMethodIfPossible(originalMethod, null);
+			assertThat(publiclyAccessibleMethod).isSameAs(originalMethod);
+			assertPubliclyAccessible(publiclyAccessibleMethod);
+		}
+
+		@Test  // gh-35667
+		void publicSubclassHidesStaticMethodInPublicSuperclass() throws Exception {
+			Method originalMethod = PublicSubclass.class.getMethod("getCacheKey");
+
+			// Prerequisite: type must be public for this use case.
+			assertPublic(originalMethod.getDeclaringClass());
+			// Prerequisite: method must be public static for this use case.
+			assertPublic(originalMethod);
+			assertStatic(originalMethod);
+
+			Method publiclyAccessibleMethod = ClassUtils.getPubliclyAccessibleMethodIfPossible(originalMethod, null);
+			assertThat(publiclyAccessibleMethod).isSameAs(originalMethod);
+			assertPubliclyAccessible(publiclyAccessibleMethod);
+		}
+
+		@Test  // gh-35667
+		void privateSubclassHidesStaticMethodInPublicSuperclass() throws Exception {
+			Method originalMethod = PrivateSubclass.class.getMethod("getCacheKey");
+
+			// Prerequisite: type must not be public for this use case.
+			assertNotPublic(originalMethod.getDeclaringClass());
+			// Prerequisite: method must be public static for this use case.
+			assertPublic(originalMethod);
+			assertStatic(originalMethod);
+
+			Method publiclyAccessibleMethod = ClassUtils.getPubliclyAccessibleMethodIfPossible(originalMethod, null);
+			assertThat(publiclyAccessibleMethod).isSameAs(originalMethod);
+			assertNotPubliclyAccessible(publiclyAccessibleMethod);
+		}
+
 	}
 
 
@@ -900,6 +955,10 @@ class ClassUtilsTests {
 
 	private static boolean isPublic(Member member) {
 		return Modifier.isPublic(member.getModifiers());
+	}
+
+	private static void assertStatic(Member member) {
+		assertThat(Modifier.isStatic(member.getModifiers())).as("%s must be static", member).isTrue();
 	}
 
 
@@ -1036,7 +1095,26 @@ class ClassUtilsTests {
 		String greet(String name);
 	}
 
+	public static class PublicSubclass extends PublicSuperclass {
+
+		/**
+		 * This method intentionally has the exact same signature as
+		 * {@link PublicSuperclass#getCacheKey()}.
+		 */
+		public static String getCacheKey() {
+			return "child";
+		}
+	}
+
 	private static class PrivateSubclass extends PublicSuperclass implements PublicInterface, PrivateInterface {
+
+		/**
+		 * This method intentionally has the exact same signature as
+		 * {@link PublicSuperclass#getCacheKey()}.
+		 */
+		public static String getCacheKey() {
+			return "child";
+		}
 
 		@Override
 		public int getNumber() {

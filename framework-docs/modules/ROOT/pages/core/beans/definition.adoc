@@ -57,9 +57,9 @@ The following table describes these properties:
 In addition to bean definitions that contain information on how to create a specific
 bean, the `ApplicationContext` implementations also permit the registration of existing
 objects that are created outside the container (by users). This is done by accessing the
-ApplicationContext's `BeanFactory` through the `getBeanFactory()` method, which returns
-the `DefaultListableBeanFactory` implementation. `DefaultListableBeanFactory` supports
-this registration through the `registerSingleton(..)` and `registerBeanDefinition(..)`
+ApplicationContext's `BeanFactory` through the `getAutowireCapableBeanFactory()` method,
+which returns the `DefaultListableBeanFactory` implementation. `DefaultListableBeanFactory`
+supports this registration through the `registerSingleton(..)` and `registerBeanDefinition(..)`
 methods. However, typical applications work solely with beans defined through regular
 bean definition metadata.
 
@@ -72,7 +72,6 @@ singleton instances is supported to some degree, the registration of new beans a
 runtime (concurrently with live access to the factory) is not officially supported and may
 lead to concurrent access exceptions, inconsistent state in the bean container, or both.
 ====
-
 
 
 [[beans-definition-overriding]]
@@ -100,9 +99,8 @@ the `@Bean` factory method in favor of any pre-declared constructor on the bean 
 ****
 
 NOTE: We acknowledge that overriding beans in test scenarios is convenient, and there is
-explicit support for this as of Spring Framework 6.2. Please refer to
+explicit support for this. Please refer to
 xref:testing/testcontext-framework/bean-overriding.adoc[this section] for more details.
-
 
 
 [[beans-beanname]]
@@ -146,7 +144,6 @@ and turning its initial character to lower-case. However, in the (unusual) speci
 case when there is more than one character and both the first and second characters
 are upper case, the original casing gets preserved. These are the same rules as
 defined by `java.beans.Introspector.decapitalize` (which Spring uses here).
-
 
 [[beans-beanname-alias]]
 === Aliasing a Bean outside the Bean Definition
@@ -197,7 +194,6 @@ See xref:core/beans/java/bean-annotation.adoc[Using the `@Bean` Annotation] for 
 ****
 
 
-
 [[beans-factory-class]]
 == Instantiating Beans
 
@@ -209,7 +205,8 @@ If you use XML-based configuration metadata, you specify the type (or class) of 
 that is to be instantiated in the `class` attribute of the `<bean/>` element. This
 `class` attribute (which, internally, is a `Class` property on a `BeanDefinition`
 instance) is usually mandatory. (For exceptions, see
-xref:core/beans/definition.adoc#beans-factory-class-instance-factory-method[Instantiation by Using an Instance Factory Method] and xref:core/beans/child-bean-definitions.adoc[Bean Definition Inheritance].)
+xref:core/beans/definition.adoc#beans-factory-class-instance-factory-method[Instantiation by Using an Instance Factory Method]
+and xref:core/beans/child-bean-definitions.adoc[Bean Definition Inheritance].)
 You can use the `Class` property in one of two ways:
 
 * Typically, to specify the bean class to be constructed in the case where the container
@@ -232,7 +229,6 @@ separated by a dollar sign (`$`) or a dot (`.`). So the value of the `class` att
 a bean definition would be `com.example.SomeThing$OtherThing` or
 `com.example.SomeThing.OtherThing`.
 ****
-
 
 [[beans-factory-class-ctor]]
 === Instantiation with a Constructor
@@ -267,7 +263,6 @@ xref:core/beans/dependencies/factory-collaborators.adoc[Injecting Dependencies].
 NOTE: In the case of constructor arguments, the container can select a corresponding
 constructor among several overloaded constructors. That said, to avoid ambiguities,
 it is recommended to keep your constructor signatures as straightforward as possible.
-
 
 [[beans-factory-class-static-factory-method]]
 === Instantiation with a Static Factory Method
@@ -345,7 +340,6 @@ overloads of the `mock` method. Choose the most specific variant of `mock` possi
 	</bean>
 ----
 ====
-
 
 [[beans-factory-class-instance-factory-method]]
 === Instantiation by Using an Instance Factory Method
@@ -478,7 +472,6 @@ xref:core/beans/definition.adoc#beans-factory-class-static-factory-method[static
 `FactoryBean` (notice the capitalization) refers to a Spring-specific
 xref:core/beans/factory-extension.adoc#beans-factory-extension-factorybean[`FactoryBean`] implementation class.
 
-
 [[beans-factory-type-determination]]
 === Determining a Bean's Runtime Type
 
@@ -494,5 +487,3 @@ The recommended way to find out about the actual runtime type of a particular be
 a `BeanFactory.getType` call for the specified bean name. This takes all of the above
 cases into account and returns the type of object that a `BeanFactory.getBean` call is
 going to return for the same bean name.
-
-

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.util;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.AbstractCollection;
 import java.util.AbstractSet;
@@ -47,8 +48,11 @@ import org.jspecify.annotations.Nullable;
  * @since 3.0
  * @param <V> the value type
  */
-@SuppressWarnings("serial")
 public class LinkedCaseInsensitiveMap<V> implements Map<String, V>, Serializable, Cloneable {
+
+	@Serial
+	private static final long serialVersionUID = -1797561627545787622L;
+
 
 	private final LinkedHashMap<String, V> targetMap;
 
@@ -433,7 +437,7 @@ public class LinkedCaseInsensitiveMap<V> implements Map<String, V>, Serializable
 
 		private final Set<Entry<String, V>> delegate;
 
-		public EntrySet(Set<Entry<String, V>> delegate) {
+		EntrySet(Set<Entry<String, V>> delegate) {
 			this.delegate = delegate;
 		}
 
@@ -444,7 +448,15 @@ public class LinkedCaseInsensitiveMap<V> implements Map<String, V>, Serializable
 
 		@Override
 		public boolean contains(Object o) {
-			return this.delegate.contains(o);
+			if (!(o instanceof Map.Entry<?, ?> entry)) {
+				return false;
+			}
+			Object key = entry.getKey();
+			if (!LinkedCaseInsensitiveMap.this.containsKey(key)) {
+				return false;
+			}
+			V value = LinkedCaseInsensitiveMap.this.get(key);
+			return ObjectUtils.nullSafeEquals(value, entry.getValue());
 		}
 
 		@Override
@@ -453,19 +465,25 @@ public class LinkedCaseInsensitiveMap<V> implements Map<String, V>, Serializable
 		}
 
 		@Override
-		@SuppressWarnings("unchecked")
 		public boolean remove(Object o) {
-			if (this.delegate.remove(o)) {
-				removeCaseInsensitiveKey(((Map.Entry<String, V>) o).getKey());
-				return true;
+			if (!(o instanceof Map.Entry<?, ?> entry)) {
+				return false;
 			}
-			return false;
+			Object key = entry.getKey();
+			if (!LinkedCaseInsensitiveMap.this.containsKey(key)) {
+				return false;
+			}
+			V value = LinkedCaseInsensitiveMap.this.get(key);
+			if (!ObjectUtils.nullSafeEquals(value, entry.getValue())) {
+				return false;
+			}
+			LinkedCaseInsensitiveMap.this.remove(key);
+			return true;
 		}
 
 		@Override
 		public void clear() {
-			this.delegate.clear();
-			caseInsensitiveKeys.clear();
+			LinkedCaseInsensitiveMap.this.clear();
 		}
 
 		@Override

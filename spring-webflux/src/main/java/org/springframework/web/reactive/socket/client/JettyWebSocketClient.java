@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -89,7 +89,7 @@ public class JettyWebSocketClient implements WebSocketClient, Lifecycle {
 	@Override
 	public Mono<Void> execute(URI url, @Nullable HttpHeaders headers, WebSocketHandler handler) {
 
-		ClientUpgradeRequest upgradeRequest = new ClientUpgradeRequest();
+		ClientUpgradeRequest upgradeRequest = new ClientUpgradeRequest(url);
 		upgradeRequest.setSubProtocols(handler.getSubProtocols());
 		if (headers != null) {
 			headers.headerNames().forEach(header -> upgradeRequest.setHeader(header, headers.getValuesAsList(header)));
@@ -110,7 +110,7 @@ public class JettyWebSocketClient implements WebSocketClient, Lifecycle {
 		JettyWebSocketHandlerAdapter handlerAdapter = new JettyWebSocketHandlerAdapter(handler, session ->
 				new JettyWebSocketSession(session, Objects.requireNonNull(handshakeInfo.get()), DefaultDataBufferFactory.sharedInstance, completion));
 		try {
-			this.client.connect(handlerAdapter, url, upgradeRequest, jettyUpgradeListener)
+			this.client.connect(handlerAdapter, upgradeRequest, jettyUpgradeListener)
 					.exceptionally(throwable -> {
 						// Only fail the completion if we have an error
 						// as the JettyWebSocketSession will never be opened.

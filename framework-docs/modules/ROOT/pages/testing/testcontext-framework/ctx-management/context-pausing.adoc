@@ -1,0 +1,45 @@
+[[testcontext-ctx-management-pausing]]
+= Context Pausing
+
+As of Spring Framework 7.0, an `ApplicationContext` stored in the context cache (see
+xref:testing/testcontext-framework/ctx-management/caching.adoc[Context Caching]) may be
+_paused_ when it is no longer actively in use and automatically _restarted_ the next time
+the context is retrieved from the cache. Specifically, the latter will restart all
+auto-startup beans in the application context, effectively restoring the lifecycle state.
+This ensures that background processes within the context are not actively running while
+the context is not used by tests. For example, JMS listener containers, scheduled tasks,
+and any other components in the context that implement `Lifecycle` or `SmartLifecycle`
+will be in a "stopped" state until the context is used again by a test. Note, however,
+that `SmartLifecycle` components can opt out of pausing by returning `false` from
+`SmartLifecycle#isPauseable()`.
+
+You can control whether inactive application contexts should be paused by setting the
+`PauseMode` to one of the following supported values.
+
+`ALWAYS` :: Always pause inactive application contexts.
+`ON_CONTEXT_SWITCH` :: Only pause inactive application contexts if the next context
+  retrieved from the context cache is a different context.
+`NEVER` :: Never pause inactive application contexts, effectively disabling the pausing
+  feature of the context cache.
+
+The `PauseMode` defaults to `ON_CONTEXT_SWITCH`, but it can be changed from the command
+line or a build script by setting a JVM system property named
+`spring.test.context.cache.pause` to one of the supported values (case insensitive). As
+an alternative, you can set the property via the
+xref:appendix.adoc#appendix-spring-properties[`SpringProperties`] mechanism.
+
+For example, if you want inactive application contexts to always be paused, you can
+switch from the default `ON_CONTEXT_SWITCH` mode to `ALWAYS` by setting the
+`spring.test.context.cache.pause` system property to `always`.
+
+```shell
+-Dspring.test.context.cache.pause=always
+```
+Similarly, if you encounter issues with `Lifecycle` components that cannot or should not
+opt out of pausing, or if you discover that your test suite runs more slowly due to the
+pausing and restarting of application contexts, you can disable the pausing feature by
+setting the `spring.test.context.cache.pause` system property to `never`.
+
+```shell
+-Dspring.test.context.cache.pause=never
+```

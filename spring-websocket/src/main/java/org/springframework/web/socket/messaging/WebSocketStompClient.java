@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -387,9 +387,9 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 		// TcpConnection implementation
 
 		@Override
-		public CompletableFuture<Void> sendAsync(Message<byte[]> message) {
+		public CompletableFuture<@Nullable Void> sendAsync(Message<byte[]> message) {
 			updateLastWriteTime();
-			CompletableFuture<Void> future = new CompletableFuture<>();
+			CompletableFuture<@Nullable Void> future = new CompletableFuture<>();
 			try {
 				WebSocketSession session = this.session;
 				Assert.state(session != null, "No WebSocketSession available");

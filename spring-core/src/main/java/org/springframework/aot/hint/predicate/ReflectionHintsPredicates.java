@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -494,12 +494,12 @@ public class ReflectionHintsPredicates {
 		@SuppressWarnings("removal")
 		private boolean memberCategoryMatch(TypeHint typeHint) {
 			if (Modifier.isPublic(this.field.getModifiers())) {
-				return typeHint.getMemberCategories().contains(MemberCategory.ACCESS_PUBLIC_FIELDS)
-						|| typeHint.getMemberCategories().contains(MemberCategory.PUBLIC_FIELDS);
+				return typeHint.getMemberCategories().contains(MemberCategory.ACCESS_PUBLIC_FIELDS) ||
+						typeHint.getMemberCategories().contains(MemberCategory.PUBLIC_FIELDS);
 			}
 			else {
-				return typeHint.getMemberCategories().contains(MemberCategory.ACCESS_DECLARED_FIELDS)
-						|| typeHint.getMemberCategories().contains(MemberCategory.DECLARED_FIELDS);
+				return typeHint.getMemberCategories().contains(MemberCategory.ACCESS_DECLARED_FIELDS) ||
+						typeHint.getMemberCategories().contains(MemberCategory.DECLARED_FIELDS);
 			}
 		}
 

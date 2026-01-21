@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -341,6 +341,13 @@ public class GenericConversionService implements ConfigurableConversionService {
 					conditionalConverter.matches(sourceType, targetType);
 		}
 
+		public boolean matchesFallback(TypeDescriptor sourceType, TypeDescriptor targetType) {
+			return (this.typeInfo.getTargetType() == targetType.getObjectType() &&
+					this.targetType.hasUnresolvableGenerics() &&
+					(!(this.converter instanceof ConditionalConverter conditionalConverter) ||
+							conditionalConverter.matches(sourceType, targetType)));
+		}
+
 		@Override
 		public @Nullable Object convert(@Nullable Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
 			if (source == null) {
@@ -474,7 +481,7 @@ public class GenericConversionService implements ConfigurableConversionService {
 		}
 
 		private ConvertersForPair getMatchableConverters(ConvertiblePair convertiblePair) {
-			return this.converters.computeIfAbsent(convertiblePair, k -> new ConvertersForPair());
+			return this.converters.computeIfAbsent(convertiblePair, key -> new ConvertersForPair());
 		}
 
 		public void remove(Class<?> sourceType, Class<?> targetType) {
@@ -610,9 +617,17 @@ public class GenericConversionService implements ConfigurableConversionService {
 		}
 
 		public @Nullable GenericConverter getConverter(TypeDescriptor sourceType, TypeDescriptor targetType) {
+			// Look for proper match among all converters (taking full generics into account)
 			for (GenericConverter converter : this.converters) {
 				if (!(converter instanceof ConditionalGenericConverter genericConverter) ||
 						genericConverter.matches(sourceType, targetType)) {
+					return converter;
+				}
+			}
+			// Fallback to pre-6.2.3 behavior: accept Class match for unresolvable generics
+			for (GenericConverter converter : this.converters) {
+				if (converter instanceof ConverterAdapter converterAdapter &&
+						converterAdapter.matchesFallback(sourceType, targetType)) {
 					return converter;
 				}
 			}

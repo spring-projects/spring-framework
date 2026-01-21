@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,8 +52,8 @@ public interface Lifecycle {
 	/**
 	 * Start this component.
 	 * <p>Should not throw an exception if the component is already running.
-	 * <p>In the case of a container, this will propagate the start signal to all
-	 * components that apply.
+	 * <p>In the case of a container, this will propagate a hard start signal to all
+	 * components that apply, even to non-auto-startup components.
 	 * @see SmartLifecycle#isAutoStartup()
 	 */
 	void start();

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -117,10 +117,11 @@ public class ExpressionException extends RuntimeException {
 
 	/**
 	 * Return the exception message.
-	 * As of Spring 4.0, this method returns the same result as {@link #toDetailedString()}.
+	 * <p>This method returns the same result as {@link #toDetailedString()}.
 	 * @see #getSimpleMessage()
 	 * @see java.lang.Throwable#getMessage()
 	 */
+	@Override
 	public String getMessage() {
 		return toDetailedString();
 	}

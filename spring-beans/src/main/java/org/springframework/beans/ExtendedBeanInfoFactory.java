@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,8 +20,6 @@ import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
 import java.lang.reflect.Method;
 
-import org.jspecify.annotations.NonNull;
-
 import org.springframework.core.Ordered;
 
 /**
@@ -30,7 +28,8 @@ import org.springframework.core.Ordered;
  * (package-visible) {@code ExtendedBeanInfo} implementation.
  *
  * <p>To be configured via a {@code META-INF/spring.factories} file with the following content:
- * {@code org.springframework.beans.BeanInfoFactory=org.springframework.beans.ExtendedBeanInfoFactory}
+ *
+ * <p>{@code org.springframework.beans.BeanInfoFactory=org.springframework.beans.ExtendedBeanInfoFactory}
  *
  * <p>Ordered at {@link Ordered#LOWEST_PRECEDENCE} to allow other user-defined
  * {@link BeanInfoFactory} types to take precedence.
@@ -44,7 +43,7 @@ import org.springframework.core.Ordered;
 public class ExtendedBeanInfoFactory extends StandardBeanInfoFactory {
 
 	@Override
-	public @NonNull BeanInfo getBeanInfo(Class<?> beanClass) throws IntrospectionException {
+	public BeanInfo getBeanInfo(Class<?> beanClass) throws IntrospectionException {
 		BeanInfo beanInfo = super.getBeanInfo(beanClass);
 		return (supports(beanClass) ? new ExtendedBeanInfo(beanInfo) : beanInfo);
 	}

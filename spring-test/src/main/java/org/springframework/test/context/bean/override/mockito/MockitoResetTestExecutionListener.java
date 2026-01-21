@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,6 +49,13 @@ import org.springframework.util.ClassUtils;
  */
 public class MockitoResetTestExecutionListener extends AbstractTestExecutionListener {
 
+	/**
+	 * The {@link #getOrder() order} value for this listener
+	 * ({@code Ordered.LOWEST_PRECEDENCE - 100}): {@value}.
+	 * @since 6.2.3
+	 */
+	public static final int ORDER = Ordered.LOWEST_PRECEDENCE - 100;
+
 	private static final Log logger = LogFactory.getLog(MockitoResetTestExecutionListener.class);
 
 	/**
@@ -56,28 +63,31 @@ public class MockitoResetTestExecutionListener extends AbstractTestExecutionList
 	 * @see #mockitoInitialized
 	 * @see #isEnabled()
 	 */
-	private static final boolean mockitoPresent = ClassUtils.isPresent("org.mockito.Mockito",
+	private static final boolean MOCKITO_PRESENT = ClassUtils.isPresent("org.mockito.Mockito",
 			MockitoResetTestExecutionListener.class.getClassLoader());
 
 	/**
 	 * Boolean flag which tracks whether Mockito has been successfully initialized
 	 * in the current environment.
-	 * <p>Even if {@link #mockitoPresent} evaluates to {@code true}, this flag
+	 * <p>Even if {@link #MOCKITO_PRESENT} evaluates to {@code true}, this flag
 	 * may eventually evaluate to {@code false} &mdash; for example, in a GraalVM
 	 * native image if the necessary reachability metadata has not been registered
 	 * for the {@link org.mockito.plugins.MockMaker} in use.
-	 * @see #mockitoPresent
+	 * @see #MOCKITO_PRESENT
 	 * @see #isEnabled()
 	 */
 	private static volatile @Nullable Boolean mockitoInitialized;
 
 
 	/**
-	 * Returns {@code Ordered.LOWEST_PRECEDENCE - 100}.
+	 * Returns {@value #ORDER}, which ensures that the
+	 * {@code MockitoResetTestExecutionListener} is ordered after all standard
+	 * {@code TestExecutionListener} implementations.
+	 * @see #ORDER
 	 */
 	@Override
 	public int getOrder() {
-		return Ordered.LOWEST_PRECEDENCE - 100;
+		return ORDER;
 	}
 
 	@Override
@@ -148,11 +158,11 @@ public class MockitoResetTestExecutionListener extends AbstractTestExecutionList
 
 	/**
 	 * Determine if this listener is enabled in the current environment.
-	 * @see #mockitoPresent
+	 * @see #MOCKITO_PRESENT
 	 * @see #mockitoInitialized
 	 */
 	private static boolean isEnabled() {
-		if (!mockitoPresent) {
+		if (!MOCKITO_PRESENT) {
 			return false;
 		}
 		Boolean enabled = mockitoInitialized;

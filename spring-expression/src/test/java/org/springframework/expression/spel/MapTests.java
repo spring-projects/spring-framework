@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,15 +43,15 @@ class MapTests extends AbstractExpressionTests {
 
 	// if the list is full of literals then it will be of the type unmodifiableMapClass
 	// rather than HashMap (or similar)
-	private static final Class<?> unmodifiableMapClass = Collections.unmodifiableMap(Map.of()).getClass();
+	private static final Class<?> UNMODIFIABLE_MAP_CLASS = Collections.unmodifiableMap(Map.of()).getClass();
 
 
 	@Test
 	void inlineMapCreationForLiterals() {
-		evaluate("{'a':1, 'b':2, 'c':3, 'd':4, 'e':5}", "{a=1, b=2, c=3, d=4, e=5}", unmodifiableMapClass);
-		evaluate("{'a':1}", "{a=1}", unmodifiableMapClass);
-		evaluate("{'abc':'def', 'uvw':'xyz'}", "{abc=def, uvw=xyz}", unmodifiableMapClass);
-		evaluate("{:}", "{}", unmodifiableMapClass);
+		evaluate("{'a':1, 'b':2, 'c':3, 'd':4, 'e':5}", "{a=1, b=2, c=3, d=4, e=5}", UNMODIFIABLE_MAP_CLASS);
+		evaluate("{'a':1}", "{a=1}", UNMODIFIABLE_MAP_CLASS);
+		evaluate("{'abc':'def', 'uvw':'xyz'}", "{abc=def, uvw=xyz}", UNMODIFIABLE_MAP_CLASS);
+		evaluate("{:}", "{}", UNMODIFIABLE_MAP_CLASS);
 	}
 
 	@Test
@@ -65,9 +65,9 @@ class MapTests extends AbstractExpressionTests {
 
 	@Test
 	void inlineMapAndNesting() {
-		evaluate("{a:{a:1,b:2,c:3},b:{d:4,e:5,f:6}}", "{a={a=1, b=2, c=3}, b={d=4, e=5, f=6}}", unmodifiableMapClass);
-		evaluate("{a:{x:1,y:'2',z:3},b:{u:4,v:{'a','b'},w:5,x:6}}", "{a={x=1, y=2, z=3}, b={u=4, v=[a, b], w=5, x=6}}", unmodifiableMapClass);
-		evaluate("{a:{1,2,3},b:{4,5,6}}", "{a=[1, 2, 3], b=[4, 5, 6]}", unmodifiableMapClass);
+		evaluate("{a:{a:1,b:2,c:3},b:{d:4,e:5,f:6}}", "{a={a=1, b=2, c=3}, b={d=4, e=5, f=6}}", UNMODIFIABLE_MAP_CLASS);
+		evaluate("{a:{x:1,y:'2',z:3},b:{u:4,v:{'a','b'},w:5,x:6}}", "{a={x=1, y=2, z=3}, b={u=4, v=[a, b], w=5, x=6}}", UNMODIFIABLE_MAP_CLASS);
+		evaluate("{a:{1,2,3},b:{4,5,6}}", "{a=[1, 2, 3], b=[4, 5, 6]}", UNMODIFIABLE_MAP_CLASS);
 	}
 
 	@Test
@@ -81,7 +81,7 @@ class MapTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	void inelineMapIsInstanceOfMap() {
+	void inlineMapIsInstanceOfMap() {
 		evaluate("{a:1, b:2} instanceof T(java.util.Map)", "true", Boolean.class);
 	}
 

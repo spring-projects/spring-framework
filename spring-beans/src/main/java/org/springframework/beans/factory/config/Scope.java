@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -126,11 +126,14 @@ public interface Scope {
 	/**
 	 * Resolve the contextual object for the given key, if any.
 	 * For example, the HttpServletRequest object for key "request".
+	 * <p>Since 7.0, this interface method returns {@code null} by default.
 	 * @param key the contextual key
 	 * @return the corresponding object, or {@code null} if none found
 	 * @throws IllegalStateException if the underlying scope is not currently active
 	 */
-	@Nullable Object resolveContextualObject(String key);
+	default @Nullable Object resolveContextualObject(String key) {
+		return null;
+	}
 
 	/**
 	 * Return the <em>conversation ID</em> for the current underlying scope, if any.
@@ -143,10 +146,13 @@ public interface Scope {
 	 * <p><b>Note: This is an optional operation.</b> It is perfectly valid to
 	 * return {@code null} in an implementation of this method if the
 	 * underlying storage mechanism has no obvious candidate for such an ID.
+	 * <p>Since 7.0, this interface method returns {@code null} by default.
 	 * @return the conversation ID, or {@code null} if there is no
 	 * conversation ID for the current scope
 	 * @throws IllegalStateException if the underlying scope is not currently active
 	 */
-	@Nullable String getConversationId();
+	default @Nullable String getConversationId() {
+		return null;
+	}
 
 }

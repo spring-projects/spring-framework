@@ -252,7 +252,6 @@ Kotlin::
 <1> Use "null-safe select first" operator on potentially null `members` list
 ======
 
-
 The following example shows how to use the "null-safe select last" operator for
 collections (`?.$`).
 
@@ -351,6 +350,50 @@ Kotlin::
 <2> Use null-safe projection operator on null `members` list
 ======
 
+[[expressions-operator-safe-navigation-optional]]
+== Null-safe Operations on `Optional`
+
+As of Spring Framework 7.0, null-safe operations are supported on instances of
+`java.util.Optional` with transparent unwrapping semantics.
+
+Specifically, when a null-safe operator is applied to an _empty_ `Optional`, it will be
+treated as if the `Optional` were `null`, and the subsequent operation will evaluate to
+`null`. However, if a null-safe operator is applied to a non-empty `Optional`, the
+subsequent operation will be applied to the object contained in the `Optional`, thereby
+effectively unwrapping the `Optional`.
+
+For example, if `user` is of type `Optional<User>`, the expression `user?.name` will
+evaluate to `null` if `user` is either `null` or an _empty_ `Optional` and will otherwise
+evaluate to the `name` of the `user`, effectively `user.get().getName()` or
+`user.get().name` for property or field access, respectively.
+
+[NOTE]
+====
+Invocations of methods defined in the `Optional` API are still supported on an _empty_
+`Optional`. For example, if `name` is of type `Optional<String>`, the expression
+`name?.orElse('Unknown')` will evaluate to `"Unknown"` if `name` is an empty `Optional`
+and will otherwise evaluate to the `String` contained in the `Optional` if `name` is a
+non-empty `Optional`, effectively `name.get()`.
+====
+
+// NOTE: &#8288; is the Unicode Character 'WORD JOINER', which prevents undesired line wraps.
+
+Similarly, if `names` is of type `Optional<List<String>>`, the expression
+`names?.?&#8288;[#this.length > 5]` will evaluate to `null` if `names` is `null` or an _empty_
+`Optional` and will otherwise evaluate to a sequence containing the names whose lengths
+are greater than 5, effectively
+`names.get().stream().filter(s -> s.length() > 5).toList()`.
+
+The same semantics apply to all of the null-safe operators mentioned previously in this
+chapter.
+
+For further details and examples, consult the javadoc for the following operators.
+
+* {spring-framework-api}/expression/spel/ast/PropertyOrFieldReference.html[`PropertyOrFieldReference`]
+* {spring-framework-api}/expression/spel/ast/MethodReference.html[`MethodReference`]
+* {spring-framework-api}/expression/spel/ast/Indexer.html[`Indexer`]
+* {spring-framework-api}/expression/spel/ast/Selection.html[`Selection`]
+* {spring-framework-api}/expression/spel/ast/Projection.html[`Projection`]
 
 [[expressions-operator-safe-navigation-compound-expressions]]
 == Null-safe Operations in Compound Expressions

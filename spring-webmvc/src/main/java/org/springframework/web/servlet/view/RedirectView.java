@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -69,9 +69,6 @@ import org.springframework.web.util.WebUtils;
  * Since most web applications will never know or care what their context path
  * actually is, they are much better off setting this flag to true, and submitting
  * paths which are to be considered relative to the web application root.
- *
- * <p><b>NOTE when using this redirect view in a Portlet environment:</b> Make sure
- * that your controller respects the Portlet {@code sendRedirect} constraints.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller

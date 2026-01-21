@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -267,9 +267,9 @@ public abstract class AbstractMessageWriterResultHandler extends HandlerResultHa
 
 	private List<MediaType> getMediaTypesFor(ResolvableType elementType) {
 		List<MediaType> writableMediaTypes = new ArrayList<>();
-		for (HttpMessageWriter<?> converter : getMessageWriters()) {
-			if (converter.canWrite(elementType, null)) {
-				writableMediaTypes.addAll(converter.getWritableMediaTypes(elementType));
+		for (HttpMessageWriter<?> messageWriter : getMessageWriters()) {
+			if (messageWriter.canWrite(elementType, null)) {
+				writableMediaTypes.addAll(messageWriter.getWritableMediaTypes(elementType));
 			}
 		}
 		return writableMediaTypes;

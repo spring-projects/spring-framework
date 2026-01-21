@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,11 +59,16 @@ public class DefaultJpaDialect implements JpaDialect, Serializable {
 	public @Nullable Object beginTransaction(EntityManager entityManager, TransactionDefinition definition)
 			throws PersistenceException, SQLException, TransactionException {
 
+		if (definition.getTimeout() != TransactionDefinition.TIMEOUT_DEFAULT) {
+			entityManager.getTransaction().setTimeout(definition.getTimeout());
+		}
+
 		if (definition.getIsolationLevel() != TransactionDefinition.ISOLATION_DEFAULT) {
 			throw new InvalidIsolationLevelException(getClass().getSimpleName() +
 					" does not support custom isolation levels due to limitations in standard JPA. " +
 					"Specific arrangements may be implemented in custom JpaDialect variants.");
 		}
+
 		entityManager.getTransaction().begin();
 		return null;
 	}

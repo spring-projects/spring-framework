@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,11 +29,6 @@ import org.springframework.core.annotation.AliasFor;
  *
  * <p>The method parameter may be declared as type {@link jakarta.servlet.http.Cookie}
  * or as cookie value type (String, int, etc.).
- *
- * <p>Note that with spring-webmvc 5.3.x and earlier, the cookie value is URL
- * decoded. This will be changed in 6.0 but in the meantime, applications can
- * also declare parameters of type {@link jakarta.servlet.http.Cookie} to access
- * the raw value.
  *
  * @author Juergen Hoeller
  * @author Sam Brannen

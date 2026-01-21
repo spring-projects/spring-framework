@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,7 +44,7 @@ import org.springframework.dao.DataAccessException;
  * @see JdbcTemplate#execute(CallableStatementCreator, CallableStatementCallback)
  */
 @FunctionalInterface
-public interface CallableStatementCallback<T> {
+public interface CallableStatementCallback<T extends @Nullable Object> {
 
 	/**
 	 * Gets called by {@code JdbcTemplate.execute} with an active JDBC
@@ -75,6 +75,6 @@ public interface CallableStatementCallback<T> {
 	 * into a DataAccessException by an SQLExceptionTranslator
 	 * @throws DataAccessException in case of custom exceptions
 	 */
-	@Nullable T doInCallableStatement(CallableStatement cs) throws SQLException, DataAccessException;
+	T doInCallableStatement(CallableStatement cs) throws SQLException, DataAccessException;
 
 }

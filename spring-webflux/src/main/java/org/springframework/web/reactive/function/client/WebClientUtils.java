@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -77,8 +77,7 @@ abstract class WebClientUtils {
 			try {
 				uri = new URI(uri.getScheme(), null, uri.getHost(), uri.getPort(), uri.getPath(), null, null);
 			}
-			catch (URISyntaxException ex) {
-				// ignore
+			catch (URISyntaxException ignored) {
 			}
 		}
 		return httpMethod.name() + " " + uri;

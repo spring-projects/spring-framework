@@ -22,7 +22,6 @@ rather than a singleton bean definition. This allows Spring to create a new targ
 instance when required.
 
 
-
 [[aop-ts-swap]]
 == Hot-swappable Target Sources
 
@@ -77,7 +76,6 @@ use a `TargetSource`), any `TargetSource` can be used in conjunction with
 arbitrary advice.
 
 
-
 [[aop-ts-pool]]
 == Pooling Target Sources
 
@@ -89,13 +87,11 @@ A crucial difference between Spring pooling and SLSB pooling is that Spring pool
 be applied to any POJO. As with Spring in general, this service can be applied in a
 non-invasive way.
 
-Spring provides support for Commons Pool 2.2, which provides a
+Spring provides support for Commons Pool 2, which provides a
 fairly efficient pooling implementation. You need the `commons-pool` Jar on your
 application's classpath to use this feature. You can also subclass
 `org.springframework.aop.target.AbstractPoolingTargetSource` to support any other
 pooling API.
-
-NOTE: Commons Pool 1.5+ is also supported but is deprecated as of Spring Framework 4.2.
 
 The following listing shows an example configuration:
 
@@ -175,7 +171,6 @@ Simpler pooling is available by using auto-proxying. You can set the `TargetSour
 used by any auto-proxy creator.
 
 
-
 [[aop-ts-prototype]]
 == Prototype Target Sources
 
@@ -198,7 +193,6 @@ To do this, you could modify the `poolTargetSource` definition shown earlier as 
 The only property is the name of the target bean. Inheritance is used in the
 `TargetSource` implementations to ensure consistent naming. As with the pooling target
 source, the target bean must be a prototype bean definition.
-
 
 
 [[aop-ts-threadlocal]]
@@ -226,7 +220,3 @@ always remember to correctly set and unset (where the latter involves a call to
 any case, since not unsetting it might result in problematic behavior. Spring's
 `ThreadLocal` support does this for you and should always be considered in favor of using
 `ThreadLocal` instances without other proper handling code.
-
-
-
-

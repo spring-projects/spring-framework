@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -168,7 +168,7 @@ public class StandardBeanExpressionResolver implements BeanExpressionResolver {
 					StandardEvaluationContext sec = new StandardEvaluationContext(bec);
 					sec.addPropertyAccessor(new BeanExpressionContextAccessor());
 					sec.addPropertyAccessor(new BeanFactoryAccessor());
-					sec.addPropertyAccessor(new MapAccessor());
+					sec.addPropertyAccessor(new org.springframework.expression.spel.support.MapAccessor());
 					sec.addPropertyAccessor(new EnvironmentAccessor());
 					sec.setBeanResolver(new BeanFactoryResolver(beanFactory));
 					sec.setTypeLocator(new StandardTypeLocator(beanFactory.getBeanClassLoader()));
@@ -201,8 +201,8 @@ public class StandardBeanExpressionResolver implements BeanExpressionResolver {
 
 		try {
 			int maxLength = Integer.parseInt(value.trim());
-			Assert.isTrue(maxLength > 0, () -> "Value [" + maxLength + "] for system property ["
-					+ MAX_SPEL_EXPRESSION_LENGTH_PROPERTY_NAME + "] must be positive");
+			Assert.isTrue(maxLength > 0, () -> "Value [" + maxLength + "] for system property [" +
+					MAX_SPEL_EXPRESSION_LENGTH_PROPERTY_NAME + "] must be positive");
 			return maxLength;
 		}
 		catch (NumberFormatException ex) {

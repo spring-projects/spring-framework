@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,12 +29,13 @@ import org.springframework.util.Assert;
  *
  * @author Keith Donald
  * @author Josh Cummings
+ * @author Sebastien Deleuze
  * @since 3.0
  * @param <S> the source type
- * @param <T> the target type
+ * @param <T> the target type (potentially {@code null})
  */
 @FunctionalInterface
-public interface Converter<S, T> {
+public interface Converter<S, T extends @Nullable Object> {
 
 	/**
 	 * Convert the source object of type {@code S} to target type {@code T}.
@@ -42,7 +43,7 @@ public interface Converter<S, T> {
 	 * @return the converted object, which must be an instance of {@code T} (potentially {@code null})
 	 * @throws IllegalArgumentException if the source cannot be converted to the desired target type
 	 */
-	@Nullable T convert(S source);
+	T convert(S source);
 
 	/**
 	 * Construct a composed {@link Converter} that first applies this {@link Converter}
@@ -56,7 +57,7 @@ public interface Converter<S, T> {
 	 * and then applies the {@code after} {@link Converter}
 	 * @since 5.3
 	 */
-	default <U> Converter<S, U> andThen(Converter<? super T, ? extends U> after) {
+	default <U> Converter<S, @Nullable U> andThen(Converter<? super T, ? extends @Nullable U> after) {
 		Assert.notNull(after, "'after' Converter must not be null");
 		return (S s) -> {
 			T initialResult = convert(s);

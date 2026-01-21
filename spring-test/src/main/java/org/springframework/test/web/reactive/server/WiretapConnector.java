@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import reactor.core.publisher.Mono;
 import reactor.core.publisher.Sinks;
 
 import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.client.reactive.ClientHttpConnector;
@@ -38,6 +39,7 @@ import org.springframework.http.client.reactive.ClientHttpRequest;
 import org.springframework.http.client.reactive.ClientHttpRequestDecorator;
 import org.springframework.http.client.reactive.ClientHttpResponse;
 import org.springframework.http.client.reactive.ClientHttpResponseDecorator;
+import org.springframework.test.json.JsonConverterDelegate;
 import org.springframework.util.Assert;
 
 /**
@@ -53,11 +55,14 @@ class WiretapConnector implements ClientHttpConnector {
 
 	private final ClientHttpConnector delegate;
 
+	private final @Nullable JsonConverterDelegate converterDelegate;
+
 	private final Map<String, ClientExchangeInfo> exchanges = new ConcurrentHashMap<>();
 
 
-	WiretapConnector(ClientHttpConnector delegate) {
+	WiretapConnector(ClientHttpConnector delegate, @Nullable JsonEncoderDecoder encoderDecoder) {
 		this.delegate = delegate;
+		this.converterDelegate = (encoderDecoder != null ? encoderDecoder.createJsonConverterDelegate() : null);
 	}
 
 
@@ -96,7 +101,8 @@ class WiretapConnector implements ClientHttpConnector {
 				clientInfo.getRequest().getRecorder().getContent(),
 				clientInfo.getResponse().getRecorder().getContent(),
 				timeout, uriTemplate,
-				clientInfo.getResponse().getMockServerResult());
+				clientInfo.getResponse().getMockServerResult(),
+				this.converterDelegate);
 	}
 
 
@@ -191,11 +197,21 @@ class WiretapConnector implements ClientHttpConnector {
 					//  1. Mock server never consumed request body (for example, error before read)
 					//  2. FluxExchangeResult: getResponseBodyContent called before getResponseBody
 					//noinspection ConstantConditions
-					(this.publisher != null ? this.publisher : this.publisherNested)
-							.onErrorMap(ex -> new IllegalStateException(
-									"Content has not been consumed, and " +
-											"an error was raised while attempting to produce it.", ex))
-							.subscribe();
+					if (this.publisher != null) {
+						this.publisher.doOnNext(DataBufferUtils::release)
+								.onErrorMap(ex -> new IllegalStateException(
+										"Content has not been consumed, and " +
+												"an error was raised while attempting to produce it.", ex))
+								.subscribe();
+					}
+					else if (this.publisherNested != null) {
+						this.publisherNested
+								.map(pub -> Flux.from(pub).doOnNext(DataBufferUtils::release))
+								.onErrorMap(ex -> new IllegalStateException(
+										"Content has not been consumed, and " +
+												"an error was raised while attempting to produce it.", ex))
+								.subscribe();
+					}
 				}
 				return this.content.asMono();
 			});

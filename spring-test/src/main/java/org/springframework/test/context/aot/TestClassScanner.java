@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,10 +17,12 @@
 package org.springframework.test.context.aot;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Modifier;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
@@ -82,8 +84,10 @@ import static org.springframework.core.annotation.MergedAnnotations.SearchStrate
 class TestClassScanner {
 
 	// JUnit Jupiter
-	private static final String EXTEND_WITH_ANNOTATION_NAME = "org.junit.jupiter.api.extension.ExtendWith";
 	private static final String SPRING_EXTENSION_NAME = "org.springframework.test.context.junit.jupiter.SpringExtension";
+	private static final String EXTEND_WITH_ANNOTATION_NAME = "org.junit.jupiter.api.extension.ExtendWith";
+	private static final String CLASS_TEMPLATE_ANNOTATION_NAME = "org.junit.jupiter.api.ClassTemplate";
+	private static final String NESTED_ANNOTATION_NAME = "org.junit.jupiter.api.Nested";
 
 	// JUnit 4
 	private static final String RUN_WITH_ANNOTATION_NAME = "org.junit.runner.RunWith";
@@ -142,7 +146,12 @@ class TestClassScanner {
 		if (packageNames.length > 0) {
 			builder.filters(includePackageNames(packageNames));
 		}
-		LauncherDiscoveryRequest request = builder.build();
+		LauncherDiscoveryRequest request = builder
+				// In case junit.platform.discovery.issue.severity.critical=INFO has been configured,
+				// we do not want scanning to fail due to the deprecation of the Vintage test engine.
+				// So, we disable reporting of the deprecation discovery issue.
+				.configurationParameter("junit.vintage.discovery.issue.reporting.enabled", "false")
+				.build();
 		Launcher launcher = LauncherFactory.create();
 		TestPlan testPlan = launcher.discover(request);
 
@@ -156,6 +165,7 @@ class TestClassScanner {
 				.map(this::getJavaClass)
 				.flatMap(Optional::stream)
 				.filter(this::isSpringTestClass)
+				.flatMap(this::expandJupiterClassTemplateIfNecessary)
 				.distinct()
 				.sorted(Comparator.comparing(Class::getName));
 	}
@@ -179,6 +189,45 @@ class TestClassScanner {
 		return isSpringTestClass;
 	}
 
+	/**
+	 * Expand the supplied test class into a stream containing the supplied test
+	 * class. If the supplied class is a JUnit Jupiter {@code @ClassTemplate}
+	 * (such as a {@code @ParameterizedClass}), the returned stream will also
+	 * contain {@code @Nested} test classes associated with the supplied test
+	 * class.
+	 * @since 7.0
+	 */
+	private Stream<Class<?>> expandJupiterClassTemplateIfNecessary(Class<?> testClass) {
+		if (isJupiterClassTemplate(testClass)) {
+			Set<Class<?>> testClasses = new HashSet<>();
+			collectNestedTestClasses(testClass, testClasses, new HashSet<>());
+			testClasses.add(testClass);
+			return testClasses.stream();
+		}
+		return Stream.of(testClass);
+	}
+
+	/**
+	 * Collect all {@code @Nested} test classes declared in the superclass hierarchy
+	 * of the supplied test class as well as {@code @Nested} test classes declared
+	 * in the supplied test class itself, recursively.
+	 * @since 7.0
+	 */
+	private static void collectNestedTestClasses(Class<?> testClass, Set<Class<?>> testClasses, Set<Class<?>> visited) {
+		if (visited.add(testClass)) {
+			Class<?> superclass = testClass.getSuperclass();
+			if (superclass != null && superclass != Object.class) {
+				collectNestedTestClasses(superclass, testClasses, visited);
+			}
+			for (Class<?> nestedClass : testClass.getDeclaredClasses()) {
+				if (isJupiterNestedClass(nestedClass)) {
+					testClasses.add(nestedClass);
+					collectNestedTestClasses(nestedClass, testClasses, visited);
+				}
+			}
+		}
+	}
+
 	private static boolean isJupiterSpringTestClass(Class<?> clazz) {
 		return MergedAnnotations.search(TYPE_HIERARCHY)
 				.withEnclosingClasses(ClassUtils::isInnerClass)
@@ -188,6 +237,15 @@ class TestClassScanner {
 				.flatMap(Arrays::stream)
 				.map(Class::getName)
 				.anyMatch(SPRING_EXTENSION_NAME::equals);
+	}
+
+	private static boolean isJupiterClassTemplate(Class<?> clazz) {
+		return MergedAnnotations.from(clazz, TYPE_HIERARCHY).isPresent(CLASS_TEMPLATE_ANNOTATION_NAME);
+	}
+
+	private static boolean isJupiterNestedClass(Class<?> clazz) {
+		return (!Modifier.isAbstract(clazz.getModifiers()) && ClassUtils.isInnerClass(clazz) &&
+				MergedAnnotations.from(clazz, TYPE_HIERARCHY).isPresent(NESTED_ANNOTATION_NAME));
 	}
 
 	private static boolean isJUnit4SpringTestClass(Class<?> clazz) {

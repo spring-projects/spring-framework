@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ import org.springframework.aot.generate.GeneratedMethods;
 import org.springframework.aot.generate.GenerationContext;
 import org.springframework.aot.generate.MethodReference;
 import org.springframework.aot.generate.MethodReference.ArgumentCodeGenerator;
+import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.aot.BeanFactoryInitializationCode;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
@@ -126,8 +127,9 @@ class ApplicationContextInitializationCodeGenerator implements BeanFactoryInitia
 		return ArgumentCodeGenerator.from(new InitializerMethodArgumentCodeGenerator());
 	}
 
-	GeneratedClass getGeneratedClass() {
-		return this.generatedClass;
+	@Override
+	public ClassName getClassName() {
+		return this.generatedClass.getName();
 	}
 
 	@Override
@@ -149,12 +151,13 @@ class ApplicationContextInitializationCodeGenerator implements BeanFactoryInitia
 
 		private @Nullable CodeBlock apply(ClassName className) {
 			String name = className.canonicalName();
-			if (name.equals(DefaultListableBeanFactory.class.getName())
-					|| name.equals(ConfigurableListableBeanFactory.class.getName())) {
+			if (name.equals(DefaultListableBeanFactory.class.getName()) ||
+					name.equals(ListableBeanFactory.class.getName()) ||
+					name.equals(ConfigurableListableBeanFactory.class.getName())) {
 				return CodeBlock.of(BEAN_FACTORY_VARIABLE);
 			}
-			else if (name.equals(ConfigurableEnvironment.class.getName())
-					|| name.equals(Environment.class.getName())) {
+			else if (name.equals(ConfigurableEnvironment.class.getName()) ||
+					name.equals(Environment.class.getName())) {
 				return CodeBlock.of("$L.getEnvironment()", APPLICATION_CONTEXT_VARIABLE);
 			}
 			else if (name.equals(ResourceLoader.class.getName())) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -79,7 +79,7 @@ public class PropertyPlaceholderHelper {
 	 * @param properties the {@code Properties} to use for replacement
 	 * @return the supplied value with placeholders replaced inline
 	 */
-	public String replacePlaceholders(String value, final Properties properties) {
+	public String replacePlaceholders(String value, Properties properties) {
 		Assert.notNull(properties, "'properties' must not be null");
 		return replacePlaceholders(value, properties::getProperty);
 	}
@@ -93,10 +93,6 @@ public class PropertyPlaceholderHelper {
 	 */
 	public String replacePlaceholders(String value, PlaceholderResolver placeholderResolver) {
 		Assert.notNull(value, "'value' must not be null");
-		return parseStringValue(value, placeholderResolver);
-	}
-
-	protected String parseStringValue(String value, PlaceholderResolver placeholderResolver) {
 		return this.parser.replacePlaceholders(value, placeholderResolver);
 	}
 

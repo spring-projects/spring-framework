@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -290,9 +290,16 @@ public final class UrlHandlerFilter implements WebFilter {
 
 		@Override
 		public Mono<Void> handleInternal(ServerWebExchange exchange, WebFilterChain chain) {
+			ServerHttpRequest request = exchange.getRequest();
+			String query = request.getURI().getRawQuery();
+			String location = trimTrailingSlash(request);
+			if (StringUtils.hasText(query)) {
+				location += "?" + query;
+			}
+
 			ServerHttpResponse response = exchange.getResponse();
 			response.setStatusCode(this.statusCode);
-			response.getHeaders().set(HttpHeaders.LOCATION, trimTrailingSlash(exchange.getRequest()));
+			response.getHeaders().set(HttpHeaders.LOCATION, location);
 			return Mono.empty();
 		}
 	}

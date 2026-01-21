@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.util.Arrays;
 
 import org.junit.jupiter.api.Test;
 
+import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.test.context.MergedContextConfiguration;
@@ -79,7 +80,7 @@ class AnnotationConfigContextLoaderTests {
 				AnnotatedFooConfigInnerClassTestCase.class, EMPTY_STRING_ARRAY,
 				new Class<?>[] {AnnotatedFooConfigInnerClassTestCase.FooConfig.class},
 				EMPTY_STRING_ARRAY, contextLoader);
-		ConfigurableApplicationContext context = contextLoader.loadContextForAotProcessing(mergedConfig);
+		ConfigurableApplicationContext context = contextLoader.loadContextForAotProcessing(mergedConfig, new RuntimeHints());
 		assertThat(context.isActive()).as("ApplicationContext is active").isFalse();
 		assertThat(Arrays.stream(context.getBeanDefinitionNames())).anyMatch(name -> name.contains("FooConfig"));
 		context.close();

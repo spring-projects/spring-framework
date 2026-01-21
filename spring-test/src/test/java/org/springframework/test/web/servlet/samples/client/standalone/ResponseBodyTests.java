@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.function.Consumer;
 
 import jakarta.validation.constraints.NotNull;
+import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.core.ParameterizedTypeReference;
@@ -46,8 +47,8 @@ class ResponseBodyTests {
 	void json() {
 		execute("/persons/Lee", body -> body.jsonPath("$.name").isEqualTo("Lee")
 				.jsonPath("$.age").isEqualTo(42)
-				.jsonPath("$.age").value(equalTo(42))
-				.jsonPath("$.age").value(Float.class, equalTo(42.0f)));
+				.jsonPath("$.age").value(v -> MatcherAssert.assertThat(v, equalTo(42)))
+				.jsonPath("$.age").value(Float.class, v -> MatcherAssert.assertThat(v, equalTo(42.0f))));
 	}
 
 	@Test

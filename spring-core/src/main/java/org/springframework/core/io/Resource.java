@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import java.net.URL;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.charset.Charset;
+import java.nio.file.Path;
 
 import org.jspecify.annotations.Nullable;
 
@@ -91,11 +92,13 @@ public interface Resource extends InputStreamSource {
 
 	/**
 	 * Determine whether this resource represents a file in a file system.
-	 * <p>A value of {@code true} strongly suggests (but does not guarantee)
-	 * that a {@link #getFile()} call will succeed.
+	 * <p>A value of {@code true} suggests (but does not guarantee) that a
+	 * {@link #getFile()} call will succeed. For non-default file systems,
+	 * {@link #getFilePath()} is the more reliable follow-up call.
 	 * <p>This is conservatively {@code false} by default.
 	 * @since 5.0
 	 * @see #getFile()
+	 * @see #getFilePath()
 	 */
 	default boolean isFile() {
 		return false;
@@ -118,12 +121,25 @@ public interface Resource extends InputStreamSource {
 
 	/**
 	 * Return a File handle for this resource.
-	 * @throws java.io.FileNotFoundException if the resource cannot be resolved as
-	 * absolute file path, i.e. if the resource is not available in a file system
+	 * <p>Note: This only works for files in the default file system.
+	 * @throws UnsupportedOperationException if the resource is a file but cannot be
+	 * exposed as a {@code java.io.File}; try {@link #getFilePath()} instead
+	 * @throws java.io.FileNotFoundException if the resource cannot be resolved as a file
 	 * @throws IOException in case of general resolution/reading failures
 	 * @see #getInputStream()
 	 */
 	File getFile() throws IOException;
+
+	/**
+	 * Return an NIO Path handle for this resource.
+	 * <p>Note: This works for files in non-default file systems as well.
+	 * @throws java.io.FileNotFoundException if the resource cannot be resolved as a file
+	 * @throws IOException in case of general resolution/reading failures
+	 * @since 7.0
+	 */
+	default Path getFilePath() throws IOException {
+		return getFile().toPath();
+	}
 
 	/**
 	 * Return a {@link ReadableByteChannel}.

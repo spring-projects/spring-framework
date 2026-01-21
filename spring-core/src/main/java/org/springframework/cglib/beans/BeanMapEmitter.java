@@ -57,6 +57,8 @@ class BeanMapEmitter extends ClassEmitter {
     public BeanMapEmitter(ClassVisitor v, String className, Class type, int require) {
         super(v);
 
+        // Byte code level cannot be higher than 1.8 due to STATICHOOK methods
+        // which set static final fields outside the initializer method <clinit>.
         begin_class(Constants.V1_8, Constants.ACC_PUBLIC, className, BEAN_MAP, null, Constants.SOURCE_FILE);
         EmitUtils.null_constructor(this);
         EmitUtils.factory_method(this, NEW_INSTANCE);

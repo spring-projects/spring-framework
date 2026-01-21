@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,5 +46,14 @@ public interface SmartPersistenceUnitInfo extends PersistenceUnitInfo {
 	 * @see #getNewTempClassLoader()
 	 */
 	void setPersistenceProviderPackageName(String persistenceProviderPackageName);
+
+	/**
+	 * Determine whether this persistence unit is configured for JTA transactions.
+	 * <p>This allows for a quick check without referring to the JPA transaction type enum
+	 * (primarily for achieving compatibility between JPA 3.2 and 4.0).
+	 * @since 7.0
+	 * @see jakarta.persistence.PersistenceUnitTransactionType#JTA
+	 */
+	boolean isConfiguredForJta();
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,11 @@ import org.junit.platform.suite.api.Suite;
  * @author Sam Brannen
  */
 @Suite
-@SelectPackages({"org.springframework.core", "org.springframework.util"})
+@SelectPackages({
+	"org.springframework.aot",
+	"org.springframework.core",
+	"org.springframework.util"
+})
 @IncludeClassNamePatterns(".*Tests?$")
 class SpringCoreTestSuite {
 }

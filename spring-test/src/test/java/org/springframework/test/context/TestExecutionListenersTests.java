@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,6 @@ import org.springframework.test.context.transaction.TransactionalTestExecutionLi
 import org.springframework.test.context.web.ServletTestExecutionListener;
 import org.springframework.util.ClassUtils;
 
-import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -60,17 +59,18 @@ import static org.springframework.test.context.TestExecutionListeners.MergeMode.
  */
 class TestExecutionListenersTests {
 
-	private static final Class<?> micrometerListenerClass =
+	private static final Class<?> MICROMETER_LISTENER_CLASS =
 			ClassUtils.resolveClassName("org.springframework.test.context.observation.MicrometerObservationRegistryTestExecutionListener", null);
 
 	@Test
 	void defaultListeners() {
-		List<Class<?>> expected = asList(ServletTestExecutionListener.class,//
+		List<Class<?>> expected = List.of(//
+				ServletTestExecutionListener.class,//
 				DirtiesContextBeforeModesTestExecutionListener.class,//
 				ApplicationEventsTestExecutionListener.class,//
 				BeanOverrideTestExecutionListener.class,//
 				DependencyInjectionTestExecutionListener.class,//
-				micrometerListenerClass,//
+				MICROMETER_LISTENER_CLASS,//
 				DirtiesContextTestExecutionListener.class,//
 				CommonCachesTestExecutionListener.class, //
 				TransactionalTestExecutionListener.class,//
@@ -86,13 +86,14 @@ class TestExecutionListenersTests {
 	 */
 	@Test
 	void defaultListenersMergedWithCustomListenerPrepended() {
-		List<Class<?>> expected = asList(QuuxTestExecutionListener.class,//
+		List<Class<?>> expected = List.of(//
+				QuuxTestExecutionListener.class,//
 				ServletTestExecutionListener.class,//
 				DirtiesContextBeforeModesTestExecutionListener.class,//
 				ApplicationEventsTestExecutionListener.class,//
 				BeanOverrideTestExecutionListener.class,//
 				DependencyInjectionTestExecutionListener.class,//
-				micrometerListenerClass,//
+				MICROMETER_LISTENER_CLASS,//
 				DirtiesContextTestExecutionListener.class,//
 				CommonCachesTestExecutionListener.class, //
 				TransactionalTestExecutionListener.class,//
@@ -108,19 +109,20 @@ class TestExecutionListenersTests {
 	 */
 	@Test
 	void defaultListenersMergedWithCustomListenerAppended() {
-		List<Class<?>> expected = asList(ServletTestExecutionListener.class,//
+		List<Class<?>> expected = List.of(//
+				ServletTestExecutionListener.class,//
 				DirtiesContextBeforeModesTestExecutionListener.class,//
 				ApplicationEventsTestExecutionListener.class,//
 				BeanOverrideTestExecutionListener.class,//
 				DependencyInjectionTestExecutionListener.class,//
-				micrometerListenerClass,//
+				MICROMETER_LISTENER_CLASS,//
 				DirtiesContextTestExecutionListener.class,//
 				CommonCachesTestExecutionListener.class, //
 				TransactionalTestExecutionListener.class,
 				SqlScriptsTestExecutionListener.class,//
 				EventPublishingTestExecutionListener.class,//
 				MockitoResetTestExecutionListener.class,//
-				BazTestExecutionListener.class
+				BazTestExecutionListener.class//
 			);
 		assertRegisteredListeners(MergedDefaultListenersWithCustomListenerAppendedTestCase.class, expected);
 	}
@@ -130,13 +132,14 @@ class TestExecutionListenersTests {
 	 */
 	@Test
 	void defaultListenersMergedWithCustomListenerInserted() {
-		List<Class<?>> expected = asList(ServletTestExecutionListener.class,//
+		List<Class<?>> expected = List.of(//
+				ServletTestExecutionListener.class,//
 				DirtiesContextBeforeModesTestExecutionListener.class,//
 				ApplicationEventsTestExecutionListener.class,//
 				BeanOverrideTestExecutionListener.class,//
 				DependencyInjectionTestExecutionListener.class,//
 				BarTestExecutionListener.class,//
-				micrometerListenerClass,//
+				MICROMETER_LISTENER_CLASS,//
 				DirtiesContextTestExecutionListener.class,//
 				CommonCachesTestExecutionListener.class, //
 				TransactionalTestExecutionListener.class,//
@@ -157,7 +160,7 @@ class TestExecutionListenersTests {
 		assertRegisteredListeners(InheritedDefaultListenersTestCase.class, List.of(QuuxTestExecutionListener.class));
 		assertRegisteredListeners(SubInheritedDefaultListenersTestCase.class, List.of(QuuxTestExecutionListener.class));
 		assertRegisteredListeners(SubSubInheritedDefaultListenersTestCase.class,
-				asList(QuuxTestExecutionListener.class, EnigmaTestExecutionListener.class));
+				List.of(QuuxTestExecutionListener.class, EnigmaTestExecutionListener.class));
 	}
 
 	@Test
@@ -168,7 +171,7 @@ class TestExecutionListenersTests {
 	@Test
 	void customListenersDeclaredOnInterface() {
 		assertRegisteredListeners(ExplicitListenersOnTestInterfaceTestCase.class,
-			asList(FooTestExecutionListener.class, BarTestExecutionListener.class));
+				List.of(FooTestExecutionListener.class, BarTestExecutionListener.class));
 	}
 
 	@Test

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,13 +36,23 @@ import org.springframework.test.context.TestContext;
 public class CommonCachesTestExecutionListener extends AbstractTestExecutionListener {
 
 	/**
-	 * Returns {@code 3005}.
+	 * The {@link #getOrder() order} value for this listener: {@value}.
+	 * @since 6.2.3
+	 */
+	public static final int ORDER = 3005;
+
+
+	/**
+	 * Returns {@value #ORDER}, which ensures that the {@code CommonCachesTestExecutionListener}
+	 * is ordered after the
+	 * {@link DirtiesContextTestExecutionListener DirtiesContextTestExecutionListener} and before the
+	 * {@link org.springframework.test.context.transaction.TransactionalTestExecutionListener
+	 * TransactionalTestExecutionListener}.
 	 */
 	@Override
 	public final int getOrder() {
-		return 3005;
+		return ORDER;
 	}
-
 
 	@Override
 	public void afterTestClass(TestContext testContext) throws Exception {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.web.context.request.async;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -342,6 +343,10 @@ public final class WebAsyncManager {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Servlet container error notification for " + formatUri(this.asyncWebRequest) + ": " + ex);
 			}
+			if (ex instanceof IOException) {
+				ex = new AsyncRequestNotUsableException(
+						"Servlet container error notification for disconnected client", ex);
+			}
 			Object result = interceptorChain.triggerAfterError(this.asyncWebRequest, callable, ex);
 			result = (result != CallableProcessingInterceptor.RESULT_NONE ? result : ex);
 			setConcurrentResultAndDispatch(result);
@@ -433,6 +438,10 @@ public final class WebAsyncManager {
 		this.asyncWebRequest.addErrorHandler(ex -> {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Servlet container error notification for " + formatUri(this.asyncWebRequest));
+			}
+			if (ex instanceof IOException) {
+				ex = new AsyncRequestNotUsableException(
+						"Servlet container error notification for disconnected client", ex);
 			}
 			try {
 				interceptorChain.triggerAfterError(this.asyncWebRequest, deferredResult, ex);

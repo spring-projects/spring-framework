@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -86,10 +86,10 @@ public class XmlEventDecoder extends AbstractDecoder<XMLEvent> {
 
 	private static final XMLInputFactory inputFactory = StaxUtils.createDefensiveInputFactory();
 
-	private static final boolean aaltoPresent = ClassUtils.isPresent(
+	private static final boolean AALTO_PRESENT = ClassUtils.isPresent(
 			"com.fasterxml.aalto.AsyncXMLStreamReader", XmlEventDecoder.class.getClassLoader());
 
-	boolean useAalto = aaltoPresent;
+	boolean useAalto = AALTO_PRESENT;
 
 	private int maxInMemorySize = 256 * 1024;
 

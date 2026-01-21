@@ -20,7 +20,6 @@ Spring Framework provides support for Coroutines on the following scope:
 * Spring AOP
 
 
-
 [[dependencies]]
 == Dependencies
 
@@ -38,7 +37,6 @@ dependencies {
 ----
 
 Version `1.4.0` and above are supported.
-
 
 
 [[how-reactive-translates-to-coroutines]]
@@ -67,7 +65,6 @@ For input parameters:
 
 Read this blog post about {spring-site-blog}/2019/04/12/going-reactive-with-spring-coroutines-and-kotlin-flow[Going Reactive with Spring, Coroutines and Kotlin Flow]
 for more details, including how to run code concurrently with Coroutines.
-
 
 
 [[controllers]]
@@ -168,11 +165,12 @@ class CoroutinesViewController(banner: Banner) {
 ----
 
 
-
 [[webflux-fn]]
 == WebFlux.fn
 
-Here is an example of Coroutines router defined via the {spring-framework-api-kdoc}/spring-webflux/org.springframework.web.reactive.function.server/co-router.html[coRouter { }] DSL and related handlers.
+Here is an example of Coroutines router defined via the
+{spring-framework-api-kdoc}/spring-webflux/org.springframework.web.reactive.function.server/co-router.html[coRouter { }]
+DSL and related handlers.
 
 [source,kotlin,indent=0]
 ----
@@ -204,7 +202,6 @@ class UserHandler(builder: WebClient.Builder) {
 ----
 
 
-
 [[transactions]]
 == Transactions
 
@@ -215,45 +212,67 @@ For suspending functions, a `TransactionalOperator.executeAndAwait` extension is
 
 [source,kotlin,indent=0]
 ----
-    import org.springframework.transaction.reactive.executeAndAwait
+	import org.springframework.transaction.reactive.executeAndAwait
 
-    class PersonRepository(private val operator: TransactionalOperator) {
+	class PersonRepository(private val operator: TransactionalOperator) {
 
-        suspend fun initDatabase() = operator.executeAndAwait {
-            insertPerson1()
-            insertPerson2()
-        }
+		suspend fun initDatabase() = operator.executeAndAwait {
+			insertPerson1()
+			insertPerson2()
+		}
 
-        private suspend fun insertPerson1() {
-            // INSERT SQL statement
-        }
+		private suspend fun insertPerson1() {
+			// INSERT SQL statement
+		}
 
-        private suspend fun insertPerson2() {
-            // INSERT SQL statement
-        }
-    }
+		private suspend fun insertPerson2() {
+			// INSERT SQL statement
+		}
+	}
 ----
 
 For Kotlin `Flow`, a  `Flow<T>.transactional` extension is provided.
 
 [source,kotlin,indent=0]
 ----
-    import org.springframework.transaction.reactive.transactional
+	import org.springframework.transaction.reactive.transactional
 
-    class PersonRepository(private val operator: TransactionalOperator) {
+	class PersonRepository(private val operator: TransactionalOperator) {
 
-        fun updatePeople() = findPeople().map(::updatePerson).transactional(operator)
+		fun updatePeople() = findPeople().map(::updatePerson).transactional(operator)
 
-        private fun findPeople(): Flow<Person> {
-            // SELECT SQL statement
-        }
+		private fun findPeople(): Flow<Person> {
+			// SELECT SQL statement
+		}
 
-        private suspend fun updatePerson(person: Person): Person {
-            // UPDATE SQL statement
-        }
-    }
+		private suspend fun updatePerson(person: Person): Person {
+			// UPDATE SQL statement
+		}
+	}
 ----
 
+[[coroutines.propagation]]
+== Context Propagation
 
+Spring applications are xref:integration/observability.adoc[instrumented with Micrometer for Observability support].
+For tracing support, the current observation is propagated through a `ThreadLocal` for blocking code,
+or the Reactor `Context` for reactive pipelines. But the current observation also needs to be made available
+in the execution context of a suspended function. Without that, the current "traceId" will not be automatically
+prepended to logged statements from coroutines.
 
+The {spring-framework-api-kdoc}/spring-core/org.springframework.core/-propagation-context-element/index.html[`PropagationContextElement`] operator generally ensures that the
+{micrometer-context-propagation-docs}/[Micrometer Context Propagation library] works with Kotlin Coroutines.
+
+It requires the `io.micrometer:context-propagation` dependency and optionally the
+`org.jetbrains.kotlinx:kotlinx-coroutines-reactor` one. Automatic context propagation via
+`CoroutinesUtils#invokeSuspendingFunction` (used by Spring to adapt Coroutines to Reactor `Flux` or `Mono`) can be
+enabled by invoking `Hooks.enableAutomaticContextPropagation()`.
+
+Applications can also use `PropagationContextElement` explicitly to augment the `CoroutineContext`
+with the context propagation mechanism:
+
+include-code::./ContextPropagationSample[tag=context,indent=0]
+
+Here, assuming that Micrometer Tracing is configured, the resulting logging statement will show the current "traceId"
+and unlock better observability for your application.
 

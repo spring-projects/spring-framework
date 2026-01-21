@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,7 +42,6 @@ import org.springframework.http.MediaType
 @ExperimentalSerializationApi
 class KotlinSerializationCborDecoderTests : AbstractDecoderTests<KotlinSerializationCborDecoder>(KotlinSerializationCborDecoder()) {
 
-	@Suppress("UsePropertyAccessSyntax", "DEPRECATION")
 	@Test
 	override fun canDecode() {
 		assertThat(decoder.canDecode(ResolvableType.forClass(Pojo::class.java), MediaType.APPLICATION_CBOR)).isTrue()
@@ -50,12 +49,32 @@ class KotlinSerializationCborDecoderTests : AbstractDecoderTests<KotlinSerializa
 		assertThat(decoder.canDecode(ResolvableType.forClass(String::class.java), null)).isFalse()
 		assertThat(decoder.canDecode(ResolvableType.forClass(Pojo::class.java), MediaType.APPLICATION_XML)).isFalse()
 
-		assertThat(decoder.canDecode(ResolvableType.forClassWithGenerics(List::class.java, Int::class.java), MediaType.APPLICATION_CBOR)).isTrue()
+		assertThat(decoder.canDecode(ResolvableType.forClassWithGenerics(List::class.java, Int::class.java), MediaType.APPLICATION_CBOR)).isFalse()
 		assertThat(decoder.canDecode(ResolvableType.forClassWithGenerics(List::class.java, Ordered::class.java), MediaType.APPLICATION_CBOR)).isFalse()
+		assertThat(decoder.canDecode(ResolvableType.forClassWithGenerics(List::class.java, OrderedImpl::class.java), MediaType.APPLICATION_CBOR)).isFalse()
 		assertThat(decoder.canDecode(ResolvableType.forClassWithGenerics(List::class.java, Pojo::class.java), MediaType.APPLICATION_CBOR)).isTrue()
-		assertThat(decoder.canDecode(ResolvableType.forClassWithGenerics(ArrayList::class.java, Int::class.java), MediaType.APPLICATION_CBOR)).isTrue()
+		assertThat(decoder.canDecode(ResolvableType.forClassWithGenerics(ArrayList::class.java, Int::class.java), MediaType.APPLICATION_CBOR)).isFalse()
 		assertThat(decoder.canDecode(ResolvableType.forClassWithGenerics(ArrayList::class.java, Int::class.java), MediaType.APPLICATION_PDF)).isFalse()
 		assertThat(decoder.canDecode(ResolvableType.forClass(Ordered::class.java), MediaType.APPLICATION_CBOR)).isFalse()
+		assertThat(decoder.canDecode(ResolvableType.forClass(OrderedImpl::class.java), MediaType.APPLICATION_CBOR)).isFalse()
+	}
+
+	@Test
+	fun canDecodeForAllTypes() {
+		val decoderForAllTypes = KotlinSerializationCborDecoder { true }
+		assertThat(decoderForAllTypes.canDecode(ResolvableType.forClass(Pojo::class.java), MediaType.APPLICATION_CBOR)).isTrue()
+		assertThat(decoderForAllTypes.canDecode(ResolvableType.forClass(Pojo::class.java), null)).isTrue()
+		assertThat(decoderForAllTypes.canDecode(ResolvableType.forClass(String::class.java), null)).isTrue()
+		assertThat(decoderForAllTypes.canDecode(ResolvableType.forClass(Pojo::class.java), MediaType.APPLICATION_XML)).isFalse()
+
+		assertThat(decoderForAllTypes.canDecode(ResolvableType.forClassWithGenerics(List::class.java, Int::class.java), MediaType.APPLICATION_CBOR)).isTrue()
+		assertThat(decoderForAllTypes.canDecode(ResolvableType.forClassWithGenerics(List::class.java, Ordered::class.java), MediaType.APPLICATION_CBOR)).isTrue()
+		assertThat(decoderForAllTypes.canDecode(ResolvableType.forClassWithGenerics(List::class.java, OrderedImpl::class.java), MediaType.APPLICATION_CBOR)).isFalse()
+		assertThat(decoderForAllTypes.canDecode(ResolvableType.forClassWithGenerics(List::class.java, Pojo::class.java), MediaType.APPLICATION_CBOR)).isTrue()
+		assertThat(decoderForAllTypes.canDecode(ResolvableType.forClassWithGenerics(ArrayList::class.java, Int::class.java), MediaType.APPLICATION_CBOR)).isTrue()
+		assertThat(decoderForAllTypes.canDecode(ResolvableType.forClassWithGenerics(ArrayList::class.java, Int::class.java), MediaType.APPLICATION_PDF)).isFalse()
+		assertThat(decoderForAllTypes.canDecode(ResolvableType.forClass(Ordered::class.java), MediaType.APPLICATION_CBOR)).isTrue()
+		assertThat(decoderForAllTypes.canDecode(ResolvableType.forClass(OrderedImpl::class.java), MediaType.APPLICATION_CBOR)).isFalse()
 	}
 
 	@Test
@@ -64,6 +83,7 @@ class KotlinSerializationCborDecoderTests : AbstractDecoderTests<KotlinSerializa
 		StepVerifier
 				.create(output)
 				.expectError(UnsupportedOperationException::class.java)
+				.verify()
 	}
 
 	@Test
@@ -85,13 +105,21 @@ class KotlinSerializationCborDecoderTests : AbstractDecoderTests<KotlinSerializa
 
 	private fun byteBuffer(value: Any): Mono<DataBuffer> {
 		return Mono.defer {
-			val bytes = Cbor.Default.encodeToByteArray(serializer(Pojo::class.java), value)
+			val bytes = Cbor.encodeToByteArray(serializer(Pojo::class.java), value)
 			val buffer = bufferFactory.allocateBuffer(bytes.size)
 			buffer.write(bytes)
 			Mono.just(buffer)
 		}
 	}
 
+
+	@Serializable
+	data class Pojo(val foo: String, val bar: String, val pojo: Pojo? = null)
+
+	class OrderedImpl : Ordered {
+		override fun getOrder(): Int {
+			return 0
+		}
+	}
+
 }
-@Serializable
-data class Pojo(val foo: String, val bar: String, val pojo: Pojo? = null)

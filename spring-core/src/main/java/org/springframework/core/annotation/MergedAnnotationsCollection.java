@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,6 +40,9 @@ import org.springframework.util.Assert;
  */
 final class MergedAnnotationsCollection implements MergedAnnotations {
 
+	private static final MergedAnnotation<?>[] EMPTY_MERGED_ANNOTATION_ARRAY = new MergedAnnotation<?>[0];
+
+
 	private final MergedAnnotation<?>[] annotations;
 
 	private final AnnotationTypeMappings[] mappings;
@@ -47,7 +50,7 @@ final class MergedAnnotationsCollection implements MergedAnnotations {
 
 	private MergedAnnotationsCollection(Collection<MergedAnnotation<?>> annotations) {
 		Assert.notNull(annotations, "Annotations must not be null");
-		this.annotations = annotations.toArray(new MergedAnnotation<?>[0]);
+		this.annotations = annotations.toArray(EMPTY_MERGED_ANNOTATION_ARRAY);
 		this.mappings = new AnnotationTypeMappings[this.annotations.length];
 		for (int i = 0; i < this.annotations.length; i++) {
 			MergedAnnotation<?> annotation = this.annotations[i];

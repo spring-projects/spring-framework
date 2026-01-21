@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,16 +35,19 @@ import org.jspecify.annotations.Nullable;
  */
 public abstract class SystemPropertyUtils {
 
-	/** Prefix for system property placeholders: {@value}. */
+	/** Prefix for property placeholders: {@value}. */
 	public static final String PLACEHOLDER_PREFIX = "${";
 
-	/** Suffix for system property placeholders: {@value}. */
+	/** Suffix for property placeholders: {@value}. */
 	public static final String PLACEHOLDER_SUFFIX = "}";
 
-	/** Value separator for system property placeholders: {@value}. */
+	/** Value separator for property placeholders: {@value}. */
 	public static final String VALUE_SEPARATOR = ":";
 
-	/** Default escape character: {@code '\'}. */
+	/**
+	 * Escape character for property placeholders: {@code '\'}.
+	 * @since 6.2
+	 */
 	public static final Character ESCAPE_CHARACTER = '\\';
 
 

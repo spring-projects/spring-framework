@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,10 +29,6 @@ import org.springframework.core.io.ResourceLoader;
  * <p>Concrete bean definition readers can of course add additional
  * load and register methods for bean definitions, specific to
  * their bean definition format.
- *
- * <p>Note that a bean definition reader does not have to implement
- * this interface. It only serves as a suggestion for bean definition
- * readers that want to follow standard naming conventions.
  *
  * @author Juergen Hoeller
  * @since 1.1

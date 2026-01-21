@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -175,7 +175,7 @@ class DefaultHandlerExceptionResolverTests {
 	void handleMethodArgumentNotValid() throws Exception {
 		BeanPropertyBindingResult errors = new BeanPropertyBindingResult(new TestBean(), "testBean");
 		errors.rejectValue("name", "invalid");
-		MethodParameter parameter = new MethodParameter(this.getClass().getMethod("handle", String.class), 0);
+		MethodParameter parameter = new MethodParameter(getClass().getMethod("handle", String.class), 0);
 		MethodArgumentNotValidException ex = new MethodArgumentNotValidException(parameter, errors);
 		ModelAndView mav = exceptionResolver.resolveException(request, response, null, ex);
 		assertThat(mav).as("No ModelAndView returned").isNotNull();
@@ -209,7 +209,7 @@ class DefaultHandlerExceptionResolverTests {
 
 	@Test
 	void handleNoResourceFoundException() {
-		NoResourceFoundException ex = new NoResourceFoundException(HttpMethod.GET, "/resource");
+		NoResourceFoundException ex = new NoResourceFoundException(HttpMethod.GET, "/context/resource", "/resource");
 		ModelAndView mav = exceptionResolver.resolveException(request, response, null, ex);
 		assertThat(mav).as("No ModelAndView returned").isNotNull();
 		assertThat(mav.isEmpty()).as("No Empty ModelAndView returned").isTrue();

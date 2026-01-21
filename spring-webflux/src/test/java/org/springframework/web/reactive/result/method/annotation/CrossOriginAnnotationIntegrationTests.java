@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,13 +35,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.config.EnableWebFlux;
 import org.springframework.web.testfixture.http.server.reactive.bootstrap.HttpServer;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
 
 /**
  * Integration tests with {@code @CrossOrigin} and {@code @RequestMapping}
@@ -105,13 +103,11 @@ class CrossOriginAnnotationIntegrationTests extends AbstractRequestMappingIntegr
 	void preflightRequestWithoutAnnotation(HttpServer httpServer) throws Exception {
 		startServer(httpServer);
 		this.headers.add(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "GET");
-		try {
-			performOptions("/no", this.headers, Void.class);
-			fail("Preflight request without CORS configuration should fail");
-		}
-		catch (HttpClientErrorException ex) {
-			assertThat(ex.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
-		}
+		ResponseEntity<Void> entity = performOptions("/no", this.headers, Void.class);
+		assertThat(entity.getStatusCode()).isEqualTo(HttpStatus.OK);
+		assertThat(entity.getHeaders().getAccessControlAllowOrigin()).isNull();
+		assertThat(entity.getHeaders().getAccessControlAllowMethods()).isEmpty();
+
 	}
 
 	@ParameterizedHttpServerTest

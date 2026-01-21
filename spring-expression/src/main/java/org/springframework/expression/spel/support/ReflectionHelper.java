@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -319,8 +319,8 @@ public abstract class ReflectionHelper {
 						(sourceType.isArray() && !sourceType.isAssignableTo(targetType)) ||
 						(argument instanceof List)) {
 
-					TypeDescriptor targetTypeToUse =
-							(sourceType.isArray() || argument instanceof List ? targetType : componentTypeDesc);
+					TypeDescriptor targetTypeToUse = (sourceType.isArray() || argument instanceof List ||
+							converter.canConvert(sourceType, targetType) ? targetType : componentTypeDesc);
 					arguments[varargsPosition] = converter.convertValue(argument, sourceType, targetTypeToUse);
 				}
 				// Possible outcomes of the above if-else block:
@@ -421,8 +421,8 @@ public abstract class ReflectionHelper {
 						(sourceType.isArray() && !sourceType.isAssignableTo(varargsArrayType)) ||
 						(argument instanceof List)) {
 
-					TypeDescriptor targetTypeToUse =
-							(sourceType.isArray() || argument instanceof List ? varargsArrayType : varargsComponentType);
+					TypeDescriptor targetTypeToUse = (sourceType.isArray() || argument instanceof List ||
+							converter.canConvert(sourceType, varargsArrayType) ? varargsArrayType : varargsComponentType);
 					arguments[varargsPosition] = converter.convertValue(argument, sourceType, targetTypeToUse);
 				}
 				// Possible outcomes of the above if-else block:

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.beans.propertyeditors;
 
 import java.beans.PropertyEditorSupport;
+import java.util.HexFormat;
 
 import org.jspecify.annotations.Nullable;
 
@@ -97,13 +98,12 @@ public class CharacterEditor extends PropertyEditorSupport {
 		return (value != null ? value.toString() : "");
 	}
 
-
-	private boolean isUnicodeCharacterSequence(String sequence) {
+	private static boolean isUnicodeCharacterSequence(String sequence) {
 		return (sequence.startsWith(UNICODE_PREFIX) && sequence.length() == UNICODE_LENGTH);
 	}
 
 	private void setAsUnicode(String text) {
-		int code = Integer.parseInt(text.substring(UNICODE_PREFIX.length()), 16);
+		int code = HexFormat.fromHexDigits(text, UNICODE_PREFIX.length(), text.length());
 		setValue((char) code);
 	}
 

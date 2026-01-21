@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,13 +33,20 @@ import org.springframework.context.ApplicationEvent;
  * to be manually registered if you have custom configuration via
  * {@link org.springframework.test.context.TestExecutionListeners @TestExecutionListeners}
  * that does not include the default listeners.</li>
- * <li>Annotate a field of type {@code ApplicationEvents} with
+ * <li>With JUnit Jupiter, declare a parameter of type {@code ApplicationEvents}
+ * in a {@code @Test}, {@code @BeforeEach}, or {@code @AfterEach} method. Since
+ * {@code ApplicationEvents} is scoped to the lifecycle of the current test method,
+ * this is the recommended approach.</li>
+ * <li>Alternatively, you can annotate a field of type {@code ApplicationEvents} with
  * {@link org.springframework.beans.factory.annotation.Autowired @Autowired} and
  * use that instance of {@code ApplicationEvents} in your test and lifecycle methods.</li>
- * <li>With JUnit Jupiter, you may optionally declare a parameter of type
- * {@code ApplicationEvents} in a test or lifecycle method as an alternative to
- * an {@code @Autowired} field in the test class.</li>
  * </ul>
+ *
+ * <p>NOTE: {@code ApplicationEvents} is registered with the {@code ApplicationContext} as a
+ * {@linkplain org.springframework.beans.factory.config.ConfigurableListableBeanFactory#registerResolvableDependency
+ * resolvable dependency} which is scoped to the lifecycle of the current test method.
+ * Consequently, {@code ApplicationEvents} cannot be accessed outside the lifecycle of a
+ * test method and cannot be {@code @Autowired} into the constructor of a test class.
  *
  * @author Sam Brannen
  * @author Oliver Drotbohm

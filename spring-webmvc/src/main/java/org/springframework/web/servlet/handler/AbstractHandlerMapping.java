@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,6 +39,8 @@ import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.PathMatcher;
 import org.springframework.web.HttpRequestHandler;
+import org.springframework.web.accept.ApiVersionHolder;
+import org.springframework.web.accept.ApiVersionStrategy;
 import org.springframework.web.context.request.WebRequestInterceptor;
 import org.springframework.web.context.request.async.WebAsyncManager;
 import org.springframework.web.context.request.async.WebAsyncUtils;
@@ -103,6 +105,8 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	private @Nullable CorsConfigurationSource corsConfigurationSource;
 
 	private CorsProcessor corsProcessor = new DefaultCorsProcessor();
+
+	private @Nullable ApiVersionStrategy versionStrategy;
 
 	private int order = Ordered.LOWEST_PRECEDENCE;  // default: same as non-Ordered
 
@@ -398,6 +402,23 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	}
 
 	/**
+	 * Configure a strategy to manage API versioning.
+	 * @param strategy the strategy to use
+	 * @since 7.0
+	 */
+	public void setApiVersionStrategy(@Nullable ApiVersionStrategy strategy) {
+		this.versionStrategy = strategy;
+	}
+
+	/**
+	 * Return the configured {@link ApiVersionStrategy} strategy.
+	 * @since 7.0
+	 */
+	public @Nullable ApiVersionStrategy getApiVersionStrategy() {
+		return this.versionStrategy;
+	}
+
+	/**
 	 * Specify the order value for this HandlerMapping bean.
 	 * <p>The default value is {@code Ordered.LOWEST_PRECEDENCE}, meaning non-ordered.
 	 * @see org.springframework.core.Ordered#getOrder()
@@ -519,6 +540,7 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	 */
 	@Override
 	public final @Nullable HandlerExecutionChain getHandler(HttpServletRequest request) throws Exception {
+		ApiVersionHolder versionHolder = initApiVersion(request);
 		Object handler = getHandlerInternal(request);
 		if (handler == null) {
 			handler = getDefaultHandler();
@@ -526,6 +548,11 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 		if (handler == null) {
 			return null;
 		}
+
+		if (versionHolder.hasError() && !request.getDispatcherType().equals(DispatcherType.ERROR)) {
+			throw versionHolder.getError();
+		}
+
 		// Bean name or resolved handler?
 		if (handler instanceof String handlerName) {
 			handler = obtainApplicationContext().getBean(handlerName);
@@ -561,6 +588,24 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 		}
 
 		return executionChain;
+	}
+
+	private ApiVersionHolder initApiVersion(HttpServletRequest request) {
+		ApiVersionHolder versionHolder;
+		if (this.versionStrategy == null) {
+			versionHolder = ApiVersionHolder.EMPTY;
+		}
+		else {
+			try {
+				Comparable<?> version = this.versionStrategy.resolveParseAndValidateVersion(request);
+				versionHolder = ApiVersionHolder.fromVersion(version);
+			}
+			catch (RuntimeException ex) {
+				versionHolder = ApiVersionHolder.fromError(ex);
+			}
+		}
+		request.setAttribute(API_VERSION_ATTRIBUTE, versionHolder);
+		return versionHolder;
 	}
 
 	/**
@@ -634,6 +679,7 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	 * @see #getAdaptedInterceptors()
 	 */
 	protected HandlerExecutionChain getHandlerExecutionChain(Object handler, HttpServletRequest request) {
+
 		HandlerExecutionChain chain = (handler instanceof HandlerExecutionChain handlerExecutionChain ?
 				handlerExecutionChain : new HandlerExecutionChain(handler));
 
@@ -647,6 +693,15 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 				chain.addInterceptor(interceptor);
 			}
 		}
+
+		if (this.versionStrategy != null) {
+			ApiVersionHolder versionHolder = (ApiVersionHolder) request.getAttribute(API_VERSION_ATTRIBUTE);
+			if (versionHolder.hasVersion()) {
+				Comparable<?> version = versionHolder.getVersion();
+				chain.addInterceptor(new ApiVersionDeprecationHandlerInterceptor(this.versionStrategy, version));
+			}
+		}
+
 		return chain;
 	}
 
@@ -752,6 +807,17 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 		@Override
 		public void handlePreFlight(HttpServletRequest request, HttpServletResponse response) throws IOException {
 			invokeCorsProcessor(request, response);
+		}
+	}
+
+
+	private record ApiVersionDeprecationHandlerInterceptor(
+			ApiVersionStrategy versionStrategy, Comparable<?> version) implements HandlerInterceptor {
+
+		@Override
+		public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
+			this.versionStrategy.handleDeprecations(this.version, handler, request, response);
+			return true;
 		}
 	}
 

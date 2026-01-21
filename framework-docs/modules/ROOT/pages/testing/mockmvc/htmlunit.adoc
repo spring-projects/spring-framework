@@ -18,4 +18,3 @@ when using HTML-based views. This integration lets you:
 NOTE: MockMvc works with templating technologies that do not rely on a Servlet Container
 (for example, Thymeleaf, FreeMarker, and others), but it does not work with JSPs, since
 they rely on the Servlet container.
-

@@ -1,11 +1,10 @@
 [[beans-factory-properties-detailed]]
 = Dependencies and Configuration in Detail
 
-As mentioned in the xref:core/beans/dependencies/factory-collaborators.adoc[previous section], you can define bean
-properties and constructor arguments as references to other managed beans (collaborators)
-or as values defined inline. Spring's XML-based configuration metadata supports
-sub-element types within its `<property/>` and `<constructor-arg/>` elements for this
-purpose.
+As mentioned in the xref:core/beans/dependencies/factory-collaborators.adoc[previous section],
+you can define bean properties and constructor arguments as references to other managed beans
+(collaborators) or as values defined inline. Spring's XML-based configuration metadata supports
+sub-element types within its `<property/>` and `<constructor-arg/>` elements for this purpose.
 
 
 [[beans-value-element]]
@@ -51,9 +50,8 @@ XML configuration:
 
 The preceding XML is more succinct. However, typos are discovered at runtime rather than
 design time, unless you use an IDE (such as https://www.jetbrains.com/idea/[IntelliJ
-IDEA] or the {spring-site-tools}[Spring Tools for Eclipse])
-that supports automatic property completion when you create bean definitions. Such IDE
-assistance is highly recommended.
+IDEA] or the {spring-site-tools}[Spring Tools]) that supports automatic property
+completion when you create bean definitions. Such IDE assistance is highly recommended.
 
 You can also configure a `java.util.Properties` instance, as follows:
 
@@ -86,11 +84,11 @@ element. The following example shows how to use it:
 
 [source,xml,indent=0,subs="verbatim,quotes"]
 ----
-	<bean id="theTargetBean" class="..."/>
+	<bean id="collaborator" class="..." />
 
-	<bean id="theClientBean" class="...">
+	<bean id="client" class="...">
 		<property name="targetName">
-			<idref bean="theTargetBean"/>
+			<idref bean="collaborator" />
 		</property>
 	</bean>
 ----
@@ -100,28 +98,24 @@ following snippet:
 
 [source,xml,indent=0,subs="verbatim,quotes"]
 ----
-	<bean id="theTargetBean" class="..." />
+	<bean id="collaborator" class="..." />
 
-	<bean id="theClientBean" class="...">
-		<property name="targetName" ref="theTargetBean"/>
+	<bean id="client" class="...">
+		<property name="targetName" value="collaborator" />
 	</bean>
 ----
 
 The first form is preferable to the second, because using the `idref` tag lets the
-container validate at deployment time that the referenced, named bean actually
-exists. In the second variation, no validation is performed on the value that is passed
-to the `targetName` property of the `client` bean. Typos are only discovered (with most
+container validate at deployment time that the referenced, named bean actually exists. In
+the second variation, no validation is performed on the value that is passed to the
+`targetName` property of the `client` bean. Typos are therefore only discovered (with most
 likely fatal results) when the `client` bean is actually instantiated. If the `client`
-bean is a xref:core/beans/factory-scopes.adoc[prototype] bean, this typo and the resulting exception
-may only be discovered long after the container is deployed.
+bean is a xref:core/beans/factory-scopes.adoc[prototype] bean, this typo and the resulting
+exception may only be discovered long after the container is deployed.
 
-NOTE: The `local` attribute on the `idref` element is no longer supported in the 4.0 beans
-XSD, since it does not provide value over a regular `bean` reference any more. Change
-your existing `idref local` references to `idref bean` when upgrading to the 4.0 schema.
-
-A common place (at least in versions earlier than Spring 2.0) where the `<idref/>` element
-brings value is in the configuration of xref:core/aop-api/pfb.adoc#aop-pfb-1[AOP interceptors] in a
-`ProxyFactoryBean` bean definition. Using `<idref/>` elements when you specify the
+NOTE: A common place (at least in versions earlier than Spring 2.0) where the `<idref/>`
+element brings value is in the configuration of xref:core/aop-api/pfb.adoc#aop-pfb-1[AOP interceptors]
+in a `ProxyFactoryBean` bean definition. Using `<idref/>` elements when you specify the
 interceptor names prevents you from misspelling an interceptor ID.
 
 
@@ -544,9 +538,10 @@ three approaches at the same time.
 [[beans-c-namespace]]
 == XML Shortcut with the c-namespace
 
-Similar to the xref:core/beans/dependencies/factory-properties-detailed.adoc#beans-p-namespace[XML Shortcut with the p-namespace], the c-namespace, introduced in Spring
-3.1, allows inlined attributes for configuring the constructor arguments rather
-then nested `constructor-arg` elements.
+Similar to the
+xref:core/beans/dependencies/factory-properties-detailed.adoc#beans-p-namespace[XML Shortcut with the p-namespace],
+the c-namespace, introduced in Spring 3.1, allows inlined attributes for configuring
+the constructor arguments rather then nested `constructor-arg` elements.
 
 The following example uses the `c:` namespace to do the same thing as the from
 xref:core/beans/dependencies/factory-collaborators.adoc#beans-constructor-injection[Constructor-based Dependency Injection]:
@@ -598,9 +593,9 @@ A corresponding index notation is also available for `<constructor-arg>` element
 not commonly used since the plain order of declaration is usually sufficient there.
 
 In practice, the constructor resolution
-xref:core/beans/dependencies/factory-collaborators.adoc#beans-factory-ctor-arguments-resolution[mechanism] is quite efficient in matching
-arguments, so unless you really need to, we recommend using the name notation
-throughout your configuration.
+xref:core/beans/dependencies/factory-collaborators.adoc#beans-factory-ctor-arguments-resolution[mechanism]
+is quite efficient in matching arguments, so unless you really need to, we recommend
+using the name notation throughout your configuration.
 
 
 [[beans-compound-property-names]]
@@ -621,6 +616,3 @@ The `something` bean has a `fred` property, which has a `bob` property, which ha
 property, and that final `sammy` property is being set to a value of `123`. In order for
 this to work, the `fred` property of `something` and the `bob` property of `fred` must not
 be `null` after the bean is constructed. Otherwise, a `NullPointerException` is thrown.
-
-
-

@@ -118,6 +118,3 @@ NOTE: Depending on your use case, the choice is basically yours. You can even mi
 match services by using the JSR-107 API on some and using Spring's own annotations on
 others. However, if these services impact the same caches, you should use a consistent
 and identical key generation implementation.
-
-
-

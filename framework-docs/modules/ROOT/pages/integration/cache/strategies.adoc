@@ -45,11 +45,11 @@ that is, the abstraction frees you from having to write the caching logic but do
 provide the actual data store. This abstraction is materialized by the
 `org.springframework.cache.Cache` and `org.springframework.cache.CacheManager` interfaces.
 
-Spring provides xref:integration/cache/store-configuration.adoc[a few implementations] of that abstraction:
-JDK `java.util.concurrent.ConcurrentMap` based caches, Gemfire cache,
+Spring provides xref:integration/cache/store-configuration.adoc[a few implementations]
+of that abstraction: JDK `java.util.concurrent.ConcurrentMap` based caches, Gemfire cache,
 https://github.com/ben-manes/caffeine/wiki[Caffeine], and JSR-107 compliant caches (such
-as Ehcache 3.x). See xref:integration/cache/plug.adoc[Plugging-in Different Back-end Caches] for more information on plugging in other cache
-stores and providers.
+as Ehcache 3.x). See xref:integration/cache/plug.adoc[Plugging-in Different Back-end Caches]
+for more information on plugging in other cache stores and providers.
 
 IMPORTANT: The caching abstraction has no special handling for multi-threaded and
 multi-process environments, as such features are handled by the cache implementation.
@@ -71,6 +71,3 @@ To use the cache abstraction, you need to take care of two aspects:
 
 * Caching declaration: Identify the methods that need to be cached and their policies.
 * Cache configuration: The backing cache where the data is stored and from which it is read.
-
-
-

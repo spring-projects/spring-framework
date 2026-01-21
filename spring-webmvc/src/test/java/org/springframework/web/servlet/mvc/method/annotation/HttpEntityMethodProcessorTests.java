@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,7 +40,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.http.converter.json.JacksonJsonHttpMessageConverter;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -104,7 +104,7 @@ public class HttpEntityMethodProcessorTests {
 		this.servletRequest.setContentType("application/json");
 
 		List<HttpMessageConverter<?>> converters = new ArrayList<>();
-		converters.add(new MappingJackson2HttpMessageConverter());
+		converters.add(new JacksonJsonHttpMessageConverter());
 		HttpEntityMethodProcessor processor = new HttpEntityMethodProcessor(converters);
 
 		@SuppressWarnings("unchecked")
@@ -121,7 +121,7 @@ public class HttpEntityMethodProcessorTests {
 		this.servletRequest.setContentType("application/json");
 
 		List<HttpMessageConverter<?>> converters = new ArrayList<>();
-		converters.add(new MappingJackson2HttpMessageConverter());
+		converters.add(new JacksonJsonHttpMessageConverter());
 		HttpEntityMethodProcessor processor = new HttpEntityMethodProcessor(converters);
 
 		HttpEntity<?> result = (HttpEntity<?>) processor.resolveArgument(this.paramSimpleBean,
@@ -138,7 +138,7 @@ public class HttpEntityMethodProcessorTests {
 		this.servletRequest.setContentType("application/json");
 
 		List<HttpMessageConverter<?>> converters = new ArrayList<>();
-		converters.add(new MappingJackson2HttpMessageConverter());
+		converters.add(new JacksonJsonHttpMessageConverter());
 		HttpEntityMethodProcessor processor = new HttpEntityMethodProcessor(converters);
 
 		@SuppressWarnings("unchecked")
@@ -161,8 +161,10 @@ public class HttpEntityMethodProcessorTests {
 		this.servletRequest.setContentType(MediaType.APPLICATION_JSON_VALUE);
 
 		List<HttpMessageConverter<?>> converters = new ArrayList<>();
-		converters.add(new MappingJackson2HttpMessageConverter());
-		HttpEntityMethodProcessor processor = new HttpEntityMethodProcessor(converters);
+		converters.add(new JacksonJsonHttpMessageConverter());
+		List<Object> requestResponseBodyAdvice = new ArrayList<>();
+		requestResponseBodyAdvice.add(new ContextClassRequestBodyAdvice());
+		HttpEntityMethodProcessor processor = new HttpEntityMethodProcessor(converters, requestResponseBodyAdvice);
 
 		@SuppressWarnings("unchecked")
 		HttpEntity<SimpleBean> result = (HttpEntity<SimpleBean>)
@@ -179,7 +181,7 @@ public class HttpEntityMethodProcessorTests {
 		MethodParameter methodReturnType = handlerMethod.getReturnType();
 
 		List<HttpMessageConverter<?>> converters = new ArrayList<>();
-		converters.add(new MappingJackson2HttpMessageConverter());
+		converters.add(new JacksonJsonHttpMessageConverter());
 		HttpEntityMethodProcessor processor = new HttpEntityMethodProcessor(converters);
 
 		Object returnValue = new JacksonController().handleList();

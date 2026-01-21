@@ -6,9 +6,6 @@ test template for FreeMarker macro test class
 NAME
 ${command.name}
 
-AGE
-${command.age}
-
 MESSAGE
 <@spring.message "hello"/> <@spring.message "world"/>
 

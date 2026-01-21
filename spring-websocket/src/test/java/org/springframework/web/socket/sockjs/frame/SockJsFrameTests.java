@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,6 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 class SockJsFrameTests {
 
-
 	@Test
 	void openFrame() {
 		SockJsFrame frame = SockJsFrame.openFrame();
@@ -49,7 +48,7 @@ class SockJsFrameTests {
 
 	@Test
 	void messageArrayFrame() {
-		SockJsFrame frame = SockJsFrame.messageFrame(new Jackson2SockJsMessageCodec(), "m1", "m2");
+		SockJsFrame frame = SockJsFrame.messageFrame(new JacksonJsonSockJsMessageCodec(), "m1", "m2");
 
 		assertThat(frame.getContent()).isEqualTo("a[\"m1\",\"m2\"]");
 		assertThat(frame.getType()).isEqualTo(SockJsFrameType.MESSAGE);

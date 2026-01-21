@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,6 +40,7 @@ import org.springframework.beans.factory.config.ConstructorArgumentValues.ValueH
 import org.springframework.beans.factory.config.DependencyDescriptor;
 import org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionValueResolver;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.InstanceSupplier;
 import org.springframework.beans.factory.support.RegisteredBean;
 import org.springframework.beans.factory.support.RootBeanDefinition;
@@ -343,6 +344,11 @@ public final class BeanInstanceSupplier<T> extends AutowiredElementResolver impl
 
 	private Object instantiate(RegisteredBean registeredBean, Executable executable, @Nullable Object[] args) {
 		if (executable instanceof Constructor<?> constructor) {
+			if (registeredBean.getBeanFactory() instanceof DefaultListableBeanFactory dlbf &&
+					registeredBean.getMergedBeanDefinition().hasMethodOverrides()) {
+				return dlbf.getInstantiationStrategy().instantiate(registeredBean.getMergedBeanDefinition(),
+						registeredBean.getBeanName(), registeredBean.getBeanFactory());
+			}
 			return BeanUtils.instantiateClass(constructor, args);
 		}
 		if (executable instanceof Method method) {

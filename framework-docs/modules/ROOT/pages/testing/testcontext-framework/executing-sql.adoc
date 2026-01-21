@@ -14,6 +14,7 @@ Although it is very useful to initialize a database for testing _once_ when the
 database _during_ integration tests. The following sections explain how to run SQL
 scripts programmatically and declaratively during integration tests.
 
+
 [[testcontext-executing-sql-programmatically]]
 == Executing SQL scripts programmatically
 
@@ -87,6 +88,7 @@ xref:testing/testcontext-framework/support-classes.adoc#testcontext-support-clas
 and xref:testing/testcontext-framework/support-classes.adoc#testcontext-support-classes-testng[`AbstractTransactionalTestNGSpringContextTests`]
 internally use a `ResourceDatabasePopulator` to run SQL scripts. See the Javadoc for the
 various `executeSqlScript(..)` methods for further details.
+
 
 [[testcontext-executing-sql-declaratively]]
 == Executing SQL scripts declaratively with @Sql
@@ -250,7 +252,7 @@ Java::
 	@SqlGroup({
 		@Sql(scripts = "/test-schema.sql", config = @SqlConfig(commentPrefix = "`")),
 		@Sql("/test-user-data.sql")
-	)}
+	})
 	void userTest() {
 		// run code that uses the test schema and test data
 	}
@@ -504,7 +506,6 @@ database schema or some common test data once per test class and then provide ad
 use case specific test data per test method. To enable `@Sql` merging, annotate either
 your test class or test method with `@SqlMergeMode(MERGE)`. To disable merging for a
 specific test method (or specific test subclass), you can switch back to the default mode
-via `@SqlMergeMode(OVERRIDE)`. Consult the xref:testing/annotations/integration-spring/annotation-sqlmergemode.adoc[`@SqlMergeMode` annotation documentation section]
- for examples and further details.
-
-
+via `@SqlMergeMode(OVERRIDE)`. Consult the
+xref:testing/annotations/integration-spring/annotation-sqlmergemode.adoc[`@SqlMergeMode` annotation documentation section]
+for examples and further details.

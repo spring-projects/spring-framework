@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -287,14 +287,7 @@ public class CorsConfiguration {
 	 * allowCredentials} is set to {@code true}, that combination is handled
 	 * by copying the method specified in the CORS preflight request.
 	 * <p>If not set, only {@code "GET"} and {@code "HEAD"} are allowed.
-	 * <p>By default this is not set.
-	 * <p><strong>Note:</strong> CORS checks use values from "Forwarded"
-	 * (<a href="https://tools.ietf.org/html/rfc7239">RFC 7239</a>),
-	 * "X-Forwarded-Host", "X-Forwarded-Port", and "X-Forwarded-Proto" headers,
-	 * if present, in order to reflect the client-originated address.
-	 * Consider using the {@code ForwardedHeaderFilter} in order to choose from a
-	 * central place whether to extract and use, or to discard such headers.
-	 * See the Spring Framework reference for more on this filter.
+	 * <p>By default, this is not set.
 	 */
 	public void setAllowedMethods(@Nullable List<String> allowedMethods) {
 		this.allowedMethods = (allowedMethods != null ? new ArrayList<>(allowedMethods) : null);
@@ -443,7 +436,7 @@ public class CorsConfiguration {
 	 * level of trust with the configured domains and also increases the surface
 	 * attack of the web application by exposing sensitive user-specific
 	 * information such as cookies and CSRF tokens.
-	 * <p>By default this is not set (i.e. user credentials are not supported).
+	 * <p>By default, this is not set (i.e. user credentials are not supported).
 	 */
 	public void setAllowCredentials(@Nullable Boolean allowCredentials) {
 		this.allowCredentials = allowCredentials;
@@ -466,7 +459,7 @@ public class CorsConfiguration {
 	 * <p>Setting this property has an impact on how {@link #setAllowedOrigins(List)
 	 * origins} and {@link #setAllowedOriginPatterns(List) originPatterns} are processed,
 	 * see related API documentation for more details.
-	 * <p>By default this is not set (i.e. private network access is not supported).
+	 * <p>By default, this is not set (i.e. private network access is not supported).
 	 * @since 5.3.32
 	 * @see <a href="https://wicg.github.io/private-network-access/">Private network access specifications</a>
 	 */
@@ -740,8 +733,8 @@ public class CorsConfiguration {
 		}
 
 		boolean allowAnyHeader = this.allowedHeaders.contains(ALL);
-		int maxResultSize = allowAnyHeader ? requestHeaders.size()
-				: Math.min(requestHeaders.size(), this.allowedHeaders.size());
+		int maxResultSize = (allowAnyHeader ? requestHeaders.size() :
+				Math.min(requestHeaders.size(), this.allowedHeaders.size()));
 		List<String> result = new ArrayList<>(maxResultSize);
 		for (String requestHeader : requestHeaders) {
 			if (StringUtils.hasText(requestHeader)) {

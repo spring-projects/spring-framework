@@ -38,11 +38,12 @@ bin
 .springBeans
 spring-*/src/main/java/META-INF/MANIFEST.MF
 
-# IDEA artifacts and output dirs
+# IntelliJ IDEA artifacts and output dirs
 *.iml
 *.ipr
 *.iws
-.idea
+.idea/*
+!.idea/icon.svg
 out
 test-output
 atlassian-ide-plugin.xml

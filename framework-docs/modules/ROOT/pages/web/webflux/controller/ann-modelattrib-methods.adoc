@@ -5,9 +5,9 @@
 
 You can use the `@ModelAttribute` annotation:
 
-* On a xref:web/webflux/controller/ann-methods/modelattrib-method-args.adoc[method argument] in `@RequestMapping` methods
-to create or access an Object from the model and to bind it to the request through a
-`WebDataBinder`.
+* On a xref:web/webflux/controller/ann-methods/modelattrib-method-args.adoc[method argument]
+in `@RequestMapping` methods to create or access an Object from the model and to bind it
+to the request through a `WebDataBinder`.
 * As a method-level annotation in `@Controller` or `@ControllerAdvice` classes, helping
 to initialize the model prior to any `@RequestMapping` method invocation.
 * On a `@RequestMapping` method to mark its return value as a model attribute.
@@ -93,8 +93,8 @@ Java::
 ----
 	@ModelAttribute
 	public void addAccount(@RequestParam String number) {
-	    Mono<Account> accountMono = accountRepository.findAccount(number);
-	    model.addAttribute("account", accountMono);
+		Mono<Account> accountMono = accountRepository.findAccount(number);
+		model.addAttribute("account", accountMono);
 	}
 
 	@PostMapping("/accounts")
@@ -159,6 +159,3 @@ Kotlin::
 	}
 ----
 ======
-
-
-

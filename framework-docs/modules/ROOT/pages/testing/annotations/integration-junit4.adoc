@@ -1,14 +1,23 @@
 [[integration-testing-annotations-junit4]]
 = Spring JUnit 4 Testing Annotations
 
+[WARNING]
+====
+JUnit 4 support is deprecated since Spring Framework 7.0 in favor of the
+xref:testing/testcontext-framework/support-classes.adoc#testcontext-junit-jupiter-extension[`SpringExtension`]
+and JUnit Jupiter.
+====
+
 The following annotations are supported only when used in conjunction with the
-xref:testing/testcontext-framework/support-classes.adoc#testcontext-junit4-runner[SpringRunner], xref:testing/testcontext-framework/support-classes.adoc#testcontext-junit4-rules[Spring's JUnit 4 rules]
-, or xref:testing/testcontext-framework/support-classes.adoc#testcontext-support-classes-junit4[Spring's JUnit 4 support classes]:
+xref:testing/testcontext-framework/support-classes.adoc#testcontext-junit4-runner[SpringRunner],
+xref:testing/testcontext-framework/support-classes.adoc#testcontext-junit4-rules[Spring's JUnit 4 rules], or
+xref:testing/testcontext-framework/support-classes.adoc#testcontext-support-classes-junit4[Spring's JUnit 4 support classes]:
 
 * xref:testing/annotations/integration-junit4.adoc#integration-testing-annotations-junit4-ifprofilevalue[`@IfProfileValue`]
 * xref:testing/annotations/integration-junit4.adoc#integration-testing-annotations-junit4-profilevaluesourceconfiguration[`@ProfileValueSourceConfiguration`]
 * xref:testing/annotations/integration-junit4.adoc#integration-testing-annotations-junit4-timed[`@Timed`]
 * xref:testing/annotations/integration-junit4.adoc#integration-testing-annotations-junit4-repeat[`@Repeat`]
+
 
 [[integration-testing-annotations-junit4-ifprofilevalue]]
 == `@IfProfileValue`
@@ -167,6 +176,7 @@ preemptively fails the test if the test takes too long. Spring's `@Timed`, on th
 hand, does not preemptively fail the test but rather waits for the test to complete
 before failing.
 
+
 [[integration-testing-annotations-junit4-repeat]]
 == `@Repeat`
 
@@ -175,9 +185,9 @@ times that the test method is to be run is specified in the annotation.
 
 The scope of execution to be repeated includes execution of the test method itself as
 well as any setting up or tearing down of the test fixture. When used with the
-xref:testing/testcontext-framework/support-classes.adoc#testcontext-junit4-rules[`SpringMethodRule`], the scope additionally includes
-preparation of the test instance by `TestExecutionListener` implementations. The
-following example shows how to use the `@Repeat` annotation:
+xref:testing/testcontext-framework/support-classes.adoc#testcontext-junit4-rules[`SpringMethodRule`],
+the scope additionally includes preparation of the test instance by `TestExecutionListener`
+implementations. The following example shows how to use the `@Repeat` annotation:
 
 [tabs]
 ======
@@ -205,6 +215,3 @@ Kotlin::
 ----
 <1> Repeat this test ten times.
 ======
-
-
-

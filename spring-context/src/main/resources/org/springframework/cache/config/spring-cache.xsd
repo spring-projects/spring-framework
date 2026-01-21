@@ -75,7 +75,7 @@
 	The bean name of the KeyGenerator that is to be used to retrieve the backing caches.
 
 	This attribute is not required, and only needs to be specified
-	explicitly if the default strategy (DefaultKeyGenerator) is not sufficient.
+	explicitly if the default strategy (SimpleKeyGenerator) is not sufficient.
 					]]></xsd:documentation>
 					<xsd:appinfo>
 						<tool:annotation kind="ref">

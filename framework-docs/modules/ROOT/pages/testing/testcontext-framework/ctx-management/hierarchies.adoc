@@ -22,8 +22,19 @@ given level in the hierarchy, the configuration resource type (that is, XML conf
 files or component classes) must be consistent. Otherwise, it is perfectly acceptable to
 have different levels in a context hierarchy configured using different resource types.
 
-The remaining JUnit Jupiter based examples in this section show common configuration
-scenarios for integration tests that require the use of context hierarchies.
+[NOTE]
+====
+If you use `@DirtiesContext` in a test whose context is configured as part of a context
+hierarchy, you can use the `hierarchyMode` flag to control how the context cache is
+cleared.
+
+For further details, see the discussion of `@DirtiesContext` in
+xref:testing/annotations/integration-spring/annotation-dirtiescontext.adoc[Spring Testing Annotations]
+and the {spring-framework-api}/test/annotation/DirtiesContext.html[`@DirtiesContext`] javadoc.
+====
+
+The JUnit Jupiter based examples in this section show common configuration scenarios for
+integration tests that require the use of context hierarchies.
 
 **Single test class with context hierarchy**
 --
@@ -229,12 +240,118 @@ Kotlin::
 	class ExtendedTests : BaseTests() {}
 ----
 ======
-
-.Dirtying a context within a context hierarchy
-NOTE: If you use `@DirtiesContext` in a test whose context is configured as part of a
-context hierarchy, you can use the `hierarchyMode` flag to control how the context cache
-is cleared. For further details, see the discussion of `@DirtiesContext` in
-xref:testing/annotations/integration-spring/annotation-dirtiescontext.adoc[Spring Testing Annotations] and the
-{spring-framework-api}/test/annotation/DirtiesContext.html[`@DirtiesContext`] javadoc.
 --
 
+[[testcontext-ctx-management-ctx-hierarchies-with-bean-overrides]]
+**Context hierarchies with bean overrides**
+--
+When `@ContextHierarchy` is used in conjunction with
+xref:testing/testcontext-framework/bean-overriding.adoc[bean overrides] such as
+`@TestBean`, `@MockitoBean`, or `@MockitoSpyBean`, it may be desirable or necessary to
+have the override applied to a single level in the context hierarchy. To achieve that,
+the bean override must specify a context name that matches a name configured via the
+`name` attribute in `@ContextConfiguration`.
+
+The following test class configures the name of the second hierarchy level to be
+`"user-config"` and simultaneously specifies that the `UserService` should be wrapped in
+a Mockito spy in the context named `"user-config"`. Consequently, Spring will only
+attempt to create the spy in the `"user-config"` context and will not attempt to create
+the spy in the parent context.
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	@ExtendWith(SpringExtension.class)
+	@ContextHierarchy({
+		@ContextConfiguration(classes = AppConfig.class),
+		@ContextConfiguration(classes = UserConfig.class, name = "user-config")
+	})
+	class IntegrationTests {
+
+		@MockitoSpyBean(contextName = "user-config")
+		UserService userService;
+
+		// ...
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes"]
+----
+	@ExtendWith(SpringExtension::class)
+	@ContextHierarchy(
+		ContextConfiguration(classes = [AppConfig::class]),
+		ContextConfiguration(classes = [UserConfig::class], name = "user-config"))
+	class IntegrationTests {
+
+		@MockitoSpyBean(contextName = "user-config")
+		lateinit var userService: UserService
+
+		// ...
+	}
+----
+======
+
+When applying bean overrides in different levels of the context hierarchy, you may need
+to have all of the bean override instances injected into the test class in order to
+interact with them — for example, to configure stubbing for mocks. However, `@Autowired`
+will always inject a matching bean found in the lowest level of the context hierarchy.
+Thus, to inject bean override instances from specific levels in the context hierarchy,
+you need to annotate fields with appropriate bean override annotations and configure the
+name of the context level.
+
+The following test class configures the names of the hierarchy levels to be `"parent"`
+and `"child"`. It also declares two `PropertyService` fields that are configured to
+create or replace `PropertyService` beans with Mockito mocks in the respective contexts,
+named `"parent"` and `"child"`. Consequently, the mock from the `"parent"` context will
+be injected into the `propertyServiceInParent` field, and the mock from the `"child"`
+context will be injected into the `propertyServiceInChild` field.
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	@ExtendWith(SpringExtension.class)
+	@ContextHierarchy({
+		@ContextConfiguration(classes = ParentConfig.class, name = "parent"),
+		@ContextConfiguration(classes = ChildConfig.class, name = "child")
+	})
+	class IntegrationTests {
+
+		@MockitoBean(contextName = "parent")
+		PropertyService propertyServiceInParent;
+
+		@MockitoBean(contextName = "child")
+		PropertyService propertyServiceInChild;
+
+		// ...
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes"]
+----
+	@ExtendWith(SpringExtension::class)
+	@ContextHierarchy(
+		ContextConfiguration(classes = [ParentConfig::class], name = "parent"),
+		ContextConfiguration(classes = [ChildConfig::class], name = "child"))
+	class IntegrationTests {
+
+		@MockitoBean(contextName = "parent")
+		lateinit var propertyServiceInParent: PropertyService
+
+		@MockitoBean(contextName = "child")
+		lateinit var propertyServiceInChild: PropertyService
+
+		// ...
+	}
+----
+======
+--

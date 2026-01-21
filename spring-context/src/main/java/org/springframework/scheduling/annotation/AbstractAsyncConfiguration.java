@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -67,7 +67,7 @@ public abstract class AbstractAsyncConfiguration implements ImportAware {
 	 * Collect any {@link AsyncConfigurer} beans through autowiring.
 	 */
 	@Autowired
-	@SuppressWarnings("NullAway") // https://github.com/uber/NullAway/issues/1126
+	@SuppressWarnings("NullAway") // https://github.com/uber/NullAway/issues/1128
 	void setConfigurers(ObjectProvider<AsyncConfigurer> configurers) {
 		SingletonSupplier<AsyncConfigurer> configurer = SingletonSupplier.ofNullable(() -> {
 			List<AsyncConfigurer> candidates = configurers.stream().toList();

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,6 +48,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.MultiValueMap;
 import org.springframework.validation.BindException;
+import org.springframework.web.accept.ApiVersionStrategy;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.util.ServletRequestPathUtils;
 import org.springframework.web.util.UriBuilder;
@@ -115,6 +116,13 @@ public interface ServerRequest {
 	 * Get the readers used to convert the body of this request.
 	 */
 	List<HttpMessageConverter<?>> messageConverters();
+
+	/**
+	 * Return the configured {@link ApiVersionStrategy}, or {@code null}.
+	 * @since 7.0
+	 */
+	@Nullable
+	ApiVersionStrategy apiVersionStrategy();
 
 	/**
 	 * Extract the body as an object of the given type.
@@ -371,6 +379,22 @@ public interface ServerRequest {
 	 */
 	static ServerRequest create(HttpServletRequest servletRequest, List<HttpMessageConverter<?>> messageReaders) {
 		return new DefaultServerRequest(servletRequest, messageReaders);
+	}
+
+	/**
+	 * Create a new {@code ServerRequest} based on the given {@code HttpServletRequest} and
+	 * message converters.
+	 * @param servletRequest the request
+	 * @param messageReaders the message readers
+	 * @param versionStrategy a strategy to use to parse version
+	 * @return the created {@code ServerRequest}
+	 * @since 7.0
+	 */
+	static ServerRequest create(
+			HttpServletRequest servletRequest, List<HttpMessageConverter<?>> messageReaders,
+			@Nullable ApiVersionStrategy versionStrategy) {
+
+		return new DefaultServerRequest(servletRequest, messageReaders, versionStrategy);
 	}
 
 	/**

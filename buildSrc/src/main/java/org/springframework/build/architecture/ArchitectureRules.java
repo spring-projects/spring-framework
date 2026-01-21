@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,13 +44,6 @@ abstract class ArchitectureRules {
 				.should()
 				.callMethod(String.class, "toUpperCase")
 				.because("String.toUpperCase(Locale.ROOT) should be used instead");
-	}
-
-	static ArchRule packageInfoShouldBeNullMarked() {
-		return ArchRuleDefinition.classes()
-				.that().haveSimpleName("package-info")
-				.should().beAnnotatedWith("org.jspecify.annotations.NullMarked")
-				.allowEmptyShould(true);
 	}
 
 	static ArchRule classesShouldNotImportForbiddenTypes() {

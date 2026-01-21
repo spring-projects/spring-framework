@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,7 +48,10 @@ import org.springframework.web.servlet.View;
  * @author Juergen Hoeller
  * @author Sebastien Deleuze
  * @since 3.1.2
+ * @deprecated since 7.0 in favor of {@link JacksonJsonView}
  */
+@Deprecated(since = "7.0", forRemoval = true)
+@SuppressWarnings("removal")
 public class MappingJackson2JsonView extends AbstractJackson2View {
 
 	/**

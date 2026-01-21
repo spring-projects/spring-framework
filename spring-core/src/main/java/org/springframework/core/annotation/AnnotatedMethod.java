@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.core.annotation;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -38,6 +39,7 @@ import org.springframework.util.StringUtils;
  * interface-declared parameter annotations from the concrete target method.
  *
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 6.1
  * @see #getMethodAnnotation(Class)
  * @see #getMethodParameters()
@@ -179,7 +181,7 @@ public class AnnotatedMethod {
 					clazz = null;
 				}
 				if (clazz != null) {
-					for (Method candidate : clazz.getMethods()) {
+					for (Method candidate : clazz.getDeclaredMethods()) {
 						if (isOverrideFor(candidate)) {
 							parameterAnnotations.add(candidate.getParameterAnnotations());
 						}
@@ -192,8 +194,9 @@ public class AnnotatedMethod {
 	}
 
 	private boolean isOverrideFor(Method candidate) {
-		if (!candidate.getName().equals(this.method.getName()) ||
-				candidate.getParameterCount() != this.method.getParameterCount()) {
+		if (Modifier.isPrivate(candidate.getModifiers()) ||
+				!candidate.getName().equals(this.method.getName()) ||
+				(candidate.getParameterCount() != this.method.getParameterCount())) {
 			return false;
 		}
 		Class<?>[] paramTypes = this.method.getParameterTypes();
@@ -202,7 +205,7 @@ public class AnnotatedMethod {
 		}
 		for (int i = 0; i < paramTypes.length; i++) {
 			if (paramTypes[i] !=
-					ResolvableType.forMethodParameter(candidate, i, this.method.getDeclaringClass()).resolve()) {
+					ResolvableType.forMethodParameter(candidate, i, this.method.getDeclaringClass()).toClass()) {
 				return false;
 			}
 		}
@@ -212,8 +215,8 @@ public class AnnotatedMethod {
 
 	@Override
 	public boolean equals(@Nullable Object other) {
-		return (this == other || (other != null && getClass() == other.getClass() &&
-				this.method.equals(((AnnotatedMethod) other).method)));
+		return (this == other || (other instanceof AnnotatedMethod otherHandlerMethod &&
+				this.method.equals(otherHandlerMethod.method)));
 	}
 
 	@Override

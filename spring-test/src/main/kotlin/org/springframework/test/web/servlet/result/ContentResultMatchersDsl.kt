@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -71,7 +71,7 @@ class ContentResultMatchersDsl internal constructor (private val actions: Result
 	/**
 	 * @see ContentResultMatchers.string
 	 */
-	fun string(matcher: Matcher<String>) {
+	fun string(matcher: Matcher<in String>) {
 		actions.andExpect(matchers.string(matcher))
 	}
 
@@ -99,14 +99,14 @@ class ContentResultMatchersDsl internal constructor (private val actions: Result
 	/**
 	 * @see ContentResultMatchers.node
 	 */
-	fun node(matcher: Matcher<Node>) {
+	fun node(matcher: Matcher<in Node>) {
 		actions.andExpect(matchers.node(matcher))
 	}
 
 	/**
 	 * @see ContentResultMatchers.source
 	 */
-	fun source(matcher: Matcher<Source>) {
+	fun source(matcher: Matcher<in Source>) {
 		actions.andExpect(matchers.source(matcher))
 	}
 

@@ -62,6 +62,3 @@ application context in which it is defined. This means that, if you put
 it only checks for `@Autowired` beans in your controllers, and not your services. See
 xref:web/webmvc/mvc-servlet.adoc[The DispatcherServlet] for more information.
 ====
-
-
-

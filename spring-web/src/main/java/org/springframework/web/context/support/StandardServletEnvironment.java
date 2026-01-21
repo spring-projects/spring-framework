@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,7 +57,7 @@ public class StandardServletEnvironment extends StandardEnvironment implements C
 
 
 	// Defensive reference to JNDI API for JDK 9+ (optional java.naming module)
-	private static final boolean jndiPresent = ClassUtils.isPresent(
+	private static final boolean JNDI_PRESENT = ClassUtils.isPresent(
 			"javax.naming.InitialContext", StandardServletEnvironment.class.getClassLoader());
 
 
@@ -109,7 +109,7 @@ public class StandardServletEnvironment extends StandardEnvironment implements C
 	protected void customizePropertySources(MutablePropertySources propertySources) {
 		propertySources.addLast(new StubPropertySource(SERVLET_CONFIG_PROPERTY_SOURCE_NAME));
 		propertySources.addLast(new StubPropertySource(SERVLET_CONTEXT_PROPERTY_SOURCE_NAME));
-		if (jndiPresent && JndiLocatorDelegate.isDefaultJndiEnvironmentAvailable()) {
+		if (JNDI_PRESENT && JndiLocatorDelegate.isDefaultJndiEnvironmentAvailable()) {
 			propertySources.addLast(new JndiPropertySource(JNDI_PROPERTY_SOURCE_NAME));
 		}
 		super.customizePropertySources(propertySources);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -85,8 +85,11 @@ class SingleCharWildcardedPathElement extends PathElement {
 		else {
 			for (int i = 0; i < this.len; i++) {
 				char ch = this.text[i];
-				// TODO revisit performance if doing a lot of case insensitive matching
-				if ((ch != '?') && (ch != Character.toLowerCase(value.charAt(i)))) {
+				char valCh = value.charAt(i);
+				if (ch == valCh || ch == '?') {
+					continue;
+				}
+				if (ch != Character.toLowerCase(valCh)) {
 					return false;
 				}
 			}

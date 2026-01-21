@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,8 @@ package org.springframework.core.io.buffer;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.Objects;
 
 import org.springframework.util.Assert;
 
@@ -103,10 +105,44 @@ final class DataBufferInputStream extends InputStream {
 		this.closed = true;
 	}
 
+	@Override
+	public byte[] readNBytes(int len) throws IOException {
+		if (len < 0) {
+			throw new IllegalArgumentException("len < 0");
+		}
+		checkClosed();
+		int size = Math.min(available(), len);
+		byte[] out = new byte[size];
+		this.dataBuffer.read(out);
+		return out;
+	}
+
+	@Override
+	public long skip(long n) throws IOException {
+		checkClosed();
+		if (n <= 0) {
+			return 0L;
+		}
+		int skipped = Math.min(available(), n > Integer.MAX_VALUE ? Integer.MAX_VALUE : (int) n);
+		this.dataBuffer.readPosition(this.dataBuffer.readPosition() + skipped);
+		return skipped;
+	}
+
+	@Override
+	public long transferTo(OutputStream out) throws IOException {
+		Objects.requireNonNull(out, "out");
+		checkClosed();
+		if (available() == 0) {
+			return 0L;
+		}
+		byte[] buf = readAllBytes();
+		out.write(buf);
+		return buf.length;
+	}
+
 	private void checkClosed() throws IOException {
 		if (this.closed) {
 			throw new IOException("DataBufferInputStream is closed");
 		}
 	}
-
 }

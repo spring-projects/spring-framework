@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,13 +46,13 @@ public class ServletRequestDataBinderFactory extends InitBinderDataBinderFactory
 	}
 
 	/**
-	 * Returns an instance of {@link ExtendedServletRequestDataBinder}.
+	 * Returns an instance of {@link org.springframework.web.servlet.support.ExtendedServletRequestDataBinder}.
 	 */
 	@Override
 	protected ServletRequestDataBinder createBinderInstance(
 			@Nullable Object target, String objectName, NativeWebRequest request) throws Exception {
 
-		return new ExtendedServletRequestDataBinder(target, objectName);
+		return new org.springframework.web.servlet.support.ExtendedServletRequestDataBinder(target, objectName);
 	}
 
 }

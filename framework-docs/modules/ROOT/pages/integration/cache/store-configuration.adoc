@@ -94,6 +94,3 @@ handled by the configured cache managers. That is, every cache definition not fo
 either `jdkCache` or `gemfireCache` (configured earlier in the example) is handled by
 the no-op cache, which does not store any information, causing the target method to be
 invoked every time.
-
-
-

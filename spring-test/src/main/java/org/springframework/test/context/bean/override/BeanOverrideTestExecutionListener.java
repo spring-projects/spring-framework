@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,17 @@
 
 package org.springframework.test.context.bean.override;
 
+import java.lang.reflect.Field;
 import java.util.List;
+import java.util.Objects;
 
+import org.springframework.beans.factory.BeanCreationException;
+import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.TestContext;
 import org.springframework.test.context.support.AbstractTestExecutionListener;
 import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
+import org.springframework.util.Assert;
+import org.springframework.util.ReflectionUtils;
 
 /**
  * {@code TestExecutionListener} that enables {@link BeanOverride @BeanOverride}
@@ -37,15 +43,21 @@ import org.springframework.test.context.support.DependencyInjectionTestExecution
 public class BeanOverrideTestExecutionListener extends AbstractTestExecutionListener {
 
 	/**
-	 * Returns {@code 1950}, which ensures that the {@code BeanOverrideTestExecutionListener}
+	 * The {@link #getOrder() order} value for this listener: {@value}.
+	 * @since 6.2.3
+	 */
+	public static final int ORDER = 1950;
+
+	/**
+	 * Returns {@value #ORDER}, which ensures that the {@code BeanOverrideTestExecutionListener}
 	 * is ordered after the
 	 * {@link org.springframework.test.context.support.DirtiesContextBeforeModesTestExecutionListener
-	 * DirtiesContextBeforeModesTestExecutionListener} and just before the
+	 * DirtiesContextBeforeModesTestExecutionListener} and before the
 	 * {@link DependencyInjectionTestExecutionListener}.
 	 */
 	@Override
 	public int getOrder() {
-		return 1950;
+		return ORDER;
 	}
 
 	/**
@@ -81,15 +93,48 @@ public class BeanOverrideTestExecutionListener extends AbstractTestExecutionList
 	 * a corresponding bean override instance.
 	 */
 	private static void injectFields(TestContext testContext) {
-		List<BeanOverrideHandler> handlers = BeanOverrideHandler.forTestClass(testContext.getTestClass());
+		Object testInstance = testContext.getTestInstance();
+		// Since JUnit Jupiter 5.12, if the SpringExtension is used with Jupiter's
+		// TEST_METHOD ExtensionContextScope, the value returned from
+		// testContext.getTestClass() may refer to the declaring class of the test
+		// method which is about to be invoked (which may be in a @Nested class
+		// within the class for the test instance). Thus, we use the class for the
+		// test instance as the "test class".
+		Class<?> testClass = testInstance.getClass();
+
+		List<BeanOverrideHandler> handlers = BeanOverrideHandler.forTestClass(testClass);
 		if (!handlers.isEmpty()) {
-			Object testInstance = testContext.getTestInstance();
-			BeanOverrideRegistry beanOverrideRegistry = testContext.getApplicationContext()
-					.getBean(BeanOverrideContextCustomizer.REGISTRY_BEAN_NAME, BeanOverrideRegistry.class);
+			ApplicationContext applicationContext = testContext.getApplicationContext();
+
+			Assert.state(applicationContext.containsBean(BeanOverrideRegistry.BEAN_NAME), () -> """
+					Test class %s declares @BeanOverride fields %s, but no BeanOverrideHandler has been registered. \
+					If you are using @ContextHierarchy, ensure that context names for bean overrides match \
+					configured @ContextConfiguration names.""".formatted(testClass.getSimpleName(),
+							handlers.stream().map(BeanOverrideHandler::getField).filter(Objects::nonNull)
+								.map(Field::getName).toList()));
+			BeanOverrideRegistry beanOverrideRegistry = applicationContext.getBean(BeanOverrideRegistry.BEAN_NAME,
+					BeanOverrideRegistry.class);
 
 			for (BeanOverrideHandler handler : handlers) {
-				beanOverrideRegistry.inject(testInstance, handler);
+				Field field = handler.getField();
+				Assert.state(field != null, () -> "BeanOverrideHandler must have a non-null field: " + handler);
+				Object bean = beanOverrideRegistry.getBeanForHandler(handler, field.getType());
+				Assert.state(bean != null, () -> """
+						No bean override instance found for BeanOverrideHandler %s. If you are using \
+						@ContextHierarchy, ensure that context names for bean overrides match configured \
+						@ContextConfiguration names.""".formatted(handler));
+				injectField(field, testInstance, bean);
 			}
+		}
+	}
+
+	private static void injectField(Field field, Object target, Object bean) {
+		try {
+			ReflectionUtils.makeAccessible(field);
+			ReflectionUtils.setField(field, target, bean);
+		}
+		catch (Throwable ex) {
+			throw new BeanCreationException("Could not inject field '" + field + "'", ex);
 		}
 	}
 

@@ -5,6 +5,7 @@
 
 This section discusses request mapping for annotated controllers.
 
+
 [[webflux-ann-requestmapping-annotation]]
 == `@RequestMapping`
 
@@ -88,39 +89,7 @@ Kotlin::
 
 You can map requests by using glob patterns and wildcards:
 
-[cols="2,3,5"]
-|===
-|Pattern |Description |Example
-
-| `+?+`
-| Matches one character
-| `+"/pages/t?st.html"+` matches `+"/pages/test.html"+` and `+"/pages/t3st.html"+`
-
-| `+*+`
-| Matches zero or more characters within a path segment
-| `+"/resources/*.png"+` matches `+"/resources/file.png"+`
-
-`+"/projects/*/versions"+` matches `+"/projects/spring/versions"+` but does not match `+"/projects/spring/boot/versions"+`
-
-| `+**+`
-| Matches zero or more path segments until the end of the path
-| `+"/resources/**"+` matches `+"/resources/file.png"+` and `+"/resources/images/file.png"+`
-
-`+"/resources/**/file.png"+` is invalid as `+**+` is only allowed at the end of the path.
-
-| `+{name}+`
-| Matches a path segment and captures it as a variable named "name"
-| `+"/projects/{project}/versions"+` matches `+"/projects/spring/versions"+` and captures `+project=spring+`
-
-| `+{name:[a-z]+}+`
-| Matches the regexp `+"[a-z]+"+` as a path variable named "name"
-| `+"/projects/{project:[a-z]+}/versions"+` matches `+"/projects/spring/versions"+` but not `+"/projects/spring1/versions"+`
-
-| `+{*path}+`
-| Matches zero or more path segments until the end of the path and captures it as a variable named "path"
-| `+"/resources/{*file}"+` matches `+"/resources/images/file.png"+` and captures `+file=/images/file.png+`
-
-|===
+include::partial$web/uri-patterns.adoc[leveloffset=+1]
 
 Captured URI variables can be accessed with `@PathVariable`, as the following example shows:
 
@@ -233,10 +202,13 @@ Kotlin::
 ======
 --
 
-URI path patterns can also have embedded `${...}` placeholders that are resolved on startup
-through `PropertySourcesPlaceholderConfigurer` against local, system, environment, and
-other property sources. You can use this to, for example, parameterize a base URL based on
-some external configuration.
+URI path patterns can also have:
+
+- Embedded `${...}` placeholders that are resolved on startup via
+`PropertySourcesPlaceholderConfigurer` against local, system, environment, and
+other property sources. This is useful, for example, to parameterize a base URL based on
+external configuration.
+- SpEL expressions `#{...}`.
 
 NOTE: Spring WebFlux uses `PathPattern` and the `PathPatternParser` for URI path matching support.
 Both classes are located in `spring-web` and are expressly designed for use with HTTP URL
@@ -408,6 +380,92 @@ Kotlin::
 ======
 
 
+[[webflux-ann-requestmapping-version]]
+== API Version
+[.small]#xref:web/webmvc/mvc-controller/ann-requestmapping.adoc#mvc-ann-requestmapping-version[See equivalent in the Servlet stack]#
+
+There is no standard way to specify an API version, so when you enable API versioning
+in the xref:web/webflux/config.adoc#webflux-config-api-version[WebFlux Config] you need
+to specify how to resolve the version. The WebFlux Config creates an
+xref:web/webflux-versioning.adoc#webflux-versioning-strategy[ApiVersionStrategy] that in turn
+is used to map requests.
+
+Once API versioning is enabled, you can begin to map requests with versions.
+The `@RequestMapping` `version` attribute supports the following:
+
+- Fixed version ("1.2") -- matches the given version only
+- Baseline version ("1.2+") -- matches the given version and above
+- No value -- matches any version, but is superseded by a more specific version match
+
+If multiple controller methods have a version less than or equal to the request version,
+the highest of those, and closest to the request version, is the one considered,
+in effect superseding the rest.
+
+To illustrate this, consider the following mappings:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	@RestController
+	@RequestMapping("/account/{id}")
+	public class AccountController {
+
+		@GetMapping // <1>
+		public Account getAccount() {
+		}
+
+		@GetMapping(version = "1.1") // <2>
+		public Account getAccount1_1() {
+		}
+
+		@GetMapping(version = "1.2+") // <3>
+		public Account getAccount1_2() {
+		}
+
+		@GetMapping(version = "1.5") // <4>
+		public Account getAccount1_5() {
+		}
+	}
+----
+<1> match any version
+<2> match version 1.1
+<3> match version 1.2 and above
+<4> match version 1.5
+======
+
+For request with version `"1.3"`:
+
+- (1) matches as it matches any version
+- (2) does not match
+- (3) matches as it matches 1.2 and above, and is *chosen* as the highest match
+- (4) is higher and does not match
+
+For request with version `"1.5"`:
+
+- (1) matches as it matches any version
+- (2) does not match
+- (3) matches as it matches 1.2 and above
+- (4) matches and is *chosen* as the highest match
+
+A request with version `"1.6"` does not have a match. (1) and (3) do match, but are
+superseded by (4), which allows only a strict match, and therefore does not match.
+In this scenario, a `NotAcceptableApiVersionException` results in a 400 response.
+
+Controller methods without a version are intended to support clients created before a
+versioned alternative was introduced. Therefore, even though an unversioned controller
+method is considered a match for any version, it is in fact given the lowest priority,
+and is effectively superseded by any alternative controller method with a version.
+
+NOTE: The above assumes the request version is a
+xref:web/webflux/config.adoc#webflux-config-api-version["supported" version],
+or otherwise it would fail.
+
+See xref:web/webflux-versioning.adoc[API Versioning] for more details on underlying
+infrastructure and support for API Versioning.
+
 
 [[webflux-ann-requestmapping-head-options]]
 == HTTP HEAD, OPTIONS
@@ -518,22 +576,20 @@ Kotlin::
 ======
 
 
-
 [[webflux-ann-httpexchange-annotation]]
 == `@HttpExchange`
 [.small]#xref:web/webmvc/mvc-controller/ann-requestmapping.adoc#mvc-ann-httpexchange-annotation[See equivalent in the Servlet stack]#
 
-While the main purpose of `@HttpExchange` is to abstract HTTP client code with a
-generated proxy, the
-xref:integration/rest-clients.adoc#rest-http-interface[HTTP Interface] on which
-such annotations are placed is a contract neutral to client vs server use.
-In addition to simplifying client code, there are also cases where an HTTP Interface
-may be a convenient way for servers to expose their API for client access. This leads
-to increased coupling between client and server and is often not a good choice,
-especially for public API's, but may be exactly the goal for an internal API.
-It is an approach commonly used in Spring Cloud, and it is why `@HttpExchange` is
-supported as an alternative to `@RequestMapping` for server side handling in
-controller classes.
+While the main purpose of `@HttpExchange` is for an HTTP Service
+xref:integration/rest-clients.adoc#rest-http-service-client[client with a generated proxy],
+the HTTP Service interface on which such annotations are placed is a contract neutral
+to client vs server use. In addition to simplifying client code, there are also cases
+where an HTTP Service interface may be a convenient way for servers to expose their
+API for client access. This leads to increased coupling between client and server and
+is often not a good choice, especially for public API's, but may be exactly the goal
+for an internal API. It is an approach commonly used in Spring Cloud, and it is why
+`@HttpExchange` is supported as an alternative to `@RequestMapping` for server side
+handling in controller classes.
 
 For example:
 
@@ -604,5 +660,5 @@ path, and content types.
 For method parameters and returns values, generally, `@HttpExchange` supports a
 subset of the method parameters that `@RequestMapping` does. Notably, it excludes any
 server-side specific parameter types. For details, see the list for
-xref:integration/rest-clients.adoc#rest-http-interface-method-parameters[@HttpExchange] and
+xref:integration/rest-clients.adoc#rest-http-service-client-method-parameters[@HttpExchange] and
 xref:web/webflux/controller/ann-methods/arguments.adoc[@RequestMapping].

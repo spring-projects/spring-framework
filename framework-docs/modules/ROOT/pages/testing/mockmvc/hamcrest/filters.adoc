@@ -18,11 +18,9 @@ Kotlin::
 +
 [source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
-	// Not possible in Kotlin until {kotlin-issues}/KT-22208 is fixed
+	mockMvc = standaloneSetup(PersonController()).addFilters<StandaloneMockMvcBuilder>(CharacterEncodingFilter()).build()
 ----
 ======
 
 Registered filters are invoked through the `MockFilterChain` from `spring-test`, and the
 last filter delegates to the `DispatcherServlet`.
-
-

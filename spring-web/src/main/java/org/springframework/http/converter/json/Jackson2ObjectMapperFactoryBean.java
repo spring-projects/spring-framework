@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -136,7 +136,10 @@ import org.springframework.context.ApplicationContextAware;
  * @author Tadaya Tsuyukubo
  * @author Sebastien Deleuze
  * @since 3.2
+ * @deprecated since 7.0 in favor of using directly Jackson 3 converters default constructor
  */
+@Deprecated(since = "7.0", forRemoval = true)
+@SuppressWarnings("removal")
 public class Jackson2ObjectMapperFactoryBean implements FactoryBean<ObjectMapper>, BeanClassLoaderAware,
 		ApplicationContextAware, InitializingBean {
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -108,10 +108,10 @@ public class WebContentInterceptor extends WebContentGenerator implements Handle
 	 * Shortcut to the
 	 * {@link org.springframework.web.util.UrlPathHelper#setAlwaysUseFullPath
 	 * same property} on the configured {@code UrlPathHelper}.
-	 * @deprecated as of 5.3, the path is resolved externally and obtained with
+	 * @deprecated the path is resolved externally and obtained with
 	 * {@link ServletRequestPathUtils#getCachedPathValue(ServletRequest)}
 	 */
-	@Deprecated
+	@Deprecated(since = "5.3")
 	public void setAlwaysUseFullPath(boolean alwaysUseFullPath) {
 	}
 
@@ -119,19 +119,19 @@ public class WebContentInterceptor extends WebContentGenerator implements Handle
 	 * Shortcut to the
 	 * {@link org.springframework.web.util.UrlPathHelper#setUrlDecode
 	 * same property} on the configured {@code UrlPathHelper}.
-	 * @deprecated as of 5.3, the path is resolved externally and obtained with
+	 * @deprecated the path is resolved externally and obtained with
 	 * {@link ServletRequestPathUtils#getCachedPathValue(ServletRequest)}
 	 */
-	@Deprecated
+	@Deprecated(since = "5.3")
 	public void setUrlDecode(boolean urlDecode) {
 	}
 
 	/**
 	 * Set the UrlPathHelper to use for resolution of lookup paths.
-	 * @deprecated as of 5.3, the path is resolved externally and obtained with
+	 * @deprecated the path is resolved externally and obtained with
 	 * {@link ServletRequestPathUtils#getCachedPathValue(ServletRequest)}
 	 */
-	@Deprecated
+	@Deprecated(since = "5.3")
 	public void setUrlPathHelper(UrlPathHelper urlPathHelper) {
 	}
 

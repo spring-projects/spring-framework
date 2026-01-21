@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpMethod;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockServletContext;
+import org.springframework.web.client.ApiVersionInserter;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -31,6 +32,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * Tests for {@link AbstractMockHttpServletRequestBuilder}
  *
  * @author Stephane Nicoll
+ * @author Réda Housni Alaoui
  */
 class AbstractMockHttpServletRequestBuilderTests {
 
@@ -96,6 +98,44 @@ class AbstractMockHttpServletRequestBuilderTests {
 		assertThat(request.getMethod()).isEqualTo(HttpMethod.POST.name());
 	}
 
+	@Test
+	void insertVersionInUrl() {
+		MockHttpServletRequest request = buildRequest(
+				new TestRequestBuilder(HttpMethod.GET).uri("/test")
+						.apiVersion(1.1)
+						.apiVersionInserter(ApiVersionInserter.usePathSegment(0)));
+
+		assertThat(request.getRequestURI()).isEqualTo("/1.1/test");
+	}
+
+	@Test
+	void insertVersionInHeader() {
+		MockHttpServletRequest request = buildRequest(
+				new TestRequestBuilder(HttpMethod.GET).uri("/test")
+						.apiVersion(1.1)
+						.apiVersionInserter(ApiVersionInserter.useHeader("API-Version")));
+
+		assertThat(request.getRequestURI()).isEqualTo("/test");
+		assertThat(request.getHeader("API-Version")).isEqualTo("1.1");
+	}
+
+	@Test
+	void mergeVersion() {
+		TestRequestBuilder builder = new TestRequestBuilder(HttpMethod.GET).uri("/b");
+		builder.merge(new TestRequestBuilder(HttpMethod.GET).uri("/a")
+				.apiVersion(1.1)
+				.apiVersionInserter(ApiVersionInserter.useHeader("API-Version")));
+
+		assertThat(buildRequest(builder).getHeader("API-Version")).isEqualTo("1.1");
+	}
+
+	@Test // gh-35493
+	void pathInfoIsNotMutatedByBuildMethod() {
+		TestRequestBuilder builder = new TestRequestBuilder(HttpMethod.GET).uri("/b");
+		assertThat(buildRequest(builder).getPathInfo()).isEqualTo("/b");
+		builder.uri("/a");
+		assertThat(buildRequest(builder).getPathInfo()).isEqualTo("/a");
+	}
 
 	private MockHttpServletRequest buildRequest(AbstractMockHttpServletRequestBuilder<?> builder) {
 		return builder.buildRequest(this.servletContext);

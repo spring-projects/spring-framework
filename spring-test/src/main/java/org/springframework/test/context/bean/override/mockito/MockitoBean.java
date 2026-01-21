@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,9 +31,9 @@ import org.springframework.test.context.bean.override.BeanOverride;
 
 /**
  * {@code @MockitoBean} is an annotation that can be used in test classes to
- * override beans in a test's
+ * override a bean in the test's
  * {@link org.springframework.context.ApplicationContext ApplicationContext}
- * using Mockito mocks.
+ * with a Mockito mock.
  *
  * <p>{@code @MockitoBean} can be applied in the following ways.
  * <ul>
@@ -49,18 +49,19 @@ import org.springframework.test.context.bean.override.BeanOverride;
  * </ul>
  *
  * <p>When {@code @MockitoBean} is declared on a field, the bean to mock is inferred
- * from the type of the annotated field. If multiple candidates exist, a
- * {@code @Qualifier} annotation can be declared on the field to help disambiguate.
- * In the absence of a {@code @Qualifier} annotation, the name of the annotated
- * field will be used as a fallback qualifier. Alternatively, you can explicitly
- * specify a bean name to mock by setting the {@link #value() value} or
- * {@link #name() name} attribute.
+ * from the type of the annotated field. If multiple candidates exist in the
+ * {@code ApplicationContext}, a {@code @Qualifier} annotation can be declared
+ * on the field to help disambiguate. In the absence of a {@code @Qualifier}
+ * annotation, the name of the annotated field will be used as a <em>fallback
+ * qualifier</em>. Alternatively, you can explicitly specify a bean name to mock
+ * by setting the {@link #value() value} or {@link #name() name} attribute.
  *
  * <p>When {@code @MockitoBean} is declared at the type level, the type of bean
- * to mock must be supplied via the {@link #types() types} attribute. If multiple
- * candidates exist, you can explicitly specify a bean name to mock by setting the
- * {@link #name() name} attribute. Note, however, that the {@code types} attribute
- * must contain a single type if an explicit bean {@code name} is configured.
+ * (or beans) to mock must be supplied via the {@link #types() types} attribute.
+ * If multiple candidates exist in the {@code ApplicationContext}, you can
+ * explicitly specify a bean name to mock by setting the {@link #name() name}
+ * attribute. Note, however, that the {@code types} attribute must contain a
+ * single type if an explicit bean {@code name} is configured.
  *
  * <p>A bean will be created if a corresponding bean does not exist. However, if
  * you would like for the test to fail when a corresponding bean does not exist,
@@ -73,11 +74,23 @@ import org.springframework.test.context.bean.override.BeanOverride;
  * registered directly}) will not be found, and a mocked bean will be added to
  * the context alongside the existing dependency.
  *
- * <p><strong>NOTE</strong>: Only <em>singleton</em> beans can be mocked.
- * Any attempt to mock a non-singleton bean will result in an exception. When
- * mocking a bean created by a {@link org.springframework.beans.factory.FactoryBean
- * FactoryBean}, the {@code FactoryBean} will be replaced with a singleton mock
- * of the type of object created by the {@code FactoryBean}.
+ * <p><strong>WARNING</strong>: Using {@code @MockitoBean} in conjunction with
+ * {@code @ContextHierarchy} can lead to undesirable results since each
+ * {@code @MockitoBean} will be applied to all context hierarchy levels by default.
+ * To ensure that a particular {@code @MockitoBean} is applied to a single context
+ * hierarchy level, set the {@link #contextName() contextName} to match a
+ * configured {@code @ContextConfiguration}
+ * {@link org.springframework.test.context.ContextConfiguration#name() name}.
+ * See the Javadoc for {@link org.springframework.test.context.ContextHierarchy @ContextHierarchy}
+ * for further details and examples.
+ *
+ * <p><strong>NOTE</strong>: When mocking a non-singleton bean, the non-singleton
+ * bean will be replaced with a singleton mock, and the corresponding bean definition
+ * will be converted to a singleton. Consequently, if you mock a prototype or scoped
+ * bean, the mock will be treated as a singleton. Similarly, when mocking a bean
+ * created by a {@link org.springframework.beans.factory.FactoryBean FactoryBean},
+ * the {@code FactoryBean} will be replaced with a singleton mock of the type of
+ * object created by the {@code FactoryBean}.
  *
  * <p>There are no restrictions on the visibility of a {@code @MockitoBean} field.
  * Such fields can therefore be {@code public}, {@code protected}, package-private
@@ -111,7 +124,7 @@ import org.springframework.test.context.bean.override.BeanOverride;
 public @interface MockitoBean {
 
 	/**
-	 * Alias for {@link #name()}.
+	 * Alias for {@link #name() name}.
 	 * <p>Intended to be used when no other attributes are needed &mdash; for
 	 * example, {@code @MockitoBean("customBeanName")}.
 	 * @see #name()
@@ -136,12 +149,25 @@ public @interface MockitoBean {
 	 * <p>Each type specified will result in a mock being created and registered
 	 * with the {@code ApplicationContext}.
 	 * <p>Types must be omitted when the annotation is used on a field.
-	 * <p>When {@code @MockitoBean} also defines a {@link #name}, this attribute
+	 * <p>When {@code @MockitoBean} also defines a {@link #name name}, this attribute
 	 * can only contain a single value.
 	 * @return the types to mock
 	 * @since 6.2.2
 	 */
 	Class<?>[] types() default {};
+
+	/**
+	 * The name of the context hierarchy level in which this {@code @MockitoBean}
+	 * should be applied.
+	 * <p>Defaults to an empty string which indicates that this {@code @MockitoBean}
+	 * should be applied to all application contexts.
+	 * <p>If a context name is configured, it must match a name configured via
+	 * {@code @ContextConfiguration(name=...)}.
+	 * @since 6.2.6
+	 * @see org.springframework.test.context.ContextHierarchy @ContextHierarchy
+	 * @see org.springframework.test.context.ContextConfiguration#name() @ContextConfiguration(name=...)
+	 */
+	String contextName() default "";
 
 	/**
 	 * Extra interfaces that should also be declared by the mock.

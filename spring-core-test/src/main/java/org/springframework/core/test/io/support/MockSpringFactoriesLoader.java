@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -122,8 +122,8 @@ public class MockSpringFactoriesLoader extends SpringFactoriesLoader {
 	public <T> void addInstance(String factoryType, T... factoryInstance) {
 		List<String> implementations = this.factories.computeIfAbsent(factoryType, key -> new ArrayList<>());
 		for (T factoryImplementation : factoryInstance) {
-			String reference = "!" + factoryType + ":" + factoryImplementation.getClass().getName()
-					+ this.sequence.getAndIncrement();
+			String reference = "!" + factoryType + ":" + factoryImplementation.getClass().getName() +
+					this.sequence.getAndIncrement();
 			implementations.add(reference);
 			this.implementations.put(reference, factoryImplementation);
 		}

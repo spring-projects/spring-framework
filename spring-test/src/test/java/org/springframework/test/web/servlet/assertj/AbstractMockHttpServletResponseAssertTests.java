@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpHeaders;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.json.JsonContent;
+import org.springframework.test.json.JsonConverterDelegate;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -138,7 +139,7 @@ public class AbstractMockHttpServletResponseAssertTests {
 	private static final class ResponseAssert extends AbstractMockHttpServletResponseAssert<ResponseAssert, MockHttpServletResponse> {
 
 		ResponseAssert(MockHttpServletResponse actual) {
-			super(null, actual, ResponseAssert.class);
+			super((JsonConverterDelegate) null, actual, ResponseAssert.class);
 		}
 
 		@Override

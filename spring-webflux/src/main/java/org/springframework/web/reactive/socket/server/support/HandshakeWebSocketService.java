@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import java.security.Principal;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -45,10 +46,8 @@ import org.springframework.web.reactive.socket.server.RequestUpgradeStrategy;
 import org.springframework.web.reactive.socket.server.WebSocketService;
 import org.springframework.web.reactive.socket.server.upgrade.JettyCoreRequestUpgradeStrategy;
 import org.springframework.web.reactive.socket.server.upgrade.JettyRequestUpgradeStrategy;
-import org.springframework.web.reactive.socket.server.upgrade.ReactorNetty2RequestUpgradeStrategy;
 import org.springframework.web.reactive.socket.server.upgrade.ReactorNettyRequestUpgradeStrategy;
 import org.springframework.web.reactive.socket.server.upgrade.StandardWebSocketUpgradeStrategy;
-import org.springframework.web.reactive.socket.server.upgrade.UndertowRequestUpgradeStrategy;
 import org.springframework.web.server.MethodNotAllowedException;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.ServerWebInputException;
@@ -65,6 +64,9 @@ import org.springframework.web.server.ServerWebInputException;
  */
 public class HandshakeWebSocketService implements WebSocketService, Lifecycle {
 
+	// For WebSocket upgrades in HTTP/2 (see RFC 8441)
+	private static final HttpMethod CONNECT_METHOD = HttpMethod.valueOf("CONNECT");
+
 	private static final String SEC_WEBSOCKET_KEY = "Sec-WebSocket-Key";
 
 	private static final String SEC_WEBSOCKET_PROTOCOL = "Sec-WebSocket-Protocol";
@@ -72,28 +74,20 @@ public class HandshakeWebSocketService implements WebSocketService, Lifecycle {
 	private static final Mono<Map<String, Object>> EMPTY_ATTRIBUTES = Mono.just(Collections.emptyMap());
 
 
-	private static final boolean jettyWsPresent;
+	private static final boolean JETTY_WS_PRESENT;
 
-	private static final boolean jettyCoreWsPresent;
+	private static final boolean JETTY_CORE_WS_PRESENT;
 
-	private static final boolean undertowWsPresent;
-
-	private static final boolean reactorNettyPresent;
-
-	private static final boolean reactorNetty2Present;
+	private static final boolean REACTOR_NETTY_PRESENT;
 
 	static {
 		ClassLoader classLoader = HandshakeWebSocketService.class.getClassLoader();
-		jettyWsPresent = ClassUtils.isPresent(
+		JETTY_WS_PRESENT = ClassUtils.isPresent(
 				"org.eclipse.jetty.ee11.websocket.server.JettyWebSocketServerContainer", classLoader);
-		jettyCoreWsPresent = ClassUtils.isPresent(
+		JETTY_CORE_WS_PRESENT = ClassUtils.isPresent(
 				"org.eclipse.jetty.websocket.server.ServerWebSocketContainer", classLoader);
-		undertowWsPresent = ClassUtils.isPresent(
-				"io.undertow.websockets.WebSocketProtocolHandshakeHandler", classLoader);
-		reactorNettyPresent = ClassUtils.isPresent(
+		REACTOR_NETTY_PRESENT = ClassUtils.isPresent(
 				"reactor.netty.http.server.HttpServerResponse", classLoader);
-		reactorNetty2Present = ClassUtils.isPresent(
-				"reactor.netty5.http.server.HttpServerResponse", classLoader);
 	}
 
 
@@ -194,23 +188,25 @@ public class HandshakeWebSocketService implements WebSocketService, Lifecycle {
 		HttpMethod method = request.getMethod();
 		HttpHeaders headers = request.getHeaders();
 
-		if (HttpMethod.GET != method) {
+		if (HttpMethod.GET != method && !CONNECT_METHOD.equals(method)) {
 			return Mono.error(new MethodNotAllowedException(
-					request.getMethod(), Collections.singleton(HttpMethod.GET)));
+					request.getMethod(), Set.of(HttpMethod.GET, CONNECT_METHOD)));
 		}
 
-		if (!"WebSocket".equalsIgnoreCase(headers.getUpgrade())) {
-			return handleBadRequest(exchange, "Invalid 'Upgrade' header: " + headers);
-		}
+		if (HttpMethod.GET == method) {
+			if (!"WebSocket".equalsIgnoreCase(headers.getUpgrade())) {
+				return handleBadRequest(exchange, "Invalid 'Upgrade' header: " + headers);
+			}
 
-		List<String> connectionValue = headers.getConnection();
-		if (!connectionValue.contains("Upgrade") && !connectionValue.contains("upgrade")) {
-			return handleBadRequest(exchange, "Invalid 'Connection' header: " + headers);
-		}
+			List<String> connectionValue = headers.getConnection();
+			if (!connectionValue.contains("Upgrade") && !connectionValue.contains("upgrade")) {
+				return handleBadRequest(exchange, "Invalid 'Connection' header: " + headers);
+			}
 
-		String key = headers.getFirst(SEC_WEBSOCKET_KEY);
-		if (key == null) {
-			return handleBadRequest(exchange, "Missing \"Sec-WebSocket-Key\" header");
+			String key = headers.getFirst(SEC_WEBSOCKET_KEY);
+			if (key == null) {
+				return handleBadRequest(exchange, "Missing \"Sec-WebSocket-Key\" header");
+			}
 		}
 
 		String protocol = selectProtocol(headers, handler);
@@ -269,41 +265,18 @@ public class HandshakeWebSocketService implements WebSocketService, Lifecycle {
 
 
 	static RequestUpgradeStrategy initUpgradeStrategy() {
-		if (jettyWsPresent) {
+		if (JETTY_WS_PRESENT) {
 			return new JettyRequestUpgradeStrategy();
 		}
-		else if (jettyCoreWsPresent) {
+		else if (JETTY_CORE_WS_PRESENT) {
 			return new JettyCoreRequestUpgradeStrategy();
 		}
-		else if (undertowWsPresent) {
-			return new UndertowRequestUpgradeStrategy();
-		}
-		else if (reactorNettyPresent) {
-			// As late as possible (Reactor Netty commonly used for WebClient)
-			return ReactorNettyStrategyDelegate.forReactorNetty1();
-		}
-		else if (reactorNetty2Present) {
-			// As late as possible (Reactor Netty commonly used for WebClient)
-			return ReactorNettyStrategyDelegate.forReactorNetty2();
+		else if (REACTOR_NETTY_PRESENT) {
+			return new ReactorNettyRequestUpgradeStrategy();
 		}
 		else {
 			// Let's assume Jakarta WebSocket API 2.1+
 			return new StandardWebSocketUpgradeStrategy();
-		}
-	}
-
-
-	/**
-	 * Inner class to avoid a reachable dependency on Reactor Netty API.
-	 */
-	private static class ReactorNettyStrategyDelegate {
-
-		public static RequestUpgradeStrategy forReactorNetty1() {
-			return new ReactorNettyRequestUpgradeStrategy();
-		}
-
-		public static RequestUpgradeStrategy forReactorNetty2() {
-			return new ReactorNetty2RequestUpgradeStrategy();
 		}
 	}
 

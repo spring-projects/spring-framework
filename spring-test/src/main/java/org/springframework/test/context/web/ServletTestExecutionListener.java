@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -65,6 +65,12 @@ import org.springframework.web.context.request.ServletWebRequest;
 public class ServletTestExecutionListener extends AbstractTestExecutionListener {
 
 	/**
+	 * The {@link #getOrder() order} value for this listener: {@value}.
+	 * @since 6.2.3
+	 */
+	public static final int ORDER = 1000;
+
+	/**
 	 * Attribute name for a {@link TestContext} attribute which indicates
 	 * whether the {@code ServletTestExecutionListener} should {@linkplain
 	 * RequestContextHolder#resetRequestAttributes() reset} Spring Web's
@@ -110,11 +116,14 @@ public class ServletTestExecutionListener extends AbstractTestExecutionListener 
 
 
 	/**
-	 * Returns {@code 1000}.
+	 * Returns {@value #ORDER}, which ensures that the {@code ServletTestExecutionListener}
+	 * is ordered before the
+	 * {@link org.springframework.test.context.support.DirtiesContextBeforeModesTestExecutionListener
+	 * DirtiesContextBeforeModesTestExecutionListener}.
 	 */
 	@Override
 	public final int getOrder() {
-		return 1000;
+		return ORDER;
 	}
 
 	/**

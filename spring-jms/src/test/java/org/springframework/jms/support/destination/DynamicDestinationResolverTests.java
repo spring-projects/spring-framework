@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,49 +34,67 @@ import static org.mockito.Mockito.mock;
 
 /**
  * @author Rick Evans
+ * @author Juergen Hoeller
  */
 class DynamicDestinationResolverTests {
 
 	private static final String DESTINATION_NAME = "foo";
 
+	private final DynamicDestinationResolver resolver = new DynamicDestinationResolver();
+
 
 	@Test
 	void resolveWithPubSubTopicSession() throws Exception {
-		Topic expectedDestination = new StubTopic();
+		Topic expectedDestination1 = new StubTopic();
+		Topic expectedDestination2 = new StubTopic();
 		TopicSession session = mock();
-		given(session.createTopic(DESTINATION_NAME)).willReturn(expectedDestination);
-		testResolveDestination(session, expectedDestination, true);
+
+		given(session.createTopic(DESTINATION_NAME)).willReturn(expectedDestination1);
+		testResolveDestination(session, expectedDestination1, true);
+		given(session.createTopic(DESTINATION_NAME)).willReturn(expectedDestination2);
+		testResolveDestination(session, expectedDestination2, true);
 	}
 
 	@Test
 	void resolveWithPubSubVanillaSession() throws Exception {
-		Topic expectedDestination = new StubTopic();
+		Topic expectedDestination1 = new StubTopic();
+		Topic expectedDestination2 = new StubTopic();
 		Session session = mock();
-		given(session.createTopic(DESTINATION_NAME)).willReturn(expectedDestination);
-		testResolveDestination(session, expectedDestination, true);
+
+		given(session.createTopic(DESTINATION_NAME)).willReturn(expectedDestination1);
+		testResolveDestination(session, expectedDestination1, true);
+		given(session.createTopic(DESTINATION_NAME)).willReturn(expectedDestination2);
+		testResolveDestination(session, expectedDestination2, true);
 	}
 
 	@Test
 	void resolveWithPointToPointQueueSession() throws Exception {
-		Queue expectedDestination = new StubQueue();
+		Queue expectedDestination1 = new StubQueue();
+		Queue expectedDestination2 = new StubQueue();
 		QueueSession session = mock();
-		given(session.createQueue(DESTINATION_NAME)).willReturn(expectedDestination);
-		testResolveDestination(session, expectedDestination, false);
+
+		given(session.createQueue(DESTINATION_NAME)).willReturn(expectedDestination1);
+		testResolveDestination(session, expectedDestination1, false);
+		given(session.createQueue(DESTINATION_NAME)).willReturn(expectedDestination2);
+		testResolveDestination(session, expectedDestination2, false);
 	}
 
 	@Test
 	void resolveWithPointToPointVanillaSession() throws Exception {
-		Queue expectedDestination = new StubQueue();
+		Queue expectedDestination1 = new StubQueue();
+		Queue expectedDestination2 = new StubQueue();
 		Session session = mock();
-		given(session.createQueue(DESTINATION_NAME)).willReturn(expectedDestination);
-		testResolveDestination(session, expectedDestination, false);
+
+		given(session.createQueue(DESTINATION_NAME)).willReturn(expectedDestination1);
+		testResolveDestination(session, expectedDestination1, false);
+		given(session.createQueue(DESTINATION_NAME)).willReturn(expectedDestination2);
+		testResolveDestination(session, expectedDestination2, false);
 	}
 
-	private static void testResolveDestination(Session session, Destination expectedDestination, boolean isPubSub) throws JMSException {
-		DynamicDestinationResolver resolver = new DynamicDestinationResolver();
+	private void testResolveDestination(Session session, Destination expected, boolean isPubSub) throws JMSException {
 		Destination destination = resolver.resolveDestinationName(session, DESTINATION_NAME, isPubSub);
 		assertThat(destination).isNotNull();
-		assertThat(destination).isSameAs(expectedDestination);
+		assertThat(destination).isSameAs(expected);
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,9 @@ import org.springframework.util.ReflectionUtils;
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @since 2.0
+ * @deprecated with no replacement as not actively maintained anymore
  */
+@Deprecated(since = "7.0")
 public abstract class BshScriptUtils {
 
 	/**

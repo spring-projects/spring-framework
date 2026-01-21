@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -93,7 +93,11 @@ import org.springframework.util.ReflectionUtils;
  * @see AbstractTransactionalJUnit4SpringContextTests
  * @see org.springframework.test.context.junit4.rules.SpringClassRule
  * @see org.springframework.test.context.junit4.rules.SpringMethodRule
+ * @deprecated since Spring Framework 7.0 in favor of the
+ * {@link org.springframework.test.context.junit.jupiter.SpringExtension SpringExtension}
+ * and JUnit Jupiter
  */
+@Deprecated(since = "7.0")
 public class SpringJUnit4ClassRunner extends BlockJUnit4ClassRunner {
 
 	private static final Log logger = LogFactory.getLog(SpringJUnit4ClassRunner.class);

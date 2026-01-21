@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,14 +31,15 @@ import org.springframework.javapoet.CodeBlock;
 
 /**
  * Generate the various fragments of code needed to register a bean.
- * <p>
- * A default implementation is provided that suits most needs and custom code
+ *
+ * <p>A default implementation is provided that suits most needs and custom code
  * fragments are only expected to be used by library authors having built custom
  * arrangement on top of the core container.
- * <p>
- * Users are not expected to implement this interface directly, but rather extends
- * from {@link BeanRegistrationCodeFragmentsDecorator} and only override the
- * necessary method(s).
+ *
+ * <p>Users are not expected to implement this interface directly, but rather
+ * extends from {@link BeanRegistrationCodeFragmentsDecorator} and only override
+ * the necessary method(s).
+ *
  * @author Phillip Webb
  * @author Stephane Nicoll
  * @since 6.0
@@ -48,12 +49,12 @@ import org.springframework.javapoet.CodeBlock;
 public interface BeanRegistrationCodeFragments {
 
 	/**
-	 * The variable name to used when creating the bean definition.
+	 * The variable name used when creating the bean definition.
 	 */
 	String BEAN_DEFINITION_VARIABLE = "beanDefinition";
 
 	/**
-	 * The variable name to used when creating the bean definition.
+	 * The variable name used when creating the bean definition.
 	 */
 	String INSTANCE_SUPPLIER_VARIABLE = "instanceSupplier";
 
@@ -69,8 +70,7 @@ public interface BeanRegistrationCodeFragments {
 
 	/**
 	 * Generate the code that defines the new bean definition instance.
-	 * <p>
-	 * This should declare a variable named {@value BEAN_DEFINITION_VARIABLE}
+	 * <p>This should declare a variable named {@value BEAN_DEFINITION_VARIABLE}
 	 * so that further fragments can refer to the variable to further tune
 	 * the bean definition.
 	 * @param generationContext the generation context
@@ -94,14 +94,13 @@ public interface BeanRegistrationCodeFragments {
 
 	/**
 	 * Generate the code that sets the instance supplier on the bean definition.
-	 * <p>
-	 * The {@code postProcessors} represent methods to be exposed once the
+	 * <p>The {@code postProcessors} represent methods to be exposed once the
 	 * instance has been created to further configure it. Each method should
 	 * accept two parameters, the {@link RegisteredBean} and the bean
 	 * instance, and should return the modified bean instance.
 	 * @param generationContext the generation context
 	 * @param beanRegistrationCode the bean registration code
-	 * @param instanceSupplierCode the instance supplier code supplier code
+	 * @param instanceSupplierCode the instance supplier code
 	 * @param postProcessors any instance post processors that should be applied
 	 * @return the generated code
 	 * @see #generateInstanceSupplierCode

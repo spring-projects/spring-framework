@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,7 +61,7 @@ public class NettyDataBufferFactory implements DataBufferFactory {
 	}
 
 	@Override
-	@Deprecated
+	@Deprecated(since = "6.0")
 	public NettyDataBuffer allocateBuffer() {
 		ByteBuf byteBuf = this.byteBufAllocator.buffer();
 		return new NettyDataBuffer(byteBuf, this);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -100,7 +100,7 @@ public class SyncInvocableHandlerMethod extends HandlerMethod {
 	public @Nullable HandlerResult invokeForHandlerResult(ServerWebExchange exchange,
 			BindingContext bindingContext, Object... providedArgs) {
 
-		CompletableFuture<HandlerResult> future =
+		CompletableFuture<@Nullable HandlerResult> future =
 				this.delegate.invoke(exchange, bindingContext, providedArgs).toFuture();
 
 		if (!future.isDone()) {

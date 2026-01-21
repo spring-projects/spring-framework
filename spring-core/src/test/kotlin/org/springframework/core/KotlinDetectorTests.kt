@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,7 @@
  */
 package org.springframework.core
 
+import kotlinx.serialization.Serializable
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
 
@@ -46,7 +47,33 @@ class KotlinDetectorTests {
 		Assertions.assertThat(KotlinDetector.isInlineClass(KotlinDetectorTests::class.java)).isFalse()
 	}
 
+	@Test
+	fun hasSerializableAnnotation() {
+		Assertions.assertThat(KotlinDetector.hasSerializableAnnotation(ResolvableType.forClass(WithoutSerializable::class.java))).isFalse()
+		Assertions.assertThat(KotlinDetector.hasSerializableAnnotation(ResolvableType.forClass(WithSerializable::class.java))).isTrue()
+
+		Assertions.assertThat(KotlinDetector.hasSerializableAnnotation(ResolvableType.forClassWithGenerics(List::class.java, WithoutSerializable::class.java))).isFalse()
+		Assertions.assertThat(KotlinDetector.hasSerializableAnnotation(ResolvableType.forClassWithGenerics(List::class.java, WithSerializable::class.java))).isTrue()
+
+		Assertions.assertThat(KotlinDetector.hasSerializableAnnotation(ResolvableType.forClassWithGenerics(Map::class.java, String::class.java, WithoutSerializable::class.java))).isFalse()
+		Assertions.assertThat(KotlinDetector.hasSerializableAnnotation(ResolvableType.forClassWithGenerics(Map::class.java, String::class.java, WithSerializable::class.java))).isTrue()
+		Assertions.assertThat(KotlinDetector.hasSerializableAnnotation(
+			ResolvableType.forClassWithGenerics(Map::class.java,
+				ResolvableType.forClass(String::class.java),
+				ResolvableType.forClassWithGenerics(List::class.java, WithSerializable::class.java)))).isTrue()
+		Assertions.assertThat(KotlinDetector.hasSerializableAnnotation(
+			ResolvableType.forClassWithGenerics(List::class.java,
+			ResolvableType.forClassWithGenerics(List::class.java, WithSerializable::class.java)))).isTrue()
+
+		Assertions.assertThat(KotlinDetector.hasSerializableAnnotation(ResolvableType.NONE)).isFalse()
+	}
+
 	@JvmInline
 	value class ValueClass(val value: String)
+
+	data class WithoutSerializable(val value: String)
+
+	@Serializable
+	data class WithSerializable(val value: String)
 
 }

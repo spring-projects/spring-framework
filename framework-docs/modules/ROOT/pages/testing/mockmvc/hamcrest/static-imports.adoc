@@ -14,5 +14,3 @@ add the above as "`favorite static members`" in the Eclipse preferences.
 
 When using MockMvc through the xref:testing/webtestclient.adoc[WebTestClient] you do not need static imports.
 The `WebTestClient` provides a fluent API without static imports.
-
-

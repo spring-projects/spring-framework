@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -161,7 +161,13 @@ public class ContentCachingResponseWrapper extends HttpServletResponseWrapper {
 	@Override
 	public void setHeader(String name, String value) {
 		if (HttpHeaders.CONTENT_LENGTH.equalsIgnoreCase(name)) {
-			this.contentLength = toContentLengthInt(Long.parseLong(value));
+			if (value != null) {
+				this.contentLength = toContentLengthInt(Long.parseLong(value));
+			}
+			else {
+				this.contentLength = null;
+				super.setHeader(name, null);
+			}
 		}
 		else {
 			super.setHeader(name, value);

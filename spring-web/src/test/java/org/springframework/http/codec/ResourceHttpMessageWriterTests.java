@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -151,6 +151,15 @@ class ResourceHttpMessageWriterTests {
 	void invalidRange() {
 
 		testWrite(get("/").header(HttpHeaders.RANGE, "invalid").build());
+
+		assertThat(this.response.getHeaders().getFirst(HttpHeaders.ACCEPT_RANGES)).isEqualTo("bytes");
+		assertThat(this.response.getStatusCode()).isEqualTo(HttpStatus.REQUESTED_RANGE_NOT_SATISFIABLE);
+	}
+
+	@Test // gh-35536
+	void invalidRangePosition() {
+
+		testWrite(get("/").header(HttpHeaders.RANGE, "bytes=2000-5000").build());
 
 		assertThat(this.response.getHeaders().getFirst(HttpHeaders.ACCEPT_RANGES)).isEqualTo("bytes");
 		assertThat(this.response.getStatusCode()).isEqualTo(HttpStatus.REQUESTED_RANGE_NOT_SATISFIABLE);

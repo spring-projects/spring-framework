@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ public interface ContextResource extends Resource {
 	/**
 	 * Return the path within the enclosing 'context'.
 	 * <p>This is typically path relative to a context-specific root directory,
-	 * for example, a ServletContext root or a PortletContext root.
+	 * for example, a ServletContext root.
 	 */
 	String getPathWithinContext();
 

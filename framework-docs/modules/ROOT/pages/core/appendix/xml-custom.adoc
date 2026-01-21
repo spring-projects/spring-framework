@@ -12,7 +12,6 @@ Spring's extensible XML configuration mechanism is based on XML Schema. If you a
 familiar with Spring's current XML configuration extensions that come with the standard
 Spring distribution, you should first read the previous section on xref:core/appendix/xsd-schemas.adoc[XML Schemas].
 
-
 To create new XML configuration extensions:
 
 . xref:core/appendix/xml-custom.adoc#core.appendix.xsd-custom-schema[Author] an XML schema to describe your custom element(s).
@@ -36,7 +35,6 @@ we will be able to define bean definitions of type `SimpleDateFormat` as follows
 (We include much more detailed
 examples follow later in this appendix. The intent of this first simple example is to walk you
 through the basic steps of making a custom extension.)
-
 
 
 [[xsd-custom-schema]]
@@ -108,7 +106,6 @@ NOTE: The schema-based approach to creating configuration format allows for tigh
 with an IDE that has a schema-aware XML editor. By using a properly authored schema, you
 can use autocompletion to let a user choose between several configuration options
 defined in the enumeration.
-
 
 
 [[xsd-custom-namespacehandler]]
@@ -185,7 +182,6 @@ orchestration of the parsing of all of the custom elements in its namespace whil
 delegating to `BeanDefinitionParsers` to do the grunt work of the XML parsing. This
 means that each `BeanDefinitionParser` contains only the logic for parsing a single
 custom element, as we can see in the next step.
-
 
 
 [[xsd-custom-parser]]
@@ -276,11 +272,9 @@ the basic grunt work of creating a single `BeanDefinition`.
 single `BeanDefinition` represents.
 ======
 
-
 In this simple case, this is all that we need to do. The creation of our single
 `BeanDefinition` is handled by the `AbstractSingleBeanDefinitionParser` superclass, as
 is the extraction and setting of the bean definition's unique identifier.
-
 
 
 [[xsd-custom-registration]]
@@ -293,7 +287,6 @@ properties files are both placed in a `META-INF` directory in your application a
 can, for example, be distributed alongside your binary classes in a JAR file. The Spring
 XML parsing infrastructure automatically picks up your new extension by consuming
 these special properties files, the formats of which are detailed in the next two sections.
-
 
 [[xsd-custom-registration-spring-handlers]]
 === Writing `META-INF/spring.handlers`
@@ -312,7 +305,6 @@ http\://www.mycompany.example/schema/myns=org.springframework.samples.xml.MyName
 The first part (the key) of the key-value pair is the URI associated with your custom
 namespace extension and needs to exactly match exactly the value of the `targetNamespace`
 attribute, as specified in your custom XSD schema.
-
 
 [[xsd-custom-registration-spring-schemas]]
 === Writing 'META-INF/spring.schemas'
@@ -335,7 +327,6 @@ http\://www.mycompany.example/schema/myns/myns.xsd=org/springframework/samples/x
 
 You are encouraged to deploy your XSD file (or files) right alongside
 the `NamespaceHandler` and `BeanDefinitionParser` classes on the classpath.
-
 
 
 [[xsd-custom-using]]
@@ -371,12 +362,10 @@ in a Spring XML configuration file:
 <1> Our custom bean.
 
 
-
 [[xsd-custom-meat]]
 == More Detailed Examples
 
 This section presents some more detailed examples of custom XML extensions.
-
 
 [[xsd-custom-custom-nested]]
 === Nesting Custom Elements within Custom Elements
@@ -753,7 +742,6 @@ http\://www.foo.example/schema/component=com.foo.ComponentNamespaceHandler
 http\://www.foo.example/schema/component/component.xsd=com/foo/component.xsd
 ----
 
-
 [[xsd-custom-custom-just-attributes]]
 === Custom Attributes on "`Normal`" Elements
 
@@ -1007,5 +995,3 @@ http\://www.foo.example/schema/jcache=com.foo.JCacheNamespaceHandler
 # in 'META-INF/spring.schemas'
 http\://www.foo.example/schema/jcache/jcache.xsd=com/foo/jcache.xsd
 ----
-
-

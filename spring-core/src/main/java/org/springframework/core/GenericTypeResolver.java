@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,9 +59,9 @@ public final class GenericTypeResolver {
 	 * @param methodParameter the method parameter specification
 	 * @param implementationClass the class to resolve type variables against
 	 * @return the corresponding generic parameter or return type
-	 * @deprecated since 5.2 in favor of {@code methodParameter.withContainingClass(implementationClass).getParameterType()}
+	 * @deprecated in favor of {@code methodParameter.withContainingClass(implementationClass).getParameterType()}
 	 */
-	@Deprecated
+	@Deprecated(since = "5.2")
 	public static Class<?> resolveParameterType(MethodParameter methodParameter, Class<?> implementationClass) {
 		Assert.notNull(methodParameter, "MethodParameter must not be null");
 		Assert.notNull(implementationClass, "Class must not be null");
@@ -156,6 +156,9 @@ public final class GenericTypeResolver {
 			if (genericType instanceof TypeVariable<?> typeVariable) {
 				ResolvableType resolvedTypeVariable = resolveVariable(
 						typeVariable, ResolvableType.forClass(contextClass));
+				if (resolvedTypeVariable == ResolvableType.NONE) {
+					resolvedTypeVariable = ResolvableType.forVariableBounds(typeVariable);
+				}
 				if (resolvedTypeVariable != ResolvableType.NONE) {
 					Class<?> resolved = resolvedTypeVariable.resolve();
 					if (resolved != null) {
@@ -166,18 +169,21 @@ public final class GenericTypeResolver {
 			else if (genericType instanceof ParameterizedType parameterizedType) {
 				ResolvableType resolvedType = ResolvableType.forType(genericType);
 				if (resolvedType.hasUnresolvableGenerics()) {
-					ResolvableType[] generics = new ResolvableType[parameterizedType.getActualTypeArguments().length];
 					Type[] typeArguments = parameterizedType.getActualTypeArguments();
+					ResolvableType[] generics = new ResolvableType[typeArguments.length];
 					ResolvableType contextType = ResolvableType.forClass(contextClass);
 					for (int i = 0; i < typeArguments.length; i++) {
 						Type typeArgument = typeArguments[i];
 						if (typeArgument instanceof TypeVariable<?> typeVariable) {
 							ResolvableType resolvedTypeArgument = resolveVariable(typeVariable, contextType);
+							if (resolvedTypeArgument == ResolvableType.NONE) {
+								resolvedTypeArgument = ResolvableType.forVariableBounds(typeVariable);
+							}
 							if (resolvedTypeArgument != ResolvableType.NONE) {
 								generics[i] = resolvedTypeArgument;
 							}
 							else {
-								generics[i] = ResolvableType.forType(typeArgument).resolveType();
+								generics[i] = ResolvableType.forType(typeArgument);
 							}
 						}
 						else if (typeArgument instanceof ParameterizedType) {
@@ -206,6 +212,9 @@ public final class GenericTypeResolver {
 			}
 			resolvedType = variableResolver.resolveVariable(typeVariable);
 			if (resolvedType != null) {
+				while (resolvedType.getType() instanceof TypeVariable<?>) {
+					resolvedType = resolvedType.resolveType();
+				}
 				return resolvedType;
 			}
 		}

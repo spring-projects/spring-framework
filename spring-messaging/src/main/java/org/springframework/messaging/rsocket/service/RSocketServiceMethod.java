@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,14 +21,16 @@ import java.time.Duration;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 
 import org.jspecify.annotations.Nullable;
 import org.reactivestreams.Publisher;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import org.springframework.core.DefaultParameterNameDiscoverer;
+import org.springframework.core.KotlinDetector;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.ReactiveAdapter;
@@ -52,6 +54,8 @@ import org.springframework.util.StringValueResolver;
  * @since 6.0
  */
 final class RSocketServiceMethod {
+
+	private static final String COROUTINES_FLOW_CLASS_NAME = "kotlinx.coroutines.flow.Flow";
 
 	private final Method method;
 
@@ -81,11 +85,13 @@ final class RSocketServiceMethod {
 		if (count == 0) {
 			return new MethodParameter[0];
 		}
-		DefaultParameterNameDiscoverer nameDiscoverer = new DefaultParameterNameDiscoverer();
+		if (KotlinDetector.isSuspendingFunction(method)) {
+			count -= 1;
+		}
+
 		MethodParameter[] parameters = new MethodParameter[count];
 		for (int i = 0; i < count; i++) {
 			parameters[i] = new SynthesizingMethodParameter(method, i);
-			parameters[i].initParameterNameDiscovery(nameDiscoverer);
 		}
 		return parameters;
 	}
@@ -128,10 +134,17 @@ final class RSocketServiceMethod {
 
 		MethodParameter returnParam = new MethodParameter(method, -1);
 		Class<?> returnType = returnParam.getParameterType();
+		boolean isSuspending = KotlinDetector.isSuspendingFunction(method);
+		boolean hasFlowReturnType = COROUTINES_FLOW_CLASS_NAME.equals(returnType.getName());
+		boolean isUnwrapped = isSuspending && !hasFlowReturnType;
+		if (isSuspending) {
+			returnType = (hasFlowReturnType ? Flux.class : Mono.class);
+		}
+
 		ReactiveAdapter reactiveAdapter = reactiveRegistry.getAdapter(returnType);
 
 		MethodParameter actualParam = (reactiveAdapter != null ? returnParam.nested() : returnParam.nestedIfOptional());
-		Class<?> actualType = actualParam.getNestedParameterType();
+		Class<?> actualType = isUnwrapped ? actualParam.getParameterType() : actualParam.getNestedParameterType();
 
 		Function<RSocketRequestValues, Publisher<?>> responseFunction;
 		if (ClassUtils.isVoidType(actualType) || (reactiveAdapter != null && reactiveAdapter.isNoValue())) {
@@ -146,7 +159,8 @@ final class RSocketServiceMethod {
 		}
 		else {
 			ParameterizedTypeReference<?> payloadType =
-					ParameterizedTypeReference.forType(actualParam.getNestedGenericParameterType());
+					ParameterizedTypeReference.forType(isUnwrapped ? actualParam.getGenericParameterType() :
+							actualParam.getNestedGenericParameterType());
 
 			responseFunction = values -> (
 					reactiveAdapter.isMultiValue() ?
@@ -166,7 +180,7 @@ final class RSocketServiceMethod {
 						((Mono<?>) responsePublisher).blockOptional());
 			}
 			else {
-				return (blockTimeout != null ?
+				return Objects.requireNonNull(blockTimeout != null ?
 						((Mono<?>) responsePublisher).block(blockTimeout) :
 						((Mono<?>) responsePublisher).block());
 			}

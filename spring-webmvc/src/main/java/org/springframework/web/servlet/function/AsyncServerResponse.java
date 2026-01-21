@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -100,7 +100,7 @@ public interface AsyncServerResponse extends ServerResponse {
 		if (obj instanceof CompletableFuture<?> futureResponse) {
 			return (CompletableFuture<ServerResponse>) futureResponse;
 		}
-		else if (DefaultAsyncServerResponse.reactiveStreamsPresent) {
+		else if (DefaultAsyncServerResponse.REACTIVE_STREAMS_PRESENT) {
 			ReactiveAdapterRegistry registry = ReactiveAdapterRegistry.getSharedInstance();
 			ReactiveAdapter publisherAdapter = registry.getAdapter(obj.getClass());
 			if (publisherAdapter != null) {

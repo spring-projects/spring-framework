@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,9 +24,10 @@ import org.jspecify.annotations.Nullable;
  * Log facade used to handle annotation introspection failures (in particular
  * {@code TypeNotPresentExceptions}). Allows annotation processing to continue,
  * assuming that when Class attribute values are not resolvable the annotation
- * should effectively disappear.
+ * should effectively be ignored.
  *
  * @author Phillip Webb
+ * @author Sam Brannen
  * @since 5.2
  */
 enum IntrospectionFailureLogger {
@@ -51,13 +52,24 @@ enum IntrospectionFailureLogger {
 		public void log(String message) {
 			getLogger().info(message);
 		}
+	},
+
+	WARN {
+		@Override
+		public boolean isEnabled() {
+			return getLogger().isWarnEnabled();
+		}
+		@Override
+		public void log(String message) {
+			getLogger().warn(message);
+		}
 	};
 
 
 	private static @Nullable Log logger;
 
 
-	void log(String message, @Nullable Object source, Exception ex) {
+	void log(String message, @Nullable Object source, Throwable ex) {
 		String on = (source != null ? " on " + source : "");
 		log(message + on + ": " + ex);
 	}

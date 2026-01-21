@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,13 +26,40 @@ package org.springframework.context;
 public interface LifecycleProcessor extends Lifecycle {
 
 	/**
-	 * Notification of context refresh, for example, for auto-starting components.
+	 * Notification of context refresh for auto-starting components.
+	 * @see ConfigurableApplicationContext#refresh()
 	 */
-	void onRefresh();
+	default void onRefresh() {
+		start();
+	}
 
 	/**
-	 * Notification of context close phase, for example, for auto-stopping components.
+	 * Notification of context restart for auto-stopping and subsequently
+	 * auto-starting components.
+	 * @since 7.0
+	 * @see ConfigurableApplicationContext#restart()
 	 */
-	void onClose();
+	default void onRestart() {
+		stop();
+		start();
+	}
+
+	/**
+	 * Notification of context pause for auto-stopping components.
+	 * @since 7.0
+	 * @see ConfigurableApplicationContext#pause()
+	 */
+	default void onPause() {
+		stop();
+	}
+
+	/**
+	 * Notification of context close phase for auto-stopping components
+	 * before destruction.
+	 * @see ConfigurableApplicationContext#close()
+	 */
+	default void onClose() {
+		stop();
+	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +36,11 @@ import org.springframework.beans.factory.config.BeanReference;
  * @since 2.0
  */
 public class BeanComponentDefinition extends BeanDefinitionHolder implements ComponentDefinition {
+
+	private static final BeanDefinition[] EMPTY_BEAN_DEFINITION_ARRAY = new BeanDefinition[0];
+
+	private static final BeanReference[] EMPTY_BEAN_REFERENCE_ARRAY = new BeanReference[0];
+
 
 	private final BeanDefinition[] innerBeanDefinitions;
 
@@ -84,8 +89,8 @@ public class BeanComponentDefinition extends BeanDefinitionHolder implements Com
 				references.add(beanRef);
 			}
 		}
-		this.innerBeanDefinitions = innerBeans.toArray(new BeanDefinition[0]);
-		this.beanReferences = references.toArray(new BeanReference[0]);
+		this.innerBeanDefinitions = innerBeans.toArray(EMPTY_BEAN_DEFINITION_ARRAY);
+		this.beanReferences = references.toArray(EMPTY_BEAN_REFERENCE_ARRAY);
 	}
 
 

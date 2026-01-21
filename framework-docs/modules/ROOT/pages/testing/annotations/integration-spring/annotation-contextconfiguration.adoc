@@ -10,7 +10,8 @@ Resource locations are typically XML configuration files or Groovy scripts locat
 classpath, while component classes are typically `@Configuration` classes. However,
 resource locations can also refer to files and scripts in the file system, and component
 classes can be `@Component` classes, `@Service` classes, and so on. See
-xref:testing/testcontext-framework/ctx-management/javaconfig.adoc#testcontext-ctx-management-javaconfig-component-classes[Component Classes] for further details.
+xref:testing/testcontext-framework/ctx-management/javaconfig.adoc#testcontext-ctx-management-javaconfig-component-classes[Component Classes]
+for further details.
 
 The following example shows a `@ContextConfiguration` annotation that refers to an XML
 file:
@@ -137,6 +138,6 @@ configuration classes as well as context initializers that are declared by super
 or enclosing classes.
 
 See xref:testing/testcontext-framework/ctx-management.adoc[Context Management],
-xref:testing/testcontext-framework/support-classes.adoc#testcontext-junit-jupiter-nested-test-configuration[`@Nested` test class configuration], and the `@ContextConfiguration`
+xref:testing/testcontext-framework/support-classes.adoc#testcontext-junit-jupiter-nested-test-configuration[`@Nested` test class configuration],
+and the {spring-framework-api}/test/context/ContextConfiguration.html[`@ContextConfiguration`]
 javadocs for further details.
-

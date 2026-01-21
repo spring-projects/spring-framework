@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -242,6 +242,7 @@ class ControllerMethodResolver {
 			result.add(new SessionStatusMethodArgumentResolver());
 		}
 		result.add(new WebSessionMethodArgumentResolver(adapterRegistry));
+		result.add(new ApiVersionMethodArgumentResolver());
 		if (KotlinDetector.isKotlinPresent()) {
 			result.add(new ContinuationHandlerMethodArgumentResolver());
 		}
@@ -351,7 +352,7 @@ class ControllerMethodResolver {
 
 		this.initBinderMethodCache
 				.computeIfAbsent(handlerType,
-						clazz -> MethodIntrospector.selectMethods(handlerType, INIT_BINDER_METHODS))
+						key -> MethodIntrospector.selectMethods(key, INIT_BINDER_METHODS))
 				.forEach(method -> {
 					Object bean = handlerMethod.getBean();
 					result.add(getInitBinderMethod(bean, method));
@@ -384,7 +385,7 @@ class ControllerMethodResolver {
 
 		this.modelAttributeMethodCache
 				.computeIfAbsent(handlerType,
-						clazz -> MethodIntrospector.selectMethods(handlerType, MODEL_ATTRIBUTE_METHODS))
+						key -> MethodIntrospector.selectMethods(key, MODEL_ATTRIBUTE_METHODS))
 				.forEach(method -> {
 					Object bean = handlerMethod.getBean();
 					result.add(createAttributeMethod(bean, method));

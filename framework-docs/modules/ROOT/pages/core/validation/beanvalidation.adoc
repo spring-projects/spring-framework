@@ -5,7 +5,6 @@ The Spring Framework provides support for the
 {bean-validation-site}[Java Bean Validation] API.
 
 
-
 [[validation-beanvalidation-overview]]
 == Overview of Bean Validation
 
@@ -78,7 +77,6 @@ specific constraints. To learn how to set up a bean validation provider as a Spr
 bean, keep reading.
 
 
-
 [[validation-beanvalidation-spring]]
 == Configuring a Bean Validation Provider
 
@@ -121,7 +119,6 @@ The basic configuration in the preceding example triggers bean validation to ini
 using its default bootstrap mechanism. A Bean Validation provider, such as the Hibernate
 Validator, is expected to be present in the classpath and is automatically detected.
 
-
 [[validation-beanvalidation-spring-inject]]
 === Inject Jakarta Validator
 
@@ -156,7 +153,6 @@ Kotlin::
 	class MyService(@Autowired private val validator: Validator)
 ----
 ======
-
 
 [[validation-beanvalidation-spring-inject-adapter]]
 === Inject Spring Validator
@@ -198,8 +194,6 @@ When used as `org.springframework.validation.Validator`, `LocalValidatorFactoryB
 invokes the underlying `jakarta.validation.Validator`, and then adapts
 ``ConstraintViolation``s to ``FieldError``s, and registers them with the `Errors` object
 passed into the `validate` method.
-
-
 
 [[validation-beanvalidation-spring-constraints]]
 === Configure Custom Constraints
@@ -276,7 +270,6 @@ Kotlin::
 ----
 ======
 
-
 As the preceding example shows, a `ConstraintValidator` implementation can have its dependencies
 `@Autowired` as any other Spring bean.
 
@@ -311,7 +304,6 @@ xref:web/webmvc/mvc-ann-rest-exceptions.adoc[Error Responses] sections, and the 
 xref:web/webflux/controller/ann-validation.adoc[Validation] and
 xref:web/webflux/ann-rest-exceptions.adoc[Error Responses] sections.
 
-
 [[validation-beanvalidation-spring-method-exceptions]]
 === Method Validation Exceptions
 
@@ -329,7 +321,6 @@ value, and a list of `MessageSourceResolvable` errors adapted from
 fields and properties, the `ParameterValidationResult` is `ParameterErrors` which
 implements `org.springframework.validation.Errors` and exposes validation errors as
 ``FieldError``s.
-
 
 [[validation-beanvalidation-spring-method-i18n]]
 === Customizing Validation Errors
@@ -399,7 +390,7 @@ A `ConstraintViolation` on the `degrees` method parameter is adapted to a
 `MessageSourceResolvable` with the following:
 
 - Error codes `"Max.myService#addStudent.degrees"`, `"Max.degrees"`, `"Max.int"`, `"Max"`
-- Message arguments "degrees2 and 2 (the field name and the constraint attribute)
+- Message arguments "degrees" and 2 (the field name and the constraint attribute)
 - Default message "must be less than or equal to 2"
 
 To customize the above default message, you can add a property such as:
@@ -411,7 +402,6 @@ Properties::
 Max.degrees=You cannot provide more than {1} {0}
 ----
 
-
 [[validation-beanvalidation-spring-other]]
 === Additional Configuration Options
 
@@ -420,7 +410,6 @@ cases. There are a number of configuration options for various Bean Validation
 constructs, from message interpolation to traversal resolution. See the
 {spring-framework-api}/validation/beanvalidation/LocalValidatorFactoryBean.html[`LocalValidatorFactoryBean`]
 javadoc for more information on these options.
-
 
 
 [[validation-binder]]
@@ -479,8 +468,7 @@ locally on a DataBinder instance. See
 xref:web/webmvc/mvc-config/validation.adoc[Spring MVC Validation Configuration].
 
 
-
 [[validation-mvc]]
-== Spring MVC 3 Validation
+== Spring MVC Validation
 
 See xref:web/webmvc/mvc-config/validation.adoc[Validation] in the Spring MVC chapter.

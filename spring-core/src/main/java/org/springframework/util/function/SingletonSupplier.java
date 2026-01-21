@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@ import org.springframework.util.Assert;
  * @since 5.1
  * @param <T> the type of results supplied by this supplier
  */
-public class SingletonSupplier<T> implements Supplier<@Nullable T> {
+public class SingletonSupplier<T extends @Nullable Object> implements Supplier<T> {
 
 	private final @Nullable Supplier<? extends @Nullable T> instanceSupplier;
 
@@ -47,10 +47,13 @@ public class SingletonSupplier<T> implements Supplier<@Nullable T> {
 
 	private volatile @Nullable T singletonInstance;
 
+	private boolean initialized;
+
 	/**
-	 * Guards access to write operations on the {@code singletonInstance} field.
+	 * Guards access to write operations on the {@code singletonInstance} and
+	 * {@code initialized} fields.
 	 */
-	private final Lock writeLock = new ReentrantLock();
+	private final Lock initializationLock = new ReentrantLock();
 
 
 	/**
@@ -63,6 +66,7 @@ public class SingletonSupplier<T> implements Supplier<@Nullable T> {
 		this.instanceSupplier = null;
 		this.defaultSupplier = defaultSupplier;
 		this.singletonInstance = instance;
+		this.initialized = (instance != null);
 	}
 
 	/**
@@ -85,6 +89,7 @@ public class SingletonSupplier<T> implements Supplier<@Nullable T> {
 		this.instanceSupplier = null;
 		this.defaultSupplier = null;
 		this.singletonInstance = singletonInstance;
+		this.initialized = (singletonInstance != null);
 	}
 
 
@@ -96,10 +101,14 @@ public class SingletonSupplier<T> implements Supplier<@Nullable T> {
 	public @Nullable T get() {
 		T instance = this.singletonInstance;
 		if (instance == null) {
-			this.writeLock.lock();
+			// Either not initialized yet, or a pre-initialized null value ->
+			// specific determination follows within full initialization lock.
+			// Pre-initialized null values are rare, so we accept the locking
+			// overhead in favor of a defensive fast path for non-null values.
+			this.initializationLock.lock();
 			try {
 				instance = this.singletonInstance;
-				if (instance == null) {
+				if (!this.initialized) {
 					if (this.instanceSupplier != null) {
 						instance = this.instanceSupplier.get();
 					}
@@ -107,10 +116,11 @@ public class SingletonSupplier<T> implements Supplier<@Nullable T> {
 						instance = this.defaultSupplier.get();
 					}
 					this.singletonInstance = instance;
+					this.initialized = true;
 				}
 			}
 			finally {
-				this.writeLock.unlock();
+				this.initializationLock.unlock();
 			}
 		}
 		return instance;
@@ -143,7 +153,7 @@ public class SingletonSupplier<T> implements Supplier<@Nullable T> {
 	 * @return the singleton supplier, or {@code null} if the instance was {@code null}
 	 */
 	@Contract("null -> null; !null -> !null")
-	public static <T> @Nullable SingletonSupplier<T> ofNullable(@Nullable T instance) {
+	public static <T extends @Nullable Object> @Nullable SingletonSupplier<T> ofNullable(@Nullable T instance) {
 		return (instance != null ? new SingletonSupplier<>(instance) : null);
 	}
 
@@ -152,7 +162,7 @@ public class SingletonSupplier<T> implements Supplier<@Nullable T> {
 	 * @param supplier the instance supplier (never {@code null})
 	 * @return the singleton supplier (never {@code null})
 	 */
-	public static <T> SingletonSupplier<T> of(Supplier<T> supplier) {
+	public static <T extends @Nullable Object> SingletonSupplier<T> of(Supplier<T> supplier) {
 		return new SingletonSupplier<>(supplier);
 	}
 
@@ -162,7 +172,7 @@ public class SingletonSupplier<T> implements Supplier<@Nullable T> {
 	 * @return the singleton supplier, or {@code null} if the instance supplier was {@code null}
 	 */
 	@Contract("null -> null; !null -> !null")
-	public static <T> @Nullable SingletonSupplier<T> ofNullable(@Nullable Supplier<? extends @Nullable T> supplier) {
+	public static <T extends @Nullable Object> @Nullable SingletonSupplier<T> ofNullable(@Nullable Supplier<T> supplier) {
 		return (supplier != null ? new SingletonSupplier<>(supplier) : null);
 	}
 

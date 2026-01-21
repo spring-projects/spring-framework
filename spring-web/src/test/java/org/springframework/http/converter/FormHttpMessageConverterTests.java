@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,6 +40,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.http.StreamingHttpOutputMessage;
 import org.springframework.http.converter.support.AllEncompassingFormHttpMessageConverter;
 import org.springframework.http.converter.xml.SourceHttpMessageConverter;
 import org.springframework.util.LinkedMultiValueMap;
@@ -49,6 +50,7 @@ import org.springframework.web.testfixture.http.MockHttpOutputMessage;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.http.MediaType.MULTIPART_FORM_DATA;
@@ -133,6 +135,27 @@ class FormHttpMessageConverterTests {
 	}
 
 	@Test
+	void readInvalidFormWithValueThatWontUrlDecode() {
+		//java.net.URLDecoder doesn't like negative integer values after a % character
+		String body = "name+1=value+1&name+2=value+2%" + ((char)-1);
+		assertInvalidFormIsRejectedWithSpecificException(body);
+	}
+
+	@Test
+	void readInvalidFormWithNameThatWontUrlDecode() {
+		//java.net.URLDecoder doesn't like negative integer values after a % character
+		String body = "name+1=value+1&name+2%" + ((char)-1) + "=value+2";
+		assertInvalidFormIsRejectedWithSpecificException(body);
+	}
+
+	@Test
+	void readInvalidFormWithNameWithNoValueThatWontUrlDecode() {
+		//java.net.URLDecoder doesn't like negative integer values after a % character
+		String body = "name+1=value+1&name+2%" + ((char)-1);
+		assertInvalidFormIsRejectedWithSpecificException(body);
+	}
+
+	@Test
 	void writeForm() throws IOException {
 		MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
 		body.set("name 1", "value 1");
@@ -182,7 +205,7 @@ class FormHttpMessageConverterTests {
 		parameters.put("charset", UTF_8.name());
 		parameters.put("foo", "bar");
 
-		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
+		StreamingMockHttpOutputMessage outputMessage = new StreamingMockHttpOutputMessage();
 		this.converter.write(parts, new MediaType("multipart", "form-data", parameters), outputMessage);
 
 		final MediaType contentType = outputMessage.getHeaders().getContentType();
@@ -226,6 +249,8 @@ class FormHttpMessageConverterTests {
 		item = items.get(5);
 		assertThat(item.getFieldName()).isEqualTo("json");
 		assertThat(item.getContentType()).isEqualTo("application/json");
+
+		assertThat(outputMessage.wasRepeatable()).isTrue();
 	}
 
 	@Test
@@ -264,7 +289,7 @@ class FormHttpMessageConverterTests {
 		parameters.put("charset", UTF_8.name());
 		parameters.put("foo", "bar");
 
-		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
+		StreamingMockHttpOutputMessage outputMessage = new StreamingMockHttpOutputMessage();
 		this.converter.write(parts, new MediaType("multipart", "form-data", parameters), outputMessage);
 
 		final MediaType contentType = outputMessage.getHeaders().getContentType();
@@ -308,6 +333,8 @@ class FormHttpMessageConverterTests {
 		item = items.get(5);
 		assertThat(item.getFieldName()).isEqualTo("xml");
 		assertThat(item.getContentType()).isEqualTo("text/xml");
+
+		assertThat(outputMessage.wasRepeatable()).isFalse();
 	}
 
 	@Test  // SPR-13309
@@ -408,6 +435,38 @@ class FormHttpMessageConverterTests {
 	private void assertCannotWrite(MediaType mediaType) {
 		Class<?> clazz = MultiValueMap.class;
 		assertThat(this.converter.canWrite(clazz, mediaType)).as(clazz.getSimpleName() + " : " + mediaType).isFalse();
+	}
+
+	private void assertInvalidFormIsRejectedWithSpecificException(String body) {
+		MockHttpInputMessage inputMessage = new MockHttpInputMessage(body.getBytes(StandardCharsets.ISO_8859_1));
+		inputMessage.getHeaders().setContentType(
+				new MediaType("application", "x-www-form-urlencoded", StandardCharsets.ISO_8859_1));
+
+		assertThatThrownBy(() -> this.converter.read(null, inputMessage))
+				.isInstanceOf(HttpMessageNotReadableException.class)
+				.hasCauseInstanceOf(IllegalArgumentException.class)
+				.hasMessage("Could not decode HTTP form payload");
+	}
+
+
+	private static class StreamingMockHttpOutputMessage extends MockHttpOutputMessage implements StreamingHttpOutputMessage {
+
+		private boolean repeatable;
+
+		public boolean wasRepeatable() {
+			return this.repeatable;
+		}
+
+		@Override
+		public void setBody(Body body) {
+			try {
+				this.repeatable = body.repeatable();
+				body.writeTo(getBody());
+			}
+			catch (IOException ex) {
+				throw new RuntimeException(ex);
+			}
+		}
 	}
 
 

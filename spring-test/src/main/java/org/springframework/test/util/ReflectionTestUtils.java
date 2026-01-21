@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -75,7 +75,7 @@ public abstract class ReflectionTestUtils {
 
 	private static final Log logger = LogFactory.getLog(ReflectionTestUtils.class);
 
-	private static final boolean springAopPresent = ClassUtils.isPresent(
+	private static final boolean SPRING_AOP_PRESENT = ClassUtils.isPresent(
 			"org.springframework.aop.framework.Advised", ReflectionTestUtils.class.getClassLoader());
 
 
@@ -180,7 +180,7 @@ public abstract class ReflectionTestUtils {
 		Assert.isTrue(targetObject != null || targetClass != null,
 				"Either targetObject or targetClass for the field must be specified");
 
-		if (targetObject != null && springAopPresent) {
+		if (targetObject != null && SPRING_AOP_PRESENT) {
 			targetObject = AopTestUtils.getUltimateTargetObject(targetObject);
 		}
 		if (targetClass == null) {
@@ -263,7 +263,7 @@ public abstract class ReflectionTestUtils {
 		Assert.isTrue(targetObject != null || targetClass != null,
 			"Either targetObject or targetClass for the field must be specified");
 
-		if (targetObject != null && springAopPresent) {
+		if (targetObject != null && SPRING_AOP_PRESENT) {
 			targetObject = AopTestUtils.getUltimateTargetObject(targetObject);
 		}
 		if (targetClass == null) {
@@ -352,7 +352,7 @@ public abstract class ReflectionTestUtils {
 					safeToString(target), value));
 		}
 
-		if (springAopPresent) {
+		if (SPRING_AOP_PRESENT) {
 			// If the target is a CGLIB proxy which does not intercept the method, invoke the
 			// method on the ultimate target.
 			if (isCglibProxyThatDoesNotInterceptMethod(target, method)) {
@@ -406,7 +406,7 @@ public abstract class ReflectionTestUtils {
 					"Could not find getter method '%s' on %s", getterMethodName, safeToString(target)));
 		}
 
-		if (springAopPresent) {
+		if (SPRING_AOP_PRESENT) {
 			// If the target is a CGLIB proxy which does not intercept the method, invoke the
 			// method on the ultimate target.
 			if (isCglibProxyThatDoesNotInterceptMethod(target, method)) {
@@ -500,7 +500,7 @@ public abstract class ReflectionTestUtils {
 			methodInvoker.setArguments(args);
 			methodInvoker.prepare();
 
-			if (targetObject != null && springAopPresent) {
+			if (targetObject != null && SPRING_AOP_PRESENT) {
 				// If the target is a CGLIB proxy which does not intercept the method, invoke the
 				// method on the ultimate target.
 				if (isCglibProxyThatDoesNotInterceptMethod(targetObject, methodInvoker.getPreparedMethod())) {

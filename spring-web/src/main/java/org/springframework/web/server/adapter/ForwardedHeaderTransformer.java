@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,6 +55,7 @@ import org.springframework.web.util.UriComponents;
  *
  * @author Rossen Stoyanchev
  * @author Sebastien Deleuze
+ * @author Mengqi Xu
  * @since 5.1
  * @see <a href="https://tools.ietf.org/html/rfc7239">https://tools.ietf.org/html/rfc7239</a>
  * @see <a href="https://docs.spring.io/spring-framework/reference/web/webflux/reactive-spring.html#webflux-forwarded-headers">Forwarded Headers</a>
@@ -118,6 +119,11 @@ public class ForwardedHeaderTransformer implements Function<ServerHttpRequest, S
 				remoteAddress = ForwardedHeaderUtils.parseForwardedFor(originalUri, headers, remoteAddress);
 				if (remoteAddress != null) {
 					builder.remoteAddress(remoteAddress);
+				}
+				InetSocketAddress localAddress = request.getLocalAddress();
+				localAddress = ForwardedHeaderUtils.parseForwardedBy(originalUri, headers, localAddress);
+				if (localAddress != null) {
+					builder.localAddress(localAddress);
 				}
 			}
 			removeForwardedHeaders(builder);

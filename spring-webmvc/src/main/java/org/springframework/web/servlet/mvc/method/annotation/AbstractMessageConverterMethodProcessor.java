@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ package org.springframework.web.servlet.mvc.method.annotation;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -93,14 +92,14 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 	private static final List<MediaType> ALL_APPLICATION_MEDIA_TYPES =
 			List.of(MediaType.ALL, new MediaType("application"));
 
+	private static final List<MediaType> PROBLEM_MEDIA_TYPES =
+			List.of(MediaType.APPLICATION_PROBLEM_JSON, MediaType.APPLICATION_PROBLEM_XML);
+
 	private static final Type RESOURCE_REGION_LIST_TYPE =
 			new ParameterizedTypeReference<List<ResourceRegion>>() {}.getType();
 
 
 	private final ContentNegotiationManager contentNegotiationManager;
-
-	private final List<MediaType> problemMediaTypes =
-			Arrays.asList(MediaType.APPLICATION_PROBLEM_JSON, MediaType.APPLICATION_PROBLEM_XML);
 
 	private final List<ErrorResponse.Interceptor> errorResponseInterceptors = new ArrayList<>();
 
@@ -108,14 +107,14 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 
 
 	/**
-	 * Constructor with list of converters only.
+	 * Construct with the provided list of converters only.
 	 */
 	protected AbstractMessageConverterMethodProcessor(List<HttpMessageConverter<?>> converters) {
 		this(converters, null, null);
 	}
 
 	/**
-	 * Constructor with list of converters and ContentNegotiationManager.
+	 * Construct with the provided list of converters and {@link ContentNegotiationManager}.
 	 */
 	protected AbstractMessageConverterMethodProcessor(List<HttpMessageConverter<?>> converters,
 			@Nullable ContentNegotiationManager contentNegotiationManager) {
@@ -124,9 +123,8 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 	}
 
 	/**
-	 * Variant of {@link #AbstractMessageConverterMethodProcessor(List)}
-	 * with an additional {@link ContentNegotiationManager} for return
-	 * value handling.
+	 * Variant of {@link #AbstractMessageConverterMethodProcessor(List, ContentNegotiationManager)}
+	 * with an additional {@code requestResponseBodyAdvice} list for return value handling.
 	 */
 	protected AbstractMessageConverterMethodProcessor(List<HttpMessageConverter<?>> converters,
 			@Nullable ContentNegotiationManager manager, @Nullable List<Object> requestResponseBodyAdvice) {
@@ -136,8 +134,7 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 
 	/**
 	 * Variant of {@link #AbstractMessageConverterMethodProcessor(List, ContentNegotiationManager, List)}
-	 * with additional list of {@link ErrorResponse.Interceptor}s for return
-	 * value handling.
+	 * with additional list of {@link ErrorResponse.Interceptor}s for return value handling.
 	 * @since 6.2
 	 */
 	protected AbstractMessageConverterMethodProcessor(List<HttpMessageConverter<?>> converters,
@@ -154,7 +151,7 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 
 
 	/**
-	 * Creates a new {@link HttpOutputMessage} from the given {@link NativeWebRequest}.
+	 * Create a new {@link HttpOutputMessage} from the given {@link NativeWebRequest}.
 	 * @param webRequest the web request to create an output message from
 	 * @return the output message
 	 */
@@ -192,10 +189,10 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 	}
 
 	/**
-	 * Writes the given return type to the given output message.
+	 * Write the given return type to the given output message.
 	 * @param value the value to write to the output message
 	 * @param returnType the type of the value
-	 * @param inputMessage the input messages. Used to inspect the {@code Accept} header.
+	 * @param inputMessage the input messages, used to inspect the {@code Accept} header
 	 * @param outputMessage the output message to write to
 	 * @throws IOException thrown in case of I/O errors
 	 * @throws HttpMediaTypeNotAcceptableException thrown when the conditions indicated
@@ -280,7 +277,7 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 
 			// For ProblemDetail, fall back on RFC 9457 format
 			if (compatibleMediaTypes.isEmpty() && ProblemDetail.class.isAssignableFrom(valueType)) {
-				determineCompatibleMediaTypes(this.problemMediaTypes, producibleTypes, compatibleMediaTypes);
+				determineCompatibleMediaTypes(PROBLEM_MEDIA_TYPES, producibleTypes, compatibleMediaTypes);
 			}
 
 			if (compatibleMediaTypes.isEmpty()) {
@@ -324,7 +321,7 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 					}
 				}
 				else if (converter instanceof SmartHttpMessageConverter smartConverter) {
-					targetResolvableType = getNestedTypeIfNeeded(ResolvableType.forMethodParameter(returnType));
+					targetResolvableType = getNestedTypeIfNeeded(ResolvableType.forType(targetType));
 					if (smartConverter.canWrite(targetResolvableType, valueType, selectedMediaType)) {
 						converterTypeToUse = ConverterType.SMART;
 					}
@@ -343,7 +340,9 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 						switch (converterTypeToUse) {
 							case BASE -> converter.write(body, selectedMediaType, outputMessage);
 							case GENERIC -> ((GenericHttpMessageConverter) converter).write(body, targetType, selectedMediaType, outputMessage);
-							case SMART -> ((SmartHttpMessageConverter) converter).write(body, targetResolvableType, selectedMediaType, outputMessage, null);
+							case SMART -> ((SmartHttpMessageConverter) converter).write(body, targetResolvableType,
+									selectedMediaType, outputMessage, getAdvice().determineWriteHints(body, returnType,
+											selectedMediaType, (Class<? extends HttpMessageConverter<?>>) converter.getClass()));
 						}
 					}
 					else {

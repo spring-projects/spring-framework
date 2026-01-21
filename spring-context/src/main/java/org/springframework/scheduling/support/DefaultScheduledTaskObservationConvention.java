@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,8 +48,8 @@ public class DefaultScheduledTaskObservationConvention implements ScheduledTaskO
 
 	@Override
 	public String getContextualName(ScheduledTaskObservationContext context) {
-		return "task " + StringUtils.uncapitalize(context.getTargetClass().getSimpleName())
-				+ "." + context.getMethod().getName();
+		return "task " + StringUtils.uncapitalize(context.getTargetClass().getSimpleName()) +
+				"." + context.getMethod().getName();
 	}
 
 	@Override

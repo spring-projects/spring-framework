@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -147,7 +147,12 @@ public class HandlerMethodValidationException extends ResponseStatusException im
 			}
 			RequestBody requestBody = param.getParameterAnnotation(RequestBody.class);
 			if (requestBody != null) {
-				visitor.requestBody(requestBody, asErrors(result));
+				if (result instanceof ParameterErrors errors) {
+					visitor.requestBody(requestBody, errors);
+				}
+				else {
+					visitor.requestBodyValidationResult(requestBody, result);
+				}
 				continue;
 			}
 			RequestHeader requestHeader = param.getParameterAnnotation(RequestHeader.class);
@@ -216,6 +221,20 @@ public class HandlerMethodValidationException extends ResponseStatusException im
 		 * @param errors the validation error
 		 */
 		void requestBody(RequestBody requestBody, ParameterErrors errors);
+
+		/**
+		 * An additional {@code @RequestBody} callback for validation failures
+		 * for constraints on the method parameter. For example:
+		 * <pre class="code">
+		 * &#064;RequestBody List&lt;&#064;NotEmpty String&gt; ids
+		 * </pre>
+		 * Handle results for {@code @RequestBody} method parameters.
+		 * @param requestBody the annotation declared on the parameter
+		 * @param result the validation result
+		 * @since 6.2.4
+		 */
+		default void requestBodyValidationResult(RequestBody requestBody, ParameterValidationResult result) {
+		}
 
 		/**
 		 * Handle results for {@code @RequestHeader} method parameters.

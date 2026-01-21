@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,15 +53,15 @@ import org.jspecify.annotations.Nullable;
  * {@link org.springframework.test.context.junit.jupiter.web.SpringJUnitWebConfig @SpringJUnitWebConfig}
  * or various test-related annotations from Spring Boot Test.
  *
- * <p>As of Spring Framework 5.3, this annotation will be inherited from an
- * enclosing test class by default. See
- * {@link NestedTestConfiguration @NestedTestConfiguration} for details.
+ * <p>This annotation will be inherited from an enclosing test class by default.
+ * See {@link NestedTestConfiguration @NestedTestConfiguration} for details.
  *
  * @author Sam Brannen
  * @since 5.2
  * @see org.springframework.beans.factory.annotation.Autowired @Autowired
  * @see jakarta.inject.Inject @jakarta.inject.Inject
  * @see org.springframework.test.context.junit.jupiter.SpringExtension SpringExtension
+ * @see org.springframework.test.context.junit.jupiter.SpringExtensionConfig @SpringExtensionConfig
  * @see org.springframework.test.context.junit.jupiter.SpringJUnitConfig @SpringJUnitConfig
  * @see org.springframework.test.context.junit.jupiter.web.SpringJUnitWebConfig @SpringJUnitWebConfig
  * @see ContextConfiguration @ContextConfiguration
@@ -88,7 +88,7 @@ public @interface TestConstructor {
 	 * <p>May alternatively be configured via the
 	 * {@link org.springframework.core.SpringProperties SpringProperties}
 	 * mechanism.
-	 * <p>As of Spring Framework 5.3, this property may also be configured as a
+	 * <p>This property may also be configured as a
 	 * <a href="https://junit.org/junit5/docs/current/user-guide/#running-tests-config-params">JUnit
 	 * Platform configuration parameter</a>.
 	 * @see #autowireMode

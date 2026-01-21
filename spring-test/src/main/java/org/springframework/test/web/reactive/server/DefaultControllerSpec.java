@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.validation.Validator;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolverBuilder;
+import org.springframework.web.reactive.config.ApiVersionConfigurer;
 import org.springframework.web.reactive.config.BlockingExecutionConfigurer;
 import org.springframework.web.reactive.config.CorsRegistry;
 import org.springframework.web.reactive.config.DelegatingWebFluxConfiguration;
@@ -119,6 +120,12 @@ class DefaultControllerSpec extends AbstractMockServerSpec<WebTestClient.Control
 	}
 
 	@Override
+	public WebTestClient.ControllerSpec apiVersioning(Consumer<ApiVersionConfigurer> configurer) {
+		this.configurer.versionConsumer = configurer;
+		return this;
+	}
+
+	@Override
 	public DefaultControllerSpec viewResolvers(Consumer<ViewResolverRegistry> consumer) {
 		this.configurer.viewResolversConsumer = consumer;
 		return this;
@@ -167,6 +174,8 @@ class DefaultControllerSpec extends AbstractMockServerSpec<WebTestClient.Control
 		private @Nullable Consumer<FormatterRegistry> formattersConsumer;
 
 		private @Nullable Validator validator;
+
+		private @Nullable Consumer<ApiVersionConfigurer> versionConsumer;
 
 		private @Nullable Consumer<ViewResolverRegistry> viewResolversConsumer;
 
@@ -217,6 +226,13 @@ class DefaultControllerSpec extends AbstractMockServerSpec<WebTestClient.Control
 		@Override
 		public @Nullable Validator getValidator() {
 			return this.validator;
+		}
+
+		@Override
+		public void configureApiVersioning(ApiVersionConfigurer configurer) {
+			if (this.versionConsumer != null) {
+				this.versionConsumer.accept(configurer);
+			}
 		}
 
 		@Override

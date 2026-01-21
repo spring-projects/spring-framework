@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,7 +40,7 @@ import org.xml.sax.XMLReader;
 
 /**
  * Convenience methods for working with the StAX API. Partly historic due to JAXP 1.3
- * compatibility; as of Spring 4.0, relying on JAXP 1.4 as included in JDK 1.6 and higher.
+ * compatibility; relying on JAXP 1.4 as included in JDK 1.6 and higher.
  *
  * <p>In particular, methods for using StAX ({@code javax.xml.stream}) in combination with
  * the TrAX API ({@code javax.xml.transform}), and converting StAX readers/writers into SAX

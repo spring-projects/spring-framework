@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,11 +49,24 @@ class KotlinSerializationCborEncoderTests : AbstractEncoderTests<KotlinSerializa
 		assertThat(encoder.canEncode(pojoType, MediaType.APPLICATION_CBOR)).isTrue()
 		assertThat(encoder.canEncode(pojoType, null)).isTrue()
 
-		assertThat(encoder.canEncode(ResolvableType.forClassWithGenerics(List::class.java, Int::class.java), MediaType.APPLICATION_CBOR)).isTrue()
+		assertThat(encoder.canEncode(ResolvableType.forClassWithGenerics(List::class.java, Int::class.java), MediaType.APPLICATION_CBOR)).isFalse()
 		assertThat(encoder.canEncode(ResolvableType.forClassWithGenerics(List::class.java, Ordered::class.java), MediaType.APPLICATION_CBOR)).isFalse()
 		assertThat(encoder.canEncode(ResolvableType.forClassWithGenerics(List::class.java, Pojo::class.java), MediaType.APPLICATION_CBOR)).isTrue()
-		assertThat(encoder.canEncode(ResolvableType.forClassWithGenerics(ArrayList::class.java, Int::class.java), MediaType.APPLICATION_CBOR)).isTrue()
-		assertThat(encoder.canEncode(ResolvableType.forClassWithGenerics(ArrayList::class.java, Int::class.java), MediaType.APPLICATION_PDF)).isFalse()
+		assertThat(encoder.canEncode(ResolvableType.forClassWithGenerics(ArrayList::class.java, Int::class.java), MediaType.APPLICATION_CBOR)).isFalse()
+	}
+
+	@Test
+	fun canEncodeForAllTypes() {
+		val encoderForAllTypes = KotlinSerializationCborEncoder { true }
+
+		val pojoType = ResolvableType.forClass(Pojo::class.java)
+		assertThat(encoderForAllTypes.canEncode(pojoType, MediaType.APPLICATION_CBOR)).isTrue()
+		assertThat(encoderForAllTypes.canEncode(pojoType, null)).isTrue()
+
+		assertThat(encoderForAllTypes.canEncode(ResolvableType.forClassWithGenerics(List::class.java, Int::class.java), MediaType.APPLICATION_CBOR)).isTrue()
+		assertThat(encoderForAllTypes.canEncode(ResolvableType.forClassWithGenerics(List::class.java, Ordered::class.java), MediaType.APPLICATION_CBOR)).isTrue()
+		assertThat(encoderForAllTypes.canEncode(ResolvableType.forClassWithGenerics(List::class.java, Pojo::class.java), MediaType.APPLICATION_CBOR)).isTrue()
+		assertThat(encoderForAllTypes.canEncode(ResolvableType.forClassWithGenerics(ArrayList::class.java, Int::class.java), MediaType.APPLICATION_CBOR)).isTrue()
 	}
 
 	@Test
@@ -66,11 +79,11 @@ class KotlinSerializationCborEncoderTests : AbstractEncoderTests<KotlinSerializa
 				pojo2,
 				pojo3
 		)
-		val pojoBytes = Cbor.Default.encodeToByteArray(arrayOf(pojo1, pojo2, pojo3))
-		testEncode(input, Pojo::class.java) { step: FirstStep<DataBuffer?> ->
+		val pojoBytes = Cbor.encodeToByteArray(arrayOf(pojo1, pojo2, pojo3))
+		testEncode(input, Pojo::class.java) { step: FirstStep<DataBuffer> ->
 			step
 				.consumeNextWith(expectBytes(pojoBytes)
-					.andThen { dataBuffer: DataBuffer? -> DataBufferUtils.release(dataBuffer) })
+					.andThen { dataBuffer: DataBuffer -> DataBufferUtils.release(dataBuffer) })
 				.verifyComplete()
 		}
 	}
@@ -79,7 +92,7 @@ class KotlinSerializationCborEncoderTests : AbstractEncoderTests<KotlinSerializa
 	fun encodeMono() {
 		val pojo = Pojo("foo", "bar")
 		val input = Mono.just(pojo)
-		testEncode(input, Pojo::class.java) { step: FirstStep<DataBuffer?> ->
+		testEncode(input, Pojo::class.java) { step: FirstStep<DataBuffer> ->
 			step
 				.consumeNextWith(expectBytes(Cbor.Default.encodeToByteArray(pojo))
 					.andThen { dataBuffer: DataBuffer? -> DataBufferUtils.release(dataBuffer) })
@@ -93,11 +106,18 @@ class KotlinSerializationCborEncoderTests : AbstractEncoderTests<KotlinSerializa
 		assertThat(encoder.canEncode(ResolvableType.forClass(Pojo::class.java), MediaType.APPLICATION_XML)).isFalse()
 		val sseType = ResolvableType.forClass(ServerSentEvent::class.java)
 		assertThat(encoder.canEncode(sseType, MediaType.APPLICATION_CBOR)).isFalse()
-		assertThat(encoder.canEncode(ResolvableType.forClass(Ordered::class.java), MediaType.APPLICATION_CBOR)).isFalse()
+		assertThat(encoder.canEncode(ResolvableType.forClassWithGenerics(List::class.java, OrderedImpl::class.java), MediaType.APPLICATION_CBOR)).isFalse()
+		assertThat(encoder.canEncode(ResolvableType.forClassWithGenerics(ArrayList::class.java, Int::class.java), MediaType.APPLICATION_PDF)).isFalse()
 	}
 
 
 	@Serializable
 	data class Pojo(val foo: String, val bar: String, val pojo: Pojo? = null)
+
+	class OrderedImpl : Ordered {
+		override fun getOrder(): Int {
+			return 0
+		}
+	}
 
 }

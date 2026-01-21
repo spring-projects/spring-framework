@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,9 @@
 
 package org.springframework.test.web.servlet.samples.client.standalone.resultmatches;
 
-import java.util.Arrays;
+import java.util.List;
 
+import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.http.HttpHeaders;
@@ -100,8 +101,8 @@ public class JsonPathAssertionTests {
 				.expectStatus().isOk()
 				.expectHeader().contentType(MediaType.APPLICATION_JSON)
 				.expectBody()
-				.jsonPath("$.composers[0].name").value(equalTo("Johann Sebastian Bach"))
-				.jsonPath("$.performers[1].name").value(equalTo("Yehudi Menuhin"));
+				.jsonPath("$.composers[0].name").value(v -> MatcherAssert.assertThat(v, equalTo("Johann Sebastian Bach")))
+				.jsonPath("$.performers[1].name").value(v -> MatcherAssert.assertThat(v, equalTo("Yehudi Menuhin")));
 	}
 
 	@Test
@@ -109,10 +110,10 @@ public class JsonPathAssertionTests {
 		client.get().uri("/music/people")
 				.exchange()
 				.expectBody()
-				.jsonPath("$.composers[0].name").value(startsWith("Johann"))
-				.jsonPath("$.performers[0].name").value(endsWith("Ashkenazy"))
-				.jsonPath("$.performers[1].name").value(containsString("di Me"))
-				.jsonPath("$.composers[1].name").value(is(in(Arrays.asList("Johann Sebastian Bach", "Johannes Brahms"))));
+				.jsonPath("$.composers[0].name").value(String.class, v -> MatcherAssert.assertThat(v, startsWith("Johann")))
+				.jsonPath("$.performers[0].name").value(String.class, v -> MatcherAssert.assertThat(v, endsWith("Ashkenazy")))
+				.jsonPath("$.performers[1].name").value(String.class, v -> MatcherAssert.assertThat(v, containsString("di Me")))
+				.jsonPath("$.composers[1].name").value(v -> MatcherAssert.assertThat(v, is(in(List.of("Johann Sebastian Bach", "Johannes Brahms")))));
 	}
 
 	@Test
@@ -120,10 +121,10 @@ public class JsonPathAssertionTests {
 		client.get().uri("/music/people")
 				.exchange()
 				.expectBody()
-				.jsonPath("$.composers[0].name").value(startsWith("Johann"))
-				.jsonPath("$.performers[0].name").value(endsWith("Ashkenazy"))
-				.jsonPath("$.performers[1].name").value(containsString("di Me"))
-				.jsonPath("$.composers[1].name").value(is(in(Arrays.asList("Johann Sebastian Bach", "Johannes Brahms"))));
+				.jsonPath("$.composers[0].name").value(String.class, v -> MatcherAssert.assertThat(v, startsWith("Johann")))
+				.jsonPath("$.performers[0].name").value(String.class, v -> MatcherAssert.assertThat(v, endsWith("Ashkenazy")))
+				.jsonPath("$.performers[1].name").value(String.class, v -> MatcherAssert.assertThat(v, containsString("di Me")))
+				.jsonPath("$.composers[1].name").value(v -> MatcherAssert.assertThat(v, is(in(List.of("Johann Sebastian Bach", "Johannes Brahms")))));
 	}
 
 

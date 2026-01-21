@@ -16,6 +16,3 @@ manage subscriptions and broadcast messages.
 routed to them based on the STOMP destination header versus handling raw WebSocket messages
 with a single `WebSocketHandler` for a given connection.
 * You can use Spring Security to secure messages based on STOMP destinations and message types.
-
-
-

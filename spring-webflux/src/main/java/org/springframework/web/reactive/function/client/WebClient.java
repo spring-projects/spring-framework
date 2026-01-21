@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,6 +45,8 @@ import org.springframework.http.client.reactive.ClientHttpRequest;
 import org.springframework.http.client.reactive.ClientHttpResponse;
 import org.springframework.http.codec.ClientCodecConfigurer;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.ApiVersionFormatter;
+import org.springframework.web.client.ApiVersionInserter;
 import org.springframework.web.reactive.function.BodyExtractor;
 import org.springframework.web.reactive.function.BodyInserter;
 import org.springframework.web.reactive.function.BodyInserters;
@@ -249,6 +251,27 @@ public interface WebClient {
 		 * @param cookiesConsumer a function that consumes the cookies map
 		 */
 		Builder defaultCookies(Consumer<MultiValueMap<String, String>> cookiesConsumer);
+
+		/**
+		 * Global option to specify an API version to add to every request,
+		 * if not already set.
+		 * @param version the version to use
+		 * @return this builder
+		 * @since 7.0
+		 */
+		Builder defaultApiVersion(Object version);
+
+		/**
+		 * Configure an {@link ApiVersionInserter} to abstract how an API version
+		 * specified via {@link RequestHeadersSpec#apiVersion(Object)}
+		 * is inserted into the request.
+		 * <p>{@code ApiVersionInserter} exposes shortcut methods for several
+		 * built-in inserter implementation types. See the class-level Javadoc
+		 * of {@link ApiVersionInserter} for a list of choices.
+		 * @param apiVersionInserter the inserter to use
+		 * @since 7.0
+		 */
+		Builder apiVersionInserter(@Nullable ApiVersionInserter apiVersionInserter);
 
 		/**
 		 * Provide a consumer to customize every request being built.
@@ -474,6 +497,22 @@ public interface WebClient {
 		 * @return this builder
 		 */
 		S headers(Consumer<HttpHeaders> headersConsumer);
+
+		/**
+		 * Set an API version for the request. The version is inserted into the
+		 * request through the {@link Builder#apiVersionInserter(ApiVersionInserter)
+		 * configured} {@code ApiVersionInserter}.
+		 * <p>If no version is set, the
+		 * {@link Builder#defaultApiVersion(Object) defaultApiVersion} is used,
+		 * if configured.
+		 * <p>If {@code null} is passed, then an API version is not inserted
+		 * irrespective of default version settings.
+		 * @param version the API version for the request; this can be a String
+		 * or some Object that can be formatted the inserter, e.g. through an
+		 * {@link ApiVersionFormatter}.
+		 * @since 7.0
+		 */
+		S apiVersion(@Nullable Object version);
 
 		/**
 		 * Set the attribute with the given name to the given value.
@@ -808,7 +847,7 @@ public interface WebClient {
 		<T> Flux<T> bodyToFlux(Class<T> elementClass);
 
 		/**
-		 * Variant of {@link #bodyToMono(Class)} with a {@link ParameterizedTypeReference}.
+		 * Variant of {@link #bodyToFlux(Class)} with a {@link ParameterizedTypeReference}.
 		 * @param elementTypeRef the type of element to decode to
 		 * @param <T> the body element type
 		 * @return the decoded body
@@ -828,7 +867,7 @@ public interface WebClient {
 		<T> Mono<ResponseEntity<T>> toEntity(Class<T> bodyClass);
 
 		/**
-		 * Variant of {@link #bodyToMono(Class)} with a {@link ParameterizedTypeReference}.
+		 * Variant of {@link #toEntity(Class)} with a {@link ParameterizedTypeReference}.
 		 * @param bodyTypeReference the expected response body type
 		 * @param <T> the response body type
 		 * @return the {@code ResponseEntity} with the decoded body
@@ -850,7 +889,7 @@ public interface WebClient {
 		<T> Mono<ResponseEntity<List<T>>> toEntityList(Class<T> elementClass);
 
 		/**
-		 * Variant of {@link #toEntity(Class)} with a {@link ParameterizedTypeReference}.
+		 * Variant of {@link #toEntityList(Class)} with a {@link ParameterizedTypeReference}.
 		 * @param elementTypeRef the type of element to decode the target Flux to
 		 * @param <T> the body element type
 		 * @return the {@code ResponseEntity}

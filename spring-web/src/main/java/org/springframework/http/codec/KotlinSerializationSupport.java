@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,10 +19,9 @@ package org.springframework.http.codec;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import java.util.function.Predicate;
 
 import kotlin.reflect.KFunction;
 import kotlin.reflect.KType;
@@ -31,8 +30,6 @@ import kotlin.reflect.jvm.ReflectJvmMapping;
 import kotlinx.serialization.KSerializer;
 import kotlinx.serialization.SerialFormat;
 import kotlinx.serialization.SerializersKt;
-import kotlinx.serialization.descriptors.PolymorphicKind;
-import kotlinx.serialization.descriptors.SerialDescriptor;
 import org.jspecify.annotations.Nullable;
 
 import org.springframework.core.KotlinDetector;
@@ -45,6 +42,12 @@ import org.springframework.util.MimeType;
 /**
  * Base class providing support methods for encoding and decoding with Kotlin
  * serialization.
+ *
+ * <p>As of Spring Framework 7.0, by default it only handles types annotated with
+ * {@link kotlinx.serialization.Serializable @Serializable} at type or generics level
+ * since it allows combined usage with other general purpose decoders without conflicts.
+ * Alternative constructors with a {@code Predicate<ResolvableType>} parameter can be used
+ * to customize this behavior.
  *
  * @author Sebastien Deleuze
  * @author Iain Henderson
@@ -63,12 +66,29 @@ public abstract class KotlinSerializationSupport<T extends SerialFormat> {
 
 	private final List<MimeType> supportedMimeTypes;
 
+	private final Predicate<ResolvableType> typePredicate;
+
 	/**
-	 * Creates a new instance of this support class with the given format
-	 * and supported mime types.
+	 * Creates a new instance with the given format and supported mime types
+	 * which only handle types annotated with
+	 * {@link kotlinx.serialization.Serializable @Serializable} at type or
+	 * generics level.
 	 */
 	protected KotlinSerializationSupport(T format, MimeType... supportedMimeTypes) {
 		this.format = format;
+		this.typePredicate = KotlinDetector::hasSerializableAnnotation;
+		this.supportedMimeTypes = Arrays.asList(supportedMimeTypes);
+	}
+
+	/**
+	 * Creates a new instance with the given format and supported mime types
+	 * which only encode types for which the specified predicate returns
+	 * {@code true}.
+	 * @since 7.0
+	 */
+	protected KotlinSerializationSupport(T format, Predicate<ResolvableType> typePredicate, MimeType... supportedMimeTypes) {
+		this.format = format;
+		this.typePredicate = typePredicate;
 		this.supportedMimeTypes = Arrays.asList(supportedMimeTypes);
 	}
 
@@ -94,15 +114,10 @@ public abstract class KotlinSerializationSupport<T extends SerialFormat> {
 	 * @return {@code true} if {@code type} can be serialized; false otherwise
 	 */
 	protected final boolean canSerialize(ResolvableType type, @Nullable MimeType mimeType) {
-		KSerializer<Object> serializer = serializer(type);
-		if (serializer == null) {
+		if (!this.typePredicate.test(type) || ResolvableType.NONE.equals(type)) {
 			return false;
 		}
-		else {
-			return (supports(mimeType) && !String.class.isAssignableFrom(type.toClass()) &&
-					!ServerSentEvent.class.isAssignableFrom(type.toClass()));
-		}
-
+		return serializer(type) != null && supports(mimeType) && !ServerSentEvent.class.isAssignableFrom(type.toClass());
 	}
 
 	private boolean supports(@Nullable MimeType mimeType) {
@@ -132,24 +147,22 @@ public abstract class KotlinSerializationSupport<T extends SerialFormat> {
 			Assert.notNull(method, "Method must not be null");
 			if (KotlinDetector.isKotlinType(method.getDeclaringClass())) {
 				KFunction<?> function = ReflectJvmMapping.getKotlinFunction(method);
-				Assert.notNull(function, "Kotlin function must not be null");
-				KType type = (parameter.getParameterIndex() == -1 ? function.getReturnType() :
-						KCallables.getValueParameters(function).get(parameter.getParameterIndex()).getType());
-				KSerializer<Object> serializer = this.kTypeSerializerCache.get(type);
-				if (serializer == null) {
-					try {
-						serializer = SerializersKt.serializerOrNull(this.format.getSerializersModule(), type);
-					}
-					catch (IllegalArgumentException ignored) {
-					}
-					if (serializer != null) {
-						if (hasPolymorphism(serializer.getDescriptor(), new HashSet<>())) {
-							return null;
+				if (function != null) {
+					KType type = (parameter.getParameterIndex() == -1 ? function.getReturnType() :
+							KCallables.getValueParameters(function).get(parameter.getParameterIndex()).getType());
+					KSerializer<Object> serializer = this.kTypeSerializerCache.get(type);
+					if (serializer == null) {
+						try {
+							serializer = SerializersKt.serializerOrNull(this.format.getSerializersModule(), type);
 						}
-						this.kTypeSerializerCache.put(type, serializer);
+						catch (IllegalArgumentException ignored) {
+						}
+						if (serializer != null) {
+							this.kTypeSerializerCache.put(type, serializer);
+						}
 					}
+					return serializer;
 				}
-				return serializer;
 			}
 		}
 		Type type = resolvableType.getType();
@@ -161,27 +174,9 @@ public abstract class KotlinSerializationSupport<T extends SerialFormat> {
 			catch (IllegalArgumentException ignored) {
 			}
 			if (serializer != null) {
-				if (hasPolymorphism(serializer.getDescriptor(), new HashSet<>())) {
-					return null;
-				}
 				this.typeSerializerCache.put(type, serializer);
 			}
 		}
 		return serializer;
 	}
-
-	private static boolean hasPolymorphism(SerialDescriptor descriptor, Set<String> alreadyProcessed) {
-		alreadyProcessed.add(descriptor.getSerialName());
-		if (descriptor.getKind().equals(PolymorphicKind.OPEN.INSTANCE)) {
-			return true;
-		}
-		for (int i = 0 ; i < descriptor.getElementsCount() ; i++) {
-			SerialDescriptor elementDescriptor = descriptor.getElementDescriptor(i);
-			if (!alreadyProcessed.contains(elementDescriptor.getSerialName()) && hasPolymorphism(elementDescriptor, alreadyProcessed)) {
-				return true;
-			}
-		}
-		return false;
-	}
-
 }

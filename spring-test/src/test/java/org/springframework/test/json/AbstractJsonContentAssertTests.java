@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,6 @@ import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.assertj.core.api.AbstractObjectAssert;
 import org.assertj.core.api.AssertProvider;
 import org.assertj.core.api.InstanceOfAssertFactories;
@@ -46,14 +45,14 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.skyscreamer.jsonassert.JSONCompareResult;
 import org.skyscreamer.jsonassert.comparator.JSONComparator;
+import tools.jackson.databind.json.JsonMapper;
 
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
-import org.springframework.test.http.HttpMessageContentConverter;
+import org.springframework.http.converter.json.JacksonJsonHttpMessageConverter;
 import org.springframework.util.FileCopyUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -85,8 +84,8 @@ class AbstractJsonContentAssertTests {
 
 	private static final String DIFFERENT = loadJson("different.json");
 
-	private static final HttpMessageContentConverter jsonContentConverter = HttpMessageContentConverter.of(
-			new MappingJackson2HttpMessageConverter(new ObjectMapper()));
+	private static final JsonConverterDelegate jsonContentConverter =
+			JsonConverterDelegate.of(List.of(new JacksonJsonHttpMessageConverter(new JsonMapper())));
 
 	private static final JsonComparator comparator = JsonAssert.comparator(JsonCompareMode.LENIENT);
 
@@ -114,25 +113,16 @@ class AbstractJsonContentAssertTests {
 		}
 
 		@Test
-		void convertToIncompatibleTargetTypeShouldFail() {
-			AbstractJsonContentAssert<?> jsonAssert = assertThat(forJson(SIMPSONS, jsonContentConverter));
-			assertThatExceptionOfType(AssertionError.class)
-					.isThrownBy(() -> jsonAssert.convertTo(Member.class))
-					.withMessageContainingAll("To convert successfully to:",
-							Member.class.getName(), "But it failed:");
-		}
-
-		@Test
 		void convertUsingAssertFactory() {
 			assertThat(forJson(SIMPSONS, jsonContentConverter))
 					.convertTo(new FamilyAssertFactory())
 					.hasFamilyMember("Homer");
 		}
 
-		private AssertProvider<AbstractJsonContentAssert<?>> forJson(@Nullable String json,
-				@Nullable HttpMessageContentConverter jsonContentConverter) {
+		private AssertProvider<AbstractJsonContentAssert<?>> forJson(
+				@Nullable String json, @Nullable JsonConverterDelegate converter) {
 
-			return () -> new TestJsonContentAssert(json, jsonContentConverter);
+			return () -> new TestJsonContentAssert(json, converter);
 		}
 
 		private static class FamilyAssertFactory extends InstanceOfAssertFactory<Family, FamilyAssert> {
@@ -395,8 +385,8 @@ class AbstractJsonContentAssertTests {
 			return () -> new TestJsonContentAssert(json, null);
 		}
 
-		private AssertProvider<AbstractJsonContentAssert<?>> forJson(@Nullable String json, HttpMessageContentConverter jsonContentConverter) {
-			return () -> new TestJsonContentAssert(json, jsonContentConverter);
+		private AssertProvider<AbstractJsonContentAssert<?>> forJson(@Nullable String json, JsonConverterDelegate converter) {
+			return () -> new TestJsonContentAssert(json, converter);
 		}
 	}
 
@@ -895,8 +885,8 @@ class AbstractJsonContentAssertTests {
 
 	private static class TestJsonContentAssert extends AbstractJsonContentAssert<TestJsonContentAssert> {
 
-		public TestJsonContentAssert(@Nullable String json, @Nullable HttpMessageContentConverter jsonContentConverter) {
-			super((json != null ? new JsonContent(json, jsonContentConverter) : null), TestJsonContentAssert.class);
+		public TestJsonContentAssert(@Nullable String json, @Nullable JsonConverterDelegate converter) {
+			super((json != null ? new JsonContent(json, converter) : null), TestJsonContentAssert.class);
 		}
 	}
 

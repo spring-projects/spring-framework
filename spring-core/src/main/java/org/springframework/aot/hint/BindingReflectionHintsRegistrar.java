@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.RecordComponent;
 import java.lang.reflect.Type;
 import java.util.HashSet;
@@ -55,7 +56,7 @@ public class BindingReflectionHintsRegistrar {
 
 	private static final String JACKSON_ANNOTATION = "com.fasterxml.jackson.annotation.JacksonAnnotation";
 
-	private static final boolean jacksonAnnotationPresent =
+	private static final boolean JACKSON_ANNOTATION_PRESENT =
 			ClassUtils.isPresent(JACKSON_ANNOTATION, BindingReflectionHintsRegistrar.class.getClassLoader());
 
 
@@ -108,14 +109,15 @@ public class BindingReflectionHintsRegistrar {
 							registerPropertyHints(hints, seen, method, 0);
 						}
 						else if ((methodName.startsWith("get") && method.getParameterCount() == 0 && method.getReturnType() != void.class) ||
-								(methodName.startsWith("is") && method.getParameterCount() == 0
-										&& ClassUtils.resolvePrimitiveIfNecessary(method.getReturnType()) == Boolean.class)) {
+								(methodName.startsWith("is") && method.getParameterCount() == 0 &&
+										ClassUtils.resolvePrimitiveIfNecessary(method.getReturnType()) == Boolean.class)) {
 							registerPropertyHints(hints, seen, method, -1);
 						}
 					}
-					if (jacksonAnnotationPresent) {
+					if (JACKSON_ANNOTATION_PRESENT) {
 						registerJacksonHints(hints, clazz);
 					}
+					registerObjectToObjectConverterHints(hints, clazz);
 				}
 				if (KotlinDetector.isKotlinType(clazz)) {
 					KotlinDelegate.registerComponentHints(hints, clazz);
@@ -148,11 +150,31 @@ public class BindingReflectionHintsRegistrar {
 		String companionClassName = clazz.getCanonicalName() + KOTLIN_COMPANION_SUFFIX;
 		if (ClassUtils.isPresent(companionClassName, null)) {
 			Class<?> companionClass = ClassUtils.resolveClassName(companionClassName, null);
-			Method serializerMethod = ClassUtils.getMethodIfAvailable(companionClass, "serializer");
+			Method serializerMethod = ClassUtils.getMethodIfAvailable(companionClass, "serializer",
+					(Class<?>[]) null);
 			if (serializerMethod != null) {
 				hints.registerMethod(serializerMethod, ExecutableMode.INVOKE);
 			}
 		}
+	}
+
+	// See also the static hints registered by ObjectToObjectConverterRuntimeHints
+	private void registerObjectToObjectConverterHints(ReflectionHints hints, Class<?> clazz) {
+		for (Method method : clazz.getMethods()) {
+			String name = method.getName();
+			boolean isStatic = Modifier.isStatic(method.getModifiers());
+			if (isStatic && (clazz != String.class) && areRelatedTypes(method.getReturnType(), clazz) &&
+					(name.equals("valueOf") || name.equals("of") || name.equals("from"))) {
+					hints.registerMethod(method, ExecutableMode.INVOKE);
+			}
+			if (!isStatic && (method.getReturnType() != String.class) && name.equals("to" + method.getReturnType().getSimpleName())) {
+				hints.registerMethod(method, ExecutableMode.INVOKE);
+			}
+		}
+	}
+
+	private static boolean areRelatedTypes(Class<?> type1, Class<?> type2) {
+		return (ClassUtils.isAssignable(type1, type2) || ClassUtils.isAssignable(type2, type1));
 	}
 
 	private void collectReferencedTypes(Set<Class<?>> types, ResolvableType resolvableType) {

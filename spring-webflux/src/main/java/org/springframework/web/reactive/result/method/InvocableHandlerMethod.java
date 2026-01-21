@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Stream;
 
 import kotlin.Unit;
@@ -36,10 +37,12 @@ import kotlin.reflect.full.KClasses;
 import kotlin.reflect.jvm.KCallablesJvm;
 import kotlin.reflect.jvm.ReflectJvmMapping;
 import org.jspecify.annotations.Nullable;
+import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.SynchronousSink;
 import reactor.core.scheduler.Scheduler;
 
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.core.CoroutinesUtils;
 import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.KotlinDetector;
@@ -82,10 +85,12 @@ public class InvocableHandlerMethod extends HandlerMethod {
 
 	private static final Object NO_ARG_VALUE = new Object();
 
+	private static final boolean KOTLIN_REFLECT_PRESENT = KotlinDetector.isKotlinReflectPresent();
+
 
 	private final HandlerMethodArgumentResolverComposite resolvers = new HandlerMethodArgumentResolverComposite();
 
-	private ParameterNameDiscoverer parameterNameDiscoverer = new DefaultParameterNameDiscoverer();
+	private ParameterNameDiscoverer parameterNameDiscoverer = DefaultParameterNameDiscoverer.getSharedInstance();
 
 	private ReactiveAdapterRegistry reactiveAdapterRegistry = ReactiveAdapterRegistry.getSharedInstance();
 
@@ -184,16 +189,27 @@ public class InvocableHandlerMethod extends HandlerMethod {
 
 		return getMethodArgumentValuesOnScheduler(exchange, bindingContext, providedArgs).flatMap(args -> {
 			if (shouldValidateArguments() && this.methodValidator != null) {
-				this.methodValidator.applyArgumentValidation(
-						getBean(), getBridgedMethod(), getMethodParameters(), args, this.validationGroups);
+				try {
+					LocaleContextHolder.setLocaleContext(exchange.getLocaleContext());
+					this.methodValidator.applyArgumentValidation(
+							getBean(), getBridgedMethod(), getMethodParameters(), args, this.validationGroups);
+				}
+				finally {
+					LocaleContextHolder.resetLocaleContext();
+				}
 			}
 			Object value;
+			boolean isSuspendingFunction;
 			Method method = getBridgedMethod();
-			boolean isSuspendingFunction = KotlinDetector.isSuspendingFunction(method);
 			try {
-				value = (KotlinDetector.isKotlinType(method.getDeclaringClass()) ?
-						KotlinDelegate.invokeFunction(method, getBean(), args, isSuspendingFunction, exchange) :
-						method.invoke(getBean(), args));
+				if (KOTLIN_REFLECT_PRESENT && KotlinDetector.isKotlinType(method.getDeclaringClass())) {
+					isSuspendingFunction = KotlinDetector.isSuspendingFunction(method);
+					value = KotlinDelegate.invokeFunction(method, getBean(), args, isSuspendingFunction, exchange);
+				}
+				else {
+					isSuspendingFunction = false;
+					value = method.invoke(getBean(), args);
+				}
 			}
 			catch (IllegalArgumentException ex) {
 				assertTargetBean(getBridgedMethod(), getBean(), args);
@@ -324,7 +340,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 
 			if (isSuspendingFunction) {
 				Object coroutineContext = exchange.getAttribute(COROUTINE_CONTEXT_ATTRIBUTE);
-				Object result = (coroutineContext == null ? CoroutinesUtils.invokeSuspendingFunction(method, target, args) :
+				Publisher<?> result = (coroutineContext == null ? CoroutinesUtils.invokeSuspendingFunction(method, target, args) :
 						CoroutinesUtils.invokeSuspendingFunction((CoroutineContext) coroutineContext, method, target, args));
 				return (result instanceof Mono<?> mono ? mono.handle(KotlinDelegate::handleResult) : result);
 			}
@@ -346,13 +362,10 @@ public class InvocableHandlerMethod extends HandlerMethod {
 							Object arg = args[index];
 							if (!(parameter.isOptional() && arg == null)) {
 								KType type = parameter.getType();
-								if (!(type.isMarkedNullable() && arg == null) && type.getClassifier() instanceof KClass<?> kClass
-										&& KotlinDetector.isInlineClass(JvmClassMappingKt.getJavaClass(kClass))) {
-									KFunction<?> constructor = KClasses.getPrimaryConstructor(kClass);
-									if (!KCallablesJvm.isAccessible(constructor)) {
-										KCallablesJvm.setAccessible(constructor, true);
-									}
-									arg = constructor.call(arg);
+								if (!(type.isMarkedNullable() && arg == null) &&
+										type.getClassifier() instanceof KClass<?> kClass &&
+										KotlinDetector.isInlineClass(JvmClassMappingKt.getJavaClass(kClass))) {
+									arg = box(kClass, arg);
 								}
 								argMap.put(parameter, arg);
 							}
@@ -366,6 +379,20 @@ public class InvocableHandlerMethod extends HandlerMethod {
 				}
 				return (result == Unit.INSTANCE ? null : result);
 			}
+		}
+
+		private static Object box(KClass<?> kClass, @Nullable Object arg) {
+			KFunction<?> constructor = Objects.requireNonNull(KClasses.getPrimaryConstructor(kClass));
+			KType type = constructor.getParameters().get(0).getType();
+			if (!(type.isMarkedNullable() && arg == null) &&
+					type.getClassifier() instanceof KClass<?> parameterClass &&
+					KotlinDetector.isInlineClass(JvmClassMappingKt.getJavaClass(parameterClass))) {
+				arg = box(parameterClass, arg);
+			}
+			if (!KCallablesJvm.isAccessible(constructor)) {
+				KCallablesJvm.setAccessible(constructor, true);
+			}
+			return constructor.call(arg);
 		}
 
 		private static void handleResult(Object result, SynchronousSink<Object> sink) {
@@ -388,7 +415,11 @@ public class InvocableHandlerMethod extends HandlerMethod {
 		}
 
 		private static Object unbox(Object result) throws InvocationTargetException, IllegalAccessException, NoSuchMethodException {
-			return result.getClass().getDeclaredMethod("unbox-impl").invoke(result);
+			Object unboxed = result.getClass().getDeclaredMethod("unbox-impl").invoke(result);
+			if (KotlinDetector.isInlineClass(unboxed.getClass())) {
+				return unbox(unboxed);
+			}
+			return unboxed;
 		}
 
 	}

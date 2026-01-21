@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -298,8 +298,8 @@ public final class TestCompiler {
 	}
 
 	private DynamicClassLoader compile() {
-		ClassLoader classLoaderToUse = (this.classLoader != null ? this.classLoader
-				: Thread.currentThread().getContextClassLoader());
+		ClassLoader classLoaderToUse = (this.classLoader != null ? this.classLoader :
+				Thread.currentThread().getContextClassLoader());
 		List<DynamicJavaFileObject> compilationUnits = this.sourceFiles.stream().map(
 				DynamicJavaFileObject::new).toList();
 		StandardJavaFileManager standardFileManager = this.compiler.getStandardFileManager(
@@ -307,13 +307,13 @@ public final class TestCompiler {
 		DynamicJavaFileManager fileManager = new DynamicJavaFileManager(
 				standardFileManager, classLoaderToUse, this.classFiles, this.resourceFiles);
 		if (!this.sourceFiles.isEmpty()) {
-			Errors errors = new Errors();
-			CompilationTask task = this.compiler.getTask(null, fileManager, errors,
+			Problems problems = new Problems();
+			CompilationTask task = this.compiler.getTask(null, fileManager, problems,
 					this.compilerOptions, null, compilationUnits);
 			task.setProcessors(this.processors);
 			boolean result = task.call();
-			if (!result || errors.hasReportedErrors()) {
-				throw new CompilationException(errors.toString(), this.sourceFiles, this.resourceFiles);
+			if (!result || problems.hasReportedErrors()) {
+				throw new CompilationException(problems.elements, this.sourceFiles, this.resourceFiles);
 			}
 		}
 		return new DynamicClassLoader(classLoaderToUse, this.classFiles, this.resourceFiles,
@@ -342,34 +342,40 @@ public final class TestCompiler {
 
 
 	/**
-	 * {@link DiagnosticListener} used to collect errors.
+	 * {@link DiagnosticListener} used to collect errors and warnings.
 	 */
-	static class Errors implements DiagnosticListener<JavaFileObject> {
+	static class Problems implements DiagnosticListener<JavaFileObject> {
 
-		private final StringBuilder message = new StringBuilder();
+		private static final List<Diagnostic.Kind> HANDLED_DIAGNOSTICS = List.of(
+				Diagnostic.Kind.ERROR, Diagnostic.Kind.MANDATORY_WARNING, Diagnostic.Kind.WARNING);
+
+		private final List<CompilationException.Problem> elements = new ArrayList<>();
 
 		@Override
 		public void report(Diagnostic<? extends JavaFileObject> diagnostic) {
-			if (diagnostic.getKind() == Diagnostic.Kind.ERROR) {
-				this.message.append('\n');
-				this.message.append(diagnostic.getMessage(Locale.getDefault()));
-				if (diagnostic.getSource() != null) {
-					this.message.append(' ');
-					this.message.append(diagnostic.getSource().getName());
-					this.message.append(' ');
-					this.message.append(diagnostic.getLineNumber()).append(':')
-							.append(diagnostic.getColumnNumber());
-				}
+			Diagnostic.Kind kind = diagnostic.getKind();
+			if (HANDLED_DIAGNOSTICS.contains(kind)) {
+				this.elements.add(new CompilationException.Problem(kind, toMessage(diagnostic)));
 			}
 		}
 
-		boolean hasReportedErrors() {
-			return !this.message.isEmpty();
+		private String toMessage(Diagnostic<? extends JavaFileObject> diagnostic) {
+			StringBuilder message = new StringBuilder();
+			message.append(diagnostic.getMessage(Locale.getDefault()));
+			if (diagnostic.getSource() != null) {
+				message.append(' ');
+				message.append(diagnostic.getSource().getName());
+				if (diagnostic.getLineNumber() != -1 && diagnostic.getColumnNumber() != -1) {
+					message.append(' ');
+					message.append(diagnostic.getLineNumber()).append(':')
+							.append(diagnostic.getColumnNumber());
+				}
+			}
+			return message.toString();
 		}
 
-		@Override
-		public String toString() {
-			return this.message.toString();
+		boolean hasReportedErrors() {
+			return this.elements.stream().anyMatch(problem -> problem.kind() == Diagnostic.Kind.ERROR);
 		}
 
 	}

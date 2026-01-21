@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,10 +18,10 @@ package org.springframework.test.context.testng.transaction.ejb;
 
 import jakarta.ejb.EJB;
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.Test;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.testng.AbstractTransactionalTestNGSpringContextTests;
@@ -45,7 +45,7 @@ abstract class AbstractEjbTxDaoTestNGTests extends AbstractTransactionalTestNGSp
 	@EJB
 	protected TestEntityDao dao;
 
-	@PersistenceContext
+	@Autowired
 	protected EntityManager em;
 
 

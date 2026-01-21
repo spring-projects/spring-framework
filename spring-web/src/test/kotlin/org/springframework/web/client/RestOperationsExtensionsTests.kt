@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -270,7 +270,6 @@ class RestOperationsExtensionsTests {
 	}
 
 	@Test
-	@Disabled("May require Kotlin 2") // TODO Enable after Kotlin 2 upgrade
 	fun `RestOperations are available`() {
 		val extensions = Class.forName("org.springframework.web.client.RestOperationsExtensionsKt")
 		ReflectionUtils.doWithMethods(RestOperations::class.java) { method ->
@@ -281,7 +280,7 @@ class RestOperationsExtensionsTests {
 					assertThat(f.typeParameters.size).isEqualTo(1)
 					val type = f.typeParameters[0].upperBounds.first()
 					assertThat(type.classifier).isEqualTo(Any::class)
-					assertThat(type.isMarkedNullable).isTrue()
+					assertThat(type.isMarkedNullable).isFalse()
 				}
 			}
 		}

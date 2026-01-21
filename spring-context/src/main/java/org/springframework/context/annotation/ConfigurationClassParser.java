@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jspecify.annotations.Nullable;
 
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
+import org.springframework.beans.factory.BeanRegistrar;
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
@@ -96,6 +98,7 @@ import org.springframework.util.StringUtils;
  * @author Phillip Webb
  * @author Sam Brannen
  * @author Stephane Nicoll
+ * @author Daeho Kwon
  * @since 3.0
  * @see ConfigurationClassBeanDefinitionReader
  */
@@ -105,8 +108,8 @@ class ConfigurationClassParser {
 			(className.startsWith("java.lang.annotation.") || className.startsWith("org.springframework.stereotype."));
 
 	private static final Predicate<Condition> REGISTER_BEAN_CONDITION_FILTER = condition ->
-			(condition instanceof ConfigurationCondition configurationCondition
-					&& ConfigurationPhase.REGISTER_BEAN.equals(configurationCondition.getConfigurationPhase()));
+			(condition instanceof ConfigurationCondition configurationCondition &&
+				ConfigurationPhase.REGISTER_BEAN.equals(configurationCondition.getConfigurationPhase()));
 
 	private static final Comparator<DeferredImportSelectorHolder> DEFERRED_IMPORT_COMPARATOR =
 			(o1, o2) -> AnnotationAwareOrderComparator.INSTANCE.compare(o1.getImportSelector(), o2.getImportSelector());
@@ -166,14 +169,23 @@ class ConfigurationClassParser {
 		for (BeanDefinitionHolder holder : configCandidates) {
 			BeanDefinition bd = holder.getBeanDefinition();
 			try {
+				ConfigurationClass configClass;
 				if (bd instanceof AnnotatedBeanDefinition annotatedBeanDef) {
-					parse(annotatedBeanDef, holder.getBeanName());
+					configClass = parse(annotatedBeanDef, holder.getBeanName());
 				}
 				else if (bd instanceof AbstractBeanDefinition abstractBeanDef && abstractBeanDef.hasBeanClass()) {
-					parse(abstractBeanDef.getBeanClass(), holder.getBeanName());
+					configClass = parse(abstractBeanDef.getBeanClass(), holder.getBeanName());
 				}
 				else {
-					parse(bd.getBeanClassName(), holder.getBeanName());
+					configClass = parse(bd.getBeanClassName(), holder.getBeanName());
+				}
+
+				// Downgrade to lite (no enhancement) in case of no instance-level @Bean methods.
+				if (!configClass.getMetadata().isAbstract() && !configClass.hasNonStaticBeanMethods() &&
+						ConfigurationClassUtils.CONFIGURATION_CLASS_FULL.equals(
+								bd.getAttribute(ConfigurationClassUtils.CONFIGURATION_CLASS_ATTRIBUTE))) {
+					bd.setAttribute(ConfigurationClassUtils.CONFIGURATION_CLASS_ATTRIBUTE,
+							ConfigurationClassUtils.CONFIGURATION_CLASS_LITE);
 				}
 			}
 			catch (BeanDefinitionStoreException ex) {
@@ -188,20 +200,25 @@ class ConfigurationClassParser {
 		this.deferredImportSelectorHandler.process();
 	}
 
-	private void parse(AnnotatedBeanDefinition beanDef, String beanName) {
-		processConfigurationClass(
-				new ConfigurationClass(beanDef.getMetadata(), beanName, (beanDef instanceof ScannedGenericBeanDefinition)),
-				DEFAULT_EXCLUSION_FILTER);
+	private ConfigurationClass parse(AnnotatedBeanDefinition beanDef, String beanName) {
+		ConfigurationClass configClass = new ConfigurationClass(
+				beanDef.getMetadata(), beanName, (beanDef instanceof ScannedGenericBeanDefinition));
+		processConfigurationClass(configClass, DEFAULT_EXCLUSION_FILTER);
+		return configClass;
 	}
 
-	private void parse(Class<?> clazz, String beanName) {
-		processConfigurationClass(new ConfigurationClass(clazz, beanName), DEFAULT_EXCLUSION_FILTER);
+	private ConfigurationClass parse(Class<?> clazz, String beanName) {
+		ConfigurationClass configClass = new ConfigurationClass(clazz, beanName);
+		processConfigurationClass(configClass, DEFAULT_EXCLUSION_FILTER);
+		return configClass;
 	}
 
-	final void parse(@Nullable String className, String beanName) throws IOException {
+	final ConfigurationClass parse(@Nullable String className, String beanName) throws IOException {
 		Assert.notNull(className, "No bean class name for configuration class bean definition");
 		MetadataReader reader = this.metadataReaderFactory.getMetadataReader(className);
-		processConfigurationClass(new ConfigurationClass(reader, beanName), DEFAULT_EXCLUSION_FILTER);
+		ConfigurationClass configClass = new ConfigurationClass(reader, beanName);
+		processConfigurationClass(configClass, DEFAULT_EXCLUSION_FILTER);
+		return configClass;
 	}
 
 	/**
@@ -533,15 +550,22 @@ class ConfigurationClassParser {
 	 * <p>For example, it is common for a {@code @Configuration} class to declare direct
 	 * {@code @Import}s in addition to meta-imports originating from an {@code @Enable}
 	 * annotation.
+	 * <p>As of Spring Framework 7.0, {@code @Import} annotations declared on interfaces
+	 * implemented by the configuration class are also considered. This allows imports to
+	 * be triggered indirectly via marker interfaces or shared base interfaces.
 	 * @param sourceClass the class to search
 	 * @param imports the imports collected so far
-	 * @param visited used to track visited classes to prevent infinite recursion
+	 * @param visited used to track visited classes and interfaces to prevent infinite
+	 * recursion
 	 * @throws IOException if there is any problem reading metadata from the named class
 	 */
 	private void collectImports(SourceClass sourceClass, Set<SourceClass> imports, Set<SourceClass> visited)
 			throws IOException {
 
 		if (visited.add(sourceClass)) {
+			for (SourceClass ifc : sourceClass.getInterfaces()) {
+				collectImports(ifc, imports, visited);
+			}
 			for (SourceClass annotation : sourceClass.getAnnotations()) {
 				String annName = annotation.getMetadata().getClassName();
 				if (!annName.equals(Import.class.getName())) {
@@ -583,6 +607,15 @@ class ConfigurationClassParser {
 							Collection<SourceClass> importSourceClasses = asSourceClasses(importClassNames, filter);
 							processImports(configClass, currentSourceClass, importSourceClasses, filter, false);
 						}
+					}
+					else if (candidate.isAssignable(BeanRegistrar.class)) {
+						Class<?> candidateClass = candidate.loadClass();
+						BeanRegistrar registrar = (BeanRegistrar) BeanUtils.instantiateClass(candidateClass);
+						AnnotationMetadata metadata = currentSourceClass.getMetadata();
+						if (registrar instanceof ImportAware importAware) {
+							importAware.setImportMetadata(metadata);
+						}
+						configClass.addBeanRegistrar(metadata.getClassName(), registrar);
 					}
 					else if (candidate.isAssignable(ImportBeanDefinitionRegistrar.class)) {
 						// Candidate class is an ImportBeanDefinitionRegistrar ->

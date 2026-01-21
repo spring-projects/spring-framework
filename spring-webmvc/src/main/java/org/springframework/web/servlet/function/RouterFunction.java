@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,6 +41,9 @@ public interface RouterFunction<T extends ServerResponse> {
 	 * or an empty {@code Optional} if there is no match
 	 */
 	Optional<HandlerFunction<T>> route(ServerRequest request);
+
+
+	// Default methods for composition and filtering
 
 	/**
 	 * Return a composed routing function that first invokes this function,
@@ -99,28 +102,6 @@ public interface RouterFunction<T extends ServerResponse> {
 	}
 
 	/**
-	 * Filter all {@linkplain HandlerFunction handler functions} routed by this function with the given
-	 * {@linkplain HandlerFilterFunction filter function}.
-	 * @param <S> the filter return type
-	 * @param filterFunction the filter to apply
-	 * @return the filtered routing function
-	 */
-	default <S extends ServerResponse> RouterFunction<S> filter(HandlerFilterFunction<T, S> filterFunction) {
-		return new RouterFunctions.FilteredRouterFunction<>(this, filterFunction);
-	}
-
-	/**
-	 * Accept the given visitor. Default implementation calls
-	 * {@link RouterFunctions.Visitor#unknown(RouterFunction)}; composed {@code RouterFunction}
-	 * implementations are expected to call {@code accept} for all components that make up this
-	 * router function.
-	 * @param visitor the visitor to accept
-	 */
-	default void accept(RouterFunctions.Visitor visitor) {
-		visitor.unknown(this);
-	}
-
-	/**
 	 * Return a new routing function with the given attribute.
 	 * @param name the attribute name
 	 * @param value the attribute value
@@ -154,5 +135,27 @@ public interface RouterFunction<T extends ServerResponse> {
 		return new RouterFunctions.AttributesRouterFunction<>(this, attributes);
 	}
 
+	/**
+	 * Filter all {@linkplain HandlerFunction handler functions} routed by this function
+	 * with the given {@linkplain HandlerFilterFunction filter function}.
+	 * @param <S> the filter return type
+	 * @param filterFunction the filter to apply
+	 * @return the filtered routing function
+	 */
+	default <S extends ServerResponse> RouterFunction<S> filter(HandlerFilterFunction<T, S> filterFunction) {
+		return new RouterFunctions.FilteredRouterFunction<>(this, filterFunction);
+	}
+
+	/**
+	 * Accept the given visitor.
+	 * <p>The default implementation calls
+	 * {@link RouterFunctions.Visitor#unknown(RouterFunction)}; composed {@code RouterFunction}
+	 * implementations are expected to call {@code accept} for all components that make up this
+	 * router function.
+	 * @param visitor the visitor to accept
+	 */
+	default void accept(RouterFunctions.Visitor visitor) {
+		visitor.unknown(this);
+	}
 
 }

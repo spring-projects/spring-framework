@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,8 +34,6 @@ import static org.springframework.test.context.TestContextAnnotationUtils.findAn
  * <p>See <a href="https://jira.spring.io/browse/SPR-10181">SPR-10181</a>.
  *
  * @author Sam Brannen
- * @since 5.3, though originally since 4.0 for the deprecated
- * {@link org.springframework.test.util.MetaAnnotationUtils} support
  * @see TestContextAnnotationUtilsTests
  */
 class OverriddenMetaAnnotationAttributesTestContextAnnotationUtilsTests {

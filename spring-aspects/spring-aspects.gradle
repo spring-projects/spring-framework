@@ -3,15 +3,15 @@ description = "Spring Aspects"
 apply plugin: "io.freefair.aspectj"
 
 compileAspectj {
-	sourceCompatibility "17"
-	targetCompatibility "17"
+	sourceCompatibility = "17"
+	targetCompatibility = "17"
 	ajcOptions {
 		compilerArgs += "-parameters"
 	}
 }
 compileTestAspectj {
-	sourceCompatibility "17"
-	targetCompatibility "17"
+	sourceCompatibility = "17"
+	targetCompatibility = "17"
 	ajcOptions {
 		compilerArgs += "-parameters"
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,9 +32,10 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.MultiValueMap;
 
 /**
- * {@code HttpHeaders} object that can only be read, not written to.
- * <p>This caches the parsed representations of the "Accept" and "Content-Type" headers
- * and will get out of sync with the backing map it is mutated at runtime.
+ * {@code HttpHeaders} variant that can only be read, not written to.
+ *
+ * <p>This caches the parsed representations of the "Accept" and "Content-Type"
+ * headers and will get out of sync with the backing map if it is mutated at runtime.
  *
  * @author Brian Clozel
  * @author Sam Brannen
@@ -43,6 +44,7 @@ import org.springframework.util.MultiValueMap;
 class ReadOnlyHttpHeaders extends HttpHeaders {
 
 	private static final long serialVersionUID = -8578554704772377436L;
+
 
 	private @Nullable MediaType cachedContentType;
 
@@ -138,7 +140,6 @@ class ReadOnlyHttpHeaders extends HttpHeaders {
 	public Set<String> headerNames() {
 		return Collections.unmodifiableSet(super.headerNames());
 	}
-
 
 	@Override
 	public List<String> put(String key, List<String> value) {

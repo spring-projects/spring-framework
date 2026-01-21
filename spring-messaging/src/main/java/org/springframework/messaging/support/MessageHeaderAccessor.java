@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -123,10 +123,6 @@ public class MessageHeaderAccessor {
 
 	private @Nullable IdGenerator idGenerator;
 
-	private MessageHeaderAccessor(@Nullable MessageHeaders headers) {
-		this.headers = new MutableMessageHeaders(headers);
-	}
-
 
 	/**
 	 * A constructor to create new headers.
@@ -143,23 +139,8 @@ public class MessageHeaderAccessor {
 		this(message != null ? message.getHeaders() : null);
 	}
 
-
-	/**
-	 * Create an instance from a plain {@link Map}.
-	 * @param map the raw headers
-	 * @since 6.2
-	 */
-	public static MessageHeaderAccessor fromMap(@Nullable Map<String, Object> map) {
-		return fromMessageHeaders(new MessageHeaders(map));
-	}
-
-	/**
-	 * Create an instance from an existing {@link MessageHeaders} instance.
-	 * @param headers the headers
-	 * @since 6.2
-	 */
-	public static MessageHeaderAccessor fromMessageHeaders(@Nullable MessageHeaders headers) {
-		return new MessageHeaderAccessor(headers);
+	private MessageHeaderAccessor(@Nullable MessageHeaders headers) {
+		this.headers = new MutableMessageHeaders(headers);
 	}
 
 
@@ -187,7 +168,7 @@ public class MessageHeaderAccessor {
 	 * <p>When modifications are complete use {@link #setImmutable()} to prevent
 	 * further changes. The intended use case for this mechanism is initialization
 	 * of a Message within a single thread.
-	 * <p>By default this is set to {@code false}.
+	 * <p>By default, this is set to {@code false}.
 	 * @since 4.1
 	 */
 	public void setLeaveMutable(boolean leaveMutable) {
@@ -331,7 +312,7 @@ public class MessageHeaderAccessor {
 	protected void verifyType(@Nullable String headerName, @Nullable Object headerValue) {
 		if (headerName != null && headerValue != null) {
 			if (MessageHeaders.ERROR_CHANNEL.equals(headerName) ||
-					MessageHeaders.REPLY_CHANNEL.endsWith(headerName)) {
+					MessageHeaders.REPLY_CHANNEL.equals(headerName)) {
 				if (!(headerValue instanceof MessageChannel || headerValue instanceof String)) {
 					throw new IllegalArgumentException(
 							"'" + headerName + "' header value must be a MessageChannel or String");
@@ -571,9 +552,26 @@ public class MessageHeaderAccessor {
 	// Static factory methods
 
 	/**
+	 * Create an instance from a plain {@link Map}.
+	 * @param map the raw headers
+	 * @since 6.2
+	 */
+	public static MessageHeaderAccessor fromMap(@Nullable Map<String, Object> map) {
+		return fromMessageHeaders(new MessageHeaders(map));
+	}
+
+	/**
+	 * Create an instance from an existing {@link MessageHeaders} instance.
+	 * @param headers the headers
+	 * @since 6.2
+	 */
+	public static MessageHeaderAccessor fromMessageHeaders(@Nullable MessageHeaders headers) {
+		return new MessageHeaderAccessor(headers);
+	}
+
+	/**
 	 * Return the original {@code MessageHeaderAccessor} used to create the headers
-	 * of the given {@code Message}, or {@code null} if that's not available or if
-	 * its type does not match the required type.
+	 * of the given {@code Message}, or {@code null} if that's not available.
 	 * <p>This is for cases where the existence of an accessor is strongly expected
 	 * (followed up with an assertion) or where an accessor will be created otherwise.
 	 * @param message the message to get an accessor for

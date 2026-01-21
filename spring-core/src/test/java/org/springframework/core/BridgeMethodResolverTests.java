@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,17 +43,6 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 @SuppressWarnings("rawtypes")
 class BridgeMethodResolverTests {
-
-	private static Method findMethodWithReturnType(String name, Class<?> returnType, Class<SettingsDaoImpl> targetType) {
-		Method[] methods = targetType.getMethods();
-		for (Method m : methods) {
-			if (m.getName().equals(name) && m.getReturnType().equals(returnType)) {
-				return m;
-			}
-		}
-		return null;
-	}
-
 
 	@Test
 	void findBridgedMethod() throws Exception {
@@ -104,6 +93,32 @@ class BridgeMethodResolverTests {
 		Method originalMethod = Adder.class.getMethod("add", Object.class);
 		Method mostSpecificMethod = BridgeMethodResolver.getMostSpecificMethod(originalMethod, FakeAdder.class);
 		assertThat(mostSpecificMethod).isSameAs(originalMethod);
+	}
+
+	@Test
+	void findBridgedMethodWithDefaultMethodInInterfaceHierarchy() throws Exception {
+		Method getValueDefault = DefaultMethods.class.getMethod("getValue");
+		Method getValuesDefault = DefaultMethods.class.getMethod("getValues");
+		Method getValueArgDefault = DefaultMethods.class.getMethod("getValue", Integer.class);
+		Method getValuesArgDefault = DefaultMethods.class.getMethod("getValues", Integer[].class);
+		for (Method method : ConcreteMethods.class.getMethods()) {
+			if (method.getName().equals("getValue")) {
+				assertThat(BridgeMethodResolver.findBridgedMethod(method)).isEqualTo(
+						method.getParameterCount() > 0 ? getValueArgDefault : getValueDefault);
+			}
+			else if (method.getName().equals("getValues")) {
+				assertThat(BridgeMethodResolver.findBridgedMethod(method)).isEqualTo(
+						method.getParameterCount() > 0 ? getValuesArgDefault : getValuesDefault);
+			}
+		}
+	}
+
+	@Test
+	void findBridgedMethodForCovariantReturnType() throws Exception {
+		Method originalMethod = OuterSubclass.class.getDeclaredMethod("getInner");
+		for (Method method: OuterSubclass.class.getDeclaredMethods()) {
+			assertThat(BridgeMethodResolver.findBridgedMethod(method)).isEqualTo(originalMethod);
+		}
 	}
 
 	@Test
@@ -159,6 +174,16 @@ class BridgeMethodResolverTests {
 		Method method = SettingsDaoImpl.class.getMethod("load");
 		assertThat(BridgeMethodResolver.findBridgedMethod(loadWithObjectReturn)).isEqualTo(method);
 		assertThat(BridgeMethodResolver.findBridgedMethod(loadWithSettingsReturn)).isEqualTo(method);
+	}
+
+	private static Method findMethodWithReturnType(String name, Class<?> returnType, Class<?> targetType) {
+		Method[] methods = targetType.getMethods();
+		for (Method m : methods) {
+			if (m.getName().equals(name) && m.getReturnType().equals(returnType)) {
+				return m;
+			}
+		}
+		return null;
 	}
 
 	@Test
@@ -405,7 +430,11 @@ class BridgeMethodResolverTests {
 	}
 
 
-	public abstract static class SubBar<T extends StringBuffer> extends InterBar<T> {
+	public abstract static class SubBar<T extends StringProducer> extends InterBar<T> {
+	}
+
+
+	public interface StringProducer extends CharSequence {
 	}
 
 
@@ -426,14 +455,14 @@ class BridgeMethodResolverTests {
 	}
 
 
-	public abstract static class AbstractDateAdder implements Adder<Date> {
+	public abstract static class AbstractAdder<T extends Serializable> implements Adder<T> {
 
 		@Override
-		public abstract void add(Date date);
+		public abstract void add(T item);
 	}
 
 
-	public static class DateAdder extends AbstractDateAdder {
+	public static class DateAdder extends AbstractAdder<Date> {
 
 		@Override
 		public void add(Date date) {
@@ -445,6 +474,69 @@ class BridgeMethodResolverTests {
 
 		public void add(Date date) {
 		}
+	}
+
+
+	interface InterfaceMethods<T> {
+
+		T getValue();
+
+		T[] getValues();
+
+		T getValue(T arg);
+
+		T[] getValues(T[] args);
+	}
+
+
+	interface DefaultMethods extends InterfaceMethods<Integer> {
+
+		default Integer getValue() {
+			return 0;
+		}
+
+		default Integer[] getValues() {
+			return new Integer[0];
+		}
+
+		@Override
+		default Integer getValue(Integer arg) {
+			return 0;
+		}
+
+		@Override
+		default Integer[] getValues(Integer[] args) {
+			return new Integer[0];
+		}
+	}
+
+
+	static class ConcreteMethods implements DefaultMethods {
+	}
+
+
+	static class Outer {
+
+		Inner getInner() {
+			return new Inner();
+		}
+	}
+
+
+	static class OuterSubclass extends Outer {
+
+		@Override
+		InnerSubclass getInner() {
+			return new InnerSubclass();
+		}
+	}
+
+
+	static class Inner {
+	}
+
+
+	static class InnerSubclass extends Inner {
 	}
 
 
@@ -841,22 +933,18 @@ class BridgeMethodResolverTests {
 
 
 	public interface MessageBroadcaster extends Receiver<MessageEvent> {
-
 	}
 
 
 	public static class RemovedMessageEvent extends MessageEvent {
-
 	}
 
 
 	public static class NewMessageEvent extends MessageEvent {
-
 	}
 
 
 	public static class ModifiedMessageEvent extends MessageEvent {
-
 	}
 
 

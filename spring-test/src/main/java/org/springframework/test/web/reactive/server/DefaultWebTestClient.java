@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,7 @@ import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.spi.mapper.MappingProvider;
 import org.hamcrest.Matcher;
 import org.hamcrest.MatcherAssert;
+import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
@@ -56,6 +57,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MimeType;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.ApiVersionInserter;
 import org.springframework.web.reactive.function.BodyInserter;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.ClientRequest;
@@ -88,6 +90,10 @@ class DefaultWebTestClient implements WebTestClient {
 
 	private final @Nullable MultiValueMap<String, String> defaultCookies;
 
+	private final @Nullable Object defaultApiVersion;
+
+	private final @Nullable ApiVersionInserter apiVersionInserter;
+
 	private final Consumer<EntityExchangeResult<?>> entityResultConsumer;
 
 	private final Duration responseTimeout;
@@ -97,19 +103,24 @@ class DefaultWebTestClient implements WebTestClient {
 	private final AtomicLong requestIndex = new AtomicLong();
 
 
-	DefaultWebTestClient(ClientHttpConnector connector, ExchangeStrategies exchangeStrategies,
+	DefaultWebTestClient(
+			ClientHttpConnector connector, ExchangeStrategies exchangeStrategies,
 			Function<ClientHttpConnector, ExchangeFunction> exchangeFactory, UriBuilderFactory uriBuilderFactory,
 			@Nullable HttpHeaders headers, @Nullable MultiValueMap<String, String> cookies,
+			@Nullable Object defaultApiVersion, @Nullable ApiVersionInserter apiVersionInserter,
 			Consumer<EntityExchangeResult<?>> entityResultConsumer,
 			@Nullable Duration responseTimeout, DefaultWebTestClientBuilder clientBuilder) {
 
-		this.wiretapConnector = new WiretapConnector(connector);
 		this.jsonEncoderDecoder = JsonEncoderDecoder.from(
 				exchangeStrategies.messageWriters(), exchangeStrategies.messageReaders());
+
+		this.wiretapConnector = new WiretapConnector(connector, this.jsonEncoderDecoder);
 		this.exchangeFunction = exchangeFactory.apply(this.wiretapConnector);
 		this.uriBuilderFactory = uriBuilderFactory;
 		this.defaultHeaders = headers;
 		this.defaultCookies = cookies;
+		this.defaultApiVersion = defaultApiVersion;
+		this.apiVersionInserter = apiVersionInserter;
 		this.entityResultConsumer = entityResultConsumer;
 		this.responseTimeout = (responseTimeout != null ? responseTimeout : Duration.ofSeconds(5));
 		this.builder = clientBuilder;
@@ -186,6 +197,8 @@ class DefaultWebTestClient implements WebTestClient {
 
 		private @Nullable MultiValueMap<String, String> cookies;
 
+		private @Nullable Object apiVersion;
+
 		private @Nullable BodyInserter<?, ? super ClientHttpRequest> inserter;
 
 		private final Map<String, Object> attributes = new LinkedHashMap<>(4);
@@ -251,18 +264,6 @@ class DefaultWebTestClient implements WebTestClient {
 		}
 
 		@Override
-		public RequestBodySpec attribute(String name, Object value) {
-			this.attributes.put(name, value);
-			return this;
-		}
-
-		@Override
-		public RequestBodySpec attributes(Consumer<Map<String, Object>> attributesConsumer) {
-			attributesConsumer.accept(this.attributes);
-			return this;
-		}
-
-		@Override
 		public RequestBodySpec accept(MediaType... acceptableMediaTypes) {
 			getHeaders().setAccept(Arrays.asList(acceptableMediaTypes));
 			return this;
@@ -307,6 +308,24 @@ class DefaultWebTestClient implements WebTestClient {
 		@Override
 		public RequestBodySpec ifNoneMatch(String... ifNoneMatches) {
 			getHeaders().setIfNoneMatch(Arrays.asList(ifNoneMatches));
+			return this;
+		}
+
+		@Override
+		public RequestBodySpec attribute(String name, Object value) {
+			this.attributes.put(name, value);
+			return this;
+		}
+
+		@Override
+		public RequestBodySpec attributes(Consumer<Map<String, Object>> attributesConsumer) {
+			attributesConsumer.accept(this.attributes);
+			return this;
+		}
+
+		@Override
+		public RequestBodySpec apiVersion(Object version) {
+			this.apiVersion = version;
 			return this;
 		}
 
@@ -364,6 +383,11 @@ class DefaultWebTestClient implements WebTestClient {
 					DefaultWebTestClient.this.entityResultConsumer, getResponseTimeout());
 		}
 
+		@Override
+		public ResponseSpec exchangeSuccessfully() {
+			return exchange().expectStatus().is2xxSuccessful();
+		}
+
 		private ClientRequest.Builder initRequestBuilder() {
 			return ClientRequest.create(this.httpMethod, initUri())
 					.headers(headersToUse -> {
@@ -372,6 +396,11 @@ class DefaultWebTestClient implements WebTestClient {
 						}
 						if (!this.headers.isEmpty()) {
 							headersToUse.putAll(this.headers);
+						}
+						Object version = getApiVersionOrDefault();
+						if (version != null) {
+							Assert.state(apiVersionInserter != null, "No ApiVersionInserter configured");
+							apiVersionInserter.insertVersion(version, headersToUse);
 						}
 					})
 					.cookies(cookiesToUse -> {
@@ -386,7 +415,17 @@ class DefaultWebTestClient implements WebTestClient {
 		}
 
 		private URI initUri() {
-			return (this.uri != null ? this.uri : DefaultWebTestClient.this.uriBuilderFactory.expand(""));
+			URI uriToUse = this.uri != null ? this.uri : DefaultWebTestClient.this.uriBuilderFactory.expand("");
+			Object version = getApiVersionOrDefault();
+			if (version != null) {
+				Assert.state(apiVersionInserter != null, "No ApiVersionInserter configured");
+				uriToUse = apiVersionInserter.insertVersion(version, uriToUse);
+			}
+			return uriToUse;
+		}
+
+		private @Nullable Object getApiVersionOrDefault() {
+			return (this.apiVersion != null ? this.apiVersion : DefaultWebTestClient.this.defaultApiVersion);
 		}
 
 	}
@@ -406,12 +445,12 @@ class DefaultWebTestClient implements WebTestClient {
 
 
 		DefaultResponseSpec(
-				ExchangeResult exchangeResult, ClientResponse response,
+				ExchangeResult result, ClientResponse response,
 				@Nullable JsonEncoderDecoder jsonEncoderDecoder,
 				Consumer<EntityExchangeResult<?>> entityResultConsumer,
 				Duration timeout) {
 
-			this.exchangeResult = exchangeResult;
+			this.exchangeResult = result;
 			this.response = response;
 			this.jsonEncoderDecoder = jsonEncoderDecoder;
 			this.entityResultConsumer = entityResultConsumer;
@@ -436,15 +475,15 @@ class DefaultWebTestClient implements WebTestClient {
 		@Override
 		public <B> BodySpec<B, ?> expectBody(Class<B> bodyType) {
 			B body = this.response.bodyToMono(bodyType).block(this.timeout);
-			EntityExchangeResult<B> entityResult = initEntityExchangeResult(body);
-			return new DefaultBodySpec<>(entityResult);
+			EntityExchangeResult<B> result = initEntityExchangeResult(body);
+			return new DefaultBodySpec<>(result);
 		}
 
 		@Override
 		public <B> BodySpec<B, ?> expectBody(ParameterizedTypeReference<B> bodyType) {
 			B body = this.response.bodyToMono(bodyType).block(this.timeout);
-			EntityExchangeResult<B> entityResult = initEntityExchangeResult(body);
-			return new DefaultBodySpec<>(entityResult);
+			EntityExchangeResult<B> result = initEntityExchangeResult(body);
+			return new DefaultBodySpec<>(result);
 		}
 
 		@Override
@@ -468,8 +507,8 @@ class DefaultWebTestClient implements WebTestClient {
 		public BodyContentSpec expectBody() {
 			ByteArrayResource resource = this.response.bodyToMono(ByteArrayResource.class).block(this.timeout);
 			byte[] body = (resource != null ? resource.getByteArray() : null);
-			EntityExchangeResult<byte[]> entityResult = initEntityExchangeResult(body);
-			return new DefaultBodyContentSpec(entityResult, this.jsonEncoderDecoder);
+			EntityExchangeResult<byte[]> result = initEntityExchangeResult(body);
+			return new DefaultBodyContentSpec(result, this.jsonEncoderDecoder);
 		}
 
 		private <B> EntityExchangeResult<B> initEntityExchangeResult(@Nullable B body) {
@@ -547,6 +586,7 @@ class DefaultWebTestClient implements WebTestClient {
 			return self();
 		}
 
+		@SuppressWarnings("removal")
 		@Override
 		public <T extends S> T value(Matcher<? super @Nullable B> matcher) {
 			this.result.assertWithDiagnostics(() -> MatcherAssert.assertThat(this.result.getResponseBody(), matcher));
@@ -554,7 +594,7 @@ class DefaultWebTestClient implements WebTestClient {
 		}
 
 		@Override
-		@SuppressWarnings("NullAway") // https://github.com/uber/NullAway/issues/1129
+		@SuppressWarnings({"NullAway", "removal"}) // https://github.com/uber/NullAway/issues/1129
 		public <T extends S, R> T value(Function<@Nullable B, @Nullable R> bodyMapper, Matcher<? super @Nullable R> matcher) {
 			this.result.assertWithDiagnostics(() -> {
 				B body = this.result.getResponseBody();
@@ -564,9 +604,17 @@ class DefaultWebTestClient implements WebTestClient {
 		}
 
 		@Override
-		@SuppressWarnings("NullAway") // https://github.com/uber/NullAway/issues/1129
 		public <T extends S> T value(Consumer<@Nullable B> consumer) {
 			this.result.assertWithDiagnostics(() -> consumer.accept(this.result.getResponseBody()));
+			return self();
+		}
+
+		@Override
+		public <T extends S, R> T value(@NonNull Function<@Nullable B, @Nullable R> bodyMapper, Consumer<? super R> consumer) {
+			this.result.assertWithDiagnostics(() -> {
+				B body = this.result.getResponseBody();
+				consumer.accept(bodyMapper.apply(body));
+			});
 			return self();
 		}
 
@@ -588,7 +636,7 @@ class DefaultWebTestClient implements WebTestClient {
 	}
 
 
-	private static class DefaultListBodySpec<E> extends DefaultBodySpec<List<@Nullable E>, ListBodySpec<E>>
+	private static class DefaultListBodySpec<E extends @Nullable Object> extends DefaultBodySpec<List<E>, ListBodySpec<E>>
 			implements ListBodySpec<E> {
 
 		DefaultListBodySpec(EntityExchangeResult<List<E>> result) {
@@ -597,7 +645,7 @@ class DefaultWebTestClient implements WebTestClient {
 
 		@Override
 		public ListBodySpec<E> hasSize(int size) {
-			List<@Nullable E> actual = getResult().getResponseBody();
+			List<E> actual = getResult().getResponseBody();
 			String message = "Response body does not contain " + size + " elements";
 			getResult().assertWithDiagnostics(() ->
 					AssertionErrors.assertEquals(message, size, (actual != null ? actual.size() : 0)));
@@ -606,9 +654,9 @@ class DefaultWebTestClient implements WebTestClient {
 
 		@Override
 		@SuppressWarnings("unchecked")
-		public ListBodySpec<E> contains(@Nullable E... elements) {
+		public ListBodySpec<E> contains(E... elements) {
 			List<E> expected = Arrays.asList(elements);
-			List<@Nullable E> actual = getResult().getResponseBody();
+			List<E> actual = getResult().getResponseBody();
 			String message = "Response body does not contain " + expected;
 			getResult().assertWithDiagnostics(() ->
 					AssertionErrors.assertTrue(message, (actual != null && actual.containsAll(expected))));
@@ -617,9 +665,9 @@ class DefaultWebTestClient implements WebTestClient {
 
 		@Override
 		@SuppressWarnings("unchecked")
-		public ListBodySpec<E> doesNotContain(@Nullable E... elements) {
+		public ListBodySpec<E> doesNotContain(E... elements) {
 			List<E> expected = Arrays.asList(elements);
-			List<@Nullable E> actual = getResult().getResponseBody();
+			List<E> actual = getResult().getResponseBody();
 			String message = "Response body should not have contained " + expected;
 			getResult().assertWithDiagnostics(() ->
 					AssertionErrors.assertTrue(message, (actual == null || !actual.containsAll(expected))));
@@ -627,7 +675,7 @@ class DefaultWebTestClient implements WebTestClient {
 		}
 
 		@Override
-		public EntityExchangeResult<List<@Nullable E>> returnResult() {
+		public EntityExchangeResult<List<E>> returnResult() {
 			return getResult();
 		}
 	}

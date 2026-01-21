@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,7 +50,6 @@ import org.springframework.util.LinkedCaseInsensitiveMap;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
-import org.springframework.web.util.UriComponentsBuilder;
 
 /**
  * Adapt {@link ServerHttpRequest} to the Servlet {@link HttpServletRequest}.
@@ -139,15 +138,15 @@ class ServletServerHttpRequest extends AbstractServerHttpRequest {
 		}
 		catch (URISyntaxException ex) {
 			if (hasQuery) {
+				String requestURL = servletRequest.getRequestURL().toString();
 				try {
-					// Maybe malformed query, try to parse and encode it
-					query = UriComponentsBuilder.fromUriString("?" + query).build().toUri().getRawQuery();
-					return new URI(servletRequest.getRequestURL().toString() + "?" + query);
+					// Maybe malformed query, try to encode it
+					return new URI(requestURL + "?" + encodeQuery(query));
 				}
 				catch (URISyntaxException ex2) {
 					try {
 						// Try leaving it out
-						return new URI(servletRequest.getRequestURL().toString());
+						return new URI(requestURL);
 					}
 					catch (URISyntaxException ex3) {
 						// ignore
@@ -159,9 +158,13 @@ class ServletServerHttpRequest extends AbstractServerHttpRequest {
 		}
 	}
 
+	private static String encodeQuery(String query) throws URISyntaxException {
+		// Avoid package cycle with web.utils
+		return new URI(null, null, "", query, null).getRawQuery();
+	}
+
 	@SuppressWarnings("NullAway") // Dataflow analysis limitation
 	private static HttpHeaders initHeaders(HttpHeaders headerValues, HttpServletRequest request) {
-
 		HttpHeaders headers = null;
 		MediaType contentType = null;
 		if (!StringUtils.hasLength(headerValues.getFirst(HttpHeaders.CONTENT_TYPE))) {
@@ -388,7 +391,6 @@ class ServletServerHttpRequest extends AbstractServerHttpRequest {
 			@Override
 			public void onError(Throwable throwable) {
 				RequestBodyPublisher.this.onError(throwable);
-
 			}
 		}
 	}

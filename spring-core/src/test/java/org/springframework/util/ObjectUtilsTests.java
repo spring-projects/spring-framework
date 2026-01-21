@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -267,6 +267,13 @@ class ObjectUtilsTests {
 	void nullSafeEqualsWithArrays() {
 		assertThat(ObjectUtils.nullSafeEquals(new String[] {"a", "b", "c"}, new String[] {"a", "b", "c"})).isTrue();
 		assertThat(ObjectUtils.nullSafeEquals(new int[] {1, 2, 3}, new int[] {1, 2, 3})).isTrue();
+		assertThat(ObjectUtils.nullSafeEquals(new long[] {1, 2, 3}, new long[] {1, 2, 3})).isTrue();
+		assertThat(ObjectUtils.nullSafeEquals(new short[] {1, 2, 3}, new short[] {1, 2, 3})).isTrue();
+		assertThat(ObjectUtils.nullSafeEquals(new byte[] {1, 2, 3}, new byte[] {1, 2, 3})).isTrue();
+		assertThat(ObjectUtils.nullSafeEquals(new float[] {1, 2, 3}, new float[] {1, 2, 3})).isTrue();
+		assertThat(ObjectUtils.nullSafeEquals(new double[] {1, 2, 3}, new double[] {1, 2, 3})).isTrue();
+		assertThat(ObjectUtils.nullSafeEquals(new char[] {1, 2, 3}, new char[] {1, 2, 3})).isTrue();
+		assertThat(ObjectUtils.nullSafeEquals(new boolean[] {true, false, true}, new boolean[] {true, false, true})).isTrue();
 	}
 
 	@Test
@@ -630,8 +637,8 @@ class ObjectUtilsTests {
 
 	@Test
 	void nullSafeToStringWithByteArray() {
-		byte[] array = {5, 8};
-		assertThat(ObjectUtils.nullSafeToString(array)).isEqualTo("{5, 8}");
+		byte[] array = {5, 38};
+		assertThat(ObjectUtils.nullSafeToString(array)).isEqualTo("{0526}");
 	}
 
 	@Test

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,9 @@ package org.springframework.messaging.tcp;
 
 import java.util.concurrent.CompletableFuture;
 
+import org.jspecify.annotations.Nullable;
+
+
 /**
  * A contract for establishing TCP connections.
  *
@@ -34,7 +37,7 @@ public interface TcpOperations<P> {
 	 * connection is successfully established
 	 * @since 6.0
 	 */
-	CompletableFuture<Void> connectAsync(TcpConnectionHandler<P> connectionHandler);
+	CompletableFuture<@Nullable Void> connectAsync(TcpConnectionHandler<P> connectionHandler);
 
 	/**
 	 * Open a new connection and a strategy for reconnecting if the connection fails.
@@ -44,7 +47,7 @@ public interface TcpOperations<P> {
 	 * initial connection is successfully established
 	 * @since 6.0
 	 */
-	CompletableFuture<Void> connectAsync(TcpConnectionHandler<P> connectionHandler, ReconnectStrategy reconnectStrategy);
+	CompletableFuture<@Nullable Void> connectAsync(TcpConnectionHandler<P> connectionHandler, ReconnectStrategy reconnectStrategy);
 
 	/**
 	 * Shut down and close any open connections.
@@ -52,6 +55,6 @@ public interface TcpOperations<P> {
 	 * connection is successfully closed
 	 * @since 6.0
 	 */
-	CompletableFuture<Void> shutdownAsync();
+	CompletableFuture<@Nullable Void> shutdownAsync();
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ import java.lang.annotation.Target;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
-import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -34,13 +34,15 @@ import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
-import okhttp3.mockwebserver.MockResponse;
-import okhttp3.mockwebserver.MockWebServer;
-import okhttp3.mockwebserver.RecordedRequest;
+import mockwebserver3.MockResponse;
+import mockwebserver3.MockWebServer;
+import mockwebserver3.RecordedRequest;
 import okio.Buffer;
 import org.apache.hc.client5.http.impl.async.HttpAsyncClientBuilder;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Named;
 import org.junit.jupiter.api.Test;
@@ -83,8 +85,8 @@ class ClientHttpConnectorTests {
 	}
 
 	@AfterEach
-	void stopServer() throws IOException {
-		server.shutdown();
+	void stopServer() {
+		server.close();
 	}
 
 	// Do not auto-close arguments since HttpComponentsClientHttpConnector implements
@@ -95,11 +97,10 @@ class ClientHttpConnectorTests {
 		URI uri = this.server.url("/").uri();
 
 		String responseBody = "bar\r\n";
-		prepareResponse(response -> {
-			response.setResponseCode(200);
-			response.addHeader("Baz", "Qux");
-			response.setBody(responseBody);
-		});
+		prepareResponse(builder -> builder
+				.code(200)
+				.addHeader("Baz", "Qux")
+				.body(responseBody));
 
 		String requestBody = "foo\r\n";
 		boolean requestHasBody = METHODS_WITH_BODY.contains(method);
@@ -143,9 +144,9 @@ class ClientHttpConnectorTests {
 
 		expectRequest(request -> {
 			assertThat(request.getMethod()).isEqualTo(method.name());
-			assertThat(request.getHeader("Foo")).isEqualTo("Bar");
+			assertThat(request.getHeaders().get("Foo")).isEqualTo("Bar");
 			if (requestHasBody) {
-				assertThat(request.getBody().readUtf8()).isEqualTo(requestBody);
+				assertThat(request.getBody().utf8()).isEqualTo(requestBody);
 			}
 		});
 	}
@@ -157,7 +158,7 @@ class ClientHttpConnectorTests {
 				stringBuffer("foo"),
 				Mono.error(error)
 		);
-		prepareResponse(response -> response.setResponseCode(200));
+		prepareResponse(builder -> builder.code(200));
 		Mono<ClientHttpResponse> futureResponse =
 				connector.connect(HttpMethod.POST, this.server.url("/").uri(), request -> request.writeWith(body));
 		StepVerifier.create(futureResponse)
@@ -168,7 +169,7 @@ class ClientHttpConnectorTests {
 	@ParameterizedConnectorTest
 	void cancelResponseBody(ClientHttpConnector connector) {
 		Buffer responseBody = randomBody(100);
-		prepareResponse(response -> response.setBody(responseBody));
+		prepareResponse(builder -> builder.body(responseBody));
 
 		ClientHttpResponse response = connector.connect(HttpMethod.POST, this.server.url("/").uri(),
 				ReactiveHttpOutputMessage::setComplete).block();
@@ -183,13 +184,12 @@ class ClientHttpConnectorTests {
 
 	@ParameterizedConnectorTest
 	void cookieExpireValueSetAsMaxAge(ClientHttpConnector connector) {
-		ZonedDateTime tomorrow = ZonedDateTime.now(ZoneId.of("UTC")).plusDays(1);
+		ZonedDateTime tomorrow = ZonedDateTime.now(ZoneOffset.UTC).plusDays(1);
 		String formattedDate = tomorrow.format(DateTimeFormatter.RFC_1123_DATE_TIME);
 
-		prepareResponse(response -> {
-			response.setResponseCode(200);
-			response.addHeader("Set-Cookie", "id=test; Expires= " + formattedDate + ";");
-		});
+		prepareResponse(builder -> builder
+				.code(200)
+				.addHeader("Set-Cookie", "id=test; Expires= " + formattedDate + ";"));
 		Mono<ClientHttpResponse> futureResponse =
 				connector.connect(HttpMethod.GET, this.server.url("/").uri(), ReactiveHttpOutputMessage::setComplete);
 		StepVerifier.create(futureResponse)
@@ -201,16 +201,33 @@ class ClientHttpConnectorTests {
 				.verifyComplete();
 	}
 
+	@ParameterizedConnectorTest
+	void partitionedCookieSupport(ClientHttpConnector connector) {
+		Assumptions.assumeFalse(connector instanceof JettyClientHttpConnector, "Jetty client does not support partitioned cookies");
+		Assumptions.assumeFalse(connector instanceof JdkClientHttpConnector, "JDK client does not support partitioned cookies");
+		prepareResponse(builder -> builder
+				.code(200)
+				.addHeader("Set-Cookie", "id=test; Partitioned;"));
+		Mono<ClientHttpResponse> futureResponse =
+				connector.connect(HttpMethod.GET, this.server.url("/").uri(), ReactiveHttpOutputMessage::setComplete);
+		StepVerifier.create(futureResponse)
+				.assertNext(response -> {
+							assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+							assertThat(response.getCookies().getFirst("id").isPartitioned()).isTrue();
+						}
+				)
+				.verifyComplete();
+	}
+
 	@Test
 	void disableCookieWithHttpComponents() {
 		ClientHttpConnector connector = new HttpComponentsClientHttpConnector(
 				HttpAsyncClientBuilder.create().disableCookieManagement().build()
 		);
 
-		prepareResponse(response -> {
-			response.setResponseCode(200);
-			response.addHeader("Set-Cookie", "id=test;");
-		});
+		prepareResponse(builder -> builder
+				.code(200)
+				.addHeader("Set-Cookie", "id=test;"));
 		Mono<ClientHttpResponse> futureResponse =
 				connector.connect(HttpMethod.GET, this.server.url("/").uri(), ReactiveHttpOutputMessage::setComplete);
 		StepVerifier.create(futureResponse)
@@ -234,10 +251,9 @@ class ClientHttpConnectorTests {
 		return responseBody;
 	}
 
-	private void prepareResponse(Consumer<MockResponse> consumer) {
-		MockResponse response = new MockResponse();
-		consumer.accept(response);
-		this.server.enqueue(response);
+	private void prepareResponse(Function<MockResponse.Builder, MockResponse.Builder> f) {
+		MockResponse.Builder builder = new MockResponse.Builder();
+		this.server.enqueue(f.apply(builder).build());
 	}
 
 	private void expectRequest(Consumer<RecordedRequest> consumer) {

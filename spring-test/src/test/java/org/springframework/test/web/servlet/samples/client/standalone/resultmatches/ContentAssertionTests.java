@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.test.web.servlet.samples.client.standalone.resultmatches;
 
+import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.http.MediaType;
@@ -77,11 +78,12 @@ class ContentAssertionTests {
 		testClient.get().uri("/handle").accept(TEXT_PLAIN)
 				.exchange()
 				.expectStatus().isOk()
-				.expectBody(String.class).value(equalTo("Hello world!"));
+				.expectBody(String.class).value(v -> MatcherAssert.assertThat(v, equalTo("Hello world!")));
 		testClient.get().uri("/handleUtf8")
 				.exchange()
 				.expectStatus().isOk()
-				.expectBody(String.class).value(equalTo("\u3053\u3093\u306b\u3061\u306f\u4e16\u754c\uff01"));
+				.expectBody(String.class).value(v ->
+						MatcherAssert.assertThat(v, equalTo("\u3053\u3093\u306b\u3061\u306f\u4e16\u754c\uff01")));
 	}
 
 	@Test
@@ -104,7 +106,7 @@ class ContentAssertionTests {
 		testClient.get().uri("/handle").accept(TEXT_PLAIN)
 				.exchange()
 				.expectStatus().isOk()
-				.expectBody(String.class).value(containsString("world"));
+				.expectBody(String.class).value(v -> MatcherAssert.assertThat(v, containsString("world")));
 	}
 
 	@Test
@@ -113,7 +115,7 @@ class ContentAssertionTests {
 				.exchange()
 				.expectStatus().isOk()
 				.expectHeader().contentType("text/plain;charset=ISO-8859-1")
-				.expectBody(String.class).value(containsString("world"));
+				.expectBody(String.class).value(v -> MatcherAssert.assertThat(v, containsString("world")));
 
 		testClient.get().uri("/handleUtf8")
 				.exchange()

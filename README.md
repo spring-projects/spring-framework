@@ -27,7 +27,7 @@ See the [Build from Source](https://github.com/spring-projects/spring-framework/
 
 ## Continuous Integration Builds
 
-Information regarding CI builds can be found in the [Spring Framework Concourse pipeline](ci/README.adoc) documentation.
+CI builds are defined with [GitHub Actions workflows](.github/workflows).
 
 ## Stay in Touch
 

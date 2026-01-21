@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -81,7 +81,7 @@ class ResourcesBeanDefinitionParser implements BeanDefinitionParser {
 
 	private static final String RESOURCE_URL_PROVIDER = "mvcResourceUrlProvider";
 
-	private static final boolean webJarsPresent = ClassUtils.isPresent(
+	private static final boolean WEB_JARS_PRESENT = ClassUtils.isPresent(
 			"org.webjars.WebJarVersionLocator", ResourcesBeanDefinitionParser.class.getClassLoader());
 
 
@@ -325,7 +325,7 @@ class ResourcesBeanDefinitionParser implements BeanDefinitionParser {
 		}
 
 		if (isAutoRegistration) {
-			if (webJarsPresent) {
+			if (WEB_JARS_PRESENT) {
 				RootBeanDefinition webJarsResolverDef = new RootBeanDefinition(LiteWebJarsResourceResolver.class);
 				webJarsResolverDef.setSource(source);
 				webJarsResolverDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);

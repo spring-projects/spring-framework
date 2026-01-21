@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import java.util.Comparator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
@@ -93,7 +94,7 @@ import org.springframework.validation.Validator;
 public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHandler<SimpMessageMappingInfo>
 		implements EmbeddedValueResolverAware, SmartLifecycle {
 
-	private static final boolean reactorPresent = ClassUtils.isPresent(
+	private static final boolean REACTOR_PRESENT = ClassUtils.isPresent(
 			"reactor.core.publisher.Flux", SimpAnnotationMethodMessageHandler.class.getClassLoader());
 
 
@@ -343,7 +344,7 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 		// Single-purpose return value types
 
 		handlers.add(new CompletableFutureReturnValueHandler());
-		if (reactorPresent) {
+		if (REACTOR_PRESENT) {
 			handlers.add(new ReactiveReturnValueHandler());
 		}
 
@@ -422,13 +423,13 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 	}
 
 	private SimpMessageMappingInfo createMessageMappingCondition(String[] destinations) {
-		@Nullable String[] resolvedDestinations = resolveEmbeddedValuesInDestinations(destinations);
+		String[] resolvedDestinations = resolveEmbeddedValuesInDestinations(destinations);
 		return new SimpMessageMappingInfo(SimpMessageTypeMessageCondition.MESSAGE,
 				new DestinationPatternsMessageCondition(resolvedDestinations, this.pathMatcher));
 	}
 
 	private SimpMessageMappingInfo createSubscribeMappingCondition(String[] destinations) {
-		@Nullable String[] resolvedDestinations = resolveEmbeddedValuesInDestinations(destinations);
+		String[] resolvedDestinations = resolveEmbeddedValuesInDestinations(destinations);
 		return new SimpMessageMappingInfo(SimpMessageTypeMessageCondition.SUBSCRIBE,
 				new DestinationPatternsMessageCondition(resolvedDestinations, this.pathMatcher));
 	}
@@ -438,13 +439,13 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 	 * @return a new array with updated destinations
 	 * @since 4.2
 	 */
-	protected @Nullable String[] resolveEmbeddedValuesInDestinations(String[] destinations) {
+	protected String[] resolveEmbeddedValuesInDestinations(String[] destinations) {
 		if (this.valueResolver == null) {
 			return destinations;
 		}
-		@Nullable String[] result = new String[destinations.length];
+		String[] result = new String[destinations.length];
 		for (int i = 0; i < destinations.length; i++) {
-			result[i] = this.valueResolver.resolveStringValue(destinations[i]);
+			result[i] = Objects.requireNonNull(this.valueResolver.resolveStringValue(destinations[i]));
 		}
 		return result;
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -128,7 +128,7 @@ class ConfigurationClassAndBeanMethodTests {
 			.startsWith("ConfigurationClass: beanName 'Config1', class path resource");
 
 		List<BeanMethod> beanMethods = getBeanMethods(configurationClass);
-		String prefix = "BeanMethod: " + Config1.class.getName();
+		String prefix = "BeanMethod: java.lang.String " + Config1.class.getName();
 		assertThat(beanMethods.get(0).toString()).isEqualTo(prefix + ".bean0()");
 		assertThat(beanMethods.get(1).toString()).isEqualTo(prefix + ".bean1(java.lang.String)");
 		assertThat(beanMethods.get(2).toString()).isEqualTo(prefix + ".bean2(java.lang.String,java.lang.Integer)");

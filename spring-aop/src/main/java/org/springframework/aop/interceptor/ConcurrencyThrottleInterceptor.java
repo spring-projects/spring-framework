@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ import org.springframework.util.ConcurrencyThrottleSupport;
  *
  * <p>Can be applied to methods of local services that involve heavy use
  * of system resources, in a scenario where it is more efficient to
- * throttle concurrency for a specific service rather than restricting
+ * throttle concurrency for a specific service rather than restrict
  * the entire thread pool (for example, the web container's thread pool).
  *
  * <p>The default concurrency limit of this interceptor is 1.
@@ -44,9 +44,23 @@ import org.springframework.util.ConcurrencyThrottleSupport;
 public class ConcurrencyThrottleInterceptor extends ConcurrencyThrottleSupport
 		implements MethodInterceptor, Serializable {
 
+	/**
+	 * Create a default {@code ConcurrencyThrottleInterceptor}
+	 * with concurrency limit 1.
+	 */
 	public ConcurrencyThrottleInterceptor() {
-		setConcurrencyLimit(1);
+		this(1);
 	}
+
+	/**
+	 * Create a {@code ConcurrencyThrottleInterceptor}
+	 * with the given concurrency limit.
+	 * @since 7.0
+	 */
+	public ConcurrencyThrottleInterceptor(int concurrencyLimit) {
+		setConcurrencyLimit(concurrencyLimit);
+	}
+
 
 	@Override
 	public @Nullable Object invoke(MethodInvocation methodInvocation) throws Throwable {

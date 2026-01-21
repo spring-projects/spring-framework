@@ -62,6 +62,7 @@ The following example shows C3P0 configuration:
 
 include-code::./ComboPooledDataSourceConfiguration[tag=snippet,indent=0]
 
+
 [[jdbc-DataSourceUtils]]
 == Using `DataSourceUtils`
 
@@ -196,6 +197,3 @@ In terms of exception behavior, `JdbcTransactionManager` is roughly equivalent t
 `JpaTransactionManager` and also to `R2dbcTransactionManager`, serving as an immediate
 companion/replacement for each other. `DataSourceTransactionManager` on the other hand
 is equivalent to `JtaTransactionManager` and can serve as a direct replacement there.
-
-
-

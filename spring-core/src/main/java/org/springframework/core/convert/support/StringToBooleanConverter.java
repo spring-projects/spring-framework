@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ import org.springframework.core.convert.converter.Converter;
  * @author Sam Brannen
  * @since 3.0
  */
-final class StringToBooleanConverter implements Converter<String, Boolean> {
+final class StringToBooleanConverter implements Converter<String, @Nullable Boolean> {
 
 	private static final Set<String> trueValues = Set.of("true", "on", "yes", "1");
 

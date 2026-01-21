@@ -117,6 +117,8 @@ public class BeanGenerator extends AbstractClassGenerator
 			types[i] = (Type)props.get(names[i]);
 		}
 		ClassEmitter ce = new ClassEmitter(v);
+		// Byte code level cannot be higher than 1.8 due to STATICHOOK methods
+		// which set static final fields outside the initializer method <clinit>.
 		ce.begin_class(Constants.V1_8,
 					   Constants.ACC_PUBLIC,
 					   getClassName(),

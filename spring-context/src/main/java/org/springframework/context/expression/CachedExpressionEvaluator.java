@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,8 +38,6 @@ public abstract class CachedExpressionEvaluator {
 
 	private final SpelExpressionParser parser;
 
-	private final ParameterNameDiscoverer parameterNameDiscoverer = new DefaultParameterNameDiscoverer();
-
 
 	/**
 	 * Create a new instance with the default {@link SpelExpressionParser}.
@@ -69,7 +67,7 @@ public abstract class CachedExpressionEvaluator {
 	 * @since 4.3
 	 */
 	protected ParameterNameDiscoverer getParameterNameDiscoverer() {
-		return this.parameterNameDiscoverer;
+		return DefaultParameterNameDiscoverer.getSharedInstance();
 	}
 
 	/**

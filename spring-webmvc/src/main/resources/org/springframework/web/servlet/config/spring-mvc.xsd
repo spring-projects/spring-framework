@@ -15,7 +15,6 @@
 		<xsd:annotation>
 			<xsd:documentation source="java:org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter"><![CDATA[
 	Configures the annotation-driven Spring MVC Controller programming model.
-	Note that this tag works in Web MVC only, not in Portlet MVC!
 
 	See org.springframework.web.servlet.config.annotation.EnableWebMvc javadoc for details
 	on code-based alternatives to enabling annotation-driven Spring MVC support.
@@ -1202,9 +1201,7 @@
 					<xsd:documentation><![CDATA[
 	When set to false, use thread-local ScriptEngine instances instead of one single shared
 	instance. This flag should be set to false for those using non thread-safe script engines
-	with templating libraries not designed for concurrency, like Handlebars or React
-	running on Nashorn for example. In this case, Java 8u60 or greater is required due to
-	this bug: https://bugs.openjdk.java.net/browse/JDK-8076099.
+	with templating libraries not designed for concurrency.
 					]]></xsd:documentation>
 				</xsd:annotation>
 			</xsd:attribute>

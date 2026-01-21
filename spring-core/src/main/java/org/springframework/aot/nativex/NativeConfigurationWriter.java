@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,12 +44,12 @@ public abstract class NativeConfigurationWriter {
 	}
 
 	private boolean hasAnyHint(RuntimeHints hints) {
-		return (hints.serialization().javaSerializationHints().findAny().isPresent()
-				|| hints.proxies().jdkProxyHints().findAny().isPresent()
-				|| hints.reflection().typeHints().findAny().isPresent()
-				|| hints.resources().resourcePatternHints().findAny().isPresent()
-				|| hints.resources().resourceBundleHints().findAny().isPresent()
-				|| hints.jni().typeHints().findAny().isPresent());
+		return (hints.serialization().javaSerializationHints().findAny().isPresent() ||
+				hints.proxies().jdkProxyHints().findAny().isPresent() ||
+				hints.reflection().typeHints().findAny().isPresent() ||
+				hints.resources().resourcePatternHints().findAny().isPresent() ||
+				hints.resources().resourceBundleHints().findAny().isPresent() ||
+				hints.jni().typeHints().findAny().isPresent());
 	}
 
 	/**

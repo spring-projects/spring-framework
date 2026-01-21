@@ -4,6 +4,7 @@ apply plugin: "kotlin"
 
 dependencies {
 	api(project(":spring-core"))
+	compileOnly("com.google.code.findbugs:jsr305") // for Reactor
 	optional(project(":spring-aop"))
 	optional(project(":spring-beans"))
 	optional(project(":spring-context"))
@@ -63,6 +64,7 @@ dependencies {
 	testImplementation(testFixtures(project(":spring-web")))
 	testImplementation("com.fasterxml.jackson.core:jackson-databind")
 	testImplementation("com.rometools:rome")
+	testImplementation("com.squareup.okhttp3:mockwebserver3")
 	testImplementation("com.thoughtworks.xstream:xstream")
 	testImplementation("de.bechte.junit:junit-hierarchicalcontextrunner")
 	testImplementation("io.projectreactor.netty:reactor-netty-http")
@@ -72,15 +74,15 @@ dependencies {
 	testImplementation("jakarta.mail:jakarta.mail-api")
 	testImplementation("jakarta.validation:jakarta.validation-api")
 	testImplementation("javax.cache:cache-api")
-	testImplementation("org.apache.httpcomponents:httpclient") {
-		exclude group: "commons-logging", module: "commons-logging"
-	}
+	testImplementation("org.apache.httpcomponents.client5:httpclient5")
 	testImplementation("org.awaitility:awaitility")
 	testImplementation("org.easymock:easymock")
+	testImplementation("org.eclipse.jetty:jetty-reactive-httpclient")
 	testImplementation("org.hibernate.orm:hibernate-core")
 	testImplementation("org.hibernate.validator:hibernate-validator")
 	testImplementation("org.hsqldb:hsqldb")
 	testImplementation("org.junit.platform:junit-platform-testkit")
+	testImplementation("tools.jackson.core:jackson-databind")
 	testRuntimeOnly("com.sun.xml.bind:jaxb-core")
 	testRuntimeOnly("com.sun.xml.bind:jaxb-impl")
 	testRuntimeOnly("org.glassfish:jakarta.el")
@@ -104,14 +106,14 @@ test {
 	description = "Runs JUnit 4, JUnit Jupiter, and TestNG tests."
 	useJUnitPlatform {
 		includeEngines "junit-vintage", "junit-jupiter", "testng"
-		excludeTags "failing-test-case"
 	}
-	// We use `include` instead of `filter.includeTestsMatching`, since
-	// the latter results in some tests being executed/reported
-	// multiple times.
-	include(["**/*Tests.class", "**/*Test.class"])
+	// `include` test filters and system properties are configured in
+	// org.springframework.build.TestConventions in buildSrc.
 	filter.excludeTestsMatching("*TestCase")
-	systemProperty("testGroups", project.properties.get("testGroups"))
-	// Java Util Logging for the JUnit Platform.
+	// Since spring-test relies on the Vintage test engine for JUnit 4 support,
+	// we disable reporting of the "deprecated" discovery issue, because that
+	// would otherwise fail the build.
+	systemProperty("junit.vintage.discovery.issue.reporting.enabled", "false")
+	// Optionally configure Java Util Logging for the JUnit Platform.
 	// systemProperty("java.util.logging.manager", "org.apache.logging.log4j.jul.LogManager")
 }

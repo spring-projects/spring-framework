@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,6 +43,7 @@ import org.springframework.messaging.converter.ByteArrayMessageConverter;
 import org.springframework.messaging.converter.CompositeMessageConverter;
 import org.springframework.messaging.converter.DefaultContentTypeResolver;
 import org.springframework.messaging.converter.GsonMessageConverter;
+import org.springframework.messaging.converter.JacksonJsonMessageConverter;
 import org.springframework.messaging.converter.JsonbMessageConverter;
 import org.springframework.messaging.converter.MappingJackson2MessageConverter;
 import org.springframework.messaging.converter.StringMessageConverter;
@@ -98,6 +99,7 @@ import org.springframework.web.socket.sockjs.support.SockJsHttpRequestHandler;
  *
  * @author Brian Clozel
  * @author Rossen Stoyanchev
+ * @author Sebastien Deleuze
  * @since 4.0
  */
 class MessageBrokerBeanDefinitionParser implements BeanDefinitionParser {
@@ -114,21 +116,24 @@ class MessageBrokerBeanDefinitionParser implements BeanDefinitionParser {
 
 	private static final int DEFAULT_MAPPING_ORDER = 1;
 
-	private static final boolean jackson2Present;
+	private static final boolean JACKSON_PRESENT;
 
-	private static final boolean gsonPresent;
+	private static final boolean JACKSON_2_PRESENT;
 
-	private static final boolean jsonbPresent;
+	private static final boolean GSON_PRESENT;
 
-	private static final boolean javaxValidationPresent;
+	private static final boolean JSONB_PRESENT;
+
+	private static final boolean BEAN_VALIDATION_PRESENT;
 
 	static {
 		ClassLoader classLoader = MessageBrokerBeanDefinitionParser.class.getClassLoader();
-		jackson2Present = ClassUtils.isPresent("com.fasterxml.jackson.databind.ObjectMapper", classLoader) &&
+		JACKSON_PRESENT = ClassUtils.isPresent("tools.jackson.databind.ObjectMapper", classLoader);
+		JACKSON_2_PRESENT = ClassUtils.isPresent("com.fasterxml.jackson.databind.ObjectMapper", classLoader) &&
 				ClassUtils.isPresent("com.fasterxml.jackson.core.JsonGenerator", classLoader);
-		gsonPresent = ClassUtils.isPresent("com.google.gson.Gson", classLoader);
-		jsonbPresent = ClassUtils.isPresent("jakarta.json.bind.Jsonb", classLoader);
-		javaxValidationPresent = ClassUtils.isPresent("jakarta.validation.Validator", classLoader);
+		GSON_PRESENT = ClassUtils.isPresent("com.google.gson.Gson", classLoader);
+		JSONB_PRESENT = ClassUtils.isPresent("jakarta.json.bind.Jsonb", classLoader);
+		BEAN_VALIDATION_PRESENT = ClassUtils.isPresent("jakarta.validation.Validator", classLoader);
 	}
 
 
@@ -488,6 +493,7 @@ class MessageBrokerBeanDefinitionParser implements BeanDefinitionParser {
 		return new RuntimeBeanReference(beanName);
 	}
 
+	@SuppressWarnings("removal")
 	private RuntimeBeanReference registerMessageConverter(
 			Element element, ParserContext context, @Nullable Object source) {
 
@@ -504,7 +510,14 @@ class MessageBrokerBeanDefinitionParser implements BeanDefinitionParser {
 			converters.setSource(source);
 			converters.add(new RootBeanDefinition(StringMessageConverter.class));
 			converters.add(new RootBeanDefinition(ByteArrayMessageConverter.class));
-			if (jackson2Present) {
+			if (JACKSON_PRESENT) {
+				RootBeanDefinition jacksonConverterDef = new RootBeanDefinition(JacksonJsonMessageConverter.class);
+				RootBeanDefinition resolverDef = new RootBeanDefinition(DefaultContentTypeResolver.class);
+				resolverDef.getPropertyValues().add("defaultMimeType", MimeTypeUtils.APPLICATION_JSON);
+				jacksonConverterDef.getPropertyValues().add("contentTypeResolver", resolverDef);
+				converters.add(jacksonConverterDef);
+			}
+			else if (JACKSON_2_PRESENT) {
 				RootBeanDefinition jacksonConverterDef = new RootBeanDefinition(MappingJackson2MessageConverter.class);
 				RootBeanDefinition resolverDef = new RootBeanDefinition(DefaultContentTypeResolver.class);
 				resolverDef.getPropertyValues().add("defaultMimeType", MimeTypeUtils.APPLICATION_JSON);
@@ -517,10 +530,10 @@ class MessageBrokerBeanDefinitionParser implements BeanDefinitionParser {
 				jacksonConverterDef.getPropertyValues().add("objectMapper", jacksonFactoryDef);
 				converters.add(jacksonConverterDef);
 			}
-			else if (gsonPresent) {
+			else if (GSON_PRESENT) {
 				converters.add(new RootBeanDefinition(GsonMessageConverter.class));
 			}
-			else if (jsonbPresent) {
+			else if (JSONB_PRESENT) {
 				converters.add(new RootBeanDefinition(JsonbMessageConverter.class));
 			}
 		}
@@ -592,7 +605,7 @@ class MessageBrokerBeanDefinitionParser implements BeanDefinitionParser {
 		if (messageBrokerElement.hasAttribute("validator")) {
 			return new RuntimeBeanReference(messageBrokerElement.getAttribute("validator"));
 		}
-		else if (javaxValidationPresent) {
+		else if (BEAN_VALIDATION_PRESENT) {
 			RootBeanDefinition validatorDef = new RootBeanDefinition(
 					"org.springframework.validation.beanvalidation.OptionalValidatorFactoryBean");
 			validatorDef.setSource(source);

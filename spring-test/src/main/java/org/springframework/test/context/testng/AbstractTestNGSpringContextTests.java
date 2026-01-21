@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -73,7 +73,7 @@ public abstract class AbstractTestNGSpringContextTests implements IHookable, App
 
 	private final TestContextManager testContextManager;
 
-	private @Nullable Throwable testException;
+	private final ThreadLocal<@Nullable Throwable> testException = new ThreadLocal<>();
 
 
 	/**
@@ -139,31 +139,33 @@ public abstract class AbstractTestNGSpringContextTests implements IHookable, App
 	public void run(IHookCallBack callBack, ITestResult testResult) {
 		Method testMethod = testResult.getMethod().getConstructorOrMethod().getMethod();
 		boolean beforeCallbacksExecuted = false;
+		Throwable currentException = null;
 
 		try {
 			this.testContextManager.beforeTestExecution(this, testMethod);
 			beforeCallbacksExecuted = true;
 		}
 		catch (Throwable ex) {
-			this.testException = ex;
+			currentException = ex;
 		}
 
 		if (beforeCallbacksExecuted) {
 			callBack.runTestMethod(testResult);
-			this.testException = getTestResultException(testResult);
+			currentException = getTestResultException(testResult);
 		}
 
 		try {
-			this.testContextManager.afterTestExecution(this, testMethod, this.testException);
+			this.testContextManager.afterTestExecution(this, testMethod, currentException);
 		}
 		catch (Throwable ex) {
-			if (this.testException == null) {
-				this.testException = ex;
+			if (currentException == null) {
+				currentException = ex;
 			}
 		}
 
-		if (this.testException != null) {
-			throwAsUncheckedException(this.testException);
+		if (currentException != null) {
+			this.testException.set(currentException);
+			throwAsUncheckedException(currentException);
 		}
 	}
 
@@ -178,10 +180,10 @@ public abstract class AbstractTestNGSpringContextTests implements IHookable, App
 	@AfterMethod(alwaysRun = true)
 	protected void springTestContextAfterTestMethod(Method testMethod) throws Exception {
 		try {
-			this.testContextManager.afterTestMethod(this, testMethod, this.testException);
+			this.testContextManager.afterTestMethod(this, testMethod, this.testException.get());
 		}
 		finally {
-			this.testException = null;
+			this.testException.remove();
 		}
 	}
 

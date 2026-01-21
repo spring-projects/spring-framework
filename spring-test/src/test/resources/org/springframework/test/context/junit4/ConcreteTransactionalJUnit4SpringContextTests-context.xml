@@ -4,7 +4,7 @@
 	xsi:schemaLocation="http://www.springframework.org/schema/jdbc https://www.springframework.org/schema/jdbc/spring-jdbc.xsd
 		http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd">
 
-	<import resource="transactionalTests-context.xml" />
+	<import resource="classpath:/org/springframework/test/context/transaction/transactionalTests-context.xml" />
 
 	<jdbc:initialize-database data-source="dataSource" >
 		<jdbc:script location="classpath:/org/springframework/test/jdbc/data.sql"/>

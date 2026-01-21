@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,8 @@
 
 package org.springframework.web.socket.client.standard;
 
-import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.URI;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -149,12 +147,10 @@ public class StandardWebSocketClient extends AbstractWebSocketClient {
 			HttpHeaders headers, final URI uri, List<String> protocols,
 			List<WebSocketExtension> extensions, Map<String, Object> attributes) {
 
-		int port = getPort(uri);
-		InetSocketAddress localAddress = new InetSocketAddress(getLocalHost(), port);
-		InetSocketAddress remoteAddress = new InetSocketAddress(uri.getHost(), port);
+		InetSocketAddress remoteAddress = new InetSocketAddress(uri.getHost(), getPort(uri));
 
-		StandardWebSocketSession session = new StandardWebSocketSession(headers,
-				attributes, localAddress, remoteAddress);
+		StandardWebSocketSession session =
+				new StandardWebSocketSession(headers, attributes, null, remoteAddress);
 
 		ClientEndpointConfig endpointConfig = ClientEndpointConfig.Builder.create()
 				.configurator(new StandardWebSocketClientConfigurator(headers))
@@ -186,15 +182,6 @@ public class StandardWebSocketClient extends AbstractWebSocketClient {
 			result.add(new WebSocketToStandardExtensionAdapter(extension));
 		}
 		return result;
-	}
-
-	private static InetAddress getLocalHost() {
-		try {
-			return InetAddress.getLocalHost();
-		}
-		catch (UnknownHostException ex) {
-			return InetAddress.getLoopbackAddress();
-		}
 	}
 
 	private static int getPort(URI uri) {

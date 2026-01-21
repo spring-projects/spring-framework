@@ -5,7 +5,7 @@
 
 The following table shows the supported controller method arguments.
 
-Reactive types (Reactor, RxJava, xref:web-reactive.adoc#webflux-reactive-libraries[or other]) are
+Reactive types (Reactor, RxJava, xref:web/webflux-reactive-libraries.adoc[or other]) are
 supported on arguments that require blocking I/O (for example, reading the request body) to
 be resolved. This is marked in the Description column. Reactive types are not expected
 on arguments that do not require blocking.
@@ -114,8 +114,6 @@ and others) and is equivalent to `required=false`.
 | Any other argument
 | If a method argument is not matched to any of the above, it is, by default, resolved as
   a `@RequestParam` if it is a simple type, as determined by
-  {spring-framework-api}/beans/BeanUtils.html#isSimpleProperty-java.lang.Class-[BeanUtils#isSimpleProperty],
+  {spring-framework-api}/beans/BeanUtils.html#isSimpleProperty(java.lang.Class)[BeanUtils#isSimpleProperty],
   or as a `@ModelAttribute`, otherwise.
 |===
-
-

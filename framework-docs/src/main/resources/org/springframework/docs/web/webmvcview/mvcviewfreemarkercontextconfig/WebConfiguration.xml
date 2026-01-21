@@ -1,0 +1,29 @@
+<!-- tag::snippet[] -->
+<beans xmlns="http://www.springframework.org/schema/beans"
+	   xmlns:mvc="http://www.springframework.org/schema/mvc"
+	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xsi:schemaLocation="
+			http://www.springframework.org/schema/beans
+			https://www.springframework.org/schema/beans/spring-beans.xsd
+			http://www.springframework.org/schema/mvc
+			https://www.springframework.org/schema/mvc/spring-mvc.xsd">
+
+	<mvc:view-resolvers>
+		<mvc:freemarker/>
+	</mvc:view-resolvers>
+
+	<!-- Configure FreeMarker... -->
+	<mvc:freemarker-configurer>
+		<mvc:template-loader-path location="/WEB-INF/freemarker"/>
+	</mvc:freemarker-configurer>
+
+	<!-- Alternatively, you can also declare the FreeMarkerConfigurer bean for full control over all properties -->
+	<!--
+	<bean id="freemarkerConfig" class="org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer">
+		<property name="templateLoaderPath" value="/WEB-INF/freemarker/"/>
+		<property name="defaultEncoding" value="UTF-8"/>
+	</bean>
+	-->
+
+</beans>
+<!-- end::snippet[] -->

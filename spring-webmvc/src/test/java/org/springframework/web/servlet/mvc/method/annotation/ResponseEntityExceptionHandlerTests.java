@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -75,7 +75,7 @@ import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
 import org.springframework.web.testfixture.servlet.MockServletConfig;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.BDDMockito.mock;
+import static org.mockito.Mockito.mock;
 
 /**
  * Tests for {@link ResponseEntityExceptionHandler}.
@@ -97,22 +97,21 @@ class ResponseEntityExceptionHandlerTests {
 	private WebRequest request = new ServletWebRequest(this.servletRequest, this.servletResponse);
 
 
-	@SuppressWarnings("unchecked")
 	@Test
 	void supportsAllDefaultHandlerExceptionResolverExceptionTypes() throws Exception {
-
 		ExceptionHandler annotation = ResponseEntityExceptionHandler.class
 				.getMethod("handleException", Exception.class, WebRequest.class)
 				.getAnnotation(ExceptionHandler.class);
+		Class<?>[] exceptionTypes = annotation.value();
 
 		Arrays.stream(DefaultHandlerExceptionResolver.class.getDeclaredMethods())
 				.filter(method -> method.getName().startsWith("handle") && (method.getParameterCount() == 4))
 				.filter(method -> !method.getName().equals("handleErrorResponse"))
 				.filter(method -> !method.getName().equals("handleDisconnectedClientException"))
 				.map(method -> method.getParameterTypes()[0])
-				.forEach(exceptionType -> assertThat(annotation.value())
+				.forEach(exceptionType -> assertThat(exceptionTypes)
 						.as("@ExceptionHandler is missing declaration for " + exceptionType.getName())
-						.contains((Class<Exception>) exceptionType));
+						.contains(exceptionType));
 	}
 
 	@Test
@@ -246,7 +245,7 @@ class ResponseEntityExceptionHandlerTests {
 			StaticMessageSource messageSource = new StaticMessageSource();
 			messageSource.addMessage(
 					ErrorResponse.getDefaultDetailMessageCode(TypeMismatchException.class, null), locale,
-					"Failed to set {0} to value: {1}");
+					"Failed to set {0} to value: {1} for type {2}");
 
 			this.exceptionHandler.setMessageSource(messageSource);
 
@@ -254,7 +253,7 @@ class ResponseEntityExceptionHandlerTests {
 					new TypeMismatchException(new PropertyChangeEvent(this, "name", "John", "James"), String.class));
 
 			ProblemDetail body = (ProblemDetail) entity.getBody();
-			assertThat(body.getDetail()).isEqualTo("Failed to set name to value: James");
+			assertThat(body.getDetail()).isEqualTo("Failed to set name to value: James for type String");
 		}
 		finally {
 			LocaleContextHolder.resetLocaleContext();
@@ -306,7 +305,7 @@ class ResponseEntityExceptionHandlerTests {
 
 	@Test
 	void noResourceFoundException() {
-		testException(new NoResourceFoundException(HttpMethod.GET, "/resource"));
+		testException(new NoResourceFoundException(HttpMethod.GET, "/context/resource", "/resource"));
 	}
 
 	@Test

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -98,9 +98,10 @@ public class JettyWebSocketHandlerAdapter implements Session.Listener {
 	}
 
 	@Override
-	public void onWebSocketClose(int statusCode, String reason) {
+	public void onWebSocketClose(int statusCode, String reason, Callback callback) {
 		Assert.state(this.delegateSession != null, "No delegate session available");
 		this.delegateSession.handleClose(CloseStatus.create(statusCode, reason));
+		callback.succeed();
 	}
 
 	@Override
@@ -115,7 +116,6 @@ public class JettyWebSocketHandlerAdapter implements Session.Listener {
 		private final DataBuffer delegate;
 
 		private final Callback callback;
-
 
 		public JettyCallbackDataBuffer(DataBuffer delegate, Callback callback) {
 			Assert.notNull(delegate, "'delegate` must not be null");
@@ -162,7 +162,7 @@ public class JettyWebSocketHandlerAdapter implements Session.Listener {
 		}
 
 		@Override
-		@Deprecated
+		@Deprecated(since = "6.0")
 		public DataBuffer capacity(int capacity) {
 			this.delegate.capacity(capacity);
 			return this;
@@ -249,7 +249,7 @@ public class JettyWebSocketHandlerAdapter implements Session.Listener {
 		}
 
 		@Override
-		@Deprecated
+		@Deprecated(since = "6.0")
 		public DataBuffer slice(int index, int length) {
 			DataBuffer delegateSlice = this.delegate.slice(index, length);
 			return new JettyCallbackDataBuffer(delegateSlice, this.callback);
@@ -262,19 +262,19 @@ public class JettyWebSocketHandlerAdapter implements Session.Listener {
 		}
 
 		@Override
-		@Deprecated
+		@Deprecated(since = "6.0")
 		public ByteBuffer asByteBuffer() {
 			return this.delegate.asByteBuffer();
 		}
 
 		@Override
-		@Deprecated
+		@Deprecated(since = "6.0")
 		public ByteBuffer asByteBuffer(int index, int length) {
 			return this.delegate.asByteBuffer(index, length);
 		}
 
 		@Override
-		@Deprecated
+		@Deprecated(since = "6.0.5")
 		public ByteBuffer toByteBuffer(int index, int length) {
 			return this.delegate.toByteBuffer(index, length);
 		}

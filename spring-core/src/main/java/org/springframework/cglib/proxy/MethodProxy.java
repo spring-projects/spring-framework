@@ -62,8 +62,8 @@ public class MethodProxy {
 			try {
 				proxy.init();
 			}
-			catch (CodeGenerationException ex) {
-				// Ignore - to be retried when actually needed later on (possibly not at all)
+			catch (CodeGenerationException ignored) {
+				// to be retried when actually needed later on (possibly not at all)
 			}
 		}
 		// SPRING PATCH END

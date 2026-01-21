@@ -180,6 +180,3 @@ Typically, `@MessageExceptionHandler` methods apply within the `@Controller` cla
 more globally (across controllers), you can declare them in a class marked with
 `@ControllerAdvice`. This is comparable to the
 xref:web/webmvc/mvc-controller/ann-advice.adoc[similar support] available in Spring MVC.
-
-
-

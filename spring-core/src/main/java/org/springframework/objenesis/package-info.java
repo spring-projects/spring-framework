@@ -12,4 +12,7 @@
  * <a href="http://objenesis.org/tutorial.html">Objenesis docs</a>
  * for details when working with these classes.
  */
+@NullUnmarked
 package org.springframework.objenesis;
+
+import org.jspecify.annotations.NullUnmarked;

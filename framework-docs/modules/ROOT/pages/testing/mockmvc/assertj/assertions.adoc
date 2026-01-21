@@ -17,6 +17,7 @@ has not been handled and is thrown as is. You can still use `.hasFailed()` and
 `.failure()` but any attempt to access part of the result will throw an exception as
 the exchange hasn't completed.
 
+
 [[mockmvc-tester-assertions-json]]
 == JSON Support
 

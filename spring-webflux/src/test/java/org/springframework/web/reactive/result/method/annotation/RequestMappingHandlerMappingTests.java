@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,17 +22,24 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.Method;
 import java.security.Principal;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import reactor.test.StepVerifier;
 
+import org.springframework.cglib.proxy.Enhancer;
+import org.springframework.cglib.proxy.NoOp;
 import org.springframework.core.annotation.AliasFor;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
+import org.springframework.web.accept.ApiVersionHolder;
+import org.springframework.web.accept.InvalidApiVersionException;
+import org.springframework.web.accept.SemanticApiVersionParser;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -42,19 +49,29 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.support.StaticWebApplicationContext;
+import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.method.HandlerTypePredicate;
+import org.springframework.web.reactive.HandlerMapping;
+import org.springframework.web.reactive.accept.DefaultApiVersionStrategy;
+import org.springframework.web.reactive.accept.HeaderApiVersionResolver;
 import org.springframework.web.reactive.result.condition.ConsumesRequestCondition;
 import org.springframework.web.reactive.result.condition.MediaTypeExpression;
 import org.springframework.web.reactive.result.method.RequestMappingInfo;
+import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.service.annotation.HttpExchange;
 import org.springframework.web.service.annotation.PostExchange;
 import org.springframework.web.service.annotation.PutExchange;
+import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest;
+import org.springframework.web.testfixture.method.PackagePrivateMethodController;
+import org.springframework.web.testfixture.server.MockServerWebExchange;
 import org.springframework.web.util.pattern.PathPattern;
 import org.springframework.web.util.pattern.PathPatternParser;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.mockito.Mockito.mock;
+import static org.springframework.web.bind.annotation.RequestMethod.POST;
+import static org.springframework.web.reactive.result.method.RequestMappingInfo.paths;
 
 /**
  * Tests for {@link RequestMappingHandlerMapping}.
@@ -62,6 +79,7 @@ import static org.mockito.Mockito.mock;
  * @author Rossen Stoyanchev
  * @author Olga Maciaszek-Sharma
  * @author Sam Brannen
+ * @author Yongjun Hong
  */
 class RequestMappingHandlerMappingTests {
 
@@ -99,6 +117,35 @@ class RequestMappingHandlerMappingTests {
 	}
 
 	@Test
+	void version() {
+		ServerWebExchange exchange = initExchangeForVersionTest("1.1");
+		HandlerMethod handlerMethod = (HandlerMethod) this.handlerMapping.getHandler(exchange).block();
+		assertThat(handlerMethod.getMethod().getName()).isEqualTo("foo1_1");
+	}
+
+	@Test
+	void versionInvalid() {
+		ServerWebExchange exchange = initExchangeForVersionTest("99");
+		StepVerifier.create(this.handlerMapping.getHandler(exchange))
+				.verifyError(InvalidApiVersionException.class);
+	}
+
+	private ServerWebExchange initExchangeForVersionTest(String version) {
+
+		((StaticWebApplicationContext) this.handlerMapping.getApplicationContext())
+				.registerSingleton("controller", VersionController.class);
+
+		DefaultApiVersionStrategy versionStrategy = new DefaultApiVersionStrategy(
+				List.of(new HeaderApiVersionResolver("API-Version")), new SemanticApiVersionParser(),
+				true, null, true, null, null);
+		this.handlerMapping.setApiVersionStrategy(versionStrategy);
+		this.handlerMapping.afterPropertiesSet();
+
+		MockServerHttpRequest request = MockServerHttpRequest.get("/foo").header("API-Version", version).build();
+		return MockServerWebExchange.from(request);
+	}
+
+	@Test
 	void resolveRequestMappingViaComposedAnnotation() {
 		RequestMappingInfo info = assertComposedAnnotationMapping("postJson", "/postJson", RequestMethod.POST);
 
@@ -110,7 +157,7 @@ class RequestMappingHandlerMappingTests {
 	}
 
 	@Test // SPR-14988
-	void getMappingOverridesConsumesFromTypeLevelAnnotation() {
+	void postMappingOverridesConsumesFromTypeLevelAnnotation() {
 		RequestMappingInfo requestMappingInfo = assertComposedAnnotationMapping(RequestMethod.POST);
 
 		ConsumesRequestCondition condition = requestMappingInfo.getConsumesCondition();
@@ -323,6 +370,147 @@ class RequestMappingHandlerMappingTests {
 				.containsExactly("h1=hv1", "!h2");
 	}
 
+	@Test  // gh-35086
+	void requestBodyAnnotationFromInterfaceIsRespected() {
+		this.handlerMapping.afterPropertiesSet();
+
+		String path = "/controller/postMapping";
+		MediaType mediaType = MediaType.APPLICATION_JSON;
+
+		RequestMappingHandlerMapping mapping = new RequestMappingHandlerMapping();
+		mapping.setApplicationContext(new StaticWebApplicationContext());
+		mapping.afterPropertiesSet();
+
+		Class<InterfaceControllerImpl> clazz = InterfaceControllerImpl.class;
+		Method method = ReflectionUtils.findMethod(clazz, "post", Foo.class);
+		assertThat(method).isNotNull();
+
+		RequestMappingInfo info = mapping.getMappingForMethod(method, clazz);
+		assertThat(info).isNotNull();
+
+		// Original ConsumesCondition
+		ConsumesRequestCondition consumesCondition = info.getConsumesCondition();
+		assertThat(consumesCondition).isNotNull();
+		assertThat(consumesCondition.isBodyRequired()).isTrue();
+		assertThat(consumesCondition.getConsumableMediaTypes()).containsOnly(mediaType);
+
+		mapping.registerHandlerMethod(new InterfaceControllerImpl(), method, info);
+
+		// Updated ConsumesCondition
+		consumesCondition = info.getConsumesCondition();
+		assertThat(consumesCondition).isNotNull();
+		assertThat(consumesCondition.isBodyRequired()).isFalse();
+		assertThat(consumesCondition.getConsumableMediaTypes()).containsOnly(mediaType);
+
+		MockServerHttpRequest request = MockServerHttpRequest.post(path)
+				.contentType(mediaType).build();
+		ServerWebExchange exchange = MockServerWebExchange.from(request);
+		exchange.getAttributes().put(HandlerMapping.API_VERSION_ATTRIBUTE, ApiVersionHolder.EMPTY);
+		RequestMappingInfo matchingInfo = info.getMatchingCondition(exchange);
+		// Since the request has no body AND the required flag is false, the
+		// ConsumesCondition in the matching condition in an EMPTY_CONDITION.
+		// In other words, the "consumes" expressions are removed.
+		assertThat(matchingInfo).isEqualTo(paths(path).methods(POST).build());
+	}
+
+	@Test  // gh-35086
+	void requestBodyAnnotationFromImplementationOverridesInterface() {
+		this.handlerMapping.afterPropertiesSet();
+
+		String path = "/controller/postMapping";
+		MediaType mediaType = MediaType.APPLICATION_JSON;
+
+		RequestMappingHandlerMapping mapping = new RequestMappingHandlerMapping();
+		mapping.setApplicationContext(new StaticWebApplicationContext());
+		mapping.afterPropertiesSet();
+
+		Class<InterfaceControllerImplOverridesRequestBody> clazz = InterfaceControllerImplOverridesRequestBody.class;
+		Method method = ReflectionUtils.findMethod(clazz, "post", Foo.class);
+		assertThat(method).isNotNull();
+
+		RequestMappingInfo info = mapping.getMappingForMethod(method, clazz);
+		assertThat(info).isNotNull();
+
+		// Original ConsumesCondition
+		ConsumesRequestCondition consumesCondition = info.getConsumesCondition();
+		assertThat(consumesCondition).isNotNull();
+		assertThat(consumesCondition.isBodyRequired()).isTrue();
+		assertThat(consumesCondition.getConsumableMediaTypes()).containsOnly(mediaType);
+
+		mapping.registerHandlerMethod(new InterfaceControllerImplOverridesRequestBody(), method, info);
+
+		// Updated ConsumesCondition
+		consumesCondition = info.getConsumesCondition();
+		assertThat(consumesCondition).isNotNull();
+		assertThat(consumesCondition.isBodyRequired()).isTrue();
+		assertThat(consumesCondition.getConsumableMediaTypes()).containsOnly(mediaType);
+
+		MockServerHttpRequest request = MockServerHttpRequest.post(path)
+				.contentType(mediaType).build();
+		ServerWebExchange exchange = MockServerWebExchange.from(request);
+		exchange.getAttributes().put(HandlerMapping.API_VERSION_ATTRIBUTE, ApiVersionHolder.EMPTY);
+		RequestMappingInfo matchingInfo = info.getMatchingCondition(exchange);
+		assertThat(matchingInfo).isEqualTo(paths(path).methods(POST).consumes(mediaType.toString()).build());
+	}
+
+	@Test  // gh-35352
+	void privateMethodOnCglibProxyShouldThrowException() throws Exception {
+		RequestMappingHandlerMapping mapping = new RequestMappingHandlerMapping();
+
+		Class<?> handlerType = PrivateMethodController.class;
+		String methodName = "privateMethod";
+		Method method = handlerType.getDeclaredMethod(methodName);
+		Class<?> proxyClass = createProxyClass(handlerType);
+
+		assertThatIllegalStateException()
+				.isThrownBy(() -> mapping.getMappingForMethod(method, proxyClass))
+				.withMessage("""
+						Private method [%s] on CGLIB proxy class [%s] cannot be used as a request \
+						handler method, because private methods cannot be overridden. \
+						Change the method to non-private visibility, or use interface-based JDK \
+						proxying instead.""", methodName, proxyClass.getName());
+	}
+
+	@Test  // gh-35352
+	void protectedMethodOnCglibProxyShouldNotThrowException() throws Exception {
+		RequestMappingHandlerMapping mapping = new RequestMappingHandlerMapping();
+
+		Class<?> handlerType = ProtectedMethodController.class;
+		Method method = handlerType.getDeclaredMethod("protectedMethod");
+		Class<?> proxyClass = createProxyClass(handlerType);
+
+		RequestMappingInfo info = mapping.getMappingForMethod(method, proxyClass);
+
+		assertThat(info.getPatternsCondition().getDirectPaths()).containsOnly("/protected");
+	}
+
+	@Test  // gh-35352
+	void differentPackagePackagePrivateMethodOnCglibProxyShouldThrowException() throws Exception {
+		RequestMappingHandlerMapping mapping = new RequestMappingHandlerMapping();
+
+		Class<?> handlerType = LocalPackagePrivateMethodControllerSubclass.class;
+		Class<?> declaringClass = PackagePrivateMethodController.class;
+		String methodName = "packagePrivateMethod";
+		Method method = declaringClass.getDeclaredMethod(methodName);
+		Class<?> proxyClass = createProxyClass(handlerType);
+
+		assertThatIllegalStateException()
+				.isThrownBy(() -> mapping.getMappingForMethod(method, proxyClass))
+				.withMessage("""
+						Package-private method [%s] declared in class [%s] cannot be advised by \
+						CGLIB-proxied handler class [%s], because it is effectively private. Either \
+						make the method public or protected, or use interface-based JDK proxying instead.""",
+							methodName, declaringClass.getName(), proxyClass.getName());
+	}
+
+
+	private static Class<?> createProxyClass(Class<?> targetClass) {
+		Enhancer enhancer = new Enhancer();
+		enhancer.setSuperclass(targetClass);
+		enhancer.setCallbackTypes(new Class[]{NoOp.class});
+		return enhancer.createClass();
+	}
+
 	private RequestMappingInfo assertComposedAnnotationMapping(RequestMethod requestMethod) {
 		String methodName = requestMethod.name().toLowerCase();
 		String path = "/" + methodName;
@@ -421,6 +609,22 @@ class RequestMappingHandlerMappingTests {
 
 
 	@RestController
+	@RequestMapping("/foo")
+	static class VersionController {
+
+		@GetMapping
+		public String foo() {
+			return "foo";
+		}
+
+		@GetMapping(version = "1.1")
+		public String foo1_1() {
+			return "foo1_1";
+		}
+	}
+
+
+	@RestController
 	@HttpExchange("/exchange")
 	static class HttpExchangeController {
 
@@ -501,11 +705,47 @@ class RequestMappingHandlerMappingTests {
 		public void post() {}
 	}
 
+	@Controller
+	@RequestMapping(path = "/controller", consumes = "application/json")
+	interface InterfaceController {
+
+		@PostMapping("/postMapping")
+		void post(@RequestBody(required = false) Foo foo);
+	}
+
+	static class InterfaceControllerImpl implements InterfaceController {
+
+		@Override
+		public void post(Foo foo) {}
+	}
+
+	static class InterfaceControllerImplOverridesRequestBody implements InterfaceController {
+
+		@Override
+		public void post(@RequestBody(required = true) Foo foo) {}
+	}
 
 	@HttpExchange
 	@Target(ElementType.TYPE)
 	@Retention(RetentionPolicy.RUNTIME)
 	@interface ExtraHttpExchange {
+	}
+
+	@Controller
+	static class PrivateMethodController {
+
+		@RequestMapping("/private")
+		private void privateMethod() {}
+	}
+
+	@Controller
+	static class ProtectedMethodController {
+
+		@RequestMapping("/protected")
+		protected void protectedMethod() {}
+	}
+
+	static class LocalPackagePrivateMethodControllerSubclass extends PackagePrivateMethodController {
 	}
 
 }

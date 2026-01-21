@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,9 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.BitSet;
+import java.util.HexFormat;
 import java.util.List;
+import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -59,12 +61,15 @@ public final class ContentDisposition {
 
 	private static final BitSet PRINTABLE = new BitSet(256);
 
+	private static final HexFormat HEX_FORMAT = HexFormat.of().withUpperCase();
+
 
 	static {
 		// RFC 2045, Section 6.7, and RFC 2047, Section 4.2
 		for (int i=33; i<= 126; i++) {
 			PRINTABLE.set(i);
 		}
+		PRINTABLE.set(34, false); // "
 		PRINTABLE.set(61, false); // =
 		PRINTABLE.set(63, false); // ?
 		PRINTABLE.set(95, false); // _
@@ -98,7 +103,7 @@ public final class ContentDisposition {
 	 * @since 5.3
 	 */
 	public boolean isAttachment() {
-		return (this.type != null && this.type.equalsIgnoreCase("attachment"));
+		return isDispositionType("attachment");
 	}
 
 	/**
@@ -106,7 +111,7 @@ public final class ContentDisposition {
 	 * @since 5.3
 	 */
 	public boolean isFormData() {
-		return (this.type != null && this.type.equalsIgnoreCase("form-data"));
+		return isDispositionType("form-data");
 	}
 
 	/**
@@ -114,7 +119,11 @@ public final class ContentDisposition {
 	 * @since 5.3
 	 */
 	public boolean isInline() {
-		return (this.type != null && this.type.equalsIgnoreCase("inline"));
+		return isDispositionType("inline");
+	}
+
+	private boolean isDispositionType(String type) {
+		return this.type != null && this.type.equalsIgnoreCase(type);
 	}
 
 	/**
@@ -252,7 +261,7 @@ public final class ContentDisposition {
 			String part = parts.get(i);
 			int eqIndex = part.indexOf('=');
 			if (eqIndex != -1) {
-				String attribute = part.substring(0, eqIndex);
+				String attribute = part.substring(0, eqIndex).toLowerCase(Locale.ROOT);
 				String value = (part.startsWith("\"", eqIndex + 1) && part.endsWith("\"") ?
 						part.substring(eqIndex + 2, part.length() - 1) :
 						part.substring(eqIndex + 1));
@@ -380,9 +389,10 @@ public final class ContentDisposition {
 				index++;
 			}
 			else if (b == '%' && index < value.length - 2) {
-				char[] array = new char[]{(char) value[index + 1], (char) value[index + 2]};
 				try {
-					baos.write(Integer.parseInt(String.valueOf(array), 16));
+					int high = HexFormat.fromHexDigit(value[index + 1]);
+					int low = HexFormat.fromHexDigit(value[index + 2]);
+					baos.write(high << 4 | low);
 				}
 				catch (NumberFormatException ex) {
 					throw new IllegalArgumentException(INVALID_HEADER_FIELD_PARAMETER_FORMAT, ex);
@@ -423,11 +433,8 @@ public final class ContentDisposition {
 				index++;
 			}
 			else if (b == '=' && index < value.length - 2) {
-				int i1 = Character.digit((char) value[index + 1], 16);
-				int i2 = Character.digit((char) value[index + 2], 16);
-				if (i1 == -1 || i2 == -1) {
-					throw new IllegalArgumentException("Not a valid hex sequence: " + filename.substring(index));
-				}
+				int i1 = HexFormat.fromHexDigit(value[index + 1]);
+				int i2 = HexFormat.fromHexDigit(value[index + 2]);
 				baos.write((i1 << 4) | i2);
 				index += 3;
 			}
@@ -464,10 +471,7 @@ public final class ContentDisposition {
 			}
 			else {
 				sb.append('=');
-				char ch1 = hexDigit(b >> 4);
-				char ch2 = hexDigit(b);
-				sb.append(ch1);
-				sb.append(ch2);
+				HEX_FORMAT.toHexDigits(sb, b);
 			}
 		}
 		sb.append("?=");
@@ -541,19 +545,11 @@ public final class ContentDisposition {
 			}
 			else {
 				sb.append('%');
-				char hex1 = hexDigit(b >> 4);
-				char hex2 = hexDigit(b);
-				sb.append(hex1);
-				sb.append(hex2);
+				HEX_FORMAT.toHexDigits(sb, b);
 			}
 		}
 		return sb.toString();
 	}
-
-	private static char hexDigit(int b) {
-		return Character.toUpperCase(Character.forDigit(b & 0xF, 16));
-	}
-
 
 	/**
 	 * A mutable builder for {@code ContentDisposition}.

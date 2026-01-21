@@ -51,6 +51,7 @@ include-code::./AsyncControllerTests[tag=duration,indent=0]
 If you prefer to get the raw result and manage the lifecycle of the asynchronous
 request yourself, use `asyncExchange` rather than `exchange`.
 
+
 [[mockmvc-tester-requests-multipart]]
 == Multipart
 
@@ -59,6 +60,7 @@ You can perform file upload requests that internally use
 request. Rather, you have to set it up to be similar to the following example:
 
 include-code::./MultipartControllerTests[tag=snippet,indent=0]
+
 
 [[mockmvc-tester-requests-paths]]
 == Using Servlet and Context Paths
@@ -80,4 +82,3 @@ The preceding properties affect every request performed through the `mockMvc` in
 If the same property is also specified on a given request, it overrides the default
 value. That is why the HTTP method and URI in the default request do not matter, since
 they must be specified on every request.
-

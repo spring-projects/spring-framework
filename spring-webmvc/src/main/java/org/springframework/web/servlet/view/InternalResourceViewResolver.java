@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,7 +49,7 @@ import org.springframework.util.ClassUtils;
  */
 public class InternalResourceViewResolver extends UrlBasedViewResolver {
 
-	private static final boolean jstlPresent = ClassUtils.isPresent(
+	private static final boolean JSTL_PRESENT = ClassUtils.isPresent(
 			"jakarta.servlet.jsp.jstl.core.Config", InternalResourceViewResolver.class.getClassLoader());
 
 	private @Nullable Boolean alwaysInclude;
@@ -62,7 +62,7 @@ public class InternalResourceViewResolver extends UrlBasedViewResolver {
 	 */
 	public InternalResourceViewResolver() {
 		Class<?> viewClass = requiredViewClass();
-		if (InternalResourceView.class == viewClass && jstlPresent) {
+		if (InternalResourceView.class == viewClass && JSTL_PRESENT) {
 			viewClass = JstlView.class;
 		}
 		setViewClass(viewClass);

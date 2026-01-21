@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,7 +51,9 @@ public class Task {
 
 
 	/**
-	 * Return the underlying task.
+	 * Return a {@link Runnable} that executes the underlying task.
+	 * <p>Note, this does not necessarily return the {@link Task#Task(Runnable) original runnable}
+	 * as it can be wrapped by the Framework for additional support.
 	 */
 	public Runnable getRunnable() {
 		return this.runnable;

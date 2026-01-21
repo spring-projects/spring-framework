@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -94,7 +94,7 @@ class SimpleUrlHandlerMappingTests {
 		testUrl("outofpattern*ye", null, handlerMapping, null);
 	}
 
-	void testUrl(String url, Object bean, HandlerMapping handlerMapping, String pathWithinMapping) {
+	private static void testUrl(String url, Object bean, HandlerMapping handlerMapping, String pathWithinMapping) {
 		MockServerHttpRequest request = MockServerHttpRequest.method(HttpMethod.GET, URI.create(url)).build();
 		ServerWebExchange exchange = MockServerWebExchange.from(request);
 		Object actual = handlerMapping.getHandler(exchange).block();
@@ -127,7 +127,8 @@ class SimpleUrlHandlerMappingTests {
 	@Configuration
 	static class WebConfig {
 
-		@Bean @SuppressWarnings("unused")
+		@Bean
+		@SuppressWarnings("unused")
 		public SimpleUrlHandlerMapping handlerMapping() {
 			SimpleUrlHandlerMapping hm = new SimpleUrlHandlerMapping();
 			hm.registerHandler("/welcome*", otherController());

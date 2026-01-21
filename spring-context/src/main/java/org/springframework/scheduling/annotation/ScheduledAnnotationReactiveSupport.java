@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.scheduling.annotation;
 
+import java.lang.reflect.InaccessibleObjectException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
@@ -59,10 +60,10 @@ import static org.springframework.scheduling.support.ScheduledTaskObservationDoc
  */
 abstract class ScheduledAnnotationReactiveSupport {
 
-	static final boolean reactorPresent = ClassUtils.isPresent(
+	static final boolean REACTOR_PRESENT = ClassUtils.isPresent(
 			"reactor.core.publisher.Flux", ScheduledAnnotationReactiveSupport.class.getClassLoader());
 
-	static final boolean coroutinesReactorPresent = ClassUtils.isPresent(
+	static final boolean COROUTINES_REACTOR_PRESENT = ClassUtils.isPresent(
 			"kotlinx.coroutines.reactor.MonoKt", ScheduledAnnotationReactiveSupport.class.getClassLoader());
 
 	private static final Log logger = LogFactory.getLog(ScheduledAnnotationReactiveSupport.class);
@@ -86,7 +87,7 @@ abstract class ScheduledAnnotationReactiveSupport {
 			// parameter in reflective inspection
 			Assert.isTrue(method.getParameterCount() == 1,
 					"Kotlin suspending functions may only be annotated with @Scheduled if declared without arguments");
-			Assert.isTrue(coroutinesReactorPresent, "Kotlin suspending functions may only be annotated with " +
+			Assert.isTrue(COROUTINES_REACTOR_PRESENT, "Kotlin suspending functions may only be annotated with " +
 					"@Scheduled if the Coroutine-Reactor bridge (kotlinx.coroutines.reactor) is present at runtime");
 			return true;
 		}
@@ -160,7 +161,7 @@ abstract class ScheduledAnnotationReactiveSupport {
 
 			Publisher<?> publisher = adapter.toPublisher(returnValue);
 			// If Reactor is on the classpath, we could benefit from having a checkpoint for debuggability
-			if (reactorPresent) {
+			if (REACTOR_PRESENT) {
 				return Flux.from(publisher).checkpoint(
 						"@Scheduled '"+ method.getName() + "()' in '" + method.getDeclaringClass().getName() + "'");
 			}
@@ -173,7 +174,7 @@ abstract class ScheduledAnnotationReactiveSupport {
 					"Cannot obtain a Publisher-convertible value from the @Scheduled reactive method",
 					ex.getTargetException());
 		}
-		catch (IllegalAccessException ex) {
+		catch (IllegalAccessException | InaccessibleObjectException ex) {
 			throw new IllegalArgumentException(
 					"Cannot obtain a Publisher-convertible value from the @Scheduled reactive method", ex);
 		}
@@ -204,9 +205,9 @@ abstract class ScheduledAnnotationReactiveSupport {
 		final Supplier<ScheduledTaskObservationContext> contextSupplier;
 
 		SubscribingRunnable(Publisher<?> publisher, boolean shouldBlock,
-							@Nullable String qualifier, List<Runnable> subscriptionTrackerRegistry,
-							String displayName, Supplier<ObservationRegistry> observationRegistrySupplier,
-							Supplier<ScheduledTaskObservationContext> contextSupplier) {
+				@Nullable String qualifier, List<Runnable> subscriptionTrackerRegistry,
+				String displayName, Supplier<ObservationRegistry> observationRegistrySupplier,
+				Supplier<ScheduledTaskObservationContext> contextSupplier) {
 
 			this.publisher = publisher;
 			this.shouldBlock = shouldBlock;
@@ -234,7 +235,7 @@ abstract class ScheduledAnnotationReactiveSupport {
 					latch.await();
 				}
 				catch (InterruptedException ex) {
-					throw new RuntimeException(ex);
+					Thread.currentThread().interrupt();
 				}
 			}
 			else {
@@ -245,7 +246,7 @@ abstract class ScheduledAnnotationReactiveSupport {
 
 		private void subscribe(TrackingSubscriber subscriber, Observation observation) {
 			this.subscriptionTrackerRegistry.add(subscriber);
-			if (reactorPresent) {
+			if (REACTOR_PRESENT) {
 				observation.start();
 				Flux.from(this.publisher)
 						.contextWrite(context -> context.put(ObservationThreadLocalAccessor.KEY, observation))

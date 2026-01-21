@@ -15,12 +15,9 @@ provided in Kotlin in addition to Java.
 The easiest way to build a Spring application with Kotlin is to leverage Spring Boot and
 its {spring-boot-docs-ref}/features/kotlin.html[dedicated Kotlin support].
 {spring-site-guides}/tutorials/spring-boot-kotlin/[This comprehensive tutorial]
-will teach you how to build Spring Boot applications with Kotlin using https://start.spring.io/#!language=kotlin&type=gradle-project[start.spring.io].
+will teach you how to build Spring Boot applications with Kotlin using
+https://start.spring.io/#!language=kotlin&type=gradle-project[start.spring.io].
 
 Feel free to join the #spring channel of https://slack.kotlinlang.org/[Kotlin Slack]
 or ask a question with `spring` and `kotlin` as tags on
 {stackoverflow-spring-kotlin-tags}[Stackoverflow] if you need support.
-
-
-
-

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,11 @@ import org.springframework.jdbc.core.support.JdbcDaoSupport;
  * @author Juergen Hoeller
  * @since 2.0
  * @see NamedParameterJdbcTemplate
+ * @deprecated as of 7.0, in favor of direct injection of {@link NamedParameterJdbcTemplate}
+ * or {@link org.springframework.jdbc.core.simple.JdbcClient}
  */
+@Deprecated(since = "7.0", forRemoval = true)
+@SuppressWarnings("removal")
 public class NamedParameterJdbcDaoSupport extends JdbcDaoSupport {
 
 	private @Nullable NamedParameterJdbcTemplate namedParameterJdbcTemplate;

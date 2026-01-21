@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,6 @@ import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.UnexpectedRollbackException;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
-import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
@@ -120,15 +119,11 @@ class JmsTransactionManagerTests {
 			return null;
 		});
 		TransactionTemplate tt = new TransactionTemplate(tm);
-		tt.execute(new TransactionCallbackWithoutResult() {
-			@Override
-			protected void doInTransactionWithoutResult(TransactionStatus status) {
+		tt.execute(status ->
 				jt.execute((SessionCallback<Void>) sess -> {
 					assertThat(session).isSameAs(sess);
 					return null;
-				});
-			}
-		});
+				}));
 		tm.commit(ts);
 
 		verify(session).commit();
@@ -153,15 +148,12 @@ class JmsTransactionManagerTests {
 			return null;
 		});
 		TransactionTemplate tt = new TransactionTemplate(tm);
-		tt.execute(new TransactionCallbackWithoutResult() {
-			@Override
-			protected void doInTransactionWithoutResult(TransactionStatus status) {
-				jt.execute((SessionCallback<Void>) sess -> {
-					assertThat(session).isSameAs(sess);
-					return null;
-				});
-				status.setRollbackOnly();
-			}
+		tt.executeWithoutResult(status -> {
+			jt.execute((SessionCallback<Void>) sess -> {
+				assertThat(session).isSameAs(sess);
+				return null;
+			});
+			status.setRollbackOnly();
 		});
 		assertThatExceptionOfType(UnexpectedRollbackException.class).isThrownBy(() ->
 				tm.commit(ts));
@@ -191,15 +183,11 @@ class JmsTransactionManagerTests {
 		});
 		TransactionTemplate tt = new TransactionTemplate(tm);
 		tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_NOT_SUPPORTED);
-		tt.execute(new TransactionCallbackWithoutResult() {
-			@Override
-			protected void doInTransactionWithoutResult(TransactionStatus status) {
+		tt.execute(status ->
 				jt.execute((SessionCallback<Void>) sess -> {
 					assertThat(session).isNotSameAs(sess);
 					return null;
-				});
-			}
-		});
+				}));
 		jt.execute((SessionCallback<Void>) sess -> {
 			assertThat(session).isSameAs(sess);
 			return null;
@@ -231,15 +219,11 @@ class JmsTransactionManagerTests {
 		});
 		TransactionTemplate tt = new TransactionTemplate(tm);
 		tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
-		tt.execute(new TransactionCallbackWithoutResult() {
-			@Override
-			protected void doInTransactionWithoutResult(TransactionStatus status) {
+		tt.execute(status ->
 				jt.execute((SessionCallback<Void>) sess -> {
 					assertThat(session).isNotSameAs(sess);
 					return null;
-				});
-			}
-		});
+				}));
 		jt.execute((SessionCallback<Void>) sess -> {
 			assertThat(session).isSameAs(sess);
 			return null;

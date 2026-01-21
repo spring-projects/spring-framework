@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,13 +21,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.converter.CompositeMessageConverter;
-import org.springframework.messaging.converter.MappingJackson2MessageConverter;
+import org.springframework.messaging.converter.JacksonJsonMessageConverter;
 import org.springframework.messaging.converter.MessageConversionException;
 import org.springframework.messaging.converter.MessageConverter;
 import org.springframework.messaging.converter.StringMessageConverter;
@@ -47,20 +46,15 @@ import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
  */
 class MessageSendingTemplateTests {
 
-	private TestMessageSendingTemplate template;
+	private final TestMessageSendingTemplate template = new TestMessageSendingTemplate();
 
-	private TestMessagePostProcessor postProcessor;
+	private final TestMessagePostProcessor postProcessor = new TestMessagePostProcessor();
 
-	private Map<String, Object> headers;
+	@SuppressWarnings("serial")
+	private final Map<String, Object> headers = new HashMap<>() {{
+		put("key", "value");
+	}};
 
-
-	@BeforeEach
-	void setup() {
-		this.template = new TestMessageSendingTemplate();
-		this.postProcessor = new TestMessagePostProcessor();
-		this.headers = new HashMap<>();
-		this.headers.put("key", "value");
-	}
 
 	@Test
 	void send() {
@@ -84,8 +78,7 @@ class MessageSendingTemplateTests {
 	@Test
 	void sendMissingDestination() {
 		Message<?> message = new GenericMessage<Object>("payload");
-		assertThatIllegalStateException().isThrownBy(() ->
-				this.template.send(message));
+		assertThatIllegalStateException().isThrownBy(() -> this.template.send(message));
 	}
 
 	@Test
@@ -177,14 +170,12 @@ class MessageSendingTemplateTests {
 
 	@Test
 	void convertAndSendNoMatchingConverter() {
-
-		MessageConverter converter = new CompositeMessageConverter(
-				List.of(new MappingJackson2MessageConverter()));
+		MessageConverter converter = new CompositeMessageConverter(List.of(new JacksonJsonMessageConverter()));
 		this.template.setMessageConverter(converter);
 
 		this.headers.put(MessageHeaders.CONTENT_TYPE, MimeTypeUtils.APPLICATION_XML);
-		assertThatExceptionOfType(MessageConversionException.class).isThrownBy(() ->
-				this.template.convertAndSend("home", "payload", new MessageHeaders(this.headers)));
+		assertThatExceptionOfType(MessageConversionException.class)
+				.isThrownBy(() -> this.template.convertAndSend("home", "payload", new MessageHeaders(this.headers)));
 	}
 
 
@@ -201,20 +192,4 @@ class MessageSendingTemplateTests {
 		}
 	}
 
-}
-
-class TestMessagePostProcessor implements MessagePostProcessor {
-
-	private Message<?> message;
-
-
-	Message<?> getMessage() {
-		return this.message;
-	}
-
-	@Override
-	public Message<?> postProcessMessage(Message<?> message) {
-		this.message = message;
-		return message;
-	}
 }

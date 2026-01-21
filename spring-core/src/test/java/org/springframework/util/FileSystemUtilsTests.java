@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,20 +17,29 @@
 package org.springframework.util;
 
 import java.io.File;
+import java.net.URI;
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystems;
+import java.nio.file.Path;
+import java.util.Map;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
+ * Tests for {@link FileSystemUtils}.
+ *
  * @author Rob Harrop
+ * @author Sam Brannen
+ * @author Juergen Hoeller
  */
 class FileSystemUtilsTests {
 
 	@Test
-	void deleteRecursively() throws Exception {
-		File root = new File("./tmp/root");
+	void deleteRecursively(@TempDir File tempDir) throws Exception {
+		File root = new File(tempDir, "root");
 		File child = new File(root, "child");
 		File grandchild = new File(child, "grandchild");
 
@@ -53,8 +62,8 @@ class FileSystemUtilsTests {
 	}
 
 	@Test
-	void copyRecursively() throws Exception {
-		File src = new File("./tmp/src");
+	void copyRecursively(@TempDir File tempDir) throws Exception {
+		File src = new File(tempDir, "src");
 		File child = new File(src, "child");
 		File grandchild = new File(child, "grandchild");
 
@@ -68,27 +77,29 @@ class FileSystemUtilsTests {
 		assertThat(grandchild).exists();
 		assertThat(bar).exists();
 
-		File dest = new File("./dest");
+		File dest = new File(tempDir, "/dest");
 		FileSystemUtils.copyRecursively(src, dest);
 
 		assertThat(dest).exists();
-		assertThat(new File(dest, child.getName())).exists();
+		assertThat(new File(dest, "child")).exists();
+		assertThat(new File(dest, "child/bar.txt")).exists();
 
+		String destPath = dest.toString().replace('\\', '/');
+		if (!destPath.startsWith("/")) {
+			destPath = "/" + destPath;
+		}
+		URI uri = URI.create("jar:file:" + destPath + "/archive.zip");
+		Map<String, String> env = Map.of("create", "true");
+		FileSystem zipfs = FileSystems.newFileSystem(uri, env);
+		Path ziproot = zipfs.getPath("/");
+		FileSystemUtils.copyRecursively(src.toPath(), ziproot);
+
+		assertThat(zipfs.getPath("/child")).exists();
+		assertThat(zipfs.getPath("/child/bar.txt")).exists();
+
+		zipfs.close();
 		FileSystemUtils.deleteRecursively(src);
 		assertThat(src).doesNotExist();
-	}
-
-
-	@AfterEach
-	void tearDown() {
-		File tmp = new File("./tmp");
-		if (tmp.exists()) {
-			FileSystemUtils.deleteRecursively(tmp);
-		}
-		File dest = new File("./dest");
-		if (dest.exists()) {
-			FileSystemUtils.deleteRecursively(dest);
-		}
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,7 +47,7 @@ class CompositeUriComponentsContributorTests {
 		resolvers.add(new RequestParamMethodArgumentResolver(true));
 
 		CompositeUriComponentsContributor contributor = new CompositeUriComponentsContributor(resolvers);
-		Method method = ClassUtils.getMethod(this.getClass(), "handleRequest", String.class, String.class, String.class);
+		Method method = ClassUtils.getMethod(getClass(), "handleRequest", String.class, String.class, String.class);
 		assertThat(contributor.supportsParameter(new MethodParameter(method, 0))).isTrue();
 		assertThat(contributor.supportsParameter(new MethodParameter(method, 1))).isTrue();
 		assertThat(contributor.supportsParameter(new MethodParameter(method, 2))).isFalse();

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,6 +43,9 @@ import org.springframework.util.StringUtils;
  */
 @SuppressWarnings("serial")
 public class MutablePropertyValues implements PropertyValues, Serializable {
+
+	private static final PropertyValue[] EMPTY_PROPERTY_VALUE_ARRAY = new PropertyValue[0];
+
 
 	private final List<PropertyValue> propertyValueList;
 
@@ -264,7 +267,7 @@ public class MutablePropertyValues implements PropertyValues, Serializable {
 
 	@Override
 	public PropertyValue[] getPropertyValues() {
-		return this.propertyValueList.toArray(new PropertyValue[0]);
+		return this.propertyValueList.toArray(EMPTY_PROPERTY_VALUE_ARRAY);
 	}
 
 	@Override

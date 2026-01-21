@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -333,6 +333,20 @@ public class MvcUriComponentsBuilderTests {
 		UriComponents uriComponents = fromMethodName(ControllerWithMethods.class,
 				"methodWithConfigurableMapping", "1").build();
 		assertThat(uriComponents.toUriString()).isEqualTo("http://localhost/something/custom/1/foo");
+	}
+
+	@Test // gh-35348
+	void fromMethodNameConfigurablePathSpEL() {
+		try {
+			System.setProperty("customMapping", "custom");
+			StandardEnvironment environment = new StandardEnvironment();
+			initWebApplicationContext(WebConfig.class, environment);
+			UriComponents uric = fromMethodName(ControllerWithMethods.class, "methodWithSpEL", "1").build();
+			assertThat(uric.toUriString()).isEqualTo("http://localhost/something/custom/1/foo");
+		}
+		finally {
+			System.clearProperty("customMapping");
+		}
 	}
 
 	@Test
@@ -701,6 +715,11 @@ public class MvcUriComponentsBuilderTests {
 
 		@RequestMapping("/${method.test.mapping}/{id}/foo")
 		HttpEntity<Void> methodWithConfigurableMapping(@PathVariable String id) {
+			return null;
+		}
+
+		@RequestMapping("/#{systemProperties.customMapping}/{id}/foo")
+		HttpEntity<Void> methodWithSpEL(@PathVariable String id) {
 			return null;
 		}
 	}

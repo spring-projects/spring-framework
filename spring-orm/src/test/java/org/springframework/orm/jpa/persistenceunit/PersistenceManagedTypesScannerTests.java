@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.context.testfixture.index.CandidateComponentsTestClassLoader;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.DefaultResourceLoader;
+import org.springframework.orm.jpa.domain.Car;
 import org.springframework.orm.jpa.domain.DriversLicense;
 import org.springframework.orm.jpa.domain.Employee;
 import org.springframework.orm.jpa.domain.EmployeeLocationConverter;
@@ -52,7 +53,7 @@ class PersistenceManagedTypesScannerTests {
 		PersistenceManagedTypes managedTypes = this.scanner.scan("org.springframework.orm.jpa.domain");
 		assertThat(managedTypes.getManagedClassNames()).containsExactlyInAnyOrder(
 				Person.class.getName(), DriversLicense.class.getName(), Employee.class.getName(),
-				EmployeeLocationConverter.class.getName());
+				EmployeeLocationConverter.class.getName(), Car.class.getName());
 		assertThat(managedTypes.getManagedPackages()).isEmpty();
 	}
 
@@ -66,6 +67,7 @@ class PersistenceManagedTypesScannerTests {
 		verify(filter).matches(DriversLicense.class.getName());
 		verify(filter).matches(Employee.class.getName());
 		verify(filter).matches(EmployeeLocationConverter.class.getName());
+		verify(filter).matches(Car.class.getName());
 		verifyNoMoreInteractions(filter);
 	}
 

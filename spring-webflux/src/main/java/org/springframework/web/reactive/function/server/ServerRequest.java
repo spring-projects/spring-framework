@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,7 +40,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpRange;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.HttpMessageReader;
-import org.springframework.http.codec.json.Jackson2CodecSupport;
+import org.springframework.http.codec.JacksonCodecSupport;
 import org.springframework.http.codec.multipart.Part;
 import org.springframework.http.server.RequestPath;
 import org.springframework.http.server.reactive.ServerHttpRequest;
@@ -49,6 +49,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.MultiValueMap;
 import org.springframework.validation.BindException;
 import org.springframework.web.bind.WebDataBinder;
+import org.springframework.web.reactive.accept.ApiVersionStrategy;
 import org.springframework.web.reactive.function.BodyExtractor;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebSession;
@@ -131,6 +132,12 @@ public interface ServerRequest {
 	List<HttpMessageReader<?>> messageReaders();
 
 	/**
+	 * Return the configured {@link ApiVersionStrategy}, or {@code null}.
+	 * @since 7.0
+	 */
+	@Nullable ApiVersionStrategy apiVersionStrategy();
+
+	/**
 	 * Extract the body with the given {@code BodyExtractor}.
 	 * @param extractor the {@code BodyExtractor} that reads from the request
 	 * @param <T> the type of the body returned
@@ -142,7 +149,7 @@ public interface ServerRequest {
 	/**
 	 * Extract the body with the given {@code BodyExtractor} and hints.
 	 * @param extractor the {@code BodyExtractor} that reads from the request
-	 * @param hints the map of hints like {@link Jackson2CodecSupport#JSON_VIEW_HINT}
+	 * @param hints the map of hints like {@link JacksonCodecSupport#JSON_VIEW_HINT}
 	 * to use to customize body extraction
 	 * @param <T> the type of the body returned
 	 * @return the extracted body
@@ -423,6 +430,23 @@ public interface ServerRequest {
 	static ServerRequest create(ServerWebExchange exchange, List<HttpMessageReader<?>> messageReaders) {
 		return new DefaultServerRequest(exchange, messageReaders);
 	}
+
+	/**
+	 * Create a new {@code ServerRequest} based on the given {@code ServerWebExchange} and
+	 * message readers.
+	 * @param exchange the exchange
+	 * @param messageReaders the message readers
+	 * @param versionStrategy a strategy to use to parse version
+	 * @return the created {@code ServerRequest}
+	 * @since 7.0
+	 */
+	static ServerRequest create(
+			ServerWebExchange exchange, List<HttpMessageReader<?>> messageReaders,
+			@Nullable ApiVersionStrategy versionStrategy) {
+
+		return new DefaultServerRequest(exchange, messageReaders, versionStrategy);
+	}
+
 
 	/**
 	 * Create a builder with the {@linkplain HttpMessageReader message readers},

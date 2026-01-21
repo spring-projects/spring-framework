@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,8 +42,8 @@ class Metadata {
 			ItemMetadata itemMetadata = metadata.getItems().stream()
 					.filter(item -> item.getType().equals(type))
 					.findFirst().orElse(null);
-			return itemMetadata != null && itemMetadata.getStereotypes().size() == stereotypes.size()
-					&& itemMetadata.getStereotypes().containsAll(stereotypes);
+			return (itemMetadata != null && itemMetadata.getStereotypes().size() == stereotypes.size() &&
+					itemMetadata.getStereotypes().containsAll(stereotypes));
 		}, "Candidates with type %s and stereotypes %s", type, stereotypes);
 	}
 

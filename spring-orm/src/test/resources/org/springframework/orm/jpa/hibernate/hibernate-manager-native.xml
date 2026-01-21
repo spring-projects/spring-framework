@@ -3,7 +3,7 @@
 	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	   xsi:schemaLocation="http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
 
-	<bean id="entityManagerFactory" name="Person" class="org.springframework.orm.hibernate5.LocalSessionFactoryBean" primary="true">
+	<bean id="entityManagerFactory" name="Person" class="org.springframework.orm.jpa.hibernate.LocalSessionFactoryBean" primary="true">
 		<property name="annotatedClasses">
 			<list>
 				<value>org.springframework.orm.jpa.domain.DriversLicense</value>
@@ -18,9 +18,15 @@
 				<prop key="hibernate.cache.provider_class">org.hibernate.cache.HashtableCacheProvider</prop>
 			</props>
 		</property>
+		<qualifier type="org.springframework.orm.jpa.domain.MyDomain"/>
 	</bean>
 
-	<bean id="transactionManager" class="org.springframework.orm.hibernate5.HibernateTransactionManager">
+	<bean id="entityManager" class="org.springframework.orm.jpa.support.SharedEntityManagerBean">
+		<property name="entityManagerFactory" ref="entityManagerFactory"/>
+		<qualifier type="org.springframework.orm.jpa.domain.MyDomain"/>
+	</bean>
+
+	<bean id="transactionManager" class="org.springframework.orm.jpa.hibernate.HibernateTransactionManager">
 		<property name="sessionFactory" ref="entityManagerFactory"/>
 	</bean>
 

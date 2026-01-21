@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,7 @@ import org.springframework.beans.factory.BeanNotOfRequiredTypeException;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.NoUniqueBeanDefinitionException;
 import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.ResolvableType;
 import org.springframework.jndi.JndiLocatorSupport;
 import org.springframework.jndi.TypeMismatchNamingException;
@@ -162,7 +163,7 @@ public class SimpleJndiBeanFactory extends JndiLocatorSupport implements BeanFac
 				return getBean(requiredType);
 			}
 			@Override
-			public T getObject(Object... args) throws BeansException {
+			public T getObject(@Nullable Object... args) throws BeansException {
 				return getBean(requiredType, args);
 			}
 			@Override
@@ -193,6 +194,12 @@ public class SimpleJndiBeanFactory extends JndiLocatorSupport implements BeanFac
 	public <T> ObjectProvider<T> getBeanProvider(ResolvableType requiredType) {
 		throw new UnsupportedOperationException(
 				"SimpleJndiBeanFactory does not support resolution by ResolvableType");
+	}
+
+	@Override
+	public <T> ObjectProvider<T> getBeanProvider(ParameterizedTypeReference<T> requiredType) {
+		throw new UnsupportedOperationException(
+				"SimpleJndiBeanFactory does not support resolution by ParameterizedTypeReference");
 	}
 
 	@Override

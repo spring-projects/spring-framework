@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.util.Assert;
 
 /**
- * A messaging template that resolves destinations names to {@link MessageChannel}'s
+ * A messaging template that resolves a destination name to a {@link MessageChannel}
  * to send and receive messages from.
  *
  * @author Mark Fisher
@@ -176,8 +176,8 @@ public class GenericMessagingTemplate extends AbstractDestinationResolvingMessag
 			accessor.removeHeader(this.receiveTimeoutHeader);
 			accessor.setImmutable();
 		}
-		else if (message.getHeaders().containsKey(this.sendTimeoutHeader)
-				|| message.getHeaders().containsKey(this.receiveTimeoutHeader)) {
+		else if (message.getHeaders().containsKey(this.sendTimeoutHeader) ||
+				message.getHeaders().containsKey(this.receiveTimeoutHeader)) {
 			messageToSend = MessageBuilder.fromMessage(message)
 					.setHeader(this.sendTimeoutHeader, null)
 					.setHeader(this.receiveTimeoutHeader, null)

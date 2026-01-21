@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -178,6 +178,15 @@ class Jaxb2RootElementHttpMessageConverterTests {
 		assertThatExceptionOfType(HttpMessageNotReadableException.class)
 				.isThrownBy(() -> this.converter.read(RootElement.class, inputMessage))
 				.withMessageContaining("DOCTYPE");
+	}
+
+	@Test
+	void readXmlRootElementHeaderCharset() throws Exception {
+		byte[] body = "<rootElement><type s=\"Hellø Wørld\"/></rootElement>".getBytes(StandardCharsets.ISO_8859_1);
+		MockHttpInputMessage inputMessage = new MockHttpInputMessage(body);
+		inputMessage.getHeaders().setContentType(MediaType.parseMediaType("application/xml;charset=iso-8859-1"));
+		RootElement result = (RootElement) converter.read(RootElement.class, inputMessage);
+		assertThat(result.type.s).as("Invalid result").isEqualTo("Hellø Wørld");
 	}
 
 	@Test

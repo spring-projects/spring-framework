@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -70,21 +70,23 @@ public interface ConfigurablePropertyResolver extends PropertyResolver {
 	void setPlaceholderSuffix(String placeholderSuffix);
 
 	/**
-	 * Specify the separating character between the placeholders replaced by this
-	 * resolver and their associated default value, or {@code null} if no such
+	 * Set the separating character to be honored between placeholders replaced by
+	 * this resolver and their associated default values, or {@code null} if no such
 	 * special character should be processed as a value separator.
 	 */
 	void setValueSeparator(@Nullable String valueSeparator);
 
 	/**
-	 * Specify the escape character to use to ignore placeholder prefix or
-	 * value separator, or {@code null} if no escaping should take place.
+	 * Set the escape character to use to ignore the
+	 * {@linkplain #setPlaceholderPrefix(String) placeholder prefix} and the
+	 * {@linkplain #setValueSeparator(String) value separator}, or {@code null}
+	 * if no escaping should take place.
 	 * @since 6.2
 	 */
 	void setEscapeCharacter(@Nullable Character escapeCharacter);
 
 	/**
-	 * Set whether to throw an exception when encountering an unresolvable placeholder
+	 * Specify whether to throw an exception when encountering an unresolvable placeholder
 	 * nested within the value of a given property. A {@code false} value indicates strict
 	 * resolution, i.e. that an exception will be thrown. A {@code true} value indicates
 	 * that unresolvable nested placeholders should be passed through in their unresolved
@@ -107,7 +109,7 @@ public interface ConfigurablePropertyResolver extends PropertyResolver {
 	 * {@link #setRequiredProperties} is present and resolves to a
 	 * non-{@code null} value.
 	 * @throws MissingRequiredPropertiesException if any of the required
-	 * properties are not resolvable.
+	 * properties are not resolvable
 	 */
 	void validateRequiredProperties() throws MissingRequiredPropertiesException;
 

@@ -63,5 +63,3 @@ TIP: Built-in support is available for converting a comma-separated string into 
 array or collection of strings or other types known to the type conversion system. For
 example, a method parameter annotated with `@RequestHeader("Accept")` may be of type
 `String` but also of `String[]` or `List<String>`.
-
-

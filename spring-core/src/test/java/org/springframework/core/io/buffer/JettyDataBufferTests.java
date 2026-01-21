@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,33 +18,34 @@ package org.springframework.core.io.buffer;
 
 import java.nio.ByteBuffer;
 
+import org.eclipse.jetty.io.ArrayByteBufferPool;
 import org.eclipse.jetty.io.Content;
+import org.eclipse.jetty.io.RetainableByteBuffer;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.BDDMockito.then;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
 
 /**
+ * Tests for {@link JettyDataBuffer}
  * @author Arjen Poutsma
+ * @author Brian Clozel
  */
 public class JettyDataBufferTests {
 
 	private final JettyDataBufferFactory dataBufferFactory = new JettyDataBufferFactory();
 
+	private ArrayByteBufferPool.Tracking byteBufferPool = new ArrayByteBufferPool.Tracking();
+
 	@Test
 	void releaseRetainChunk() {
-		ByteBuffer buffer = ByteBuffer.allocate(3);
-		Content.Chunk mockChunk = mock();
-		given(mockChunk.getByteBuffer()).willReturn(buffer);
-		given(mockChunk.release()).willReturn(false, false, true);
+		RetainableByteBuffer retainableBuffer = byteBufferPool.acquire(3, false);
+		ByteBuffer buffer = retainableBuffer.getByteBuffer();
+		buffer.position(0).limit(1);
+		Content.Chunk chunk = Content.Chunk.asChunk(buffer, false, retainableBuffer);
 
-
-
-		JettyDataBuffer dataBuffer = this.dataBufferFactory.wrap(mockChunk);
+		JettyDataBuffer dataBuffer = this.dataBufferFactory.wrap(chunk);
 		dataBuffer.retain();
 		dataBuffer.retain();
 		assertThat(dataBuffer.release()).isFalse();
@@ -52,8 +53,12 @@ public class JettyDataBufferTests {
 		assertThat(dataBuffer.release()).isTrue();
 
 		assertThatIllegalStateException().isThrownBy(dataBuffer::release);
+		assertThat(retainableBuffer.isRetained()).isFalse();
+		assertThat(byteBufferPool.getLeaks()).isEmpty();
+	}
 
-		then(mockChunk).should(times(3)).retain();
-		then(mockChunk).should(times(3)).release();
+	@AfterEach
+	public void tearDown() throws Exception {
+		this.byteBufferPool.clear();
 	}
 }

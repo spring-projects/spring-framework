@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,11 @@ class EntityManagerRuntimeHints implements RuntimeHintsRegistrar {
 
 	private static final String ENTITY_MANAGER_FACTORY_CLASS_NAME = "jakarta.persistence.EntityManagerFactory";
 
+	// Up to Hibernate 7.0
 	private static final String QUERY_SQM_IMPL_CLASS_NAME = "org.hibernate.query.sqm.internal.QuerySqmImpl";
+
+	// As of Hibernate 7.1
+	private static final String SQM_QUERY_IMPL_CLASS_NAME = "org.hibernate.query.sqm.internal.SqmQueryImpl";
 
 	private static final String NATIVE_QUERY_IMPL_CLASS_NAME = "org.hibernate.query.sql.internal.NativeQueryImpl";
 
@@ -62,6 +66,12 @@ class EntityManagerRuntimeHints implements RuntimeHintsRegistrar {
 		}
 		try {
 			Class<?> clazz = ClassUtils.forName(QUERY_SQM_IMPL_CLASS_NAME, classLoader);
+			hints.proxies().registerJdkProxy(ClassUtils.getAllInterfacesForClass(clazz, classLoader));
+		}
+		catch (ClassNotFoundException ignored) {
+		}
+		try {
+			Class<?> clazz = ClassUtils.forName(SQM_QUERY_IMPL_CLASS_NAME, classLoader);
 			hints.proxies().registerJdkProxy(ClassUtils.getAllInterfacesForClass(clazz, classLoader));
 		}
 		catch (ClassNotFoundException ignored) {

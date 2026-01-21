@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -79,17 +79,19 @@ class HttpRequestValuesTests {
 
 		assertThat(uriTemplate)
 				.isEqualTo("/path?" +
-						"{param1}={param1[0]}&" +
-						"{param2}={param2[0]}&" +
-						"{param2}={param2[1]}");
+						"{queryParam-param1}={queryParam-param1[0]}&" +
+						"{queryParam-param2}={queryParam-param2[0]}&" +
+						"{queryParam-param2}={queryParam-param2[1]}");
 
 		assertThat(requestValues.getUriVariables())
-				.containsOnlyKeys("param1", "param2", "param1[0]", "param2[0]", "param2[1]")
-				.containsEntry("param1", "param1")
-				.containsEntry("param2", "param2")
-				.containsEntry("param1[0]", "1st value")
-				.containsEntry("param2[0]", "2nd value A")
-				.containsEntry("param2[1]", "2nd value B");
+				.containsOnlyKeys(
+						"queryParam-param1", "queryParam-param2", "queryParam-param1[0]",
+						"queryParam-param2[0]", "queryParam-param2[1]")
+				.containsEntry("queryParam-param1", "param1")
+				.containsEntry("queryParam-param2", "param2")
+				.containsEntry("queryParam-param1[0]", "1st value")
+				.containsEntry("queryParam-param2[0]", "2nd value A")
+				.containsEntry("queryParam-param2[1]", "2nd value B");
 
 		URI uri = UriComponentsBuilder.fromUriString(uriTemplate)
 				.encode()
@@ -97,6 +99,24 @@ class HttpRequestValuesTests {
 
 		assertThat(uri.toString())
 				.isEqualTo("/path?param1=1st%20value&param2=2nd%20value%20A&param2=2nd%20value%20B");
+	}
+
+	@Test // gh-34364
+	void queryParamWithSemicolon() {
+		HttpRequestValues requestValues = HttpRequestValues.builder().setHttpMethod(HttpMethod.POST)
+				.setUriTemplate("/path")
+				.addRequestParameter("userId:eq", "test value")
+				.build();
+
+		String uriTemplate = requestValues.getUriTemplate();
+		assertThat(uriTemplate).isEqualTo("/path?{queryParam-userId%3Aeq}={queryParam-userId%3Aeq[0]}");
+
+		URI uri = UriComponentsBuilder.fromUriString(uriTemplate)
+				.encode()
+				.build(requestValues.getUriVariables());
+
+		assertThat(uri.toString())
+				.isEqualTo("/path?userId%3Aeq=test%20value");
 	}
 
 	@Test
@@ -144,7 +164,7 @@ class HttpRequestValuesTests {
 		String uriTemplate = requestValues.getUriTemplate();
 		assertThat(uriTemplate).isNotNull();
 
-		assertThat(uriTemplate).isEqualTo("/path?{query param}={query param[0]}");
+		assertThat(uriTemplate).isEqualTo("/path?{queryParam-query param}={queryParam-query param[0]}");
 
 		URI uri = UriComponentsBuilder.fromUriString(uriTemplate)
 				.encode()

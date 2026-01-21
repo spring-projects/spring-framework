@@ -53,6 +53,3 @@ takes care of and which actions are your responsibility.
 
 The Spring Framework takes care of all the low-level details that can make JDBC such a
 tedious API.
-
-
-

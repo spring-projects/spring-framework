@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,13 +53,19 @@ public interface FragmentsRendering extends SmartView {
 	 */
 	HttpHeaders headers();
 
+	/**
+	 * Return the {@code ModelAndView} for each fragment.
+	 * @since 6.2.15
+	 */
+	Collection<ModelAndView> fragments();
+
 
 	/**
 	 * Create a builder with one HTML fragment, also inheriting attributes from
 	 * the shared model for the request.
 	 * @param viewName the name of the view for the fragment
 	 * @return the created builder
-	 * @since 6.2.1
+	 * @since 6.2.13
 	 */
 	static Builder fragment(String viewName) {
 		return new DefaultFragmentsRenderingBuilder().fragment(viewName);
@@ -71,7 +77,7 @@ public interface FragmentsRendering extends SmartView {
 	 * @param model attributes for the fragment, in addition to attributes from the
 	 * shared model for the request
 	 * @return the created builder
-	 * @since 6.2.1
+	 * @since 6.2.13
 	 */
 	static Builder fragment(String viewName, Map<String, Object> model) {
 		return new DefaultFragmentsRenderingBuilder().fragment(viewName, model);
@@ -82,10 +88,38 @@ public interface FragmentsRendering extends SmartView {
 	 * @param fragments the fragments to add; each fragment also inherits
 	 * attributes from the shared model for the request
 	 * @return the created builder
-	 * @since 6.2.1
+	 * @since 6.2.13
 	 */
 	static Builder fragments(Collection<ModelAndView> fragments) {
 		return new DefaultFragmentsRenderingBuilder().fragments(fragments);
+	}
+
+
+	/**
+	 * The same as {@link #fragment(String, Map)}.
+	 * @deprecated in favor of {@link #fragment(String, Map)}
+	 */
+	@Deprecated(since = "6.2.13", forRemoval = true)
+	static Builder with(String viewName, Map<String, Object> model) {
+		return fragment(viewName, model);
+	}
+
+	/**
+	 * The same as {@link #fragment(String)}.
+	 * @deprecated in favor of {@link #fragment(String)}
+	 */
+	@Deprecated(since = "6.2.13", forRemoval = true)
+	static Builder with(String viewName) {
+		return fragment(viewName);
+	}
+
+	/**
+	 * The same as {@link #fragments(Collection)}.
+	 * @deprecated in favor of {@link #fragments(Collection)}
+	 */
+	@Deprecated(since = "6.2.13", forRemoval = true)
+	static Builder with(Collection<ModelAndView> fragments) {
+		return fragments(fragments);
 	}
 
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,7 +66,9 @@ import org.springframework.context.PayloadApplicationEvent;
 import org.springframework.context.ResourceLoaderAware;
 import org.springframework.context.event.ApplicationEventMulticaster;
 import org.springframework.context.event.ContextClosedEvent;
+import org.springframework.context.event.ContextPausedEvent;
 import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.context.event.ContextRestartedEvent;
 import org.springframework.context.event.ContextStartedEvent;
 import org.springframework.context.event.ContextStoppedEvent;
 import org.springframework.context.event.SimpleApplicationEventMulticaster;
@@ -74,6 +76,7 @@ import org.springframework.context.expression.StandardBeanExpressionResolver;
 import org.springframework.context.weaving.LoadTimeWeaverAware;
 import org.springframework.context.weaving.LoadTimeWeaverAwareProcessor;
 import org.springframework.core.NativeDetector;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.convert.ConversionService;
@@ -620,10 +623,20 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 				finishRefresh();
 			}
 
-			catch (RuntimeException | Error ex ) {
+			catch (RuntimeException | Error ex) {
 				if (logger.isWarnEnabled()) {
 					logger.warn("Exception encountered during context initialization - " +
 							"cancelling refresh attempt: " + ex);
+				}
+
+				// Stop already started Lifecycle beans to avoid dangling resources.
+				if (this.lifecycleProcessor != null && this.lifecycleProcessor.isRunning()) {
+					try {
+						this.lifecycleProcessor.stop();
+					}
+					catch (Throwable ex2) {
+						logger.warn("Exception thrown from LifecycleProcessor on cancelled refresh", ex2);
+					}
 				}
 
 				// Destroy already created singletons to avoid dangling resources.
@@ -926,6 +939,9 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 */
 	@SuppressWarnings("unchecked")
 	protected void finishBeanFactoryInitialization(ConfigurableListableBeanFactory beanFactory) {
+		// Mark current thread for singleton instantiation with applied bootstrap locking.
+		beanFactory.prepareSingletonBootstrap();
+
 		// Initialize bootstrap executor for this context.
 		if (beanFactory.containsBean(BOOTSTRAP_EXECUTOR_BEAN_NAME) &&
 				beanFactory.isTypeMatch(BOOTSTRAP_EXECUTOR_BEAN_NAME, Executor.class)) {
@@ -1299,6 +1315,12 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	}
 
 	@Override
+	public <T> ObjectProvider<T> getBeanProvider(ParameterizedTypeReference<T> requiredType) {
+		assertBeanFactoryActive();
+		return getBeanFactory().getBeanProvider(requiredType);
+	}
+
+	@Override
 	public boolean containsBean(String name) {
 		return getBeanFactory().containsBean(name);
 	}
@@ -1485,17 +1507,17 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	//---------------------------------------------------------------------
 
 	@Override
-	public @Nullable String getMessage(String code, Object @Nullable [] args, @Nullable String defaultMessage, Locale locale) {
+	public @Nullable String getMessage(String code, Object @Nullable [] args, @Nullable String defaultMessage, @Nullable Locale locale) {
 		return getMessageSource().getMessage(code, args, defaultMessage, locale);
 	}
 
 	@Override
-	public String getMessage(String code, Object @Nullable [] args, Locale locale) throws NoSuchMessageException {
+	public String getMessage(String code, Object @Nullable [] args, @Nullable Locale locale) throws NoSuchMessageException {
 		return getMessageSource().getMessage(code, args, locale);
 	}
 
 	@Override
-	public String getMessage(MessageSourceResolvable resolvable, Locale locale) throws NoSuchMessageException {
+	public String getMessage(MessageSourceResolvable resolvable, @Nullable Locale locale) throws NoSuchMessageException {
 		return getMessageSource().getMessage(resolvable, locale);
 	}
 
@@ -1546,6 +1568,18 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	public void stop() {
 		getLifecycleProcessor().stop();
 		publishEvent(new ContextStoppedEvent(this));
+	}
+
+	@Override
+	public void restart() {
+		getLifecycleProcessor().onRestart();
+		publishEvent(new ContextRestartedEvent(this));
+	}
+
+	@Override
+	public void pause() {
+		getLifecycleProcessor().onPause();
+		publishEvent(new ContextPausedEvent(this));
 	}
 
 	@Override

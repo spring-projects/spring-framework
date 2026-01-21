@@ -166,7 +166,7 @@ following sections to make this pattern much easier to implement.
 == MockMvc and WebDriver Setup
 
 To use Selenium WebDriver with `MockMvc`, make sure that your project includes a test
-dependency on `org.seleniumhq.selenium:selenium-htmlunit3-driver`.
+dependency on `org.seleniumhq.selenium:htmlunit3-driver`.
 
 We can easily create a Selenium WebDriver that integrates with MockMvc by using the
 `MockMvcHtmlUnitDriverBuilder` as the following example shows:
@@ -203,7 +203,7 @@ Kotlin::
 ======
 
 NOTE: This is a simple example of using `MockMvcHtmlUnitDriverBuilder`. For more advanced
-usage, see xref:testing/mockmvc/htmlunit/webdriver.adoc#spring-mvc-test-server-htmlunit-webdriver-advanced-builder[Advanced `MockMvcHtmlUnitDriverBuilder`].
+usage, see <<mockmvc-server-htmlunit-webdriver-advanced-builder>>.
 
 The preceding example ensures that any URL that references `localhost` as the server is
 directed to our `MockMvc` instance without the need for a real HTTP connection. Any other
@@ -259,10 +259,11 @@ Kotlin::
 ======
 --
 
-This improves on the design of our xref:testing/mockmvc/htmlunit/mah.adoc#spring-mvc-test-server-htmlunit-mah-usage[HtmlUnit test]
+This improves on the design of our
+xref:testing/mockmvc/htmlunit/mah.adoc#mockmvc-server-htmlunit-mah-usage[HtmlUnit test]
 by leveraging the Page Object Pattern. As we mentioned in
-xref:testing/mockmvc/htmlunit/webdriver.adoc#spring-mvc-test-server-htmlunit-webdriver-why[Why WebDriver and MockMvc?], we can use the Page Object Pattern
-with HtmlUnit, but it is much easier with WebDriver. Consider the following
+<<mockmvc-server-htmlunit-webdriver-why>>, we can use the Page Object Pattern with
+HtmlUnit, but it is much easier with WebDriver. Consider the following
 `CreateMessagePage` implementation:
 
 --
@@ -562,7 +563,19 @@ Kotlin::
 +
 [source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
-	// Not possible in Kotlin until {kotlin-issues}/KT-22208 is fixed
+	val mockMvc: MockMvc = MockMvcBuilders
+			.webAppContextSetup(context)
+			.apply<DefaultMockMvcBuilder>(springSecurity())
+			.build()
+
+	driver = MockMvcHtmlUnitDriverBuilder
+			.mockMvcSetup(mockMvc)
+			// for illustration only - defaults to ""
+			.contextPath("")
+			// By default MockMvc is used for localhost only;
+			// the following will use MockMvc for example.com and example.org as well
+			.useMockMvcForHosts("example.com", "example.org")
+			.build()
 ----
 ======
 

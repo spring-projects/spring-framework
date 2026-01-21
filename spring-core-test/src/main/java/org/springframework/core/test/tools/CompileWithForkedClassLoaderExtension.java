@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.core.test.tools;
 
 import java.lang.reflect.Method;
 
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.InvocationInterceptor;
 import org.junit.jupiter.api.extension.ReflectiveInvocationContext;
@@ -44,7 +45,7 @@ import static org.junit.platform.launcher.EngineFilter.includeEngines;
 class CompileWithForkedClassLoaderExtension implements InvocationInterceptor {
 
 	@Override
-	public void interceptBeforeAllMethod(Invocation<Void> invocation,
+	public void interceptBeforeAllMethod(Invocation<@Nullable Void> invocation,
 			ReflectiveInvocationContext<Method> invocationContext,
 			ExtensionContext extensionContext) throws Throwable {
 
@@ -52,7 +53,7 @@ class CompileWithForkedClassLoaderExtension implements InvocationInterceptor {
 	}
 
 	@Override
-	public void interceptBeforeEachMethod(Invocation<Void> invocation,
+	public void interceptBeforeEachMethod(Invocation<@Nullable Void> invocation,
 			ReflectiveInvocationContext<Method> invocationContext,
 			ExtensionContext extensionContext) throws Throwable {
 
@@ -60,7 +61,7 @@ class CompileWithForkedClassLoaderExtension implements InvocationInterceptor {
 	}
 
 	@Override
-	public void interceptAfterEachMethod(Invocation<Void> invocation,
+	public void interceptAfterEachMethod(Invocation<@Nullable Void> invocation,
 			ReflectiveInvocationContext<Method> invocationContext,
 			ExtensionContext extensionContext) throws Throwable {
 
@@ -68,7 +69,7 @@ class CompileWithForkedClassLoaderExtension implements InvocationInterceptor {
 	}
 
 	@Override
-	public void interceptAfterAllMethod(Invocation<Void> invocation,
+	public void interceptAfterAllMethod(Invocation<@Nullable Void> invocation,
 			ReflectiveInvocationContext<Method> invocationContext,
 			ExtensionContext extensionContext) throws Throwable {
 
@@ -76,7 +77,7 @@ class CompileWithForkedClassLoaderExtension implements InvocationInterceptor {
 	}
 
 	@Override
-	public void interceptTestMethod(Invocation<Void> invocation,
+	public void interceptTestMethod(Invocation<@Nullable Void> invocation,
 			ReflectiveInvocationContext<Method> invocationContext,
 			ExtensionContext extensionContext) throws Throwable {
 
@@ -84,13 +85,13 @@ class CompileWithForkedClassLoaderExtension implements InvocationInterceptor {
 				() -> runTestWithModifiedClassPath(invocationContext, extensionContext));
 	}
 
-	private void intercept(Invocation<Void> invocation, ExtensionContext extensionContext)
+	private void intercept(Invocation<@Nullable Void> invocation, ExtensionContext extensionContext)
 			throws Throwable {
 
 		intercept(invocation, extensionContext, Action.NONE);
 	}
 
-	private void intercept(Invocation<Void> invocation, ExtensionContext extensionContext,
+	private void intercept(Invocation<@Nullable Void> invocation, ExtensionContext extensionContext,
 			Action action) throws Throwable {
 
 		if (isUsingForkedClassPathLoader(extensionContext)) {

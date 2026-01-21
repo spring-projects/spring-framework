@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@ import org.springframework.messaging.converter.ByteArrayMessageConverter;
 import org.springframework.messaging.converter.CompositeMessageConverter;
 import org.springframework.messaging.converter.ContentTypeResolver;
 import org.springframework.messaging.converter.DefaultContentTypeResolver;
-import org.springframework.messaging.converter.MappingJackson2MessageConverter;
+import org.springframework.messaging.converter.JacksonJsonMessageConverter;
 import org.springframework.messaging.converter.MessageConverter;
 import org.springframework.messaging.converter.StringMessageConverter;
 import org.springframework.messaging.handler.invocation.HandlerMethodArgumentResolver;
@@ -343,9 +343,9 @@ class MessageBrokerBeanDefinitionParserTests {
 		assertThat(converters).hasSize(3);
 		assertThat(converters).element(0).isInstanceOf(StringMessageConverter.class);
 		assertThat(converters).element(1).isInstanceOf(ByteArrayMessageConverter.class);
-		assertThat(converters).element(2).isInstanceOf(MappingJackson2MessageConverter.class);
+		assertThat(converters).element(2).isInstanceOf(JacksonJsonMessageConverter.class);
 
-		ContentTypeResolver resolver = ((MappingJackson2MessageConverter) converters.get(2)).getContentTypeResolver();
+		ContentTypeResolver resolver = ((JacksonJsonMessageConverter) converters.get(2)).getContentTypeResolver();
 		assertThat(((DefaultContentTypeResolver) resolver).getDefaultMimeType()).isEqualTo(MimeTypeUtils.APPLICATION_JSON);
 
 		DirectFieldAccessor handlerAccessor = new DirectFieldAccessor(annotationMethodMessageHandler);

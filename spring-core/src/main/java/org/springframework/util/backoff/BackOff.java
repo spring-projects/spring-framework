@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,16 +17,16 @@
 package org.springframework.util.backoff;
 
 /**
- * Provide a {@link BackOffExecution} that indicates the rate at which
- * an operation should be retried.
+ * Strategy interface for providing a {@link BackOffExecution} that indicates the
+ * rate at which an operation should be retried.
  *
  * <p>Users of this interface are expected to use it like this:
  *
  * <pre class="code">
- * BackOffExecution exec = backOff.start();
+ * BackOffExecution execution = backOff.start();
  *
  * // In the operation recovery/retry loop:
- * long waitInterval = exec.nextBackOff();
+ * long waitInterval = execution.nextBackOff();
  * if (waitInterval == BackOffExecution.STOP) {
  *     // do not retry operation
  * }
@@ -35,12 +35,14 @@ package org.springframework.util.backoff;
  *     // retry operation
  * }</pre>
  *
- * Once the underlying operation has completed successfully,
- * the execution instance can be discarded.
+ * <p>Once the underlying operation has completed successfully, the execution
+ * instance can be discarded.
  *
  * @author Stephane Nicoll
  * @since 4.1
  * @see BackOffExecution
+ * @see FixedBackOff
+ * @see ExponentialBackOff
  */
 @FunctionalInterface
 public interface BackOff {

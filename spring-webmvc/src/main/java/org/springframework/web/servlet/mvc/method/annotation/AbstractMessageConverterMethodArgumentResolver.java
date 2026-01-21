@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -71,6 +71,9 @@ import org.springframework.web.method.support.HandlerMethodArgumentResolver;
  */
 public abstract class AbstractMessageConverterMethodArgumentResolver implements HandlerMethodArgumentResolver {
 
+	protected enum ConverterType { BASE, GENERIC, SMART };
+
+
 	private static final Set<HttpMethod> SUPPORTED_METHODS = Set.of(HttpMethod.POST, HttpMethod.PUT, HttpMethod.PATCH);
 
 	private static final Object NO_VALUE = new Object();
@@ -79,8 +82,6 @@ public abstract class AbstractMessageConverterMethodArgumentResolver implements 
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	protected final List<HttpMessageConverter<?>> messageConverters;
-
-	protected enum ConverterType { BASE, GENERIC, SMART };
 
 	private final RequestResponseBodyAdviceChain advice;
 
@@ -175,7 +176,7 @@ public abstract class AbstractMessageConverterMethodArgumentResolver implements 
 			ResolvableType targetResolvableType = null;
 			message = new EmptyBodyCheckingHttpInputMessage(inputMessage);
 			for (HttpMessageConverter<?> converter : this.messageConverters) {
-				Class<HttpMessageConverter<?>> converterClass = (Class<HttpMessageConverter<?>>) converter.getClass();
+				Class<? extends HttpMessageConverter<?>> converterClass = (Class<? extends HttpMessageConverter<?>>) converter.getClass();
 				ConverterType converterTypeToUse = null;
 				if (converter instanceof GenericHttpMessageConverter<?> genericConverter) {
 					if (genericConverter.canRead(targetType, contextClass, contentType)) {
@@ -195,17 +196,17 @@ public abstract class AbstractMessageConverterMethodArgumentResolver implements 
 				}
 				if (converterTypeToUse != null) {
 					if (message.hasBody()) {
-						HttpInputMessage msgToUse =
-								getAdvice().beforeBodyRead(message, parameter, targetType, converterClass);
+						HttpInputMessage msgToUse = this.advice.beforeBodyRead(message, parameter, targetType, converterClass);
 						body = switch (converterTypeToUse) {
 							case BASE -> ((HttpMessageConverter<T>) converter).read(targetClass, msgToUse);
 							case GENERIC -> ((GenericHttpMessageConverter<?>) converter).read(targetType, contextClass, msgToUse);
-							case SMART -> ((SmartHttpMessageConverter<?>) converter).read(targetResolvableType, msgToUse, null);
+							case SMART -> ((SmartHttpMessageConverter<?>) converter).read(targetResolvableType, msgToUse,
+									this.advice.determineReadHints(parameter, targetType, (Class<SmartHttpMessageConverter<?>>) converterClass));
 						};
-						body = getAdvice().afterBodyRead(body, msgToUse, parameter, targetType, converterClass);
+						body = this.advice.afterBodyRead(body, msgToUse, parameter, targetType, converterClass);
 					}
 					else {
-						body = getAdvice().handleEmptyBody(null, message, parameter, targetType, converterClass);
+						body = this.advice.handleEmptyBody(null, message, parameter, targetType, converterClass);
 					}
 					break;
 				}
@@ -213,7 +214,7 @@ public abstract class AbstractMessageConverterMethodArgumentResolver implements 
 			}
 
 			if (body == NO_VALUE && noContentType && !message.hasBody()) {
-				body = getAdvice().handleEmptyBody(
+				body = this.advice.handleEmptyBody(
 						null, message, parameter, targetType, NoContentTypeHttpMessageConverter.class);
 			}
 		}

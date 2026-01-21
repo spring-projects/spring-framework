@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,8 +48,8 @@ public interface GeneratedFiles {
 	 * @param javaFile the java file to add
 	 */
 	default void addSourceFile(JavaFile javaFile) {
-		validatePackage(javaFile.packageName, javaFile.typeSpec.name);
-		String className = javaFile.packageName + "." + javaFile.typeSpec.name;
+		validatePackage(javaFile.packageName(), javaFile.typeSpec().name());
+		String className = javaFile.packageName() + "." + javaFile.typeSpec().name();
 		addSourceFile(className, javaFile::writeTo);
 	}
 
@@ -193,9 +193,9 @@ public interface GeneratedFiles {
 
 	private static void validatePackage(String packageName, String className) {
 		if (!StringUtils.hasLength(packageName)) {
-			throw new IllegalArgumentException("Could not add '" + className + "', "
-					+ "processing classes in the default package is not supported. "
-					+ "Did you forget to add a package statement?");
+			throw new IllegalArgumentException("Could not add '" + className + "', " +
+					"processing classes in the default package is not supported. " +
+					"Did you forget to add a package statement?");
 		}
 	}
 

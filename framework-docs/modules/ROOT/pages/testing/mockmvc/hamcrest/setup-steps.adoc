@@ -25,7 +25,13 @@ Kotlin::
 +
 [source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
-	// Not possible in Kotlin until {kotlin-issues}/KT-22208 is fixed
+	// static import of MockMvcBuilders.standaloneSetup
+
+	val mockMvc = standaloneSetup(MusicController())
+		.defaultRequest<StandaloneMockMvcBuilder>(get("/").accept(MediaType.APPLICATION_JSON))
+		.alwaysExpect<StandaloneMockMvcBuilder>(status().isOk())
+		.alwaysExpect<StandaloneMockMvcBuilder>(content().contentType("application/json;charset=UTF-8"))
+		.build()
 ----
 ======
 
@@ -53,11 +59,16 @@ Kotlin::
 +
 [source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
-	// Not possible in Kotlin until {kotlin-issues}/KT-22208 is fixed
+	// static import of SharedHttpSessionConfigurer.sharedHttpSession
+
+	val mockMvc = MockMvcBuilders.standaloneSetup(TestController())
+			.apply<StandaloneMockMvcBuilder>(sharedHttpSession())
+			.build()
+
+	// Use mockMvc to perform requests...
 ----
 ======
 
 See the javadoc for
 {spring-framework-api}/test/web/servlet/setup/ConfigurableMockMvcBuilder.html[`ConfigurableMockMvcBuilder`]
 for a list of all MockMvc builder features or use the IDE to explore the available options.
-

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,12 +32,12 @@ import org.springframework.core.convert.converter.ConverterFactory;
 final class StringToEnumConverterFactory implements ConverterFactory<String, Enum> {
 
 	@Override
-	public <T extends Enum> Converter<String, T> getConverter(Class<T> targetType) {
+	public <T extends Enum> Converter<String, @Nullable T> getConverter(Class<T> targetType) {
 		return new StringToEnum(ConversionUtils.getEnumType(targetType));
 	}
 
 
-	private static class StringToEnum<T extends Enum> implements Converter<String, T> {
+	private static class StringToEnum<T extends Enum> implements Converter<String, @Nullable T> {
 
 		private final Class<T> enumType;
 

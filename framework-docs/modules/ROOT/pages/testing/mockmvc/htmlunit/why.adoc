@@ -60,7 +60,7 @@ assume our form looks like the following snippet:
 	</form>
 ----
 
-How do we ensure that our form produce the correct request to create a new message? A
+How do we ensure that our form produces the correct request to create a new message? A
 naive attempt might resemble the following:
 
 [tabs]
@@ -154,7 +154,7 @@ validation.
 [[mockmvc-server-htmlunit-why-integration]]
 == Integration Testing to the Rescue?
 
-To resolve the issues mentioned earlier, we could perform end-to-end integration testing,
+To resolve the issues mentioned above, we could perform end-to-end integration testing,
 but this has some drawbacks. Consider testing the view that lets us page through the
 messages. We might need the following tests:
 
@@ -171,7 +171,7 @@ leads to a number of additional challenges:
 * Testing can become slow, since each test would need to ensure that the database is in
   the correct state.
 * Since our database needs to be in a specific state, we cannot run tests in parallel.
-* Performing assertions on such items as auto-generated IDs, timestamps, and others can
+* Performing assertions on items such as auto-generated IDs, timestamps, and others can
   be difficult.
 
 These challenges do not mean that we should abandon end-to-end integration testing

@@ -425,5 +425,3 @@ computation sequence along with a promise to begin and complete the computation.
 A `Publisher` can emit data while a transaction is ongoing but not necessarily completed.
 Therefore, methods that depend upon successful completion of an entire transaction need
 to ensure completion and buffer results in the calling code.
-
-

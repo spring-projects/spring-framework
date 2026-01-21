@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.http;
 
+import java.io.Serializable;
 import java.net.URI;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -50,12 +51,12 @@ import org.springframework.util.ObjectUtils;
  * @see org.springframework.web.ErrorResponse
  * @see org.springframework.web.ErrorResponseException
  */
-public class ProblemDetail {
+public class ProblemDetail implements Serializable {
 
-	private static final URI BLANK_TYPE = URI.create("about:blank");
+	private static final long serialVersionUID = 3307761915842206538L;
 
 
-	private URI type = BLANK_TYPE;
+	private @Nullable URI type;
 
 	private @Nullable String title;
 
@@ -65,6 +66,7 @@ public class ProblemDetail {
 
 	private @Nullable URI instance;
 
+	@SuppressWarnings("serial")
 	private @Nullable Map<String, Object> properties;
 
 
@@ -100,18 +102,18 @@ public class ProblemDetail {
 
 	/**
 	 * Setter for the {@link #getType() problem type}.
-	 * <p>By default, this is {@link #BLANK_TYPE}.
+	 * <p>By default, this is not set. According to the spec, when not present,
+	 * the type is assumed to be "about:blank"
 	 * @param type the problem type
 	 */
-	public void setType(URI type) {
-		Assert.notNull(type, "'type' is required");
+	public void setType(@Nullable URI type) {
 		this.type = type;
 	}
 
 	/**
 	 * Return the configured {@link #setType(URI) problem type}.
 	 */
-	public URI getType() {
+	public @Nullable URI getType() {
 		return this.type;
 	}
 
@@ -241,7 +243,7 @@ public class ProblemDetail {
 	@Override
 	public boolean equals(@Nullable Object other) {
 		return (this == other || (other instanceof ProblemDetail that &&
-				getType().equals(that.getType()) &&
+				ObjectUtils.nullSafeEquals(getType(), that.getType()) &&
 				ObjectUtils.nullSafeEquals(getTitle(), that.getTitle()) &&
 				this.status == that.status &&
 				ObjectUtils.nullSafeEquals(this.detail, that.detail) &&

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -88,6 +88,8 @@ public class InstanceSupplierCodeGenerator {
 
 	private static final CodeBlock NO_ARGS = CodeBlock.of("");
 
+	private static final boolean KOTLIN_REFLECT_PRESENT = KotlinDetector.isKotlinReflectPresent();
+
 
 	private final GenerationContext generationContext;
 
@@ -114,6 +116,7 @@ public class InstanceSupplierCodeGenerator {
 		this.generatedMethods = generatedMethods;
 		this.allowDirectSupplierShortcut = allowDirectSupplierShortcut;
 	}
+
 
 	/**
 	 * Generate the instance supplier code.
@@ -160,12 +163,13 @@ public class InstanceSupplierCodeGenerator {
 				registeredBean.getBeanName(), constructor, registeredBean.getBeanClass());
 
 		Class<?> publicType = descriptor.publicType();
-		if (KotlinDetector.isKotlinType(publicType) && KotlinDelegate.hasConstructorWithOptionalParameter(publicType)) {
+		if (KOTLIN_REFLECT_PRESENT && KotlinDetector.isKotlinType(publicType) && KotlinDelegate.hasConstructorWithOptionalParameter(publicType)) {
 			return generateCodeForInaccessibleConstructor(descriptor,
 					hints -> hints.registerType(publicType, MemberCategory.INVOKE_DECLARED_CONSTRUCTORS));
 		}
 
-		if (!isVisible(constructor, constructor.getDeclaringClass())) {
+		if (!isVisible(constructor, constructor.getDeclaringClass()) ||
+				registeredBean.getMergedBeanDefinition().hasMethodOverrides()) {
 			return generateCodeForInaccessibleConstructor(descriptor,
 					hints -> hints.registerConstructor(constructor, ExecutableMode.INVOKE));
 		}
@@ -233,8 +237,7 @@ public class InstanceSupplierCodeGenerator {
 
 		CodeBlock arguments = hasArguments ?
 				new AutowiredArgumentsCodeGenerator(actualType, constructor)
-						.generateCode(constructor.getParameterTypes(), (onInnerClass ? 1 : 0))
-				: NO_ARGS;
+						.generateCode(constructor.getParameterTypes(), (onInnerClass ? 1 : 0)) : NO_ARGS;
 
 		CodeBlock newInstance = generateNewInstanceCodeForConstructor(actualType, arguments);
 		code.add(generateWithGeneratorCode(hasArguments, newInstance));
@@ -292,9 +295,12 @@ public class InstanceSupplierCodeGenerator {
 
 		this.generationContext.getRuntimeHints().reflection().registerMethod(factoryMethod, ExecutableMode.INVOKE);
 		GeneratedMethod getInstanceMethod = generateGetInstanceSupplierMethod(method -> {
+			CodeWarnings codeWarnings = new CodeWarnings();
 			Class<?> suppliedType = ClassUtils.resolvePrimitiveIfNecessary(factoryMethod.getReturnType());
+			codeWarnings.detectDeprecation(suppliedType, factoryMethod);
 			method.addJavadoc("Get the bean instance supplier for '$L'.", beanName);
 			method.addModifiers(PRIVATE_STATIC);
+			codeWarnings.suppress(method);
 			method.returns(ParameterizedTypeName.get(BeanInstanceSupplier.class, suppliedType));
 			method.addStatement(generateInstanceSupplierForFactoryMethod(
 					factoryMethod, suppliedType, targetClass, factoryMethod.getName()));
@@ -324,8 +330,7 @@ public class InstanceSupplierCodeGenerator {
 		boolean hasArguments = factoryMethod.getParameterCount() > 0;
 		CodeBlock arguments = hasArguments ?
 				new AutowiredArgumentsCodeGenerator(ClassUtils.getUserClass(targetClass), factoryMethod)
-						.generateCode(factoryMethod.getParameterTypes())
-				: NO_ARGS;
+						.generateCode(factoryMethod.getParameterTypes()) : NO_ARGS;
 
 		CodeBlock newInstance = generateNewInstanceCodeForMethod(
 				factoryBeanName, ClassUtils.getUserClass(targetClass), factoryMethodName, arguments);
@@ -379,7 +384,7 @@ public class InstanceSupplierCodeGenerator {
 		Visibility visibility = AccessControl.lowest(classAccessControl, memberAccessControl).getVisibility();
 		return (visibility == Visibility.PUBLIC || (visibility != Visibility.PRIVATE &&
 				member.getDeclaringClass().getPackageName().equals(this.className.packageName())));
-		}
+	}
 
 	private CodeBlock generateParameterTypesCode(Class<?>[] parameterTypes) {
 		CodeBlock.Builder code = CodeBlock.builder();
@@ -439,6 +444,7 @@ public class InstanceSupplierCodeGenerator {
 			}
 		}
 	}
+
 
 	record ConstructorDescriptor(String beanName, Constructor<?> constructor, Class<?> publicType) {
 

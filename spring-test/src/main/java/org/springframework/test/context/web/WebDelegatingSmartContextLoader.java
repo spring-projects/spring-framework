@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,25 +38,25 @@ public class WebDelegatingSmartContextLoader extends AbstractDelegatingSmartCont
 
 	private static final String GROOVY_XML_WEB_CONTEXT_LOADER_CLASS_NAME = "org.springframework.test.context.web.GenericGroovyXmlWebContextLoader";
 
-	private static final boolean groovyPresent = ClassUtils.isPresent("groovy.lang.Closure",
-		WebDelegatingSmartContextLoader.class.getClassLoader())
-			&& ClassUtils.isPresent(GROOVY_XML_WEB_CONTEXT_LOADER_CLASS_NAME,
-				WebDelegatingSmartContextLoader.class.getClassLoader());
+	private static final boolean GROOVY_PRESENT = ClassUtils.isPresent("groovy.lang.Closure",
+			WebDelegatingSmartContextLoader.class.getClassLoader()) &&
+				ClassUtils.isPresent(GROOVY_XML_WEB_CONTEXT_LOADER_CLASS_NAME,
+						WebDelegatingSmartContextLoader.class.getClassLoader());
 
 	private final SmartContextLoader xmlLoader;
 	private final SmartContextLoader annotationConfigLoader;
 
 
 	public WebDelegatingSmartContextLoader() {
-		if (groovyPresent) {
+		if (GROOVY_PRESENT) {
 			try {
 				Class<?> loaderClass = ClassUtils.forName(GROOVY_XML_WEB_CONTEXT_LOADER_CLASS_NAME,
 					WebDelegatingSmartContextLoader.class.getClassLoader());
 				this.xmlLoader = (SmartContextLoader) BeanUtils.instantiateClass(loaderClass);
 			}
 			catch (Throwable ex) {
-				throw new IllegalStateException("Failed to enable support for Groovy scripts; "
-						+ "could not load class: " + GROOVY_XML_WEB_CONTEXT_LOADER_CLASS_NAME, ex);
+				throw new IllegalStateException("Failed to enable support for Groovy scripts; " +
+						"could not load class: " + GROOVY_XML_WEB_CONTEXT_LOADER_CLASS_NAME, ex);
 			}
 		}
 		else {

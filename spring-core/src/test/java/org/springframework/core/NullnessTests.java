@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -375,6 +375,13 @@ public class NullnessTests {
 		var field = NullnessFields.class.getDeclaredField("customNullableField");
 		var nullness = Nullness.forField(field);
 		Assertions.assertThat(nullness).isEqualTo(Nullness.NULLABLE);
+	}
+
+	@Test
+	void voidClassMethod() throws NoSuchMethodException {
+		var method = JSpecifyProcessor.class.getMethod("voidClassProcess");
+		var nullness = Nullness.forMethodReturnType(method);
+		Assertions.assertThat(nullness).isEqualTo(Nullness.UNSPECIFIED);
 	}
 
 	// Primitive types

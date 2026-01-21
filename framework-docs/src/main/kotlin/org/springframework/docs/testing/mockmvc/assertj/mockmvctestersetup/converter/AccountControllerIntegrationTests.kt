@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
+@file:Suppress("DEPRECATION")
+
 package org.springframework.docs.testing.mockmvc.assertj.mockmvctestersetup.converter
 
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.docs.testing.mockmvc.assertj.mockmvctestersetup.ApplicationWebConfiguration
-import org.springframework.http.converter.json.AbstractJackson2HttpMessageConverter
+import org.springframework.http.converter.AbstractJacksonHttpMessageConverter
 import org.springframework.test.context.junit.jupiter.web.SpringJUnitWebConfig
 import org.springframework.test.web.servlet.assertj.MockMvcTester
 import org.springframework.web.context.WebApplicationContext
@@ -28,7 +30,7 @@ import org.springframework.web.context.WebApplicationContext
 class AccountControllerIntegrationTests(@Autowired wac: WebApplicationContext) {
 
 	private val mockMvc = MockMvcTester.from(wac).withHttpMessageConverters(
-		listOf(wac.getBean(AbstractJackson2HttpMessageConverter::class.java)))
+		listOf(wac.getBean(AbstractJacksonHttpMessageConverter::class.java)))
 
 	// ...
 

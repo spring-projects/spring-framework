@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,9 +28,8 @@ import jakarta.jms.MessageListener;
 import jakarta.jms.TextMessage;
 import org.apache.activemq.artemis.jms.client.ActiveMQConnectionFactory;
 import org.apache.activemq.artemis.junit.EmbeddedActiveMQExtension;
-import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.AutoClose;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -48,12 +47,14 @@ import static org.junit.jupiter.params.provider.Arguments.argumentSet;
  */
 class MessageListenerContainerObservationTests {
 
-	@RegisterExtension
+	@AutoClose("stop")
 	EmbeddedActiveMQExtension server = new EmbeddedActiveMQExtension();
+
+	@AutoClose
+	ActiveMQConnectionFactory connectionFactory;
 
 	TestObservationRegistry registry = TestObservationRegistry.create();
 
-	ActiveMQConnectionFactory connectionFactory;
 
 	@BeforeEach
 	void setupServer() {
@@ -143,12 +144,6 @@ class MessageListenerContainerObservationTests {
 				argumentSet(DefaultMessageListenerContainer.class.getSimpleName(), new DefaultMessageListenerContainer()),
 				argumentSet(SimpleMessageListenerContainer.class.getSimpleName(), new SimpleMessageListenerContainer())
 		);
-	}
-
-	@AfterEach
-	void shutdownServer() {
-		connectionFactory.close();
-		server.stop();
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -81,8 +81,8 @@ abstract class AbstractJCacheKeyOperation<A extends Annotation> extends Abstract
 		for (CacheParameterDetail keyParameterDetail : this.keyParameterDetails) {
 			int parameterPosition = keyParameterDetail.getParameterPosition();
 			if (parameterPosition >= values.length) {
-				throw new IllegalStateException("Values mismatch, key parameter at position "
-						+ parameterPosition + " cannot be matched against " + values.length + " value(s)");
+				throw new IllegalStateException("Values mismatch, key parameter at position " +
+						parameterPosition + " cannot be matched against " + values.length + " value(s)");
 			}
 			result.add(keyParameterDetail.toCacheInvocationParameter(values[parameterPosition]));
 		}

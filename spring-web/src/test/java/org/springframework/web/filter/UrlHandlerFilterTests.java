@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,8 +18,11 @@ package org.springframework.web.filter;
 
 import java.io.IOException;
 
+import jakarta.servlet.DispatcherType;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 
@@ -29,6 +32,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.testfixture.servlet.MockFilterChain;
 import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
+import org.springframework.web.util.ServletRequestPathUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -74,14 +78,18 @@ public class UrlHandlerFilterTests {
 		UrlHandlerFilter filter = UrlHandlerFilter.trailingSlashHandler("/path/*").redirect(status).build();
 
 		String path = "/path/123";
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", path + "/");
 		MockHttpServletResponse response = new MockHttpServletResponse();
-
 		MockFilterChain chain = new MockFilterChain();
-		filter.doFilterInternal(new MockHttpServletRequest("GET", path + "/"), response, chain);
+
+		String queryString = "foo=bar";
+		request.setQueryString(queryString);
+
+		filter.doFilterInternal(request, response, chain);
 
 		assertThat(chain.getRequest()).isNull();
 		assertThat(response.getStatus()).isEqualTo(status.value());
-		assertThat(response.getHeader(HttpHeaders.LOCATION)).isEqualTo(path);
+		assertThat(response.getHeader(HttpHeaders.LOCATION)).isEqualTo(path + "?" + queryString);
 		assertThat(response.isCommitted()).isTrue();
 	}
 
@@ -122,6 +130,90 @@ public class UrlHandlerFilterTests {
 		assertThat(response.getStatus()).isEqualTo(200);
 		assertThat(response.getHeader(HttpHeaders.LOCATION)).isNull();
 		assertThat(response.isCommitted()).isFalse();
+	}
+
+	@Test // gh-35538
+	void shouldNotFilterErrorAndAsyncDispatches() {
+		UrlHandlerFilter filter = UrlHandlerFilter.trailingSlashHandler("/path/**").wrapRequest().build();
+
+		assertThat(filter.shouldNotFilterAsyncDispatch())
+				.as("Should not filter ASYNC dispatch as wrapped request is reused")
+				.isTrue();
+
+		assertThat(filter.shouldNotFilterErrorDispatch())
+				.as("Should not filter ERROR dispatch as it's an internal, fixed path")
+				.isTrue();
+	}
+
+	@Test // gh-35538
+	void shouldNotCacheParsedPath() throws Exception {
+		UrlHandlerFilter filter = UrlHandlerFilter.trailingSlashHandler("/path/*").wrapRequest().build();
+
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/path/123/");
+		request.setServletPath("/path/123/");
+
+		MockFilterChain chain = new MockFilterChain();
+		filter.doFilterInternal(request, new MockHttpServletResponse(), chain);
+
+		assertThat(ServletRequestPathUtils.hasParsedRequestPath(request))
+				.as("Path with trailing slash should not be cached")
+				.isFalse();
+	}
+
+	@Test // gh-35538
+	void shouldClearPreviouslyCachedPath() throws Exception {
+		UrlHandlerFilter filter = UrlHandlerFilter.trailingSlashHandler("/path/*").wrapRequest().build();
+
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/path/123/");
+		request.setServletPath("/path/123/");
+
+		ServletRequestPathUtils.parseAndCache(request);
+		assertThat(ServletRequestPathUtils.getParsedRequestPath(request).value()).isEqualTo("/path/123/");
+
+		PathServlet servlet = new PathServlet();
+		MockFilterChain chain = new MockFilterChain(servlet);
+		filter.doFilterInternal(request, new MockHttpServletResponse(), chain);
+
+		assertThat(servlet.getParsedPath()).isNull();
+	}
+
+	@Test // gh-35509
+	void shouldRespectForwardedPath() throws Exception {
+		UrlHandlerFilter filter = UrlHandlerFilter.trailingSlashHandler("/requestURI/*").wrapRequest().build();
+
+		String requestURI = "/requestURI/123/";
+		MockHttpServletRequest originalRequest = new MockHttpServletRequest("GET", requestURI);
+		originalRequest.setServletPath(requestURI);
+
+		MockFilterChain chain = new MockFilterChain();
+		filter.doFilterInternal(originalRequest, new MockHttpServletResponse(), chain);
+
+		HttpServletRequest wrapped = (HttpServletRequest) chain.getRequest();
+		assertThat(wrapped).isNotNull().isNotSameAs(originalRequest);
+		assertThat(wrapped.getRequestURI()).isEqualTo("/requestURI/123");
+
+		// Change dispatcher type of underlying requests
+		originalRequest.setDispatcherType(DispatcherType.FORWARD);
+		assertThat(wrapped.getRequestURI())
+				.as("Should delegate to underlying request for the requestURI on FORWARD")
+				.isEqualTo(requestURI);
+	}
+
+
+	@SuppressWarnings("serial")
+	private static class PathServlet extends HttpServlet {
+
+		private String parsedPath;
+
+		public String getParsedPath() {
+			return parsedPath;
+		}
+
+		@Override
+		protected void doGet(HttpServletRequest request, HttpServletResponse response) {
+			this.parsedPath = (ServletRequestPathUtils.hasParsedRequestPath(request) ?
+					ServletRequestPathUtils.getParsedRequestPath(request).value() : null);
+		}
 	}
 
 }

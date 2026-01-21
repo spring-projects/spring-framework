@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -364,6 +364,16 @@ class AspectJAutoProxyCreatorTests {
 		}
 	}
 
+	@Test
+	void nullAdviceIsSkipped() {
+		try (ConfigurableApplicationContext context = new AnnotationConfigApplicationContext(ProxyWithNullAdviceConfig.class)) {
+			@SuppressWarnings("unchecked")
+			Supplier<String> supplier = context.getBean(Supplier.class);
+			assertThat(AopUtils.isAopProxy(supplier)).as("AOP proxy").isTrue();
+			assertThat(supplier.get()).isEqualTo("lambda");
+		}
+	}
+
 	private ClassPathXmlApplicationContext newContext(String fileSuffix) {
 		return new ClassPathXmlApplicationContext(getClass().getSimpleName() + "-" + fileSuffix, getClass());
 	}
@@ -625,6 +635,16 @@ class ProxyTargetClassFalseConfig extends AbstractProxyTargetClassConfig {
 @Configuration(proxyBeanMethods = false)
 @EnableAspectJAutoProxy(proxyTargetClass = true)
 class ProxyTargetClassTrueConfig extends AbstractProxyTargetClassConfig {
+}
+
+@Configuration(proxyBeanMethods = false)
+@EnableAspectJAutoProxy(proxyTargetClass = true)
+class ProxyWithNullAdviceConfig extends AbstractProxyTargetClassConfig {
+
+	@Override
+	SupplierAdvice supplierAdvice() {
+		return null;
+	}
 }
 
 @Configuration

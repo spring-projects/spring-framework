@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@ import java.nio.charset.StandardCharsets;
 import org.jspecify.annotations.Nullable;
 
 import org.springframework.util.Assert;
-import org.springframework.util.StringUtils;
 
 /**
  * Represents a SockJS frame. Provides factory methods to create SockJS frames.
@@ -133,13 +132,28 @@ public class SockJsFrame {
 
 	@Override
 	public String toString() {
-		String result = this.content;
-		if (result.length() > 80) {
-			result = result.substring(0, 80) + "...(truncated)";
+		int maxLength = 80;
+		int length = Math.min(this.content.length(), maxLength);
+
+		StringBuilder sb = new StringBuilder(length + 36);
+		sb.append("SockJsFrame content='");
+
+		for (int i = 0; i < length; i++) {
+			char c = this.content.charAt(i);
+			switch(c) {
+				case '\n' -> sb.append("\\n");
+				case '\r' -> sb.append("\\r");
+				default -> sb.append(c);
+			}
 		}
-		result = StringUtils.replace(result, "\n", "\\n");
-		result = StringUtils.replace(result, "\r", "\\r");
-		return "SockJsFrame content='" + result + "'";
+
+		if (length < this.content.length()) {
+			sb.append("...(truncated)");
+		}
+
+		sb.append('\'');
+
+		return sb.toString();
 	}
 
 

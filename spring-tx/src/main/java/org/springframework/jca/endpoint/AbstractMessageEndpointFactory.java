@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -144,7 +144,7 @@ public abstract class AbstractMessageEndpointFactory implements MessageEndpointF
 
 	/**
 	 * Implementation of the JCA 1.7 {@code #getEndpointClass()} method,
-	 * returning {@code} null in order to indicate a synthetic endpoint type.
+	 * returning {@code null} in order to indicate a synthetic endpoint type.
 	 */
 	@Override
 	public @Nullable Class<?> getEndpointClass() {

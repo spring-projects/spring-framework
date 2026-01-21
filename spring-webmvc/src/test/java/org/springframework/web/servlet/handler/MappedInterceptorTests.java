@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,10 +26,13 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.Named;
 import org.junit.jupiter.api.Test;
 
+import org.springframework.http.HttpMethod;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.PathMatcher;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.i18n.LocaleChangeInterceptor;
 import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
+import org.springframework.web.util.ServletRequestPathUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -108,10 +111,57 @@ class MappedInterceptorTests {
 	}
 
 	@Test
+	void includeMultipleMethods(){
+		testHttpMethods(
+				new HttpMethod[] {HttpMethod.GET, HttpMethod.POST},
+				new HttpMethod[] {},
+				"GET", "POST");
+	}
+
+	@Test
+	void excludeMultipleMethods() {
+		testHttpMethods(
+				new HttpMethod[] {},
+				new HttpMethod[] {HttpMethod.GET, HttpMethod.POST, HttpMethod.OPTIONS},
+				"HEAD", "PUT", "DELETE", "TRACE", "PATCH");
+	}
+
+	private void testHttpMethods(HttpMethod[] include, HttpMethod[] exclude, String... expected) {
+		MappedInterceptor interceptor = new MappedInterceptor(null, null, include, exclude, delegate, null);
+		for (HttpMethod httpMethod : HttpMethod.values()) {
+			boolean matches = ObjectUtils.containsElement(expected, httpMethod.name());
+			assertThat(interceptor.matches(requestWithMethod(httpMethod.name())))
+					.as("Expected " + httpMethod + " to " + (matches ? "" : "not ") + "match")
+					.isEqualTo(matches);
+		}
+	}
+
+	private MockHttpServletRequest requestWithMethod(String method) {
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		request.setRequestURI("/some/path");
+		request.setMethod(method);
+		ServletRequestPathUtils.parseAndCache(request);
+		return request;
+	}
+
+	@PathPatternsParameterizedTest
+	void includePatternAndHttMethods(Function<String, MockHttpServletRequest> requestFactory) {
+
+		MappedInterceptor getInterceptor = new MappedInterceptor(
+				new String[] {"/foo/*"}, null, new HttpMethod[] {HttpMethod.GET}, null, delegate, null);
+
+		MappedInterceptor putInterceptor = new MappedInterceptor(
+				new String[] {"/foo/*"}, null, new HttpMethod[] {HttpMethod.PUT}, null, delegate, null);
+
+		assertThat(getInterceptor.matches(requestFactory.apply("/foo/bar"))).isTrue();
+		assertThat(putInterceptor.matches(requestFactory.apply("/foo/bar"))).isFalse();
+	}
+
+	@Test
 	void preHandle() throws Exception {
 		HandlerInterceptor delegate = mock();
 
-		new MappedInterceptor(null, delegate).preHandle(mock(), mock(), null);
+		new MappedInterceptor(null,null, delegate).preHandle(mock(), mock(), null);
 
 		then(delegate).should().preHandle(any(HttpServletRequest.class), any(HttpServletResponse.class), any());
 	}
@@ -120,7 +170,7 @@ class MappedInterceptorTests {
 	void postHandle() throws Exception {
 		HandlerInterceptor delegate = mock();
 
-		new MappedInterceptor(null, delegate).postHandle(mock(), mock(), null, mock());
+		new MappedInterceptor(null,null, delegate).postHandle(mock(), mock(), null, mock());
 
 		then(delegate).should().postHandle(any(), any(), any(), any());
 	}
@@ -129,7 +179,7 @@ class MappedInterceptorTests {
 	void afterCompletion() throws Exception {
 		HandlerInterceptor delegate = mock();
 
-		new MappedInterceptor(null, delegate).afterCompletion(mock(), mock(), null, mock());
+		new MappedInterceptor(null,null, delegate).afterCompletion(mock(), mock(), null, mock());
 
 		then(delegate).should().afterCompletion(any(), any(), any(), any());
 	}

@@ -103,7 +103,6 @@ Kotlin::
 ======
 
 
-
 [[webflux-client-body-form]]
 == Form Data
 
@@ -170,7 +169,6 @@ Kotlin::
 			.awaitBody<Unit>()
 ----
 ======
-
 
 
 [[webflux-client-body-multipart]]
@@ -306,40 +304,37 @@ Java::
 +
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
-Resource resource = ...
-Mono<String> result = webClient
-    .post()
-    .uri("https://example.com")
-    .body(Flux.concat(
-            FormPartEvent.create("field", "field value"),
-            FilePartEvent.create("file", resource)
-    ), PartEvent.class)
-    .retrieve()
-    .bodyToMono(String.class);
+	Resource resource = ...
+	Mono<String> result = webClient
+		.post()
+		.uri("https://example.com")
+		.body(Flux.concat(
+				FormPartEvent.create("field", "field value"),
+				FilePartEvent.create("file", resource)
+		), PartEvent.class)
+		.retrieve()
+		.bodyToMono(String.class);
 ----
 
 Kotlin::
 +
 [source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
-var resource: Resource = ...
-var result: Mono<String> = webClient
-	.post()
-	.uri("https://example.com")
-	.body(
-		Flux.concat(
-			FormPartEvent.create("field", "field value"),
-			FilePartEvent.create("file", resource)
+	var resource: Resource = ...
+	var result: Mono<String> = webClient
+		.post()
+		.uri("https://example.com")
+		.body(
+			Flux.concat(
+				FormPartEvent.create("field", "field value"),
+				FilePartEvent.create("file", resource)
+			)
 		)
-	)
-	.retrieve()
-	.bodyToMono()
+		.retrieve()
+		.bodyToMono()
 ----
 ======
 
 On the server side, `PartEvent` objects that are received via `@RequestBody` or
 `ServerRequest::bodyToFlux(PartEvent.class)` can be relayed to another service
 via the `WebClient`.
-
-
-

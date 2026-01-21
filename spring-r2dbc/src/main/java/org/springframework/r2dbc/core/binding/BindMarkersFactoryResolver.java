@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,8 +30,8 @@ import org.springframework.util.LinkedCaseInsensitiveMap;
 
 /**
  * Resolves a {@link BindMarkersFactory} from a {@link ConnectionFactory} using
- * {@link BindMarkerFactoryProvider}. Dialect resolution uses Spring's
- * {@link SpringFactoriesLoader spring.factories} to determine available extensions.
+ * a {@link BindMarkerFactoryProvider}. Dialect resolution uses Spring's
+ * {@link SpringFactoriesLoader spring.factories} file to determine available extensions.
  *
  * @author Mark Paluch
  * @since 5.3
@@ -45,8 +45,8 @@ public final class BindMarkersFactoryResolver {
 
 
 	/**
-	 * Retrieve a {@link BindMarkersFactory} by inspecting {@link ConnectionFactory}
-	 * and its metadata.
+	 * Retrieve a {@link BindMarkersFactory} by inspecting the supplied
+	 * {@link ConnectionFactory} and its metadata.
 	 * @param connectionFactory the connection factory to inspect
 	 * @return the resolved {@link BindMarkersFactory}
 	 * @throws NoBindMarkersFactoryException if no {@link BindMarkersFactory} can be resolved
@@ -69,18 +69,21 @@ public final class BindMarkersFactoryResolver {
 
 
 	/**
-	 * SPI to extend Spring's default R2DBC BindMarkersFactory discovery mechanism.
-	 * Implementations of this interface are discovered through Spring's
+	 * SPI to extend Spring's default R2DBC {@link BindMarkersFactory} discovery
+	 * mechanism.
+	 *
+	 * <p>Implementations of this interface are discovered through Spring's
 	 * {@link SpringFactoriesLoader} mechanism.
+	 *
 	 * @see SpringFactoriesLoader
 	 */
 	@FunctionalInterface
 	public interface BindMarkerFactoryProvider {
 
 		/**
-		 * Return a {@link BindMarkersFactory} for a {@link ConnectionFactory}.
-		 * @param connectionFactory the connection factory to be used with the {@link BindMarkersFactory}
-		 * @return the {@link BindMarkersFactory} if the {@link BindMarkerFactoryProvider}
+		 * Return a {@link BindMarkersFactory} for the given {@link ConnectionFactory}.
+		 * @param connectionFactory the connection factory to be used with the {@code BindMarkersFactory}
+		 * @return the {@code BindMarkersFactory} if this {@code BindMarkerFactoryProvider}
 		 * can provide a bind marker factory object, otherwise {@code null}
 		 */
 		@Nullable BindMarkersFactory getBindMarkers(ConnectionFactory connectionFactory);
@@ -88,7 +91,7 @@ public final class BindMarkersFactoryResolver {
 
 
 	/**
-	 * Exception thrown when {@link BindMarkersFactoryResolver} cannot resolve a
+	 * Exception thrown when a {@link BindMarkersFactoryResolver} cannot resolve a
 	 * {@link BindMarkersFactory}.
 	 */
 	@SuppressWarnings("serial")
@@ -105,8 +108,11 @@ public final class BindMarkersFactoryResolver {
 
 
 	/**
-	 * Built-in bind maker factories. Used typically as last {@link BindMarkerFactoryProvider}
-	 * when other providers register with a higher precedence.
+	 * Built-in bind marker factories.
+	 *
+	 * <p>Typically used as the last {@link BindMarkerFactoryProvider} when other
+	 * providers are registered with a higher precedence.
+	 *
 	 * @see org.springframework.core.Ordered
 	 * @see org.springframework.core.annotation.AnnotationAwareOrderComparator
 	 */

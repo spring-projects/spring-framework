@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ import org.springframework.util.ClassUtils;
  */
 class MockServerContainerContextCustomizerFactory implements ContextCustomizerFactory {
 
-	private static final boolean webSocketPresent = ClassUtils.isPresent("jakarta.websocket.server.ServerContainer",
+	private static final boolean WEB_SOCKET_PRESENT = ClassUtils.isPresent("jakarta.websocket.server.ServerContainer",
 			MockServerContainerContextCustomizerFactory.class.getClassLoader());
 
 
@@ -46,7 +46,7 @@ class MockServerContainerContextCustomizerFactory implements ContextCustomizerFa
 	public @Nullable ContextCustomizer createContextCustomizer(Class<?> testClass,
 			List<ContextConfigurationAttributes> configAttributes) {
 
-		if (webSocketPresent && isAnnotatedWithWebAppConfiguration(testClass)) {
+		if (WEB_SOCKET_PRESENT && isAnnotatedWithWebAppConfiguration(testClass)) {
 			return new MockServerContainerContextCustomizer();
 		}
 		// Else, nothing to customize

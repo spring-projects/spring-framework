@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -141,6 +140,10 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	 * We'll create a lot of DataBinder instances: Let's use a static logger.
 	 */
 	protected static final Log logger = LogFactory.getLog(DataBinder.class);
+
+	/** Internal constant for constructor binding via "[]". */
+	private static final int NO_INDEX = -1;
+
 
 	private @Nullable Object target;
 
@@ -532,14 +535,13 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	 * <p>Mark fields as disallowed, for example to avoid unwanted
 	 * modifications by malicious users when binding HTTP request parameters.
 	 * <p>Supports {@code "xxx*"}, {@code "*xxx"}, {@code "*xxx*"}, and
-	 * {@code "xxx*yyy"} matches (with an arbitrary number of pattern parts), as
-	 * well as direct equality.
-	 * <p>The default implementation of this method stores disallowed field patterns
-	 * in {@linkplain PropertyAccessorUtils#canonicalPropertyName(String) canonical}
-	 * form and also transforms disallowed field patterns to
-	 * {@linkplain String#toLowerCase() lowercase} to support case-insensitive
-	 * pattern matching in {@link #isAllowed}. Subclasses which override this
-	 * method must therefore take both of these transformations into account.
+	 * {@code "xxx*yyy"} matches (with an arbitrary number of pattern parts),
+	 * as well as direct equality.
+	 * <p>The default implementation of this method stores disallowed field
+	 * patterns in {@linkplain PropertyAccessorUtils#canonicalPropertyName(String)
+	 * canonical} form, and subsequently pattern matching in {@link #isAllowed}
+	 * is case-insensitive. Subclasses that override this method must therefore
+	 * take this transformation into account.
 	 * <p>More sophisticated matching can be implemented by overriding the
 	 * {@link #isAllowed} method.
 	 * <p>Alternatively, specify a list of <i>allowed</i> field patterns.
@@ -557,8 +559,7 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 		else {
 			String[] fieldPatterns = new String[disallowedFields.length];
 			for (int i = 0; i < fieldPatterns.length; i++) {
-				String field = PropertyAccessorUtils.canonicalPropertyName(disallowedFields[i]);
-				fieldPatterns[i] = field.toLowerCase(Locale.ROOT);
+				fieldPatterns[i] = PropertyAccessorUtils.canonicalPropertyName(disallowedFields[i]);
 			}
 			this.disallowedFields = fieldPatterns;
 		}
@@ -937,7 +938,7 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 						value = createMap(paramPath, paramType, resolvableType, valueResolver);
 					}
 					else if (paramType.isArray()) {
-						value = createArray(paramPath, resolvableType, valueResolver);
+						value = createArray(paramPath, paramType, resolvableType, valueResolver);
 					}
 				}
 
@@ -954,11 +955,9 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 						}
 					}
 					catch (TypeMismatchException ex) {
-						ex.initPropertyName(paramPath);
 						args[i] = null;
 						failedParamNames.add(paramPath);
-						getBindingResult().recordFieldValue(paramPath, paramType, value);
-						getBindingErrorProcessor().processPropertyAccessException(ex, getBindingResult());
+						handleTypeMismatchException(ex, paramPath, paramType, value);
 					}
 				}
 			}
@@ -1021,8 +1020,7 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 		return false;
 	}
 
-	@SuppressWarnings("unchecked")
-	private <V> @Nullable List<V> createList(
+	private @Nullable List<?> createList(
 			String paramPath, Class<?> paramType, ResolvableType type, ValueResolver valueResolver) {
 
 		ResolvableType elementType = type.getNested(2);
@@ -1030,18 +1028,23 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 		if (indexes == null) {
 			return null;
 		}
-		int size = (indexes.last() < this.autoGrowCollectionLimit ? indexes.last() + 1 : 0);
-		List<V> list = (List<V>) CollectionFactory.createCollection(paramType, size);
+
+		int lastIndex = Math.max(indexes.last(), 0);
+		int size = (lastIndex < this.autoGrowCollectionLimit ? lastIndex + 1 : 0);
+		List<?> list = (List<?>) CollectionFactory.createCollection(paramType, size);
 		for (int i = 0; i < size; i++) {
 			list.add(null);
 		}
+
 		for (int index : indexes) {
-			list.set(index, (V) createObject(elementType, paramPath + "[" + index + "].", valueResolver));
+			String indexedPath = paramPath + "[" + (index != NO_INDEX ? index : "") + "]";
+			list.set(Math.max(index, 0),
+					createIndexedValue(paramPath, paramType, elementType, indexedPath, valueResolver));
 		}
+
 		return list;
 	}
 
-	@SuppressWarnings("unchecked")
 	private <V> @Nullable Map<String, V> createMap(
 			String paramPath, Class<?> paramType, ResolvableType type, ValueResolver valueResolver) {
 
@@ -1051,33 +1054,43 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 			if (!name.startsWith(paramPath + "[")) {
 				continue;
 			}
+
 			int startIdx = paramPath.length() + 1;
 			int endIdx = name.indexOf(']', startIdx);
-			String nestedPath = ((name.length() > endIdx + 1) ? name.substring(0, endIdx + 2) : "");
 			boolean quoted = (endIdx - startIdx > 2 && name.charAt(startIdx) == '\'' && name.charAt(endIdx - 1) == '\'');
 			String key = (quoted ? name.substring(startIdx + 1, endIdx - 1) : name.substring(startIdx, endIdx));
+
 			if (map == null) {
 				map = CollectionFactory.createMap(paramType, 16);
 			}
-			if (!map.containsKey(key)) {
-				map.put(key, (V) createObject(elementType, nestedPath, valueResolver));
-			}
+
+			String indexedPath = name.substring(0, endIdx + 1);
+			map.put(key, createIndexedValue(paramPath, paramType, elementType, indexedPath, valueResolver));
 		}
+
 		return map;
 	}
 
 	@SuppressWarnings("unchecked")
-	private <V> @Nullable V @Nullable [] createArray(String paramPath, ResolvableType type, ValueResolver valueResolver) {
+	private <V> @Nullable V @Nullable [] createArray(
+			String paramPath, Class<?> paramType, ResolvableType type, ValueResolver valueResolver) {
+
 		ResolvableType elementType = type.getNested(2);
 		SortedSet<Integer> indexes = getIndexes(paramPath, valueResolver);
 		if (indexes == null) {
 			return null;
 		}
-		int size = (indexes.last() < this.autoGrowCollectionLimit ? indexes.last() + 1: 0);
+
+		int lastIndex = Math.max(indexes.last(), 0);
+		int size = (lastIndex < this.autoGrowCollectionLimit ? lastIndex + 1: 0);
 		@Nullable V[] array = (V[]) Array.newInstance(elementType.resolve(), size);
+
 		for (int index : indexes) {
-			array[index] = (V) createObject(elementType, paramPath + "[" + index + "].", valueResolver);
+			String indexedPath = paramPath + "[" + (index != NO_INDEX ? index : "") + "]";
+			array[Math.max(index, 0)] =
+					createIndexedValue(paramPath, paramType, elementType, indexedPath, valueResolver);
 		}
+
 		return array;
 	}
 
@@ -1085,14 +1098,66 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 		SortedSet<Integer> indexes = null;
 		for (String name : valueResolver.getNames()) {
 			if (name.startsWith(paramPath + "[")) {
-				int endIndex = name.indexOf(']', paramPath.length() + 1);
-				String rawIndex = name.substring(paramPath.length() + 1, endIndex);
-				int index = Integer.parseInt(rawIndex);
+				int index;
+				if (paramPath.length() + 2 == name.length()) {
+					if (!name.endsWith("[]")) {
+						continue;
+					}
+					index = NO_INDEX;
+				}
+				else {
+					int endIndex = name.indexOf(']', paramPath.length() + 2);
+					String indexValue = name.substring(paramPath.length() + 1, endIndex);
+					index = Integer.parseInt(indexValue);
+				}
 				indexes = (indexes != null ? indexes : new TreeSet<>());
 				indexes.add(index);
 			}
 		}
 		return indexes;
+	}
+
+	@SuppressWarnings("unchecked")
+	private <V> @Nullable V createIndexedValue(
+			String paramPath, Class<?> containerType, ResolvableType elementType,
+			String indexedPath, ValueResolver valueResolver) {
+
+		Object value = null;
+		Class<?> elementClass = elementType.resolve(Object.class);
+
+		if (List.class.isAssignableFrom(elementClass)) {
+			value = createList(indexedPath, elementClass, elementType, valueResolver);
+		}
+		else if (Map.class.isAssignableFrom(elementClass)) {
+			value = createMap(indexedPath, elementClass, elementType, valueResolver);
+		}
+		else if (elementClass.isArray()) {
+			value = createArray(indexedPath, elementClass, elementType, valueResolver);
+		}
+		else {
+			Object rawValue = valueResolver.resolveValue(indexedPath, elementClass);
+			if (rawValue != null) {
+				try {
+					value = convertIfNecessary(rawValue, elementClass);
+				}
+				catch (TypeMismatchException ex) {
+					handleTypeMismatchException(ex, paramPath, containerType, rawValue);
+				}
+			}
+			else {
+				value = createObject(elementType, indexedPath + ".", valueResolver);
+			}
+		}
+
+		return (V) value;
+	}
+
+	private void handleTypeMismatchException(
+			TypeMismatchException ex, String paramPath, Class<?> paramType, @Nullable Object value) {
+
+		ex.initPropertyName(paramPath);
+		getBindingResult().recordFieldValue(paramPath, paramType, value);
+		getBindingErrorProcessor().processPropertyAccessException(ex, getBindingResult());
 	}
 
 	private void validateConstructorArgument(
@@ -1202,9 +1267,9 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	 * Determine if the given field is allowed for binding.
 	 * <p>Invoked for each passed-in property value.
 	 * <p>Checks for {@code "xxx*"}, {@code "*xxx"}, {@code "*xxx*"}, and
-	 * {@code "xxx*yyy"} matches (with an arbitrary number of pattern parts), as
-	 * well as direct equality, in the configured lists of allowed field patterns
-	 * and disallowed field patterns.
+	 * {@code "xxx*yyy"} matches (with an arbitrary number of pattern parts),
+	 * as well as direct equality, in the configured lists of allowed field
+	 * patterns and disallowed field patterns.
 	 * <p>Matching against allowed field patterns is case-sensitive; whereas,
 	 * matching against disallowed field patterns is case-insensitive.
 	 * <p>A field matching a disallowed pattern will not be accepted even if it
@@ -1220,8 +1285,13 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	protected boolean isAllowed(String field) {
 		String[] allowed = getAllowedFields();
 		String[] disallowed = getDisallowedFields();
-		return ((ObjectUtils.isEmpty(allowed) || PatternMatchUtils.simpleMatch(allowed, field)) &&
-				(ObjectUtils.isEmpty(disallowed) || !PatternMatchUtils.simpleMatch(disallowed, field.toLowerCase(Locale.ROOT))));
+		if (!ObjectUtils.isEmpty(allowed) && !PatternMatchUtils.simpleMatch(allowed, field)) {
+			return false;
+		}
+		if (!ObjectUtils.isEmpty(disallowed)) {
+			return !PatternMatchUtils.simpleMatchIgnoreCase(disallowed, field);
+		}
+		return true;
 	}
 
 	/**
@@ -1379,6 +1449,9 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 
 		/**
 		 * Return the names of all property values.
+		 * <p>Useful for proactive checks whether there are property values nested
+		 * further below the path for a constructor arg. If not then the
+		 * constructor arg can be considered missing and not to be instantiated.
 		 * @since 6.1.2
 		 */
 		Set<String> getNames();

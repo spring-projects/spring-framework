@@ -3,6 +3,7 @@
 
 Spring offers support for the Jackson JSON library.
 
+
 [[webflux-ann-jsonview]]
 == JSON Views
 [.small]#xref:web/webmvc/mvc-controller/ann-methods/jackson.adoc[See equivalent in the Servlet stack]#
@@ -83,6 +84,3 @@ Kotlin::
 
 NOTE: `@JsonView` allows an array of view classes but you can specify only one per
 controller method. Use a composite interface if you need to activate multiple views.
-
-
-

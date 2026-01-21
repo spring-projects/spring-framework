@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,20 +46,21 @@ import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
 import org.springframework.web.util.pattern.PathPatternParser;
 
 /**
- * <strong>Central entry point to Spring's functional web framework.</strong>
+ * <strong>Central entry point to Spring's functional WebFlux framework.</strong>
  * Exposes routing functionality, such as to {@linkplain #route() create} a
  * {@code RouterFunction} using a discoverable builder-style API, to
- * {@linkplain #route(RequestPredicate, HandlerFunction) create} a {@code RouterFunction}
- * given a {@code RequestPredicate} and {@code HandlerFunction}, and to do further
- * {@linkplain #nest(RequestPredicate, RouterFunction) subrouting} on an existing routing
- * function.
+ * {@linkplain #route(RequestPredicate, HandlerFunction) create} a
+ * {@code RouterFunction} given a {@code RequestPredicate} and
+ * {@code HandlerFunction}, and to do further
+ * {@linkplain #nest(RequestPredicate, RouterFunction) subrouting} on an
+ * existing routing function.
  *
- * <p>Additionally, this class can {@linkplain #toHttpHandler(RouterFunction) transform}
- * a {@code RouterFunction} into an {@code HttpHandler}, which can be run in Servlet
- * environments, Reactor, or Undertow.
+ * <p>Use {@linkplain #toHttpHandler(RouterFunction)} to turn a
+ * {@code RouterFunction} into a WebFlux {@code HttpHandler}.
  *
  * @author Arjen Poutsma
  * @author Sebastien Deleuze
+ * @author Rossen Stoyanchev
  * @since 5.0
  */
 public abstract class RouterFunctions {
@@ -86,10 +87,9 @@ public abstract class RouterFunctions {
 			RouterFunctions.class.getName() + ".matchingPattern";
 
 
-
-
 	/**
-	 * Offers a discoverable way to create router functions through a builder-style interface.
+	 * Offers a discoverable way to create router functions through
+	 * a WebFlux builder-style interface.
 	 * @return a router function builder
 	 * @since 5.1
 	 */
@@ -99,8 +99,8 @@ public abstract class RouterFunctions {
 
 	/**
 	 * Route to the given handler function if the given request predicate applies.
-	 * <p>For instance, the following example routes GET requests for "/user" to the
-	 * {@code listUsers} method in {@code userController}:
+	 * <p>For instance, the following example routes GET requests for "/user"
+	 * to the {@code listUsers} method in {@code userController}:
 	 * <pre class="code">
 	 * RouterFunction&lt;ServerResponse&gt; route =
 	 *     RouterFunctions.route(RequestPredicates.GET("/user"), userController::listUsers);
@@ -119,22 +119,24 @@ public abstract class RouterFunctions {
 	}
 
 	/**
-	 * Route to the given router function if the given request predicate applies. This method can be
-	 * used to create <strong>nested routes</strong>, where a group of routes share a common path
-	 * (prefix), header, or other request predicate.
-	 * <p>For instance, the following example first creates a composed route that resolves to
-	 * {@code listUsers} for a GET, and {@code createUser} for a POST. This composed route then gets
-	 * nested with a "/user" path predicate, so that GET requests for "/user" will list users,
-	 * and POST request for "/user" will create a new user.
+	 * Route to the given router function if the given request predicate applies.
+	 * Use method to create <strong>nested routes</strong>, where a group of
+	 * routes share a common path (prefix), header, or other request  predicate.
+	 * <p>For instance, the following example first creates a composed route
+	 * that resolves to {@code listUsers} for a GET, and {@code createUser}
+	 * for a POST. This composed route then gets nested with a "/user" path
+	 * predicate, so that GET requests for "/user" will list users, and POST
+	 * request for "/user" will create a new user:
 	 * <pre class="code">
 	 * RouterFunction&lt;ServerResponse&gt; userRoutes =
-	 *   RouterFunctions.route(RequestPredicates.method(HttpMethod.GET), this::listUsers)
-	 *     .andRoute(RequestPredicates.method(HttpMethod.POST), this::createUser);
+	 *     RouterFunctions.route(RequestPredicates.method(HttpMethod.GET), this::listUsers)
+	 *         .andRoute(RequestPredicates.method(HttpMethod.POST), this::createUser);
+	 *
 	 * RouterFunction&lt;ServerResponse&gt; nestedRoute =
-	 *   RouterFunctions.nest(RequestPredicates.path("/user"), userRoutes);
+	 *       RouterFunctions.nest(RequestPredicates.path("/user"), userRoutes);
 	 * </pre>
 	 * @param predicate the predicate to test
-	 * @param routerFunction the nested router function to delegate to if the predicate applies
+	 * @param routerFunction the nested router function
 	 * @param <T> the type of response returned by the handler function
 	 * @return a router function that routes to {@code routerFunction} if
 	 * {@code predicate} evaluates to {@code true}
@@ -148,41 +150,45 @@ public abstract class RouterFunctions {
 
 	/**
 	 * Route requests that match the given predicate to the given resource.
-	 * For instance
+	 * For instance:
 	 * <pre class="code">
 	 * Resource resource = new ClassPathResource("static/index.html")
 	 * RouterFunction&lt;ServerResponse&gt; resources = RouterFunctions.resource(path("/api/**").negate(), resource);
 	 * </pre>
-	 * @param predicate predicate to match
+	 * @param predicate the predicate to match
 	 * @param resource the resources to serve
 	 * @return a router function that routes to a resource
 	 * @since 6.1.4
 	 */
 	public static RouterFunction<ServerResponse> resource(RequestPredicate predicate, Resource resource) {
-		return resources(new PredicateResourceLookupFunction(predicate, resource), (consumerResource, httpHeaders) -> {});
+		PredicateResourceLookupFunction function = new PredicateResourceLookupFunction(predicate, resource);
+		return resources(function, (consumerResource, httpHeaders) -> {});
 	}
 
 	/**
 	 * Route requests that match the given predicate to the given resource.
-	 * For instance
+	 * For instance:
 	 * <pre class="code">
 	 * Resource resource = new ClassPathResource("static/index.html")
 	 * RouterFunction&lt;ServerResponse&gt; resources = RouterFunctions.resource(path("/api/**").negate(), resource);
 	 * </pre>
-	 * @param predicate predicate to match
+	 * @param predicate the predicate to match
 	 * @param resource the resources to serve
-	 * @param headersConsumer provides access to the HTTP headers for served resources
+	 * @param headersConsumer for access to the HTTP headers for served resources
 	 * @return a router function that routes to a resource
 	 * @since 6.1.4
 	 */
-	public static RouterFunction<ServerResponse> resource(RequestPredicate predicate, Resource resource,
+	public static RouterFunction<ServerResponse> resource(
+			RequestPredicate predicate, Resource resource,
 			BiConsumer<Resource, HttpHeaders> headersConsumer) {
-		return resources(new PredicateResourceLookupFunction(predicate, resource), headersConsumer);
+
+		PredicateResourceLookupFunction function = new PredicateResourceLookupFunction(predicate, resource);
+		return resources(function, headersConsumer);
 	}
 
 	/**
-	 * Route requests that match the given pattern to resources relative to the given root location.
-	 * For instance
+	 * Route requests that match the given pattern to resources relative to the
+	 * given root location. For instance:
 	 * <pre class="code">
 	 * Resource location = new FileUrlResource("public-resources/");
 	 * RouterFunction&lt;ServerResponse&gt; resources = RouterFunctions.resources("/resources/**", location);
@@ -198,8 +204,8 @@ public abstract class RouterFunctions {
 	}
 
 	/**
-	 * Route requests that match the given pattern to resources relative to the given root location.
-	 * For instance
+	 * Route requests that match the given pattern to resources relative to the
+	 * given root location. For instance:
 	 * <pre class="code">
 	 * Resource location = new FileUrlResource("public-resources/");
 	 * RouterFunction&lt;ServerResponse&gt; resources = RouterFunctions.resources("/resources/**", location);
@@ -212,20 +218,23 @@ public abstract class RouterFunctions {
 	 * @see org.springframework.web.util.pattern.PathPattern
 	 * @see #resourceLookupFunction(String, Resource)
 	 */
-	public static RouterFunction<ServerResponse> resources(String pattern, Resource location,
+	public static RouterFunction<ServerResponse> resources(
+			String pattern, Resource location,
 			BiConsumer<Resource, HttpHeaders> headersConsumer) {
+
 		return resources(resourceLookupFunction(pattern, location), headersConsumer);
 	}
 
 	/**
-	 * Returns the resource lookup function used by {@link #resources(String, Resource)}.
-	 * The returned function can be {@linkplain Function#andThen(Function) composed} on, for
-	 * instance to return a default resource when the lookup function does not match:
+	 * Returns the resource lookup function used by
+	 * {@link #resources(String, Resource)}. The returned function can be
+	 * {@linkplain Function#andThen(Function) composed} on. For instance to
+	 * return a default resource when the lookup function does not match:
 	 * <pre class="code">
 	 * Mono&lt;Resource&gt; defaultResource = Mono.just(new ClassPathResource("index.html"));
 	 * Function&lt;ServerRequest, Mono&lt;Resource&gt;&gt; lookupFunction =
-	 *   RouterFunctions.resourceLookupFunction("/resources/**", new FileUrlResource("public-resources/"))
-	 *     .andThen(resourceMono -&gt; resourceMono.switchIfEmpty(defaultResource));
+	 *     RouterFunctions.resourceLookupFunction("/resources/**", new FileUrlResource("public-resources/"))
+	 *         .andThen(resourceMono -&gt; resourceMono.switchIfEmpty(defaultResource));
 	 * RouterFunction&lt;ServerResponse&gt; resources = RouterFunctions.resources(lookupFunction);
      * </pre>
 	 * @param pattern the pattern to match
@@ -233,32 +242,40 @@ public abstract class RouterFunctions {
 	 * @return the default resource lookup function for the given parameters.
 	 * @see org.springframework.web.util.pattern.PathPattern
 	 */
-	public static Function<ServerRequest, Mono<Resource>> resourceLookupFunction(String pattern, Resource location) {
+	public static Function<ServerRequest, Mono<Resource>> resourceLookupFunction(
+			String pattern, Resource location) {
+
 		return new PathResourceLookupFunction(pattern, location);
 	}
 
 	/**
-	 * Route to resources using the provided lookup function. If the lookup function provides a
-	 * {@link Resource} for the given request, it will be it will be exposed using a
-	 * {@link HandlerFunction} that handles GET, HEAD, and OPTIONS requests.
-	 * @param lookupFunction the function to provide a {@link Resource} given the {@link ServerRequest}
+	 * Route to resources using the provided lookup function. If the lookup
+	 * function provides a {@link Resource} for the given request, it will be
+	 * exposed using a {@link HandlerFunction} that handles GET, HEAD,
+	 * and OPTIONS requests.
+	 * @param lookupFunction the function to provide a {@link Resource}
 	 * @return a router function that routes to resources
 	 */
-	public static RouterFunction<ServerResponse> resources(Function<ServerRequest, Mono<Resource>> lookupFunction) {
+	public static RouterFunction<ServerResponse> resources(
+			Function<ServerRequest, Mono<Resource>> lookupFunction) {
+
 		return new ResourcesRouterFunction(lookupFunction, (resource, httpHeaders) -> {});
 	}
 
 	/**
-	 * Route to resources using the provided lookup function. If the lookup function provides a
-	 * {@link Resource} for the given request, it will be it will be exposed using a
-	 * {@link HandlerFunction} that handles GET, HEAD, and OPTIONS requests.
-	 * @param lookupFunction the function to provide a {@link Resource} given the {@link ServerRequest}
+	 * Route to resources using the provided lookup function. If the lookup
+	 * function provides a {@link Resource} for the given request, it will be
+	 * exposed using a {@link HandlerFunction} that handles GET, HEAD,
+	 * and OPTIONS requests.
+	 * @param lookupFunction the function to provide a {@link Resource}
 	 * @param headersConsumer provides access to the HTTP headers for served resources
 	 * @return a router function that routes to resources
 	 * @since 6.1
 	 */
-	public static RouterFunction<ServerResponse> resources(Function<ServerRequest, Mono<Resource>> lookupFunction,
+	public static RouterFunction<ServerResponse> resources(
+			Function<ServerRequest, Mono<Resource>> lookupFunction,
 			BiConsumer<Resource, HttpHeaders> headersConsumer) {
+
 		return new ResourcesRouterFunction(lookupFunction, headersConsumer);
 	}
 
@@ -266,14 +283,12 @@ public abstract class RouterFunctions {
 	 * Convert the given {@linkplain RouterFunction router function} into an
 	 * {@link HttpHandler}, using the {@linkplain HandlerStrategies#builder()
 	 * default strategies}.
-	 * <p>The returned handler can be adapted to run in the following environments.
+	 * <p>The returned handler can be adapted to run in the following environments:
 	 * <ul>
-	 * <li>Servlet environments using the
+	 * <li>For Servlet containers, use
 	 * {@link org.springframework.http.server.reactive.ServletHttpHandlerAdapter}</li>
-	 * <li>Reactor using the
+	 * <li>For Reactor Netty, use
 	 * {@link org.springframework.http.server.reactive.ReactorHttpHandlerAdapter}
-	 * <li>Undertow using the
-	 * {@link org.springframework.http.server.reactive.UndertowHttpHandlerAdapter}</li>
 	 * </ul>
 	 * <p>Note that {@code HttpWebHandlerAdapter} also implements {@link WebHandler},
 	 * allowing for additional filter and exception handler registration through
@@ -288,14 +303,12 @@ public abstract class RouterFunctions {
 	/**
 	 * Convert the given {@linkplain RouterFunction router function} into an
 	 * {@link HttpHandler}, using the given strategies.
-	 * <p>The returned handler can be adapted to run in the following environments.
+	 * <p>The returned handler can be adapted to run in the following environments:
 	 * <ul>
-	 * <li>Servlet environments using the
+	 * <li>For Servlet containers, use
 	 * {@link org.springframework.http.server.reactive.ServletHttpHandlerAdapter}</li>
-	 * <li>Reactor using the
-	 * {@link org.springframework.http.server.reactive.ReactorHttpHandlerAdapter}</li>
-	 * <li>Undertow using the
-	 * {@link org.springframework.http.server.reactive.UndertowHttpHandlerAdapter}</li>
+	 * <li>For Reactor Netty, use
+	 * {@link org.springframework.http.server.reactive.ReactorHttpHandlerAdapter}
 	 * </ul>
 	 * @param routerFunction the router function to convert
 	 * @param strategies the strategies to use
@@ -311,8 +324,9 @@ public abstract class RouterFunctions {
 	}
 
 	/**
-	 * Convert the given {@linkplain RouterFunction router function} into a {@link WebHandler}.
-	 * This conversion uses {@linkplain HandlerStrategies#builder() default strategies}.
+	 * Convert the given {@linkplain RouterFunction router function} into a
+	 * {@link WebHandler}. This conversion uses
+	 * {@linkplain HandlerStrategies#builder() default strategies}.
 	 * @param routerFunction the router function to convert
 	 * @return a web handler that handles web request using the given router function
 	 */
@@ -321,8 +335,8 @@ public abstract class RouterFunctions {
 	}
 
 	/**
-	 * Convert the given {@linkplain RouterFunction router function} into a {@link WebHandler},
-	 * using the given strategies.
+	 * Convert the given {@linkplain RouterFunction router function} into a
+	 * {@link WebHandler}, using the given strategies.
 	 * @param routerFunction the router function to convert
 	 * @param strategies the strategies to use
 	 * @return a web handler that handles web request using the given router function
@@ -335,16 +349,18 @@ public abstract class RouterFunctions {
 	}
 
 	/**
-	 * Changes the {@link PathPatternParser} on the given {@linkplain RouterFunction router function}. This method
-	 * can be used to change the {@code PathPatternParser} properties from the defaults, for instance to change
-	 * {@linkplain PathPatternParser#setCaseSensitive(boolean) case sensitivity}.
+	 * Changes the {@link PathPatternParser} on the given
+	 * {@linkplain RouterFunction router function}. This method can be used to
+	 * change the {@code PathPatternParser} properties from the defaults.
+	 * For instance to change {@linkplain PathPatternParser#setCaseSensitive(boolean)
+	 * case sensitivity}.
 	 * @param routerFunction the router function to change the parser in
 	 * @param parser the parser to change to.
 	 * @param <T> the type of response returned by the handler function
 	 * @return the change router function
 	 */
-	public static <T extends ServerResponse> RouterFunction<T> changeParser(RouterFunction<T> routerFunction,
-			PathPatternParser parser) {
+	public static <T extends ServerResponse> RouterFunction<T> changeParser(
+			RouterFunction<T> routerFunction, PathPatternParser parser) {
 
 		Assert.notNull(routerFunction, "RouterFunction must not be null");
 		Assert.notNull(parser, "Parser must not be null");
@@ -363,370 +379,402 @@ public abstract class RouterFunctions {
 	public interface Builder {
 
 		/**
-		 * Adds a route to the given handler function that handles HTTP {@code GET} requests.
-		 * @param handlerFunction the handler function to handle all {@code GET} requests
+		 * Adds a route to the given handler function that handles
+		 * HTTP {@code GET} requests.
+		 * @param handlerFunction handler for GET requests
+		 * @param <T> the type of response returned by the handler function
 		 * @return this builder
 		 * @since 5.3
 		 */
-		Builder GET(HandlerFunction<ServerResponse> handlerFunction);
+		<T extends ServerResponse> Builder GET(HandlerFunction<T> handlerFunction);
 
 		/**
-		 * Adds a route to the given handler function that handles all HTTP {@code GET} requests
-		 * that match the given pattern.
+		 * Adds a route to the given handler function that handles all
+		 * HTTP {@code GET} requests that match the given pattern.
 		 * @param pattern the pattern to match to
-		 * @param handlerFunction the handler function to handle all {@code GET} requests that
-		 * match {@code pattern}
+		 * @param handlerFunction handler for GET requests that match {@code pattern}
+		 * @param <T> the type of response returned by the handler function
 		 * @return this builder
 		 * @see org.springframework.web.util.pattern.PathPattern
 		 */
-		Builder GET(String pattern, HandlerFunction<ServerResponse> handlerFunction);
+		<T extends ServerResponse> Builder GET(String pattern, HandlerFunction<T> handlerFunction);
 
 		/**
-		 * Adds a route to the given handler function that handles all HTTP {@code GET} requests
-		 * that match the given predicate.
-		 * @param predicate predicate to match
-		 * @param handlerFunction the handler function to handle all {@code GET} requests that
-		 * match {@code predicate}
+		 * Adds a route to the given handler function that handles all
+		 * HTTP {@code GET} requests that match the given predicate.
+		 * @param predicate the predicate to match
+		 * @param handlerFunction handler for GET requests that match {@code predicate}
+		 * @param <T> the type of response returned by the handler function
 		 * @return this builder
 		 * @since 5.3
 		 * @see RequestPredicates
 		 */
-		Builder GET(RequestPredicate predicate, HandlerFunction<ServerResponse> handlerFunction);
+		<T extends ServerResponse> Builder GET(
+				RequestPredicate predicate, HandlerFunction<T> handlerFunction);
 
 		/**
-		 * Adds a route to the given handler function that handles all HTTP {@code GET} requests
-		 * that match the given pattern and predicate.
-		 * <p>For instance, the following example routes GET requests for "/user" that accept JSON
-		 * to the {@code listUsers} method in {@code userController}:
+		 * Adds a route to the given handler function that handles all
+		 * HTTP {@code GET} requests that match the given pattern and predicate.
+		 * <p>For instance, the below routes GET requests for "/user" that
+		 * accept JSON to the {@code listUsers} method in {@code userController}:
 		 * <pre class="code">
 		 * RouterFunction&lt;ServerResponse&gt; route =
-		 *   RouterFunctions.route()
-		 *     .GET("/user", RequestPredicates.accept(MediaType.APPLICATION_JSON), userController::listUsers)
-		 *     .build();
+		 *     RouterFunctions.route()
+		 *         .GET("/user", RequestPredicates.accept(MediaType.APPLICATION_JSON), userController::listUsers)
+		 *         .build();
 		 * </pre>
 		 * @param pattern the pattern to match to
 		 * @param predicate additional predicate to match
-		 * @param handlerFunction the handler function to handle all {@code GET} requests that
-		 * match {@code pattern} and the predicate
+		 * @param handlerFunction handler for GET requests that match {@code pattern} and the predicate
+		 * @param <T> the type of response returned by the handler function
 		 * @return this builder
 		 * @see org.springframework.web.util.pattern.PathPattern
 		 * @see RequestPredicates
 		 */
-		Builder GET(String pattern, RequestPredicate predicate, HandlerFunction<ServerResponse> handlerFunction);
+		<T extends ServerResponse> Builder GET(
+				String pattern, RequestPredicate predicate, HandlerFunction<T> handlerFunction);
 
 		/**
 		 * Adds a route to the given handler function that handles HTTP {@code HEAD} requests.
-		 * @param handlerFunction the handler function to handle all {@code HEAD} requests
+		 * @param handlerFunction handler for HEAD requests
+		 * @param <T> the type of response returned by the handler function
 		 * @return this builder
 		 * @since 5.3
 		 */
-		Builder HEAD(HandlerFunction<ServerResponse> handlerFunction);
+		<T extends ServerResponse> Builder HEAD(HandlerFunction<T> handlerFunction);
 
 		/**
-		 * Adds a route to the given handler function that handles all HTTP {@code HEAD} requests
-		 * that match the given pattern.
+		 * Adds a route to the given handler function that handles all
+		 * HTTP {@code HEAD} requests that match the given pattern.
 		 * @param pattern the pattern to match to
-		 * @param handlerFunction the handler function to handle all {@code HEAD} requests that
-		 * match {@code pattern}
+		 * @param handlerFunction handler for HEAD requests that match {@code pattern}
+		 * @param <T> the type of response returned by the handler function
 		 * @return this builder
 		 * @see org.springframework.web.util.pattern.PathPattern
 		 */
-		Builder HEAD(String pattern, HandlerFunction<ServerResponse> handlerFunction);
+		<T extends ServerResponse> Builder HEAD(String pattern, HandlerFunction<T> handlerFunction);
 
 		/**
-		 * Adds a route to the given handler function that handles all HTTP {@code HEAD} requests
-		 * that match the given predicate.
-		 * @param predicate predicate to match
-		 * @param handlerFunction the handler function to handle all {@code HEAD} requests that
-		 * match {@code predicate}
+		 * Adds a route to the given handler function that handles all
+		 * HTTP {@code HEAD} requests that match the given predicate.
+		 * @param predicate the predicate to match
+		 * @param handlerFunction handler for HEAD requests that match {@code predicate}
+		 * @param <T> the type of response returned by the handler function
 		 * @return this builder
 		 * @since 5.3
 		 * @see RequestPredicates
 		 */
-		Builder HEAD(RequestPredicate predicate, HandlerFunction<ServerResponse> handlerFunction);
+		<T extends ServerResponse> Builder HEAD(
+				RequestPredicate predicate, HandlerFunction<T> handlerFunction);
 
 		/**
-		 * Adds a route to the given handler function that handles all HTTP {@code HEAD} requests
-		 * that match the given pattern and predicate.
+		 * Adds a route to the given handler function that handles all
+		 * HTTP {@code HEAD} requests that match the given pattern and predicate.
 		 * @param pattern the pattern to match to
 		 * @param predicate additional predicate to match
-		 * @param handlerFunction the handler function to handle all {@code HEAD} requests that
-		 * match {@code pattern}
+		 * @param handlerFunction handler for HEAD requests that match {@code pattern}
+		 * @param <T> the type of response returned by the handler function
 		 * @return this builder
 		 * @see org.springframework.web.util.pattern.PathPattern
 		 */
-		Builder HEAD(String pattern, RequestPredicate predicate, HandlerFunction<ServerResponse> handlerFunction);
+		<T extends ServerResponse> Builder HEAD(
+				String pattern, RequestPredicate predicate, HandlerFunction<T> handlerFunction);
 
 		/**
-		 * Adds a route to the given handler function that handles HTTP {@code POST} requests.
-		 * @param handlerFunction the handler function to handle all {@code POST} requests
+		 * Adds a route to the given handler function that handles
+		 * HTTP {@code POST} requests.
+		 * @param handlerFunction handler for POST requests
+		 * @param <T> the type of response returned by the handler function
 		 * @return this builder
 		 * @since 5.3
 		 */
-		Builder POST(HandlerFunction<ServerResponse> handlerFunction);
+		<T extends ServerResponse> Builder POST(HandlerFunction<T> handlerFunction);
 
 		/**
-		 * Adds a route to the given handler function that handles all HTTP {@code POST} requests
-		 * that match the given pattern.
+		 * Adds a route to the given handler function that handles all
+		 * HTTP {@code POST} requests that match the given pattern.
 		 * @param pattern the pattern to match to
-		 * @param handlerFunction the handler function to handle all {@code POST} requests that
-		 * match {@code pattern}
+		 * @param handlerFunction handler for POST requests that match {@code pattern}
+		 * @param <T> the type of response returned by the handler function
 		 * @return this builder
 		 * @see org.springframework.web.util.pattern.PathPattern
 		 */
-		Builder POST(String pattern, HandlerFunction<ServerResponse> handlerFunction);
+		<T extends ServerResponse> Builder POST(String pattern, HandlerFunction<T> handlerFunction);
 
 		/**
-		 * Adds a route to the given handler function that handles all HTTP {@code POST} requests
-		 * that match the given predicate.
-		 * @param predicate predicate to match
-		 * @param handlerFunction the handler function to handle all {@code POST} requests that
-		 * match {@code predicate}
+		 * Adds a route to the given handler function that handles all
+		 * HTTP {@code POST} requests that match the given predicate.
+		 * @param predicate the predicate to match
+		 * @param handlerFunction handler for POST requests that match {@code predicate}
+		 * @param <T> the type of response returned by the handler function
 		 * @return this builder
 		 * @since 5.3
 		 * @see RequestPredicates
 		 */
-		Builder POST(RequestPredicate predicate, HandlerFunction<ServerResponse> handlerFunction);
+		<T extends ServerResponse> Builder POST(
+				RequestPredicate predicate, HandlerFunction<T> handlerFunction);
 
 		/**
-		 * Adds a route to the given handler function that handles all HTTP {@code POST} requests
-		 * that match the given pattern and predicate.
-		 * <p>For instance, the following example routes POST requests for "/user" that contain JSON
-		 * to the {@code addUser} method in {@code userController}:
+		 * Adds a route to the given handler function that handles all
+		 * HTTP {@code POST} requests that match the given pattern and predicate.
+		 * <p>For instance, the below routes POST requests for "/user" that
+		 * contain JSON to the {@code addUser} method in {@code userController}:
 		 * <pre class="code">
 		 * RouterFunction&lt;ServerResponse&gt; route =
-		 *   RouterFunctions.route()
-		 *     .POST("/user", RequestPredicates.contentType(MediaType.APPLICATION_JSON), userController::addUser)
-		 *     .build();
+		 *     RouterFunctions.route()
+		 *         .POST("/user", RequestPredicates.contentType(MediaType.APPLICATION_JSON), userController::addUser)
+		 *         .build();
 		 * </pre>
 		 * @param pattern the pattern to match to
 		 * @param predicate additional predicate to match
-		 * @param handlerFunction the handler function to handle all {@code POST} requests that
-		 * match {@code pattern}
+		 * @param handlerFunction handler for POST requests that match {@code pattern}
+		 * @param <T> the type of response returned by the handler function
 		 * @return this builder
 		 * @see org.springframework.web.util.pattern.PathPattern
 		 */
-		Builder POST(String pattern, RequestPredicate predicate, HandlerFunction<ServerResponse> handlerFunction);
+		<T extends ServerResponse> Builder POST(
+				String pattern, RequestPredicate predicate, HandlerFunction<T> handlerFunction);
 
 		/**
-		 * Adds a route to the given handler function that handles HTTP {@code PUT} requests.
-		 * @param handlerFunction the handler function to handle all {@code PUT} requests
+		 * Adds a route to the given handler function that handles
+		 * HTTP {@code PUT} requests.
+		 * @param handlerFunction handler for PUT requests
+		 * @param <T> the type of response returned by the handler function
 		 * @return this builder
 		 * @since 5.3
 		 */
-		Builder PUT(HandlerFunction<ServerResponse> handlerFunction);
+		<T extends ServerResponse> Builder PUT(HandlerFunction<T> handlerFunction);
 
 		/**
-		 * Adds a route to the given handler function that handles all HTTP {@code PUT} requests
-		 * that match the given pattern.
+		 * Adds a route to the given handler function that handles all
+		 * HTTP {@code PUT} requests that match the given pattern.
 		 * @param pattern the pattern to match to
-		 * @param handlerFunction the handler function to handle all {@code PUT} requests that
-		 * match {@code pattern}
+		 * @param handlerFunction handler for PUT requests that match {@code pattern}
+		 * @param <T> the type of response returned by the handler function
 		 * @return this builder
 		 * @see org.springframework.web.util.pattern.PathPattern
 		 */
-		Builder PUT(String pattern, HandlerFunction<ServerResponse> handlerFunction);
+		<T extends ServerResponse> Builder PUT(String pattern, HandlerFunction<T> handlerFunction);
 
 		/**
-		 * Adds a route to the given handler function that handles all HTTP {@code PUT} requests
-		 * that match the given predicate.
-		 * @param predicate predicate to match
-		 * @param handlerFunction the handler function to handle all {@code PUT} requests that
-		 * match {@code predicate}
+		 * Adds a route to the given handler function that handles all
+		 * HTTP {@code PUT} requests that match the given predicate.
+		 * @param predicate the predicate to match
+		 * @param handlerFunction handler for PUT requests that match {@code predicate}
+		 * @param <T> the type of response returned by the handler function
 		 * @return this builder
 		 * @since 5.3
 		 * @see RequestPredicates
 		 */
-		Builder PUT(RequestPredicate predicate, HandlerFunction<ServerResponse> handlerFunction);
+		<T extends ServerResponse> Builder PUT(
+				RequestPredicate predicate, HandlerFunction<T> handlerFunction);
 
 		/**
-		 * Adds a route to the given handler function that handles all HTTP {@code PUT} requests
-		 * that match the given pattern and predicate.
-		 * <p>For instance, the following example routes PUT requests for "/user" that contain JSON
-		 * to the {@code editUser} method in {@code userController}:
+		 * Adds a route to the given handler function that handles all
+		 * HTTP {@code PUT} requests that match the given pattern and predicate.
+		 * <p>For instance, the below routes PUT requests for "/user" that
+		 * contain JSON to the {@code editUser} method in {@code userController}:
 		 * <pre class="code">
 		 * RouterFunction&lt;ServerResponse&gt; route =
-		 *   RouterFunctions.route()
-		 *     .PUT("/user", RequestPredicates.contentType(MediaType.APPLICATION_JSON), userController::editUser)
-		 *     .build();
+		 *     RouterFunctions.route()
+		 *         .PUT("/user", RequestPredicates.contentType(MediaType.APPLICATION_JSON), userController::editUser)
+		 *         .build();
 		 * </pre>
 		 * @param pattern the pattern to match to
 		 * @param predicate additional predicate to match
-		 * @param handlerFunction the handler function to handle all {@code PUT} requests that
-		 * match {@code pattern}
+		 * @param handlerFunction handler for PUT requests that match {@code pattern}
+		 * @param <T> the type of response returned by the handler function
 		 * @return this builder
 		 * @see org.springframework.web.util.pattern.PathPattern
 		 */
-		Builder PUT(String pattern, RequestPredicate predicate, HandlerFunction<ServerResponse> handlerFunction);
+		<T extends ServerResponse> Builder PUT(
+				String pattern, RequestPredicate predicate, HandlerFunction<T> handlerFunction);
 
 		/**
-		 * Adds a route to the given handler function that handles HTTP {@code PATCH} requests.
-		 * @param handlerFunction the handler function to handle all {@code PATCH} requests
+		 * Adds a route to the given handler function that handles
+		 * HTTP {@code PATCH} requests.
+		 * @param handlerFunction handler for PATCH requests
+		 * @param <T> the type of response returned by the handler function
 		 * @return this builder
 		 * @since 5.3
 		 */
-		Builder PATCH(HandlerFunction<ServerResponse> handlerFunction);
+		<T extends ServerResponse> Builder PATCH(HandlerFunction<T> handlerFunction);
 
 		/**
-		 * Adds a route to the given handler function that handles all HTTP {@code PATCH} requests
-		 * that match the given pattern.
+		 * Adds a route to the given handler function that handles all
+		 * HTTP {@code PATCH} requests that match the given pattern.
 		 * @param pattern the pattern to match to
-		 * @param handlerFunction the handler function to handle all {@code PATCH} requests that
-		 * match {@code pattern}
+		 * @param handlerFunction handler for PATCH requests that match {@code pattern}
+		 * @param <T> the type of response returned by the handler function
 		 * @return this builder
 		 * @see org.springframework.web.util.pattern.PathPattern
 		 */
-		Builder PATCH(String pattern, HandlerFunction<ServerResponse> handlerFunction);
+		<T extends ServerResponse> Builder PATCH(String pattern, HandlerFunction<T> handlerFunction);
 
 		/**
-		 * Adds a route to the given handler function that handles all HTTP {@code PATCH} requests
-		 * that match the given predicate.
-		 * @param predicate predicate to match
-		 * @param handlerFunction the handler function to handle all {@code PATCH} requests that
-		 * match {@code predicate}
+		 * Adds a route to the given handler function that handles all
+		 * HTTP {@code PATCH} requests that match the given predicate.
+		 * @param predicate the predicate to match
+		 * @param handlerFunction handler for PATCH requests that match {@code predicate}
+		 * @param <T> the type of response returned by the handler function
 		 * @return this builder
 		 * @since 5.3
 		 * @see RequestPredicates
 		 */
-		Builder PATCH(RequestPredicate predicate, HandlerFunction<ServerResponse> handlerFunction);
+		<T extends ServerResponse> Builder PATCH(
+				RequestPredicate predicate, HandlerFunction<T> handlerFunction);
 
 		/**
-		 * Adds a route to the given handler function that handles all HTTP {@code PATCH} requests
-		 * that match the given pattern and predicate.
-		 * <p>For instance, the following example routes PATCH requests for "/user" that contain JSON
-		 * to the {@code editUser} method in {@code userController}:
+		 * Adds a route to the given handler function that handles all
+		 * HTTP {@code PATCH} requests that match the given pattern and predicate.
+		 * <p>For instance, the below routes PATCH requests for "/user" that
+		 * contain JSON to the {@code editUser} method in {@code userController}:
 		 * <pre class="code">
 		 * RouterFunction&lt;ServerResponse&gt; route =
-		 *   RouterFunctions.route()
-		 *     .PATCH("/user", RequestPredicates.contentType(MediaType.APPLICATION_JSON), userController::editUser)
-		 *     .build();
+		 *     RouterFunctions.route()
+		 *         .PATCH("/user", RequestPredicates.contentType(MediaType.APPLICATION_JSON), userController::editUser)
+		 *         .build();
 		 * </pre>
 		 * @param pattern the pattern to match to
 		 * @param predicate additional predicate to match
-		 * @param handlerFunction the handler function to handle all {@code PATCH} requests that
-		 * match {@code pattern}
+		 * @param handlerFunction handler for PATCH requests that match {@code pattern}
+		 * @param <T> the type of response returned by the handler function
 		 * @return this builder
 		 * @see org.springframework.web.util.pattern.PathPattern
 		 */
-		Builder PATCH(String pattern, RequestPredicate predicate, HandlerFunction<ServerResponse> handlerFunction);
+		<T extends ServerResponse> Builder PATCH(
+				String pattern, RequestPredicate predicate, HandlerFunction<T> handlerFunction);
 
 		/**
-		 * Adds a route to the given handler function that handles HTTP {@code DELETE} requests.
-		 * @param handlerFunction the handler function to handle all {@code DELETE} requests
+		 * Adds a route to the given handler function that handles
+		 * HTTP {@code DELETE} requests.
+		 * @param handlerFunction handler for DELETE requests
+		 * @param <T> the type of response returned by the handler function
 		 * @return this builder
 		 * @since 5.3
 		 */
-		Builder DELETE(HandlerFunction<ServerResponse> handlerFunction);
+		<T extends ServerResponse> Builder DELETE(HandlerFunction<T> handlerFunction);
 
 		/**
-		 * Adds a route to the given handler function that handles all HTTP {@code DELETE} requests
-		 * that match the given pattern.
+		 * Adds a route to the given handler function that handles all
+		 * HTTP {@code DELETE} requests that match the given pattern.
 		 * @param pattern the pattern to match to
-		 * @param handlerFunction the handler function to handle all {@code DELETE} requests that
-		 * match {@code pattern}
+		 * @param handlerFunction handler for DELETE requests that match {@code pattern}
+		 * @param <T> the type of response returned by the handler function
 		 * @return this builder
 		 * @see org.springframework.web.util.pattern.PathPattern
 		 */
-		Builder DELETE(String pattern, HandlerFunction<ServerResponse> handlerFunction);
+		<T extends ServerResponse> Builder DELETE(
+				String pattern, HandlerFunction<T> handlerFunction);
 
 		/**
-		 * Adds a route to the given handler function that handles all HTTP {@code DELETE} requests
-		 * that match the given predicate.
-		 * @param predicate predicate to match
-		 * @param handlerFunction the handler function to handle all {@code DELETE} requests that
-		 * match {@code predicate}
-		 * @return this builder
-		 * @since 5.3
-		 * @see RequestPredicates
-		 */
-		Builder DELETE(RequestPredicate predicate, HandlerFunction<ServerResponse> handlerFunction);
-
-		/**
-		 * Adds a route to the given handler function that handles all HTTP {@code DELETE} requests
-		 * that match the given pattern and predicate.
-		 * @param pattern the pattern to match to
-		 * @param predicate additional predicate to match
-		 * @param handlerFunction the handler function to handle all {@code DELETE} requests that
-		 * match {@code pattern}
-		 * @return this builder
-		 * @see org.springframework.web.util.pattern.PathPattern
-		 */
-		Builder DELETE(String pattern, RequestPredicate predicate, HandlerFunction<ServerResponse> handlerFunction);
-
-		/**
-		 * Adds a route to the given handler function that handles HTTP {@code OPTIONS} requests.
-		 * @param handlerFunction the handler function to handle all {@code OPTIONS} requests
-		 * @return this builder
-		 * @since 5.3
-		 */
-		Builder OPTIONS(HandlerFunction<ServerResponse> handlerFunction);
-
-		/**
-		 * Adds a route to the given handler function that handles all HTTP {@code OPTIONS} requests
-		 * that match the given pattern.
-		 * @param pattern the pattern to match to
-		 * @param handlerFunction the handler function to handle all {@code OPTIONS} requests that
-		 * match {@code pattern}
-		 * @return this builder
-		 * @see org.springframework.web.util.pattern.PathPattern
-		 */
-		Builder OPTIONS(String pattern, HandlerFunction<ServerResponse> handlerFunction);
-
-		/**
-		 * Adds a route to the given handler function that handles all HTTP {@code OPTIONS} requests
-		 * that match the given predicate.
-		 * @param predicate predicate to match
-		 * @param handlerFunction the handler function to handle all {@code OPTIONS} requests that
-		 * match {@code predicate}
+		 * Adds a route to the given handler function that handles all
+		 * HTTP {@code DELETE} requests that match the given predicate.
+		 * @param predicate the predicate to match
+		 * @param handlerFunction handler for DELETE requests that match {@code predicate}
+		 * @param <T> the type of response returned by the handler function
 		 * @return this builder
 		 * @since 5.3
 		 * @see RequestPredicates
 		 */
-		Builder OPTIONS(RequestPredicate predicate, HandlerFunction<ServerResponse> handlerFunction);
+		<T extends ServerResponse> Builder DELETE(
+				RequestPredicate predicate, HandlerFunction<T> handlerFunction);
 
 		/**
-		 * Adds a route to the given handler function that handles all HTTP {@code OPTIONS} requests
-		 * that match the given pattern and predicate.
+		 * Adds a route to the given handler function that handles all
+		 * HTTP {@code DELETE} requests that match the given pattern and predicate.
 		 * @param pattern the pattern to match to
 		 * @param predicate additional predicate to match
-		 * @param handlerFunction the handler function to handle all {@code OPTIONS} requests that
-		 * match {@code pattern}
+		 * @param handlerFunction handler for DELETE requests that match {@code pattern}
+		 * @param <T> the type of response returned by the handler function
 		 * @return this builder
 		 * @see org.springframework.web.util.pattern.PathPattern
 		 */
-		Builder OPTIONS(String pattern, RequestPredicate predicate, HandlerFunction<ServerResponse> handlerFunction);
+		<T extends ServerResponse> Builder DELETE(
+				String pattern, RequestPredicate predicate, HandlerFunction<T> handlerFunction);
 
 		/**
-		 * Adds a route to the given handler function that handles all requests that match the
-		 * given predicate.
+		 * Adds a route to the given handler function that handles
+		 * HTTP {@code OPTIONS} requests.
+		 * @param handlerFunction handler for OPTIONS requests
+		 * @param <T> the type of response returned by the handler function
+		 * @return this builder
+		 * @since 5.3
+		 */
+		<T extends ServerResponse> Builder OPTIONS(HandlerFunction<T> handlerFunction);
+
+		/**
+		 * Adds a route to the given handler function that handles all
+		 * HTTP {@code OPTIONS} requests that match the given pattern.
+		 * @param pattern the pattern to match to
+		 * @param handlerFunction handler for OPTIONS requests that match {@code pattern}
+		 * @param <T> the type of response returned by the handler function
+		 * @return this builder
+		 * @see org.springframework.web.util.pattern.PathPattern
+		 */
+		<T extends ServerResponse> Builder OPTIONS(
+				String pattern, HandlerFunction<T> handlerFunction);
+
+		/**
+		 * Adds a route to the given handler function that handles all
+		 * HTTP {@code OPTIONS} requests that match the given predicate.
+		 * @param predicate the predicate to match
+		 * @param handlerFunction handler for OPTIONS requests that match {@code predicate}
+		 * @param <T> the type of response returned by the handler function
+		 * @return this builder
+		 * @since 5.3
+		 * @see RequestPredicates
+		 */
+		<T extends ServerResponse> Builder OPTIONS(
+				RequestPredicate predicate, HandlerFunction<T> handlerFunction);
+
+		/**
+		 * Adds a route to the given handler function that handles all
+		 * HTTP {@code OPTIONS} requests that match the given pattern and predicate.
+		 * @param pattern the pattern to match to
+		 * @param predicate additional predicate to match
+		 * @param handlerFunction handler for OPTIONS requests that match {@code pattern}
+		 * @param <T> the type of response returned by the handler function
+		 * @return this builder
+		 * @see org.springframework.web.util.pattern.PathPattern
+		 */
+		<T extends ServerResponse> Builder OPTIONS(
+				String pattern, RequestPredicate predicate, HandlerFunction<T> handlerFunction);
+
+		/**
+		 * Adds a route to the given handler function that handles all
+		 * requests that match the given predicate.
 		 * @param predicate the request predicate to match
-		 * @param handlerFunction the handler function to handle all requests that match the predicate
+		 * @param handlerFunction handler for requests that match the predicate
+		 * @param <T> the type of response returned by the handler function
 		 * @return this builder
 		 * @since 5.2
 		 * @see RequestPredicates
 		 */
-		Builder route(RequestPredicate predicate, HandlerFunction<ServerResponse> handlerFunction);
+		<T extends ServerResponse> Builder route(
+				RequestPredicate predicate, HandlerFunction<T> handlerFunction);
 
 		/**
-		 * Adds the given route to this builder. Can be used to merge externally defined router
-		 * functions into this builder, or can be combined with
+		 * Adds the given route to this builder. Can be used to merge externally
+		 * defined router functions into this builder, or can be combined with
 		 * {@link RouterFunctions#route(RequestPredicate, HandlerFunction)}
 		 * to allow for more flexible predicate matching.
-		 * <p>For instance, the following example adds the router function returned from
-		 * {@code OrderController.routerFunction()}.
-		 * to the {@code changeUser} method in {@code userController}:
+		 * <p>For instance, the fbelow adds the router function returned from
+		 * {@code OrderController.routerFunction()} to the {@code changeUser}
+		 * method in {@code userController}:
 		 * <pre class="code">
 		 * RouterFunction&lt;ServerResponse&gt; route =
-		 *   RouterFunctions.route()
-		 *     .GET("/users", userController::listUsers)
-		 *     .add(orderController.routerFunction());
-		 *     .build();
+		 *     RouterFunctions.route()
+		 *         .GET("/users", userController::listUsers)
+		 *         .add(orderController.routerFunction());
+		 *         .build();
 		 * </pre>
 		 * @param routerFunction the router function to be added
+		 * @param <T> the type of response returned by the handler function
 		 * @return this builder
 		 * @see RequestPredicates
 		 */
-		Builder add(RouterFunction<ServerResponse> routerFunction);
+		<T extends ServerResponse> Builder add(RouterFunction<T> routerFunction);
 
 		/**
 		 * Route requests that match the given predicate to the given resource.
@@ -735,7 +783,7 @@ public abstract class RouterFunctions {
 		 * Resource resource = new ClassPathResource("static/index.html")
 		 * RouterFunction&lt;ServerResponse&gt; resources = RouterFunctions.resource(path("/api/**").negate(), resource);
 		 * </pre>
-		 * @param predicate predicate to match
+		 * @param predicate the predicate to match
 		 * @param resource the resources to serve
 		 * @return a router function that routes to a resource
 		 * @since 6.1.4
@@ -744,22 +792,24 @@ public abstract class RouterFunctions {
 
 		/**
 		 * Route requests that match the given predicate to the given resource.
-		 * For instance
+		 * For instance:
 		 * <pre class="code">
 		 * Resource resource = new ClassPathResource("static/index.html")
 		 * RouterFunction&lt;ServerResponse&gt; resources = RouterFunctions.resource(path("/api/**").negate(), resource);
 		 * </pre>
-		 * @param predicate predicate to match
+		 * @param predicate the predicate to match
 		 * @param resource the resources to serve
 		 * @param headersConsumer provides access to the HTTP headers for served resources
 		 * @return a router function that routes to a resource
 		 * @since 6.1.4
 		 */
-		Builder resource(RequestPredicate predicate, Resource resource, BiConsumer<Resource, HttpHeaders> headersConsumer);
+		Builder resource(
+				RequestPredicate predicate, Resource resource,
+				BiConsumer<Resource, HttpHeaders> headersConsumer);
 
 		/**
-		 * Route requests that match the given pattern to resources relative to the given root location.
-		 * For instance
+		 * Route requests that match the given pattern to resources relative to
+		 * the given root location. For instance:
 		 * <pre class="code">
 		 * Resource location = new FileUrlResource("public-resources/");
 		 * RouterFunction&lt;ServerResponse&gt; resources = RouterFunctions.resources("/resources/**", location);
@@ -772,8 +822,8 @@ public abstract class RouterFunctions {
 		Builder resources(String pattern, Resource location);
 
 		/**
-		 * Route requests that match the given pattern to resources relative to the given root location.
-		 * For instance
+		 * Route requests that match the given pattern to resources relative to
+		 * the given root location. For instance:
 		 * <pre class="code">
 		 * Resource location = new FileUrlResource("public-resources/");
 		 * RouterFunction&lt;ServerResponse&gt; resources = RouterFunctions.resources("/resources/**", location);
@@ -785,163 +835,178 @@ public abstract class RouterFunctions {
 		 * @since 6.1
 		 * @see org.springframework.web.util.pattern.PathPattern
 		 */
-		Builder resources(String pattern, Resource location, BiConsumer<Resource, HttpHeaders> headersConsumer);
+		Builder resources(
+				String pattern, Resource location,
+				BiConsumer<Resource, HttpHeaders> headersConsumer);
 
 		/**
-		 * Route to resources using the provided lookup function. If the lookup function provides a
-		 * {@link Resource} for the given request, it will be it will be exposed using a
-		 * {@link HandlerFunction} that handles GET, HEAD, and OPTIONS requests.
-		 * @param lookupFunction the function to provide a {@link Resource} given the {@link ServerRequest}
+		 * Route to resources using the provided lookup function.
+		 * If the lookup function provides a {@link Resource} for the given
+		 * request, it will be it will be exposed using a {@link HandlerFunction}
+		 * that handles GET, HEAD, and OPTIONS requests.
+		 * @param lookupFunction the function to provide a {@link Resource}
 		 * @return this builder
 		 */
 		Builder resources(Function<ServerRequest, Mono<Resource>> lookupFunction);
 
 		/**
-		 * Route to resources using the provided lookup function. If the lookup function provides a
-		 * {@link Resource} for the given request, it will be it will be exposed using a
-		 * {@link HandlerFunction} that handles GET, HEAD, and OPTIONS requests.
-		 * @param lookupFunction the function to provide a {@link Resource} given the {@link ServerRequest}
+		 * Route to resources using the provided lookup function.
+		 * If the lookup function provides a {@link Resource} for the given
+		 * request, it will be it will be exposed using a {@link HandlerFunction}
+		 * that handles GET, HEAD, and OPTIONS requests.
+		 * @param lookupFunction the function to provide a {@link Resource}
 		 * @param headersConsumer provides access to the HTTP headers for served resources
 		 * @return this builder
 		 * @since 6.1
 		 */
-		Builder resources(Function<ServerRequest, Mono<Resource>> lookupFunction, BiConsumer<Resource, HttpHeaders> headersConsumer);
+		Builder resources(
+				Function<ServerRequest, Mono<Resource>> lookupFunction,
+				BiConsumer<Resource, HttpHeaders> headersConsumer);
 
 		/**
-		 * Route to the supplied router function if the given request predicate applies. This method
-		 * can be used to create <strong>nested routes</strong>, where a group of routes share a
-		 * common path (prefix), header, or other request predicate.
-		 * <p>For instance, the following example creates a nested route with a "/user" path
-		 * predicate, so that GET requests for "/user" will list users,
-		 * and POST request for "/user" will create a new user.
+		 * Route to the supplied router function if the given request predicate
+		 * applies. This method can be used to create <strong>nested routes</strong>,
+		 * where a group of routes share a common path (prefix), header, or other
+		 * request predicate.
+		 * <p>For instance, the below creates a nested route with a "/user" path
+		 * predicate, so that GET requests for "/user" will list users, and POST
+		 * request for "/user" will create a new user:
 		 * <pre class="code">
 		 * RouterFunction&lt;ServerResponse&gt; nestedRoute =
-		 *   RouterFunctions.route()
-		 *     .nest(RequestPredicates.path("/user"), () -&gt;
-		 *       RouterFunctions.route()
-		 *         .GET(this::listUsers)
-		 *         .POST(this::createUser)
-		 *         .build())
-		 *     .build();
+		 *     RouterFunctions.route()
+		 *         .nest(RequestPredicates.path("/user"), () -&gt;
+		 *             RouterFunctions.route()
+		 *                 .GET(this::listUsers)
+		 *                 .POST(this::createUser)
+		 *                 .build())
+		 *         .build();
 		 * </pre>
 		 * @param predicate the predicate to test
-		 * @param routerFunctionSupplier supplier for the nested router function to delegate to if
-		 * the predicate applies
+		 * @param routerFunctionSupplier supplier for the nested router function
+		 * to delegate to if the predicate applies
+		 * @param <T> the type of response returned by the handler function
 		 * @return this builder
 		 * @see RequestPredicates
 		 */
-		Builder nest(RequestPredicate predicate, Supplier<RouterFunction<ServerResponse>> routerFunctionSupplier);
+		<T extends ServerResponse> Builder nest(
+				RequestPredicate predicate, Supplier<RouterFunction<T>> routerFunctionSupplier);
 
 		/**
-		 * Route to a built router function if the given request predicate applies.
-		 * This method can be used to create <strong>nested routes</strong>, where a group of routes
-		 * share a common path (prefix), header, or other request predicate.
-		 * <p>For instance, the following example creates a nested route with a "/user" path
-		 * predicate, so that GET requests for "/user" will list users,
-		 * and POST request for "/user" will create a new user.
+		 * Route to a built router function if the given request predicate
+		 * applies. This method can be used to create <strong>nested routes</strong>,
+		 * where a group of routes share a common path (prefix), header, or
+		 * other request predicate.
+		 * <p>For instance, the below creates a nested route with a "/user" path
+		 * predicate, so that GET requests for "/user" will list users, and POST
+		 * request for "/user" will create a new user:
 		 * <pre class="code">
 		 * RouterFunction&lt;ServerResponse&gt; nestedRoute =
-		 *   RouterFunctions.route()
-		 *     .nest(RequestPredicates.path("/user"), builder -&gt;
-		 *       builder.GET(this::listUsers)
-		 *              .POST(this::createUser))
-		 *     .build();
+		 *     RouterFunctions.route()
+		 *         .nest(RequestPredicates.path("/user"), builder -&gt;
+		 *             builder.GET(this::listUsers).POST(this::createUser))
+		 *         .build();
 		 * </pre>
 		 * @param predicate the predicate to test
-		 * @param builderConsumer consumer for a {@code Builder} that provides the nested router
-		 * function
+		 * @param builderConsumer consumer for a {@code Builder} that provides the nested router function
 		 * @return this builder
 		 * @see RequestPredicates
 		 */
 		Builder nest(RequestPredicate predicate, Consumer<Builder> builderConsumer);
 
 		/**
-		 * Route to the supplied router function if the given path prefix pattern applies. This method
-		 * can be used to create <strong>nested routes</strong>, where a group of routes share a
-		 * common path prefix. Specifically, this method can be used to merge externally defined
-		 * router functions under a path prefix.
-		 * <p>For instance, the following example creates a nested route with a "/user" path
-		 * predicate that delegates to the router function defined in {@code userController},
-		 * and with a "/order" path that delegates to {@code orderController}.
+		 * Route to the supplied router function if the given path prefix
+		 * pattern applies. This method can be used to create
+		 * <strong>nested routes</strong>, where a group of routes share a common
+		 * path prefix. Specifically, this method can be used to merge
+		 * externally defined router functions under a path prefix.
+		 * <p>For instance, the below creates a nested route with a "/user" path
+		 * predicate that delegates to the router function defined in
+		 * {@code userController}, and with a "/order" path that delegates to
+		 * {@code orderController}:
 		 * <pre class="code">
 		 * RouterFunction&lt;ServerResponse&gt; nestedRoute =
-		 *   RouterFunctions.route()
-		 *     .path("/user", userController::routerFunction)
-		 *     .path("/order", orderController::routerFunction)
-		 *     .build();
+		 *     RouterFunctions.route()
+		 *         .path("/user", userController::routerFunction)
+		 *         .path("/order", orderController::routerFunction)
+		 *         .build();
 		 * </pre>
 		 * @param pattern the pattern to match to
-		 * @param routerFunctionSupplier supplier for the nested router function to delegate to if
-		 * the pattern matches
+		 * @param routerFunctionSupplier supplier for the nested router function
+		 * to delegate to if the pattern matches
+		 * @param <T> the type of response returned by the handler function
 		 * @return this builder
 		 * @see org.springframework.web.util.pattern.PathPattern
 		 */
-		Builder path(String pattern, Supplier<RouterFunction<ServerResponse>> routerFunctionSupplier);
+		<T extends ServerResponse> Builder path(
+				String pattern, Supplier<RouterFunction<T>> routerFunctionSupplier);
 
 		/**
-		 * Route to a built router function if the given path prefix pattern applies.
-		 * This method can be used to create <strong>nested routes</strong>, where a group of routes
-		 * share a common path prefix.
-		 * <p>For instance, the following example creates a nested route with a "/user" path
-		 * predicate, so that GET requests for "/user" will list users,
-		 * and POST request for "/user" will create a new user.
+		 * Route to a built router function if the given path prefix pattern
+		 * applies. This method can be used to create <strong>nested routes</strong>,
+		 * where a group of routes share a common path prefix.
+		 * <p>For instance, the following example creates a nested route with a
+		 * "/user" path predicate, so that GET requests for "/user" will list
+		 * users, and POST request for "/user" will create a new user:
 		 * <pre class="code">
 		 * RouterFunction&lt;ServerResponse&gt; nestedRoute =
-		 *   RouterFunctions.route()
-		 *     .path("/user", builder -&gt;
-		 *       builder.GET(this::listUsers)
-		 *              .POST(this::createUser))
-		 *     .build();
+		 *     RouterFunctions.route()
+		 *         .path("/user", builder -&gt;
+		 *             builder.GET(this::listUsers).POST(this::createUser))
+		 *         .build();
 		 * </pre>
 		 * @param pattern the pattern to match to
-		 * @param builderConsumer consumer for a {@code Builder} that provides the nested router
-		 * function
+		 * @param builderConsumer consumer for a {@code Builder} that provides
+		 * the nested router function
 		 * @return this builder
 		 * @see org.springframework.web.util.pattern.PathPattern
 		 */
 		Builder path(String pattern, Consumer<Builder> builderConsumer);
 
 		/**
-		 * Filters all routes created by this builder with the given filter function. Filter
-		 * functions are typically used to address cross-cutting concerns, such as logging,
-		 * security, etc.
-		 * <p>For instance, the following example creates a filter that returns a 401 Unauthorized
-		 * response if the request does not contain the necessary authentication headers.
+		 * Filters all routes created by this builder with the given filter
+		 * function. Filter functions are typically used to address cross-cutting
+		 * concerns, such as logging, security, etc.
+		 * <p>For instance, the following example creates a filter that returns
+		 * a 401 Unauthorized response if the request does not contain the
+		 * necessary authentication headers:
 		 * <pre class="code">
 		 * RouterFunction&lt;ServerResponse&gt; filteredRoute =
-		 *   RouterFunctions.route()
-		 *     .GET("/user", this::listUsers)
-		 *     .filter((request, next) -&gt; {
-		 *       // check for authentication headers
-		 *       if (isAuthenticated(request)) {
-		 *         return next.handle(request);
-		 *       }
-		 *       else {
-		 *         return ServerResponse.status(HttpStatus.UNAUTHORIZED).build();
-		 *       }
-		 *     })
-		 *     .build();
+		 *     RouterFunctions.route()
+		 *         .GET("/user", this::listUsers)
+		 *         .filter((request, next) -&gt; {
+		 *             // check for authentication headers
+		 *             if (isAuthenticated(request)) {
+		 *                 return next.handle(request);
+		 *            }
+		 *            else {
+		 *                return ServerResponse.status(HttpStatus.UNAUTHORIZED).build();
+		 *            }
+		 *         })
+		 *         .build();
 		 * </pre>
 		 * @param filterFunction the function to filter all routes built by this builder
+		 * @param <T> the type of the {@linkplain HandlerFunction handler function} to filter
+		 * @param <R> the type of the response of the function
 		 * @return this builder
 		 */
-		Builder filter(HandlerFilterFunction<ServerResponse, ServerResponse> filterFunction);
+		<T extends ServerResponse, R extends ServerResponse> Builder filter(
+				HandlerFilterFunction<T, R> filterFunction);
 
 		/**
-		 * Filter the request object for all routes created by this builder with the given request
-		 * processing function. Filters are typically used to address cross-cutting concerns, such
-		 * as logging, security, etc.
-		 * <p>For instance, the following example creates a filter that logs the request before
-		 * the handler function executes.
+		 * Filter the request object for all routes created by this builder with
+		 * the given request processing function. Filters are typically used to
+		 * address cross-cutting concerns, such as logging, security, etc.
+		 * <p>For instance, the following example creates a filter that logs the
+		 * request before the handler function executes:
 		 * <pre class="code">
 		 * RouterFunction&lt;ServerResponse&gt; filteredRoute =
-		 *   RouterFunctions.route()
-		 *     .GET("/user", this::listUsers)
-		 *     .before(request -&gt; {
-		 *       log(request);
-		 *       return request;
-		 *     })
-		 *     .build();
+		 *     RouterFunctions.route()
+		 *         .GET("/user", this::listUsers)
+		 *         .before(request -&gt; {
+		 *             log(request);
+		 *             return request;
+		 *         })
+		 *         .build();
 		 * </pre>
 		 * @param requestProcessor a function that transforms the request
 		 * @return this builder
@@ -949,68 +1014,75 @@ public abstract class RouterFunctions {
 		Builder before(Function<ServerRequest, ServerRequest> requestProcessor);
 
 		/**
-		 * Filter the response object for all routes created by this builder with the given response
-		 * processing function. Filters are typically used to address cross-cutting concerns, such
-		 * as logging, security, etc.
-		 * <p>For instance, the following example creates a filter that logs the response after
-		 * the handler function executes.
+		 * Filter the response object for all routes created by this builder
+		 * with the given response processing function. Filters are typically
+		 * used to address cross-cutting concerns, such as logging, security, etc.
+		 * <p>For instance, the following example creates a filter that logs
+		 * the response after the handler function executes:
 		 * <pre class="code">
 		 * RouterFunction&lt;ServerResponse&gt; filteredRoute =
-		 *   RouterFunctions.route()
-		 *     .GET("/user", this::listUsers)
-		 *     .after((request, response) -&gt; {
-		 *       log(response);
-		 *       return response;
-		 *     })
-		 *     .build();
+		 *     RouterFunctions.route()
+		 *         .GET("/user", this::listUsers)
+		 *         .after((request, response) -&gt; {
+		 *             log(response);
+		 *             return response;
+		 *          })
+		 *         .build();
 		 * </pre>
 		 * @param responseProcessor a function that transforms the response
+		 * @param <T> the type of the {@linkplain HandlerFunction handler function} to filter
+		 * @param <R> the type of the response of the function
 		 * @return this builder
 		 */
-		Builder after(BiFunction<ServerRequest, ServerResponse, ServerResponse> responseProcessor);
+		<T extends ServerResponse, R extends ServerResponse> Builder after(
+				BiFunction<ServerRequest, T, R> responseProcessor);
 
 		/**
-		 * Filters all exceptions that match the predicate by applying the given response provider
-		 * function.
-		 * <p>For instance, the following example creates a filter that returns a 500 response
-		 * status when an {@code IllegalStateException} occurs.
+		 * Filters all exceptions that match the predicate by applying the
+		 * given response provider function.
+		 * <p>For instance, the following example creates a filter that returns
+		 * a 500 response status when an {@code IllegalStateException} occurs:
 		 * <pre class="code">
 		 * RouterFunction&lt;ServerResponse&gt; filteredRoute =
-		 *   RouterFunctions.route()
-		 *     .GET("/user", this::listUsers)
-		 *     .onError(e -&gt; e instanceof IllegalStateException,
-		 *       (e, request) -&gt; ServerResponse.status(HttpStatus.INTERNAL_SERVER_ERROR).build())
-		 *     .build();
+		 *     RouterFunctions.route()
+		 *         .GET("/user", this::listUsers)
+		 *         .onError(e -&gt; e instanceof IllegalStateException,
+		 *             (e, request) -&gt; ServerResponse.status(HttpStatus.INTERNAL_SERVER_ERROR).build())
+		 *         .build();
 		 * </pre>
 		 * @param predicate the type of exception to filter
 		 * @param responseProvider a function that creates a response
+		 * @param <T> the type of response returned by the handler function
 		 * @return this builder
 		 */
-		Builder onError(Predicate<? super Throwable> predicate,
-				BiFunction<? super Throwable, ServerRequest, Mono<ServerResponse>> responseProvider);
+		<T extends ServerResponse> Builder onError(
+				Predicate<? super Throwable> predicate,
+				BiFunction<? super Throwable, ServerRequest, Mono<T>> responseProvider);
 
 		/**
-		 * Filters all exceptions of the given type by applying the given response provider
-		 * function.
-		 * <p>For instance, the following example creates a filter that returns a 500 response
-		 * status when an {@code IllegalStateException} occurs.
+		 * Filters all exceptions of the given type by applying the
+		 * given response provider function.
+		 * <p>For instance, the following example creates a filter that returns
+		 * a 500 response status when an {@code IllegalStateException} occurs:
 		 * <pre class="code">
 		 * RouterFunction&lt;ServerResponse&gt; filteredRoute =
-		 *   RouterFunctions.route()
-		 *     .GET("/user", this::listUsers)
-		 *     .onError(IllegalStateException.class,
-		 *       (e, request) -&gt; ServerResponse.status(HttpStatus.INTERNAL_SERVER_ERROR).build())
-		 *     .build();
+		 *     RouterFunctions.route()
+		 *         .GET("/user", this::listUsers)
+		 *         .onError(IllegalStateException.class,
+		 *             (e, request) -&gt; ServerResponse.status(HttpStatus.INTERNAL_SERVER_ERROR).build())
+		 *         .build();
 		 * </pre>
 		 * @param exceptionType the type of exception to filter
 		 * @param responseProvider a function that creates a response
+		 * @param <T> the type of response returned by the handler function
 		 * @return this builder
 		 */
-		<T extends Throwable> Builder onError(Class<T> exceptionType,
+		<T extends Throwable> Builder onError(
+				Class<T> exceptionType,
 				BiFunction<? super T, ServerRequest, Mono<ServerResponse>> responseProvider);
 
 		/**
-		 * Add an attribute with the given name and value to the last route built with this builder.
+		 * Add an attribute  to the last route built with this builder.
 		 * @param name the attribute name
 		 * @param value the attribute value
 		 * @return this builder
@@ -1019,11 +1091,11 @@ public abstract class RouterFunctions {
 		Builder withAttribute(String name, Object value);
 
 		/**
-		 * Manipulate the attributes of the last route built with the given consumer.
-		 * <p>The map provided to the consumer is "live", so that the consumer can be used
-		 * to {@linkplain Map#put(Object, Object) overwrite} existing attributes,
-		 * {@linkplain Map#remove(Object) remove} attributes, or use any of the other
-		 * {@link Map} methods.
+		 * Manipulate the attributes of the last route built.
+		 * <p>The map provided to the consumer is "live", so that the consumer
+		 * can be used to {@linkplain Map#put(Object, Object) overwrite} existing
+		 * attributes, {@linkplain Map#remove(Object) remove} attributes,
+		 * or use any of the other {@link Map} methods.
 		 * @param attributesConsumer a function that consumes the attributes map
 		 * @return this builder
 		 * @since 5.3
@@ -1032,8 +1104,8 @@ public abstract class RouterFunctions {
 
 		/**
 		 * Builds the {@code RouterFunction}. All created routes are
-		 * {@linkplain RouterFunction#and(RouterFunction) composed} with one another, and filters
-		 * (if any) are applied to the result.
+		 * {@linkplain RouterFunction#and(RouterFunction) composed} with one
+		 * another, and filters (if any) are applied to the result.
 		 * @return the built router function
 		 */
 		RouterFunction<ServerResponse> build();
@@ -1103,9 +1175,9 @@ public abstract class RouterFunctions {
 
 
 	/**
-	 * A composed routing function that first invokes one function, and then invokes the
-	 * another function (of the same response type {@code T}) if this route had
-	 * {@linkplain Mono#empty() no result}.
+	 * A composed routing function that first invokes one function,
+	 * and then invokes another function (of the same response type {@code T})
+	 * if this route had {@linkplain Mono#empty() no result}.
 	 * @param <T> the server response type
 	 */
 	static final class SameComposedRouterFunction<T extends ServerResponse> extends AbstractRouterFunction<T> {
@@ -1134,9 +1206,9 @@ public abstract class RouterFunctions {
 
 
 	/**
-	 * A composed routing function that first invokes one function, and then invokes
-	 * another function (of a different response type) if this route had
-	 * {@linkplain Mono#empty() no result}.
+	 * A composed routing function that first invokes one function,
+	 * and then invokes another function (of a different response type)
+	 * if this route had {@linkplain Mono#empty() no result}.
 	 */
 	static final class DifferentComposedRouterFunction extends AbstractRouterFunction<ServerResponse> {
 
@@ -1170,9 +1242,9 @@ public abstract class RouterFunctions {
 
 
 	/**
-	 * Filter the specified {@linkplain HandlerFunction handler functions} with the given
-	 * {@linkplain HandlerFilterFunction filter function}.
-	 * @param <T> the type of the {@linkplain HandlerFunction handler function} to filter
+	 * Filter the specified {@linkplain HandlerFunction handler functions}
+	 * with the given {@linkplain HandlerFilterFunction filter function}.
+	 * @param <T> the type of the {@linkplain HandlerFunction handler function}to filter
 	 * @param <S> the type of the response of the function
 	 */
 	static final class FilteredRouterFunction<T extends ServerResponse, S extends ServerResponse>
@@ -1258,24 +1330,24 @@ public abstract class RouterFunctions {
 		public Mono<HandlerFunction<T>> route(ServerRequest serverRequest) {
 			return this.predicate.nest(serverRequest)
 					.map(nestedRequest -> {
-								if (logger.isTraceEnabled()) {
-									String logPrefix = serverRequest.exchange().getLogPrefix();
-									logger.trace(logPrefix + String.format("Matched nested %s", this.predicate));
-								}
-								return this.routerFunction.route(nestedRequest)
-										.doOnNext(match -> {
-											if (nestedRequest != serverRequest) {
-												// new attributes map from nestedRequest.attributes() can be composed of the old attributes,
-												// which means that clearing the old attributes will remove those values from new attributes as well
-												// so let's make a copy
-												Map<String, Object> newAttributes = new LinkedHashMap<>(nestedRequest.attributes());
-												Map<String, Object> oldAttributes = serverRequest.attributes();
-												oldAttributes.clear();
-												oldAttributes.putAll(newAttributes);
-											}
-										});
+						if (logger.isTraceEnabled()) {
+							String logPrefix = serverRequest.exchange().getLogPrefix();
+							logger.trace(logPrefix + String.format("Matched nested %s", this.predicate));
+						}
+						return this.routerFunction.route(nestedRequest).doOnNext(match -> {
+							if (nestedRequest != serverRequest) {
+								// new attributes map from nestedRequest.attributes() can be composed of
+								// the old attributes, which means clearing the old attributes will
+								// remove those values from new attributes as well
+								// so let's make a copy
+								Map<String, Object> newAttributes = new LinkedHashMap<>(nestedRequest.attributes());
+								Map<String, Object> oldAttributes = serverRequest.attributes();
+								oldAttributes.clear();
+								oldAttributes.putAll(newAttributes);
 							}
-					).orElseGet(Mono::empty);
+						});
+					})
+					.orElseGet(Mono::empty);
 		}
 
 
@@ -1306,7 +1378,8 @@ public abstract class RouterFunctions {
 
 		@Override
 		public Mono<HandlerFunction<ServerResponse>> route(ServerRequest request) {
-			return this.lookupFunction.apply(request).map(resource -> new ResourceHandlerFunction(resource, this.headersConsumer));
+			return this.lookupFunction.apply(request)
+					.map(resource -> new ResourceHandlerFunction(resource, this.headersConsumer));
 		}
 
 		@Override
@@ -1328,12 +1401,8 @@ public abstract class RouterFunctions {
 		}
 
 		private static Map<String, Object> initAttributes(Map<String, Object> attributes) {
-			if (attributes.isEmpty()) {
-				return Collections.emptyMap();
-			}
-			else {
-				return Collections.unmodifiableMap(new LinkedHashMap<>(attributes));
-			}
+			return (attributes.isEmpty() ?
+					Collections.emptyMap() : Collections.unmodifiableMap(new LinkedHashMap<>(attributes)));
 		}
 
 		@Override

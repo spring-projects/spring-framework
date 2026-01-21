@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import org.apache.commons.logging.LogFactory;
 import org.jspecify.annotations.Nullable;
 
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.core.log.LogFormatUtils;
@@ -61,11 +62,14 @@ public abstract class ResourceHandlerUtils {
 			if (location instanceof org.springframework.core.io.PathResource) {
 				return;
 			}
-			else if (location instanceof UrlResource) {
-				path = location.getURL().toExternalForm();
+			else if (location instanceof FileSystemResource fileSystemResource) {
+				path = fileSystemResource.getPath();
 			}
 			else if (location instanceof ClassPathResource classPathResource) {
 				path = classPathResource.getPath();
+			}
+			else if (location instanceof UrlResource) {
+				path = location.getURL().toExternalForm();
 			}
 			else {
 				path = location.getURL().getPath();
@@ -73,8 +77,7 @@ public abstract class ResourceHandlerUtils {
 			Assert.isTrue(path.endsWith(FOLDER_SEPARATOR) || path.endsWith(WINDOWS_FOLDER_SEPARATOR),
 					"Resource location does not end with slash: " + path);
 		}
-		catch (IOException ex) {
-			// ignore
+		catch (IOException ignored) {
 		}
 	}
 

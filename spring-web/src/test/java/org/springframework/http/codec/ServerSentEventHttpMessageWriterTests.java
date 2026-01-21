@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,19 +22,19 @@ import java.time.Duration;
 import java.util.Collections;
 import java.util.Map;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
+import tools.jackson.databind.SerializationFeature;
+import tools.jackson.databind.json.JsonMapper;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.core.testfixture.io.buffer.AbstractDataBufferAllocatingTests;
 import org.springframework.http.MediaType;
-import org.springframework.http.codec.json.Jackson2JsonEncoder;
-import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
+import org.springframework.http.codec.json.JacksonJsonEncoder;
 import org.springframework.web.testfixture.http.server.reactive.MockServerHttpResponse;
 import org.springframework.web.testfixture.xml.Pojo;
 
@@ -54,7 +54,7 @@ class ServerSentEventHttpMessageWriterTests extends AbstractDataBufferAllocating
 	private static final Map<String, Object> HINTS = Collections.emptyMap();
 
 	private ServerSentEventHttpMessageWriter messageWriter =
-			new ServerSentEventHttpMessageWriter(new Jackson2JsonEncoder());
+			new ServerSentEventHttpMessageWriter(new JacksonJsonEncoder());
 
 
 	@ParameterizedDataBufferAllocatingTest
@@ -164,8 +164,8 @@ class ServerSentEventHttpMessageWriterTests extends AbstractDataBufferAllocating
 	void writePojoWithPrettyPrint(DataBufferFactory bufferFactory) {
 		super.bufferFactory = bufferFactory;
 
-		ObjectMapper mapper = Jackson2ObjectMapperBuilder.json().indentOutput(true).build();
-		this.messageWriter = new ServerSentEventHttpMessageWriter(new Jackson2JsonEncoder(mapper));
+		JsonMapper mapper = JsonMapper.builder().enable(SerializationFeature.INDENT_OUTPUT).build();
+		this.messageWriter = new ServerSentEventHttpMessageWriter(new JacksonJsonEncoder(mapper));
 
 		MockServerHttpResponse outputMessage = new MockServerHttpResponse(super.bufferFactory);
 		Flux<Pojo> source = Flux.just(new Pojo("foofoo", "barbar"), new Pojo("foofoofoo", "barbarbar"));

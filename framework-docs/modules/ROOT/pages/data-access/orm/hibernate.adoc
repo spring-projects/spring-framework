@@ -1,7 +1,7 @@
 [[orm-hibernate]]
 = Hibernate
 
-We start with a coverage of https://hibernate.org/[Hibernate 5] in a Spring environment,
+We start with a coverage of https://hibernate.org/[Hibernate] in a Spring environment,
 using it to demonstrate the approach that Spring takes towards integrating OR mappers.
 This section covers many issues in detail and shows different variations of DAO
 implementations and transaction demarcation. Most of these patterns can be directly
@@ -10,13 +10,12 @@ cover the other ORM technologies and show brief examples.
 
 [NOTE]
 ====
-As of Spring Framework 6.0, Spring requires Hibernate ORM 5.5+ for Spring's
-`HibernateJpaVendorAdapter` as well as for a native Hibernate `SessionFactory` setup.
-We recommend Hibernate ORM 5.6 as the last feature branch in that Hibernate generation.
+As of Spring Framework 7.0, Spring requires Hibernate ORM 7.x for Spring's
+`HibernateJpaVendorAdapter`.
 
-Hibernate ORM 6.x is only supported as a JPA provider (`HibernateJpaVendorAdapter`).
-Plain `SessionFactory` setup with the `orm.hibernate5` package is not supported anymore.
-We recommend Hibernate ORM 6.1/6.2 with JPA-style setup for new development projects.
+The `org.springframework.orm.jpa.hibernate` package supersedes the former `orm.hibernate5`:
+now for use with Hibernate ORM 7.1+, tightly integrated with `HibernateJpaVendorAdapter`
+as well as supporting Hibernate's native `SessionFactory.getCurrentSession()` style.
 ====
 
 
@@ -43,7 +42,7 @@ JDBC `DataSource` and a Hibernate `SessionFactory` on top of it:
 			<property name="password" value=""/>
 		</bean>
 
-		<bean id="mySessionFactory" class="org.springframework.orm.hibernate5.LocalSessionFactoryBean">
+		<bean id="mySessionFactory" class="org.springframework.orm.jpa.hibernate.LocalSessionFactoryBean">
 			<property name="dataSource" ref="myDataSource"/>
 			<property name="mappingResources">
 				<list>
@@ -271,7 +270,7 @@ processing at runtime. The following example shows how to do so:
 		<!-- SessionFactory, DataSource, etc. omitted -->
 
 		<bean id="transactionManager"
-				class="org.springframework.orm.hibernate5.HibernateTransactionManager">
+				class="org.springframework.orm.jpa.hibernate.HibernateTransactionManager">
 			<property name="sessionFactory" ref="sessionFactory"/>
 		</bean>
 
@@ -301,7 +300,7 @@ and an example for a business method implementation:
 ----
 	<beans>
 
-		<bean id="myTxManager" class="org.springframework.orm.hibernate5.HibernateTransactionManager">
+		<bean id="myTxManager" class="org.springframework.orm.jpa.hibernate.HibernateTransactionManager">
 			<property name="sessionFactory" ref="mySessionFactory"/>
 		</bean>
 
@@ -515,6 +514,3 @@ the following events occur when a JTA transaction commits:
 * Hibernate is synchronized to the JTA transaction, so the transaction is called back
   through an `afterCompletion` callback by the JTA transaction manager and can
   properly clear its cache.
-
-
-

@@ -4,10 +4,13 @@
 Spring offers ways to return output other than HTML, including PDF and Excel spreadsheets.
 This section describes how to use those features.
 
-
+WARNING: As of Spring Framework 7.0, view classes in the `org.springframework.web.servlet.view.document`
+package are deprecated. Instead, libraries can adapt this existing code to provide support with their own `*View` types.
+As an alternative, applications can perform direct rendering in web handlers.
 
 [[mvc-view-document-intro]]
 == Introduction to Document Views
+
 
 An HTML page is not always the best way for the user to view the model output,
 and Spring makes it simple to generate a PDF document or an Excel spreadsheet
@@ -22,7 +25,6 @@ NOTE: You should use the latest versions of the underlying document-generation l
 if possible. In particular, we strongly recommend OpenPDF (for example, OpenPDF 1.2.12)
 instead of the outdated original iText 2.1.7, since OpenPDF is actively maintained and
 fixes an important vulnerability for untrusted PDF content.
-
 
 
 [[mvc-view-document-pdf]]
@@ -73,7 +75,6 @@ A controller can return such a view either from an external view definition
 (referencing it by name) or as a `View` instance from the handler method.
 
 
-
 [[mvc-view-document-excel]]
 == Excel Views
 
@@ -85,7 +86,3 @@ and `AbstractXlsxStreamingView`) that supersede the outdated `AbstractExcelView`
 The programming model is similar to `AbstractPdfView`, with `buildExcelDocument()`
 as the central template method and controllers being able to return such a view from
 an external definition (by name) or as a `View` instance from the handler method.
-
-
-
-

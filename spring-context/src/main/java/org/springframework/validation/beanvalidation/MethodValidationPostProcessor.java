@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,8 +59,6 @@ import org.springframework.validation.method.MethodValidationResult;
  * {@link Validated} annotation at the type level, for their methods to be searched for
  * inline constraint annotations. Validation groups can be specified through {@code @Validated}
  * as well. By default, JSR-303 will validate against its default group only.
- *
- * <p>This functionality requires a Bean Validation 1.1+ provider.
  *
  * @author Juergen Hoeller
  * @since 3.1

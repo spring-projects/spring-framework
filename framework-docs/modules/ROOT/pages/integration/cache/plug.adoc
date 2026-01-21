@@ -10,6 +10,3 @@ caching abstraction framework on top of the storage API, as the _Caffeine_ class
 Most `CacheManager` classes can use the classes in the
 `org.springframework.cache.support` package (such as `AbstractCacheManager` which takes
 care of the boiler-plate code, leaving only the actual mapping to be completed).
-
-
-

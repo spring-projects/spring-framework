@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -151,8 +151,9 @@ import org.springframework.util.ErrorHandler;
 public abstract class AbstractMessageListenerContainer extends AbstractJmsListeningContainer
 		implements MessageListenerContainer {
 
-	private static final boolean micrometerJakartaPresent = ClassUtils.isPresent(
-			"io.micrometer.jakarta9.instrument.jms.JmsInstrumentation", AbstractMessageListenerContainer.class.getClassLoader());
+	private static final boolean MICROMETER_JAKARTA_PRESENT = ClassUtils.isPresent(
+			"io.micrometer.jakarta9.instrument.jms.JmsInstrumentation",
+			AbstractMessageListenerContainer.class.getClassLoader());
 
 	private volatile @Nullable Object destination;
 
@@ -166,11 +167,11 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 
 	private @Nullable String subscriptionName;
 
+	private boolean pubSubNoLocal = false;
+
 	private @Nullable Boolean replyPubSubDomain;
 
 	private @Nullable QosSettings replyQosSettings;
-
-	private boolean pubSubNoLocal = false;
 
 	private @Nullable MessageConverter messageConverter;
 
@@ -179,6 +180,8 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 	private @Nullable ErrorHandler errorHandler;
 
 	private @Nullable ObservationRegistry observationRegistry;
+
+	private boolean acknowledgeAfterListener = true;
 
 	private boolean exposeListenerSession = true;
 
@@ -484,12 +487,7 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 	 */
 	@Override
 	public boolean isReplyPubSubDomain() {
-		if (this.replyPubSubDomain != null) {
-			return this.replyPubSubDomain;
-		}
-		else {
-			return isPubSubDomain();
-		}
+		return (this.replyPubSubDomain != null ? this.replyPubSubDomain : isPubSubDomain());
 	}
 
 	/**
@@ -573,6 +571,37 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 	 */
 	public @Nullable ObservationRegistry getObservationRegistry() {
 		return this.observationRegistry;
+	}
+
+	/**
+	 * Specify whether the listener container should automatically acknowledge
+	 * each JMS Message after the message listener returned. This applies in
+	 * case of client acknowledge modes, including vendor-specific modes but
+	 * not in case of auto-acknowledge or a transacted JMS Session.
+	 * <p>As of 6.2, the default is {@code true}: The listener container will
+	 * acknowledge each JMS Message even in case of a vendor-specific mode,
+	 * assuming client-acknowledge style processing for custom vendor modes.
+	 * <p>If the provided listener prefers to manually acknowledge each message in
+	 * the listener itself, in combination with an "individual acknowledge" mode,
+	 * switch this flag to {code false} along with the vendor-specific mode.
+	 * @since 6.2.6
+	 * @see #setSessionAcknowledgeMode
+	 * @see #setMessageListener
+	 * @see Message#acknowledge()
+	 */
+	public void setAcknowledgeAfterListener(boolean acknowledgeAfterListener) {
+		this.acknowledgeAfterListener = acknowledgeAfterListener;
+	}
+
+	/**
+	 * Determine whether the listener container should automatically acknowledge
+	 * each JMS Message after the message listener returned.
+	 * @since 6.2.6
+	 * @see #setAcknowledgeAfterListener
+	 * @see #isClientAcknowledge(Session)
+	 */
+	public boolean isAcknowledgeAfterListener() {
+		return this.acknowledgeAfterListener;
 	}
 
 	/**
@@ -671,7 +700,7 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 	 * @since 6.1
 	 */
 	protected Observation createObservation(Message message) {
-		if (micrometerJakartaPresent && this.observationRegistry != null) {
+		if (MICROMETER_JAKARTA_PRESENT && this.observationRegistry != null) {
 			return ObservationFactory.create(this.observationRegistry, message);
 		}
 		else {
@@ -756,7 +785,7 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 		Session sessionToClose = null;
 		try {
 			Session sessionToUse = session;
-			if (micrometerJakartaPresent && this.observationRegistry != null) {
+			if (MICROMETER_JAKARTA_PRESENT && this.observationRegistry != null) {
 				sessionToUse = MicrometerInstrumentation.instrumentSession(sessionToUse, this.observationRegistry);
 			}
 			if (!isExposeListenerSession()) {
@@ -812,7 +841,7 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 				JmsUtils.commitIfNecessary(session);
 			}
 		}
-		else if (message != null && isClientAcknowledge(session)) {
+		else if (message != null && isAcknowledgeAfterListener() && isClientAcknowledge(session)) {
 			message.acknowledge();
 		}
 	}
@@ -976,13 +1005,14 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 	private static class MessageRejectedWhileStoppingException extends RuntimeException {
 	}
 
+
 	private abstract static class MicrometerInstrumentation {
 
 		static Session instrumentSession(Session session, ObservationRegistry registry) {
 			return JmsInstrumentation.instrumentSession(session, registry);
 		}
-
 	}
+
 
 	private abstract static class ObservationFactory {
 

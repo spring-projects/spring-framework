@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -136,7 +136,23 @@ public class DefaultTestContext implements TestContext {
 					from the ContextCache due to a maximum cache size policy."""
 						.formatted(this.mergedConfig));
 		}
+		this.cacheAwareContextLoaderDelegate.registerContextUsage(this.mergedConfig, this.testClass);
 		return context;
+	}
+
+	/**
+	 * Mark the {@linkplain ApplicationContext application context} associated
+	 * with this test context as <em>unused</em> so that it can be safely
+	 * {@linkplain org.springframework.context.ConfigurableApplicationContext#pause() paused}
+	 * if no other test classes are actively using the same application context.
+	 * <p>The default implementation delegates to the {@link CacheAwareContextLoaderDelegate}
+	 * that was supplied when this {@code TestContext} was constructed.
+	 * @since 7.0
+	 * @see CacheAwareContextLoaderDelegate#unregisterContextUsage(MergedContextConfiguration, Class)
+	 */
+	@Override
+	public void markApplicationContextUnused() {
+		this.cacheAwareContextLoaderDelegate.unregisterContextUsage(this.mergedConfig, this.testClass);
 	}
 
 	/**

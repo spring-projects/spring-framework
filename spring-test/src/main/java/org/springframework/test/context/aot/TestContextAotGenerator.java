@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -314,8 +314,7 @@ public class TestContextAotGenerator {
 	ClassName processAheadOfTime(MergedContextConfiguration mergedConfig,
 			GenerationContext generationContext) throws TestContextAotException {
 
-		GenericApplicationContext gac = loadContextForAotProcessing(mergedConfig);
-		try {
+		try (GenericApplicationContext gac = loadContextForAotProcessing(mergedConfig)) {
 			return this.aotGenerator.processAheadOfTime(gac, generationContext);
 		}
 		catch (Throwable ex) {
@@ -331,9 +330,9 @@ public class TestContextAotGenerator {
 	 * create {@link GenericApplicationContext GenericApplicationContexts}.
 	 * @throws TestContextAotException if an error occurs while loading the application
 	 * context or if one of the prerequisites is not met
-	 * @see AotContextLoader#loadContextForAotProcessing(MergedContextConfiguration)
+	 * @see AotContextLoader#loadContextForAotProcessing(MergedContextConfiguration, RuntimeHints)
 	 */
-	private GenericApplicationContext loadContextForAotProcessing(
+	GenericApplicationContext loadContextForAotProcessing(
 			MergedContextConfiguration mergedConfig) throws TestContextAotException {
 
 		Class<?> testClass = mergedConfig.getTestClass();
@@ -345,7 +344,7 @@ public class TestContextAotGenerator {
 
 		if (contextLoader instanceof AotContextLoader aotContextLoader) {
 			try {
-				ApplicationContext context = aotContextLoader.loadContextForAotProcessing(mergedConfig);
+				ApplicationContext context = aotContextLoader.loadContextForAotProcessing(mergedConfig, this.runtimeHints);
 				if (context instanceof GenericApplicationContext gac) {
 					return gac;
 				}

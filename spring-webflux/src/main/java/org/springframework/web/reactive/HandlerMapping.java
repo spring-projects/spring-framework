@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.web.reactive;
 
 import reactor.core.publisher.Mono;
 
+import org.springframework.web.accept.ApiVersionHolder;
 import org.springframework.web.server.ServerWebExchange;
 
 /**
@@ -82,6 +83,14 @@ public interface HandlerMapping {
 	 * this request attribute to be present in all scenarios.
 	 */
 	String PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE = HandlerMapping.class.getName() + ".producibleMediaTypes";
+
+	/**
+	 * Name of the {@link ServerWebExchange#getAttributes() attribute} that
+	 * contains an {@link ApiVersionHolder} with the result of obtaining and
+	 * parsing the API version of the request.
+	 * @since 7.0
+	 */
+	String API_VERSION_ATTRIBUTE = HandlerMapping.class.getName() + ".apiVersion";
 
 
 	/**

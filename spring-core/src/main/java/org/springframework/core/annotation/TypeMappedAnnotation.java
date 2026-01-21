@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@ import org.springframework.util.ClassUtils;
  * applying the mapping and mirroring rules of an {@link AnnotationTypeMapping}.
  *
  * <p>Root attribute values are extracted from a source object using a supplied
- * {@code BiFunction}. This allows various different annotation models to be
+ * {@link ValueExtractor}. This allows various different annotation models to be
  * supported by the same class. For example, the attributes source might be an
  * actual {@link Annotation} instance where methods on the annotation instance
  * are {@linkplain AnnotationUtils#invokeAnnotationMethod(Method, Object) invoked}
@@ -199,7 +199,7 @@ final class TypeMappedAnnotation<A extends Annotation> extends AbstractMergedAnn
 	@Override
 	public boolean hasDefaultValue(String attributeName) {
 		int attributeIndex = getAttributeIndex(attributeName, true);
-		Object value = getValue(attributeIndex, true, false);
+		Object value = getValue(attributeIndex, false);
 		return (value == null || this.mapping.isEquivalentToDefaultValue(attributeIndex, value, this.valueExtractor));
 	}
 
@@ -369,28 +369,25 @@ final class TypeMappedAnnotation<A extends Annotation> extends AbstractMergedAnn
 	private Object getRequiredValue(int attributeIndex, String attributeName) {
 		Object value = getValue(attributeIndex, Object.class);
 		if (value == null) {
-			throw new NoSuchElementException("No element at attribute index "
-					+ attributeIndex + " for name " + attributeName);
+			throw new NoSuchElementException("No element at attribute index " +
+					attributeIndex + " for name " + attributeName);
 		}
 		return value;
 	}
 
 	private <T> @Nullable T getValue(int attributeIndex, Class<T> type) {
 		Method attribute = this.mapping.getAttributes().get(attributeIndex);
-		Object value = getValue(attributeIndex, true, false);
+		Object value = getValue(attributeIndex, false);
 		if (value == null) {
 			value = attribute.getDefaultValue();
 		}
 		return adapt(attribute, value, type);
 	}
 
-	private @Nullable Object getValue(int attributeIndex, boolean useConventionMapping, boolean forMirrorResolution) {
+	private @Nullable Object getValue(int attributeIndex, boolean forMirrorResolution) {
 		AnnotationTypeMapping mapping = this.mapping;
 		if (this.useMergedValues) {
 			int mappedIndex = this.mapping.getAliasMapping(attributeIndex);
-			if (mappedIndex == -1 && useConventionMapping) {
-				mappedIndex = this.mapping.getConventionMapping(attributeIndex);
-			}
 			if (mappedIndex != -1) {
 				mapping = mapping.getRoot();
 				attributeIndex = mappedIndex;
@@ -425,8 +422,7 @@ final class TypeMappedAnnotation<A extends Annotation> extends AbstractMergedAnn
 
 	private @Nullable Object getValueForMirrorResolution(Method attribute, @Nullable Object annotation) {
 		int attributeIndex = this.mapping.getAttributes().indexOf(attribute);
-		boolean valueAttribute = VALUE.equals(attribute.getName());
-		return getValue(attributeIndex, !valueAttribute, true);
+		return getValue(attributeIndex, true);
 	}
 
 	@SuppressWarnings("unchecked")

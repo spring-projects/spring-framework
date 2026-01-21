@@ -30,5 +30,3 @@ Alternatively, you may specifically handle, for example, the resulting `MissingP
 in the case of a required `@PathVariable`. A null value after conversion will be treated like
 an empty original value, so the corresponding `Missing...Exception` variants will be thrown.
 ====
-
-

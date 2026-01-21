@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -268,6 +268,17 @@ class ContentCachingResponseWrapperTests {
 				.isThrownBy(() -> responseWrapper.setHeader(CONTENT_LENGTH, overflow))
 				.withMessageContaining("Content-Length exceeds ContentCachingResponseWrapper's maximum")
 				.withMessageContaining(overflow);
+	}
+
+	@Test
+	void setContentLengthNull() {
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		ContentCachingResponseWrapper responseWrapper = new ContentCachingResponseWrapper(response);
+		responseWrapper.setContentLength(1024);
+		responseWrapper.setHeader(CONTENT_LENGTH, null);
+
+		assertThat(response.getHeaderNames()).doesNotContain(CONTENT_LENGTH);
+		assertThat(responseWrapper.getHeader(CONTENT_LENGTH)).isNull();
 	}
 
 

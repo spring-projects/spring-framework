@@ -22,7 +22,6 @@ xref:web/webflux/controller/ann-advice.adoc[@ControllerAdvice] that handles all 
 and any `ErrorResponseException`, and renders an error response with a body.
 
 
-
 [[webflux-ann-rest-exceptions-render]]
 == Render
 [.small]#xref:web/webmvc/mvc-ann-rest-exceptions.adoc#mvc-ann-rest-exceptions-render[See equivalent in the Servlet stack]#
@@ -49,7 +48,6 @@ xref:web/webflux/config.adoc[WebFlux Config] with a `WebFluxConfigurer`. Use tha
 any RFC 9457 response and take some action.
 
 
-
 [[webflux-ann-rest-exceptions-non-standard]]
 == Non-Standard Fields
 [.small]#xref:web/webmvc/mvc-ann-rest-exceptions.adoc#mvc-ann-rest-exceptions-non-standard[See equivalent in the Servlet stack]#
@@ -68,6 +66,12 @@ from an existing `ProblemDetail`. This could be done centrally, for example, fro
 `@ControllerAdvice` such as `ResponseEntityExceptionHandler` that re-creates the
 `ProblemDetail` of an exception into a subclass with the additional non-standard fields.
 
+TIP: In Spring Boot, the `spring.webflux.problemdetails.enabled` property autoconfigures
+a `ResponseEntityExceptionHandler` that handles built-in exceptions with problem details.
+In that case, you may prefer to create another `@ControllerAdvice` instead of extending
+`ResponseEntityExceptionHandler` if you want to take over the handling of a specific
+built-in exception. You'll need to ensure your handler is ordered ahead of the one
+configured by Spring Boot whose order is 0.
 
 
 [[webflux-ann-rest-exceptions-i18n]]
@@ -138,6 +142,10 @@ Message codes and arguments for each error are also resolved via `MessageSource`
 | `+{0}+` the list of global errors, `+{1}+` the list of field errors.
 Message codes and arguments for each error are also resolved via `MessageSource`.
 
+| `NoResourceFoundException`
+| (default)
+| `+{0}+` the request path (or portion of) used to find a resource
+
 |===
 
 NOTE: Unlike other exceptions, the message arguments for
@@ -149,8 +157,6 @@ xref:core/validation/beanvalidation.adoc#validation-beanvalidation-spring-method
 for more details.
 
 
-
-
 [[webflux-ann-rest-exceptions-client]]
 == Client Handling
 [.small]#xref:web/webmvc/mvc-ann-rest-exceptions.adoc#mvc-ann-rest-exceptions-client[See equivalent in the Servlet stack]#
@@ -159,7 +165,3 @@ A client application can catch `WebClientResponseException`, when using the `Web
 or `RestClientResponseException` when using the `RestTemplate`, and use their
 `getResponseBodyAs` methods to decode the error response body to any target type such as
 `ProblemDetail`, or a subclass of `ProblemDetail`.
-
-
-
-

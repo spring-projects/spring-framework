@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -104,6 +104,27 @@ class BeanWrapperAutoGrowingTests {
 	}
 
 	@Test
+	void getPropertyValueAutoGrow3dArrayList() {
+		assertThat(wrapper.getPropertyValue("threeDimensionalArrayList[1][2][3][4]")).isNotNull();
+		assertThat(bean.getThreeDimensionalArrayList()).hasSize(2);
+		assertThat(bean.getThreeDimensionalArrayList().get(1)).hasNumberOfRows(3);
+		assertThat(bean.getThreeDimensionalArrayList().get(1)[2]).hasNumberOfRows(4);
+		assertThat(bean.getThreeDimensionalArrayList().get(1)[2][3]).hasSize(5);
+		assertThat(bean.getThreeDimensionalArrayList().get(1)[2][3][4]).isInstanceOf(Bean.class);
+	}
+
+	@Test
+	void getPropertyValueAutoGrow3dArrayListForDefault3dArray() {
+		assertThat(wrapper.getPropertyValue("threeDimensionalArrayList[0]")).isNotNull();
+		assertThat(bean.getThreeDimensionalArrayList()).hasSize(1);
+
+		// Default 3-dimensional array should be [[[]]]
+		assertThat(bean.getThreeDimensionalArrayList().get(0)).hasNumberOfRows(1);
+		assertThat(bean.getThreeDimensionalArrayList().get(0)[0]).hasNumberOfRows(1);
+		assertThat(bean.getThreeDimensionalArrayList().get(0)[0][0]).isEmpty();
+	}
+
+	@Test
 	void setPropertyValueAutoGrow2dArray() {
 		Bean newBean = new Bean();
 		newBean.setProp("enigma");
@@ -121,6 +142,16 @@ class BeanWrapperAutoGrowingTests {
 		assertThat(bean.getThreeDimensionalArray()[2][3][4])
 			.isInstanceOf(Bean.class)
 			.extracting(Bean::getProp).isEqualTo("enigma");
+	}
+
+	@Test
+	void setPropertyValueAutoGrow3dArrayList() {
+		Bean newBean = new Bean();
+		newBean.setProp("enigma");
+		wrapper.setPropertyValue("threeDimensionalArrayList[0][1][2][3]", newBean);
+		assertThat(bean.getThreeDimensionalArrayList().get(0)[1][2][3])
+				.isInstanceOf(Bean.class)
+				.extracting(Bean::getProp).isEqualTo("enigma");
 	}
 
 	@Test
@@ -215,6 +246,8 @@ class BeanWrapperAutoGrowingTests {
 
 		private Bean[][][] threeDimensionalArray;
 
+		private List<Bean[][][]> threeDimensionalArrayList;
+
 		private List<Bean> list;
 
 		private List<List<Bean>> nestedList;
@@ -267,6 +300,14 @@ class BeanWrapperAutoGrowingTests {
 
 		public void setThreeDimensionalArray(Bean[][][] threeDimensionalArray) {
 			this.threeDimensionalArray = threeDimensionalArray;
+		}
+
+		public List<Bean[][][]> getThreeDimensionalArrayList() {
+			return threeDimensionalArrayList;
+		}
+
+		public void setThreeDimensionalArrayList(List<Bean[][][]> threeDimensionalArrayList) {
+			this.threeDimensionalArrayList = threeDimensionalArrayList;
 		}
 
 		public List<Bean> getList() {

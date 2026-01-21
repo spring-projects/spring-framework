@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,9 @@ import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.BeanNameAware;
+import org.springframework.core.env.AbstractPropertyResolver;
 import org.springframework.util.StringValueResolver;
+import org.springframework.util.SystemPropertyUtils;
 
 /**
  * Abstract base class for property resource configurers that resolve placeholders
@@ -38,16 +40,16 @@ import org.springframework.util.StringValueResolver;
  *
  * <pre class="code">
  * &lt;bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource"&gt;
- *   &lt;property name="driverClassName" value="${driver}" /&gt;
- *   &lt;property name="url" value="jdbc:${dbname}" /&gt;
+ *   &lt;property name="driverClassName" value="${jdbc.driver}" /&gt;
+ *   &lt;property name="url" value="jdbc:${jdbc.dbname}" /&gt;
  * &lt;/bean&gt;
  * </pre>
  *
  * Example properties file:
  *
  * <pre class="code">
- * driver=com.mysql.jdbc.Driver
- * dbname=mysql:mydb</pre>
+ * jdbc.driver=com.mysql.jdbc.Driver
+ * jdbc.dbname=mysql:mydb</pre>
  *
  * Annotated bean definitions may take advantage of property replacement using
  * the {@link org.springframework.beans.factory.annotation.Value @Value} annotation:
@@ -80,11 +82,12 @@ import org.springframework.util.StringValueResolver;
  * <p>Example XML property with default value:
  *
  * <pre class="code">
- *   &lt;property name="url" value="jdbc:${dbname:defaultdb}" /&gt;
+ *   &lt;property name="url" value="jdbc:${jdbc.dbname:defaultdb}" /&gt;
  * </pre>
  *
  * @author Chris Beams
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 3.1
  * @see PropertyPlaceholderConfigurer
  * @see org.springframework.context.support.PropertySourcesPlaceholderConfigurer
@@ -93,16 +96,21 @@ public abstract class PlaceholderConfigurerSupport extends PropertyResourceConfi
 		implements BeanNameAware, BeanFactoryAware {
 
 	/** Default placeholder prefix: {@value}. */
-	public static final String DEFAULT_PLACEHOLDER_PREFIX = "${";
+	public static final String DEFAULT_PLACEHOLDER_PREFIX = SystemPropertyUtils.PLACEHOLDER_PREFIX;
 
 	/** Default placeholder suffix: {@value}. */
-	public static final String DEFAULT_PLACEHOLDER_SUFFIX = "}";
+	public static final String DEFAULT_PLACEHOLDER_SUFFIX = SystemPropertyUtils.PLACEHOLDER_SUFFIX;
 
 	/** Default value separator: {@value}. */
-	public static final String DEFAULT_VALUE_SEPARATOR = ":";
+	public static final String DEFAULT_VALUE_SEPARATOR = SystemPropertyUtils.VALUE_SEPARATOR;
 
-	/** Default escape character: {@code '\'}. */
-	public static final Character DEFAULT_ESCAPE_CHARACTER = '\\';
+	/**
+	 * Default escape character: {@code '\'}.
+	 * @since 6.2
+	 * @see AbstractPropertyResolver#getDefaultEscapeCharacter()
+	 */
+	public static final Character DEFAULT_ESCAPE_CHARACTER = SystemPropertyUtils.ESCAPE_CHARACTER;
+
 
 	/** Defaults to {@value #DEFAULT_PLACEHOLDER_PREFIX}. */
 	protected String placeholderPrefix = DEFAULT_PLACEHOLDER_PREFIX;
@@ -113,8 +121,10 @@ public abstract class PlaceholderConfigurerSupport extends PropertyResourceConfi
 	/** Defaults to {@value #DEFAULT_VALUE_SEPARATOR}. */
 	protected @Nullable String valueSeparator = DEFAULT_VALUE_SEPARATOR;
 
-	/** Defaults to {@link #DEFAULT_ESCAPE_CHARACTER}. */
-	protected @Nullable Character escapeCharacter = DEFAULT_ESCAPE_CHARACTER;
+	/**
+	 * The default is determined by {@link AbstractPropertyResolver#getDefaultEscapeCharacter()}.
+	 */
+	protected @Nullable Character escapeCharacter = AbstractPropertyResolver.getDefaultEscapeCharacter();
 
 	protected boolean trimValues = false;
 
@@ -129,7 +139,7 @@ public abstract class PlaceholderConfigurerSupport extends PropertyResourceConfi
 
 	/**
 	 * Set the prefix that a placeholder string starts with.
-	 * The default is {@value #DEFAULT_PLACEHOLDER_PREFIX}.
+	 * <p>The default is {@value #DEFAULT_PLACEHOLDER_PREFIX}.
 	 */
 	public void setPlaceholderPrefix(String placeholderPrefix) {
 		this.placeholderPrefix = placeholderPrefix;
@@ -137,31 +147,32 @@ public abstract class PlaceholderConfigurerSupport extends PropertyResourceConfi
 
 	/**
 	 * Set the suffix that a placeholder string ends with.
-	 * The default is {@value #DEFAULT_PLACEHOLDER_SUFFIX}.
+	 * <p>The default is {@value #DEFAULT_PLACEHOLDER_SUFFIX}.
 	 */
 	public void setPlaceholderSuffix(String placeholderSuffix) {
 		this.placeholderSuffix = placeholderSuffix;
 	}
 
 	/**
-	 * Specify the separating character between the placeholder variable
-	 * and the associated default value, or {@code null} if no such
-	 * special character should be processed as a value separator.
-	 * The default is {@value #DEFAULT_VALUE_SEPARATOR}.
+	 * Specify the separating character between the placeholder variable and the
+	 * associated default value, or {@code null} if no such special character
+	 * should be processed as a value separator.
+	 * <p>The default is {@value #DEFAULT_VALUE_SEPARATOR}.
 	 */
 	public void setValueSeparator(@Nullable String valueSeparator) {
 		this.valueSeparator = valueSeparator;
 	}
 
 	/**
-	 * Specify the escape character to use to ignore placeholder prefix
-	 * or value separator, or {@code null} if no escaping should take
-	 * place.
-	 * <p>Default is {@link #DEFAULT_ESCAPE_CHARACTER}.
+	 * Set the escape character to use to ignore the
+	 * {@linkplain #setPlaceholderPrefix(String) placeholder prefix} and the
+	 * {@linkplain #setValueSeparator(String) value separator}, or {@code null}
+	 * if no escaping should take place.
+	 * <p>The default is determined by {@link AbstractPropertyResolver#getDefaultEscapeCharacter()}.
 	 * @since 6.2
 	 */
-	public void setEscapeCharacter(@Nullable Character escsEscapeCharacter) {
-		this.escapeCharacter = escsEscapeCharacter;
+	public void setEscapeCharacter(@Nullable Character escapeCharacter) {
+		this.escapeCharacter = escapeCharacter;
 	}
 
 	/**

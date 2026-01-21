@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.web.context.request.async;
 
+import java.io.IOException;
 import java.util.concurrent.Callable;
 
 import jakarta.servlet.AsyncEvent;
@@ -152,6 +153,21 @@ class WebAsyncManagerErrorTests {
 		verify(interceptor).beforeConcurrentHandling(this.asyncWebRequest, callable);
 	}
 
+	@Test // gh-34363
+	void startCallableProcessingDisconnectedClient() throws Exception {
+		StubCallable callable = new StubCallable();
+		this.asyncManager.startCallableProcessing(callable);
+
+		IOException ex = new IOException("broken pipe");
+		AsyncEvent event = new AsyncEvent(new MockAsyncContext(this.servletRequest, this.servletResponse), ex);
+		this.asyncWebRequest.onError(event);
+
+		assertThat(this.asyncManager.hasConcurrentResult()).isTrue();
+		assertThat(this.asyncManager.getConcurrentResult())
+				.as("Disconnected client error not wrapped in AsyncRequestNotUsableException")
+				.isExactlyInstanceOf(AsyncRequestNotUsableException.class);
+	}
+
 	@Test
 	void startDeferredResultProcessingErrorAndComplete() throws Exception {
 
@@ -257,6 +273,21 @@ class WebAsyncManagerErrorTests {
 		assertThat(this.asyncManager.hasConcurrentResult()).isTrue();
 		assertThat(this.asyncManager.getConcurrentResult()).isEqualTo(e);
 		assertThat(((MockAsyncContext) this.servletRequest.getAsyncContext()).getDispatchedPath()).isEqualTo("/test");
+	}
+
+	@Test // gh-34363
+	void startDeferredResultProcessingDisconnectedClient() throws Exception {
+		DeferredResult<Object> deferredResult = new DeferredResult<>();
+		this.asyncManager.startDeferredResultProcessing(deferredResult);
+
+		IOException ex = new IOException("broken pipe");
+		AsyncEvent event = new AsyncEvent(new MockAsyncContext(this.servletRequest, this.servletResponse), ex);
+		this.asyncWebRequest.onError(event);
+
+		assertThat(this.asyncManager.hasConcurrentResult()).isTrue();
+		assertThat(deferredResult.getResult())
+				.as("Disconnected client error not wrapped in AsyncRequestNotUsableException")
+				.isExactlyInstanceOf(AsyncRequestNotUsableException.class);
 	}
 
 

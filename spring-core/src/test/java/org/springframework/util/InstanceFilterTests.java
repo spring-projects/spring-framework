@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
-import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
@@ -30,47 +29,44 @@ class InstanceFilterTests {
 
 	@Test
 	void emptyFilterApplyMatchIfEmpty() {
-		InstanceFilter<String> filter = new InstanceFilter<>(null, null, true);
+		InstanceFilter<String> filter = new InstanceFilter<>(null, null);
 		match(filter, "foo");
 		match(filter, "bar");
 	}
 
 	@Test
 	void includesFilter() {
-		InstanceFilter<String> filter = new InstanceFilter<>(
-				asList("First", "Second"), null, true);
+		InstanceFilter<String> filter = new InstanceFilter<>(List.of("First", "Second"), null);
 		match(filter, "Second");
 		doNotMatch(filter, "foo");
 	}
 
 	@Test
 	void excludesFilter() {
-		InstanceFilter<String> filter = new InstanceFilter<>(
-				null, asList("First", "Second"), true);
+		InstanceFilter<String> filter = new InstanceFilter<>(null, List.of("First", "Second"));
 		doNotMatch(filter, "Second");
 		match(filter, "foo");
 	}
 
 	@Test
 	void includesAndExcludesFilters() {
-		InstanceFilter<String> filter = new InstanceFilter<>(
-				asList("foo", "Bar"), asList("First", "Second"), true);
+		InstanceFilter<String> filter = new InstanceFilter<>(List.of("foo", "Bar"), List.of("First", "Second"));
 		doNotMatch(filter, "Second");
 		match(filter, "foo");
 	}
 
 	@Test
 	void includesAndExcludesFiltersConflict() {
-		InstanceFilter<String> filter = new InstanceFilter<>(
-				List.of("First"), List.of("First"), true);
+		InstanceFilter<String> filter = new InstanceFilter<>(List.of("First"), List.of("First"));
 		doNotMatch(filter, "First");
 	}
 
-	private <T> void match(InstanceFilter<T> filter, T candidate) {
+
+	private static <T> void match(InstanceFilter<T> filter, T candidate) {
 		assertThat(filter.match(candidate)).as("filter '" + filter + "' should match " + candidate).isTrue();
 	}
 
-	private <T> void doNotMatch(InstanceFilter<T> filter, T candidate) {
+	private static <T> void doNotMatch(InstanceFilter<T> filter, T candidate) {
 		assertThat(filter.match(candidate)).as("filter '" + filter + "' should not match " + candidate).isFalse();
 	}
 

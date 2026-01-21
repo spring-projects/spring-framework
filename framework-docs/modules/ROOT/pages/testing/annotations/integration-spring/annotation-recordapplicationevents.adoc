@@ -11,4 +11,3 @@ The recorded events can be accessed via the `ApplicationEvents` API within tests
 See xref:testing/testcontext-framework/application-events.adoc[Application Events] and the 
 {spring-framework-api}/test/context/event/RecordApplicationEvents.html[`@RecordApplicationEvents`
 javadoc] for an example and further details.
-

@@ -4,7 +4,9 @@
 `@Configuration` is a class-level annotation indicating that an object is a source of
 bean definitions. `@Configuration` classes declare beans through `@Bean`-annotated
 methods. Calls to `@Bean` methods on `@Configuration` classes can also be used to define
-inter-bean dependencies. See xref:core/beans/java/basic-concepts.adoc[Basic Concepts: `@Bean` and `@Configuration`] for a general introduction.
+inter-bean dependencies. See
+xref:core/beans/java/basic-concepts.adoc[Basic Concepts: `@Bean` and `@Configuration`]
+for a general introduction.
 
 
 [[beans-java-injecting-dependencies]]
@@ -56,7 +58,6 @@ injection.
 NOTE: This method of declaring inter-bean dependencies works only when the `@Bean` method
 is declared within a `@Configuration` class. You cannot declare inter-bean dependencies
 by using plain `@Component` classes.
-
 
 
 [[beans-java-method-injection]]
@@ -259,6 +260,3 @@ instead) or by annotating your configuration class with
 are then not intercepted, so you have to exclusively rely on dependency injection at the
 constructor or method level there.
 ====
-
-
-

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,11 @@
 
 package org.springframework.web.servlet.mvc.method.annotation;
 
+import java.util.Collections;
+import java.util.Map;
+
 import com.fasterxml.jackson.annotation.JsonView;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.http.MediaType;
@@ -32,8 +36,7 @@ import org.springframework.util.Assert;
  * or {@code @ExceptionHandler} method.
  *
  * <p>The serialization view specified in the annotation will be passed in to the
- * {@link org.springframework.http.converter.json.MappingJackson2HttpMessageConverter}
- * which will then use it to serialize the response body.
+ * Jackson converters which will then use it to serialize the response body.
  *
  * <p>Note that despite {@code @JsonView} allowing for more than one class to
  * be specified, the use for a response body advice is only supported with
@@ -44,6 +47,7 @@ import org.springframework.util.Assert;
  * @see com.fasterxml.jackson.annotation.JsonView
  * @see com.fasterxml.jackson.databind.ObjectMapper#writerWithView(Class)
  */
+@SuppressWarnings("removal")
 public class JsonViewResponseBodyAdvice extends AbstractMappingJacksonResponseBodyAdvice {
 
 	@Override
@@ -55,6 +59,15 @@ public class JsonViewResponseBodyAdvice extends AbstractMappingJacksonResponseBo
 	protected void beforeBodyWriteInternal(MappingJacksonValue bodyContainer, MediaType contentType,
 			MethodParameter returnType, ServerHttpRequest request, ServerHttpResponse response) {
 
+		bodyContainer.setSerializationView(getJsonView(returnType));
+	}
+
+	@Override
+	public @Nullable Map<String, Object> determineWriteHints(@Nullable Object body, MethodParameter returnType, MediaType selectedContentType, Class<? extends HttpMessageConverter<?>> selectedConverterType) {
+		return Collections.singletonMap(JsonView.class.getName(), getJsonView(returnType));
+	}
+
+	private static Class<?> getJsonView(MethodParameter returnType) {
 		JsonView ann = returnType.getMethodAnnotation(JsonView.class);
 		Assert.state(ann != null, "No JsonView annotation");
 
@@ -63,8 +76,7 @@ public class JsonViewResponseBodyAdvice extends AbstractMappingJacksonResponseBo
 			throw new IllegalArgumentException(
 					"@JsonView only supported for response body advice with exactly 1 class argument: " + returnType);
 		}
-
-		bodyContainer.setSerializationView(classes[0]);
+		return classes[0];
 	}
 
 }

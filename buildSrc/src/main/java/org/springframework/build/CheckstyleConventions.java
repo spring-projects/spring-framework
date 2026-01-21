@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,7 +50,7 @@ public class CheckstyleConventions {
 			project.getPlugins().apply(CheckstylePlugin.class);
 			project.getTasks().withType(Checkstyle.class).forEach(checkstyle -> checkstyle.getMaxHeapSize().set("1g"));
 			CheckstyleExtension checkstyle = project.getExtensions().getByType(CheckstyleExtension.class);
-			checkstyle.setToolVersion("10.21.1");
+			checkstyle.setToolVersion("13.0.0");
 			checkstyle.getConfigDirectory().set(project.getRootProject().file("src/checkstyle"));
 			String version = SpringJavaFormatPlugin.class.getPackage().getImplementationVersion();
 			DependencySet checkstyleDependencies = project.getConfigurations().getByName("checkstyle").getDependencies();
@@ -63,8 +63,8 @@ public class CheckstyleConventions {
 		project.getPlugins().apply(NoHttpPlugin.class);
 		NoHttpExtension noHttp = project.getExtensions().getByType(NoHttpExtension.class);
 		noHttp.setAllowlistFile(project.file("src/nohttp/allowlist.lines"));
-		noHttp.getSource().exclude("**/test-output/**", "**/.settings/**",
-				"**/.classpath", "**/.project", "**/.gradle/**", "**/node_modules/**");
+		noHttp.getSource().exclude("**/test-output/**", "**/.settings/**", "**/.classpath",
+				"**/.project", "**/.gradle/**", "**/node_modules/**", "**/spring-jcl/**", "buildSrc/build/**");
 		List<String> buildFolders = List.of("bin", "build", "out");
 		project.allprojects(subproject -> {
 			Path rootPath = project.getRootDir().toPath();

@@ -22,5 +22,3 @@ Since the `TestContextBootstrapper` SPI is likely to change in the future (to ac
 new requirements), we strongly encourage implementers not to implement this interface
 directly but rather to extend `AbstractTestContextBootstrapper` or one of its concrete
 subclasses instead.
-
-

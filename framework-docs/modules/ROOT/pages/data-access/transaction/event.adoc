@@ -66,6 +66,3 @@ See the
 {spring-framework-api}/transaction/reactive/TransactionalEventPublisher.html[`TransactionalEventPublisher`]
 javadoc for details.
 ====
-
-
-

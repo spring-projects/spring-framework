@@ -30,9 +30,9 @@ Kotlin::
 ----
 ======
 
-
-You can use the xref:web/webmvc/mvc-config/message-converters.adoc[Message Converters] option of the xref:web/webmvc/mvc-config.adoc[MVC Config] to
-configure or customize message conversion.
+You can use the
+xref:web/webmvc/mvc-config/message-converters.adoc[Message Converters] option of the xref:web/webmvc/mvc-config.adoc[MVC Config]
+to configure or customize message conversion.
 
 NOTE: Form data should be read using xref:web/webmvc/mvc-controller/ann-methods/requestparam.adoc[`@RequestParam`],
 not with `@RequestBody` which can't always be used reliably since in the Servlet API, request parameter
@@ -71,4 +71,3 @@ Kotlin::
 If method validation applies because other parameters have `@Constraint` annotations,
 then `HandlerMethodValidationException` is raised instead. For more details, see the
 section on xref:web/webmvc/mvc-controller/ann-validation.adoc[Validation].
-

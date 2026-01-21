@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,6 +57,7 @@ import org.springframework.expression.spel.ast.Ternary;
 import org.springframework.expression.spel.standard.SpelCompiler;
 import org.springframework.expression.spel.standard.SpelExpression;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
+import org.springframework.expression.spel.support.MapAccessor;
 import org.springframework.expression.spel.support.ReflectiveIndexAccessor;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.expression.spel.testdata.PersonInOtherPackage;
@@ -618,9 +619,9 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		}
 
 		@Test  // gh-32356
-		void indexIntoMapOfPrimitiveIntArrayWithCompilableMapAccessor() {
+		void indexIntoMapOfPrimitiveIntArrayWithMapAccessor() {
 			StandardEvaluationContext context = new StandardEvaluationContext();
-			context.addPropertyAccessor(new CompilableMapAccessor());
+			context.addPropertyAccessor(new MapAccessor());
 
 			Map<String, int[]> map = Map.of("foo", new int[] { 1, 2, 3 });
 
@@ -635,21 +636,21 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 			assertThat(stringify(expression.getValue(context, map))).isEqualTo("1 2 3");
 			assertThat(getAst().getExitDescriptor()).isEqualTo("Ljava/lang/Object");
 
-			// custom CompilableMapAccessor via implicit #root & array index
+			// custom MapAccessor via implicit #root & array index
 			expression = parser.parseExpression("foo[1]");
 
 			assertThat(expression.getValue(context, map)).isEqualTo(2);
 			assertCanCompile(expression);
 			assertThat(expression.getValue(context, map)).isEqualTo(2);
 
-			// custom CompilableMapAccessor via explicit #root & array index
+			// custom MapAccessor via explicit #root & array index
 			expression = parser.parseExpression("#root.foo[1]");
 
 			assertThat(expression.getValue(context, map)).isEqualTo(2);
 			assertCanCompile(expression);
 			assertThat(expression.getValue(context, map)).isEqualTo(2);
 
-			// custom CompilableMapAccessor via explicit #this & array index
+			// custom MapAccessor via explicit #this & array index
 			expression = parser.parseExpression("#this.foo[1]");
 
 			assertThat(expression.getValue(context, map)).isEqualTo(2);

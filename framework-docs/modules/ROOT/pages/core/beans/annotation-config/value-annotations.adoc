@@ -9,15 +9,15 @@ Java::
 +
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
-    @Component
-    public class MovieRecommender {
+	@Component
+	public class MovieRecommender {
 
-        private final String catalog;
+		private final String catalog;
 
-        public MovieRecommender(@Value("${catalog.name}") String catalog) {
-            this.catalog = catalog;
-        }
-    }
+		public MovieRecommender(@Value("${catalog.name}") String catalog) {
+			this.catalog = catalog;
+		}
+	}
 ----
 
 Kotlin::
@@ -37,9 +37,9 @@ Java::
 +
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
-    @Configuration
-    @PropertySource("classpath:application.properties")
-    public class AppConfig { }
+	@Configuration
+	@PropertySource("classpath:application.properties")
+	public class AppConfig { }
 ----
 
 Kotlin::
@@ -56,7 +56,7 @@ And the following `application.properties` file:
 
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
-    catalog.name=MovieCatalog
+	catalog.name=MovieCatalog
 ----
 
 In that case, the `catalog` parameter and field will be equal to the `MovieCatalog` value.
@@ -101,8 +101,11 @@ NOTE: When configuring a `PropertySourcesPlaceholderConfigurer` using JavaConfig
 
 Using the above configuration ensures Spring initialization failure if any `${}`
 placeholder could not be resolved. It is also possible to use methods like
-`setPlaceholderPrefix`, `setPlaceholderSuffix`, `setValueSeparator`, or
-`setEscapeCharacter` to customize placeholders.
+`setPlaceholderPrefix()`, `setPlaceholderSuffix()`, `setValueSeparator()`, or
+`setEscapeCharacter()` to customize the placeholder syntax. In addition, the default
+escape character can be changed or disabled globally by setting the
+`spring.placeholder.escapeCharacter.default` property via a JVM system property (or via
+the xref:appendix.adoc#appendix-spring-properties[`SpringProperties`] mechanism).
 
 NOTE: Spring Boot configures by default a `PropertySourcesPlaceholderConfigurer` bean that
 will get properties from `application.properties` and `application.yml` files.
@@ -119,15 +122,15 @@ Java::
 +
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
-    @Component
-    public class MovieRecommender {
+	@Component
+	public class MovieRecommender {
 
-        private final String catalog;
+		private final String catalog;
 
-        public MovieRecommender(@Value("${catalog.name:defaultCatalog}") String catalog) {
-            this.catalog = catalog;
-        }
-    }
+		public MovieRecommender(@Value("${catalog.name:defaultCatalog}") String catalog) {
+			this.catalog = catalog;
+		}
+	}
 ----
 
 Kotlin::
@@ -150,16 +153,16 @@ Java::
 +
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
-    @Configuration
-    public class AppConfig {
+	@Configuration
+	public class AppConfig {
 
-        @Bean
-        public ConversionService conversionService() {
-            DefaultFormattingConversionService conversionService = new DefaultFormattingConversionService();
-            conversionService.addConverter(new MyCustomConverter());
-            return conversionService;
-        }
-    }
+		@Bean
+		public ConversionService conversionService() {
+			DefaultFormattingConversionService conversionService = new DefaultFormattingConversionService();
+			conversionService.addConverter(new MyCustomConverter());
+			return conversionService;
+		}
+	}
 ----
 
 Kotlin::
@@ -188,15 +191,15 @@ Java::
 +
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
-    @Component
-    public class MovieRecommender {
+	@Component
+	public class MovieRecommender {
 
-        private final String catalog;
+		private final String catalog;
 
-        public MovieRecommender(@Value("#{systemProperties['user.catalog'] + 'Catalog' }") String catalog) {
-            this.catalog = catalog;
-        }
-    }
+		public MovieRecommender(@Value("#{systemProperties['user.catalog'] + 'Catalog' }") String catalog) {
+			this.catalog = catalog;
+		}
+	}
 ----
 
 Kotlin::
@@ -217,16 +220,16 @@ Java::
 +
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
-    @Component
-    public class MovieRecommender {
+	@Component
+	public class MovieRecommender {
 
-        private final Map<String, Integer> countOfMoviesPerCatalog;
+		private final Map<String, Integer> countOfMoviesPerCatalog;
 
-        public MovieRecommender(
-                @Value("#{{'Thriller': 100, 'Comedy': 300}}") Map<String, Integer> countOfMoviesPerCatalog) {
-            this.countOfMoviesPerCatalog = countOfMoviesPerCatalog;
-        }
-    }
+		public MovieRecommender(
+				@Value("#{{'Thriller': 100, 'Comedy': 300}}") Map<String, Integer> countOfMoviesPerCatalog) {
+			this.countOfMoviesPerCatalog = countOfMoviesPerCatalog;
+		}
+	}
 ----
 
 Kotlin::
@@ -238,5 +241,3 @@ Kotlin::
 		@Value("#{{'Thriller': 100, 'Comedy': 300}}") private val countOfMoviesPerCatalog: Map<String, Int>)
 ----
 ======
-
-

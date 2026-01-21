@@ -45,12 +45,11 @@ for such a purpose, make sure to construct it with an on-demand `InputStreamSour
 (for example, through a lambda expression that retrieves the actual `InputStream`).
 
 You can use `@ResponseBody` with reactive types.
-See xref:web/webmvc/mvc-ann-async.adoc[Asynchronous Requests] and xref:web/webmvc/mvc-ann-async.adoc#mvc-ann-async-reactive-types[Reactive Types] for more details.
+See xref:web/webmvc/mvc-ann-async.adoc[Asynchronous Requests] and
+xref:web/webmvc/mvc-ann-async.adoc#mvc-ann-async-reactive-types[Reactive Types] for more details.
 
-You can use the xref:web/webmvc/mvc-config/message-converters.adoc[Message Converters] option of the xref:web/webmvc/mvc-config.adoc[MVC Config] to
-configure or customize message conversion.
+You can use the xref:web/webmvc/mvc-config/message-converters.adoc[Message Converters] option
+of the xref:web/webmvc/mvc-config.adoc[MVC Config] to configure or customize message conversion.
 
 You can combine `@ResponseBody` methods with JSON serialization views.
 See xref:web/webmvc/mvc-controller/ann-methods/jackson.adoc[Jackson JSON] for details.
-
-

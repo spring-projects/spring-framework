@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,8 +54,6 @@ import org.springframework.validation.SmartValidator;
  * <p>Can be used as a programmatic wrapper. Also serves as base class for
  * {@link CustomValidatorBean} and {@link LocalValidatorFactoryBean},
  * and as the primary implementation of the {@link SmartValidator} interface.
- *
- * <p>This adapter is fully compatible with Bean Validation 1.1 as well as 2.0.
  *
  * @author Juergen Hoeller
  * @author Sam Brannen

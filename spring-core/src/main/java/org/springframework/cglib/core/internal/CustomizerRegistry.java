@@ -22,7 +22,7 @@ public class CustomizerRegistry {
         Class<? extends KeyFactoryCustomizer> klass = customizer.getClass();
         for (Class type : customizerTypes) {
             if (type.isAssignableFrom(klass)) {
-                List<KeyFactoryCustomizer> list = customizers.computeIfAbsent(type, k -> new ArrayList<>());
+                List<KeyFactoryCustomizer> list = customizers.computeIfAbsent(type, key -> new ArrayList<>());
                 list.add(customizer);
             }
         }

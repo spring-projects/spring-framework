@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,9 +58,9 @@ public class StandardAnnotationMetadata extends StandardClassMetadata implements
 	 * Create a new {@code StandardAnnotationMetadata} wrapper for the given Class.
 	 * @param introspectedClass the Class to introspect
 	 * @see #StandardAnnotationMetadata(Class, boolean)
-	 * @deprecated since 5.2 in favor of the factory method {@link AnnotationMetadata#introspect(Class)}
+	 * @deprecated in favor of the factory method {@link AnnotationMetadata#introspect(Class)}
 	 */
-	@Deprecated
+	@Deprecated(since = "5.2")
 	public StandardAnnotationMetadata(Class<?> introspectedClass) {
 		this(introspectedClass, false);
 	}
@@ -75,12 +75,12 @@ public class StandardAnnotationMetadata extends StandardClassMetadata implements
 	 * {@link org.springframework.core.annotation.AnnotationAttributes} for compatibility
 	 * with ASM-based {@link AnnotationMetadata} implementations
 	 * @since 3.1.1
-	 * @deprecated since 5.2 in favor of the factory method {@link AnnotationMetadata#introspect(Class)}.
+	 * @deprecated in favor of the factory method {@link AnnotationMetadata#introspect(Class)}.
 	 * Use {@link MergedAnnotation#asMap(org.springframework.core.annotation.MergedAnnotation.Adapt...) MergedAnnotation.asMap}
 	 * from {@link #getAnnotations()} rather than {@link #getAnnotationAttributes(String)}
 	 * if {@code nestedAnnotationsAsMap} is {@code false}
 	 */
-	@Deprecated
+	@Deprecated(since = "5.2")
 	public StandardAnnotationMetadata(Class<?> introspectedClass, boolean nestedAnnotationsAsMap) {
 		super(introspectedClass);
 		this.mergedAnnotations = MergedAnnotations.from(introspectedClass,

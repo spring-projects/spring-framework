@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,8 +18,6 @@ package org.springframework.lang;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
@@ -53,7 +51,8 @@ import java.lang.annotation.Target;
  * <p>The additional return values denote the following:
  * <ul>
  * <li>{@code fail} - the method throws an exception, if the arguments satisfy argument constraints
- * <li>{@code new} - the method returns a non-null new object which is distinct from any other object existing in the heap prior to method execution. If method is also pure, then we can be sure that the new object is not stored to any field/array and will be lost if method return value is not used.
+ * <li>{@code new} - the method returns a non-null new object which is distinct from any other object existing in the heap prior to method execution.
+ * If the method has no visible side effects, then we can be sure that the new object is not stored to any field/array and will be lost if the method's return value is not used.
  * <li>{@code this} - the method returns its qualifier value (not applicable for static methods)
  * <li>{@code param1, param2, ...} - the method returns its first (second, ...) parameter value
  * </ul>
@@ -77,13 +76,12 @@ import java.lang.annotation.Target;
  * NullAway custom contract annotations</a>
  */
 @Documented
-@Retention(RetentionPolicy.CLASS)
 @Target(ElementType.METHOD)
 public @interface Contract {
 
 	/**
 	 * Contains the contract clauses describing causal relations between call arguments and the returned value.
 	 */
-	String value() default "";
+	String value();
 
 }

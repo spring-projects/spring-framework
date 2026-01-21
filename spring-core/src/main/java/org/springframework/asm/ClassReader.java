@@ -193,12 +193,16 @@ public class ClassReader {
       final byte[] classFileBuffer, final int classFileOffset, final boolean checkClassVersion) {
     this.classFileBuffer = classFileBuffer;
     this.b = classFileBuffer;
+
     // Check the class' major_version. This field is after the magic and minor_version fields, which
     // use 4 and 2 bytes respectively.
-    if (checkClassVersion && readShort(classFileOffset + 6) > Opcodes.V24) {
-      throw new IllegalArgumentException(
-          "Unsupported class file major version " + readShort(classFileOffset + 6));
-    }
+    // SPRING PATCH: leniently try to parse newer class files as well
+    // if (checkClassVersion && readShort(classFileOffset + 6) > Opcodes.V26) {
+    //   throw new IllegalArgumentException(
+    //       "Unsupported class file major version " + readShort(classFileOffset + 6));
+    // }
+    // END OF PATCH
+
     // Create the constant pool arrays. The constant_pool_count field is after the magic,
     // minor_version and major_version fields, which use 4, 2 and 2 bytes respectively.
     int constantPoolCount = readUnsignedShort(classFileOffset + 8);

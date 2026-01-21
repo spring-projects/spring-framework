@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,9 +61,20 @@ public abstract class NettyWebSocketSessionSupport<T> extends AbstractWebSocketS
 		messageTypes.put(PongWebSocketFrame.class, WebSocketMessage.Type.PONG);
 	}
 
-
+	/**
+	 * Constructor that uses the hashcode of the delegate as the session id.
+	 */
 	protected NettyWebSocketSessionSupport(T delegate, HandshakeInfo info, NettyDataBufferFactory factory) {
-		super(delegate, ObjectUtils.getIdentityHexString(delegate), info, factory);
+		this(delegate, ObjectUtils.getIdentityHexString(delegate), info, factory);
+	}
+
+	/**
+	 * Variant of {@link #NettyWebSocketSessionSupport(Object, HandshakeInfo, NettyDataBufferFactory)}
+	 * with a given WebSocket session id.
+	 * @since 6.2.15
+	 */
+	protected NettyWebSocketSessionSupport(T delegate, String id, HandshakeInfo info, NettyDataBufferFactory factory) {
+		super(delegate, id, info, factory);
 	}
 
 

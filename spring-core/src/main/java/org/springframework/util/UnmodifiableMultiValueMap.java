@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -141,26 +141,32 @@ final class UnmodifiableMultiValueMap<K,V> implements MultiValueMap<K,V>, Serial
 
 	@Override
 	public Set<K> keySet() {
-		if (this.keySet == null) {
-			this.keySet = Collections.unmodifiableSet(this.delegate.keySet());
+		Set<K> keySet = this.keySet;
+		if (keySet == null) {
+			keySet = Collections.unmodifiableSet(this.delegate.keySet());
+			this.keySet = keySet;
 		}
-		return this.keySet;
+		return keySet;
 	}
 
 	@Override
 	public Set<Entry<K, List<V>>> entrySet() {
-		if (this.entrySet == null) {
-			this.entrySet = new UnmodifiableEntrySet<>(this.delegate.entrySet());
+		Set<Entry<K, List<V>>> entrySet = this.entrySet;
+		if (entrySet == null) {
+			entrySet = new UnmodifiableEntrySet<>(this.delegate.entrySet());
+			this.entrySet = entrySet;
 		}
-		return this.entrySet;
+		return entrySet;
 	}
 
 	@Override
 	public Collection<List<V>> values() {
-		if (this.values == null) {
-			this.values = new UnmodifiableValueCollection<>(this.delegate.values());
+		Collection<List<V>> values = this.values;
+		if (values == null) {
+			values = new UnmodifiableValueCollection<>(this.delegate.values());
+			this.values = values;
 		}
-		return this.values;
+		return values;
 	}
 
 	// unsupported

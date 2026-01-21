@@ -2,16 +2,17 @@
 = Method Injection
 
 In most application scenarios, most beans in the container are
-xref:core/beans/factory-scopes.adoc#beans-factory-scopes-singleton[singletons]. When a singleton bean needs to
-collaborate with another singleton bean or a non-singleton bean needs to collaborate
-with another non-singleton bean, you typically handle the dependency by defining one
-bean as a property of the other. A problem arises when the bean lifecycles are
-different. Suppose singleton bean A needs to use non-singleton (prototype) bean B,
+xref:core/beans/factory-scopes.adoc#beans-factory-scopes-singleton[singletons]. When a
+singleton bean needs to collaborate with another singleton bean or a non-singleton bean
+needs to collaborate with another non-singleton bean, you typically handle the dependency
+by defining one bean as a property of the other. A problem arises when the bean lifecycles
+are different. Suppose singleton bean A needs to use non-singleton (prototype) bean B,
 perhaps on each method invocation on A. The container creates the singleton bean A only
 once, and thus only gets one opportunity to set the properties. The container cannot
 provide bean A with a new instance of bean B every time one is needed.
 
-A solution is to forego some inversion of control. You can xref:core/beans/factory-nature.adoc#beans-factory-aware[make bean A aware of the container]
+A solution is to forego some inversion of control. You can
+xref:core/beans/factory-nature.adoc#beans-factory-aware[make bean A aware of the container]
  by implementing the `ApplicationContextAware` interface,
 and by xref:core/beans/basics.adoc#beans-factory-client[making a `getBean("B")` call to the container] ask for (a
 typically new) bean B instance every time bean A needs it. The following example
@@ -103,7 +104,6 @@ You can read more about the motivation for Method Injection in
 ****
 
 
-
 [[beans-factory-lookup-method-injection]]
 == Lookup Method Injection
 
@@ -120,8 +120,6 @@ dynamically generate a subclass that overrides the method.
   subclasses cannot be `final`, and the method to be overridden cannot be `final`, either.
 * Unit-testing a class that has an `abstract` method requires you to subclass the class
   yourself and to supply a stub implementation of the `abstract` method.
-* Concrete methods are also necessary for component scanning, which requires concrete
-  classes to pick up.
 * A further key limitation is that lookup methods do not work with factory methods and
   in particular not with `@Bean` methods in configuration classes, since, in that case,
   the container is not in charge of creating the instance and therefore cannot create
@@ -293,20 +291,15 @@ Kotlin::
 ----
 ======
 
-Note that you should typically declare such annotated lookup methods with a concrete
-stub implementation, in order for them to be compatible with Spring's component
-scanning rules where abstract classes get ignored by default. This limitation does not
-apply to explicitly registered or explicitly imported bean classes.
-
 [TIP]
 ====
 Another way of accessing differently scoped target beans is an `ObjectFactory`/
-`Provider` injection point. See xref:core/beans/factory-scopes.adoc#beans-factory-scopes-other-injection[Scoped Beans as Dependencies].
+`Provider` injection point. See
+xref:core/beans/factory-scopes.adoc#beans-factory-scopes-other-injection[Scoped Beans as Dependencies].
 
 You may also find the `ServiceLocatorFactoryBean` (in the
 `org.springframework.beans.factory.config` package) to be useful.
 ====
-
 
 
 [[beans-factory-arbitrary-method-replacement]]
@@ -429,6 +422,3 @@ substring of the fully qualified type name. For example, the following all match
 Because the number of arguments is often enough to distinguish between each possible
 choice, this shortcut can save a lot of typing, by letting you type only the
 shortest string that matches an argument type.
-
-
-

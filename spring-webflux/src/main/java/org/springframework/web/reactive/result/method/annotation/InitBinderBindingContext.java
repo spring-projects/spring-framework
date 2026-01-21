@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -72,12 +72,12 @@ class InitBinderBindingContext extends BindingContext {
 
 
 	/**
-	 * Returns an instance of {@link ExtendedWebExchangeDataBinder}.
+	 * Returns an instance of {@link org.springframework.web.reactive.result.ExtendedWebExchangeDataBinder}.
 	 * @since 6.2.1
 	 */
 	@Override
 	protected WebExchangeDataBinder createBinderInstance(@Nullable Object target, String name) {
-		return new ExtendedWebExchangeDataBinder(target, name);
+		return new org.springframework.web.reactive.result.ExtendedWebExchangeDataBinder(target, name);
 	}
 
 	@Override

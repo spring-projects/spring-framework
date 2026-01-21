@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -426,10 +426,6 @@ class ValidatorFactoryTests {
 		private Environment environment;
 
 		@Override
-		public void initialize(NameAddressValid constraintAnnotation) {
-		}
-
-		@Override
 		public boolean isValid(ValidPerson value, ConstraintValidatorContext context) {
 			if (value.expectsAutowiredValidator) {
 				assertThat(this.environment).isNotNull();
@@ -496,10 +492,6 @@ class ValidatorFactoryTests {
 	public static class InnerValidator implements ConstraintValidator<InnerValid, InnerBean> {
 
 		@Override
-		public void initialize(InnerValid constraintAnnotation) {
-		}
-
-		@Override
 		public boolean isValid(InnerBean bean, ConstraintValidatorContext context) {
 			context.disableDefaultConstraintViolation();
 			if (bean.getValue() == null) {
@@ -541,10 +533,6 @@ class ValidatorFactoryTests {
 
 
 	public static class NotXListValidator implements ConstraintValidator<NotXList, List<String>> {
-
-		@Override
-		public void initialize(NotXList constraintAnnotation) {
-		}
 
 		@Override
 		public boolean isValid(List<String> list, ConstraintValidatorContext context) {

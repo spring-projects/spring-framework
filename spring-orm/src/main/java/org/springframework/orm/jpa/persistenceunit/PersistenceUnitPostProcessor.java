@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,11 @@
 package org.springframework.orm.jpa.persistenceunit;
 
 /**
- * Callback interface for post-processing a JPA PersistenceUnitInfo.
- * Implementations can be registered with a DefaultPersistenceUnitManager
- * or via a LocalContainerEntityManagerFactoryBean.
+ * Callback interface for post-processing a {@link MutablePersistenceUnitInfo}
+ * configuration that Spring prepares for JPA persistence unit bootstrapping.
+ *
+ * <p>Implementations can be registered with a {@link DefaultPersistenceUnitManager}
+ * or via a {@link org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean}.
  *
  * @author Juergen Hoeller
  * @since 2.0
@@ -29,10 +31,10 @@ package org.springframework.orm.jpa.persistenceunit;
 public interface PersistenceUnitPostProcessor {
 
 	/**
-	 * Post-process the given PersistenceUnitInfo, for example registering
-	 * further entity classes and jar files.
-	 * @param pui the chosen PersistenceUnitInfo, as read from {@code persistence.xml}.
-	 * Passed in as MutablePersistenceUnitInfo.
+	 * Post-process the given {@link MutablePersistenceUnitInfo},
+	 * for example registering further entity classes and jar files.
+	 * @param pui the chosen persistence unit configuration, as read from
+	 * {@code persistence.xml}. Passed in as MutablePersistenceUnitInfo.
 	 */
 	void postProcessPersistenceUnitInfo(MutablePersistenceUnitInfo pui);
 

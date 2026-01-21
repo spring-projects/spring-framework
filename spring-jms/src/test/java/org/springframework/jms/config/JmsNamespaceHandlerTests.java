@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -293,10 +293,10 @@ class JmsNamespaceHandlerTests {
 		assertThat(context.containsComponentDefinition("listener1")).as("Parser should have registered a component named 'listener1'").isTrue();
 		assertThat(context.containsComponentDefinition("listener2")).as("Parser should have registered a component named 'listener2'").isTrue();
 		assertThat(context.containsComponentDefinition("listener3")).as("Parser should have registered a component named 'listener3'").isTrue();
-		assertThat(context.containsComponentDefinition(DefaultMessageListenerContainer.class.getName() + "#0")).as("Parser should have registered a component named '"
-				+ DefaultMessageListenerContainer.class.getName() + "#0'").isTrue();
-		assertThat(context.containsComponentDefinition(JmsMessageEndpointManager.class.getName() + "#0")).as("Parser should have registered a component named '"
-				+ JmsMessageEndpointManager.class.getName() + "#0'").isTrue();
+		assertThat(context.containsComponentDefinition(DefaultMessageListenerContainer.class.getName() + "#0")).as("Parser should have registered a component named '" +
+				DefaultMessageListenerContainer.class.getName() + "#0'").isTrue();
+		assertThat(context.containsComponentDefinition(JmsMessageEndpointManager.class.getName() + "#0")).as("Parser should have registered a component named '" +
+				JmsMessageEndpointManager.class.getName() + "#0'").isTrue();
 		assertThat(context.containsComponentDefinition("testJmsFactory")).as("Parser should have registered a component named 'testJmsFactory").isTrue();
 		assertThat(context.containsComponentDefinition("testJcaFactory")).as("Parser should have registered a component named 'testJcaFactory").isTrue();
 		assertThat(context.containsComponentDefinition("onlyJmsFactory")).as("Parser should have registered a component named 'testJcaFactory").isTrue();

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.core.codec;
 
 import java.util.Map;
+import java.util.Objects;
 
 import org.jspecify.annotations.Nullable;
 import org.reactivestreams.Publisher;
@@ -84,23 +85,24 @@ public abstract class AbstractDataBufferDecoder<T> extends AbstractDecoder<T> {
 	public Flux<T> decode(Publisher<DataBuffer> input, ResolvableType elementType,
 			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
-		return Flux.from(input).map(buffer -> decodeDataBuffer(buffer, elementType, mimeType, hints));
+		return Flux.from(input).map(buffer ->
+				Objects.requireNonNull(decodeDataBuffer(buffer, elementType, mimeType, hints)));
 	}
 
 	@Override
 	public Mono<T> decodeToMono(Publisher<DataBuffer> input, ResolvableType elementType,
 			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
-		return DataBufferUtils.join(input, this.maxInMemorySize)
-				.map(buffer -> decodeDataBuffer(buffer, elementType, mimeType, hints));
+		return DataBufferUtils.join(input, this.maxInMemorySize).map(buffer ->
+				Objects.requireNonNull(decodeDataBuffer(buffer, elementType, mimeType, hints)));
 	}
 
 	/**
 	 * How to decode a {@code DataBuffer} to the target element type.
-	 * @deprecated as of 5.2, please implement
+	 * @deprecated in favor of implementing
 	 * {@link #decode(DataBuffer, ResolvableType, MimeType, Map)} instead
 	 */
-	@Deprecated
+	@Deprecated(since = "5.2")
 	protected @Nullable T decodeDataBuffer(DataBuffer buffer, ResolvableType elementType,
 			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 

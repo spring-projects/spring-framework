@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ import org.springframework.transaction.TransactionStatus;
  * @see CallbackPreferringPlatformTransactionManager
  */
 @FunctionalInterface
-public interface TransactionCallback<T> {
+public interface TransactionCallback<T extends @Nullable Object> {
 
 	/**
 	 * Gets called by {@link TransactionTemplate#execute} within a transactional context.
@@ -53,6 +53,6 @@ public interface TransactionCallback<T> {
 	 * @see TransactionTemplate#execute
 	 * @see CallbackPreferringPlatformTransactionManager#execute
 	 */
-	@Nullable T doInTransaction(TransactionStatus status);
+	T doInTransaction(TransactionStatus status);
 
 }

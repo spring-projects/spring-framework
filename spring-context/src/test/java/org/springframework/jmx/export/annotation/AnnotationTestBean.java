@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,10 +25,11 @@ import org.springframework.stereotype.Service;
  * @author Juergen Hoeller
  */
 @Service("testBean")
-@ManagedResource(objectName = "bean:name=testBean4", description = "My Managed Bean", log = true,
+@ManagedResource(value = "bean:name=testBean4", description = "My Managed Bean", log = true,
 		logFile = "build/jmx.log", currencyTimeLimit = 15, persistPolicy = "OnUpdate", persistPeriod = 200,
 		persistLocation = "./foo", persistName = "bar.jmx")
-@ManagedNotification(name = "My Notification", notificationTypes = { "type.foo", "type.bar" })
+@ManagedNotification(name = "My Notification 1", notificationTypes = { "type.foo", "type.bar" })
+@ManagedNotification(name = "My Notification 2", notificationTypes = "type.enigma")
 public class AnnotationTestBean implements ITestBean {
 
 	private String name;

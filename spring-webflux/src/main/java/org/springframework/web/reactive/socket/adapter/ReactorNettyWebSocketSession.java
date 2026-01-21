@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,14 +64,18 @@ public class ReactorNettyWebSocketSession
 	 * Constructor with an additional maxFramePayloadLength argument.
 	 * @since 5.1
 	 */
-	@SuppressWarnings("rawtypes")
 	public ReactorNettyWebSocketSession(WebsocketInbound inbound, WebsocketOutbound outbound,
 			HandshakeInfo info, NettyDataBufferFactory bufferFactory,
 			int maxFramePayloadLength) {
 
-		super(new WebSocketConnection(inbound, outbound), info, bufferFactory);
+		super(new WebSocketConnection(inbound, outbound), getChannelId(inbound).asLongText(), info, bufferFactory);
 		this.maxFramePayloadLength = maxFramePayloadLength;
-		this.channelId = ((ChannelOperations) inbound).channel().id();
+		this.channelId = getChannelId(inbound);
+	}
+
+	@SuppressWarnings("rawtypes")
+	private static ChannelId getChannelId(WebsocketInbound inbound) {
+		return ((ChannelOperations) inbound).channel().id();
 	}
 
 

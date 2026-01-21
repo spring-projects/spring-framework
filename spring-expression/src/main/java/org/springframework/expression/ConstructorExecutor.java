@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,8 @@
  */
 
 package org.springframework.expression;
+
+import org.jspecify.annotations.Nullable;
 
 /**
  * A {@code ConstructorExecutor} is built by a {@link ConstructorResolver} and
@@ -49,6 +51,6 @@ public interface ConstructorExecutor {
 	 * @throws AccessException if there is a problem executing the constructor or
 	 * if this {@code ConstructorExecutor} has become stale
 	 */
-	TypedValue execute(EvaluationContext context, Object... arguments) throws AccessException;
+	TypedValue execute(EvaluationContext context, @Nullable Object... arguments) throws AccessException;
 
 }

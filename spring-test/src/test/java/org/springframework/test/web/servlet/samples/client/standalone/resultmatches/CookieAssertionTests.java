@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.test.web.servlet.samples.client.standalone.resultmat
 
 import java.time.Duration;
 
+import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -75,12 +76,14 @@ public class CookieAssertionTests {
 	@Test
 	public void testEqualTo() {
 		client.get().uri("/").exchange().expectCookie().valueEquals(COOKIE_NAME, "en-US");
-		client.get().uri("/").exchange().expectCookie().value(COOKIE_NAME, equalTo("en-US"));
+		client.get().uri("/").exchange().expectCookie()
+				.value(COOKIE_NAME, v -> MatcherAssert.assertThat(v, equalTo("en-US")));
 	}
 
 	@Test
 	public void testMatcher() {
-		client.get().uri("/").exchange().expectCookie().value(COOKIE_NAME, startsWith("en-US"));
+		client.get().uri("/").exchange().expectCookie()
+				.value(COOKIE_NAME, v -> MatcherAssert.assertThat(v, startsWith("en-US")));
 	}
 
 	@Test

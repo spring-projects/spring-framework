@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.web.client;
 
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PushbackInputStream;
@@ -34,7 +35,6 @@ import org.springframework.http.client.ClientHttpResponse;
  * @author Brian Clozel
  * @author Rossen Stoyanchev
  * @since 4.1.5
- * @see <a href="https://tools.ietf.org/html/rfc7230#section-3.3.3">RFC 7230 Section 3.3.3</a>
  */
 class IntrospectingClientHttpResponse extends ClientHttpResponseDecorator {
 
@@ -47,14 +47,18 @@ class IntrospectingClientHttpResponse extends ClientHttpResponseDecorator {
 
 
 	/**
-	 * Indicates whether the response has a message body.
+	 * Indicates whether the response might have a message body.
 	 * <p>Implementation returns {@code false} for:
 	 * <ul>
 	 * <li>a response status of {@code 1XX}, {@code 204} or {@code 304}</li>
 	 * <li>a {@code Content-Length} header of {@code 0}</li>
 	 * </ul>
-	 * @return {@code true} if the response has a message body, {@code false} otherwise
+	 * <p>In other cases, the server could use a {@code Transfer-Encoding} header or just
+	 * write the body and close the response. Reading the message body is then the only way
+	 * to check for the presence of a body.
+	 * @return {@code true} if the response might have a message body, {@code false} otherwise
 	 * @throws IOException in case of I/O errors
+	 * @see <a href="https://tools.ietf.org/html/rfc7230#section-3.3.3">RFC 7230 Section 3.3.3</a>
 	 */
 	public boolean hasMessageBody() throws IOException {
 		HttpStatusCode statusCode = getStatusCode();
@@ -62,10 +66,7 @@ class IntrospectingClientHttpResponse extends ClientHttpResponseDecorator {
 				statusCode == HttpStatus.NOT_MODIFIED) {
 			return false;
 		}
-		if (getHeaders().getContentLength() == 0) {
-			return false;
-		}
-		return true;
+		return getHeaders().getContentLength() != 0;
 	}
 
 	/**
@@ -73,6 +74,7 @@ class IntrospectingClientHttpResponse extends ClientHttpResponseDecorator {
 	 * <p>Implementation tries to read the first bytes of the response stream:
 	 * <ul>
 	 * <li>if no bytes are available, the message body is empty</li>
+	 * <li>if an {@link EOFException} is thrown, the body is considered empty</li>
 	 * <li>otherwise it is not empty and the stream is reset to its start for further reading</li>
 	 * </ul>
 	 * @return {@code true} if the response has a zero-length message body, {@code false} otherwise
@@ -85,26 +87,31 @@ class IntrospectingClientHttpResponse extends ClientHttpResponseDecorator {
 		if (body == null) {
 			return true;
 		}
-		if (body.markSupported()) {
-			body.mark(1);
-			if (body.read() == -1) {
-				return true;
+		try {
+			if (body.markSupported()) {
+				body.mark(1);
+				if (body.read() == -1) {
+					return true;
+				}
+				else {
+					body.reset();
+					return false;
+				}
 			}
 			else {
-				body.reset();
-				return false;
+				this.pushbackInputStream = new PushbackInputStream(body);
+				int b = this.pushbackInputStream.read();
+				if (b == -1) {
+					return true;
+				}
+				else {
+					this.pushbackInputStream.unread(b);
+					return false;
+				}
 			}
 		}
-		else {
-			this.pushbackInputStream = new PushbackInputStream(body);
-			int b = this.pushbackInputStream.read();
-			if (b == -1) {
-				return true;
-			}
-			else {
-				this.pushbackInputStream.unread(b);
-				return false;
-			}
+		catch (EOFException exc) {
+			return true;
 		}
 	}
 

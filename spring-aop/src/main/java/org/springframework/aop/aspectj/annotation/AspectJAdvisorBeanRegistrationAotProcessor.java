@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,13 +39,13 @@ class AspectJAdvisorBeanRegistrationAotProcessor implements BeanRegistrationAotP
 
 	private static final String AJC_MAGIC = "ajc$";
 
-	private static final boolean aspectjPresent = ClassUtils.isPresent("org.aspectj.lang.annotation.Pointcut",
+	private static final boolean ASPECTJ_PRESENT = ClassUtils.isPresent("org.aspectj.lang.annotation.Pointcut",
 			AspectJAdvisorBeanRegistrationAotProcessor.class.getClassLoader());
 
 
 	@Override
 	public @Nullable BeanRegistrationAotContribution processAheadOfTime(RegisteredBean registeredBean) {
-		if (aspectjPresent) {
+		if (ASPECTJ_PRESENT) {
 			Class<?> beanClass = registeredBean.getBeanClass();
 			if (compiledByAjc(beanClass)) {
 				return new AspectJAdvisorContribution(beanClass);

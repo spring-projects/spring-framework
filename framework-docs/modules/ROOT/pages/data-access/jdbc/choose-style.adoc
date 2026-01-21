@@ -22,6 +22,3 @@ and match to include a feature from a different approach.
   data-access layer. This approach allows you to define your query string, declare
   parameters, and compile the query. Once you do that, `execute(...)`, `update(...)`, and
   `findObject(...)` methods can be called multiple times with various parameter values.
-
-
-

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -86,7 +86,8 @@ public class StandardJmsActivationSpecFactory implements JmsActivationSpecFactor
 	 * able to work <i>without</i> an active JMS Session: for example,
 	 * {@link org.springframework.jms.support.destination.JndiDestinationResolver}
 	 * or {@link org.springframework.jms.support.destination.BeanFactoryDestinationResolver}
-	 * but not {@link org.springframework.jms.support.destination.DynamicDestinationResolver}.
+	 * but not {@link org.springframework.jms.support.destination.SimpleDestinationResolver}
+	 * or {@link org.springframework.jms.support.destination.DynamicDestinationResolver}.
 	 */
 	public void setDestinationResolver(@Nullable DestinationResolver destinationResolver) {
 		this.destinationResolver = destinationResolver;

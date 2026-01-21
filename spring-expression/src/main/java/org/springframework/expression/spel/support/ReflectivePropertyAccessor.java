@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -74,6 +74,9 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 	private static final Set<Class<?>> ANY_TYPES = Collections.emptySet();
 
 	private static final Set<Class<?>> BOOLEAN_TYPES = Set.of(Boolean.class, boolean.class);
+
+	private static final boolean KOTLIN_REFLECT_PRESENT = KotlinDetector.isKotlinReflectPresent();
+
 
 	private final boolean allowWrite;
 
@@ -558,7 +561,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 
 	private static boolean isKotlinProperty(Method method, String methodSuffix) {
 		Class<?> clazz = method.getDeclaringClass();
-		return KotlinDetector.isKotlinType(clazz) &&
+		return KOTLIN_REFLECT_PRESENT && KotlinDetector.isKotlinType(clazz) &&
 				KotlinDelegate.isKotlinProperty(method, methodSuffix);
 	}
 
@@ -624,11 +627,12 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 			}
 
 			if (this.member instanceof Method method) {
-				String getterName = "get" + StringUtils.capitalize(name);
+				String capitalizedName = StringUtils.capitalize(name);
+				String getterName = "get" + capitalizedName;
 				if (getterName.equals(method.getName())) {
 					return true;
 				}
-				getterName = "is" + StringUtils.capitalize(name);
+				getterName = "is" + capitalizedName;
 				if (getterName.equals(method.getName())) {
 					return true;
 				}

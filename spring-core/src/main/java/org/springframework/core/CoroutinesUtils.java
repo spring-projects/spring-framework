@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.core;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Map;
+import java.util.Objects;
 
 import kotlin.Unit;
 import kotlin.coroutines.CoroutineContext;
@@ -44,6 +45,7 @@ import kotlinx.coroutines.reactor.ReactorFlowKt;
 import org.jspecify.annotations.Nullable;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Hooks;
 import reactor.core.publisher.Mono;
 
 import org.springframework.util.Assert;
@@ -84,7 +86,9 @@ public abstract class CoroutinesUtils {
 
 	/**
 	 * Invoke a suspending function and convert it to {@link Mono} or {@link Flux}.
-	 * Uses an {@linkplain Dispatchers#getUnconfined() unconfined} dispatcher.
+	 * Uses an {@linkplain Dispatchers#getUnconfined() unconfined} dispatcher, augmented with
+	 * {@link PropagationContextElement} if
+	 * {@linkplain Hooks#isAutomaticContextPropagationEnabled() Reactor automatic context propagation} is enabled.
 	 * @param method the suspending function to invoke
 	 * @param target the target to invoke {@code method} on
 	 * @param args the function arguments. If the {@code Continuation} argument is specified as the last argument
@@ -93,7 +97,9 @@ public abstract class CoroutinesUtils {
 	 * @throws IllegalArgumentException if {@code method} is not a suspending function
 	 */
 	public static Publisher<?> invokeSuspendingFunction(Method method, Object target, @Nullable Object... args) {
-		return invokeSuspendingFunction(Dispatchers.getUnconfined(), method, target, args);
+		CoroutineContext context = Hooks.isAutomaticContextPropagationEnabled() ?
+				Dispatchers.getUnconfined().plus(new PropagationContextElement()) : Dispatchers.getUnconfined();
+		return invokeSuspendingFunction(context, method, target, args);
 	}
 
 	/**
@@ -131,11 +137,7 @@ public abstract class CoroutinesUtils {
 									if (!(type.isMarkedNullable() && arg == null) &&
 											type.getClassifier() instanceof KClass<?> kClass &&
 											KotlinDetector.isInlineClass(JvmClassMappingKt.getJavaClass(kClass))) {
-										KFunction<?> constructor = KClasses.getPrimaryConstructor(kClass);
-										if (!KCallablesJvm.isAccessible(constructor)) {
-											KCallablesJvm.setAccessible(constructor, true);
-										}
-										arg = constructor.call(arg);
+										arg = box(kClass, arg);
 									}
 									argMap.put(parameter, arg);
 								}
@@ -159,6 +161,20 @@ public abstract class CoroutinesUtils {
 			return mono.flatMapMany(o -> ((Publisher<?>)o));
 		}
 		return mono;
+	}
+
+	private static Object box(KClass<?> kClass, @Nullable Object arg) {
+		KFunction<?> constructor = Objects.requireNonNull(KClasses.getPrimaryConstructor(kClass));
+		KType type = constructor.getParameters().get(0).getType();
+		if (!(type.isMarkedNullable() && arg == null) &&
+				type.getClassifier() instanceof KClass<?> parameterClass &&
+				KotlinDetector.isInlineClass(JvmClassMappingKt.getJavaClass(parameterClass))) {
+			arg = box(parameterClass, arg);
+		}
+		if (!KCallablesJvm.isAccessible(constructor)) {
+			KCallablesJvm.setAccessible(constructor, true);
+		}
+		return constructor.call(arg);
 	}
 
 	private static Flux<?> asFlux(Object flow) {

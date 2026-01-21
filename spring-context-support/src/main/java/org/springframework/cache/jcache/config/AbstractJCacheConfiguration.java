@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2025 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,11 +41,12 @@ import org.springframework.context.annotation.Role;
 @Configuration(proxyBeanMethods = false)
 public abstract class AbstractJCacheConfiguration extends AbstractCachingConfiguration {
 
-	protected @Nullable Supplier<? extends @Nullable CacheResolver> exceptionCacheResolver;
+	@SuppressWarnings("NullAway.Init")
+	protected Supplier<@Nullable CacheResolver> exceptionCacheResolver;
 
 
 	@Override
-	@SuppressWarnings("NullAway") // https://github.com/uber/NullAway/issues/1126
+	@SuppressWarnings("NullAway") // See https://github.com/uber/NullAway/issues/1290
 	protected void useCachingConfigurer(CachingConfigurerSupplier cachingConfigurerSupplier) {
 		super.useCachingConfigurer(cachingConfigurerSupplier);
 		this.exceptionCacheResolver = cachingConfigurerSupplier.adapt(config -> {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ public interface MethodReplacer {
 	 * @param obj the instance we're reimplementing the method for
 	 * @param method the method to reimplement
 	 * @param args arguments to the method
-	 * @return return value for the method
+	 * @return the return value for the method
 	 */
 	Object reimplement(Object obj, Method method, Object[] args) throws Throwable;
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -50,6 +51,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Juergen Hoeller
  * @author Scott Andrews
  * @author Jeremy Grelle
+ * @author Sam Brannen
  */
 @SuppressWarnings({ "rawtypes", "unchecked" })
 class OptionsTagTests extends AbstractHtmlElementTagTests {
@@ -60,6 +62,7 @@ class OptionsTagTests extends AbstractHtmlElementTagTests {
 	private OptionsTag tag;
 
 	@Override
+	@SuppressWarnings("serial")
 	protected void onSetUp() {
 		this.tag = new OptionsTag() {
 			@Override
@@ -112,6 +115,86 @@ class OptionsTagTests extends AbstractHtmlElementTagTests {
 		assertThat(element.attribute("id").getValue()).isEqualTo("myOption3");
 		assertThat(element.attribute("class").getValue()).isEqualTo("myClass");
 		assertThat(element.attribute("onclick").getValue()).isEqualTo("CLICK");
+	}
+
+	@Test  // gh-35783
+	void withListWithHtmlEscaping() throws Exception {
+		getPageContext().setAttribute(
+				SelectTag.LIST_VALUE_PAGE_ATTRIBUTE, new BindStatus(getRequestContext(), "testBean.country", false));
+
+		this.tag.setItems(List.of("café", "Jane \"I Love Cafés\" Smith"));
+		this.tag.setId("myOption");
+
+		var expectedOutput = """
+				<option id="myOption1" value="caf&eacute;">caf&eacute;</option>
+				<option id="myOption2" value="Jane &quot;I Love Caf&eacute;s&quot; Smith">Jane &quot;I Love Caf&eacute;s&quot; Smith</option>
+				""".replace("\n", "");
+
+		assertThat(this.tag.doStartTag()).isEqualTo(Tag.SKIP_BODY);
+		assertThat(getOutput()).isEqualTo(expectedOutput);
+	}
+
+	@Test  // gh-35783
+	void withListWithHtmlEscapingAndCharacterEncoding() throws Exception {
+		this.getPageContext().getResponse().setCharacterEncoding("UTF-8");
+
+		getPageContext().setAttribute(
+				SelectTag.LIST_VALUE_PAGE_ATTRIBUTE, new BindStatus(getRequestContext(), "testBean.country", false));
+
+		this.tag.setItems(List.of("café", "Jane \"I Love Cafés\" Smith"));
+		this.tag.setId("myOption");
+
+		var expectedOutput = """
+				<option id="myOption1" value="café">café</option>
+				<option id="myOption2" value="Jane &quot;I Love Cafés&quot; Smith">Jane &quot;I Love Cafés&quot; Smith</option>
+				""".replace("\n", "");
+
+		assertThat(this.tag.doStartTag()).isEqualTo(Tag.SKIP_BODY);
+		assertThat(getOutput()).isEqualTo(expectedOutput);
+	}
+
+	@Test  // gh-35783
+	void withMapWithHtmlEscaping() throws Exception {
+		getPageContext().setAttribute(
+				SelectTag.LIST_VALUE_PAGE_ATTRIBUTE, new BindStatus(getRequestContext(), "testBean.country", false));
+
+		var map = new LinkedHashMap<String, String>();
+		map.put("one", "Jane \"I Love Cafés\" Smith");
+		map.put("two", "Joe Café");
+
+		this.tag.setItems(map);
+		this.tag.setId("myOption");
+
+		var expectedOutput = """
+				<option id="myOption1" value="one">Jane &quot;I Love Caf&eacute;s&quot; Smith</option>
+				<option id="myOption2" value="two">Joe Caf&eacute;</option>
+				""".replace("\n", "");
+
+		assertThat(this.tag.doStartTag()).isEqualTo(Tag.SKIP_BODY);
+		assertThat(getOutput()).isEqualTo(expectedOutput);
+	}
+
+	@Test  // gh-35783
+	void withMapWithHtmlEscapingAndCharacterEncoding() throws Exception {
+		this.getPageContext().getResponse().setCharacterEncoding("UTF-8");
+
+		getPageContext().setAttribute(
+				SelectTag.LIST_VALUE_PAGE_ATTRIBUTE, new BindStatus(getRequestContext(), "testBean.country", false));
+
+		var map = new LinkedHashMap<String, String>();
+		map.put("one", "Jane \"I Love Cafés\" Smith");
+		map.put("two", "Joe Café");
+
+		this.tag.setItems(map);
+		this.tag.setId("myOption");
+
+		var expectedOutput = """
+				<option id="myOption1" value="one">Jane &quot;I Love Cafés&quot; Smith</option>
+				<option id="myOption2" value="two">Joe Café</option>
+				""".replace("\n", "");
+
+		assertThat(this.tag.doStartTag()).isEqualTo(Tag.SKIP_BODY);
+		assertThat(getOutput()).isEqualTo(expectedOutput);
 	}
 
 	@Test

@@ -49,6 +49,3 @@ but many other options exist and are explained later in this chapter.
 
 TIP: Guides and tutorials on {spring-site-guides}[spring.io] use the annotation-based
 programming model described in this section.
-
-
-
