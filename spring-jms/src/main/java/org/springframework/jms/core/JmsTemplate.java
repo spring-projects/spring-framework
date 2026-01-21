@@ -899,11 +899,6 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	}
 
 	@Override
-	public @Nullable Message sendAndReceive(Destination destination, Destination responseQueue, MessageCreator messageCreator) throws JmsException {
-		return executeLocal(session -> doSendAndReceive(session, destination, responseQueue, messageCreator), true);
-	}
-
-	@Override
 	public @Nullable Message sendAndReceive(String destinationName, MessageCreator messageCreator) throws JmsException {
 		return executeLocal(session -> {
 			Destination destination = resolveDestinationName(session, destinationName);
@@ -912,11 +907,16 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	}
 
 	@Override
+	public @Nullable Message sendAndReceive(Destination destination, Destination responseQueue, MessageCreator messageCreator) throws JmsException {
+		return executeLocal(session -> doSendAndReceive(session, destination, responseQueue, messageCreator, true), true);
+	}
+
+	@Override
 	public @Nullable Message sendAndReceive(String destinationName, String responseQueueName, MessageCreator messageCreator) throws JmsException {
 		return executeLocal(session -> {
 			Destination destination = resolveDestinationName(session, destinationName);
 			Destination responseQueue = resolveDestinationName(session, responseQueueName);
-			return doSendAndReceive(session, destination, responseQueue, messageCreator);
+			return doSendAndReceive(session, destination, responseQueue, messageCreator, true);
 		}, true);
 	}
 
@@ -932,7 +932,7 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 		TemporaryQueue responseQueue = null;
 		try {
 			responseQueue = session.createTemporaryQueue();
-			return doSendAndReceive(session, destination, responseQueue, messageCreator);
+			return doSendAndReceive(session, destination, responseQueue, messageCreator, false);
 		}
 		finally {
 			if (responseQueue != null) {
@@ -946,9 +946,10 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	 * a reply has been received on the specified {@link Destination responseQueue}.
 	 * <p>Return the response message or {@code null} if no message has been received.
 	 * @throws JMSException if thrown by JMS API methods
+	 * @since 7.0.4
 	 */
-	protected @Nullable Message doSendAndReceive(Session session, Destination destination, Destination responseQueue, MessageCreator messageCreator)
-			throws JMSException {
+	protected @Nullable Message doSendAndReceive(Session session, Destination destination, Destination responseQueue,
+			MessageCreator messageCreator, boolean useCorrelationId) throws JMSException {
 
 		Assert.notNull(messageCreator, "MessageCreator must not be null");
 		MessageProducer producer = null;
@@ -956,12 +957,20 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 		try {
 			Message requestMessage = messageCreator.createMessage(session);
 			producer = session.createProducer(destination);
-			consumer = session.createConsumer(responseQueue);
 			requestMessage.setJMSReplyTo(responseQueue);
 			if (logger.isDebugEnabled()) {
 				logger.debug("Sending created message: " + requestMessage);
 			}
 			doSend(producer, requestMessage);
+			String messageSelector = null;
+			if (useCorrelationId) {
+				String correlationId = requestMessage.getJMSCorrelationID();
+				if (correlationId == null) {
+					correlationId = requestMessage.getJMSMessageID();
+				}
+				messageSelector = "JMSCorrelationID='" + correlationId + "'";
+			}
+			consumer = session.createConsumer(responseQueue, messageSelector);
 			return receiveFromConsumer(consumer, getReceiveTimeout());
 		}
 		finally {

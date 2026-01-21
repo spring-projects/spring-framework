@@ -361,7 +361,7 @@ public interface JmsOperations {
 	/**
 	 * Send a request message and receive the reply from a default destination. The
 	 * {@link MessageCreator} callback creates the message given a Session. A temporary
-	 * queue is created as part of this operation and is set in the {@code JMSReplyTO}
+	 * queue is created as part of this operation and is set in the {@code JMSReplyTo}
 	 * header of the message.
 	 * <p>This will only work with a default destination specified!
 	 * @param messageCreator callback to create a request message
@@ -373,10 +373,10 @@ public interface JmsOperations {
 	@Nullable Message sendAndReceive(MessageCreator messageCreator) throws JmsException;
 
 	/**
-	 * Send a message and receive the reply from the specified destination. The
-	 * {@link MessageCreator} callback creates the message given a Session. A temporary
-	 * queue is created as part of this operation and is set in the {@code JMSReplyTO}
-	 * header of the message.
+	 * Send a message and receive the reply from the specified destination.
+	 * <p>The {@link MessageCreator} callback creates the message given a Session.
+	 * A temporary queue is created as part of this operation and is set in the
+	 * {@code JMSReplyTo} header of the message.
 	 * @param destination the destination to send this message to
 	 * @param messageCreator callback to create a message
 	 * @return the reply, possibly {@code null} if the message could not be received,
@@ -387,10 +387,10 @@ public interface JmsOperations {
 	@Nullable Message sendAndReceive(Destination destination, MessageCreator messageCreator) throws JmsException;
 
 	/**
-	 * Send a message and receive the reply from the specified destination. The
-	 * {@link MessageCreator} callback creates the message given a Session. A temporary
-	 * queue is created as part of this operation and is set in the {@code JMSReplyTO}
-	 * header of the message.
+	 * Send a message and receive the reply from the specified destination.
+	 * <p>The {@link MessageCreator} callback creates the message given a Session.
+	 * A temporary queue is created as part of this operation and is set in the
+	 * {@code JMSReplyTo} header of the message.
 	 * @param destinationName the name of the destination to send this message to
 	 * (to be resolved to an actual destination by a DestinationResolver)
 	 * @param messageCreator callback to create a message
@@ -405,8 +405,10 @@ public interface JmsOperations {
 	 * Send a message to the specified destination and receive the reply from the
 	 * specified response queue.
 	 * <p>The {@link MessageCreator} callback creates the message given a Session,
-	 * and the specified {@code responseQueue} is set in the {@code JMSReplyTO}
-	 * header of the message.
+	 * potentially setting a {@code JMSCorrelationID} for receiving from the given
+	 * response queue; otherwise, the {@code JMSMessageID} is used for correlation.
+	 * The specified {@code responseQueue} is set in the {@code JMSReplyTo} header
+	 * of the message.
 	 * @param destination the destination to send the message to
 	 * @param responseQueue the destination to receive the reply from
 	 * @param messageCreator callback to create a message
@@ -422,8 +424,10 @@ public interface JmsOperations {
 	 * Send a message to the specified destination and receive the reply from the
 	 * specified response queue.
 	 * <p>The {@link MessageCreator} callback creates the message given a Session,
-	 * and the destination with the specified {@code responseQueueName} is set in
-	 * the {@code JMSReplyTO} header of the message.
+	 * potentially setting a {@code JMSCorrelationID} for receiving from the given
+	 * response queue; otherwise, the {@code JMSMessageID} is used for correlation.
+	 * The specified {@code responseQueue} is set in the {@code JMSReplyTo} header
+	 * of the message.
 	 * @param destinationName the name of the destination to send the message to
 	 * (to be resolved to an actual destination by a DestinationResolver)
 	 * @param responseQueueName the name of the destination to receive the reply from
