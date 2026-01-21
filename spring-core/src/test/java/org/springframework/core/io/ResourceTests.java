@@ -70,7 +70,7 @@ class ResourceTests {
 
 	@Nested
 	@ParameterizedClass
-	@MethodSource("resource")
+	@MethodSource("resources")
 	class ParameterizedResourceTests {
 
 		private final Resource resource;
@@ -136,7 +136,7 @@ class ResourceTests {
 			assertThatExceptionOfType(FileNotFoundException.class).isThrownBy(() -> relative4.getContentAsString(UTF_8));
 		}
 
-		private static Stream<Arguments> resource() throws URISyntaxException {
+		private static Stream<Arguments> resources() throws URISyntaxException {
 			URL resourceClass = ResourceTests.class.getResource("ResourceTests.class");
 			Path resourceClassFilePath = Paths.get(resourceClass.toURI());
 			return Stream.of(
