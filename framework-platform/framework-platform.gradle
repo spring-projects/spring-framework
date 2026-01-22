@@ -138,7 +138,7 @@ dependencies {
 		api("org.seleniumhq.selenium:htmlunit3-driver:4.40.0")
 		api("org.seleniumhq.selenium:selenium-java:4.40.0")
 		api("org.skyscreamer:jsonassert:1.5.3")
-		api("org.testng:testng:7.11.0")
+		api("org.testng:testng:7.12.0")
 		api("org.webjars:underscorejs:1.8.3")
 		api("org.webjars:webjars-locator-lite:1.1.0")
 		api("org.xmlunit:xmlunit-assertj:2.10.4")
