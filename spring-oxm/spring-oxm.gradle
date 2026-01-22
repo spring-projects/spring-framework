@@ -1,3 +1,5 @@
+import com.github.bjornvester.xjc.XjcTask
+
 plugins {
 	id "com.github.bjornvester.xjc"
 }
@@ -26,14 +28,8 @@ dependencies {
 	testRuntimeOnly("com.sun.xml.bind:jaxb-impl")
 }
 
-tasks.named("xjc").configure { xjc ->
-	// XJC plugin only works against main sources, so we have to "move" them to test sources.
-	sourceSets.main.java.exclude {
-		it.file.absolutePath.startsWith(outputJavaDir.get().asFile.absolutePath)
-	}
-	sourceSets.main.resources.exclude {
-		it.file.absolutePath.startsWith(outputResourcesDir.get().asFile.absolutePath)
-	}
-	sourceSets.test.java.srcDir(xjc.outputJavaDir)
-	sourceSets.test.resources.srcDir(xjc.outputResourcesDir)
-}
+// XJC plugin adds generated code to main source set, but we need it only for tests
+sourceSets.main.java.setSrcDirs(["src/main/java"])
+sourceSets.main.resources.setSrcDirs(["src/main/resources"])
+sourceSets.test.java.srcDir(tasks.named("xjc", XjcTask).flatMap { it.outputJavaDir })
+sourceSets.test.resources.srcDir(tasks.named("xjc", XjcTask).flatMap { it.outputResourcesDir })
