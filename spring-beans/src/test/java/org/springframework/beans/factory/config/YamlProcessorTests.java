@@ -44,8 +44,7 @@ import static org.assertj.core.api.InstanceOfAssertFactories.set;
  */
 class YamlProcessorTests {
 
-	private final YamlProcessor processor = new YamlProcessor() {
-	};
+	private final TestYamlProcessor processor = new TestYamlProcessor();
 
 
 	@Test
@@ -182,8 +181,33 @@ class YamlProcessorTests {
 				.withMessageContaining("Global tag is not allowed: tag:yaml.org,2002:java.net.URL");
 	}
 
+	@Test
+	void processAndFlattenWithoutIncludedNulls() {
+		setYaml("foo: bar\nbar:\n spam: {}");
+		Map<String, Object> flattened = this.processor.processAndFlatten(false);
+		assertThat(flattened).containsEntry("foo", "bar").doesNotContainKey("bar.spam").hasSize(1);
+	}
+
+	@Test
+	void processAndFlattenWithIncludedNulls() {
+		setYaml("foo: bar\nbar:\n spam: {}");
+		Map<String, Object> flattened = this.processor.processAndFlatten(true);
+		assertThat(flattened).containsEntry("foo", "bar").containsEntry("bar.spam", null).hasSize(2);
+	}
+
 	private void setYaml(String yaml) {
 		this.processor.setResources(new ByteArrayResource(yaml.getBytes()));
+	}
+
+	private static class TestYamlProcessor extends YamlProcessor {
+
+		Map<String, Object> processAndFlatten(boolean includeNulls) {
+			Map<String, Object> flattened = new LinkedHashMap<>();
+			process((properties, map) -> flattened.putAll(getFlattenedMap(map, includeNulls)));
+			return flattened;
+		}
+
+
 	}
 
 }
