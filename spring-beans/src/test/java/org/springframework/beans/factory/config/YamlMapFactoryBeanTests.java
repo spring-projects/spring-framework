@@ -128,4 +128,18 @@ class YamlMapFactoryBeanTests {
 				this.factory.getObject().get("mymap"));
 	}
 
+	@Test
+	void testMapWithIntegerKey() {
+		this.factory.setResources(new ByteArrayResource("foo:\n  1: bar".getBytes()));
+		Map<String, Object> map = this.factory.getObject();
+
+		assertThat(map).hasSize(1);
+		assertThat(map.containsKey("foo")).isTrue();
+		Object object = map.get("foo");
+		assertThat(object).isInstanceOf(LinkedHashMap.class);
+		@SuppressWarnings("unchecked")
+		Map<String, Object> sub = (Map<String, Object>) object;
+		assertThat(sub.containsKey("1")).isTrue();
+		assertThat(sub.get("1")).isEqualTo("bar");
+	}
 }
