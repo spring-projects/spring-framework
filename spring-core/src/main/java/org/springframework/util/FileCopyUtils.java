@@ -168,13 +168,7 @@ public abstract class FileCopyUtils {
 		Assert.notNull(out, "No Writer specified");
 
 		try {
-			int charCount = 0;
-			char[] buffer = new char[BUFFER_SIZE];
-			int charsRead;
-			while ((charsRead = in.read(buffer)) != -1) {
-				out.write(buffer, 0, charsRead);
-				charCount += charsRead;
-			}
+			int charCount = (int) in.transferTo(out);
 			out.flush();
 			return charCount;
 		}
