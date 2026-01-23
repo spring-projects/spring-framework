@@ -110,8 +110,8 @@ class MethodParameterKotlinTests {
 		assertThat(returnGenericParameterType("suspendFun7")).isInstanceOf(TypeVariable::class.java)
 		assertThat(returnGenericParameterTypeBoundName("suspendFun7")).isEqualTo("org.springframework.core.Consumer<? super java.lang.Number>")
 
-		assertThat(returnParameterType("suspendFun8")).isEqualTo(Object::class.java)
-		assertThat(returnGenericParameterType("suspendFun8")).isEqualTo(Object::class.java)
+		assertThat(returnParameterType("suspendFun8")).isEqualTo(Any::class.java)
+		assertThat(returnGenericParameterType("suspendFun8")).isEqualTo(Any::class.java)
 	}
 
 	@Test

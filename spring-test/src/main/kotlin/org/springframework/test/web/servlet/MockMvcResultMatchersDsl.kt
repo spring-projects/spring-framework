@@ -114,7 +114,7 @@ class MockMvcResultMatchersDsl(private val actions: ResultActions) {
 	/**
 	 * @see MockMvcResultMatchers.jsonPath
 	 */
-	fun <T> jsonPath(expression: String, matcher: Matcher<T>) {
+	fun <T : Any> jsonPath(expression: String, matcher: Matcher<T>) {
 		actions.andExpect(MockMvcResultMatchers.jsonPath(expression, matcher))
 	}
 
