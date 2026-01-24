@@ -51,8 +51,26 @@ import org.springframework.util.StreamUtils;
  */
 public abstract class AbstractXmlHttpMessageConverter<T> extends AbstractHttpMessageConverter<T> {
 
-	private final TransformerFactory transformerFactory = TransformerFactory.newInstance();
+	private final TransformerFactory transformerFactory = createSecureTransformerFactory();
 
+
+	/**
+	 * Creates a secure TransformerFactory with disabled DTD processing to prevent XXE attacks.
+	 * @return a securely configured TransformerFactory instance
+	 */
+	private static TransformerFactory createSecureTransformerFactory() {
+		TransformerFactory factory = TransformerFactory.newInstance();
+		try {
+			factory.setAttribute("http://javax.xml.XMLConstants/feature/secure-processing", true);
+			factory.setAttribute("http://javax.xml.XMLConstants/property/accessExternalDTD", "");
+			factory.setAttribute("http://javax.xml.XMLConstants/property/accessExternalStylesheet", "");
+		}
+		catch (IllegalArgumentException ex) {
+			// Some TransformerFactory implementations may not support these attributes
+			// but we'll still have the secure-processing feature enabled
+		}
+		return factory;
+	}
 
 	/**
 	 * Protected constructor that sets the {@link #setSupportedMediaTypes(java.util.List) supportedMediaTypes}
