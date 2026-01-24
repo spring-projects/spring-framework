@@ -183,16 +183,34 @@ class YamlProcessorTests {
 
 	@Test
 	void processAndFlattenWithoutIncludedNulls() {
-		setYaml("foo: bar\nbar:\n spam: {}");
-		Map<String, Object> flattened = this.processor.processAndFlatten(false);
-		assertThat(flattened).containsEntry("foo", "bar").doesNotContainKey("bar.spam").hasSize(1);
+		setYaml("avalue: value\nanull: null\natilde: ~\nparent:\n  anempty: {}\n");
+		Map<String, Object> flattened = this.processor.processAndFlatten(false, null);
+		assertThat(flattened).containsOnly(
+				entry("avalue", "value"),
+				entry("anull", ""),
+				entry("atilde", ""));
 	}
 
 	@Test
 	void processAndFlattenWithIncludedNulls() {
-		setYaml("foo: bar\nbar:\n spam: {}");
-		Map<String, Object> flattened = this.processor.processAndFlatten(true);
-		assertThat(flattened).containsEntry("foo", "bar").containsEntry("bar.spam", null).hasSize(2);
+		setYaml("avalue: value\nanull: null\natilde: ~\nparent:\n  anempty: {}\n");
+		Map<String, Object> flattened = this.processor.processAndFlatten(true, null);
+		assertThat(flattened).containsOnly(
+				entry("avalue", "value"),
+				entry("anull", null),
+				entry("atilde", null),
+				entry("parent.anempty", null));
+	}
+
+	@Test
+	void processAndFlattenWithIncludedBlankString() {
+		setYaml("avalue: value\nanull: null\natilde: ~\nparent:\n  anempty: {}\n");
+		Map<String, Object> flattened = this.processor.processAndFlatten(true, "");
+		assertThat(flattened).containsOnly(
+				entry("avalue", "value"),
+				entry("anull", ""),
+				entry("atilde", ""),
+				entry("parent.anempty", ""));
 	}
 
 	private void setYaml(String yaml) {
@@ -201,9 +219,9 @@ class YamlProcessorTests {
 
 	private static class TestYamlProcessor extends YamlProcessor {
 
-		Map<String, Object> processAndFlatten(boolean includeNulls) {
+		Map<String, Object> processAndFlatten(boolean includeEmpty, Object emptyValue) {
 			Map<String, Object> flattened = new LinkedHashMap<>();
-			process((properties, map) -> flattened.putAll(getFlattenedMap(map, includeNulls)));
+			process((properties, map) -> flattened.putAll(getFlattenedMap(map, includeEmpty, emptyValue)));
 			return flattened;
 		}
 
