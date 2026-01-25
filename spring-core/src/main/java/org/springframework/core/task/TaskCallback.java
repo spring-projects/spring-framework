@@ -51,7 +51,7 @@ public interface TaskCallback<V extends @Nullable Object, E extends Exception> e
 	}
 
 	/**
-	 * Derive a {@link TaskCallback} from the given {@link Callable}.
+	 * Derive a {@link TaskCallback} from the given {@link Runnable}.
 	 * @since 7.0.4
 	 */
 	@SuppressWarnings("NullAway")

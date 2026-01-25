@@ -65,6 +65,7 @@ public class RetryTask<V extends @Nullable Object, E extends Exception> implemen
 	/**
 	 * Create a new {@code RetryTask} for the given retryable task.
 	 * @param task a task that allows for re-execution after failure
+	 * @see RetryPolicy#withDefaults()
 	 * @see #RetryTask(TaskCallback, RetryPolicy)
 	 * @see #RetryTask(TaskCallback, RetryOperations)
 	 */
@@ -135,6 +136,7 @@ public class RetryTask<V extends @Nullable Object, E extends Exception> implemen
 	/**
 	 * Wrap the given target {@code Callable} into a retrying {@code Callable}.
 	 * @param task a task that allows for re-execution after failure
+	 * @see RetryPolicy#withDefaults()
 	 * @see #wrap(Callable, RetryPolicy)
 	 * @see #wrap(Callable, RetryOperations)
 	 */
@@ -170,6 +172,7 @@ public class RetryTask<V extends @Nullable Object, E extends Exception> implemen
 	/**
 	 * Wrap the given target {@code Runnable} into a retrying {@code Runnable}.
 	 * @param task a task that allows for re-execution after failure
+	 * @see RetryPolicy#withDefaults()
 	 * @see #wrap(Runnable, RetryPolicy)
 	 * @see #wrap(Runnable, RetryOperations)
 	 */

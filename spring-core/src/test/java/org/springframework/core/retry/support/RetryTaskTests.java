@@ -55,7 +55,7 @@ class RetryTaskTests {
 				syncExecutor.execute(new RetryTask<>(() -> {
 					invocationCount.incrementAndGet();
 					return "always succeeds";
-					}, retryPolicy)))
+				}, retryPolicy)))
 				.isEqualTo("always succeeds");
 		assertThat(invocationCount).hasValue(1);
 	}
@@ -68,7 +68,7 @@ class RetryTaskTests {
 						throw new IllegalStateException("Boom " + invocationCount.get());
 					}
 					return "finally succeeded";
-					}, retryPolicy)))
+				}, retryPolicy)))
 				.isEqualTo("finally succeeded");
 		assertThat(invocationCount).hasValue(2);
 	}
