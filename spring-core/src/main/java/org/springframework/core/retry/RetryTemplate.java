@@ -89,7 +89,7 @@ public class RetryTemplate implements RetryOperations {
 	 * @see RetryPolicy#builder()
 	 */
 	public void setRetryPolicy(RetryPolicy retryPolicy) {
-		Assert.notNull(retryPolicy, "Retry policy must not be null");
+		Assert.notNull(retryPolicy, "RetryPolicy must not be null");
 		this.retryPolicy = retryPolicy;
 	}
 

@@ -215,7 +215,7 @@ public abstract class SharedEntityManagerCreator {
 		}
 
 		@Override
-		public @Nullable Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+		public @Nullable Object invoke(Object proxy, Method method, @Nullable Object[] args) throws Throwable {
 			// Invocation on EntityManager interface coming in...
 
 			switch (method.getName()) {
@@ -361,7 +361,7 @@ public abstract class SharedEntityManagerCreator {
 
 		private @Nullable EntityManager entityManager;
 
-		private @Nullable Map<Object, Object> outputParameters;
+		private @Nullable Map<@Nullable Object, @Nullable Object> outputParameters;
 
 		public DeferredQueryInvocationHandler(Query target, EntityManager entityManager) {
 			this.target = target;
@@ -369,7 +369,7 @@ public abstract class SharedEntityManagerCreator {
 		}
 
 		@Override
-		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+		public @Nullable Object invoke(Object proxy, Method method, @Nullable Object[] args) throws Throwable {
 			// Invocation on Query interface coming in...
 
 			switch (method.getName()) {

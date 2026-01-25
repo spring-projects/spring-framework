@@ -60,13 +60,13 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
  */
 class RetryTemplateTests {
 
-	private final RetryPolicy retryPolicy = RetryPolicy.builder().maxRetries(3).delay(Duration.ZERO).build();
+	RetryPolicy retryPolicy = RetryPolicy.builder().maxRetries(3).delay(Duration.ZERO).build();
 
-	private final RetryTemplate retryTemplate = new RetryTemplate(retryPolicy);
+	RetryTemplate retryTemplate = new RetryTemplate(retryPolicy);
 
-	private final RetryListener retryListener = mock();
+	RetryListener retryListener = mock();
 
-	private final InOrder inOrder = inOrder(retryListener);
+	InOrder inOrder = inOrder(retryListener);
 
 
 	@BeforeEach

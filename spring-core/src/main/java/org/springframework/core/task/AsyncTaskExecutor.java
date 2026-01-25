@@ -27,14 +27,10 @@ import org.springframework.util.concurrent.FutureUtils;
 
 /**
  * Extended interface for asynchronous {@link TaskExecutor} implementations,
- * offering support for {@link java.util.concurrent.Callable}.
- *
- * <p>Note: The {@link java.util.concurrent.Executors} class includes a set of
- * methods that can convert some other common closure-like objects, for example,
- * {@link java.security.PrivilegedAction} to {@link Callable} before executing them.
+ * offering support for {@link Future}/{@link CompletableFuture} handles.
  *
  * <p>Implementing this interface also indicates that the {@link #execute(Runnable)}
- * method will not execute its Runnable in the caller's thread but rather
+ * method will not execute the given Runnable in the caller's thread but rather
  * asynchronously in some other thread.
  *
  * @author Juergen Hoeller
@@ -127,8 +123,7 @@ public interface AsyncTaskExecutor extends TaskExecutor {
 
 	/**
 	 * Submit a {@code Callable} task for execution, receiving a {@code CompletableFuture}
-	 * representing that task. The Future will return the Callable's result upon
-	 * completion.
+	 * representing that task. The Future will return the Callable's result upon completion.
 	 * @param task the {@code Callable} to execute (never {@code null})
 	 * @return a {@code CompletableFuture} representing pending completion of the task
 	 * @throws TaskRejectedException if the given task was not accepted
