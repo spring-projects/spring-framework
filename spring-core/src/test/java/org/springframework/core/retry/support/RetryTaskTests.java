@@ -52,7 +52,7 @@ class RetryTaskTests {
 	@Test
 	void syncTaskWithImmediateSuccess() {
 		assertThat(
-				syncExecutor.execute(new RetryTask<>(() -> {
+				syncExecutor.execute(new RetryTask<String, RuntimeException>(() -> {
 					invocationCount.incrementAndGet();
 					return "always succeeds";
 				}, retryPolicy)))
@@ -63,7 +63,7 @@ class RetryTaskTests {
 	@Test
 	void syncTaskWithSuccessAfterInitialFailures() {
 		assertThat(
-				syncExecutor.execute(new RetryTask<>(() -> {
+				syncExecutor.execute(new RetryTask<String, RuntimeException>(() -> {
 					if (invocationCount.incrementAndGet() < 2) {
 						throw new IllegalStateException("Boom " + invocationCount.get());
 					}
