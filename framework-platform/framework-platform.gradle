@@ -14,7 +14,7 @@ dependencies {
 	api(platform("io.rsocket:rsocket-bom:1.1.5"))
 	api(platform("org.apache.groovy:groovy-bom:5.0.3"))
 	api(platform("org.apache.logging.log4j:log4j-bom:2.25.3"))
-	api(platform("org.assertj:assertj-bom:3.27.6"))
+	api(platform("org.assertj:assertj-bom:3.27.7"))
 	api(platform("org.eclipse.jetty:jetty-bom:12.1.5"))
 	api(platform("org.eclipse.jetty.ee11:jetty-ee11-bom:12.1.5"))
 	api(platform("org.jetbrains.kotlinx:kotlinx-coroutines-bom:1.10.2"))
