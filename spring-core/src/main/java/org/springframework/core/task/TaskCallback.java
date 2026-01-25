@@ -41,4 +41,25 @@ public interface TaskCallback<V extends @Nullable Object, E extends Exception> e
 	@Override
 	V call() throws E;
 
+
+	/**
+	 * Derive a {@link TaskCallback} from the given {@link Callable}.
+	 * @since 7.0.4
+	 */
+	static <V> TaskCallback<V, Exception> from(Callable<V> task) {
+		return task::call;
+	}
+
+	/**
+	 * Derive a {@link TaskCallback} from the given {@link Callable}.
+	 * @since 7.0.4
+	 */
+	@SuppressWarnings("NullAway")
+	static TaskCallback<Void, RuntimeException> from(Runnable task) {
+		return () -> {
+			task.run();
+			return null;
+		};
+	}
+
 }

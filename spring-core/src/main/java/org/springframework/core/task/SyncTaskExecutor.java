@@ -63,7 +63,14 @@ public class SyncTaskExecutor extends ConcurrencyThrottleSupport implements Task
 	/**
 	 * Execute the given {@code task} synchronously, through direct
 	 * invocation of its {@link Runnable#run() run()} method.
+	 * <p>This can be used with a {@link #setConcurrencyLimit concurrency limit},
+	 * analogous to a concurrency-bounded {@link SimpleAsyncTaskExecutor} setup.
+	 * Also, the provided task may apply a retry policy via
+	 * {@link org.springframework.core.retry.support.RetryTask}.
 	 * @throws RuntimeException if propagated from the given {@code Runnable}
+	 * @see #setConcurrencyLimit
+	 * @see #setRejectTasksWhenLimitReached
+	 * @see org.springframework.core.retry.support.RetryTask#wrap(Runnable)
 	 */
 	@Override
 	public void execute(Runnable task) {
@@ -85,10 +92,17 @@ public class SyncTaskExecutor extends ConcurrencyThrottleSupport implements Task
 	/**
 	 * Execute the given {@code task} synchronously, through direct
 	 * invocation of its {@link TaskCallback#call() call()} method.
+	 * <p>This can be used with a {@link #setConcurrencyLimit concurrency limit},
+	 * analogous to a concurrency-bounded {@link SimpleAsyncTaskExecutor} setup.
+	 * Also, the provided task may apply a retry policy via
+	 * {@link org.springframework.core.retry.support.RetryTask}.
 	 * @param <V> the returned value type, if any
 	 * @param <E> the exception propagated, if any
 	 * @throws E if propagated from the given {@code TaskCallback}
 	 * @since 7.0
+	 * @see #setConcurrencyLimit
+	 * @see #setRejectTasksWhenLimitReached
+	 * @see org.springframework.core.retry.support.RetryTask#RetryTask(TaskCallback)
 	 */
 	public <V extends @Nullable Object, E extends Exception> V execute(TaskCallback<V, E> task) throws E {
 		Assert.notNull(task, "Task must not be null");
