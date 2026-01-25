@@ -69,7 +69,7 @@ import org.springframework.util.CollectionUtils;
  * a Spring application context.
  *
  * <p>Encapsulates the common functionality between the different JPA bootstrap
- * contracts (standalone as well as container).
+ * contracts: standalone as well as container.
  *
  * <p>Implements support for standard JPA configuration conventions as well as
  * Spring's customizable {@link JpaVendorAdapter} mechanism, and controls the
@@ -178,10 +178,10 @@ public abstract class AbstractEntityManagerFactoryBean implements
 	}
 
 	/**
-	 * Specify the name of the EntityManagerFactory configuration.
-	 * <p>Default is none, indicating the default EntityManagerFactory
-	 * configuration. The persistence provider will throw an exception if
-	 * ambiguous EntityManager configurations are found.
+	 * Specify the name of the persistence unit configuration to use.
+	 * <p>Default is none, indicating the default persistence unit configuration.
+	 * The persistence provider will throw an exception if ambiguous persistence
+	 * unit configurations are found.
 	 * @see jakarta.persistence.Persistence#createEntityManagerFactory(String)
 	 */
 	public void setPersistenceUnitName(@Nullable String persistenceUnitName) {
