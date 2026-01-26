@@ -131,6 +131,12 @@ jar {
 	}
 }
 
+kotlin {
+    compilerOptions {
+        freeCompilerArgs.addAll("-Xcontext-parameters")
+    }
+}
+
 test {
 	// Make sure the classes dir is used on the test classpath (required by ResourceTests).
 	// When test fixtures are involved, the JAR is used by default.
