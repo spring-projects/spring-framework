@@ -171,7 +171,7 @@ public class ReactorClientHttpConnector implements ClientHttpConnector, SmartLif
 				.responseConnection((response, connection) -> {
 					ReactorClientHttpResponse clientResponse = new ReactorClientHttpResponse(response, connection);
 					responseRef.set(clientResponse);
-					clearChannelAttribute(connection);
+					registerAttributeCallback(connection);
 					return Mono.just((ClientHttpResponse) clientResponse);
 				})
 				.next()
@@ -201,9 +201,9 @@ public class ReactorClientHttpConnector implements ClientHttpConnector, SmartLif
 		return new ReactorClientHttpRequest(method, uri, request, nettyOutbound);
 	}
 
-	private static void clearChannelAttribute(Connection connection) {
-		connection.onTerminate().subscribe(
-				aVoid -> {}, ex -> clearAttribute(connection), () -> clearAttribute(connection));
+	private static void registerAttributeCallback(Connection connection) {
+		connection.onTerminate().subscribe(aVoid -> {},
+				ex -> clearAttribute(connection), () -> clearAttribute(connection));
 	}
 
 	private static void clearAttribute(Connection connection) {
