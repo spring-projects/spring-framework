@@ -50,7 +50,7 @@ import org.springframework.util.Assert;
  * @since 7.0.4
  * @param <V> the returned value type, if any
  * @param <E> the exception propagated, if any
- * @see RetryTemplate
+ * @see RetryOperations
  * @see org.springframework.core.task.SyncTaskExecutor#execute(TaskCallback)
  * @see org.springframework.core.task.AsyncTaskExecutor#submit(Callable)
  * @see org.springframework.core.task.AsyncTaskExecutor#submitCompletable(Callable)
@@ -59,7 +59,7 @@ public class RetryTask<V extends @Nullable Object, E extends Exception> implemen
 
 	private final TaskCallback<V, E> task;
 
-	private final RetryOperations retryTemplate;
+	private final RetryOperations retryOperations;
 
 
 	/**
@@ -86,14 +86,14 @@ public class RetryTask<V extends @Nullable Object, E extends Exception> implemen
 	/**
 	 * Create a new {@code RetryTask} for the given retryable task.
 	 * @param task a task that allows for re-execution after failure
-	 * @param retryTemplate the retry delegate to use (typically a {@link RetryTemplate}
+	 * @param retryOperations the retry delegate to use (typically a {@link RetryTemplate}
 	 * but declaring the {@link RetryOperations} interface for flexibility)
 	 */
-	public RetryTask(TaskCallback<V, E> task, RetryOperations retryTemplate) {
+	public RetryTask(TaskCallback<V, E> task, RetryOperations retryOperations) {
 		Assert.notNull(task, "TaskCallback must not be null");
-		Assert.notNull(retryTemplate, "RetryTemplate must not be null");
+		Assert.notNull(retryOperations, "RetryOperations must not be null");
 		this.task = task;
-		this.retryTemplate = retryTemplate;
+		this.retryOperations = retryOperations;
 	}
 
 
@@ -101,7 +101,7 @@ public class RetryTask<V extends @Nullable Object, E extends Exception> implemen
 	@Override
 	public V call() throws E {
 		try {
-			return this.retryTemplate.execute(new Retryable<>() {
+			return this.retryOperations.execute(new Retryable<>() {
 				@Override
 				public V execute() throws E {
 					return task.call();
@@ -129,7 +129,7 @@ public class RetryTask<V extends @Nullable Object, E extends Exception> implemen
 	@Override
 	public String toString() {
 		return "RetryTask for " + getName() + " using " +
-				(this.retryTemplate instanceof RetryTemplate rt ? rt.getRetryPolicy() : this.retryTemplate);
+				(this.retryOperations instanceof RetryTemplate rt ? rt.getRetryPolicy() : this.retryOperations);
 	}
 
 
@@ -157,11 +157,11 @@ public class RetryTask<V extends @Nullable Object, E extends Exception> implemen
 	/**
 	 * Wrap the given target {@code Callable} into a retrying {@code Callable}.
 	 * @param task a task that allows for re-execution after failure
-	 * @param retryTemplate the retry delegate to use (typically a {@link RetryTemplate}
+	 * @param retryOperations the retry delegate to use (typically a {@link RetryTemplate}
 	 * but declaring the {@link RetryOperations} interface for flexibility)
 	 */
-	public static <V> Callable<V> wrap(Callable<V> task, RetryOperations retryTemplate) {
-		return new RetryTask<>(TaskCallback.from(task), retryTemplate) {
+	public static <V> Callable<V> wrap(Callable<V> task, RetryOperations retryOperations) {
+		return new RetryTask<>(TaskCallback.from(task), retryOperations) {
 			@Override
 			public String getName() {
 				return task.getClass().getName();
@@ -193,11 +193,11 @@ public class RetryTask<V extends @Nullable Object, E extends Exception> implemen
 	/**
 	 * Wrap the given target {@code Runnable} into a retrying {@code Runnable}.
 	 * @param task a task that allows for re-execution after failure
-	 * @param retryTemplate the retry delegate to use (typically a {@link RetryTemplate}
+	 * @param retryOperations the retry delegate to use (typically a {@link RetryTemplate}
 	 * but declaring the {@link RetryOperations} interface for flexibility)
 	 */
-	public static Runnable wrap(Runnable task, RetryOperations retryTemplate) {
-		RetryTask<Void, RuntimeException> rt = new RetryTask<>(TaskCallback.from(task), retryTemplate) {
+	public static Runnable wrap(Runnable task, RetryOperations retryOperations) {
+		RetryTask<Void, RuntimeException> rt = new RetryTask<>(TaskCallback.from(task), retryOperations) {
 			@Override
 			public String getName() {
 				return task.getClass().getName();
