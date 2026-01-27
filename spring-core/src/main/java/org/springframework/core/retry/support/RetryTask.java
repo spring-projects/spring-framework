@@ -196,8 +196,9 @@ public class RetryTask<V extends @Nullable Object, E extends Exception> implemen
 	 * @param retryTemplate the retry delegate to use (typically a {@link RetryTemplate}
 	 * but declaring the {@link RetryOperations} interface for flexibility)
 	 */
+	@SuppressWarnings("NullAway") // https://github.com/uber/NullAway/issues/1451
 	public static Runnable wrap(Runnable task, RetryOperations retryTemplate) {
-		RetryTask<Void, RuntimeException> rt = new RetryTask<>(TaskCallback.from(task), retryTemplate) {
+		RetryTask<@Nullable Void, RuntimeException> rt = new RetryTask<>(TaskCallback.from(task), retryTemplate) {
 			@Override
 			public String getName() {
 				return task.getClass().getName();

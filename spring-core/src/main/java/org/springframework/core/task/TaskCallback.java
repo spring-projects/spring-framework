@@ -55,8 +55,7 @@ public interface TaskCallback<V extends @Nullable Object, E extends Exception> e
 	 * Derive a {@link TaskCallback} from the given {@link Runnable}.
 	 * @since 7.0.4
 	 */
-	@SuppressWarnings("NullAway")
-	static TaskCallback<Void, RuntimeException> from(Runnable task) {
+	static TaskCallback<@Nullable Void, RuntimeException> from(Runnable task) {
 		return () -> {
 			task.run();
 			return null;
