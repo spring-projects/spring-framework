@@ -23,6 +23,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.spi.PersistenceProvider;
 import jakarta.persistence.spi.PersistenceUnitInfo;
+import jakarta.transaction.TransactionManager;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.AvailableSettings;
@@ -38,7 +39,13 @@ import org.hibernate.dialect.SybaseDialect;
 import org.hibernate.resource.jdbc.spi.PhysicalConnectionHandlingMode;
 import org.jspecify.annotations.Nullable;
 
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.BeanFactoryAware;
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.orm.jpa.hibernate.ConfigurableJtaPlatform;
+import org.springframework.orm.jpa.hibernate.SpringBeanContainer;
 import org.springframework.orm.jpa.persistenceunit.SmartPersistenceUnitInfo;
+import org.springframework.transaction.jta.JtaTransactionManager;
 
 /**
  * {@link org.springframework.orm.jpa.JpaVendorAdapter} implementation for Hibernate.
@@ -65,7 +72,7 @@ import org.springframework.orm.jpa.persistenceunit.SmartPersistenceUnitInfo;
  * @since 2.0
  * @see HibernateJpaDialect
  */
-public class HibernateJpaVendorAdapter extends AbstractJpaVendorAdapter {
+public class HibernateJpaVendorAdapter extends AbstractJpaVendorAdapter implements BeanFactoryAware {
 
 	private final HibernateJpaDialect jpaDialect = new HibernateJpaDialect();
 
@@ -74,6 +81,10 @@ public class HibernateJpaVendorAdapter extends AbstractJpaVendorAdapter {
 	private final Class<? extends EntityManagerFactory> entityManagerFactoryInterface;
 
 	private final Class<? extends EntityManager> entityManagerInterface;
+
+	private @Nullable Object jtaTransactionManager;
+
+	private @Nullable BeanFactory beanFactory;
 
 
 	public HibernateJpaVendorAdapter() {
@@ -108,6 +119,29 @@ public class HibernateJpaVendorAdapter extends AbstractJpaVendorAdapter {
 	 */
 	public void setPrepareConnection(boolean prepareConnection) {
 		this.jpaDialect.setPrepareConnection(prepareConnection);
+	}
+
+	/**
+	 * Set the Spring {@link org.springframework.transaction.jta.JtaTransactionManager}
+	 * or the JTA {@link jakarta.transaction.TransactionManager} to be used with Hibernate,
+	 * if any. Implicitly sets up {@code JtaPlatform}.
+	 * @since 7.0.4
+	 * @see AvailableSettings#JTA_PLATFORM
+	 */
+	public void setJtaTransactionManager(Object jtaTransactionManager) {
+		this.jtaTransactionManager = jtaTransactionManager;
+	}
+
+	/**
+	 * Set the Spring {@link ConfigurableListableBeanFactory} to use for a default
+	 * Hibernate setup with {@link SpringBeanContainer}. This enables autowiring of
+	 * Hibernate attribute converters and entity listeners.
+	 * @since 7.0.4
+	 * @see AvailableSettings#BEAN_CONTAINER
+	 */
+	@Override
+	public void setBeanFactory(BeanFactory beanFactory) {
+		this.beanFactory = beanFactory;
 	}
 
 
@@ -163,7 +197,31 @@ public class HibernateJpaVendorAdapter extends AbstractJpaVendorAdapter {
 					PhysicalConnectionHandlingMode.DELAYED_ACQUISITION_AND_HOLD);
 		}
 
-		// For SpringBeanContainer to be called on Hibernate 6.2
+		// Derive Hibernate JtaPlatform from Spring (Jta)TransactionManager setup.
+		if (this.jtaTransactionManager != null) {
+			if (this.jtaTransactionManager instanceof JtaTransactionManager springJtaTm) {
+				if (springJtaTm.getTransactionManager() == null) {
+					throw new IllegalArgumentException(
+							"Can only apply JtaTransactionManager which has a TransactionManager reference set");
+				}
+				jpaProperties.put(AvailableSettings.JTA_PLATFORM, new ConfigurableJtaPlatform(
+						springJtaTm.getTransactionManager(), springJtaTm.getUserTransaction(),
+						springJtaTm.getTransactionSynchronizationRegistry()));
+			}
+			else if (this.jtaTransactionManager instanceof TransactionManager jtaTm) {
+				jpaProperties.put(AvailableSettings.JTA_PLATFORM, new ConfigurableJtaPlatform(jtaTm, null, null));
+			}
+			else {
+				throw new IllegalArgumentException(
+						"Unknown transaction manager type: " + this.jtaTransactionManager.getClass().getName());
+			}
+		}
+
+		// This enables autowiring of Hibernate attribute converters and entity listeners.
+		if (this.beanFactory instanceof ConfigurableListableBeanFactory clbf) {
+			jpaProperties.put(AvailableSettings.BEAN_CONTAINER, new SpringBeanContainer(clbf));
+		}
+		// For SpringBeanContainer to actually be called at runtime.
 		jpaProperties.put("hibernate.cdi.extensions", "true");
 
 		return jpaProperties;
