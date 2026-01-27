@@ -377,47 +377,45 @@ public class LocalValidatorFactoryBean extends SpringValidatorAdapter
 	protected void postProcessConfiguration(Configuration<?> configuration) {
 	}
 
+	private ValidatorFactory obtainValidatorFactory() {
+		Assert.state(this.validatorFactory != null, "No target ValidatorFactory set");
+		return this.validatorFactory;
+	}
+
 
 	@Override
 	public Validator getValidator() {
-		Assert.state(this.validatorFactory != null, "No target ValidatorFactory set");
-		return this.validatorFactory.getValidator();
+		return obtainValidatorFactory().getValidator();
 	}
 
 	@Override
 	public ValidatorContext usingContext() {
-		Assert.state(this.validatorFactory != null, "No target ValidatorFactory set");
-		return this.validatorFactory.usingContext();
+		return obtainValidatorFactory().usingContext();
 	}
 
 	@Override
 	public MessageInterpolator getMessageInterpolator() {
-		Assert.state(this.validatorFactory != null, "No target ValidatorFactory set");
-		return this.validatorFactory.getMessageInterpolator();
+		return obtainValidatorFactory().getMessageInterpolator();
 	}
 
 	@Override
 	public TraversableResolver getTraversableResolver() {
-		Assert.state(this.validatorFactory != null, "No target ValidatorFactory set");
-		return this.validatorFactory.getTraversableResolver();
+		return obtainValidatorFactory().getTraversableResolver();
 	}
 
 	@Override
 	public ConstraintValidatorFactory getConstraintValidatorFactory() {
-		Assert.state(this.validatorFactory != null, "No target ValidatorFactory set");
-		return this.validatorFactory.getConstraintValidatorFactory();
+		return obtainValidatorFactory().getConstraintValidatorFactory();
 	}
 
 	@Override
 	public ParameterNameProvider getParameterNameProvider() {
-		Assert.state(this.validatorFactory != null, "No target ValidatorFactory set");
-		return this.validatorFactory.getParameterNameProvider();
+		return obtainValidatorFactory().getParameterNameProvider();
 	}
 
 	@Override
 	public ClockProvider getClockProvider() {
-		Assert.state(this.validatorFactory != null, "No target ValidatorFactory set");
-		return this.validatorFactory.getClockProvider();
+		return obtainValidatorFactory().getClockProvider();
 	}
 
 	@Override
@@ -427,8 +425,8 @@ public class LocalValidatorFactoryBean extends SpringValidatorAdapter
 			try {
 				return super.unwrap(type);
 			}
-			catch (ValidationException ex) {
-				// Ignore - we'll try ValidatorFactory unwrapping next
+			catch (ValidationException ignored) {
+				// Trying ValidatorFactory unwrapping next
 			}
 		}
 		if (this.validatorFactory != null) {

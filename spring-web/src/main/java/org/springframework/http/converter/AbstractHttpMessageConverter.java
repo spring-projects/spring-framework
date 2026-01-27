@@ -224,7 +224,6 @@ public abstract class AbstractHttpMessageConverter<T> implements HttpMessageConv
 						}
 					});
 				}
-
 				@Override
 				public boolean repeatable() {
 					return supportsRepeatableWrites(t);

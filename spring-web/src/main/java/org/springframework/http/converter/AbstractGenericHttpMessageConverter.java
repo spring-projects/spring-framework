@@ -93,7 +93,7 @@ public abstract class AbstractGenericHttpMessageConverter<T> extends AbstractHtt
 	 * and then calls {@link #writeInternal}.
 	 */
 	@Override
-	public final void write(final T t, @Nullable final Type type, @Nullable MediaType contentType,
+	public final void write(final T t, final @Nullable Type type, @Nullable MediaType contentType,
 			HttpOutputMessage outputMessage) throws IOException, HttpMessageNotWritableException {
 
 		final HttpHeaders headers = outputMessage.getHeaders();
@@ -108,14 +108,12 @@ public abstract class AbstractGenericHttpMessageConverter<T> extends AbstractHtt
 						public OutputStream getBody() {
 							return outputStream;
 						}
-
 						@Override
 						public HttpHeaders getHeaders() {
 							return headers;
 						}
 					});
 				}
-
 				@Override
 				public boolean repeatable() {
 					return supportsRepeatableWrites(t);

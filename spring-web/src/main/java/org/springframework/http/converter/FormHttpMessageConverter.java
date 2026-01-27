@@ -414,7 +414,6 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 				public void writeTo(OutputStream outputStream) throws IOException {
 					StreamUtils.copy(bytes, outputStream);
 				}
-
 				@Override
 				public boolean repeatable() {
 					return true;
