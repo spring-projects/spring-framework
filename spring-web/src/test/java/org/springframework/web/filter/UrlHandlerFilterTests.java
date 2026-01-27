@@ -33,8 +33,7 @@ import org.springframework.web.testfixture.servlet.MockFilterChain;
 import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
 import org.springframework.web.util.ServletRequestPathUtils;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.*;
 
 /**
  * Unit tests for {@link UrlHandlerFilter}.
@@ -93,19 +92,66 @@ public class UrlHandlerFilterTests {
 		assertThat(response.isCommitted()).isTrue();
 	}
 
-	@Test
-	void noUrlHandling() throws Exception {
-		testNoUrlHandling("/path/**", "", "/path/123");
-		testNoUrlHandling("/path/*", "", "/path/123");
-		testNoUrlHandling("/**", "", "/"); // gh-33444
-		testNoUrlHandling("/**", "/myApp", "/myApp/"); // gh-33565
+	@Test // gh-35882
+	void orderedUrlHandling() throws Exception {
+		String path = "/path/123";
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", path + "/");
+
+		HttpStatus status = HttpStatus.PERMANENT_REDIRECT;
+
+		// Request wrapping
+		UrlHandlerFilter filter = UrlHandlerFilter
+				.trailingSlashHandler("/path/**").redirect(status)
+				.trailingSlashHandler("/path/123/").wrapRequest() // most specific pattern
+				.trailingSlashHandler("/path/123/**").redirect(status)
+				.useSpecificityOrder(true)
+				.build();
+
+		MockFilterChain chain = new MockFilterChain();
+		filter.doFilterInternal(request, new MockHttpServletResponse(), chain);
+
+		HttpServletRequest actual = (HttpServletRequest) chain.getRequest();
+		assertThat(actual).isNotNull().isNotSameAs(request);
+		assertThat(actual.getRequestURL().toString()).isEqualTo("http://localhost" + path);
+
+		// Redirect
+		filter = UrlHandlerFilter
+				.trailingSlashHandler("/path/**").wrapRequest()
+				.trailingSlashHandler("/path/123/").redirect(status) // most specific pattern
+				.trailingSlashHandler("/path/123/**").wrapRequest()
+				.useSpecificityOrder(true)
+				.build();
+
+		MockHttpServletResponse response = new MockHttpServletResponse();
+
+		chain = new MockFilterChain();
+		filter.doFilterInternal(request, response, chain);
+
+		assertThat(chain.getRequest()).isNull();
+		assertThat(response.getStatus()).isEqualTo(status.value());
+		assertThat(response.getHeader(HttpHeaders.LOCATION)).isEqualTo(path);
+		assertThat(response.isCommitted()).isTrue();
 	}
 
-	private static void testNoUrlHandling(String pattern, String contextPath, String requestURI)
-			throws ServletException, IOException {
+	@Test
+	void noUrlHandling() throws Exception {
+		testNoUrlHandling("/path/**", null, "", "/path/123");
+		testNoUrlHandling("/path/*", null, "", "/path/123");
+		testNoUrlHandling("/**", null, "", "/"); // gh-33444
+		testNoUrlHandling("/**", null, "/myApp", "/myApp/"); // gh-33565
+		testNoUrlHandling("/path/**", "/path/123/**", "", "/path/123/"); // gh-35882
+		testNoUrlHandling("/path/*/*", "/path/123/**", "", "/path/123/abc/"); // gh-35882
+		testNoUrlHandling("/path/**", "/path/123/abc/", "", "/path/123/abc/"); // gh-35882
+	}
+
+	private static void testNoUrlHandling(String pattern, @Nullable String excludePattern, String contextPath,
+			String requestURI) throws ServletException, IOException {
+
+		boolean hasExcludePattern = StringUtils.hasLength(excludePattern);
 
 		// No request wrapping
-		UrlHandlerFilter filter = UrlHandlerFilter.trailingSlashHandler(pattern).wrapRequest().build();
+		UrlHandlerFilter.Builder builder = UrlHandlerFilter.trailingSlashHandler(pattern).wrapRequest();
+		UrlHandlerFilter filter = hasExcludePattern ? builder.exclude(excludePattern).build() : builder.build();
 
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", requestURI);
 		request.setContextPath(contextPath);
@@ -117,7 +163,8 @@ public class UrlHandlerFilterTests {
 
 		// No redirect
 		HttpStatus status = HttpStatus.PERMANENT_REDIRECT;
-		filter = UrlHandlerFilter.trailingSlashHandler(pattern).redirect(status).build();
+		builder = UrlHandlerFilter.trailingSlashHandler(pattern).redirect(status);
+		filter = hasExcludePattern ? builder.exclude(excludePattern).build() : builder.build();
 
 		request = new MockHttpServletRequest("GET", requestURI);
 		request.setContextPath(contextPath);
