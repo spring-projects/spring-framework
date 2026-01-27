@@ -261,7 +261,7 @@ public class LocalValidatorFactoryBean extends SpringValidatorAdapter
 			configuration = bootstrap.configure();
 		}
 
-		// Try Hibernate Validator 5.2's externalClassLoader(ClassLoader) method
+		// Try Hibernate Validator's externalClassLoader(ClassLoader) method
 		if (this.applicationContext != null) {
 			try {
 				Method eclMethod = configuration.getClass().getMethod("externalClassLoader", ClassLoader.class);
@@ -269,7 +269,7 @@ public class LocalValidatorFactoryBean extends SpringValidatorAdapter
 				ReflectionUtils.invokeMethod(eclMethod, configuration, this.applicationContext.getClassLoader());
 			}
 			catch (NoSuchMethodException ignored) {
-				// no Hibernate Validator 5.2+ or similar provider
+				// no Hibernate Validator or similar provider
 			}
 		}
 
@@ -370,47 +370,45 @@ public class LocalValidatorFactoryBean extends SpringValidatorAdapter
 	protected void postProcessConfiguration(Configuration<?> configuration) {
 	}
 
+	private ValidatorFactory obtainValidatorFactory() {
+		Assert.state(this.validatorFactory != null, "No target ValidatorFactory set");
+		return this.validatorFactory;
+	}
+
 
 	@Override
 	public Validator getValidator() {
-		Assert.state(this.validatorFactory != null, "No target ValidatorFactory set");
-		return this.validatorFactory.getValidator();
+		return obtainValidatorFactory().getValidator();
 	}
 
 	@Override
 	public ValidatorContext usingContext() {
-		Assert.state(this.validatorFactory != null, "No target ValidatorFactory set");
-		return this.validatorFactory.usingContext();
+		return obtainValidatorFactory().usingContext();
 	}
 
 	@Override
 	public MessageInterpolator getMessageInterpolator() {
-		Assert.state(this.validatorFactory != null, "No target ValidatorFactory set");
-		return this.validatorFactory.getMessageInterpolator();
+		return obtainValidatorFactory().getMessageInterpolator();
 	}
 
 	@Override
 	public TraversableResolver getTraversableResolver() {
-		Assert.state(this.validatorFactory != null, "No target ValidatorFactory set");
-		return this.validatorFactory.getTraversableResolver();
+		return obtainValidatorFactory().getTraversableResolver();
 	}
 
 	@Override
 	public ConstraintValidatorFactory getConstraintValidatorFactory() {
-		Assert.state(this.validatorFactory != null, "No target ValidatorFactory set");
-		return this.validatorFactory.getConstraintValidatorFactory();
+		return obtainValidatorFactory().getConstraintValidatorFactory();
 	}
 
 	@Override
 	public ParameterNameProvider getParameterNameProvider() {
-		Assert.state(this.validatorFactory != null, "No target ValidatorFactory set");
-		return this.validatorFactory.getParameterNameProvider();
+		return obtainValidatorFactory().getParameterNameProvider();
 	}
 
 	@Override
 	public ClockProvider getClockProvider() {
-		Assert.state(this.validatorFactory != null, "No target ValidatorFactory set");
-		return this.validatorFactory.getClockProvider();
+		return obtainValidatorFactory().getClockProvider();
 	}
 
 	@Override
