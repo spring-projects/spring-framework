@@ -247,7 +247,7 @@ public class LocalSessionFactoryBean extends HibernateExceptionTranslator
 	}
 
 	/**
-	 * Set a Hibernate 5 {@link ImplicitNamingStrategy} for the SessionFactory.
+	 * Set a Hibernate {@link ImplicitNamingStrategy} for the SessionFactory.
 	 * @see Configuration#setImplicitNamingStrategy
 	 */
 	public void setImplicitNamingStrategy(ImplicitNamingStrategy implicitNamingStrategy) {
@@ -255,7 +255,7 @@ public class LocalSessionFactoryBean extends HibernateExceptionTranslator
 	}
 
 	/**
-	 * Set a Hibernate 5 {@link PhysicalNamingStrategy} for the SessionFactory.
+	 * Set a Hibernate {@link PhysicalNamingStrategy} for the SessionFactory.
 	 * @see Configuration#setPhysicalNamingStrategy
 	 */
 	public void setPhysicalNamingStrategy(PhysicalNamingStrategy physicalNamingStrategy) {
