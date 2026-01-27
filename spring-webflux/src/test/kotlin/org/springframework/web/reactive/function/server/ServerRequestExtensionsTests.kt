@@ -19,7 +19,6 @@ package org.springframework.web.reactive.function.server
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.core.ParameterizedTypeReference
@@ -70,71 +69,55 @@ class ServerRequestExtensionsTests {
 	}
 
 	@Test
-	fun `awaitBody with reified type parameters`() {
+	suspend fun `awaitBody with reified type parameters`() {
 		every { request.bodyToMono<String>() } returns Mono.just("foo")
-		runBlocking {
-			assertThat(request.awaitBody<String>()).isEqualTo("foo")
-		}
+		assertThat(request.awaitBody<String>()).isEqualTo("foo")
 	}
 
 	@Test
-	fun `awaitBody with KClass parameters`() {
+	suspend fun `awaitBody with KClass parameters`() {
 		every { request.bodyToMono(String::class.java) } returns Mono.just("foo")
-		runBlocking {
-			assertThat(request.awaitBody(String::class)).isEqualTo("foo")
-		}
+		assertThat(request.awaitBody(String::class)).isEqualTo("foo")
 	}
 
 	@Test
-	fun `awaitBodyOrNull with reified type parameters`() {
+	suspend fun `awaitBodyOrNull with reified type parameters`() {
 		every { request.bodyToMono<String>() } returns Mono.empty()
-		runBlocking {
-			assertThat(request.awaitBodyOrNull<String>()).isNull()
-		}
+		assertThat(request.awaitBodyOrNull<String>()).isNull()
 	}
 
 	@Test
-	fun `awaitBodyOrNull with KClass parameters`() {
+	suspend fun `awaitBodyOrNull with KClass parameters`() {
 		every { request.bodyToMono(String::class.java) } returns Mono.empty()
-		runBlocking {
-			assertThat(request.awaitBodyOrNull(String::class)).isNull()
-		}
+		assertThat(request.awaitBodyOrNull(String::class)).isNull()
 	}
 
 	@Test
-	fun awaitFormData() {
+	suspend fun awaitFormData() {
 		val map = mockk<MultiValueMap<String, String>>()
 		every { request.formData() } returns Mono.just(map)
-		runBlocking {
-			assertThat(request.awaitFormData()).isEqualTo(map)
-		}
+		assertThat(request.awaitFormData()).isEqualTo(map)
 	}
 
 	@Test
-	fun awaitMultipartData() {
+	suspend fun awaitMultipartData() {
 		val map = mockk<MultiValueMap<String, Part>>()
 		every { request.multipartData() } returns Mono.just(map)
-		runBlocking {
-			assertThat(request.awaitMultipartData()).isEqualTo(map)
-		}
+		assertThat(request.awaitMultipartData()).isEqualTo(map)
 	}
 
 	@Test
-	fun awaitPrincipal() {
+	suspend fun awaitPrincipal() {
 		val principal = mockk<Principal>()
 		every { request.principal() } returns Mono.just(principal)
-		runBlocking {
-			assertThat(request.awaitPrincipal()).isEqualTo(principal)
-		}
+		assertThat(request.awaitPrincipal()).isEqualTo(principal)
 	}
 
 	@Test
-	fun awaitSession() {
+	suspend fun awaitSession() {
 		val session = mockk<WebSession>()
 		every { request.session() } returns Mono.just(session)
-		runBlocking {
-			assertThat(request.awaitSession()).isEqualTo(session)
-		}
+		assertThat(request.awaitSession()).isEqualTo(session)
 	}
 
 	@Test

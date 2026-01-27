@@ -20,7 +20,6 @@ import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.toList
-import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.reactivestreams.Publisher
@@ -40,36 +39,30 @@ class RSocketRequesterExtensionsTests {
 
 	@Test
 	@Suppress("DEPRECATION")
-	fun connectAndAwait() {
+	suspend fun connectAndAwait() {
 		val requester = mockk<RSocketRequester>()
 		val builder = mockk<RSocketRequester.Builder>()
 		every { builder.connect(any()) } returns Mono.just(requester)
-		runBlocking {
-			assertThat(builder.connectAndAwait(mockk())).isEqualTo(requester)
-		}
+		assertThat(builder.connectAndAwait(mockk())).isEqualTo(requester)
 	}
 
 	@Test
 	@Suppress("DEPRECATION")
-	fun connectTcpAndAwait() {
+	suspend fun connectTcpAndAwait() {
 		val host = "127.0.0.1"
 		val requester = mockk<RSocketRequester>()
 		val builder = mockk<RSocketRequester.Builder>()
 		every { builder.connectTcp(host, any()) } returns Mono.just(requester)
-		runBlocking {
-			assertThat(builder.connectTcpAndAwait(host, 0)).isEqualTo(requester)
-		}
+		assertThat(builder.connectTcpAndAwait(host, 0)).isEqualTo(requester)
 	}
 
 	@Test
 	@Suppress("DEPRECATION")
-	fun connectWebSocketAndAwait() {
+	suspend fun connectWebSocketAndAwait() {
 		val requester = mockk<RSocketRequester>()
 		val builder = mockk<RSocketRequester.Builder>()
 		every { builder.connectWebSocket(any()) } returns Mono.just(requester)
-		runBlocking {
-			assertThat(builder.connectWebSocketAndAwait(mockk())).isEqualTo(requester)
-		}
+		assertThat(builder.connectWebSocketAndAwait(mockk())).isEqualTo(requester)
 	}
 
 	@Test
@@ -104,57 +97,45 @@ class RSocketRequesterExtensionsTests {
 	}
 
 	@Test
-	fun sendAndAwait() {
+	suspend fun sendAndAwait() {
 		val retrieveSpec = mockk<RSocketRequester.RetrieveSpec>()
 		every { retrieveSpec.send() } returns Mono.empty()
-		runBlocking {
-			retrieveSpec.sendAndAwait()
-		}
+		retrieveSpec.sendAndAwait()
 	}
 
 	@Test
-	fun retrieveAndAwait() {
+	suspend fun retrieveAndAwait() {
 		val response = "foo"
 		val retrieveSpec = mockk<RSocketRequester.RetrieveSpec>()
 		every { retrieveSpec.retrieveMono(match<ParameterizedTypeReference<*>>(stringTypeRefMatcher)) } returns Mono.just("foo")
-		runBlocking {
-			assertThat(retrieveSpec.retrieveAndAwait<String>()).isEqualTo(response)
-		}
+		assertThat(retrieveSpec.retrieveAndAwait<String>()).isEqualTo(response)
 	}
 
 	@Test
-	fun retrieveAndAwaitOrNull() {
+	suspend fun retrieveAndAwaitOrNull() {
 		val retrieveSpec = mockk<RSocketRequester.RetrieveSpec>()
 		every { retrieveSpec.retrieveMono(match<ParameterizedTypeReference<*>>(stringTypeRefMatcher)) } returns Mono.empty()
-		runBlocking {
-			assertThat(retrieveSpec.retrieveAndAwaitOrNull<String>()).isNull()
-		}
+		assertThat(retrieveSpec.retrieveAndAwaitOrNull<String>()).isNull()
 	}
 
 	@Test
-	fun retrieveFlow() {
+	suspend fun retrieveFlow() {
 		val retrieveSpec = mockk<RSocketRequester.RetrieveSpec>()
 		every { retrieveSpec.retrieveFlux(match<ParameterizedTypeReference<*>>(stringTypeRefMatcher)) } returns Flux.just("foo", "bar")
-		runBlocking {
-			assertThat(retrieveSpec.retrieveFlow<String>().toList()).contains("foo", "bar")
-		}
+		assertThat(retrieveSpec.retrieveFlow<String>().toList()).contains("foo", "bar")
 	}
 
 	@Test
 	fun retrieveMono() {
 		val retrieveSpec = mockk<RSocketRequester.RetrieveSpec>()
 		every { retrieveSpec.retrieveMono(match<ParameterizedTypeReference<*>>(stringTypeRefMatcher)) } returns Mono.just("foo")
-		runBlocking {
-			assertThat(retrieveSpec.retrieveMono<String>().block()).isEqualTo("foo")
-		}
+		assertThat(retrieveSpec.retrieveMono<String>().block()).isEqualTo("foo")
 	}
 
 	@Test
 	fun retrieveFlux() {
 		val retrieveSpec = mockk<RSocketRequester.RetrieveSpec>()
 		every { retrieveSpec.retrieveFlux(match<ParameterizedTypeReference<*>>(stringTypeRefMatcher)) } returns Flux.just("foo", "bar")
-		runBlocking {
-			assertThat(retrieveSpec.retrieveFlux<String>().collectList().block()).contains("foo", "bar")
-		}
+		assertThat(retrieveSpec.retrieveFlux<String>().collectList().block()).contains("foo", "bar")
 	}
 }

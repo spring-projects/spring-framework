@@ -49,7 +49,7 @@ class MethodValidationKotlinTests {
 	}
 
 	@Test
-	fun coroutinesParameterValidation() = runBlocking<Unit> {
+	suspend fun coroutinesParameterValidation() {
 		val bean = MyValidCoroutinesBean()
 		val proxyFactory = ProxyFactory(bean)
 		val validator = LocalValidatorFactoryBean()

@@ -102,12 +102,10 @@ class WebClientExtensionsTests {
 	}
 
 	@Test
-	fun `awaitExchange with function parameter`() {
+	suspend fun `awaitExchange with function parameter`() {
 		val foo = mockk<Foo>()
 		every { requestBodySpec.exchangeToMono(any<Function<ClientResponse, Mono<Foo>>>()) } returns Mono.just(foo)
-		runBlocking {
-			assertThat(requestBodySpec.awaitExchange { foo }).isEqualTo(foo)
-		}
+		assertThat(requestBodySpec.awaitExchange { foo }).isEqualTo(foo)
 	}
 
 	@Test
@@ -123,21 +121,17 @@ class WebClientExtensionsTests {
 	}
 
 	@Test
-	fun `awaitExchangeOrNull returning null`() {
+	suspend fun `awaitExchangeOrNull returning null`() {
 		val foo = mockk<Foo>()
 		every { requestBodySpec.exchangeToMono(any<Function<ClientResponse, Mono<Foo>>>()) } returns Mono.empty()
-		runBlocking {
-			assertThat(requestBodySpec.awaitExchangeOrNull { foo }).isEqualTo(null)
-		}
+		assertThat(requestBodySpec.awaitExchangeOrNull { foo }).isEqualTo(null)
 	}
 
 	@Test
-	fun `awaitExchangeOrNull returning object`() {
+	suspend fun `awaitExchangeOrNull returning object`() {
 		val foo = mockk<Foo>()
 		every { requestBodySpec.exchangeToMono(any<Function<ClientResponse, Mono<Foo>>>()) } returns Mono.just(foo)
-		runBlocking {
-			assertThat(requestBodySpec.awaitExchangeOrNull { foo }).isEqualTo(foo)
-		}
+		assertThat(requestBodySpec.awaitExchangeOrNull { foo }).isEqualTo(foo)
 	}
 
 	@Test
@@ -153,65 +147,53 @@ class WebClientExtensionsTests {
 	}
 
 	@Test
-	fun exchangeToFlow() {
+	suspend fun exchangeToFlow() {
 		val foo = mockk<Foo>()
 		every { requestBodySpec.exchangeToFlux(any<Function<ClientResponse, Flux<Foo>>>()) } returns Flux.just(foo, foo)
-		runBlocking {
-			assertThat(requestBodySpec.exchangeToFlow {
-				flow {
-					emit(foo)
-					emit(foo)
-				}
-			}.toList()).isEqualTo(listOf(foo, foo))
-		}
+		assertThat(requestBodySpec.exchangeToFlow {
+			flow {
+				emit(foo)
+				emit(foo)
+			}
+		}.toList()).isEqualTo(listOf(foo, foo))
 	}
 
 	@Test
-	fun awaitBody() {
+	suspend fun awaitBody() {
 		val spec = mockk<WebClient.ResponseSpec>()
 		every { spec.bodyToMono<String>() } returns Mono.just("foo")
-		runBlocking {
-			assertThat(spec.awaitBody<String>()).isEqualTo("foo")
-		}
+		assertThat(spec.awaitBody<String>()).isEqualTo("foo")
 	}
 
 	@Test
-	fun `awaitBody of type Unit`() {
+	suspend fun `awaitBody of type Unit`() {
 		val spec = mockk<WebClient.ResponseSpec>()
 		val entity = mockk<ResponseEntity<Void>>()
 		every { spec.toBodilessEntity() } returns Mono.just(entity)
-		runBlocking {
-			assertThat(spec.awaitBody<Unit>()).isEqualTo(Unit)
-		}
+		assertThat(spec.awaitBody<Unit>()).isEqualTo(Unit)
 	}
 
 	@Test
-	fun awaitBodyOrNull() {
+	suspend fun awaitBodyOrNull() {
 		val spec = mockk<WebClient.ResponseSpec>()
 		every { spec.bodyToMono<String>() } returns Mono.just("foo")
-		runBlocking {
-			assertThat(spec.awaitBodyOrNull<String>()).isEqualTo("foo")
-		}
+		assertThat(spec.awaitBodyOrNull<String>()).isEqualTo("foo")
 	}
 
 	@Test
-	fun `awaitBodyOrNull of type Unit`() {
+	suspend fun `awaitBodyOrNull of type Unit`() {
 		val spec = mockk<WebClient.ResponseSpec>()
 		val entity = mockk<ResponseEntity<Void>>()
 		every { spec.toBodilessEntity() } returns Mono.just(entity)
-		runBlocking {
-			assertThat(spec.awaitBodyOrNull<Unit>()).isEqualTo(Unit)
-		}
+		assertThat(spec.awaitBodyOrNull<Unit>()).isEqualTo(Unit)
 	}
 
 	@Test
-	fun awaitBodilessEntity() {
+	suspend fun awaitBodilessEntity() {
 		val spec = mockk<WebClient.ResponseSpec>()
 		val entity = mockk<ResponseEntity<Void>>()
 		every { spec.toBodilessEntity() } returns Mono.just(entity)
-		runBlocking {
-			assertThat(spec.awaitBodilessEntity()).isEqualTo(entity)
-		}
+		assertThat(spec.awaitBodilessEntity()).isEqualTo(entity)
 	}
 
 	@Test
