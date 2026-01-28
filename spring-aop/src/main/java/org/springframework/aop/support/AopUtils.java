@@ -382,7 +382,7 @@ public abstract class AopUtils {
 			Continuation<?> continuation = (Continuation<?>) args[args.length -1];
 			Assert.state(continuation != null, "No Continuation available");
 			CoroutineContext context = continuation.getContext().minusKey(Job.Key);
-			return CoroutinesUtils.invokeSuspendingFunction(context, method, target, args);
+			return CoroutinesUtils.invokeSuspendingFunctionPreserveNulls(context, method, target, args);
 		}
 	}
 
