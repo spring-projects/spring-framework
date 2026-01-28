@@ -89,7 +89,7 @@ public @interface TestConstructor {
 	 * {@link org.springframework.core.SpringProperties SpringProperties}
 	 * mechanism.
 	 * <p>This property may also be configured as a
-	 * <a href="https://junit.org/junit5/docs/current/user-guide/#running-tests-config-params">JUnit
+	 * <a href="https://docs.junit.org/current/running-tests/configuration-parameters.html">JUnit
 	 * Platform configuration parameter</a>.
 	 * @see #autowireMode
 	 */

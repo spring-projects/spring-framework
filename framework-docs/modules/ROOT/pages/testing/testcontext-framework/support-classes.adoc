@@ -25,7 +25,7 @@ TestNG:
 * Dependency injection for test constructors, test methods, and test lifecycle callback
   methods. See xref:testing/testcontext-framework/support-classes.adoc#testcontext-junit-jupiter-di[Dependency
   Injection with the `SpringExtension`] for further details.
-* Powerful support for link:https://docs.junit.org/current/user-guide/#extensions-conditions[conditional
+* Powerful support for link:https://docs.junit.org/current/extensions/conditional-test-execution.html[conditional
   test execution] based on SpEL expressions, environment variables, system properties,
   and so on. See the documentation for `@EnabledIf` and `@DisabledIf` in
   xref:testing/annotations/integration-junit-jupiter.adoc[Spring JUnit Jupiter Testing Annotations]
@@ -163,7 +163,7 @@ for further details.
 === Dependency Injection with the `SpringExtension`
 
 The `SpringExtension` implements the
-link:https://docs.junit.org/current/user-guide/#extensions-parameter-resolution[`ParameterResolver`]
+link:https://docs.junit.org/current/extensions/parameter-resolution.html[`ParameterResolver`]
 extension API from JUnit Jupiter, which lets Spring provide dependency injection for test
 constructors, test methods, and test lifecycle callback methods.
 

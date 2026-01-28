@@ -187,7 +187,7 @@ default mode may be set via the
 xref:appendix.adoc#appendix-spring-properties[`SpringProperties`] mechanism.
 
 The default mode may also be configured as a
-https://docs.junit.org/current/user-guide/#running-tests-config-params[JUnit Platform configuration parameter].
+https://docs.junit.org/current/running-tests/configuration-parameters.html[JUnit Platform configuration parameter].
 
 If the `spring.test.constructor.autowire.mode` property is not set, test class
 constructors will not be automatically autowired.
