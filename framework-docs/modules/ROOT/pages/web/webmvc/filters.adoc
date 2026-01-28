@@ -120,17 +120,27 @@ See the sections on xref:web/webmvc-cors.adoc[CORS] and the xref:web/webmvc-cors
 == URL Handler
 [.small]#xref:web/webflux/reactive-spring.adoc#filters.url-handler[See equivalent in the Reactive stack]#
 
-In previous Spring Framework versions, Spring MVC could be configured to ignore trailing slashes in URL paths
-when mapping incoming requests on controller methods. This means that sending a "GET /home/" request would be
-handled by a controller method annotated with `@GetMapping("/home")`.
+You may want your controller endpoints to match routes with or without a trailing slash in the URL path.
+For example, both "GET /home" and "GET /home/" should be handled by a controller method annotated with `@GetMapping("/home")`.
 
-This option was deprecated in 6.0 and removed in 7.0, but applications are still expected to handle such
-requests in a safe way. The `UrlHandlerFilter` Servlet filter has been designed for this purpose.
-It can be configured to:
+Spring provides `UrlHandlerFilter` that removes the trailing slash from URL paths to ensure a consistent view of paths with or without a trailing slash.
+This is important to avoid a mismatch between URL-based authorization decisions and web framework request mappings.
+The filter can remove the trailing slash in one of a couple of ways:
 
-* respond with an HTTP redirect status when receiving URLs with trailing slashes, sending browsers to the non-trailing slash URL variant.
-* wrap the request to act as if the request was sent without a trailing slash and continue the processing of the request.
+* respond with an HTTP redirect status that sends clients to the same path without a trailing slash.
+* wrap the request to remove the trailing slash.
+
+NOTE: Historically Spring MVC supported trailing slash matching of URL paths.
+This capability was deprecated in 6.0 for security reasons and removed in 7.0 with
+`UrlHandlerFilter` providing a safer alternative.
 
 Here is how you can instantiate and configure a `UrlHandlerFilter` for a blog application:
 
 include-code::./UrlHandlerFilterConfiguration[tag=config,indent=0]
+
+Keep in mind the following:
+
+- the root path `"/"` is excluded from trailing slash handling.
+- prefer `@RequestMapping` over
+- `@RequestMapping("/")` adds a trailing slash to a type-level mapping, and therefore will
+not map when trailing slash handling applies; use `@RequestMapping` (no path attribute) instead.

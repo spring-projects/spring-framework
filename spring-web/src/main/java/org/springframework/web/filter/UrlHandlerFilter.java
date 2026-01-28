@@ -100,10 +100,18 @@ public final class UrlHandlerFilter extends OncePerRequestFilter {
 
 
 	/**
-	 * Create a builder by adding a handler for URL's with a trailing slash.
-	 * @param pathPatterns path patterns to map the handler to, for example,
-	 * <code>"/path/&#42;"</code>, <code>"/path/&#42;&#42;"</code>,
-	 * <code>"/path/foo/"</code>.
+	 * Add a handler that removes the trailing slash from URL paths to ensure
+	 * consistent interpretation of paths with or without a trailing slash for
+	 * requestion mapping purposes. This is important especially to avoid
+	 * misalignment between URL-based authorization decisions and web framework
+	 * request mappings.
+	 * <p>The root path {@code "/"} is excluded from trailing slash handling.
+	 * <p><strong>Note:</strong> A method-level {@code @RequestMapping("/")} adds
+	 * a trailing slash to a type-level prefix mapping, and therefore would never
+	 * match to a URL with the trailing slash removed. Use {@code @RequestMapping}
+	 * without a path instead to avoid the trailing slash in the mapping.
+	 * @param pathPatterns patterns to map the handler to, e.g.
+	 * <code>"/path/&#42;"</code>, <code>"/path/&#42;&#42;"</code>, <code>"/path/foo/"</code>
 	 * @return a spec to configure the trailing slash handler with
 	 * @see Builder#trailingSlashHandler(String...)
 	 */
