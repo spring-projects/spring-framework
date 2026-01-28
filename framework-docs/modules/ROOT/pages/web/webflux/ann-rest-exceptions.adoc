@@ -34,7 +34,7 @@ any `@RequestMapping` method to render an RFC 9457 response. This is processed a
 already set.
 - The Jackson JSON and XML message converters use "application/problem+json" or
 "application/problem+xml" respectively as the producible media types for `ProblemDetail`
-to ensure they are favoured for content negotiation.
+to ensure they are favored for content negotiation.
 
 To enable RFC 9457 responses for Spring WebFlux exceptions and for any
 `ErrorResponseException`, extend `ResponseEntityExceptionHandler` and declare it as an
