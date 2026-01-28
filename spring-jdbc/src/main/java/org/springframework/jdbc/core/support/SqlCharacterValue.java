@@ -78,7 +78,7 @@ public class SqlCharacterValue implements SqlTypeValue {
 	/**
 	 * Create a new {@code SqlCharacterValue} for the given content.
 	 * @param reader the content reader
-	 * @param length the length of the content
+	 * @param length the length of the content (or -1 if undetermined)
 	 */
 	public SqlCharacterValue(Reader reader, long length) {
 		this.content = reader;
@@ -88,7 +88,7 @@ public class SqlCharacterValue implements SqlTypeValue {
 	/**
 	 * Create a new {@code SqlCharacterValue} for the given content.
 	 * @param asciiStream the content as ASCII stream
-	 * @param length the length of the content
+	 * @param length the length of the content (or -1 if undetermined)
 	 */
 	public SqlCharacterValue(InputStream asciiStream, long length) {
 		this.content = asciiStream;
@@ -109,8 +109,8 @@ public class SqlCharacterValue implements SqlTypeValue {
 		else if (this.content instanceof Reader reader) {
 			setReader(ps, paramIndex, sqlType, reader, this.length);
 		}
-		else if (this.content instanceof InputStream asciiStream) {
-			ps.setAsciiStream(paramIndex, asciiStream, this.length);
+		else if (this.content instanceof InputStream inputStream) {
+			setInputStream(ps, paramIndex, inputStream, this.length);
 		}
 		else {
 			throw new IllegalArgumentException("Illegal content type: " + this.content.getClass().getName());
@@ -135,13 +135,39 @@ public class SqlCharacterValue implements SqlTypeValue {
 			throws SQLException {
 
 		if (sqlType == Types.CLOB) {
-			ps.setClob(paramIndex, reader, length);
+			if (length >= 0) {
+				ps.setClob(paramIndex, reader, length);
+			}
+			else {
+				ps.setClob(paramIndex, reader);
+			}
 		}
 		else if (sqlType == Types.NCLOB) {
-			ps.setNClob(paramIndex, reader, length);
+			if (length >= 0) {
+				ps.setNClob(paramIndex, reader, length);
+			}
+			else {
+				ps.setNClob(paramIndex, reader);
+			}
 		}
 		else {
-			ps.setCharacterStream(paramIndex, reader, length);
+			if (length >= 0) {
+				ps.setCharacterStream(paramIndex, reader, length);
+			}
+			else {
+				ps.setCharacterStream(paramIndex, reader);
+			}
+		}
+	}
+
+	private void setInputStream(PreparedStatement ps, int paramIndex, InputStream is, long length)
+			throws SQLException {
+
+		if (length >= 0) {
+			ps.setAsciiStream(paramIndex, is, length);
+		}
+		else {
+			ps.setAsciiStream(paramIndex, is);
 		}
 	}
 

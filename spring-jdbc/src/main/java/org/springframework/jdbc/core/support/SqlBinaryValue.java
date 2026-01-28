@@ -71,7 +71,7 @@ public class SqlBinaryValue implements SqlTypeValue {
 	/**
 	 * Create a new {@code SqlBinaryValue} for the given content.
 	 * @param stream the content stream
-	 * @param length the length of the content
+	 * @param length the length of the content (or -1 if undetermined)
 	 */
 	public SqlBinaryValue(InputStream stream, long length) {
 		this.content = stream;
@@ -83,7 +83,7 @@ public class SqlBinaryValue implements SqlTypeValue {
 	 * <p>Consider specifying a {@link Resource} with content length support
 	 * when available: {@link SqlBinaryValue#SqlBinaryValue(Resource)}.
 	 * @param resource the resource to obtain a content stream from
-	 * @param length the length of the content
+	 * @param length the length of the content (or -1 if undetermined)
 	 */
 	public SqlBinaryValue(InputStreamSource resource, long length) {
 		this.content = resource;
@@ -147,10 +147,20 @@ public class SqlBinaryValue implements SqlTypeValue {
 			throws SQLException {
 
 		if (sqlType == Types.BLOB) {
-			ps.setBlob(paramIndex, is, length);
+			if (length >= 0) {
+				ps.setBlob(paramIndex, is, length);
+			}
+			else {
+				ps.setBlob(paramIndex, is);
+			}
 		}
 		else {
-			ps.setBinaryStream(paramIndex, is, length);
+			if (length >= 0) {
+				ps.setBinaryStream(paramIndex, is, length);
+			}
+			else {
+				ps.setBinaryStream(paramIndex, is);
+			}
 		}
 	}
 
