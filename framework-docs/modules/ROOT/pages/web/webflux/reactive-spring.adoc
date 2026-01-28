@@ -395,7 +395,6 @@ include-code::./UrlHandlerFilterConfiguration[tag=config,indent=0]
 Keep in mind the following:
 
 - the root path `"/"` is excluded from trailing slash handling.
-- prefer `@RequestMapping` over
 - `@RequestMapping("/")` adds a trailing slash to a type-level mapping, and therefore will
 not map when trailing slash handling applies; use `@RequestMapping` (no path attribute) instead.
 
