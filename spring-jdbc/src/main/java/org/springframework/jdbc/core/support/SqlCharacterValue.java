@@ -29,7 +29,7 @@ import org.jspecify.annotations.Nullable;
 import org.springframework.jdbc.core.SqlTypeValue;
 
 /**
- * Object to represent a character-based parameter value for a SQL statement,
+ * Object to represent a character-based parameter value for an SQL statement,
  * for example, a character stream for a CLOB/NCLOB or a LONGVARCHAR column.
  *
  * <p>Designed for use with {@link org.springframework.jdbc.core.JdbcTemplate}
@@ -37,7 +37,7 @@ import org.springframework.jdbc.core.SqlTypeValue;
  * passed in as a parameter value wrapping the target content value.
  *
  * <p>Can be combined with {@link org.springframework.jdbc.core.SqlParameterValue}
- * for specifying a SQL type, for example,
+ * for specifying an SQL type, for example,
  * {@code new SqlParameterValue(Types.CLOB, new SqlCharacterValue(myContent))}.
  * With most database drivers, the type hint is not actually necessary.
  *

@@ -30,7 +30,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.jdbc.core.SqlTypeValue;
 
 /**
- * Object to represent a binary parameter value for a SQL statement, for example,
+ * Object to represent a binary parameter value for an SQL statement, for example,
  * a binary stream for a BLOB or a LONGVARBINARY or PostgreSQL BYTEA column.
  *
  * <p>Designed for use with {@link org.springframework.jdbc.core.JdbcTemplate}
@@ -38,7 +38,7 @@ import org.springframework.jdbc.core.SqlTypeValue;
  * passed in as a parameter value wrapping the target content value.
  *
  * <p>Can be combined with {@link org.springframework.jdbc.core.SqlParameterValue}
- * for specifying a SQL type, for example,
+ * for specifying an SQL type, for example,
  * {@code new SqlParameterValue(Types.BLOB, new SqlBinaryValue(myContent))}.
  * With most database drivers, the type hint is not actually necessary.
  *

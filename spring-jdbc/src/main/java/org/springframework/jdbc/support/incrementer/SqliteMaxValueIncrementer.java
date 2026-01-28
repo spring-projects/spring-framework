@@ -29,7 +29,7 @@ import org.springframework.jdbc.support.JdbcUtils;
 
 /**
  * {@link DataFieldMaxValueIncrementer} that increments the maximum value of a given table with
- * the equivalent of an auto-increment column, using a SQLite {@code select max(rowid)} query.
+ * the equivalent of an auto-increment column, using an SQLite {@code select max(rowid)} query.
  *
  * @author Luke Taylor
  * @author Juergen Hoeller
