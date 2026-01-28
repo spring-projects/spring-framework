@@ -419,7 +419,7 @@ public class LocalValidatorFactoryBean extends SpringValidatorAdapter
 				return super.unwrap(type);
 			}
 			catch (ValidationException ignored) {
-				// we'll try ValidatorFactory unwrapping next
+				// Trying ValidatorFactory unwrapping next
 			}
 		}
 		if (this.validatorFactory != null) {
