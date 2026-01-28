@@ -1,16 +1,17 @@
 [[beans-standard-annotations]]
-= Using JSR 330 Standard Annotations
+= Using JSR-330 Standard Annotations
 
-Spring offers support for JSR-330 standard annotations (Dependency Injection). Those
-annotations are scanned in the same way as the Spring annotations. To use them, you need
-to have the relevant jars in your classpath.
+Spring offers support for JSR-330 standard _Dependency Injection_ annotations which are
+available in the `jakarta.inject` package. These annotations may optionally be used as
+alternatives to Spring annotations.
+
+To use them, you need to have the relevant jar in your classpath. For example, the
+`jakarta.inject` artifact is available in the standard Maven repository
+(`https://repo.maven.apache.org/maven2/jakarta/inject/jakarta.inject-api/2.0.0/`),
 
 [NOTE]
 =====
-If you use Maven, the `jakarta.inject` artifact is available in the standard Maven
-repository (
-https://repo.maven.apache.org/maven2/jakarta/inject/jakarta.inject-api/2.0.0/[https://repo.maven.apache.org/maven2/jakarta/inject/jakarta.inject-api/2.0.0/]).
-You can add the following dependency to your file pom.xml:
+If you use Maven, you can add the following dependency to your `pom.xml` file.
 
 [source,xml,indent=0,subs="verbatim,quotes"]
 ----
@@ -26,13 +27,14 @@ You can add the following dependency to your file pom.xml:
 [[beans-inject-named]]
 == Dependency Injection with `@Inject` and `@Named`
 
-Instead of `@Autowired`, you can use `@jakarta.inject.Inject` as follows:
+Instead of using `@Autowired` for dependency injection, you may optionally choose to use
+`@jakarta.inject.Inject` as follows.
 
 [tabs]
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",fold="-imports"]
 ----
 	import jakarta.inject.Inject;
 
@@ -54,7 +56,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes"]
+[source,kotlin,indent=0,subs="verbatim,quotes",fold="-imports"]
 ----
 	import jakarta.inject.Inject
 
@@ -72,17 +74,19 @@ Kotlin::
 ----
 ======
 
-As with `@Autowired`, you can use `@Inject` at the field level, method level
-and constructor-argument level. Furthermore, you may declare your injection point as a
-`Provider`, allowing for on-demand access to beans of shorter scopes or lazy access to
-other beans through a `Provider.get()` call. The following example offers a variant of the
-preceding example:
+As with `@Autowired`, you can use `@Inject` at the field level, method level, and
+constructor-argument level.
+
+Furthermore, as an alternative to Spring's `ObjectProvider` mechanism, you may choose to
+declare your injection point as a `jakarta.inject.Provider`, allowing for on-demand
+access to beans of shorter scopes or lazy access to other beans through a
+`Provider.get()` call. The following example offers a variant of the preceding example.
 
 [tabs]
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",fold="-imports"]
 ----
 	import jakarta.inject.Inject;
 	import jakarta.inject.Provider;
@@ -105,9 +109,10 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes"]
+[source,kotlin,indent=0,subs="verbatim,quotes",fold="-imports"]
 ----
 	import jakarta.inject.Inject
+	import jakarta.inject.Provider
 
 	class SimpleMovieLister {
 
@@ -123,14 +128,15 @@ Kotlin::
 ----
 ======
 
-If you would like to use a qualified name for the dependency that should be injected,
-you should use the `@Named` annotation, as the following example shows:
+If you would like to use a qualified name for the dependency that should be injected, you
+may choose to use the `@Named` annotation as an alternative to Spring's `@Qualifier`
+support, as the following example shows.
 
 [tabs]
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",fold="-imports"]
 ----
 	import jakarta.inject.Inject;
 	import jakarta.inject.Named;
@@ -150,7 +156,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes"]
+[source,kotlin,indent=0,subs="verbatim,quotes",fold="-imports"]
 ----
 	import jakarta.inject.Inject
 	import jakarta.inject.Named
@@ -170,12 +176,15 @@ Kotlin::
 ======
 
 As with `@Autowired`, `@Inject` can also be used with `java.util.Optional` or
-`@Nullable`. This is even more applicable here, since `@Inject` does not have
-a `required` attribute. The following pair of examples show how to use `@Inject` and
-`@Nullable`:
+`@Nullable`. This is even more applicable here, since `@Inject` does not have a
+`required` attribute. The following examples show how to use `@Inject` with `Optional`,
+`@Nullable`, and Kotlin's built-in support for nullable types.
 
-[source,java,indent=0,subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",fold="-imports"]
 ----
+	import jakarta.inject.Inject;
+	import java.util.Optional;
+
 	public class SimpleMovieLister {
 
 		@Inject
@@ -189,8 +198,11 @@ a `required` attribute. The following pair of examples show how to use `@Inject`
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",fold="-imports"]
 ----
+	import jakarta.inject.Inject;
+	import org.jspecify.annotations.Nullable;
+
 	public class SimpleMovieLister {
 
 		@Inject
@@ -202,8 +214,10 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes"]
+[source,kotlin,indent=0,subs="verbatim,quotes",fold="-imports"]
 ----
+	import jakarta.inject.Inject
+
 	class SimpleMovieLister {
 
 		@Inject
@@ -214,21 +228,21 @@ Kotlin::
 
 
 [[beans-named]]
-== `@Named` and `@ManagedBean`: Standard Equivalents to the `@Component` Annotation
+== `@Named`: Standard Equivalent to the `@Component` Annotation
 
-Instead of `@Component`, you can use `@jakarta.inject.Named` or `jakarta.annotation.ManagedBean`,
-as the following example shows:
+Instead of `@Component` or other Spring stereotype annotations, you may optionally choose
+to use `@jakarta.inject.Named`, as the following example shows.
 
 [tabs]
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",fold="-imports"]
 ----
 	import jakarta.inject.Inject;
 	import jakarta.inject.Named;
 
-	@Named("movieListener")  // @ManagedBean("movieListener") could be used as well
+	@Named("movieListener")
 	public class SimpleMovieLister {
 
 		private MovieFinder movieFinder;
@@ -244,12 +258,12 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes"]
+[source,kotlin,indent=0,subs="verbatim,quotes",fold="-imports"]
 ----
 	import jakarta.inject.Inject
 	import jakarta.inject.Named
 
-	@Named("movieListener")  // @ManagedBean("movieListener") could be used as well
+	@Named("movieListener")
 	class SimpleMovieLister {
 
 		@Inject
@@ -260,14 +274,15 @@ Kotlin::
 ----
 ======
 
-It is very common to use `@Component` without specifying a name for the component.
-`@Named` can be used in a similar fashion, as the following example shows:
+It is very common to use `@Component` or other Spring stereotype annotations without
+specifying an explicit name for the component, and `@Named` can be used in a similar
+fashion, as the following example shows.
 
 [tabs]
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",fold="-imports"]
 ----
 	import jakarta.inject.Inject;
 	import jakarta.inject.Named;
@@ -288,7 +303,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes"]
+[source,kotlin,indent=0,subs="verbatim,quotes",fold="-imports"]
 ----
 	import jakarta.inject.Inject
 	import jakarta.inject.Named
@@ -304,14 +319,14 @@ Kotlin::
 ----
 ======
 
-When you use `@Named` or `@ManagedBean`, you can use component scanning in the
-exact same way as when you use Spring annotations, as the following example shows:
+When you use `@Named`, you can use component scanning in the exact same way as when you
+use Spring annotations, as the following example shows.
 
 [tabs]
 ======
 Java::
 +
-[source,java,indent=0,subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",fold="-imports"]
 ----
 	@Configuration
 	@ComponentScan(basePackages = "org.example")
@@ -322,7 +337,7 @@ Java::
 
 Kotlin::
 +
-[source,kotlin,indent=0,subs="verbatim,quotes"]
+[source,kotlin,indent=0,subs="verbatim,quotes",fold="-imports"]
 ----
 	@Configuration
 	@ComponentScan(basePackages = ["org.example"])
@@ -332,55 +347,106 @@ Kotlin::
 ----
 ======
 
-NOTE: In contrast to `@Component`, the JSR-330 `@Named` and the JSR-250 `@ManagedBean`
-annotations are not composable. You should use Spring's stereotype model for building
-custom component annotations.
+NOTE: In contrast to `@Component`, the JSR-330 `@Named` annotation is not composable. You
+should use Spring's stereotype model for building custom component annotations.
+
+[TIP]
+====
+If you work with legacy systems that still use `@javax.inject.Named` or
+`@javax.annotation.ManagedBean` for components (note the `javax` package namespace), you
+can explicitly configure component scanning to include those annotations types, as shown
+in the following example.
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",fold="-imports"]
+----
+	@Configuration
+	@ComponentScan(
+		basePackages = "org.example",
+		includeFilters = @Filter({
+			javax.inject.Named.class,
+			javax.annotation.ManagedBean.class
+		})
+	)
+	public class AppConfig  {
+		// ...
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",fold="-imports"]
+----
+	@Configuration
+	@ComponentScan(
+		basePackages = ["org.example"],
+		includeFilters = [Filter([
+			javax.inject.Named::class,
+			javax.annotation.ManagedBean::class
+		])]
+	)
+	class AppConfig  {
+		// ...
+	}
+----
+======
+
+In addition, if you would like for the `value` attributes in `@javax.inject.Named` and
+`@javax.annotation.ManagedBean` to be used as component names, you need to override the
+`isStereotypeWithNameValue(...)` method in `AnnotationBeanNameGenerator` to add explicit
+support for `javax.annotation.ManagedBean` and `javax.inject.Named` and register your
+custom `AnnotationBeanNameGenerator` via the `nameGenerator` attribute in
+`@ComponentScan`.
+====
 
 
 [[beans-standard-annotations-limitations]]
 == Limitations of JSR-330 Standard Annotations
 
-When you work with standard annotations, you should know that some significant
-features are not available, as the following table shows:
+When you work with JSR-330 standard annotations, you should know that some significant
+features are not available, as the following table shows.
 
 [[annotations-comparison]]
-.Spring component model elements versus JSR-330 variants
+.Spring component model versus JSR-330 variants
 |===
-| Spring| jakarta.inject.*| jakarta.inject restrictions / comments
+| Spring | JSR-330 | JSR-330 restrictions / comments
 
-| @Autowired
-| @Inject
-| `@Inject` has no 'required' attribute. Can be used with Java 8's `Optional` instead.
+| `@Autowired`
+| `@Inject`
+| `@Inject` has no `required` attribute. Can be used with Java's `Optional` instead.
 
-| @Component
-| @Named / @ManagedBean
+| `@Component`
+| `@Named`
 | JSR-330 does not provide a composable model, only a way to identify named components.
 
-| @Scope("singleton")
-| @Singleton
+| `@Scope("singleton")`
+| `@Singleton`
 | The JSR-330 default scope is like Spring's `prototype`. However, in order to keep it
   consistent with Spring's general defaults, a JSR-330 bean declared in the Spring
   container is a `singleton` by default. In order to use a scope other than `singleton`,
   you should use Spring's `@Scope` annotation. `jakarta.inject` also provides a
-  `jakarta.inject.Scope` annotation: however, this one is only intended to be used
+  `jakarta.inject.Scope` annotation; however, this one is only intended to be used
   for creating custom annotations.
 
-| @Qualifier
-| @Qualifier / @Named
+| `@Qualifier`
+| `@Qualifier` / `@Named`
 | `jakarta.inject.Qualifier` is just a meta-annotation for building custom qualifiers.
   Concrete `String` qualifiers (like Spring's `@Qualifier` with a value) can be associated
   through `jakarta.inject.Named`.
 
-| @Value
+| `@Value`
 | -
 | no equivalent
 
-| @Lazy
+| `@Lazy`
 | -
 | no equivalent
 
-| ObjectFactory
-| Provider
+| `ObjectFactory`
+| `Provider`
 | `jakarta.inject.Provider` is a direct alternative to Spring's `ObjectFactory`,
   only with a shorter `get()` method name. It can also be used in combination with
   Spring's `@Autowired` or with non-annotated constructors and setter methods.
