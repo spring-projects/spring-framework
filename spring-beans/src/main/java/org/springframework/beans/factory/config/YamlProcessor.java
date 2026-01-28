@@ -313,8 +313,9 @@ public abstract class YamlProcessor {
 	 * source. When called with the Map from a {@link MatchCallback} the result will
 	 * contain the same values as the {@link MatchCallback} Properties.
 	 * @param source the source map
-	 * @param includeEmpty if empty entries should be included in the result
-	 * @param emptyValue the value used to represent empty entries (e.g. {@code null} or an empty {@code String}
+	 * @param includeEmpty whether empty entries should be included in the result
+	 * @param emptyValue the value used to represent an empty entry &mdash; for
+	 * example, {@code null} or an empty {@code String}
 	 * @return a flattened map
 	 * @since 7.0.4
 	 */
