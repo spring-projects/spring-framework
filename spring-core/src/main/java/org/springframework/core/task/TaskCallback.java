@@ -36,6 +36,7 @@ import org.jspecify.annotations.Nullable;
  * @param <E> the exception propagated, if any
  * @see SyncTaskExecutor#execute(TaskCallback)
  */
+@FunctionalInterface
 public interface TaskCallback<V extends @Nullable Object, E extends Exception> extends Callable<V> {
 
 	@Override
