@@ -16,7 +16,6 @@
 
 package org.springframework.util;
 
-import java.io.ByteArrayInputStream;
 import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
@@ -76,7 +75,7 @@ public abstract class FileCopyUtils {
 	public static void copy(byte[] in, File out) throws IOException {
 		Assert.notNull(in, "No input byte array specified");
 		Assert.notNull(out, "No output File specified");
-		copy(new ByteArrayInputStream(in), Files.newOutputStream(out.toPath()));
+		Files.write(out.toPath(), in);
 	}
 
 	/**
@@ -87,7 +86,7 @@ public abstract class FileCopyUtils {
 	 */
 	public static byte[] copyToByteArray(File in) throws IOException {
 		Assert.notNull(in, "No input File specified");
-		return copyToByteArray(Files.newInputStream(in.toPath()));
+		return Files.readAllBytes(in.toPath());
 	}
 
 
