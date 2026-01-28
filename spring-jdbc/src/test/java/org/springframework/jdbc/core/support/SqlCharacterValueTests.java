@@ -105,12 +105,30 @@ class SqlCharacterValueTests {
 	}
 
 	@Test
+	void withReaderUndeterminedLength() throws SQLException {
+		Reader content = new StringReader("abc");
+		SqlCharacterValue value = new SqlCharacterValue(content, -1);
+		PreparedStatement ps = mock();
+		value.setTypeValue(ps, 1, JdbcUtils.TYPE_UNKNOWN, null);
+		verify(ps).setCharacterStream(1, content);
+	}
+
+	@Test
 	void withReaderForClob() throws SQLException {
 		Reader content = new StringReader("abc");
 		SqlCharacterValue value = new SqlCharacterValue(content, 3);
 		PreparedStatement ps = mock();
 		value.setTypeValue(ps, 1, Types.CLOB, null);
 		verify(ps).setClob(1, content, 3L);
+	}
+
+	@Test
+	void withReaderForClobUndeterminedLength() throws SQLException {
+		Reader content = new StringReader("abc");
+		SqlCharacterValue value = new SqlCharacterValue(content, -1);
+		PreparedStatement ps = mock();
+		value.setTypeValue(ps, 1, Types.CLOB, null);
+		verify(ps).setClob(1, content);
 	}
 
 	@Test
@@ -123,12 +141,30 @@ class SqlCharacterValueTests {
 	}
 
 	@Test
+	void withReaderForNClobUndeterminedLength() throws SQLException {
+		Reader content = new StringReader("abc");
+		SqlCharacterValue value = new SqlCharacterValue(content, -1);
+		PreparedStatement ps = mock();
+		value.setTypeValue(ps, 1, Types.NCLOB, null);
+		verify(ps).setNClob(1, content);
+	}
+
+	@Test
 	void withAsciiStream() throws SQLException {
 		InputStream content = new ByteArrayInputStream("abc".getBytes(StandardCharsets.US_ASCII));
 		SqlCharacterValue value = new SqlCharacterValue(content, 3);
 		PreparedStatement ps = mock();
 		value.setTypeValue(ps, 1, JdbcUtils.TYPE_UNKNOWN, null);
 		verify(ps).setAsciiStream(1, content, 3L);
+	}
+
+	@Test
+	void withAsciiStreamUndeterminedLength() throws SQLException {
+		InputStream content = new ByteArrayInputStream("abc".getBytes(StandardCharsets.US_ASCII));
+		SqlCharacterValue value = new SqlCharacterValue(content, -1);
+		PreparedStatement ps = mock();
+		value.setTypeValue(ps, 1, JdbcUtils.TYPE_UNKNOWN, null);
+		verify(ps).setAsciiStream(1, content);
 	}
 
 }
