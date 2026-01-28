@@ -116,9 +116,9 @@ class CollectionUtilsTests {
 		assertThat(CollectionUtils.contains(Collections.enumeration(List.of()), "myElement")).isFalse();
 
 		List<String> list = Arrays.asList("myElement", null);
-		Enumeration<String> enumeration = Collections.enumeration(list);
-		assertThat(CollectionUtils.contains(enumeration, "myElement")).isTrue();
-		assertThat(CollectionUtils.contains(enumeration, null)).isTrue();
+		assertThat(CollectionUtils.contains(Collections.enumeration(list), "myElement")).isTrue();
+		assertThat(CollectionUtils.contains(Collections.enumeration(list), null)).isTrue();
+		assertThat(CollectionUtils.contains(Collections.enumeration(list), "nonExistingElement")).isFalse();
 	}
 
 	@Test
