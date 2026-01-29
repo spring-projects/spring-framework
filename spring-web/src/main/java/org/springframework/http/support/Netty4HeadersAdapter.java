@@ -144,7 +144,7 @@ public final class Netty4HeadersAdapter implements MultiValueMap<String, String>
 	@Nullable
 	@Override
 	public List<String> remove(Object key) {
-		if (key instanceof String headerName) {
+		if (key instanceof String headerName && this.headers.contains(headerName)) {
 			List<String> previousValues = this.headers.getAll(headerName);
 			this.headers.remove(headerName);
 			return previousValues;

@@ -129,7 +129,7 @@ class UndertowHeadersAdapter implements MultiValueMap<String, String> {
 	@Override
 	@Nullable
 	public List<String> remove(Object key) {
-		if (key instanceof String headerName) {
+		if (key instanceof String headerName && this.headers.contains(headerName)) {
 			Collection<String> removed = this.headers.remove(headerName);
 			if (removed != null) {
 				return new ArrayList<>(removed);
