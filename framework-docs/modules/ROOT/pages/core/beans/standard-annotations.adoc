@@ -354,7 +354,7 @@ should use Spring's stereotype model for building custom component annotations.
 ====
 If you work with legacy systems that still use `@javax.inject.Named` or
 `@javax.annotation.ManagedBean` for components (note the `javax` package namespace), you
-can explicitly configure component scanning to include those annotations types, as shown
+can explicitly configure component scanning to include those annotation types, as shown
 in the following example.
 
 [tabs]
