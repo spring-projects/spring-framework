@@ -93,9 +93,9 @@ public class RetryAnnotationBeanPostProcessor extends AbstractBeanFactoryAwareAd
 				return retrySpec;
 			}
 
-			Retryable retryable = AnnotatedElementUtils.getMergedAnnotation(method, Retryable.class);
+			Retryable retryable = AnnotatedElementUtils.findMergedAnnotation(method, Retryable.class);
 			if (retryable == null) {
-				retryable = AnnotatedElementUtils.getMergedAnnotation(targetClass, Retryable.class);
+				retryable = AnnotatedElementUtils.findMergedAnnotation(targetClass, Retryable.class);
 				if (retryable == null) {
 					return null;
 				}

@@ -523,7 +523,6 @@ class RetryInterceptorTests {
 
 		int counter = 0;
 
-		@Retryable(maxRetries = 5, delay = 10)
 		@Override
 		public void retryOperation() throws IOException {
 			counter++;

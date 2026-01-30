@@ -101,14 +101,14 @@ public class ConcurrencyLimitBeanPostProcessor extends AbstractBeanFactoryAwareA
 					interceptor = holder.methodInterceptors.get(method);
 					if (interceptor == null) {
 						boolean perMethod = false;
-						ConcurrencyLimit annotation = AnnotatedElementUtils.getMergedAnnotation(method, ConcurrencyLimit.class);
+						ConcurrencyLimit annotation = AnnotatedElementUtils.findMergedAnnotation(method, ConcurrencyLimit.class);
 						if (annotation != null) {
 							perMethod = true;
 						}
 						else {
 							interceptor = holder.classInterceptor;
 							if (interceptor == null) {
-								annotation = AnnotatedElementUtils.getMergedAnnotation(targetClass, ConcurrencyLimit.class);
+								annotation = AnnotatedElementUtils.findMergedAnnotation(targetClass, ConcurrencyLimit.class);
 							}
 						}
 						if (interceptor == null) {
