@@ -392,6 +392,17 @@ any of its subclasses and nested classes. Thus, you may annotate a top-level tes
 with `@NestedTestConfiguration`, and that will apply to all of its nested test classes
 recursively.
 
+[NOTE]
+====
+As of Spring Framework 7.0, the `SpringExtension` uses a test-method scoped
+`ExtensionContext` within `@Nested` test class hierarchies by default. However, the
+`SpringExtension` can be configured to use a test-class scoped `ExtensionContext`.
+
+See the documentation for
+xref:testing/annotations/integration-junit-jupiter.adoc#integration-testing-annotations-springextensionconfig[`@SpringExtensionConfig`]
+for details.
+====
+
 [TIP]
 ====
 If you are developing a component that integrates with the Spring TestContext Framework

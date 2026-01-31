@@ -5,6 +5,7 @@ The following annotations are supported when used in conjunction with the
 xref:testing/testcontext-framework/support-classes.adoc#testcontext-junit-jupiter-extension[`SpringExtension`]
 and JUnit Jupiter (that is, the programming model in JUnit):
 
+* xref:testing/annotations/integration-junit-jupiter.adoc#integration-testing-annotations-springextensionconfig[`@SpringExtensionConfig`]
 * xref:testing/annotations/integration-junit-jupiter.adoc#integration-testing-annotations-junit-jupiter-springjunitconfig[`@SpringJUnitConfig`]
 * xref:testing/annotations/integration-junit-jupiter.adoc#integration-testing-annotations-junit-jupiter-springjunitwebconfig[`@SpringJUnitWebConfig`]
 * xref:testing/annotations/integration-junit-jupiter.adoc#integration-testing-annotations-testconstructor[`@TestConstructor`]
@@ -13,6 +14,47 @@ and JUnit Jupiter (that is, the programming model in JUnit):
 * xref:testing/annotations/integration-junit-jupiter.adoc#integration-testing-annotations-junit-jupiter-disabledif[`@DisabledIf`]
 * xref:testing/annotations/integration-spring/annotation-disabledinaotmode.adoc[`@DisabledInAotMode`]
 
+
+[[integration-testing-annotations-springextensionconfig]]
+== `@SpringExtensionConfig`
+
+`@SpringExtensionConfig` is a type-level annotation that can be used to configure the
+behavior of the `SpringExtension`.
+
+As of Spring Framework 7.0, the `SpringExtension` is configured to use a test-method
+scoped `ExtensionContext`, which enables consistent dependency injection into fields and
+constructors from the `ApplicationContext` for the current test method in a `@Nested`
+test class hierarchy. However, if a third-party `TestExecutionListener` is not compatible
+with the semantics associated with a test-method scoped extension context — or if a
+developer wishes to switch to test-class scoped semantics — the `SpringExtension` can be
+configured to use a test-class scoped `ExtensionContext` by annotating a top-level test
+class with `@SpringExtensionConfig(useTestClassScopedExtensionContext = true)`.
+
+[TIP]
+====
+If your top-level test class is configured to use JUnit Jupiter's
+`@TestInstance(Lifecycle.PER_CLASS)` semantics, the `SpringExtension` will always use a
+test-class scoped `ExtensionContext`, and there is no need to declare
+`@SpringExtensionConfig(useTestClassScopedExtensionContext = true)`.
+====
+
+[NOTE]
+====
+This annotation is currently only applicable to `@Nested` test class hierarchies and
+should be applied to the top-level enclosing class of a `@Nested` test class hierarchy.
+
+Consequently, there is no need to declare this annotation on a test class that does not
+contain `@Nested` test classes.
+====
+
+[NOTE]
+====
+xref:testing/annotations/integration-junit-jupiter.adoc#integration-testing-annotations-nestedtestconfiguration[`@NestedTestConfiguration`]
+does not apply to this annotation.
+
+`@SpringExtensionConfig` will always be detected within a `@Nested` test class hierarchy,
+effectively disregarding any `@NestedTestConfiguration(OVERRIDE)` declarations.
+====
 
 [[integration-testing-annotations-junit-jupiter-springjunitconfig]]
 == `@SpringJUnitConfig`

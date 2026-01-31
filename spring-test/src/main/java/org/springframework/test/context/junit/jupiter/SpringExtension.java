@@ -88,7 +88,12 @@ import org.springframework.util.ReflectionUtils.MethodFilter;
  * be configured to use a test-class scoped extension context by annotating a
  * top-level test class with
  * {@link SpringExtensionConfig#useTestClassScopedExtensionContext()
- * &#64;SpringExtensionConfig(useTestClassScopedExtensionContext = true)}.
+ * &#64;SpringExtensionConfig(useTestClassScopedExtensionContext = true)}. Note,
+ * however, that the {@code SpringExtension} will always use a test-class scoped
+ * {@code ExtensionContext} if your top-level test class is configured to use JUnit
+ * Jupiter’s {@code @TestInstance(Lifecycle.PER_CLASS)} semantics, in which case
+ * there is no need to declare
+ * {@code @SpringExtensionConfig(useTestClassScopedExtensionContext = true)}.
  *
  * <p><strong>NOTE:</strong> This class requires JUnit Jupiter 6.0 or higher.
  *

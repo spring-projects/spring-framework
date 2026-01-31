@@ -60,6 +60,11 @@ public @interface SpringExtensionConfig {
 	 * {@code ExtensionContext}. Thus, there is no need to declare this annotation
 	 * attribute with a value of {@code false}.
 	 *
+	 * <p>Similarly, if your top-level test class is configured to use JUnit Jupiter’s
+	 * {@code @TestInstance(Lifecycle.PER_CLASS)} semantics, the {@code SpringExtension}
+	 * will always use a test-class scoped {@code ExtensionContext}, and there is no need
+	 * to declare {@code @SpringExtensionConfig(useTestClassScopedExtensionContext = true)}.
+	 *
 	 * @see SpringExtension
 	 * @see SpringExtension#getTestInstantiationExtensionContextScope(org.junit.jupiter.api.extension.ExtensionContext)
 	 */
