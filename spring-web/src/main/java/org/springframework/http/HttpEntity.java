@@ -56,7 +56,7 @@ import org.springframework.util.ObjectUtils;
  * @see #getBody()
  * @see #getHeaders()
  */
-public class HttpEntity<T> {
+public class HttpEntity<T extends @Nullable Object> {
 
 	/**
 	 * An {@code HttpEntity} instance with a {@code null} body and

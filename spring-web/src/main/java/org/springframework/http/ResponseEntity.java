@@ -78,7 +78,7 @@ import org.springframework.util.ObjectUtils;
  * @see org.springframework.web.client.RestOperations#getForEntity(URI, Class)
  * @see RequestEntity
  */
-public class ResponseEntity<T> extends HttpEntity<T> {
+public class ResponseEntity<T extends @Nullable Object> extends HttpEntity<T> {
 
 	private final HttpStatusCode status;
 
@@ -263,7 +263,7 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 	 * @return the created {@code ResponseEntity}
 	 * @since 4.1
 	 */
-	public static <T> ResponseEntity<T> ok(@Nullable T body) {
+	public static <T extends @Nullable Object> ResponseEntity<T> ok(@Nullable T body) {
 		return ok().body(body);
 	}
 
@@ -310,7 +310,7 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 	 * @return the created {@code ResponseEntity}
 	 * @since 6.0.5
 	 */
-	public static <T> ResponseEntity<T> ofNullable(@Nullable T body) {
+	public static <T extends @Nullable Object> ResponseEntity<T> ofNullable(@Nullable T body) {
 		if (body == null) {
 			return notFound().build();
 		}
@@ -660,7 +660,7 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 		}
 
 		@Override
-		public <T> ResponseEntity<T> body(@Nullable T body) {
+		public <T extends @Nullable Object> ResponseEntity<T> body(@Nullable T body) {
 			return new ResponseEntity<>(body, this.headers, this.statusCode);
 		}
 	}
