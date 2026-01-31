@@ -45,6 +45,7 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.util.PropertyPlaceholderHelper;
 import org.springframework.util.PropertyPlaceholderHelper.PlaceholderResolver;
 import org.springframework.util.StringUtils;
+import java.util.function.Predicate;
 
 /**
  * A {@link HandlerMethodReturnValueHandler} for sending to destinations specified in a
@@ -72,6 +73,8 @@ public class SendToMethodReturnValueHandler implements HandlerMethodReturnValueH
 	private final PropertyPlaceholderHelper placeholderHelper = new PropertyPlaceholderHelper("{", "}", null, null, false);
 
 	private @Nullable MessageHeaderInitializer headerInitializer;
+
+	private @Nullable Predicate<String> headerFilter;
 
 
 	public SendToMethodReturnValueHandler(SimpMessageSendingOperations messagingTemplate, boolean annotationRequired) {
@@ -133,6 +136,27 @@ public class SendToMethodReturnValueHandler implements HandlerMethodReturnValueH
 		return this.headerInitializer;
 	}
 
+	/**
+	 * Add a filter to determine which headers from the input message should be propagated to the output message.
+	 * Multiple filters are combined with logical OR.
+	 * <p>If not set, no input headers are propagated (default behavior).</p>
+	 */
+	public void addHeaderFilter(Predicate<String> filter) {
+		Assert.notNull(filter, "Filter predicate must not be null");
+		if (this.headerFilter == null) {
+			this.headerFilter = filter;
+		} else {
+			this.headerFilter = this.headerFilter.or(filter);
+		}
+	}
+
+	/**
+	 * Return the configured header filter.
+	 */
+	public @Nullable Predicate<String> getHeaderFilter() {
+		return this.headerFilter;
+	}
+
 
 	@Override
 	public boolean supportsReturnType(MethodParameter returnType) {
@@ -171,11 +195,11 @@ public class SendToMethodReturnValueHandler implements HandlerMethodReturnValueH
 				destination = destinationHelper.expandTemplateVars(destination);
 				if (broadcast) {
 					this.messagingTemplate.convertAndSendToUser(
-							user, destination, returnValue, createHeaders(null, returnType));
+							user, destination, returnValue, createHeaders(null, returnType, message));
 				}
 				else {
 					this.messagingTemplate.convertAndSendToUser(
-							user, destination, returnValue, createHeaders(sessionId, returnType));
+							user, destination, returnValue, createHeaders(sessionId, returnType, message));
 				}
 			}
 		}
@@ -185,7 +209,7 @@ public class SendToMethodReturnValueHandler implements HandlerMethodReturnValueH
 			String[] destinations = getTargetDestinations(sendTo, message, this.defaultDestinationPrefix);
 			for (String destination : destinations) {
 				destination = destinationHelper.expandTemplateVars(destination);
-				this.messagingTemplate.convertAndSend(destination, returnValue, createHeaders(sessionId, returnType));
+				this.messagingTemplate.convertAndSend(destination, returnValue, createHeaders(sessionId, returnType, message));
 			}
 		}
 	}
@@ -234,11 +258,22 @@ public class SendToMethodReturnValueHandler implements HandlerMethodReturnValueH
 				new String[] {defaultPrefix + destination} : new String[] {defaultPrefix + '/' + destination});
 	}
 
-	private MessageHeaders createHeaders(@Nullable String sessionId, MethodParameter returnType) {
+	private MessageHeaders createHeaders(@Nullable String sessionId, MethodParameter returnType, @Nullable Message<?> inputMessage) {
 		SimpMessageHeaderAccessor headerAccessor = SimpMessageHeaderAccessor.create(SimpMessageType.MESSAGE);
 		if (getHeaderInitializer() != null) {
 			getHeaderInitializer().initHeaders(headerAccessor);
 		}
+
+		if (inputMessage != null && headerFilter != null) {
+			Map<String, Object> inputHeaders = inputMessage.getHeaders();
+			for (Map.Entry<String, Object> entry : inputHeaders.entrySet()) {
+				String name = entry.getKey();
+				if (headerFilter.test(name)) {
+					headerAccessor.setHeader(name, entry.getValue());
+				}
+			}
+		}
+
 		if (sessionId != null) {
 			headerAccessor.setSessionId(sessionId);
 		}
