@@ -16,9 +16,9 @@
 
 package org.springframework.web.service.invoker;
 
+import org.aopalliance.intercept.MethodInterceptor;
 import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
-
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.web.service.annotation.GetExchange;
 
@@ -43,6 +43,18 @@ public class HttpServiceProxyFactoryTests {
 		assertThat(service.execute()).isEqualTo("decorated");
 	}
 
+
+	@Test
+	void proxyFactoryCustomizer() {
+		var mi = (MethodInterceptor) invocation -> "intercepted";
+		var factory = HttpServiceProxyFactory.builderFor(mock(HttpExchangeAdapter.class))
+				.proxyCustomizer((fact, serviceType) -> {
+					fact.addAdvice(0, mi);
+				}).build();
+
+		var service = factory.createClient(Service.class);
+		assertThat(service.execute()).isEqualTo("intercepted");
+	}
 
 	private interface Service {
 
