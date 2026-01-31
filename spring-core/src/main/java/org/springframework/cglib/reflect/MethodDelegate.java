@@ -97,7 +97,7 @@ import org.springframework.cglib.core.TypeUtils;
  *   to have all the code for your events separated out into methods instead of individual
  *   classes.  One of the ways Java gets around that is to create anonymous classes.
  *   They are particularly troublesome because many Debuggers do not know what to do
- *   with them.  Anonymous classes tend to duplicate alot of code as well.  We can
+ *   with them.  Anonymous classes tend to duplicate a lot of code as well.  We can
  *   use any interface with one declared method to forward events to any method that
  *   matches the signature (although the method name can be different).
  * </p>
