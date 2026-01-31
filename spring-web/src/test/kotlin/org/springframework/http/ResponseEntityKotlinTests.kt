@@ -43,4 +43,21 @@ class ResponseEntityKotlinTests {
 		assertThat(responseEntity.body).isNull()
 	}
 
+
+	@Test
+	fun ofNullNullableType() {
+		val responseEntity = ResponseEntity.ofNullable<Int?>(null)
+		assertThat(responseEntity).isNotNull()
+		assertThat(responseEntity.statusCode).isEqualTo(HttpStatus.NOT_FOUND)
+		assertThat(responseEntity.body).isNull()
+	}
+
+	@Test
+	fun okNullNullableType() {
+		val responseEntity = ResponseEntity.ok<String?>(null)
+		assertThat(responseEntity).isNotNull()
+		assertThat(responseEntity.statusCode).isEqualTo(HttpStatus.OK)
+		assertThat(responseEntity.body).isNull()
+	}
+
 }
