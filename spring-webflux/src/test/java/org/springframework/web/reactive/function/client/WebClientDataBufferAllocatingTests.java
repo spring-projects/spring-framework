@@ -28,6 +28,7 @@ import mockwebserver3.MockResponse;
 import mockwebserver3.MockWebServer;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -97,8 +98,8 @@ class WebClientDataBufferAllocatingTests extends AbstractDataBufferAllocatingTes
 	}
 
 
-	@ParameterizedDataBufferAllocatingTest
-	void bodyToMonoVoid(DataBufferFactory bufferFactory) throws IOException {
+	@Test
+	void bodyToMonoVoid() throws IOException {
 		setUp(bufferFactory);
 
 		this.server.enqueue(new MockResponse.Builder().
@@ -116,8 +117,8 @@ class WebClientDataBufferAllocatingTests extends AbstractDataBufferAllocatingTes
 		assertThat(this.server.getRequestCount()).isEqualTo(1);
 	}
 
-	@ParameterizedDataBufferAllocatingTest // SPR-17482
-	void bodyToMonoVoidWithoutContentType(DataBufferFactory bufferFactory) throws IOException {
+	@Test // SPR-17482
+	void bodyToMonoVoidWithoutContentType() throws IOException {
 		setUp(bufferFactory);
 
 		this.server.enqueue(new MockResponse.Builder()
@@ -134,40 +135,40 @@ class WebClientDataBufferAllocatingTests extends AbstractDataBufferAllocatingTes
 		assertThat(this.server.getRequestCount()).isEqualTo(1);
 	}
 
-	@ParameterizedDataBufferAllocatingTest
-	void onStatusWithBodyNotConsumed(DataBufferFactory bufferFactory) throws IOException {
+	@Test
+	void onStatusWithBodyNotConsumed() throws IOException {
 		setUp(bufferFactory);
 
 		RuntimeException ex = new RuntimeException("response error");
 		testOnStatus(ex, response -> Mono.just(ex));
 	}
 
-	@ParameterizedDataBufferAllocatingTest
-	void onStatusWithBodyConsumed(DataBufferFactory bufferFactory) throws IOException {
+	@Test
+	void onStatusWithBodyConsumed() throws IOException {
 		setUp(bufferFactory);
 
 		RuntimeException ex = new RuntimeException("response error");
 		testOnStatus(ex, response -> response.bodyToMono(Void.class).thenReturn(ex));
 	}
 
-	@ParameterizedDataBufferAllocatingTest // SPR-17473
-	void onStatusWithMonoErrorAndBodyNotConsumed(DataBufferFactory bufferFactory) throws IOException {
+	@Test // SPR-17473
+	void onStatusWithMonoErrorAndBodyNotConsumed() throws IOException {
 		setUp(bufferFactory);
 
 		RuntimeException ex = new RuntimeException("response error");
 		testOnStatus(ex, response -> Mono.error(ex));
 	}
 
-	@ParameterizedDataBufferAllocatingTest
-	void onStatusWithMonoErrorAndBodyConsumed(DataBufferFactory bufferFactory) throws IOException {
+	@Test
+	void onStatusWithMonoErrorAndBodyConsumed() throws IOException {
 		setUp(bufferFactory);
 
 		RuntimeException ex = new RuntimeException("response error");
 		testOnStatus(ex, response -> response.bodyToMono(Void.class).then(Mono.error(ex)));
 	}
 
-	@ParameterizedDataBufferAllocatingTest // gh-23230
-	void onStatusWithImmediateErrorAndBodyNotConsumed(DataBufferFactory bufferFactory) throws IOException {
+	@Test // gh-23230
+	void onStatusWithImmediateErrorAndBodyNotConsumed() throws IOException {
 		setUp(bufferFactory);
 
 		RuntimeException ex = new RuntimeException("response error");
@@ -176,8 +177,8 @@ class WebClientDataBufferAllocatingTests extends AbstractDataBufferAllocatingTes
 		});
 	}
 
-	@ParameterizedDataBufferAllocatingTest
-	void releaseBody(DataBufferFactory bufferFactory) throws IOException {
+	@Test
+	void releaseBody() throws IOException {
 		setUp(bufferFactory);
 
 		this.server.enqueue(new MockResponse.Builder()
@@ -194,8 +195,8 @@ class WebClientDataBufferAllocatingTests extends AbstractDataBufferAllocatingTes
 				.verify(Duration.ofSeconds(3));
 	}
 
-	@ParameterizedDataBufferAllocatingTest
-	void exchangeToBodilessEntity(DataBufferFactory bufferFactory) throws IOException {
+	@Test
+	void exchangeToBodilessEntity() throws IOException {
 		setUp(bufferFactory);
 
 		this.server.enqueue(new MockResponse.Builder()
