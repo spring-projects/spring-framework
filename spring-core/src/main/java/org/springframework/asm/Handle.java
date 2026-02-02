@@ -71,7 +71,7 @@ public final class Handle {
    * @deprecated this constructor has been superseded by {@link #Handle(int, String, String, String,
    *     boolean)}.
    */
-  @Deprecated
+  @Deprecated(forRemoval = false)
   public Handle(final int tag, final String owner, final String name, final String descriptor) {
     this(tag, owner, name, descriptor, tag == Opcodes.H_INVOKEINTERFACE);
   }

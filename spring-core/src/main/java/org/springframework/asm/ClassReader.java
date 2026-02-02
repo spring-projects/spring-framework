@@ -100,7 +100,7 @@ public class ClassReader {
    * @deprecated Use {@link #readByte(int)} and the other read methods instead. This field will
    *     eventually be deleted.
    */
-  @Deprecated
+  @Deprecated(forRemoval = false)
   // DontCheck(MemberName): can't be renamed (for backward binary compatibility).
   public final byte[] b;
 
@@ -197,7 +197,7 @@ public class ClassReader {
     // Check the class' major_version. This field is after the magic and minor_version fields, which
     // use 4 and 2 bytes respectively.
     // SPRING PATCH: leniently try to parse newer class files as well
-    // if (checkClassVersion && readShort(classFileOffset + 6) > Opcodes.V26) {
+    // if (checkClassVersion && readShort(classFileOffset + 6) > Opcodes.V27) {
     //   throw new IllegalArgumentException(
     //       "Unsupported class file major version " + readShort(classFileOffset + 6));
     // }
@@ -3550,6 +3550,9 @@ public class ClassReader {
       final char[] charBuffer,
       final int codeAttributeOffset,
       final Label[] labels) {
+    if (length > classFileBuffer.length - offset) {
+      throw new IllegalArgumentException();
+    }
     for (Attribute attributePrototype : attributePrototypes) {
       if (attributePrototype.type.equals(type)) {
         return attributePrototype.read(
