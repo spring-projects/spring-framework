@@ -9,11 +9,11 @@ javaPlatform {
 dependencies {
 	api(platform("com.fasterxml.jackson:jackson-bom:2.18.5"))
 	api(platform("io.micrometer:micrometer-bom:1.14.14"))
-	api(platform("io.netty:netty-bom:4.1.128.Final"))
+	api(platform("io.netty:netty-bom:4.1.130.Final"))
 	api(platform("io.netty:netty5-bom:5.0.0.Alpha5"))
 	api(platform("io.projectreactor:reactor-bom:2024.0.13"))
 	api(platform("io.rsocket:rsocket-bom:1.1.5"))
-	api(platform("org.apache.groovy:groovy-bom:4.0.29"))
+	api(platform("org.apache.groovy:groovy-bom:4.0.30"))
 	api(platform("org.apache.logging.log4j:log4j-bom:2.21.1"))
 	api(platform("org.assertj:assertj-bom:3.27.7"))
 	api(platform("org.eclipse.jetty:jetty-bom:12.0.30"))
@@ -21,7 +21,7 @@ dependencies {
 	api(platform("org.jetbrains.kotlinx:kotlinx-coroutines-bom:1.8.1"))
 	api(platform("org.jetbrains.kotlinx:kotlinx-serialization-bom:1.6.3"))
 	api(platform("org.junit:junit-bom:5.14.2"))
-	api(platform("org.mockito:mockito-bom:5.20.0"))
+	api(platform("org.mockito:mockito-bom:5.21.0"))
 
 	constraints {
 		api("com.fasterxml:aalto-xml:1.3.4")
