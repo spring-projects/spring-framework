@@ -110,28 +110,25 @@ class MethodParameterKotlinTests {
 		assertThat(returnGenericParameterType("suspendFun7")).isInstanceOf(TypeVariable::class.java)
 		assertThat(returnGenericParameterTypeBoundName("suspendFun7")).isEqualTo("org.springframework.core.Consumer<? super java.lang.Number>")
 
-		assertThat(returnParameterType("suspendFun8")).isEqualTo(Object::class.java)
-		assertThat(returnGenericParameterType("suspendFun8")).isEqualTo(Object::class.java)
+		assertThat(returnParameterType("suspendFun8")).isEqualTo(Any::class.java)
+		assertThat(returnGenericParameterType("suspendFun8")).isEqualTo(Any::class.java)
 	}
 
 	@Test
 	fun `Parameter name for regular function`() {
 		val methodParameter = returnMethodParameter("nullable", 0)
-		methodParameter.initParameterNameDiscovery(KotlinReflectionParameterNameDiscoverer())
 		assertThat(methodParameter.getParameterName()).isEqualTo("nullable")
 	}
 
 	@Test
 	fun `Parameter name for suspending function`() {
 		val methodParameter = returnMethodParameter("suspendFun", 0)
-		methodParameter.initParameterNameDiscovery(KotlinReflectionParameterNameDiscoverer())
 		assertThat(methodParameter.getParameterName()).isEqualTo("p1")
 	}
 
 	@Test
 	fun `Continuation parameter name for suspending function`() {
 		val methodParameter = returnMethodParameter("suspendFun", 1)
-		methodParameter.initParameterNameDiscovery(KotlinReflectionParameterNameDiscoverer())
 		assertThat(methodParameter.getParameterName()).isNull()
 	}
 

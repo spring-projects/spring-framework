@@ -20,11 +20,10 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.reactive.asFlow
-import kotlinx.coroutines.reactive.awaitLast
+import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.reactor.asFlux
 import kotlinx.coroutines.reactor.mono
 import org.springframework.transaction.ReactiveTransaction
-import java.util.*
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 
@@ -47,6 +46,6 @@ fun <T : Any> Flow<T>.transactional(operator: TransactionalOperator, context: Co
 */
 suspend fun <T> TransactionalOperator.executeAndAwait(f: suspend (ReactiveTransaction) -> T): T {
 	val context = currentCoroutineContext().minusKey(Job.Key)
-	return execute { status -> mono(context) { f(status) } }.map { value -> Optional.ofNullable(value) }
-				.defaultIfEmpty(Optional.empty()).awaitLast().orElse(null)
+	@Suppress("UNCHECKED_CAST")
+	return execute { status -> mono<T & Any>(context) { f(status) } }.singleOrEmpty().awaitFirstOrNull() as T
 }

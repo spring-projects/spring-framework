@@ -1205,7 +1205,13 @@ public abstract class DataBufferUtils {
 				long pos = this.position.get();
 				Attachment attachment = new Attachment(byteBuffer, dataBuffer, iterator);
 				this.writing.set(true);
-				this.channel.write(byteBuffer, pos, attachment, this);
+				try {
+					this.channel.write(byteBuffer, pos, attachment, this);
+				}
+				catch (RuntimeException ex) {
+					// If the exception escapes, route it to the failure handler
+					failed(ex, attachment);
+				}
 			}
 		}
 

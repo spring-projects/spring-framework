@@ -1841,11 +1841,12 @@ public class HttpHeaders implements Serializable {
 
 	/**
 	 * Return this HttpHeaders as a {@code Map} with the first values for each
-	 * header name.
+	 * header name. This method is susceptible to include multiple
+	 * casing variants of a given header name, see {@link #asMultiValueMap()}
+	 * javadoc.
 	 * <p>The difference between this method and {@link #asSingleValueMap()} is
 	 * that this method returns a copy of the headers, whereas the latter
-	 * returns a view. This copy also ensures that collection-iterating methods
-	 * like {@code entrySet()} are case-insensitive.
+	 * returns a view.
 	 * @return a single value representation of these headers
 	 */
 	public Map<String, String> toSingleValueMap() {
@@ -1854,16 +1855,14 @@ public class HttpHeaders implements Serializable {
 
 	/**
 	 * Return this HttpHeaders as a {@code Map} with the first values for each
-	 * header name.
-	 * <p>The difference between this method and {@link #toSingleValueMap()} is
-	 * that this method returns a view of the headers, whereas the latter
-	 * returns a copy. This method is also susceptible to include multiple
+	 * header name. This method is susceptible to include multiple
 	 * casing variants of a given header name, see {@link #asMultiValueMap()}
 	 * javadoc.
+	 * <p>The difference between this method and {@link #toSingleValueMap()} is
+	 * that this method returns a view of the headers, whereas the latter
+	 * returns a copy.
 	 * @return a single value representation of these headers
-	 * @deprecated in favor of {@link #toSingleValueMap()} which performs a copy but
-	 * ensures that collection-iterating methods like {@code entrySet()} are
-	 * case-insensitive
+	 * @deprecated in favor of {@link #toSingleValueMap()} which performs a copy
 	 */
 	@Deprecated(since = "7.0", forRemoval = true)
 	public Map<String, String> asSingleValueMap() {
@@ -2331,7 +2330,7 @@ public class HttpHeaders implements Serializable {
 			}
 
 			@Override
-			public boolean equals(Object o) {
+			public boolean equals(@Nullable Object o) {
 				if (this == o) {
 					return true;
 				}

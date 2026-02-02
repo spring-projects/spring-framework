@@ -313,7 +313,8 @@ public abstract class AbstractJacksonHttpMessageConverter<T extends ObjectMapper
 	public Object read(ResolvableType type, HttpInputMessage inputMessage, @Nullable Map<String, Object> hints)
 			throws IOException, HttpMessageNotReadableException {
 
-		Class<?> contextClass = (type.getSource() instanceof MethodParameter parameter ? parameter.getContainingClass() : null);
+		Class<?> contextClass = (type.getSource() instanceof MethodParameter parameter ? parameter.getContainingClass() :
+				(hints != null ? (Class<?>) hints.get("contextClass") : null));
 		JavaType javaType = getJavaType(type.getType(), contextClass);
 		return readJavaType(javaType, inputMessage, hints);
 	}

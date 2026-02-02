@@ -28,6 +28,8 @@ import jakarta.jms.Connection;
 import jakarta.jms.ConnectionFactory;
 import jakarta.jms.Destination;
 import jakarta.jms.JMSException;
+import jakarta.jms.MessageConsumer;
+import jakarta.jms.Session;
 import org.junit.jupiter.api.Test;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
@@ -52,6 +54,9 @@ import static org.mockito.Mockito.verify;
  * @author Sam Brannen
  */
 class DefaultMessageListenerContainerTests {
+
+	private static final Destination DESTINATION = new Destination() {};
+
 
 	@Test
 	void applyBackOff() {
@@ -223,12 +228,10 @@ class DefaultMessageListenerContainerTests {
 	}
 
 	private static DefaultMessageListenerContainer createContainer(ConnectionFactory connectionFactory) {
-		Destination destination = new Destination() {};
-
 		DefaultMessageListenerContainer container = new DefaultMessageListenerContainer();
 		container.setConnectionFactory(connectionFactory);
 		container.setCacheLevel(DefaultMessageListenerContainer.CACHE_NONE);
-		container.setDestination(destination);
+		container.setDestination(DESTINATION);
 		return container;
 	}
 
@@ -257,7 +260,12 @@ class DefaultMessageListenerContainerTests {
 						throw new JMSException("Test exception (attempt " + currentAttempts + ")");
 					}
 					else {
-						return mock(Connection.class);
+						Connection con = mock(Connection.class);
+						Session session = mock(Session.class);
+						MessageConsumer consumer = mock(MessageConsumer.class);
+						given(con.createSession(false, Session.AUTO_ACKNOWLEDGE)).willReturn(session);
+						given(session.createConsumer(DESTINATION)).willReturn(consumer);
+						return con;
 					}
 				}
 			});

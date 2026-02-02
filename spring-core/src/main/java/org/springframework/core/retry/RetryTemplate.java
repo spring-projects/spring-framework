@@ -16,9 +16,11 @@
 
 package org.springframework.core.retry;
 
-import java.io.Serial;
-import java.util.ArrayDeque;
-import java.util.Deque;
+import java.lang.reflect.UndeclaredThrowableException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.function.Supplier;
 
 import org.jspecify.annotations.Nullable;
 
@@ -87,7 +89,7 @@ public class RetryTemplate implements RetryOperations {
 	 * @see RetryPolicy#builder()
 	 */
 	public void setRetryPolicy(RetryPolicy retryPolicy) {
-		Assert.notNull(retryPolicy, "Retry policy must not be null");
+		Assert.notNull(retryPolicy, "RetryPolicy must not be null");
 		this.retryPolicy = retryPolicy;
 	}
 
@@ -120,101 +122,192 @@ public class RetryTemplate implements RetryOperations {
 	}
 
 
-	/**
-	 * Execute the supplied {@link Retryable} operation according to the configured
-	 * {@link RetryPolicy}.
-	 * <p>If the {@code Retryable} succeeds, its result will be returned. Otherwise, a
-	 * {@link RetryException} will be thrown to the caller. The {@code RetryException}
-	 * will contain the last exception thrown by the {@code Retryable} operation as the
-	 * {@linkplain RetryException#getCause() cause} and any exceptions from previous
-	 * attempts as {@linkplain RetryException#getSuppressed() suppressed exceptions}.
-	 * @param retryable the {@code Retryable} to execute and retry if needed
-	 * @param <R> the type of the result
-	 * @return the result of the {@code Retryable}, if any
-	 * @throws RetryException if the {@code RetryPolicy} is exhausted
-	 */
 	@Override
 	public <R extends @Nullable Object> R execute(Retryable<R> retryable) throws RetryException {
+		long startTime = System.currentTimeMillis();
 		String retryableName = retryable.getName();
+		MutableRetryState retryState = new MutableRetryState();
+
 		// Initial attempt
+		logger.debug(() -> "Preparing to execute retryable operation '%s'".formatted(retryableName));
+		R result;
 		try {
-			logger.debug(() -> "Preparing to execute retryable operation '%s'".formatted(retryableName));
-			R result = retryable.execute();
-			logger.debug(() -> "Retryable operation '%s' completed successfully".formatted(retryableName));
-			return result;
+			result = retryable.execute();
 		}
 		catch (Throwable initialException) {
 			logger.debug(initialException,
 					() -> "Execution of retryable operation '%s' failed; initiating the retry process"
 							.formatted(retryableName));
+			retryState.addException(initialException);
+			this.retryListener.onRetryableExecution(this.retryPolicy, retryable, retryState);
+
 			// Retry process starts here
 			BackOffExecution backOffExecution = this.retryPolicy.getBackOff().start();
-			Deque<Throwable> exceptions = new ArrayDeque<>(4);
-			exceptions.add(initialException);
-
 			Throwable lastException = initialException;
-			while (this.retryPolicy.shouldRetry(lastException)) {
+			long timeout = this.retryPolicy.getTimeout().toMillis();
+
+			while (this.retryPolicy.shouldRetry(lastException) && retryState.getRetryCount() < Integer.MAX_VALUE) {
+				checkIfTimeoutExceeded(timeout, startTime, 0, retryable, retryState);
+
 				try {
-					long duration = backOffExecution.nextBackOff();
-					if (duration == BackOffExecution.STOP) {
+					long sleepTime = backOffExecution.nextBackOff();
+					if (sleepTime == BackOffExecution.STOP) {
 						break;
 					}
+					checkIfTimeoutExceeded(timeout, startTime, sleepTime, retryable, retryState);
 					logger.debug(() -> "Backing off for %dms after retryable operation '%s'"
-							.formatted(duration, retryableName));
-					Thread.sleep(duration);
+							.formatted(sleepTime, retryableName));
+					Thread.sleep(sleepTime);
 				}
 				catch (InterruptedException interruptedException) {
 					Thread.currentThread().interrupt();
-					RetryException retryException = new RetryInterruptedException(
-							"Unable to back off for retryable operation '%s'".formatted(retryableName),
-							interruptedException);
-					exceptions.forEach(retryException::addSuppressed);
+					RetryException retryException = new RetryException("Interrupted during back-off for " +
+							"retryable operation '%s'; aborting execution".formatted(retryableName), retryState);
 					this.retryListener.onRetryPolicyInterruption(this.retryPolicy, retryable, retryException);
 					throw retryException;
 				}
+
 				logger.debug(() -> "Preparing to retry operation '%s'".formatted(retryableName));
+				retryState.increaseRetryCount();
+				this.retryListener.beforeRetry(this.retryPolicy, retryable);
 				try {
-					this.retryListener.beforeRetry(this.retryPolicy, retryable);
-					R result = retryable.execute();
-					this.retryListener.onRetrySuccess(this.retryPolicy, retryable, result);
-					logger.debug(() -> "Retryable operation '%s' completed successfully after retry"
-							.formatted(retryableName));
-					return result;
+					result = retryable.execute();
 				}
 				catch (Throwable currentException) {
 					logger.debug(currentException, () -> "Retry attempt for operation '%s' failed due to '%s'"
 							.formatted(retryableName, currentException));
+					retryState.addException(currentException);
 					this.retryListener.onRetryFailure(this.retryPolicy, retryable, currentException);
-					exceptions.add(currentException);
+					this.retryListener.onRetryableExecution(this.retryPolicy, retryable, retryState);
 					lastException = currentException;
+					continue;
 				}
+
+				// Did not enter catch block above -> retry success.
+				logger.debug(() -> "Retryable operation '%s' completed successfully after retry"
+						.formatted(retryableName));
+				this.retryListener.onRetrySuccess(this.retryPolicy, retryable, result);
+				this.retryListener.onRetryableExecution(this.retryPolicy, retryable, retryState);
+				return result;
 			}
 
 			// The RetryPolicy has exhausted at this point, so we throw a RetryException with the
 			// last exception as the cause and remaining exceptions as suppressed exceptions.
 			RetryException retryException = new RetryException(
 					"Retry policy for operation '%s' exhausted; aborting execution".formatted(retryableName),
-					exceptions.removeLast());
-			exceptions.forEach(retryException::addSuppressed);
+					retryState);
 			this.retryListener.onRetryPolicyExhaustion(this.retryPolicy, retryable, retryException);
 			throw retryException;
+		}
+
+		// Never entered initial catch block -> initial success.
+		logger.debug(() -> "Retryable operation '%s' completed successfully".formatted(retryableName));
+		this.retryListener.onRetryableExecution(this.retryPolicy, retryable, retryState);
+		return result;
+	}
+
+	private void checkIfTimeoutExceeded(long timeout, long startTime, long sleepTime, Retryable<?> retryable,
+			RetryState retryState) throws RetryException {
+
+		if (timeout > 0) {
+			// If sleepTime > 0, we are predicting what the effective elapsed time
+			// would be if we were to sleep for sleepTime milliseconds.
+			long elapsedTime = System.currentTimeMillis() + sleepTime - startTime;
+			if (elapsedTime >= timeout) {
+				String message = (sleepTime > 0 ? """
+						Retry policy for operation '%s' would exceed timeout (%dms) due \
+						to pending sleep time (%dms); preemptively aborting execution"""
+								.formatted(retryable.getName(), timeout, sleepTime) :
+						"Retry policy for operation '%s' exceeded timeout (%dms); aborting execution"
+								.formatted(retryable.getName(), timeout));
+				RetryException retryException = new RetryException(message, retryState);
+				this.retryListener.onRetryPolicyTimeout(this.retryPolicy, retryable, retryException);
+				throw retryException;
+			}
+		}
+	}
+
+	@Override
+	public <R extends @Nullable Object> R invoke(Supplier<R> retryable) {
+		try {
+			return execute(new Retryable<>() {
+				@Override
+				public R execute() {
+					return retryable.get();
+				}
+				@Override
+				public String getName() {
+					return retryable.getClass().getName();
+				}
+			});
+		}
+		catch (RetryException retryException) {
+			Throwable ex = retryException.getCause();
+			if (ex instanceof RuntimeException runtimeException) {
+				throw runtimeException;
+			}
+			if (ex instanceof Error error) {
+				throw error;
+			}
+			throw new UndeclaredThrowableException(ex);
+		}
+	}
+
+	@Override
+	public void invoke(Runnable retryable) {
+		try {
+			execute(new Retryable<>() {
+				@Override
+				public Void execute() {
+					retryable.run();
+					return null;
+				}
+				@Override
+				public String getName() {
+					return retryable.getClass().getName();
+				}
+			});
+		}
+		catch (RetryException retryException) {
+			Throwable ex = retryException.getCause();
+			if (ex instanceof RuntimeException runtimeException) {
+				throw runtimeException;
+			}
+			if (ex instanceof Error error) {
+				throw error;
+			}
+			throw new UndeclaredThrowableException(ex);
 		}
 	}
 
 
-	private static class RetryInterruptedException extends RetryException {
+	private static class MutableRetryState implements RetryState {
 
-		@Serial
-		private static final long serialVersionUID = 1L;
+		private int retryCount;
 
+		private final List<Throwable> exceptions = new ArrayList<>(4);
 
-		RetryInterruptedException(String message, InterruptedException cause) {
-			super(message, cause);
+		public void increaseRetryCount(){
+			this.retryCount++;
 		}
 
 		@Override
 		public int getRetryCount() {
-			return (getSuppressed().length - 1);
+			return this.retryCount;
+		}
+
+		public void addException(Throwable exception) {
+			this.exceptions.add(exception);
+		}
+
+		@Override
+		public List<Throwable> getExceptions() {
+			return Collections.unmodifiableList(this.exceptions);
+		}
+
+		@Override
+		public String toString() {
+			return "RetryState: retryCount=" + this.retryCount + ", exceptions=" + this.exceptions;
 		}
 	}
 

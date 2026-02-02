@@ -38,6 +38,7 @@ import org.springframework.beans.testfixture.beans.TestAnnotation;
 import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.beans.testfixture.beans.factory.DummyFactory;
 import org.springframework.cglib.proxy.NoOp;
+import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.AliasFor;
 import org.springframework.core.io.Resource;
 import org.springframework.util.ObjectUtils;
@@ -552,6 +553,10 @@ class BeanFactoryUtilsTests {
 		assertThat(lbf.getBean("sfb2", CharSequence.class)).isInstanceOf(String.class);
 		assertThat(lbf.getBean("sfb1")).isInstanceOf(String.class);
 		assertThat(lbf.getBean("sfb2")).isInstanceOf(String.class);
+
+		assertThat(lbf.getBeanNamesForType(Object.class)).isNotEmpty();
+		assertThat(lbf.getBeanNamesForType(ResolvableType.forClass(Object.class))).isNotEmpty();
+		assertThat(lbf.getBeanNamesForType(ResolvableType.NONE)).isEmpty();
 	}
 
 	@Test

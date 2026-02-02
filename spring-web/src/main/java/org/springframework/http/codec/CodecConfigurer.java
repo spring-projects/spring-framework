@@ -227,6 +227,24 @@ public interface CodecConfigurer {
 		void jacksonCborEncoder(Encoder<?> encoder);
 
 		/**
+		 * Override the default Jackson 3.x XML {@code Decoder}.
+		 * <p>Note that {@link #maxInMemorySize(int)}, if configured, will be
+		 * applied to the given decoder.
+		 * @param decoder the decoder instance to use
+		 * @since 7.0.3
+		 * @see org.springframework.http.codec.xml.JacksonXmlDecoder
+		 */
+		void jacksonXmlDecoder(Decoder<?> decoder);
+
+		/**
+		 * Override the default Jackson 3.x XML {@code Encoder}.
+		 * @param encoder the encoder instance to use
+		 * @since 7.0.3
+		 * @see org.springframework.http.codec.xml.JacksonXmlEncoder
+		 */
+		void jacksonXmlEncoder(Encoder<?> encoder);
+
+		/**
 		 * Override the default Protobuf {@code Decoder}.
 		 * <p>Note that {@link #maxInMemorySize(int)}, if configured, will be
 		 * applied to the given decoder.

@@ -248,8 +248,10 @@ class RestTemplateIntegrationTests extends AbstractMockWebServerTests {
 				assertThat(ex.getStatusText()).isNotNull();
 				assertThat(ex.getResponseBodyAsString()).isNotNull();
 				assertThat(ex.getMessage()).containsSubsequence("404", "on GET request for \"" + url + "\": [no body]");
-				assumeFalse(clientHttpRequestFactory instanceof JdkClientHttpRequestFactory, "JDK HttpClient does not expose status text");
-				assertThat(ex.getMessage()).isEqualTo("404 Client Error on GET request for \"" + url + "\": [no body]");
+				// JDK HttpClient does not expose status text
+				if (!(clientHttpRequestFactory instanceof JdkClientHttpRequestFactory)) {
+					assertThat(ex.getMessage()).isEqualTo("404 Client Error on GET request for \"" + url + "\": [no body]");
+				}
 			});
 	}
 

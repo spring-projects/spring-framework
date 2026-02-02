@@ -200,24 +200,10 @@ public abstract class DataSourceUtils {
 		boolean debugEnabled = logger.isDebugEnabled();
 		// Set read-only flag.
 		if (setReadOnly) {
-			try {
-				if (debugEnabled) {
-					logger.debug("Setting JDBC Connection [" + con + "] read-only");
-				}
-				con.setReadOnly(true);
+			if (debugEnabled) {
+				logger.debug("Setting JDBC Connection [" + con + "] read-only");
 			}
-			catch (SQLException | RuntimeException ex) {
-				Throwable exToCheck = ex;
-				while (exToCheck != null) {
-					if (exToCheck.getClass().getSimpleName().contains("Timeout")) {
-						// Assume it's a connection timeout that would otherwise get lost: for example, from JDBC 4.0
-						throw ex;
-					}
-					exToCheck = exToCheck.getCause();
-				}
-				// "read-only not supported" SQLException -> ignore, it's just a hint anyway
-				logger.debug("Could not set JDBC Connection read-only", ex);
-			}
+			setReadOnlyIfPossible(con);
 		}
 
 		// Apply specific isolation level, if any.
@@ -234,6 +220,31 @@ public abstract class DataSourceUtils {
 		}
 
 		return previousIsolationLevel;
+	}
+
+	/**
+	 * Apply the read-only hint to the given Connection,
+	 * suppressing exceptions other than timeout-related ones.
+	 * @param con the Connection to prepare
+	 * @throws SQLException in case of a timeout exception
+	 * @since 6.2.15
+	 */
+	static void setReadOnlyIfPossible(Connection con) throws SQLException {
+		try {
+			con.setReadOnly(true);
+		}
+		catch (SQLException | RuntimeException ex) {
+			Throwable exToCheck = ex;
+			while (exToCheck != null) {
+				if (exToCheck.getClass().getSimpleName().contains("Timeout")) {
+					// Assume it's a connection timeout that would otherwise get lost: for example, from JDBC 4.0
+					throw ex;
+				}
+				exToCheck = exToCheck.getCause();
+			}
+			// "read-only not supported" SQLException -> ignore, it's just a hint anyway
+			logger.debug("Could not set JDBC Connection read-only", ex);
+		}
 	}
 
 	/**

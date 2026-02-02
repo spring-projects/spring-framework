@@ -27,11 +27,13 @@ import org.springframework.web.server.ServerWebExchange;
  * @since 7.0
  */
 @FunctionalInterface
-public
-interface ApiVersionResolver {
+public interface ApiVersionResolver {
 
 	/**
 	 * Resolve the version for the given exchange.
+	 * <p>Implementations of this method are expected to be non-blocking.
+	 * If you need to resolve the version asynchronously, please implement the
+	 * {@link AsyncApiVersionResolver} subinterface instead.
 	 * @param exchange the current exchange
 	 * @return the version value, or {@code null} if not found
 	 */

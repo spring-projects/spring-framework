@@ -40,7 +40,7 @@ class JsonPathResultMatchersDsl internal constructor(@PublishedApi internal val 
 	/**
 	 * @see JsonPathResultMatchers.value
 	 */
-	inline fun <reified T> value(matcher: Matcher<T>) {
+	inline fun <reified T : Any> value(matcher: Matcher<T>) {
 		actions.andExpect(matchers.value(matcher, T::class.java))
 	}
 

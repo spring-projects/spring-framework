@@ -54,44 +54,9 @@ information.
 This locale resolver inspects a `Cookie` that might exist on the client to see if a
 `Locale` or `TimeZone` is specified. If so, it uses the specified details. By using the
 properties of this locale resolver, you can specify the name of the cookie as well as the
-maximum age. The following example defines a `CookieLocaleResolver`:
+maximum age. The following example defines a `CookieLocaleResolver` bean:
 
-[source,xml,indent=0,subs="verbatim,quotes"]
-----
-	<bean id="localeResolver" class="org.springframework.web.servlet.i18n.CookieLocaleResolver">
-
-		<property name="cookieName" value="clientlanguage"/>
-
-		<!-- in seconds. If set to -1, the cookie is not persisted (deleted when browser shuts down) -->
-		<property name="cookieMaxAge" value="100000"/>
-
-	</bean>
-----
-
-The following table describes the properties `CookieLocaleResolver`:
-
-[[mvc-cookie-locale-resolver-props-tbl]]
-.CookieLocaleResolver properties
-[cols="1,1,4"]
-|===
-| Property | Default | Description
-
-| `cookieName`
-| class name + LOCALE
-| The name of the cookie
-
-| `cookieMaxAge`
-| Servlet container default
-| The maximum time a cookie persists on the client. If `-1` is specified, the
-  cookie will not be persisted. It is available only until the client shuts down
-  the browser.
-
-| `cookiePath`
-| /
-| Limits the visibility of the cookie to a certain part of your site. When `cookiePath` is
-  specified, the cookie is visible only to that path and the paths below it.
-|===
-
+include-code::./WebConfiguration[tag=snippet,indent=0]
 
 [[mvc-localeresolver-session]]
 == Session Resolver
@@ -115,31 +80,7 @@ You can enable changing of locales by adding the `LocaleChangeInterceptor` to on
 accordingly, calling the `setLocale` method on the `LocaleResolver` in the dispatcher's
 application context. The next example shows that calls to all `{asterisk}.view` resources
 that contain a parameter named `siteLanguage` now changes the locale. So, for example,
-a request for the URL, `https://www.sf.net/home.view?siteLanguage=nl`, changes the site
+a request for the URL `https://domain.com/home.view?siteLanguage=nl` changes the site
 language to Dutch. The following example shows how to intercept the locale:
 
-[source,xml,indent=0,subs="verbatim"]
-----
-	<bean id="localeChangeInterceptor"
-			class="org.springframework.web.servlet.i18n.LocaleChangeInterceptor">
-		<property name="paramName" value="siteLanguage"/>
-	</bean>
-
-	<bean id="localeResolver"
-			class="org.springframework.web.servlet.i18n.CookieLocaleResolver"/>
-
-	<bean id="urlMapping"
-			class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping">
-		<property name="interceptors">
-			<list>
-				<ref bean="localeChangeInterceptor"/>
-			</list>
-		</property>
-		<property name="mappings">
-			<value>/**/*.view=someController</value>
-		</property>
-	</bean>
-----
-
-
-
+include-code::./WebConfiguration[tag=snippet,indent=0,chomp=-tags]

@@ -16,8 +16,6 @@
 
 package org.springframework.util;
 
-import java.io.ByteArrayInputStream;
-import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -30,9 +28,11 @@ import java.nio.file.Files;
 import org.jspecify.annotations.Nullable;
 
 /**
- * Simple utility methods for file and stream copying. All copy methods use a block size
- * of 4096 bytes, and close all affected streams when done. A variation of the copy
- * methods from this class that leave streams open can be found in {@link StreamUtils}.
+ * Simple utility methods for file and stream copying.
+ *
+ * <p>All copy methods use a block size of {@value #BUFFER_SIZE} bytes and
+ * close all affected streams when done. A variation of the copy methods from
+ * this class that leave streams open can be found in {@link StreamUtils}.
  *
  * <p>Mainly for use within the framework, but also useful for application code.
  *
@@ -76,7 +76,7 @@ public abstract class FileCopyUtils {
 	public static void copy(byte[] in, File out) throws IOException {
 		Assert.notNull(in, "No input byte array specified");
 		Assert.notNull(out, "No output File specified");
-		copy(new ByteArrayInputStream(in), Files.newOutputStream(out.toPath()));
+		Files.write(out.toPath(), in);
 	}
 
 	/**
@@ -87,7 +87,7 @@ public abstract class FileCopyUtils {
 	 */
 	public static byte[] copyToByteArray(File in) throws IOException {
 		Assert.notNull(in, "No input File specified");
-		return copyToByteArray(Files.newInputStream(in.toPath()));
+		return Files.readAllBytes(in.toPath());
 	}
 
 
@@ -125,11 +125,8 @@ public abstract class FileCopyUtils {
 		Assert.notNull(in, "No input byte array specified");
 		Assert.notNull(out, "No OutputStream specified");
 
-		try {
+		try (out) {
 			out.write(in);
-		}
-		finally {
-			close(out);
 		}
 	}
 
@@ -167,20 +164,10 @@ public abstract class FileCopyUtils {
 		Assert.notNull(in, "No Reader specified");
 		Assert.notNull(out, "No Writer specified");
 
-		try {
-			int charCount = 0;
-			char[] buffer = new char[BUFFER_SIZE];
-			int charsRead;
-			while ((charsRead = in.read(buffer)) != -1) {
-				out.write(buffer, 0, charsRead);
-				charCount += charsRead;
-			}
+		try (in; out) {
+			int charCount = (int) in.transferTo(out);
 			out.flush();
 			return charCount;
-		}
-		finally {
-			close(in);
-			close(out);
 		}
 	}
 
@@ -195,11 +182,8 @@ public abstract class FileCopyUtils {
 		Assert.notNull(in, "No input String specified");
 		Assert.notNull(out, "No Writer specified");
 
-		try {
+		try (out) {
 			out.write(in);
-		}
-		finally {
-			close(out);
 		}
 	}
 
@@ -218,19 +202,6 @@ public abstract class FileCopyUtils {
 		StringWriter out = new StringWriter(BUFFER_SIZE);
 		copy(in, out);
 		return out.toString();
-	}
-
-	/**
-	 * Attempt to close the supplied {@link Closeable}, silently swallowing any
-	 * exceptions.
-	 * @param closeable the {@code Closeable} to close
-	 */
-	private static void close(Closeable closeable) {
-		try {
-			closeable.close();
-		}
-		catch (IOException ignored) {
-		}
 	}
 
 }

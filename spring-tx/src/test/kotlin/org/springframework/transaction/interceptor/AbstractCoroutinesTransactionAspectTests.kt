@@ -19,6 +19,7 @@ package org.springframework.transaction.interceptor
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.assertThatExceptionOfType
 import org.assertj.core.api.Fail
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -53,7 +54,7 @@ abstract class AbstractCoroutinesTransactionAspectTests {
 	}
 
 	@Test
-	fun noTransaction() {
+	suspend fun noTransaction() {
 		val rtm = Mockito.mock(ReactiveTransactionManager::class.java)
 		val tb = DefaultTestBean()
 		val tas: TransactionAttributeSource = MapTransactionAttributeSource()
@@ -63,9 +64,7 @@ abstract class AbstractCoroutinesTransactionAspectTests {
 		// and transaction attribute source
 		val itb = advised(tb, rtm, tas) as TestBean
 		checkReactiveTransaction(false)
-		runBlocking {
-			itb.getName()
-		}
+		itb.getName()
 		checkReactiveTransaction(false)
 
 		// expect no calls
@@ -76,7 +75,7 @@ abstract class AbstractCoroutinesTransactionAspectTests {
 	 * Check that a transaction is created and committed.
 	 */
 	@Test
-	fun transactionShouldSucceed() {
+	suspend fun transactionShouldSucceed() {
 		val txatt: TransactionAttribute = DefaultTransactionAttribute()
 		val tas = MapTransactionAttributeSource()
 		tas.register(getNameMethod!!, txatt)
@@ -87,9 +86,7 @@ abstract class AbstractCoroutinesTransactionAspectTests {
 		given(rtm.commit(status)).willReturn(Mono.empty())
 		val tb = DefaultTestBean()
 		val itb = advised(tb, rtm, tas) as TestBean
-		runBlocking {
-			itb.getName()
-		}
+		itb.getName()
 		Mockito.verify(rtm).commit(status)
 	}
 
@@ -97,7 +94,7 @@ abstract class AbstractCoroutinesTransactionAspectTests {
 	 * Check that two transactions are created and committed.
 	 */
 	@Test
-	fun twoTransactionsShouldSucceed() {
+	suspend fun twoTransactionsShouldSucceed() {
 		val txatt: TransactionAttribute = DefaultTransactionAttribute()
 		val tas1 = MapTransactionAttributeSource()
 		tas1.register(getNameMethod!!, txatt)
@@ -110,10 +107,8 @@ abstract class AbstractCoroutinesTransactionAspectTests {
 		given(rtm.commit(status)).willReturn(Mono.empty())
 		val tb = DefaultTestBean()
 		val itb = advised(tb, rtm, arrayOf(tas1, tas2)) as TestBean
-		runBlocking {
-			itb.getName()
-			itb.setName("myName")
-		}
+		itb.getName()
+		itb.setName("myName")
 		Mockito.verify(rtm, Mockito.times(2)).commit(status)
 	}
 
@@ -121,7 +116,7 @@ abstract class AbstractCoroutinesTransactionAspectTests {
 	 * Check that a transaction is created and committed.
 	 */
 	@Test
-	fun transactionShouldSucceedWithNotNew() {
+	suspend fun transactionShouldSucceedWithNotNew() {
 		val txatt: TransactionAttribute = DefaultTransactionAttribute()
 		val tas = MapTransactionAttributeSource()
 		tas.register(getNameMethod!!, txatt)
@@ -132,9 +127,7 @@ abstract class AbstractCoroutinesTransactionAspectTests {
 		given(rtm.commit(status)).willReturn(Mono.empty())
 		val tb = DefaultTestBean()
 		val itb = advised(tb, rtm, tas) as TestBean
-		runBlocking {
-			itb.getName()
-		}
+		itb.getName()
 		Mockito.verify(rtm).commit(status)
 	}
 
@@ -254,14 +247,8 @@ abstract class AbstractCoroutinesTransactionAspectTests {
 			}
 		}
 		val itb = advised(tb, rtm, tas) as TestBean
-		runBlocking {
-			try {
-				itb.getName()
-			}
-			catch (actual: Exception) {
-				assertThat(actual).isInstanceOf(CannotCreateTransactionException::class.java)
-			}
-		}
+		assertThatExceptionOfType(CannotCreateTransactionException::class.java)
+			.isThrownBy { runBlocking { itb.getName() } }
 	}
 
 	/**
@@ -270,7 +257,7 @@ abstract class AbstractCoroutinesTransactionAspectTests {
 	 * infrastructure exception was thrown to the client
 	 */
 	@Test
-	fun cannotCommitTransaction() {
+	suspend fun cannotCommitTransaction() {
 		val txatt: TransactionAttribute = DefaultTransactionAttribute()
 		val m = setNameMethod
 		val tas = MapTransactionAttributeSource()
@@ -286,17 +273,15 @@ abstract class AbstractCoroutinesTransactionAspectTests {
 		val tb = DefaultTestBean()
 		val itb = advised(tb, rtm, tas) as TestBean
 		val name = "new name"
-		runBlocking {
-			try {
-				itb.setName(name)
-			}
-			catch (actual: Exception) {
-				assertThat(actual).isInstanceOf(ex.javaClass)
-				assertThat(actual).hasMessage(ex.message)
-			}
-			// Should have invoked target and changed name
-			assertThat(itb.getName()).isEqualTo(name)
+		try {
+			itb.setName(name)
 		}
+		catch (actual: Exception) {
+			assertThat(actual).isInstanceOf(ex.javaClass)
+			assertThat(actual).hasMessage(ex.message)
+		}
+		// Should have invoked target and changed name
+		assertThat(itb.getName()).isEqualTo(name)
 	}
 
 	private fun checkReactiveTransaction(expected: Boolean) {

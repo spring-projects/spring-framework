@@ -32,6 +32,8 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Chris Beams
  * @since 20.05.2003
  */
+@Deprecated(since = "7.0.3", forRemoval = true)
+@SuppressWarnings("removal")
 class PagedListHolderTests {
 
 	@Test

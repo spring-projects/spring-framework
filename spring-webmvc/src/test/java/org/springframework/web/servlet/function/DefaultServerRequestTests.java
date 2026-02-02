@@ -409,7 +409,6 @@ class DefaultServerRequestTests {
 		);
 	}
 
-
 	@ParameterizedHttpMethodTest
 	void checkNotModifiedTimestamp(String method) {
 		MockHttpServletRequest servletRequest = PathPatternsTestUtils.initRequest(method, "/", true);

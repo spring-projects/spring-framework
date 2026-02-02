@@ -161,7 +161,7 @@ public final class PersistenceManagedTypesScanner {
 					}
 				}
 				catch (Throwable ex) {
-					throw new PersistenceException("Failed to read candidate component class: " + resource, ex);
+					throw new PersistenceException("Failed to read candidate entity class: " + resource, ex);
 				}
 			}
 		}

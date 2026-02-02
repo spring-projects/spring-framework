@@ -49,9 +49,11 @@ import org.springframework.util.Assert;
  * @since 19.05.2003
  * @param <E> the element type
  * @see #getPageList()
- * @see org.springframework.beans.support.MutableSortDefinition
+ * @deprecated as severely outdated and superseded by more modern solutions,
+ * for example in Spring Data Commons
  */
-@SuppressWarnings("serial")
+@Deprecated(since = "7.0.3", forRemoval = true)
+@SuppressWarnings({"removal", "serial"})
 public class PagedListHolder<E> implements Serializable {
 
 	/**

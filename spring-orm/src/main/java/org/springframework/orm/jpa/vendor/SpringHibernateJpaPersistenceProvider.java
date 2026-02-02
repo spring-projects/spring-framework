@@ -45,7 +45,7 @@ import org.springframework.orm.jpa.persistenceunit.SmartPersistenceUnitInfo;
 class SpringHibernateJpaPersistenceProvider extends HibernatePersistenceProvider {
 
 	@Override
-	@SuppressWarnings({"rawtypes", "unchecked"})  // on Hibernate 6
+	@SuppressWarnings({"rawtypes", "unchecked"})
 	public EntityManagerFactory createContainerEntityManagerFactory(PersistenceUnitInfo info, Map properties) {
 		final List<String> mergedClassesAndPackages = new ArrayList<>(info.getManagedClassNames());
 		if (info instanceof SmartPersistenceUnitInfo smartInfo) {

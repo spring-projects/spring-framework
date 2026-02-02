@@ -187,7 +187,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 
 	private SessionAttributeStore sessionAttributeStore = new DefaultSessionAttributeStore();
 
-	private ParameterNameDiscoverer parameterNameDiscoverer = new DefaultParameterNameDiscoverer();
+	private ParameterNameDiscoverer parameterNameDiscoverer = DefaultParameterNameDiscoverer.getSharedInstance();
 
 	private @Nullable ConfigurableBeanFactory beanFactory;
 

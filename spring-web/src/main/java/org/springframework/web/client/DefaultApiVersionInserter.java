@@ -81,7 +81,7 @@ final class DefaultApiVersionInserter implements ApiVersionInserter {
 			builder.replacePath(null);
 			pathSegments.forEach(builder::pathSegment);
 		}
-		return builder.build().toUri();
+		return builder.build(true).toUri();
 	}
 
 	private void assertPathSegmentIndex(Integer index, int pathSegmentsSize, URI uri) {

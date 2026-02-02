@@ -80,7 +80,7 @@ import org.springframework.util.ClassUtils;
  * Typically combined with {@link HibernateTransactionManager} for declarative
  * transactions against the {@code SessionFactory} and its JDBC {@code DataSource}.
  *
- * <p>Compatible with Hibernate ORM 7.1, as of Spring Framework 7.0.
+ * <p>Compatible with Hibernate ORM 7.x, as of Spring Framework 7.0.
  * This Hibernate-specific factory builder can also be a convenient way to set up
  * a JPA {@code EntityManagerFactory} since the Hibernate {@code SessionFactory}
  * natively exposes the JPA {@code EntityManagerFactory} interface as well now.
@@ -180,32 +180,25 @@ public class LocalSessionFactoryBuilder extends Configuration {
 	/**
 	 * Set the Spring {@link JtaTransactionManager} or the JTA {@link TransactionManager}
 	 * to be used with Hibernate, if any. Allows for using a Spring-managed transaction
-	 * manager for Hibernate 5's session and cache synchronization, with the
+	 * manager for Hibernate's session and cache synchronization, with the
 	 * "hibernate.transaction.jta.platform" automatically set to it.
 	 * <p>A passed-in Spring {@link JtaTransactionManager} needs to contain a JTA
-	 * {@link TransactionManager} reference to be usable here, except for the WebSphere
-	 * case where we'll automatically set {@code WebSphereExtendedJtaPlatform} accordingly.
+	 * {@link TransactionManager} reference to be usable here.
 	 * <p>Note: If this is set, the Hibernate settings should not contain a JTA platform
 	 * setting to avoid meaningless double configuration.
+	 * @see AvailableSettings#JTA_PLATFORM
 	 */
 	public LocalSessionFactoryBuilder setJtaTransactionManager(Object jtaTransactionManager) {
 		Assert.notNull(jtaTransactionManager, "Transaction manager reference must not be null");
 
 		if (jtaTransactionManager instanceof JtaTransactionManager springJtaTm) {
-			boolean webspherePresent = ClassUtils.isPresent("com.ibm.wsspi.uow.UOWManager", getClass().getClassLoader());
-			if (webspherePresent) {
-				getProperties().put(AvailableSettings.JTA_PLATFORM,
-						"org.hibernate.engine.transaction.jta.platform.internal.WebSphereExtendedJtaPlatform");
+			if (springJtaTm.getTransactionManager() == null) {
+				throw new IllegalArgumentException(
+						"Can only apply JtaTransactionManager which has a TransactionManager reference set");
 			}
-			else {
-				if (springJtaTm.getTransactionManager() == null) {
-					throw new IllegalArgumentException(
-							"Can only apply JtaTransactionManager which has a TransactionManager reference set");
-				}
-				getProperties().put(AvailableSettings.JTA_PLATFORM,
-						new ConfigurableJtaPlatform(springJtaTm.getTransactionManager(), springJtaTm.getUserTransaction(),
-								springJtaTm.getTransactionSynchronizationRegistry()));
-			}
+			getProperties().put(AvailableSettings.JTA_PLATFORM,
+					new ConfigurableJtaPlatform(springJtaTm.getTransactionManager(), springJtaTm.getUserTransaction(),
+							springJtaTm.getTransactionSynchronizationRegistry()));
 		}
 		else if (jtaTransactionManager instanceof TransactionManager jtaTm) {
 			getProperties().put(AvailableSettings.JTA_PLATFORM,
@@ -332,7 +325,7 @@ public class LocalSessionFactoryBuilder extends Configuration {
 						}
 					}
 					catch (Throwable ex) {
-						throw new MappingException("Failed to read candidate component class: " + resource, ex);
+						throw new MappingException("Failed to read candidate entity class: " + resource, ex);
 					}
 				}
 			}

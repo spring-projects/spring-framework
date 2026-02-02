@@ -24,12 +24,12 @@ import org.springframework.util.Assert;
  * Implementation of {@link BackOff} that increases the back-off period for each attempt.
  * When the interval has reached the {@linkplain #setMaxInterval max interval}, it is no
  * longer increased. Stops once the {@linkplain #setMaxElapsedTime max elapsed time} or
- * {@linkplain #setMaxAttempts max attempts} has been reached.
+ * {@linkplain #setMaxAttempts max attempts} has been reached in back-off processing.
  *
  * <p>Example: The default interval is {@value #DEFAULT_INITIAL_INTERVAL} ms;
  * the default multiplier is {@value #DEFAULT_MULTIPLIER}; and the default max
- * interval is {@value #DEFAULT_MAX_INTERVAL}. For 10 attempts the sequence will be
- * as follows:
+ * interval is {@value #DEFAULT_MAX_INTERVAL}. For 10 back-off attempts, the
+ * sequence will be as follows:
  *
  * <pre>
  * request#     back-off
@@ -47,11 +47,13 @@ import org.springframework.util.Assert;
  * </pre>
  *
  * <p>Note that the default max elapsed time is {@link Long#MAX_VALUE}, and the
- * default maximum number of attempts is {@link Integer#MAX_VALUE}.
+ * default maximum number of back-off attempts is {@link Integer#MAX_VALUE}.
  * Use {@link #setMaxElapsedTime} to limit the length of time that an instance
- * should accumulate before returning {@link BackOffExecution#STOP}. Alternatively,
- * use {@link #setMaxAttempts} to limit the number of attempts. The execution
- * stops when either of those two limits is reached.
+ * should accumulate before returning {@link BackOffExecution#STOP}.
+ * Alternatively, use {@link #setMaxAttempts} to limit the number of back-off
+ * attempts (in a retry scenario, this is equivalent to the maximum number of
+ * retries excluding the original invocation).
+ * The execution stops when either of those two limits is reached.
  *
  * @author Stephane Nicoll
  * @author Gary Russell
@@ -226,8 +228,10 @@ public class ExponentialBackOff implements BackOff {
 	}
 
 	/**
-	 * The maximum number of attempts after which a call to
+	 * The maximum number of back-off attempts after which a call to
 	 * {@link BackOffExecution#nextBackOff()} returns {@link BackOffExecution#STOP}.
+	 * <p>Note that in a retry scenario, this is equivalent to the maximum number
+	 * of retries excluding the original invocation.
 	 * @param maxAttempts the maximum number of attempts
 	 * @since 6.1
 	 * @see #setMaxElapsedTime
@@ -237,8 +241,10 @@ public class ExponentialBackOff implements BackOff {
 	}
 
 	/**
-	 * Return the maximum number of attempts after which a call to
+	 * Return the maximum number of back-off attempts after which a call to
 	 * {@link BackOffExecution#nextBackOff()} returns {@link BackOffExecution#STOP}.
+	 * <p>Note that in a retry scenario, this is equivalent to the maximum number
+	 * of retries excluding the original invocation.
 	 * @return the maximum number of attempts
 	 * @since 6.1
 	 * @see #getMaxElapsedTime()

@@ -31,9 +31,11 @@ import org.springframework.web.server.ResponseStatusException;
 @SuppressWarnings("serial")
 public class NoResourceFoundException extends ResponseStatusException {
 
-
 	public NoResourceFoundException(URI uri, String resourcePath) {
-		super(HttpStatus.NOT_FOUND, "No static resource " + resourcePath + " for request '" + uri + "'.");
+		super(HttpStatus.NOT_FOUND,
+				"No static resource " + resourcePath + " for request '" + uri + "'.",
+				null, null, new Object[] { resourcePath});
+
 		setDetail("No static resource " + resourcePath + ".");
 	}
 

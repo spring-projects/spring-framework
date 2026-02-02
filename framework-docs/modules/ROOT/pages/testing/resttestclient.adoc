@@ -10,7 +10,7 @@ applications without a running server via MockMvc.
 
 
 
-[[resttestclient-setup]]
+[[resttestclient.setup]]
 == Setup
 
 To set up a `RestTestClient` you need to choose a server setup to bind to. This can be one
@@ -18,7 +18,7 @@ of several MockMvc setup choices, or a connection to a live server.
 
 
 
-[[resttestclient-controller-config]]
+[[resttestclient.controller-config]]
 === Bind to Controller
 
 This setup allows you to test specific controller(s) via mock request and response objects,
@@ -42,55 +42,17 @@ Kotlin::
 ----
 ======
 
-[[resttestclient-context-config]]
+[[resttestclient.context-config]]
 === Bind to `ApplicationContext`
 
 This setup allows you to load Spring configuration with Spring MVC
 infrastructure and controller declarations and use it to handle requests via mock request
 and response objects, without a running server.
 
-[tabs]
-======
-Java::
-+
-[source,java,indent=0,subs="verbatim,quotes"]
-----
-	@SpringJUnitConfig(WebConfig.class) // <1>
-	class MyTests {
+include-code::./RestClientContextTests[indent=0]
 
-		RestTestClient client;
 
-		@BeforeEach
-		void setUp(ApplicationContext context) {  // <2>
-			client = RestTestClient.bindToApplicationContext(context).build(); // <3>
-		}
-	}
-----
-<1> Specify the configuration to load
-<2> Inject the configuration
-<3> Create the `RestTestClient`
-
-Kotlin::
-+
-[source,kotlin,indent=0,subs="verbatim,quotes"]
-----
-	@SpringJUnitConfig(WebConfig::class) // <1>
-	class MyTests {
-
-		lateinit var client: RestTestClient
-
-		@BeforeEach
-		fun setUp(context: ApplicationContext) { // <2>
-			client = RestTestClient.bindToApplicationContext(context).build() // <3>
-		}
-	}
-----
-<1> Specify the configuration to load
-<2> Inject the configuration
-<3> Create the `RestTestClient`
-======
-
-[[resttestclient-fn-config]]
+[[resttestclient.fn-config]]
 === Bind to Router Function
 
 This setup allows you to test xref:web/webmvc-functional.adoc[functional endpoints] via
@@ -115,7 +77,7 @@ Kotlin::
 ----
 ======
 
-[[resttestclient-server-config]]
+[[resttestclient.server-config]]
 === Bind to Server
 
 This setup connects to a running server to perform full, end-to-end HTTP tests:
@@ -139,7 +101,7 @@ Kotlin::
 
 
 
-[[resttestclient-client-config]]
+[[resttestclient.client-config]]
 === Client Config
 
 In addition to the server setup options described earlier, you can also configure client
@@ -170,7 +132,7 @@ Kotlin::
 
 
 
-[[resttestclient-tests]]
+[[resttestclient.tests]]
 == Writing Tests
 
 xref:integration/rest-clients.adoc#rest-restclient[`RestClient`] and `RestTestClient` have
@@ -182,70 +144,22 @@ provides two alternative ways to verify the response:
 
 
 
-[[resttestclient-workflow]]
+[[resttestclient.workflow]]
 === Built-in Assertions
 
 To use the built-in assertions, remain in the workflow after the call to `exchange()`, and
 use one of the expectation methods. For example:
 
-[tabs]
-======
-Java::
-+
-[source,java,indent=0,subs="verbatim,quotes"]
-----
-	client.get().uri("/persons/1")
-		.accept(MediaType.APPLICATION_JSON)
-		.exchange()
-		.expectStatus().isOk()
-		.expectHeader().contentType(MediaType.APPLICATION_JSON);
-----
+include-code::./RestClientWorkflowTests[tag=test,indent=0]
 
-Kotlin::
-+
-[source,kotlin,indent=0,subs="verbatim,quotes"]
-----
-	client.get().uri("/persons/1")
-		.accept(MediaType.APPLICATION_JSON)
-		.exchange()
-		.expectStatus().isOk()
-		.expectHeader().contentType(MediaType.APPLICATION_JSON)
-----
-======
 
 If you would like for all expectations to be asserted even if one of them fails, you can
 use `expectAll(..)` instead of multiple chained `expect*(..)` calls. This feature is
 similar to the _soft assertions_ support in AssertJ and the `assertAll()` support in
 JUnit Jupiter.
 
-[tabs]
-======
-Java::
-+
-[source,java,indent=0,subs="verbatim,quotes"]
-----
-	client.get().uri("/persons/1")
-		.accept(MediaType.APPLICATION_JSON)
-		.exchange()
-		.expectAll(
-			spec -> spec.expectStatus().isOk(),
-			spec -> spec.expectHeader().contentType(MediaType.APPLICATION_JSON)
-		);
-----
+include-code::./RestClientWorkflowTests[tag=soft-assertions,indent=0]
 
-Kotlin::
-+
-[source,kotlin,indent=0,subs="verbatim,quotes"]
-----
-	client.get().uri("/persons/1")
-		.accept(MediaType.APPLICATION_JSON)
-		.exchange()
-		.expectAll(
-			{ spec -> spec.expectStatus().isOk() },
-			{ spec -> spec.expectHeader().contentType(MediaType.APPLICATION_JSON) }
-		)
-----
-======
 
 You can then choose to decode the response body through one of the following:
 
@@ -256,124 +170,34 @@ You can then choose to decode the response body through one of the following:
 If the built-in assertions are insufficient, you can consume the object instead and
 perform any other assertions:
 
-[tabs]
-======
-Java::
-+
-[source,java,indent=0,subs="verbatim,quotes"]
-----
-    client.get().uri("/persons/1")
-            .exchange()
-            .expectStatus().isOk()
-            .expectBody(Person.class)
-            .consumeWith(result -> {
-                // custom assertions (for example, AssertJ)...
-            });
-----
-
-Kotlin::
-+
-[source,kotlin,indent=0,subs="verbatim,quotes"]
-----
-	client.get().uri("/persons/1")
-			.exchange()
-			.expectStatus().isOk()
-			.expectBody<Person>()
-			.consumeWith {
-				// custom assertions (for example, AssertJ)...
-			}
-----
-======
+include-code::./RestClientWorkflowTests[tag=consume,indent=0]
 
 Or you can exit the workflow and obtain a `EntityExchangeResult`:
 
-[tabs]
-======
-Java::
-+
-[source,java,indent=0,subs="verbatim,quotes"]
-----
-	EntityExchangeResult<Person> result = client.get().uri("/persons/1")
-			.exchange()
-			.expectStatus().isOk()
-			.expectBody(Person.class)
-			.returnResult();
-----
+include-code::./RestClientWorkflowTests[tag=result,indent=0]
 
-Kotlin::
-+
-[source,kotlin,indent=0,subs="verbatim,quotes"]
-----
-	val result = client.get().uri("/persons/1")
-			.exchange()
-			.expectStatus().isOk
-			.expectBody<Person>()
-			.returnResult()
-----
-======
 
 TIP: When you need to decode to a target type with generics, look for the overloaded methods
 that accept {spring-framework-api}/core/ParameterizedTypeReference.html[`ParameterizedTypeReference`]
 instead of `Class<T>`.
 
 
-[[resttestclient-no-content]]
+[[resttestclient.no-content]]
 ==== No Content
 
 If the response is not expected to have content, you can assert that as follows:
 
-[tabs]
-======
-Java::
-+
-[source,java,indent=0,subs="verbatim,quotes"]
-----
-	client.post().uri("/persons")
-			.body(person)
-			.exchange()
-			.expectStatus().isCreated()
-			.expectBody().isEmpty();
-----
-
-Kotlin::
-+
-[source,kotlin,indent=0,subs="verbatim,quotes"]
-----
-	client.post().uri("/persons")
-			.body(person)
-			.exchange()
-			.expectStatus().isCreated()
-			.expectBody().isEmpty()
-----
-======
+include-code::./NoContentTests[tag=emptyBody,indent=0]
 
 If you want to ignore the response content, the following releases the content without any assertions:
 
-[tabs]
-======
-Java::
-+
-[source,java,indent=0,subs="verbatim,quotes"]
-----
-	client.get().uri("/persons/123")
-			.exchange()
-			.expectStatus().isNotFound()
-			.expectBody(Void.class);
-----
+include-code::./NoContentTests[tag=ignoreBody,indent=0]
 
-Kotlin::
-+
-[source,kotlin,indent=0,subs="verbatim,quotes"]
-----
-	client.get().uri("/persons/123")
-			.exchange()
-			.expectStatus().isNotFound
-			.expectBody<Unit>()
-----
-======
+NOTE: Consuming the response body (for example, with `expectBody`) is required if your tests are running with
+leak detection for pooled buffers. Without that, the tool will report buffers being leaked.
 
 
-[[resttestclient-json]]
+[[resttestclient.json]]
 ==== JSON Content
 
 You can use `expectBody()` without a target type to perform assertions on the raw
@@ -381,126 +205,25 @@ content rather than through higher level Object(s).
 
 To verify the full JSON content with https://jsonassert.skyscreamer.org[JSONAssert]:
 
-[tabs]
-======
-Java::
-+
-[source,java,indent=0,subs="verbatim,quotes"]
-----
-	client.get().uri("/persons/1")
-			.exchange()
-			.expectStatus().isOk()
-			.expectBody()
-			.json("{\"name\":\"Jane\"}")
-----
+include-code::./JsonTests[tag=jsonBody,indent=0]
 
-Kotlin::
-+
-[source,kotlin,indent=0,subs="verbatim,quotes"]
-----
-	client.get().uri("/persons/1")
-			.exchange()
-			.expectStatus().isOk()
-			.expectBody()
-			.json("{\"name\":\"Jane\"}")
-----
-======
 
 To verify JSON content with https://github.com/jayway/JsonPath[JSONPath]:
 
-[tabs]
-======
-Java::
-+
-[source,java,indent=0,subs="verbatim,quotes"]
-----
-	client.get().uri("/persons")
-			.exchange()
-			.expectStatus().isOk()
-			.expectBody()
-			.jsonPath("$[0].name").isEqualTo("Jane")
-			.jsonPath("$[1].name").isEqualTo("Jason");
-----
-
-Kotlin::
-+
-[source,kotlin,indent=0,subs="verbatim,quotes"]
-----
-	client.get().uri("/persons")
-			.exchange()
-			.expectStatus().isOk()
-			.expectBody()
-			.jsonPath("$[0].name").isEqualTo("Jane")
-			.jsonPath("$[1].name").isEqualTo("Jason")
-----
-======
+include-code::./JsonTests[tag=jsonPath,indent=0]
 
 
-
-[[resttestclient-assertj]]
+[[resttestclient.assertj]]
 === AssertJ Integration
 
 `RestTestClientResponse` is the main entry point for the AssertJ integration.
 It is an `AssertProvider` that wraps the `ResponseSpec` of an exchange in order to enable
 use of `assertThat()` statements. For example:
 
-[tabs]
-======
-Java::
-+
-[source,java,indent=0,subs="verbatim,quotes"]
-----
-	ResponseSpec spec = client.get().uri("/persons").exchange();
+include-code::./AssertJTests[tag=withSpec,indent=0]
 
-	RestTestClientResponse response = RestTestClientResponse.from(spec);
-	assertThat(response).hasStatusOk();
-	assertThat(response).hasContentTypeCompatibleWith(MediaType.TEXT_PLAIN);
-	// ...
-----
-
-Kotlin::
-+
-[source,kotlin,indent=0,subs="verbatim,quotes"]
-----
-	val spec = client.get().uri("/persons").exchange()
-
-	val response = RestTestClientResponse.from(spec)
-	assertThat(response).hasStatusOk()
-	assertThat(response).hasContentTypeCompatibleWith(MediaType.TEXT_PLAIN)
-	// ...
-----
-======
 
 You can also use the built-in workflow first, and then obtain an `ExchangeResult` to wrap
 and continue with AssertJ. For example:
 
-[tabs]
-======
-Java::
-+
-[source,java,indent=0,subs="verbatim,quotes"]
-----
-	ExchangeResult result = client.get().uri("/persons").exchange()
-			. // ...
-			.returnResult();
-
-	RestTestClientResponse response = RestTestClientResponse.from(result);
-	assertThat(response).hasStatusOk();
-	assertThat(response).hasContentTypeCompatibleWith(MediaType.TEXT_PLAIN);
-	// ...
-----
-
-Kotlin::
-+
-[source,kotlin,indent=0,subs="verbatim,quotes"]
-----
-	val result = client.get().uri("/persons").exchange()
-			. // ...
-			.returnResult()
-
-	val response = RestTestClientResponse.from(spec)
-	assertThat(response).hasStatusOk()
-	assertThat(response).hasContentTypeCompatibleWith(MediaType.TEXT_PLAIN)
-	// ...
-----
-======
+include-code::./AssertJTests[tag=withResult,indent=0]

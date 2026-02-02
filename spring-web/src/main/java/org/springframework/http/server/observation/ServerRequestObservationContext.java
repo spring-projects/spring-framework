@@ -16,6 +16,9 @@
 
 package org.springframework.http.server.observation;
 
+import java.util.Collections;
+
+import io.micrometer.observation.transport.Propagator;
 import io.micrometer.observation.transport.RequestReplyReceiverContext;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -32,10 +35,12 @@ import org.jspecify.annotations.Nullable;
  */
 public class ServerRequestObservationContext extends RequestReplyReceiverContext<HttpServletRequest, HttpServletResponse> {
 
+	private static final HeaderGetter GETTER = new HeaderGetter();
+
 	private @Nullable String pathPattern;
 
 	public ServerRequestObservationContext(HttpServletRequest request, HttpServletResponse response) {
-		super(HttpServletRequest::getHeader);
+		super(GETTER);
 		setCarrier(request);
 		setResponse(response);
 	}
@@ -47,4 +52,17 @@ public class ServerRequestObservationContext extends RequestReplyReceiverContext
 	public void setPathPattern(@Nullable String pathPattern) {
 		this.pathPattern = pathPattern;
 	}
+
+	static final class HeaderGetter implements Propagator.Getter<HttpServletRequest> {
+		@Override
+		public String get(HttpServletRequest carrier, String key) {
+			return carrier.getHeader(key);
+		}
+
+		@Override
+		public Iterable<String> getAll(HttpServletRequest carrier, String key) {
+			return Collections.list(carrier.getHeaders(key));
+		}
+	}
+
 }

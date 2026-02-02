@@ -393,9 +393,9 @@ is used to map requests.
 Once API versioning is enabled, you can begin to map requests with versions.
 The `@RequestMapping` `version` attribute supports the following:
 
-- No value -- matches any version
 - Fixed version ("1.2") -- matches the given version only
 - Baseline version ("1.2+") -- matches the given version and above
+- No value -- matches any version, but is superseded by a more specific version match
 
 If multiple controller methods have a version less than or equal to the request version,
 the highest of those, and closest to the request version, is the one considered,
@@ -453,6 +453,11 @@ For request with version `"1.5"`:
 A request with version `"1.6"` does not have a match. (1) and (3) do match, but are
 superseded by (4), which allows only a strict match, and therefore does not match.
 In this scenario, a `NotAcceptableApiVersionException` results in a 400 response.
+
+Controller methods without a version are intended to support clients created before a
+versioned alternative was introduced. Therefore, even though an unversioned controller
+method is considered a match for any version, it is in fact given the lowest priority,
+and is effectively superseded by any alternative controller method with a version.
 
 NOTE: The above assumes the request version is a
 xref:web/webflux/config.adoc#webflux-config-api-version["supported" version],

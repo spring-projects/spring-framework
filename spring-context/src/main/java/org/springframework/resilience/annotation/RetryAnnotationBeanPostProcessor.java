@@ -30,6 +30,8 @@ import org.springframework.aop.framework.autoproxy.AbstractBeanFactoryAwareAdvis
 import org.springframework.aop.support.ComposablePointcut;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
 import org.springframework.aop.support.annotation.AnnotationMatchingPointcut;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.context.EmbeddedValueResolverAware;
 import org.springframework.core.MethodClassKey;
 import org.springframework.core.annotation.AnnotatedElementUtils;
@@ -52,7 +54,9 @@ import org.springframework.util.StringValueResolver;
  */
 @SuppressWarnings("serial")
 public class RetryAnnotationBeanPostProcessor extends AbstractBeanFactoryAwareAdvisingPostProcessor
-		implements EmbeddedValueResolverAware {
+		implements ApplicationEventPublisherAware, EmbeddedValueResolverAware {
+
+	private final RetryAnnotationInterceptor interceptor = new RetryAnnotationInterceptor();
 
 	private @Nullable StringValueResolver embeddedValueResolver;
 
@@ -62,15 +66,18 @@ public class RetryAnnotationBeanPostProcessor extends AbstractBeanFactoryAwareAd
 
 		Pointcut cpc = new AnnotationMatchingPointcut(Retryable.class, true);
 		Pointcut mpc = new AnnotationMatchingPointcut(null, Retryable.class, true);
-		this.advisor = new DefaultPointcutAdvisor(
-				new ComposablePointcut(cpc).union(mpc),
-				new RetryAnnotationInterceptor());
+		this.advisor = new DefaultPointcutAdvisor(new ComposablePointcut(cpc).union(mpc), this.interceptor);
 	}
 
 
 	@Override
 	public void setEmbeddedValueResolver(StringValueResolver resolver) {
 		this.embeddedValueResolver = resolver;
+	}
+
+	@Override
+	public void setApplicationEventPublisher(ApplicationEventPublisher applicationEventPublisher) {
+		this.interceptor.setApplicationEventPublisher(applicationEventPublisher);
 	}
 
 
@@ -86,9 +93,9 @@ public class RetryAnnotationBeanPostProcessor extends AbstractBeanFactoryAwareAd
 				return retrySpec;
 			}
 
-			Retryable retryable = AnnotatedElementUtils.getMergedAnnotation(method, Retryable.class);
+			Retryable retryable = AnnotatedElementUtils.findMergedAnnotation(method, Retryable.class);
 			if (retryable == null) {
-				retryable = AnnotatedElementUtils.getMergedAnnotation(targetClass, Retryable.class);
+				retryable = AnnotatedElementUtils.findMergedAnnotation(targetClass, Retryable.class);
 				if (retryable == null) {
 					return null;
 				}
@@ -99,6 +106,7 @@ public class RetryAnnotationBeanPostProcessor extends AbstractBeanFactoryAwareAd
 					Arrays.asList(retryable.includes()), Arrays.asList(retryable.excludes()),
 					instantiatePredicate(retryable.predicate()),
 					parseLong(retryable.maxRetries(), retryable.maxRetriesString()),
+					parseDuration(retryable.timeout(), retryable.timeoutString(), timeUnit),
 					parseDuration(retryable.delay(), retryable.delayString(), timeUnit),
 					parseDuration(retryable.jitter(), retryable.jitterString(), timeUnit),
 					parseDouble(retryable.multiplier(), retryable.multiplierString()),

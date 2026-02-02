@@ -18,7 +18,6 @@ package org.springframework.web.service.invoker
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.toList
-import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatIllegalStateException
 import org.junit.jupiter.api.Test
@@ -42,7 +41,7 @@ class KotlinHttpServiceMethodTests {
 	private val reactorProxyFactory = HttpServiceProxyFactory.builderFor(this.reactorExchangeAdapter).build()
 
 	@Test
-	fun coroutinesService(): Unit = runBlocking {
+	suspend fun coroutinesService() {
 		val service = reactorProxyFactory.createClient(FunctionsService::class.java)
 
 		val stringBody = service.stringBody()

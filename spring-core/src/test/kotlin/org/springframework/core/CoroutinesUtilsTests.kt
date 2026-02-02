@@ -18,11 +18,17 @@ package org.springframework.core
 
 import io.micrometer.observation.Observation
 import io.micrometer.observation.tck.TestObservationRegistry
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineName
+import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.reactor.awaitSingle
 import kotlinx.coroutines.reactor.awaitSingleOrNull
+import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -33,8 +39,6 @@ import reactor.core.publisher.Mono
 import reactor.test.StepVerifier
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.coroutineContext
-import kotlin.reflect.full.primaryConstructor
-import kotlin.reflect.jvm.isAccessible
 import kotlin.reflect.jvm.javaMethod
 
 /**
@@ -47,8 +51,8 @@ class CoroutinesUtilsTests {
 	private val observationRegistry = TestObservationRegistry.create()
 
 	@Test
-	fun deferredToMono() {
-		runBlocking {
+	suspend fun deferredToMono() {
+		coroutineScope {
 			val deferred: Deferred<String> = async(Dispatchers.IO) {
 				delay(1)
 				"foo"
@@ -62,12 +66,10 @@ class CoroutinesUtilsTests {
 	}
 
 	@Test
-	fun monoToDeferred() {
-		runBlocking {
-			val mono = Mono.just("foo")
-			val deferred = CoroutinesUtils.monoToDeferred(mono)
-			Assertions.assertThat(deferred.await()).isEqualTo("foo")
-		}
+	suspend fun monoToDeferred() {
+		val mono = Mono.just("foo")
+		val deferred = CoroutinesUtils.monoToDeferred(mono)
+		Assertions.assertThat(deferred.await()).isEqualTo("foo")
 	}
 
 	@Test
@@ -93,12 +95,10 @@ class CoroutinesUtilsTests {
 	}
 
 	@Test
-	fun invokeSuspendingFunctionWithNullableParameter() {
+	suspend fun invokeSuspendingFunctionWithNullableParameter() {
 		val method = CoroutinesUtilsTests::class.java.getDeclaredMethod("suspendingFunctionWithNullable", String::class.java, Continuation::class.java)
 		val mono = CoroutinesUtils.invokeSuspendingFunction(method, this, null, null) as Mono
-		runBlocking {
-			Assertions.assertThat(mono.awaitSingleOrNull()).isNull()
-		}
+		Assertions.assertThat(mono.awaitSingleOrNull()).isNull()
 	}
 
 	@Test
@@ -154,23 +154,19 @@ class CoroutinesUtilsTests {
 	}
 
 	@Test
-	fun invokeSuspendingFunctionWithNullContinuationParameterAndContext() {
+	suspend fun invokeSuspendingFunctionWithNullContinuationParameterAndContext() {
 		val method = CoroutinesUtilsTests::class.java.getDeclaredMethod("suspendingFunctionWithContext", String::class.java, Continuation::class.java)
 		val context = CoroutineName("name")
 		val mono = CoroutinesUtils.invokeSuspendingFunction(context, method, this, "foo", null) as Mono
-		runBlocking {
-			Assertions.assertThat(mono.awaitSingle()).isEqualTo("foo")
-		}
+		Assertions.assertThat(mono.awaitSingle()).isEqualTo("foo")
 	}
 
 	@Test
-	fun invokeSuspendingFunctionWithoutContinuationParameterAndContext() {
+	suspend fun invokeSuspendingFunctionWithoutContinuationParameterAndContext() {
 		val method = CoroutinesUtilsTests::class.java.getDeclaredMethod("suspendingFunctionWithContext", String::class.java, Continuation::class.java)
 		val context = CoroutineName("name")
 		val mono = CoroutinesUtils.invokeSuspendingFunction(context, method, this, "foo") as Mono
-		runBlocking {
-			Assertions.assertThat(mono.awaitSingle()).isEqualTo("foo")
-		}
+		Assertions.assertThat(mono.awaitSingle()).isEqualTo("foo")
 	}
 
 	@Test
@@ -181,57 +177,45 @@ class CoroutinesUtilsTests {
 	}
 
 	@Test
-	fun invokeSuspendingFunctionReturningUnit() {
+	suspend fun invokeSuspendingFunctionReturningUnit() {
 		val method = CoroutinesUtilsTests::class.java.getDeclaredMethod("suspendingUnit", Continuation::class.java)
 		val mono = CoroutinesUtils.invokeSuspendingFunction(method, this) as Mono
-		runBlocking {
-			Assertions.assertThat(mono.awaitSingleOrNull()).isNull()
-		}
+		Assertions.assertThat(mono.awaitSingleOrNull()).isNull()
 	}
 
 	@Test
-	fun invokeSuspendingFunctionReturningNull() {
+	suspend fun invokeSuspendingFunctionReturningNull() {
 		val method = CoroutinesUtilsTests::class.java.getDeclaredMethod("suspendingNullable", Continuation::class.java)
 		val mono = CoroutinesUtils.invokeSuspendingFunction(method, this) as Mono
-		runBlocking {
-			Assertions.assertThat(mono.awaitSingleOrNull()).isNull()
-		}
+		Assertions.assertThat(mono.awaitSingleOrNull()).isNull()
 	}
 
 	@Test
-	fun invokeSuspendingFunctionWithValueClassParameter() {
+	suspend fun invokeSuspendingFunctionWithValueClassParameter() {
 		val method = CoroutinesUtilsTests::class.java.declaredMethods.first { it.name.startsWith("suspendingFunctionWithValueClassParameter") }
 		val mono = CoroutinesUtils.invokeSuspendingFunction(method, this, "foo", null) as Mono
-		runBlocking {
-			Assertions.assertThat(mono.awaitSingle()).isEqualTo("foo")
-		}
+		Assertions.assertThat(mono.awaitSingle()).isEqualTo("foo")
 	}
 
 	@Test
-	fun invokeSuspendingFunctionWithNestedValueClassParameter() {
+	suspend fun invokeSuspendingFunctionWithNestedValueClassParameter() {
 		val method = CoroutinesUtilsTests::class.java.declaredMethods.first { it.name.startsWith("suspendingFunctionWithNestedValueClassParameter") }
 		val mono = CoroutinesUtils.invokeSuspendingFunction(method, this, "foo", null) as Mono
-		runBlocking {
-			Assertions.assertThat(mono.awaitSingle()).isEqualTo("foo")
-		}
+		Assertions.assertThat(mono.awaitSingle()).isEqualTo("foo")
 	}
 
 	@Test
-	fun invokeSuspendingFunctionWithValueClassReturnValue() {
+	suspend fun invokeSuspendingFunctionWithValueClassReturnValue() {
 		val method = CoroutinesUtilsTests::class.java.declaredMethods.first { it.name.startsWith("suspendingFunctionWithValueClassReturnValue") }
 		val mono = CoroutinesUtils.invokeSuspendingFunction(method, this, null) as Mono
-		runBlocking {
-			Assertions.assertThat(mono.awaitSingle()).isEqualTo(ValueClass("foo"))
-		}
+		Assertions.assertThat(mono.awaitSingle()).isEqualTo(ValueClass("foo"))
 	}
 
 	@Test
-	fun invokeSuspendingFunctionWithResultOfUnitReturnValue() {
+	suspend fun invokeSuspendingFunctionWithResultOfUnitReturnValue() {
 		val method = CoroutinesUtilsTests::class.java.declaredMethods.first { it.name.startsWith("suspendingFunctionWithResultOfUnitReturnValue") }
 		val mono = CoroutinesUtils.invokeSuspendingFunction(method, this, null) as Mono
-		runBlocking {
-			Assertions.assertThat(mono.awaitSingle()).isEqualTo(Result.success(Unit))
-		}
+		Assertions.assertThat(mono.awaitSingle()).isEqualTo(Result.success(Unit))
 	}
 
 	@Test
@@ -246,51 +230,41 @@ class CoroutinesUtilsTests {
 	}
 
 	@Test
-	fun invokeSuspendingFunctionWithNullableValueClassParameter() {
+	suspend fun invokeSuspendingFunctionWithNullableValueClassParameter() {
 		val method = CoroutinesUtilsTests::class.java.declaredMethods.first { it.name.startsWith("suspendingFunctionWithNullableValueClass") }
 		val mono = CoroutinesUtils.invokeSuspendingFunction(method, this, null, null) as Mono
-		runBlocking {
-			Assertions.assertThat(mono.awaitSingleOrNull()).isNull()
-		}
+		Assertions.assertThat(mono.awaitSingleOrNull()).isNull()
 	}
 
 	@Test
-	fun invokeSuspendingFunctionWithValueClassWithPrivateConstructorParameter() {
+	suspend fun invokeSuspendingFunctionWithValueClassWithPrivateConstructorParameter() {
 		val method = CoroutinesUtilsTests::class.java.declaredMethods.first { it.name.startsWith("suspendingFunctionWithValueClassWithPrivateConstructor") }
 		val mono = CoroutinesUtils.invokeSuspendingFunction(method, this, "foo", null) as Mono
-		runBlocking {
-			Assertions.assertThat(mono.awaitSingleOrNull()).isEqualTo("foo")
-		}
+		Assertions.assertThat(mono.awaitSingleOrNull()).isEqualTo("foo")
 	}
 
 	@Test
-	fun invokeSuspendingFunctionWithExtension() {
+	suspend fun invokeSuspendingFunctionWithExtension() {
 		val method = CoroutinesUtilsTests::class.java.getDeclaredMethod("suspendingFunctionWithExtension",
 			CustomException::class.java, Continuation::class.java)
 		val mono = CoroutinesUtils.invokeSuspendingFunction(method, this, CustomException("foo")) as Mono
-		runBlocking {
-			Assertions.assertThat(mono.awaitSingleOrNull()).isEqualTo("foo")
-		}
+		Assertions.assertThat(mono.awaitSingleOrNull()).isEqualTo("foo")
 	}
 
 	@Test
-	fun invokeSuspendingFunctionWithExtensionAndParameter() {
+	suspend fun invokeSuspendingFunctionWithExtensionAndParameter() {
 		val method = CoroutinesUtilsTests::class.java.getDeclaredMethod("suspendingFunctionWithExtensionAndParameter",
 			CustomException::class.java, Int::class.java, Continuation::class.java)
 		val mono = CoroutinesUtils.invokeSuspendingFunction(method, this, CustomException("foo"), 20) as Mono
-		runBlocking {
-			Assertions.assertThat(mono.awaitSingleOrNull()).isEqualTo("foo-20")
-		}
+		Assertions.assertThat(mono.awaitSingleOrNull()).isEqualTo("foo-20")
 	}
 
 	@Test
-	fun invokeSuspendingFunctionWithGenericParameter() {
+	suspend fun invokeSuspendingFunctionWithGenericParameter() {
 		val method = GenericController::class.java.declaredMethods.first { it.name.startsWith("handle") }
 		val horse = Animal("horse")
 		val mono = CoroutinesUtils.invokeSuspendingFunction(method, AnimalController(), horse, null) as Mono
-		runBlocking {
-			Assertions.assertThat(mono.awaitSingle()).isEqualTo(horse.name)
-		}
+		Assertions.assertThat(mono.awaitSingle()).isEqualTo(horse.name)
 	}
 
 	@Test

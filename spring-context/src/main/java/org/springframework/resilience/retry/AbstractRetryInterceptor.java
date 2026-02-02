@@ -17,10 +17,13 @@
 package org.springframework.resilience.retry;
 
 import java.lang.reflect.Method;
+import java.time.Duration;
 import java.util.concurrent.Future;
 
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.jspecify.annotations.Nullable;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
@@ -28,10 +31,14 @@ import reactor.core.publisher.Mono;
 import reactor.util.retry.Retry;
 
 import org.springframework.aop.ProxyMethodInvocation;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.core.ReactiveAdapter;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.retry.RetryException;
+import org.springframework.core.retry.RetryListener;
 import org.springframework.core.retry.RetryPolicy;
+import org.springframework.core.retry.RetryState;
 import org.springframework.core.retry.RetryTemplate;
 import org.springframework.core.retry.Retryable;
 import org.springframework.util.ClassUtils;
@@ -47,7 +54,9 @@ import org.springframework.util.ClassUtils;
  * @see Mono#retryWhen
  * @see Flux#retryWhen
  */
-public abstract class AbstractRetryInterceptor implements MethodInterceptor {
+public abstract class AbstractRetryInterceptor implements MethodInterceptor, ApplicationEventPublisherAware {
+
+	private static final Log logger = LogFactory.getLog(AbstractRetryInterceptor.class);
 
 	/**
 	 * Reactive Streams API present on the classpath?
@@ -57,6 +66,8 @@ public abstract class AbstractRetryInterceptor implements MethodInterceptor {
 
 	private final @Nullable ReactiveAdapterRegistry reactiveAdapterRegistry;
 
+	private @Nullable ApplicationEventPublisher applicationEventPublisher;
+
 
 	public AbstractRetryInterceptor() {
 		if (REACTIVE_STREAMS_PRESENT) {
@@ -65,6 +76,11 @@ public abstract class AbstractRetryInterceptor implements MethodInterceptor {
 		else {
 			this.reactiveAdapterRegistry = null;
 		}
+	}
+
+	@Override
+	public void setApplicationEventPublisher(ApplicationEventPublisher applicationEventPublisher) {
+		this.applicationEventPublisher = applicationEventPublisher;
 	}
 
 
@@ -85,7 +101,7 @@ public abstract class AbstractRetryInterceptor implements MethodInterceptor {
 				if (result == null) {
 					return null;
 				}
-				return ReactorDelegate.adaptReactiveResult(result, adapter, spec, method);
+				return new ReactorDelegate().adaptReactiveResult(invocation, result, adapter, spec);
 			}
 		}
 
@@ -94,12 +110,24 @@ public abstract class AbstractRetryInterceptor implements MethodInterceptor {
 				.excludes(spec.excludes())
 				.predicate(spec.predicate().forMethod(method))
 				.maxRetries(spec.maxRetries())
+				.timeout(spec.timeout())
 				.delay(spec.delay())
 				.jitter(spec.jitter())
 				.multiplier(spec.multiplier())
 				.maxDelay(spec.maxDelay())
 				.build();
+
 		RetryTemplate retryTemplate = new RetryTemplate(retryPolicy);
+		retryTemplate.setRetryListener(new RetryListener() {
+			@Override
+			public void onRetryableExecution(RetryPolicy retryPolicy, Retryable<?> retryable, RetryState retryState) {
+				if (!retryState.isSuccessful()) {
+					onEvent(new MethodRetryEvent(invocation, retryState.getLastException(), false));
+				}
+			}
+		});
+
+		String methodName = ClassUtils.getQualifiedMethodName(method, (target != null ? target.getClass() : null));
 
 		try {
 			return retryTemplate.execute(new Retryable<@Nullable Object>() {
@@ -110,12 +138,23 @@ public abstract class AbstractRetryInterceptor implements MethodInterceptor {
 				}
 				@Override
 				public String getName() {
-					return ClassUtils.getQualifiedMethodName(method, (target != null ? target.getClass() : null));
+					return methodName;
 				}
 			});
 		}
 		catch (RetryException ex) {
+			onEvent(new MethodRetryEvent(invocation, ex, true));
+			if (logger.isDebugEnabled()) {
+				logger.debug("Retryable operation '%s' failed".formatted(methodName), ex);
+			}
 			throw ex.getCause();
+		}
+	}
+
+	private void onEvent(MethodRetryEvent event) {
+		logger.trace(event, event.getFailure());
+		if (this.applicationEventPublisher != null) {
+			this.applicationEventPublisher.publishEvent(event);
 		}
 	}
 
@@ -131,19 +170,41 @@ public abstract class AbstractRetryInterceptor implements MethodInterceptor {
 	/**
 	 * Inner class to avoid a hard dependency on Reactive Streams and Reactor at runtime.
 	 */
-	private static class ReactorDelegate {
+	private class ReactorDelegate {
 
-		public static Object adaptReactiveResult(
-				Object result, ReactiveAdapter adapter, MethodRetrySpec spec, Method method) {
+		public Object adaptReactiveResult(
+				MethodInvocation invocation, Object result, ReactiveAdapter adapter, MethodRetrySpec spec) {
 
 			Publisher<?> publisher = adapter.toPublisher(result);
 			Retry retry = Retry.backoff(spec.maxRetries(), spec.delay())
 					.jitter(calculateJitterFactor(spec))
 					.multiplier(spec.multiplier())
 					.maxBackoff(spec.maxDelay())
-					.filter(spec.combinedPredicate().forMethod(method));
-			publisher = (adapter.isMultiValue() ? Flux.from(publisher).retryWhen(retry) :
-					Mono.from(publisher).retryWhen(retry));
+					.filter(spec.combinedPredicate().forMethod(invocation.getMethod()));
+
+			Duration timeout = spec.timeout();
+			boolean timeoutIsPositive = (!timeout.isNegative() && !timeout.isZero());
+			if (adapter.isMultiValue()) {
+				Flux<?> flux = Flux.from(publisher)
+						.doOnError(ex -> onEvent(new MethodRetryEvent(invocation, ex, false)))
+						.retryWhen(retry);
+				if (timeoutIsPositive) {
+					flux = flux.timeout(timeout);
+				}
+				flux = flux.doOnError(ex -> onEvent(new MethodRetryEvent(invocation, ex, true)));
+				publisher = flux;
+			}
+			else {
+				Mono<?> mono = Mono.from(publisher)
+						.doOnError(ex -> onEvent(new MethodRetryEvent(invocation, ex, false)))
+						.retryWhen(retry);
+				if (timeoutIsPositive) {
+					mono = mono.timeout(timeout);
+				}
+				mono = mono.doOnError(ex -> onEvent(new MethodRetryEvent(invocation, ex, true)));
+				publisher = mono;
+			}
+
 			return adapter.fromPublisher(publisher);
 		}
 

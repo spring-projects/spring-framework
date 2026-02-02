@@ -31,13 +31,15 @@ import org.springframework.util.ConcurrencyThrottleSupport;
 import org.springframework.util.CustomizableThreadCreator;
 
 /**
- * {@link TaskExecutor} implementation that fires up a new Thread for each task,
- * executing it asynchronously. Provides a virtual thread option on JDK 21.
+ * {@link TaskExecutor} implementation that fires up a new Thread for each task.
+ * Provides a {@link #setVirtualThreads virtual threads} option on JDK 21+.
  *
  * <p>Supports a graceful shutdown through {@link #setTaskTerminationTimeout},
  * at the expense of task tracking overhead per execution thread at runtime.
- * Supports limiting concurrent threads through {@link #setConcurrencyLimit}.
- * By default, the number of concurrent task executions is unlimited.
+ * Supports limiting concurrent threads through {@link #setConcurrencyLimit};
+ * by default, the number of concurrent task executions is unlimited. Can be
+ * combined with {@link org.springframework.core.retry.support.RetryTask} for
+ * re-executing submitted tasks after failure, according to a retry policy.
  *
  * <p><b>NOTE: This implementation does not reuse threads!</b> Consider a
  * thread-pooling TaskExecutor implementation instead, in particular for
@@ -54,6 +56,7 @@ import org.springframework.util.CustomizableThreadCreator;
  * @see #setVirtualThreads
  * @see #setTaskTerminationTimeout
  * @see #setConcurrencyLimit
+ * @see org.springframework.core.retry.support.RetryTask
  * @see org.springframework.scheduling.concurrent.SimpleAsyncTaskScheduler
  * @see org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor
  */
@@ -211,10 +214,13 @@ public class SimpleAsyncTaskExecutor extends CustomizableThreadCreator
 
 	/**
 	 * Specify whether to reject tasks when the concurrency limit has been reached,
-	 * throwing {@link TaskRejectedException} on any further submission attempts.
+	 * throwing {@link TaskRejectedException} (which extends the common
+	 * {@link java.util.concurrent.RejectedExecutionException})
+	 * on any further execution attempts.
 	 * <p>The default is {@code false}, blocking the caller until the submission can
 	 * be accepted. Switch this to {@code true} for immediate rejection instead.
 	 * @since 6.2.6
+	 * @see #setConcurrencyLimit
 	 */
 	public void setRejectTasksWhenLimitReached(boolean rejectTasksWhenLimitReached) {
 		this.rejectTasksWhenLimitReached = rejectTasksWhenLimitReached;
@@ -422,9 +428,14 @@ public class SimpleAsyncTaskExecutor extends CustomizableThreadCreator
 		@Override
 		protected void onLimitReached() {
 			if (rejectTasksWhenLimitReached) {
-				throw new TaskRejectedException("Concurrency limit reached: " + getConcurrencyLimit());
+				onAccessRejected("Concurrency limit reached: " + getConcurrencyLimit());
 			}
 			super.onLimitReached();
+		}
+
+		@Override
+		protected void onAccessRejected(String msg) {
+			throw new TaskRejectedException(msg);
 		}
 
 		@Override

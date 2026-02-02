@@ -41,8 +41,8 @@ Kotlin::
 [source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	class MyForm(
-			val name: String,
-			val file: FilePart)
+			private val name: String,
+			private val file: FilePart)
 
 	@Controller
 	class FileUploadController {
@@ -103,8 +103,8 @@ Kotlin::
 [source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@PostMapping("/")
-	fun handle(@RequestPart("meta-data") Part metadata, // <1>
-			@RequestPart("file-data") FilePart file): String { // <2>
+	fun handle(@RequestPart("meta-data") metadata: Part, // <1>
+			@RequestPart("file-data") file: FilePart): String { // <2>
 		// ...
 	}
 ----
@@ -169,8 +169,8 @@ Kotlin::
 [source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@PostMapping("/")
-	fun handle(@Valid @RequestPart("meta-data") metadata: MetaData): String {
-		// ...
+	fun handle(@Valid @RequestPart("meta-data") metadata: Mono<MetaData>): String {
+		// use one of the onError* operators...
 	}
 ----
 ======
@@ -202,7 +202,7 @@ Kotlin::
 [source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@PostMapping("/")
-	fun handle(@RequestBody parts: MultiValueMap<String, Part>): String { // <1>
+	fun handle(@RequestBody parts: Mono<MultiValueMap<String, Part>>): String { // <1>
 		// ...
 	}
 ----
@@ -227,87 +227,7 @@ when uploading. If the file is large enough to be split across multiple buffers,
 
 For example:
 
-[tabs]
-======
-Java::
-+
-[source,java,indent=0,subs="verbatim,quotes"]
-----
-  @PostMapping("/")
-  public void handle(@RequestBody Flux<PartEvent> allPartsEvents) { <1>
-      allPartsEvents.windowUntil(PartEvent::isLast) <2>
-              .concatMap(p -> p.switchOnFirst((signal, partEvents) -> { <3>
-                  if (signal.hasValue()) {
-                      PartEvent event = signal.get();
-                      if (event instanceof FormPartEvent formEvent) { <4>
-                          String value = formEvent.value();
-                          // handle form field
-                      }
-                      else if (event instanceof FilePartEvent fileEvent) { <5>
-                          String filename = fileEvent.filename();
-                          Flux<DataBuffer> contents = partEvents.map(PartEvent::content); <6>
-                          // handle file upload
-                      }
-                      else {
-                          return Mono.error(new RuntimeException("Unexpected event: " + event));
-                      }
-                  }
-                  else {
-                      return partEvents; // either complete or error signal
-                  }
-              }));
-  }
-----
-<1> Using `@RequestBody`.
-<2> The final `PartEvent` for a particular part will have `isLast()` set to `true`, and can be
-followed by additional events belonging to subsequent parts.
-This makes the `isLast` property suitable as a predicate for the `Flux::windowUntil` operator, to
-split events from all parts into windows that each belong to a single part.
-<3> The `Flux::switchOnFirst` operator allows you to see whether you are handling a form field or
-file upload.
-<4> Handling the form field.
-<5> Handling the file upload.
-<6> The body contents must be completely consumed, relayed, or released to avoid memory leaks.
-
-Kotlin::
-+
-[source,kotlin,indent=0,subs="verbatim,quotes"]
-----
-	@PostMapping("/")
-	fun handle(@RequestBody allPartsEvents: Flux<PartEvent>) = { // <1>
-      allPartsEvents.windowUntil(PartEvent::isLast) <2>
-          .concatMap {
-              it.switchOnFirst { signal, partEvents -> <3>
-                  if (signal.hasValue()) {
-                      val event = signal.get()
-                      if (event is FormPartEvent) { <4>
-                          val value: String = event.value();
-                          // handle form field
-                      } else if (event is FilePartEvent) { <5>
-                          val filename: String = event.filename();
-                          val contents: Flux<DataBuffer> = partEvents.map(PartEvent::content); <6>
-                          // handle file upload
-                      } else {
-                          return Mono.error(RuntimeException("Unexpected event: " + event));
-                      }
-                  } else {
-                      return partEvents; // either complete or error signal
-                  }
-              }
-          }
-}
-----
-<1> Using `@RequestBody`.
-<2> The final `PartEvent` for a particular part will have `isLast()` set to `true`, and can be
-followed by additional events belonging to subsequent parts.
-This makes the `isLast` property suitable as a predicate for the `Flux::windowUntil` operator, to
-split events from all parts into windows that each belong to a single part.
-<3> The `Flux::switchOnFirst` operator allows you to see whether you are handling a form field or
-file upload.
-<4> Handling the form field.
-<5> Handling the file upload.
-<6> The body contents must be completely consumed, relayed, or released to avoid memory leaks.
-======
+include-code::./PartEventController[tag=snippet,indent=0]
 
 Received part events can also be relayed to another service by using the `WebClient`.
 See xref:web/webflux-webclient/client-body.adoc#webflux-client-body-multipart[Multipart Data].

@@ -66,6 +66,16 @@ final class HttpComponentsClientHttpResponse implements ClientHttpResponse {
 	public HttpHeaders getHeaders() {
 		if (this.headers == null) {
 			MultiValueMap<String, String> adapter = new HttpComponentsHeadersAdapter(this.httpResponse);
+			// update headers if response is decompressed
+			HttpEntity httpEntity = this.httpResponse.getEntity();
+			if (httpEntity != null) {
+				if (httpEntity.getContentLength() == -1) {
+					adapter.remove(HttpHeaders.CONTENT_LENGTH);
+				}
+				if (httpEntity.getContentEncoding() == null) {
+					adapter.remove(HttpHeaders.CONTENT_ENCODING);
+				}
+			}
 			this.headers = HttpHeaders.readOnlyHttpHeaders(adapter);
 		}
 		return this.headers;

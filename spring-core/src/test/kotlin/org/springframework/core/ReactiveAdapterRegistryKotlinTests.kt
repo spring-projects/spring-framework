@@ -23,7 +23,6 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.toList
-import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.reactivestreams.Publisher
@@ -52,11 +51,11 @@ class ReactiveAdapterRegistryKotlinTests {
 	}
 
 	@Test
-	fun publisherToDeferred() {
+	suspend fun publisherToDeferred() {
 		val source = Mono.just(1)
 		val target = getAdapter(Deferred::class).fromPublisher(source)
 		assertThat(target).isInstanceOf(Deferred::class.java)
-		assertThat(runBlocking { (target as Deferred<*>).await() }).isEqualTo(1)
+		assertThat((target as Deferred<*>).await()).isEqualTo(1)
 	}
 
 	@Test
@@ -76,11 +75,11 @@ class ReactiveAdapterRegistryKotlinTests {
 	}
 
 	@Test
-	fun publisherToFlow() {
+	suspend fun publisherToFlow() {
 		val source = Flux.just(1, 2, 3)
 		val target = getAdapter(Flow::class).fromPublisher(source)
 		assertThat(target).isInstanceOf(Flow::class.java)
-		assertThat(runBlocking { (target as Flow<*>).toList() }).contains(1, 2, 3)
+		assertThat((target as Flow<*>).toList()).contains(1, 2, 3)
 	}
 
 	private fun getAdapter(reactiveType: KClass<*>): ReactiveAdapter {

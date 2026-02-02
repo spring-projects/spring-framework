@@ -16,6 +16,7 @@
 
 package org.springframework.orm.jpa;
 
+import java.sql.Connection;
 import java.sql.SQLException;
 
 import jakarta.persistence.EntityManager;
@@ -78,7 +79,7 @@ public interface JpaDialect extends PersistenceExceptionTranslator {
 	 * @throws org.springframework.transaction.TransactionException in case of invalid arguments
 	 * @see #cleanupTransaction
 	 * @see jakarta.persistence.EntityTransaction#begin
-	 * @see org.springframework.jdbc.datasource.DataSourceUtils#prepareConnectionForTransaction
+	 * @see org.springframework.jdbc.datasource.DataSourceUtils#prepareConnectionForTransaction(Connection, TransactionDefinition)
 	 */
 	@Nullable Object beginTransaction(EntityManager entityManager, TransactionDefinition definition)
 			throws PersistenceException, SQLException, TransactionException;

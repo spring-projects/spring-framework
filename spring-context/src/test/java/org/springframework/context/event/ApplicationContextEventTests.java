@@ -24,6 +24,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
 import org.aopalliance.intercept.MethodInvocation;
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
@@ -59,6 +60,7 @@ import org.springframework.scheduling.support.TaskUtils;
 import org.springframework.util.ReflectionUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.assertj.core.api.Assertions.assertThatRuntimeException;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.BDDMockito.given;
@@ -298,7 +300,7 @@ class ApplicationContextEventTests extends AbstractApplicationEventListenerTests
 	}
 
 	@Test
-	void testEventPublicationInterceptor() throws Throwable {
+	void testEventPublicationInterceptorWithEventClass() throws Throwable {
 		MethodInvocation invocation = mock();
 		ApplicationContext ctx = mock();
 
@@ -311,6 +313,60 @@ class ApplicationContextEventTests extends AbstractApplicationEventListenerTests
 		given(invocation.getThis()).willReturn(new Object());
 		interceptor.invoke(invocation);
 		verify(ctx).publishEvent(isA(MyEvent.class));
+	}
+
+	@Test
+	void testEventPublicationInterceptorWithEventFactory() throws Throwable {
+		MethodInvocation invocation = mock();
+		ApplicationContext ctx = mock();
+
+		EventPublicationInterceptor interceptor = new EventPublicationInterceptor();
+		interceptor.setApplicationEventFactory((inv, retVal) -> new MyEvent(inv.getThis()));
+		interceptor.setApplicationEventPublisher(ctx);
+		interceptor.afterPropertiesSet();
+
+		given(invocation.proceed()).willReturn(new Object());
+		given(invocation.getThis()).willReturn(new Object());
+		interceptor.invoke(invocation);
+		verify(ctx).publishEvent(isA(MyEvent.class));
+	}
+
+	@Test
+	void testEventPublicationInterceptorWithMethodFailure() throws Throwable {
+		MethodInvocation invocation = mock();
+		ApplicationContext ctx = mock();
+
+		EventPublicationInterceptor interceptor = new EventPublicationInterceptor();
+		interceptor.setApplicationEventPublisher(ctx);
+		interceptor.afterPropertiesSet();
+
+		given(invocation.proceed()).willThrow(new IllegalStateException());
+		assertThatIllegalStateException().isThrownBy(() -> interceptor.invoke(invocation));
+		verify(ctx).publishEvent(isA(MethodFailureEvent.class));
+	}
+
+	@Test
+	void testEventPublicationInterceptorWithCustomFailure() throws Throwable {
+		MethodInvocation invocation = mock();
+		ApplicationContext ctx = mock();
+
+		EventPublicationInterceptor interceptor = new EventPublicationInterceptor();
+		interceptor.setApplicationEventFactory(new EventPublicationInterceptor.ApplicationEventFactory() {
+			@Override
+			public ApplicationEvent onSuccess(MethodInvocation invocation, @Nullable Object returnValue) {
+				return new MyEvent(returnValue);
+			}
+			@Override
+			public ApplicationEvent onFailure(MethodInvocation invocation, Throwable failure) {
+				return new MyOtherEvent(failure);
+			}
+		});
+		interceptor.setApplicationEventPublisher(ctx);
+		interceptor.afterPropertiesSet();
+
+		given(invocation.proceed()).willThrow(new IllegalStateException());
+		assertThatIllegalStateException().isThrownBy(() -> interceptor.invoke(invocation));
+		verify(ctx).publishEvent(isA(MyOtherEvent.class));
 	}
 
 	@Test

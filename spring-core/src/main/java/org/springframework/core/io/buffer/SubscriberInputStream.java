@@ -185,7 +185,7 @@ final class SubscriberInputStream extends InputStream implements Subscriber<Data
 	}
 
 	private void resume() {
-		if (this.parkedThread != READY) {
+		if (this.parkedThread.get() != READY) {
 			Object old = this.parkedThread.getAndSet(READY);
 			if (old != READY) {
 				LockSupport.unpark((Thread)old);

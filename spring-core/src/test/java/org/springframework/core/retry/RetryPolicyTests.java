@@ -132,6 +132,22 @@ class RetryPolicyTests {
 		}
 
 		@Test
+		void timeoutPreconditions() {
+			assertThatIllegalArgumentException()
+					.isThrownBy(() -> RetryPolicy.builder().timeout(Duration.ofMillis(-1)))
+					.withMessage("Invalid timeout (-1ms): must be greater than or equal to zero.");
+		}
+
+		@Test
+		void timeout() {
+			Duration timeout = Duration.ofMillis(42);
+
+			var policy = RetryPolicy.builder().timeout(timeout).build();
+
+			assertThat(policy.getTimeout()).isSameAs(timeout);
+		}
+
+		@Test
 		void delayPreconditions() {
 			assertThatIllegalArgumentException()
 					.isThrownBy(() -> RetryPolicy.builder().delay(Duration.ofMillis(-1)))

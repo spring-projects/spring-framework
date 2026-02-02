@@ -152,26 +152,9 @@ from the iframe. By default, the iframe is set to download the SockJS client
 from a CDN location. It is a good idea to configure this option to use
 a URL from the same origin as the application.
 
-The following example shows how to do so in Java configuration:
+The following example shows how to configure it:
 
-[source,java,indent=0,subs="verbatim,quotes"]
-----
-	@Configuration
-	@EnableWebSocketMessageBroker
-	public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
-
-		@Override
-		public void registerStompEndpoints(StompEndpointRegistry registry) {
-			registry.addEndpoint("/portfolio").withSockJS()
-					.setClientLibraryUrl("http://localhost:8080/myapp/js/sockjs-client.js");
-		}
-
-		// ...
-
-	}
-----
-
-The XML namespace provides a similar option through the `<websocket:sockjs>` element.
+include-code::./WebSocketConfiguration[tag=snippet,indent=0]
 
 NOTE: During initial development, do enable the SockJS client `devel` mode that prevents
 the browser from caching SockJS requests (like the iframe) that would otherwise
@@ -307,23 +290,4 @@ jettyHttpClient.setExecutor(new QueuedThreadPool(1000));
 The following example shows the server-side SockJS-related properties (see javadoc for details)
 that you should also consider customizing:
 
-[source,java,indent=0,subs="verbatim,quotes"]
-----
-	@Configuration
-	public class WebSocketConfig extends WebSocketMessageBrokerConfigurationSupport {
-
-		@Override
-		public void registerStompEndpoints(StompEndpointRegistry registry) {
-			registry.addEndpoint("/sockjs").withSockJS()
-				.setStreamBytesLimit(512 * 1024) <1>
-				.setHttpMessageCacheSize(1000) <2>
-				.setDisconnectDelay(30 * 1000); <3>
-		}
-
-		// ...
-	}
-----
-<1> Set the `streamBytesLimit` property to 512KB (the default is 128KB -- `128 * 1024`).
-<2> Set the `httpMessageCacheSize` property to 1,000 (the default is `100`).
-<3> Set the `disconnectDelay` property to 30 property seconds (the default is five seconds
--- `5 * 1000`).
+include-code::./WebSocketConfiguration[tag=snippet,indent=0]

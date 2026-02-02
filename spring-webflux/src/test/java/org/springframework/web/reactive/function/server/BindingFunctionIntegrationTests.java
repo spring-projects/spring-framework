@@ -95,13 +95,13 @@ class BindingFunctionIntegrationTests extends AbstractRouterFunctionIntegrationT
 	@ParameterizedHttpServerTest
 	void bindToMixed(HttpServer httpServer) throws Exception {
 
-			startServer(httpServer);
+		startServer(httpServer);
 
-			Mono<String> result = this.webClient.get()
-					.uri("/mixed?foo=FOO")
-					.header("bar", "BAR")
-					.retrieve()
-					.bodyToMono(String.class);
+		Mono<String> result = this.webClient.get()
+				.uri("/mixed?foo=FOO")
+				.header("bar", "BAR")
+				.retrieve()
+				.bodyToMono(String.class);
 
 		StepVerifier.create(result)
 				.expectNext("FOO:BAR")

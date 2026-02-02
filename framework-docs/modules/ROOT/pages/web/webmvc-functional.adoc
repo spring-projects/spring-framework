@@ -900,81 +900,9 @@ processing lifecycle and also (potentially) run side by side with annotated cont
 any are declared. It is also how functional endpoints are enabled by the Spring Boot Web
 starter.
 
-The following example shows a WebMvc Java configuration:
+The following example shows a related Spring MVC configuration:
 
-[tabs]
-======
-Java::
-+
-[source,java,indent=0,subs="verbatim,quotes"]
-----
-	@Configuration
-	@EnableMvc
-	public class WebConfig implements WebMvcConfigurer {
-
-		@Bean
-		public RouterFunction<?> routerFunctionA() {
-			// ...
-		}
-
-		@Bean
-		public RouterFunction<?> routerFunctionB() {
-			// ...
-		}
-
-		// ...
-
-		@Override
-		public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
-			// configure message conversion...
-		}
-
-		@Override
-		public void addCorsMappings(CorsRegistry registry) {
-			// configure CORS...
-		}
-
-		@Override
-		public void configureViewResolvers(ViewResolverRegistry registry) {
-			// configure view resolution for HTML rendering...
-		}
-	}
-----
-
-Kotlin::
-+
-[source,kotlin,indent=0,subs="verbatim,quotes"]
-----
-	@Configuration
-	@EnableMvc
-	class WebConfig : WebMvcConfigurer {
-
-		@Bean
-		fun routerFunctionA(): RouterFunction<*> {
-			// ...
-		}
-
-		@Bean
-		fun routerFunctionB(): RouterFunction<*> {
-			// ...
-		}
-
-		// ...
-
-		override fun configureMessageConverters(converters: List<HttpMessageConverter<*>>) {
-			// configure message conversion...
-		}
-
-		override fun addCorsMappings(registry: CorsRegistry) {
-			// configure CORS...
-		}
-
-		override fun configureViewResolvers(registry: ViewResolverRegistry) {
-			// configure view resolution for HTML rendering...
-		}
-	}
-----
-======
+include-code::./WebConfiguration[tag=snippet,indent=0]
 
 
 [[webmvc-fn-handler-filter-function]]

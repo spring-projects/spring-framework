@@ -235,88 +235,14 @@ val map = request.awaitMultipartData()
 
 The following example shows how to access multipart data, one at a time, in streaming fashion:
 
-[tabs]
-======
-Java::
-+
-[source,java,indent=0,subs="verbatim,quotes"]
-----
-Flux<PartEvent> allPartEvents = request.bodyToFlux(PartEvent.class);
-allPartsEvents.windowUntil(PartEvent::isLast)
-      .concatMap(p -> p.switchOnFirst((signal, partEvents) -> {
-          if (signal.hasValue()) {
-              PartEvent event = signal.get();
-              if (event instanceof FormPartEvent formEvent) {
-                  String value = formEvent.value();
-                  // handle form field
-              }
-              else if (event instanceof FilePartEvent fileEvent) {
-                  String filename = fileEvent.filename();
-                  Flux<DataBuffer> contents = partEvents.map(PartEvent::content);
-                  // handle file upload
-              }
-              else {
-                  return Mono.error(new RuntimeException("Unexpected event: " + event));
-              }
-          }
-          else {
-              return partEvents; // either complete or error signal
-          }
-      }));
-----
-
-Kotlin::
-+
-[source,kotlin,indent=0,subs="verbatim,quotes"]
-----
-val parts = request.bodyToFlux<PartEvent>()
-allPartsEvents.windowUntil(PartEvent::isLast)
-    .concatMap {
-        it.switchOnFirst { signal, partEvents ->
-            if (signal.hasValue()) {
-                val event = signal.get()
-                if (event is FormPartEvent) {
-                    val value: String = event.value();
-                    // handle form field
-                } else if (event is FilePartEvent) {
-                    val filename: String = event.filename();
-                    val contents: Flux<DataBuffer> = partEvents.map(PartEvent::content);
-                    // handle file upload
-                } else {
-                    return Mono.error(RuntimeException("Unexpected event: " + event));
-                }
-            } else {
-                return partEvents; // either complete or error signal
-            }
-        }
-    }
-}
-----
-======
+include-code::./PartEventHandler[tag=snippet,indent=0]
 
 NOTE: The body contents of the `PartEvent` objects must be completely consumed, relayed, or released to avoid memory leaks.
 
 The following shows how to bind request parameters, URI variables, or headers via `DataBinder`,
 and also shows how to customize the `DataBinder`:
 
-[tabs]
-======
-Java::
-+
-[source,java]
-----
-Pet pet = request.bind(Pet.class, dataBinder -> dataBinder.setAllowedFields("name"));
-----
-
-Kotlin::
-+
-[source,kotlin]
-----
-val pet = request.bind(Pet::class.java, {dataBinder -> dataBinder.setAllowedFields("name")})
-----
-======
-
-
+include-code::./RequestHandler[tag=snippet,indent=0]
 
 [[webflux-fn-response]]
 === ServerResponse
@@ -326,24 +252,7 @@ a `build` method to create it. You can use the builder to set the response statu
 headers, or to provide a body. The following example creates a 200 (OK) response with JSON
 content:
 
-[tabs]
-======
-Java::
-+
-[source,java]
-----
-Mono<Person> person = ...
-ServerResponse.ok().contentType(MediaType.APPLICATION_JSON).body(person, Person.class);
-----
-
-Kotlin::
-+
-[source,kotlin]
-----
-val person: Person = ...
-ServerResponse.ok().contentType(MediaType.APPLICATION_JSON).bodyValue(person)
-----
-======
+include-code::./ResponseHandler[tag=snippet,indent=0]
 
 The following example shows how to build a 201 (CREATED) response with a `Location` header and no body:
 
@@ -354,7 +263,7 @@ Java::
 [source,java]
 ----
 URI location = ...
-ServerResponse.created(location).build();
+return ServerResponse.created(location).build();
 ----
 
 Kotlin::
@@ -362,7 +271,7 @@ Kotlin::
 [source,kotlin]
 ----
 val location: URI = ...
-ServerResponse.created(location).build()
+return ServerResponse.created(location).build()
 ----
 ======
 
@@ -375,14 +284,14 @@ Java::
 +
 [source,java]
 ----
-ServerResponse.ok().hint(JacksonCodecSupport.JSON_VIEW_HINT, MyJacksonView.class).body(...);
+return ServerResponse.ok().hint(JacksonCodecSupport.JSON_VIEW_HINT, MyJacksonView.class).body(...);
 ----
 
 Kotlin::
 +
 [source,kotlin]
 ----
-ServerResponse.ok().hint(JacksonCodecSupport.JSON_VIEW_HINT, MyJacksonView::class.java).body(...)
+return ServerResponse.ok().hint(JacksonCodecSupport.JSON_VIEW_HINT, MyJacksonView::class.java).body(...)
 ----
 ======
 
@@ -417,87 +326,7 @@ Therefore, it is useful to group related handler functions together into a handl
 has a similar role as  `@Controller` in an annotation-based application.
 For example, the following class exposes a reactive `Person` repository:
 
---
-[tabs]
-======
-Java::
-+
-[source,java,indent=0,subs="verbatim,quotes"]
-----
-import static org.springframework.http.MediaType.APPLICATION_JSON;
-import static org.springframework.web.reactive.function.server.ServerResponse.ok;
-
-public class PersonHandler {
-
-	private final PersonRepository repository;
-
-	public PersonHandler(PersonRepository repository) {
-		this.repository = repository;
-	}
-
-	public Mono<ServerResponse> listPeople(ServerRequest request) { // <1>
-		Flux<Person> people = repository.allPeople();
-		return ok().contentType(APPLICATION_JSON).body(people, Person.class);
-	}
-
-	public Mono<ServerResponse> createPerson(ServerRequest request) { // <2>
-		Mono<Person> person = request.bodyToMono(Person.class);
-		return ok().build(repository.savePerson(person));
-	}
-
-	public Mono<ServerResponse> getPerson(ServerRequest request) { // <3>
-		int personId = Integer.valueOf(request.pathVariable("id"));
-		return repository.getPerson(personId)
-			.flatMap(person -> ok().contentType(APPLICATION_JSON).bodyValue(person))
-			.switchIfEmpty(ServerResponse.notFound().build());
-	}
-}
-----
-<1> `listPeople` is a handler function that returns all `Person` objects found in the repository as
-JSON.
-<2> `createPerson` is a handler function that stores a new `Person` contained in the request body.
-Note that `PersonRepository.savePerson(Person)` returns `Mono<Void>`: an empty `Mono` that emits
-a completion signal when the person has been read from the request and stored. So we use the
-`build(Publisher<Void>)` method to send a response when that completion signal is received (that is,
-when the `Person` has been saved).
-<3> `getPerson` is a handler function that returns a single person, identified by the `id` path
-variable. We retrieve that `Person` from the repository and create a JSON response, if it is
-found. If it is not found, we use `switchIfEmpty(Mono<T>)` to return a 404 Not Found response.
-
-Kotlin::
-+
-[source,kotlin,indent=0,subs="verbatim,quotes"]
-----
-	class PersonHandler(private val repository: PersonRepository) {
-
-		suspend fun listPeople(request: ServerRequest): ServerResponse { // <1>
-			val people: Flow<Person> = repository.allPeople()
-			return ok().contentType(APPLICATION_JSON).bodyAndAwait(people);
-		}
-
-		suspend fun createPerson(request: ServerRequest): ServerResponse { // <2>
-			val person = request.awaitBody<Person>()
-			repository.savePerson(person)
-			return ok().buildAndAwait()
-		}
-
-		suspend fun getPerson(request: ServerRequest): ServerResponse { // <3>
-			val personId = request.pathVariable("id").toInt()
-			return repository.getPerson(personId)?.let { ok().contentType(APPLICATION_JSON).bodyValueAndAwait(it) }
-					?: ServerResponse.notFound().buildAndAwait()
-
-		}
-	}
-----
-<1> `listPeople` is a handler function that returns all `Person` objects found in the repository as
-JSON.
-<2> `createPerson` is a handler function that stores a new `Person` contained in the request body.
-Note that `PersonRepository.savePerson(Person)` is a suspending function with no return type.
-<3> `getPerson` is a handler function that returns a single person, identified by the `id` path
-variable. We retrieve that `Person` from the repository and create a JSON response, if it is
-found. If it is not found, we return a 404 Not Found response.
-======
---
+include-code::./PersonHandler[tag=snippet,indent=0]
 
 [[webflux-fn-handler-validation]]
 === Validation
@@ -506,66 +335,7 @@ A functional endpoint can use Spring's xref:web/webmvc/mvc-config/validation.ado
 apply validation to the request body. For example, given a custom Spring
 xref:web/webmvc/mvc-config/validation.adoc[Validator] implementation for a `Person`:
 
-[tabs]
-======
-Java::
-+
-[source,java,indent=0,subs="verbatim,quotes"]
-----
-	public class PersonHandler {
-
-		private final Validator validator = new PersonValidator(); // <1>
-
-		// ...
-
-		public Mono<ServerResponse> createPerson(ServerRequest request) {
-			Mono<Person> person = request.bodyToMono(Person.class).doOnNext(this::validate); // <2>
-			return ok().build(repository.savePerson(person));
-		}
-
-		private void validate(Person person) {
-			Errors errors = new BeanPropertyBindingResult(person, "person");
-			validator.validate(person, errors);
-			if (errors.hasErrors()) {
-				throw new ServerWebInputException(errors.toString()); // <3>
-			}
-		}
-	}
-----
-<1> Create `Validator` instance.
-<2> Apply validation.
-<3> Raise exception for a 400 response.
-
-Kotlin::
-+
-[source,kotlin,indent=0,subs="verbatim,quotes"]
-----
-	class PersonHandler(private val repository: PersonRepository) {
-
-		private val validator = PersonValidator() // <1>
-
-		// ...
-
-		suspend fun createPerson(request: ServerRequest): ServerResponse {
-			val person = request.awaitBody<Person>()
-			validate(person) // <2>
-			repository.savePerson(person)
-			return ok().buildAndAwait()
-		}
-
-		private fun validate(person: Person) {
-			val errors: Errors = BeanPropertyBindingResult(person, "person");
-			validator.validate(person, errors);
-			if (errors.hasErrors()) {
-				throw ServerWebInputException(errors.toString()) // <3>
-			}
-		}
-	}
-----
-<1> Create `Validator` instance.
-<2> Apply validation.
-<3> Raise exception for a 400 response.
-======
+include-code::./PersonHandler[tag=snippet,indent=0]
 
 Handlers can also use the standard bean validation API (JSR-303) by creating and injecting
 a global `Validator` instance based on `LocalValidatorFactoryBean`.
@@ -603,28 +373,7 @@ path, headers, xref:#api-version[API version], and more.
 
 The following example uses an `Accept` header, request predicate:
 
-[tabs]
-======
-Java::
-+
-[source,java,indent=0,subs="verbatim,quotes"]
-----
-	RouterFunction<ServerResponse> route = RouterFunctions.route()
-		.GET("/hello-world", accept(MediaType.TEXT_PLAIN),
-			request -> ServerResponse.ok().bodyValue("Hello World")).build();
-----
-
-Kotlin::
-+
-[source,kotlin,indent=0,subs="verbatim,quotes"]
-----
-	val route = coRouter {
-		GET("/hello-world", accept(TEXT_PLAIN)) {
-			ServerResponse.ok().bodyValueAndAwait("Hello World")
-		}
-	}
-----
-======
+include-code::./RouterConfiguration[tag=snippet,indent=0]
 
 You can compose multiple request predicates together by using:
 
@@ -659,61 +408,7 @@ There are also other ways to compose multiple router functions together:
 
 The following example shows the composition of four routes:
 
-
-[tabs]
-======
-Java::
-+
-[source,java,indent=0,subs="verbatim,quotes"]
-----
-import static org.springframework.http.MediaType.APPLICATION_JSON;
-import static org.springframework.web.reactive.function.server.RequestPredicates.*;
-
-PersonRepository repository = ...
-PersonHandler handler = new PersonHandler(repository);
-
-RouterFunction<ServerResponse> otherRoute = ...
-
-RouterFunction<ServerResponse> route = route()
-	.GET("/person/{id}", accept(APPLICATION_JSON), handler::getPerson) // <1>
-	.GET("/person", accept(APPLICATION_JSON), handler::listPeople) // <2>
-	.POST("/person", handler::createPerson) // <3>
-	.add(otherRoute) // <4>
-	.build();
-----
-<1> pass:q[`GET /person/{id}`] with an `Accept` header that matches JSON is routed to
-`PersonHandler.getPerson`
-<2> `GET /person` with an `Accept` header that matches JSON is routed to
-`PersonHandler.listPeople`
-<3> `POST /person` with no additional predicates is mapped to
-`PersonHandler.createPerson`, and
-<4> `otherRoute` is a router function that is created elsewhere, and added to the route built.
-
-Kotlin::
-+
-[source,kotlin,indent=0,subs="verbatim,quotes"]
-----
-	import org.springframework.http.MediaType.APPLICATION_JSON
-
-	val repository: PersonRepository = ...
-	val handler = PersonHandler(repository);
-
-	val otherRoute: RouterFunction<ServerResponse> = coRouter {  }
-
-	val route = coRouter {
-		GET("/person/{id}", accept(APPLICATION_JSON), handler::getPerson) // <1>
-		GET("/person", accept(APPLICATION_JSON), handler::listPeople) // <2>
-		POST("/person", handler::createPerson) // <3>
-	}.and(otherRoute) // <4>
-----
-<1> pass:q[`GET /person/{id}`] with an `Accept` header that matches JSON is routed to
-`PersonHandler.getPerson`
-<2> `GET /person` with an `Accept` header that matches JSON is routed to
-`PersonHandler.listPeople`
-<3> `POST /person` with no additional predicates is mapped to
-`PersonHandler.createPerson`, and
-<4> `otherRoute` is a router function that is created elsewhere, and added to the route built.
-======
+include-code::./RouterConfiguration[tag=snippet,indent=0]
 
 [[nested-routes]]
 === Nested Routes
@@ -811,7 +506,7 @@ Java::
 ----
 	RouterFunction<ServerResponse> route = RouterFunctions.route()
 		.GET("/hello-world", version("1.2"),
-			request -> ServerResponse.ok().body("Hello World")).build();
+			request -> ServerResponse.ok().bodyValue("Hello World")).build();
 ----
 
 Kotlin::
@@ -944,7 +639,6 @@ Java::
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Configuration
-	@EnableWebFlux
 	public class WebConfig implements WebFluxConfigurer {
 
 		@Bean
@@ -981,7 +675,6 @@ Kotlin::
 [source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	@Configuration
-	@EnableWebFlux
 	class WebConfig : WebFluxConfigurer {
 
 		@Bean
@@ -1049,9 +742,9 @@ Kotlin::
 [source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
 	val route = router {
-		"/person".nest {
+		("/person" and accept(APPLICATION_JSON)).nest {
 			GET("/{id}", handler::getPerson)
-			GET("", handler::listPeople)
+			GET(handler::listPeople)
 			before { // <1>
 				ServerRequest.from(it)
 						.header("X-RequestHeader", "Value").build()
@@ -1078,54 +771,7 @@ Now we can add a simple security filter to our route, assuming that we have a `S
 can determine whether a particular path is allowed.
 The following example shows how to do so:
 
-[tabs]
-======
-Java::
-+
-[source,java,indent=0,subs="verbatim,quotes"]
-----
-	SecurityManager securityManager = ...
-
-	RouterFunction<ServerResponse> route = route()
-		.path("/person", b1 -> b1
-			.nest(accept(APPLICATION_JSON), b2 -> b2
-				.GET("/{id}", handler::getPerson)
-				.GET(handler::listPeople))
-			.POST(handler::createPerson))
-		.filter((request, next) -> {
-			if (securityManager.allowAccessTo(request.path())) {
-				return next.handle(request);
-			}
-			else {
-				return ServerResponse.status(UNAUTHORIZED).build();
-			}
-		})
-		.build();
-----
-
-Kotlin::
-+
-[source,kotlin,indent=0,subs="verbatim,quotes"]
-----
-	val securityManager: SecurityManager = ...
-
-	val route = router {
-			("/person" and accept(APPLICATION_JSON)).nest {
-				GET("/{id}", handler::getPerson)
-				GET("", handler::listPeople)
-				POST(handler::createPerson)
-				filter { request, next ->
-					if (securityManager.allowAccessTo(request.path())) {
-						next(request)
-					}
-					else {
-						status(UNAUTHORIZED).build();
-					}
-				}
-			}
-		}
-----
-======
+include-code::./RouterConfiguration[tag=snippet,indent=0]
 
 The preceding example demonstrates that invoking the `next.handle(ServerRequest)` is optional.
 We only let the handler function be run when access is allowed.

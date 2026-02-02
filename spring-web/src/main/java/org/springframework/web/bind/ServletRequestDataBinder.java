@@ -69,7 +69,7 @@ import org.springframework.web.util.WebUtils;
  * // trigger actual binding of request parameters
  * binder.bind(request);
  * // optionally evaluate binding errors
- * Errors errors = binder.getErrors();
+ * BindingResult bindingResult = binder.getBindingResult();
  * ...</pre>
  *
  * @author Rod Johnson

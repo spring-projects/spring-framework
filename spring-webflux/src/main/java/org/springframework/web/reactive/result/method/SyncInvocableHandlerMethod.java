@@ -100,7 +100,7 @@ public class SyncInvocableHandlerMethod extends HandlerMethod {
 	public @Nullable HandlerResult invokeForHandlerResult(ServerWebExchange exchange,
 			BindingContext bindingContext, Object... providedArgs) {
 
-		CompletableFuture<HandlerResult> future =
+		CompletableFuture<@Nullable HandlerResult> future =
 				this.delegate.invoke(exchange, bindingContext, providedArgs).toFuture();
 
 		if (!future.isDone()) {

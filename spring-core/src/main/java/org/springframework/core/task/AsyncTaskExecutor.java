@@ -21,18 +21,16 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.util.concurrent.FutureUtils;
 
 /**
  * Extended interface for asynchronous {@link TaskExecutor} implementations,
- * offering support for {@link java.util.concurrent.Callable}.
- *
- * <p>Note: The {@link java.util.concurrent.Executors} class includes a set of
- * methods that can convert some other common closure-like objects, for example,
- * {@link java.security.PrivilegedAction} to {@link Callable} before executing them.
+ * offering support for {@link Future}/{@link CompletableFuture} handles.
  *
  * <p>Implementing this interface also indicates that the {@link #execute(Runnable)}
- * method will not execute its Runnable in the caller's thread but rather
+ * method will not execute the given Runnable in the caller's thread but rather
  * asynchronously in some other thread.
  *
  * @author Juergen Hoeller
@@ -105,7 +103,7 @@ public interface AsyncTaskExecutor extends TaskExecutor {
 	 * @throws TaskRejectedException if the given task was not accepted
 	 * @since 3.0
 	 */
-	default <T> Future<T> submit(Callable<T> task) {
+	default <T extends @Nullable Object> Future<T> submit(Callable<T> task) {
 		FutureTask<T> future = new FutureTask<>(task);
 		execute(future, TIMEOUT_INDEFINITE);
 		return future;
@@ -125,14 +123,13 @@ public interface AsyncTaskExecutor extends TaskExecutor {
 
 	/**
 	 * Submit a {@code Callable} task for execution, receiving a {@code CompletableFuture}
-	 * representing that task. The Future will return the Callable's result upon
-	 * completion.
+	 * representing that task. The Future will return the Callable's result upon completion.
 	 * @param task the {@code Callable} to execute (never {@code null})
 	 * @return a {@code CompletableFuture} representing pending completion of the task
 	 * @throws TaskRejectedException if the given task was not accepted
 	 * @since 6.0
 	 */
-	default <T> CompletableFuture<T> submitCompletable(Callable<T> task) {
+	default <T extends @Nullable Object> CompletableFuture<T> submitCompletable(Callable<T> task) {
 		return FutureUtils.callAsync(task, this);
 	}
 

@@ -79,6 +79,7 @@ import org.springframework.web.servlet.handler.ConversionServiceExposingIntercep
 import org.springframework.web.servlet.handler.HandlerExceptionResolverComposite;
 import org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver;
 import org.springframework.web.servlet.mvc.annotation.ResponseStatusExceptionResolver;
+import org.springframework.web.servlet.mvc.method.annotation.ContextClassRequestBodyAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.ExceptionHandlerExceptionResolver;
 import org.springframework.web.servlet.mvc.method.annotation.JsonViewRequestBodyAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.JsonViewResponseBodyAdvice;
@@ -208,11 +209,12 @@ class WebMvcConfigurationSupportTests {
 		DirectFieldAccessor fieldAccessor = new DirectFieldAccessor(adapter);
 		@SuppressWarnings("unchecked")
 		List<Object> bodyAdvice = (List<Object>) fieldAccessor.getPropertyValue("requestResponseBodyAdvice");
-		assertThat(bodyAdvice).hasSize(4);
+		assertThat(bodyAdvice).hasSize(5);
 		assertThat(bodyAdvice.get(0).getClass()).isEqualTo(JsonViewRequestBodyAdvice.class);
-		assertThat(bodyAdvice.get(1).getClass()).isEqualTo(KotlinRequestBodyAdvice.class);
-		assertThat(bodyAdvice.get(2).getClass()).isEqualTo(JsonViewResponseBodyAdvice.class);
-		assertThat(bodyAdvice.get(3).getClass()).isEqualTo(KotlinResponseBodyAdvice.class);
+		assertThat(bodyAdvice.get(1).getClass()).isEqualTo(ContextClassRequestBodyAdvice.class);
+		assertThat(bodyAdvice.get(2).getClass()).isEqualTo(KotlinRequestBodyAdvice.class);
+		assertThat(bodyAdvice.get(3).getClass()).isEqualTo(JsonViewResponseBodyAdvice.class);
+		assertThat(bodyAdvice.get(4).getClass()).isEqualTo(KotlinResponseBodyAdvice.class);
 	}
 
 	@Test

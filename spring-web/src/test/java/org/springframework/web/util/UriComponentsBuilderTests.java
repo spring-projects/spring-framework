@@ -930,4 +930,13 @@ class UriComponentsBuilderTests {
 		assertThat(uri.toString()).isEqualTo("ws://localhost:7777/test");
 	}
 
+	@ParameterizedTest // gh-36029
+	@EnumSource
+	void singleCharFragment(ParserType parserType) {
+		URI uri = UriComponentsBuilder
+				.fromUriString("https://localhost/resource#a", parserType)
+				.build().toUri();
+		assertThat(uri.toString()).isEqualTo("https://localhost/resource#a");
+	}
+
 }

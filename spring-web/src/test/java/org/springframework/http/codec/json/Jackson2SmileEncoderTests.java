@@ -46,7 +46,7 @@ import static org.springframework.http.MediaType.APPLICATION_XML;
  *
  * @author Sebastien Deleuze
  */
-@SuppressWarnings("removal")
+@SuppressWarnings({"deprecation", "removal"})
 class Jackson2SmileEncoderTests extends AbstractEncoderTests<Jackson2SmileEncoder> {
 
 	private static final MimeType SMILE_MIME_TYPE = new MimeType("application", "x-jackson-smile");

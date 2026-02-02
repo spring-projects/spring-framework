@@ -18,8 +18,8 @@ You can also use `WebClient.builder()` with further options:
 * `exchangeStrategies`: HTTP message reader/writer customizations.
 * `clientConnector`: HTTP client library settings.
 * `apiVersionInserter`: to insert API version values in the request
-* `observationRegistry`: the registry to use for enabling xref:integration/observability.adoc#http-client.webclient[Observability support].
-* `observationConvention`: xref:integration/observability.adoc#config[an optional, custom convention to extract metadata] for recorded observations.
+* `observationRegistry`: the registry to use for enabling xref:integration/observability.adoc#observability.http-client.webclient[Observability support].
+* `observationConvention`: xref:integration/observability.adoc#observability.config[an optional, custom convention to extract metadata] for recorded observations.
 
 For example:
 

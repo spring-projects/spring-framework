@@ -6,7 +6,7 @@ plugins {
 	id 'com.github.bjornvester.xjc' version '1.8.2' apply false
 	id 'com.gradleup.shadow' version "9.2.2" apply false
 	id 'me.champeau.jmh' version '0.7.2' apply false
-	id 'io.spring.nullability' version '0.0.8' apply false
+	id 'io.spring.nullability' version '0.0.11' apply false
 }
 
 ext {
@@ -70,13 +70,14 @@ configure([rootProject] + javaProjects) { project ->
 	ext.javadocLinks = [
 			"https://docs.oracle.com/en/java/javase/17/docs/api/",
 			//"https://jakarta.ee/specifications/platform/11/apidocs/",
-			"https://docs.hibernate.org/orm/5.6/javadocs/",
+			"https://docs.hibernate.org/orm/7.2/javadocs/",
 			"https://www.quartz-scheduler.org/api/2.3.0/",
-			"https://hc.apache.org/httpcomponents-client-5.5.x/current/httpclient5/apidocs/",
+			"https://hc.apache.org/httpcomponents-client-5.6.x/current/httpclient5/apidocs/",
+			"https://projectreactor.io/docs/core/release/api/",
 			"https://projectreactor.io/docs/test/release/api/",
 			"https://junit.org/junit4/javadoc/4.13.2/",
-			"https://docs.junit.org/6.0.1/api/",
-			"https://www.reactive-streams.org/reactive-streams-1.0.3-javadoc/",
+			"https://docs.junit.org/6.0.2/api/",
+			"https://www.reactive-streams.org/reactive-streams-1.0.4-javadoc/",
 			"https://r2dbc.io/spec/1.0.0.RELEASE/api/",
 			"https://jspecify.dev/docs/api/"
 	] as String[]

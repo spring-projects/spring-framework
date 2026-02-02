@@ -71,7 +71,7 @@ class BindingReflectionHintsRegistrarKotlinTests {
 		assertThat(RuntimeHintsPredicates.reflection().onMethodInvocation(SampleDataClass::class.java, "isNonNullable")).accepts(hints)
 		assertThat(RuntimeHintsPredicates.reflection().onMethodInvocation(SampleDataClass::class.java, "isNullable")).accepts(hints)
 		val copyDefault: Method = SampleDataClass::class.java.getMethod("copy\$default", SampleDataClass::class.java,
-			String::class.java, Boolean::class.javaPrimitiveType, Boolean::class.javaObjectType, Int::class.java, Object::class.java)
+			String::class.java, Boolean::class.javaPrimitiveType, Boolean::class.javaObjectType, Int::class.java, Any::class.java)
 		assertThat(RuntimeHintsPredicates.reflection().onMethodInvocation(copyDefault)).accepts(hints)
 	}
 

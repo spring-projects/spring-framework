@@ -141,9 +141,10 @@ public class LocalContainerEntityManagerFactoryBean extends AbstractEntityManage
 	}
 
 	/**
-	 * Uses the specified persistence unit name as the name of the default
-	 * persistence unit, if applicable.
-	 * <p><b>NOTE: Only applied if no external PersistenceUnitManager specified.</b>
+	 * Specify the name of the persistence unit configuration to use.
+	 * <p>Uses the specified persistence unit name as the name of the
+	 * default persistence unit, if applicable. Otherwise, it selects
+	 * among the available persistence units.
 	 * @see DefaultPersistenceUnitManager#setDefaultPersistenceUnitName
 	 */
 	@Override

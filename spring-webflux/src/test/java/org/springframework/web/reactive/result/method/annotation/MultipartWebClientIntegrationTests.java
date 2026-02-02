@@ -30,6 +30,7 @@ import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 import reactor.test.StepVerifier;
 
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -70,9 +71,7 @@ class MultipartWebClientIntegrationTests extends AbstractHttpHandlerIntegrationT
 
 	@Override
 	protected HttpHandler createHttpHandler() {
-		AnnotationConfigApplicationContext wac = new AnnotationConfigApplicationContext();
-		wac.register(TestConfiguration.class);
-		wac.refresh();
+		ApplicationContext wac = new AnnotationConfigApplicationContext(TestConfiguration.class);
 		return WebHttpHandlerBuilder.webHandler(new DispatcherHandler(wac)).build();
 	}
 

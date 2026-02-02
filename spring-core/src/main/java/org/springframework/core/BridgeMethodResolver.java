@@ -202,15 +202,15 @@ public final class BridgeMethodResolver {
 	private static boolean checkResolvedTypeMatch(Method genericMethod, Method candidateMethod, Class<?> clazz) {
 		// First, compare return type.
 		ResolvableType genericReturnType = ResolvableType.forMethodReturnType(genericMethod, clazz);
-		if (!ClassUtils.resolvePrimitiveIfNecessary(candidateMethod.getReturnType()).equals(
-				ClassUtils.resolvePrimitiveIfNecessary(genericReturnType.toClass()))) {
+		if (!ClassUtils.resolvePrimitiveIfNecessary(genericReturnType.toClass()).isAssignableFrom(
+				ClassUtils.resolvePrimitiveIfNecessary(candidateMethod.getReturnType()))) {
 			return false;
 		}
 		Class<?>[] candidateParameters = candidateMethod.getParameterTypes();
 		for (int i = 0; i < candidateParameters.length; i++) {
 			ResolvableType genericParameter = ResolvableType.forMethodParameter(genericMethod, i, clazz);
-			if (!ClassUtils.resolvePrimitiveIfNecessary(candidateParameters[i]).equals(
-					ClassUtils.resolvePrimitiveIfNecessary(genericParameter.toClass()))) {
+			if (!ClassUtils.resolvePrimitiveIfNecessary(genericParameter.toClass()).equals(
+					ClassUtils.resolvePrimitiveIfNecessary(candidateParameters[i]))) {
 				return false;
 			}
 		}

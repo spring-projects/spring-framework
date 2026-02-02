@@ -535,8 +535,9 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 			// Determine target for FactoryBean match if necessary.
 			if (beanInstance instanceof FactoryBean<?> factoryBean) {
 				if (!isFactoryDereference) {
+					Class<?> classToMatch = typeToMatch.resolve();
 					if (factoryBean instanceof SmartFactoryBean<?> smartFactoryBean &&
-							smartFactoryBean.supportsType(typeToMatch.toClass())) {
+							classToMatch != null && smartFactoryBean.supportsType(classToMatch)) {
 						return true;
 					}
 					Class<?> type = getTypeForFactoryBean(factoryBean);
@@ -557,7 +558,6 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 						}
 						Class<?> targetClass = targetType.resolve();
 						if (targetClass != null && FactoryBean.class.isAssignableFrom(targetClass)) {
-							Class<?> classToMatch = typeToMatch.resolve();
 							if (classToMatch != null && !FactoryBean.class.isAssignableFrom(classToMatch) &&
 									!classToMatch.isAssignableFrom(targetType.toClass())) {
 								return typeToMatch.isAssignableFrom(targetType.getGeneric());

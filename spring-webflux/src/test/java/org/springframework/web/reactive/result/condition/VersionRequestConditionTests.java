@@ -24,10 +24,12 @@ import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import org.springframework.web.accept.ApiVersionHolder;
 import org.springframework.web.accept.NotAcceptableApiVersionException;
 import org.springframework.web.accept.SemanticApiVersionParser;
 import org.springframework.web.reactive.HandlerMapping;
 import org.springframework.web.reactive.accept.DefaultApiVersionStrategy;
+import org.springframework.web.reactive.accept.QueryApiVersionResolver;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest;
 import org.springframework.web.testfixture.server.MockServerWebExchange;
@@ -51,7 +53,7 @@ public class VersionRequestConditionTests {
 
 	private static DefaultApiVersionStrategy initVersionStrategy(@Nullable String defaultVersion) {
 		return new DefaultApiVersionStrategy(
-				List.of(exchange -> exchange.getRequest().getQueryParams().getFirst("api-version")),
+				List.of(new QueryApiVersionResolver("api-version")),
 				new SemanticApiVersionParser(), null, defaultVersion, false, null, null);
 	}
 
@@ -179,13 +181,15 @@ public class VersionRequestConditionTests {
 	}
 
 	private static MockServerWebExchange exchange() {
-		return MockServerWebExchange.from(MockServerHttpRequest.get("/path"));
+		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/path"));
+		exchange.getAttributes().put(HandlerMapping.API_VERSION_ATTRIBUTE, ApiVersionHolder.EMPTY);
+		return exchange;
 	}
 
 	private ServerWebExchange exchangeWithVersion(String v) {
 		Comparable<?> version = this.strategy.parseVersion(v);
 		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/path"));
-		exchange.getAttributes().put(HandlerMapping.API_VERSION_ATTRIBUTE, version);
+		exchange.getAttributes().put(HandlerMapping.API_VERSION_ATTRIBUTE, ApiVersionHolder.fromVersion(version));
 		return exchange;
 	}
 

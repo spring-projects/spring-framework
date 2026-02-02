@@ -64,8 +64,6 @@ import org.springframework.util.Assert;
 @SuppressWarnings("serial")
 public class LocalEntityManagerFactoryBean extends AbstractEntityManagerFactoryBean {
 
-	private static final String DATASOURCE_PROPERTY = "jakarta.persistence.dataSource";
-
 	private @Nullable PersistenceConfiguration configuration;
 
 
@@ -129,11 +127,23 @@ public class LocalEntityManagerFactoryBean extends AbstractEntityManagerFactoryB
 	 */
 	public PersistenceConfiguration getPersistenceConfiguration() {
 		if (this.configuration == null) {
-			this.configuration = new PersistenceConfiguration(getPersistenceUnitName());
+			String name = getPersistenceUnitName();
+			Assert.state(name != null, "No persistenceUnitName set");
+			this.configuration = new PersistenceConfiguration(name);
 		}
 		return this.configuration;
 	}
 
+	/**
+	 * Specify the name of the persistence unit configuration to use.
+	 * <p>Uses the specified persistence unit name as the name of the local
+	 * persistence unit built through {@link #getPersistenceConfiguration()}, if
+	 * applicable. Otherwise, it selects among the available persistence units.
+	 * <p>Note: This setter method is not meant to be used in combination with
+	 * {@link #setPersistenceConfiguration} which derives the persistence unit
+	 * name from the given {@link PersistenceConfiguration} instance instead.
+	 * @see #getPersistenceConfiguration()
+	 */
 	@Override
 	public void setPersistenceUnitName(@Nullable String persistenceUnitName) {
 		Assert.state(this.configuration == null || this.configuration.name().equals(persistenceUnitName),
@@ -154,10 +164,10 @@ public class LocalEntityManagerFactoryBean extends AbstractEntityManagerFactoryB
 	 */
 	public void setDataSource(@Nullable DataSource dataSource) {
 		if (dataSource != null) {
-			getJpaPropertyMap().put(DATASOURCE_PROPERTY, dataSource);
+			getJpaPropertyMap().put(PersistenceConfiguration.JDBC_DATASOURCE, dataSource);
 		}
 		else {
-			getJpaPropertyMap().remove(DATASOURCE_PROPERTY);
+			getJpaPropertyMap().remove(PersistenceConfiguration.JDBC_DATASOURCE);
 		}
 	}
 
@@ -169,7 +179,7 @@ public class LocalEntityManagerFactoryBean extends AbstractEntityManagerFactoryB
 	 */
 	@Override
 	public @Nullable DataSource getDataSource() {
-		return (DataSource) getJpaPropertyMap().get(DATASOURCE_PROPERTY);
+		return (DataSource) getJpaPropertyMap().get(PersistenceConfiguration.JDBC_DATASOURCE);
 	}
 
 

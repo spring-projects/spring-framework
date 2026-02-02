@@ -33,6 +33,8 @@ import org.jspecify.annotations.Nullable;
  */
 public interface RetryListener {
 
+	// Interception callbacks for retry attempts (not covering the initial invocation)
+
 	/**
 	 * Called before every retry attempt.
 	 * @param retryPolicy the {@link RetryPolicy}
@@ -59,6 +61,27 @@ public interface RetryListener {
 	default void onRetryFailure(RetryPolicy retryPolicy, Retryable<?> retryable, Throwable throwable) {
 	}
 
+
+	// Execution callbacks for all invocation attempts and terminal scenarios
+
+	/**
+	 * Called after every attempt, including the initial invocation.
+	 * <p>The success of the attempt can be checked via {@link RetryState#isSuccessful()};
+	 * if not successful, the current exception can be introspected via
+	 * {@link RetryState#getLastException()}.
+	 * @param retryPolicy the {@link RetryPolicy}
+	 * @param retryable the {@link Retryable} operation
+	 * @param retryState the current state of retry processing
+	 * (this is a live instance reflecting the current state; not intended to be stored)
+	 * @since 7.0.2
+	 * @see RetryTemplate#execute(Retryable)
+	 * @see RetryState#isSuccessful()
+	 * @see RetryState#getLastException()
+	 * @see RetryState#getRetryCount()
+	 */
+	default void onRetryableExecution(RetryPolicy retryPolicy, Retryable<?> retryable, RetryState retryState) {
+	}
+
 	/**
 	 * Called if the {@link RetryPolicy} is exhausted.
 	 * @param retryPolicy the {@code RetryPolicy}
@@ -66,8 +89,7 @@ public interface RetryListener {
 	 * @param exception the resulting {@link RetryException}, with the last
 	 * exception thrown by the {@code Retryable} operation as the cause and any
 	 * exceptions from previous attempts as suppressed exceptions
-	 * @see RetryException#getCause()
-	 * @see RetryException#getSuppressed()
+	 * @see RetryException#getExceptions()
 	 * @see RetryException#getRetryCount()
 	 */
 	default void onRetryPolicyExhaustion(RetryPolicy retryPolicy, Retryable<?> retryable, RetryException exception) {
@@ -77,14 +99,28 @@ public interface RetryListener {
 	 * Called if the {@link RetryPolicy} is interrupted between retry attempts.
 	 * @param retryPolicy the {@code RetryPolicy}
 	 * @param retryable the {@link Retryable} operation
-	 * @param exception the resulting {@link RetryException}, with an
-	 * {@link InterruptedException} as the cause and any exceptions from previous
-	 * invocations of the {@code Retryable} operation as suppressed exceptions
-	 * @see RetryException#getCause()
-	 * @see RetryException#getSuppressed()
+	 * @param exception the resulting {@link RetryException}, with the last
+	 * exception thrown by the {@code Retryable} operation as the cause and any
+	 * exceptions from previous attempts as suppressed exceptions
+	 * @see RetryException#getExceptions()
 	 * @see RetryException#getRetryCount()
 	 */
 	default void onRetryPolicyInterruption(RetryPolicy retryPolicy, Retryable<?> retryable, RetryException exception) {
+	}
+
+	/**
+	 * Called if the configured {@linkplain RetryPolicy#getTimeout() timeout} for
+	 * a {@link RetryPolicy} is exceeded.
+	 * @param retryPolicy the {@code RetryPolicy}
+	 * @param retryable the {@link Retryable} operation
+	 * @param exception the resulting {@link RetryException}, with the last
+	 * exception thrown by the {@code Retryable} operation as the cause and any
+	 * exceptions from previous attempts as suppressed exceptions
+	 * @since 7.0.2
+	 * @see RetryException#getExceptions()
+	 * @see RetryException#getRetryCount()
+	 */
+	default void onRetryPolicyTimeout(RetryPolicy retryPolicy, Retryable<?> retryable, RetryException exception) {
 	}
 
 }

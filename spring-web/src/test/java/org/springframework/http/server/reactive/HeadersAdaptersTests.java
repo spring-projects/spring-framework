@@ -82,6 +82,19 @@ class HeadersAdaptersTests {
 				.hasSize(0);
 	}
 
+	@ParameterizedHeadersTest
+	void shouldReturnNullWhenRemoveUnknown(MultiValueMap<String, String> headers) {
+		assertThat(headers.remove("unknown")).isEqualTo(null);
+	}
+
+	@ParameterizedHeadersTest
+	void shouldReturnPreviousValuesWhenRemove(MultiValueMap<String, String> headers) {
+		headers.add("TestHeader", "first");
+		headers.add("TestHEADER", "second");
+
+		assertThat(headers.remove("testheader")).hasSize(2);
+	}
+
 	@ParameterizedPopulatedHeadersTest
 	void toString(MultiValueMap<String, String> headers) {
 		String expectedFirstHeader = "TestHeader:\"first\", \"second\", \"third\"";

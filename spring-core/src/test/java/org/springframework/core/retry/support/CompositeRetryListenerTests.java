@@ -83,6 +83,16 @@ class CompositeRetryListenerTests {
 	}
 
 	@Test
+	void onRetryableExecution() {
+		RetryException exception = new RetryException("", new Exception());
+		compositeRetryListener.onRetryableExecution(retryPolicy, retryable, exception);
+
+		verify(listener1).onRetryableExecution(retryPolicy, retryable, exception);
+		verify(listener2).onRetryableExecution(retryPolicy, retryable, exception);
+		verify(listener3).onRetryableExecution(retryPolicy, retryable, exception);
+	}
+
+	@Test
 	void onRetryPolicyExhaustion() {
 		RetryException exception = new RetryException("", new Exception());
 		compositeRetryListener.onRetryPolicyExhaustion(retryPolicy, retryable, exception);
@@ -100,6 +110,16 @@ class CompositeRetryListenerTests {
 		verify(listener1).onRetryPolicyInterruption(retryPolicy, retryable, exception);
 		verify(listener2).onRetryPolicyInterruption(retryPolicy, retryable, exception);
 		verify(listener3).onRetryPolicyInterruption(retryPolicy, retryable, exception);
+	}
+
+	@Test
+	void onRetryPolicyTimeout() {
+		RetryException exception = new RetryException("", new Exception());
+		compositeRetryListener.onRetryPolicyTimeout(retryPolicy, retryable, exception);
+
+		verify(listener1).onRetryPolicyTimeout(retryPolicy, retryable, exception);
+		verify(listener2).onRetryPolicyTimeout(retryPolicy, retryable, exception);
+		verify(listener3).onRetryPolicyTimeout(retryPolicy, retryable, exception);
 	}
 
 }

@@ -52,8 +52,8 @@ class FailingBeforeAndAfterMethodsTestNGTests {
 
 	@ParameterizedTest
 	@MethodSource("testData")
-	void runTestAndAssertCounters(Class<?> clazz, int expectedTestStartCount,
-			int expectedTestSuccessCount, int expectedFailureCount, int expectedFailedConfigurationsCount) throws Exception {
+	void runTestAndAssertCounters(Class<?> clazz, int expectedTestStartCount, int expectedTestSuccessCount,
+			int expectedFailureCount, int expectedFailedConfigurationsCount) {
 
 		TrackingTestNGTestListener listener = new TrackingTestNGTestListener();
 		TestNG testNG = new TestNG();

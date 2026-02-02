@@ -183,6 +183,7 @@ public interface Resource extends InputStreamSource {
 
 	/**
 	 * Determine the content length for this resource.
+	 * @return the content length (or -1 if undetermined)
 	 * @throws IOException if the resource cannot be resolved
 	 * (in the file system or as some other known physical resource type)
 	 */
@@ -190,6 +191,7 @@ public interface Resource extends InputStreamSource {
 
 	/**
 	 * Determine the last-modified timestamp for this resource.
+	 * @return the last-modified timestamp (or 0 if not known)
 	 * @throws IOException if the resource cannot be resolved
 	 * (in the file system or as some other known physical resource type)
 	 */

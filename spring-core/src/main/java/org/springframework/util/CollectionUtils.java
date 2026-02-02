@@ -503,7 +503,7 @@ public abstract class CollectionUtils {
 	}
 
 	/**
-	 * Adapt a {@code Map<K, List<V>>} to an {@code MultiValueMap<K, V>}.
+	 * Adapt a {@code Map<K, List<V>>} to a {@code MultiValueMap<K, V>}.
 	 * @param targetMap the original map
 	 * @return the adapted multi-value map (wrapping the original map)
 	 * @since 3.1

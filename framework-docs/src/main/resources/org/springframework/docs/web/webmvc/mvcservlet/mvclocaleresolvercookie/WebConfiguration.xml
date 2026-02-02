@@ -1,0 +1,19 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xsi:schemaLocation="
+			http://www.springframework.org/schema/beans
+			https://www.springframework.org/schema/beans/spring-beans.xsd">
+
+	<!-- tag::snippet[] -->
+	<bean id="localeResolver" class="org.springframework.web.servlet.i18n.CookieLocaleResolver">
+
+		<constructor-arg index="0" value="clientlanguage"/>
+
+		<!-- in seconds. If set to -1, the cookie is not persisted (deleted when browser shuts down) -->
+		<property name="cookieMaxAge" value="100000"/>
+
+	</bean>
+	<!-- end::snippet[] -->
+
+</beans>
+

@@ -16,6 +16,10 @@
 
 package org.springframework.test.context.cache;
 
+import java.util.Locale;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.jspecify.annotations.Nullable;
 
 import org.springframework.context.ApplicationContext;
@@ -30,8 +34,9 @@ import org.springframework.util.Assert;
  *
  * <p>A {@code ContextCache} maintains a cache of {@code ApplicationContexts}
  * keyed by {@link MergedContextConfiguration} instances, potentially configured
- * with a {@linkplain ContextCacheUtils#retrieveMaxCacheSize maximum size} and
- * a custom eviction policy.
+ * with a {@linkplain ContextCacheUtils#retrieveMaxCacheSize maximum size},
+ * {@linkplain ContextCacheUtils#retrievePauseMode() pause mode}, and custom
+ * eviction policy.
  *
  * <p>As of Spring Framework 6.1, this SPI includes optional support for
  * {@linkplain #getFailureCount(MergedContextConfiguration) tracking} and
@@ -54,6 +59,7 @@ import org.springframework.util.Assert;
  * @author Juergen Hoeller
  * @since 4.2
  * @see ContextCacheUtils#retrieveMaxCacheSize()
+ * @see ContextCacheUtils#retrievePauseMode()
  */
 public interface ContextCache {
 
@@ -82,6 +88,25 @@ public interface ContextCache {
 	 * @see #DEFAULT_MAX_CONTEXT_CACHE_SIZE
 	 */
 	String MAX_CONTEXT_CACHE_SIZE_PROPERTY_NAME = "spring.test.context.cache.maxSize";
+
+	/**
+	 * System property used to configure whether inactive application contexts
+	 * stored in the {@link ContextCache} should be paused: {@value}.
+	 * <p>Defaults to {@code on_context_switch}. Can be set to {@code always} or
+	 * {@code never} to disable pausing of inactive application contexts &mdash;
+	 * for example:
+	 * <p>{@code -Dspring.test.context.cache.pause=never}
+	 * <p>May alternatively be configured via the
+	 * {@link org.springframework.core.SpringProperties} mechanism.
+	 * <p>Note that implementations of {@code ContextCache} are not required to
+	 * support context pausing. Consult the documentation of the corresponding
+	 * implementation for details.
+	 * @since 7.0.3
+	 * @see PauseMode
+	 * @see org.springframework.context.ConfigurableApplicationContext#pause()
+	 * @see #unregisterContextUsage(MergedContextConfiguration, Class)
+	 */
+	String CONTEXT_CACHE_PAUSE_PROPERTY_NAME = "spring.test.context.cache.pause";
 
 
 	/**
@@ -221,7 +246,8 @@ public interface ContextCache {
 	 * {@link MergedContextConfiguration} and any of its parents.
 	 * <p>If no other test classes are actively using the same application
 	 * context(s), the application context(s) should be
-	 * {@linkplain org.springframework.context.ConfigurableApplicationContext#pause() paused}.
+	 * {@linkplain org.springframework.context.ConfigurableApplicationContext#pause()
+	 * paused} according to the configured {@link PauseMode}.
 	 * <p>The default implementation of this method does nothing. Concrete
 	 * implementations are therefore highly encouraged to override this
 	 * method, {@link #registerContextUsage(MergedContextConfiguration, Class)},
@@ -334,6 +360,62 @@ public interface ContextCache {
 		 */
 		ApplicationContext loadContext(MergedContextConfiguration mergedConfig);
 
+	}
+
+	/**
+	 * Enumeration of <em>modes</em> that dictate whether inactive application contexts
+	 * stored in the {@link ContextCache} should be
+	 * {@linkplain org.springframework.context.ConfigurableApplicationContext#pause() paused}.
+	 *
+	 * @since 7.0.3
+	 * @see #ALWAYS
+	 * @see #ON_CONTEXT_SWITCH
+	 * @see #NEVER
+	 * @see ContextCache#CONTEXT_CACHE_PAUSE_PROPERTY_NAME
+	 */
+	enum PauseMode {
+
+		/**
+		 * Always pause inactive application contexts.
+		 */
+		ALWAYS,
+
+		/**
+		 * Only pause inactive application contexts if the next context
+		 * retrieved from the cache is a different context.
+		 */
+		ON_CONTEXT_SWITCH,
+
+		/**
+		 * Never pause inactive application contexts, effectively disabling the
+		 * pausing feature of the {@link ContextCache}.
+		 */
+		NEVER;
+
+
+		/**
+		 * Get the {@code PauseMode} enum constant with the supplied name,
+		 * {@linkplain String#strip() stripped} and ignoring case.
+		 * @param name the name of the enum constant to retrieve
+		 * @return the corresponding enum constant or {@code null} if not found
+		 * @see PauseMode#valueOf(String)
+		 */
+		public static @Nullable PauseMode from(@Nullable String name) {
+			if (name == null) {
+				return null;
+			}
+			try {
+				return PauseMode.valueOf(name.strip().toUpperCase(Locale.ROOT));
+			}
+			catch (IllegalArgumentException ex) {
+				Log logger = LogFactory.getLog(PauseMode.class);
+				if (logger.isDebugEnabled()) {
+					logger.debug("Failed to parse PauseMode from '%s': %s"
+							.formatted(name, ex.getMessage()));
+				}
+				return null;
+			}
+		}
 	}
 
 }

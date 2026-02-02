@@ -13,7 +13,7 @@ jobs:
     timeout-minutes: 60
     steps:
       - name: Check Out Code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: Build and Publish
         id: build-and-publish
         uses: ./.github/actions/build
@@ -21,7 +21,7 @@ jobs:
           develocity-access-key: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
           publish: true
       - name: Deploy
-        uses: spring-io/artifactory-deploy-action@dc1913008c0599f0c4b1fdafb6ff3c502b3565ea # v0.0.2
+        uses: spring-io/artifactory-deploy-action@926d7f7cc810569395346bf3a4d91b380b3e355b # v0.0.4
         with:
           artifact-properties: |
             /**/framework-api-*.zip::zip.name=spring-framework,zip.deployed=false

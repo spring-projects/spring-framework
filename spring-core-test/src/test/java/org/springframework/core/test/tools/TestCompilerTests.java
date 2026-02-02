@@ -30,6 +30,7 @@ import javax.annotation.processing.Processor;
 import javax.annotation.processing.RoundEnvironment;
 import javax.annotation.processing.SupportedAnnotationTypes;
 import javax.lang.model.element.TypeElement;
+import javax.tools.Diagnostic;
 import javax.tools.FileObject;
 import javax.tools.StandardLocation;
 
@@ -136,7 +137,8 @@ class TestCompilerTests {
 		assertThatExceptionOfType(CompilationException.class).isThrownBy(
 				() -> TestCompiler.forSystem().withSources(
 						SourceFile.of(HELLO_BAD)).compile(compiled -> {
-				}));
+				})).satisfies(ex -> assertThat(ex.getProblems()).singleElement()
+				.satisfies(problem -> assertThat(problem.message()).contains("Supplier")));
 	}
 
 	@Test
@@ -177,7 +179,14 @@ class TestCompilerTests {
 		assertThatExceptionOfType(CompilationException.class).isThrownBy(
 				() -> TestCompiler.forSystem().failOnWarning().withSources(
 						SourceFile.of(HELLO_DEPRECATED), main).compile(compiled -> {
-				}));
+				})).satisfies(compilationException -> {
+			assertThat(compilationException.getProblems(Diagnostic.Kind.ERROR)).singleElement()
+					.satisfies(error -> assertThat(error.message())
+							.contains("-Werror"));
+			assertThat(compilationException.getProblems(Diagnostic.Kind.MANDATORY_WARNING)).singleElement()
+					.satisfies(warning -> assertThat(warning.message())
+							.contains("get()", "com.example.Hello"));
+		});
 	}
 
 	@Test

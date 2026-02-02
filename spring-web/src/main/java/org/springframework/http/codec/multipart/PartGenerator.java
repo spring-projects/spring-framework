@@ -52,7 +52,8 @@ import org.springframework.util.FastByteArrayOutputStream;
 
 /**
  * Subscribes to a token stream (i.e. the result of
- * {@link MultipartParser#parse(Flux, byte[], int, Charset)}), and produces a flux of {@link Part} objects.
+ * {@link MultipartParser#parse(Flux, byte[], int, Charset)}), and produces a flux
+ * of {@link Part} objects.
  *
  * @author Arjen Poutsma
  * @since 5.3
@@ -330,7 +331,6 @@ final class PartGenerator extends BaseSubscriber<MultipartParser.Token> {
 		public String toString() {
 			return "FORM-FIELD";
 		}
-
 	}
 
 
@@ -422,7 +422,6 @@ final class PartGenerator extends BaseSubscriber<MultipartParser.Token> {
 		public String toString() {
 			return "IN-MEMORY";
 		}
-
 	}
 
 
@@ -487,7 +486,6 @@ final class PartGenerator extends BaseSubscriber<MultipartParser.Token> {
 			this.releaseOnDispose = false;
 
 			if (changeState(this, newState)) {
-
 				newState.writeBuffers(this.content);
 
 				if (this.completed) {
@@ -512,9 +510,8 @@ final class PartGenerator extends BaseSubscriber<MultipartParser.Token> {
 		public String toString() {
 			return "CREATE-FILE";
 		}
-
-
 	}
+
 
 	private final class IdleFileState implements State {
 
@@ -542,7 +539,6 @@ final class PartGenerator extends BaseSubscriber<MultipartParser.Token> {
 		public void body(DataBuffer dataBuffer) {
 			long count = this.byteCount.addAndGet(dataBuffer.readableByteCount());
 			if (PartGenerator.this.maxDiskUsagePerPart == -1 || count <= PartGenerator.this.maxDiskUsagePerPart) {
-
 				this.closeOnDispose = false;
 				this.deleteOnDispose = false;
 				WritingFileState newState = new WritingFileState(this);
@@ -582,16 +578,14 @@ final class PartGenerator extends BaseSubscriber<MultipartParser.Token> {
 			}
 		}
 
-
 		@Override
 		public String toString() {
 			return "IDLE-FILE";
 		}
-
 	}
 
-	private final class WritingFileState implements State {
 
+	private final class WritingFileState implements State {
 
 		private final HttpHeaders headers;
 
@@ -643,9 +637,7 @@ final class PartGenerator extends BaseSubscriber<MultipartParser.Token> {
 			Mono.just(dataBuffer)
 					.flatMap(this::writeInternal)
 					.subscribeOn(PartGenerator.this.blockingOperationScheduler)
-					.subscribe(null,
-					PartGenerator.this::emitError,
-					this::writeComplete);
+					.subscribe(null, PartGenerator.this::emitError, this::writeComplete);
 		}
 
 		public void writeBuffers(Iterable<DataBuffer> dataBuffers) {
@@ -653,9 +645,7 @@ final class PartGenerator extends BaseSubscriber<MultipartParser.Token> {
 					.concatMap(this::writeInternal)
 					.then()
 					.subscribeOn(PartGenerator.this.blockingOperationScheduler)
-					.subscribe(null,
-							PartGenerator.this::emitError,
-							this::writeComplete);
+					.subscribe(null, PartGenerator.this::emitError, this::writeComplete);
 		}
 
 		private void writeComplete() {
@@ -710,7 +700,6 @@ final class PartGenerator extends BaseSubscriber<MultipartParser.Token> {
 			this.disposed = true;
 		}
 
-
 		@Override
 		public String toString() {
 			return "WRITE-FILE";
@@ -738,7 +727,6 @@ final class PartGenerator extends BaseSubscriber<MultipartParser.Token> {
 		public String toString() {
 			return "DISPOSED";
 		}
-
 	}
 
 }

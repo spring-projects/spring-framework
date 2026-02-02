@@ -26,6 +26,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 
+import jakarta.xml.bind.annotation.XmlRootElement;
 import mockwebserver3.MockResponse;
 import mockwebserver3.MockWebServer;
 import mockwebserver3.RecordedRequest;
@@ -36,6 +37,7 @@ import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -189,6 +191,24 @@ class WebClientAdapterTests {
 		assertThat(request.getBody().utf8()).isEqualTo("[{\"name\":\"John\"},{\"name\":\"Richard\"}]");
 	}
 
+	@Test // gh-36078
+	void postObject() throws InterruptedException {
+		prepareResponse(response -> response.code(201));
+
+		WebClient webClient = WebClient.builder()
+				.baseUrl(this.server.url("/").toString())
+				.defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_XML_VALUE)
+				.build();
+
+		initService(webClient).postObject(new Person("John"));
+
+		RecordedRequest request = server.takeRequest();
+		assertThat(request.getMethod()).isEqualTo("POST");
+		assertThat(request.getTarget()).isEqualTo("/object");
+		assertThat(request.getBody().utf8()).isEqualTo(
+				"<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?><person><name>John</name></person>");
+	}
+
 	@Test
 	void uriBuilderFactory() throws Exception {
 		String ignoredResponseBody = "hello";
@@ -304,6 +324,9 @@ class WebClientAdapterTests {
 		@PostExchange("/persons")
 		void postPersonSet(@RequestBody Set<Person> set);
 
+		@PostExchange("/object")
+		void postObject(@RequestBody Object object);
+
 		@GetExchange("/greeting")
 		String getWithUriBuilderFactory(UriBuilderFactory uriBuilderFactory);
 
@@ -316,9 +339,13 @@ class WebClientAdapterTests {
 	}
 
 
+	@XmlRootElement
 	static final class Person {
 
-		private final String name;
+		private String name;
+
+		public Person() {
+		}
 
 		Person(String name) {
 			this.name = name;
@@ -328,6 +355,9 @@ class WebClientAdapterTests {
 			return this.name;
 		}
 
+		public void setName(String name) {
+			this.name = name;
+		}
 	}
 
 }

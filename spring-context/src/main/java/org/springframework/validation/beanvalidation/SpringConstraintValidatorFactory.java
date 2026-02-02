@@ -18,6 +18,7 @@ package org.springframework.validation.beanvalidation;
 
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorFactory;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.util.Assert;
@@ -40,6 +41,8 @@ public class SpringConstraintValidatorFactory implements ConstraintValidatorFact
 
 	private final AutowireCapableBeanFactory beanFactory;
 
+	private final @Nullable ConstraintValidatorFactory defaultConstraintValidatorFactory;
+
 
 	/**
 	 * Create a new SpringConstraintValidatorFactory for the given BeanFactory.
@@ -48,11 +51,35 @@ public class SpringConstraintValidatorFactory implements ConstraintValidatorFact
 	public SpringConstraintValidatorFactory(AutowireCapableBeanFactory beanFactory) {
 		Assert.notNull(beanFactory, "BeanFactory must not be null");
 		this.beanFactory = beanFactory;
+		this.defaultConstraintValidatorFactory = null;
+	}
+
+	/**
+	 * Create a new SpringConstraintValidatorFactory for the given BeanFactory.
+	 * @param beanFactory the target BeanFactory
+	 * @param defaultConstraintValidatorFactory the default ConstraintValidatorFactory
+	 * as exposed by the validation provider (for creating provider-internal validator
+	 * implementations which might not be publicly accessible in a module path setup)
+	 * @since 7.0.3
+	 */
+	public SpringConstraintValidatorFactory(
+			AutowireCapableBeanFactory beanFactory, ConstraintValidatorFactory defaultConstraintValidatorFactory) {
+
+		Assert.notNull(beanFactory, "BeanFactory must not be null");
+		this.beanFactory = beanFactory;
+		this.defaultConstraintValidatorFactory = defaultConstraintValidatorFactory;
 	}
 
 
 	@Override
 	public <T extends ConstraintValidator<?, ?>> T getInstance(Class<T> key) {
+		if (this.defaultConstraintValidatorFactory != null) {
+			// Create provider-internal validator implementations through default ConstraintValidatorFactory.
+			String providerModuleName = this.defaultConstraintValidatorFactory.getClass().getModule().getName();
+			if (providerModuleName != null && providerModuleName.equals(key.getModule().getName())) {
+				return this.defaultConstraintValidatorFactory.getInstance(key);
+			}
+		}
 		return this.beanFactory.createBean(key);
 	}
 

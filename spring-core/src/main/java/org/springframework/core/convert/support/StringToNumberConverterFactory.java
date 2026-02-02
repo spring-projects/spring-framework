@@ -43,7 +43,7 @@ import org.springframework.util.NumberUtils;
 final class StringToNumberConverterFactory implements ConverterFactory<String, Number> {
 
 	@Override
-	public <T extends Number> Converter<String, T> getConverter(Class<T> targetType) {
+	public <T extends Number> Converter<String, @Nullable T> getConverter(Class<T> targetType) {
 		return new StringToNumber<>(targetType);
 	}
 

@@ -39,6 +39,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import io.netty.channel.Channel;
 import io.netty.util.Attribute;
 import mockwebserver3.MockResponse;
 import mockwebserver3.MockWebServer;
@@ -54,6 +55,7 @@ import reactor.core.publisher.Mono;
 import reactor.core.publisher.Sinks;
 import reactor.netty.channel.ChannelOperations;
 import reactor.netty.http.client.HttpClient;
+import reactor.netty.http.client.HttpClientRequest;
 import reactor.netty.resources.ConnectionProvider;
 import reactor.test.StepVerifier;
 
@@ -438,8 +440,8 @@ class WebClientIntegrationTests {
 		});
 	}
 
-	@Test // gh-24788
-	void retrieveJsonArrayAsBodilessEntityShouldReleasesConnection() throws IOException {
+	@Test  // gh-24788
+	void retrieveJsonArrayAsBodilessEntityShouldReleaseConnection() throws IOException {
 
 		// Constrain connection pool and make consecutive requests.
 		// 2nd request should hang if response was not drained.
@@ -722,7 +724,7 @@ class WebClientIntegrationTests {
 		});
 	}
 
-	@ParameterizedWebClientTest // gh-31202
+	@ParameterizedWebClientTest  // gh-31202
 	void retrieve929UnknownStatusCode(ClientHttpConnector connector) throws IOException {
 		startServer(connector);
 
@@ -1318,6 +1320,28 @@ class WebClientIntegrationTests {
 				.expectNext("Hey now")
 				.expectComplete()
 				.verify(Duration.ofSeconds(3));
+	}
+
+	@Test  // gh-36158
+	void reactorNettyAttributes() throws IOException {
+		startServer(new ReactorClientHttpConnector());
+
+		prepareResponse(builder ->
+				builder.setHeader("Content-Type", "text/plain").body("Hello Spring!"));
+
+		AtomicReference<Channel> channelRef = new AtomicReference<>();
+
+		Mono<String> result = this.webClient.get().uri("/greeting")
+				.httpRequest(request -> {
+					HttpClientRequest reactorRequest = request.getNativeRequest();
+					channelRef.set(((ChannelOperations<?, ?>) reactorRequest).channel());
+				})
+				.retrieve()
+				.bodyToMono(String.class);
+
+		StepVerifier.create(result).expectNext("Hello Spring!").expectComplete().verify(Duration.ofSeconds(3));
+
+		assertThat(channelRef.get().attr(ReactorClientHttpConnector.ATTRIBUTES_KEY).get()).isNull();
 	}
 
 	private <T> Mono<T> doMalformedChunkedResponseTest(

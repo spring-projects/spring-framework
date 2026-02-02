@@ -304,13 +304,37 @@ public abstract class YamlProcessor {
 	 * @since 4.1.3
 	 */
 	protected final Map<String, Object> getFlattenedMap(Map<String, Object> source) {
+		return getFlattenedMap(source, false, null);
+	}
+
+	/**
+	 * Return a flattened version of the given map, recursively following any nested Map
+	 * or Collection values. Entries from the resulting map retain the same order as the
+	 * source. When called with the Map from a {@link MatchCallback} the result will
+	 * contain the same values as the {@link MatchCallback} Properties.
+	 * @param source the source map
+	 * @param includeEmpty whether empty entries should be included in the result
+	 * @param emptyValue the value used to represent an empty entry &mdash; for
+	 * example, {@code null} or an empty {@code String}
+	 * @return a flattened map
+	 * @since 7.0.4
+	 */
+	protected final Map<String, Object> getFlattenedMap(Map<String, Object> source, boolean includeEmpty,
+			@Nullable Object emptyValue) {
+
 		Map<String, Object> result = new LinkedHashMap<>();
-		buildFlattenedMap(result, source, null);
+		buildFlattenedMap(result, source, null, includeEmpty, emptyValue);
 		return result;
 	}
 
 	@SuppressWarnings({"rawtypes", "unchecked"})
-	private void buildFlattenedMap(Map<String, Object> result, Map<String, Object> source, @Nullable String path) {
+	private void buildFlattenedMap(Map<String, Object> result, Map<String, Object> source, @Nullable String path,
+			boolean includeEmpty, @Nullable Object emptyValue) {
+
+		if (includeEmpty && source.isEmpty()) {
+			result.put(path, emptyValue);
+			return;
+		}
 		source.forEach((key, value) -> {
 			if (StringUtils.hasText(path)) {
 				if (key.startsWith("[")) {
@@ -325,7 +349,7 @@ public abstract class YamlProcessor {
 			}
 			else if (value instanceof Map map) {
 				// Need a compound key
-				buildFlattenedMap(result, map, key);
+				buildFlattenedMap(result, map, key, includeEmpty, emptyValue);
 			}
 			else if (value instanceof Collection collection) {
 				// Need a compound key
@@ -336,12 +360,12 @@ public abstract class YamlProcessor {
 					int count = 0;
 					for (Object object : collection) {
 						buildFlattenedMap(result, Collections.singletonMap(
-								"[" + (count++) + "]", object), key);
+								"[" + (count++) + "]", object), key, includeEmpty, emptyValue);
 					}
 				}
 			}
 			else {
-				result.put(key, (value != null ? value : ""));
+				result.put(key, (value != null ? value : (includeEmpty ? emptyValue : "")));
 			}
 		});
 	}

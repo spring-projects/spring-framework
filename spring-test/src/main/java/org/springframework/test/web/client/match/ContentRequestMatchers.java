@@ -36,6 +36,7 @@ import org.jspecify.annotations.Nullable;
 import org.w3c.dom.Node;
 
 import org.springframework.core.io.Resource;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.ClientHttpRequest;
@@ -205,6 +206,7 @@ public class ContentRequestMatchers {
 	 * <li>{@code String} - form field
 	 * <li>{@link Resource} - content from a file
 	 * <li>{@code byte[]} - other raw content
+	 * <li>{@link HttpEntity} - entity with a Resource or byte[], and a Content-Type header
 	 * </ul>
 	 * <p><strong>Note:</strong> This method uses the fork of Commons FileUpload library
 	 * packaged with Apache Tomcat in the {@code org.apache.tomcat.util.http.fileupload}
@@ -239,7 +241,7 @@ public class ContentRequestMatchers {
 		return multipartData(map, DEFAULT_MULTIPART_ENCODING, false);
 	}
 
-	@SuppressWarnings("ConstantConditions")
+	@SuppressWarnings({"ConstantConditions", "unchecked"})
 	private RequestMatcher multipartData(
 			MultiValueMap<String, ?> expectedMap, Charset defaultCharset, boolean containsExactly) {
 
@@ -256,25 +258,43 @@ public class ContentRequestMatchers {
 						values.size() == actualMap.get(name).size() :
 						values.size() <= actualMap.get(name).size());
 				for (int i = 0; i < values.size(); i++) {
+					MediaType expectedContentType = null;
 					Object expected = values.get(i);
 					Object actual = actualMap.get(name).get(i);
+
+					if (expected instanceof HttpEntity<?> entity) {
+						expectedContentType = entity.getHeaders().getContentType();
+						expected = entity.getBody();
+					}
 					if (expected instanceof Resource resource) {
 						expected = StreamUtils.copyToByteArray(resource.getInputStream());
 					}
+
 					if (expected instanceof byte[]) {
-						assertTrue("Multipart is not a file", actual instanceof byte[]);
-						assertEquals("Multipart content", expected, actual);
+						assertEquals("Multipart content", expected, asHttpEntity(actual).getBody());
 					}
 					else if (expected instanceof String) {
 						assertTrue("Multipart is not a String", actual instanceof String);
 						assertEquals("Multipart content", expected, actual);
 					}
 					else {
-						throw new IllegalArgumentException("Unexpected multipart value: " + expected.getClass());
+						throw new IllegalArgumentException("Unexpected multipart value: " +
+								(expected != null ? expected.getClass() : null));
+					}
+
+					if (expectedContentType != null) {
+						assertEquals("Multipart content-type",
+								expectedContentType, asHttpEntity(actual).getHeaders().getContentType());
 					}
 				}
 			}
 		};
+	}
+
+	@SuppressWarnings("unchecked")
+	private static HttpEntity<byte[]> asHttpEntity(Object actual) {
+		assertTrue("Multipart is not an HttpEntity", actual instanceof HttpEntity<?>);
+		return (HttpEntity<byte[]>) actual;
 	}
 
 	/**
@@ -444,13 +464,19 @@ public class ContentRequestMatchers {
 				MultiValueMap<String, Object> result = new LinkedMultiValueMap<>();
 				for (FileItem fileItem : fileItems) {
 					result.add(fileItem.getFieldName(),
-							(fileItem.isFormField() ? fileItem.getString() : fileItem.get()));
+							(fileItem.isFormField() ? fileItem.getString() : toHttpEntity(fileItem)));
 				}
 				return result;
 			}
 			catch (Exception ex) {
 				throw new IllegalStateException("Failed to parse multipart request", ex);
 			}
+		}
+
+		private static HttpEntity<?> toHttpEntity(FileItem fileItem) {
+			HttpHeaders headers = new HttpHeaders();
+			headers.set(HttpHeaders.CONTENT_TYPE, fileItem.getContentType());
+			return new HttpEntity<>(fileItem.get(), headers);
 		}
 	}
 

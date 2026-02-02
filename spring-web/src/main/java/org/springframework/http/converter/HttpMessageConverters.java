@@ -16,6 +16,7 @@
 
 package org.springframework.http.converter;
 
+import java.util.List;
 import java.util.function.Consumer;
 
 /**
@@ -165,6 +166,15 @@ public interface HttpMessageConverters extends Iterable<HttpMessageConverter<?>>
 		 * @param customConverter the converter instance to add
 		 */
 		T addCustomConverter(HttpMessageConverter<?> customConverter);
+
+		/**
+		 * Add a consumer for mutating the list of selected message converters.
+		 * <p>This operation happens before converters are
+		 * {@link #configureMessageConverters(Consumer) configured individually}.</p>
+		 * @param configurer the configurer to use
+		 * @since 7.0.3
+		 */
+		T configureMessageConvertersList(Consumer<List<HttpMessageConverter<?>>> configurer);
 
 		/**
 		 * Add a consumer for configuring the selected message converters.

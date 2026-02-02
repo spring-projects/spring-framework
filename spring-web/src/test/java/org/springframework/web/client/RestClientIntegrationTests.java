@@ -406,8 +406,10 @@ class RestClientIntegrationTests {
 		}
 		catch (HttpServerErrorException ex) {
 			assertThat(ex.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
-			assumeFalse(requestFactory instanceof JdkClientHttpRequestFactory, "JDK HttpClient does not expose status text");
-			assertThat(ex.getStatusText()).isEqualTo("Server Error");
+			// JDK HttpClient does not expose status text
+			if (!(requestFactory instanceof JdkClientHttpRequestFactory)) {
+				assertThat(ex.getStatusText()).isEqualTo("Server Error");
+			}
 			assertThat(ex.getResponseHeaders().getContentType()).isEqualTo(MediaType.TEXT_PLAIN);
 			assertThat(ex.getResponseBodyAsString()).isEqualTo(errorMessage);
 		}
@@ -1022,6 +1024,29 @@ class RestClientIntegrationTests {
 
 		expectRequestCount(1);
 		expectRequest(request -> assertThat(request.getHeaders().get("foo")).isEqualTo("bar"));
+	}
+
+
+	@ParameterizedRestClientTest
+	void sendNullHeaderValue(ClientHttpRequestFactory requestFactory) throws IOException {
+		startServer(requestFactory);
+
+		prepareResponse(builder -> builder
+				.setHeader("Content-Type", "text/plain").body("Hello Spring!"));
+
+		String result = this.restClient.get()
+				.uri("/greeting")
+				.httpRequest(request -> request.getHeaders().add("X-Test-Header", null))
+				.retrieve()
+				.body(String.class);
+
+		assertThat(result).isEqualTo("Hello Spring!");
+
+		expectRequestCount(1);
+		expectRequest(request -> {
+			assertThat(request.getHeaders().get("X-Test-Header")).isNullOrEmpty();
+			assertThat(request.getTarget()).isEqualTo("/greeting");
+		});
 	}
 
 	@ParameterizedRestClientTest

@@ -46,7 +46,6 @@ public abstract class AbstractJCacheConfiguration extends AbstractCachingConfigu
 
 
 	@Override
-	@SuppressWarnings("NullAway") // See https://github.com/uber/NullAway/issues/1290
 	protected void useCachingConfigurer(CachingConfigurerSupplier cachingConfigurerSupplier) {
 		super.useCachingConfigurer(cachingConfigurerSupplier);
 		this.exceptionCacheResolver = cachingConfigurerSupplier.adapt(config -> {

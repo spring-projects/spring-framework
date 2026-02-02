@@ -422,6 +422,18 @@ public class JmsMessagingTemplate extends AbstractMessagingTemplate<Destination>
 		return (replyMessage != null ? (T) getMessageConverter().fromMessage(replyMessage, targetClass) : null);
 	}
 
+	@Override
+	public <T> @Nullable T convertSendAndReceive(Object request, @Nullable Map<String, Object> headers,
+			Class<T> targetClass, @Nullable MessagePostProcessor postProcessor) throws MessagingException {
+
+		Destination defaultDestination = getDefaultDestination();
+		if (defaultDestination != null) {
+			return convertSendAndReceive(defaultDestination, request, headers, targetClass, postProcessor);
+		}
+		else {
+			return convertSendAndReceive(getRequiredDefaultDestinationName(), request, headers, targetClass, postProcessor);
+		}
+	}
 
 	@Override
 	protected void doSend(Destination destination, Message<?> message) {

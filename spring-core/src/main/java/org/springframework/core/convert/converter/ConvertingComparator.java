@@ -36,7 +36,7 @@ import org.springframework.util.comparator.Comparators;
  * @param <S> the source type
  * @param <T> the target type
  */
-public class ConvertingComparator<S, T> implements Comparator<S> {
+public class ConvertingComparator<S, T extends @Nullable Object> implements Comparator<S> {
 
 	private final Comparator<T> comparator;
 

@@ -19,6 +19,7 @@ package org.springframework.http.client;
 import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.PushbackInputStream;
 import java.io.UncheckedIOException;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -60,6 +61,7 @@ import org.springframework.util.StringUtils;
  *
  * @author Marten Deinum
  * @author Arjen Poutsma
+ * @author Brian Clozel
  * @since 6.1
  */
 class JdkClientHttpRequest extends AbstractStreamingClientHttpRequest {
@@ -173,7 +175,7 @@ class JdkClientHttpRequest extends AbstractStreamingClientHttpRequest {
 		headers.forEach((headerName, headerValues) -> {
 			if (!DISALLOWED_HEADERS.contains(headerName.toLowerCase(Locale.ROOT))) {
 				for (String headerValue : headerValues) {
-					builder.header(headerName, headerValue);
+					builder.header(headerName, (headerValue != null) ? headerValue : "");
 				}
 			}
 		});
@@ -325,30 +327,61 @@ class JdkClientHttpRequest extends AbstractStreamingClientHttpRequest {
 	 */
 	private static final class DecompressingBodyHandler implements BodyHandler<InputStream> {
 
+
 		@Override
 		public BodySubscriber<InputStream> apply(ResponseInfo responseInfo) {
-			String contentEncoding = responseInfo.headers().firstValue(HttpHeaders.CONTENT_ENCODING).orElse("");
-			if (contentEncoding.equalsIgnoreCase("gzip")) {
-				return BodySubscribers.mapping(
+
+			String contentEncoding = responseInfo.headers()
+					.firstValue(HttpHeaders.CONTENT_ENCODING)
+					.orElse("")
+					.toLowerCase(Locale.ROOT);
+
+			return switch (contentEncoding) {
+				case "gzip", "deflate" -> BodySubscribers.mapping(
 						BodySubscribers.ofInputStream(),
-						(InputStream is) -> {
-							try {
-								return new GZIPInputStream(is);
-							}
-							catch (IOException ex) {
-								throw new UncheckedIOException(ex);
-							}
-						});
+						(InputStream is) -> decompressStream(is, contentEncoding));
+				default -> BodySubscribers.ofInputStream();
+			};
+		}
+
+		private static InputStream decompressStream(InputStream original, String contentEncoding) {
+			PushbackInputStream wrapped = new PushbackInputStream(original);
+			try {
+				if (hasResponseBody(wrapped)) {
+					if (contentEncoding.equals("gzip")) {
+						return new GZIPInputStream(wrapped);
+					}
+					else if (contentEncoding.equals("deflate")) {
+						return new InflaterInputStream(wrapped);
+					}
+				}
+				else {
+					return wrapped;
+				}
 			}
-			else if (contentEncoding.equalsIgnoreCase("deflate")) {
-				return BodySubscribers.mapping(
-						BodySubscribers.ofInputStream(),
-						InflaterInputStream::new);
+			catch (IOException ex) {
+				throw new UncheckedIOException(ex);
 			}
-			else {
-				return BodySubscribers.ofInputStream();
+			return wrapped;
+		}
+
+		private static boolean hasResponseBody(PushbackInputStream inputStream) {
+			try {
+				int b = inputStream.read();
+				if (b == -1) {
+					return false;
+				}
+				else {
+					inputStream.unread(b);
+					return true;
+				}
+
+			}
+			catch (IOException exc) {
+				return false;
 			}
 		}
 	}
+
 
 }

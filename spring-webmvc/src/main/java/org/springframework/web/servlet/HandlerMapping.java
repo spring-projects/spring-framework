@@ -20,6 +20,8 @@ import jakarta.servlet.ServletRequest;
 import jakarta.servlet.http.HttpServletRequest;
 import org.jspecify.annotations.Nullable;
 
+import org.springframework.web.accept.ApiVersionHolder;
+
 /**
  * Interface to be implemented by objects that define a mapping between
  * requests and handler objects.
@@ -136,8 +138,9 @@ public interface HandlerMapping {
 	String PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE = HandlerMapping.class.getName() + ".producibleMediaTypes";
 
 	/**
-	 * Name of the {@link HttpServletRequest} attribute that contains the
-	 * resolved and parsed API version.
+	 * Name of the {@link HttpServletRequest} attribute that contains an
+	 * {@link ApiVersionHolder} with the
+	 * result of obtaining and parsing the API version of the request.
 	 * @since 7.0
 	 */
 	String API_VERSION_ATTRIBUTE = HandlerMapping.class.getName() + ".apiVersion";

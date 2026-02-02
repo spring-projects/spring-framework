@@ -79,7 +79,7 @@ final class DefaultJdbcClient implements JdbcClient {
 	}
 
 	public DefaultJdbcClient(NamedParameterJdbcOperations jdbcTemplate, @Nullable ConversionService conversionService) {
-		Assert.notNull(jdbcTemplate, "JdbcTemplate must not be null");
+		Assert.notNull(jdbcTemplate, "NamedParameterJdbcTemplate must not be null");
 		this.namedParamOps = jdbcTemplate;
 		this.conversionService =
 				(conversionService != null ? conversionService : DefaultConversionService.getSharedInstance());

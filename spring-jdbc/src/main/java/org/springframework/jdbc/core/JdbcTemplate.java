@@ -58,7 +58,6 @@ import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedCaseInsensitiveMap;
-import org.springframework.util.StringUtils;
 
 /**
  * <b>This is the central delegate in the JDBC core package.</b>
@@ -591,35 +590,34 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 		// Callback to execute the batch update.
 		class BatchUpdateStatementCallback implements StatementCallback<int[]>, SqlProvider {
 
-			private @Nullable String currSql;
+			private final StringBuilder currSql = new StringBuilder();
 
 			@Override
 			public int[] doInStatement(Statement stmt) throws SQLException, DataAccessException {
 				int[] rowsAffected = new int[sql.length];
 				if (JdbcUtils.supportsBatchUpdates(stmt.getConnection())) {
 					for (String sqlStmt : sql) {
-						this.currSql = appendSql(this.currSql, sqlStmt);
+						appendSql(sqlStmt);
 						stmt.addBatch(sqlStmt);
 					}
 					try {
 						rowsAffected = stmt.executeBatch();
 					}
 					catch (BatchUpdateException ex) {
-						String batchExceptionSql = null;
+						this.currSql.setLength(0);
+						int[] updateCounts = ex.getUpdateCounts();
 						for (int i = 0; i < ex.getUpdateCounts().length; i++) {
-							if (ex.getUpdateCounts()[i] == Statement.EXECUTE_FAILED) {
-								batchExceptionSql = appendSql(batchExceptionSql, sql[i]);
+							if (updateCounts[i] == Statement.EXECUTE_FAILED) {
+								appendSql(sql[i]);
 							}
-						}
-						if (StringUtils.hasLength(batchExceptionSql)) {
-							this.currSql = batchExceptionSql;
 						}
 						throw ex;
 					}
 				}
 				else {
 					for (int i = 0; i < sql.length; i++) {
-						this.currSql = sql[i];
+						this.currSql.setLength(0);
+						this.currSql.append(sql[i]);
 						if (!stmt.execute(sql[i])) {
 							rowsAffected[i] = stmt.getUpdateCount();
 						}
@@ -631,13 +629,16 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 				return rowsAffected;
 			}
 
-			private String appendSql(@Nullable String sql, String statement) {
-				return (StringUtils.hasLength(sql) ? sql + "; " + statement : statement);
+			private void appendSql(String statement) {
+				if (!this.currSql.isEmpty()) {
+					this.currSql.append("; ");
+				}
+				this.currSql.append(statement);
 			}
 
 			@Override
 			public @Nullable String getSql() {
-				return this.currSql;
+				return this.currSql.toString();
 			}
 		}
 

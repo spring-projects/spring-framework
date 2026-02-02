@@ -30,10 +30,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.testfixture.http.server.reactive.bootstrap.AbstractHttpHandlerIntegrationTests;
 import org.springframework.web.testfixture.http.server.reactive.bootstrap.HttpServer;
-import org.springframework.web.testfixture.http.server.reactive.bootstrap.JettyHttpServer;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 /**
  * @author Rossen Stoyanchev
@@ -79,7 +77,6 @@ class CookieIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 
 	@ParameterizedHttpServerTest
 	public void partitionedAttributeTest(HttpServer httpServer) throws Exception {
-		assumeFalse(httpServer instanceof JettyHttpServer, "Jetty does not support Servlet 6.1 yet");
 		startServer(httpServer);
 
 		URI url = URI.create("http://localhost:" + port);

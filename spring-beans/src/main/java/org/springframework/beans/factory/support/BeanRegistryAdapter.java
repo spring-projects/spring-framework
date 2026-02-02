@@ -280,6 +280,12 @@ public class BeanRegistryAdapter implements BeanRegistry {
 		}
 
 		@Override
+		public Spec<T> scope(String scope) {
+			this.beanDefinition.setScope(scope);
+			return this;
+		}
+
+		@Override
 		public Spec<T> supplier(Function<SupplierContext, T> supplier) {
 			this.beanDefinition.setInstanceSupplier(() ->
 					supplier.apply(new SupplierContextAdapter(this.beanFactory)));

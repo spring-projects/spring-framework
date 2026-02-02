@@ -112,7 +112,7 @@ public abstract class AbstractMockWebServerTests {
 					String headerName = request.getTarget().replace("/header/","");
 					return new MockResponse.Builder().body(headerName + ":" + request.getHeaders().get(headerName)).code(200).build();
 				}
-				else if(request.getTarget().startsWith("/compress/") && request.getBody() != null) {
+				else if(request.getMethod().equals("POST") && request.getTarget().startsWith("/compress/") && request.getBody() != null) {
 					String encoding = request.getTarget().replace("/compress/","");
 					String requestBody = request.getBody().utf8();
 					ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
@@ -137,6 +137,13 @@ public abstract class AbstractMockWebServerTests {
 							.code(200);
 					builder.setHeader(HttpHeaders.CONTENT_ENCODING, encoding);
 					builder.setHeader(HttpHeaders.CONTENT_LENGTH, buffer.size());
+					return builder.build();
+				}
+				else if (request.getMethod().equals("HEAD") && request.getTarget().startsWith("/headforcompress/")) {
+					String encoding = request.getTarget().replace("/headforcompress/","");
+					MockResponse.Builder builder = new MockResponse.Builder().code(200)
+							.setHeader(HttpHeaders.CONTENT_LENGTH, 500)
+							.setHeader(HttpHeaders.CONTENT_ENCODING, encoding);
 					return builder.build();
 				}
 				return new MockResponse.Builder().code(404).build();

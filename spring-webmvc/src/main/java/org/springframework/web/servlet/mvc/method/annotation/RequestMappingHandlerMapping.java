@@ -582,7 +582,7 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 		}
 
 		@Override
-		public boolean equals(Object obj) {
+		public boolean equals(@Nullable Object obj) {
 			return (obj instanceof AnnotationDescriptor that && this.annotation.equals(that.annotation));
 		}
 

@@ -16,11 +16,9 @@
 
 package org.springframework.web.reactive.function.client;
 
-import java.util.stream.Stream;
-
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.EnumSource;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -99,16 +97,12 @@ class WebClientResponseExceptionTests {
 	}
 
 	@ParameterizedTest
-	@MethodSource("httpStatusValues")
+	@EnumSource
 	void createExceptionWithStatus(HttpStatus status) {
 		WebClientResponseException exception = WebClientResponseException
 				.create(status, "reasonPhrase", new HttpHeaders(), new byte[0], null, null);
 
 		assertThat(exception.getStatusCode()).isEqualTo(status);
-	}
-
-	static Stream<HttpStatus> httpStatusValues() {
-		return Stream.of(HttpStatus.values());
 	}
 
 }

@@ -23,6 +23,7 @@ import org.hibernate.SessionFactory;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.framework.ProxyFactory;
+import org.springframework.aop.support.AopUtils;
 import org.springframework.aop.target.SingletonTargetSource;
 import org.springframework.orm.jpa.AbstractContainerEntityManagerFactoryIntegrationTests;
 import org.springframework.orm.jpa.EntityManagerFactoryInfo;
@@ -44,6 +45,11 @@ class HibernateEntityManagerFactoryIntegrationTests extends AbstractContainerEnt
 				"/org/springframework/orm/jpa/memdb.xml", "/org/springframework/orm/jpa/inject.xml"};
 	}
 
+
+	@Test
+	void testAdvisedEntityManagerProxyFromSmartFactoryBean() {
+		assertThat(AopUtils.isAopProxy(sharedEntityManager)).isTrue();
+	}
 
 	@Test
 	void testCanCastNativeEntityManagerFactoryToHibernateEntityManagerFactoryImpl() {

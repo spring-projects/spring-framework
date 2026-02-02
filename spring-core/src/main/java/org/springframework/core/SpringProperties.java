@@ -50,6 +50,7 @@ import org.jspecify.annotations.Nullable;
  * @see org.springframework.test.context.NestedTestConfiguration#ENCLOSING_CONFIGURATION_PROPERTY_NAME
  * @see org.springframework.test.context.TestConstructor#TEST_CONSTRUCTOR_AUTOWIRE_MODE_PROPERTY_NAME
  * @see org.springframework.test.context.cache.ContextCache#MAX_CONTEXT_CACHE_SIZE_PROPERTY_NAME
+ * @see org.springframework.test.context.cache.ContextCache#CONTEXT_CACHE_PAUSE_PROPERTY_NAME
  */
 public final class SpringProperties {
 

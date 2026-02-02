@@ -17,6 +17,7 @@
 package org.springframework.messaging.core;
 
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
@@ -50,6 +51,7 @@ import static org.mockito.Mockito.verify;
  *
  * @author Rossen Stoyanchev
  * @author Gary Russell
+ * @author Sam Brannen
  */
 class GenericMessagingTemplateTests {
 
@@ -246,6 +248,20 @@ class GenericMessagingTemplateTests {
 
 		assertThat(message.getHeaders()).isSameAs(headers);
 		assertThat(accessor.isMutable()).isFalse();
+	}
+
+	@Test
+	void convertAndSendWithDefaultDestinationAndSimpMessageHeaders() {
+		Map<String, Object> headers = Map.of("foo", "bar");
+		Object payload = "Hello";
+		TestMessagePostProcessor postProcessor = new TestMessagePostProcessor();
+
+		this.template.convertAndSend(payload, headers, postProcessor);
+		List<Message<byte[]>> messages = this.messageChannel.getMessages();
+		Message<byte[]> message = messages.get(0);
+
+		assertThat(postProcessor.getMessage().getPayload()).isEqualTo(payload);
+		assertThat(message.getHeaders()).containsKeys("foo");
 	}
 
 

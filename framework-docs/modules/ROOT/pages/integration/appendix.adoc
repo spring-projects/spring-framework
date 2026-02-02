@@ -1,15 +1,10 @@
 [[appendix]]
 = Appendix
 
-
-
-
 [[appendix.xsd-schemas]]
 == XML Schemas
 
 This part of the appendix lists XML schemas related to integration technologies.
-
-
 
 [[appendix.xsd-schemas-jee]]
 === The `jee` Schema
@@ -172,7 +167,7 @@ different properties with `jee`:
 
 The `<jee:local-slsb/>` element configures a reference to a local EJB Stateless Session Bean.
 
-The following example shows how to configures a reference to a local EJB Stateless Session Bean
+The following example shows how to configure a reference to a local EJB Stateless Session Bean
 without `jee`:
 
 [source,xml,indent=0,subs="verbatim,quotes"]
@@ -184,7 +179,7 @@ without `jee`:
 	</bean>
 ----
 
-The following example shows how to configures a reference to a local EJB Stateless Session Bean
+The following example shows how to configure a reference to a local EJB Stateless Session Bean
 with `jee`:
 
 [source,xml,indent=0,subs="verbatim,quotes"]
@@ -200,7 +195,7 @@ with `jee`:
 
 The `<jee:local-slsb/>` element configures a reference to a local EJB Stateless Session Bean.
 
-The following example shows how to configures a reference to a local EJB Stateless Session Bean
+The following example shows how to configure a reference to a local EJB Stateless Session Bean
 and a number of properties without `jee`:
 
 [source,xml,indent=0,subs="verbatim,quotes"]
@@ -215,7 +210,7 @@ and a number of properties without `jee`:
 	</bean>
 ----
 
-The following example shows how to configures a reference to a local EJB Stateless Session Bean
+The following example shows how to configure a reference to a local EJB Stateless Session Bean
 and a number of properties with `jee`:
 
 [source,xml,indent=0,subs="verbatim,quotes"]
@@ -234,7 +229,7 @@ and a number of properties with `jee`:
 
 The `<jee:remote-slsb/>` element configures a reference to a `remote` EJB Stateless Session Bean.
 
-The following example shows how to configures a reference to a remote EJB Stateless Session Bean
+The following example shows how to configure a reference to a remote EJB Stateless Session Bean
 without `jee`:
 
 [source,xml,indent=0,subs="verbatim,quotes"]
@@ -251,7 +246,7 @@ without `jee`:
 	</bean>
 ----
 
-The following example shows how to configures a reference to a remote EJB Stateless Session Bean
+The following example shows how to configure a reference to a remote EJB Stateless Session Bean
 with `jee`:
 
 [source,xml,indent=0,subs="verbatim,quotes"]
@@ -313,7 +308,7 @@ xref:integration/jmx/naming.adoc#jmx-context-mbeanexport[Configuring Annotation-
 === The `cache` Schema
 
 You can use the `cache` elements to enable support for Spring's `@CacheEvict`, `@CachePut`,
-and `@Caching` annotations. It it also supports declarative XML-based caching. See
+and `@Caching` annotations. The `cache` schema also supports declarative XML-based caching. See
 xref:integration/cache/annotations.adoc#cache-annotation-enable[Enabling Caching Annotations] and
 xref:integration/cache/declarative-xml.adoc[Declarative XML-based Caching] for details.
 

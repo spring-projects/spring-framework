@@ -16,6 +16,8 @@
 
 package org.springframework.core.convert.converter;
 
+import org.jspecify.annotations.Nullable;
+
 /**
  * A factory for "ranged" converters that can convert objects from S to subtypes of R.
  *
@@ -36,6 +38,6 @@ public interface ConverterFactory<S, R> {
 	 * @param targetType the target type to convert to
 	 * @return a converter from S to T
 	 */
-	<T extends R> Converter<S, T> getConverter(Class<T> targetType);
+	<T extends R> Converter<S, ? extends @Nullable T> getConverter(Class<T> targetType);
 
 }

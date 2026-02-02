@@ -40,4 +40,9 @@ class NoResourceFoundExceptionTests {
 		assertThat(noResourceFoundException.getBody().getDetail()).isEqualTo("No static resource /resource.");
 	}
 
+	@Test
+	void messageArgumentsShouldContainResourcePath() {
+		var noResourceFoundException = new NoResourceFoundException(HttpMethod.GET, "/context/resource", "/resource");
+		assertThat(noResourceFoundException.getDetailMessageArguments()).containsExactly("/resource");
+	}
 }

@@ -24,6 +24,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.core.MethodParameter;
+import org.springframework.web.accept.ApiVersionHolder;
 import org.springframework.web.accept.SemanticApiVersionParser;
 import org.springframework.web.accept.SemanticApiVersionParser.Version;
 import org.springframework.web.context.request.ServletWebRequest;
@@ -82,7 +83,7 @@ class ApiVersionMethodArgumentResolverTests {
 	@Test
 	void resolveArgument() throws Exception {
 		Version version = new SemanticApiVersionParser().parseVersion("1.2");
-		this.servletRequest.setAttribute(HandlerMapping.API_VERSION_ATTRIBUTE, version);
+		this.servletRequest.setAttribute(HandlerMapping.API_VERSION_ATTRIBUTE, ApiVersionHolder.fromVersion(version));
 
 		Object actual = this.resolver.resolveArgument(this.param, this.mav, this.webRequest, null);
 
@@ -93,6 +94,7 @@ class ApiVersionMethodArgumentResolverTests {
 
 	@Test
 	void resolveNullableArgument() throws Exception {
+		this.servletRequest.setAttribute(HandlerMapping.API_VERSION_ATTRIBUTE, ApiVersionHolder.EMPTY);
 		Object actual = this.resolver.resolveArgument(this.nullableParam, this.mav, this.webRequest, null);
 		assertThat(actual).isNull();
 	}
@@ -100,7 +102,7 @@ class ApiVersionMethodArgumentResolverTests {
 	@Test
 	void resolveOptionalArgument() throws Exception {
 		Version version = new SemanticApiVersionParser().parseVersion("1.2");
-		this.servletRequest.setAttribute(HandlerMapping.API_VERSION_ATTRIBUTE, version);
+		this.servletRequest.setAttribute(HandlerMapping.API_VERSION_ATTRIBUTE, ApiVersionHolder.fromVersion(version));
 
 		Object actual = this.resolver.resolveArgument(this.optionalParam, this.mav, this.webRequest, null);
 		assertThat(actual).asInstanceOf(OPTIONAL).hasValue(version);
@@ -108,6 +110,7 @@ class ApiVersionMethodArgumentResolverTests {
 
 	@Test
 	void resolveOptionalArgumentWhenEmpty() throws Exception {
+		this.servletRequest.setAttribute(HandlerMapping.API_VERSION_ATTRIBUTE, ApiVersionHolder.EMPTY);
 		Object actual = this.resolver.resolveArgument(this.optionalParam, this.mav, this.webRequest, null);
 		assertThat(actual).asInstanceOf(OPTIONAL).isEmpty();
 	}
