@@ -169,7 +169,7 @@ public class RetryTemplate implements RetryOperations {
 
 				logger.debug(() -> "Preparing to retry operation '%s'".formatted(retryableName));
 				retryState.increaseRetryCount();
-				this.retryListener.beforeRetry(this.retryPolicy, retryable);
+				this.retryListener.beforeRetry(this.retryPolicy, retryable, retryState);
 				try {
 					result = retryable.execute();
 				}
