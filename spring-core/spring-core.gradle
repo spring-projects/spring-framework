@@ -14,8 +14,8 @@ multiRelease {
 	releaseVersions 21, 24
 }
 
-def javapoetVersion = "0.7.0"
-def objenesisVersion = "3.4"
+def javapoetVersion = "0.10.0"
+def objenesisVersion = "3.5"
 
 configurations {
 	java21Api.extendsFrom(api)

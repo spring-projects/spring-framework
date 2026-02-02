@@ -200,6 +200,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
+
 =======================================================================
 
 SPRING FRAMEWORK ${version} SUBCOMPONENTS:
@@ -212,7 +213,7 @@ code for these subcomponents is subject to the terms and
 conditions of the following licenses.
 
 
->>> ASM 9.1 (org.ow2.asm:asm:9.1, org.ow2.asm:asm-commons:9.1):
+>>> ASM 9.9.1 (org.ow2.asm:asm:9.9.1):
 
 Copyright (c) 2000-2011 INRIA, France Telecom
 All rights reserved.
@@ -249,32 +250,28 @@ Copyright (c) 1999-2009, OW2 Consortium <https://www.ow2.org/>
 
 >>> CGLIB 3.3 (cglib:cglib:3.3):
 
-Per the LICENSE file in the CGLIB JAR distribution downloaded from
-https://github.com/cglib/cglib/releases/download/RELEASE_3_3_0/cglib-3.3.0.jar,
-CGLIB 3.3 is licensed under the Apache License, version 2.0, the text of which
-is included above.
+Per the LICENSE file in the CGLIB distribution, CGLIB 3.3 is licensed
+under the Apache License, version 2.0, the text of which is included above.
 
 
->>> JavaPoet 1.13.0 (com.squareup:javapoet:1.13.0):
+>>> JavaPoet 0.10.0 (com.palantir.javapoet:javapoet:0.10.0):
 
-Per the LICENSE file in the JavaPoet JAR distribution downloaded from
-https://github.com/square/javapoet/archive/refs/tags/javapoet-1.13.0.zip,
-JavaPoet 1.13.0 is licensed under the Apache License, version 2.0, the text of
-which is included above.
+Per the LICENSE file in the JavaPoet distribution, JavaPoet 0.10.0 is licensed
+under the Apache License, version 2.0, the text of which is included above.
 
 
->>> Objenesis 3.4 (org.objenesis:objenesis:3.4):
+>>> Objenesis 3.5 (org.objenesis:objenesis:3.5):
 
-Per the LICENSE file in the Objenesis ZIP distribution downloaded from
-http://objenesis.org/download.html, Objenesis 3.4 is licensed under the
+Per the LICENSE file in the Objenesis distribution downloaded from
+http://objenesis.org/download.html, Objenesis 3.5 is licensed under the
 Apache License, version 2.0, the text of which is included above.
 
-Per the NOTICE file in the Objenesis ZIP distribution downloaded from
+Per the NOTICE file in the Objenesis distribution downloaded from
 http://objenesis.org/download.html and corresponding to section 4d of the
 Apache License, Version 2.0, in this case for Objenesis:
 
 Objenesis
-Copyright 2006-2019 Joe Walnes, Henri Tremblay, Leonardo Mesquita
+Copyright 2006-2026 Joe Walnes, Henri Tremblay, Leonardo Mesquita
 
 
 ===============================================================================
