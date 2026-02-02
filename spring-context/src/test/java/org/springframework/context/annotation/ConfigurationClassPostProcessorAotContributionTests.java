@@ -176,6 +176,24 @@ public class ConfigurationClassPostProcessorAotContributionTests {
 							));
 		}
 
+		@Test
+		void applyToWhenHasImportAwareBeanRegistrarRegistersHints() {
+			BeanFactoryInitializationAotContribution contribution = getContribution(BeanRegistrarTests.ImportAwareConfiguration.class);
+			contribution.applyTo(generationContext, beanFactoryInitializationCode);
+			assertThat(generationContext.getRuntimeHints().resources().resourcePatternHints())
+					.singleElement()
+					.satisfies(resourceHint -> assertThat(resourceHint.getIncludes())
+							.map(ResourcePatternHint::getPattern)
+							.containsExactlyInAnyOrder(
+									"/",
+									"org",
+									"org/springframework",
+									"org/springframework/context",
+									"org/springframework/context/annotation",
+									"org/springframework/context/annotation/ConfigurationClassPostProcessorAotContributionTests$BeanRegistrarTests$ImportAwareConfiguration.class"
+							));
+		}
+
 		@SuppressWarnings("unchecked")
 		private void compile(BiConsumer<Consumer<DefaultListableBeanFactory>, Compiled> result) {
 			MethodReference methodReference = beanFactoryInitializationCode.getInitializers().get(0);

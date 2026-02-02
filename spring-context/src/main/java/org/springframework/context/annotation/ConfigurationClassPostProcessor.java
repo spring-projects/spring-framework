@@ -999,6 +999,7 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 								.addStatement("throw new $T(\"Failed to read metadata for '$L'\", ex)",
 										IllegalStateException.class, beanRegistrarEntry.getKey())
 								.endControlFlow();
+						generationContext.getRuntimeHints().resources().registerType(TypeReference.of(beanRegistrarEntry.getKey()));
 					}
 					code.addStatement("$L.register(new $T(($T)$L, $L, $L, $L.getClass(), $L), $L)", beanRegistrarName,
 							BeanRegistryAdapter.class, BeanDefinitionRegistry.class, BeanFactoryInitializationCode.BEAN_FACTORY_VARIABLE,
