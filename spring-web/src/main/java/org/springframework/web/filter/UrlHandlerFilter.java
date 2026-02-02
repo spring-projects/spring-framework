@@ -74,9 +74,12 @@ public final class UrlHandlerFilter extends OncePerRequestFilter {
 
 	private final HandlerRegistry handlerRegistry;
 
+	private final boolean excludeContextPath;
 
-	private UrlHandlerFilter(HandlerRegistry handlerRegistry) {
+
+	private UrlHandlerFilter(HandlerRegistry handlerRegistry, boolean excludeContextPath) {
 		this.handlerRegistry = handlerRegistry;
+		this.excludeContextPath = excludeContextPath;
 	}
 
 
@@ -87,7 +90,7 @@ public final class UrlHandlerFilter extends OncePerRequestFilter {
 		RequestPath path = (ServletRequestPathUtils.hasParsedRequestPath(request) ?
 				ServletRequestPathUtils.getParsedRequestPath(request) :
 				ServletRequestPathUtils.parse(request));
-		PathContainer lookupPath = path.subPath(path.contextPath().elements().size());
+		PathContainer lookupPath = excludeContextPath ? path.subPath(path.contextPath().elements().size()) : path;
 		Handler handler = handlerRegistry.lookupHandler(path, lookupPath, request);
 		if (handler != null) {
 			handler.handle(request, response, chain);
@@ -141,7 +144,15 @@ public final class UrlHandlerFilter extends OncePerRequestFilter {
 		 * @return the {@link Builder}, which allows adding more
 		 * handlers and then building the Filter instance.
 		 */
-		Builder useSpecificityOrder(boolean useSpecificityOrder);
+		Builder sortPatternsBySpecificity(boolean sortPatternsBySpecificity);
+
+		/**
+		 * Specify whether to exclude the context path when matching paths.
+		 * <p>The default value is {@code false}.
+		 * @return the {@link Builder}, which allows adding more
+		 * handlers and then building the Filter instance.
+		 */
+		Builder excludeContextPath(boolean excludeContextPath);
 
 		/**
 		 * Build the {@link UrlHandlerFilter} instance.
@@ -210,7 +221,9 @@ public final class UrlHandlerFilter extends OncePerRequestFilter {
 
 		private final MultiValueMap<Handler, String> handlers = new LinkedMultiValueMap<>();
 
-		private boolean useSpecificityOrder = false;
+		private boolean sortPatternsBySpecificity = false;
+
+		private boolean excludeContextPath = false;
 
 		private DefaultBuilder() {
 			// Ensure any no-op handlers are registered first when building
@@ -228,8 +241,14 @@ public final class UrlHandlerFilter extends OncePerRequestFilter {
 		}
 
 		@Override
-		public Builder useSpecificityOrder(boolean useSpecificityOrder) {
-			this.useSpecificityOrder = useSpecificityOrder;
+		public Builder sortPatternsBySpecificity(boolean sortPatternsBySpecificity) {
+			this.sortPatternsBySpecificity = sortPatternsBySpecificity;
+			return this;
+		}
+
+		@Override
+		public Builder excludeContextPath(boolean excludeContextPath) {
+			this.excludeContextPath = excludeContextPath;
 			return this;
 		}
 
@@ -243,7 +262,7 @@ public final class UrlHandlerFilter extends OncePerRequestFilter {
 		@Override
 		public UrlHandlerFilter build() {
 			HandlerRegistry handlerRegistry;
-			if (this.useSpecificityOrder) {
+			if (this.sortPatternsBySpecificity) {
 				handlerRegistry = new OrderedHandlerRegistry();
 			}
 			else {
@@ -255,7 +274,7 @@ public final class UrlHandlerFilter extends OncePerRequestFilter {
 				}
 			}
 
-			return new UrlHandlerFilter(handlerRegistry);
+			return new UrlHandlerFilter(handlerRegistry, this.excludeContextPath);
 		}
 
 		private final class DefaultTrailingSlashSpec implements TrailingSlashSpec {

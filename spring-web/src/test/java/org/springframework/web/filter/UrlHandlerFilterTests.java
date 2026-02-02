@@ -38,25 +38,33 @@ import static org.assertj.core.api.Assertions.*;
 /**
  * Unit tests for {@link UrlHandlerFilter}.
  *
- * @author Rossen Stoyanchev
+ * @author Rossen Stoyanchev, James Missen
  */
 public class UrlHandlerFilterTests {
 
 	@Test
 	void requestWrapping() throws Exception {
-		testRequestWrapping("/path/**", "/path/123", null);
-		testRequestWrapping("/path/*", "/path", "/123");
-		testRequestWrapping("/path/*", "", "/path/123");
+		testRequestWrapping("/path/**", "", "/path/123", null);
+		testRequestWrapping("/path/*", "", "/path", "/123");
+		testRequestWrapping("/path/*", "", "", "/path/123");
+		testRequestWrapping("/path/**", "/myApp", "/path/123", null); // gh-35975
+		testRequestWrapping("/path/*", "/myApp", "/path", "/123"); // gh-35975
+		testRequestWrapping("/path/*", "/myApp", "", "/path/123"); // gh-35975
 	}
 
-	void testRequestWrapping(String pattern, String servletPath, @Nullable String pathInfo) throws Exception {
+	void testRequestWrapping(String pattern, String contextPath, String servletPath,
+			@Nullable String pathInfo) throws Exception {
 
-		UrlHandlerFilter filter = UrlHandlerFilter.trailingSlashHandler(pattern).wrapRequest().build();
+		UrlHandlerFilter filter = UrlHandlerFilter
+				.trailingSlashHandler(pattern).wrapRequest()
+				.excludeContextPath(true) // gh-35975
+				.build();
 
 		boolean hasPathInfo = StringUtils.hasLength(pathInfo);
-		String requestURI = servletPath + (hasPathInfo ? pathInfo : "");
+		String requestURI = contextPath + servletPath + (hasPathInfo ? pathInfo : "");
 
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", requestURI + "/");
+		request.setContextPath(contextPath);
 		request.setServletPath(hasPathInfo ? servletPath : servletPath + "/");
 		request.setPathInfo(hasPathInfo ? pathInfo + "/" : pathInfo);
 
@@ -104,7 +112,7 @@ public class UrlHandlerFilterTests {
 				.trailingSlashHandler("/path/**").redirect(status)
 				.trailingSlashHandler("/path/123/").wrapRequest() // most specific pattern
 				.trailingSlashHandler("/path/123/**").redirect(status)
-				.useSpecificityOrder(true)
+				.sortPatternsBySpecificity(true)
 				.build();
 
 		MockFilterChain chain = new MockFilterChain();
@@ -119,7 +127,7 @@ public class UrlHandlerFilterTests {
 				.trailingSlashHandler("/path/**").wrapRequest()
 				.trailingSlashHandler("/path/123/").redirect(status) // most specific pattern
 				.trailingSlashHandler("/path/123/**").wrapRequest()
-				.useSpecificityOrder(true)
+				.sortPatternsBySpecificity(true)
 				.build();
 
 		MockHttpServletResponse response = new MockHttpServletResponse();
@@ -142,6 +150,8 @@ public class UrlHandlerFilterTests {
 		testNoUrlHandling("/path/**", "/path/123/**", "", "/path/123/"); // gh-35882
 		testNoUrlHandling("/path/*/*", "/path/123/**", "", "/path/123/abc/"); // gh-35882
 		testNoUrlHandling("/path/**", "/path/123/abc/", "", "/path/123/abc/"); // gh-35882
+		testNoUrlHandling("/path/**", null, "/myApp", "/myApp/path/123/"); // gh-35975
+		testNoUrlHandling("/path/*", null, "/myApp", "/myApp/path/123/"); // gh-35975
 	}
 
 	private static void testNoUrlHandling(String pattern, @Nullable String excludePattern, String contextPath,
