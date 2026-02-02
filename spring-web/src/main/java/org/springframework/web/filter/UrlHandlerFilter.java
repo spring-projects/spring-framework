@@ -18,7 +18,6 @@ package org.springframework.web.filter;
 
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -57,7 +56,6 @@ import org.springframework.web.util.pattern.PathPatternParser;
  * UrlHandlerFilter filter = UrlHandlerFilter
  *    .trailingSlashHandler("/path1/**").redirect(HttpStatus.PERMANENT_REDIRECT)
  *    .trailingSlashHandler("/path2/**").wrapRequest()
- *    .exclude("/path1/foo/bar/**", "/path2/baz/")
  *    .build();
  * </pre>
  *
@@ -128,16 +126,6 @@ public final class UrlHandlerFilter extends OncePerRequestFilter {
 		TrailingSlashSpec trailingSlashHandler(String... patterns);
 
 		/**
-		 * Exclude patterns from matching any other handler.
-		 * @param patterns path patterns to not map any handler to, e.g.
-		 * <code>"/path/foo/&#42;"</code>, <code>"/path/foo/&#42;&#42;"</code>,
-		 * <code>"/path/foo/bar/"</code>.
-		 * @return the {@link Builder}, which allows adding more
-		 * handlers and then building the Filter instance.
-		 */
-		Builder exclude(String... patterns);
-
-		/**
 		 * Specify whether to use path pattern specificity for matching handlers,
 		 * with more specific patterns taking precedence.
 		 * <p>The default value is {@code false}.
@@ -196,48 +184,15 @@ public final class UrlHandlerFilter extends OncePerRequestFilter {
 	 */
 	private static final class DefaultBuilder implements Builder {
 
-		/**
-		 * Empty handler that does not handle the request URL, and proceeds directly to the next filter.
-		 */
-		private static final Handler NO_OP_HANDLER = new Handler() {
-
-			@Override
-			public boolean supports(HttpServletRequest request, RequestPath path) {
-				return true;
-			}
-
-			@Override
-			public void handle(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
-					throws ServletException, IOException {
-
-				chain.doFilter(request, response);
-			}
-
-			@Override
-			public String toString() {
-				return "NoOpHandler";
-			}
-		};
-
 		private final MultiValueMap<Handler, String> handlers = new LinkedMultiValueMap<>();
 
 		private boolean sortPatternsBySpecificity = false;
 
 		private boolean excludeContextPath = false;
 
-		private DefaultBuilder() {
-			// Ensure any no-op handlers are registered first when building
-			this.handlers.addAll(NO_OP_HANDLER, Collections.emptyList());
-		}
-
 		@Override
 		public TrailingSlashSpec trailingSlashHandler(String... patterns) {
 			return new DefaultTrailingSlashSpec(patterns);
-		}
-
-		@Override
-		public Builder exclude(String... patterns) {
-			return addHandler(NO_OP_HANDLER, patterns);
 		}
 
 		@Override

@@ -19,14 +19,12 @@ package org.springframework.web.filter.reactive;
 import java.net.URI;
 import java.util.List;
 
-import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import reactor.core.publisher.Mono;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.ServerHttpRequest;
-import org.springframework.util.StringUtils;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebFilterChain;
 import org.springframework.web.server.WebHandler;
@@ -125,25 +123,18 @@ public class UrlHandlerFilterTests {
 
 	@Test
 	void noUrlHandling() {
-		testNoUrlHandling("/path/**", null, "", "/path/123");
-		testNoUrlHandling("/path/*", null, "", "/path/123");
-		testNoUrlHandling("/**", null, "", "/"); // gh-33444
-		testNoUrlHandling("/**", null, "/myApp", "/myApp/"); // gh-33565
-		testNoUrlHandling("/path/**", "/path/123/**", "", "/path/123/"); // gh-35882
-		testNoUrlHandling("/path/*/*", "/path/123/**", "", "/path/123/abc/"); // gh-35882
-		testNoUrlHandling("/path/**", "/path/123/abc/", "", "/path/123/abc/"); // gh-35882
-		testNoUrlHandling("/path/**", null, "/myApp", "/myApp/path/123/"); // gh-35975
-		testNoUrlHandling("/path/*", null, "/myApp", "/myApp/path/123/"); // gh-35975
+		testNoUrlHandling("/path/**", "", "/path/123");
+		testNoUrlHandling("/path/*", "", "/path/123");
+		testNoUrlHandling("/**", "", "/"); // gh-33444
+		testNoUrlHandling("/**", "/myApp", "/myApp/"); // gh-33565
+		testNoUrlHandling("/path/**", "/myApp", "/myApp/path/123/"); // gh-35975
+		testNoUrlHandling("/path/*", "/myApp", "/myApp/path/123/"); // gh-35975
 	}
 
-	private static void testNoUrlHandling(String pattern, @Nullable String excludePattern, String contextPath,
-			String path) {
-
-		boolean hasExcludePattern = StringUtils.hasLength(excludePattern);
+	private static void testNoUrlHandling(String pattern, String contextPath, String path) {
 
 		// No request mutation
-		UrlHandlerFilter.Builder builder = UrlHandlerFilter.trailingSlashHandler(pattern).mutateRequest();
-		UrlHandlerFilter filter = hasExcludePattern ? builder.exclude(excludePattern).build() : builder.build();
+		UrlHandlerFilter filter = UrlHandlerFilter.trailingSlashHandler(pattern).mutateRequest().build();
 
 		MockServerHttpRequest request = MockServerHttpRequest.get(path).contextPath(contextPath).build();
 		ServerWebExchange exchange = MockServerWebExchange.from(request);
@@ -155,8 +146,7 @@ public class UrlHandlerFilterTests {
 
 		// No redirect
 		HttpStatus status = HttpStatus.PERMANENT_REDIRECT;
-		builder = UrlHandlerFilter.trailingSlashHandler(pattern).redirect(status);
-		filter = hasExcludePattern ? builder.exclude(excludePattern).build() : builder.build();
+		filter = UrlHandlerFilter.trailingSlashHandler(pattern).redirect(status).build();
 
 		request = MockServerHttpRequest.get(path).contextPath(contextPath).build();
 		exchange = MockServerWebExchange.from(request);

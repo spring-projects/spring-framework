@@ -143,25 +143,19 @@ public class UrlHandlerFilterTests {
 
 	@Test
 	void noUrlHandling() throws Exception {
-		testNoUrlHandling("/path/**", null, "", "/path/123");
-		testNoUrlHandling("/path/*", null, "", "/path/123");
-		testNoUrlHandling("/**", null, "", "/"); // gh-33444
-		testNoUrlHandling("/**", null, "/myApp", "/myApp/"); // gh-33565
-		testNoUrlHandling("/path/**", "/path/123/**", "", "/path/123/"); // gh-35882
-		testNoUrlHandling("/path/*/*", "/path/123/**", "", "/path/123/abc/"); // gh-35882
-		testNoUrlHandling("/path/**", "/path/123/abc/", "", "/path/123/abc/"); // gh-35882
-		testNoUrlHandling("/path/**", null, "/myApp", "/myApp/path/123/"); // gh-35975
-		testNoUrlHandling("/path/*", null, "/myApp", "/myApp/path/123/"); // gh-35975
+		testNoUrlHandling("/path/**", "", "/path/123");
+		testNoUrlHandling("/path/*", "", "/path/123");
+		testNoUrlHandling("/**", "", "/"); // gh-33444
+		testNoUrlHandling("/**", "/myApp", "/myApp/"); // gh-33565
+		testNoUrlHandling("/path/**", "/myApp", "/myApp/path/123/"); // gh-35975
+		testNoUrlHandling("/path/*", "/myApp", "/myApp/path/123/"); // gh-35975
 	}
 
-	private static void testNoUrlHandling(String pattern, @Nullable String excludePattern, String contextPath,
-			String requestURI) throws ServletException, IOException {
-
-		boolean hasExcludePattern = StringUtils.hasLength(excludePattern);
+	private static void testNoUrlHandling(String pattern, String contextPath, String requestURI)
+			throws ServletException, IOException {
 
 		// No request wrapping
-		UrlHandlerFilter.Builder builder = UrlHandlerFilter.trailingSlashHandler(pattern).wrapRequest();
-		UrlHandlerFilter filter = hasExcludePattern ? builder.exclude(excludePattern).build() : builder.build();
+		UrlHandlerFilter filter = UrlHandlerFilter.trailingSlashHandler(pattern).wrapRequest().build();
 
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", requestURI);
 		request.setContextPath(contextPath);
@@ -173,8 +167,7 @@ public class UrlHandlerFilterTests {
 
 		// No redirect
 		HttpStatus status = HttpStatus.PERMANENT_REDIRECT;
-		builder = UrlHandlerFilter.trailingSlashHandler(pattern).redirect(status);
-		filter = hasExcludePattern ? builder.exclude(excludePattern).build() : builder.build();
+		filter = UrlHandlerFilter.trailingSlashHandler(pattern).redirect(status).build();
 
 		request = new MockHttpServletRequest("GET", requestURI);
 		request.setContextPath(contextPath);
