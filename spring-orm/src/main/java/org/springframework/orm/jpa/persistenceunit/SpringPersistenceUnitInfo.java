@@ -23,6 +23,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
+import jakarta.persistence.FetchType;
 import jakarta.persistence.PersistenceConfiguration;
 import jakarta.persistence.PersistenceUnitTransactionType;
 import jakarta.persistence.spi.ClassTransformer;
@@ -207,6 +208,16 @@ public class SpringPersistenceUnitInfo extends MutablePersistenceUnitInfo {
 
 		setSharedCacheMode(config.sharedCacheMode());
 		setValidationMode(config.validationMode());
+
+		// JPA 4.0 defaultToOneFetchType
+		Method defaultToOneFetchType = ClassUtils.getMethodIfAvailable(config.getClass(), "defaultToOneFetchType");
+		if (defaultToOneFetchType != null) {
+			FetchType fetchType = (FetchType) ReflectionUtils.invokeMethod(defaultToOneFetchType, config);
+			if (fetchType != null) {
+				setDefaultToOneFetchType(fetchType);
+			}
+		}
+
 		getProperties().putAll(config.properties());
 
 		// Further relevant settings from HibernatePersistenceConfiguration on Hibernate 7.1+
@@ -247,9 +258,20 @@ public class SpringPersistenceUnitInfo extends MutablePersistenceUnitInfo {
 		@SuppressWarnings({"rawtypes", "unchecked"})
 		@Override
 		public @Nullable Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-			// Fast path for SmartPersistenceUnitInfo JTA check
 			if (method.getName().equals("isConfiguredForJta")) {
+				// Fast path for SmartPersistenceUnitInfo JTA check
 				return (getTransactionType() == PersistenceUnitTransactionType.JTA);
+			}
+			else if (method.getName().equals("getAllManagedClassNames")) {
+				// JPA 4.0 letting the container perform the scanning ->
+				// with Spring, only makes sense with typical default persistence unit.
+				if (excludeUnlistedClasses() && getMappingFileNames().isEmpty()) {
+					List<String> mergedClassesAndPackages = new ArrayList<>(getManagedClassNames());
+					mergedClassesAndPackages.addAll(getManagedPackages());
+					return mergedClassesAndPackages;
+				}
+				throw new UnsupportedOperationException(
+						"JPA 4.0 getAllManagedClassNames only supported with exclude-unlisted-classes and no orm.xml");
 			}
 
 			// Regular methods to be delegated to SpringPersistenceUnitInfo

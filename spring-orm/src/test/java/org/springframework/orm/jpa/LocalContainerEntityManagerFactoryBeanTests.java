@@ -27,6 +27,7 @@ import jakarta.persistence.OptimisticLockException;
 import jakarta.persistence.PersistenceConfiguration;
 import jakarta.persistence.PersistenceException;
 import jakarta.persistence.PersistenceUnitTransactionType;
+import jakarta.persistence.spi.ClassTransformer;
 import jakarta.persistence.spi.PersistenceProvider;
 import jakarta.persistence.spi.PersistenceUnitInfo;
 import jakarta.persistence.spi.ProviderUtil;
@@ -364,6 +365,16 @@ class LocalContainerEntityManagerFactoryBeanTests extends AbstractEntityManagerF
 		@Override
 		public boolean generateSchema(String persistenceUnitName, Map map) {
 			throw new UnsupportedOperationException();
+		}
+
+		// JPA 4.0 method
+		public boolean generateSchema(PersistenceConfiguration persistenceConfiguration) {
+			throw new UnsupportedOperationException();
+		}
+
+		// JPA 4.0 method
+		public ClassTransformer getClassTransformer(PersistenceUnitInfo persistenceUnitInfo, Map<?,?> map) {
+			return null;
 		}
 	}
 

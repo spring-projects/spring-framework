@@ -30,6 +30,7 @@ import org.hibernate.jpa.boot.internal.PersistenceUnitInfoDescriptor;
 
 import org.springframework.core.NativeDetector;
 import org.springframework.orm.jpa.persistenceunit.SmartPersistenceUnitInfo;
+import org.springframework.util.ClassUtils;
 
 /**
  * Spring-specific subclass of the standard {@link HibernatePersistenceProvider}
@@ -51,19 +52,45 @@ class SpringHibernateJpaPersistenceProvider extends HibernatePersistenceProvider
 		if (info instanceof SmartPersistenceUnitInfo smartInfo) {
 			mergedClassesAndPackages.addAll(smartInfo.getManagedPackages());
 		}
-		return new EntityManagerFactoryBuilderImpl(
-				new PersistenceUnitInfoDescriptor(info) {
-					@Override
-					public List<String> getManagedClassNames() {
-						return mergedClassesAndPackages;
-					}
-					@Override
-					public void pushClassTransformer(EnhancementContext enhancementContext) {
-						if (!NativeDetector.inNativeImage()) {
-							super.pushClassTransformer(enhancementContext);
-						}
-					}
-				}, properties).build();
+
+		PersistenceUnitInfoDescriptor descriptor;
+		if (!NativeDetector.inNativeImage()) {
+			// No ClassTransformer adaptation necessary
+			descriptor = new PersistenceUnitInfoDescriptor(info) {
+				@Override
+				public List<String> getManagedClassNames() {
+					return mergedClassesAndPackages;
+				}
+			};
+		}
+		else if (ClassUtils.hasMethod(PersistenceUnitInfoDescriptor.class, "isClassTransformerRegistrationDisabled")) {
+			// Hibernate 8.0: no pushClassTransformer override necessary
+			descriptor = new PersistenceUnitInfoDescriptor(info) {
+				@Override
+				public List<String> getManagedClassNames() {
+					return mergedClassesAndPackages;
+				}
+				// @Override on Hibernate 8.0
+				public boolean isClassTransformerRegistrationDisabled() {
+					return true;
+				}
+			};
+		}
+		else {
+			// Hibernate 7.x: pushClassTransformer no-op in native image
+			descriptor = new PersistenceUnitInfoDescriptor(info) {
+				@Override
+				public List<String> getManagedClassNames() {
+					return mergedClassesAndPackages;
+				}
+				@Override
+				public void pushClassTransformer(EnhancementContext enhancementContext) {
+					// no-op
+				}
+			};
+		}
+
+		return new EntityManagerFactoryBuilderImpl(descriptor, properties).build();
 	}
 
 }

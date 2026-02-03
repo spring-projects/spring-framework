@@ -23,6 +23,7 @@ import java.util.Properties;
 
 import javax.sql.DataSource;
 
+import jakarta.persistence.FetchType;
 import jakarta.persistence.PersistenceUnitTransactionType;
 import jakarta.persistence.SharedCacheMode;
 import jakarta.persistence.ValidationMode;
@@ -81,6 +82,8 @@ public class MutablePersistenceUnitInfo {
 	private SharedCacheMode sharedCacheMode = SharedCacheMode.UNSPECIFIED;
 
 	private ValidationMode validationMode = ValidationMode.AUTO;
+
+	private FetchType defaultToOneFetchType = FetchType.EAGER;
 
 	private Properties properties = new Properties();
 
@@ -211,6 +214,14 @@ public class MutablePersistenceUnitInfo {
 
 	public ValidationMode getValidationMode() {
 		return this.validationMode;
+	}
+
+	public void setDefaultToOneFetchType(FetchType defaultToOneFetchType) {
+		this.defaultToOneFetchType = defaultToOneFetchType;
+	}
+
+	public FetchType getDefaultToOneFetchType() {
+		return this.defaultToOneFetchType;
 	}
 
 	public void addProperty(String name, String value) {

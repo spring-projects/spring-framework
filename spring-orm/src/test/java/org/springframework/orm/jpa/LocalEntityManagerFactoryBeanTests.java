@@ -21,6 +21,7 @@ import java.util.Properties;
 
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.PersistenceConfiguration;
+import jakarta.persistence.spi.ClassTransformer;
 import jakarta.persistence.spi.PersistenceProvider;
 import jakarta.persistence.spi.PersistenceUnitInfo;
 import jakarta.persistence.spi.ProviderUtil;
@@ -184,14 +185,26 @@ class LocalEntityManagerFactoryBeanTests extends AbstractEntityManagerFactoryBea
 			throw new UnsupportedOperationException();
 		}
 
+		// JPA 2.1 method
 		@Override
 		public void generateSchema(PersistenceUnitInfo persistenceUnitInfo, Map map) {
 			throw new UnsupportedOperationException();
 		}
 
+		// JPA 2.1 method
 		@Override
 		public boolean generateSchema(String persistenceUnitName, Map map) {
 			throw new UnsupportedOperationException();
+		}
+
+		// JPA 4.0 method
+		public boolean generateSchema(PersistenceConfiguration persistenceConfiguration) {
+			throw new UnsupportedOperationException();
+		}
+
+		// JPA 4.0 method
+		public ClassTransformer getClassTransformer(PersistenceUnitInfo persistenceUnitInfo, Map<?,?> map) {
+			return null;
 		}
 	}
 

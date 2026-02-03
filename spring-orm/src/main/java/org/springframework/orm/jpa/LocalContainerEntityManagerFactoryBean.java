@@ -21,6 +21,7 @@ import java.util.List;
 import javax.sql.DataSource;
 
 import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.PersistenceConfiguration;
 import jakarta.persistence.PersistenceException;
 import jakarta.persistence.SharedCacheMode;
@@ -285,6 +286,17 @@ public class LocalContainerEntityManagerFactoryBean extends AbstractEntityManage
 	 */
 	public void setValidationMode(ValidationMode validationMode) {
 		this.internalPersistenceUnitManager.setValidationMode(validationMode);
+	}
+
+	/**
+	 * Specify the JPA 4.0 default fetch type for all of this manager's persistence
+	 * units, overriding any value in {@code persistence.xml} if set.
+	 * <p><b>NOTE: Only applied if no external PersistenceUnitManager specified. Also,
+	 * this requires a JPA 4.0+ persistence provider and will be ignored otherwise.</b>
+	 * @since 7.0.4
+	 */
+	public void setDefaultToOneFetchType(FetchType defaultToOneFetchType) {
+		this.internalPersistenceUnitManager.setDefaultToOneFetchType(defaultToOneFetchType);
 	}
 
 	/**
