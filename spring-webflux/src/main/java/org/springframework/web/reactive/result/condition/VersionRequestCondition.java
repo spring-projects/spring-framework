@@ -100,9 +100,12 @@ public final class VersionRequestCondition extends AbstractRequestCondition<Vers
 
 	@Override
 	public @Nullable VersionRequestCondition getMatchingCondition(ServerWebExchange exchange) {
+		if (this.version == null) {
+			return this;
+		}
 		ApiVersionHolder versionHolder = exchange.getRequiredAttribute(HandlerMapping.API_VERSION_ATTRIBUTE);
 
-		if (this.version == null || !versionHolder.hasVersion()) {
+		if (!versionHolder.hasVersion()) {
 			return this;
 		}
 
