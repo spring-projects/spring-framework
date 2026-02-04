@@ -100,6 +100,8 @@ final class DefaultRestClientBuilder implements RestClient.Builder {
 
 	private @Nullable List<StatusHandler> statusHandlers;
 
+	private boolean defaultStatusHandlerEnabled = true;
+
 	private @Nullable List<ClientHttpRequestInterceptor> interceptors;
 
 	private @Nullable BiPredicate<URI, HttpMethod> bufferingPredicate;
@@ -138,6 +140,7 @@ final class DefaultRestClientBuilder implements RestClient.Builder {
 		this.apiVersionInserter = other.apiVersionInserter;
 		this.defaultRequest = other.defaultRequest;
 		this.statusHandlers = (other.statusHandlers != null ? new ArrayList<>(other.statusHandlers) : null);
+		this.defaultStatusHandlerEnabled = other.defaultStatusHandlerEnabled;
 		this.interceptors = (other.interceptors != null) ? new ArrayList<>(other.interceptors) : null;
 		this.bufferingPredicate = other.bufferingPredicate;
 		this.initializers = (other.initializers != null) ? new ArrayList<>(other.initializers) : null;
@@ -301,6 +304,12 @@ final class DefaultRestClientBuilder implements RestClient.Builder {
 		return defaultStatusHandlerInternal(StatusHandler.fromErrorHandler(errorHandler));
 	}
 
+	@Override
+	public RestClient.Builder disableDefaultStatusHandler() {
+		this.defaultStatusHandlerEnabled = false;
+		return this;
+	}
+
 	private RestClient.Builder defaultStatusHandlerInternal(StatusHandler statusHandler) {
 		if (this.statusHandlers == null) {
 			this.statusHandlers = new ArrayList<>();
@@ -436,7 +445,7 @@ final class DefaultRestClientBuilder implements RestClient.Builder {
 				requestFactory, this.interceptors, this.bufferingPredicate, this.initializers,
 				uriBuilderFactory, defaultHeaders, defaultCookies, this.defaultApiVersion,
 				this.apiVersionInserter, this.defaultRequest,
-				this.statusHandlers, converters,
+				this.statusHandlers, this.defaultStatusHandlerEnabled, converters,
 				this.observationRegistry, this.observationConvention,
 				new DefaultRestClientBuilder(this));
 	}

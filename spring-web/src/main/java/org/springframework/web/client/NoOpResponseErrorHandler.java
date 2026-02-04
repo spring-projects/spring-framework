@@ -29,6 +29,8 @@ import org.springframework.web.client.RestClient.ResponseSpec.ErrorHandler;
  * <p>This implementation is not suitable with the {@link RestClient} as it uses
  * a list of candidates where the first matching is invoked. If you want to
  * disable default status handlers with the {@code RestClient}, consider
+ * disabling the built-in default status handler via
+ * {@link RestClient.Builder#disableDefaultStatusHandler()} or
  * registering a noop {@link ResponseSpec.ErrorHandler ErrorHandler} with a
  * predicate that matches all status code, see
  * {@link RestClient.Builder#defaultStatusHandler(Predicate, ErrorHandler)}.

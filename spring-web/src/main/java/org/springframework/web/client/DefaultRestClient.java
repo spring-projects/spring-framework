@@ -116,6 +116,8 @@ final class DefaultRestClient implements RestClient {
 
 	private final List<StatusHandler> defaultStatusHandlers;
 
+	private final boolean defaultStatusHandlerEnabled;
+
 	private final DefaultRestClientBuilder builder;
 
 	private final List<HttpMessageConverter<?>> messageConverters;
@@ -134,7 +136,7 @@ final class DefaultRestClient implements RestClient {
 			@Nullable MultiValueMap<String, String> defaultCookies,
 			@Nullable Object defaultApiVersion, @Nullable ApiVersionInserter apiVersionInserter,
 			@Nullable Consumer<RequestHeadersSpec<?>> defaultRequest,
-			@Nullable List<StatusHandler> statusHandlers,
+			@Nullable List<StatusHandler> statusHandlers, boolean defaultStatusHandlerEnabled,
 			List<HttpMessageConverter<?>> messageConverters,
 			ObservationRegistry observationRegistry,
 			@Nullable ClientRequestObservationConvention observationConvention,
@@ -151,6 +153,7 @@ final class DefaultRestClient implements RestClient {
 		this.apiVersionInserter = apiVersionInserter;
 		this.defaultRequest = defaultRequest;
 		this.defaultStatusHandlers = (statusHandlers != null ? new ArrayList<>(statusHandlers) : new ArrayList<>());
+		this.defaultStatusHandlerEnabled = defaultStatusHandlerEnabled;
 		this.messageConverters = messageConverters;
 		this.observationRegistry = observationRegistry;
 		this.observationConvention = observationConvention;
@@ -785,7 +788,9 @@ final class DefaultRestClient implements RestClient {
 		DefaultResponseSpec(RequestHeadersSpec<?> requestHeadersSpec) {
 			this.requestHeadersSpec = requestHeadersSpec;
 			this.statusHandlers.addAll(DefaultRestClient.this.defaultStatusHandlers);
-			this.statusHandlers.add(StatusHandler.createDefaultStatusHandler(DefaultRestClient.this.messageConverters));
+			if (DefaultRestClient.this.defaultStatusHandlerEnabled) {
+				this.statusHandlers.add(StatusHandler.createDefaultStatusHandler(DefaultRestClient.this.messageConverters));
+			}
 			this.defaultStatusHandlerCount = this.statusHandlers.size();
 		}
 

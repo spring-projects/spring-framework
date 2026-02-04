@@ -274,6 +274,15 @@ public class RestClientBuilderTests {
 				);
 	}
 
+	@Test
+	void disableDefaultStatusHandler() {
+		RestClient restClient = RestClient.builder()
+				.disableDefaultStatusHandler()
+				.build();
+
+		assertThat(fieldValue("defaultStatusHandlerEnabled", restClient)).isEqualTo(false);
+	}
+
 	private static @Nullable Object fieldValue(String name, DefaultRestClientBuilder instance) {
 		try {
 			Field field = DefaultRestClientBuilder.class.getDeclaredField(name);
