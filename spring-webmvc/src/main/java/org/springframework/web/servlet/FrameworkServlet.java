@@ -971,10 +971,7 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 				return;
 			}
 		}
-		// Work around until https://github.com/jakartaee/servlet/pull/545 is fixed and in use
-		if (request.getDispatcherType() != DispatcherType.ERROR) {
-			super.doTrace(request, response);
-		}
+		super.doTrace(request, response);
 	}
 
 	/**
