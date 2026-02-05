@@ -16,8 +16,10 @@
 
 package org.springframework.orm.jpa.vendor;
 
+import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Map;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceException;
@@ -25,6 +27,7 @@ import org.hibernate.ConnectionReleaseMode;
 import org.hibernate.FlushMode;
 import org.hibernate.JDBCException;
 import org.hibernate.Session;
+import org.hibernate.StatelessSession;
 import org.hibernate.engine.spi.SessionImplementor;
 import org.jspecify.annotations.Nullable;
 
@@ -39,10 +42,12 @@ import org.springframework.transaction.InvalidIsolationLevelException;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionException;
 import org.springframework.transaction.support.ResourceTransactionDefinition;
+import org.springframework.util.ClassUtils;
+import org.springframework.util.ReflectionUtils;
 
 /**
  * {@link org.springframework.orm.jpa.JpaDialect} implementation for Hibernate.
- * Compatible with Hibernate ORM 7.x.
+ * Compatible with Hibernate ORM 7.x and 8.x.
  *
  * @author Juergen Hoeller
  * @author Costin Leau
@@ -53,6 +58,10 @@ import org.springframework.transaction.support.ResourceTransactionDefinition;
  */
 @SuppressWarnings("serial")
 public class HibernateJpaDialect extends DefaultJpaDialect {
+
+	/** Hibernate 8.0: inherited setProperty(String, Object) method from JPA 4.0 EntityAgent. */
+	private static final @Nullable Method STATELESS_SESSION_SET_PROPERTY = ClassUtils.getMethodIfAvailable(
+			StatelessSession.class, "setProperty", String.class, Object.class);
 
 	private final HibernateExceptionTranslator exceptionTranslator = new HibernateExceptionTranslator();
 
@@ -192,6 +201,21 @@ public class HibernateJpaDialect extends DefaultJpaDialect {
 			throws PersistenceException, SQLException {
 
 		return new HibernateConnectionHandle(entityManager.unwrap(SessionImplementor.class));
+	}
+
+	@Override
+	public StatelessSession deriveEntityAgent(EntityManager entityManager, @Nullable Map<?, ?> properties)
+			throws PersistenceException {
+
+		StatelessSession entityAgent = entityManager.unwrap(Session.class).statelessWithOptions().connection().open();
+		if (properties != null && STATELESS_SESSION_SET_PROPERTY != null) {
+			for (Map.Entry<?, ?> entry : properties.entrySet()) {
+				if (entry.getKey() instanceof String key) {
+					ReflectionUtils.invokeMethod(STATELESS_SESSION_SET_PROPERTY, entityAgent, key, entry.getValue());
+				}
+			}
+		}
+		return entityAgent;
 	}
 
 	@Override

@@ -334,7 +334,15 @@ public abstract class EntityManagerFactoryUtils {
 
 		// Create a new EntityManager for use within the current transaction.
 		logger.debug("Opening JPA EntityAgent");
-		Object entityAgent = createEntityAgent(emf, properties);
+		Object entityAgent = null;
+		if (emHolder != null && emf instanceof EntityManagerFactoryInfo info &&
+				info.getJpaDialect() instanceof DefaultJpaDialect defaultJpaDialect) {
+			// For JpaTransactionManager: share transaction context with primary EntityManager.
+			entityAgent = defaultJpaDialect.deriveEntityAgent(emHolder.getEntityManager(), properties);
+		}
+		if (entityAgent == null) {
+			entityAgent = createEntityAgent(emf, properties);
+		}
 
 		if (emHolder != null) {
 			emHolder.setEntityAgent(entityAgent);
