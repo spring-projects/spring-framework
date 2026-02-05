@@ -48,8 +48,7 @@ class HibernateMultiEntityManagerFactoryIntegrationTests extends AbstractContain
 	@Override
 	@Test
 	protected void testEntityManagerFactoryImplementsEntityManagerFactoryInfo() {
-		boolean condition = this.entityManagerFactory instanceof EntityManagerFactoryInfo;
-		assertThat(condition).as("Must have introduced config interface").isTrue();
+		assertThat(this.entityManagerFactory).isInstanceOf(EntityManagerFactoryInfo.class);
 		EntityManagerFactoryInfo emfi = (EntityManagerFactoryInfo) this.entityManagerFactory;
 		assertThat(emfi.getPersistenceUnitName()).isEqualTo("Drivers");
 		assertThat(emfi.getPersistenceUnitInfo()).as("PersistenceUnitInfo must be available").isNotNull();

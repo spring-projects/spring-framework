@@ -88,8 +88,7 @@ class EntityManagerFactoryUtilsTests {
 		IllegalStateException ise = new IllegalStateException();
 		DataAccessException dex = EntityManagerFactoryUtils.convertJpaAccessExceptionIfPossible(ise);
 		assertThat(dex.getCause()).isSameAs(ise);
-		boolean condition = dex instanceof InvalidDataAccessApiUsageException;
-		assertThat(condition).isTrue();
+		assertThat(dex).isInstanceOf(InvalidDataAccessApiUsageException.class);
 	}
 
 	@Test
@@ -97,8 +96,7 @@ class EntityManagerFactoryUtilsTests {
 		IllegalArgumentException iae = new IllegalArgumentException();
 		DataAccessException dex = EntityManagerFactoryUtils.convertJpaAccessExceptionIfPossible(iae);
 		assertThat(dex.getCause()).isSameAs(iae);
-		boolean condition = dex instanceof InvalidDataAccessApiUsageException;
-		assertThat(condition).isTrue();
+		assertThat(dex).isInstanceOf(InvalidDataAccessApiUsageException.class);
 	}
 
 	/**

@@ -39,8 +39,7 @@ class EclipseLinkEntityManagerFactoryIntegrationTests extends AbstractContainerE
 
 	@Test
 	void testCanCastSharedEntityManagerProxyToEclipseLinkEntityManager() {
-		boolean condition = sharedEntityManager instanceof JpaEntityManager;
-		assertThat(condition).isTrue();
+		assertThat(sharedEntityManager).isInstanceOf(JpaEntityManager.class);
 		JpaEntityManager eclipselinkEntityManager = (JpaEntityManager) sharedEntityManager;
 		assertThat(eclipselinkEntityManager.getActiveSession()).isNotNull();
 	}

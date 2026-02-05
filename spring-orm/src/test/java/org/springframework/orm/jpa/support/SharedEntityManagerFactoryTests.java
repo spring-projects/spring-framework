@@ -58,8 +58,7 @@ class SharedEntityManagerFactoryTests {
 		assertThat(proxyFactoryBean.getObject()).isSameAs(proxy);
 		assertThat(proxy.contains(o)).isFalse();
 
-		boolean condition = proxy instanceof EntityManagerProxy;
-		assertThat(condition).isTrue();
+		assertThat(proxy).isInstanceOf(EntityManagerProxy.class);
 		EntityManagerProxy emProxy = (EntityManagerProxy) proxy;
 		assertThatIllegalStateException().as("outside of transaction").isThrownBy(
 				emProxy::getTargetEntityManager);

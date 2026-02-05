@@ -49,8 +49,7 @@ public abstract class AbstractContainerEntityManagerFactoryIntegrationTests
 
 	@Test
 	protected void testEntityManagerFactoryImplementsEntityManagerFactoryInfo() {
-		boolean condition = entityManagerFactory instanceof EntityManagerFactoryInfo;
-		assertThat(condition).as("Must have introduced config interface").isTrue();
+		assertThat(entityManagerFactory).isInstanceOf(EntityManagerFactoryInfo.class);
 		EntityManagerFactoryInfo emfi = (EntityManagerFactoryInfo) entityManagerFactory;
 		assertThat(emfi.getPersistenceUnitName()).isEqualTo("Person");
 		assertThat(emfi.getPersistenceUnitInfo()).as("PersistenceUnitInfo must be available").isNotNull();
@@ -172,8 +171,8 @@ public abstract class AbstractContainerEntityManagerFactoryIntegrationTests
 
 	@Test
 	void testEntityManagerProxyRejectsProgrammaticTxManagement() {
-		assertThatIllegalStateException().as("Should not be able to create transactions on container managed EntityManager").isThrownBy(
-				sharedEntityManager::getTransaction);
+		assertThatIllegalStateException().as("Should not be able to create transactions on container managed EntityManager")
+				.isThrownBy(sharedEntityManager::getTransaction);
 	}
 
 	@Test
@@ -234,9 +233,7 @@ public abstract class AbstractContainerEntityManagerFactoryIntegrationTests
 		q.setFlushMode(FlushModeType.AUTO);
 		List<Person> people = q.getResultList();
 		assertThat(people).isEmpty();
-		assertThatException()
-			.isThrownBy(q::getSingleResult)
-			.withMessageContaining("closed");
+		assertThatException().isThrownBy(q::getSingleResult).withMessageContaining("closed");
 		// We would typically expect an IllegalStateException, but Hibernate throws a
 		// PersistenceException. So we assert the contents of the exception message instead.
 
