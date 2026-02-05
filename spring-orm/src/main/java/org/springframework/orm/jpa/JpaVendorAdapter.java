@@ -129,7 +129,7 @@ public interface JpaVendorAdapter {
 	 * that this provider's EntityAgents will implement.
 	 * <p>If the provider does not offer any EntityAgent extensions,
 	 * the adapter should simply return the standard
-	 * {@link jakarta.persistence.EntityAgent} class here.
+	 * {@code jakarta.persistence.EntityAgent} class here.
 	 * @return the EntityAgent class, or {@code null} if not supported
 	 * (on JPA 3.2)
 	 * @since 7.0.4
