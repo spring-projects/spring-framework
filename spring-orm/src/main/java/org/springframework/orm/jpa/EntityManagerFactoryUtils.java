@@ -16,6 +16,7 @@
 
 package org.springframework.orm.jpa;
 
+import java.lang.reflect.Method;
 import java.util.Map;
 
 import jakarta.persistence.EntityExistsException;
@@ -52,7 +53,9 @@ import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.transaction.support.ResourceHolderSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -75,6 +78,12 @@ public abstract class EntityManagerFactoryUtils {
 	 */
 	public static final int ENTITY_MANAGER_SYNCHRONIZATION_ORDER =
 			DataSourceUtils.CONNECTION_SYNCHRONIZATION_ORDER - 100;
+
+	private static final @Nullable Method CREATE_ENTITY_AGENT_METHOD =
+			ClassUtils.getMethodIfAvailable(EntityManagerFactory.class, "createEntityAgent");
+
+	private static final @Nullable Method CREATE_ENTITY_AGENT_WITH_PROPERTIES_METHOD =
+			ClassUtils.getMethodIfAvailable(EntityManagerFactory.class, "createEntityAgent", Map.class);
 
 	private static final Log logger = LogFactory.getLog(EntityManagerFactoryUtils.class);
 
@@ -195,9 +204,8 @@ public abstract class EntityManagerFactoryUtils {
 
 		Assert.notNull(emf, "No EntityManagerFactory specified");
 
-		EntityManagerHolder emHolder =
-				(EntityManagerHolder) TransactionSynchronizationManager.getResource(emf);
-		if (emHolder != null) {
+		EntityManagerHolder emHolder = (EntityManagerHolder) TransactionSynchronizationManager.getResource(emf);
+		if (emHolder != null && emHolder.hasEntityManager()) {
 			if (synchronizedWithTransaction) {
 				if (!emHolder.isSynchronizedWithTransaction()) {
 					if (TransactionSynchronizationManager.isActualTransactionActive()) {
@@ -232,6 +240,7 @@ public abstract class EntityManagerFactoryUtils {
 					// with no synchronized EntityManager having been requested by application code before.
 					// Unbind in order to register a new unsynchronized EntityManager instead.
 					TransactionSynchronizationManager.unbindResource(emf);
+					emHolder = null;
 				}
 				else {
 					// Either a previously bound unsynchronized EntityManager, or the application
@@ -263,21 +272,30 @@ public abstract class EntityManagerFactoryUtils {
 		}
 
 		try {
-			// Use same EntityManager for further JPA operations within the transaction.
-			// Thread-bound object will get removed by synchronization at transaction completion.
-			emHolder = new EntityManagerHolder(em);
-			if (synchronizedWithTransaction) {
+			if (emHolder != null) {
+				emHolder.setEntityManager(em);
 				Object transactionData = prepareTransaction(em, emf);
 				TransactionSynchronizationManager.registerSynchronization(
-						new TransactionalEntityManagerSynchronization(emHolder, emf, transactionData, true));
+						new TransactionalEntityManagerSynchronization(emHolder, emf, transactionData, false));
 				emHolder.setSynchronizedWithTransaction(true);
 			}
 			else {
-				// Unsynchronized - just scope it for the transaction, as demanded by the JPA 2.1 spec...
-				TransactionSynchronizationManager.registerSynchronization(
-						new TransactionScopedEntityManagerSynchronization(emHolder, emf));
+				// Use same EntityManager for further JPA operations within the transaction.
+				// Thread-bound object will get removed by synchronization at transaction completion.
+				emHolder = new EntityManagerHolder(em);
+				if (synchronizedWithTransaction) {
+					Object transactionData = prepareTransaction(em, emf);
+					TransactionSynchronizationManager.registerSynchronization(
+							new TransactionalEntityManagerSynchronization(emHolder, emf, transactionData, true));
+					emHolder.setSynchronizedWithTransaction(true);
+				}
+				else {
+					// Unsynchronized - just scope it for the transaction, as demanded by the JPA 2.1 spec...
+					TransactionSynchronizationManager.registerSynchronization(
+							new TransactionScopedEntityManagerSynchronization(emHolder, emf));
+				}
+				TransactionSynchronizationManager.bindResource(emf, emHolder);
 			}
-			TransactionSynchronizationManager.bindResource(emf, emHolder);
 		}
 		catch (RuntimeException ex) {
 			// Unexpected exception from external delegation call -> close EntityManager and rethrow.
@@ -286,6 +304,79 @@ public abstract class EntityManagerFactoryUtils {
 		}
 
 		return em;
+	}
+
+	/**
+	 * Obtain a JPA EntityAgent from the given factory. Binds a corresponding
+	 * EntityAgent to the thread when running in a Spring-managed transaction.
+	 * @param emf the EntityManagerFactory to create the EntityAgent with
+	 * @param properties the properties to be passed into the {@code createEntityAgent}
+	 * call (may be {@code null})
+	 * @return the EntityAgent, or {@code null} if none found
+	 * @throws PersistenceException if the EntityManager couldn't be created
+	 * @since 7.0.4
+	 */
+	static @Nullable Object doGetTransactionalEntityAgent(EntityManagerFactory emf, @Nullable Map<?, ?> properties)
+			throws PersistenceException {
+
+		Assert.notNull(emf, "No EntityManagerFactory specified");
+
+		EntityManagerHolder emHolder = (EntityManagerHolder) TransactionSynchronizationManager.getResource(emf);
+		if (emHolder != null) {
+			if (emHolder.hasEntityAgent()) {
+				return emHolder.getEntityAgent();
+			}
+		}
+		else if (!TransactionSynchronizationManager.isSynchronizationActive()) {
+			// Indicate that we can't obtain a transactional EntityManager.
+			return null;
+		}
+
+		// Create a new EntityManager for use within the current transaction.
+		logger.debug("Opening JPA EntityAgent");
+		Object entityAgent = createEntityAgent(emf, properties);
+
+		if (emHolder != null) {
+			emHolder.setEntityAgent(entityAgent);
+		}
+		else {
+			emHolder = new EntityManagerHolder(entityAgent);
+			TransactionSynchronizationManager.registerSynchronization(
+					new TransactionScopedEntityManagerSynchronization(emHolder, emf));
+			TransactionSynchronizationManager.bindResource(emf, emHolder);
+		}
+		emHolder.setSynchronizedWithTransaction(true);
+
+		return entityAgent;
+	}
+
+	/**
+	 * Create a new JPA EntityAgent via reflectively detected JPA 4.0 API.
+	 * @param emf the EntityManagerFactory to create the EntityAgent with
+	 * @param properties the properties to be passed into the {@code createEntityAgent}
+	 * call (may be {@code null})
+	 * @since 7.0.4
+	 */
+	static Object createEntityAgent(EntityManagerFactory emf, @Nullable Map<?, ?> properties) {
+		if (CREATE_ENTITY_AGENT_METHOD == null || CREATE_ENTITY_AGENT_WITH_PROPERTIES_METHOD == null) {
+			throw new IllegalStateException("JPA 4.0 createEntityAgent API not available");
+		}
+		Object entityAgent = (!CollectionUtils.isEmpty(properties) ?
+				ReflectionUtils.invokeMethod(CREATE_ENTITY_AGENT_WITH_PROPERTIES_METHOD, emf, properties) :
+				ReflectionUtils.invokeMethod(CREATE_ENTITY_AGENT_METHOD, emf));
+		if (entityAgent == null) {
+			throw new IllegalStateException("JPA 4.0 createEntityAgent API returned null");
+		}
+		return entityAgent;
+	}
+
+	/**
+	 * Determine the {@code jakarta.persistence.EntityAgent} class.
+	 * @return the {@code EntityAgent} class, or {@code null} if not available
+	 * @since 7.0.4
+	 */
+	static @Nullable Class<?> getEntityAgentClass() {
+		return (CREATE_ENTITY_AGENT_METHOD != null ? CREATE_ENTITY_AGENT_METHOD.getReturnType() : null);
 	}
 
 	/**
@@ -424,6 +515,23 @@ public abstract class EntityManagerFactoryUtils {
 		}
 	}
 
+	/**
+	 * Close the given JPA EntityHandler (EntityManager or EntityAgent),
+	 * catching and logging any cleanup exceptions thrown.
+	 * @param entityHandler the JPA EntityManager/EntityAgent to close
+	 * @since 7.0.4
+	 */
+	static void closeEntityHandler(@Nullable Object entityHandler) {
+		if (entityHandler instanceof AutoCloseable closeable) {
+			try {
+				closeable.close();
+			}
+			catch (Throwable ex) {
+				logger.error("Failed to close JPA EntityHandler", ex);
+			}
+		}
+	}
+
 
 	/**
 	 * Callback for resource cleanup at the end of a non-JPA transaction
@@ -488,7 +596,7 @@ public abstract class EntityManagerFactoryUtils {
 
 		@Override
 		protected void releaseResource(EntityManagerHolder resourceHolder, EntityManagerFactory resourceKey) {
-			closeEntityManager(resourceHolder.getEntityManager());
+			resourceHolder.closeAll();
 		}
 
 		@Override
@@ -523,7 +631,7 @@ public abstract class EntityManagerFactoryUtils {
 
 		@Override
 		protected void releaseResource(EntityManagerHolder resourceHolder, EntityManagerFactory resourceKey) {
-			closeEntityManager(resourceHolder.getEntityManager());
+			resourceHolder.closeAll();
 		}
 	}
 

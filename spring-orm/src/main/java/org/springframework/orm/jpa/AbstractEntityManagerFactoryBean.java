@@ -69,6 +69,7 @@ import org.springframework.util.CollectionUtils;
  * a Spring application context. As of 7.0, it additionally exposes a shared
  * {@link jakarta.persistence.EntityManager} instance through {@link SmartFactoryBean},
  * making {@code EntityManager} available for dependency injection as well.
+ * As of 7.0.4, it also exposes a JPA 4.0 {@code EntityAgent} if available.
  *
  * <p>Encapsulates the common functionality between the different JPA bootstrap
  * contracts: standalone as well as container. Note that as of 7.0, the JPA 3.2
@@ -99,6 +100,10 @@ public abstract class AbstractEntityManagerFactoryBean implements
 		BeanNameAware, InitializingBean, SmartInitializingSingleton, DisposableBean,
 		EntityManagerFactoryInfo, PersistenceExceptionTranslator, Serializable {
 
+	/** JPA 4.0 EntityAgent class, if available. */
+	private static final @Nullable Class<?> ENTITY_AGENT_CLASS = EntityManagerFactoryUtils.getEntityAgentClass();
+
+
 	/** Logger available to subclasses. */
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -111,6 +116,8 @@ public abstract class AbstractEntityManagerFactoryBean implements
 	private @Nullable Class<? extends EntityManagerFactory> entityManagerFactoryInterface;
 
 	private @Nullable Class<? extends EntityManager> entityManagerInterface;
+
+	private @Nullable Class<?> entityAgentInterface = ENTITY_AGENT_CLASS;
 
 	private @Nullable JpaDialect jpaDialect;
 
@@ -137,6 +144,9 @@ public abstract class AbstractEntityManagerFactoryBean implements
 
 	/** Exposed client-level shared EntityManager proxy. */
 	private @Nullable EntityManager sharedEntityManager;
+
+	/** Exposed client-level shared EntityAgent proxy. */
+	private @Nullable Object sharedEntityAgent;
 
 
 	/**
@@ -383,6 +393,11 @@ public abstract class AbstractEntityManagerFactoryBean implements
 					this.entityManagerInterface = EntityManager.class;
 				}
 			}
+			if (this.entityAgentInterface != null) {
+				Class<?> vendorInterface = jpaVendorAdapter.getEntityAgentInterface();
+				this.entityAgentInterface = (vendorInterface != null &&
+						ClassUtils.isVisible(vendorInterface, this.beanClassLoader) ? vendorInterface : null);
+			}
 			if (this.jpaDialect == null) {
 				this.jpaDialect = jpaVendorAdapter.getJpaDialect();
 			}
@@ -401,7 +416,12 @@ public abstract class AbstractEntityManagerFactoryBean implements
 		// application-managed EntityManager proxy that automatically joins
 		// existing transactions.
 		this.entityManagerFactory = createEntityManagerFactoryProxy(this.nativeEntityManagerFactory);
+
 		this.sharedEntityManager = SharedEntityManagerCreator.createSharedEntityManager(this.entityManagerFactory);
+		if (this.entityAgentInterface != null) {
+			this.sharedEntityAgent = SharedEntityManagerCreator.createSharedEntityAgent(
+					this.entityManagerFactory, null, this.entityAgentInterface);
+		}
 	}
 
 	@Override
@@ -645,6 +665,9 @@ public abstract class AbstractEntityManagerFactoryBean implements
 		if (EntityManager.class.isAssignableFrom(type)) {
 			return (type.isInstance(this.sharedEntityManager) ? type.cast(this.sharedEntityManager) : null);
 		}
+		if (ENTITY_AGENT_CLASS != null && ENTITY_AGENT_CLASS.isAssignableFrom(type)) {
+			return (type.isInstance(this.sharedEntityAgent) ? type.cast(this.sharedEntityAgent) : null);
+		}
 		return SmartFactoryBean.super.getObject(type);
 	}
 
@@ -652,6 +675,9 @@ public abstract class AbstractEntityManagerFactoryBean implements
 	public boolean supportsType(Class<?> type) {
 		if (EntityManager.class.isAssignableFrom(type)) {
 			return type.isInstance(this.sharedEntityManager);
+		}
+		if (ENTITY_AGENT_CLASS != null && ENTITY_AGENT_CLASS.isAssignableFrom(type)) {
+			return type.isInstance(this.sharedEntityAgent);
 		}
 		return SmartFactoryBean.super.supportsType(type);
 	}

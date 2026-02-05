@@ -59,7 +59,6 @@ class PersistenceContextTransactionTests {
 	void setup() {
 		given(factory.createEntityManager()).willReturn(manager);
 		given(manager.getTransaction()).willReturn(tx);
-		given(manager.isOpen()).willReturn(true);
 
 		@SuppressWarnings("serial")
 		PersistenceAnnotationBeanPostProcessor pabpp = new PersistenceAnnotationBeanPostProcessor() {
@@ -99,8 +98,6 @@ class PersistenceContextTransactionTests {
 
 	@Test
 	void testTransactionCommitWithSharedEntityManagerAndPropagationSupports() {
-		given(manager.isOpen()).willReturn(true);
-
 		tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_SUPPORTS);
 
 		tt.execute(status -> {
