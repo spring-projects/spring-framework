@@ -16,7 +16,6 @@
 
 package org.springframework.messaging.simp.annotation.support;
 
-import java.util.Map;
 import java.util.function.Predicate;
 
 import org.apache.commons.logging.Log;
@@ -99,21 +98,20 @@ public class SubscriptionMethodReturnValueHandler implements HandlerMethodReturn
 	}
 
 	/**
-	 * Add a filter to determine which headers from the input message should be propagated to the output message.
-	 * Multiple filters are combined with logical OR.
-	 * <p>If not set, no input headers are propagated (default behavior).</p>
+	 * Add a filter to determine which headers from the input message should be
+	 * propagated to the output message. Multiple filters are combined with
+	 * {@link Predicate#or(Predicate)}.
+	 * <p>By default, no headers are propagated if this is not set.
+	 * @since 7.0.4
 	 */
 	public void addHeaderFilter(Predicate<String> filter) {
 		Assert.notNull(filter, "Filter predicate must not be null");
-		if (this.headerFilter == null) {
-			this.headerFilter = filter;
-		} else {
-			this.headerFilter = this.headerFilter.or(filter);
-		}
+		this.headerFilter = (this.headerFilter != null ? this.headerFilter.or(filter) : filter);
 	}
 
 	/**
 	 * Return the configured header filter.
+	 * @since 7.0.4
 	 */
 	public @Nullable Predicate<String> getHeaderFilter() {
 		return this.headerFilter;
@@ -161,17 +159,13 @@ public class SubscriptionMethodReturnValueHandler implements HandlerMethodReturn
 		if (getHeaderInitializer() != null) {
 			getHeaderInitializer().initHeaders(accessor);
 		}
-
-		if (inputMessage != null && headerFilter != null) {
-			Map<String, Object> inputHeaders = inputMessage.getHeaders();
-			for (Map.Entry<String, Object> entry : inputHeaders.entrySet()) {
-				String name = entry.getKey();
-				if (headerFilter.test(name)) {
-					accessor.setHeader(name, entry.getValue());
+		if (inputMessage != null && this.headerFilter != null) {
+			inputMessage.getHeaders().forEach((name, value) -> {
+				if (this.headerFilter.test(name)) {
+					accessor.setHeader(name, value);
 				}
-			}
+			});
 		}
-
 		if (sessionId != null) {
 			accessor.setSessionId(sessionId);
 		}

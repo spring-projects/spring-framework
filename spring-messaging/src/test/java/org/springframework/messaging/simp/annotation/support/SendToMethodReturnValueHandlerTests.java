@@ -298,22 +298,21 @@ public class SendToMethodReturnValueHandlerTests {
 		given(this.messageChannel.send(any(Message.class))).willReturn(true);
 
 		String sessionId = "sess1";
-		String customHeaderName = "x-custom-header";
-		String customHeaderValue = "custom-value";
+		String headerName = "x-custom-header";
+		String headerValue = "custom-value";
 		Message<?> inputMessage = createMessage(sessionId, "sub1", null, null, null);
-		inputMessage = MessageBuilder.fromMessage(inputMessage)
-				.setHeader(customHeaderName, customHeaderValue)
-				.build();
+		inputMessage = MessageBuilder.fromMessage(inputMessage).setHeader(headerName, headerValue).build();
 
-		SendToMethodReturnValueHandler handler = new SendToMethodReturnValueHandler(new SimpMessagingTemplate(this.messageChannel), true);
-		handler.addHeaderFilter(name -> name.equals(customHeaderName));
+		SimpMessagingTemplate template = new SimpMessagingTemplate(this.messageChannel);
+		SendToMethodReturnValueHandler handler = new SendToMethodReturnValueHandler(template, true);
+		handler.addHeaderFilter(name -> name.equals(headerName));
 
 		handler.handleReturnValue(PAYLOAD, this.sendToReturnType, inputMessage);
 
 		verify(this.messageChannel, times(2)).send(this.messageCaptor.capture());
 		for (Message<?> sent : this.messageCaptor.getAllValues()) {
 			MessageHeaders headers = sent.getHeaders();
-			assertThat(headers.get(customHeaderName)).isEqualTo(customHeaderValue);
+			assertThat(headers.get(headerName)).isEqualTo(headerValue);
 		}
 	}
 
@@ -330,7 +329,8 @@ public class SendToMethodReturnValueHandlerTests {
 				.setHeader(headerB, "B-value")
 				.build();
 
-		SendToMethodReturnValueHandler handler = new SendToMethodReturnValueHandler(new SimpMessagingTemplate(this.messageChannel), true);
+		SimpMessagingTemplate template = new SimpMessagingTemplate(this.messageChannel);
+		SendToMethodReturnValueHandler handler = new SendToMethodReturnValueHandler(template, true);
 		handler.addHeaderFilter(name -> name.equals(headerA));
 		handler.addHeaderFilter(name -> name.equals(headerB));
 
@@ -344,9 +344,8 @@ public class SendToMethodReturnValueHandlerTests {
 		}
 	}
 
-
-	private void assertResponse(MethodParameter methodParameter, String sessionId,
-								int index, String destination) {
+	private void assertResponse(
+			MethodParameter methodParameter, String sessionId, int index, String destination) {
 
 		SimpMessageHeaderAccessor accessor = getCapturedAccessor(index);
 		assertThat(accessor.getSessionId()).isEqualTo(sessionId);

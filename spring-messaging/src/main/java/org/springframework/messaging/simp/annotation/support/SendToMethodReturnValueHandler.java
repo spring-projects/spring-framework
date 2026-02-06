@@ -20,6 +20,7 @@ import java.lang.annotation.Annotation;
 import java.security.Principal;
 import java.util.Collections;
 import java.util.Map;
+import java.util.function.Predicate;
 
 import org.jspecify.annotations.Nullable;
 
@@ -45,7 +46,6 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.util.PropertyPlaceholderHelper;
 import org.springframework.util.PropertyPlaceholderHelper.PlaceholderResolver;
 import org.springframework.util.StringUtils;
-import java.util.function.Predicate;
 
 /**
  * A {@link HandlerMethodReturnValueHandler} for sending to destinations specified in a
@@ -137,21 +137,20 @@ public class SendToMethodReturnValueHandler implements HandlerMethodReturnValueH
 	}
 
 	/**
-	 * Add a filter to determine which headers from the input message should be propagated to the output message.
-	 * Multiple filters are combined with logical OR.
-	 * <p>If not set, no input headers are propagated (default behavior).</p>
+	 * Add a filter to determine which headers from the input message should be
+	 * propagated to the output message. Multiple filters are combined with
+	 * {@link Predicate#or(Predicate)}.
+	 * <p>By default, no headers are propagated if this is not set.
+	 * @since 7.0.4
 	 */
 	public void addHeaderFilter(Predicate<String> filter) {
-		Assert.notNull(filter, "Filter predicate must not be null");
-		if (this.headerFilter == null) {
-			this.headerFilter = filter;
-		} else {
-			this.headerFilter = this.headerFilter.or(filter);
-		}
+		Assert.notNull(filter, "'headerFilter' predicate must not be null");
+		this.headerFilter = (this.headerFilter != null ? this.headerFilter.or(filter) : filter);
 	}
 
 	/**
 	 * Return the configured header filter.
+	 * @since 7.0.4
 	 */
 	public @Nullable Predicate<String> getHeaderFilter() {
 		return this.headerFilter;
@@ -263,17 +262,13 @@ public class SendToMethodReturnValueHandler implements HandlerMethodReturnValueH
 		if (getHeaderInitializer() != null) {
 			getHeaderInitializer().initHeaders(headerAccessor);
 		}
-
-		if (inputMessage != null && headerFilter != null) {
-			Map<String, Object> inputHeaders = inputMessage.getHeaders();
-			for (Map.Entry<String, Object> entry : inputHeaders.entrySet()) {
-				String name = entry.getKey();
-				if (headerFilter.test(name)) {
-					headerAccessor.setHeader(name, entry.getValue());
+		if (inputMessage != null && this.headerFilter != null) {
+			inputMessage.getHeaders().forEach((name, value) -> {
+				if (this.headerFilter.test(name)) {
+					headerAccessor.setHeader(name, value);
 				}
-			}
+			});
 		}
-
 		if (sessionId != null) {
 			headerAccessor.setSessionId(sessionId);
 		}
