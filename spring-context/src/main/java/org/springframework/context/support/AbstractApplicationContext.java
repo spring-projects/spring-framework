@@ -27,6 +27,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Executor;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -1067,11 +1068,9 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 			this.shutdownHook = new Thread(SHUTDOWN_HOOK_THREAD_NAME) {
 				@Override
 				public void run() {
-					if (isStartupShutdownThreadStuck()) {
-						active.set(false);
+					if (!tryLockForShutdown()) {
 						return;
 					}
-					startupShutdownLock.lock();
 					try {
 						doClose();
 					}
@@ -1081,6 +1080,30 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 				}
 			};
 			Runtime.getRuntime().addShutdownHook(this.shutdownHook);
+		}
+	}
+
+	/**
+	 * Try to acquire the common startup/shutdown lock, backing out if
+	 * the main startup/shutdown thread is stuck or on interruption.
+	 * @see #isStartupShutdownThreadStuck()
+	 */
+	private boolean tryLockForShutdown() {
+		try {
+			while (!this.startupShutdownLock.tryLock(100, TimeUnit.MILLISECONDS)) {
+				if (!this.active.get() || this.closed.get()) {
+					return false;
+				}
+				if (isStartupShutdownThreadStuck()) {
+					this.active.set(false);
+					return false;
+				}
+			}
+			return true;
+		}
+		catch (InterruptedException ex) {
+			Thread.currentThread().interrupt();
+			return false;
 		}
 	}
 
@@ -1095,7 +1118,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 			activeThread.interrupt();
 			try {
 				// Leave just a little bit of time for the interruption to show effect
-				Thread.sleep(1);
+				Thread.sleep(10);
 			}
 			catch (InterruptedException ex) {
 				Thread.currentThread().interrupt();
@@ -1117,12 +1140,10 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 */
 	@Override
 	public void close() {
-		if (isStartupShutdownThreadStuck()) {
-			this.active.set(false);
+		if (!tryLockForShutdown()) {
 			return;
 		}
 
-		this.startupShutdownLock.lock();
 		try {
 			this.startupShutdownThread = Thread.currentThread();
 
