@@ -372,11 +372,17 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 		SendToMethodReturnValueHandler sendToHandler =
 				new SendToMethodReturnValueHandler(this.brokerTemplate, true);
 		sendToHandler.setHeaderInitializer(this.headerInitializer);
+		if (this.headerFilter != null) {
+			sendToHandler.addHeaderFilter(this.headerFilter);
+		}
 		handlers.add(sendToHandler);
 
 		SubscriptionMethodReturnValueHandler subscriptionHandler =
 				new SubscriptionMethodReturnValueHandler(this.clientMessagingTemplate);
 		subscriptionHandler.setHeaderInitializer(this.headerInitializer);
+		if (this.headerFilter != null) {
+			subscriptionHandler.addHeaderFilter(this.headerFilter);
+		}
 		handlers.add(subscriptionHandler);
 
 		// Custom return value types
@@ -387,6 +393,9 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 
 		sendToHandler = new SendToMethodReturnValueHandler(this.brokerTemplate, false);
 		sendToHandler.setHeaderInitializer(this.headerInitializer);
+		if (this.headerFilter != null) {
+			sendToHandler.addHeaderFilter(this.headerFilter);
+		}
 		handlers.add(sendToHandler);
 
 		return handlers;
