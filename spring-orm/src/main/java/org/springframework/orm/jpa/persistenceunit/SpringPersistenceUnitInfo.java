@@ -262,16 +262,13 @@ public class SpringPersistenceUnitInfo extends MutablePersistenceUnitInfo {
 				// Fast path for SmartPersistenceUnitInfo JTA check
 				return (getTransactionType() == PersistenceUnitTransactionType.JTA);
 			}
-			else if (method.getName().equals("getAllManagedClassNames")) {
-				// JPA 4.0 letting the container perform the scanning ->
-				// with Spring, only makes sense with typical default persistence unit.
-				if (excludeUnlistedClasses() && getMappingFileNames().isEmpty()) {
-					List<String> mergedClassesAndPackages = new ArrayList<>(getManagedClassNames());
-					mergedClassesAndPackages.addAll(getManagedPackages());
-					return mergedClassesAndPackages;
+			else if (method.getName().equals("getAllClassNames")) {
+				// JPA 4.0 letting the container perform the scanning
+				if (excludeUnlistedClasses()) {
+					return getManagedClassNames();  // typically coming from Spring default persistence unit
 				}
 				throw new UnsupportedOperationException(
-						"JPA 4.0 getAllManagedClassNames only supported with exclude-unlisted-classes and no orm.xml");
+						"JPA 4.0 getAllClassNames only supported with exclude-unlisted-classes");
 			}
 
 			// Regular methods to be delegated to SpringPersistenceUnitInfo

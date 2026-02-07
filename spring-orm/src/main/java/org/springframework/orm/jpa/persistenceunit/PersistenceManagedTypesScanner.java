@@ -18,6 +18,7 @@ package org.springframework.orm.jpa.persistenceunit;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.lang.annotation.Annotation;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -72,6 +73,15 @@ public final class PersistenceManagedTypesScanner {
 		entityTypeFilters.add(new AnnotationTypeFilter(Embeddable.class, false));
 		entityTypeFilters.add(new AnnotationTypeFilter(MappedSuperclass.class, false));
 		entityTypeFilters.add(new AnnotationTypeFilter(Converter.class, false));
+		try {
+			@SuppressWarnings("unchecked")
+			Class<? extends Annotation> discoverable = (Class<? extends Annotation>) ClassUtils.forName(
+					"jakarta.persistence.spi.Discoverable", PersistenceManagedTypesScanner.class.getClassLoader());
+			entityTypeFilters.add(new AnnotationTypeFilter(discoverable, true));
+		}
+		catch (ClassNotFoundException ex) {
+			// JPA 4.0 API not present - simply skip.
+		}
 	}
 
 	private final ResourcePatternResolver resourcePatternResolver;
@@ -147,7 +157,7 @@ public final class PersistenceManagedTypesScanner {
 							}
 						}
 					}
-					else if (className.endsWith(PACKAGE_INFO_SUFFIX)) {
+					if (className.endsWith(PACKAGE_INFO_SUFFIX)) {
 						scanResult.managedPackages.add(className.substring(0,
 								className.length() - PACKAGE_INFO_SUFFIX.length()));
 					}
