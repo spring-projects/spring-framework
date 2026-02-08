@@ -1578,7 +1578,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 		ResultSet keys = ps.getGeneratedKeys();
 		if (keys != null) {
 			try {
-				RowMapperResultSetExtractor<Map<String, Object>> rse =
+				RowMapperResultSetExtractor<Map<String, @Nullable Object>> rse =
 						new RowMapperResultSetExtractor<>(getColumnMapRowMapper(), rowsExpected);
 				generatedKeys.addAll(result(rse.extractData(keys)));
 			}
