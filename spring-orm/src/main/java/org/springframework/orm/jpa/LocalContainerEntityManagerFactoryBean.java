@@ -86,14 +86,11 @@ import org.springframework.util.StringUtils;
  * @author Juergen Hoeller
  * @author Rod Johnson
  * @since 2.0
- * @see #setPersistenceXmlLocation
  * @see #setJpaProperties
  * @see #setJpaVendorAdapter
  * @see #setLoadTimeWeaver
  * @see #setDataSource
- * @see EntityManagerFactoryInfo
  * @see LocalEntityManagerFactoryBean
- * @see org.springframework.orm.jpa.support.SharedEntityManagerBean
  * @see jakarta.persistence.spi.PersistenceProvider#createContainerEntityManagerFactory
  */
 @SuppressWarnings("serial")
