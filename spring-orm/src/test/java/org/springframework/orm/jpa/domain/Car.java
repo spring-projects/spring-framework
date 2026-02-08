@@ -47,4 +47,5 @@ public class Car {
 	String getModel() {
 		return model;
 	}
+
 }

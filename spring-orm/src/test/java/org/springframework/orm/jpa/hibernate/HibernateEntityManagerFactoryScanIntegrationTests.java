@@ -14,30 +14,17 @@
  * limitations under the License.
  */
 
-package org.springframework.orm.jpa.domain;
+package org.springframework.orm.jpa.hibernate;
 
-import jakarta.persistence.AttributeConverter;
-import jakarta.persistence.Converter;
-
-@Converter(autoApply = true)
-public class EmployeeKindConverter implements AttributeConverter<EmployeeKind, String> {
-
-	@Override
-	public String convertToDatabaseColumn(EmployeeKind employeeKind) {
-		if (employeeKind != null) {
-			return employeeKind.getName();
-		}
-		return null;
-	}
+/**
+ * @author Juergen Hoeller
+ */
+class HibernateEntityManagerFactoryScanIntegrationTests extends HibernateEntityManagerFactoryIntegrationTests {
 
 	@Override
-	public EmployeeKind convertToEntityAttribute(String data) {
-		if (data != null) {
-			EmployeeKind employeeKind = new EmployeeKind();
-			employeeKind.setName(data);
-			return employeeKind;
-		}
-		return null;
+	protected String[] getConfigLocations() {
+		return new String[] {"/org/springframework/orm/jpa/hibernate/hibernate-manager-scan.xml",
+				"/org/springframework/orm/jpa/memdb.xml", "/org/springframework/orm/jpa/inject.xml"};
 	}
 
 }

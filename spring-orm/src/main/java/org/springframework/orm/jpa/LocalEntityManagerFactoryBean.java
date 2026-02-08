@@ -51,10 +51,8 @@ import org.springframework.lang.Nullable;
  * @since 2.0
  * @see #setJpaProperties
  * @see #setJpaVendorAdapter
- * @see JpaTransactionManager#setEntityManagerFactory
+ * @see #setDataSource
  * @see LocalContainerEntityManagerFactoryBean
- * @see org.springframework.jndi.JndiObjectFactoryBean
- * @see org.springframework.orm.jpa.support.SharedEntityManagerBean
  * @see jakarta.persistence.Persistence#createEntityManagerFactory
  * @see jakarta.persistence.spi.PersistenceProvider#createEntityManagerFactory
  */
@@ -62,6 +60,8 @@ import org.springframework.lang.Nullable;
 public class LocalEntityManagerFactoryBean extends AbstractEntityManagerFactoryBean {
 
 	private static final String DATASOURCE_PROPERTY = "jakarta.persistence.dataSource";
+
+	private static final String NON_JTA_DATASOURCE_PROPERTY = "jakarta.persistence.nonJtaDataSource";
 
 
 	/**
@@ -78,9 +78,11 @@ public class LocalEntityManagerFactoryBean extends AbstractEntityManagerFactoryB
 	public void setDataSource(@Nullable DataSource dataSource) {
 		if (dataSource != null) {
 			getJpaPropertyMap().put(DATASOURCE_PROPERTY, dataSource);
+			getJpaPropertyMap().put(NON_JTA_DATASOURCE_PROPERTY, dataSource);
 		}
 		else {
 			getJpaPropertyMap().remove(DATASOURCE_PROPERTY);
+			getJpaPropertyMap().remove(NON_JTA_DATASOURCE_PROPERTY);
 		}
 	}
 
@@ -111,8 +113,8 @@ public class LocalEntityManagerFactoryBean extends AbstractEntityManagerFactoryB
 			// Create EntityManagerFactory directly through PersistenceProvider.
 			EntityManagerFactory emf = provider.createEntityManagerFactory(getPersistenceUnitName(), getJpaPropertyMap());
 			if (emf == null) {
-				throw new IllegalStateException(
-						"PersistenceProvider [" + provider + "] did not return an EntityManagerFactory for name '" +
+				throw new PersistenceException(
+						"PersistenceProvider [" + provider + "] could not find persistence unit for name '" +
 						getPersistenceUnitName() + "'");
 			}
 			return emf;
