@@ -34,6 +34,7 @@ import org.springframework.http.client.ClientHttpResponse;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
@@ -115,6 +116,38 @@ class DefaultRestClientTests {
 						.retrieve()
 						.requiredBody(new ParameterizedTypeReference<String>() {})
 		);
+	}
+
+	@Test
+	void defaultStatusHandlerThrowsOnErrorStatus() throws IOException {
+		mockSentRequest(HttpMethod.GET, "https://example.org");
+		mockResponseStatus(HttpStatus.BAD_REQUEST);
+		mockResponseBody("Error", MediaType.TEXT_PLAIN);
+
+		assertThatThrownBy(() -> this.client.get()
+				.uri("https://example.org")
+				.retrieve()
+				.body(String.class))
+				.isInstanceOf(HttpClientErrorException.class);
+	}
+
+	@Test
+	void disableDefaultStatusHandlerAllowsErrorBody() throws IOException {
+		this.client = RestClient.builder()
+				.requestFactory(this.requestFactory)
+				.disableDefaultStatusHandler()
+				.build();
+
+		mockSentRequest(HttpMethod.GET, "https://example.org");
+		mockResponseStatus(HttpStatus.BAD_REQUEST);
+		mockResponseBody("Error", MediaType.TEXT_PLAIN);
+
+		String result = this.client.get()
+				.uri("https://example.org")
+				.retrieve()
+				.body(String.class);
+
+		assertThat(result).isEqualTo("Error");
 	}
 
 

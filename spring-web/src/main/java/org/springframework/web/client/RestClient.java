@@ -386,11 +386,24 @@ public interface RestClient {
 		 * error is invoked. If you want to disable other defaults, consider
 		 * using {@link #defaultStatusHandler(Predicate, ResponseSpec.ErrorHandler)}
 		 * with a predicate that matches all status codes.
+		 * <p>To disable the built-in default status handler entirely, use
+		 * {@link #disableDefaultStatusHandler()}.
 		 * @param errorHandler handler that typically, though not necessarily,
 		 * throws an exception
 		 * @return this builder
 		 */
 		Builder defaultStatusHandler(ResponseErrorHandler errorHandler);
+
+		/**
+		 * Disable the default status handler that maps error status
+		 * codes (4xx/5xx) to {@link RestClientException} variants.
+		 * <p>By default, the default status handler is enabled. Disabling it allows
+		 * full control over status handling via custom handlers or per-response
+		 * {@code onStatus} registrations.
+		 * @return this builder
+		 * @since 7.0.4
+		 */
+		Builder disableDefaultStatusHandler();
 
 		/**
 		 * Add the given request interceptor to the end of the interceptor chain.
