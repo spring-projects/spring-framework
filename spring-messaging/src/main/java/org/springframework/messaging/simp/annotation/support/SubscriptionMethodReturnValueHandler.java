@@ -160,9 +160,10 @@ public class SubscriptionMethodReturnValueHandler implements HandlerMethodReturn
 			getHeaderInitializer().initHeaders(accessor);
 		}
 		if (inputMessage != null && this.headerFilter != null) {
-			inputMessage.getHeaders().forEach((name, value) -> {
+			SimpMessageHeaderAccessor inputAccessor = SimpMessageHeaderAccessor.wrap(inputMessage);
+			inputAccessor.toNativeHeaderMap().forEach((name, values) -> {
 				if (this.headerFilter.test(name)) {
-					accessor.setHeader(name, value);
+					accessor.setNativeHeaderValues(name, values);
 				}
 			});
 		}

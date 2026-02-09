@@ -298,21 +298,26 @@ public class SendToMethodReturnValueHandlerTests {
 		given(this.messageChannel.send(any(Message.class))).willReturn(true);
 
 		String sessionId = "sess1";
-		String headerName = "x-custom-header";
-		String headerValue = "custom-value";
-		Message<?> inputMessage = createMessage(sessionId, "sub1", null, null, null);
-		inputMessage = MessageBuilder.fromMessage(inputMessage).setHeader(headerName, headerValue).build();
+		String nativeHeaderName = "x-custom-header";
+		String nativeHeaderValue = "custom-value";
+
+		SimpMessageHeaderAccessor inputAccessor = SimpMessageHeaderAccessor.create();
+		inputAccessor.setSessionId(sessionId);
+		inputAccessor.setSubscriptionId("sub1");
+		inputAccessor.setNativeHeader(nativeHeaderName, nativeHeaderValue);
+		Message<?> inputMessage = MessageBuilder.createMessage(new byte[0], inputAccessor.getMessageHeaders());
 
 		SimpMessagingTemplate template = new SimpMessagingTemplate(this.messageChannel);
 		SendToMethodReturnValueHandler handler = new SendToMethodReturnValueHandler(template, true);
-		handler.addHeaderFilter(name -> name.equals(headerName));
+		handler.addHeaderFilter(name -> name.equals(nativeHeaderName));
 
 		handler.handleReturnValue(PAYLOAD, this.sendToReturnType, inputMessage);
 
 		verify(this.messageChannel, times(2)).send(this.messageCaptor.capture());
 		for (Message<?> sent : this.messageCaptor.getAllValues()) {
-			MessageHeaders headers = sent.getHeaders();
-			assertThat(headers.get(headerName)).isEqualTo(headerValue);
+			SimpMessageHeaderAccessor sentAccessor = MessageHeaderAccessor.getAccessor(sent, SimpMessageHeaderAccessor.class);
+			assertThat(sentAccessor).isNotNull();
+			assertThat(sentAccessor.getFirstNativeHeader(nativeHeaderName)).isEqualTo(nativeHeaderValue);
 		}
 	}
 
@@ -323,11 +328,13 @@ public class SendToMethodReturnValueHandlerTests {
 		String sessionId = "sess1";
 		String headerA = "x-header-a";
 		String headerB = "x-header-b";
-		Message<?> inputMessage = createMessage(sessionId, "sub1", null, null, null);
-		inputMessage = MessageBuilder.fromMessage(inputMessage)
-				.setHeader(headerA, "A-value")
-				.setHeader(headerB, "B-value")
-				.build();
+
+		SimpMessageHeaderAccessor inputAccessor = SimpMessageHeaderAccessor.create();
+		inputAccessor.setSessionId(sessionId);
+		inputAccessor.setSubscriptionId("sub1");
+		inputAccessor.setNativeHeader(headerA, "A-value");
+		inputAccessor.setNativeHeader(headerB, "B-value");
+		Message<?> inputMessage = MessageBuilder.createMessage(new byte[0], inputAccessor.getMessageHeaders());
 
 		SimpMessagingTemplate template = new SimpMessagingTemplate(this.messageChannel);
 		SendToMethodReturnValueHandler handler = new SendToMethodReturnValueHandler(template, true);
@@ -338,9 +345,10 @@ public class SendToMethodReturnValueHandlerTests {
 
 		verify(this.messageChannel, times(2)).send(this.messageCaptor.capture());
 		for (Message<?> sent : this.messageCaptor.getAllValues()) {
-			MessageHeaders headers = sent.getHeaders();
-			assertThat(headers.get(headerA)).isEqualTo("A-value");
-			assertThat(headers.get(headerB)).isEqualTo("B-value");
+			SimpMessageHeaderAccessor sentAccessor = MessageHeaderAccessor.getAccessor(sent, SimpMessageHeaderAccessor.class);
+			assertThat(sentAccessor).isNotNull();
+			assertThat(sentAccessor.getFirstNativeHeader(headerA)).isEqualTo("A-value");
+			assertThat(sentAccessor.getFirstNativeHeader(headerB)).isEqualTo("B-value");
 		}
 	}
 
