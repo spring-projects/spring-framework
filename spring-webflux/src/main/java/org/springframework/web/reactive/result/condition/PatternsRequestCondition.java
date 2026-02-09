@@ -157,13 +157,16 @@ public final class PatternsRequestCondition extends AbstractRequestCondition<Pat
 	@Override
 	@Nullable
 	public PatternsRequestCondition getMatchingCondition(ServerWebExchange exchange) {
-		SortedSet<PathPattern> matches = getMatchingPatterns(exchange);
+		PathContainer lookupPath = exchange.getRequest().getPath().pathWithinApplication();
+		if (this.patterns.size() == 1) {
+			return (this.patterns.first().matches(lookupPath) ? this : null);
+		}
+		SortedSet<PathPattern> matches = getMatchingPatterns(lookupPath);
 		return (matches != null ? new PatternsRequestCondition(matches) : null);
 	}
 
 	@Nullable
-	private SortedSet<PathPattern> getMatchingPatterns(ServerWebExchange exchange) {
-		PathContainer lookupPath = exchange.getRequest().getPath().pathWithinApplication();
+	private SortedSet<PathPattern> getMatchingPatterns(PathContainer lookupPath) {
 		TreeSet<PathPattern> result = null;
 		for (PathPattern pattern : this.patterns) {
 			if (pattern.matches(lookupPath)) {
