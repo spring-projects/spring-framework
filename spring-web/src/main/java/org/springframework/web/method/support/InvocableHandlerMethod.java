@@ -150,7 +150,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	 */
 	public void setMethodValidator(@Nullable MethodValidator methodValidator) {
 		this.methodValidator = methodValidator;
-		this.validationGroups = (methodValidator != null ?
+		this.validationGroups = (methodValidator != null && (shouldValidateArguments() || shouldValidateReturnValue()) ?
 				methodValidator.determineValidationGroups(getBean(), getBridgedMethod()) : EMPTY_GROUPS);
 	}
 
