@@ -1,6 +1,13 @@
 changelog:
   repository: spring-projects/spring-framework
   sections:
+    - title: ":warning: Attention Required"
+      labels:
+        - "for: upgrade-attention"
+      summary:
+        mode: "member-comment"
+        config:
+          prefix: "Attention Required:"
     - title: ":star: New Features"
       labels:
         - "type: enhancement"
