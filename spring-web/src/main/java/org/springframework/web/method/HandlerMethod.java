@@ -96,6 +96,8 @@ public class HandlerMethod extends AnnotatedMethod {
 	@Nullable
 	private HandlerMethod resolvedFromHandlerMethod;
 
+	private @Nullable HandlerMethod resolvedBeanHandlerMethod;
+
 	private final String description;
 
 
@@ -305,8 +307,10 @@ public class HandlerMethod extends AnnotatedMethod {
 	}
 
 	/**
-	 * Return the HandlerMethod from which this HandlerMethod instance was
-	 * resolved via {@link #createWithResolvedBean()}.
+	 * Return the original HandlerMethod instance that from which the current
+	 * HandlerMethod instance was created via either
+	 * {@link #createWithValidateFlags()} or {@link #createWithResolvedBean()}.
+	 * The original instance is needed for cached CORS config lookups.
 	 */
 	@Nullable
 	public HandlerMethod getResolvedFromHandlerMethod() {
@@ -330,6 +334,10 @@ public class HandlerMethod extends AnnotatedMethod {
 	 * <p>If the {@link #getBean() handler} is not String, return the same instance.
 	 */
 	public HandlerMethod createWithResolvedBean() {
+		if (this.resolvedBeanHandlerMethod != null) {
+			return this.resolvedBeanHandlerMethod;
+		}
+
 		if (!(this.bean instanceof String beanName)) {
 			return this;
 		}
@@ -337,7 +345,13 @@ public class HandlerMethod extends AnnotatedMethod {
 		Assert.state(this.beanFactory != null, "Cannot resolve bean name without BeanFactory");
 		Object handler = this.beanFactory.getBean(beanName);
 		Assert.notNull(handler, "No handler instance");
-		return new HandlerMethod(this, handler, false);
+
+		HandlerMethod handlerMethod = new HandlerMethod(this, handler, false);
+		if (this.beanFactory.isSingleton(beanName)) {
+			this.resolvedBeanHandlerMethod = handlerMethod;
+		}
+
+		return handlerMethod;
 	}
 
 	/**
