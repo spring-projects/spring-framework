@@ -263,9 +263,10 @@ public class SendToMethodReturnValueHandler implements HandlerMethodReturnValueH
 			getHeaderInitializer().initHeaders(headerAccessor);
 		}
 		if (inputMessage != null && this.headerFilter != null) {
-			inputMessage.getHeaders().forEach((name, value) -> {
+			SimpMessageHeaderAccessor inputAccessor = SimpMessageHeaderAccessor.wrap(inputMessage);
+			inputAccessor.toNativeHeaderMap().forEach((name, values) -> {
 				if (this.headerFilter.test(name)) {
-					headerAccessor.setHeader(name, value);
+					headerAccessor.setNativeHeaderValues(name, values);
 				}
 			});
 		}
