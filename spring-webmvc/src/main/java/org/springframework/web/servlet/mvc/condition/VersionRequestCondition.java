@@ -99,9 +99,12 @@ public final class VersionRequestCondition extends AbstractRequestCondition<Vers
 
 	@Override
 	public @Nullable VersionRequestCondition getMatchingCondition(HttpServletRequest request) {
-		ApiVersionHolder versionHolder = (ApiVersionHolder) request.getAttribute(HandlerMapping.API_VERSION_ATTRIBUTE);
+		if (this.version == null) {
+			return this;
+		}
 
-		if (this.version == null || !versionHolder.hasVersion()) {
+		ApiVersionHolder versionHolder = (ApiVersionHolder) request.getAttribute(HandlerMapping.API_VERSION_ATTRIBUTE);
+		if (!versionHolder.hasVersion()) {
 			return this;
 		}
 
