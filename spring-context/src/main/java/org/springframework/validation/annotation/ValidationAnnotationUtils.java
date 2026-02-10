@@ -17,9 +17,12 @@
 package org.springframework.validation.annotation;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
 
 import org.jspecify.annotations.Nullable;
 
+import org.springframework.aop.framework.AopProxyUtils;
+import org.springframework.aop.support.AopUtils;
 import org.springframework.core.annotation.AnnotationUtils;
 
 /**
@@ -33,6 +36,8 @@ import org.springframework.core.annotation.AnnotationUtils;
 public abstract class ValidationAnnotationUtils {
 
 	private static final Object[] EMPTY_OBJECT_ARRAY = new Object[0];
+
+	private static final Class<?>[] EMPTY_CLASS_ARRAY = new Class<?>[0];
 
 
 	/**
@@ -74,6 +79,32 @@ public abstract class ValidationAnnotationUtils {
 			return EMPTY_OBJECT_ARRAY;
 		}
 		return (hints instanceof Object[] objectHints ? objectHints : new Object[] {hints});
+	}
+
+	/**
+	 * Determine the applicable validation groups from an
+	 * {@link org.springframework.validation.annotation.Validated @Validated}
+	 * annotation either on the method, or on the containing target class of
+	 * the method, or for an AOP proxy without a target (with all behavior in
+	 * advisors), also check on proxied interfaces.
+	 * @since 7.0.4
+	 */
+	public static Class<?>[] determineValidationGroups(Object target, Method method) {
+		Validated validatedAnn = AnnotationUtils.findAnnotation(method, Validated.class);
+		if (validatedAnn == null) {
+			if (AopUtils.isAopProxy(target)) {
+				for (Class<?> type : AopProxyUtils.proxiedUserInterfaces(target)) {
+					validatedAnn = AnnotationUtils.findAnnotation(type, Validated.class);
+					if (validatedAnn != null) {
+						break;
+					}
+				}
+			}
+			else {
+				validatedAnn = AnnotationUtils.findAnnotation(target.getClass(), Validated.class);
+			}
+		}
+		return (validatedAnn != null ? validatedAnn.value() : EMPTY_CLASS_ARRAY);
 	}
 
 }

@@ -39,7 +39,10 @@ public interface MethodValidator {
 	 * @param target the target Object
 	 * @param method the target method
 	 * @return the applicable validation groups as a {@code Class} array
+	 * @deprecated in favor of
+	 * {@link org.springframework.validation.annotation.ValidationAnnotationUtils#determineValidationGroups(Object, Method)}
 	 */
+	@Deprecated(since = "7.0.4", forRemoval = true)
 	Class<?>[] determineValidationGroups(Object target, Method method);
 
 	/**
@@ -48,7 +51,8 @@ public interface MethodValidator {
 	 * @param method the target method
 	 * @param parameters the parameters, if already created and available
 	 * @param arguments the candidate argument values to validate
-	 * @param groups validation groups from {@link #determineValidationGroups}
+	 * @param groups validation groups from
+	 * {@link org.springframework.validation.annotation.ValidationAnnotationUtils#determineValidationGroups(Object, Method)}
 	 * @return the result of validation
 	 */
 	MethodValidationResult validateArguments(
@@ -78,7 +82,8 @@ public interface MethodValidator {
 	 * @param method the target method
 	 * @param returnType the return parameter, if already created and available
 	 * @param returnValue the return value to validate
-	 * @param groups validation groups from {@link #determineValidationGroups}
+	 * @param groups validation groups from
+	 * {@link org.springframework.validation.annotation.ValidationAnnotationUtils#determineValidationGroups(Object, Method)}
 	 * @return the result of validation
 	 */
 	MethodValidationResult validateReturnValue(

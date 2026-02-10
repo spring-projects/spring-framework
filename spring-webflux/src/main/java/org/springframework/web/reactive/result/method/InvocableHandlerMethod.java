@@ -55,6 +55,7 @@ import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.lang.Contract;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
+import org.springframework.validation.annotation.ValidationAnnotationUtils;
 import org.springframework.validation.method.MethodValidator;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.reactive.BindingContext;
@@ -165,7 +166,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	public void setMethodValidator(@Nullable MethodValidator methodValidator) {
 		this.methodValidator = methodValidator;
 		this.validationGroups = (methodValidator != null ?
-				methodValidator.determineValidationGroups(getBean(), getBridgedMethod()) : EMPTY_GROUPS);
+				ValidationAnnotationUtils.determineValidationGroups(getBean(), getBridgedMethod()) : EMPTY_GROUPS);
 	}
 
 	/**

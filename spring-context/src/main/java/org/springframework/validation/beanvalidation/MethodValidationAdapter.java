@@ -40,8 +40,6 @@ import jakarta.validation.executable.ExecutableValidator;
 import jakarta.validation.metadata.ConstraintDescriptor;
 import org.jspecify.annotations.Nullable;
 
-import org.springframework.aop.framework.AopProxyUtils;
-import org.springframework.aop.support.AopUtils;
 import org.springframework.context.MessageSourceResolvable;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.core.BridgeMethodResolver;
@@ -50,7 +48,6 @@ import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ParameterNameDiscoverer;
-import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.util.Assert;
 import org.springframework.util.function.SingletonSupplier;
 import org.springframework.validation.BeanPropertyBindingResult;
@@ -59,6 +56,7 @@ import org.springframework.validation.DefaultMessageCodesResolver;
 import org.springframework.validation.Errors;
 import org.springframework.validation.MessageCodesResolver;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.validation.annotation.ValidationAnnotationUtils;
 import org.springframework.validation.method.MethodValidationResult;
 import org.springframework.validation.method.MethodValidator;
 import org.springframework.validation.method.ParameterErrors;
@@ -213,24 +211,14 @@ public class MethodValidationAdapter implements MethodValidator {
 	 * annotation on the method, or on the containing target class of the method,
 	 * or for an AOP proxy without a target (with all behavior in advisors), also
 	 * check on proxied interfaces.
+	 * @deprecated in favor of
+	 * {@link org.springframework.validation.annotation.ValidationAnnotationUtils#determineValidationGroups(Object, Method)}
 	 */
+	@SuppressWarnings("removal")
+	@Deprecated(since = "7.0.4", forRemoval = true)
 	@Override
 	public Class<?>[] determineValidationGroups(Object target, Method method) {
-		Validated validatedAnn = AnnotationUtils.findAnnotation(method, Validated.class);
-		if (validatedAnn == null) {
-			if (AopUtils.isAopProxy(target)) {
-				for (Class<?> type : AopProxyUtils.proxiedUserInterfaces(target)) {
-					validatedAnn = AnnotationUtils.findAnnotation(type, Validated.class);
-					if (validatedAnn != null) {
-						break;
-					}
-				}
-			}
-			else {
-				validatedAnn = AnnotationUtils.findAnnotation(target.getClass(), Validated.class);
-			}
-		}
-		return (validatedAnn != null ? validatedAnn.value() : new Class<?>[0]);
+		return ValidationAnnotationUtils.determineValidationGroups(target, method);
 	}
 
 	@Override

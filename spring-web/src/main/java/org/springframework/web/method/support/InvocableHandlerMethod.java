@@ -43,6 +43,7 @@ import org.springframework.core.MethodParameter;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
+import org.springframework.validation.annotation.ValidationAnnotationUtils;
 import org.springframework.validation.method.MethodValidator;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.support.SessionStatus;
@@ -151,7 +152,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	public void setMethodValidator(@Nullable MethodValidator methodValidator) {
 		this.methodValidator = methodValidator;
 		this.validationGroups = (methodValidator != null && (shouldValidateArguments() || shouldValidateReturnValue()) ?
-				methodValidator.determineValidationGroups(getBean(), getBridgedMethod()) : EMPTY_GROUPS);
+				ValidationAnnotationUtils.determineValidationGroups(getBean(), getBridgedMethod()) : EMPTY_GROUPS);
 	}
 
 
