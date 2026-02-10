@@ -121,7 +121,8 @@ public abstract class AbstractStompBrokerRelayIntegrationTests {
 		StubMessageChannel channel = new StubMessageChannel();
 		List<String> prefixes = Arrays.asList("/queue/", "/topic/");
 		this.relay = new StompBrokerRelayMessageHandler(channel, this.responseChannel, channel, prefixes);
-		this.relay.setRelayPort(this.port);
+		// We do not set the relayPort, since we explicitly set the TCP client.
+		// this.relay.setRelayPort(this.port);
 		this.relay.setApplicationEventPublisher(this.eventPublisher);
 		this.relay.setSystemHeartbeatReceiveInterval(0);
 		this.relay.setSystemHeartbeatSendInterval(0);
