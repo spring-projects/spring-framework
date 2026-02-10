@@ -236,7 +236,7 @@ public abstract class AbstractMessageConverter implements SmartMessageConverter 
 			return !isStrictContentTypeMatch();
 		}
 		for (MimeType current : getSupportedMimeTypes()) {
-			if (current.getType().equals(mimeType.getType()) && current.getSubtype().equals(mimeType.getSubtype())) {
+			if (current.includes(mimeType)) {
 				return true;
 			}
 		}
