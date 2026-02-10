@@ -76,6 +76,7 @@ import org.springframework.util.Assert;
  *
  * @author Rossen Stoyanchev
  * @author Andy Wilkinson
+ * @author Sam Brannen
  * @since 4.0
  */
 public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler {
@@ -130,6 +131,15 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 	private @Nullable String virtualHost;
 
 	private @Nullable TcpOperations<byte[]> tcpClient;
+
+	/**
+	 * Tracks whether this {@code StompBrokerRelayMessageHandler} manages the
+	 * TCP client internally.
+	 * @since 7.0.4
+	 * @see #setTcpClient(TcpOperations)
+	 * @see #isPauseable()
+	 */
+	private boolean internallyManagedTcpClient = true;
 
 	private @Nullable MessageHeaderInitializer headerInitializer;
 
@@ -344,10 +354,12 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 	 * <p>By default {@link ReactorNettyTcpClient} is used.
 	 * <p><strong>Note:</strong> when this property is used, any
 	 * {@link #setRelayHost(String) host} or {@link #setRelayPort(int) port}
-	 * specified are effectively ignored.
+	 * specified will be effectively ignored, and {@link #isPauseable()} will
+	 * return {@code false}.
 	 */
 	public void setTcpClient(@Nullable TcpOperations<byte[]> tcpClient) {
 		this.tcpClient = tcpClient;
+		this.internallyManagedTcpClient = (tcpClient == null);
 	}
 
 	/**
@@ -415,6 +427,19 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 		return this.taskScheduler;
 	}
 
+	/**
+	 * Returns {@code true} if this {@code StompBrokerRelayMessageHandler} manages
+	 * the TCP client internally.
+	 * <p>Returns {@code false} if an externally managed TCP client has been
+	 * {@linkplain #setTcpClient(TcpOperations) registered}.
+	 * @since 7.0.4
+	 * @see #setTcpClient(TcpOperations)
+	 * @see org.springframework.context.SmartLifecycle#isPauseable()
+	 */
+	@Override
+	public boolean isPauseable() {
+		return this.internallyManagedTcpClient;
+	}
 
 	@Override
 	protected void startInternal() {
@@ -471,6 +496,9 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 			}
 			catch (Throwable ex) {
 				logger.error("Error in shutdown of TCP client", ex);
+			}
+			if (this.internallyManagedTcpClient) {
+				this.tcpClient = null;
 			}
 		}
 	}

@@ -20,6 +20,7 @@ import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CountDownLatch;
@@ -40,10 +41,12 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.messaging.Message;
+import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageDeliveryException;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.MessagingException;
 import org.springframework.messaging.StubMessageChannel;
+import org.springframework.messaging.SubscribableChannel;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageType;
 import org.springframework.messaging.simp.broker.BrokerAvailabilityEvent;
@@ -59,6 +62,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  * Integration tests for {@link StompBrokerRelayMessageHandler} running against ActiveMQ.
  *
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
  */
 public abstract class AbstractStompBrokerRelayIntegrationTests {
 
@@ -119,21 +123,21 @@ public abstract class AbstractStompBrokerRelayIntegrationTests {
 
 	private void createAndStartRelay() throws InterruptedException {
 		StubMessageChannel channel = new StubMessageChannel();
-		List<String> prefixes = Arrays.asList("/queue/", "/topic/");
-		this.relay = new StompBrokerRelayMessageHandler(channel, this.responseChannel, channel, prefixes);
-		// We do not set the relayPort, since we explicitly set the TCP client.
-		// this.relay.setRelayPort(this.port);
+		List<String> prefixes = List.of("/queue/", "/topic/");
+
+		this.relay = createRelay(channel, this.responseChannel, channel, prefixes, this.port);
 		this.relay.setApplicationEventPublisher(this.eventPublisher);
 		this.relay.setSystemHeartbeatReceiveInterval(0);
 		this.relay.setSystemHeartbeatSendInterval(0);
 		this.relay.setPreservePublishOrder(true);
 
-		TcpOperations<byte[]> tcpClient = initTcpClient(this.port);
-		this.relay.setTcpClient(tcpClient);
-
 		this.relay.start();
 		this.eventPublisher.expectBrokerAvailabilityEvent(true);
 	}
+
+	protected abstract StompBrokerRelayMessageHandler createRelay(SubscribableChannel inboundChannel,
+			MessageChannel outboundChannel, SubscribableChannel brokerChannel, Collection<String> destinationPrefixes,
+			int port);
 
 	protected abstract TcpOperations<byte[]> initTcpClient(int port);
 
@@ -208,12 +212,6 @@ public abstract class AbstractStompBrokerRelayIntegrationTests {
 	}
 
 	@Test
-	void brokerAvailabilityEventWhenStopped() throws Exception {
-		stopActiveMqBrokerAndAwait();
-		this.eventPublisher.expectBrokerAvailabilityEvent(false);
-	}
-
-	@Test
 	void relayReconnectsIfBrokerComesBackUp() throws Exception {
 		String sess1 = "sess1";
 		MessageExchange conn1 = MessageExchangeBuilder.connect(sess1).build();
@@ -247,6 +245,87 @@ public abstract class AbstractStompBrokerRelayIntegrationTests {
 		this.relay.handleMessage(disconnect.message);
 
 		this.responseHandler.expectMessages(disconnect);
+	}
+
+	@Test // gh-36266
+	void stopAndRestartWithInternallyManagedTcpClient() throws Exception {
+		assertRelayIsRunning(true);
+		assertRelayIsPauseable(true);
+		assertBrokerIsAvailable(true);
+
+		publishSubscribe();
+
+		this.relay.stop();
+		assertRelayIsRunning(false);
+		assertRelayIsPauseable(true);
+		assertBrokerIsAvailable(false);
+		this.eventPublisher.expectBrokerAvailabilityEvent(false);
+
+		this.responseHandler.queue.clear();
+
+		this.relay.start();
+		assertRelayIsRunning(true);
+		assertRelayIsPauseable(true);
+		if (!this.relay.isBrokerAvailable()) {
+			this.eventPublisher.expectBrokerAvailabilityEvent(true);
+		}
+		assertBrokerIsAvailable(true);
+
+		publishSubscribe();
+	}
+
+	@Test // gh-36266
+	void stopAndRestartWithExternallyManagedTcpClient() throws Exception {
+		this.relay.setTcpClient(initTcpClient(this.port));
+
+		assertRelayIsRunning(true);
+		assertRelayIsPauseable(false);
+		assertBrokerIsAvailable(true);
+
+		publishSubscribe();
+
+		this.relay.stop();
+		assertRelayIsRunning(false);
+		assertRelayIsPauseable(false);
+		assertBrokerIsAvailable(false);
+		this.eventPublisher.expectBrokerAvailabilityEvent(false);
+
+		this.responseHandler.queue.clear();
+
+		this.relay.start();
+		assertRelayIsRunning(true);
+		assertRelayIsPauseable(false);
+		// Even though the relay is "running", the broker should not be
+		// available since the TcpClient is externally managed. In other words,
+		// this is the expected behavior when the relay is not pauseable.
+		assertBrokerIsAvailable(false);
+	}
+
+	private void assertRelayIsRunning(boolean running) {
+		if (running) {
+			assertThat(this.relay.isRunning()).as("is running").isTrue();
+		}
+		else {
+			assertThat(this.relay.isRunning()).as("is running").isFalse();
+		}
+	}
+
+	private void assertRelayIsPauseable(boolean pauseable) {
+		if (pauseable) {
+			assertThat(this.relay.isPauseable()).as("is pauseable").isTrue();
+		}
+		else {
+			assertThat(this.relay.isPauseable()).as("is pauseable").isFalse();
+		}
+	}
+
+	private void assertBrokerIsAvailable(boolean available) {
+		if (available) {
+			assertThat(this.relay.isBrokerAvailable()).as("is broker available").isTrue();
+		}
+		else {
+			assertThat(this.relay.isBrokerAvailable()).as("is broker available").isFalse();
+		}
 	}
 
 
