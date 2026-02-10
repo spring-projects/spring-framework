@@ -275,8 +275,8 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 	 * Add a filter to determine which headers from the input message should be
 	 * propagated to the output message. Applies to return value handling of
 	 * {@code @SendTo}, {@code @SendToUser}, and {@code @SubscribeMapping}
-	 * controller methods. Multiple filters are combined with
-	 * {@link Predicate#or(Predicate)}.
+	 * controller methods. The filter is applied to the "native headers" submap.
+	 * Multiple filters are combined with {@link Predicate#or(Predicate)}.
 	 * <p>By default, no headers are propagated if this is not set.
 	 * @since 7.0.4
 	 * @see SendToMethodReturnValueHandler#addHeaderFilter(Predicate)

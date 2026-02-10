@@ -19,6 +19,7 @@ package org.springframework.messaging.simp.annotation.support;
 import java.lang.annotation.Annotation;
 import java.security.Principal;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
 
@@ -41,6 +42,7 @@ import org.springframework.messaging.simp.SimpMessageType;
 import org.springframework.messaging.simp.annotation.SendToUser;
 import org.springframework.messaging.simp.user.DestinationUserNameProvider;
 import org.springframework.messaging.support.MessageHeaderInitializer;
+import org.springframework.messaging.support.NativeMessageHeaderAccessor;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.PropertyPlaceholderHelper;
@@ -138,7 +140,8 @@ public class SendToMethodReturnValueHandler implements HandlerMethodReturnValueH
 
 	/**
 	 * Add a filter to determine which headers from the input message should be
-	 * propagated to the output message. Multiple filters are combined with
+	 * propagated to the output message. The filter is applied to the "native
+	 * headers" submap. Multiple filters are combined with
 	 * {@link Predicate#or(Predicate)}.
 	 * <p>By default, no headers are propagated if this is not set.
 	 * @since 7.0.4
@@ -257,14 +260,15 @@ public class SendToMethodReturnValueHandler implements HandlerMethodReturnValueH
 				new String[] {defaultPrefix + destination} : new String[] {defaultPrefix + '/' + destination});
 	}
 
-	private MessageHeaders createHeaders(@Nullable String sessionId, MethodParameter returnType, @Nullable Message<?> inputMessage) {
+	private MessageHeaders createHeaders(
+			@Nullable String sessionId, MethodParameter returnType, @Nullable Message<?> inputMessage) {
+
 		SimpMessageHeaderAccessor headerAccessor = SimpMessageHeaderAccessor.create(SimpMessageType.MESSAGE);
 		if (getHeaderInitializer() != null) {
 			getHeaderInitializer().initHeaders(headerAccessor);
 		}
 		if (inputMessage != null && this.headerFilter != null) {
-			SimpMessageHeaderAccessor inputAccessor = SimpMessageHeaderAccessor.wrap(inputMessage);
-			inputAccessor.toNativeHeaderMap().forEach((name, values) -> {
+			getNativeHeaders(inputMessage).forEach((name, values) -> {
 				if (this.headerFilter.test(name)) {
 					headerAccessor.setNativeHeaderValues(name, values);
 				}
@@ -276,6 +280,12 @@ public class SendToMethodReturnValueHandler implements HandlerMethodReturnValueH
 		headerAccessor.setHeader(AbstractMessageSendingTemplate.CONVERSION_HINT_HEADER, returnType);
 		headerAccessor.setLeaveMutable(true);
 		return headerAccessor.getMessageHeaders();
+	}
+
+	@SuppressWarnings("unchecked")
+	private static Map<String, List<String>> getNativeHeaders(Message<?> message) {
+		Object value = message.getHeaders().get(NativeMessageHeaderAccessor.NATIVE_HEADERS);
+		return (value != null ? (Map<String, List<String>>) value : Collections.emptyMap());
 	}
 
 
