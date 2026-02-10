@@ -836,7 +836,6 @@ Java::
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
 	ClassPathResource index = new ClassPathResource("static/index.html");
-	List<String> extensions = List.of("js", "css", "ico", "png", "jpg", "gif");
 	RequestPredicate spaPredicate = path("/api/**").or(path("/error")).negate();
 	RouterFunction<ServerResponse> redirectToIndex = route()
 		.resource(spaPredicate, index)
