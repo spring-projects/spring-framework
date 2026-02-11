@@ -98,6 +98,15 @@ public interface HttpMessageConverters extends Iterable<HttpMessageConverter<?>>
 		T registerDefaults();
 
 		/**
+		 * Prevent the registration of default converters using classpath detection.
+		 * Manual registrations like {@link #withJsonConverter(HttpMessageConverter)} are
+		 * still allowed. If both {@link #registerDefaults()} and this method are called,
+		 * the latest call wins.
+		 * @since 7.0.4
+		 */
+		T disableDefaults();
+
+		/**
 		 * Override the default String {@code HttpMessageConverter}
 		 * with any converter supporting String conversion.
 		 * @param stringMessageConverter the converter instance to use
