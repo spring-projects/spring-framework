@@ -9,7 +9,7 @@ javaPlatform {
 dependencies {
 	api(platform("com.fasterxml.jackson:jackson-bom:2.20.2"))
 	api(platform("io.micrometer:micrometer-bom:1.16.3"))
-	api(platform("io.netty:netty-bom:4.2.9.Final"))
+	api(platform("io.netty:netty-bom:4.2.10.Final"))
 	api(platform("io.projectreactor:reactor-bom:2025.0.3"))
 	api(platform("io.rsocket:rsocket-bom:1.1.5"))
 	api(platform("org.apache.groovy:groovy-bom:5.0.4"))
@@ -120,7 +120,7 @@ dependencies {
 		api("org.glassfish:jakarta.el:4.0.2")
 		api("org.graalvm.sdk:graal-sdk:22.3.1")
 		api("org.hamcrest:hamcrest:3.0")
-		api("org.hibernate.orm:hibernate-core:7.2.3.Final")
+		api("org.hibernate.orm:hibernate-core:7.2.4.Final")
 		api("org.hibernate.validator:hibernate-validator:9.1.0.Final")
 		api("org.hsqldb:hsqldb:2.7.4")
 		api("org.htmlunit:htmlunit:4.21.0")
