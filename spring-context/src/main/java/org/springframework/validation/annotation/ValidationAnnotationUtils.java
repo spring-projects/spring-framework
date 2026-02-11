@@ -27,7 +27,8 @@ import org.springframework.core.annotation.AnnotationUtils;
 
 /**
  * Utility class for handling validation annotations.
- * Mainly for internal use within the framework.
+ *
+ * <p>Mainly for internal use within the framework.
  *
  * @author Christoph Dreis
  * @author Juergen Hoeller
@@ -41,7 +42,7 @@ public abstract class ValidationAnnotationUtils {
 
 
 	/**
-	 * Determine any validation hints by the given annotation.
+	 * Determine any validation hints for the given annotation.
 	 * <p>This implementation checks for Spring's
 	 * {@link org.springframework.validation.annotation.Validated},
 	 * {@code @jakarta.validation.Valid}, and custom annotations whose
@@ -62,7 +63,7 @@ public abstract class ValidationAnnotationUtils {
 			return EMPTY_OBJECT_ARRAY;
 		}
 		// Meta presence of @Validated ?
-		Validated validatedAnn = AnnotationUtils.getAnnotation(ann, Validated.class);
+		Validated validatedAnn = AnnotationUtils.findAnnotation(annotationType, Validated.class);
 		if (validatedAnn != null) {
 			return validatedAnn.value();
 		}
