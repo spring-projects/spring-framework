@@ -54,6 +54,9 @@ import java.lang.annotation.Target;
  * for optional dependencies. For a programmatic equivalent, allowing for lazy references
  * with more sophistication, consider {@link org.springframework.beans.factory.ObjectProvider}.
  *
+ * <p>This annotation may be used as a <em>meta-annotation</em> to create custom
+ * <em>composed annotations</em>.
+ *
  * @author Chris Beams
  * @author Juergen Hoeller
  * @since 3.0
