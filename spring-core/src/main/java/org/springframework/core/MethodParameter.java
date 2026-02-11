@@ -87,6 +87,8 @@ public class MethodParameter {
 
 	private volatile @Nullable Type genericParameterType;
 
+	private volatile Annotation @Nullable [] methodAnnotations;
+
 	private volatile Annotation @Nullable [] parameterAnnotations;
 
 	private volatile @Nullable ParameterNameDiscoverer parameterNameDiscoverer =
@@ -584,7 +586,12 @@ public class MethodParameter {
 	 * Return the annotations associated with the target method/constructor itself.
 	 */
 	public Annotation[] getMethodAnnotations() {
-		return adaptAnnotationArray(getAnnotatedElement().getAnnotations());
+		Annotation[] methodAnns = this.methodAnnotations;
+		if (methodAnns == null) {
+			methodAnns = adaptAnnotationArray(getAnnotatedElement().getAnnotations());
+			this.methodAnnotations = methodAnns;
+		}
+		return methodAnns;
 	}
 
 	/**
@@ -592,9 +599,15 @@ public class MethodParameter {
 	 * @param annotationType the annotation type to look for
 	 * @return the annotation object, or {@code null} if not found
 	 */
+	@SuppressWarnings("unchecked")
 	public <A extends Annotation> @Nullable A getMethodAnnotation(Class<A> annotationType) {
-		A annotation = getAnnotatedElement().getAnnotation(annotationType);
-		return (annotation != null ? adaptAnnotation(annotation) : null);
+		Annotation[] anns = getMethodAnnotations();
+		for (Annotation ann : anns) {
+			if (annotationType.isInstance(ann)) {
+				return (A) ann;
+			}
+		}
+		return null;
 	}
 
 	/**
@@ -604,7 +617,7 @@ public class MethodParameter {
 	 * @see #getMethodAnnotation(Class)
 	 */
 	public <A extends Annotation> boolean hasMethodAnnotation(Class<A> annotationType) {
-		return getAnnotatedElement().isAnnotationPresent(annotationType);
+		return (getMethodAnnotation(annotationType) != null);
 	}
 
 	/**
