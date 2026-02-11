@@ -154,7 +154,7 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 					"' in method " + parameter.getMethod() + " is not parameterized");
 		}
 
-		Object body = readWithMessageConverters(webRequest, parameter, paramType);
+		Object body = readWithMessageConverters(inputMessage, parameter, paramType);
 		if (RequestEntity.class == parameter.getParameterType()) {
 			return new RequestEntity<>(body, inputMessage.getHeaders(),
 					inputMessage.getMethod(), inputMessage.getURI());
