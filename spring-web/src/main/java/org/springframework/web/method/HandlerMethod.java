@@ -48,6 +48,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.validation.annotation.ValidationAnnotationUtils;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 /**
@@ -72,6 +73,8 @@ public class HandlerMethod extends AnnotatedMethod {
 	/** Logger that is available to subclasses. */
 	protected static final Log logger = LogFactory.getLog(HandlerMethod.class);
 
+	private static final Class<?>[] EMPTY_CLASS_ARRAY = new Class<?>[0];
+
 
 	private final Object bean;
 
@@ -84,6 +87,8 @@ public class HandlerMethod extends AnnotatedMethod {
 	private final boolean validateArguments;
 
 	private final boolean validateReturnValue;
+
+	private Class<?> @Nullable [] validationGroups;
 
 	private @Nullable HttpStatusCode responseStatus;
 
@@ -191,16 +196,25 @@ public class HandlerMethod extends AnnotatedMethod {
 		this.beanFactory = handlerMethod.beanFactory;
 		this.messageSource = handlerMethod.messageSource;
 		this.beanType = handlerMethod.beanType;
+
 		this.validateArguments = (initValidateFlags ?
 				MethodValidationInitializer.checkArguments(this.beanType, getMethodParameters()) :
 				handlerMethod.validateArguments);
+
 		this.validateReturnValue = (initValidateFlags ?
 				MethodValidationInitializer.checkReturnValue(this.beanType, getBridgedMethod()) :
 				handlerMethod.validateReturnValue);
+
+		this.validationGroups = (handler != null && (shouldValidateArguments() || shouldValidateReturnValue()) ?
+				ValidationAnnotationUtils.determineValidationGroups(handler, getBridgedMethod()) :
+				handlerMethod.validationGroups);
+
 		this.responseStatus = handlerMethod.responseStatus;
 		this.responseStatusReason = handlerMethod.responseStatusReason;
+
 		this.resolvedFromHandlerMethod = (handlerMethod.resolvedFromHandlerMethod != null ?
 				handlerMethod.resolvedFromHandlerMethod : handlerMethod);
+
 		this.description = handlerMethod.toString();
 	}
 
@@ -279,6 +293,18 @@ public class HandlerMethod extends AnnotatedMethod {
 	 */
 	public boolean shouldValidateReturnValue() {
 		return this.validateReturnValue;
+	}
+
+	/**
+	 * Return validation groups declared in
+	 * {@link org.springframework.validation.annotation.Validated @Validated}
+	 * either on the method, or on the containing target class of the method, or
+	 * for an AOP proxy without a target (with all behavior in advisors), also
+	 * check on proxied interfaces.
+	 * @since 7.0.4
+	 */
+	public Class<?>[] getValidationGroups() {
+		return (this.validationGroups != null ? this.validationGroups : EMPTY_CLASS_ARRAY);
 	}
 
 	/**
