@@ -371,12 +371,13 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 
 	@Override
 	public @Nullable V computeIfAbsent(@Nullable K key, Function<@Nullable ? super K, @Nullable ? extends V> mappingFunction) {
-		// avoid locking if entry is present
+		// Avoid locking if entry is present
 		Reference<K, V> ref = getReference(key, Restructure.NEVER);
 		Entry<K, V> entry = (ref != null ? ref.get() : null);
 		if (entry != null) {
 			return entry.getValue();
 		}
+
 		return doTask(key, new Task<V>(TaskOption.RESTRUCTURE_BEFORE, TaskOption.RESIZE) {
 			@Override
 			protected @Nullable V execute(@Nullable Reference<K, V> ref, @Nullable Entry<K, V> entry, @Nullable Entries<V> entries) {
@@ -396,12 +397,13 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 
 	@Override
 	public @Nullable V computeIfPresent(@Nullable K key, BiFunction<@Nullable ? super K, @Nullable ? super V, @Nullable ? extends V> remappingFunction) {
-		// avoid locking if entry is absent
+		// Avoid locking if entry is absent
 		Reference<K, V> ref = getReference(key, Restructure.NEVER);
 		Entry<K, V> entry = (ref != null ? ref.get() : null);
 		if (entry == null) {
 			return null;
 		}
+
 		return doTask(key, new Task<V>(TaskOption.RESTRUCTURE_BEFORE, TaskOption.RESIZE) {
 			@Override
 			protected @Nullable V execute(@Nullable Reference<K, V> ref, @Nullable Entry<K, V> entry, @Nullable Entries<V> entries) {
