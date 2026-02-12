@@ -247,7 +247,7 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 	 * @param handshakeHeaders the headers for the WebSocket handshake
 	 * @param handler the session handler
 	 * @param uriVariables the URI variables to expand into the URL
-	 * @return a {@code ListenableFuture} for access to the session when ready for use
+	 * @return a {@code CompletableFuture} for access to the session when ready for use
 	 * @since 6.0
 	 */
 	public CompletableFuture<StompSession> connectAsync(String url, @Nullable WebSocketHttpHeaders handshakeHeaders,

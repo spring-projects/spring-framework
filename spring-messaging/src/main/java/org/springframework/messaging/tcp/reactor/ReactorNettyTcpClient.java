@@ -208,7 +208,7 @@ public class ReactorNettyTcpClient<P> implements TcpOperations<P> {
 			return handleShuttingDownConnectFailure(handler);
 		}
 
-		// Report first connect to the ListenableFuture
+		// Report first connect to the CompletableFuture
 		CompletableFuture<@Nullable Void> connectFuture = new CompletableFuture<>();
 
 		extendTcpClient(this.tcpClient, handler)
