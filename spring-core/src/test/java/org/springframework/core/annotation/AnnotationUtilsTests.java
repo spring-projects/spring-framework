@@ -160,10 +160,11 @@ class AnnotationUtilsTests {
 		assertThat(getAnnotation(bridgeMethod, Order.class)).isNull();
 		assertThat(findAnnotation(bridgeMethod, Order.class)).isNotNull();
 
-		// As of JDK 8, invoking getAnnotation() on a bridge method actually finds an
-		// annotation on its 'bridged' method [1]; however, the Eclipse compiler does
-		// not support this [2]. Thus, we effectively ignore the following
-		// assertion if the test is currently executing within the Eclipse IDE.
+		// For code compiled with OpenJDK, invoking getAnnotation() on a bridge
+		// method actually finds an annotation on its 'bridged' method [1]; however,
+		// the Eclipse compiler does not support this [2]. Thus, we effectively
+		// ignore the following assertion if the test is currently executing within
+		// the Eclipse IDE.
 		//
 		// [1] https://bugs.openjdk.java.net/browse/JDK-6695379
 		// [2] https://bugs.eclipse.org/bugs/show_bug.cgi?id=495396

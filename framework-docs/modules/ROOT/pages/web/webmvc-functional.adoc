@@ -15,7 +15,7 @@ the same xref:web/webmvc/mvc-servlet.adoc[DispatcherServlet].
 
 In WebMvc.fn, an HTTP request is handled with a `HandlerFunction`: a function that takes
 `ServerRequest` and returns a `ServerResponse`.
-Both the request and the response object have immutable contracts that offer JDK 8-friendly
+Both the request and the response object have immutable contracts that offer convenient
 access to the HTTP request and response.
 `HandlerFunction` is the equivalent of the body of a `@RequestMapping` method in the
 annotation-based programming model.
@@ -116,7 +116,7 @@ xref:web/webmvc-functional.adoc#webmvc-fn-running[Running a Server].
 == HandlerFunction
 [.small]#xref:web/webflux-functional.adoc#webflux-fn-handler-functions[See equivalent in the Reactive stack]#
 
-`ServerRequest` and `ServerResponse` are immutable interfaces that offer JDK 8-friendly
+`ServerRequest` and `ServerResponse` are immutable interfaces that offer convenient
 access to the HTTP request and response, including headers, body, method, and status code.
 
 [[webmvc-fn-request]]

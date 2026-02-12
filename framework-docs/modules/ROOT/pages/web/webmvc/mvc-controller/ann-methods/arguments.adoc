@@ -6,7 +6,7 @@
 The next table describes the supported controller method arguments. Reactive types are not supported
 for any arguments.
 
-JDK 8's `java.util.Optional` is supported as a method argument in combination with
+`java.util.Optional` is supported as a method argument in combination with
 annotations that have a `required` attribute (for example, `@RequestParam`, `@RequestHeader`,
 and others) and is equivalent to `required=false`.
 

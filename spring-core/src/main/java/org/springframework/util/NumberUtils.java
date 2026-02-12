@@ -147,7 +147,7 @@ public abstract class NumberUtils {
 		else if (number instanceof BigDecimal bigDecimal) {
 			bigInt = bigDecimal.toBigInteger();
 		}
-		// Effectively analogous to JDK 8's BigInteger.longValueExact()
+		// Effectively analogous to Java's BigInteger.longValueExact()
 		if (bigInt != null && (bigInt.compareTo(LONG_MIN) < 0 || bigInt.compareTo(LONG_MAX) > 0)) {
 			raiseOverflowException(number, targetClass);
 		}
