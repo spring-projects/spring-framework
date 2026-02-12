@@ -231,8 +231,7 @@ class BridgeMethodResolverTests {
 			}
 		}
 		assertThat(bridgeMethod != null && bridgeMethod.isBridge()).isTrue();
-		boolean condition = bridgedMethod != null && !bridgedMethod.isBridge();
-		assertThat(condition).isTrue();
+		assertThat(bridgedMethod != null && !bridgedMethod.isBridge()).isTrue();
 		assertThat(BridgeMethodResolver.findBridgedMethod(bridgeMethod)).isEqualTo(bridgedMethod);
 	}
 

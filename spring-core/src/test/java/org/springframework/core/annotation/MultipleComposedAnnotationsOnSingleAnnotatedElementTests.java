@@ -202,8 +202,7 @@ class MultipleComposedAnnotationsOnSingleAnnotatedElementTests {
 			}
 		}
 		assertThat(bridgeMethod != null && bridgeMethod.isBridge()).isTrue();
-		boolean condition = bridgedMethod != null && !bridgedMethod.isBridge();
-		assertThat(condition).isTrue();
+		assertThat(bridgedMethod != null && !bridgedMethod.isBridge()).isTrue();
 
 		return bridgeMethod;
 	}

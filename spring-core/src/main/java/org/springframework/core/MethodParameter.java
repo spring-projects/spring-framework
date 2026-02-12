@@ -45,13 +45,13 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 
 /**
- * Helper class that encapsulates the specification of a method parameter, i.e. a {@link Method}
- * or {@link Constructor} plus a parameter index and a nested type index for a declared generic
- * type. Useful as a specification object to pass along.
+ * Helper class that encapsulates the specification of a method parameter: a
+ * {@link Method} or {@link Constructor} plus a parameter index and a nested type
+ * index for a declared generic type. Useful as a specification object to pass along.
  *
- * <p>As of 4.2, there is a {@link org.springframework.core.annotation.SynthesizingMethodParameter}
- * subclass available which synthesizes annotations with attribute aliases. That subclass is used
- * for web and message endpoint processing, in particular.
+ * <p>There is also a {@link org.springframework.core.annotation.SynthesizingMethodParameter}
+ * subclass available which synthesizes annotations with attribute aliases. That
+ * subclass is used for web and message endpoint processing, in particular.
  *
  * @author Juergen Hoeller
  * @author Rob Harrop
@@ -128,7 +128,8 @@ public class MethodParameter {
 	}
 
 	/**
-	 * Create a new MethodParameter for the given constructor, with nesting level 1.
+	 * Create a new {@code MethodParameter} for the given constructor, with nesting
+	 * level 1.
 	 * @param constructor the Constructor to specify a parameter for
 	 * @param parameterIndex the index of the parameter
 	 */
@@ -137,7 +138,7 @@ public class MethodParameter {
 	}
 
 	/**
-	 * Create a new MethodParameter for the given constructor.
+	 * Create a new {@code MethodParameter} for the given constructor.
 	 * @param constructor the Constructor to specify a parameter for
 	 * @param parameterIndex the index of the parameter
 	 * @param nestingLevel the nesting level of the target type
@@ -152,7 +153,7 @@ public class MethodParameter {
 	}
 
 	/**
-	 * Internal constructor used to create a {@link MethodParameter} with a
+	 * Internal constructor used to create a {@code MethodParameter} with a
 	 * containing class already set.
 	 * @param executable the Executable to specify a parameter for
 	 * @param parameterIndex the index of the parameter
@@ -168,9 +169,9 @@ public class MethodParameter {
 	}
 
 	/**
-	 * Copy constructor, resulting in an independent MethodParameter object
+	 * Copy constructor, resulting in an independent {@code MethodParameter} object
 	 * based on the same metadata and cache state that the original object was in.
-	 * @param original the original MethodParameter object to copy from
+	 * @param original the original {@code MethodParameter} object to copy from
 	 */
 	public MethodParameter(MethodParameter original) {
 		Assert.notNull(original, "Original must not be null");
@@ -279,7 +280,7 @@ public class MethodParameter {
 	/**
 	 * Decrease this parameter's nesting level.
 	 * @see #getNestingLevel()
-	 * @deprecated in favor of retaining the original MethodParameter and
+	 * @deprecated in favor of retaining the original {@code MethodParameter} and
 	 * using {@link #nested(Integer)} if nesting is required
 	 */
 	@Deprecated(since = "5.2")
@@ -773,9 +774,9 @@ public class MethodParameter {
 
 
 	/**
-	 * Create a new MethodParameter for the given method or constructor.
-	 * <p>This is a convenience factory method for scenarios where a
-	 * Method or Constructor reference is treated in a generic fashion.
+	 * Create a new {@code MethodParameter} for the given method or constructor.
+	 * <p>This is a convenience factory method for scenarios where a {@link Method}
+	 * or {@link Constructor} reference is treated in a generic fashion.
 	 * @param methodOrConstructor the Method or Constructor to specify a parameter for
 	 * @param parameterIndex the index of the parameter
 	 * @return the corresponding MethodParameter instance
@@ -791,9 +792,9 @@ public class MethodParameter {
 	}
 
 	/**
-	 * Create a new MethodParameter for the given method or constructor.
-	 * <p>This is a convenience factory method for scenarios where a
-	 * Method or Constructor reference is treated in a generic fashion.
+	 * Create a new {@code MethodParameter} for the given method or constructor.
+	 * <p>This is a convenience factory method for scenarios where a {@link Method}
+	 * or {@link Constructor} reference is treated in a generic fashion.
 	 * @param executable the Method or Constructor to specify a parameter for
 	 * @param parameterIndex the index of the parameter
 	 * @return the corresponding MethodParameter instance
@@ -812,11 +813,11 @@ public class MethodParameter {
 	}
 
 	/**
-	 * Create a new MethodParameter for the given parameter descriptor.
-	 * <p>This is a convenience factory method for scenarios where a
-	 * Java 8 {@link Parameter} descriptor is already available.
+	 * Create a new {@code MethodParameter} for the given parameter descriptor.
+	 * <p>This is a convenience factory method for scenarios where a {@link Parameter}
+	 * descriptor is already available.
 	 * @param parameter the parameter descriptor
-	 * @return the corresponding MethodParameter instance
+	 * @return the corresponding {@code MethodParameter} instance
 	 * @since 5.0
 	 */
 	public static MethodParameter forParameter(Parameter parameter) {
@@ -851,7 +852,7 @@ public class MethodParameter {
 	}
 
 	/**
-	 * Create a new MethodParameter for the given field-aware constructor,
+	 * Create a new {@code MethodParameter} for the given field-aware constructor,
 	 * for example, on a data class or record type.
 	 * <p>A field-aware method parameter will detect field annotations as well,
 	 * as long as the field name matches the parameter name.
@@ -859,7 +860,7 @@ public class MethodParameter {
 	 * @param parameterIndex the index of the parameter
 	 * @param fieldName the name of the underlying field,
 	 * matching the constructor's parameter name
-	 * @return the corresponding MethodParameter instance
+	 * @return the corresponding {@code MethodParameter} instance
 	 * @since 6.1
 	 */
 	public static MethodParameter forFieldAwareConstructor(Constructor<?> ctor, int parameterIndex, @Nullable String fieldName) {
