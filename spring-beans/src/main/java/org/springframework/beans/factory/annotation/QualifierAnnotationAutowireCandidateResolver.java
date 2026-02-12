@@ -348,8 +348,20 @@ public class QualifierAnnotationAutowireCandidateResolver extends GenericTypeAwa
 		if (!super.isRequired(descriptor)) {
 			return false;
 		}
-		Autowired autowired = descriptor.getAnnotation(Autowired.class);
-		return (autowired == null || autowired.required());
+
+		for (Annotation ann : descriptor.getAnnotations()) {
+			// Directly present?
+			if (ann instanceof Autowired autowired) {
+				return autowired.required();
+			}
+			// Meta-present?
+			Autowired autowired = AnnotationUtils.findAnnotation(ann.annotationType(), Autowired.class);
+			if (autowired != null) {
+				return autowired.required();
+			}
+		}
+		// No @Autowired annotation present: default to true.
+		return true;
 	}
 
 	/**
