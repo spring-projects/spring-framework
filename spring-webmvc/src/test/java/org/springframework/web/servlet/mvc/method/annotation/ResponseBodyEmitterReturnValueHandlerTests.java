@@ -288,7 +288,7 @@ class ResponseBodyEmitterReturnValueHandlerTests {
 
 		WebAsyncManager asyncManager = WebAsyncUtils.getAsyncManager(this.webRequest);
 		assertThat(asyncManager.getConcurrentResult()).isSameAs(ex);
-		assertThat(this.response.getContentType()).isNull();
+		assertThat(this.response.getContentType()).isEqualTo(MediaType.TEXT_EVENT_STREAM_VALUE);
 	}
 
 	@Test
