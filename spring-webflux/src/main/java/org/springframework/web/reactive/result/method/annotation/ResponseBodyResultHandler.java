@@ -19,6 +19,8 @@ package org.springframework.web.reactive.result.method.annotation;
 import java.net.URI;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import reactor.core.publisher.Mono;
 
@@ -52,6 +54,9 @@ import org.springframework.web.server.ServerWebExchange;
  * @since 5.0
  */
 public class ResponseBodyResultHandler extends AbstractMessageWriterResultHandler implements HandlerResultHandler {
+
+	private final Map<Class<?>, Boolean> responseBodyControllerCache = new ConcurrentHashMap<>();
+
 
 	/**
 	 * Basic constructor with a default {@link ReactiveAdapterRegistry}.
@@ -93,8 +98,8 @@ public class ResponseBodyResultHandler extends AbstractMessageWriterResultHandle
 	@Override
 	public boolean supports(HandlerResult result) {
 		MethodParameter returnType = result.getReturnTypeSource();
-		Class<?> containingClass = returnType.getContainingClass();
-		return (AnnotatedElementUtils.hasAnnotation(containingClass, ResponseBody.class) ||
+		return (this.responseBodyControllerCache.computeIfAbsent(returnType.getContainingClass(),
+				clazz -> AnnotatedElementUtils.hasAnnotation(clazz, ResponseBody.class)) ||
 				returnType.hasMethodAnnotation(ResponseBody.class));
 	}
 
