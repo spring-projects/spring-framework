@@ -20,6 +20,8 @@ import java.io.IOException;
 import java.lang.reflect.Type;
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.jspecify.annotations.Nullable;
 
@@ -66,6 +68,9 @@ import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolv
  * @since 3.1
  */
 public class RequestResponseBodyMethodProcessor extends AbstractMessageConverterMethodProcessor {
+
+	private final Map<Class<?>, Boolean> responseBodyControllerCache = new ConcurrentHashMap<>();
+
 
 	/**
 	 * Basic constructor with converters only. Suitable for resolving
@@ -132,7 +137,8 @@ public class RequestResponseBodyMethodProcessor extends AbstractMessageConverter
 
 	@Override
 	public boolean supportsReturnType(MethodParameter returnType) {
-		return (AnnotatedElementUtils.hasAnnotation(returnType.getContainingClass(), ResponseBody.class) ||
+		return (this.responseBodyControllerCache.computeIfAbsent(returnType.getContainingClass(),
+				clazz -> AnnotatedElementUtils.hasAnnotation(clazz, ResponseBody.class)) ||
 				returnType.hasMethodAnnotation(ResponseBody.class));
 	}
 
