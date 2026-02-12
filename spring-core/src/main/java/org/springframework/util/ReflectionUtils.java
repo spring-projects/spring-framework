@@ -78,8 +78,8 @@ public abstract class ReflectionUtils {
 
 
 	/**
-	 * Cache for {@link Class#getDeclaredMethods()} plus equivalent default methods
-	 * from Java 8 based interfaces, allowing for fast iteration.
+	 * Cache for {@link Class#getDeclaredMethods()} plus equivalent interface
+	 * default methods, allowing for fast iteration.
 	 */
 	private static final Map<Class<?>, Method[]> declaredMethodsCache = new ConcurrentReferenceHashMap<>(256);
 
@@ -309,7 +309,7 @@ public abstract class ReflectionUtils {
 	/**
 	 * Perform the given callback operation on all matching methods of the given
 	 * class, as locally declared or equivalent thereof (such as default methods
-	 * on Java 8 based interfaces that the given class implements).
+	 * from interfaces that the given class implements).
 	 * @param clazz the class to introspect
 	 * @param mc the callback to invoke for each method
 	 * @throws IllegalStateException if introspection fails
@@ -444,7 +444,7 @@ public abstract class ReflectionUtils {
 
 	/**
 	 * Variant of {@link Class#getDeclaredMethods()} that uses a local cache in
-	 * order to avoid new Method instances. In addition, it also includes Java 8
+	 * order to avoid new {@link Method} instances. In addition, it also includes
 	 * default methods from locally implemented interfaces, since those are
 	 * effectively to be treated just like declared methods.
 	 * @param clazz the class to introspect

@@ -3,13 +3,15 @@
 :page-section-summary-toc: 1
 
 The Spring Framework supports various Kotlin constructs, such as instantiating Kotlin classes
-through primary constructors, immutable classes data binding, and function optional parameters
-with default values.
+through primary constructors, data binding for immutable classes, and optional parameters
+with default values for functions.
 
 Kotlin parameter names are recognized through a dedicated `KotlinReflectionParameterNameDiscoverer`,
-which allows finding interface method parameter names without requiring the Java 8 `-parameters`
-compiler flag to be enabled during compilation. (For completeness, we nevertheless recommend
-running the Kotlin compiler with its `-java-parameters` flag for standard Java parameter exposure.)
+which allows finding interface method parameter names without requiring the Java `-parameters`
+compiler flag to be enabled during compilation.
+
+TIP: For completeness, we nevertheless recommend running the Kotlin compiler with its
+`-java-parameters` flag for standard Java parameter exposure.
 
 You can declare configuration classes as
 {kotlin-docs}/nested-classes.html[top level or nested but not inner],

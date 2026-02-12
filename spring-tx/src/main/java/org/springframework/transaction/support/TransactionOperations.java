@@ -54,8 +54,8 @@ public interface TransactionOperations {
 	 * {@link org.springframework.transaction.TransactionStatus} from within the callback,
 	 * use {@link #execute(TransactionCallback)} instead.
 	 * <p>This variant is analogous to using a {@link TransactionCallbackWithoutResult}
-	 * but with a simplified signature for common cases - and conveniently usable with
-	 * Java 8 lambda expressions.
+	 * but with a simplified signature for common cases and conveniently usable with
+	 * lambda expressions.
 	 * @param action the Runnable that specifies the transactional action
 	 * @throws TransactionException in case of initialization, rollback, or system errors
 	 * @throws RuntimeException if thrown by the Runnable

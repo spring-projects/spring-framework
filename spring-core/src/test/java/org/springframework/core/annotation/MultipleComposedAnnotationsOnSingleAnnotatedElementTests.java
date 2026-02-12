@@ -105,7 +105,7 @@ class MultipleComposedAnnotationsOnSingleAnnotatedElementTests {
 	}
 
 	@Test
-	@Disabled("Disabled since some Java 8 updates handle the bridge method differently")
+	@Disabled("Disabled since some Java versions/compilers handle the bridge method differently")
 	void getMultipleComposedAnnotationsOnBridgeMethod() {
 		Set<Cacheable> cacheables = getAllMergedAnnotations(getBridgeMethod(), Cacheable.class);
 		assertThat(cacheables).isNotNull();

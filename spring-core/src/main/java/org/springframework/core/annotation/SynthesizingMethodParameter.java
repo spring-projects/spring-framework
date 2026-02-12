@@ -134,9 +134,10 @@ public class SynthesizingMethodParameter extends MethodParameter {
 	}
 
 	/**
-	 * Create a new SynthesizingMethodParameter for the given parameter descriptor.
-	 * <p>This is a convenience factory method for scenarios where a
-	 * Java 8 {@link Parameter} descriptor is already available.
+	 * Create a new {@code SynthesizingMethodParameter} for the given parameter
+	 * descriptor.
+	 * <p>This is a convenience factory method for scenarios where a Java
+	 * {@link Parameter} descriptor is already available.
 	 * @param parameter the parameter descriptor
 	 * @return the corresponding {@code SynthesizingMethodParameter} instance
 	 * @since 5.0

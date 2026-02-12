@@ -114,9 +114,9 @@ import org.springframework.context.ApplicationContextAware;
  * <li><a href="https://github.com/FasterXML/jackson-datatype-jdk7">jackson-datatype-jdk7</a>:
  * support for Java 7 types like {@link java.nio.file.Path}</li>
  * <li><a href="https://github.com/FasterXML/jackson-datatype-jdk8">jackson-datatype-jdk8</a>:
- * support for other Java 8 types like {@link java.util.Optional}</li>
+ * support for Java 8 types like {@link java.util.Optional}</li>
  * <li><a href="https://github.com/FasterXML/jackson-datatype-jsr310">jackson-datatype-jsr310</a>:
- * support for Java 8 Date &amp; Time API types</li>
+ * support for Java Date &amp; Time API types</li>
  * <li><a href="https://github.com/FasterXML/jackson-module-kotlin">jackson-module-kotlin</a>:
  * support for Kotlin classes and data classes</li>
  * </ul>

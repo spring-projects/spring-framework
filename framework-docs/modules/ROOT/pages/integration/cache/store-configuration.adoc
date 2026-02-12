@@ -35,7 +35,7 @@ xref:integration/cache/store-configuration.adoc#cache-store-configuration-jsr107
 [[cache-store-configuration-caffeine]]
 == Caffeine Cache
 
-Caffeine is a Java 8 rewrite of Guava's cache, and its implementation is located in the
+Caffeine is a rewrite of Guava's cache, and its implementation is located in the
 `org.springframework.cache.caffeine` package and provides access to several features
 of Caffeine.
 

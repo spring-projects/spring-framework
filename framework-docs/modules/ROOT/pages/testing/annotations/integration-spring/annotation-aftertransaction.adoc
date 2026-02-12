@@ -4,8 +4,7 @@
 `@AfterTransaction` indicates that the annotated `void` method should be run after a
 transaction is ended, for test methods that have been configured to run within a
 transaction by using Spring's `@Transactional` annotation. `@AfterTransaction` methods
-are not required to be `public` and may be declared on Java 8-based interface default
-methods.
+are not required to be `public` and may be declared on interface default methods.
 
 [tabs]
 ======

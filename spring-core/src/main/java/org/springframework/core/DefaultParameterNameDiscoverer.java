@@ -20,7 +20,7 @@ import org.jspecify.annotations.Nullable;
 
 /**
  * Default implementation of the {@link ParameterNameDiscoverer} strategy interface,
- * delegating to the Java 8 standard reflection mechanism.
+ * delegating to Java's standard reflection mechanism.
  *
  * <p>If a Kotlin reflection implementation is present,
  * {@link KotlinReflectionParameterNameDiscoverer} is added first in the list and
@@ -47,7 +47,7 @@ public class DefaultParameterNameDiscoverer extends PrioritizedParameterNameDisc
 			addDiscoverer(new KotlinReflectionParameterNameDiscoverer());
 		}
 
-		// Recommended approach on Java 8+: compilation with -parameters.
+		// Recommended approach on Java: compilation with -parameters.
 		addDiscoverer(new StandardReflectionParameterNameDiscoverer());
 	}
 

@@ -26,11 +26,12 @@ import kotlin.reflect.jvm.ReflectJvmMapping;
 import org.jspecify.annotations.Nullable;
 
 /**
- * {@link ParameterNameDiscoverer} implementation which uses Kotlin's reflection facilities
- * for introspecting parameter names.
+ * {@link ParameterNameDiscoverer} implementation which uses Kotlin's reflection
+ * facilities for introspecting parameter names.
  *
- * <p>Compared to {@link StandardReflectionParameterNameDiscoverer}, it allows in addition to
- * determine interface parameter names without requiring Java 8 -parameters compiler flag.
+ * <p>In contrast to {@link StandardReflectionParameterNameDiscoverer}, this
+ * discoverer can also determine interface parameter names without requiring Java's
+ * {@code -parameters} compiler flag.
  *
  * @author Sebastien Deleuze
  * @since 5.0

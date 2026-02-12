@@ -26,7 +26,7 @@ behind the scenes for each annotated method, by using a `JmsListenerContainerFac
 Such a container is not registered against the application context but can be easily
 located for management purposes by using the `JmsListenerEndpointRegistry` bean.
 
-TIP: `@JmsListener` is a repeatable annotation on Java 8, so you can associate
+TIP: `@JmsListener` is a repeatable annotation, so you can associate
 several JMS destinations with the same method by adding additional `@JmsListener`
 declarations to it.
 

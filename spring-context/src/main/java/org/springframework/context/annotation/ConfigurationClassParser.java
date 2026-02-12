@@ -443,7 +443,7 @@ class ConfigurationClassParser {
 			Set<MethodMetadata> beanMethods = retrieveBeanMethodMetadata(ifc);
 			for (MethodMetadata methodMetadata : beanMethods) {
 				if (!methodMetadata.isAbstract()) {
-					// A default method or other concrete method on a Java 8+ interface...
+					// A default method or other concrete method on a Java interface...
 					configClass.addBeanMethod(new BeanMethod(methodMetadata, configClass));
 				}
 			}

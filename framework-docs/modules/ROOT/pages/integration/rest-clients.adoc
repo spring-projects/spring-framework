@@ -466,7 +466,7 @@ synchronous, asynchronous, and streaming scenarios.
 * Non-blocking I/O
 * Reactive Streams back pressure
 * High concurrency with fewer hardware resources
-* Functional-style, fluent API that takes advantage of Java 8 lambdas
+* Functional-style, fluent API that takes advantage of lambda expressions
 * Synchronous and asynchronous interactions
 * Streaming up to or streaming down from a server
 

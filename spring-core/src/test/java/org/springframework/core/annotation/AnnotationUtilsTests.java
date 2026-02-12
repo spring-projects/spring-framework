@@ -576,7 +576,7 @@ class AnnotationUtilsTests {
 		final List<String> expectedValuesJava = asList("A", "B", "C");
 		final List<String> expectedValuesSpring = asList("A", "B", "C", "meta1");
 
-		// Java 8
+		// Java
 		MyRepeatable[] array = MyRepeatableClass.class.getAnnotationsByType(MyRepeatable.class);
 		assertThat(array).isNotNull();
 		List<String> values = stream(array).map(MyRepeatable::value).collect(toList());
@@ -601,7 +601,7 @@ class AnnotationUtilsTests {
 		final List<String> expectedValuesJava = asList("A", "B", "C");
 		final List<String> expectedValuesSpring = asList("A", "B", "C", "meta1");
 
-		// Java 8
+		// Java
 		MyRepeatable[] array = clazz.getAnnotationsByType(MyRepeatable.class);
 		assertThat(array).isNotNull();
 		List<String> values = stream(array).map(MyRepeatable::value).collect(toList());
@@ -626,7 +626,7 @@ class AnnotationUtilsTests {
 		final List<String> expectedValuesJava = asList("X", "Y", "Z");
 		final List<String> expectedValuesSpring = asList("X", "Y", "Z", "meta2");
 
-		// Java 8
+		// Java
 		MyRepeatable[] array = clazz.getAnnotationsByType(MyRepeatable.class);
 		assertThat(array).isNotNull();
 		List<String> values = stream(array).map(MyRepeatable::value).collect(toList());
@@ -651,7 +651,7 @@ class AnnotationUtilsTests {
 		final List<String> expectedValuesJava = asList("X", "Y", "Z");
 		final List<String> expectedValuesSpring = asList("X", "Y", "Z", "meta2");
 
-		// Java 8
+		// Java
 		MyRepeatable[] array = clazz.getAnnotationsByType(MyRepeatable.class);
 		assertThat(array).isNotNull();
 		List<String> values = stream(array).map(MyRepeatable::value).collect(toList());
@@ -675,7 +675,7 @@ class AnnotationUtilsTests {
 		final List<String> expectedValuesJava = asList("A", "B", "C");
 		final List<String> expectedValuesSpring = asList("A", "B", "C", "meta1");
 
-		// Java 8
+		// Java
 		MyRepeatable[] array = MyRepeatableClass.class.getDeclaredAnnotationsByType(MyRepeatable.class);
 		assertThat(array).isNotNull();
 		List<String> values = stream(array).map(MyRepeatable::value).collect(toList());
@@ -699,7 +699,7 @@ class AnnotationUtilsTests {
 	void getDeclaredRepeatableAnnotationsDeclaredOnSuperclass() {
 		final Class<?> clazz = SubMyRepeatableClass.class;
 
-		// Java 8
+		// Java
 		MyRepeatable[] array = clazz.getDeclaredAnnotationsByType(MyRepeatable.class);
 		assertThat(array).isNotNull();
 		assertThat(array).isEmpty();

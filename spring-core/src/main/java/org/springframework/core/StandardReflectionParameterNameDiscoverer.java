@@ -23,7 +23,7 @@ import java.lang.reflect.Parameter;
 import org.jspecify.annotations.Nullable;
 
 /**
- * {@link ParameterNameDiscoverer} implementation which uses JDK 8's reflection facilities
+ * {@link ParameterNameDiscoverer} implementation which uses Java's reflection facilities
  * for introspecting parameter names (based on the "-parameters" compiler flag).
  *
  * <p>This is a key element of {@link DefaultParameterNameDiscoverer} where it is being

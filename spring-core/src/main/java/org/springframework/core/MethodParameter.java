@@ -393,10 +393,10 @@ public class MethodParameter {
 
 	/**
 	 * Return whether this method indicates a parameter which is not required:
-	 * either in the form of Java 8's {@link java.util.Optional}, JSpecify annotations,
-	 * any variant of a parameter-level {@code @Nullable} annotation (such as from Spring,
-	 * JSR-305 or Jakarta set of annotations), a language-level nullable type
-	 * declaration or {@code Continuation} parameter in Kotlin.
+	 * either in the form of {@link java.util.Optional}, JSpecify annotations,
+	 * any variant of a parameter-level {@code @Nullable} annotation (such as
+	 * from Spring, JSR-305, or Jakarta annotations), or a language-level
+	 * nullable type declaration or {@code Continuation} parameter in Kotlin.
 	 * @since 4.3
 	 * @see Nullness#forMethodParameter(MethodParameter)
 	 */
