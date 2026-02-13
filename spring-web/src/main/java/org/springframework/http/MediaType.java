@@ -458,7 +458,7 @@ public class MediaType extends MimeType implements Serializable {
 	 * @throws IllegalArgumentException if any of the parameters contain illegal characters
 	 */
 	public MediaType(MediaType other, @Nullable Map<String, String> parameters) {
-		super(other.getType(), other.getSubtype(), parameters);
+		super(other, parameters);
 	}
 
 	/**

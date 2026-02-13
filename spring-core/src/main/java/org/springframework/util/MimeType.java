@@ -140,31 +140,6 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 	 */
 	public MimeType(String type, String subtype, Charset charset) {
 		this(type, subtype, Collections.singletonMap(PARAM_CHARSET, charset.name()));
-		this.resolvedCharset = charset;
-	}
-
-	/**
-	 * Copy-constructor that copies the type, subtype, parameters of the given {@code MimeType},
-	 * and allows to set the specified character set.
-	 * @param other the other MimeType
-	 * @param charset the character set
-	 * @throws IllegalArgumentException if any of the parameters contains illegal characters
-	 * @since 4.3
-	 */
-	public MimeType(MimeType other, Charset charset) {
-		this(other.getType(), other.getSubtype(), addCharsetParameter(charset, other.getParameters()));
-		this.resolvedCharset = charset;
-	}
-
-	/**
-	 * Copy-constructor that copies the type and subtype of the given {@code MimeType},
-	 * and allows for different parameter.
-	 * @param other the other MimeType
-	 * @param parameters the parameters (may be {@code null})
-	 * @throws IllegalArgumentException if any of the parameters contains illegal characters
-	 */
-	public MimeType(MimeType other, @Nullable Map<String, String> parameters) {
-		this(other.getType(), other.getSubtype(), parameters);
 	}
 
 	/**
@@ -181,16 +156,43 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 		checkToken(subtype);
 		this.type = type.toLowerCase(Locale.ROOT);
 		this.subtype = subtype.toLowerCase(Locale.ROOT);
-		if (!CollectionUtils.isEmpty(parameters)) {
-			Map<String, String> map = new LinkedCaseInsensitiveMap<>(parameters.size(), Locale.ROOT);
-			parameters.forEach((parameter, value) -> {
-				checkParameters(parameter, value);
-				map.put(parameter, value);
-			});
-			this.parameters = Collections.unmodifiableMap(map);
+		this.parameters = createParametersMap(parameters);
+		if (this.parameters.containsKey(PARAM_CHARSET)) {
+			this.resolvedCharset = Charset.forName(unquote(this.parameters.get(PARAM_CHARSET)));
 		}
-		else {
-			this.parameters = Collections.emptyMap();
+	}
+
+	/**
+	 * Copy-constructor that copies the type, subtype, parameters of the given {@code MimeType},
+	 * and allows to set the specified character set.
+	 * @param other the other MimeType
+	 * @param charset the character set
+	 * @throws IllegalArgumentException if any of the parameters contains illegal characters
+	 * @since 4.3
+	 */
+	public MimeType(MimeType other, Charset charset) {
+		this.type = other.type;
+		this.subtype = other.subtype;
+		Map<String, String> map = new LinkedCaseInsensitiveMap<>(other.parameters.size() + 1, Locale.ROOT);
+		map.putAll(other.parameters);
+		map.put(PARAM_CHARSET, charset.name());
+		this.parameters = Collections.unmodifiableMap(map);
+		this.resolvedCharset = charset;
+	}
+
+	/**
+	 * Copy-constructor that copies the type and subtype of the given {@code MimeType},
+	 * and allows for different parameter.
+	 * @param other the other MimeType
+	 * @param parameters the parameters (may be {@code null})
+	 * @throws IllegalArgumentException if any of the parameters contains illegal characters
+	 */
+	public MimeType(MimeType other, @Nullable Map<String, String> parameters) {
+		this.type = other.type;
+		this.subtype = other.subtype;
+		this.parameters = createParametersMap(parameters);
+		if (this.parameters.containsKey(PARAM_CHARSET)) {
+			this.resolvedCharset = Charset.forName(unquote(this.parameters.get(PARAM_CHARSET)));
 		}
 	}
 
@@ -223,16 +225,25 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 		}
 	}
 
+	private Map<String, String> createParametersMap(@Nullable Map<String, String> parameters) {
+		if (!CollectionUtils.isEmpty(parameters)) {
+			Map<String, String> map = new LinkedCaseInsensitiveMap<>(parameters.size(), Locale.ROOT);
+			parameters.forEach((parameter, value) -> {
+				checkParameters(parameter, value);
+				map.put(parameter, value);
+			});
+			return Collections.unmodifiableMap(map);
+		}
+		else {
+			return Collections.emptyMap();
+		}
+	}
+
 	protected void checkParameters(String parameter, String value) {
 		Assert.hasLength(parameter, "'parameter' must not be empty");
 		Assert.hasLength(value, "'value' must not be empty");
 		checkToken(parameter);
-		if (PARAM_CHARSET.equals(parameter)) {
-			if (this.resolvedCharset == null) {
-				this.resolvedCharset = Charset.forName(unquote(value));
-			}
-		}
-		else if (!isQuotedString(value)) {
+		if (!isQuotedString(value)) {
 			checkToken(value);
 		}
 	}
