@@ -198,15 +198,15 @@ class StandardMultipartHttpServletRequestTests {
 	}
 
 	@SuppressWarnings("serial")
-	private static class FileCountLimitExceededException  extends IOException {
+	private static class FileCountLimitExceededException extends IOException {
 	}
 
 	@SuppressWarnings("serial")
-	private static class FileUploadByteCountLimitException  extends IOException {
+	private static class FileUploadByteCountLimitException extends IOException {
 	}
 
 	@SuppressWarnings("serial")
-	private static class FileUploadFileCountLimitException  extends IOException {
+	private static class FileUploadFileCountLimitException extends IOException {
 	}
 
 }
