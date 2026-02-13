@@ -58,7 +58,7 @@ public class AnnotatedMethod {
 
 	private final MethodParameter[] parameters;
 
-	private final Map<Class<? extends Annotation>, Object> annotations = new ConcurrentHashMap<>(4);
+	private final Map<Class<? extends Annotation>, Object> annotations;
 
 	private volatile @Nullable List<Annotation[][]> inheritedParameterAnnotations;
 
@@ -73,6 +73,7 @@ public class AnnotatedMethod {
 		this.bridgedMethod = BridgeMethodResolver.findBridgedMethod(method);
 		ReflectionUtils.makeAccessible(this.bridgedMethod);
 		this.parameters = initMethodParameters();
+		this.annotations = new ConcurrentHashMap<>(4);
 	}
 
 	/**
@@ -83,6 +84,7 @@ public class AnnotatedMethod {
 		this.method = annotatedMethod.method;
 		this.bridgedMethod = annotatedMethod.bridgedMethod;
 		this.parameters = annotatedMethod.parameters;
+		this.annotations = annotatedMethod.annotations;
 		this.inheritedParameterAnnotations = annotatedMethod.inheritedParameterAnnotations;
 	}
 
