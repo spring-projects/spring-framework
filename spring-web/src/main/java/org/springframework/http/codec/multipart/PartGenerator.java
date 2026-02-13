@@ -99,7 +99,8 @@ final class PartGenerator extends BaseSubscriber<MultipartParser.Token> {
 
 			sink.onCancel(generator);
 			sink.onRequest(l -> generator.requestToken());
-			tokens.subscribe(generator);
+			tokens.doOnDiscard(MultipartParser.BodyToken.class, bodyToken -> DataBufferUtils.release(bodyToken.buffer()))
+					.subscribe(generator);
 		});
 	}
 
