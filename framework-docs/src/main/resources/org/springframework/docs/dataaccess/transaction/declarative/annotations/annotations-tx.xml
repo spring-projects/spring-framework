@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- tag::snippet[] -->
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="
+		http://www.springframework.org/schema/beans
+		https://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/tx
+		https://www.springframework.org/schema/tx/spring-tx.xsd
+		http://www.springframework.org/schema/aop
+		https://www.springframework.org/schema/aop/spring-aop.xsd">
+
+	<!-- this is the service object that we want to make transactional -->
+	<bean id="fooService" class="x.y.service.DefaultFooService"/>
+
+	<!-- enable the configuration of transactional behavior based on annotations -->
+	<!-- a TransactionManager is still required -->
+	<tx:annotation-driven transaction-manager="txManager"/> <!--1-->
+
+	<bean id="txManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<!-- (this dependency is defined somewhere else) -->
+		<property name="dataSource" ref="dataSource"/>
+	</bean>
+
+	<!-- other <bean/> definitions here -->
+
+</beans>
+<!-- end::snippet[] -->
