@@ -648,7 +648,7 @@ class JmsTemplateTests {
 		given(localSession.createTemporaryQueue()).willReturn(replyDestination);
 
 		MessageConsumer messageConsumer = mock();
-		given(localSession.createConsumer(replyDestination, null)).willReturn(messageConsumer);
+		given(localSession.createConsumer(replyDestination)).willReturn(messageConsumer);
 
 		TextMessage request = mock();
 		MessageCreator messageCreator = mock();

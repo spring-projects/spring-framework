@@ -957,20 +957,22 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 		try {
 			Message requestMessage = messageCreator.createMessage(session);
 			producer = session.createProducer(destination);
+			if (!useCorrelationId) {
+				consumer = session.createConsumer(responseQueue);
+			}
 			requestMessage.setJMSReplyTo(responseQueue);
 			if (logger.isDebugEnabled()) {
 				logger.debug("Sending created message: " + requestMessage);
 			}
 			doSend(producer, requestMessage);
-			String messageSelector = null;
-			if (useCorrelationId) {
+			if (consumer == null) {  // useCorrelationId=true
 				String correlationId = requestMessage.getJMSCorrelationID();
 				if (correlationId == null) {
 					correlationId = requestMessage.getJMSMessageID();
 				}
-				messageSelector = "JMSCorrelationID='" + correlationId + "'";
+				String messageSelector = "JMSCorrelationID='" + correlationId + "'";
+				consumer = session.createConsumer(responseQueue, messageSelector);
 			}
-			consumer = session.createConsumer(responseQueue, messageSelector);
 			return receiveFromConsumer(consumer, getReceiveTimeout());
 		}
 		finally {
