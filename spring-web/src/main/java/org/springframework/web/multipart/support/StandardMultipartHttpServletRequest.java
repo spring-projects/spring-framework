@@ -117,10 +117,11 @@ public class StandardMultipartHttpServletRequest extends AbstractMultipartHttpSe
 		// MaxUploadSizeExceededException ?
 		Throwable cause = ex;
 		do {
-			String msg = cause.getMessage();
+			String msg = cause.toString();
 			if (msg != null) {
 				msg = msg.toLowerCase(Locale.ROOT);
-				if ((msg.contains("exceed") && (msg.contains("size") || msg.contains("length"))) ||
+				if (((msg.contains("exceed") || msg.contains("limit")) &&
+						(msg.contains("size") || msg.contains("length") || msg.contains("count"))) ||
 						(msg.contains("request") && (msg.contains("big") || msg.contains("large")))) {
 					throw new MaxUploadSizeExceededException(-1, ex);
 				}
