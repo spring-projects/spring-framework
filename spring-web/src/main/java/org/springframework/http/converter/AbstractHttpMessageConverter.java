@@ -252,13 +252,14 @@ public abstract class AbstractHttpMessageConverter<T> implements HttpMessageConv
 				contentTypeToUse = (mediaType != null ? mediaType : contentTypeToUse);
 			}
 			if (contentTypeToUse != null) {
+				String value = contentTypeToUse.toString();
 				if (contentTypeToUse.getCharset() == null) {
 					Charset defaultCharset = getDefaultCharset();
 					if (defaultCharset != null) {
-						contentTypeToUse = new MediaType(contentTypeToUse, defaultCharset);
+						value += ";charset=" + defaultCharset.name();
 					}
 				}
-				headers.setContentType(contentTypeToUse);
+				headers.set(HttpHeaders.CONTENT_TYPE, value);
 			}
 		}
 		if (headers.getContentLength() < 0 && !headers.containsHeader(HttpHeaders.TRANSFER_ENCODING)) {
