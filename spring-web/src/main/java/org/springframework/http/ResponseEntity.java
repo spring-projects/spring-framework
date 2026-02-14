@@ -264,7 +264,7 @@ public class ResponseEntity<T extends @Nullable Object> extends HttpEntity<T> {
 	 * @return the created {@code ResponseEntity}
 	 * @since 4.1
 	 */
-	public static <T extends @Nullable Object> ResponseEntity<@Nullable T> ok(@Nullable T body) {
+	public static <T extends @Nullable Object> ResponseEntity<T> ok(T body) {
 		return ok().body(body);
 	}
 
@@ -297,8 +297,8 @@ public class ResponseEntity<T extends @Nullable Object> extends HttpEntity<T> {
 
 			@SuppressWarnings("unchecked")
 			@Override
-			public <T> ResponseEntity<@Nullable T> build() {
-				return (ResponseEntity<@Nullable T>) body(body);
+			public <T extends @Nullable Object> ResponseEntity<T> build() {
+				return (ResponseEntity<T>) body(body);
 			}
 		};
 	}
@@ -311,7 +311,7 @@ public class ResponseEntity<T extends @Nullable Object> extends HttpEntity<T> {
 	 * @return the created {@code ResponseEntity}
 	 * @since 6.0.5
 	 */
-	public static <T extends @Nullable Object> ResponseEntity<@Nullable T> ofNullable(@Nullable T body) {
+	public static <T extends @Nullable Object> ResponseEntity<T> ofNullable(@Nullable T body) {
 		if (body == null) {
 			return notFound().build();
 		}
@@ -519,7 +519,7 @@ public class ResponseEntity<T extends @Nullable Object> extends HttpEntity<T> {
 		 * @return the response entity
 		 * @see BodyBuilder#body(Object)
 		 */
-		<T> ResponseEntity<@Nullable T> build();
+		<T extends @Nullable Object> ResponseEntity<T> build();
 	}
 
 
@@ -655,8 +655,9 @@ public class ResponseEntity<T extends @Nullable Object> extends HttpEntity<T> {
 			return this;
 		}
 
+		@SuppressWarnings("NullAway")
 		@Override
-		public <T> ResponseEntity<@Nullable T> build() {
+		public <T extends @Nullable Object> ResponseEntity<T> build() {
 			return body(null);
 		}
 
