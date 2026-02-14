@@ -21,6 +21,7 @@ import java.net.URISyntaxException;
 import java.util.List;
 import java.util.function.Predicate;
 
+import org.jspecify.annotations.Nullable;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -54,7 +55,7 @@ abstract class WebClientUtils {
 	@SuppressWarnings("unchecked")
 	public static <T> Mono<ResponseEntity<T>> mapToEntity(ClientResponse response, Mono<T> bodyMono) {
 		return ((Mono<Object>) bodyMono).defaultIfEmpty(VALUE_NONE).map(body ->
-				new ResponseEntity<>(
+				new ResponseEntity<@Nullable T>(
 						body != VALUE_NONE ? (T) body : null,
 						response.headers().asHttpHeaders(),
 						response.statusCode()));
