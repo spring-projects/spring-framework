@@ -16,11 +16,9 @@
 
 package org.springframework.http.server;
 
-import java.util.AbstractSet;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Enumeration;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -34,6 +32,7 @@ import org.jspecify.annotations.Nullable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedCaseInsensitiveMap;
+import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
 /**
@@ -59,27 +58,27 @@ final class ServletRequestHeadersAdapter implements MultiValueMap<String, String
 
 	@Override
 	public void add(String key, @Nullable String value) {
-		throw new UnsupportedOperationException();
+		throw immutableRequestException();
 	}
 
 	@Override
 	public void addAll(String key, List<? extends String> values) {
-		throw new UnsupportedOperationException();
+		throw immutableRequestException();
 	}
 
 	@Override
 	public void addAll(MultiValueMap<String, String> map) {
-		throw new UnsupportedOperationException();
+		throw httpHeadersMapException();
 	}
 
 	@Override
 	public void set(String key, @Nullable String value) {
-		throw new UnsupportedOperationException();
+		throw immutableRequestException();
 	}
 
 	@Override
 	public void setAll(Map<String, String> map) {
-		throw new UnsupportedOperationException();
+		throw immutableRequestException();
 	}
 
 	@Override
@@ -95,12 +94,7 @@ final class ServletRequestHeadersAdapter implements MultiValueMap<String, String
 
 	@Override
 	public int size() {
-		Enumeration<String> names = this.request.getHeaderNames();
-		Set<String> set = new LinkedHashSet<>();
-		while (names.hasMoreElements()) {
-			set.add(names.nextElement().toLowerCase(Locale.ROOT));
-		}
-		return set.size();
+		return keySet().size();
 	}
 
 	@Override
@@ -123,18 +117,7 @@ final class ServletRequestHeadersAdapter implements MultiValueMap<String, String
 
 	@Override
 	public boolean containsValue(Object rawValue) {
-		if (rawValue instanceof String text) {
-			Enumeration<String> names = this.request.getHeaderNames();
-			while (names.hasMoreElements()) {
-				Enumeration<String> values = this.request.getHeaders(names.nextElement());
-				while (values.hasMoreElements()) {
-					if (text.equals(values.nextElement())) {
-						return true;
-					}
-				}
-			}
-		}
-		return false;
+		throw httpHeadersMapException();
 	}
 
 	@Override
@@ -154,22 +137,22 @@ final class ServletRequestHeadersAdapter implements MultiValueMap<String, String
 
 	@Override
 	public @Nullable List<String> put(String key, List<String> value) {
-		throw new UnsupportedOperationException();
+		throw immutableRequestException();
 	}
 
 	@Override
 	public @Nullable List<String> remove(Object key) {
-		throw new UnsupportedOperationException();
+		throw immutableRequestException();
 	}
 
 	@Override
 	public void putAll(Map<? extends String, ? extends List<String>> map) {
-		throw new UnsupportedOperationException();
+		throw httpHeadersMapException();
 	}
 
 	@Override
 	public void clear() {
-		throw new UnsupportedOperationException();
+		throw immutableRequestException();
 	}
 
 	@Override
@@ -184,45 +167,44 @@ final class ServletRequestHeadersAdapter implements MultiValueMap<String, String
 
 	@Override
 	public Collection<List<String>> values() {
-		List<List<String>> allValues = new ArrayList<>();
-		Enumeration<String> names = this.request.getHeaderNames();
-		while (names.hasMoreElements()) {
-			String name = names.nextElement();
-			List<String> currentValues = new ArrayList<>();
-			Enumeration<String> values = this.request.getHeaders(name);
-			while (values.hasMoreElements()) {
-				currentValues.add(values.nextElement());
-			}
-			allValues.add(currentValues);
-		}
-		return allValues;
+		throw httpHeadersMapException();
 	}
 
 	@Override
 	public Set<Entry<String, List<String>>> entrySet() {
-		return new AbstractSet<>() {
-			@Override
-			public Iterator<Entry<String, List<String>>> iterator() {
-				return new EntryIterator();
-			}
+		throw httpHeadersMapException();
+	}
 
-			@Override
-			public int size() {
-				return ServletRequestHeadersAdapter.this.size();
-			}
-		};
+	private static UnsupportedOperationException immutableRequestException() {
+		return new UnsupportedOperationException("Request headers are immutable");
+	}
+
+	private static UnsupportedOperationException httpHeadersMapException() {
+		return new UnsupportedOperationException("HttpHeaders does not support all Map operations");
 	}
 
 
 	@Override
 	public int hashCode() {
-		return Map.copyOf(this).hashCode();
+		return toMultiValueMap().hashCode();
 	}
 
 	@Override
 	public boolean equals(@Nullable Object other) {
-		return (this == other ||
-				(other instanceof MultiValueMap<?,?> that && Map.copyOf(this).equals(that)));
+		return (this == other || (other instanceof MultiValueMap<?,?> that && toMultiValueMap().equals(that)));
+	}
+
+	private MultiValueMap<String, String> toMultiValueMap() {
+		MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
+		Enumeration<String> names = this.request.getHeaderNames();
+		while (names.hasMoreElements()) {
+			String name = names.nextElement();
+			Enumeration<String> values = this.request.getHeaders(name);
+			while (values.hasMoreElements()) {
+				map.add(name, values.nextElement());
+			}
+		}
+		return map;
 	}
 
 	@Override
@@ -237,124 +219,80 @@ final class ServletRequestHeadersAdapter implements MultiValueMap<String, String
 	 * @param headers the headers map to wrap
 	 * @return the wrapper instance
 	 */
-	public static MultiValueMap<String, String> overrideHeadersWrapper(MultiValueMap<String, String> headers) {
-		return new OverrideHeaderWrapper(headers);
-	}
-
-
-	private class EntryIterator implements Iterator<Entry<String, List<String>>> {
-
-		private final Iterator<String> names = ServletRequestHeadersAdapter.this.keySet().iterator();
-
-		@Override
-		public boolean hasNext() {
-			return this.names.hasNext();
-		}
-
-		@Override
-		public Entry<String, List<String>> next() {
-			return new HeaderEntry(this.names.next());
-		}
-	}
-
-
-	private final class HeaderEntry implements Entry<String, List<String>> {
-
-		private final String key;
-
-		HeaderEntry(String key) {
-			this.key = key;
-		}
-
-		@Override
-		public String getKey() {
-			return this.key;
-		}
-
-		@Override
-		public @Nullable List<String> getValue() {
-			return get(this.key);
-		}
-
-		@Override
-		public @Nullable List<String> setValue(List<String> value) {
-			List<String> previous = getValue();
-			remove(this.key);
-			addAll(this.key, value);
-			return previous;
-		}
+	static MultiValueMap<String, String> requestHeaderOverrideWrapper(MultiValueMap<String, String> headers) {
+		return new RequestHeaderOverrideWrapper(headers);
 	}
 
 
 	/**
-	 * Wrapper that supports optional override values.
+	 * Wrapper that holds override values.
 	 */
-	private static class OverrideHeaderWrapper implements MultiValueMap<String, String> {
+	private static class RequestHeaderOverrideWrapper implements MultiValueMap<String, String> {
 
 		private final MultiValueMap<String, String> delegate;
 
-		private @Nullable MultiValueMap<String, String> overrideHeaders;
+		private @Nullable MultiValueMap<String, String> overrideMap;
 
-		OverrideHeaderWrapper(MultiValueMap<String, String> delegate) {
+		RequestHeaderOverrideWrapper(MultiValueMap<String, String> delegate) {
 			this.delegate = delegate;
 		}
 
 		@Override
 		public @Nullable String getFirst(String key) {
-			String value = (this.overrideHeaders != null ? this.overrideHeaders.getFirst(key) : null);
+			String value = (this.overrideMap != null ? this.overrideMap.getFirst(key) : null);
 			return (value != null ? value : this.delegate.getFirst(key));
 		}
 
 		@Override
 		public void add(String key, @Nullable String value) {
-			initOverrideHeaders().add(key, value);
+			initOverrideMap().add(key, value);
 		}
 
 		@Override
 		public void addAll(String key, List<? extends String> values) {
-			initOverrideHeaders().addAll(key, values);
+			initOverrideMap().addAll(key, values);
 		}
 
 		@Override
 		public void addAll(MultiValueMap<String, String> map) {
-			initOverrideHeaders().addAll(map);
+			throw httpHeadersMapException();
 		}
 
 		@Override
 		public void set(String key, @Nullable String value) {
-			initOverrideHeaders().set(key, value);
+			initOverrideMap().set(key, value);
 		}
 
 		@Override
 		public void setAll(Map<String, String> map) {
-			initOverrideHeaders().setAll(map);
+			initOverrideMap().setAll(map);
 		}
 
 		@Override
 		public Map<String, String> toSingleValueMap() {
 			Map<String, String> map = this.delegate.toSingleValueMap();
-			if (this.overrideHeaders != null) {
-				this.overrideHeaders.forEach((key, values) -> map.put(key, values.get(0)));
+			if (this.overrideMap != null) {
+				this.overrideMap.forEach((key, values) -> map.put(key, values.get(0)));
 			}
 			return map;
 		}
 
 		@Override
 		public int size() {
-			if (this.overrideHeaders == null) {
+			if (this.overrideMap == null) {
 				return this.delegate.size();
 			}
 			Set<String> set = new LinkedHashSet<>();
 			for (String name : this.delegate.keySet()) {
 				set.add(name.toLowerCase(Locale.ROOT));
 			}
-			this.overrideHeaders.keySet().forEach(key -> set.add(key.toLowerCase(Locale.ROOT)));
+			this.overrideMap.keySet().forEach(key -> set.add(key.toLowerCase(Locale.ROOT)));
 			return set.size();
 		}
 
 		@Override
 		public boolean isEmpty() {
-			return (this.delegate.isEmpty() && (this.overrideHeaders == null || this.overrideHeaders.isEmpty()));
+			return (this.delegate.isEmpty() && (this.overrideMap == null || this.overrideMap.isEmpty()));
 		}
 
 		@Override
@@ -363,8 +301,8 @@ final class ServletRequestHeadersAdapter implements MultiValueMap<String, String
 				if (this.delegate.containsKey(headerName)) {
 					return true;
 				}
-				if (this.overrideHeaders != null) {
-					return this.overrideHeaders.containsKey(headerName);
+				if (this.overrideMap != null) {
+					return this.overrideMap.containsKey(headerName);
 				}
 			}
 			return false;
@@ -372,22 +310,14 @@ final class ServletRequestHeadersAdapter implements MultiValueMap<String, String
 
 		@Override
 		public boolean containsValue(Object rawValue) {
-			if (rawValue instanceof String text) {
-				if (this.delegate.containsValue(text)) {
-					return true;
-				}
-				if (this.overrideHeaders != null) {
-					return this.overrideHeaders.containsValue(rawValue);
-				}
-			}
-			return false;
+			throw httpHeadersMapException();
 		}
 
 		@Override
 		public @Nullable List<String> get(Object key) {
 			if (key instanceof String headerName) {
-				if (this.overrideHeaders != null) {
-					List<String> values = this.overrideHeaders.get(headerName);
+				if (this.overrideMap != null) {
+					List<String> values = this.overrideMap.get(headerName);
 					if (values != null) {
 						return values;
 					}
@@ -399,128 +329,79 @@ final class ServletRequestHeadersAdapter implements MultiValueMap<String, String
 
 		@Override
 		public @Nullable List<String> put(String key, List<String> value) {
-			return initOverrideHeaders().put(key, value);
+			return initOverrideMap().put(key, value);
 		}
 
 		@Override
 		public @Nullable List<String> remove(Object key) {
-			return initOverrideHeaders().remove(key);
+			return initOverrideMap().remove(key);
 		}
 
 		@Override
 		public void putAll(Map<? extends String, ? extends List<String>> map) {
-			initOverrideHeaders().putAll(map);
+			throw httpHeadersMapException();
 		}
 
 		@Override
 		public void clear() {
-			initOverrideHeaders().clear();
+			if (this.overrideMap != null) {
+				this.overrideMap.clear();
+			}
 		}
 
 		@Override
 		public Set<String> keySet() {
 			Set<String> set = this.delegate.keySet();
-			if (this.overrideHeaders != null) {
-				set.addAll(this.overrideHeaders.keySet());
+			if (this.overrideMap != null) {
+				set.addAll(this.overrideMap.keySet());
 			}
 			return set;
 		}
 
 		@Override
 		public Collection<List<String>> values() {
-			List<List<String>> allValues = new ArrayList<>();
-			for (String name : keySet()) {
-				if (this.overrideHeaders != null && this.overrideHeaders.containsKey(name)) {
-					allValues.add(this.overrideHeaders.get(name));
-				}
-				else {
-					allValues.add(this.delegate.get(name));
-				}
-			}
-			return allValues;
+			throw httpHeadersMapException();
 		}
 
 		@Override
 		public Set<Entry<String, List<String>>> entrySet() {
-			return new AbstractSet<>() {
-				@Override
-				public Iterator<Entry<String, List<String>>> iterator() {
-					return new OverrideHeaderWrapper.EntryIterator();
-				}
-
-				@Override
-				public int size() {
-					return OverrideHeaderWrapper.this.size();
-				}
-			};
+			throw httpHeadersMapException();
 		}
 
-		private MultiValueMap<String, String> initOverrideHeaders() {
-			if (this.overrideHeaders == null) {
-				this.overrideHeaders = CollectionUtils.toMultiValueMap(new LinkedCaseInsensitiveMap<>(8, Locale.ROOT));
+		private MultiValueMap<String, String> initOverrideMap() {
+			if (this.overrideMap == null) {
+				this.overrideMap = CollectionUtils.toMultiValueMap(new LinkedCaseInsensitiveMap<>(8, Locale.ROOT));
 			}
-			return this.overrideHeaders;
+			return this.overrideMap;
 		}
 
 
 		@Override
 		public int hashCode() {
-			return Map.copyOf(this).hashCode();
+			return toMultiValueMap().hashCode();
 		}
 
 		@Override
 		public boolean equals(@Nullable Object other) {
-			return (this == other ||
-					(other instanceof MultiValueMap<?,?> that && Map.copyOf(this).equals(that)));
+			return (this == other || (other instanceof MultiValueMap<?,?> that && toMultiValueMap().equals(that)));
+		}
+
+		private MultiValueMap<String, String> toMultiValueMap() {
+			MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
+			for (String name : keySet()) {
+				List<String> values = get(name);
+				if (values != null) {
+					for (String value : values) {
+						map.add(name, value);
+					}
+				}
+			}
+			return map;
 		}
 
 		@Override
 		public String toString() {
 			return HttpHeaders.formatHeaders(this);
-		}
-
-
-		private class EntryIterator implements Iterator<Entry<String, List<String>>> {
-
-			private final Iterator<String> names = OverrideHeaderWrapper.this.keySet().iterator();
-
-			@Override
-			public boolean hasNext() {
-				return this.names.hasNext();
-			}
-
-			@Override
-			public Entry<String, List<String>> next() {
-				return new OverrideHeaderWrapper.HeaderEntry(this.names.next());
-			}
-		}
-
-
-		private final class HeaderEntry implements Entry<String, List<String>> {
-
-			private final String key;
-
-			HeaderEntry(String key) {
-				this.key = key;
-			}
-
-			@Override
-			public String getKey() {
-				return this.key;
-			}
-
-			@Override
-			public @Nullable List<String> getValue() {
-				return get(this.key);
-			}
-
-			@Override
-			public @Nullable List<String> setValue(List<String> value) {
-				List<String> previous = getValue();
-				remove(this.key);
-				addAll(this.key, value);
-				return previous;
-			}
 		}
 	}
 

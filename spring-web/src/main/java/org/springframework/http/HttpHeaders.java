@@ -491,7 +491,12 @@ public class HttpHeaders implements Serializable {
 	 */
 	public static HttpHeaders copyOf(MultiValueMap<String, String> headers) {
 		HttpHeaders httpHeadersCopy = new HttpHeaders();
-		headers.forEach((key, values) -> httpHeadersCopy.put(key, new ArrayList<>(values)));
+		for (String name : headers.keySet()) {
+			List<String> values = headers.get(name);
+			if (values != null) {
+				httpHeadersCopy.put(name, new ArrayList<>(values));
+			}
+		}
 		return httpHeadersCopy;
 	}
 
@@ -1984,7 +1989,9 @@ public class HttpHeaders implements Serializable {
 	 * @see #put(String, List)
 	 */
 	public void putAll(Map<? extends String, ? extends List<String>> headers) {
-		headers.forEach(this::put);
+		for (String name : headers.keySet()) {
+			put(name, headers.get(name));
+		}
 	}
 
 	/**

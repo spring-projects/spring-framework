@@ -181,7 +181,10 @@ class ReadOnlyHttpHeaders extends HttpHeaders {
 
 	@Override
 	public void forEach(BiConsumer<? super String, ? super List<String>> action) {
-		this.headers.forEach((k, vs) -> action.accept(k, Collections.unmodifiableList(vs)));
+		for (String name : this.headers.keySet()) {
+			List<String> values = this.headers.get(name);
+			action.accept(name, (values != null ? Collections.unmodifiableList(values) : Collections.emptyList()));
+		}
 	}
 
 }

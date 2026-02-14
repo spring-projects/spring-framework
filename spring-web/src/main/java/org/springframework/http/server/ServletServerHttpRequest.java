@@ -216,7 +216,7 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 		if (nativeHeaders == null) {
 			nativeHeaders = new ServletRequestHeadersAdapter(this.servletRequest);
 		}
-		return ServletRequestHeadersAdapter.overrideHeadersWrapper(nativeHeaders);
+		return ServletRequestHeadersAdapter.requestHeaderOverrideWrapper(nativeHeaders);
 	}
 
 
