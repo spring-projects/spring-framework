@@ -531,6 +531,7 @@ following kinds of expressions cannot be compiled.
 * Expressions relying on the conversion service
 * Expressions using custom resolvers
 * Expressions using overloaded operators
+* Expressions using `Optional` with the null-safe or Elvis operator
 * Expressions using array construction syntax
 * Expressions using selection or projection
 * Expressions using bean references
