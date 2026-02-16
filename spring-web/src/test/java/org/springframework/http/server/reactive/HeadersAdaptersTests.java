@@ -298,12 +298,14 @@ class HeadersAdaptersTests {
 
 	static Stream<Arguments> nativeHeadersWithCasedEntries() {
 		return Stream.of(
-				argumentSet("Netty", new Netty4HeadersAdapter(withHeaders(new DefaultHttpHeaders(), h -> h::add))),
-				argumentSet("Tomcat", new TomcatHeadersAdapter(withHeaders(new MimeHeaders(),
-						h -> (k, v) -> h.addValue(k).setString(v)))),
-				argumentSet("Jetty", new JettyHeadersAdapter(withHeaders(HttpFields.build(), h -> h::add))),
-				argumentSet("HttpComponents", new HttpComponentsHeadersAdapter(withHeaders(new HttpGet("https://example.com"),
-						h -> h::addHeader)))
+				argumentSet("Netty", new Netty4HeadersAdapter(
+						withHeaders(new DefaultHttpHeaders(), h -> h::add))),
+				argumentSet("Tomcat", new TomcatHeadersAdapter(
+						withHeaders(new MimeHeaders(), h -> (k, v) -> h.addValue(k).setString(v)))),
+				argumentSet("Jetty", new JettyHeadersAdapter(
+						withHeaders(HttpFields.build(), h -> h::add))),
+				argumentSet("HttpComponents", new HttpComponentsHeadersAdapter(
+						withHeaders(new HttpGet("https://example.com"), h -> h::addHeader)))
 		);
 	}
 
