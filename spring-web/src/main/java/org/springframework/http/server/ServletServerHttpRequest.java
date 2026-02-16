@@ -22,7 +22,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
-import java.lang.reflect.Field;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -42,9 +41,6 @@ import java.util.Map;
 import java.util.Set;
 
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletRequestWrapper;
-import org.apache.catalina.connector.RequestFacade;
-import org.apache.coyote.Request;
 import org.jspecify.annotations.Nullable;
 
 import org.springframework.http.HttpHeaders;
@@ -52,10 +48,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.InvalidMediaTypeException;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
-import org.springframework.util.ClassUtils;
 import org.springframework.util.LinkedCaseInsensitiveMap;
-import org.springframework.util.MultiValueMap;
-import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -69,9 +62,6 @@ import org.springframework.util.StringUtils;
 public class ServletServerHttpRequest implements ServerHttpRequest {
 
 	protected static final Charset FORM_CHARSET = StandardCharsets.UTF_8;
-
-	private static final boolean TOMCAT_PRESENT = ClassUtils.isPresent(
-			"org.apache.tomcat.util.http.MimeHeaders", ServletServerHttpRequest.class.getClassLoader());
 
 
 	private final HttpServletRequest servletRequest;
@@ -166,8 +156,7 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 	@Override
 	public HttpHeaders getHeaders() {
 		if (this.headers == null) {
-			MultiValueMap<String, String> headersAdapter = initHeadersMultiValueMap();
-			this.headers = new HttpHeaders(headersAdapter);
+			this.headers = new HttpHeaders(ServletRequestHeadersAdapter.create(this.servletRequest));
 
 			// HttpServletRequest exposes some headers as properties:
 			// we should include those if not already present
@@ -208,19 +197,6 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 		return this.headers;
 	}
 
-	private MultiValueMap<String, String> initHeadersMultiValueMap() {
-		MultiValueMap<String, String> nativeHeaders = null;
-		if (TOMCAT_PRESENT) {
-			nativeHeaders = TomcatInitializer.createTomcatHttpHeaders(this.servletRequest);
-		}
-		if (nativeHeaders == null) {
-			nativeHeaders = new ServletRequestHeadersAdapter(this.servletRequest);
-		}
-		return ServletRequestHeadersAdapter.requestHeaderOverrideWrapper(nativeHeaders);
-	}
-
-
-	@Override
 	public @Nullable Principal getPrincipal() {
 		return this.servletRequest.getUserPrincipal();
 	}
@@ -327,41 +303,6 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 			// ignore
 		}
 		return FORM_CHARSET;
-	}
-
-
-	private static final class TomcatInitializer {
-
-		private static final Field COYOTE_REQUEST_FIELD;
-
-		static {
-			Field field = ReflectionUtils.findField(RequestFacade.class, "request");
-			Assert.state(field != null, "Incompatible Tomcat implementation");
-			ReflectionUtils.makeAccessible(field);
-			COYOTE_REQUEST_FIELD = field;
-		}
-
-		public static @Nullable MultiValueMap<String, String> createTomcatHttpHeaders(HttpServletRequest servletRequest) {
-			RequestFacade requestFacade = getRequestFacade(servletRequest);
-			if (requestFacade == null) {
-				return null;
-			}
-			Object field = ReflectionUtils.getField(COYOTE_REQUEST_FIELD, requestFacade);
-			Assert.state(field != null, "No Tomcat connector request");
-			Request coyoteRequest = ((org.apache.catalina.connector.Request) field).getCoyoteRequest();
-			return new TomcatHeadersAdapter(coyoteRequest.getMimeHeaders());
-		}
-
-		private static @Nullable RequestFacade getRequestFacade(HttpServletRequest request) {
-			if (request instanceof RequestFacade facade) {
-				return facade;
-			}
-			else if (request instanceof HttpServletRequestWrapper wrapper) {
-				HttpServletRequest wrappedRequest = (HttpServletRequest) wrapper.getRequest();
-				return getRequestFacade(wrappedRequest);
-			}
-			return null;
-		}
 	}
 
 

@@ -16,11 +16,11 @@
 
 package org.springframework.http.server;
 
+import java.util.AbstractSet;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -119,10 +119,9 @@ class ServletResponseHeadersAdapter implements MultiValueMap<String, String> {
 	public @Nullable List<String> get(Object key) {
 		if (key instanceof String headerName) {
 			Collection<String> values = this.response.getHeaders(headerName);
-			if (values.isEmpty()) {
-				return (this.response.containsHeader(headerName) ? Collections.emptyList() : null);
+			if (!values.isEmpty()) {
+				return new ArrayList<>(values);
 			}
-			return new ArrayList<>(values);
 		}
 		return null;
 	}
@@ -162,7 +161,7 @@ class ServletResponseHeadersAdapter implements MultiValueMap<String, String> {
 
 	@Override
 	public Set<String> keySet() {
-		return new LinkedHashSet<>(this.response.getHeaderNames());
+		return new HeaderNames();
 	}
 
 	@Override
@@ -203,6 +202,45 @@ class ServletResponseHeadersAdapter implements MultiValueMap<String, String> {
 	@Override
 	public String toString() {
 		return HttpHeaders.formatHeaders(this);
+	}
+
+
+	private class HeaderNames extends AbstractSet<String> {
+
+		@Override
+		public Iterator<String> iterator() {
+			return new HeaderNamesIterator(response.getHeaderNames());
+		}
+
+		@Override
+		public int size() {
+			return ServletResponseHeadersAdapter.this.size();
+		}
+	}
+
+
+	private static final class HeaderNamesIterator implements Iterator<String> {
+
+		private final Iterator<String> values;
+
+		private HeaderNamesIterator(Collection<String> values) {
+			this.values = values.iterator();
+		}
+
+		@Override
+		public boolean hasNext() {
+			return this.values.hasNext();
+		}
+
+		@Override
+		public String next() {
+			return this.values.next();
+		}
+
+		@Override
+		public void remove() {
+			throw new UnsupportedOperationException();
+		}
 	}
 
 }

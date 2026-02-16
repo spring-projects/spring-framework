@@ -87,13 +87,13 @@ public class ServletServerHttpResponse implements ServerHttpResponse {
 	@Override
 	public OutputStream getBody() throws IOException {
 		this.bodyUsed = true;
-		writeHeaders();
+		this.headersWritten = true;
 		return this.servletResponse.getOutputStream();
 	}
 
 	@Override
 	public void flush() throws IOException {
-		writeHeaders();
+		this.headersWritten = true;
 		if (this.bodyUsed) {
 			this.servletResponse.flushBuffer();
 		}
@@ -101,13 +101,7 @@ public class ServletServerHttpResponse implements ServerHttpResponse {
 
 	@Override
 	public void close() {
-		writeHeaders();
-	}
-
-	private void writeHeaders() {
-		if (!this.headersWritten) {
-			this.headersWritten = true;
-		}
+		this.headersWritten = true;
 	}
 
 }
