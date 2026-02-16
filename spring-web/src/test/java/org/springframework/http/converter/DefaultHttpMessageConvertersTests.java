@@ -210,22 +210,31 @@ class DefaultHttpMessageConvertersTests {
 					.addCustomConverter(customConverter)
 					.configureMessageConverters(converter -> {
 						if (converter instanceof CustomHttpMessageConverter custom) {
-							custom.processed = true;
+							assertThat(custom.processCount).isZero();
+							custom.processCount++;
+						}
+					})
+					.configureMessageConverters(converter -> {
+						if (converter instanceof CustomHttpMessageConverter custom) {
+							assertThat(custom.processCount).isEqualTo(1);
+							custom.processCount++;
 						}
 					}).build();
 
-			assertThat(customConverter.processed).isTrue();
+			assertThat(customConverter.processCount).isEqualTo(2);
 		}
 
 		@Test
 		void shouldAppendCustomConverterToList() {
-			var customConverter = new CustomHttpMessageConverter();
+			var firstCustom = new CustomHttpMessageConverter();
+			var secondCustom = new CustomHttpMessageConverter();
 			var messageConverters = HttpMessageConverters.forClient()
 					.registerDefaults()
-					.configureMessageConvertersList(converters -> converters.add(customConverter))
+					.configureMessageConvertersList(converters -> converters.add(firstCustom))
+					.configureMessageConvertersList(converters -> converters.add(secondCustom))
 					.build();
 
-			assertThat(messageConverters).last().isInstanceOf(CustomHttpMessageConverter.class);
+			assertThat(messageConverters).containsSequence(firstCustom, secondCustom);
 		}
 
 	}
@@ -336,22 +345,31 @@ class DefaultHttpMessageConvertersTests {
 					.addCustomConverter(customConverter)
 					.configureMessageConverters(converter -> {
 						if (converter instanceof CustomHttpMessageConverter custom) {
-							custom.processed = true;
+							assertThat(custom.processCount).isZero();
+							custom.processCount++;
+						}
+					})
+					.configureMessageConverters(converter -> {
+						if (converter instanceof CustomHttpMessageConverter custom) {
+							assertThat(custom.processCount).isEqualTo(1);
+							custom.processCount++;
 						}
 					}).build();
 
-			assertThat(customConverter.processed).isTrue();
+			assertThat(customConverter.processCount).isEqualTo(2);
 		}
 
 		@Test
 		void shouldAppendCustomConverterToList() {
-			var customConverter = new CustomHttpMessageConverter();
+			var firstCustom = new CustomHttpMessageConverter();
+			var secondCustom = new CustomHttpMessageConverter();
 			var messageConverters = HttpMessageConverters.forServer()
 					.registerDefaults()
-					.configureMessageConvertersList(converters -> converters.add(customConverter))
+					.configureMessageConvertersList(converters -> converters.add(firstCustom))
+					.configureMessageConvertersList(converters -> converters.add(secondCustom))
 					.build();
 
-			assertThat(messageConverters).last().isInstanceOf(CustomHttpMessageConverter.class);
+			assertThat(messageConverters).containsSequence(firstCustom, secondCustom);
 		}
 	}
 
@@ -365,7 +383,7 @@ class DefaultHttpMessageConvertersTests {
 
 	static class CustomHttpMessageConverter extends AbstractHttpMessageConverter<Object> {
 
-		boolean processed = false;
+		int processCount;
 
 		@Override
 		protected boolean supports(Class<?> clazz) {
