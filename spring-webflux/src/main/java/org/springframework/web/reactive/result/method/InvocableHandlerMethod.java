@@ -55,7 +55,6 @@ import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.lang.Contract;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
-import org.springframework.validation.annotation.ValidationAnnotationUtils;
 import org.springframework.validation.method.MethodValidator;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.reactive.BindingContext;
@@ -96,8 +95,6 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	private ReactiveAdapterRegistry reactiveAdapterRegistry = ReactiveAdapterRegistry.getSharedInstance();
 
 	private @Nullable MethodValidator methodValidator;
-
-	private Class<?>[] validationGroups = EMPTY_GROUPS;
 
 	private @Nullable Scheduler invocationScheduler;
 
@@ -165,8 +162,6 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	 */
 	public void setMethodValidator(@Nullable MethodValidator methodValidator) {
 		this.methodValidator = methodValidator;
-		this.validationGroups = (methodValidator != null ?
-				ValidationAnnotationUtils.determineValidationGroups(getBean(), getBridgedMethod()) : EMPTY_GROUPS);
 	}
 
 	/**
@@ -193,7 +188,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 				try {
 					LocaleContextHolder.setLocaleContext(exchange.getLocaleContext());
 					this.methodValidator.applyArgumentValidation(
-							getBean(), getBridgedMethod(), getMethodParameters(), args, this.validationGroups);
+							getBean(), getBridgedMethod(), getMethodParameters(), args, getValidationGroups());
 				}
 				finally {
 					LocaleContextHolder.resetLocaleContext();
