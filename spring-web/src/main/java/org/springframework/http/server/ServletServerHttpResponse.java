@@ -18,6 +18,7 @@ package org.springframework.http.server;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -118,19 +119,31 @@ public class ServletServerHttpResponse implements ServerHttpResponse {
 					this.servletResponse.addHeader(headerName, headerValue);
 				}
 			});
+
 			// HttpServletResponse exposes some headers as properties: we should include those if not already present
-			MediaType contentTypeHeader = this.headers.getContentType();
-			if (this.servletResponse.getContentType() == null && contentTypeHeader != null) {
-				this.servletResponse.setContentType(contentTypeHeader.toString());
+			if (this.servletResponse.getContentType() == null && this.headers.containsKey(HttpHeaders.CONTENT_TYPE)) {
+				this.servletResponse.setContentType(this.headers.getFirst(HttpHeaders.CONTENT_TYPE));
 			}
-			if (this.servletResponse.getCharacterEncoding() == null && contentTypeHeader != null &&
-					contentTypeHeader.getCharset() != null) {
-				this.servletResponse.setCharacterEncoding(contentTypeHeader.getCharset().name());
+			if (this.servletResponse.getCharacterEncoding() == null && this.headers.containsKey(HttpHeaders.CONTENT_TYPE)) {
+				try {
+					// Lazy parsing into MediaType
+					MediaType contentType = this.headers.getContentType();
+					if (contentType != null) {
+						Charset charset = contentType.getCharset();
+						if (charset != null) {
+							this.servletResponse.setCharacterEncoding(charset.name());
+						}
+					}
+				}
+				catch (Exception ex) {
+					// Leave character encoding unspecified
+				}
 			}
-			long contentLength = getHeaders().getContentLength();
+			long contentLength = this.headers.getContentLength();
 			if (contentLength != -1) {
 				this.servletResponse.setContentLengthLong(contentLength);
 			}
+
 			this.headersWritten = true;
 		}
 	}

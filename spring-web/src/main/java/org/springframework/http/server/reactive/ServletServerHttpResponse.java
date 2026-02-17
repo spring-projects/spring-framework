@@ -50,7 +50,9 @@ import org.springframework.util.ReflectionUtils;
  */
 class ServletServerHttpResponse extends AbstractListenerServerHttpResponse {
 
-	private static final boolean IS_SERVLET61 = ReflectionUtils.findField(HttpServletResponse.class, "SC_PERMANENT_REDIRECT") != null;
+	private static final boolean SERVLET61 =
+			(ReflectionUtils.findField(HttpServletResponse.class, "SC_PERMANENT_REDIRECT") != null);
+
 
 	private final HttpServletResponse response;
 
@@ -138,31 +140,35 @@ class ServletServerHttpResponse extends AbstractListenerServerHttpResponse {
 	}
 
 	protected void adaptHeaders(boolean removeAdaptedHeaders) {
-		MediaType contentType = null;
-		try {
-			contentType = getHeaders().getContentType();
-		}
-		catch (Exception ex) {
-			String rawContentType = getHeaders().getFirst(HttpHeaders.CONTENT_TYPE);
-			this.response.setContentType(rawContentType);
-		}
-		if (this.response.getContentType() == null && contentType != null) {
-			this.response.setContentType(contentType.toString());
-		}
+		HttpHeaders headers = getHeaders();
 
-		Charset charset = (contentType != null ? contentType.getCharset() : null);
-		if (this.response.getCharacterEncoding() == null && charset != null) {
-			this.response.setCharacterEncoding(charset.name());
+		// HttpServletResponse exposes some headers as properties: we should include those if not already present
+		if (this.response.getContentType() == null && headers.containsKey(HttpHeaders.CONTENT_TYPE)) {
+			this.response.setContentType(headers.getFirst(HttpHeaders.CONTENT_TYPE));
 		}
-
-		long contentLength = getHeaders().getContentLength();
+		if (this.response.getCharacterEncoding() == null && headers.containsKey(HttpHeaders.CONTENT_TYPE)) {
+			try {
+				// Lazy parsing into MediaType
+				MediaType contentType = headers.getContentType();
+				if (contentType != null) {
+					Charset charset = contentType.getCharset();
+					if (charset != null) {
+						this.response.setCharacterEncoding(charset.name());
+					}
+				}
+			}
+			catch (Exception ex) {
+				// Leave character encoding unspecified
+			}
+		}
+		long contentLength = headers.getContentLength();
 		if (contentLength != -1) {
 			this.response.setContentLengthLong(contentLength);
 		}
 
 		if (removeAdaptedHeaders) {
-			getHeaders().remove(HttpHeaders.CONTENT_TYPE);
-			getHeaders().remove(HttpHeaders.CONTENT_LENGTH);
+			headers.remove(HttpHeaders.CONTENT_TYPE);
+			headers.remove(HttpHeaders.CONTENT_LENGTH);
 		}
 	}
 
@@ -186,7 +192,7 @@ class ServletServerHttpResponse extends AbstractListenerServerHttpResponse {
 				cookie.setSecure(httpCookie.isSecure());
 				cookie.setHttpOnly(httpCookie.isHttpOnly());
 				if (httpCookie.isPartitioned()) {
-					if (IS_SERVLET61) {
+					if (SERVLET61) {
 						cookie.setAttribute("Partitioned", "");
 					}
 					else {
@@ -372,7 +378,6 @@ class ServletServerHttpResponse extends AbstractListenerServerHttpResponse {
 
 
 	private class ResponseBodyProcessor extends AbstractListenerWriteProcessor<DataBuffer> {
-
 
 		public ResponseBodyProcessor() {
 			super(request.getLogPrefix());

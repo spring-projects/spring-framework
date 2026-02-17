@@ -459,6 +459,11 @@ public class ResponseBodyEmitterReturnValueHandler implements HandlerMethodRetur
 			// ignore
 		}
 
+		// @Override - on Servlet 6.1
+		public void setCharacterEncoding(Charset encoding) {
+			// ignore
+		}
+
 		@Override
 		public void setContentLength(int len) {
 			// ignore

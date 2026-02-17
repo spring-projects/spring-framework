@@ -187,10 +187,10 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 				if (contentType != null && contentType.getCharset() == null) {
 					String requestEncoding = this.servletRequest.getCharacterEncoding();
 					if (StringUtils.hasLength(requestEncoding)) {
-						Charset charSet = Charset.forName(requestEncoding);
+						Charset charset = Charset.forName(requestEncoding);
 						Map<String, String> params = new LinkedCaseInsensitiveMap<>();
 						params.putAll(contentType.getParameters());
-						params.put("charset", charSet.toString());
+						params.put("charset", charset.toString());
 						MediaType mediaType = new MediaType(contentType.getType(), contentType.getSubtype(), params);
 						this.headers.setContentType(mediaType);
 					}
@@ -207,7 +207,6 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 				}
 			}
 		}
-
 		return this.headers;
 	}
 
