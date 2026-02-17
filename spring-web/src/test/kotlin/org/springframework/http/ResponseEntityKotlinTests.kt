@@ -61,8 +61,8 @@ class ResponseEntityKotlinTests {
 	}
 
 	@Test
-	fun okNullUnitType() {
-		val responseEntity = ResponseEntity.ok<Unit>(null)
+	fun okUnitType() {
+		val responseEntity: ResponseEntity<Unit> = ResponseEntity.ok().build()
 		assertThat(responseEntity).isNotNull()
 		assertThat(responseEntity.statusCode).isEqualTo(HttpStatus.OK)
 		assertThat(responseEntity.body).isNull()
