@@ -374,7 +374,7 @@ public class ScriptTemplateView extends AbstractUrlBasedView {
 
 		setResponseContentType(request, response);
 		if (this.charset != null) {
-			response.setCharacterEncoding(this.charset.name());
+			response.setCharacterEncoding(this.charset);
 		}
 	}
 

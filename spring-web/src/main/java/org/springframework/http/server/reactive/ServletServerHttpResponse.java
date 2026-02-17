@@ -18,7 +18,6 @@ package org.springframework.http.server.reactive;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.nio.charset.Charset;
 
 import jakarta.servlet.AsyncContext;
 import jakarta.servlet.AsyncEvent;
@@ -122,31 +121,34 @@ class ServletServerHttpResponse extends AbstractListenerServerHttpResponse {
 	}
 
 	protected void adaptHeaders(boolean removeAdaptedHeaders) {
-		MediaType contentType = null;
-		try {
-			contentType = getHeaders().getContentType();
-		}
-		catch (Exception ex) {
-			String rawContentType = getHeaders().getFirst(HttpHeaders.CONTENT_TYPE);
-			this.response.setContentType(rawContentType);
-		}
-		if (this.response.getContentType() == null && contentType != null) {
-			this.response.setContentType(contentType.toString());
+		HttpHeaders headers = getHeaders();
+		// HttpServletResponse exposes some headers as properties: we should include those if not already present
+
+		if (this.response.getContentType() == null && headers.containsHeader(HttpHeaders.CONTENT_TYPE)) {
+			this.response.setContentType(headers.getFirst(HttpHeaders.CONTENT_TYPE));
 		}
 
-		Charset charset = (contentType != null ? contentType.getCharset() : null);
-		if (this.response.getCharacterEncoding() == null && charset != null) {
-			this.response.setCharacterEncoding(charset.name());
+		if (this.response.getCharacterEncoding() == null && headers.containsHeader(HttpHeaders.CONTENT_TYPE)) {
+			try {
+				// Lazy parsing into MediaType
+				MediaType contentType = headers.getContentType();
+				if (contentType != null) {
+					this.response.setCharacterEncoding(contentType.getCharset());
+				}
+			}
+			catch (Exception ex) {
+				// Leave character encoding unspecified
+			}
 		}
 
-		long contentLength = getHeaders().getContentLength();
+		long contentLength = headers.getContentLength();
 		if (contentLength != -1) {
 			this.response.setContentLengthLong(contentLength);
 		}
 
 		if (removeAdaptedHeaders) {
-			getHeaders().remove(HttpHeaders.CONTENT_TYPE);
-			getHeaders().remove(HttpHeaders.CONTENT_LENGTH);
+			headers.remove(HttpHeaders.CONTENT_TYPE);
+			headers.remove(HttpHeaders.CONTENT_LENGTH);
 		}
 	}
 
@@ -351,7 +353,6 @@ class ServletServerHttpResponse extends AbstractListenerServerHttpResponse {
 
 
 	private class ResponseBodyProcessor extends AbstractListenerWriteProcessor<DataBuffer> {
-
 
 		public ResponseBodyProcessor() {
 			super(request.getLogPrefix());
