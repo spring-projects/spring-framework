@@ -18,6 +18,7 @@ package org.springframework.http.server;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.charset.Charset;
 
 import jakarta.servlet.http.HttpServletResponse;
 import org.jspecify.annotations.Nullable;
@@ -116,15 +117,18 @@ public class ServletServerHttpResponse implements ServerHttpResponse {
 					// Lazy parsing into MediaType
 					MediaType contentType = this.headers.getContentType();
 					if (contentType != null) {
-						this.servletResponse.setCharacterEncoding(contentType.getCharset());
+						Charset charset = contentType.getCharset();
+						if (charset != null) {
+							this.servletResponse.setCharacterEncoding(charset);
+						}
 					}
 				}
 				catch (Exception ex) {
 					// Leave character encoding unspecified
 				}
 			}
+			this.headersWritten = true;
 		}
-		this.headersWritten = true;
 	}
 
 }

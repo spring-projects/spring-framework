@@ -17,6 +17,7 @@
 package org.springframework.web.servlet.function;
 
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.Collection;
 import java.util.Set;
 
@@ -60,6 +61,7 @@ abstract class AbstractServerResponse extends ErrorHandlingServerResponse {
 		this.headers = HttpHeaders.readOnlyHttpHeaders(headers);
 		this.cookies = CollectionUtils.unmodifiableMultiValueMap(new LinkedMultiValueMap<>(cookies));
 	}
+
 
 	@Override
 	public final HttpStatusCode statusCode() {
@@ -121,12 +123,19 @@ abstract class AbstractServerResponse extends ErrorHandlingServerResponse {
 				// Lazy parsing into MediaType
 				MediaType contentType = this.headers.getContentType();
 				if (contentType != null) {
-					servletResponse.setCharacterEncoding(contentType.getCharset());
+					Charset charset = contentType.getCharset();
+					if (charset != null) {
+						servletResponse.setCharacterEncoding(charset);
+					}
 				}
 			}
 			catch (Exception ex) {
 				// Leave character encoding unspecified
 			}
+		}
+		long contentLength = this.headers.getContentLength();
+		if (contentLength != -1) {
+			servletResponse.setContentLengthLong(contentLength);
 		}
 	}
 

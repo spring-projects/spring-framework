@@ -18,6 +18,7 @@ package org.springframework.http.server.reactive;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
 
 import jakarta.servlet.AsyncContext;
 import jakarta.servlet.AsyncEvent;
@@ -122,25 +123,26 @@ class ServletServerHttpResponse extends AbstractListenerServerHttpResponse {
 
 	protected void adaptHeaders(boolean removeAdaptedHeaders) {
 		HttpHeaders headers = getHeaders();
-		// HttpServletResponse exposes some headers as properties: we should include those if not already present
 
+		// HttpServletResponse exposes some headers as properties: we should include those if not already present
 		if (this.response.getContentType() == null && headers.containsHeader(HttpHeaders.CONTENT_TYPE)) {
 			this.response.setContentType(headers.getFirst(HttpHeaders.CONTENT_TYPE));
 		}
-
 		if (this.response.getCharacterEncoding() == null && headers.containsHeader(HttpHeaders.CONTENT_TYPE)) {
 			try {
 				// Lazy parsing into MediaType
 				MediaType contentType = headers.getContentType();
 				if (contentType != null) {
-					this.response.setCharacterEncoding(contentType.getCharset());
+					Charset charset = contentType.getCharset();
+					if (charset != null) {
+						this.response.setCharacterEncoding(charset);
+					}
 				}
 			}
 			catch (Exception ex) {
 				// Leave character encoding unspecified
 			}
 		}
-
 		long contentLength = headers.getContentLength();
 		if (contentLength != -1) {
 			this.response.setContentLengthLong(contentLength);
