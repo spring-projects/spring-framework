@@ -183,6 +183,7 @@ public class MethodParameter {
 		this.containingClass = original.containingClass;
 		this.parameterType = original.parameterType;
 		this.genericParameterType = original.genericParameterType;
+		this.methodAnnotations = original.methodAnnotations;
 		this.parameterAnnotations = original.parameterAnnotations;
 		this.parameterNameDiscoverer = original.parameterNameDiscoverer;
 		this.parameterName = original.parameterName;
