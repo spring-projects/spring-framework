@@ -34,6 +34,7 @@ import org.springframework.web.servlet.ModelAndView;
 
 /**
  * Base class for {@link ServerResponse} implementations with error handling.
+ *
  * @author Arjen Poutsma
  * @since 5.3
  */
@@ -80,6 +81,7 @@ abstract class ErrorHandlingServerResponse implements ServerResponse {
 		}
 		return null;
 	}
+
 
 	private static class ErrorHandler<T extends ServerResponse> {
 
