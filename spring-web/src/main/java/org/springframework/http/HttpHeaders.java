@@ -2336,9 +2336,9 @@ public class HttpHeaders implements Serializable {
 
 			@Override
 			public List<String> setValue(List<String> value) {
-				List<String> previousValues = Objects.requireNonNull(CaseInsensitiveEntrySet.this.headers.get(this.key));
+				List<String> previous = Objects.requireNonNull(CaseInsensitiveEntrySet.this.headers.get(this.key));
 				CaseInsensitiveEntrySet.this.headers.put(this.key, value);
-				return previousValues;
+				return previous;
 			}
 
 			@Override

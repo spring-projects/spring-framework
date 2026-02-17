@@ -148,7 +148,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	/**
 	 * Configure a reactive adapter registry. This is needed for cases where the response is
 	 * fully handled within the controller in combination with an async void return value.
-	 * <p>By default this is a {@link ReactiveAdapterRegistry} with default settings.
+	 * <p>By default, this is a {@link ReactiveAdapterRegistry} with default settings.
 	 */
 	public void setReactiveAdapterRegistry(ReactiveAdapterRegistry registry) {
 		this.reactiveAdapterRegistry = registry;
