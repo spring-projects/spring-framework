@@ -64,8 +64,6 @@ public class InvocableHandlerMethod extends HandlerMethod {
 
 	private static final Object[] EMPTY_ARGS = new Object[0];
 
-	private static final Class<?>[] EMPTY_GROUPS = new Class<?>[0];
-
 	private static final boolean KOTLIN_REFLECT_PRESENT = KotlinDetector.isKotlinReflectPresent();
 
 
