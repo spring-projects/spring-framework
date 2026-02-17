@@ -2056,9 +2056,8 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 		return DATE_FORMATTER.format(time);
 	}
 
-
 	private static Set<String> toCaseInsensitiveSet(Set<String> originalSet) {
-		final Set<String> deduplicatedSet = Collections.newSetFromMap(
+		Set<String> deduplicatedSet = Collections.newSetFromMap(
 				new LinkedCaseInsensitiveMap<>(originalSet.size(), Locale.ROOT));
 		// add/addAll (put/putAll in LinkedCaseInsensitiveMap) retain the casing of the last occurrence.
 		// Here we prefer the first.
@@ -2075,6 +2074,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	private static final class CaseInsensitiveEntrySet extends AbstractSet<Entry<String, List<String>>> {
 
 		private final MultiValueMap<String, String> headers;
+
 		private final Set<String> deduplicatedNames;
 
 		public CaseInsensitiveEntrySet(MultiValueMap<String, String> headers) {
@@ -2091,6 +2091,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 		public int size() {
 			return this.deduplicatedNames.size();
 		}
+
 
 		private final class CaseInsensitiveIterator implements Iterator<Map.Entry<String, List<String>>> {
 
@@ -2127,6 +2128,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 			}
 		}
 
+
 		private final class CaseInsensitiveEntry implements Map.Entry<String, List<String>> {
 
 			private final String key;
@@ -2147,10 +2149,9 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 
 			@Override
 			public List<String> setValue(List<String> value) {
-				List<String> previousValues = Objects.requireNonNull(
-						CaseInsensitiveEntrySet.this.headers.get(this.key));
+				List<String> previous = Objects.requireNonNull(CaseInsensitiveEntrySet.this.headers.get(this.key));
 				CaseInsensitiveEntrySet.this.headers.put(this.key, value);
-				return previousValues;
+				return previous;
 			}
 		}
 	}
