@@ -151,7 +151,7 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 	 * Mainly intended for code that wants to set the current transaction
 	 * rollback-only but not throw an application exception.
 	 * <p>This exposes the locally declared transaction boundary with its declared name
-	 * and characteristics, as managed by the aspect. Ar runtime, the local boundary may
+	 * and characteristics, as managed by the aspect. At runtime, the local boundary may
 	 * participate in an outer transaction: If you need transaction metadata from such
 	 * an outer transaction (the actual resource transaction) instead, consider using
 	 * {@link org.springframework.transaction.support.TransactionSynchronizationManager}.
