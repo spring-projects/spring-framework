@@ -123,13 +123,13 @@ public class ResolvableType implements Serializable {
 
 	private @Nullable Class<?> resolved;
 
-	private volatile @Nullable ResolvableType superType;
+	private transient volatile @Nullable ResolvableType superType;
 
-	private volatile ResolvableType @Nullable [] interfaces;
+	private transient volatile ResolvableType @Nullable [] interfaces;
 
-	private volatile ResolvableType @Nullable [] generics;
+	private transient volatile ResolvableType @Nullable [] generics;
 
-	private volatile @Nullable Boolean unresolvableGenerics;
+	private transient volatile @Nullable Boolean unresolvableGenerics;
 
 
 	/**

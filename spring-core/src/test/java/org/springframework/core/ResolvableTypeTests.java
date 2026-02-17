@@ -1336,6 +1336,22 @@ class ResolvableTypeTests {
 	}
 
 	@Test
+	void serializeWithCachedState() throws Exception {
+		ResolvableType type = ResolvableType.forClass(List.class);
+		testSerialization(type);
+		type.getSuperType();
+		type.getInterfaces();
+		type.getGenerics();
+		type.hasUnresolvableGenerics();
+		testSerialization(type);
+		type.getSuperType();
+		type.getInterfaces();
+		type.getGenerics();
+		type.hasUnresolvableGenerics();
+		testSerialization(type);
+	}
+
+	@Test
 	void canResolveVoid() {
 		ResolvableType type = ResolvableType.forClass(void.class);
 		assertThat(type.resolve()).isEqualTo(void.class);
