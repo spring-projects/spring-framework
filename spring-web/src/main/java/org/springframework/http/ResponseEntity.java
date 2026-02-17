@@ -311,7 +311,7 @@ public class ResponseEntity<T extends @Nullable Object> extends HttpEntity<T> {
 	 * @return the created {@code ResponseEntity}
 	 * @since 6.0.5
 	 */
-	public static <T extends @Nullable Object> ResponseEntity<T> ofNullable(@Nullable T body) {
+	public static <T extends @Nullable Object> ResponseEntity<T> ofNullable(T body) {
 		if (body == null) {
 			return notFound().build();
 		}
