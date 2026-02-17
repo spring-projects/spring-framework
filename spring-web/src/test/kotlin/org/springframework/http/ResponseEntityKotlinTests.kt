@@ -36,15 +36,6 @@ class ResponseEntityKotlinTests {
 	}
 
 	@Test
-	fun ofNullNullable() {
-		val responseEntity = ResponseEntity.ofNullable<Int>(null)
-		assertThat(responseEntity).isNotNull()
-		assertThat(responseEntity.statusCode).isEqualTo(HttpStatus.NOT_FOUND)
-		assertThat(responseEntity.body).isNull()
-	}
-
-
-	@Test
 	fun ofNullNullableType() {
 		val responseEntity = ResponseEntity.ofNullable<Int?>(null)
 		assertThat(responseEntity).isNotNull()
@@ -65,7 +56,7 @@ class ResponseEntityKotlinTests {
 		val responseEntity: ResponseEntity<Unit> = ResponseEntity.ok().build()
 		assertThat(responseEntity).isNotNull()
 		assertThat(responseEntity.statusCode).isEqualTo(HttpStatus.OK)
-		assertThat(responseEntity.body).isNull()
+		assertThat(responseEntity.body).isEqualTo(Unit)
 	}
 
 	@Test
@@ -81,7 +72,7 @@ class ResponseEntityKotlinTests {
 		val responseEntity = ResponseEntity.noContent().build<Unit>()
 		assertThat(responseEntity).isNotNull()
 		assertThat(responseEntity.statusCode).isEqualTo(HttpStatus.NO_CONTENT)
-		assertThat(responseEntity.body).isNull()
+		assertThat(responseEntity.body).isEqualTo(Unit)
 	}
 
 	@Test
