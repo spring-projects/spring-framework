@@ -19,6 +19,7 @@ package org.springframework.http.server;
 import java.util.AbstractSet;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -49,8 +50,12 @@ class ServletResponseHeadersAdapter implements MultiValueMap<String, String> {
 
 
 	@Override
-	public String getFirst(String key) {
-		return this.response.getHeader(key);
+	public @Nullable String getFirst(String key) {
+		String header = this.response.getHeader(key);
+		if (header == null && key.equalsIgnoreCase(HttpHeaders.CONTENT_TYPE)) {
+			header = this.response.getContentType();
+		}
+		return header;
 	}
 
 	@Override
@@ -119,6 +124,10 @@ class ServletResponseHeadersAdapter implements MultiValueMap<String, String> {
 	public @Nullable List<String> get(Object key) {
 		if (key instanceof String headerName) {
 			Collection<String> values = this.response.getHeaders(headerName);
+			if (values.isEmpty() && headerName.equalsIgnoreCase(HttpHeaders.CONTENT_TYPE)) {
+				String contentType = this.response.getContentType();
+				return (contentType != null ? Collections.singletonList(contentType) : null);
+			}
 			if (!values.isEmpty()) {
 				return new ArrayList<>(values);
 			}
@@ -138,11 +147,11 @@ class ServletResponseHeadersAdapter implements MultiValueMap<String, String> {
 	@Override
 	public @Nullable List<String> remove(Object key) {
 		if (key instanceof String headerName) {
-			Collection<String> previous = this.response.getHeaders(headerName);
+			List<String> previous = get(headerName);
 			if (previous != null) {
 				this.response.setHeader(headerName, null);
 			}
-			return (previous != null ? new ArrayList<>(previous) : null);
+			return previous;
 		}
 		return null;
 	}
