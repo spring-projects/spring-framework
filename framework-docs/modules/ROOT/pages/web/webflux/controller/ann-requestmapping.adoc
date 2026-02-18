@@ -394,7 +394,8 @@ Once API versioning is enabled, you can begin to map requests with versions.
 The `@RequestMapping` `version` attribute supports the following:
 
 - Fixed version ("1.2") -- matches the given version only
-- Baseline version ("1.2+") -- matches the given version and above
+- Baseline version ("1.2+") -- matches the given and
+xref:web/webflux/config.adoc#webflux-config-api-version[supported versions] above
 - No value -- matches any version, but is superseded by a more specific version match
 
 If multiple controller methods have a version less than or equal to the request version,
@@ -443,6 +444,9 @@ For request with version `"1.3"`:
 - (3) matches as it matches 1.2 and above, and is *chosen* as the highest match
 - (4) is higher and does not match
 
+NOTE: Version 1.3 must be present in the mappings, or be
+xref:web/webflux/config.adoc#webflux-config-api-version[configured as supported].
+
 For request with version `"1.5"`:
 
 - (1) matches as it matches any version
@@ -458,10 +462,6 @@ Controller methods without a version are intended to support clients created bef
 versioned alternative was introduced. Therefore, even though an unversioned controller
 method is considered a match for any version, it is in fact given the lowest priority,
 and is effectively superseded by any alternative controller method with a version.
-
-NOTE: The above assumes the request version is a
-xref:web/webflux/config.adoc#webflux-config-api-version["supported" version],
-or otherwise it would fail.
 
 See xref:web/webflux-versioning.adoc[API Versioning] for more details on underlying
 infrastructure and support for API Versioning.
