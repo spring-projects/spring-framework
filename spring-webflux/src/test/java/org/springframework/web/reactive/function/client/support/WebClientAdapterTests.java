@@ -129,6 +129,23 @@ class WebClientAdapterTests {
 		assertThat(attributes).containsEntry("myAttribute", "myAttributeValue");
 	}
 
+	@Test // see gh-36326
+	void getBodyWithGenericReturnType() {
+		prepareResponse(r -> r.setHeader("Content-Type", "application/json").body("{\"name\":\"Karl\"}"));
+		Person person = initService(PersonClient.class).getBody();
+
+		assertThat(person.getName()).isEqualTo("Karl");
+	}
+
+
+	@Test // see gh-36326
+	void getEntityWithGenericReturnType() {
+		prepareResponse(r -> r.setHeader("Content-Type", "application/json").body("{\"name\":\"Karl\"}"));
+		ResponseEntity<Person> entity = initService(PersonClient.class).getEntity();
+
+		assertThat(entity.getBody().getName()).isEqualTo("Karl");
+	}
+
 	@Test // gh-29624
 	void uri() throws Exception {
 		String expectedBody = "hello";
@@ -358,6 +375,20 @@ class WebClientAdapterTests {
 		public void setName(String name) {
 			this.name = name;
 		}
+	}
+
+
+	private interface BaseClient<T> {
+
+		@GetExchange
+		T getBody();
+
+		@GetExchange
+		ResponseEntity<T> getEntity();
+	}
+
+
+	private interface PersonClient extends BaseClient<Person> {
 	}
 
 }

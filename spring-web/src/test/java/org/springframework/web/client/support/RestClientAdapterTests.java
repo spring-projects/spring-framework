@@ -200,6 +200,22 @@ class RestClientAdapterTests {
 		assertThat(actualResponse).isEqualTo("Hello Spring 2!");
 	}
 
+	@Test // see gh-36326
+	void getBodyWithGenericReturnType() {
+		prepareResponse(r -> r.setHeader("Content-Type", "application/json").body("{\"name\":\"Karl\"}"));
+		Person person = initService(PersonClient.class).getBody();
+
+		assertThat(person.name()).isEqualTo("Karl");
+	}
+
+	@Test // see gh-36326
+	void getEntityWithGenericReturnType() {
+		prepareResponse(r -> r.setHeader("Content-Type", "application/json").body("{\"name\":\"Karl\"}"));
+		ResponseEntity<Person> entity = initService(PersonClient.class).getEntity();
+
+		assertThat(entity.getBody().name()).isEqualTo("Karl");
+	}
+
 	@ParameterizedAdapterTest
 	void getWithUriBuilderFactory(MockWebServer server, Service service) throws InterruptedException {
 		prepareResponse(builder ->
@@ -443,6 +459,21 @@ class RestClientAdapterTests {
 
 
 	record Person(String name) {
+	}
+
+
+	private interface BaseClient<T> {
+
+		@GetExchange
+		T getBody();
+
+		@GetExchange
+		ResponseEntity<T> getEntity();
+	}
+
+
+	private interface PersonClient extends BaseClient<Person> {
+
 	}
 
 }

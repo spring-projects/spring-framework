@@ -18,6 +18,7 @@ package org.springframework.web.service.invoker;
 
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Method;
+import java.lang.reflect.Type;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
@@ -30,6 +31,7 @@ import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.KotlinDetector;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ParameterizedTypeReference;
@@ -84,7 +86,7 @@ final class HttpServiceMethod {
 
 
 	HttpServiceMethod(
-			Method method, Class<?> containingClass, List<HttpServiceArgumentResolver> argumentResolvers,
+			Method method, Class<?> serviceType, List<HttpServiceArgumentResolver> argumentResolvers,
 			HttpRequestValues.Processor valuesProcessor, HttpExchangeAdapter adapter,
 			@Nullable StringValueResolver embeddedValueResolver) {
 
@@ -97,12 +99,12 @@ final class HttpServiceMethod {
 
 		this.requestValuesInitializer =
 				HttpRequestValuesInitializer.create(
-						method, containingClass, embeddedValueResolver,
+						method, serviceType, embeddedValueResolver,
 						(isReactorAdapter ? ReactiveHttpRequestValues::builder : HttpRequestValues::builder));
 
 		this.responseFunction = (isReactorAdapter ?
-				ReactorExchangeResponseFunction.create((ReactorHttpExchangeAdapter) adapter, method) :
-				ExchangeResponseFunction.create(adapter, method));
+				ReactorExchangeResponseFunction.create((ReactorHttpExchangeAdapter) adapter, method, serviceType) :
+				ExchangeResponseFunction.create(adapter, method, serviceType));
 	}
 
 	private static MethodParameter[] initMethodParameters(Method method) {
@@ -403,13 +405,15 @@ final class HttpServiceMethod {
 		/**
 		 * Create the {@code ResponseFunction} that matches the method return type.
 		 */
-		public static ResponseFunction create(HttpExchangeAdapter client, Method method) {
+		public static ResponseFunction create(
+				HttpExchangeAdapter client, Method method, Class<?> serviceType) {
+
 			if (KotlinDetector.isSuspendingFunction(method)) {
 				throw new IllegalStateException(
 						"Kotlin Coroutines are only supported with reactive implementations");
 			}
 
-			MethodParameter param = new MethodParameter(method, -1).nestedIfOptional();
+			MethodParameter param = new MethodParameter(method, -1).withContainingClass(serviceType).nestedIfOptional();
 			Class<?> paramType = param.getNestedParameterType();
 
 			Function<HttpRequestValues, @Nullable Object> responseFunction;
@@ -429,15 +433,17 @@ final class HttpServiceMethod {
 							asOptionalIfNecessary(client.exchangeForBodilessEntity(request), param);
 				}
 				else {
+					Type type = bodyParam.getNestedGenericParameterType();
 					ParameterizedTypeReference<?> bodyTypeRef =
-							ParameterizedTypeReference.forType(bodyParam.getNestedGenericParameterType());
+							ParameterizedTypeReference.forType(GenericTypeResolver.resolveType(type, serviceType));
 					responseFunction = request ->
 							asOptionalIfNecessary(client.exchangeForEntity(request, bodyTypeRef), param);
 				}
 			}
 			else {
+				Type type = param.getNestedGenericParameterType();
 				ParameterizedTypeReference<?> bodyTypeRef =
-						ParameterizedTypeReference.forType(param.getNestedGenericParameterType());
+						ParameterizedTypeReference.forType(GenericTypeResolver.resolveType(type, serviceType));
 				responseFunction = request ->
 						asOptionalIfNecessary(client.exchangeForBody(request, bodyTypeRef), param);
 			}
@@ -486,8 +492,10 @@ final class HttpServiceMethod {
 		/**
 		 * Create the {@code ResponseFunction} that matches the method return type.
 		 */
-		public static ResponseFunction create(ReactorHttpExchangeAdapter client, Method method) {
-			MethodParameter returnParam = new MethodParameter(method, -1);
+		public static ResponseFunction create(
+				ReactorHttpExchangeAdapter client, Method method, Class<?> serviceType) {
+
+			MethodParameter returnParam = new MethodParameter(method, -1).withContainingClass(serviceType);
 			Class<?> returnType = returnParam.getParameterType();
 			boolean isSuspending = KotlinDetector.isSuspendingFunction(method);
 			boolean hasFlowReturnType = COROUTINES_FLOW_CLASS_NAME.equals(returnType.getName());
@@ -512,18 +520,19 @@ final class HttpServiceMethod {
 				responseFunction = client::exchangeForHeadersMono;
 			}
 			else if (actualType.equals(ResponseEntity.class)) {
-				MethodParameter bodyParam = isUnwrapped ? actualParam : actualParam.nested();
+				MethodParameter bodyParam = (isUnwrapped ? actualParam : actualParam.nested());
 				Class<?> bodyType = bodyParam.getNestedParameterType();
 				if (bodyType.equals(Void.class)) {
 					responseFunction = client::exchangeForBodilessEntityMono;
 				}
 				else {
 					ReactiveAdapter bodyAdapter = client.getReactiveAdapterRegistry().getAdapter(bodyType);
-					responseFunction = initResponseEntityFunction(client, bodyParam, bodyAdapter, isUnwrapped);
+					responseFunction = initResponseEntityFunction(client, bodyParam, serviceType, bodyAdapter, isUnwrapped);
 				}
 			}
 			else {
-				responseFunction = initBodyFunction(client, actualParam, reactiveAdapter, isUnwrapped);
+				responseFunction = initBodyFunction(
+						client, actualParam, serviceType, reactiveAdapter, isUnwrapped);
 			}
 
 			return new ReactorExchangeResponseFunction(
@@ -532,20 +541,26 @@ final class HttpServiceMethod {
 
 		@SuppressWarnings("ConstantConditions")
 		private static Function<HttpRequestValues, Publisher<?>> initResponseEntityFunction(
-				ReactorHttpExchangeAdapter client, MethodParameter methodParam,
+				ReactorHttpExchangeAdapter client, MethodParameter methodParam, Class<?> serviceType,
 				@Nullable ReactiveAdapter reactiveAdapter, boolean isUnwrapped) {
 
 			if (reactiveAdapter == null) {
-				return request -> client.exchangeForEntityMono(
-						request, ParameterizedTypeReference.forType(methodParam.getNestedGenericParameterType()));
+				return request -> {
+					Type type = methodParam.getNestedGenericParameterType();
+					Type resolvedType = GenericTypeResolver.resolveType(type, serviceType);
+					return client.exchangeForEntityMono(request, ParameterizedTypeReference.forType(resolvedType));
+				};
 			}
 
 			Assert.isTrue(reactiveAdapter.isMultiValue(),
 					"ResponseEntity body must be a concrete value or a multi-value Publisher");
 
+			Type type = (isUnwrapped ?
+					methodParam.nested().getGenericParameterType() :
+					methodParam.nested().getNestedGenericParameterType());
+
 			ParameterizedTypeReference<?> bodyType =
-					ParameterizedTypeReference.forType(isUnwrapped ? methodParam.nested().getGenericParameterType() :
-							methodParam.nested().getNestedGenericParameterType());
+					ParameterizedTypeReference.forType(GenericTypeResolver.resolveType(type, serviceType));
 
 			// Shortcut for Flux
 			if (reactiveAdapter.getReactiveType().equals(Flux.class)) {
@@ -562,12 +577,16 @@ final class HttpServiceMethod {
 		}
 
 		private static Function<HttpRequestValues, Publisher<?>> initBodyFunction(
-				ReactorHttpExchangeAdapter client, MethodParameter methodParam,
+				ReactorHttpExchangeAdapter client,
+				MethodParameter methodParam, Class<?> serviceType,
 				@Nullable ReactiveAdapter reactiveAdapter, boolean isSuspending) {
 
+			Type type = (isSuspending ?
+					methodParam.getGenericParameterType() :
+					methodParam.getNestedGenericParameterType());
+
 			ParameterizedTypeReference<?> bodyType =
-					ParameterizedTypeReference.forType(isSuspending ? methodParam.getGenericParameterType() :
-							methodParam.getNestedGenericParameterType());
+					ParameterizedTypeReference.forType(GenericTypeResolver.resolveType(type, serviceType));
 
 			return (reactiveAdapter != null && reactiveAdapter.isMultiValue() ?
 					request -> client.exchangeForBodyFlux(request, bodyType) :
