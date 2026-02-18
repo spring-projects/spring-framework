@@ -101,7 +101,7 @@ class WebClientAdapterTests {
 	void greeting() {
 		prepareResponse(builder -> builder.setHeader("Content-Type", "text/plain").body("Hello Spring!"));
 
-		StepVerifier.create(initService().getGreeting())
+		StepVerifier.create(initService(Service.class).getGreeting())
 				.expectNext("Hello Spring!")
 				.expectComplete()
 				.verify(Duration.ofSeconds(5));
@@ -121,7 +121,7 @@ class WebClientAdapterTests {
 
 		prepareResponse(response -> response.setHeader("Content-Type", "text/plain").body("Hello Spring!"));
 
-		StepVerifier.create(initService(webClient).getGreetingWithAttribute("myAttributeValue"))
+		StepVerifier.create(initService(webClient, Service.class).getGreetingWithAttribute("myAttributeValue"))
 				.expectNext("Hello Spring!")
 				.expectComplete()
 				.verify(Duration.ofSeconds(5));
@@ -135,7 +135,7 @@ class WebClientAdapterTests {
 		prepareResponse(response -> response.code(200).body(expectedBody));
 
 		URI dynamicUri = this.server.url("/greeting/123").uri();
-		String actualBody = initService().getGreetingById(dynamicUri, "456");
+		String actualBody = initService(Service.class).getGreetingById(dynamicUri, "456");
 
 		assertThat(actualBody).isEqualTo(expectedBody);
 		assertThat(this.server.takeRequest().getUrl().uri()).isEqualTo(dynamicUri);
@@ -149,7 +149,7 @@ class WebClientAdapterTests {
 		map.add("param1", "value 1");
 		map.add("param2", "value 2");
 
-		initService().postForm(map);
+		initService(Service.class).postForm(map);
 
 		RecordedRequest request = this.server.takeRequest();
 		assertThat(request.getHeaders().get("Content-Type")).isEqualTo("application/x-www-form-urlencoded");
@@ -164,7 +164,7 @@ class WebClientAdapterTests {
 		MultipartFile file = new MockMultipartFile(
 				fileName, originalFileName, MediaType.APPLICATION_JSON_VALUE, "test".getBytes());
 
-		initService().postMultipart(file, "test2");
+		initService(Service.class).postMultipart(file, "test2");
 
 		RecordedRequest request = this.server.takeRequest();
 		assertThat(request.getHeaders().get("Content-Type")).startsWith("multipart/form-data;boundary=");
@@ -183,7 +183,7 @@ class WebClientAdapterTests {
 		persons.add(new Person("John"));
 		persons.add(new Person("Richard"));
 
-		initService().postPersonSet(persons);
+		initService(Service.class).postPersonSet(persons);
 
 		RecordedRequest request = server.takeRequest();
 		assertThat(request.getMethod()).isEqualTo("POST");
@@ -200,7 +200,7 @@ class WebClientAdapterTests {
 				.defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_XML_VALUE)
 				.build();
 
-		initService(webClient).postObject(new Person("John"));
+		initService(webClient, Service.class).postObject(new Person("John"));
 
 		RecordedRequest request = server.takeRequest();
 		assertThat(request.getMethod()).isEqualTo("POST");
@@ -215,7 +215,7 @@ class WebClientAdapterTests {
 		prepareResponse(response -> response.code(200).body(ignoredResponseBody));
 		UriBuilderFactory factory = new DefaultUriBuilderFactory(this.anotherServer.url("/").toString());
 
-		String actualBody = initService().getWithUriBuilderFactory(factory);
+		String actualBody = initService(Service.class).getWithUriBuilderFactory(factory);
 
 		assertThat(actualBody).isEqualTo(ANOTHER_SERVER_RESPONSE_BODY);
 		assertThat(this.anotherServer.takeRequest().getTarget()).isEqualTo("/greeting");
@@ -228,7 +228,7 @@ class WebClientAdapterTests {
 		prepareResponse(response -> response.code(200).body(ignoredResponseBody));
 		UriBuilderFactory factory = new DefaultUriBuilderFactory(this.anotherServer.url("/").toString());
 
-		String actualBody = initService().getWithUriBuilderFactory(factory, "123", "test");
+		String actualBody = initService(Service.class).getWithUriBuilderFactory(factory, "123", "test");
 
 		assertThat(actualBody).isEqualTo(ANOTHER_SERVER_RESPONSE_BODY);
 		assertThat(this.anotherServer.takeRequest().getTarget()).isEqualTo("/greeting/123?param=test");
@@ -242,7 +242,7 @@ class WebClientAdapterTests {
 		URI dynamicUri = this.server.url("/greeting/123").uri();
 		UriBuilderFactory factory = new DefaultUriBuilderFactory(this.anotherServer.url("/").toString());
 
-		String actualBody = initService().getWithIgnoredUriBuilderFactory(dynamicUri, factory);
+		String actualBody = initService(Service.class).getWithIgnoredUriBuilderFactory(dynamicUri, factory);
 
 		assertThat(actualBody).isEqualTo(expectedResponseBody);
 		assertThat(this.server.takeRequest().getUrl().uri()).isEqualTo(dynamicUri);
@@ -285,14 +285,14 @@ class WebClientAdapterTests {
 		return anotherServer;
 	}
 
-	private Service initService() {
+	private <S> S initService(Class<S> serviceType) {
 		WebClient webClient = WebClient.builder().baseUrl(this.server.url("/").toString()).build();
-		return initService(webClient);
+		return initService(webClient, serviceType);
 	}
 
-	private Service initService(WebClient webClient) {
+	private <S> S initService(WebClient webClient, Class<S> serviceType) {
 		WebClientAdapter adapter = WebClientAdapter.create(webClient);
-		return HttpServiceProxyFactory.builderFor(adapter).build().createClient(Service.class);
+		return HttpServiceProxyFactory.builderFor(adapter).build().createClient(serviceType);
 	}
 
 	private void prepareResponse(Function<MockResponse.Builder, MockResponse.Builder> f) {

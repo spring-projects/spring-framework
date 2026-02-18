@@ -330,7 +330,7 @@ class RestClientAdapterTests {
 		prepareResponse(builder ->
 				builder.setHeader("Content-Type", "text/plain").body("Hello Spring 2!"));
 
-		InputStream inputStream = initService().getInputStream();
+		InputStream inputStream = initService(Service.class).getInputStream();
 
 		RecordedRequest request = this.anotherServer.takeRequest();
 		assertThat(request.getTarget()).isEqualTo("/input-stream");
@@ -341,7 +341,7 @@ class RestClientAdapterTests {
 	void getInputStreamWithError() {
 		prepareResponse(builder -> builder.code(400).body("rejected"));
 
-		assertThatThrownBy(() -> initService().getInputStream())
+		assertThatThrownBy(() -> initService(Service.class).getInputStream())
 				.isExactlyInstanceOf(HttpClientErrorException.BadRequest.class)
 				.hasMessage("400 Client Error: \"rejected\"");
 	}
@@ -352,7 +352,7 @@ class RestClientAdapterTests {
 				builder.setHeader("Content-Type", "text/plain").body("Hello Spring 2!"));
 
 		String body = "test stream";
-		initService().postOutputStream(outputStream -> outputStream.write(body.getBytes()));
+		initService(Service.class).postOutputStream(outputStream -> outputStream.write(body.getBytes()));
 
 		RecordedRequest request = this.anotherServer.takeRequest();
 		assertThat(request.getTarget()).isEqualTo("/output-stream");
@@ -377,11 +377,11 @@ class RestClientAdapterTests {
 		assertThat(responseEntity.getBody()).isNull();
 	}
 
-	private Service initService() {
+	private <S> S initService(Class<S> serviceType) {
 		String url = this.anotherServer.url("/").toString();
 		RestClient restClient = RestClient.builder().baseUrl(url).build();
 		RestClientAdapter adapter = RestClientAdapter.create(restClient);
-		return HttpServiceProxyFactory.builderFor(adapter).build().createClient(Service.class);
+		return HttpServiceProxyFactory.builderFor(adapter).build().createClient(serviceType);
 	}
 
 	private void prepareResponse(Function<MockResponse.Builder, MockResponse.Builder> f) {
