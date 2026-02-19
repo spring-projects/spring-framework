@@ -377,17 +377,14 @@ public interface RestClient {
 						ResponseSpec.ErrorHandler errorHandler);
 
 		/**
-		 * Register a default
-		 * {@linkplain ResponseSpec#onStatus(ResponseErrorHandler) status handler}
-		 * to apply to every response. Such default handlers are applied in the
-		 * order in which they are registered, and after any others that are
-		 * registered for a specific response.
-		 * <p>The first status handler who claims that a response has an
-		 * error is invoked. If you want to disable other defaults, consider
-		 * using {@link #defaultStatusHandler(Predicate, ResponseSpec.ErrorHandler)}
-		 * with a predicate that matches all status codes.
-		 * @param errorHandler handler that typically, though not necessarily,
-		 * throws an exception
+		 * Variant of {@link #defaultStatusHandler(Predicate, ResponseSpec.ErrorHandler)}
+		 * that allows use of {@code RestTemplate}'s {@code ResponseErrorHandler}
+		 * mechanism. This is provided mainly to assist {@code RestTemplate}
+		 * users to transition to {@link RestClient}. Internally, the given
+		 * handler is adapted to {@link RestClient.ResponseSpec}, which is the
+		 * preferred mechanism to use.
+		 * @param errorHandler the error handler to configure, internally adapted
+		 * and integrated into the {@link ResponseSpec.ErrorHandler} chain.
 		 * @return this builder
 		 */
 		Builder defaultStatusHandler(ResponseErrorHandler errorHandler);
