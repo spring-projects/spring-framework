@@ -30,6 +30,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import reactor.core.publisher.Sinks;
 import reactor.core.scheduler.Schedulers;
 
@@ -359,6 +360,27 @@ class ResponseBodyEmitterReturnValueHandlerTests {
 		assertThat(this.response.getContentAsString()).isEqualTo("data:foo\n\ndata:bar\n\n");
 	}
 
+	@Test // gh-36357
+	void responseEntityMono() throws Exception {
+
+		ResponseEntity<Publisher<?>> entity = ResponseEntity.ok()
+				.contentType(MediaType.TEXT_PLAIN)
+				.header("X-Custom", "value")
+				.body(Mono.just("foo"));
+
+		ResolvableType bodyType = forClassWithGenerics(Mono.class, String.class);
+		MethodParameter type = on(TestController.class).resolveReturnType(ResponseEntity.class, bodyType);
+		this.handler.handleReturnValue(entity, type, this.mavContainer, this.webRequest);
+
+		assertThat(this.response.getStatus()).isEqualTo(200);
+		assertThat(this.response.getHeaders("Content-Type")).containsExactly("text/plain");
+		assertThat(this.response.getHeaders("X-Custom")).containsExactly("value");
+
+		WebAsyncManager manager = WebAsyncUtils.getAsyncManager(request);
+		assertThat(manager.isConcurrentHandlingStarted()).isTrue();
+		assertThat(manager.getConcurrentResult()).isEqualTo("foo");
+	}
+
 
 	@SuppressWarnings({"unused", "ConstantConditions"})
 	private static class TestController {
@@ -384,6 +406,8 @@ class ResponseBodyEmitterReturnValueHandlerTests {
 		private ResponseEntity<Flux<SimpleBean>> h10() { return null; }
 
 		private ResponseEntity<Publisher<?>> h11() { return null; }
+
+		private ResponseEntity<Mono<String>> h12() { return null; }
 
 	}
 
