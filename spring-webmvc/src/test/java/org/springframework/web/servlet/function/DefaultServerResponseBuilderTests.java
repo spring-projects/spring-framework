@@ -236,6 +236,22 @@ class DefaultServerResponseBuilderTests {
 	}
 
 	@Test
+	void buildReplacesExistingResponseHeaders() throws Exception {
+		ServerResponse response = ServerResponse.ok()
+				.header("MyKey", "MyValue")
+				.build();
+
+		MockHttpServletRequest mockRequest = new MockHttpServletRequest("GET", "https://example.com");
+		MockHttpServletResponse mockResponse = new MockHttpServletResponse();
+		mockResponse.addHeader("MyKey", "OldValue");
+
+		ModelAndView mav = response.writeTo(mockRequest, mockResponse, EMPTY_CONTEXT);
+		assertThat(mav).isNull();
+
+		assertThat(mockResponse.getHeaders("MyKey")).containsExactly("MyValue");
+	}
+
+	@Test
 	void notModifiedEtag() throws Exception {
 		String etag = "\"foo\"";
 		ServerResponse response = ServerResponse.ok()
