@@ -63,9 +63,11 @@ public abstract class AbstractFileResolvingResource extends AbstractResource {
 					httpCon.setRequestMethod("HEAD");
 					int code = httpCon.getResponseCode();
 					if (code == HttpURLConnection.HTTP_OK) {
+						httpCon.disconnect();
 						return true;
 					}
 					else if (code == HttpURLConnection.HTTP_NOT_FOUND) {
+						httpCon.disconnect();
 						return false;
 					}
 					else if (code == HttpURLConnection.HTTP_BAD_METHOD) {
@@ -74,9 +76,11 @@ public abstract class AbstractFileResolvingResource extends AbstractResource {
 						if (con instanceof HttpURLConnection newHttpCon) {
 							code = newHttpCon.getResponseCode();
 							if (code == HttpURLConnection.HTTP_OK) {
+								newHttpCon.disconnect();
 								return true;
 							}
 							else if (code == HttpURLConnection.HTTP_NOT_FOUND) {
+								newHttpCon.disconnect();
 								return false;
 							}
 							httpCon = newHttpCon;
