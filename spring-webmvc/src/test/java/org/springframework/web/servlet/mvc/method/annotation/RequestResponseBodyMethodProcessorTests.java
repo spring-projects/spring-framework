@@ -24,6 +24,8 @@ import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeName;
@@ -1021,6 +1023,24 @@ class RequestResponseBodyMethodProcessorTests {
 				this.request, methodParameter, methodParameter.getGenericParameterType());
 		assertThat(value).isEqualTo("foo");
 	}
+
+	@Test // gh-36300
+	void shouldNotDuplicateInCompatibleMediaTypes() throws Exception {
+		Method method = TestRestController.class.getMethod("handle");
+		MethodParameter returnType = new MethodParameter(method, -1);
+
+		List<HttpMessageConverter<?>> converters = List.of(new StringHttpMessageConverter(), new JacksonJsonHttpMessageConverter());
+		RequestResponseBodyMethodProcessor processor = new RequestResponseBodyMethodProcessor(converters);
+
+		String accept = Stream.iterate(1, i -> i + 1)
+				.limit(48).map(i -> "application/" + i)
+				.collect(Collectors.joining(","));
+		accept = accept + ", application/json";
+		this.servletRequest.addHeader("Accept", accept);
+
+		processor.writeWithMessageConverters("spring framework", returnType, this.request);
+	}
+
 
 	private void assertContentDisposition(RequestResponseBodyMethodProcessor processor,
 			boolean expectContentDisposition, String requestURI, String comment) throws Exception {
