@@ -408,8 +408,8 @@ public class HandlerMethod extends AnnotatedMethod {
 
 	/**
 	 * Assert that the target bean class is an instance of the class where the given
-	 * method is declared. In some cases the actual controller instance at request-
-	 * processing time may be a JDK dynamic proxy (lazy initialization, prototype
+	 * method is declared. In some cases the actual controller instance at request-processing
+	 * time may be a JDK dynamic proxy (lazy initialization, prototype
 	 * beans, and others). {@code @Controller}'s that require proxying should prefer
 	 * class-based proxy mechanisms.
 	 */
