@@ -47,6 +47,7 @@ public abstract class AbstractFileResolvingResource extends AbstractResource {
 
 	@Override
 	public boolean exists() {
+		HttpURLConnection httpCon = null;
 		try {
 			URL url = getURL();
 			if (ResourceUtils.isFileURL(url)) {
@@ -58,16 +59,14 @@ public abstract class AbstractFileResolvingResource extends AbstractResource {
 				URLConnection con = url.openConnection();
 				customizeConnection(con);
 
-				HttpURLConnection httpCon = (con instanceof HttpURLConnection huc ? huc : null);
+				httpCon = (con instanceof HttpURLConnection huc ? huc : null);
 				if (httpCon != null) {
 					httpCon.setRequestMethod("HEAD");
 					int code = httpCon.getResponseCode();
 					if (code == HttpURLConnection.HTTP_OK) {
-						httpCon.disconnect();
 						return true;
 					}
 					else if (code == HttpURLConnection.HTTP_NOT_FOUND) {
-						httpCon.disconnect();
 						return false;
 					}
 					else if (code == HttpURLConnection.HTTP_BAD_METHOD) {
@@ -76,11 +75,9 @@ public abstract class AbstractFileResolvingResource extends AbstractResource {
 						if (con instanceof HttpURLConnection newHttpCon) {
 							code = newHttpCon.getResponseCode();
 							if (code == HttpURLConnection.HTTP_OK) {
-								newHttpCon.disconnect();
 								return true;
 							}
 							else if (code == HttpURLConnection.HTTP_NOT_FOUND) {
-								newHttpCon.disconnect();
 								return false;
 							}
 							httpCon = newHttpCon;
@@ -109,7 +106,6 @@ public abstract class AbstractFileResolvingResource extends AbstractResource {
 
 				if (httpCon != null) {
 					// No HTTP OK status, and no content-length header: give up
-					httpCon.disconnect();
 					return false;
 				}
 				else {
@@ -121,6 +117,11 @@ public abstract class AbstractFileResolvingResource extends AbstractResource {
 		}
 		catch (IOException ex) {
 			return false;
+		}
+		finally {
+			if (httpCon != null) {
+				httpCon.disconnect();
+			}
 		}
 	}
 
