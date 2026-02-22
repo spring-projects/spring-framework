@@ -25,6 +25,7 @@ import org.eclipse.jetty.client.Request;
 import org.eclipse.jetty.client.Response;
 import org.eclipse.jetty.http.HttpHeader;
 import org.eclipse.jetty.util.component.LifeCycle;
+import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.client.ClientUpgradeRequest;
 import org.eclipse.jetty.websocket.client.JettyUpgradeListener;
 import org.jspecify.annotations.Nullable;
@@ -107,8 +108,10 @@ public class JettyWebSocketClient implements WebSocketClient, Lifecycle {
 		};
 
 		Sinks.Empty<Void> completion = Sinks.empty();
-		JettyWebSocketHandlerAdapter handlerAdapter = new JettyWebSocketHandlerAdapter(handler, session ->
-				new JettyWebSocketSession(session, Objects.requireNonNull(handshakeInfo.get()), DefaultDataBufferFactory.sharedInstance, completion));
+		JettyWebSocketHandlerAdapter handlerAdapter = new JettyWebSocketHandlerAdapter(handler, session -> {
+			configureSession(session);
+			return new JettyWebSocketSession(session, Objects.requireNonNull(handshakeInfo.get()), DefaultDataBufferFactory.sharedInstance, completion);
+		});
 		try {
 			this.client.connect(handlerAdapter, upgradeRequest, jettyUpgradeListener)
 					.exceptionally(throwable -> {
@@ -122,5 +125,16 @@ public class JettyWebSocketClient implements WebSocketClient, Lifecycle {
 		catch (IOException ex) {
 			return Mono.error(ex);
 		}
+	}
+
+	private void configureSession(Session session) {
+		session.setMaxFrameSize(this.client.getMaxFrameSize());
+		session.setMaxBinaryMessageSize(this.client.getMaxBinaryMessageSize());
+		session.setMaxTextMessageSize(this.client.getMaxTextMessageSize());
+		session.setMaxOutgoingFrames(this.client.getMaxOutgoingFrames());
+		session.setIdleTimeout(this.client.getIdleTimeout());
+		session.setAutoFragment(this.client.isAutoFragment());
+		session.setInputBufferSize(this.client.getInputBufferSize());
+		session.setOutputBufferSize(this.client.getOutputBufferSize());
 	}
 }
