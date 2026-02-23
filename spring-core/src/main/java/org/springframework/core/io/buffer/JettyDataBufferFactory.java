@@ -66,27 +66,27 @@ public class JettyDataBufferFactory implements DataBufferFactory {
 
 	@Override
 	@Deprecated(since = "6.0")
-	public JettyDataBuffer allocateBuffer() {
+	public DataBuffer allocateBuffer() {
 		DefaultDataBuffer delegate = this.delegate.allocateBuffer();
-		return new JettyDataBuffer(this, delegate);
+		return new JettyVirtualDataBuffer(this, delegate);
 	}
 
 	@Override
-	public JettyDataBuffer allocateBuffer(int initialCapacity) {
+	public DataBuffer allocateBuffer(int initialCapacity) {
 		DefaultDataBuffer delegate = this.delegate.allocateBuffer(initialCapacity);
-		return new JettyDataBuffer(this, delegate);
+		return new JettyVirtualDataBuffer(this, delegate);
 	}
 
 	@Override
-	public JettyDataBuffer wrap(ByteBuffer byteBuffer) {
+	public DataBuffer wrap(ByteBuffer byteBuffer) {
 		DefaultDataBuffer delegate = this.delegate.wrap(byteBuffer);
-		return new JettyDataBuffer(this, delegate);
+		return new JettyVirtualDataBuffer(this, delegate);
 	}
 
 	@Override
-	public JettyDataBuffer wrap(byte[] bytes) {
+	public DataBuffer wrap(byte[] bytes) {
 		DefaultDataBuffer delegate = this.delegate.wrap(bytes);
-		return new JettyDataBuffer(this, delegate);
+		return new JettyVirtualDataBuffer(this, delegate);
 	}
 
 	public JettyDataBuffer wrap(Content.Chunk chunk) {
@@ -96,9 +96,9 @@ public class JettyDataBufferFactory implements DataBufferFactory {
 	}
 
 	@Override
-	public JettyDataBuffer join(List<? extends DataBuffer> dataBuffers) {
+	public DataBuffer join(List<? extends DataBuffer> dataBuffers) {
 		DefaultDataBuffer delegate = this.delegate.join(dataBuffers);
-		return new JettyDataBuffer(this, delegate);
+		return new JettyVirtualDataBuffer(this, delegate);
 	}
 
 	@Override
