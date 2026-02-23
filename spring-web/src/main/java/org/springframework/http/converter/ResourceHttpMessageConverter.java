@@ -93,7 +93,7 @@ public class ResourceHttpMessageConverter extends AbstractHttpMessageConverter<R
 				}
 			};
 		}
-		else if (Resource.class == clazz || ByteArrayResource.class.isAssignableFrom(clazz)) {
+		else if (clazz.isAssignableFrom(ByteArrayResource.class)) {
 			byte[] body = StreamUtils.copyToByteArray(inputMessage.getBody());
 			return new ByteArrayResource(body) {
 				@Override
