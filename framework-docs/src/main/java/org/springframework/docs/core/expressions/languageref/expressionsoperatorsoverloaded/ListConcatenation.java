@@ -1,5 +1,5 @@
 /*
- * Copyright 2026-present the original author or authors.
+ * Copyright 2002-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ public class ListConcatenation implements OperatorOverloader {
 
 	@Override
 	public boolean overridesOperation(Operation operation, Object left, Object right) {
-		return operation == Operation.ADD && left instanceof List && right instanceof List;
+		return (operation == Operation.ADD && left instanceof List && right instanceof List);
 	}
 
 	@Override
@@ -43,4 +43,5 @@ public class ListConcatenation implements OperatorOverloader {
 				"No overload for operation %s and operands [%s] and [%s]"
 						.formatted(operation, left, right));
 	}
+
 }
