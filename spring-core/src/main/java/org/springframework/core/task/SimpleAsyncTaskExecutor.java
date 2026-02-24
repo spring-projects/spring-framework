@@ -219,7 +219,9 @@ public class SimpleAsyncTaskExecutor extends CustomizableThreadCreator
 
 	/**
 	 * Specify whether to reject tasks when the concurrency limit has been reached,
-	 * throwing {@link TaskRejectedException} on any further execution attempts.
+	 * throwing {@link TaskRejectedException} (which extends the common
+	 * {@link java.util.concurrent.RejectedExecutionException})
+	 * on any further execution attempts.
 	 * <p>The default is {@code false}, blocking the caller until the submission can
 	 * be accepted. Switch this to {@code true} for immediate rejection instead.
 	 * @since 6.2.6
@@ -305,7 +307,7 @@ public class SimpleAsyncTaskExecutor extends CustomizableThreadCreator
 	 * @see #TIMEOUT_IMMEDIATE
 	 * @see #doExecute(Runnable)
 	 */
-	@Deprecated
+	@Deprecated(since = "5.3.16")
 	@Override
 	public void execute(Runnable task, long startTimeout) {
 		Assert.notNull(task, "Runnable must not be null");

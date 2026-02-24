@@ -242,8 +242,8 @@ public class ThreadPoolTaskExecutor extends ExecutorConfigurationSupport
 	 * @since 6.1.4
 	 * @see #initiateShutdown()
 	 */
-	public void setStrictEarlyShutdown(boolean defaultEarlyShutdown) {
-		this.strictEarlyShutdown = defaultEarlyShutdown;
+	public void setStrictEarlyShutdown(boolean strictEarlyShutdown) {
+		this.strictEarlyShutdown = strictEarlyShutdown;
 	}
 
 	/**
