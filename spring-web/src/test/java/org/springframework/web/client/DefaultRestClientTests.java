@@ -18,6 +18,7 @@ package org.springframework.web.client;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -36,6 +37,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 /**
  * Tests for {@link DefaultRestClient}.
@@ -115,6 +118,21 @@ class DefaultRestClientTests {
 						.retrieve()
 						.requiredBody(new ParameterizedTypeReference<String>() {})
 		);
+	}
+
+	@Test
+	void inputStreamBody() throws IOException {
+		mockSentRequest(HttpMethod.GET, "https://example.org");
+		mockResponseStatus(HttpStatus.OK);
+		mockResponseBody("Hello World", MediaType.TEXT_PLAIN);
+
+		InputStream result = this.client.get()
+				.uri("https://example.org")
+				.retrieve()
+				.requiredBody(InputStream.class);
+
+		assertThat(result).isInstanceOf(InputStream.class);
+		verify(this.response, times(0)).close();
 	}
 
 

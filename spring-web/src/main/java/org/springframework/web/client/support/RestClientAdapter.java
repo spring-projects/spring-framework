@@ -16,8 +16,6 @@
 
 package org.springframework.web.client.support;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
@@ -75,8 +73,7 @@ public final class RestClientAdapter implements HttpExchangeAdapter {
 
 	@Override
 	public <T> @Nullable T exchangeForBody(HttpRequestValues values, ParameterizedTypeReference<T> bodyType) {
-		return (bodyType.getType().equals(InputStream.class) ?
-				exchangeForInputStream(values) : newRequest(values).retrieve().body(bodyType));
+		return newRequest(values).retrieve().body(bodyType);
 	}
 
 	@Override
@@ -86,21 +83,7 @@ public final class RestClientAdapter implements HttpExchangeAdapter {
 
 	@Override
 	public <T> ResponseEntity<T> exchangeForEntity(HttpRequestValues values, ParameterizedTypeReference<T> bodyType) {
-		return (bodyType.getType().equals(InputStream.class) ?
-				exchangeForEntityInputStream(values) : newRequest(values).retrieve().toEntity(bodyType));
-	}
-
-	@SuppressWarnings("unchecked")
-	private <T> T exchangeForInputStream(HttpRequestValues values) {
-		return (T) newRequest(values).exchange((request, response) -> getInputStream(response), false);
-	}
-
-	@SuppressWarnings("unchecked")
-	private <T> ResponseEntity<T> exchangeForEntityInputStream(HttpRequestValues values) {
-		return (ResponseEntity<T>) newRequest(values).exchangeForRequiredValue((request, response) ->
-				ResponseEntity.status(response.getStatusCode())
-						.headers(response.getHeaders())
-						.body(getInputStream(response)), false);
+		return newRequest(values).retrieve().toEntity(bodyType);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -161,16 +144,6 @@ public final class RestClientAdapter implements HttpExchangeAdapter {
 
 		return bodySpec;
 	}
-
-	private static InputStream getInputStream(
-			RestClient.RequestHeadersSpec.ConvertibleClientHttpResponse response) throws IOException {
-
-		if (response.getStatusCode().isError()) {
-			throw response.createException();
-		}
-		return response.getBody();
-	}
-
 
 
 	/**

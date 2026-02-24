@@ -42,6 +42,7 @@ import org.jspecify.annotations.Nullable;
 
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.ResolvableType;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpRequest;
@@ -251,6 +252,10 @@ final class DefaultRestClient implements RestClient {
 					}
 					return (T) messageConverter.read((Class)bodyClass, responseWrapper);
 				}
+			}
+
+			if (bodyClass.equals(InputStream.class)) {
+				return (T) responseWrapper.getBody();
 			}
 
 			throw new UnknownContentTypeException(bodyType, contentType,
@@ -609,7 +614,11 @@ final class DefaultRestClient implements RestClient {
 				clientResponse = clientRequest.execute();
 				observationContext.setResponse(clientResponse);
 				ConvertibleClientHttpResponse convertibleWrapper = new DefaultConvertibleClientHttpResponse(clientResponse, this.hints);
-				return exchangeFunction.exchange(clientRequest, convertibleWrapper);
+				T result = exchangeFunction.exchange(clientRequest, convertibleWrapper);
+				if (close && isStreamingResult(result)) {
+					close = false;
+				}
+				return result;
 			}
 			catch (IOException ex) {
 				ResourceAccessException resourceAccessException = createResourceAccessException(uri, this.httpMethod, ex);
@@ -744,6 +753,10 @@ final class DefaultRestClient implements RestClient {
 				DefaultRestClient.this.initializers.forEach(initializer -> initializer.initialize(request));
 			}
 			return request;
+		}
+
+		private static boolean isStreamingResult(@Nullable Object result) {
+			return (result instanceof InputStream || result instanceof InputStreamResource);
 		}
 
 		private static ResourceAccessException createResourceAccessException(URI url, HttpMethod method, IOException ex) {
