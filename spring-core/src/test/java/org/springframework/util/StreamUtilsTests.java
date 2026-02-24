@@ -124,6 +124,7 @@ class StreamUtilsTests {
 	void nonClosingInputStream() throws Exception {
 		InputStream source = mock();
 		InputStream nonClosing = StreamUtils.nonClosing(source);
+
 		nonClosing.read();
 		nonClosing.read(bytes);
 		nonClosing.read(bytes, 1, 2);
@@ -133,21 +134,49 @@ class StreamUtilsTests {
 		ordered.verify(source).read(bytes, 0, bytes.length);
 		ordered.verify(source).read(bytes, 1, 2);
 		ordered.verify(source, never()).close();
+
+		assertThat(StreamUtils.nonClosing(nonClosing)).isSameAs(nonClosing);
 	}
 
 	@Test
 	void nonClosingOutputStream() throws Exception {
 		OutputStream source = mock();
 		OutputStream nonClosing = StreamUtils.nonClosing(source);
+
 		nonClosing.write(1);
 		nonClosing.write(bytes);
 		nonClosing.write(bytes, 1, 2);
+		nonClosing.flush();
 		nonClosing.close();
 		InOrder ordered = inOrder(source);
 		ordered.verify(source).write(1);
 		ordered.verify(source).write(bytes, 0, bytes.length);
 		ordered.verify(source).write(bytes, 1, 2);
+		ordered.verify(source).flush();
 		ordered.verify(source, never()).close();
+
+		assertThat(StreamUtils.nonClosing(nonClosing)).isSameAs(nonClosing);
+	}
+
+	@Test
+	void nonFlushingOutputStream() throws Exception {
+		OutputStream source = mock();
+		OutputStream nonFlushing = StreamUtils.nonFlushing(source);
+
+		nonFlushing.write(1);
+		nonFlushing.write(bytes);
+		nonFlushing.write(bytes, 1, 2);
+		nonFlushing.flush();
+		nonFlushing.close();
+		InOrder ordered = inOrder(source);
+		ordered.verify(source).write(1);
+		ordered.verify(source).write(bytes, 0, bytes.length);
+		ordered.verify(source).write(bytes, 1, 2);
+		ordered.verify(source, never()).flush();
+		ordered.verify(source, never()).close();
+
+		assertThat(StreamUtils.nonFlushing(nonFlushing)).isSameAs(nonFlushing);
+		assertThat(StreamUtils.nonClosing(nonFlushing)).isSameAs(nonFlushing);
 	}
 
 }

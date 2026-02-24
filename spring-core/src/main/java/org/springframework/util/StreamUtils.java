@@ -221,9 +221,13 @@ public abstract class StreamUtils {
 	 * Return a variant of the given {@link InputStream} where calling
 	 * {@link InputStream#close() close()} has no effect.
 	 * @param in the InputStream to decorate
-	 * @return a version of the InputStream that ignores calls to close
+	 * @return a version of the InputStream that ignores calls to close,
+	 * or the given InputStream if it is non-closing already
 	 */
 	public static InputStream nonClosing(InputStream in) {
+		if (in instanceof NonClosingInputStream) {
+			return in;
+		}
 		Assert.notNull(in, "No InputStream specified");
 		return new NonClosingInputStream(in);
 	}
@@ -232,15 +236,38 @@ public abstract class StreamUtils {
 	 * Return a variant of the given {@link OutputStream} where calling
 	 * {@link OutputStream#close() close()} has no effect.
 	 * @param out the OutputStream to decorate
-	 * @return a version of the OutputStream that ignores calls to close
+	 * @return a version of the OutputStream that ignores calls to close,
+	 * or the given OutputStream if it is non-closing already
+	 * @see #nonFlushing(OutputStream)
 	 */
 	public static OutputStream nonClosing(OutputStream out) {
+		if (out instanceof NonClosingOutputStream) {
+			return out;
+		}
 		Assert.notNull(out, "No OutputStream specified");
 		return new NonClosingOutputStream(out);
 	}
 
+	/**
+	 * Return a variant of the given {@link OutputStream} where calling
+	 * {@link OutputStream#flush() flush()} and/or
+	 * {@link OutputStream#close() close()} has no effect.
+	 * @param out the OutputStream to decorate
+	 * @return a version of the OutputStream that ignores calls to flush/close,
+	 * or the given OutputStream if it is non-flushing already
+	 * @since 7.0.6
+	 * @see #nonClosing(OutputStream)
+	 */
+	public static OutputStream nonFlushing(OutputStream out) {
+		if (out instanceof NonFlushingOutputStream) {
+			return out;
+		}
+		Assert.notNull(out, "No OutputStream specified");
+		return new NonFlushingOutputStream(out);
+	}
 
-	private static final class NonClosingInputStream extends FilterInputStream {
+
+	private static class NonClosingInputStream extends FilterInputStream {
 
 		public NonClosingInputStream(InputStream in) {
 			super(in);
@@ -272,7 +299,7 @@ public abstract class StreamUtils {
 	}
 
 
-	private static final class NonClosingOutputStream extends FilterOutputStream {
+	private static class NonClosingOutputStream extends FilterOutputStream {
 
 		public NonClosingOutputStream(OutputStream out) {
 			super(out);
@@ -286,6 +313,18 @@ public abstract class StreamUtils {
 
 		@Override
 		public void close() throws IOException {
+		}
+	}
+
+
+	private static class NonFlushingOutputStream extends NonClosingOutputStream {
+
+		public NonFlushingOutputStream(OutputStream out) {
+			super(out);
+		}
+
+		@Override
+		public void flush() throws IOException {
 		}
 	}
 
