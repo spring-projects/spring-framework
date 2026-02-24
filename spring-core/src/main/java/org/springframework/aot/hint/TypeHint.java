@@ -53,6 +53,8 @@ public final class TypeHint implements ConditionalHint {
 
 	private final Set<MemberCategory> memberCategories;
 
+	private final @Nullable Boolean serializable;
+
 
 	private TypeHint(Builder builder) {
 		this.type = builder.type;
@@ -61,6 +63,7 @@ public final class TypeHint implements ConditionalHint {
 		this.fields = builder.fields.stream().map(FieldHint::new).collect(Collectors.toSet());
 		this.constructors = builder.constructors.values().stream().map(ExecutableHint.Builder::build).collect(Collectors.toSet());
 		this.methods = builder.methods.values().stream().map(ExecutableHint.Builder::build).collect(Collectors.toSet());
+		this.serializable = builder.serializable;
 	}
 
 	/**
@@ -120,6 +123,15 @@ public final class TypeHint implements ConditionalHint {
 		return this.memberCategories;
 	}
 
+	/**
+	 * Return whether to register this type for Java serialization.
+	 * @return whether to register this type for Java serialization.
+	 * @since 7.0.6
+	 */
+	public @Nullable Boolean getSerializable() {
+		return this.serializable;
+	}
+
 	@Override
 	public String toString() {
 		return TypeHint.class.getSimpleName() + "[type=" + this.type + "]";
@@ -152,6 +164,8 @@ public final class TypeHint implements ConditionalHint {
 		private final Map<ExecutableKey, ExecutableHint.Builder> methods = new HashMap<>();
 
 		private final Set<MemberCategory> memberCategories = new HashSet<>();
+
+		private @Nullable Boolean serializable;
 
 		Builder(TypeReference type) {
 			this.type = type;
@@ -257,6 +271,17 @@ public final class TypeHint implements ConditionalHint {
 		 */
 		public Builder withMembers(MemberCategory... memberCategories) {
 			this.memberCategories.addAll(Arrays.asList(memberCategories));
+			return this;
+		}
+
+		/**
+		 * Specify if this type should be registered for Java serialization.
+		 * @param serializable whether to register this type for Java serialization.
+		 * @return {@code this}, to facilitate method chaining
+		 * @since 7.0.6
+		 */
+		public Builder withJavaSerialization(@Nullable Boolean serializable) {
+			this.serializable = serializable;
 			return this;
 		}
 

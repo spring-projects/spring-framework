@@ -65,7 +65,7 @@ class RuntimeHintsWriterTests {
 				builder.schemaMappers(schemaMappers -> schemaMappers.mapPrefix("https://www.graalvm.org/", "classpath:org/springframework/aot/nativex/"))
 		);
 		SchemaValidatorsConfig config = SchemaValidatorsConfig.builder().build();
-		JSON_SCHEMA = jsonSchemaFactory.getSchema(SchemaLocation.of("https://www.graalvm.org/reachability-metadata-schema-v1.0.0.json"), config);
+		JSON_SCHEMA = jsonSchemaFactory.getSchema(SchemaLocation.of("https://www.graalvm.org/reachability-metadata-schema-v1.2.0.json"), config);
 	}
 
 	@Nested
@@ -89,7 +89,8 @@ class RuntimeHintsWriterTests {
 					.withField("DEFAULT_CHARSET")
 					.withField("defaultCharset")
 					.withField("aScore")
-					.withMethod("setDefaultCharset", List.of(TypeReference.of(Charset.class)), ExecutableMode.INVOKE));
+					.withMethod("setDefaultCharset", List.of(TypeReference.of(Charset.class)), ExecutableMode.INVOKE)
+					.withJavaSerialization(true));
 			assertEquals("""
 				{
 					"reflection": [
@@ -110,7 +111,8 @@ class RuntimeHintsWriterTests {
 							],
 							"methods": [
 								{ "name": "setDefaultCharset", "parameterTypes": [ "java.nio.charset.Charset" ] }
-							]
+							],
+							"serializable": true
 						}
 					]
 				}
@@ -198,6 +200,23 @@ class RuntimeHintsWriterTests {
 									"parameterTypes": ["java.lang.String"]
 								}
 							]
+						}
+					]
+				}
+				""", hints);
+		}
+
+		@Test
+		void serializationEnabled() throws JSONException {
+			RuntimeHints hints = new RuntimeHints();
+			hints.reflection().registerType(Integer.class, builder -> builder.withJavaSerialization(true));
+
+			assertEquals("""
+				{
+					"reflection": [
+						{
+							"type": "java.lang.Integer",
+							"serializable": true
 						}
 					]
 				}
@@ -409,15 +428,17 @@ class RuntimeHintsWriterTests {
 			hints.resources().registerResourceBundle("com.example.message");
 			assertEquals("""
 				{
-					"bundles": [
-						{ "name": "com.example.message"},
-						{ "name": "com.example.message2"}
+					"resources": [
+						{ "bundle": "com.example.message"},
+						{ "bundle": "com.example.message2"}
 					]
 				}""", hints);
 		}
 	}
 
 	@Nested
+	@Deprecated(forRemoval = true)
+	@SuppressWarnings("removal")
 	class SerializationHintsTests {
 
 		@Test
@@ -432,8 +453,8 @@ class RuntimeHintsWriterTests {
 			hints.serialization().registerType(TypeReference.of(String.class));
 			assertEquals("""
 				{
-					"serialization": [
-						{ "type": "java.lang.String" }
+					"reflection": [
+						{ "type": "java.lang.String", "serializable": true }
 					]
 				}
 				""", hints);
@@ -447,9 +468,9 @@ class RuntimeHintsWriterTests {
 					.registerType(TypeReference.of(String.class));
 			assertEquals("""
 				{
-					"serialization": [
-						{ "type": "java.lang.String" },
-						{ "type": "org.springframework.core.env.Environment" }
+					"reflection": [
+						{ "type": "java.lang.String", "serializable": true },
+						{ "type": "org.springframework.core.env.Environment", "serializable": true }
 					]
 				}
 				""", hints);
@@ -462,8 +483,8 @@ class RuntimeHintsWriterTests {
 					builder -> builder.onReachableType(TypeReference.of("org.example.Test")));
 			assertEquals("""
 				{
-					"serialization": [
-						{ "condition": { "typeReached": "org.example.Test" }, "type": "java.lang.String" }
+					"reflection": [
+						{ "condition": { "typeReached": "org.example.Test" }, "type": "java.lang.String", "serializable": true }
 					]
 				}
 				""", hints);
@@ -561,6 +582,27 @@ class RuntimeHintsWriterTests {
 						{
 							"type": { "proxy": ["java.util.function.Function"] },
 							"condition": { "typeReached": "org.example.Test" }
+						}
+					]
+				}
+				""", hints);
+		}
+
+		@Test
+		void shouldWriteSerialization() throws JSONException {
+			RuntimeHints hints = new RuntimeHints();
+			hints.proxies().registerJdkProxy(hint -> {
+				hint.proxiedInterfaces(Function.class);
+				hint.javaSerialization(true);
+			});
+			assertEquals("""
+				{
+					"reflection": [
+						{
+							"type": {
+								"proxy": ["java.util.function.Function"]
+							},
+							"serializable": true
 						}
 					]
 				}

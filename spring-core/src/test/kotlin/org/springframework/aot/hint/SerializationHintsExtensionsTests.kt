@@ -27,6 +27,7 @@ import java.util.function.Consumer
  *
  * @author Sebastien Deleuze
  */
+@Suppress("REMOVAL", "DEPRECATION")
 class SerializationHintsExtensionsTests {
 
 	private val serializationHints = mockk<SerializationHints>()

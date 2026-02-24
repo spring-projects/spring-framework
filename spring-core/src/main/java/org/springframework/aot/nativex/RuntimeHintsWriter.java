@@ -28,8 +28,9 @@ import org.springframework.core.SpringVersion;
  * GraalVM {@code native-image} compiler, typically named {@code reachability-metadata.json}.
  *
  * @author Brian Clozel
+ * @author Stephane Nicoll
  * @since 7.0
- * @see <a href="https://www.graalvm.org/jdk23/reference-manual/native-image/metadata/#specifying-metadata-with-json">GraalVM Reachability Metadata</a>
+ * @see <a href="https://www.graalvm.org/jdk25/reference-manual/native-image/metadata">GraalVM Reachability Metadata</a>
  */
 class RuntimeHintsWriter {
 
@@ -50,14 +51,6 @@ class RuntimeHintsWriter {
 		List<Map<String, Object>> resourceHints = new ResourceHintsAttributes().resources(hints.resources());
 		if (!resourceHints.isEmpty()) {
 			document.put("resources", resourceHints);
-		}
-		List<Map<String, Object>> resourceBundles = new ResourceHintsAttributes().resourceBundles(hints.resources());
-		if (!resourceBundles.isEmpty()) {
-			document.put("bundles", resourceBundles);
-		}
-		List<Map<String, Object>> serialization = new SerializationHintsAttributes().toAttributes(hints.serialization());
-		if (!serialization.isEmpty()) {
-			document.put("serialization", serialization);
 		}
 
 		writer.writeObject(document);

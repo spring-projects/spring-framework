@@ -28,6 +28,8 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Stephane Nicoll
  */
+@Deprecated
+@SuppressWarnings("removal")
 class SerializationHintsPredicatesTests {
 
 	private final SerializationHintsPredicates serialization = new SerializationHintsPredicates();

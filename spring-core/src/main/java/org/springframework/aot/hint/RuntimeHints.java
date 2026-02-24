@@ -37,6 +37,7 @@ public class RuntimeHints {
 
 	private final ResourceHints resources = new ResourceHints();
 
+	@SuppressWarnings("removal")
 	private final SerializationHints serialization = new SerializationHints();
 
 	private final ProxyHints proxies = new ProxyHints();
@@ -63,7 +64,10 @@ public class RuntimeHints {
 	/**
 	 * Provide access to serialization-based hints.
 	 * @return serialization hints
+	 * @deprecated in favor of {@link #reflection()}
 	 */
+	@SuppressWarnings("removal")
+	@Deprecated(since = "7.0.6", forRemoval = true)
 	public SerializationHints serialization() {
 		return this.serialization;
 	}

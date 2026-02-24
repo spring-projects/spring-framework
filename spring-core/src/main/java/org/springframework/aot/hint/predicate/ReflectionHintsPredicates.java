@@ -23,6 +23,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Predicate;
 
@@ -297,6 +298,30 @@ public class ReflectionHintsPredicates {
 		return new FieldHintPredicate(field);
 	}
 
+	/**
+	 * Return a predicate that checks whether Java serialization is configured according to the given flag.
+	 * @param type the type to check
+	 * @param serializable the expected serializable flag
+	 * @return the {@link RuntimeHints} predicate
+	 * @since 7.0.6
+	 */
+	public Predicate<RuntimeHints> onJavaSerialization(Class<?> type, @Nullable Boolean serializable) {
+		Assert.notNull(type, "'type' must not be null");
+		return new SerializationdHintPredicate(TypeReference.of(type), serializable);
+	}
+
+	/**
+	 * Return a predicate that checks whether Java serialization is configured according to the given flag.
+	 * @param typeReference the type reference to check
+	 * @param serializable the expected serializable flag
+	 * @return the {@link RuntimeHints} predicate
+	 * @since 7.0.6
+	 */
+	public Predicate<RuntimeHints> onJavaSerialization(TypeReference typeReference, @Nullable Boolean serializable) {
+		Assert.notNull(typeReference, "'typeReference' must not be null");
+		return new SerializationdHintPredicate(typeReference, serializable);
+	}
+
 
 	public static class TypeHintPredicate implements Predicate<RuntimeHints> {
 
@@ -506,6 +531,28 @@ public class ReflectionHintsPredicates {
 		private boolean exactMatch(TypeHint typeHint) {
 			return typeHint.fields().anyMatch(fieldHint ->
 					this.field.getName().equals(fieldHint.getName()));
+		}
+	}
+
+
+	public static class SerializationdHintPredicate implements Predicate<RuntimeHints> {
+
+		private final TypeReference typeReference;
+
+		private final @Nullable Boolean serializable;
+
+		SerializationdHintPredicate(TypeReference typeReference, @Nullable Boolean serializable) {
+			this.typeReference = typeReference;
+			this.serializable = serializable;
+		}
+
+		@Override
+		public boolean test(RuntimeHints runtimeHints) {
+			TypeHint typeHint = runtimeHints.reflection().getTypeHint(this.typeReference);
+			if (typeHint == null) {
+				return false;
+			}
+			return Objects.equals(typeHint.getSerializable(), this.serializable);
 		}
 	}
 

@@ -231,6 +231,17 @@ public class ReflectionHints {
 				typeHint -> typeHint.withMethod(method.getName(), mapParameters(method), mode));
 	}
 
+	/**
+	 * Register the need for Java Serialization on the specified type.
+	 * @param type the type that should be serializable
+	 * @return {@code this}, to facilitate method chaining
+	 * @since 7.0.6
+	 */
+	public ReflectionHints registerJavaSerialization(Class<?> type) {
+		return registerType(TypeReference.of(type),
+				typeHint -> typeHint.withJavaSerialization(true));
+	}
+
 	private List<TypeReference> mapParameters(Executable executable) {
 		return TypeReference.listOf(executable.getParameterTypes());
 	}

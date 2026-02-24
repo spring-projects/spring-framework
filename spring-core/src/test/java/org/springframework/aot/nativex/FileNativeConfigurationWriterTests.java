@@ -35,7 +35,6 @@ import org.springframework.aot.hint.ProxyHints;
 import org.springframework.aot.hint.ReflectionHints;
 import org.springframework.aot.hint.ResourceHints;
 import org.springframework.aot.hint.RuntimeHints;
-import org.springframework.aot.hint.SerializationHints;
 import org.springframework.aot.hint.TypeReference;
 import org.springframework.core.codec.StringDecoder;
 
@@ -47,6 +46,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Sebastien Deleuze
  * @author Janne Valkealahti
  * @author Sam Brannen
+ * @author Stephane Nicoll
  */
 class FileNativeConfigurationWriterTests {
 
@@ -66,15 +66,15 @@ class FileNativeConfigurationWriterTests {
 	void serializationConfig() throws IOException, JSONException {
 		FileNativeConfigurationWriter generator = new FileNativeConfigurationWriter(tempDir);
 		RuntimeHints hints = new RuntimeHints();
-		SerializationHints serializationHints = hints.serialization();
-		serializationHints.registerType(Integer.class);
-		serializationHints.registerType(Long.class);
+		ReflectionHints reflectionHints = hints.reflection();
+		reflectionHints.registerJavaSerialization(Integer.class);
+		reflectionHints.registerJavaSerialization(Long.class);
 		generator.write(hints);
 		assertEquals("""
 				{
-					"serialization": [
-						{ "type": "java.lang.Integer" },
-						{ "type": "java.lang.Long" }
+					"reflection": [
+						{ "type": "java.lang.Integer", "serializable": true },
+						{ "type": "java.lang.Long", "serializable": true }
 					]
 				}
 				""");

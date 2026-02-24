@@ -27,7 +27,9 @@ import org.jspecify.annotations.Nullable;
  *
  * @author Brian Clozel
  * @since 6.0
+ * @deprecated in favor of {@link TypeHint}
  */
+@Deprecated(since = "7.0.6", forRemoval = true)
 public final class JavaSerializationHint implements ConditionalHint {
 
 	private final TypeReference type;

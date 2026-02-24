@@ -22,6 +22,7 @@ import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -32,6 +33,7 @@ import org.springframework.aot.hint.ConditionalHint;
 import org.springframework.aot.hint.ExecutableHint;
 import org.springframework.aot.hint.ExecutableMode;
 import org.springframework.aot.hint.FieldHint;
+import org.springframework.aot.hint.JavaSerializationHint;
 import org.springframework.aot.hint.JdkProxyHint;
 import org.springframework.aot.hint.MemberCategory;
 import org.springframework.aot.hint.ReflectionHints;
@@ -62,14 +64,26 @@ class ReflectionHintsAttributes {
 			};
 
 	public List<Map<String, Object>> reflection(RuntimeHints hints) {
-		List<Map<String, Object>> reflectionHints = new ArrayList<>();
-		reflectionHints.addAll(hints.reflection().typeHints()
-				.sorted(Comparator.comparing(TypeHint::getType))
-				.map(this::toAttributes).toList());
+		List<Map<String, Object>> reflectionHints = new ArrayList<>(reflectionHints(hints));
 		reflectionHints.addAll(hints.proxies().jdkProxyHints()
 				.sorted(JDK_PROXY_HINT_COMPARATOR)
 				.map(this::toAttributes).toList());
 		return reflectionHints;
+	}
+
+	@SuppressWarnings("removal")
+	private List<Map<String, Object>> reflectionHints(RuntimeHints hints) {
+		Map<TypeReference, Map<String, Object>> allTypeHints = hints.reflection().typeHints()
+				.map(this::toAttributes).collect(Collectors.toMap((attributes -> (TypeReference) Objects.requireNonNull(attributes.get("type"))),
+						attributes -> attributes));
+		hints.serialization().javaSerializationHints().forEach(hint -> {
+			allTypeHints.merge(hint.getType(), toAttributes(hint),
+					(currentAttributes, newAttributes) -> {
+						handleSerializable(currentAttributes, true);
+						return currentAttributes;
+					});
+		});
+		return allTypeHints.entrySet().stream().sorted(Comparator.comparing(Map.Entry::getKey)).map(Map.Entry::getValue).toList();
 	}
 
 	public List<Map<String, Object>> jni(RuntimeHints hints) {
@@ -88,6 +102,16 @@ class ReflectionHintsAttributes {
 		handleFields(attributes, hint.fields());
 		handleExecutables(attributes, Stream.concat(
 				hint.constructors(), hint.methods()).sorted().toList());
+		handleSerializable(attributes, hint.getSerializable());
+		return attributes;
+	}
+
+	@SuppressWarnings("removal")
+	private Map<String, Object> toAttributes(JavaSerializationHint serializationHint) {
+		LinkedHashMap<String, Object> attributes = new LinkedHashMap<>();
+		handleCondition(attributes, serializationHint);
+		attributes.put("type", serializationHint.getType());
+		handleSerializable(attributes, true);
 		return attributes;
 	}
 
@@ -148,7 +172,14 @@ class ReflectionHintsAttributes {
 		Map<String, Object> attributes = new LinkedHashMap<>();
 		handleCondition(attributes, hint);
 		attributes.put("type", Map.of("proxy", hint.getProxiedInterfaces()));
+		handleSerializable(attributes, hint.getSerializable());
 		return attributes;
+	}
+
+	private void handleSerializable(Map<String, Object> attributes, @Nullable Boolean serializable) {
+		if (serializable != null) {
+			attributes.put("serializable", serializable);
+		}
 	}
 
 }

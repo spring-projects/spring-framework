@@ -46,6 +46,7 @@ public abstract class RuntimeHintsPredicates {
 
 	private static final ResourceHintsPredicates resource = new ResourceHintsPredicates();
 
+	@SuppressWarnings("removal")
 	private static final SerializationHintsPredicates serialization = new SerializationHintsPredicates();
 
 	private static final ProxyHintsPredicates proxies = new ProxyHintsPredicates();
@@ -73,7 +74,10 @@ public abstract class RuntimeHintsPredicates {
 	/**
 	 * Return a predicate generator for {@link SerializationHints serialization hints}.
 	 * @return the predicate generator
+	 * @deprecated in favor of {@link #reflection()}
 	 */
+	@Deprecated(since = "7.0.6", forRemoval = true)
+	@SuppressWarnings("removal")
 	public static SerializationHintsPredicates serialization() {
 		return serialization;
 	}

@@ -37,10 +37,13 @@ public final class JdkProxyHint implements ConditionalHint {
 
 	private final @Nullable TypeReference reachableType;
 
+	private final @Nullable Boolean serializable;
+
 
 	private JdkProxyHint(Builder builder) {
 		this.proxiedInterfaces = List.copyOf(builder.proxiedInterfaces);
 		this.reachableType = builder.reachableType;
+		this.serializable = builder.serializable;
 	}
 
 	/**
@@ -75,11 +78,21 @@ public final class JdkProxyHint implements ConditionalHint {
 		return this.reachableType;
 	}
 
+	/**
+	 * Return whether to register this proxy for Java serialization.
+	 * @return whether to register this proxy for Java serialization.
+	 * @since 7.0.6
+	 */
+	public @Nullable Boolean getSerializable() {
+		return this.serializable;
+	}
+
 	@Override
 	public boolean equals(@Nullable Object other) {
 		return (this == other || (other instanceof JdkProxyHint that &&
 				this.proxiedInterfaces.equals(that.proxiedInterfaces) &&
-				Objects.equals(this.reachableType, that.reachableType)));
+				Objects.equals(this.reachableType, that.reachableType) &&
+				Objects.equals(this.serializable, that.serializable)));
 	}
 
 	@Override
@@ -96,6 +109,8 @@ public final class JdkProxyHint implements ConditionalHint {
 		private final LinkedList<TypeReference> proxiedInterfaces;
 
 		private @Nullable TypeReference reachableType;
+
+		private @Nullable Boolean serializable;
 
 		Builder() {
 			this.proxiedInterfaces = new LinkedList<>();
@@ -128,6 +143,17 @@ public final class JdkProxyHint implements ConditionalHint {
 		 */
 		public Builder onReachableType(TypeReference reachableType) {
 			this.reachableType = reachableType;
+			return this;
+		}
+
+		/**
+		 * Specify if this proxy should be registered for Java serialization.
+		 * @param serializable whether to register this proxy for Java serialization.
+		 * @return {@code this}, to facilitate method chaining
+		 * @since 7.0.6
+		 */
+		public Builder javaSerialization(@Nullable Boolean serializable) {
+			this.serializable = serializable;
 			return this;
 		}
 

@@ -80,6 +80,18 @@ class ProxyHintsTests {
 		assertThat(this.proxyHints.jdkProxyHints()).singleElement().satisfies(proxiedInterfaces(Function.class));
 	}
 
+	@Test
+	void registerJdkProxyWithJavaSerialization() {
+		this.proxyHints.registerJdkProxy(hint -> {
+			hint.proxiedInterfaces(TypeReference.of("com.example.Test"));
+			hint.javaSerialization(true);
+		});
+		assertThat(this.proxyHints.jdkProxyHints()).singleElement().satisfies(hint -> {
+			assertThat(hint.getProxiedInterfaces()).containsExactly(TypeReference.of("com.example.Test"));
+			assertThat(hint.getSerializable()).isTrue();
+		});
+	}
+
 
 	private static Consumer<JdkProxyHint.Builder> springProxy(String proxiedInterface) {
 		return builder -> builder.proxiedInterfaces(toTypeReferences(
