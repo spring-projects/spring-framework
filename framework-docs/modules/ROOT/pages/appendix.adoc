@@ -81,6 +81,11 @@ resolvable otherwise. See
 {spring-framework-api}++/core/env/AbstractEnvironment.html#IGNORE_GETENV_PROPERTY_NAME++[`AbstractEnvironment`]
 for details.
 
+| `spring.http.response.flush.enabled`
+| Configures the Spring MVC `ServletServerHttpResponse` to allow flushing on the `OutputStream`
+returned by `ServletServerHttpResponse#getBody()`. By default, such flush calls are ignored and
+only `ServletServerHttpResponse#flush()` will actually flush the response to the network.
+
 | `spring.jdbc.getParameterType.ignore`
 | Instructs Spring to ignore `java.sql.ParameterMetaData.getParameterType` completely.
 See the note in xref:data-access/jdbc/advanced.adoc#jdbc-batch-list[Batch Operations with a List of Objects].

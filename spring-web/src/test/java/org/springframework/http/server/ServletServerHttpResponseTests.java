@@ -19,9 +19,12 @@ package org.springframework.http.server;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
+import jakarta.servlet.ServletOutputStream;
+import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import org.springframework.core.SpringProperties;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -29,8 +32,13 @@ import org.springframework.util.FileCopyUtils;
 import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
+ * Tests for {@link ServletServerHttpResponse}.
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
@@ -118,6 +126,35 @@ class ServletServerHttpResponseTests {
 		FileCopyUtils.copy(content, response.getBody());
 
 		assertThat(mockResponse.getContentAsByteArray()).as("Invalid content written").isEqualTo(content);
+	}
+
+	@Test
+	void skipFlushCallsOnOutputStream() throws Exception {
+		ServletOutputStream mockStream = mock();
+		HttpServletResponse mockResponse = mock();
+		when(mockResponse.getOutputStream()).thenReturn(mockStream);
+
+		this.response = new ServletServerHttpResponse(mockResponse);
+		byte[] content = "Hello World".getBytes(StandardCharsets.UTF_8);
+		FileCopyUtils.copy(content, response.getBody());
+		response.getBody().flush();
+		verify(mockStream, never()).flush();
+	}
+
+	@Test
+	void appliesFlushCallsOnOutputStream() throws Exception {
+		SpringProperties.setProperty(ServletServerHttpResponse.BODY_FLUSH_ENABLED, Boolean.TRUE.toString());
+		ServletOutputStream mockStream = mock();
+		HttpServletResponse mockResponse = mock();
+		when(mockResponse.getOutputStream()).thenReturn(mockStream);
+
+		this.response = new ServletServerHttpResponse(mockResponse);
+		byte[] content = "Hello World".getBytes(StandardCharsets.UTF_8);
+		FileCopyUtils.copy(content, response.getBody());
+		response.getBody().flush();
+		verify(mockStream).flush();
+
+		SpringProperties.setProperty(ServletServerHttpResponse.BODY_FLUSH_ENABLED, null);
 	}
 
 }
