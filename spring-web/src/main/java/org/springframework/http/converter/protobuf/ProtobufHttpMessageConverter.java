@@ -237,11 +237,9 @@ public class ProtobufHttpMessageConverter extends AbstractHttpMessageConverter<M
 			OutputStreamWriter outputStreamWriter = new OutputStreamWriter(outputMessage.getBody(), charset);
 			TextFormat.printer().print(message, outputStreamWriter);
 			outputStreamWriter.flush();
-			outputMessage.getBody().flush();
 		}
 		else if (this.protobufFormatDelegate != null) {
 			this.protobufFormatDelegate.print(message, outputMessage, contentType, charset);
-			outputMessage.getBody().flush();
 		}
 	}
 
