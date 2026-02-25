@@ -43,8 +43,8 @@ public class ServletServerHttpResponse implements ServerHttpResponse {
 	/**
 	 * System property that indicates whether {@code response.getBody().flush()}
 	 * should effectively flush to the network. This is by default disabled,
-	 * and developers must set the {@code "spring.http.response.flush.enabled"}
-	 * {@link org.springframework.core.SpringProperties Spring property} to
+	 * and developers must set the {@value}
+	 * {@linkplain org.springframework.core.SpringProperties Spring property} to
 	 * turn it on.
 	 * <p>Applications should instead {@link #flush()} on the response directly.
 	 * @since 7.0.6

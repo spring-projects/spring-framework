@@ -799,7 +799,7 @@ class DefaultServerRequest implements ServerRequest {
 			throw new UnsupportedOperationException();
 		}
 
-		// @Override - on Servlet 6.2
+		@SuppressWarnings("unused")  // @Override - on Servlet 6.2
 		public void sendEarlyHints() {
 			throw new UnsupportedOperationException();
 		}

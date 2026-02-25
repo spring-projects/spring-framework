@@ -70,7 +70,7 @@ class SpringHibernateJpaPersistenceProvider extends HibernatePersistenceProvider
 				public List<String> getManagedClassNames() {
 					return mergedClassesAndPackages;
 				}
-				// @Override on Hibernate 8.0
+				@SuppressWarnings("unused")  // @Override on Hibernate 8.0
 				public boolean isClassTransformerRegistrationDisabled() {
 					return true;
 				}

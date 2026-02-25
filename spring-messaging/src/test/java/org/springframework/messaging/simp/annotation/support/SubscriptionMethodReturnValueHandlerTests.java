@@ -187,6 +187,7 @@ class SubscriptionMethodReturnValueHandlerTests {
 	}
 
 	@Test
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	void testHeaderFilterSinglePredicate() throws Exception {
 		String sessionId = "sess1";
 		String subscriptionId = "subs1";
@@ -216,6 +217,7 @@ class SubscriptionMethodReturnValueHandlerTests {
 	}
 
 	@Test
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	void testHeaderFilterMultiplePredicates() throws Exception {
 		String sessionId = "sess1";
 		String subscriptionId = "subs1";

@@ -197,12 +197,12 @@ class LocalEntityManagerFactoryBeanTests extends AbstractEntityManagerFactoryBea
 			throw new UnsupportedOperationException();
 		}
 
-		// JPA 4.0 method
+		@SuppressWarnings("unused")  // JPA 4.0 method
 		public boolean generateSchema(PersistenceConfiguration persistenceConfiguration) {
 			throw new UnsupportedOperationException();
 		}
 
-		// JPA 4.0 method
+		@SuppressWarnings("unused")  // JPA 4.0 method
 		public ClassTransformer getClassTransformer(PersistenceUnitInfo persistenceUnitInfo, Map<?,?> map) {
 			return null;
 		}
