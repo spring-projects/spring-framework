@@ -94,10 +94,6 @@ configure([rootProject] + javaProjects) { project ->
 			//"https://hc.apache.org/httpcomponents-client-5.5.x/current/httpclient5/apidocs/",
 			"https://projectreactor.io/docs/test/release/api/",
 			"https://junit.org/junit4/javadoc/4.13.2/",
-			// TODO Uncomment link to JUnit 5 docs once we execute Gradle with Java 18+.
-			// See https://github.com/spring-projects/spring-framework/issues/27497
-			//
-			// "https://junit.org/junit5/docs/5.14.2/api/",
 			"https://www.reactive-streams.org/reactive-streams-1.0.4-javadoc/",
 			//"https://javadoc.io/static/io.rsocket/rsocket-core/1.1.1/",
 			"https://r2dbc.io/spec/1.0.0.RELEASE/api/",
