@@ -333,6 +333,7 @@
 **** xref:testing/testcontext-framework/ctx-management/javaconfig.adoc[]
 **** xref:testing/testcontext-framework/ctx-management/xml.adoc[]
 **** xref:testing/testcontext-framework/ctx-management/groovy.adoc[]
+**** xref:testing/testcontext-framework/ctx-management/default-config.adoc[]
 **** xref:testing/testcontext-framework/ctx-management/mixed-config.adoc[]
 **** xref:testing/testcontext-framework/ctx-management/context-customizers.adoc[]
 **** xref:testing/testcontext-framework/ctx-management/initializers.adoc[]
