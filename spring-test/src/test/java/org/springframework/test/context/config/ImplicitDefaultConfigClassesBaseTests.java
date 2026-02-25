@@ -41,22 +41,35 @@ class ImplicitDefaultConfigClassesBaseTests {
 	@Autowired
 	String greeting1;
 
+	@Autowired
+	Integer puzzle1;
+
 
 	@Test
-	void greeting1() {
+	void greeting1AndPuzzle1() {
 		// This class must NOT be annotated with @SpringJUnitConfig or @ContextConfiguration.
 		assertThat(AnnotatedElementUtils.hasAnnotation(getClass(), ContextConfiguration.class)).isFalse();
 
 		assertThat(greeting1).isEqualTo("TEST 1");
+		assertThat(puzzle1).isEqualTo(111);
 	}
 
 
 	@Configuration
-	static class DefaultConfig {
+	static class DefaultConfig1A {
 
 		@Bean
 		String greeting1() {
 			return "TEST 1";
+		}
+	}
+
+	@Configuration
+	static class DefaultConfig1B {
+
+		@Bean
+		Integer puzzle1() {
+			return 111;
 		}
 	}
 

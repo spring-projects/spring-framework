@@ -20,9 +20,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -266,8 +268,50 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 					"Neither @ContextConfiguration nor @ContextHierarchy found for test class [%s]: using %s",
 					testClass.getSimpleName(), contextLoader.getClass().getSimpleName()));
 		}
-		return buildMergedContextConfiguration(testClass, defaultConfigAttributesList, contextLoader, null,
-				cacheAwareContextLoaderDelegate, false);
+		MergedContextConfiguration mergedConfig = buildMergedContextConfiguration(
+				testClass, defaultConfigAttributesList, contextLoader, null, cacheAwareContextLoaderDelegate, false);
+		logWarningForIgnoredDefaultConfig(mergedConfig, contextLoader, cacheAwareContextLoaderDelegate);
+		return mergedConfig;
+	}
+
+	/**
+	 * In Spring Framework 7.1, we will use the "complete" list of default config attributes.
+	 * In the interim, we log a warning if the "current" detected config differs from the
+	 * "complete" detected config, which signals that some default configuration is currently
+	 * being ignored.
+	 */
+	private void logWarningForIgnoredDefaultConfig(MergedContextConfiguration mergedConfig,
+			ContextLoader contextLoader, CacheAwareContextLoaderDelegate cacheAwareContextLoaderDelegate) {
+
+		if (logger.isWarnEnabled()) {
+			Class<?> testClass = mergedConfig.getTestClass();
+			List<ContextConfigurationAttributes> completeDefaultConfigAttributesList =
+					ContextLoaderUtils.resolveDefaultContextConfigurationAttributes(testClass);
+			MergedContextConfiguration completeMergedConfig = buildMergedContextConfiguration(
+					testClass, completeDefaultConfigAttributesList, contextLoader, null,
+					cacheAwareContextLoaderDelegate, false);
+			if (!mergedConfig.equals(completeMergedConfig)) {
+				String warningMessage = """
+						For test class [%1$s], the following 'default' context configuration %2$s were \
+						detected but are currently ignored: %3$s. In Spring Framework 7.1, these %2$s will no \
+						longer be ignored. Please update your test configuration accordingly. For details, see: \
+						https://docs.spring.io/spring-framework/reference/testing/testcontext-framework/ctx-management/default-config.html""";
+
+				Set<Class<?>> currentClasses = new HashSet<>(Arrays.asList(mergedConfig.getClasses()));
+				List<Class<?>> ignoredClasses = Arrays.stream(completeMergedConfig.getClasses())
+						.filter(mcc -> !currentClasses.contains(mcc)).toList();
+				if (!ignoredClasses.isEmpty()) {
+					logger.warn(warningMessage.formatted(testClass.getName(), "classes", names(ignoredClasses)));
+				}
+
+				Set<String> currentLocations = new HashSet<>(Arrays.asList(mergedConfig.getLocations()));
+				String ignoredLocations = Arrays.stream(completeMergedConfig.getLocations())
+						.filter(mcc -> !currentLocations.contains(mcc)).collect(Collectors.joining(", "));
+				if (!ignoredLocations.isEmpty()) {
+					logger.warn(warningMessage.formatted(testClass.getName(), "locations", ignoredLocations));
+				}
+			}
+		}
 	}
 
 	/**
@@ -618,6 +662,10 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 		return mergedConfig;
 	}
 
+
+	private static String names(Collection<Class<?>> classes) {
+		return classes.stream().map(Class::getName).collect(Collectors.joining(", "));
+	}
 
 	private static List<String> classSimpleNames(Collection<?> components) {
 		return components.stream().map(Object::getClass).map(Class::getSimpleName).toList();

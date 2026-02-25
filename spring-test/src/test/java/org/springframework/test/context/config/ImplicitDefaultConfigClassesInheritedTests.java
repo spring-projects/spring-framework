@@ -44,8 +44,9 @@ class ImplicitDefaultConfigClassesInheritedTests extends ImplicitDefaultConfigCl
 	// To be removed in favor of base class method in 7.1
 	@Test
 	@Override
-	void greeting1() {
+	void greeting1AndPuzzle1() {
 		assertThat(greeting1).isEqualTo("TEST 2");
+		assertThat(puzzle1).isEqualTo(222);
 	}
 
 	@Test
@@ -64,11 +65,16 @@ class ImplicitDefaultConfigClassesInheritedTests extends ImplicitDefaultConfigCl
 
 
 	@Configuration
-	static class DefaultConfig {
+	static class DefaultConfig2 {
 
 		@Bean
 		String greeting2() {
 			return "TEST 2";
+		}
+
+		@Bean
+		Integer puzzle2() {
+			return 222;
 		}
 	}
 
