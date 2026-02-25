@@ -47,6 +47,11 @@ import static org.mockito.Mockito.verify;
  */
 class DefaultRestClientTests {
 
+	private static final String URL = "https://example.com";
+
+	public static final String BODY = "Hello World";
+
+
 	private final ClientHttpRequestFactory requestFactory = mock();
 
 	private final ClientHttpRequest request = mock();
@@ -66,70 +71,57 @@ class DefaultRestClientTests {
 
 	@Test
 	void requiredBodyWithClass() throws IOException {
-		mockSentRequest(HttpMethod.GET, "https://example.org");
+		mockSentRequest(HttpMethod.GET, URL);
 		mockResponseStatus(HttpStatus.OK);
-		mockResponseBody("Hello World", MediaType.TEXT_PLAIN);
+		mockResponseBody(BODY, MediaType.TEXT_PLAIN);
 
-		String result = this.client.get()
-				.uri("https://example.org")
-				.retrieve()
-				.requiredBody(String.class);
+		String result = this.client.get().uri(URL).retrieve().requiredBody(String.class);
 
-		assertThat(result).isEqualTo("Hello World");
+		assertThat(result).isEqualTo(BODY);
 	}
 
 	@Test
 	void requiredBodyWithClassAndNullBody() throws IOException {
-		mockSentRequest(HttpMethod.GET, "https://example.org");
+		mockSentRequest(HttpMethod.GET, URL);
 		mockResponseStatus(HttpStatus.OK);
 		mockEmptyResponseBody();
 
 		assertThatIllegalStateException().isThrownBy(() ->
-				this.client.get()
-						.uri("https://example.org")
-						.retrieve()
-						.requiredBody(String.class)
+				this.client.get().uri(URL).retrieve().requiredBody(String.class)
 		);
 	}
 
 	@Test
 	void requiredBodyWithParameterizedTypeReference() throws IOException {
-		mockSentRequest(HttpMethod.GET, "https://example.org");
+		mockSentRequest(HttpMethod.GET, URL);
 		mockResponseStatus(HttpStatus.OK);
-		mockResponseBody("Hello World", MediaType.TEXT_PLAIN);
+		mockResponseBody(BODY, MediaType.TEXT_PLAIN);
 
-		String result = this.client.get()
-				.uri("https://example.org")
-				.retrieve()
+		String result = this.client.get().uri(URL).retrieve()
 				.requiredBody(new ParameterizedTypeReference<>() {});
 
-		assertThat(result).isEqualTo("Hello World");
+		assertThat(result).isEqualTo(BODY);
 	}
 
 	@Test
 	void requiredBodyWithParameterizedTypeReferenceAndNullBody() throws IOException {
-		mockSentRequest(HttpMethod.GET, "https://example.org");
+		mockSentRequest(HttpMethod.GET, URL);
 		mockResponseStatus(HttpStatus.OK);
 		mockEmptyResponseBody();
 
 		assertThatIllegalStateException().isThrownBy(() ->
-				this.client.get()
-						.uri("https://example.org")
-						.retrieve()
+				this.client.get().uri(URL).retrieve()
 						.requiredBody(new ParameterizedTypeReference<String>() {})
 		);
 	}
 
 	@Test
 	void inputStreamBody() throws IOException {
-		mockSentRequest(HttpMethod.GET, "https://example.org");
+		mockSentRequest(HttpMethod.GET, URL);
 		mockResponseStatus(HttpStatus.OK);
-		mockResponseBody("Hello World", MediaType.TEXT_PLAIN);
+		mockResponseBody(BODY, MediaType.TEXT_PLAIN);
 
-		InputStream result = this.client.get()
-				.uri("https://example.org")
-				.retrieve()
-				.requiredBody(InputStream.class);
+		InputStream result = this.client.get().uri(URL).retrieve().requiredBody(InputStream.class);
 
 		assertThat(result).isInstanceOf(InputStream.class);
 		verify(this.response, times(0)).close();
