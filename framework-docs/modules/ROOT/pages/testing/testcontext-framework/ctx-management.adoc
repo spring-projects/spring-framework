@@ -108,7 +108,7 @@ or context initializers. Alternatively, you can implement and configure your own
 `SmartContextLoader` for advanced use cases.
 
 * xref:testing/testcontext-framework/ctx-management/javaconfig.adoc[Context Configuration with Component Classes]
-* xref:testing/testcontext-framework/ctx-management/xml.adoc[Context Configuration with XML resources]
+* xref:testing/testcontext-framework/ctx-management/xml.adoc[Context Configuration with XML Resources]
 * xref:testing/testcontext-framework/ctx-management/groovy.adoc[Context Configuration with Groovy Scripts]
 * xref:testing/testcontext-framework/ctx-management/mixed-config.adoc[Mixing Component Classes, XML, and Groovy Scripts]
 * xref:testing/testcontext-framework/ctx-management/context-customizers.adoc[Context Configuration with Context Customizers]

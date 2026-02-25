@@ -1,5 +1,5 @@
 [[testcontext-ctx-management-xml]]
-= Context Configuration with XML resources
+= Context Configuration with XML Resources
 
 To load an `ApplicationContext` for your tests by using XML configuration files, annotate
 your test class with `@ContextConfiguration` and configure the `locations` attribute with
