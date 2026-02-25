@@ -15,8 +15,8 @@ apply from: "${rootDir}/gradle/publications.gradle"
 antora {
 	options = [clean: true, fetch: !project.gradle.startParameter.offline, stacktrace: true]
 	environment = [
-			'BUILD_REFNAME': 'HEAD',
-			'BUILD_VERSION': project.version,
+		'BUILD_REFNAME': 'HEAD',
+		'BUILD_VERSION': project.version,
 	]
 }
 
@@ -49,8 +49,8 @@ tasks.withType(KotlinCompilationTask.class).configureEach {
 	javaSources.from = []
 	compilerOptions.jvmTarget = JvmTarget.JVM_17
 	compilerOptions.freeCompilerArgs.addAll(
-			"-Xjdk-release=17", // Needed due to https://youtrack.jetbrains.com/issue/KT-49746
-			"-Xannotation-default-target=param-property" // Upcoming default, see https://youtrack.jetbrains.com/issue/KT-73255
+		"-Xjdk-release=17", // Needed due to https://youtrack.jetbrains.com/issue/KT-49746
+		"-Xannotation-default-target=param-property" // Upcoming default, see https://youtrack.jetbrains.com/issue/KT-73255
 	)
 }
 
