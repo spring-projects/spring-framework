@@ -49,7 +49,6 @@ Kotlin::
 <1> Injecting the `ApplicationContext`.
 ======
 
-
 Similarly, if your test is configured to load a `WebApplicationContext`, you can inject
 the web application context into your test, as follows:
 
@@ -87,7 +86,6 @@ Kotlin::
 <2> Injecting the `WebApplicationContext`.
 ======
 
-
 Dependency injection by using `@Autowired` is provided by the
 `DependencyInjectionTestExecutionListener`, which is configured by default
 (see xref:testing/testcontext-framework/fixture-di.adoc[Dependency Injection of Test Fixtures]).
@@ -100,17 +98,18 @@ class level. If your test class does not explicitly declare application context 
 locations or component classes, the configured `ContextLoader` determines how to load a
 context from a default location or default configuration classes. In addition to context
 resource locations and component classes, an application context can also be configured
-through application context initializers.
+through xref:testing/testcontext-framework/ctx-management/context-customizers.adoc[context customizers]
+or xref:testing/testcontext-framework/ctx-management/initializers.adoc[context initializers].
 
-The following sections explain how to use Spring's `@ContextConfiguration` annotation to
-configure a test `ApplicationContext` by using XML configuration files, Groovy scripts,
-component classes (typically `@Configuration` classes), or context initializers.
-Alternatively, you can implement and configure your own custom `SmartContextLoader` for
-advanced use cases.
+The following sections explain how to use `@ContextConfiguration` and related annotations
+to configure a test `ApplicationContext` by using component classes (typically
+`@Configuration` classes), XML configuration files, Groovy scripts, context customizers,
+or context initializers. Alternatively, you can implement and configure your own custom
+`SmartContextLoader` for advanced use cases.
 
+* xref:testing/testcontext-framework/ctx-management/javaconfig.adoc[Context Configuration with Component Classes]
 * xref:testing/testcontext-framework/ctx-management/xml.adoc[Context Configuration with XML resources]
 * xref:testing/testcontext-framework/ctx-management/groovy.adoc[Context Configuration with Groovy Scripts]
-* xref:testing/testcontext-framework/ctx-management/javaconfig.adoc[Context Configuration with Component Classes]
 * xref:testing/testcontext-framework/ctx-management/mixed-config.adoc[Mixing XML, Groovy Scripts, and Component Classes]
 * xref:testing/testcontext-framework/ctx-management/context-customizers.adoc[Context Configuration with Context Customizers]
 * xref:testing/testcontext-framework/ctx-management/initializers.adoc[Context Configuration with Context Initializers]
