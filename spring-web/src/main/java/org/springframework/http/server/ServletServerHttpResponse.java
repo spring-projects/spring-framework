@@ -47,10 +47,12 @@ public class ServletServerHttpResponse implements ServerHttpResponse {
 	 * {@link org.springframework.core.SpringProperties Spring property} to
 	 * turn it on.
 	 * <p>Applications should instead {@link #flush()} on the response directly.
+	 * @since 7.0.6
 	 */
-	public static final String BODY_FLUSH_ENABLED = "spring.http.response.flush.enabled";
+	public static final String FLUSH_ENABLED_PROPERTY_NAME = "spring.http.response.flush.enabled";
 
-	private final boolean flushEnabled = SpringProperties.getFlag(BODY_FLUSH_ENABLED);
+
+	private final boolean flushEnabled = SpringProperties.getFlag(FLUSH_ENABLED_PROPERTY_NAME);
 
 	private final HttpServletResponse servletResponse;
 
@@ -104,8 +106,8 @@ public class ServletServerHttpResponse implements ServerHttpResponse {
 	/**
 	 * Return the body of the message as an output stream.
 	 * <p>By default, flushing the output stream has no effect
-	 * (see {@link #BODY_FLUSH_ENABLED}) and should be performed
-	 * using {@link #flush()} instead.
+	 * (see {@link #FLUSH_ENABLED_PROPERTY_NAME}) and should be performed
+	 * using the ServerHttpResponse-level {@link #flush()} method instead.
 	 * @return the output stream body (never {@code null})
 	 * @throws IOException in case of I/O errors
 	 */
@@ -113,8 +115,8 @@ public class ServletServerHttpResponse implements ServerHttpResponse {
 	public OutputStream getBody() throws IOException {
 		this.bodyUsed = true;
 		writeHeaders();
-		return (this.flushEnabled) ? this.servletResponse.getOutputStream() :
-				StreamUtils.nonFlushing(this.servletResponse.getOutputStream());
+		return (this.flushEnabled ? this.servletResponse.getOutputStream() :
+				StreamUtils.nonFlushing(this.servletResponse.getOutputStream()));
 	}
 
 	@Override

@@ -143,7 +143,7 @@ class ServletServerHttpResponseTests {
 
 	@Test
 	void appliesFlushCallsOnOutputStream() throws Exception {
-		SpringProperties.setProperty(ServletServerHttpResponse.BODY_FLUSH_ENABLED, Boolean.TRUE.toString());
+		SpringProperties.setProperty(ServletServerHttpResponse.FLUSH_ENABLED_PROPERTY_NAME, Boolean.TRUE.toString());
 		ServletOutputStream mockStream = mock();
 		HttpServletResponse mockResponse = mock();
 		when(mockResponse.getOutputStream()).thenReturn(mockStream);
@@ -154,7 +154,7 @@ class ServletServerHttpResponseTests {
 		response.getBody().flush();
 		verify(mockStream).flush();
 
-		SpringProperties.setProperty(ServletServerHttpResponse.BODY_FLUSH_ENABLED, null);
+		SpringProperties.setProperty(ServletServerHttpResponse.FLUSH_ENABLED_PROPERTY_NAME, null);
 	}
 
 }
