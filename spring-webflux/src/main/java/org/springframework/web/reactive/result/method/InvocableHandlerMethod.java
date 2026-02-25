@@ -81,8 +81,6 @@ public class InvocableHandlerMethod extends HandlerMethod {
 
 	private static final Mono<Object[]> EMPTY_ARGS = Mono.just(new Object[0]);
 
-	private static final Class<?>[] EMPTY_GROUPS = new Class<?>[0];
-
 	private static final Object NO_ARG_VALUE = new Object();
 
 	private static final boolean KOTLIN_REFLECT_PRESENT = KotlinDetector.isKotlinReflectPresent();
