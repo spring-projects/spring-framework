@@ -183,9 +183,6 @@ By default, a retryable operation will be retried for any exception thrown: with
 3 retry attempts (`maxRetries = 3`) after an initial failure, and a delay of 1 second
 between attempts.
 
-If you only need to customize the number of retry attempts, you can use the
-`RetryPolicy.withMaxRetries()` factory method as demonstrated below.
-
 [NOTE]
 ====
 A retryable operation will be executed at least once and retried at most `maxRetries`
@@ -195,6 +192,9 @@ times, where `maxRetries` is the maximum number of retry attempts. Specifically,
 For example, if `maxRetries` is set to `4`, the retryable operation will be invoked at
 least once and at most 5 times.
 ====
+
+If you only need to customize the number of retry attempts, you can use the
+`RetryPolicy.withMaxRetries()` factory method as demonstrated below.
 
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
