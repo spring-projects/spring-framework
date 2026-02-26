@@ -298,15 +298,18 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 						https://docs.spring.io/spring-framework/reference/testing/testcontext-framework/ctx-management/default-config.html""";
 
 				Set<Class<?>> currentClasses = new HashSet<>(Arrays.asList(mergedConfig.getClasses()));
-				List<Class<?>> ignoredClasses = Arrays.stream(completeMergedConfig.getClasses())
-						.filter(clazz -> !currentClasses.contains(clazz)).toList();
+				String ignoredClasses = Arrays.stream(completeMergedConfig.getClasses())
+						.filter(clazz -> !currentClasses.contains(clazz))
+						.map(Class::getName)
+						.collect(Collectors.joining(", "));
 				if (!ignoredClasses.isEmpty()) {
-					logger.warn(warningMessage.formatted(testClass.getName(), "classes", names(ignoredClasses)));
+					logger.warn(warningMessage.formatted(testClass.getName(), "classes", ignoredClasses));
 				}
 
 				Set<String> currentLocations = new HashSet<>(Arrays.asList(mergedConfig.getLocations()));
 				String ignoredLocations = Arrays.stream(completeMergedConfig.getLocations())
-						.filter(location -> !currentLocations.contains(location)).collect(Collectors.joining(", "));
+						.filter(location -> !currentLocations.contains(location))
+						.collect(Collectors.joining(", "));
 				if (!ignoredLocations.isEmpty()) {
 					logger.warn(warningMessage.formatted(testClass.getName(), "locations", ignoredLocations));
 				}
@@ -662,10 +665,6 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 		return mergedConfig;
 	}
 
-
-	private static String names(Collection<Class<?>> classes) {
-		return classes.stream().map(Class::getName).collect(Collectors.joining(", "));
-	}
 
 	private static List<String> classSimpleNames(Collection<?> components) {
 		return components.stream().map(Object::getClass).map(Class::getSimpleName).toList();
