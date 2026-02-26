@@ -299,14 +299,14 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 
 				Set<Class<?>> currentClasses = new HashSet<>(Arrays.asList(mergedConfig.getClasses()));
 				List<Class<?>> ignoredClasses = Arrays.stream(completeMergedConfig.getClasses())
-						.filter(mcc -> !currentClasses.contains(mcc)).toList();
+						.filter(clazz -> !currentClasses.contains(clazz)).toList();
 				if (!ignoredClasses.isEmpty()) {
 					logger.warn(warningMessage.formatted(testClass.getName(), "classes", names(ignoredClasses)));
 				}
 
 				Set<String> currentLocations = new HashSet<>(Arrays.asList(mergedConfig.getLocations()));
 				String ignoredLocations = Arrays.stream(completeMergedConfig.getLocations())
-						.filter(mcc -> !currentLocations.contains(mcc)).collect(Collectors.joining(", "));
+						.filter(location -> !currentLocations.contains(location)).collect(Collectors.joining(", "));
 				if (!ignoredLocations.isEmpty()) {
 					logger.warn(warningMessage.formatted(testClass.getName(), "locations", ignoredLocations));
 				}
