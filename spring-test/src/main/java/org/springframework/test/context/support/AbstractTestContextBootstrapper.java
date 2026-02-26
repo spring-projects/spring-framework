@@ -79,6 +79,13 @@ import org.springframework.util.StringUtils;
  */
 public abstract class AbstractTestContextBootstrapper implements TestContextBootstrapper {
 
+	private static final String IGNORED_DEFAULT_CONFIG_MESSAGE = """
+			For test class [%1$s], the following 'default' context configuration %2$s were detected \
+			but are currently ignored: %3$s. In Spring Framework 7.1, these %2$s will no longer be ignored. \
+			Please update your test configuration accordingly. For details, see: \
+			https://docs.spring.io/spring-framework/reference/testing/testcontext-framework/ctx-management/default-config.html""";
+
+
 	private final Log logger = LogFactory.getLog(getClass());
 
 	private @Nullable BootstrapContext bootstrapContext;
@@ -290,28 +297,25 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 			MergedContextConfiguration completeMergedConfig = buildMergedContextConfiguration(
 					testClass, completeDefaultConfigAttributesList, contextLoader, null,
 					cacheAwareContextLoaderDelegate, false);
-			if (!mergedConfig.equals(completeMergedConfig)) {
-				String warningMessage = """
-						For test class [%1$s], the following 'default' context configuration %2$s were \
-						detected but are currently ignored: %3$s. In Spring Framework 7.1, these %2$s will no \
-						longer be ignored. Please update your test configuration accordingly. For details, see: \
-						https://docs.spring.io/spring-framework/reference/testing/testcontext-framework/ctx-management/default-config.html""";
 
+			if (!Arrays.equals(mergedConfig.getClasses(), completeMergedConfig.getClasses())) {
 				Set<Class<?>> currentClasses = new HashSet<>(Arrays.asList(mergedConfig.getClasses()));
 				String ignoredClasses = Arrays.stream(completeMergedConfig.getClasses())
 						.filter(clazz -> !currentClasses.contains(clazz))
 						.map(Class::getName)
 						.collect(Collectors.joining(", "));
 				if (!ignoredClasses.isEmpty()) {
-					logger.warn(warningMessage.formatted(testClass.getName(), "classes", ignoredClasses));
+					logger.warn(IGNORED_DEFAULT_CONFIG_MESSAGE.formatted(testClass.getName(), "classes", ignoredClasses));
 				}
+			}
 
+			if (!Arrays.equals(mergedConfig.getLocations(), completeMergedConfig.getLocations())) {
 				Set<String> currentLocations = new HashSet<>(Arrays.asList(mergedConfig.getLocations()));
 				String ignoredLocations = Arrays.stream(completeMergedConfig.getLocations())
 						.filter(location -> !currentLocations.contains(location))
 						.collect(Collectors.joining(", "));
 				if (!ignoredLocations.isEmpty()) {
-					logger.warn(warningMessage.formatted(testClass.getName(), "locations", ignoredLocations));
+					logger.warn(IGNORED_DEFAULT_CONFIG_MESSAGE.formatted(testClass.getName(), "locations", ignoredLocations));
 				}
 			}
 		}
