@@ -110,16 +110,17 @@ public class ApiVersionConfigurer {
 	}
 
 	/**
-	 * Add a resolver that extracts the API version from a path segment
-	 * and that allows to include only certain paths based on the provided {@link Predicate}.
-	 * <p>Note that this resolver never returns {@code null}, and therefore
-	 * cannot yield to other resolvers, see {@link org.springframework.web.accept.PathApiVersionResolver}.
+	 * Variant of {@link #usePathSegment(int)} with a {@code Predicate<RequestPath>}
+	 * to determine whether a given path is versioned, providing additional
+	 * flexibility, and the option to resolve the version to {@code null}.
 	 * @param index the index of the path segment to check; e.g. for URL's like
 	 * {@code "/{version}/..."} use index 0, for {@code "/api/{version}/..."} index 1.
-	 * @param includePath a {@link Predicate} that allows to include a certain path
+	 * @param versionPathPredicate used to decide if a path is versioned (true)
+	 * or not (false).
+	 * @since 7.0.6
 	 */
-	public ApiVersionConfigurer usePathSegment(int index, Predicate<RequestPath> includePath) {
-		this.versionResolvers.add(new PathApiVersionResolver(index, includePath));
+	public ApiVersionConfigurer usePathSegment(int index, Predicate<RequestPath> versionPathPredicate) {
+		this.versionResolvers.add(new PathApiVersionResolver(index, versionPathPredicate));
 		return this;
 	}
 

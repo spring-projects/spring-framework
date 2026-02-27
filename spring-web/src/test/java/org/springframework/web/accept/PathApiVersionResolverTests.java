@@ -17,10 +17,12 @@
 package org.springframework.web.accept;
 
 import java.util.List;
+import java.util.function.Predicate;
 
 import org.junit.jupiter.api.Test;
 
 import org.springframework.http.server.PathContainer;
+import org.springframework.http.server.RequestPath;
 import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 import org.springframework.web.util.ServletRequestPathUtils;
 
@@ -45,52 +47,25 @@ public class PathApiVersionResolverTests {
 	}
 
 	@Test
-	void includePathFalse() {
-		String requestUri = "/v3/api-docs";
-		testResolveWithIncludePath(requestUri, null);
+	void resolveWithVersionPathPredicate() {
+		testVersionPathPredicate("/app/1.0/path", "1.0");
+		testVersionPathPredicate("/app", null);
+		testVersionPathPredicate("/v3/api-docs", null);
 	}
 
-	@Test
-	void includePathTrue() {
-		String requestUri = "/app/1.0/path";
-		testResolveWithIncludePath(requestUri, "1.0");
-	}
-
-	@Test
-	void includePathFalseShortPath() {
-		String requestUri = "/app";
-		testResolveWithIncludePath(requestUri, null);
-	}
-
-	@Test
-	void includePathInsufficientPathSegments() {
-		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/app");
-		try {
-			ServletRequestPathUtils.parseAndCache(request);
-			assertThatThrownBy(() -> new PathApiVersionResolver(1, requestPath -> true)
-					.resolveVersion(request))
-				.isInstanceOf(InvalidApiVersionException.class);
-		}
-		finally {
-			ServletRequestPathUtils.clearParsedRequestPath(request);
-		}
-	}
-
-	private static void testResolveWithIncludePath(String requestUri, String expected) {
+	private static void testVersionPathPredicate(String requestUri, String expectedVersion) {
+		Predicate<RequestPath> versionPathPredicate = path -> {
+			List<PathContainer.Element> elements = path.elements();
+			return (elements.size() > 3 &&
+					elements.get(1).value().equals("app") &&
+					elements.get(3).value().matches("\\d+\\.\\d+"));
+		};
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", requestUri);
 		try {
 			ServletRequestPathUtils.parseAndCache(request);
-			String actual = new PathApiVersionResolver(1, requestPath -> {
-				List<PathContainer.Element> elements = requestPath.elements();
-				if (elements.size() < 4) {
-					return false;
-				}
-				return elements.get(0).value().equals("/") &&
-						elements.get(1).value().equals("app") &&
-						elements.get(2).value().equals("/") &&
-						elements.get(3).value().equals("1.0");
-			}).resolveVersion(request);
-			assertThat(actual).isEqualTo(expected);
+			PathApiVersionResolver resolver = new PathApiVersionResolver(1, versionPathPredicate);
+			String actual = resolver.resolveVersion(request);
+			assertThat(actual).isEqualTo(expectedVersion);
 		}
 		finally {
 			ServletRequestPathUtils.clearParsedRequestPath(request);

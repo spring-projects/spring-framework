@@ -17,10 +17,12 @@
 package org.springframework.web.reactive.accept;
 
 import java.util.List;
+import java.util.function.Predicate;
 
 import org.junit.jupiter.api.Test;
 
 import org.springframework.http.server.PathContainer;
+import org.springframework.http.server.RequestPath;
 import org.springframework.web.accept.InvalidApiVersionException;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest;
@@ -48,42 +50,22 @@ public class PathApiVersionResolverTests {
 	}
 
 	@Test
-	void includePathFalse() {
-		String requestUri = "/v3/api-docs";
-		testResolveWithIncludePath(requestUri, null);
+	void resolveWithVersionPathPredicate() {
+		testVersionPathPredicate("/app/1.0/path", "1.0");
+		testVersionPathPredicate("/app", null);
+		testVersionPathPredicate("/v3/api-docs", null);
 	}
 
-	@Test
-	void includePathTrue() {
-		String requestUri = "/app/1.0/path";
-		testResolveWithIncludePath(requestUri, "1.0");
-	}
-
-	@Test
-	void includePathFalseShortPath() {
-		String requestUri = "/app";
-		testResolveWithIncludePath(requestUri, null);
-	}
-
-	@Test
-	void includePathInsufficientPathSegments() {
-		ServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/too-short"));
-		assertThatThrownBy(() -> new PathApiVersionResolver(1, requestPath -> true).resolveVersion(exchange))
-				.isInstanceOf(InvalidApiVersionException.class);
-	}
-
-	private static void testResolveWithIncludePath(String requestUri, String expected) {
-		ServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get(requestUri));
-		String actual = new PathApiVersionResolver(1, requestPath -> {
-			List<PathContainer.Element> elements = requestPath.elements();
-			if (elements.size() < 4) {
-				return false;
-			}
-			return elements.get(0).value().equals("/") &&
+	private static void testVersionPathPredicate(String requestUri, String expected) {
+		Predicate<RequestPath> versionPathPredicate = path -> {
+			List<PathContainer.Element> elements = path.elements();
+			return (elements.size() > 3 &&
 					elements.get(1).value().equals("app") &&
-					elements.get(2).value().equals("/") &&
-					elements.get(3).value().equals("1.0");
-		}).resolveVersion(exchange);
+					elements.get(3).value().matches("\\d+\\.\\d+"));
+		};
+		ServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get(requestUri));
+		PathApiVersionResolver resolver = new PathApiVersionResolver(1, versionPathPredicate);
+		String actual = resolver.resolveVersion(exchange);
 		assertThat(actual).isEqualTo(expected);
 	}
 
