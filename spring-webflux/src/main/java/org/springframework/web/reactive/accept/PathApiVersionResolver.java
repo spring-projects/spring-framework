@@ -16,14 +16,15 @@
 
 package org.springframework.web.reactive.accept;
 
+import java.util.function.Predicate;
+
 import org.jspecify.annotations.Nullable;
+
 import org.springframework.http.server.PathContainer;
 import org.springframework.http.server.RequestPath;
 import org.springframework.util.Assert;
 import org.springframework.web.accept.InvalidApiVersionException;
 import org.springframework.web.server.ServerWebExchange;
-
-import java.util.function.Predicate;
 
 /**
  * {@link ApiVersionResolver} that extract the version from a path segment.
