@@ -21,6 +21,7 @@ import java.nio.charset.Charset;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.Callable;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -291,6 +292,74 @@ class RuntimeHintsWriterTests {
 				builder.withMethod("test", Collections.emptyList(), ExecutableMode.INVOKE);
 			});
 			assertThat(writeJson(hints)).isEqualTo(writeJson(hints2));
+		}
+
+		@Test
+		void oneLambda() throws JSONException {
+			RuntimeHints hints = new RuntimeHints();
+			hints.reflection().registerLambda(Integer.class, builder -> builder.withDeclaringMethod("getCell", Integer.class, Integer.class).withInterfaces(Supplier.class));
+
+			assertEquals("""
+					{
+						"reflection": [
+							{
+								"type": {
+									"lambda": {
+										"declaringClass":  "java.lang.Integer",
+										"declaringMethod": {
+											"name": "getCell",
+											"parameterTypes": [ "java.lang.Integer", "java.lang.Integer" ]
+										},
+										"interfaces": [ "java.util.function.Supplier" ]
+									}
+								}
+							}
+						]
+					}
+					""", hints);
+		}
+
+		@Test
+		void sortLambdasByDeclaringClassAndMethods() throws JSONException {
+			RuntimeHints hints = new RuntimeHints();
+			hints.reflection().registerLambda(String.class, builder -> builder.withInterfaces(Callable.class));
+			hints.reflection().registerLambda(Integer.class,
+					builder -> builder.withDeclaringMethod("def").withInterfaces(Supplier.class));
+			hints.reflection().registerLambda(Integer.class,
+					builder -> builder.withDeclaringMethod("abc").withInterfaces(Function.class));
+
+			assertEquals("""
+					{
+						"reflection": [
+							{
+								"type": {
+									"lambda": {
+										"declaringClass":  "java.lang.Integer",
+										"declaringMethod": { "name": "abc" },
+										"interfaces": [ "java.util.function.Function" ]
+									}
+								}
+							},
+							{
+								"type": {
+									"lambda": {
+										"declaringClass":  "java.lang.Integer",
+										"declaringMethod": { "name": "def" },
+										"interfaces": [ "java.util.function.Supplier" ]
+									}
+								}
+							},
+							{
+								"type": {
+									"lambda": {
+										"declaringClass":  "java.lang.String",
+										"interfaces": [ "java.util.concurrent.Callable" ]
+									}
+								}
+							}
+						]
+					}
+					""", hints);
 		}
 
 	}

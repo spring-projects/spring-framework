@@ -35,6 +35,7 @@ import org.springframework.aot.hint.ExecutableMode;
 import org.springframework.aot.hint.FieldHint;
 import org.springframework.aot.hint.JavaSerializationHint;
 import org.springframework.aot.hint.JdkProxyHint;
+import org.springframework.aot.hint.LambdaHint;
 import org.springframework.aot.hint.MemberCategory;
 import org.springframework.aot.hint.ReflectionHints;
 import org.springframework.aot.hint.RuntimeHints;
@@ -63,6 +64,12 @@ class ReflectionHintsAttributes {
 				return leftSignature.compareTo(rightSignature);
 			};
 
+	private static final Comparator<LambdaHint> LAMBDA_HINT_COMPARATOR =
+			Comparator.comparing(LambdaHint::getDeclaringClass)
+					.thenComparing(LambdaHint::getDeclaringMethod, Comparator.nullsFirst(
+							Comparator.comparing(LambdaHint.DeclaringMethod::name)));
+
+
 	public List<Map<String, Object>> reflection(RuntimeHints hints) {
 		List<Map<String, Object>> reflectionHints = new ArrayList<>(reflectionHints(hints));
 		reflectionHints.addAll(hints.proxies().jdkProxyHints()
@@ -83,7 +90,9 @@ class ReflectionHintsAttributes {
 						return currentAttributes;
 					});
 		});
-		return allTypeHints.entrySet().stream().sorted(Comparator.comparing(Map.Entry::getKey)).map(Map.Entry::getValue).toList();
+		return Stream.concat(
+				allTypeHints.entrySet().stream().sorted(Map.Entry.comparingByKey()).map(Map.Entry::getValue),
+				hints.reflection().lambdaHints().sorted(LAMBDA_HINT_COMPARATOR).map(this::toAttributes)).toList();
 	}
 
 	public List<Map<String, Object>> jni(RuntimeHints hints) {
@@ -104,6 +113,23 @@ class ReflectionHintsAttributes {
 				hint.constructors(), hint.methods()).sorted().toList());
 		handleSerializable(attributes, hint.getSerializable());
 		return attributes;
+	}
+
+	private Map<String, Object> toAttributes(LambdaHint hint) {
+		Map<String, Object> attributes = new LinkedHashMap<>();
+		Map<String, Object> lambdaAttributes = new LinkedHashMap<>();
+		lambdaAttributes.put("declaringClass", hint.getDeclaringClass());
+		LambdaHint.DeclaringMethod declaringMethod = hint.getDeclaringMethod();
+		if (declaringMethod != null) {
+			Map<String, Object> methodAttributes = new LinkedHashMap<>();
+			methodAttributes.put("name", declaringMethod.name());
+			methodAttributes.put("parameterTypes", declaringMethod.parameterTypes());
+			lambdaAttributes.put("declaringMethod", methodAttributes);
+		}
+		lambdaAttributes.put("interfaces", hint.getInterfaces());
+
+		attributes.put("lambda", lambdaAttributes);
+		return Map.of("type", attributes);
 	}
 
 	@SuppressWarnings("removal")

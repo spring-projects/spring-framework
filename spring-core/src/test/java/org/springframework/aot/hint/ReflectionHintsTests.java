@@ -20,7 +20,9 @@ import java.io.Serializable;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.List;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
@@ -221,6 +223,30 @@ class ReflectionHintsTests {
 						typeHint.getMemberCategories().contains(MemberCategory.INTROSPECT_PUBLIC_METHODS))
 				.anyMatch(typeHint -> typeHint.getType().getCanonicalName().equals(FirstInterface.class.getCanonicalName()) &&
 						typeHint.getMemberCategories().contains(MemberCategory.INTROSPECT_PUBLIC_METHODS));
+	}
+
+	@Test
+	void registerLambda() {
+		this.reflectionHints.registerLambda(String.class, lambdaHint -> lambdaHint.withInterfaces(Supplier.class));
+		assertThat(this.reflectionHints.lambdaHints()).singleElement().satisfies(lambdaHint -> {
+			assertThat(lambdaHint.getDeclaringClass()).isEqualTo(TypeReference.of(String.class));
+			assertThat(lambdaHint.getReachableType()).isNull();
+			assertThat(lambdaHint.getDeclaringMethod()).isNull();
+			assertThat(lambdaHint.getInterfaces()).containsExactly(TypeReference.of(Supplier.class));
+		});
+	}
+
+	@Test
+	void registerLambdaWithDeclaringMethod() {
+		this.reflectionHints.registerLambda(TypeReference.of("com.example.Demo"), lambdaHint -> lambdaHint.withInterfaces(Supplier.class)
+				.withDeclaringMethod("hello", String.class, Integer.class));
+		assertThat(this.reflectionHints.lambdaHints()).singleElement().satisfies(lambdaHint -> {
+			assertThat(lambdaHint.getDeclaringClass()).isEqualTo(TypeReference.of("com.example.Demo"));
+			assertThat(lambdaHint.getReachableType()).isNull();
+			assertThat(lambdaHint.getDeclaringMethod()).isEqualTo(new LambdaHint.DeclaringMethod("hello",
+					List.of(TypeReference.of(String.class), TypeReference.of(Integer.class))));
+			assertThat(lambdaHint.getInterfaces()).containsExactly(TypeReference.of(Supplier.class));
+		});
 	}
 
 	private void assertTestTypeMethodHints(Consumer<ExecutableHint> methodHint) {
