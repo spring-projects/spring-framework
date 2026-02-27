@@ -16,8 +16,11 @@
 
 package org.springframework.web.reactive.accept;
 
+import java.util.List;
+
 import org.junit.jupiter.api.Test;
 
+import org.springframework.http.server.PathContainer;
 import org.springframework.web.accept.InvalidApiVersionException;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest;
@@ -29,6 +32,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 /**
  * Unit tests for {@link org.springframework.web.accept.PathApiVersionResolver}.
  * @author Rossen Stoyanchev
+ * @author Martin Mois
  */
 public class PathApiVersionResolverTests {
 
@@ -43,10 +47,49 @@ public class PathApiVersionResolverTests {
 		assertThatThrownBy(() -> testResolve(0, "/", "1.0")).isInstanceOf(InvalidApiVersionException.class);
 	}
 
+	@Test
+	void includePathFalse() {
+		String requestUri = "/v3/api-docs";
+		testResolveWithIncludePath(requestUri, null);
+	}
+
+	@Test
+	void includePathTrue() {
+		String requestUri = "/app/1.0/path";
+		testResolveWithIncludePath(requestUri, "1.0");
+	}
+
+	@Test
+	void includePathFalseShortPath() {
+		String requestUri = "/app";
+		testResolveWithIncludePath(requestUri, null);
+	}
+
+	@Test
+	void includePathInsufficientPathSegments() {
+		ServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/too-short"));
+		assertThatThrownBy(() -> new PathApiVersionResolver(1, requestPath -> true).resolveVersion(exchange))
+				.isInstanceOf(InvalidApiVersionException.class);
+	}
+
+	private static void testResolveWithIncludePath(String requestUri, String expected) {
+		ServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get(requestUri));
+		String actual = new PathApiVersionResolver(1, requestPath -> {
+			List<PathContainer.Element> elements = requestPath.elements();
+			if (elements.size() < 4) {
+				return false;
+			}
+			return elements.get(0).value().equals("/") &&
+					elements.get(1).value().equals("app") &&
+					elements.get(2).value().equals("/") &&
+					elements.get(3).value().equals("1.0");
+		}).resolveVersion(exchange);
+		assertThat(actual).isEqualTo(expected);
+	}
+
 	private static void testResolve(int index, String requestUri, String expected) {
 		ServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get(requestUri));
 		String actual = new PathApiVersionResolver(index).resolveVersion(exchange);
 		assertThat(actual).isEqualTo(expected);
 	}
-
 }

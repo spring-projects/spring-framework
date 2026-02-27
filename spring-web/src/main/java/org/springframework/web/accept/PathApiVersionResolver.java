@@ -16,12 +16,16 @@
 
 package org.springframework.web.accept;
 
+import java.util.function.Predicate;
+
 import jakarta.servlet.http.HttpServletRequest;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.http.server.PathContainer;
 import org.springframework.http.server.RequestPath;
 import org.springframework.util.Assert;
 import org.springframework.web.util.ServletRequestPathUtils;
+
 
 /**
  * {@link ApiVersionResolver} that extract the version from a path segment.
@@ -37,6 +41,7 @@ import org.springframework.web.util.ServletRequestPathUtils;
 public class PathApiVersionResolver implements ApiVersionResolver {
 
 	private final int pathSegmentIndex;
+	private @Nullable Predicate<RequestPath> includePath;
 
 
 	/**
@@ -49,13 +54,25 @@ public class PathApiVersionResolver implements ApiVersionResolver {
 		this.pathSegmentIndex = pathSegmentIndex;
 	}
 
+	/**
+	 * Create a resolver instance.
+	 * @param pathSegmentIndex the index of the path segment that contains the API version
+	 * @param includePath a {@link Predicate} that tests if the given path should be included
+	 */
+	public PathApiVersionResolver(int pathSegmentIndex, Predicate<RequestPath> includePath) {
+		this(pathSegmentIndex);
+		this.includePath = includePath;
+	}
 
 	@Override
-	public String resolveVersion(HttpServletRequest request) {
+	public @Nullable String resolveVersion(HttpServletRequest request) {
 		if (!ServletRequestPathUtils.hasParsedRequestPath(request)) {
 			throw new IllegalStateException("Expected parsed request path");
 		}
 		RequestPath path = ServletRequestPathUtils.getParsedRequestPath(request);
+		if (this.includePath != null && !this.includePath.test(path)) {
+			return null;
+		}
 		int i = 0;
 		for (PathContainer.Element element : path.pathWithinApplication().elements()) {
 			if (element instanceof PathContainer.PathSegment && i++ == this.pathSegmentIndex) {
