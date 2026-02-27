@@ -40,16 +40,25 @@ import static org.mockito.Mockito.mock;
 /**
  * Unit tests for {@link UrlHandlerFilter}.
  *
- * @author Rossen Stoyanchev
+ * @author Rossen Stoyanchev, James Missen
  */
 public class UrlHandlerFilterTests {
 
 	@Test
 	void requestMutation() {
-		UrlHandlerFilter filter = UrlHandlerFilter.trailingSlashHandler("/path/**").mutateRequest().build();
+		testRequestMutation("/path/**", "", "/path/123");
+		testRequestMutation("/path/*", "", "/path/123");
+		testRequestMutation("/path/**", "/myApp", "/myApp/path/123"); // gh-35975
+		testRequestMutation("/path/*", "/myApp", "/myApp/path/123"); // gh-35975
+	}
 
-		String path = "/path/123";
-		MockServerHttpRequest original = MockServerHttpRequest.get(path + "/").build();
+	void testRequestMutation(String pattern, String contextPath, String path) {
+		UrlHandlerFilter filter = UrlHandlerFilter
+				.trailingSlashHandler(pattern).mutateRequest()
+				.excludeContextPath(true) // gh-35975
+				.build();
+
+		MockServerHttpRequest original = MockServerHttpRequest.get(path + "/").contextPath(contextPath).build();
 		ServerWebExchange exchange = MockServerWebExchange.from(original);
 
 		ServerHttpRequest actual = invokeFilter(filter, exchange);
@@ -75,12 +84,51 @@ public class UrlHandlerFilterTests {
 		assertThat(exchange.getResponse().getHeaders().getLocation()).isEqualTo(URI.create(path + "?" + queryString));
 	}
 
+	@Test // gh-35882
+	void orderedUrlHandling() {
+		String path = "/path/123";
+		MockServerHttpRequest original = MockServerHttpRequest.get(path + "/").build();
+		ServerWebExchange exchange = MockServerWebExchange.from(original);
+
+		HttpStatus status = HttpStatus.PERMANENT_REDIRECT;
+
+		// Request mutation
+		UrlHandlerFilter filter = UrlHandlerFilter
+				.trailingSlashHandler("/path/**").redirect(status)
+				.trailingSlashHandler("/path/123/").mutateRequest() // most specific pattern
+				.trailingSlashHandler("/path/123/**").redirect(status)
+				.sortPatternsBySpecificity(true)
+				.build();
+
+		ServerHttpRequest actual = invokeFilter(filter, exchange);
+
+		assertThat(actual).isNotNull().isNotSameAs(original);
+		assertThat(actual.getPath().value()).isEqualTo(path);
+
+		// Redirect
+		filter = UrlHandlerFilter
+				.trailingSlashHandler("/path/**").mutateRequest()
+				.trailingSlashHandler("/path/123/").redirect(status) // most specific pattern
+				.trailingSlashHandler("/path/123/**").mutateRequest()
+				.sortPatternsBySpecificity(true)
+				.build();
+
+		UrlHandlerFilter finalFilter = filter;
+		assertThatThrownBy(() -> invokeFilter(finalFilter, exchange))
+				.hasMessageContaining("No argument value was captured");
+
+		assertThat(exchange.getResponse().getStatusCode()).isEqualTo(status);
+		assertThat(exchange.getResponse().getHeaders().getLocation()).isEqualTo(URI.create(path));
+	}
+
 	@Test
 	void noUrlHandling() {
 		testNoUrlHandling("/path/**", "", "/path/123");
 		testNoUrlHandling("/path/*", "", "/path/123");
 		testNoUrlHandling("/**", "", "/"); // gh-33444
 		testNoUrlHandling("/**", "/myApp", "/myApp/"); // gh-33565
+		testNoUrlHandling("/path/**", "/myApp", "/myApp/path/123/"); // gh-35975
+		testNoUrlHandling("/path/*", "/myApp", "/myApp/path/123/"); // gh-35975
 	}
 
 	private static void testNoUrlHandling(String pattern, String contextPath, String path) {
