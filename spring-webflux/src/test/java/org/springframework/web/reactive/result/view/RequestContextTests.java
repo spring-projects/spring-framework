@@ -73,4 +73,45 @@ class RequestContextTests {
 		assertThat(context.getContextUrl("{foo}?spam={spam}", map)).isEqualTo("/foo/bar%20baz?spam=%26bucket%3D");
 	}
 
+	@Test
+	void defaultHtmlEscapeNotConfigured() {
+		RequestContext context = new RequestContext(this.exchange, this.model, this.applicationContext);
+		assertThat(context.getDefaultHtmlEscape()).isFalse();
+		assertThat(context.isDefaultHtmlEscape()).isFalse();
+	}
+	@Test
+	void defaultHtmlEscapeSetToTrue() {
+		MockServerWebExchange exchange = MockServerWebExchange.builder(
+				MockServerHttpRequest.get("/foo/path").contextPath("/foo"))
+			.defaultHtmlEscape(true)
+			.build();
+
+		RequestContext context = new RequestContext(exchange, this.model, this.applicationContext);
+		assertThat(context.getDefaultHtmlEscape()).isTrue();
+		assertThat(context.isDefaultHtmlEscape()).isTrue();
+	}
+	@Test
+	void defaultHtmlEscapeSetToFalse() {
+		MockServerWebExchange exchange = MockServerWebExchange.builder(
+			MockServerHttpRequest.get("/foo/path").contextPath("/foo"))
+				.defaultHtmlEscape(false)
+				.build();
+
+		RequestContext context = new RequestContext(exchange, this.model, this.applicationContext);
+		assertThat(context.getDefaultHtmlEscape()).isFalse();
+		assertThat(context.isDefaultHtmlEscape()).isFalse();
+	}
+
+	@Test
+	void defaultHtmlEscapeOverriddenPerRequest() {
+		MockServerWebExchange exchange = MockServerWebExchange.builder(
+					MockServerHttpRequest.get("/foo/path").contextPath("/foo"))
+				.defaultHtmlEscape(true)
+				.build();
+
+		RequestContext context = new RequestContext(exchange, this.model, this.applicationContext);
+		context.setDefaultHtmlEscape(false);
+		assertThat(context.getDefaultHtmlEscape()).isFalse();
+		assertThat(context.isDefaultHtmlEscape()).isFalse();
+	}
 }
