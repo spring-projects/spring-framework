@@ -40,10 +40,12 @@
 	<suppress files="[\\/]src[\\/]main[\\/]java[\\/]org[\\/]springframework[\\/](core|util)[\\/](SpringProperties|SystemPropertyUtils)" checks="RegexpSinglelineJava" id="systemOutErrPrint"/>
 	<suppress files="[\\/]src[\\/]main[\\/]java[\\/]org[\\/]springframework[\\/]lang[\\/]NonNull.+" checks="IllegalImport" id="bannedNullabilityImports"/>
 	<suppress files="ByteArrayEncoder" checks="SpringLambda"/>
-	<suppress files="SocketUtils" checks="HideUtilityClassConstructor"/>
 	<suppress files="ResolvableType" checks="FinalClass"/>
-	<suppress files="Target_ClassFinder" checks="HideUtilityClassConstructor"/>
+	<suppress files="RuntimeHints" checks="SpringJavadoc"/>
+	<suppress files="SocketUtils" checks="HideUtilityClassConstructor"/>
 	<suppress files="StringDecoderBenchmark" checks="RegexpSinglelineJava" id="separatorSymbolLocation"/>
+	<suppress files="Target_ClassFinder" checks="HideUtilityClassConstructor"/>
+
 
 	<!-- spring-core-test -->
 	<suppress files="CompileWithForkedClassLoader" checks="IllegalImport" id="bannedJUnitJupiterImports"/>
