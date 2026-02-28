@@ -19,10 +19,12 @@ package org.springframework.core.task;
 import java.io.Serializable;
 import java.util.Set;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -96,9 +98,9 @@ public class SimpleAsyncTaskExecutor extends CustomizableThreadCreator
 
 	private boolean rejectTasksWhenLimitReached = false;
 
-	private volatile boolean active = true;
+	private final AtomicBoolean closed = new AtomicBoolean();
 
-	private volatile boolean cancelled = false;
+	private boolean cancelled = false;  // within activeThreads synchronization
 
 
 	/**
@@ -274,7 +276,7 @@ public class SimpleAsyncTaskExecutor extends CustomizableThreadCreator
 	 * @see #close()
 	 */
 	public boolean isActive() {
-		return this.active;
+		return !this.closed.get();
 	}
 
 	/**
@@ -312,14 +314,15 @@ public class SimpleAsyncTaskExecutor extends CustomizableThreadCreator
 	public void execute(Runnable task, long startTimeout) {
 		Assert.notNull(task, "Runnable must not be null");
 		if (!isActive()) {
-			throw new TaskRejectedException(getClass().getSimpleName() + " has been closed already");
+			throw new TaskRejectedException(getClass().getSimpleName() + " is not active");
 		}
 
 		Runnable taskToUse = (this.taskDecorator != null ? this.taskDecorator.decorate(task) : task);
+		Future<?> future = (task instanceof Future<?> f ? f : null);
 		if (isThrottleActive() && startTimeout > TIMEOUT_IMMEDIATE) {
 			this.concurrencyThrottle.beforeAccess();
 			try {
-				doExecute(new TaskTrackingRunnable(taskToUse));
+				doExecute(new TaskTrackingRunnable(taskToUse, future));
 			}
 			catch (Throwable ex) {
 				// Release concurrency permit if thread creation fails
@@ -329,7 +332,7 @@ public class SimpleAsyncTaskExecutor extends CustomizableThreadCreator
 			}
 		}
 		else if (this.activeThreads != null) {
-			doExecute(new TaskTrackingRunnable(taskToUse));
+			doExecute(new TaskTrackingRunnable(taskToUse, future));
 		}
 		else {
 			doExecute(taskToUse);
@@ -405,12 +408,13 @@ public class SimpleAsyncTaskExecutor extends CustomizableThreadCreator
 	 */
 	@Override
 	public void close() {
-		if (this.active) {
-			this.active = false;
+		if (this.closed.compareAndSet(false, true)) {
 			Set<Thread> threads = this.activeThreads;
 			if (threads != null) {
 				if (this.cancelRemainingTasksOnClose) {
-					this.cancelled = true;
+					synchronized (threads) {
+						this.cancelled = true;
+					}
 					// Early interrupt for remaining tasks on close
 					threads.forEach(Thread::interrupt);
 				}
@@ -435,9 +439,12 @@ public class SimpleAsyncTaskExecutor extends CustomizableThreadCreator
 		}
 	}
 
-	private void checkCancelled() {
-		if (this.cancelled) {
-			throw new TaskRejectedException(getClass().getSimpleName() + " has cancelled all remaining tasks");
+	private void checkCancelled(@Nullable Future<?> future) {
+		if (this.cancelled) {  // within synchronization from TaskTrackingRunnable
+			if (future != null) {
+				future.cancel(false);
+			}
+			throw new CancellationException(getClass().getSimpleName() + " has cancelled all remaining tasks");
 		}
 	}
 
@@ -477,9 +484,12 @@ public class SimpleAsyncTaskExecutor extends CustomizableThreadCreator
 
 		private final Runnable task;
 
-		public TaskTrackingRunnable(Runnable task) {
+		private final @Nullable Future<?> future;
+
+		public TaskTrackingRunnable(Runnable task, @Nullable Future<?> future) {
 			Assert.notNull(task, "Task must not be null");
 			this.task = task;
+			this.future = future;
 		}
 
 		@Override
@@ -488,14 +498,9 @@ public class SimpleAsyncTaskExecutor extends CustomizableThreadCreator
 			Thread thread = null;
 			if (threads != null) {
 				thread = Thread.currentThread();
-				if (isActive()) {
+				synchronized (threads) {
+					checkCancelled(this.future);
 					threads.add(thread);
-				}
-				else {
-					synchronized (threads) {
-						checkCancelled();
-						threads.add(thread);
-					}
 				}
 			}
 			try {
@@ -503,12 +508,9 @@ public class SimpleAsyncTaskExecutor extends CustomizableThreadCreator
 			}
 			finally {
 				if (threads != null) {
-					if (isActive()) {
-						threads.remove(thread);
-					}
-					else {
+					threads.remove(thread);
+					if (closed.get()) {
 						synchronized (threads) {
-							threads.remove(thread);
 							if (threads.isEmpty()) {
 								threads.notify();
 							}

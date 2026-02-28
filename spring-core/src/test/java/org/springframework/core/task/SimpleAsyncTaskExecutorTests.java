@@ -16,8 +16,11 @@
 
 package org.springframework.core.task;
 
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.junit.jupiter.api.Test;
 
@@ -27,6 +30,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
+import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.willCallRealMethod;
@@ -86,11 +90,11 @@ class SimpleAsyncTaskExecutorTests {
 	 * <p>This test reproduces a critical bug where OutOfMemoryError from
 	 * Thread.start() causes the executor to permanently deadlock:
 	 * <ol>
-	 *   <li>beforeAccess() increments concurrencyCount
-	 *   <li>doExecute() throws Error before thread starts
-	 *   <li>TaskTrackingRunnable.run() never executes
-	 *   <li>afterAccess() in finally block never called
-	 *   <li>Subsequent tasks block forever in onLimitReached()
+	 * <li>beforeAccess() increments concurrencyCount
+	 * <li>doExecute() throws Error before thread starts
+	 * <li>TaskTrackingRunnable.run() never executes
+	 * <li>afterAccess() in finally block never called
+	 * <li>Subsequent tasks block forever in onLimitReached()
 	 * </ol>
 	 *
 	 * <p>Test approach: The first execute() should fail with some exception
@@ -129,6 +133,105 @@ class SimpleAsyncTaskExecutorTests {
 		assertThat(completed)
 				.withFailMessage("Executor should not deadlock if concurrency permit was properly released after first failure")
 				.isTrue();
+	}
+
+	@Test
+	void taskTerminationTimeout() throws InterruptedException{
+		Future<?> future;
+		try (SimpleAsyncTaskExecutor executor = new SimpleAsyncTaskExecutor()) {
+			executor.setTaskTerminationTimeout(500);
+			future = executor.submit(() -> {
+				try {
+					Thread.sleep(200);
+				}
+				catch (InterruptedException ex) {
+					Thread.currentThread().interrupt();
+					throw new IllegalStateException();
+				}
+			});
+			Thread.sleep(100);
+		}
+		assertThatNoException().isThrownBy(future::get);
+	}
+
+	@Test
+	void taskTerminationTimeoutWithImmediateCancel() {
+		AtomicBoolean finished = new AtomicBoolean();
+		Future<?> future;
+		try (SimpleAsyncTaskExecutor executor = new SimpleAsyncTaskExecutor()) {
+			executor.setTaskTerminationTimeout(100);
+			future = executor.submit(() -> {
+				if (finished.get()) {
+					throw new IllegalStateException();
+				}
+			});
+		}
+		finished.set(true);
+		assertThatExceptionOfType(CancellationException.class).isThrownBy(future::get);
+	}
+
+	@Test
+	void taskTerminationTimeoutWithLateInterrupt() throws InterruptedException {
+		AtomicBoolean interrupted = new AtomicBoolean();
+		Future<?> future;
+		try (SimpleAsyncTaskExecutor executor = new SimpleAsyncTaskExecutor()) {
+			executor.setTaskTerminationTimeout(200);
+			future = executor.submit(() -> {
+				try {
+					Thread.sleep(500);
+				}
+				catch (InterruptedException ex) {
+					Thread.currentThread().interrupt();
+					interrupted.set(true);
+				}
+			});
+			Thread.sleep(100);
+		}
+		assertThatNoException().isThrownBy(future::get);
+		assertThat(interrupted).isTrue();
+	}
+
+	@Test
+	void taskTerminationTimeoutWithEarlyInterrupt() throws InterruptedException {
+		AtomicBoolean interrupted = new AtomicBoolean();
+		Future<?> future;
+		try (SimpleAsyncTaskExecutor executor = new SimpleAsyncTaskExecutor()) {
+			executor.setTaskTerminationTimeout(500);
+			executor.setCancelRemainingTasksOnClose(true);
+			future = executor.submit(() -> {
+				try {
+					Thread.sleep(200);
+				}
+				catch (InterruptedException ex) {
+					Thread.currentThread().interrupt();
+					interrupted.set(true);
+				}
+			});
+			Thread.sleep(100);
+		}
+		assertThatNoException().isThrownBy(future::get);
+		assertThat(interrupted).isTrue();
+	}
+
+	@Test
+	void cancelRemainingTasksOnClose() throws InterruptedException {
+		AtomicBoolean interrupted = new AtomicBoolean();
+		Future<?> future;
+		try (SimpleAsyncTaskExecutor executor = new SimpleAsyncTaskExecutor()) {
+			executor.setCancelRemainingTasksOnClose(true);
+			future = executor.submit(() -> {
+				try {
+					Thread.sleep(200);
+				}
+				catch (InterruptedException ex) {
+					Thread.currentThread().interrupt();
+					interrupted.set(true);
+				}
+			});
+			Thread.sleep(100);
+		}
+		assertThatNoException().isThrownBy(future::get);
+		assertThat(interrupted).isTrue();
 	}
 
 	@Test
