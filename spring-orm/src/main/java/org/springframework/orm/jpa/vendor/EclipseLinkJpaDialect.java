@@ -181,16 +181,18 @@ public class EclipseLinkJpaDialect extends DefaultJpaDialect {
 
 		@Override
 		public Connection getConnection() {
-			if (this.connection == null) {
+			Connection con = this.connection;
+			if (con == null) {
 				transactionIsolationLock.lock();
 				try {
-					this.connection = this.entityManager.unwrap(Connection.class);
+					con = this.entityManager.unwrap(Connection.class);
 				}
 				finally {
 					transactionIsolationLock.unlock();
 				}
+				this.connection = con;
 			}
-			return this.connection;
+			return con;
 		}
 	}
 

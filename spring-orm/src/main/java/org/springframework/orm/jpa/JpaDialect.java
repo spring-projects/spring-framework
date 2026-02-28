@@ -100,7 +100,7 @@ public interface JpaDialect extends PersistenceExceptionTranslator {
 	 * @param readOnly whether the transaction is supposed to be read-only
 	 * @param name the name of the transaction (if any)
 	 * @return an arbitrary object that holds transaction data, if any
-	 * (to be passed into cleanupTransaction)
+	 * (to be passed into {@link #cleanupTransaction})
 	 * @throws jakarta.persistence.PersistenceException if thrown by JPA methods
 	 * @see #cleanupTransaction
 	 */
@@ -117,6 +117,7 @@ public interface JpaDialect extends PersistenceExceptionTranslator {
 	 * @param transactionData arbitrary object that holds transaction data, if any
 	 * (as returned by beginTransaction or prepareTransaction)
 	 * @see #beginTransaction
+	 * @see #prepareTransaction
 	 * @see org.springframework.jdbc.datasource.DataSourceUtils#resetConnectionAfterTransaction
 	 */
 	void cleanupTransaction(@Nullable Object transactionData);

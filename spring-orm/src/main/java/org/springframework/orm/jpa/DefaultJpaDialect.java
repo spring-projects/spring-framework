@@ -69,6 +69,9 @@ public class DefaultJpaDialect implements JpaDialect, Serializable {
 		return null;
 	}
 
+	/**
+	 * This implementation simply returns {@code null} for no transaction data.
+	 */
 	@Override
 	@Nullable
 	public Object prepareTransaction(EntityManager entityManager, boolean readOnly, @Nullable String name)
@@ -81,6 +84,7 @@ public class DefaultJpaDialect implements JpaDialect, Serializable {
 	 * This implementation does nothing, since the default {@code beginTransaction}
 	 * implementation does not require any cleanup.
 	 * @see #beginTransaction
+	 * @see #prepareTransaction
 	 */
 	@Override
 	public void cleanupTransaction(@Nullable Object transactionData) {
