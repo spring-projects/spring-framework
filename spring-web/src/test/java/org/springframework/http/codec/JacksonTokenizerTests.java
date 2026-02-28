@@ -306,7 +306,7 @@ class JacksonTokenizerTests extends AbstractLeakCheckingTests {
 				.verify();
 	}
 
-	@Test
+	@Test  // fails on Jackson 3.1.0: encounters NumberType.DOUBLE
 	void useBigDecimalForFloats() {
 		Flux<DataBuffer> source = Flux.just(stringBuffer("1E+2"));
 		Flux<TokenBuffer> tokens = JacksonTokenizer.tokenize(
@@ -323,8 +323,7 @@ class JacksonTokenizerTests extends AbstractLeakCheckingTests {
 				.verifyComplete();
 	}
 
-	// gh-31747
-	@Test
+	@Test  // gh-31747
 	void compositeNettyBuffer() {
 		ByteBufAllocator allocator = UnpooledByteBufAllocator.DEFAULT;
 		ByteBuf firstByteBuf = allocator.buffer();
