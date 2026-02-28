@@ -21,6 +21,7 @@ import java.sql.SQLException;
 import java.util.Map;
 
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.FlushModeType;
 import jakarta.persistence.PersistenceException;
 import org.jspecify.annotations.Nullable;
 
@@ -37,6 +38,9 @@ import org.springframework.transaction.TransactionException;
  * <p>Simply begins a standard JPA transaction in {@link #beginTransaction} and
  * performs standard exception translation through {@link EntityManagerFactoryUtils}.
  *
+ * <p>Supports JPA 4.0's {@code FlushModeType.EXPLICIT} for read-only transactions,
+ * if available.
+ *
  * @author Juergen Hoeller
  * @since 2.0
  * @see JpaTransactionManager#setJpaDialect
@@ -44,16 +48,31 @@ import org.springframework.transaction.TransactionException;
 @SuppressWarnings("serial")
 public class DefaultJpaDialect implements JpaDialect, Serializable {
 
+	// JPA 4.0 FlushModeType.EXPLICIT available?
+	private static final @Nullable FlushModeType FLUSH_MODE_EXPLICIT;
+
+	static {
+		FlushModeType explicit;
+		try {
+			explicit = FlushModeType.valueOf("EXPLICIT");
+		}
+		catch (IllegalArgumentException ex) {
+			explicit = null;
+		}
+		FLUSH_MODE_EXPLICIT = explicit;
+	}
+
+
 	/**
 	 * This implementation invokes the standard JPA {@code Transaction.begin}
 	 * method. Throws an InvalidIsolationLevelException if a non-default isolation
 	 * level is set.
-	 * <p>This implementation does not return any transaction data Object, since there
-	 * is no state to be kept for a standard JPA transaction. Hence, subclasses do not
-	 * have to care about the return value ({@code null}) of this implementation
-	 * and are free to return their own transaction data Object.
+	 * <p>This implementation returns transaction data for a flush mode reset
+	 * if necessary, calling {@link #prepareFlushMode} accordingly. Can be reused
+	 * in subclasses or alternatively replaced with custom flush mode handling.
 	 * @see jakarta.persistence.EntityTransaction#begin
 	 * @see org.springframework.transaction.InvalidIsolationLevelException
+	 * @see #prepareFlushMode
 	 * @see #cleanupTransaction
 	 */
 	@Override
@@ -71,23 +90,52 @@ public class DefaultJpaDialect implements JpaDialect, Serializable {
 		}
 
 		entityManager.getTransaction().begin();
-		return null;
+		return prepareFlushMode(entityManager, definition.isReadOnly());
 	}
 
+	/**
+	 * This implementation returns transaction data for a flush mode reset
+	 * if necessary, calling {@link #prepareFlushMode} accordingly.
+	 * @see #prepareFlushMode
+	 */
 	@Override
 	public @Nullable Object prepareTransaction(EntityManager entityManager, boolean readOnly, @Nullable String name)
 			throws PersistenceException {
 
+		return prepareFlushMode(entityManager, readOnly);
+	}
+
+	/**
+	 * Prepare transaction data for a flush mode reset if necessary.
+	 * Only applied for read-only transactions on JPA 4.0.
+	 * <p>Used by {@link #beginTransaction} as well as {@link #prepareTransaction}.
+	 * Can be reused in corresponding overridden methods in vendor-specific
+	 * subclasses, or alternatively replaced with custom flush mode handling.
+	 * @param entityManager the EntityManager to begin a JPA transaction on
+	 * @param readOnly whether the transaction is supposed to be read-only
+	 * @return transaction data for a flush mode reset, if necessary
+	 * (to be returned from {@link #beginTransaction}/{@link #prepareTransaction}
+	 * and subsequently passed into {@link #cleanupTransaction} after completion)
+	 * @since 7.0.6
+	 */
+	protected @Nullable Object prepareFlushMode(EntityManager entityManager, boolean readOnly) {
+		if (readOnly && FLUSH_MODE_EXPLICIT != null) {
+			FlushModeType previousFlushMode = entityManager.getFlushMode();
+			entityManager.setFlushMode(FLUSH_MODE_EXPLICIT);
+			return new FlushModeTransactionData(entityManager, previousFlushMode);
+		}
 		return null;
 	}
 
 	/**
-	 * This implementation does nothing, since the default {@code beginTransaction}
-	 * implementation does not require any cleanup.
-	 * @see #beginTransaction
+	 * This implementation resets the flush mode if necessary.
+	 * @see #prepareFlushMode
 	 */
 	@Override
 	public void cleanupTransaction(@Nullable Object transactionData) {
+		if (transactionData instanceof FlushModeTransactionData flushModeTransactionData) {
+			flushModeTransactionData.resetFlushMode();
+		}
 	}
 
 	/**
@@ -147,6 +195,23 @@ public class DefaultJpaDialect implements JpaDialect, Serializable {
 	@Override
 	public @Nullable DataAccessException translateExceptionIfPossible(RuntimeException ex) {
 		return EntityManagerFactoryUtils.convertJpaAccessExceptionIfPossible(ex);
+	}
+
+
+	private static class FlushModeTransactionData {
+
+		private final EntityManager entityManager;
+
+		private final FlushModeType previousFlushMode;
+
+		public FlushModeTransactionData(EntityManager entityManager, FlushModeType previousFlushMode) {
+			this.entityManager = entityManager;
+			this.previousFlushMode = previousFlushMode;
+		}
+
+		public void resetFlushMode() {
+			this.entityManager.setFlushMode(this.previousFlushMode);
+		}
 	}
 
 }

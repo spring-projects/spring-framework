@@ -153,7 +153,8 @@ public class EclipseLinkJpaDialect extends DefaultJpaDialect {
 			entityManager.getTransaction().begin();
 		}
 
-		return null;
+		// Reuse JPA 4.0 FlushModeType.EXPLICIT handling from superclass.
+		return prepareFlushMode(entityManager, definition.isReadOnly());
 	}
 
 	@Override
@@ -183,16 +184,18 @@ public class EclipseLinkJpaDialect extends DefaultJpaDialect {
 
 		@Override
 		public Connection getConnection() {
-			if (this.connection == null) {
+			Connection con = this.connection;
+			if (con == null) {
 				transactionIsolationLock.lock();
 				try {
-					this.connection = this.entityManager.unwrap(Connection.class);
+					con = this.entityManager.unwrap(Connection.class);
 				}
 				finally {
 					transactionIsolationLock.unlock();
 				}
+				this.connection = con;
 			}
-			return this.connection;
+			return con;
 		}
 	}
 
