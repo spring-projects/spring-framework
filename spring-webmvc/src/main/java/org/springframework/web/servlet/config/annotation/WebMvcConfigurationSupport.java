@@ -884,7 +884,7 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	}
 
 	/**
-	 * Override this method to add custom {@link HttpMessageConverter messsage converters}
+	 * Override this method to add custom {@link HttpMessageConverter message converters}
 	 * to use with the {@link RequestMappingHandlerAdapter} and the
 	 * {@link ExceptionHandlerExceptionResolver}.
 	 * <p>Adding converters to the list turns off the default converters that would
