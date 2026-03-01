@@ -24,6 +24,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jspecify.annotations.Nullable;
 
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.config.DestructionAwareBeanPostProcessor;
 import org.springframework.beans.factory.support.MergedBeanDefinitionPostProcessor;
 import org.springframework.beans.factory.support.RootBeanDefinition;
@@ -98,7 +100,8 @@ class ApplicationListenerDetector implements DestructionAwareBeanPostProcessor, 
 			try {
 				ApplicationEventMulticaster multicaster = this.applicationContext.getApplicationEventMulticaster();
 				multicaster.removeApplicationListener(applicationListener);
-				multicaster.removeApplicationListenerBean(beanName);
+				multicaster.removeApplicationListenerBean(
+						bean instanceof FactoryBean ? BeanFactory.FACTORY_BEAN_PREFIX + beanName : beanName);
 			}
 			catch (IllegalStateException ex) {
 				// ApplicationEventMulticaster not initialized yet - no need to remove a listener

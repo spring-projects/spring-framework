@@ -30,6 +30,7 @@ import org.mockito.ArgumentCaptor;
 
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanPostProcessor;
@@ -435,12 +436,15 @@ class ApplicationContextEventTests extends AbstractApplicationEventListenerTests
 		RootBeanDefinition listener1Def = new RootBeanDefinition(MyOrderedListener1.class);
 		listener1Def.setDependsOn("nestedChild");
 		context.registerBeanDefinition("listener1", listener1Def);
+		context.registerBeanDefinition("listenerFb", new RootBeanDefinition(MyFactoryBeanListener.class));
 		context.refresh();
 
 		MyOrderedListener1 listener1 = context.getBean("listener1", MyOrderedListener1.class);
+		MyFactoryBeanListener listenerFb = context.getBean("&listenerFb", MyFactoryBeanListener.class);
 		MyEvent event1 = new MyEvent(context);
 		context.publishEvent(event1);
 		assertThat(listener1.seenEvents).contains(event1);
+		assertThat(listenerFb.seenEvents).contains(event1);
 
 		SimpleApplicationEventMulticaster multicaster = context.getBean(SimpleApplicationEventMulticaster.class);
 		assertThat(multicaster.getApplicationListeners()).isNotEmpty();
@@ -778,6 +782,27 @@ class ApplicationContextEventTests extends AbstractApplicationEventListenerTests
 		@Override
 		public void onApplicationEvent(MyEvent event) {
 			assertThat(this.otherListener.seenEvents).contains(event);
+		}
+	}
+
+
+	public static class MyFactoryBeanListener implements FactoryBean<String>, ApplicationListener<ApplicationEvent> {
+
+		public final List<ApplicationEvent> seenEvents = new ArrayList<>();
+
+		@Override
+		public void onApplicationEvent(ApplicationEvent event) {
+			this.seenEvents.add(event);
+		}
+
+		@Override
+		public String getObject() {
+			return "";
+		}
+
+		@Override
+		public Class<?> getObjectType() {
+			return String.class;
 		}
 	}
 
