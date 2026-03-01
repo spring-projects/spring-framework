@@ -100,7 +100,7 @@ public class ApiVersionConfigurer {
 	 * Add a resolver that extracts the API version from a path segment.
 	 * <p>Note that this resolver never returns {@code null}, and therefore
 	 * cannot yield to other resolvers, see {@link org.springframework.web.accept.PathApiVersionResolver}.
-	 * @param index the index of the path segment to check; e.g. for URL's like
+	 * @param index the index of the path segment to check; e.g. for URLs like
 	 * {@code "/{version}/..."} use index 0, for {@code "/api/{version}/..."} index 1.
 	 */
 	public ApiVersionConfigurer usePathSegment(int index) {

@@ -117,7 +117,7 @@ public final class UrlHandlerFilter implements WebFilter {
 	public interface Builder {
 
 		/**
-		 * Add a handler for URL's with a trailing slash.
+		 * Add a handler for URLs with a trailing slash.
 		 * @param pathPatterns path patterns to map the handler to, e.g.
 		 * <code>"/path/&#42;"</code>, <code>"/path/&#42;&#42;"</code>,
 		 * <code>"/path/foo/"</code>.
