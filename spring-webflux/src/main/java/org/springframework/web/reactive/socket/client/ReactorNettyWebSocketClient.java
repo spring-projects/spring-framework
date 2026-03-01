@@ -127,16 +127,18 @@ public class ReactorNettyWebSocketClient implements WebSocketClient {
 	@Override
 	public Mono<Void> execute(URI url, HttpHeaders requestHeaders, WebSocketHandler handler) {
 		String protocols = StringUtils.collectionToCommaDelimitedString(handler.getSubProtocols());
+		WebsocketClientSpec wsClientSpec = buildSpec(protocols);
 		return getHttpClient()
 				.headers(nettyHeaders -> setNettyHeaders(requestHeaders, nettyHeaders))
-				.websocket(buildSpec(protocols))
+				.websocket(wsClientSpec)
 				.uri(url.toString())
 				.handle((inbound, outbound) -> {
 					HttpHeaders responseHeaders = toHttpHeaders(inbound);
 					String protocol = responseHeaders.getFirst("Sec-WebSocket-Protocol");
 					HandshakeInfo info = new HandshakeInfo(url, responseHeaders, Mono.empty(), protocol);
 					NettyDataBufferFactory factory = new NettyDataBufferFactory(outbound.alloc());
-					WebSocketSession session = new ReactorNettyWebSocketSession(inbound, outbound, info, factory);
+					WebSocketSession session = new ReactorNettyWebSocketSession(inbound, outbound, info, factory,
+							wsClientSpec.maxFramePayloadLength());
 					if (logger.isDebugEnabled()) {
 						logger.debug("Started session '" + session.getId() + "' for " + url);
 					}
