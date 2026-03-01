@@ -16,10 +16,6 @@
 
 package org.springframework.core.testfixture.io.buffer;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
@@ -37,7 +33,8 @@ import io.netty.buffer.UnpooledByteBufAllocator;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.extension.AfterEachCallback;
 import org.junit.jupiter.api.extension.RegisterExtension;
-import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.Parameter;
+import org.junit.jupiter.params.ParameterizedClass;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import reactor.core.publisher.Mono;
@@ -60,6 +57,8 @@ import static org.junit.jupiter.params.provider.Arguments.argumentSet;
  * @author Rossen Stoyanchev
  * @author Sam Brannen
  */
+@ParameterizedClass
+@MethodSource("dataBufferFactories")
 public abstract class AbstractDataBufferAllocatingTests {
 
 	private static UnpooledByteBufAllocator netty4OffHeapUnpooled;
@@ -74,6 +73,7 @@ public abstract class AbstractDataBufferAllocatingTests {
 	@RegisterExtension
 	AfterEachCallback leakDetector = context -> waitForDataBufferRelease(Duration.ofSeconds(2));
 
+	@Parameter
 	protected DataBufferFactory bufferFactory;
 
 
@@ -167,14 +167,6 @@ public abstract class AbstractDataBufferAllocatingTests {
 		netty4OffHeapUnpooled = new UnpooledByteBufAllocator(true);
 		netty4OnHeapPooled = new PooledByteBufAllocator(false, 1, 1, 4096, 4, 0, 0, 0, true);
 		netty4OffHeapPooled = new PooledByteBufAllocator(true, 1, 1, 4096, 4, 0, 0, 0, true);
-	}
-
-
-	@Retention(RetentionPolicy.RUNTIME)
-	@Target(ElementType.METHOD)
-	@ParameterizedTest
-	@MethodSource("org.springframework.core.testfixture.io.buffer.AbstractDataBufferAllocatingTests#dataBufferFactories()")
-	public @interface ParameterizedDataBufferAllocatingTest {
 	}
 
 	public static Stream<Arguments> dataBufferFactories() {
