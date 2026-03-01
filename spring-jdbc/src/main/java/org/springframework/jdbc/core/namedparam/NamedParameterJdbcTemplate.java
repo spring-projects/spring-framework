@@ -18,6 +18,7 @@ package org.springframework.jdbc.core.namedparam;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -434,6 +435,21 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 		}, generatedKeyHolder);
 	}
 
+	@Override
+	public int[][] batchUpdate(String sql, Collection<SqlParameterSource> batchArgs, int batchSize) {
+		if (batchArgs.isEmpty() || batchSize <= 0) {
+			return new int[0][0];
+		}
+
+		ParsedSql parsedSql = getParsedSql(sql);
+		SqlParameterSource sqlParameterSource = batchArgs.iterator().next();
+		PreparedStatementCreatorFactory pscf = getPreparedStatementCreatorFactory(parsedSql, sqlParameterSource);
+
+		return getJdbcOperations().batchUpdate(pscf.getSql(), batchArgs, batchSize, (ps, argument) -> {
+			@Nullable Object[] values = NamedParameterUtils.buildValueArray(parsedSql, argument, null);
+			pscf.newPreparedStatementSetter(values).setValues(ps);
+		});
+	}
 
 	/**
 	 * Build a {@link PreparedStatementCreator} based on the given SQL and named parameters.
