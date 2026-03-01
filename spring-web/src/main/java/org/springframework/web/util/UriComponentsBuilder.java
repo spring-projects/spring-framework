@@ -57,7 +57,7 @@ import org.springframework.web.util.UriComponents.UriTemplateVariables;
  * {@link ParserType#WHAT_WG WhatWG parser type}, based on the algorithm from
  * the WhatWG <a href="https://url.spec.whatwg.org">URL Living Standard</a>
  * provides more lenient handling of a wide range of cases that occur in user
- * types URL's.
+ * types URLs.
  *
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
@@ -787,7 +787,7 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 	public enum ParserType {
 
 		/**
-		 * This parser type expects URI's to conform to RFC 3986 syntax.
+		 * This parser type expects URIs to conform to RFC 3986 syntax.
 		 */
 		RFC,
 
@@ -795,7 +795,7 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 		 * This parser follows the
 		 * <a href="https://url.spec.whatwg.org/#url-parsing">URL parsing algorithm</a>
 		 * in the WhatWG URL Living standard that browsers implement to align on
-		 * lenient handling of user typed URL's that may not conform to RFC syntax.
+		 * lenient handling of user typed URLs that may not conform to RFC syntax.
 		 * @see <a href="https://url.spec.whatwg.org">URL Living Standard</a>
 		 * @see <a href="https://github.com/web-platform-tests/wpt/tree/master/url">URL tests</a>
 		 */

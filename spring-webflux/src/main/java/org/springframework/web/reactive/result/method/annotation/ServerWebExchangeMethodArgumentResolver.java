@@ -46,7 +46,7 @@ import org.springframework.web.util.UriComponentsBuilder;
  * <li>{@link Locale}
  * <li>{@link TimeZone}
  * <li>{@link ZoneId}
- * <li>{@link UriBuilder} or {@link UriComponentsBuilder} -- for building URL's
+ * <li>{@link UriBuilder} or {@link UriComponentsBuilder} -- for building URLs
  * relative to the current request
  * </ul>
  *

@@ -3,7 +3,7 @@
 
 [.small]#xref:web/webflux/uri-building.adoc[See equivalent in the Reactive stack]#
 
-This section describes various options available in the Spring Framework to work with URI's.
+This section describes various options available in the Spring Framework to work with URIs.
 
 include::partial$web/web-uris.adoc[leveloffset=+1]
 

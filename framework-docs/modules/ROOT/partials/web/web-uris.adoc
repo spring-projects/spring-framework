@@ -2,7 +2,7 @@
 = UriComponents
 [.small]#Spring MVC and Spring WebFlux#
 
-`UriComponentsBuilder` helps to build URI's from URI templates with variables, as the following example shows:
+`UriComponentsBuilder` helps to build URIs from URI templates with variables, as the following example shows:
 
 [tabs]
 ======
@@ -247,7 +247,7 @@ and treats deviations from the syntax as illegal.
 https://github.com/web-platform-tests/wpt/tree/master/url[URL parsing algorithm] in the
 https://url.spec.whatwg.org[WhatWG URL Living standard]. It provides lenient handling of
 a wide range of cases of unexpected input. Browsers implement this in order to handle
-leniently user typed URL's. For more details, see the URL Living Standard and URL parsing
+leniently user typed URLs. For more details, see the URL Living Standard and URL parsing
 https://github.com/web-platform-tests/wpt/tree/master/url[test cases].
 
 By default, `RestClient`, `WebClient`, and `RestTemplate` use the RFC parser type, and
@@ -255,10 +255,10 @@ expect applications to provide with URL templates that conform to RFC syntax. To
 that you can customize the `UriBuilderFactory` on any of the clients.
 
 Applications and frameworks may further rely on `UriComponentsBuilder` for their own needs
-to parse user provided URL's in order to inspect and possibly validated URI components
+to parse user provided URLs in order to inspect and possibly validated URI components
 such as the scheme, host, port, path, and query. Such components can decide to use the
-WhatWG parser type in order to handle URL's more leniently, and to align with the way
-browsers parse URI's, in case of a redirect to the input URL or if it is included in a
+WhatWG parser type in order to handle URLs more leniently, and to align with the way
+browsers parse URIs, in case of a redirect to the input URL or if it is included in a
 response to a browser.
 
 

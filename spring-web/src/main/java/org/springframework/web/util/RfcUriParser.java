@@ -26,7 +26,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
- * Parser for URI's based on RFC 3986 syntax.
+ * Parser for URIs based on RFC 3986 syntax.
  *
  * @author Rossen Stoyanchev
  * @since 6.2
