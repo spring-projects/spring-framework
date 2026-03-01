@@ -57,7 +57,7 @@ import org.springframework.web.util.UriComponents.UriTemplateVariables;
  * {@link ParserType#WHAT_WG WhatWG parser type}, based on the algorithm from
  * the WhatWG <a href="https://url.spec.whatwg.org">URL Living Standard</a>
  * provides more lenient handling of a wide range of cases that occur in user
- * types URLs.
+ * typed URLs.
  *
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
