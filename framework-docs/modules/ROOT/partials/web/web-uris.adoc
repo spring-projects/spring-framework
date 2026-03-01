@@ -128,7 +128,7 @@ Kotlin::
 = UriBuilder
 [.small]#Spring MVC and Spring WebFlux#
 
-<<web-uricomponents, `UriComponentsBuilder`>> implements `UriBuilder`. You can create a
+<<uricomponents, `UriComponentsBuilder`>> implements `UriBuilder`. You can create a
 `UriBuilder`, in turn, with a `UriBuilderFactory`. Together, `UriBuilderFactory` and
 `UriBuilder` provide a pluggable mechanism to build URIs from URI templates, based on
 shared configuration, such as a base URL, encoding preferences, and other details.
@@ -373,14 +373,14 @@ Java::
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
 	String baseUrl = "https://example.com";
-	DefaultUriBuilderFactory factory = new DefaultUriBuilderFactory(baseUrl)
+	DefaultUriBuilderFactory factory = new DefaultUriBuilderFactory(baseUrl);
 	factory.setEncodingMode(EncodingMode.TEMPLATE_AND_VALUES);
 
-	// Customize the RestTemplate..
+	// Customize the RestTemplate.
 	RestTemplate restTemplate = new RestTemplate();
 	restTemplate.setUriTemplateHandler(factory);
 
-	// Customize the WebClient..
+	// Customize the WebClient.
 	WebClient client = WebClient.builder().uriBuilderFactory(factory).build();
 ----
 
@@ -393,12 +393,12 @@ Kotlin::
 		encodingMode = EncodingMode.TEMPLATE_AND_VALUES
 	}
 
-	// Customize the RestTemplate..
+	// Customize the RestTemplate.
 	val restTemplate = RestTemplate().apply {
 		uriTemplateHandler = factory
 	}
 
-	// Customize the WebClient..
+	// Customize the WebClient.
 	val client = WebClient.builder().uriBuilderFactory(factory).build()
 ----
 ======
