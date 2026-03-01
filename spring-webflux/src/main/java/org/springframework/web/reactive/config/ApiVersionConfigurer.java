@@ -27,6 +27,7 @@ import java.util.function.Predicate;
 import org.jspecify.annotations.Nullable;
 
 import org.springframework.http.MediaType;
+import org.springframework.http.server.RequestPath;
 import org.springframework.util.Assert;
 import org.springframework.web.accept.ApiVersionParser;
 import org.springframework.web.accept.InvalidApiVersionException;
@@ -105,6 +106,20 @@ public class ApiVersionConfigurer {
 	 */
 	public ApiVersionConfigurer usePathSegment(int index) {
 		this.versionResolvers.add(new PathApiVersionResolver(index));
+		return this;
+	}
+
+	/**
+	 * Add a resolver that extracts the API version from a path segment
+	 * and that allows to exclude certain paths based on the provided {@link Predicate}.
+	 * <p>Note that this resolver never returns {@code null}, and therefore
+	 * cannot yield to other resolvers, see {@link org.springframework.web.accept.PathApiVersionResolver}.
+	 * @param index the index of the path segment to check; e.g. for URL's like
+	 * {@code "/{version}/..."} use index 0, for {@code "/api/{version}/..."} index 1.
+	 * @param excludePath a {@link Predicate} that allows to exclude certain paths
+	 */
+	public ApiVersionConfigurer usePathSegment(int index, Predicate<RequestPath> excludePath) {
+		this.versionResolvers.add(new PathApiVersionResolver(index, excludePath));
 		return this;
 	}
 
