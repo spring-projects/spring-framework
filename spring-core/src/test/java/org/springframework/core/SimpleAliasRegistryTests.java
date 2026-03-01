@@ -18,6 +18,7 @@ package org.springframework.core;
 
 import java.util.Map;
 
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -53,7 +54,7 @@ class SimpleAliasRegistryTests {
 	private static final String ALIAS5 = "alias5";
 
 
-	private final SimpleAliasRegistry registry = new SimpleAliasRegistry();
+	private final SimpleAliasRegistryForTest registry = new SimpleAliasRegistryForTest();
 
 
 	@Test
@@ -87,6 +88,89 @@ class SimpleAliasRegistryTests {
 		assertHasAlias(REAL_NAME, ALIAS1);
 		assertHasAlias(REAL_NAME, ALIAS2);
 		assertHasAlias(REAL_NAME, ALIAS3);
+	}
+
+	@Test
+	void registerSameAliasTwice_DoesNothing() {
+		registerAlias(NAME1, ALIAS1);
+		assertHasAlias(NAME1, ALIAS1);
+
+		registerAlias(NAME1, ALIAS1);
+		assertHasAlias(NAME1, ALIAS1);
+	}
+
+	@Test
+	void registerAliasWithSameName_GivenAliasOverridingAllowed_DoesNothing() {
+		registry.setAllowAliasOverriding(true);
+
+		registerAlias(NAME1, NAME1);
+		assertDoesNotHaveAlias(NAME1, NAME1);
+	}
+
+	@Test
+	void registerAliasWithSameName_GivenAliasOverridingNotAllowed_DoesNothing() {
+		registry.setAllowAliasOverriding(false);
+
+		registerAlias(NAME1, NAME1);
+		assertDoesNotHaveAlias(NAME1, NAME1);
+	}
+
+	@Test
+	void registerAliasWithSameName_GivenAliasOverridingAllowed_ThenReplacesExistingAlias() {
+		// GIVEN
+		registry.setAllowAliasOverriding(true);
+		registerAlias(NAME1, ALIAS1);
+		assertHasAlias(NAME1, ALIAS1);
+
+		// WHEN
+		registerAlias(ALIAS1, ALIAS1);
+
+		// THEN
+		assertDoesNotHaveAlias(NAME1, ALIAS1);
+		assertDoesNotHaveAlias(ALIAS1, ALIAS1);
+	}
+
+	@Test
+	void registerAliasWithSameName_GivenAliasOverridingNotAllowed_ThenThrowsException() {
+		// GIVEN
+		registry.setAllowAliasOverriding(false);
+		registerAlias(NAME1, ALIAS1);
+		assertHasAlias(NAME1, ALIAS1);
+
+		// WHEN/THEN
+		assertThatIllegalStateException()
+				.isThrownBy(() -> registerAlias(ALIAS1, ALIAS1))
+				.withMessage("Cannot define alias '%s' for name '%s': It is already " +
+						"registered for name '%s'.", ALIAS1, ALIAS1, NAME1);
+	}
+
+	@Test
+	void overrideAlreadyExistingAlias_GivenAliasOverridingAllowed_ThenReplacesExistingAlias() {
+		// GIVEN
+		registry.setAllowAliasOverriding(true);
+		registerAlias(NAME1, ALIAS1);
+		assertHasAlias(NAME1, ALIAS1);
+
+		// WHEN
+		registerAlias(NAME2, ALIAS1);
+
+		// THEN
+		assertDoesNotHaveAlias(NAME1, ALIAS1);
+		assertHasAlias(NAME2, ALIAS1);
+	}
+
+	@Test
+	void overrideAlreadyExistingAlias_GivenAliasOverridingNotAllowed_ThenThrowsException() {
+		// GIVEN
+		registry.setAllowAliasOverriding(false);
+		registerAlias(NAME1, ALIAS1);
+		assertHasAlias(NAME1, ALIAS1);
+
+		// WHEN/THEN
+		assertThatIllegalStateException()
+				.isThrownBy(() -> registerAlias(NAME2, ALIAS1))
+				.withMessage("Cannot define alias '%s' for name '%s': It is already " +
+						"registered for name '%s'.", ALIAS1, NAME2, NAME1);
 	}
 
 	@Test
@@ -341,6 +425,31 @@ class SimpleAliasRegistryTests {
 		public String resolveStringValue(String str) {
 			return this.placeholders.getOrDefault(str, str);
 		}
+	}
+
+	/**
+	 * An implementation of {@link SimpleAliasRegistry} that allows configuring the alias overriding behaviour.
+	 * By default, {@link SimpleAliasRegistry}'s default behaviour will be used.
+	 */
+	private static class SimpleAliasRegistryForTest extends SimpleAliasRegistry {
+
+		private boolean allowAliasOverriding = super.allowAliasOverriding();
+
+		/**
+		 * Sets the alias overriding behaviour.
+		 *
+		 * @param allowAliasOverriding {@code true} or {@code false} to force a specific behaviour. {@code null}
+		 * to fall back to {@link SimpleAliasRegistry}'s default.
+		 */
+		public void setAllowAliasOverriding(@Nullable Boolean allowAliasOverriding) {
+			this.allowAliasOverriding = allowAliasOverriding != null ? allowAliasOverriding : super.allowAliasOverriding();
+		}
+
+		@Override
+		protected boolean allowAliasOverriding() {
+			return allowAliasOverriding;
+		}
+
 	}
 
 }

@@ -59,6 +59,11 @@ public class SimpleAliasRegistry implements AliasRegistry {
 		Assert.hasText(alias, "'alias' must not be empty");
 		synchronized (this.aliasMap) {
 			if (alias.equals(name)) {
+				String registeredName = this.aliasMap.get(alias);
+				if (registeredName != null && !registeredName.equals(name) && !allowAliasOverriding()) {
+					throw new IllegalStateException("Cannot define alias '" + alias + "' for name '" +
+							name + "': It is already registered for name '" + registeredName + "'.");
+				}
 				this.aliasMap.remove(alias);
 				this.aliasNames.remove(alias);
 				if (logger.isDebugEnabled()) {
