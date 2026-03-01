@@ -44,6 +44,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.util.ObjectUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.springframework.core.testfixture.io.ResourceTestUtils.qualifiedResource;
 
 /**
@@ -170,6 +171,41 @@ class BeanFactoryUtilsTests {
 		assertThat(beans).hasSize(2);
 		assertThat(beans.get("&t3")).isEqualTo(t3);
 		assertThat(beans.get("&t4")).isEqualTo(t4);
+	}
+
+	@Test
+	void testBeanOfType_GivenSingleBean_ThenReturnsBean() {
+		StaticListableBeanFactory lbf = new StaticListableBeanFactory();
+		TestBean t1 = new TestBean();
+		lbf.addBean("t1", t1);
+
+		ITestBean actual = BeanFactoryUtils.beanOfType(lbf, ITestBean.class);
+
+		assertThat(actual).isSameAs(t1);
+	}
+
+	@Test
+	void testBeanOfType_GivenMultipleBeans_ThenThrowsException() {
+		StaticListableBeanFactory lbf = new StaticListableBeanFactory();
+		TestBean t1 = new TestBean();
+		TestBean t2 = new TestBean();
+		DummyFactory t3 = new DummyFactory();
+		lbf.addBean("t1", t1);
+		lbf.addBean("t2", t2);
+		lbf.addBean("t3", t3);
+
+		assertThatExceptionOfType(NoUniqueBeanDefinitionException.class)
+				.isThrownBy(() -> BeanFactoryUtils.beanOfType(lbf, ITestBean.class))
+				.withMessage("No qualifying bean of type 'org.springframework.beans.testfixture.beans.ITestBean' available: expected single matching bean but found 3: t1,t2,t3");
+	}
+
+	@Test
+	void testBeanOfType_GivenBeanDoesNotExist_ThenThrowsException() {
+		StaticListableBeanFactory lbf = new StaticListableBeanFactory();
+
+		assertThatExceptionOfType(NoSuchBeanDefinitionException.class)
+				.isThrownBy(() -> BeanFactoryUtils.beanOfType(lbf, ITestBean.class))
+				.withMessage("No qualifying bean of type 'org.springframework.beans.testfixture.beans.ITestBean' available");
 	}
 
 	@Test
