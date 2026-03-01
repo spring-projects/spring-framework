@@ -37,6 +37,10 @@ public enum Database {
 
 	DB2,
 
+	/**
+	 * @deprecated Apache Derby is retired, switch to HSQLDB or H2
+	 */
+	@Deprecated(forRemoval = true, since = "7.1")
 	DERBY,
 
 	/** @since 2.5.5 */

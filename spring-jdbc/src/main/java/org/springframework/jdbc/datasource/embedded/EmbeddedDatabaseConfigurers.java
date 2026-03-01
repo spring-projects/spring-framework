@@ -38,6 +38,7 @@ public abstract class EmbeddedDatabaseConfigurers {
 	 * @return the configurer instance
 	 * @throws IllegalStateException if the driver for the specified database type is not available
 	 */
+	@SuppressWarnings("removal")
 	public static EmbeddedDatabaseConfigurer getConfigurer(EmbeddedDatabaseType type) {
 		Assert.notNull(type, "EmbeddedDatabaseType is required");
 		try {
