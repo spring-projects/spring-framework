@@ -99,6 +99,11 @@ public class ServerWebExchangeDecorator implements ServerWebExchange {
 	}
 
 	@Override
+	public @Nullable Boolean getDefaultHtmlEscape() {
+		return getDelegate().getDefaultHtmlEscape();
+	}
+
+	@Override
 	public Mono<MultiValueMap<String, String>> getFormData() {
 		return getDelegate().getFormData();
 	}

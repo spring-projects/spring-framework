@@ -40,9 +40,9 @@ import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRe
 public final class MockServerWebExchange extends DefaultServerWebExchange {
 
 
-	private MockServerWebExchange(MockServerHttpRequest request, WebSessionManager sessionManager) {
+	private MockServerWebExchange(MockServerHttpRequest request, WebSessionManager sessionManager, Boolean defaultHtmlEscape) {
 		super(request, new MockServerHttpResponse(), sessionManager,
-				ServerCodecConfigurer.create(), new AcceptHeaderLocaleContextResolver());
+				ServerCodecConfigurer.create(), new AcceptHeaderLocaleContextResolver() , null, defaultHtmlEscape);
 	}
 
 
@@ -101,6 +101,8 @@ public final class MockServerWebExchange extends DefaultServerWebExchange {
 
 		private @Nullable WebSessionManager sessionManager;
 
+		private @Nullable Boolean defaultHtmlEscape;
+
 
 		public Builder(MockServerHttpRequest request) {
 			this.request = request;
@@ -128,11 +130,21 @@ public final class MockServerWebExchange extends DefaultServerWebExchange {
 		}
 
 		/**
+		 * Configure the default HTML escaping setting for the exchange.
+		 * @param defaultHtmlEscape the default HTML escaping setting to use
+		 * @since 5.3.8
+		 */
+		public Builder defaultHtmlEscape(boolean defaultHtmlEscape) {
+			this.defaultHtmlEscape = defaultHtmlEscape;
+			return this;
+		}
+
+		/**
 		 * Build the {@code MockServerWebExchange} instance.
 		 */
 		public MockServerWebExchange build() {
 			return new MockServerWebExchange(this.request,
-					this.sessionManager != null ? this.sessionManager : new DefaultWebSessionManager());
+					this.sessionManager != null ? this.sessionManager : new DefaultWebSessionManager(),this.defaultHtmlEscape);
 		}
 	}
 

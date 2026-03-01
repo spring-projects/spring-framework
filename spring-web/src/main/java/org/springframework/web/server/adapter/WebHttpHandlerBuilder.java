@@ -91,6 +91,8 @@ public final class WebHttpHandlerBuilder {
 
 	private final List<WebExceptionHandler> exceptionHandlers = new ArrayList<>();
 
+	private @Nullable Boolean defaultHtmlEscape;
+
 	private @Nullable Function<HttpHandler, HttpHandler> httpHandlerDecorator;
 
 	private @Nullable WebSessionManager sessionManager;
@@ -130,6 +132,7 @@ public final class WebHttpHandlerBuilder {
 		this.observationRegistry = other.observationRegistry;
 		this.observationConvention = other.observationConvention;
 		this.httpHandlerDecorator = other.httpHandlerDecorator;
+		this.defaultHtmlEscape = other.defaultHtmlEscape;
 	}
 
 
@@ -290,6 +293,26 @@ public final class WebHttpHandlerBuilder {
 	}
 
 	/**
+ 	* Configure a default HTML escape setting to apply to the created
+ 	* {@link org.springframework.web.server.ServerWebExchange}.
+ 	* @param defaultHtmlEscape whether to enable default HTML escaping
+ 	* @return this builder
+ 	* @since 7.0
+ 	*/
+	public WebHttpHandlerBuilder defaultHtmlEscape(Boolean defaultHtmlEscape) {
+		this.defaultHtmlEscape = defaultHtmlEscape;
+		return this;
+	}
+
+	/**
+ 	* Return whether a default HTML escape setting has been configured.
+ 	* @since 7.0
+ 	*/
+	public boolean hasDefaultHtmlEscape() {
+		return (this.defaultHtmlEscape != null);
+	}
+
+	/**
 	 * Configure the {@link ServerCodecConfigurer} to set on the {@code WebServerExchange}.
 	 * @param codecConfigurer the codec configurer
 	 */
@@ -423,6 +446,9 @@ public final class WebHttpHandlerBuilder {
 		}
 		if (this.applicationContext != null) {
 			adapted.setApplicationContext(this.applicationContext);
+		}
+		if(this.defaultHtmlEscape != null) {
+			adapted.setDefaultHtmlEscape(this.defaultHtmlEscape);
 		}
 		adapted.afterPropertiesSet();
 
