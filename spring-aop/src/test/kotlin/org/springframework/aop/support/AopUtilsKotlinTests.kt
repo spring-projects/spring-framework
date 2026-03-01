@@ -44,6 +44,17 @@ class AopUtilsKotlinTests {
 	}
 
 	@Test
+	fun `Invoking suspending function with null argument should not return default value`() {
+		val method = ReflectionUtils.findMethod(WithoutInterface::class.java, "handleWithDefaultParam",
+			String::class. java, Continuation::class.java)!!
+		val continuation = Continuation<Any>(CoroutineName("test")) { }
+		val result = AopUtils.invokeJoinpointUsingReflection(WithoutInterface(), method, arrayOf(null, continuation))
+		assertThat(result).isInstanceOfSatisfying(Mono::class.java) {
+			assertThat(it.block()).isEqualTo(null)
+		}
+	}
+
+	@Test
 	fun `Invoking suspending function on bridged method should return Mono`() {
 		val value = "foo"
 		val bridgedMethod = ReflectionUtils.findMethod(WithInterface::class.java, "handle", Any::class.java, Continuation::class.java)!!
@@ -62,6 +73,11 @@ class AopUtilsKotlinTests {
 
 	class WithoutInterface {
 		suspend fun handle(value: String): String {
+			delay(1)
+			return value
+		}
+
+		suspend fun handleWithDefaultParam(value: String? = "defaultVal") : String? {
 			delay(1)
 			return value
 		}
