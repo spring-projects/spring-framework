@@ -18,9 +18,9 @@ package org.springframework.web.accept;
 
 import java.util.function.Predicate;
 
-import org.jspecify.annotations.Nullable;
-
 import jakarta.servlet.http.HttpServletRequest;
+
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.http.server.PathContainer;
 import org.springframework.http.server.RequestPath;
