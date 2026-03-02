@@ -48,24 +48,31 @@ public class PathApiVersionResolverTests {
 	}
 
 	@Test
-	void excludePathTrue() {
+	void includePathFalse() {
 		String requestUri = "/v3/api-docs";
-		testResolveWithExcludePath(requestUri, null);
+		testResolveWithIncludePath(requestUri, null);
 	}
 
 	@Test
-	void excludePathFalse() {
+	void includePathTrue() {
 		String requestUri = "/app/1.0/path";
-		testResolveWithExcludePath(requestUri, "1.0");
+		testResolveWithIncludePath(requestUri, "1.0");
 	}
 
 	@Test
-	void excludePathFalseShortPath() {
+	void includePathFalseShortPath() {
 		String requestUri = "/app";
-		assertThatThrownBy(() -> testResolveWithExcludePath(requestUri, null)).isInstanceOf(InvalidApiVersionException.class);
+		testResolveWithIncludePath(requestUri, null);
 	}
 
-	private static void testResolveWithExcludePath(String requestUri, String expected) {
+	@Test
+	void includePathInsufficientPathSegments() {
+		ServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/too-short"));
+		assertThatThrownBy(() -> new PathApiVersionResolver(1, requestPath -> true).resolveVersion(exchange))
+				.isInstanceOf(InvalidApiVersionException.class);
+	}
+
+	private static void testResolveWithIncludePath(String requestUri, String expected) {
 		ServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get(requestUri));
 		String actual = new PathApiVersionResolver(1, requestPath -> {
 			List<PathContainer.Element> elements = requestPath.elements();
@@ -73,9 +80,9 @@ public class PathApiVersionResolverTests {
 				return false;
 			}
 			return elements.get(0).value().equals("/") &&
-					elements.get(1).value().equals("v3") &&
+					elements.get(1).value().equals("app") &&
 					elements.get(2).value().equals("/") &&
-					elements.get(3).value().equals("api-docs");
+					elements.get(3).value().equals("1.0");
 		}).resolveVersion(exchange);
 		assertThat(actual).isEqualTo(expected);
 	}
@@ -85,5 +92,4 @@ public class PathApiVersionResolverTests {
 		String actual = new PathApiVersionResolver(index).resolveVersion(exchange);
 		assertThat(actual).isEqualTo(expected);
 	}
-
 }

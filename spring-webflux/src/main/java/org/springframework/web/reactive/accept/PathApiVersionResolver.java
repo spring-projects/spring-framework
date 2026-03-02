@@ -41,7 +41,7 @@ import org.springframework.web.server.ServerWebExchange;
 public class PathApiVersionResolver implements ApiVersionResolver {
 
 	private final int pathSegmentIndex;
-	private @Nullable Predicate<RequestPath> excludePath = null;
+	private @Nullable Predicate<RequestPath> includePath = null;
 
 
 	/**
@@ -57,11 +57,11 @@ public class PathApiVersionResolver implements ApiVersionResolver {
 	/**
 	 * Create a resolver instance.
 	 * @param pathSegmentIndex the index of the path segment that contains the API version
-	 * @param excludePath a {@link Predicate} that tests if the given path should be excluded
+	 * @param includePath a {@link Predicate} that tests if the given path should be included
 	 */
-	public PathApiVersionResolver(int pathSegmentIndex, Predicate<RequestPath> excludePath) {
+	public PathApiVersionResolver(int pathSegmentIndex, Predicate<RequestPath> includePath) {
 		this(pathSegmentIndex);
-		this.excludePath = excludePath;
+		this.includePath = includePath;
 	}
 
 
@@ -69,7 +69,7 @@ public class PathApiVersionResolver implements ApiVersionResolver {
 	public @Nullable String resolveVersion(ServerWebExchange exchange) {
 		int i = 0;
 		RequestPath path = exchange.getRequest().getPath();
-		if (this.excludePath != null && this.excludePath.test(path)) {
+		if (this.includePath != null && !this.includePath.test(path)) {
 			return null;
 		}
 		for (PathContainer.Element e : path.pathWithinApplication().elements()) {
