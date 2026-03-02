@@ -14,14 +14,19 @@
  * limitations under the License.
  */
 
-package org.springframework.test.context.configuration.interfaces;
+package org.springframework.test.context.config.interfaces;
 
-import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.jdbc.EmptyDatabaseConfig;
+import org.springframework.test.context.jdbc.SqlConfig;
 
 /**
  * @author Sam Brannen
  * @since 4.3
  */
-@TestPropertySource(properties = { "foo = bar", "enigma: 42" })
-interface TestPropertySourceTestInterface {
+@ContextConfiguration(classes = EmptyDatabaseConfig.class)
+@DirtiesContext
+@SqlConfig(commentPrefixes = { "`", "%%" }, blockCommentStartDelimiter = "#$", blockCommentEndDelimiter = "$#", separator = "@@")
+interface SqlConfigTestInterface {
 }

@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-package org.springframework.test.context.configuration.interfaces;
+package org.springframework.test.context.config.interfaces;
 
 import java.util.List;
 
 import org.springframework.test.context.BootstrapWith;
 import org.springframework.test.context.ContextCustomizerFactory;
-import org.springframework.test.context.configuration.interfaces.BootstrapWithTestInterface.CustomTestContextBootstrapper;
+import org.springframework.test.context.config.interfaces.BootstrapWithTestInterface.CustomTestContextBootstrapper;
 import org.springframework.test.context.support.DefaultTestContextBootstrapper;
 
 import static java.util.Collections.singletonList;

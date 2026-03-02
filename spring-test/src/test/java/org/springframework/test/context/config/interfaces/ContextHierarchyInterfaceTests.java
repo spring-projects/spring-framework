@@ -14,19 +14,15 @@
  * limitations under the License.
  */
 
-package org.springframework.test.context.configuration.interfaces;
-
-import javax.sql.DataSource;
+package org.springframework.test.context.config.interfaces;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.test.context.jdbc.Sql;
-import org.springframework.test.context.jdbc.SqlConfig;
+import org.springframework.context.ApplicationContext;
+import org.springframework.test.context.aot.DisabledInAotMode;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.test.jdbc.JdbcTestUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -35,29 +31,30 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @since 4.3
  */
 @ExtendWith(SpringExtension.class)
-class SqlConfigInterfaceTests implements SqlConfigTestInterface {
-
-	JdbcTemplate jdbcTemplate;
+@DisabledInAotMode("@ContextHierarchy is not supported in AOT")
+class ContextHierarchyInterfaceTests implements ContextHierarchyTestInterface {
 
 	@Autowired
-	void setDataSource(DataSource dataSource) {
-		this.jdbcTemplate = new JdbcTemplate(dataSource);
-	}
+	String foo;
+
+	@Autowired
+	String bar;
+
+	@Autowired
+	String baz;
+
+	@Autowired
+	ApplicationContext context;
+
 
 	@Test
-	@Sql(scripts = "/org/springframework/test/context/jdbc/schema.sql", //
-			config = @SqlConfig(separator = ";"))
-	@Sql("/org/springframework/test/context/jdbc/data-add-users-with-custom-script-syntax.sql")
-	void methodLevelScripts() {
-		assertNumUsers(3);
-	}
-
-	void assertNumUsers(int expected) {
-		assertThat(countRowsInTable("user")).as("Number of rows in the 'user' table.").isEqualTo(expected);
-	}
-
-	int countRowsInTable(String tableName) {
-		return JdbcTestUtils.countRowsInTable(this.jdbcTemplate, tableName);
+	void loadContextHierarchy() {
+		assertThat(context).as("child ApplicationContext").isNotNull();
+		assertThat(context.getParent()).as("parent ApplicationContext").isNotNull();
+		assertThat(context.getParent().getParent()).as("grandparent ApplicationContext").isNull();
+		assertThat(foo).isEqualTo("foo");
+		assertThat(bar).isEqualTo("bar");
+		assertThat(baz).isEqualTo("baz-child");
 	}
 
 }

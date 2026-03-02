@@ -14,18 +14,24 @@
  * limitations under the License.
  */
 
-package org.springframework.test.context.configuration.interfaces;
+package org.springframework.test.context.config.interfaces;
 
+import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.ContextHierarchy;
-import org.springframework.test.context.hierarchies.standard.SingleTestClassWithTwoLevelContextHierarchyTests;
+import org.springframework.test.context.config.interfaces.WebAppConfigurationTestInterface.Config;
+import org.springframework.test.context.web.WebAppConfiguration;
 
 /**
  * @author Sam Brannen
  * @since 4.3
  */
-@ContextHierarchy({
-	@ContextConfiguration(classes = SingleTestClassWithTwoLevelContextHierarchyTests.ParentConfig.class),
-	@ContextConfiguration(classes = SingleTestClassWithTwoLevelContextHierarchyTests.ChildConfig.class) })
-interface ContextHierarchyTestInterface {
+@WebAppConfiguration
+@ContextConfiguration(classes = Config.class)
+interface WebAppConfigurationTestInterface {
+
+	@Configuration
+	class Config {
+		/* no user beans required for these tests */
+	}
+
 }

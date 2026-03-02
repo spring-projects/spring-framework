@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.test.context.configuration.interfaces;
+package org.springframework.test.context.config.interfaces;
 
 import java.util.concurrent.atomic.AtomicInteger;
 

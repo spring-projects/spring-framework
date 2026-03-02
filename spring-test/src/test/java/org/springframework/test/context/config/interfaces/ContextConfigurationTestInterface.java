@@ -14,24 +14,26 @@
  * limitations under the License.
  */
 
-package org.springframework.test.context.configuration.interfaces;
+package org.springframework.test.context.config.interfaces;
 
-import org.springframework.context.annotation.Configuration;
+import org.springframework.beans.testfixture.beans.Employee;
+import org.springframework.context.annotation.Bean;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.configuration.interfaces.WebAppConfigurationTestInterface.Config;
-import org.springframework.test.context.web.WebAppConfiguration;
+import org.springframework.test.context.config.interfaces.ContextConfigurationTestInterface.Config;
 
 /**
  * @author Sam Brannen
  * @since 4.3
  */
-@WebAppConfiguration
 @ContextConfiguration(classes = Config.class)
-interface WebAppConfigurationTestInterface {
+interface ContextConfigurationTestInterface {
 
-	@Configuration
 	class Config {
-		/* no user beans required for these tests */
+
+		@Bean
+		Employee employee() {
+			return new Employee("Dilbert");
+		}
 	}
 
 }
