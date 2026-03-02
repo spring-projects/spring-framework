@@ -16,8 +16,11 @@
 
 package org.springframework.web.accept;
 
+import java.util.List;
+
 import org.junit.jupiter.api.Test;
 
+import org.springframework.http.server.PathContainer;
 import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 import org.springframework.web.util.ServletRequestPathUtils;
 
@@ -39,6 +42,57 @@ public class PathApiVersionResolverTests {
 	@Test
 	void insufficientPathSegments() {
 		assertThatThrownBy(() -> testResolve(0, "/", "1.0")).isInstanceOf(InvalidApiVersionException.class);
+	}
+
+	@Test
+	void includePathFalse() {
+		String requestUri = "/v3/api-docs";
+		testResolveWithIncludePath(requestUri, null);
+	}
+
+	@Test
+	void includePathTrue() {
+		String requestUri = "/app/1.0/path";
+		testResolveWithIncludePath(requestUri, "1.0");
+	}
+
+	@Test
+	void includePathFalseShortPath() {
+		String requestUri = "/app";
+		testResolveWithIncludePath(requestUri, null);
+	}
+
+	@Test
+	void includePathInsufficientPathSegments() {
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/app");
+		try {
+			ServletRequestPathUtils.parseAndCache(request);
+			assertThatThrownBy(() -> new PathApiVersionResolver(1, requestPath -> true)
+					.resolveVersion(request))
+				.isInstanceOf(InvalidApiVersionException.class);
+		} finally {
+			ServletRequestPathUtils.clearParsedRequestPath(request);
+		}
+	}
+
+	private static void testResolveWithIncludePath(String requestUri, String expected) {
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", requestUri);
+		try {
+			ServletRequestPathUtils.parseAndCache(request);
+			String actual = new PathApiVersionResolver(1, requestPath -> {
+				List<PathContainer.Element> elements = requestPath.elements();
+				if (elements.size() < 4) {
+					return false;
+				}
+				return elements.get(0).value().equals("/") &&
+						elements.get(1).value().equals("app") &&
+						elements.get(2).value().equals("/") &&
+						elements.get(3).value().equals("1.0");
+			}).resolveVersion(request);
+			assertThat(actual).isEqualTo(expected);
+		} finally {
+			ServletRequestPathUtils.clearParsedRequestPath(request);
+		}
 	}
 
 	private static void testResolve(int index, String requestUri, String expected) {
