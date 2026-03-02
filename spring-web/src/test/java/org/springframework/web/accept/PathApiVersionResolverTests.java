@@ -70,7 +70,8 @@ public class PathApiVersionResolverTests {
 			assertThatThrownBy(() -> new PathApiVersionResolver(1, requestPath -> true)
 					.resolveVersion(request))
 				.isInstanceOf(InvalidApiVersionException.class);
-		} finally {
+		}
+		finally {
 			ServletRequestPathUtils.clearParsedRequestPath(request);
 		}
 	}
@@ -90,7 +91,8 @@ public class PathApiVersionResolverTests {
 						elements.get(3).value().equals("1.0");
 			}).resolveVersion(request);
 			assertThat(actual).isEqualTo(expected);
-		} finally {
+		}
+		finally {
 			ServletRequestPathUtils.clearParsedRequestPath(request);
 		}
 	}
