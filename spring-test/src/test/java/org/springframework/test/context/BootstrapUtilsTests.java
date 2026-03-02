@@ -25,6 +25,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
+import org.springframework.core.annotation.AliasFor;
 import org.springframework.test.context.BootstrapUtilsTests.OuterClass.NestedWithInheritedBootstrapper;
 import org.springframework.test.context.BootstrapUtilsTests.OuterClass.NestedWithInheritedBootstrapper.DoubleNestedWithInheritedButOverriddenBootstrapper;
 import org.springframework.test.context.BootstrapUtilsTests.OuterClass.NestedWithInheritedBootstrapper.DoubleNestedWithOverriddenBootstrapper;
@@ -140,6 +141,37 @@ class BootstrapUtilsTests {
 		assertBootstrapper(LocalDeclarationAndMetaAnnotatedBootstrapWithAnnotationClass.class, EnigmaBootstrapper.class);
 	}
 
+	/**
+	 * @since 7.0.6
+	 */
+	@Test  // gh-35938
+	void resolveTestContextBootstrapperWithMetaBootstrapWithAnnotationThatOverridesMetaMetaBootstrapWithAnnotation() {
+		BootstrapContext bootstrapContext = BootstrapTestUtils.buildBootstrapContext(
+				MetaAndMetaMetaBootstrapWithAnnotationsClass.class, delegate);
+			assertThatIllegalStateException()
+				.isThrownBy(() -> resolveTestContextBootstrapper(bootstrapContext))
+				.withMessageContaining("Configuration error: found multiple declarations of @BootstrapWith")
+				.withMessageContaining(FooBootstrapper.class.getSimpleName())
+				.withMessageContaining(BarBootstrapper.class.getSimpleName());
+	}
+
+	/**
+	 * @since 7.0.6
+	 */
+	@Test  // gh-35938
+	void resolveTestContextBootstrapperWithComposedBootstrapWithAnnotationThatOverridesMetaMetaBootstrapWithAnnotation() {
+		assertBootstrapper(ConfigurableAndMetaMetaBootstrapWithAnnotationsClass.class, BarBootstrapper.class);
+	}
+
+	/**
+	 * @since 7.0.6
+	 */
+	@Test  // gh-35938
+	void resolveTestContextBootstrapperWithCustomizedComposedBootstrapWithAnnotationThatOverridesMetaMetaBootstrapWithAnnotation() {
+		assertBootstrapper(CustomizedConfigurableAndMetaMetaBootstrapWithAnnotationsClass.class, EnigmaBootstrapper.class);
+	}
+
+
 	private void assertBootstrapper(Class<?> testClass, Class<?> expectedBootstrapper) {
 		BootstrapContext bootstrapContext = BootstrapTestUtils.buildBootstrapContext(testClass, delegate);
 		TestContextBootstrapper bootstrapper = resolveTestContextBootstrapper(bootstrapContext);
@@ -166,6 +198,28 @@ class BootstrapUtilsTests {
 	@BootstrapWith(BarBootstrapper.class)
 	@Retention(RetentionPolicy.RUNTIME)
 	@interface BootWithBar {}
+
+	/**
+	 * This annotation emulates the expectation of certain Spring Boot users who wish
+	 * to be able to <em>override</em> the {@code @BootstrapWith} meta-annotation
+	 * declaration on {@code @SpringBootTest} while retaining the other configuration of
+	 * {@code @SpringBootTest}.
+	 * <p>In this annotation, {@code @BootWithFoo} plays the role of {@code @SpringBootTest},
+	 * which the user wishes to override via a local declaration of
+	 * {@code @BootstrapWith(BarBootstrapper.class)}.
+	 */
+	@BootWithFoo
+	@BootstrapWith(BarBootstrapper.class)
+	@Retention(RetentionPolicy.RUNTIME)
+	@interface BootWithBarInsteadOfFoo {}
+
+	@BootWithFoo
+	@Retention(RetentionPolicy.RUNTIME)
+	@interface BootWithConfigurableBootstrapperInsteadOfFoo {
+
+		@AliasFor(annotation = BootstrapWith.class)
+		Class<? extends TestContextBootstrapper> value() default BarBootstrapper.class;
+	}
 
 	// Invalid
 	@BootstrapWith
@@ -194,6 +248,15 @@ class BootstrapUtilsTests {
 	@BootWithBar
 	@BootstrapWith(EnigmaBootstrapper.class)
 	static class LocalDeclarationAndMetaAnnotatedBootstrapWithAnnotationClass {}
+
+	@BootWithBarInsteadOfFoo
+	static class MetaAndMetaMetaBootstrapWithAnnotationsClass {}
+
+	@BootWithConfigurableBootstrapperInsteadOfFoo
+	static class ConfigurableAndMetaMetaBootstrapWithAnnotationsClass {}
+
+	@BootWithConfigurableBootstrapperInsteadOfFoo(EnigmaBootstrapper.class)
+	static class CustomizedConfigurableAndMetaMetaBootstrapWithAnnotationsClass {}
 
 	@org.springframework.test.context.web.WebAppConfiguration
 	static class WebAppConfigClass {
