@@ -217,8 +217,8 @@ class BootstrapUtilsTests {
 	@Retention(RetentionPolicy.RUNTIME)
 	@interface BootWithConfigurableBootstrapperInsteadOfFoo {
 
-		@AliasFor(annotation = BootstrapWith.class)
-		Class<? extends TestContextBootstrapper> value() default BarBootstrapper.class;
+		@AliasFor(annotation = BootstrapWith.class, attribute = "value")
+		Class<? extends TestContextBootstrapper> bootstrapWith() default BarBootstrapper.class;
 	}
 
 	// Invalid
@@ -255,7 +255,7 @@ class BootstrapUtilsTests {
 	@BootWithConfigurableBootstrapperInsteadOfFoo
 	static class ConfigurableAndMetaMetaBootstrapWithAnnotationsClass {}
 
-	@BootWithConfigurableBootstrapperInsteadOfFoo(EnigmaBootstrapper.class)
+	@BootWithConfigurableBootstrapperInsteadOfFoo(bootstrapWith = EnigmaBootstrapper.class)
 	static class CustomizedConfigurableAndMetaMetaBootstrapWithAnnotationsClass {}
 
 	@org.springframework.test.context.web.WebAppConfiguration
