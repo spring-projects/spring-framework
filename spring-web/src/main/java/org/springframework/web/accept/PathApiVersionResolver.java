@@ -18,6 +18,7 @@ package org.springframework.web.accept;
 
 import java.util.function.Predicate;
 
+import jakarta.servlet.http.HttpServletRequest;
 import org.jspecify.annotations.Nullable;
 
 import org.springframework.http.server.PathContainer;
@@ -25,7 +26,6 @@ import org.springframework.http.server.RequestPath;
 import org.springframework.util.Assert;
 import org.springframework.web.util.ServletRequestPathUtils;
 
-import jakarta.servlet.http.HttpServletRequest;
 
 /**
  * {@link ApiVersionResolver} that extract the version from a path segment.
