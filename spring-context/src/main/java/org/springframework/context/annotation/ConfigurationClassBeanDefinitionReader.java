@@ -368,8 +368,8 @@ class ConfigurationClassBeanDefinitionReader {
 					"@Bean definition illegally overridden by existing bean definition: " + existingBeanDef);
 		}
 		if (logger.isDebugEnabled()) {
-			logger.debug("Skipping bean definition for %s: a definition for bean '%s' already exists. " +
-					"This top-level bean definition is considered as an override.".formatted(beanMethod, beanName));
+			logger.debug(("Skipping bean definition for %s: a definition for bean '%s' already exists. " +
+					"This top-level bean definition is considered as an override.").formatted(beanMethod, beanName));
 		}
 		return true;
 	}
