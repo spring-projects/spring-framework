@@ -53,8 +53,10 @@ final class AnnotationTypeMapping {
 
 	private static final Log logger = LogFactory.getLog(AnnotationTypeMapping.class);
 
-	private static final Predicate<? super Annotation> isBeanValidationConstraint = annotation ->
-			annotation.annotationType().getName().equals("jakarta.validation.Constraint");
+	private static final Predicate<? super Annotation> isBeanValidationConstraint = annotation -> {
+				String name = annotation.annotationType().getName();
+				return (name.equals("jakarta.validation.Constraint") || name.equals("javax.validation.Constraint"));
+			};
 
 	/**
 	 * Set used to track which convention-based annotation attribute overrides
