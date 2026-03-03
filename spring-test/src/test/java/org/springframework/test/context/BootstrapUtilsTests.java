@@ -146,13 +146,7 @@ class BootstrapUtilsTests {
 	 */
 	@Test  // gh-35938
 	void resolveTestContextBootstrapperWithMetaBootstrapWithAnnotationThatOverridesMetaMetaBootstrapWithAnnotation() {
-		BootstrapContext bootstrapContext = BootstrapTestUtils.buildBootstrapContext(
-				MetaAndMetaMetaBootstrapWithAnnotationsClass.class, delegate);
-			assertThatIllegalStateException()
-				.isThrownBy(() -> resolveTestContextBootstrapper(bootstrapContext))
-				.withMessageContaining("Configuration error: found multiple declarations of @BootstrapWith")
-				.withMessageContaining(FooBootstrapper.class.getSimpleName())
-				.withMessageContaining(BarBootstrapper.class.getSimpleName());
+		assertBootstrapper(MetaAndMetaMetaBootstrapWithAnnotationsClass.class, BarBootstrapper.class);
 	}
 
 	/**
