@@ -19,6 +19,7 @@ package org.springframework.context.support;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.Charset;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -80,9 +81,10 @@ import org.springframework.util.StringUtils;
  *
  * @author Juergen Hoeller
  * @author Sebastien Deleuze
+ * @author Sam Brannen
  * @see #setCacheSeconds
  * @see #setBasenames
- * @see #setDefaultEncoding
+ * @see #setDefaultCharset
  * @see #setFileEncodings
  * @see #setPropertiesPersister
  * @see #setResourceLoader
@@ -135,7 +137,7 @@ public class ReloadableResourceBundleMessageSource extends AbstractResourceBased
 	/**
 	 * Set per-file charsets to use for parsing properties files.
 	 * <p>Only applies to classic properties files, not to XML files.
-	 * @param fileEncodings a Properties with filenames as keys and charset
+	 * @param fileEncodings a Properties object with filenames as keys and charset
 	 * names as values. Filenames have to match the basename syntax,
 	 * with optional locale-specific components: for example, "WEB-INF/messages"
 	 * or "WEB-INF/messages_en".
@@ -567,18 +569,21 @@ public class ReloadableResourceBundleMessageSource extends AbstractResourceBased
 				this.propertiesPersister.loadFromXml(props, is);
 			}
 			else {
-				String encoding = null;
+				Charset charset = null;
 				if (this.fileEncodings != null) {
-					encoding = this.fileEncodings.getProperty(filename);
-				}
-				if (encoding == null) {
-					encoding = getDefaultEncoding();
-				}
-				if (encoding != null) {
-					if (logger.isDebugEnabled()) {
-						logger.debug("Loading properties [" + resource.getFilename() + "] with encoding '" + encoding + "'");
+					String charsetName = this.fileEncodings.getProperty(filename);
+					if (charsetName != null) {
+						charset = Charset.forName(charsetName);
 					}
-					this.propertiesPersister.load(props, new InputStreamReader(is, encoding));
+				}
+				if (charset == null) {
+					charset = getDefaultCharset();
+				}
+				if (charset != null) {
+					if (logger.isDebugEnabled()) {
+						logger.debug("Loading properties [" + resource.getFilename() + "] with encoding '" + charset + "'");
+					}
+					this.propertiesPersister.load(props, new InputStreamReader(is, charset));
 				}
 				else {
 					if (logger.isDebugEnabled()) {

@@ -16,6 +16,7 @@
 
 package org.springframework.context.support;
 
+import java.nio.charset.UnsupportedCharsetException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
@@ -30,14 +31,18 @@ import org.springframework.context.MessageSourceResolvable;
 import org.springframework.context.NoSuchMessageException;
 import org.springframework.context.i18n.LocaleContextHolder;
 
+import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
+ * Tests for {@link ResourceBundleMessageSource} and {@link ReloadableResourceBundleMessageSource}.
+ *
  * @author Juergen Hoeller
  * @author Sebastien Deleuze
+ * @author Sam Brannen
  * @since 03.02.2004
  */
 class ResourceBundleMessageSourceTests {
@@ -272,23 +277,28 @@ class ResourceBundleMessageSourceTests {
 		assertThat(ms.getMessage("code2", null, Locale.GERMAN)).isEqualTo("nachricht2");
 	}
 
+	@Test  // gh-36413
+	void resourceBundleMessageSourceWithInvalidDefaultCharsetName() {
+		ResourceBundleMessageSource ms = new ResourceBundleMessageSource();
+		assertThatExceptionOfType(UnsupportedCharsetException.class).isThrownBy(() -> ms.setDefaultEncoding("BOGUS"));
+	}
+
 	@Test
-	void resourceBundleMessageSourceWithDefaultCharset() {
+	void resourceBundleMessageSourceWithDefaultCharsetName() {
 		ResourceBundleMessageSource ms = new ResourceBundleMessageSource();
 		ms.setBasename("org/springframework/context/support/messages");
-		ms.setDefaultEncoding("ISO-8859-1");
+		ms.setDefaultEncoding(ISO_8859_1.name());
 		assertThat(ms.getMessage("code1", null, Locale.ENGLISH)).isEqualTo("message1");
 		assertThat(ms.getMessage("code2", null, Locale.GERMAN)).isEqualTo("nachricht2");
 	}
 
-	@Test
-	void resourceBundleMessageSourceWithInappropriateDefaultCharset() {
+	@Test  // gh-36413
+	void resourceBundleMessageSourceWithDefaultCharset() {
 		ResourceBundleMessageSource ms = new ResourceBundleMessageSource();
 		ms.setBasename("org/springframework/context/support/messages");
-		ms.setDefaultEncoding("argh");
-		ms.setFallbackToSystemLocale(false);
-		assertThatExceptionOfType(NoSuchMessageException.class).isThrownBy(() ->
-				ms.getMessage("code1", null, Locale.ENGLISH));
+		ms.setDefaultCharset(ISO_8859_1);
+		assertThat(ms.getMessage("code1", null, Locale.ENGLISH)).isEqualTo("message1");
+		assertThat(ms.getMessage("code2", null, Locale.GERMAN)).isEqualTo("nachricht2");
 	}
 
 	@Test
@@ -353,13 +363,13 @@ class ResourceBundleMessageSourceTests {
 	void reloadableResourceBundleMessageSourceWithDefaultCharset() {
 		ReloadableResourceBundleMessageSource ms = new ReloadableResourceBundleMessageSource();
 		ms.setBasename("org/springframework/context/support/messages");
-		ms.setDefaultEncoding("ISO-8859-1");
+		ms.setDefaultCharset(ISO_8859_1);
 		assertThat(ms.getMessage("code1", null, Locale.ENGLISH)).isEqualTo("message1");
 		assertThat(ms.getMessage("code2", null, Locale.GERMAN)).isEqualTo("nachricht2");
 	}
 
 	@Test
-	void reloadableResourceBundleMessageSourceWithInappropriateDefaultCharset() {
+	void reloadableResourceBundleMessageSourceWithInappropriateDefaultCharsetName() {
 		ReloadableResourceBundleMessageSource ms = new ReloadableResourceBundleMessageSource();
 		ms.setBasename("org/springframework/context/support/messages");
 		ms.setDefaultEncoding("unicode");
