@@ -273,10 +273,8 @@ public class EmitUtils {
                 List bucket = (List)buckets.get(key);
                 Label next = null;
                 if (skipEquals && bucket.size() == 1) {
-                    if (skipEquals) {
-						e.pop();
-					}
-                    callback.processCase(bucket.get(0), end);
+					e.pop();
+					callback.processCase(bucket.get(0), end);
                 } else {
                     for (Iterator it = bucket.iterator(); it.hasNext();) {
                         String string = (String)it.next();
