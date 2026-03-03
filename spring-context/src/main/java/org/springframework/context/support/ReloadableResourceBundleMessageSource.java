@@ -92,10 +92,12 @@ import org.springframework.util.StringUtils;
 public class ReloadableResourceBundleMessageSource extends AbstractResourceBasedMessageSource
 		implements ResourceLoaderAware {
 
+	private static final String PROPERTIES_EXTENSION = ".properties";
+
 	private static final String XML_EXTENSION = ".xml";
 
 
-	private List<String> fileExtensions = List.of(".properties", XML_EXTENSION);
+	private List<String> fileExtensions = List.of(PROPERTIES_EXTENSION, XML_EXTENSION);
 
 	@Nullable
 	private Properties fileEncodings;
@@ -381,18 +383,18 @@ public class ReloadableResourceBundleMessageSource extends AbstractResourceBased
 		StringBuilder temp = new StringBuilder(basename);
 
 		temp.append('_');
-		if (language.length() > 0) {
+		if (!language.isEmpty()) {
 			temp.append(language);
 			result.add(0, temp.toString());
 		}
 
 		temp.append('_');
-		if (country.length() > 0) {
+		if (!country.isEmpty()) {
 			temp.append(country);
 			result.add(0, temp.toString());
 		}
 
-		if (variant.length() > 0 && (language.length() > 0 || country.length() > 0)) {
+		if (!variant.isEmpty() && (!language.isEmpty() || !country.isEmpty())) {
 			temp.append('_').append(variant);
 			result.add(0, temp.toString());
 		}
@@ -562,13 +564,13 @@ public class ReloadableResourceBundleMessageSource extends AbstractResourceBased
 	 */
 	protected Properties loadProperties(Resource resource, String filename) throws IOException {
 		Properties props = newProperties();
-		try (InputStream is = resource.getInputStream()) {
+		try (InputStream inputStream = resource.getInputStream()) {
 			String resourceFilename = resource.getFilename();
 			if (resourceFilename != null && resourceFilename.endsWith(XML_EXTENSION)) {
 				if (logger.isDebugEnabled()) {
 					logger.debug("Loading properties [" + resource.getFilename() + "]");
 				}
-				this.propertiesPersister.loadFromXml(props, is);
+				this.propertiesPersister.loadFromXml(props, inputStream);
 			}
 			else {
 				String encoding = null;
@@ -582,13 +584,13 @@ public class ReloadableResourceBundleMessageSource extends AbstractResourceBased
 					if (logger.isDebugEnabled()) {
 						logger.debug("Loading properties [" + resource.getFilename() + "] with encoding '" + encoding + "'");
 					}
-					this.propertiesPersister.load(props, new InputStreamReader(is, encoding));
+					this.propertiesPersister.load(props, new InputStreamReader(inputStream, encoding));
 				}
 				else {
 					if (logger.isDebugEnabled()) {
 						logger.debug("Loading properties [" + resource.getFilename() + "]");
 					}
-					this.propertiesPersister.load(props, is);
+					this.propertiesPersister.load(props, inputStream);
 				}
 			}
 			return props;
