@@ -2011,9 +2011,9 @@ class MergedAnnotationsTests {
 
 		// The unsynthesized annotation for handleMappedWithSamePathAndValueAttributes()
 		// should produce almost the same toString() results as synthesized annotations for
-		// handleMappedWithPathAttribute() on Java 9 or higher; however, due to multiple changes
-		// in the JDK's toString() implementation for annotations in JDK 9, 14, and 19,
-		// we do not test the JDK implementation.
+		// handleMappedWithPathAttribute(); however, due to multiple changes in the JDK's
+		// toString() implementation for annotations in JDK 19 and higher, we do not test
+		// the JDK implementation.
 		// assertToStringForWebMappingWithPathAndValue(webMappingWithPathAndValue);
 
 		assertToStringForWebMappingWithPathAndValue(synthesizedWebMapping1);
@@ -2021,7 +2021,7 @@ class MergedAnnotationsTests {
 	}
 
 	private void assertToStringForWebMappingWithPathAndValue(RequestMapping webMapping) {
-		assertThat(webMapping.toString())
+		assertThat(webMapping).asString()
 				.startsWith("@org.springframework.core.annotation.MergedAnnotationsTests.RequestMapping(")
 				.contains(
 					// Strings
@@ -2034,7 +2034,7 @@ class MergedAnnotationsTests {
 					"clazz=org.springframework.core.annotation.MergedAnnotationsTests.RequestMethod.class",
 					"classes={int[][].class, org.springframework.core.annotation.MergedAnnotationsTests.RequestMethod[].class}",
 					// Bytes
-					"byteValue=(byte) 0xFF", "bytes={(byte) 0xFF}",
+					"byteValue=(byte)0xff", "bytes={(byte)0xff}",
 					// Shorts
 					"shortValue=9876", "shorts={9876}",
 					// Longs
@@ -2042,9 +2042,22 @@ class MergedAnnotationsTests {
 					// Floats
 					"floatValue=3.14f", "floats={3.14f}",
 					// Doubles
-					"doubleValue=99.999d", "doubles={99.999d}"
+					"doubleValue=99.999", "doubles={99.999}"
 				)
 				.endsWith(")");
+	}
+
+	@Test  // gh-36417
+	void toStringForSynthesizedAnnotationsWithSingleValueAttributes() {
+		MyRepeatable myRepeatable = MergedAnnotations.from(SingleMyRepeatableClass.class)
+				.get(MyRepeatable.class).synthesize();
+		assertThat(myRepeatable).asString()
+				.isEqualTo("@%s(\"meta\")", MyRepeatable.class.getCanonicalName());
+
+		ValueAttribute valueAttribute = MergedAnnotations.from(ValueAttributeMetaMetaClass.class)
+				.get(ValueAttribute.class).synthesize();
+		assertThat(valueAttribute).asString()
+				.isEqualTo("@%s({\"FromValueAttributeMeta\"})", ValueAttribute.class.getCanonicalName());
 	}
 
 	@Test
@@ -3083,6 +3096,16 @@ class MergedAnnotationsTests {
 	@MyRepeatableContainer({ @MyRepeatable("B"), @MyRepeatable("C") })
 	@MyRepeatableMeta1
 	static class MyRepeatableClass {
+	}
+
+	@Retention(RetentionPolicy.RUNTIME)
+	@Inherited
+	@MyRepeatable("meta")
+	@interface SingleMyRepeatable {
+	}
+
+	@SingleMyRepeatable
+	static class SingleMyRepeatableClass {
 	}
 
 	static class SubMyRepeatableClass extends MyRepeatableClass {

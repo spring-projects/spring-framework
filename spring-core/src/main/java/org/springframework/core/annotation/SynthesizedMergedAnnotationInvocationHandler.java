@@ -137,14 +137,20 @@ final class SynthesizedMergedAnnotationInvocationHandler<A extends Annotation> i
 		String string = this.string;
 		if (string == null) {
 			StringBuilder builder = new StringBuilder("@").append(getName(this.type)).append('(');
-			for (int i = 0; i < this.attributes.size(); i++) {
-				Method attribute = this.attributes.get(i);
-				if (i > 0) {
-					builder.append(", ");
+			if (this.attributes.size() == 1 && this.attributes.get(0).getName().equals(MergedAnnotation.VALUE)) {
+				// Don't prepend "value=" for an annotation that only declares a "value" attribute.
+				builder.append(toString(getAttributeValue(this.attributes.get(0))));
+			}
+			else {
+				for (int i = 0; i < this.attributes.size(); i++) {
+					Method attribute = this.attributes.get(i);
+					if (i > 0) {
+						builder.append(", ");
+					}
+					builder.append(attribute.getName());
+					builder.append('=');
+					builder.append(toString(getAttributeValue(attribute)));
 				}
-				builder.append(attribute.getName());
-				builder.append('=');
-				builder.append(toString(getAttributeValue(attribute)));
 			}
 			builder.append(')');
 			string = builder.toString();
@@ -187,7 +193,7 @@ final class SynthesizedMergedAnnotationInvocationHandler<A extends Annotation> i
 			return '\'' + value.toString() + '\'';
 		}
 		if (type == Byte.class) {
-			return String.format("(byte) 0x%02X", value);
+			return String.format("(byte)0x%02x", value);
 		}
 		if (type == Long.class) {
 			return Long.toString((Long) value) + 'L';
@@ -196,7 +202,7 @@ final class SynthesizedMergedAnnotationInvocationHandler<A extends Annotation> i
 			return Float.toString((Float) value) + 'f';
 		}
 		if (type == Double.class) {
-			return Double.toString((Double) value) + 'd';
+			return Double.toString((Double) value);
 		}
 		if (value instanceof Enum<?> e) {
 			return e.name();
