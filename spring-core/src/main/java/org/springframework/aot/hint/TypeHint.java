@@ -53,7 +53,7 @@ public final class TypeHint implements ConditionalHint {
 
 	private final Set<MemberCategory> memberCategories;
 
-	private final @Nullable Boolean serializable;
+	private final boolean javaSerialization;
 
 
 	private TypeHint(Builder builder) {
@@ -63,7 +63,7 @@ public final class TypeHint implements ConditionalHint {
 		this.fields = builder.fields.stream().map(FieldHint::new).collect(Collectors.toSet());
 		this.constructors = builder.constructors.values().stream().map(ExecutableHint.Builder::build).collect(Collectors.toSet());
 		this.methods = builder.methods.values().stream().map(ExecutableHint.Builder::build).collect(Collectors.toSet());
-		this.serializable = builder.serializable;
+		this.javaSerialization = builder.javaSerialization;
 	}
 
 	/**
@@ -124,12 +124,12 @@ public final class TypeHint implements ConditionalHint {
 	}
 
 	/**
-	 * Return whether to register this type for Java serialization.
-	 * @return whether to register this type for Java serialization.
+	 * Return whether this hint registers the type for Java serialization.
+	 * @return whether the type is registered for Java serialization
 	 * @since 7.0.6
 	 */
-	public @Nullable Boolean getSerializable() {
-		return this.serializable;
+	public boolean hasJavaSerialization() {
+		return this.javaSerialization;
 	}
 
 	@Override
@@ -165,7 +165,7 @@ public final class TypeHint implements ConditionalHint {
 
 		private final Set<MemberCategory> memberCategories = new HashSet<>();
 
-		private @Nullable Boolean serializable;
+		private boolean javaSerialization;
 
 		Builder(TypeReference type) {
 			this.type = type;
@@ -276,12 +276,12 @@ public final class TypeHint implements ConditionalHint {
 
 		/**
 		 * Specify if this type should be registered for Java serialization.
-		 * @param serializable whether to register this type for Java serialization.
+		 * @param javaSerialization whether to register this type for Java serialization.
 		 * @return {@code this}, to facilitate method chaining
 		 * @since 7.0.6
 		 */
-		public Builder withJavaSerialization(@Nullable Boolean serializable) {
-			this.serializable = serializable;
+		public Builder withJavaSerialization(boolean javaSerialization) {
+			this.javaSerialization = javaSerialization;
 			return this;
 		}
 

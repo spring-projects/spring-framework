@@ -37,13 +37,13 @@ public final class JdkProxyHint implements ConditionalHint {
 
 	private final @Nullable TypeReference reachableType;
 
-	private final @Nullable Boolean serializable;
+	private final boolean javaSerialization;
 
 
 	private JdkProxyHint(Builder builder) {
 		this.proxiedInterfaces = List.copyOf(builder.proxiedInterfaces);
 		this.reachableType = builder.reachableType;
-		this.serializable = builder.serializable;
+		this.javaSerialization = builder.javaSerialization;
 	}
 
 	/**
@@ -79,12 +79,12 @@ public final class JdkProxyHint implements ConditionalHint {
 	}
 
 	/**
-	 * Return whether to register this proxy for Java serialization.
-	 * @return whether to register this proxy for Java serialization.
+	 * Return whether this hint registers the proxy for Java serialization.
+	 * @return whether the proxy is registered for Java serialization
 	 * @since 7.0.6
 	 */
-	public @Nullable Boolean getSerializable() {
-		return this.serializable;
+	public boolean hasJavaSerialization() {
+		return this.javaSerialization;
 	}
 
 	@Override
@@ -92,7 +92,7 @@ public final class JdkProxyHint implements ConditionalHint {
 		return (this == other || (other instanceof JdkProxyHint that &&
 				this.proxiedInterfaces.equals(that.proxiedInterfaces) &&
 				Objects.equals(this.reachableType, that.reachableType) &&
-				Objects.equals(this.serializable, that.serializable)));
+				Objects.equals(this.javaSerialization, that.javaSerialization)));
 	}
 
 	@Override
@@ -110,7 +110,7 @@ public final class JdkProxyHint implements ConditionalHint {
 
 		private @Nullable TypeReference reachableType;
 
-		private @Nullable Boolean serializable;
+		private boolean javaSerialization;
 
 		Builder() {
 			this.proxiedInterfaces = new LinkedList<>();
@@ -148,12 +148,12 @@ public final class JdkProxyHint implements ConditionalHint {
 
 		/**
 		 * Specify if this proxy should be registered for Java serialization.
-		 * @param serializable whether to register this proxy for Java serialization.
+		 * @param javaSerialization whether to register this proxy for Java serialization
 		 * @return {@code this}, to facilitate method chaining
 		 * @since 7.0.6
 		 */
-		public Builder javaSerialization(@Nullable Boolean serializable) {
-			this.serializable = serializable;
+		public Builder withJavaSerialization(boolean javaSerialization) {
+			this.javaSerialization = javaSerialization;
 			return this;
 		}
 
