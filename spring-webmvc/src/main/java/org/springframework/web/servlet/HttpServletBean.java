@@ -107,9 +107,9 @@ public abstract class HttpServletBean extends HttpServlet implements Environment
 	 * Set the {@code Environment} that this servlet runs in.
 	 * <p>Any environment set here overrides the {@link StandardServletEnvironment}
 	 * provided by default.
-	 * @since 3.1
 	 * @throws IllegalArgumentException if environment is not assignable to
 	 * {@code ConfigurableEnvironment}
+	 * @since 3.1
 	 */
 	@Override
 	public void setEnvironment(Environment environment) {
