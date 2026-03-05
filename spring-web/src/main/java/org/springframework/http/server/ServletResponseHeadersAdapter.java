@@ -52,6 +52,7 @@ class ServletResponseHeadersAdapter implements MultiValueMap<String, String> {
 	@Override
 	public @Nullable String getFirst(String key) {
 		String header = this.response.getHeader(key);
+		// https://bz.apache.org/bugzilla/show_bug.cgi?id=69967
 		if (header == null && key.equalsIgnoreCase(HttpHeaders.CONTENT_TYPE)) {
 			header = this.response.getContentType();
 		}
@@ -124,6 +125,7 @@ class ServletResponseHeadersAdapter implements MultiValueMap<String, String> {
 	public @Nullable List<String> get(Object key) {
 		if (key instanceof String headerName) {
 			Collection<String> values = this.response.getHeaders(headerName);
+			// https://bz.apache.org/bugzilla/show_bug.cgi?id=69967
 			if (values.isEmpty() && headerName.equalsIgnoreCase(HttpHeaders.CONTENT_TYPE)) {
 				String contentType = this.response.getContentType();
 				return (contentType != null ? Collections.singletonList(contentType) : null);
