@@ -277,7 +277,7 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 		}
 		MergedContextConfiguration mergedConfig = buildMergedContextConfiguration(
 				testClass, defaultConfigAttributesList, contextLoader, null, cacheAwareContextLoaderDelegate, false);
-		logWarningForIgnoredDefaultConfig(mergedConfig, contextLoader, cacheAwareContextLoaderDelegate);
+		logWarningForIgnoredDefaultConfig(mergedConfig, cacheAwareContextLoaderDelegate);
 		return mergedConfig;
 	}
 
@@ -288,12 +288,20 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 	 * being ignored.
 	 */
 	private void logWarningForIgnoredDefaultConfig(MergedContextConfiguration mergedConfig,
-			ContextLoader contextLoader, CacheAwareContextLoaderDelegate cacheAwareContextLoaderDelegate) {
+			CacheAwareContextLoaderDelegate cacheAwareContextLoaderDelegate) {
 
 		if (logger.isWarnEnabled()) {
 			Class<?> testClass = mergedConfig.getTestClass();
 			List<ContextConfigurationAttributes> completeDefaultConfigAttributesList =
 					ContextLoaderUtils.resolveDefaultContextConfigurationAttributes(testClass);
+			// Ideally, we should be able to reuse the ContextLoader that was resolved
+			// in buildDefaultMergedContextConfiguration(); however, since we have been
+			// informed that some implementations of resolveContextLoader() mutate the
+			// state of the supplied ContextConfigurationAttributes to detect default
+			// configuration classes, we need to invoke resolveContextLoader() on the
+			// completeDefaultConfigAttributesList as well in order not to break such
+			// custom TestContextBootstrappers.
+			ContextLoader contextLoader = resolveContextLoader(testClass, completeDefaultConfigAttributesList);
 			MergedContextConfiguration completeMergedConfig = buildMergedContextConfiguration(
 					testClass, completeDefaultConfigAttributesList, contextLoader, null,
 					cacheAwareContextLoaderDelegate, false);
