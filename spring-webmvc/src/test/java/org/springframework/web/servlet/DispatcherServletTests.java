@@ -801,7 +801,7 @@ class DispatcherServletTests {
 		assertThat(custom.getEnvironment()).isInstanceOf(CustomServletEnvironment.class);
 	}
 
-	@Test
+	@Test  // gh-36247
 	void allowedOptionsIncludesPatchMethod() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest(getServletContext(), "OPTIONS", "/foo");
 		MockHttpServletResponse response = spy(new MockHttpServletResponse());
@@ -809,7 +809,7 @@ class DispatcherServletTests {
 		servlet.setDispatchOptionsRequest(false);
 		servlet.service(request, response);
 		verify(response, never()).getHeader(anyString()); // SPR-10341
-		assertThat(response.getHeader("Allow")).isEqualTo("GET, HEAD, POST, PUT, DELETE, TRACE, OPTIONS, PATCH");
+		assertThat(response.getHeader("Allow")).isEqualTo("GET, HEAD, PATCH, POST, PUT, DELETE, TRACE, OPTIONS");
 	}
 
 	@Test

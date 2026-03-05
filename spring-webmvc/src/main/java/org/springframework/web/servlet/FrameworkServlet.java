@@ -30,7 +30,6 @@ import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpServletResponseWrapper;
 import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.BeanUtils;
@@ -49,7 +48,6 @@ import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
@@ -172,7 +170,7 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	 * HTTP methods supported by {@link jakarta.servlet.http.HttpServlet}.
 	 */
 	private static final Set<String> HTTP_SERVLET_METHODS =
-			Set.of("DELETE", "HEAD", "GET", "OPTIONS", "POST", "PUT", "TRACE");
+			Set.of("DELETE", "HEAD", "GET", "OPTIONS", "PATCH", "POST", "PUT", "TRACE");
 
 
 	/** ServletContext attribute to find the WebApplicationContext in. */
@@ -864,7 +862,7 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 
 	/**
 	 * Override the parent class implementation in order to intercept requests
-	 * using PATCH or non-standard HTTP methods (WebDAV).
+	 * using non-standard HTTP methods (such as WebDAV).
 	 */
 	@Override
 	protected void service(HttpServletRequest request, HttpServletResponse response)
@@ -887,6 +885,18 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	 */
 	@Override
 	protected final void doGet(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+
+		processRequest(request, response);
+	}
+
+	/**
+	 * Delegate {@code PATCH} requests to {@link #processRequest}.
+	 * @since 7.1
+	 * @see #doService
+	 */
+	@Override
+	protected final void doPatch(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 
 		processRequest(request, response);
@@ -943,16 +953,7 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 			}
 		}
 
-		// Use response wrapper in order to always add PATCH to the allowed methods
-		super.doOptions(request, new HttpServletResponseWrapper(response) {
-			@Override
-			public void setHeader(String name, String value) {
-				if (HttpHeaders.ALLOW.equals(name)) {
-					value = (StringUtils.hasLength(value) ? value + ", " : "") + HttpMethod.PATCH.name();
-				}
-				super.setHeader(name, value);
-			}
-		});
+		super.doOptions(request, response);
 	}
 
 	/**
@@ -1154,9 +1155,9 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 
 	/**
 	 * Subclasses must implement this method to do the work of request handling,
-	 * receiving a centralized callback for {@code GET}, {@code POST}, {@code PUT},
-	 * {@code DELETE}, {@code OPTIONS}, and {@code TRACE} requests as well as for
-	 * requests using non-standard HTTP methods (such as WebDAV).
+	 * receiving a centralized callback for {@code GET}, {@code PATCH}, {@code POST},
+	 * {@code PUT}, {@code DELETE}, {@code OPTIONS}, and {@code TRACE} requests
+	 * as well as for requests using non-standard HTTP methods (such as WebDAV).
 	 * <p>The contract is essentially the same as that for the commonly overridden
 	 * {@code doGet} or {@code doPost} methods of HttpServlet.
 	 * <p>This class intercepts calls to ensure that exception handling and
