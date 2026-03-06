@@ -297,13 +297,12 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 			// Ideally, we should be able to reuse the ContextLoader that was resolved
 			// in buildDefaultMergedContextConfiguration(); however, since we have been
 			// informed that some implementations of resolveContextLoader() mutate the
-			// state of the supplied ContextConfigurationAttributes to detect default
-			// configuration classes, we need to invoke resolveContextLoader() on the
-			// completeDefaultConfigAttributesList as well in order not to break such
-			// custom TestContextBootstrappers.
-			ContextLoader contextLoader = resolveContextLoader(testClass, completeDefaultConfigAttributesList);
+			// state of the supplied ContextConfigurationAttributes to register
+			// configuration classes, we need to supply null for the ContextLoader in
+			// the invocation of buildMergedContextConfiguration() in order not to break
+			// such custom TestContextBootstrappers.
 			MergedContextConfiguration completeMergedConfig = buildMergedContextConfiguration(
-					testClass, completeDefaultConfigAttributesList, contextLoader, null,
+					testClass, completeDefaultConfigAttributesList, null, null,
 					cacheAwareContextLoaderDelegate, false);
 
 			if (!Arrays.equals(mergedConfig.getClasses(), completeMergedConfig.getClasses())) {
