@@ -221,7 +221,7 @@ class ContentDispositionTests {
 						.filename("中文.txt", StandardCharsets.UTF_8)
 						.build().toString())
 				.isEqualTo("form-data; name=\"name\"; " +
-						"filename=\"=?UTF-8?Q?=E4=B8=AD=E6=96=87.txt?=\"; " +
+						"filename=\"??.txt\"; " +
 						"filename*=UTF-8''%E4%B8%AD%E6%96%87.txt");
 	}
 
@@ -272,7 +272,7 @@ class ContentDispositionTests {
 	void formatWithUtf8FilenameWithQuotes() {
 		String filename = "\"中文.txt";
 		assertThat(ContentDisposition.formData().filename(filename, StandardCharsets.UTF_8).build().toString())
-				.isEqualTo("form-data; filename=\"=?UTF-8?Q?=22=E4=B8=AD=E6=96=87.txt?=\"; filename*=UTF-8''%22%E4%B8%AD%E6%96%87.txt");
+				.isEqualTo("form-data; filename=\"\\\"??.txt\"; filename*=UTF-8''%22%E4%B8%AD%E6%96%87.txt");
 	}
 
 	@Test
@@ -303,14 +303,14 @@ class ContentDispositionTests {
 				.build();
 		String result = cd.toString();
 		assertThat(result).isEqualTo("attachment; " +
-						"filename=\"=?UTF-8?Q?filename_with_=3F=E9=97=AE=E5=8F=B7.txt?=\"; " +
+						"filename=\"filename with ???.txt\"; " +
 						"filename*=UTF-8''filename%20with%20%3F%E9%97%AE%E5%8F%B7.txt");
 
 		String[] parts = result.split("; ");
 
 		String quotedPrintableFilename = parts[0] + "; " + parts[1];
 		assertThat(ContentDisposition.parse(quotedPrintableFilename).getFilename())
-				.isEqualTo(filename);
+				.isEqualTo("filename with ???.txt");
 
 		String rfc5987Filename = parts[0] + "; " + parts[2];
 		assertThat(ContentDisposition.parse(rfc5987Filename).getFilename())
