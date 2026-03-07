@@ -170,6 +170,15 @@ public interface ServerWebExchange {
 	@Nullable ApplicationContext getApplicationContext();
 
 	/**
+ 	* Return the default HTML escape setting available for the current request,
+ 	* or {@code null} if no default was configured at the handler level.
+ 	* @return whether default HTML escaping is enabled, or {@code null} if not configured
+ 	* @since 7.0
+ 	* @see org.springframework.web.server.adapter.WebHttpHandlerBuilder#defaultHtmlEscape(boolean)
+ 	*/
+	@Nullable Boolean getDefaultHtmlEscape();
+
+	/**
 	 * Returns {@code true} if the one of the {@code checkNotModified} methods
 	 * in this contract were used and they returned true.
 	 */

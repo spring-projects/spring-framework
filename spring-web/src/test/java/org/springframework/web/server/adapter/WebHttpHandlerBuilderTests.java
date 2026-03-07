@@ -128,6 +128,48 @@ class WebHttpHandlerBuilderTests {
 	}
 
 	@Test
+	void defaultHtmlEscape() {
+			HttpHandler httpHandler = WebHttpHandlerBuilder
+				.webHandler(exchange -> Mono.empty())
+				.defaultHtmlEscape(true)
+				.build();
+
+		assertThat(httpHandler).isInstanceOf(HttpWebHandlerAdapter.class);
+		assertThat(((HttpWebHandlerAdapter) httpHandler).getDefaultHtmlEscape()).isTrue();
+	}
+
+	@Test
+	void defaultHtmlEscapeSetToFalse() {
+		HttpHandler httpHandler = WebHttpHandlerBuilder
+			.webHandler(exchange -> Mono.empty())
+			.defaultHtmlEscape(false)
+			.build();
+
+		assertThat(httpHandler).isInstanceOf(HttpWebHandlerAdapter.class);
+		assertThat(((HttpWebHandlerAdapter) httpHandler).getDefaultHtmlEscape()).isFalse();
+	}
+
+	@Test
+	void defaultHtmlEscapeNotConfigured() {
+		HttpHandler httpHandler = WebHttpHandlerBuilder
+			.webHandler(exchange -> Mono.empty())
+			.build();
+
+		assertThat(httpHandler).isInstanceOf(HttpWebHandlerAdapter.class);
+		assertThat(((HttpWebHandlerAdapter) httpHandler).getDefaultHtmlEscape()).isNull();
+	}
+
+	@Test
+	void cloneWithDefaultHtmlEscape() {
+		WebHttpHandlerBuilder builder = WebHttpHandlerBuilder
+				.webHandler(exchange -> Mono.empty())
+				.defaultHtmlEscape(true);
+
+		assertThat(((HttpWebHandlerAdapter) builder.build()).getDefaultHtmlEscape()).isTrue();
+		assertThat(((HttpWebHandlerAdapter) builder.clone().build()).getDefaultHtmlEscape()).isTrue();
+	}
+
+	@Test
 	void httpHandlerDecorator() {
 		BiFunction<ServerHttpRequest, String, ServerHttpRequest> mutator =
 				(req, value) -> req.mutate().headers(headers -> headers.add("My-Header", value)).build();

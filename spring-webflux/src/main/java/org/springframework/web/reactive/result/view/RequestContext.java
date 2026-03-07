@@ -94,7 +94,7 @@ public class RequestContext {
 				tzaLocaleContext.getTimeZone() : null);
 		this.timeZone = (timeZone != null ? timeZone : TimeZone.getDefault());
 
-		this.defaultHtmlEscape = null;  // TODO
+		this.defaultHtmlEscape = exchange.getDefaultHtmlEscape() != null ? exchange.getDefaultHtmlEscape() : Boolean.FALSE;
 		this.dataValueProcessor = dataValueProcessor;
 	}
 
@@ -150,7 +150,6 @@ public class RequestContext {
 	/**
 	 * (De)activate default HTML escaping for messages and errors, for the scope
 	 * of this RequestContext.
-	 * <p>TODO: currently no application-wide setting ...
 	 */
 	public void setDefaultHtmlEscape(boolean defaultHtmlEscape) {
 		this.defaultHtmlEscape = defaultHtmlEscape;
@@ -165,10 +164,11 @@ public class RequestContext {
 	}
 
 	/**
-	 * Return the default HTML escape setting, differentiating between no default
-	 * specified and an explicit value.
-	 * @return whether default HTML escaping is enabled (null = no explicit default)
-	 */
+ 	* Return the default HTML escape setting, differentiating between no default
+ 	* specified and an explicit value.
+ 	* @return whether default HTML escaping is enabled (null = no explicit default
+ 	* specified at the handler level or the request context level)
+ 	*/
 	public @Nullable Boolean getDefaultHtmlEscape() {
 		return this.defaultHtmlEscape;
 	}

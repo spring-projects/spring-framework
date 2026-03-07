@@ -99,6 +99,8 @@ public class HttpWebHandlerAdapter extends WebHandlerDecorator implements HttpHa
 
 	private @Nullable ApplicationContext applicationContext;
 
+	private @Nullable Boolean defaultHtmlEscape;
+
 	/** Whether to log potentially sensitive info (form data at DEBUG, headers at TRACE). */
 	private boolean enableLoggingRequestDetails = false;
 
@@ -251,6 +253,26 @@ public class HttpWebHandlerAdapter extends WebHandlerDecorator implements HttpHa
 	}
 
 	/**
+ 	* Configure a default HTML escape setting to apply to every
+ 	* {@link org.springframework.web.server.ServerWebExchange} created
+ 	* by this adapter.
+ 	* @param defaultHtmlEscape whether to enable default HTML escaping
+ 	* @since 7.0
+ 	*/
+	public void setDefaultHtmlEscape(Boolean defaultHtmlEscape) {
+		this.defaultHtmlEscape = defaultHtmlEscape;
+	}
+
+	/**
+ 	* Return the configured default HTML escape setting,
+ 	* or {@code null} if not configured.
+ 	* @since 7.0
+ 	*/
+	public @Nullable Boolean getDefaultHtmlEscape() {
+		return this.defaultHtmlEscape;
+	}
+
+	/**
 	 * This method must be invoked after all properties have been set to
 	 * complete initialization.
 	 */
@@ -300,7 +322,7 @@ public class HttpWebHandlerAdapter extends WebHandlerDecorator implements HttpHa
 
 	protected ServerWebExchange createExchange(ServerHttpRequest request, ServerHttpResponse response) {
 		return new DefaultServerWebExchange(request, response, this.sessionManager,
-				getCodecConfigurer(), getLocaleContextResolver(), this.applicationContext);
+				getCodecConfigurer(), getLocaleContextResolver(), this.applicationContext , this.defaultHtmlEscape);
 	}
 
 	/**

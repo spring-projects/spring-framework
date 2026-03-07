@@ -101,6 +101,8 @@ public class DefaultServerWebExchange implements ServerWebExchange {
 
 	private final @Nullable ApplicationContext applicationContext;
 
+	private final @Nullable Boolean defaultHtmlEscape;
+
 	private volatile boolean notModified;
 
 	private Function<String, String> urlTransformer = url -> url;
@@ -114,12 +116,19 @@ public class DefaultServerWebExchange implements ServerWebExchange {
 			WebSessionManager sessionManager, ServerCodecConfigurer codecConfigurer,
 			LocaleContextResolver localeContextResolver) {
 
-		this(request, response, sessionManager, codecConfigurer, localeContextResolver, null);
+		this(request, response, sessionManager, codecConfigurer, localeContextResolver, null , null);
+	}
+
+	public DefaultServerWebExchange(ServerHttpRequest request, ServerHttpResponse response,
+			WebSessionManager sessionManager, ServerCodecConfigurer codecConfigurer,
+			LocaleContextResolver localeContextResolver , @Nullable ApplicationContext applicationContext) {
+
+		this(request, response, sessionManager, codecConfigurer, localeContextResolver, applicationContext , null);
 	}
 
 	protected DefaultServerWebExchange(ServerHttpRequest request, ServerHttpResponse response,
 			WebSessionManager sessionManager, ServerCodecConfigurer codecConfigurer,
-			LocaleContextResolver localeContextResolver, @Nullable ApplicationContext applicationContext) {
+			LocaleContextResolver localeContextResolver, @Nullable ApplicationContext applicationContext , @Nullable Boolean defaultHtmlEscape) {
 
 		Assert.notNull(request, "'request' is required");
 		Assert.notNull(response, "'response' is required");
@@ -137,6 +146,7 @@ public class DefaultServerWebExchange implements ServerWebExchange {
 		this.formDataMono = initFormData(request, codecConfigurer, getLogPrefix());
 		this.multipartDataMono = initMultipartData(codecConfigurer, getLogPrefix());
 		this.applicationContext = applicationContext;
+		this.defaultHtmlEscape = defaultHtmlEscape;
 
 		if (request instanceof AbstractServerHttpRequest abstractServerHttpRequest) {
 			abstractServerHttpRequest.setAttributesSupplier(() -> this.attributes);
@@ -276,6 +286,11 @@ public class DefaultServerWebExchange implements ServerWebExchange {
 	@Override
 	public @Nullable ApplicationContext getApplicationContext() {
 		return this.applicationContext;
+	}
+
+	@Override
+	public @Nullable Boolean getDefaultHtmlEscape() {
+		return this.defaultHtmlEscape;
 	}
 
 	@Override

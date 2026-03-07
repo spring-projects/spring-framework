@@ -47,12 +47,19 @@ public final class MockServerWebExchange extends DefaultServerWebExchange {
 
 	private MockServerWebExchange(
 			MockServerHttpRequest request, @Nullable WebSessionManager sessionManager,
-			@Nullable ApplicationContext applicationContext, @Nullable Principal principal) {
+			@Nullable ApplicationContext applicationContext , @Nullable Principal principal) {
+
+		this(request, sessionManager, applicationContext, null, principal);
+	}
+
+	private MockServerWebExchange(
+			MockServerHttpRequest request, @Nullable WebSessionManager sessionManager,
+			@Nullable ApplicationContext applicationContext , @Nullable Boolean defaultHtmlEscape, @Nullable Principal principal) {
 
 		super(request, new MockServerHttpResponse(),
 				sessionManager != null ? sessionManager : new DefaultWebSessionManager(),
 				ServerCodecConfigurer.create(), new AcceptHeaderLocaleContextResolver(),
-				applicationContext);
+				applicationContext , defaultHtmlEscape);
 
 		this.principalMono = (principal != null) ? Mono.just(principal) : Mono.empty();
 	}
@@ -125,6 +132,8 @@ public final class MockServerWebExchange extends DefaultServerWebExchange {
 
 		private @Nullable ApplicationContext applicationContext;
 
+		private @Nullable Boolean defaultHtmlEscape;
+
 		private @Nullable Principal principal;
 
 		public Builder(MockServerHttpRequest request) {
@@ -164,6 +173,18 @@ public final class MockServerWebExchange extends DefaultServerWebExchange {
 		}
 
 		/**
+ 		* Set the default HTML escape setting for the exchange.
+		* @param defaultHtmlEscape whether to enable default HTML escaping,
+ 		* or {@code null} if not configured
+ 		* @return this builder
+ 		* @since 7.0
+ 		*/
+		public Builder defaultHtmlEscape(@Nullable Boolean defaultHtmlEscape) {
+    		this.defaultHtmlEscape = defaultHtmlEscape;
+    		return this;
+		}
+
+		/**
 		 * Provide a user to associate with the exchange.
 		 * @param principal the principal to use
 		 * @since 6.2.7
@@ -178,7 +199,7 @@ public final class MockServerWebExchange extends DefaultServerWebExchange {
 		 */
 		public MockServerWebExchange build() {
 			return new MockServerWebExchange(
-					this.request, this.sessionManager, this.applicationContext, this.principal);
+					this.request, this.sessionManager, this.applicationContext, this.defaultHtmlEscape, this.principal);
 		}
 	}
 
