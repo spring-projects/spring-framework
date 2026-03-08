@@ -29,6 +29,7 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.BeanInstantiationException;
 import org.springframework.beans.BeanUtils;
+import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.lang.Nullable;
 import org.springframework.test.context.BootstrapContext;
@@ -304,8 +305,6 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 		ContextLoader contextLoader = resolveContextLoader(testClass, configAttributesList);
 		List<String> locations = new ArrayList<>();
 		List<Class<?>> classes = new ArrayList<>();
-		List<Class<?>> initializers = new ArrayList<>();
-
 		for (ContextConfigurationAttributes configAttributes : configAttributesList) {
 			if (logger.isTraceEnabled()) {
 				logger.trace(String.format("Processing locations and classes for context configuration attributes %s",
@@ -323,12 +322,13 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 				locations.addAll(0, Arrays.asList(processedLocations));
 				// Legacy ContextLoaders don't know how to process classes
 			}
-			initializers.addAll(0, Arrays.asList(configAttributes.getInitializers()));
 			if (!configAttributes.isInheritLocations()) {
 				break;
 			}
 		}
 
+		Set<Class<? extends ApplicationContextInitializer<?>>> initializers =
+				ApplicationContextInitializerUtils.resolveInitializerClasses(configAttributesList);
 		Set<ContextCustomizer> contextCustomizers = getContextCustomizers(testClass,
 				Collections.unmodifiableList(configAttributesList));
 
@@ -342,8 +342,7 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 				TestPropertySourceUtils.buildMergedTestPropertySources(testClass);
 		MergedContextConfiguration mergedConfig = new MergedContextConfiguration(testClass,
 				StringUtils.toStringArray(locations), ClassUtils.toClassArray(classes),
-				ApplicationContextInitializerUtils.resolveInitializerClasses(configAttributesList),
-				ActiveProfilesUtils.resolveActiveProfiles(testClass),
+				initializers, ActiveProfilesUtils.resolveActiveProfiles(testClass),
 				mergedTestPropertySources.getPropertySourceDescriptors(),
 				mergedTestPropertySources.getProperties(),
 				contextCustomizers, contextLoader, cacheAwareContextLoaderDelegate, parentConfig);
