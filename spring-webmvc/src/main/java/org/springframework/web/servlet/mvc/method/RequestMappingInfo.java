@@ -550,6 +550,7 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 		result = 31 * result + this.headersCondition.hashCode();
 		result = 31 * result + this.consumesCondition.hashCode();
 		result = 31 * result + this.producesCondition.hashCode();
+		result = 31 * result + this.versionCondition.hashCode();
 		result = 31 * result + this.customConditionHolder.hashCode();
 		return result;
 	}
