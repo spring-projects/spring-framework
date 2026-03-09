@@ -93,7 +93,14 @@ public @interface ModelAttribute {
 	 * Allows data binding to be disabled directly on an {@code @ModelAttribute}
 	 * method parameter or on the attribute returned from an {@code @ModelAttribute}
 	 * method, both of which would prevent data binding for that attribute.
-	 * <p>By default this is set to {@code true} in which case data binding applies.
+	 * <p><strong>Note:</strong> This flag only controls binding via setters and
+	 * direct binding to fields of an existing object. It does not preclude
+	 * constructor binding, which is required to create the object and is safer
+	 * as the constructor declares explicitly the inputs it needs.
+	 * A typical case is where a model attribute is stored in the session, via
+	 * {@link SessionAttributes}, and needs to be accessed again in another
+	 * request later without further binding.
+	 * <p>By default, this is set to {@code true} in which case data binding applies.
 	 * Set this to {@code false} to disable data binding.
 	 * @since 4.3
 	 */
