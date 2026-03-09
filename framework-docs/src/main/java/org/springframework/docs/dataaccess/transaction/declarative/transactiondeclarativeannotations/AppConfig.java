@@ -14,28 +14,29 @@
  * limitations under the License.
  */
 
-package org.springframework.docs.dataaccess.transaction.declarative.annotations
+package org.springframework.docs.dataaccess.transaction.declarative.transactiondeclarativeannotations;
 
-import org.springframework.context.annotation.Bean
-import org.springframework.context.annotation.Configuration
-import org.springframework.jdbc.datasource.DataSourceTransactionManager
-import org.springframework.transaction.PlatformTransactionManager
-import org.springframework.transaction.annotation.EnableTransactionManagement
-import javax.sql.DataSource
+import javax.sql.DataSource;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.jdbc.datasource.DataSourceTransactionManager;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 // tag::snippet[]
 @Configuration
 @EnableTransactionManagement
-class AppConfig {
+public class AppConfig {
 
 	@Bean
-	fun fooService(): FooService {
-		return DefaultFooService()
+	public FooService fooService() {
+		return new DefaultFooService();
 	}
 
 	@Bean
-	fun txManager(dataSource: DataSource): PlatformTransactionManager {
-		return DataSourceTransactionManager(dataSource)
+	public PlatformTransactionManager txManager(DataSource dataSource) {
+		return new DataSourceTransactionManager(dataSource);
 	}
 }
 // end::snippet[]

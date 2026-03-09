@@ -17,7 +17,7 @@
 
 	<!-- enable the configuration of transactional behavior based on annotations -->
 	<!-- a TransactionManager is still required -->
-	<tx:annotation-driven transaction-manager="txManager"/> <!--1-->
+	<tx:annotation-driven transaction-manager="txManager"/>
 
 	<bean id="txManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
 		<!-- (this dependency is defined somewhere else) -->
