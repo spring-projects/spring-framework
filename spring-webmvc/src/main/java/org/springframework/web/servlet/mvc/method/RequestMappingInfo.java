@@ -541,19 +541,17 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 
 	@SuppressWarnings({"ConstantConditions", "NullAway", "removal"})
 	private int calculateHashCode() {
-		Object patternBase = (this.pathPatternsCondition != null) 
-                             ? this.pathPatternsCondition 
-                             : this.patternsCondition;
-                             
-        int h = patternBase.hashCode();
-        h = 31 * h + methodsCondition.hashCode();
-        h = 31 * h + paramsCondition.hashCode();
-        h = 31 * h + headersCondition.hashCode();
-        h = 31 * h + consumesCondition.hashCode();
-        h = 31 * h + producesCondition.hashCode();
-        h = 31 * h + customConditionHolder.hashCode();
 
-		return h;
+		int result = (this.pathPatternsCondition != null ?
+				this.pathPatternsCondition : this.patternsCondition).hashCode();
+
+		result = 31 * result + this.methodsCondition.hashCode();
+		result = 31 * result + this.paramsCondition.hashCode();
+		result = 31 * result + this.headersCondition.hashCode();
+		result = 31 * result + this.consumesCondition.hashCode();
+		result = 31 * result + this.producesCondition.hashCode();
+		result = 31 * result + this.customConditionHolder.hashCode();
+		return result;
 	}
 
 	@Override
