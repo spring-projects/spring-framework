@@ -35,12 +35,11 @@ import org.springframework.core.annotation.AliasFor;
  * example:
  *
  * <pre class="code">
- *     &#064;Bean
- *     public MyBean myBean() {
- *         // instantiate and configure MyBean obj
- *         return obj;
- *     }
- * </pre>
+ * &#064;Bean
+ * public MyBean myBean() {
+ *     // instantiate and configure MyBean obj
+ *     return obj;
+ * }</pre>
  *
  * <h3>Bean Names</h3>
  *
@@ -52,12 +51,11 @@ import org.springframework.core.annotation.AliasFor;
  * (i.e. a primary bean name plus one or more aliases) for a single bean.
  *
  * <pre class="code">
- *     &#064;Bean({"b1", "b2"}) // bean available as 'b1' and 'b2', but not 'myBean'
- *     public MyBean myBean() {
- *         // instantiate and configure MyBean obj
- *         return obj;
- *     }
- * </pre>
+ * &#064;Bean({"b1", "b2"}) // bean available as 'b1' and 'b2', but not 'myBean'
+ * public MyBean myBean() {
+ *     // instantiate and configure MyBean obj
+ *     return obj;
+ * }</pre>
  *
  * <h3>Profile, Scope, Lazy, DependsOn, Primary, Order</h3>
  *
@@ -67,16 +65,15 @@ import org.springframework.core.annotation.AliasFor;
  * {@link Primary @Primary} annotations to declare those semantics. For example:
  *
  * <pre class="code">
- *     &#064;Bean
- *     &#064;Profile("production")
- *     &#064;Scope("prototype")
- *     public MyBean myBean() {
- *         // instantiate and configure MyBean obj
- *         return obj;
- *     }
- * </pre>
+ * &#064;Bean
+ * &#064;Profile("production")
+ * &#064;Scope("prototype")
+ * public MyBean myBean() {
+ *     // instantiate and configure MyBean obj
+ *     return obj;
+ * }</pre>
  *
- * The semantics of the above-mentioned annotations match their use at the component
+ * The semantics of the aforementioned annotations match their use at the component
  * class level: {@code @Profile} allows for selective inclusion of certain beans.
  * {@code @Scope} changes the bean's scope from singleton to the specified scope.
  * {@code @Lazy} only has an actual effect in case of the default singleton scope.
@@ -119,17 +116,17 @@ import org.springframework.core.annotation.AliasFor;
  * &#064;Configuration
  * public class AppConfig {
  *
- *     &#064;Bean
- *     public FooService fooService() {
- *         return new FooService(fooRepository());
- *     }
+ *    &#064;Bean
+ *    public FooService fooService() {
+ *        return new FooService(fooRepository());
+ *    }
  *
- *     &#064;Bean
- *     public FooRepository fooRepository() {
- *         return new JdbcFooRepository(dataSource());
- *     }
+ *    &#064;Bean
+ *    public FooRepository fooRepository() {
+ *        return new JdbcFooRepository(dataSource());
+ *    }
  *
- *     // ...
+ *    // ...
  * }</pre>
  *
  * <h3>{@code @Bean} <em>Lite</em> Mode</h3>
@@ -158,20 +155,21 @@ import org.springframework.core.annotation.AliasFor;
  * <pre class="code">
  * &#064;Component
  * public class Calculator {
- *     public int sum(int a, int b) {
- *         return a+b;
- *     }
+ *    public int sum(int a, int b) {
+ *        return a+b;
+ *    }
  *
- *     &#064;Bean
- *     public MyBean myBean() {
- *         return new MyBean();
- *     }
+ *    &#064;Bean
+ *    public MyBean myBean() {
+ *        return new MyBean();
+ *    }
  * }</pre>
  *
  * <h3>Bootstrapping</h3>
  *
- * <p>See the @{@link Configuration} javadoc for further details including how to bootstrap
- * the container using {@link AnnotationConfigApplicationContext} and friends.
+ * <p>See the {@link Configuration @Configuration} javadoc for further details
+ * including how to bootstrap the container using
+ * {@link AnnotationConfigApplicationContext} and friends.
  *
  * <h3>{@code BeanFactoryPostProcessor}-returning {@code @Bean} methods</h3>
  *
@@ -183,14 +181,13 @@ import org.springframework.core.annotation.AliasFor;
  * lifecycle issues, mark {@code BFPP}-returning {@code @Bean} methods as {@code static}. For example:
  *
  * <pre class="code">
- *     &#064;Bean
- *     public static PropertySourcesPlaceholderConfigurer pspc() {
- *         // instantiate, configure and return pspc ...
- *     }
- * </pre>
+ * &#064;Bean
+ * public static PropertySourcesPlaceholderConfigurer pspc() {
+ *     // instantiate, configure and return pspc ...
+ * }</pre>
  *
  * By marking this method as {@code static}, it can be invoked without causing instantiation of its
- * declaring {@code @Configuration} class, thus avoiding the above-mentioned lifecycle conflicts.
+ * declaring {@code @Configuration} class, thus avoiding the aforementioned lifecycle conflicts.
  * Note however that {@code static} {@code @Bean} methods will not be enhanced for scoping and AOP
  * semantics as mentioned above. This works out in {@code BFPP} cases, as they are not typically
  * referenced by other {@code @Bean} methods. As a reminder, an INFO-level log message will be
