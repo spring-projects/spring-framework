@@ -151,17 +151,17 @@ injected into a `Set<MovieCatalog>` annotated with `@Qualifier("action")`.
 [TIP]
 ====
 Letting qualifier values select against target bean names, within the type-matching
-candidates, does not require a `@Qualifier` annotation at the injection point.
-If there is no other resolution indicator (such as a qualifier or a primary marker),
-for a non-unique dependency situation, Spring matches the injection point name
-(that is, the field name or parameter name) against the target bean names and chooses
-the same-named candidate, if any (either by bean name or by associated alias).
+candidates, does not require a `@Qualifier` annotation at the injection point. If there
+is no other resolution indicator (such as a qualifier, a primary marker, or a fallback
+marker), for a non-unique dependency situation, Spring matches the injection point name
+(that is, the field name or parameter name) against the target bean names and chooses the
+same-named candidate, if any (either by bean name or by associated alias).
 
-Since version 6.1, this requires the `-parameters` Java compiler flag to be present.
-As of 6.2, the container applies fast shortcut resolution for bean name matches,
-bypassing the full type matching algorithm when the parameter name matches the
-bean name and no type, qualifier or primary conditions override the match. It is
-therefore recommendable for your parameter names to match the target bean names.
+Since version 6.1, this requires the `-parameters` Java compiler flag to be present. As
+of 6.2, the container applies fast shortcut resolution for bean name matches, bypassing
+the full type matching algorithm when the parameter name matches the bean name and no
+type, qualifier, primary, or fallback conditions override the match. It is therefore
+recommendable for your parameter names to match the target bean names.
 ====
 
 As an alternative for injection by name, consider the JSR-250 `@Resource` annotation
