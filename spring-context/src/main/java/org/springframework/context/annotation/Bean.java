@@ -82,8 +82,8 @@ import org.springframework.core.annotation.AliasFor;
  * through direct references, which is typically helpful for singleton startup.
  * {@code @Primary} is a mechanism to resolve ambiguity at the injection point level
  * if a single target component needs to be injected but several beans match by type.
- * {@code @Fallback} marks a bean as a fallback candidate in such scenarios; if all
- * beans but one among multiple matching candidates are marked as fallback, the
+ * {@link Fallback @Fallback} marks a bean as a fallback candidate in such scenarios;
+ * if all beans but one among multiple matching candidates are marked as fallback, the
  * remaining bean will be selected.
  *
  * <p>Additionally, {@code @Bean} methods may also declare qualifier annotations
