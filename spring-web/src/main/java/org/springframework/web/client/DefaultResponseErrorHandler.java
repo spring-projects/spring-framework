@@ -69,10 +69,9 @@ public class DefaultResponseErrorHandler implements ResponseErrorHandler {
 	 * to use to decode error content.
 	 * @since 6.0
 	 */
-	void setMessageConverters(List<HttpMessageConverter<?>> converters) {
+	protected void setMessageConverters(List<HttpMessageConverter<?>> converters) {
 		this.messageConverters = Collections.unmodifiableList(converters);
 	}
-
 
 	/**
 	 * Delegates to {@link #hasError(HttpStatusCode)} with the response status code.
