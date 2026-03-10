@@ -49,17 +49,9 @@ public final class MockServerWebExchange extends DefaultServerWebExchange {
 			MockServerHttpRequest request, @Nullable WebSessionManager sessionManager,
 			@Nullable ApplicationContext applicationContext, @Nullable Principal principal) {
 
-		this(request, sessionManager, applicationContext, null, principal);
-	}
-
-	private MockServerWebExchange(
-			MockServerHttpRequest request, @Nullable WebSessionManager sessionManager,
-			@Nullable ApplicationContext applicationContext, @Nullable Boolean defaultHtmlEscape, @Nullable Principal principal) {
-
 		super(request, new MockServerHttpResponse(),
 				sessionManager != null ? sessionManager : new DefaultWebSessionManager(),
-				ServerCodecConfigurer.create(), new AcceptHeaderLocaleContextResolver(),
-				applicationContext, defaultHtmlEscape);
+				ServerCodecConfigurer.create(), new AcceptHeaderLocaleContextResolver(), applicationContext);
 
 		this.principalMono = (principal != null) ? Mono.just(principal) : Mono.empty();
 	}
@@ -180,8 +172,8 @@ public final class MockServerWebExchange extends DefaultServerWebExchange {
  		* @since 7.0.6
  		*/
 		public Builder defaultHtmlEscape(@Nullable Boolean defaultHtmlEscape) {
-    		this.defaultHtmlEscape = defaultHtmlEscape;
-    		return this;
+			this.defaultHtmlEscape = defaultHtmlEscape;
+			return this;
 		}
 
 		/**
@@ -199,7 +191,7 @@ public final class MockServerWebExchange extends DefaultServerWebExchange {
 		 */
 		public MockServerWebExchange build() {
 			return new MockServerWebExchange(
-					this.request, this.sessionManager, this.applicationContext, this.defaultHtmlEscape, this.principal);
+					this.request, this.sessionManager, this.applicationContext, this.principal);
 		}
 	}
 

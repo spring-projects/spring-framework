@@ -23,6 +23,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.context.support.GenericApplicationContext;
+import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest;
 import org.springframework.web.testfixture.server.MockServerWebExchange;
 
@@ -76,42 +77,19 @@ class RequestContextTests {
 	@Test
 	void defaultHtmlEscapeNotConfigured() {
 		RequestContext context = new RequestContext(this.exchange, this.model, this.applicationContext);
-		assertThat(context.getDefaultHtmlEscape()).isFalse();
+		assertThat(context.getDefaultHtmlEscape()).isNull();
 		assertThat(context.isDefaultHtmlEscape()).isFalse();
 	}
 	@Test
-	void defaultHtmlEscapeSetToTrue() {
+	void defaultHtmlEscape() {
 		MockServerWebExchange exchange = MockServerWebExchange.builder(
-				MockServerHttpRequest.get("/foo/path").contextPath("/foo"))
-			.defaultHtmlEscape(true)
-			.build();
+				MockServerHttpRequest.get("/foo/path").contextPath("/foo")).build();
+
+		exchange.getAttributes().put(ServerWebExchange.HTML_ESCAPE_ATTRIBUTE, true);
 
 		RequestContext context = new RequestContext(exchange, this.model, this.applicationContext);
 		assertThat(context.getDefaultHtmlEscape()).isTrue();
 		assertThat(context.isDefaultHtmlEscape()).isTrue();
 	}
-	@Test
-	void defaultHtmlEscapeSetToFalse() {
-		MockServerWebExchange exchange = MockServerWebExchange.builder(
-			MockServerHttpRequest.get("/foo/path").contextPath("/foo"))
-				.defaultHtmlEscape(false)
-				.build();
 
-		RequestContext context = new RequestContext(exchange, this.model, this.applicationContext);
-		assertThat(context.getDefaultHtmlEscape()).isFalse();
-		assertThat(context.isDefaultHtmlEscape()).isFalse();
-	}
-
-	@Test
-	void defaultHtmlEscapeOverriddenPerRequest() {
-		MockServerWebExchange exchange = MockServerWebExchange.builder(
-					MockServerHttpRequest.get("/foo/path").contextPath("/foo"))
-				.defaultHtmlEscape(true)
-				.build();
-
-		RequestContext context = new RequestContext(exchange, this.model, this.applicationContext);
-		context.setDefaultHtmlEscape(false);
-		assertThat(context.getDefaultHtmlEscape()).isFalse();
-		assertThat(context.isDefaultHtmlEscape()).isFalse();
-	}
 }

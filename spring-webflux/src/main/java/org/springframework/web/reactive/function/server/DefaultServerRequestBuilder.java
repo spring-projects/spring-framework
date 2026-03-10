@@ -435,11 +435,6 @@ class DefaultServerRequestBuilder implements ServerRequest.Builder {
 		}
 
 		@Override
-		public @Nullable Boolean getDefaultHtmlEscape() {
-			return this.delegate.getDefaultHtmlEscape();
-		}
-
-		@Override
 		public boolean isNotModified() {
 			return this.delegate.isNotModified();
 		}

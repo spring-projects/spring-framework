@@ -94,7 +94,7 @@ public class RequestContext {
 				tzaLocaleContext.getTimeZone() : null);
 		this.timeZone = (timeZone != null ? timeZone : TimeZone.getDefault());
 
-		this.defaultHtmlEscape = exchange.getDefaultHtmlEscape() != null ? exchange.getDefaultHtmlEscape() : false;
+		this.defaultHtmlEscape = exchange.getAttribute(ServerWebExchange.HTML_ESCAPE_ATTRIBUTE);
 		this.dataValueProcessor = dataValueProcessor;
 	}
 
