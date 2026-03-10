@@ -20,6 +20,7 @@ import java.time.Duration;
 
 import org.jspecify.annotations.Nullable;
 
+import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
@@ -239,14 +240,21 @@ public final class ServerSentEvent<T> {
 
 		@Override
 		public Builder<T> id(String id) {
+			checkEvent(id);
 			this.id = id;
 			return this;
 		}
 
 		@Override
 		public Builder<T> event(String event) {
+			checkEvent(event);
 			this.event = event;
 			return this;
+		}
+
+		private static void checkEvent(String content) {
+			Assert.isTrue(content.indexOf('\n') == -1 && content.indexOf('\r') == -1,
+					"illegal character '\\n' or '\\r' in event content");
 		}
 
 		@Override
