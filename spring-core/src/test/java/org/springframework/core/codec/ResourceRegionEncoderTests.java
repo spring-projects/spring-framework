@@ -41,11 +41,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Test cases for {@link ResourceRegionEncoder} class.
+ *
  * @author Brian Clozel
  */
 class ResourceRegionEncoderTests extends AbstractLeakCheckingTests {
 
-	private ResourceRegionEncoder encoder = new ResourceRegionEncoder();
+	private final ResourceRegionEncoder encoder = new ResourceRegionEncoder();
+
 
 	@Test
 	void canEncode() {
@@ -116,7 +118,7 @@ class ResourceRegionEncoderTests extends AbstractLeakCheckingTests {
 				.verify();
 	}
 
-	@Test // gh-22107
+	@Test  // gh-22107
 	void cancelWithoutDemandForMultipleResourceRegions() {
 		Resource resource = new ClassPathResource("ResourceRegionEncoderTests.txt", getClass());
 		Flux<ResourceRegion> regions = Flux.just(
@@ -138,7 +140,7 @@ class ResourceRegionEncoderTests extends AbstractLeakCheckingTests {
 		subscriber.cancel();
 	}
 
-	@Test // gh-22107
+	@Test  // gh-22107
 	void cancelWithoutDemandForSingleResourceRegion() {
 		Resource resource = new ClassPathResource("ResourceRegionEncoderTests.txt", getClass());
 		Mono<ResourceRegion> regions = Mono.just(new ResourceRegion(resource, 0, 6));

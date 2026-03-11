@@ -120,6 +120,7 @@ class MergedAnnotationReadingVisitor<A extends Annotation> extends AnnotationVis
 		return new MergedAnnotationReadingVisitor<>(this.classLoader, this.source, type, consumer);
 	}
 
+
 	@SuppressWarnings("unchecked")
 	@Nullable
 	static <A extends Annotation> AnnotationVisitor get(@Nullable ClassLoader classLoader,
