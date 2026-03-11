@@ -145,8 +145,7 @@ final class ClassFileAnnotationMetadata implements AnnotationMetadata {
 	public Set<String> getAnnotationTypes() {
 		Set<String> annotationTypes = this.annotationTypes;
 		if (annotationTypes == null) {
-			annotationTypes = Collections.unmodifiableSet(
-					AnnotationMetadata.super.getAnnotationTypes());
+			annotationTypes = Collections.unmodifiableSet(AnnotationMetadata.super.getAnnotationTypes());
 			this.annotationTypes = annotationTypes;
 		}
 		return annotationTypes;
@@ -171,7 +170,8 @@ final class ClassFileAnnotationMetadata implements AnnotationMetadata {
 
 	@Override
 	public boolean equals(@Nullable Object other) {
-		return (this == other || (other instanceof ClassFileAnnotationMetadata that && this.className.equals(that.className)));
+		return (this == other || (other instanceof ClassFileAnnotationMetadata that &&
+				this.className.equals(that.className)));
 	}
 
 	@Override
@@ -259,11 +259,13 @@ final class ClassFileAnnotationMetadata implements AnnotationMetadata {
 		void enclosingClass(ClassEntry thisClass) {
 			String thisClassName = thisClass.name().stringValue();
 			int currentClassIndex = thisClassName.lastIndexOf('$');
-			this.enclosingClassName = ClassUtils.convertResourcePathToClassName(thisClassName.substring(0, currentClassIndex));
+			this.enclosingClassName = ClassUtils.convertResourcePathToClassName(
+					thisClassName.substring(0, currentClassIndex));
 		}
 
 		void superClass(Superclass superClass) {
-			this.superClassName = ClassUtils.convertResourcePathToClassName(superClass.superclassEntry().name().stringValue());
+			this.superClassName = ClassUtils.convertResourcePathToClassName(
+					superClass.superclassEntry().name().stringValue());
 		}
 
 		void interfaces(Interfaces interfaces) {
@@ -300,9 +302,11 @@ final class ClassFileAnnotationMetadata implements AnnotationMetadata {
 		}
 
 		ClassFileAnnotationMetadata build() {
-			boolean independentInnerClass = (this.enclosingClassName != null) && this.innerAccessFlags.contains(AccessFlag.STATIC);
-			return new ClassFileAnnotationMetadata(this.className, this.accessFlags, this.enclosingClassName, this.superClassName,
-					independentInnerClass, this.interfaceNames, this.memberClassNames, this.declaredMethods, this.mergedAnnotations);
+			boolean independentInnerClass = (this.enclosingClassName != null) &&
+					this.innerAccessFlags.contains(AccessFlag.STATIC);
+			return new ClassFileAnnotationMetadata(this.className, this.accessFlags, this.enclosingClassName,
+					this.superClassName, independentInnerClass, this.interfaceNames, this.memberClassNames,
+					this.declaredMethods, this.mergedAnnotations);
 		}
 	}
 

@@ -171,7 +171,7 @@ abstract class ClassFileAnnotationDelegate {
 	}
 
 
-	record Source(Annotation entryName) {
+	record Source(Annotation annotation) {
 	}
 
 }
