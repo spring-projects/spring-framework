@@ -56,10 +56,8 @@ import org.springframework.web.context.ContextLoader;
  * {@code registerBean(...)} methods available in a {@code GenericApplicationContext}.
  * If you wish to register annotated <em>component classes</em> with a
  * {@code GenericApplicationContext} in a web environment, you may use a
- * {@code GenericWebApplicationContext} with an
- * {@link org.springframework.context.annotation.AnnotatedBeanDefinitionReader
- * AnnotatedBeanDefinitionReader}. See the Javadoc for {@link GenericWebApplicationContext}
- * for details and an example.
+ * {@code GenericWebApplicationContext} with an {@link AnnotatedBeanDefinitionReader}.
+ * See the Javadoc for {@link GenericWebApplicationContext} for details and an example.
  *
  * <p>To make use of this application context, the
  * {@linkplain ContextLoader#CONTEXT_CLASS_PARAM "contextClass"} context-param for
@@ -116,9 +114,19 @@ public class AnnotationConfigWebApplicationContext extends AbstractRefreshableWe
 	/**
 	 * Set a custom {@link BeanNameGenerator} for use with {@link AnnotatedBeanDefinitionReader}
 	 * and/or {@link ClassPathBeanDefinitionScanner}.
-	 * <p>Default is {@link org.springframework.context.annotation.AnnotationBeanNameGenerator}.
+	 * <p>Default is an {@link org.springframework.context.annotation.AnnotationBeanNameGenerator
+	 * AnnotationBeanNameGenerator}.
+	 * <p>When processing {@link org.springframework.context.annotation.Configuration @Configuration}
+	 * classes, a {@link org.springframework.context.annotation.ConfigurationBeanNameGenerator
+	 * ConfigurationBeanNameGenerator} (such as
+	 * {@link org.springframework.context.annotation.FullyQualifiedConfigurationBeanNameGenerator
+	 * FullyQualifiedConfigurationBeanNameGenerator}) also determines the default
+	 * names for {@link org.springframework.context.annotation.Bean @Bean} methods
+	 * without an explicit {@code name} attribute.
 	 * @see AnnotatedBeanDefinitionReader#setBeanNameGenerator
 	 * @see ClassPathBeanDefinitionScanner#setBeanNameGenerator
+	 * @see org.springframework.context.annotation.FullyQualifiedAnnotationBeanNameGenerator
+	 * @see org.springframework.context.annotation.FullyQualifiedConfigurationBeanNameGenerator
 	 */
 	public void setBeanNameGenerator(@Nullable BeanNameGenerator beanNameGenerator) {
 		this.beanNameGenerator = beanNameGenerator;
