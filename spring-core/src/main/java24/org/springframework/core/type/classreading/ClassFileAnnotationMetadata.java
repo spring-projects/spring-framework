@@ -16,165 +16,294 @@
 
 package org.springframework.core.type.classreading;
 
-import java.lang.classfile.Annotation;
-import java.lang.classfile.AnnotationElement;
-import java.lang.classfile.AnnotationValue;
+import java.lang.classfile.AccessFlags;
+import java.lang.classfile.ClassModel;
+import java.lang.classfile.Interfaces;
+import java.lang.classfile.MethodModel;
+import java.lang.classfile.Superclass;
+import java.lang.classfile.attribute.InnerClassInfo;
+import java.lang.classfile.attribute.InnerClassesAttribute;
+import java.lang.classfile.attribute.NestHostAttribute;
 import java.lang.classfile.attribute.RuntimeVisibleAnnotationsAttribute;
-import java.lang.constant.ClassDesc;
-import java.lang.reflect.Array;
+import java.lang.classfile.constantpool.ClassEntry;
+import java.lang.reflect.AccessFlag;
 import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.LinkedHashSet;
 import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.jspecify.annotations.Nullable;
 
-import org.springframework.core.annotation.AnnotationFilter;
-import org.springframework.core.annotation.MergedAnnotation;
 import org.springframework.core.annotation.MergedAnnotations;
+import org.springframework.core.type.AnnotationMetadata;
+import org.springframework.core.type.MethodMetadata;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.StringUtils;
 
 /**
- * Parse {@link RuntimeVisibleAnnotationsAttribute} into {@link MergedAnnotations}
- * instances.
+ * {@link AnnotationMetadata} implementation that leverages
+ * the {@link java.lang.classfile.ClassFile} API.
  *
  * @author Brian Clozel
+ * @author Juergen Hoeller
  * @since 7.0
  */
-abstract class ClassFileAnnotationMetadata {
+final class ClassFileAnnotationMetadata implements AnnotationMetadata {
 
-	static MergedAnnotations createMergedAnnotations(
-			String className, RuntimeVisibleAnnotationsAttribute annotationAttribute, @Nullable ClassLoader classLoader) {
+	private final String className;
 
-		Set<MergedAnnotation<?>> annotations = annotationAttribute.annotations()
-				.stream()
-				.map(ann -> createMergedAnnotation(className, ann, classLoader))
-				.filter(Objects::nonNull)
-				.collect(Collectors.toSet());
-		return MergedAnnotations.of(annotations);
+	private final AccessFlags accessFlags;
+
+	private final @Nullable String enclosingClassName;
+
+	private final @Nullable String superClassName;
+
+	private final boolean independentInnerClass;
+
+	private final Set<String> interfaceNames;
+
+	private final Set<String> memberClassNames;
+
+	private final Set<MethodMetadata> declaredMethods;
+
+	private final MergedAnnotations mergedAnnotations;
+
+	private @Nullable Set<String> annotationTypes;
+
+
+	ClassFileAnnotationMetadata(String className, AccessFlags accessFlags, @Nullable String enclosingClassName,
+				@Nullable String superClassName, boolean independentInnerClass, Set<String> interfaceNames,
+				Set<String> memberClassNames, Set<MethodMetadata> declaredMethods, MergedAnnotations mergedAnnotations) {
+
+		this.className = className;
+		this.accessFlags = accessFlags;
+		this.enclosingClassName = enclosingClassName;
+		this.superClassName = (!className.endsWith(".package-info")) ? superClassName : null;
+		this.independentInnerClass = independentInnerClass;
+		this.interfaceNames = interfaceNames;
+		this.memberClassNames = memberClassNames;
+		this.declaredMethods = declaredMethods;
+		this.mergedAnnotations = mergedAnnotations;
 	}
 
-	@SuppressWarnings("unchecked")
-	private static <A extends java.lang.annotation.Annotation> @Nullable MergedAnnotation<A> createMergedAnnotation(
-			String className, Annotation annotation, @Nullable ClassLoader classLoader) {
 
-		String typeName = fromTypeDescriptor(annotation.className().stringValue());
-		if (AnnotationFilter.PLAIN.matches(typeName)) {
-			return null;
+	@Override
+	public String getClassName() {
+		return this.className;
+	}
+
+	@Override
+	public boolean isInterface() {
+		return this.accessFlags.has(AccessFlag.INTERFACE);
+	}
+
+	@Override
+	public boolean isAnnotation() {
+		return this.accessFlags.has(AccessFlag.ANNOTATION);
+	}
+
+	@Override
+	public boolean isAbstract() {
+		return this.accessFlags.has(AccessFlag.ABSTRACT);
+	}
+
+	@Override
+	public boolean isFinal() {
+		return this.accessFlags.has(AccessFlag.FINAL);
+	}
+
+	@Override
+	public boolean isIndependent() {
+		return (this.enclosingClassName == null || this.independentInnerClass);
+	}
+
+	@Override
+	public @Nullable String getEnclosingClassName() {
+		return this.enclosingClassName;
+	}
+
+	@Override
+	public @Nullable String getSuperClassName() {
+		return this.superClassName;
+	}
+
+	@Override
+	public String[] getInterfaceNames() {
+		return StringUtils.toStringArray(this.interfaceNames);
+	}
+
+	@Override
+	public String[] getMemberClassNames() {
+		return StringUtils.toStringArray(this.memberClassNames);
+	}
+
+	@Override
+	public MergedAnnotations getAnnotations() {
+		return this.mergedAnnotations;
+	}
+
+	@Override
+	public Set<String> getAnnotationTypes() {
+		Set<String> annotationTypes = this.annotationTypes;
+		if (annotationTypes == null) {
+			annotationTypes = Collections.unmodifiableSet(
+					AnnotationMetadata.super.getAnnotationTypes());
+			this.annotationTypes = annotationTypes;
 		}
-		Map<String, Object> attributes = new LinkedHashMap<>(4);
-		try {
-			for (AnnotationElement element : annotation.elements()) {
-				Object annotationValue = readAnnotationValue(className, element.value(), classLoader);
-				if (annotationValue != null) {
-					attributes.put(element.name().stringValue(), annotationValue);
+		return annotationTypes;
+	}
+
+	@Override
+	public Set<MethodMetadata> getAnnotatedMethods(String annotationName) {
+		Set<MethodMetadata> result = new LinkedHashSet<>(4);
+		for (MethodMetadata annotatedMethod : this.declaredMethods) {
+			if (annotatedMethod.isAnnotated(annotationName)) {
+				result.add(annotatedMethod);
+			}
+		}
+		return Collections.unmodifiableSet(result);
+	}
+
+	@Override
+	public Set<MethodMetadata> getDeclaredMethods() {
+		return Collections.unmodifiableSet(this.declaredMethods);
+	}
+
+
+	@Override
+	public boolean equals(@Nullable Object other) {
+		return (this == other || (other instanceof ClassFileAnnotationMetadata that && this.className.equals(that.className)));
+	}
+
+	@Override
+	public int hashCode() {
+		return this.className.hashCode();
+	}
+
+	@Override
+	public String toString() {
+		return this.className;
+	}
+
+
+	static ClassFileAnnotationMetadata of(ClassModel classModel, @Nullable ClassLoader classLoader) {
+		Builder builder = new Builder(classLoader);
+		builder.classEntry(classModel.thisClass());
+		String currentClassName = classModel.thisClass().name().stringValue();
+		classModel.elementStream().forEach(classElement -> {
+			switch (classElement) {
+				case AccessFlags flags -> {
+					builder.accessFlags(flags);
+				}
+				case NestHostAttribute _ -> {
+					builder.enclosingClass(classModel.thisClass());
+				}
+				case InnerClassesAttribute innerClasses -> {
+					builder.nestMembers(currentClassName, innerClasses);
+				}
+				case RuntimeVisibleAnnotationsAttribute annotationsAttribute -> {
+					builder.mergedAnnotations(ClassFileAnnotationDelegate.createMergedAnnotations(
+							ClassUtils.convertResourcePathToClassName(currentClassName), annotationsAttribute, classLoader));
+				}
+				case Superclass superclass -> {
+					builder.superClass(superclass);
+				}
+				case Interfaces interfaces -> {
+					builder.interfaces(interfaces);
+				}
+				case MethodModel method -> {
+					builder.method(method);
+				}
+				default -> {
+					// ignore class element
 				}
 			}
-			Map<String, Object> compactedAttributes = (attributes.isEmpty() ? Collections.emptyMap() : attributes);
-			Class<A> annotationType = (Class<A>) ClassUtils.forName(typeName, classLoader);
-			return MergedAnnotation.of(classLoader, new Source(annotation), annotationType, compactedAttributes);
-		}
-		catch (ClassNotFoundException | LinkageError ex) {
-			return null;
-		}
-	}
-
-	private static @Nullable Object readAnnotationValue(
-			String className, AnnotationValue elementValue, @Nullable ClassLoader classLoader) {
-
-		switch (elementValue) {
-			case AnnotationValue.OfConstant constantValue -> {
-				return constantValue.resolvedValue();
-			}
-			case AnnotationValue.OfAnnotation annotationValue -> {
-				return createMergedAnnotation(className, annotationValue.annotation(), classLoader);
-			}
-			case AnnotationValue.OfClass classValue -> {
-				return fromTypeDescriptor(classValue.className().stringValue());
-			}
-			case AnnotationValue.OfEnum enumValue -> {
-				return parseEnum(enumValue, classLoader);
-			}
-			case AnnotationValue.OfArray arrayValue -> {
-				return parseArrayValue(className, classLoader, arrayValue);
-			}
-		}
-	}
-
-	private static String fromTypeDescriptor(String descriptor) {
-		ClassDesc classDesc = ClassDesc.ofDescriptor(descriptor);
-		return classDesc.isPrimitive() ? classDesc.displayName() :
-		classDesc.packageName() + "." + classDesc.displayName();
-	}
-
-	private static Class<?> loadClass(String className, @Nullable ClassLoader classLoader) {
-		String name = fromTypeDescriptor(className);
-		return ClassUtils.resolveClassName(name, classLoader);
-	}
-
-	private static Object parseArrayValue(String className, @Nullable ClassLoader classLoader, AnnotationValue.OfArray arrayValue) {
-		if (arrayValue.values().isEmpty()) {
-			return new Object[0];
-		}
-		Stream<AnnotationValue> stream = arrayValue.values().stream();
-		switch (arrayValue.values().getFirst()) {
-			case AnnotationValue.OfInt _ -> {
-				return stream.map(AnnotationValue.OfInt.class::cast).mapToInt(AnnotationValue.OfInt::intValue).toArray();
-			}
-			case AnnotationValue.OfDouble _ -> {
-				return stream.map(AnnotationValue.OfDouble.class::cast).mapToDouble(AnnotationValue.OfDouble::doubleValue).toArray();
-			}
-			case AnnotationValue.OfLong _ -> {
-				return stream.map(AnnotationValue.OfLong.class::cast).mapToLong(AnnotationValue.OfLong::longValue).toArray();
-			}
-			default -> {
-				Class<?> arrayElementType = resolveArrayElementType(arrayValue.values(), classLoader);
-				return stream
-						.map(rawValue -> readAnnotationValue(className, rawValue, classLoader))
-						.toArray(s -> (Object[]) Array.newInstance(arrayElementType, s));
-			}
-		}
-	}
-
-	@SuppressWarnings("unchecked")
-	private static @Nullable <E extends Enum<E>> Enum<E> parseEnum(AnnotationValue.OfEnum enumValue, @Nullable ClassLoader classLoader) {
-		String enumClassName = fromTypeDescriptor(enumValue.className().stringValue());
-		try {
-			Class<E> enumClass = (Class<E>) ClassUtils.forName(enumClassName, classLoader);
-			return Enum.valueOf(enumClass, enumValue.constantName().stringValue());
-		}
-		catch (ClassNotFoundException | LinkageError ex) {
-			return null;
-		}
-	}
-
-	private static Class<?> resolveArrayElementType(List<AnnotationValue> values, @Nullable ClassLoader classLoader) {
-		AnnotationValue firstValue = values.getFirst();
-		switch (firstValue) {
-			case AnnotationValue.OfConstant constantValue -> {
-				return constantValue.resolvedValue().getClass();
-			}
-			case AnnotationValue.OfAnnotation _ -> {
-				return MergedAnnotation.class;
-			}
-			case AnnotationValue.OfClass _ -> {
-				return String.class;
-			}
-			case AnnotationValue.OfEnum enumValue -> {
-				return loadClass(enumValue.className().stringValue(), classLoader);
-			}
-			default -> {
-				return Object.class;
-			}
-		}
+		});
+		return builder.build();
 	}
 
 
-	record Source(Annotation entryName) {
+	static class Builder {
+
+		private final ClassLoader classLoader;
+
+		private String className;
+
+		private AccessFlags accessFlags;
+
+		private Set<AccessFlag> innerAccessFlags;
+
+		private @Nullable String enclosingClassName;
+
+		private @Nullable String superClassName;
+
+		private Set<String> interfaceNames = new LinkedHashSet<>(4);
+
+		private Set<String> memberClassNames = new LinkedHashSet<>(4);
+
+		private Set<MethodMetadata> declaredMethods = new LinkedHashSet<>(4);
+
+		private MergedAnnotations mergedAnnotations = MergedAnnotations.of(Collections.emptySet());
+
+		public Builder(ClassLoader classLoader) {
+			this.classLoader = classLoader;
+		}
+
+		void classEntry(ClassEntry classEntry) {
+			this.className = ClassUtils.convertResourcePathToClassName(classEntry.name().stringValue());
+		}
+
+		void accessFlags(AccessFlags accessFlags) {
+			this.accessFlags = accessFlags;
+		}
+
+		void enclosingClass(ClassEntry thisClass) {
+			String thisClassName = thisClass.name().stringValue();
+			int currentClassIndex = thisClassName.lastIndexOf('$');
+			this.enclosingClassName = ClassUtils.convertResourcePathToClassName(thisClassName.substring(0, currentClassIndex));
+		}
+
+		void superClass(Superclass superClass) {
+			this.superClassName = ClassUtils.convertResourcePathToClassName(superClass.superclassEntry().name().stringValue());
+		}
+
+		void interfaces(Interfaces interfaces) {
+			for (ClassEntry entry : interfaces.interfaces()) {
+				this.interfaceNames.add(ClassUtils.convertResourcePathToClassName(entry.name().stringValue()));
+			}
+		}
+
+		void nestMembers(String currentClassName, InnerClassesAttribute innerClasses) {
+			for (InnerClassInfo classInfo : innerClasses.classes()) {
+				String innerClassName = classInfo.innerClass().name().stringValue();
+				if (currentClassName.equals(innerClassName)) {
+					// the current class is an inner class
+					this.innerAccessFlags = classInfo.flags();
+				}
+				classInfo.outerClass().ifPresent(outerClass -> {
+					if (outerClass.name().stringValue().equals(currentClassName)) {
+						// collecting data about actual inner classes
+						this.memberClassNames.add(ClassUtils.convertResourcePathToClassName(innerClassName));
+					}
+				});
+			}
+		}
+
+		void mergedAnnotations(MergedAnnotations mergedAnnotations) {
+			this.mergedAnnotations = mergedAnnotations;
+		}
+
+		void method(MethodModel method) {
+			ClassFileMethodMetadata classFileMethodMetadata = ClassFileMethodMetadata.of(method, this.classLoader);
+			if (!classFileMethodMetadata.isSynthetic() && !classFileMethodMetadata.isDefaultConstructor()) {
+				this.declaredMethods.add(classFileMethodMetadata);
+			}
+		}
+
+		ClassFileAnnotationMetadata build() {
+			boolean independentInnerClass = (this.enclosingClassName != null) && this.innerAccessFlags.contains(AccessFlag.STATIC);
+			return new ClassFileAnnotationMetadata(this.className, this.accessFlags, this.enclosingClassName, this.superClassName,
+					independentInnerClass, this.interfaceNames, this.memberClassNames, this.declaredMethods, this.mergedAnnotations);
+		}
 	}
 
 }

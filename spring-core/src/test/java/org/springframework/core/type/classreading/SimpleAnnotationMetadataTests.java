@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
-import com.github.benmanes.caffeine.cache.Caffeine;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.core.type.AbstractAnnotationMetadataTests;
@@ -53,17 +52,20 @@ class SimpleAnnotationMetadataTests extends AbstractAnnotationMetadataTests {
 	@Test
 	void getClassAttributeWhenUnknownClass() {
 		var annotation = get(WithClassMissingFromClasspath.class).getAnnotations().get(ClassAttributes.class);
-		assertThat(annotation.getStringArray("types")).contains("com.github.benmanes.caffeine.cache.Caffeine");
+		assertThat(annotation.getStringArray("types")).contains("javax.annotation.meta.When");
 		assertThatIllegalArgumentException().isThrownBy(() -> annotation.getClassArray("types"));
 	}
 
-	@ClassAttributes(types = {Caffeine.class})
+
+	@ClassAttributes(types = {javax.annotation.meta.When.class})
+	@javax.annotation.Nonnull(when = javax.annotation.meta.When.MAYBE)
 	public static class WithClassMissingFromClasspath {
 	}
 
 
 	@Retention(RetentionPolicy.RUNTIME)
 	public @interface ClassAttributes {
+
 		Class<?>[] types();
 	}
 

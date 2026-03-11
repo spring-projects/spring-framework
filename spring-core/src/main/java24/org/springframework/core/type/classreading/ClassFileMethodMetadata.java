@@ -41,7 +41,7 @@ import org.springframework.util.ClassUtils;
  * @author Brian Clozel
  * @since 7.0
  */
-class ClassFileMethodMetadata implements MethodMetadata {
+final class ClassFileMethodMetadata implements MethodMetadata {
 
 	private final String methodName;
 
@@ -148,7 +148,7 @@ class ClassFileMethodMetadata implements MethodMetadata {
 		MergedAnnotations annotations = methodModel.elementStream()
 				.filter(element -> element instanceof RuntimeVisibleAnnotationsAttribute)
 				.findFirst()
-				.map(element -> ClassFileAnnotationMetadata.createMergedAnnotations(methodName, (RuntimeVisibleAnnotationsAttribute) element, classLoader))
+				.map(element -> ClassFileAnnotationDelegate.createMergedAnnotations(methodName, (RuntimeVisibleAnnotationsAttribute) element, classLoader))
 				.orElse(MergedAnnotations.of(Collections.emptyList()));
 		return new ClassFileMethodMetadata(methodName, flags, declaringClassName, returnTypeName, source, annotations);
 	}

@@ -19,8 +19,6 @@ package org.springframework.core.annotation;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
-import javax.annotation.concurrent.ThreadSafe;
-
 import org.junit.jupiter.api.Test;
 
 import org.springframework.lang.Contract;
@@ -81,11 +79,6 @@ class AnnotationFilterTests {
 	@Test
 	void javaWhenJavaLangAnnotationReturnsTrue() {
 		assertThat(AnnotationFilter.JAVA.matches(Retention.class)).isTrue();
-	}
-
-	@Test
-	void javaWhenJavaxAnnotationReturnsTrue() {
-		assertThat(AnnotationFilter.JAVA.matches(ThreadSafe.class)).isTrue();
 	}
 
 	@Test
