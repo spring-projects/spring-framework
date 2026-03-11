@@ -31,8 +31,8 @@ dependencies {
 		api("com.google.code.findbugs:findbugs:3.0.1")
 		api("com.google.code.findbugs:jsr305:3.0.2")
 		api("com.google.code.gson:gson:2.13.2")
-		api("com.google.protobuf:protobuf-java-util:4.33.4")
-		api("com.h2database:h2:2.3.232")
+		api("com.google.protobuf:protobuf-java-util:4.34.0")
+		api("com.h2database:h2:2.4.240")
 		api("com.jayway.jsonpath:json-path:2.10.0")
 		api("com.networknt:json-schema-validator:1.5.3")
 		api("com.oracle.database.jdbc:ojdbc11:21.9.0.0")
@@ -49,7 +49,7 @@ dependencies {
 		api("de.bechte.junit:junit-hierarchicalcontextrunner:4.12.2")
 		api("io.mockk:mockk:1.14.5")
 		api("io.projectreactor.tools:blockhound:1.0.8.RELEASE")
-		api("io.r2dbc:r2dbc-h2:1.0.0.RELEASE")
+		api("io.r2dbc:r2dbc-h2:1.1.0.RELEASE")
 		api("io.r2dbc:r2dbc-spi-test:1.0.0.RELEASE")
 		api("io.r2dbc:r2dbc-spi:1.0.0.RELEASE")
 		api("io.reactivex.rxjava3:rxjava:3.1.12")
@@ -142,6 +142,6 @@ dependencies {
 		api("org.webjars:webjars-locator-lite:1.1.0")
 		api("org.xmlunit:xmlunit-assertj:2.10.4")
 		api("org.xmlunit:xmlunit-matchers:2.10.4")
-		api("org.yaml:snakeyaml:2.5")
+		api("org.yaml:snakeyaml:2.6")
 	}
 }
