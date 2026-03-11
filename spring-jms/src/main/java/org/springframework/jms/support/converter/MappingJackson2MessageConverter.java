@@ -435,7 +435,7 @@ public class MappingJackson2MessageConverter implements SmartMessageConverter, B
 			throws JMSException, IOException {
 
 		throw new IllegalArgumentException("Unsupported message type [" + message.getClass() +
-				"]. MappingJacksonMessageConverter by default only supports TextMessages and BytesMessages.");
+				"]. MappingJackson2MessageConverter by default only supports TextMessages and BytesMessages.");
 	}
 
 	/**

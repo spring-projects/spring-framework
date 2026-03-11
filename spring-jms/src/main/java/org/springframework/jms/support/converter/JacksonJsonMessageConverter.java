@@ -419,7 +419,7 @@ public class JacksonJsonMessageConverter implements SmartMessageConverter, BeanC
 			throws JMSException, IOException {
 
 		throw new IllegalArgumentException("Unsupported message type [" + message.getClass() +
-				"]. MappingJacksonMessageConverter by default only supports TextMessages and BytesMessages.");
+				"]. JacksonJsonMessageConverter by default only supports TextMessages and BytesMessages.");
 	}
 
 	/**
