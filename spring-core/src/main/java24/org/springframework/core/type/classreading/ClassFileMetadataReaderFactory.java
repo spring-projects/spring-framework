@@ -30,7 +30,7 @@ import org.springframework.core.io.ResourceLoader;
  * @author Brian Clozel
  * @since 7.0
  */
-class ClassFileMetadataReaderFactory extends AbstractMetadataReaderFactory {
+final class ClassFileMetadataReaderFactory extends AbstractMetadataReaderFactory {
 
 	/**
 	 * Create a new ClassFileMetadataReaderFactory for the default class loader.
