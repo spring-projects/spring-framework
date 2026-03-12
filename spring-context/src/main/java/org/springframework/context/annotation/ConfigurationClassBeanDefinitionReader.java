@@ -303,8 +303,8 @@ class ConfigurationClassBeanDefinitionReader {
 		}
 
 		if (logger.isTraceEnabled()) {
-			logger.trace("Registering bean definition for @Bean method %s.%s()"
-					.formatted(configClass.getMetadata().getClassName(), beanName));
+			logger.trace("Registering bean definition for @Bean method %s.%s() with bean name '%s'"
+					.formatted(configClass.getMetadata().getClassName(), methodName, beanName));
 		}
 		this.registry.registerBeanDefinition(beanName, beanDefToRegister);
 	}
