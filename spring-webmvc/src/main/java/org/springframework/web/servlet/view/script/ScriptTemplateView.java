@@ -51,6 +51,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
+import org.springframework.web.servlet.resource.ResourceHandlerUtils;
 import org.springframework.web.servlet.support.RequestContextUtils;
 import org.springframework.web.servlet.view.AbstractUrlBasedView;
 
@@ -351,11 +352,26 @@ public class ScriptTemplateView extends AbstractUrlBasedView {
 
 	@Nullable
 	protected Resource getResource(String location) {
-		if (this.resourceLoaderPaths != null) {
+		String normalizedLocation = ResourceHandlerUtils.normalizeInputPath(location);
+		if (this.resourceLoaderPaths != null && !ResourceHandlerUtils.shouldIgnoreInputPath(normalizedLocation)) {
+			ApplicationContext context = obtainApplicationContext();
 			for (String path : this.resourceLoaderPaths) {
-				Resource resource = obtainApplicationContext().getResource(path + location);
-				if (resource.exists()) {
-					return resource;
+				Resource resource = context.getResource(path + normalizedLocation);
+				try {
+					if (resource.exists() && ResourceHandlerUtils.isResourceUnderLocation(context.getResource(path), resource)) {
+						return resource;
+					}
+				}
+				catch (IOException ex) {
+					if (logger.isDebugEnabled()) {
+						String error = "Skip location [" + normalizedLocation + "] due to error";
+						if (logger.isTraceEnabled()) {
+							logger.trace(error, ex);
+						}
+						else {
+							logger.debug(error + ": " + ex.getMessage());
+						}
+					}
 				}
 			}
 		}
