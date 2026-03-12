@@ -195,7 +195,7 @@ final class ClassFileAnnotationMetadata implements AnnotationMetadata {
 					builder.accessFlags(flags);
 				}
 				case NestHostAttribute _ -> {
-					builder.enclosingClass(classModel.thisClass());
+					builder.enclosingClassFromNestHost(classModel.thisClass());
 				}
 				case InnerClassesAttribute innerClasses -> {
 					builder.nestMembers(currentClassName, innerClasses);
@@ -256,11 +256,16 @@ final class ClassFileAnnotationMetadata implements AnnotationMetadata {
 			this.accessFlags = accessFlags;
 		}
 
-		void enclosingClass(ClassEntry thisClass) {
+		void enclosingClassFromNestHost(ClassEntry thisClass) {
+			if (this.enclosingClassName != null) {
+				return;
+			}
 			String thisClassName = thisClass.name().stringValue();
 			int currentClassIndex = thisClassName.lastIndexOf('$');
-			this.enclosingClassName = ClassUtils.convertResourcePathToClassName(
-					thisClassName.substring(0, currentClassIndex));
+			if (currentClassIndex > 0) {
+				this.enclosingClassName = ClassUtils.convertResourcePathToClassName(
+						thisClassName.substring(0, currentClassIndex));
+			}
 		}
 
 		void superClass(Superclass superClass) {
@@ -280,6 +285,8 @@ final class ClassFileAnnotationMetadata implements AnnotationMetadata {
 				if (currentClassName.equals(innerClassName)) {
 					// the current class is an inner class
 					this.innerAccessFlags = classInfo.flags();
+					classInfo.outerClass().ifPresent(outerClass ->
+							this.enclosingClassName = ClassUtils.convertResourcePathToClassName(outerClass.name().stringValue()));
 				}
 				classInfo.outerClass().ifPresent(outerClass -> {
 					if (outerClass.name().stringValue().equals(currentClassName)) {

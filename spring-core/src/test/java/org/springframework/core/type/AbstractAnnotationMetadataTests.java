@@ -149,6 +149,14 @@ public abstract class AbstractAnnotationMetadataTests {
 		}
 
 		@Test
+		void getEnclosingClassNameWhenNestedMemberClassReturnsImmediateEnclosingClass() {
+			assertThat(get(TestNestedMemberClass.TestMemberClassInnerClassA.class).getEnclosingClassName())
+					.isEqualTo(TestNestedMemberClass.class.getName());
+			assertThat(get(TestNestedMemberClass.TestMemberClassInnerClassA.TestMemberClassInnerClassAA.class).getEnclosingClassName())
+					.isEqualTo(TestNestedMemberClass.TestMemberClassInnerClassA.class.getName());
+		}
+
+		@Test
 		void getSuperClassNameWhenHasSuperClassReturnsName() {
 			assertThat(get(TestSubclass.class).getSuperClassName()).isEqualTo(TestClass.class.getName());
 			assertThat(get(TestClass.class).getSuperClassName()).isEqualTo(Object.class.getName());
