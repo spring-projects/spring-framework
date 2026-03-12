@@ -209,7 +209,7 @@ class ConfigurationClassBeanDefinitionReader {
 		String beanName = (explicitNames.length > 0 && StringUtils.hasText(explicitNames[0])) ? explicitNames[0] : null;
 		String localBeanName = defaultBeanName(beanName, methodName);
 		beanName = (this.importBeanNameGenerator instanceof ConfigurationBeanNameGenerator cbng ?
-				cbng.deriveBeanName(metadata, beanName) : defaultBeanName(beanName, methodName));
+				cbng.deriveBeanName(metadata, beanName) : localBeanName);
 		if (explicitNames.length > 0) {
 			// Register aliases even when overridden below.
 			for (int i = 1; i < explicitNames.length; i++) {
