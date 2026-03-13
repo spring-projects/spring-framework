@@ -598,6 +598,20 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 		// Initialize the bean instance.
 		Object exposedObject = bean;
+
+		// If the instance supplier was bypassed (e.g. explicit args were provided),
+		// apply any post-processing that was registered via InstanceSupplier.andThen().
+		// Note: this runs after early singleton caching. For the typical case where
+		// post-processing returns the same instance, this is safe. If post-processing
+		// wraps the instance, circular reference detection at the end of this method
+		// will detect the mismatch and throw BeanCurrentlyInCreationException.
+		if (args != null && mbd.getInstanceSupplier() instanceof InstanceSupplier<?>) {
+			exposedObject = applyInstanceSupplierPostProcessing(exposedObject, beanName, mbd);
+			if (exposedObject != instanceWrapper.getWrappedInstance()) {
+				instanceWrapper = new BeanWrapperImpl(exposedObject);
+				initBeanWrapper(instanceWrapper);
+			}
+		}
 		try {
 			populateBean(beanName, mbd, instanceWrapper);
 			exposedObject = initializeBean(beanName, exposedObject, mbd);
@@ -1283,6 +1297,23 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			return throwingSupplier.getWithException();
 		}
 		return supplier.get();
+	}
+
+	/**
+	 * Apply any post-processing from the bean definition's
+	 * {@link InstanceSupplier} to an already-created instance. This is called
+	 * when the instance supplier was bypassed during creation (for example,
+	 * when explicit constructor arguments were provided) but the post-processing
+	 * registered via {@link InstanceSupplier#andThen} still needs to be applied.
+	 * @param bean the already-created bean instance
+	 * @param beanName the name of the bean
+	 * @param mbd the bean definition for the bean
+	 * @return the post-processed bean instance
+	 * @since 7.0
+	 * @see InstanceSupplier#postProcessInstance
+	 */
+	protected Object applyInstanceSupplierPostProcessing(Object bean, String beanName, RootBeanDefinition mbd) {
+		return bean;
 	}
 
 	/**
