@@ -601,8 +601,10 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 		// If the instance supplier was bypassed (e.g. explicit args were provided),
 		// apply any post-processing that was registered via InstanceSupplier.andThen().
-		// This is done after singleton caching since it only applies to non-singleton
-		// beans (singletons don't use explicit args with getBean).
+		// Note: this runs after early singleton caching. For the typical case where
+		// post-processing returns the same instance, this is safe. If post-processing
+		// wraps the instance, circular reference detection at the end of this method
+		// will detect the mismatch and throw BeanCurrentlyInCreationException.
 		if (args != null && mbd.getInstanceSupplier() instanceof InstanceSupplier<?>) {
 			exposedObject = applyInstanceSupplierPostProcessing(exposedObject, beanName, mbd);
 			if (exposedObject != instanceWrapper.getWrappedInstance()) {

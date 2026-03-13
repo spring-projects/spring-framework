@@ -66,6 +66,7 @@ import org.springframework.beans.factory.support.BeanDefinitionOverrideException
 import org.springframework.beans.factory.support.ChildBeanDefinition;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.GenericBeanDefinition;
+import org.springframework.beans.factory.support.InstanceSupplier;
 import org.springframework.beans.factory.support.ManagedList;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.ConstructorDependenciesBean;
@@ -2186,6 +2187,46 @@ class DefaultListableBeanFactoryTests {
 		assertThat(argsInstance.getBeanName()).isEqualTo("bd1");
 		assertThat(argsInstance.getName()).isEqualTo("another");
 		assertThat(argsInstance.getAge()).isEqualTo(42);
+	}
+
+	@Test
+	void singletonWithInstanceSupplierAndThenPostProcessingAppliedWithExplicitArgs() {
+		RootBeanDefinition bd = new RootBeanDefinition(TestBean.class);
+		InstanceSupplier<TestBean> supplier = InstanceSupplier.of(
+				registeredBean -> new TestBean("fromSupplier"))
+				.andThen((registeredBean, instance) -> {
+					instance.setAge(42);
+					return instance;
+				});
+		bd.setInstanceSupplier(supplier);
+		lbf.registerBeanDefinition("testBean", bd);
+
+		// getBean with explicit args bypasses instance supplier but should apply andThen() post-processing
+		TestBean bean = (TestBean) lbf.getBean("testBean", "fromArgs");
+		assertThat(bean.getName()).isEqualTo("fromArgs");
+		assertThat(bean.getAge())
+				.as("andThen() post-processing should be applied even when instance supplier is bypassed")
+				.isEqualTo(42);
+	}
+
+	@Test
+	void prototypeWithInstanceSupplierAndThenPostProcessingAppliedWithExplicitArgs() {
+		RootBeanDefinition bd = new RootBeanDefinition(TestBean.class);
+		bd.setScope(BeanDefinition.SCOPE_PROTOTYPE);
+		InstanceSupplier<TestBean> supplier = InstanceSupplier.of(
+				registeredBean -> new TestBean("fromSupplier"))
+				.andThen((registeredBean, instance) -> {
+					instance.setAge(99);
+					return instance;
+				});
+		bd.setInstanceSupplier(supplier);
+		lbf.registerBeanDefinition("testBean", bd);
+
+		TestBean bean = (TestBean) lbf.getBean("testBean", "fromArgs");
+		assertThat(bean.getName()).isEqualTo("fromArgs");
+		assertThat(bean.getAge())
+				.as("andThen() post-processing should be applied for prototype with explicit args")
+				.isEqualTo(99);
 	}
 
 	@Test
