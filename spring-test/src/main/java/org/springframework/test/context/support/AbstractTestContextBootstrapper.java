@@ -20,11 +20,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -79,13 +77,6 @@ import org.springframework.util.StringUtils;
  * @since 4.1
  */
 public abstract class AbstractTestContextBootstrapper implements TestContextBootstrapper {
-
-	private static final String IGNORED_DEFAULT_CONFIG_MESSAGE = """
-			For test class [%1$s], the following 'default' context configuration %2$s were detected \
-			but are currently ignored: %3$s. In Spring Framework 7.1, these %2$s will no longer be ignored. \
-			Please update your test configuration accordingly. For details, see: \
-			https://docs.spring.io/spring-framework/reference/testing/testcontext-framework/ctx-management/default-config.html""";
-
 
 	private final Log logger = LogFactory.getLog(getClass());
 
@@ -262,12 +253,9 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 			CacheAwareContextLoaderDelegate cacheAwareContextLoaderDelegate) {
 
 		List<ContextConfigurationAttributes> defaultConfigAttributesList =
-				Collections.singletonList(new ContextConfigurationAttributes(testClass));
-				// for 7.1: ContextLoaderUtils.resolveDefaultContextConfigurationAttributes(testClass);
-
+				ContextLoaderUtils.resolveDefaultContextConfigurationAttributes(testClass);
 		MergedContextConfiguration mergedConfig = buildMergedContextConfiguration(
 				testClass, defaultConfigAttributesList, null, cacheAwareContextLoaderDelegate, false);
-		logWarningForIgnoredDefaultConfig(mergedConfig, cacheAwareContextLoaderDelegate);
 
 		if (logger.isTraceEnabled()) {
 			logger.trace(String.format(
@@ -281,46 +269,6 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 		}
 
 		return mergedConfig;
-	}
-
-	/**
-	 * In Spring Framework 7.1, we will use the "complete" list of default config attributes.
-	 * In the interim, we log a warning if the "current" detected config differs from the
-	 * "complete" detected config, which signals that some default configuration is currently
-	 * being ignored.
-	 */
-	private void logWarningForIgnoredDefaultConfig(MergedContextConfiguration mergedConfig,
-			CacheAwareContextLoaderDelegate cacheAwareContextLoaderDelegate) {
-
-		if (logger.isWarnEnabled()) {
-			Class<?> testClass = mergedConfig.getTestClass();
-			List<ContextConfigurationAttributes> completeDefaultConfigAttributesList =
-					ContextLoaderUtils.resolveDefaultContextConfigurationAttributes(testClass);
-			MergedContextConfiguration completeMergedConfig = buildMergedContextConfiguration(
-					testClass, completeDefaultConfigAttributesList, null,
-					cacheAwareContextLoaderDelegate, false);
-
-			if (!Arrays.equals(mergedConfig.getClasses(), completeMergedConfig.getClasses())) {
-				Set<Class<?>> currentClasses = new HashSet<>(Arrays.asList(mergedConfig.getClasses()));
-				String ignoredClasses = Arrays.stream(completeMergedConfig.getClasses())
-						.filter(clazz -> !currentClasses.contains(clazz))
-						.map(Class::getName)
-						.collect(Collectors.joining(", "));
-				if (!ignoredClasses.isEmpty()) {
-					logger.warn(IGNORED_DEFAULT_CONFIG_MESSAGE.formatted(testClass.getName(), "classes", ignoredClasses));
-				}
-			}
-
-			if (!Arrays.equals(mergedConfig.getLocations(), completeMergedConfig.getLocations())) {
-				Set<String> currentLocations = new HashSet<>(Arrays.asList(mergedConfig.getLocations()));
-				String ignoredLocations = Arrays.stream(completeMergedConfig.getLocations())
-						.filter(location -> !currentLocations.contains(location))
-						.collect(Collectors.joining(", "));
-				if (!ignoredLocations.isEmpty()) {
-					logger.warn(IGNORED_DEFAULT_CONFIG_MESSAGE.formatted(testClass.getName(), "locations", ignoredLocations));
-				}
-			}
-		}
 	}
 
 	/**

@@ -46,7 +46,7 @@ class ImplicitDefaultConfigClassesBaseTests {
 
 
 	@Test
-	void greeting1AndPuzzle1() {
+	final void greeting1AndPuzzle1() {
 		// This class must NOT be annotated with @SpringJUnitConfig or @ContextConfiguration.
 		assertThat(AnnotatedElementUtils.hasAnnotation(getClass(), ContextConfiguration.class)).isFalse();
 
