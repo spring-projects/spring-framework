@@ -1,0 +1,113 @@
+[[webflux-native-transports]]
+= Native Transports
+
+Spring WebFlux, built on Reactor Netty,
+supports the use of Netty native transports to improve performance and reduce overhead.
+Instead of the standard Java NIO implementation, you can leverage OS-specific I/O mechanisms:
+
+* `epoll` -- for Linux (high-performance, event-driven interface);
+* `io_uring` -- modern alternative for Linux (available since kernel 5.1+);
+* `kqueue` -- for macOS and BSD systems.
+
+Using native transports is particularly beneficial when handling a large number of concurrent connections.
+
+[[webflux-native-transports-dependencies]]
+== Adding Dependencies
+
+To enable a native transport, you need to add the corresponding `netty-transport`
+dependency with the correct platform classifier. When using Spring Boot,
+the Netty version is managed by the Spring Boot Bill of Materials (BOM),
+so you can omit the version. The classifier must still be specified to match your system architecture.
+
+[[webflux-native-transports-dependencies-maven]]
+=== Maven
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+<dependencies>
+    <!-- For epoll on Linux x86_64 -->
+    <dependency>
+        <groupId>io.netty</groupId>
+        <artifactId>netty-transport-native-epoll</artifactId>
+        <classifier>linux-x86_64</classifier>
+    </dependency>
+
+    <!-- For io_uring on Linux x86_64 -->
+    <dependency>
+        <groupId>io.netty</groupId>
+        <artifactId>netty-transport-native-io_uring</artifactId>
+        <classifier>linux-x86_64</classifier>
+    </dependency>
+
+    <!-- For kqueue on macOS Apple Silicon -->
+    <dependency>
+        <groupId>io.netty</groupId>
+        <artifactId>netty-transport-native-kqueue</artifactId>
+        <classifier>osx-aarch_64</classifier>
+    </dependency>
+</dependencies>
+----
+
+[[webflux-native-transports-dependencies-gradle]]
+=== Gradle (Kotlin DSL)
+
+[source,kotlin,indent=0]
+----
+dependencies {
+    // epoll on Linux x86_64
+    implementation("io.netty:netty-transport-native-epoll") {
+        artifact {
+            classifier = "linux-x86_64"
+        }
+    }
+
+    // io_uring on Linux x86_64
+    implementation("io.netty:netty-transport-native-io_uring") {
+        artifact {
+            classifier = "linux-x86_64"
+        }
+    }
+
+    // kqueue on macOS (Apple Silicon)
+    implementation("io.netty:netty-transport-native-kqueue") {
+        artifact {
+            classifier = "osx-aarch_64"
+        }
+    }
+}
+----
+
+Note that the classifier must exactly match your system architecture
+(`linux-x86_64`, `linux-aarch64`, `linux-riscv64`, `osx-x86_64`, `osx-aarch_64`, etc.).
+For a complete list, refer to the Netty documentation.
+
+[[webflux-native-transports-selection]]
+== Automatic Transport Selection
+
+Reactor Netty automatically picks the available native transport
+when the corresponding dependency is present in the classpath.
+The priority is given to more efficient mechanisms:
+io_uring (if available), then epoll/kqueue, and finally NIO.
+No additional configuration is required.
+
+When using native transports, ensure that your application is not running
+inside a container with a mismatched architecture
+(e.g., a Linux image on a macOS machine — the classifier will not match).
+In such cases, the NIO transport will be used automatically.
+
+[[webflux-native-transports-verifying]]
+== Verifying the Used Transport
+
+To check which native transport is active,
+enable DEBUG logging for the `reactor.netty.resources` package (or the broader `reactor.netty`).
+During startup, you will see log messages indicating the availability of each transport:
+
+[source,text]
+----
+Default io_uring support : false
+Default Epoll support : false
+Default KQueue support : false
+----
+
+If a particular transport shows `true`, Reactor Netty will use it.
+If all show `false`, the fallback NIO transport is used.
