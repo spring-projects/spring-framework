@@ -1016,7 +1016,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 	/**
 	 * Response extractor for {@link HttpEntity}.
 	 */
-	private class ResponseEntityResponseExtractor<T> implements ResponseExtractor<ResponseEntity<T>> {
+	private class ResponseEntityResponseExtractor<T> implements ResponseExtractor<ResponseEntity<@Nullable T>> {
 
 		private final @Nullable HttpMessageConverterExtractor<T> delegate;
 
@@ -1030,7 +1030,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 		}
 
 		@Override
-		public ResponseEntity<T> extractData(ClientHttpResponse response) throws IOException {
+		public ResponseEntity<@Nullable T> extractData(ClientHttpResponse response) throws IOException {
 			if (this.delegate != null) {
 				T body = this.delegate.extractData(response);
 				return ResponseEntity.status(response.getStatusCode()).headers(response.getHeaders()).body(body);
