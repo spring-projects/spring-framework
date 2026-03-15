@@ -16,6 +16,7 @@
 
 package org.springframework.aop.aspectj;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
@@ -457,6 +458,43 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 					// Implemented interfaces probably expose conflicting method signatures...
 					// Proceed with original target method.
 				}
+			}
+		}
+		else if (containsAnnotationPointcut()) {
+			try {
+				// Get the param value inside @annotation(...)
+				PointcutExpression pointcutExpression = obtainPointcutExpression();
+				String expr = pointcutExpression.getPointcutExpression();
+				int start = expr.indexOf('(', expr.indexOf("@annotation"));
+				int end = expr.indexOf(')', start);
+				String annotationParam = expr.substring(start + 1, end).trim();
+
+				boolean isParamFullyQualifiedClassName = annotationParam.contains(".");
+				if (isParamFullyQualifiedClassName) {
+					@SuppressWarnings("unchecked")
+					Class<? extends Annotation> annClass = (Class<? extends Annotation>) ClassUtils.forName(
+							annotationParam, targetClass.getClassLoader());
+					// Check for annotation on target method for every interface in the target class hierarchy
+					for (Class<?> ifc : ClassUtils.getAllInterfacesForClassAsSet(targetClass)) {
+						try {
+							Method interfaceMethod = ifc.getMethod(method.getName(), method.getParameterTypes());
+							if (interfaceMethod.isAnnotationPresent(annClass)) {
+								targetMethod = interfaceMethod;
+								break;
+							}
+						}
+						catch (NoSuchMethodException ignored) {
+							// The interface doesn't contain the target method
+						}
+					}
+				}
+				else {
+					// TODO: Support variable annotation params such as @annotation(transactional)
+					//  WIP gh-22311
+				}
+			}
+			catch (ClassNotFoundException ignored) {
+				// Pointcut annotation class not found. Proceed with original target method
 			}
 		}
 		return getShadowMatch(targetMethod, method);
