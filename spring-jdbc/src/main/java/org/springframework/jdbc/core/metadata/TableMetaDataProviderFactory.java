@@ -47,6 +47,7 @@ public final class TableMetaDataProviderFactory {
 	 * @param context the class that holds configuration and meta-data
 	 * @return instance of the TableMetaDataProvider implementation to be used
 	 */
+	@SuppressWarnings("removal")
 	public static TableMetaDataProvider createMetaDataProvider(DataSource dataSource, TableMetaDataContext context) {
 		try {
 			return JdbcUtils.extractDatabaseMetaData(dataSource, databaseMetaData -> {
