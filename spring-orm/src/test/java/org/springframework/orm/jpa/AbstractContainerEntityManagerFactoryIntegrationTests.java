@@ -106,7 +106,7 @@ public abstract class AbstractContainerEntityManagerFactoryIntegrationTests
 	void testGetReferenceWhenNoRow() {
 		assertThatException().isThrownBy(() -> {
 				Person notThere = sharedEntityManager.getReference(Person.class, 666);
-				// We may get here (as with Hibernate). Either behaviour is valid:
+				// We may get here (as with Hibernate). Either behavior is valid:
 				// throw exception on first access or on getReference itself.
 				notThere.getFirstName();
 			})

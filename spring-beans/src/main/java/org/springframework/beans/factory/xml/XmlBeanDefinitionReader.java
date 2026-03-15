@@ -211,7 +211,7 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	/**
 	 * Specify which {@link org.springframework.beans.factory.parsing.ProblemReporter} to use.
 	 * <p>The default implementation is {@link org.springframework.beans.factory.parsing.FailFastProblemReporter}
-	 * which exhibits fail fast behaviour. External tools can provide an alternative implementation
+	 * which exhibits fail fast behavior. External tools can provide an alternative implementation
 	 * that collates errors and warnings for display in the tool UI.
 	 */
 	public void setProblemReporter(@Nullable ProblemReporter problemReporter) {

@@ -35,7 +35,7 @@ import org.dom4j.io.SAXReader;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.propertyeditors.StringTrimmerEditor;
-import org.springframework.beans.testfixture.beans.Colour;
+import org.springframework.beans.testfixture.beans.Color;
 import org.springframework.beans.testfixture.beans.Pet;
 import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.validation.BeanPropertyBindingResult;
@@ -596,9 +596,9 @@ public class RadioButtonsTagTests extends AbstractFormTagTests {
 	@Override
 	protected TestBean createTestBean() {
 		List colours = new ArrayList();
-		colours.add(Colour.BLUE);
-		colours.add(Colour.RED);
-		colours.add(Colour.GREEN);
+		colours.add(Color.BLUE);
+		colours.add(Color.RED);
+		colours.add(Color.GREEN);
 
 		List pets = new ArrayList();
 		pets.add(new Pet("Rudiger"));
@@ -613,7 +613,7 @@ public class RadioButtonsTagTests extends AbstractFormTagTests {
 		this.bean.setSomeBoolean(Boolean.TRUE);
 		this.bean.setStringArray(new String[] {"bar", "foo"});
 		this.bean.setSomeIntegerArray(new Integer[] {2, 1});
-		this.bean.setOtherColours(colours);
+		this.bean.setOtherColors(colours);
 		this.bean.setPets(pets);
 		List list = new ArrayList();
 		list.add("foo");

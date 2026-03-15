@@ -49,7 +49,7 @@ public class ExpectedLookupTemplate extends JndiTemplate {
 
 	/**
 	 * Construct a new JndiTemplate that will always return the given object,
-	 * but honour only requests for the given name.
+	 * but honor only requests for the given name.
 	 * @param name the name the client is expected to look up
 	 * @param object the object that will be returned
 	 */

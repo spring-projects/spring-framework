@@ -655,7 +655,7 @@ class PathPatternTests {
 		assertMatches(pp,"/");
 		assertMatches(pp,"//");
 
-		// Confirming AntPathMatcher behaviour:
+		// Confirming AntPathMatcher behavior:
 		assertThat(new AntPathMatcher().match("/{foo}", "/")).isFalse();
 		assertThat(new AntPathMatcher().match("/{foo}", "/a")).isTrue();
 		assertThat(new AntPathMatcher().match("/{foo}{bar}", "/a")).isTrue();

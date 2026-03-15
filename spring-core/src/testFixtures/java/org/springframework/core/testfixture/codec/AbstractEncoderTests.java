@@ -187,7 +187,7 @@ public abstract class AbstractEncoderTests<E extends Encoder<?>> extends Abstrac
 	}
 
 	/**
-	 * Test a {@link Encoder#encode encode} scenario where the input stream is canceled.
+	 * Test a {@link Encoder#encode encode} scenario where the input stream is cancelled.
 	 * This test method will feed the first element of the {@code input} stream to the decoder,
 	 * followed by a cancel signal.
 	 * The result is expected to contain one "normal" element.

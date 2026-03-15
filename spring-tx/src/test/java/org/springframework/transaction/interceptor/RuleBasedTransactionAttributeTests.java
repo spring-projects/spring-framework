@@ -58,7 +58,7 @@ class RuleBasedTransactionAttributeTests {
 		assertThat(rta.rollbackOn(new RuntimeException())).isTrue();
 		assertThat(rta.rollbackOn(new MyRuntimeException())).isTrue();
 		assertThat(rta.rollbackOn(new Exception())).isFalse();
-		// Check that default behaviour is overridden
+		// Check that default behavior is overridden
 		assertThat(rta.rollbackOn(new IOException())).isTrue();
 	}
 
@@ -70,10 +70,10 @@ class RuleBasedTransactionAttributeTests {
 		RuleBasedTransactionAttribute rta = new RuleBasedTransactionAttribute(TransactionDefinition.PROPAGATION_REQUIRED, list);
 
 		assertThat(rta.rollbackOn(new RuntimeException())).isTrue();
-		// Check default behaviour is overridden
+		// Check default behavior is overridden
 		assertThat(rta.rollbackOn(new MyRuntimeException())).isFalse();
 		assertThat(rta.rollbackOn(new Exception())).isFalse();
-		// Check that default behaviour is overridden
+		// Check that default behavior is overridden
 		assertThat(rta.rollbackOn(new IOException())).isTrue();
 	}
 
@@ -94,9 +94,9 @@ class RuleBasedTransactionAttributeTests {
 
 	private void doTestRuleForSelectiveRollbackOnChecked(RuleBasedTransactionAttribute rta) {
 		assertThat(rta.rollbackOn(new RuntimeException())).isTrue();
-		// Check default behaviour is overridden
+		// Check default behavior is overridden
 		assertThat(rta.rollbackOn(new Exception())).isFalse();
-		// Check that default behaviour is overridden
+		// Check that default behavior is overridden
 		assertThat(rta.rollbackOn(new RemoteException())).isTrue();
 	}
 
@@ -115,7 +115,7 @@ class RuleBasedTransactionAttributeTests {
 
 		assertThat(rta.rollbackOn(new RuntimeException())).isTrue();
 		assertThat(rta.rollbackOn(new Exception())).isTrue();
-		// Check that default behaviour is overridden
+		// Check that default behavior is overridden
 		assertThat(rta.rollbackOn(new IOException())).isFalse();
 	}
 
