@@ -102,7 +102,7 @@ class ScriptFactoryPostProcessorTests {
 
 		Messenger messenger = (Messenger) ctx.getBean(MESSENGER_BEAN_NAME);
 		assertThat(messenger.getMessage()).isEqualTo(MESSAGE_TEXT);
-		// cool; now let's change the script and check the refresh behaviour...
+		// cool; now let's change the script and check the refresh behavior...
 		pauseToLetRefreshDelayKickIn(DEFAULT_SECONDS_TO_PAUSE);
 		StaticScriptSource source = getScriptSource(ctx);
 		source.setScript(CHANGED_SCRIPT);
@@ -123,7 +123,7 @@ class ScriptFactoryPostProcessorTests {
 
 		Messenger messenger = (Messenger) ctx.getBean(MESSENGER_BEAN_NAME);
 		assertThat(messenger.getMessage()).isEqualTo(MESSAGE_TEXT);
-		// cool; now let's change the script and check the refresh behaviour...
+		// cool; now let's change the script and check the refresh behavior...
 		pauseToLetRefreshDelayKickIn(DEFAULT_SECONDS_TO_PAUSE);
 		StaticScriptSource source = getScriptSource(ctx);
 		source.setScript(CHANGED_SCRIPT);
@@ -147,7 +147,7 @@ class ScriptFactoryPostProcessorTests {
 
 		Messenger messenger = (Messenger) ctx.getBean(MESSENGER_BEAN_NAME);
 		assertThat(messenger.getMessage()).isEqualTo(MESSAGE_TEXT);
-		// cool; now let's change the script and check the refresh behaviour...
+		// cool; now let's change the script and check the refresh behavior...
 		pauseToLetRefreshDelayKickIn(DEFAULT_SECONDS_TO_PAUSE);
 		StaticScriptSource source = getScriptSource(ctx);
 		source.setScript(CHANGED_SCRIPT);
@@ -199,7 +199,7 @@ class ScriptFactoryPostProcessorTests {
 
 		Messenger messenger = (Messenger) ctx.getBean(MESSENGER_BEAN_NAME);
 		assertThat(messenger.getMessage()).isEqualTo(MESSAGE_TEXT);
-		// cool; now let's change the script and check the refresh behaviour...
+		// cool; now let's change the script and check the refresh behavior...
 		pauseToLetRefreshDelayKickIn(DEFAULT_SECONDS_TO_PAUSE);
 		StaticScriptSource source = getScriptSource(ctx);
 		// needs The Sundays compiler; must NOT throw any exception here...

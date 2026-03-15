@@ -120,7 +120,7 @@ final class InstantiationModelAwarePointcutAdvisorImpl
 
 	/**
 	 * The pointcut for Spring AOP to use.
-	 * Actual behaviour of the pointcut will change depending on the state of the advice.
+	 * Actual behavior of the pointcut will change depending on the state of the advice.
 	 */
 	@Override
 	public Pointcut getPointcut() {
@@ -261,7 +261,7 @@ final class InstantiationModelAwarePointcutAdvisorImpl
 
 
 	/**
-	 * Pointcut implementation that changes its behaviour when the advice is instantiated.
+	 * Pointcut implementation that changes its behavior when the advice is instantiated.
 	 * Note that this is a <i>dynamic</i> pointcut; otherwise it might be optimized out
 	 * if it does not at first match statically.
 	 */

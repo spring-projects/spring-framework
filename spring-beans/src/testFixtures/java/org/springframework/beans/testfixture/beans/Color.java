@@ -20,22 +20,8 @@ package org.springframework.beans.testfixture.beans;
  * @author Rob Harrop
  * @author Juergen Hoeller
  */
-public class Colour {
+public enum Color {
 
-	public static final Colour RED = new Colour("RED");
-	public static final Colour BLUE = new Colour("BLUE");
-	public static final Colour GREEN = new Colour("GREEN");
-	public static final Colour PURPLE = new Colour("PURPLE");
-
-	private final String name;
-
-	public Colour(String name) {
-		this.name = name;
-	}
-
-	@Override
-	public String toString() {
-		return this.name;
-	}
+	RED, BLUE, GREEN, PURPLE
 
 }

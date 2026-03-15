@@ -29,7 +29,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 
 /**
- * A {@link BeanPostProcessor} that honours {@link ImportAware} callback using
+ * A {@link BeanPostProcessor} that honors {@link ImportAware} callback using
  * a mapping computed at build time.
  *
  * @author Stephane Nicoll

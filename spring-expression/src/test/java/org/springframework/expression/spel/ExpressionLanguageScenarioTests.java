@@ -243,7 +243,7 @@ class ExpressionLanguageScenarioTests extends AbstractExpressionTests {
 
 
 	/**
-	 * Regardless of the current context object, or root context object, this resolver can tell you what colour a fruit is !
+	 * Regardless of the current context object, or root context object, this resolver can tell you what color a fruit is !
 	 * It only supports property reading, not writing.  To support writing it would need to override canWrite() and write()
 	 */
 	private static class FruitColourAccessor implements PropertyAccessor {
@@ -284,7 +284,7 @@ class ExpressionLanguageScenarioTests extends AbstractExpressionTests {
 
 
 	/**
-	 * Regardless of the current context object, or root context object, this resolver can tell you what colour a vegetable is !
+	 * Regardless of the current context object, or root context object, this resolver can tell you what color a vegetable is !
 	 * It only supports property reading, not writing.
 	 */
 	private static class VegetableColourAccessor implements PropertyAccessor {

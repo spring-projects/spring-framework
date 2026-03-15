@@ -27,7 +27,7 @@ import jakarta.servlet.jsp.tagext.Tag;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.propertyeditors.StringArrayPropertyEditor;
-import org.springframework.beans.testfixture.beans.Colour;
+import org.springframework.beans.testfixture.beans.Color;
 import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
@@ -482,7 +482,7 @@ class OptionTagTests extends AbstractHtmlElementTagTests {
 	protected void extendRequest(MockHttpServletRequest request) {
 		TestBean bean = new TestBean();
 		bean.setName("foo");
-		bean.setFavouriteColour(Colour.GREEN);
+		bean.setFavouriteColor(Color.GREEN);
 		bean.setStringArray(ARRAY);
 		bean.setSpouse(new TestBean("Sally"));
 		bean.setSomeNumber(Float.valueOf("12.34"));

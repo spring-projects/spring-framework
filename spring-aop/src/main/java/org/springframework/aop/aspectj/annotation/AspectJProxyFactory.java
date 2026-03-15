@@ -83,7 +83,7 @@ public class AspectJProxyFactory extends ProxyCreatorSupport {
 
 	/**
 	 * Add the supplied aspect instance to the chain. The type of the aspect instance
-	 * supplied must be a singleton aspect. True singleton lifecycle is not honoured when
+	 * supplied must be a singleton aspect. True singleton lifecycle is not honored when
 	 * using this method - the caller is responsible for managing the lifecycle of any
 	 * aspects added in this way.
 	 * @param aspectInstance the AspectJ aspect instance

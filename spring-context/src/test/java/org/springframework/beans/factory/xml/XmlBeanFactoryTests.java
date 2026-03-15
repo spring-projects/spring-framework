@@ -1321,7 +1321,7 @@ class XmlBeanFactoryTests {
 		assertThat(dave2.getName()).isEqualTo("David");
 		assertThat(dave2).isSameAs(dave1);
 
-		// Check unadvised behaviour
+		// Check unadvised behavior
 		String str = "woierowijeiowiej";
 		assertThat(oom.echo(str)).isEqualTo(str);
 

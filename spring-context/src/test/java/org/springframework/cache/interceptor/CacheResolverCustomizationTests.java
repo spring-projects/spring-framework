@@ -47,7 +47,7 @@ import static org.springframework.context.testfixture.cache.CacheTestUtils.asser
 import static org.springframework.context.testfixture.cache.CacheTestUtils.assertCacheMiss;
 
 /**
- * Provides various {@link CacheResolver} customisations scenario
+ * Provides various {@link CacheResolver} customizations scenario
  *
  * @author Stephane Nicoll
  * @since 4.1

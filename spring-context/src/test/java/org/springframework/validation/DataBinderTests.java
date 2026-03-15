@@ -718,19 +718,19 @@ class DataBinderTests {
 	void bindingWithDisallowedFields() throws BindException {
 		TestBean rod = new TestBean();
 		DataBinder binder = new DataBinder(rod);
-		binder.setDisallowedFields(" ", "\t", "favouriteColour", null, "age");
+		binder.setDisallowedFields(" ", "\t", "favoriteColor", null, "age");
 		MutablePropertyValues pvs = new MutablePropertyValues();
 		pvs.add("name", "Rod");
 		pvs.add("age", "32x");
-		pvs.add("favouriteColour", "BLUE");
+		pvs.add("favoriteColor", "BLUE");
 
 		binder.bind(pvs);
 		binder.close();
 
 		assertThat(rod.getName()).as("changed name correctly").isEqualTo("Rod");
 		assertThat(rod.getAge()).as("did not change age").isZero();
-		assertThat(rod.getFavouriteColour()).as("did not change favourite colour").isNull();
-		assertThat(binder.getBindingResult().getSuppressedFields()).containsExactlyInAnyOrder("age", "favouriteColour");
+		assertThat(rod.getFavoriteColor()).as("did not change favorite color").isNull();
+		assertThat(binder.getBindingResult().getSuppressedFields()).containsExactlyInAnyOrder("age", "favoriteColor");
 	}
 
 	@Test
