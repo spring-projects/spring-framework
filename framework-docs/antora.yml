@@ -31,7 +31,7 @@ asciidoc:
     spring-org: 'spring-projects'
     spring-github-org: "https://github.com/{spring-org}"
     spring-framework-github: "https://github.com/{spring-org}/spring-framework"
-    spring-framework-code: '{spring-framework-github}/tree/main'
+    spring-framework-code: '{spring-framework-github}/tree/7.0.x'
     spring-framework-issues: '{spring-framework-github}/issues'
     spring-framework-wiki: '{spring-framework-github}/wiki'
     # Docs
