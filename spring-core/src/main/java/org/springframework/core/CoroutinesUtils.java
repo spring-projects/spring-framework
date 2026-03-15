@@ -134,7 +134,7 @@ public abstract class CoroutinesUtils {
 								Object arg = args[index];
 								if (!(parameter.isOptional() && arg == null)) {
 									KType type = parameter.getType();
-									if (!(type.isMarkedNullable() && arg == null) &&
+									if (!type.isMarkedNullable() &&
 											type.getClassifier() instanceof KClass<?> kClass &&
 											KotlinDetector.isInlineClass(JvmClassMappingKt.getJavaClass(kClass))) {
 										arg = box(kClass, arg);
@@ -166,7 +166,7 @@ public abstract class CoroutinesUtils {
 	private static Object box(KClass<?> kClass, @Nullable Object arg) {
 		KFunction<?> constructor = Objects.requireNonNull(KClasses.getPrimaryConstructor(kClass));
 		KType type = constructor.getParameters().get(0).getType();
-		if (!(type.isMarkedNullable() && arg == null) &&
+		if (!type.isMarkedNullable() &&
 				type.getClassifier() instanceof KClass<?> parameterClass &&
 				KotlinDetector.isInlineClass(JvmClassMappingKt.getJavaClass(parameterClass))) {
 			arg = box(parameterClass, arg);
