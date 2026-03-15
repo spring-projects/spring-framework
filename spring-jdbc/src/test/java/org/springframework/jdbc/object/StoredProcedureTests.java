@@ -318,7 +318,7 @@ class StoredProcedureTests {
 		List<Object> rs2 = (List<Object>) res.get("#result-set-2");
 		assertThat(rs2).hasSize(1);
 		Object o2 = rs2.get(0);
-		assertThat(o2).as("wron type returned for result set 2").isInstanceOf(Map.class);
+		assertThat(o2).as("wrong type returned for result set 2").isInstanceOf(Map.class);
 		Map<String, String> m2 = (Map<String, String>) o2;
 		assertThat(m2.get("spam")).isEqualTo("Spam");
 		assertThat(m2.get("eggs")).isEqualTo("Eggs");

@@ -274,7 +274,7 @@ Kotlin::
 Next, you can provide the information for the candidate bean definitions. You can add
 `<qualifier/>` tags as sub-elements of the `<bean/>` tag and then specify the `type` and
 `value` to match your custom qualifier annotations. The type is matched against the
-fully-qualified class name of the annotation. Alternately, as a convenience if no risk of
+fully-qualified class name of the annotation. Alternatively, as a convenience if no risk of
 conflicting names exists, you can use the short class name. The following example
 demonstrates both approaches:
 

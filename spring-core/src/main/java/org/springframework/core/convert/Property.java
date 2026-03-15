@@ -162,7 +162,7 @@ public final class Property {
 			return StringUtils.uncapitalize(this.writeMethod.getName().substring(index));
 		}
 		else {
-			throw new IllegalStateException("Property is neither readable nor writeable");
+			throw new IllegalStateException("Property is neither readable nor writable");
 		}
 	}
 
@@ -171,7 +171,7 @@ public final class Property {
 		MethodParameter write = resolveWriteMethodParameter();
 		if (write == null) {
 			if (read == null) {
-				throw new IllegalStateException("Property is neither readable nor writeable");
+				throw new IllegalStateException("Property is neither readable nor writable");
 			}
 			return read;
 		}

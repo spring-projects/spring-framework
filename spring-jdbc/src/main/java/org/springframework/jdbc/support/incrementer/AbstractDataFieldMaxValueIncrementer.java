@@ -42,7 +42,7 @@ public abstract class AbstractDataFieldMaxValueIncrementer implements DataFieldM
 	@Nullable
 	private String incrementerName;
 
-	/** The length to which a string result should be pre-pended with zeroes. */
+	/** The length to which a string result should be prepended with zeroes. */
 	protected int paddingLength = 0;
 
 
@@ -99,7 +99,7 @@ public abstract class AbstractDataFieldMaxValueIncrementer implements DataFieldM
 
 	/**
 	 * Set the padding length, i.e. the length to which a string result
-	 * should be pre-pended with zeroes.
+	 * should be prepended with zeroes.
 	 */
 	public void setPaddingLength(int paddingLength) {
 		this.paddingLength = paddingLength;

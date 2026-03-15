@@ -256,7 +256,7 @@ class GenericConversionServiceTests {
 	void interfaceToString() {
 		conversionService.addConverter(new MyBaseInterfaceToStringConverter());
 		conversionService.addConverter(new ObjectToStringConverter());
-		Object converted = conversionService.convert(new MyInterfaceImplementer(), String.class);
+		Object converted = conversionService.convert(new MyInterfaceImplementor(), String.class);
 		assertThat(converted).isEqualTo("RESULT");
 	}
 
@@ -264,7 +264,7 @@ class GenericConversionServiceTests {
 	void interfaceArrayToStringArray() {
 		conversionService.addConverter(new MyBaseInterfaceToStringConverter());
 		conversionService.addConverter(new ArrayToArrayConverter(conversionService));
-		String[] converted = conversionService.convert(new MyInterface[] {new MyInterfaceImplementer()}, String[].class);
+		String[] converted = conversionService.convert(new MyInterface[] {new MyInterfaceImplementor()}, String[].class);
 		assertThat(converted[0]).isEqualTo("RESULT");
 	}
 
@@ -272,7 +272,7 @@ class GenericConversionServiceTests {
 	void objectArrayToStringArray() {
 		conversionService.addConverter(new MyBaseInterfaceToStringConverter());
 		conversionService.addConverter(new ArrayToArrayConverter(conversionService));
-		String[] converted = conversionService.convert(new MyInterfaceImplementer[] {new MyInterfaceImplementer()}, String[].class);
+		String[] converted = conversionService.convert(new MyInterfaceImplementor[] {new MyInterfaceImplementor()}, String[].class);
 		assertThat(converted[0]).isEqualTo("RESULT");
 	}
 
@@ -631,7 +631,7 @@ class GenericConversionServiceTests {
 	}
 
 
-	private static class MyInterfaceImplementer implements MyInterface {
+	private static class MyInterfaceImplementor implements MyInterface {
 	}
 
 

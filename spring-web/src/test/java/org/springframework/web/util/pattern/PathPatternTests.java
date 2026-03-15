@@ -843,10 +843,10 @@ class PathPatternTests {
 				parse("/hotels/{hotel}/booking"))).isEqualTo(1);
 
 		assertThat(comparator.compare(
-				parse("/hotels/{hotel}/bookings/{booking}/cutomers/{customer}"),
+				parse("/hotels/{hotel}/bookings/{booking}/customers/{customer}"),
 				parse("/**"))).isEqualTo(-1);
 		assertThat(comparator.compare(parse("/**"),
-				parse("/hotels/{hotel}/bookings/{booking}/cutomers/{customer}"))).isEqualTo(1);
+				parse("/hotels/{hotel}/bookings/{booking}/customers/{customer}"))).isEqualTo(1);
 		assertThat(comparator.compare(parse("/**"), parse("/**"))).isEqualTo(0);
 
 		assertThat(comparator.compare(parse("/hotels/{hotel}"), parse("/hotels/*"))).isEqualTo(-1);
@@ -855,16 +855,16 @@ class PathPatternTests {
 		assertThat(comparator.compare(parse("/hotels/*"), parse("/hotels/*/**"))).isEqualTo(-1);
 		assertThat(comparator.compare(parse("/hotels/*/**"), parse("/hotels/*"))).isEqualTo(1);
 
-// TODO: shouldn't the wildcard lower the score?
-//		assertEquals(-1,
-//				comparator.compare(parse("/hotels/new"), parse("/hotels/new.*")));
+		// TODO: shouldn't the wildcard lower the score?
+		// assertEquals(-1,
+		//		comparator.compare(parse("/hotels/new"), parse("/hotels/new.*")));
 
 		// SPR-6741
 		assertThat(comparator.compare(
 				parse("/hotels/{hotel}/bookings/{booking}/cutomers/{customer}"),
 				parse("/hotels/**"))).isEqualTo(-1);
 		assertThat(comparator.compare(parse("/hotels/**"),
-				parse("/hotels/{hotel}/bookings/{booking}/cutomers/{customer}"))).isEqualTo(1);
+				parse("/hotels/{hotel}/bookings/{booking}/customers/{customer}"))).isEqualTo(1);
 		assertThat(comparator.compare(parse("/hotels/foo/bar/**"),
 				parse("/hotels/{hotel}"))).isEqualTo(1);
 		assertThat(comparator.compare(parse("/hotels/{hotel}"),
