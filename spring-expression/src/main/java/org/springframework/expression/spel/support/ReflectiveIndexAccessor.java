@@ -45,7 +45,7 @@ import org.springframework.util.ReflectionUtils;
  *
  * <p>{@code ReflectiveIndexAccessor} also implements {@link CompilableIndexAccessor}
  * in order to support compilation to bytecode for read access. Note, however,
- * that the configured read-method must be invokable via a public class or public
+ * that the configured read-method must be invocable via a public class or public
  * interface for compilation to succeed.
  *
  * <h3>Example</h3>

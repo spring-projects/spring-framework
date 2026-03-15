@@ -347,10 +347,10 @@ recognized and used as the `PropertyEditor` for `Something`-typed properties.
 [literal,subs="verbatim,quotes"]
 ----
 com
-  chank
-    pop
-      Something
-      SomethingEditor // the PropertyEditor for the Something class
+└── example
+    └── things
+        ├── *Something*
+        └── *SomethingEditor* // the PropertyEditor for the Something class
 ----
 
 Note that you can also use the standard `BeanInfo` JavaBeans mechanism here as well
@@ -362,10 +362,10 @@ following example uses the `BeanInfo` mechanism to explicitly register one or mo
 [literal,subs="verbatim,quotes"]
 ----
 com
-  chank
-    pop
-      Something
-      SomethingBeanInfo // the BeanInfo for the Something class
+└── example
+    └── things
+        ├── *Something*
+        └── *SomethingBeanInfo* // the BeanInfo for the Something class
 ----
 
 The following Java source code for the referenced `SomethingBeanInfo` class

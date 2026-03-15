@@ -655,7 +655,7 @@ class PathPatternTests {
 		assertMatches(pp,"/");
 		assertMatches(pp,"//");
 
-		// Confirming AntPathMatcher behaviour:
+		// Confirming AntPathMatcher behavior:
 		assertThat(new AntPathMatcher().match("/{foo}", "/")).isFalse();
 		assertThat(new AntPathMatcher().match("/{foo}", "/a")).isTrue();
 		assertThat(new AntPathMatcher().match("/{foo}{bar}", "/a")).isTrue();
@@ -843,10 +843,10 @@ class PathPatternTests {
 				parse("/hotels/{hotel}/booking"))).isEqualTo(1);
 
 		assertThat(comparator.compare(
-						parse("/hotels/{hotel}/bookings/{booking}/cutomers/{customer}"),
+						parse("/hotels/{hotel}/bookings/{booking}/customers/{customer}"),
 						parse("/**"))).isEqualTo(-1);
 		assertThat(comparator.compare(parse("/**"),
-				parse("/hotels/{hotel}/bookings/{booking}/cutomers/{customer}"))).isEqualTo(1);
+				parse("/hotels/{hotel}/bookings/{booking}/customers/{customer}"))).isEqualTo(1);
 		assertThat(comparator.compare(parse("/**"), parse("/**"))).isEqualTo(0);
 
 		assertThat(comparator.compare(parse("/hotels/{hotel}"), parse("/hotels/*"))).isEqualTo(-1);
@@ -861,10 +861,10 @@ class PathPatternTests {
 
 		// SPR-6741
 		assertThat(comparator.compare(
-						parse("/hotels/{hotel}/bookings/{booking}/cutomers/{customer}"),
+						parse("/hotels/{hotel}/bookings/{booking}/customers/{customer}"),
 						parse("/hotels/**"))).isEqualTo(-1);
 		assertThat(comparator.compare(parse("/hotels/**"),
-				parse("/hotels/{hotel}/bookings/{booking}/cutomers/{customer}"))).isEqualTo(1);
+				parse("/hotels/{hotel}/bookings/{booking}/customers/{customer}"))).isEqualTo(1);
 		assertThat(comparator.compare(parse("/hotels/foo/bar/**"),
 				parse("/hotels/{hotel}"))).isEqualTo(1);
 		assertThat(comparator.compare(parse("/hotels/{hotel}"),

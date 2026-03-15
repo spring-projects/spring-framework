@@ -113,7 +113,7 @@ public class MimeMessageHelper {
 
 	/**
 	 * Constant indicating a multipart message with a single root multipart
-	 * element of type "mixed". Texts, inline elements and attachements
+	 * element of type "mixed". Texts, inline elements and attachments
 	 * will all get added to that root element.
 	 * <p>This was Spring 1.0's default behavior. It is known to work properly
 	 * on Outlook. However, other mail clients tend to misinterpret inline
@@ -123,7 +123,7 @@ public class MimeMessageHelper {
 
 	/**
 	 * Constant indicating a multipart message with a single root multipart
-	 * element of type "related". Texts, inline elements and attachements
+	 * element of type "related". Texts, inline elements and attachments
 	 * will all get added to that root element.
 	 * <p>This was the default behavior from Spring 1.1 up to 1.2 final.
 	 * This is the "Microsoft multipart mode", as natively sent by Outlook.

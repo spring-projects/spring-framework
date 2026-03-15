@@ -36,7 +36,7 @@ import org.springframework.beans.factory.parsing.BeanDefinitionParsingException;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
-import org.springframework.beans.testfixture.beans.Colour;
+import org.springframework.beans.testfixture.beans.Color;
 import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -67,8 +67,8 @@ class AutowiredConfigurationTests {
 		ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(
 				AutowiredConfigurationTests.class.getSimpleName() + ".xml", AutowiredConfigurationTests.class);
 
-		assertThat(context.getBean("colour", Colour.class)).isEqualTo(Colour.RED);
-		assertThat(context.getBean("testBean", TestBean.class).getName()).isEqualTo(Colour.RED.toString());
+		assertThat(context.getBean("color", Color.class)).isEqualTo(Color.RED);
+		assertThat(context.getBean("testBean", TestBean.class).getName()).isEqualTo(Color.RED.toString());
 		context.close();
 	}
 
@@ -77,7 +77,7 @@ class AutowiredConfigurationTests {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(
 				AutowiredMethodConfig.class, ColorConfig.class);
 
-		assertThat(context.getBean(Colour.class)).isEqualTo(Colour.RED);
+		assertThat(context.getBean(Color.class)).isEqualTo(Color.RED);
 		assertThat(context.getBean(TestBean.class).getName()).isEqualTo("RED-RED");
 		context.close();
 	}
@@ -87,7 +87,7 @@ class AutowiredConfigurationTests {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(
 				OptionalAutowiredMethodConfig.class, ColorConfig.class);
 
-		assertThat(context.getBean(Colour.class)).isEqualTo(Colour.RED);
+		assertThat(context.getBean(Color.class)).isEqualTo(Color.RED);
 		assertThat(context.getBean(TestBean.class).getName()).isEqualTo("RED-RED");
 		context.close();
 	}
@@ -97,7 +97,7 @@ class AutowiredConfigurationTests {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(
 				OptionalAutowiredMethodConfig.class);
 
-		assertThat(context.getBeansOfType(Colour.class)).isEmpty();
+		assertThat(context.getBeansOfType(Color.class)).isEmpty();
 		assertThat(context.getBean(TestBean.class).getName()).isEmpty();
 		context.close();
 	}
@@ -107,7 +107,7 @@ class AutowiredConfigurationTests {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(
 				QualifiedAutowiredMethodConfig.class);
 
-		assertThat(context.getBeansOfType(Colour.class)).isEmpty();
+		assertThat(context.getBeansOfType(Color.class)).isEmpty();
 		assertThat(context.getBean(TestBean.class).getName()).isEmpty();
 		context.close();
 	}
@@ -121,7 +121,7 @@ class AutowiredConfigurationTests {
 		ctx.registerBeanDefinition("config1", new RootBeanDefinition(AutowiredConstructorConfig.class));
 		ctx.registerBeanDefinition("config2", new RootBeanDefinition(ColorConfig.class));
 		ctx.refresh();
-		assertThat(ctx.getBean(Colour.class)).isSameAs(ctx.getBean(AutowiredConstructorConfig.class).colour);
+		assertThat(ctx.getBean(Color.class)).isSameAs(ctx.getBean(AutowiredConstructorConfig.class).color);
 		ctx.close();
 	}
 
@@ -134,7 +134,7 @@ class AutowiredConfigurationTests {
 		ctx.registerBeanDefinition("config1", new RootBeanDefinition(ObjectFactoryConstructorConfig.class));
 		ctx.registerBeanDefinition("config2", new RootBeanDefinition(ColorConfig.class));
 		ctx.refresh();
-		assertThat(ctx.getBean(Colour.class)).isSameAs(ctx.getBean(ObjectFactoryConstructorConfig.class).colour);
+		assertThat(ctx.getBean(Color.class)).isSameAs(ctx.getBean(ObjectFactoryConstructorConfig.class).color);
 		ctx.close();
 	}
 
@@ -147,7 +147,7 @@ class AutowiredConfigurationTests {
 		ctx.registerBeanDefinition("config1", new RootBeanDefinition(MultipleConstructorConfig.class));
 		ctx.registerBeanDefinition("config2", new RootBeanDefinition(ColorConfig.class));
 		ctx.refresh();
-		assertThat(ctx.getBean(Colour.class)).isSameAs(ctx.getBean(MultipleConstructorConfig.class).colour);
+		assertThat(ctx.getBean(Color.class)).isSameAs(ctx.getBean(MultipleConstructorConfig.class).color);
 		ctx.close();
 	}
 
@@ -275,11 +275,11 @@ class AutowiredConfigurationTests {
 	static class AutowiredConfig {
 
 		@Autowired
-		private Colour colour;
+		private Color color;
 
 		@Bean
 		public TestBean testBean() {
-			return new TestBean(colour.toString());
+			return new TestBean(color.toString());
 		}
 	}
 
@@ -288,8 +288,8 @@ class AutowiredConfigurationTests {
 	static class AutowiredMethodConfig {
 
 		@Bean
-		public TestBean testBean(Colour colour, List<Colour> colours) {
-			return new TestBean(colour.toString() + "-" + colours.get(0).toString());
+		public TestBean testBean(Color color, List<Color> colors) {
+			return new TestBean(color.toString() + "-" + colors.get(0).toString());
 		}
 	}
 
@@ -298,12 +298,12 @@ class AutowiredConfigurationTests {
 	static class OptionalAutowiredMethodConfig {
 
 		@Bean
-		public TestBean testBean(Optional<Colour> colour, Optional<List<Colour>> colours) {
-			if (colour.isEmpty() && colours.isEmpty()) {
+		public TestBean testBean(Optional<Color> color, Optional<List<Color>> colors) {
+			if (color.isEmpty() && colors.isEmpty()) {
 				return new TestBean("");
 			}
 			else {
-				return new TestBean(colour.get() + "-" + colours.get().get(0).toString());
+				return new TestBean(color.get() + "-" + colors.get().get(0).toString());
 			}
 		}
 	}
@@ -314,9 +314,9 @@ class AutowiredConfigurationTests {
 
 		@Bean
 		@Qualifier("testBean")
-		public TestBean testBean(Optional<Colour> colour, Optional<List<Colour>> colours) {
-			if (!colour.isEmpty() || !colours.isEmpty()) {
-				throw new IllegalStateException("Unexpected match: " + colour + " " + colours);
+		public TestBean testBean(Optional<Color> color, Optional<List<Color>> colors) {
+			if (!color.isEmpty() || !colors.isEmpty()) {
+				throw new IllegalStateException("Unexpected match: " + color + " " + colors);
 			}
 			return new TestBean("");
 		}
@@ -331,11 +331,11 @@ class AutowiredConfigurationTests {
 	@Configuration
 	static class AutowiredConstructorConfig {
 
-		Colour colour;
+		Color color;
 
 		// @Autowired
-		AutowiredConstructorConfig(Colour colour) {
-			this.colour = colour;
+		AutowiredConstructorConfig(Color color) {
+			this.color = color;
 		}
 	}
 
@@ -343,11 +343,11 @@ class AutowiredConfigurationTests {
 	@Configuration
 	static class ObjectFactoryConstructorConfig {
 
-		Colour colour;
+		Color color;
 
 		// @Autowired
-		ObjectFactoryConstructorConfig(ObjectFactory<Colour> colourFactory) {
-			this.colour = colourFactory.getObject();
+		ObjectFactoryConstructorConfig(ObjectFactory<Color> colorFactory) {
+			this.color = colorFactory.getObject();
 		}
 	}
 
@@ -355,15 +355,15 @@ class AutowiredConfigurationTests {
 	@Configuration
 	static class MultipleConstructorConfig {
 
-		Colour colour;
+		Color color;
 
 		@Autowired
-		MultipleConstructorConfig(Colour colour) {
-			this.colour = colour;
+		MultipleConstructorConfig(Color color) {
+			this.color = color;
 		}
 
 		MultipleConstructorConfig(String test) {
-			this.colour = new Colour(test);
+			this.color = Color.BLUE;
 		}
 	}
 
@@ -372,8 +372,8 @@ class AutowiredConfigurationTests {
 	static class ColorConfig {
 
 		@Bean
-		public Colour colour() {
-			return Colour.RED;
+		public Color color() {
+			return Color.RED;
 		}
 	}
 

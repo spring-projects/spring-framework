@@ -206,7 +206,7 @@ import org.springframework.core.annotation.AliasFor;
  * ({@code BPP}) types. Because {@code BPP} objects must be instantiated early in the container
  * lifecycle, a non-static {@code @Bean} method that returns a {@code BPP} will cause eager
  * initialization of its declaring {@code @Configuration} class, which can make other beans in the
- * {@code @Configuration} class (as well as depencencies of those beans) ineligible for full
+ * {@code @Configuration} class (as well as dependencies of those beans) ineligible for full
  * post-processing. To avoid these lifecycle issues, mark {@code BPP}-returning {@code @Bean}
  * methods as {@code static}. For example:
  *

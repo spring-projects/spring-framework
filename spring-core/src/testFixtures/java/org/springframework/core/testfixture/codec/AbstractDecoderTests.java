@@ -213,7 +213,7 @@ public abstract class AbstractDecoderTests<D extends Decoder<?>> extends Abstrac
 	}
 
 	/**
-	 * Test a {@link Decoder#decode decode} scenario where the input stream is canceled.
+	 * Test a {@link Decoder#decode decode} scenario where the input stream is cancelled.
 	 * This test method will feed the first element of the {@code input} stream to the decoder,
 	 * followed by a cancel signal.
 	 * The result is expected to contain one "normal" element.
@@ -377,7 +377,7 @@ public abstract class AbstractDecoderTests<D extends Decoder<?>> extends Abstrac
 	}
 
 	/**
-	 * Test a {@link Decoder#decodeToMono decode} scenario where the input stream is canceled.
+	 * Test a {@link Decoder#decodeToMono decode} scenario where the input stream is cancelled.
 	 * This test method will immediately cancel the output stream.
 	 *
 	 * @param input the input to be provided to the decoder
