@@ -19,6 +19,6 @@ meta-annotation. If a bootstrapper is not explicitly configured by using
 `WebTestContextBootstrapper` is used, depending on the presence of `@WebAppConfiguration`.
 
 Since the `TestContextBootstrapper` SPI is likely to change in the future (to accommodate
-new requirements), we strongly encourage implementers not to implement this interface
+new requirements), we strongly encourage implementors not to implement this interface
 directly but rather to extend `AbstractTestContextBootstrapper` or one of its concrete
 subclasses instead.

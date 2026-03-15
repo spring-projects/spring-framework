@@ -76,8 +76,8 @@ class HttpHeadersTests {
 	void writableHttpHeadersUnwrapsMultiple() {
 		HttpHeaders originalExchangeHeaders = HttpHeaders.readOnlyHttpHeaders(new HttpHeaders());
 		HttpHeaders firewallHeaders = new HttpHeaders(originalExchangeHeaders);
-		HttpHeaders writeable = new HttpHeaders(firewallHeaders);
-		writeable.setContentType(MediaType.APPLICATION_JSON);
+		HttpHeaders writable = new HttpHeaders(firewallHeaders);
+		writable.setContentType(MediaType.APPLICATION_JSON);
 	}
 
 	@Test

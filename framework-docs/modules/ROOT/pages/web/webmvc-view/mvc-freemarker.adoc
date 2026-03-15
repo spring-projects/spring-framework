@@ -182,7 +182,7 @@ The parameters to any of the above macros have consistent meanings:
   For strictly sorted maps, you can use a `SortedMap` (such as a `TreeMap`) with a
   suitable `Comparator` and, for arbitrary Maps that should return values in insertion
   order, use a `LinkedHashMap` or a `LinkedMap` from `commons-collections`.
-* `separator`: Where multiple options are available as discreet elements (radio buttons
+* `separator`: Where multiple options are available as discrete elements (radio buttons
   or checkboxes), the sequence of characters used to separate each one in the list
   (such as `<br>`).
 * `attributes`: An additional string of arbitrary tags or text to be included within
