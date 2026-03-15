@@ -75,6 +75,7 @@ asciidoc:
     kotlin-issues: 'https://youtrack.jetbrains.com/issue'
     micrometer-docs: 'https://docs.micrometer.io/micrometer/reference'
     micrometer-context-propagation-docs: 'https://docs.micrometer.io/context-propagation/reference'
+    netty-native-transports: 'https://netty.io/wiki/native-transports.html'
     petclinic-github-org: 'https://github.com/spring-petclinic'
     reactive-streams-site: 'https://www.reactive-streams.org'
     reactive-streams-spec: 'https://github.com/reactive-streams/reactive-streams-jvm/blob/master/README.md#specification'
