@@ -25,6 +25,7 @@ import java.lang.annotation.Target;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiFunction;
@@ -101,6 +102,12 @@ class RestClientAdapterTests {
 	@ParameterizedTest
 	@MethodSource("arguments")
 	@interface ParameterizedAdapterTest {
+	}
+
+	public static Stream<Object> wildcardCases() {
+		return Stream.of(
+				(Function<PersonClient, List<? extends Person>>) BaseClient::getListWildcardUpperBound1,
+				(Function<PersonClient, List<? extends Person>>) BaseClient::getListWildcardUpperBound2);
 	}
 
 	public static Stream<Object[]> arguments() throws IOException {
@@ -214,6 +221,15 @@ class RestClientAdapterTests {
 		ResponseEntity<Person> entity = initService(PersonClient.class).getEntity();
 
 		assertThat(entity.getBody().name()).isEqualTo("Karl");
+	}
+
+	@ParameterizedTest
+	@MethodSource("wildcardCases")
+	void getWildcardReturnType(Function<PersonClient, List<? extends Person>> invocation) {
+		PersonClient client = initService(PersonClient.class);
+		prepareResponse(r -> r.setHeader("Content-Type", "application/json").body("[{\"name\":\"Karl\"}]"));
+		List<? extends Person> list = invocation.apply(client);
+		assertThat(list.get(0).name()).isEqualTo("Karl");
 	}
 
 	@ParameterizedAdapterTest
@@ -466,6 +482,12 @@ class RestClientAdapterTests {
 
 		@GetExchange
 		T getBody();
+
+		@GetExchange
+		List<? extends T> getListWildcardUpperBound1();
+
+		@GetExchange
+		List<? extends Person> getListWildcardUpperBound2();
 
 		@GetExchange
 		ResponseEntity<T> getEntity();
