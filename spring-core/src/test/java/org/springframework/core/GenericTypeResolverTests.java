@@ -25,6 +25,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Supplier;
 
 import org.junit.jupiter.api.Test;
@@ -250,6 +251,15 @@ class GenericTypeResolverTests {
 		assertThat(resolvedType).isEqualTo(InheritsDefaultMethod.ConcreteType.class);
 	}
 
+	@Test
+	void resolveTypeFromNestedParameterizedType() {
+		Type resolvedType = resolveType(method(MyInterfaceType.class, "get").getGenericReturnType(), MyCollectionInterfaceType.class);
+		assertThat(resolvedType).isEqualTo(method(MyCollectionInterfaceType.class, "get").getGenericReturnType());
+
+		resolvedType = resolveType(method(MyInterfaceType.class, "get").getGenericReturnType(), MyOptionalInterfaceType.class);
+		assertThat(resolvedType).isEqualTo(method(MyOptionalInterfaceType.class, "get").getGenericReturnType());
+	}
+
 	private static Method method(Class<?> target, String methodName, Class<?>... parameterTypes) {
 		Method method = findMethod(target, methodName, parameterTypes);
 		assertThat(method).describedAs(target.getName() + "#" + methodName).isNotNull();
@@ -258,12 +268,29 @@ class GenericTypeResolverTests {
 
 
 	public interface MyInterfaceType<T> {
+		default T get() {
+			return null;
+		}
 	}
 
 	public class MySimpleInterfaceType implements MyInterfaceType<String> {
 	}
 
+	public class MyParameterizedInterfaceType<P> implements MyInterfaceType<Collection<P>> {
+	}
+
+	public class MyOptionalInterfaceType extends MyParameterizedInterfaceType<Optional<String>> {
+		@Override
+		public Collection<Optional<String>> get() {
+			return super.get();
+		}
+	}
+
 	public class MyCollectionInterfaceType implements MyInterfaceType<Collection<String>> {
+		@Override
+		public Collection<String> get() {
+			return MyInterfaceType.super.get();
+		}
 	}
 
 	public abstract class MyAbstractType<T> implements MyInterfaceType<T> {
