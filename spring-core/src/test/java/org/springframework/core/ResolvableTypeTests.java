@@ -42,10 +42,13 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.concurrent.Callable;
+import java.util.stream.Stream;
 
 import org.assertj.core.api.AbstractAssert;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -1601,6 +1604,31 @@ class ResolvableTypeTests {
 		assertThat(typeWithGenerics.isAssignableFrom(PaymentCreator.class)).isTrue();
 	}
 
+	@ParameterizedTest
+	@MethodSource("wildcardInfo")
+	void gh36474(ResolvableType typeVariable, Class<?> resolved) {
+		assertThat(typeVariable.resolve()).isEqualTo(resolved);
+	}
+
+
+	static Stream<Object[]> wildcardInfo() throws Exception {
+		WildcardType listxs = getWildcardType(AssignmentBase.class, "listxs");
+		WildcardType listsc = getWildcardType(AssignmentBase.class, "listsc");
+		ResolvableType owner = ResolvableType.forType(Assignment.class).as(AssignmentBase.class);
+
+		ResolvableType lbWildcard = ResolvableType.forWildCardTypeWithUpperBound(
+				listxs, ResolvableType.forType(listxs.getUpperBounds()[0], owner));
+		ResolvableType ubWildcard = ResolvableType.forWildCardTypeWithLowerBound(
+				listsc, ResolvableType.forType(listsc.getLowerBounds()[0], owner));
+		return Stream.of(new Object[] {lbWildcard, String.class}, new Object[] {ubWildcard, CharSequence.class});
+	}
+
+
+	static WildcardType getWildcardType(Class<?> cls, String field) throws Exception {
+		ResolvableType type = ResolvableType.forField(cls.getField(field));
+		return (WildcardType) type.getGeneric(0).getType();
+	}
+
 
 	private ResolvableType testSerialization(ResolvableType type) throws Exception {
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -1631,13 +1659,13 @@ class ResolvableTypeTests {
 	@SuppressWarnings("unused")
 	private HashMap<Integer, List<String>> myMap;
 
-
 	@SuppressWarnings("serial")
 	static class ExtendsList extends ArrayList<CharSequence> {
-	}
 
+	}
 	@SuppressWarnings("serial")
 	static class ExtendsMap extends HashMap<String, Integer> {
+
 	}
 
 

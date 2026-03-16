@@ -154,11 +154,8 @@ public final class GenericTypeResolver {
 	public static Type resolveType(Type genericType, @Nullable Class<?> contextClass) {
 		if (contextClass != null) {
 			if (genericType instanceof TypeVariable<?> typeVariable) {
-				ResolvableType resolvedTypeVariable = resolveVariable(
+				ResolvableType resolvedTypeVariable = resolveVariableConsiderBound(
 						typeVariable, ResolvableType.forClass(contextClass));
-				if (resolvedTypeVariable == ResolvableType.NONE) {
-					resolvedTypeVariable = ResolvableType.forVariableBounds(typeVariable);
-				}
 				if (resolvedTypeVariable != ResolvableType.NONE) {
 					Type type = resolvedTypeVariable.getType();
 					if (type instanceof ParameterizedType) {
@@ -179,10 +176,8 @@ public final class GenericTypeResolver {
 					for (int i = 0; i < typeArguments.length; i++) {
 						Type typeArgument = typeArguments[i];
 						if (typeArgument instanceof TypeVariable<?> typeVariable) {
-							ResolvableType resolvedTypeArgument = resolveVariable(typeVariable, contextType);
-							if (resolvedTypeArgument == ResolvableType.NONE) {
-								resolvedTypeArgument = ResolvableType.forVariableBounds(typeVariable);
-							}
+							ResolvableType resolvedTypeArgument = resolveVariableConsiderBound(
+									typeVariable, contextType);
 							if (resolvedTypeArgument != ResolvableType.NONE) {
 								generics[i] = resolvedTypeArgument;
 							}
@@ -190,7 +185,7 @@ public final class GenericTypeResolver {
 								generics[i] = ResolvableType.forType(typeArgument);
 							}
 						}
-						else if (typeArgument instanceof ParameterizedType) {
+						else if (typeArgument instanceof ParameterizedType || typeArgument instanceof WildcardType) {
 							generics[i] = ResolvableType.forType(resolveType(typeArgument, contextClass));
 						}
 						else {
@@ -203,8 +198,37 @@ public final class GenericTypeResolver {
 					}
 				}
 			}
+			else if (genericType instanceof WildcardType wildcardType) {
+				Type[] originalLowerBound = wildcardType.getLowerBounds();
+				Type[] originalUpperBound = wildcardType.getUpperBounds();
+
+				if (originalLowerBound.length == 1) {
+					Type lowerBound = resolveType(originalLowerBound[0], contextClass);
+					if (lowerBound != originalLowerBound[0]) {
+						return ResolvableType.forWildCardTypeWithLowerBound(
+								wildcardType, ResolvableType.forType(lowerBound))
+								.getType();
+					}
+				} else if (originalUpperBound.length == 1) {
+					Type upperBound = resolveType(originalUpperBound[0], contextClass);
+					if (upperBound != originalUpperBound[0]) {
+						return ResolvableType.forWildCardTypeWithUpperBound(
+								wildcardType, ResolvableType.forType(upperBound))
+								.getType();
+					}
+				}
+				return wildcardType;
+			}
 		}
 		return genericType;
+	}
+
+	private static ResolvableType resolveVariableConsiderBound(TypeVariable<?> typeVariable, ResolvableType contextType) {
+		ResolvableType resolvedTypeArgument = resolveVariable(typeVariable, contextType);
+		if (resolvedTypeArgument == ResolvableType.NONE) {
+			resolvedTypeArgument = ResolvableType.forVariableBounds(typeVariable);
+		}
+		return resolvedTypeArgument;
 	}
 
 	private static ResolvableType resolveVariable(TypeVariable<?> typeVariable, ResolvableType contextType) {

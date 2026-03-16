@@ -22,6 +22,7 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,6 +30,8 @@ import java.util.Optional;
 import java.util.function.Supplier;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.core.GenericTypeResolver.getTypeVariableMap;
@@ -251,6 +254,14 @@ class GenericTypeResolverTests {
 		assertThat(resolvedType).isEqualTo(InheritsDefaultMethod.ConcreteType.class);
 	}
 
+	@ParameterizedTest
+	@ValueSource(strings = {"getUpperBound", "getLowerBound"})
+	void resolveTypeFromWildcardType(String methodName) {
+		Type type = method(MyInterfaceType.class, methodName).getGenericReturnType();
+		Type resolvedType = resolveType(type, MySimpleInterfaceType.class);
+		assertThat(resolvedType).isEqualTo(method(MySimpleInterfaceType.class, methodName).getGenericReturnType());
+	}
+
 	@Test
 	void resolveTypeFromNestedParameterizedType() {
 		Type resolvedType = resolveType(method(MyInterfaceType.class, "get").getGenericReturnType(), MyCollectionInterfaceType.class);
@@ -268,12 +279,29 @@ class GenericTypeResolverTests {
 
 
 	public interface MyInterfaceType<T> {
+		default Optional<? extends T> getUpperBound() {
+			return Optional.empty();
+		}
+
+		default List<? super T> getLowerBound() {
+			return Collections.emptyList();
+		}
+
 		default T get() {
 			return null;
 		}
 	}
 
 	public class MySimpleInterfaceType implements MyInterfaceType<String> {
+		@Override
+		public Optional<? extends String> getUpperBound() {
+			return MyInterfaceType.super.getUpperBound();
+		}
+
+		@Override
+		public List<? super String> getLowerBound() {
+			return MyInterfaceType.super.getLowerBound();
+		}
 	}
 
 	public class MyParameterizedInterfaceType<P> implements MyInterfaceType<Collection<P>> {
