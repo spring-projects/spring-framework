@@ -154,7 +154,7 @@ public final class GenericTypeResolver {
 	public static Type resolveType(Type genericType, @Nullable Class<?> contextClass) {
 		if (contextClass != null) {
 			if (genericType instanceof TypeVariable<?> typeVariable) {
-				ResolvableType resolvedTypeVariable = resolveVariableConsiderBound(
+				ResolvableType resolvedTypeVariable = resolveVariableConsiderBounds(
 						typeVariable, ResolvableType.forClass(contextClass));
 				if (resolvedTypeVariable != ResolvableType.NONE) {
 					Type type = resolvedTypeVariable.getType();
@@ -176,7 +176,7 @@ public final class GenericTypeResolver {
 					for (int i = 0; i < typeArguments.length; i++) {
 						Type typeArgument = typeArguments[i];
 						if (typeArgument instanceof TypeVariable<?> typeVariable) {
-							ResolvableType resolvedTypeArgument = resolveVariableConsiderBound(
+							ResolvableType resolvedTypeArgument = resolveVariableConsiderBounds(
 									typeVariable, contextType);
 							if (resolvedTypeArgument != ResolvableType.NONE) {
 								generics[i] = resolvedTypeArgument;
@@ -205,25 +205,25 @@ public final class GenericTypeResolver {
 				if (originalLowerBound.length == 1) {
 					Type lowerBound = resolveType(originalLowerBound[0], contextClass);
 					if (lowerBound != originalLowerBound[0]) {
-						return ResolvableType.forWildCardTypeWithLowerBound(
+						return ResolvableType.forWildcardTypeWithLowerBound(
 								wildcardType, ResolvableType.forType(lowerBound))
 								.getType();
 					}
-				} else if (originalUpperBound.length == 1) {
+				}
+				else if (originalUpperBound.length == 1) {
 					Type upperBound = resolveType(originalUpperBound[0], contextClass);
 					if (upperBound != originalUpperBound[0]) {
-						return ResolvableType.forWildCardTypeWithUpperBound(
+						return ResolvableType.forWildcardTypeWithUpperBound(
 								wildcardType, ResolvableType.forType(upperBound))
 								.getType();
 					}
 				}
-				return wildcardType;
 			}
 		}
 		return genericType;
 	}
 
-	private static ResolvableType resolveVariableConsiderBound(TypeVariable<?> typeVariable, ResolvableType contextType) {
+	private static ResolvableType resolveVariableConsiderBounds(TypeVariable<?> typeVariable, ResolvableType contextType) {
 		ResolvableType resolvedTypeArgument = resolveVariable(typeVariable, contextType);
 		if (resolvedTypeArgument == ResolvableType.NONE) {
 			resolvedTypeArgument = ResolvableType.forVariableBounds(typeVariable);

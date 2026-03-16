@@ -620,6 +620,7 @@ public class ResolvableType implements Serializable {
 		ResolvableType[] generics = getGenerics();
 		for (ResolvableType generic : generics) {
 			if (generic.isUnresolvableTypeVariable() ||
+					generic.isWildcardWithoutBounds() ||
 					generic.isUnresolvableWildcard(currentTypeSeen(alreadySeen)) ||
 					generic.hasUnresolvableGenerics(currentTypeSeen(alreadySeen))) {
 				return true;
@@ -688,7 +689,7 @@ public class ResolvableType implements Serializable {
 
 	/**
 	 * Determine whether the underlying type represents a wildcard
-	 * has unresolvable upper bound or lower bound, or simply without bound
+	 * has unresolvable upper bound or lower bound.
 	 */
 	private boolean isUnresolvableWildcard(Set<Type> alreadySeen) {
 		if (this.type instanceof WildcardType wildcardType) {
@@ -703,7 +704,7 @@ public class ResolvableType implements Serializable {
 				return upperResolvable.isUnresolvableTypeVariable() || upperResolvable.determineUnresolvableGenerics(alreadySeen);
 			}
 		}
-		return isWildcardWithoutBounds();
+		return false;
 	}
 
 	/**
@@ -1212,7 +1213,7 @@ public class ResolvableType implements Serializable {
 	 * @param upperBound the upper bound of the wildcardType
 	 * @return a {@code ResolvableType} for the specific wildcardType and upperBound
 	 */
-	public static ResolvableType forWildCardTypeWithUpperBound(WildcardType wildcardType, ResolvableType upperBound) {
+	public static ResolvableType forWildcardTypeWithUpperBound(WildcardType wildcardType, ResolvableType upperBound) {
 		Assert.notNull(wildcardType, "WildcardType must not be null");
 		Assert.notNull(upperBound, "UpperBound must not be null");
 		Type[] originalLowerBound = wildcardType.getLowerBounds();
@@ -1220,10 +1221,10 @@ public class ResolvableType implements Serializable {
 				() -> "The WildcardType has lower bound while upper bound provided " + wildcardType);
 
 		Type upperBoundType = upperBound.getType();
-		VariableResolver variableResolver = upperBoundType instanceof TypeVariable<?> typeVariable
-				? new TypeVariablesVariableResolver(
-						new TypeVariable<?>[]{typeVariable}, new ResolvableType[]{upperBound})
-				: null;
+		VariableResolver variableResolver = upperBoundType instanceof TypeVariable<?> typeVariable ?
+				new TypeVariablesVariableResolver(
+						new TypeVariable<?>[]{typeVariable}, new ResolvableType[]{upperBound}) :
+				null;
 
 		return forType(new WildcardTypeImpl(new Type[]{upperBoundType}, EMPTY_TYPE_ARRAY), variableResolver);
 	}
@@ -1234,7 +1235,7 @@ public class ResolvableType implements Serializable {
 	 * @param lowerBound the lower bound of the wildcardType
 	 * @return a {@code ResolvableType} for the specific wildcardType and lowerBound
 	 */
-	public static ResolvableType forWildCardTypeWithLowerBound(WildcardType wildcardType, ResolvableType lowerBound) {
+	public static ResolvableType forWildcardTypeWithLowerBound(WildcardType wildcardType, ResolvableType lowerBound) {
 		Assert.notNull(wildcardType, "WildcardType must not be null");
 		Assert.notNull(lowerBound, "LowerBound must not be null");
 		Type[] originalUpperBound = wildcardType.getUpperBounds();
@@ -1243,10 +1244,10 @@ public class ResolvableType implements Serializable {
 						.formatted(originalUpperBound[0], wildcardType));
 
 		Type lowerBoundType = lowerBound.getType();
-		VariableResolver variableResolver = lowerBoundType instanceof TypeVariable<?> typeVariable
-				? new TypeVariablesVariableResolver(
-						new TypeVariable<?>[]{typeVariable}, new ResolvableType[]{lowerBound})
-				: null;
+		VariableResolver variableResolver = lowerBoundType instanceof TypeVariable<?> typeVariable ?
+				new TypeVariablesVariableResolver(
+						new TypeVariable<?>[]{typeVariable}, new ResolvableType[]{lowerBound}) :
+				null;
 
 		return forType(new WildcardTypeImpl(new Type[]{Object.class}, new Type[]{lowerBoundType}), variableResolver);
 	}
@@ -1700,9 +1701,10 @@ public class ResolvableType implements Serializable {
 	}
 
 
-	private static final class WildcardTypeImpl	implements WildcardType, Serializable {
+	private static final class WildcardTypeImpl implements WildcardType, Serializable {
 
 		private final Type[] upperBound;
+
 		private final Type[] lowerBound;
 
 		private WildcardTypeImpl(Type[] upperBound, Type[] lowerBound) {
@@ -1712,12 +1714,12 @@ public class ResolvableType implements Serializable {
 
 		@Override
 		public Type[] getUpperBounds() {
-			return upperBound.clone();
+			return this.upperBound.clone();
 		}
 
 		@Override
 		public Type[] getLowerBounds() {
-			return lowerBound.clone();
+			return this.lowerBound.clone();
 		}
 
 		@Override
@@ -1725,23 +1727,24 @@ public class ResolvableType implements Serializable {
 			if (!(o instanceof WildcardType that)) {
 				return false;
 			}
-			return Arrays.equals(upperBound, that.getUpperBounds()) && Arrays.equals(lowerBound, that.getLowerBounds());
+			return Arrays.equals(this.upperBound, that.getUpperBounds()) &&
+					Arrays.equals(this.lowerBound, that.getLowerBounds());
 		}
 
 		@Override
 		public int hashCode() {
-			return Arrays.hashCode(getLowerBounds()) ^ Arrays.hashCode(getUpperBounds());
+			return Arrays.hashCode(this.lowerBound) ^ Arrays.hashCode(this.upperBound);
 		}
 
 		@Override
 		public String toString() {
-			if (getLowerBounds().length == 1) {
-				return "? super " + typeToString(getLowerBounds()[0]);
+			if (this.lowerBound.length == 1) {
+				return "? super " + typeToString(this.lowerBound[0]);
 			}
-			if (getUpperBounds().length == 0 || getUpperBounds()[0] == Object.class) {
+			if (this.upperBound.length == 0 || this.upperBound[0] == Object.class) {
 				return "?";
 			}
-			return "? extends " + typeToString(getUpperBounds()[0]);
+			return "? extends " + typeToString(this.upperBound[0]);
 		}
 
 		private static String typeToString(Type type) {

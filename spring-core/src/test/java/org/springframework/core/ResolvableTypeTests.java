@@ -1616,9 +1616,9 @@ class ResolvableTypeTests {
 		WildcardType listsc = getWildcardType(AssignmentBase.class, "listsc");
 		ResolvableType owner = ResolvableType.forType(Assignment.class).as(AssignmentBase.class);
 
-		ResolvableType lbWildcard = ResolvableType.forWildCardTypeWithUpperBound(
+		ResolvableType lbWildcard = ResolvableType.forWildcardTypeWithUpperBound(
 				listxs, ResolvableType.forType(listxs.getUpperBounds()[0], owner));
-		ResolvableType ubWildcard = ResolvableType.forWildCardTypeWithLowerBound(
+		ResolvableType ubWildcard = ResolvableType.forWildcardTypeWithLowerBound(
 				listsc, ResolvableType.forType(listsc.getLowerBounds()[0], owner));
 		return Stream.of(new Object[] {lbWildcard, String.class}, new Object[] {ubWildcard, CharSequence.class});
 	}
@@ -1659,13 +1659,13 @@ class ResolvableTypeTests {
 	@SuppressWarnings("unused")
 	private HashMap<Integer, List<String>> myMap;
 
+
 	@SuppressWarnings("serial")
 	static class ExtendsList extends ArrayList<CharSequence> {
-
 	}
+
 	@SuppressWarnings("serial")
 	static class ExtendsMap extends HashMap<String, Integer> {
-
 	}
 
 

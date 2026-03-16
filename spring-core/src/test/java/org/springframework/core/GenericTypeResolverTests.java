@@ -264,10 +264,11 @@ class GenericTypeResolverTests {
 
 	@Test
 	void resolveTypeFromNestedParameterizedType() {
-		Type resolvedType = resolveType(method(MyInterfaceType.class, "get").getGenericReturnType(), MyCollectionInterfaceType.class);
+		Type rawReturnType = method(MyInterfaceType.class, "get").getGenericReturnType();
+		Type resolvedType = resolveType(rawReturnType, MyCollectionInterfaceType.class);
 		assertThat(resolvedType).isEqualTo(method(MyCollectionInterfaceType.class, "get").getGenericReturnType());
 
-		resolvedType = resolveType(method(MyInterfaceType.class, "get").getGenericReturnType(), MyOptionalInterfaceType.class);
+		resolvedType = resolveType(rawReturnType, MyOptionalInterfaceType.class);
 		assertThat(resolvedType).isEqualTo(method(MyOptionalInterfaceType.class, "get").getGenericReturnType());
 	}
 
