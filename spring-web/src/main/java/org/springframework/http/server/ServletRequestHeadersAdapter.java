@@ -16,6 +16,7 @@
 
 package org.springframework.http.server;
 
+import java.nio.charset.Charset;
 import java.util.AbstractSet;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -33,10 +34,13 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.jspecify.annotations.Nullable;
 
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.InvalidMediaTypeException;
+import org.springframework.http.MediaType;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedCaseInsensitiveMap;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.util.StringUtils;
 
 /**
  * {@code MultiValueMap} implementation for wrapping Servlet request headers.
@@ -48,6 +52,12 @@ final class ServletRequestHeadersAdapter implements MultiValueMap<String, String
 
 	private final HttpServletRequest request;
 
+	/**
+	 * Cached Content-Type value with charset appended (lazily computed).
+	 * {@code null} means not yet computed; an empty string means no charset should be appended.
+	 */
+	private @Nullable String cachedContentType;
+
 
 	private ServletRequestHeadersAdapter(HttpServletRequest request) {
 		this.request = request;
@@ -56,6 +66,9 @@ final class ServletRequestHeadersAdapter implements MultiValueMap<String, String
 
 	@Override
 	public @Nullable String getFirst(String key) {
+		if (HttpHeaders.CONTENT_TYPE.equalsIgnoreCase(key)) {
+			return getContentType();
+		}
 		return this.request.getHeader(key);
 	}
 
@@ -126,6 +139,10 @@ final class ServletRequestHeadersAdapter implements MultiValueMap<String, String
 	@Override
 	public @Nullable List<String> get(Object key) {
 		if (key instanceof String headerName) {
+			if (HttpHeaders.CONTENT_TYPE.equalsIgnoreCase(headerName)) {
+				String contentType = getContentType();
+				return (contentType != null ? Collections.singletonList(contentType) : null);
+			}
 			Enumeration<String> values = this.request.getHeaders(headerName);
 			if (values.hasMoreElements()) {
 				String value = values.nextElement();
@@ -176,6 +193,44 @@ final class ServletRequestHeadersAdapter implements MultiValueMap<String, String
 	@Override
 	public Set<Entry<String, List<String>>> entrySet() {
 		throw httpHeadersMapException();
+	}
+
+	/**
+	 * Return the Content-Type header value, appending the charset from
+	 * {@link HttpServletRequest#getCharacterEncoding()} if the Content-Type does not
+	 * already include a {@code charset} parameter and the media type is not
+	 * {@code application/json}.
+	 * <p>The computed value is cached to avoid repeated string building.
+	 */
+	private @Nullable String getContentType() {
+		String stringContentType = this.cachedContentType;
+		if (stringContentType != null) {
+			return stringContentType;
+		}
+
+		stringContentType = this.request.getContentType();
+		try {
+			MediaType contentType = stringContentType != null ? MediaType.parseMediaType(stringContentType) : null;
+			if (contentType != null && contentType.getCharset() == null) {
+				String requestEncoding = this.request.getCharacterEncoding();
+				if (StringUtils.hasLength(requestEncoding)) {
+					Charset charset = Charset.forName(requestEncoding);
+					Map<String, String> params = new LinkedCaseInsensitiveMap<>();
+					params.putAll(contentType.getParameters());
+					if (!MediaType.APPLICATION_JSON.equals(contentType)) {
+						params.put("charset", charset.toString());
+					}
+					MediaType mediaType = new MediaType(contentType.getType(), contentType.getSubtype(), params);
+					stringContentType = mediaType.toString();
+				}
+			}
+		}
+		catch (InvalidMediaTypeException ex) {
+			// Ignore: simply not exposing an invalid content type in HttpHeaders...
+		}
+
+		this.cachedContentType = stringContentType;
+		return stringContentType;
 	}
 
 	private static UnsupportedOperationException immutableRequestException() {

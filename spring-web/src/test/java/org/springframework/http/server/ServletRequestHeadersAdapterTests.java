@@ -18,6 +18,7 @@ package org.springframework.http.server;
 
 import org.junit.jupiter.api.Test;
 
+import org.springframework.http.HttpHeaders;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 
@@ -44,4 +45,38 @@ public class ServletRequestHeadersAdapterTests {
 		assertThat(headersAdapter.get("foo")).containsExactly("override value");
 	}
 
+	@Test // gh-36426
+	void contentTypeCharsetAppendedForTextType() {
+		request.setContentType("text/plain");
+		request.setCharacterEncoding("UTF-8");
+
+		assertThat(headersAdapter.getFirst(HttpHeaders.CONTENT_TYPE)).isEqualTo("text/plain;charset=UTF-8");
+		assertThat(headersAdapter.get(HttpHeaders.CONTENT_TYPE)).containsExactly("text/plain;charset=UTF-8");
+	}
+
+	@Test // gh-36426
+	void contentTypeCharsetNotAppendedForApplicationJson() {
+		request.setContentType("application/json");
+		request.setCharacterEncoding("UTF-8");
+
+		assertThat(headersAdapter.getFirst(HttpHeaders.CONTENT_TYPE)).isEqualTo("application/json");
+		assertThat(headersAdapter.get(HttpHeaders.CONTENT_TYPE)).containsExactly("application/json");
+	}
+
+	@Test // gh-36426
+	void contentTypeCharsetNotAppendedWhenAlreadyPresent() {
+		request.setContentType("text/plain;charset=ISO-8859-1");
+		request.setCharacterEncoding("UTF-8");
+
+		assertThat(headersAdapter.getFirst(HttpHeaders.CONTENT_TYPE)).isEqualTo("text/plain;charset=ISO-8859-1");
+		assertThat(headersAdapter.get(HttpHeaders.CONTENT_TYPE)).containsExactly("text/plain;charset=ISO-8859-1");
+	}
+
+	@Test // gh-36426
+	void contentTypeCharsetNotAppendedWhenNoEncoding() {
+		request.setContentType("text/plain");
+
+		assertThat(headersAdapter.getFirst(HttpHeaders.CONTENT_TYPE)).isEqualTo("text/plain");
+		assertThat(headersAdapter.get(HttpHeaders.CONTENT_TYPE)).containsExactly("text/plain");
+	}
 }
