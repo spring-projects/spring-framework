@@ -110,6 +110,12 @@ class AssertTests {
 	}
 
 	@Test
+	void isNullWithNonNullObject() {
+		assertThatIllegalArgumentException().isThrownBy(() -> Assert.isNull("foo", "Bla"))
+				.withMessage("Bla");
+	}
+
+	@Test
 	void isNullWithMessageSupplier() {
 		Assert.isNull(null, () -> "enigma");
 	}

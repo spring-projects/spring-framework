@@ -81,7 +81,7 @@ class ExponentialBackOffTests {
 	}
 
 	@Test
-	void maxAttemptsReached() {
+	void maxElapsedTimeReached() {
 		ExponentialBackOff backOff = new ExponentialBackOff(2000L, 2.0);
 		backOff.setMaxElapsedTime(4000L);
 
@@ -160,6 +160,51 @@ class ExponentialBackOffTests {
 		BackOffExecution execution = backOff.start();
 		IntStream.range(0, 7).forEach(i -> delays.add(execution.nextBackOff()));
 		assertThat(delays).containsExactly(1000L, 2000L, 4000L, 8000L, 10000L, 10000L, BackOffExecution.STOP);
+	}
+
+	@Test
+	void withJitter_ThenJitterIsApplied() {
+		// GIVEN
+		ExponentialBackOff backOff = new ExponentialBackOff();
+		backOff.setInitialInterval(1000L);
+		backOff.setJitter(100L);
+		backOff.setMaxInterval(20000L);
+		backOff.setMultiplier(2.0);
+
+		BackOffExecution execution = backOff.start();
+
+		// WHEN
+		List<Long> delays = IntStream.range(0, 7).mapToObj(i -> execution.nextBackOff()).toList();
+
+		// THEN
+		assertThat(delays).hasSize(7);
+		assertThat(delays)
+				.withFailMessage("Jitter was not applied")
+				.isNotEqualTo(List.of(1000L, 2000L, 4000L, 8000L, 16000L, 20000L, 20000L));
+	}
+
+	@Test
+	void withJitter_ThenDelaysStayInExpectedRanges() {
+		// GIVEN
+		ExponentialBackOff backOff = new ExponentialBackOff();
+		backOff.setInitialInterval(1000L);
+		backOff.setJitter(100L); // 10% of initial interval
+		backOff.setMaxInterval(20000L);
+		backOff.setMultiplier(2.0);
+
+		BackOffExecution execution = backOff.start();
+
+		// WHEN
+		List<Long> delays = IntStream.range(0, 7).mapToObj(i -> execution.nextBackOff()).toList();
+
+		// THEN
+		assertThat(delays.get(0)).isBetween(1000L, 1100L); 		// 1000  +   10% (never below initial interval)
+		assertThat(delays.get(1)).isBetween(1800L, 2200L); 		// 2000  +/- 10%
+		assertThat(delays.get(2)).isBetween(3600L, 4400L); 		// 4000  +/- 10%
+		assertThat(delays.get(3)).isBetween(7200L, 8800L);		// 8000  +/- 10%
+		assertThat(delays.get(4)).isBetween(14400L, 17600L); 	// 16000 +/- 10%
+		assertThat(delays.get(5)).isBetween(18000L, 20000L); 	// 20000 -   10% (max interval)
+		assertThat(delays.get(6)).isBetween(18000L, 20000L); 	// 20000 -   10% (max interval)
 	}
 
 }
