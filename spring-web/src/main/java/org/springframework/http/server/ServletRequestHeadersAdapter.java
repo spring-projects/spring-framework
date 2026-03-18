@@ -53,8 +53,7 @@ final class ServletRequestHeadersAdapter implements MultiValueMap<String, String
 	private final HttpServletRequest request;
 
 	/**
-	 * Cached Content-Type value with charset appended (lazily computed).
-	 * {@code null} means not yet computed; an empty string means no charset should be appended.
+	 * Cached Content-Type value with charset appended.
 	 */
 	private @Nullable String cachedContentType;
 
