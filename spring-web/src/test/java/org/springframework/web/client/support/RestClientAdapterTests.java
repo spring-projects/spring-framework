@@ -200,6 +200,27 @@ class RestClientAdapterTests {
 		assertThat(actualResponse).isEqualTo("Hello Spring 2!");
 	}
 
+	@Test
+	void greetingWithDefaultApiVersion() throws Exception {
+		prepareResponse(builder ->
+				builder.setHeader("Content-Type", "text/plain").body("Hello Spring 2!"));
+
+		RestClient restClient = RestClient.builder()
+				.baseUrl(anotherServer.url("/").toString())
+				.defaultApiVersion("1.0")
+				.apiVersionInserter(ApiVersionInserter.useHeader("X-Version"))
+				.build();
+
+		RestClientAdapter adapter = RestClientAdapter.create(restClient);
+		Service service = HttpServiceProxyFactory.builderFor(adapter).build().createClient(Service.class);
+
+		String actualResponse = service.getGreeting();
+
+		RecordedRequest request = anotherServer.takeRequest();
+		assertThat(request.getHeaders().get("X-Version")).isEqualTo("1.0");
+		assertThat(actualResponse).isEqualTo("Hello Spring 2!");
+	}
+
 	@Test // see gh-36326
 	void getBodyWithGenericReturnType() {
 		prepareResponse(r -> r.setHeader("Content-Type", "application/json").body("{\"name\":\"Karl\"}"));

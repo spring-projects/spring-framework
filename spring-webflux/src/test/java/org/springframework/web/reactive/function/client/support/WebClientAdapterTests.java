@@ -48,6 +48,7 @@ import org.springframework.web.bind.annotation.RequestAttribute;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.client.ApiVersionInserter;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.service.annotation.GetExchange;
@@ -127,6 +128,25 @@ class WebClientAdapterTests {
 				.verify(Duration.ofSeconds(5));
 
 		assertThat(attributes).containsEntry("myAttribute", "myAttributeValue");
+	}
+
+	@Test
+	void greetingWithDefaultApiVersion() throws InterruptedException {
+		prepareResponse(builder -> builder.setHeader("Content-Type", "text/plain").body("Hello Spring 2!"));
+
+		WebClient webClient = WebClient.builder()
+				.baseUrl(this.server.url("/").toString())
+				.defaultApiVersion("1.0")
+				.apiVersionInserter(ApiVersionInserter.useHeader("X-Version"))
+				.build();
+
+		StepVerifier.create(initService(webClient, Service.class).getGreeting())
+				.expectNext("Hello Spring 2!")
+				.expectComplete()
+				.verify(Duration.ofSeconds(5));
+
+		RecordedRequest request = this.server.takeRequest();
+		assertThat(request.getHeaders().get("X-Version")).isEqualTo("1.0");
 	}
 
 	@Test // see gh-36326
