@@ -44,7 +44,7 @@ import org.springframework.util.FileCopyUtils;
  * @param <T> the data type
  * @see RestTemplate
  */
-public class HttpMessageConverterExtractor<T> implements ResponseExtractor<T> {
+public class HttpMessageConverterExtractor<T extends @Nullable Object> implements ResponseExtractor<T> {
 
 	private final Type responseType;
 
@@ -85,10 +85,10 @@ public class HttpMessageConverterExtractor<T> implements ResponseExtractor<T> {
 
 	@Override
 	@SuppressWarnings({"rawtypes", "unchecked", "resource"})
-	public @Nullable T extractData(ClientHttpResponse response) throws IOException {
+	public T extractData(ClientHttpResponse response) throws IOException {
 		IntrospectingClientHttpResponse responseWrapper = new IntrospectingClientHttpResponse(response);
 		if (!responseWrapper.hasMessageBody() || responseWrapper.hasEmptyMessageBody()) {
-			return null;
+			throw new RestClientException("No response body");
 		}
 		MediaType contentType = getContentType(responseWrapper);
 

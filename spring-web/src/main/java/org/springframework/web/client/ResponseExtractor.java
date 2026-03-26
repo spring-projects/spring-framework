@@ -39,7 +39,7 @@ import org.springframework.http.client.ClientHttpResponse;
  * @see RestTemplate#execute
  */
 @FunctionalInterface
-public interface ResponseExtractor<T> {
+public interface ResponseExtractor<T extends @Nullable Object> {
 
 	/**
 	 * Extract data from the given {@code ClientHttpResponse} and return it.
@@ -47,6 +47,6 @@ public interface ResponseExtractor<T> {
 	 * @return the extracted data
 	 * @throws IOException in case of I/O errors
 	 */
-	@Nullable T extractData(ClientHttpResponse response) throws IOException;
+	 T extractData(ClientHttpResponse response) throws IOException;
 
 }
