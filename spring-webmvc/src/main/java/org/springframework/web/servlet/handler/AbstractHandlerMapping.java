@@ -762,7 +762,7 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 
 		private final @Nullable CorsConfiguration config;
 
-		public CorsInterceptor(@Nullable CorsConfiguration config) {
+		CorsInterceptor(@Nullable CorsConfiguration config) {
 			this.config = config;
 		}
 
@@ -795,7 +795,7 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	private final class PreFlightHttpRequestHandler
 			extends CorsInterceptor implements HttpRequestHandler, PreFlightRequestHandler {
 
-		public PreFlightHttpRequestHandler(@Nullable CorsConfiguration config) {
+		PreFlightHttpRequestHandler(@Nullable CorsConfiguration config) {
 			super(config);
 		}
 
