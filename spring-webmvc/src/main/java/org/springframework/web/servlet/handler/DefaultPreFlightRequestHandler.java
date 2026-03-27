@@ -16,9 +16,17 @@
 
 package org.springframework.web.servlet.handler;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.jspecify.annotations.Nullable;
+
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
@@ -40,13 +48,6 @@ import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.util.ServletRequestPathUtils;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-
 /**
  * Default implementation of {@link PreFlightRequestHandler} that discovers all
  * {@link HandlerMapping} beans in the {@link ApplicationContext} and uses them to
@@ -57,6 +58,7 @@ import java.util.Properties;
  * {@link DispatcherServlet}, with fallback to the default mappings configured in
  * {@code DispatcherServlet.properties} if no mappings are found.
  *
+ * @author Rossen Stoyanchev
  * @since 7.1
  * @see PreFlightRequestHandler
  * @see HandlerMapping
