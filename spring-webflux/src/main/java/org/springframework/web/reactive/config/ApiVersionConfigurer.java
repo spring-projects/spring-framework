@@ -203,7 +203,6 @@ public class ApiVersionConfigurer {
 	 * Provide a {@link Predicate} to perform supported version checks with, in
 	 * effect taking over the supported version check and superseding the
 	 * {@link #addSupportedVersions} and {@link #detectSupportedVersions}.
-	 *
 	 * @param predicate the predicate to use
 	 */
 	public ApiVersionConfigurer setSupportedVersionPredicate(@Nullable Predicate<Comparable<?>> predicate) {
