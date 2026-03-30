@@ -238,7 +238,7 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 	 * @deprecated as of 6.2, in favor of {@link #fromUriString(String)};
 	 * scheduled for removal in 7.0.
 	 */
-	@Deprecated(since = "6.2")
+	@Deprecated(since = "6.2", forRemoval = true)
 	public static UriComponentsBuilder fromHttpUrl(String httpUrl) throws InvalidUrlException {
 		return fromUriString(httpUrl);
 	}

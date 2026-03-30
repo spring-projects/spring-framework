@@ -71,7 +71,10 @@ public class ContentCachingRequestWrapper extends HttpServletRequestWrapper {
 	/**
 	 * Create a new ContentCachingRequestWrapper for the given servlet request.
 	 * @param request the original servlet request
+	 * @deprecated as of 6.2, in favor of {@link #ContentCachingRequestWrapper(HttpServletRequest, int)},
+	 * for removal in 7.0
 	 */
+	@Deprecated(forRemoval = true)
 	public ContentCachingRequestWrapper(HttpServletRequest request) {
 		super(request);
 		int contentLength = request.getContentLength();

@@ -115,7 +115,7 @@ public class UnknownContentTypeException extends RestClientException {
 	 * Return the raw HTTP status code value.
 	 * @deprecated in favor of {@link #getStatusCode()}, for removal in 7.0
 	 */
-	@Deprecated(since = "6.0")
+	@Deprecated(since = "6.0", forRemoval = true)
 	public int getRawStatusCode() {
 		return this.statusCode.value();
 	}
