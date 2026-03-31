@@ -442,7 +442,7 @@ public interface MergedAnnotation<A extends Annotation> {
 	/**
 	 * Create a new view of the annotation that exposes non-merged attribute values.
 	 * <p>Methods from this view will return attribute values with only alias mirroring
-	 * rules applied. Aliases to {@link #getMetaSource() meta-source} attributes will
+	 * rules applied. Aliases to {@linkplain #getMetaSource() meta-source} attributes will
 	 * not be applied.
 	 * @return a non-merged view of the annotation
 	 */
@@ -451,25 +451,28 @@ public interface MergedAnnotation<A extends Annotation> {
 	/**
 	 * Create a new mutable {@link AnnotationAttributes} instance from this
 	 * merged annotation.
-	 * <p>The {@link Adapt adaptations} may be used to change the way that values
-	 * are added.
+	 * <p>The {@linkplain Adapt adaptations} may be used to change the way that
+	 * values are added.
 	 * @param adaptations the adaptations that should be applied to the annotation values
-	 * @return an immutable map containing the attributes and values
+	 * @return a mutable {@code AnnotationAttributes} instance containing the attributes
+	 * and values
 	 */
 	AnnotationAttributes asAnnotationAttributes(Adapt... adaptations);
 
 	/**
-	 * Get an immutable {@link Map} that contains all the annotation attributes.
-	 * <p>The {@link Adapt adaptations} may be used to change the way that values are added.
+	 * Create an immutable {@link Map} that contains all the annotation attributes.
+	 * <p>The {@linkplain Adapt adaptations} may be used to change the way that
+	 * values are added.
 	 * @param adaptations the adaptations that should be applied to the annotation values
 	 * @return an immutable map containing the attributes and values
 	 */
 	Map<String, Object> asMap(Adapt... adaptations);
 
 	/**
-	 * Create a new {@link Map} instance of the given type that contains all the annotation
+	 * Create a new {@link Map} of the given type that contains all the annotation
 	 * attributes.
-	 * <p>The {@link Adapt adaptations} may be used to change the way that values are added.
+	 * <p>The {@linkplain Adapt adaptations} may be used to change the way that
+	 * values are added.
 	 * @param factory a map factory
 	 * @param adaptations the adaptations that should be applied to the annotation values
 	 * @return a map containing the attributes and values

@@ -29,6 +29,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiConsumer;
 
 import kotlin.jvm.JvmClassMappingKt;
@@ -46,8 +47,6 @@ import org.springframework.test.context.TestContextAnnotationUtils;
 import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
 
-import static org.springframework.core.annotation.MergedAnnotations.SearchStrategy.DIRECT;
-
 /**
  * Utility methods for working with bean overrides.
  *
@@ -63,6 +62,31 @@ public abstract class BeanOverrideUtils {
 	private static final Comparator<MergedAnnotation<? extends Annotation>> reversedMetaDistance =
 			Comparator.<MergedAnnotation<? extends Annotation>> comparingInt(MergedAnnotation::getDistance).reversed();
 
+
+	/**
+	 * Resolve the {@link BeanOverrideHandler} for the given {@link Parameter}.
+	 * @param parameter the parameter to process
+	 * @param testClass the test class to process
+	 * @return the bean override handler for the parameter, or {@code null} if no
+	 * handler was found
+	 * @see BeanOverrideProcessor#createHandler(Annotation, Class, Parameter)
+	 * @see #findAllHandlers(Class)
+	 */
+	public static @Nullable BeanOverrideHandler resolveHandlerForParameter(Parameter parameter, Class<?> testClass) {
+		AtomicReference<BeanOverrideHandler> handlerReference = new AtomicReference<>();
+		AtomicBoolean overrideAnnotationFound = new AtomicBoolean();
+		processElement(parameter, (processor, composedAnnotation) -> {
+			Assert.state(!overrideAnnotationFound.getPlain(),
+					() -> "Multiple @BeanOverride annotations found on parameter: " + parameter);
+			overrideAnnotationFound.setPlain(true);
+			BeanOverrideHandler handler = processor.createHandler(composedAnnotation, testClass, parameter);
+			Assert.state(handler != null,
+					() -> "BeanOverrideProcessor [%s] returned null BeanOverrideHandler for parameter [%s]"
+							.formatted(processor.getClass().getSimpleName(), parameter));
+			handlerReference.setPlain(handler);
+		});
+		return handlerReference.getPlain();
+	}
 
 	/**
 	 * Process the given {@code testClass} and build the corresponding
@@ -169,16 +193,10 @@ public abstract class BeanOverrideUtils {
 	}
 
 	private static void processParameter(Parameter parameter, Class<?> testClass, List<BeanOverrideHandler> handlers) {
-		AtomicBoolean overrideAnnotationFound = new AtomicBoolean();
-		processElement(parameter, (processor, composedAnnotation) -> {
-			Assert.state(overrideAnnotationFound.compareAndSet(false, true),
-					() -> "Multiple @BeanOverride annotations found on parameter: " + parameter);
-			BeanOverrideHandler handler = processor.createHandler(composedAnnotation, testClass, parameter);
-			Assert.state(handler != null,
-					() -> "BeanOverrideProcessor [%s] returned null BeanOverrideHandler for parameter [%s]"
-							.formatted(processor.getClass().getSimpleName(), parameter));
+		BeanOverrideHandler handler = resolveHandlerForParameter(parameter, testClass);
+		if (handler != null) {
 			handlers.add(handler);
-		});
+		}
 	}
 
 	private static void processField(Field field, Class<?> testClass, List<BeanOverrideHandler> handlers) {
@@ -199,14 +217,15 @@ public abstract class BeanOverrideUtils {
 		processElement(field, (processor, composedAnnotation) -> {
 			Assert.state(!Modifier.isStatic(field.getModifiers()),
 					() -> "@BeanOverride field must not be static: " + field);
-			Assert.state(overrideAnnotationFound.compareAndSet(false, true),
+			Assert.state(!overrideAnnotationFound.getPlain(),
 					() -> "Multiple @BeanOverride annotations found on field: " + field);
+			overrideAnnotationFound.setPlain(true);
 			handlers.add(processor.createHandler(composedAnnotation, testClass, field));
 		});
 	}
 
 	private static void processElement(AnnotatedElement element, BiConsumer<BeanOverrideProcessor, Annotation> consumer) {
-		MergedAnnotations.from(element, DIRECT)
+		MergedAnnotations.from(element)
 				.stream(BeanOverride.class)
 				.sorted(reversedMetaDistance)
 				.forEach(mergedAnnotation -> {
@@ -227,7 +246,6 @@ public abstract class BeanOverrideUtils {
 	 * @param testClass the test class to process
 	 * @return the candidate constructor, or {@code null} if no suitable candidate
 	 * was found
-	 * @since 7.1
 	 */
 	private static @Nullable Constructor<?> findConstructorWithParameters(Class<?> testClass) {
 		List<Constructor<?>> constructors = Arrays.stream(testClass.getDeclaredConstructors())
@@ -239,7 +257,6 @@ public abstract class BeanOverrideUtils {
 
 	/**
 	 * Inner class to avoid a hard dependency on Kotlin at runtime.
-	 * @since 7.1
 	 */
 	private static class KotlinDelegate {
 

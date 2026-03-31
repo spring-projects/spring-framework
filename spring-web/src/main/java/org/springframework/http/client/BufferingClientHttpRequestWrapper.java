@@ -51,7 +51,7 @@ final class BufferingClientHttpRequestWrapper extends AbstractBufferingClientHtt
 	@Override
 	protected ClientHttpResponse executeInternal(HttpHeaders headers, byte[] bufferedOutput) throws IOException {
 		this.request.getHeaders().putAll(headers);
-		return executeWithRequest(this.request, bufferedOutput, true);
+		return executeWithRequestAndBody(this.request, bufferedOutput, true);
 	}
 
 }

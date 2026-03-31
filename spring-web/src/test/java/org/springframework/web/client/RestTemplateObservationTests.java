@@ -55,6 +55,7 @@ import static org.springframework.http.HttpMethod.GET;
  * Tests for the client HTTP observations with {@link RestTemplate}.
  * @author Brian Clozel
  */
+@SuppressWarnings("removal")
 class RestTemplateObservationTests {
 
 

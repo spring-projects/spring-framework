@@ -16,6 +16,8 @@
 
 package org.springframework.web.reactive.function.client
 
+import io.micrometer.context.ContextRegistry
+import io.micrometer.context.ContextSnapshotFactory
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.flow.Flow
@@ -25,6 +27,7 @@ import kotlinx.coroutines.withContext
 import org.reactivestreams.Publisher
 import org.springframework.core.ParameterizedTypeReference
 import org.springframework.http.ResponseEntity
+import org.springframework.util.ClassUtils
 import org.springframework.web.reactive.function.client.CoExchangeFilterFunction.Companion.COROUTINE_CONTEXT_ATTRIBUTE
 import org.springframework.web.reactive.function.client.WebClient.RequestBodySpec
 import org.springframework.web.reactive.function.client.WebClient.RequestHeadersSpec
@@ -237,8 +240,25 @@ suspend inline fun <reified T : Any> WebClient.ResponseSpec.awaitEntity(): Respo
 	}
 }
 
+private val contextPropagationPresent = ClassUtils.isPresent("io.micrometer.context.ContextSnapshotFactory",
+	WebClient::class.java.classLoader)
+
 @PublishedApi
 internal fun CoroutineContext.toReactorContext(): ReactorContext {
-	val context = Context.of(COROUTINE_CONTEXT_ATTRIBUTE, this).readOnly()
-	return (this[ReactorContext.Key]?.context?.putAll(context) ?: context).asCoroutineContext()
+	var context = Context.of(COROUTINE_CONTEXT_ATTRIBUTE, this)
+	if (contextPropagationPresent) {
+		context = ContextPropagationDelegate.captureThreadLocalsInto(context)
+	}
+	val readOnlyContext = context.readOnly()
+	return (this[ReactorContext.Key]?.context?.putAll(readOnlyContext) ?: readOnlyContext).asCoroutineContext()
+}
+
+private object ContextPropagationDelegate {
+
+	private val contextSnapshotFactory = ContextSnapshotFactory.builder()
+		.contextRegistry(ContextRegistry.getInstance()).build()
+
+	fun captureThreadLocalsInto(context: Context): Context {
+		return contextSnapshotFactory.captureAll().updateContext(context)
+	}
 }

@@ -26,13 +26,14 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.LinkedBlockingDeque;
 
-import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.core.task.SyncTaskExecutor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.client.ClientHttpRequest;
+import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
@@ -41,11 +42,7 @@ import org.springframework.messaging.simp.stomp.StompEncoder;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.web.client.HttpServerErrorException;
-import org.springframework.web.client.RequestCallback;
-import org.springframework.web.client.ResponseExtractor;
-import org.springframework.web.client.RestClientException;
-import org.springframework.web.client.RestOperations;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.client.RestClient;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketHandler;
@@ -63,12 +60,12 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 /**
- * Tests for {@link RestTemplateXhrTransport}.
+ * Tests for {@link RestClientXhrTransport}.
  *
+ * @author Brian Clozel
  * @author Rossen Stoyanchev
  */
-@SuppressWarnings("removal")
-class RestTemplateXhrTransportTests {
+class RestClientXhrTransportTests {
 
 	private static final JacksonJsonSockJsMessageCodec CODEC = new JacksonJsonSockJsMessageCodec();
 
@@ -82,7 +79,7 @@ class RestTemplateXhrTransportTests {
 				a["foo"]
 				c[3000,"Go away!"]""";
 		ClientHttpResponse response = response(HttpStatus.OK, body);
-		connect(response);
+		connect(response).get();
 
 		verify(this.webSocketHandler).afterConnectionEstablished(any());
 		verify(this.webSocketHandler).handleMessage(any(), eq(new TextMessage("foo")));
@@ -133,11 +130,9 @@ class RestTemplateXhrTransportTests {
 	@Test
 	void connectFailure() {
 		final HttpServerErrorException expected = new HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR);
-		RestOperations restTemplate = mock();
-		given(restTemplate.execute(any(), eq(HttpMethod.POST), any(), any())).willThrow(expected);
-
+		FailingClientHttpRequestFactory requestFactory = new FailingClientHttpRequestFactory(expected);
 		final CountDownLatch latch = new CountDownLatch(1);
-		connect(restTemplate).whenComplete((result, ex) -> {
+		connect(requestFactory).whenComplete((result, ex) -> {
 			if (ex == expected) {
 				latch.countDown();
 			}
@@ -172,11 +167,12 @@ class RestTemplateXhrTransportTests {
 	}
 
 	private CompletableFuture<WebSocketSession> connect(ClientHttpResponse... responses) {
-		return connect(new TestRestTemplate(responses));
+		return connect(new TestClientHttpRequestFactory(responses));
 	}
 
-	private CompletableFuture<WebSocketSession> connect(RestOperations restTemplate) {
-		RestTemplateXhrTransport transport = new RestTemplateXhrTransport(restTemplate);
+	private CompletableFuture<WebSocketSession> connect(ClientHttpRequestFactory requestFactory) {
+		RestClient restClient = RestClient.builder().requestFactory(requestFactory).build();
+		RestClientXhrTransport transport = new RestClientXhrTransport(restClient);
 		transport.setTaskExecutor(new SyncTaskExecutor());
 
 		SockJsUrlInfo urlInfo = new SockJsUrlInfo(URI.create("https://example.com"));
@@ -201,27 +197,38 @@ class RestTemplateXhrTransportTests {
 		return new ByteArrayInputStream(bytes);
 	}
 
-
-	@SuppressWarnings("removal")
-	private static class TestRestTemplate extends RestTemplate {
+	private static class TestClientHttpRequestFactory implements ClientHttpRequestFactory {
 
 		private Queue<ClientHttpResponse> responses = new LinkedBlockingDeque<>();
 
-		private TestRestTemplate(ClientHttpResponse... responses) {
+		private TestClientHttpRequestFactory(ClientHttpResponse... responses) {
 			this.responses.addAll(Arrays.asList(responses));
 		}
 
 		@Override
-		public <T> T execute(URI url, HttpMethod method, @Nullable RequestCallback callback,
-				@Nullable ResponseExtractor<T> extractor) throws RestClientException {
+		public ClientHttpRequest createRequest(URI uri, HttpMethod httpMethod) throws IOException {
+			ClientHttpRequest request = mock();
+			given(request.getHeaders()).willReturn(new HttpHeaders());
+			given(request.execute()).willReturn(this.responses.remove());
+			return request;
+		}
 
-			try {
-				extractor.extractData(this.responses.remove());
-			}
-			catch (Throwable t) {
-				throw new RestClientException("Failed to invoke extractor", t);
-			}
-			return null;
+	}
+
+	private static class FailingClientHttpRequestFactory implements ClientHttpRequestFactory {
+
+		private final Exception expected;
+
+		private FailingClientHttpRequestFactory(Exception expected) {
+			this.expected = expected;
+		}
+
+		@Override
+		public ClientHttpRequest createRequest(URI uri, HttpMethod httpMethod) throws IOException {
+			ClientHttpRequest request = mock();
+			given(request.getHeaders()).willReturn(new HttpHeaders());
+			given(request.execute()).willThrow(this.expected);
+			return request;
 		}
 	}
 

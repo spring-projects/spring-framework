@@ -47,7 +47,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  * @author Juergen Hoeller
  */
 @SpringJUnitWebConfig
-@SuppressWarnings("deprecation")
+@SuppressWarnings({"deprecation", "removal"})
 class MockMvcClientHttpRequestFactoryTests {
 
 	private final RestTemplate template;

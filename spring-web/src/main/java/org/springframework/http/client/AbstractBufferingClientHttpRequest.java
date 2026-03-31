@@ -31,18 +31,18 @@ import org.springframework.util.StreamUtils;
  * @author Arjen Poutsma
  * @since 3.0.6
  */
-abstract class AbstractBufferingClientHttpRequest extends AbstractClientHttpRequest {
+public abstract class AbstractBufferingClientHttpRequest extends AbstractClientHttpRequest {
 
 	private final FastByteArrayOutputStream bufferedOutput = new FastByteArrayOutputStream(1024);
 
 
 	@Override
-	protected OutputStream getBodyInternal(HttpHeaders headers) throws IOException {
+	protected final OutputStream getBodyInternal(HttpHeaders headers) {
 		return this.bufferedOutput;
 	}
 
 	@Override
-	protected ClientHttpResponse executeInternal(HttpHeaders headers) throws IOException {
+	protected final ClientHttpResponse executeInternal(HttpHeaders headers) throws IOException {
 		byte[] bytes = this.bufferedOutput.toByteArrayUnsafe();
 		if (headers.getContentLength() < 0) {
 			headers.setContentLength(bytes.length);
@@ -70,7 +70,7 @@ abstract class AbstractBufferingClientHttpRequest extends AbstractClientHttpRequ
 	 * @throws IOException in case of I/O errors from execution
 	 * @since 7.0
 	 */
-	protected ClientHttpResponse executeWithRequest(
+	final ClientHttpResponse executeWithRequestAndBody(
 			ClientHttpRequest request, byte[] bufferedOutput, boolean bufferResponse) throws IOException {
 
 		if (bufferedOutput.length > 0) {

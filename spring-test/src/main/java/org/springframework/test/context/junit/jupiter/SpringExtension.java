@@ -24,8 +24,6 @@ import java.lang.reflect.Parameter;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
-import java.util.Objects;
-import java.util.Optional;
 
 import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.AfterAll;
@@ -437,14 +435,13 @@ public class SpringExtension implements BeforeAllCallback, AfterAllCallback, Tes
 		}
 
 		ApplicationContext applicationContext = getApplicationContext(extensionContext);
+
+		// If the parameter is a @BeanOverride with an explicit name, we simply look
+		// up the bean by name instead of performing full dependency resolution.
 		if (isBeanOverride(parameter)) {
-			Optional<String> beanName = BeanOverrideUtils.findAllHandlers(testClass).stream()
-					.filter(handler -> parameter.equals(handler.getParameter()))
-					.map(BeanOverrideHandler::getBeanName)
-					.filter(Objects::nonNull)
-					.findFirst();
-			if (beanName.isPresent()) {
-				return applicationContext.getBean(beanName.get());
+			BeanOverrideHandler handler = BeanOverrideUtils.resolveHandlerForParameter(parameter, testClass);
+			if (handler != null && handler.getBeanName() != null) {
+				return applicationContext.getBean(handler.getBeanName());
 			}
 		}
 		return ParameterResolutionDelegate.resolveDependency(parameter, index, testClass,

@@ -257,7 +257,7 @@ An `XhrTransport`, by definition, supports both `xhr-streaming` and `xhr-polling
 from a client perspective, there is no difference other than in the URL used to connect
 to the server. At present there are two implementations:
 
-* `RestTemplateXhrTransport` uses Spring's `RestTemplate` for HTTP requests.
+* `RestClientXhrTransport` uses Spring's `RestClient` for HTTP requests.
 * `JettyXhrTransport` uses Jetty's `HttpClient` for HTTP requests.
 
 The following example shows how to create a SockJS client and connect to a SockJS endpoint:
@@ -266,7 +266,7 @@ The following example shows how to create a SockJS client and connect to a SockJ
 ----
   List<Transport> transports = new ArrayList<>(2);
   transports.add(new WebSocketTransport(new StandardWebSocketClient()));
-  transports.add(new RestTemplateXhrTransport());
+  transports.add(new RestClientXhrTransport());
 
   SockJsClient sockJsClient = new SockJsClient(transports);
   sockJsClient.doHandshake(new MyWebSocketHandler(), "ws://example.com:8080/sockjs");

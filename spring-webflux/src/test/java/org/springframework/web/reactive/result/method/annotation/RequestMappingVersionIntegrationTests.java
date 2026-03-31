@@ -22,7 +22,6 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.accept.SemanticApiVersionParser.Version;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -77,18 +76,15 @@ class RequestMappingVersionIntegrationTests extends AbstractRequestMappingIntegr
 	@Test  // gh-36059
 	void staticResourceWithInvalidApiVersion() throws Exception {
 		startServer(new TomcatHttpServer());
-
-		String url = "http://localhost:" + this.port + "/cp/test/foo.css";
-		RequestEntity<Void> requestEntity = RequestEntity.get(url).header("API-Version", "Invalid").build();
-		ResponseEntity<String> entity = getRestTemplate().exchange(requestEntity, String.class);
+		ResponseEntity<String> entity = getRestClient().get().uri("/cp/test/foo.css")
+				.header("API-Version", "Invalid").retrieve().toEntity(String.class);
 
 		assertThat(entity.getBody()).isEqualTo("h1 { color:red; }");
 	}
 
 	private ResponseEntity<String> exchangeWithVersion(String version) {
-		String url = "http://localhost:" + this.port;
-		RequestEntity<Void> requestEntity = RequestEntity.get(url).header("API-Version", version).build();
-		return getRestTemplate().exchange(requestEntity, String.class);
+		return getRestClient().get().uri("/").header("API-Version", version)
+				.retrieve().toEntity(String.class);
 	}
 
 

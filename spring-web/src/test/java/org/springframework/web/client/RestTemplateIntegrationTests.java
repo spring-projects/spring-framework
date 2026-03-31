@@ -82,6 +82,7 @@ import static org.springframework.http.MediaType.MULTIPART_MIXED;
  * @author Brian Clozel
  * @author Sam Brannen
  */
+@SuppressWarnings("removal")
 class RestTemplateIntegrationTests extends AbstractMockWebServerTests {
 
 	@Retention(RetentionPolicy.RUNTIME)

@@ -41,7 +41,7 @@ import org.springframework.util.FastByteArrayOutputStream;
  * @author Rossen Stoyanchev
  * @since 6.1
  */
-abstract class AbstractStreamingClientHttpRequest extends AbstractClientHttpRequest
+public abstract class AbstractStreamingClientHttpRequest extends AbstractClientHttpRequest
 		implements StreamingHttpOutputMessage {
 
 	private @Nullable Body body;

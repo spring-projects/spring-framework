@@ -57,6 +57,7 @@ import static org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY;
  * Tests for {@link DefaultResponseErrorHandler} handling of specific
  * HTTP status codes.
  */
+@SuppressWarnings("removal")
 class DefaultResponseErrorHandlerHttpStatusTests {
 
 	private final DefaultResponseErrorHandler handler = new DefaultResponseErrorHandler();

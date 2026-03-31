@@ -814,6 +814,7 @@ final class DefaultRestClient implements RestClient {
 		}
 
 		@Override
+		@SuppressWarnings("removal")
 		public ResponseSpec onStatus(ResponseErrorHandler errorHandler) {
 			Assert.notNull(errorHandler, "ResponseErrorHandler must not be null");
 

@@ -32,6 +32,7 @@ dependencies {
 	optional("org.jetbrains.kotlin:kotlin-reflect")
 	optional("org.jetbrains.kotlin:kotlin-stdlib")
 	optional("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
+	optional("io.micrometer:context-propagation")
 	optional("org.webjars:webjars-locator-lite")
 	optional("tools.jackson.core:jackson-databind")
 	optional("tools.jackson.dataformat:jackson-dataformat-smile")

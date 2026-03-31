@@ -31,7 +31,9 @@ import org.springframework.http.client.ClientHttpResponse;
  *
  * @author Arjen Poutsma
  * @since 3.0
+ * @deprecated as of 7.1 in favor of {@link RestClient.ResponseSpec.ErrorHandler}
  */
+@Deprecated(since = "7.1", forRemoval = true)
 public interface ResponseErrorHandler {
 
 	/**

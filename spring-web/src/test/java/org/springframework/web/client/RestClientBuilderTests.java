@@ -49,7 +49,7 @@ import static org.assertj.core.api.Assertions.fail;
  */
 class RestClientBuilderTests {
 
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({"unchecked", "removal"})
 	@Test
 	void createFromRestTemplate() {
 		JettyClientHttpRequestFactory requestFactory = new JettyClientHttpRequestFactory();
@@ -90,6 +90,7 @@ class RestClientBuilderTests {
 	}
 
 	@Test
+	@SuppressWarnings("removal")
 	void defaultUriBuilderFactory() {
 		RestTemplate restTemplate = new RestTemplate();
 

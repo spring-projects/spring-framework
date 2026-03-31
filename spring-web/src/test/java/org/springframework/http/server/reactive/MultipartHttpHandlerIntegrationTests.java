@@ -16,8 +16,6 @@
 
 package org.springframework.http.server.reactive;
 
-import java.net.URI;
-
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
@@ -27,14 +25,12 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.http.codec.multipart.FormFieldPart;
 import org.springframework.http.codec.multipart.Part;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebHandler;
 import org.springframework.web.server.adapter.HttpWebHandlerAdapter;
@@ -81,9 +77,9 @@ class MultipartHttpHandlerIntegrationTests extends AbstractHttpHandlerIntegratio
 		parts.add("fooPart", fooPart);
 		parts.add("barPart", barPart);
 
-		URI url = URI.create("http://localhost:" + port + "/form-parts");
-		ResponseEntity<Void> response = new RestTemplate().exchange(
-				RequestEntity.post(url).contentType(mediaType).body(parts), Void.class);
+		ResponseEntity<Void> response = getRestClient().post().uri("/form-parts")
+				.contentType(MediaType.MULTIPART_FORM_DATA).body(parts)
+				.retrieve().toBodilessEntity();
 
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 	}

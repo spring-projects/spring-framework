@@ -90,7 +90,10 @@ final class StatusHandler {
 
 	/**
 	 * Create a StatusHandler from a {@link ResponseErrorHandler}.
+	 * @deprecated as of 7.1 in favor of {@link #of(Predicate, RestClient.ResponseSpec.ErrorHandler)}
 	 */
+	@Deprecated(since = "7.1", forRemoval = true)
+	@SuppressWarnings("removal")
 	public static StatusHandler fromErrorHandler(ResponseErrorHandler errorHandler) {
 		Assert.notNull(errorHandler, "ResponseErrorHandler must not be null");
 
@@ -160,7 +163,7 @@ final class StatusHandler {
 		return preface + bodyText;
 	}
 
-	@SuppressWarnings("NullAway")
+	@SuppressWarnings({"NullAway", "removal"})
 	private static Function<ResolvableType, ? extends @Nullable Object> initBodyConvertFunction(
 			ClientHttpResponse response, byte[] body, List<HttpMessageConverter<?>> messageConverters) {
 

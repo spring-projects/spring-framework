@@ -99,7 +99,7 @@ class InterceptingClientHttpRequest extends AbstractBufferingClientHttpRequest {
 			ClientHttpRequest delegate = this.requestFactory.createRequest(request.getURI(), request.getMethod());
 			request.getHeaders().forEach((key, value) -> delegate.getHeaders().addAll(key, value));
 			request.getAttributes().forEach((key, value) -> delegate.getAttributes().put(key, value));
-			return executeWithRequest(delegate, body, shouldBufferResponse(request));
+			return executeWithRequestAndBody(delegate, body, shouldBufferResponse(request));
 		}
 	}
 

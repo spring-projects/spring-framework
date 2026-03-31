@@ -16,8 +16,6 @@
 
 package org.springframework.test.web.client.samples.matchers;
 
-import java.net.URI;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -29,11 +27,11 @@ import jakarta.xml.bind.annotation.XmlRootElement;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.MediaType;
 import org.springframework.http.converter.xml.Jaxb2RootElementHttpMessageConverter;
 import org.springframework.test.web.Person;
 import org.springframework.test.web.client.MockRestServiceServer;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.client.RestClient;
 
 import static org.hamcrest.Matchers.hasXPath;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.content;
@@ -61,7 +59,7 @@ class XmlContentRequestMatchersIntegrationTests {
 
 	private MockRestServiceServer mockServer;
 
-	private RestTemplate restTemplate;
+	private RestClient restClient;
 
 	private PeopleWrapper people;
 
@@ -76,13 +74,11 @@ class XmlContentRequestMatchersIntegrationTests {
 
 		this.people = new PeopleWrapper(composers);
 
-		List<HttpMessageConverter<?>> converters = new ArrayList<>();
-		converters.add(new Jaxb2RootElementHttpMessageConverter());
+		RestClient.Builder clientBuilder = RestClient.builder().configureMessageConverters(converters ->
+				converters.registerDefaults().withXmlConverter(new Jaxb2RootElementHttpMessageConverter()));
 
-		this.restTemplate = new RestTemplate();
-		this.restTemplate.setMessageConverters(converters);
-
-		this.mockServer = MockRestServiceServer.createServer(this.restTemplate);
+		this.mockServer = MockRestServiceServer.createServer(clientBuilder);
+		this.restClient = clientBuilder.build();
 	}
 
 	@Test
@@ -106,7 +102,8 @@ class XmlContentRequestMatchersIntegrationTests {
 	}
 
 	private void executeAndVerify() {
-		this.restTemplate.put(URI.create("/composers"), this.people);
+		this.restClient.put().uri("/composers").contentType(MediaType.APPLICATION_XML)
+				.body(this.people).retrieve().toBodilessEntity();
 		this.mockServer.verify();
 	}
 

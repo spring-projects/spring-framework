@@ -76,7 +76,6 @@ class SseIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 
 	private void startServer(HttpServer httpServer, ClientHttpConnector connector) throws Exception {
 		super.startServer(httpServer);
-
 		this.webClient = WebClient
 				.builder()
 				.clientConnector(connector)

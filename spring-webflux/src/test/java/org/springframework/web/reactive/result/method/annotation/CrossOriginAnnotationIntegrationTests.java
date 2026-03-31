@@ -35,7 +35,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.client.RestClient;
 import org.springframework.web.reactive.config.EnableWebFlux;
 import org.springframework.web.testfixture.http.server.reactive.bootstrap.HttpServer;
 
@@ -73,10 +73,11 @@ class CrossOriginAnnotationIntegrationTests extends AbstractRequestMappingIntegr
 		return context;
 	}
 
+
 	@Override
-	protected RestTemplate initRestTemplate() {
+	protected RestClient initRestClient(RestClient.Builder builder) {
 		// JDK default HTTP client disallowed headers like Origin
-		return new RestTemplate(new HttpComponentsClientHttpRequestFactory());
+		return builder.requestFactory(new HttpComponentsClientHttpRequestFactory()).build();
 	}
 
 

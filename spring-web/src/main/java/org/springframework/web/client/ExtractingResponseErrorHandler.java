@@ -60,7 +60,10 @@ import org.springframework.util.CollectionUtils;
  * @author Arjen Poutsma
  * @since 5.0
  * @see RestTemplate#setErrorHandler(ResponseErrorHandler)
+ * @deprecated as of 7.1 in favor of {@link RestClient.ResponseSpec.ErrorHandler}
  */
+@Deprecated(since = "7.1", forRemoval = true)
+@SuppressWarnings("removal")
 public class ExtractingResponseErrorHandler extends DefaultResponseErrorHandler {
 
 	private List<HttpMessageConverter<?>> messageConverters = Collections.emptyList();

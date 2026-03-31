@@ -99,7 +99,9 @@ public final class RestClientAdapter implements HttpExchangeAdapter {
 		RestClient.RequestBodySpec spec = setUri(uriSpec, values);
 		spec.headers(headers -> headers.putAll(values.getHeaders()));
 		setCookieHeader(spec, values);
-		spec.apiVersion(values.getApiVersion());
+		if (values.getApiVersion() != null) {
+			spec.apiVersion(values.getApiVersion());
+		}
 		spec.attributes(attributes -> attributes.putAll(values.getAttributes()));
 		setBody(spec, values);
 		return spec;

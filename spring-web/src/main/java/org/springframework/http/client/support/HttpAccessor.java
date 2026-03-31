@@ -50,7 +50,10 @@ import org.springframework.util.Assert;
  * @since 3.0
  * @see ClientHttpRequestFactory
  * @see org.springframework.web.client.RestTemplate
+ * @deprecated since 7.1 with no replacement.
  */
+@Deprecated(since = "7.1", forRemoval = true)
+@SuppressWarnings("removal")
 public abstract class HttpAccessor {
 
 	/** Logger available to subclasses. */

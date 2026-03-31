@@ -58,7 +58,10 @@ import org.springframework.util.ObjectUtils;
  * @author Juergen Hoeller
  * @since 3.0
  * @see RestTemplate#setErrorHandler
+ * @deprecated as of 7.1 in favor of {@link RestClient.ResponseSpec.ErrorHandler}
  */
+@Deprecated(since = "7.1", forRemoval = true)
+@SuppressWarnings("removal")
 public class DefaultResponseErrorHandler implements ResponseErrorHandler {
 
 	private @Nullable List<HttpMessageConverter<?>> messageConverters;

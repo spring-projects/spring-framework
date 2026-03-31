@@ -45,7 +45,10 @@ import org.springframework.web.util.UriBuilderFactory;
  * @author Olga Maciaszek-Sharma
  * @author Brian Clozel
  * @since 6.1
+ * @deprecated as of 7.1 in favor of {@link RestClientAdapter}.
  */
+@Deprecated(since = "7.1", forRemoval = true)
+@SuppressWarnings("removal")
 public final class RestTemplateAdapter implements HttpExchangeAdapter {
 
 	private final RestTemplate restTemplate;

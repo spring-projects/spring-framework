@@ -17,17 +17,14 @@
 package org.springframework.http.server.reactive;
 
 import java.io.File;
-import java.net.URI;
 
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
-import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.ZeroCopyHttpOutputMessage;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.testfixture.http.server.reactive.bootstrap.AbstractHttpHandlerIntegrationTests;
 import org.springframework.web.testfixture.http.server.reactive.bootstrap.HttpServer;
 import org.springframework.web.testfixture.http.server.reactive.bootstrap.JettyCoreHttpServer;
@@ -59,9 +56,7 @@ class ZeroCopyIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 
 		startServer(httpServer);
 
-		URI url = URI.create("http://localhost:" + port);
-		RequestEntity<?> request = RequestEntity.get(url).build();
-		ResponseEntity<byte[]> response = new RestTemplate().exchange(request, byte[].class);
+		ResponseEntity<byte[]> response = getRestClient().get().retrieve().toEntity(byte[].class);
 
 		assertThat(response.hasBody()).isTrue();
 		assertThat(response.getHeaders().getContentLength()).isEqualTo(springLogoResource.contentLength());
