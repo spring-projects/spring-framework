@@ -249,7 +249,7 @@ public abstract class HttpRange {
 			}
 			if (lastBytePos != null && lastBytePos < firstBytePos) {
 				throw new IllegalArgumentException("firstBytePosition=" + firstBytePos +
-						" should be less then or equal to lastBytePosition=" + lastBytePos);
+						" should be less than or equal to lastBytePosition=" + lastBytePos);
 			}
 		}
 
