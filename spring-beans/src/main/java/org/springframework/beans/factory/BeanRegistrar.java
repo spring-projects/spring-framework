@@ -19,21 +19,9 @@ package org.springframework.beans.factory;
 import org.springframework.core.env.Environment;
 
 /**
- * Contract for registering beans programmatically, typically imported with an
- * {@link org.springframework.context.annotation.Import @Import} annotation on
- * a {@link org.springframework.context.annotation.Configuration @Configuration}
- * class.
- * <pre class="code">
- * &#064;Configuration
- * &#064;Import(MyBeanRegistrar.class)
- * class MyConfiguration {
- * }</pre>
- * Can also be applied to an application context via
- * {@link org.springframework.context.support.GenericApplicationContext#register(BeanRegistrar...)}.
+ * Contract for registering beans programmatically. Implementations use the
+ * {@link BeanRegistry} and {@link Environment} to register beans:
  *
- *
- * <p>Bean registrar implementations use {@link BeanRegistry} and {@link Environment}
- * APIs to register beans programmatically in a concise and flexible way.
  * <pre class="code">
  * class MyBeanRegistrar implements BeanRegistrar {
  *
@@ -52,9 +40,55 @@ import org.springframework.core.env.Environment;
  *     }
  * }</pre>
  *
+ * <p>{@code BeanRegistrar} implementations are not Spring components: they must have
+ * a no-arg constructor and cannot rely on dependency injection or any other
+ * component-model feature. They can be used in two distinct ways depending on the
+ * application context setup.
+ *
+ * <h3>With the {@code @Configuration} model</h3>
+ *
+ * <p>A {@code BeanRegistrar} must be imported via
+ * {@link org.springframework.context.annotation.Import @Import} on a
+ * {@link org.springframework.context.annotation.Configuration @Configuration} class:
+ *
+ * <pre class="code">
+ * &#064;Configuration
+ * &#064;Import(MyBeanRegistrar.class)
+ * class MyConfiguration {
+ * }</pre>
+ *
+ * <p>This is the only mechanism that triggers bean registration in the annotation-based
+ * configuration model. Annotating an implementation with {@code @Configuration} or
+ * {@code @Component}, or returning an instance from a {@code @Bean} method, registers
+ * it as a bean but does <strong>not</strong> invoke its
+ * {@link #register(BeanRegistry, Environment) register} method.
+ *
+ * <p>When imported, the registrar is invoked in the order it is encountered during
+ * configuration class processing. It can therefore check for and build on beans that
+ * have already been defined, but has no visibility into beans that will be registered
+ * by classes processed later.
+ *
+ * <h3>Programmatic usage</h3>
+ *
+ * <p>A {@code BeanRegistrar} can also be applied directly to a
+ * {@link org.springframework.context.support.GenericApplicationContext}:
+ *
+ * <pre class="code">
+ * GenericApplicationContext context = new GenericApplicationContext();
+ * context.register(new MyBeanRegistrar());
+ * context.registerBean("myBean", MyBean.class);
+ * context.refresh();</pre>
+ *
+ * <p>This mode is primarily intended for fully programmatic application context setups.
+ * Registrars applied this way are invoked before any {@code @Configuration} class is
+ * processed. They can therefore observe beans registered programmatically (e.g., via
+ * {@link org.springframework.context.support.GenericApplicationContext#registerBean(Class)}),
+ * but will <strong>not</strong> see any beans defined in {@code @Configuration} classes
+ * also registered with the context.
+ *
  * <p>A {@code BeanRegistrar} implementing {@link org.springframework.context.annotation.ImportAware}
- * can optionally introspect import metadata when used in an import scenario, otherwise the
- * {@code setImportMetadata} method is simply not being called.
+ * can optionally introspect import metadata when used in an import scenario; otherwise
+ * the {@code setImportMetadata} method is not called.
  *
  * <p>In Kotlin, it is recommended to use {@code BeanRegistrarDsl} instead of
  * implementing {@code BeanRegistrar}.
