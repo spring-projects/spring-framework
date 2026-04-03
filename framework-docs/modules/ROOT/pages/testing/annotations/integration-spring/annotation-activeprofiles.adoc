@@ -72,6 +72,12 @@ bean definition profiles programmatically by implementing a custom
 xref:testing/testcontext-framework/ctx-management/env-profiles.adoc#testcontext-ctx-management-env-profiles-ActiveProfilesResolver[`ActiveProfilesResolver`]
 and registering it by using the `resolver` attribute of `@ActiveProfiles`.
 
+NOTE: The `spring.profiles.active` system property is not taken into account by the
+Test Context Framework when determining active profiles for a test class. If you need
+to override the profiles configured via `@ActiveProfiles`, you can implement a custom
+`ActiveProfilesResolver` as described in
+xref:testing/testcontext-framework/ctx-management/env-profiles.adoc[Context Configuration with Environment Profiles].
+
 See xref:testing/testcontext-framework/ctx-management/env-profiles.adoc[Context Configuration with Environment Profiles],
 xref:testing/testcontext-framework/support-classes.adoc#testcontext-junit-jupiter-nested-test-configuration[`@Nested` test class configuration], and the
 {spring-framework-api}/test/context/ActiveProfiles.html[`@ActiveProfiles`] javadoc for

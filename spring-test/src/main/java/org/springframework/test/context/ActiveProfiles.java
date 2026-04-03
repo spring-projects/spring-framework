@@ -38,6 +38,14 @@ import org.springframework.core.annotation.AliasFor;
  * enclosing test class by default. See
  * {@link NestedTestConfiguration @NestedTestConfiguration} for details.
  *
+ * <p>Note that the {@code spring.profiles.active} system property is not taken
+ * into account by the Test Context Framework when determining active profiles for
+ * a test class. If you need to override the profiles configured via
+ * {@code @ActiveProfiles}, you can implement a custom {@link ActiveProfilesResolver}
+ * and register it via the {@link #resolver} attribute. See
+ * <em>Context Configuration with Environment Profiles</em> in the reference manual
+ * for further details and examples.
+ *
  * @author Sam Brannen
  * @since 3.1
  * @see SmartContextLoader
