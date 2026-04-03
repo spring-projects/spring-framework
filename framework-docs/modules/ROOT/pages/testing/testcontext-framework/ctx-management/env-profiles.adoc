@@ -543,3 +543,75 @@ Kotlin::
 ----
 ======
 
+The following example demonstrates how to implement and register a custom
+`SystemPropertyOverrideActiveProfilesResolver` that allows the `spring.profiles.active`
+property (whether configured as a JVM system property or environment variable) to
+override profiles configured via `@ActiveProfiles`:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	// profiles resolved programmatically via a custom resolver that
+	// allows "spring.profiles.active" to override @ActiveProfiles
+	@ActiveProfiles(
+			resolver = SystemPropertyOverrideActiveProfilesResolver.class,
+			inheritProfiles = false)
+	class TransferServiceTest extends AbstractIntegrationTest {
+		// test body
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	// profiles resolved programmatically via a custom resolver that
+	// allows "spring.profiles.active" to override @ActiveProfiles
+	@ActiveProfiles(
+			resolver = SystemPropertyOverrideActiveProfilesResolver::class,
+			inheritProfiles = false)
+	class TransferServiceTest : AbstractIntegrationTest() {
+		// test body
+	}
+----
+======
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	public class SystemPropertyOverrideActiveProfilesResolver implements ActiveProfilesResolver {
+
+		@Override
+		public String[] resolve(Class<?> testClass) {
+			String profiles = System.getProperty("spring.profiles.active");
+			if (profiles != null && !profiles.isBlank()) {
+				return profiles.split(",");
+			}
+			return new DefaultActiveProfilesResolver().resolve(testClass);
+		}
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	class SystemPropertyOverrideActiveProfilesResolver : ActiveProfilesResolver {
+
+		override fun resolve(testClass: Class<*>): Array<String> {
+			val profiles = System.getProperty("spring.profiles.active")
+			if (!profiles.isNullOrBlank()) {
+				return profiles.split(",").toTypedArray()
+			}
+			return DefaultActiveProfilesResolver().resolve(testClass)
+		}
+	}
+----
+======
+
