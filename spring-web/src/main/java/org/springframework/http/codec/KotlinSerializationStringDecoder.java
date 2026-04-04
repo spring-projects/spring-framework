@@ -116,23 +116,21 @@ public abstract class KotlinSerializationStringDecoder<T extends StringFormat> e
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
 	public Flux<Object> decode(Publisher<DataBuffer> inputStream, ResolvableType elementType,
 			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 		return Flux.defer(() -> {
 			KSerializer<Object> serializer = serializer(elementType);
-			if (serializer == null) {
+			KSerializer<Object> listSerializer = serializer(ResolvableType.forClassWithGenerics(List.class, elementType));
+			if (serializer == null || listSerializer == null) {
 				return Mono.error(new DecodingException("Could not find KSerializer for " + elementType));
 			}
 			return this.stringDecoder
 					.decode(inputStream, elementType, mimeType, hints)
-					.handle((string, sink) -> {
-						try {
-							sink.next(format().decodeFromString(serializer, string));
-						}
-						catch (IllegalArgumentException ex) {
-							sink.error(processException(ex));
-						}
-					});
+					.flatMapIterable(string -> string.startsWith("[") ?
+							(List<Object>) format().decodeFromString(listSerializer, string) :
+							List.of(format().decodeFromString(serializer, string)))
+					.onErrorMap(IllegalArgumentException.class, this::processException);
 		});
 	}
 

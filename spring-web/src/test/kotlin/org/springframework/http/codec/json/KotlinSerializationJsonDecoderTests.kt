@@ -198,6 +198,20 @@ class KotlinSerializationJsonDecoderTests : AbstractDecoderTests<KotlinSerializa
 	}
 
 	@Test
+	fun decodeJsonArrayToFlux() {
+		val input = Flux.concat(
+			stringBuffer("[{\"bar\":\"b1\",\"foo\":\"f1\"},"),
+			stringBuffer("{\"bar\":\"b2\",\"foo\":\"f2\"}]"))
+
+		testDecodeAll(input, ResolvableType.forClass(Pojo::class.java), {
+			it.expectNext(Pojo("f1", "b1"))
+				.expectNext(Pojo("f2", "b2"))
+				.expectComplete()
+				.verify()
+		}, null, null)
+	}
+
+	@Test
 	override fun decodeToMono() {
 		val input = Flux.concat(
 				stringBuffer("[{\"bar\":\"b1\",\"foo\":\"f1\"},"),
