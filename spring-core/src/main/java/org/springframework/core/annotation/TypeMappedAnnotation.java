@@ -604,7 +604,7 @@ final class TypeMappedAnnotation<A extends Annotation> extends AbstractMergedAnn
 				return clazz.getClassLoader();
 			}
 			if (this.source instanceof Member member) {
-				member.getDeclaringClass().getClassLoader();
+				return member.getDeclaringClass().getClassLoader();
 			}
 		}
 		return null;
