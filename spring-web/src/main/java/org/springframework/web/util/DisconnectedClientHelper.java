@@ -42,7 +42,8 @@ import org.springframework.util.ClassUtils;
 public class DisconnectedClientHelper {
 
 	private static final Set<String> EXCEPTION_PHRASES =
-			Set.of("broken pipe", "connection reset by peer");
+			Set.of("broken pipe", "connection reset by peer",
+					"response may not be written");
 
 	private static final Set<String> EXCEPTION_TYPE_NAMES =
 			Set.of("AbortedException", "ClientAbortException",
