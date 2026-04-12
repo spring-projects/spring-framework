@@ -120,10 +120,10 @@ class DefaultClientRequestObservationConventionTests {
 	}
 
 	@Test
-	void shouldKeepQueryParameterForUriKeyValue() {
+	void shouldStripQueryParametersFromUriKeyValue() {
 		ClientRequestObservationContext context = createContext(ClientRequest.create(HttpMethod.GET, URI.create("https://example.org/resource/42?queryKey=Query")));
 		context.setUriTemplate("https://example.org/resource/{id}?queryKey={queryValue}");
-		assertThat(this.observationConvention.getLowCardinalityKeyValues(context)).contains(KeyValue.of("uri", "/resource/{id}?queryKey={queryValue}"));
+		assertThat(this.observationConvention.getLowCardinalityKeyValues(context)).contains(KeyValue.of("uri", "/resource/{id}"));
 	}
 
 	private ClientRequestObservationContext createContext(ClientRequest.Builder request) {
