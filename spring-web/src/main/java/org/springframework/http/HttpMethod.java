@@ -110,6 +110,10 @@ public final class HttpMethod implements Comparable<HttpMethod>, Serializable {
 
 	/**
 	 * Return an {@code HttpMethod} object for the given value.
+	 * <p>Note that this lookup is case-sensitive. For predefined constants,
+	 * the method value must be provided in uppercase (e.g., {@code "GET"},
+	 * {@code "POST"}). If no predefined constant matches, a new
+	 * {@code HttpMethod} instance is returned for the given value as-is.
 	 * @param method the method value as a String
 	 * @return the corresponding {@code HttpMethod}
 	 */
