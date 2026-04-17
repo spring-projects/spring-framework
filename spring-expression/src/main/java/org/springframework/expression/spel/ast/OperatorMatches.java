@@ -16,7 +16,6 @@
 
 package org.springframework.expression.spel.ast;
 
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -27,6 +26,7 @@ import org.springframework.expression.spel.ExpressionState;
 import org.springframework.expression.spel.SpelEvaluationException;
 import org.springframework.expression.spel.SpelMessage;
 import org.springframework.expression.spel.support.BooleanTypedValue;
+import org.springframework.util.ConcurrentLruCache;
 
 /**
  * Implements the matches operator. Matches takes two operands:
@@ -41,6 +41,12 @@ import org.springframework.expression.spel.support.BooleanTypedValue;
  */
 public class OperatorMatches extends Operator {
 
+	/**
+	 * Maximum number of compiled regular expressions in the pattern cache: {@value}.
+	 * @since 6.2.19
+	 */
+	public static final int MAX_PATTERN_CACHE_SIZE = 256;
+
 	private static final int PATTERN_ACCESS_THRESHOLD = 1000000;
 
 	/**
@@ -49,28 +55,46 @@ public class OperatorMatches extends Operator {
 	 */
 	private static final int MAX_REGEX_LENGTH = 1000;
 
-	private final ConcurrentMap<String, Pattern> patternCache;
+
+	private final ConcurrentLruCache<String, Pattern> patternCache;
 
 
 	/**
 	 * Create a new {@link OperatorMatches} instance.
-	 * @deprecated as of Spring Framework 5.2.23 in favor of invoking
-	 * {@link #OperatorMatches(ConcurrentMap, int, int, SpelNodeImpl...)}
-	 * with a shared pattern cache instead
+	 * @deprecated as of Spring Framework 5.2.23; for removal in Spring Framework 7.1; invoke
+	 * {@link #OperatorMatches(ConcurrentLruCache, int, int, SpelNodeImpl...)} instead
 	 */
-	@Deprecated(since = "5.2.23")
+	@Deprecated(since = "5.2.23", forRemoval = true)
 	public OperatorMatches(int startPos, int endPos, SpelNodeImpl... operands) {
-		this(new ConcurrentHashMap<>(), startPos, endPos, operands);
+		this(new ConcurrentLruCache<>(MAX_PATTERN_CACHE_SIZE, Pattern::compile), startPos, endPos, operands);
 	}
 
 	/**
 	 * Create a new {@link OperatorMatches} instance with a shared pattern cache.
+	 * <p>As of Spring Framework 6.2.19, the supplied {@code patternCacheMap} will
+	 * be ignored.
 	 * @since 5.2.23
+	 * @deprecated as of Spring Framework 6.2.19; for removal in Spring Framework 7.1; invoke
+	 * {@link #OperatorMatches(ConcurrentLruCache, int, int, SpelNodeImpl...)} instead
 	 */
-	public OperatorMatches(ConcurrentMap<String, Pattern> patternCache, int startPos, int endPos, SpelNodeImpl... operands) {
+	@Deprecated(since = "6.2.19", forRemoval = true)
+	public OperatorMatches(ConcurrentMap<String, Pattern> patternCacheMap,
+			int startPos, int endPos, SpelNodeImpl... operands) {
+
+		this(startPos, endPos, operands);
+	}
+
+	/**
+	 * Create a new {@link OperatorMatches} instance with a shared pattern cache.
+	 * @since 6.2.19
+	 */
+	public OperatorMatches(ConcurrentLruCache<String, Pattern> patternCache,
+			int startPos, int endPos, SpelNodeImpl... operands) {
+
 		super("matches", startPos, endPos, operands);
 		this.patternCache = patternCache;
 	}
+
 
 	/**
 	 * Check the first operand matches the regex specified as the second operand.
@@ -96,12 +120,13 @@ public class OperatorMatches extends Operator {
 			throw new SpelEvaluationException(rightOp.getStartPosition(),
 					SpelMessage.INVALID_SECOND_OPERAND_FOR_MATCHES_OPERATOR, right);
 		}
+		if (regex.length() > MAX_REGEX_LENGTH) {
+			throw new SpelEvaluationException(rightOp.getStartPosition(),
+					SpelMessage.MAX_REGEX_LENGTH_EXCEEDED, MAX_REGEX_LENGTH);
+		}
 
 		try {
-			Pattern pattern = this.patternCache.computeIfAbsent(regex, key -> {
-				checkRegexLength(key);
-				return Pattern.compile(key);
-			});
+			Pattern pattern = this.patternCache.get(regex);
 			Matcher matcher = pattern.matcher(new MatcherInput(input, new AccessCount()));
 			return BooleanTypedValue.forValue(matcher.matches());
 		}
@@ -112,13 +137,6 @@ public class OperatorMatches extends Operator {
 		catch (IllegalStateException ex) {
 			throw new SpelEvaluationException(
 					rightOp.getStartPosition(), ex, SpelMessage.FLAWED_PATTERN, right);
-		}
-	}
-
-	private void checkRegexLength(String regex) {
-		if (regex.length() > MAX_REGEX_LENGTH) {
-			throw new SpelEvaluationException(getRightOperand().getStartPosition(),
-					SpelMessage.MAX_REGEX_LENGTH_EXCEEDED, MAX_REGEX_LENGTH);
 		}
 	}
 
