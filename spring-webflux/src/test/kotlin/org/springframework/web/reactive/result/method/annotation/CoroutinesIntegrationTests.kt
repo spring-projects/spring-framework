@@ -131,7 +131,6 @@ class CoroutinesIntegrationTests : AbstractRequestMappingIntegrationTests() {
 		assertThat(entity.body).isEqualTo("foobar")
 	}
 
-
 	@Configuration
 	@EnableWebFlux
 	@ComponentScan(resourcePattern = "**/CoroutinesIntegrationTests*")
@@ -207,7 +206,6 @@ class CoroutinesIntegrationTests : AbstractRequestMappingIntegrationTests() {
 						}
 			return ResponseEntity.ok().body(strings)
 		}
-
 	}
 
 

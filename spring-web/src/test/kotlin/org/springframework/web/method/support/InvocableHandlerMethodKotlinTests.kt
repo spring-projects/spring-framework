@@ -156,6 +156,13 @@ class InvocableHandlerMethodKotlinTests {
 	}
 
 	@Test
+	fun valueClassWithNullableAndUnderlyingValue() {
+		composite.addResolver(StubArgumentResolver(LongValueClass::class.java, 1L))
+		val value = getInvocable(ValueClassHandler::valueClassWithNullable.javaMethod!!).invokeForRequest(request, null)
+		Assertions.assertThat(value).isEqualTo(1L)
+	}
+
+	@Test
 	fun valueClassWithNullable() {
 		composite.addResolver(StubArgumentResolver(LongValueClass::class.java, null))
 		val value = getInvocable(ValueClassHandler::valueClassWithNullable.javaMethod!!).invokeForRequest(request, null)
@@ -213,6 +220,14 @@ class InvocableHandlerMethodKotlinTests {
 		composite.addResolver(StubArgumentResolver(LongValueClass::class.java, null))
 		val value = getInvocable(SuspendingValueClassHandler::valueClassWithNullable.javaMethod!!).invokeForRequest(request, null)
 		StepVerifier.create(value as Mono<Long>).verifyComplete()
+	}
+
+	@Test
+	fun suspendingValueClassWithNullableAndUnderlyingValue() {
+		composite.addResolver(ContinuationHandlerMethodArgumentResolver())
+		composite.addResolver(StubArgumentResolver(LongValueClass::class.java, 1L))
+		val value = getInvocable(SuspendingValueClassHandler::valueClassWithNullable.javaMethod!!).invokeForRequest(request, null)
+		StepVerifier.create(value as Mono<Long>).expectNext(1L).verifyComplete()
 	}
 
 	@Test

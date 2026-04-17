@@ -259,6 +259,14 @@ class InvocableHandlerMethodKotlinTests {
 	}
 
 	@Test
+	fun valueClassWithNullableAndUnderlyingValue() {
+		this.resolvers.add(stubResolver(1L, LongValueClass::class.java))
+		val method = ValueClassController::valueClassWithNullable.javaMethod!!
+		val result = invoke(ValueClassController(), method)
+		assertHandlerResultValue(result, "1")
+	}
+
+	@Test
 	fun valueClassWithNullable() {
 		this.resolvers.add(stubResolver(null, LongValueClass::class.java))
 		val method = ValueClassController::valueClassWithNullable.javaMethod!!
@@ -318,6 +326,14 @@ class InvocableHandlerMethodKotlinTests {
 		val method = SuspendingValueClassController::valueClassWithNullable.javaMethod!!
 		val result = invoke(SuspendingValueClassController(), method, null)
 		assertHandlerResultValue(result, "null")
+	}
+
+	@Test
+	fun suspendingValueClassWithNullableAndUnderlyingValue() {
+		this.resolvers.add(stubResolver(1L, LongValueClass::class.java))
+		val method = SuspendingValueClassController::valueClassWithNullable.javaMethod!!
+		val result = invoke(SuspendingValueClassController(), method)
+		assertHandlerResultValue(result, "1")
 	}
 
 	@Test
