@@ -22,8 +22,6 @@ import java.util.Collections;
 import java.util.Deque;
 import java.util.List;
 import java.util.Locale;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 import java.util.regex.Pattern;
 
 import org.springframework.expression.ParseException;
@@ -79,6 +77,7 @@ import org.springframework.expression.spel.ast.TypeReference;
 import org.springframework.expression.spel.ast.VariableReference;
 import org.springframework.lang.Contract;
 import org.springframework.lang.Nullable;
+import org.springframework.util.ConcurrentLruCache;
 import org.springframework.util.StringUtils;
 
 /**
@@ -100,7 +99,9 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 	private final Deque<SpelNodeImpl> constructedNodes = new ArrayDeque<>();
 
 	// Shared cache for compiled regex patterns
-	private final ConcurrentMap<String, Pattern> patternCache = new ConcurrentHashMap<>();
+	private final ConcurrentLruCache<String, Pattern> patternCache =
+			new ConcurrentLruCache<>(OperatorMatches.MAX_PATTERN_CACHE_SIZE, Pattern::compile);
+
 
 	// The expression being parsed
 	private String expressionString = "";
