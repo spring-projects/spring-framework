@@ -19,6 +19,7 @@ package org.springframework.validation.method;
 import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Stream;
 
 import org.springframework.context.MessageSourceResolvable;
 import org.springframework.validation.Errors;
@@ -56,17 +57,22 @@ public interface MethodValidationResult {
 	 * Whether the result contains any validation errors.
 	 */
 	default boolean hasErrors() {
-		return !getParameterValidationResults().isEmpty();
+		return !getParameterValidationResults().isEmpty() ||
+				!getCrossParameterValidationResults().isEmpty();
 	}
 
 	/**
-	 * Return a single list with all errors from all validation results.
+	 * Return a single list with all errors from all validation results,
+	 * including cross-parameter validation errors.
 	 * @see #getParameterValidationResults()
+	 * @see #getCrossParameterValidationResults()
 	 * @see ParameterValidationResult#getResolvableErrors()
 	 */
 	default List<? extends MessageSourceResolvable> getAllErrors() {
-		return getParameterValidationResults().stream()
-				.flatMap(result -> result.getResolvableErrors().stream())
+		return Stream.concat(
+				getParameterValidationResults().stream()
+						.flatMap(result -> result.getResolvableErrors().stream()),
+				getCrossParameterValidationResults().stream())
 				.toList();
 	}
 
