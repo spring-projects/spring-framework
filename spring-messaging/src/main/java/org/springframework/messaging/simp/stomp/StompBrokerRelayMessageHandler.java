@@ -456,10 +456,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 		accessor.setLogin(this.systemLogin);
 		accessor.setPasscode(this.systemPasscode);
 		accessor.setHeartbeat(this.systemHeartbeatSendInterval, this.systemHeartbeatReceiveInterval);
-		String virtualHost = getVirtualHost();
-		if (virtualHost != null) {
-			accessor.setHost(virtualHost);
-		}
+		accessor.setHost(getVirtualHost() != null ? getVirtualHost() : getRelayHost());
 		accessor.setSessionId(SYSTEM_SESSION_ID);
 		if (logger.isDebugEnabled()) {
 			logger.debug("Forwarding " + accessor.getShortLogMessage(EMPTY_PAYLOAD));
@@ -582,9 +579,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 			stompHeaderAccessor = (stompHeaderAccessor.isMutable() ? stompHeaderAccessor : StompHeaderAccessor.wrap(message));
 			stompHeaderAccessor.setLogin(this.clientLogin);
 			stompHeaderAccessor.setPasscode(this.clientPasscode);
-			if (getVirtualHost() != null) {
-				stompHeaderAccessor.setHost(getVirtualHost());
-			}
+			stompHeaderAccessor.setHost(getVirtualHost() != null ? getVirtualHost() : getRelayHost());
 			RelayConnectionHandler handler = new RelayConnectionHandler(sessionId, stompHeaderAccessor);
 			this.connectionHandlers.put(sessionId, handler);
 			this.stats.incrementConnectCount();
