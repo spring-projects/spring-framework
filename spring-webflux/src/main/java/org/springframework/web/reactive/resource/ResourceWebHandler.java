@@ -567,8 +567,8 @@ public class ResourceWebHandler implements WebHandler, InitializingBean {
 
 	private String locationToString(List<Resource> locations) {
 		return locations.toString()
-				.replaceAll("class path resource", "classpath")
-				.replaceAll("ServletContext resource", "ServletContext");
+				.replace("class path resource", "classpath")
+				.replace("ServletContext resource", "ServletContext");
 	}
 
 }
