@@ -96,8 +96,6 @@ public class HandlerMethod extends AnnotatedMethod {
 
 	private @Nullable HandlerMethod resolvedFromHandlerMethod;
 
-	private volatile @Nullable HandlerMethod resolvedBeanHandlerMethod;
-
 	private final String description;
 
 
@@ -355,23 +353,13 @@ public class HandlerMethod extends AnnotatedMethod {
 	 * <p>If the {@link #getBean() handler} is not String, return the same instance.
 	 */
 	public HandlerMethod createWithResolvedBean() {
-		HandlerMethod resolvedBeanHandlerMethod = this.resolvedBeanHandlerMethod;
-		if (resolvedBeanHandlerMethod != null) {
-			return resolvedBeanHandlerMethod;
-		}
-
 		// We need to resolve a bean name reference.
 		if (!(this.bean instanceof String beanName)) {
 			return this;
 		}
 		Assert.state(this.beanFactory != null, "Cannot resolve bean name without BeanFactory");
 		Object handler = this.beanFactory.getBean(beanName);
-
-		HandlerMethod handlerMethod = new HandlerMethod(this, handler, false);
-		if (this.beanFactory.isSingleton(beanName)) {
-			this.resolvedBeanHandlerMethod = handlerMethod;
-		}
-		return handlerMethod;
+		return new HandlerMethod(this, handler, false);
 	}
 
 	/**
