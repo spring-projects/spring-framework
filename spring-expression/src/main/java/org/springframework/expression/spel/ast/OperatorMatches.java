@@ -125,6 +125,7 @@ public class OperatorMatches extends Operator {
 					SpelMessage.MAX_REGEX_LENGTH_EXCEEDED, MAX_REGEX_LENGTH);
 		}
 
+		state.trackOperation();
 		try {
 			Pattern pattern = this.patternCache.get(regex);
 			Matcher matcher = pattern.matcher(new MatcherInput(input, new AccessCount()));

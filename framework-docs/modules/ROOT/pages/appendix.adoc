@@ -74,6 +74,11 @@ expressions used in XML bean definitions, `@Value`, etc.
 | The mode to use when compiling expressions for the
 xref:core/expressions/evaluation.adoc#expressions-compiler-configuration[Spring Expression Language].
 
+| `spring.expression.maxOperations`
+| The default maximum number of operations permitted during
+xref:core/expressions/evaluation.adoc#expressions-parser-configuration[Spring Expression Language]
+expression evaluation.
+
 | `spring.getenv.ignore`
 | Instructs Spring to ignore operating system environment variables if a Spring
 `Environment` property -- for example, a placeholder in a configuration String -- isn't

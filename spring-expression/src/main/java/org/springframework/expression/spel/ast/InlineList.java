@@ -27,7 +27,7 @@ import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.CodeFlow;
 import org.springframework.expression.spel.ExpressionState;
 import org.springframework.expression.spel.SpelNode;
-import org.springframework.expression.spel.support.StandardEvaluationContext;
+import org.springframework.expression.spel.support.SimpleEvaluationContext;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
@@ -42,69 +42,64 @@ import org.springframework.util.Assert;
  */
 public class InlineList extends SpelNodeImpl {
 
+	private final boolean isConstant;
+
 	@Nullable
-	private final TypedValue constant;
+	private volatile TypedValue constant;
 
 
 	public InlineList(int startPos, int endPos, SpelNodeImpl... args) {
 		super(startPos, endPos, args);
-		this.constant = computeConstantValue();
+		this.isConstant = determineIfConstant();
 	}
 
 
 	/**
-	 * If all the components of the list are constants, or lists that themselves
-	 * contain constants, then a constant list can be built to represent this node.
-	 * <p>This will speed up later getValue calls and reduce the amount of garbage
-	 * created.
+	 * Determine whether this list is structurally eligible to be a constant
+	 * value: whether all of its components are themselves constants or lists
+	 * that contain only constants.
+	 * <p>The actual constant value is created lazily on the first call to
+	 * {@link #getValueInternal(ExpressionState)}.
 	 */
-	@Nullable
-	private TypedValue computeConstantValue() {
+	private boolean determineIfConstant() {
 		for (int c = 0, max = getChildCount(); c < max; c++) {
 			SpelNode child = getChild(c);
-			if (!(child instanceof Literal)) {
-				if (child instanceof InlineList inlineList) {
-					if (!inlineList.isConstant()) {
-						return null;
-					}
-				}
-				else if (!(child instanceof OpMinus opMinus) || !opMinus.isNegativeNumberLiteral()) {
-					return null;
-				}
+			if (child instanceof Literal) {
+				continue;
 			}
+			if (child instanceof InlineList inlineList && inlineList.isConstant()) {
+				continue;
+			}
+			if (child instanceof OpMinus opMinus && opMinus.isNegativeNumberLiteral()) {
+				continue;
+			}
+			return false;
 		}
-
-		List<Object> constantList = new ArrayList<>();
-		int childcount = getChildCount();
-		ExpressionState expressionState = new ExpressionState(new StandardEvaluationContext());
-		for (int c = 0; c < childcount; c++) {
-			SpelNode child = getChild(c);
-			if (child instanceof Literal literal) {
-				constantList.add(literal.getLiteralValue().getValue());
-			}
-			else if (child instanceof InlineList inlineList) {
-				constantList.add(inlineList.getConstantValue());
-			}
-			else if (child instanceof OpMinus) {
-				constantList.add(child.getValue(expressionState));
-			}
-		}
-		return new TypedValue(Collections.unmodifiableList(constantList));
+		return true;
 	}
 
 	@Override
 	public TypedValue getValueInternal(ExpressionState expressionState) throws EvaluationException {
-		if (this.constant != null) {
-			return this.constant;
+		TypedValue result = this.constant;
+		if (result != null) {
+			return result;
 		}
-		else {
-			int childCount = getChildCount();
-			List<Object> returnValue = new ArrayList<>(childCount);
-			for (int c = 0; c < childCount; c++) {
-				returnValue.add(getChild(c).getValue(expressionState));
-			}
-			return new TypedValue(returnValue);
+		result = createList(expressionState);
+		if (this.isConstant) {
+			this.constant = result;
 		}
+		return result;
+	}
+
+	private TypedValue createList(ExpressionState expressionState) throws EvaluationException {
+		int childCount = getChildCount();
+		expressionState.trackOperation();
+		List<Object> list = new ArrayList<>(childCount);
+		for (int c = 0; c < childCount; c++) {
+			expressionState.trackOperation();
+			list.add(getChild(c).getValue(expressionState));
+		}
+		return new TypedValue(this.isConstant ? Collections.unmodifiableList(list) : list);
 	}
 
 	@Override
@@ -118,22 +113,38 @@ public class InlineList extends SpelNodeImpl {
 	}
 
 	/**
-	 * Return whether this list is a constant value.
+	 * Return whether this list is structurally a constant value.
+	 * <p>Note that the resulting constant value is created lazily on the
+	 * first call to {@link #getValueInternal(ExpressionState)} or
+	 * {@link #getConstantValue()}.
 	 */
 	public boolean isConstant() {
-		return (this.constant != null);
+		return this.isConstant;
 	}
 
+	/**
+	 * Return the cached constant {@link List} value for this inline list,
+	 * lazily creating it on first access.
+	 * @see #isConstant()
+	 * @deprecated as of Spring Framework 6.2.19; this method was only intended for
+	 * testing purposes and will be removed in a future version of the framework
+	 */
 	@SuppressWarnings("unchecked")
+	@Deprecated(since = "6.2.19")
 	@Nullable
 	public List<Object> getConstantValue() {
-		Assert.state(this.constant != null, "No constant");
-		return (List<Object>) this.constant.getValue();
+		Assert.state(this.isConstant, "Not a constant");
+		TypedValue result = this.constant;
+		if (result == null) {
+			result = createList(new ExpressionState(SimpleEvaluationContext.forReadOnlyDataBinding().build()));
+			this.constant = result;
+		}
+		return (List<Object>) result.getValue();
 	}
 
 	@Override
 	public boolean isCompilable() {
-		return isConstant();
+		return this.isConstant;
 	}
 
 	@Override

@@ -62,6 +62,7 @@ public class OperatorInstanceof extends Operator {
 		Object leftValue = left.getValue();
 		Object rightValue = right.getValue();
 		BooleanTypedValue result;
+		state.trackOperation();
 		if (!(rightValue instanceof Class<?> rightClass)) {
 			throw new SpelEvaluationException(getRightOperand().getStartPosition(),
 					SpelMessage.INSTANCEOF_OPERATOR_NEEDS_CLASS_OPERAND,

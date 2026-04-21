@@ -51,6 +51,7 @@ public class Elvis extends SpelNodeImpl {
 	 */
 	@Override
 	public TypedValue getValueInternal(ExpressionState state) throws EvaluationException {
+		state.trackOperation();
 		TypedValue value = this.children[0].getValueInternal(state);
 		// If this check is changed, the generateCode method will need changing too
 		if (value.getValue() != null && !"".equals(value.getValue())) {

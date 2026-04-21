@@ -67,6 +67,8 @@ public class ExpressionState {
 	@Nullable
 	private Deque<VariableScope> variableScopes;
 
+	private int operationsCount;
+
 	// When entering a new scope there is a new base object which should be used
 	// for '#this' references (or to act as a target for unqualified references).
 	// This ArrayDeque captures those objects at each nested scope level.
@@ -146,6 +148,7 @@ public class ExpressionState {
 	 * @see EvaluationContext#assignVariable(String, Supplier)
 	 */
 	public TypedValue assignVariable(String name, Supplier<TypedValue> valueSupplier) {
+		trackOperation();
 		return this.relatedContext.assignVariable(name, valueSupplier);
 	}
 
@@ -170,6 +173,7 @@ public class ExpressionState {
 	 * @see #setVariable(String, Object)
 	 */
 	public TypedValue lookupVariable(String name) {
+		trackOperation();
 		Object value = this.relatedContext.lookupVariable(name);
 		return (value != null ? new TypedValue(value) : TypedValue.NULL);
 	}
@@ -301,6 +305,7 @@ public class ExpressionState {
 	public TypedValue operate(Operation op, @Nullable Object left, @Nullable Object right) throws EvaluationException {
 		OperatorOverloader overloader = this.relatedContext.getOperatorOverloader();
 		if (overloader.overridesOperation(op, left, right)) {
+			trackOperation();
 			Object returnValue = overloader.operate(op, left, right);
 			return new TypedValue(returnValue);
 		}
@@ -321,6 +326,18 @@ public class ExpressionState {
 
 	public SpelParserConfiguration getConfiguration() {
 		return this.configuration;
+	}
+
+	/**
+	 * Track an operation during expression evaluation.
+	 * @since 6.2.19
+	 * @see SpelParserConfiguration#getMaximumOperations()
+	 */
+	public void trackOperation() {
+		int maxOperations = this.configuration.getMaximumOperations();
+		if (++this.operationsCount >= maxOperations) {
+			throw new SpelEvaluationException(SpelMessage.MAX_OPERATIONS_EXCEEDED, maxOperations);
+		}
 	}
 
 

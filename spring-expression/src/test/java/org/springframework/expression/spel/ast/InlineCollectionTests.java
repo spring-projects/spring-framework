@@ -30,6 +30,7 @@ import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
  * Tests for {@link InlineList} and {@link InlineMap}.
@@ -47,17 +48,35 @@ class InlineCollectionTests {
 	class InlineListTests {
 
 		@Test
-		void listIsCached() {
-			InlineList list = parseList("{1, -2, 3, 4}");
-			assertThat(list.isConstant()).isTrue();
-			assertThat(list.getConstantValue()).isEqualTo(List.of(1, -2, 3, 4));
+		@SuppressWarnings({ "rawtypes", "unchecked", "deprecation" })
+		void getConstantValue() {
+			InlineList inlineList = parseList("{1, -2, 3, 4}");
+			assertThat(inlineList.isConstant()).isTrue();
+			List list1 = inlineList.getConstantValue();
+			List list2 = inlineList.getValue(expressionState(), List.class);
+			assertThat(list1).containsExactly(1, -2, 3, 4).isSameAs(list2);
+		}
+
+		@Test
+		@SuppressWarnings({ "rawtypes", "unchecked" })
+		void constantListIsCached() {
+			ExpressionState expressionState = expressionState();
+
+			InlineList inlineList = parseList("{1, -2, 3, 4}");
+			assertThat(inlineList.isConstant()).isTrue();
+			List list1 = inlineList.getValue(expressionState, List.class);
+			List list2 = inlineList.getValue(expressionState, List.class);
+			assertThat(list1).containsExactly(1, -2, 3, 4).isSameAs(list2);
+			// Constant inline lists are immutable.
+			assertThatExceptionOfType(UnsupportedOperationException.class)
+					.isThrownBy(() -> list1.add(999));
 		}
 
 		@Test
 		void dynamicListIsNotCached() {
 			InlineList list = parseList("{1, (5 - 3), 3, 4}");
 			assertThat(list.isConstant()).isFalse();
-			assertThat(list.getValue(null)).isEqualTo(List.of(1, 2, 3, 4));
+			assertThat(list.getValue(expressionState())).isEqualTo(List.of(1, 2, 3, 4));
 		}
 
 		@Test
@@ -110,11 +129,28 @@ class InlineCollectionTests {
 	class InlineMapTests {
 
 		@Test
-		void mapIsCached() {
-			InlineMap map = parseMap("{1 : 2, 3 : 4}");
-			assertThat(map.isConstant()).isTrue();
-			Map<Integer, Integer> expected = Map.of(1, 2, 3, 4);
-			assertThat(map.getValue(null)).isEqualTo(expected);
+		@SuppressWarnings({ "rawtypes", "unchecked", "deprecation" })
+		void getConstantValue() {
+			InlineMap inlineMap = parseMap("{1 : 2, 3 : 4}");
+			assertThat(inlineMap.isConstant()).isTrue();
+			Map map1 = inlineMap.getConstantValue();
+			Map map2 = inlineMap.getValue(expressionState(), Map.class);
+			assertThat(map1).isEqualTo(Map.of(1, 2, 3, 4)).isSameAs(map2);
+		}
+
+		@Test
+		@SuppressWarnings({ "rawtypes", "unchecked" })
+		void constantMapIsCached() {
+			ExpressionState expressionState = expressionState();
+
+			InlineMap inlineMap = parseMap("{1 : 2, 3 : 4}");
+			assertThat(inlineMap.isConstant()).isTrue();
+			Map map1 = inlineMap.getValue(expressionState, Map.class);
+			Map map2 = inlineMap.getValue(expressionState, Map.class);
+			assertThat(map1).isEqualTo(Map.of(1, 2, 3, 4)).isSameAs(map2);
+			// Constant inline maps are immutable.
+			assertThatExceptionOfType(UnsupportedOperationException.class)
+					.isThrownBy(() -> map1.put(99, "X"));
 		}
 
 		@Test
@@ -122,7 +158,7 @@ class InlineCollectionTests {
 			InlineMap map = parseMap("{-1 : 2, (-2 - 1) : -4}");
 			assertThat(map.isConstant()).isFalse();
 			Map<Integer, Integer> expected = Map.of(-1, 2, -3, -4);
-			assertThat(map.getValue(null)).isEqualTo(expected);
+			assertThat(map.getValue(expressionState())).isEqualTo(expected);
 		}
 
 		@Test
@@ -155,7 +191,7 @@ class InlineCollectionTests {
 			InlineMap map = parseMap("{-1 : 2, -3 : 4}");
 			assertThat(map.isConstant()).isTrue();
 			Map<Integer, Integer> expected = Map.of(-1, 2, -3, 4);
-			assertThat(map.getValue(null)).isEqualTo(expected);
+			assertThat(map.getValue(expressionState())).isEqualTo(expected);
 		}
 
 		@Test
@@ -163,7 +199,7 @@ class InlineCollectionTests {
 			InlineMap map = parseMap("{1 : -2, 3 : -4}");
 			assertThat(map.isConstant()).isTrue();
 			Map<Integer, Integer> expected = Map.of(1, -2, 3, -4);
-			assertThat(map.getValue(null)).isEqualTo(expected);
+			assertThat(map.getValue(expressionState())).isEqualTo(expected);
 		}
 
 		@Test
@@ -171,7 +207,7 @@ class InlineCollectionTests {
 			InlineMap map = parseMap("{1L : -2L, 3L : -4L}");
 			assertThat(map.isConstant()).isTrue();
 			Map<Long, Long> expected = Map.of(1L, -2L, 3L, -4L);
-			assertThat(map.getValue(null)).isEqualTo(expected);
+			assertThat(map.getValue(expressionState())).isEqualTo(expected);
 		}
 
 		@Test
@@ -179,7 +215,7 @@ class InlineCollectionTests {
 			InlineMap map = parseMap("{-1.0f : -2.0f, -3.0f : -4.0f}");
 			assertThat(map.isConstant()).isTrue();
 			Map<Float, Float> expected = Map.of(-1.0f, -2.0f, -3.0f, -4.0f);
-			assertThat(map.getValue(null)).isEqualTo(expected);
+			assertThat(map.getValue(expressionState())).isEqualTo(expected);
 		}
 
 		@Test
@@ -187,7 +223,7 @@ class InlineCollectionTests {
 			InlineMap map = parseMap("{-1.0 : -2.0, -3.0 : -4.0}");
 			assertThat(map.isConstant()).isTrue();
 			Map<Double, Double> expected = Map.of(-1.0, -2.0, -3.0, -4.0);
-			assertThat(map.getValue(null)).isEqualTo(expected);
+			assertThat(map.getValue(expressionState())).isEqualTo(expected);
 		}
 
 		@Test
@@ -195,7 +231,7 @@ class InlineCollectionTests {
 			InlineMap map = parseMap("{-1 : -2, -3 : -4}");
 			assertThat(map.isConstant()).isTrue();
 			Map<Integer, Integer> expected = Map.of(-1, -2, -3, -4);
-			assertThat(map.getValue(null)).isEqualTo(expected);
+			assertThat(map.getValue(expressionState())).isEqualTo(expected);
 		}
 
 		private InlineMap parseMap(String s) {
@@ -208,6 +244,10 @@ class InlineCollectionTests {
 
 	private SpelExpression parseExpression(String s) {
 		return (SpelExpression) parser.parseExpression(s);
+	}
+
+	private static ExpressionState expressionState() {
+		return new ExpressionState(new StandardEvaluationContext());
 	}
 
 

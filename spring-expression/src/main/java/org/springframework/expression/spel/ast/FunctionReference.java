@@ -84,6 +84,7 @@ public class FunctionReference extends SpelNodeImpl {
 		// Note: "javaMethod" cannot be named "method" due to a bug in Checkstyle.
 		if (function instanceof Method javaMethod) {
 			try {
+				state.trackOperation();
 				return executeFunctionViaMethod(state, javaMethod);
 			}
 			catch (SpelEvaluationException ex) {
@@ -95,6 +96,7 @@ public class FunctionReference extends SpelNodeImpl {
 		// Function registered via a MethodHandle.
 		if (function instanceof MethodHandle methodHandle) {
 			try {
+				state.trackOperation();
 				return executeFunctionViaMethodHandle(state, methodHandle);
 			}
 			catch (SpelEvaluationException ex) {
