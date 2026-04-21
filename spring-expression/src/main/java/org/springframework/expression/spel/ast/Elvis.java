@@ -60,6 +60,7 @@ public class Elvis extends SpelNodeImpl {
 	 */
 	@Override
 	public TypedValue getValueInternal(ExpressionState state) throws EvaluationException {
+		state.trackOperation();
 		TypedValue leftHandTypedValue = this.children[0].getValueInternal(state);
 		Object leftHandValue = leftHandTypedValue.getValue();
 

@@ -395,6 +395,16 @@ set a JVM system property or Spring property named `spring.context.expression.ma
 to the maximum expression length needed by your application (see
 xref:appendix.adoc#appendix-spring-properties[Supported Spring Properties]).
 
+Similarly, the number of operations performed during the evaluation of a SpEL expression
+cannot exceed 10,000 by default; however, the `maxOperations` value is configurable. If
+you create a `SpelExpressionParser` programmatically (the recommend approach), you can
+specify a custom `maxOperations` value when creating the `SpelParserConfiguration` that
+you provide to the `SpelExpressionParser`. If you are not able to configure an explicit
+value for `maxOperations` via `SpelParserConfiguration`, you can set a JVM system
+property or Spring property named `spring.expression.maxOperations` to the maximum number
+of operations required by your application (see
+xref:appendix.adoc#appendix-spring-properties[Supported Spring Properties]).
+
 
 [[expressions-spel-compilation]]
 == SpEL Compilation

@@ -122,13 +122,13 @@ public class MethodReference extends SpelNodeImpl {
 		Object target = contextObject.getValue();
 		TypeDescriptor targetType = contextObject.getTypeDescriptor();
 		@Nullable Object[] arguments = getArguments(state);
-		TypedValue result = getValueInternal(evaluationContext, target, targetType, arguments);
+		TypedValue result = getValueInternal(state, evaluationContext, target, targetType, arguments);
 		updateExitTypeDescriptor();
 		return result;
 	}
 
-	private TypedValue getValueInternal(EvaluationContext evaluationContext, @Nullable Object target,
-			@Nullable TypeDescriptor targetType, @Nullable Object[] arguments) {
+	private TypedValue getValueInternal(ExpressionState state, EvaluationContext evaluationContext,
+			@Nullable Object target, @Nullable TypeDescriptor targetType, @Nullable Object[] arguments) {
 
 		List<TypeDescriptor> argumentTypes = getArgumentTypes(arguments);
 		Optional<?> fallbackOptionalTarget = null;
@@ -156,6 +156,7 @@ public class MethodReference extends SpelNodeImpl {
 		MethodExecutor executorToUse = getCachedExecutor(evaluationContext, target, targetType, argumentTypes);
 		if (executorToUse != null) {
 			try {
+				state.trackOperation();
 				return executorToUse.execute(evaluationContext, target, arguments);
 			}
 			catch (AccessException ex) {
@@ -218,6 +219,7 @@ public class MethodReference extends SpelNodeImpl {
 		this.cachedExecutor = new CachedMethodExecutor(
 				executorToUse, (targetToUse instanceof Class<?> clazz ? clazz : null), targetType, argumentTypes);
 		try {
+			state.trackOperation();
 			return executorToUse.execute(evaluationContext, targetToUse, arguments);
 		}
 		catch (AccessException ex) {
@@ -433,6 +435,8 @@ public class MethodReference extends SpelNodeImpl {
 
 	private class MethodValueRef implements ValueRef {
 
+		private final ExpressionState expressionState;
+
 		private final EvaluationContext evaluationContext;
 
 		private final @Nullable Object target;
@@ -442,6 +446,7 @@ public class MethodReference extends SpelNodeImpl {
 		private final @Nullable Object[] arguments;
 
 		public MethodValueRef(ExpressionState state, @Nullable Object[] arguments) {
+			this.expressionState = state;
 			this.evaluationContext = state.getEvaluationContext();
 			this.target = state.getActiveContextObject().getValue();
 			this.targetType = state.getActiveContextObject().getTypeDescriptor();
@@ -451,7 +456,7 @@ public class MethodReference extends SpelNodeImpl {
 		@Override
 		public TypedValue getValue() {
 			TypedValue result = MethodReference.this.getValueInternal(
-					this.evaluationContext, this.target, this.targetType, this.arguments);
+					this.expressionState, this.evaluationContext, this.target, this.targetType, this.arguments);
 			updateExitTypeDescriptor();
 			return result;
 		}

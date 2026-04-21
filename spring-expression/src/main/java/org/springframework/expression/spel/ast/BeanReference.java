@@ -65,6 +65,7 @@ public class BeanReference extends SpelNodeImpl {
 					getStartPosition(), SpelMessage.NO_BEAN_RESOLVER_REGISTERED, this.beanName);
 		}
 
+		state.trackOperation();
 		try {
 			return new TypedValue(beanResolver.resolve(state.getEvaluationContext(), this.beanName));
 		}
