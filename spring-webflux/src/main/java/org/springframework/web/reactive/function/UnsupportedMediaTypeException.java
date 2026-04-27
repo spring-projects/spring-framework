@@ -73,7 +73,7 @@ public class UnsupportedMediaTypeException extends NestedRuntimeException {
 
 	private static String initReason(@Nullable MediaType contentType, @Nullable ResolvableType bodyType) {
 		return "Content type '" + (contentType != null ? contentType : "") + "' not supported" +
-				(bodyType != null ? " for bodyType=" + bodyType.toString() : "");
+				(bodyType != null ? " for bodyType=" + bodyType : "");
 	}
 
 

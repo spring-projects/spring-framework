@@ -3043,7 +3043,7 @@ class ServletAnnotationControllerHandlerMethodTests extends AbstractServletHandl
 
 		@RequestMapping("/myPath.do")
 		public void myHandle(GenericBean<?> gb, HttpServletResponse response) throws Exception {
-			response.getWriter().write(gb.getTestBeanSet().toString() + "-" +
+			response.getWriter().write(gb.getTestBeanSet() + "-" +
 					gb.getTestBeanSet().iterator().next().getClass().getName());
 		}
 	}

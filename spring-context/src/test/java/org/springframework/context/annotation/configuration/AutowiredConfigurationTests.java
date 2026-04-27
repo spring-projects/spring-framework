@@ -289,7 +289,7 @@ class AutowiredConfigurationTests {
 
 		@Bean
 		public TestBean testBean(Color color, List<Color> colors) {
-			return new TestBean(color.toString() + "-" + colors.get(0).toString());
+			return new TestBean(color + "-" + colors.get(0));
 		}
 	}
 
@@ -303,7 +303,7 @@ class AutowiredConfigurationTests {
 				return new TestBean("");
 			}
 			else {
-				return new TestBean(color.get() + "-" + colors.get().get(0).toString());
+				return new TestBean(color.get() + "-" + colors.get().get(0));
 			}
 		}
 	}
