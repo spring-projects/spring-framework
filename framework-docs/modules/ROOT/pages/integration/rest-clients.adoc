@@ -1029,6 +1029,26 @@ to a client application, what input and output types to create, what endpoint me
 signatures are needed, what Javadoc to have, and so on. The resulting Java API guides and
 is ready to use.
 
+For testing, an HTTP Interface Client can also be backed by `WebTestClient` or
+`RestTestClient` so that an `@HttpExchange` interface can be invoked against a mock
+server (for example a controller bound via `WebTestClient.bindToController(...)` or
+`RestTestClient.bindToController(...)`):
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	// Using RestTestClient...
+
+	RestTestClient client = RestTestClient.bindToController(new MyController()).build();
+	RestTestClientAdapter adapter = RestTestClientAdapter.create(client);
+
+	// or WebTestClient...
+
+	WebTestClient client = WebTestClient.bindToController(new MyController()).build();
+	WebTestClientAdapter adapter = WebTestClientAdapter.create(client);
+
+	HttpServiceProxyFactory factory = HttpServiceProxyFactory.builderFor(adapter).build();
+----
+
 
 [[rest-http-service-client-method-parameters]]
 === Method Parameters
