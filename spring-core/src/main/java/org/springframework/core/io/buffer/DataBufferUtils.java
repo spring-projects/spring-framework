@@ -1138,9 +1138,11 @@ public abstract class DataBufferUtils {
 		protected void hookOnNext(DataBuffer dataBuffer) {
 			try {
 				try (DataBuffer.ByteBufferIterator iterator = dataBuffer.readableByteBuffers()) {
-					ByteBuffer byteBuffer = iterator.next();
-					while (byteBuffer.hasRemaining()) {
-						this.channel.write(byteBuffer);
+					while (iterator.hasNext()) {
+						ByteBuffer byteBuffer = iterator.next();
+						while (byteBuffer.hasRemaining()) {
+							this.channel.write(byteBuffer);
+						}
 					}
 				}
 				this.sink.next(dataBuffer);
