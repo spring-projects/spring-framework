@@ -1252,7 +1252,7 @@ built-in decorators to suppress 404 exceptions and return a `ResponseEntity` wit
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
 	// For RestClient
-	HttpServiceProxyFactory factory = HttpServiceProxyFactory.builderFor(restCqlientAdapter)
+	HttpServiceProxyFactory factory = HttpServiceProxyFactory.builderFor(restClientAdapter)
 			.exchangeAdapterDecorator(NotFoundRestClientAdapterDecorator::new)
 			.build();
 
