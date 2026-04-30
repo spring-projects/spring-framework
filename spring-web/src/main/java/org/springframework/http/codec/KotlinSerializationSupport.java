@@ -30,6 +30,7 @@ import kotlin.reflect.jvm.ReflectJvmMapping;
 import kotlinx.serialization.KSerializer;
 import kotlinx.serialization.SerialFormat;
 import kotlinx.serialization.SerializersKt;
+import kotlinx.serialization.builtins.BuiltinSerializersKt;
 import org.jspecify.annotations.Nullable;
 
 import org.springframework.core.KotlinDetector;
@@ -60,6 +61,8 @@ public abstract class KotlinSerializationSupport<T extends SerialFormat> {
 	private final Map<Type, KSerializer<Object>> typeSerializerCache = new ConcurrentReferenceHashMap<>();
 
 	private final Map<KType, KSerializer<Object>> kTypeSerializerCache = new ConcurrentReferenceHashMap<>();
+
+	private final Map<KSerializer<Object>, KSerializer<List<Object>>> listSerializerCache = new ConcurrentReferenceHashMap<>();
 
 
 	private final T format;
@@ -178,5 +181,18 @@ public abstract class KotlinSerializationSupport<T extends SerialFormat> {
 			}
 		}
 		return serializer;
+	}
+
+	/**
+	 * Returns a serializer for {@code List} based on the given element serializer.
+	 * <p>This method wraps the Kotlin
+	 * {@link kotlinx.serialization.builtins.BuiltinSerializersKt#ListSerializer(KSerializer) ListSerializer}
+	 * function and caches the result for improved performance.
+	 * @param serializer the serializer for the list element type
+	 * @return a serializer for {@code List} with elements of the given type
+	 * @see <a href="https://kotlinlang.org/api/kotlinx.serialization/kotlinx-serialization-core/kotlinx.serialization.builtins/-list-serializer.html">ListSerializer</a>
+	 */
+	protected final KSerializer<List<Object>> listSerializer(KSerializer<Object> serializer) {
+		return this.listSerializerCache.computeIfAbsent(serializer, BuiltinSerializersKt::ListSerializer);
 	}
 }

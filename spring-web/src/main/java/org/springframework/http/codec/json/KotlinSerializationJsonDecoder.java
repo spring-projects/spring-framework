@@ -22,7 +22,6 @@ import java.util.Objects;
 import java.util.function.Predicate;
 
 import kotlinx.serialization.KSerializer;
-import kotlinx.serialization.builtins.BuiltinSerializersKt;
 import kotlinx.serialization.json.Json;
 import org.jspecify.annotations.Nullable;
 import org.reactivestreams.Publisher;
@@ -121,7 +120,7 @@ public class KotlinSerializationJsonDecoder extends KotlinSerializationStringDec
 						if (signal.hasValue()) {
 							String value = Objects.requireNonNull(signal.get());
 							if (value.stripLeading().startsWith("[") && !List.class.isAssignableFrom(elementType.toClass())) {
-								KSerializer<List<Object>> listSerializer = BuiltinSerializersKt.ListSerializer(serializer);
+								KSerializer<List<Object>> listSerializer = listSerializer(serializer);
 								return flux
 										.flatMapIterable(string -> format().decodeFromString(listSerializer, string))
 										.onErrorMap(IllegalArgumentException.class, this::processException);
