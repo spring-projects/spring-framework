@@ -309,7 +309,7 @@ public class TransportHandlingSockJsService extends AbstractSockJsService implem
 					Principal currentPrincipal = request.getPrincipal();
 					if (!principal.equals(currentPrincipal) &&
 							(currentPrincipal == null || !principal.getName().equals(currentPrincipal.getName()))) {
-						logger.debug("The user for the session and the request do not match¶.");
+						logger.debug("The user for the session and the request do not match.");
 						response.setStatusCode(HttpStatus.NOT_FOUND);
 						return;
 					}
