@@ -154,11 +154,11 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 		checkToken(type);
 		checkToken(subtype);
 		this.type = type.toLowerCase(Locale.ROOT);
-		this.subtype = subtype.toLowerCase(Locale.ROOT);
-		this.parameters = createParametersMap(parameters);
-		if (this.parameters.containsKey(PARAM_CHARSET)) {
-			this.resolvedCharset = Charset.forName(unquote(this.parameters.get(PARAM_CHARSET)));
-		}
+        this.subtype = subtype.toLowerCase(Locale.ROOT);
+        this.parameters = createParametersMap(parameters);
+        if (this.parameters.containsKey(PARAM_CHARSET)) {
+            this.resolvedCharset = Charset.forName(this.parameters.get(PARAM_CHARSET));
+        }
 	}
 
 	/**
@@ -188,11 +188,11 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 	 */
 	public MimeType(MimeType other, @Nullable Map<String, String> parameters) {
 		this.type = other.type;
-		this.subtype = other.subtype;
-		this.parameters = createParametersMap(parameters);
-		if (this.parameters.containsKey(PARAM_CHARSET)) {
-			this.resolvedCharset = Charset.forName(unquote(this.parameters.get(PARAM_CHARSET)));
-		}
+        this.subtype = other.subtype;
+        this.parameters = createParametersMap(parameters);
+        if (this.parameters.containsKey(PARAM_CHARSET)) {
+            this.resolvedCharset = Charset.forName(this.parameters.get(PARAM_CHARSET));
+        }
 	}
 
 	/**
@@ -229,7 +229,7 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 			Map<String, String> map = new LinkedCaseInsensitiveMap<>(parameters.size(), Locale.ROOT);
 			parameters.forEach((parameter, value) -> {
 				checkParameters(parameter, value);
-				map.put(parameter, value);
+				map.put(parameter, unquote(value));
 			});
 			return Collections.unmodifiableMap(map);
 		}
@@ -255,7 +255,29 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 	}
 
 	protected String unquote(String s) {
-		return (isQuotedString(s) ? s.substring(1, s.length() - 1) : s);
+		if (s.length() < 2 || s.charAt(0) != '"' || s.charAt(s.length() - 1) != '"') {
+			return s;
+		}
+		String inner = s.substring(1, s.length() - 1);
+		if (inner.indexOf('\\') == -1) {
+			return inner;
+		}
+		StringBuilder sb = new StringBuilder(inner.length());
+		boolean escaped = false;
+		for (int i = 0; i < inner.length(); i++) {
+			char c = inner.charAt(i);
+			if (escaped) {
+				sb.append(c);
+				escaped = false;
+			}
+			else if (c == '\\') {
+				escaped = true;
+			}
+			else {
+				sb.append(c);
+			}
+		}
+		return sb.toString();
 	}
 
 	/**
@@ -327,7 +349,8 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 	 * @return the parameter value, or {@code null} if not present
 	 */
 	public @Nullable String getParameter(String name) {
-		return this.parameters.get(name);
+		String value = this.parameters.get(name);
+		return (value != null ? unquote(value) : null);
 	}
 
 	/**
@@ -520,8 +543,39 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 			builder.append(';');
 			builder.append(key);
 			builder.append('=');
-			builder.append(val);
+			if (requiresQuoting(val)) {
+				builder.append(quoteValue(val));
+			}
+			else {
+				builder.append(val);
+			}
 		});
+	}
+
+	private boolean requiresQuoting(String val) {
+		if (val.isEmpty()) {
+			return true;
+		}
+		for (int i = 0; i < val.length(); i++) {
+			if (!TOKEN.get(val.charAt(i))) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private static String quoteValue(String val) {
+		StringBuilder sb = new StringBuilder(val.length() + 2);
+		sb.append('"');
+		for (int i = 0; i < val.length(); i++) {
+			char c = val.charAt(i);
+			if (c == '"' || c == '\\') {
+				sb.append('\\');
+			}
+			sb.append(c);
+		}
+		sb.append('"');
+		return sb.toString();
 	}
 
 	/**
@@ -673,15 +727,12 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 	}
 
 	private void readObject(ObjectInputStream ois) throws IOException, ClassNotFoundException {
-		// Rely on default serialization, just initialize state after deserialization.
-		ois.defaultReadObject();
-
-		// Initialize transient fields.
-		String charsetName = getParameter(PARAM_CHARSET);
-		if (charsetName != null) {
-			this.resolvedCharset = Charset.forName(unquote(charsetName));
-		}
-	}
+        ois.defaultReadObject();
+        String charsetName = getParameter(PARAM_CHARSET);
+        if (charsetName != null) {
+            this.resolvedCharset = Charset.forName(charsetName);
+        }
+    }
 
 
 	/**

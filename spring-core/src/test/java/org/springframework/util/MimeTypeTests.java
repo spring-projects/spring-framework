@@ -104,7 +104,7 @@ class MimeTypeTests {
 		assertThat(mimeType.getType()).as("Invalid type").isEqualTo("application");
 		assertThat(mimeType.getSubtype()).as("Invalid subtype").isEqualTo("xop+xml");
 		assertThat(mimeType.getCharset()).as("Invalid charset").isEqualTo(StandardCharsets.UTF_8);
-		assertThat(mimeType.getParameter("type")).isEqualTo("\"application/soap+xml;action=\\\"https://x.y.z\\\"\"");
+		assertThat(mimeType.getParameter("type")).isEqualTo("application/soap+xml;action=\"https://x.y.z\"");
 	}
 
 	@Test
@@ -256,10 +256,49 @@ class MimeTypeTests {
 				MimeTypeUtils.parseMimeType("text/html; charset=foo-bar"));
 	}
 
+	@Test  // gh-36730
+	void parseMimeTypeWithQuotedCharset() {
+		MimeType mimeType = MimeTypeUtils.parseMimeType("text/plain; charset=\"us-ascii\"");
+		assertThat(mimeType.getCharset()).isEqualTo(StandardCharsets.US_ASCII);
+		assertThat(mimeType.getParameter("charset")).isEqualTo("us-ascii");
+	}
+
+	@Test  // gh-36730
+	void parseMimeTypeWithQuotedCharsetMatchesUnquoted() {
+		// Per RFC 2045 Section 5.1: quoted and unquoted parameter values are semantically equivalent
+		MimeType quoted   = MimeTypeUtils.parseMimeType("text/plain; charset=\"UTF-8\"");
+		MimeType unquoted = MimeTypeUtils.parseMimeType("text/plain; charset=UTF-8");
+		assertThat(quoted).isEqualTo(unquoted);
+		assertThat(quoted.getCharset()).isEqualTo(unquoted.getCharset());
+	}
+
+	@Test  // gh-36730
+	void parseMimeTypeWithQuotedPairInParameterValue() {
+		// Per RFC 9110 Section 5.6.4: backslash-escaped characters inside a quoted-string
+		MimeType mimeType = MimeTypeUtils.parseMimeType(
+				"multipart/form-data; boundary=\"hello \\\"world\\\"\"");
+		assertThat(mimeType.getParameter("boundary")).isEqualTo("hello \"world\"");
+	}
+
+	@Test  // gh-36730
+	void parseMimeTypeWithEscapedBackslashInParameterValue() {
+		// Per RFC 9110 Section 5.6.4: \\ inside a quoted-string becomes a single backslash
+		MimeType mimeType = MimeTypeUtils.parseMimeType(
+				"application/octet-stream; filename=\"path\\\\file.txt\"");
+		assertThat(mimeType.getParameter("filename")).isEqualTo("path\\file.txt");
+	}
+
+	@Test  // gh-36730
+	void parseMimeTypeWithUnquotedParameterValueUnchanged() {
+		// Regression guard: unquoted values must pass through without modification
+		MimeType mimeType = MimeTypeUtils.parseMimeType("text/plain; charset=UTF-8");
+		assertThat(mimeType.getParameter("charset")).isEqualTo("UTF-8");
+	}
+
 	@Test  // SPR-8917
 	void parseMimeTypeQuotedParameterValue() {
 		MimeType mimeType = MimeTypeUtils.parseMimeType("audio/*;attr=\"v>alue\"");
-		assertThat(mimeType.getParameter("attr")).isEqualTo("\"v>alue\"");
+		assertThat(mimeType.getParameter("attr")).isEqualTo("v>alue");
 	}
 
 	@Test  // SPR-8917
@@ -277,7 +316,7 @@ class MimeTypeTests {
 	@Test  // SPR-16630
 	void parseMimeTypeWithSpacesAroundEqualsAndQuotedValue() {
 		MimeType mimeType = MimeTypeUtils.parseMimeType("text/plain; foo = \" bar \" ");
-		assertThat(mimeType.getParameter("foo")).isEqualTo("\" bar \"");
+		assertThat(mimeType.getParameter("foo")).isEqualTo(" bar ");
 	}
 
 	@Test
@@ -311,14 +350,22 @@ class MimeTypeTests {
 		assertThat(mimeTypes).as("Incorrect number of mime types").hasSize(2);
 	}
 
-	@Test  // SPR-17459
+	@Test
 	void parseMimeTypesWithQuotedParameters() {
 		testWithQuotedParameters("foo/bar;param=\",\"");
 		testWithQuotedParameters("foo/bar;param=\"s,a,\"");
 		testWithQuotedParameters("foo/bar;param=\"s,\"", "text/x-c");
 		testWithQuotedParameters("foo/bar;param=\"a\\\"b,c\"");
-		testWithQuotedParameters("foo/bar;param=\"\\\\\"");
-		testWithQuotedParameters("foo/bar;param=\"\\,\\\"");
+		// Normalization: parse unescapes quoted-pairs, serialize re-escapes —
+		// semantic equivalence is preserved, byte-for-byte identity is not.
+		MimeType doubleBackslash = MimeTypeUtils.parseMimeType("foo/bar;param=\"\\\\\"");
+		assertThat(doubleBackslash.getParameter("param")).isEqualTo("\\");
+		assertThat(doubleBackslash.toString()).isEqualTo("foo/bar;param=\"\\\\\"");
+		// Normalization: \, is a valid quoted-pair but comma needs no escaping —
+		// semantic equivalence is preserved, byte-for-byte identity is not.
+		MimeType escapedComma = MimeTypeUtils.parseMimeType("foo/bar;param=\"\\,\\\"");
+		assertThat(escapedComma.getParameter("param")).isEqualTo(",");
+		assertThat(escapedComma.toString()).isEqualTo("foo/bar;param=\",\"");
 	}
 
 	@Test
