@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -48,6 +49,8 @@ import org.springframework.util.ClassUtils;
  * {@link #setTargetType targetType} is set to {@link MessageType#TEXT}.
  * Converts from a {@link TextMessage} or {@link BytesMessage} to an object.
  *
+ * <p>For untrusted environments, use {@link #setTrustedPackages(String...)}.
+ *
  * @author Sebastien Deleuze
  * @since 7.0
  */
@@ -73,6 +76,8 @@ public class JacksonJsonMessageConverter implements SmartMessageConverter, BeanC
 
 	private final Map<Class<?>, String> classIdMappings = new HashMap<>();
 
+	private String @Nullable [] trustedPackages;
+
 	private @Nullable ClassLoader beanClassLoader;
 
 
@@ -80,6 +85,7 @@ public class JacksonJsonMessageConverter implements SmartMessageConverter, BeanC
 	 * Construct a new instance with a {@link JsonMapper} customized with the
 	 * {@link tools.jackson.databind.JacksonModule}s found by
 	 * {@link MapperBuilder#findModules(ClassLoader)}.
+	 * @see #setTrustedPackages(String...)
 	 */
 	public JacksonJsonMessageConverter() {
 		this(JsonMapper.builder());
@@ -89,6 +95,8 @@ public class JacksonJsonMessageConverter implements SmartMessageConverter, BeanC
 	 * Construct a new instance with the provided {@link JsonMapper.Builder}
 	 * customized with the {@link tools.jackson.databind.JacksonModule}s found
 	 * by {@link MapperBuilder#findModules(ClassLoader)}.
+	 * @param builder the mapper builder to use
+	 * @see #setTrustedPackages(String...)
 	 * @see JsonMapper#builder()
 	 */
 	public JacksonJsonMessageConverter(JsonMapper.Builder builder) {
@@ -98,11 +106,22 @@ public class JacksonJsonMessageConverter implements SmartMessageConverter, BeanC
 
 	/**
 	 * Construct a new instance with the provided {@link JsonMapper}.
+	 * @param mapper the mapper to use
+	 * @see #setTrustedPackages(String...)
 	 * @see JsonMapper#builder()
 	 */
 	public JacksonJsonMessageConverter(JsonMapper mapper) {
 		Assert.notNull(mapper, "JsonMapper must not be null");
 		this.mapper = mapper;
+	}
+
+	/**
+	 * Specify the trusted Java packages for deserialization.
+	 * @param trustedPackages the trusted Java packages for deserialization
+	 * @since 7.0.8
+	 */
+	public void setTrustedPackages(String... trustedPackages) {
+		this.trustedPackages = trustedPackages.clone();
 	}
 
 	/**
@@ -166,6 +185,23 @@ public class JacksonJsonMessageConverter implements SmartMessageConverter, BeanC
 			this.idClassMappings.put(id, clazz);
 			this.classIdMappings.put(clazz, id);
 		});
+	}
+
+	private boolean isTrustedPackage(String requestedType) {
+		if (this.trustedPackages != null) {
+			String packageName = ClassUtils.getPackageName(requestedType);
+			int lastBracketIndex = packageName.lastIndexOf('[');
+			if (lastBracketIndex != -1 && packageName.length() > lastBracketIndex + 1 && packageName.charAt(lastBracketIndex + 1) == 'L') {
+				packageName = packageName.substring(lastBracketIndex + 2);
+			}
+			for (String trustedPackage : this.trustedPackages) {
+				if (packageName.equals(trustedPackage)) {
+					return true;
+				}
+			}
+			return false;
+		}
+		return true;
 	}
 
 	@Override
@@ -444,6 +480,10 @@ public class JacksonJsonMessageConverter implements SmartMessageConverter, BeanC
 		Class<?> mappedClass = this.idClassMappings.get(typeId);
 		if (mappedClass != null) {
 			return this.mapper.constructType(mappedClass);
+		}
+		if (!isTrustedPackage(typeId)) {
+			throw new MessageConversionException("The class '" + typeId + "' is not in the trusted packages: " +
+					Arrays.toString(this.trustedPackages));
 		}
 		try {
 			Class<?> typeClass = ClassUtils.forName(typeId, this.beanClassLoader);
