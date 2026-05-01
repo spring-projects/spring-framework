@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -49,6 +50,8 @@ import org.springframework.util.ClassUtils;
  * {@link #setTargetType targetType} is set to {@link MessageType#TEXT}.
  * Converts from a {@link TextMessage} or {@link BytesMessage} to an object.
  *
+ * <p>For untrusted environments, use {@link #setTrustedPackages(String...)}.
+ *
  * <p>It customizes Jackson's default properties with the following ones:
  * <ul>
  * <li>{@link MapperFeature#DEFAULT_VIEW_INCLUSION} is disabled</li>
@@ -59,6 +62,7 @@ import org.springframework.util.ClassUtils;
  * @author Dave Syer
  * @author Juergen Hoeller
  * @author Stephane Nicoll
+ * @author Sebastien Deleuze
  * @since 3.1.4
  */
 public class MappingJackson2MessageConverter implements SmartMessageConverter, BeanClassLoaderAware {
@@ -87,11 +91,15 @@ public class MappingJackson2MessageConverter implements SmartMessageConverter, B
 	private final Map<Class<?>, String> classIdMappings = new HashMap<>();
 
 	@Nullable
+	private String[] trustedPackages;
+
+	@Nullable
 	private ClassLoader beanClassLoader;
 
 
 	/**
 	 * Construct a {@code MappingJackson2MessageConverter} with a default {@link ObjectMapper}.
+	 * @see #setTrustedPackages(String...)
 	 */
 	@SuppressWarnings("deprecation")  // on Jackson 2.13: configure(MapperFeature, boolean)
 	public MappingJackson2MessageConverter() {
@@ -104,12 +112,21 @@ public class MappingJackson2MessageConverter implements SmartMessageConverter, B
 	 * Construct a {@code MappingJackson2MessageConverter} with a custom {@link ObjectMapper}.
 	 * @param objectMapper the {@code ObjectMapper} to use
 	 * @since 6.1
+	 * @see #setTrustedPackages(String...)
 	 */
 	public MappingJackson2MessageConverter(ObjectMapper objectMapper) {
 		Assert.notNull(objectMapper, "ObjectMapper must not be null");
 		this.objectMapper = objectMapper;
 	}
 
+	/**
+	 * Specify the trusted Java packages for deserialization.
+	 * @param trustedPackages the trusted Java packages for deserialization
+	 * @since 6.2.19
+	 */
+	public void setTrustedPackages(String... trustedPackages) {
+		this.trustedPackages = trustedPackages.clone();
+	}
 
 	/**
 	 * Set the {@code ObjectMapper} for this converter.
@@ -181,6 +198,23 @@ public class MappingJackson2MessageConverter implements SmartMessageConverter, B
 			this.idClassMappings.put(id, clazz);
 			this.classIdMappings.put(clazz, id);
 		});
+	}
+
+	private boolean isTrustedPackage(String requestedType) {
+		if (this.trustedPackages != null) {
+			String packageName = ClassUtils.getPackageName(requestedType);
+			int lastBracketIndex = packageName.lastIndexOf('[');
+			if (lastBracketIndex != -1 && packageName.length() > lastBracketIndex + 1 && packageName.charAt(lastBracketIndex + 1) == 'L') {
+				packageName = packageName.substring(lastBracketIndex + 2);
+			}
+			for (String trustedPackage : this.trustedPackages) {
+				if (packageName.equals(trustedPackage)) {
+					return true;
+				}
+			}
+			return false;
+		}
+		return true;
 	}
 
 	@Override
@@ -462,6 +496,10 @@ public class MappingJackson2MessageConverter implements SmartMessageConverter, B
 		Class<?> mappedClass = this.idClassMappings.get(typeId);
 		if (mappedClass != null) {
 			return this.objectMapper.constructType(mappedClass);
+		}
+		if (!isTrustedPackage(typeId)) {
+			throw new MessageConversionException("The class '" + typeId + "' is not in the trusted packages: " +
+					Arrays.toString(this.trustedPackages));
 		}
 		try {
 			Class<?> typeClass = ClassUtils.forName(typeId, this.beanClassLoader);
