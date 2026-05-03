@@ -129,6 +129,20 @@ class FormTagTests extends AbstractHtmlElementTagTests {
 	}
 
 	@Test
+	void writeFormWithHtmlEscaping() throws Exception {
+		this.tag.setCssClass("\"class\"");
+		this.tag.setCssStyle("\"style\"");
+
+		this.tag.doStartTag();
+		this.tag.doEndTag();
+		this.tag.doFinally();
+
+		String output = getOutput();
+		assertContainsAttribute(output, "class", "&quot;class&quot;");
+		assertContainsAttribute(output, "style", "&quot;style&quot;");
+	}
+
+	@Test
 	void withActionFromRequest() throws Exception {
 		String commandName = "myCommand";
 		String enctype = "my/enctype";

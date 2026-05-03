@@ -24,7 +24,6 @@ import jakarta.servlet.jsp.tagext.DynamicAttributes;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
-import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -40,6 +39,7 @@ import org.springframework.util.StringUtils;
  * @author Rob Harrop
  * @author Jeremy Grelle
  * @author Rossen Stoyanchev
+ * @author Sebastien Deleuze
  * @since 2.0
  */
 @SuppressWarnings("serial")
@@ -465,8 +465,7 @@ public abstract class AbstractHtmlElementTag extends AbstractDataBoundFormElemen
 	 */
 	protected void writeOptionalAttributes(TagWriter tagWriter) throws JspException {
 		tagWriter.writeOptionalAttributeValue(CLASS_ATTRIBUTE, resolveCssClass());
-		tagWriter.writeOptionalAttributeValue(STYLE_ATTRIBUTE,
-				ObjectUtils.getDisplayString(evaluate("cssStyle", getCssStyle())));
+		writeOptionalAttribute(tagWriter, STYLE_ATTRIBUTE, getCssStyle());
 		writeOptionalAttribute(tagWriter, LANG_ATTRIBUTE, getLang());
 		writeOptionalAttribute(tagWriter, TITLE_ATTRIBUTE, getTitle());
 		writeOptionalAttribute(tagWriter, DIR_ATTRIBUTE, getDir());
@@ -495,10 +494,10 @@ public abstract class AbstractHtmlElementTag extends AbstractDataBoundFormElemen
 	 */
 	protected String resolveCssClass() throws JspException {
 		if (getBindStatus().isError() && StringUtils.hasText(getCssErrorClass())) {
-			return ObjectUtils.getDisplayString(evaluate("cssErrorClass", getCssErrorClass()));
+			return getDisplayString(evaluate("cssErrorClass", getCssErrorClass()));
 		}
 		else {
-			return ObjectUtils.getDisplayString(evaluate("cssClass", getCssClass()));
+			return getDisplayString(evaluate("cssClass", getCssClass()));
 		}
 	}
 
