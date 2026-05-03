@@ -43,6 +43,7 @@ import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.ServerSentEvent;
@@ -61,6 +62,7 @@ import org.springframework.web.reactive.HandlerResultHandler;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolver;
 import org.springframework.web.reactive.result.HandlerResultHandlerSupport;
 import org.springframework.web.server.NotAcceptableStatusException;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.server.ServerWebExchange;
 
 /**
@@ -89,6 +91,7 @@ import org.springframework.web.server.ServerWebExchange;
  * presence of annotations, for example, for {@code @ResponseBody}.
  *
  * @author Rossen Stoyanchev
+ * @author Sebastien Deleuze
  * @since 5.0
  */
 public class ViewResolutionResultHandler extends HandlerResultHandlerSupport implements HandlerResultHandler, Ordered {
@@ -256,65 +259,70 @@ public class ViewResolutionResultHandler extends HandlerResultHandlerSupport imp
 						clazz = FragmentsRendering.class;
 					}
 
-					if (returnValue == NO_VALUE || ClassUtils.isVoidType(clazz)) {
-						viewsMono = resolveViews(getDefaultViewName(exchange), locale);
-					}
-					else if (CharSequence.class.isAssignableFrom(clazz) && !hasModelAnnotation(parameter)) {
-						viewsMono = resolveViews(returnValue.toString(), locale);
-					}
-					else if (Rendering.class.isAssignableFrom(clazz)) {
-						Rendering render = (Rendering) returnValue;
-						HttpStatusCode status = render.status();
-						if (status != null) {
-							exchange.getResponse().setStatusCode(status);
+					try {
+						if (returnValue == NO_VALUE || ClassUtils.isVoidType(clazz)) {
+							viewsMono = resolveViews(getDefaultViewName(exchange), locale);
 						}
-						exchange.getResponse().getHeaders().putAll(render.headers());
-						model.addAllAttributes(render.modelAttributes());
-						Object view = render.view();
-						if (view == null) {
-							view = getDefaultViewName(exchange);
+						else if (CharSequence.class.isAssignableFrom(clazz) && !hasModelAnnotation(parameter)) {
+							viewsMono = resolveViews(returnValue.toString(), locale);
 						}
-						viewsMono = (view instanceof String viewName ? resolveViews(viewName, locale) :
-								Mono.just(Collections.singletonList((View) view)));
-					}
-					else if (FragmentsRendering.class.isAssignableFrom(clazz)) {
-						ServerHttpResponse response = exchange.getResponse();
-						FragmentsRendering render = (FragmentsRendering) returnValue;
-						HttpStatusCode status = render.status();
-						if (status != null) {
-							response.setStatusCode(status);
+						else if (Rendering.class.isAssignableFrom(clazz)) {
+							Rendering render = (Rendering) returnValue;
+							HttpStatusCode status = render.status();
+							if (status != null) {
+								exchange.getResponse().setStatusCode(status);
+							}
+							exchange.getResponse().getHeaders().putAll(render.headers());
+							model.addAllAttributes(render.modelAttributes());
+							Object view = render.view();
+							if (view == null) {
+								view = getDefaultViewName(exchange);
+							}
+							viewsMono = (view instanceof String viewName ? resolveViews(viewName, locale) :
+									Mono.just(Collections.singletonList((View) view)));
 						}
-						response.getHeaders().putAll(render.headers());
-						bindingContext.updateModel(exchange);
+						else if (FragmentsRendering.class.isAssignableFrom(clazz)) {
+							ServerHttpResponse response = exchange.getResponse();
+							FragmentsRendering render = (FragmentsRendering) returnValue;
+							HttpStatusCode status = render.status();
+							if (status != null) {
+								response.setStatusCode(status);
+							}
+							response.getHeaders().putAll(render.headers());
+							bindingContext.updateModel(exchange);
 
-						StreamHandler streamHandler =
-								(this.sseHandler.supports(exchange.getRequest()) ? this.sseHandler : null);
+							StreamHandler streamHandler =
+									(this.sseHandler.supports(exchange.getRequest()) ? this.sseHandler : null);
 
-						if (streamHandler != null) {
-							streamHandler.updateResponse(exchange);
+							if (streamHandler != null) {
+								streamHandler.updateResponse(exchange);
+							}
+
+							Flux<Flux<DataBuffer>> renderFlux = render.fragments()
+									.concatMap(fragment -> renderFragment(fragment, null, streamHandler, locale, bindingContext, exchange))
+									.doOnDiscard(DataBuffer.class, DataBufferUtils::release);
+
+							return response.writeAndFlushWith(renderFlux);
 						}
-
-						Flux<Flux<DataBuffer>> renderFlux = render.fragments()
-								.concatMap(fragment -> renderFragment(fragment, null, streamHandler, locale, bindingContext, exchange))
-								.doOnDiscard(DataBuffer.class, DataBufferUtils::release);
-
-						return response.writeAndFlushWith(renderFlux);
+						else if (Model.class.isAssignableFrom(clazz)) {
+							model.addAllAttributes(((Model) returnValue).asMap());
+							viewsMono = resolveViews(getDefaultViewName(exchange), locale);
+						}
+						else if (Map.class.isAssignableFrom(clazz) && !hasModelAnnotation(parameter)) {
+							model.addAllAttributes((Map<String, ?>) returnValue);
+							viewsMono = resolveViews(getDefaultViewName(exchange), locale);
+						}
+						else if (View.class.isAssignableFrom(clazz)) {
+							viewsMono = Mono.just(Collections.singletonList((View) returnValue));
+						}
+						else {
+							String name = getNameForReturnValue(parameter);
+							model.addAttribute(name, returnValue);
+							viewsMono = resolveViews(getDefaultViewName(exchange), locale);
+						}
 					}
-					else if (Model.class.isAssignableFrom(clazz)) {
-						model.addAllAttributes(((Model) returnValue).asMap());
-						viewsMono = resolveViews(getDefaultViewName(exchange), locale);
-					}
-					else if (Map.class.isAssignableFrom(clazz) && !hasModelAnnotation(parameter)) {
-						model.addAllAttributes((Map<String, ?>) returnValue);
-						viewsMono = resolveViews(getDefaultViewName(exchange), locale);
-					}
-					else if (View.class.isAssignableFrom(clazz)) {
-						viewsMono = Mono.just(Collections.singletonList((View) returnValue));
-					}
-					else {
-						String name = getNameForReturnValue(parameter);
-						model.addAttribute(name, returnValue);
-						viewsMono = resolveViews(getDefaultViewName(exchange), locale);
+					catch (ResponseStatusException ex) {
+						return Mono.error(ex);
 					}
 					bindingContext.updateModel(exchange);
 					return viewsMono.flatMap(views -> render(views, model.asMap(), null, bindingContext, exchange));
@@ -324,11 +332,15 @@ public class ViewResolutionResultHandler extends HandlerResultHandlerSupport imp
 	/**
 	 * Select a default view name when a controller did not specify it.
 	 * Use the request path the leading and trailing slash stripped.
+	 * @throws ResponseStatusException with a 400 error code if the path contains a "redirect:" prefix
 	 */
 	private String getDefaultViewName(ServerWebExchange exchange) {
 		String path = exchange.getRequest().getPath().pathWithinApplication().value();
 		if (path.startsWith("/")) {
 			path = path.substring(1);
+		}
+		if (path.startsWith(UrlBasedViewResolver.REDIRECT_URL_PREFIX)) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Rejected path '" + path + "' with 'redirect:' prefix");
 		}
 		if (path.endsWith("/")) {
 			path = path.substring(0, path.length() - 1);

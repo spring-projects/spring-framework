@@ -52,6 +52,7 @@ import org.springframework.web.reactive.HandlerResult;
 import org.springframework.web.reactive.accept.HeaderContentTypeResolver;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolver;
 import org.springframework.web.server.NotAcceptableStatusException;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.testfixture.http.server.reactive.MockServerHttpResponse;
 import org.springframework.web.testfixture.server.MockServerWebExchange;
@@ -253,6 +254,20 @@ class ViewResolutionResultHandlerTests {
 		exchange = MockServerWebExchange.from(get("/account.123"));
 		handler.handleResult(exchange, result).block(Duration.ofMillis(5000));
 		assertResponseBody(exchange, "account: {id=123}");
+	}
+
+	@Test
+	void defaultViewNameWithRedirectPrefixFails() {
+		MethodParameter returnType = on(Handler.class).resolveReturnType(Mono.class, String.class);
+		HandlerResult result = new HandlerResult(new Object(), Mono.empty(), returnType, this.bindingContext);
+		ViewResolutionResultHandler handler = resultHandler(new TestViewResolver("account"));
+
+		MockServerWebExchange exchange = MockServerWebExchange.from(get("/redirect:account"));
+		Mono<Void> mono = handler.handleResult(exchange, result);
+		StepVerifier.create(mono)
+				.expectNextCount(0)
+				.expectError(ResponseStatusException.class)
+				.verify();
 	}
 
 	@Test
