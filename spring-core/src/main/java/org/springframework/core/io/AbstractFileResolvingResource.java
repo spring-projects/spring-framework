@@ -59,59 +59,69 @@ public abstract class AbstractFileResolvingResource extends AbstractResource {
 				customizeConnection(con);
 
 				HttpURLConnection httpCon = (con instanceof HttpURLConnection huc ? huc : null);
-				if (httpCon != null) {
-					httpCon.setRequestMethod("HEAD");
-					int code = httpCon.getResponseCode();
-					if (code == HttpURLConnection.HTTP_OK) {
+				try {
+					if (httpCon != null) {
+						httpCon.setRequestMethod("HEAD");
+						int code = httpCon.getResponseCode();
+						if (code == HttpURLConnection.HTTP_OK) {
+							return true;
+						}
+						else if (code == HttpURLConnection.HTTP_NOT_FOUND) {
+							return false;
+						}
+						else if (code == HttpURLConnection.HTTP_BAD_METHOD) {
+							httpCon.disconnect();
+							con = url.openConnection();
+							customizeConnection(con);
+							if (con instanceof HttpURLConnection newHttpCon) {
+								code = newHttpCon.getResponseCode();
+								if (code == HttpURLConnection.HTTP_OK) {
+									return true;
+								}
+								else if (code == HttpURLConnection.HTTP_NOT_FOUND) {
+									return false;
+								}
+								httpCon = newHttpCon;
+							}
+							else {
+								httpCon = null;
+							}
+						}
+					}
+
+					if (con instanceof JarURLConnection jarCon) {
+						// For JarURLConnection, do not check content-length but rather the
+						// existence of the entry (or the jar root in case of no entryName).
+						// getJarFile() called for enforced presence check of the jar file,
+						// throwing a NoSuchFileException otherwise (turned to false below).
+						JarFile jarFile = jarCon.getJarFile();
+						try {
+							return (jarCon.getEntryName() == null || jarCon.getJarEntry() != null);
+						}
+						finally {
+							if (!jarCon.getUseCaches()) {
+								jarFile.close();
+							}
+						}
+					}
+					else if (con.getContentLengthLong() > 0) {
 						return true;
 					}
-					else if (code == HttpURLConnection.HTTP_NOT_FOUND) {
+
+					if (httpCon != null) {
+						// No HTTP OK status, and no content-length header: give up
 						return false;
 					}
-					else if (code == HttpURLConnection.HTTP_BAD_METHOD) {
-						con = url.openConnection();
-						customizeConnection(con);
-						if (con instanceof HttpURLConnection newHttpCon) {
-							code = newHttpCon.getResponseCode();
-							if (code == HttpURLConnection.HTTP_OK) {
-								return true;
-							}
-							else if (code == HttpURLConnection.HTTP_NOT_FOUND) {
-								return false;
-							}
-							httpCon = newHttpCon;
-						}
+					else {
+						// Fall back to stream existence: can we open the stream?
+						getInputStream().close();
+						return true;
 					}
 				}
-
-				if (con instanceof JarURLConnection jarCon) {
-					// For JarURLConnection, do not check content-length but rather the
-					// existence of the entry (or the jar root in case of no entryName).
-					// getJarFile() called for enforced presence check of the jar file,
-					// throwing a NoSuchFileException otherwise (turned to false below).
-					JarFile jarFile = jarCon.getJarFile();
-					try {
-						return (jarCon.getEntryName() == null || jarCon.getJarEntry() != null);
+				finally {
+					if (httpCon != null) {
+						httpCon.disconnect();
 					}
-					finally {
-						if (!jarCon.getUseCaches()) {
-							jarFile.close();
-						}
-					}
-				}
-				else if (con.getContentLengthLong() > 0) {
-					return true;
-				}
-
-				if (httpCon != null) {
-					// No HTTP OK status, and no content-length header: give up
-					httpCon.disconnect();
-					return false;
-				}
-				else {
-					// Fall back to stream existence: can we open the stream?
-					getInputStream().close();
-					return true;
 				}
 			}
 		}
@@ -141,44 +151,53 @@ public abstract class AbstractFileResolvingResource extends AbstractResource {
 				// Try InputStream resolution for jar resources
 				URLConnection con = url.openConnection();
 				customizeConnection(con);
-				if (con instanceof HttpURLConnection httpCon) {
-					httpCon.setRequestMethod("HEAD");
-					int code = httpCon.getResponseCode();
-					if (code == HttpURLConnection.HTTP_BAD_METHOD) {
-						con = url.openConnection();
-						customizeConnection(con);
-						if (!(con instanceof HttpURLConnection newHttpCon)) {
+				HttpURLConnection httpCon = (con instanceof HttpURLConnection huc ? huc : null);
+				try {
+					if (httpCon != null) {
+						httpCon.setRequestMethod("HEAD");
+						int code = httpCon.getResponseCode();
+						if (code == HttpURLConnection.HTTP_BAD_METHOD) {
+							httpCon.disconnect();
+							con = url.openConnection();
+							customizeConnection(con);
+							if (!(con instanceof HttpURLConnection newHttpCon)) {
+								httpCon = null;
+								return false;
+							}
+							code = newHttpCon.getResponseCode();
+							httpCon = newHttpCon;
+						}
+						if (code != HttpURLConnection.HTTP_OK) {
 							return false;
 						}
-						code = newHttpCon.getResponseCode();
-						httpCon = newHttpCon;
 					}
-					if (code != HttpURLConnection.HTTP_OK) {
-						httpCon.disconnect();
-						return false;
+					else if (con instanceof JarURLConnection jarCon) {
+						JarEntry jarEntry = jarCon.getJarEntry();
+						if (jarEntry == null) {
+							return false;
+						}
+						else {
+							return !jarEntry.isDirectory();
+						}
 					}
-				}
-				else if (con instanceof JarURLConnection jarCon) {
-					JarEntry jarEntry = jarCon.getJarEntry();
-					if (jarEntry == null) {
+					long contentLength = con.getContentLengthLong();
+					if (contentLength > 0) {
+						return true;
+					}
+					else if (contentLength == 0) {
+						// Empty file or directory -> not considered readable...
 						return false;
 					}
 					else {
-						return !jarEntry.isDirectory();
+						// Fall back to stream existence: can we open the stream?
+						getInputStream().close();
+						return true;
 					}
 				}
-				long contentLength = con.getContentLengthLong();
-				if (contentLength > 0) {
-					return true;
-				}
-				else if (contentLength == 0) {
-					// Empty file or directory -> not considered readable...
-					return false;
-				}
-				else {
-					// Fall back to stream existence: can we open the stream?
-					getInputStream().close();
-					return true;
+				finally {
+					if (httpCon != null) {
+						httpCon.disconnect();
+					}
 				}
 			}
 		}
@@ -298,17 +317,27 @@ public abstract class AbstractFileResolvingResource extends AbstractResource {
 			// Try a URL connection content-length header
 			URLConnection con = url.openConnection();
 			customizeConnection(con);
-			if (con instanceof HttpURLConnection httpCon) {
-				httpCon.setRequestMethod("HEAD");
+			HttpURLConnection httpCon = (con instanceof HttpURLConnection huc ? huc : null);
+			try {
+				if (httpCon != null) {
+					httpCon.setRequestMethod("HEAD");
+				}
+				long length = con.getContentLengthLong();
+				if (length <= 0 && httpCon != null &&
+						httpCon.getResponseCode() == HttpURLConnection.HTTP_BAD_METHOD) {
+					httpCon.disconnect();
+					con = url.openConnection();
+					customizeConnection(con);
+					httpCon = (con instanceof HttpURLConnection huc ? huc : null);
+					length = con.getContentLengthLong();
+				}
+				return length;
 			}
-			long length = con.getContentLengthLong();
-			if (length <= 0 && con instanceof HttpURLConnection httpCon &&
-					httpCon.getResponseCode() == HttpURLConnection.HTTP_BAD_METHOD) {
-				con = url.openConnection();
-				customizeConnection(con);
-				length = con.getContentLengthLong();
+			finally {
+				if (httpCon != null) {
+					httpCon.disconnect();
+				}
 			}
-			return length;
 		}
 	}
 
@@ -333,23 +362,33 @@ public abstract class AbstractFileResolvingResource extends AbstractResource {
 		// Try a URL connection last-modified header
 		URLConnection con = url.openConnection();
 		customizeConnection(con);
-		if (con instanceof HttpURLConnection httpCon) {
-			httpCon.setRequestMethod("HEAD");
-		}
-		long lastModified = con.getLastModified();
-		if (lastModified == 0) {
-			if (con instanceof HttpURLConnection httpCon &&
-					httpCon.getResponseCode() == HttpURLConnection.HTTP_BAD_METHOD) {
-				con = url.openConnection();
-				customizeConnection(con);
-				lastModified = con.getLastModified();
+		HttpURLConnection httpCon = (con instanceof HttpURLConnection huc ? huc : null);
+		try {
+			if (httpCon != null) {
+				httpCon.setRequestMethod("HEAD");
 			}
-			if (fileCheck && con.getContentLengthLong() <= 0) {
-				throw new FileNotFoundException(getDescription() +
-						" cannot be resolved in the file system for checking its last-modified timestamp");
+			long lastModified = con.getLastModified();
+			if (lastModified == 0) {
+				if (httpCon != null &&
+						httpCon.getResponseCode() == HttpURLConnection.HTTP_BAD_METHOD) {
+					httpCon.disconnect();
+					con = url.openConnection();
+					customizeConnection(con);
+					httpCon = (con instanceof HttpURLConnection huc ? huc : null);
+					lastModified = con.getLastModified();
+				}
+				if (fileCheck && con.getContentLengthLong() <= 0) {
+					throw new FileNotFoundException(getDescription() +
+							" cannot be resolved in the file system for checking its last-modified timestamp");
+				}
+			}
+			return lastModified;
+		}
+		finally {
+			if (httpCon != null) {
+				httpCon.disconnect();
 			}
 		}
-		return lastModified;
 	}
 
 	/**
