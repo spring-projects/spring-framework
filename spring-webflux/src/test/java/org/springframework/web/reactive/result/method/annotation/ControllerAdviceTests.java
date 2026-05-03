@@ -86,7 +86,7 @@ class ControllerAdviceTests {
 	}
 
 	@Test // SPR-12605
-	public void resolveExceptionWithHandlerMethodArg() throws Exception {
+	void resolveExceptionWithHandlerMethodArg() throws Exception {
 		testException(new ArrayIndexOutOfBoundsException(), "HandlerMethod: handle");
 	}
 

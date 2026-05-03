@@ -111,7 +111,7 @@ class ResponseStatusExceptionResolverTests {
 	}
 
 	@Test // SPR-12903
-	public void nestedException() {
+	void nestedException() {
 		Exception cause = new StatusCodeAndReasonMessageException();
 		TypeMismatchException ex = new TypeMismatchException("value", ITestBean.class, cause);
 		ModelAndView mav = exceptionResolver.resolveException(request, response, null, ex);
@@ -126,7 +126,7 @@ class ResponseStatusExceptionResolverTests {
 	}
 
 	@Test  // SPR-15524
-	public void responseStatusExceptionWithReason() {
+	void responseStatusExceptionWithReason() {
 		ResponseStatusException ex = new ResponseStatusException(HttpStatus.BAD_REQUEST, "The reason");
 		ModelAndView mav = exceptionResolver.resolveException(request, response, null, ex);
 		assertResolved(mav, 400, "The reason");

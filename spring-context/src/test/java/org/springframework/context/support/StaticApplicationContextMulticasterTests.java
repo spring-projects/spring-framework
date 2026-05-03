@@ -81,13 +81,13 @@ class StaticApplicationContextMulticasterTests extends AbstractApplicationContex
 
 	@Test
 	@Override
-	public void count() {
+	protected void count() {
 		assertCount(15);
 	}
 
 	@Test
 	@Override
-	public void events() throws Exception {
+	protected void events() throws Exception {
 		TestApplicationEventMulticaster.counter = 0;
 		super.events();
 		assertThat(TestApplicationEventMulticaster.counter).isEqualTo(1);

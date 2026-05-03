@@ -18,7 +18,6 @@ package org.springframework.core;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
-import java.util.Arrays;
 
 import org.junit.jupiter.api.Test;
 
@@ -71,22 +70,22 @@ class PrioritizedParameterNameDiscovererTests {
 	void orderedParameterDiscoverers1() {
 		PrioritizedParameterNameDiscoverer pnd = new PrioritizedParameterNameDiscoverer();
 		pnd.addDiscoverer(returnsFooBar);
-		assertThat(Arrays.equals(FOO_BAR, pnd.getParameterNames(anyMethod))).isTrue();
-		assertThat(Arrays.equals(FOO_BAR, pnd.getParameterNames((Constructor<?>) null))).isTrue();
+		assertThat(pnd.getParameterNames(anyMethod)).containsExactly(FOO_BAR);
+		assertThat(pnd.getParameterNames((Constructor<?>) null)).containsExactly(FOO_BAR);
 		pnd.addDiscoverer(returnsSomethingElse);
-		assertThat(Arrays.equals(FOO_BAR, pnd.getParameterNames(anyMethod))).isTrue();
-		assertThat(Arrays.equals(FOO_BAR, pnd.getParameterNames((Constructor<?>) null))).isTrue();
+		assertThat(pnd.getParameterNames(anyMethod)).containsExactly(FOO_BAR);
+		assertThat(pnd.getParameterNames((Constructor<?>) null)).containsExactly(FOO_BAR);
 	}
 
 	@Test
 	void orderedParameterDiscoverers2() {
 		PrioritizedParameterNameDiscoverer pnd = new PrioritizedParameterNameDiscoverer();
 		pnd.addDiscoverer(returnsSomethingElse);
-		assertThat(Arrays.equals(SOMETHING_ELSE, pnd.getParameterNames(anyMethod))).isTrue();
-		assertThat(Arrays.equals(SOMETHING_ELSE, pnd.getParameterNames((Constructor<?>) null))).isTrue();
+		assertThat(pnd.getParameterNames(anyMethod)).containsExactly(SOMETHING_ELSE);
+		assertThat(pnd.getParameterNames((Constructor<?>) null)).containsExactly(SOMETHING_ELSE);
 		pnd.addDiscoverer(returnsFooBar);
-		assertThat(Arrays.equals(SOMETHING_ELSE, pnd.getParameterNames(anyMethod))).isTrue();
-		assertThat(Arrays.equals(SOMETHING_ELSE, pnd.getParameterNames((Constructor<?>) null))).isTrue();
+		assertThat(pnd.getParameterNames(anyMethod)).containsExactly(SOMETHING_ELSE);
+		assertThat(pnd.getParameterNames((Constructor<?>) null)).containsExactly(SOMETHING_ELSE);
 	}
 
 }

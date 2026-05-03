@@ -73,6 +73,27 @@ Java::
 ----
 <1> Mark a field for overriding the bean with type `CustomService`.
 <2> The result of this static method will be used as the instance and injected into the field.
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes"]
+----
+	class OverrideBeanTests {
+		@TestBean // <1>
+		lateinit var customService: CustomService
+
+		// test case body...
+
+		companion object {
+			@JvmStatic
+			fun customService(): CustomService { // <2>
+				return MyFakeCustomService()
+			}
+		}
+	}
+----
+<1> Mark a field for overriding the bean with type `CustomService`.
+<2> The result of this static method will be used as the instance and injected into the field.
 ======
 
 In the example above, we are overriding the bean with type `CustomService`. If more than
@@ -96,6 +117,28 @@ Java::
 
 		static CustomService createCustomService() { // <2>
 			return new MyFakeCustomService();
+		}
+	}
+----
+<1> Mark a field for overriding the bean with name `service`, and specify that the
+    factory method is named `createCustomService`.
+<2> The result of this static method will be used as the instance and injected into the field.
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes"]
+----
+	class OverrideBeanTests {
+		@TestBean(name = "service", methodName = "createCustomService") // <1>
+		lateinit var customService: CustomService
+
+		// test case body...
+
+		companion object {
+			@JvmStatic
+			fun createCustomService(): CustomService { // <2>
+				return MyFakeCustomService()
+			}
 		}
 	}
 ----

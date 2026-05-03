@@ -775,7 +775,7 @@ class UriComponentsBuilderTests {
 	}
 
 	@Test  // gh-25243
-	void testCloneAndMerge() {
+	void cloneAndMerge() {
 		UriComponentsBuilder builder1 = UriComponentsBuilder.newInstance();
 		builder1.scheme("http").host("e1.com").path("/p1").pathSegment("ps1").queryParam("q1", "x").fragment("f1").encode();
 
@@ -800,7 +800,7 @@ class UriComponentsBuilderTests {
 	}
 
 	@Test  // gh-24772
-	void testDeepClone() {
+	void deepClone() {
 		HashMap<String, Object> vars = new HashMap<>();
 		vars.put("ps1", "foo");
 		vars.put("ps2", "bar");

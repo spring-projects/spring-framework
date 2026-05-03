@@ -26,6 +26,7 @@ import jakarta.json.bind.JsonbBuilder;
 import jakarta.json.bind.JsonbConfig;
 import org.jspecify.annotations.Nullable;
 
+import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 
 /**
@@ -94,6 +95,10 @@ public class JsonbHttpMessageConverter extends AbstractJsonHttpMessageConverter 
 		return this.jsonb;
 	}
 
+	@Override
+	public boolean canWriteRepeatedly(Object o, @Nullable MediaType contentType) {
+		return true;
+	}
 
 	@Override
 	protected Object readInternal(Type resolvedType, Reader reader) throws Exception {
@@ -111,6 +116,7 @@ public class JsonbHttpMessageConverter extends AbstractJsonHttpMessageConverter 
 	}
 
 	@Override
+	@SuppressWarnings("removal")
 	protected boolean supportsRepeatableWrites(Object o) {
 		return true;
 	}

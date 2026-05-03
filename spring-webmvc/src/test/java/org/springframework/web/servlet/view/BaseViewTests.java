@@ -217,8 +217,8 @@ class BaseViewTests {
 		AbstractView v = new ConcreteView();
 		v.setAttributesCSV("foo=[bar],king=[kong]");
 		assertThat(v.getStaticAttributes()).hasSize(2);
-		assertThat(v.getStaticAttributes().get("foo").equals("bar")).isTrue();
-		assertThat(v.getStaticAttributes().get("king").equals("kong")).isTrue();
+		assertThat(v.getStaticAttributes().get("foo")).isEqualTo("bar");
+		assertThat(v.getStaticAttributes().get("king")).isEqualTo("kong");
 	}
 
 	@Test

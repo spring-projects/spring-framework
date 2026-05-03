@@ -36,7 +36,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
  * {@link RestClient} tests for sending API versions.
  * @author Rossen Stoyanchev
  */
-public class RestClientVersionTests {
+class RestClientVersionTests {
 
 	private final MockWebServer server = new MockWebServer();
 

@@ -58,5 +58,5 @@ import org.springframework.context.ApplicationContextInitializer;
 	key = ClassOrderer.DEFAULT_ORDER_PROPERTY_NAME,
 	value = "org.junit.jupiter.api.ClassOrderer$ClassName"
 )
-public class AciTestSuite {
+class AciTestSuite {
 }

@@ -1,10 +1,15 @@
 [[observability]]
 = Observability Support
 
+With https://docs.micrometer.io/micrometer/reference/concepts.html[Micrometer], developers can instrument libraries and applications for metrics (timers, gauges, counters)
+that collect statistics about their runtime behavior. Metrics can help you to track error rates, usage patterns, performance, and more.
+https://docs.micrometer.io/tracing/reference/[Micrometer can also produce traces], giving you a holistic view of an entire system, crossing application boundaries; you can zoom in on particular user requests and follow their entire completion across applications.
+
 Micrometer defines an {micrometer-docs}/observation.html[Observation concept that enables both Metrics and Traces] in applications.
-Metrics support offers a way to create timers, gauges, or counters for collecting statistics about the runtime behavior of your application.
-Metrics can help you to track error rates, usage patterns, performance, and more.
-Traces provide a holistic view of an entire system, crossing application boundaries; you can zoom in on particular user requests and follow their entire completion across applications.
+Each observation will produce:
+
+* https://docs.micrometer.io/micrometer/reference/observation/components.html#micrometer-observation-default-meter-handler[several metrics - a timer, a long task timer and many counters]
+* a https://docs.micrometer.io/tracing/reference/glossary.html[span for the current trace]
 
 Spring Framework instruments various parts of its own codebase to publish observations if an `ObservationRegistry` is configured.
 You can learn more about {spring-boot-docs-ref}/actuator/observability.html[configuring the observability infrastructure in Spring Boot].

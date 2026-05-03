@@ -16,11 +16,22 @@
 
 package org.springframework.http.codec.json;
 
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.function.Predicate;
 
+import kotlinx.serialization.KSerializer;
+import kotlinx.serialization.builtins.BuiltinSerializersKt;
 import kotlinx.serialization.json.Json;
+import org.jspecify.annotations.Nullable;
+import org.reactivestreams.Publisher;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import org.springframework.core.ResolvableType;
+import org.springframework.core.codec.DecodingException;
+import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.KotlinSerializationStringDecoder;
 import org.springframework.util.MimeType;
@@ -94,6 +105,39 @@ public class KotlinSerializationJsonDecoder extends KotlinSerializationStringDec
 	 */
 	public KotlinSerializationJsonDecoder(Json json, Predicate<ResolvableType> typePredicate) {
 		super(json, typePredicate, DEFAULT_JSON_MIME_TYPES);
+	}
+
+	@Override
+	public Flux<Object> decode(Publisher<DataBuffer> inputStream, ResolvableType elementType,
+			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
+		return Flux.defer(() -> {
+			KSerializer<Object> serializer = serializer(elementType);
+			if (serializer == null) {
+				return Mono.error(new DecodingException("Could not find KSerializer for " + elementType));
+			}
+			return this.stringDecoder
+					.decode(inputStream, elementType, mimeType, hints)
+					.switchOnFirst((signal, flux) -> {
+						if (signal.hasValue()) {
+							String value = Objects.requireNonNull(signal.get());
+							if (value.stripLeading().startsWith("[") && !List.class.isAssignableFrom(elementType.toClass())) {
+								KSerializer<List<Object>> listSerializer = BuiltinSerializersKt.ListSerializer(serializer);
+								return flux
+										.flatMapIterable(string -> format().decodeFromString(listSerializer, string))
+										.onErrorMap(IllegalArgumentException.class, this::processException);
+							}
+							return flux.handle((string, sink) -> {
+								try {
+									sink.next(format().decodeFromString(serializer, string));
+								}
+								catch (IllegalArgumentException ex) {
+									sink.error(processException(ex));
+								}
+							});
+						}
+						return flux;
+					});
+		});
 	}
 
 }

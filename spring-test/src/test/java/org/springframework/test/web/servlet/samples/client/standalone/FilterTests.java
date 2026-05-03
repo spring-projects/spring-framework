@@ -58,10 +58,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  *
  * @author Rossen Stoyanchev
  */
-public class FilterTests {
+class FilterTests {
 
 	@Test
-	public void whenFiltersCompleteMvcProcessesRequest() throws Exception {
+	void whenFiltersCompleteMvcProcessesRequest() throws Exception {
 		WebTestClient client = MockMvcWebTestClient.bindToController(new PersonController())
 				.filters(new ContinueFilter())
 				.build();
@@ -81,7 +81,7 @@ public class FilterTests {
 	}
 
 	@Test
-	public void filtersProcessRequest() {
+	void filtersProcessRequest() {
 		WebTestClient client = MockMvcWebTestClient.bindToController(new PersonController())
 				.filters(new ContinueFilter(), new RedirectFilter())
 				.build();
@@ -93,7 +93,7 @@ public class FilterTests {
 	}
 
 	@Test
-	public void filterMappedBySuffix() {
+	void filterMappedBySuffix() {
 		WebTestClient client = MockMvcWebTestClient.bindToController(new PersonController())
 				.filter(new RedirectFilter(), "*.html")
 				.build();
@@ -105,7 +105,7 @@ public class FilterTests {
 	}
 
 	@Test
-	public void filterWithExactMapping() {
+	void filterWithExactMapping() {
 		WebTestClient client = MockMvcWebTestClient.bindToController(new PersonController())
 				.filter(new RedirectFilter(), "/p", "/persons")
 				.build();
@@ -117,7 +117,7 @@ public class FilterTests {
 	}
 
 	@Test
-	public void filterSkipped() throws Exception {
+	void filterSkipped() throws Exception {
 		WebTestClient client = MockMvcWebTestClient.bindToController(new PersonController())
 				.filter(new RedirectFilter(), "/p", "/person")
 				.build();
@@ -138,7 +138,7 @@ public class FilterTests {
 	}
 
 	@Test
-	public void filterWrapsRequestResponse() throws Exception {
+	void filterWrapsRequestResponse() throws Exception {
 		WebTestClient client = MockMvcWebTestClient.bindToController(new PersonController())
 				.filter(new WrappingRequestResponseFilter())
 				.build();
@@ -152,7 +152,7 @@ public class FilterTests {
 	}
 
 	@Test
-	public void filterWrapsRequestResponseAndPerformsAsyncDispatch() {
+	void filterWrapsRequestResponseAndPerformsAsyncDispatch() {
 		WebTestClient client = MockMvcWebTestClient.bindToController(new PersonController())
 				.filters(new WrappingRequestResponseFilter(), new ShallowEtagHeaderFilter())
 				.build();

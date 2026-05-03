@@ -39,6 +39,7 @@ import org.springframework.core.io.AbstractResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
 /**
  * Resolver that delegates to the chain, and if a resource is found, it then
@@ -139,34 +140,29 @@ public class EncodedResourceResolver extends AbstractResourceResolver {
 			return resource;
 		}
 
-		String acceptEncoding = getAcceptEncoding(request);
-		if (acceptEncoding == null) {
+		List<String> acceptedCodings = parseAcceptEncoding(request);
+		if (acceptedCodings.isEmpty()) {
 			return resource;
 		}
 
-		for (String coding : this.contentCodings) {
-			if (acceptEncoding.contains(coding)) {
+		for (String acceptedCoding : acceptedCodings) {
+			if (this.contentCodings.contains(acceptedCoding)) {
 				try {
-					String extension = getExtension(coding);
-					Resource encoded = new EncodedResource(resource, coding, extension);
+					String extension = getExtension(acceptedCoding);
+					Resource encoded = new EncodedResource(resource, acceptedCoding, extension);
 					if (encoded.exists()) {
 						return encoded;
 					}
 				}
 				catch (IOException ex) {
 					if (logger.isTraceEnabled()) {
-						logger.trace("No " + coding + " resource for [" + resource.getFilename() + "]", ex);
+						logger.trace("No " + acceptedCoding + " resource for [" + resource.getFilename() + "]", ex);
 					}
 				}
 			}
 		}
 
 		return resource;
-	}
-
-	private @Nullable String getAcceptEncoding(HttpServletRequest request) {
-		String header = request.getHeader(HttpHeaders.ACCEPT_ENCODING);
-		return (header != null ? header.toLowerCase(Locale.ROOT) : null);
 	}
 
 	private String getExtension(String coding) {
@@ -182,6 +178,23 @@ public class EncodedResourceResolver extends AbstractResourceResolver {
 			List<? extends Resource> locations, ResourceResolverChain chain) {
 
 		return chain.resolveUrlPath(resourceUrlPath, locations);
+	}
+
+	/**
+	 * Parse the accepted encodings from the given HTTP request.
+	 */
+	static List<String> parseAcceptEncoding(HttpServletRequest request) {
+		String header = request.getHeader("Accept-Encoding");
+		if (!StringUtils.hasText(header)) {
+			return Collections.emptyList();
+		}
+		header = header.toLowerCase(Locale.ROOT);
+		return Arrays.stream(StringUtils.tokenizeToStringArray(header, ","))
+				.map(token -> {
+					int index = token.indexOf(';');
+					return (index >= 0 ? token.substring(0, index) : token).trim();
+				})
+				.toList();
 	}
 
 

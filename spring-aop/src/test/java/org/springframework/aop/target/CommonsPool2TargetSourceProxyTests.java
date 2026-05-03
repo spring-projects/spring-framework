@@ -36,7 +36,7 @@ class CommonsPool2TargetSourceProxyTests {
 		qualifiedResource(CommonsPool2TargetSourceProxyTests.class, "context.xml");
 
 	@Test
-	void testProxy() {
+	void proxy() {
 		DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(beanFactory);
 		reader.loadBeanDefinitions(CONTEXT);

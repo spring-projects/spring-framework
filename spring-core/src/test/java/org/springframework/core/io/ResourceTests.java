@@ -271,6 +271,50 @@ class ResourceTests {
 		}
 
 		@Test
+		void isReadableChecksExistsFirst() {
+			AtomicBoolean existsCalled = new AtomicBoolean();
+			AtomicBoolean canReadCalled = new AtomicBoolean();
+			File file = new File("/dev/my.txt") {
+				@Override
+				public boolean exists() {
+					existsCalled.set(true);
+					return false;
+				}
+				@Override
+				public boolean canRead() {
+					canReadCalled.set(true);
+					return false;
+				}
+			};
+			Resource resource = new FileSystemResource(file);
+			assertThat(resource.isReadable()).isFalse();
+			assertThat(existsCalled).isTrue();
+			assertThat(canReadCalled).isFalse();
+		}
+
+		@Test
+		void isReadableChecksCanReadAfterExists() {
+			AtomicBoolean existsCalled = new AtomicBoolean();
+			AtomicBoolean canReadCalled = new AtomicBoolean();
+			File file = new File("/dev/my.txt") {
+				@Override
+				public boolean exists() {
+					existsCalled.set(true);
+					return true;
+				}
+				@Override
+				public boolean canRead() {
+					canReadCalled.set(true);
+					return false;
+				}
+			};
+			Resource resource = new FileSystemResource(file);
+			assertThat(resource.isReadable()).isFalse();
+			assertThat(existsCalled).isTrue();
+			assertThat(canReadCalled).isTrue();
+		}
+
+		@Test
 		void getFilePath() throws Exception {
 			Path path = mock();
 			given(path.normalize()).willReturn(path);

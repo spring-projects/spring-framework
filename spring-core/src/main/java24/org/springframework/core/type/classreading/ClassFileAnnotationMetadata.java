@@ -26,6 +26,7 @@ import java.lang.classfile.attribute.InnerClassesAttribute;
 import java.lang.classfile.attribute.NestHostAttribute;
 import java.lang.classfile.attribute.RuntimeVisibleAnnotationsAttribute;
 import java.lang.classfile.constantpool.ClassEntry;
+import java.lang.constant.ClassDesc;
 import java.lang.reflect.AccessFlag;
 import java.util.Collections;
 import java.util.LinkedHashSet;
@@ -221,6 +222,18 @@ final class ClassFileAnnotationMetadata implements AnnotationMetadata {
 		return builder.build();
 	}
 
+	static String resolveTypeName(ClassDesc type) {
+		if (type.isPrimitive()) {
+			return type.displayName();
+		}
+		ClassDesc effectiveType = type;
+		while (effectiveType.isArray()) {
+			effectiveType = effectiveType.componentType();
+		}
+		String packageName = effectiveType.packageName();
+		return (packageName.isEmpty() ? type.displayName() : packageName + "." + type.displayName());
+	}
+
 
 	static class Builder {
 
@@ -242,7 +255,7 @@ final class ClassFileAnnotationMetadata implements AnnotationMetadata {
 
 		private Set<MethodMetadata> declaredMethods = new LinkedHashSet<>(4);
 
-		private MergedAnnotations mergedAnnotations = MergedAnnotations.of(Collections.emptySet());
+		private MergedAnnotations mergedAnnotations = MergedAnnotations.of(Collections.emptyList());
 
 		public Builder(ClassLoader classLoader) {
 			this.classLoader = classLoader;

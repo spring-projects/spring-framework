@@ -30,7 +30,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class CompositeSetTests {
 
 	@Test
-	void testEquals() {
+	void equals() {
 		Set<String> first = Set.of("foo", "bar");
 		Set<String> second = Set.of("baz", "qux");
 		CompositeSet<String> composite = new CompositeSet<>(first, second);
@@ -38,10 +38,10 @@ class CompositeSetTests {
 		Set<String> all = new HashSet<>(first);
 		all.addAll(second);
 
-		assertThat(composite.equals(all)).isTrue();
-		assertThat(composite.equals(first)).isFalse();
-		assertThat(composite.equals(second)).isFalse();
-		assertThat(composite.equals(Collections.emptySet())).isFalse();
+		assertThat(composite).isEqualTo(all);
+		assertThat(composite).isNotEqualTo(first);
+		assertThat(composite).isNotEqualTo(second);
+		assertThat(composite).isNotEqualTo(Collections.emptySet());
 	}
 
 }

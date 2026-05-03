@@ -80,7 +80,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
  * @author Rossen Stoyanchev
  * @author Brian Clozel
  */
-@SuppressWarnings("JUnitMalformedDeclaration")
+@SuppressWarnings({"JUnitMalformedDeclaration", "removal"})
 class RestClientAdapterTests {
 
 	private final MockWebServer anotherServer = new MockWebServer();
@@ -197,6 +197,26 @@ class RestClientAdapterTests {
 
 		RecordedRequest request = anotherServer.takeRequest();
 		assertThat(request.getHeaders().get("API-Version")).isEqualTo("1.2");
+		assertThat(actualResponse).isEqualTo("Hello Spring 2!");
+	}
+
+	@Test // gh-36514
+	void greetingWithDefaultApiVersion() throws Exception {
+		prepareResponse(builder ->
+				builder.setHeader("Content-Type", "text/plain").body("Hello Spring 2!"));
+
+		RestClient restClient = RestClient.builder()
+				.baseUrl(anotherServer.url("/").toString())
+				.defaultApiVersion("1.0")
+				.apiVersionInserter(ApiVersionInserter.useHeader("X-Version"))
+				.build();
+
+		String actualResponse =
+				HttpServiceProxyFactory.builderFor(RestClientAdapter.create(restClient)).build()
+						.createClient(Service.class).getGreeting();
+
+		RecordedRequest request = anotherServer.takeRequest();
+		assertThat(request.getHeaders().get("X-Version")).isEqualTo("1.0");
 		assertThat(actualResponse).isEqualTo("Hello Spring 2!");
 	}
 

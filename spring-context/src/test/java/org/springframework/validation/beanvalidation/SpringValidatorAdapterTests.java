@@ -80,13 +80,13 @@ class SpringValidatorAdapterTests {
 
 
 	@Test
-	void testUnwrap() {
+	void unwrap() {
 		Validator nativeValidator = validatorAdapter.unwrap(Validator.class);
 		assertThat(nativeValidator).isSameAs(this.nativeValidator);
 	}
 
 	@Test  // SPR-13406
-	public void testNoStringArgumentValue() throws Exception {
+	void noStringArgumentValue() throws Exception {
 		TestBean testBean = new TestBean();
 		testBean.setPassword("pass");
 		testBean.setConfirmPassword("pass");
@@ -105,7 +105,7 @@ class SpringValidatorAdapterTests {
 	}
 
 	@Test  // SPR-13406
-	public void testApplyMessageSourceResolvableToStringArgumentValueWithResolvedLogicalFieldName() throws Exception {
+	void applyMessageSourceResolvableToStringArgumentValueWithResolvedLogicalFieldName() throws Exception {
 		TestBean testBean = new TestBean();
 		testBean.setPassword("password");
 		testBean.setConfirmPassword("PASSWORD");
@@ -124,7 +124,7 @@ class SpringValidatorAdapterTests {
 	}
 
 	@Test  // SPR-13406
-	public void testApplyMessageSourceResolvableToStringArgumentValueWithUnresolvedLogicalFieldName() {
+	void applyMessageSourceResolvableToStringArgumentValueWithUnresolvedLogicalFieldName() {
 		TestBean testBean = new TestBean();
 		testBean.setEmail("test@example.com");
 		testBean.setConfirmEmail("TEST@EXAMPLE.IO");
@@ -148,7 +148,7 @@ class SpringValidatorAdapterTests {
 	}
 
 	@Test  // SPR-15123
-	public void testApplyMessageSourceResolvableToStringArgumentValueWithAlwaysUseMessageFormat() {
+	void applyMessageSourceResolvableToStringArgumentValueWithAlwaysUseMessageFormat() {
 		messageSource.setAlwaysUseMessageFormat(true);
 
 		TestBean testBean = new TestBean();
@@ -174,7 +174,7 @@ class SpringValidatorAdapterTests {
 	}
 
 	@Test
-	void testPatternMessage() {
+	void patternMessage() {
 		TestBean testBean = new TestBean();
 		testBean.setEmail("X");
 		testBean.setConfirmEmail("X");
@@ -192,7 +192,7 @@ class SpringValidatorAdapterTests {
 	}
 
 	@Test  // SPR-16177
-	public void testWithList() {
+	void withList() {
 		Parent parent = new Parent();
 		parent.setName("Parent whit list");
 		parent.getChildList().addAll(createChildren(parent));
@@ -204,7 +204,7 @@ class SpringValidatorAdapterTests {
 	}
 
 	@Test  // SPR-16177
-	public void testWithSet() {
+	void withSet() {
 		Parent parent = new Parent();
 		parent.setName("Parent with set");
 		parent.getChildSet().addAll(createChildren(parent));
@@ -230,7 +230,7 @@ class SpringValidatorAdapterTests {
 	}
 
 	@Test  // SPR-15839
-	public void testListElementConstraint() {
+	void listElementConstraint() {
 		BeanWithListElementConstraint bean = new BeanWithListElementConstraint();
 		bean.setProperty(Arrays.asList("no", "element", "can", "be", null));
 
@@ -242,7 +242,7 @@ class SpringValidatorAdapterTests {
 	}
 
 	@Test  // SPR-15839
-	public void testMapValueConstraint() {
+	void mapValueConstraint() {
 		Map<String, String> property = new HashMap<>();
 		property.put("no value can be", null);
 
@@ -257,7 +257,7 @@ class SpringValidatorAdapterTests {
 	}
 
 	@Test  // SPR-15839
-	public void testMapEntryConstraint() {
+	void mapEntryConstraint() {
 		Map<String, String> property = new HashMap<>();
 		property.put(null, null);
 

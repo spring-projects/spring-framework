@@ -66,30 +66,30 @@ class PathResourceResolverTests {
 	@Test
 	void checkResource() {
 		Resource location = new ClassPathResource("test/", PathResourceResolver.class);
-		testCheckResource(location, "../testsecret/secret.txt");
-		testCheckResource(location, "test/../../testsecret/secret.txt");
+		checkResource(location, "../testsecret/secret.txt");
+		checkResource(location, "test/../../testsecret/secret.txt");
 
 		location = new UrlResource(getClass().getResource("./test/"));
 		String secretPath = new UrlResource(getClass().getResource("testsecret/secret.txt")).getURL().getPath();
-		testCheckResource(location, "file:" + secretPath);
-		testCheckResource(location, "/file:" + secretPath);
-		testCheckResource(location, "/" + secretPath);
-		testCheckResource(location, "////../.." + secretPath);
-		testCheckResource(location, "/%2E%2E/testsecret/secret.txt");
-		testCheckResource(location, "/%2e%2e/testsecret/secret.txt");
-		testCheckResource(location, " " + secretPath);
-		testCheckResource(location, "/  " + secretPath);
-		testCheckResource(location, "url:" + secretPath);
+		checkResource(location, "file:" + secretPath);
+		checkResource(location, "/file:" + secretPath);
+		checkResource(location, "/" + secretPath);
+		checkResource(location, "////../.." + secretPath);
+		checkResource(location, "/%2E%2E/testsecret/secret.txt");
+		checkResource(location, "/%2e%2e/testsecret/secret.txt");
+		checkResource(location, " " + secretPath);
+		checkResource(location, "/  " + secretPath);
+		checkResource(location, "url:" + secretPath);
 	}
 
-	private void testCheckResource(Resource location, String requestPath) {
+	private void checkResource(Resource location, String requestPath) {
 		List<Resource> locations = Collections.singletonList(location);
 		Resource actual = this.resolver.resolveResource(null, requestPath, locations, null);
 		assertThat(actual).isNull();
 	}
 
 	@Test  // gh-23463
-	public void ignoreInvalidEscapeSequence() throws IOException {
+	void ignoreInvalidEscapeSequence() throws IOException {
 		UrlResource location = new UrlResource(getClass().getResource("./test/"));
 
 		Resource resource = new UrlResource(location.getURL() + "test%file.txt");
@@ -113,7 +113,7 @@ class PathResourceResolverTests {
 	}
 
 	@Test  // SPR-12432
-	public void checkServletContextResource() throws Exception {
+	void checkServletContextResource() throws Exception {
 		Resource classpathLocation = new ClassPathResource("test/", PathResourceResolver.class);
 		MockServletContext context = new MockServletContext();
 
@@ -125,7 +125,7 @@ class PathResourceResolverTests {
 	}
 
 	@Test  // SPR-12624
-	public void checkRelativeLocation() throws Exception {
+	void checkRelativeLocation() throws Exception {
 		String location= new UrlResource(getClass().getResource("./test/")).getURL().toExternalForm();
 		location = location.replace("/test/org/springframework","/test/org/../org/springframework");
 
@@ -136,13 +136,13 @@ class PathResourceResolverTests {
 	}
 
 	@Test  // SPR-12747
-	public void checkFileLocation() throws Exception {
+	void checkFileLocation() throws Exception {
 		Resource resource = getResource("main.css");
 		assertThat(this.resolver.checkResource(resource, resource)).isTrue();
 	}
 
 	@Test  // SPR-13241
-	public void resolvePathRootResource() {
+	void resolvePathRootResource() {
 		Resource webjarsLocation = new ClassPathResource("/META-INF/resources/webjars/", PathResourceResolver.class);
 		String path = this.resolver.resolveUrlPathInternal("", Collections.singletonList(webjarsLocation), null);
 

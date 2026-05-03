@@ -636,9 +636,11 @@ class AnnotationTransactionAttributeSourceTests {
 
 	interface ITestBean2X extends ITestBean2, BeanNameAware {
 
+		@Override
 		@Transactional
 		int getAge();
 
+		@Override
 		void setAge(int age);
 
 		String getName();

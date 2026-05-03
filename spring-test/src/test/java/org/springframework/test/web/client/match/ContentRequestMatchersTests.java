@@ -37,13 +37,13 @@ import static org.hamcrest.Matchers.hasXPath;
  *
  * @author Rossen Stoyanchev
  */
-public class ContentRequestMatchersTests {
+class ContentRequestMatchersTests {
 
 	private final MockClientHttpRequest request = new MockClientHttpRequest();
 
 
 	@Test
-	public void testContentType() throws Exception {
+	void contentType() throws Exception {
 		this.request.getHeaders().setContentType(MediaType.APPLICATION_JSON);
 
 		MockRestRequestMatchers.content().contentType("application/json").match(this.request);
@@ -51,7 +51,7 @@ public class ContentRequestMatchersTests {
 	}
 
 	@Test
-	public void testContentTypeNoMatch1() {
+	void contentTypeNoMatch1() {
 		this.request.getHeaders().setContentType(MediaType.APPLICATION_JSON);
 
 		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
@@ -59,7 +59,7 @@ public class ContentRequestMatchersTests {
 	}
 
 	@Test
-	public void testContentTypeNoMatch2() {
+	void contentTypeNoMatch2() {
 		this.request.getHeaders().setContentType(MediaType.APPLICATION_JSON);
 
 		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
@@ -67,14 +67,14 @@ public class ContentRequestMatchersTests {
 	}
 
 	@Test
-	public void testString() throws Exception {
+	void string() throws Exception {
 		this.request.getBody().write("test".getBytes());
 
 		MockRestRequestMatchers.content().string("test").match(this.request);
 	}
 
 	@Test
-	public void testStringNoMatch() throws Exception {
+	void stringNoMatch() throws Exception {
 		this.request.getBody().write("test".getBytes());
 
 		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
@@ -82,7 +82,7 @@ public class ContentRequestMatchersTests {
 	}
 
 	@Test
-	public void testBytes() throws Exception {
+	void bytes() throws Exception {
 		byte[] content = "test".getBytes();
 		this.request.getBody().write(content);
 
@@ -90,7 +90,7 @@ public class ContentRequestMatchersTests {
 	}
 
 	@Test
-	public void testBytesNoMatch() throws Exception {
+	void bytesNoMatch() throws Exception {
 		this.request.getBody().write("test".getBytes());
 
 		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
@@ -98,7 +98,7 @@ public class ContentRequestMatchersTests {
 	}
 
 	@Test
-	public void testFormData() throws Exception {
+	void formData() throws Exception {
 		String contentType = "application/x-www-form-urlencoded;charset=UTF-8";
 		String body = "name+1=value+1&name+2=value+A&name+2=value+B&name+3";
 
@@ -114,7 +114,7 @@ public class ContentRequestMatchersTests {
 	}
 
 	@Test
-	public void testFormDataContains() throws Exception {
+	void formDataContains() throws Exception {
 		String contentType = "application/x-www-form-urlencoded;charset=UTF-8";
 		String body = "name+1=value+1&name+2=value+A&name+2=value+B&name+3";
 
@@ -127,7 +127,7 @@ public class ContentRequestMatchersTests {
 	}
 
 	@Test
-	public void testMultipartData() throws Exception {
+	void multipartData() throws Exception {
 		String contentType = "multipart/form-data;boundary=1234567890";
 		String body = """
 				--1234567890\r
@@ -161,7 +161,7 @@ public class ContentRequestMatchersTests {
 	}
 
 	@Test
-	public void testMultipartDataContains() throws Exception {
+	void multipartDataContains() throws Exception {
 		String contentType = "multipart/form-data;boundary=1234567890";
 		String body = """
 				--1234567890\r
@@ -197,7 +197,7 @@ public class ContentRequestMatchersTests {
 	}
 
 	@Test
-	public void testXml() throws Exception {
+	void xml() throws Exception {
 		String content = "<foo><bar>baz</bar><bar>bazz</bar></foo>";
 		this.request.getBody().write(content.getBytes());
 
@@ -205,7 +205,7 @@ public class ContentRequestMatchersTests {
 	}
 
 	@Test
-	public void testXmlNoMatch() throws Exception {
+	void xmlNoMatch() throws Exception {
 		this.request.getBody().write("<foo>11</foo>".getBytes());
 
 		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
@@ -213,7 +213,7 @@ public class ContentRequestMatchersTests {
 	}
 
 	@Test
-	public void testNodeMatcher() throws Exception {
+	void nodeMatcher() throws Exception {
 		String content = "<foo><bar>baz</bar></foo>";
 		this.request.getBody().write(content.getBytes());
 
@@ -221,7 +221,7 @@ public class ContentRequestMatchersTests {
 	}
 
 	@Test
-	public void testNodeMatcherNoMatch() throws Exception {
+	void nodeMatcherNoMatch() throws Exception {
 		String content = "<foo><bar>baz</bar></foo>";
 		this.request.getBody().write(content.getBytes());
 		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
@@ -229,7 +229,7 @@ public class ContentRequestMatchersTests {
 	}
 
 	@Test
-	public void testJsonLenientMatch() throws Exception {
+	void jsonLenientMatch() throws Exception {
 		String content = "{\n \"foo array\":[\"first\",\"second\"] , \"someExtraProperty\": \"which is allowed\" \n}";
 		this.request.getBody().write(content.getBytes());
 
@@ -241,7 +241,7 @@ public class ContentRequestMatchersTests {
 
 	@Test
 	@Deprecated
-	public void testJsonLenientMatchWithDeprecatedBooleanFlag() throws Exception {
+	void jsonLenientMatchWithDeprecatedBooleanFlag() throws Exception {
 		String content = "{\n \"foo array\":[\"first\",\"second\"] , \"someExtraProperty\": \"which is allowed\" \n}";
 		this.request.getBody().write(content.getBytes());
 
@@ -250,7 +250,7 @@ public class ContentRequestMatchersTests {
 	}
 
 	@Test
-	public void testJsonStrictMatch() throws Exception {
+	void jsonStrictMatch() throws Exception {
 		String content = "{\n \"foo\": \"bar\", \"foo array\":[\"first\",\"second\"] \n}";
 		this.request.getBody().write(content.getBytes());
 
@@ -262,7 +262,7 @@ public class ContentRequestMatchersTests {
 
 	@Test
 	@Deprecated
-	public void testJsonStrictMatchWithDeprecatedBooleanFlag() throws Exception {
+	void jsonStrictMatchWithDeprecatedBooleanFlag() throws Exception {
 		String content = "{\n \"foo\": \"bar\", \"foo array\":[\"first\",\"second\"] \n}";
 		this.request.getBody().write(content.getBytes());
 
@@ -273,7 +273,7 @@ public class ContentRequestMatchersTests {
 	}
 
 	@Test
-	public void testJsonLenientNoMatch() throws Exception {
+	void jsonLenientNoMatch() throws Exception {
 		String content = "{\n \"bar\" : \"foo\"  \n}";
 		this.request.getBody().write(content.getBytes());
 
@@ -291,7 +291,7 @@ public class ContentRequestMatchersTests {
 
 	@Test
 	@Deprecated
-	public void testJsonLenientNoMatchWithDeprecatedBooleanFlag() throws Exception {
+	void jsonLenientNoMatchWithDeprecatedBooleanFlag() throws Exception {
 		String content = "{\n \"bar\" : \"foo\"  \n}";
 		this.request.getBody().write(content.getBytes());
 
@@ -303,7 +303,7 @@ public class ContentRequestMatchersTests {
 	}
 
 	@Test
-	public void testJsonStrictNoMatch() throws Exception {
+	void jsonStrictNoMatch() throws Exception {
 		String content = "{\n \"foo array\":[\"first\",\"second\"] , \"someExtraProperty\": \"which is NOT allowed\" \n}";
 		this.request.getBody().write(content.getBytes());
 
@@ -316,7 +316,7 @@ public class ContentRequestMatchersTests {
 
 	@Test
 	@Deprecated
-	public void testJsonStrictNoMatchWithDeprecatedBooleanFlag() throws Exception {
+	void jsonStrictNoMatchWithDeprecatedBooleanFlag() throws Exception {
 		String content = "{\n \"foo array\":[\"first\",\"second\"] , \"someExtraProperty\": \"which is NOT allowed\" \n}";
 		this.request.getBody().write(content.getBytes());
 

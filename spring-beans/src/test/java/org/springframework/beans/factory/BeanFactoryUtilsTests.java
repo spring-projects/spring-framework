@@ -85,7 +85,7 @@ class BeanFactoryUtilsTests {
 
 
 	@Test
-	void testHierarchicalCountBeansWithNonHierarchicalFactory() {
+	void hierarchicalCountBeansWithNonHierarchicalFactory() {
 		StaticListableBeanFactory lbf = new StaticListableBeanFactory();
 		lbf.addBean("t1", new TestBean());
 		lbf.addBean("t2", new TestBean());
@@ -96,7 +96,7 @@ class BeanFactoryUtilsTests {
 	 * Check that override doesn't count as two separate beans.
 	 */
 	@Test
-	void testHierarchicalCountBeansWithOverride() {
+	void hierarchicalCountBeansWithOverride() {
 		// Leaf count
 		assertThat(this.listableBeanFactory.getBeanDefinitionCount()).isEqualTo(1);
 		// Count minus duplicate
@@ -105,14 +105,14 @@ class BeanFactoryUtilsTests {
 	}
 
 	@Test
-	void testHierarchicalNamesWithNoMatch() {
+	void hierarchicalNamesWithNoMatch() {
 		List<String> names = Arrays.asList(
 				BeanFactoryUtils.beanNamesForTypeIncludingAncestors(this.listableBeanFactory, NoOp.class));
 		assertThat(names).isEmpty();
 	}
 
 	@Test
-	void testHierarchicalNamesWithMatchOnlyInRoot() {
+	void hierarchicalNamesWithMatchOnlyInRoot() {
 		List<String> names = Arrays.asList(
 				BeanFactoryUtils.beanNamesForTypeIncludingAncestors(this.listableBeanFactory, IndexedTestBean.class));
 		assertThat(names).hasSize(1);
@@ -122,7 +122,7 @@ class BeanFactoryUtilsTests {
 	}
 
 	@Test
-	void testGetBeanNamesForTypeWithOverride() {
+	void getBeanNamesForTypeWithOverride() {
 		List<String> names = Arrays.asList(
 				BeanFactoryUtils.beanNamesForTypeIncludingAncestors(this.listableBeanFactory, ITestBean.class));
 		// includes 2 TestBeans from FactoryBeans (DummyFactory definitions)
@@ -134,7 +134,7 @@ class BeanFactoryUtilsTests {
 	}
 
 	@Test
-	void testNoBeansOfType() {
+	void noBeansOfType() {
 		StaticListableBeanFactory lbf = new StaticListableBeanFactory();
 		lbf.addBean("foo", new Object());
 		Map<String, ?> beans = BeanFactoryUtils.beansOfTypeIncludingAncestors(lbf, ITestBean.class, true, false);
@@ -142,7 +142,7 @@ class BeanFactoryUtilsTests {
 	}
 
 	@Test
-	void testFindsBeansOfTypeWithStaticFactory() {
+	void findsBeansOfTypeWithStaticFactory() {
 		StaticListableBeanFactory lbf = new StaticListableBeanFactory();
 		TestBean t1 = new TestBean();
 		TestBean t2 = new TestBean();
@@ -173,7 +173,7 @@ class BeanFactoryUtilsTests {
 	}
 
 	@Test
-	void testFindsBeansOfTypeWithDefaultFactory() {
+	void findsBeansOfTypeWithDefaultFactory() {
 		Object test3 = this.listableBeanFactory.getBean("test3");
 		Object test = this.listableBeanFactory.getBean("test");
 
@@ -236,7 +236,7 @@ class BeanFactoryUtilsTests {
 	}
 
 	@Test
-	void testHierarchicalResolutionWithOverride() {
+	void hierarchicalResolutionWithOverride() {
 		Object test3 = this.listableBeanFactory.getBean("test3");
 		Object test = this.listableBeanFactory.getBean("test");
 
@@ -275,14 +275,14 @@ class BeanFactoryUtilsTests {
 	}
 
 	@Test
-	void testHierarchicalNamesForAnnotationWithNoMatch() {
+	void hierarchicalNamesForAnnotationWithNoMatch() {
 		List<String> names = Arrays.asList(
 				BeanFactoryUtils.beanNamesForAnnotationIncludingAncestors(this.listableBeanFactory, Override.class));
 		assertThat(names).isEmpty();
 	}
 
 	@Test
-	void testHierarchicalNamesForAnnotationWithMatchOnlyInRoot() {
+	void hierarchicalNamesForAnnotationWithMatchOnlyInRoot() {
 		List<String> names = Arrays.asList(
 				BeanFactoryUtils.beanNamesForAnnotationIncludingAncestors(this.listableBeanFactory, TestAnnotation.class));
 		assertThat(names).hasSize(1);
@@ -292,7 +292,7 @@ class BeanFactoryUtilsTests {
 	}
 
 	@Test
-	void testGetBeanNamesForAnnotationWithOverride() {
+	void getBeanNamesForAnnotationWithOverride() {
 		AnnotatedBean annotatedBean = new AnnotatedBean();
 		this.listableBeanFactory.registerSingleton("anotherAnnotatedBean", annotatedBean);
 		List<String> names = Arrays.asList(
@@ -303,27 +303,27 @@ class BeanFactoryUtilsTests {
 	}
 
 	@Test
-	void testADependencies() {
+	void aDependencies() {
 		String[] deps = this.dependentBeansFactory.getDependentBeans("a");
 		assertThat(ObjectUtils.isEmpty(deps)).isTrue();
 	}
 
 	@Test
-	void testBDependencies() {
+	void bDependencies() {
 		String[] deps = this.dependentBeansFactory.getDependentBeans("b");
-		assertThat(Arrays.equals(new String[] { "c" }, deps)).isTrue();
+		assertThat(deps).containsExactly("c");
 	}
 
 	@Test
-	void testCDependencies() {
+	void cDependencies() {
 		String[] deps = this.dependentBeansFactory.getDependentBeans("c");
-		assertThat(Arrays.equals(new String[] { "int", "long" }, deps)).isTrue();
+		assertThat(deps).containsExactly("int", "long");
 	}
 
 	@Test
-	void testIntDependencies() {
+	void intDependencies() {
 		String[] deps = this.dependentBeansFactory.getDependentBeans("int");
-		assertThat(Arrays.equals(new String[] { "buffer" }, deps)).isTrue();
+		assertThat(deps).containsExactly("buffer");
 	}
 
 	@Test
@@ -334,7 +334,7 @@ class BeanFactoryUtilsTests {
 	}
 
 	@Test  // gh-25520
-	public void findAnnotationOnBeanWithStaticFactory() {
+	void findAnnotationOnBeanWithStaticFactory() {
 		StaticListableBeanFactory lbf = new StaticListableBeanFactory();
 		lbf.addBean("controllerAdvice", new ControllerAdviceClass());
 		lbf.addBean("restControllerAdvice", new RestControllerAdviceClass());
@@ -401,7 +401,7 @@ class BeanFactoryUtilsTests {
 		testIsSingletonAndIsPrototype(lbf);
 	}
 
-	void testIsSingletonAndIsPrototype(ListableBeanFactory lbf) {
+	private static void testIsSingletonAndIsPrototype(ListableBeanFactory lbf) {
 		Map<String, ?> beans = BeanFactoryUtils.beansOfTypeIncludingAncestors(lbf, ITestBean.class);
 		assertThat(beans).hasSize(7);
 		assertThat(beans.get("bean")).isSameAs(lbf.getBean("bean"));
@@ -520,7 +520,7 @@ class BeanFactoryUtilsTests {
 		testSupportsMultipleTypes(lbf);
 	}
 
-	void testSupportsMultipleTypes(ListableBeanFactory lbf) {
+	private static void testSupportsMultipleTypes(ListableBeanFactory lbf) {
 		List<ITestBean> testBeanList = lbf.getBeanProvider(ITestBean.class).stream().toList();
 		assertThat(testBeanList).hasSize(5);
 		assertThat(testBeanList.get(0)).isSameAs(lbf.getBean("bean", TestBean.class));

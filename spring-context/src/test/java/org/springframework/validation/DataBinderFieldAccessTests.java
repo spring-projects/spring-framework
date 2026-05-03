@@ -58,7 +58,7 @@ class DataBinderFieldAccessTests {
 		Map<?, ?> m = binder.getBindingResult().getModel();
 		assertThat(m).as("There is one element in map").hasSize(2);
 		FieldAccessBean tb = (FieldAccessBean) m.get("person");
-		assertThat(tb.equals(rod)).as("Same object").isTrue();
+		assertThat(tb).as("Same object").isEqualTo(rod);
 	}
 
 	@Test

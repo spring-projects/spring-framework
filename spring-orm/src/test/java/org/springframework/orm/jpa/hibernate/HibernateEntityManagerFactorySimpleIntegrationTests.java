@@ -33,8 +33,9 @@ class HibernateEntityManagerFactorySimpleIntegrationTests extends HibernateEntit
 				"/org/springframework/orm/jpa/memdb.xml", "/org/springframework/orm/jpa/inject.xml"};
 	}
 
+	@Override
 	@Test
-	protected void testEntityManagerFactoryImplementsEntityManagerFactoryInfo() {
+	protected void entityManagerFactoryImplementsEntityManagerFactoryInfo() {
 		assertThat(entityManagerFactory).isInstanceOf(EntityManagerFactoryInfo.class);
 		EntityManagerFactoryInfo emfi = (EntityManagerFactoryInfo) entityManagerFactory;
 		assertThat(emfi.getPersistenceUnitName()).isEqualTo("Person");

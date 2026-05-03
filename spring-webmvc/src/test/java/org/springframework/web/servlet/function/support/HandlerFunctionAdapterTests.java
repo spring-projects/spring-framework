@@ -46,7 +46,7 @@ import static org.mockito.Mockito.mock;
  *
  * @author Rossen Stoyanchev
  */
-public class HandlerFunctionAdapterTests {
+class HandlerFunctionAdapterTests {
 
 	private final MockHttpServletRequest servletRequest = new MockHttpServletRequest("GET", "/");
 

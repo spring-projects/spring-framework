@@ -24,6 +24,7 @@ import org.springframework.core.ResolvableType
  * This extension is not subject to type erasure and retains actual generic type arguments.
  *
  * @author Sebastien Deleuze
+ * @author Yanming Zhou
  * @since 5.0
  */
 inline fun <reified T : Any> BeanFactory.getBean(): T =
@@ -31,14 +32,14 @@ inline fun <reified T : Any> BeanFactory.getBean(): T =
 
 /**
  * Extension for [BeanFactory.getBean] providing a `getBean<Foo>("foo")` variant.
- * Like the original Java method, this extension is subject to type erasure.
+ * This extension is not subject to type erasure and retains actual generic type arguments.
  *
  * @see BeanFactory.getBean(String, Class<T>)
  * @author Sebastien Deleuze
  * @since 5.0
  */
 inline fun <reified T : Any> BeanFactory.getBean(name: String): T =
-		getBean(name, T::class.java)
+		getBean(name, (object : ParameterizedTypeReference<T>() {}))
 
 /**
  * Extension for [BeanFactory.getBean] providing a `getBean<Foo>(arg1, arg2)` variant.

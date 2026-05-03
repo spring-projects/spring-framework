@@ -129,7 +129,7 @@ class ConcurrentWebSocketSessionDecoratorTests {
 	}
 
 	@Test // SPR-17140
-	public void overflowStrategyDrop() throws IOException, InterruptedException {
+	void overflowStrategyDrop() throws IOException, InterruptedException {
 
 		BlockingWebSocketSession session = new BlockingWebSocketSession();
 		session.setId("123");

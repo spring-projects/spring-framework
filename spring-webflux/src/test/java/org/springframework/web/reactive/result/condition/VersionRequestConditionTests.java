@@ -41,7 +41,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
  * Unit tests for {@link VersionRequestCondition}.
  * @author Rossen Stoyanchev
  */
-public class VersionRequestConditionTests {
+class VersionRequestConditionTests {
 
 	private DefaultApiVersionStrategy strategy;
 

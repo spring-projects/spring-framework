@@ -52,7 +52,7 @@ import static org.assertj.core.api.InstanceOfAssertFactories.LIST;
 class BeanWrapperGenericsTests {
 
 	@Test
-	void testGenericSet() {
+	void genericSet() {
 		GenericBean<?> gb = new GenericBean<>();
 		BeanWrapper bw = new BeanWrapperImpl(gb);
 		Set<String> input = new HashSet<>();
@@ -64,7 +64,7 @@ class BeanWrapperGenericsTests {
 	}
 
 	@Test
-	void testGenericLowerBoundedSet() {
+	void genericLowerBoundedSet() {
 		GenericBean<?> gb = new GenericBean<>();
 		BeanWrapper bw = new BeanWrapperImpl(gb);
 		bw.registerCustomEditor(Number.class, new CustomNumberEditor(Integer.class, true));
@@ -77,7 +77,7 @@ class BeanWrapperGenericsTests {
 	}
 
 	@Test
-	void testGenericSetWithConversionFailure() {
+	void genericSetWithConversionFailure() {
 		GenericBean<?> gb = new GenericBean<>();
 		BeanWrapper bw = new BeanWrapperImpl(gb);
 		Set<TestBean> input = new HashSet<>();
@@ -88,7 +88,7 @@ class BeanWrapperGenericsTests {
 	}
 
 	@Test
-	void testGenericList() throws Exception {
+	void genericList() throws Exception {
 		GenericBean<?> gb = new GenericBean<>();
 		BeanWrapper bw = new BeanWrapperImpl(gb);
 		List<String> input = new ArrayList<>();
@@ -100,7 +100,7 @@ class BeanWrapperGenericsTests {
 	}
 
 	@Test
-	void testGenericListElement() throws Exception {
+	void genericListElement() throws Exception {
 		GenericBean<?> gb = new GenericBean<>();
 		gb.setResourceList(new ArrayList<>());
 		BeanWrapper bw = new BeanWrapperImpl(gb);
@@ -109,7 +109,7 @@ class BeanWrapperGenericsTests {
 	}
 
 	@Test
-	void testGenericMap() {
+	void genericMap() {
 		GenericBean<?> gb = new GenericBean<>();
 		BeanWrapper bw = new BeanWrapperImpl(gb);
 		Map<String, String> input = new HashMap<>();
@@ -121,7 +121,7 @@ class BeanWrapperGenericsTests {
 	}
 
 	@Test
-	void testGenericMapElement() {
+	void genericMapElement() {
 		GenericBean<?> gb = new GenericBean<>();
 		gb.setShortMap(new HashMap<>());
 		BeanWrapper bw = new BeanWrapperImpl(gb);
@@ -131,7 +131,7 @@ class BeanWrapperGenericsTests {
 	}
 
 	@Test
-	void testGenericMapWithKeyType() {
+	void genericMapWithKeyType() {
 		GenericBean<?> gb = new GenericBean<>();
 		BeanWrapper bw = new BeanWrapperImpl(gb);
 		Map<String, String> input = new HashMap<>();
@@ -143,7 +143,7 @@ class BeanWrapperGenericsTests {
 	}
 
 	@Test
-	void testGenericMapElementWithKeyType() {
+	void genericMapElementWithKeyType() {
 		GenericBean<?> gb = new GenericBean<>();
 		gb.setLongMap(new HashMap<>());
 		BeanWrapper bw = new BeanWrapperImpl(gb);
@@ -153,7 +153,7 @@ class BeanWrapperGenericsTests {
 	}
 
 	@Test
-	void testGenericMapWithCollectionValue() {
+	void genericMapWithCollectionValue() {
 		GenericBean<?> gb = new GenericBean<>();
 		BeanWrapper bw = new BeanWrapperImpl(gb);
 		bw.registerCustomEditor(Number.class, new CustomNumberEditor(Integer.class, false));
@@ -170,7 +170,7 @@ class BeanWrapperGenericsTests {
 	}
 
 	@Test
-	void testGenericMapElementWithCollectionValue() {
+	void genericMapElementWithCollectionValue() {
 		GenericBean<?> gb = new GenericBean<>();
 		gb.setCollectionMap(new HashMap<>());
 		BeanWrapper bw = new BeanWrapperImpl(gb);
@@ -182,7 +182,7 @@ class BeanWrapperGenericsTests {
 	}
 
 	@Test
-	void testGenericMapFromProperties() {
+	void genericMapFromProperties() {
 		GenericBean<?> gb = new GenericBean<>();
 		BeanWrapper bw = new BeanWrapperImpl(gb);
 		Properties input = new Properties();
@@ -194,7 +194,7 @@ class BeanWrapperGenericsTests {
 	}
 
 	@Test
-	void testGenericListOfLists() {
+	void genericListOfLists() {
 		GenericBean<String> gb = new GenericBean<>();
 		List<List<Integer>> list = new ArrayList<>();
 		list.add(new ArrayList<>());
@@ -206,7 +206,7 @@ class BeanWrapperGenericsTests {
 	}
 
 	@Test
-	void testGenericListOfListsWithElementConversion() {
+	void genericListOfListsWithElementConversion() {
 		GenericBean<String> gb = new GenericBean<>();
 		List<List<Integer>> list = new ArrayList<>();
 		list.add(new ArrayList<>());
@@ -218,7 +218,7 @@ class BeanWrapperGenericsTests {
 	}
 
 	@Test
-	void testGenericListOfArrays() {
+	void genericListOfArrays() {
 		GenericBean<String> gb = new GenericBean<>();
 		ArrayList<String[]> list = new ArrayList<>();
 		list.add(new String[] {"str1", "str2"});
@@ -230,7 +230,7 @@ class BeanWrapperGenericsTests {
 	}
 
 	@Test
-	void testGenericListOfArraysWithElementConversion() {
+	void genericListOfArraysWithElementConversion() {
 		GenericBean<String> gb = new GenericBean<>();
 		ArrayList<String[]> list = new ArrayList<>();
 		list.add(new String[] {"str1", "str2"});
@@ -243,7 +243,7 @@ class BeanWrapperGenericsTests {
 	}
 
 	@Test
-	void testGenericListOfMaps() {
+	void genericListOfMaps() {
 		GenericBean<String> gb = new GenericBean<>();
 		List<Map<Integer, Long>> list = new ArrayList<>();
 		list.add(new HashMap<>());
@@ -255,7 +255,7 @@ class BeanWrapperGenericsTests {
 	}
 
 	@Test
-	void testGenericListOfMapsWithElementConversion() {
+	void genericListOfMapsWithElementConversion() {
 		GenericBean<String> gb = new GenericBean<>();
 		List<Map<Integer, Long>> list = new ArrayList<>();
 		list.add(new HashMap<>());
@@ -267,7 +267,7 @@ class BeanWrapperGenericsTests {
 	}
 
 	@Test
-	void testGenericMapOfMaps() {
+	void genericMapOfMaps() {
 		GenericBean<String> gb = new GenericBean<>();
 		Map<String, Map<Integer, Long>> map = new HashMap<>();
 		map.put("mykey", new HashMap<>());
@@ -279,7 +279,7 @@ class BeanWrapperGenericsTests {
 	}
 
 	@Test
-	void testGenericMapOfMapsWithElementConversion() {
+	void genericMapOfMapsWithElementConversion() {
 		GenericBean<String> gb = new GenericBean<>();
 		Map<String, Map<Integer, Long>> map = new HashMap<>();
 		map.put("mykey", new HashMap<>());
@@ -291,7 +291,7 @@ class BeanWrapperGenericsTests {
 	}
 
 	@Test
-	void testGenericMapOfLists() {
+	void genericMapOfLists() {
 		GenericBean<String> gb = new GenericBean<>();
 		Map<Integer, List<Integer>> map = new HashMap<>();
 		map.put(1, new ArrayList<>());
@@ -303,7 +303,7 @@ class BeanWrapperGenericsTests {
 	}
 
 	@Test
-	void testGenericMapOfListsWithElementConversion() {
+	void genericMapOfListsWithElementConversion() {
 		GenericBean<String> gb = new GenericBean<>();
 		Map<Integer, List<Integer>> map = new HashMap<>();
 		map.put(1, new ArrayList<>());
@@ -315,7 +315,7 @@ class BeanWrapperGenericsTests {
 	}
 
 	@Test
-	void testGenericTypeNestingMapOfInteger() {
+	void genericTypeNestingMapOfInteger() {
 		Map<String, String> map = new HashMap<>();
 		map.put("testKey", "100");
 
@@ -328,7 +328,7 @@ class BeanWrapperGenericsTests {
 	}
 
 	@Test
-	void testGenericTypeNestingMapOfListOfInteger() {
+	void genericTypeNestingMapOfListOfInteger() {
 		Map<String, List<String>> map = new HashMap<>();
 		List<String> list = Arrays.asList("1", "2", "3");
 		map.put("testKey", list);
@@ -343,7 +343,7 @@ class BeanWrapperGenericsTests {
 	}
 
 	@Test
-	void testGenericTypeNestingListOfMapOfInteger() {
+	void genericTypeNestingListOfMapOfInteger() {
 		List<Map<String, String>> list = new ArrayList<>();
 		Map<String, String> map = new HashMap<>();
 		map.put("testKey", "5");
@@ -359,7 +359,7 @@ class BeanWrapperGenericsTests {
 	}
 
 	@Test
-	void testGenericTypeNestingMapOfListOfListOfInteger() {
+	void genericTypeNestingMapOfListOfListOfInteger() {
 		Map<String, List<List<String>>> map = new HashMap<>();
 		List<String> list = Arrays.asList("1", "2", "3");
 		map.put("testKey", Collections.singletonList(list));
@@ -374,7 +374,7 @@ class BeanWrapperGenericsTests {
 	}
 
 	@Test
-	void testComplexGenericMap() {
+	void complexGenericMap() {
 		Map<List<String>, List<String>> inputMap = new HashMap<>();
 		List<String> inputKey = new ArrayList<>();
 		inputKey.add("1");
@@ -390,7 +390,7 @@ class BeanWrapperGenericsTests {
 	}
 
 	@Test
-	void testComplexGenericMapWithCollectionConversion() {
+	void complexGenericMapWithCollectionConversion() {
 		Map<Set<String>, Set<String>> inputMap = new HashMap<>();
 		Set<String> inputKey = new HashSet<>();
 		inputKey.add("1");
@@ -406,7 +406,7 @@ class BeanWrapperGenericsTests {
 	}
 
 	@Test
-	void testComplexGenericIndexedMapEntry() {
+	void complexGenericIndexedMapEntry() {
 		List<String> inputValue = new ArrayList<>();
 		inputValue.add("10");
 
@@ -418,7 +418,7 @@ class BeanWrapperGenericsTests {
 	}
 
 	@Test
-	void testComplexGenericIndexedMapEntryWithCollectionConversion() {
+	void complexGenericIndexedMapEntryWithCollectionConversion() {
 		Set<String> inputValue = new HashSet<>();
 		inputValue.add("10");
 
@@ -430,7 +430,7 @@ class BeanWrapperGenericsTests {
 	}
 
 	@Test
-	void testComplexGenericIndexedMapEntryWithPlainValue() {
+	void complexGenericIndexedMapEntryWithPlainValue() {
 		String inputValue = "10";
 
 		ComplexMapHolder holder = new ComplexMapHolder();
@@ -441,7 +441,7 @@ class BeanWrapperGenericsTests {
 	}
 
 	@Test
-	void testComplexDerivedIndexedMapEntry() {
+	void complexDerivedIndexedMapEntry() {
 		List<String> inputValue = new ArrayList<>();
 		inputValue.add("10");
 
@@ -453,7 +453,7 @@ class BeanWrapperGenericsTests {
 	}
 
 	@Test
-	void testComplexDerivedIndexedMapEntryWithCollectionConversion() {
+	void complexDerivedIndexedMapEntryWithCollectionConversion() {
 		Set<String> inputValue = new HashSet<>();
 		inputValue.add("10");
 
@@ -465,7 +465,7 @@ class BeanWrapperGenericsTests {
 	}
 
 	@Test
-	void testComplexDerivedIndexedMapEntryWithPlainValue() {
+	void complexDerivedIndexedMapEntryWithPlainValue() {
 		String inputValue = "10";
 
 		ComplexMapHolder holder = new ComplexMapHolder();
@@ -476,7 +476,7 @@ class BeanWrapperGenericsTests {
 	}
 
 	@Test
-	void testComplexMultiValueMapEntry() {
+	void complexMultiValueMapEntry() {
 		List<String> inputValue = new ArrayList<>();
 		inputValue.add("10");
 
@@ -488,7 +488,7 @@ class BeanWrapperGenericsTests {
 	}
 
 	@Test
-	void testComplexMultiValueMapEntryWithCollectionConversion() {
+	void complexMultiValueMapEntryWithCollectionConversion() {
 		Set<String> inputValue = new HashSet<>();
 		inputValue.add("10");
 
@@ -500,7 +500,7 @@ class BeanWrapperGenericsTests {
 	}
 
 	@Test
-	void testComplexMultiValueMapEntryWithPlainValue() {
+	void complexMultiValueMapEntryWithPlainValue() {
 		String inputValue = "10";
 
 		ComplexMapHolder holder = new ComplexMapHolder();
@@ -511,7 +511,7 @@ class BeanWrapperGenericsTests {
 	}
 
 	@Test
-	void testGenericallyTypedIntegerBean() {
+	void genericallyTypedIntegerBean() {
 		GenericIntegerBean gb = new GenericIntegerBean();
 		BeanWrapper bw = new BeanWrapperImpl(gb);
 		bw.setPropertyValue("genericProperty", "10");
@@ -521,7 +521,7 @@ class BeanWrapperGenericsTests {
 	}
 
 	@Test
-	void testGenericallyTypedSetOfIntegerBean() {
+	void genericallyTypedSetOfIntegerBean() {
 		GenericSetOfIntegerBean gb = new GenericSetOfIntegerBean();
 		BeanWrapper bw = new BeanWrapperImpl(gb);
 		bw.setPropertyValue("genericProperty", "10");
@@ -532,7 +532,7 @@ class BeanWrapperGenericsTests {
 	}
 
 	@Test
-	void testSettingGenericPropertyWithReadOnlyInterface() {
+	void settingGenericPropertyWithReadOnlyInterface() {
 		Bar bar = new Bar();
 		BeanWrapper bw = new BeanWrapperImpl(bar);
 		bw.setPropertyValue("version", "10");
@@ -540,7 +540,7 @@ class BeanWrapperGenericsTests {
 	}
 
 	@Test
-	void testSettingLongPropertyWithGenericInterface() {
+	void settingLongPropertyWithGenericInterface() {
 		Promotion bean = new Promotion();
 		BeanWrapper bw = new BeanWrapperImpl(bean);
 		bw.setPropertyValue("id", "10");
@@ -548,7 +548,7 @@ class BeanWrapperGenericsTests {
 	}
 
 	@Test
-	void testUntypedPropertyWithMapAtRuntime() {
+	void untypedPropertyWithMapAtRuntime() {
 		class Holder<D> {
 			private final D data;
 			public Holder(D data) {

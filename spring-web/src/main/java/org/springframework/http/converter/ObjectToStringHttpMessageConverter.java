@@ -100,6 +100,11 @@ public class ObjectToStringHttpMessageConverter extends AbstractHttpMessageConve
 	}
 
 	@Override
+	public boolean canWriteRepeatedly(Object o, @Nullable MediaType contentType) {
+		return true;
+	}
+
+	@Override
 	protected boolean supports(Class<?> clazz) {
 		// should not be called, since we override canRead/Write
 		throw new UnsupportedOperationException();
@@ -137,6 +142,7 @@ public class ObjectToStringHttpMessageConverter extends AbstractHttpMessageConve
 	}
 
 	@Override
+	@SuppressWarnings("removal")
 	protected boolean supportsRepeatableWrites(Object o) {
 		return true;
 	}

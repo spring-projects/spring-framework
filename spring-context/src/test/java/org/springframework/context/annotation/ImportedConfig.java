@@ -14,24 +14,9 @@
  * limitations under the License.
  */
 
-package org.springframework.test.context.bean.override;
+package org.springframework.context.annotation;
 
-import java.util.List;
-
-/**
- * Test utilities for Bean Overrides.
- *
- * @author Sam Brannen
- * @since 6.2.2
- */
-public abstract class BeanOverrideTestUtils {
-
-	public static List<BeanOverrideHandler> findHandlers(Class<?> testClass) {
-		return BeanOverrideHandler.forTestClass(testClass);
-	}
-
-	public static List<BeanOverrideHandler> findAllHandlers(Class<?> testClass) {
-		return BeanOverrideHandler.findAllHandlers(testClass);
-	}
-
+@ComponentScan("org.springframework.context.annotation.componentscan.simple")
+@ComponentScan("org.springframework.context.annotation.componentscan.importing")
+public final class ImportedConfig {
 }

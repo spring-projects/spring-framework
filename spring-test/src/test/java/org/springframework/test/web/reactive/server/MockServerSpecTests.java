@@ -37,13 +37,13 @@ import static org.assertj.core.api.Assertions.assertThat;
  * Tests for {@link AbstractMockServerSpec}.
  * @author Rossen Stoyanchev
  */
-public class MockServerSpecTests {
+class MockServerSpecTests {
 
 	private final TestMockServerSpec serverSpec = new TestMockServerSpec();
 
 
 	@Test
-	public void applyFiltersAfterConfigurerAdded() {
+	void applyFiltersAfterConfigurerAdded() {
 
 		MockServerConfigurer configurer = new MockServerConfigurer() {
 
@@ -67,7 +67,7 @@ public class MockServerSpecTests {
 	}
 
 	@Test
-	public void applyFiltersBeforeServerCreated() {
+	void applyFiltersBeforeServerCreated() {
 
 		MockServerConfigurer configurer = new MockServerConfigurer() {
 

@@ -60,7 +60,7 @@ class ExpressionLanguageScenarioTests extends AbstractExpressionTests {
 	 * Scenario: using the standard infrastructure and running simple expression evaluation.
 	 */
 	@Test
-	void testScenario_UsingStandardInfrastructure() {
+	void usingStandardInfrastructure() {
 		// Create a parser
 		SpelExpressionParser parser = new SpelExpressionParser();
 		// Parse an expression
@@ -78,7 +78,7 @@ class ExpressionLanguageScenarioTests extends AbstractExpressionTests {
 	 * Scenario: using the standard context but adding your own variables
 	 */
 	@Test
-	void testScenario_DefiningVariablesThatWillBeAccessibleInExpressions() {
+	void definingVariablesThatWillBeAccessibleInExpressions() {
 		// Create a parser
 		SpelExpressionParser parser = new SpelExpressionParser();
 		// Use the standard evaluation context
@@ -105,7 +105,7 @@ class ExpressionLanguageScenarioTests extends AbstractExpressionTests {
 	 * Scenario: using your own root context object
 	 */
 	@Test
-	void testScenario_UsingADifferentRootContextObject() {
+	void usingADifferentRootContextObject() {
 		// Create a parser
 		SpelExpressionParser parser = new SpelExpressionParser();
 		// Use the standard evaluation context
@@ -151,7 +151,7 @@ class ExpressionLanguageScenarioTests extends AbstractExpressionTests {
 	 * Scenario: using your own java methods and calling them from the expression
 	 */
 	@Test
-	void testScenario_RegisteringJavaMethodsAsFunctionsAndCallingThem() throws Exception {
+	void registeringJavaMethodsAsFunctionsAndCallingThem() throws Exception {
 		// Create a parser
 		SpelExpressionParser parser = new SpelExpressionParser();
 		// Use the standard evaluation context
@@ -167,7 +167,7 @@ class ExpressionLanguageScenarioTests extends AbstractExpressionTests {
 	 * Scenario: looking up your own MethodHandles and calling them from the expression
 	 */
 	@Test
-	void testScenario_RegisteringJavaMethodsAsMethodHandlesAndCallingThem() throws Exception {
+	void registeringJavaMethodsAsMethodHandlesAndCallingThem() throws Exception {
 		// Create a parser
 		SpelExpressionParser parser = new SpelExpressionParser();
 		//this.context is already populated with all relevant MethodHandle examples
@@ -201,7 +201,7 @@ class ExpressionLanguageScenarioTests extends AbstractExpressionTests {
 	 * Scenario: add a property resolver that will get called in the resolver chain, this one only supports reading.
 	 */
 	@Test
-	void testScenario_AddingYourOwnPropertyResolvers_1() {
+	void addingYourOwnPropertyResolvers_1() {
 		// Create a parser
 		SpelExpressionParser parser = new SpelExpressionParser();
 		// Use the standard evaluation context
@@ -217,7 +217,7 @@ class ExpressionLanguageScenarioTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	void testScenario_AddingYourOwnPropertyResolvers_2() {
+	void addingYourOwnPropertyResolvers_2() {
 		// Create a parser
 		SpelExpressionParser parser = new SpelExpressionParser();
 		// Use the standard evaluation context

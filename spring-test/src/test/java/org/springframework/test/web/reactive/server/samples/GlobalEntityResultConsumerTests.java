@@ -35,7 +35,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Rossen Stoyanchev
  */
-public class GlobalEntityResultConsumerTests {
+class GlobalEntityResultConsumerTests {
 
 	private final StringBuilder output = new StringBuilder();
 

@@ -151,12 +151,14 @@ class EvaluationTests extends AbstractExpressionTests {
 
 		@Test
 		void elvisOperator() {
-			evaluate("'Andy'?:'Dave'", "Andy", String.class);
-			evaluate("null?:'Dave'", "Dave", String.class);
-			evaluate("3?:1", 3, Integer.class);
-			evaluate("(2*3)?:1*10", 6, Integer.class);
-			evaluate("null?:2*10", 20, Integer.class);
-			evaluate("(null?:1)*10", 10, Integer.class);
+			evaluate("'Andy' ?: 'Dave'", "Andy", String.class);
+			evaluate("null ?: 'Dave'", "Dave", String.class);
+			evaluate("3 ?: 1", 3, Integer.class);
+			evaluate("(2 * 3) ?: 1 * 10", 6, Integer.class);
+			evaluate("null ?: 2 * 10", 20, Integer.class);
+			evaluate("(null ?: 1) * 10", 10, Integer.class);
+			evaluate("3 ?: #var = 5", 3, Integer.class);
+			evaluate("null ?: #var = 5", 5, Integer.class);
 		}
 
 		@Test
@@ -721,59 +723,41 @@ class EvaluationTests extends AbstractExpressionTests {
 	class TernaryOperatorTests {
 
 		@Test
-		void ternaryOperator01() {
-			evaluate("2>4?1:2", 2, Integer.class);
+		void ternaryExpressionWithNullConditionType() {
+			// cannot convert null to boolean
+			evaluateAndCheckError("null ? 0 : 1", SpelMessage.TYPE_CONVERSION_ERROR);
 		}
 
 		@Test
-		void ternaryOperator02() {
-			evaluate("'abc'=='abc'?1:2", 1, Integer.class);
-		}
-
-		@Test
-		void ternaryOperator03() {
+		void ternaryExpressionWithInvalidConditionType() {
 			// cannot convert String to boolean
-			evaluateAndCheckError("'hello'?1:2", SpelMessage.TYPE_CONVERSION_ERROR);
+			evaluateAndCheckError("'hello' ? 1 : 2", SpelMessage.TYPE_CONVERSION_ERROR);
 		}
 
 		@Test
-		void ternaryOperator04() {
-			Expression e = parser.parseExpression("1>2?3:4");
-			assertThat(e.isWritable(context)).isFalse();
+		void ternaryExpressionIsNotWritable() {
+			Expression exp = parser.parseExpression("1 > 2 ? 3 : 4");
+			assertThat(exp.isWritable(context)).isFalse();
 		}
 
 		@Test
-		void ternaryOperator05() {
-			evaluate("1>2?#var=4:#var=5", 5, Integer.class);
-			evaluate("3?:#var=5", 3, Integer.class);
-			evaluate("null?:#var=5", 5, Integer.class);
-			evaluate("2>4?(3>2?true:false):(5<3?true:false)", false, Boolean.class);
+		void ternaryExpressions() {
+			evaluate("2 > 4 ? 1 : 2", 2, Integer.class);
+			evaluate("'abc' == 'abc' ? 1 : 2", 1, Integer.class);
+			evaluate("1 > 2 ? #var = 4 : #var = 5", 5, Integer.class);
+			evaluate("2 > 4 ? (3 > 2 ? true : false) : (5 < 3 ? true : false)", false, Boolean.class);
 		}
 
 		@Test
-		void ternaryOperator06() {
-			evaluate("3?:#var=5", 3, Integer.class);
-			evaluate("null?:#var=5", 5, Integer.class);
-			evaluate("2>4?(3>2?true:false):(5<3?true:false)", false, Boolean.class);
-		}
-
-		@Test
-		void ternaryExpressionWithImplicitGrouping() {
+		void ternaryExpressionsWithImplicitGrouping() {
 			evaluate("4 % 2 == 0 ? 2 : 3 * 10", 2, Integer.class);
 			evaluate("4 % 2 == 1 ? 2 : 3 * 10", 30, Integer.class);
 		}
 
 		@Test
-		void ternaryExpressionWithExplicitGrouping() {
+		void ternaryExpressionsWithExplicitGrouping() {
 			evaluate("((4 % 2 == 0) ? 2 : 1) * 10", 20, Integer.class);
 		}
-
-		@Test
-		void ternaryOperatorWithNullValue() {
-			assertThatExceptionOfType(EvaluationException.class)
-				.isThrownBy(parser.parseExpression("null ? 0 : 1")::getValue);
-		}
-
 	}
 
 	@Nested
@@ -886,10 +870,10 @@ class EvaluationTests extends AbstractExpressionTests {
 
 			// BigDecimal
 			e = parser.parseExpression("bd++");
-			assertThat(new BigDecimal("2").equals(helper.bd)).isTrue();
+			assertThat(new BigDecimal("2")).isEqualTo(helper.bd);
 			BigDecimal return_bd = e.getValue(ctx, BigDecimal.class);
 			assertThat(new BigDecimal("2")).isEqualTo(return_bd);
-			assertThat(new BigDecimal("3").equals(helper.bd)).isTrue();
+			assertThat(new BigDecimal("3")).isEqualTo(helper.bd);
 
 			// double
 			e = parser.parseExpression("ddd++");
@@ -939,10 +923,10 @@ class EvaluationTests extends AbstractExpressionTests {
 
 			// BigDecimal
 			e = parser.parseExpression("++bd");
-			assertThat(new BigDecimal("2").equals(helper.bd)).isTrue();
+			assertThat(new BigDecimal("2")).isEqualTo(helper.bd);
 			BigDecimal return_bd = e.getValue(ctx, BigDecimal.class);
 			assertThat(new BigDecimal("3")).isEqualTo(return_bd);
-			assertThat(new BigDecimal("3").equals(helper.bd)).isTrue();
+			assertThat(new BigDecimal("3")).isEqualTo(helper.bd);
 
 			// double
 			e = parser.parseExpression("++ddd");
@@ -1036,10 +1020,10 @@ class EvaluationTests extends AbstractExpressionTests {
 
 			// BigDecimal
 			e = parser.parseExpression("bd--");
-			assertThat(new BigDecimal("2").equals(helper.bd)).isTrue();
+			assertThat(new BigDecimal("2")).isEqualTo(helper.bd);
 			BigDecimal return_bd = e.getValue(ctx,BigDecimal.class);
 			assertThat(new BigDecimal("2")).isEqualTo(return_bd);
-			assertThat(new BigDecimal("1").equals(helper.bd)).isTrue();
+			assertThat(new BigDecimal("1")).isEqualTo(helper.bd);
 
 			// double
 			e = parser.parseExpression("ddd--");
@@ -1089,10 +1073,10 @@ class EvaluationTests extends AbstractExpressionTests {
 
 			// BigDecimal
 			e = parser.parseExpression("--bd");
-			assertThat(new BigDecimal("2").equals(helper.bd)).isTrue();
+			assertThat(new BigDecimal("2")).isEqualTo(helper.bd);
 			BigDecimal return_bd = e.getValue(ctx,BigDecimal.class);
 			assertThat(new BigDecimal("1")).isEqualTo(return_bd);
-			assertThat(new BigDecimal("1").equals(helper.bd)).isTrue();
+			assertThat(new BigDecimal("1")).isEqualTo(helper.bd);
 
 			// double
 			e = parser.parseExpression("--ddd");
@@ -1439,22 +1423,22 @@ class EvaluationTests extends AbstractExpressionTests {
 
 			ctx.setVariable("wobble", 3);
 			e = parser.parseExpression("#wobble++");
-			assertThat(((Integer) ctx.lookupVariable("wobble"))).isEqualTo(3);
+			assertThat((Integer) ctx.lookupVariable("wobble")).isEqualTo(3);
 			int r = e.getValue(ctx, int.class);
 			assertThat(r).isEqualTo(3);
-			assertThat(((Integer) ctx.lookupVariable("wobble"))).isEqualTo(4);
+			assertThat((Integer) ctx.lookupVariable("wobble")).isEqualTo(4);
 
 			e = parser.parseExpression("--#wobble");
-			assertThat(((Integer) ctx.lookupVariable("wobble"))).isEqualTo(4);
+			assertThat((Integer) ctx.lookupVariable("wobble")).isEqualTo(4);
 			r = e.getValue(ctx, int.class);
 			assertThat(r).isEqualTo(3);
-			assertThat(((Integer) ctx.lookupVariable("wobble"))).isEqualTo(3);
+			assertThat((Integer) ctx.lookupVariable("wobble")).isEqualTo(3);
 
 			e = parser.parseExpression("#wobble=34");
-			assertThat(((Integer) ctx.lookupVariable("wobble"))).isEqualTo(3);
+			assertThat((Integer) ctx.lookupVariable("wobble")).isEqualTo(3);
 			r = e.getValue(ctx, int.class);
 			assertThat(r).isEqualTo(34);
-			assertThat(((Integer) ctx.lookupVariable("wobble"))).isEqualTo(34);
+			assertThat((Integer) ctx.lookupVariable("wobble")).isEqualTo(34);
 
 			// Projection
 			expectFailNotIncrementable(parser, ctx, "({1,2,3}.![#isEven(#this)])++");  // projection would be {false,true,false}

@@ -518,8 +518,8 @@ public class HandlerMappingIntrospector
 
 			String message = getLogMessage(label, request);
 
-			if (logger.isWarnEnabled() && counter.getAndIncrement() == 0) {
-				logger.warn(message + " This is logged once only at WARN level, and every time at TRACE.");
+			if (logger.isDebugEnabled() && counter.getAndIncrement() == 0) {
+				logger.debug(message + " This is logged once only at DEBUG level, and every time at TRACE.");
 			}
 			else if (logger.isTraceEnabled()) {
 				logger.trace("No CachedResult, performing " + label + " lookup instead.");
@@ -529,7 +529,9 @@ public class HandlerMappingIntrospector
 		private static String getLogMessage(String label, HttpServletRequest request) {
 			return "Cache miss for " + request.getDispatcherType() + " dispatch to '" + request.getRequestURI() + "' " +
 					"(previous " + request.getAttribute(CACHED_RESULT_ATTRIBUTE) + "). " +
-					"Performing " + label + " lookup.";
+					"Performing " + label + " lookup. If there are repeated lookups per request, " +
+					"consider using HandlerMappingIntrospector#createCacheFilter()" +
+					"to create a Servlet Filter to set the cache for the request.";
 		}
 	}
 

@@ -44,7 +44,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
 class ModelMapTests {
 
 	@Test
-	void testNoArgCtorYieldsEmptyModel() {
+	void noArgCtorYieldsEmptyModel() {
 		assertThat(new ModelMap()).isEmpty();
 	}
 
@@ -52,7 +52,7 @@ class ModelMapTests {
 	 * SPR-2185 - Null model assertion causes backwards compatibility issue
 	 */
 	@Test
-	void testAddNullObjectWithExplicitKey() {
+	void addNullObjectWithExplicitKey() {
 		ModelMap model = new ModelMap();
 		model.addAttribute("foo", null);
 		assertThat(model.containsKey("foo")).isTrue();
@@ -63,14 +63,14 @@ class ModelMapTests {
 	 * SPR-2185 - Null model assertion causes backwards compatibility issue
 	 */
 	@Test
-	void testAddNullObjectViaCtorWithExplicitKey() {
+	void addNullObjectViaCtorWithExplicitKey() {
 		ModelMap model = new ModelMap("foo", null);
 		assertThat(model.containsKey("foo")).isTrue();
 		assertThat(model.get("foo")).isNull();
 	}
 
 	@Test
-	void testNamedObjectCtor() {
+	void namedObjectCtor() {
 		ModelMap model = new ModelMap("foo", "bing");
 		assertThat(model).hasSize(1);
 		String bing = (String) model.get("foo");
@@ -79,7 +79,7 @@ class ModelMapTests {
 	}
 
 	@Test
-	void testUnnamedCtorScalar() {
+	void unnamedCtorScalar() {
 		ModelMap model = new ModelMap("foo", "bing");
 		assertThat(model).hasSize(1);
 		String bing = (String) model.get("foo");
@@ -88,7 +88,7 @@ class ModelMapTests {
 	}
 
 	@Test
-	void testOneArgCtorWithScalar() {
+	void oneArgCtorWithScalar() {
 		ModelMap model = new ModelMap("bing");
 		assertThat(model).hasSize(1);
 		String string = (String) model.get("string");
@@ -97,14 +97,14 @@ class ModelMapTests {
 	}
 
 	@Test
-	void testOneArgCtorWithNull() {
+	void oneArgCtorWithNull() {
 		//Null model arguments added without a name being explicitly supplied are not allowed
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				new ModelMap(null));
 	}
 
 	@Test
-	void testOneArgCtorWithCollection() {
+	void oneArgCtorWithCollection() {
 		ModelMap model = new ModelMap(new String[]{"foo", "boing"});
 		assertThat(model).hasSize(1);
 		String[] strings = (String[]) model.get("stringList");
@@ -115,14 +115,14 @@ class ModelMapTests {
 	}
 
 	@Test
-	void testOneArgCtorWithEmptyCollection() {
+	void oneArgCtorWithEmptyCollection() {
 		ModelMap model = new ModelMap(new HashSet<>());
 		// must not add if collection is empty...
 		assertThat(model).isEmpty();
 	}
 
 	@Test
-	void testAddObjectWithNull() {
+	void addObjectWithNull() {
 		// Null model arguments added without a name being explicitly supplied are not allowed
 		ModelMap model = new ModelMap();
 		assertThatIllegalArgumentException().isThrownBy(() ->
@@ -130,7 +130,7 @@ class ModelMapTests {
 	}
 
 	@Test
-	void testAddObjectWithEmptyArray() {
+	void addObjectWithEmptyArray() {
 		ModelMap model = new ModelMap(new int[]{});
 		assertThat(model).hasSize(1);
 		int[] ints = (int[]) model.get("intList");
@@ -139,21 +139,21 @@ class ModelMapTests {
 	}
 
 	@Test
-	void testAddAllObjectsWithNullMap() {
+	void addAllObjectsWithNullMap() {
 		ModelMap model = new ModelMap();
 		model.addAllAttributes((Map<String, ?>) null);
 		assertThat(model).isEmpty();
 	}
 
 	@Test
-	void testAddAllObjectsWithNullCollection() {
+	void addAllObjectsWithNullCollection() {
 		ModelMap model = new ModelMap();
 		model.addAllAttributes((Collection<Object>) null);
 		assertThat(model).isEmpty();
 	}
 
 	@Test
-	void testAddAllObjectsWithSparseArrayList() {
+	void addAllObjectsWithSparseArrayList() {
 		// Null model arguments added without a name being explicitly supplied are not allowed
 		ModelMap model = new ModelMap();
 		ArrayList<String> list = new ArrayList<>();
@@ -164,7 +164,7 @@ class ModelMapTests {
 	}
 
 	@Test
-	void testAddMap() {
+	void addMap() {
 		Map<String, String> map = new HashMap<>();
 		map.put("one", "one-value");
 		map.put("two", "two-value");
@@ -176,7 +176,7 @@ class ModelMapTests {
 	}
 
 	@Test
-	void testAddObjectNoKeyOfSameTypeOverrides() {
+	void addObjectNoKeyOfSameTypeOverrides() {
 		ModelMap model = new ModelMap();
 		model.addAttribute("foo");
 		model.addAttribute("bar");
@@ -186,7 +186,7 @@ class ModelMapTests {
 	}
 
 	@Test
-	void testAddListOfTheSameObjects() {
+	void addListOfTheSameObjects() {
 		List<TestBean> beans = new ArrayList<>();
 		beans.add(new TestBean("one"));
 		beans.add(new TestBean("two"));
@@ -197,7 +197,7 @@ class ModelMapTests {
 	}
 
 	@Test
-	void testMergeMapWithOverriding() {
+	void mergeMapWithOverriding() {
 		Map<String, TestBean> beans = new HashMap<>();
 		beans.put("one", new TestBean("one"));
 		beans.put("two", new TestBean("two"));
@@ -210,7 +210,7 @@ class ModelMapTests {
 	}
 
 	@Test
-	void testInnerClass() {
+	void innerClass() {
 		ModelMap map = new ModelMap();
 		SomeInnerClass inner = new SomeInnerClass();
 		map.addAttribute(inner);
@@ -218,7 +218,7 @@ class ModelMapTests {
 	}
 
 	@Test
-	void testInnerClassWithTwoUpperCaseLetters() {
+	void innerClassWithTwoUpperCaseLetters() {
 		ModelMap map = new ModelMap();
 		UKInnerClass inner = new UKInnerClass();
 		map.addAttribute(inner);
@@ -226,7 +226,7 @@ class ModelMapTests {
 	}
 
 	@Test
-	void testAopCglibProxy() {
+	void aopCglibProxy() {
 		ModelMap map = new ModelMap();
 		ProxyFactory factory = new ProxyFactory();
 		SomeInnerClass val = new SomeInnerClass();
@@ -238,7 +238,7 @@ class ModelMapTests {
 	}
 
 	@Test
-	void testAopJdkProxy() {
+	void aopJdkProxy() {
 		ModelMap map = new ModelMap();
 		ProxyFactory factory = new ProxyFactory();
 		Map<?, ?> target = new HashMap<>();
@@ -250,7 +250,7 @@ class ModelMapTests {
 	}
 
 	@Test
-	void testAopJdkProxyWithMultipleInterfaces() {
+	void aopJdkProxyWithMultipleInterfaces() {
 		ModelMap map = new ModelMap();
 		Map<?, ?> target = new HashMap<>();
 		ProxyFactory factory = new ProxyFactory();
@@ -265,7 +265,7 @@ class ModelMapTests {
 	}
 
 	@Test
-	void testAopJdkProxyWithDetectedInterfaces() {
+	void aopJdkProxyWithDetectedInterfaces() {
 		ModelMap map = new ModelMap();
 		Map<?, ?> target = new HashMap<>();
 		ProxyFactory factory = new ProxyFactory(target);
@@ -275,7 +275,7 @@ class ModelMapTests {
 	}
 
 	@Test
-	void testRawJdkProxy() {
+	void rawJdkProxy() {
 		ModelMap map = new ModelMap();
 		Object proxy = Proxy.newProxyInstance(
 				getClass().getClassLoader(),

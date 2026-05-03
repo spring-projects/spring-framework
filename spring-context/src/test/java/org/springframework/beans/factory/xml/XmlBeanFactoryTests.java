@@ -152,8 +152,8 @@ class XmlBeanFactoryTests {
 		assertThat(emmasJenks.getName()).as("Emmas jenks has right name").isEqualTo("Andrew");
 		assertThat(emmasJenks).as("Emmas doesn't equal new ref").isNotSameAs(xbf.getBean("jenks"));
 		assertThat(georgiasJenks.getName()).as("Georgias jenks has right name").isEqualTo("Andrew");
-		assertThat(emmasJenks.equals(georgiasJenks)).as("They are object equal").isTrue();
-		assertThat(emmasJenks.equals(xbf.getBean("jenks"))).as("They object equal direct ref").isTrue();
+		assertThat(emmasJenks).as("They are object equal").isEqualTo(georgiasJenks);
+		assertThat(emmasJenks).as("They object equal direct ref").isEqualTo(xbf.getBean("jenks"));
 	}
 
 	@Test
@@ -1526,7 +1526,7 @@ class XmlBeanFactoryTests {
 		new XmlBeanDefinitionReader(xbf).loadBeanDefinitions(CONSTRUCTOR_ARG_CONTEXT);
 		ConstructorArrayTestBean bean = (ConstructorArrayTestBean) xbf.getBean("constructorArray");
 		assertThat(bean.array).isInstanceOf(int[].class);
-		assertThat(((int[]) bean.array)).hasSize(1);
+		assertThat((int[]) bean.array).hasSize(1);
 		assertThat(((int[]) bean.array)[0]).isEqualTo(1);
 	}
 
@@ -1536,7 +1536,7 @@ class XmlBeanFactoryTests {
 		new XmlBeanDefinitionReader(xbf).loadBeanDefinitions(CONSTRUCTOR_ARG_CONTEXT);
 		ConstructorArrayTestBean bean = (ConstructorArrayTestBean) xbf.getBean("indexedConstructorArray");
 		assertThat(bean.array).isInstanceOf(int[].class);
-		assertThat(((int[]) bean.array)).hasSize(1);
+		assertThat((int[]) bean.array).hasSize(1);
 		assertThat(((int[]) bean.array)[0]).isEqualTo(1);
 	}
 
@@ -1546,7 +1546,7 @@ class XmlBeanFactoryTests {
 		new XmlBeanDefinitionReader(xbf).loadBeanDefinitions(CONSTRUCTOR_ARG_CONTEXT);
 		ConstructorArrayTestBean bean = (ConstructorArrayTestBean) xbf.getBean("constructorArrayNoType");
 		assertThat(bean.array).isInstanceOf(String[].class);
-		assertThat(((String[]) bean.array)).isEmpty();
+		assertThat((String[]) bean.array).isEmpty();
 	}
 
 	@Test
@@ -1557,7 +1557,7 @@ class XmlBeanFactoryTests {
 		bd.setLenientConstructorResolution(false);
 		ConstructorArrayTestBean bean = (ConstructorArrayTestBean) xbf.getBean("constructorArrayNoType");
 		assertThat(bean.array).isInstanceOf(String[].class);
-		assertThat(((String[]) bean.array)).isEmpty();
+		assertThat((String[]) bean.array).isEmpty();
 	}
 
 	@Test

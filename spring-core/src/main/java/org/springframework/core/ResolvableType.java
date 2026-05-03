@@ -22,6 +22,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
@@ -1152,7 +1153,6 @@ public class ResolvableType implements Serializable {
 	 * @see #forClassWithGenerics(Class, ResolvableType...)
 	 */
 	public static ResolvableType forClassWithGenerics(Class<?> clazz, Class<?>... generics) {
-		Assert.notNull(clazz, "Class must not be null");
 		Assert.notNull(generics, "Generics array must not be null");
 		ResolvableType[] resolvableGenerics = new ResolvableType[generics.length];
 		for (int i = 0; i < generics.length; i++) {
@@ -1282,6 +1282,18 @@ public class ResolvableType implements Serializable {
 	}
 
 	/**
+	 * Return a {@code ResolvableType} for the specified {@link Parameter}.
+	 * <p>This is a convenience factory method for scenarios where a {@code Parameter}
+	 * descriptor is already available.
+	 * @param parameter the source parameter
+	 * @return a {@code ResolvableType} for the specified parameter
+	 * @since 7.1
+	 */
+	public static ResolvableType forParameter(Parameter parameter) {
+		return forMethodParameter(MethodParameter.forParameter(parameter));
+	}
+
+	/**
 	 * Return a {@code ResolvableType} for the specified {@link Constructor} parameter.
 	 * @param constructor the source constructor (must not be {@code null})
 	 * @param parameterIndex the parameter index
@@ -1289,7 +1301,6 @@ public class ResolvableType implements Serializable {
 	 * @see #forConstructorParameter(Constructor, int, Class)
 	 */
 	public static ResolvableType forConstructorParameter(Constructor<?> constructor, int parameterIndex) {
-		Assert.notNull(constructor, "Constructor must not be null");
 		return forMethodParameter(new MethodParameter(constructor, parameterIndex));
 	}
 
@@ -1307,7 +1318,6 @@ public class ResolvableType implements Serializable {
 	public static ResolvableType forConstructorParameter(Constructor<?> constructor, int parameterIndex,
 			Class<?> implementationClass) {
 
-		Assert.notNull(constructor, "Constructor must not be null");
 		MethodParameter methodParameter = new MethodParameter(constructor, parameterIndex, implementationClass);
 		return forMethodParameter(methodParameter);
 	}
@@ -1319,7 +1329,6 @@ public class ResolvableType implements Serializable {
 	 * @see #forMethodReturnType(Method, Class)
 	 */
 	public static ResolvableType forMethodReturnType(Method method) {
-		Assert.notNull(method, "Method must not be null");
 		return forMethodParameter(new MethodParameter(method, -1));
 	}
 
@@ -1333,7 +1342,6 @@ public class ResolvableType implements Serializable {
 	 * @see #forMethodReturnType(Method)
 	 */
 	public static ResolvableType forMethodReturnType(Method method, Class<?> implementationClass) {
-		Assert.notNull(method, "Method must not be null");
 		MethodParameter methodParameter = new MethodParameter(method, -1, implementationClass);
 		return forMethodParameter(methodParameter);
 	}
@@ -1347,7 +1355,6 @@ public class ResolvableType implements Serializable {
 	 * @see #forMethodParameter(MethodParameter)
 	 */
 	public static ResolvableType forMethodParameter(Method method, int parameterIndex) {
-		Assert.notNull(method, "Method must not be null");
 		return forMethodParameter(new MethodParameter(method, parameterIndex));
 	}
 
@@ -1363,7 +1370,6 @@ public class ResolvableType implements Serializable {
 	 * @see #forMethodParameter(MethodParameter)
 	 */
 	public static ResolvableType forMethodParameter(Method method, int parameterIndex, Class<?> implementationClass) {
-		Assert.notNull(method, "Method must not be null");
 		MethodParameter methodParameter = new MethodParameter(method, parameterIndex, implementationClass);
 		return forMethodParameter(methodParameter);
 	}

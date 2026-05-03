@@ -116,11 +116,11 @@ class TransactionInterceptorTests extends AbstractTransactionAspectTests {
 		ti.setTransactionManager(ptm);
 		ti = SerializationTestUtils.serializeAndDeserialize(ti);
 
-		assertThat(ti.getTransactionManager() instanceof SerializableTransactionManager).isTrue();
-		assertThat(ti.getTransactionAttributeSource() instanceof CompositeTransactionAttributeSource).isTrue();
+		assertThat(ti.getTransactionManager()).isInstanceOf(SerializableTransactionManager.class);
+		assertThat(ti.getTransactionAttributeSource()).isInstanceOf(CompositeTransactionAttributeSource.class);
 		CompositeTransactionAttributeSource ctas = (CompositeTransactionAttributeSource) ti.getTransactionAttributeSource();
-		assertThat(ctas.getTransactionAttributeSources()[0] instanceof NameMatchTransactionAttributeSource).isTrue();
-		assertThat(ctas.getTransactionAttributeSources()[1] instanceof NameMatchTransactionAttributeSource).isTrue();
+		assertThat(ctas.getTransactionAttributeSources()[0]).isInstanceOf(NameMatchTransactionAttributeSource.class);
+		assertThat(ctas.getTransactionAttributeSources()[1]).isInstanceOf(NameMatchTransactionAttributeSource.class);
 	}
 
 	@Test

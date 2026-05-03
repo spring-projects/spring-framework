@@ -23,6 +23,7 @@ import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.StringJoiner;
 
@@ -45,7 +46,6 @@ import org.springframework.expression.spel.SpelMessage;
 import org.springframework.expression.spel.support.ReflectiveMethodExecutor;
 import org.springframework.expression.spel.support.ReflectiveMethodResolver;
 import org.springframework.util.Assert;
-import org.springframework.util.ObjectUtils;
 
 /**
  * Expression language AST node that represents a method reference (i.e., a
@@ -75,7 +75,16 @@ public class MethodReference extends SpelNodeImpl {
 
 	private final String name;
 
-	private @Nullable Character originalPrimitiveExitTypeDescriptor;
+	private volatile @Nullable Character originalPrimitiveExitTypeDescriptor;
+
+	/**
+	 * Tracks whether an {@link Optional} was unwrapped in
+	 * {@link #getValueInternal(EvaluationContext, Object, TypeDescriptor, Object[])}
+	 * using the null-safe operator and therefore needs to be unwrapped in a
+	 * compiled expression.
+	 * @since 7.1
+	 */
+	private volatile boolean unwrapOptional;
 
 	private volatile @Nullable CachedMethodExecutor cachedExecutor;
 
@@ -133,6 +142,7 @@ public class MethodReference extends SpelNodeImpl {
 		List<TypeDescriptor> argumentTypes = getArgumentTypes(arguments);
 		Optional<?> fallbackOptionalTarget = null;
 		boolean isEmptyOptional = false;
+		this.unwrapOptional = false;
 
 		if (isNullSafe()) {
 			if (target == null) {
@@ -142,6 +152,7 @@ public class MethodReference extends SpelNodeImpl {
 				if (optional.isPresent()) {
 					target = optional.get();
 					fallbackOptionalTarget = optional;
+					this.unwrapOptional = true;
 				}
 				else {
 					isEmptyOptional = true;
@@ -193,6 +204,9 @@ public class MethodReference extends SpelNodeImpl {
 			if (searchResult.methodExecutor != null) {
 				executorToUse = searchResult.methodExecutor;
 				targetToUse = fallbackOptionalTarget;
+				// If we end up using a method on the original Optional instance,
+				// we don't need to unwrap the Optional in the compiled expression.
+				this.unwrapOptional = false;
 			}
 		}
 		// If we got this far, that means we failed to find an executor for both the
@@ -384,6 +398,9 @@ public class MethodReference extends SpelNodeImpl {
 
 		Label skipIfNull = null;
 		if (isNullSafe() && (descriptor != null || !isStatic)) {
+			if (this.unwrapOptional) {
+				CodeFlow.insertOptionalUnwrapIfNecessary(mv, descriptor);
+			}
 			skipIfNull = new Label();
 			Label continueLabel = new Label();
 			mv.visitInsn(DUP);
@@ -476,7 +493,7 @@ public class MethodReference extends SpelNodeImpl {
 
 		public boolean isSuitable(Object target, @Nullable TypeDescriptor targetType, List<TypeDescriptor> argumentTypes) {
 			return ((this.staticClass == null || this.staticClass == target) &&
-					ObjectUtils.nullSafeEquals(this.targetType, targetType) && this.argumentTypes.equals(argumentTypes));
+					Objects.equals(this.targetType, targetType) && this.argumentTypes.equals(argumentTypes));
 		}
 
 		public boolean hasProxyTarget() {

@@ -34,13 +34,13 @@ class OverloadedAdviceTests {
 
 	@Test
 	@SuppressWarnings("resource")
-	void testConfigParsingWithMismatchedAdviceMethod() {
+	void configParsingWithMismatchedAdviceMethod() {
 		new ClassPathXmlApplicationContext(getClass().getSimpleName() + ".xml", getClass());
 	}
 
 	@Test
 	@SuppressWarnings("resource")
-	void testExceptionOnConfigParsingWithAmbiguousAdviceMethod() {
+	void exceptionOnConfigParsingWithAmbiguousAdviceMethod() {
 		assertThatExceptionOfType(BeanCreationException.class)
 			.isThrownBy(() -> new ClassPathXmlApplicationContext(getClass().getSimpleName() + "-ambiguous.xml", getClass()))
 			.havingRootCause()

@@ -34,7 +34,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Sebastien Deleuze
  */
-public class BeanRegistryAdapterTests {
+class BeanRegistryAdapterTests {
 
 	private final DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
 

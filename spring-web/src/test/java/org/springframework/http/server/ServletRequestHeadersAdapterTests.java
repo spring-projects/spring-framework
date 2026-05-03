@@ -26,7 +26,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * Unit tests for {@link ServletRequestHeadersAdapter}.
  */
-public class ServletRequestHeadersAdapterTests {
+class ServletRequestHeadersAdapterTests {
 
 	private final MockHttpServletRequest request = new MockHttpServletRequest();
 

@@ -115,6 +115,11 @@ public class MarshallingHttpMessageConverter extends AbstractXmlHttpMessageConve
 	}
 
 	@Override
+	public boolean canWriteRepeatedly(Object o, @Nullable MediaType contentType) {
+		return true;
+	}
+
+	@Override
 	protected boolean supports(Class<?> clazz) {
 		// should not be called, since we override canRead()/canWrite()
 		throw new UnsupportedOperationException();
@@ -137,6 +142,7 @@ public class MarshallingHttpMessageConverter extends AbstractXmlHttpMessageConve
 	}
 
 	@Override
+	@SuppressWarnings("removal")
 	protected boolean supportsRepeatableWrites(Object o) {
 		return true;
 	}

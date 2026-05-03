@@ -30,7 +30,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class InstrumentableClassLoaderTests {
 
 	@Test
-	void testDefaultLoadTimeWeaver() {
+	void defaultLoadTimeWeaver() {
 		ClassLoader loader = new SimpleInstrumentableClassLoader(ClassUtils.getDefaultClassLoader());
 		ReflectiveLoadTimeWeaver handler = new ReflectiveLoadTimeWeaver(loader);
 		assertThat(handler.getInstrumentableClassLoader()).isSameAs(loader);

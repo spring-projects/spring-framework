@@ -6,6 +6,6 @@
 		http://www.springframework.org/schema/mvc https://www.springframework.org/schema/mvc/spring-mvc.xsd">
 
 	<mvc:annotation-driven />
-	<mvc:resources mapping="/resources/**" location="/, classpath:/META-INF/" />
+	<mvc:resources mapping="/resources/**" location="/static, classpath:/META-INF/" />
 
 </beans>

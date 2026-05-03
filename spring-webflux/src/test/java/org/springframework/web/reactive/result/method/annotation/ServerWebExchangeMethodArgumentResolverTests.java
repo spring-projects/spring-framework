@@ -102,7 +102,7 @@ class ServerWebExchangeMethodArgumentResolverTests {
 	}
 
 	@Test // gh-25822
-	public void resolveUriComponentsBuilderWithContextPath() {
+	void resolveUriComponentsBuilderWithContextPath() {
 		ServerWebExchange exchange = MockServerWebExchange.from(
 				MockServerHttpRequest.get("https://example.org:9999/app/path?q=foo").contextPath("/app"));
 

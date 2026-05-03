@@ -22,7 +22,7 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.test.context.bean.override.BeanOverrideHandler;
-import org.springframework.test.context.bean.override.BeanOverrideTestUtils;
+import org.springframework.test.context.bean.override.BeanOverrideUtils;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBeans;
 
@@ -59,7 +59,7 @@ class MockitoSpyBeansTests {
 
 
 	private static Stream<Class<?>> getRegisteredMockTypes(Class<?> testClass) {
-		return BeanOverrideTestUtils.findAllHandlers(testClass)
+		return BeanOverrideUtils.findAllHandlers(testClass)
 				.stream()
 				.map(BeanOverrideHandler::getBeanType)
 				.map(ResolvableType::getRawClass);

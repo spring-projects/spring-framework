@@ -42,7 +42,7 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standal
  * @author Rossen Stoyanchev
  * @author Sam Brannen
  */
-public class ExceptionHandlerTests {
+class ExceptionHandlerTests {
 
 	@Nested
 	class MvcTests {

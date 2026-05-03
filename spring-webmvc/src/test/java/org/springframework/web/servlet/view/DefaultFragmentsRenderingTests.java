@@ -38,7 +38,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Rossen Stoyanchev
  * @author Sebastien Deleuze
  */
-public class DefaultFragmentsRenderingTests {
+class DefaultFragmentsRenderingTests {
 
 	@Test
 	void render() throws Exception {

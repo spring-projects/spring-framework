@@ -58,15 +58,15 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.springframework.beans.factory.support.BeanDefinitionBuilder.rootBeanDefinition;
 import static org.springframework.context.ConfigurableApplicationContext.ENVIRONMENT_BEAN_NAME;
-import static org.springframework.core.env.EnvironmentSystemIntegrationTests.Constants.DERIVED_DEV_BEAN_NAME;
-import static org.springframework.core.env.EnvironmentSystemIntegrationTests.Constants.DERIVED_DEV_ENV_NAME;
-import static org.springframework.core.env.EnvironmentSystemIntegrationTests.Constants.DEV_BEAN_NAME;
-import static org.springframework.core.env.EnvironmentSystemIntegrationTests.Constants.DEV_ENV_NAME;
-import static org.springframework.core.env.EnvironmentSystemIntegrationTests.Constants.ENVIRONMENT_AWARE_BEAN_NAME;
-import static org.springframework.core.env.EnvironmentSystemIntegrationTests.Constants.PROD_BEAN_NAME;
-import static org.springframework.core.env.EnvironmentSystemIntegrationTests.Constants.PROD_ENV_NAME;
-import static org.springframework.core.env.EnvironmentSystemIntegrationTests.Constants.TRANSITIVE_BEAN_NAME;
-import static org.springframework.core.env.EnvironmentSystemIntegrationTests.Constants.XML_PATH;
+import static org.springframework.core.env.Constants.DERIVED_DEV_BEAN_NAME;
+import static org.springframework.core.env.Constants.DERIVED_DEV_ENV_NAME;
+import static org.springframework.core.env.Constants.DEV_BEAN_NAME;
+import static org.springframework.core.env.Constants.DEV_ENV_NAME;
+import static org.springframework.core.env.Constants.ENVIRONMENT_AWARE_BEAN_NAME;
+import static org.springframework.core.env.Constants.PROD_BEAN_NAME;
+import static org.springframework.core.env.Constants.PROD_ENV_NAME;
+import static org.springframework.core.env.Constants.TRANSITIVE_BEAN_NAME;
+import static org.springframework.core.env.Constants.XML_PATH;
 
 /**
  * System integration tests for container support of the {@link Environment} API.
@@ -87,7 +87,7 @@ import static org.springframework.core.env.EnvironmentSystemIntegrationTests.Con
  * @author Sam Brannen
  * @see org.springframework.context.support.EnvironmentIntegrationTests
  */
-public class EnvironmentSystemIntegrationTests {
+class EnvironmentSystemIntegrationTests {
 
 	private final ConfigurableEnvironment prodEnv = new StandardEnvironment();
 
@@ -648,7 +648,7 @@ public class EnvironmentSystemIntegrationTests {
 		}
 	}
 
-	@Profile(DERIVED_DEV_ENV_NAME)
+	@Profile(Constants.DERIVED_DEV_ENV_NAME)
 	@Configuration
 	static class DerivedDevConfig extends DevConfig {
 		@Bean
@@ -664,26 +664,6 @@ public class EnvironmentSystemIntegrationTests {
 		public Object expressionBean() {
 			return new Object();
 		}
-	}
-
-
-	/**
-	 * Constants used both locally and in scan* sub-packages
-	 */
-	public static class Constants {
-
-		public static final String XML_PATH = "org/springframework/core/env/EnvironmentSystemIntegrationTests-context.xml";
-
-		public static final String ENVIRONMENT_AWARE_BEAN_NAME = "envAwareBean";
-
-		public static final String PROD_BEAN_NAME = "prodBean";
-		public static final String DEV_BEAN_NAME = "devBean";
-		public static final String DERIVED_DEV_BEAN_NAME = "derivedDevBean";
-		public static final String TRANSITIVE_BEAN_NAME = "transitiveBean";
-
-		public static final String PROD_ENV_NAME = "prod";
-		public static final String DEV_ENV_NAME = "dev";
-		public static final String DERIVED_DEV_ENV_NAME = "derivedDev";
 	}
 
 }

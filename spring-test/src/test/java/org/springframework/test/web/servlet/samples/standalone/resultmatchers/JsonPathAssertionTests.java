@@ -48,13 +48,13 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standal
  * @author Rossen Stoyanchev
  * @see ContentAssertionTests
  */
-public class JsonPathAssertionTests {
+class JsonPathAssertionTests {
 
 	private MockMvc mockMvc;
 
 
 	@BeforeEach
-	public void setup() {
+	void setup() {
 		this.mockMvc = standaloneSetup(new MusicController())
 				.defaultRequest(get("/").accept(MediaType.APPLICATION_JSON))
 				.alwaysExpect(status().isOk())
@@ -64,7 +64,7 @@ public class JsonPathAssertionTests {
 
 
 	@Test
-	public void exists() throws Exception {
+	void exists() throws Exception {
 		String composerByName = "$.composers[?(@.name == '%s')]";
 		String performerByName = "$.performers[?(@.name == '%s')]";
 
@@ -82,7 +82,7 @@ public class JsonPathAssertionTests {
 	}
 
 	@Test
-	public void doesNotExist() throws Exception {
+	void doesNotExist() throws Exception {
 		this.mockMvc.perform(get("/music/people"))
 			.andExpect(jsonPath("$.composers[?(@.name == 'Edvard Grieeeeeeg')]").doesNotExist())
 			.andExpect(jsonPath("$.composers[?(@.name == 'Robert Schuuuuuuman')]").doesNotExist())
@@ -90,7 +90,7 @@ public class JsonPathAssertionTests {
 	}
 
 	@Test
-	public void equality() throws Exception {
+	void equality() throws Exception {
 		this.mockMvc.perform(get("/music/people"))
 			.andExpect(jsonPath("$.composers[0].name").value("Johann Sebastian Bach"))
 			.andExpect(jsonPath("$.performers[1].name").value("Yehudi Menuhin"));
@@ -102,7 +102,7 @@ public class JsonPathAssertionTests {
 	}
 
 	@Test
-	public void hamcrestMatcher() throws Exception {
+	void hamcrestMatcher() throws Exception {
 		this.mockMvc.perform(get("/music/people"))
 			.andExpect(jsonPath("$.composers[0].name", startsWith("Johann")))
 			.andExpect(jsonPath("$.performers[0].name", endsWith("Ashkenazy")))
@@ -111,7 +111,7 @@ public class JsonPathAssertionTests {
 	}
 
 	@Test
-	public void hamcrestMatcherWithParameterizedJsonPath() throws Exception {
+	void hamcrestMatcherWithParameterizedJsonPath() throws Exception {
 		String composerName = "$.composers[%s].name";
 		String performerName = "$.performers[%s].name";
 

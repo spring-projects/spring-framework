@@ -16,7 +16,6 @@
 
 package org.springframework.util;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Locale;
 import java.util.Properties;
@@ -515,120 +514,106 @@ class StringUtilsTests {
 
 	@Test
 	void tokenizeToStringArray() {
-		String[] sa = StringUtils.tokenizeToStringArray("a,b , ,c", ",");
-		assertThat(sa).hasSize(3);
-		assertThat(sa[0].equals("a") && sa[1].equals("b") && sa[2].equals("c")).as("components are correct").isTrue();
+		String[] array = StringUtils.tokenizeToStringArray("a,b , ,c", ",");
+		assertThat(array).containsExactly("a", "b", "c");
 	}
 
 	@Test
 	void tokenizeToStringArrayWithNotIgnoreEmptyTokens() {
-		String[] sa = StringUtils.tokenizeToStringArray("a,b , ,c", ",", true, false);
-		assertThat(sa).hasSize(4);
-		assertThat(sa[0].equals("a") && sa[1].equals("b") && sa[2].isEmpty() && sa[3].equals("c")).as("components are correct").isTrue();
+		String[] array = StringUtils.tokenizeToStringArray("a,b , ,c", ",", true, false);
+		assertThat(array).containsExactly("a", "b", "", "c");
 	}
 
 	@Test
 	void tokenizeToStringArrayWithNotTrimTokens() {
-		String[] sa = StringUtils.tokenizeToStringArray("a,b ,c", ",", false, true);
-		assertThat(sa).hasSize(3);
-		assertThat(sa[0].equals("a") && sa[1].equals("b ") && sa[2].equals("c")).as("components are correct").isTrue();
+		String[] array = StringUtils.tokenizeToStringArray("a,b ,c", ",", false, true);
+		assertThat(array).containsExactly("a", "b ", "c");
 	}
 
 	@Test
 	void commaDelimitedListToStringArrayWithNullProducesEmptyArray() {
-		String[] sa = StringUtils.commaDelimitedListToStringArray(null);
-		assertThat(sa).as("String array isn't null with null input").isNotNull();
-		assertThat(sa.length).as("String array length == 0 with null input").isEqualTo(0);
+		String[] array = StringUtils.commaDelimitedListToStringArray(null);
+		assertThat(array).isEmpty();
 	}
 
 	@Test
 	void commaDelimitedListToStringArrayWithEmptyStringProducesEmptyArray() {
-		String[] sa = StringUtils.commaDelimitedListToStringArray("");
-		assertThat(sa).as("String array isn't null with null input").isNotNull();
-		assertThat(sa.length).as("String array length == 0 with null input").isEqualTo(0);
+		String[] array = StringUtils.commaDelimitedListToStringArray("");
+		assertThat(array).isEmpty();
 	}
 
 	@Test
 	void delimitedListToStringArrayWithComma() {
-		String[] sa = StringUtils.delimitedListToStringArray("a,b", ",");
-		assertThat(sa).hasSize(2);
-		assertThat(sa[0]).isEqualTo("a");
-		assertThat(sa[1]).isEqualTo("b");
+		String[] array = StringUtils.delimitedListToStringArray("a,b", ",");
+		assertThat(array).containsExactly("a", "b");
 	}
 
 	@Test
 	void delimitedListToStringArrayWithSemicolon() {
-		String[] sa = StringUtils.delimitedListToStringArray("a;b", ";");
-		assertThat(sa).hasSize(2);
-		assertThat(sa[0]).isEqualTo("a");
-		assertThat(sa[1]).isEqualTo("b");
+		String[] array = StringUtils.delimitedListToStringArray("a;b", ";");
+		assertThat(array).containsExactly("a", "b");
 	}
 
 	@Test
 	void delimitedListToStringArrayWithEmptyDelimiter() {
-		String[] sa = StringUtils.delimitedListToStringArray("a,b", "");
-		assertThat(sa).hasSize(3);
-		assertThat(sa[0]).isEqualTo("a");
-		assertThat(sa[1]).isEqualTo(",");
-		assertThat(sa[2]).isEqualTo("b");
+		String[] array = StringUtils.delimitedListToStringArray("a,b", "");
+		assertThat(array).containsExactly("a", ",", "b");
 	}
 
 	@Test
 	void delimitedListToStringArrayWithNullDelimiter() {
-		String[] sa = StringUtils.delimitedListToStringArray("a,b", null);
-		assertThat(sa).hasSize(1);
-		assertThat(sa[0]).isEqualTo("a,b");
+		String[] array = StringUtils.delimitedListToStringArray("a,b", null);
+		assertThat(array).containsExactly("a,b");
 	}
 
 	@Test
 	void delimitedListToStringArrayWithCharacterToDelete() {
-		String[] sa = StringUtils.delimitedListToStringArray("a,b,c", ",", "a");
-		assertThat(sa).containsExactly("", "b", "c");
+		String[] array = StringUtils.delimitedListToStringArray("a,b,c", ",", "a");
+		assertThat(array).containsExactly("", "b", "c");
 	}
 
 	@Test
 	void delimitedListToStringArrayWithCharacterToDeleteEqualsToDelimiter() {
-		String[] sa = StringUtils.delimitedListToStringArray("a,b,c", ",", ",");
-		assertThat(sa).containsExactly("a", "b", "c");
+		String[] array = StringUtils.delimitedListToStringArray("a,b,c", ",", ",");
+		assertThat(array).containsExactly("a", "b", "c");
 	}
 
 	@Test
 	void commaDelimitedListToStringArrayMatchWords() {
 		// Could read these from files
-		String[] sa = new String[] {"foo", "bar", "big"};
-		doTestCommaDelimitedListToStringArrayLegalMatch(sa);
-		doTestStringArrayReverseTransformationMatches(sa);
+		String[] array = new String[] {"foo", "bar", "big"};
+		doTestCommaDelimitedListToStringArrayLegalMatch(array);
+		doTestStringArrayReverseTransformationMatches(array);
 
-		sa = new String[] {"a", "b", "c"};
-		doTestCommaDelimitedListToStringArrayLegalMatch(sa);
-		doTestStringArrayReverseTransformationMatches(sa);
+		array = new String[] {"a", "b", "c"};
+		doTestCommaDelimitedListToStringArrayLegalMatch(array);
+		doTestStringArrayReverseTransformationMatches(array);
 
 		// Test same words
-		sa = new String[] {"AA", "AA", "AA", "AA", "AA"};
-		doTestCommaDelimitedListToStringArrayLegalMatch(sa);
-		doTestStringArrayReverseTransformationMatches(sa);
+		array = new String[] {"AA", "AA", "AA", "AA", "AA"};
+		doTestCommaDelimitedListToStringArrayLegalMatch(array);
+		doTestStringArrayReverseTransformationMatches(array);
 	}
 
-	private void doTestStringArrayReverseTransformationMatches(String[] sa) {
+	private void doTestStringArrayReverseTransformationMatches(String[] array) {
 		String[] reverse =
-				StringUtils.commaDelimitedListToStringArray(StringUtils.arrayToCommaDelimitedString(sa));
-		assertThat(Arrays.asList(reverse)).as("Reverse transformation is equal").isEqualTo(Arrays.asList(sa));
+				StringUtils.commaDelimitedListToStringArray(StringUtils.arrayToCommaDelimitedString(array));
+		assertThat(reverse).as("Reverse transformation is equal").isEqualTo(array);
 	}
 
 	@Test
 	void commaDelimitedListToStringArraySingleString() {
 		// Could read these from files
 		String s = "woeirqupoiewuropqiewuorpqiwueopriquwopeiurqopwieur";
-		String[] sa = StringUtils.commaDelimitedListToStringArray(s);
-		assertThat(sa.length).as("Found one String with no delimiters").isEqualTo(1);
-		assertThat(sa[0]).as("Single array entry matches input String with no delimiters").isEqualTo(s);
+		String[] array = StringUtils.commaDelimitedListToStringArray(s);
+		assertThat(array).as("Single array entry matches input String with no delimiters").containsExactly(s);
 	}
 
 	@Test
 	void commaDelimitedListToStringArrayWithOtherPunctuation() {
 		// Could read these from files
-		String[] sa = new String[] {"xcvwert4456346&*.", "///", ".!", ".", ";"};
-		doTestCommaDelimitedListToStringArrayLegalMatch(sa);
+		String[] array = new String[] {"xcvwert4456346&*.", "///", ".!", ".", ";"};
+		doTestCommaDelimitedListToStringArrayLegalMatch(array);
 	}
 
 	/**
@@ -637,20 +622,17 @@ class StringUtilsTests {
 	@Test
 	void commaDelimitedListToStringArrayEmptyStrings() {
 		// Could read these from files
-		String[] sa = StringUtils.commaDelimitedListToStringArray("a,,b");
-		assertThat(sa.length).as("a,,b produces array length 3").isEqualTo(3);
-		assertThat(sa[0].equals("a") && sa[1].isEmpty() && sa[2].equals("b")).as("components are correct").isTrue();
+		String[] array = StringUtils.commaDelimitedListToStringArray("a,,b");
+		assertThat(array).containsExactly("a", "", "b");
 
-		sa = new String[] {"", "", "a", ""};
-		doTestCommaDelimitedListToStringArrayLegalMatch(sa);
+		array = new String[] {"", "", "a", ""};
+		doTestCommaDelimitedListToStringArrayLegalMatch(array);
 	}
 
 	private void doTestCommaDelimitedListToStringArrayLegalMatch(String[] components) {
 		String sb = String.join(String.valueOf(','), components);
-		String[] sa = StringUtils.commaDelimitedListToStringArray(sb);
-		assertThat(sa).as("String array isn't null with legal match").isNotNull();
-		assertThat(sa.length).as("String array length is correct with legal match").isEqualTo(components.length);
-		assertThat(Arrays.equals(sa, components)).as("Output equals input").isTrue();
+		String[] array = StringUtils.commaDelimitedListToStringArray(sb);
+		assertThat(array).as("Output equals input").isEqualTo(components);
 	}
 
 

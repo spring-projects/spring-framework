@@ -41,7 +41,7 @@ import static org.assertj.core.api.Assertions.assertThatIOException;
 class HttpRequestHandlerTests {
 
 	@Test
-	void testHttpRequestHandlerServletPassThrough() throws Exception {
+	void httpRequestHandlerServletPassThrough() throws Exception {
 		MockServletContext servletContext = new MockServletContext();
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		MockHttpServletResponse response = new MockHttpServletResponse();

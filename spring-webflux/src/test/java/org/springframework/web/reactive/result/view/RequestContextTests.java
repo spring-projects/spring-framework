@@ -51,13 +51,13 @@ class RequestContextTests {
 	}
 
 	@Test
-	void testGetContextUrl() {
+	void getContextUrl() {
 		RequestContext context = new RequestContext(this.exchange, this.model, this.applicationContext);
 		assertThat(context.getContextUrl("bar")).isEqualTo("/foo/bar");
 	}
 
 	@Test
-	void testGetContextUrlWithMap() {
+	void getContextUrlWithMap() {
 		RequestContext context = new RequestContext(this.exchange, this.model, this.applicationContext);
 		Map<String, Object> map = new HashMap<>();
 		map.put("foo", "bar");
@@ -66,7 +66,7 @@ class RequestContextTests {
 	}
 
 	@Test
-	void testGetContextUrlWithMapEscaping() {
+	void getContextUrlWithMapEscaping() {
 		RequestContext context = new RequestContext(this.exchange, this.model, this.applicationContext);
 		Map<String, Object> map = new HashMap<>();
 		map.put("foo", "bar baz");

@@ -37,7 +37,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @author Rossen Stoyanchev
  */
 @Disabled
-public class PrintingResultHandlerSmokeTests {
+class PrintingResultHandlerSmokeTests {
 
 	private final WebTestClient testClient =
 			MockMvcWebTestClient.bindToController(new SimpleController()).build();
@@ -47,7 +47,7 @@ public class PrintingResultHandlerSmokeTests {
 	// Comment out class-level @Disabled to see the output.
 
 	@Test
-	public void printViaConsumer() {
+	void printViaConsumer() {
 		testClient.post().uri("/")
 				.contentType(MediaType.TEXT_PLAIN)
 				.bodyValue("Hello Request".getBytes(StandardCharsets.UTF_8))
@@ -58,7 +58,7 @@ public class PrintingResultHandlerSmokeTests {
 	}
 
 	@Test
-	public void returnResultAndPrint() {
+	void returnResultAndPrint() {
 		EntityExchangeResult<String> result = testClient.post().uri("/")
 				.contentType(MediaType.TEXT_PLAIN)
 				.bodyValue("Hello Request".getBytes(StandardCharsets.UTF_8))
@@ -80,4 +80,5 @@ public class PrintingResultHandlerSmokeTests {
 			return "Hello Response";
 		}
 	}
+
 }

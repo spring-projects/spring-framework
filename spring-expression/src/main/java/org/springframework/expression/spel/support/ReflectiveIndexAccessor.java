@@ -156,7 +156,8 @@ public class ReflectiveIndexAccessor implements CompilableIndexAccessor {
 		}
 		catch (Exception ex) {
 			throw new IllegalArgumentException("Failed to find public read-method '%s(%s)' in class '%s'."
-					.formatted(readMethodName, getName(indexType), getName(targetType)));
+					.formatted(readMethodName, ClassUtils.getCanonicalName(indexType),
+							ClassUtils.getCanonicalName(targetType)));
 		}
 
 		this.readMethodToInvoke = ClassUtils.getPubliclyAccessibleMethodIfPossible(this.readMethod, targetType);
@@ -170,8 +171,9 @@ public class ReflectiveIndexAccessor implements CompilableIndexAccessor {
 			}
 			catch (Exception ex) {
 				throw new IllegalArgumentException("Failed to find public write-method '%s(%s, %s)' in class '%s'."
-						.formatted(writeMethodName, getName(indexType), getName(indexedValueType),
-								getName(targetType)));
+						.formatted(writeMethodName, ClassUtils.getCanonicalName(indexType),
+								ClassUtils.getCanonicalName(indexedValueType),
+								ClassUtils.getCanonicalName(targetType)));
 			}
 			this.writeMethodToInvoke = ClassUtils.getPubliclyAccessibleMethodIfPossible(writeMethod, targetType);
 			ReflectionUtils.makeAccessible(this.writeMethodToInvoke);
@@ -269,12 +271,6 @@ public class ReflectiveIndexAccessor implements CompilableIndexAccessor {
 		boolean isInterface = publicDeclaringClass.isInterface();
 		int opcode = (isInterface ? INVOKEINTERFACE : INVOKEVIRTUAL);
 		mv.visitMethodInsn(opcode, classDesc, methodName, methodDescr, isInterface);
-	}
-
-
-	private static String getName(Class<?> clazz) {
-		String canonicalName = clazz.getCanonicalName();
-		return (canonicalName != null ? canonicalName : clazz.getName());
 	}
 
 }

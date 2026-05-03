@@ -87,8 +87,7 @@ public @interface TestConstructor {
 	 * semantics by default.
 	 * <p>May alternatively be configured via the
 	 * {@link org.springframework.core.SpringProperties SpringProperties}
-	 * mechanism.
-	 * <p>This property may also be configured as a
+	 * mechanism or as a
 	 * <a href="https://docs.junit.org/current/running-tests/configuration-parameters.html">JUnit
 	 * Platform configuration parameter</a>.
 	 * @see #autowireMode

@@ -31,7 +31,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class LazyCreationTargetSourceTests {
 
 	@Test
-	void testCreateLazy() {
+	void createLazy() {
 		TargetSource targetSource = new AbstractLazyCreationTargetSource() {
 			@Override
 			protected Object createObject() {

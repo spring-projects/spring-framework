@@ -61,7 +61,9 @@ configure([rootProject] + javaProjects) { project ->
 		testImplementation("org.junit.platform:junit-platform-suite")
 		testImplementation("org.mockito:mockito-core")
 		testImplementation("org.mockito:mockito-junit-jupiter")
-		testImplementation("io.mockk:mockk")
+		testImplementation("io.mockk:mockk") {
+			exclude group: 'junit', module: 'junit'
+		}
 		testImplementation("org.assertj:assertj-core")
 		testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 		testRuntimeOnly("org.apache.logging.log4j:log4j-core")
@@ -72,7 +74,7 @@ configure([rootProject] + javaProjects) { project ->
 		//"https://jakarta.ee/specifications/platform/11/apidocs/",
 		"https://docs.hibernate.org/orm/7.2/javadocs/",
 		"https://www.quartz-scheduler.org/api/2.3.0/",
-		"https://hc.apache.org/httpcomponents-client-5.6.x/current/httpclient5/apidocs/",
+		"https://hc.apache.org/httpcomponents-client-5.6.x/5.6/httpclient5/apidocs/",
 		"https://projectreactor.io/docs/core/release/api/",
 		"https://projectreactor.io/docs/test/release/api/",
 		"https://junit.org/junit4/javadoc/4.13.2/",

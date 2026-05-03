@@ -483,13 +483,13 @@ class MessageBrokerConfigurationTests {
 	}
 
 	@Test // SPR-16275
-	public void dotSeparatorWithBrokerSlashConvention() {
+	void dotSeparatorWithBrokerSlashConvention() {
 		ApplicationContext context = loadConfig(DotSeparatorWithSlashBrokerConventionConfig.class);
 		testDotSeparator(context, true);
 	}
 
 	@Test // SPR-16275
-	public void dotSeparatorWithBrokerDotConvention() {
+	void dotSeparatorWithBrokerDotConvention() {
 		ApplicationContext context = loadConfig(DotSeparatorWithDotBrokerConventionConfig.class);
 		testDotSeparator(context, false);
 	}

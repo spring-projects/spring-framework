@@ -17,6 +17,7 @@
 package org.springframework.test.context.bean.override.mockito;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Parameter;
 
 import org.jspecify.annotations.Nullable;
 
@@ -44,6 +45,14 @@ abstract class AbstractMockitoBeanOverrideHandler extends BeanOverrideHandler {
 			MockReset reset) {
 
 		super(field, beanType, beanName, contextName, strategy);
+		this.reset = (reset != null ? reset : MockReset.AFTER);
+	}
+
+	protected AbstractMockitoBeanOverrideHandler(Parameter parameter, ResolvableType beanType,
+			@Nullable String beanName, String contextName, BeanOverrideStrategy strategy,
+			MockReset reset) {
+
+		super(parameter, beanType, beanName, contextName, strategy);
 		this.reset = (reset != null ? reset : MockReset.AFTER);
 	}
 
@@ -92,6 +101,7 @@ abstract class AbstractMockitoBeanOverrideHandler extends BeanOverrideHandler {
 	public String toString() {
 		return new ToStringCreator(this)
 				.append("field", getField())
+				.append("parameter", getParameter())
 				.append("beanType", getBeanType())
 				.append("beanName", getBeanName())
 				.append("contextName", getContextName())

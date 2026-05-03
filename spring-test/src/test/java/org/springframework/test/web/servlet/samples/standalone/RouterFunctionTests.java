@@ -18,7 +18,6 @@ package org.springframework.test.web.servlet.samples.standalone;
 
 import java.util.concurrent.CompletableFuture;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;
@@ -46,15 +45,10 @@ import static org.springframework.web.servlet.function.ServerResponse.ok;
 /**
  * @author Arjen Poutsma
  */
-public class RouterFunctionTests {
+class RouterFunctionTests {
 
-	private MockMvc mockMvc;
+	private MockMvc mockMvc = routerFunctions(testRoute()).defaultResponseCharacterEncoding(UTF_8).build();
 
-	@BeforeEach
-	void setUp() {
-		RouterFunction<?> testRoute = testRoute();
-		this.mockMvc = routerFunctions(testRoute).defaultResponseCharacterEncoding(UTF_8).build();
-	}
 
 	@Test
 	void json() throws Exception {
@@ -75,7 +69,7 @@ public class RouterFunctionTests {
 	}
 
 	@Test
-	public void queryParameter() throws Exception {
+	void queryParameter() throws Exception {
 		this.mockMvc
 			.perform(get("/search?name=George").accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk())
@@ -164,4 +158,5 @@ public class RouterFunctionTests {
 			this.age = age;
 		}
 	}
+
 }

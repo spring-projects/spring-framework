@@ -50,86 +50,86 @@ class DefaultLobHandlerTests {
 
 
 	@Test
-	void testGetBlobAsBytes() throws SQLException {
+	void getBlobAsBytes() throws SQLException {
 		lobHandler.getBlobAsBytes(rs, 1);
 		verify(rs).getBytes(1);
 	}
 
 	@Test
-	void testGetBlobAsBinaryStream() throws SQLException {
+	void getBlobAsBinaryStream() throws SQLException {
 		lobHandler.getBlobAsBinaryStream(rs, 1);
 		verify(rs).getBinaryStream(1);
 	}
 
 	@Test
-	void testGetClobAsString() throws SQLException {
+	void getClobAsString() throws SQLException {
 		lobHandler.getClobAsString(rs, 1);
 		verify(rs).getString(1);
 	}
 
 	@Test
-	void testGetClobAsAsciiStream() throws SQLException {
+	void getClobAsAsciiStream() throws SQLException {
 		lobHandler.getClobAsAsciiStream(rs, 1);
 		verify(rs).getAsciiStream(1);
 	}
 
 	@Test
-	void testGetClobAsCharacterStream() throws SQLException {
+	void getClobAsCharacterStream() throws SQLException {
 		lobHandler.getClobAsCharacterStream(rs, 1);
 		verify(rs).getCharacterStream(1);
 	}
 
 	@Test
-	void testSetBlobAsBytes() throws SQLException {
+	void setBlobAsBytes() throws SQLException {
 		byte[] content = "testContent".getBytes();
 		lobCreator.setBlobAsBytes(ps, 1, content);
 		verify(ps).setBytes(1, content);
 	}
 
 	@Test
-	void testSetBlobAsBinaryStream() throws SQLException {
+	void setBlobAsBinaryStream() throws SQLException {
 		InputStream bis = new ByteArrayInputStream("testContent".getBytes());
 		lobCreator.setBlobAsBinaryStream(ps, 1, bis, 11);
 		verify(ps).setBinaryStream(1, bis, 11);
 	}
 
 	@Test
-	void testSetBlobAsBinaryStreamWithoutLength() throws SQLException {
+	void setBlobAsBinaryStreamWithoutLength() throws SQLException {
 		InputStream bis = new ByteArrayInputStream("testContent".getBytes());
 		lobCreator.setBlobAsBinaryStream(ps, 1, bis, -1);
 		verify(ps).setBinaryStream(1, bis);
 	}
 
 	@Test
-	void testSetClobAsString() throws SQLException {
+	void setClobAsString() throws SQLException {
 		String content = "testContent";
 		lobCreator.setClobAsString(ps, 1, content);
 		verify(ps).setString(1, content);
 	}
 
 	@Test
-	void testSetClobAsAsciiStream() throws SQLException {
+	void setClobAsAsciiStream() throws SQLException {
 		InputStream bis = new ByteArrayInputStream("testContent".getBytes());
 		lobCreator.setClobAsAsciiStream(ps, 1, bis, 11);
 		verify(ps).setAsciiStream(1, bis, 11);
 	}
 
 	@Test
-	void testSetClobAsAsciiStreamWithoutLength() throws SQLException {
+	void setClobAsAsciiStreamWithoutLength() throws SQLException {
 		InputStream bis = new ByteArrayInputStream("testContent".getBytes());
 		lobCreator.setClobAsAsciiStream(ps, 1, bis, -1);
 		verify(ps).setAsciiStream(1, bis);
 	}
 
 	@Test
-	void testSetClobAsCharacterStream() throws SQLException {
+	void setClobAsCharacterStream() throws SQLException {
 		Reader str = new StringReader("testContent");
 		lobCreator.setClobAsCharacterStream(ps, 1, str, 11);
 		verify(ps).setCharacterStream(1, str, 11);
 	}
 
 	@Test
-	void testSetClobAsCharacterStreamWithoutLength() throws SQLException {
+	void setClobAsCharacterStreamWithoutLength() throws SQLException {
 		Reader str = new StringReader("testContent");
 		lobCreator.setClobAsCharacterStream(ps, 1, str, -1);
 		verify(ps).setCharacterStream(1, str);

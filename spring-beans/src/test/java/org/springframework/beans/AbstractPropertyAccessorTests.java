@@ -375,7 +375,7 @@ abstract class AbstractPropertyAccessorTests {
 	}
 
 	@Test
-	void testErrorMessageOfNestedProperty() {
+	void errorMessageOfNestedProperty() {
 		ITestBean target = new TestBean();
 		ITestBean child = new DifferentTestBean();
 		child.setName("test");
@@ -599,11 +599,11 @@ abstract class AbstractPropertyAccessorTests {
 		AbstractPropertyAccessor accessor = createAccessor(target);
 
 		accessor.setPropertyValue("bool2", "true");
-		assertThat(Boolean.TRUE.equals(accessor.getPropertyValue("bool2"))).as("Correct bool2 value").isTrue();
+		assertThat(accessor.getPropertyValue("bool2")).as("Correct bool2 value").isEqualTo(Boolean.TRUE);
 		assertThat(target.getBool2()).as("Correct bool2 value").isTrue();
 
 		accessor.setPropertyValue("bool2", "false");
-		assertThat(Boolean.FALSE.equals(accessor.getPropertyValue("bool2"))).as("Correct bool2 value").isTrue();
+		assertThat(accessor.getPropertyValue("bool2")).as("Correct bool2 value").isEqualTo(Boolean.FALSE);
 		assertThat(target.getBool2()).as("Correct bool2 value").isFalse();
 	}
 
@@ -628,7 +628,7 @@ abstract class AbstractPropertyAccessorTests {
 		assertThat(new BigInteger("3")).as("Correct bigInteger value").isEqualTo(target.getBigInteger());
 		assertThat(Float.valueOf("8.1")).as("Correct float2 value").isEqualTo(accessor.getPropertyValue("float2"));
 		assertThat(Float.valueOf("8.1")).as("Correct float2 value").isEqualTo(target.getFloat2());
-		assertThat(Double.valueOf("6.1").equals(accessor.getPropertyValue("double2"))).as("Correct double2 value").isTrue();
+		assertThat(Double.valueOf("6.1")).as("Correct double2 value").isEqualTo(accessor.getPropertyValue("double2"));
 		assertThat(Double.valueOf("6.1")).as("Correct double2 value").isEqualTo(target.getDouble2());
 		assertThat(new BigDecimal("4.0")).as("Correct bigDecimal value").isEqualTo(accessor.getPropertyValue("bigDecimal"));
 		assertThat(new BigDecimal("4.0")).as("Correct bigDecimal value").isEqualTo(target.getBigDecimal());
@@ -651,7 +651,7 @@ abstract class AbstractPropertyAccessorTests {
 		assertThat(Integer.valueOf("8")).as("Correct int2 value").isEqualTo(target.getInt2());
 		assertThat(Long.valueOf("6")).as("Correct long2 value").isEqualTo(accessor.getPropertyValue("long2"));
 		assertThat(Long.valueOf("6")).as("Correct long2 value").isEqualTo(target.getLong2());
-		assertThat(new BigInteger("3").equals(accessor.getPropertyValue("bigInteger"))).as("Correct bigInteger value").isTrue();
+		assertThat(new BigInteger("3")).as("Correct bigInteger value").isEqualTo(accessor.getPropertyValue("bigInteger"));
 		assertThat(new BigInteger("3")).as("Correct bigInteger value").isEqualTo(target.getBigInteger());
 		assertThat(Float.valueOf("8.1")).as("Correct float2 value").isEqualTo(accessor.getPropertyValue("float2"));
 		assertThat(Float.valueOf("8.1")).as("Correct float2 value").isEqualTo(target.getFloat2());
@@ -1495,15 +1495,15 @@ abstract class AbstractPropertyAccessorTests {
 		accessor.setPropertyValues(pvs);
 		assertThat(target.getArray()[0]).isEqualTo(tb5);
 		assertThat(target.getArray()[1]).isEqualTo(tb4);
-		assertThat((target.getList().get(0))).isEqualTo(tb3);
-		assertThat((target.getList().get(1))).isEqualTo(tb2);
-		assertThat((target.getList().get(2))).isEqualTo(tb0);
-		assertThat((target.getList().get(3))).isNull();
-		assertThat((target.getList().get(4))).isEqualTo(tb1);
-		assertThat((target.getMap().get("key1"))).isEqualTo(tb1);
-		assertThat((target.getMap().get("key2"))).isEqualTo(tb0);
-		assertThat((target.getMap().get("key5"))).isEqualTo(tb4);
-		assertThat((target.getMap().get("key9"))).isEqualTo(tb5);
+		assertThat(target.getList().get(0)).isEqualTo(tb3);
+		assertThat(target.getList().get(1)).isEqualTo(tb2);
+		assertThat(target.getList().get(2)).isEqualTo(tb0);
+		assertThat(target.getList().get(3)).isNull();
+		assertThat(target.getList().get(4)).isEqualTo(tb1);
+		assertThat(target.getMap().get("key1")).isEqualTo(tb1);
+		assertThat(target.getMap().get("key2")).isEqualTo(tb0);
+		assertThat(target.getMap().get("key5")).isEqualTo(tb4);
+		assertThat(target.getMap().get("key9")).isEqualTo(tb5);
 		assertThat(accessor.getPropertyValue("array[0]")).isEqualTo(tb5);
 		assertThat(accessor.getPropertyValue("array[1]")).isEqualTo(tb4);
 		assertThat(accessor.getPropertyValue("list[0]")).isEqualTo(tb3);

@@ -25,6 +25,7 @@ import org.apache.commons.logging.LogFactory;
 import org.jspecify.annotations.Nullable;
 
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.ContextResource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
@@ -52,7 +53,8 @@ public abstract class ResourceHandlerUtils {
 
 
 	/**
-	 * Assert the given location is not null, and its path ends on slash.
+	 * Assert the given location is valid.
+	 * Location should not be null, its path ends with a slash, and not be an unsafe location.
 	 */
 	@SuppressWarnings("removal")
 	public static void assertResourceLocation(@Nullable Resource location) {
@@ -67,6 +69,15 @@ public abstract class ResourceHandlerUtils {
 			}
 			else if (location instanceof ClassPathResource classPathResource) {
 				path = classPathResource.getPath();
+				Assert.isTrue(!path.isEmpty() && !"/".equals(path),
+						() -> "Resource location '" + location + "' is considered unsafe " +
+								"and cannot be used as it provides access to the entire classpath.");
+			}
+			else if (location instanceof ContextResource contextResource) {
+				path = contextResource.getPathWithinContext();
+				Assert.isTrue(!"/".equals(path),
+						() -> "Resource location '" + location + "' is considered unsafe " +
+								"and cannot be used as it provides access to the root servlet context.");
 			}
 			else if (location instanceof UrlResource) {
 				path = location.getURL().toExternalForm();
@@ -163,7 +174,6 @@ public abstract class ResourceHandlerUtils {
 	/**
 	 * Checks for invalid resource input paths rejecting the following:
 	 * <ul>
-	 * <li>Paths that contain "WEB-INF" or "META-INF"
 	 * <li>Paths that contain "../" after a call to
 	 * {@link org.springframework.util.StringUtils#cleanPath}.
 	 * <li>Paths that represent a {@link org.springframework.util.ResourceUtils#isUrl
@@ -176,13 +186,6 @@ public abstract class ResourceHandlerUtils {
 	 * @return {@code true} if the path is invalid, {@code false} otherwise
 	 */
 	public static boolean isInvalidPath(String path) {
-		if (path.contains("WEB-INF") || path.contains("META-INF")) {
-			if (logger.isWarnEnabled()) {
-				logger.warn(LogFormatUtils.formatValue(
-						"Path with \"WEB-INF\" or \"META-INF\": [" + path + "]", -1, true));
-			}
-			return true;
-		}
 		if (path.contains(":/")) {
 			String relativePath = (path.charAt(0) == '/' ? path.substring(1) : path);
 			if (ResourceUtils.isUrl(relativePath) || relativePath.startsWith("url:")) {

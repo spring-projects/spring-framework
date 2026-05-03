@@ -202,7 +202,7 @@ class ControllerAdviceBeanTests {
 
 	@Test
 	@SuppressWarnings({"rawtypes", "unchecked"})
-	public void findAnnotatedBeansSortsBeans() {
+	void findAnnotatedBeansSortsBeans() {
 		Class[] expectedTypes = {
 				// Since ControllerAdviceBean currently treats PriorityOrdered the same as Ordered,
 				// OrderedControllerAdvice is sorted before PriorityOrderedControllerAdvice.

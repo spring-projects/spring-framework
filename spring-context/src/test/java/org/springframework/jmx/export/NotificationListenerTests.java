@@ -46,7 +46,7 @@ class NotificationListenerTests extends AbstractMBeanServerTests {
 
 	@SuppressWarnings({"rawtypes", "unchecked"})
 	@Test
-	void testRegisterNotificationListenerForMBean() throws Exception {
+	void registerNotificationListenerForMBean() throws Exception {
 		ObjectName objectName = ObjectName.getInstance("spring:name=Test");
 		JmxTestBean bean = new JmxTestBean();
 
@@ -72,7 +72,7 @@ class NotificationListenerTests extends AbstractMBeanServerTests {
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Test
-	void testRegisterNotificationListenerWithWildcard() throws Exception {
+	void registerNotificationListenerWithWildcard() throws Exception {
 		ObjectName objectName = ObjectName.getInstance("spring:name=Test");
 		JmxTestBean bean = new JmxTestBean();
 
@@ -97,7 +97,7 @@ class NotificationListenerTests extends AbstractMBeanServerTests {
 	}
 
 	@Test
-	void testRegisterNotificationListenerWithHandback() throws Exception {
+	void registerNotificationListenerWithHandback() throws Exception {
 		String objectName = "spring:name=Test";
 		JmxTestBean bean = new JmxTestBean();
 
@@ -128,7 +128,7 @@ class NotificationListenerTests extends AbstractMBeanServerTests {
 	}
 
 	@Test
-	void testRegisterNotificationListenerForAllMBeans() throws Exception {
+	void registerNotificationListenerForAllMBeans() throws Exception {
 		ObjectName objectName = ObjectName.getInstance("spring:name=Test");
 		JmxTestBean bean = new JmxTestBean();
 
@@ -155,7 +155,7 @@ class NotificationListenerTests extends AbstractMBeanServerTests {
 
 	@SuppressWarnings("serial")
 	@Test
-	void testRegisterNotificationListenerWithFilter() throws Exception {
+	void registerNotificationListenerWithFilter() throws Exception {
 		ObjectName objectName = ObjectName.getInstance("spring:name=Test");
 		JmxTestBean bean = new JmxTestBean();
 
@@ -193,14 +193,14 @@ class NotificationListenerTests extends AbstractMBeanServerTests {
 	}
 
 	@Test
-	void testCreationWithNoNotificationListenerSet() {
+	void creationWithNoNotificationListenerSet() {
 		assertThatIllegalArgumentException().as("no NotificationListener supplied").isThrownBy(
 				new NotificationListenerBean()::afterPropertiesSet);
 	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Test
-	void testRegisterNotificationListenerWithBeanNameAndBeanNameInBeansMap() throws Exception {
+	void registerNotificationListenerWithBeanNameAndBeanNameInBeansMap() throws Exception {
 		String beanName = "testBean";
 		ObjectName objectName = ObjectName.getInstance("spring:name=Test");
 
@@ -231,7 +231,7 @@ class NotificationListenerTests extends AbstractMBeanServerTests {
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Test
-	void testRegisterNotificationListenerWithBeanNameAndBeanInstanceInBeansMap() throws Exception {
+	void registerNotificationListenerWithBeanNameAndBeanInstanceInBeansMap() throws Exception {
 		String beanName = "testBean";
 		ObjectName objectName = ObjectName.getInstance("spring:name=Test");
 
@@ -262,7 +262,7 @@ class NotificationListenerTests extends AbstractMBeanServerTests {
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Test
-	void testRegisterNotificationListenerWithBeanNameBeforeObjectNameMappedToSameBeanInstance() throws Exception {
+	void registerNotificationListenerWithBeanNameBeforeObjectNameMappedToSameBeanInstance() throws Exception {
 		String beanName = "testBean";
 		ObjectName objectName = ObjectName.getInstance("spring:name=Test");
 
@@ -294,7 +294,7 @@ class NotificationListenerTests extends AbstractMBeanServerTests {
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Test
-	void testRegisterNotificationListenerWithObjectNameBeforeBeanNameMappedToSameBeanInstance() throws Exception {
+	void registerNotificationListenerWithObjectNameBeforeBeanNameMappedToSameBeanInstance() throws Exception {
 		String beanName = "testBean";
 		ObjectName objectName = ObjectName.getInstance("spring:name=Test");
 
@@ -326,7 +326,7 @@ class NotificationListenerTests extends AbstractMBeanServerTests {
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Test
-	void testRegisterNotificationListenerWithTwoBeanNamesMappedToDifferentBeanInstances() throws Exception {
+	void registerNotificationListenerWithTwoBeanNamesMappedToDifferentBeanInstances() throws Exception {
 		String beanName1 = "testBean1";
 		String beanName2 = "testBean2";
 
@@ -369,7 +369,7 @@ class NotificationListenerTests extends AbstractMBeanServerTests {
 	}
 
 	@Test
-	void testNotificationListenerRegistrar() throws Exception {
+	void notificationListenerRegistrar() throws Exception {
 		ObjectName objectName = ObjectName.getInstance("spring:name=Test");
 		JmxTestBean bean = new JmxTestBean();
 
@@ -402,7 +402,7 @@ class NotificationListenerTests extends AbstractMBeanServerTests {
 	}
 
 	@Test
-	void testNotificationListenerRegistrarWithMultipleNames() throws Exception {
+	void notificationListenerRegistrarWithMultipleNames() throws Exception {
 		ObjectName objectName = ObjectName.getInstance("spring:name=Test");
 		ObjectName objectName2 = ObjectName.getInstance("spring:name=Test2");
 		JmxTestBean bean = new JmxTestBean();

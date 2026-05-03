@@ -356,7 +356,7 @@ class MockHttpServletRequestTests {
 			Locale.setDefault(newDefaultLocale);
 			// Create the request after changing the default locale.
 			MockHttpServletRequest request = new MockHttpServletRequest();
-			assertThat(newDefaultLocale.equals(request.getLocale())).isFalse();
+			assertThat(newDefaultLocale).isNotEqualTo(request.getLocale());
 			assertThat(request.getLocale()).isEqualTo(Locale.ENGLISH);
 		}
 		finally {

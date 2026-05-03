@@ -16,6 +16,8 @@
 
 package org.springframework.expression.spel.ast;
 
+import java.util.Objects;
+
 import org.springframework.asm.Label;
 import org.springframework.asm.MethodVisitor;
 import org.springframework.expression.EvaluationException;
@@ -25,7 +27,6 @@ import org.springframework.expression.spel.ExpressionState;
 import org.springframework.expression.spel.SpelEvaluationException;
 import org.springframework.expression.spel.SpelMessage;
 import org.springframework.util.Assert;
-import org.springframework.util.ObjectUtils;
 
 /**
  * Represents a ternary expression, for example: "someCheck()?true:false".
@@ -51,12 +52,12 @@ public class Ternary extends SpelNodeImpl {
 	 */
 	@Override
 	public TypedValue getValueInternal(ExpressionState state) throws EvaluationException {
-		Boolean value = this.children[0].getValue(state, Boolean.class);
-		if (value == null) {
+		Boolean condition = this.children[0].getValue(state, Boolean.class);
+		if (condition == null) {
 			throw new SpelEvaluationException(getChild(0).getStartPosition(),
 					SpelMessage.TYPE_CONVERSION_ERROR, "null", "boolean");
 		}
-		TypedValue result = this.children[value ? 1 : 2].getValueInternal(state);
+		TypedValue result = this.children[condition ? 1 : 2].getValueInternal(state);
 		computeExitTypeDescriptor();
 		return result;
 	}
@@ -66,35 +67,28 @@ public class Ternary extends SpelNodeImpl {
 		return "(" + getChild(0).toStringAST() + " ? " + getChild(1).toStringAST() + " : " + getChild(2).toStringAST() + ")";
 	}
 
-	private void computeExitTypeDescriptor() {
-		if (this.exitTypeDescriptor == null && this.children[1].exitTypeDescriptor != null &&
-				this.children[2].exitTypeDescriptor != null) {
-			String leftDescriptor = this.children[1].exitTypeDescriptor;
-			String rightDescriptor = this.children[2].exitTypeDescriptor;
-			if (ObjectUtils.nullSafeEquals(leftDescriptor, rightDescriptor)) {
-				this.exitTypeDescriptor = leftDescriptor;
-			}
-			else {
-				// Use the easiest to compute common supertype
-				this.exitTypeDescriptor = "Ljava/lang/Object";
-			}
-		}
-	}
-
 	@Override
 	public boolean isCompilable() {
 		SpelNodeImpl condition = this.children[0];
 		SpelNodeImpl left = this.children[1];
 		SpelNodeImpl right = this.children[2];
+		String conditionDescriptor = condition.exitTypeDescriptor;
+		String leftDescriptor = left.exitTypeDescriptor;
+		String rightDescriptor = right.exitTypeDescriptor;
+
 		return (condition.isCompilable() && left.isCompilable() && right.isCompilable() &&
-				CodeFlow.isBooleanCompatible(condition.exitTypeDescriptor) &&
-				left.exitTypeDescriptor != null && right.exitTypeDescriptor != null);
+				CodeFlow.isBooleanCompatible(conditionDescriptor) &&
+				leftDescriptor != null && rightDescriptor != null);
 	}
 
 	@Override
 	public void generateCode(MethodVisitor mv, CodeFlow cf) {
-		// May reach here without it computed if all elements are literals
+		// If all elements are literals and the expression was not previously
+		// evaluated in interpreted mode, we may get here without the exit descriptor
+		// having been computed, so we must ensure the exit descriptor has been
+		// computed before proceeding.
 		computeExitTypeDescriptor();
+
 		cf.enterCompilationScope();
 		this.children[0].generateCode(mv, cf);
 		String lastDesc = cf.lastDescriptor();
@@ -126,6 +120,20 @@ public class Ternary extends SpelNodeImpl {
 		cf.exitCompilationScope();
 		mv.visitLabel(endOfIf);
 		cf.pushDescriptor(this.exitTypeDescriptor);
+	}
+
+	private void computeExitTypeDescriptor() {
+		String leftDescriptor = this.children[1].exitTypeDescriptor;
+		String rightDescriptor = this.children[2].exitTypeDescriptor;
+		if (this.exitTypeDescriptor == null && leftDescriptor != null && rightDescriptor != null) {
+			if (Objects.equals(leftDescriptor, rightDescriptor)) {
+				this.exitTypeDescriptor = leftDescriptor;
+			}
+			else {
+				// Use the easiest to compute common supertype
+				this.exitTypeDescriptor = "Ljava/lang/Object";
+			}
+		}
 	}
 
 }

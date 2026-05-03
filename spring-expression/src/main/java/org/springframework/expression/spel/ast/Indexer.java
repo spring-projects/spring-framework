@@ -108,7 +108,7 @@ public class Indexer extends SpelNodeImpl {
 
 	private final boolean nullSafe;
 
-	private @Nullable IndexedType indexedType;
+	private volatile @Nullable IndexedType indexedType;
 
 	private volatile @Nullable String originalPrimitiveExitTypeDescriptor;
 
@@ -346,6 +346,7 @@ public class Indexer extends SpelNodeImpl {
 
 		Label skipIfNull = null;
 		if (isNullSafe()) {
+			CodeFlow.insertOptionalUnwrapIfNecessary(mv, descriptor);
 			mv.visitInsn(DUP);
 			skipIfNull = new Label();
 			Label continueLabel = new Label();

@@ -324,8 +324,7 @@ public class SimpleAsyncTaskExecutor extends CustomizableThreadCreator
 			catch (Throwable ex) {
 				// Release concurrency permit if thread creation fails
 				this.concurrencyThrottle.afterAccess();
-				throw new TaskRejectedException(
-						"Failed to start execution thread for task: " + task, ex);
+				throw new TaskRejectedException("Failed to start execution thread for task: " + task, ex);
 			}
 		}
 		else if (this.activeThreads != null) {

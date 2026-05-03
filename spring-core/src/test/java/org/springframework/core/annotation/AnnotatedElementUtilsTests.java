@@ -643,8 +643,7 @@ class AnnotatedElementUtilsTests {
 			}
 		}
 		assertThat(bridgeMethod != null && bridgeMethod.isBridge()).isTrue();
-		boolean condition = bridgedMethod != null && !bridgedMethod.isBridge();
-		assertThat(condition).isTrue();
+		assertThat(bridgedMethod != null && !bridgedMethod.isBridge()).isTrue();
 
 		AnnotationAttributes attributes = findMergedAnnotationAttributes(bridgeMethod, Order.class);
 		assertThat(attributes).as("Should find @Order on StringGenericParameter.getFor() bridge method").isNotNull();

@@ -61,13 +61,13 @@ class ProfileXmlBeanDefinitionTests {
 	private static final String TARGET_BEAN = "foo";
 
 	@Test
-	void testProfileValidation() {
+	void profileValidation() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				beanFactoryFor(PROD_ELIGIBLE_XML, NULL_ACTIVE));
 	}
 
 	@Test
-	void testProfilePermutations() {
+	void profilePermutations() {
 		assertThat(beanFactoryFor(PROD_ELIGIBLE_XML, NONE_ACTIVE)).isNot(containingTarget());
 		assertThat(beanFactoryFor(PROD_ELIGIBLE_XML, DEV_ACTIVE)).isNot(containingTarget());
 		assertThat(beanFactoryFor(PROD_ELIGIBLE_XML, PROD_ACTIVE)).is(containingTarget());
@@ -116,7 +116,7 @@ class ProfileXmlBeanDefinitionTests {
 	}
 
 	@Test
-	void testDefaultProfile() {
+	void defaultProfile() {
 		{
 			DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
 			XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(beanFactory);
@@ -140,7 +140,7 @@ class ProfileXmlBeanDefinitionTests {
 	}
 
 	@Test
-	void testDefaultAndNonDefaultProfile() {
+	void defaultAndNonDefaultProfile() {
 		assertThat(beanFactoryFor(DEFAULT_ELIGIBLE_XML, NONE_ACTIVE)).is(containingTarget());
 		assertThat(beanFactoryFor(DEFAULT_ELIGIBLE_XML, "other")).isNot(containingTarget());
 

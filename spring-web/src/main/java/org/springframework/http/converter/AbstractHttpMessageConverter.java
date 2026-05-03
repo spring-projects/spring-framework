@@ -304,9 +304,11 @@ public abstract class AbstractHttpMessageConverter<T> implements HttpMessageConv
 	 * @return {@code true} if {@code t} can be written repeatedly;
 	 * {@code false} otherwise
 	 * @since 6.1
+	 * @deprecated since 7.1 in favor of {@link #canWriteRepeatedly(Object, MediaType)}.
 	 */
+	@Deprecated(since = "7.1", forRemoval = true)
 	protected boolean supportsRepeatableWrites(T t) {
-		return false;
+		return canWriteRepeatedly(t, null);
 	}
 
 

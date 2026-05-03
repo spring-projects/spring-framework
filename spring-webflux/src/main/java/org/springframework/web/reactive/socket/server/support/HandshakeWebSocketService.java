@@ -254,8 +254,7 @@ public class HandshakeWebSocketService implements WebSocketService, Lifecycle {
 		URI uri = request.getURI();
 		// Copy request headers, as they might be pooled and recycled by
 		// the server implementation once the handshake HTTP exchange is done.
-		HttpHeaders headers = new HttpHeaders();
-		headers.addAll(request.getHeaders());
+		HttpHeaders headers = HttpHeaders.copyOf(request.getHeaders());
 		MultiValueMap<String, HttpCookie> cookies = request.getCookies();
 		Mono<Principal> principal = exchange.getPrincipal();
 		String logPrefix = exchange.getLogPrefix();

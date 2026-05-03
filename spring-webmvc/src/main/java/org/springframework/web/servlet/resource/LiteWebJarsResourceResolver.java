@@ -88,7 +88,10 @@ public class LiteWebJarsResourceResolver extends AbstractResourceResolver {
 		if (path == null) {
 			String webJarResourcePath = findWebJarResourcePath(resourceUrlPath);
 			if (webJarResourcePath != null) {
-				return chain.resolveUrlPath(webJarResourcePath, locations);
+				path = chain.resolveUrlPath(webJarResourcePath, locations);
+				if (path == null && webJarResourcePath.endsWith("/")) {
+					path = webJarResourcePath;
+				}
 			}
 		}
 		return path;

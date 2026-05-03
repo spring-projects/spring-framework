@@ -143,7 +143,7 @@ class RequestParamMethodArgumentResolverTests {
 	}
 
 	@Test  // SPR-17050
-	public void resolveAndConvertNullValue() {
+	void resolveAndConvertNullValue() {
 		MethodParameter param = this.testMethod
 				.annot(requestParam().notRequired())
 				.arg(Integer.class);
@@ -172,13 +172,13 @@ class RequestParamMethodArgumentResolverTests {
 	}
 
 	@Test  // SPR-8561
-	public void resolveSimpleTypeParamToNull() {
+	void resolveSimpleTypeParamToNull() {
 		MethodParameter param = this.testMethod.annotNotPresent(RequestParam.class).arg(String.class);
 		assertThat(resolve(param, MockServerWebExchange.from(MockServerHttpRequest.get("/")))).isNull();
 	}
 
 	@Test  // SPR-10180
-	public void resolveEmptyValueToDefault() {
+	void resolveEmptyValueToDefault() {
 		ServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/path?name="));
 		MethodParameter param = this.testMethod.annot(requestParam().notRequired("bar")).arg(String.class);
 		Object result = resolve(param, exchange);

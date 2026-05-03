@@ -90,7 +90,7 @@ class FailingBeforeAndAfterMethodsSpringExtensionTests {
 		// something else like an error in the @Configuration class, etc.
 		if (getExpectedFailedCount(testClass) > 0) {
 			events.assertThatEvents().haveExactly(1,
-				event(test("testNothing"),
+				event(test("dummyTest"),
 					finishedWithFailure(
 						instanceOf(AssertionError.class),
 						message(msg -> msg.contains("always failing")))));
@@ -177,7 +177,7 @@ class FailingBeforeAndAfterMethodsSpringExtensionTests {
 	private abstract static class BaseTestCase {
 
 		@Test
-		void testNothing() {
+		void dummyTest() {
 		}
 	}
 
@@ -215,7 +215,7 @@ class FailingBeforeAndAfterMethodsSpringExtensionTests {
 	static class FailingBeforeTransactionTestCase {
 
 		@Test
-		void testNothing() {
+		void dummyTest() {
 		}
 
 		@BeforeTransaction
@@ -230,7 +230,7 @@ class FailingBeforeAndAfterMethodsSpringExtensionTests {
 	static class FailingAfterTransactionTestCase {
 
 		@Test
-		void testNothing() {
+		void dummyTest() {
 		}
 
 		@AfterTransaction

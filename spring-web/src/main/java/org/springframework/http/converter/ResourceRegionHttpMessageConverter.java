@@ -105,6 +105,23 @@ public class ResourceRegionHttpMessageConverter extends AbstractGenericHttpMessa
 	}
 
 	@Override
+	public boolean canWriteRepeatedly(Object object, @Nullable MediaType contentType) {
+		if (object instanceof ResourceRegion resourceRegion) {
+			return supportsRepeatableWrites(resourceRegion);
+		}
+		else {
+			@SuppressWarnings("unchecked")
+			Collection<ResourceRegion> regions = (Collection<ResourceRegion>) object;
+			for (ResourceRegion region : regions) {
+				if (!supportsRepeatableWrites(region)) {
+					return false;
+				}
+			}
+			return true;
+		}
+	}
+
+	@Override
 	protected void writeInternal(Object object, @Nullable Type type, HttpOutputMessage outputMessage)
 			throws IOException, HttpMessageNotWritableException {
 
@@ -140,20 +157,9 @@ public class ResourceRegionHttpMessageConverter extends AbstractGenericHttpMessa
 	}
 
 	@Override
+	@SuppressWarnings("removal")
 	protected boolean supportsRepeatableWrites(Object object) {
-		if (object instanceof ResourceRegion resourceRegion) {
-			return supportsRepeatableWrites(resourceRegion);
-		}
-		else {
-			@SuppressWarnings("unchecked")
-			Collection<ResourceRegion> regions = (Collection<ResourceRegion>) object;
-			for (ResourceRegion region : regions) {
-				if (!supportsRepeatableWrites(region)) {
-					return false;
-				}
-			}
-			return true;
-		}
+		return canWriteRepeatedly(object, null);
 	}
 
 	private boolean supportsRepeatableWrites(ResourceRegion region) {

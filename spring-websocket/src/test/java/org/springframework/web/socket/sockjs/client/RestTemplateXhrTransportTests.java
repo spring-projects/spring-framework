@@ -67,6 +67,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
  *
  * @author Rossen Stoyanchev
  */
+@SuppressWarnings("removal")
 class RestTemplateXhrTransportTests {
 
 	private static final JacksonJsonSockJsMessageCodec CODEC = new JacksonJsonSockJsMessageCodec();
@@ -201,6 +202,7 @@ class RestTemplateXhrTransportTests {
 	}
 
 
+	@SuppressWarnings("removal")
 	private static class TestRestTemplate extends RestTemplate {
 
 		private Queue<ClientHttpResponse> responses = new LinkedBlockingDeque<>();

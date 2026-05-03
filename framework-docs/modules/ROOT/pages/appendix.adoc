@@ -138,6 +138,11 @@ xref:testing/testcontext-framework/ctx-management/context-pausing.adoc[Context P
 in the _Spring TestContext Framework_. See
 xref:testing/testcontext-framework/ctx-management/failure-threshold.adoc[Context Failure Threshold].
 
+| `spring.test.extension.context.scope`
+| The default _extension context scope_ used by the `SpringExtension` in `@Nested` test
+class hierarchies. See
+xref:testing/annotations/integration-junit-jupiter.adoc#integration-testing-annotations-springextensionconfig[`@SpringExtensionConfig`].
+
 | `spring.test.enclosing.configuration`
 | The default _enclosing configuration inheritance mode_ to use if
 `@NestedTestConfiguration` is not present on a test class. See

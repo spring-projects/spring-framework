@@ -31,7 +31,7 @@ import org.springframework.core.testfixture.nullness.marked.unmarked.PackageUnma
  *
  * @author Sebastien Deleuze
  */
-public class NullnessTests {
+class NullnessTests {
 
 	// JSpecify without @NullMarked and @NullUnmarked
 

@@ -112,7 +112,7 @@ class HandlerMethodMappingTests {
 	}
 
 	@Test // gh-26490
-	public void ambiguousMatchOnPreFlightRequestWithoutCorsConfig() {
+	void ambiguousMatchOnPreFlightRequestWithoutCorsConfig() {
 		this.mapping.registerMapping("/f?o", this.handler, this.method1);
 		this.mapping.registerMapping("/fo?", this.handler, this.method2);
 
@@ -130,7 +130,7 @@ class HandlerMethodMappingTests {
 	}
 
 	@Test // gh-26490
-	public void ambiguousMatchOnPreFlightRequestWithCorsConfig() throws Exception {
+	void ambiguousMatchOnPreFlightRequestWithCorsConfig() throws Exception {
 		this.mapping.registerMapping("/f?o", this.handler, this.method1);
 		this.mapping.registerMapping("/fo?", this.handler, this.handler.getClass().getMethod("corsHandlerMethod"));
 

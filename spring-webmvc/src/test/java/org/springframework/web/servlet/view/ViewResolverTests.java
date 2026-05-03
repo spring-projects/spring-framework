@@ -175,9 +175,8 @@ class ViewResolverTests {
 		TestBean tb = new TestBean();
 		model.put("tb", tb);
 		view.render(model, this.request, this.response);
-		assertThat(tb.equals(this.request.getAttribute("tb"))).as("Correct tb attribute").isTrue();
-		boolean condition = this.request.getAttribute("rc") instanceof RequestContext;
-		assertThat(condition).as("Correct rc attribute").isTrue();
+		assertThat(tb).as("Correct tb attribute").isEqualTo(this.request.getAttribute("tb"));
+		assertThat(this.request.getAttribute("rc")).as("Correct rc attribute").isInstanceOf(RequestContext.class);
 
 		view = vr.resolveViewName("redirect:myUrl", Locale.getDefault());
 		assertThat(view.getClass()).as("Correct view class").isEqualTo(RedirectView.class);
@@ -245,7 +244,7 @@ class ViewResolverTests {
 		model.put("tb", tb);
 		view.render(model, this.request, this.response);
 
-		assertThat(tb.equals(this.request.getAttribute("tb"))).as("Correct tb attribute").isTrue();
+		assertThat(tb).as("Correct tb attribute").isEqualTo(this.request.getAttribute("tb"));
 		assertThat(this.request.getAttribute("rc")).as("Correct rc attribute").isNull();
 		assertThat(this.request.getAttribute("key1")).isEqualTo("value1");
 		assertThat(this.request.getAttribute("key2")).isEqualTo(2);
@@ -348,7 +347,7 @@ class ViewResolverTests {
 		model.put("tb", tb);
 		view.render(model, this.request, this.response);
 
-		assertThat(tb.equals(this.request.getAttribute("tb"))).as("Correct tb attribute").isTrue();
+		assertThat(tb).as("Correct tb attribute").isEqualTo(this.request.getAttribute("tb"));
 		assertThat(this.request.getAttribute("rc")).as("Correct rc attribute").isNull();
 
 		assertThat(Config.get(this.request, Config.FMT_LOCALE)).isEqualTo(locale);
@@ -382,7 +381,7 @@ class ViewResolverTests {
 		model.put("tb", tb);
 		view.render(model, this.request, this.response);
 
-		assertThat(tb.equals(this.request.getAttribute("tb"))).as("Correct tb attribute").isTrue();
+		assertThat(tb).as("Correct tb attribute").isEqualTo(this.request.getAttribute("tb"));
 		assertThat(this.request.getAttribute("rc")).as("Correct rc attribute").isNull();
 
 		assertThat(Config.get(this.request, Config.FMT_LOCALE)).isEqualTo(locale);

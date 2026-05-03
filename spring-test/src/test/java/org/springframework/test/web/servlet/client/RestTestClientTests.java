@@ -26,7 +26,6 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.hamcrest.MatcherAssert;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -51,13 +50,7 @@ import static org.hamcrest.Matchers.equalTo;
  */
 class RestTestClientTests {
 
-	private RestTestClient client;
-
-
-	@BeforeEach
-	void setUp() {
-		this.client = RestTestClient.bindToController(new TestController()).build();
-	}
+	private RestTestClient client = RestTestClient.bindToController(new TestController()).build();
 
 
 	@Nested
@@ -65,7 +58,7 @@ class RestTestClientTests {
 
 		@ParameterizedTest
 		@ValueSource(strings = {"GET", "POST", "PUT", "DELETE", "PATCH", "HEAD"})
-		void testMethod(String method) {
+		void method(String method) {
 			RestTestClientTests.this.client.method(HttpMethod.valueOf(method)).uri("/test")
 					.exchange()
 					.expectStatus().isOk()
@@ -73,7 +66,7 @@ class RestTestClientTests {
 		}
 
 		@Test
-		void testGet() {
+		void get() {
 			RestTestClientTests.this.client.get().uri("/test")
 					.exchange()
 					.expectStatus().isOk()
@@ -81,7 +74,7 @@ class RestTestClientTests {
 		}
 
 		@Test
-		void testPost() {
+		void post() {
 			RestTestClientTests.this.client.post().uri("/test")
 					.exchange()
 					.expectStatus().isOk()
@@ -89,7 +82,7 @@ class RestTestClientTests {
 		}
 
 		@Test
-		void testPut() {
+		void put() {
 			RestTestClientTests.this.client.put().uri("/test")
 					.exchange()
 					.expectStatus().isOk()
@@ -97,7 +90,7 @@ class RestTestClientTests {
 		}
 
 		@Test
-		void testDelete() {
+		void delete() {
 			RestTestClientTests.this.client.delete().uri("/test")
 					.exchange()
 					.expectStatus().isOk()
@@ -105,7 +98,7 @@ class RestTestClientTests {
 		}
 
 		@Test
-		void testPatch() {
+		void patch() {
 			RestTestClientTests.this.client.patch().uri("/test")
 					.exchange()
 					.expectStatus().isOk()
@@ -113,7 +106,7 @@ class RestTestClientTests {
 		}
 
 		@Test
-		void testHead() {
+		void head() {
 			RestTestClientTests.this.client.head().uri("/test")
 					.exchange()
 					.expectStatus().isOk()
@@ -121,7 +114,7 @@ class RestTestClientTests {
 		}
 
 		@Test
-		void testOptions() {
+		void options() {
 			RestTestClientTests.this.client.options().uri("/test")
 					.exchange()
 					.expectStatus().isOk()
@@ -167,7 +160,7 @@ class RestTestClientTests {
 		}
 
 		@Test
-		void testWithPathVariables() {
+		void withPathVariables() {
 			RestTestClientTests.this.client.get().uri("/test/{id}", 1)
 					.exchange()
 					.expectStatus().isOk()
@@ -175,7 +168,7 @@ class RestTestClientTests {
 		}
 
 		@Test
-		void testWithParameterMap() {
+		void withParameterMap() {
 			RestTestClientTests.this.client.get().uri("/test/{id}", Map.of("id", 1))
 					.exchange()
 					.expectStatus().isOk()
@@ -183,7 +176,7 @@ class RestTestClientTests {
 		}
 
 		@Test
-		void testWithUrlBuilder() {
+		void withUrlBuilder() {
 			RestTestClientTests.this.client.get().uri(builder -> builder.path("/test/{id}").build(1))
 					.exchange()
 					.expectStatus().isOk()
@@ -191,7 +184,7 @@ class RestTestClientTests {
 		}
 
 		@Test
-		void testURI() {
+		void uri() {
 			RestTestClientTests.this.client.get().uri(URI.create("/test"))
 					.exchange()
 					.expectStatus().isOk()
@@ -202,8 +195,9 @@ class RestTestClientTests {
 
 	@Nested
 	class Cookies {
+
 		@Test
-		void testCookie() {
+		void cookie() {
 			RestTestClientTests.this.client.get().uri("/test")
 					.cookie("foo", "bar")
 					.exchange()
@@ -212,7 +206,7 @@ class RestTestClientTests {
 		}
 
 		@Test
-		void testCookies() {
+		void cookies() {
 			RestTestClientTests.this.client.get().uri("/test")
 					.cookies(cookies -> cookies.add("foo", "bar"))
 					.exchange()
@@ -224,8 +218,9 @@ class RestTestClientTests {
 
 	@Nested
 	class Headers {
+
 		@Test
-		void testHeader() {
+		void header() {
 			RestTestClientTests.this.client.get().uri("/test")
 					.header("foo", "bar")
 					.exchange()
@@ -234,7 +229,7 @@ class RestTestClientTests {
 		}
 
 		@Test
-		void testHeaders() {
+		void headers() {
 			RestTestClientTests.this.client.get().uri("/test")
 					.headers(headers -> headers.set("foo", "bar"))
 					.exchange()
@@ -243,7 +238,7 @@ class RestTestClientTests {
 		}
 
 		@Test
-		void testContentType() {
+		void contentType() {
 			RestTestClientTests.this.client.post().uri("/test")
 					.contentType(MediaType.APPLICATION_JSON)
 					.exchange()
@@ -252,7 +247,7 @@ class RestTestClientTests {
 		}
 
 		@Test
-		void testAcceptCharset() {
+		void acceptCharset() {
 			RestTestClientTests.this.client.get().uri("/test")
 					.acceptCharset(StandardCharsets.UTF_8)
 					.exchange()
@@ -261,7 +256,7 @@ class RestTestClientTests {
 		}
 
 		@Test
-		void testIfModifiedSince() {
+		void ifModifiedSince() {
 			RestTestClientTests.this.client.get().uri("/test")
 					.ifModifiedSince(ZonedDateTime.of(1970, 1, 1, 0, 0, 0, 0, ZoneOffset.UTC))
 					.exchange()
@@ -270,7 +265,7 @@ class RestTestClientTests {
 		}
 
 		@Test
-		void testIfNoneMatch() {
+		void ifNoneMatch() {
 			RestTestClientTests.this.client.get().uri("/test")
 					.ifNoneMatch("foo")
 					.exchange()
@@ -282,8 +277,9 @@ class RestTestClientTests {
 
 	@Nested
 	class Expectations {
+
 		@Test
-		void testExpectCookie() {
+		void expectCookie() {
 			RestTestClientTests.this.client.get().uri("/test")
 					.exchange()
 					.expectCookie().value("session", v -> MatcherAssert.assertThat(v, equalTo("abc")));
@@ -293,8 +289,9 @@ class RestTestClientTests {
 
 	@Nested
 	class ReturnResults {
+
 		@Test
-		void testBodyReturnResult() {
+		void bodyReturnResult() {
 			var result = RestTestClientTests.this.client.get().uri("/test")
 					.exchange()
 					.expectStatus().isOk()
@@ -303,7 +300,7 @@ class RestTestClientTests {
 		}
 
 		@Test
-		void testReturnResultClass() {
+		void returnResultClass() {
 			var result = RestTestClientTests.this.client.get().uri("/test")
 					.exchange()
 					.expectStatus().isOk()
@@ -312,7 +309,7 @@ class RestTestClientTests {
 		}
 
 		@Test
-		void testReturnResultParameterizedTypeReference() {
+		void returnResultParameterizedTypeReference() {
 			var result = RestTestClientTests.this.client.get().uri("/test")
 					.exchange()
 					.expectStatus().isOk()
@@ -322,7 +319,7 @@ class RestTestClientTests {
 		}
 
 		@Test
-		void testResultContent() {
+		void resultContent() {
 			String body = "body-in";
 			EntityExchangeResult<String> result = RestTestClientTests.this.client.post().uri("/body")
 					.body(body)
@@ -357,4 +354,5 @@ class RestTestClientTests {
 			return body + "-out";
 		}
 	}
+
 }

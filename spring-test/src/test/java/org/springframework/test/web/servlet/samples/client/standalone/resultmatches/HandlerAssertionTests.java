@@ -43,7 +43,7 @@ import static org.springframework.web.servlet.mvc.method.annotation.MvcUriCompon
  *
  * @author Rossen Stoyanchev
  */
-public class HandlerAssertionTests {
+class HandlerAssertionTests {
 
 	private final WebTestClient client =
 			MockMvcWebTestClient.bindToController(new SimpleController())
@@ -52,12 +52,12 @@ public class HandlerAssertionTests {
 
 
 	@Test
-	public void handlerType() throws Exception {
+	void handlerType() throws Exception {
 		performRequest().andExpect(handler().handlerType(SimpleController.class));
 	}
 
 	@Test
-	public void methodCallOnNonMock() {
+	void methodCallOnNonMock() {
 		assertThatExceptionOfType(AssertionError.class)
 				.isThrownBy(() -> performRequest().andExpect(handler().methodCall("bogus")))
 				.withMessageContaining("The supplied object [bogus] is not an instance of")
@@ -66,24 +66,24 @@ public class HandlerAssertionTests {
 	}
 
 	@Test
-	public void methodCall() throws Exception {
+	void methodCall() throws Exception {
 		performRequest().andExpect(handler().methodCall(on(SimpleController.class).handle()));
 	}
 
 	@Test
-	public void methodName() throws Exception {
+	void methodName() throws Exception {
 		performRequest().andExpect(handler().methodName("handle"));
 	}
 
 	@Test
-	public void methodNameMatchers() throws Exception {
+	void methodNameMatchers() throws Exception {
 		performRequest()
 				.andExpect(handler().methodName(equalTo("handle")))
 				.andExpect(handler().methodName(is(not("save"))));
 	}
 
 	@Test
-	public void method() throws Exception {
+	void method() throws Exception {
 		Method method = SimpleController.class.getMethod("handle");
 		performRequest().andExpect(handler().method(method));
 	}

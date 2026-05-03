@@ -61,10 +61,9 @@ class AopNamespaceHandlerScopeIntegrationTests {
 
 
 	@Test
-	void testSingletonScoping() throws Exception {
+	void singletonScoping() throws Exception {
 		assertThat(AopUtils.isAopProxy(singletonScoped)).as("Should be AOP proxy").isTrue();
-		boolean condition = singletonScoped instanceof TestBean;
-		assertThat(condition).as("Should be target class proxy").isTrue();
+		assertThat(singletonScoped).as("Should be target class proxy").isInstanceOf(TestBean.class);
 		String rob = "Rob Harrop";
 		String bram = "Bram Smeets";
 		assertThat(singletonScoped.getName()).isEqualTo(rob);
@@ -75,19 +74,17 @@ class AopNamespaceHandlerScopeIntegrationTests {
 	}
 
 	@Test
-	void testRequestScoping() {
+	void requestScoping() {
 		MockHttpServletRequest oldRequest = new MockHttpServletRequest();
 		MockHttpServletRequest newRequest = new MockHttpServletRequest();
 
 		RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(oldRequest));
 
 		assertThat(AopUtils.isAopProxy(requestScoped)).as("Should be AOP proxy").isTrue();
-		boolean condition = requestScoped instanceof TestBean;
-		assertThat(condition).as("Should be target class proxy").isTrue();
+		assertThat(requestScoped).as("Should be target class proxy").isInstanceOf(TestBean.class);
 
 		assertThat(AopUtils.isAopProxy(testBean)).as("Should be AOP proxy").isTrue();
-		boolean condition1 = testBean instanceof TestBean;
-		assertThat(condition1).as("Regular bean should be JDK proxy").isFalse();
+		assertThat(testBean).as("Regular bean should be JDK proxy").isNotInstanceOf(TestBean.class);
 
 		String rob = "Rob Harrop";
 		String bram = "Bram Smeets";
@@ -103,7 +100,7 @@ class AopNamespaceHandlerScopeIntegrationTests {
 	}
 
 	@Test
-	void testSessionScoping() {
+	void sessionScoping() {
 		MockHttpSession oldSession = new MockHttpSession();
 		MockHttpSession newSession = new MockHttpSession();
 
@@ -112,14 +109,12 @@ class AopNamespaceHandlerScopeIntegrationTests {
 		RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request));
 
 		assertThat(AopUtils.isAopProxy(sessionScoped)).as("Should be AOP proxy").isTrue();
-		boolean condition1 = sessionScoped instanceof TestBean;
-		assertThat(condition1).as("Should not be target class proxy").isFalse();
+		assertThat(sessionScoped).as("Should not be target class proxy").isNotInstanceOf(TestBean.class);
 
 		assertThat(sessionScopedAlias).isSameAs(sessionScoped);
 
 		assertThat(AopUtils.isAopProxy(testBean)).as("Should be AOP proxy").isTrue();
-		boolean condition = testBean instanceof TestBean;
-		assertThat(condition).as("Regular bean should be JDK proxy").isFalse();
+		assertThat(testBean).as("Regular bean should be JDK proxy").isNotInstanceOf(TestBean.class);
 
 		String rob = "Rob Harrop";
 		String bram = "Bram Smeets";

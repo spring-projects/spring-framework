@@ -44,6 +44,7 @@ import static org.mockito.Mockito.mock;
  * @author Juergen Hoeller
  * @author Denys Ivano
  */
+@SuppressWarnings("removal")
 class DefaultResponseErrorHandlerTests {
 
 	private final DefaultResponseErrorHandler handler = new DefaultResponseErrorHandler();

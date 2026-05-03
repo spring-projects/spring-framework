@@ -189,6 +189,7 @@ public interface RestClient {
 	 * @return a {@code RestClient} initialized with the {@code restTemplate}'s
 	 * configuration
 	 */
+	@SuppressWarnings("removal")
 	static RestClient create(RestTemplate restTemplate) {
 		return new DefaultRestClientBuilder(restTemplate).build();
 	}
@@ -218,6 +219,7 @@ public interface RestClient {
 	 * @return a {@code RestClient} builder initialized with {@code restTemplate}'s
 	 * configuration
 	 */
+	@SuppressWarnings("removal")
 	static RestClient.Builder builder(RestTemplate restTemplate) {
 		return new DefaultRestClientBuilder(restTemplate);
 	}
@@ -386,7 +388,10 @@ public interface RestClient {
 		 * @param errorHandler the error handler to configure, internally adapted
 		 * and integrated into the {@link ResponseSpec.ErrorHandler} chain.
 		 * @return this builder
+		 * @deprecated as of 7.1 in favor of {@link #defaultStatusHandler(Predicate, ResponseSpec.ErrorHandler)}
 		 */
+		@Deprecated(since = "7.1", forRemoval = true)
+		@SuppressWarnings("removal")
 		Builder defaultStatusHandler(ResponseErrorHandler errorHandler);
 
 		/**
@@ -1012,7 +1017,10 @@ public interface RestClient {
 		 * {@link RestClientException}.
 		 * @param errorHandler the error handler
 		 * @return this builder
+		 * @deprecated as of 7.1 in favor of {@link #onStatus(Predicate, ErrorHandler)}
 		 */
+		@Deprecated(since = "7.1", forRemoval = true)
+		@SuppressWarnings("removal")
 		ResponseSpec onStatus(ResponseErrorHandler errorHandler);
 
 		/**

@@ -17,6 +17,7 @@
 package org.springframework.test.context.bean.override.mockito;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Parameter;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashSet;
@@ -58,11 +59,17 @@ class MockitoBeanOverrideHandler extends AbstractMockitoBeanOverrideHandler {
 
 
 	MockitoBeanOverrideHandler(ResolvableType typeToMock, MockitoBean mockitoBean) {
-		this(null, typeToMock, mockitoBean);
+		this((Field) null, typeToMock, mockitoBean);
 	}
 
 	MockitoBeanOverrideHandler(@Nullable Field field, ResolvableType typeToMock, MockitoBean mockitoBean) {
 		this(field, typeToMock, (!mockitoBean.name().isBlank() ? mockitoBean.name() : null),
+				mockitoBean.contextName(), (mockitoBean.enforceOverride() ? REPLACE : REPLACE_OR_CREATE),
+				mockitoBean.reset(), mockitoBean.extraInterfaces(), mockitoBean.answers(), mockitoBean.serializable());
+	}
+
+	MockitoBeanOverrideHandler(Parameter parameter, ResolvableType typeToMock, MockitoBean mockitoBean) {
+		this(parameter, typeToMock, (!mockitoBean.name().isBlank() ? mockitoBean.name() : null),
 				mockitoBean.contextName(), (mockitoBean.enforceOverride() ? REPLACE : REPLACE_OR_CREATE),
 				mockitoBean.reset(), mockitoBean.extraInterfaces(), mockitoBean.answers(), mockitoBean.serializable());
 	}
@@ -78,6 +85,16 @@ class MockitoBeanOverrideHandler extends AbstractMockitoBeanOverrideHandler {
 		this.serializable = serializable;
 	}
 
+	private MockitoBeanOverrideHandler(Parameter parameter, ResolvableType typeToMock, @Nullable String beanName,
+			String contextName, BeanOverrideStrategy strategy, MockReset reset, Class<?>[] extraInterfaces,
+			Answers answers, boolean serializable) {
+
+		super(parameter, typeToMock, beanName, contextName, strategy, reset);
+		Assert.notNull(typeToMock, "'typeToMock' must not be null");
+		this.extraInterfaces = asClassSet(extraInterfaces);
+		this.answers = answers;
+		this.serializable = serializable;
+	}
 
 	private static Set<Class<?>> asClassSet(Class<?>[] classes) {
 		if (classes.length == 0) {
@@ -158,6 +175,7 @@ class MockitoBeanOverrideHandler extends AbstractMockitoBeanOverrideHandler {
 	public String toString() {
 		return new ToStringCreator(this)
 				.append("field", getField())
+				.append("parameter", getParameter())
 				.append("beanType", getBeanType())
 				.append("beanName", getBeanName())
 				.append("contextName", getContextName())

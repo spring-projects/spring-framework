@@ -37,13 +37,13 @@ class AnnotationDrivenBeanDefinitionParserTests {
 	private ConfigurableApplicationContext context;
 
 	@BeforeEach
-	public void setup() {
+	void setup() {
 		this.context = new ClassPathXmlApplicationContext(
 				"annotationDrivenContext.xml", AnnotationDrivenBeanDefinitionParserTests.class);
 	}
 
 	@AfterEach
-	public void after() {
+	void after() {
 		if (this.context != null) {
 			this.context.close();
 		}
@@ -56,7 +56,7 @@ class AnnotationDrivenBeanDefinitionParserTests {
 
 	@Test
 	@SuppressWarnings("rawtypes")
-	public void asyncPostProcessorExecutorReference() {
+	void asyncPostProcessorExecutorReference() {
 		Object executor = context.getBean("testExecutor");
 		Object aspect = context.getBean(TaskManagementConfigUtils.ASYNC_EXECUTION_ASPECT_BEAN_NAME);
 		assertThat(((Supplier) new DirectFieldAccessor(aspect).getPropertyValue("defaultExecutor")).get()).isSameAs(executor);
@@ -64,7 +64,7 @@ class AnnotationDrivenBeanDefinitionParserTests {
 
 	@Test
 	@SuppressWarnings("rawtypes")
-	public void asyncPostProcessorExceptionHandlerReference() {
+	void asyncPostProcessorExceptionHandlerReference() {
 		Object exceptionHandler = context.getBean("testExceptionHandler");
 		Object aspect = context.getBean(TaskManagementConfigUtils.ASYNC_EXECUTION_ASPECT_BEAN_NAME);
 		assertThat(((Supplier) new DirectFieldAccessor(aspect).getPropertyValue("exceptionHandler")).get()).isSameAs(exceptionHandler);

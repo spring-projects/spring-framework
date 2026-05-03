@@ -207,7 +207,7 @@ class FormContentFilterTests {
 	}
 
 	@Test  // SPR-15835
-	public void hiddenHttpMethodFilterFollowedByHttpPutFormContentFilter() throws Exception {
+	void hiddenHttpMethodFilterFollowedByHttpPutFormContentFilter() throws Exception {
 		this.request.addParameter("_method", "PUT");
 		this.request.addParameter("hiddenField", "testHidden");
 		this.filter.doFilter(this.request, this.response, this.filterChain);

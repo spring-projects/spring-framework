@@ -196,7 +196,7 @@ class RedirectViewTests {
 	}
 
 	@Test // SPR-13693
-	public void remoteHost() {
+	void remoteHost() {
 		RedirectView rv = new RedirectView();
 
 		assertThat(rv.isRemoteHost("https://url.somewhere.com")).isFalse();
@@ -211,7 +211,7 @@ class RedirectViewTests {
 	}
 
 	@Test // SPR-16752
-	public void contextRelativeWithValidatedContextPath() throws Exception {
+	void contextRelativeWithValidatedContextPath() throws Exception {
 		String url = "/myUrl";
 
 		this.request.setContextPath("//context");
@@ -364,7 +364,7 @@ class RedirectViewTests {
 		 */
 		@Override
 		protected Map<String, Object> queryProperties(Map<String, Object> model) {
-			assertThat(this.expectedModel.equals(model)).as("Map and model must be equal.").isTrue();
+			assertThat(this.expectedModel).as("Map and model must be equal.").isEqualTo(model);
 			this.queryPropertiesCalled = true;
 			return super.queryProperties(model);
 		}

@@ -718,11 +718,11 @@ class AnnotationUtilsTests {
 		ImplicitAliasesWithMissingDefaultValuesContextConfig config = clazz.getAnnotation(annotationType);
 		assertThat(config).isNotNull();
 
-		assertThatExceptionOfType(AnnotationConfigurationException.class).isThrownBy(() ->
-				synthesizeAnnotation(config, clazz))
+		assertThatExceptionOfType(AnnotationConfigurationException.class)
+			.isThrownBy(() -> synthesizeAnnotation(config, clazz))
 			.withMessageStartingWith("Misconfigured aliases:")
-			.withMessageContaining("attribute 'location1' in annotation [" + annotationType.getName() + "]")
-			.withMessageContaining("attribute 'location2' in annotation [" + annotationType.getName() + "]")
+			.withMessageContaining("attribute 'location1' in annotation [%s]", annotationType.getCanonicalName())
+			.withMessageContaining("attribute 'location2' in annotation [%s]", annotationType.getCanonicalName())
 			.withMessageContaining("default values");
 	}
 
@@ -733,11 +733,11 @@ class AnnotationUtilsTests {
 				ImplicitAliasesWithDifferentDefaultValuesContextConfig.class;
 		ImplicitAliasesWithDifferentDefaultValuesContextConfig config = clazz.getAnnotation(annotationType);
 		assertThat(config).isNotNull();
-		assertThatExceptionOfType(AnnotationConfigurationException.class).isThrownBy(() ->
-				synthesizeAnnotation(config, clazz))
+		assertThatExceptionOfType(AnnotationConfigurationException.class)
+			.isThrownBy(() -> synthesizeAnnotation(config, clazz))
 			.withMessageStartingWith("Misconfigured aliases:")
-			.withMessageContaining("attribute 'location1' in annotation [" + annotationType.getName() + "]")
-			.withMessageContaining("attribute 'location2' in annotation [" + annotationType.getName() + "]")
+			.withMessageContaining("attribute 'location1' in annotation [%s]", annotationType.getCanonicalName())
+			.withMessageContaining("attribute 'location2' in annotation [%s]", annotationType.getCanonicalName())
 			.withMessageContaining("same default value");
 	}
 
@@ -919,8 +919,18 @@ class AnnotationUtilsTests {
 		Map<String, Object> map = Collections.singletonMap(VALUE, 42L);
 		assertThatIllegalStateException().isThrownBy(() ->
 				synthesizeAnnotation(map, Component.class, null).value())
-			.withMessageContaining("Attribute 'value' in annotation org.springframework.core.testfixture.stereotype.Component " +
-					"should be compatible with java.lang.String but a java.lang.Long value was returned");
+			.withMessageContaining("Attribute 'value' in annotation %s should be compatible with " +
+					"java.lang.String but a java.lang.Long value was returned",
+					Component.class.getCanonicalName());
+	}
+
+	@Test
+	void synthesizeAnnotationFromMapWithAttributeOfIncorrectArrayType() {
+		Map<String, Object> map = Collections.singletonMap(VALUE, new int[] {42});
+		assertThatIllegalStateException().isThrownBy(() ->
+				synthesizeAnnotation(map, CharsContainer.class, null).chars())
+			.withMessageContaining("Attribute 'chars' in annotation %s should be compatible with " +
+					"char[] but a int[] value was returned", CharsContainer.class.getCanonicalName());
 	}
 
 	@Test

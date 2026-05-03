@@ -40,12 +40,12 @@ import static org.mockito.Mockito.verify;
 class BatchSqlUpdateTests {
 
 	@Test
-	void testBatchUpdateWithExplicitFlush() throws Exception {
+	void batchUpdateWithExplicitFlush() throws Exception {
 		doTestBatchUpdate(false);
 	}
 
 	@Test
-	void testBatchUpdateWithFlushThroughBatchSize() throws Exception {
+	void batchUpdateWithFlushThroughBatchSize() throws Exception {
 		doTestBatchUpdate(true);
 	}
 

@@ -17,6 +17,7 @@
 package org.springframework.test.context.bean.override.mockito;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Parameter;
 import java.lang.reflect.Proxy;
 
 import org.jspecify.annotations.Nullable;
@@ -49,11 +50,17 @@ class MockitoSpyBeanOverrideHandler extends AbstractMockitoBeanOverrideHandler {
 
 
 	MockitoSpyBeanOverrideHandler(ResolvableType typeToSpy, MockitoSpyBean spyBean) {
-		this(null, typeToSpy, spyBean);
+		this((Field) null, typeToSpy, spyBean);
 	}
 
 	MockitoSpyBeanOverrideHandler(@Nullable Field field, ResolvableType typeToSpy, MockitoSpyBean spyBean) {
 		super(field, typeToSpy, (StringUtils.hasText(spyBean.name()) ? spyBean.name() : null),
+				spyBean.contextName(), BeanOverrideStrategy.WRAP, spyBean.reset());
+		Assert.notNull(typeToSpy, "typeToSpy must not be null");
+	}
+
+	MockitoSpyBeanOverrideHandler(Parameter parameter, ResolvableType typeToSpy, MockitoSpyBean spyBean) {
+		super(parameter, typeToSpy, (StringUtils.hasText(spyBean.name()) ? spyBean.name() : null),
 				spyBean.contextName(), BeanOverrideStrategy.WRAP, spyBean.reset());
 		Assert.notNull(typeToSpy, "typeToSpy must not be null");
 	}

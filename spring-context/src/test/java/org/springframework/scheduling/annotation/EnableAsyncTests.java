@@ -314,7 +314,7 @@ class EnableAsyncTests {
 	}
 
 	@Test  // SPR-14949
-	public void findOnInterfaceWithInterfaceProxy() {
+	void findOnInterfaceWithInterfaceProxy() {
 		// Arrange
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(Spr14949ConfigA.class);
 		AsyncInterface asyncBean = ctx.getBean(AsyncInterface.class);
@@ -330,7 +330,7 @@ class EnableAsyncTests {
 	}
 
 	@Test  // SPR-14949
-	public void findOnInterfaceWithCglibProxy() {
+	void findOnInterfaceWithCglibProxy() {
 		// Arrange
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(Spr14949ConfigB.class);
 		AsyncInterface asyncBean = ctx.getBean(AsyncInterface.class);
@@ -347,7 +347,7 @@ class EnableAsyncTests {
 
 	@Test
 	@SuppressWarnings("resource")
-	public void exceptionThrownWithBeanNotOfRequiredTypeRootCause() {
+	void exceptionThrownWithBeanNotOfRequiredTypeRootCause() {
 		assertThatExceptionOfType(Throwable.class).isThrownBy(() ->
 				new AnnotationConfigApplicationContext(JdkProxyConfiguration.class))
 			.withCauseInstanceOf(BeanNotOfRequiredTypeException.class);

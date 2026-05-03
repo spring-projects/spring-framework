@@ -31,7 +31,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class QuartzSchedulerLifecycleTests {
 
 	@Test  // SPR-6354
-	public void destroyLazyInitSchedulerWithDefaultShutdownOrderDoesNotHang() {
+	void destroyLazyInitSchedulerWithDefaultShutdownOrderDoesNotHang() {
 		ConfigurableApplicationContext context =
 				new ClassPathXmlApplicationContext("quartzSchedulerLifecycleTests.xml", getClass());
 		assertThat(context.getBean("lazyInitSchedulerWithDefaultShutdownOrder")).isNotNull();
@@ -44,7 +44,7 @@ class QuartzSchedulerLifecycleTests {
 	}
 
 	@Test  // SPR-6354
-	public void destroyLazyInitSchedulerWithCustomShutdownOrderDoesNotHang() {
+	void destroyLazyInitSchedulerWithCustomShutdownOrderDoesNotHang() {
 		ConfigurableApplicationContext context =
 				new ClassPathXmlApplicationContext("quartzSchedulerLifecycleTests.xml", getClass());
 		assertThat(context.getBean("lazyInitSchedulerWithCustomShutdownOrder")).isNotNull();

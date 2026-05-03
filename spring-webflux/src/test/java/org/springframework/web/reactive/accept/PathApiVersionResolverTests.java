@@ -36,7 +36,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
  * @author Rossen Stoyanchev
  * @author Martin Mois
  */
-public class PathApiVersionResolverTests {
+class PathApiVersionResolverTests {
 
 	@Test
 	void resolve() {

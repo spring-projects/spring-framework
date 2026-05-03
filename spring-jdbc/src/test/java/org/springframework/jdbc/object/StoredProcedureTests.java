@@ -90,7 +90,7 @@ class StoredProcedureTests {
 	}
 
 	@Test
-	void testNoSuchStoredProcedure() throws Exception {
+	void noSuchStoredProcedure() throws Exception {
 		SQLException sqlException = new SQLException(
 				"Syntax error or access violation exception", "42000");
 		given(callableStatement.execute()).willThrow(sqlException);
@@ -115,7 +115,7 @@ class StoredProcedureTests {
 	}
 
 	@Test
-	void testAddInvoices() throws Exception {
+	void addInvoices() throws Exception {
 		given(callableStatement.execute()).willReturn(false);
 		given(callableStatement.getUpdateCount()).willReturn(-1);
 		given(callableStatement.getObject(3)).willReturn(4);
@@ -128,7 +128,7 @@ class StoredProcedureTests {
 	}
 
 	@Test
-	void testAddInvoicesUsingObjectArray() throws Exception {
+	void addInvoicesUsingObjectArray() throws Exception {
 		given(callableStatement.execute()).willReturn(false);
 		given(callableStatement.getUpdateCount()).willReturn(-1);
 		given(callableStatement.getObject(3)).willReturn(5);
@@ -141,7 +141,7 @@ class StoredProcedureTests {
 	}
 
 	@Test
-	void testAddInvoicesWithinTransaction() throws Exception {
+	void addInvoicesWithinTransaction() throws Exception {
 		given(callableStatement.execute()).willReturn(false);
 		given(callableStatement.getUpdateCount()).willReturn(-1);
 		given(callableStatement.getObject(3)).willReturn(4);
@@ -165,7 +165,7 @@ class StoredProcedureTests {
 	 * mechanism.
 	 */
 	@Test
-	void testStoredProcedureConfiguredViaJdbcTemplateWithCustomExceptionTranslator()
+	void storedProcedureConfiguredViaJdbcTemplateWithCustomExceptionTranslator()
 			throws Exception {
 		given(callableStatement.execute()).willReturn(false);
 		given(callableStatement.getUpdateCount()).willReturn(-1);
@@ -201,7 +201,7 @@ class StoredProcedureTests {
 	 * Confirm our JdbcTemplate is used
 	 */
 	@Test
-	void testStoredProcedureConfiguredViaJdbcTemplate() throws Exception {
+	void storedProcedureConfiguredViaJdbcTemplate() throws Exception {
 		given(callableStatement.execute()).willReturn(false);
 		given(callableStatement.getUpdateCount()).willReturn(-1);
 		given(callableStatement.getObject(2)).willReturn(4);
@@ -215,7 +215,7 @@ class StoredProcedureTests {
 	}
 
 	@Test
-	void testNullArg() throws Exception {
+	void nullArg() throws Exception {
 		given(callableStatement.execute()).willReturn(false);
 		given(callableStatement.getUpdateCount()).willReturn(-1);
 		given(connection.prepareCall("{call " + NullArg.SQL + "(?)}")).willReturn(callableStatement);
@@ -225,7 +225,7 @@ class StoredProcedureTests {
 	}
 
 	@Test
-	void testUnnamedParameter() {
+	void unnamedParameter() {
 		this.verifyClosedAfter = false;
 		// Shouldn't succeed in creating stored procedure with unnamed parameter
 		assertThatExceptionOfType(InvalidDataAccessApiUsageException.class)
@@ -233,14 +233,14 @@ class StoredProcedureTests {
 	}
 
 	@Test
-	void testMissingParameter() {
+	void missingParameter() {
 		this.verifyClosedAfter = false;
 		MissingParameterStoredProcedure mp = new MissingParameterStoredProcedure(dataSource);
 		assertThatExceptionOfType(InvalidDataAccessApiUsageException.class).isThrownBy(mp::execute);
 	}
 
 	@Test
-	void testStoredProcedureExceptionTranslator() throws Exception {
+	void storedProcedureExceptionTranslator() throws Exception {
 		SQLException sqlException = new SQLException("Syntax error or access violation exception", "42000");
 		given(callableStatement.execute()).willThrow(sqlException);
 		given(connection.prepareCall("{call " + StoredProcedureExceptionTranslator.SQL + "()}")).willReturn(callableStatement);
@@ -249,7 +249,7 @@ class StoredProcedureTests {
 	}
 
 	@Test
-	void testStoredProcedureWithResultSet() throws Exception {
+	void storedProcedureWithResultSet() throws Exception {
 		ResultSet resultSet = mock();
 		given(resultSet.next()).willReturn(true, true, false);
 		given(callableStatement.execute()).willReturn(true);
@@ -265,7 +265,7 @@ class StoredProcedureTests {
 
 	@Test
 	@SuppressWarnings("unchecked")
-	public void testStoredProcedureWithResultSetMapped() throws Exception {
+	void storedProcedureWithResultSetMapped() throws Exception {
 		ResultSet resultSet = mock();
 		given(resultSet.next()).willReturn(true, true, false);
 		given(resultSet.getString(2)).willReturn("Foo", "Bar");
@@ -284,7 +284,7 @@ class StoredProcedureTests {
 
 	@Test
 	@SuppressWarnings("unchecked")
-	public void testStoredProcedureWithUndeclaredResults() throws Exception {
+	void storedProcedureWithUndeclaredResults() throws Exception {
 		ResultSet resultSet1 = mock();
 		given(resultSet1.next()).willReturn(true, true, false);
 		given(resultSet1.getString(2)).willReturn("Foo", "Bar");
@@ -330,7 +330,7 @@ class StoredProcedureTests {
 	}
 
 	@Test
-	void testStoredProcedureSkippingResultsProcessing() throws Exception {
+	void storedProcedureSkippingResultsProcessing() throws Exception {
 		given(callableStatement.execute()).willReturn(true);
 		given(callableStatement.getUpdateCount()).willReturn(-1);
 		given(connection.prepareCall("{call " + StoredProcedureWithResultSetMapped.SQL + "()}")).willReturn(callableStatement);
@@ -343,7 +343,7 @@ class StoredProcedureTests {
 
 	@Test
 	@SuppressWarnings("unchecked")
-	public void testStoredProcedureSkippingUndeclaredResults() throws Exception {
+	void storedProcedureSkippingUndeclaredResults() throws Exception {
 		ResultSet resultSet = mock();
 		given(resultSet.next()).willReturn(true, true, false);
 		given(resultSet.getString(2)).willReturn("Foo", "Bar");
@@ -366,7 +366,7 @@ class StoredProcedureTests {
 	}
 
 	@Test
-	void testParameterMapper() throws Exception {
+	void parameterMapper() throws Exception {
 		given(callableStatement.execute()).willReturn(false);
 		given(callableStatement.getUpdateCount()).willReturn(-1);
 		given(callableStatement.getObject(2)).willReturn("OK");
@@ -381,7 +381,7 @@ class StoredProcedureTests {
 	}
 
 	@Test
-	void testSqlTypeValue() throws Exception {
+	void sqlTypeValue() throws Exception {
 		int[] testVal = new int[] { 1, 2 };
 		given(callableStatement.execute()).willReturn(false);
 		given(callableStatement.getUpdateCount()).willReturn(-1);
@@ -396,7 +396,7 @@ class StoredProcedureTests {
 	}
 
 	@Test
-	void testNumericWithScale() throws Exception {
+	void numericWithScale() throws Exception {
 		given(callableStatement.execute()).willReturn(false);
 		given(callableStatement.getUpdateCount()).willReturn(-1);
 		given(callableStatement.getObject(1)).willReturn(new BigDecimal("12345.6789"));
@@ -409,7 +409,7 @@ class StoredProcedureTests {
 
 	private static class StoredProcedureConfiguredViaJdbcTemplate extends StoredProcedure {
 
-		public static final String SQL = "configured_via_jt";
+		static final String SQL = "configured_via_jt";
 
 		public StoredProcedureConfiguredViaJdbcTemplate(JdbcTemplate t) {
 			setJdbcTemplate(t);

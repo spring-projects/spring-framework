@@ -81,34 +81,34 @@ class XsltViewTests {
 	}
 
 	@Test
-	void testSimpleTransformWithDocument() throws Exception {
+	void simpleTransformWithDocument() throws Exception {
 		org.w3c.dom.Document document = getDomDocument();
 		doTestWithModel(singletonMap("someKey", document));
 	}
 
 	@Test
-	void testSimpleTransformWithNode() throws Exception {
+	void simpleTransformWithNode() throws Exception {
 		org.w3c.dom.Document document = getDomDocument();
 		doTestWithModel(singletonMap("someKey", document.getDocumentElement()));
 	}
 
 	@Test
-	void testSimpleTransformWithInputStream() throws Exception {
+	void simpleTransformWithInputStream() throws Exception {
 		doTestWithModel(singletonMap("someKey", getProductDataResource().getInputStream()));
 	}
 
 	@Test
-	void testSimpleTransformWithReader() throws Exception {
+	void simpleTransformWithReader() throws Exception {
 		doTestWithModel(singletonMap("someKey", new InputStreamReader(getProductDataResource().getInputStream())));
 	}
 
 	@Test
-	void testSimpleTransformWithResource() throws Exception {
+	void simpleTransformWithResource() throws Exception {
 		doTestWithModel(singletonMap("someKey", getProductDataResource()));
 	}
 
 	@Test
-	void testWithSourceKey() throws Exception {
+	void withSourceKey() throws Exception {
 		XsltView view = getXsltView(HTML_OUTPUT);
 		view.setSourceKey("actualData");
 
@@ -121,7 +121,7 @@ class XsltViewTests {
 	}
 
 	@Test
-	void testContentTypeCarriedFromTemplate() throws Exception {
+	void contentTypeCarriedFromTemplate() throws Exception {
 		XsltView view = getXsltView(HTML_OUTPUT);
 
 		Source source = new StreamSource(getProductDataResource().getInputStream());
@@ -131,7 +131,7 @@ class XsltViewTests {
 	}
 
 	@Test
-	void testModelParametersCarriedAcross() throws Exception {
+	void modelParametersCarriedAcross() throws Exception {
 		Map<String, Object> model = new HashMap<>();
 		model.put("someKey", getProductDataResource());
 		model.put("title", "Product List");
@@ -140,7 +140,7 @@ class XsltViewTests {
 	}
 
 	@Test
-	void testStaticAttributesCarriedAcross() throws Exception {
+	void staticAttributesCarriedAcross() throws Exception {
 		XsltView view = getXsltView(HTML_OUTPUT);
 		view.setSourceKey("actualData");
 		view.addStaticAttribute("title", "Product List");

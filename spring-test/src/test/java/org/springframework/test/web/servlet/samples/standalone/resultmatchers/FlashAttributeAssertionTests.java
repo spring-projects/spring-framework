@@ -41,7 +41,7 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standal
  * @author Rossen Stoyanchev
  * @author Sam Brannen
  */
-public class FlashAttributeAssertionTests {
+class FlashAttributeAssertionTests {
 
 	private final MockMvc mockMvc = standaloneSetup(new PersonController())
 										.alwaysExpect(status().isFound())

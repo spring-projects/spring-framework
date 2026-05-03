@@ -52,7 +52,7 @@ class ResourceUrlProviderJavaConfigTests {
 
 
 	@BeforeEach
-	public void setup() throws Exception {
+	void setup() throws Exception {
 		AnnotationConfigWebApplicationContext context = new AnnotationConfigWebApplicationContext();
 		context.setServletContext(new MockServletContext());
 		context.register(WebConfig.class);
@@ -108,7 +108,7 @@ class ResourceUrlProviderJavaConfigTests {
 	static class WebConfig extends WebMvcConfigurationSupport {
 
 		@Override
-		public void addResourceHandlers(ResourceHandlerRegistry registry) {
+		protected void addResourceHandlers(ResourceHandlerRegistry registry) {
 			registry.addResourceHandler("/resources/**")
 				.addResourceLocations("classpath:org/springframework/web/servlet/resource/test/")
 				.resourceChain(true).addResolver(new VersionResourceResolver().addContentVersionStrategy("/**"));

@@ -58,7 +58,7 @@ class MockitoSpyBeanWithDirtiesContextBeforeMethodIntegrationTests {
 
 	@RepeatedTest(2)
 	@DirtiesContext(methodMode = BEFORE_METHOD)
-	void testSpying() {
+	void spying() {
 		assertThat(service).isSameAs(autowiredService);
 
 		assertThat(caller.sayGreeting()).isEqualTo("I say simple");

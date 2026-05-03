@@ -95,7 +95,7 @@ class DirtiesContextInterfaceTests {
 
 
 		@Test
-		public void verifyContextWasAutowired() {
+		void verifyContextWasAutowired() {
 			assertThat(this.applicationContext).as("The application context should have been autowired.").isNotNull();
 		}
 

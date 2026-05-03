@@ -46,6 +46,7 @@ import mockwebserver3.MockWebServer;
 import mockwebserver3.RecordedRequest;
 import org.eclipse.jetty.client.Request;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -1322,6 +1323,7 @@ class WebClientIntegrationTests {
 				.verify(Duration.ofSeconds(3));
 	}
 
+	@Disabled("Disabled because it's flaky (gh-36589)")
 	@Test  // gh-36158
 	void reactorNettyAttributes() throws IOException {
 		startServer(new ReactorClientHttpConnector());

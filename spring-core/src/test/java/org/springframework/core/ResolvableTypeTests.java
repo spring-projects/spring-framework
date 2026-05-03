@@ -25,6 +25,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
@@ -208,6 +209,29 @@ class ResolvableTypeTests {
 	}
 
 	@Test
+	void forParameterForMethod() throws Exception {
+		Method method = Methods.class.getMethod("charSequenceParameter", List.class);
+		Parameter parameter = method.getParameters()[0];
+		ResolvableType type = ResolvableType.forParameter(parameter);
+		assertThat(type.getType()).isEqualTo(method.getGenericParameterTypes()[0]);
+	}
+
+	@Test
+	void forParameterForConstructor() throws Exception {
+		Constructor<Constructors> constructor = Constructors.class.getConstructor(List.class);
+		Parameter parameter = constructor.getParameters()[0];
+		ResolvableType type = ResolvableType.forParameter(parameter);
+		assertThat(type.getType()).isEqualTo(constructor.getGenericParameterTypes()[0]);
+	}
+
+	@Test
+	void forParameterMustNotBeNull() {
+		assertThatIllegalArgumentException()
+				.isThrownBy(() -> ResolvableType.forParameter(null))
+				.withMessage("Parameter must not be null");
+	}
+
+	@Test
 	void forConstructorParameter() throws Exception {
 		Constructor<Constructors> constructor = Constructors.class.getConstructor(List.class);
 		ResolvableType type = ResolvableType.forConstructorParameter(constructor, 0);
@@ -222,6 +246,13 @@ class ResolvableTypeTests {
 	}
 
 	@Test
+	void forConstructorParameterWithImplementationClassMustNotBeNull() {
+		assertThatIllegalArgumentException()
+				.isThrownBy(() -> ResolvableType.forConstructorParameter(null, 0, TypedConstructors.class))
+				.withMessage("Executable must not be null");
+	}
+
+	@Test
 	void forMethodParameterByIndex() throws Exception {
 		Method method = Methods.class.getMethod("charSequenceParameter", List.class);
 		ResolvableType type = ResolvableType.forMethodParameter(method, 0);
@@ -233,6 +264,13 @@ class ResolvableTypeTests {
 		assertThatIllegalArgumentException()
 				.isThrownBy(() -> ResolvableType.forMethodParameter(null, 0))
 				.withMessage("Method must not be null");
+	}
+
+	@Test
+	void forMethodParameterByIndexWithImplementationClassMustNotBeNull() {
+		assertThatIllegalArgumentException()
+				.isThrownBy(() -> ResolvableType.forMethodParameter(null, 0, TypedMethods.class))
+				.withMessage("Executable must not be null");
 	}
 
 	@Test
@@ -300,6 +338,13 @@ class ResolvableTypeTests {
 		assertThatIllegalArgumentException()
 				.isThrownBy(() -> ResolvableType.forMethodReturnType(null))
 				.withMessage("Method must not be null");
+	}
+
+	@Test
+	void forMethodReturnWithImplementationClassMustNotBeNull() {
+		assertThatIllegalArgumentException()
+				.isThrownBy(() -> ResolvableType.forMethodReturnType(null, TypedMethods.class))
+				.withMessage("Executable must not be null");
 	}
 
 	@Test  // gh-27748
@@ -1256,9 +1301,9 @@ class ResolvableTypeTests {
 		ResolvableType arg1 = ResolvableType.forMethodParameter(method, 1, ClassArguments.class);
 		ResolvableType arg2 = ResolvableType.forMethodParameter(method, 2, ClassArguments.class);
 
-		assertThat(returnType.getType().equals(arg0.as(Class.class).getGeneric(0).getType())).isTrue();
-		assertThat(returnType.getType().equals(arg1.as(Class.class).getGeneric(0).getType())).isFalse();
-		assertThat(returnType.getType().equals(arg2.as(Class.class).getGeneric(0).getType())).isFalse();
+		assertThat(returnType.getType()).isEqualTo(arg0.as(Class.class).getGeneric(0).getType());
+		assertThat(returnType.getType()).isNotEqualTo(arg1.as(Class.class).getGeneric(0).getType());
+		assertThat(returnType.getType()).isNotEqualTo(arg2.as(Class.class).getGeneric(0).getType());
 	}
 
 	@Test
@@ -1305,6 +1350,13 @@ class ResolvableTypeTests {
 	void classWithGenericsAs() {
 		ResolvableType type = ResolvableType.forClassWithGenerics(MultiValueMap.class, Integer.class, String.class);
 		assertThat(type.asMap().toString()).isEqualTo("java.util.Map<java.lang.Integer, java.util.List<java.lang.String>>");
+	}
+
+	@Test
+	void forClassWithGenericsClassMustNotBeNull() {
+		assertThatIllegalArgumentException()
+				.isThrownBy(() -> ResolvableType.forClassWithGenerics(null, String.class))
+				.withMessage("Class must not be null");
 	}
 
 	@Test

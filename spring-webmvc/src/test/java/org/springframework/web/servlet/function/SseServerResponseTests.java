@@ -75,6 +75,41 @@ class SseServerResponseTests {
 		assertThat(this.mockResponse.getContentAsString()).isEqualTo(expected);
 	}
 
+	@Test // gh-36537
+	void sendStringFlushesResponse() throws Exception {
+		ServerResponse response = ServerResponse.sse(sse -> {
+			try {
+				sse.send("foo bar");
+			}
+			catch (IOException ex) {
+				throw new UncheckedIOException(ex);
+			}
+		});
+
+		ServerResponse.Context context = Collections::emptyList;
+
+		response.writeTo(this.mockRequest, this.mockResponse, context);
+		assertThat(this.mockResponse.isCommitted()).isTrue();
+	}
+
+	@Test // gh-36537
+	void sendObjectFlushesResponse() throws Exception {
+		Person person = new Person("John Doe", 42);
+		ServerResponse response = ServerResponse.sse(sse -> {
+			try {
+				sse.send(person);
+			}
+			catch (IOException ex) {
+				throw new UncheckedIOException(ex);
+			}
+		});
+
+		ServerResponse.Context context = () -> List.of(new JacksonJsonHttpMessageConverter());
+
+		response.writeTo(this.mockRequest, this.mockResponse, context);
+		assertThat(this.mockResponse.isCommitted()).isTrue();
+	}
+
 	@Test
 	void sendObject() throws Exception {
 		Person person = new Person("John Doe", 42);

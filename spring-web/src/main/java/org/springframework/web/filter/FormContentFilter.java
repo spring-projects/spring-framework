@@ -36,10 +36,10 @@ import jakarta.servlet.http.HttpServletRequestWrapper;
 import jakarta.servlet.http.HttpServletResponse;
 import org.jspecify.annotations.Nullable;
 
+import org.springframework.core.ResolvableType;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.FormHttpMessageConverter;
-import org.springframework.http.converter.support.AllEncompassingFormHttpMessageConverter;
 import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
@@ -48,7 +48,7 @@ import org.springframework.util.StringUtils;
 
 /**
  * {@code Filter} that parses form data for HTTP PUT, PATCH, and DELETE requests
- * and exposes it as Servlet request parameters. By default the Servlet spec
+ * and exposes it as Servlet request parameters. By default, the Servlet spec
  * only requires this for HTTP POST.
  *
  * @author Rossen Stoyanchev
@@ -58,12 +58,12 @@ public class FormContentFilter extends OncePerRequestFilter {
 
 	private static final List<String> HTTP_METHODS = Arrays.asList("PUT", "PATCH", "DELETE");
 
-	private FormHttpMessageConverter formConverter = new AllEncompassingFormHttpMessageConverter();
+	private FormHttpMessageConverter formConverter = new FormHttpMessageConverter();
 
 
 	/**
 	 * Set the converter to use for parsing form content.
-	 * <p>By default this is an instance of {@link AllEncompassingFormHttpMessageConverter}.
+	 * <p>By default, this is an instance of {@link FormHttpMessageConverter}.
 	 */
 	public void setFormConverter(FormHttpMessageConverter converter) {
 		Assert.notNull(converter, "FormHttpMessageConverter is required");
@@ -94,6 +94,7 @@ public class FormContentFilter extends OncePerRequestFilter {
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	private @Nullable MultiValueMap<String, String> parseIfNecessary(HttpServletRequest request) throws IOException {
 		if (!shouldParse(request)) {
 			return null;
@@ -105,7 +106,7 @@ public class FormContentFilter extends OncePerRequestFilter {
 				return request.getInputStream();
 			}
 		};
-		return this.formConverter.read(null, inputMessage);
+		return (MultiValueMap<String, String>) this.formConverter.read(ResolvableType.forClassWithGenerics(MultiValueMap.class, String.class, String.class), inputMessage, null);
 	}
 
 	private boolean shouldParse(HttpServletRequest request) {

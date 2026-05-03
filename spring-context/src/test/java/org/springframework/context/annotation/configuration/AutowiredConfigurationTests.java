@@ -63,7 +63,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 class AutowiredConfigurationTests {
 
 	@Test
-	void testAutowiredConfigurationDependencies() {
+	void autowiredConfigurationDependencies() {
 		ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(
 				AutowiredConfigurationTests.class.getSimpleName() + ".xml", AutowiredConfigurationTests.class);
 
@@ -73,7 +73,7 @@ class AutowiredConfigurationTests {
 	}
 
 	@Test
-	void testAutowiredConfigurationMethodDependencies() {
+	void autowiredConfigurationMethodDependencies() {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(
 				AutowiredMethodConfig.class, ColorConfig.class);
 
@@ -83,7 +83,7 @@ class AutowiredConfigurationTests {
 	}
 
 	@Test
-	void testAutowiredConfigurationMethodDependenciesWithOptionalAndAvailable() {
+	void autowiredConfigurationMethodDependenciesWithOptionalAndAvailable() {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(
 				OptionalAutowiredMethodConfig.class, ColorConfig.class);
 
@@ -93,7 +93,7 @@ class AutowiredConfigurationTests {
 	}
 
 	@Test
-	void testAutowiredConfigurationMethodDependenciesWithOptionalAndNotAvailable() {
+	void autowiredConfigurationMethodDependenciesWithOptionalAndNotAvailable() {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(
 				OptionalAutowiredMethodConfig.class);
 
@@ -103,7 +103,7 @@ class AutowiredConfigurationTests {
 	}
 
 	@Test
-	void testAutowiredConfigurationMethodDependenciesWithQualifier() {
+	void autowiredConfigurationMethodDependenciesWithQualifier() {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(
 				QualifiedAutowiredMethodConfig.class);
 
@@ -113,7 +113,7 @@ class AutowiredConfigurationTests {
 	}
 
 	@Test
-	void testAutowiredSingleConstructorSupported() {
+	void autowiredSingleConstructorSupported() {
 		DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(factory).loadBeanDefinitions(
 				new ClassPathResource("annotation-config.xml", AutowiredConstructorConfig.class));
@@ -126,7 +126,7 @@ class AutowiredConfigurationTests {
 	}
 
 	@Test
-	void testObjectFactoryConstructorWithTypeVariable() {
+	void objectFactoryConstructorWithTypeVariable() {
 		DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(factory).loadBeanDefinitions(
 				new ClassPathResource("annotation-config.xml", ObjectFactoryConstructorConfig.class));
@@ -139,7 +139,7 @@ class AutowiredConfigurationTests {
 	}
 
 	@Test
-	void testAutowiredAnnotatedConstructorSupported() {
+	void autowiredAnnotatedConstructorSupported() {
 		DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(factory).loadBeanDefinitions(
 				new ClassPathResource("annotation-config.xml", MultipleConstructorConfig.class));
@@ -152,7 +152,7 @@ class AutowiredConfigurationTests {
 	}
 
 	@Test
-	void testValueInjection() {
+	void valueInjection() {
 		ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(
 				"ValueInjectionTests.xml", AutowiredConfigurationTests.class);
 		doTestValueInjection(context);
@@ -160,7 +160,7 @@ class AutowiredConfigurationTests {
 	}
 
 	@Test
-	void testValueInjectionWithMetaAnnotation() {
+	void valueInjectionWithMetaAnnotation() {
 		AnnotationConfigApplicationContext context =
 				new AnnotationConfigApplicationContext(ValueConfigWithMetaAnnotation.class);
 		doTestValueInjection(context);
@@ -168,7 +168,7 @@ class AutowiredConfigurationTests {
 	}
 
 	@Test
-	void testValueInjectionWithAliasedMetaAnnotation() {
+	void valueInjectionWithAliasedMetaAnnotation() {
 		AnnotationConfigApplicationContext context =
 				new AnnotationConfigApplicationContext(ValueConfigWithAliasedMetaAnnotation.class);
 		doTestValueInjection(context);
@@ -176,7 +176,7 @@ class AutowiredConfigurationTests {
 	}
 
 	@Test
-	void testValueInjectionWithProviderFields() {
+	void valueInjectionWithProviderFields() {
 		AnnotationConfigApplicationContext context =
 				new AnnotationConfigApplicationContext(ValueConfigWithProviderFields.class);
 		doTestValueInjection(context);
@@ -184,7 +184,7 @@ class AutowiredConfigurationTests {
 	}
 
 	@Test
-	void testValueInjectionWithProviderConstructorArguments() {
+	void valueInjectionWithProviderConstructorArguments() {
 		AnnotationConfigApplicationContext context =
 				new AnnotationConfigApplicationContext(ValueConfigWithProviderConstructorArguments.class);
 		doTestValueInjection(context);
@@ -192,7 +192,7 @@ class AutowiredConfigurationTests {
 	}
 
 	@Test
-	void testValueInjectionWithProviderMethodArguments() {
+	void valueInjectionWithProviderMethodArguments() {
 		AnnotationConfigApplicationContext context =
 				new AnnotationConfigApplicationContext(ValueConfigWithProviderMethodArguments.class);
 		doTestValueInjection(context);
@@ -200,7 +200,7 @@ class AutowiredConfigurationTests {
 	}
 
 	@Test
-	void testValueInjectionWithAccidentalAutowiredAnnotations() {
+	void valueInjectionWithAccidentalAutowiredAnnotations() {
 		assertThatExceptionOfType(BeanDefinitionParsingException.class).isThrownBy(() ->
 				new AnnotationConfigApplicationContext(ValueConfigWithAccidentalAutowiredAnnotations.class));
 	}
@@ -232,7 +232,7 @@ class AutowiredConfigurationTests {
 	}
 
 	@Test
-	void testCustomPropertiesWithClassPathContext() throws IOException {
+	void customPropertiesWithClassPathContext() throws IOException {
 		ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(
 				"AutowiredConfigurationTests-custom.xml", AutowiredConfigurationTests.class);
 
@@ -243,7 +243,7 @@ class AutowiredConfigurationTests {
 	}
 
 	@Test
-	void testCustomPropertiesWithGenericContext() throws IOException {
+	void customPropertiesWithGenericContext() throws IOException {
 		GenericApplicationContext context = new GenericApplicationContext();
 		new XmlBeanDefinitionReader(context).loadBeanDefinitions(
 				new ClassPathResource("AutowiredConfigurationTests-custom.xml", AutowiredConfigurationTests.class));
@@ -256,7 +256,7 @@ class AutowiredConfigurationTests {
 	}
 
 	@Test
-	void testValueInjectionWithRecord() {
+	void valueInjectionWithRecord() {
 		System.setProperty("recordBeanName", "enigma");
 		try (GenericApplicationContext context = new AnnotationConfigApplicationContext(RecordBean.class)) {
 			assertThat(context.getBean(RecordBean.class).name()).isEqualTo("enigma");
@@ -289,7 +289,7 @@ class AutowiredConfigurationTests {
 
 		@Bean
 		public TestBean testBean(Color color, List<Color> colors) {
-			return new TestBean(color.toString() + "-" + colors.get(0).toString());
+			return new TestBean(color + "-" + colors.get(0));
 		}
 	}
 
@@ -303,7 +303,7 @@ class AutowiredConfigurationTests {
 				return new TestBean("");
 			}
 			else {
-				return new TestBean(color.get() + "-" + colors.get().get(0).toString());
+				return new TestBean(color.get() + "-" + colors.get().get(0));
 			}
 		}
 	}

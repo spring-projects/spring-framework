@@ -168,7 +168,7 @@ public class EncodedResource implements InputStreamSource {
 	 * <p>The given consumer will be invoked a single time by default - but may
 	 * also be invoked multiple times in case of a multi-content resource handle,
 	 * for example returned from a
-	 * {@link ResourceLoader#getResource getResource("classpath*:..."} call.
+	 * {@link ResourceLoader#getResource getResource("classpath*:...")} call.
 	 * While {@link #getReader()} returns a merged sequence of content
 	 * in such a case, this method performs one callback per file content.
 	 * @param consumer a consumer for each Reader

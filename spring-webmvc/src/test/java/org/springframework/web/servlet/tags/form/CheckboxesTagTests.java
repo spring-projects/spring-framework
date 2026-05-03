@@ -55,7 +55,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
  * @author Jeremy Grelle
  */
 @SuppressWarnings({ "rawtypes", "unchecked" })
-public class CheckboxesTagTests extends AbstractFormTagTests {
+class CheckboxesTagTests extends AbstractFormTagTests {
 
 	private CheckboxesTag tag;
 

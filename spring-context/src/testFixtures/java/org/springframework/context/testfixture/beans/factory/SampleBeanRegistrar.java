@@ -41,7 +41,9 @@ public class SampleBeanRegistrar implements BeanRegistrar {
 	}
 
 	public record Foo() {}
+
 	public record Bar(Foo foo) {}
+
 	public record Baz(String message) {}
 
 	public static class Init {
@@ -53,4 +55,5 @@ public class SampleBeanRegistrar implements BeanRegistrar {
 			initialized = true;
 		}
 	}
+
 }

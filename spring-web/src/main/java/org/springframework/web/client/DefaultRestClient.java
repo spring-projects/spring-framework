@@ -756,6 +756,9 @@ final class DefaultRestClient implements RestClient {
 		}
 
 		private static boolean isStreamingResult(@Nullable Object result) {
+			if (result instanceof ResponseEntity<?> entity) {
+				result = entity.getBody();
+			}
 			return (result instanceof InputStream || result instanceof InputStreamResource);
 		}
 
@@ -811,6 +814,7 @@ final class DefaultRestClient implements RestClient {
 		}
 
 		@Override
+		@SuppressWarnings("removal")
 		public ResponseSpec onStatus(ResponseErrorHandler errorHandler) {
 			Assert.notNull(errorHandler, "ResponseErrorHandler must not be null");
 

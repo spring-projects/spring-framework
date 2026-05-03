@@ -41,7 +41,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Oliver Gierke
  */
 @SuppressWarnings("resource")
-public class Spr8954Tests {
+class Spr8954Tests {
 
 	@Test
 	void repro() {

@@ -34,6 +34,7 @@ import reactor.core.scheduler.Schedulers;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.DecodingException;
 import org.springframework.core.io.buffer.DataBufferLimitException;
+import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.http.MediaType;
 import org.springframework.http.ReactiveHttpInputMessage;
 import org.springframework.http.codec.HttpMessageReader;
@@ -200,8 +201,14 @@ public class DefaultPartHttpMessageReader extends LoggingCodecSupport implements
 					.windowUntil(MultipartParser.Token::isLast)
 					.concatMap(partsTokens -> {
 						if (tooManyParts(partCount)) {
-							return Mono.error(new DecodingException("Too many parts (" + partCount.get() + "/" +
-									this.maxParts + " allowed)"));
+							return partsTokens
+									.doOnNext(token -> {
+										if (token instanceof MultipartParser.BodyToken bodyToken) {
+											DataBufferUtils.release(bodyToken.buffer());
+										}
+									})
+									.then(Mono.error(new DecodingException("Too many parts (" + partCount.get() + "/" +
+											this.maxParts + " allowed)")));
 						}
 						else {
 							return PartGenerator.createPart(partsTokens,

@@ -822,6 +822,7 @@ public class MethodParameter {
 	 * @since 5.0
 	 */
 	public static MethodParameter forParameter(Parameter parameter) {
+		Assert.notNull(parameter, "Parameter must not be null");
 		return forExecutable(parameter.getDeclaringExecutable(), findParameterIndex(parameter));
 	}
 

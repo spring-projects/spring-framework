@@ -16,8 +16,6 @@
 
 package org.springframework.test.web.client.samples.matchers;
 
-import java.net.URI;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -31,11 +29,11 @@ import jakarta.xml.bind.annotation.XmlRootElement;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.MediaType;
 import org.springframework.http.converter.xml.Jaxb2RootElementHttpMessageConverter;
 import org.springframework.test.web.Person;
 import org.springframework.test.web.client.MockRestServiceServer;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.client.RestClient;
 
 import static org.hamcrest.Matchers.closeTo;
 import static org.hamcrest.Matchers.equalTo;
@@ -53,7 +51,7 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
  * @see ContentRequestMatchersIntegrationTests
  * @see XmlContentRequestMatchersIntegrationTests
  */
-public class XpathRequestMatchersIntegrationTests {
+class XpathRequestMatchersIntegrationTests {
 
 	private static final Map<String, String> NS =
 			Collections.singletonMap("ns", "https://example.org/music/people");
@@ -61,13 +59,13 @@ public class XpathRequestMatchersIntegrationTests {
 
 	private MockRestServiceServer mockServer;
 
-	private RestTemplate restTemplate;
+	private RestClient restClient;
 
 	private PeopleWrapper people;
 
 
 	@BeforeEach
-	public void setup() {
+	void setup() {
 		List<Person> composers = Arrays.asList(
 				new Person("Johann Sebastian Bach").setSomeDouble(21),
 				new Person("Johannes Brahms").setSomeDouble(.0025),
@@ -80,18 +78,16 @@ public class XpathRequestMatchersIntegrationTests {
 
 		this.people = new PeopleWrapper(composers, performers);
 
-		List<HttpMessageConverter<?>> converters = new ArrayList<>();
-		converters.add(new Jaxb2RootElementHttpMessageConverter());
+		RestClient.Builder clientBuilder = RestClient.builder().configureMessageConverters(converters ->
+				converters.registerDefaults().withXmlConverter(new Jaxb2RootElementHttpMessageConverter()));
 
-		this.restTemplate = new RestTemplate();
-		this.restTemplate.setMessageConverters(converters);
-
-		this.mockServer = MockRestServiceServer.createServer(this.restTemplate);
+		this.mockServer = MockRestServiceServer.createServer(clientBuilder);
+		this.restClient = clientBuilder.build();
 	}
 
 
 	@Test
-	public void testExists() throws Exception {
+	void exists() throws Exception {
 		String composer = "/ns:people/composers/composer[%s]";
 		String performer = "/ns:people/performers/performer[%s]";
 
@@ -109,7 +105,7 @@ public class XpathRequestMatchersIntegrationTests {
 	}
 
 	@Test
-	public void testDoesNotExist() throws Exception {
+	void doesNotExist() throws Exception {
 		String composer = "/ns:people/composers/composer[%s]";
 		String performer = "/ns:people/performers/performer[%s]";
 
@@ -125,7 +121,7 @@ public class XpathRequestMatchersIntegrationTests {
 	}
 
 	@Test
-	public void testString() throws Exception {
+	void string() throws Exception {
 		String composerName = "/ns:people/composers/composer[%s]/name";
 		String performerName = "/ns:people/performers/performer[%s]/name";
 
@@ -146,7 +142,7 @@ public class XpathRequestMatchersIntegrationTests {
 	}
 
 	@Test
-	public void testNumber() throws Exception {
+	void number() throws Exception {
 		String composerDouble = "/ns:people/composers/composer[%s]/someDouble";
 
 		this.mockServer.expect(requestTo("/composers"))
@@ -163,7 +159,7 @@ public class XpathRequestMatchersIntegrationTests {
 	}
 
 	@Test
-	public void testBoolean() throws Exception {
+	void booleanCase() throws Exception {
 
 		String performerBooleanValue = "/ns:people/performers/performer[%s]/someBoolean";
 
@@ -177,7 +173,7 @@ public class XpathRequestMatchersIntegrationTests {
 	}
 
 	@Test
-	public void testNodeCount() throws Exception {
+	void nodeCount() throws Exception {
 		this.mockServer.expect(requestTo("/composers"))
 			.andExpect(content().contentType("application/xml"))
 			.andExpect(xpath("/ns:people/composers/composer", NS).nodeCount(4))
@@ -190,7 +186,8 @@ public class XpathRequestMatchersIntegrationTests {
 	}
 
 	private void executeAndVerify() {
-		this.restTemplate.put(URI.create("/composers"), this.people);
+		this.restClient.put().uri("/composers").contentType(MediaType.APPLICATION_XML)
+				.body(this.people).retrieve().toBodilessEntity();
 		this.mockServer.verify();
 	}
 

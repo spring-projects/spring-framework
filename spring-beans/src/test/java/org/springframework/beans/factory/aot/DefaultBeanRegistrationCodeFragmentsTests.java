@@ -67,7 +67,7 @@ class DefaultBeanRegistrationCodeFragmentsTests {
 	private final DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
 
 	@Test
-	public void getTargetWithInstanceSupplier() {
+	void getTargetWithInstanceSupplier() {
 		RootBeanDefinition beanDefinition = new RootBeanDefinition(SimpleBean.class);
 		beanDefinition.setInstanceSupplier(SimpleBean::new);
 		RegisteredBean registeredBean = registerTestBean(beanDefinition);
@@ -78,7 +78,7 @@ class DefaultBeanRegistrationCodeFragmentsTests {
 	}
 
 	@Test
-	public void getTargetWithInstanceSupplierAndResourceDescription() {
+	void getTargetWithInstanceSupplierAndResourceDescription() {
 		RootBeanDefinition beanDefinition = new RootBeanDefinition(SimpleBean.class);
 		beanDefinition.setInstanceSupplier(SimpleBean::new);
 		beanDefinition.setResourceDescription("my test resource");

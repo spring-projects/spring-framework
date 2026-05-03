@@ -1605,7 +1605,7 @@ class MergedAnnotationsTests {
 		assertThatExceptionOfType(AnnotationConfigurationException.class)
 				.isThrownBy(() -> MergedAnnotation.from(annotation))
 				.withMessageStartingWith("@AliasFor declaration on attribute 'foo' in annotation")
-				.withMessageContaining(AliasForWithMissingAttributeDeclaration.class.getName())
+				.withMessageContaining(AliasForWithMissingAttributeDeclaration.class.getCanonicalName())
 				.withMessageContaining("points to itself");
 	}
 
@@ -1618,7 +1618,7 @@ class MergedAnnotationsTests {
 		assertThatExceptionOfType(AnnotationConfigurationException.class)
 				.isThrownBy(() -> MergedAnnotation.from(annotation))
 				.withMessageStartingWith("In @AliasFor declared on attribute 'foo' in annotation")
-				.withMessageContaining(AliasForWithDuplicateAttributeDeclaration.class.getName())
+				.withMessageContaining(AliasForWithDuplicateAttributeDeclaration.class.getCanonicalName())
 				.withMessageContaining("attribute 'attribute' and its alias 'value' are present with values of 'baz' and 'bar'");
 	}
 
@@ -1630,7 +1630,7 @@ class MergedAnnotationsTests {
 		assertThatExceptionOfType(AnnotationConfigurationException.class)
 				.isThrownBy(() -> MergedAnnotation.from(annotation))
 				.withMessageStartingWith("@AliasFor declaration on attribute 'foo' in annotation")
-				.withMessageContaining(AliasForNonexistentAttribute.class.getName())
+				.withMessageContaining(AliasForNonexistentAttribute.class.getCanonicalName())
 				.withMessageContaining("declares an alias for 'bar' which is not present");
 	}
 
@@ -1643,7 +1643,7 @@ class MergedAnnotationsTests {
 		assertThatExceptionOfType(AnnotationConfigurationException.class)
 				.isThrownBy(() -> MergedAnnotation.from(annotation))
 				.withMessage("@AliasFor declaration on attribute 'bar' in annotation [" +
-						AliasForWithMirroredAliasForWrongAttribute.class.getName() +
+						AliasForWithMirroredAliasForWrongAttribute.class.getCanonicalName() +
 						"] declares an alias for 'quux' which is not present.");
 	}
 
@@ -1655,7 +1655,7 @@ class MergedAnnotationsTests {
 		assertThatExceptionOfType(AnnotationConfigurationException.class)
 				.isThrownBy(() -> MergedAnnotation.from(annotation))
 				.withMessageStartingWith("Misconfigured aliases")
-				.withMessageContaining(AliasForAttributeOfDifferentType.class.getName())
+				.withMessageContaining(AliasForAttributeOfDifferentType.class.getCanonicalName())
 				.withMessageContaining("attribute 'foo'")
 				.withMessageContaining("attribute 'bar'")
 				.withMessageContaining("same return type");
@@ -1669,7 +1669,7 @@ class MergedAnnotationsTests {
 		assertThatExceptionOfType(AnnotationConfigurationException.class)
 				.isThrownBy(() -> MergedAnnotation.from(annotation))
 				.withMessageStartingWith("Misconfigured aliases")
-				.withMessageContaining(AliasForWithMissingDefaultValues.class.getName())
+				.withMessageContaining(AliasForWithMissingDefaultValues.class.getCanonicalName())
 				.withMessageContaining("attribute 'foo' in annotation")
 				.withMessageContaining("attribute 'bar' in annotation")
 				.withMessageContaining("default values");
@@ -1684,7 +1684,7 @@ class MergedAnnotationsTests {
 		assertThatExceptionOfType(AnnotationConfigurationException.class)
 				.isThrownBy(() -> MergedAnnotation.from(annotation))
 				.withMessageStartingWith("Misconfigured aliases")
-				.withMessageContaining(AliasForAttributeWithDifferentDefaultValue.class.getName())
+				.withMessageContaining(AliasForAttributeWithDifferentDefaultValue.class.getCanonicalName())
 				.withMessageContaining("attribute 'foo' in annotation")
 				.withMessageContaining("attribute 'bar' in annotation")
 				.withMessageContaining("same default value");
@@ -1699,9 +1699,9 @@ class MergedAnnotationsTests {
 		assertThatExceptionOfType(AnnotationConfigurationException.class)
 				.isThrownBy(() -> MergedAnnotation.from(annotation))
 				.withMessageStartingWith("@AliasFor declaration on attribute 'xmlConfigFile' in annotation")
-				.withMessageContaining(AliasedComposedTestConfigurationNotMetaPresent.class.getName())
+				.withMessageContaining(AliasedComposedTestConfigurationNotMetaPresent.class.getCanonicalName())
 				.withMessageContaining("declares an alias for attribute 'location' in annotation")
-				.withMessageContaining(TestConfiguration.class.getName())
+				.withMessageContaining(TestConfiguration.class.getCanonicalName())
 				.withMessageContaining("not meta-present");
 	}
 
@@ -1792,8 +1792,8 @@ class MergedAnnotationsTests {
 		assertThatExceptionOfType(AnnotationConfigurationException.class)
 				.isThrownBy(() -> MergedAnnotation.from(clazz, config))
 				.withMessageStartingWith("Misconfigured aliases:")
-				.withMessageContaining("attribute 'location1' in annotation [" + annotationType.getName() + "]")
-				.withMessageContaining("attribute 'location2' in annotation [" + annotationType.getName() + "]")
+				.withMessageContaining("attribute 'location1' in annotation [%s]", annotationType.getCanonicalName())
+				.withMessageContaining("attribute 'location2' in annotation [%s]", annotationType.getCanonicalName())
 				.withMessageContaining("default values");
 	}
 
@@ -1807,8 +1807,8 @@ class MergedAnnotationsTests {
 		assertThatExceptionOfType(AnnotationConfigurationException.class)
 				.isThrownBy(() -> MergedAnnotation.from(clazz, config))
 				.withMessageStartingWith("Misconfigured aliases:")
-				.withMessageContaining("attribute 'location1' in annotation [" + annotationType.getName() + "]")
-				.withMessageContaining("attribute 'location2' in annotation [" + annotationType.getName() + "]")
+				.withMessageContaining("attribute 'location1' in annotation [%s]", annotationType.getCanonicalName())
+				.withMessageContaining("attribute 'location2' in annotation [%s]", annotationType.getCanonicalName())
 				.withMessageContaining("same default value");
 	}
 
@@ -1978,9 +1978,20 @@ class MergedAnnotationsTests {
 		MergedAnnotation<Component> annotation = MergedAnnotation.of(Component.class, map);
 		assertThatIllegalStateException()
 				.isThrownBy(() -> annotation.synthesize().value())
-				.withMessage("Attribute 'value' in annotation " +
-						"org.springframework.core.testfixture.stereotype.Component should be " +
-						"compatible with java.lang.String but a java.lang.Long value was returned");
+				.withMessage("Attribute 'value' in annotation %s should be compatible with " +
+						"java.lang.String but a java.lang.Long value was returned",
+						Component.class.getCanonicalName());
+	}
+
+	@Test
+	void synthesizeFromMapWithAttributeOfIncorrectArrayType() {
+		Map<String, Object> map = Collections.singletonMap("value", new int[] {42});
+		MergedAnnotation<TestPropertySource> annotation = MergedAnnotation.of(TestPropertySource.class, map);
+		assertThatIllegalStateException()
+				.isThrownBy(() -> annotation.synthesize().value())
+				.withMessage("Attribute 'value' in annotation %s should be compatible with " +
+						"java.lang.String[] but a int[] value was returned",
+						TestPropertySource.class.getCanonicalName());
 	}
 
 	@Test

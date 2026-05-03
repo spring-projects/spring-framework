@@ -231,7 +231,7 @@ class Jaxb2XmlDecoderTests extends AbstractLeakCheckingTests {
 	}
 
 	@Test // gh-24622
-	public void decodeErrorWithXmlNotWellFormed() {
+	void decodeErrorWithXmlNotWellFormed() {
 		Mono<DataBuffer> source = toDataBufferMono("<Response><tag>something</tag</Response>");
 		Mono<Object> result = this.decoder.decodeToMono(source, ResolvableType.forClass(Pojo.class), null, HINTS);
 

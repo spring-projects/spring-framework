@@ -34,19 +34,19 @@ import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 class ReflectiveLoadTimeWeaverTests {
 
 	@Test
-	void testCtorWithNullClassLoader() {
+	void ctorWithNullClassLoader() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				new ReflectiveLoadTimeWeaver(null));
 	}
 
 	@Test
-	void testCtorWithClassLoaderThatDoesNotExposeAnAddTransformerMethod() {
+	void ctorWithClassLoaderThatDoesNotExposeAnAddTransformerMethod() {
 		assertThatIllegalStateException().isThrownBy(() ->
 				new ReflectiveLoadTimeWeaver(getClass().getClassLoader()));
 	}
 
 	@Test
-	void testCtorWithClassLoaderThatDoesNotExposeAGetThrowawayClassLoaderMethodIsOkay() {
+	void ctorWithClassLoaderThatDoesNotExposeAGetThrowawayClassLoaderMethodIsOkay() {
 		JustAddTransformerClassLoader classLoader = new JustAddTransformerClassLoader();
 		ReflectiveLoadTimeWeaver weaver = new ReflectiveLoadTimeWeaver(classLoader);
 		weaver.addTransformer(new ClassFileTransformer() {
@@ -59,20 +59,20 @@ class ReflectiveLoadTimeWeaverTests {
 	}
 
 	@Test
-	void testAddTransformerWithNullTransformer() {
+	void addTransformerWithNullTransformer() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				new ReflectiveLoadTimeWeaver(new JustAddTransformerClassLoader()).addTransformer(null));
 	}
 
 	@Test
-	void testGetThrowawayClassLoaderWithClassLoaderThatDoesNotExposeAGetThrowawayClassLoaderMethodYieldsFallbackClassLoader() {
+	void getThrowawayClassLoaderWithClassLoaderThatDoesNotExposeAGetThrowawayClassLoaderMethodYieldsFallbackClassLoader() {
 		ReflectiveLoadTimeWeaver weaver = new ReflectiveLoadTimeWeaver(new JustAddTransformerClassLoader());
 		ClassLoader throwawayClassLoader = weaver.getThrowawayClassLoader();
 		assertThat(throwawayClassLoader).isNotNull();
 	}
 
 	@Test
-	void testGetThrowawayClassLoaderWithTotallyCompliantClassLoader() {
+	void getThrowawayClassLoaderWithTotallyCompliantClassLoader() {
 		TotallyCompliantClassLoader classLoader = new TotallyCompliantClassLoader();
 		ReflectiveLoadTimeWeaver weaver = new ReflectiveLoadTimeWeaver(classLoader);
 		ClassLoader throwawayClassLoader = weaver.getThrowawayClassLoader();

@@ -12,7 +12,6 @@
 	<suppress files="[\\/]src[\\/](test|testFixtures)[\\/](java|java21|java24)[\\/]" checks="AnnotationLocation|AnnotationUseStyle|AtclauseOrder|AvoidNestedBlocks|FinalClass|HideUtilityClassConstructor|InnerTypeLast|JavadocStyle|JavadocType|JavadocVariable|LeftCurly|MultipleVariableDeclarations|NeedBraces|OneTopLevelClass|OuterTypeFilename|RequireThis|SpringCatch|SpringJavadoc|SpringNoThis|SpringDeprecatedCheck|EmptyCatchBlock"/>
 	<suppress files="[\\/]src[\\/](test|testFixtures)[\\/](java|java21|java24)[\\/]" checks="RegexpSinglelineJava" id="printStackTrace"/>
 	<suppress files="[\\/]src[\\/](test|testFixtures)[\\/](java|java21|java24)[\\/]" checks="RegexpSinglelineJava" id="systemOutErrPrint"/>
-	<suppress files="[\\/]src[\\/](test|testFixtures)[\\/](java|java21|java24)[\\/]" checks="SpringJUnit5" message="should not be public"/>
 	<suppress files="[\\/]src[\\/]test[\\/](java|java21|java24)[\\/]org[\\/]springframework[\\/].+(Tests|Suite)" checks="IllegalImport" id="bannedJUnitJupiterImports"/>
 	<suppress files="[\\/]src[\\/]testFixtures[\\/]java[\\/].+" checks="IllegalImport" id="bannedJUnitJupiterImports"/>
 
@@ -46,7 +45,6 @@
 	<suppress files="StringDecoderBenchmark" checks="RegexpSinglelineJava" id="separatorSymbolLocation"/>
 	<suppress files="Target_ClassFinder" checks="HideUtilityClassConstructor"/>
 
-
 	<!-- spring-core-test -->
 	<suppress files="CompileWithForkedClassLoader" checks="IllegalImport" id="bannedJUnitJupiterImports"/>
 	<suppress files="org[\\/]springframework[\\/]aot[\\/]agent[\\/].+" checks="RegexpSinglelineJava" id="systemOutErrPrint"/>
@@ -56,9 +54,11 @@
 	<suppress files="ExpressionException" checks="MutableException"/>
 	<suppress files="SpelMessage" checks="JavadocVariable|JavadocStyle"/>
 	<suppress files="SpelReproTests" checks="InterfaceIsType"/>
+	<suppress files="SpelCompilationCoverageTests" checks="SpringJUnit5" message="should not be public"/>
 
 	<!-- spring-jdbc -->
 	<suppress files="ResultSetWrappingSqlRowSet" checks="JavadocStyle"/>
+	<suppress files="DataSourceTransactionManagerTests" checks="SpringJUnit5" message="should not be public"/>
 
 	<!-- spring-jms -->
 	<suppress files="JmsHeaderMapper" checks="InterfaceIsType"/>
@@ -103,7 +103,8 @@
 	<suppress files="src[\\/]test[\\/]java[\\/]org[\\/]springframework[\\/]test[\\/]context[\\/]junit[\\/]jupiter[\\/]web[\\/].+Tests" checks="IllegalImport" id="bannedHamcrestImports"/>
 	<suppress files="src[\\/]test[\\/]java[\\/]org[\\/]springframework[\\/]test[\\/]util[\\/].+Tests" checks="IllegalImport" id="bannedHamcrestImports"/>
 	<suppress files="src[\\/]test[\\/]java[\\/]org[\\/]springframework[\\/]test[\\/]web[\\/](client|reactive|servlet|support)[\\/].+Tests" checks="IllegalImport" id="bannedHamcrestImports"/>
-	<suppress files="src[\\/]test[\\/]java[\\/]org[\\/]springframework[\\/]test[\\/]context[\\/](aot|junit4)" checks="SpringJUnit5"/>
+	<suppress files="src[\\/]test[\\/]java[\\/]org[\\/]springframework[\\/]test[\\/]context[\\/](aot|bean[\\/]override|junit4)" checks="SpringJUnit5"/>
+	<suppress files="(ExplicitPropertiesFileInClasspathTestPropertySourceTests|SingleTestClassWithTwoLevelContextHierarchyTests)" checks="SpringJUnit5" message="should not be public"/>
 	<suppress files="org[\\/]springframework[\\/]test[\\/]context[\\/].+[\\/](ExpectedExceptionSpringRunnerTests|StandardJUnit4FeaturesTests|TestNGConcurrencyTests|ProgrammaticTxMgmtTestNGTests)" checks="RegexpSinglelineJava" id="expectedExceptionAnnotation"/>
 
 	<!-- spring-web -->

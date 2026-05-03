@@ -291,7 +291,7 @@ class RequestMappingInfoTests {
 
 	@Test
 	@Disabled
-	public void preFlightRequest() {
+	void preFlightRequest() {
 		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.options("/foo")
 				.header("Origin", "https://domain.com")
 				.header(HttpHeaders.ACCESS_CONTROL_REQUEST_HEADERS, "POST"));

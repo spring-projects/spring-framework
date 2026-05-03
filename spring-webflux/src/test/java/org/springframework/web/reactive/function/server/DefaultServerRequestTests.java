@@ -247,7 +247,7 @@ class DefaultServerRequestTests {
 	class BodyTests {
 
 		@Test
-		public void body() {
+		void body() {
 			byte[] bytes = "foo".getBytes(StandardCharsets.UTF_8);
 			DefaultDataBuffer dataBuffer = DefaultDataBufferFactory.sharedInstance.wrap(ByteBuffer.wrap(bytes));
 			Flux<DataBuffer> body = Flux.just(dataBuffer);
@@ -266,7 +266,7 @@ class DefaultServerRequestTests {
 		}
 
 		@Test
-		public void bodyToMono() {
+		void bodyToMono() {
 			byte[] bytes = "foo".getBytes(StandardCharsets.UTF_8);
 			DefaultDataBuffer dataBuffer = DefaultDataBufferFactory.sharedInstance.wrap(ByteBuffer.wrap(bytes));
 			Flux<DataBuffer> body = Flux.just(dataBuffer);
@@ -284,7 +284,7 @@ class DefaultServerRequestTests {
 		}
 
 		@Test
-		public void bodyToMonoParameterizedTypeReference() {
+		void bodyToMonoParameterizedTypeReference() {
 			byte[] bytes = "foo".getBytes(StandardCharsets.UTF_8);
 			DefaultDataBuffer dataBuffer = DefaultDataBufferFactory.sharedInstance.wrap(ByteBuffer.wrap(bytes));
 			Flux<DataBuffer> body = Flux.just(dataBuffer);
@@ -304,7 +304,7 @@ class DefaultServerRequestTests {
 		}
 
 		@Test
-		public void bodyToMonoDecodingException() {
+		void bodyToMonoDecodingException() {
 			byte[] bytes = "{\"invalid\":\"json\" ".getBytes(StandardCharsets.UTF_8);
 			DefaultDataBuffer dataBuffer = DefaultDataBufferFactory.sharedInstance.wrap(ByteBuffer.wrap(bytes));
 			Flux<DataBuffer> body = Flux.just(dataBuffer);
@@ -325,7 +325,7 @@ class DefaultServerRequestTests {
 		}
 
 		@Test
-		public void bodyToFlux() {
+		void bodyToFlux() {
 			byte[] bytes = "foo".getBytes(StandardCharsets.UTF_8);
 			DefaultDataBuffer dataBuffer = DefaultDataBufferFactory.sharedInstance.wrap(ByteBuffer.wrap(bytes));
 			Flux<DataBuffer> body = Flux.just(dataBuffer);
@@ -343,7 +343,7 @@ class DefaultServerRequestTests {
 		}
 
 		@Test
-		public void bodyToFluxParameterizedTypeReference() {
+		void bodyToFluxParameterizedTypeReference() {
 			byte[] bytes = "foo".getBytes(StandardCharsets.UTF_8);
 			DefaultDataBuffer dataBuffer = DefaultDataBufferFactory.sharedInstance.wrap(ByteBuffer.wrap(bytes));
 			Flux<DataBuffer> body = Flux.just(dataBuffer);
@@ -363,7 +363,7 @@ class DefaultServerRequestTests {
 		}
 
 		@Test
-		public void bodyUnacceptable() {
+		void bodyUnacceptable() {
 			byte[] bytes = "foo".getBytes(StandardCharsets.UTF_8);
 			DefaultDataBuffer dataBuffer = DefaultDataBufferFactory.sharedInstance.wrap(ByteBuffer.wrap(bytes));
 			Flux<DataBuffer> body = Flux.just(dataBuffer);

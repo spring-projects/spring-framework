@@ -42,7 +42,7 @@ class HttpStatusCodeExceptionTests {
 	 * serializable due to the addition of a non-serializable {@code Charset} field.
 	 */
 	@Test
-	void testSerializability() throws IOException, ClassNotFoundException {
+	void serializability() throws IOException, ClassNotFoundException {
 		HttpStatusCodeException ex1 = new HttpClientErrorException(
 				HttpStatus.BAD_REQUEST, null, null, StandardCharsets.US_ASCII);
 		ByteArrayOutputStream out = new ByteArrayOutputStream();

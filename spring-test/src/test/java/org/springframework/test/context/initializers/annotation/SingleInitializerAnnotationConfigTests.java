@@ -35,7 +35,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @since 3.2
  */
 @SpringJUnitConfig(classes = { GlobalConfig.class, DevProfileConfig.class }, initializers = FooBarAliasInitializer.class)
-public class SingleInitializerAnnotationConfigTests {
+class SingleInitializerAnnotationConfigTests {
 
 	@Autowired
 	protected String foo;
@@ -49,7 +49,7 @@ public class SingleInitializerAnnotationConfigTests {
 
 
 	@Test
-	public void activeBeans() {
+	void activeBeans() {
 		assertThat(foo).isEqualTo("foo");
 		assertThat(bar).isEqualTo("foo");
 		assertThat(baz).isEqualTo("global config");

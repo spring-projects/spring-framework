@@ -23,6 +23,7 @@ import java.util.function.Predicate;
 
 import org.jspecify.annotations.Nullable;
 
+import org.springframework.util.ClassUtils;
 import org.springframework.util.ExceptionTypeFilter;
 import org.springframework.util.backoff.BackOff;
 
@@ -96,8 +97,7 @@ class DefaultRetryPolicy implements RetryPolicy {
 	private static String names(Set<Class<? extends Throwable>> types) {
 		StringJoiner result = new StringJoiner(", ", "[", "]");
 		for (Class<? extends Throwable> type : types) {
-			String name = type.getCanonicalName();
-			result.add(name != null? name : type.getName());
+			result.add(ClassUtils.getCanonicalName(type));
 		}
 		return result.toString();
 	}

@@ -46,7 +46,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  *
  * @author Rossen Stoyanchev
  */
-public class JsonPathAssertionTests {
+class JsonPathAssertionTests {
 
 	private final WebTestClient client =
 			MockMvcWebTestClient.bindToController(new MusicController())
@@ -58,7 +58,7 @@ public class JsonPathAssertionTests {
 
 
 	@Test
-	public void exists() {
+	void exists() {
 		String composerByName = "$.composers[?(@.name == '%s')]";
 		String performerByName = "$.performers[?(@.name == '%s')]";
 
@@ -78,7 +78,7 @@ public class JsonPathAssertionTests {
 	}
 
 	@Test
-	public void doesNotExist() {
+	void doesNotExist() {
 		client.get().uri("/music/people")
 				.exchange()
 				.expectBody()
@@ -88,7 +88,7 @@ public class JsonPathAssertionTests {
 	}
 
 	@Test
-	public void equality() {
+	void equality() {
 		client.get().uri("/music/people")
 				.exchange()
 				.expectBody()
@@ -106,7 +106,7 @@ public class JsonPathAssertionTests {
 	}
 
 	@Test
-	public void hamcrestMatcher() {
+	void hamcrestMatcher() {
 		client.get().uri("/music/people")
 				.exchange()
 				.expectBody()
@@ -117,7 +117,7 @@ public class JsonPathAssertionTests {
 	}
 
 	@Test
-	public void hamcrestMatcherWithParameterizedJsonPath() {
+	void hamcrestMatcherWithParameterizedJsonPath() {
 		client.get().uri("/music/people")
 				.exchange()
 				.expectBody()

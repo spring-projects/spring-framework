@@ -32,7 +32,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
  * @author Arjen Poutsma
  * @author Brian Clozel
  */
-public class JettyDataBufferTests {
+class JettyDataBufferTests {
 
 	private final JettyDataBufferFactory dataBufferFactory = new JettyDataBufferFactory();
 
@@ -58,7 +58,7 @@ public class JettyDataBufferTests {
 	}
 
 	@AfterEach
-	public void tearDown() throws Exception {
+	void tearDown() throws Exception {
 		this.byteBufferPool.clear();
 	}
 }

@@ -32,7 +32,7 @@ import org.springframework.web.testfixture.servlet.MockServletContext;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class SpringConfiguratorTests {
+class SpringConfiguratorTests {
 
 	private MockServletContext servletContext;
 

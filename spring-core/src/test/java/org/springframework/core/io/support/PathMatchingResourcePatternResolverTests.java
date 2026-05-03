@@ -56,6 +56,7 @@ import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
+import org.springframework.core.testfixture.ide.IdeUtils;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.util.FileSystemUtils;
@@ -112,9 +113,11 @@ class PathMatchingResourcePatternResolverTests {
 			long length1 = 0;
 			Resource[] resources1 = resolver.getResources("classpath*:META-INF/MANIFEST.MF");
 			for (Resource resource : resources1) {
-				assertThat(resource.exists()).isTrue();
-				assertThat(resource.isReadable()).isTrue();
-				assertThat(resource.isFile()).isFalse();
+				assertThat(resource.exists()).as("%s exists", resource).isTrue();
+				assertThat(resource.isReadable()).as("%s is readable", resource).isTrue();
+				if (!IdeUtils.runningInEclipse()) {
+					assertThat(resource.isFile()).as("%s is a file", resource).isFalse();
+				}
 				length1 += resource.contentLength();
 				resource.consumeContent(inputStream ->
 						content1.append(FileCopyUtils.copyToString(new InputStreamReader(inputStream))));

@@ -45,18 +45,18 @@ import static org.springframework.test.context.TestExecutionListeners.MergeMode.
  */
 @ExtendWith(SpringExtension.class)
 @TestExecutionListeners(listeners = CustomEventPublishingTestExecutionListener.class, mergeMode = MERGE_WITH_DEFAULTS)
-public class CustomTestEventTests {
+class CustomTestEventTests {
 
 	private static final List<CustomEvent> events = new ArrayList<>();
 
 
 	@BeforeEach
-	public void clearEvents() {
+	void clearEvents() {
 		events.clear();
 	}
 
 	@Test
-	public void customTestEventPublished() {
+	void customTestEventPublished() {
 		assertThat(events).hasSize(1);
 		CustomEvent customEvent = events.get(0);
 		assertThat(customEvent.getSource()).isEqualTo(getClass());

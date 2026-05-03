@@ -62,7 +62,7 @@ class MappingMediaTypeFileExtensionResolverTests {
 	}
 
 	@Test // SPR-13747
-	public void lookupMediaTypeCaseInsensitive() {
+	void lookupMediaTypeCaseInsensitive() {
 		assertThat(new MappingMediaTypeFileExtensionResolver(DEFAULT_MAPPINGS).lookupMediaType("JSON"))
 				.isEqualTo(MediaType.APPLICATION_JSON);
 	}

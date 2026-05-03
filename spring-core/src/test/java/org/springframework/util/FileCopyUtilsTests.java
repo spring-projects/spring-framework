@@ -23,7 +23,6 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Arrays;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -45,7 +44,7 @@ class FileCopyUtilsTests {
 		ByteArrayOutputStream out = new ByteArrayOutputStream(content.length);
 		int count = FileCopyUtils.copy(in, out);
 		assertThat(count).isEqualTo(content.length);
-		assertThat(Arrays.equals(content, out.toByteArray())).isTrue();
+		assertThat(out.toByteArray()).isEqualTo(content);
 	}
 
 	@Test
@@ -53,7 +52,7 @@ class FileCopyUtilsTests {
 		byte[] content = "content".getBytes();
 		ByteArrayOutputStream out = new ByteArrayOutputStream(content.length);
 		FileCopyUtils.copy(content, out);
-		assertThat(Arrays.equals(content, out.toByteArray())).isTrue();
+		assertThat(out.toByteArray()).isEqualTo(content);
 	}
 
 	@Test
@@ -61,7 +60,7 @@ class FileCopyUtilsTests {
 		byte[] content = "content".getBytes();
 		ByteArrayInputStream in = new ByteArrayInputStream(content);
 		byte[] result = FileCopyUtils.copyToByteArray(in);
-		assertThat(Arrays.equals(content, result)).isTrue();
+		assertThat(result).isEqualTo(content);
 	}
 
 	@Test

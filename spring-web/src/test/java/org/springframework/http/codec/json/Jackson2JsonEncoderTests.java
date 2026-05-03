@@ -58,13 +58,13 @@ import static org.springframework.http.MediaType.APPLICATION_XML;
 @SuppressWarnings("removal")
 class Jackson2JsonEncoderTests extends AbstractEncoderTests<Jackson2JsonEncoder> {
 
-	public Jackson2JsonEncoderTests() {
+	Jackson2JsonEncoderTests() {
 		super(new Jackson2JsonEncoder());
 	}
 
 	@Override
 	@Test
-	public void canEncode() {
+	protected void canEncode() {
 		ResolvableType pojoType = ResolvableType.forClass(Pojo.class);
 		assertThat(this.encoder.canEncode(pojoType, APPLICATION_JSON)).isTrue();
 		assertThat(this.encoder.canEncode(pojoType, APPLICATION_NDJSON)).isTrue();
@@ -87,7 +87,7 @@ class Jackson2JsonEncoderTests extends AbstractEncoderTests<Jackson2JsonEncoder>
 	@Override
 	@Test
 	@SuppressWarnings("deprecation")
-	public void encode() throws Exception {
+	protected void encode() throws Exception {
 		Flux<Object> input = Flux.just(new Pojo("foo", "bar"),
 				new Pojo("foofoo", "barbar"),
 				new Pojo("foofoofoo", "barbarbar"));
@@ -101,7 +101,7 @@ class Jackson2JsonEncoderTests extends AbstractEncoderTests<Jackson2JsonEncoder>
 	}
 
 	@Test  // SPR-15866
-	public void canEncodeWithCustomMimeType() {
+	void canEncodeWithCustomMimeType() {
 		MimeType textJavascript = new MimeType("text", "javascript", StandardCharsets.UTF_8);
 		Jackson2JsonEncoder encoder = new Jackson2JsonEncoder(new ObjectMapper(), textJavascript);
 
@@ -174,7 +174,7 @@ class Jackson2JsonEncoderTests extends AbstractEncoderTests<Jackson2JsonEncoder>
 
 
 	@Test  // SPR-15727
-	public void encodeStreamWithCustomStreamingType() {
+	void encodeStreamWithCustomStreamingType() {
 		MediaType fooMediaType = new MediaType("application", "foo");
 		MediaType barMediaType = new MediaType("application", "bar");
 		this.encoder.setStreamingMediaTypes(Arrays.asList(fooMediaType, barMediaType));
@@ -247,7 +247,7 @@ class Jackson2JsonEncoderTests extends AbstractEncoderTests<Jackson2JsonEncoder>
 	}
 
 	@Test  // gh-28045
-	public void jacksonValueUnwrappedBeforeObjectMapperSelection() {
+	void jacksonValueUnwrappedBeforeObjectMapperSelection() {
 		JacksonViewBean bean = new JacksonViewBean();
 		bean.setWithView1("with");
 		bean.setWithView2("with");
@@ -272,7 +272,7 @@ class Jackson2JsonEncoderTests extends AbstractEncoderTests<Jackson2JsonEncoder>
 	}
 
 	@Test  // gh-22771
-	public void encodeWithFlushAfterWriteOff() {
+	void encodeWithFlushAfterWriteOff() {
 		ObjectMapper mapper = new ObjectMapper();
 		mapper.configure(SerializationFeature.FLUSH_AFTER_WRITE_VALUE, false);
 		Jackson2JsonEncoder encoder = new Jackson2JsonEncoder(mapper);

@@ -16,25 +16,30 @@
 
 package org.springframework.core.type.classreading;
 
+import java.io.IOException;
+
 import org.springframework.core.type.AbstractMethodMetadataTests;
 import org.springframework.core.type.AnnotationMetadata;
 
+
 /**
  * Tests for {@link SimpleMethodMetadata} and
- * {@link SimpleMethodMetadataReadingVisitor}.
+ * {@link SimpleMethodMetadataReadingVisitor} on Java < 24,
+ * and for the ClassFile API variant on Java >= 24.
  *
  * @author Phillip Webb
+ * @author Brian Clozel
  */
-class SimpleMethodMetadataTests extends AbstractMethodMetadataTests {
+class DefaultMethodMetadataTests extends AbstractMethodMetadataTests {
+
 
 	@Override
 	protected AnnotationMetadata get(Class<?> source) {
 		try {
-			return new SimpleMetadataReaderFactory(
-					source.getClassLoader()).getMetadataReader(
-							source.getName()).getAnnotationMetadata();
+			return MetadataReaderFactory.create(source.getClassLoader())
+					.getMetadataReader(source.getName()).getAnnotationMetadata();
 		}
-		catch (Exception ex) {
+		catch (IOException ex) {
 			throw new IllegalStateException(ex);
 		}
 	}

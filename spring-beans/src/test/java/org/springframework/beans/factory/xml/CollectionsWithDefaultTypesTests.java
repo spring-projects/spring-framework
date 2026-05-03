@@ -42,7 +42,7 @@ class CollectionsWithDefaultTypesTests {
 	}
 
 	@Test
-	void testListHasDefaultType() {
+	void listHasDefaultType() {
 		TestBean bean = (TestBean) this.beanFactory.getBean("testBean");
 		for (Object o : bean.getSomeList()) {
 			assertThat(o.getClass()).as("Value type is incorrect").isEqualTo(Integer.class);
@@ -50,7 +50,7 @@ class CollectionsWithDefaultTypesTests {
 	}
 
 	@Test
-	void testSetHasDefaultType() {
+	void setHasDefaultType() {
 		TestBean bean = (TestBean) this.beanFactory.getBean("testBean");
 		for (Object o : bean.getSomeSet()) {
 			assertThat(o.getClass()).as("Value type is incorrect").isEqualTo(Integer.class);
@@ -58,13 +58,13 @@ class CollectionsWithDefaultTypesTests {
 	}
 
 	@Test
-	void testMapHasDefaultKeyAndValueType() {
+	void mapHasDefaultKeyAndValueType() {
 		TestBean bean = (TestBean) this.beanFactory.getBean("testBean");
 		assertMap(bean.getSomeMap());
 	}
 
 	@Test
-	void testMapWithNestedElementsHasDefaultKeyAndValueType() {
+	void mapWithNestedElementsHasDefaultKeyAndValueType() {
 		TestBean bean = (TestBean) this.beanFactory.getBean("testBean2");
 		assertMap(bean.getSomeMap());
 	}
@@ -79,11 +79,11 @@ class CollectionsWithDefaultTypesTests {
 
 	@Test
 	@SuppressWarnings("rawtypes")
-	public void testBuildCollectionFromMixtureOfReferencesAndValues() {
+	void buildCollectionFromMixtureOfReferencesAndValues() {
 		MixedCollectionBean jumble = (MixedCollectionBean) this.beanFactory.getBean("jumble");
 		assertThat(jumble.getJumble()).as("Expected 3 elements, not " + jumble.getJumble().size()).hasSize(3);
 		List l = (List) jumble.getJumble();
-		assertThat(l.get(0).equals("literal")).isTrue();
+		assertThat(l.get(0)).isEqualTo("literal");
 		Integer[] array1 = (Integer[]) l.get(1);
 		assertThat(array1[0]).isEqualTo(2);
 		assertThat(array1[1]).isEqualTo(4);

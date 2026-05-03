@@ -230,6 +230,20 @@ class CoroutinesUtilsTests {
 	}
 
 	@Test
+	suspend fun invokeSuspendingFunctionWithNullableValueClassParameterAndNonNullParameter() {
+		val method = CoroutinesUtilsTests::class.java.declaredMethods.first { it.name.startsWith("suspendingFunctionWithNullableValueClass") }
+		val mono = CoroutinesUtils.invokeSuspendingFunction(method, this, ValueClass("foo"), null) as Mono
+		Assertions.assertThat(mono.awaitSingleOrNull()).isEqualTo("foo")
+	}
+
+	@Test
+	suspend fun invokeSuspendingFunctionWithNullableValueClassParameterAndUnderlyingValue() {
+		val method = CoroutinesUtilsTests::class.java.declaredMethods.first { it.name.startsWith("suspendingFunctionWithNullableValueClass") }
+		val mono = CoroutinesUtils.invokeSuspendingFunction(method, this, "foo", null) as Mono
+		Assertions.assertThat(mono.awaitSingleOrNull()).isEqualTo("foo")
+	}
+
+	@Test
 	suspend fun invokeSuspendingFunctionWithNullableValueClassParameter() {
 		val method = CoroutinesUtilsTests::class.java.declaredMethods.first { it.name.startsWith("suspendingFunctionWithNullableValueClass") }
 		val mono = CoroutinesUtils.invokeSuspendingFunction(method, this, null, null) as Mono

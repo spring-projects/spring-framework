@@ -84,7 +84,7 @@ class AnnotatedConfigClassesWithoutAtConfigurationTests {
 
 
 	@Test
-	void testSPR_9051() {
+	void spr_9051() {
 		assertThat(enigma).isNotNull();
 		assertThat(lifecycleBean).isNotNull();
 		assertThat(lifecycleBean.isInitialized()).isTrue();

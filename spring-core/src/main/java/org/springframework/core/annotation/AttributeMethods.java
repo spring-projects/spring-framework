@@ -26,6 +26,7 @@ import java.util.Map;
 import org.jspecify.annotations.Nullable;
 
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.ConcurrentReferenceHashMap;
 import org.springframework.util.ReflectionUtils;
 
@@ -143,8 +144,9 @@ final class AttributeMethods {
 					throw ex;
 				}
 				catch (Throwable ex) {
-					throw new IllegalStateException("Could not obtain annotation attribute value for " +
-							get(i).getName() + " declared on @" + getName(annotation.annotationType()), ex);
+					throw new IllegalStateException(
+							"Could not obtain annotation attribute value for " + get(i).getName() +
+							" declared on @" + ClassUtils.getCanonicalName(annotation.annotationType()), ex);
 				}
 			}
 		}
@@ -305,13 +307,8 @@ final class AttributeMethods {
 		if (attributeName == null) {
 			return "(none)";
 		}
-		String in = (annotationType != null ? " in annotation [" + annotationType.getName() + "]" : "");
+		String in = (annotationType != null ? " in annotation [" + ClassUtils.getCanonicalName(annotationType) + "]" : "");
 		return "attribute '" + attributeName + "'" + in;
-	}
-
-	private static String getName(Class<?> clazz) {
-		String canonicalName = clazz.getCanonicalName();
-		return (canonicalName != null ? canonicalName : clazz.getName());
 	}
 
 }

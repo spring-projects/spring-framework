@@ -17,7 +17,6 @@
 package org.springframework.web.reactive.function.client;
 
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.List;
 import java.util.function.Predicate;
 
@@ -28,7 +27,6 @@ import reactor.core.publisher.Mono;
 import org.springframework.core.codec.CodecException;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.StringUtils;
 
 /**
  * Internal methods shared between {@link DefaultWebClient} and
@@ -69,18 +67,43 @@ abstract class WebClientUtils {
 	}
 
 	/**
-	 * Return a String representation of the request details for logging purposes.
+	 * Return a String representation of the request details for logging purposes
+	 * in "METHOD URI" format.
+	 * For the Security purpose, URI is returned in encoded format,
+	 * while userInfo, query, and fragment is stripped out.
 	 * @since 6.0.16
 	 */
 	public static String getRequestDescription(HttpMethod httpMethod, URI uri) {
-		if (StringUtils.hasText(uri.getQuery())) {
-			try {
-				uri = new URI(uri.getScheme(), null, uri.getHost(), uri.getPort(), uri.getPath(), null, null);
+		StringBuilder sb = new StringBuilder()
+				.append(httpMethod.name()).append(" ");
+
+		// also handles Opaque URI, which has only schemeSpecificPart
+		if (uri.getRawUserInfo() == null && uri.getRawQuery() == null && uri.getRawFragment() == null) {
+			return sb.append(uri).toString();
+		}
+
+		if (uri.getScheme() != null) {
+			sb.append(uri.getScheme()).append(':');
+		}
+		if (uri.getHost() != null) {
+			sb.append("//");
+			String host = uri.getHost();
+			// IPv6 handling
+			if (host.indexOf(':') >= 0 && !host.startsWith("[") && !host.endsWith("]")) {
+				sb.append('[').append(host).append(']');
 			}
-			catch (URISyntaxException ignored) {
+			else {
+				sb.append(host);
+			}
+
+			if (uri.getPort() != -1) {
+				sb.append(':').append(uri.getPort());
 			}
 		}
-		return httpMethod.name() + " " + uri;
+		if (uri.getRawPath() != null) {
+			sb.append(uri.getRawPath());
+		}
+		return sb.toString();
 	}
 
 }

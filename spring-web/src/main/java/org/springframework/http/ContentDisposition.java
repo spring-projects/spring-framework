@@ -17,11 +17,14 @@
 package org.springframework.http;
 
 import java.io.ByteArrayOutputStream;
+import java.nio.CharBuffer;
+import java.nio.charset.CharacterCodingException;
 import java.nio.charset.Charset;
+import java.nio.charset.CharsetEncoder;
+import java.nio.charset.CodingErrorAction;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Base64;
-import java.util.BitSet;
 import java.util.HexFormat;
 import java.util.List;
 import java.util.Locale;
@@ -59,21 +62,7 @@ public final class ContentDisposition {
 	private static final String INVALID_HEADER_FIELD_PARAMETER_FORMAT =
 			"Invalid header field parameter format (as defined in RFC 5987)";
 
-	private static final BitSet PRINTABLE = new BitSet(256);
-
 	private static final HexFormat HEX_FORMAT = HexFormat.of().withUpperCase();
-
-
-	static {
-		// RFC 2045, Section 6.7, and RFC 2047, Section 4.2
-		for (int i=33; i<= 126; i++) {
-			PRINTABLE.set(i);
-		}
-		PRINTABLE.set(34, false); // "
-		PRINTABLE.set(61, false); // =
-		PRINTABLE.set(63, false); // ?
-		PRINTABLE.set(95, false); // _
-	}
 
 
 	private final @Nullable String type;
@@ -195,7 +184,7 @@ public final class ContentDisposition {
 			}
 			else {
 				sb.append("; filename=\"");
-				sb.append(encodeQuotedPrintableFilename(this.filename, this.charset)).append('\"');
+				sb.append(toIso88591(encodeQuotedPairs(this.filename))).append('\"');
 				sb.append("; filename*=");
 				sb.append(encodeRfc5987Filename(this.filename, this.charset));
 			}
@@ -446,44 +435,16 @@ public final class ContentDisposition {
 		return StreamUtils.copyToString(baos, charset);
 	}
 
-	/**
-	 * Encode the given header field param as described in RFC 2047.
-	 * @param filename the filename
-	 * @param charset the charset for the filename
-	 * @return the encoded header field param
-	 * @see <a href="https://tools.ietf.org/html/rfc2047">RFC 2047</a>
-	 */
-	private static String encodeQuotedPrintableFilename(String filename, Charset charset) {
-		Assert.notNull(filename, "'filename' must not be null");
-		Assert.notNull(charset, "'charset' must not be null");
-
-		byte[] source = filename.getBytes(charset);
-		StringBuilder sb = new StringBuilder(source.length << 1);
-		sb.append("=?");
-		sb.append(charset.name());
-		sb.append("?Q?");
-		for (byte b : source) {
-			if (b == 32) { // RFC 2047, section 4.2, rule (2)
-				sb.append('_');
-			}
-			else if (isPrintable(b)) {
-				sb.append((char) b);
-			}
-			else {
-				sb.append('=');
-				HEX_FORMAT.toHexDigits(sb, b);
-			}
+	private static String toIso88591(String input) {
+		CharsetEncoder encoder = ISO_8859_1.newEncoder()
+				.onUnmappableCharacter(CodingErrorAction.REPLACE)
+				.replaceWith(new byte[] { (byte) '_' });
+		try {
+			return ISO_8859_1.decode(encoder.encode(CharBuffer.wrap(input))).toString();
 		}
-		sb.append("?=");
-		return sb.toString();
-	}
-
-	private static boolean isPrintable(byte c) {
-		int b = c;
-		if (b < 0) {
-			b = 256 + b;
+		catch (CharacterCodingException exc) {
+			throw new IllegalArgumentException("Failed to convert to ISO 8859-1", exc);
 		}
-		return PRINTABLE.get(b);
 	}
 
 	private static String encodeQuotedPairs(String filename) {

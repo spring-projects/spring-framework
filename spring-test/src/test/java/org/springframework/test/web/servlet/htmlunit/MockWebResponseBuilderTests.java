@@ -38,7 +38,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
  * @author Rob Winch
  * @since 4.2
  */
-public class MockWebResponseBuilderTests {
+class MockWebResponseBuilderTests {
 
 	private final MockHttpServletResponse response = new MockHttpServletResponse();
 
@@ -48,27 +48,27 @@ public class MockWebResponseBuilderTests {
 
 
 	@BeforeEach
-	public void setup() throws Exception {
+	void setup() throws Exception {
 		this.webRequest = new WebRequest(new URL("http://company.example:80/test/this/here"));
 		this.responseBuilder = new MockWebResponseBuilder(System.currentTimeMillis(), this.webRequest, this.response);
 	}
 
 
 	@Test
-	public void constructorWithNullWebRequest() {
+	void constructorWithNullWebRequest() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				new MockWebResponseBuilder(0L, null, this.response));
 	}
 
 	@Test
-	public void constructorWithNullResponse() {
+	void constructorWithNullResponse() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				new MockWebResponseBuilder(0L,
 						new WebRequest(new URL("http://company.example:80/test/this/here")), null));
 	}
 
 	@Test
-	public void buildContent() throws Exception {
+	void buildContent() throws Exception {
 		this.response.getWriter().write("expected content");
 		WebResponse webResponse = this.responseBuilder.build();
 
@@ -76,7 +76,7 @@ public class MockWebResponseBuilderTests {
 	}
 
 	@Test
-	public void buildContentCharset() throws Exception {
+	void buildContentCharset() throws Exception {
 		this.response.addHeader("Content-Type", "text/html; charset=UTF-8");
 		WebResponse webResponse = this.responseBuilder.build();
 
@@ -84,7 +84,7 @@ public class MockWebResponseBuilderTests {
 	}
 
 	@Test
-	public void buildContentType() throws Exception {
+	void buildContentType() throws Exception {
 		this.response.addHeader("Content-Type", "text/html; charset-UTF-8");
 		WebResponse webResponse = this.responseBuilder.build();
 
@@ -92,7 +92,7 @@ public class MockWebResponseBuilderTests {
 	}
 
 	@Test
-	public void buildResponseHeaders() throws Exception {
+	void buildResponseHeaders() throws Exception {
 		this.response.addHeader("Content-Type", "text/html");
 		this.response.addHeader("X-Test", "value");
 		Cookie cookie = new Cookie("cookieA", "valueA");
@@ -120,7 +120,7 @@ public class MockWebResponseBuilderTests {
 	}
 
 	@Test  // SPR-14169
-	public void buildResponseHeadersNullDomainDefaulted() throws Exception {
+	void buildResponseHeadersNullDomainDefaulted() throws Exception {
 		Cookie cookie = new Cookie("cookieA", "valueA");
 		this.response.addCookie(cookie);
 		WebResponse webResponse = this.responseBuilder.build();
@@ -133,7 +133,7 @@ public class MockWebResponseBuilderTests {
 	}
 
 	@Test
-	public void buildStatus() throws Exception {
+	void buildStatus() throws Exception {
 		WebResponse webResponse = this.responseBuilder.build();
 
 		assertThat(webResponse.getStatusCode()).isEqualTo(200);
@@ -141,7 +141,7 @@ public class MockWebResponseBuilderTests {
 	}
 
 	@Test
-	public void buildStatusNotOk() throws Exception {
+	void buildStatusNotOk() throws Exception {
 		this.response.setStatus(401);
 		WebResponse webResponse = this.responseBuilder.build();
 
@@ -150,7 +150,7 @@ public class MockWebResponseBuilderTests {
 	}
 
 	@Test
-	public void buildStatusWithCustomMessage() throws Exception {
+	void buildStatusWithCustomMessage() throws Exception {
 		this.response.sendError(401, "Custom");
 		WebResponse webResponse = this.responseBuilder.build();
 
@@ -159,7 +159,7 @@ public class MockWebResponseBuilderTests {
 	}
 
 	@Test
-	public void buildWebRequest() throws Exception {
+	void buildWebRequest() throws Exception {
 		WebResponse webResponse = this.responseBuilder.build();
 
 		assertThat(webResponse.getWebRequest()).isEqualTo(this.webRequest);

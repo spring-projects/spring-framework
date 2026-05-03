@@ -70,7 +70,7 @@ class StaticApplicationContextTests extends AbstractApplicationContextTests {
 
 	@Test
 	@Override
-	public void count() {
+	protected void count() {
 		assertCount(15);
 	}
 

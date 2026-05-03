@@ -31,7 +31,12 @@ import org.springframework.beans.factory.annotation.AnnotatedGenericBeanDefiniti
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.SimpleBeanDefinitionRegistry;
+import org.springframework.core.OverridingClassLoader;
 import org.springframework.core.annotation.AliasFor;
+import org.springframework.core.type.AnnotationMetadata;
+import org.springframework.core.type.classreading.MetadataReader;
+import org.springframework.core.type.classreading.MetadataReaderFactory;
+import org.springframework.core.type.classreading.SimpleMetadataReaderFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Controller;
 import org.springframework.stereotype.Service;
@@ -89,6 +94,14 @@ class AnnotationBeanNameGeneratorTests {
 				.isThrownBy(() -> generateBeanName(bd))
 				.withMessage("Stereotype annotations suggest inconsistent component names: '%s' versus '%s'",
 						"myComponent", "myService");
+	}
+
+	@Test  // gh-36524
+	void generateBeanNameForConventionBasedComponentWithMissingAnnotationAttributeTypeViaAsm() throws Exception {
+		FilteringClassLoader classLoader = new FilteringClassLoader(getClass().getClassLoader());
+		MetadataReaderFactory readerFactory = new SimpleMetadataReaderFactory(classLoader);
+		MetadataReader reader = readerFactory.getMetadataReader(ConventionBasedComponentWithMissingAnnotationAttributeType.class.getName());
+		assertGeneratedName(reader.getAnnotationMetadata(), "myComponent");
 	}
 
 	@Test
@@ -171,6 +184,11 @@ class AnnotationBeanNameGeneratorTests {
 		assertThat(generateBeanName(bd)).isNotBlank().isEqualTo(expectedName);
 	}
 
+	private void assertGeneratedName(AnnotationMetadata annotationMetadata, String expectedName) {
+		BeanDefinition bd = new AnnotatedGenericBeanDefinition(annotationMetadata);
+		assertThat(generateBeanName(bd)).isNotBlank().isEqualTo(expectedName);
+	}
+
 	private void assertGeneratedNameIsDefault(Class<?> clazz) {
 		BeanDefinition bd = annotatedBeanDef(clazz);
 		String expectedName = this.beanNameGenerator.buildDefaultBeanName(bd);
@@ -228,6 +246,22 @@ class AnnotationBeanNameGeneratorTests {
 	@ConventionBasedComponent1("myComponent")
 	@ConventionBasedComponent2("myService")
 	static class ConventionBasedComponentWithMultipleConflictingNames {
+	}
+
+	static class FilteredType {
+	}
+
+	@Retention(RetentionPolicy.RUNTIME)
+	@interface ExampleAnnotation {
+
+		Class<?> value() default Void.class;
+
+		String description() default "";
+	}
+
+	@ExampleAnnotation(value = FilteredType.class, description = "optional")
+	@ConventionBasedComponent1("myComponent")
+	static class ConventionBasedComponentWithMissingAnnotationAttributeType {
 	}
 
 	@Component
@@ -374,6 +408,26 @@ class AnnotationBeanNameGeneratorTests {
 
 	@MyNamedStereotype(value = "enigma")
 	static class StereotypeWithGeneratedName {
+	}
+
+	static class FilteringClassLoader extends OverridingClassLoader {
+
+		FilteringClassLoader(ClassLoader parent) {
+			super(parent);
+		}
+
+		@Override
+		protected boolean isEligibleForOverriding(String className) {
+			return className.startsWith(AnnotationBeanNameGeneratorTests.class.getName());
+		}
+
+		@Override
+		protected Class<?> loadClassForOverriding(String name) throws ClassNotFoundException {
+			if (name.contains("Filtered")) {
+				throw new ClassNotFoundException(name);
+			}
+			return super.loadClassForOverriding(name);
+		}
 	}
 
 }

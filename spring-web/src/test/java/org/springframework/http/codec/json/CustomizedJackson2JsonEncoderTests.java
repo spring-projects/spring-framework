@@ -50,7 +50,7 @@ class CustomizedJackson2JsonEncoderTests extends AbstractEncoderTests<Jackson2Js
 
 	@Test
 	@Override
-	public void encode() throws Exception {
+	protected void encode() throws Exception {
 		Flux<MyCustomizedEncoderBean> input = Flux.just(
 				new MyCustomizedEncoderBean(MyCustomEncoderEnum.VAL1),
 				new MyCustomizedEncoderBean(MyCustomEncoderEnum.VAL2)

@@ -175,7 +175,7 @@ class ServletInvocableHandlerMethodTests {
 	}
 
 	@Test  // SPR-9159
-	public void invokeAndHandle_NotVoidWithResponseStatusAndReason() throws Exception {
+	void invokeAndHandle_NotVoidWithResponseStatusAndReason() throws Exception {
 		ServletInvocableHandlerMethod handlerMethod = getHandlerMethod(new Handler(), "responseStatusWithReason");
 		handlerMethod.invokeAndHandle(this.webRequest, this.mavContainer);
 
@@ -218,7 +218,7 @@ class ServletInvocableHandlerMethodTests {
 	}
 
 	@Test // gh-23775, gh-24635
-	public void invokeAndHandle_ETagFilterHasNoImpactWhenETagPresent() throws Exception {
+	void invokeAndHandle_ETagFilterHasNoImpactWhenETagPresent() throws Exception {
 
 		String eTagValue = "\"deadb33f8badf00d\"";
 
@@ -326,7 +326,7 @@ class ServletInvocableHandlerMethodTests {
 	}
 
 	@Test  // SPR-12287
-	public void wrapConcurrentResult_ResponseEntityNullBody() throws Exception {
+	void wrapConcurrentResult_ResponseEntityNullBody() throws Exception {
 		this.returnValueHandlers.addHandler(new HttpEntityMethodProcessor(this.converters));
 		ServletInvocableHandlerMethod handlerMethod = getHandlerMethod(new ResponseEntityHandler(), "handleDeferred");
 		handlerMethod = handlerMethod.wrapConcurrentResult(new ResponseEntity<>(HttpStatus.OK));
@@ -390,7 +390,7 @@ class ServletInvocableHandlerMethodTests {
 	}
 
 	@Test // SPR-15478
-	public void wrapConcurrentResult_CollectedValuesListWithResponseEntity() throws Exception {
+	void wrapConcurrentResult_CollectedValuesListWithResponseEntity() throws Exception {
 		List<HttpMessageConverter<?>> converters = Collections.singletonList(new JacksonJsonHttpMessageConverter());
 		ResolvableType elementType = ResolvableType.forClass(Bar.class);
 		ReactiveTypeHandler.CollectedValuesList result = new ReactiveTypeHandler.CollectedValuesList(elementType);
@@ -408,7 +408,7 @@ class ServletInvocableHandlerMethodTests {
 	}
 
 	@Test  // SPR-12287 (16/Oct/14 comments)
-	public void responseEntityRawTypeWithNullBody() throws Exception {
+	void responseEntityRawTypeWithNullBody() throws Exception {
 		this.returnValueHandlers.addHandler(new HttpEntityMethodProcessor(this.converters));
 		ServletInvocableHandlerMethod handlerMethod = getHandlerMethod(new ResponseEntityHandler(), "handleRawType");
 		handlerMethod.invokeAndHandle(this.webRequest, this.mavContainer);

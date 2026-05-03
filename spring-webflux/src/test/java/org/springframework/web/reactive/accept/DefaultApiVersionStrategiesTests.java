@@ -38,7 +38,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
  * @author Rossen Stoyanchev
  * @author Jonathan Kaplan
  */
-public class DefaultApiVersionStrategiesTests {
+class DefaultApiVersionStrategiesTests {
 
 	private static final SemanticApiVersionParser parser = new SemanticApiVersionParser();
 

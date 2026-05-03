@@ -113,7 +113,7 @@ class DataBinderTests {
 		Map<?, ?> map = binder.getBindingResult().getModel();
 		assertThat(map).as("There is one element in map").hasSize(2);
 		TestBean tb = (TestBean) map.get("person");
-		assertThat(tb.equals(rod)).as("Same object").isTrue();
+		assertThat(tb).as("Same object").isEqualTo(rod);
 
 		BindingResult other = new DataBinder(rod, "person").getBindingResult();
 		assertThat(binder.getBindingResult()).isEqualTo(other);
@@ -793,7 +793,7 @@ class DataBinderTests {
 		Map<?,?> m = binder.getBindingResult().getModel();
 		assertThat(m).as("There is one element in map").hasSize(2);
 		TestBean tb = (TestBean) m.get("person");
-		assertThat(tb.equals(rod)).as("Same object").isTrue();
+		assertThat(tb).as("Same object").isEqualTo(rod);
 	}
 
 	@Test
@@ -1854,8 +1854,12 @@ class DataBinderTests {
 
 		FieldError ageError = errors.getFieldError("age");
 		assertThat(ageError.getCode()).isEqualTo("typeMismatch");
+		assertThat(ageError.isBindingFailure()).isTrue();
+		assertThat(ageError.shouldRenderDefaultMessage()).isFalse();
 		FieldError nameError = errors.getFieldError("name");
 		assertThat(nameError.getCode()).isEqualTo("badName");
+		assertThat(nameError.isBindingFailure()).isFalse();
+		assertThat(nameError.shouldRenderDefaultMessage()).isTrue();
 	}
 
 	@Test

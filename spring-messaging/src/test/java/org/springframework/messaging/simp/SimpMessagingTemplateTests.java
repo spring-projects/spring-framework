@@ -87,7 +87,7 @@ class SimpMessagingTemplateTests {
 	}
 
 	@Test // gh-23836
-	public void convertAndSendToUserWithInvalidSequence() {
+	void convertAndSendToUserWithInvalidSequence() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				this.messagingTemplate.convertAndSendToUser("joe%2F", "/queue/foo", "data"));
 	}

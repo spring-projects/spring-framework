@@ -969,7 +969,7 @@ class DefaultConversionServiceTests {
 			MethodParameter parameter = new MethodParameter(method, 0);
 			TypeDescriptor descriptor = new TypeDescriptor(parameter);
 			Object actual = conversionService.convert("1,2,3", TypeDescriptor.valueOf(String.class), descriptor);
-			assertThat(((Optional<List<Integer>>) actual)).contains(List.of(1, 2, 3));
+			assertThat((Optional<List<Integer>>) actual).contains(List.of(1, 2, 3));
 		}
 
 		@Test

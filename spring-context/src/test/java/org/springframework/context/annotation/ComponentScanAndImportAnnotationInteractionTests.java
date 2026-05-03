@@ -28,7 +28,7 @@ import org.springframework.context.annotation.componentscan.simple.SimpleCompone
  * @author Chris Beams
  * @since 3.1
  */
-public class ComponentScanAndImportAnnotationInteractionTests {
+class ComponentScanAndImportAnnotationInteractionTests {
 
 	@Test
 	void componentScanOverlapsWithImport() {
@@ -99,12 +99,6 @@ public class ComponentScanAndImportAnnotationInteractionTests {
 
 	@Import(ImportedConfig.class)
 	static final class Config3 {
-	}
-
-
-	@ComponentScan("org.springframework.context.annotation.componentscan.simple")
-	@ComponentScan("org.springframework.context.annotation.componentscan.importing")
-	public static final class ImportedConfig {
 	}
 
 }

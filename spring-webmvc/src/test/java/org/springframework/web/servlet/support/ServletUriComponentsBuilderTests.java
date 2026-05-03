@@ -109,7 +109,7 @@ class ServletUriComponentsBuilderTests {
 	}
 
 	@Test // SPR-16650
-	public void fromRequestWithForwardedPrefix() throws Exception {
+	void fromRequestWithForwardedPrefix() throws Exception {
 		this.request.addHeader("X-Forwarded-Prefix", "/prefix");
 		this.request.setContextPath("/mvc-showcase");
 		this.request.setRequestURI("/mvc-showcase/bar");
@@ -121,7 +121,7 @@ class ServletUriComponentsBuilderTests {
 	}
 
 	@Test // SPR-16650
-	public void fromRequestWithForwardedPrefixTrailingSlash() throws Exception {
+	void fromRequestWithForwardedPrefixTrailingSlash() throws Exception {
 		this.request.addHeader("X-Forwarded-Prefix", "/foo/");
 		this.request.setContextPath("/spring-mvc-showcase");
 		this.request.setRequestURI("/spring-mvc-showcase/bar");
@@ -133,7 +133,7 @@ class ServletUriComponentsBuilderTests {
 	}
 
 	@Test // SPR-16650
-	public void fromRequestWithForwardedPrefixRoot() throws Exception {
+	void fromRequestWithForwardedPrefixRoot() throws Exception {
 		this.request.addHeader("X-Forwarded-Prefix", "/");
 		this.request.setContextPath("/mvc-showcase");
 		this.request.setRequestURI("/mvc-showcase/bar");
@@ -153,7 +153,7 @@ class ServletUriComponentsBuilderTests {
 	}
 
 	@Test // SPR-16650
-	public void fromContextPathWithForwardedPrefix() throws Exception {
+	void fromContextPathWithForwardedPrefix() throws Exception {
 		this.request.addHeader("X-Forwarded-Prefix", "/prefix");
 		this.request.setContextPath("/mvc-showcase");
 		this.request.setRequestURI("/mvc-showcase/simple");
@@ -174,7 +174,7 @@ class ServletUriComponentsBuilderTests {
 	}
 
 	@Test // SPR-16650
-	public void fromServletMappingWithForwardedPrefix() throws Exception {
+	void fromServletMappingWithForwardedPrefix() throws Exception {
 		this.request.addHeader("X-Forwarded-Prefix", "/prefix");
 		this.request.setContextPath("/mvc-showcase");
 		this.request.setServletPath("/app");
@@ -201,7 +201,7 @@ class ServletUriComponentsBuilderTests {
 	}
 
 	@Test // SPR-10272
-	public void pathExtension() {
+	void pathExtension() {
 		this.request.setRequestURI("/rest/books/6.json");
 		ServletUriComponentsBuilder builder = ServletUriComponentsBuilder.fromRequestUri(this.request);
 		String extension = builder.removePathExtension();

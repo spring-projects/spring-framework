@@ -26,7 +26,6 @@ import org.jspecify.annotations.Nullable;
  *
  * @author Rossen Stoyanchev
  * @since 4.2
- * @see org.springframework.web.client.RestTemplate#setUriTemplateHandler(UriTemplateHandler)
  */
 public interface UriTemplateHandler {
 

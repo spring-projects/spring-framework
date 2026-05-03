@@ -43,7 +43,7 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standal
  * @see XmlContentAssertionTests
  * @see XpathAssertionTests
  */
-public class ContentAssertionTests {
+class ContentAssertionTests {
 
 	private final MockMvc mockMvc = standaloneSetup(new SimpleController()).alwaysExpect(status().isOk()).build();
 

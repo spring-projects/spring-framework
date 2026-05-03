@@ -80,7 +80,7 @@ class StringDecoderTests extends AbstractDecoderTests<StringDecoder> {
 	}
 
 	@Test // gh-30299
-	public void decodeAndCancelWithPendingChunks() {
+	void decodeAndCancelWithPendingChunks() {
 		Flux<DataBuffer> input = toDataBuffers("abc", 1, UTF_8).concatWith(Flux.never());
 		Flux<String> result = this.decoder.decode(input, TYPE, null, null);
 

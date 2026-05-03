@@ -58,7 +58,7 @@ class OptionTagEnumTests extends AbstractHtmlElementTagTests {
 
 	@Test
 	@SuppressWarnings("rawtypes")
-	public void withJavaEnum() throws Exception {
+	void withJavaEnum() throws Exception {
 		GenericBean testBean = new GenericBean();
 		testBean.setCustomEnum(CustomEnum.VALUE_1);
 		getPageContext().getRequest().setAttribute("testBean", testBean);

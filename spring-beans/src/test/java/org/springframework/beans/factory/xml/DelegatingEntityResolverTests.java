@@ -31,19 +31,19 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
 class DelegatingEntityResolverTests {
 
 	@Test
-	void testCtorWhereDtdEntityResolverIsNull() {
+	void ctorWhereDtdEntityResolverIsNull() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				new DelegatingEntityResolver(null, new NoOpEntityResolver()));
 	}
 
 	@Test
-	void testCtorWhereSchemaEntityResolverIsNull() {
+	void ctorWhereSchemaEntityResolverIsNull() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				new DelegatingEntityResolver(new NoOpEntityResolver(), null));
 	}
 
 	@Test
-	void testCtorWhereEntityResolversAreBothNull() {
+	void ctorWhereEntityResolversAreBothNull() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				new DelegatingEntityResolver(null, null));
 	}

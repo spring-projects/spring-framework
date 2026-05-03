@@ -22,7 +22,7 @@ import org.springframework.core.io.ResourceLoader;
 
 /**
  * Internal delegate for instantiating {@link MetadataReaderFactory} implementations.
- * For JDK >= 24, the {@link ClassFileMetadataReaderFactory} is being used.
+ * For JDK >= 24, the {@link ClassFileMetadataReaderFactory} is used.
  *
  * @author Brian Clozel
  * @since 7.0

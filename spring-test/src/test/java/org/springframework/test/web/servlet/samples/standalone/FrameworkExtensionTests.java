@@ -50,18 +50,18 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standal
  * @author Rossen Stoyanchev
  * @since 4.1
  */
-public class FrameworkExtensionTests {
+class FrameworkExtensionTests {
 
 	private final MockMvc mockMvc = standaloneSetup(new SampleController()).apply(defaultSetup()).build();
 
 
 	@Test
-	public void fooHeader() throws Exception {
+	void fooHeader() throws Exception {
 		this.mockMvc.perform(get("/").with(headers().foo("a=b"))).andExpect(content().string("Foo"));
 	}
 
 	@Test
-	public void barHeader() throws Exception {
+	void barHeader() throws Exception {
 		this.mockMvc.perform(get("/").with(headers().bar("a=b"))).andExpect(content().string("Bar"));
 	}
 

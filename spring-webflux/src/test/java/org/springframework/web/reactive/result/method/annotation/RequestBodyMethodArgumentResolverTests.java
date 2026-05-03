@@ -109,7 +109,7 @@ class RequestBodyMethodArgumentResolverTests {
 	}
 
 	@Test // SPR-15758
-	public void emptyBodyWithoutContentType() {
+	void emptyBodyWithoutContentType() {
 		MethodParameter param = this.testMethod.annot(requestBody().notRequired()).arg(Map.class);
 		String body = resolveValueWithEmptyBody(param);
 
@@ -118,7 +118,7 @@ class RequestBodyMethodArgumentResolverTests {
 
 	@Test
 	@SuppressWarnings("unchecked")
-	public void emptyBodyWithMono() {
+	void emptyBodyWithMono() {
 		MethodParameter param = this.testMethod.annot(requestBody()).arg(Mono.class, String.class);
 		StepVerifier.create((Mono<Void>) resolveValueWithEmptyBody(param))
 				.expectNextCount(0)
@@ -134,7 +134,7 @@ class RequestBodyMethodArgumentResolverTests {
 
 	@Test
 	@SuppressWarnings("unchecked")
-	public void emptyBodyWithFlux() {
+	void emptyBodyWithFlux() {
 		MethodParameter param = this.testMethod.annot(requestBody()).arg(Flux.class, String.class);
 		StepVerifier.create((Flux<Void>) resolveValueWithEmptyBody(param))
 				.expectNextCount(0)
@@ -217,7 +217,7 @@ class RequestBodyMethodArgumentResolverTests {
 	}
 
 	@Test // gh-29565
-	public void invalidContentType() {
+	void invalidContentType() {
 		MethodParameter parameter = this.testMethod.annot(requestBody()).arg(String.class);
 
 		ServerWebExchange exchange = MockServerWebExchange.from(

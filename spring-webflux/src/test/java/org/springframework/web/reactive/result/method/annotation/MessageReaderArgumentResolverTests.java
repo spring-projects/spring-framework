@@ -102,7 +102,7 @@ class MessageReaderArgumentResolverTests {
 	// More extensive "empty body" tests in RequestBody- and HttpEntityArgumentResolverTests
 
 	@Test @SuppressWarnings("unchecked") // SPR-9942
-	public void emptyBody() {
+	void emptyBody() {
 		MockServerHttpRequest request = post("/path").contentType(MediaType.APPLICATION_JSON).build();
 		ServerWebExchange exchange = MockServerWebExchange.from(request);
 		ResolvableType type = forClassWithGenerics(Mono.class, TestBean.class);
@@ -114,7 +114,7 @@ class MessageReaderArgumentResolverTests {
 	}
 
 	@Test @SuppressWarnings("unchecked")
-	public void tooLargeBody() {
+	void tooLargeBody() {
 		StringBuilder bodyBuilder = new StringBuilder();
 		while (bodyBuilder.toString().getBytes().length < 256 * 1024) {
 			bodyBuilder.append("The default maximum input length is 256kb.");
@@ -202,7 +202,7 @@ class MessageReaderArgumentResolverTests {
 	}
 
 	@Test
-	void testBean() {
+	void bean() {
 		String body = "{\"bar\":\"b1\",\"foo\":\"f1\"}";
 		MethodParameter param = this.testMethod.arg(TestBean.class);
 		TestBean value = resolveValue(param, body);
@@ -277,7 +277,7 @@ class MessageReaderArgumentResolverTests {
 	}
 
 	@Test  // SPR-9964
-	public void parameterizedMethodArgument() throws Exception {
+	void parameterizedMethodArgument() throws Exception {
 		Method method = AbstractParameterizedController.class.getMethod("handleDto", Identifiable.class);
 		HandlerMethod handlerMethod = new HandlerMethod(new ConcreteParameterizedController(), method);
 		MethodParameter methodParam = handlerMethod.getMethodParameters()[0];

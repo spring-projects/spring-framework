@@ -429,12 +429,14 @@ class ConfigurationClassBeanDefinitionReader {
 	}
 
 	private void loadBeanDefinitionsFromBeanRegistrars(MultiValueMap<String, BeanRegistrar> registrars) {
-		if (!(this.registry instanceof ListableBeanFactory beanFactory)) {
-			throw new IllegalStateException("Cannot support bean registrars since " +
-					this.registry.getClass().getName() + " does not implement ListableBeanFactory");
-		}
-		registrars.values().forEach(registrarList -> registrarList.forEach(registrar -> registrar.register(new BeanRegistryAdapter(
-				this.registry, beanFactory, this.environment, registrar.getClass()), this.environment)));
+		registrars.values().forEach(registrarList -> registrarList.forEach(registrar -> {
+			if (!(this.registry instanceof ListableBeanFactory beanFactory)) {
+				throw new IllegalStateException("Cannot support bean registrars since " +
+						this.registry.getClass().getName() + " does not implement ListableBeanFactory");
+			}
+			registrar.register(new BeanRegistryAdapter(
+					this.registry, beanFactory, this.environment, registrar.getClass()), this.environment);
+		}));
 	}
 
 

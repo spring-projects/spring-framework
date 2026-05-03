@@ -36,14 +36,14 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @since 3.2
  */
 @SpringJUnitConfig(initializers = EntireAppInitializer.class)
-public class InitializerWithoutConfigFilesOrClassesTests {
+class InitializerWithoutConfigFilesOrClassesTests {
 
 	@Autowired
 	private String foo;
 
 
 	@Test
-	public void foo() {
+	void foo() {
 		assertThat(foo).isEqualTo("foo");
 	}
 

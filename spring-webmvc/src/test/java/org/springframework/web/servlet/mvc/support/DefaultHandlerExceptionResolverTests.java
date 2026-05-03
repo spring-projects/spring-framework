@@ -154,7 +154,7 @@ class DefaultHandlerExceptionResolverTests {
 	}
 
 	@Test
-	public void handleHttpMessageNotReadable() {
+	void handleHttpMessageNotReadable() {
 		HttpMessageNotReadableException ex = new HttpMessageNotReadableException("foo", new MockHttpInputMessage(new byte[0]));
 		ModelAndView mav = exceptionResolver.resolveException(request, response, null, ex);
 		assertThat(mav).as("No ModelAndView returned").isNotNull();
@@ -230,7 +230,7 @@ class DefaultHandlerExceptionResolverTests {
 	}
 
 	@Test  // SPR-14669
-	public void handleAsyncRequestTimeoutException() {
+	void handleAsyncRequestTimeoutException() {
 		Exception ex = new AsyncRequestTimeoutException();
 		ModelAndView mav = exceptionResolver.resolveException(request, response, null, ex);
 		assertThat(mav).as("No ModelAndView returned").isNotNull();

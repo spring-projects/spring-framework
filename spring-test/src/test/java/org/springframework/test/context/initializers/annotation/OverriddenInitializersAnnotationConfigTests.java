@@ -33,11 +33,11 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @since 3.2
  */
 @SpringJUnitConfig(initializers = DevProfileInitializer.class, inheritInitializers = false)
-public class OverriddenInitializersAnnotationConfigTests extends SingleInitializerAnnotationConfigTests {
+class OverriddenInitializersAnnotationConfigTests extends SingleInitializerAnnotationConfigTests {
 
 	@Test
 	@Override
-	public void activeBeans() {
+	void activeBeans() {
 		assertThat(foo).isEqualTo("foo");
 		assertThat(bar).isNull();
 		assertThat(baz).isEqualTo("dev profile config");

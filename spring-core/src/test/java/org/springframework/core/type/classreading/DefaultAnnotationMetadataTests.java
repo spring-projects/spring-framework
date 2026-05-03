@@ -22,11 +22,12 @@ import java.lang.annotation.RetentionPolicy;
 
 import org.junit.jupiter.api.Test;
 
+import org.springframework.core.OverridingClassLoader;
 import org.springframework.core.type.AbstractAnnotationMetadataTests;
 import org.springframework.core.type.AnnotationMetadata;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
  * Tests for {@link SimpleAnnotationMetadata} and
@@ -50,21 +51,46 @@ class DefaultAnnotationMetadataTests extends AbstractAnnotationMetadataTests {
 	}
 
 	@Test
-	void getClassAttributeWhenUnknownClass() {
-		var annotation = get(WithClassMissingFromClasspath.class).getAnnotations().get(ClassAttributes.class);
-		assertThat(annotation.getStringArray("types")).contains("javax.annotation.meta.When");
-		assertThatIllegalArgumentException().isThrownBy(() -> annotation.getClassArray("types"));
+	void getClassAttributeWhenUnknownClass() throws IOException {
+		var classLoader = new FilteringClassLoader(getClass().getClassLoader());
+		var mergedAnnotation = MetadataReaderFactory.create(classLoader)
+				.getMetadataReader(WithClassMissingFromClasspath.class.getName())
+				.getAnnotationMetadata()
+				.getAnnotations()
+				.get(ClassAttributes.class);
+		assertThat(mergedAnnotation.getStringArray("types")).contains("javax.annotation.meta.When");
+		assertThatExceptionOfType(TypeNotPresentException.class)
+				.isThrownBy(() -> mergedAnnotation.getClassArray("types"))
+				.withMessageContaining("javax.annotation.meta.When");
+	}
+
+
+	private static class FilteringClassLoader extends OverridingClassLoader {
+
+		FilteringClassLoader(ClassLoader parent) {
+			super(parent);
+		}
+
+		@Override
+		protected boolean isEligibleForOverriding(String className) {
+			return className.startsWith("javax.annotation.");
+		}
+
+		@Override
+		protected Class<?> loadClassForOverriding(String name) throws ClassNotFoundException {
+			throw new ClassNotFoundException(name);
+		}
 	}
 
 
 	@ClassAttributes(types = {javax.annotation.meta.When.class})
 	@javax.annotation.Nonnull(when = javax.annotation.meta.When.MAYBE)
-	public static class WithClassMissingFromClasspath {
+	static class WithClassMissingFromClasspath {
 	}
 
 
 	@Retention(RetentionPolicy.RUNTIME)
-	public @interface ClassAttributes {
+	@interface ClassAttributes {
 
 		Class<?>[] types();
 	}

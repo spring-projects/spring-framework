@@ -50,7 +50,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Rossen Stoyanchev
  * @since 5.0
  */
-public class WiretapConnectorTests {
+class WiretapConnectorTests {
 
 	private final LeakAwareDataBufferFactory bufferFactory =
 			new LeakAwareDataBufferFactory(new NettyDataBufferFactory(PooledByteBufAllocator.DEFAULT));
@@ -61,7 +61,7 @@ public class WiretapConnectorTests {
 	}
 
 	@Test
-	public void captureAndClaim() {
+	void captureAndClaim() {
 		ClientHttpRequest request = new MockClientHttpRequest(HttpMethod.GET, "/test");
 		ClientHttpResponse response = new MockClientHttpResponse(HttpStatus.OK);
 		ClientHttpConnector connector = createConnector(request, response);

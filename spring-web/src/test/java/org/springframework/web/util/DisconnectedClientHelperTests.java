@@ -41,7 +41,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * Unit tests for {@link DisconnectedClientHelper}.
  * @author Rossen Stoyanchev
  */
-public class DisconnectedClientHelperTests {
+class DisconnectedClientHelperTests {
 
 	@ParameterizedTest
 	@ValueSource(strings = {"broKen pipe", "connection reset By peer"})

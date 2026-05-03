@@ -50,13 +50,13 @@ class TransactionAspectTests {
 
 
 	@BeforeEach
-	public void initContext() {
+	void initContext() {
 		AnnotationTransactionAspect.aspectOf().setTransactionManager(txManager);
 	}
 
 
 	@Test
-	void testCommitOnAnnotatedClass() throws Throwable {
+	void commitOnAnnotatedClass() throws Throwable {
 		txManager.clear();
 		assertThat(txManager.begun).isEqualTo(0);
 		annotationOnlyOnClassWithNoInterface.echo(null);

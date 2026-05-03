@@ -24,11 +24,12 @@ import org.springframework.test.context.ActiveProfilesResolver;
  * @since 4.0
  */
 @ActiveProfiles(resolver = DevProfileResolverAnnotationConfigTests.class, inheritProfiles = false)
-public class DevProfileResolverAnnotationConfigTests extends DevProfileAnnotationConfigTests implements
+class DevProfileResolverAnnotationConfigTests extends DevProfileAnnotationConfigTests implements
 		ActiveProfilesResolver {
 
 	@Override
 	public String[] resolve(Class<?> testClass) {
 		return new String[] { "dev" };
 	}
+
 }

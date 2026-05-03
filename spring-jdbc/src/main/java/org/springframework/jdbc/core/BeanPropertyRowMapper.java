@@ -42,7 +42,6 @@ import org.springframework.dao.DataRetrievalFailureException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.jdbc.support.JdbcUtils;
 import org.springframework.util.Assert;
-import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -342,7 +341,7 @@ public class BeanPropertyRowMapper<T> implements RowMapper<T> {
 					Object value = getColumnValue(rs, index, pd);
 					if (rowNumber == 0 && logger.isDebugEnabled()) {
 						logger.debug("Mapping column '" + column + "' to property '" + pd.getName() +
-								"' of type '" + ClassUtils.getQualifiedName(pd.getPropertyType()) + "'");
+								"' of type '" + pd.getPropertyType().getTypeName() + "'");
 					}
 					try {
 						bw.setPropertyValue(pd.getName(), value);
@@ -350,7 +349,7 @@ public class BeanPropertyRowMapper<T> implements RowMapper<T> {
 					catch (TypeMismatchException ex) {
 						if (value == null && isPrimitivesDefaultedForNullValue()) {
 							if (logger.isDebugEnabled()) {
-								String propertyType = ClassUtils.getQualifiedName(pd.getPropertyType());
+								String propertyType = pd.getPropertyType().getTypeName();
 								logger.debug("""
 										Ignoring intercepted TypeMismatchException for row %d and column '%s' \
 										with null value when setting property '%s' of type '%s' on object: %s"

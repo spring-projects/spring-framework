@@ -20,7 +20,7 @@ import java.lang.reflect.Method;
 
 import org.junit.jupiter.api.Test;
 
-import org.springframework.util.ReflectionUtils;
+import org.springframework.util.ClassUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.context.MethodInvoker.DEFAULT_INVOKER;
@@ -38,7 +38,7 @@ class TestContextManagerMethodInvokerTests {
 
 	private final TestContextManager testContextManager = new TestContextManager(TestCase.class);
 
-	private final Method testMethod = ReflectionUtils.findMethod(TestCase.class, "testMethod");
+	private final Method testMethod = ClassUtils.getMethod(TestCase.class, "testMethod");
 
 
 	@Test
@@ -71,7 +71,7 @@ class TestContextManagerMethodInvokerTests {
 	private static class TestCase {
 
 		@SuppressWarnings("unused")
-		void testMethod() {
+		public void testMethod() {
 		}
 	}
 

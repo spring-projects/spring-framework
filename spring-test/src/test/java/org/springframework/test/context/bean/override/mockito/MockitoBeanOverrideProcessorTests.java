@@ -18,6 +18,7 @@ package org.springframework.test.context.bean.override.mockito;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
+import java.lang.reflect.Parameter;
 import java.util.List;
 
 import org.jspecify.annotations.Nullable;
@@ -52,17 +53,17 @@ class MockitoBeanOverrideProcessorTests {
 		@Test
 		void mockAnnotationCreatesMockitoBeanOverrideHandler() {
 			MockitoBean annotation = AnnotationUtils.synthesizeAnnotation(MockitoBean.class);
-			BeanOverrideHandler object = processor.createHandler(annotation, TestCase.class, field);
+			BeanOverrideHandler handler = processor.createHandler(annotation, TestCase.class, field);
 
-			assertThat(object).isExactlyInstanceOf(MockitoBeanOverrideHandler.class);
+			assertThat(handler).isExactlyInstanceOf(MockitoBeanOverrideHandler.class);
 		}
 
 		@Test
 		void spyAnnotationCreatesMockitoSpyBeanOverrideHandler() {
 			MockitoSpyBean annotation = AnnotationUtils.synthesizeAnnotation(MockitoSpyBean.class);
-			BeanOverrideHandler object = processor.createHandler(annotation, TestCase.class, field);
+			BeanOverrideHandler handler = processor.createHandler(annotation, TestCase.class, field);
 
-			assertThat(object).isExactlyInstanceOf(MockitoSpyBeanOverrideHandler.class);
+			assertThat(handler).isExactlyInstanceOf(MockitoSpyBeanOverrideHandler.class);
 		}
 
 		@Test
@@ -99,6 +100,81 @@ class MockitoBeanOverrideProcessorTests {
 
 		@MockitoBean(name = "bogus", types = Integer.class)
 		static class NameNotSupportedTestCase {
+		}
+	}
+
+	@Nested  // gh-36096
+	class CreateHandlerForParameterTests {
+
+		private final Parameter parameter = TestCase.class.getDeclaredConstructors()[0].getParameters()[0];
+
+
+		@Test
+		void mockAnnotationCreatesMockitoBeanOverrideHandler() {
+			MockitoBean annotation = AnnotationUtils.synthesizeAnnotation(MockitoBean.class);
+			BeanOverrideHandler handler = processor.createHandler(annotation, TestCase.class, parameter);
+
+			assertThat(handler).isExactlyInstanceOf(MockitoBeanOverrideHandler.class);
+		}
+
+		@Test
+		void spyAnnotationCreatesMockitoSpyBeanOverrideHandler() {
+			MockitoSpyBean annotation = AnnotationUtils.synthesizeAnnotation(MockitoSpyBean.class);
+			BeanOverrideHandler handler = processor.createHandler(annotation, TestCase.class, parameter);
+
+			assertThat(handler).isExactlyInstanceOf(MockitoSpyBeanOverrideHandler.class);
+		}
+
+		@Test
+		void otherAnnotationThrows() {
+			Annotation annotation = parameter.getAnnotation(Nullable.class);
+
+			assertThatIllegalStateException()
+					.isThrownBy(() -> processor.createHandler(annotation, TestCase.class, parameter))
+					.withMessage("Invalid annotation passed to MockitoBeanOverrideProcessor: expected either " +
+							"@MockitoBean or @MockitoSpyBean on parameter '%s' in constructor %s",
+							parameter.getName(), parameter.getDeclaringExecutable().getName());
+		}
+
+		@Test
+		void typesAttributeNotSupportedForMockitoBean() {
+			Parameter parameter = TypesNotSupportedForMockitoBeanTestCase.class
+					.getDeclaredConstructors()[0].getParameters()[0];
+			MockitoBean annotation = parameter.getAnnotation(MockitoBean.class);
+
+			assertThatIllegalStateException()
+					.isThrownBy(() -> processor.createHandler(annotation, TypesNotSupportedForMockitoBeanTestCase.class, parameter))
+					.withMessage("The @MockitoBean 'types' attribute must be omitted when declared on a parameter");
+		}
+
+		@Test
+		void typesAttributeNotSupportedForMockitoSpyBean() {
+			Parameter parameter = TypesNotSupportedForMockitoSpyBeanTestCase.class
+					.getDeclaredConstructors()[0].getParameters()[0];
+			MockitoSpyBean annotation = parameter.getAnnotation(MockitoSpyBean.class);
+
+			assertThatIllegalStateException()
+					.isThrownBy(() -> processor.createHandler(annotation, TypesNotSupportedForMockitoSpyBeanTestCase.class, parameter))
+					.withMessage("The @MockitoSpyBean 'types' attribute must be omitted when declared on a parameter");
+		}
+
+
+		static class TestCase {
+
+			TestCase(@MockitoBean @MockitoSpyBean @Nullable Integer number) {
+			}
+		}
+
+		static class TypesNotSupportedForMockitoBeanTestCase {
+
+			TypesNotSupportedForMockitoBeanTestCase(@MockitoBean(types = Integer.class) String param) {
+			}
+		}
+
+		static class TypesNotSupportedForMockitoSpyBeanTestCase {
+
+			TypesNotSupportedForMockitoSpyBeanTestCase(@MockitoSpyBean(types = Integer.class) String param) {
+			}
 		}
 	}
 

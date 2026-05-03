@@ -25,6 +25,8 @@ import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.BeanRegistrar;
 import org.springframework.beans.factory.BeanRegistry;
 import org.springframework.beans.factory.ListableBeanFactory;
@@ -80,6 +82,12 @@ public class BeanRegistryAdapter implements BeanRegistry {
 		this.customizers = customizers;
 	}
 
+
+	@Override
+	public void register(BeanRegistrar registrar) {
+		Assert.notNull(registrar, "BeanRegistrar must not be null");
+		registrar.register(this, this.environment);
+	}
 
 	@Override
 	public void registerAlias(String name, String alias) {
@@ -170,9 +178,19 @@ public class BeanRegistryAdapter implements BeanRegistry {
 	}
 
 	@Override
-	public void register(BeanRegistrar registrar) {
-		Assert.notNull(registrar, "'registrar' must not be null");
-		registrar.register(this, this.environment);
+	public boolean containsBean(String name) {
+		return this.beanFactory.containsBean(name);
+	}
+
+	@Override
+	public boolean containsBean(Class<?> beanType) {
+		return BeanFactoryUtils.beanNamesForTypeIncludingAncestors(this.beanFactory, beanType).length > 0;
+	}
+
+	@Override
+	public <T> boolean containsBean(ParameterizedTypeReference<T> beanType) {
+		ResolvableType resolvableType = ResolvableType.forType(beanType);
+		return BeanFactoryUtils.beanNamesForTypeIncludingAncestors(this.beanFactory, resolvableType).length > 0;
 	}
 
 
@@ -218,9 +236,9 @@ public class BeanRegistryAdapter implements BeanRegistry {
 
 		private final RootBeanDefinition beanDefinition;
 
-		private final ListableBeanFactory beanFactory;
+		private final BeanFactory beanFactory;
 
-		public BeanSpecAdapter(RootBeanDefinition beanDefinition, ListableBeanFactory beanFactory) {
+		public BeanSpecAdapter(RootBeanDefinition beanDefinition, BeanFactory beanFactory) {
 			this.beanDefinition = beanDefinition;
 			this.beanFactory = beanFactory;
 		}
@@ -296,9 +314,9 @@ public class BeanRegistryAdapter implements BeanRegistry {
 
 	private static class SupplierContextAdapter implements SupplierContext {
 
-		private final ListableBeanFactory beanFactory;
+		private final BeanFactory beanFactory;
 
-		public SupplierContextAdapter(ListableBeanFactory beanFactory) {
+		public SupplierContextAdapter(BeanFactory beanFactory) {
 			this.beanFactory = beanFactory;
 		}
 

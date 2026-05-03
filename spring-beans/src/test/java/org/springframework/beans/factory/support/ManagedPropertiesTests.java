@@ -34,7 +34,7 @@ class ManagedPropertiesTests {
 
 	@Test
 	@SuppressWarnings("unchecked")
-	public void mergeSunnyDay() {
+	void mergeSunnyDay() {
 		ManagedProperties parent = new ManagedProperties();
 		parent.setProperty("one", "one");
 		parent.setProperty("two", "two");
@@ -69,7 +69,7 @@ class ManagedPropertiesTests {
 
 	@Test
 	@SuppressWarnings("unchecked")
-	public void mergeEmptyChild() {
+	void mergeEmptyChild() {
 		ManagedProperties parent = new ManagedProperties();
 		parent.setProperty("one", "one");
 		parent.setProperty("two", "two");
@@ -81,7 +81,7 @@ class ManagedPropertiesTests {
 
 	@Test
 	@SuppressWarnings("unchecked")
-	public void mergeChildValuesOverrideTheParents() {
+	void mergeChildValuesOverrideTheParents() {
 		ManagedProperties parent = new ManagedProperties();
 		parent.setProperty("one", "one");
 		parent.setProperty("two", "two");

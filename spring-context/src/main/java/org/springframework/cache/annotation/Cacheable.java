@@ -193,8 +193,18 @@ public @interface Cacheable {
 	 * This is effectively a hint and the chosen cache provider might not actually
 	 * support it in a synchronized fashion. Check your provider documentation for
 	 * more details on the actual semantics.
+	 * <p>Note that `sync=true` leads to a combined callback operation against the
+	 * cache provider. If this combined operation fails on initial cache access,
+	 * there is no separate put operation to attempt anymore. Whereas for a default
+	 * `sync=false` setup, there are independent get and put steps: If the get step
+	 * fails but its error is suppressed in the {@code CacheErrorHandler} setup,
+	 * there will still be a put attempt after calling the underlying method.
 	 * @since 4.3
 	 * @see org.springframework.cache.Cache#get(Object, Callable)
+	 * @see org.springframework.cache.Cache#get(Object)
+	 * @see org.springframework.cache.Cache#put(Object, Object)
+	 * @see org.springframework.cache.interceptor.CacheErrorHandler#handleCacheGetError
+	 * @see org.springframework.cache.interceptor.CacheErrorHandler#handleCachePutError
 	 */
 	boolean sync() default false;
 

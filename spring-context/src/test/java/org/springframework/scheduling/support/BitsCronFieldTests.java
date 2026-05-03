@@ -106,9 +106,9 @@ class BitsCronFieldTests {
 
 	@Test
 	void names() {
-		assertThat(((BitsCronField)CronField.parseMonth("JAN,FEB,MAR,APR,MAY,JUN,JUL,AUG,SEP,OCT,NOV,DEC")))
+		assertThat((BitsCronField)CronField.parseMonth("JAN,FEB,MAR,APR,MAY,JUN,JUL,AUG,SEP,OCT,NOV,DEC"))
 				.has(clear(0)).has(setRange(1, 12));
-		assertThat(((BitsCronField)CronField.parseDaysOfWeek("SUN,MON,TUE,WED,THU,FRI,SAT")))
+		assertThat((BitsCronField)CronField.parseDaysOfWeek("SUN,MON,TUE,WED,THU,FRI,SAT"))
 				.has(clear(0)).has(setRange(1, 7));
 	}
 

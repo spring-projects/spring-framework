@@ -16,7 +16,6 @@
 
 package org.springframework.http.server.reactive;
 
-import java.net.URI;
 import java.util.Random;
 
 import org.reactivestreams.Publisher;
@@ -25,9 +24,7 @@ import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
-import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.testfixture.http.server.reactive.bootstrap.AbstractHttpHandlerIntegrationTests;
 import org.springframework.web.testfixture.http.server.reactive.bootstrap.HttpServer;
 
@@ -59,11 +56,7 @@ class RandomHandlerIntegrationTests extends AbstractHttpHandlerIntegrationTests 
 
 		// TODO: fix Reactor support
 
-		RestTemplate restTemplate = new RestTemplate();
-
-		byte[] body = randomBytes();
-		RequestEntity<byte[]> request = RequestEntity.post(URI.create("http://localhost:" + port)).body(body);
-		ResponseEntity<byte[]> response = restTemplate.exchange(request, byte[].class);
+		ResponseEntity<byte[]> response = getRestClient().post().body(randomBytes()).retrieve().toEntity(byte[].class);
 
 		assertThat(response.getBody()).isNotNull();
 		assertThat(response.getHeaders().getContentLength()).isEqualTo(RESPONSE_SIZE);

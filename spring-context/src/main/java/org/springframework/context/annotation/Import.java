@@ -71,8 +71,8 @@ public @interface Import {
 
 	/**
 	 * {@link Configuration @Configuration}, {@link ImportSelector},
-	 * {@link ImportBeanDefinitionRegistrar}, {@link BeanRegistrar}, or regular
-	 * component classes to import.
+	 * {@link ImportBeanDefinitionRegistrar}, {@link BeanRegistrar},
+	 * or regular component classes to import.
 	 */
 	Class<?>[] value();
 

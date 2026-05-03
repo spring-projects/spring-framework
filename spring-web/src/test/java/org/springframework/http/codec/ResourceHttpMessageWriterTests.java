@@ -63,7 +63,7 @@ class ResourceHttpMessageWriterTests {
 
 	@Test
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public void getWritableMediaTypes() {
+	void getWritableMediaTypes() {
 		assertThat((List) this.writer.getWritableMediaTypes())
 				.containsExactlyInAnyOrder(MimeTypeUtils.APPLICATION_OCTET_STREAM, MimeTypeUtils.ALL);
 	}

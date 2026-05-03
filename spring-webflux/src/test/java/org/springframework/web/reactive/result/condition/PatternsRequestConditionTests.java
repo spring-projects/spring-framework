@@ -114,7 +114,7 @@ class PatternsRequestConditionTests {
 	}
 
 	@Test // gh-22543
-	public void matchWithEmptyPatterns() {
+	void matchWithEmptyPatterns() {
 		PatternsRequestCondition condition = new PatternsRequestCondition();
 		assertThat(condition.getMatchingCondition(MockServerWebExchange.from(get("")))).isNotNull();
 		assertThat(condition.getMatchingCondition(MockServerWebExchange.from(get("/anything")))).isNull();

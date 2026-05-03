@@ -239,7 +239,7 @@ class JacksonTokenizerTests extends AbstractLeakCheckingTests {
 	}
 
 	@Test
-	void testLimit() {
+	void limit() {
 		List<String> source = asList(
 				"[",
 				"{", "\"id\":1,\"name\":\"Dan\"", "},",
@@ -260,7 +260,7 @@ class JacksonTokenizerTests extends AbstractLeakCheckingTests {
 	}
 
 	@Test
-	void testLimitTokenized() {
+	void limitTokenized() {
 
 		List<String> source = asList(
 				"[",
@@ -297,7 +297,7 @@ class JacksonTokenizerTests extends AbstractLeakCheckingTests {
 	}
 
 	@Test  // SPR-16521
-	public void jsonEOFExceptionIsWrappedAsDecodingError() {
+	void jsonEOFExceptionIsWrappedAsDecodingError() {
 		Flux<DataBuffer> source = Flux.just(stringBuffer("{\"status\": \"noClosingQuote}"));
 		Flux<TokenBuffer> tokens = JacksonTokenizer.tokenize(source, this.objectMapper, false, false, -1);
 

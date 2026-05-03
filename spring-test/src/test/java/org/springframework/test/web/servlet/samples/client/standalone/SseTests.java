@@ -35,14 +35,14 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Rossen Stoyanchev
  */
-public class SseTests {
+class SseTests {
 
 	private final WebTestClient testClient =
 			MockMvcWebTestClient.bindToController(new SseController()).build();
 
 
 	@Test
-	public void sse() {
+	void sse() {
 		FluxExchangeResult<Person> exchangeResult = this.testClient.get()
 				.uri("/persons")
 				.exchange()

@@ -102,7 +102,7 @@ public class BeanOverrideTestExecutionListener extends AbstractTestExecutionList
 		// test instance as the "test class".
 		Class<?> testClass = testInstance.getClass();
 
-		List<BeanOverrideHandler> handlers = BeanOverrideHandler.forTestClass(testClass);
+		List<BeanOverrideHandler> handlers = BeanOverrideUtils.findHandlersForFields(testClass);
 		if (!handlers.isEmpty()) {
 			ApplicationContext applicationContext = testContext.getApplicationContext();
 

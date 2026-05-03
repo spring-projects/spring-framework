@@ -56,19 +56,19 @@ class MethodMatchersTests {
 
 
 	@Test
-	void testDefaultMatchesAll() {
+	void defaultMatchesAll() {
 		MethodMatcher defaultMm = MethodMatcher.TRUE;
 		assertThat(defaultMm.matches(EXCEPTION_GETMESSAGE, Exception.class)).isTrue();
 		assertThat(defaultMm.matches(ITESTBEAN_SETAGE, TestBean.class)).isTrue();
 	}
 
 	@Test
-	void testMethodMatcherTrueSerializable() throws Exception {
+	void methodMatcherTrueSerializable() throws Exception {
 		assertThat(MethodMatcher.TRUE).isSameAs(SerializationTestUtils.serializeAndDeserialize(MethodMatcher.TRUE));
 	}
 
 	@Test
-	void testSingle() {
+	void single() {
 		MethodMatcher defaultMm = MethodMatcher.TRUE;
 		assertThat(defaultMm.matches(EXCEPTION_GETMESSAGE, Exception.class)).isTrue();
 		assertThat(defaultMm.matches(ITESTBEAN_SETAGE, TestBean.class)).isTrue();
@@ -80,7 +80,7 @@ class MethodMatchersTests {
 
 
 	@Test
-	void testDynamicAndStaticMethodMatcherIntersection() {
+	void dynamicAndStaticMethodMatcherIntersection() {
 		MethodMatcher mm1 = MethodMatcher.TRUE;
 		MethodMatcher mm2 = new TestDynamicMethodMatcherWhichMatches();
 		MethodMatcher intersection = MethodMatchers.intersection(mm1, mm2);
@@ -95,7 +95,7 @@ class MethodMatchersTests {
 	}
 
 	@Test
-	void testStaticMethodMatcherUnion() {
+	void staticMethodMatcherUnion() {
 		MethodMatcher getterMatcher = new StartsWithMatcher("get");
 		MethodMatcher setterMatcher = new StartsWithMatcher("set");
 		MethodMatcher union = MethodMatchers.union(getterMatcher, setterMatcher);
@@ -107,7 +107,7 @@ class MethodMatchersTests {
 	}
 
 	@Test
-	void testUnionEquals() {
+	void unionEquals() {
 		MethodMatcher first = MethodMatchers.union(MethodMatcher.TRUE, MethodMatcher.TRUE);
 		MethodMatcher second = new ComposablePointcut(MethodMatcher.TRUE).union(new ComposablePointcut(MethodMatcher.TRUE)).getMethodMatcher();
 		assertThat(first).isEqualTo(second);

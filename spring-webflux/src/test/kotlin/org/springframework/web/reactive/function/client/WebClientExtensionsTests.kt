@@ -16,6 +16,9 @@
 
 package org.springframework.web.reactive.function.client
 
+import io.micrometer.observation.Observation
+import io.micrometer.observation.ObservationHandler
+import io.micrometer.observation.ObservationRegistry
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
@@ -30,11 +33,13 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.reactivestreams.Publisher
 import org.springframework.core.ParameterizedTypeReference
+import org.springframework.core.PropagationContextElement
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.reactive.function.client.CoExchangeFilterFunction.Companion.COROUTINE_CONTEXT_ATTRIBUTE
 import reactor.core.publisher.Flux
+import reactor.core.publisher.Hooks
 import reactor.core.publisher.Mono
 import java.time.Duration
 import java.util.concurrent.CompletableFuture
@@ -433,9 +438,88 @@ class WebClientExtensionsTests {
 		}
 	}
 
+	@Test
+	fun `awaitExchange preserves parent observation with automatic context propagation`() {
+		Hooks.enableAutomaticContextPropagation()
+		try {
+			val observationRegistry = ObservationRegistry.create()
+			val contextObservationHandler = ContextObservationHandler()
+			observationRegistry.observationConfig().observationHandler(contextObservationHandler)
+			val exchangeFunction = mockk<ExchangeFunction>()
+			val mockResponse = mockk<ClientResponse>()
+			every { exchangeFunction.exchange(any()) } returns Mono.just(mockResponse)
+			every { mockResponse.statusCode() } returns HttpStatus.OK
+			every { mockResponse.releaseBody() } returns Mono.empty()
+
+			val parent = Observation.start("parent", observationRegistry)
+			val scope = parent.openScope()
+			try {
+				runBlocking(PropagationContextElement()) {
+					val webClient = WebClient.builder()
+						.exchangeFunction(exchangeFunction)
+						.observationRegistry(observationRegistry)
+						.build()
+					webClient.get().uri("/path1").awaitExchange { it.statusCode() }
+					webClient.get().uri("/path2").awaitExchange { it.statusCode() }
+				}
+			} finally {
+				scope.close()
+				parent.stop()
+			}
+			assertThat(contextObservationHandler.parentObservation).containsExactly(true, true)
+		} finally {
+			Hooks.disableAutomaticContextPropagation()
+		}
+	}
+
+	@Test
+	fun `awaitBody preserves parent observation with automatic context propagation`() {
+		Hooks.enableAutomaticContextPropagation()
+		try {
+			val observationRegistry = ObservationRegistry.create()
+			val contextObservationHandler = ContextObservationHandler()
+			observationRegistry.observationConfig().observationHandler(contextObservationHandler)
+			val exchangeFunction = mockk<ExchangeFunction>()
+			val mockResponse = mockk<ClientResponse>()
+			every { exchangeFunction.exchange(any()) } returns Mono.just(mockResponse)
+			every { mockResponse.statusCode() } returns HttpStatus.OK
+			every { mockResponse.bodyToMono(object : ParameterizedTypeReference<String>() {}) } returns Mono.just("body")
+
+			val parent = Observation.start("parent", observationRegistry)
+			val scope = parent.openScope()
+			try {
+				runBlocking(PropagationContextElement()) {
+					val webClient = WebClient.builder()
+						.exchangeFunction(exchangeFunction)
+						.observationRegistry(observationRegistry)
+						.build()
+					webClient.get().uri("/path1").retrieve().awaitBody<String>()
+					webClient.get().uri("/path2").retrieve().awaitBody<String>()
+				}
+			} finally {
+				scope.close()
+				parent.stop()
+			}
+			assertThat(contextObservationHandler.parentObservation).containsExactly(true, true)
+		} finally {
+			Hooks.disableAutomaticContextPropagation()
+		}
+	}
+
 	class Foo
 
 	private data class FooContextElement(val foo: Foo) : AbstractCoroutineContextElement(FooContextElement) {
 		companion object Key : CoroutineContext.Key<FooContextElement>
+	}
+
+	private class ContextObservationHandler : ObservationHandler<ClientRequestObservationContext> {
+
+		val parentObservation = mutableListOf<Boolean>()
+
+		override fun onStart(context: ClientRequestObservationContext) {
+			parentObservation.add(context.parentObservation != null)
+		}
+
+		override fun supportsContext(context: Observation.Context) = context is ClientRequestObservationContext
 	}
 }

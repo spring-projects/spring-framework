@@ -609,7 +609,7 @@ class PathPatternTests {
 	}
 
 	@Test // SPR-15264
-	public void extractUriTemplateVariables() {
+	void extractUriTemplateVariables() {
 		PathPattern pp;
 		pp = new PathPatternParser().parse("/{foo}");
 		assertMatches(pp,"/abc");
@@ -1008,7 +1008,7 @@ class PathPatternTests {
 	}
 
 	@Test  // SPR-13286
-	public void caseInsensitive() {
+	void caseInsensitive() {
 		PathPatternParser pp = new PathPatternParser();
 		pp.setCaseSensitive(false);
 		PathPattern p = pp.parse("/group/{groupName}/members");

@@ -39,11 +39,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  *
  * @author Rossen Stoyanchev
  */
-public class ReactiveReturnTypeTests {
-
+class ReactiveReturnTypeTests {
 
 	@Test // SPR-16869
-	public void sseWithFlux() throws Exception {
+	void sseWithFlux() throws Exception {
 
 		MockMvc mockMvc = MockMvcBuilders.standaloneSetup(ReactiveController.class).build();
 

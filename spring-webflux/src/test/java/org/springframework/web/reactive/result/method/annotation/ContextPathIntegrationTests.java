@@ -30,7 +30,7 @@ import org.springframework.http.server.reactive.HttpHandler;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.client.RestClient;
 import org.springframework.web.reactive.config.EnableWebFlux;
 import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
 import org.springframework.web.testfixture.http.server.reactive.bootstrap.AbstractHttpServer;
@@ -73,16 +73,13 @@ class ContextPathIntegrationTests {
 		server.start();
 
 		try {
-			RestTemplate restTemplate = new RestTemplate();
-			String actual;
+			RestClient restClient = RestClient.create("http://localhost:" + server.getPort());
 
-			String url = "http://localhost:" + server.getPort() + "/webApp1/test";
-			actual = restTemplate.getForObject(url, String.class);
-			assertThat(actual).isEqualTo("Tested in /webApp1");
+			assertThat(restClient.get().uri("/webApp1/test").retrieve().body(String.class))
+					.isEqualTo("Tested in /webApp1");
 
-			url = "http://localhost:" + server.getPort() + "/webApp2/test";
-			actual = restTemplate.getForObject(url, String.class);
-			assertThat(actual).isEqualTo("Tested in /webApp2");
+			assertThat(restClient.get().uri("/webApp2/test").retrieve().body(String.class))
+					.isEqualTo("Tested in /webApp2");
 		}
 		finally {
 			server.stop();
@@ -104,9 +101,9 @@ class ContextPathIntegrationTests {
 		server.start();
 
 		try {
-			String url = "http://localhost:" + server.getPort() + "/app/api/test";
-			String actual = new RestTemplate().getForObject(url, String.class);
-			assertThat(actual).isEqualTo("Tested in /app/api");
+			RestClient restClient = RestClient.create("http://localhost:" + server.getPort());
+			assertThat(restClient.get().uri("/app/api/test").retrieve().body(String.class))
+					.isEqualTo("Tested in /app/api");
 		}
 		finally {
 			server.stop();

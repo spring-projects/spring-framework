@@ -53,14 +53,14 @@ import org.springframework.http.client.JdkClientHttpRequestFactory;
 import org.springframework.http.client.JettyClientHttpRequestFactory;
 import org.springframework.http.client.ReactorClientHttpRequestFactory;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
-import org.springframework.http.converter.FormHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJacksonValue;
+import org.springframework.http.converter.multipart.MultipartHttpMessageConverter;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.junit.jupiter.api.Assumptions.assumeFalse;
+import static org.assertj.core.api.Assumptions.assumeThat;
 import static org.junit.jupiter.params.provider.Arguments.argumentSet;
 import static org.springframework.http.HttpMethod.POST;
 import static org.springframework.http.MediaType.MULTIPART_MIXED;
@@ -82,6 +82,7 @@ import static org.springframework.http.MediaType.MULTIPART_MIXED;
  * @author Brian Clozel
  * @author Sam Brannen
  */
+@SuppressWarnings("removal")
 class RestTemplateIntegrationTests extends AbstractMockWebServerTests {
 
 	@Retention(RetentionPolicy.RUNTIME)
@@ -227,8 +228,8 @@ class RestTemplateIntegrationTests extends AbstractMockWebServerTests {
 
 	@ParameterizedRestTemplateTest
 	void patchForObject(ClientHttpRequestFactory clientHttpRequestFactory) {
-		assumeFalse(clientHttpRequestFactory instanceof SimpleClientHttpRequestFactory,
-				"HttpURLConnection does not support the PATCH method");
+		assumeThat(clientHttpRequestFactory).as("HttpURLConnection does not support the PATCH method")
+				.isNotInstanceOf(SimpleClientHttpRequestFactory.class);
 
 		setUpClient(clientHttpRequestFactory);
 
@@ -241,8 +242,8 @@ class RestTemplateIntegrationTests extends AbstractMockWebServerTests {
 		setUpClient(clientHttpRequestFactory);
 
 		String url = baseUrl + "/status/notfound";
-		assertThatExceptionOfType(HttpClientErrorException.class).isThrownBy(() ->
-				template.execute(url, HttpMethod.GET, null, null))
+		assertThatExceptionOfType(HttpClientErrorException.class)
+			.isThrownBy(() -> template.execute(url, HttpMethod.GET, null, null))
 			.satisfies(ex -> {
 				assertThat(ex.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
 				assertThat(ex.getStatusText()).isNotNull();
@@ -260,12 +261,13 @@ class RestTemplateIntegrationTests extends AbstractMockWebServerTests {
 		setUpClient(clientHttpRequestFactory);
 
 		String url = baseUrl + "/status/badrequest";
-		assertThatExceptionOfType(HttpClientErrorException.class).isThrownBy(() ->
-				template.execute(url, HttpMethod.GET, null, null))
+		assertThatExceptionOfType(HttpClientErrorException.class)
+			.isThrownBy(() -> template.execute(url, HttpMethod.GET, null, null))
 			.satisfies(ex -> {
 				assertThat(ex.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
 				assertThat(ex.getMessage()).containsSubsequence("400", "on GET request for \""+url+ "\": [no body]");
-				assumeFalse(clientHttpRequestFactory instanceof JdkClientHttpRequestFactory, "JDK HttpClient does not expose status text");
+				assumeThat(clientHttpRequestFactory).as("JDK HttpClient does not expose status text")
+						.isNotInstanceOf(JdkClientHttpRequestFactory.class);
 				assertThat(ex.getMessage()).isEqualTo("400 Client Error on GET request for \""+url+ "\": [no body]");
 			});
 	}
@@ -275,14 +277,15 @@ class RestTemplateIntegrationTests extends AbstractMockWebServerTests {
 		setUpClient(clientHttpRequestFactory);
 
 		String url = baseUrl + "/status/server";
-		assertThatExceptionOfType(HttpServerErrorException.class).isThrownBy(() ->
-				template.execute(url, HttpMethod.GET, null, null))
+		assertThatExceptionOfType(HttpServerErrorException.class)
+			.isThrownBy(() -> template.execute(url, HttpMethod.GET, null, null))
 			.satisfies(ex -> {
 				assertThat(ex.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
 				assertThat(ex.getStatusText()).isNotNull();
 				assertThat(ex.getResponseBodyAsString()).isNotNull();
 				assertThat(ex.getMessage()).containsSubsequence("500", "on GET request for \"" + url + "\": [no body]");
-				assumeFalse(clientHttpRequestFactory instanceof JdkClientHttpRequestFactory, "JDK HttpClient does not expose status text");
+				assumeThat(clientHttpRequestFactory).as("JDK HttpClient does not expose status text")
+						.isNotInstanceOf(JdkClientHttpRequestFactory.class);
 				assertThat(ex.getMessage()).isEqualTo("500 Server Error on GET request for \"" + url + "\": [no body]");
 			});
 	}
@@ -348,23 +351,25 @@ class RestTemplateIntegrationTests extends AbstractMockWebServerTests {
 
 	private void addSupportedMediaTypeToFormHttpMessageConverter(MediaType mediaType) {
 		this.template.getMessageConverters().stream()
-				.filter(FormHttpMessageConverter.class::isInstance)
-				.map(FormHttpMessageConverter.class::cast)
+				.filter(MultipartHttpMessageConverter.class::isInstance)
+				.map(MultipartHttpMessageConverter.class::cast)
 				.findFirst()
-				.orElseThrow(() -> new IllegalStateException("Failed to find FormHttpMessageConverter"))
+				.orElseThrow(() -> new IllegalStateException("Failed to find MultipartHttpMessageConverter"))
 				.addSupportedMediaTypes(mediaType);
 	}
 
 	@ParameterizedRestTemplateTest
 	void form(ClientHttpRequestFactory clientHttpRequestFactory) {
 		setUpClient(clientHttpRequestFactory);
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 
 		MultiValueMap<String, String> form = new LinkedMultiValueMap<>();
 		form.add("name 1", "value 1");
 		form.add("name 2", "value 2+1");
 		form.add("name 2", "value 2+2");
 
-		template.postForLocation(baseUrl + "/form", form);
+		template.exchange(baseUrl + "/form", POST, new HttpEntity<>(form, headers), Void.class);
 	}
 
 	@ParameterizedRestTemplateTest

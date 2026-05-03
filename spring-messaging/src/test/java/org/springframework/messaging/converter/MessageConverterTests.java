@@ -139,7 +139,7 @@ class MessageConverterTests {
 	}
 
 	@Test // gh-29768
-	public void toMessageDefaultContentType() {
+	void toMessageDefaultContentType() {
 		DefaultContentTypeResolver resolver = new DefaultContentTypeResolver();
 		resolver.setDefaultMimeType(MimeTypeUtils.TEXT_PLAIN);
 

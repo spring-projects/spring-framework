@@ -179,6 +179,10 @@ If a specific parameter in a constructor for a JUnit Jupiter test class is of ty
 `ApplicationContext` (or a sub-type thereof) or is annotated or meta-annotated with
 `@Autowired`, `@Qualifier`, or `@Value`, Spring injects the value for that specific
 parameter with the corresponding bean or value from the test's `ApplicationContext`.
+Similarly, if a specific parameter is annotated with `@MockitoBean` or `@MockitoSpyBean`,
+Spring will inject a Mockito mock or spy, respectively &mdash; see
+xref:testing/annotations/integration-spring/annotation-mockitobean.adoc[`@MockitoBean` and `@MockitoSpyBean`]
+for details.
 
 Spring can also be configured to autowire all arguments for a test class constructor if
 the constructor is considered to be _autowirable_. A constructor is considered to be
@@ -396,11 +400,10 @@ recursively.
 ====
 As of Spring Framework 7.0, the `SpringExtension` uses a test-method scoped
 `ExtensionContext` within `@Nested` test class hierarchies by default. However, the
-`SpringExtension` can be configured to use a test-class scoped `ExtensionContext`.
-
-See the documentation for
-xref:testing/annotations/integration-junit-jupiter.adoc#integration-testing-annotations-springextensionconfig[`@SpringExtensionConfig`]
-for details.
+`SpringExtension` can be configured to use a test-class scoped `ExtensionContext` — for
+example via `@SpringExtensionConfig` or the `spring.test.extension.context.scope` Spring
+property (see
+xref:testing/annotations/integration-junit-jupiter.adoc#integration-testing-annotations-springextensionconfig[`@SpringExtensionConfig`]).
 ====
 
 [TIP]

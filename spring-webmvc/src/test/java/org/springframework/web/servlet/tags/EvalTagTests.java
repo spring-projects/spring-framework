@@ -139,7 +139,7 @@ class EvalTagTests extends AbstractTagTests {
 	}
 
 	@Test  // SPR-6923
-	public void nestedPropertyWithAttributeName() throws Exception {
+	void nestedPropertyWithAttributeName() throws Exception {
 		tag.setExpression("bean.bean");
 		tag.setVar("foo");
 		int action = tag.doStartTag();

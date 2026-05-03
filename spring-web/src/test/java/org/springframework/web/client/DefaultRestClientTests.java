@@ -20,15 +20,21 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.util.function.Consumer;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.ClientHttpRequest;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.ClientHttpResponse;
@@ -115,16 +121,29 @@ class DefaultRestClientTests {
 		);
 	}
 
-	@Test
-	void inputStreamBody() throws IOException {
+	@ParameterizedTest(name = "{0}")
+	@MethodSource("streamResponseBodies")
+	void streamingBody(String typeName, Consumer<RestClient> clientConsumer) throws IOException {
 		mockSentRequest(HttpMethod.GET, URL);
 		mockResponseStatus(HttpStatus.OK);
-		mockResponseBody(BODY, MediaType.TEXT_PLAIN);
+		mockResponseBody(BODY, MediaType.APPLICATION_OCTET_STREAM);
 
-		InputStream result = this.client.get().uri(URL).retrieve().requiredBody(InputStream.class);
+		clientConsumer.accept(this.client);
 
-		assertThat(result).isInstanceOf(InputStream.class);
 		verify(this.response, times(0)).close();
+	}
+
+	static Stream<Arguments> streamResponseBodies() {
+		return Stream.of(
+				Arguments.of("InputStream", (Consumer<RestClient>) client -> {
+					InputStream result = client.get().uri(URL).retrieve().requiredBody(InputStream.class);
+					assertThat(result).isInstanceOf(InputStream.class);
+				}),
+				Arguments.of("ResponseEntity<Inpustream>", (Consumer<RestClient>) client -> {
+					ResponseEntity<InputStream> result = client.get().uri(URL).retrieve().toEntity(InputStream.class);
+					assertThat(result).isInstanceOf(ResponseEntity.class);
+				})
+		);
 	}
 
 

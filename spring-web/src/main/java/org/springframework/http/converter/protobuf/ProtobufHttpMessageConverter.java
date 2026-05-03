@@ -122,6 +122,12 @@ public class ProtobufHttpMessageConverter extends AbstractHttpMessageConverter<M
 		this(null, extensionRegistry);
 	}
 
+
+	@Override
+	public boolean canWriteRepeatedly(Message message, @Nullable MediaType contentType) {
+		return true;
+	}
+
 	/**
 	 * Constructor for a subclass that supports additional formats.
 	 * @param formatDelegate delegate to read and write additional formats
@@ -255,6 +261,7 @@ public class ProtobufHttpMessageConverter extends AbstractHttpMessageConverter<M
 	}
 
 	@Override
+	@SuppressWarnings("removal")
 	protected boolean supportsRepeatableWrites(Message message) {
 		return true;
 	}

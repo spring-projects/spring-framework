@@ -56,7 +56,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
  * @author Rossen Stoyanchev
  */
 @SuppressWarnings("unused")
-public class HandlerMethodMappingTests {
+class HandlerMethodMappingTests {
 
 	private MyHandlerMethodMapping mapping;
 
@@ -117,7 +117,7 @@ public class HandlerMethodMappingTests {
 	}
 
 	@Test // gh-26490
-	public void ambiguousMatchOnPreFlightRequestWithoutCorsConfig() throws Exception {
+	void ambiguousMatchOnPreFlightRequestWithoutCorsConfig() throws Exception {
 		this.mapping.registerMapping("/foo", this.handler, this.method1);
 		this.mapping.registerMapping("/f??", this.handler, this.method2);
 
@@ -141,7 +141,7 @@ public class HandlerMethodMappingTests {
 	}
 
 	@Test // gh-26490
-	public void ambiguousMatchOnPreFlightRequestWithCorsConfig() throws Exception {
+	void ambiguousMatchOnPreFlightRequestWithCorsConfig() throws Exception {
 		this.mapping.registerMapping("/f?o", this.handler, this.method1);
 		this.mapping.registerMapping("/fo?", this.handler, this.handler.getClass().getMethod("corsHandlerMethod"));
 

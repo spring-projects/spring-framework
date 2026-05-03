@@ -35,6 +35,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.ClientHttpRequest;
 import org.springframework.http.client.ClientHttpRequestExecution;
@@ -49,6 +50,7 @@ import org.springframework.util.StreamUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.willThrow;
 import static org.mockito.Mockito.mock;
@@ -135,15 +137,15 @@ class RestClientObservationTests {
 
 	@Test
 	void shouldContributeServerErrorOutcome() throws Exception {
-		ResponseErrorHandler errorHandler = mock();
-		given(errorHandler.hasError(response)).willReturn(true);
-		this.client = this.client.mutate().defaultStatusHandler(errorHandler).build();
+		RestClient.ResponseSpec.ErrorHandler errorHandler = mock();
+		this.client = this.client.mutate()
+				.defaultStatusHandler(HttpStatusCode::is5xxServerError, errorHandler).build();
 
 		String url = "https://example.org";
 		mockSentRequest(GET, url);
 		mockResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR);
 		willThrow(new HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR))
-				.given(errorHandler).handleError(URI.create(url), GET, response);
+				.given(errorHandler).handle(any(), any());
 
 		assertThatExceptionOfType(HttpServerErrorException.class).isThrownBy(() ->
 				client.get().uri(url).retrieve().toBodilessEntity());
@@ -257,7 +259,8 @@ class RestClientObservationTests {
 	@Test
 	void openScopeWithObservation() throws Exception {
 		this.client = createBuilder().requestInterceptor(new ObservationContextInterceptor(this.observationRegistry))
-				.defaultStatusHandler(new ObservationErrorHandler(this.observationRegistry)).build();
+				.defaultStatusHandler(HttpStatusCode::is2xxSuccessful, new ObservationErrorHandler(this.observationRegistry))
+				.build();
 		mockSentRequest(GET, "https://example.org");
 		mockResponseStatus(HttpStatus.OK);
 		mockResponseBody("Hello World", MediaType.TEXT_PLAIN);
@@ -334,7 +337,7 @@ class RestClientObservationTests {
 		}
 	}
 
-	static class ObservationErrorHandler implements ResponseErrorHandler {
+	static class ObservationErrorHandler implements RestClient.ResponseSpec.ErrorHandler {
 
 		final TestObservationRegistry observationRegistry;
 
@@ -343,14 +346,10 @@ class RestClientObservationTests {
 		}
 
 		@Override
-		public boolean hasError(ClientHttpResponse response) {
-			return true;
-		}
-
-		@Override
-		public void handleError(URI uri, HttpMethod httpMethod, ClientHttpResponse response) {
+		public void handle(HttpRequest request, ClientHttpResponse response) throws IOException {
 			assertThat(this.observationRegistry.getCurrentObservationScope()).isNotNull();
 		}
+
 	}
 
 }

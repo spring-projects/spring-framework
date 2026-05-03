@@ -33,7 +33,7 @@ class RefreshableTargetSourceTests {
 	 * Test what happens when checking for refresh but not refreshing object.
 	 */
 	@Test
-	void testRefreshCheckWithNonRefresh() throws Exception {
+	void refreshCheckWithNonRefresh() throws Exception {
 		CountingRefreshableTargetSource ts = new CountingRefreshableTargetSource();
 		ts.setRefreshCheckDelay(0);
 
@@ -49,7 +49,7 @@ class RefreshableTargetSourceTests {
 	 * Test what happens when checking for refresh and refresh occurs.
 	 */
 	@Test
-	void testRefreshCheckWithRefresh() throws Exception {
+	void refreshCheckWithRefresh() throws Exception {
 		CountingRefreshableTargetSource ts = new CountingRefreshableTargetSource(true);
 		ts.setRefreshCheckDelay(0);
 
@@ -65,7 +65,7 @@ class RefreshableTargetSourceTests {
 	 * Test what happens when no refresh occurs.
 	 */
 	@Test
-	void testWithNoRefreshCheck() {
+	void withNoRefreshCheck() {
 		CountingRefreshableTargetSource ts = new CountingRefreshableTargetSource(true);
 		ts.setRefreshCheckDelay(-1);
 
@@ -78,7 +78,7 @@ class RefreshableTargetSourceTests {
 
 	@Test
 	@EnabledForTestGroups(LONG_RUNNING)
-	public void testRefreshOverTime() throws Exception {
+	void refreshOverTime() throws Exception {
 		CountingRefreshableTargetSource ts = new CountingRefreshableTargetSource(true);
 		ts.setRefreshCheckDelay(100);
 
@@ -95,7 +95,7 @@ class RefreshableTargetSourceTests {
 
 		Object d = ts.getTarget();
 		assertThat(d).as("D should not be null").isNotNull();
-		assertThat(a.equals(d)).as("A and D should not be equal").isFalse();
+		assertThat(a).as("A and D should not be equal").isNotEqualTo(d);
 
 		Object e = ts.getTarget();
 		assertThat(e).as("D and E should be equal").isEqualTo(d);
@@ -103,7 +103,7 @@ class RefreshableTargetSourceTests {
 		Thread.sleep(110);
 
 		Object f = ts.getTarget();
-		assertThat(e.equals(f)).as("E and F should be different").isFalse();
+		assertThat(e).as("E and F should be different").isNotEqualTo(f);
 	}
 
 

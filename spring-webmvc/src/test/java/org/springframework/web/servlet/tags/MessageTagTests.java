@@ -238,7 +238,7 @@ class MessageTagTests extends AbstractTagTests {
 		tag.setText("testtext");
 		assertThat(tag.doStartTag()).as("Correct doStartTag return value").isEqualTo(Tag.EVAL_BODY_INCLUDE);
 		assertThat(tag.doEndTag()).as("Correct doEndTag return value").isEqualTo(Tag.EVAL_PAGE);
-		assertThat((message.toString())).as("Correct message").isEqualTo("test message");
+		assertThat(message.toString()).as("Correct message").isEqualTo("test message");
 	}
 
 	@Test

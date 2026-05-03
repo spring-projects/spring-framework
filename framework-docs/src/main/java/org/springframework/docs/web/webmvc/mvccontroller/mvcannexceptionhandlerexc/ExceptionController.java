@@ -29,7 +29,7 @@ public class ExceptionController {
 
 	// tag::narrow[]
 	@ExceptionHandler({FileSystemException.class, RemoteException.class})
-	public ResponseEntity<String> handleIoException(IOException ex) {
+	public ResponseEntity<String> handleIOException(IOException ex) {
 		return ResponseEntity.internalServerError().body(ex.getMessage());
 	}
 	// end::narrow[]

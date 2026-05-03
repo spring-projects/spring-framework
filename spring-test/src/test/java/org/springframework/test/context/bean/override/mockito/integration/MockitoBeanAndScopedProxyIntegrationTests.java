@@ -61,7 +61,7 @@ public class MockitoBeanAndScopedProxyIntegrationTests {
 	}
 
 	@Test
-	void testMocking() {
+	void mocking() {
 		assertThat(serviceCaller.sayGreeting()).isEqualTo("I say mock");
 	}
 

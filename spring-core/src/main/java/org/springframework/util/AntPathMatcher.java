@@ -854,7 +854,6 @@ public class AntPathMatcher implements PathMatcher {
 		 */
 		private static class PatternInfo {
 
-
 			private final @Nullable String pattern;
 
 			private int uriVars;

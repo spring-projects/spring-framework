@@ -33,7 +33,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
  * Unit tests for {@link PathApiVersionResolver}.
  * @author Rossen Stoyanchev
  */
-public class PathApiVersionResolverTests {
+class PathApiVersionResolverTests {
 
 	@Test
 	void resolve() {

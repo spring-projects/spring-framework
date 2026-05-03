@@ -43,14 +43,14 @@ import org.springframework.util.ResourceUtils;
 public interface ResourceLoader {
 
 	/**
-	 * Pseudo URL prefix for loading from the class path: "classpath:".
-	 * This retrieves the "nearest" matching resource in the classpath.
+	 * Pseudo URL prefix for loading from the class path: {@value}.
+	 * <p>This retrieves the "nearest" matching resource in the classpath.
 	 * @see ClassLoader#getResource
 	 */
 	String CLASSPATH_URL_PREFIX = ResourceUtils.CLASSPATH_URL_PREFIX;
 
 	/**
-	 * Pseudo URL prefix for all matching resources from the class path: {@code "classpath*:"}.
+	 * Pseudo URL prefix for all matching resources from the class path: {@value}.
 	 * <p>This differs from the common {@link #CLASSPATH_URL_PREFIX "classpath:"} prefix
 	 * in that it retrieves all matching resources for a given path. For example, to
 	 * locate all "messages.properties" files in the root of all deployed JAR files
@@ -72,7 +72,7 @@ public interface ResourceLoader {
 	 * Return a {@code Resource} handle for the specified resource location.
 	 * <p>The handle should always be a reusable resource descriptor,
 	 * allowing for multiple {@link Resource#getInputStream()} calls.
-	 * <p><ul>
+	 * <ul>
 	 * <li>Must support fully qualified URLs, for example, "file:C:/test.properties".
 	 * <li>Must support classpath pseudo-URLs, for example, "classpath:test.properties".
 	 * (Exposing the "nearest" resource in the classpath; see {@link ClassLoader#getResource}.)
@@ -91,6 +91,7 @@ public interface ResourceLoader {
 	 * @param location the resource location
 	 * @return a corresponding {@code Resource} handle (never {@code null})
 	 * @see #CLASSPATH_URL_PREFIX
+	 * @see #CLASSPATH_ALL_URL_PREFIX
 	 * @see Resource#exists()
 	 * @see Resource#consumeContent
 	 */

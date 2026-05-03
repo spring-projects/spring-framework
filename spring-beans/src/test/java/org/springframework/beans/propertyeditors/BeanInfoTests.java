@@ -36,7 +36,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class BeanInfoTests {
 
 	@Test
-	void testComplexObject() {
+	void complexObject() {
 		ValueBean bean = new ValueBean();
 		BeanWrapper bw = new BeanWrapperImpl(bean);
 		Integer value = 1;

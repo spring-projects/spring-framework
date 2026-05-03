@@ -126,7 +126,7 @@ import org.springframework.web.util.UriUtils;
  * <td><p>methodParam</p></td>
  * <td><p>false</p></td>
  * <td><p>true</p></td>
- * <td><p>The parameter name used for HTTP methods other then GET and POST.
+ * <td><p>The parameter name used for HTTP methods other than GET and POST.
  * Default is '_method'.</p></td>
  * </tr>
  * <tr class="odd-row-color">

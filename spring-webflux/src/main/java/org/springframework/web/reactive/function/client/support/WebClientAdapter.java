@@ -111,7 +111,9 @@ public final class WebClientAdapter extends AbstractReactorHttpExchangeAdapter {
 		WebClient.RequestBodySpec bodySpec = setUri(uriSpec, values);
 		bodySpec.headers(headers -> headers.putAll(values.getHeaders()));
 		bodySpec.cookies(cookies -> cookies.putAll(values.getCookies()));
-		bodySpec.apiVersion(values.getApiVersion());
+		if (values.getApiVersion() != null) {
+			bodySpec.apiVersion(values.getApiVersion());
+		}
 		bodySpec.attributes(attributes -> attributes.putAll(values.getAttributes()));
 		setBody(bodySpec, values);
 		return bodySpec;

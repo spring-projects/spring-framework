@@ -41,7 +41,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
 class MethodInvokingFactoryBeanTests {
 
 	@Test
-	void testParameterValidation() throws Exception {
+	void parameterValidation() throws Exception {
 
 		// assert that only static OR non-static are set, but not both or none
 		MethodInvokingFactoryBean mcfb = new MethodInvokingFactoryBean();
@@ -91,14 +91,14 @@ class MethodInvokingFactoryBeanTests {
 	}
 
 	@Test
-	void testGetObjectType() throws Exception {
+	void getObjectType() throws Exception {
 		TestClass1 tc1 = new TestClass1();
 		MethodInvokingFactoryBean mcfb = new MethodInvokingFactoryBean();
 		mcfb = new MethodInvokingFactoryBean();
 		mcfb.setTargetObject(tc1);
 		mcfb.setTargetMethod("method1");
 		mcfb.afterPropertiesSet();
-		assertThat(int.class.equals(mcfb.getObjectType())).isTrue();
+		assertThat(int.class).isEqualTo(mcfb.getObjectType());
 
 		mcfb = new MethodInvokingFactoryBean();
 		mcfb.setTargetClass(TestClass1.class);
@@ -127,7 +127,7 @@ class MethodInvokingFactoryBeanTests {
 	}
 
 	@Test
-	void testGetObject() throws Exception {
+	void getObject() throws Exception {
 		// singleton, non-static
 		TestClass1 tc1 = new TestClass1();
 		MethodInvokingFactoryBean mcfb = new MethodInvokingFactoryBean();
@@ -190,7 +190,7 @@ class MethodInvokingFactoryBeanTests {
 	}
 
 	@Test
-	void testArgumentConversion() throws Exception {
+	void argumentConversion() throws Exception {
 		MethodInvokingFactoryBean mcfb = new MethodInvokingFactoryBean();
 		mcfb.setTargetClass(TestClass1.class);
 		mcfb.setTargetMethod("supertypes");
@@ -224,7 +224,7 @@ class MethodInvokingFactoryBeanTests {
 	}
 
 	@Test
-	void testInvokeWithNullArgument() throws Exception {
+	void invokeWithNullArgument() throws Exception {
 		MethodInvoker methodInvoker = new MethodInvoker();
 		methodInvoker.setTargetClass(TestClass1.class);
 		methodInvoker.setTargetMethod("nullArgument");
@@ -234,7 +234,7 @@ class MethodInvokingFactoryBeanTests {
 	}
 
 	@Test
-	void testInvokeWithIntArgument() throws Exception {
+	void invokeWithIntArgument() throws Exception {
 		ArgumentConvertingMethodInvoker methodInvoker = new ArgumentConvertingMethodInvoker();
 		methodInvoker.setTargetClass(TestClass1.class);
 		methodInvoker.setTargetMethod("intArgument");
@@ -251,7 +251,7 @@ class MethodInvokingFactoryBeanTests {
 	}
 
 	@Test
-	void testInvokeWithIntArguments() throws Exception {
+	void invokeWithIntArguments() throws Exception {
 		MethodInvokingBean methodInvoker = new MethodInvokingBean();
 		methodInvoker.setTargetClass(TestClass1.class);
 		methodInvoker.setTargetMethod("intArguments");

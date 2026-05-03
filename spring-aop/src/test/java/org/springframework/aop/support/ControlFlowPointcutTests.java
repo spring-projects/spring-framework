@@ -152,7 +152,7 @@ class ControlFlowPointcutTests {
 	}
 
 	@Test
-	void testToString() {
+	void toStringOutput() {
 		String pointcutType = ControlFlowPointcut.class.getName();
 		String componentType = MyComponent.class.getName();
 

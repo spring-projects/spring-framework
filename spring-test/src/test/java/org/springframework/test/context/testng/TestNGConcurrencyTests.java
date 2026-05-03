@@ -58,52 +58,52 @@ class TestNGConcurrencyTests {
 	static class ConcurrentTestCase extends AbstractTestNGSpringContextTests {
 
 		@Test(expectedExceptions = RuntimeException.class, expectedExceptionsMessageRegExp = "Message1")
-		public void message1() {
+		void message1() {
 			throw new RuntimeException("Message1");
 		}
 
 		@Test(expectedExceptions = RuntimeException.class, expectedExceptionsMessageRegExp = "Message2")
-		public void message2() {
+		void message2() {
 			throw new RuntimeException("Message2");
 		}
 
 		@Test(expectedExceptions = RuntimeException.class, expectedExceptionsMessageRegExp = "Message3")
-		public void message3() {
+		void message3() {
 			throw new RuntimeException("Message3");
 		}
 
 		@Test(expectedExceptions = RuntimeException.class, expectedExceptionsMessageRegExp = "Message4")
-		public void message4() {
+		void message4() {
 			throw new RuntimeException("Message4");
 		}
 
 		@Test(expectedExceptions = RuntimeException.class, expectedExceptionsMessageRegExp = "Message5")
-		public void message5() {
+		void message5() {
 			throw new RuntimeException("Message5");
 		}
 
 		@Test(expectedExceptions = RuntimeException.class, expectedExceptionsMessageRegExp = "Message6")
-		public void message6() {
+		void message6() {
 			throw new RuntimeException("Message6");
 		}
 
 		@Test(expectedExceptions = RuntimeException.class, expectedExceptionsMessageRegExp = "Message7")
-		public void message7() {
+		void message7() {
 			throw new RuntimeException("Message7");
 		}
 
 		@Test(expectedExceptions = RuntimeException.class, expectedExceptionsMessageRegExp = "Message8")
-		public void message8() {
+		void message8() {
 			throw new RuntimeException("Message8");
 		}
 
 		@Test(expectedExceptions = RuntimeException.class, expectedExceptionsMessageRegExp = "Message9")
-		public void message9() {
+		void message9() {
 			throw new RuntimeException("Message9");
 		}
 
 		@Test(expectedExceptions = RuntimeException.class, expectedExceptionsMessageRegExp = "Message10")
-		public void message10() {
+		void message10() {
 			throw new RuntimeException("Message10");
 		}
 

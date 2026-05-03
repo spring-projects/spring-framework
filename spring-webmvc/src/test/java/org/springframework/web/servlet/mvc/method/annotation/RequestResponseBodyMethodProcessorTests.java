@@ -49,13 +49,13 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.ByteArrayHttpMessageConverter;
+import org.springframework.http.converter.FormHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.ResourceHttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.json.JacksonJsonHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
-import org.springframework.http.converter.support.AllEncompassingFormHttpMessageConverter;
 import org.springframework.http.converter.xml.JacksonXmlHttpMessageConverter;
 import org.springframework.http.converter.xml.MappingJackson2XmlHttpMessageConverter;
 import org.springframework.util.MultiValueMap;
@@ -135,7 +135,7 @@ class RequestResponseBodyMethodProcessorTests {
 		this.servletRequest.setContent(content.getBytes(StandardCharsets.UTF_8));
 		this.servletRequest.setContentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE);
 
-		List<HttpMessageConverter<?>> converters = List.of(new AllEncompassingFormHttpMessageConverter());
+		List<HttpMessageConverter<?>> converters = List.of(new FormHttpMessageConverter());
 		RequestResponseBodyMethodProcessor processor = new RequestResponseBodyMethodProcessor(converters);
 
 		@SuppressWarnings("unchecked")

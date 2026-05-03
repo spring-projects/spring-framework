@@ -240,7 +240,7 @@ class SockJsSessionTests extends AbstractSockJsSessionTests<TestSockJsSession> {
 	}
 
 	@Test
-	void writeFrameIoException() throws Exception {
+	void writeFrameIOException() throws Exception {
 		this.session.setExceptionOnWrite(new IOException());
 		this.session.delegateConnectionEstablished();
 

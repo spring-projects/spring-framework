@@ -23,7 +23,6 @@ import java.util.Map;
 
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import test.annotation.EmptySpringAnnotation;
 import test.annotation.transaction.Tx;
@@ -37,6 +36,7 @@ import org.springframework.beans.testfixture.beans.IOther;
 import org.springframework.beans.testfixture.beans.ITestBean;
 import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.beans.testfixture.beans.subpkg.DeepBean;
+import org.springframework.util.ClassUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
@@ -50,30 +50,22 @@ import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
  */
 class AspectJExpressionPointcutTests {
 
-	private Method getAge;
-
-	private Method setAge;
-
-	private Method setSomeNumber;
-
+	private final Method getAge = ClassUtils.getMethod(TestBean.class, "getAge");
+	private final Method setAge = ClassUtils.getMethod(TestBean.class, "setAge", int.class);
+	private final Method setSomeNumber = ClassUtils.getMethod(TestBean.class, "setSomeNumber", Number.class);
 	private final Map<String, Method> methodsOnHasGeneric = new HashMap<>();
 
 
-	@BeforeEach
-	void setup() throws NoSuchMethodException {
-		getAge = TestBean.class.getMethod("getAge");
-		setAge = TestBean.class.getMethod("setAge", int.class);
-		setSomeNumber = TestBean.class.getMethod("setSomeNumber", Number.class);
-
+	AspectJExpressionPointcutTests() throws NoSuchMethodException {
 		// Assumes no overloading
 		for (Method method : HasGeneric.class.getMethods()) {
-			methodsOnHasGeneric.put(method.getName(), method);
+			this.methodsOnHasGeneric.put(method.getName(), method);
 		}
 	}
 
 
 	@Test
-	void testMatchExplicit() {
+	void matchExplicit() {
 		String expression = "execution(int org.springframework.beans.testfixture.beans.TestBean.getAge())";
 
 		Pointcut pointcut = getPointcut(expression);
@@ -91,7 +83,7 @@ class AspectJExpressionPointcutTests {
 	}
 
 	@Test
-	void testMatchWithTypePattern() {
+	void matchWithTypePattern() {
 		String expression = "execution(* *..TestBean.*Age(..))";
 
 		Pointcut pointcut = getPointcut(expression);
@@ -110,12 +102,12 @@ class AspectJExpressionPointcutTests {
 
 
 	@Test
-	void testThis() throws SecurityException, NoSuchMethodException{
+	void thisCase() throws SecurityException, NoSuchMethodException{
 		testThisOrTarget("this");
 	}
 
 	@Test
-	void testTarget() throws SecurityException, NoSuchMethodException {
+	void target() throws SecurityException, NoSuchMethodException {
 		testThisOrTarget("target");
 	}
 
@@ -139,12 +131,12 @@ class AspectJExpressionPointcutTests {
 	}
 
 	@Test
-	void testWithinRootPackage() throws SecurityException, NoSuchMethodException {
+	void withinRootPackage() throws SecurityException, NoSuchMethodException {
 		testWithinPackage(false);
 	}
 
 	@Test
-	void testWithinRootAndSubpackages() throws SecurityException, NoSuchMethodException {
+	void withinRootAndSubpackages() throws SecurityException, NoSuchMethodException {
 		testWithinPackage(true);
 	}
 
@@ -168,7 +160,7 @@ class AspectJExpressionPointcutTests {
 	}
 
 	@Test
-	void testFriendlyErrorOnNoLocationClassMatching() {
+	void friendlyErrorOnNoLocationClassMatching() {
 		AspectJExpressionPointcut pc = new AspectJExpressionPointcut();
 		assertThatIllegalStateException()
 				.isThrownBy(() -> pc.getClassFilter().matches(ITestBean.class))
@@ -176,7 +168,7 @@ class AspectJExpressionPointcutTests {
 	}
 
 	@Test
-	void testFriendlyErrorOnNoLocation2ArgMatching() {
+	void friendlyErrorOnNoLocation2ArgMatching() {
 		AspectJExpressionPointcut pc = new AspectJExpressionPointcut();
 		assertThatIllegalStateException()
 				.isThrownBy(() -> pc.getMethodMatcher().matches(getAge, ITestBean.class))
@@ -184,7 +176,7 @@ class AspectJExpressionPointcutTests {
 	}
 
 	@Test
-	void testFriendlyErrorOnNoLocation3ArgMatching() {
+	void friendlyErrorOnNoLocation3ArgMatching() {
 		AspectJExpressionPointcut pc = new AspectJExpressionPointcut();
 		assertThatIllegalStateException()
 				.isThrownBy(() -> pc.getMethodMatcher().matches(getAge, ITestBean.class, (Object[]) null))
@@ -193,7 +185,7 @@ class AspectJExpressionPointcutTests {
 
 
 	@Test
-	void testMatchWithArgs() {
+	void matchWithArgs() {
 		String expression = "execution(void org.springframework.beans.testfixture.beans.TestBean.setSomeNumber(Number)) && args(Double)";
 
 		Pointcut pointcut = getPointcut(expression);
@@ -214,7 +206,7 @@ class AspectJExpressionPointcutTests {
 	}
 
 	@Test
-	void testSimpleAdvice() {
+	void simpleAdvice() {
 		String expression = "execution(int org.springframework.beans.testfixture.beans.TestBean.getAge())";
 		CallCountingInterceptor interceptor = new CallCountingInterceptor();
 		TestBean testBean = getAdvisedProxy(expression, interceptor);
@@ -227,7 +219,7 @@ class AspectJExpressionPointcutTests {
 	}
 
 	@Test
-	void testDynamicMatchingProxy() {
+	void dynamicMatchingProxy() {
 		String expression = "execution(void org.springframework.beans.testfixture.beans.TestBean.setSomeNumber(Number)) && args(Double)";
 		CallCountingInterceptor interceptor = new CallCountingInterceptor();
 		TestBean testBean = getAdvisedProxy(expression, interceptor);
@@ -241,7 +233,7 @@ class AspectJExpressionPointcutTests {
 	}
 
 	@Test
-	void testInvalidExpression() {
+	void invalidExpression() {
 		String expression = "execution(void org.springframework.beans.testfixture.beans.TestBean.setSomeNumber(Number) && args(Double)";
 		assertThat(getPointcut(expression).getClassFilter().matches(Object.class)).isFalse();
 	}
@@ -271,20 +263,20 @@ class AspectJExpressionPointcutTests {
 	}
 
 	@Test
-	void testWithUnsupportedPointcutPrimitive() {
+	void withUnsupportedPointcutPrimitive() {
 		String expression = "call(int org.springframework.beans.testfixture.beans.TestBean.getAge())";
 		assertThat(getPointcut(expression).getClassFilter().matches(Object.class)).isFalse();
 	}
 
 	@Test
-	void testAndSubstitution() {
+	void andSubstitution() {
 		AspectJExpressionPointcut pc = getPointcut("execution(* *(..)) and args(String)");
 		String expr = pc.getPointcutExpression().getPointcutExpression();
 		assertThat(expr).isEqualTo("execution(* *(..)) && args(String)");
 	}
 
 	@Test
-	void testMultipleAndSubstitutions() {
+	void multipleAndSubstitutions() {
 		AspectJExpressionPointcut pc = getPointcut("execution(* *(..)) and args(String) and this(Object)");
 		String expr = pc.getPointcutExpression().getPointcutExpression();
 		assertThat(expr).isEqualTo("execution(* *(..)) && args(String) && this(Object)");
@@ -297,7 +289,7 @@ class AspectJExpressionPointcutTests {
 	}
 
 	@Test
-	void testMatchGenericArgument() {
+	void matchGenericArgument() {
 		String expression = "execution(* set*(java.util.List<org.springframework.beans.testfixture.beans.TestBean>) )";
 		AspectJExpressionPointcut ajexp = new AspectJExpressionPointcut();
 		ajexp.setExpression(expression);
@@ -316,7 +308,7 @@ class AspectJExpressionPointcutTests {
 	}
 
 	@Test
-	void testMatchVarargs() throws Exception {
+	void matchVarargs() throws Exception {
 
 		@SuppressWarnings("unused")
 		class MyTemplate {
@@ -342,19 +334,19 @@ class AspectJExpressionPointcutTests {
 	}
 
 	@Test
-	void testMatchAnnotationOnClassWithAtWithin() throws Exception {
+	void matchAnnotationOnClassWithAtWithin() throws Exception {
 		String expression = "@within(test.annotation.transaction.Tx)";
 		testMatchAnnotationOnClass(expression);
 	}
 
 	@Test
-	void testMatchAnnotationOnClassWithoutBinding() throws Exception {
+	void matchAnnotationOnClassWithoutBinding() throws Exception {
 		String expression = "within(@test.annotation.transaction.Tx *)";
 		testMatchAnnotationOnClass(expression);
 	}
 
 	@Test
-	void testMatchAnnotationOnClassWithSubpackageWildcard() throws Exception {
+	void matchAnnotationOnClassWithSubpackageWildcard() throws Exception {
 		String expression = "within(@(test.annotation..*) *)";
 		AspectJExpressionPointcut springAnnotatedPc = testMatchAnnotationOnClass(expression);
 		assertThat(springAnnotatedPc.matches(TestBean.class.getMethod("setName", String.class), TestBean.class)).isFalse();
@@ -366,7 +358,7 @@ class AspectJExpressionPointcutTests {
 	}
 
 	@Test
-	void testMatchAnnotationOnClassWithExactPackageWildcard() throws Exception {
+	void matchAnnotationOnClassWithExactPackageWildcard() throws Exception {
 		String expression = "within(@(test.annotation.transaction.*) *)";
 		testMatchAnnotationOnClass(expression);
 	}
@@ -384,7 +376,7 @@ class AspectJExpressionPointcutTests {
 	}
 
 	@Test
-	void testAnnotationOnMethodWithFQN() throws Exception {
+	void annotationOnMethodWithFQN() throws Exception {
 		String expression = "@annotation(test.annotation.transaction.Tx)";
 		AspectJExpressionPointcut ajexp = new AspectJExpressionPointcut();
 		ajexp.setExpression(expression);
@@ -398,7 +390,7 @@ class AspectJExpressionPointcutTests {
 	}
 
 	@Test
-	void testAnnotationOnCglibProxyMethod() throws Exception {
+	void annotationOnCglibProxyMethod() throws Exception {
 		String expression = "@annotation(test.annotation.transaction.Tx)";
 		AspectJExpressionPointcut ajexp = new AspectJExpressionPointcut();
 		ajexp.setExpression(expression);
@@ -410,7 +402,7 @@ class AspectJExpressionPointcutTests {
 	}
 
 	@Test
-	void testNotAnnotationOnCglibProxyMethod() throws Exception {
+	void notAnnotationOnCglibProxyMethod() throws Exception {
 		String expression = "!@annotation(test.annotation.transaction.Tx)";
 		AspectJExpressionPointcut ajexp = new AspectJExpressionPointcut();
 		ajexp.setExpression(expression);
@@ -422,7 +414,7 @@ class AspectJExpressionPointcutTests {
 	}
 
 	@Test
-	void testAnnotationOnDynamicProxyMethod() throws Exception {
+	void annotationOnDynamicProxyMethod() throws Exception {
 		String expression = "@annotation(test.annotation.transaction.Tx)";
 		AspectJExpressionPointcut ajexp = new AspectJExpressionPointcut();
 		ajexp.setExpression(expression);
@@ -434,7 +426,7 @@ class AspectJExpressionPointcutTests {
 	}
 
 	@Test
-	void testNotAnnotationOnDynamicProxyMethod() throws Exception {
+	void notAnnotationOnDynamicProxyMethod() throws Exception {
 		String expression = "!@annotation(test.annotation.transaction.Tx)";
 		AspectJExpressionPointcut ajexp = new AspectJExpressionPointcut();
 		ajexp.setExpression(expression);
@@ -446,7 +438,7 @@ class AspectJExpressionPointcutTests {
 	}
 
 	@Test
-	void testAnnotationOnMethodWithWildcard() throws Exception {
+	void annotationOnMethodWithWildcard() throws Exception {
 		String expression = "execution(@(test.annotation..*) * *(..))";
 		AspectJExpressionPointcut anySpringMethodAnnotation = new AspectJExpressionPointcut();
 		anySpringMethodAnnotation.setExpression(expression);
@@ -462,7 +454,7 @@ class AspectJExpressionPointcutTests {
 	}
 
 	@Test
-	void testAnnotationOnMethodArgumentsWithFQN() throws Exception {
+	void annotationOnMethodArgumentsWithFQN() throws Exception {
 		String expression = "@args(*, test.annotation.EmptySpringAnnotation))";
 		AspectJExpressionPointcut takesSpringAnnotatedArgument2 = new AspectJExpressionPointcut();
 		takesSpringAnnotatedArgument2.setExpression(expression);
@@ -491,7 +483,7 @@ class AspectJExpressionPointcutTests {
 	}
 
 	@Test
-	void testAnnotationOnMethodArgumentsWithWildcards() throws Exception {
+	void annotationOnMethodArgumentsWithWildcards() throws Exception {
 		String expression = "execution(* *(*, @(test..*) *))";
 		AspectJExpressionPointcut takesSpringAnnotatedArgument2 = new AspectJExpressionPointcut();
 		takesSpringAnnotatedArgument2.setExpression(expression);

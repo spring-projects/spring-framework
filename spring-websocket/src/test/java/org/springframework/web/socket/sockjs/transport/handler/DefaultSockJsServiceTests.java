@@ -16,6 +16,7 @@
 
 package org.springframework.web.socket.sockjs.transport.handler;
 
+import java.net.InetSocketAddress;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.Collections;
@@ -269,6 +270,29 @@ class DefaultSockJsServiceTests extends AbstractHttpRequestTests {
 
 		this.session.setPrincipal(new TestPrincipal("little red riding hood"));
 		this.servletRequest.setUserPrincipal(new TestPrincipal("wolf"));
+
+		resetResponse();
+		reset(this.xhrSendHandler);
+		sockJsPath = sessionUrlPrefix + "xhr_send";
+		setRequest("POST", sockJsPrefix + sockJsPath);
+		this.service.handleRequest(this.request, this.response, sockJsPath, this.wsHandler);
+
+		assertThat(this.servletResponse.getStatus()).isEqualTo(404);
+		verifyNoMoreInteractions(this.xhrSendHandler);
+	}
+
+	@Test
+	void handleTransportRequestXhrSendWithDifferentRemoteAddress() {
+		String sockJsPath = sessionUrlPrefix + "xhr";
+		setRequest("POST", sockJsPrefix + sockJsPath);
+		this.service.handleRequest(this.request, this.response, sockJsPath, this.wsHandler);
+
+		// session created
+		assertThat(this.servletResponse.getStatus()).isEqualTo(200);
+		verify(this.xhrHandler).handleRequest(this.request, this.response, this.wsHandler, this.session);
+
+		this.session.setRemoteAddress(new InetSocketAddress("127.0.0.1:8080", 8080));
+		this.servletRequest.setRemoteAddr("127.0.0.1:9090");
 
 		resetResponse();
 		reset(this.xhrSendHandler);

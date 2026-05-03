@@ -65,8 +65,12 @@ public @interface SpringExtensionConfig {
 	 * will always use a test-class scoped {@code ExtensionContext}, and there is no need
 	 * to declare {@code @SpringExtensionConfig(useTestClassScopedExtensionContext = true)}.
 	 *
+	 * <p>Furthermore, this attribute takes precedence over global configuration
+	 * of the {@code spring.test.extension.context.scope} property.
+	 *
 	 * @see SpringExtension
-	 * @see SpringExtension#getTestInstantiationExtensionContextScope(org.junit.jupiter.api.extension.ExtensionContext)
+	 * @see SpringExtension#EXTENSION_CONTEXT_SCOPE_PROPERTY_NAME
+	 * @see SpringExtension.ExtensionContextScope
 	 */
 	boolean useTestClassScopedExtensionContext();
 

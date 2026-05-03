@@ -61,7 +61,7 @@ public abstract class AbstractMBeanServerTests {
 
 
 	@BeforeEach
-	public final void setUp() throws Exception {
+	protected final void setUp() throws Exception {
 		this.server = MBeanServerFactory.createMBeanServer();
 		try {
 			onSetUp();

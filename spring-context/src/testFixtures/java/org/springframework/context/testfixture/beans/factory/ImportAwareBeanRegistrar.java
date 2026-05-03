@@ -45,4 +45,5 @@ public class ImportAwareBeanRegistrar implements BeanRegistrar, ImportAware {
 	}
 
 	public record ClassNameHolder(@Nullable String className) {}
+
 }

@@ -34,7 +34,7 @@ import static org.springframework.core.testfixture.io.ResourceTestUtils.qualifie
 class ScopedProxyAutowireTests {
 
 	@Test
-	void testScopedProxyInheritsAutowireCandidateFalse() {
+	void scopedProxyInheritsAutowireCandidateFalse() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(bf).loadBeanDefinitions(
 				qualifiedResource(ScopedProxyAutowireTests.class, "scopedAutowireFalse.xml"));
@@ -48,7 +48,7 @@ class ScopedProxyAutowireTests {
 	}
 
 	@Test
-	void testScopedProxyReplacesAutowireCandidateTrue() {
+	void scopedProxyReplacesAutowireCandidateTrue() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(bf).loadBeanDefinitions(
 				qualifiedResource(ScopedProxyAutowireTests.class, "scopedAutowireTrue.xml"));

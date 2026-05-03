@@ -41,7 +41,7 @@ import static org.mockito.Mockito.verify;
 class GenericStoredProcedureTests {
 
 	@Test
-	void testAddInvoices() throws Exception {
+	void addInvoices() throws Exception {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(bf).loadBeanDefinitions(
 				new ClassPathResource("org/springframework/jdbc/object/GenericStoredProcedureTests-context.xml"));

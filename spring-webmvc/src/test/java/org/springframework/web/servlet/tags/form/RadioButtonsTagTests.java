@@ -51,7 +51,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
  * @author Jeremy Grelle
  */
 @SuppressWarnings({ "rawtypes", "unchecked" })
-public class RadioButtonsTagTests extends AbstractFormTagTests {
+class RadioButtonsTagTests extends AbstractFormTagTests {
 
 	private RadioButtonsTag tag;
 

@@ -31,7 +31,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class AopNamespaceHandlerProxyTargetClassTests extends AopNamespaceHandlerTests {
 
 	@Test
-	void testIsClassProxy() {
+	void isClassProxy() {
 		ITestBean bean = getTestBean();
 		assertThat(AopUtils.isCglibProxy(bean)).as("Should be a CGLIB proxy").isTrue();
 		assertThat(((Advised) bean).isExposeProxy()).as("Should expose proxy").isTrue();

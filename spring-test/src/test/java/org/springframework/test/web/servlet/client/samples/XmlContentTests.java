@@ -31,6 +31,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.xml.Jaxb2RootElementHttpMessageConverter;
 import org.springframework.test.web.servlet.client.RestTestClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -59,7 +60,9 @@ class XmlContentTests {
 			""";
 
 
-	private final RestTestClient client = RestTestClient.bindToController(new PersonController()).build();
+	private final RestTestClient client = RestTestClient.bindToController(new PersonController())
+			.configureServer(server -> server.setMessageConverters(new Jaxb2RootElementHttpMessageConverter()))
+			.build();
 
 
 	@Test

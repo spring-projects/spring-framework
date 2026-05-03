@@ -51,7 +51,7 @@ import static org.mockito.Mockito.mock;
  * @author Eko Kurniawan Khannedy
  */
 @SuppressWarnings("deprecation")
-public class InterceptorRegistryTests {
+class InterceptorRegistryTests {
 
 	private InterceptorRegistry registry;
 
@@ -145,7 +145,7 @@ public class InterceptorRegistryTests {
 	}
 
 	@Test  // SPR-11130
-	public void addInterceptorWithExcludePathPatternOnly() {
+	void addInterceptorWithExcludePathPatternOnly() {
 		this.registry.addInterceptor(this.interceptor1).excludePathPatterns("/path1/secret");
 		this.registry.addInterceptor(this.interceptor2).addPathPatterns("/path2");
 
@@ -202,8 +202,7 @@ public class InterceptorRegistryTests {
 	private void verifyWebInterceptor(HandlerInterceptor interceptor,
 			TestWebRequestInterceptor webInterceptor) throws Exception {
 
-		boolean condition = interceptor instanceof WebRequestHandlerInterceptorAdapter;
-		assertThat(condition).isTrue();
+		assertThat(interceptor).isInstanceOf(WebRequestHandlerInterceptorAdapter.class);
 		interceptor.preHandle(this.request, this.response, null);
 		assertThat(webInterceptor.preHandleInvoked).isTrue();
 	}

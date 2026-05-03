@@ -50,7 +50,7 @@ class ServiceLocatorFactoryBeanTests {
 	}
 
 	@Test
-	void testNoArgGetter() {
+	void noArgGetter() {
 		bf.registerBeanDefinition("testService", genericBeanDefinition(TestService.class).getBeanDefinition());
 		bf.registerBeanDefinition("factory",
 				genericBeanDefinition(ServiceLocatorFactoryBean.class)
@@ -63,7 +63,7 @@ class ServiceLocatorFactoryBeanTests {
 	}
 
 	@Test
-	void testErrorOnTooManyOrTooFew() {
+	void errorOnTooManyOrTooFew() {
 		bf.registerBeanDefinition("testService", genericBeanDefinition(TestService.class).getBeanDefinition());
 		bf.registerBeanDefinition("testServiceInstance2", genericBeanDefinition(TestService.class).getBeanDefinition());
 		bf.registerBeanDefinition("factory",
@@ -87,7 +87,7 @@ class ServiceLocatorFactoryBeanTests {
 	}
 
 	@Test
-	void testErrorOnTooManyOrTooFewWithCustomServiceLocatorException() {
+	void errorOnTooManyOrTooFewWithCustomServiceLocatorException() {
 		bf.registerBeanDefinition("testService", genericBeanDefinition(TestService.class).getBeanDefinition());
 		bf.registerBeanDefinition("testServiceInstance2", genericBeanDefinition(TestService.class).getBeanDefinition());
 		bf.registerBeanDefinition("factory",
@@ -116,7 +116,7 @@ class ServiceLocatorFactoryBeanTests {
 	}
 
 	@Test
-	void testStringArgGetter() throws Exception {
+	void stringArgGetter() throws Exception {
 		bf.registerBeanDefinition("testService", genericBeanDefinition(TestService.class).getBeanDefinition());
 		bf.registerBeanDefinition("factory",
 				genericBeanDefinition(ServiceLocatorFactoryBean.class)
@@ -136,7 +136,7 @@ class ServiceLocatorFactoryBeanTests {
 	}
 
 	@Disabled @Test // worked when using an ApplicationContext (see commented), fails when using BeanFactory
-	public void testCombinedLocatorInterface() {
+	void combinedLocatorInterface() {
 		bf.registerBeanDefinition("testService", genericBeanDefinition(TestService.class).getBeanDefinition());
 		bf.registerAlias("testService", "1");
 
@@ -169,7 +169,7 @@ class ServiceLocatorFactoryBeanTests {
 	}
 
 	@Disabled @Test // worked when using an ApplicationContext (see commented), fails when using BeanFactory
-	public void testServiceMappings() {
+	void serviceMappings() {
 		bf.registerBeanDefinition("testService1", genericBeanDefinition(TestService.class).getBeanDefinition());
 		bf.registerBeanDefinition("testService2", genericBeanDefinition(ExtendedTestService.class).getBeanDefinition());
 		bf.registerBeanDefinition("factory",
@@ -205,13 +205,13 @@ class ServiceLocatorFactoryBeanTests {
 	}
 
 	@Test
-	void testNoServiceLocatorInterfaceSupplied() {
+	void noServiceLocatorInterfaceSupplied() {
 		assertThatIllegalArgumentException().isThrownBy(
 				new ServiceLocatorFactoryBean()::afterPropertiesSet);
 	}
 
 	@Test
-	void testWhenServiceLocatorInterfaceIsNotAnInterfaceType() {
+	void whenServiceLocatorInterfaceIsNotAnInterfaceType() {
 		ServiceLocatorFactoryBean factory = new ServiceLocatorFactoryBean();
 		factory.setServiceLocatorInterface(getClass());
 		assertThatIllegalArgumentException().isThrownBy(
@@ -220,7 +220,7 @@ class ServiceLocatorFactoryBeanTests {
 	}
 
 	@Test
-	void testWhenServiceLocatorExceptionClassToExceptionTypeWithOnlyNoArgCtor() {
+	void whenServiceLocatorExceptionClassToExceptionTypeWithOnlyNoArgCtor() {
 		ServiceLocatorFactoryBean factory = new ServiceLocatorFactoryBean();
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				factory.setServiceLocatorExceptionClass(ExceptionClassWithOnlyZeroArgCtor.class));
@@ -229,7 +229,7 @@ class ServiceLocatorFactoryBeanTests {
 
 	@Test
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public void testWhenServiceLocatorExceptionClassIsNotAnExceptionSubclass() {
+	void whenServiceLocatorExceptionClassIsNotAnExceptionSubclass() {
 		ServiceLocatorFactoryBean factory = new ServiceLocatorFactoryBean();
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				factory.setServiceLocatorExceptionClass((Class) getClass()));
@@ -237,7 +237,7 @@ class ServiceLocatorFactoryBeanTests {
 	}
 
 	@Test
-	void testWhenServiceLocatorMethodCalledWithTooManyParameters() {
+	void whenServiceLocatorMethodCalledWithTooManyParameters() {
 		ServiceLocatorFactoryBean factory = new ServiceLocatorFactoryBean();
 		factory.setServiceLocatorInterface(ServiceLocatorInterfaceWithExtraNonCompliantMethod.class);
 		factory.afterPropertiesSet();
@@ -247,7 +247,7 @@ class ServiceLocatorFactoryBeanTests {
 	}
 
 	@Test
-	void testRequiresListableBeanFactoryAndChokesOnAnythingElse() {
+	void requiresListableBeanFactoryAndChokesOnAnythingElse() {
 		BeanFactory beanFactory = mock();
 		try {
 			ServiceLocatorFactoryBean factory = new ServiceLocatorFactoryBean();

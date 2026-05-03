@@ -40,6 +40,7 @@ import org.springframework.core.io.Resource;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.InstanceOfAssertFactories.LIST;
 
 /**
  * @author Keith Donald
@@ -181,12 +182,11 @@ class CollectionToCollectionConverterTests {
 	}
 
 	@SuppressWarnings("rawtypes")
-	private void testCollectionConversionToArrayList(Collection<String> aSource) {
-		Object myConverted = (new CollectionToCollectionConverter(new GenericConversionService())).convert(
-				aSource, TypeDescriptor.forObject(aSource), TypeDescriptor.forObject(new ArrayList()));
-		boolean condition = myConverted instanceof ArrayList<?>;
-		assertThat(condition).isTrue();
-		assertThat(((ArrayList<?>) myConverted)).hasSameSizeAs(aSource);
+	private void testCollectionConversionToArrayList(Collection<String> source) {
+		CollectionToCollectionConverter converter = new CollectionToCollectionConverter(new GenericConversionService());
+		Object convertedValue = converter.convert(
+				source, TypeDescriptor.forObject(source), TypeDescriptor.forObject(new ArrayList()));
+		assertThat(convertedValue).asInstanceOf(LIST).hasSameSizeAs(source);
 	}
 
 	@Test

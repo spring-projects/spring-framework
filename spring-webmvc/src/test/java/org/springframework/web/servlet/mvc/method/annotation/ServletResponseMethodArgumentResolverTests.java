@@ -72,7 +72,7 @@ class ServletResponseMethodArgumentResolverTests {
 	}
 
 	@Test  // SPR-8983
-	public void servletResponseNoMavContainer() throws Exception {
+	void servletResponseNoMavContainer() throws Exception {
 		MethodParameter servletResponseParameter = new MethodParameter(method, 0);
 		assertThat(resolver.supportsParameter(servletResponseParameter)).as("ServletResponse not supported").isTrue();
 

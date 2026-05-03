@@ -72,7 +72,7 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppC
 @WebAppConfiguration
 @ContextConfiguration
 @DirtiesContext
-public class RequestContextHolderTests {
+class RequestContextHolderTests {
 
 	private static final String FROM_TCF_MOCK = "fromTestContextFrameworkMock";
 	private static final String FROM_MVC_TEST_DEFAULT = "fromSpringMvcTestDefault";
@@ -102,7 +102,7 @@ public class RequestContextHolderTests {
 
 
 	@BeforeEach
-	public void setup() {
+	void setup() {
 		this.mockRequest.setAttribute(FROM_TCF_MOCK, FROM_TCF_MOCK);
 
 		this.mockMvc = webAppContextSetup(this.wac)
@@ -113,30 +113,30 @@ public class RequestContextHolderTests {
 	}
 
 	@Test
-	public void singletonController() throws Exception {
+	void singletonController() throws Exception {
 		this.mockMvc.perform(get("/singletonController").requestAttr(FROM_MVC_TEST_MOCK, FROM_MVC_TEST_MOCK));
 	}
 
 	@Test
-	public void requestScopedController() throws Exception {
+	void requestScopedController() throws Exception {
 		assertThat(AopUtils.isCglibProxy(this.requestScopedController)).as("request-scoped controller must be a CGLIB proxy").isTrue();
 		this.mockMvc.perform(get("/requestScopedController").requestAttr(FROM_MVC_TEST_MOCK, FROM_MVC_TEST_MOCK));
 	}
 
 	@Test
-	public void requestScopedService() throws Exception {
+	void requestScopedService() throws Exception {
 		assertThat(AopUtils.isCglibProxy(this.requestScopedService)).as("request-scoped service must be a CGLIB proxy").isTrue();
 		this.mockMvc.perform(get("/requestScopedService").requestAttr(FROM_MVC_TEST_MOCK, FROM_MVC_TEST_MOCK));
 	}
 
 	@Test
-	public void sessionScopedService() throws Exception {
+	void sessionScopedService() throws Exception {
 		assertThat(AopUtils.isCglibProxy(this.sessionScopedService)).as("session-scoped service must be a CGLIB proxy").isTrue();
 		this.mockMvc.perform(get("/sessionScopedService").requestAttr(FROM_MVC_TEST_MOCK, FROM_MVC_TEST_MOCK));
 	}
 
 	@AfterEach
-	public void verifyRestoredRequestAttributes() {
+	void verifyRestoredRequestAttributes() {
 		assertRequestAttributes(false);
 	}
 

@@ -85,7 +85,7 @@ class ProducesRequestConditionTests {
 	}
 
 	@Test // gh-21670
-	public void matchWithParameters() {
+	void matchWithParameters() {
 		String base = "application/atom+xml";
 		ProducesRequestCondition condition = new ProducesRequestCondition(base + ";type=feed");
 		MockServerWebExchange exchange = MockServerWebExchange.from(get("/").header("Accept", base + ";type=feed"));
@@ -121,7 +121,7 @@ class ProducesRequestConditionTests {
 	}
 
 	@Test // SPR-17550
-	public void matchWithNegationAndMediaTypeAllWithQualityParameter() {
+	void matchWithNegationAndMediaTypeAllWithQualityParameter() {
 		ProducesRequestCondition condition = new ProducesRequestCondition("!application/json");
 
 		MockServerWebExchange exchange = MockServerWebExchange.from(get("/").header("Accept",
@@ -131,7 +131,7 @@ class ProducesRequestConditionTests {
 	}
 
 	@Test // gh-22853
-	public void matchAndCompare() {
+	void matchAndCompare() {
 		RequestedContentTypeResolverBuilder builder = new RequestedContentTypeResolverBuilder();
 		builder.headerResolver();
 		builder.fixedResolver(MediaType.TEXT_HTML);

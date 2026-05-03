@@ -245,7 +245,12 @@ class StompBrokerRelayMessageHandlerTests {
 
 		ArgumentCaptor<Message> captor = ArgumentCaptor.forClass(Message.class);
 		verify(handler).handleMessage(captor.capture());
-		assertThat(captor.getValue()).isSameAs(message);
+
+		Message actual = captor.getValue();
+		assertThat(actual).isSameAs(message);
+
+		accessor = StompHeaderAccessor.getAccessor(actual, StompHeaderAccessor.class);
+		assertThat(accessor.getSessionId()).isEqualTo(StompBrokerRelayMessageHandler.SYSTEM_SESSION_ID);
 	}
 
 	@Test

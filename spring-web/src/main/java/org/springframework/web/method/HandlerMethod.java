@@ -96,7 +96,7 @@ public class HandlerMethod extends AnnotatedMethod {
 
 	private @Nullable HandlerMethod resolvedFromHandlerMethod;
 
-	private @Nullable HandlerMethod resolvedBeanHandlerMethod;
+	private volatile @Nullable HandlerMethod resolvedBeanHandlerMethod;
 
 	private final String description;
 
@@ -233,7 +233,10 @@ public class HandlerMethod extends AnnotatedMethod {
 			this.responseStatus = annotation.code();
 			this.responseStatusReason = resolvedReason;
 			if (StringUtils.hasText(this.responseStatusReason) && getMethod().getReturnType() != void.class) {
-				logger.warn("Return value of [" + getMethod() + "] will be ignored since @ResponseStatus 'reason' attribute is set.");
+				if (logger.isWarnEnabled()) {
+					logger.warn("Return value of [" + getMethod() +
+							"] will be ignored since @ResponseStatus 'reason' attribute is set.");
+				}
 			}
 		}
 	}
@@ -352,23 +355,22 @@ public class HandlerMethod extends AnnotatedMethod {
 	 * <p>If the {@link #getBean() handler} is not String, return the same instance.
 	 */
 	public HandlerMethod createWithResolvedBean() {
-		if (this.resolvedBeanHandlerMethod != null) {
-			return this.resolvedBeanHandlerMethod;
+		HandlerMethod resolvedBeanHandlerMethod = this.resolvedBeanHandlerMethod;
+		if (resolvedBeanHandlerMethod != null) {
+			return resolvedBeanHandlerMethod;
 		}
 
+		// We need to resolve a bean name reference.
 		if (!(this.bean instanceof String beanName)) {
 			return this;
 		}
-
 		Assert.state(this.beanFactory != null, "Cannot resolve bean name without BeanFactory");
 		Object handler = this.beanFactory.getBean(beanName);
-		Assert.notNull(handler, "No handler instance");
 
 		HandlerMethod handlerMethod = new HandlerMethod(this, handler, false);
 		if (this.beanFactory.isSingleton(beanName)) {
 			this.resolvedBeanHandlerMethod = handlerMethod;
 		}
-
 		return handlerMethod;
 	}
 
@@ -407,19 +409,18 @@ public class HandlerMethod extends AnnotatedMethod {
 	// Support methods for use in subclass variants
 
 	/**
-	 * Assert that the target bean class is an instance of the class where the given
-	 * method is declared. In some cases the actual controller instance at request-processing
-	 * time may be a JDK dynamic proxy (lazy initialization, prototype
-	 * beans, and others). {@code @Controller}'s that require proxying should prefer
-	 * class-based proxy mechanisms.
+	 * Assert that the target bean class is an instance of the class where the given method
+	 * is declared. In some cases the actual controller instance at request-processing time
+	 * may be a JDK dynamic proxy (lazy initialization, prototype beans, and others).
+	 * {@code @Controller}'s that require proxying should prefer class-based proxy mechanisms.
 	 */
 	protected void assertTargetBean(Method method, Object targetBean, @Nullable Object[] args) {
 		Class<?> methodDeclaringClass = method.getDeclaringClass();
 		Class<?> targetBeanClass = targetBean.getClass();
 		if (!methodDeclaringClass.isAssignableFrom(targetBeanClass)) {
 			String text = "The mapped handler method class '" + methodDeclaringClass.getName() +
-					"' is not an instance of the actual controller bean class '" +
-					targetBeanClass.getName() + "'. If the controller requires proxying " +
+					"' is not an instance of the actual target bean class '" +
+					targetBeanClass.getName() + "'. If the target bean requires proxying " +
 					"(for example, due to @Transactional), please use class-based proxying.";
 			throw new IllegalStateException(formatInvokeError(text, args));
 		}
@@ -430,12 +431,12 @@ public class HandlerMethod extends AnnotatedMethod {
 				.mapToObj(i -> {
 					Object arg = args[i];
 					return (arg != null ?
-							"[" + i + "] [type=" +arg.getClass().getName() + "] [value=" + arg + "]" :
+							"[" + i + "] [type=" + arg.getClass().getName() + "] [value=" + arg + "]" :
 							"[" + i + "] [null]");
 				})
-				.collect(Collectors.joining(",\n", " ", " "));
+				.collect(Collectors.joining(",\n"));
 		return text + "\n" +
-				"Controller [" + getBeanType().getName() + "]\n" +
+				"Handler [" + getBeanType().getName() + "]\n" +
 				"Method [" + getBridgedMethod().toGenericString() + "] " +
 				"with argument values:\n" + formattedArgs;
 	}

@@ -46,5 +46,5 @@ import org.junit.platform.suite.api.Suite;
 @SelectPackages("org.springframework.test.context.junit.jupiter")
 @IncludeClassNamePatterns(".*Tests$")
 @ExcludeTags("failing-test-case")
-public class SpringJUnitJupiterTestSuite {
+class SpringJUnitJupiterTestSuite {
 }

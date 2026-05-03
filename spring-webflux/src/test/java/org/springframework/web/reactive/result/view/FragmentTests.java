@@ -28,7 +28,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * Unit tests for {@link Fragment}.
  * @author Rossen Stoyanchev
  */
-public class FragmentTests {
+class FragmentTests {
 
 	@Test
 	void mergeAttributes() {

@@ -35,7 +35,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 @ContextHierarchy(@ContextConfiguration)
 @DisabledInAotMode("@ContextHierarchy is not supported in AOT")
-public class DispatcherWacRootWacEarTests extends RootWacEarTests {
+class DispatcherWacRootWacEarTests extends RootWacEarTests {
 
 	@Autowired
 	private WebApplicationContext wac;

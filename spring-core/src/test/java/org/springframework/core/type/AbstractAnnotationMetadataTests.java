@@ -261,7 +261,9 @@ public abstract class AbstractAnnotationMetadataTests {
 			assertThat(get(WithDirectAnnotations.class).getAnnotations().stream())
 					.filteredOn(MergedAnnotation::isDirectlyPresent)
 					.extracting(a -> a.getType().getName())
-					.containsExactlyInAnyOrder(DirectAnnotation1.class.getName(), DirectAnnotation2.class.getName());
+					// We do not use containsExactlyInAnyOrder(), because annotations
+					// must be returned in source declaration order.
+					.containsExactly(DirectAnnotation1.class.getName(), DirectAnnotation2.class.getName());
 		}
 
 		@Test
@@ -290,8 +292,10 @@ public abstract class AbstractAnnotationMetadataTests {
 			MultiValueMap<String, Object> attributes =
 					get(WithMetaAnnotationAttributes.class).getAllAnnotationAttributes(AnnotationAttributes.class.getName());
 			assertThat(attributes).containsOnlyKeys("name", "size");
-			assertThat(attributes.get("name")).containsExactlyInAnyOrder("m1", "m2");
-			assertThat(attributes.get("size")).containsExactlyInAnyOrder(1, 2);
+			// We do not use containsExactlyInAnyOrder(), because annotations
+			// must be returned in source declaration order.
+			assertThat(attributes.get("name")).containsExactly("m1", "m2");
+			assertThat(attributes.get("size")).containsExactly(1, 2);
 		}
 
 		@Test
@@ -335,15 +339,19 @@ public abstract class AbstractAnnotationMetadataTests {
 		@Test
 		void getAnnotationTypesReturnsDirectAnnotations() {
 			AnnotationMetadata metadata = get(WithDirectAnnotations.class);
-			assertThat(metadata.getAnnotationTypes()).containsExactlyInAnyOrder(
-					DirectAnnotation1.class.getName(), DirectAnnotation2.class.getName());
+			// We do not use containsExactlyInAnyOrder(), because annotations
+			// must be returned in source declaration order.
+			assertThat(metadata.getAnnotationTypes())
+					.containsExactly(DirectAnnotation1.class.getName(), DirectAnnotation2.class.getName());
 		}
 
 		@Test
 		void getMetaAnnotationTypesReturnsMetaAnnotations() {
 			AnnotationMetadata metadata = get(WithMetaAnnotations.class);
+			// We do not use containsExactlyInAnyOrder(), because annotations
+			// must be returned in source declaration order.
 			assertThat(metadata.getMetaAnnotationTypes(MetaAnnotationRoot.class.getName()))
-					.containsExactlyInAnyOrder(MetaAnnotation1.class.getName(), MetaAnnotation2.class.getName());
+					.containsExactly(MetaAnnotation1.class.getName(), MetaAnnotation2.class.getName());
 		}
 
 		@Test

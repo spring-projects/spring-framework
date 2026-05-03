@@ -66,8 +66,7 @@ class WebHttpHandlerBuilderTests {
 		context.refresh();
 
 		HttpHandler httpHandler = WebHttpHandlerBuilder.applicationContext(context).build();
-		boolean condition = httpHandler instanceof HttpWebHandlerAdapter;
-		assertThat(condition).isTrue();
+		assertThat(httpHandler).isInstanceOf(HttpWebHandlerAdapter.class);
 		assertThat(((HttpWebHandlerAdapter) httpHandler).getApplicationContext()).isSameAs(context);
 
 		MockServerHttpRequest request = MockServerHttpRequest.get("/").build();
@@ -339,7 +338,7 @@ class WebHttpHandlerBuilderTests {
 	static class ObservationConfig {
 
 		@Bean
-		public TestObservationRegistry testObservationRegistry() {
+		public TestObservationRegistry observationRegistry() {
 			return TestObservationRegistry.create();
 		}
 

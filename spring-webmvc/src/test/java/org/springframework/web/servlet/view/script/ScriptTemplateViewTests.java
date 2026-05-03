@@ -56,7 +56,7 @@ import static org.mockito.Mockito.mock;
  *
  * @author Sebastien Deleuze
  */
-public class ScriptTemplateViewTests {
+class ScriptTemplateViewTests {
 
 	private ScriptTemplateView view;
 
@@ -66,7 +66,7 @@ public class ScriptTemplateViewTests {
 
 
 	@BeforeEach
-	public void setup() {
+	void setup() {
 		this.configurer = new ScriptTemplateConfigurer();
 		this.wac = new StaticWebApplicationContext();
 		this.wac.getBeanFactory().registerSingleton("scriptTemplateConfigurer", this.configurer);
@@ -75,7 +75,7 @@ public class ScriptTemplateViewTests {
 
 
 	@Test
-	public void missingTemplate() throws Exception {
+	void missingTemplate() throws Exception {
 		MockServletContext servletContext = new MockServletContext();
 		this.wac.setServletContext(servletContext);
 		this.wac.refresh();
@@ -88,14 +88,14 @@ public class ScriptTemplateViewTests {
 	}
 
 	@Test
-	public void missingScriptTemplateConfig() {
+	void missingScriptTemplateConfig() {
 		assertThatExceptionOfType(ApplicationContextException.class).isThrownBy(() ->
 						this.view.setApplicationContext(new StaticApplicationContext()))
 				.withMessageContaining("ScriptTemplateConfig");
 	}
 
 	@Test
-	public void detectScriptTemplateConfigWithEngine() {
+	void detectScriptTemplateConfigWithEngine() {
 		InvocableScriptEngine engine = mock(InvocableScriptEngine.class);
 		this.configurer.setEngine(engine);
 		this.configurer.setRenderObject("Template");
@@ -115,7 +115,7 @@ public class ScriptTemplateViewTests {
 	}
 
 	@Test
-	public void detectScriptTemplateConfigWithEngineName() {
+	void detectScriptTemplateConfigWithEngineName() {
 		this.configurer.setEngineName("jython");
 		this.configurer.setRenderObject("Template");
 		this.configurer.setRenderFunction("render");
@@ -131,7 +131,7 @@ public class ScriptTemplateViewTests {
 	}
 
 	@Test
-	public void customEngineAndRenderFunction() {
+	void customEngineAndRenderFunction() {
 		ScriptEngine engine = mock(InvocableScriptEngine.class);
 		given(engine.get("key")).willReturn("value");
 		this.view.setEngine(engine);
@@ -147,7 +147,7 @@ public class ScriptTemplateViewTests {
 	}
 
 	@Test
-	public void nonSharedEngine() throws Exception {
+	void nonSharedEngine() throws Exception {
 		int iterations = 20;
 		this.view.setEngineName("jython");
 		this.view.setRenderFunction("render");
@@ -166,13 +166,13 @@ public class ScriptTemplateViewTests {
 	}
 
 	@Test
-	public void nonInvocableScriptEngine() {
+	void nonInvocableScriptEngine() {
 		this.view.setEngine(mock(ScriptEngine.class));
 		this.view.setApplicationContext(this.wac);
 	}
 
 	@Test
-	public void nonInvocableScriptEngineWithRenderFunction() {
+	void nonInvocableScriptEngineWithRenderFunction() {
 		this.view.setEngine(mock(ScriptEngine.class));
 		this.view.setRenderFunction("render");
 		assertThatIllegalArgumentException().isThrownBy(() ->
@@ -180,7 +180,7 @@ public class ScriptTemplateViewTests {
 	}
 
 	@Test
-	public void engineAndEngineNameBothDefined() {
+	void engineAndEngineNameBothDefined() {
 		this.view.setEngine(mock(InvocableScriptEngine.class));
 		this.view.setEngineName("test");
 		this.view.setRenderFunction("render");
@@ -190,7 +190,7 @@ public class ScriptTemplateViewTests {
 	}
 
 	@Test  // gh-23258
-	public void engineAndEngineSupplierBothDefined() {
+	void engineAndEngineSupplierBothDefined() {
 		ScriptEngine engine = mock(InvocableScriptEngine.class);
 		this.view.setEngineSupplier(() -> engine);
 		this.view.setEngine(engine);
@@ -201,7 +201,7 @@ public class ScriptTemplateViewTests {
 	}
 
 	@Test  // gh-23258
-	public void engineNameAndEngineSupplierBothDefined() {
+	void engineNameAndEngineSupplierBothDefined() {
 		this.view.setEngineSupplier(() -> mock(InvocableScriptEngine.class));
 		this.view.setEngineName("test");
 		this.view.setRenderFunction("render");
@@ -211,7 +211,7 @@ public class ScriptTemplateViewTests {
 	}
 
 	@Test
-	public void engineSetterAndNonSharedEngine() {
+	void engineSetterAndNonSharedEngine() {
 		this.view.setEngine(mock(InvocableScriptEngine.class));
 		this.view.setRenderFunction("render");
 		this.view.setSharedEngine(false);
@@ -221,7 +221,7 @@ public class ScriptTemplateViewTests {
 	}
 
 	@Test // SPR-14210
-	public void resourceLoaderPath() throws Exception {
+	void resourceLoaderPath() throws Exception {
 		MockServletContext servletContext = new MockServletContext();
 		this.wac.setServletContext(servletContext);
 		this.wac.refresh();
@@ -259,7 +259,7 @@ public class ScriptTemplateViewTests {
 	}
 
 	@Test // SPR-13379
-	public void contentType() throws Exception {
+	void contentType() throws Exception {
 		MockServletContext servletContext = new MockServletContext();
 		this.wac.setServletContext(servletContext);
 		this.wac.refresh();
@@ -292,7 +292,7 @@ public class ScriptTemplateViewTests {
 	}
 
 	@Test  // gh-23258
-	public void engineSupplierWithSharedEngine() {
+	void engineSupplierWithSharedEngine() {
 		this.configurer.setEngineSupplier(() -> mock(InvocableScriptEngine.class));
 		this.configurer.setRenderObject("Template");
 		this.configurer.setRenderFunction("render");
@@ -310,7 +310,7 @@ public class ScriptTemplateViewTests {
 	}
 
 	@Test  // gh-23258
-	public void engineSupplierWithNonSharedEngine() {
+	void engineSupplierWithNonSharedEngine() {
 		this.configurer.setEngineSupplier(() -> mock(InvocableScriptEngine.class));
 		this.configurer.setRenderObject("Template");
 		this.configurer.setRenderFunction("render");

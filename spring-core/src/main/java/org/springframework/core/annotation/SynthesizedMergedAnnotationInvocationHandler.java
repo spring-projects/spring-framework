@@ -136,7 +136,7 @@ final class SynthesizedMergedAnnotationInvocationHandler<A extends Annotation> i
 	private String annotationToString() {
 		String string = this.string;
 		if (string == null) {
-			StringBuilder builder = new StringBuilder("@").append(getName(this.type)).append('(');
+			StringBuilder builder = new StringBuilder("@").append(ClassUtils.getCanonicalName(this.type)).append('(');
 			if (this.attributes.size() == 1 && this.attributes.get(0).getName().equals(MergedAnnotation.VALUE)) {
 				// Don't prepend "value=" for an annotation that only declares a "value" attribute.
 				builder.append(toString(getAttributeValue(this.attributes.get(0))));
@@ -208,7 +208,7 @@ final class SynthesizedMergedAnnotationInvocationHandler<A extends Annotation> i
 			return e.name();
 		}
 		if (type == Class.class) {
-			return getName((Class<?>) value) + ".class";
+			return ClassUtils.getCanonicalName((Class<?>) value) + ".class";
 		}
 		return String.valueOf(value);
 	}
@@ -218,7 +218,7 @@ final class SynthesizedMergedAnnotationInvocationHandler<A extends Annotation> i
 			Class<?> type = ClassUtils.resolvePrimitiveIfNecessary(method.getReturnType());
 			return this.annotation.getValue(attributeName, type).orElseThrow(
 					() -> new NoSuchElementException("No value found for attribute named '" + attributeName +
-							"' in merged annotation " + getName(this.annotation.getType())));
+							"' in merged annotation " + ClassUtils.getCanonicalName(this.annotation.getType())));
 		});
 
 		// Clone non-empty arrays so that users cannot alter the contents of values in our cache.
@@ -270,11 +270,6 @@ final class SynthesizedMergedAnnotationInvocationHandler<A extends Annotation> i
 		Class<?>[] interfaces = new Class<?>[] {type};
 		InvocationHandler handler = new SynthesizedMergedAnnotationInvocationHandler<>(annotation, type);
 		return (A) Proxy.newProxyInstance(classLoader, interfaces, handler);
-	}
-
-	private static String getName(Class<?> clazz) {
-		String canonicalName = clazz.getCanonicalName();
-		return (canonicalName != null ? canonicalName : clazz.getName());
 	}
 
 }
