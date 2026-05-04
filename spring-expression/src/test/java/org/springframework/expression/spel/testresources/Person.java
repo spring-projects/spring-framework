@@ -59,4 +59,8 @@ public class Person {
 		return company;
 	}
 
+	public void getInvalid() {
+		// no-op
+	}
+
 }

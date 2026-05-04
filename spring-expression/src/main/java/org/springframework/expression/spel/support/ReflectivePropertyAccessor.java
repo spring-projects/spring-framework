@@ -376,16 +376,20 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 	 */
 	@Nullable
 	protected Method findGetterForProperty(String propertyName, Class<?> clazz, boolean mustBeStatic) {
-		Method method = findMethodForProperty(getPropertyMethodSuffixes(propertyName),
+		String[] methodSuffixes = getPropertyMethodSuffixes(propertyName);
+		Method method = findMethodForProperty(methodSuffixes,
 				"get", clazz, mustBeStatic, 0, ANY_TYPES);
 		if (method == null) {
-			method = findMethodForProperty(getPropertyMethodSuffixes(propertyName),
+			method = findMethodForProperty(methodSuffixes,
 					"is", clazz, mustBeStatic, 0, BOOLEAN_TYPES);
 			if (method == null) {
 				// Record-style plain accessor method, for example, name()
 				method = findMethodForProperty(new String[] {propertyName},
 						"", clazz, mustBeStatic, 0, ANY_TYPES);
 			}
+		}
+		if (method != null && method.getReturnType() == void.class) {
+			method = null; // not a valid accessor method
 		}
 		return method;
 	}
