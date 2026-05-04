@@ -225,7 +225,7 @@ public class HttpHeaders implements Serializable {
 	 */
 	public static final String CONTENT_RANGE = "Content-Range";
 	/**
-	 * The CORS {@code Content-Security-Policy} response header field name.
+	 * The Security {@code Content-Security-Policy} response header field name.
 	 * @see <a href="https://www.w3.org/TR/CSP3/">Content Security Policy Level 3 W3C recommendation</a>
 	 */
 	public static final String CONTENT_SECURITY_POLICY = "Content-Security-Policy";
