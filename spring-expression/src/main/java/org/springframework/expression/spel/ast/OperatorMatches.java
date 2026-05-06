@@ -98,12 +98,10 @@ public class OperatorMatches extends Operator {
 		}
 
 		try {
-			Pattern pattern = this.patternCache.get(regex);
-			if (pattern == null) {
-				checkRegexLength(regex);
-				pattern = Pattern.compile(regex);
-				this.patternCache.putIfAbsent(regex, pattern);
-			}
+			Pattern pattern = this.patternCache.computeIfAbsent(regex, key -> {
+				checkRegexLength(key);
+				return Pattern.compile(key);
+			});
 			Matcher matcher = pattern.matcher(new MatcherInput(input, new AccessCount()));
 			return BooleanTypedValue.forValue(matcher.matches());
 		}
