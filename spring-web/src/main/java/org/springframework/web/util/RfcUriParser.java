@@ -178,7 +178,7 @@ abstract class RfcUriParser {
 						parser.capturePath().advanceTo(QUERY, i + 1);
 						break;
 					case '#':
-						parser.capturePath().advanceTo(FRAGMENT);
+						parser.capturePath().advanceTo(FRAGMENT, i + 1);
 						break;
 				}
 			}
