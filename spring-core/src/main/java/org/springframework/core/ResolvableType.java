@@ -1548,9 +1548,6 @@ public class ResolvableType implements Serializable {
 			return new ResolvableType(type, null, typeProvider, variableResolver);
 		}
 
-		// Purge empty entries on access since we don't have a clean-up thread or the like.
-		cache.purgeUnreferencedEntries();
-
 		// Check the cache - we may have a ResolvableType which has been resolved before...
 		ResolvableType resultType = new ResolvableType(type, typeProvider, variableResolver);
 		ResolvableType cachedType = cache.get(resultType);
