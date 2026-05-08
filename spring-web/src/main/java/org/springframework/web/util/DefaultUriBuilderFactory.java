@@ -433,7 +433,7 @@ public class DefaultUriBuilderFactory implements UriBuilderFactory {
 		@Override
 		public URI build(Map<String, ?> uriVars) {
 			if (!CollectionUtils.isEmpty(defaultUriVariables)) {
-				Map<String, Object> map = new HashMap<>(defaultUriVariables.size() + uriVars.size());
+				Map<String, Object> map = CollectionUtils.newHashMap(defaultUriVariables.size() + uriVars.size());
 				map.putAll(defaultUriVariables);
 				map.putAll(uriVars);
 				uriVars = map;
