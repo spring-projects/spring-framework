@@ -76,6 +76,7 @@ public class IndexedTestBean {
 		TestBean tb6 = new TestBean("name6", 0);
 		TestBean tb7 = new TestBean("name7", 0);
 		TestBean tb8 = new TestBean("name8", 0);
+		TestBean tb9 = new TestBean("name9", 0);
 		TestBean tbA = new TestBean("nameA", 0);
 		TestBean tbB = new TestBean("nameB", 0);
 		TestBean tbC = new TestBean("nameC", 0);
@@ -104,6 +105,8 @@ public class IndexedTestBean {
 		list.add(tbY);
 		this.map.put("key4", list);
 		this.map.put("key5[foo]", tb8);
+		this.map.put("'", tb9);
+		this.map.put("\"", tb9);
 		this.myTestBeans = new MyTestBeans(tbZ);
 	}
 

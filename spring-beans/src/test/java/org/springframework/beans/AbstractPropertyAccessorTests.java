@@ -1413,6 +1413,8 @@ abstract class AbstractPropertyAccessorTests {
 		assertThat(accessor.getPropertyValue("map[key5[foo]].name")).isEqualTo("name8");
 		assertThat(accessor.getPropertyValue("map['key5[foo]'].name")).isEqualTo("name8");
 		assertThat(accessor.getPropertyValue("map[\"key5[foo]\"].name")).isEqualTo("name8");
+		assertThat(accessor.getPropertyValue("map['].name")).isEqualTo("name9");
+		assertThat(accessor.getPropertyValue("map[\"].name")).isEqualTo("name9");
 		assertThat(accessor.getPropertyValue("iterableMap[key1].name")).isEqualTo("nameC");
 		assertThat(accessor.getPropertyValue("iterableMap[key2][0].name")).isEqualTo("nameA");
 		assertThat(accessor.getPropertyValue("iterableMap[key2][1].name")).isEqualTo("nameB");

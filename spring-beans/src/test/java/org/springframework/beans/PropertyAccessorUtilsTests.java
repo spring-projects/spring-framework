@@ -79,6 +79,10 @@ class PropertyAccessorUtilsTests {
 		assertThat(PropertyAccessorUtils.canonicalPropertyName("map[key1].name")).isEqualTo("map[key1].name");
 		assertThat(PropertyAccessorUtils.canonicalPropertyName("map['key1'].name")).isEqualTo("map[key1].name");
 		assertThat(PropertyAccessorUtils.canonicalPropertyName("map[\"key1\"].name")).isEqualTo("map[key1].name");
+		assertThat(PropertyAccessorUtils.canonicalPropertyName("map['key1]")).isEqualTo("map['key1]");
+		assertThat(PropertyAccessorUtils.canonicalPropertyName("map[\"key1]")).isEqualTo("map[\"key1]");
+		assertThat(PropertyAccessorUtils.canonicalPropertyName("map[']")).isEqualTo("map[']");
+		assertThat(PropertyAccessorUtils.canonicalPropertyName("map[\"]")).isEqualTo("map[\"]");
 	}
 
 	@Test
