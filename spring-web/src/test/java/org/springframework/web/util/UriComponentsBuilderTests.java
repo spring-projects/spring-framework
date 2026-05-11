@@ -267,7 +267,10 @@ class UriComponentsBuilderTests {
 	@EnumSource
 	void fromUriStringInvalidIPv6Host(ParserType parserType) {
 		assertThatIllegalArgumentException().isThrownBy(() ->
-				UriComponentsBuilder.fromUriString("http://[1abc:2abc:3abc::5ABC:6abc:8080/resource", parserType));
+				UriComponentsBuilder.fromUriString("https://[1abc:2abc:3abc::5ABC:6abc:8080/resource", parserType));
+
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				UriComponentsBuilder.fromUriString("https://[1abc:2abc:3abc::5ABC:6abc]resource", parserType));
 	}
 
 	@ParameterizedTest // see SPR-11970

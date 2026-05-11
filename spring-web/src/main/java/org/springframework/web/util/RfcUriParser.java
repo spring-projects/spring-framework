@@ -241,11 +241,15 @@ abstract class RfcUriParser {
 						parser.index(++i);
 						parser.captureHost();
 						if (parser.hasNext()) {
-							if (parser.charAtIndex() == ':') {
+							char next = parser.charAtIndex();
+							if (next == ':') {
 								parser.advanceTo(PORT, i + 1);
 							}
-							else {
+							else if (next == '/') {
 								parser.advanceTo(PATH, i);
+							}
+							else {
+								fail(parser, "Bad authority");
 							}
 						}
 						break;
