@@ -127,9 +127,9 @@ public class OpMultiply extends Operator {
 			throw new SpelEvaluationException(getStartPosition(),
 					SpelMessage.NEGATIVE_REPEATED_TEXT_COUNT, count);
 		}
-		int result = text.length() * count;
+		long result = (long) text.length() * (long) count;
 		if (result < 0 || result > MAX_REPEATED_TEXT_SIZE) {
-			throw new SpelEvaluationException(getStartPosition(),
+			throw new SpelEvaluationException(getRightOperand().getStartPosition(),
 					SpelMessage.MAX_REPEATED_TEXT_SIZE_EXCEEDED, MAX_REPEATED_TEXT_SIZE);
 		}
 	}

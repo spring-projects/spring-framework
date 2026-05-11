@@ -153,16 +153,19 @@ public class OpPlus extends Operator {
 	}
 
 	private void checkStringLength(String string) {
-		if (string.length() > MAX_CONCATENATED_STRING_LENGTH) {
+		checkStringLength(string.length());
+	}
+
+	private void checkStringLength(int stringLength) {
+		if (stringLength > MAX_CONCATENATED_STRING_LENGTH) {
 			throw new SpelEvaluationException(getStartPosition(),
 					SpelMessage.MAX_CONCATENATED_STRING_LENGTH_EXCEEDED, MAX_CONCATENATED_STRING_LENGTH);
 		}
 	}
 
 	private TypedValue concatenate(String leftString, String rightString) {
-		String result = leftString + rightString;
-		checkStringLength(result);
-		return new TypedValue(result);
+		checkStringLength(leftString.length() + rightString.length());
+		return new TypedValue(leftString + rightString);
 	}
 
 	@Override
