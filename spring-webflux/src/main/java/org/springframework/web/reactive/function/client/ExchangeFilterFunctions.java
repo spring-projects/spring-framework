@@ -17,9 +17,11 @@
 package org.springframework.web.reactive.function.client;
 
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.buffer.DataBufferUtils;
@@ -34,6 +36,7 @@ import org.springframework.util.Assert;
  * @author Rob Winch
  * @author Arjen Poutsma
  * @author Sam Brannen
+ * @author Kai Zander
  * @since 5.0
  */
 public abstract class ExchangeFilterFunctions {
@@ -76,6 +79,7 @@ public abstract class ExchangeFilterFunctions {
 	 * Return a filter that applies HTTP Basic Authentication to the request
 	 * headers via {@link HttpHeaders#setBasicAuth(String)} and
 	 * {@link HttpHeaders#encodeBasicAuth(String, String, Charset)}.
+	 * <p>{@linkplain StandardCharsets#ISO_8859_1 ISO-8859-1} is used to convert the credentials into an octet sequence.
 	 * @param username the username
 	 * @param password the password
 	 * @return the filter to add authentication headers with
@@ -83,7 +87,24 @@ public abstract class ExchangeFilterFunctions {
 	 * @see HttpHeaders#setBasicAuth(String)
 	 */
 	public static ExchangeFilterFunction basicAuthentication(String username, String password) {
-		String encodedCredentials = HttpHeaders.encodeBasicAuth(username, password, null);
+		return basicAuthentication(username, password, null);
+	}
+
+	/**
+	 * Return a filter that applies HTTP Basic Authentication to the request
+	 * headers via {@link HttpHeaders#setBasicAuth(String)} and
+	 * {@link HttpHeaders#encodeBasicAuth(String, String, Charset)}.
+	 * @param username the username
+	 * @param password the password
+	 * @param charset the charset to use to convert the credentials into an octet
+	 * sequence. Defaults to {@linkplain StandardCharsets#ISO_8859_1 ISO-8859-1}.
+	 * @return the filter to add authentication headers with
+	 * @since 7.0.8
+	 * @see HttpHeaders#encodeBasicAuth(String, String, Charset)
+	 * @see HttpHeaders#setBasicAuth(String)
+	 */
+	public static ExchangeFilterFunction basicAuthentication(String username, String password, @Nullable Charset charset) {
+		String encodedCredentials = HttpHeaders.encodeBasicAuth(username, password, charset);
 		return (request, next) ->
 				next.exchange(ClientRequest.from(request)
 						.headers(headers -> headers.setBasicAuth(encodedCredentials))
