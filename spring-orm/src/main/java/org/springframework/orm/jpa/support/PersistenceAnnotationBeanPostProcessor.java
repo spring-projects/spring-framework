@@ -856,12 +856,11 @@ public class PersistenceAnnotationBeanPostProcessor implements InstantiationAwar
 			return CodeBlock.of("$L($L)", generatedMethod.getName(), REGISTERED_BEAN_PARAMETER);
 		}
 
-		@SuppressWarnings("NullAway")
 		private void generateGetEntityManagerMethod(MethodSpec.Builder method, PersistenceElement injectedElement) {
 			String unitName = injectedElement.unitName;
 			Properties properties = injectedElement.properties;
 			method.addJavadoc("Get the '$L' {@link $T}.",
-					(StringUtils.hasLength(unitName)) ? unitName : "default",
+					(StringUtils.hasLength(unitName) ? unitName : "default"),
 					EntityManager.class);
 			method.addModifiers(javax.lang.model.element.Modifier.PUBLIC,
 					javax.lang.model.element.Modifier.STATIC);
@@ -871,10 +870,8 @@ public class PersistenceAnnotationBeanPostProcessor implements InstantiationAwar
 					"$T entityManagerFactory = $T.findEntityManagerFactory(($T) $L.getBeanFactory(), $S)",
 					EntityManagerFactory.class, EntityManagerFactoryUtils.class,
 					ListableBeanFactory.class, REGISTERED_BEAN_PARAMETER, unitName);
-			boolean hasProperties = !CollectionUtils.isEmpty(properties);
-			if (hasProperties) {
-				method.addStatement("$T properties = new Properties()",
-						Properties.class);
+			if (properties != null) {
+				method.addStatement("$T properties = new Properties()", Properties.class);
 				for (String propertyName : new TreeSet<>(properties.stringPropertyNames())) {
 					method.addStatement("properties.put($S, $S)", propertyName, properties.getProperty(propertyName));
 				}
@@ -882,7 +879,7 @@ public class PersistenceAnnotationBeanPostProcessor implements InstantiationAwar
 			method.addStatement(
 					"return $T.createSharedEntityManager(entityManagerFactory, $L, $L)",
 					SharedEntityManagerCreator.class,
-					(hasProperties) ? "properties" : null,
+					(properties != null ? "properties" : null),
 					injectedElement.synchronizedWithTransaction);
 		}
 	}

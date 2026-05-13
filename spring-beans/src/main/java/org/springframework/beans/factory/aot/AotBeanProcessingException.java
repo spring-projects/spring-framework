@@ -31,6 +31,7 @@ public class AotBeanProcessingException extends AotProcessingException {
 
 	private final RootBeanDefinition beanDefinition;
 
+
 	/**
 	 * Create an instance with the {@link RegisteredBean} that fails to be
 	 * processed, a detail message, and an optional root cause.
@@ -63,6 +64,7 @@ public class AotBeanProcessingException extends AotProcessingException {
 		sb.append(": ").append(msg);
 		return sb.toString();
 	}
+
 
 	/**
 	 * Return the bean definition of the bean that failed to be processed.

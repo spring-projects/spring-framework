@@ -885,16 +885,13 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 					});
 			GeneratedMethod generateMethod = generatedClass.getMethods().add("apply", method -> {
 				method.addJavadoc("Apply resource autowiring.");
-				method.addModifiers(javax.lang.model.element.Modifier.PUBLIC,
-						javax.lang.model.element.Modifier.STATIC);
+				method.addModifiers(javax.lang.model.element.Modifier.PUBLIC, javax.lang.model.element.Modifier.STATIC);
 				method.addParameter(RegisteredBean.class, REGISTERED_BEAN_PARAMETER);
 				method.addParameter(this.target, INSTANCE_PARAMETER);
 				method.returns(this.target);
-				method.addCode(generateMethodCode(generatedClass.getName(),
-						generationContext.getRuntimeHints()));
+				method.addCode(generateMethodCode(generatedClass.getName(), generationContext.getRuntimeHints()));
 			});
 			beanRegistrationCode.addInstancePostProcessor(generateMethod.toMethodReference());
-
 			registerHints(generationContext.getRuntimeHints());
 		}
 
