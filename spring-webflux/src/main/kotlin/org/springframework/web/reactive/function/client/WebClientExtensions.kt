@@ -34,6 +34,7 @@ import org.springframework.web.reactive.function.client.WebClient.RequestHeaders
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import reactor.util.context.Context
+import reactor.util.retry.Retry
 import kotlin.coroutines.CoroutineContext
 
 /**
@@ -226,7 +227,7 @@ inline fun <reified T : Any> WebClient.ResponseSpec.toEntityFlux(): Mono<Respons
 		toEntityFlux(object : ParameterizedTypeReference<T>() {})
 
 /**
- * Extension for [WebClient.ResponseSpec.toEntity] providing a `toEntity<Foo>()` variant
+ * Extension for [WebClient.ResponseSpec.toEntity] providing a `awaitEntity<Foo>()` variant
  * leveraging Kotlin reified type parameters and allows [kotlin.coroutines.CoroutineContext]
  * propagation to the [CoExchangeFilterFunction]. This extension is not subject to type erasure
  * and retains actual generic type arguments.
@@ -237,6 +238,23 @@ suspend inline fun <reified T : Any> WebClient.ResponseSpec.awaitEntity(): Respo
 	val context = currentCoroutineContext().minusKey(Job.Key)
 	return withContext(context.toReactorContext()) {
 		toEntity(T::class.java).awaitSingle()
+	}
+}
+
+/**
+ * Extension for [WebClient.ResponseSpec.toEntity] providing a `awaitEntityWithRetry<Foo>(Retry)` variant
+ * leveraging Kotlin reified type parameters and allows [kotlin.coroutines.CoroutineContext]
+ * propagation to the [CoExchangeFilterFunction]. This extension is not subject to type erasure
+ * and retains actual generic type arguments.
+ *
+ * @param retrySpec the [Retry] strategy passed to the [Mono.retryWhen]
+ * @param T the type of the body
+ * @since 7.0.9
+ */
+suspend inline fun <reified T : Any> WebClient.ResponseSpec.awaitEntityWithRetry(retrySpec: Retry): ResponseEntity<T> {
+	val context = currentCoroutineContext().minusKey(Job.Key)
+	return withContext(context.toReactorContext()) {
+		toEntity<T>().retryWhen(retrySpec).awaitSingle()
 	}
 }
 
