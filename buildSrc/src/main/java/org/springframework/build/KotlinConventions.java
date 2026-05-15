@@ -79,14 +79,6 @@ public class KotlinConventions {
 					spec.url("https://www.reactive-streams.org/reactive-streams-1.0.3-javadoc/"));
 			externalDocumentationLinks.register("kotlinx-coroutines", spec ->
 					spec.url("https://kotlinlang.org/api/kotlinx.coroutines/"));
-			externalDocumentationLinks.register("hamcrest", spec ->
-					spec.url("https://javadoc.io/doc/org.hamcrest/hamcrest/2.1/"));
-			externalDocumentationLinks.register("jakarta-servlet", spec -> {
-				spec.url("https://javadoc.io/doc/jakarta.servlet/jakarta.servlet-api/latest/");
-				spec.packageListUrl("https://javadoc.io/doc/jakarta.servlet/jakarta.servlet-api/latest/element-list");
-			});
-			externalDocumentationLinks.register("rsocket-core", spec ->
-					spec.url("https://javadoc.io/static/io.rsocket/rsocket-core/1.1.1/"));
 		});
 	}
 
