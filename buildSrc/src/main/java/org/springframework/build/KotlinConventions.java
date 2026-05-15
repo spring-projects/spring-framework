@@ -81,5 +81,4 @@ public class KotlinConventions {
 					spec.url("https://kotlinlang.org/api/kotlinx.coroutines/"));
 		});
 	}
-
 }
