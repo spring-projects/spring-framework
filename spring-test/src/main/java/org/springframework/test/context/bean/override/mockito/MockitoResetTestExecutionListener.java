@@ -92,7 +92,7 @@ public class MockitoResetTestExecutionListener extends AbstractTestExecutionList
 
 	@Override
 	public void beforeTestMethod(TestContext testContext) {
-		if (isEnabled()) {
+		if (isEnabled() && testContext.hasApplicationContext()) {
 			resetMocks(testContext.getApplicationContext(), MockReset.BEFORE);
 		}
 	}
