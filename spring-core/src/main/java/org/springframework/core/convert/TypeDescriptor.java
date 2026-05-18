@@ -22,7 +22,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
@@ -36,6 +35,7 @@ import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.lang.Contract;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.CollectionUtils;
 
 /**
  * Contextual descriptor about a type to convert from or to.
@@ -55,7 +55,7 @@ import org.springframework.util.ClassUtils;
 @SuppressWarnings("serial")
 public class TypeDescriptor implements Serializable {
 
-	private static final Map<Class<?>, TypeDescriptor> commonTypesCache = new HashMap<>(32);
+	private static final Map<Class<?>, TypeDescriptor> commonTypesCache;
 
 	private static final Class<?>[] CACHED_COMMON_TYPES = {
 			boolean.class, Boolean.class, byte.class, Byte.class, char.class, Character.class,
@@ -63,9 +63,11 @@ public class TypeDescriptor implements Serializable {
 			long.class, Long.class, short.class, Short.class, String.class, Object.class};
 
 	static {
+		Map<Class<?>, TypeDescriptor> commonTypes = CollectionUtils.newHashMap(CACHED_COMMON_TYPES.length);
 		for (Class<?> preCachedClass : CACHED_COMMON_TYPES) {
-			commonTypesCache.put(preCachedClass, valueOf(preCachedClass));
+			commonTypes.put(preCachedClass, new TypeDescriptor(ResolvableType.forClass(preCachedClass), null, null));
 		}
+		commonTypesCache = Map.copyOf(commonTypes);
 	}
 
 
