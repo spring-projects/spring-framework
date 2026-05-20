@@ -249,6 +249,10 @@ class ConfigurationClassParser {
 		if (this.conditionEvaluator.shouldSkip(configClass.getMetadata(), ConfigurationPhase.PARSE_CONFIGURATION)) {
 			return;
 		}
+		if (!configClass.isImported() && shouldSkipFromEnclosingClasses(
+				configClass.getMetadata(), ConfigurationPhase.PARSE_CONFIGURATION)) {
+			return;
+		}
 
 		ConfigurationClass existingClass = this.configurationClasses.get(configClass);
 		if (existingClass != null) {
@@ -735,6 +739,13 @@ class ConfigurationClassParser {
 		if (enclosingConfigurationClass != null) {
 			allConditions.addAll(this.conditionEvaluator.collectConditions(enclosingConfigurationClass.getMetadata()));
 		}
+		if (!configurationClass.isImported()) {
+			for (AnnotationMetadata enclosing = getEnclosingClassMetadata(metadata);
+					enclosing != null;
+					enclosing = getEnclosingClassMetadata(enclosing)) {
+				allConditions.addAll(this.conditionEvaluator.collectConditions(enclosing));
+			}
+		}
 		return allConditions.stream().filter(REGISTER_BEAN_CONDITION_FILTER).toList();
 	}
 
@@ -746,6 +757,39 @@ class ConfigurationClassParser {
 					.findFirst().orElse(null);
 		}
 		return null;
+	}
+
+	/**
+	 * Determine whether any class in the lexical enclosing chain of the given
+	 * metadata declares a {@code @Conditional} that vetoes registration for the
+	 * given phase. Used to extend enclosing-class condition inheritance to
+	 * nested {@code @Configuration} classes discovered via {@code @ComponentScan}
+	 * or direct registration (paths where the enclosing class is not present in
+	 * {@code importedBy}).
+	 */
+	private boolean shouldSkipFromEnclosingClasses(AnnotationMetadata metadata, ConfigurationPhase phase) {
+		for (AnnotationMetadata enclosing = getEnclosingClassMetadata(metadata);
+				enclosing != null;
+				enclosing = getEnclosingClassMetadata(enclosing)) {
+			if (this.conditionEvaluator.shouldSkip(enclosing, phase)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private @Nullable AnnotationMetadata getEnclosingClassMetadata(AnnotationMetadata metadata) {
+		String enclosingClassName = metadata.getEnclosingClassName();
+		if (enclosingClassName == null) {
+			return null;
+		}
+		try {
+			return this.metadataReaderFactory.getMetadataReader(enclosingClassName).getAnnotationMetadata();
+		}
+		catch (IOException ex) {
+			// Enclosing metadata not readable — treat as if no condition applies.
+			return null;
+		}
 	}
 
 
