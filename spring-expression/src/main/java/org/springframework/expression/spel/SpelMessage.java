@@ -312,7 +312,11 @@ public enum SpelMessage {
 	/** @since 7.0.9 */
 	MAX_BIG_POWER_RESULT_EXCEEDED(Kind.ERROR, 1086,
 			"BigDecimal/BigInteger power operation with base bit length ''{0}'' and exponent ''{1}'' " +
-			"would produce a result exceeding the configured maximum of ''{2}'' bits");
+			"would produce a result exceeding the configured maximum of ''{2}'' bits"),
+
+	/** @since 7.1 */
+	MAX_EXPRESSION_NESTING_DEPTH_EXCEEDED(Kind.ERROR, 1087,
+			"SpEL expression nesting depth exceeds the threshold of {0}");
 
 
 	private final Kind kind;

@@ -20,13 +20,16 @@ import java.util.function.Consumer;
 
 import org.assertj.core.api.ThrowableAssert.ThrowingCallable;
 import org.assertj.core.api.ThrowableAssertAlternative;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.ExpressionException;
+import org.springframework.expression.spel.SpelCompilerMode;
 import org.springframework.expression.spel.SpelMessage;
 import org.springframework.expression.spel.SpelNode;
 import org.springframework.expression.spel.SpelParseException;
+import org.springframework.expression.spel.SpelParserConfiguration;
 import org.springframework.expression.spel.ast.OpAnd;
 import org.springframework.expression.spel.ast.OpOr;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
@@ -34,6 +37,7 @@ import org.springframework.expression.spel.support.StandardEvaluationContext;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.springframework.expression.spel.SpelMessage.MISSING_CONSTRUCTOR_ARGS;
 import static org.springframework.expression.spel.SpelMessage.NON_TERMINATING_DOUBLE_QUOTED_STRING;
 import static org.springframework.expression.spel.SpelMessage.NON_TERMINATING_QUOTED_STRING;
@@ -54,6 +58,105 @@ import static org.springframework.expression.spel.SpelMessage.UNEXPECTED_ESCAPE_
 class SpelParserTests {
 
 	private final SpelExpressionParser parser = new SpelExpressionParser();
+
+
+	@Nested  // gh-36723
+	class MaxNestingDepthTests {
+
+		private final int maxNestingDepth = 10;
+
+		private final SpelExpressionParser parser = new SpelExpressionParser(configurationWithMaxNestingDepth(maxNestingDepth));
+
+
+		@Test
+		void maxNestingDepthWithInlineLists() {
+			// 9 < max
+			assertThatNoException().isThrownBy(() -> parser.parseExpression(nestedInlineList(9)));
+			// 10 <= max
+			assertThatNoException().isThrownBy(() -> parser.parseExpression(nestedInlineList(10)));
+
+			// 11 > max
+			assertNestingDepthExceeded(() -> parser.parseExpression(nestedInlineList(11)), maxNestingDepth);
+			// 100 > max
+			assertNestingDepthExceeded(() -> parser.parseExpression(nestedInlineList(100)), maxNestingDepth);
+		}
+
+		@Test
+		void maxNestingDepthWithParentheses() {
+			assertThatNoException().isThrownBy(() -> parser.parseExpression(nestedParentheses(9)));
+			assertThatNoException().isThrownBy(() -> parser.parseExpression(nestedParentheses(10)));
+
+			assertNestingDepthExceeded(() -> parser.parseExpression(nestedParentheses(11)), maxNestingDepth);
+			assertNestingDepthExceeded(() -> parser.parseExpression(nestedParentheses(100)), maxNestingDepth);
+		}
+
+		@Test
+		void maxNestingDepthWithChainedUnaryOperators() {
+			assertThatNoException().isThrownBy(() -> parser.parseExpression("!".repeat(9) + "true"));
+			assertThatNoException().isThrownBy(() -> parser.parseExpression("!".repeat(10) + "true"));
+
+			assertNestingDepthExceeded(() -> parser.parseExpression("!".repeat(11) + "true"), maxNestingDepth);
+			assertNestingDepthExceeded(() -> parser.parseExpression("-".repeat(100) + "1"), maxNestingDepth);
+		}
+
+		@Test
+		void maxNestingDepthProtectsAgainstStackOverflowFromChainedUnaryOperators() {
+			// Effectively disable the expression-length limit so that the nesting-depth
+			// limit is the guard that stops the parser well before the JVM call stack does.
+			SpelParserConfiguration configuration = new SpelParserConfiguration(SpelCompilerMode.OFF, null, false, false,
+					0, Integer.MAX_VALUE, SpelParserConfiguration.DEFAULT_MAX_OPERATIONS,
+					SpelParserConfiguration.DEFAULT_MAX_BIG_POWER_BITS,
+					SpelParserConfiguration.DEFAULT_MAX_EXPRESSION_NESTING_DEPTH);
+			SpelExpressionParser parser = new SpelExpressionParser(configuration);
+
+			assertParseExceptionThrownBy(() -> parser.parseExpression("!".repeat(100_000) + "true"))
+					.satisfies(ex -> assertThat(ex.getMessageCode()).isEqualTo(SpelMessage.MAX_EXPRESSION_NESTING_DEPTH_EXCEEDED));
+		}
+
+		@Test
+		void maxNestingDepthIsNotExceededBySequentialNonNestedTernaryExpressions() {
+			// Many independent (sibling, non-nested) ternary expressions as elements of a
+			// single inline list should not accumulate nesting depth across elements.
+			String manySiblingTernaryExpressions = "{" + "(true ? 1 : 2),".repeat(50) + "(true ? 1 : 2)}";
+
+			assertThatNoException().isThrownBy(() -> parser.parseExpression(manySiblingTernaryExpressions));
+		}
+
+		@Test
+		void maxNestingDepthWithNestedTernaryExpressions() {
+			assertThatNoException().isThrownBy(() -> parser.parseExpression(nestedTernaryExpression(2)));
+
+			assertNestingDepthExceeded(() -> parser.parseExpression(nestedTernaryExpression(50)), maxNestingDepth);
+		}
+
+		private static SpelParserConfiguration configurationWithMaxNestingDepth(int maxNestingDepth) {
+			return new SpelParserConfiguration(SpelCompilerMode.OFF, null, false, false, 0, 10_000,
+					SpelParserConfiguration.DEFAULT_MAX_OPERATIONS, SpelParserConfiguration.DEFAULT_MAX_BIG_POWER_BITS,
+					maxNestingDepth);
+		}
+
+		private static void assertNestingDepthExceeded(ThrowingCallable throwingCallable, int maxNestingDepth) {
+			assertParseExceptionThrownBy(throwingCallable)
+					.withMessageEndingWith("SpEL expression nesting depth exceeds the threshold of " + maxNestingDepth)
+					.satisfies(ex -> assertThat(ex.getMessageCode()).isEqualTo(SpelMessage.MAX_EXPRESSION_NESTING_DEPTH_EXCEEDED));
+		}
+
+		private static String nestedInlineList(int depth) {
+			return "{".repeat(depth) + "1" + "}".repeat(depth);
+		}
+
+		private static String nestedParentheses(int depth) {
+			return "(".repeat(depth) + "1" + ")".repeat(depth);
+		}
+
+		private static String nestedTernaryExpression(int depth) {
+			String expression = "1";
+			for (int i = 0; i < depth; i++) {
+				expression = "true ? 1 : " + expression;
+			}
+			return expression;
+		}
+	}
 
 
 	@Test

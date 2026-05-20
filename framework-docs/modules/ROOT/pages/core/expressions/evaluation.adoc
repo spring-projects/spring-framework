@@ -588,6 +588,31 @@ JVM system property or Spring property named `spring.expression.maxBigPowerBits`
 maximum result size in bits (see xref:appendix.adoc#appendix-spring-properties[Supported
 Spring Properties]).
 
+Likewise, the structural nesting depth of a SpEL expression -- for example, the depth of
+nested inline lists or maps, parenthesized expressions, ternary or Elvis expressions, or
+chained unary operators -- cannot exceed 1,000 by default; however, the
+`maximumNestingDepth` value is configurable. If you create a `SpelExpressionParser`
+programmatically, you can specify a custom `maximumNestingDepth` value when creating the
+`SpelParserConfiguration` that you provide to the `SpelExpressionParser`. Unlike
+`maxExpressionLength` and `maxOperations`, there is currently no JVM system property or
+Spring property available for configuring `maximumNestingDepth` globally.
+
+[NOTE]
+====
+Without such a limit, a sufficiently deeply nested expression can drive SpEL's
+recursive-descent parser to exhaust the current thread's call stack, resulting in a
+`StackOverflowError` instead of a descriptive exception.
+
+The `maximumNestingDepth` limit improves diagnostics for that common case by converting
+it into a clear `SpelParseException`; however, it is not a guaranteed defense against
+`StackOverflowError` under every possible JVM thread stack size configuration, since the
+amount of stack space consumed per level of nesting depends on the JVM, its JIT
+compilation state, and the platform. Applications and frameworks that evaluate SpEL
+expressions from an untrusted source should not rely on `maximumNestingDepth` alone and
+should instead heed the <<expressions-evaluation-context-security,security
+considerations>> discussed previously in this chapter.
+====
+
 [[expressions-spel-compilation]]
 == SpEL Compilation
 
