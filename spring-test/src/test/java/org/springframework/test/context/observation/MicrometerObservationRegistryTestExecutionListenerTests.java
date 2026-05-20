@@ -34,6 +34,8 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.willAnswer;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 
 /**
  * Tests for {@link MicrometerObservationRegistryTestExecutionListener}.
@@ -41,6 +43,8 @@ import static org.mockito.Mockito.mock;
  * @author Marcin Grzejszczak
  * @author Sam Brannen
  * @since 6.0.10
+ * @see MicrometerObservationRegistryTestExecutionListenerWithContextLoadFailureTests
+ * @see MicrometerObservationRegistryTestExecutionListenerWithContextLoadFailureTestNGTests
  */
 class MicrometerObservationRegistryTestExecutionListenerTests {
 
@@ -62,9 +66,29 @@ class MicrometerObservationRegistryTestExecutionListenerTests {
 				.given(testContext).setAttribute(anyString(), any());
 		given(testContext.removeAttribute(anyString()))
 				.willAnswer(invocation -> attributes.get(invocation.getArgument(0, String.class)));
+		given(testContext.hasApplicationContext()).willReturn(true);
 		given(testContext.getApplicationContext()).willReturn(applicationContext);
 		Class testClass = getClass();
 		given(testContext.getTestClass()).willReturn(testClass);
+	}
+
+	@Test  // gh-36817
+	void beforeTestMethodIsNoOpWhenContextIsNotAvailable() throws Exception {
+		given(testContext.hasApplicationContext()).willReturn(false);
+
+		listener.beforeTestMethod(testContext);
+
+		verify(testContext).hasApplicationContext();
+		verify(testContext, never()).getApplicationContext();
+	}
+
+	@Test  // gh-36817
+	void afterTestMethodIsNoOpWhenContextIsNotAvailable() throws Exception {
+		given(testContext.hasApplicationContext()).willReturn(false);
+
+		listener.afterTestMethod(testContext);
+
+		verify(testContext, never()).getApplicationContext();
 	}
 
 	@Test
