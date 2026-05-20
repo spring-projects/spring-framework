@@ -508,7 +508,6 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	 * account.
 	 * <p>More sophisticated matching can be implemented by overriding the
 	 * {@link #isAllowed} method.
-	 * <p>Alternatively, specify a list of <i>disallowed</i> field patterns.
 	 * <p>Used for binding to fields with {@link #bind(PropertyValues)}, and not
 	 * applicable to constructor binding via {@link #construct},
 	 * which uses only the values it needs.
@@ -551,7 +550,9 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	 * @param disallowedFields array of disallowed field patterns
 	 * @see #setAllowedFields
 	 * @see #isAllowed(String)
+	 * @deprecated as of 7.1, in favor of {@link #setAllowedFields}.
 	 */
+	@Deprecated(since = "7.1", forRemoval = true)
 	public void setDisallowedFields(String @Nullable ... disallowedFields) {
 		if (disallowedFields == null) {
 			this.disallowedFields = null;
@@ -569,7 +570,9 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	 * Return the field patterns that should <i>not</i> be allowed for binding.
 	 * @return array of disallowed field patterns
 	 * @see #setDisallowedFields(String...)
+	 * @deprecated as of 7.1, in favor of {@link #getAllowedFields()}.
 	 */
+	@Deprecated(since = "7.1", forRemoval = true)
 	public String @Nullable [] getDisallowedFields() {
 		return this.disallowedFields;
 	}

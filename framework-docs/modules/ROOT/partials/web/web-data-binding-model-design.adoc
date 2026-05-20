@@ -28,8 +28,8 @@ For example:
 	}
 ----
 
-NOTE: It is also possible to configure `disallowedFields`, but that's fragile, and
-due to be https://github.com/spring-projects/spring-framework/issues/36802[deprecated] in Spring Framework 7.1.
+NOTE: It is also possible to configure `disallowedFields`, but that's fragile and
+https://github.com/spring-projects/spring-framework/issues/36802[deprecated as of Spring Framework 7.1].
 It is easy to overlook fields or introduce additional fields over time that should also be excluded.
 
 By default, `DataBinder` applies both constructor and setter binding.

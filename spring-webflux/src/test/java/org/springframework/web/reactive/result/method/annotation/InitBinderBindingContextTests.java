@@ -62,6 +62,7 @@ class InitBinderBindingContextTests {
 
 
 	@Test
+	@SuppressWarnings("removal")
 	void createBinder() throws Exception {
 		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/"));
 		BindingContext context = createBindingContext("initBinder", WebDataBinder.class);
@@ -84,6 +85,7 @@ class InitBinderBindingContextTests {
 	}
 
 	@Test
+	@SuppressWarnings("removal")
 	void createBinderWithAttrName() throws Exception {
 		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/"));
 		BindingContext context = createBindingContext("initBinderWithAttributeName", WebDataBinder.class);
@@ -94,6 +96,7 @@ class InitBinderBindingContextTests {
 	}
 
 	@Test
+	@SuppressWarnings("removal")
 	void createBinderWithAttrNameNoMatch() throws Exception {
 		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/"));
 		BindingContext context = createBindingContext("initBinderWithAttributeName", WebDataBinder.class);
@@ -103,6 +106,7 @@ class InitBinderBindingContextTests {
 	}
 
 	@Test
+	@SuppressWarnings("removal")
 	void createBinderNullAttrName() throws Exception {
 		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/"));
 		BindingContext context = createBindingContext("initBinderWithAttributeName", WebDataBinder.class);
@@ -119,6 +123,7 @@ class InitBinderBindingContextTests {
 	}
 
 	@Test
+	@SuppressWarnings("removal")
 	void createBinderTypeConversion() throws Exception {
 		MockServerHttpRequest request = MockServerHttpRequest.get("/path?requestParam=22").build();
 		MockServerWebExchange exchange = MockServerWebExchange.from(request);
@@ -260,11 +265,13 @@ class InitBinderBindingContextTests {
 	private static class InitBinderHandler {
 
 		@InitBinder
+		@SuppressWarnings("removal")
 		public void initBinder(WebDataBinder dataBinder) {
 			dataBinder.setDisallowedFields("id");
 		}
 
 		@InitBinder(value="foo")
+		@SuppressWarnings("removal")
 		public void initBinderWithAttributeName(WebDataBinder dataBinder) {
 			dataBinder.setDisallowedFields("id");
 		}
@@ -275,6 +282,7 @@ class InitBinderBindingContextTests {
 		}
 
 		@InitBinder
+		@SuppressWarnings("removal")
 		public void initBinderTypeConversion(WebDataBinder dataBinder, @RequestParam int requestParam) {
 			dataBinder.setDisallowedFields("requestParam-" + requestParam);
 		}
