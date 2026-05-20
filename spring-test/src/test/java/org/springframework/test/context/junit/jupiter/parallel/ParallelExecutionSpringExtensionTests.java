@@ -58,6 +58,7 @@ class ParallelExecutionSpringExtensionTests {
 				.configurationParameter("junit.jupiter.conditions.deactivate", "org.junit.jupiter.engine.extension.DisabledCondition")//
 				.configurationParameter("junit.jupiter.execution.parallel.enabled", "true")//
 				.configurationParameter("junit.jupiter.execution.parallel.config.dynamic.factor", "10")//
+				.configurationParameter("junit.jupiter.execution.parallel.config.executor-service", "WORKER_THREAD_POOL")
 				.selectors(selectClass(TestCase.class))//
 				.build();
 
