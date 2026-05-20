@@ -79,10 +79,12 @@ public abstract class ExchangeFilterFunctions {
 	 * Return a filter that applies HTTP Basic Authentication to the request
 	 * headers via {@link HttpHeaders#setBasicAuth(String)} and
 	 * {@link HttpHeaders#encodeBasicAuth(String, String, Charset)}.
-	 * <p>{@linkplain StandardCharsets#ISO_8859_1 ISO-8859-1} is used to convert the credentials into an octet sequence.
+	 * <p>{@linkplain StandardCharsets#ISO_8859_1 ISO-8859-1} is used to convert
+	 * the credentials into an octet sequence.
 	 * @param username the username
 	 * @param password the password
 	 * @return the filter to add authentication headers with
+	 * @see #basicAuthentication(String, String, Charset)
 	 * @see HttpHeaders#encodeBasicAuth(String, String, Charset)
 	 * @see HttpHeaders#setBasicAuth(String)
 	 */
@@ -100,6 +102,7 @@ public abstract class ExchangeFilterFunctions {
 	 * sequence. Defaults to {@linkplain StandardCharsets#ISO_8859_1 ISO-8859-1}.
 	 * @return the filter to add authentication headers with
 	 * @since 7.0.8
+	 * @see #basicAuthentication(String, String)
 	 * @see HttpHeaders#encodeBasicAuth(String, String, Charset)
 	 * @see HttpHeaders#setBasicAuth(String)
 	 */

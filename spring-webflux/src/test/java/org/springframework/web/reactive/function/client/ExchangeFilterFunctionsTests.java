@@ -115,7 +115,7 @@ class ExchangeFilterFunctionsTests {
 		assertThat(result).isEqualTo(response);
 	}
 
-	@Test
+	@Test  // gh-36777
 	void basicAuthenticationUsernameAndUnicodePassword() {
 		ClientRequest request = ClientRequest.create(HttpMethod.GET, DEFAULT_URL).build();
 		ClientResponse response = mock();
