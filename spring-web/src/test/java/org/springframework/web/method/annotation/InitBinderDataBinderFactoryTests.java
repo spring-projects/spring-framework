@@ -56,6 +56,7 @@ class InitBinderDataBinderFactoryTests {
 
 
 	@Test
+	@SuppressWarnings("removal")
 	void createBinder() throws Exception {
 		WebDataBinderFactory factory = createFactory("initBinder", WebDataBinder.class);
 		WebDataBinder dataBinder = factory.createBinder(this.webRequest, null, null);
@@ -76,6 +77,7 @@ class InitBinderDataBinderFactoryTests {
 	}
 
 	@Test
+	@SuppressWarnings("removal")
 	void createBinderWithAttrName() throws Exception {
 		WebDataBinderFactory factory = createFactory("initBinderWithAttributeName", WebDataBinder.class);
 		WebDataBinder dataBinder = factory.createBinder(this.webRequest, null, "foo");
@@ -85,6 +87,7 @@ class InitBinderDataBinderFactoryTests {
 	}
 
 	@Test
+	@SuppressWarnings("removal")
 	void createBinderWithAttrNameNoMatch() throws Exception {
 		WebDataBinderFactory factory = createFactory("initBinderWithAttributeName", WebDataBinder.class);
 		WebDataBinder dataBinder = factory.createBinder(this.webRequest, null, "invalidName");
@@ -93,6 +96,7 @@ class InitBinderDataBinderFactoryTests {
 	}
 
 	@Test
+	@SuppressWarnings("removal")
 	void createBinderNullAttrName() throws Exception {
 		WebDataBinderFactory factory = createFactory("initBinderWithAttributeName", WebDataBinder.class);
 		WebDataBinder dataBinder = factory.createBinder(this.webRequest, null, null);
@@ -108,6 +112,7 @@ class InitBinderDataBinderFactoryTests {
 	}
 
 	@Test
+	@SuppressWarnings("removal")
 	void createBinderTypeConversion() throws Exception {
 		this.webRequest.getNativeRequest(MockHttpServletRequest.class).setParameter("requestParam", "22");
 		this.argumentResolvers.addResolver(new RequestParamMethodArgumentResolver(null, false));
@@ -138,11 +143,13 @@ class InitBinderDataBinderFactoryTests {
 	private static class InitBinderHandler {
 
 		@InitBinder
+		@SuppressWarnings("removal")
 		public void initBinder(WebDataBinder dataBinder) {
 			dataBinder.setDisallowedFields("id");
 		}
 
 		@InitBinder(value="foo")
+		@SuppressWarnings("removal")
 		public void initBinderWithAttributeName(WebDataBinder dataBinder) {
 			dataBinder.setDisallowedFields("id");
 		}
@@ -153,6 +160,7 @@ class InitBinderDataBinderFactoryTests {
 		}
 
 		@InitBinder
+		@SuppressWarnings("removal")
 		public void initBinderTypeConversion(WebDataBinder dataBinder, @RequestParam int requestParam) {
 			dataBinder.setDisallowedFields("requestParam-" + requestParam);
 		}

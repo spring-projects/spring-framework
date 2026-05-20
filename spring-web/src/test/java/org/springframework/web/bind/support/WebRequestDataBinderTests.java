@@ -329,6 +329,7 @@ class WebRequestDataBinderTests {
 		}
 
 		@Test
+		@SuppressWarnings("removal")
 		void shouldNotTriggerBindingWhenFieldIsDisallowed() {
 			TestBean tb = new TestBean();
 
@@ -363,6 +364,7 @@ class WebRequestDataBinderTests {
 
 		@ParameterizedTest
 		@ValueSource(strings = { "stringArray*", "stringArray[]" })
+		@SuppressWarnings("removal")
 		void shouldNotTriggerBindingWhenFieldIsDisallowedWithEmptyArrayIndex(String disallowedField) {
 			TestBean tb = new TestBean();
 
@@ -398,6 +400,7 @@ class WebRequestDataBinderTests {
 
 		@ParameterizedTest
 		@ValueSource(strings = { "someMap*", "someMap[*]", "someMap[key1]" })
+		@SuppressWarnings("removal")
 		void shouldNotTriggerAutoGrowWhenFieldIsDisallowed(String disallowedField) {
 			TestBean tb = new TestBean();
 			tb.setSomeMap(null);

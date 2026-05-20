@@ -715,6 +715,7 @@ class DataBinderTests {
 	}
 
 	@Test
+	@SuppressWarnings("removal")
 	void bindingWithDisallowedFields() throws BindException {
 		TestBean rod = new TestBean();
 		DataBinder binder = new DataBinder(rod);
@@ -734,6 +735,7 @@ class DataBinderTests {
 	}
 
 	@Test
+	@SuppressWarnings("removal")
 	void bindingWithAllowedAndDisallowedFields() throws BindException {
 		TestBean rod = new TestBean();
 		DataBinder binder = new DataBinder(rod);
@@ -752,6 +754,7 @@ class DataBinderTests {
 	}
 
 	@Test
+	@SuppressWarnings("removal")
 	void bindingWithOverlappingAllowedAndDisallowedFields() throws BindException {
 		TestBean rod = new TestBean();
 		DataBinder binder = new DataBinder(rod);
@@ -797,6 +800,7 @@ class DataBinderTests {
 	}
 
 	@Test
+	@SuppressWarnings("removal")
 	void bindingWithAllowedAndDisallowedMapFields() throws BindException {
 		TestBean rod = new TestBean();
 		DataBinder binder = new DataBinder(rod);
