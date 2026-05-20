@@ -16,6 +16,7 @@
 
 package org.springframework.test.context.junit.jupiter.parallel;
 
+import java.io.PrintWriter;
 import java.lang.reflect.Parameter;
 
 import org.junit.jupiter.api.AfterEach;
@@ -26,6 +27,7 @@ import org.junit.platform.launcher.Launcher;
 import org.junit.platform.launcher.LauncherDiscoveryRequest;
 import org.junit.platform.launcher.core.LauncherFactory;
 import org.junit.platform.launcher.listeners.SummaryGeneratingListener;
+import org.junit.platform.launcher.listeners.TestExecutionSummary;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -55,6 +57,7 @@ class ParallelExecutionSpringExtensionTests {
 		launcher.registerTestExecutionListeners(listener);
 
 		LauncherDiscoveryRequest request = request()//
+				.configurationParameter("junit.platform.discovery.issue.severity.critical", "INFO")//
 				.configurationParameter("junit.jupiter.conditions.deactivate", "org.junit.jupiter.engine.extension.DisabledCondition")//
 				.configurationParameter("junit.jupiter.execution.parallel.enabled", "true")//
 				.configurationParameter("junit.jupiter.execution.parallel.config.dynamic.factor", "10")//
@@ -64,8 +67,14 @@ class ParallelExecutionSpringExtensionTests {
 
 		launcher.execute(request);
 
-		assertThat(listener.getSummary().getTestsSucceededCount()).as(
-			"number of tests executed successfully").isEqualTo(NUM_TESTS);
+		TestExecutionSummary summary = listener.getSummary();
+		long totalFailureCount = summary.getTotalFailureCount();
+		if (totalFailureCount > 0) {
+			summary.printFailuresTo(new PrintWriter(System.err, true));
+		}
+		assertThat(totalFailureCount).as("number of failures").isZero();
+		assertThat(summary.getTestsSucceededCount())
+				.as("number of tests executed successfully").isEqualTo(NUM_TESTS);
 	}
 
 	@SpringJUnitConfig
