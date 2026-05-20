@@ -20,7 +20,6 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -42,15 +41,11 @@ import org.springframework.util.StringUtils;
  */
 final class DefaultPathContainer implements PathContainer {
 
-	private static final PathContainer EMPTY_PATH = new DefaultPathContainer("", Collections.emptyList());
+	private static final PathContainer EMPTY_PATH = new DefaultPathContainer("", List.of());
 
-	private static final Map<Character, DefaultSeparator> SEPARATORS = new HashMap<>(2);
-
-	static {
-		SEPARATORS.put('/', new DefaultSeparator('/', "%2F"));
-		SEPARATORS.put('.', new DefaultSeparator('.', "%2E"));
-	}
-
+	private static final Map<Character, DefaultSeparator> SEPARATORS = Map.of(
+			'/', new DefaultSeparator('/', "%2F"),
+			'.', new DefaultSeparator('.', "%2E"));
 
 	private final String path;
 
