@@ -17,6 +17,7 @@
 package org.springframework.web.server.adapter;
 
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
@@ -25,7 +26,10 @@ import io.micrometer.observation.contextpropagation.ObservationThreadLocalAccess
 import io.micrometer.observation.tck.TestObservationRegistry;
 import io.micrometer.observation.tck.TestObservationRegistryAssert;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import reactor.core.publisher.Mono;
+import reactor.netty.channel.AbortedException;
 import reactor.test.StepVerifier;
 
 import org.springframework.http.HttpStatus;
@@ -86,6 +90,36 @@ class HttpWebHandlerAdapterObservabilityTests {
 		HttpStatusSuccessStubWebHandler targetHandler = new HttpStatusSuccessStubWebHandler(HttpStatus.OK);
 		StepVerifier.create(createWebHandler(targetHandler).handle(this.request, this.response)).thenCancel().verify();
 		assertThatHttpObservation().hasLowCardinalityKeyValue("outcome", "UNKNOWN");
+	}
+
+	@ParameterizedTest
+	@MethodSource("disconnectExceptions")
+	void handlerShouldMarkConnectionAbortedForClientDisconnect(Exception disconnectEx) {
+		// ThrowingExceptionWebHandler captures ServerRequestObservationContext from exchange
+		// attributes; handleUnresolvedError operates on the same object, so setConnectionAborted(true)
+		// is visible after block().
+		ThrowingExceptionWebHandler throwingHandler = new ThrowingExceptionWebHandler(disconnectEx);
+		createWebHandler(throwingHandler).handle(this.request, this.response).block();
+		assertThat(throwingHandler.observationContext).isPresent();
+		assertThat(throwingHandler.observationContext.get().isConnectionAborted()).isTrue();
+	}
+
+	static List<Exception> disconnectExceptions() {
+		// Verified by DisconnectedClientHelperTests.disconnectedExceptions() and exceptionPhrases()
+		return List.of(
+				new AbortedException(""),
+				new IOException("Broken pipe")
+		);
+	}
+
+	@Test
+	void handlerShouldNotMarkConnectionAbortedForServerError() {
+		ThrowingExceptionWebHandler throwingHandler =
+				new ThrowingExceptionWebHandler(new IllegalStateException("server error"));
+		createWebHandler(throwingHandler).handle(this.request, this.response).block();
+		assertThat(throwingHandler.observationContext).isPresent();
+		assertThat(throwingHandler.observationContext.get().isConnectionAborted()).isFalse();
+		assertThat(this.response.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
 	}
 
 	private HttpWebHandlerAdapter createWebHandler(WebHandler targetHandler) {
