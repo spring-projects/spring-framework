@@ -256,10 +256,18 @@ public class Indexer extends SpelNodeImpl {
 			try {
 				for (IndexAccessor indexAccessor : accessorsToTry) {
 					if (indexAccessor.canRead(evalContext, target, index)) {
+						if (accessMode.supportsWrites && !indexAccessor.canWrite(evalContext, target, index) &&
+								hasCompetingWriteAccessor(accessorsToTry, indexAccessor, evalContext, target, index)) {
+							throw new SpelEvaluationException(getStartPosition(), SpelMessage.COMPETING_ACCESSORS,
+									index, target.getClass().getTypeName());
+						}
 						this.indexedType = IndexedType.CUSTOM;
 						return new IndexAccessorValueRef(target, index, evalContext, targetDescriptor);
 					}
 				}
+			}
+			catch (SpelEvaluationException ex) {
+				throw ex;
 			}
 			catch (Exception ex) {
 				throw new SpelEvaluationException(
@@ -470,6 +478,17 @@ public class Indexer extends SpelNodeImpl {
 
 	private static Class<?> getObjectType(Object obj) {
 		return (obj instanceof Class<?> clazz ? clazz : obj.getClass());
+	}
+
+	private static boolean hasCompetingWriteAccessor(List<IndexAccessor> accessors, IndexAccessor readAccessor,
+			EvaluationContext evalContext, Object target, Object index) throws AccessException {
+
+		for (IndexAccessor accessor : accessors) {
+			if (accessor != readAccessor && accessor.canWrite(evalContext, target, index)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 

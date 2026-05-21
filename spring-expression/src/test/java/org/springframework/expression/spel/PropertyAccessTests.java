@@ -300,6 +300,19 @@ class PropertyAccessTests extends AbstractExpressionTests {
 			.extracting(SpelEvaluationException::getMessageCode).isEqualTo(SpelMessage.ARRAY_INDEX_OUT_OF_BOUNDS);
 	}
 
+	@Test  // gh-32737
+	void competingReadAndWritePropertyAccessors() {
+		StandardEvaluationContext context = new StandardEvaluationContext(new Object());
+		context.addPropertyAccessor(new ConfigurablePropertyAccessor(Map.of("counter", 1)));
+		context.addPropertyAccessor(new WriteOnlyPropertyAccessor());
+
+		Expression expression = parser.parseExpression("counter++");
+
+		assertThatSpelEvaluationException()
+				.isThrownBy(() -> expression.getValue(context))
+				.extracting(SpelEvaluationException::getMessageCode).isEqualTo(SpelMessage.COMPETING_ACCESSORS);
+	}
+
 
 	private ThrowableTypeAssert<SpelEvaluationException> assertThatSpelEvaluationException() {
 		return assertThatExceptionOfType(SpelEvaluationException.class);
@@ -382,6 +395,34 @@ class PropertyAccessTests extends AbstractExpressionTests {
 		@Override
 		public boolean canWrite(EvaluationContext context, Object target, String name) {
 			return false;
+		}
+
+		@Override
+		public void write(EvaluationContext context, Object target, String name, Object newValue) {
+		}
+	}
+
+
+	private static class WriteOnlyPropertyAccessor implements PropertyAccessor {
+
+		@Override
+		public Class<?>[] getSpecificTargetClasses() {
+			return null;
+		}
+
+		@Override
+		public boolean canRead(EvaluationContext context, Object target, String name) {
+			return false;
+		}
+
+		@Override
+		public TypedValue read(EvaluationContext context, Object target, String name) {
+			return TypedValue.NULL;
+		}
+
+		@Override
+		public boolean canWrite(EvaluationContext context, Object target, String name) {
+			return "counter".equals(name);
 		}
 
 		@Override

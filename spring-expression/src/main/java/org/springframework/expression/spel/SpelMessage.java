@@ -303,7 +303,11 @@ public enum SpelMessage {
 
 	/** @since 6.2 */
 	EXCEPTION_DURING_INDEX_WRITE(Kind.ERROR, 1084,
-			"A problem occurred while attempting to write index ''{0}'' in ''{1}''");
+			"A problem occurred while attempting to write index ''{0}'' in ''{1}''"),
+
+	/** @since 7.1 */
+	COMPETING_ACCESSORS(Kind.ERROR, 1085,
+			"Found competing read and write accessors for ''{0}'' in ''{1}''");
 
 
 
