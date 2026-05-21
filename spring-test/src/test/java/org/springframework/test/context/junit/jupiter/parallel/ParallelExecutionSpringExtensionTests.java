@@ -20,11 +20,11 @@ import java.lang.reflect.Parameter;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Constants;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.platform.testkit.engine.EngineExecutionResults;
 import org.junit.platform.testkit.engine.EngineTestKit;
-import org.junit.platform.testkit.engine.Event;
 import org.junit.platform.testkit.engine.Events;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,7 +32,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClass;
 
 /**
@@ -51,21 +50,20 @@ class ParallelExecutionSpringExtensionTests {
 	void runTestsInParallel() {
 		EngineExecutionResults results = EngineTestKit.engine("junit-jupiter")//
 				.configurationParameter("junit.platform.discovery.issue.severity.critical", "INFO")//
-				.configurationParameter("junit.jupiter.conditions.deactivate", "org.junit.jupiter.engine.extension.DisabledCondition")//
-				.configurationParameter("junit.jupiter.execution.parallel.enabled", "true")//
-				.configurationParameter("junit.jupiter.execution.parallel.config.dynamic.factor", "10")//
-				.configurationParameter("junit.jupiter.execution.parallel.config.executor-service", "WORKER_THREAD_POOL")
+				.configurationParameter(Constants.DEACTIVATE_CONDITIONS_PATTERN_PROPERTY_NAME, "*DisabledCondition")//
+				.configurationParameter(Constants.PARALLEL_EXECUTION_ENABLED_PROPERTY_NAME, "true")//
+				.configurationParameter(Constants.PARALLEL_CONFIG_DYNAMIC_FACTOR_PROPERTY_NAME, "10")//
+				.configurationParameter(Constants.PARALLEL_CONFIG_EXECUTOR_SERVICE_PROPERTY_NAME, "WORKER_THREAD_POOL")
 				.selectors(selectClass(TestCase.class))//
 				.execute();
 
+		// List failed events in case of errors to get a sense of what failed.
 		Events failedEvents = results.allEvents().failed();
-		long totalFailureCount = failedEvents.count();
-		if (totalFailureCount > 0) {
-			failedEvents.stream().map(Event::getPayload).forEach(System.err::println);
+		if (failedEvents.count() > 0) {
+			failedEvents.debug();
 		}
-		assertThat(totalFailureCount).as("number of failures").isZero();
 
-		results.testEvents().assertStatistics(stats -> stats.succeeded(NUM_TESTS));
+		results.testEvents().assertStatistics(stats -> stats.started(NUM_TESTS).succeeded(NUM_TESTS).failed(0));
 	}
 
 	@SpringJUnitConfig
