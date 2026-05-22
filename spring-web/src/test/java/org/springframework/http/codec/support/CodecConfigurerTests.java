@@ -68,6 +68,8 @@ import org.springframework.http.codec.protobuf.ProtobufEncoder;
 import org.springframework.http.codec.protobuf.ProtobufHttpMessageWriter;
 import org.springframework.http.codec.smile.JacksonSmileDecoder;
 import org.springframework.http.codec.smile.JacksonSmileEncoder;
+import org.springframework.http.codec.xml.JacksonXmlDecoder;
+import org.springframework.http.codec.xml.JacksonXmlEncoder;
 import org.springframework.http.codec.xml.Jaxb2XmlDecoder;
 import org.springframework.http.codec.xml.Jaxb2XmlEncoder;
 import org.springframework.util.MimeTypeUtils;
@@ -92,7 +94,7 @@ class CodecConfigurerTests {
 	@Test
 	void defaultReaders() {
 		List<HttpMessageReader<?>> readers = this.configurer.getReaders();
-		assertThat(readers).hasSize(19);
+		assertThat(readers).hasSize(20);
 		assertThat(getNextDecoder(readers).getClass()).isEqualTo(ByteArrayDecoder.class);
 		assertThat(getNextDecoder(readers).getClass()).isEqualTo(ByteBufferDecoder.class);
 		assertThat(getNextDecoder(readers).getClass()).isEqualTo(DataBufferDecoder.class);
@@ -110,6 +112,7 @@ class CodecConfigurerTests {
 		assertThat(getNextDecoder(readers).getClass()).isEqualTo(KotlinSerializationCborDecoder.class);
 		assertThat(getNextDecoder(readers).getClass()).isEqualTo(JacksonCborDecoder.class);
 		assertThat(getNextDecoder(readers).getClass()).isEqualTo(Jaxb2XmlDecoder.class);
+		assertThat(getNextDecoder(readers).getClass()).isEqualTo(JacksonXmlDecoder.class);
 		assertThat(getNextDecoder(readers).getClass()).isEqualTo(KotlinSerializationProtobufDecoder.class);
 		assertStringDecoder(getNextDecoder(readers), false);
 	}
@@ -117,7 +120,7 @@ class CodecConfigurerTests {
 	@Test
 	void defaultWriters() {
 		List<HttpMessageWriter<?>> writers = this.configurer.getWriters();
-		assertThat(writers).hasSize(18);
+		assertThat(writers).hasSize(19);
 		assertThat(getNextEncoder(writers).getClass()).isEqualTo(ByteArrayEncoder.class);
 		assertThat(getNextEncoder(writers).getClass()).isEqualTo(ByteBufferEncoder.class);
 		assertThat(getNextEncoder(writers).getClass()).isEqualTo(DataBufferEncoder.class);
@@ -134,6 +137,7 @@ class CodecConfigurerTests {
 		assertThat(getNextEncoder(writers).getClass()).isEqualTo(KotlinSerializationCborEncoder.class);
 		assertThat(getNextEncoder(writers).getClass()).isEqualTo(JacksonCborEncoder.class);
 		assertThat(getNextEncoder(writers).getClass()).isEqualTo(Jaxb2XmlEncoder.class);
+		assertThat(getNextEncoder(writers).getClass()).isEqualTo(JacksonXmlEncoder.class);
 		assertThat(getNextEncoder(writers).getClass()).isEqualTo(KotlinSerializationProtobufEncoder.class);
 		assertStringEncoder(getNextEncoder(writers), false);
 	}
@@ -160,7 +164,7 @@ class CodecConfigurerTests {
 
 		List<HttpMessageReader<?>> readers = this.configurer.getReaders();
 
-		assertThat(readers).hasSize(23);
+		assertThat(readers).hasSize(24);
 		assertThat(getNextDecoder(readers)).isSameAs(customDecoder1);
 		assertThat(readers.get(this.index.getAndIncrement())).isSameAs(customReader1);
 		assertThat(getNextDecoder(readers).getClass()).isEqualTo(ByteArrayDecoder.class);
@@ -182,6 +186,7 @@ class CodecConfigurerTests {
 		assertThat(getNextDecoder(readers).getClass()).isEqualTo(KotlinSerializationCborDecoder.class);
 		assertThat(getNextDecoder(readers).getClass()).isEqualTo(JacksonCborDecoder.class);
 		assertThat(getNextDecoder(readers).getClass()).isEqualTo(Jaxb2XmlDecoder.class);
+		assertThat(getNextDecoder(readers).getClass()).isEqualTo(JacksonXmlDecoder.class);
 		assertThat(getNextDecoder(readers).getClass()).isEqualTo(KotlinSerializationProtobufDecoder.class);
 		assertThat(getNextDecoder(readers).getClass()).isEqualTo(StringDecoder.class);
 	}
@@ -208,7 +213,7 @@ class CodecConfigurerTests {
 
 		List<HttpMessageWriter<?>> writers = this.configurer.getWriters();
 
-		assertThat(writers).hasSize(22);
+		assertThat(writers).hasSize(23);
 		assertThat(getNextEncoder(writers)).isSameAs(customEncoder1);
 		assertThat(writers.get(this.index.getAndIncrement())).isSameAs(customWriter1);
 		assertThat(getNextEncoder(writers).getClass()).isEqualTo(ByteArrayEncoder.class);
@@ -229,6 +234,7 @@ class CodecConfigurerTests {
 		assertThat(getNextEncoder(writers).getClass()).isEqualTo(KotlinSerializationCborEncoder.class);
 		assertThat(getNextEncoder(writers).getClass()).isEqualTo(JacksonCborEncoder.class);
 		assertThat(getNextEncoder(writers).getClass()).isEqualTo(Jaxb2XmlEncoder.class);
+		assertThat(getNextEncoder(writers).getClass()).isEqualTo(JacksonXmlEncoder.class);
 		assertThat(getNextEncoder(writers).getClass()).isEqualTo(KotlinSerializationProtobufEncoder.class);
 		assertThat(getNextEncoder(writers).getClass()).isEqualTo(CharSequenceEncoder.class);
 	}
@@ -299,6 +305,8 @@ class CodecConfigurerTests {
 	void encoderDecoderOverrides() {
 		JacksonJsonDecoder jacksonDecoder = new JacksonJsonDecoder();
 		JacksonJsonEncoder jacksonEncoder = new JacksonJsonEncoder();
+		JacksonXmlDecoder jacksonXmlDecoder = new JacksonXmlDecoder();
+		JacksonXmlEncoder jacksonXmlEncoder = new JacksonXmlEncoder();
 		JacksonSmileDecoder smileDecoder = new JacksonSmileDecoder();
 		JacksonSmileEncoder smileEncoder = new JacksonSmileEncoder();
 		ProtobufDecoder protobufDecoder = new ProtobufDecoder(ExtensionRegistry.newInstance());
@@ -308,6 +316,8 @@ class CodecConfigurerTests {
 
 		this.configurer.defaultCodecs().jacksonJsonDecoder(jacksonDecoder);
 		this.configurer.defaultCodecs().jacksonJsonEncoder(jacksonEncoder);
+		this.configurer.defaultCodecs().jacksonXmlDecoder(jacksonXmlDecoder);
+		this.configurer.defaultCodecs().jacksonXmlEncoder(jacksonXmlEncoder);
 		this.configurer.defaultCodecs().jacksonSmileDecoder(smileDecoder);
 		this.configurer.defaultCodecs().jacksonSmileEncoder(smileEncoder);
 		this.configurer.defaultCodecs().protobufDecoder(protobufDecoder);
@@ -316,10 +326,12 @@ class CodecConfigurerTests {
 		this.configurer.defaultCodecs().jaxb2Encoder(jaxb2Encoder);
 
 		assertDecoderInstance(jacksonDecoder);
+		assertDecoderInstance(jacksonXmlDecoder);
 		assertDecoderInstance(smileDecoder);
 		assertDecoderInstance(protobufDecoder);
 		assertDecoderInstance(jaxb2Decoder);
 		assertEncoderInstance(jacksonEncoder);
+		assertEncoderInstance(jacksonXmlEncoder);
 		assertEncoderInstance(smileEncoder);
 		assertEncoderInstance(protobufEncoder);
 		assertEncoderInstance(jaxb2Encoder);
@@ -369,6 +381,8 @@ class CodecConfigurerTests {
 
 		JacksonJsonDecoder jacksonDecoder = new JacksonJsonDecoder();
 		JacksonJsonEncoder jacksonEncoder = new JacksonJsonEncoder();
+		JacksonXmlDecoder jacksonXmlDecoder = new JacksonXmlDecoder();
+		JacksonXmlEncoder jacksonXmlEncoder = new JacksonXmlEncoder();
 		Jaxb2XmlDecoder jaxb2Decoder = new Jaxb2XmlDecoder();
 		Jaxb2XmlEncoder jaxb2Encoder = new Jaxb2XmlEncoder();
 		ProtobufDecoder protoDecoder = new ProtobufDecoder();
@@ -376,6 +390,8 @@ class CodecConfigurerTests {
 
 		clone.defaultCodecs().jacksonJsonDecoder(jacksonDecoder);
 		clone.defaultCodecs().jacksonJsonEncoder(jacksonEncoder);
+		clone.defaultCodecs().jacksonXmlDecoder(jacksonXmlDecoder);
+		clone.defaultCodecs().jacksonXmlEncoder(jacksonXmlEncoder);
 		clone.defaultCodecs().jaxb2Decoder(jaxb2Decoder);
 		clone.defaultCodecs().jaxb2Encoder(jaxb2Encoder);
 		clone.defaultCodecs().protobufDecoder(protoDecoder);
@@ -393,8 +409,8 @@ class CodecConfigurerTests {
 				.map(reader -> ((EncoderHttpMessageWriter<?>) reader).getEncoder())
 				.collect(Collectors.toList());
 
-		assertThat(decoders).contains(jacksonDecoder, jaxb2Decoder, protoDecoder);
-		assertThat(encoders).contains(jacksonEncoder, jaxb2Encoder, protoEncoder);
+		assertThat(decoders).contains(jacksonDecoder, jacksonXmlDecoder, jaxb2Decoder, protoDecoder);
+		assertThat(encoders).contains(jacksonEncoder, jacksonXmlEncoder, jaxb2Encoder, protoEncoder);
 
 		// Original does not have the customizations
 
@@ -408,8 +424,8 @@ class CodecConfigurerTests {
 				.map(reader -> ((EncoderHttpMessageWriter<?>) reader).getEncoder())
 				.collect(Collectors.toList());
 
-		assertThat(decoders).doesNotContain(jacksonDecoder, jaxb2Decoder, protoDecoder);
-		assertThat(encoders).doesNotContain(jacksonEncoder, jaxb2Encoder, protoEncoder);
+		assertThat(decoders).doesNotContain(jacksonDecoder, jacksonXmlDecoder, jaxb2Decoder, protoDecoder);
+		assertThat(encoders).doesNotContain(jacksonEncoder, jacksonXmlEncoder, jaxb2Encoder, protoEncoder);
 	}
 
 	private Decoder<?> getNextDecoder(List<HttpMessageReader<?>> readers) {

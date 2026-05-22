@@ -55,11 +55,15 @@ class JacksonXmlDecoderTests extends AbstractDecoderTests<JacksonXmlDecoder> {
 	@Override
 	@Test
 	protected void canDecode() {
+		ResolvableType stringType = ResolvableType.forClass(String.class);
+		ResolvableType charSequenceType = ResolvableType.forClass(CharSequence.class);
 		assertThat(decoder.canDecode(ResolvableType.forClass(Pojo.class), MediaType.APPLICATION_XML)).isTrue();
 		assertThat(decoder.canDecode(ResolvableType.forClass(Pojo.class), MediaType.TEXT_XML)).isTrue();
 		assertThat(decoder.canDecode(ResolvableType.forClass(Pojo.class), new MediaType("application", "soap+xml"))).isTrue();
 		assertThat(decoder.canDecode(ResolvableType.forClass(Pojo.class), null)).isTrue();
-		assertThat(decoder.canDecode(ResolvableType.forClass(String.class), null)).isTrue();
+		assertThat(decoder.canDecode(stringType, MediaType.APPLICATION_XML)).isFalse();
+		assertThat(decoder.canDecode(stringType, null)).isFalse();
+		assertThat(decoder.canDecode(charSequenceType, MediaType.APPLICATION_XML)).isFalse();
 		assertThat(decoder.canDecode(ResolvableType.forClass(Pojo.class), MediaType.APPLICATION_JSON)).isFalse();
 	}
 

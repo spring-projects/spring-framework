@@ -679,7 +679,7 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs, CodecConfigure
 			addCodec(this.objectReaders, new DecoderHttpMessageReader<>(this.jaxb2Decoder != null ?
 					(Jaxb2XmlDecoder) this.jaxb2Decoder : new Jaxb2XmlDecoder()));
 		}
-		else if(JACKSON_XML_PRESENT) {
+		if (JACKSON_XML_PRESENT) {
 			addCodec(this.objectReaders, new DecoderHttpMessageReader<>(getJacksonXmlDecoder()));
 		}
 		if (KOTLIN_SERIALIZATION_PROTOBUF_PRESENT) {
@@ -821,7 +821,7 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs, CodecConfigure
 			addCodec(writers, new EncoderHttpMessageWriter<>(this.jaxb2Encoder != null ?
 					(Jaxb2XmlEncoder) this.jaxb2Encoder : new Jaxb2XmlEncoder()));
 		}
-		else if (JACKSON_XML_PRESENT) {
+		if (JACKSON_XML_PRESENT) {
 			addCodec(writers, new EncoderHttpMessageWriter<>(getJacksonXmlEncoder()));
 		}
 		if (KOTLIN_SERIALIZATION_PROTOBUF_PRESENT) {

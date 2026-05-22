@@ -103,6 +103,11 @@ public class JacksonXmlDecoder extends AbstractJacksonDecoder<XmlMapper> {
 
 
 	@Override
+	public boolean canDecode(ResolvableType elementType, @Nullable MimeType mimeType) {
+		return super.canDecode(elementType, mimeType) && !CharSequence.class.isAssignableFrom(elementType.toClass());
+	}
+
+	@Override
 	public Flux<Object> decode(Publisher<DataBuffer> input, ResolvableType elementType, @Nullable MimeType mimeType,
 			@Nullable Map<String, Object> hints) {
 
