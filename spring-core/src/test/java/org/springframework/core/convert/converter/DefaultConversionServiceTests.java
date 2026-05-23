@@ -58,6 +58,7 @@ import org.springframework.core.convert.ConverterNotFoundException;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.unit.DataSize;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -229,6 +230,37 @@ class DefaultConversionServiceTests {
 	@Test
 	void stringToNumberEmptyString() {
 		assertThat(conversionService.convert("", Number.class)).isNull();
+	}
+
+	@Test
+	void stringToDataSize() {
+		assertThat(conversionService.convert("10B", DataSize.class)).isEqualTo(DataSize.ofBytes(10));
+		assertThat(conversionService.convert("+10KB", DataSize.class)).isEqualTo(DataSize.ofKilobytes(10));
+		assertThat(conversionService.convert("-10MB", DataSize.class)).isEqualTo(DataSize.ofMegabytes(-10));
+		assertThat(conversionService.convert("10", DataSize.class)).isEqualTo(DataSize.ofBytes(10));
+	}
+
+	@Test
+	void stringToDataSizeEmptyString() {
+		assertThat(conversionService.convert("", DataSize.class)).isNull();
+	}
+
+	@Test
+	void stringToDataSizeInvalidString() {
+		assertThatExceptionOfType(ConversionFailedException.class).isThrownBy(() ->
+				conversionService.convert("10WB", DataSize.class));
+	}
+
+	@Test
+	void numberToDataSize() {
+		assertThat(conversionService.convert(10, DataSize.class)).isEqualTo(DataSize.ofBytes(10));
+		assertThat(conversionService.convert(-10L, DataSize.class)).isEqualTo(DataSize.ofBytes(-10));
+	}
+
+	@Test
+	void numberToDataSizeWithDecimalNumber() {
+		assertThatExceptionOfType(ConversionFailedException.class).isThrownBy(() ->
+				conversionService.convert(10.5, DataSize.class));
 	}
 
 	@Test
