@@ -341,6 +341,18 @@ import org.springframework.stereotype.Component;
  * with the {@code @Profile} annotation to provide two options of the same bean to the
  * enclosing {@code @Configuration} class.
  *
+ * <p>{@link Conditional @Conditional} annotations declared on an enclosing
+ * {@code @Configuration} class gate registration of any nested
+ * {@code @Configuration} classes within it when the nested class is reached
+ * through the parser's recursion from its enclosing class (the case shown
+ * above) or via {@link Import @Import}. When the nested class is discovered
+ * independently of its enclosing class, for example via
+ * {@link ComponentScan @ComponentScan} or by directly registering the nested
+ * class against the application context, it is processed using only its own
+ * {@code @Conditional} annotations. In that case, redeclare the relevant
+ * conditions on the nested class, or extract them into a composed
+ * annotation applied to both, if the same gating is intended.
+ *
  * <h2>Configuring lazy initialization</h2>
  *
  * <p>By default, {@code @Bean} methods will be <em>eagerly instantiated</em> at container
