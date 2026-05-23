@@ -610,6 +610,19 @@ Kotlin::
 See the {spring-framework-api}/context/annotation/Conditional.html[`@Conditional`]
 javadoc for more detail.
 
+[NOTE]
+====
+A `@Conditional` declared on an enclosing `@Configuration` class gates the
+registration of nested `@Configuration` classes within it only when the
+nested class is reached through the parser's recursion from its enclosing
+class, or through `@Import`. When the nested class is discovered
+independently of its enclosing class, for example via `@ComponentScan` or
+by directly registering it against the application context, it is processed
+using only its own `@Conditional` annotations. In that case, redeclare the
+relevant conditions on the nested class, or extract them into a composed
+meta-annotation applied to both, if the same gating is intended.
+====
+
 
 [[beans-java-combining]]
 == Combining Java and XML Configuration
