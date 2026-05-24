@@ -191,6 +191,24 @@ class SpringValidatorAdapterTests {
 		assertThat(error.unwrap(ConstraintViolation.class).getPropertyPath().toString()).isEqualTo("email");
 	}
 
+	@Test  // gh-21750
+	void patternMessageWithRangeQuantifier() throws Exception {
+		BeanWithPatternContainingRangeQuantifier bean = new BeanWithPatternContainingRangeQuantifier();
+		bean.setCode("1234");
+
+		BeanPropertyBindingResult errors = new BeanPropertyBindingResult(bean, "bean");
+		validatorAdapter.validate(bean, errors);
+
+		assertThat(errors.getFieldErrorCount("code")).isEqualTo(1);
+		FieldError error = errors.getFieldError("code");
+		assertThat(error).isNotNull();
+		assertThat(messageSource.getMessage(error, Locale.ENGLISH)).isEqualTo("code must match \"\\d{1,3}\".");
+		assertThat(messageSource.getMessage(SerializationTestUtils.serializeAndDeserialize(error), Locale.ENGLISH))
+				.isEqualTo("code must match \"\\d{1,3}\".");
+		assertThat(error.contains(ConstraintViolation.class)).isTrue();
+		assertThat(error.unwrap(ConstraintViolation.class).getPropertyPath().toString()).isEqualTo("code");
+	}
+
 	@Test  // SPR-16177
 	void withList() {
 		Parent parent = new Parent();
@@ -521,6 +539,21 @@ class SpringValidatorAdapterTests {
 				}
 			});
 			return fieldsErrors.isEmpty();
+		}
+	}
+
+
+	static class BeanWithPatternContainingRangeQuantifier {
+
+		@Pattern(regexp = "\\d{1,3}", message = "{0} must match \"{regexp}\".")
+		private String code;
+
+		public String getCode() {
+			return code;
+		}
+
+		public void setCode(String code) {
+			this.code = code;
 		}
 	}
 
