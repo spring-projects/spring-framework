@@ -620,7 +620,7 @@ independently of its enclosing class, for example via `@ComponentScan` or
 by directly registering it against the application context, it is processed
 using only its own `@Conditional` annotations. In that case, redeclare the
 relevant conditions on the nested class, or extract them into a composed
-meta-annotation applied to both, if the same gating is intended.
+annotation applied to both, if the same gating is intended.
 ====
 
 

@@ -351,7 +351,7 @@ import org.springframework.stereotype.Component;
  * class against the application context, it is processed using only its own
  * {@code @Conditional} annotations. In that case, redeclare the relevant
  * conditions on the nested class, or extract them into a composed
- * meta-annotation applied to both, if the same gating is intended.
+ * annotation applied to both, if the same gating is intended.
  *
  * <h2>Configuring lazy initialization</h2>
  *
