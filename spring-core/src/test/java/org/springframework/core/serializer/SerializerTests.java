@@ -79,6 +79,17 @@ class SerializerTests {
 	}
 
 	@Test
+	void defaultDeserializerExposesNullClassLoaderByDefault() {
+		assertThat(new DefaultDeserializer().getClassLoader()).isNull();
+	}
+
+	@Test
+	void defaultDeserializerExposesConfiguredClassLoader() {
+		ClassLoader classLoader = getClass().getClassLoader();
+		assertThat(new DefaultDeserializer(classLoader).getClassLoader()).isSameAs(classLoader);
+	}
+
+	@Test
 	void serializationDelegateWithExplicitSerializerAndDeserializer() throws IOException {
 		SerializationDelegate delegate = new SerializationDelegate(new DefaultSerializer(), new DefaultDeserializer());
 		byte[] serializedObj = delegate.serializeToByteArray(SPRING_FRAMEWORK);
