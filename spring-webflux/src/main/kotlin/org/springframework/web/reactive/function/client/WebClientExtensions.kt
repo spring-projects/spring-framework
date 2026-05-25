@@ -236,7 +236,7 @@ inline fun <reified T : Any> WebClient.ResponseSpec.toEntityFlux(): Mono<Respons
 suspend inline fun <reified T : Any> WebClient.ResponseSpec.awaitEntity(): ResponseEntity<T> {
 	val context = currentCoroutineContext().minusKey(Job.Key)
 	return withContext(context.toReactorContext()) {
-		toEntity(T::class.java).awaitSingle()
+		toEntity<T>().awaitSingle()
 	}
 }
 

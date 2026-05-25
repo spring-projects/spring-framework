@@ -220,6 +220,14 @@ class WebClientExtensionsTests {
 	}
 
 	@Test
+	suspend fun `awaitEntity preserves generic type information`() {
+		val spec = mockk<WebClient.ResponseSpec>()
+		val entity = mockk<ResponseEntity<List<Foo>>>()
+		every { spec.toEntity(any<ParameterizedTypeReference<List<Foo>>>()) } returns Mono.just(entity)
+		assertThat(spec.awaitEntity<List<Foo>>()).isEqualTo(entity)
+	}
+
+	@Test
 	fun `ResponseSpec#awaitEntity with coroutine context propagation`() {
 		val exchangeFunction = mockk<ExchangeFunction>()
 		val mockResponse = mockk<ClientResponse>()
@@ -230,7 +238,7 @@ class WebClientExtensionsTests {
 		every { mockResponse.statusCode() } returns HttpStatus.OK
 		every { mockResponse.headers() } returns mockClientHeaders
 		every { mockClientHeaders.asHttpHeaders() } returns HttpHeaders()
-		every { mockResponse.bodyToMono(Foo::class.java) } returns Mono.just(foo)
+		every { mockResponse.bodyToMono(any<ParameterizedTypeReference<Foo>>()) } returns Mono.just(foo)
 		runBlocking(FooContextElement(foo)) {
 			val responseEntity = WebClient.builder()
 				.exchangeFunction(exchangeFunction)
@@ -258,7 +266,7 @@ class WebClientExtensionsTests {
 		every { mockResponse.statusCode() } returns HttpStatus.OK
 		every { mockResponse.headers() } returns mockClientHeaders
 		every { mockClientHeaders.asHttpHeaders() } returns HttpHeaders()
-		every { mockResponse.bodyToMono(Foo::class.java) } returns Mono.just(foo)
+		every { mockResponse.bodyToMono(any<ParameterizedTypeReference<Foo>>()) } returns Mono.just(foo)
 		runBlocking {
 			val responseEntity = WebClient.builder()
 				.exchangeFunction(exchangeFunction)
