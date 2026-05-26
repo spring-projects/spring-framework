@@ -61,8 +61,8 @@ public class DefaultDeserializer implements Deserializer<Object> {
 
 	/**
 	 * Return the {@link ClassLoader} to use for deserialization, or {@code null}
-	 * to use the "latest user-defined ClassLoader" of {@link ObjectInputStream}.
-	 * @since 7.1
+	 * to use the "latest user-defined ClassLoader".
+	 * @since 6.2.19
 	 * @see ConfigurableObjectInputStream#ConfigurableObjectInputStream(InputStream, ClassLoader)
 	 */
 	@Nullable
