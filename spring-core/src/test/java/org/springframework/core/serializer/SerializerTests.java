@@ -78,12 +78,12 @@ class SerializerTests {
 		assertThat(deserializer.expectedInputStream).isNotNull();
 	}
 
-	@Test
+	@Test  // gh-36833
 	void defaultDeserializerExposesNullClassLoaderByDefault() {
 		assertThat(new DefaultDeserializer().getClassLoader()).isNull();
 	}
 
-	@Test
+	@Test  // gh-36833
 	void defaultDeserializerExposesConfiguredClassLoader() {
 		ClassLoader classLoader = getClass().getClassLoader();
 		assertThat(new DefaultDeserializer(classLoader).getClassLoader()).isSameAs(classLoader);
