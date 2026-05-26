@@ -252,7 +252,9 @@ public abstract class MimeTypeUtils {
 				if (eqIndex >= 0) {
 					String attribute = parameter.substring(0, eqIndex).trim();
 					String value = parameter.substring(eqIndex + 1).trim();
-					parameters.put(attribute, value);
+					if (parameters.put(attribute, value) != null) {
+						throw new InvalidMimeTypeException(mimeType, "duplicate parameter '" + parameter + "'");
+					}
 				}
 			}
 			index = nextIndex;
