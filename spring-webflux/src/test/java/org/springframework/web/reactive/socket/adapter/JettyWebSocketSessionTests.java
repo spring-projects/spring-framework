@@ -19,6 +19,7 @@ package org.springframework.web.reactive.socket.adapter;
 import java.net.URI;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -45,51 +46,45 @@ import static org.mockito.Mockito.verify;
 
 /**
  * Tests for {@link JettyWebSocketSession}.
- *
  * @author Max Guiking
  */
 class JettyWebSocketSessionTests {
 
-	private final DefaultDataBufferFactory bufferFactory = DefaultDataBufferFactory.sharedInstance;
+	private final Session nativeSession = mock(Session.class);
 
-	private final Session jettySession = mock(Session.class);
-
-	private final JettyWebSocketSession session = new JettyWebSocketSession(this.jettySession,
-			new HandshakeInfo(URI.create("ws://example.org"), new HttpHeaders(), Mono.empty(), null),
-			this.bufferFactory);
+	private final JettyWebSocketSession webSocketSession = new JettyWebSocketSession(
+			this.nativeSession, new HandshakeInfo(URI.create("ws://example.org"),
+			new HttpHeaders(), Mono.empty(), null), DefaultDataBufferFactory.sharedInstance);
 
 
 	@Test
-	void sendBinaryMessageWithSingleFragmentMarksFragmentAsLast() {
+	void sendBinaryMessageWithSingleBuffer() {
 		succeedOnSendPartialBinary();
 
-		DataBuffer payload = this.bufferFactory.wrap("hello".getBytes(StandardCharsets.UTF_8));
+		DataBuffer payload = DefaultDataBufferFactory.sharedInstance.wrap("hello".getBytes(StandardCharsets.UTF_8));
 		WebSocketMessage message = new WebSocketMessage(WebSocketMessage.Type.BINARY, payload);
 
-		this.session.sendMessage(message).block();
+		this.webSocketSession.sendMessage(message).block();
 
-		ArgumentCaptor<Boolean> lastCaptor = ArgumentCaptor.forClass(Boolean.class);
-		verify(this.jettySession).sendPartialBinary(any(ByteBuffer.class), lastCaptor.capture(), any(Callback.class));
-		assertThat(lastCaptor.getValue()).as("FIN bit must be set for the final (and only) fragment").isTrue();
+		ArgumentCaptor<Boolean> last = ArgumentCaptor.forClass(Boolean.class);
+		verify(this.nativeSession).sendPartialBinary(any(ByteBuffer.class), last.capture(), any(Callback.class));
+		assertThat(last.getValue()).isTrue();
 	}
 
 	@Test
-	void sendBinaryMessageWithMultipleFragmentsMarksOnlyFinalFragmentAsLast() {
+	void sendBinaryMessageWithMultipleBuffers() {
 		succeedOnSendPartialBinary();
 
-		List<ByteBuffer> fragments = List.of(
+		WebSocketMessage message = new WebSocketMessage(WebSocketMessage.Type.BINARY, new MultiBufferDataBuffer(
 				ByteBuffer.wrap("one".getBytes(StandardCharsets.UTF_8)),
 				ByteBuffer.wrap("two".getBytes(StandardCharsets.UTF_8)),
-				ByteBuffer.wrap("three".getBytes(StandardCharsets.UTF_8)));
-		WebSocketMessage message = new WebSocketMessage(WebSocketMessage.Type.BINARY,
-				new MultiBufferDataBuffer(this.bufferFactory, fragments));
+				ByteBuffer.wrap("three".getBytes(StandardCharsets.UTF_8))));
 
-		this.session.sendMessage(message).block();
+		this.webSocketSession.sendMessage(message).block();
 
-		ArgumentCaptor<Boolean> lastCaptor = ArgumentCaptor.forClass(Boolean.class);
-		verify(this.jettySession, times(fragments.size()))
-				.sendPartialBinary(any(ByteBuffer.class), lastCaptor.capture(), any(Callback.class));
-		assertThat(lastCaptor.getAllValues()).containsExactly(false, false, true);
+		ArgumentCaptor<Boolean> last = ArgumentCaptor.forClass(Boolean.class);
+		verify(this.nativeSession, times(3)).sendPartialBinary(any(ByteBuffer.class), last.capture(), any(Callback.class));
+		assertThat(last.getAllValues()).containsExactly(false, false, true);
 	}
 
 	private void succeedOnSendPartialBinary() {
@@ -97,22 +92,20 @@ class JettyWebSocketSessionTests {
 			Callback callback = invocation.getArgument(2);
 			callback.succeed();
 			return null;
-		}).when(this.jettySession).sendPartialBinary(any(ByteBuffer.class), anyBoolean(), any(Callback.class));
+		}).when(this.nativeSession).sendPartialBinary(any(ByteBuffer.class), anyBoolean(), any(Callback.class));
 	}
 
 
 	/**
-	 * Minimal {@link DataBuffer} whose {@link #readableByteBuffers()} yields a
-	 * caller-supplied list of buffers, exercising the multi-fragment branch of
-	 * {@link JettyWebSocketSession#sendMessage(WebSocketMessage)}.
+	 * Minimal DataBuffer that returns a given list of buffers from {@link #readableByteBuffers()}.
 	 */
 	private static final class MultiBufferDataBuffer extends DataBufferWrapper {
 
 		private final List<ByteBuffer> buffers;
 
-		MultiBufferDataBuffer(DefaultDataBufferFactory factory, List<ByteBuffer> buffers) {
-			super(factory.allocateBuffer(0));
-			this.buffers = buffers;
+		MultiBufferDataBuffer(ByteBuffer... buffers) {
+			super(DefaultDataBufferFactory.sharedInstance.allocateBuffer(0));
+			this.buffers = Arrays.asList(buffers);
 		}
 
 		@Override
@@ -123,7 +116,7 @@ class JettyWebSocketSessionTests {
 
 				@Override
 				public boolean hasNext() {
-					return this.index < MultiBufferDataBuffer.this.buffers.size();
+					return (this.index < MultiBufferDataBuffer.this.buffers.size());
 				}
 
 				@Override
