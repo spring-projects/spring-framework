@@ -17,6 +17,10 @@ antora {
 	]
 }
 
+node {
+	version = '24.15.0'
+}
+
 tasks.named("generateAntoraYml") {
 	asciidocAttributes = project.provider( {
 		return  ["spring-version": project.version ]
