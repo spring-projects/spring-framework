@@ -1,11 +1,11 @@
 {
   "dependencies": {
-    "antora": "3.2.0-alpha.11",
+    "antora": "3.2.0-alpha.12",
     "@antora/atlas-extension": "1.0.0-alpha.5",
-    "@antora/collector-extension": "1.0.2",
+    "@antora/collector-extension": "1.0.3",
     "@asciidoctor/tabs": "1.0.0-beta.6",
-    "@springio/antora-extensions": "1.14.7",
+    "@springio/antora-extensions": "1.14.11",
     "fast-xml-parser": "5.7.0",
-    "@springio/asciidoctor-extensions": "1.0.0-alpha.17"
+    "@springio/asciidoctor-extensions": "1.0.0-alpha.18"
   }
 }
