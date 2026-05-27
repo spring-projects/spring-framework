@@ -1296,6 +1296,8 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 
 		private @Nullable Object lastRecoveryMarker;
 
+		private @Nullable BackOffExecution invokerBackOff;
+
 		private int idleTaskExecutionCount = 0;
 
 		private volatile boolean idle = true;
@@ -1338,6 +1340,15 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 			}
 			catch (Throwable ex) {
 				clearResources();
+				if (this.invokerBackOff != null) {
+					// We failed more than once in a row, probably due to a specific failure
+					// from the JMS receive call even after a successful connection recovery:
+					// locally wait before a further recovery attempt to avoid a burst retry.
+					applyBackOffTime(this.invokerBackOff);
+				}
+				else {
+					this.invokerBackOff = DefaultMessageListenerContainer.this.backOff.start();
+				}
 				boolean alreadyRecovered = false;
 				recoveryLock.lock();
 				try {
@@ -1449,7 +1460,9 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 			this.currentReceiveThread = Thread.currentThread();
 			try {
 				initResourcesIfNecessary();
-				return receiveAndExecute(this, this.session, this.consumer);
+				boolean messageReceived = receiveAndExecute(this, this.session, this.consumer);
+				this.invokerBackOff = null;  // successful receive attempt without exception
+				return messageReceived;
 			}
 			finally {
 				this.currentReceiveThread = null;
@@ -1471,7 +1484,6 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 			}
 		}
 
-		@SuppressWarnings("NullAway") // Dataflow analysis limitation
 		private void initResourcesIfNecessary() throws JMSException {
 			if (getCacheLevel() <= CACHE_CONNECTION) {
 				updateRecoveryMarker();
@@ -1482,6 +1494,7 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 					this.session = createSession(getSharedConnection());
 				}
 				if (this.consumer == null && getCacheLevel() >= CACHE_CONSUMER) {
+					Assert.state(this.session != null, "No cached Session");
 					this.consumer = createListenerConsumer(this.session);
 					lifecycleLock.lock();
 					try {
