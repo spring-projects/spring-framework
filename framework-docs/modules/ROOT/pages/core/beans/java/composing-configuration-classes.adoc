@@ -612,15 +612,15 @@ javadoc for more detail.
 
 [NOTE]
 ====
-A `@Conditional` declared on an enclosing `@Configuration` class gates the
-registration of nested `@Configuration` classes within it only when the
-nested class is reached through the parser's recursion from its enclosing
-class, or through `@Import`. When the nested class is discovered
-independently of its enclosing class, for example via `@ComponentScan` or
-by directly registering it against the application context, it is processed
-using only its own `@Conditional` annotations. In that case, redeclare the
-relevant conditions on the nested class, or extract them into a composed
-annotation applied to both, if the same gating is intended.
+A `@Conditional` annotation declared on an enclosing `@Configuration` class is only
+applied to the registration of a nested `@Configuration` class if the nested class is
+reached through the parser's recursion from its enclosing class, or via `@Import`. If a
+nested class is discovered independently of its enclosing class — for example, via
+`@ComponentScan` or by directly registering it against the application context — it is
+processed using only its own `@Conditional` annotations. Thus, if you wish to ensure that
+the same `@Conditional` annotations apply in such scenarios, you must redeclare the
+relevant annotations on the nested class, or extract them into a composed annotation
+which you apply to both the enclosing class and the nested class.
 ====
 
 
