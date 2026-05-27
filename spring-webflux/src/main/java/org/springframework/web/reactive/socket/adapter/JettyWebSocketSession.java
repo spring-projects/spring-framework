@@ -209,7 +209,7 @@ public class JettyWebSocketSession extends AbstractWebSocketSession<Session> {
 							}
 
 							ByteBuffer buffer = iterator.next();
-							boolean last = iterator.hasNext();
+							boolean last = !iterator.hasNext();
 							session.sendPartialBinary(buffer, last, Callback.from(this::succeeded, this::failed));
 							return Action.SCHEDULED;
 						}
