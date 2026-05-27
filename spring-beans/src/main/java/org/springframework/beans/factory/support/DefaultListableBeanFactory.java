@@ -1164,12 +1164,19 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		if (mbd.isBackgroundInit()) {
 			Executor executor = getBootstrapExecutor();
 			if (executor != null) {
+				// Force initialization of depends-on beans in mainline thread.
 				String[] dependsOn = mbd.getDependsOn();
 				if (dependsOn != null) {
 					for (String dep : dependsOn) {
 						getBean(dep);
 					}
 				}
+				// Force initialization of factory reference in mainline thread.
+				String factoryBeanName = mbd.getFactoryBeanName();
+				if (factoryBeanName != null) {
+					getBean(factoryBeanName);
+				}
+				// Instantiate current bean in background thread.
 				CompletableFuture<?> future = CompletableFuture.runAsync(
 						() -> instantiateSingletonInBackgroundThread(beanName), executor);
 				addSingletonFactory(beanName, () -> {
