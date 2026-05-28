@@ -4,7 +4,7 @@
     "@antora/atlas-extension": "1.0.0-alpha.5",
     "@antora/collector-extension": "1.0.3",
     "@asciidoctor/tabs": "1.0.0-beta.6",
-    "@springio/antora-extensions": "1.14.11",
+    "@springio/antora-extensions": "1.14.12",
     "fast-xml-parser": "5.7.0",
     "@springio/asciidoctor-extensions": "1.0.0-alpha.18"
   }
