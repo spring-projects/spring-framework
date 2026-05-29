@@ -1075,25 +1075,25 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	 * if not recovered yet, and at debug level if already recovered.
 	 * Can be overridden in subclasses.
 	 * @param ex the exception to handle
-	 * @param alreadyRecovered whether a previously executing listener
-	 * already recovered from the present listener setup failure
-	 * (this usually indicates a follow-up failure than can be ignored
-	 * other than for debug log purposes)
+	 * @param alreadyHandled whether a previously executing listener already
+	 * recovered from the present listener setup failure or the problem has
+	 * been handled otherwise already (this usually indicates a follow-up
+	 * failure than can be ignored other than for debug log purposes)
 	 * @see #recoverAfterListenerSetupFailure()
 	 */
-	protected void handleListenerSetupFailure(Throwable ex, boolean alreadyRecovered) {
+	protected void handleListenerSetupFailure(Throwable ex, boolean alreadyHandled) {
 		if (ex instanceof JMSException jmsException) {
 			invokeExceptionListener(jmsException);
 		}
 		if (ex instanceof SharedConnectionNotInitializedException) {
-			if (!alreadyRecovered) {
+			if (!alreadyHandled) {
 				logger.debug("JMS message listener invoker needs to establish shared Connection");
 			}
 		}
 		else {
 			// Recovery during active operation...
-			if (alreadyRecovered) {
-				logger.debug("Setup of JMS message listener invoker failed - already recovered by other invoker", ex);
+			if (alreadyHandled) {
+				logger.debug("Setup of JMS message listener invoker failed", ex);
 			}
 			else {
 				StringBuilder msg = new StringBuilder();
@@ -1317,6 +1317,7 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 				lifecycleLock.unlock();
 			}
 			boolean messageReceived = false;
+			boolean exhausted = false;
 			try {
 				// For core consumers without maxMessagesPerTask, no idle limit applies since they
 				// will always get rescheduled immediately anyway. Whereas for surplus consumers
@@ -1340,31 +1341,45 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 			}
 			catch (Throwable ex) {
 				clearResources();
+				boolean alreadyHandled = false;
 				if (this.invokerBackOff != null) {
 					// We failed more than once in a row, probably due to a specific failure
 					// from the JMS receive call even after a successful connection recovery:
 					// locally wait before a further recovery attempt to avoid a burst retry.
-					applyBackOffTime(this.invokerBackOff);
+					alreadyHandled = true;
+					if (logger.isWarnEnabled()) {
+						logger.warn("Recurring setup failure in " + id() + " - retrying using " +
+								this.invokerBackOff + ". Cause: " + (ex instanceof JMSException jmsException ?
+								JmsUtils.buildExceptionMessage(jmsException) : ex.getMessage()));
+					}
+					exhausted = !applyBackOffTime(this.invokerBackOff);
+					if (exhausted) {
+						// Too many recurring setup failures at the invoker level.
+						if (logger.isWarnEnabled()) {
+							logger.warn("Exhausted back-off in " + id() + " after recurring setup failure: " +
+									this.invokerBackOff);
+						}
+					}
 				}
 				else {
 					this.invokerBackOff = DefaultMessageListenerContainer.this.backOff.start();
 				}
-				boolean alreadyRecovered = false;
-				recoveryLock.lock();
-				try {
-					if (this.lastRecoveryMarker == currentRecoveryMarker) {
-						handleListenerSetupFailure(ex, false);
-						recoverAfterListenerSetupFailure();
-						currentRecoveryMarker = new Object();
+				boolean recovered = false;
+				if (!exhausted) {
+					recoveryLock.lock();
+					try {
+						if (this.lastRecoveryMarker == DefaultMessageListenerContainer.this.currentRecoveryMarker) {
+							handleListenerSetupFailure(ex, alreadyHandled);
+							recoverAfterListenerSetupFailure();
+							DefaultMessageListenerContainer.this.currentRecoveryMarker = new Object();
+							recovered = true;
+						}
 					}
-					else {
-						alreadyRecovered = true;
+					finally {
+						recoveryLock.unlock();
 					}
 				}
-				finally {
-					recoveryLock.unlock();
-				}
-				if (alreadyRecovered) {
+				if (!recovered) {
 					handleListenerSetupFailure(ex, true);
 				}
 			}
@@ -1385,7 +1400,8 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 				}
 				lifecycleLock.lock();
 				try {
-					if (!shouldRescheduleInvoker(this.idleTaskExecutionCount) || !rescheduleTaskIfNecessary(this)) {
+					if (exhausted || !shouldRescheduleInvoker(this.idleTaskExecutionCount) ||
+							!rescheduleTaskIfNecessary(this)) {
 						// We're shutting down completely.
 						scheduledInvokers.remove(this);
 						if (logger.isDebugEnabled()) {
@@ -1394,16 +1410,15 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 						lifecycleCondition.signalAll();
 						clearResources();
 					}
-					else if (isRunning()) {
+					if (isRunning()) {
 						int nonPausedConsumers = getScheduledConsumerCount() - getPausedTaskCount();
 						if (nonPausedConsumers < 1) {
-							logger.error("All scheduled consumers have been paused, probably due to tasks having been rejected. " +
-									"Check your thread pool configuration! Manual recovery necessary through a start() call.");
+							logger.error("All scheduled consumers have been paused due to tasks having been exhausted/rejected. " +
+									"Check your back-off and executor setup! Manual recovery necessary through a start() call.");
 						}
 						else if (nonPausedConsumers < getConcurrentConsumers()) {
-							logger.warn("Number of scheduled consumers has dropped below concurrentConsumers limit, probably " +
-									"due to tasks having been rejected. Check your thread pool configuration! Automatic recovery " +
-									"to be triggered by remaining consumers.");
+							logger.warn("Number of scheduled consumers has dropped below concurrentConsumers limit due to tasks " +
+									"having been exhausted/rejected. Automatic recovery to be triggered by remaining consumers.");
 						}
 					}
 				}
@@ -1461,7 +1476,10 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 			try {
 				initResourcesIfNecessary();
 				boolean messageReceived = receiveAndExecute(this, this.session, this.consumer);
-				this.invokerBackOff = null;  // successful receive attempt without exception
+				if (this.invokerBackOff != null) {
+					logger.debug("Successful receive attempt after JMS message listener invoker recovery");
+					this.invokerBackOff = null;
+				}
 				return messageReceived;
 			}
 			finally {
@@ -1550,6 +1568,10 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 			}
 			this.consumer = null;
 			this.session = null;
+		}
+
+		private String id() {
+			return getClass().getSimpleName() + "@" + Integer.toHexString(hashCode());
 		}
 
 		@Override
