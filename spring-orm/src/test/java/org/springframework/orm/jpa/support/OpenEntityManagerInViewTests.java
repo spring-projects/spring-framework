@@ -76,18 +76,19 @@ class OpenEntityManagerInViewTests {
 
 
 	@BeforeEach
-	void setUp() {
+	void setup() {
 		given(factory.createEntityManager()).willReturn(manager);
 		this.request.setAsyncSupported(true);
 	}
 
 	@AfterEach
-	void tearDown() {
+	void cleanup() {
 		assertThat(TransactionSynchronizationManager.getResourceMap()).isEmpty();
 		assertThat(TransactionSynchronizationManager.isSynchronizationActive()).isFalse();
 		assertThat(TransactionSynchronizationManager.isCurrentTransactionReadOnly()).isFalse();
 		assertThat(TransactionSynchronizationManager.isActualTransactionActive()).isFalse();
 	}
+
 
 	@Test
 	void openEntityManagerInViewInterceptor() {

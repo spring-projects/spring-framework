@@ -509,6 +509,7 @@ public abstract class AbstractEntityManagerFactoryBean implements
 	 * Delegate an incoming invocation from the proxy, dispatching to EntityManagerFactoryInfo
 	 * or the native EntityManagerFactory accordingly.
 	 */
+	@SuppressWarnings("NullAway")  // for query.unwrap(null)
 	Object invokeProxyMethod(Method method, Object @Nullable [] args) throws Throwable {
 		if (method.getDeclaringClass().isAssignableFrom(EntityManagerFactoryInfo.class)) {
 			return method.invoke(this, args);
@@ -517,9 +518,8 @@ public abstract class AbstractEntityManagerFactoryBean implements
 				args[0] == SynchronizationType.SYNCHRONIZED) {
 			// JPA 2.1's createEntityManager(SynchronizationType, Map)
 			// Redirect to plain createEntityManager and add synchronization semantics through Spring proxy
-			EntityManager rawEntityManager = (args.length > 1 ?
-					getNativeEntityManagerFactory().createEntityManager((Map<?, ?>) args[1]) :
-					getNativeEntityManagerFactory().createEntityManager());
+			EntityManager rawEntityManager = EntityManagerFactoryUtils.createEntityManager(
+					getNativeEntityManagerFactory(), (args.length > 1 ? (Map<?, ?>) args[1] : null));
 			postProcessEntityManager(rawEntityManager);
 			return ExtendedEntityManagerCreator.createApplicationManagedEntityManager(rawEntityManager, this, true);
 		}
@@ -532,6 +532,7 @@ public abstract class AbstractEntityManagerFactoryBean implements
 					// Assumably a Spring-generated proxy from SharedEntityManagerCreator:
 					// since we're passing it back to the native EntityManagerFactory,
 					// let's unwrap it to the original Query object from the provider.
+					// Note that null is not an officially supported argument in JPA.
 					try {
 						args[i] = query.unwrap(null);
 					}
@@ -605,9 +606,8 @@ public abstract class AbstractEntityManagerFactoryBean implements
 
 	@Override
 	public EntityManager createNativeEntityManager(@Nullable Map<?, ?> properties) {
-		EntityManager rawEntityManager = (!CollectionUtils.isEmpty(properties) ?
-				getNativeEntityManagerFactory().createEntityManager(properties) :
-				getNativeEntityManagerFactory().createEntityManager());
+		EntityManager rawEntityManager = EntityManagerFactoryUtils.createEntityManager(
+				getNativeEntityManagerFactory(), properties);
 		postProcessEntityManager(rawEntityManager);
 		return rawEntityManager;
 	}

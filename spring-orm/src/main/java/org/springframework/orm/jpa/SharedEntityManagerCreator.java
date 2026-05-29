@@ -39,7 +39,6 @@ import org.jspecify.annotations.Nullable;
 
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.ClassUtils;
-import org.springframework.util.CollectionUtils;
 import org.springframework.util.ConcurrentReferenceHashMap;
 
 /**
@@ -376,9 +375,7 @@ public abstract class SharedEntityManagerCreator {
 			boolean newTarget = false;
 			if (target == null) {
 				logger.debug("Creating new EntityManager for shared EntityManager invocation");
-				target = (!CollectionUtils.isEmpty(this.properties) ?
-						this.targetFactory.createEntityManager(this.properties) :
-						this.targetFactory.createEntityManager());
+				target = EntityManagerFactoryUtils.createEntityManager(this.targetFactory, this.properties);
 				newTarget = true;
 			}
 

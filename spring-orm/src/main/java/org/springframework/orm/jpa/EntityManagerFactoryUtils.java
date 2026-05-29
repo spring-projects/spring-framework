@@ -79,10 +79,10 @@ public abstract class EntityManagerFactoryUtils {
 	public static final int ENTITY_MANAGER_SYNCHRONIZATION_ORDER =
 			DataSourceUtils.CONNECTION_SYNCHRONIZATION_ORDER - 100;
 
-	private static final @Nullable Method CREATE_ENTITY_AGENT_METHOD =
-			ClassUtils.getMethodIfAvailable(EntityManagerFactory.class, "createEntityAgent");
+	private static final boolean CREATE_ENTITY_MANAGER_WITHOUT_ARGUMENTS_AVAILABLE =
+			ClassUtils.hasMethod(EntityManagerFactory.class, "createEntityManager");
 
-	private static final @Nullable Method CREATE_ENTITY_AGENT_WITH_PROPERTIES_METHOD =
+	private static final @Nullable Method CREATE_ENTITY_AGENT_METHOD =
 			ClassUtils.getMethodIfAvailable(EntityManagerFactory.class, "createEntityAgent", Map.class);
 
 	private static final Log logger = LogFactory.getLog(EntityManagerFactoryUtils.class);
@@ -268,7 +268,7 @@ public abstract class EntityManagerFactoryUtils {
 			}
 		}
 		if (em == null) {
-			em = (!CollectionUtils.isEmpty(properties) ? emf.createEntityManager(properties) : emf.createEntityManager());
+			em = createEntityManager(emf, properties);
 		}
 
 		try {
@@ -359,6 +359,23 @@ public abstract class EntityManagerFactoryUtils {
 	}
 
 	/**
+	 * Create a new JPA EntityManager via reflectively detected JPA 3.2/4.0 API.
+	 * @param emf the EntityManagerFactory to create the EntityManager with
+	 * @param properties the properties to be passed into the {@code createEntityManager}
+	 * call (may be {@code null})
+	 * @since 7.0.8
+	 */
+	public static EntityManager createEntityManager(EntityManagerFactory emf, @Nullable Map<?, ?> properties) {
+		if (CollectionUtils.isEmpty(properties)) {
+			properties = null;
+		}
+		if (properties == null && CREATE_ENTITY_MANAGER_WITHOUT_ARGUMENTS_AVAILABLE) {
+			return emf.createEntityManager();  // on JPA 3.2
+		}
+		return emf.createEntityManager(properties);  // on JPA 4.0 even for empty properties
+	}
+
+	/**
 	 * Create a new JPA EntityAgent via reflectively detected JPA 4.0 API.
 	 * @param emf the EntityManagerFactory to create the EntityAgent with
 	 * @param properties the properties to be passed into the {@code createEntityAgent}
@@ -366,12 +383,13 @@ public abstract class EntityManagerFactoryUtils {
 	 * @since 7.0.4
 	 */
 	static Object createEntityAgent(EntityManagerFactory emf, @Nullable Map<?, ?> properties) {
-		if (CREATE_ENTITY_AGENT_METHOD == null || CREATE_ENTITY_AGENT_WITH_PROPERTIES_METHOD == null) {
+		if (CREATE_ENTITY_AGENT_METHOD == null) {
 			throw new IllegalStateException("JPA 4.0 createEntityAgent API not available");
 		}
-		Object entityAgent = (!CollectionUtils.isEmpty(properties) ?
-				ReflectionUtils.invokeMethod(CREATE_ENTITY_AGENT_WITH_PROPERTIES_METHOD, emf, properties) :
-				ReflectionUtils.invokeMethod(CREATE_ENTITY_AGENT_METHOD, emf));
+		if (CollectionUtils.isEmpty(properties)) {
+			properties = null;
+		}
+		Object entityAgent = ReflectionUtils.invokeMethod(CREATE_ENTITY_AGENT_METHOD, emf, properties);
 		if (entityAgent == null) {
 			throw new IllegalStateException("JPA 4.0 createEntityAgent API returned null");
 		}
