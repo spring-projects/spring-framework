@@ -143,9 +143,7 @@ public class LocalEntityManagerFactoryBean extends AbstractEntityManagerFactoryB
 	 */
 	public PersistenceConfiguration getPersistenceConfiguration() {
 		if (this.configuration == null) {
-			String name = getPersistenceUnitName();
-			Assert.state(name != null, "No persistenceUnitName set");
-			this.configuration = new PersistenceConfiguration(name);
+			this.configuration = new PersistenceConfiguration(obtainPersistenceUnitName());
 		}
 		return this.configuration;
 	}
@@ -165,6 +163,12 @@ public class LocalEntityManagerFactoryBean extends AbstractEntityManagerFactoryB
 		Assert.state(this.configuration == null || this.configuration.name().equals(persistenceUnitName),
 				"Cannot change setPersistenceUnitName when PersistenceConfiguration has been set");
 		super.setPersistenceUnitName(persistenceUnitName);
+	}
+
+	private String obtainPersistenceUnitName() {
+		String name = getPersistenceUnitName();
+		Assert.state(name != null, "No persistenceUnitName set");
+		return name;
 	}
 
 	/**
@@ -265,7 +269,7 @@ public class LocalEntityManagerFactoryBean extends AbstractEntityManagerFactoryB
 			// Create EntityManagerFactory directly through PersistenceProvider.
 			EntityManagerFactory emf = (this.configuration != null ?
 					provider.createEntityManagerFactory(this.configuration) :
-					provider.createEntityManagerFactory(getPersistenceUnitName(), getJpaPropertyMap()));
+					provider.createEntityManagerFactory(obtainPersistenceUnitName(), getJpaPropertyMap()));
 			if (emf == null) {
 				throw new PersistenceException(
 						"PersistenceProvider [" + provider + "] could not find persistence unit for name '" +
@@ -277,7 +281,7 @@ public class LocalEntityManagerFactoryBean extends AbstractEntityManagerFactoryB
 			// Let JPA perform its standard PersistenceProvider autodetection.
 			return (this.configuration != null ?
 					Persistence.createEntityManagerFactory(this.configuration) :
-					Persistence.createEntityManagerFactory(getPersistenceUnitName(), getJpaPropertyMap()));
+					Persistence.createEntityManagerFactory(obtainPersistenceUnitName(), getJpaPropertyMap()));
 		}
 	}
 

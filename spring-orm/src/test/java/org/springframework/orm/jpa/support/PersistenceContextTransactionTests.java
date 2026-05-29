@@ -74,7 +74,7 @@ class PersistenceContextTransactionTests {
 	}
 
 	@AfterEach
-	void clear() {
+	void cleanup() {
 		assertThat(TransactionSynchronizationManager.getResourceMap()).isEmpty();
 		assertThat(TransactionSynchronizationManager.isSynchronizationActive()).isFalse();
 		assertThat(TransactionSynchronizationManager.isCurrentTransactionReadOnly()).isFalse();

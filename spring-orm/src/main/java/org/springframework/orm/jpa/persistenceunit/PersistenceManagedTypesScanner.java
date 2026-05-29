@@ -146,7 +146,11 @@ public final class PersistenceManagedTypesScanner {
 				try {
 					MetadataReader reader = factory.getMetadataReader(resource);
 					String className = reader.getClassMetadata().getClassName();
-					if (matchesEntityTypeFilter(reader, factory) && this.managedClassNameFilter.matches(className)) {
+					if (className.endsWith(ClassUtils.PACKAGE_INFO_SUFFIX)) {
+						scanResult.managedPackages.add(className.substring(0,
+								className.length() - ClassUtils.PACKAGE_INFO_SUFFIX.length()));
+					}
+					else if (matchesEntityTypeFilter(reader, factory) && this.managedClassNameFilter.matches(className)) {
 						scanResult.managedClassNames.add(className);
 						if (scanResult.persistenceUnitRootUrl == null) {
 							URL url = resource.getURL();
@@ -154,10 +158,6 @@ public final class PersistenceManagedTypesScanner {
 								scanResult.persistenceUnitRootUrl = ResourceUtils.extractJarFileURL(url);
 							}
 						}
-					}
-					if (className.endsWith(ClassUtils.PACKAGE_INFO_SUFFIX)) {
-						scanResult.managedPackages.add(className.substring(0,
-								className.length() - ClassUtils.PACKAGE_INFO_SUFFIX.length()));
 					}
 				}
 				catch (FileNotFoundException ex) {
