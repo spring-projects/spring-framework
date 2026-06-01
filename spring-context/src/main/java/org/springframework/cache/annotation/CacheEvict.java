@@ -154,4 +154,29 @@ public @interface CacheEvict {
 	 */
 	boolean beforeInvocation() default false;
 
+	/**
+	 * Whether the eviction must be performed immediately, with all affected
+	 * entries expected to be invisible to subsequent lookups as soon as this
+	 * operation returns.
+	 * <p>Setting this attribute to {@code true} causes the framework to invoke
+	 * {@link org.springframework.cache.Cache#evictIfPresent} (for a single key)
+	 * or {@link org.springframework.cache.Cache#invalidate} (when
+	 * {@link #allEntries} is {@code true}) instead of
+	 * {@link org.springframework.cache.Cache#evict} /
+	 * {@link org.springframework.cache.Cache#clear}. The latter pair is allowed
+	 * by contract to perform the removal in an asynchronous or deferred fashion,
+	 * which can lead to a concurrently inserted entry being removed by a late
+	 * eviction — for example, when a Redis-backed cache implements
+	 * {@link org.springframework.cache.Cache#clear} via an asynchronous
+	 * {@code UNLINK} while a subsequent {@code @CachePut} writes a new value.
+	 * <p>Defaults to {@code false}, preserving the previous behavior where the
+	 * immediacy of the eviction implicitly follows {@link #beforeInvocation()}:
+	 * a before-invocation eviction is always immediate, whereas an
+	 * after-invocation eviction may be deferred by the underlying cache
+	 * implementation.
+	 * @since 7.0
+	 * @see org.springframework.cache.Cache#evictIfPresent
+	 * @see org.springframework.cache.Cache#invalidate
+	 */
+	boolean immediate() default false;
 }
