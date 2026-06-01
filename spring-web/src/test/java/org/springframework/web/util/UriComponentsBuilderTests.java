@@ -270,6 +270,27 @@ class UriComponentsBuilderTests {
 				UriComponentsBuilder.fromUriString("http://[1abc:2abc:3abc::5ABC:6abc:8080/resource", parserType));
 	}
 
+	@ParameterizedTest // gh-36759
+	@EnumSource
+	void fromUriStringRelativeUriWithFragment(ParserType parserType) {
+		UriComponents result = UriComponentsBuilder.fromUriString("path2#foo", parserType).build();
+		assertThat(result.getScheme()).isNull();
+		assertThat(result.getHost()).isNull();
+		assertThat(result.getPath()).isEqualTo("path2");
+		assertThat(result.getFragment()).isEqualTo("foo");
+		assertThat(result.toUriString()).isEqualTo("path2#foo");
+	}
+
+	@ParameterizedTest // gh-36759
+	@EnumSource
+	void fromUriStringRelativeUriWithEmptyFragment(ParserType parserType) {
+		UriComponents result = UriComponentsBuilder.fromUriString("path2#", parserType).build();
+		assertThat(result.getScheme()).isNull();
+		assertThat(result.getHost()).isNull();
+		assertThat(result.getPath()).isEqualTo("path2");
+		assertThat(result.getFragment()).isNull();
+	}
+
 	@ParameterizedTest // see SPR-11970
 	@EnumSource
 	void fromUriStringNoPathWithReservedCharInQuery(ParserType parserType) {
