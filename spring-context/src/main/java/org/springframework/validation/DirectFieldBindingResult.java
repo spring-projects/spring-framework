@@ -19,7 +19,6 @@ package org.springframework.validation;
 import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.ConfigurablePropertyAccessor;
-import org.springframework.beans.DirectFieldAccessor;
 import org.springframework.beans.PropertyAccessorFactory;
 
 /**
@@ -100,7 +99,7 @@ public class DirectFieldBindingResult extends AbstractPropertyBindingResult {
 			this.directFieldAccessor = createDirectFieldAccessor();
 			this.directFieldAccessor.setExtractOldValueForEditor(true);
 			this.directFieldAccessor.setAutoGrowNestedPaths(this.autoGrowNestedPaths);
-			((DirectFieldAccessor) this.directFieldAccessor).setAutoGrowCollectionLimit(this.autoGrowCollectionLimit);
+			this.directFieldAccessor.setAutoGrowCollectionLimit(this.autoGrowCollectionLimit);
 		}
 		return this.directFieldAccessor;
 	}
