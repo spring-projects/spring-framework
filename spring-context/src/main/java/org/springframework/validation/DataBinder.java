@@ -341,7 +341,7 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	 */
 	protected AbstractPropertyBindingResult createDirectFieldBindingResult() {
 		DirectFieldBindingResult result = new DirectFieldBindingResult(getTarget(),
-				getObjectName(), isAutoGrowNestedPaths());
+				getObjectName(), isAutoGrowNestedPaths(), getAutoGrowCollectionLimit());
 
 		if (this.conversionService != null) {
 			result.initConversion(this.conversionService);

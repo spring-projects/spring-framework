@@ -19,6 +19,7 @@ package org.springframework.validation;
 import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.ConfigurablePropertyAccessor;
+import org.springframework.beans.DirectFieldAccessor;
 import org.springframework.beans.PropertyAccessorFactory;
 
 /**
@@ -41,6 +42,8 @@ public class DirectFieldBindingResult extends AbstractPropertyBindingResult {
 
 	private final boolean autoGrowNestedPaths;
 
+	private final int autoGrowCollectionLimit;
+
 	private transient @Nullable ConfigurablePropertyAccessor directFieldAccessor;
 
 
@@ -60,9 +63,24 @@ public class DirectFieldBindingResult extends AbstractPropertyBindingResult {
 	 * @param autoGrowNestedPaths whether to "auto-grow" a nested path that contains a null value
 	 */
 	public DirectFieldBindingResult(@Nullable Object target, String objectName, boolean autoGrowNestedPaths) {
+		this(target, objectName, autoGrowNestedPaths, Integer.MAX_VALUE);
+	}
+
+	/**
+	 * Create a new {@code DirectFieldBindingResult} for the given target.
+	 * @param target the target object to bind onto
+	 * @param objectName the name of the target object
+	 * @param autoGrowNestedPaths whether to "auto-grow" a nested path that contains a null value
+	 * @param autoGrowCollectionLimit the limit for array and collection auto-growing
+	 * @since 7.1
+	 */
+	public DirectFieldBindingResult(@Nullable Object target, String objectName,
+			boolean autoGrowNestedPaths, int autoGrowCollectionLimit) {
+
 		super(objectName);
 		this.target = target;
 		this.autoGrowNestedPaths = autoGrowNestedPaths;
+		this.autoGrowCollectionLimit = autoGrowCollectionLimit;
 	}
 
 
@@ -82,6 +100,7 @@ public class DirectFieldBindingResult extends AbstractPropertyBindingResult {
 			this.directFieldAccessor = createDirectFieldAccessor();
 			this.directFieldAccessor.setExtractOldValueForEditor(true);
 			this.directFieldAccessor.setAutoGrowNestedPaths(this.autoGrowNestedPaths);
+			((DirectFieldAccessor) this.directFieldAccessor).setAutoGrowCollectionLimit(this.autoGrowCollectionLimit);
 		}
 		return this.directFieldAccessor;
 	}
