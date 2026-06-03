@@ -22,6 +22,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 /**
@@ -42,6 +43,15 @@ class ServerSentEventTests {
 	void rejectsInvalidEvent(String newLine, String description) {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				ServerSentEvent.<String>builder().event("first" + newLine + "second").build());
+	}
+
+
+	@ParameterizedTest(name = "{1}")
+	@MethodSource("newLineCharacters")
+	void supportMultiLineComments(String newLine, String description) {
+		ServerSentEvent<String> event = ServerSentEvent.<String>builder()
+				.comment("foo" + newLine + "bar" + newLine + "baz").data("payload").build();
+		assertThat(event.format()).isEqualTo(":foo\n:bar\n:baz\ndata:");
 	}
 
 	private static Stream<Arguments> newLineCharacters() {
