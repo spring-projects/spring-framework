@@ -58,6 +58,14 @@ class ServerSentEventTests {
 		assertThat(event.format()).contains("id:42").doesNotContain("event");
 	}
 
+	@ParameterizedTest(name = "{1}")
+	@MethodSource("newLineCharacters")
+	void supportMultiLineComments(String newLine, String description) {
+		ServerSentEvent<String> event = ServerSentEvent.<String>builder()
+				.comment("foo" + newLine + "bar" + newLine + "baz").data("payload").build();
+		assertThat(event.format()).isEqualTo(":foo\n:bar\n:baz\ndata:");
+	}
+
 	private static Stream<Arguments> newLineCharacters() {
 		return Stream.of(
 				Arguments.of("\n", "LF"),

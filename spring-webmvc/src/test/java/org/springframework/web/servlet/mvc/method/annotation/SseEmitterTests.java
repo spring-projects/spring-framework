@@ -168,6 +168,17 @@ class SseEmitterTests {
 				.send(event().name("first" + newLineChars + "second")));
 	}
 
+	@ParameterizedTest(name = "{1}")
+	@MethodSource("newLineCharacters")
+	void supportMultiLineComments(String newLineChars, String description) throws Exception {
+		this.emitter.send(event().comment("foo" + newLineChars + "bar" + newLineChars + "baz").data("payload"));
+		this.handler.assertSentObjectCount(3);
+		this.handler.assertObject(0, ":foo\n:bar\n:baz\ndata:", TEXT_PLAIN_UTF8);
+		this.handler.assertObject(1, "payload");
+		this.handler.assertObject(2, "\n\n", TEXT_PLAIN_UTF8);
+		this.handler.assertWriteCount(1);
+	}
+
 	private static Stream<Arguments> newLineCharacters() {
 		return Stream.of(
 				Arguments.of("\n", "LF"),

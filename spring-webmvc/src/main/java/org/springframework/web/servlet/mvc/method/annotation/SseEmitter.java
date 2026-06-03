@@ -223,7 +223,9 @@ public class SseEmitter extends ResponseBodyEmitter {
 
 		@Override
 		public SseEventBuilder comment(String comment) {
-			append(':').append(StringUtils.replace(comment, "\n", "\n:")).append('\n');
+			append(':');
+			appendEscaped(comment, "\n:");
+			append('\n');
 			return this;
 		}
 
@@ -259,6 +261,16 @@ public class SseEmitter extends ResponseBodyEmitter {
 				this.dataToSend.add(new DataWithMediaType(input, mediaType));
 			}
 			else {
+				appendEscaped(input, "\ndata:");
+				saveAppendedText(mediaType);
+			}
+		}
+
+		private void appendEscaped(String input, String replacement) {
+			if (input.indexOf('\n') == -1 && input.indexOf('\r') == -1) {
+				append(input);
+			}
+			else {
 				int length = input.length();
 				for (int i = 0; i < length; i++) {
 					char c = input.charAt(i);
@@ -266,16 +278,15 @@ public class SseEmitter extends ResponseBodyEmitter {
 						if (i + 1 < length && input.charAt(i + 1) == '\n') {
 							i++;
 						}
-						this.sb.append("\ndata:");
+						append(replacement);
 					}
 					else if (c == '\n') {
-						this.sb.append("\ndata:");
+						append(replacement);
 					}
 					else {
-						this.sb.append(c);
+						append(c);
 					}
 				}
-				saveAppendedText(mediaType);
 			}
 		}
 
