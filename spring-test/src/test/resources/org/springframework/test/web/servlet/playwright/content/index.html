@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Playwright-MockMvc integration Test Web Page</title>
+</head>
+<body>
+<h1>Spring Test Web Page</h1>
+
+<!-- Simple GET request form -->
+<section>
+    <h2>GET Request Form</h2>
+    <form id="getForm" data-testid="getForm" method="get" action="/search">
+        <label for="query">Search Query:</label>
+        <input type="text" id="query" name="query" required>
+        <button type="submit">Submit GET</button>
+    </form>
+    <div id="getResult"></div>
+</section>
+
+<script>
+    const getForm = document.getElementById("getForm");
+    const getResult = document.getElementById("getResult");
+
+    getForm.addEventListener("submit", async (event) => {
+        event.preventDefault();
+
+        const formData = new FormData(getForm);
+        const query = new URLSearchParams(formData).toString();
+        const url = `${getForm.action}?${query}`;
+
+        try {
+            const response = await fetch(url, {
+                method: "GET",
+                headers: {
+                    "X-Requested-With": "XMLHttpRequest"
+                }
+            });
+
+            const text = await response.text();
+            getResult.textContent = text;
+        }
+        catch (error) {
+            getResult.textContent = `Request failed: ${error}`;
+        }
+    });
+</script>
+
+<!-- Simple POST request form -->
+<section>
+    <h2>POST Request Form</h2>
+    <form id="postForm" data-testid="postForm" method="post" action="/submit">
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username" required>
+        <label for="message">Message:</label>
+        <textarea id="message" name="message" required></textarea>
+        <button type="submit">Submit POST</button>
+    </form>
+</section>
+
+<!-- Multipart form with single file -->
+<section>
+    <h2>Single File Upload Form</h2>
+    <form id="singleFileForm" data-testid="singleFileForm" method="post" action="/upload-single" enctype="multipart/form-data">
+        <label for="singleFile">Choose File:</label>
+        <input type="file" id="singleFile" name="file" required>
+        <button type="submit">Upload Single File</button>
+    </form>
+</section>
+
+<!-- Multipart form with multiple files -->
+<section>
+    <h2>Multiple Files Upload Form</h2>
+    <form id="multipleFilesForm" data-testid="multipleFilesForm" method="post" action="/upload-multiple" enctype="multipart/form-data">
+        <label for="multipleFiles">Choose Files:</label>
+        <input type="file" id="multipleFiles" name="files" multiple required>
+        <button type="submit">Upload Multiple Files</button>
+    </form>
+</section>
+
+<!-- Multipart form with file, text, and number inputs -->
+<section>
+    <h2>Mixed Multipart Form</h2>
+    <form id="mixedMultipartForm" data-testid="mixedMultipartForm" method="post" action="/upload-mixed" enctype="multipart/form-data">
+        <label for="mixedFile">Choose File:</label>
+        <input type="file" id="mixedFile" name="file" required>
+        <label for="description">Description:</label>
+        <input type="text" id="description" name="description" required>
+        <label for="version">Version:</label>
+        <input type="number" id="version" name="version" required>
+        <button type="submit">Submit Mixed Multipart</button>
+    </form>
+</section>
+</body>
+</html>

@@ -142,5 +142,6 @@ dependencies {
 		api("org.xmlunit:xmlunit-assertj:2.10.4")
 		api("org.xmlunit:xmlunit-matchers:2.10.4")
 		api("org.yaml:snakeyaml:2.6")
+        api("com.microsoft.playwright:playwright:1.60.0")
 	}
 }

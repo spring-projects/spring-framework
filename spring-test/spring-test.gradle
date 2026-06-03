@@ -55,6 +55,7 @@ dependencies {
 	optional("org.skyscreamer:jsonassert")
 	optional("org.testng:testng")
 	optional("org.xmlunit:xmlunit-matchers")
+    optional("com.microsoft.playwright:playwright")
 	testImplementation(project(":spring-context-support"))
 	testImplementation(project(":spring-core-test"))
 	testImplementation(project(":spring-oxm"))
