@@ -16,6 +16,7 @@
 
 package org.springframework.web.servlet.mvc.support;
 
+import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collections;
@@ -269,6 +270,14 @@ class DefaultHandlerExceptionResolverTests {
 		assertThat(actual).isSameAs(expected);
 	}
 
+	@Test // gh-34481
+	void handleDisconnectedClientException() {
+		Exception ex = new IOException("Broken pipe");
+		ModelAndView mav = exceptionResolver.resolveException(request, response, null, ex);
+		assertThat(mav).as("No ModelAndView returned").isNotNull();
+		assertThat(mav.isEmpty()).as("No Empty ModelAndView returned").isTrue();
+		assertThat(response.getStatus()).as("Should attempt to send server error").isEqualTo(500);
+	}
 
 	@SuppressWarnings("unused")
 	public void handle(String arg) {
