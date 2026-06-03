@@ -437,6 +437,18 @@ class ExceptionHandlerExceptionResolverTests {
 	}
 
 	@Test
+	void resolveExceptionHandlerRethrowsDisconnectedClientException() throws Exception {
+		IOException ex = new IOException("Broken pipe");
+		HandlerMethod handlerMethod = new HandlerMethod(new RethrowingExceptionController(), "handle");
+		this.resolver.afterPropertiesSet();
+		ModelAndView mav = this.resolver.resolveException(this.request, this.response, handlerMethod, ex);
+
+		assertThat(mav).isNotNull();
+		assertThat(mav.isEmpty()).isTrue();
+		assertThat(this.response.getStatus()).isEqualTo(500);
+	}
+
+	@Test
 	void resolveExceptionJsonMediaType() throws UnsupportedEncodingException, NoSuchMethodException {
 		IllegalArgumentException ex = new IllegalArgumentException();
 		HandlerMethod handlerMethod = new HandlerMethod(new MediaTypeController(), "handle");
@@ -546,6 +558,18 @@ class ExceptionHandlerExceptionResolverTests {
 
 		@ExceptionHandler(IOException.class)
 		public void handleException() {
+		}
+	}
+
+
+	@Controller
+	static class RethrowingExceptionController {
+
+		public void handle() {}
+
+		@ExceptionHandler(IOException.class)
+		public void handleException(IOException ex) throws IOException {
+			throw ex;
 		}
 	}
 

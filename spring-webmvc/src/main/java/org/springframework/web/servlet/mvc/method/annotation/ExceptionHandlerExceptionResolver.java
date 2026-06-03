@@ -465,6 +465,9 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 		}
 		catch (Throwable invocationEx) {
 			if (disconnectedClientHelper.checkAndLogClientDisconnectedException(invocationEx)) {
+				if (!response.isCommitted()) {
+					response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+				}
 				return new ModelAndView();
 			}
 			// Any other than the original exception (or a cause) is unintended here,

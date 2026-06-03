@@ -16,6 +16,7 @@
 
 package org.springframework.web.servlet.mvc.support;
 
+import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collections;
@@ -165,6 +166,15 @@ class DefaultHandlerExceptionResolverTests {
 	@Test
 	void handleHttpMessageNotWritable() {
 		HttpMessageNotWritableException ex = new HttpMessageNotWritableException("foo");
+		ModelAndView mav = exceptionResolver.resolveException(request, response, null, ex);
+		assertThat(mav).as("No ModelAndView returned").isNotNull();
+		assertThat(mav.isEmpty()).as("No Empty ModelAndView returned").isTrue();
+		assertThat(response.getStatus()).as("Invalid status code").isEqualTo(500);
+	}
+
+	@Test
+	void handleDisconnectedClientException() {
+		Exception ex = new IOException("Broken pipe");
 		ModelAndView mav = exceptionResolver.resolveException(request, response, null, ex);
 		assertThat(mav).as("No ModelAndView returned").isNotNull();
 		assertThat(mav.isEmpty()).as("No Empty ModelAndView returned").isTrue();
