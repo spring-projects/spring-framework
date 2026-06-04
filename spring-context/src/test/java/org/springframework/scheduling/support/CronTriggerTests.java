@@ -16,6 +16,7 @@
 
 package org.springframework.scheduling.support;
 
+import java.time.ZoneId;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -744,6 +745,16 @@ class CronTriggerTests {
 		TriggerContext context = getTriggerContext(lastCompletionTime);
 		Object nextExecutionTime = trigger.nextExecutionTime(context);
 		assertThat(nextExecutionTime).isEqualTo(this.calendar.getTime());
+	}
+
+	@Test
+	void equalsAndHashCodeConsiderZoneId() {
+		String cron = "0 0 9 * * *";
+		CronTrigger amsterdam = new CronTrigger(cron, ZoneId.of("Europe/Amsterdam"));
+		CronTrigger newYork = new CronTrigger(cron, ZoneId.of("America/New_York"));
+
+		assertThat(amsterdam).isNotEqualTo(newYork);
+		assertThat(amsterdam).doesNotHaveSameHashCodeAs(newYork);
 	}
 
 

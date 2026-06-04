@@ -19,6 +19,7 @@ package org.springframework.scheduling.support;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.Objects;
 import java.util.TimeZone;
 
 import org.jspecify.annotations.Nullable;
@@ -145,12 +146,13 @@ public class CronTrigger implements Trigger {
 	@Override
 	public boolean equals(@Nullable Object other) {
 		return (this == other || (other instanceof CronTrigger that &&
-				this.expression.equals(that.expression)));
+				this.expression.equals(that.expression) &&
+				Objects.equals(this.zoneId, that.zoneId)));
 	}
 
 	@Override
 	public int hashCode() {
-		return this.expression.hashCode();
+		return Objects.hash(this.expression, this.zoneId);
 	}
 
 	@Override
