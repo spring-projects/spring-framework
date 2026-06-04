@@ -467,6 +467,27 @@ class DataBufferUtilsTests extends AbstractDataBufferAllocatingTests {
 	}
 
 	@ParameterizedDataBufferAllocatingTest
+	void writeAsynchronousFileChannelWithJoinedBuffer(DataBufferFactory bufferFactory) throws Exception {
+		super.bufferFactory = bufferFactory;
+
+		DataBuffer foo = stringBuffer("foo");
+		DataBuffer bar = stringBuffer("bar");
+		DataBuffer joined = bufferFactory.join(List.of(foo, bar));
+
+		AsynchronousFileChannel channel = AsynchronousFileChannel.open(tempFile, StandardOpenOption.WRITE);
+
+		Flux<DataBuffer> writeResult = DataBufferUtils.write(Flux.just(joined), channel);
+		StepVerifier.create(writeResult)
+				.consumeNextWith(stringConsumer("foobar"))
+				.verifyComplete();
+
+		String result = String.join("", Files.readAllLines(tempFile));
+
+		assertThat(result).isEqualTo("foobar");
+		channel.close();
+	}
+
+	@ParameterizedDataBufferAllocatingTest
 	void writeAsynchronousFileChannelErrorInFlux(DataBufferFactory bufferFactory) throws Exception {
 		super.bufferFactory = bufferFactory;
 
