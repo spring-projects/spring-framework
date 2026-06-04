@@ -16,6 +16,7 @@
 
 package org.springframework.scheduling.support;
 
+import java.time.ZonedDateTime;
 import java.util.Arrays;
 
 import org.assertj.core.api.Condition;
@@ -29,6 +30,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
  *
  * @author Arjen Poutsma
  * @author Sam Brannen
+ * @author Brian Clozel
  */
 class BitsCronFieldTests {
 
@@ -110,6 +112,24 @@ class BitsCronFieldTests {
 				.has(clear(0)).has(setRange(1, 12));
 		assertThat((BitsCronField)CronField.parseDaysOfWeek("SUN,MON,TUE,WED,THU,FRI,SAT"))
 				.has(clear(0)).has(setRange(1, 7));
+	}
+
+	@Test
+	void nextOrSameWithMidnightGap() {
+		BitsCronField field = BitsCronField.parseHours("0-23/2");
+		ZonedDateTime last = ZonedDateTime.parse("2025-04-24T23:00:00+02:00[Africa/Cairo]");
+		ZonedDateTime expected = ZonedDateTime.parse("2025-04-25T02:00:00+03:00[Africa/Cairo]");
+		ZonedDateTime actual = field.nextOrSame(last);
+		assertThat(actual).isEqualTo(expected);
+	}
+
+	@Test
+	void nextOrSameWithGapAfterRollForward() {
+		BitsCronField field = BitsCronField.parseHours("0,2");
+		ZonedDateTime last = ZonedDateTime.parse("2026-03-08T01:00:00-05:00[America/New_York]");
+		ZonedDateTime expected = ZonedDateTime.parse("2026-03-09T00:00:00-04:00[America/New_York]");
+		ZonedDateTime actual = field.nextOrSame(last);
+		assertThat(actual).isEqualTo(expected);
 	}
 
 
