@@ -200,6 +200,7 @@ final class BitsCronField extends CronField {
 						temporal = type().rollForward(temporal);
 						next = nextSetBit(0);
 					}
+					current = type().get(temporal);
 				}
 			}
 			if (count >= CronExpression.MAX_ATTEMPTS) {
