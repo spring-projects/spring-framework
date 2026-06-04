@@ -26,6 +26,7 @@ import org.jspecify.annotations.Nullable;
 import org.springframework.scheduling.Trigger;
 import org.springframework.scheduling.TriggerContext;
 import org.springframework.util.Assert;
+import org.springframework.util.ObjectUtils;
 
 /**
  * {@link Trigger} implementation for cron expressions. Wraps a
@@ -145,12 +146,13 @@ public class CronTrigger implements Trigger {
 	@Override
 	public boolean equals(@Nullable Object other) {
 		return (this == other || (other instanceof CronTrigger that &&
-				this.expression.equals(that.expression)));
+				this.expression.equals(that.expression) &&
+				ObjectUtils.nullSafeEquals(this.zoneId, that.zoneId)));
 	}
 
 	@Override
 	public int hashCode() {
-		return this.expression.hashCode();
+		return ObjectUtils.nullSafeHash(this.expression, this.zoneId);
 	}
 
 	@Override
