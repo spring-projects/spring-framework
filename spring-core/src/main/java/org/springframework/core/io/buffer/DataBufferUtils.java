@@ -1215,6 +1215,11 @@ public abstract class DataBufferUtils {
 					failed(ex, attachment);
 				}
 			}
+			else {
+				iterator.close();
+				this.sink.next(dataBuffer);
+				request(1);
+			}
 		}
 
 		@Override
@@ -1238,7 +1243,6 @@ public abstract class DataBufferUtils {
 		@Override
 		public void completed(Integer written, Attachment attachment) {
 			DataBuffer.ByteBufferIterator iterator = attachment.iterator();
-			iterator.close();
 
 			long pos = this.position.addAndGet(written);
 			ByteBuffer byteBuffer = attachment.byteBuffer();
@@ -1248,9 +1252,11 @@ public abstract class DataBufferUtils {
 			}
 			else if (iterator.hasNext()) {
 				ByteBuffer next = iterator.next();
-				this.channel.write(next, pos, attachment, this);
+				Attachment nextAttachment = new Attachment(next, attachment.dataBuffer(), iterator);
+				this.channel.write(next, pos, nextAttachment, this);
 			}
 			else {
+				iterator.close();
 				this.sink.next(attachment.dataBuffer());
 				this.writing.set(false);
 
