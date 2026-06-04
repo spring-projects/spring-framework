@@ -748,7 +748,7 @@ class CronTriggerTests {
 	}
 
 	@Test
-	void equalsAndHashCodeConsidersZoneId() {
+	void equalsAndHashCodeConsiderZoneId() {
 		String cron = "0 0 9 * * *";
 		CronTrigger amsterdam = new CronTrigger(cron, ZoneId.of("Europe/Amsterdam"));
 		CronTrigger newYork = new CronTrigger(cron, ZoneId.of("America/New_York"));
