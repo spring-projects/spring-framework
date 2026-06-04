@@ -367,7 +367,7 @@ public final class ConcurrentLruCache<K, V> {
 
 	private static final class ReadOperations<K, V> {
 
-		private static final int BUFFER_COUNT = detectNumberOfBuffers();
+		private static final int BUFFER_COUNT = 4;
 
 		private static final int BUFFERS_MASK = BUFFER_COUNT - 1;
 
@@ -450,11 +450,6 @@ public final class ConcurrentLruCache<K, V> {
 			this.processedCount.lazySet(bufferIndex, writeCount);
 		}
 
-		private static int detectNumberOfBuffers() {
-			int availableProcessors = Runtime.getRuntime().availableProcessors();
-			int nextPowerOfTwo = 1 << (Integer.SIZE - Integer.numberOfLeadingZeros(availableProcessors - 1));
-			return Math.min(4, nextPowerOfTwo);
-		}
 	}
 
 
