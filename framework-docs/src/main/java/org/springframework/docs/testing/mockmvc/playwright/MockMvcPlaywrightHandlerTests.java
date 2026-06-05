@@ -45,7 +45,7 @@ import java.nio.charset.StandardCharsets;
 
 import static com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat;
 
-@SpringJUnitWebConfig(resourcePath = "classpath:org/springframework/test/web/servlet/playwright/content")
+@SpringJUnitWebConfig
 public class MockMvcPlaywrightHandlerTests {
 
 	private static Playwright playwright;
