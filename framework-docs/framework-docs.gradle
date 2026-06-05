@@ -91,4 +91,5 @@ dependencies {
 	implementation("org.junit.jupiter:junit-jupiter-api")
 	implementation("tools.jackson.core:jackson-databind")
 	implementation("tools.jackson.dataformat:jackson-dataformat-xml")
+    implementation("com.microsoft.playwright:playwright")
 }

@@ -1,0 +1,23 @@
+[[mockmvc-server-playwright]]
+= Playwright Integration
+:page-section-summary-toc: 1
+
+Spring Test provides integration between xref:testing/mockmvc/overview.adoc[MockMvc] and
+https://playwright.dev/[Playwright] via `MockMvcPlaywrightHandler`.
+This allows browser-style end-to-end testing against your MVC controllers without
+starting a server.
+
+== Setup
+
+First, make sure that you have included a test dependency on `com.microsoft.playwright:playwright`.
+To use it, create a `MockMvc` instance and register `MockMvcPlaywrightHandler` as a
+route https://playwright.dev/java/docs/network#handle-requests[handler] for requests.
+
+include-code::./MockMvcPlaywrightHandlerTests[tag=setup,indent=0]
+
+Browser http requests, such as form submission and file uploads, are then translated
+to MockMvc requests.
+
+Don't forget to close playwright resources after your tests
+
+include-code::./MockMvcPlaywrightHandlerTests[tag=close,indent=0]
