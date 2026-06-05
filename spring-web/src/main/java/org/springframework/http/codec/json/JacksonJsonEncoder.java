@@ -123,7 +123,7 @@ public class JacksonJsonEncoder extends AbstractJacksonEncoder<JsonMapper> {
 
 	@Override
 	public boolean canEncode(ResolvableType elementType, @Nullable MimeType mimeType) {
-		return super.canEncode(elementType, mimeType) && !String.class.isAssignableFrom(elementType.toClass());
+		return (super.canEncode(elementType, mimeType) && String.class != elementType.toClass());
 	}
 
 	@Override

@@ -90,6 +90,7 @@ class JacksonJsonEncoderTests extends AbstractEncoderTests<JacksonJsonEncoder> {
 
 		// SPR-15910
 		assertThat(this.encoder.canEncode(ResolvableType.forClass(Object.class), APPLICATION_OCTET_STREAM)).isFalse();
+		assertThat(this.encoder.canEncode(ResolvableType.forClass(String.class), null)).isFalse();
 
 		assertThatThrownBy(() -> this.encoder.canEncode(ResolvableType.forClass(MappingJacksonValue.class), APPLICATION_JSON))
 				.isInstanceOf(UnsupportedOperationException.class);

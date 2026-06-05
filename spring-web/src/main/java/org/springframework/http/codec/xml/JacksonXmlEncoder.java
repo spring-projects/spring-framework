@@ -98,6 +98,11 @@ public class JacksonXmlEncoder extends AbstractJacksonEncoder<XmlMapper> {
 
 
 	@Override
+	public boolean canEncode(ResolvableType elementType, @Nullable MimeType mimeType) {
+		return (super.canEncode(elementType, mimeType) && String.class != elementType.toClass());
+	}
+
+	@Override
 	public Flux<DataBuffer> encode(Publisher<?> inputStream, DataBufferFactory bufferFactory, ResolvableType elementType,
 			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
