@@ -749,12 +749,16 @@ class CronTriggerTests {
 
 	@Test
 	void equalsAndHashCodeConsiderZoneId() {
-		String cron = "0 0 9 * * *";
-		CronTrigger amsterdam = new CronTrigger(cron, ZoneId.of("Europe/Amsterdam"));
-		CronTrigger newYork = new CronTrigger(cron, ZoneId.of("America/New_York"));
+		String expression = "0 0 9 * * *";
+		CronTrigger amsterdam1 = new CronTrigger(expression, ZoneId.of("Europe/Amsterdam"));
+		CronTrigger amsterdam2 = new CronTrigger(expression, ZoneId.of("Europe/Amsterdam"));
+		CronTrigger newYork = new CronTrigger(expression, ZoneId.of("America/New_York"));
 
-		assertThat(amsterdam).isNotEqualTo(newYork);
-		assertThat(amsterdam).doesNotHaveSameHashCodeAs(newYork);
+		assertThat(amsterdam1)
+				.isEqualTo(amsterdam2)
+				.hasSameHashCodeAs(amsterdam2)
+				.isNotEqualTo(newYork)
+				.doesNotHaveSameHashCodeAs(newYork);
 	}
 
 
