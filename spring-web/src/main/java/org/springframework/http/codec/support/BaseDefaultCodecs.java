@@ -675,12 +675,13 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs, CodecConfigure
 		if (JACKSON_CBOR_PRESENT || JACKSON_2_CBOR_PRESENT) {
 			addCodec(this.objectReaders, new DecoderHttpMessageReader<>(getJacksonCborDecoder()));
 		}
-		if (JAXB_2_PRESENT) {
+		// Jackson supports Jackson and JAXB annotations, prefer it if present
+		if (JACKSON_XML_PRESENT) {
+			addCodec(this.objectReaders, new DecoderHttpMessageReader<>(getJacksonXmlDecoder()));
+		}
+		else if (JAXB_2_PRESENT) {
 			addCodec(this.objectReaders, new DecoderHttpMessageReader<>(this.jaxb2Decoder != null ?
 					(Jaxb2XmlDecoder) this.jaxb2Decoder : new Jaxb2XmlDecoder()));
-		}
-		else if(JACKSON_XML_PRESENT) {
-			addCodec(this.objectReaders, new DecoderHttpMessageReader<>(getJacksonXmlDecoder()));
 		}
 		if (KOTLIN_SERIALIZATION_PROTOBUF_PRESENT) {
 			addCodec(this.objectReaders,
@@ -817,12 +818,13 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs, CodecConfigure
 		if (JACKSON_CBOR_PRESENT || JACKSON_2_CBOR_PRESENT) {
 			addCodec(writers, new EncoderHttpMessageWriter<>(getJacksonCborEncoder()));
 		}
-		if (JAXB_2_PRESENT) {
+		// Jackson supports Jackson and JAXB annotations, prefer it if present
+		if (JACKSON_XML_PRESENT) {
+			addCodec(writers, new EncoderHttpMessageWriter<>(getJacksonXmlEncoder()));
+		}
+		else if (JAXB_2_PRESENT) {
 			addCodec(writers, new EncoderHttpMessageWriter<>(this.jaxb2Encoder != null ?
 					(Jaxb2XmlEncoder) this.jaxb2Encoder : new Jaxb2XmlEncoder()));
-		}
-		else if (JACKSON_XML_PRESENT) {
-			addCodec(writers, new EncoderHttpMessageWriter<>(getJacksonXmlEncoder()));
 		}
 		if (KOTLIN_SERIALIZATION_PROTOBUF_PRESENT) {
 			addCodec(writers, new EncoderHttpMessageWriter<>(getKotlinSerializationProtobufEncoder()));
