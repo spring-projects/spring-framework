@@ -3,7 +3,7 @@
 
 In the previous sections, we have seen how to use MockMvc in conjunction with the raw
 HtmlUnit APIs. In this section, we use additional abstractions within the Selenium
-https://docs.seleniumhq.org/projects/webdriver/[WebDriver] to make things even easier.
+https://www.selenium.dev/documentation/webdriver/[WebDriver] to make things even easier.
 
 [[mockmvc-server-htmlunit-webdriver-why]]
 == Why WebDriver and MockMvc?
@@ -12,7 +12,7 @@ We can already use HtmlUnit and MockMvc, so why would we want to use WebDriver? 
 Selenium WebDriver provides a very elegant API that lets us easily organize our code. To
 better show how it works, we explore an example in this section.
 
-NOTE: Despite being a part of https://docs.seleniumhq.org/[Selenium], WebDriver does not
+NOTE: Despite being a part of https://www.selenium.dev/documentation/[Selenium], WebDriver does not
 require a Selenium Server to run your tests.
 
 Suppose we need to ensure that a message is created properly. The tests involve finding
