@@ -48,6 +48,7 @@ public class OperatorNot extends SpelNodeImpl {  // Not is a unary operator so d
 			if (value == null) {
 				throw new SpelEvaluationException(SpelMessage.TYPE_CONVERSION_ERROR, "null", "boolean");
 			}
+			state.trackOperation();
 			return BooleanTypedValue.forValue(!value);
 		}
 		catch (SpelEvaluationException ex) {

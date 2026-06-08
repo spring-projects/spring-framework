@@ -48,6 +48,7 @@ public class OperatorPower extends Operator {
 		Object rightOperand = rightOp.getValueInternal(state).getValue();
 
 		if (leftOperand instanceof Number leftNumber && rightOperand instanceof Number rightNumber) {
+			state.trackOperation();
 			if (leftNumber instanceof BigDecimal) {
 				BigDecimal leftBigDecimal = NumberUtils.convertNumberToTargetClass(leftNumber, BigDecimal.class);
 				return new TypedValue(leftBigDecimal.pow(rightNumber.intValue()));

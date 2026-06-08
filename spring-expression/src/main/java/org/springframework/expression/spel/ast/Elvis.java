@@ -60,17 +60,17 @@ public class Elvis extends SpelNodeImpl {
 
 
 	/**
-	 * If the left-hand operand is neither neither {@code null}, an empty
-	 * {@link Optional}, nor an empty {@link String}, return its value, or the
-	 * value contained in the {@code Optional}. If the left-hand operand is
-	 * {@code null}, an empty {@code Optional}, or an empty {@code String},
-	 * return the other value.
+	 * If the left-hand operand is neither {@code null}, an empty {@link Optional},
+	 * nor an empty {@link String}, return its value, or the value contained in the
+	 * {@code Optional}. If the left-hand operand is {@code null}, an empty
+	 * {@code Optional}, or an empty {@code String}, return the other value.
 	 * @param state the expression state
 	 * @throws EvaluationException if the null/empty check does not evaluate correctly
 	 * or there is a problem evaluating the alternative
 	 */
 	@Override
 	public TypedValue getValueInternal(ExpressionState state) throws EvaluationException {
+		state.trackOperation();
 		TypedValue result;
 		TypedValue leftHandTypedValue = this.children[0].getValueInternal(state);
 		Object leftHandValue = leftHandTypedValue.getValue();

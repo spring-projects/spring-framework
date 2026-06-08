@@ -37,6 +37,7 @@ import org.mockito.stubbing.Answer;
 import org.springframework.core.MethodParameter;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.isA;
@@ -128,6 +129,86 @@ class JacksonJsonMessageConverterTests {
 		given(textMessageMock.getText()).willReturn(text);
 
 		MyBean result = (MyBean)converter.fromMessage(textMessageMock);
+		assertThat(unmarshalled).as("Invalid result").isEqualTo(result);
+	}
+
+	@Test
+	void fromTextMessageUntrusted() throws Exception {
+		converter = new JacksonJsonMessageConverter();
+		converter.setTrustedPackages("java.lang");
+		converter.setTypeIdPropertyName("__typeid__");
+		TextMessage textMessageMock = mock();
+
+		String text = "{\"foo\":\"bar\"}";
+		given(textMessageMock.getStringProperty("__typeid__")).willReturn(MyBean.class.getName());
+		given(textMessageMock.getText()).willReturn(text);
+
+		assertThatExceptionOfType(MessageConversionException.class)
+				.isThrownBy(() -> converter.fromMessage(textMessageMock))
+				.withMessageContaining("is not in the trusted packages");
+	}
+
+	@Test
+	void fromTextMessageTrusted() throws Exception {
+		converter = new JacksonJsonMessageConverter();
+		converter.setTrustedPackages("java.lang", "org.springframework.jms.support.converter");
+		converter.setTypeIdPropertyName("__typeid__");
+		TextMessage textMessageMock = mock();
+		MyBean unmarshalled = new MyBean("bar");
+
+		String text = "{\"foo\":\"bar\"}";
+		given(textMessageMock.getStringProperty("__typeid__")).willReturn(MyBean.class.getName());
+		given(textMessageMock.getText()).willReturn(text);
+
+		MyBean result = (MyBean) converter.fromMessage(textMessageMock);
+		assertThat(unmarshalled).as("Invalid result").isEqualTo(result);
+	}
+
+	@Test
+	void fromTextMessageTrustedEmpty() throws Exception {
+		converter = new JacksonJsonMessageConverter();
+		converter.setTrustedPackages();
+		converter.setTypeIdPropertyName("__typeid__");
+		TextMessage textMessageMock = mock();
+
+		String text = "{\"foo\":\"bar\"}";
+		given(textMessageMock.getStringProperty("__typeid__")).willReturn(MyBean.class.getName());
+		given(textMessageMock.getText()).willReturn(text);
+
+		assertThatExceptionOfType(MessageConversionException.class)
+				.isThrownBy(() -> converter.fromMessage(textMessageMock))
+				.withMessageContaining("is not in the trusted packages");
+	}
+
+	@Test
+	void fromTextMessageTrusted1DArray() throws Exception {
+		converter = new JacksonJsonMessageConverter();
+		converter.setTrustedPackages("org.springframework.jms.support.converter");
+		converter.setTypeIdPropertyName("__typeid__");
+		TextMessage textMessageMock = mock();
+		MyBean[] unmarshalled = new MyBean[] { new MyBean("bar") };
+
+		String text = "[{\"foo\":\"bar\"}]";
+		given(textMessageMock.getStringProperty("__typeid__")).willReturn("[L" + MyBean.class.getName() + ";");
+		given(textMessageMock.getText()).willReturn(text);
+
+		MyBean[] result = (MyBean[]) converter.fromMessage(textMessageMock);
+		assertThat(unmarshalled).as("Invalid result").isEqualTo(result);
+	}
+
+	@Test
+	void fromTextMessageTrusted2DArray() throws Exception {
+		converter = new JacksonJsonMessageConverter();
+		converter.setTrustedPackages("org.springframework.jms.support.converter");
+		converter.setTypeIdPropertyName("__typeid__");
+		TextMessage textMessageMock = mock();
+		MyBean[][] unmarshalled = new MyBean[][] { { new MyBean("bar") } };
+
+		String text = "[[{\"foo\":\"bar\"}]]";
+		given(textMessageMock.getStringProperty("__typeid__")).willReturn("[[L" + MyBean.class.getName() + ";");
+		given(textMessageMock.getText()).willReturn(text);
+
+		MyBean[][] result = (MyBean[][]) converter.fromMessage(textMessageMock);
 		assertThat(unmarshalled).as("Invalid result").isEqualTo(result);
 	}
 

@@ -44,6 +44,7 @@ public class Assign extends SpelNodeImpl {
 		if (!state.getEvaluationContext().isAssignmentEnabled()) {
 			throw new SpelEvaluationException(getStartPosition(), SpelMessage.NOT_ASSIGNABLE, toStringAST());
 		}
+		state.trackOperation();
 		return this.children[0].setValueInternal(state, () -> this.children[1].getValueInternal(state));
 	}
 
