@@ -63,6 +63,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.springframework.expression.spel.SpelMessage.COMPETING_ACCESSORS;
 import static org.springframework.expression.spel.SpelMessage.EXCEPTION_DURING_INDEX_READ;
 import static org.springframework.expression.spel.SpelMessage.EXCEPTION_DURING_INDEX_WRITE;
 import static org.springframework.expression.spel.SpelMessage.INDEXING_NOT_SUPPORTED_FOR_TYPE;
@@ -716,6 +717,18 @@ class IndexingTests {
 			assertThat(expr.getValue(context, arrayNode)).isSameAs(node1);
 		}
 
+		@Test  // gh-32737
+		void competingReadAndWriteIndexAccessors() {
+			context.addIndexAccessor(new ReadOnlyIndexAccessor());
+			context.addIndexAccessor(new WriteOnlyIndexAccessor());
+
+			Expression expr = parser.parseExpression("[0]++");
+
+			assertThatExceptionOfType(SpelEvaluationException.class)
+					.isThrownBy(() -> expr.getValue(context, this))
+					.extracting(SpelEvaluationException::getMessageCode).isEqualTo(COMPETING_ACCESSORS);
+		}
+
 		@Test  // gh-32706
 		void readIndexWithStringIndexType() {
 			BirdNameToColorMappings birdNameMappings = new BirdNameToColorMappings();
@@ -845,6 +858,62 @@ class IndexingTests {
 				ArrayNode arrayNode = (ArrayNode) target;
 				Integer intIndex = (Integer) index;
 				arrayNode.set(intIndex, this.objectMapper.convertValue(newValue, JsonNode.class));
+			}
+		}
+
+
+		private static class ReadOnlyIndexAccessor implements IndexAccessor {
+
+			@Override
+			public Class<?>[] getSpecificTargetClasses() {
+				return null;
+			}
+
+			@Override
+			public boolean canRead(EvaluationContext context, Object target, Object index) {
+				return true;
+			}
+
+			@Override
+			public TypedValue read(EvaluationContext context, Object target, Object index) {
+				return new TypedValue(1);
+			}
+
+			@Override
+			public boolean canWrite(EvaluationContext context, Object target, Object index) {
+				return false;
+			}
+
+			@Override
+			public void write(EvaluationContext context, Object target, Object index, @Nullable Object newValue) {
+			}
+		}
+
+
+		private static class WriteOnlyIndexAccessor implements IndexAccessor {
+
+			@Override
+			public Class<?>[] getSpecificTargetClasses() {
+				return null;
+			}
+
+			@Override
+			public boolean canRead(EvaluationContext context, Object target, Object index) {
+				return false;
+			}
+
+			@Override
+			public TypedValue read(EvaluationContext context, Object target, Object index) {
+				return TypedValue.NULL;
+			}
+
+			@Override
+			public boolean canWrite(EvaluationContext context, Object target, Object index) {
+				return true;
+			}
+
+			@Override
+			public void write(EvaluationContext context, Object target, Object index, @Nullable Object newValue) {
 			}
 		}
 	}
