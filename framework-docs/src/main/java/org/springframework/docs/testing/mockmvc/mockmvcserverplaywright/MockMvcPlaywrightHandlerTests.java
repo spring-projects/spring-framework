@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.docs.testing.mockmvc.playwright;
+package org.springframework.docs.testing.mockmvc.mockmvcserverplaywright;
 
 import com.microsoft.playwright.Browser;
 import com.microsoft.playwright.Page;
@@ -53,23 +53,20 @@ public class MockMvcPlaywrightHandlerTests {
 	private Page page;
 
 	private final MockMvcPlaywrightHandler handler;
-
+	// tag::init[]
 	public MockMvcPlaywrightHandlerTests(WebApplicationContext wac) {
 		var mockMvc = MockMvcBuilders.webAppContextSetup(wac).build();
 		this.handler = MockMvcPlaywrightHandler.builder(mockMvc).build();
 	}
-
-	private static FilePayload filePayload(String name, String content) {
-		return new FilePayload(name, MediaType.TEXT_PLAIN_VALUE, content.getBytes(StandardCharsets.UTF_8));
-	}
+	// end::init[]
 
 	// tag::setup[]
+
 	@BeforeAll
 	static void initPlaywright() {
 		playwright = Playwright.create();
 		browser = playwright.chromium().launch();
 	}
-
 	@BeforeEach
 	public void initPage() {
 		page = browser.newPage();
@@ -77,21 +74,21 @@ public class MockMvcPlaywrightHandlerTests {
 		page.route(url -> url.startsWith("http://localhost"), handler);
 		page.navigate("http://localhost/index.html");
 	}
-	// end::setup[]
 
+	// end::setup[]
 	// tag::close[]
+
 	@AfterEach
 	public void closePage() {
 		page.close();
 	}
-
 	@AfterAll
 	static void closePlaywright() {
 		browser.close();
 		playwright.close();
 	}
-	// end::close[]
 
+	// end::close[]
 	@Test
 	public void testLoadSimpleHtmlPage() {
 		assertThat(page).hasTitle("Playwright-MockMvc integration Test Web Page");
@@ -120,6 +117,10 @@ public class MockMvcPlaywrightHandlerTests {
 		page.locator("#singleFileForm button[type='submit']").click();
 
 		assertThat(page.locator("body")).hasText("file=playwright-single.txt,content=single-content");
+	}
+
+	private static FilePayload filePayload(String name, String content) {
+		return new FilePayload(name, MediaType.TEXT_PLAIN_VALUE, content.getBytes(StandardCharsets.UTF_8));
 	}
 
 	@Test

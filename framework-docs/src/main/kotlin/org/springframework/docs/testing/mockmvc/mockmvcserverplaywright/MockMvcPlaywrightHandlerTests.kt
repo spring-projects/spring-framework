@@ -1,20 +1,4 @@
-/*
- * Copyright 2002-present the original author or authors.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      https://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-package org.springframework.docs.testing.mockmvc.playwright
+package org.springframework.docs.testing.mockmvc.mockmvcserverplaywright
 
 import com.microsoft.playwright.Browser
 import com.microsoft.playwright.Page
@@ -53,10 +37,12 @@ class MockMvcPlaywrightHandlerTests(wac: WebApplicationContext) {
 
 	private val handler: MockMvcPlaywrightHandler
 
+	// tag::init[]
 	init {
 		val mockMvc = MockMvcBuilders.webAppContextSetup(wac).build()
 		handler = MockMvcPlaywrightHandler.builder(mockMvc).build()
 	}
+	// end::init[]
 
 	private fun filePayload(name: String, content: String): FilePayload {
 		return FilePayload(name, MediaType.TEXT_PLAIN_VALUE, content.toByteArray(StandardCharsets.UTF_8))
@@ -178,9 +164,9 @@ class MockMvcPlaywrightHandlerTests(wac: WebApplicationContext) {
 
 			@PostMapping(path = ["/upload-mixed"], produces = [MediaType.TEXT_PLAIN_VALUE])
 			fun uploadMixed(
-				@RequestParam("file") file: MultipartFile,
-				@RequestParam description: String,
-				@RequestParam version: Int,
+                @RequestParam("file") file: MultipartFile,
+                @RequestParam description: String,
+                @RequestParam version: Int,
 			): String {
 				return "file=${file.originalFilename},description=$description,version=$version,content=" +
 						StreamUtils.copyToString(file.inputStream, StandardCharsets.UTF_8)
