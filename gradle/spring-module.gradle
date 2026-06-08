@@ -84,6 +84,8 @@ javadoc {
 		// cross-module @see and @link references which are only reachable
 		// when running the global 'framework-api:javadoc' task.
 		addBooleanOption('Werror', false)
+		// do not ship 4MB of web fonts for single modules
+		addBooleanOption("-no-fonts", true)
 	}
 
 	// Attempt to suppress warnings due to cross-module @see and @link references.
