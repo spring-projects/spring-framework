@@ -314,7 +314,10 @@ public interface ContextCache {
 	void reset();
 
 	/**
-	 * Clear all contexts from the cache, clearing context hierarchy information as well.
+	 * Clear all contexts from the cache, explicitly
+	 * {@linkplain org.springframework.context.ConfigurableApplicationContext#close() closing}
+	 * each context that is an instance of {@code ConfigurableApplicationContext}
+	 * and clearing context hierarchy information as well.
 	 */
 	void clear();
 
