@@ -239,10 +239,19 @@ public abstract class SharedEntityManagerCreator {
 				Object result = method.invoke(target, args);
 				if (result instanceof Query query) {
 					if (newTarget) {
+						InvocationHandler ih = new DeferredQueryInvocationHandler(query, target);
 						Class<?>[] ifcs = cachedQueryInterfaces.computeIfAbsent(query.getClass(), key ->
 								ClassUtils.getAllInterfacesForClass(key, this.proxyClassLoader));
-						result = Proxy.newProxyInstance(this.proxyClassLoader, ifcs,
-								new DeferredQueryInvocationHandler(query, target));
+						try {
+							result = Proxy.newProxyInstance(this.proxyClassLoader, ifcs, ih);
+						}
+						catch (IllegalArgumentException ex) {
+							// Hibernate 8.0 NativeMutationOrSelectionQueryImpl multi-interface mismatch?
+							// Fall back to single declared interface from method signature.
+							Class<?>[] singleIfc = new Class<?>[] {method.getReturnType()};
+							cachedQueryInterfaces.put(query.getClass(), singleIfc);
+							result = Proxy.newProxyInstance(this.proxyClassLoader, singleIfc, ih);
+						}
 						close = false;
 					}
 					else {
@@ -503,7 +512,7 @@ public abstract class SharedEntityManagerCreator {
 
 		private @Nullable Map<@Nullable Object, @Nullable Object> outputParameters;
 
-		public DeferredQueryInvocationHandler(Query target, Object entityHandler) {
+		public DeferredQueryInvocationHandler(Query target, @Nullable Object entityHandler) {
 			this.target = target;
 			this.entityHandler = entityHandler;
 		}
@@ -531,7 +540,11 @@ public abstract class SharedEntityManagerCreator {
 						return proxy;
 					}
 					else {
-						return this.target.unwrap(targetClass);
+						Object retVal = this.target.unwrap(targetClass);
+						if (retVal instanceof Query query && targetClass.isInterface()) {
+							retVal = adaptQueryProxy(proxy, query, targetClass);
+						}
+						return retVal;
 					}
 				}
 				case "getOutputParameterValue" -> {
@@ -552,14 +565,21 @@ public abstract class SharedEntityManagerCreator {
 			// Invoke method on actual Query object.
 			try {
 				Object retVal = method.invoke(this.target, args);
-				if (method.getName().equals("registerStoredProcedureParameter") && args.length == 3 &&
+				Class<?> returnType = method.getReturnType();
+				if (retVal == this.target && returnType.isInstance(proxy)) {
+					retVal = proxy;
+				}
+				else if (retVal instanceof Query query) {
+					retVal = adaptQueryProxy(proxy, query, returnType);
+				}
+				else if (method.getName().equals("registerStoredProcedureParameter") && args.length == 3 &&
 						(args[2] == ParameterMode.OUT || args[2] == ParameterMode.INOUT)) {
 					if (this.outputParameters == null) {
 						this.outputParameters = new LinkedHashMap<>();
 					}
 					this.outputParameters.put(args[0], null);
 				}
-				return (retVal == this.target ? proxy : retVal);
+				return retVal;
 			}
 			catch (InvocationTargetException ex) {
 				throw ex.getTargetException();
@@ -588,6 +608,14 @@ public abstract class SharedEntityManagerCreator {
 					this.entityHandler = null;
 				}
 			}
+		}
+
+		private Object adaptQueryProxy(Object proxy, Query query, Class<?> expectedType) {
+			InvocationHandler ih = this;
+			if (query != this.target) {
+				ih = new DeferredQueryInvocationHandler(query, this.entityHandler);
+			}
+			return Proxy.newProxyInstance(proxy.getClass().getClassLoader(), new Class<?>[] {expectedType}, ih);
 		}
 	}
 
