@@ -25,8 +25,9 @@ import java.net.URI;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.security.Principal;
-import java.text.SimpleDateFormat;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -35,7 +36,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.TimeZone;
 import java.util.function.Consumer;
 
 import jakarta.servlet.ServletContext;
@@ -90,12 +90,9 @@ import org.springframework.web.util.UrlPathHelper;
 public abstract class AbstractMockHttpServletRequestBuilder<B extends AbstractMockHttpServletRequestBuilder<B>>
 		implements ConfigurableSmartRequestBuilder<B>, Mergeable {
 
-	private static final SimpleDateFormat simpleDateFormat;
-
-	static {
-		simpleDateFormat = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz", Locale.US);
-		simpleDateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
-	}
+	private static final DateTimeFormatter DATE_FORMAT =
+			DateTimeFormatter.ofPattern("EEE, dd MMM yyyy HH:mm:ss zzz", Locale.US)
+					.withZone(ZoneId.of("GMT"));
 
 
 	private final HttpMethod method;
@@ -401,7 +398,7 @@ public abstract class AbstractMockHttpServletRequestBuilder<B extends AbstractMo
 
 		for (Object value : values) {
 			if (value instanceof Date date) {
-				this.headers.add(name, simpleDateFormat.format(date));
+				this.headers.add(name, DATE_FORMAT.format(date.toInstant()));
 			}
 			else {
 				this.headers.add(name, String.valueOf(value));
