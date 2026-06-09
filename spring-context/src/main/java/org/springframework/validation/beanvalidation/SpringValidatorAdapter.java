@@ -351,11 +351,77 @@ public class SpringValidatorAdapter implements SmartValidator, jakarta.validatio
 	 * @see #getArgumentsForConstraint
 	 */
 	protected boolean requiresMessageFormat(ConstraintViolation<?> violation) {
-		return containsSpringStylePlaceholder(violation.getMessage());
+		return containsSpringStylePlaceholder(
+				violation.getMessage(), violation.getConstraintDescriptor().getAttributes());
 	}
 
-	private static boolean containsSpringStylePlaceholder(@Nullable String message) {
-		return (message != null && message.contains("{0}"));
+	/**
+	 * Determine the default message to expose for the given constraint violation.
+	 * <p>The default implementation escapes interpolated constraint attribute values
+	 * before applying {@link java.text.MessageFormat}, since such values may contain
+	 * curly braces from regular expressions or similar syntax.
+	 * @param violation the Bean Validation constraint violation, including
+	 * BV-defined interpolation of named attribute references in its message
+	 * @return the default message for the corresponding Spring error
+	 * @since 7.1
+	 * @see #requiresMessageFormat
+	 */
+	protected String determineDefaultMessage(ConstraintViolation<?> violation) {
+		String message = violation.getMessage();
+		return (requiresMessageFormat(violation) ?
+				escapeConstraintAttributeValues(message, violation.getConstraintDescriptor().getAttributes()) :
+				message);
+	}
+
+	private static boolean containsSpringStylePlaceholder(@Nullable String message, Map<String, Object> attributes) {
+		if (message == null) {
+			return false;
+		}
+		int index = message.indexOf("{0}");
+		while (index != -1) {
+			if (!isWithinConstraintAttributeValue(message, index, attributes)) {
+				return true;
+			}
+			index = message.indexOf("{0}", index + 3);
+		}
+		return false;
+	}
+
+	private static boolean isWithinConstraintAttributeValue(
+			String message, int index, Map<String, Object> attributes) {
+
+		for (Map.Entry<String, Object> attribute : attributes.entrySet()) {
+			if (INTERNAL_ANNOTATION_ATTRIBUTES.contains(attribute.getKey())) {
+				continue;
+			}
+			if (attribute.getValue() instanceof String value && value.contains("{0}")) {
+				int valueIndex = message.indexOf(value);
+				while (valueIndex != -1) {
+					if (valueIndex <= index && index < valueIndex + value.length()) {
+						return true;
+					}
+					valueIndex = message.indexOf(value, valueIndex + value.length());
+				}
+			}
+		}
+		return false;
+	}
+
+	private static String escapeConstraintAttributeValues(String message, Map<String, Object> attributes) {
+		String result = message;
+		for (Map.Entry<String, Object> attribute : attributes.entrySet()) {
+			if (INTERNAL_ANNOTATION_ATTRIBUTES.contains(attribute.getKey())) {
+				continue;
+			}
+			if (attribute.getValue() instanceof String value && !value.isEmpty()) {
+				result = result.replace(value, escapeMessageFormatPattern(value));
+			}
+		}
+		return result;
+	}
+
+	private static String escapeMessageFormatPattern(String value) {
+		return value.replace("'", "''").replace("{", "'{'").replace("}", "'}'");
 	}
 
 
@@ -453,24 +519,19 @@ public class SpringValidatorAdapter implements SmartValidator, jakarta.validatio
 	@SuppressWarnings("serial")
 	private static class ValidationObjectError extends ObjectError implements Serializable {
 
-		private @Nullable transient SpringValidatorAdapter adapter;
-
-		private @Nullable transient ConstraintViolation<?> violation;
+		private final boolean shouldRenderDefaultMessage;
 
 		public ValidationObjectError(String objectName, String[] codes, Object[] arguments,
 				ConstraintViolation<?> violation, SpringValidatorAdapter adapter) {
 
-			super(objectName, codes, arguments, violation.getMessage());
-			this.adapter = adapter;
-			this.violation = violation;
+			super(objectName, codes, arguments, adapter.determineDefaultMessage(violation));
+			this.shouldRenderDefaultMessage = adapter.requiresMessageFormat(violation);
 			wrap(violation);
 		}
 
 		@Override
 		public boolean shouldRenderDefaultMessage() {
-			return (this.adapter != null && this.violation != null ?
-					this.adapter.requiresMessageFormat(this.violation) :
-					containsSpringStylePlaceholder(getDefaultMessage()));
+			return this.shouldRenderDefaultMessage;
 		}
 	}
 
@@ -481,24 +542,19 @@ public class SpringValidatorAdapter implements SmartValidator, jakarta.validatio
 	@SuppressWarnings("serial")
 	private static class ValidationFieldError extends FieldError implements Serializable {
 
-		private @Nullable transient SpringValidatorAdapter adapter;
-
-		private @Nullable transient ConstraintViolation<?> violation;
+		private final boolean shouldRenderDefaultMessage;
 
 		public ValidationFieldError(String objectName, String field, @Nullable Object rejectedValue, String[] codes,
 				Object[] arguments, ConstraintViolation<?> violation, SpringValidatorAdapter adapter) {
 
-			super(objectName, field, rejectedValue, false, codes, arguments, violation.getMessage());
-			this.adapter = adapter;
-			this.violation = violation;
+			super(objectName, field, rejectedValue, false, codes, arguments, adapter.determineDefaultMessage(violation));
+			this.shouldRenderDefaultMessage = adapter.requiresMessageFormat(violation);
 			wrap(violation);
 		}
 
 		@Override
 		public boolean shouldRenderDefaultMessage() {
-			return (this.adapter != null && this.violation != null ?
-					this.adapter.requiresMessageFormat(this.violation) :
-					containsSpringStylePlaceholder(getDefaultMessage()));
+			return this.shouldRenderDefaultMessage;
 		}
 	}
 
