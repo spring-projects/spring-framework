@@ -47,7 +47,7 @@ public class FieldError extends ObjectError {
 	 * Create a new FieldError instance.
 	 * @param objectName the name of the affected object
 	 * @param field the affected field of the object
-	 * @param defaultMessage the default message to be used to resolve this message
+	 * @param defaultMessage the static default message to be used to resolve this message
 	 */
 	public FieldError(String objectName, String field, String defaultMessage) {
 		this(objectName, field, null, false, null, null, defaultMessage);
@@ -60,9 +60,9 @@ public class FieldError extends ObjectError {
 	 * @param rejectedValue the rejected field value
 	 * @param bindingFailure whether this error represents a binding failure
 	 * (like a type mismatch); else, it is a validation failure
-	 * @param codes the codes to be used to resolve this message
+	 * @param codes the codes to be used to resolve this message. These should be i18n keys in your application
 	 * @param arguments the array of arguments to be used to resolve this message
-	 * @param defaultMessage the default message to be used to resolve this message
+	 * @param defaultMessage the static default message to be used to resolve this message
 	 */
 	public FieldError(String objectName, String field, @Nullable Object rejectedValue, boolean bindingFailure,
 			String @Nullable [] codes, Object @Nullable [] arguments, @Nullable String defaultMessage) {
