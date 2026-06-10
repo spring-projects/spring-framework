@@ -260,6 +260,16 @@ class GenericTypeResolverTests {
 		assertThat(resolvedType).isEqualTo(method(MyOptionalInterfaceType.class, "get").getGenericReturnType());
 	}
 
+	@Test
+	void resolveWildcardTypeArgument() {
+		Type genericReturnType = method(WildcardService.class, "findAll").getGenericReturnType();
+		Type resolvedType = resolveType(genericReturnType, PersonWildcardService.class);
+		assertThat(resolvedType).isInstanceOf(ParameterizedType.class);
+		ParameterizedType parameterizedType = (ParameterizedType) resolvedType;
+		assertThat(parameterizedType.getRawType()).isEqualTo(List.class);
+		assertThat(parameterizedType.getActualTypeArguments()[0]).isEqualTo(String.class);
+	}
+
 	private static Method method(Class<?> target, String methodName, Class<?>... parameterTypes) {
 		Method method = findMethod(target, methodName, parameterTypes);
 		assertThat(method).describedAs(target.getName() + "#" + methodName).isNotNull();
@@ -501,6 +511,19 @@ class GenericTypeResolverTests {
 	public static class InheritsDefaultMethod implements InterfaceWithDefaultMethod<InheritsDefaultMethod.ConcreteType> {
 
 		static class ConcreteType implements InterfaceWithDefaultMethod.AbstractType {
+		}
+	}
+
+	interface WildcardService<T> {
+
+		List<? extends T> findAll();
+	}
+
+	static class PersonWildcardService implements WildcardService<String> {
+
+		@Override
+		public List<? extends String> findAll() {
+			return List.of();
 		}
 	}
 
