@@ -620,7 +620,7 @@ resource URLs, since there are no view technologies that can make use of a non-b
 of resolvers and transformers. When serving only local resources, the workaround is to use
 `ResourceUrlProvider` directly (for example, through a custom element) and block.
 
-Note that, when using both `EncodedResourceResolver` (for example, Gzip, Brotli encoded) and
+Note that, when using both `EncodedResourceResolver` (for example, Gzip, Brotli, Zstd encoded) and
 `VersionedResourceResolver`, they must be registered in that order, to ensure content-based
 versions are always computed reliably based on the unencoded file.
 
