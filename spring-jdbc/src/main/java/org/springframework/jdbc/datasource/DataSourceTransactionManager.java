@@ -106,6 +106,17 @@ import org.springframework.util.Assert;
  * is available as an extended subclass which includes commit/rollback exception
  * translation, aligned with {@link org.springframework.jdbc.core.JdbcTemplate}.</b>
  *
+ * <p><b>Transaction manager coordination:</b> When two {@code DataSourceTransactionManager}
+ * instances are configured with the <em>same</em> {@code DataSource} object, the second
+ * manager's {@code getTransaction()} will detect and participate in the connection already
+ * bound to the thread by the first, because both managers use the same
+ * {@link TransactionSynchronizationManager} key (the {@code DataSource} instance).
+ * As a result, nested {@code TransactionTemplate}/{@code @Transactional} calls that use
+ * different manager beans but the same underlying {@code DataSource} share the same JDBC
+ * connection and physical transaction. This is generally the desired behavior for such
+ * setups. If separate, independent transactions are required, configure each manager with
+ * a distinct {@code DataSource} (or use JTA).
+ *
  * @author Juergen Hoeller
  * @since 02.05.2003
  * @see #setNestedTransactionAllowed
