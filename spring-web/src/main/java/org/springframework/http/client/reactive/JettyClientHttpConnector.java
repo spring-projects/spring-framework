@@ -17,7 +17,9 @@
 package org.springframework.http.client.reactive;
 
 import java.net.URI;
+import java.time.Duration;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
 import org.eclipse.jetty.client.HttpClient;
@@ -49,6 +51,8 @@ public class JettyClientHttpConnector implements ClientHttpConnector {
 	private JettyDataBufferFactory bufferFactory = new JettyDataBufferFactory();
 
 	private ResponseCookie.Parser cookieParser = new JdkResponseCookieParser();
+
+	private long readTimeout;
 
 
 	/**
@@ -102,6 +106,21 @@ public class JettyClientHttpConnector implements ClientHttpConnector {
 		this.cookieParser = parser;
 	}
 
+	/**
+	 * Set the underlying read timeout in milliseconds.
+	 */
+	public void setReadTimeout(long readTimeout) {
+		Assert.isTrue(readTimeout > 0, "Timeout must be a positive value");
+		this.readTimeout = readTimeout;
+	}
+
+	/**
+	 * Set the underlying read timeout as {@code Duration}.
+	 */
+	public void setReadTimeout(Duration readTimeout) {
+		Assert.notNull(readTimeout, "readTimeout is required");
+		this.readTimeout = readTimeout.toMillis();
+	}
 
 	@Override
 	public Mono<ClientHttpResponse> connect(HttpMethod method, URI uri,
@@ -121,6 +140,7 @@ public class JettyClientHttpConnector implements ClientHttpConnector {
 		}
 
 		Request jettyRequest = this.httpClient.newRequest(uri).method(method.toString());
+		jettyRequest.timeout(this.readTimeout, TimeUnit.MILLISECONDS);
 		JettyClientHttpRequest request = new JettyClientHttpRequest(jettyRequest, this.bufferFactory);
 
 		return requestCallback.apply(request).then(execute(request));
