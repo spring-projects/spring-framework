@@ -911,8 +911,8 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 		else {
 			// A single data class constructor -> resolve constructor arguments from request parameters.
 			@Nullable String[] paramNames = BeanUtils.getParameterNames(ctor);
-			Class<?>[] paramTypes = ctor.getParameterTypes();
-			@Nullable Object[] args = new Object[paramTypes.length];
+			Class<?>[] paramTypes = new Class<?>[paramNames.length];
+			@Nullable Object[] args = new Object[paramNames.length];
 			Set<String> failedParamNames = new HashSet<>(4);
 
 			for (int i = 0; i < paramNames.length; i++) {
@@ -926,7 +926,8 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 				}
 
 				String paramPath = nestedPath + lookupName;
-				Class<?> paramType = paramTypes[i];
+				Class<?> paramType = param.getParameterType();
+				paramTypes[i] = paramType;
 				ResolvableType resolvableType = ResolvableType.forMethodParameter(param);
 
 				Object value = valueResolver.resolveValue(paramPath, paramType);
@@ -1009,7 +1010,8 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	 */
 	protected boolean shouldConstructArgument(MethodParameter param) {
 		Class<?> type = param.nestedIfOptional().getNestedParameterType();
-		return !BeanUtils.isSimpleValueType(type) && !type.getPackageName().startsWith("java.");
+		return !BeanUtils.isSimpleValueType(type) && !KotlinDetector.isInlineClass(type) &&
+				!type.getPackageName().startsWith("java.");
 	}
 
 	private boolean hasValuesFor(String paramPath, ValueResolver resolver) {
