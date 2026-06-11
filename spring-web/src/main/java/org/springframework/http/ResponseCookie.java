@@ -75,6 +75,7 @@ public final class ResponseCookie extends HttpCookie {
 		Rfc6265Utils.validateCookieValue(value);
 		Rfc6265Utils.validateDomain(domain);
 		Rfc6265Utils.validatePath(path);
+		Rfc6265Utils.validateSameSite(sameSite);
 	}
 
 
@@ -430,6 +431,18 @@ public final class ResponseCookie extends HttpCookie {
 				char c = path.charAt(i);
 				if (c < 0x20 || c > 0x7E || c == ';') {
 					throw new IllegalArgumentException(path + ": Invalid cookie path char '" + c + "'");
+				}
+			}
+		}
+
+		public static void validateSameSite(@Nullable String sameSite) {
+			if (sameSite == null) {
+				return;
+			}
+			for (int i = 0; i < sameSite.length(); i++) {
+				char c = sameSite.charAt(i);
+				if (c < 0x20 || c > 0x7E || c == ';') {
+					throw new IllegalArgumentException(sameSite + ": Invalid cookie SameSite char '" + c + "'");
 				}
 			}
 		}

@@ -82,6 +82,17 @@ class ResponseCookieTests {
 						.hasMessageContaining("invalid cookie domain char"));
 	}
 
+	@Test
+	void sameSiteChecks() {
+
+		Arrays.asList("Strict", "Lax", "None")
+				.forEach(sameSite -> ResponseCookie.from("n", "v").sameSite(sameSite).build());
+
+		Arrays.asList("Lax\r\nSet-Cookie: x=y", "Lax\n", "La;x", "Lax\t", "Lax\u0005")
+				.forEach(sameSite -> assertThatThrownBy(() -> ResponseCookie.from("n", "v").sameSite(sameSite).build())
+						.hasMessageContaining("Invalid cookie SameSite char"));
+	}
+
 	@Test // gh-24663
 	void domainWithEmptyDoubleQuotes() {
 
