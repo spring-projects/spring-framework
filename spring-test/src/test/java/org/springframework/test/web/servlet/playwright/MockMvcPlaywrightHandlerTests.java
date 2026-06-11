@@ -16,11 +16,19 @@
 
 package org.springframework.test.web.servlet.playwright;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+
 import com.microsoft.playwright.Browser;
 import com.microsoft.playwright.Page;
 import com.microsoft.playwright.Playwright;
 import com.microsoft.playwright.options.FilePayload;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.MediaType;
@@ -39,13 +47,10 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-
 import static com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat;
 
 @SpringJUnitWebConfig(resourcePath = "classpath:org/springframework/test/web/servlet/playwright/content")
-public class MockMvcPlaywrightHandlerTests {
+class MockMvcPlaywrightHandlerTests {
 
 	private static final String LOCALHOST = "http://localhost";
 	private static Playwright playwright;
@@ -70,7 +75,7 @@ public class MockMvcPlaywrightHandlerTests {
 	}
 
 	@BeforeEach
-	public void initPage() {
+	void initPage() {
 		page = browser.newPage();
 		page.setDefaultTimeout(500);
 		page.route(url -> url.startsWith(LOCALHOST), handler);
@@ -78,7 +83,7 @@ public class MockMvcPlaywrightHandlerTests {
 	}
 
 	@AfterEach
-	public void closePage() {
+	void closePage() {
 		page.close();
 	}
 
@@ -89,12 +94,12 @@ public class MockMvcPlaywrightHandlerTests {
 	}
 
 	@Test
-	public void testLoadSimpleHtmlPage() {
+	void testLoadSimpleHtmlPage() {
 		assertThat(page).hasTitle("Playwright-MockMvc integration Test Web Page");
 	}
 
 	@Test
-	public void getForm() {
+	void getForm() {
 		page.locator("#query").fill("spring");
 		page.locator("#getForm button[type='submit']").click();
 
@@ -102,7 +107,7 @@ public class MockMvcPlaywrightHandlerTests {
 	}
 
 	@Test
-	public void postForm() {
+	void postForm() {
 		page.locator("#username").fill("joe");
 		page.locator("#message").fill("hello");
 		page.locator("#postForm button[type='submit']").click();
@@ -111,7 +116,7 @@ public class MockMvcPlaywrightHandlerTests {
 	}
 
 	@Test
-	public void singleFileForm() throws IOException {
+	void singleFileForm() throws IOException {
 		page.locator("#singleFile").setInputFiles(filePayload("playwright-single.txt", "single-content"));
 		page.locator("#singleFileForm button[type='submit']").click();
 
@@ -119,7 +124,7 @@ public class MockMvcPlaywrightHandlerTests {
 	}
 
 	@Test
-	public void multipleFilesForm() throws IOException {
+	void multipleFilesForm() throws IOException {
 		var fileOne = filePayload("playwright-multiple-1.txt", "first-content");
 		var fileTwo = filePayload("playwright-multiple-2.txt", "second-content");
 		page.locator("#multipleFiles").setInputFiles(new FilePayload[]{fileOne, fileTwo});
@@ -129,7 +134,7 @@ public class MockMvcPlaywrightHandlerTests {
 	}
 
 	@Test
-	public void mixedMultipartForm() throws IOException {
+	void mixedMultipartForm() throws IOException {
 		page.locator("#mixedFile").setInputFiles(filePayload("playwright-mixed.txt", "mixed-content"));
 		page.locator("#description").fill("sample");
 		page.locator("#version").fill("7");
@@ -187,7 +192,7 @@ public class MockMvcPlaywrightHandlerTests {
 
 			@PostMapping(path = "/upload-mixed", produces = MediaType.TEXT_PLAIN_VALUE)
 			String uploadMixed(@RequestParam("file") MultipartFile file, @RequestParam String description,
-			                   @RequestParam Integer version) throws IOException {
+								@RequestParam Integer version) throws IOException {
 				return "file=" + file.getOriginalFilename() + ",description=" + description + ",version=" + version +
 						",content=" + StreamUtils.copyToString(file.getInputStream(), StandardCharsets.UTF_8);
 			}

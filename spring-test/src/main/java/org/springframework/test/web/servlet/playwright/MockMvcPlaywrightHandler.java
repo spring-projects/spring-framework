@@ -16,6 +16,21 @@
 
 package org.springframework.test.web.servlet.playwright;
 
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.net.URLDecoder;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
+import java.util.Locale;
+import java.util.Optional;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
 import com.microsoft.playwright.Request;
 import com.microsoft.playwright.Route;
 import jakarta.servlet.http.Part;
@@ -24,6 +39,7 @@ import org.apache.commons.lang3.Strings;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jspecify.annotations.Nullable;
+
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -45,23 +61,13 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
-import java.io.IOException;
-import java.net.*;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
-import java.util.List;
-import java.util.Optional;
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-
 /**
  * {@code MockMvcPlaywrightHandler} delegates playwright
  * {@link Route} handling to  {@link MockMvc} instance.
  *
  * @author Alain Michel Chomnoue Nghemning
  */
-public class MockMvcPlaywrightHandler implements Consumer<Route> {
+public final class MockMvcPlaywrightHandler implements Consumer<Route> {
 
 	private static final Log logger = LogFactory.getLog(MockMvcPlaywrightHandler.class);
 
@@ -100,7 +106,8 @@ public class MockMvcPlaywrightHandler implements Consumer<Route> {
 		AbstractMockHttpServletRequestBuilder<?> builder;
 		if (Strings.CI.contains(contentType, MediaType.MULTIPART_FORM_DATA_VALUE)) {
 			builder = multiPartRequestBuilder(request);
-		} else {
+		}
+		else {
 			builder = simpleRequestBuilder(request);
 		}
 		builder.queryParams(queryParams(request));
@@ -116,15 +123,9 @@ public class MockMvcPlaywrightHandler implements Consumer<Route> {
 		final String[] pairs = getQuery(request);
 		for (String pair : pairs) {
 			final int idx = pair.indexOf('=');
-			final String key =
-					idx > 0
-							? URLDecoder.decode(pair.substring(0, idx), charset)
-							: pair;
+			final String key = idx > 0 ? URLDecoder.decode(pair.substring(0, idx), this.charset) : pair;
 			final String value;
-			value =
-					idx > 0 && pair.length() > idx + 1
-							? URLDecoder.decode(pair.substring(idx + 1), charset)
-							: null;
+			value = idx > 0 && pair.length() > idx + 1 ? URLDecoder.decode(pair.substring(idx + 1), this.charset) : null;
 			params.add(key, value);
 		}
 		return params;
@@ -137,19 +138,19 @@ public class MockMvcPlaywrightHandler implements Consumer<Route> {
 
 	private MockHttpServletRequestBuilder simpleRequestBuilder(Request request) {
 		return MockMvcRequestBuilders.request(
-						HttpMethod.valueOf(request.method().toUpperCase()), getPath(request))
+						HttpMethod.valueOf(request.method().toUpperCase(Locale.ROOT)), getPath(request))
 				.content(request.postDataBuffer());
 	}
 
 	private String getPath(Request request) {
-		return URLDecoder.decode(getUrl(request).getPath(), charset);
+		return URLDecoder.decode(getUrl(request).getPath(), this.charset);
 	}
 
 	private MockMultipartHttpServletRequestBuilder multiPartRequestBuilder(Request request) {
 		var builder =
 				MockMvcRequestBuilders.multipart(
 						HttpMethod.valueOf(request.method()), getPath(request));
-		var content = fileUpload.getContent(request);
+		var content = this.fileUpload.getContent(request);
 		content.files().stream().map(MockMvcPlaywrightHandler::toMockMultipartFile).forEach(builder::file);
 		if (!content.parts().isEmpty()) {
 			var parts = content.parts().stream()
@@ -159,11 +160,12 @@ public class MockMvcPlaywrightHandler implements Consumer<Route> {
 		return builder;
 	}
 
-	private static  MockPart toMockPart(FormFieldPart part) {
-		try(var content = part.content()) {
+	private static MockPart toMockPart(FormFieldPart part) {
+		try (var content = part.content()) {
 			return new MockPart(part.name(), content.readAllBytes());
-		} catch (IOException e) {
-			throw new RuntimeException(e);
+		}
+		catch (IOException ex) {
+			throw new RuntimeException(ex);
 		}
 	}
 
@@ -174,16 +176,18 @@ public class MockMvcPlaywrightHandler implements Consumer<Route> {
 					Optional.ofNullable(part.headers().getContentType())
 							.map(MediaType::getType).orElse(MediaType.TEXT_PLAIN_VALUE),
 					part.content());
-		} catch (IOException e) {
-			throw new RuntimeException(e);
+		}
+		catch (IOException ex) {
+			throw new RuntimeException(ex);
 		}
 	}
 
 	private static URL getUrl(Request request) {
 		try {
 			return new URI(request.url()).toURL();
-		} catch (URISyntaxException | MalformedURLException e) {
-			throw new RuntimeException(e);
+		}
+		catch (URISyntaxException | MalformedURLException ex) {
+			throw new RuntimeException(ex);
 		}
 	}
 
@@ -196,23 +200,24 @@ public class MockMvcPlaywrightHandler implements Consumer<Route> {
 		MockHttpServletResponse response;
 		try {
 			// System.out.println("Handling request " + request);
-			response = performMockMvcRequest(requestBuilder(request), mockMvc);
+			response = performMockMvcRequest(requestBuilder(request), this.mockMvc);
 			return fulfillOptions(response);
-		} catch (Exception e) {
-			logger.error(e.getMessage(), e);
+		}
+		catch (Exception ex) {
+			logger.error(ex.getMessage(), ex);
 			return new Route.FulfillOptions()
 					.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value())
-					.setBody(e.getMessage());
+					.setBody(ex.getMessage());
 		}
 	}
 
 	private MockHttpServletResponse performMockMvcRequest(
 			RequestBuilder request, MockMvc mockMvc) throws Exception {
 		var response = mockMvc.perform(request).andReturn().getResponse();
-		return StringUtils.isBlank(response.getForwardedUrl())
-				? response
-				: performMockMvcRequest(
-				MockMvcRequestBuilders.get(toPath(response.getForwardedUrl())), mockMvc);
+		if (StringUtils.isBlank(response.getForwardedUrl())) {
+			return response;
+		}
+		return performMockMvcRequest(MockMvcRequestBuilders.get(toPath(response.getForwardedUrl())), mockMvc);
 	}
 
 	public static final class Builder {
@@ -280,23 +285,24 @@ public class MockMvcPlaywrightHandler implements Consumer<Route> {
 
 
 		public MockMvcPlaywrightHandler build() {
-			var multipartConverter = multiPartConverters==null? new MultipartHttpMessageConverter() :
-					new MultipartHttpMessageConverter(multiPartConverters);
-			multipartConverter.setCharset(charset);
-			if (multiPartSupportedMediaTypes != null) {
-				multipartConverter.setSupportedMediaTypes(multiPartSupportedMediaTypes);
+			var multipartConverter = this.multiPartConverters == null ?
+					new MultipartHttpMessageConverter() :
+					new MultipartHttpMessageConverter(this.multiPartConverters);
+			multipartConverter.setCharset(this.charset);
+			if (this.multiPartSupportedMediaTypes != null) {
+				multipartConverter.setSupportedMediaTypes(this.multiPartSupportedMediaTypes);
 			}
-			if (multipartCharset != null) {
-				multipartConverter.setMultipartCharset(multipartCharset);
+			if (this.multipartCharset != null) {
+				multipartConverter.setMultipartCharset(this.multipartCharset);
 			}
-			multipartConverter.setMaxInMemorySize(multiPartMaxInMemorySize);
-			multipartConverter.setMaxHeadersSize(multipartMaxHeadersSize);
-			multipartConverter.setMaxDiskUsagePerPart(maxDiskUsagePerPart);
-			multipartConverter.setMaxParts(maxParts);
+			multipartConverter.setMaxInMemorySize(this.multiPartMaxInMemorySize);
+			multipartConverter.setMaxHeadersSize(this.multipartMaxHeadersSize);
+			multipartConverter.setMaxDiskUsagePerPart(this.maxDiskUsagePerPart);
+			multipartConverter.setMaxParts(this.maxParts);
 
 			var fileUpload = new PlaywrightFileUpload(multipartConverter);
-			var handler = new MockMvcPlaywrightHandler(mockMvc, fileUpload);
-			handler.charset =charset;
+			var handler = new MockMvcPlaywrightHandler(this.mockMvc, fileUpload);
+			handler.charset = this.charset;
 			return handler;
 		}
 	}

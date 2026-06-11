@@ -1,0 +1,17 @@
+[[mockmvc-playwright-setup]]
+= Playwright Setup
+
+To integrate playwright with MockMvc, first make sure that you have included a test dependency on `com.microsoft.playwright:playwright`.
+To use it, create a `MockMvcPlaywrightHandler` instance and register it as a
+route https://playwright.dev/java/docs/network#handle-requests[handler] for http requests.
+
+include-code::./MockMvcPlaywrightHandlerTests[tag=init,indent=0]
+
+include-code::./MockMvcPlaywrightHandlerTests[tag=setup,indent=0]
+
+Browser http requests, such as form submission and file uploads, are then translated
+to MockMvc requests.
+
+Remember to close playwright resources after your tests
+
+include-code::./MockMvcPlaywrightHandlerTests[tag=close,indent=0]

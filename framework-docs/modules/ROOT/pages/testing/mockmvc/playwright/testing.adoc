@@ -1,0 +1,58 @@
+[[mockmvc-playwright-testing]]
+= Testing Fullstack Web Applications with Playwright and Mockmvc
+
+With Playwright and Mockmvc in place, you can simulate user interactions with the browser
+and assert the expected changes without mocking the API calls. The following examples cover simple form
+submission and file upload.
+
+NOTE: We use `com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat` for assertions.
+
+[[mockmvc-playwright-testing-get]]
+== Simple GET form
+
+Having an HTML page with a GET form
+
+[source,html]
+----
+<form id="getForm" data-testid="getForm" method="get" action="/search">
+        <label for="query">Search Query:</label>
+        <input type="text" id="query" name="query" required>
+        <button type="submit">Submit GET</button>
+</form>
+<div id="getResult"></div>
+<script>
+...
+// Event listener to submit the form and display results in `getResult`
+</script>
+----
+
+And the following controller to handle the `/search` request
+
+include-code::./MockMvcPlaywrightHandlerTests[tag=controller,indent=0]
+
+Playwright can be used to submit the form and assert results are displayed
+
+include-code::./MockMvcPlaywrightHandlerTests[tag=test,indent=0]
+
+[[mockmvc-playwright-testing-file-upload]]
+== File Upload
+
+You can test a file upload with playwright and assert that it is properly handled by your controllers.
+For example, the following form uploads a file.
+
+[source,html]
+----
+<form id="singleFileForm" data-testid="singleFileForm" method="post" action="/upload-single" enctype="multipart/form-data">
+        <label for="singleFile">Choose File:</label>
+        <input type="file" id="singleFile" name="file" required>
+        <button type="submit">Upload Single File</button>
+</form>
+----
+
+Assuming that the following controller handles the POST `/upload-single` request
+
+include-code::./MockMvcPlaywrightHandlerTests[tag=controller,indent=0]
+
+Playwright can be used to send the file and assert results are displayed
+
+include-code::./MockMvcPlaywrightHandlerTests[tag=test,indent=0]

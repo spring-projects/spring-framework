@@ -382,6 +382,8 @@
 **** xref:testing/mockmvc/htmlunit/webdriver.adoc[]
 **** xref:testing/mockmvc/htmlunit/geb.adoc[]
 *** xref:testing/mockmvc/playwright.adoc[]
+**** xref:testing/mockmvc/playwright/setup.adoc[]
+**** xref:testing/mockmvc/playwright/testing.adoc[]
 *** xref:testing/mockmvc/vs-end-to-end-integration-tests.adoc[]
 *** xref:testing/mockmvc/resources.adoc[]
 ** xref:testing/spring-mvc-test-client.adoc[]

@@ -16,10 +16,10 @@
 
 package org.springframework.test.web.servlet.playwright.fileupload;
 
-import org.springframework.http.converter.multipart.FormFieldPart;
-import org.springframework.http.converter.multipart.FilePart;
-
 import java.util.List;
+
+import org.springframework.http.converter.multipart.FilePart;
+import org.springframework.http.converter.multipart.FormFieldPart;
 
 public record FileUploadContent(
 		List<FormFieldPart> parts, List<FilePart> files) {}
