@@ -32,7 +32,7 @@ example writes notifications to the console:
 		}
 
 		public boolean isNotificationEnabled(Notification notification) {
-			return AttributeChangeNotification.class.isAssignableFrom(notification.getClass());
+			return (notification instanceof AttributeChangeNotification);
 		}
 
 	}

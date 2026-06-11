@@ -163,8 +163,7 @@ class SimpMessagingTemplateTests {
 	void processHeadersToSend() {
 		Map<String, Object> map = this.messagingTemplate.processHeadersToSend(null);
 
-		assertThat(map).isNotNull();
-		assertThat(MessageHeaders.class.isAssignableFrom(map.getClass())).as("Actual: " + map.getClass()).isTrue();
+		assertThat(map).isInstanceOf(MessageHeaders.class);
 
 		SimpMessageHeaderAccessor headerAccessor =
 				MessageHeaderAccessor.getAccessor((MessageHeaders) map, SimpMessageHeaderAccessor.class);
