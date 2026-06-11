@@ -250,6 +250,16 @@ class GenericTypeResolverTests {
 		assertThat(resolvedType).isEqualTo(InheritsDefaultMethod.ConcreteType.class);
 	}
 
+	@Test
+	void resolveTypeVariableCollisionAcrossInterfaces() throws Exception {
+		Type createBody = Create.class.getMethod("create", Object.class)
+				.getGenericParameterTypes()[0];
+	
+		Type resolved = resolveType(createBody, Controller.class);
+	
+		assertThat(resolved).isEqualTo(Long.class);
+	}
+
 	private static Method method(Class<?> target, String methodName, Class<?>... parameterTypes) {
 		Method method = findMethod(target, methodName, parameterTypes);
 		assertThat(method).describedAs(target.getName() + "#" + methodName).isNotNull();
@@ -475,6 +485,19 @@ class GenericTypeResolverTests {
 
 		static class ConcreteType implements InterfaceWithDefaultMethod.AbstractType {
 		}
+	}
+
+	interface Search<I, O> {
+	}
+
+	interface Create<I, O> {
+
+		default O create(I body) {
+			return null;
+		}
+	}
+
+	static class Controller implements Search<String, Long>, Create<Long, Long> {
 	}
 
 }
