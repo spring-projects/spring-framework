@@ -36,7 +36,7 @@ public class SimpleHandlerAdapter implements HandlerAdapter {
 
 	@Override
 	public boolean supports(Object handler) {
-		return WebHandler.class.isAssignableFrom(handler.getClass());
+		return handler instanceof WebHandler;
 	}
 
 	@Override

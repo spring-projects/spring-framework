@@ -99,7 +99,7 @@ public class WebSocketHandlerAdapter implements HandlerAdapter, Ordered {
 
 	@Override
 	public boolean supports(Object handler) {
-		return WebSocketHandler.class.isAssignableFrom(handler.getClass());
+		return handler instanceof WebSocketHandler;
 	}
 
 	@Override

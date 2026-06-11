@@ -75,7 +75,7 @@ public class AspectJAfterThrowingAdvice extends AbstractAspectJAdvice
 	 * is only invoked if the thrown exception is a subtype of the given throwing type.
 	 */
 	private boolean shouldInvokeOnThrowing(Throwable ex) {
-		return getDiscoveredThrowingType().isAssignableFrom(ex.getClass());
+		return getDiscoveredThrowingType().isInstance(ex);
 	}
 
 }

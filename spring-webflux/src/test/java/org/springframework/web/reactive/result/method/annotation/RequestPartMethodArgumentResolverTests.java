@@ -300,7 +300,7 @@ class RequestPartMethodArgumentResolverTests {
 		Object value = result.block(Duration.ofSeconds(5));
 
 		assertThat(value).isNotNull();
-		assertThat(param.getParameterType().isAssignableFrom(value.getClass())).isTrue();
+		assertThat(param.getParameterType().isInstance(value)).isTrue();
 		return (T) value;
 	}
 

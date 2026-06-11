@@ -72,7 +72,7 @@ public class OperatorInstanceof extends Operator {
 			result = BooleanTypedValue.FALSE;  // null is not an instanceof anything
 		}
 		else {
-			result = BooleanTypedValue.forValue(rightClass.isAssignableFrom(leftValue.getClass()));
+			result = BooleanTypedValue.forValue(rightClass.isInstance(leftValue));
 		}
 		this.type = rightClass;
 		if (rightOperand instanceof TypeReference) {

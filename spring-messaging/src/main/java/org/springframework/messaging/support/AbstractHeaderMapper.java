@@ -95,7 +95,7 @@ public abstract class AbstractHeaderMapper<T> implements HeaderMapper<T> {
 		if (value == null) {
 			return null;
 		}
-		if (!type.isAssignableFrom(value.getClass())) {
+		if (!type.isInstance(value)) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Skipping header '" + name + "': expected type [" + type + "], but got [" +
 						value.getClass() + "]");

@@ -78,7 +78,7 @@ public class GeneratedKeyHolder implements KeyHolder {
 		Iterator<Object> keyIter = this.keyList.get(0).values().iterator();
 		if (keyIter.hasNext()) {
 			Object key = keyIter.next();
-			if (key == null || !(keyType.isAssignableFrom(key.getClass()))) {
+			if (key == null || !(keyType.isInstance(key))) {
 				throw new DataRetrievalFailureException(
 						"The generated key type is not supported. " +
 						"Unable to cast [" + (key != null ? key.getClass().getName() : null) +

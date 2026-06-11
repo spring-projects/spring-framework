@@ -295,7 +295,7 @@ class MessageReaderArgumentResolverTests {
 		Object value = result.block(Duration.ofSeconds(5));
 
 		assertThat(value).isNotNull();
-		assertThat(param.getParameterType().isAssignableFrom(value.getClass())).as("Unexpected return value type: " + value).isTrue();
+		assertThat(param.getParameterType().isInstance(value)).as("Unexpected return value type: " + value).isTrue();
 
 		return (T) value;
 	}
