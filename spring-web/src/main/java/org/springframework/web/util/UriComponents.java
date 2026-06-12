@@ -345,7 +345,7 @@ public abstract class UriComponents implements Serializable {
 	 */
 	private static class VarArgsTemplateVariables implements UriTemplateVariables {
 
-		private final Iterator<Object> valueIterator;
+		private final Iterator<@Nullable Object> valueIterator;
 
 		public VarArgsTemplateVariables(@Nullable Object... uriVariableValues) {
 			this.valueIterator = Arrays.asList(uriVariableValues).iterator();
