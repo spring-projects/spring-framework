@@ -61,7 +61,7 @@ public class HeadersMethodArgumentResolver implements SyncHandlerMethodArgumentR
 		}
 		else if (MessageHeaderAccessor.class.isAssignableFrom(paramType)) {
 			MessageHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, MessageHeaderAccessor.class);
-			if (accessor != null && paramType.isAssignableFrom(accessor.getClass())) {
+			if (accessor != null && paramType.isInstance(accessor)) {
 				return accessor;
 			}
 			else {

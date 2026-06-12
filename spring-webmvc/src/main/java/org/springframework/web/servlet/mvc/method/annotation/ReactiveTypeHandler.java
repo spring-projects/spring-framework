@@ -579,11 +579,11 @@ class ReactiveTypeHandler {
 
 		@SuppressWarnings("ReactiveStreamsUnusedPublisher")
 		public Object writeReactorContext(Object returnValue) {
-			if (Mono.class.isAssignableFrom(returnValue.getClass())) {
+			if (returnValue instanceof Mono) {
 				ContextSnapshot snapshot = this.snapshotFactory.captureAll();
 				return ((Mono<?>) returnValue).contextWrite(snapshot::updateContext);
 			}
-			else if (Flux.class.isAssignableFrom(returnValue.getClass())) {
+			else if (returnValue instanceof Flux) {
 				ContextSnapshot snapshot = this.snapshotFactory.captureAll();
 				return ((Flux<?>) returnValue).contextWrite(snapshot::updateContext);
 			}

@@ -234,7 +234,7 @@ class RequestBodyMethodArgumentResolverTests {
 		Object value = result.block(Duration.ofSeconds(5));
 
 		assertThat(value).isNotNull();
-		assertThat(param.getParameterType().isAssignableFrom(value.getClass()))
+		assertThat(param.getParameterType().isInstance(value))
 				.as("Unexpected return value type: " + value).isTrue();
 
 		//no inspection unchecked
@@ -248,7 +248,7 @@ class RequestBodyMethodArgumentResolverTests {
 		Object value = result.block(Duration.ofSeconds(5));
 
 		if (value != null) {
-			assertThat(param.getParameterType().isAssignableFrom(value.getClass()))
+			assertThat(param.getParameterType().isInstance(value))
 					.as("Unexpected parameter type: " + value).isTrue();
 		}
 
