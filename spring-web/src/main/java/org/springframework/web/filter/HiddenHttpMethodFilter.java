@@ -38,7 +38,7 @@ import org.springframework.web.util.WebUtils;
  * is to use a normal POST with an additional hidden form field ({@code _method})
  * to pass the "real" HTTP method along. This filter reads that parameter and changes
  * the {@link HttpServletRequestWrapper#getMethod()} return value accordingly.
- * Only {@code "PUT"}, {@code "DELETE"} and {@code "PATCH"} HTTP methods are allowed.
+ * Only {@code "PUT"}, {@code "DELETE"}, {@code "PATCH"}, and {@code "QUERY"} HTTP methods are allowed.
  *
  * <p>The name of the request parameter defaults to {@code _method}, but can be
  * adapted via the {@link #setMethodParam(String) methodParam} property.
@@ -55,7 +55,7 @@ import org.springframework.web.util.WebUtils;
 public class HiddenHttpMethodFilter extends OncePerRequestFilter {
 
 	private static final List<String> ALLOWED_METHODS =
-			List.of(HttpMethod.PUT.name(), HttpMethod.DELETE.name(), HttpMethod.PATCH.name());
+			List.of(HttpMethod.PUT.name(), HttpMethod.DELETE.name(), HttpMethod.PATCH.name(), HttpMethod.QUERY.name());
 
 	/** Default method parameter: {@code _method}. */
 	public static final String DEFAULT_METHOD_PARAM = "_method";

@@ -118,7 +118,7 @@ class RestTestClientTests {
 			RestTestClientTests.this.client.options().uri("/test")
 					.exchange()
 					.expectStatus().isOk()
-					.expectHeader().valueEquals("Allow", "GET,HEAD,POST,PUT,PATCH,DELETE,OPTIONS")
+					.expectHeader().valueEquals("Allow", "GET,HEAD,POST,PUT,PATCH,DELETE,OPTIONS,QUERY")
 					.expectBody().isEmpty();
 		}
 
