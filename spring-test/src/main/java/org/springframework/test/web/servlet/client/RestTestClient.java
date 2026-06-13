@@ -120,6 +120,13 @@ public interface RestTestClient {
 	RequestHeadersUriSpec<?> delete();
 
 	/**
+	 * Prepare an HTTP QUERY request.
+	 * @return a spec for specifying the target URL
+	 * @since 7.1
+	 */
+	RequestBodyUriSpec query();
+
+	/**
 	 * Prepare an HTTP OPTIONS request.
 	 * @return a spec for specifying the target URL
 	 */

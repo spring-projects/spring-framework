@@ -90,7 +90,7 @@ class RequestPredicatesTests {
 
 	@Test
 	void methods() {
-		RequestPredicate predicate = RequestPredicates.methods(HttpMethod.GET, HttpMethod.HEAD);
+		RequestPredicate predicate = RequestPredicates.methods(HttpMethod.GET, HttpMethod.HEAD, HttpMethod.QUERY);
 		MockServerHttpRequest mockRequest = MockServerHttpRequest.get("https://example.com").build();
 		ServerRequest request = new DefaultServerRequest(MockServerWebExchange.from(mockRequest), Collections.emptyList());
 		assertThat(predicate.test(request)).isTrue();
