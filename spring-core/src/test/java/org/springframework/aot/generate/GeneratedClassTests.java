@@ -79,6 +79,14 @@ class GeneratedClassTests {
 	}
 
 	@Test
+	void reserveMethodNamesWhenMultipleNamesReservesEachName() {
+		GeneratedClass generatedClass = createGeneratedClass(TEST_CLASS_NAME);
+		generatedClass.reserveMethodNames("apply", "test");
+		assertThat(generatedClass.getMethods().add("apply", emptyMethodCustomizer).getName()).isEqualTo("apply1");
+		assertThat(generatedClass.getMethods().add("test", emptyMethodCustomizer).getName()).isEqualTo("test1");
+	}
+
+	@Test
 	void generateMethodNameWhenAllEmptyPartsGeneratesSetName() {
 		GeneratedClass generatedClass = createGeneratedClass(TEST_CLASS_NAME);
 		GeneratedMethod generatedMethod = generatedClass.getMethods().add("123", emptyMethodCustomizer);
