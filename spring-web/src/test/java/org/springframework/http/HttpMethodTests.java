@@ -44,12 +44,12 @@ class HttpMethodTests {
 	void values() {
 		HttpMethod[] values = HttpMethod.values();
 		assertThat(values).containsExactly(HttpMethod.GET, HttpMethod.HEAD, HttpMethod.POST, HttpMethod.PUT,
-				HttpMethod.PATCH, HttpMethod.DELETE, HttpMethod.OPTIONS, HttpMethod.TRACE);
+				HttpMethod.PATCH, HttpMethod.DELETE, HttpMethod.OPTIONS, HttpMethod.TRACE, HttpMethod.QUERY);
 
 		// check defensive copy
 		values[0] = HttpMethod.POST;
 		assertThat(HttpMethod.values()).containsExactly(HttpMethod.GET, HttpMethod.HEAD, HttpMethod.POST, HttpMethod.PUT,
-				HttpMethod.PATCH, HttpMethod.DELETE, HttpMethod.OPTIONS, HttpMethod.TRACE);
+				HttpMethod.PATCH, HttpMethod.DELETE, HttpMethod.OPTIONS, HttpMethod.TRACE, HttpMethod.QUERY);
 	}
 
 	@Test
