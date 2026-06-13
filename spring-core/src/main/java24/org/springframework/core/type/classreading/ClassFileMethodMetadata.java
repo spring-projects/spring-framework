@@ -195,7 +195,7 @@ final class ClassFileMethodMetadata implements MethodMetadata {
 			builder.append(this.methodName);
 			builder.append('(');
 			builder.append(Stream.of(this.descriptor.parameterArray())
-					.map(desc -> desc.packageName() + "." + desc.displayName())
+					.map(ClassFileAnnotationMetadata::resolveTypeName)
 					.collect(Collectors.joining(",")));
 			builder.append(')');
 			return builder.toString();
