@@ -151,7 +151,7 @@ public class ShallowEtagHeaderFilter extends OncePerRequestFilter {
 
 		if (!response.isCommitted() &&
 				responseStatusCode >= 200 && responseStatusCode < 300 &&
-				HttpMethod.GET.matches(request.getMethod())) {
+				(HttpMethod.GET.matches(request.getMethod()) || HttpMethod.QUERY.matches(request.getMethod()))) {
 
 			String cacheControl = response.getHeader(HttpHeaders.CACHE_CONTROL);
 			return (cacheControl == null || !cacheControl.contains(DIRECTIVE_NO_STORE));

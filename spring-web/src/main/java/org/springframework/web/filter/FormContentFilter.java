@@ -47,7 +47,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
 
 /**
- * {@code Filter} that parses form data for HTTP PUT, PATCH, and DELETE requests
+ * {@code Filter} that parses form data for HTTP PUT, PATCH, DELETE, and QUERY requests
  * and exposes it as Servlet request parameters. By default, the Servlet spec
  * only requires this for HTTP POST.
  *
@@ -56,7 +56,7 @@ import org.springframework.util.StringUtils;
  */
 public class FormContentFilter extends OncePerRequestFilter {
 
-	private static final List<String> HTTP_METHODS = Arrays.asList("PUT", "PATCH", "DELETE");
+	private static final List<String> HTTP_METHODS = Arrays.asList("PUT", "PATCH", "DELETE", "QUERY");
 
 	private FormHttpMessageConverter formConverter = new FormHttpMessageConverter();
 

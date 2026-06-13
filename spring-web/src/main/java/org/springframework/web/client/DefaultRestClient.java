@@ -195,6 +195,11 @@ final class DefaultRestClient implements RestClient {
 	}
 
 	@Override
+	public RequestBodyUriSpec query() {
+		return methodInternal(HttpMethod.QUERY);
+	}
+
+	@Override
 	public RequestBodyUriSpec method(HttpMethod method) {
 		Assert.notNull(method, "HttpMethod must not be null");
 		return methodInternal(method);
