@@ -16,6 +16,7 @@
 
 package org.springframework.core.task;
 
+import java.lang.reflect.Field;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Future;
@@ -23,6 +24,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.junit.jupiter.api.Test;
+
+import org.springframework.util.ConcurrencyThrottleSupport;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -130,6 +133,47 @@ class SimpleAsyncTaskExecutorTests {
 		assertThat(completed)
 				.withFailMessage("Executor should not deadlock if concurrency permit was properly released after first failure")
 				.isTrue();
+	}
+
+	@Test  // immediate-timeout tasks bypass the throttle and must not unbalance its count
+	@SuppressWarnings("deprecation")
+	void immediateTasksDoNotCorruptConcurrencyThrottle() throws Exception {
+		try (SimpleAsyncTaskExecutor executor = new SimpleAsyncTaskExecutor()) {
+			executor.setConcurrencyLimit(2);
+			executor.setTaskTerminationTimeout(10_000);  // enables active-thread tracking
+
+			int taskCount = 5;
+			CountDownLatch done = new CountDownLatch(taskCount);
+			for (int i = 0; i < taskCount; i++) {
+				executor.execute(done::countDown, AsyncTaskExecutor.TIMEOUT_IMMEDIATE);
+			}
+			assertThat(done.await(5, TimeUnit.SECONDS)).isTrue();
+
+			// Each worker runs afterAccess() in its finally block. With the bug, immediate tasks
+			// released a permit they never acquired, driving the count to -taskCount. Poll until
+			// the count settles; it must never drop below zero.
+			int count = 0;
+			for (int i = 0; i < 100; i++) {
+				count = concurrencyCount(executor);
+				if (count < 0) {
+					break;
+				}
+				Thread.sleep(10);
+			}
+			assertThat(count)
+					.withFailMessage("concurrencyThrottle count must stay >= 0; an immediate task " +
+							"released a permit it never acquired")
+					.isGreaterThanOrEqualTo(0);
+		}
+	}
+
+	private static int concurrencyCount(SimpleAsyncTaskExecutor executor) throws Exception {
+		Field throttleField = SimpleAsyncTaskExecutor.class.getDeclaredField("concurrencyThrottle");
+		throttleField.setAccessible(true);
+		Object throttle = throttleField.get(executor);
+		Field countField = ConcurrencyThrottleSupport.class.getDeclaredField("concurrencyCount");
+		countField.setAccessible(true);
+		return countField.getInt(throttle);
 	}
 
 	@Test

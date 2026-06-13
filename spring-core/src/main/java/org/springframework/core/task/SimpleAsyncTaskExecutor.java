@@ -319,7 +319,7 @@ public class SimpleAsyncTaskExecutor extends CustomizableThreadCreator
 		if (isThrottleActive() && startTimeout > TIMEOUT_IMMEDIATE) {
 			this.concurrencyThrottle.beforeAccess();
 			try {
-				doExecute(new TaskTrackingRunnable(taskToUse, future));
+				doExecute(new TaskTrackingRunnable(taskToUse, future, true));
 			}
 			catch (Throwable ex) {
 				// Release concurrency permit if thread creation fails
@@ -328,7 +328,7 @@ public class SimpleAsyncTaskExecutor extends CustomizableThreadCreator
 			}
 		}
 		else if (this.activeThreads != null) {
-			doExecute(new TaskTrackingRunnable(taskToUse, future));
+			doExecute(new TaskTrackingRunnable(taskToUse, future, false));
 		}
 		else {
 			doExecute(taskToUse);
@@ -471,10 +471,13 @@ public class SimpleAsyncTaskExecutor extends CustomizableThreadCreator
 
 		private final @Nullable Future<?> future;
 
-		public TaskTrackingRunnable(Runnable task, @Nullable Future<?> future) {
+		private final boolean throttled;
+
+		public TaskTrackingRunnable(Runnable task, @Nullable Future<?> future, boolean throttled) {
 			Assert.notNull(task, "Task must not be null");
 			this.task = task;
 			this.future = future;
+			this.throttled = throttled;
 		}
 
 		@Override
@@ -502,7 +505,9 @@ public class SimpleAsyncTaskExecutor extends CustomizableThreadCreator
 						}
 					}
 				}
-				concurrencyThrottle.afterAccess();
+				if (this.throttled) {
+					concurrencyThrottle.afterAccess();
+				}
 			}
 		}
 	}
