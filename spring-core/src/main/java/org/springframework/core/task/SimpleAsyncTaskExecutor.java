@@ -471,27 +471,27 @@ public class SimpleAsyncTaskExecutor extends CustomizableThreadCreator
 
 		private final @Nullable Future<?> future;
 
-		private final boolean throttled;
+		private final boolean releaseThrottle;
 
-		public TaskTrackingRunnable(Runnable task, @Nullable Future<?> future, boolean throttled) {
+		public TaskTrackingRunnable(Runnable task, @Nullable Future<?> future, boolean releaseThrottle) {
 			Assert.notNull(task, "Task must not be null");
 			this.task = task;
 			this.future = future;
-			this.throttled = throttled;
+			this.releaseThrottle = releaseThrottle;
 		}
 
 		@Override
 		public void run() {
 			Set<Thread> threads = activeThreads;
 			Thread thread = null;
-			if (threads != null) {
-				thread = Thread.currentThread();
-				synchronized (threads) {
-					checkCancelled(this.future);
-					threads.add(thread);
-				}
-			}
 			try {
+				if (threads != null) {
+					thread = Thread.currentThread();
+					synchronized (threads) {
+						checkCancelled(this.future);
+						threads.add(thread);
+					}
+				}
 				this.task.run();
 			}
 			finally {
@@ -505,7 +505,9 @@ public class SimpleAsyncTaskExecutor extends CustomizableThreadCreator
 						}
 					}
 				}
-				if (this.throttled) {
+				// Release the throttle permit only if one was acquired (see execute),
+				// and always release it once acquired -- even if checkCancelled() above threw.
+				if (this.releaseThrottle) {
 					concurrencyThrottle.afterAccess();
 				}
 			}

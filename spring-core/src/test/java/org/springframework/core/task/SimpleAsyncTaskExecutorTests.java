@@ -22,6 +22,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.jupiter.api.Test;
 
@@ -135,36 +136,49 @@ class SimpleAsyncTaskExecutorTests {
 				.isTrue();
 	}
 
-	@Test  // immediate-timeout tasks bypass the throttle and must not unbalance its count
+	@Test  // immediate-timeout tasks bypass the throttle: no permit acquired, so none released
 	@SuppressWarnings("deprecation")
-	void immediateTasksDoNotCorruptConcurrencyThrottle() throws Exception {
-		try (SimpleAsyncTaskExecutor executor = new SimpleAsyncTaskExecutor()) {
-			executor.setConcurrencyLimit(2);
-			executor.setTaskTerminationTimeout(10_000);  // enables active-thread tracking
-
-			int taskCount = 5;
-			CountDownLatch done = new CountDownLatch(taskCount);
-			for (int i = 0; i < taskCount; i++) {
-				executor.execute(done::countDown, AsyncTaskExecutor.TIMEOUT_IMMEDIATE);
+	void immediateTaskDoesNotReleaseThrottlePermit() throws Exception {
+		// doExecute runs the wrapper inline so the throttle accounting is observed deterministically
+		SimpleAsyncTaskExecutor executor = new SimpleAsyncTaskExecutor() {
+			@Override
+			protected void doExecute(Runnable task) {
+				task.run();
 			}
-			assertThat(done.await(5, TimeUnit.SECONDS)).isTrue();
+		};
+		executor.setConcurrencyLimit(2);
+		executor.setTaskTerminationTimeout(10_000);  // enables active-thread tracking
 
-			// Each worker runs afterAccess() in its finally block. With the bug, immediate tasks
-			// released a permit they never acquired, driving the count to -taskCount. Poll until
-			// the count settles; it must never drop below zero.
-			int count = 0;
-			for (int i = 0; i < 100; i++) {
-				count = concurrencyCount(executor);
-				if (count < 0) {
-					break;
-				}
-				Thread.sleep(10);
+		executor.execute(() -> {}, AsyncTaskExecutor.TIMEOUT_IMMEDIATE);
+
+		// The task never acquired a permit, so afterAccess() must not have been called.
+		assertThat(concurrencyCount(executor)).isZero();
+	}
+
+	@Test  // a throttled task cancelled before it runs must still release its acquired permit
+	@SuppressWarnings("deprecation")
+	void cancelledThrottledTaskReleasesPermit() throws Exception {
+		AtomicReference<Runnable> captured = new AtomicReference<>();
+		// capture the wrapper without running it, to control the cancellation timing
+		SimpleAsyncTaskExecutor executor = new SimpleAsyncTaskExecutor() {
+			@Override
+			protected void doExecute(Runnable task) {
+				captured.set(task);
 			}
-			assertThat(count)
-					.withFailMessage("concurrencyThrottle count must stay >= 0; an immediate task " +
-							"released a permit it never acquired")
-					.isGreaterThanOrEqualTo(0);
-		}
+		};
+		executor.setConcurrencyLimit(1);
+		executor.setCancelRemainingTasksOnClose(true);  // close() marks remaining tasks cancelled
+
+		executor.execute(() -> {}, AsyncTaskExecutor.TIMEOUT_INDEFINITE);  // acquires a permit
+		assertThat(concurrencyCount(executor)).isOne();
+
+		executor.close();  // sets the cancelled flag
+
+		// The wrapper hits checkCancelled() and throws before running the task, but the
+		// acquired permit must still be released.
+		assertThatExceptionOfType(CancellationException.class)
+				.isThrownBy(() -> captured.get().run());
+		assertThat(concurrencyCount(executor)).isZero();
 	}
 
 	private static int concurrencyCount(SimpleAsyncTaskExecutor executor) throws Exception {
