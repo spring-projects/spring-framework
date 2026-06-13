@@ -47,7 +47,7 @@ import org.springframework.web.server.WebFilterChain;
 public class HiddenHttpMethodFilter implements WebFilter {
 
 	private static final List<HttpMethod> ALLOWED_METHODS =
-			List.of(HttpMethod.PUT, HttpMethod.DELETE, HttpMethod.PATCH);
+			List.of(HttpMethod.PUT, HttpMethod.DELETE, HttpMethod.PATCH, HttpMethod.QUERY);
 
 	/** Default name of the form parameter with the HTTP method to use. */
 	public static final String DEFAULT_METHOD_PARAMETER_NAME = "_method";

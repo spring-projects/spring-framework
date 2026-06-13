@@ -253,8 +253,9 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 		if (helper.hasMethodsMismatch()) {
 			Set<String> methods = helper.getAllowedMethods();
 			if (HttpMethod.OPTIONS.matches(request.getMethod())) {
-				Set<MediaType> mediaTypes = helper.getConsumablePatchMediaTypes();
-				HttpOptionsHandler handler = new HttpOptionsHandler(methods, mediaTypes);
+				Set<MediaType> patchMediaTypes = helper.getConsumablePatchMediaTypes();
+				Set<MediaType> queryMediaTypes = helper.getConsumableQueryMediaTypes();
+				HttpOptionsHandler handler = new HttpOptionsHandler(methods, patchMediaTypes, queryMediaTypes);
 				return new HandlerMethod(handler, HTTP_OPTIONS_HANDLE_METHOD);
 			}
 			throw new HttpRequestMethodNotSupportedException(request.getMethod(), methods);
@@ -437,6 +438,21 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 			return result;
 		}
 
+		/**
+		 * Return declared "consumable" types but only among those that have
+		 * QUERY specified, or that have no methods at all.
+		 */
+		public Set<MediaType> getConsumableQueryMediaTypes() {
+			Set<MediaType> result = new LinkedHashSet<>();
+			for (PartialMatch match : this.partialMatches) {
+				Set<RequestMethod> methods = match.getInfo().getMethodsCondition().getMethods();
+				if (methods.isEmpty() || methods.contains(RequestMethod.QUERY)) {
+					result.addAll(match.getInfo().getConsumesCondition().getConsumableMediaTypes());
+				}
+			}
+			return result;
+		}
+
 
 		/**
 		 * Container for a RequestMappingInfo that matches the URL path at least.
@@ -501,9 +517,10 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 
 		private final HttpHeaders headers = new HttpHeaders();
 
-		public HttpOptionsHandler(Set<String> declaredMethods, Set<MediaType> acceptPatch) {
+		public HttpOptionsHandler(Set<String> declaredMethods, Set<MediaType> acceptPatch, Set<MediaType> acceptQuery) {
 			this.headers.setAllow(initAllowedHttpMethods(declaredMethods));
 			this.headers.setAcceptPatch(new ArrayList<>(acceptPatch));
+			this.headers.setAcceptQuery(new ArrayList<>(acceptQuery));
 		}
 
 		private static Set<HttpMethod> initAllowedHttpMethods(Set<String> declaredMethods) {
@@ -519,7 +536,7 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 				for (String method : declaredMethods) {
 					HttpMethod httpMethod = HttpMethod.valueOf(method);
 					result.add(httpMethod);
-					if (httpMethod == HttpMethod.GET) {
+					if (httpMethod == HttpMethod.GET || httpMethod == HttpMethod.QUERY) {
 						result.add(HttpMethod.HEAD);
 					}
 				}
