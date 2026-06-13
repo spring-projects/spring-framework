@@ -153,10 +153,24 @@ abstract class AbstractXMLStreamReader implements XMLStreamReader {
 	}
 
 	@Override
-	public void require(int expectedType, String namespaceURI, String localName) throws XMLStreamException {
+	public void require(int expectedType, @Nullable String namespaceURI, @Nullable String localName)
+			throws XMLStreamException {
+
 		int eventType = getEventType();
 		if (eventType != expectedType) {
 			throw new XMLStreamException("Expected [" + expectedType + "] but read [" + eventType + "]");
+		}
+		// This reader only exposes a name and namespace for START_ELEMENT and END_ELEMENT,
+		// so a non-null namespace or local name can only ever match one of those events.
+		if ((namespaceURI != null || localName != null) &&
+				eventType != XMLStreamConstants.START_ELEMENT && eventType != XMLStreamConstants.END_ELEMENT) {
+			throw new XMLStreamException("Current event is not a START_ELEMENT or END_ELEMENT");
+		}
+		if (localName != null && !localName.equals(getLocalName())) {
+			throw new XMLStreamException("Expected local name [" + localName + "] but read [" + getLocalName() + "]");
+		}
+		if (namespaceURI != null && !namespaceURI.equals(getNamespaceURI())) {
+			throw new XMLStreamException("Expected namespace [" + namespaceURI + "] but read [" + getNamespaceURI() + "]");
 		}
 	}
 

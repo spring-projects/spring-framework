@@ -21,6 +21,8 @@ import java.io.StringWriter;
 
 import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLStreamConstants;
+import javax.xml.stream.XMLStreamException;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.stax.StAXSource;
@@ -34,6 +36,7 @@ import org.xmlunit.util.Predicate;
 import org.springframework.core.testfixture.xml.XmlContent;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 class XMLEventStreamReaderTests {
 
@@ -66,6 +69,27 @@ class XMLEventStreamReaderTests {
 		Predicate<Node> nodeFilter = n ->
 				n.getNodeType() != Node.DOCUMENT_TYPE_NODE && n.getNodeType() != Node.PROCESSING_INSTRUCTION_NODE;
 		assertThat(XmlContent.from(writer)).isSimilarTo(XML, nodeFilter);
+	}
+
+	@Test  // require(type, namespaceURI, localName) must validate the name and namespace
+	void requireValidatesNamespaceAndLocalName() throws Exception {
+		advanceToStartElement("root");
+
+		streamReader.require(XMLStreamConstants.START_ELEMENT, null, "root");
+		streamReader.require(XMLStreamConstants.START_ELEMENT, "namespace", "root");
+		streamReader.require(XMLStreamConstants.START_ELEMENT, "namespace", null);
+
+		assertThatExceptionOfType(XMLStreamException.class).isThrownBy(() ->
+				streamReader.require(XMLStreamConstants.START_ELEMENT, null, "wrong"));
+		assertThatExceptionOfType(XMLStreamException.class).isThrownBy(() ->
+				streamReader.require(XMLStreamConstants.START_ELEMENT, "wrong-namespace", "root"));
+	}
+
+	private void advanceToStartElement(String localName) throws Exception {
+		while (streamReader.getEventType() != XMLStreamConstants.START_ELEMENT ||
+				!streamReader.getLocalName().equals(localName)) {
+			streamReader.next();
+		}
 	}
 
 }
