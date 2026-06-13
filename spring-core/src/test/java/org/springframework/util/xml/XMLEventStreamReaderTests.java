@@ -21,6 +21,7 @@ import java.io.StringWriter;
 
 import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLStreamConstants;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.stax.StAXSource;
@@ -68,6 +69,25 @@ class XMLEventStreamReaderTests {
 		Predicate<Node> nodeFilter = n ->
 				n.getNodeType() != Node.DOCUMENT_TYPE_NODE && n.getNodeType() != Node.PROCESSING_INSTRUCTION_NODE;
 		assertThat(XmlContent.from(writer)).isSimilarTo(XML, nodeFilter);
+	}
+
+	@Test  // gh-36914
+	void getTextCharactersHonorsSourceStart() throws Exception {
+		char[] target = new char[10];
+
+		advanceToCharacters();
+
+		// text node is "content" (7 chars); copy from index 4 with an oversized buffer
+		// getTextCharacters(sourceStart, ...) must not read past the source
+		int count = streamReader.getTextCharacters(4, target, 0, 10);
+		assertThat(count).isEqualTo(3);
+		assertThat(new String(target, 0, count)).isEqualTo("ent");
+	}
+
+	private void advanceToCharacters() throws Exception {
+		while (streamReader.getEventType() != XMLStreamConstants.CHARACTERS) {
+			streamReader.next();
+		}
 	}
 
 }
