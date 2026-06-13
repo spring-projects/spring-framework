@@ -122,6 +122,46 @@ abstract class ClassFileAnnotationDelegate {
 			case AnnotationValue.OfLong _ -> {
 				return stream.map(AnnotationValue.OfLong.class::cast).mapToLong(AnnotationValue.OfLong::longValue).toArray();
 			}
+			case AnnotationValue.OfByte _ -> {
+				List<AnnotationValue> values = arrayValue.values();
+				byte[] result = new byte[values.size()];
+				for (int i = 0; i < result.length; i++) {
+					result[i] = ((AnnotationValue.OfByte) values.get(i)).byteValue();
+				}
+				return result;
+			}
+			case AnnotationValue.OfShort _ -> {
+				List<AnnotationValue> values = arrayValue.values();
+				short[] result = new short[values.size()];
+				for (int i = 0; i < result.length; i++) {
+					result[i] = ((AnnotationValue.OfShort) values.get(i)).shortValue();
+				}
+				return result;
+			}
+			case AnnotationValue.OfChar _ -> {
+				List<AnnotationValue> values = arrayValue.values();
+				char[] result = new char[values.size()];
+				for (int i = 0; i < result.length; i++) {
+					result[i] = ((AnnotationValue.OfChar) values.get(i)).charValue();
+				}
+				return result;
+			}
+			case AnnotationValue.OfBoolean _ -> {
+				List<AnnotationValue> values = arrayValue.values();
+				boolean[] result = new boolean[values.size()];
+				for (int i = 0; i < result.length; i++) {
+					result[i] = ((AnnotationValue.OfBoolean) values.get(i)).booleanValue();
+				}
+				return result;
+			}
+			case AnnotationValue.OfFloat _ -> {
+				List<AnnotationValue> values = arrayValue.values();
+				float[] result = new float[values.size()];
+				for (int i = 0; i < result.length; i++) {
+					result[i] = ((AnnotationValue.OfFloat) values.get(i)).floatValue();
+				}
+				return result;
+			}
 			default -> {
 				Class<?> arrayElementType = resolveArrayElementType(arrayValue.values(), classLoader);
 				return stream
