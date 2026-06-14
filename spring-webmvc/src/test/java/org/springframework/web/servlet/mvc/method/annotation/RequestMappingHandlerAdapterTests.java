@@ -42,8 +42,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
-import org.springframework.http.converter.json.MappingJacksonValue;
+import org.springframework.http.converter.json.JacksonJsonHttpMessageConverter;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.http.server.ServletServerHttpResponse;
@@ -279,11 +278,9 @@ class RequestMappingHandlerAdapterTests {
 	}
 
 	@Test // gh-15486
-	@SuppressWarnings("removal")
-	// TODO Migrate from MappingJackson2HttpMessageConverter and MappingJacksonValue to JacksonJsonHttpMessageConverter.
 	void responseBodyAdvice() throws Exception {
 		List<HttpMessageConverter<?>> converters = new ArrayList<>();
-		converters.add(new MappingJackson2HttpMessageConverter());
+		converters.add(new JacksonJsonHttpMessageConverter());
 		this.handlerAdapter.setMessageConverters(converters);
 
 		this.webAppContext.registerSingleton("rba", ResponseCodeSuppressingAdvice.class);
@@ -455,20 +452,25 @@ class RequestMappingHandlerAdapterTests {
 	 */
 	@ControllerAdvice
 	private static class ResponseCodeSuppressingAdvice
-			extends AbstractMappingJacksonResponseBodyAdvice implements RequestBodyAdvice {
+			implements ResponseBodyAdvice<Object>, RequestBodyAdvice {
 
 		@Override
-		@SuppressWarnings("removal")
-		protected void beforeBodyWriteInternal(MappingJacksonValue bodyContainer, MediaType contentType,
-				MethodParameter returnType, ServerHttpRequest request, ServerHttpResponse response) {
+		public boolean supports(MethodParameter returnType, Class<? extends HttpMessageConverter<?>> converterType) {
+			return JacksonJsonHttpMessageConverter.class.equals(converterType);
+		}
+
+		@Override
+		public Object beforeBodyWrite(Object body, MethodParameter returnType,
+				MediaType contentType, Class<? extends HttpMessageConverter<?>> converterType,
+				ServerHttpRequest request, ServerHttpResponse response) {
 
 			int status = ((ServletServerHttpResponse) response).getServletResponse().getStatus();
 			response.setStatusCode(HttpStatus.OK);
 
 			Map<String, Object> map = new LinkedHashMap<>();
 			map.put("status", status);
-			map.put("message", bodyContainer.getValue());
-			bodyContainer.setValue(map);
+			map.put("message", body);
+			return map;
 		}
 
 		@Override
