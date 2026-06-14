@@ -79,6 +79,12 @@ class CacheControlTests {
 	}
 
 	@Test
+	void mustUnderstand() {
+		CacheControl cc = CacheControl.noStore().mustUnderstand();
+		assertThat(cc.getHeaderValue()).isEqualTo("no-store, must-understand");
+	}
+
+	@Test
 	void staleIfError() {
 		CacheControl cc = CacheControl.maxAge(1, TimeUnit.HOURS).staleIfError(2, TimeUnit.HOURS);
 		assertThat(cc.getHeaderValue()).isEqualTo("max-age=3600, stale-if-error=7200");
