@@ -258,7 +258,7 @@ class ControllerMappingReflectiveProcessorTests {
 		}
 
 		@QueryMapping
-		@SuppressWarnings("rawtypes")
+		@SuppressWarnings({"rawtypes", "unchecked"})
 		HttpEntity queryRawHttpEntity(HttpEntity entity) {
 			return new HttpEntity(new Response("response"));
 		}
