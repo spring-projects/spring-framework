@@ -117,7 +117,7 @@ class GlobalCorsConfigIntegrationTests extends AbstractRequestMappingIntegration
 		assertThat(entity.getStatusCode()).isEqualTo(HttpStatus.OK);
 		assertThat(entity.getHeaders().getAccessControlAllowOrigin()).isEqualTo("*");
 		assertThat(entity.getHeaders().getAccessControlAllowMethods())
-				.containsExactly(HttpMethod.GET, HttpMethod.HEAD, HttpMethod.POST);
+				.containsExactly(HttpMethod.GET, HttpMethod.QUERY, HttpMethod.HEAD, HttpMethod.POST);
 	}
 
 	@ParameterizedHttpServerTest

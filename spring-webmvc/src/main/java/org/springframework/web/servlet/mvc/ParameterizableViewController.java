@@ -48,7 +48,7 @@ public class ParameterizableViewController extends AbstractController {
 
 	public ParameterizableViewController() {
 		super(false);
-		setSupportedMethods(HttpMethod.GET.name(), HttpMethod.HEAD.name());
+		setSupportedMethods(HttpMethod.GET.name(), HttpMethod.QUERY.name(), HttpMethod.HEAD.name());
 	}
 
 	/**

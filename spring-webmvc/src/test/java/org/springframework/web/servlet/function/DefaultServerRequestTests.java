@@ -588,7 +588,7 @@ class DefaultServerRequestTests {
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.METHOD)
 	@ParameterizedTest(name = "[{index}] {0}")
-	@ValueSource(strings = { "GET", "HEAD" })
+	@ValueSource(strings = { "GET", "HEAD", "QUERY" })
 	@interface ParameterizedHttpMethodTest {
 	}
 

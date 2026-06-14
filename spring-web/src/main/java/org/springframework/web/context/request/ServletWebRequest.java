@@ -50,7 +50,7 @@ import org.springframework.web.util.WebUtils;
  */
 public class ServletWebRequest extends ServletRequestAttributes implements NativeWebRequest {
 
-	private static final Set<String> SAFE_METHODS = Set.of("GET", "HEAD");
+	private static final Set<String> SAFE_METHODS = Set.of("GET", "HEAD", "QUERY");
 
 	/**
 	 * Date formats as specified in the HTTP RFC.
