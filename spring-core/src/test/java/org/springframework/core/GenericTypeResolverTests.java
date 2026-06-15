@@ -251,6 +251,14 @@ class GenericTypeResolverTests {
 		assertThat(resolvedType).isEqualTo(InheritsDefaultMethod.ConcreteType.class);
 	}
 
+	@Test  // gh-36890
+	void resolveTypeVariableCollisionAcrossInterfaces() {
+		Type type = method(Create.class, "create", Object.class).getGenericParameterTypes()[0];
+		Type resolvedType = resolveType(type, Controller.class);
+
+		assertThat(resolvedType).isEqualTo(Long.class);
+	}
+
 	@Test
 	void resolveTypeFromNestedParameterizedType() {
 		Type resolvedType = resolveType(method(MyInterfaceType.class, "get").getGenericReturnType(), MyCollectionInterfaceType.class);
@@ -502,6 +510,19 @@ class GenericTypeResolverTests {
 
 		static class ConcreteType implements InterfaceWithDefaultMethod.AbstractType {
 		}
+	}
+
+	interface Search<I, O> {
+	}
+
+	interface Create<I, O> {
+
+		default O create(I body) {
+			return null;
+		}
+	}
+
+	static class Controller implements Search<String, Long>, Create<Long, Long> {
 	}
 
 }

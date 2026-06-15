@@ -209,7 +209,7 @@ public final class GenericTypeResolver {
 
 	private static ResolvableType resolveVariable(TypeVariable<?> typeVariable, ResolvableType contextType) {
 		ResolvableType resolvedType;
-		if (contextType.hasGenerics()) {
+		if (contextType.hasGenerics() && declaresTypeVariable(typeVariable, contextType)) {
 			ResolvableType.VariableResolver variableResolver = contextType.asVariableResolver();
 			if (variableResolver == null) {
 				return ResolvableType.NONE;
@@ -237,6 +237,11 @@ public final class GenericTypeResolver {
 			}
 		}
 		return ResolvableType.NONE;
+	}
+
+	private static boolean declaresTypeVariable(TypeVariable<?> typeVariable, ResolvableType contextType) {
+		TypeVariable<?> variableToCompare = SerializableTypeWrapper.unwrap(typeVariable);
+		return (variableToCompare.getGenericDeclaration() == contextType.resolve());
 	}
 
 	/**
