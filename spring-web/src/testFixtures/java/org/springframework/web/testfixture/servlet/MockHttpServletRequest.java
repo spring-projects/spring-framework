@@ -222,7 +222,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
 	private @Nullable String authType;
 
-	private @Nullable Cookie[] cookies;
+	private Cookie @Nullable [] cookies;
 
 	private final Map<String, HeaderValueHolder> headers = new LinkedCaseInsensitiveMap<>();
 
@@ -392,7 +392,8 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	private void updateContentTypeHeader() {
 		if (StringUtils.hasLength(this.contentType)) {
 			String value = this.contentType;
-			if (StringUtils.hasLength(this.characterEncoding) && !this.contentType.toLowerCase().contains(CHARSET_PREFIX)) {
+			if (StringUtils.hasLength(this.characterEncoding) &&
+					!this.contentType.toLowerCase(Locale.ROOT).contains(CHARSET_PREFIX)) {
 				value += ';' + CHARSET_PREFIX + this.characterEncoding;
 			}
 			doAddHeaderValue(HttpHeaders.CONTENT_TYPE, value, true);
@@ -468,7 +469,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 			}
 			catch (IllegalArgumentException ex) {
 				// Try to get charset value anyway
-				contentType = contentType.toLowerCase();
+				contentType = contentType.toLowerCase(Locale.ROOT);
 				int charsetIndex = contentType.indexOf(CHARSET_PREFIX);
 				if (charsetIndex != -1) {
 					this.characterEncoding = contentType.substring(charsetIndex + CHARSET_PREFIX.length());
@@ -616,7 +617,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	}
 
 	@Override
-	public @Nullable String[] getParameterValues(String name) {
+	public String @Nullable [] getParameterValues(String name) {
 		Assert.notNull(name, "Parameter name must not be null");
 		return this.parameters.get(name);
 	}
@@ -998,7 +999,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 		return this.authType;
 	}
 
-	public void setCookies(@Nullable Cookie... cookies) {
+	public void setCookies(Cookie @Nullable ... cookies) {
 		this.cookies = (ObjectUtils.isEmpty(cookies) ? null : cookies);
 		if (this.cookies == null) {
 			removeHeader(HttpHeaders.COOKIE);
@@ -1015,7 +1016,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	}
 
 	@Override
-	public @Nullable Cookie[] getCookies() {
+	public Cookie @Nullable [] getCookies() {
 		return this.cookies;
 	}
 
