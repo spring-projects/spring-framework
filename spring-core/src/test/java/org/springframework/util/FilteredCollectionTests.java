@@ -17,14 +17,17 @@
 package org.springframework.util;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Arjen Poutsma
+ * @author Yanming Zhou
  */
 class FilteredCollectionTests {
 
@@ -74,4 +77,11 @@ class FilteredCollectionTests {
 		assertThat(contained).isFalse();
 	}
 
+	@Test
+	void nullable() {
+		List<@Nullable String> list = Arrays.asList("foo", "bar", null);
+		FilteredCollection<@Nullable String> filtered = new FilteredCollection<>(list, s -> !"bar".equals(s));
+
+		assertThat(filtered).containsExactlyInAnyOrder("foo", null);
+	}
 }
