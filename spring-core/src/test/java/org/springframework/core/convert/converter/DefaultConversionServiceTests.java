@@ -1195,7 +1195,7 @@ class DefaultConversionServiceTests {
 	}
 
 
-	public class ColorConverter implements Converter<String, Color> {
+	public static class ColorConverter implements Converter<String, Color> {
 
 		@Override
 		public Color convert(String source) {
