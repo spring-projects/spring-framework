@@ -21,6 +21,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -28,6 +29,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
  * @author Arjen Poutsma
+ * @author Yanming Zhou
  */
 class CompositeCollectionTests {
 
@@ -191,5 +193,18 @@ class CompositeCollectionTests {
 		assertThat(composite).isEmpty();
 		assertThat(first).isEmpty();
 		assertThat(second).isEmpty();
+	}
+
+	@Test
+	void nullable() {
+		List<@Nullable String> first = new ArrayList<>();
+		first.add("foo");
+		first.add(null);
+		List<@Nullable String> second = new ArrayList<>();
+		second.add("bar");
+		second.add(null);
+		CompositeCollection<@Nullable String> composite = new CompositeCollection<>(first, second);
+
+		assertThat(composite).containsExactly("foo", null, "bar", null);
 	}
 }
