@@ -21,6 +21,7 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.entry;
 
 /**
  * Test fixture for {@link WebSocketExtension}.
@@ -34,13 +35,11 @@ class WebSocketExtensionTests {
 		List<WebSocketExtension> extensions =
 				WebSocketExtension.parseExtensions("x-test-extension ; foo=bar ; bar=baz");
 
-		assertThat(extensions).hasSize(1);
-		WebSocketExtension extension = extensions.get(0);
-
-		assertThat(extension.getName()).isEqualTo("x-test-extension");
-		assertThat(extension.getParameters()).hasSize(2);
-		assertThat(extension.getParameters().get("foo")).isEqualTo("bar");
-		assertThat(extension.getParameters().get("bar")).isEqualTo("baz");
+		assertThat(extensions).singleElement().satisfies(extension -> {
+			assertThat(extension.getName()).isEqualTo("x-test-extension");
+			assertThat(extension.getParameters())
+					.containsOnly(entry("foo", "bar"), entry("bar", "baz"));
+		});
 	}
 
 	@Test
@@ -48,7 +47,7 @@ class WebSocketExtensionTests {
 		List<WebSocketExtension> extensions =
 				WebSocketExtension.parseExtensions("x-foo-extension, x-bar-extension");
 
-		assertThat(extensions.stream().map(WebSocketExtension::getName))
+		assertThat(extensions).extracting(WebSocketExtension::getName)
 				.containsExactly("x-foo-extension", "x-bar-extension");
 	}
 
