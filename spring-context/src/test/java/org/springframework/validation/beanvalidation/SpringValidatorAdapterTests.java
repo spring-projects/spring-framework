@@ -525,7 +525,7 @@ class SpringValidatorAdapterTests {
 	}
 
 
-	public class BeanWithListElementConstraint {
+	public static class BeanWithListElementConstraint {
 
 		@Valid
 		private List<@NotNull String> property;
@@ -540,7 +540,7 @@ class SpringValidatorAdapterTests {
 	}
 
 
-	public class BeanWithMapEntryConstraint {
+	public static class BeanWithMapEntryConstraint {
 
 		@Valid
 		private Map<@NotNull String, @NotNull String> property;

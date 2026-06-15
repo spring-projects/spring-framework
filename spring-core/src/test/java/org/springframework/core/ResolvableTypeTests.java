@@ -1773,7 +1773,7 @@ class ResolvableTypeTests {
 	public interface MyInterfaceType<T> {
 	}
 
-	public class MyGenericInterfaceType<T> implements MyInterfaceType<T>, ResolvableTypeProvider {
+	public static class MyGenericInterfaceType<T> implements MyInterfaceType<T>, ResolvableTypeProvider {
 
 		private final Class<T> type;
 
@@ -1790,26 +1790,26 @@ class ResolvableTypeTests {
 		}
 	}
 
-	public class MySimpleInterfaceType implements MyInterfaceType<String> {
+	public static class MySimpleInterfaceType implements MyInterfaceType<String> {
 	}
 
-	public abstract class MySimpleInterfaceTypeWithImplementsRaw implements MyInterfaceType<String>, List {
+	public abstract static class MySimpleInterfaceTypeWithImplementsRaw implements MyInterfaceType<String>, List {
 	}
 
-	public abstract class ExtendsMySimpleInterfaceTypeWithImplementsRaw extends MySimpleInterfaceTypeWithImplementsRaw {
+	public abstract static class ExtendsMySimpleInterfaceTypeWithImplementsRaw extends MySimpleInterfaceTypeWithImplementsRaw {
 	}
 
-	public class MyCollectionInterfaceType implements MyInterfaceType<Collection<String>> {
+	public static class MyCollectionInterfaceType implements MyInterfaceType<Collection<String>> {
 	}
 
 
-	public abstract class MySuperclassType<T> {
+	public abstract static class MySuperclassType<T> {
 	}
 
-	public class MySimpleSuperclassType extends MySuperclassType<String> {
+	public static class MySimpleSuperclassType extends MySuperclassType<String> {
 	}
 
-	public class MyCollectionSuperclassType extends MySuperclassType<Collection<String>> {
+	public static class MyCollectionSuperclassType extends MySuperclassType<Collection<String>> {
 	}
 
 
@@ -1819,22 +1819,22 @@ class ResolvableTypeTests {
 	private static class SubConsumer<N extends Number> implements Consumer<N> {
 	}
 
-	public class Wildcard<T extends CharSequence> {
+	public static class Wildcard<T extends CharSequence> {
 	}
 
-	public class WildcardFixed extends Wildcard<String> {
+	public static class WildcardFixed extends Wildcard<String> {
 	}
 
-	public class WildcardConsumer<T extends CharSequence & Serializable> implements Consumer<Wildcard<T>> {
+	public static class WildcardConsumer<T extends CharSequence & Serializable> implements Consumer<Wildcard<T>> {
 	}
 
-	public class DoubleWildcard<T extends CharSequence & Serializable> {
+	public static class DoubleWildcard<T extends CharSequence & Serializable> {
 	}
 
-	public class DoubleWildcardFixed extends DoubleWildcard<String> {
+	public static class DoubleWildcardFixed extends DoubleWildcard<String> {
 	}
 
-	public class DoubleWildcardConsumer<T extends CharSequence & Serializable> implements Consumer<DoubleWildcard<T>> {
+	public static class DoubleWildcardConsumer<T extends CharSequence & Serializable> implements Consumer<DoubleWildcard<T>> {
 	}
 
 
@@ -1853,10 +1853,10 @@ class ResolvableTypeTests {
 	}
 
 
-	class Foo<T extends Foo<T>> {
+	static class Foo<T extends Foo<T>> {
 	}
 
-	class Bar extends Foo<Bar> {
+	static class Bar extends Foo<Bar> {
 	}
 
 
@@ -1888,19 +1888,19 @@ class ResolvableTypeTests {
 	public interface IBase<BT extends IBase<BT>> {
 	}
 
-	public abstract class AbstractBase<BT extends IBase<BT>> implements IBase<BT> {
+	public abstract static class AbstractBase<BT extends IBase<BT>> implements IBase<BT> {
 	}
 
-	public class BaseImplementation extends AbstractBase<BaseImplementation> {
+	public static class BaseImplementation extends AbstractBase<BaseImplementation> {
 	}
 
-	public class BaseProvider<BT extends IBase<BT>> implements IProvider<IBase<BT>> {
+	public static class BaseProvider<BT extends IBase<BT>> implements IProvider<IBase<BT>> {
 
 		public Collection<IBase<BT>> stuff;
 	}
 
 
-	public abstract class UnresolvedWithGenerics {
+	public abstract static class UnresolvedWithGenerics {
 
 		Set<Integer> set;
 	}

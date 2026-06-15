@@ -260,25 +260,25 @@ class GenericTypeResolverTests {
 	public interface MyInterfaceType<T> {
 	}
 
-	public class MySimpleInterfaceType implements MyInterfaceType<String> {
+	public static class MySimpleInterfaceType implements MyInterfaceType<String> {
 	}
 
-	public class MyCollectionInterfaceType implements MyInterfaceType<Collection<String>> {
+	public static class MyCollectionInterfaceType implements MyInterfaceType<Collection<String>> {
 	}
 
-	public abstract class MyAbstractType<T> implements MyInterfaceType<T> {
+	public abstract static class MyAbstractType<T> implements MyInterfaceType<T> {
 	}
 
-	public class MyConcreteType extends MyAbstractType<Character> {
+	public static class MyConcreteType extends MyAbstractType<Character> {
 	}
 
-	public abstract class MySuperclassType<T> {
+	public abstract static class MySuperclassType<T> {
 	}
 
-	public class MySimpleSuperclassType extends MySuperclassType<String> {
+	public static class MySimpleSuperclassType extends MySuperclassType<String> {
 	}
 
-	public class MyCollectionSuperclassType extends MySuperclassType<Collection<String>> {
+	public static class MyCollectionSuperclassType extends MySuperclassType<Collection<String>> {
 	}
 
 	public static class MyTypeWithMethods<T> {
@@ -380,19 +380,19 @@ class GenericTypeResolverTests {
 	static class GenericClass<T> {
 	}
 
-	class A {}
+	static class A {}
 
-	class B<T> {}
+	static class B<T> {}
 
-	class C extends A {}
+	static class C extends A {}
 
-	class D extends B<Long> {}
+	static class D extends B<Long> {}
 
-	class E extends C {}
+	static class E extends C {}
 
-	class TestIfc<T> {}
+	static class TestIfc<T> {}
 
-	class TestImpl<I extends A, T extends B<I>> extends TestIfc<T> {
+	static class TestImpl<I extends A, T extends B<I>> extends TestIfc<T> {
 	}
 
 	abstract static class BiGenericClass<T extends B<?>, V extends A> {}
