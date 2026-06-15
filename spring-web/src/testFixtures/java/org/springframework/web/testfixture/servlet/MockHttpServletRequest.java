@@ -66,6 +66,7 @@ import org.jspecify.annotations.Nullable;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.lang.Contract;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedCaseInsensitiveMap;
 import org.springframework.util.LinkedMultiValueMap;
@@ -1311,6 +1312,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	}
 
 	@Override
+	@Contract("true -> !null")
 	public @Nullable HttpSession getSession(boolean create) {
 		checkActive();
 		// Reset session if invalidated.
@@ -1325,7 +1327,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	}
 
 	@Override
-	public @Nullable HttpSession getSession() {
+	public HttpSession getSession() {
 		return getSession(true);
 	}
 
