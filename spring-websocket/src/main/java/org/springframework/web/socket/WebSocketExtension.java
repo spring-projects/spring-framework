@@ -104,11 +104,8 @@ public class WebSocketExtension {
 		if (this == other) {
 			return true;
 		}
-		if (other == null || !(other instanceof WebSocketExtension)) {
-			return false;
-		}
-		WebSocketExtension otherExt = (WebSocketExtension) other;
-		return (this.name.equals(otherExt.name) && this.parameters.equals(otherExt.parameters));
+		return (other instanceof WebSocketExtension that &&
+				this.name.equals(that.name) && this.parameters.equals(that.parameters));
 	}
 
 	@Override
