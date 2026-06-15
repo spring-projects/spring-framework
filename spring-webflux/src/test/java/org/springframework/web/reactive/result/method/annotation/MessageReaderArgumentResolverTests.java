@@ -294,8 +294,7 @@ class MessageReaderArgumentResolverTests {
 		Mono<Object> result = this.resolver.readBody(param, true, this.bindingContext, exchange);
 		Object value = result.block(Duration.ofSeconds(5));
 
-		assertThat(value).isNotNull();
-		assertThat(param.getParameterType().isAssignableFrom(value.getClass())).as("Unexpected return value type: " + value).isTrue();
+		assertThat(value).isInstanceOf(param.getParameterType());
 
 		return (T) value;
 	}

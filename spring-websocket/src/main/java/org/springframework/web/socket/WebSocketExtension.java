@@ -103,7 +103,7 @@ public class WebSocketExtension {
 		if (this == other) {
 			return true;
 		}
-		if (other == null || !WebSocketExtension.class.isAssignableFrom(other.getClass())) {
+		if (other == null || !(other instanceof WebSocketExtension)) {
 			return false;
 		}
 		WebSocketExtension otherExt = (WebSocketExtension) other;

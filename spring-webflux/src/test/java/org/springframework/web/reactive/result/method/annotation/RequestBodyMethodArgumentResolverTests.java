@@ -233,9 +233,7 @@ class RequestBodyMethodArgumentResolverTests {
 		Mono<Object> result = this.resolver.readBody(param, true, new BindingContext(), exchange);
 		Object value = result.block(Duration.ofSeconds(5));
 
-		assertThat(value).isNotNull();
-		assertThat(param.getParameterType().isAssignableFrom(value.getClass()))
-				.as("Unexpected return value type: " + value).isTrue();
+		assertThat(value).isInstanceOf(param.getParameterType());
 
 		//no inspection unchecked
 		return (T) value;
@@ -248,8 +246,7 @@ class RequestBodyMethodArgumentResolverTests {
 		Object value = result.block(Duration.ofSeconds(5));
 
 		if (value != null) {
-			assertThat(param.getParameterType().isAssignableFrom(value.getClass()))
-					.as("Unexpected parameter type: " + value).isTrue();
+			assertThat(value).isInstanceOf(param.getParameterType());
 		}
 
 		//no inspection unchecked

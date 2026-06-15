@@ -57,7 +57,7 @@ public class CompositeMessageCondition implements MessageCondition<CompositeMess
 	@SuppressWarnings("unchecked")
 	public <T extends MessageCondition<T>> T getCondition(Class<T> messageConditionType) {
 		for (MessageCondition<?> condition : this.messageConditions) {
-			if (messageConditionType.isAssignableFrom(condition.getClass())) {
+			if (messageConditionType.isInstance(condition)) {
 				return (T) condition;
 			}
 		}

@@ -205,7 +205,7 @@ public class MessageHeaders implements Map<String, Object>, Serializable {
 		if (value == null) {
 			return null;
 		}
-		if (!type.isAssignableFrom(value.getClass())) {
+		if (!type.isInstance(value)) {
 			throw new IllegalArgumentException("Incorrect type specified for header '" +
 					key + "'. Expected [" + type + "] but actual type is [" + value.getClass() + "]");
 		}

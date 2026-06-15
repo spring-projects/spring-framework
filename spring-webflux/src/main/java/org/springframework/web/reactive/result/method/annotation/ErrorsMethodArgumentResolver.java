@@ -65,10 +65,10 @@ public class ErrorsMethodArgumentResolver extends HandlerMethodArgumentResolverS
 		// This is done to enable early argument resolution here. When the Mono actually
 		// completes it is replaced in the model with the actual value.
 
-		if (Mono.class.isAssignableFrom(errors.getClass())) {
+		if (errors instanceof Mono) {
 			return ((Mono<?>) errors).cast(Object.class);
 		}
-		else if (Errors.class.isAssignableFrom(errors.getClass())) {
+		else if (errors instanceof Errors) {
 			return Mono.just(errors);
 		}
 		else {
