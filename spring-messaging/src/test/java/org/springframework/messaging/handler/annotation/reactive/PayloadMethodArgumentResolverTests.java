@@ -55,6 +55,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * Tests for {@link PayloadMethodArgumentResolver}.
  *
  * @author Rossen Stoyanchev
+ * @author Yanming Zhou
  */
 class PayloadMethodArgumentResolverTests {
 
@@ -160,7 +161,7 @@ class PayloadMethodArgumentResolverTests {
 
 
 	@SuppressWarnings("unchecked")
-	private <T> @Nullable T resolveValue(MethodParameter param, Publisher<DataBuffer> content, Validator validator) {
+	private <T extends @Nullable Object> T resolveValue(MethodParameter param, Publisher<DataBuffer> content, Validator validator) {
 
 		Message<?> message = new GenericMessage<>(content,
 				Collections.singletonMap(MessageHeaders.CONTENT_TYPE, MimeTypeUtils.TEXT_PLAIN));
@@ -200,7 +201,7 @@ class PayloadMethodArgumentResolverTests {
 		}
 
 		@Override
-		public void validate(@Nullable Object target, Errors errors) {
+		public void validate(Object target, Errors errors) {
 			if (target instanceof String && ((String) target).length() < 8) {
 				errors.reject("Invalid length");
 			}
