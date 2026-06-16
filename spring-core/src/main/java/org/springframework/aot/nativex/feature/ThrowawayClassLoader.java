@@ -65,7 +65,7 @@ class ThrowawayClassLoader extends ClassLoader {
 		if (inputStream == null) {
 			return null;
 		}
-		try {
+		try (inputStream) {
 			ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 			inputStream.transferTo(outputStream);
 			byte[] bytes = outputStream.toByteArray();
