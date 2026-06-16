@@ -25,6 +25,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
  * Tests for {@link ThrowawayClassLoader}.
@@ -54,6 +55,23 @@ class ThrowawayClassLoaderTests {
 
 		assertThat(loaded.getName()).isEqualTo(className);
 		assertThat(closed).as("InputStream closed").isTrue();
+	}
+
+	@Test
+	void loadClassThrowsClassNotFoundExceptionWhenClassResourceIsMissing() {
+		// The grandparent resolves bootstrap classes only, so super.loadClass(...) fails,
+		// and the resource loader provides no class bytes. The fallback must then honor the
+		// ClassLoader.loadClass contract by reporting the failure instead of returning null.
+		ClassLoader resourceLoader = new ClassLoader(new ClassLoader(null) {}) {
+			@Override
+			public InputStream getResourceAsStream(String name) {
+				return null;
+			}
+		};
+		ThrowawayClassLoader classLoader = new ThrowawayClassLoader(resourceLoader);
+
+		assertThatExceptionOfType(ClassNotFoundException.class)
+				.isThrownBy(() -> classLoader.loadClass("com.example.MissingClass"));
 	}
 
 	private static byte[] classBytesOf(String className) throws IOException {

@@ -54,7 +54,11 @@ class ThrowawayClassLoader extends ClassLoader {
 				return super.loadClass(name, true);
 			}
 			catch (ClassNotFoundException ex) {
-				return loadClassFromResource(name);
+				Class<?> loadedFromResource = loadClassFromResource(name);
+				if (loadedFromResource == null) {
+					throw ex;
+				}
+				return loadedFromResource;
 			}
 		}
 	}
