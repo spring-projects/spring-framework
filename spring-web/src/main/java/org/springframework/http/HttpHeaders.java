@@ -133,7 +133,7 @@ public class HttpHeaders implements Serializable {
 	/**
 	 * The HTTP {@code Accept-Query} header field name.
 	 * @since 7.1
-	 * @see <a href="https://httpwg.org/http-extensions/draft-ietf-httpbis-safe-method-w-body.html">IETF Draft</a>
+	 * @see <a href="https://www.rfc-editor.org/rfc/rfc10008.html#section-3">Section 3 of RFC 10008</a>
 	 */
 	public static final String ACCEPT_QUERY = "Accept-Query";
 	/**

@@ -88,7 +88,7 @@ public final class HttpMethod implements Comparable<HttpMethod>, Serializable {
 	/**
 	 * The HTTP method {@code QUERY}.
 	 * @since 7.1
-	 * @see <a href="https://www.rfc-editor.org/rfc/rfc10008.html">The HTTP QUERY Method</a>
+	 * @see <a href="https://www.rfc-editor.org/rfc/rfc10008.html#section-2">The HTTP QUERY Method, section 2</a>
 	 */
 	public static final HttpMethod QUERY = new HttpMethod("QUERY");
 
