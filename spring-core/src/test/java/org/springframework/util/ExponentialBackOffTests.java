@@ -27,6 +27,7 @@ import org.springframework.util.backoff.ExponentialBackOff;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.assertj.core.api.Assertions.assertThatNoException;
 
 /**
  * Tests for {@link ExponentialBackOff}.
@@ -116,6 +117,20 @@ class ExponentialBackOffTests {
 	void invalidInterval() {
 		ExponentialBackOff backOff = new ExponentialBackOff();
 		assertThatIllegalArgumentException().isThrownBy(() -> backOff.setMultiplier(0.9));
+	}
+
+	@Test
+	void jitterWithZeroInitialInterval() {
+		// 'initialInterval = 0' and 'jitter > 0' are both individually accepted
+		// configurations, so their combination must not throw. With initialInterval
+		// of 0, the first nextBackOff() previously evaluated 'jitter * (0 / 0)',
+		// resulting in an integer division by zero.
+		ExponentialBackOff backOff = new ExponentialBackOff();
+		backOff.setInitialInterval(0);
+		backOff.setJitter(100);
+
+		BackOffExecution execution = backOff.start();
+		assertThatNoException().isThrownBy(execution::nextBackOff);
 	}
 
 	@Test
