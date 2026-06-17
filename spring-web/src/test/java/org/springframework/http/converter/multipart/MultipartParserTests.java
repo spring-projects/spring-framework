@@ -189,8 +189,7 @@ class MultipartParserTests {
 
 	private void parse(String fileName, String boundary, MultipartParser.PartListener listener) throws Exception {
 		try (InputStream input = createStream(fileName)) {
-			MultipartParser multipartParser = new MultipartParser(10 * 1024, 4 * 1024);
-			multipartParser.parse(input, boundary.getBytes(UTF_8), StandardCharsets.UTF_8, listener);
+			MultipartParser.parse(input, boundary.getBytes(UTF_8), UTF_8, 10 * 1024, 4 * 1024, listener);
 		}
 	}
 

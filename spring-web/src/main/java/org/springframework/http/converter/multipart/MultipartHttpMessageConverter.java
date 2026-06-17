@@ -355,8 +355,8 @@ public class MultipartHttpMessageConverter implements SmartHttpMessageConverter<
 		PartGenerator partGenerator = new PartGenerator(
 				this.maxInMemorySize, this.maxDiskUsagePerPart, this.maxParts, getTempDirectory());
 
-		MultipartParser parser = new MultipartParser(this.maxHeadersSize, 2 * 1024);
-		parser.parse(message.getBody(), boundary, headersCharset, partGenerator);
+		MultipartParser.parse(
+				message.getBody(), boundary, headersCharset, this.maxHeadersSize, 2 * 1024, partGenerator);
 
 		return partGenerator.getParts();
 	}
