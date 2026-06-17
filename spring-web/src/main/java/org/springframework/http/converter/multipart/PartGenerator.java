@@ -151,6 +151,7 @@ final class PartGenerator implements MultipartParser.PartListener {
 		}
 	}
 
+
 	/**
 	 * Represents the internal state of the {@link PartGenerator} for creating a single {@link Part}.
 	 * {@link State} instances are stateful, and created when a new
@@ -178,6 +179,7 @@ final class PartGenerator implements MultipartParser.PartListener {
 		}
 
 	}
+
 
 	/**
 	 * The initial state of the creator. Throws an exception for {@link #onBody(DataBuffer, boolean)}.
@@ -338,11 +340,32 @@ final class PartGenerator implements MultipartParser.PartListener {
 
 		private long byteCount;
 
-
 		public FileState(HttpHeaders headers, Path folder) {
 			this.headers = headers;
 			this.file = createFile(folder);
 			this.outputStream = createOutputStream(this.file);
+		}
+
+		private Path createFile(Path directory) {
+			try {
+				Path tempFile = Files.createTempFile(directory, null, ".multipart");
+				if (logger.isTraceEnabled()) {
+					logger.trace("Storing multipart data in file " + tempFile);
+				}
+				return tempFile;
+			}
+			catch (IOException ex) {
+				throw new UncheckedIOException("Could not create temp file in " + directory, ex);
+			}
+		}
+
+		private OutputStream createOutputStream(Path file) {
+			try {
+				return Files.newOutputStream(file, StandardOpenOption.WRITE);
+			}
+			catch (IOException ex) {
+				throw new UncheckedIOException("Could not write to temp file " + file, ex);
+			}
 		}
 
 		@Override
@@ -372,28 +395,6 @@ final class PartGenerator implements MultipartParser.PartListener {
 			}
 			catch (IOException exc) {
 				// ignored
-			}
-		}
-
-		private Path createFile(Path directory) {
-			try {
-				Path tempFile = Files.createTempFile(directory, null, ".multipart");
-				if (logger.isTraceEnabled()) {
-					logger.trace("Storing multipart data in file " + tempFile);
-				}
-				return tempFile;
-			}
-			catch (IOException ex) {
-				throw new UncheckedIOException("Could not create temp file in " + directory, ex);
-			}
-		}
-
-		private OutputStream createOutputStream(Path file) {
-			try {
-				return Files.newOutputStream(file, StandardOpenOption.WRITE);
-			}
-			catch (IOException ex) {
-				throw new UncheckedIOException("Could not write to temp file " + file, ex);
 			}
 		}
 
