@@ -7001,7 +7001,7 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 	}
 
 
-	public class PayloadX {
+	public static class PayloadX {
 
 		public int valueI = 120;
 		public Integer valueIB = 120;
@@ -7713,7 +7713,7 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 	}
 
 
-	public class Reg {
+	public static class Reg {
 
 		private Integer _value,_value2;
 		private Long _valueL,_valueL2;

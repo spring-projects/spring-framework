@@ -687,7 +687,7 @@ class BeanWrapperGenericsTests {
 	}
 
 
-	public class Bar implements Foo {
+	public static class Bar implements Foo {
 
 		private double version;
 
@@ -710,7 +710,7 @@ class BeanWrapperGenericsTests {
 	}
 
 
-	public class Promotion implements ObjectWithId<Long> {
+	public static class Promotion implements ObjectWithId<Long> {
 
 		private Long id;
 
