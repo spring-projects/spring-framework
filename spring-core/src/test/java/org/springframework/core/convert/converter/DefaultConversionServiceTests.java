@@ -232,35 +232,38 @@ class DefaultConversionServiceTests {
 		assertThat(conversionService.convert("", Number.class)).isNull();
 	}
 
-	@Test
-	void stringToDataSize() {
-		assertThat(conversionService.convert("10B", DataSize.class)).isEqualTo(DataSize.ofBytes(10));
-		assertThat(conversionService.convert("+10KB", DataSize.class)).isEqualTo(DataSize.ofKilobytes(10));
-		assertThat(conversionService.convert("-10MB", DataSize.class)).isEqualTo(DataSize.ofMegabytes(-10));
-		assertThat(conversionService.convert("10", DataSize.class)).isEqualTo(DataSize.ofBytes(10));
+	@Test  // gh-36830
+	void stringToDataSizeWithInvalidString() {
+		assertThatExceptionOfType(ConversionFailedException.class)
+				.isThrownBy(() -> conversionService.convert("10WB", DataSize.class))
+				.havingRootCause()
+					.isInstanceOf(IllegalArgumentException.class)
+					.withMessage("Unknown data unit suffix 'WB'");
 	}
 
-	@Test
-	void stringToDataSizeEmptyString() {
+	@Test  // gh-36830
+	void stringToDataSizeWithEmptyString() {
 		assertThat(conversionService.convert("", DataSize.class)).isNull();
 	}
 
-	@Test
-	void stringToDataSizeInvalidString() {
-		assertThatExceptionOfType(ConversionFailedException.class).isThrownBy(() ->
-				conversionService.convert("10WB", DataSize.class));
+	@Test  // gh-36830
+	void stringToDataSize() {
+		assertThat(conversionService.convert("10", DataSize.class)).isEqualTo(DataSize.ofBytes(10));
+		assertThat(conversionService.convert("10B", DataSize.class)).isEqualTo(DataSize.ofBytes(10));
+		assertThat(conversionService.convert("+10KB", DataSize.class)).isEqualTo(DataSize.ofKilobytes(10));
+		assertThat(conversionService.convert("-10MB", DataSize.class)).isEqualTo(DataSize.ofMegabytes(-10));
 	}
 
-	@Test
+	@Test  // gh-36830
+	void numberToDataSizeWithDecimalNumber() {
+		assertThatExceptionOfType(ConversionFailedException.class)
+				.isThrownBy(() -> conversionService.convert(10.5, DataSize.class));
+	}
+
+	@Test  // gh-36830
 	void numberToDataSize() {
 		assertThat(conversionService.convert(10, DataSize.class)).isEqualTo(DataSize.ofBytes(10));
 		assertThat(conversionService.convert(-10L, DataSize.class)).isEqualTo(DataSize.ofBytes(-10));
-	}
-
-	@Test
-	void numberToDataSizeWithDecimalNumber() {
-		assertThatExceptionOfType(ConversionFailedException.class).isThrownBy(() ->
-				conversionService.convert(10.5, DataSize.class));
 	}
 
 	@Test
