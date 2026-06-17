@@ -57,7 +57,7 @@ class ThrowawayClassLoaderTests {
 		assertThat(closed).as("InputStream closed").isTrue();
 	}
 
-	@Test
+	@Test  // gh-36938
 	void loadClassThrowsClassNotFoundExceptionWhenClassResourceIsMissing() {
 		// The grandparent resolves bootstrap classes only, so super.loadClass(...) fails,
 		// and the resource loader provides no class bytes. The fallback must then honor the
@@ -70,9 +70,12 @@ class ThrowawayClassLoaderTests {
 		};
 		ThrowawayClassLoader classLoader = new ThrowawayClassLoader(resourceLoader);
 
+		String name = "com.example.MissingClass";
 		assertThatExceptionOfType(ClassNotFoundException.class)
-				.isThrownBy(() -> classLoader.loadClass("com.example.MissingClass"));
+				.isThrownBy(() -> classLoader.loadClass(name))
+				.withMessageContaining(name);
 	}
+
 
 	private static byte[] classBytesOf(String className) throws IOException {
 		String resourceName = className.replace('.', '/') + ".class";
