@@ -154,6 +154,10 @@ public class ExponentialBackOff implements BackOff {
 	 * {@code initialInterval} or above {@code maxInterval}.
 	 * <p>If a {@code multiplier} is specified, it is applied to the jitter value
 	 * as well.
+	 * <p>When {@code initialInterval} is {@code 0} combined with a positive
+	 * jitter, the interval never grows regardless of any configured multiplier,
+	 * so the full configured jitter is applied directly as a random interval in
+	 * the range from {@code 0} to {@code min(jitter, maxInterval)}.
 	 * @param jitter the jitter value in milliseconds
 	 * @since 7.0
 	 */
@@ -311,7 +315,9 @@ public class ExponentialBackOff implements BackOff {
 			long jitter = getJitter();
 			if (jitter > 0) {
 				long initialInterval = getInitialInterval();
-				long applicableJitter = jitter * (interval / initialInterval);
+				// When initialInterval is 0 the interval never grows, so the scale factor
+				// stays at its baseline value of 1 and the full configured jitter is applied.
+				long applicableJitter = jitter * (initialInterval > 0 ? (interval / initialInterval) : 1);
 				long min = Math.max(interval - applicableJitter, initialInterval);
 				long max = Math.min(interval + applicableJitter, getMaxInterval());
 				return min + (long) (Math.random() * (max - min));

@@ -281,6 +281,11 @@ public interface RetryPolicy {
 		 * {@linkplain #maxDelay(Duration) max delay}.
 		 * <p>If a {@linkplain #multiplier(double) multiplier} is specified, it
 		 * is applied to the jitter value as well.
+		 * <p>When the configured {@linkplain #delay(Duration) delay} is zero
+		 * combined with a positive jitter, the delay never grows regardless of
+		 * any configured multiplier, so the full configured jitter is applied
+		 * directly as a random delay in the range from zero to
+		 * {@code min(jitter, maxDelay)}.
 		 * <p>The default is no jitter.
 		 * <p>The supplied value will override any previously configured value.
 		 * <p>You should not specify this configuration option if you have

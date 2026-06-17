@@ -81,6 +81,13 @@ public void sendNotification() {
 }
 ----
 
+[NOTE]
+====
+When `delay` is `0` combined with a positive `jitter`, the delay never grows
+regardless of any configured `multiplier`, so the full configured `jitter` is
+applied directly as a random delay in the range from `0` to `min(jitter, maxDelay)`.
+====
+
 Last but not least, `@Retryable` also works for reactive methods with a reactive return
 type, decorating the pipeline with Reactor's retry capabilities:
 
@@ -262,6 +269,13 @@ and an exponential back-off strategy with a bit of jitter.
     retryTemplate.invoke(
             () -> jmsClient.destination("notifications").send(...));
 ----
+
+[NOTE]
+====
+When `delay` is zero combined with a positive `jitter`, the delay never grows
+regardless of any configured `multiplier`, so the full configured `jitter` is
+applied directly as a random delay in the range from zero to `min(jitter, maxDelay)`.
+====
 
 [TIP]
 ====
