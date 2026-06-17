@@ -96,8 +96,8 @@ final class PartGenerator implements MultipartParser.PartListener {
 
 	private static boolean isFormField(HttpHeaders headers) {
 		MediaType contentType = headers.getContentType();
-		return (contentType == null || MediaType.TEXT_PLAIN.equalsTypeAndSubtype(contentType)) &&
-				headers.getContentDisposition().getFilename() == null;
+		return ((contentType == null || MediaType.TEXT_PLAIN.equalsTypeAndSubtype(contentType)) &&
+				headers.getContentDisposition().getFilename() == null);
 	}
 
 	@Override
@@ -133,9 +133,8 @@ final class PartGenerator implements MultipartParser.PartListener {
 	}
 
 	@Override
-	public void onError(Throwable error) {
+	public void onError(Throwable ex) {
 		deleteParts();
-		throw new HttpMessageConversionException("Cannot decode multipart body", error);
 	}
 
 	void addPart(Part part) {
@@ -168,7 +167,7 @@ final class PartGenerator implements MultipartParser.PartListener {
 	private interface State {
 
 		/**
-		 * Invoked when a {@link MultipartParser.PartListener#onBody(DataBuffer, boolean)} is received.
+		 * Invoked when the parser receives additional data.
 		 */
 		void onBody(DataBuffer dataBuffer, boolean last);
 

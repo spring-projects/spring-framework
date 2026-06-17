@@ -16,7 +16,6 @@
 
 package org.springframework.http.converter.multipart;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -81,8 +80,26 @@ final class MultipartParser {
 	}
 
 
+	/**
+	 * Simple delegation to {@link State#data(DataBuffer)}.
+	 */
 	void handleData(DataBuffer dataBuffer) {
 		this.state.data(dataBuffer);
+	}
+
+	/**
+	 * Handle a parsing error cleaning resources in the state and in the listener
+	 * unless the error is {@link HttpMessageConversionException} in which case
+	 * it is simply propagated.
+	 */
+	void handleException(String message, @Nullable Throwable cause) {
+		if (cause instanceof HttpMessageConversionException ex) {
+			throw ex;
+		}
+		changeState(DisposedState.INSTANCE, null);
+		HttpMessageConversionException ex = new HttpMessageConversionException(message, cause);
+		this.listener.onError(ex);
+		throw ex;
 	}
 
 	private void changeState(State newState, @Nullable DataBuffer remainder) {
@@ -118,6 +135,7 @@ final class MultipartParser {
 		return result;
 	}
 
+
 	/**
 	 * Parse the given stream of bytes into events published to the given {@link PartListener}.
 	 * @param input the input stream
@@ -141,9 +159,8 @@ final class MultipartParser {
 			}
 			parser.state.complete();
 		}
-		catch (IOException ex) {
-			parser.state.dispose();
-			listener.onError(new HttpMessageConversionException("Could not decode multipart message", ex));
+		catch (Throwable ex) {
+			parser.handleException("Could not decode multipart message", ex);
 		}
 	}
 
@@ -155,13 +172,19 @@ final class MultipartParser {
 
 		/**
 		 * Handle {@link HttpHeaders} for a part.
+		 * <p>Expectations for exception handling are the same as for {@link #onBody}.
 		 */
 		void onHeaders(HttpHeaders headers);
 
 		/**
-		 * Handle a piece of data for a body part.
+		 * Handle the next chunk of body data.
+		 * <p>Implementations must release the input buffer.
+		 * <p>Implementations must handle all exceptions, cleaning up resources,
+		 * and wrapping the exception as {@link HttpMessageConversionException}.
 		 * @param buffer a chunk of body
-		 * @param last   whether this is the last chunk for the part
+		 * @param last whether this is the last chunk for the part
+		 * @throws HttpMessageConversionException if the buffer could not be
+		 * handled due to exceeded limits or for any other reason
 		 */
 		void onBody(DataBuffer buffer, boolean last);
 
@@ -171,7 +194,12 @@ final class MultipartParser {
 		void onComplete();
 
 		/**
-		 * Handle any error thrown during the parsing phase.
+		 * Handle any error thrown during the parsing phase. The purpose of the
+		 * method call is to allow cleaning up of resources. The listener does
+		 * not need to throw or wrap and throw the error.
+		 * <p>{@link #onHeaders} and {@link #onBody} are expected to handle their
+		 * own exceptions, i.e. any exception those methods throw will not be
+		 * passed here.
 		 */
 		void onError(Throwable error);
 
@@ -194,10 +222,26 @@ final class MultipartParser {
 	 */
 	private interface State {
 
+		/**
+		 * Handle the next chunk of data.
+		 * <p>If this method raises any exception other than
+		 * {@link HttpMessageConversionException}, it will be
+		 * {@link MultipartParser#handleException handled} by the parser.
+		 * An {@link HttpMessageConversionException} on the other hand is
+		 * considered fully handled and allowed to propagate as is.
+		 */
 		void data(DataBuffer buf);
 
+		/**
+		 * Called when the current part is fully parsed.
+		 * <p>Expecations for exception handling are the same as for {@link #data}.
+		 */
 		void complete();
 
+		/**
+		 * Clean up resources held by the state. Called in case of errors or
+		 * when switching to a new state.
+		 */
 		default void dispose() {
 		}
 
@@ -241,8 +285,7 @@ final class MultipartParser {
 
 		@Override
 		public void complete() {
-			changeState(DisposedState.INSTANCE, null);
-			MultipartParser.this.listener.onError(new HttpMessageConversionException("Could not find first boundary"));
+			handleException("Could not find first boundary", null);
 		}
 
 		@Override
@@ -312,7 +355,14 @@ final class MultipartParser {
 			if (logger.isTraceEnabled()) {
 				logger.trace("Emitting headers: " + headers);
 			}
-			MultipartParser.this.listener.onHeaders(headers);
+			try {
+				MultipartParser.this.listener.onHeaders(headers);
+			}
+			catch (Throwable ex) {
+				// PartListener should have cleaned its state, clean our own
+				dispose();
+				throw ex;
+			}
 		}
 
 		/**
@@ -338,12 +388,9 @@ final class MultipartParser {
 			if (count <= MultipartParser.this.maxHeadersSize) {
 				return true;
 			}
-			else {
-				MultipartParser.this.listener.onError(
-						new HttpMessageConversionException("Part headers exceeded the memory usage limit of " +
-								MultipartParser.this.maxHeadersSize + " bytes"));
-				return false;
-			}
+			MultipartParser.this.handleException(
+					"Part headers exceeded the limit of " + MultipartParser.this.maxHeadersSize + " bytes", null);
+			return false;
 		}
 
 		/**
@@ -377,8 +424,7 @@ final class MultipartParser {
 
 		@Override
 		public void complete() {
-			changeState(DisposedState.INSTANCE, null);
-			MultipartParser.this.listener.onError(new HttpMessageConversionException("Could not find end of headers"));
+			MultipartParser.this.handleException("Could not find end of headers", null);
 		}
 
 		@Override
@@ -493,25 +539,32 @@ final class MultipartParser {
 				}
 				len += previous.readableByteCount();
 			}
-			emit.forEach(buffer -> MultipartParser.this.listener.onBody(buffer, false));
+			emit.forEach(buffer -> invokeListener(buffer, false));
 		}
 
 		private void flush() {
 			for (Iterator<DataBuffer> iterator = this.queue.iterator(); iterator.hasNext(); ) {
 				DataBuffer buffer = iterator.next();
 				boolean last = !iterator.hasNext();
-				MultipartParser.this.listener.onBody(buffer, last);
+				invokeListener(buffer, last);
 			}
 			this.queue.clear();
 		}
 
+		private void invokeListener(DataBuffer buffer, boolean last) {
+			try {
+				MultipartParser.this.listener.onBody(buffer, last);
+			}
+			catch (Throwable ex) {
+				dispose();
+				throw ex;
+			}
+		}
+
 		@Override
 		public void complete() {
-			changeState(DisposedState.INSTANCE, null);
-			String msg = "Could not find end of body (␍␊--" +
-					new String(MultipartParser.this.boundary, StandardCharsets.UTF_8) +
-					")";
-			MultipartParser.this.listener.onError(new HttpMessageConversionException(msg));
+			MultipartParser.this.handleException("Could not find end of body (␍␊--" +
+					new String(MultipartParser.this.boundary, StandardCharsets.UTF_8) + ")", null);
 		}
 
 		@Override

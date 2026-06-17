@@ -38,6 +38,7 @@ import org.springframework.http.converter.HttpMessageConversionException;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * Tests for {@link MultipartParser}.
@@ -74,7 +75,9 @@ class MultipartParserTests {
 	@Test
 	void noEndBoundary() throws Exception {
 		TestListener listener = new TestListener();
-		parse("no-end-boundary.multipart", "boundary", listener);
+		assertThatThrownBy(() -> parse("no-end-boundary.multipart", "boundary", listener))
+				.isInstanceOf(HttpMessageConversionException.class)
+				.hasMessage("Could not find end of headers");
 
 		assertThat(listener.error).isInstanceOf(HttpMessageConversionException.class);
 	}
@@ -82,7 +85,9 @@ class MultipartParserTests {
 	@Test
 	void garbage() throws Exception {
 		TestListener listener = new TestListener();
-		parse("garbage-1.multipart", "boundary", listener);
+		assertThatThrownBy(() -> parse("garbage-1.multipart", "boundary", listener))
+				.isInstanceOf(HttpMessageConversionException.class)
+				.hasMessage("Could not find first boundary");
 
 		assertThat(listener.error).isInstanceOf(HttpMessageConversionException.class);
 	}
@@ -90,7 +95,9 @@ class MultipartParserTests {
 	@Test
 	void noEndHeader() throws Exception {
 		TestListener listener = new TestListener();
-		parse("no-end-header.multipart", "boundary", listener);
+		assertThatThrownBy(() -> parse("no-end-header.multipart", "boundary", listener))
+				.isInstanceOf(HttpMessageConversionException.class)
+				.hasMessage("Could not find end of headers");
 
 		assertThat(listener.error).isInstanceOf(HttpMessageConversionException.class);
 	}
@@ -98,7 +105,9 @@ class MultipartParserTests {
 	@Test
 	void noEndBody() throws Exception {
 		TestListener listener = new TestListener();
-		parse("no-end-body.multipart", "boundary", listener);
+		assertThatThrownBy(() -> parse("no-end-body.multipart", "boundary", listener))
+				.isInstanceOf(HttpMessageConversionException.class)
+				.hasMessage("Could not find end of body (␍␊--boundary)");
 
 		assertThat(listener.error).isInstanceOf(HttpMessageConversionException.class);
 	}

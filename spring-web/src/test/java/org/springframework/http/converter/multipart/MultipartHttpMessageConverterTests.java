@@ -200,7 +200,7 @@ class MultipartHttpMessageConverterTests {
 		void readMultipartInvalid() throws Exception {
 			MockHttpInputMessage response = createMultipartResponse("garbage-1.multipart", "boundary");
 			assertThatThrownBy(() -> converter.read(ResolvableType.forClassWithGenerics(MultiValueMap.class, String.class, Part.class), response, null))
-					.isInstanceOf(HttpMessageConversionException.class).hasMessage("Cannot decode multipart body");
+					.isInstanceOf(HttpMessageConversionException.class).hasMessage("Could not find first boundary");
 		}
 
 		@Test
