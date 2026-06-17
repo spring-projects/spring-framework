@@ -337,26 +337,30 @@ final class PartGenerator implements MultipartParser.PartListener {
 		public void onBody(DataBuffer dataBuffer, boolean last) {
 			this.byteCount += dataBuffer.readableByteCount();
 			if (isMaxDiskUsagePerPartExceeded()) {
-				try {
-					this.outputStream.close();
-				}
-				catch (IOException exc) {
-					// ignored
-				}
-				throw new HttpMessageConversionException(
-						"Part exceeded the disk usage limit of " +
-								PartGenerator.this.maxDiskUsagePerPart + " bytes");
+				closeOutputStream();
+				throw new HttpMessageConversionException("Part exceeded " +
+						"the disk usage limit of " + PartGenerator.this.maxDiskUsagePerPart + " bytes");
 			}
 			writeBuffer(dataBuffer);
 			if (last) {
 				Part part = DefaultParts.part(this.headers, this.file);
 				PartGenerator.this.addPart(part);
+				closeOutputStream();
 			}
 		}
 
 		private boolean isMaxDiskUsagePerPartExceeded() {
 			return (PartGenerator.this.maxDiskUsagePerPart != -1 &&
 					this.byteCount > PartGenerator.this.maxDiskUsagePerPart);
+		}
+
+		private void closeOutputStream() {
+			try {
+				this.outputStream.close();
+			}
+			catch (IOException exc) {
+				// ignored
+			}
 		}
 
 		private Path createFile(Path directory) {
