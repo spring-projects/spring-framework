@@ -131,6 +131,21 @@ class ExponentialBackOffTests {
 		assertThatNoException().isThrownBy(execution::nextBackOff);
 	}
 
+	@Test  // gh-36943
+	void jitterScalesProportionallyWithInterval() {
+		ExponentialBackOff backOff = new ExponentialBackOff();
+		backOff.setJitter(100);
+		BackOffExecution execution = backOff.start();
+
+		// Default: initialInterval=2000, multiplier=1.5
+		// Attempt 1: interval=2000, scale=1.0,  applicableJitter=100 → [max(1900,2000), 2100) = [2000, 2099]
+		assertThat(execution.nextBackOff()).isBetween(2000L, 2099L);
+		// Attempt 2: interval=3000, scale=1.5,  applicableJitter=150 → [max(2850,2000), 3150) = [2850, 3149]
+		assertThat(execution.nextBackOff()).isBetween(2850L, 3149L);
+		// Attempt 3: interval=4500, scale=2.25, applicableJitter=225 → [max(4275,2000), 4725) = [4275, 4724]
+		assertThat(execution.nextBackOff()).isBetween(4275L, 4724L);
+	}
+
 	@Test
 	void maxIntervalReachedImmediately() {
 		ExponentialBackOff backOff = new ExponentialBackOff(1000L, 2.0);

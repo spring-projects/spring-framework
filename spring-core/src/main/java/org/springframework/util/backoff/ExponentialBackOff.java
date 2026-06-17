@@ -317,7 +317,7 @@ public class ExponentialBackOff implements BackOff {
 				long initialInterval = getInitialInterval();
 				// When initialInterval is 0 the interval never grows, so the scale factor
 				// stays at its baseline value of 1 and the full configured jitter is applied.
-				long applicableJitter = jitter * (initialInterval > 0 ? (interval / initialInterval) : 1);
+				long applicableJitter = (long) (jitter * (initialInterval > 0 ? ((double) interval / initialInterval) : 1));
 				long min = Math.max(interval - applicableJitter, initialInterval);
 				long max = Math.min(interval + applicableJitter, getMaxInterval());
 				return min + (long) (Math.random() * (max - min));
