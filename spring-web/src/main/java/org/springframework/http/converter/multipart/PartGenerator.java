@@ -112,15 +112,16 @@ final class PartGenerator implements MultipartParser.PartListener {
 	}
 
 	void deleteParts() {
-		try {
-			for (List<Part> partList : this.parts.values()) {
-				for (Part part : partList) {
+		this.state.dispose();
+		for (List<Part> parts : this.parts.values()) {
+			for (Part part : parts) {
+				try {
 					part.delete();
 				}
+				catch (IOException ex) {
+					// ignored
+				}
 			}
-		}
-		catch (IOException ex) {
-			// ignored
 		}
 	}
 
@@ -169,6 +170,12 @@ final class PartGenerator implements MultipartParser.PartListener {
 		 * Invoked when a {@link MultipartParser.PartListener#onBody(DataBuffer, boolean)} is received.
 		 */
 		void onBody(DataBuffer dataBuffer, boolean last);
+
+		/**
+		 * Clean up resources.
+		 */
+		default void dispose() {
+		}
 
 	}
 
@@ -306,6 +313,11 @@ final class PartGenerator implements MultipartParser.PartListener {
 		}
 
 		@Override
+		public void dispose() {
+			this.content.forEach(DataBufferUtils::release);
+		}
+
+		@Override
 		public String toString() {
 			return "IN-MEMORY";
 		}
@@ -395,6 +407,17 @@ final class PartGenerator implements MultipartParser.PartListener {
 			}
 			finally {
 				DataBufferUtils.release(dataBuffer);
+			}
+		}
+
+		@Override
+		public void dispose() {
+			closeOutputStream();
+			try {
+				Files.deleteIfExists(this.file);
+			}
+			catch (IOException ex) {
+				// ignored
 			}
 		}
 
