@@ -119,17 +119,15 @@ class ExponentialBackOffTests {
 		assertThatIllegalArgumentException().isThrownBy(() -> backOff.setMultiplier(0.9));
 	}
 
-	@Test
+	@Test  // gh-36932
 	void jitterWithZeroInitialInterval() {
-		// 'initialInterval = 0' and 'jitter > 0' are both individually accepted
-		// configurations, so their combination must not throw. With initialInterval
-		// of 0, the first nextBackOff() previously evaluated 'jitter * (0 / 0)',
-		// resulting in an integer division by zero.
 		ExponentialBackOff backOff = new ExponentialBackOff();
 		backOff.setInitialInterval(0);
 		backOff.setJitter(100);
-
 		BackOffExecution execution = backOff.start();
+
+		// 'initialInterval = 0' and 'jitter > 0' are both individually accepted
+		// configurations, so their combination must not throw.
 		assertThatNoException().isThrownBy(execution::nextBackOff);
 	}
 
