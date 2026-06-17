@@ -43,10 +43,12 @@ import org.springframework.http.converter.HttpMessageConversionException;
  *
  * @author Brian Clozel
  * @author Arjen Poutsma
+ * @since 7.1
  */
 final class MultipartParser {
 
 	private static final Log logger = LogFactory.getLog(MultipartParser.class);
+
 
 	private final int maxHeadersSize;
 
@@ -88,6 +90,7 @@ final class MultipartParser {
 			listener.onError(new HttpMessageConversionException("Could not decode multipart message", ex));
 		}
 	}
+
 
 	private final class InternalParser {
 
@@ -138,6 +141,7 @@ final class MultipartParser {
 			}
 			return result;
 		}
+
 
 		/**
 		 * Represents the internal state of the {@link MultipartParser}.

@@ -34,6 +34,7 @@ import org.springframework.util.Assert;
  *
  * @author Arjen Poutsma
  * @author Brian Clozel
+ * @since 7.1
  */
 abstract class DefaultParts {
 

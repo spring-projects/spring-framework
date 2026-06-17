@@ -47,10 +47,12 @@ import org.springframework.util.MultiValueMap;
  *
  * @author Brian Clozel
  * @author Arjen Poutsma
+ * @since 7.1
  */
 final class PartGenerator implements MultipartParser.PartListener {
 
 	private static final Log logger = LogFactory.getLog(PartGenerator.class);
+
 
 	private final MultiValueMap<String, Part> parts = new LinkedMultiValueMap<>();
 
@@ -266,23 +268,26 @@ final class PartGenerator implements MultipartParser.PartListener {
 		@Override
 		public void onBody(DataBuffer dataBuffer, boolean last) {
 			this.byteCount += dataBuffer.readableByteCount();
-			if (PartGenerator.this.maxInMemorySize == -1 ||
-					this.byteCount <= PartGenerator.this.maxInMemorySize) {
-				this.content.add(dataBuffer);
-				if (last) {
-					emitMemoryPart();
-				}
-			}
-			else {
+			if (isMaxInMemorySizeExceeded()) {
 				switchToFile(dataBuffer, last);
+				return;
+			}
+			this.content.add(dataBuffer);
+			if (last) {
+				emitMemoryPart();
 			}
 		}
 
+		private boolean isMaxInMemorySizeExceeded() {
+			return (PartGenerator.this.maxInMemorySize != -1 &&
+					this.byteCount > PartGenerator.this.maxInMemorySize);
+		}
+
 		private void switchToFile(DataBuffer current, boolean last) {
-			FileState newState = new FileState(this.headers, PartGenerator.this.fileStorageDirectory);
-			this.content.forEach(newState::writeBuffer);
-			newState.onBody(current, last);
-			PartGenerator.this.state = newState;
+			FileState fileState = new FileState(this.headers, PartGenerator.this.fileStorageDirectory);
+			this.content.forEach(fileState::writeBuffer);
+			fileState.onBody(current, last);
+			PartGenerator.this.state = fileState;
 		}
 
 		private void emitMemoryPart() {
@@ -331,23 +336,27 @@ final class PartGenerator implements MultipartParser.PartListener {
 		@Override
 		public void onBody(DataBuffer dataBuffer, boolean last) {
 			this.byteCount += dataBuffer.readableByteCount();
-			if (PartGenerator.this.maxDiskUsagePerPart == -1 || this.byteCount <= PartGenerator.this.maxDiskUsagePerPart) {
-				writeBuffer(dataBuffer);
-				if (last) {
-					Part part = DefaultParts.part(this.headers, this.file);
-					PartGenerator.this.addPart(part);
-				}
-			}
-			else {
+			if (isMaxDiskUsagePerPartExceeded()) {
 				try {
 					this.outputStream.close();
 				}
 				catch (IOException exc) {
 					// ignored
 				}
-				throw new HttpMessageConversionException("Part exceeded the disk usage limit of " +
-						PartGenerator.this.maxDiskUsagePerPart + " bytes");
+				throw new HttpMessageConversionException(
+						"Part exceeded the disk usage limit of " +
+								PartGenerator.this.maxDiskUsagePerPart + " bytes");
 			}
+			writeBuffer(dataBuffer);
+			if (last) {
+				Part part = DefaultParts.part(this.headers, this.file);
+				PartGenerator.this.addPart(part);
+			}
+		}
+
+		private boolean isMaxDiskUsagePerPartExceeded() {
+			return (PartGenerator.this.maxDiskUsagePerPart != -1 &&
+					this.byteCount > PartGenerator.this.maxDiskUsagePerPart);
 		}
 
 		private Path createFile(Path directory) {

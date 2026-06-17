@@ -63,7 +63,6 @@ public interface Part {
 	 * Delete the underlying storage for this part.
 	 */
 	default void delete() throws IOException {
-
 	}
 
 }

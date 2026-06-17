@@ -26,6 +26,7 @@ import org.springframework.http.MediaType;
  * Various static utility methods for dealing with multipart parsing.
  * @author Arjen Poutsma
  * @author Brian Clozel
+ * @since 7.1
  */
 abstract class MultipartUtils {
 

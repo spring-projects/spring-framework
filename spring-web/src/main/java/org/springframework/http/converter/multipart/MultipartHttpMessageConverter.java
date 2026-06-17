@@ -158,6 +158,7 @@ public class MultipartHttpMessageConverter implements SmartHttpMessageConverter<
 
 	private int maxParts = -1;
 
+
 	/**
 	 * Create a new converter instance with the given converter instances for reading and
 	 * writing parts.
@@ -184,6 +185,7 @@ public class MultipartHttpMessageConverter implements SmartHttpMessageConverter<
 		this(List.of( new ByteArrayHttpMessageConverter(), new StringHttpMessageConverter(),
 				new ResourceHttpMessageConverter()));
 	}
+
 
 	/**
 	 * Set the list of {@link MediaType} objects supported by this converter.
@@ -218,7 +220,6 @@ public class MultipartHttpMessageConverter implements SmartHttpMessageConverter<
 	public List<MediaType> getSupportedMediaTypes() {
 		return Collections.unmodifiableList(this.supportedMediaTypes);
 	}
-
 
 	/**
 	 * Return the configured converters for MIME parts.
@@ -274,7 +275,6 @@ public class MultipartHttpMessageConverter implements SmartHttpMessageConverter<
 		this.multipartCharset = charset;
 	}
 
-
 	/**
 	 * Configure the maximum amount of memory that is allowed per headers section of each part.
 	 * <p>By default, this is set to 10K.
@@ -317,17 +317,15 @@ public class MultipartHttpMessageConverter implements SmartHttpMessageConverter<
 		this.maxParts = maxParts;
 	}
 
+
 	@Override
 	public boolean canRead(ResolvableType elementType, @Nullable MediaType mediaType) {
 		if (!supportsMediaType(mediaType)) {
 			return false;
 		}
-		if (!MultiValueMap.class.isAssignableFrom(elementType.toClass()) ||
-				(!elementType.hasUnresolvableGenerics() &&
-				!Part.class.isAssignableFrom(elementType.getGeneric(1).toClass()))) {
-			return false;
-		}
-		return true;
+		return (MultiValueMap.class.isAssignableFrom(elementType.toClass()) &&
+				(elementType.hasUnresolvableGenerics() ||
+						Part.class.isAssignableFrom(elementType.getGeneric(1).toClass())));
 	}
 
 	private boolean supportsMediaType(@Nullable MediaType mediaType) {
@@ -343,7 +341,9 @@ public class MultipartHttpMessageConverter implements SmartHttpMessageConverter<
 	}
 
 	@Override
-	public MultiValueMap<String, Part> read(ResolvableType type, HttpInputMessage message, @Nullable Map<String, Object> hints) throws IOException, HttpMessageNotReadableException {
+	public MultiValueMap<String, Part> read(
+			ResolvableType type, HttpInputMessage message, @Nullable Map<String, Object> hints)
+			throws IOException, HttpMessageNotReadableException {
 
 		Charset headersCharset = MultipartUtils.charset(message.getHeaders());
 		byte[] boundary = boundary(message, headersCharset);
@@ -351,12 +351,15 @@ public class MultipartHttpMessageConverter implements SmartHttpMessageConverter<
 			throw new HttpMessageNotReadableException("No multipart boundary found in Content-Type: \"" +
 					message.getHeaders().getContentType() + "\"", message);
 		}
-		PartGenerator partListener = new PartGenerator(this.maxInMemorySize, this.maxDiskUsagePerPart, this.maxParts, getTempDirectory());
-		new MultipartParser(this.maxHeadersSize, 2 * 1024).parse(message.getBody(), boundary,
-				headersCharset, partListener);
-		return partListener.getParts();
-	}
 
+		PartGenerator partGenerator = new PartGenerator(
+				this.maxInMemorySize, this.maxDiskUsagePerPart, this.maxParts, getTempDirectory());
+
+		MultipartParser parser = new MultipartParser(this.maxHeadersSize, 2 * 1024);
+		parser.parse(message.getBody(), boundary, headersCharset, partGenerator);
+
+		return partGenerator.getParts();
+	}
 
 	private static byte @Nullable [] boundary(HttpInputMessage message, Charset headersCharset) {
 		MediaType contentType = message.getHeaders().getContentType();
@@ -398,7 +401,11 @@ public class MultipartHttpMessageConverter implements SmartHttpMessageConverter<
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public void write(MultiValueMap<String, ?> map, ResolvableType type, @Nullable MediaType contentType, HttpOutputMessage outputMessage, @Nullable Map<String, Object> hints) throws IOException, HttpMessageNotWritableException {
+	public void write(
+			MultiValueMap<String, ?> map, ResolvableType type, @Nullable MediaType contentType,
+			HttpOutputMessage outputMessage, @Nullable Map<String, Object> hints)
+			throws IOException, HttpMessageNotWritableException {
+
 		MultiValueMap<String, Object> parts = (MultiValueMap<String, Object>) map;
 
 		// If the supplied content type is null, fall back to multipart/form-data.
@@ -446,19 +453,25 @@ public class MultipartHttpMessageConverter implements SmartHttpMessageConverter<
 	}
 
 
-	@SuppressWarnings({"unchecked", "ConstantValue"})
+	@SuppressWarnings("ConstantValue")
 	private <T> boolean checkPartsRepeatable(MultiValueMap<String, Object> map, MediaType contentType) {
-		return map.entrySet().stream().allMatch(e -> e.getValue().stream().filter(Objects::nonNull).allMatch(part -> {
-			HttpHeaders headers = null;
-			Object body = part;
-			if (part instanceof HttpEntity<?> entity) {
-				headers = entity.getHeaders();
-				body = entity.getBody();
-				Assert.state(body != null, "Empty body for part '" + e.getKey() + "': " + part);
-			}
-			HttpMessageConverter<T> converter = (HttpMessageConverter<T>) findConverterFor(e.getKey(), headers, body);
-			return converter != null && converter.canWriteRepeatedly((T) body, contentType);
-		}));
+		return map.entrySet().stream().allMatch(entry ->
+				entry.getValue().stream()
+						.filter(Objects::nonNull)
+						.allMatch(part -> isPartRepeatable(entry.getKey(), part, contentType)));
+	}
+
+	@SuppressWarnings("unchecked")
+	private <T> boolean isPartRepeatable(String name, Object part, MediaType contentType) {
+		HttpHeaders headers = null;
+		Object body = part;
+		if (part instanceof HttpEntity<?> entity) {
+			headers = entity.getHeaders();
+			body = entity.getBody();
+			Assert.state(body != null, "Empty body for part '" + name + "': " + part);
+		}
+		HttpMessageConverter<T> converter = (HttpMessageConverter<T>) findConverterFor(name, headers, body);
+		return (converter != null && converter.canWriteRepeatedly((T) body, contentType));
 	}
 
 	private @Nullable HttpMessageConverter<?> findConverterFor(
@@ -483,7 +496,9 @@ public class MultipartHttpMessageConverter implements SmartHttpMessageConverter<
 		return (this.multipartCharset != null);
 	}
 
-	private void writeParts(OutputStream os, MultiValueMap<String, Object> parts, byte[] boundary) throws IOException {
+	private void writeParts(
+			OutputStream os, MultiValueMap<String, Object> parts, byte[] boundary) throws IOException {
+
 		for (Map.Entry<String, List<Object>> entry : parts.entrySet()) {
 			String name = entry.getKey();
 			for (Object part : entry.getValue()) {
@@ -548,7 +563,6 @@ public class MultipartHttpMessageConverter implements SmartHttpMessageConverter<
 			return null;
 		}
 	}
-
 
 	private void writeBoundary(OutputStream os, byte[] boundary) throws IOException {
 		os.write('-');
