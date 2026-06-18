@@ -55,7 +55,8 @@ class XmlValidationModeDetectorTests {
 		"xsdWithNoComments.xml",
 		"xsdWithMultipleComments.xml",
 		"xsdWithDoctypeInComment.xml",
-		"xsdWithDoctypeInOpenCommentWithAdditionalCommentOnSameLine.xml"
+		"xsdWithDoctypeInOpenCommentWithAdditionalCommentOnSameLine.xml",
+		"xsdWithDoctypeInMultiLineCommentBody.xml"
 	})
 	void xsdDetection(String fileName) throws Exception {
 		assertValidationMode(fileName, VALIDATION_XSD);
