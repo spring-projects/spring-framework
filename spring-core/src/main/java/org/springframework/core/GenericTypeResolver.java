@@ -193,6 +193,9 @@ public final class GenericTypeResolver {
 						else if (typeArgument instanceof ParameterizedType) {
 							generics[i] = ResolvableType.forType(resolveType(typeArgument, contextClass));
 						}
+						else if (typeArgument instanceof WildcardType) {
+							generics[i] = ResolvableType.forType(resolveType(typeArgument, contextClass));
+						}
 						else {
 							generics[i] = ResolvableType.forType(typeArgument);
 						}
@@ -201,6 +204,12 @@ public final class GenericTypeResolver {
 					if (rawClass != null) {
 						return ResolvableType.forClassWithGenerics(rawClass, generics).getType();
 					}
+				}
+			}
+			else if (genericType instanceof WildcardType wildcardType) {
+				Type[] upperBounds = wildcardType.getUpperBounds();
+				if (upperBounds.length == 1) {
+					return resolveType(upperBounds[0], contextClass);
 				}
 			}
 		}
