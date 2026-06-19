@@ -57,12 +57,7 @@ public class MappingMediaTypeFileExtensionResolver implements MediaTypeFileExten
 	public MappingMediaTypeFileExtensionResolver(@Nullable Map<String, MediaType> mediaTypes) {
 		if (mediaTypes != null) {
 			Set<String> allFileExtensions = CollectionUtils.newHashSet(mediaTypes.size());
-			mediaTypes.forEach((extension, mediaType) -> {
-				String lowerCaseExtension = extension.toLowerCase(Locale.ROOT);
-				this.mediaTypes.put(lowerCaseExtension, mediaType);
-				addFileExtension(mediaType, lowerCaseExtension);
-				allFileExtensions.add(lowerCaseExtension);
-			});
+			mediaTypes.forEach((extension, mediaType) -> addMapping(extension.toLowerCase(Locale.ROOT), mediaType));
 			this.allFileExtensions.addAll(allFileExtensions);
 		}
 	}
@@ -82,14 +77,10 @@ public class MappingMediaTypeFileExtensionResolver implements MediaTypeFileExten
 	protected void addMapping(String extension, MediaType mediaType) {
 		MediaType previous = this.mediaTypes.putIfAbsent(extension, mediaType);
 		if (previous == null) {
-			addFileExtension(mediaType, extension);
+			this.fileExtensions.computeIfAbsent(
+					mediaType, key -> new CopyOnWriteArrayList<>()).add(extension);
 			this.allFileExtensions.add(extension);
 		}
-	}
-
-	private void addFileExtension(MediaType mediaType, String extension) {
-		this.fileExtensions.computeIfAbsent(mediaType, key -> new CopyOnWriteArrayList<>())
-				.add(extension);
 	}
 
 

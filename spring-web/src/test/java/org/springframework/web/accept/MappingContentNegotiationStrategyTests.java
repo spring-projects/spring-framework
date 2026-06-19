@@ -23,9 +23,11 @@ import java.util.Map;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.http.MediaType;
+import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.context.request.NativeWebRequest;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * A test fixture with a test subclass of AbstractMappingContentNegotiationStrategy.
@@ -36,7 +38,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class MappingContentNegotiationStrategyTests {
 
 	@Test
-	void resolveMediaTypes() throws Exception {
+	void resolveMediaTypesFromRegisteredExtensions() throws Exception {
 		Map<String, MediaType> mapping = Collections.singletonMap("json", MediaType.APPLICATION_JSON);
 		TestMappingContentNegotiationStrategy strategy = new TestMappingContentNegotiationStrategy("json", mapping);
 
@@ -47,27 +49,7 @@ class MappingContentNegotiationStrategyTests {
 	}
 
 	@Test
-	void resolveMediaTypesNoMatch() throws Exception {
-		Map<String, MediaType> mapping = null;
-		TestMappingContentNegotiationStrategy strategy = new TestMappingContentNegotiationStrategy("blah", mapping);
-
-		List<MediaType> mediaTypes = strategy.resolveMediaTypes(null);
-
-		assertThat(mediaTypes).isEqualTo(ContentNegotiationStrategy.MEDIA_TYPE_ALL_LIST);
-	}
-
-	@Test
-	void resolveMediaTypesNoKey() throws Exception {
-		Map<String, MediaType> mapping = Collections.singletonMap("json", MediaType.APPLICATION_JSON);
-		TestMappingContentNegotiationStrategy strategy = new TestMappingContentNegotiationStrategy(null, mapping);
-
-		List<MediaType> mediaTypes = strategy.resolveMediaTypes(null);
-
-		assertThat(mediaTypes).isEqualTo(ContentNegotiationStrategy.MEDIA_TYPE_ALL_LIST);
-	}
-
-	@Test
-	void resolveMediaTypesHandleNoMatch() throws Exception {
+	void resolveMediaTypesViaMediaTypeFactory() throws Exception {
 		Map<String, MediaType> mapping = null;
 		TestMappingContentNegotiationStrategy strategy = new TestMappingContentNegotiationStrategy("xml", mapping);
 
@@ -75,6 +57,25 @@ class MappingContentNegotiationStrategyTests {
 
 		assertThat(mediaTypes).hasSize(1);
 		assertThat(mediaTypes.get(0).toString()).isEqualTo("application/xml");
+	}
+
+	@Test
+	void resolveMediaTypesUnknownKey() {
+		Map<String, MediaType> mapping = null;
+		TestMappingContentNegotiationStrategy strategy = new TestMappingContentNegotiationStrategy("blah", mapping);
+
+		assertThatThrownBy(() -> strategy.resolveMediaTypes(null))
+				.isInstanceOf(HttpMediaTypeNotAcceptableException.class);
+	}
+
+	@Test
+	void resolveMediaTypesNullKey() throws Exception {
+		Map<String, MediaType> mapping = Collections.singletonMap("json", MediaType.APPLICATION_JSON);
+		TestMappingContentNegotiationStrategy strategy = new TestMappingContentNegotiationStrategy(null, mapping);
+
+		List<MediaType> mediaTypes = strategy.resolveMediaTypes(null);
+
+		assertThat(mediaTypes).isEqualTo(ContentNegotiationStrategy.MEDIA_TYPE_ALL_LIST);
 	}
 
 
@@ -92,10 +93,6 @@ class MappingContentNegotiationStrategyTests {
 			return this.extension;
 		}
 
-		@Override
-		protected MediaType handleNoMatch(NativeWebRequest request, String mappingKey) {
-			return "xml".equals(mappingKey) ? MediaType.APPLICATION_XML : null;
-		}
 	}
 
 }

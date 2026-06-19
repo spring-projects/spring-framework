@@ -68,13 +68,15 @@ class MappingMediaTypeFileExtensionResolverTests {
 	}
 
 	@Test
-	void allFileExtensions() {
-		Map<String, MediaType> mappings = new HashMap<>();
-		mappings.put("json", MediaType.APPLICATION_JSON);
-		mappings.put("JsOn", MediaType.APPLICATION_JSON);
-		mappings.put("jSoN", MediaType.APPLICATION_JSON);
+	void mappingsAreCaseInsensitive() {
+		Map<String, MediaType> map = new HashMap<>();
+		map.put("json", MediaType.APPLICATION_JSON);
+		map.put("JsOn", MediaType.APPLICATION_JSON);
+		map.put("jSoN", MediaType.APPLICATION_JSON);
 
-		MappingMediaTypeFileExtensionResolver resolver = new MappingMediaTypeFileExtensionResolver(mappings);
+		MappingMediaTypeFileExtensionResolver resolver = new MappingMediaTypeFileExtensionResolver(map);
 		assertThat(resolver.getAllFileExtensions()).containsExactly("json");
 	}
+
+
 }
