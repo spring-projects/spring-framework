@@ -190,8 +190,8 @@ public class MergedContextConfiguration implements Serializable {
 	 * or {@code propertySourceProperties} an empty array will be stored instead.
 	 * If a {@code null} value is supplied for the
 	 * {@code contextInitializerClasses} an empty set will be stored instead.
-	 * Furthermore, active profiles will be sorted, and duplicate profiles
-	 * will be removed.
+	 * Furthermore, duplicate active profiles will be removed while preserving
+	 * registration order.
 	 * @param testClass the test class for which the configuration was merged
 	 * @param locations the merged context resource locations
 	 * @param classes the merged annotated classes
@@ -229,8 +229,8 @@ public class MergedContextConfiguration implements Serializable {
 	 * or {@code propertySourceProperties} an empty array will be stored instead.
 	 * If a {@code null} value is supplied for {@code contextInitializerClasses}
 	 * or {@code contextCustomizers}, an empty set will be stored instead.
-	 * Furthermore, active profiles will be sorted, and duplicate profiles
-	 * will be removed.
+	 * Furthermore, duplicate active profiles will be removed while preserving
+	 * registration order.
 	 * @param testClass the test class for which the configuration was merged
 	 * @param locations the merged context resource locations
 	 * @param classes the merged annotated classes
@@ -268,8 +268,8 @@ public class MergedContextConfiguration implements Serializable {
 	 * {@code activeProfiles}, or {@code propertySourceProperties} an empty array
 	 * will be stored instead. If a {@code null} value is supplied for
 	 * {@code contextInitializerClasses} or {@code contextCustomizers}, an empty
-	 * set will be stored instead. Furthermore, active profiles will be sorted,
-	 * and duplicate profiles will be removed.
+	 * set will be stored instead. Furthermore, duplicate active profiles
+	 * will be removed while preserving registration order.
 	 * @param testClass the test class for which the configuration was merged
 	 * @param locations the merged context resource locations
 	 * @param classes the merged annotated classes
