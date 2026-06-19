@@ -75,6 +75,8 @@ class MappingMediaTypeFileExtensionResolverTests {
 		map.put("jSoN", MediaType.APPLICATION_JSON);
 
 		MappingMediaTypeFileExtensionResolver resolver = new MappingMediaTypeFileExtensionResolver(map);
+		map.forEach(resolver::addMapping);
+
 		assertThat(resolver.getAllFileExtensions()).containsExactly("json");
 	}
 

@@ -49,7 +49,7 @@ class MappingContentNegotiationStrategyTests {
 	}
 
 	@Test
-	void resolveMediaTypesViaMediaTypeFactory() throws Exception {
+	void resolveMediaTypesViaFactory() throws Exception {
 		Map<String, MediaType> mapping = null;
 		TestMappingContentNegotiationStrategy strategy = new TestMappingContentNegotiationStrategy("xml", mapping);
 
@@ -63,6 +63,15 @@ class MappingContentNegotiationStrategyTests {
 	void resolveMediaTypesUnknownKey() {
 		Map<String, MediaType> mapping = null;
 		TestMappingContentNegotiationStrategy strategy = new TestMappingContentNegotiationStrategy("blah", mapping);
+
+		assertThatThrownBy(() -> strategy.resolveMediaTypes(null))
+				.isInstanceOf(HttpMediaTypeNotAcceptableException.class);
+	}
+
+	@Test
+	void resolveMediaTypesInvalidKey() {
+		Map<String, MediaType> mapping = null;
+		TestMappingContentNegotiationStrategy strategy = new TestMappingContentNegotiationStrategy("not.json", mapping);
 
 		assertThatThrownBy(() -> strategy.resolveMediaTypes(null))
 				.isInstanceOf(HttpMediaTypeNotAcceptableException.class);
