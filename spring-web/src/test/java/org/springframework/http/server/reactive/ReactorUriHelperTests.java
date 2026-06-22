@@ -55,32 +55,32 @@ class ReactorUriHelperTests {
 
 	@Test
 	void requestUriWithScheme() throws URISyntaxException {
-		given(nettyRequest.scheme()).willReturn("http");
+		given(nettyRequest.scheme()).willReturn("https");
 		given(nettyRequest.hostName()).willReturn("example.org");
-		given(nettyRequest.hostPort()).willReturn(80);
-		given(nettyRequest.uri()).willReturn("http://example.org/path");
+		given(nettyRequest.hostPort()).willReturn(443);
+		given(nettyRequest.uri()).willReturn("https://example.org/path");
 
 		URI uri = ReactorUriHelper.createUri(nettyRequest);
-		assertThat(uri).hasScheme("http")
+		assertThat(uri).hasScheme("https")
 				.hasHost("example.org")
 				.hasPort(-1)
 				.hasPath("/path")
-				.hasToString("http://example.org/path");
+				.hasToString("https://example.org/path");
 	}
 
 	@Test
 	void requestUriWithoutLeadingSlash() throws URISyntaxException {
-		given(nettyRequest.scheme()).willReturn("http");
+		given(nettyRequest.scheme()).willReturn("https");
 		given(nettyRequest.hostName()).willReturn("example.org");
-		given(nettyRequest.hostPort()).willReturn(80);
+		given(nettyRequest.hostPort()).willReturn(443);
 		given(nettyRequest.uri()).willReturn("foo/bar");
 
 		URI uri = ReactorUriHelper.createUri(nettyRequest);
-		assertThat(uri).hasScheme("http")
+		assertThat(uri).hasScheme("https")
 				.hasHost("example.org")
 				.hasPort(-1)
 				.hasPath("/foo/bar")
-				.hasToString("http://example.org/foo/bar");
+				.hasToString("https://example.org/foo/bar");
 	}
 
 	@ParameterizedTest(name = "{displayName}({arguments})")
