@@ -956,6 +956,7 @@ public abstract class StringUtils {
 			String country = tokens[1];
 			validateLocalePart(country);
 			String variant = Arrays.stream(tokens).skip(2).collect(Collectors.joining(delimiter));
+			validateLocalePart(variant);
 			return new Locale(language, country, variant);
 		}
 
