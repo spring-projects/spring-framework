@@ -58,7 +58,7 @@ public class SqliteMaxValueIncrementer extends AbstractColumnMaxValueIncrementer
 
 
 	@Override
-	protected long getNextKey() {
+	protected synchronized long getNextKey() {
 		Connection con = DataSourceUtils.getConnection(getDataSource());
 		Statement stmt = null;
 		try {
