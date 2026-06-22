@@ -35,10 +35,11 @@ import static org.mockito.Mockito.mock;
  */
 class ReactorUriHelperTests {
 
+	private final HttpServerRequest nettyRequest = mock();
+
+
 	@Test
 	void hostnameWithZoneId() throws URISyntaxException {
-		HttpServerRequest nettyRequest = mock();
-
 		given(nettyRequest.scheme()).willReturn("http");
 		given(nettyRequest.hostName()).willReturn("fe80::a%en1");
 		given(nettyRequest.hostPort()).willReturn(80);
@@ -50,7 +51,21 @@ class ReactorUriHelperTests {
 				.hasPort(-1)
 				.hasPath("/")
 				.hasToString("http://[fe80::a%25en1]/");
+	}
 
+	@Test
+	void requestUriWithScheme() throws URISyntaxException {
+		given(nettyRequest.scheme()).willReturn("http");
+		given(nettyRequest.hostName()).willReturn("example.org");
+		given(nettyRequest.hostPort()).willReturn(80);
+		given(nettyRequest.uri()).willReturn("http://example.org/path");
+
+		URI uri = ReactorUriHelper.createUri(nettyRequest);
+		assertThat(uri).hasScheme("http")
+				.hasHost("example.org")
+				.hasPort(-1)
+				.hasPath("/path")
+				.hasToString("http://example.org/path");
 	}
 
 	@ParameterizedTest(name = "{displayName}({arguments})")
@@ -61,8 +76,6 @@ class ReactorUriHelperTests {
 			"''                | /",
 	})
 	void forwardedPrefix(String forwardedPrefixHeader, String expectedPath) throws URISyntaxException {
-		HttpServerRequest nettyRequest = mock();
-
 		given(nettyRequest.scheme()).willReturn("https");
 		given(nettyRequest.hostName()).willReturn("localhost");
 		given(nettyRequest.hostPort()).willReturn(443);
