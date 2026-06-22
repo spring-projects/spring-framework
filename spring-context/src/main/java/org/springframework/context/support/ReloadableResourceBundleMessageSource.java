@@ -40,6 +40,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.ConcurrentLruCache;
 import org.springframework.util.DefaultPropertiesPersister;
 import org.springframework.util.PropertiesPersister;
 import org.springframework.util.StringUtils;
@@ -114,14 +115,18 @@ public class ReloadableResourceBundleMessageSource extends AbstractResourceBased
 
 	private ResourceLoader resourceLoader = new DefaultResourceLoader();
 
-	// Cache to hold filename lists per Locale
+	// Cache to hold filename lists per Locale.
 	private final ConcurrentMap<String, Map<Locale, List<String>>> cachedFilenames = new ConcurrentHashMap<>();
 
-	// Cache to hold already loaded properties per filename
+	// Cache to hold already loaded properties per filename.
 	private final ConcurrentMap<String, PropertiesHolder> cachedProperties = new ConcurrentHashMap<>();
 
-	// Cache to hold already loaded properties per filename
+	// Cache to hold already merged properties per Locale.
 	private final ConcurrentMap<Locale, PropertiesHolder> cachedMergedProperties = new ConcurrentHashMap<>();
+
+	// Cache to hold merged properties per non-JVM Locale.
+	private final ConcurrentLruCache<Locale, PropertiesHolder> customLocaleProperties =
+			new ConcurrentLruCache<>(64, locale -> mergeProperties(collectPropertiesToMerge(locale)));
 
 
 	/**
@@ -201,20 +206,16 @@ public class ReloadableResourceBundleMessageSource extends AbstractResourceBased
 	protected @Nullable String resolveCodeWithoutArguments(String code, Locale locale) {
 		if (getCacheMillis() < 0) {
 			PropertiesHolder propHolder = getMergedProperties(locale);
-			String result = propHolder.getProperty(code);
-			if (result != null) {
-				return result;
-			}
+			return propHolder.getProperty(code);
 		}
-		else {
-			for (String basename : getBasenameSet()) {
-				List<String> filenames = calculateAllFilenames(basename, locale);
-				for (String filename : filenames) {
-					PropertiesHolder propHolder = getProperties(filename);
-					String result = propHolder.getProperty(code);
-					if (result != null) {
-						return result;
-					}
+
+		for (String basename : getBasenameSet()) {
+			List<String> filenames = calculateAllFilenames(basename, locale);
+			for (String filename : filenames) {
+				PropertiesHolder propHolder = getProperties(filename, locale);
+				String result = propHolder.getProperty(code);
+				if (result != null) {
+					return result;
 				}
 			}
 		}
@@ -229,20 +230,16 @@ public class ReloadableResourceBundleMessageSource extends AbstractResourceBased
 	protected @Nullable MessageFormat resolveCode(String code, Locale locale) {
 		if (getCacheMillis() < 0) {
 			PropertiesHolder propHolder = getMergedProperties(locale);
-			MessageFormat result = propHolder.getMessageFormat(code, locale);
-			if (result != null) {
-				return result;
-			}
+			return propHolder.getMessageFormat(code, locale);
 		}
-		else {
-			for (String basename : getBasenameSet()) {
-				List<String> filenames = calculateAllFilenames(basename, locale);
-				for (String filename : filenames) {
-					PropertiesHolder propHolder = getProperties(filename);
-					MessageFormat result = propHolder.getMessageFormat(code, locale);
-					if (result != null) {
-						return result;
-					}
+
+		for (String basename : getBasenameSet()) {
+			List<String> filenames = calculateAllFilenames(basename, locale);
+			for (String filename : filenames) {
+				PropertiesHolder propHolder = getProperties(filename, locale);
+				MessageFormat result = propHolder.getMessageFormat(code, locale);
+				if (result != null) {
+					return result;
 				}
 			}
 		}
@@ -265,12 +262,18 @@ public class ReloadableResourceBundleMessageSource extends AbstractResourceBased
 		if (mergedHolder != null) {
 			return mergedHolder;
 		}
-		mergedHolder = mergeProperties(collectPropertiesToMerge(locale));
-		PropertiesHolder existing = this.cachedMergedProperties.putIfAbsent(locale, mergedHolder);
-		if (existing != null) {
-			mergedHolder = existing;
+
+		if (JVM_LOCALES.contains(locale)) {
+			mergedHolder = mergeProperties(collectPropertiesToMerge(locale));
+			PropertiesHolder existing = this.cachedMergedProperties.putIfAbsent(locale, mergedHolder);
+			if (existing != null) {
+				mergedHolder = existing;
+			}
+			return mergedHolder;
 		}
-		return mergedHolder;
+		else {
+			return this.customLocaleProperties.get(locale);
+		}
 	}
 
 	/**
@@ -289,7 +292,7 @@ public class ReloadableResourceBundleMessageSource extends AbstractResourceBased
 			List<String> filenames = calculateAllFilenames(basenames[i], locale);
 			for (int j = filenames.size() - 1; j >= 0; j--) {
 				String filename = filenames.get(j);
-				PropertiesHolder propHolder = getProperties(filename);
+				PropertiesHolder propHolder = getProperties(filename, locale);
 				if (propHolder.getProperties() != null) {
 					holders.add(propHolder);
 				}
@@ -338,11 +341,11 @@ public class ReloadableResourceBundleMessageSource extends AbstractResourceBased
 			}
 		}
 
-		// Filenames for given Locale
+		// Filenames for given Locale.
 		List<String> filenames = new ArrayList<>(7);
 		filenames.addAll(calculateFilenamesForLocale(basename, locale));
 
-		// Filenames for default Locale, if any
+		// Filenames for default Locale, if any.
 		Locale defaultLocale = getDefaultLocale();
 		if (defaultLocale != null && !defaultLocale.equals(locale)) {
 			List<String> fallbackFilenames = calculateFilenamesForLocale(basename, defaultLocale);
@@ -354,24 +357,27 @@ public class ReloadableResourceBundleMessageSource extends AbstractResourceBased
 			}
 		}
 
-		// Filename for default bundle file
+		// Filename for default bundle file.
 		filenames.add(basename);
 
-		if (localeMap == null) {
-			localeMap = new ConcurrentHashMap<>();
-			Map<Locale, List<String>> existing = this.cachedFilenames.putIfAbsent(basename, localeMap);
-			if (existing != null) {
-				localeMap = existing;
+		if (JVM_LOCALES.contains(locale)) {
+			if (localeMap == null) {
+				localeMap = new ConcurrentHashMap<>();
+				Map<Locale, List<String>> existing = this.cachedFilenames.putIfAbsent(basename, localeMap);
+				if (existing != null) {
+					localeMap = existing;
+				}
 			}
+			localeMap.put(locale, filenames);
 		}
-		localeMap.put(locale, filenames);
+
 		return filenames;
 	}
 
 	/**
 	 * Calculate the filenames for the given bundle basename and Locale,
 	 * appending language code, country code, and variant code.
-	 * <p>For example, basename "messages", Locale "de_AT_oo" &rarr; "messages_de_AT_OO",
+	 * <p>For example, basename "messages", Locale "de_AT_OO" &rarr; "messages_de_AT_OO",
 	 * "messages_de_AT", "messages_de".
 	 * <p>Follows the rules defined by {@link java.util.Locale#toString()}.
 	 * @param basename the basename of the bundle
@@ -405,6 +411,22 @@ public class ReloadableResourceBundleMessageSource extends AbstractResourceBased
 		return result;
 	}
 
+
+	/**
+	 * Get a PropertiesHolder for the given filename, either from the
+	 * cache or freshly loaded.
+	 * @param filename the bundle filename (basename + Locale)
+	 * @param locale the requested locale (for cache filtering)
+	 * @return the current PropertiesHolder for the bundle
+	 * @see #getProperties(String)
+	 */
+	private PropertiesHolder getProperties(String filename, Locale locale) {
+		PropertiesHolder propHolder = getProperties(filename);
+		if (propHolder.getProperties() == null && !JVM_LOCALES.contains(locale)) {
+			this.cachedProperties.remove(filename);
+		}
+		return propHolder;
+	}
 
 	/**
 	 * Get a PropertiesHolder for the given filename, either from the

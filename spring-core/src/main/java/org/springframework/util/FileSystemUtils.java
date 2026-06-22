@@ -118,7 +118,7 @@ public abstract class FileSystemUtils {
 
 	/**
 	 * Recursively copy the contents of the {@code src} file/directory
-	 * to the {@code dest} file/directory.
+	 * to the {@code dest} file/directory, including symbolic links.
 	 * @param src the source directory
 	 * @param dest the destination directory
 	 * @throws IOException in the case of I/O errors

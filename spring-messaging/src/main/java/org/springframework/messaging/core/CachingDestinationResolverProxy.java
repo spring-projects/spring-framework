@@ -30,6 +30,9 @@ import org.springframework.util.Assert;
  * if the destination resolving process is expensive (for example, the destination has to be
  * resolved through an external system) and the resolution results are stable anyway.
  *
+ * <p>Note: This cache is not designed for setups with varying dynamic destination names.
+ * Prefer direct destination resolution in such scenarios.
+ *
  * @author Agim Emruli
  * @author Juergen Hoeller
  * @since 4.1
