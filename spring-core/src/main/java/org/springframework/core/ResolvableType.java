@@ -943,8 +943,9 @@ public class ResolvableType implements Serializable {
 	}
 
 	private @Nullable ResolvableType resolveVariable(TypeVariable<?> variable) {
+		TypeVariable<?> variableToCompare = SerializableTypeWrapper.unwrap(variable);
 		if (this.type instanceof TypeVariable) {
-			return resolveType().resolveVariable(variable);
+			return resolveType().resolveVariable(variableToCompare);
 		}
 		if (this.type instanceof ParameterizedType parameterizedType) {
 			Class<?> resolved = resolve();
@@ -954,23 +955,29 @@ public class ResolvableType implements Serializable {
 			TypeVariable<?>[] variables = resolved.getTypeParameters();
 			Type[] typeArguments = parameterizedType.getActualTypeArguments();
 			for (int i = 0; i < variables.length; i++) {
-				if (ObjectUtils.nullSafeEquals(variables[i].getName(), variable.getName())) {
+				if (ObjectUtils.nullSafeEquals(variables[i], variableToCompare)) {
 					return forType(typeArguments[i], this.variableResolver);
 				}
 			}
 			Type ownerType = parameterizedType.getOwnerType();
 			if (ownerType != null) {
-				return forType(ownerType, this.variableResolver).resolveVariable(variable);
+				return forType(ownerType, this.variableResolver).resolveVariable(variableToCompare);
+			}
+			// Fallback: comparison by variable name, independent of generic declaration context.
+			for (int i = 0; i < variables.length; i++) {
+				if (ObjectUtils.nullSafeEquals(variables[i].getName(), variableToCompare.getName())) {
+					return forType(typeArguments[i], this.variableResolver);
+				}
 			}
 		}
 		if (this.type instanceof WildcardType) {
-			ResolvableType resolved = resolveType().resolveVariable(variable);
+			ResolvableType resolved = resolveType().resolveVariable(variableToCompare);
 			if (resolved != null) {
 				return resolved;
 			}
 		}
 		if (this.variableResolver != null) {
-			return this.variableResolver.resolveVariable(variable);
+			return this.variableResolver.resolveVariable(variableToCompare);
 		}
 		return null;
 	}
@@ -1616,8 +1623,7 @@ public class ResolvableType implements Serializable {
 		public @Nullable ResolvableType resolveVariable(TypeVariable<?> variable) {
 			TypeVariable<?> variableToCompare = SerializableTypeWrapper.unwrap(variable);
 			for (int i = 0; i < this.variables.length; i++) {
-				TypeVariable<?> resolvedVariable = SerializableTypeWrapper.unwrap(this.variables[i]);
-				if (ObjectUtils.nullSafeEquals(resolvedVariable, variableToCompare)) {
+				if (ObjectUtils.nullSafeEquals(this.variables[i], variableToCompare)) {
 					return this.generics[i];
 				}
 			}

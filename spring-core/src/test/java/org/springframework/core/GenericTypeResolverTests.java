@@ -251,13 +251,19 @@ class GenericTypeResolverTests {
 		assertThat(resolvedType).isEqualTo(InheritsDefaultMethod.ConcreteType.class);
 	}
 
-	@Test
+	@Test  // gh-36480
 	void resolveTypeFromNestedParameterizedType() {
 		Type resolvedType = resolveType(method(MyInterfaceType.class, "get").getGenericReturnType(), MyCollectionInterfaceType.class);
 		assertThat(resolvedType).isEqualTo(method(MyCollectionInterfaceType.class, "get").getGenericReturnType());
 
 		resolvedType = resolveType(method(MyInterfaceType.class, "get").getGenericReturnType(), MyOptionalInterfaceType.class);
 		assertThat(resolvedType).isEqualTo(method(MyOptionalInterfaceType.class, "get").getGenericReturnType());
+	}
+
+	@Test  // gh-36890
+	void resolveTypeAgainstSameNamedVariables() {
+		Type resolvedType = resolveType(method(Create.class, "create", Object.class).getGenericParameterTypes()[0], Controller.class);
+		assertThat(resolvedType).isEqualTo(Long.class);
 	}
 
 	private static Method method(Class<?> target, String methodName, Class<?>... parameterTypes) {
@@ -502,6 +508,18 @@ class GenericTypeResolverTests {
 
 		static class ConcreteType implements InterfaceWithDefaultMethod.AbstractType {
 		}
+	}
+
+	interface Search<I, O> {
+	}
+
+	interface Create<I, O> {
+		default O create(I body) {
+			return null;
+		}
+	}
+
+	static class Controller implements Search<String, Long>, Create<Long, Long> {
 	}
 
 }
