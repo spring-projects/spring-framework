@@ -76,6 +76,8 @@ import static org.assertj.core.api.Assertions.entry;
  * @author Juergen Hoeller
  * @author Stephane Nicoll
  * @author Sam Brannen
+ * @author YeongJae Min
+ * @author Yanming Zhou
  */
 class DefaultConversionServiceTests {
 
@@ -258,12 +260,16 @@ class DefaultConversionServiceTests {
 	void numberToDataSizeWithDecimalNumber() {
 		assertThatExceptionOfType(ConversionFailedException.class)
 				.isThrownBy(() -> conversionService.convert(10.5, DataSize.class));
+		assertThatExceptionOfType(ConversionFailedException.class)
+				.isThrownBy(() -> conversionService.convert(new BigDecimal("10.5"), DataSize.class));
 	}
 
 	@Test  // gh-36830
 	void numberToDataSize() {
 		assertThat(conversionService.convert(10, DataSize.class)).isEqualTo(DataSize.ofBytes(10));
 		assertThat(conversionService.convert(-10L, DataSize.class)).isEqualTo(DataSize.ofBytes(-10));
+		assertThat(conversionService.convert(new BigDecimal("10"), DataSize.class)).isEqualTo(DataSize.ofBytes(10));
+		assertThat(conversionService.convert(new BigDecimal("10.0"), DataSize.class)).isEqualTo(DataSize.ofBytes(10));
 	}
 
 	@Test
