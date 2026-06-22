@@ -23,15 +23,20 @@ import org.springframework.util.unit.DataSize;
  * Converts from a {@link Number} to a {@link DataSize}.
  *
  * @author YeongJae Min
+ * @author Yanming Zhou
  * @since 7.1
- * @see DataSize#parse(CharSequence)
+ * @see DataSize#ofBytes(long)
  * @see StringToDataSizeConverter
  */
 final class NumberToDataSizeConverter implements Converter<Number, DataSize> {
 
 	@Override
 	public DataSize convert(Number source) {
-		return DataSize.parse(source.toString());
+		long bytes = source.longValue();
+		if (source.doubleValue() - bytes != 0) {
+			throw new IllegalArgumentException("'" + source + "' is not a valid data size");
+		}
+		return DataSize.ofBytes(bytes);
 	}
 
 }
