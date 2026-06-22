@@ -41,6 +41,8 @@ import static org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType.
  *
  * @author Sam Brannen
  * @author Juergen Hoeller
+ * @author Jiri Krokviak
+ * @author Yanming Zhou
  * @since 6.1
  * @see JdbcClientIndexedParameterTests
  * @see JdbcClientNamedParameterTests
@@ -298,6 +300,69 @@ class JdbcClientIntegrationTests {
 						.batchUpdate());
 	}
 
+	@Test
+	void batchUpdateWithNamedParametersAndGeneratedKeys() {
+		KeyHolder generatedKeyHolder = new GeneratedKeyHolder();
+		int[] rowsAffected = this.jdbcClient.sql(INSERT_WITH_NAMED_PARAMS)
+				.batch()
+				.param("firstName", "Jane").param("lastName", "Smith").add()
+				.param("firstName", "John").param("lastName", "Doe")
+				.batchUpdate(generatedKeyHolder);
+
+		assertThat(rowsAffected).containsExactly(1, 1);
+		assertNumUsers(3);
+		assertUser(1, "Jane", "Smith");
+		assertUser(2, "John", "Doe");
+		assertThat(generatedKeyHolder.getKeyList()).containsExactly(Map.of("ID", 1), Map.of("ID", 2));
+	}
+
+	@Test
+	void batchUpdateWithIndexedParametersAndGeneratedKeys() {
+		KeyHolder generatedKeyHolder = new GeneratedKeyHolder();
+		int[] rowsAffected = this.jdbcClient.sql(INSERT_WITH_JDBC_PARAMS)
+				.batch()
+				.params("Jane", "Smith").add()
+				.params("John", "Doe")
+				.batchUpdate(generatedKeyHolder);
+
+		assertThat(rowsAffected).containsExactly(1, 1);
+		assertNumUsers(3);
+		assertUser(1, "Jane", "Smith");
+		assertUser(2, "John", "Doe");
+		assertThat(generatedKeyHolder.getKeyList()).containsExactly(Map.of("ID", 1), Map.of("ID", 2));
+	}
+
+	@Test
+	void batchUpdateWithNamedParametersAndGeneratedKeysAndKeyColumnNames() {
+		KeyHolder generatedKeyHolder = new GeneratedKeyHolder();
+		int[] rowsAffected = this.jdbcClient.sql(INSERT_WITH_NAMED_PARAMS)
+				.batch()
+				.param("firstName", "Jane").param("lastName", "Smith").add()
+				.param("firstName", "John").param("lastName", "Doe")
+				.batchUpdate(generatedKeyHolder, "id");
+
+		assertThat(rowsAffected).containsExactly(1, 1);
+		assertNumUsers(3);
+		assertUser(1, "Jane", "Smith");
+		assertUser(2, "John", "Doe");
+		assertThat(generatedKeyHolder.getKeyList()).containsExactly(Map.of("ID", 1), Map.of("ID", 2));
+	}
+
+	@Test
+	void batchUpdateWithIndexedParametersAndGeneratedKeysAndKeyColumnNames() {
+		KeyHolder generatedKeyHolder = new GeneratedKeyHolder();
+		int[] rowsAffected = this.jdbcClient.sql(INSERT_WITH_JDBC_PARAMS)
+				.batch()
+				.params("Jane", "Smith").add()
+				.params("John", "Doe")
+				.batchUpdate(generatedKeyHolder, "id");
+
+		assertThat(rowsAffected).containsExactly(1, 1);
+		assertNumUsers(3);
+		assertUser(1, "Jane", "Smith");
+		assertUser(2, "John", "Doe");
+		assertThat(generatedKeyHolder.getKeyList()).containsExactly(Map.of("ID", 1), Map.of("ID", 2));
+	}
 
 	@Nested  // gh-34768
 	class ReusedNamedParameterTests {

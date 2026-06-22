@@ -16,6 +16,8 @@
 
 package org.springframework.jdbc.core.simple;
 
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -30,6 +32,7 @@ import org.jspecify.annotations.Nullable;
 import org.springframework.beans.BeanUtils;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.support.DefaultConversionService;
+import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcOperations;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.PreparedStatementCreator;
@@ -56,6 +59,8 @@ import org.springframework.util.Assert;
  *
  * @author Juergen Hoeller
  * @author Sam Brannen
+ * @author Jiri Krokviak
+ * @author Yanming Zhou
  * @since 6.1
  * @see JdbcClient#create(DataSource)
  * @see JdbcClient#create(JdbcOperations)
@@ -401,6 +406,54 @@ final class DefaultJdbcClient implements JdbcClient {
 				return (Boolean.TRUE.equals(this.usingNamedParams) ?
 						namedParamOps.batchUpdate(sql, this.namedBatch.toArray(new SqlParameterSource[0])) :
 						classicOps.batchUpdate(sql, this.indexedBatch));
+			}
+
+			@Override
+			public int[] batchUpdate(KeyHolder generatedKeyHolder) {
+				return doBatchUpdate(generatedKeyHolder, null);
+			}
+
+			@Override
+			public int[] batchUpdate(KeyHolder generatedKeyHolder, String... keyColumnNames) {
+				return doBatchUpdate(generatedKeyHolder, keyColumnNames);
+			}
+
+			private int[] doBatchUpdate(KeyHolder generatedKeyHolder, String @Nullable [] keyColumnNames) {
+				completeEntry();
+				if (Boolean.TRUE.equals(this.usingNamedParams)) {
+					if (keyColumnNames != null) {
+						return namedParamOps.batchUpdate(sql, this.namedBatch.toArray(new SqlParameterSource[0]),
+								generatedKeyHolder, keyColumnNames);
+					}
+					else {
+						return namedParamOps.batchUpdate(sql, this.namedBatch.toArray(new SqlParameterSource[0]),
+								generatedKeyHolder);
+					}
+				}
+				else {
+					if (this.indexedBatch.isEmpty()) {
+						return new int[0];
+					}
+					PreparedStatementCreatorFactory pscf = new PreparedStatementCreatorFactory(sql);
+					if (keyColumnNames != null) {
+						pscf.setGeneratedKeysColumnNames(keyColumnNames);
+					}
+					else {
+						pscf.setReturnGeneratedKeys(true);
+					}
+					PreparedStatementCreator psc = pscf.newPreparedStatementCreator(this.indexedBatch.get(0));
+					return classicOps.batchUpdate(psc, new BatchPreparedStatementSetter() {
+						@Override
+						public void setValues(PreparedStatement ps, int i) throws SQLException {
+							pscf.newPreparedStatementSetter(indexedBatch.get(i)).setValues(ps);
+						}
+
+						@Override
+						public int getBatchSize() {
+							return indexedBatch.size();
+						}
+					}, generatedKeyHolder);
+				}
 			}
 
 			private void completeEntry() {

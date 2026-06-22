@@ -30,6 +30,7 @@ import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
 import org.springframework.core.convert.ConversionService;
+import org.springframework.dao.DataAccessException;
 import org.springframework.dao.support.DataAccessUtils;
 import org.springframework.jdbc.core.JdbcOperations;
 import org.springframework.jdbc.core.ResultSetExtractor;
@@ -62,6 +63,8 @@ import org.springframework.jdbc.support.rowset.SqlRowSet;
  *
  * @author Juergen Hoeller
  * @author Sam Brannen
+ * @author Jiri Krokviak
+ * @author Yanming Zhou
  * @since 6.1
  * @see ResultSetExtractor
  * @see RowCallbackHandler
@@ -456,11 +459,42 @@ public interface JdbcClient {
 		/**
 		 * Execute the accumulated sets of parameters as a batch update, completing
 		 * the current (final) set as the last batch entry.
-		 * @return an array containing the numbers of rows affected by each
-		 * execution in the batch
+		 * @return an array containing the numbers of rows affected by each execution in the batch
+		 * (may also contain special JDBC-defined negative values for affected rows such as
+		 * {@link java.sql.Statement#SUCCESS_NO_INFO}/{@link java.sql.Statement#EXECUTE_FAILED})
+		 * @throws DataAccessException if there is any problem issuing the update
 		 * @see java.sql.PreparedStatement#executeBatch()
 		 */
 		int[] batchUpdate();
+
+		/**
+		 * Execute the accumulated sets of parameters as a batch update, completing
+		 * the current (final) set as the last batch entry, returning generated keys.
+		 * @param generatedKeyHolder a {@link KeyHolder} that will hold the generated keys
+		 * @return an array containing the numbers of rows affected by each execution in the batch
+		 * (may also contain special JDBC-defined negative values for affected rows such as
+		 * {@link java.sql.Statement#SUCCESS_NO_INFO}/{@link java.sql.Statement#EXECUTE_FAILED})
+		 * @throws DataAccessException if there is any problem issuing the update
+		 * @see #batchUpdate
+		 * @see org.springframework.jdbc.support.GeneratedKeyHolder
+		 * @see java.sql.DatabaseMetaData#supportsGetGeneratedKeys()
+		 */
+		int[] batchUpdate(KeyHolder generatedKeyHolder);
+
+		/**
+		 * Execute the accumulated sets of parameters as a batch update, completing
+		 * the current (final) set as the last batch entry, returning generated keys.
+		 * @param generatedKeyHolder a {@link KeyHolder} that will hold the generated keys
+		 * @param keyColumnNames names of the columns that will have keys generated for them
+		 * @return an array containing the numbers of rows affected by each execution in the batch
+		 * (may also contain special JDBC-defined negative values for affected rows such as
+		 * {@link java.sql.Statement#SUCCESS_NO_INFO}/{@link java.sql.Statement#EXECUTE_FAILED})
+		 * @throws DataAccessException if there is any problem issuing the update
+		 * @see #batchUpdate
+		 * @see org.springframework.jdbc.support.GeneratedKeyHolder
+		 * @see java.sql.DatabaseMetaData#supportsGetGeneratedKeys()
+		 */
+		int[] batchUpdate(KeyHolder generatedKeyHolder, String... keyColumnNames);
 	}
 
 
