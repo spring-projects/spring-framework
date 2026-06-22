@@ -99,6 +99,27 @@ class StompBrokerRelayMessageHandlerTests {
 	}
 
 	@Test
+	void virtualHostDefault() {
+		Message<byte[]> connectMessage = connectMessage("sess1", "joe");
+		MessageHeaderAccessor.getAccessor(connectMessage, StompHeaderAccessor.class).setHost("ABC");
+
+		this.brokerRelay.start();
+		this.brokerRelay.handleMessage(connectMessage("sess1", "joe"));
+
+		assertThat(this.tcpClient.getSentMessages()).hasSize(2);
+
+		StompHeaderAccessor headers1 = this.tcpClient.getSentHeaders(0);
+		assertThat(headers1.getCommand()).isEqualTo(StompCommand.CONNECT);
+		assertThat(headers1.getSessionId()).isEqualTo(StompBrokerRelayMessageHandler.SYSTEM_SESSION_ID);
+		assertThat(headers1.getHost()).isNull();
+
+		StompHeaderAccessor headers2 = this.tcpClient.getSentHeaders(1);
+		assertThat(headers2.getCommand()).isEqualTo(StompCommand.CONNECT);
+		assertThat(headers2.getSessionId()).isEqualTo("sess1");
+		assertThat(headers2.getHost()).isNull();
+	}
+
+	@Test
 	void loginAndPasscode() {
 		this.brokerRelay.setSystemLogin("syslogin");
 		this.brokerRelay.setSystemPasscode("syspasscode");

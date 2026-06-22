@@ -28,20 +28,16 @@ import org.springframework.web.util.ServletRequestPathUtils;
 
 /**
  * Simple {@code Controller} implementation that transforms the virtual
- * path of a URL into a view name and returns that view.
+ * path of a URL into a view name and returns that view, optionally prepending a
+ * {@link #setPrefix prefix} and/or appending a {@link #setSuffix suffix}.
  *
- * <p>Can optionally prepend a {@link #setPrefix prefix} and/or append a
- * {@link #setSuffix suffix} to build the viewname from the URL filename.
- *
- * <p>Find some examples below:
+ * <p>This is intended for use with individually mapped static content pages
+ * such as a home page or an index page. See examples below:
  * <ol>
  * <li>{@code "/index" -> "index"}</li>
  * <li>{@code "/index.html" -> "index"}</li>
  * <li>{@code "/index.html"} + prefix {@code "pre_"} and suffix {@code "_suf" -> "pre_index_suf"}</li>
- * <li>{@code "/products/view.html" -> "products/view"}</li>
  * </ol>
- *
- * <p>Thanks to David Barri for suggesting prefix/suffix support!
  *
  * @author Alef Arendsen
  * @author Juergen Hoeller

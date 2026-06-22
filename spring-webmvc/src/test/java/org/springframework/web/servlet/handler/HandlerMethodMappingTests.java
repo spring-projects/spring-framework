@@ -142,8 +142,8 @@ class HandlerMethodMappingTests {
 
 	@Test // gh-26490
 	void ambiguousMatchOnPreFlightRequestWithCorsConfig() throws Exception {
-		this.mapping.registerMapping("/f?o", this.handler, this.method1);
-		this.mapping.registerMapping("/fo?", this.handler, this.handler.getClass().getMethod("corsHandlerMethod"));
+		this.mapping.registerMapping("/f?o", this.handler, this.handler.getClass().getMethod("corsHandlerMethod1"));
+		this.mapping.registerMapping("/fo?", this.handler, this.handler.getClass().getMethod("corsHandlerMethod2"));
 
 		MockHttpServletRequest request = new MockHttpServletRequest("OPTIONS", "/foo");
 		request.addHeader(HttpHeaders.ORIGIN, "https://domain.com");
@@ -166,7 +166,7 @@ class HandlerMethodMappingTests {
 
 	@Test
 	void abortInterceptorInPreFlightRequestWithCorsConfig() throws Exception {
-		this.mapping.registerMapping("/foo", this.handler, this.handler.getClass().getMethod("corsHandlerMethod"));
+		this.mapping.registerMapping("/foo", this.handler, this.handler.getClass().getMethod("corsHandlerMethod1"));
 
 		MockHttpServletRequest request = new MockHttpServletRequest("OPTIONS", "/foo");
 		request.addParameter("abort", "true");
@@ -297,7 +297,7 @@ class HandlerMethodMappingTests {
 	@Test
 	void registerCustomHandlerMethod() throws Exception {
 		this.mapping.setCustomerHandlerMethod(true);
-		this.mapping.registerMapping("/foo", this.handler, this.handler.getClass().getMethod("corsHandlerMethod"));
+		this.mapping.registerMapping("/foo", this.handler, this.handler.getClass().getMethod("corsHandlerMethod1"));
 
 		MockHttpServletRequest request = new MockHttpServletRequest("OPTIONS", "/foo");
 		request.addParameter("abort", "true");
@@ -418,7 +418,13 @@ class HandlerMethodMappingTests {
 
 		@RequestMapping
 		@CrossOrigin(originPatterns = "*")
-		public void corsHandlerMethod() {
+		public void corsHandlerMethod1() {
+		}
+
+		@RequestMapping
+		@CrossOrigin(originPatterns = "*")
+		public void corsHandlerMethod2() {
 		}
 	}
+
 }
