@@ -146,6 +146,9 @@ abstract class ReactorUriHelper {
 				return;
 			}
 		}
+		if (length > 0 && uri.charAt(0) != '/') {
+			builder.append('/');
+		}
 		builder.append(uri);
 	}
 
