@@ -107,6 +107,9 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 	// The expression being parsed
 	private String expressionString = "";
 
+	// Current structural nesting depth (inline lists, maps) while parsing
+	private int nestingDepth;
+
 	// The token stream constructed from that expression string
 	private List<Token> tokenStream = Collections.emptyList();
 
@@ -134,6 +137,7 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 
 		try {
 			this.expressionString = expressionString;
+			this.nestingDepth = 0;
 			Tokenizer tokenizer = new Tokenizer(expressionString);
 			this.tokenStream = tokenizer.process();
 			this.tokenStreamLength = this.tokenStream.size();
@@ -159,6 +163,18 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 		if (string.length() > maxLength) {
 			throw new SpelEvaluationException(SpelMessage.MAX_EXPRESSION_LENGTH_EXCEEDED, maxLength);
 		}
+	}
+
+	private void enterNesting(int startPos) {
+		this.nestingDepth++;
+		int maxDepth = this.configuration.getMaximumNestingDepth();
+		if (this.nestingDepth > maxDepth) {
+			throw internalException(startPos, SpelMessage.MAX_NESTING_DEPTH_EXCEEDED, maxDepth);
+		}
+	}
+
+	private void exitNesting() {
+		this.nestingDepth--;
 	}
 
 	//	expression
@@ -636,6 +652,7 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 		if (t == null || !peekToken(TokenKind.LCURLY, true)) {
 			return false;
 		}
+		enterNesting(t.startPos);
 		SpelNodeImpl expr = null;
 		Token closingCurly = peekToken();
 		if (closingCurly != null && peekToken(TokenKind.RCURLY, true)) {
@@ -686,6 +703,7 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 				throw internalException(t.startPos, SpelMessage.OOD);
 			}
 		}
+		exitNesting();
 		this.constructedNodes.push(expr);
 		return true;
 	}

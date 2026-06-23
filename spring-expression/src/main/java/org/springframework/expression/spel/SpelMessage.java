@@ -307,7 +307,11 @@ public enum SpelMessage {
 
 	/** @since 6.2.19 */
 	MAX_OPERATIONS_EXCEEDED(Kind.ERROR, 1085,
-			"SpEL expression evaluation exceeded the threshold of ''{0}'' operations");
+			"SpEL expression evaluation exceeded the threshold of ''{0}'' operations"),
+
+	/** @since 7.0 */
+	MAX_NESTING_DEPTH_EXCEEDED(Kind.ERROR, 1086,
+			"SpEL expression structural nesting depth exceeded the threshold of ''{0}'' levels");
 
 
 	private final Kind kind;

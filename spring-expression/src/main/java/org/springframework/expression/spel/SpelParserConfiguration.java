@@ -50,6 +50,15 @@ public class SpelParserConfiguration {
 	public static final int DEFAULT_MAX_OPERATIONS = 10_000;
 
 	/**
+	 * Default maximum structural nesting depth permitted for a SpEL expression: {@value}.
+	 * <p>This guards against deeply nested inline lists, maps, and other recursive
+	 * constructs that could cause excessive parser recursion.
+	 * @since 7.0
+	 * @see #SPRING_EXPRESSION_MAX_NESTING_DEPTH_PROPERTY_NAME
+	 */
+	public static final int DEFAULT_MAX_NESTING_DEPTH = 1_000;
+
+	/**
 	 * System property to configure the default compiler mode for SpEL expression parsers: {@value}.
 	 * <p><strong>NOTE</strong>: Instead of relying on a global default, applications
 	 * and frameworks should ideally set an explicit custom value via the
@@ -74,6 +83,20 @@ public class SpelParserConfiguration {
 	 */
 	public static final String SPRING_EXPRESSION_MAX_OPERATIONS_PROPERTY_NAME = "spring.expression.maxOperations";
 
+	/**
+	 * System property to configure the default maximum structural nesting depth
+	 * permitted for SpEL expression parsing: {@value}.
+	 * <p><strong>NOTE</strong>: Instead of relying on a global default, applications
+	 * and frameworks should ideally set an explicit custom value via the
+	 * {@link #SpelParserConfiguration(SpelCompilerMode, ClassLoader, boolean, boolean, int, int, int, int)}
+	 * constructor which provides complete configuration control and the ability
+	 * to override global defaults per use case.
+	 * <p>Can also be configured via the {@link SpringProperties} mechanism.
+	 * @since 7.0
+	 * @see #DEFAULT_MAX_NESTING_DEPTH
+	 */
+	public static final String SPRING_EXPRESSION_MAX_NESTING_DEPTH_PROPERTY_NAME = "spring.expression.maxNestingDepth";
+
 
 	private static final SpelCompilerMode defaultCompilerMode;
 
@@ -97,6 +120,8 @@ public class SpelParserConfiguration {
 	private final int maximumExpressionLength;
 
 	private final int maximumOperations;
+
+	private final int maximumNestingDepth;
 
 
 	/**
@@ -206,7 +231,7 @@ public class SpelParserConfiguration {
 			boolean autoGrowNullReferences, boolean autoGrowCollections, int maximumAutoGrowSize, int maximumExpressionLength) {
 
 		this((compilerMode != null ? compilerMode : defaultCompilerMode), compilerClassLoader, autoGrowNullReferences,
-				autoGrowCollections, maximumAutoGrowSize, maximumExpressionLength, retrieveMaxOperations());
+				autoGrowCollections, maximumAutoGrowSize, maximumExpressionLength, retrieveMaxOperations(), retrieveMaxNestingDepth());
 	}
 
 	/**
@@ -223,14 +248,43 @@ public class SpelParserConfiguration {
 	 * @param maximumOperations the maximum number of operations permitted during
 	 * SpEL expression evaluation; must be a positive number
 	 * @since 6.2.19
+	 * @deprecated as of 7.0, in favor of
+	 * {@link #SpelParserConfiguration(SpelCompilerMode, ClassLoader, boolean, boolean, int, int, int, int)}
 	 */
+	@Deprecated(since = "7.0")
 	public SpelParserConfiguration(SpelCompilerMode compilerMode, @Nullable ClassLoader compilerClassLoader,
 			boolean autoGrowNullReferences, boolean autoGrowCollections, int maximumAutoGrowSize, int maximumExpressionLength,
 			int maximumOperations) {
 
+		this(compilerMode, compilerClassLoader, autoGrowNullReferences, autoGrowCollections,
+				maximumAutoGrowSize, maximumExpressionLength, maximumOperations, retrieveMaxNestingDepth());
+	}
+
+	/**
+	 * Create a new {@code SpelParserConfiguration} instance.
+	 * @param compilerMode the compiler mode that parsers using this configuration
+	 * should use; must not be {@code null}
+	 * @param compilerClassLoader the {@code ClassLoader} to use as the basis for
+	 * expression compilation; or {@code null} to use the default {@code ClassLoader}
+	 * @param autoGrowNullReferences if null references should automatically grow
+	 * @param autoGrowCollections if collections should automatically grow
+	 * @param maximumAutoGrowSize the maximum size to which a collection can auto grow
+	 * @param maximumExpressionLength the maximum length of a SpEL expression;
+	 * must be a positive number
+	 * @param maximumOperations the maximum number of operations permitted during
+	 * SpEL expression evaluation; must be a positive number
+	 * @param maximumNestingDepth the maximum structural nesting depth permitted
+	 * during SpEL expression parsing; must be a positive number
+	 * @since 7.0
+	 */
+	public SpelParserConfiguration(SpelCompilerMode compilerMode, @Nullable ClassLoader compilerClassLoader,
+			boolean autoGrowNullReferences, boolean autoGrowCollections, int maximumAutoGrowSize, int maximumExpressionLength,
+			int maximumOperations, int maximumNestingDepth) {
+
 		Assert.notNull(compilerMode, "'compilerMode' must not be null");
 		Assert.isTrue(maximumExpressionLength > 0, "'maximumExpressionLength' must be a positive number");
 		Assert.isTrue(maximumOperations > 0, "'maximumOperations' must be a positive number");
+		Assert.isTrue(maximumNestingDepth > 0, "'maximumNestingDepth' must be a positive number");
 
 		this.compilerMode = compilerMode;
 		this.compilerClassLoader = compilerClassLoader;
@@ -239,6 +293,7 @@ public class SpelParserConfiguration {
 		this.maximumAutoGrowSize = maximumAutoGrowSize;
 		this.maximumExpressionLength = maximumExpressionLength;
 		this.maximumOperations = maximumOperations;
+		this.maximumNestingDepth = maximumNestingDepth;
 	}
 
 
@@ -294,6 +349,14 @@ public class SpelParserConfiguration {
 		return this.maximumOperations;
 	}
 
+	/**
+	 * Return the maximum structural nesting depth permitted for a SpEL expression.
+	 * @since 7.0
+	 */
+	public int getMaximumNestingDepth() {
+		return this.maximumNestingDepth;
+	}
+
 
 	private static int retrieveMaxOperations() {
 		String value = SpringProperties.getProperty(SPRING_EXPRESSION_MAX_OPERATIONS_PROPERTY_NAME);
@@ -310,6 +373,24 @@ public class SpelParserConfiguration {
 		catch (NumberFormatException ex) {
 			throw new IllegalArgumentException("Failed to parse value for system property [" +
 					SPRING_EXPRESSION_MAX_OPERATIONS_PROPERTY_NAME + "]: " + ex.getMessage(), ex);
+		}
+	}
+
+	private static int retrieveMaxNestingDepth() {
+		String value = SpringProperties.getProperty(SPRING_EXPRESSION_MAX_NESTING_DEPTH_PROPERTY_NAME);
+		if (!StringUtils.hasText(value)) {
+			return DEFAULT_MAX_NESTING_DEPTH;
+		}
+
+		try {
+			int maxDepth = Integer.parseInt(value.trim());
+			Assert.isTrue(maxDepth > 0, () -> "Value [" + maxDepth + "] for system property [" +
+					SPRING_EXPRESSION_MAX_NESTING_DEPTH_PROPERTY_NAME + "] must be positive");
+			return maxDepth;
+		}
+		catch (NumberFormatException ex) {
+			throw new IllegalArgumentException("Failed to parse value for system property [" +
+					SPRING_EXPRESSION_MAX_NESTING_DEPTH_PROPERTY_NAME + "]: " + ex.getMessage(), ex);
 		}
 	}
 
