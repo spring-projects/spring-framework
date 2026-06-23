@@ -260,20 +260,7 @@ public class ConcurrentWebSocketSessionDecorator extends WebSocketSessionDecorat
 				if (this.closeInProgress) {
 					return;
 				}
-				if (!CloseStatus.SESSION_NOT_RELIABLE.equals(status)) {
-					try {
-						checkSessionLimits();
-					}
-					catch (SessionLimitExceededException ex) {
-						// Ignore
-					}
-					if (this.limitExceeded) {
-						if (logger.isDebugEnabled()) {
-							logger.debug("Changing close status " + status + " to SESSION_NOT_RELIABLE.");
-						}
-						status = CloseStatus.SESSION_NOT_RELIABLE;
-					}
-				}
+				status = checkSessionLimitsAndChangeStatusIfNecessary(status);
 				this.closeInProgress = true;
 				super.close(status);
 			}
@@ -281,6 +268,24 @@ public class ConcurrentWebSocketSessionDecorator extends WebSocketSessionDecorat
 				this.closeLock.unlock();
 			}
 		}
+	}
+
+	private CloseStatus checkSessionLimitsAndChangeStatusIfNecessary(CloseStatus status) {
+		if (!CloseStatus.SESSION_NOT_RELIABLE.equals(status)) {
+			try {
+				checkSessionLimits();
+			}
+			catch (SessionLimitExceededException ex) {
+				// Ignore
+			}
+			if (this.limitExceeded) {
+				if (logger.isDebugEnabled()) {
+					logger.debug("Changing close status " + status + " to SESSION_NOT_RELIABLE.");
+				}
+				status = CloseStatus.SESSION_NOT_RELIABLE;
+			}
+		}
+		return status;
 	}
 
 
