@@ -45,11 +45,9 @@ public class DefaultMultipartHttpServletRequest extends AbstractMultipartHttpSer
 
 	private static final String CONTENT_TYPE = "Content-Type";
 
-	@SuppressWarnings("NullAway.Init")
-	private Map<String, String[]> multipartParameters;
+	private @Nullable Map<String, String[]> multipartParameters;
 
-	@SuppressWarnings("NullAway.Init")
-	private Map<String, String> multipartParameterContentTypes;
+	private @Nullable Map<String, String> multipartParameterContentTypes;
 
 
 	/**
@@ -170,7 +168,7 @@ public class DefaultMultipartHttpServletRequest extends AbstractMultipartHttpSer
 		if (this.multipartParameters == null) {
 			initializeMultipart();
 		}
-		return this.multipartParameters;
+		return (this.multipartParameters != null ? this.multipartParameters : Collections.emptyMap());
 	}
 
 	/**
@@ -190,7 +188,8 @@ public class DefaultMultipartHttpServletRequest extends AbstractMultipartHttpSer
 		if (this.multipartParameterContentTypes == null) {
 			initializeMultipart();
 		}
-		return this.multipartParameterContentTypes;
+		return (this.multipartParameterContentTypes != null ? this.multipartParameterContentTypes :
+				Collections.emptyMap());
 	}
 
 }

@@ -58,8 +58,7 @@ import org.springframework.web.multipart.MultipartFile;
  */
 public class StandardMultipartHttpServletRequest extends AbstractMultipartHttpServletRequest {
 
-	@SuppressWarnings("NullAway.Init")
-	private Set<String> multipartParameterNames;
+	private @Nullable Set<String> multipartParameterNames;
 
 
 	/**
@@ -144,7 +143,7 @@ public class StandardMultipartHttpServletRequest extends AbstractMultipartHttpSe
 		if (this.multipartParameterNames == null) {
 			initializeMultipart();
 		}
-		if (this.multipartParameterNames.isEmpty()) {
+		if (CollectionUtils.isEmpty(this.multipartParameterNames)) {
 			return super.getParameterNames();
 		}
 
@@ -164,7 +163,7 @@ public class StandardMultipartHttpServletRequest extends AbstractMultipartHttpSe
 		if (this.multipartParameterNames == null) {
 			initializeMultipart();
 		}
-		if (this.multipartParameterNames.isEmpty()) {
+		if (CollectionUtils.isEmpty(this.multipartParameterNames)) {
 			return super.getParameterMap();
 		}
 

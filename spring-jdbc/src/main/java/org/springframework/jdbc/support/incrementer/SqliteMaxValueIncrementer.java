@@ -59,11 +59,12 @@ public class SqliteMaxValueIncrementer extends AbstractColumnMaxValueIncrementer
 
 	@Override
 	protected synchronized long getNextKey() {
-		Connection con = DataSourceUtils.getConnection(getDataSource());
+		DataSource dataSource = obtainDataSource();
+		Connection con = DataSourceUtils.getConnection(dataSource);
 		Statement stmt = null;
 		try {
 			stmt = con.createStatement();
-			DataSourceUtils.applyTransactionTimeout(stmt, getDataSource());
+			DataSourceUtils.applyTransactionTimeout(stmt, dataSource);
 			stmt.executeUpdate("insert into " + getIncrementerName() + " values(null)");
 			ResultSet rs = stmt.executeQuery("select max(rowid) from " + getIncrementerName());
 			if (!rs.next()) {
@@ -78,7 +79,7 @@ public class SqliteMaxValueIncrementer extends AbstractColumnMaxValueIncrementer
 		}
 		finally {
 			JdbcUtils.closeStatement(stmt);
-			DataSourceUtils.releaseConnection(con, getDataSource());
+			DataSourceUtils.releaseConnection(con, dataSource);
 		}
 	}
 
