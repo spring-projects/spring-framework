@@ -44,6 +44,7 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
@@ -257,19 +258,28 @@ class DefaultConversionServiceTests {
 	}
 
 	@Test  // gh-36830
-	void numberToDataSizeWithDecimalNumber() {
+	void numberToDataSizeConversionRejectsNumberWithFractionalPart() {
 		assertThatExceptionOfType(ConversionFailedException.class)
-				.isThrownBy(() -> conversionService.convert(10.5, DataSize.class));
+				.isThrownBy(() -> conversionService.convert(-10.5, DataSize.class))
+				.havingRootCause()
+					.isInstanceOf(IllegalArgumentException.class)
+					.withMessage("'-10.5' is not a valid data size");
 		assertThatExceptionOfType(ConversionFailedException.class)
-				.isThrownBy(() -> conversionService.convert(new BigDecimal("10.5"), DataSize.class));
+				.isThrownBy(() -> conversionService.convert(new BigDecimal("10.5"), DataSize.class))
+				.havingRootCause()
+					.isInstanceOf(IllegalArgumentException.class)
+					.withMessage("'10.5' is not a valid data size");
 	}
 
 	@Test  // gh-36830
 	void numberToDataSize() {
 		assertThat(conversionService.convert(10, DataSize.class)).isEqualTo(DataSize.ofBytes(10));
+		assertThat(conversionService.convert(10.0, DataSize.class)).isEqualTo(DataSize.ofBytes(10));
 		assertThat(conversionService.convert(-10L, DataSize.class)).isEqualTo(DataSize.ofBytes(-10));
+		assertThat(conversionService.convert(-10.0, DataSize.class)).isEqualTo(DataSize.ofBytes(-10));
 		assertThat(conversionService.convert(new BigDecimal("10"), DataSize.class)).isEqualTo(DataSize.ofBytes(10));
 		assertThat(conversionService.convert(new BigDecimal("10.0"), DataSize.class)).isEqualTo(DataSize.ofBytes(10));
+		assertThat(conversionService.convert(new AtomicInteger(1000), DataSize.class)).isEqualTo(DataSize.ofBytes(1000));
 	}
 
 	@Test

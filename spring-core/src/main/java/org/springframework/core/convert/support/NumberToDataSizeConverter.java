@@ -33,6 +33,7 @@ final class NumberToDataSizeConverter implements Converter<Number, DataSize> {
 	@Override
 	public DataSize convert(Number source) {
 		long bytes = source.longValue();
+		// Ensure Number is a whole number.
 		if (source.doubleValue() - bytes != 0) {
 			throw new IllegalArgumentException("'" + source + "' is not a valid data size");
 		}
