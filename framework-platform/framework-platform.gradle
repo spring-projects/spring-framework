@@ -7,7 +7,7 @@ javaPlatform {
 }
 
 dependencies {
-	api(platform("com.fasterxml.jackson:jackson-bom:2.21.2"))
+	api(platform("com.fasterxml.jackson:jackson-bom:2.21.4"))
 	api(platform("io.micrometer:micrometer-bom:1.16.6"))
 	api(platform("io.netty:netty-bom:4.2.15.Final"))
 	api(platform("io.projectreactor:reactor-bom:2025.0.6"))
@@ -21,7 +21,7 @@ dependencies {
 	api(platform("org.jetbrains.kotlinx:kotlinx-serialization-bom:1.11.0"))
 	api(platform("org.junit:junit-bom:6.1.0"))
 	api(platform("org.mockito:mockito-bom:5.23.0"))
-	api(platform("tools.jackson:jackson-bom:3.1.1"))
+	api(platform("tools.jackson:jackson-bom:3.1.4"))
 
 	constraints {
 		api("com.fasterxml:aalto-xml:1.3.4")
@@ -120,8 +120,8 @@ dependencies {
 		api("org.glassfish:jakarta.el:4.0.2")
 		api("org.graalvm.sdk:graal-sdk:22.3.1")
 		api("org.hamcrest:hamcrest:3.0")
-		api("org.hibernate.orm:hibernate-core:7.4.0.Final")
-		api("org.hibernate.validator:hibernate-validator:9.1.0.Final")
+		api("org.hibernate.orm:hibernate-core:7.4.2.Final")
+		api("org.hibernate.validator:hibernate-validator:9.1.1.Final")
 		api("org.hsqldb:hsqldb:2.7.4")
 		api("org.htmlunit:htmlunit:4.21.0")
 		api("org.javamoney:moneta:1.4.4")
