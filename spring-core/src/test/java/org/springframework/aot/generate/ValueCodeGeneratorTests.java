@@ -158,6 +158,36 @@ class ValueCodeGeneratorTests {
 		}
 
 		@Test
+		void generateWhenFloatNaN() {
+			assertThat(generateCode(Float.NaN)).hasToString("java.lang.Float.NaN");
+		}
+
+		@Test
+		void generateWhenFloatPositiveInfinity() {
+			assertThat(generateCode(Float.POSITIVE_INFINITY)).hasToString("java.lang.Float.POSITIVE_INFINITY");
+		}
+
+		@Test
+		void generateWhenFloatNegativeInfinity() {
+			assertThat(generateCode(Float.NEGATIVE_INFINITY)).hasToString("java.lang.Float.NEGATIVE_INFINITY");
+		}
+
+		@Test
+		void generateWhenDoubleNaN() {
+			assertThat(generateCode(Double.NaN)).hasToString("java.lang.Double.NaN");
+		}
+
+		@Test
+		void generateWhenDoublePositiveInfinity() {
+			assertThat(generateCode(Double.POSITIVE_INFINITY)).hasToString("java.lang.Double.POSITIVE_INFINITY");
+		}
+
+		@Test
+		void generateWhenDoubleNegativeInfinity() {
+			assertThat(generateCode(Double.NEGATIVE_INFINITY)).hasToString("java.lang.Double.NEGATIVE_INFINITY");
+		}
+
+		@Test
 		void generateWhenChar() {
 			assertThat(generateCode('a')).hasToString("'a'");
 		}
