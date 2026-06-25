@@ -167,6 +167,20 @@ class DefaultServerRequestTests {
 		assertThat(request.param("foo")).contains("bar");
 	}
 
+	@Test  // gh-36966
+	void paramsEntrySetPreservesOrder() {
+		MockHttpServletRequest servletRequest = PathPatternsTestUtils.initRequest("GET", "/", true);
+		servletRequest.setParameter("charlie", "3");
+		servletRequest.setParameter("alpha", "1");
+		servletRequest.setParameter("bravo", "2");
+
+		DefaultServerRequest request = new DefaultServerRequest(servletRequest, this.messageConverters);
+
+		assertThat(request.params().entrySet())
+				.extracting(Map.Entry::getKey)
+				.containsExactly("charlie", "alpha", "bravo");
+	}
+
 	@Test
 	void multipartData() throws Exception {
 		MockPart formPart = new MockPart("form", "foo".getBytes(UTF_8));
