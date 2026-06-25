@@ -291,8 +291,9 @@ class DefaultSockJsServiceTests extends AbstractHttpRequestTests {
 		assertThat(this.servletResponse.getStatus()).isEqualTo(200);
 		verify(this.xhrHandler).handleRequest(this.request, this.response, this.wsHandler, this.session);
 
-		this.session.setRemoteAddress(new InetSocketAddress("127.0.0.1:8080", 8080));
-		this.servletRequest.setRemoteAddr("127.0.0.1:9090");
+		this.session.setRemoteAddress(new InetSocketAddress("0.0.0.0.1", 54001));
+		this.servletRequest.setRemoteAddr("0.0.0.0.2");
+		this.servletRequest.setRemotePort(54001);
 
 		resetResponse();
 		reset(this.xhrSendHandler);
@@ -302,6 +303,32 @@ class DefaultSockJsServiceTests extends AbstractHttpRequestTests {
 
 		assertThat(this.servletResponse.getStatus()).isEqualTo(404);
 		verifyNoMoreInteractions(this.xhrSendHandler);
+	}
+
+	@Test
+	void handleTransportRequestXhrSendWithSameRemoteAddress() {
+		String sockJsPath = sessionUrlPrefix + "xhr";
+		setRequest("POST", sockJsPrefix + sockJsPath);
+		this.service.handleRequest(this.request, this.response, sockJsPath, this.wsHandler);
+
+		// session created
+		assertThat(this.servletResponse.getStatus()).isEqualTo(200);
+		verify(this.xhrHandler).handleRequest(this.request, this.response, this.wsHandler, this.session);
+
+		this.session.setRemoteAddress(new InetSocketAddress("0.0.0.0.1", 54001));
+		this.servletRequest.setRemoteAddr("0.0.0.0.1");
+		this.servletRequest.setRemotePort(54002); // port can vary
+
+		resetResponse();
+		reset(this.xhrSendHandler);
+		given(this.xhrSendHandler.checkSessionType(this.session)).willReturn(true);
+
+		sockJsPath = sessionUrlPrefix + "xhr_send";
+		setRequest("POST", sockJsPrefix + sockJsPath);
+		this.service.handleRequest(this.request, this.response, sockJsPath, this.wsHandler);
+
+		assertThat(this.servletResponse.getStatus()).isEqualTo(200);
+		verify(this.xhrSendHandler).handleRequest(this.request, this.response, this.wsHandler, this.session);
 	}
 
 	@Test
