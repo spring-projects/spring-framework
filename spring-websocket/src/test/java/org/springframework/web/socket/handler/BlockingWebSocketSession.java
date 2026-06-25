@@ -32,8 +32,6 @@ public class BlockingWebSocketSession extends TestWebSocketSession {
 
 	private final AtomicReference<CountDownLatch> sendLatch = new AtomicReference<>();
 
-	private final AtomicReference<CountDownLatch> releaseLatch = new AtomicReference<>();
-
 
 	public CountDownLatch initSendLatch() {
 		this.sendLatch.set(new CountDownLatch(1));
@@ -51,8 +49,7 @@ public class BlockingWebSocketSession extends TestWebSocketSession {
 
 	private void block() {
 		try {
-			this.releaseLatch.set(new CountDownLatch(1));
-			this.releaseLatch.get().await();
+			new CountDownLatch(1).await();
 		}
 		catch (InterruptedException ex) {
 			ex.printStackTrace();
