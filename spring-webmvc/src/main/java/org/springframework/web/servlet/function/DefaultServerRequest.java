@@ -33,6 +33,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -443,7 +444,7 @@ class DefaultServerRequest implements ServerRequest {
 						List<String> value = Arrays.asList(entry.getValue());
 						return new SimpleImmutableEntry<>(entry.getKey(), value);
 					})
-					.collect(Collectors.toSet());
+					.collect(Collectors.toCollection(LinkedHashSet::new));
 		}
 
 		@Override
