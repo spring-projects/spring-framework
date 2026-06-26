@@ -108,7 +108,7 @@ class MimeTypeTests {
 		assertThat(mimeType.getParameter("type")).isEqualTo("\"application/soap+xml;action=\\\"https://x.y.z\\\"\"");
 	}
 
-	@Test
+	@Test  //  gh-36730
 	void parseParameterWithQuotedPair() {
 		String s = "text/plain;twelve=\"1\\\"2\"";
 		MimeType mimeType = MimeType.valueOf(s);
@@ -301,6 +301,13 @@ class MimeTypeTests {
 	void parseMimeTypeIllegalQuotedParameterValue() {
 		assertThatExceptionOfType(InvalidMimeTypeException.class).isThrownBy(() ->
 				MimeTypeUtils.parseMimeType("audio/*;attr=\""));
+	}
+
+	@Test  // gh-36971
+	void parseMimeTypeWrappedInQuotes() {
+		assertThatExceptionOfType(InvalidMimeTypeException.class)
+				.isThrownBy(() -> MimeTypeUtils.parseMimeType("\"application/xml\""))
+				.withMessageContaining("Invalid token character '\"'");
 	}
 
 	@Test
