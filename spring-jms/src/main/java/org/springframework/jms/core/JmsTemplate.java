@@ -78,6 +78,11 @@ import org.springframework.util.ClassUtils;
  * application's environment naming context via JNDI; application servers
  * typically expose pooled, transaction-aware factories there.
  *
+ * <p><b>Note that Spring's JMS setup is designed to be used against trusted
+ * broker setups, with trusted packages for {@code ObjectMessage} deserialization
+ * to be configured at the broker level (for example: in the ActiveMQ setup).</b>
+ * Alternatively, you may configure a custom {@link #setMessageConverter converter}.
+ *
  * @author Mark Pollack
  * @author Juergen Hoeller
  * @author Stephane Nicoll
