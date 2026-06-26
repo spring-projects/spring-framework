@@ -119,6 +119,11 @@ import org.springframework.util.backoff.FixedBackOff;
  * "AUTO_ACKNOWLEDGE" mode, this container applies automatic message acknowledgment
  * before listener execution, with no redelivery in case of an exception.
  *
+ * <p><b>Note that Spring's JMS setup is designed to be used against trusted
+ * broker setups, with trusted packages for {@code ObjectMessage} deserialization
+ * to be configured at the broker level (for example: in the ActiveMQ setup).</b>
+ * Alternatively, you may configure a custom {@link #setMessageConverter converter}.
+ *
  * @author Juergen Hoeller
  * @author Sam Brannen
  * @since 2.0
