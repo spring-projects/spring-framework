@@ -178,6 +178,7 @@ class PathMatchingResourcePatternResolverTests {
 		}
 
 		@Test
+		@SuppressWarnings("deprecation")  // for deprecated URL constructor on JDK 20
 		void encodedHashtagInPath() throws IOException {
 			Path rootDir = Paths.get("src/test/resources/custom%23root").toAbsolutePath();
 			URL root = new URL("file:" + rootDir + "/");
@@ -489,6 +490,7 @@ class PathMatchingResourcePatternResolverTests {
 					copyClasses(LogFactory.class, "commons-logging");
 		}
 
+		@SuppressWarnings("deprecation")  // for deprecated URL constructor on JDK 20
 		private String copyClasses(Class<?> sourceClass, String destinationName) throws URISyntaxException, IOException {
 			Path destination = this.temp.resolve(destinationName);
 			String resourcePath = ClassUtils.convertClassNameToResourcePath(

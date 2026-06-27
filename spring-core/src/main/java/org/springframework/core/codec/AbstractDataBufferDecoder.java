@@ -82,6 +82,7 @@ public abstract class AbstractDataBufferDecoder<T> extends AbstractDecoder<T> {
 
 
 	@Override
+	@SuppressWarnings("deprecation")
 	public Flux<T> decode(Publisher<DataBuffer> input, ResolvableType elementType,
 			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
@@ -90,6 +91,7 @@ public abstract class AbstractDataBufferDecoder<T> extends AbstractDecoder<T> {
 	}
 
 	@Override
+	@SuppressWarnings("deprecation")
 	public Mono<T> decodeToMono(Publisher<DataBuffer> input, ResolvableType elementType,
 			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 

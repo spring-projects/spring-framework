@@ -16,7 +16,7 @@
 
 package org.springframework.test.web.servlet.samples.standalone.resultmatchers;
 
-import java.net.URL;
+import java.net.URI;
 
 import org.junit.jupiter.api.Test;
 
@@ -67,7 +67,7 @@ class FlashAttributeAssertionTests {
 		this.mockMvc.perform(post("/persons"))
 			.andExpect(flash().attribute("one", "1"))
 			.andExpect(flash().attribute("two", 2.222))
-			.andExpect(flash().attribute("three", new URL("https://example.com")));
+			.andExpect(flash().attribute("three", URI.create("https://example.com").toURL()));
 	}
 
 	@Test
@@ -78,7 +78,7 @@ class FlashAttributeAssertionTests {
 			.andExpect(flash().attribute("three", notNullValue()))
 			.andExpect(flash().attribute("one", equalTo("1")))
 			.andExpect(flash().attribute("two", equalTo(2.222)))
-			.andExpect(flash().attribute("three", equalTo(new URL("https://example.com"))));
+			.andExpect(flash().attribute("three", equalTo(URI.create("https://example.com").toURL())));
 	}
 
 
@@ -89,7 +89,7 @@ class FlashAttributeAssertionTests {
 		String save(RedirectAttributes redirectAttrs) throws Exception {
 			redirectAttrs.addFlashAttribute("one", "1");
 			redirectAttrs.addFlashAttribute("two", 2.222);
-			redirectAttrs.addFlashAttribute("three", new URL("https://example.com"));
+			redirectAttrs.addFlashAttribute("three", URI.create("https://example.com").toURL());
 			return "redirect:/person/1";
 		}
 	}

@@ -16,7 +16,7 @@
 
 package org.springframework.test.web.servlet.htmlunit;
 
-import java.net.URL;
+import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
@@ -49,7 +49,7 @@ class MockWebResponseBuilderTests {
 
 	@BeforeEach
 	void setup() throws Exception {
-		this.webRequest = new WebRequest(new URL("http://company.example:80/test/this/here"));
+		this.webRequest = new WebRequest(URI.create("http://company.example:80/test/this/here").toURL());
 		this.responseBuilder = new MockWebResponseBuilder(System.currentTimeMillis(), this.webRequest, this.response);
 	}
 
@@ -64,7 +64,7 @@ class MockWebResponseBuilderTests {
 	void constructorWithNullResponse() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				new MockWebResponseBuilder(0L,
-						new WebRequest(new URL("http://company.example:80/test/this/here")), null));
+						new WebRequest(URI.create("http://company.example:80/test/this/here").toURL()), null));
 	}
 
 	@Test

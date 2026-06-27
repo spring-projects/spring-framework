@@ -132,7 +132,7 @@ public abstract class StringUtils {
 	 */
 	@Contract("null -> false")
 	public static boolean hasLength(@Nullable CharSequence str) {
-		return (str != null && !str.isEmpty());  // as of JDK 15
+		return (str != null && !str.isEmpty());
 	}
 
 	/**

@@ -97,6 +97,7 @@ class ResourceBundleMessageSourceTests {
 		doTestMessageAccess(true, false, true, true, false);
 	}
 
+	@SuppressWarnings("deprecation")  // for Locale constructors on JDK 19
 	protected void doTestMessageAccess(
 			boolean reloadable, boolean fallbackToSystemLocale,
 			boolean expectGermanFallback, boolean useCodeAsDefaultMessage, boolean alwaysUseMessageFormat) {
@@ -406,6 +407,7 @@ class ResourceBundleMessageSourceTests {
 	}
 
 	@Test
+	@SuppressWarnings("deprecation")  // for Locale constructors on JDK 19
 	void reloadableResourceBundleMessageSourceFileNameCalculation() {
 		ReloadableResourceBundleMessageSource ms = new ReloadableResourceBundleMessageSource();
 
