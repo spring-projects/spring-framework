@@ -17,6 +17,7 @@
 package org.springframework.mock.web;
 
 import java.io.IOException;
+import java.net.URI;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -548,7 +549,7 @@ class MockHttpServletRequestTests {
 	@Test
 	void getRequestURLWithIpv6AddressViaServerNameWithoutPort() throws Exception {
 		request.setServerName("[::ffff:abcd:abcd]");
-		URL url = new java.net.URL(request.getRequestURL().toString());
+		URL url = URI.create(request.getRequestURL().toString()).toURL();
 		assertThat(url).asString().isEqualTo("http://[::ffff:abcd:abcd]");
 	}
 
@@ -556,7 +557,7 @@ class MockHttpServletRequestTests {
 	void getRequestURLWithIpv6AddressViaServerNameWithPort() throws Exception {
 		request.setServerName("[::ffff:abcd:abcd]");
 		request.setServerPort(9999);
-		URL url = new java.net.URL(request.getRequestURL().toString());
+		URL url = URI.create(request.getRequestURL().toString()).toURL();
 		assertThat(url).asString().isEqualTo("http://[::ffff:abcd:abcd]:9999");
 	}
 
@@ -571,14 +572,14 @@ class MockHttpServletRequestTests {
 	@Test
 	void getRequestURLWithIpv6AddressViaHostHeaderWithoutPort() throws Exception {
 		request.addHeader(HOST, "[::ffff:abcd:abcd]");
-		URL url = new java.net.URL(request.getRequestURL().toString());
+		URL url = URI.create(request.getRequestURL().toString()).toURL();
 		assertThat(url).asString().isEqualTo("http://[::ffff:abcd:abcd]");
 	}
 
 	@Test
 	void getRequestURLWithIpv6AddressViaHostHeaderWithPort() throws Exception {
 		request.addHeader(HOST, "[::ffff:abcd:abcd]:9999");
-		URL url = new java.net.URL(request.getRequestURL().toString());
+		URL url = URI.create(request.getRequestURL().toString()).toURL();
 		assertThat(url).asString().isEqualTo("http://[::ffff:abcd:abcd]:9999");
 	}
 

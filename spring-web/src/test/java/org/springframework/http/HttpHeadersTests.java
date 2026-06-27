@@ -332,6 +332,7 @@ class HttpHeadersTests {
 	}
 
 	@Test
+	@SuppressWarnings("deprecation")  // for Locale constructors on JDK 19
 	void dateOtherLocale() {
 		Locale defaultLocale = Locale.getDefault();
 		try {

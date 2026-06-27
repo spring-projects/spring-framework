@@ -17,7 +17,7 @@
 package org.springframework.test.web.servlet.htmlunit;
 
 import java.io.IOException;
-import java.net.URL;
+import java.net.URI;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.htmlunit.WebClient;
@@ -134,7 +134,7 @@ class MockMvcConnectionBuilderSupportTests {
 	}
 
 	private WebResponse getResponse(WebConnection connection, String url) throws IOException {
-		return connection.getResponse(new WebRequest(new URL(url)));
+		return connection.getResponse(new WebRequest(URI.create(url).toURL()));
 	}
 
 

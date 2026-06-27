@@ -73,7 +73,7 @@ class SimpleClientHttpRequestFactoryTests extends AbstractHttpRequestFactoryTest
 
 	@Test
 	void deleteWithoutBodyDoesNotRaiseException() throws Exception {
-		HttpURLConnection connection = new TestHttpURLConnection(new URL("https://example.com"));
+		HttpURLConnection connection = new TestHttpURLConnection(URI.create("https://example.com").toURL());
 		((SimpleClientHttpRequestFactory) this.factory).prepareConnection(connection, "DELETE");
 		SimpleClientHttpRequest request = new SimpleClientHttpRequest(connection, 4096);
 		request.execute();

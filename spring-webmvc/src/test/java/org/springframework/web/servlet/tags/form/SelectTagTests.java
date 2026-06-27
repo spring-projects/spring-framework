@@ -60,7 +60,9 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 @SuppressWarnings({ "rawtypes", "unchecked" })
 class SelectTagTests extends AbstractFormTagTests {
 
+	@SuppressWarnings("deprecation")  // for Locale constructors on JDK 19
 	private static final Locale LOCALE_AT = new Locale("de", "AT");
+	@SuppressWarnings("deprecation")  // for Locale constructors on JDK 19
 	private static final Locale LOCALE_NL = new Locale("nl", "NL");
 
 	private SelectTag tag;

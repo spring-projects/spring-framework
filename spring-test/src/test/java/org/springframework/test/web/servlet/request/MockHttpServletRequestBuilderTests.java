@@ -566,6 +566,7 @@ class MockHttpServletRequestBuilderTests {
 	}
 
 	@Test
+	@SuppressWarnings("deprecation")  // for Locale constructors on JDK 19
 	void locale() {
 		Locale locale = new Locale("nl", "nl");
 		this.builder.locale(locale);

@@ -385,6 +385,7 @@ class ResourceTests {
 		}
 
 		@Test
+		@SuppressWarnings("deprecation")  // for deprecated URL constructor on JDK 20
 		void filenameIsExtractedFromURL() throws Exception {
 			assertThat(new UrlResource(new URL("file:test?argh")).getFilename()).isEqualTo("test");
 			assertThat(new UrlResource(new URL("file:/test?argh")).getFilename()).isEqualTo("test");

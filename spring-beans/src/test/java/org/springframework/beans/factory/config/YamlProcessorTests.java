@@ -16,6 +16,7 @@
 
 package org.springframework.beans.factory.config;
 
+import java.net.URI;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -150,7 +151,7 @@ class YamlProcessorTests {
 
 	@Test
 	void customTypeNotSupportedByDefault() throws Exception {
-		URL url = new URL("https://localhost:9000/");
+		URL url = URI.create("https://localhost:9000/").toURL();
 		setYaml("value: !!java.net.URL [\"" + url + "\"]");
 		assertThatExceptionOfType(ComposerException.class)
 				.isThrownBy(() -> this.processor.process((properties, map) -> {}))
@@ -161,7 +162,7 @@ class YamlProcessorTests {
 	void customTypesSupportedDueToExplicitConfiguration() throws Exception {
 		this.processor.setSupportedTypes(URL.class, String.class);
 
-		URL url = new URL("https://localhost:9000/");
+		URL url = URI.create("https://localhost:9000/").toURL();
 		setYaml("value: !!java.net.URL [!!java.lang.String [\"" + url + "\"]]");
 
 		this.processor.process((properties, map) -> {

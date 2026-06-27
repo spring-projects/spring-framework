@@ -225,6 +225,7 @@ class MBeanClientInterceptorTests extends AbstractMBeanServerTests {
 	}
 
 	@Test
+	@SuppressWarnings("deprecation")  // for Thread.getId() on JDK 19
 	void mxBeanOperationAccess() throws Exception {
 		MBeanClientInterceptor interceptor = new MBeanClientInterceptor();
 		interceptor.setServer(ManagementFactory.getPlatformMBeanServer());

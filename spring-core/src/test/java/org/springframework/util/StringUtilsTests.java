@@ -734,6 +734,7 @@ class StringUtilsTests {
 	}
 
 	@Test
+	@SuppressWarnings("deprecation")  // for Locale constructors on JDK 19
 	void invalidLocaleWithLocaleString() {
 		assertThat(StringUtils.parseLocaleString("invalid")).isEqualTo(new Locale("invalid"));
 		assertThat(StringUtils.parseLocaleString("invalidvalue")).isEqualTo(new Locale("invalidvalue"));
@@ -742,6 +743,7 @@ class StringUtilsTests {
 	}
 
 	@Test
+	@SuppressWarnings("deprecation")  // for Locale constructors on JDK 19
 	void invalidLocaleWithLanguageTag() {
 		assertThat(StringUtils.parseLocale("invalid")).isEqualTo(new Locale("invalid"));
 		assertThat(StringUtils.parseLocale("invalidvalue")).isEqualTo(new Locale("invalidvalue"));
