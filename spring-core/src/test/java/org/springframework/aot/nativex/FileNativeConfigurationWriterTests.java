@@ -18,6 +18,7 @@ package org.springframework.aot.nativex;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.function.Consumer;
@@ -174,6 +175,17 @@ class FileNativeConfigurationWriterTests {
 							{"glob": "com/example/another.properties"}
 					]
 				}""");
+	}
+
+	@Test
+	void resourceConfigWithNonAsciiPatternIsWrittenAsUtf8() throws IOException {
+		FileNativeConfigurationWriter generator = new FileNativeConfigurationWriter(tempDir);
+		RuntimeHints hints = new RuntimeHints();
+		hints.resources().registerPattern("com/example/café/**");
+		generator.write(hints);
+		Path jsonFile = tempDir.resolve("META-INF").resolve("native-image").resolve("reachability-metadata.json");
+		byte[] content = Files.readAllBytes(jsonFile);
+		assertThat(content).containsSequence("café".getBytes(StandardCharsets.UTF_8));
 	}
 
 	@Test
