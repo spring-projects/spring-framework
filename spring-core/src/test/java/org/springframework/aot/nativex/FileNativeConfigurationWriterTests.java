@@ -18,12 +18,12 @@ package org.springframework.aot.nativex;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-import org.json.JSONException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.skyscreamer.jsonassert.JSONAssert;
@@ -63,7 +63,7 @@ class FileNativeConfigurationWriterTests {
 	}
 
 	@Test
-	void serializationConfig() throws IOException, JSONException {
+	void serializationConfig() throws Exception {
 		FileNativeConfigurationWriter generator = new FileNativeConfigurationWriter(tempDir);
 		RuntimeHints hints = new RuntimeHints();
 		ReflectionHints reflectionHints = hints.reflection();
@@ -81,7 +81,7 @@ class FileNativeConfigurationWriterTests {
 	}
 
 	@Test
-	void proxyConfig() throws IOException, JSONException {
+	void proxyConfig() throws Exception {
 		FileNativeConfigurationWriter generator = new FileNativeConfigurationWriter(tempDir);
 		RuntimeHints hints = new RuntimeHints();
 		ProxyHints proxyHints = hints.proxies();
@@ -99,7 +99,7 @@ class FileNativeConfigurationWriterTests {
 	}
 
 	@Test
-	void reflectionConfig() throws IOException, JSONException {
+	void reflectionConfig() throws Exception {
 		FileNativeConfigurationWriter generator = new FileNativeConfigurationWriter(tempDir);
 		RuntimeHints hints = new RuntimeHints();
 		ReflectionHints reflectionHints = hints.reflection();
@@ -138,7 +138,7 @@ class FileNativeConfigurationWriterTests {
 	}
 
 	@Test
-	void jniConfig() throws IOException, JSONException {
+	void jniConfig() throws Exception {
 		// same format as reflection so just test basic file generation
 		FileNativeConfigurationWriter generator = new FileNativeConfigurationWriter(tempDir);
 		RuntimeHints hints = new RuntimeHints();
@@ -157,7 +157,7 @@ class FileNativeConfigurationWriterTests {
 	}
 
 	@Test
-	void resourceConfig() throws IOException, JSONException {
+	void resourceConfig() throws Exception {
 		FileNativeConfigurationWriter generator = new FileNativeConfigurationWriter(tempDir);
 		RuntimeHints hints = new RuntimeHints();
 		ResourceHints resourceHints = hints.resources();
@@ -176,6 +176,17 @@ class FileNativeConfigurationWriterTests {
 				}""");
 	}
 
+	@Test  // gh-36972
+	void resourceConfigWithNonAsciiPatternIsWrittenAsUtf8() throws IOException {
+		FileNativeConfigurationWriter generator = new FileNativeConfigurationWriter(tempDir);
+		RuntimeHints hints = new RuntimeHints();
+		hints.resources().registerPattern("com/example/café/**");
+		generator.write(hints);
+		Path jsonFile = tempDir.resolve("META-INF").resolve("native-image").resolve("reachability-metadata.json");
+		byte[] content = Files.readAllBytes(jsonFile);
+		assertThat(content).containsSequence("café".getBytes(StandardCharsets.UTF_8));
+	}
+
 	@Test
 	void namespace() {
 		String groupId = "foo.bar";
@@ -190,7 +201,8 @@ class FileNativeConfigurationWriterTests {
 		assertThat(jsonFile.toFile()).exists();
 	}
 
-	private void assertEquals(String expectedString) throws IOException, JSONException {
+
+	private static void assertEquals(String expectedString) throws Exception {
 		Path jsonFile = tempDir.resolve("META-INF").resolve("native-image").resolve("reachability-metadata.json");
 		String content = Files.readString(jsonFile);
 		JSONAssert.assertEquals(expectedString, content, JSONCompareMode.NON_EXTENSIBLE);
