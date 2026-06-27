@@ -1,5 +1,5 @@
 plugins {
-	id "io.spring.develocity.conventions" version "0.0.22"
+	id "io.spring.develocity.conventions" version "0.0.25"
 }
 
 include "spring-aop"

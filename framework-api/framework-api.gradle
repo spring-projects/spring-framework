@@ -15,8 +15,8 @@ repositories {
 }
 
 dependencies {
-	moduleProjects.each { moduleProject ->
-		javadoc moduleProject
+	rootProject.ext.moduleProjects.each { moduleProject ->
+		javadoc project(moduleProject.path)
 	}
 }
 
@@ -52,7 +52,7 @@ javadoc {
 			// ensure the javadoc process can resolve types compiled from .aj sources
 			springAspectsOutput
 		)
-		classpath += files(moduleProjects.collect { it.sourceSets.main.compileClasspath })
+		classpath += files(rootProject.ext.moduleProjects.collect { it.sourceSets.main.compileClasspath })
 	}
 }
 
@@ -96,7 +96,7 @@ tasks.register('schemaZip', Zip) {
 	description = "Builds -${archiveClassifier} archive containing all " +
 			"XSDs for deployment at https://springframework.org/schema."
 	duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-	moduleProjects.each { module ->
+	rootProject.ext.moduleProjects.each { module ->
 		def Properties schemas = new Properties();
 
 		module.sourceSets.main.resources.find {
