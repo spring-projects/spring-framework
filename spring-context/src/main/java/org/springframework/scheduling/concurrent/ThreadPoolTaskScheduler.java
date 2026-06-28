@@ -63,6 +63,7 @@ import org.springframework.util.ErrorHandler;
  * @author Mark Fisher
  * @since 3.0
  * @see #setPoolSize
+ * @see #setTaskStartupOverrunThreshold
  * @see #setRemoveOnCancelPolicy
  * @see #setContinueExistingPeriodicTasksAfterShutdownPolicy
  * @see #setExecuteExistingDelayedTasksAfterShutdownPolicy
@@ -91,6 +92,8 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 	private volatile @Nullable ErrorHandler errorHandler;
 
 	private Clock clock = Clock.systemDefaultZone();
+
+	private volatile @Nullable Duration taskStartupOverrunThreshold;
 
 	private @Nullable ScheduledExecutorService scheduledExecutor;
 
@@ -426,6 +429,38 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 		}
 	}
 
+
+	/**
+	 * Check whether the given task is being executed significantly later than
+	 * its scheduled time and, if a {@link #setTaskStartupOverrunThreshold threshold}
+	 * is set, emit a {@code WARN}-level log message.
+	 *
+	 * <p>This hook is called by the underlying {@link ScheduledThreadPoolExecutor}
+	 * immediately before each task is handed to a thread for execution.
+	 *
+	 * @param thread the thread that will run task {@code task}
+	 * @param task the task that is about to be executed
+	 * @since 7.0
+	 * @see #setTaskStartupOverrunThreshold(Duration)
+	 */
+	@Override
+	protected void beforeExecute(Thread thread, Runnable task) {
+		Duration threshold = this.taskStartupOverrunThreshold;
+		if (threshold != null && task instanceof RunnableScheduledFuture<?> scheduledTask) {
+			long delayNanos = scheduledTask.getDelay(TimeUnit.NANOSECONDS);
+			if (delayNanos < 0) {
+				Duration overrun = Duration.ofNanos(-delayNanos);
+				if (overrun.compareTo(threshold) >= 0) {
+					if (logger.isWarnEnabled()) {
+						logger.warn("Task [" + task + "] is starting " + overrun.toMillis() +
+								"ms late (threshold: " + threshold.toMillis() + "ms). " +
+								"Consider increasing the thread pool size or reducing task duration.");
+					}
+				}
+			}
+		}
+		super.beforeExecute(thread, task);
+	}
 
 	private <V> RunnableScheduledFuture<V> decorateTaskIfNecessary(RunnableScheduledFuture<V> future) {
 		return (this.taskDecorator != null ? new DelegatingRunnableScheduledFuture<>(future, this.taskDecorator) :
