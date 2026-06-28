@@ -58,6 +58,7 @@ import org.springframework.web.reactive.result.condition.ConsumesRequestConditio
 import org.springframework.web.reactive.result.condition.MediaTypeExpression;
 import org.springframework.web.reactive.result.method.RequestMappingInfo;
 import org.springframework.web.server.ServerWebExchange;
+import org.springframework.web.service.annotation.GetExchange;
 import org.springframework.web.service.annotation.HttpExchange;
 import org.springframework.web.service.annotation.PostExchange;
 import org.springframework.web.service.annotation.PutExchange;
@@ -128,6 +129,34 @@ class RequestMappingHandlerMappingTests {
 		ServerWebExchange exchange = initExchangeForVersionTest("99");
 		StepVerifier.create(this.handlerMapping.getHandler(exchange))
 				.verifyError(InvalidApiVersionException.class);
+	}
+
+	@Test
+	void httpExchangeWithVersion() {
+		DefaultApiVersionStrategy versionStrategy = new DefaultApiVersionStrategy(
+				List.of(new HeaderApiVersionResolver("API-Version")), new SemanticApiVersionParser(),
+				true, null, true, null, null);
+		this.handlerMapping.setApiVersionStrategy(versionStrategy);
+		this.handlerMapping.afterPropertiesSet();
+
+		Class<HttpExchangeController> clazz = HttpExchangeController.class;
+		Method method = ReflectionUtils.findMethod(clazz, "versionedExchange");
+		RequestMappingInfo mappingInfo = this.handlerMapping.getMappingForMethod(method, clazz);
+
+		assertThat(mappingInfo).isNotNull();
+		assertThat(mappingInfo.getVersionCondition().getVersion()).isEqualTo("1.1");
+	}
+
+	@Test
+	void httpExchangeWithoutVersionHasNoVersionCondition() {
+		this.handlerMapping.afterPropertiesSet();
+
+		Class<HttpExchangeController> clazz = HttpExchangeController.class;
+		Method method = ReflectionUtils.findMethod(clazz, "defaultValuesExchange");
+		RequestMappingInfo mappingInfo = this.handlerMapping.getMappingForMethod(method, clazz);
+
+		assertThat(mappingInfo).isNotNull();
+		assertThat(mappingInfo.getVersionCondition().getVersion()).isNull();
 	}
 
 	private ServerWebExchange initExchangeForVersionTest(String version) {
@@ -639,6 +668,11 @@ class RequestMappingHandlerMappingTests {
 				headers = {"h1=hv1", "!h2", "Accept=application/ignored"})
 		public String customHeadersExchange() {
 			return "info";
+		}
+
+		@GetExchange(version = "1.1")
+		public String versionedExchange() {
+			return "v1.1";
 		}
 	}
 
