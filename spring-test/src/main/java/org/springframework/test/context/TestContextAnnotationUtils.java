@@ -17,10 +17,12 @@
 package org.springframework.test.context;
 
 import java.lang.annotation.Annotation;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 import org.jspecify.annotations.Nullable;
 
@@ -578,13 +580,14 @@ public abstract class TestContextAnnotationUtils {
 		 * or an empty set if none were found
 		 */
 		public Set<T> findAllLocalMergedAnnotations() {
-			Class<?> rootDeclaringClass = getRootDeclaringClass();
-			Set<Class<?>> localSources = new HashSet<>();
-			localSources.add(rootDeclaringClass);
-			Collections.addAll(localSources, rootDeclaringClass.getInterfaces());
-			return MergedAnnotations.from(rootDeclaringClass, SearchStrategy.TYPE_HIERARCHY, RepeatableContainers.none())
-					.stream(getAnnotationType())
-					.filter(mergedAnnotation -> localSources.contains(mergedAnnotation.getSource()))
+			Class<T> annotationType = getAnnotationType();
+			Stream<MergedAnnotation<T>> classAnnotations =
+					MergedAnnotations.from(this.rootDeclaringClass, SearchStrategy.DIRECT, RepeatableContainers.none())
+							.stream(annotationType);
+			Stream<MergedAnnotation<T>> interfaceAnnotations = Arrays.stream(this.rootDeclaringClass.getInterfaces())
+					.flatMap(ifc -> MergedAnnotations.from(ifc, SearchStrategy.TYPE_HIERARCHY, RepeatableContainers.none())
+							.stream(annotationType));
+			return Stream.concat(classAnnotations, interfaceAnnotations)
 					.collect(MergedAnnotationCollectors.toAnnotationSet());
 		}
 

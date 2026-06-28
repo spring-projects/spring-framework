@@ -297,6 +297,17 @@ class TestContextAnnotationUtilsTests {
 		}
 
 		@Test
+		void annotationOnTransitiveInterface() {
+			var descriptor = findAnnotationDescriptor(ClassImplementingTransitiveAnnotatedInterface.class, ContextConfiguration.class);
+			assertThat(descriptor).isNotNull();
+			assertThat(descriptor.findAllLocalMergedAnnotations())
+					.satisfiesExactly(
+						config1 -> assertThat(config1.classes()).containsExactly(Config1.class),
+						config2 -> assertThat(config2.classes()).containsExactly(Config2.class)
+					);
+		}
+
+		@Test
 		void annotationOnClassAndInterface() {
 			var descriptor = findAnnotationDescriptor(AnnotatedClassImplementingAnnotatedInterface.class, ContextConfiguration.class);
 			assertThat(descriptor).isNotNull();
@@ -763,6 +774,13 @@ class TestContextAnnotationUtilsTests {
 	}
 
 	static class ClassImplementingAnnotatedInterface implements AnnotatedInterface {
+	}
+
+	interface TransitiveAnnotatedInterface extends AnnotatedInterface {
+	}
+
+	@ContextConfiguration(classes = Config1.class)
+	static class ClassImplementingTransitiveAnnotatedInterface implements TransitiveAnnotatedInterface {
 	}
 
 	@ContextConfiguration(classes = Config1.class)
