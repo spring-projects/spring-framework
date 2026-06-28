@@ -21,6 +21,7 @@ import java.util.Set;
 
 import org.jspecify.annotations.Nullable;
 
+import org.springframework.core.ResolvableType;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.ConditionalGenericConverter;
@@ -51,7 +52,14 @@ final class OptionalToObjectConverter implements ConditionalGenericConverter {
 
 	@Override
 	public boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType) {
-		return ConversionUtils.canConvertElements(sourceType.getElementTypeDescriptor(), targetType, this.conversionService);
+		ResolvableType elementType = sourceType.getResolvableType().getGeneric();
+		if (elementType.resolve() == null) {
+			// Unknown Optional element type (raw Optional, wildcard, or unresolved
+			// type variable): remain permissive.
+			return true;
+		}
+		TypeDescriptor sourceElementType = new TypeDescriptor(elementType, null, null);
+		return ConversionUtils.canConvertElements(sourceElementType, targetType, this.conversionService);
 	}
 
 	@Override
