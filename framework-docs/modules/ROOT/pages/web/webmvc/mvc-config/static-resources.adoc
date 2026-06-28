@@ -40,8 +40,8 @@ bean so that it can be injected into others. You can also make the rewrite trans
 `ResourceUrlEncodingFilter` for Thymeleaf, JSPs, FreeMarker, and others with URL tags that
 rely on `HttpServletResponse#encodeURL`.
 
-Note that, when using both `EncodedResourceResolver` (for example, for serving gzipped or
-brotli-encoded resources) and `VersionResourceResolver`, you must register them in this order.
+Note that, when using both `EncodedResourceResolver` (for example, for serving gzipped, brotli,
+or zstd encoded resources) and `VersionResourceResolver`, you must register them in this order.
 That ensures content-based versions are always computed reliably, based on the unencoded file.
 
 For https://www.webjars.org/documentation[WebJars], versioned URLs like

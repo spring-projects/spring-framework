@@ -40,6 +40,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * Tests for {@link EncodedResourceResolver}.
  *
  * @author Rossen Stoyanchev
+ * @author Toshiaki Maki
  */
 @ExtendWith(GzipSupport.class)
 class EncodedResourceResolverTests {
@@ -88,6 +89,24 @@ class EncodedResourceResolverTests {
 		assertThat(actual).isInstanceOf(HttpResource.class);
 		HttpHeaders headers = ((HttpResource) actual).getResponseHeaders();
 		assertThat(headers.getFirst(HttpHeaders.CONTENT_ENCODING)).isEqualTo("gzip");
+		assertThat(headers.getFirst(HttpHeaders.VARY)).isEqualTo("Accept-Encoding");
+	}
+
+	@Test
+	void resolveZstd() {
+
+		MockServerWebExchange exchange = MockServerWebExchange.from(
+				MockServerHttpRequest.get("").header("Accept-Encoding", "zstd"));
+
+		String file = "js/foo.js";
+		Resource actual = this.resolver.resolveResource(exchange, file, this.locations).block(TIMEOUT);
+
+		assertThat(actual.getDescription()).isEqualTo(getResource(file + ".zst").getDescription());
+		assertThat(actual.getFilename()).isEqualTo(getResource(file).getFilename());
+
+		assertThat(actual).isInstanceOf(HttpResource.class);
+		HttpHeaders headers = ((HttpResource) actual).getResponseHeaders();
+		assertThat(headers.getFirst(HttpHeaders.CONTENT_ENCODING)).isEqualTo("zstd");
 		assertThat(headers.getFirst(HttpHeaders.VARY)).isEqualTo("Accept-Encoding");
 	}
 
