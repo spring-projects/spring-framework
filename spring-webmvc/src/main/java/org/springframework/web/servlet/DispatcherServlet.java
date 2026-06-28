@@ -149,6 +149,7 @@ import org.springframework.web.util.WebUtils;
  * @author Chris Beams
  * @author Rossen Stoyanchev
  * @author Sebastien Deleuze
+ * @author Filip Hrisafov
  * @see org.springframework.web.HttpRequestHandler
  * @see org.springframework.web.servlet.mvc.Controller
  * @see org.springframework.web.context.ContextLoaderListener
@@ -261,8 +262,8 @@ public class DispatcherServlet extends FrameworkServlet {
 	/** Store default strategy implementations. */
 	private static @Nullable Properties defaultStrategies;
 
-	/** Detect all HandlerMappings or just expect "handlerMapping" bean?. */
-	private boolean detectAllHandlerMappings = true;
+	/** Detect all HandlerMappings, only local HandlerMappings or just expect "handlerMapping" bean?. */
+	private DetectionStrategy detectHandlerMappingsStrategy = DetectionStrategy.ALL_BEANS;
 
 	/** Detect all HandlerAdapters or just expect "handlerAdapter" bean?. */
 	private boolean detectAllHandlerAdapters = true;
@@ -374,9 +375,21 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * just a single bean with name "handlerMapping" will be expected.
 	 * <p>Default is "true". Turn this off if you want this servlet to use a single
 	 * HandlerMapping, despite multiple HandlerMapping beans being defined in the context.
+	 * @see #detectLocalHandlerMappingsOnly()
 	 */
 	public void setDetectAllHandlerMappings(boolean detectAllHandlerMappings) {
-		this.detectAllHandlerMappings = detectAllHandlerMappings;
+		this.detectHandlerMappingsStrategy =
+				(detectAllHandlerMappings ? DetectionStrategy.ALL_BEANS : DetectionStrategy.SINGLE_BEAN);
+	}
+
+	/**
+	 * Configures the servlet to only detect HandlerMapping beans from the local context.
+	 * <p>The default is to detect HandlerMappings from all context ancestors.
+	 * @since 7.0
+	 * @see #setDetectAllHandlerMappings
+	 */
+	public void detectLocalHandlerMappingsOnly() {
+		this.detectHandlerMappingsStrategy = DetectionStrategy.LOCAL_BEANS;
 	}
 
 	/**
@@ -506,25 +519,40 @@ public class DispatcherServlet extends FrameworkServlet {
 	private void initHandlerMappings(ApplicationContext context) {
 		this.handlerMappings = null;
 
-		if (this.detectAllHandlerMappings) {
-			// Find all HandlerMappings in the ApplicationContext, including ancestor contexts.
-			Map<String, HandlerMapping> matchingBeans =
-					BeanFactoryUtils.beansOfTypeIncludingAncestors(context, HandlerMapping.class, true, false);
-			if (!matchingBeans.isEmpty()) {
-				this.handlerMappings = new ArrayList<>(matchingBeans.values());
-				// We keep HandlerMappings in sorted order.
-				AnnotationAwareOrderComparator.sort(this.handlerMappings);
+		this.handlerMappings = switch (this.detectHandlerMappingsStrategy) {
+			case ALL_BEANS -> {
+				// Find all HandlerMappings in the ApplicationContext, including ancestor contexts.
+				Map<String, HandlerMapping> matchingBeans =
+						BeanFactoryUtils.beansOfTypeIncludingAncestors(context, HandlerMapping.class, true, false);
+				if (!matchingBeans.isEmpty()) {
+					List<HandlerMapping> handlerMappings = new ArrayList<>(matchingBeans.values());
+					// We keep HandlerMappings in sorted order.
+					AnnotationAwareOrderComparator.sort(handlerMappings);
+					yield handlerMappings;
+				}
+				yield null;
 			}
-		}
-		else {
-			try {
-				HandlerMapping hm = context.getBean(HANDLER_MAPPING_BEAN_NAME, HandlerMapping.class);
-				this.handlerMappings = Collections.singletonList(hm);
+			case LOCAL_BEANS -> {
+				Map<String, HandlerMapping> matchingBeans = context.getBeansOfType(HandlerMapping.class, true, false);
+				if (!matchingBeans.isEmpty()) {
+					List<HandlerMapping> handlerMappings = new ArrayList<>(matchingBeans.values());
+					// We keep HandlerMappings in sorted order.
+					AnnotationAwareOrderComparator.sort(handlerMappings);
+					yield handlerMappings;
+				}
+				yield null;
 			}
-			catch (NoSuchBeanDefinitionException ex) {
-				// Ignore, we'll add a default HandlerMapping later.
+			case SINGLE_BEAN -> {
+				try {
+					HandlerMapping hm = context.getBean(HANDLER_MAPPING_BEAN_NAME, HandlerMapping.class);
+					yield Collections.singletonList(hm);
+				}
+				catch (NoSuchBeanDefinitionException ex) {
+					// Ignore, we'll add a default HandlerMapping later.
+					yield null;
+				}
 			}
-		}
+		};
 
 		// Ensure we have at least one HandlerMapping, by registering
 		// a default HandlerMapping if no other mappings are found.
@@ -1403,6 +1431,26 @@ public class DispatcherServlet extends FrameworkServlet {
 			uri = request.getRequestURI();
 		}
 		return uri;
+	}
+
+	/**
+	 * The DetectionStrategy enum represents different strategies for handling
+	 * detection logic of the specific beans.
+	 */
+	private enum DetectionStrategy {
+		/**
+		 * Look for beans in all ancestors of the bean factory.
+		 */
+		ALL_BEANS,
+		/**
+		 * Look for beans only in the configured bean factory.
+		 */
+		LOCAL_BEANS,
+		/**
+		 * Do not look for beans in the configured bean factory.
+		 * Look for the dedicated single bean.
+		 */
+		SINGLE_BEAN
 	}
 
 }
