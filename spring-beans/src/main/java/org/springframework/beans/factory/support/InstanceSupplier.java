@@ -22,6 +22,7 @@ import java.util.function.Supplier;
 import org.jspecify.annotations.Nullable;
 
 import org.springframework.util.Assert;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.function.ThrowingBiFunction;
 import org.springframework.util.function.ThrowingSupplier;
 
@@ -55,6 +56,37 @@ public interface InstanceSupplier<T> extends ThrowingSupplier<T> {
 	T get(RegisteredBean registeredBean) throws Exception;
 
 	/**
+	 * Get the supplied instance using the specified explicit arguments.
+	 * @param registeredBean the registered bean requesting the instance
+	 * @param args the explicit arguments to use
+	 * @return the supplied instance
+	 * @throws Exception on error
+	 * @since 7.1
+	 * @see #supportsExplicitArguments(Object...)
+	 */
+	default T get(RegisteredBean registeredBean, @Nullable Object @Nullable ... args) throws Exception {
+		if (!ObjectUtils.isEmpty(args)) {
+			throw new UnsupportedOperationException("Retrieval with arguments not supported - " +
+					"for custom InstanceSupplier classes, implement get(RegisteredBean, Object...) for your purposes");
+		}
+		return get(registeredBean);
+	}
+
+	/**
+	 * Return whether this supplier supports the specified explicit arguments.
+	 * <p>The bean factory calls this method before using
+	 * {@link #get(RegisteredBean, Object...)} for explicit arguments. Custom
+	 * implementations that override {@code get(RegisteredBean, Object...)}
+	 * should return {@code true} for supported argument arrangements.
+	 * @param args the explicit arguments to check
+	 * @return {@code true} if this supplier supports explicit arguments
+	 * @since 7.1
+	 */
+	default boolean supportsExplicitArguments(@Nullable Object @Nullable ... args) {
+		return false;
+	}
+
+	/**
 	 * Return the factory method that this supplier uses to create the
 	 * instance, or {@code null} if it is not known or this supplier uses
 	 * another means.
@@ -81,6 +113,14 @@ public interface InstanceSupplier<T> extends ThrowingSupplier<T> {
 			@Override
 			public V get(RegisteredBean registeredBean) throws Exception {
 				return after.applyWithException(registeredBean, InstanceSupplier.this.get(registeredBean));
+			}
+			@Override
+			public V get(RegisteredBean registeredBean, @Nullable Object @Nullable ... args) throws Exception {
+				return after.applyWithException(registeredBean, InstanceSupplier.this.get(registeredBean, args));
+			}
+			@Override
+			public boolean supportsExplicitArguments(@Nullable Object @Nullable ... args) {
+				return InstanceSupplier.this.supportsExplicitArguments(args);
 			}
 			@Override
 			public @Nullable Method getFactoryMethod() {
