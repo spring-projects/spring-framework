@@ -1323,7 +1323,6 @@ class WebClientIntegrationTests {
 				.verify(Duration.ofSeconds(3));
 	}
 
-	@Disabled("Disabled because it's flaky (gh-36589)")
 	@Test  // gh-36158
 	void reactorNettyAttributes() throws IOException {
 		startServer(new ReactorClientHttpConnector());
@@ -1334,14 +1333,17 @@ class WebClientIntegrationTests {
 		AtomicReference<Channel> channelRef = new AtomicReference<>();
 
 		Mono<String> result = this.webClient.get().uri("/greeting")
-				.httpRequest(request -> {
-					HttpClientRequest reactorRequest = request.getNativeRequest();
-					channelRef.set(((ChannelOperations<?, ?>) reactorRequest).channel());
-				})
-				.retrieve()
-				.bodyToMono(String.class);
+            .httpRequest(request -> {
+                HttpClientRequest reactorRequest = request.getNativeRequest();
+                channelRef.set(((ChannelOperations<?, ?>) reactorRequest).channel());
+            })
+            .retrieve()
+            .bodyToMono(String.class);
 
-		StepVerifier.create(result).expectNext("Hello Spring!").expectComplete().verify(Duration.ofSeconds(3));
+    StepVerifier.create(result)
+            .expectNext("Hello Spring!")
+            .expectComplete()
+            .verify(Duration.ofSeconds(3));
 
 		assertThat(channelRef.get().attr(ReactorClientHttpConnector.ATTRIBUTES_KEY).get()).isNull();
 	}
