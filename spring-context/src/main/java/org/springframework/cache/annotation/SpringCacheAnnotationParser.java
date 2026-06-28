@@ -140,6 +140,7 @@ public class SpringCacheAnnotationParser implements CacheAnnotationParser, Seria
 		builder.setCacheResolver(cacheEvict.cacheResolver());
 		builder.setCacheWide(cacheEvict.allEntries());
 		builder.setBeforeInvocation(cacheEvict.beforeInvocation());
+		builder.setImmediate(cacheEvict.immediate());
 
 		defaultConfig.applyDefault(builder);
 		CacheEvictOperation op = builder.build();

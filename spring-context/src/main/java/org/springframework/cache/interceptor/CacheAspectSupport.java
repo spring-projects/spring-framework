@@ -674,17 +674,19 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 			CacheEvictOperation operation = (CacheEvictOperation) context.metadata.operation;
 			if (isConditionPassing(context, result)) {
 				Object key = context.getGeneratedKey();
+				// A before-invocation eviction is always immediate (backwards-compatible default).
+				boolean immediate = operation.isImmediate() || operation.isBeforeInvocation();
 				for (Cache cache : context.getCaches()) {
 					if (operation.isCacheWide()) {
 						logInvalidating(context, operation, null);
-						doClear(cache, operation.isBeforeInvocation());
+						doClear(cache, immediate);
 					}
 					else {
 						if (key == null) {
 							key = generateKey(context, result);
 						}
 						logInvalidating(context, operation, key);
-						doEvict(cache, key, operation.isBeforeInvocation());
+						doEvict(cache, key, immediate);
 					}
 				}
 			}
