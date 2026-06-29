@@ -37,6 +37,7 @@ import kotlin.jvm.internal.DefaultConstructorMarker;
 import kotlin.reflect.KClass;
 import kotlin.reflect.KFunction;
 import kotlin.reflect.KParameter;
+import kotlin.reflect.KType;
 import kotlin.reflect.full.KClasses;
 import kotlin.reflect.jvm.KCallablesJvm;
 import kotlin.reflect.jvm.ReflectJvmMapping;
@@ -924,10 +925,34 @@ public abstract class BeanUtils {
 			Map<KParameter, Object> argParameters = CollectionUtils.newHashMap(parameters.size());
 			for (int i = 0 ; i < args.length ; i++) {
 				if (!(parameters.get(i).isOptional() && args[i] == null)) {
-					argParameters.put(parameters.get(i), args[i]);
+					Object arg = args[i];
+					KType type = parameters.get(i).getType();
+					if (!(type.isMarkedNullable() && arg == null) &&
+							type.getClassifier() instanceof KClass<?> kClass &&
+							KotlinDetector.isInlineClass(JvmClassMappingKt.getJavaClass(kClass)) &&
+							!JvmClassMappingKt.getJavaClass(kClass).isInstance(arg)) {
+						arg = box(kClass, arg);
+					}
+					argParameters.put(parameters.get(i), arg);
 				}
 			}
 			return kotlinConstructor.callBy(argParameters);
+		}
+
+		private static Object box(KClass<?> kClass, @Nullable Object arg) {
+			KFunction<?> constructor = KClasses.getPrimaryConstructor(kClass);
+			Assert.state(constructor != null,
+					"Kotlin value classes annotated with @JvmInline are expected to have a single JVM constructor");
+			KType type = constructor.getParameters().get(0).getType();
+			if (!(type.isMarkedNullable() && arg == null) &&
+					type.getClassifier() instanceof KClass<?> parameterClass &&
+					KotlinDetector.isInlineClass(JvmClassMappingKt.getJavaClass(parameterClass))) {
+				arg = box(parameterClass, arg);
+			}
+			if (!KCallablesJvm.isAccessible(constructor)) {
+				KCallablesJvm.setAccessible(constructor, true);
+			}
+			return constructor.call(arg);
 		}
 
 		public static boolean hasDefaultConstructorMarker(Constructor<?> ctor) {
