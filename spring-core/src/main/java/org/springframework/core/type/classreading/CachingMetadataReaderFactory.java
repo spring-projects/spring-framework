@@ -17,20 +17,27 @@
 package org.springframework.core.type.classreading;
 
 import java.io.IOException;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 import org.jspecify.annotations.Nullable;
 
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.util.ClassUtils;
+import org.springframework.util.ResourceUtils;
 
 /**
  * Caching implementation of the {@link MetadataReaderFactory} interface,
- * caching a {@link MetadataReader} instance per Spring {@link Resource} handle
- * (i.e. per ".class" file).
+ * caching a {@link MetadataReader} instance per class name.
+ * <p>Metadata is also associated with the originating {@link Resource} handle
+ * in the shared {@link DefaultResourceLoader} resource cache when available.
  *
  * @author Juergen Hoeller
  * @author Costin Leau
@@ -42,7 +49,14 @@ public class CachingMetadataReaderFactory extends AbstractMetadataReaderFactory 
 	/** Default maximum number of entries for a local MetadataReader cache: 256. */
 	public static final int DEFAULT_CACHE_LIMIT = 256;
 
+	private static final String CLASSES_DIR = "/classes/";
+
+	private static final String TEST_CLASSES_DIR = "/test-classes/";
+
 	private final MetadataReaderFactory delegate;
+
+	/** MetadataReader cache keyed by class name. */
+	private @Nullable Map<String, MetadataReader> classNameMetadataReaderCache;
 
 	/** MetadataReader cache: either local or shared at the ResourceLoader level. */
 	private @Nullable Map<Resource, MetadataReader> metadataReaderCache;
@@ -81,6 +95,7 @@ public class CachingMetadataReaderFactory extends AbstractMetadataReaderFactory 
 		this.delegate = delegate;
 		if (getResourceLoader() instanceof DefaultResourceLoader defaultResourceLoader) {
 			this.metadataReaderCache = defaultResourceLoader.getResourceCache(MetadataReader.class);
+			this.classNameMetadataReaderCache = new ConcurrentHashMap<>();
 		}
 		else {
 			setCacheLimit(DEFAULT_CACHE_LIMIT);
@@ -97,12 +112,17 @@ public class CachingMetadataReaderFactory extends AbstractMetadataReaderFactory 
 	public void setCacheLimit(int cacheLimit) {
 		if (cacheLimit <= 0) {
 			this.metadataReaderCache = null;
+			this.classNameMetadataReaderCache = null;
 		}
 		else if (this.metadataReaderCache instanceof LocalResourceCache localResourceCache) {
 			localResourceCache.setCacheLimit(cacheLimit);
+			if (this.classNameMetadataReaderCache instanceof LocalClassNameCache localClassNameCache) {
+				localClassNameCache.setCacheLimit(cacheLimit);
+			}
 		}
 		else {
 			this.metadataReaderCache = new LocalResourceCache(cacheLimit);
+			this.classNameMetadataReaderCache = new LocalClassNameCache(cacheLimit);
 		}
 	}
 
@@ -120,34 +140,49 @@ public class CachingMetadataReaderFactory extends AbstractMetadataReaderFactory 
 
 	@Override
 	public MetadataReader getMetadataReader(Resource resource) throws IOException {
-		if (this.metadataReaderCache instanceof ConcurrentMap) {
-			// No synchronization necessary...
-			MetadataReader metadataReader = this.metadataReaderCache.get(resource);
-			if (metadataReader == null) {
-				metadataReader = this.delegate.getMetadataReader(resource);
-				this.metadataReaderCache.put(resource, metadataReader);
-			}
-			return metadataReader;
-		}
-		else if (this.metadataReaderCache != null) {
-			synchronized (this.metadataReaderCache) {
-				MetadataReader metadataReader = this.metadataReaderCache.get(resource);
-				if (metadataReader == null) {
-					metadataReader = this.delegate.getMetadataReader(resource);
-					this.metadataReaderCache.put(resource, metadataReader);
-				}
+		@Nullable String className = resolveClassName(resource);
+		if (className != null) {
+			MetadataReader metadataReader = getFromClassNameCache(className);
+			if (metadataReader != null) {
+				cacheMetadataReader(resource, metadataReader);
 				return metadataReader;
 			}
 		}
-		else {
-			return this.delegate.getMetadataReader(resource);
+
+		MetadataReader metadataReader = getFromResourceCache(resource);
+		if (metadataReader != null) {
+			if (className != null) {
+				cacheMetadataReaderByClassName(className, metadataReader);
+			}
+			return metadataReader;
 		}
+
+		metadataReader = this.delegate.getMetadataReader(resource);
+		if (className == null) {
+			className = metadataReader.getClassMetadata().getClassName();
+		}
+		MetadataReader existing = getFromClassNameCache(className);
+		if (existing != null) {
+			cacheMetadataReader(resource, existing);
+			return existing;
+		}
+		cacheMetadataReader(resource, metadataReader);
+		cacheMetadataReaderByClassName(className, metadataReader);
+		return metadataReader;
 	}
 
 	/**
 	 * Clear the local MetadataReader cache, if any, removing all cached class metadata.
 	 */
 	public void clearCache() {
+		if (this.classNameMetadataReaderCache instanceof LocalClassNameCache) {
+			synchronized (this.classNameMetadataReaderCache) {
+				this.classNameMetadataReaderCache.clear();
+			}
+		}
+		else if (this.classNameMetadataReaderCache != null) {
+			this.classNameMetadataReaderCache.clear();
+		}
 		if (this.metadataReaderCache instanceof LocalResourceCache) {
 			synchronized (this.metadataReaderCache) {
 				this.metadataReaderCache.clear();
@@ -157,6 +192,114 @@ public class CachingMetadataReaderFactory extends AbstractMetadataReaderFactory 
 			// Shared resource cache -> reset to local cache.
 			setCacheLimit(DEFAULT_CACHE_LIMIT);
 		}
+	}
+
+	private @Nullable MetadataReader getFromClassNameCache(String className) {
+		if (this.classNameMetadataReaderCache instanceof ConcurrentMap<String, MetadataReader> concurrentMap) {
+			return concurrentMap.get(className);
+		}
+		else if (this.classNameMetadataReaderCache != null) {
+			synchronized (this.classNameMetadataReaderCache) {
+				return this.classNameMetadataReaderCache.get(className);
+			}
+		}
+		return null;
+	}
+
+	private @Nullable MetadataReader getFromResourceCache(Resource resource) {
+		if (this.metadataReaderCache instanceof ConcurrentMap<Resource, MetadataReader> concurrentMap) {
+			return concurrentMap.get(resource);
+		}
+		else if (this.metadataReaderCache != null) {
+			synchronized (this.metadataReaderCache) {
+				return this.metadataReaderCache.get(resource);
+			}
+		}
+		return null;
+	}
+
+	private void cacheMetadataReader(Resource resource, MetadataReader metadataReader) {
+		if (this.metadataReaderCache instanceof ConcurrentMap<Resource, MetadataReader> concurrentMap) {
+			concurrentMap.putIfAbsent(resource, metadataReader);
+		}
+		else if (this.metadataReaderCache != null) {
+			synchronized (this.metadataReaderCache) {
+				this.metadataReaderCache.putIfAbsent(resource, metadataReader);
+			}
+		}
+	}
+
+	private void cacheMetadataReaderByClassName(MetadataReader metadataReader) {
+		cacheMetadataReaderByClassName(metadataReader.getClassMetadata().getClassName(), metadataReader);
+	}
+
+	private void cacheMetadataReaderByClassName(String className, MetadataReader metadataReader) {
+		if (this.classNameMetadataReaderCache instanceof ConcurrentMap<String, MetadataReader> concurrentMap) {
+			concurrentMap.putIfAbsent(className, metadataReader);
+		}
+		else if (this.classNameMetadataReaderCache != null) {
+			synchronized (this.classNameMetadataReaderCache) {
+				this.classNameMetadataReaderCache.putIfAbsent(className, metadataReader);
+			}
+		}
+	}
+
+	static @Nullable String resolveClassName(Resource resource) {
+		if (resource instanceof ClassPathResource classPathResource) {
+			return toClassName(classPathResource.getPath());
+		}
+		try {
+			String urlString = resource.getURL().toString();
+			int separatorIndex = urlString.indexOf(ResourceUtils.JAR_URL_SEPARATOR);
+			String path = (separatorIndex >= 0 ?
+					urlString.substring(separatorIndex + ResourceUtils.JAR_URL_SEPARATOR.length()) :
+					resource.getURL().getPath());
+			path = URLDecoder.decode(path, StandardCharsets.UTF_8);
+			if (path.startsWith("/")) {
+				path = path.substring(1);
+			}
+			return toClassName(extractClassFileResourcePath(path));
+		}
+		catch (IOException ex) {
+			return null;
+		}
+	}
+
+	private static final String[] CLASS_FILE_ROOT_MARKERS = {
+			"/classes/java/test/", "/classes/java/main/",
+			"/classes/kotlin/test/", "/classes/kotlin/main/",
+			CLASSES_DIR, TEST_CLASSES_DIR
+	};
+
+	private static String extractClassFileResourcePath(String path) {
+		int classFileIndex = path.indexOf(ClassUtils.CLASS_FILE_SUFFIX);
+		if (classFileIndex < 0) {
+			return path;
+		}
+		String beforeSuffix = path.substring(0, classFileIndex);
+		int bestStart = -1;
+		for (String marker : CLASS_FILE_ROOT_MARKERS) {
+			int index = beforeSuffix.indexOf(marker);
+			if (index >= 0) {
+				int start = index + marker.length();
+				if (start > bestStart) {
+					bestStart = start;
+				}
+			}
+		}
+		if (bestStart >= 0) {
+			return path.substring(bestStart, classFileIndex + ClassUtils.CLASS_FILE_SUFFIX.length());
+		}
+		return path;
+	}
+
+	private static @Nullable String toClassName(String resourcePath) {
+		if (!resourcePath.endsWith(ClassUtils.CLASS_FILE_SUFFIX)) {
+			return null;
+		}
+		String pathWithoutSuffix = resourcePath.substring(0,
+				resourcePath.length() - ClassUtils.CLASS_FILE_SUFFIX.length());
+		return ClassUtils.convertResourcePathToClassName(pathWithoutSuffix);
 	}
 
 
@@ -180,6 +323,30 @@ public class CachingMetadataReaderFactory extends AbstractMetadataReaderFactory 
 
 		@Override
 		protected boolean removeEldestEntry(Map.Entry<Resource, MetadataReader> eldest) {
+			return size() > this.cacheLimit;
+		}
+	}
+
+	@SuppressWarnings("serial")
+	private static class LocalClassNameCache extends LinkedHashMap<String, MetadataReader> {
+
+		private volatile int cacheLimit;
+
+		public LocalClassNameCache(int cacheLimit) {
+			super(cacheLimit, 0.75f, true);
+			this.cacheLimit = cacheLimit;
+		}
+
+		public void setCacheLimit(int cacheLimit) {
+			this.cacheLimit = cacheLimit;
+		}
+
+		public int getCacheLimit() {
+			return this.cacheLimit;
+		}
+
+		@Override
+		protected boolean removeEldestEntry(Map.Entry<String, MetadataReader> eldest) {
 			return size() > this.cacheLimit;
 		}
 	}
