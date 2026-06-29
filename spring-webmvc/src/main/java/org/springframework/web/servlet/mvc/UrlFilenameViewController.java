@@ -22,8 +22,11 @@ import java.util.concurrent.ConcurrentHashMap;
 import jakarta.servlet.http.HttpServletRequest;
 import org.jspecify.annotations.Nullable;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.util.StringUtils;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.HandlerMapping;
+import org.springframework.web.servlet.view.UrlBasedViewResolver;
 import org.springframework.web.util.ServletRequestPathUtils;
 
 /**
@@ -150,7 +153,16 @@ public class UrlFilenameViewController extends AbstractUrlViewController {
 	 * @see #getSuffix()
 	 */
 	protected String postProcessViewName(String viewName) {
-		return getPrefix() + viewName + getSuffix();
+		return checkViewName(getPrefix() + viewName + getSuffix(), viewName);
+	}
+
+	private static String checkViewName(String viewNameToUse, String originalViewName) {
+		if (viewNameToUse.startsWith(UrlBasedViewResolver.REDIRECT_URL_PREFIX) ||
+				viewNameToUse.startsWith(UrlBasedViewResolver.FORWARD_URL_PREFIX)) {
+			throw new ResponseStatusException(
+					HttpStatus.BAD_REQUEST, "Rejected viewName '" + originalViewName + "'");
+		}
+		return viewNameToUse;
 	}
 
 }
