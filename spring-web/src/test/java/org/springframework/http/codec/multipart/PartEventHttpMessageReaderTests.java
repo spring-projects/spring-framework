@@ -256,6 +256,21 @@ class PartEventHttpMessageReaderTests extends AbstractLeakCheckingTests {
 	}
 
 	@Test
+	void partSizeTooLargeWithUnlimitedMemorySize() {
+		MockServerHttpRequest request = createRequest("simple.multipart", "simple-boundary");
+
+		PartEventHttpMessageReader reader = new PartEventHttpMessageReader();
+		reader.setMaxPartSize(10);
+		reader.setMaxInMemorySize(-1);
+
+		Flux<PartEvent> result = reader.read(forClass(PartEvent.class), request, emptyMap());
+
+		StepVerifier.create(result)
+				.expectError(DataBufferLimitException.class)
+				.verify();
+	}
+
+	@Test
 	void formPartTooLarge() {
 		MockServerHttpRequest request = createRequest(
 				"simple.multipart", "simple-boundary");
