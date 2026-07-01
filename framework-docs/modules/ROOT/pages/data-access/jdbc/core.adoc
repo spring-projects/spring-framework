@@ -680,6 +680,21 @@ provides `firstName` and `lastName` properties, such as the `Actor` class from a
 			.update();
 ----
 
+For batch updates, accumulate the batch entries in a fluent fashion through `batch()`,
+binding the parameters for each entry as for a single update – either as positional
+parameters or as named parameters – and separating consecutive entries with `add()`.
+The accumulated entries are executed as a single JDBC batch by `batchUpdate()`, which
+also completes the final entry implicitly:
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	this.jdbcClient.sql("insert into t_actor (first_name, last_name) values (:firstName, :lastName)")
+			.batch()
+				.param("firstName", "Leonor").param("lastName", "Watling").add()
+				.param("firstName", "Christian").param("lastName", "Bale")
+			.batchUpdate();
+----
+
 The automatic `Actor` class mapping for parameters as well as the query results above is
 provided through implicit `SimplePropertySqlParameterSource` and `SimplePropertyRowMapper`
 strategies which are also available for direct use. They can serve as a common replacement
@@ -687,9 +702,9 @@ for `BeanPropertySqlParameterSource` and `BeanPropertyRowMapper`/`DataClassRowMa
 also with `JdbcTemplate` and `NamedParameterJdbcTemplate` themselves.
 
 NOTE: `JdbcClient` is a flexible but simplified facade for JDBC query/update statements.
-Advanced capabilities such as batch inserts and stored procedure calls typically require
-extra customization: consider Spring's `SimpleJdbcInsert` and `SimpleJdbcCall` classes or
-plain direct `JdbcTemplate` usage for any such capabilities not available in `JdbcClient`.
+Advanced capabilities such as stored procedure calls typically require extra customization:
+consider Spring's `SimpleJdbcInsert` and `SimpleJdbcCall` classes or plain direct
+`JdbcTemplate` usage for any such capabilities not available in `JdbcClient`.
 
 
 [[jdbc-SQLExceptionTranslator]]
