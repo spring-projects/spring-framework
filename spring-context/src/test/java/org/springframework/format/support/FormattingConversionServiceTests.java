@@ -176,6 +176,24 @@ class FormattingConversionServiceTests {
 		assertThat(formattingService.convert("1", Integer.class)).isEqualTo(Integer.valueOf(1));
 	}
 
+	@Test
+	void defaultFormattingConversionServiceHasNoDuplicateDateConverters() {
+		DefaultFormattingConversionService service = new DefaultFormattingConversionService();
+		String serviceString = service.toString();
+		int count = countOccurrences(serviceString, "DateFormatterRegistrar$DateToLongConverter");
+		assertThat(count).isEqualTo(1);
+	}
+
+	private int countOccurrences(String str, String subStr) {
+		int count = 0;
+		int idx = 0;
+		while ((idx = str.indexOf(subStr, idx)) != -1) {
+			count++;
+			idx += subStr.length();
+		}
+		return count;
+	}
+
 
 	static class NullReturningFormatter implements Formatter<Integer> {
 
