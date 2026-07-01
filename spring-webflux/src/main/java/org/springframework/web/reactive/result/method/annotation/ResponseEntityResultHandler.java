@@ -56,7 +56,7 @@ import org.springframework.web.server.ServerWebExchange;
  */
 public class ResponseEntityResultHandler extends AbstractMessageWriterResultHandler implements HandlerResultHandler {
 
-	private static final Set<HttpMethod> SAFE_METHODS = Set.of(HttpMethod.GET, HttpMethod.HEAD);
+	private static final Set<HttpMethod> SAFE_METHODS = Set.of(HttpMethod.GET, HttpMethod.QUERY, HttpMethod.HEAD);
 
 
 	/**

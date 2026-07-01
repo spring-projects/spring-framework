@@ -44,6 +44,7 @@ import org.springframework.core.annotation.AliasFor;
  * @see PutMapping
  * @see DeleteMapping
  * @see PatchMapping
+ * @see QueryMapping
  * @see RequestMapping
  */
 @Target(ElementType.METHOD)
