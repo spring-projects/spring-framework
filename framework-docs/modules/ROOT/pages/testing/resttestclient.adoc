@@ -77,6 +77,41 @@ Kotlin::
 ----
 ======
 
+[[resttestclient.springboottest-config]]
+=== Bind to `@SpringBootTest`
+
+When using Spring Boot, `@AutoConfigureRestTestClient` auto-configures a `RestTestClient` that connects to the embedded server started by `@SpringBootTest`.
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
+	@AutoConfigureRestTestClient
+	class HttpRequestTest {
+
+		@Autowired
+		private RestTestClient restTestClient;
+
+		// ...
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes"]
+----
+	@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
+	@AutoConfigureRestTestClient
+	class HttpRequestTest(@Autowired private val restTestClient: RestTestClient) {
+
+		// ...
+	}
+----
+======
+
 [[resttestclient.server-config]]
 === Bind to Server
 
