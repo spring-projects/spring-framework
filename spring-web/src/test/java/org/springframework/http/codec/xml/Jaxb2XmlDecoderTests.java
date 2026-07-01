@@ -35,7 +35,9 @@ import reactor.test.StepVerifier;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.DecodingException;
+import org.springframework.core.codec.Hints;
 import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DataBufferLimitException;
 import org.springframework.core.testfixture.io.buffer.AbstractLeakCheckingTests;
 import org.springframework.http.MediaType;
 import org.springframework.util.MimeType;
@@ -92,7 +94,7 @@ class Jaxb2XmlDecoderTests extends AbstractLeakCheckingTests {
 	@Test
 	void splitOneBranches() {
 		Flux<XMLEvent> xmlEvents = this.xmlEventDecoder.decode(toDataBufferMono(POJO_ROOT), null, null, HINTS);
-		Flux<List<XMLEvent>> result = Jaxb2Helper.split(xmlEvents, Set.of(new QName("pojo")));
+		Flux<List<XMLEvent>> result = Jaxb2Helper.split(xmlEvents, Set.of(new QName("pojo")), null);
 
 		StepVerifier.create(result)
 				.consumeNextWith(events -> {
@@ -113,8 +115,7 @@ class Jaxb2XmlDecoderTests extends AbstractLeakCheckingTests {
 	@Test
 	void splitMultipleBranches() {
 		Flux<XMLEvent> xmlEvents = this.xmlEventDecoder.decode(toDataBufferMono(POJO_CHILD), null, null, HINTS);
-		Flux<List<XMLEvent>> result = Jaxb2Helper.split(xmlEvents, Set.of(new QName("pojo")));
-
+		Flux<List<XMLEvent>> result = Jaxb2Helper.split(xmlEvents, Set.of(new QName("pojo")), null);
 
 		StepVerifier.create(result)
 				.consumeNextWith(events -> {
@@ -140,6 +141,34 @@ class Jaxb2XmlDecoderTests extends AbstractLeakCheckingTests {
 					assertEndElement(events.get(7), "pojo");
 				})
 				.expectComplete()
+				.verify();
+	}
+
+	@Test
+	void splitMultipleBranchesLimitExceeded() {
+
+		Flux<String> source = Flux.just(
+				"<?xml version=\"1.0\" encoding=\"UTF-8\"?>",
+				"<root><pojo><foo>foo</foo></pojo>",
+				"<pojo><foo>foofoo</foo>",
+				"<bar>barbar</bar></pojo>",
+				"<root/>");
+
+		XmlEventDecoder.ReceivedByteTracker byteTracker = new XmlEventDecoder.ReceivedByteTracker(30);
+		Map<String, Object> hints = Hints.from(XmlEventDecoder.BYTE_TRACKER_HINT, byteTracker);
+		Flux<XMLEvent> xmlEvents = this.xmlEventDecoder.decode(source.map(this::toToDataBuffer), null, null, hints);
+		Flux<List<XMLEvent>> result = Jaxb2Helper.split(xmlEvents, Set.of(new QName("pojo")), byteTracker);
+
+		StepVerifier.create(result)
+				.consumeNextWith(events -> {
+					assertThat(events).hasSize(5);
+					assertStartElement(events.get(0), "pojo");
+					assertStartElement(events.get(1), "foo");
+					assertCharacters(events.get(2), "foo");
+					assertEndElement(events.get(3), "foo");
+					assertEndElement(events.get(4), "pojo");
+				})
+				.expectError(DataBufferLimitException.class)
 				.verify();
 	}
 
@@ -263,11 +292,16 @@ class Jaxb2XmlDecoderTests extends AbstractLeakCheckingTests {
 
 	private Mono<DataBuffer> toDataBufferMono(String value) {
 		return Mono.defer(() -> {
-			byte[] bytes = value.getBytes(StandardCharsets.UTF_8);
-			DataBuffer buffer = this.bufferFactory.allocateBuffer(bytes.length);
-			buffer.write(bytes);
+			DataBuffer buffer = toToDataBuffer(value);
 			return Mono.just(buffer);
 		});
+	}
+
+	private DataBuffer toToDataBuffer(String value) {
+		byte[] bytes = value.getBytes(StandardCharsets.UTF_8);
+		DataBuffer buffer = this.bufferFactory.allocateBuffer(bytes.length);
+		buffer.write(bytes);
+		return buffer;
 	}
 
 	@jakarta.xml.bind.annotation.XmlType
