@@ -4,7 +4,7 @@
 		xmlns:lang="http://www.springframework.org/schema/lang"
 		xsi:schemaLocation="http://www.springframework.org/schema/beans
 				https://www.springframework.org/schema/beans/spring-beans.xsd"
- 		default-lazy-init="true">
+		default-lazy-init="true">
 
 	<bean class="org.springframework.scripting.support.ScriptFactoryPostProcessor"/>
 
@@ -16,7 +16,7 @@ package org.springframework.scripting.groovy;
 import org.springframework.scripting.Calculator
 class GroovyCalculator implements Calculator {
 	int add(int x, int y) {
-	   return x + y;
+		return x + y;
 	}
 }
 			</value>
@@ -39,20 +39,20 @@ class GroovyCalculator implements Calculator {
 		<property name="message" ref="myMessage"/>
 	</bean>
 
-  <bean id="messengerInstanceInline" class="org.springframework.scripting.support.StandardScriptFactory">
-	  <constructor-arg value="Groovy"/>
-	  <constructor-arg>
-      <value>inline:
+	<bean id="messengerInstanceInline" class="org.springframework.scripting.support.StandardScriptFactory">
+		<constructor-arg value="Groovy"/>
+		<constructor-arg>
+			<value>inline:
 package org.springframework.scripting.groovy;
 import org.springframework.scripting.Messenger
 class GroovyMessenger implements Messenger {
-  def String message;
+	def String message;
 }
 return new GroovyMessenger();
-      </value>
-    </constructor-arg>
-    <property name="message" ref="myMessage"/>
-  </bean>
+			</value>
+		</constructor-arg>
+		<property name="message" ref="myMessage"/>
+	</bean>
 
 	<bean id="myMessage" class="java.lang.String">
 		<constructor-arg value="Hello World!"/>

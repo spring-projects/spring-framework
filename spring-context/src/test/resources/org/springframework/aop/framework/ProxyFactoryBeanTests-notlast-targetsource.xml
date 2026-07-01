@@ -18,9 +18,9 @@
 	/>
 
 	<!--
-       An error, as the target source or non-advice object
-       must be last
-    -->
+		An error, as the target source or non-advice object
+		must be last
+	-->
 	<bean id="targetSourceNotLast"
 		class="org.springframework.aop.framework.ProxyFactoryBean">
 		<property name="proxyInterfaces"><value>org.springframework.beans.testfixture.beans.ITestBean</value></property>

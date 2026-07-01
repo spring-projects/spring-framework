@@ -38,7 +38,7 @@
 	</bean>
 
 	<bean name="wrappedAssemblerTwo" class="org.springframework.context.support.TestProxyFactoryBean">
-	    <property name="target" ref="assemblerTwo"/>
+		<property name="target" ref="assemblerTwo"/>
 	</bean>
 
 </beans>

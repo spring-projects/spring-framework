@@ -16,9 +16,9 @@
 				<property name="interfaceMappings">
 					<props>
 						<prop key="bean:name=testBean4">
- 							org.springframework.jmx.export.assembler.IAdditionalTestMethods,
+							org.springframework.jmx.export.assembler.IAdditionalTestMethods,
 							org.springframework.jmx.export.assembler.ICustomJmxBean
- 						</prop>
+						</prop>
 					</props>
 				</property>
 				<property name="notificationInfos">

@@ -19,7 +19,7 @@
 		default initial capacity.
 
 		For details see: https://github.com/spring-projects/spring-framework/issues/25801
-	 -->
+	-->
 	<bean id="removeNodeStatusScreen" class="org.springframework.beans.testfixture.beans.TestBean" scope="thread">
 		<property name="spouse" ref="removeNodeStatusPresenter" />
 	</bean>

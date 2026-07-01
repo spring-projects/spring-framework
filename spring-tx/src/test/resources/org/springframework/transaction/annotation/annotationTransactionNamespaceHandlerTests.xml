@@ -4,8 +4,8 @@
 	   xmlns:context="http://www.springframework.org/schema/context"
 	   xmlns:tx="http://www.springframework.org/schema/tx"
 	   xsi:schemaLocation="http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans-4.0.xsd
-       http://www.springframework.org/schema/context https://www.springframework.org/schema/context/spring-context-4.0.xsd
-       http://www.springframework.org/schema/tx https://www.springframework.org/schema/tx/spring-tx-4.0.xsd">
+	   http://www.springframework.org/schema/context https://www.springframework.org/schema/context/spring-context-4.0.xsd
+	   http://www.springframework.org/schema/tx https://www.springframework.org/schema/tx/spring-tx-4.0.xsd">
 
 	<tx:annotation-driven order="#{ T(java.lang.Integer).MAX_VALUE }"/>
 

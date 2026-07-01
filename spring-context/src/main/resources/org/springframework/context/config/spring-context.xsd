@@ -506,17 +506,17 @@
 		<xsd:attribute name="type" use="required">
 			<xsd:annotation>
 				<xsd:documentation><![CDATA[
-    Controls the type of filtering to apply to the expression.
+	Controls the type of filtering to apply to the expression.
 
-    "annotation" indicates an annotation to be present or meta-present at the type level in target components;
-    "assignable" indicates a class (or interface) that the target components are assignable to (extend/implement);
-    "aspectj" indicates an AspectJ type pattern expression to be matched by the target components;
-    "regex" indicates a regex pattern to be matched by the target components' class names;
-    "custom" indicates a custom implementation of the org.springframework.core.type.TypeFilter interface.
+	"annotation" indicates an annotation to be present or meta-present at the type level in target components;
+	"assignable" indicates a class (or interface) that the target components are assignable to (extend/implement);
+	"aspectj" indicates an AspectJ type pattern expression to be matched by the target components;
+	"regex" indicates a regex pattern to be matched by the target components' class names;
+	"custom" indicates a custom implementation of the org.springframework.core.type.TypeFilter interface.
 
-    Note: This attribute will not be inherited by child bean definitions.
-    Hence, it needs to be specified per concrete bean definition.
-                ]]></xsd:documentation>
+	Note: This attribute will not be inherited by child bean definitions.
+	Hence, it needs to be specified per concrete bean definition.
+				]]></xsd:documentation>
 			</xsd:annotation>
 			<xsd:simpleType>
 				<xsd:restriction base="xsd:string">
@@ -531,8 +531,8 @@
 		<xsd:attribute name="expression" type="xsd:string" use="required">
 			<xsd:annotation>
 				<xsd:documentation><![CDATA[
-    Indicates the filter expression, the type of which is indicated by "type".
-                ]]></xsd:documentation>
+	Indicates the filter expression, the type of which is indicated by "type".
+				]]></xsd:documentation>
 			</xsd:annotation>
 		</xsd:attribute>
 	</xsd:complexType>

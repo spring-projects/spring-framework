@@ -10,7 +10,7 @@
 				<property name="age"><value>11</value></property>
 			</bean>
 		</property>
-  </bean>
+	</bean>
 
 	<bean id="otb" class="org.springframework.beans.testfixture.beans.TestBean">
 		<property name="age"><value>98</value></property>
@@ -19,7 +19,7 @@
 				<property name="age"><value>99</value></property>
 			</bean>
 		</property>
-  </bean>
+	</bean>
 
 	<bean id="propertyPath1" class="org.springframework.beans.factory.config.PropertyPathFactoryBean">
 		<property name="targetObject">

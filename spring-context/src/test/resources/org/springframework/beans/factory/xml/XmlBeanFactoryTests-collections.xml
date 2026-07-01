@@ -133,15 +133,15 @@
 					<value type="java.lang.Integer">10</value>
 				</entry>
 				<entry>
- 					<key>
+					<key>
 						<ref bean="jennyKey"/>
 					</key>
 					<ref bean="jenny"/>
 				</entry>
 				<entry>
- 					<key>
- 						<bean class="java.lang.Integer">
- 							<constructor-arg value="5"/>
+					<key>
+						<bean class="java.lang.Integer">
+							<constructor-arg value="5"/>
 						</bean>
 					</key>
 					<idref bean="david"/>

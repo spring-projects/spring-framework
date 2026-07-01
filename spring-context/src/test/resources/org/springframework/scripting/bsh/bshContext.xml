@@ -9,10 +9,10 @@
 		<constructor-arg>
 			<value>inline:
 int add(int x, int y) {
-  return x + y;
+	return x + y;
 }
 			</value>
- 		</constructor-arg>
+		</constructor-arg>
 		<constructor-arg value="org.springframework.scripting.Calculator"/>
 	</bean>
 
@@ -63,7 +63,7 @@ int add(int x, int y) {
 	</bean>
 
 	<bean id="messengerPrototype" class="org.springframework.scripting.bsh.BshScriptFactory" scope="prototype"
-			 init-method="init">
+		  init-method="init">
 		<constructor-arg value="classpath:org/springframework/scripting/bsh/MessengerImpl.bsh"/>
 		<property name="message" value="Hello World!"/>
 	</bean>

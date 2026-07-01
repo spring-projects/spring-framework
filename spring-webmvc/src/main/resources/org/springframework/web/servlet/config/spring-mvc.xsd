@@ -482,8 +482,8 @@
 		<xsd:attribute name="cache-name" type="xsd:string" use="optional">
 			<xsd:annotation>
 				<xsd:documentation><![CDATA[
-    The cache name to use in the configured cache manager.
-    Will use "spring-resource-chain-cache" by default.
+	The cache name to use in the configured cache manager.
+	Will use "spring-resource-chain-cache" by default.
 					]]></xsd:documentation>
 			</xsd:annotation>
 		</xsd:attribute>
