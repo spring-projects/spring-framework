@@ -27,7 +27,6 @@ import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.core.io.buffer.DataBufferLimitException;
 import org.springframework.core.testfixture.io.buffer.AbstractLeakCheckingTests;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -85,28 +84,6 @@ class XmlEventDecoderTests extends AbstractLeakCheckingTests {
 				.consumeNextWith(e -> assertEndElement(e, "pojo"))
 				.consumeNextWith(e -> assertThat(e.isEndDocument()).isTrue())
 				.expectComplete()
-				.verify();
-	}
-
-	@Test
-	void toXMLEventsWithLimit() {
-
-		this.decoder.setMaxInMemorySize(6);
-
-		Flux<String> source = Flux.just(
-				"<pojo>", "<foo>", "foofoo", "</foo>", "<bar>", "barbarbar", "</bar>", "</pojo>");
-
-		Flux<XMLEvent> events = this.decoder.decode(
-				source.map(this::stringBuffer), null, null, Collections.emptyMap());
-
-		StepVerifier.create(events)
-				.consumeNextWith(e -> assertThat(e.isStartDocument()).isTrue())
-				.consumeNextWith(e -> assertStartElement(e, "pojo"))
-				.consumeNextWith(e -> assertStartElement(e, "foo"))
-				.consumeNextWith(e -> assertCharacters(e, "foofoo"))
-				.consumeNextWith(e -> assertEndElement(e, "foo"))
-				.consumeNextWith(e -> assertStartElement(e, "bar"))
-				.expectError(DataBufferLimitException.class)
 				.verify();
 	}
 

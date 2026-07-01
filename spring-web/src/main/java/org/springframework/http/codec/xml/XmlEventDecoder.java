@@ -84,6 +84,12 @@ import org.springframework.util.xml.StaxUtils;
  */
 public class XmlEventDecoder extends AbstractDecoder<XMLEvent> {
 
+	/**
+	 * Hint key for a {@link ReceivedByteTracker} instance that callers can use
+	 * to track the number of received bytes.
+	 */
+	public static final String BYTE_TRACKER_HINT = XmlEventDecoder.class.getName() + ".byteTracker";
+
 	private static final XMLInputFactory inputFactory = StaxUtils.createDefensiveInputFactory();
 
 	private static final boolean AALTO_PRESENT = ClassUtils.isPresent(
@@ -100,10 +106,13 @@ public class XmlEventDecoder extends AbstractDecoder<XMLEvent> {
 
 
 	/**
-	 * Set the max number of bytes that can be buffered by this decoder. This
-	 * is either the size the entire input when decoding as a whole, or when
-	 * using async parsing via Aalto XML, it is size one top-level XML tree.
-	 * When the limit is exceeded, {@link DataBufferLimitException} is raised.
+	 * Set the max number of bytes this decoder should buffer in memory resulting
+	 * in a {@link DataBufferLimitException} when the limit is exceeded.
+	 * <p>When joining all buffers and decoding as a whole, the limit is applied
+	 * to the entire input.
+	 * <p>>When using Aalto XML async parsing, the limit does not apply at the
+	 * level of this decoder because the XML events parsed from each buffer are
+	 * emitted immediately and the buffer is released.
 	 * <p>By default this is set to 256K.
 	 * @param byteCount the max number of bytes to buffer, or -1 for unlimited
 	 * @since 5.1.11
@@ -126,7 +135,7 @@ public class XmlEventDecoder extends AbstractDecoder<XMLEvent> {
 			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
 		if (this.useAalto) {
-			AaltoDataBufferToXmlEvent mapper = new AaltoDataBufferToXmlEvent(this.maxInMemorySize);
+			AaltoDataBufferToXmlEvent mapper = new AaltoDataBufferToXmlEvent(hints);
 			return Flux.from(input)
 					.flatMapIterable(mapper)
 					.doFinally(signalType -> mapper.endOfInput());
@@ -155,7 +164,7 @@ public class XmlEventDecoder extends AbstractDecoder<XMLEvent> {
 	/*
 	 * Separate static class to isolate Aalto dependency.
 	 */
-	private static class AaltoDataBufferToXmlEvent implements Function<DataBuffer, List<? extends XMLEvent>> {
+	private static final class AaltoDataBufferToXmlEvent implements Function<DataBuffer, List<? extends XMLEvent>> {
 
 		private static final AsyncXMLInputFactory inputFactory =
 				StaxUtils.createDefensiveInputFactory(InputFactoryImpl::new);
@@ -165,22 +174,19 @@ public class XmlEventDecoder extends AbstractDecoder<XMLEvent> {
 
 		private final XMLEventAllocator eventAllocator = EventAllocatorImpl.getDefaultInstance();
 
-		private final int maxInMemorySize;
+		@Nullable
+		private final ReceivedByteTracker byteTracker;
 
-		private int byteCount;
-
-		private int elementDepth;
-
-
-		public AaltoDataBufferToXmlEvent(int maxInMemorySize) {
-			this.maxInMemorySize = maxInMemorySize;
+		private AaltoDataBufferToXmlEvent(@Nullable Map<String, Object> hints) {
+			this.byteTracker = (hints != null ? (ReceivedByteTracker) hints.get(BYTE_TRACKER_HINT) : null);
 		}
-
 
 		@Override
 		public List<? extends XMLEvent> apply(DataBuffer dataBuffer) {
 			try {
-				increaseByteCount(dataBuffer);
+				if (this.byteTracker != null) {
+					this.byteTracker.incrementByteCount(dataBuffer);
+				}
 				AsyncByteBufferFeeder inputFeeder = this.streamReader.getInputFeeder();
 				try (DataBuffer.ByteBufferIterator iterator = dataBuffer.readableByteBuffers()) {
 					while (iterator.hasNext()) {
@@ -199,11 +205,7 @@ public class XmlEventDecoder extends AbstractDecoder<XMLEvent> {
 						if (event.isEndDocument()) {
 							break;
 						}
-						checkDepthAndResetByteCount(event);
 					}
-				}
-				if (this.maxInMemorySize > 0 && this.byteCount > this.maxInMemorySize) {
-					raiseLimitException();
 				}
 				return events;
 			}
@@ -215,40 +217,55 @@ public class XmlEventDecoder extends AbstractDecoder<XMLEvent> {
 			}
 		}
 
-		private void increaseByteCount(DataBuffer dataBuffer) {
-			if (this.maxInMemorySize > 0) {
-				if (dataBuffer.readableByteCount() > Integer.MAX_VALUE - this.byteCount) {
-					raiseLimitException();
-				}
-				else {
-					this.byteCount += dataBuffer.readableByteCount();
-				}
-			}
-		}
-
-		private void checkDepthAndResetByteCount(XMLEvent event) {
-			if (this.maxInMemorySize > 0) {
-				if (event.isStartElement()) {
-					this.byteCount = this.elementDepth == 1 ? 0 : this.byteCount;
-					this.elementDepth++;
-				}
-				else if (event.isEndElement()) {
-					this.elementDepth--;
-					this.byteCount = this.elementDepth == 1 ? 0 : this.byteCount;
-				}
-			}
-		}
-
-		private void raiseLimitException() {
-			throw new DataBufferLimitException(
-					"Exceeded limit on max bytes per XML top-level node: " + this.maxInMemorySize);
-		}
-
 		public void endOfInput() {
 			this.streamReader.getInputFeeder().endOfInput();
 		}
 	}
 
 
+	/**
+	 * Callers of {@link XmlEventDecoder} that buffer emitted XML events at a
+	 * higher level, can pass an instance of this tracker as an
+	 * {@link XmlEventDecoder#BYTE_TRACKER_HINT} to monitor the total number of
+	 * bytes received, and to reset periodically.
+	 * <p>For use with Aalto XML async parsing only, in which case this decoder
+	 * parses releases each buffer immediately.
+	 */
+	public static class ReceivedByteTracker {
+
+		/** An instance to use when there is no limit. */
+		public static final ReceivedByteTracker NO_OP = new ReceivedByteTracker(-1);
+
+		private final int maxInMemorySize;
+
+		private int byteCount;
+
+		public ReceivedByteTracker(int maxInMemorySize) {
+			this.maxInMemorySize = maxInMemorySize;
+		}
+
+		public int getMaxInMemorySize() {
+			return this.maxInMemorySize;
+		}
+
+		public boolean isMaxInMemorySizeExceeded() {
+			return (this.maxInMemorySize != -1 && this.byteCount > this.maxInMemorySize);
+		}
+
+		public void reset() {
+			this.byteCount = 0;
+		}
+
+		private void incrementByteCount(DataBuffer buffer) {
+			if (this.maxInMemorySize != -1) {
+				this.byteCount += buffer.readableByteCount();
+			}
+		}
+
+		@Override
+		public String toString() {
+			return this.byteCount + " bytes";
+		}
+	}
 
 }
