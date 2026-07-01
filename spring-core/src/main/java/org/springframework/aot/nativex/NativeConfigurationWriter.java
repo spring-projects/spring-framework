@@ -46,6 +46,7 @@ public abstract class NativeConfigurationWriter {
 	private boolean hasAnyHint(RuntimeHints hints) {
 		return (hints.proxies().jdkProxyHints().findAny().isPresent() ||
 				hints.reflection().typeHints().findAny().isPresent() ||
+				hints.reflection().lambdaHints().findAny().isPresent() ||
 				hints.resources().resourcePatternHints().findAny().isPresent() ||
 				hints.resources().resourceBundleHints().findAny().isPresent() ||
 				hints.jni().typeHints().findAny().isPresent() ||
