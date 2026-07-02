@@ -35,11 +35,6 @@ import org.apache.commons.logging.LogFactory;
 import org.jspecify.annotations.Nullable;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
-import org.springframework.cache.interceptor.events.CacheClearEvent;
-import org.springframework.cache.interceptor.events.CacheEvictEvent;
-import org.springframework.cache.interceptor.events.CacheOperationEvent;
-import org.springframework.cache.interceptor.events.CachePutEvent;
-import org.springframework.context.ApplicationEventPublisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -54,6 +49,11 @@ import org.springframework.beans.factory.SmartInitializingSingleton;
 import org.springframework.beans.factory.annotation.BeanFactoryAnnotationUtils;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
+import org.springframework.cache.interceptor.events.CacheClearEvent;
+import org.springframework.cache.interceptor.events.CacheEvictEvent;
+import org.springframework.cache.interceptor.events.CacheOperationEvent;
+import org.springframework.cache.interceptor.events.CachePutEvent;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.expression.AnnotatedElementKey;
 import org.springframework.context.expression.BeanFactoryResolver;
 import org.springframework.core.BridgeMethodResolver;
@@ -174,9 +174,8 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 
 	/**
 	 * Set the {@link ApplicationEventPublisher} to use for publishing cache operation events.
-	 *
-	 * @see CacheInterceptor#setApplicationEventPublisher(ApplicationEventPublisher)
 	 * @since 7.1
+	 * @see CacheInterceptor#setApplicationEventPublisher(ApplicationEventPublisher)
 	 */
 	public void setApplicationEventPublisher(final ApplicationEventPublisher applicationEventPublisher) {
 		this.applicationEventPublisher = applicationEventPublisher;
@@ -714,7 +713,8 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 		if (this.applicationEventPublisher != null) {
 			try {
 				this.applicationEventPublisher.publishEvent(event);
-			} catch (Throwable ex) {
+			}
+			catch (Throwable ex) {
 				if (logger.isWarnEnabled()) {
 					logger.warn("Failed to publish " + event, ex);
 				}
