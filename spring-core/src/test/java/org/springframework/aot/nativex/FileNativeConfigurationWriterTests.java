@@ -23,6 +23,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -131,6 +132,34 @@ class FileNativeConfigurationWriterTests {
 							"methods": [
 								{ "name": "setDefaultCharset", "parameterTypes": [ "java.nio.charset.Charset" ] }
 							]
+						}
+					]
+				}
+				""");
+	}
+
+	@Test  // gh-36989
+	void lambdaConfig() throws Exception {
+		FileNativeConfigurationWriter generator = new FileNativeConfigurationWriter(tempDir);
+		RuntimeHints hints = new RuntimeHints();
+		hints.reflection().registerLambda(Integer.class, builder -> builder
+				.withDeclaringMethod("getCell", Integer.class, Integer.class)
+				.withInterfaces(Supplier.class));
+		generator.write(hints);
+		assertEquals("""
+				{
+					"reflection": [
+						{
+							"type": {
+								"lambda": {
+									"declaringClass": "java.lang.Integer",
+									"declaringMethod": {
+										"name": "getCell",
+										"parameterTypes": [ "java.lang.Integer", "java.lang.Integer" ]
+									},
+									"interfaces": [ "java.util.function.Supplier" ]
+								}
+							}
 						}
 					]
 				}
