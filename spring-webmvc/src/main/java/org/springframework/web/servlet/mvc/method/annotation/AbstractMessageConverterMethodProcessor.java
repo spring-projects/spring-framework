@@ -448,6 +448,14 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 	private List<MediaType> getAcceptableMediaTypes(HttpServletRequest request)
 			throws HttpMediaTypeNotAcceptableException {
 
+		Object attribute = request.getAttribute(HandlerMapping.PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE);
+		if (attribute instanceof Set<?> producibleMediaTypes && producibleMediaTypes.size() == 1) {
+			Object onlyElement = producibleMediaTypes.iterator().next();
+			if (onlyElement instanceof MediaType onlyType && onlyType.isConcrete()) {
+				return Collections.singletonList(onlyType);
+			}
+		}
+
 		return this.contentNegotiationManager.resolveMediaTypes(new ServletWebRequest(request));
 	}
 
