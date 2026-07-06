@@ -209,10 +209,6 @@ class FormHttpMessageConverterTests {
 				.as("Invalid content-length").isEqualTo(outputMessage.getBodyAsBytes().length);
 	}
 
-	private void assertCanRead(MediaType mediaType) {
-		assertCanRead(MULTI_VALUE_MAP, mediaType);
-	}
-
 	private void assertCanRead(ResolvableType type, MediaType mediaType) {
 		assertThat(this.converter.canRead(type, mediaType)).as(type.toClass().getSimpleName() + " : " + mediaType).isTrue();
 	}

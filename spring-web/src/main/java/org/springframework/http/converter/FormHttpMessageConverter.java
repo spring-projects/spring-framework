@@ -82,11 +82,6 @@ public class FormHttpMessageConverter implements SmartHttpMessageConverter<Objec
 	/** The default charset used by the converter. */
 	public static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
 
-	private static final ResolvableType MULTIVALUE_TYPE =
-			ResolvableType.forClassWithGenerics(MultiValueMap.class, String.class, String.class);
-
-	private static final ResolvableType MAP_TYPE =
-			ResolvableType.forClassWithGenerics(Map.class, String.class, String.class);
 
 	private Charset charset = DEFAULT_CHARSET;
 
