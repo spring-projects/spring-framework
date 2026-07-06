@@ -125,6 +125,13 @@ class MimeTypeTests {
 	}
 
 	@Test
+	void rejectsDuplicateParameterWithDifferentCase() {
+		String s = "text/plain;dupe=\"1\";DUPE=\"2\"";
+		assertThatThrownBy(() -> MimeType.valueOf(s)).isInstanceOf(InvalidMimeTypeException.class)
+				.hasMessageContaining("Invalid mime type \"text/plain;dupe=\"1\";DUPE=\"2\"\": duplicate parameter 'DUPE=\"2\"'");
+	}
+
+	@Test
 	void withConversionService() {
 		ConversionService conversionService = new DefaultConversionService();
 		assertThat(conversionService.canConvert(String.class, MimeType.class)).isTrue();
