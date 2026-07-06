@@ -202,7 +202,7 @@ class RestTemplateXhrTransportTests {
 	}
 
 
-	@SuppressWarnings("removal")
+	@SuppressWarnings({"deprecation", "removal"})
 	private static class TestRestTemplate extends RestTemplate {
 
 		private Queue<ClientHttpResponse> responses = new LinkedBlockingDeque<>();

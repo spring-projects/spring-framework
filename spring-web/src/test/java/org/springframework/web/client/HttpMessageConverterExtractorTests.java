@@ -52,7 +52,7 @@ import static org.mockito.Mockito.mock;
  * @author Brian Clozel
  * @author Sam Brannen
  */
-@SuppressWarnings("removal")
+@SuppressWarnings({ "deprecation", "removal"})
 class HttpMessageConverterExtractorTests {
 
 	private final HttpMessageConverter<String> converter = mock();
