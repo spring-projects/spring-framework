@@ -67,7 +67,7 @@ public interface RetryPolicy {
 	 * @see Builder#timeout(Duration)
 	 */
 	default Duration getTimeout() {
-		return Duration.ZERO;
+		return Builder.DEFAULT_TIMEOUT;
 	}
 
 	/**
@@ -158,15 +158,22 @@ public interface RetryPolicy {
 		public static final long DEFAULT_DELAY = 1000;
 
 		/**
+		 * The default {@linkplain #multiplier(double) multiplier}: {@value}.
+		 */
+		public static final double DEFAULT_MULTIPLIER = 1.0;
+
+		/**
 		 * The default {@linkplain #maxDelay(Duration) max delay}: {@value} ms.
 		 * @see Long#MAX_VALUE
 		 */
 		public static final long DEFAULT_MAX_DELAY = Long.MAX_VALUE;
 
 		/**
-		 * The default {@linkplain #multiplier(double) multiplier}: {@value}.
+		 * The default {@linkplain #timeout(Duration) timeout}: {@value}.
+		 * @since 7.0.9
+		 * @see Duration#ZERO
 		 */
-		public static final double DEFAULT_MULTIPLIER = 1.0;
+		public static final Duration DEFAULT_TIMEOUT = Duration.ZERO;
 
 
 		private @Nullable BackOff backOff;
