@@ -205,12 +205,22 @@ public class TableMetaDataContext {
 		if (generatedKeyNames.length > 0) {
 			this.generatedKeyColumnsUsed = true;
 		}
-		if (!declaredColumns.isEmpty()) {
-			return new ArrayList<>(declaredColumns);
-		}
 		Set<String> keys = CollectionUtils.newLinkedHashSet(generatedKeyNames.length);
 		for (String key : generatedKeyNames) {
 			keys.add(key.toUpperCase(Locale.ROOT));
+		}
+		if (!declaredColumns.isEmpty()) {
+			List<String> overlapping = new ArrayList<>();
+			for (String column : declaredColumns) {
+				if (keys.contains(column.toUpperCase(Locale.ROOT))) {
+					overlapping.add(column);
+				}
+			}
+			if (!overlapping.isEmpty()) {
+				throw new InvalidDataAccessApiUsageException(
+						"Declared columns " + overlapping + " must not overlap with generated key columns");
+			}
+			return new ArrayList<>(declaredColumns);
 		}
 		List<String> columns = new ArrayList<>();
 		for (TableParameterMetaData meta : obtainMetaDataProvider().getTableParameterMetaData()) {
