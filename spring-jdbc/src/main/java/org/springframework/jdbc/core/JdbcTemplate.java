@@ -1061,9 +1061,9 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 				new BatchPreparedStatementSetter() {
 					@Override
 					public void setValues(PreparedStatement ps, int i) throws SQLException {
-						Object[] values = batchArgs.get(i);
+						@Nullable Object[] values = batchArgs.get(i);
 						int colIndex = 0;
-						for (Object value : values) {
+						for (@Nullable Object value : values) {
 							colIndex++;
 							if (value instanceof SqlParameterValue paramValue) {
 								StatementCreatorUtils.setParameterValue(ps, colIndex, paramValue, paramValue.getValue());
