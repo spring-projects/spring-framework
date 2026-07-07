@@ -603,7 +603,7 @@ public class ViewResolutionResultHandler extends HandlerResultHandlerSupport imp
 						finally {
 							DataBufferUtils.release(buffer);
 						}
-						text = text.replace("\n", "\ndata:");
+						text = escapeSseFragment(text);
 						return bufferFactory.wrap(text.getBytes(charset));
 					});
 
@@ -613,6 +613,30 @@ public class ViewResolutionResultHandler extends HandlerResultHandlerSupport imp
 		private DataBuffer encodeText(String text, Charset charset, DataBufferFactory bufferFactory) {
 			byte[] bytes = text.getBytes(charset);
 			return bufferFactory.wrap(bytes);
+		}
+
+		private String escapeSseFragment(String content) {
+			if (content.indexOf('\n') == -1 && content.indexOf('\r') == -1) {
+				return content;
+			}
+			StringBuilder fragment = new StringBuilder();
+			int length = content.length();
+			for (int i = 0; i < length; i++) {
+				char c = content.charAt(i);
+				if (c == '\r') {
+					if (i + 1 < length && content.charAt(i + 1) == '\n') {
+						i++;
+					}
+					fragment.append("\ndata:");
+				}
+				else if (c == '\n') {
+					fragment.append("\ndata:");
+				}
+				else {
+					fragment.append(c);
+				}
+			}
+			return fragment.toString();
 		}
 	}
 
