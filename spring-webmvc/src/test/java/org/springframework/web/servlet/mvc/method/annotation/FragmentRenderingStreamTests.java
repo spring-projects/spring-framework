@@ -146,6 +146,31 @@ class FragmentRenderingStreamTests {
 				"""));
 	}
 
+	@Test
+	void escapeViewFragment() throws Exception {
+		MethodParameter type = on(TestController.class).resolveReturnType(SseEmitter.class);
+
+		SseEmitter emitter = new SseEmitter();
+		this.handler.handleReturnValue(emitter, type, new ModelAndViewContainer(), webRequest);
+
+		assertThat(this.request.isAsyncStarted()).isTrue();
+		assertThat(this.response.getStatus()).isEqualTo(200);
+
+		ModelAndView mav1 = new ModelAndView("fragment1", Map.of("foo", "Foo\n and Bar"));
+
+		emitter.send(SseEmitter.event().data(mav1));
+
+		assertThat(this.response.getContentType()).isEqualTo("text/event-stream");
+		assertThat(this.response.getContentAsString()).isEqualTo(("""
+				event:fragment1
+				data:<p>
+				data:	Hello Foo
+				data: and Bar
+				data:</p>
+
+				"""));
+	}
+
 
 	@SuppressWarnings({"unused", "DataFlowIssue"})
 	private static class TestController {
