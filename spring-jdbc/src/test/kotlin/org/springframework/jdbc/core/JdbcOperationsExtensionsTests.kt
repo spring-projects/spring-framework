@@ -223,4 +223,42 @@ class JdbcOperationsExtensionsTests {
 		verify { template.query(sql, ofType<RowMapper<Int?>>(), 3) }
 	}
 
+	@Test  // gh-37012
+	fun `batchUpdate with non-null batchArgs`() {
+		val batchArgs: List<Array<Any>> = listOf(arrayOf(1, "a"), arrayOf(2, "b"))
+		val result = intArrayOf(1, 1)
+		every { template.batchUpdate(sql, batchArgs) } returns result
+		assertThat(template.batchUpdate(sql, batchArgs)).isEqualTo(result)
+		verify { template.batchUpdate(sql, batchArgs) }
+	}
+
+	@Test  // gh-37012
+	fun `batchUpdate with nullable batchArgs`() {
+		val batchArgs: List<Array<Any?>> = listOf(arrayOf(1, null), arrayOf(null, "b"))
+		val result = intArrayOf(1, 1)
+		every { template.batchUpdate(sql, batchArgs) } returns result
+		assertThat(template.batchUpdate(sql, batchArgs)).isEqualTo(result)
+		verify { template.batchUpdate(sql, batchArgs) }
+	}
+
+	@Test  // gh-37012
+	fun `batchUpdate with non-null batchArgs and argTypes`() {
+		val batchArgs: List<Array<Any>> = listOf(arrayOf(1, "a"), arrayOf(2, "b"))
+		val argTypes = intArrayOf(JDBCType.INTEGER.vendorTypeNumber, JDBCType.VARCHAR.vendorTypeNumber)
+		val result = intArrayOf(1, 1)
+		every { template.batchUpdate(sql, batchArgs, argTypes) } returns result
+		assertThat(template.batchUpdate(sql, batchArgs, argTypes)).isEqualTo(result)
+		verify { template.batchUpdate(sql, batchArgs, argTypes) }
+	}
+
+	@Test  // gh-37012
+	fun `batchUpdate with nullable batchArgs and argTypes`() {
+		val batchArgs: List<Array<Any?>> = listOf(arrayOf(1, null), arrayOf(null, "b"))
+		val argTypes = intArrayOf(JDBCType.INTEGER.vendorTypeNumber, JDBCType.VARCHAR.vendorTypeNumber)
+		val result = intArrayOf(1, 1)
+		every { template.batchUpdate(sql, batchArgs, argTypes) } returns result
+		assertThat(template.batchUpdate(sql, batchArgs, argTypes)).isEqualTo(result)
+		verify { template.batchUpdate(sql, batchArgs, argTypes) }
+	}
+
 }

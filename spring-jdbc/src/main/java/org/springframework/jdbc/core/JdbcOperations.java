@@ -1013,7 +1013,7 @@ public interface JdbcOperations {
 	 * {@link java.sql.Statement#SUCCESS_NO_INFO}/{@link java.sql.Statement#EXECUTE_FAILED})
 	 * @throws DataAccessException if there is any problem issuing the update
 	 */
-	int[] batchUpdate(String sql, List<Object[]> batchArgs) throws DataAccessException;
+	int[] batchUpdate(String sql, List<? extends @Nullable Object[]> batchArgs) throws DataAccessException;
 
 	/**
 	 * Execute a batch using the supplied SQL statement with the batch of supplied arguments.
@@ -1026,7 +1026,7 @@ public interface JdbcOperations {
 	 * {@link java.sql.Statement#SUCCESS_NO_INFO}/{@link java.sql.Statement#EXECUTE_FAILED})
 	 * @throws DataAccessException if there is any problem issuing the update
 	 */
-	int[] batchUpdate(String sql, List<Object[]> batchArgs, int[] argTypes) throws DataAccessException;
+	int[] batchUpdate(String sql, List<? extends @Nullable Object[]> batchArgs, int[] argTypes) throws DataAccessException;
 
 	/**
 	 * Execute multiple batches using the supplied SQL statement with the collect of supplied

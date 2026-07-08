@@ -1046,12 +1046,12 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	}
 
 	@Override
-	public int[] batchUpdate(String sql, List<@Nullable Object[]> batchArgs) throws DataAccessException {
+	public int[] batchUpdate(String sql, List<? extends @Nullable Object[]> batchArgs) throws DataAccessException {
 		return batchUpdate(sql, batchArgs, new int[0]);
 	}
 
 	@Override
-	public int[] batchUpdate(String sql, List<@Nullable Object[]> batchArgs, int[] argTypes) throws DataAccessException {
+	public int[] batchUpdate(String sql, List<? extends @Nullable Object[]> batchArgs, int[] argTypes) throws DataAccessException {
 		if (batchArgs.isEmpty()) {
 			return new int[0];
 		}
