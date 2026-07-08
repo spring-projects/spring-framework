@@ -169,9 +169,8 @@ public interface RetryPolicy {
 		public static final long DEFAULT_MAX_DELAY = Long.MAX_VALUE;
 
 		/**
-		 * The default {@linkplain #timeout(Duration) timeout}: {@value}.
+		 * The default {@linkplain #timeout(Duration) timeout}: {@link Duration#ZERO}.
 		 * @since 7.0.9
-		 * @see Duration#ZERO
 		 */
 		public static final Duration DEFAULT_TIMEOUT = Duration.ZERO;
 
