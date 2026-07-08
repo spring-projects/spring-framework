@@ -67,6 +67,7 @@ import org.springframework.web.servlet.support.RequestDataValueProcessor;
  * </table>
  *
  * @author Rossen Stoyanchev
+ * @author Sebastien Deleuze
  * @since 3.1
  */
 @SuppressWarnings("serial")
@@ -152,7 +153,8 @@ public class ButtonTag extends AbstractHtmlElementTag {
 	 */
 	protected void writeValue(TagWriter tagWriter) throws JspException {
 		String valueToUse = (getValue() != null ? getValue() : getDefaultValue());
-		tagWriter.writeAttribute("value", processFieldValue(getName(), valueToUse, getType()));
+		tagWriter.writeAttribute("value",
+				processFieldValue(getName(), getDisplayString(valueToUse), getType()));
 	}
 
 	/**
