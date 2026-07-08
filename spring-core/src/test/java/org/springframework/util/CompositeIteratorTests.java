@@ -21,6 +21,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -33,6 +34,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
  *
  * @author Erwin Vervaet
  * @author Juergen Hoeller
+ * @author Yanming Zhou
  */
 class CompositeIteratorTests {
 
@@ -99,4 +101,13 @@ class CompositeIteratorTests {
 				it.add(iterator));
 	}
 
+	@Test
+	void nullable() {
+		List<@Nullable String> first = Arrays.asList("1", null);
+		List<@Nullable String> second = Arrays.asList("2", null);
+		CompositeIterator<String> it = new CompositeIterator<>();
+		it.add(first.iterator());
+		it.add(second.iterator());
+		assertThat(it).toIterable().containsExactly("1", null, "2", null);
+	}
 }
