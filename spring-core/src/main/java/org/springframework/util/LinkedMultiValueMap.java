@@ -16,6 +16,8 @@
 
 package org.springframework.util;
 
+import org.jspecify.annotations.Nullable;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -31,11 +33,12 @@ import java.util.Map;
  *
  * @author Arjen Poutsma
  * @author Juergen Hoeller
+ * @author Yanming Zhou
  * @since 3.0
  * @param <K> the key type
  * @param <V> the value element type
  */
-public class LinkedMultiValueMap<K, V> extends MultiValueMapAdapter<K, V> implements Serializable, Cloneable {
+public class LinkedMultiValueMap<K, V extends @Nullable Object> extends MultiValueMapAdapter<K, V> implements Serializable, Cloneable {
 
 	private static final long serialVersionUID = 3801124242820219131L;
 
