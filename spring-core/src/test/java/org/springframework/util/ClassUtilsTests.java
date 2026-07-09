@@ -54,6 +54,7 @@ import org.springframework.tests.sample.objects.ITestObject;
 import org.springframework.tests.sample.objects.TestObject;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * Tests for {@link ClassUtils}.
@@ -63,6 +64,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Rob Harrop
  * @author Rick Evans
  * @author Sam Brannen
+ * @author Chengang Guan
  */
 class ClassUtilsTests {
 
@@ -99,6 +101,20 @@ class ClassUtilsTests {
 		assertThat(ClassHavingNestedClass.class.getPackageName().length()).isEqualTo(1);
 		assertThat(ClassUtils.forName("a.ClassHavingNestedClass$NestedClass", classLoader)).isEqualTo(ClassHavingNestedClass.NestedClass.class);
 		assertThat(ClassUtils.forName("a.ClassHavingNestedClass.NestedClass", classLoader)).isEqualTo(ClassHavingNestedClass.NestedClass.class);
+	}
+
+	@Test
+	void forNamesWithDeepNestingTypes() throws ClassNotFoundException {
+		assertThat(ClassUtils.forName("org.springframework.util.ClassUtilsTests.NestedClass.NestedClassLevel1", classLoader))
+				.isEqualTo(NestedClass.NestedClassLevel1.class);
+		assertThat(ClassUtils.forName("org.springframework.util.ClassUtilsTests.NestedClass.NestedClassLevel1.NestedClassLevel2", classLoader))
+				.isEqualTo(NestedClass.NestedClassLevel1.NestedClassLevel2.class);
+		assertThat(ClassUtils.forName("org.springframework.util.ClassUtilsTests$NestedClass$NestedClassLevel1$NestedClassLevel2", classLoader))
+				.isEqualTo(NestedClass.NestedClassLevel1.NestedClassLevel2.class);
+		assertThatThrownBy(() -> ClassUtils.forName("org.springframework.util.ClassUtilsTests.NestedClass$NestedClassLevel1", classLoader))
+				.isInstanceOf(ClassNotFoundException.class);
+		assertThatThrownBy(() -> ClassUtils.forName("org.springframework.util.ClassUtilsTests$NestedClass.NestedClassLevel1", classLoader))
+				.isInstanceOf(ClassNotFoundException.class);
 	}
 
 	@Test
@@ -979,6 +995,12 @@ class ClassUtilsTests {
 	}
 
 	public static class NestedClass {
+
+		public static class NestedClassLevel1 {
+
+			public static class NestedClassLevel2 {
+			}
+		}
 
 		static boolean noArgCalled;
 		static boolean argCalled;
