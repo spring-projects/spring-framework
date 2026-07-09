@@ -151,7 +151,9 @@ public class XmlValidationModeDetector {
 	private String consumeCommentTokens(String line) {
 		int indexOfStartComment = line.indexOf(START_COMMENT);
 		if (indexOfStartComment == -1 && !line.contains(END_COMMENT)) {
-			return line;
+			// If we are inside a multi-line comment, the entire line is comment
+			// data and must not be treated as content.
+			return (this.inComment ? "" : line);
 		}
 
 		String result = "";

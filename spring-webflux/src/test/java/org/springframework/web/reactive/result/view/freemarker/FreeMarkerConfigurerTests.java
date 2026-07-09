@@ -74,7 +74,7 @@ class FreeMarkerConfigurerTests {
 
 	@Test
 	@SuppressWarnings("rawtypes")
-	public void freeMarkerConfigurerWithNonFileResourceLoaderPath() throws Exception {
+	void freeMarkerConfigurerWithNonFileResourceLoaderPath() throws Exception {
 		freeMarkerConfigurer.setTemplateLoaderPath("file:/mydir");
 		Properties settings = new Properties();
 		settings.setProperty("localized_lookup", "false");

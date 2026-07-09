@@ -59,7 +59,7 @@ class GeneratedMethodsTests {
 
 	@Test
 	void createWithExistingGeneratorUsesGenerator() {
-		Function<MethodName, String> generator = name -> "__" + name.toString();
+		Function<MethodName, String> generator = name -> "__" + name;
 		GeneratedMethods methods = new GeneratedMethods(TEST_CLASS_NAME, generator);
 		assertThat(methods.add("test", methodSpecCustomizer).getName()).hasToString("__test");
 	}

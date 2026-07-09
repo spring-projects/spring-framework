@@ -46,13 +46,6 @@ abstract class ArchitectureRules {
 				.because("String.toUpperCase(Locale.ROOT) should be used instead");
 	}
 
-	static ArchRule packageInfoShouldBeNullMarked() {
-		return ArchRuleDefinition.classes()
-				.that().haveSimpleName("package-info")
-				.should().beAnnotatedWith("org.jspecify.annotations.NullMarked")
-				.allowEmptyShould(true);
-	}
-
 	static ArchRule classesShouldNotImportForbiddenTypes() {
 		return ArchRuleDefinition.noClasses()
 				.should().dependOnClassesThat()

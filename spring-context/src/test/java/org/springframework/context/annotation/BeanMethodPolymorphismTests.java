@@ -37,7 +37,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Juergen Hoeller
  */
 @SuppressWarnings("resource")
-public class BeanMethodPolymorphismTests {
+class BeanMethodPolymorphismTests {
 
 	@Test
 	void beanMethodDetectedOnSuperClass() {

@@ -160,7 +160,7 @@ public final class BindMarkersFactoryResolver {
 			if (builder.isEmpty()) {
 				return "";
 			}
-			return "_" + builder.toString();
+			return "_" + builder;
 		}
 	}
 

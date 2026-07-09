@@ -17,6 +17,7 @@
 package org.springframework.beans.factory.support;
 
 import java.beans.PropertyEditor;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -66,6 +67,7 @@ import org.springframework.beans.factory.config.Scope;
 import org.springframework.beans.factory.config.SmartInstantiationAwareBeanPostProcessor;
 import org.springframework.core.DecoratingClassLoader;
 import org.springframework.core.NamedThreadLocal;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.log.LogMessage;
@@ -199,6 +201,17 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	@Override
 	public <T> T getBean(String name, Class<T> requiredType) throws BeansException {
 		return doGetBean(name, requiredType, null, false);
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public <T> T getBean(String name, ParameterizedTypeReference<T> typeReference) throws BeansException {
+		Object bean = getBean(name);
+		Type requiredType = typeReference.getType();
+		if (!ResolvableType.forType(requiredType).isInstance(bean)) {
+			throw new BeanNotOfRequiredTypeException(name, requiredType, bean.getClass());
+		}
+		return (T) bean;
 	}
 
 	@Override
@@ -413,7 +426,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 			catch (TypeMismatchException ex) {
 				if (logger.isTraceEnabled()) {
 					logger.trace("Failed to convert bean '" + name + "' to required type '" +
-							ClassUtils.getQualifiedName(requiredType) + "'", ex);
+							requiredType.getTypeName() + "'", ex);
 				}
 				throw new BeanNotOfRequiredTypeException(name, requiredType, bean.getClass());
 			}
@@ -535,8 +548,9 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 			// Determine target for FactoryBean match if necessary.
 			if (beanInstance instanceof FactoryBean<?> factoryBean) {
 				if (!isFactoryDereference) {
+					Class<?> classToMatch = typeToMatch.resolve();
 					if (factoryBean instanceof SmartFactoryBean<?> smartFactoryBean &&
-							smartFactoryBean.supportsType(typeToMatch.toClass())) {
+							classToMatch != null && smartFactoryBean.supportsType(classToMatch)) {
 						return true;
 					}
 					Class<?> type = getTypeForFactoryBean(factoryBean);
@@ -557,7 +571,6 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 						}
 						Class<?> targetClass = targetType.resolve();
 						if (targetClass != null && FactoryBean.class.isAssignableFrom(targetClass)) {
-							Class<?> classToMatch = typeToMatch.resolve();
 							if (classToMatch != null && !FactoryBean.class.isAssignableFrom(classToMatch) &&
 									!classToMatch.isAssignableFrom(targetType.toClass())) {
 								return typeToMatch.isAssignableFrom(targetType.getGeneric());

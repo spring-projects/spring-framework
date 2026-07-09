@@ -74,7 +74,7 @@ public class MessageMethodArgumentResolver implements HandlerMethodArgumentResol
 		Class<?> targetMessageType = parameter.getParameterType();
 		Class<?> targetPayloadType = getPayloadType(parameter, message);
 
-		if (!targetMessageType.isAssignableFrom(message.getClass())) {
+		if (!targetMessageType.isInstance(message)) {
 			throw new MethodArgumentTypeMismatchException(message, parameter, "Actual message type '" +
 					ClassUtils.getDescriptiveType(message) + "' does not match expected type '" +
 					ClassUtils.getQualifiedName(targetMessageType) + "'");

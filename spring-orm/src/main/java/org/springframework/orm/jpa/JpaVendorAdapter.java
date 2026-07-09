@@ -125,6 +125,20 @@ public interface JpaVendorAdapter {
 	}
 
 	/**
+	 * Return the vendor-specific JPA 4.0 EntityAgent interface
+	 * that this provider's EntityAgents will implement.
+	 * <p>If the provider does not offer any EntityAgent extensions,
+	 * the adapter should simply return the standard
+	 * {@code jakarta.persistence.EntityAgent} class here.
+	 * @return the EntityAgent class, or {@code null} if not supported
+	 * (on JPA 3.2)
+	 * @since 7.0.4
+	 */
+	default @Nullable Class<?> getEntityAgentInterface() {
+		return EntityManagerFactoryUtils.getEntityAgentClass();
+	}
+
+	/**
 	 * Optional callback for post-processing the native EntityManagerFactory
 	 * before active use.
 	 * <p>This can be used for triggering vendor-specific initialization processes.

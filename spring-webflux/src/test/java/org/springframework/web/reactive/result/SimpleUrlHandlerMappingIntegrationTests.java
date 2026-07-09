@@ -16,7 +16,6 @@
 
 package org.springframework.web.reactive.result;
 
-import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
@@ -31,11 +30,9 @@ import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DefaultDataBuffer;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.server.reactive.HttpHandler;
 import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.DispatcherHandler;
 import org.springframework.web.reactive.handler.SimpleUrlHandlerMapping;
 import org.springframework.web.server.WebHandler;
@@ -54,6 +51,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 class SimpleUrlHandlerMappingIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 
+
 	@Override
 	protected HttpHandler createHttpHandler() {
 		AnnotationConfigApplicationContext wac = new AnnotationConfigApplicationContext(WebConfig.class);
@@ -63,15 +61,12 @@ class SimpleUrlHandlerMappingIntegrationTests extends AbstractHttpHandlerIntegra
 				.build();
 	}
 
-
 	@ParameterizedHttpServerTest
 	void requestToFooHandler(HttpServer httpServer) throws Exception {
 		startServer(httpServer);
 
-		URI url = URI.create("http://localhost:" + this.port + "/foo");
-		RequestEntity<Void> request = RequestEntity.get(url).build();
-		@SuppressWarnings("resource")
-		ResponseEntity<byte[]> response = new RestTemplate().exchange(request, byte[].class);
+		ResponseEntity<byte[]> response = getRestClient().get().uri("http://localhost:" + this.port + "/foo")
+				.retrieve().toEntity(byte[].class);
 
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 		assertThat(response.getBody()).isEqualTo("foo".getBytes(StandardCharsets.UTF_8));
@@ -81,10 +76,8 @@ class SimpleUrlHandlerMappingIntegrationTests extends AbstractHttpHandlerIntegra
 	public void requestToBarHandler(HttpServer httpServer) throws Exception {
 		startServer(httpServer);
 
-		URI url = URI.create("http://localhost:" + this.port + "/bar");
-		RequestEntity<Void> request = RequestEntity.get(url).build();
-		@SuppressWarnings("resource")
-		ResponseEntity<byte[]> response = new RestTemplate().exchange(request, byte[].class);
+		ResponseEntity<byte[]> response = getRestClient().get().uri("http://localhost:" + this.port + "/bar")
+				.retrieve().toEntity(byte[].class);
 
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 		assertThat(response.getBody()).isEqualTo("bar".getBytes(StandardCharsets.UTF_8));
@@ -94,24 +87,19 @@ class SimpleUrlHandlerMappingIntegrationTests extends AbstractHttpHandlerIntegra
 	void requestToHeaderSettingHandler(HttpServer httpServer) throws Exception {
 		startServer(httpServer);
 
-		URI url = URI.create("http://localhost:" + this.port + "/header");
-		RequestEntity<Void> request = RequestEntity.get(url).build();
-		@SuppressWarnings("resource")
-		ResponseEntity<byte[]> response = new RestTemplate().exchange(request, byte[].class);
+		ResponseEntity<byte[]> response = getRestClient().get().uri("http://localhost:" + this.port + "/header")
+				.retrieve().toEntity(byte[].class);
 
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 		assertThat(response.getHeaders().getFirst("foo")).isEqualTo("bar");
 	}
 
 	@ParameterizedHttpServerTest
-	@SuppressWarnings("resource")
 	void handlerNotFound(HttpServer httpServer) throws Exception {
 		startServer(httpServer);
 
-		URI url = URI.create("http://localhost:" + this.port + "/oops");
-		RequestEntity<Void> request = RequestEntity.get(url).build();
 		try {
-			new RestTemplate().exchange(request, byte[].class);
+			getRestClient().get().uri("http://localhost:" + this.port + "/oops").retrieve().toEntity(byte[].class);
 		}
 		catch (HttpClientErrorException ex) {
 			assertThat(ex.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);

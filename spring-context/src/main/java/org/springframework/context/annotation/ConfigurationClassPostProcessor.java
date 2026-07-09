@@ -222,7 +222,7 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 	/**
 	 * Set the {@link ProblemReporter} to use.
 	 * <p>Used to register any problems detected with {@link Configuration} or {@link Bean}
-	 * declarations. For instance, an @Bean method marked as {@code final} is illegal
+	 * declarations. For instance, a @Bean method marked as {@code final} is illegal
 	 * and would be reported as a problem. Defaults to {@link FailFastProblemReporter}.
 	 */
 	public void setProblemReporter(@Nullable ProblemReporter problemReporter) {
@@ -242,12 +242,15 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 
 	/**
 	 * Set the {@link BeanNameGenerator} to be used when triggering component scanning
-	 * from {@link Configuration} classes and when registering {@link Import}'ed
-	 * configuration classes. The default is a standard {@link AnnotationBeanNameGenerator}
-	 * for scanned components (compatible with the default in {@link ClassPathBeanDefinitionScanner})
+	 * from {@link Configuration @Configuration} classes and when registering
+	 * {@link Import @Import}'ed configuration classes.
+	 * <p>The default is a standard {@link AnnotationBeanNameGenerator} for scanned
+	 * components (compatible with the default in {@link ClassPathBeanDefinitionScanner})
 	 * and a variant thereof for imported configuration classes (using unique fully-qualified
 	 * class names instead of standard component overriding).
-	 * <p>Note that this strategy does <em>not</em> apply to {@link Bean} methods.
+	 * <p>If the supplied bean name generator is a {@link ConfigurationBeanNameGenerator}
+	 * (such as {@link FullyQualifiedConfigurationBeanNameGenerator}), it also affects the
+	 * default names for {@link Bean @Bean} methods in configuration classes.
 	 * <p>This setter is typically only appropriate when configuring the post-processor as a
 	 * standalone bean definition in XML, for example, not using the dedicated {@code AnnotationConfig*}
 	 * application contexts or the {@code <context:annotation-config>} element. Any bean name
@@ -255,6 +258,9 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 	 * @since 3.1.1
 	 * @see AnnotationConfigApplicationContext#setBeanNameGenerator(BeanNameGenerator)
 	 * @see AnnotationConfigUtils#CONFIGURATION_BEAN_NAME_GENERATOR
+	 * @see AnnotationBeanNameGenerator
+	 * @see FullyQualifiedAnnotationBeanNameGenerator
+	 * @see FullyQualifiedConfigurationBeanNameGenerator
 	 */
 	public void setBeanNameGenerator(BeanNameGenerator beanNameGenerator) {
 		Assert.notNull(beanNameGenerator, "BeanNameGenerator must not be null");
@@ -999,6 +1005,7 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 								.addStatement("throw new $T(\"Failed to read metadata for '$L'\", ex)",
 										IllegalStateException.class, beanRegistrarEntry.getKey())
 								.endControlFlow();
+						generationContext.getRuntimeHints().resources().registerType(TypeReference.of(beanRegistrarEntry.getKey()));
 					}
 					code.addStatement("$L.register(new $T(($T)$L, $L, $L, $L.getClass(), $L), $L)", beanRegistrarName,
 							BeanRegistryAdapter.class, BeanDefinitionRegistry.class, BeanFactoryInitializationCode.BEAN_FACTORY_VARIABLE,

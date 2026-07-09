@@ -29,7 +29,6 @@ import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
-import org.springframework.util.StreamUtils;
 
 /**
  * Implementation of {@link HttpMessageConverter} that can read and write strings.
@@ -91,6 +90,11 @@ public class StringHttpMessageConverter extends AbstractHttpMessageConverter<Str
 	}
 
 	@Override
+	public boolean canWriteRepeatedly(String s, @Nullable MediaType contentType) {
+		return true;
+	}
+
+	@Override
 	protected String readInternal(Class<? extends String> clazz, HttpInputMessage inputMessage) throws IOException {
 		Charset charset = getContentTypeCharset(inputMessage.getHeaders().getContentType());
 		long length = inputMessage.getHeaders().getContentLength();
@@ -125,7 +129,7 @@ public class StringHttpMessageConverter extends AbstractHttpMessageConverter<Str
 			headers.setAcceptCharset(getAcceptedCharsets());
 		}
 		Charset charset = getContentTypeCharset(headers.getContentType());
-		StreamUtils.copy(str, charset, outputMessage.getBody());
+		outputMessage.getBody().write(str.getBytes(charset));
 	}
 
 
@@ -162,6 +166,7 @@ public class StringHttpMessageConverter extends AbstractHttpMessageConverter<Str
 	}
 
 	@Override
+	@SuppressWarnings("removal")
 	protected boolean supportsRepeatableWrites(String s) {
 		return true;
 	}

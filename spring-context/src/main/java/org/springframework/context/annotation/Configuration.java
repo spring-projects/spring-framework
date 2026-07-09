@@ -341,6 +341,18 @@ import org.springframework.stereotype.Component;
  * with the {@code @Profile} annotation to provide two options of the same bean to the
  * enclosing {@code @Configuration} class.
  *
+ * <p>A {@link Conditional @Conditional} annotation declared on an enclosing
+ * {@code @Configuration} class is only applied to the registration of a nested
+ * {@code @Configuration} class if the nested class is reached through the parser's
+ * recursion from its enclosing class, or via {@link Import @Import}. If a nested
+ * class is discovered independently of its enclosing class &mdash; for example,
+ * via {@link ComponentScan @ComponentScan} or by directly registering it against
+ * the application context &mdash; it is processed using only its own
+ * {@code @Conditional} annotations. Thus, if you wish to ensure that the same
+ * {@code @Conditional} annotations apply in such scenarios, you must redeclare
+ * the relevant annotations on the nested class, or extract them into a composed
+ * annotation which you apply to both the enclosing class and the nested class.
+ *
  * <h2>Configuring lazy initialization</h2>
  *
  * <p>By default, {@code @Bean} methods will be <em>eagerly instantiated</em> at container
@@ -437,6 +449,8 @@ public @interface Configuration {
 	 * <p>Alias for {@link Component#value}.
 	 * @return the explicit component name, if any (or empty String otherwise)
 	 * @see AnnotationBeanNameGenerator
+	 * @see FullyQualifiedAnnotationBeanNameGenerator
+	 * @see FullyQualifiedConfigurationBeanNameGenerator
 	 */
 	@AliasFor(annotation = Component.class)
 	String value() default "";

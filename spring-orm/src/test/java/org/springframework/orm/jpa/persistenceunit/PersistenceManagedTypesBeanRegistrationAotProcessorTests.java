@@ -71,7 +71,8 @@ class PersistenceManagedTypesBeanRegistrationAotProcessorTests {
 			PersistenceManagedTypes persistenceManagedTypes = freshApplicationContext.getBean(
 					"persistenceManagedTypes", PersistenceManagedTypes.class);
 			assertThat(persistenceManagedTypes.getManagedClassNames()).containsExactlyInAnyOrder(
-					DriversLicense.class.getName(), Person.class.getName(), Employee.class.getName(),
+					Person.class.getName(), DriversLicense.class.getName(), Employee.class.getName(),
+					EmployeeCategoryConverter.class.getName(), EmployeeKindConverter.class.getName(),
 					EmployeeLocationConverter.class.getName(), Car.class.getName());
 			assertThat(persistenceManagedTypes.getManagedPackages()).isEmpty();
 			assertThat(freshApplicationContext.getBean(

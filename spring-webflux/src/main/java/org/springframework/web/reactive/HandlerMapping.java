@@ -18,6 +18,7 @@ package org.springframework.web.reactive;
 
 import reactor.core.publisher.Mono;
 
+import org.springframework.web.accept.ApiVersionHolder;
 import org.springframework.web.server.ServerWebExchange;
 
 /**
@@ -84,8 +85,9 @@ public interface HandlerMapping {
 	String PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE = HandlerMapping.class.getName() + ".producibleMediaTypes";
 
 	/**
-	 * Name of the {@link ServerWebExchange#getAttributes() attribute} containing
-	 * the resolved and parsed API version.
+	 * Name of the {@link ServerWebExchange#getAttributes() attribute} that
+	 * contains an {@link ApiVersionHolder} with the result of obtaining and
+	 * parsing the API version of the request.
 	 * @since 7.0
 	 */
 	String API_VERSION_ATTRIBUTE = HandlerMapping.class.getName() + ".apiVersion";

@@ -28,6 +28,7 @@ import java.util.Set;
 import org.jspecify.annotations.Nullable;
 
 import org.springframework.lang.Contract;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.ConcurrentReferenceHashMap;
 
 /**
@@ -124,7 +125,8 @@ final class AnnotationTypeMappings {
 			AnnotationUtils.rethrowAnnotationConfigurationException(ex);
 			if (failureLogger.isEnabled()) {
 				failureLogger.log("Failed to introspect " + (meta ? "meta-annotation @" : "annotation @") +
-						annotationType.getName(), (source != null ? source.getAnnotationType() : null), ex);
+						ClassUtils.getCanonicalName(annotationType),
+						(source != null ? ClassUtils.getCanonicalName(source.getAnnotationType()) : null), ex);
 			}
 		}
 	}

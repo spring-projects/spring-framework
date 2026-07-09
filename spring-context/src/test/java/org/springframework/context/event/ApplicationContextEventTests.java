@@ -24,11 +24,13 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
 import org.aopalliance.intercept.MethodInvocation;
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanPostProcessor;
@@ -59,6 +61,7 @@ import org.springframework.scheduling.support.TaskUtils;
 import org.springframework.util.ReflectionUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.assertj.core.api.Assertions.assertThatRuntimeException;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.BDDMockito.given;
@@ -245,7 +248,7 @@ class ApplicationContextEventTests extends AbstractApplicationEventListenerTests
 
 	@Test
 	@SuppressWarnings("unchecked")
-	public void proxiedListeners() {
+	void proxiedListeners() {
 		MyOrderedListener1 listener1 = new MyOrderedListener1();
 		MyOrderedListener2 listener2 = new MyOrderedListener2(listener1);
 		ApplicationListener<ApplicationEvent> proxy1 = (ApplicationListener<ApplicationEvent>) new ProxyFactory(listener1).getProxy();
@@ -262,7 +265,7 @@ class ApplicationContextEventTests extends AbstractApplicationEventListenerTests
 
 	@Test
 	@SuppressWarnings("unchecked")
-	public void proxiedListenersMixedWithTargetListeners() {
+	void proxiedListenersMixedWithTargetListeners() {
 		MyOrderedListener1 listener1 = new MyOrderedListener1();
 		MyOrderedListener2 listener2 = new MyOrderedListener2(listener1);
 		ApplicationListener<ApplicationEvent> proxy1 = (ApplicationListener<ApplicationEvent>) new ProxyFactory(listener1).getProxy();
@@ -298,7 +301,7 @@ class ApplicationContextEventTests extends AbstractApplicationEventListenerTests
 	}
 
 	@Test
-	void testEventPublicationInterceptor() throws Throwable {
+	void eventPublicationInterceptorWithEventClass() throws Throwable {
 		MethodInvocation invocation = mock();
 		ApplicationContext ctx = mock();
 
@@ -311,6 +314,60 @@ class ApplicationContextEventTests extends AbstractApplicationEventListenerTests
 		given(invocation.getThis()).willReturn(new Object());
 		interceptor.invoke(invocation);
 		verify(ctx).publishEvent(isA(MyEvent.class));
+	}
+
+	@Test
+	void eventPublicationInterceptorWithEventFactory() throws Throwable {
+		MethodInvocation invocation = mock();
+		ApplicationContext ctx = mock();
+
+		EventPublicationInterceptor interceptor = new EventPublicationInterceptor();
+		interceptor.setApplicationEventFactory((inv, retVal) -> new MyEvent(inv.getThis()));
+		interceptor.setApplicationEventPublisher(ctx);
+		interceptor.afterPropertiesSet();
+
+		given(invocation.proceed()).willReturn(new Object());
+		given(invocation.getThis()).willReturn(new Object());
+		interceptor.invoke(invocation);
+		verify(ctx).publishEvent(isA(MyEvent.class));
+	}
+
+	@Test
+	void eventPublicationInterceptorWithMethodFailure() throws Throwable {
+		MethodInvocation invocation = mock();
+		ApplicationContext ctx = mock();
+
+		EventPublicationInterceptor interceptor = new EventPublicationInterceptor();
+		interceptor.setApplicationEventPublisher(ctx);
+		interceptor.afterPropertiesSet();
+
+		given(invocation.proceed()).willThrow(new IllegalStateException());
+		assertThatIllegalStateException().isThrownBy(() -> interceptor.invoke(invocation));
+		verify(ctx).publishEvent(isA(MethodFailureEvent.class));
+	}
+
+	@Test
+	void eventPublicationInterceptorWithCustomFailure() throws Throwable {
+		MethodInvocation invocation = mock();
+		ApplicationContext ctx = mock();
+
+		EventPublicationInterceptor interceptor = new EventPublicationInterceptor();
+		interceptor.setApplicationEventFactory(new EventPublicationInterceptor.ApplicationEventFactory() {
+			@Override
+			public ApplicationEvent onSuccess(MethodInvocation invocation, @Nullable Object returnValue) {
+				return new MyEvent(returnValue);
+			}
+			@Override
+			public ApplicationEvent onFailure(MethodInvocation invocation, Throwable failure) {
+				return new MyOtherEvent(failure);
+			}
+		});
+		interceptor.setApplicationEventPublisher(ctx);
+		interceptor.afterPropertiesSet();
+
+		given(invocation.proceed()).willThrow(new IllegalStateException());
+		assertThatIllegalStateException().isThrownBy(() -> interceptor.invoke(invocation));
+		verify(ctx).publishEvent(isA(MyOtherEvent.class));
 	}
 
 	@Test
@@ -379,12 +436,15 @@ class ApplicationContextEventTests extends AbstractApplicationEventListenerTests
 		RootBeanDefinition listener1Def = new RootBeanDefinition(MyOrderedListener1.class);
 		listener1Def.setDependsOn("nestedChild");
 		context.registerBeanDefinition("listener1", listener1Def);
+		context.registerBeanDefinition("listenerFb", new RootBeanDefinition(MyFactoryBeanListener.class));
 		context.refresh();
 
 		MyOrderedListener1 listener1 = context.getBean("listener1", MyOrderedListener1.class);
+		MyFactoryBeanListener listenerFb = context.getBean("&listenerFb", MyFactoryBeanListener.class);
 		MyEvent event1 = new MyEvent(context);
 		context.publishEvent(event1);
 		assertThat(listener1.seenEvents).contains(event1);
+		assertThat(listenerFb.seenEvents).contains(event1);
 
 		SimpleApplicationEventMulticaster multicaster = context.getBean(SimpleApplicationEventMulticaster.class);
 		assertThat(multicaster.getApplicationListeners()).isNotEmpty();
@@ -722,6 +782,27 @@ class ApplicationContextEventTests extends AbstractApplicationEventListenerTests
 		@Override
 		public void onApplicationEvent(MyEvent event) {
 			assertThat(this.otherListener.seenEvents).contains(event);
+		}
+	}
+
+
+	public static class MyFactoryBeanListener implements FactoryBean<String>, ApplicationListener<ApplicationEvent> {
+
+		public final List<ApplicationEvent> seenEvents = new ArrayList<>();
+
+		@Override
+		public void onApplicationEvent(ApplicationEvent event) {
+			this.seenEvents.add(event);
+		}
+
+		@Override
+		public String getObject() {
+			return "";
+		}
+
+		@Override
+		public Class<?> getObjectType() {
+			return String.class;
 		}
 	}
 

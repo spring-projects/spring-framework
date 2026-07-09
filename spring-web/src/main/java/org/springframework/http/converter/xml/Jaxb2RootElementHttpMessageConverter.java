@@ -19,7 +19,6 @@ package org.springframework.http.converter.xml;
 import java.io.StringReader;
 import java.nio.charset.Charset;
 
-import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 import javax.xml.transform.Result;
@@ -39,7 +38,6 @@ import jakarta.xml.bind.annotation.XmlType;
 import org.jspecify.annotations.Nullable;
 import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 
 import org.springframework.core.annotation.AnnotationUtils;
@@ -67,6 +65,10 @@ import org.springframework.util.ClassUtils;
  * @see MarshallingHttpMessageConverter
  */
 public class Jaxb2RootElementHttpMessageConverter extends AbstractJaxb2HttpMessageConverter<Object> {
+
+	private static final EntityResolver NO_OP_ENTITY_RESOLVER =
+			(publicId, systemId) -> new InputSource(new StringReader(""));
+
 
 	private boolean supportDtd = false;
 
@@ -127,6 +129,11 @@ public class Jaxb2RootElementHttpMessageConverter extends AbstractJaxb2HttpMessa
 	}
 
 	@Override
+	public boolean canWriteRepeatedly(Object o, @Nullable MediaType contentType) {
+		return true;
+	}
+
+	@Override
 	protected boolean supports(Class<?> clazz) {
 		// should not be called, since we override canRead/Write
 		throw new UnsupportedOperationException();
@@ -176,24 +183,36 @@ public class Jaxb2RootElementHttpMessageConverter extends AbstractJaxb2HttpMessa
 			try {
 				// By default, Spring will prevent the processing of external entities.
 				// This is a mitigation against XXE attacks.
-				SAXParserFactory saxParserFactory = this.sourceParserFactory;
-				if (saxParserFactory == null) {
-					saxParserFactory = SAXParserFactory.newInstance();
-					saxParserFactory.setNamespaceAware(true);
-					saxParserFactory.setFeature(
-							"http://apache.org/xml/features/disallow-doctype-decl", !isSupportDtd());
-					saxParserFactory.setFeature(
-							"http://xml.org/sax/features/external-general-entities", isProcessExternalEntities());
-					this.sourceParserFactory = saxParserFactory;
+				SAXParserFactory factory = this.sourceParserFactory;
+				if (factory == null) {
+					factory = SAXParserFactory.newInstance();
+					factory.setNamespaceAware(true);
+					try {
+						factory.setFeature(
+								"http://apache.org/xml/features/disallow-doctype-decl", !isSupportDtd());
+					}
+					catch (Exception ex) {
+						// Xerces properties not recognized/supported - ignore
+					}
+					try {
+						factory.setFeature(
+								"http://xml.org/sax/features/external-general-entities", isProcessExternalEntities());
+						factory.setFeature(
+								"http://xml.org/sax/features/external-parameter-entities", isProcessExternalEntities());
+					}
+					catch (Exception ex) {
+						// SAX properties not recognized/supported - ignore
+					}
+					this.sourceParserFactory = factory;
 				}
-				SAXParser saxParser = saxParserFactory.newSAXParser();
+				SAXParser saxParser = factory.newSAXParser();
 				XMLReader xmlReader = saxParser.getXMLReader();
 				if (!isProcessExternalEntities()) {
 					xmlReader.setEntityResolver(NO_OP_ENTITY_RESOLVER);
 				}
 				return new SAXSource(xmlReader, inputSource);
 			}
-			catch (SAXException | ParserConfigurationException ex) {
+			catch (Exception ex) {
 				logger.warn("Processing of external entities could not be disabled", ex);
 				return source;
 			}
@@ -235,12 +254,9 @@ public class Jaxb2RootElementHttpMessageConverter extends AbstractJaxb2HttpMessa
 	}
 
 	@Override
+	@SuppressWarnings("removal")
 	protected boolean supportsRepeatableWrites(Object o) {
 		return true;
 	}
-
-
-	private static final EntityResolver NO_OP_ENTITY_RESOLVER =
-			(publicId, systemId) -> new InputSource(new StringReader(""));
 
 }

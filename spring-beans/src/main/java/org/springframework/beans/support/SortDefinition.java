@@ -21,7 +21,10 @@ package org.springframework.beans.support;
  *
  * @author Juergen Hoeller
  * @since 26.05.2003
+ * @deprecated as severely outdated and superseded by more modern solutions,
+ * for example in Spring Data Commons
  */
+@Deprecated(since = "7.0.3", forRemoval = true)
 public interface SortDefinition {
 
 	/**

@@ -16,6 +16,9 @@
 
 package org.springframework.orm.jpa;
 
+import java.util.LinkedHashSet;
+import java.util.Set;
+
 import javax.sql.DataSource;
 
 import jakarta.persistence.EntityManagerFactory;
@@ -25,8 +28,16 @@ import jakarta.persistence.PersistenceException;
 import jakarta.persistence.spi.PersistenceProvider;
 import org.jspecify.annotations.Nullable;
 
+import org.springframework.context.ResourceLoaderAware;
+import org.springframework.core.io.ResourceLoader;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
+import org.springframework.core.io.support.ResourcePatternResolver;
+import org.springframework.core.io.support.ResourcePatternUtils;
 import org.springframework.orm.jpa.persistenceunit.DefaultPersistenceUnitManager;
+import org.springframework.orm.jpa.persistenceunit.PersistenceManagedTypes;
+import org.springframework.orm.jpa.persistenceunit.PersistenceManagedTypesScanner;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 
 /**
  * {@link org.springframework.beans.factory.FactoryBean} that creates a JPA
@@ -54,19 +65,22 @@ import org.springframework.util.Assert;
  * @since 2.0
  * @see #setJpaProperties
  * @see #setJpaVendorAdapter
- * @see JpaTransactionManager#setEntityManagerFactory
+ * @see #setPersistenceConfiguration
+ * @see #setDataSource
  * @see LocalContainerEntityManagerFactoryBean
- * @see org.springframework.jndi.JndiObjectFactoryBean
- * @see org.springframework.orm.jpa.support.SharedEntityManagerBean
  * @see jakarta.persistence.Persistence#createEntityManagerFactory
  * @see jakarta.persistence.spi.PersistenceProvider#createEntityManagerFactory
  */
 @SuppressWarnings("serial")
-public class LocalEntityManagerFactoryBean extends AbstractEntityManagerFactoryBean {
+public class LocalEntityManagerFactoryBean extends AbstractEntityManagerFactoryBean implements ResourceLoaderAware {
 
-	private static final String DATASOURCE_PROPERTY = "jakarta.persistence.dataSource";
+	private static final String NON_JTA_DATASOURCE_PROPERTY = "jakarta.persistence.nonJtaDataSource";
 
 	private @Nullable PersistenceConfiguration configuration;
+
+	private String @Nullable [] packagesToScan;
+
+	private ResourcePatternResolver resourcePatternResolver = new PathMatchingResourcePatternResolver();
 
 
 	/**
@@ -129,16 +143,53 @@ public class LocalEntityManagerFactoryBean extends AbstractEntityManagerFactoryB
 	 */
 	public PersistenceConfiguration getPersistenceConfiguration() {
 		if (this.configuration == null) {
-			this.configuration = new PersistenceConfiguration(getPersistenceUnitName());
+			this.configuration = new PersistenceConfiguration(obtainPersistenceUnitName());
 		}
 		return this.configuration;
 	}
 
+	/**
+	 * Specify the name of the persistence unit configuration to use.
+	 * <p>Uses the specified persistence unit name as the name of the local
+	 * persistence unit built through {@link #getPersistenceConfiguration()}, if
+	 * applicable. Otherwise, it selects among the available persistence units.
+	 * <p>Note: This setter method is not meant to be used in combination with
+	 * {@link #setPersistenceConfiguration} which derives the persistence unit
+	 * name from the given {@link PersistenceConfiguration} instance instead.
+	 * @see #getPersistenceConfiguration()
+	 */
 	@Override
 	public void setPersistenceUnitName(@Nullable String persistenceUnitName) {
 		Assert.state(this.configuration == null || this.configuration.name().equals(persistenceUnitName),
 				"Cannot change setPersistenceUnitName when PersistenceConfiguration has been set");
 		super.setPersistenceUnitName(persistenceUnitName);
+	}
+
+	private String obtainPersistenceUnitName() {
+		String name = getPersistenceUnitName();
+		Assert.state(name != null, "No persistenceUnitName set");
+		return name;
+	}
+
+	/**
+	 * Set whether to use Spring-based scanning for entity classes in the classpath
+	 * instead of using JPA's standard scanning of jar files with {@code persistence.xml}
+	 * markers in them. In case of Spring-based scanning, no {@code persistence.xml}
+	 * is necessary; all you need to do is to specify base packages to search here.
+	 * <p>Default is none. Specify packages to search for autodetection of your entity
+	 * classes in the classpath. This is analogous to Spring's component-scan feature
+	 * ({@link org.springframework.context.annotation.ClassPathBeanDefinitionScanner}).
+	 * <p>The use of this setter switches this {@code LocalEntityManagerFactoryBean}
+	 * to a {@link #getPersistenceConfiguration() PersistenceConfiguration}, with no
+	 * {@code persistence.xml} reading or provider-driven scanning happening anymore.
+	 * Further JPA settings can be applied on the local {@link PersistenceConfiguration}
+	 * via {@link #getPersistenceConfiguration()}.
+	 * @since 7.0.4
+	 * @see LocalContainerEntityManagerFactoryBean#setPackagesToScan
+	 * @see org.springframework.orm.jpa.hibernate.LocalSessionFactoryBean#setPackagesToScan
+	 */
+	public void setPackagesToScan(String... packagesToScan) {
+		this.packagesToScan = packagesToScan;
 	}
 
 	/**
@@ -154,10 +205,12 @@ public class LocalEntityManagerFactoryBean extends AbstractEntityManagerFactoryB
 	 */
 	public void setDataSource(@Nullable DataSource dataSource) {
 		if (dataSource != null) {
-			getJpaPropertyMap().put(DATASOURCE_PROPERTY, dataSource);
+			getJpaPropertyMap().put(PersistenceConfiguration.JDBC_DATASOURCE, dataSource);
+			getJpaPropertyMap().put(NON_JTA_DATASOURCE_PROPERTY, dataSource);
 		}
 		else {
-			getJpaPropertyMap().remove(DATASOURCE_PROPERTY);
+			getJpaPropertyMap().remove(PersistenceConfiguration.JDBC_DATASOURCE);
+			getJpaPropertyMap().remove(NON_JTA_DATASOURCE_PROPERTY);
 		}
 	}
 
@@ -169,7 +222,12 @@ public class LocalEntityManagerFactoryBean extends AbstractEntityManagerFactoryB
 	 */
 	@Override
 	public @Nullable DataSource getDataSource() {
-		return (DataSource) getJpaPropertyMap().get(DATASOURCE_PROPERTY);
+		return (DataSource) getJpaPropertyMap().get(PersistenceConfiguration.JDBC_DATASOURCE);
+	}
+
+	@Override
+	public void setResourceLoader(ResourceLoader resourceLoader) {
+		this.resourcePatternResolver = ResourcePatternUtils.getResourcePatternResolver(resourceLoader);
 	}
 
 
@@ -183,6 +241,25 @@ public class LocalEntityManagerFactoryBean extends AbstractEntityManagerFactoryB
 			logger.debug("Building JPA EntityManagerFactory for persistence unit '" + getPersistenceUnitName() + "'");
 		}
 
+		if (this.packagesToScan != null) {
+			PersistenceManagedTypesScanner scanner = new PersistenceManagedTypesScanner(this.resourcePatternResolver);
+			PersistenceManagedTypes result = scanner.scan(this.packagesToScan);
+			// Expose managed class names from scan result (on JPA 4.0+, this includes
+			// everything meta-annotated with @Discoverable, even package-info classes)
+			Set<String> classNameSet = new LinkedHashSet<>(result.getManagedClassNames());
+			// Expose managed packages as package-info class names if not included already
+			// (accepted by PersistenceConfiguration on Hibernate as well as EclipseLink)
+			for (String managedPackage : result.getManagedPackages()) {
+				classNameSet.add(managedPackage + ClassUtils.PACKAGE_INFO_SUFFIX);
+			}
+			// Expose pre-resolved Class references to PersistenceConfiguration.
+			PersistenceConfiguration config = getPersistenceConfiguration();
+			ClassLoader classLoader = this.resourcePatternResolver.getClassLoader();
+			for (String className : classNameSet) {
+				config.managedClass(ClassUtils.resolveClassName(className, classLoader));
+			}
+		}
+
 		if (this.configuration != null) {
 			this.configuration.properties(getJpaPropertyMap());
 		}
@@ -192,10 +269,10 @@ public class LocalEntityManagerFactoryBean extends AbstractEntityManagerFactoryB
 			// Create EntityManagerFactory directly through PersistenceProvider.
 			EntityManagerFactory emf = (this.configuration != null ?
 					provider.createEntityManagerFactory(this.configuration) :
-					provider.createEntityManagerFactory(getPersistenceUnitName(), getJpaPropertyMap()));
+					provider.createEntityManagerFactory(obtainPersistenceUnitName(), getJpaPropertyMap()));
 			if (emf == null) {
-				throw new IllegalStateException(
-						"PersistenceProvider [" + provider + "] did not return an EntityManagerFactory for name '" +
+				throw new PersistenceException(
+						"PersistenceProvider [" + provider + "] could not find persistence unit for name '" +
 						getPersistenceUnitName() + "'");
 			}
 			return emf;
@@ -204,7 +281,7 @@ public class LocalEntityManagerFactoryBean extends AbstractEntityManagerFactoryB
 			// Let JPA perform its standard PersistenceProvider autodetection.
 			return (this.configuration != null ?
 					Persistence.createEntityManagerFactory(this.configuration) :
-					Persistence.createEntityManagerFactory(getPersistenceUnitName(), getJpaPropertyMap()));
+					Persistence.createEntityManagerFactory(obtainPersistenceUnitName(), getJpaPropertyMap()));
 		}
 	}
 

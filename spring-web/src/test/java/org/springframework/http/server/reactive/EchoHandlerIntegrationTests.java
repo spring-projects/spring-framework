@@ -16,14 +16,11 @@
 
 package org.springframework.http.server.reactive;
 
-import java.net.URI;
 import java.util.Random;
 
 import reactor.core.publisher.Mono;
 
-import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.testfixture.http.server.reactive.bootstrap.AbstractHttpHandlerIntegrationTests;
 import org.springframework.web.testfixture.http.server.reactive.bootstrap.HttpServer;
 
@@ -49,11 +46,8 @@ class EchoHandlerIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 	public void echo(HttpServer httpServer) throws Exception {
 		startServer(httpServer);
 
-		RestTemplate restTemplate = new RestTemplate();
-
 		byte[] body = randomBytes();
-		RequestEntity<byte[]> request = RequestEntity.post(URI.create("http://localhost:" + port)).body(body);
-		ResponseEntity<byte[]> response = restTemplate.exchange(request, byte[].class);
+		ResponseEntity<byte[]> response = getRestClient().post().body(body).retrieve().toEntity(byte[].class);
 
 		assertThat(response.getBody()).isEqualTo(body);
 	}

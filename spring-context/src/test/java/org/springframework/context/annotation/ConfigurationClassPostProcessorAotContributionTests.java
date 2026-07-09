@@ -83,7 +83,7 @@ import static org.assertj.core.api.Assertions.entry;
  * @author Sam Brannen
  * @author Sebastien Deleuze
  */
-public class ConfigurationClassPostProcessorAotContributionTests {
+class ConfigurationClassPostProcessorAotContributionTests {
 
 	private final TestGenerationContext generationContext = new TestGenerationContext();
 
@@ -173,6 +173,24 @@ public class ConfigurationClassPostProcessorAotContributionTests {
 									"org/springframework/context/testfixture/context",
 									"org/springframework/context/testfixture/context/annotation",
 									"org/springframework/context/testfixture/context/annotation/ImportConfiguration.class"
+							));
+		}
+
+		@Test
+		void applyToWhenHasImportAwareBeanRegistrarRegistersHints() {
+			BeanFactoryInitializationAotContribution contribution = getContribution(BeanRegistrarTests.ImportAwareConfiguration.class);
+			contribution.applyTo(generationContext, beanFactoryInitializationCode);
+			assertThat(generationContext.getRuntimeHints().resources().resourcePatternHints())
+					.singleElement()
+					.satisfies(resourceHint -> assertThat(resourceHint.getIncludes())
+							.map(ResourcePatternHint::getPattern)
+							.containsExactlyInAnyOrder(
+									"/",
+									"org",
+									"org/springframework",
+									"org/springframework/context",
+									"org/springframework/context/annotation",
+									"org/springframework/context/annotation/ConfigurationClassPostProcessorAotContributionTests$BeanRegistrarTests$ImportAwareConfiguration.class"
 							));
 		}
 
@@ -448,7 +466,7 @@ public class ConfigurationClassPostProcessorAotContributionTests {
 	}
 
 	@Nested
-	public class BeanRegistrarTests {
+	class BeanRegistrarTests {
 
 		@Test
 		void applyToWhenHasDefaultConstructor() throws NoSuchMethodException {

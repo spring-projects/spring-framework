@@ -33,6 +33,7 @@ import org.springframework.core.env.Environment;
  * programmatic bean registration capabilities.
  *
  * @author Sebastien Deleuze
+ * @author Juergen Hoeller
  * @since 7.0
  */
 public interface BeanRegistry {
@@ -140,6 +141,28 @@ public interface BeanRegistry {
 	 */
 	<T> void registerBean(String name, ParameterizedTypeReference<T> beanType, Consumer<Spec<T>> customizer);
 
+	/**
+	 * Determine whether a bean of the given name is already registered.
+	 * @param name the name of the bean
+	 * @since 7.1
+	 */
+	boolean containsBean(String name);
+
+	/**
+	 * Determine whether a bean of the given type is already registered.
+	 * @param beanType the type of the bean
+	 * @since 7.1
+	 */
+	boolean containsBean(Class<?> beanType);
+
+	/**
+	 * Determine whether a bean of the given generics-containing type is
+	 * already registered.
+	 * @param beanType the generics-containing type of the bean
+	 * @since 7.1
+	 */
+	<T> boolean containsBean(ParameterizedTypeReference<T> beanType);
+
 
 	/**
 	 * Specification for customizing a bean.
@@ -206,6 +229,13 @@ public interface BeanRegistry {
 		 * @see BeanDefinition#SCOPE_PROTOTYPE
 		 */
 		Spec<T> prototype();
+
+		/**
+		 * Configure this bean with a custom scope.
+		 * @since 7.0.4
+		 * @see BeanDefinition#setScope(String)
+		 */
+		Spec<T> scope(String scope);
 
 		/**
 		 * Set the supplier to construct a bean instance.

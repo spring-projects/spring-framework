@@ -30,6 +30,7 @@ import org.springframework.messaging.StubMessageChannel;
 import org.springframework.messaging.SubscribableChannel;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageType;
+import org.springframework.messaging.simp.stomp.StompBrokerRelayMessageHandler;
 import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.support.MessageBuilder;
@@ -151,7 +152,7 @@ class UserDestinationMessageHandlerTests {
 		given(this.brokerChannel.send(Mockito.any(Message.class))).willReturn(true);
 
 		StompHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.MESSAGE);
-		accessor.setSessionId("system123");
+		accessor.setSessionId(StompBrokerRelayMessageHandler.SYSTEM_SESSION_ID);
 		accessor.setDestination("/topic/unresolved");
 		accessor.setNativeHeader(ORIGINAL_DESTINATION, "/user/joe/queue/foo");
 		accessor.setNativeHeader("customHeader", "customHeaderValue");
@@ -175,7 +176,7 @@ class UserDestinationMessageHandlerTests {
 		given(this.brokerChannel.send(Mockito.any(Message.class))).willReturn(true);
 
 		StompHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.MESSAGE);
-		accessor.setSessionId("system123");
+		accessor.setSessionId(StompBrokerRelayMessageHandler.SYSTEM_SESSION_ID);
 		accessor.setDestination("/topic/unresolved");
 		accessor.setNativeHeader(ORIGINAL_DESTINATION, "/user/joe/queue/foo");
 		accessor.setLeaveMutable(true);

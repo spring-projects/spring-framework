@@ -251,7 +251,8 @@ Kotlin::
 ======
 
 TIP: If you need to have a `LocalValidatorFactoryBean` injected somewhere, create a bean and
-mark it with `@Primary` in order to avoid conflict with the one declared in the MVC config.
+mark it with `@Primary`, or mark the one declared in the MVC config with `@Fallback`, in
+order to avoid conflict.
 
 
 [[webflux-config-content-negotiation]]

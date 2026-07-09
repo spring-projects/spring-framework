@@ -66,10 +66,10 @@ public class AnnotationConfigContextLoader extends AbstractGenericContextLoader 
 	 * Process <em>component classes</em> in the supplied {@link ContextConfigurationAttributes}.
 	 * <p>If the <em>component classes</em> are {@code null} or empty and
 	 * {@link #isGenerateDefaultLocations()} returns {@code true}, this
-	 * {@code SmartContextLoader} will attempt to {@link
+	 * {@code SmartContextLoader} will attempt to {@linkplain
 	 * #detectDefaultConfigurationClasses detect default configuration classes}.
 	 * If defaults are detected they will be
-	 * {@link ContextConfigurationAttributes#setClasses(Class[]) set} in the
+	 * {@linkplain ContextConfigurationAttributes#setClasses(Class[]) set} in the
 	 * supplied configuration attributes. Otherwise, properties in the supplied
 	 * configuration attributes will not be modified.
 	 * @param configAttributes the context configuration attributes to process

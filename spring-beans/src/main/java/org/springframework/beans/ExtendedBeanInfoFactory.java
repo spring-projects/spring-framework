@@ -28,7 +28,8 @@ import org.springframework.core.Ordered;
  * (package-visible) {@code ExtendedBeanInfo} implementation.
  *
  * <p>To be configured via a {@code META-INF/spring.factories} file with the following content:
- * {@code org.springframework.beans.BeanInfoFactory=org.springframework.beans.ExtendedBeanInfoFactory}
+ *
+ * <p>{@code org.springframework.beans.BeanInfoFactory=org.springframework.beans.ExtendedBeanInfoFactory}
  *
  * <p>Ordered at {@link Ordered#LOWEST_PRECEDENCE} to allow other user-defined
  * {@link BeanInfoFactory} types to take precedence.

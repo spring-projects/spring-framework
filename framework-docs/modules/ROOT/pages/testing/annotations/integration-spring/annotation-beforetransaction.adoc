@@ -4,8 +4,7 @@
 `@BeforeTransaction` indicates that the annotated `void` method should be run before a
 transaction is started, for test methods that have been configured to run within a
 transaction by using Spring's `@Transactional` annotation. `@BeforeTransaction` methods
-are not required to be `public` and may be declared on Java 8-based interface default
-methods.
+are not required to be `public` and may be declared on interface default methods.
 
 The following example shows how to use the `@BeforeTransaction` annotation:
 

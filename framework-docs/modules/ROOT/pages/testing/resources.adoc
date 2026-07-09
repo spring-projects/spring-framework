@@ -11,7 +11,7 @@ https://testng.org/[TestNG] ::
   testing, distributed testing, and other features. Supported in the
   xref:testing/testcontext-framework.adoc[Spring TestContext Framework].
 {assertj-docs}[AssertJ] ::
-  "Fluent assertions for Java", including support for Java 8 lambdas, streams, and
+  "Fluent assertions for Java", including support for lambda expressions, streams, and
   numerous other features. Supported in Spring's
   xref:testing/mockmvc/assertj.adoc[MockMvc testing support].
 https://en.wikipedia.org/wiki/Mock_Object[Mock Objects] ::

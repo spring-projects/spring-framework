@@ -40,7 +40,6 @@ import org.springframework.http.ReactiveHttpOutputMessage;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.util.Assert;
-import org.springframework.util.StringUtils;
 
 /**
  * {@code HttpMessageWriter} for {@code "text/event-stream"} responses.
@@ -48,6 +47,7 @@ import org.springframework.util.StringUtils;
  * @author Sebastien Deleuze
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
+ * @author Brian Clozel
  * @since 5.0
  */
 public class ServerSentEventHttpMessageWriter implements HttpMessageWriter<Object> {
@@ -129,8 +129,9 @@ public class ServerSentEventHttpMessageWriter implements HttpMessageWriter<Objec
 				result = Flux.just(encodeText(sseText + "\n", mediaType, factory));
 			}
 			else if (data instanceof String text) {
-				text = StringUtils.replace(text, "\n", "\ndata:");
-				result = Flux.just(encodeText(sseText + text + "\n\n", mediaType, factory));
+				StringBuilder sb = new StringBuilder(sseText);
+				writeStringData(text, sb);
+				result = Flux.just(encodeText(sb.toString(), mediaType, factory));
 			}
 			else {
 				result = encodeEvent(sseText, data, dataType, mediaType, factory, hints);
@@ -138,6 +139,31 @@ public class ServerSentEventHttpMessageWriter implements HttpMessageWriter<Objec
 
 			return result.doOnDiscard(DataBuffer.class, DataBufferUtils::release);
 		});
+	}
+
+	private void writeStringData(String input, StringBuilder sb) {
+		if (input.indexOf('\n') == -1 && input.indexOf('\r') == -1) {
+			sb.append(input);
+		}
+		else {
+			int length = input.length();
+			for (int i = 0; i < length; i++) {
+				char c = input.charAt(i);
+				if (c == '\r') {
+					if (i + 1 < length && input.charAt(i + 1) == '\n') {
+						i++;
+					}
+					sb.append("\ndata:");
+				}
+				else if (c == '\n') {
+					sb.append("\ndata:");
+				}
+				else {
+					sb.append(c);
+				}
+			}
+		}
+		sb.append("\n\n");
 	}
 
 	@SuppressWarnings("unchecked")

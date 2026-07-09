@@ -67,6 +67,13 @@ interface, clearly indicating the post-processor nature of that bean. Otherwise,
 Since a `BeanPostProcessor` needs to be instantiated early in order to apply to the
 initialization of other beans in the context, this early type detection is critical.
 
+Furthermore, when registering a `BeanPostProcessor` via an `@Bean` factory method,
+declare the method as `static` and ideally with no dependencies. Doing so avoids eager
+initialization of the configuration class and other beans, which would make them
+ineligible for full post-processing (such as auto-proxying). See the
+"BeanPostProcessor-returning `@Bean` methods" section in the
+{spring-framework-api}/context/annotation/Bean.html[`@Bean`] javadoc for details.
+
 [[beans-factory-programmatically-registering-beanpostprocessors]]
 .Programmatically registering `BeanPostProcessor` instances
 NOTE: While the recommended approach for `BeanPostProcessor` registration is through
@@ -80,7 +87,7 @@ of execution. Note also that `BeanPostProcessor` instances registered programmat
 are always processed before those registered through auto-detection, regardless of any
 explicit ordering.
 
-.`BeanPostProcessor` instances and AOP auto-proxying
+.`BeanPostProcessor` instances and early initialization
 [NOTE]
 ====
 Classes that implement the `BeanPostProcessor` interface are special and are treated
@@ -90,17 +97,23 @@ of the `ApplicationContext`. Next, all `BeanPostProcessor` instances are registe
 in a sorted fashion and applied to all further beans in the container. Because AOP
 auto-proxying is implemented as a `BeanPostProcessor` itself, neither `BeanPostProcessor`
 instances nor the beans they directly reference are eligible for auto-proxying and,
-thus, do not have aspects woven into them.
+thus, do not have aspects woven into them. More generally, any bean that is instantiated
+during this early phase is not eligible for full post-processing by all
+`BeanPostProcessor` instances.
 
-For any such bean, you should see an informational log message: `Bean someBean is not
-eligible for getting processed by all BeanPostProcessor interfaces (for example: not
-eligible for auto-proxying)`.
+For any such bean, you should see a WARN-level log message similar to the following.
 
-If you have beans wired into your `BeanPostProcessor` by using autowiring or
-`@Resource` (which may fall back to autowiring), Spring might access unexpected beans
-when searching for type-matching dependency candidates and, therefore, make them
-ineligible for auto-proxying or other kinds of bean post-processing. For example, if you
-have a dependency annotated with `@Resource` where the field or setter name does not
+[quote]
+Bean 'someBean' of type [org.example.SomeType] is not eligible for getting processed by
+all BeanPostProcessors (for example: not eligible for auto-proxying).
+
+To minimize the number of beans affected, register a `BeanPostProcessor` with a
+`static` `@Bean` method that has no dependencies (see the note above). If you have
+beans wired into your `BeanPostProcessor` by using autowiring or `@Resource` (which
+may fall back to autowiring), Spring might access unexpected beans when searching
+for type-matching dependency candidates and, therefore, make them ineligible for
+auto-proxying or other kinds of bean post-processing. For example, if you have a
+dependency annotated with `@Resource` where the field or setter name does not
 directly correspond to the declared name of a bean and no name attribute is used,
 Spring accesses other beans for matching them by type.
 ====
@@ -135,7 +148,7 @@ Java::
 		}
 
 		public Object postProcessAfterInitialization(Object bean, String beanName) {
-			System.out.println("Bean '" + beanName + "' created : " + bean.toString());
+			System.out.println("Bean '" + beanName + "' created : " + bean);
 			return bean;
 		}
 	}
@@ -164,7 +177,48 @@ Kotlin::
 ----
 ======
 
-The following `beans` element uses the `InstantiationTracingBeanPostProcessor`:
+You can register the `InstantiationTracingBeanPostProcessor` with Java configuration
+by using a `static` `@Bean` method (recommended to avoid eager initialization of the
+configuration class and other beans):
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",chomp="-packages"]
+----
+	@Configuration
+	public class AppConfig {
+
+		@Bean
+		public static InstantiationTracingBeanPostProcessor instantiationTracingBeanPostProcessor() {
+			return new InstantiationTracingBeanPostProcessor();
+		}
+
+		// ... other bean definitions
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",chomp="-packages"]
+----
+	@Configuration
+	class AppConfig {
+
+		@Bean
+		companion object {
+			@JvmStatic
+			fun instantiationTracingBeanPostProcessor() = InstantiationTracingBeanPostProcessor()
+		}
+
+		// ... other bean definitions
+	}
+----
+======
+
+Alternatively, the `InstantiationTracingBeanPostProcessor` can be registered via the
+`bean` element with XML configuration:
 
 [source,xml,indent=0,subs="verbatim,quotes"]
 ----
@@ -192,7 +246,7 @@ The following `beans` element uses the `InstantiationTracingBeanPostProcessor`:
 ----
 
 Notice how the `InstantiationTracingBeanPostProcessor` is merely defined. It does not
-even have a name, and, because it is a bean, it can be dependency-injected as you would any
+even have a name, and, because it is a bean, it can be dependency-injected as with any
 other bean. (The preceding configuration also defines a bean that is backed by a Groovy
 script.)
 
@@ -299,6 +353,23 @@ An `ApplicationContext` automatically detects any beans that are deployed into i
 implement the `BeanFactoryPostProcessor` interface. It uses these beans as bean factory
 post-processors, at the appropriate time. You can deploy these post-processor beans as
 you would any other bean.
+
+When registering a `BeanFactoryPostProcessor` via an `@Bean` factory method in a
+`@Configuration` class, declare the method as `static` to avoid lifecycle conflicts
+with annotation processing (such as `@Autowired`, `@Value`, and `@PostConstruct`) in the
+configuration class. See the "BeanFactoryPostProcessor-returning `@Bean` methods"
+section in the {spring-framework-api}/context/annotation/Bean.html[`@Bean`] javadoc
+for details and an example.
+
+For any non-static `@Bean` factory method with a `BeanFactoryPostProcessor` return type,
+you should see an INFO-level log message similar to the following.
+
+[quote]
+@Bean method MyConfig.myBfpp is non-static and returns an object assignable to Spring's
+BeanFactoryPostProcessor interface. This will result in a failure to process annotations
+such as @Autowired, @Resource, and @PostConstruct within the method's declaring
+@Configuration class. Add the 'static' modifier to this method to avoid these container
+lifecycle issues; see @Bean javadoc for complete details.
 
 NOTE: As with ``BeanPostProcessor``s , you typically do not want to configure
 ``BeanFactoryPostProcessor``s for lazy initialization. If no other bean references a

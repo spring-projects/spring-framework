@@ -70,16 +70,14 @@ class ContextLoaderTests {
 		listener.contextInitialized(event);
 		String contextAttr = WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE;
 		WebApplicationContext context = (WebApplicationContext) sc.getAttribute(contextAttr);
-		boolean condition1 = context instanceof XmlWebApplicationContext;
-		assertThat(condition1).as("Correct WebApplicationContext exposed in ServletContext").isTrue();
+		assertThat(context).as("Correct WebApplicationContext exposed in ServletContext").isInstanceOf(XmlWebApplicationContext.class);
 		assertThat(WebApplicationContextUtils.getRequiredWebApplicationContext(sc)).isInstanceOf(
 				XmlWebApplicationContext.class);
 		LifecycleBean lb = (LifecycleBean) context.getBean("lifecycle");
 		assertThat(context.containsBean("father")).as("Has father").isTrue();
 		assertThat(context.containsBean("rod")).as("Has rod").isTrue();
 		assertThat(context.containsBean("kerry")).as("Has kerry").isTrue();
-		boolean condition = !lb.isDestroyed();
-		assertThat(condition).as("Not destroyed").isTrue();
+		assertThat(lb.isDestroyed()).as("Not destroyed").isFalse();
 		assertThat(context.containsBean("beans1.bean1")).isFalse();
 		assertThat(context.containsBean("beans1.bean2")).isFalse();
 		listener.contextDestroyed(event);
@@ -241,8 +239,7 @@ class ContextLoaderTests {
 		listener.contextInitialized(event);
 		String contextAttr = WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE;
 		WebApplicationContext wc = (WebApplicationContext) sc.getAttribute(contextAttr);
-		boolean condition = wc instanceof SimpleWebApplicationContext;
-		assertThat(condition).as("Correct WebApplicationContext exposed in ServletContext").isTrue();
+		assertThat(wc).as("Correct WebApplicationContext exposed in ServletContext").isInstanceOf(SimpleWebApplicationContext.class);
 	}
 
 	@Test

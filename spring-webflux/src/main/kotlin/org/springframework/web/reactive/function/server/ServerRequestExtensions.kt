@@ -24,6 +24,7 @@ import org.springframework.core.ParameterizedTypeReference
 import org.springframework.http.MediaType
 import org.springframework.http.codec.multipart.Part
 import org.springframework.util.MultiValueMap
+import org.springframework.web.bind.WebDataBinder
 import org.springframework.web.server.WebSession
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
@@ -202,3 +203,23 @@ fun ServerRequest.Headers.contentTypeOrNull(): MediaType? =
 fun ServerRequest.pathVariableOrNull(name: String): String? {
 	return pathVariables()[name]
 }
+
+/**
+ * Extension for [ServerRequest.bind] providing a `bindAndAwait<Foo>()` Coroutines
+ * variant leveraging Kotlin reified type parameters.
+ *
+ * @author Sebastien Deleuze
+ * @since 7.0.3
+ */
+suspend inline fun <reified T : Any> ServerRequest.bindAndAwait(): T? =
+	bind(T::class.java).awaitSingleOrNull()
+
+/**
+ * Extension for [ServerRequest.bind] providing a `bindAndAwait<Foo> { ... }` Coroutines
+ * variant leveraging Kotlin reified type parameters.
+ *
+ * @author Sebastien Deleuze
+ * @since 7.0.3
+ */
+suspend inline fun <reified T : Any> ServerRequest.bindAndAwait(noinline dataBinderCustomizer: (WebDataBinder) -> Unit): T? =
+	bind(T::class.java, dataBinderCustomizer).awaitSingleOrNull()

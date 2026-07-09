@@ -1017,6 +1017,24 @@ public class CodeFlow implements Opcodes {
 		};
 	}
 
+	/**
+	 * If the provided descriptor represents a {@link java.util.Optional}, insert
+	 * the necessary bytecode to unwrap it.
+	 * <p>An empty {@code Optional} will be replaced with {@code null}.
+	 * @param mv the method visitor into which instructions should be inserted
+	 * @param descriptor the descriptor of a type that may or may not need unwrapping
+	 * @since 7.1
+	 * @see java.util.Optional#orElse(Object)
+	 */
+	public static void insertOptionalUnwrapIfNecessary(MethodVisitor mv, @Nullable String descriptor) {
+		if ("Ljava/util/Optional".equals(descriptor)) {
+			// Push 'null' onto the stack as the argument for orElse
+			mv.visitInsn(ACONST_NULL);
+			// Invoke java.util.Optional.orElse(null)
+			mv.visitMethodInsn(INVOKEVIRTUAL, "java/util/Optional", "orElse",
+					"(Ljava/lang/Object;)Ljava/lang/Object;", false);
+		}
+	}
 
 	/**
 	 * Interface used to generate fields.

@@ -57,6 +57,7 @@ import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
+import org.springframework.web.accept.ApiVersionHolder;
 import org.springframework.web.accept.SemanticApiVersionParser;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.CookieValue;
@@ -176,7 +177,7 @@ class RequestMappingHandlerAdapterIntegrationTests {
 		request.getSession().setAttribute("sessionAttribute", sessionAttribute);
 		request.setAttribute("requestAttribute", requestAttribute);
 		SemanticApiVersionParser.Version version = new SemanticApiVersionParser().parseVersion("1.2");
-		request.setAttribute(HandlerMapping.API_VERSION_ATTRIBUTE, version);
+		request.setAttribute(HandlerMapping.API_VERSION_ATTRIBUTE, ApiVersionHolder.fromVersion(version));
 
 		HandlerMethod handlerMethod = handlerMethod("handle", parameterTypes);
 		ModelAndView mav = handlerAdapter.handle(request, response, handlerMethod);

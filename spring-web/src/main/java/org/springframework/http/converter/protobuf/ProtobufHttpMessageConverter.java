@@ -122,6 +122,12 @@ public class ProtobufHttpMessageConverter extends AbstractHttpMessageConverter<M
 		this(null, extensionRegistry);
 	}
 
+
+	@Override
+	public boolean canWriteRepeatedly(Message message, @Nullable MediaType contentType) {
+		return true;
+	}
+
 	/**
 	 * Constructor for a subclass that supports additional formats.
 	 * @param formatDelegate delegate to read and write additional formats
@@ -237,11 +243,9 @@ public class ProtobufHttpMessageConverter extends AbstractHttpMessageConverter<M
 			OutputStreamWriter outputStreamWriter = new OutputStreamWriter(outputMessage.getBody(), charset);
 			TextFormat.printer().print(message, outputStreamWriter);
 			outputStreamWriter.flush();
-			outputMessage.getBody().flush();
 		}
 		else if (this.protobufFormatDelegate != null) {
 			this.protobufFormatDelegate.print(message, outputMessage, contentType, charset);
-			outputMessage.getBody().flush();
 		}
 	}
 
@@ -257,6 +261,7 @@ public class ProtobufHttpMessageConverter extends AbstractHttpMessageConverter<M
 	}
 
 	@Override
+	@SuppressWarnings("removal")
 	protected boolean supportsRepeatableWrites(Message message) {
 		return true;
 	}

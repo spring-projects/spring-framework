@@ -56,7 +56,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
  * @author Rossen Stoyanchev
  */
 @SuppressWarnings("unused")
-public class HandlerMethodMappingTests {
+class HandlerMethodMappingTests {
 
 	private MyHandlerMethodMapping mapping;
 
@@ -117,7 +117,7 @@ public class HandlerMethodMappingTests {
 	}
 
 	@Test // gh-26490
-	public void ambiguousMatchOnPreFlightRequestWithoutCorsConfig() throws Exception {
+	void ambiguousMatchOnPreFlightRequestWithoutCorsConfig() throws Exception {
 		this.mapping.registerMapping("/foo", this.handler, this.method1);
 		this.mapping.registerMapping("/f??", this.handler, this.method2);
 
@@ -141,9 +141,9 @@ public class HandlerMethodMappingTests {
 	}
 
 	@Test // gh-26490
-	public void ambiguousMatchOnPreFlightRequestWithCorsConfig() throws Exception {
-		this.mapping.registerMapping("/f?o", this.handler, this.method1);
-		this.mapping.registerMapping("/fo?", this.handler, this.handler.getClass().getMethod("corsHandlerMethod"));
+	void ambiguousMatchOnPreFlightRequestWithCorsConfig() throws Exception {
+		this.mapping.registerMapping("/f?o", this.handler, this.handler.getClass().getMethod("corsHandlerMethod1"));
+		this.mapping.registerMapping("/fo?", this.handler, this.handler.getClass().getMethod("corsHandlerMethod2"));
 
 		MockHttpServletRequest request = new MockHttpServletRequest("OPTIONS", "/foo");
 		request.addHeader(HttpHeaders.ORIGIN, "https://domain.com");
@@ -166,7 +166,7 @@ public class HandlerMethodMappingTests {
 
 	@Test
 	void abortInterceptorInPreFlightRequestWithCorsConfig() throws Exception {
-		this.mapping.registerMapping("/foo", this.handler, this.handler.getClass().getMethod("corsHandlerMethod"));
+		this.mapping.registerMapping("/foo", this.handler, this.handler.getClass().getMethod("corsHandlerMethod1"));
 
 		MockHttpServletRequest request = new MockHttpServletRequest("OPTIONS", "/foo");
 		request.addParameter("abort", "true");
@@ -297,7 +297,7 @@ public class HandlerMethodMappingTests {
 	@Test
 	void registerCustomHandlerMethod() throws Exception {
 		this.mapping.setCustomerHandlerMethod(true);
-		this.mapping.registerMapping("/foo", this.handler, this.handler.getClass().getMethod("corsHandlerMethod"));
+		this.mapping.registerMapping("/foo", this.handler, this.handler.getClass().getMethod("corsHandlerMethod1"));
 
 		MockHttpServletRequest request = new MockHttpServletRequest("OPTIONS", "/foo");
 		request.addParameter("abort", "true");
@@ -418,7 +418,13 @@ public class HandlerMethodMappingTests {
 
 		@RequestMapping
 		@CrossOrigin(originPatterns = "*")
-		public void corsHandlerMethod() {
+		public void corsHandlerMethod1() {
+		}
+
+		@RequestMapping
+		@CrossOrigin(originPatterns = "*")
+		public void corsHandlerMethod2() {
 		}
 	}
+
 }

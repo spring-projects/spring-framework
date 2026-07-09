@@ -28,6 +28,7 @@ import org.springframework.test.context.ContextLoader;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.springframework.test.context.support.ContextLoaderUtils.resolveContextConfigurationAttributes;
+import static org.springframework.test.context.support.ContextLoaderUtils.resolveDefaultContextConfigurationAttributes;
 
 /**
  * Tests for {@link ContextLoaderUtils} involving {@link ContextConfigurationAttributes}.
@@ -164,8 +165,76 @@ class ContextLoaderUtilsConfigurationAttributesTests extends AbstractContextConf
 		assertThat(attributesList).hasSize(1);
 	}
 
+	@Test
+	void resolveDefaultContextConfigurationAttributesWithSuperclass() {
+		var attributesList = resolveDefaultContextConfigurationAttributes(Superclass.class);
+		assertThat(attributesList).hasSize(1);
 
-	// -------------------------------------------------------------------------
+		var configAttributes = attributesList.get(0);
+		assertThat(configAttributes.getDeclaringClass()).isEqualTo(Superclass.class);
+		assertDefaultAttributes(configAttributes);
+	}
+
+	@Test
+	void resolveDefaultContextConfigurationAttributesWithSubclass() {
+		var attributesList = resolveDefaultContextConfigurationAttributes(Subclass.class);
+		assertThat(attributesList).hasSize(2);
+
+		// For bottom-up semantics, Subclass must come before Superclass.
+		var configAttributes = attributesList.get(0);
+		assertThat(configAttributes.getDeclaringClass()).isEqualTo(Subclass.class);
+		assertDefaultAttributes(configAttributes);
+
+		configAttributes = attributesList.get(1);
+		assertThat(configAttributes.getDeclaringClass()).isEqualTo(Superclass.class);
+		assertDefaultAttributes(configAttributes);
+	}
+
+	@Test
+	void resolveDefaultContextConfigurationAttributesWithNestedClass() {
+		var attributesList = resolveDefaultContextConfigurationAttributes(Superclass.NestedTests.class);
+		assertThat(attributesList).hasSize(2);
+
+		// For bottom-up semantics, Superclass.NestedTests must come before Superclass.
+		var configAttributes = attributesList.get(0);
+		assertThat(configAttributes.getDeclaringClass()).isEqualTo(Superclass.NestedTests.class);
+		assertDefaultAttributes(configAttributes);
+
+		configAttributes = attributesList.get(1);
+		assertThat(configAttributes.getDeclaringClass()).isEqualTo(Superclass.class);
+		assertDefaultAttributes(configAttributes);
+	}
+
+	@Test
+	void resolveDefaultContextConfigurationAttributesWithNestedClassesInSuperAndSubClasses() {
+		var attributesList = resolveDefaultContextConfigurationAttributes(Subclass.NestedTests.class);
+		assertThat(attributesList).hasSize(3);
+
+		// For bottom-up semantics, Subclass.NestedTests must come before Subclass.
+		var configAttributes = attributesList.get(0);
+		assertThat(configAttributes.getDeclaringClass()).isEqualTo(Subclass.NestedTests.class);
+		assertDefaultAttributes(configAttributes);
+
+		// For bottom-up semantics, Subclass must come before Superclass.
+		configAttributes = attributesList.get(1);
+		assertThat(configAttributes.getDeclaringClass()).isEqualTo(Subclass.class);
+		assertDefaultAttributes(configAttributes);
+
+		configAttributes = attributesList.get(2);
+		assertThat(configAttributes.getDeclaringClass()).isEqualTo(Superclass.class);
+		assertDefaultAttributes(configAttributes);
+	}
+
+
+	private static void assertDefaultAttributes(ContextConfigurationAttributes configAttributes) {
+		assertThat(configAttributes.getClasses()).isEmpty();
+		assertThat(configAttributes.getLocations()).isEmpty();
+		assertThat(configAttributes.getInitializers()).isEmpty();
+		assertThat(configAttributes.getContextLoaderClass()).isEqualTo(ContextLoader.class);
+		assertThat(configAttributes.isInheritInitializers()).isTrue();
+		assertThat(configAttributes.isInheritLocations()).isTrue();
+	}
+
 
 	@ContextConfiguration(value = "x", locations = "y")
 	private static class ConflictingLocations {
@@ -173,6 +242,18 @@ class ContextLoaderUtilsConfigurationAttributesTests extends AbstractContextConf
 
 	@ContextConfiguration(locations = "x", classes = Object.class)
 	private static class LocationsAndClasses {
+	}
+
+	static class Superclass {
+		// @Nested
+		class NestedTests {
+		}
+	}
+
+	static class Subclass extends Superclass {
+		// @Nested
+		class NestedTests {
+		}
 	}
 
 }

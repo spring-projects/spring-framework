@@ -36,7 +36,7 @@ import org.springframework.util.MimeType;
 /**
  * Encode from an {@code Object} stream to a byte stream of JSON objects using
  * <a href="https://github.com/Kotlin/kotlinx.serialization">kotlinx.serialization</a>.
- * It supports {@code application/json}, {@code application/x-ndjson} and {@code application/*+json} with
+ * It supports {@code application/json}, {@code application/x-ndjson}, {@code application/jsonl} and {@code application/*+json} with
  * various character sets, {@code UTF-8} being the default.
  *
  * <p>As of Spring Framework 7.0, by default it only encodes types annotated with
@@ -59,7 +59,8 @@ public class KotlinSerializationJsonEncoder extends KotlinSerializationStringEnc
 	private static final MimeType[] DEFAULT_JSON_MIME_TYPES = new MimeType[] {
 			MediaType.APPLICATION_JSON,
 			new MediaType("application", "*+json"),
-			MediaType.APPLICATION_NDJSON
+			MediaType.APPLICATION_NDJSON,
+			MediaType.APPLICATION_JSONL
 	};
 
 	/**
@@ -87,7 +88,7 @@ public class KotlinSerializationJsonEncoder extends KotlinSerializationStringEnc
 	 */
 	public KotlinSerializationJsonEncoder(Json json) {
 		super(json, DEFAULT_JSON_MIME_TYPES);
-		setStreamingMediaTypes(List.of(MediaType.APPLICATION_NDJSON));
+		setStreamingMediaTypes(List.of(MediaType.APPLICATION_NDJSON, MediaType.APPLICATION_JSONL));
 	}
 
 	/**
@@ -97,7 +98,7 @@ public class KotlinSerializationJsonEncoder extends KotlinSerializationStringEnc
 	 */
 	public KotlinSerializationJsonEncoder(Json json, Predicate<ResolvableType> typePredicate) {
 		super(json, typePredicate, DEFAULT_JSON_MIME_TYPES);
-		setStreamingMediaTypes(List.of(MediaType.APPLICATION_NDJSON));
+		setStreamingMediaTypes(List.of(MediaType.APPLICATION_NDJSON, MediaType.APPLICATION_JSONL));
 	}
 
 	@Override

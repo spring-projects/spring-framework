@@ -105,6 +105,8 @@ public final class WebHttpHandlerBuilder {
 
 	private @Nullable ServerRequestObservationConvention observationConvention;
 
+	private @Nullable Boolean defaultHtmlEscape;
+
 
 	/**
 	 * Private constructor to use when initialized from an ApplicationContext.
@@ -123,13 +125,14 @@ public final class WebHttpHandlerBuilder {
 		this.applicationContext = other.applicationContext;
 		this.filters.addAll(other.filters);
 		this.exceptionHandlers.addAll(other.exceptionHandlers);
+		this.httpHandlerDecorator = other.httpHandlerDecorator;
 		this.sessionManager = other.sessionManager;
 		this.codecConfigurer = other.codecConfigurer;
 		this.localeContextResolver = other.localeContextResolver;
 		this.forwardedHeaderTransformer = other.forwardedHeaderTransformer;
 		this.observationRegistry = other.observationRegistry;
 		this.observationConvention = other.observationConvention;
-		this.httpHandlerDecorator = other.httpHandlerDecorator;
+		this.defaultHtmlEscape = other.defaultHtmlEscape;
 	}
 
 
@@ -269,6 +272,31 @@ public final class WebHttpHandlerBuilder {
 	}
 
 	/**
+	 * Configure a {@link Function} to decorate the {@link HttpHandler} returned
+	 * by this builder which effectively wraps the entire
+	 * {@link WebExceptionHandler} - {@link WebFilter} - {@link WebHandler}
+	 * processing chain. This provides access to the request and response before
+	 * the entire chain and likewise the ability to observe the result of
+	 * the entire chain.
+	 * @param handlerDecorator the decorator to apply
+	 * @since 5.3
+	 */
+	public WebHttpHandlerBuilder httpHandlerDecorator(Function<HttpHandler, HttpHandler> handlerDecorator) {
+		this.httpHandlerDecorator = (this.httpHandlerDecorator != null ?
+				handlerDecorator.andThen(this.httpHandlerDecorator) : handlerDecorator);
+		return this;
+	}
+
+	/**
+	 * Whether a decorator for {@link HttpHandler} is configured or not via
+	 * {@link #httpHandlerDecorator(Function)}.
+	 * @since 5.3
+	 */
+	public boolean hasHttpHandlerDecorator() {
+		return (this.httpHandlerDecorator != null);
+	}
+
+	/**
 	 * Configure the {@link WebSessionManager} to set on the
 	 * {@link ServerWebExchange WebServerExchange}.
 	 * <p>By default {@link DefaultWebSessionManager} is used.
@@ -371,28 +399,26 @@ public final class WebHttpHandlerBuilder {
 	}
 
 	/**
-	 * Configure a {@link Function} to decorate the {@link HttpHandler} returned
-	 * by this builder which effectively wraps the entire
-	 * {@link WebExceptionHandler} - {@link WebFilter} - {@link WebHandler}
-	 * processing chain. This provides access to the request and response before
-	 * the entire chain and likewise the ability to observe the result of
-	 * the entire chain.
-	 * @param handlerDecorator the decorator to apply
-	 * @since 5.3
+	 * Configure whether default HTML escaping is enabled for the web application.
+	 * The setting is then exposed as the exchanger attribute
+	 * {@link ServerWebExchange#HTML_ESCAPE_ATTRIBUTE}.
+	 * <p>This method differentiates between no setting specified at all and
+	 * an actual boolean value specified, allowing to have a context-specific
+	 * default in case of no setting at the global level.
+	 * @param defaultHtmlEscape whether to enable default HTML escaping
+	 * @since 7.0.6
 	 */
-	public WebHttpHandlerBuilder httpHandlerDecorator(Function<HttpHandler, HttpHandler> handlerDecorator) {
-		this.httpHandlerDecorator = (this.httpHandlerDecorator != null ?
-				handlerDecorator.andThen(this.httpHandlerDecorator) : handlerDecorator);
+	public WebHttpHandlerBuilder defaultHtmlEscape(@Nullable Boolean defaultHtmlEscape) {
+		this.defaultHtmlEscape = defaultHtmlEscape;
 		return this;
 	}
 
 	/**
-	 * Whether a decorator for {@link HttpHandler} is configured or not via
-	 * {@link #httpHandlerDecorator(Function)}.
-	 * @since 5.3
+	 * Whether HTML escaping is enabled for the web application.
+	 * @since 7.0.6
 	 */
-	public boolean hasHttpHandlerDecorator() {
-		return (this.httpHandlerDecorator != null);
+	public @Nullable Boolean getDefaultHtmlEscape() {
+		return this.defaultHtmlEscape;
 	}
 
 	/**
@@ -423,6 +449,9 @@ public final class WebHttpHandlerBuilder {
 		}
 		if (this.applicationContext != null) {
 			adapted.setApplicationContext(this.applicationContext);
+		}
+		if (this.defaultHtmlEscape != null) {
+			adapted.setDefaultHtmlEscape(this.defaultHtmlEscape);
 		}
 		adapted.afterPropertiesSet();
 

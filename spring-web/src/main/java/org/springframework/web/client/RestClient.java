@@ -189,6 +189,7 @@ public interface RestClient {
 	 * @return a {@code RestClient} initialized with the {@code restTemplate}'s
 	 * configuration
 	 */
+	@SuppressWarnings("removal")
 	static RestClient create(RestTemplate restTemplate) {
 		return new DefaultRestClientBuilder(restTemplate).build();
 	}
@@ -218,6 +219,7 @@ public interface RestClient {
 	 * @return a {@code RestClient} builder initialized with {@code restTemplate}'s
 	 * configuration
 	 */
+	@SuppressWarnings("removal")
 	static RestClient.Builder builder(RestTemplate restTemplate) {
 		return new DefaultRestClientBuilder(restTemplate);
 	}
@@ -377,19 +379,19 @@ public interface RestClient {
 						ResponseSpec.ErrorHandler errorHandler);
 
 		/**
-		 * Register a default
-		 * {@linkplain ResponseSpec#onStatus(ResponseErrorHandler) status handler}
-		 * to apply to every response. Such default handlers are applied in the
-		 * order in which they are registered, and after any others that are
-		 * registered for a specific response.
-		 * <p>The first status handler who claims that a response has an
-		 * error is invoked. If you want to disable other defaults, consider
-		 * using {@link #defaultStatusHandler(Predicate, ResponseSpec.ErrorHandler)}
-		 * with a predicate that matches all status codes.
-		 * @param errorHandler handler that typically, though not necessarily,
-		 * throws an exception
+		 * Variant of {@link #defaultStatusHandler(Predicate, ResponseSpec.ErrorHandler)}
+		 * that allows use of {@code RestTemplate}'s {@code ResponseErrorHandler}
+		 * mechanism. This is provided mainly to assist {@code RestTemplate}
+		 * users to transition to {@link RestClient}. Internally, the given
+		 * handler is adapted to {@link RestClient.ResponseSpec}, which is the
+		 * preferred mechanism to use.
+		 * @param errorHandler the error handler to configure, internally adapted
+		 * and integrated into the {@link ResponseSpec.ErrorHandler} chain.
 		 * @return this builder
+		 * @deprecated as of 7.1 in favor of {@link #defaultStatusHandler(Predicate, ResponseSpec.ErrorHandler)}
 		 */
+		@Deprecated(since = "7.1", forRemoval = true)
+		@SuppressWarnings("removal")
 		Builder defaultStatusHandler(ResponseErrorHandler errorHandler);
 
 		/**
@@ -1015,7 +1017,10 @@ public interface RestClient {
 		 * {@link RestClientException}.
 		 * @param errorHandler the error handler
 		 * @return this builder
+		 * @deprecated as of 7.1 in favor of {@link #onStatus(Predicate, ErrorHandler)}
 		 */
+		@Deprecated(since = "7.1", forRemoval = true)
+		@SuppressWarnings("removal")
 		ResponseSpec onStatus(ResponseErrorHandler errorHandler);
 
 		/**
@@ -1027,8 +1032,23 @@ public interface RestClient {
 		 * response with a status code of 4xx or 5xx. Use
 		 * {@link #onStatus(Predicate, ErrorHandler)} to customize error response
 		 * handling.
+		 * @see #requiredBody(Class)
 		 */
 		<T> @Nullable T body(Class<T> bodyType);
+
+		/**
+		 * Extract the body as an object of the given type.
+		 * @param bodyType the type of return value
+		 * @param <T> the body type
+		 * @return the body
+		 * @throws IllegalStateException if no response body was available
+		 * @throws RestClientResponseException by default when receiving a
+		 * response with a status code of 4xx or 5xx. Use
+		 * {@link #onStatus(Predicate, ErrorHandler)} to customize error response
+		 * handling.
+		 * @since 7.0.4
+		 */
+		<T> T requiredBody(Class<T> bodyType);
 
 		/**
 		 * Extract the body as an object of the given type.
@@ -1039,8 +1059,23 @@ public interface RestClient {
 		 * response with a status code of 4xx or 5xx. Use
 		 * {@link #onStatus(Predicate, ErrorHandler)} to customize error response
 		 * handling.
+		 * @see #requiredBody(ParameterizedTypeReference)
 		 */
 		<T> @Nullable T body(ParameterizedTypeReference<T> bodyType);
+
+		/**
+		 * Extract the body as an object of the given type.
+		 * @param bodyType the type of return value
+		 * @param <T> the body type
+		 * @return the body
+		 * @throws IllegalStateException if no response body was available
+		 * @throws RestClientResponseException by default when receiving a
+		 * response with a status code of 4xx or 5xx. Use
+		 * {@link #onStatus(Predicate, ErrorHandler)} to customize error response
+		 * handling.
+		 * @since 7.0.4
+		 */
+		<T> T requiredBody(ParameterizedTypeReference<T> bodyType);
 
 		/**
 		 * Return a {@code ResponseEntity} with the body decoded to an Object of

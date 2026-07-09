@@ -22,6 +22,7 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.assertThatIllegalStateException
 import org.junit.jupiter.api.Test
 import org.springframework.transaction.support.DefaultTransactionDefinition
 import kotlin.coroutines.AbstractCoroutineContextElement
@@ -33,13 +34,11 @@ class TransactionalOperatorExtensionsTests {
 
 	@Test
 	@Suppress("UNUSED_VARIABLE")
-	fun commitWithSuspendingFunction() {
+	suspend fun commitWithSuspendingFunction() {
 		val operator = TransactionalOperator.create(tm, DefaultTransactionDefinition())
-		runBlocking {
-			val returnValue: Boolean = operator.executeAndAwait {
-				delay(1)
-				true
-			}
+		val returnValue: Boolean = operator.executeAndAwait {
+			delay(1)
+			true
 		}
 		assertThat(tm.commit).isTrue()
 		assertThat(tm.rollback).isFalse()
@@ -47,13 +46,11 @@ class TransactionalOperatorExtensionsTests {
 
 	@Test
 	@Suppress("UNUSED_VARIABLE")
-	fun commitWithEmptySuspendingFunction() {
+	suspend fun commitWithEmptySuspendingFunction() {
 		val operator = TransactionalOperator.create(tm, DefaultTransactionDefinition())
-		runBlocking {
-			val returnValue: Boolean? = operator.executeAndAwait {
-				delay(1)
-				null
-			}
+		val returnValue: Boolean? = operator.executeAndAwait {
+			delay(1)
+			null
 		}
 		assertThat(tm.commit).isTrue()
 		assertThat(tm.rollback).isFalse()
@@ -62,22 +59,20 @@ class TransactionalOperatorExtensionsTests {
 	@Test
 	fun rollbackWithSuspendingFunction() {
 		val operator = TransactionalOperator.create(tm, DefaultTransactionDefinition())
-		runBlocking {
-			try {
+		assertThatIllegalStateException().isThrownBy {
+			runBlocking {
 				operator.executeAndAwait {
 					delay(1)
 					throw IllegalStateException()
 				}
-			} catch (ex: IllegalStateException) {
-				assertThat(tm.commit).isFalse()
-				assertThat(tm.rollback).isTrue()
-				return@runBlocking
 			}
 		}
+		assertThat(tm.commit).isFalse()
+		assertThat(tm.rollback).isTrue()
 	}
 
 	@Test
-	fun commitWithFlow() {
+	suspend fun commitWithFlow() {
 		val operator = TransactionalOperator.create(tm, DefaultTransactionDefinition())
 		val flow = flow {
 			emit(1)
@@ -85,10 +80,8 @@ class TransactionalOperatorExtensionsTests {
 			emit(3)
 			emit(4)
 		}
-		runBlocking {
-			val list = flow.transactional(operator).toList()
-			assertThat(list).hasSize(4)
-		}
+		val list = flow.transactional(operator).toList()
+		assertThat(list).hasSize(4)
 		assertThat(tm.commit).isTrue()
 		assertThat(tm.rollback).isFalse()
 	}
@@ -100,15 +93,13 @@ class TransactionalOperatorExtensionsTests {
 			delay(1)
 			throw IllegalStateException()
 		}
-		runBlocking {
-			try {
+		assertThatIllegalStateException().isThrownBy {
+			runBlocking {
 				flow.transactional(operator).toList()
-			} catch (ex: IllegalStateException) {
-				assertThat(tm.commit).isFalse()
-				assertThat(tm.rollback).isTrue()
-				return@runBlocking
 			}
 		}
+		assertThat(tm.commit).isFalse()
+		assertThat(tm.rollback).isTrue()
 	}
 
 	@Test

@@ -22,7 +22,7 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
-import org.springframework.util.ReflectionUtils;
+import org.springframework.util.ClassUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -40,7 +40,7 @@ class TestContextManagerListenerExecutionOrderTests {
 
 	private final TestContextManager testContextManager = new TestContextManager(TestCase.class);
 
-	private final Method testMethod = ReflectionUtils.findMethod(TestCase.class, "testMethod");
+	private final Method testMethod = ClassUtils.getMethod(TestCase.class, "testMethod");
 
 
 	@Test
@@ -105,7 +105,7 @@ class TestContextManagerListenerExecutionOrderTests {
 	private static class TestCase {
 
 		@SuppressWarnings("unused")
-		void testMethod() {
+		public void testMethod() {
 		}
 	}
 

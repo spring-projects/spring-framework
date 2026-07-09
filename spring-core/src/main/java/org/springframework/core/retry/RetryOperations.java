@@ -16,6 +16,8 @@
 
 package org.springframework.core.retry;
 
+import java.util.function.Supplier;
+
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -28,6 +30,7 @@ import org.jspecify.annotations.Nullable;
  * project but redesigned as a minimal core retry feature in the Spring Framework.
  *
  * @author Mahmoud Ben Hassine
+ * @author Juergen Hoeller
  * @since 7.0
  * @see RetryTemplate
  */
@@ -43,9 +46,34 @@ public interface RetryOperations {
 	 * attempts as {@linkplain RetryException#getSuppressed() suppressed exceptions}.
 	 * @param retryable the {@code Retryable} to execute and retry if needed
 	 * @param <R> the type of the result
-	 * @return the result of the {@code Retryable}, if any
-	 * @throws RetryException if the {@code RetryPolicy} is exhausted
+	 * @return the successful result of the {@code Retryable}, if any
+	 * @throws RetryException if the {@code RetryPolicy} is exhausted. Note that this
+	 * exception represents a failure outcome and is not meant to be propagated; you
+	 * will typically rather rethrow its cause (the last original exception thrown by
+	 * the {@code Retryable} callback) or throw a custom business exception instead.
 	 */
 	<R extends @Nullable Object> R execute(Retryable<R> retryable) throws RetryException;
+
+	/**
+	 * Invoke the given {@link Supplier} according to the {@link RetryPolicy},
+	 * returning a successful result or throwing the last {@code Supplier} exception
+	 * to the caller in case of retry policy exhaustion.
+	 * @param retryable the {@code Supplier} to invoke and retry if needed
+	 * @param <R> the type of the result
+	 * @return the result of the {@code Supplier}
+	 * @throws RuntimeException if thrown by the {@code Supplier}
+	 * @since 7.0.3
+	 */
+	<R extends @Nullable Object> R invoke(Supplier<R> retryable);
+
+	/**
+	 * Invoke the given {@link Runnable} according to the {@link RetryPolicy},
+	 * returning successfully or throwing the last {@code Runnable} exception
+	 * to the caller in case of retry policy exhaustion.
+	 * @param retryable the {@code Runnable} to invoke and retry if needed
+	 * @throws RuntimeException if thrown by the {@code Runnable}
+	 * @since 7.0.3
+	 */
+	void invoke(Runnable retryable);
 
 }

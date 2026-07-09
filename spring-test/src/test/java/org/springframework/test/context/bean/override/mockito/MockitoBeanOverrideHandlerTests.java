@@ -26,7 +26,7 @@ import org.mockito.Answers;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.test.context.bean.override.BeanOverrideHandler;
-import org.springframework.test.context.bean.override.BeanOverrideTestUtils;
+import org.springframework.test.context.bean.override.BeanOverrideUtils;
 import org.springframework.util.ReflectionUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -42,13 +42,13 @@ class MockitoBeanOverrideHandlerTests {
 
 	@Test
 	void beanNameIsSetToNullIfAnnotationNameIsEmpty() {
-		List<BeanOverrideHandler> list = BeanOverrideTestUtils.findHandlers(SampleOneMock.class);
+		List<BeanOverrideHandler> list = BeanOverrideUtils.findHandlersForFields(SampleOneMock.class);
 		assertThat(list).singleElement().satisfies(handler -> assertThat(handler.getBeanName()).isNull());
 	}
 
 	@Test
 	void beanNameIsSetToAnnotationName() {
-		List<BeanOverrideHandler> list = BeanOverrideTestUtils.findHandlers(SampleOneMockWithName.class);
+		List<BeanOverrideHandler> list = BeanOverrideUtils.findHandlersForFields(SampleOneMockWithName.class);
 		assertThat(list).singleElement().satisfies(handler -> assertThat(handler.getBeanName()).isEqualTo("anotherService"));
 	}
 
@@ -194,7 +194,7 @@ class MockitoBeanOverrideHandlerTests {
 
 	private MockitoBeanOverrideHandler createHandler(Class<?> clazz) {
 		MockitoBean annotation = AnnotatedElementUtils.getMergedAnnotation(clazz, MockitoBean.class);
-		return new MockitoBeanOverrideHandler(null, ResolvableType.forClass(annotation.types()[0]), annotation);
+		return new MockitoBeanOverrideHandler((Field) null, ResolvableType.forClass(annotation.types()[0]), annotation);
 	}
 
 

@@ -1,91 +1,53 @@
-xref:core/validation/data-binding.adoc[Data binding] for web requests involves
-binding request parameters to a model object. By default, request parameters can be bound
-to any public property of the model object, which means malicious clients can provide
-extra values for properties that exist in the model object graph, but are not expected to
-be set. This is why model object design requires careful consideration.
+Data binding involves binding untrusted input onto application objects.
+For security reasons, it's crucial to ensure that input is properly constrained to expected fields only.
+This section provides guidance for safe binding.
 
-TIP: The model object, and its nested object graph is also sometimes referred to as a
-_command object_, _form-backing object_, or _POJO_ (Plain Old Java Object).
+First, prefer **immutable object design** for web binding purposes.
+It is safe because a constructor naturally constrains binding to expected inputs.
+You can use a Java record or a class with a primary constructor, and either can have further nested objects.
+See xref:core/validation/data-binding.adoc#data-binding-constructor-binding[Constructor Binding] for details.
 
-A good practice is to use a _dedicated model object_ rather than exposing your domain
-model such as JPA or Hibernate entities for web data binding. For example, on a form to
-change an email address, create a `ChangeEmailForm` model object that declares only
-the properties required for the input:
+Another option for safe binding is to use **dedicated objects** designed for the expected input.
+Such objects, even if mutable, are safe because they constrain binding to the expected inputs.
 
-[source,java,indent=0,subs="verbatim,quotes"]
-----
-	public class ChangeEmailForm {
-
-		private String oldEmailAddress;
-		private String newEmailAddress;
-
-		public void setOldEmailAddress(String oldEmailAddress) {
-			this.oldEmailAddress = oldEmailAddress;
-		}
-
-		public String getOldEmailAddress() {
-			return this.oldEmailAddress;
-		}
-
-		public void setNewEmailAddress(String newEmailAddress) {
-			this.newEmailAddress = newEmailAddress;
-		}
-
-		public String getNewEmailAddress() {
-			return this.newEmailAddress;
-		}
-
-	}
-----
-
-Another good practice is to apply
-xref:core/validation/data-binding.adoc#data-binding-constructor-binding[constructor binding],
-which uses only the request parameters it needs for constructor arguments, and any other
-input is ignored. This is in contrast to property binding which by default binds every
-request parameter for which there is a matching property.
-
-If neither a dedicated model object nor constructor binding is sufficient, and you must
-use property binding, we strongly recommend registering `allowedFields` patterns (case
-sensitive) on `WebDataBinder` in order to prevent unexpected properties from being set.
+Domain objects such as JPA or Hibernate entities are generally not safe for web binding
+as they likely contain more properties than the expected inputs.
+For such cases, it's crucial to declare the properties to expose for binding.
 For example:
 
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Controller
-	public class ChangeEmailController {
+	public class PersonController {
 
 		@InitBinder
 		void initBinder(WebDataBinder binder) {
-			binder.setAllowedFields("oldEmailAddress", "newEmailAddress");
+			// See Javadoc for supported pattern syntax
+			binder.setAllowedFields("firstName", "lastName", "*Address");
 		}
-
-		// @RequestMapping methods, etc.
-
 	}
 ----
 
-You can also register `disallowedFields`  patterns (case insensitive). However,
-"allowed" configuration is preferred over "disallowed" as it is more explicit and less
-prone to mistakes.
+NOTE: It is also possible to configure `disallowedFields`, but that's fragile, and
+due to be https://github.com/spring-projects/spring-framework/issues/36802[deprecated] in Spring Framework 7.1.
+It is easy to overlook fields or introduce additional fields over time that should also be excluded.
 
-By default, constructor and property binding are both used. If you want to use
-constructor binding only, you can set the `declarativeBinding` flag on `WebDataBinder`
-through an `@InitBinder` method either locally within a controller or globally through an
-`@ControllerAdvice`. Turning this flag on ensures that only constructor binding is used
-and that property binding is not used unless `allowedFields` patterns are configured.
-For example:
+By default, `DataBinder` applies both constructor and setter binding.
+This is fine with immutable objects and dedicated objects, but for domain objects, you must
+remember to set `allowedFields`. To ensure data binding is only used in declarative style where
+expected inputs are explicitly declared, you can set  `declarativeBinding` on `DataBinder`.
+That applies constructor binding always, and setter binding conditionally if `allowedFields` is set.
+The following shows how to set this flag globally, or
+you can also narrow it through attributes on `ControllerAdvice`:
 
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
-	@Controller
-	public class MyController {
+	@ControllerAdvice
+	public class ControllerConfig {
 
 		@InitBinder
 		void initBinder(WebDataBinder binder) {
 			binder.setDeclarativeBinding(true);
 		}
-
-		// @RequestMapping methods, etc.
-
 	}
 ----

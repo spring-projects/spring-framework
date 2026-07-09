@@ -41,7 +41,7 @@ class Spr10744Tests {
 
 
 	@Test
-	void testSpr10744() {
+	void spr10744() {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
 		context.getBeanFactory().registerScope("myTestScope", new MyTestScope());
 		context.register(MyTestConfiguration.class);

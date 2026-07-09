@@ -38,7 +38,11 @@ import org.springframework.util.StringUtils;
  * @since 19.05.2003
  * @param <T> the type of objects that may be compared by this comparator
  * @see org.springframework.beans.BeanWrapper
+ * @deprecated as severely outdated and superseded by more modern solutions,
+ * for example in Spring Data Commons
  */
+@Deprecated(since = "7.0.3", forRemoval = true)
+@SuppressWarnings("removal")
 public class PropertyComparator<T> implements Comparator<T> {
 
 	protected final Log logger = LogFactory.getLog(getClass());

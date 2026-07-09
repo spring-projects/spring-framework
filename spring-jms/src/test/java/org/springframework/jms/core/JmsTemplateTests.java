@@ -129,7 +129,7 @@ class JmsTemplateTests {
 
 
 	@Test
-	void testExceptionStackTrace() {
+	void exceptionStackTrace() {
 		JMSException jmsEx = new JMSException("could not connect");
 		Exception innerEx = new Exception("host not found");
 		jmsEx.setLinkedException(innerEx);
@@ -142,7 +142,7 @@ class JmsTemplateTests {
 	}
 
 	@Test
-	void testProducerCallback() throws Exception {
+	void producerCallback() throws Exception {
 		JmsTemplate template = createTemplate();
 		template.setConnectionFactory(this.connectionFactory);
 
@@ -162,7 +162,7 @@ class JmsTemplateTests {
 	}
 
 	@Test
-	void testProducerCallbackWithIdAndTimestampDisabled() throws Exception {
+	void producerCallbackWithIdAndTimestampDisabled() throws Exception {
 		JmsTemplate template = createTemplate();
 		template.setConnectionFactory(this.connectionFactory);
 		template.setMessageIdEnabled(false);
@@ -189,7 +189,7 @@ class JmsTemplateTests {
 	 * Test the method execute(SessionCallback action).
 	 */
 	@Test
-	void testSessionCallback() throws Exception {
+	void sessionCallback() throws Exception {
 		JmsTemplate template = createTemplate();
 		template.setConnectionFactory(this.connectionFactory);
 
@@ -203,7 +203,7 @@ class JmsTemplateTests {
 	}
 
 	@Test
-	void testSessionCallbackWithinSynchronizedTransaction() throws Exception {
+	void sessionCallbackWithinSynchronizedTransaction() throws Exception {
 		SingleConnectionFactory scf = new SingleConnectionFactory(this.connectionFactory);
 		JmsTemplate template = createTemplate();
 		template.setConnectionFactory(scf);
@@ -257,7 +257,7 @@ class JmsTemplateTests {
 	 * {@code send(Destination d, MessageCreator messageCreator)}
 	 */
 	@Test
-	void testSendDestination() throws Exception {
+	void sendDestination() throws Exception {
 		doTestSendDestination(true, false, true, false);
 	}
 
@@ -266,7 +266,7 @@ class JmsTemplateTests {
 	 * {@code send(String d, MessageCreator messageCreator)}
 	 */
 	@Test
-	void testSendDestinationName() throws Exception {
+	void sendDestinationName() throws Exception {
 		doTestSendDestination(false, false, true, false);
 	}
 
@@ -275,7 +275,7 @@ class JmsTemplateTests {
 	 * {@code send(Destination d, MessageCreator messageCreator)} using QOS parameters.
 	 */
 	@Test
-	void testSendDestinationWithQOS() throws Exception {
+	void sendDestinationWithQOS() throws Exception {
 		doTestSendDestination(true, false, false, true);
 	}
 
@@ -284,7 +284,7 @@ class JmsTemplateTests {
 	 * {@code send(String d, MessageCreator messageCreator)} using QOS parameters.
 	 */
 	@Test
-	void testSendDestinationNameWithQOS() throws Exception {
+	void sendDestinationNameWithQOS() throws Exception {
 		doTestSendDestination(false, false, false, true);
 	}
 
@@ -292,7 +292,7 @@ class JmsTemplateTests {
 	 * Test sending to the default destination.
 	 */
 	@Test
-	void testSendDefaultDestination() throws Exception {
+	void sendDefaultDestination() throws Exception {
 		doTestSendDestination(true, true, true, true);
 	}
 
@@ -300,7 +300,7 @@ class JmsTemplateTests {
 	 * Test sending to the default destination name.
 	 */
 	@Test
-	void testSendDefaultDestinationName() throws Exception {
+	void sendDefaultDestinationName() throws Exception {
 		doTestSendDestination(false, true, true, true);
 	}
 
@@ -308,7 +308,7 @@ class JmsTemplateTests {
 	 * Test sending to the default destination using explicit QOS parameters.
 	 */
 	@Test
-	void testSendDefaultDestinationWithQOS() throws Exception {
+	void sendDefaultDestinationWithQOS() throws Exception {
 		doTestSendDestination(true, true, false, false);
 	}
 
@@ -316,7 +316,7 @@ class JmsTemplateTests {
 	 * Test sending to the default destination name using explicit QOS parameters.
 	 */
 	@Test
-	void testSendDefaultDestinationNameWithQOS() throws Exception {
+	void sendDefaultDestinationNameWithQOS() throws Exception {
 		doTestSendDestination(false, true, false, false);
 	}
 
@@ -391,7 +391,7 @@ class JmsTemplateTests {
 	}
 
 	@Test
-	void testConverter() throws Exception {
+	void converter() throws Exception {
 		JmsTemplate template = createTemplate();
 		template.setConnectionFactory(this.connectionFactory);
 		template.setMessageConverter(new SimpleMessageConverter());
@@ -415,87 +415,87 @@ class JmsTemplateTests {
 	}
 
 	@Test
-	void testReceiveDefaultDestination() throws Exception {
+	void receiveDefaultDestination() throws Exception {
 		doTestReceive(true, true, false, false, false, false, JmsTemplate.RECEIVE_TIMEOUT_INDEFINITE_WAIT);
 	}
 
 	@Test
-	void testReceiveDefaultDestinationName() throws Exception {
+	void receiveDefaultDestinationName() throws Exception {
 		doTestReceive(false, true, false, false, false, false, JmsTemplate.RECEIVE_TIMEOUT_INDEFINITE_WAIT);
 	}
 
 	@Test
-	void testReceiveDestination() throws Exception {
+	void receiveDestination() throws Exception {
 		doTestReceive(true, false, false, false, false, true, JmsTemplate.RECEIVE_TIMEOUT_INDEFINITE_WAIT);
 	}
 
 	@Test
-	void testReceiveDestinationWithClientAcknowledge() throws Exception {
+	void receiveDestinationWithClientAcknowledge() throws Exception {
 		doTestReceive(true, false, false, true, false, false, 1000);
 	}
 
 	@Test
-	void testReceiveDestinationName() throws Exception {
+	void receiveDestinationName() throws Exception {
 		doTestReceive(false, false, false, false, false, true, 1000);
 	}
 
 	@Test
-	void testReceiveDefaultDestinationWithSelector() throws Exception {
+	void receiveDefaultDestinationWithSelector() throws Exception {
 		doTestReceive(true, true, false, false, true, true, 1000);
 	}
 
 	@Test
-	void testReceiveDefaultDestinationNameWithSelector() throws Exception {
+	void receiveDefaultDestinationNameWithSelector() throws Exception {
 		doTestReceive(false, true, false, false, true, true, JmsTemplate.RECEIVE_TIMEOUT_NO_WAIT);
 	}
 
 	@Test
-	void testReceiveDestinationWithSelector() throws Exception {
+	void receiveDestinationWithSelector() throws Exception {
 		doTestReceive(true, false, false, false, true, false, 1000);
 	}
 
 	@Test
-	void testReceiveDestinationWithClientAcknowledgeWithSelector() throws Exception {
+	void receiveDestinationWithClientAcknowledgeWithSelector() throws Exception {
 		doTestReceive(true, false, false, true, true, true, JmsTemplate.RECEIVE_TIMEOUT_INDEFINITE_WAIT);
 	}
 
 	@Test
-	void testReceiveDestinationNameWithSelector() throws Exception {
+	void receiveDestinationNameWithSelector() throws Exception {
 		doTestReceive(false, false, false, false, true, false, JmsTemplate.RECEIVE_TIMEOUT_NO_WAIT);
 	}
 
 	@Test
-	void testReceiveAndConvertDefaultDestination() throws Exception {
+	void receiveAndConvertDefaultDestination() throws Exception {
 		doTestReceive(true, true, true, false, false, false, 1000);
 	}
 
 	@Test
-	void testReceiveAndConvertDefaultDestinationName() throws Exception {
+	void receiveAndConvertDefaultDestinationName() throws Exception {
 		doTestReceive(false, true, true, false, false, false, 1000);
 	}
 
 	@Test
-	void testReceiveAndConvertDestinationName() throws Exception {
+	void receiveAndConvertDestinationName() throws Exception {
 		doTestReceive(false, false, true, false, false, true, JmsTemplate.RECEIVE_TIMEOUT_INDEFINITE_WAIT);
 	}
 
 	@Test
-	void testReceiveAndConvertDestination() throws Exception {
+	void receiveAndConvertDestination() throws Exception {
 		doTestReceive(true, false, true, false, false, true, 1000);
 	}
 
 	@Test
-	void testReceiveAndConvertDefaultDestinationWithSelector() throws Exception {
+	void receiveAndConvertDefaultDestinationWithSelector() throws Exception {
 		doTestReceive(true, true, true, false, true, true, JmsTemplate.RECEIVE_TIMEOUT_NO_WAIT);
 	}
 
 	@Test
-	void testReceiveAndConvertDestinationNameWithSelector() throws Exception {
+	void receiveAndConvertDestinationNameWithSelector() throws Exception {
 		doTestReceive(false, false, true, false, true, true, JmsTemplate.RECEIVE_TIMEOUT_INDEFINITE_WAIT);
 	}
 
 	@Test
-	void testReceiveAndConvertDestinationWithSelector() throws Exception {
+	void receiveAndConvertDestinationWithSelector() throws Exception {
 		doTestReceive(true, false, true, false, true, false, 1000);
 	}
 
@@ -605,22 +605,22 @@ class JmsTemplateTests {
 	}
 
 	@Test
-	void testSendAndReceiveDefaultDestination() throws Exception {
+	void sendAndReceiveDefaultDestination() throws Exception {
 		doTestSendAndReceive(true, true, 1000L);
 	}
 
 	@Test
-	void testSendAndReceiveDefaultDestinationName() throws Exception {
+	void sendAndReceiveDefaultDestinationName() throws Exception {
 		doTestSendAndReceive(false, true, 1000L);
 	}
 
 	@Test
-	void testSendAndReceiveDestination() throws Exception {
+	void sendAndReceiveDestination() throws Exception {
 		doTestSendAndReceive(true, false, 1000L);
 	}
 
 	@Test
-	void testSendAndReceiveDestinationName() throws Exception {
+	void sendAndReceiveDestinationName() throws Exception {
 		doTestSendAndReceive(false, false, 1000L);
 	}
 
@@ -649,7 +649,6 @@ class JmsTemplateTests {
 
 		MessageConsumer messageConsumer = mock();
 		given(localSession.createConsumer(replyDestination)).willReturn(messageConsumer);
-
 
 		TextMessage request = mock();
 		MessageCreator messageCreator = mock();
@@ -688,67 +687,194 @@ class JmsTemplateTests {
 	}
 
 	@Test
-	void testIllegalStateException() throws Exception {
+	void sendAndReceiveDestinationWithResponseQueue() throws Exception {
+		doTestSendAndReceiveWithResponseQueue(true, 1000L);
+	}
+
+	@Test
+	void sendAndReceiveDestinationNameWithResponseQueueName() throws Exception {
+		doTestSendAndReceiveWithResponseQueue(false, 1000L);
+	}
+
+	private void doTestSendAndReceiveWithResponseQueue(boolean explicitDestination, long timeout) throws Exception {
+		JmsTemplate template = createTemplate();
+		template.setConnectionFactory(this.connectionFactory);
+		template.setReceiveTimeout(timeout);
+
+		String destinationName = "testDestination";
+		String responseQueueName = "responseQueue";
+
+		Queue responseQueue = mock();
+		given(this.jndiContext.lookup(responseQueueName)).willReturn(responseQueue);
+
+		Session localSession = getLocalSession();
+		MessageProducer messageProducer = mock();
+		given(localSession.createProducer(this.queue)).willReturn(messageProducer);
+
+		MessageConsumer messageConsumer = mock();
+		// Default sendAndReceive with responseQueue uses MESSAGE_ID selector
+		given(localSession.createConsumer(responseQueue, "JMSCorrelationID='ID:test-message-id-12345'"))
+				.willReturn(messageConsumer);
+
+		TextMessage request = mock();
+		given(request.getJMSMessageID()).willReturn("ID:test-message-id-12345");
+		MessageCreator messageCreator = mock();
+		given(messageCreator.createMessage(localSession)).willReturn(request);
+
+		TextMessage reply = mock();
+		if (timeout == JmsTemplate.RECEIVE_TIMEOUT_NO_WAIT) {
+			given(messageConsumer.receiveNoWait()).willReturn(reply);
+		}
+		else if (timeout == JmsTemplate.RECEIVE_TIMEOUT_INDEFINITE_WAIT) {
+			given(messageConsumer.receive()).willReturn(reply);
+		}
+		else {
+			given(messageConsumer.receive(timeout)).willReturn(reply);
+		}
+
+		Message message;
+		if (explicitDestination) {
+			message = template.sendAndReceive(this.queue, responseQueue, messageCreator);
+		}
+		else {
+			message = template.sendAndReceive(destinationName, responseQueueName, messageCreator);
+		}
+
+		// replyTO set on the request
+		verify(request).setJMSReplyTo(responseQueue);
+		assertThat(message).as("Reply message not received").isSameAs(reply);
+		verify(this.connection).start();
+		verify(this.connection).close();
+		verify(localSession).close();
+		verify(messageConsumer).close();
+		verify(messageProducer).close();
+	}
+
+	@Test
+	void sendAndReceiveDestinationWithResponseQueueAndCorrelationIdSelector() throws Exception {
+		doTestSendAndReceiveWithResponseQueueAndCorrelationId(true, 1000L);
+	}
+
+	@Test
+	void sendAndReceiveDestinationNameWithResponseQueueNameAndCorrelationIdSelector() throws Exception {
+		doTestSendAndReceiveWithResponseQueueAndCorrelationId(false, 1000L);
+	}
+
+	private void doTestSendAndReceiveWithResponseQueueAndCorrelationId(boolean explicitDestination, long timeout) throws Exception {
+		JmsTemplate template = createTemplate();
+		template.setConnectionFactory(this.connectionFactory);
+		template.setReceiveTimeout(timeout);
+
+		String destinationName = "testDestination";
+		String responseQueueName = "responseQueue";
+
+		Queue responseQueue = mock();
+		given(this.jndiContext.lookup(responseQueueName)).willReturn(responseQueue);
+
+		Session localSession = getLocalSession();
+		MessageProducer messageProducer = mock();
+		given(localSession.createProducer(this.queue)).willReturn(messageProducer);
+
+		MessageConsumer messageConsumer = mock();
+		given(localSession.createConsumer(responseQueue, "JMSCorrelationID='xyz'"))
+				.willReturn(messageConsumer);
+
+		TextMessage request = mock();
+		given(request.getJMSCorrelationID()).willReturn("xyz");
+		MessageCreator messageCreator = mock();
+		given(messageCreator.createMessage(localSession)).willReturn(request);
+
+		TextMessage reply = mock();
+		if (timeout == JmsTemplate.RECEIVE_TIMEOUT_NO_WAIT) {
+			given(messageConsumer.receiveNoWait()).willReturn(reply);
+		}
+		else if (timeout == JmsTemplate.RECEIVE_TIMEOUT_INDEFINITE_WAIT) {
+			given(messageConsumer.receive()).willReturn(reply);
+		}
+		else {
+			given(messageConsumer.receive(timeout)).willReturn(reply);
+		}
+
+		Message message;
+		if (explicitDestination) {
+			message = template.sendAndReceive(this.queue, responseQueue, messageCreator);
+		}
+		else {
+			message = template.sendAndReceive(destinationName, responseQueueName, messageCreator);
+		}
+
+		// replyTO set on the request
+		verify(request).setJMSReplyTo(responseQueue);
+		assertThat(message).as("Reply message not received").isSameAs(reply);
+		verify(this.connection).start();
+		verify(this.connection).close();
+		verify(localSession).close();
+		verify(messageConsumer).close();
+		verify(messageProducer).close();
+	}
+
+	@Test
+	void illegalStateException() throws Exception {
 		doTestJmsException(new jakarta.jms.IllegalStateException(""), org.springframework.jms.IllegalStateException.class);
 	}
 
 	@Test
-	void testInvalidClientIDException() throws Exception {
+	void invalidClientIDException() throws Exception {
 		doTestJmsException(new jakarta.jms.InvalidClientIDException(""), InvalidClientIDException.class);
 	}
 
 	@Test
-	void testInvalidDestinationException() throws Exception {
+	void invalidDestinationException() throws Exception {
 		doTestJmsException(new jakarta.jms.InvalidDestinationException(""), InvalidDestinationException.class);
 	}
 
 	@Test
-	void testInvalidSelectorException() throws Exception {
+	void invalidSelectorException() throws Exception {
 		doTestJmsException(new jakarta.jms.InvalidSelectorException(""), InvalidSelectorException.class);
 	}
 
 	@Test
-	void testJmsSecurityException() throws Exception {
+	void jmsSecurityException() throws Exception {
 		doTestJmsException(new jakarta.jms.JMSSecurityException(""), JmsSecurityException.class);
 	}
 
 	@Test
-	void testMessageEOFException() throws Exception {
+	void messageEOFException() throws Exception {
 		doTestJmsException(new jakarta.jms.MessageEOFException(""), MessageEOFException.class);
 	}
 
 	@Test
-	void testMessageFormatException() throws Exception {
+	void messageFormatException() throws Exception {
 		doTestJmsException(new jakarta.jms.MessageFormatException(""), MessageFormatException.class);
 	}
 
 	@Test
-	void testMessageNotReadableException() throws Exception {
+	void messageNotReadableException() throws Exception {
 		doTestJmsException(new jakarta.jms.MessageNotReadableException(""), MessageNotReadableException.class);
 	}
 
 	@Test
-	void testMessageNotWriteableException() throws Exception {
+	void messageNotWriteableException() throws Exception {
 		doTestJmsException(new jakarta.jms.MessageNotWriteableException(""), MessageNotWriteableException.class);
 	}
 
 	@Test
-	void testResourceAllocationException() throws Exception {
+	void resourceAllocationException() throws Exception {
 		doTestJmsException(new jakarta.jms.ResourceAllocationException(""), ResourceAllocationException.class);
 	}
 
 	@Test
-	void testTransactionInProgressException() throws Exception {
+	void transactionInProgressException() throws Exception {
 		doTestJmsException(new jakarta.jms.TransactionInProgressException(""), TransactionInProgressException.class);
 	}
 
 	@Test
-	void testTransactionRolledBackException() throws Exception {
+	void transactionRolledBackException() throws Exception {
 		doTestJmsException(new jakarta.jms.TransactionRolledBackException(""), TransactionRolledBackException.class);
 	}
 
 	@Test
-	void testUncategorizedJmsException() throws Exception {
+	void uncategorizedJmsException() throws Exception {
 		doTestJmsException(new jakarta.jms.JMSException(""), UncategorizedJmsException.class);
 	}
 

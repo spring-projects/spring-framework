@@ -23,6 +23,8 @@ import java.util.TreeSet;
 import java.util.function.Predicate;
 
 import org.jspecify.annotations.Nullable;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import org.springframework.util.Assert;
 import org.springframework.web.accept.ApiVersionParser;
@@ -152,6 +154,7 @@ public class DefaultApiVersionStrategy implements ApiVersionStrategy {
 		}
 	}
 
+	@SuppressWarnings("removal")
 	@Override
 	public @Nullable String resolveVersion(ServerWebExchange exchange) {
 		for (ApiVersionResolver resolver : this.versionResolvers) {
@@ -161,6 +164,15 @@ public class DefaultApiVersionStrategy implements ApiVersionStrategy {
 			}
 		}
 		return null;
+	}
+
+	@Override
+	public Mono<String> resolveApiVersion(ServerWebExchange exchange) {
+		return Flux.fromIterable(this.versionResolvers)
+				.flatMap(resolver -> resolver instanceof AsyncApiVersionResolver asyncResolver ?
+						asyncResolver.resolveVersionAsync(exchange) :
+						Mono.justOrEmpty(resolver.resolveVersion(exchange)))
+				.next();
 	}
 
 	@Override

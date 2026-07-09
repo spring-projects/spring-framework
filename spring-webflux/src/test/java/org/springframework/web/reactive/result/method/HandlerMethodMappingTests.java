@@ -112,7 +112,7 @@ class HandlerMethodMappingTests {
 	}
 
 	@Test // gh-26490
-	public void ambiguousMatchOnPreFlightRequestWithoutCorsConfig() {
+	void ambiguousMatchOnPreFlightRequestWithoutCorsConfig() {
 		this.mapping.registerMapping("/f?o", this.handler, this.method1);
 		this.mapping.registerMapping("/fo?", this.handler, this.method2);
 
@@ -130,9 +130,9 @@ class HandlerMethodMappingTests {
 	}
 
 	@Test // gh-26490
-	public void ambiguousMatchOnPreFlightRequestWithCorsConfig() throws Exception {
-		this.mapping.registerMapping("/f?o", this.handler, this.method1);
-		this.mapping.registerMapping("/fo?", this.handler, this.handler.getClass().getMethod("corsHandlerMethod"));
+	void ambiguousMatchOnPreFlightRequestWithCorsConfig() throws Exception {
+		this.mapping.registerMapping("/f?o", this.handler, this.handler.getClass().getMethod("corsHandlerMethod1"));
+		this.mapping.registerMapping("/fo?", this.handler, this.handler.getClass().getMethod("corsHandlerMethod2"));
 
 		MockServerWebExchange exchange = MockServerWebExchange.from(
 				MockServerHttpRequest.options("https://example.org/foo")
@@ -256,7 +256,12 @@ class HandlerMethodMappingTests {
 
 		@RequestMapping
 		@CrossOrigin(originPatterns = "*")
-		public void corsHandlerMethod() {
+		public void corsHandlerMethod1() {
+		}
+
+		@RequestMapping
+		@CrossOrigin(originPatterns = "*")
+		public void corsHandlerMethod2() {
 		}
 	}
 

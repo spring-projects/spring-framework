@@ -78,8 +78,8 @@ public abstract class ReflectionUtils {
 
 
 	/**
-	 * Cache for {@link Class#getDeclaredMethods()} plus equivalent default methods
-	 * from Java 8 based interfaces, allowing for fast iteration.
+	 * Cache for {@link Class#getDeclaredMethods()} plus equivalent interface
+	 * default methods, allowing for fast iteration.
 	 */
 	private static final Map<Class<?>, Method[]> declaredMethodsCache = new ConcurrentReferenceHashMap<>(256);
 
@@ -309,7 +309,7 @@ public abstract class ReflectionUtils {
 	/**
 	 * Perform the given callback operation on all matching methods of the given
 	 * class, as locally declared or equivalent thereof (such as default methods
-	 * on Java 8 based interfaces that the given class implements).
+	 * from interfaces that the given class implements).
 	 * @param clazz the class to introspect
 	 * @param mc the callback to invoke for each method
 	 * @throws IllegalStateException if introspection fails
@@ -444,7 +444,7 @@ public abstract class ReflectionUtils {
 
 	/**
 	 * Variant of {@link Class#getDeclaredMethods()} that uses a local cache in
-	 * order to avoid new Method instances. In addition, it also includes Java 8
+	 * order to avoid new {@link Method} instances. In addition, it also includes
 	 * default methods from locally implemented interfaces, since those are
 	 * effectively to be treated just like declared methods.
 	 * @param clazz the class to introspect
@@ -768,7 +768,7 @@ public abstract class ReflectionUtils {
 	public static void shallowCopyFieldState(final Object src, final Object dest) {
 		Assert.notNull(src, "Source for field copy cannot be null");
 		Assert.notNull(dest, "Destination for field copy cannot be null");
-		if (!src.getClass().isAssignableFrom(dest.getClass())) {
+		if (!src.getClass().isInstance(dest)) {
 			throw new IllegalArgumentException("Destination class [" + dest.getClass().getName() +
 					"] must be same or subclass as source class [" + src.getClass().getName() + "]");
 		}

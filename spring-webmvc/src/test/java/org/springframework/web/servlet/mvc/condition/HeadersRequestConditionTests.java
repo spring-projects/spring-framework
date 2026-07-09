@@ -16,11 +16,8 @@
 
 package org.springframework.web.servlet.mvc.condition;
 
-import java.util.Collection;
-
 import org.junit.jupiter.api.Test;
 
-import org.springframework.web.servlet.mvc.condition.HeadersRequestCondition.HeaderExpression;
 import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -131,7 +128,7 @@ class HeadersRequestConditionTests {
 	}
 
 	@Test // SPR-16674
-	public void compareToWithMoreSpecificMatchByValue() {
+	void compareToWithMoreSpecificMatchByValue() {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 
 		HeadersRequestCondition condition1 = new HeadersRequestCondition("foo=a");
@@ -160,8 +157,7 @@ class HeadersRequestConditionTests {
 		HeadersRequestCondition condition2 = new HeadersRequestCondition("foo=baz");
 
 		HeadersRequestCondition result = condition1.combine(condition2);
-		Collection<HeaderExpression> conditions = result.getContent();
-		assertThat(conditions).hasSize(2);
+		assertThat(result.getContent()).hasSize(2);
 	}
 
 	@Test

@@ -65,12 +65,16 @@ class TomcatHeadersAdapter implements MultiValueMap<String, String> {
 
 	@Override
 	public void addAll(String key, List<? extends String> values) {
-		values.forEach(value -> add(key, value));
+		for (String value : values) {
+			add(key, value);
+		}
 	}
 
 	@Override
 	public void addAll(MultiValueMap<String, String> values) {
-		values.forEach(this::addAll);
+		for (Entry<String, List<String>> entry : values.entrySet()) {
+			addAll(entry.getKey(), entry.getValue());
+		}
 	}
 
 	@Override
@@ -80,24 +84,28 @@ class TomcatHeadersAdapter implements MultiValueMap<String, String> {
 
 	@Override
 	public void setAll(Map<String, String> values) {
-		values.forEach(this::set);
+		for (Entry<String, String> entry : values.entrySet()) {
+			set(entry.getKey(), entry.getValue());
+		}
 	}
 
 	@Override
 	public Map<String, String> toSingleValueMap() {
-		Map<String, String> singleValueMap = CollectionUtils.newLinkedHashMap(this.headers.size());
-		this.keySet().forEach(key -> singleValueMap.put(key, getFirst(key)));
-		return singleValueMap;
+		Map<String, String> map = CollectionUtils.newLinkedHashMap(this.headers.size());
+		for (String name : this.keySet()) {
+			map.put(name, getFirst(name));
+		}
+		return map;
 	}
 
 	@Override
 	public int size() {
 		Enumeration<String> names = this.headers.names();
-		Set<String> deduplicated = new LinkedHashSet<>();
+		Set<String> set = new LinkedHashSet<>(this.headers.size());
 		while (names.hasMoreElements()) {
-			deduplicated.add(names.nextElement().toLowerCase(Locale.ROOT));
+			set.add(names.nextElement().toLowerCase(Locale.ROOT));
 		}
-		return deduplicated.size();
+		return set.size();
 	}
 
 	@Override
@@ -116,10 +124,10 @@ class TomcatHeadersAdapter implements MultiValueMap<String, String> {
 	@Override
 	public boolean containsValue(Object value) {
 		if (value instanceof String text) {
-			MessageBytes messageBytes = MessageBytes.newInstance();
-			messageBytes.setString(text);
+			MessageBytes bytes = MessageBytes.newInstance();
+			bytes.setString(text);
 			for (int i = 0; i < this.headers.size(); i++) {
-				if (this.headers.getValue(i).equals(messageBytes)) {
+				if (this.headers.getValue(i).equals(bytes)) {
 					return true;
 				}
 			}
@@ -129,33 +137,38 @@ class TomcatHeadersAdapter implements MultiValueMap<String, String> {
 
 	@Override
 	public @Nullable List<String> get(Object key) {
-		if (containsKey(key)) {
-			return Collections.list(this.headers.values((String) key));
+		if (key instanceof String headerName) {
+			Enumeration<String> values = this.headers.values(headerName);
+			if (values.hasMoreElements()) {
+				return Collections.list(values);
+			}
 		}
 		return null;
 	}
 
 	@Override
 	public @Nullable List<String> put(String key, List<String> value) {
-		List<String> previousValues = get(key);
+		List<String> previous = get(key);
 		this.headers.removeHeader(key);
 		value.forEach(v -> this.headers.addValue(key).setString(v));
-		return previousValues;
+		return previous;
 	}
 
 	@Override
 	public @Nullable List<String> remove(Object key) {
 		if (key instanceof String headerName) {
-			List<String> previousValues = get(key);
+			List<String> previous = get(key);
 			this.headers.removeHeader(headerName);
-			return previousValues;
+			return previous;
 		}
 		return null;
 	}
 
 	@Override
 	public void putAll(Map<? extends String, ? extends List<String>> map) {
-		map.forEach(this::put);
+		for (Entry<? extends String, ? extends List<String>> entry : map.entrySet()) {
+			put(entry.getKey(), entry.getValue());
+		}
 	}
 
 	@Override
@@ -257,6 +270,7 @@ class TomcatHeadersAdapter implements MultiValueMap<String, String> {
 			return size;
 		}
 	}
+
 
 	private final class HeaderNamesIterator implements Iterator<String> {
 

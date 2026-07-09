@@ -80,7 +80,7 @@ class Jaxb2CollectionHttpMessageConverterTests {
 
 	@Test
 	@SuppressWarnings("unchecked")
-	public void readXmlRootElementList() throws Exception {
+	void readXmlRootElementList() throws Exception {
 		String content = "<list><rootElement><type s=\"1\"/></rootElement><rootElement><type s=\"2\"/></rootElement></list>";
 		MockHttpInputMessage inputMessage = new MockHttpInputMessage(content.getBytes(StandardCharsets.UTF_8));
 		List<RootElement> result = (List<RootElement>) converter.read(rootElementListType, null, inputMessage);
@@ -92,7 +92,7 @@ class Jaxb2CollectionHttpMessageConverterTests {
 
 	@Test
 	@SuppressWarnings("unchecked")
-	public void readXmlRootElementSet() throws Exception {
+	void readXmlRootElementSet() throws Exception {
 		String content = "<set><rootElement><type s=\"1\"/></rootElement><rootElement><type s=\"2\"/></rootElement></set>";
 		MockHttpInputMessage inputMessage = new MockHttpInputMessage(content.getBytes(StandardCharsets.UTF_8));
 		Set<RootElement> result = (Set<RootElement>) converter.read(rootElementSetType, null, inputMessage);
@@ -104,7 +104,7 @@ class Jaxb2CollectionHttpMessageConverterTests {
 
 	@Test
 	@SuppressWarnings("unchecked")
-	public void readXmlTypeList() throws Exception {
+	void readXmlTypeList() throws Exception {
 		String content = "<list><foo s=\"1\"/><bar s=\"2\"/></list>";
 		MockHttpInputMessage inputMessage = new MockHttpInputMessage(content.getBytes(StandardCharsets.UTF_8));
 		List<TestType> result = (List<TestType>) converter.read(typeListType, null, inputMessage);
@@ -116,7 +116,7 @@ class Jaxb2CollectionHttpMessageConverterTests {
 
 	@Test
 	@SuppressWarnings("unchecked")
-	public void readXmlTypeSet() throws Exception {
+	void readXmlTypeSet() throws Exception {
 		String content = "<set><foo s=\"1\"/><bar s=\"2\"/></set>";
 		MockHttpInputMessage inputMessage = new MockHttpInputMessage(content.getBytes(StandardCharsets.UTF_8));
 		Set<TestType> result = (Set<TestType>) converter.read(typeSetType, null, inputMessage);
@@ -128,7 +128,7 @@ class Jaxb2CollectionHttpMessageConverterTests {
 
 	@Test
 	@SuppressWarnings("unchecked")
-	public void readXmlRootElementExternalEntityDisabled() throws Exception {
+	void readXmlRootElementExternalEntityDisabled() throws Exception {
 		Resource external = new ClassPathResource("external.txt", getClass());
 		String content = "<!DOCTYPE root [" +
 				"  <!ELEMENT external ANY >\n" +
@@ -157,7 +157,7 @@ class Jaxb2CollectionHttpMessageConverterTests {
 
 	@Test
 	@SuppressWarnings("unchecked")
-	public void readXmlRootElementExternalEntityEnabled() throws Exception {
+	void readXmlRootElementExternalEntityEnabled() throws Exception {
 		Resource external = new ClassPathResource("external.txt", getClass());
 		String content = "<!DOCTYPE root [" +
 				"  <!ELEMENT external ANY >\n" +
@@ -180,7 +180,7 @@ class Jaxb2CollectionHttpMessageConverterTests {
 	}
 
 	@Test
-	void testXmlBomb() {
+	void xmlBomb() {
 		// https://en.wikipedia.org/wiki/Billion_laughs
 		// https://msdn.microsoft.com/en-us/magazine/ee335713.aspx
 		String content = """
@@ -207,7 +207,7 @@ class Jaxb2CollectionHttpMessageConverterTests {
 
 	@Test
 	@SuppressWarnings("unchecked")
-	public void readXmlRootElementListHeaderCharset() throws Exception {
+	void readXmlRootElementListHeaderCharset() throws Exception {
 		String content = "<list><rootElement><type s=\"Hellø Wørld\"/></rootElement></list>";
 		MockHttpInputMessage inputMessage = new MockHttpInputMessage(content.getBytes(StandardCharsets.ISO_8859_1));
 		inputMessage.getHeaders().setContentType(MediaType.parseMediaType("application/xml;charset=iso-8859-1"));

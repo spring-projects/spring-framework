@@ -35,25 +35,25 @@ class DefaultScopedObjectTests {
 
 
 	@Test
-	void testCtorWithNullBeanFactory() {
+	void ctorWithNullBeanFactory() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 			new DefaultScopedObject(null, GOOD_BEAN_NAME));
 	}
 
 	@Test
-	void testCtorWithNullTargetBeanName() {
+	void ctorWithNullTargetBeanName() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				testBadTargetBeanName(null));
 	}
 
 	@Test
-	void testCtorWithEmptyTargetBeanName() {
+	void ctorWithEmptyTargetBeanName() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				testBadTargetBeanName(""));
 	}
 
 	@Test
-	void testCtorWithJustWhitespacedTargetBeanName() {
+	void ctorWithJustWhitespacedTargetBeanName() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				testBadTargetBeanName("   "));
 	}

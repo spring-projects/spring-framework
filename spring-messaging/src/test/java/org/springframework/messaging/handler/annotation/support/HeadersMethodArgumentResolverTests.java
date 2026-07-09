@@ -67,8 +67,7 @@ class HeadersMethodArgumentResolverTests {
 		MethodParameter param = this.resolvable.annotPresent(Headers.class).arg(Map.class, String.class, Object.class);
 		Object resolved = this.resolver.resolveArgument(param, this.message);
 
-		boolean condition = resolved instanceof Map;
-		assertThat(condition).isTrue();
+		assertThat(resolved).isInstanceOf(Map.class);
 		@SuppressWarnings("unchecked")
 		Map<String, Object> headers = (Map<String, Object>) resolved;
 		assertThat(headers.get("foo")).isEqualTo("bar");
@@ -84,8 +83,7 @@ class HeadersMethodArgumentResolverTests {
 	void resolveArgumentMessageHeaders() throws Exception {
 		Object resolved = this.resolver.resolveArgument(this.resolvable.arg(MessageHeaders.class), this.message);
 
-		boolean condition = resolved instanceof MessageHeaders;
-		assertThat(condition).isTrue();
+		assertThat(resolved).isInstanceOf(MessageHeaders.class);
 		MessageHeaders headers = (MessageHeaders) resolved;
 		assertThat(headers.get("foo")).isEqualTo("bar");
 	}
@@ -95,8 +93,7 @@ class HeadersMethodArgumentResolverTests {
 		MethodParameter param = this.resolvable.arg(MessageHeaderAccessor.class);
 		Object resolved = this.resolver.resolveArgument(param, this.message);
 
-		boolean condition = resolved instanceof MessageHeaderAccessor;
-		assertThat(condition).isTrue();
+		assertThat(resolved).isInstanceOf(MessageHeaderAccessor.class);
 		MessageHeaderAccessor headers = (MessageHeaderAccessor) resolved;
 		assertThat(headers.getHeader("foo")).isEqualTo("bar");
 	}
@@ -106,8 +103,7 @@ class HeadersMethodArgumentResolverTests {
 		MethodParameter param = this.resolvable.arg(TestMessageHeaderAccessor.class);
 		Object resolved = this.resolver.resolveArgument(param, this.message);
 
-		boolean condition = resolved instanceof TestMessageHeaderAccessor;
-		assertThat(condition).isTrue();
+		assertThat(resolved).isInstanceOf(TestMessageHeaderAccessor.class);
 		TestMessageHeaderAccessor headers = (TestMessageHeaderAccessor) resolved;
 		assertThat(headers.getHeader("foo")).isEqualTo("bar");
 	}

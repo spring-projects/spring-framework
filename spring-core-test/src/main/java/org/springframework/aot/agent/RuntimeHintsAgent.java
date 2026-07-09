@@ -49,7 +49,6 @@ public final class RuntimeHintsAgent {
 	private static boolean loaded = false;
 
 	private RuntimeHintsAgent() {
-
 	}
 
 	public static void premain(@Nullable String agentArgs, Instrumentation inst) {
@@ -67,6 +66,7 @@ public final class RuntimeHintsAgent {
 	public static boolean isLoaded() {
 		return loaded;
 	}
+
 
 	private static final class ParsedArguments {
 
@@ -108,6 +108,6 @@ public final class RuntimeHintsAgent {
 			}
 			return new ParsedArguments(included, excluded);
 		}
-
 	}
+
 }

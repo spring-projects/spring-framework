@@ -39,7 +39,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  *
  * @author Rossen Stoyanchev
  */
-public class RequestAttributeAssertionTests {
+class RequestAttributeAssertionTests {
 
 	private final WebTestClient mainServletClient =
 			MockMvcWebTestClient.bindToController(new SimpleController())

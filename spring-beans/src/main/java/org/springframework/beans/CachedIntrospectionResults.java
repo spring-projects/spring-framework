@@ -283,7 +283,7 @@ public final class CachedIntrospectionResults {
 			}
 
 			// Explicitly check implemented interfaces for setter/getter methods as well,
-			// in particular for Java 8 default methods...
+			// in particular for interface default methods.
 			Class<?> currClass = beanClass;
 			while (currClass != null && currClass != Object.class) {
 				introspectInterfaces(beanClass, currClass, readMethodNames);

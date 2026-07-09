@@ -27,6 +27,7 @@ import java.util.Set;
 
 import javax.sql.DataSource;
 
+import jakarta.persistence.FetchType;
 import jakarta.persistence.PersistenceConfiguration;
 import jakarta.persistence.PersistenceException;
 import jakarta.persistence.SharedCacheMode;
@@ -122,6 +123,8 @@ public class DefaultPersistenceUnitManager
 	private @Nullable SharedCacheMode sharedCacheMode;
 
 	private @Nullable ValidationMode validationMode;
+
+	private @Nullable FetchType defaultToOneFetchType;
 
 	private DataSourceLookup dataSourceLookup = new JndiDataSourceLookup();
 
@@ -289,6 +292,17 @@ public class DefaultPersistenceUnitManager
 	 */
 	public void setValidationMode(ValidationMode validationMode) {
 		this.validationMode = validationMode;
+	}
+
+	/**
+	 * Specify the JPA 4.0 default fetch type for all of this manager's persistence
+	 * units, overriding any value in {@code persistence.xml} if set.
+	 * <p>This setting only applies against a JPA 4.0+ persistence provider.
+	 * Otherwise, it will be ignored.
+	 * @since 7.0.4
+	 */
+	public void setDefaultToOneFetchType(FetchType defaultToOneFetchType) {
+		this.defaultToOneFetchType = defaultToOneFetchType;
 	}
 
 	/**
@@ -474,6 +488,9 @@ public class DefaultPersistenceUnitManager
 			// during schema generation, see https://hibernate.atlassian.net/browse/HHH-12287
 			if (this.validationMode != null) {
 				pui.setValidationMode(this.validationMode);
+			}
+			if (this.defaultToOneFetchType != null) {
+				pui.setDefaultToOneFetchType(this.defaultToOneFetchType);
 			}
 
 			// Initialize persistence unit ClassLoader

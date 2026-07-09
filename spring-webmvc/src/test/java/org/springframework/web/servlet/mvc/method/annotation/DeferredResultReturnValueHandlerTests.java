@@ -63,7 +63,7 @@ class DeferredResultReturnValueHandlerTests {
 
 
 	@Test
-	public void supportsReturnType() throws Exception {
+	void supportsReturnType() throws Exception {
 		assertThat(this.handler.supportsReturnType(
 				on(TestController.class).resolveReturnType(DeferredResult.class, String.class))).isTrue();
 

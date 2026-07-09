@@ -48,14 +48,14 @@ class JacksonCsvEncoderTests extends AbstractEncoderTests<org.springframework.ht
 
 	@Test
 	@Override
-	public void canEncode() throws Exception {
+	protected void canEncode() throws Exception {
 		ResolvableType pojoType = ResolvableType.forClass(Pojo.class);
 		assertThat(this.encoder.canEncode(pojoType, JacksonCsvEncoder.TEXT_CSV)).isTrue();
 	}
 
 	@Test
 	@Override
-	public void encode() throws Exception {
+	protected void encode() throws Exception {
 		Flux<Object> input = Flux.just(new Pojo("spring", "framework"),
 				new Pojo("spring", "data"),
 				new Pojo("spring", "boot"));

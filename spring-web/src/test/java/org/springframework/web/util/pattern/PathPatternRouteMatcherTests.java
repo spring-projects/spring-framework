@@ -50,14 +50,14 @@ class PathPatternRouteMatcherTests {
 	}
 
 	@Test // gh-23310
-	public void noDecodingAndNoParamParsing() {
+	void noDecodingAndNoParamParsing() {
 		PathPatternRouteMatcher routeMatcher = new PathPatternRouteMatcher();
 		RouteMatcher.Route route = routeMatcher.parseRoute("projects.spring%20framework;p=1");
 		assertThat(routeMatcher.match("projects.spring%20framework;p=1", route)).isTrue();
 	}
 
 	@Test // gh-23310
-	public void separatorOnlyDecoded() {
+	void separatorOnlyDecoded() {
 		PathPatternRouteMatcher routeMatcher = new PathPatternRouteMatcher();
 		RouteMatcher.Route route = routeMatcher.parseRoute("projects.spring%2Eframework");
 		Map<String, String> vars = routeMatcher.matchAndExtract("projects.{project}", route);

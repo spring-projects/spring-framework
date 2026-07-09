@@ -57,14 +57,12 @@ public interface StreamingHttpOutputMessage extends HttpOutputMessage {
 			public void writeTo(OutputStream outputStream) throws IOException {
 				StreamUtils.copy(body, outputStream);
 			}
-
 			@Override
 			public boolean repeatable() {
 				return true;
 			}
 		});
 	}
-
 
 
 	/**

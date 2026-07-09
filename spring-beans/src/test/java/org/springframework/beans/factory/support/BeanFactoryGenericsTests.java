@@ -523,7 +523,7 @@ class BeanFactoryGenericsTests {
 				new ClassPathResource("genericBeanTests.xml", getClass()));
 
 		NamedUrlList list = bf.getBean("list", NamedUrlList.class);
-		assertThat(list).containsExactly(new URL("http://localhost:8080"));
+		assertThat(list).containsExactly(URI.create("http://localhost:8080").toURL());
 	}
 
 	@Test
@@ -533,7 +533,7 @@ class BeanFactoryGenericsTests {
 				new ClassPathResource("genericBeanTests.xml", getClass()));
 
 		NamedUrlSet set = bf.getBean("set", NamedUrlSet.class);
-		assertThat(set).containsExactly(new URL("http://localhost:8080"));
+		assertThat(set).containsExactly(URI.create("http://localhost:8080").toURL());
 	}
 
 	@Test
@@ -543,7 +543,7 @@ class BeanFactoryGenericsTests {
 				new ClassPathResource("genericBeanTests.xml", getClass()));
 
 		NamedUrlMap map = bf.getBean("map", NamedUrlMap.class);
-		assertThat(map).containsExactly(entry(10, new URL("http://localhost:8080")));
+		assertThat(map).containsExactly(entry(10, URI.create("http://localhost:8080").toURL()));
 	}
 
 	@Test
@@ -577,7 +577,7 @@ class BeanFactoryGenericsTests {
 				new ClassPathResource("genericBeanTests.xml", getClass()));
 
 		UrlSet urlSet = bf.getBean("setBean", UrlSet.class);
-		assertThat(urlSet).containsExactly(new URL("https://www.springframework.org"));
+		assertThat(urlSet).containsExactly(URI.create("https://www.springframework.org").toURL());
 	}
 
 	/**

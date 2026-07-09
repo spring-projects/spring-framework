@@ -183,7 +183,8 @@ public abstract class AbstractReflectiveMBeanInfoAssembler extends AbstractMBean
 
 	private boolean exposeClassDescriptor = false;
 
-	private @Nullable ParameterNameDiscoverer parameterNameDiscoverer = new DefaultParameterNameDiscoverer();
+	private @Nullable ParameterNameDiscoverer parameterNameDiscoverer =
+			DefaultParameterNameDiscoverer.getSharedInstance();
 
 
 	/**
@@ -507,8 +508,8 @@ public abstract class AbstractReflectiveMBeanInfoAssembler extends AbstractMBean
 	 * @return the {@code MBeanParameterInfo} array
 	 */
 	protected MBeanParameterInfo[] getOperationParameters(Method method, String beanKey) {
-		ParameterNameDiscoverer paramNameDiscoverer = getParameterNameDiscoverer();
-		@Nullable String[] paramNames = (paramNameDiscoverer != null ? paramNameDiscoverer.getParameterNames(method) : null);
+		ParameterNameDiscoverer pnd = getParameterNameDiscoverer();
+		@Nullable String[] paramNames = (pnd != null ? pnd.getParameterNames(method) : null);
 		if (paramNames == null) {
 			return new MBeanParameterInfo[0];
 		}

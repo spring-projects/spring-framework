@@ -25,7 +25,8 @@ public void sendNotification() {
 
 By default, the method invocation will be retried for any exception thrown: with at most
 3 retry attempts (`maxRetries = 3`) after an initial failure, and a delay of 1 second
-between attempts.
+between attempts. If all attempts have failed and the retry policy has been exhausted,
+the last original exception from the target method will be propagated to the caller.
 
 [NOTE]
 ====
@@ -69,16 +70,23 @@ Or for 4 retry attempts and an exponential back-off strategy with a bit of jitte
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
 @Retryable(
-  includes = MessageDeliveryException.class,
-  maxRetries = 4,
-  delay = 100,
-  jitter = 10,
-  multiplier = 2,
-  maxDelay = 1000)
+        includes = MessageDeliveryException.class,
+        maxRetries = 4,
+        delay = 100,
+        jitter = 10,
+        multiplier = 2,
+        maxDelay = 1000)
 public void sendNotification() {
     this.jmsClient.destination("notifications").send(...);
 }
 ----
+
+[NOTE]
+====
+When `delay` is `0` combined with a positive `jitter`, the delay never grows
+regardless of any configured `multiplier`, so the full configured `jitter` is
+applied directly as a random delay in the range from `0` to `min(jitter, maxDelay)`.
+====
 
 Last but not least, `@Retryable` also works for reactive methods with a reactive return
 type, decorating the pipeline with Reactor's retry capabilities:
@@ -98,6 +106,13 @@ For details on the various characteristics, see the available annotation attribu
 TIP: Several attributes in `@Retryable` have `String` variants that provide property
 placeholder and SpEL support, as an alternative to the specifically typed annotation
 attributes used in the above examples.
+
+[TIP]
+====
+During `@Retryable` processing, Spring publishes a `MethodRetryEvent` for every exception
+coming out of the target method. This can be used to track/log all original exceptions
+whereas the caller of the `@Retryable` method will only ever see the last exception.
+====
 
 
 [[resilience-annotations-concurrencylimit]]
@@ -174,7 +189,7 @@ configured {spring-framework-api}/core/retry/RetryPolicy.html[`RetryPolicy`].
 ----
     var retryTemplate = new RetryTemplate(); // <1>
 
-    retryTemplate.execute(
+    retryTemplate.invoke(
             () -> jmsClient.destination("notifications").send(...));
 ----
 <1> Implicitly uses `RetryPolicy.withDefaults()`.
@@ -182,9 +197,6 @@ configured {spring-framework-api}/core/retry/RetryPolicy.html[`RetryPolicy`].
 By default, a retryable operation will be retried for any exception thrown: with at most
 3 retry attempts (`maxRetries = 3`) after an initial failure, and a delay of 1 second
 between attempts.
-
-If you only need to customize the number of retry attempts, you can use the
-`RetryPolicy.withMaxRetries()` factory method as demonstrated below.
 
 [NOTE]
 ====
@@ -196,11 +208,14 @@ For example, if `maxRetries` is set to `4`, the retryable operation will be invo
 least once and at most 5 times.
 ====
 
+If you only need to customize the number of retry attempts, you can use the
+`RetryPolicy.withMaxRetries()` factory method as demonstrated below.
+
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
     var retryTemplate = new RetryTemplate(RetryPolicy.withMaxRetries(4)); // <1>
 
-    retryTemplate.execute(
+    retryTemplate.invoke(
             () -> jmsClient.destination("notifications").send(...));
 ----
 <1> Explicitly uses `RetryPolicy.withMaxRetries(4)`.
@@ -218,7 +233,7 @@ matched against an exception thrown by a failed operation as well as nested caus
 
     var retryTemplate = new RetryTemplate(retryPolicy);
 
-    retryTemplate.execute(
+    retryTemplate.invoke(
             () -> jmsClient.destination("notifications").send(...));
 ----
 <1> Specify one or more exception types to include.
@@ -251,21 +266,108 @@ and an exponential back-off strategy with a bit of jitter.
 
     var retryTemplate = new RetryTemplate(retryPolicy);
 
-    retryTemplate.execute(
+    retryTemplate.invoke(
             () -> jmsClient.destination("notifications").send(...));
 ----
 
-[TIP]
+[NOTE]
 ====
-A {spring-framework-api}/core/retry/RetryListener.html[`RetryListener`] can be registered
-with a `RetryTemplate` to react to events published during key retry phases (before a
-retry attempt, after a retry attempt, etc.), and you can compose multiple listeners via a
-{spring-framework-api}/core/retry/support/CompositeRetryListener.html[`CompositeRetryListener`].
+When `delay` is zero combined with a positive `jitter`, the delay never grows
+regardless of any configured `multiplier`, so the full configured `jitter` is
+applied directly as a random delay in the range from zero to `min(jitter, maxDelay)`.
 ====
 
+[TIP]
+====
 Although the factory methods and builder API for `RetryPolicy` cover most common
 configuration scenarios, you can implement a custom `RetryPolicy` for complete control
 over the types of exceptions that should trigger a retry as well as the
-{spring-framework-api}/util/backoff/BackOff.html[`BackOff`] strategy to use. Note that you
-can also configure a customized `BackOff` strategy via the `backOff()` method in the
-`RetryPolicy.Builder`.
+{spring-framework-api}/util/backoff/BackOff.html[`BackOff`] strategy to use. Note that
+you can also configure a customized `BackOff` strategy via the `backOff()` method in
+the `RetryPolicy.Builder`.
+====
+
+Note that the examples above apply a pattern similar to `@Retryable` method invocations
+where the last original exception will be propagated to the caller, using the `invoke`
+variants on `RetryTemplate` which are available with and without a return value.
+The callback may throw unchecked exceptions, the last one of which is exposed for
+direct handling on the caller side:
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+    try {
+        retryTemplate.invoke(
+                () -> jmsClient.destination("notifications").send(...));
+    }
+    catch (MessageDeliveryException ex) {
+        // coming out of the original JmsClient send method
+    }
+----
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+    try {
+        var result = retryTemplate.invoke(() -> {
+            jmsClient.destination("notifications").send(...);
+            return "result";
+        });
+    }
+    catch (MessageDeliveryException ex) {
+        // coming out of the original JmsClient send method
+    }
+----
+
+`RetryTemplate` instances are very light and can be created on the fly,
+potentially with a specific retry policy to use for a given invocation:
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+    try {
+        new RetryTemplate(RetryPolicy.withMaxRetries(4)).invoke(
+                () -> jmsClient.destination("notifications").send(...));
+    }
+    catch (MessageDeliveryException ex) {
+        // coming out of the original JmsClient send method
+    }
+----
+
+For deeper interaction, you may use RetryTemplate's `execute` method. The caller will
+have to handle the checked `RetryException` thrown by `RetryTemplate`, exposing the
+outcome of all attempts:
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+    try {
+        var result = retryTemplate.execute(() -> {
+            jmsClient.destination("notifications").send(...);
+            return "result";
+        });
+    }
+    catch (RetryException ex) {
+        // ex.getExceptions() / ex.getLastException() ...
+    }
+----
+
+A {spring-framework-api}/core/retry/RetryListener.html[`RetryListener`] can be registered
+with a `RetryTemplate` to react to key retry steps (before or after a retry attempt etc.)
+or simply to every invocation attempt, being able to track all exceptions coming out of
+the callback and all retry outcomes (exhaustion, interruption, timeout). This is
+particularly useful when using `invoke` where no retry state other than the last
+original exception is exposed otherwise:
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+    var retryTemplate = new RetryTemplate();
+    retryTemplate.setRetryListener(new RetryListener() {
+        @Override
+        public void onRetryableExecution(RetryPolicy retryPolicy, Retryable<?> retryable, RetryState retryState) {
+            ...
+        }
+    });
+
+    retryTemplate.invoke(
+            () -> jmsClient.destination("notifications").send(...));
+----
+
+You can also compose multiple listeners via a
+{spring-framework-api}/core/retry/support/CompositeRetryListener.html[`CompositeRetryListener`].

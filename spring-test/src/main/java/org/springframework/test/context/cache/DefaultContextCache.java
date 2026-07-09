@@ -21,6 +21,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -49,10 +50,15 @@ import org.springframework.util.Assert;
  * constructor argument} or set via a system property or Spring property named
  * {@value ContextCache#MAX_CONTEXT_CACHE_SIZE_PROPERTY_NAME}.
  *
+ * <p>The {@link PauseMode} may be supplied as a {@linkplain #DefaultContextCache(int, PauseMode)
+ * constructor argument} or set via a system property or Spring property named
+ * {@value ContextCache#CONTEXT_CACHE_PAUSE_PROPERTY_NAME}.
+ *
  * @author Sam Brannen
  * @author Juergen Hoeller
  * @since 2.5
  * @see ContextCacheUtils#retrieveMaxCacheSize()
+ * @see ContextCacheUtils#retrievePauseMode()
  */
 public class DefaultContextCache implements ContextCache {
 
@@ -82,6 +88,13 @@ public class DefaultContextCache implements ContextCache {
 	private final Map<MergedContextConfiguration, Set<Class<?>>> contextUsageMap = new ConcurrentHashMap<>(32);
 
 	/**
+	 * Set of keys for contexts that are currently unused and are therefore
+	 * candidates for pausing on context switch.
+	 * @since 7.0.3
+	 */
+	private final Set<MergedContextConfiguration> unusedContexts = new LinkedHashSet<>(4);
+
+	/**
 	 * Map of context keys to context load failure counts.
 	 * @since 6.1
 	 */
@@ -91,6 +104,8 @@ public class DefaultContextCache implements ContextCache {
 
 	private final int maxSize;
 
+	private final PauseMode pauseMode;
+
 	private final AtomicInteger hitCount = new AtomicInteger();
 
 	private final AtomicInteger missCount = new AtomicInteger();
@@ -98,10 +113,13 @@ public class DefaultContextCache implements ContextCache {
 
 	/**
 	 * Create a new {@code DefaultContextCache} using the maximum cache size
-	 * obtained via {@link ContextCacheUtils#retrieveMaxCacheSize()}.
+	 * obtained via {@link ContextCacheUtils#retrieveMaxCacheSize()} and the
+	 * {@link PauseMode} obtained via {@link ContextCacheUtils#retrievePauseMode()}.
 	 * @since 4.3
 	 * @see #DefaultContextCache(int)
+	 * @see #DefaultContextCache(int, PauseMode)
 	 * @see ContextCacheUtils#retrieveMaxCacheSize()
+	 * @see ContextCacheUtils#retrievePauseMode()
 	 */
 	public DefaultContextCache() {
 		this(ContextCacheUtils.retrieveMaxCacheSize());
@@ -109,16 +127,35 @@ public class DefaultContextCache implements ContextCache {
 
 	/**
 	 * Create a new {@code DefaultContextCache} using the supplied maximum
-	 * cache size.
+	 * cache size and the {@link PauseMode} obtained via
+	 * {@link ContextCacheUtils#retrievePauseMode()}.
 	 * @param maxSize the maximum cache size
 	 * @throws IllegalArgumentException if the supplied {@code maxSize} value
 	 * is not positive
 	 * @since 4.3
 	 * @see #DefaultContextCache()
+	 * @see #DefaultContextCache(int, PauseMode)
+	 * @see ContextCacheUtils#retrievePauseMode()
 	 */
 	public DefaultContextCache(int maxSize) {
+		this(maxSize, ContextCacheUtils.retrievePauseMode());
+	}
+
+	/**
+	 * Create a new {@code DefaultContextCache} using the supplied maximum
+	 * cache size and {@link PauseMode}.
+	 * @param maxSize the maximum cache size
+	 * @param pauseMode the {@code PauseMode} to use
+	 * @throws IllegalArgumentException if the supplied {@code maxSize} value
+	 * is not positive or if the supplied {@code PauseMode} is {@code null}
+	 * @since 7.0.3
+	 * @see #DefaultContextCache()
+	 */
+	public DefaultContextCache(int maxSize, PauseMode pauseMode) {
 		Assert.isTrue(maxSize > 0, "'maxSize' must be positive");
+		Assert.notNull(pauseMode, "'pauseMode' must not be null");
 		this.maxSize = maxSize;
+		this.pauseMode = pauseMode;
 	}
 
 
@@ -137,19 +174,22 @@ public class DefaultContextCache implements ContextCache {
 		}
 		else {
 			this.hitCount.incrementAndGet();
+			pauseOnContextSwitchIfNecessary(key);
 			restartContextIfNecessary(context);
 		}
 		return context;
 	}
 
 	private void restartContextIfNecessary(ApplicationContext context) {
-		// Recurse up the context hierarchy first.
-		ApplicationContext parent = context.getParent();
-		if (parent != null) {
-			restartContextIfNecessary(parent);
-		}
-		if (context instanceof ConfigurableApplicationContext cac && !cac.isRunning()) {
-			cac.restart();
+		if (this.pauseMode != PauseMode.NEVER) {
+			// Recurse up the context hierarchy first.
+			ApplicationContext parent = context.getParent();
+			if (parent != null) {
+				restartContextIfNecessary(parent);
+			}
+			if (context instanceof ConfigurableApplicationContext cac && !cac.isRunning()) {
+				cac.restart();
+			}
 		}
 	}
 
@@ -160,6 +200,7 @@ public class DefaultContextCache implements ContextCache {
 		Assert.notNull(context, "ApplicationContext must not be null");
 
 		evictLruContextIfNecessary();
+		pauseOnContextSwitchIfNecessary(key);
 		putInternal(key, context);
 	}
 
@@ -169,6 +210,7 @@ public class DefaultContextCache implements ContextCache {
 		Assert.notNull(loadFunction, "LoadFunction must not be null");
 
 		evictLruContextIfNecessary();
+		pauseOnContextSwitchIfNecessary(key);
 		ApplicationContext context = loadFunction.loadContext(key);
 		Assert.state(context != null, "LoadFunction must return a non-null ApplicationContext");
 		putInternal(key, context);
@@ -197,8 +239,8 @@ public class DefaultContextCache implements ContextCache {
 		MergedContextConfiguration child = key;
 		MergedContextConfiguration parent = child.getParent();
 		while (parent != null) {
-			Set<MergedContextConfiguration> list = this.hierarchyMap.computeIfAbsent(parent, k -> new HashSet<>());
-			list.add(child);
+			Set<MergedContextConfiguration> set = this.hierarchyMap.computeIfAbsent(parent, k -> new HashSet<>());
+			set.add(child);
 			child = parent;
 			parent = child.getParent();
 		}
@@ -222,8 +264,9 @@ public class DefaultContextCache implements ContextCache {
 		Set<Class<?>> activeTestClasses = getActiveTestClasses(mergedConfig);
 		activeTestClasses.remove(testClass);
 		if (activeTestClasses.isEmpty()) {
-			if (context instanceof ConfigurableApplicationContext cac && cac.isRunning()) {
-				cac.pause();
+			switch (this.pauseMode) {
+				case ALWAYS -> pauseIfNecessary(context);
+				case ON_CONTEXT_SWITCH -> this.unusedContexts.add(mergedConfig);
 			}
 			this.contextUsageMap.remove(mergedConfig);
 		}
@@ -237,6 +280,38 @@ public class DefaultContextCache implements ContextCache {
 
 	private Set<Class<?>> getActiveTestClasses(MergedContextConfiguration mergedConfig) {
 		return this.contextUsageMap.computeIfAbsent(mergedConfig, key -> new HashSet<>());
+	}
+
+	private boolean pauseOnContextSwitch() {
+		return (this.pauseMode == PauseMode.ON_CONTEXT_SWITCH);
+	}
+
+	private void pauseOnContextSwitchIfNecessary(MergedContextConfiguration activeContextKey) {
+		if (pauseOnContextSwitch()) {
+			removeFromUnusedContexts(activeContextKey);
+			for (MergedContextConfiguration unusedContextKey : this.unusedContexts) {
+				pauseIfNecessary(this.contextMap.get(unusedContextKey));
+			}
+			this.unusedContexts.clear();
+		}
+	}
+
+	/**
+	 * Remove the supplied key and any keys for parent contexts from the unused
+	 * contexts set. This effectively stops tracking the context (or context
+	 * hierarchy) as unused.
+	 */
+	private void removeFromUnusedContexts(MergedContextConfiguration key) {
+		do {
+			this.unusedContexts.remove(key);
+			key = key.getParent();
+		} while (key != null);
+	}
+
+	private static void pauseIfNecessary(@Nullable ApplicationContext context) {
+		if (context instanceof ConfigurableApplicationContext cac && cac.isRunning()) {
+			cac.pause();
+		}
 	}
 
 	@Override
@@ -266,11 +341,7 @@ public class DefaultContextCache implements ContextCache {
 		}
 
 		// Remove empty entries from the hierarchy map.
-		for (Map.Entry<MergedContextConfiguration, Set<MergedContextConfiguration>> entry : this.hierarchyMap.entrySet()) {
-			if (entry.getValue().isEmpty()) {
-				this.hierarchyMap.remove(entry.getKey());
-			}
-		}
+		this.hierarchyMap.entrySet().removeIf(entry -> entry.getValue().isEmpty());
 	}
 
 	private void remove(List<MergedContextConfiguration> removedContexts, MergedContextConfiguration key) {
@@ -290,6 +361,9 @@ public class DefaultContextCache implements ContextCache {
 		// stack as opposed to prior to the recursive call).
 		ApplicationContext context = this.contextMap.remove(key);
 		this.contextUsageMap.remove(key);
+		if (pauseOnContextSwitch()) {
+			this.unusedContexts.remove(key);
+		}
 		if (context instanceof ConfigurableApplicationContext cac) {
 			cac.close();
 		}
@@ -355,6 +429,7 @@ public class DefaultContextCache implements ContextCache {
 			this.contextMap.clear();
 			this.hierarchyMap.clear();
 			this.contextUsageMap.clear();
+			this.unusedContexts.clear();
 		}
 	}
 

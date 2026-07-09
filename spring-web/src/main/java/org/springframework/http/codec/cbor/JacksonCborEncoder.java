@@ -34,12 +34,11 @@ import org.springframework.util.MimeType;
 /**
  * Encode from an {@code Object} to bytes of CBOR objects using Jackson 3.x.
  *
- * <p>Stream encoding is currently not supported.
+ * <p><a href="https://github.com/FasterXML/jackson-dataformats-binary/issues/110">Stream encoding is currently not supported</a>.
  *
  * @author Sebastien Deleuze
  * @since 7.0
  * @see JacksonCborDecoder
- * @see <a href="https://github.com/spring-projects/spring-framework/issues/20513">Add CBOR support to WebFlux</a>
  */
 public class JacksonCborEncoder extends AbstractJacksonEncoder<CBORMapper> {
 

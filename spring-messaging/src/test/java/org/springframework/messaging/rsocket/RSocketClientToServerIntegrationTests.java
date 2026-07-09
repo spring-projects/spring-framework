@@ -74,7 +74,7 @@ class RSocketClientToServerIntegrationTests {
 
 	@BeforeAll
 	@SuppressWarnings("ConstantConditions")
-	public static void setupOnce() {
+	static void setupOnce() {
 
 		MimeType metadataMimeType = MimeTypeUtils.parseMimeType(
 				WellKnownMimeType.MESSAGE_RSOCKET_COMPOSITE_METADATA.getString());
@@ -167,7 +167,7 @@ class RSocketClientToServerIntegrationTests {
 	}
 
 	@Test // gh-26344
-	public void echoChannelWithEmptyInput() {
+	void echoChannelWithEmptyInput() {
 		Flux<String> result = requester.route("echo-channel-empty").data(Flux.empty()).retrieveFlux(String.class);
 		StepVerifier.create(result).verifyComplete();
 	}

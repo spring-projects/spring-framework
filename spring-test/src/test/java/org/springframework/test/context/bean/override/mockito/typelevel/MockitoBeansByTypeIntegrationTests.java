@@ -63,37 +63,47 @@ class MockitoBeansByTypeIntegrationTests implements MockTestInterface01 {
 	@Autowired
 	Service06 service06;
 
+	final ConstructorService01 constructorService01;
+
 	@MockitoBean
 	Service07 service07;
 
 
-	@BeforeEach
-	void configureMocks() {
-		given(service01.greeting()).willReturn("mock 01");
-		given(service02.greeting()).willReturn("mock 02");
-		given(service03.greeting()).willReturn("mock 03");
-		given(service04.greeting()).willReturn("mock 04");
-		given(service05.greeting()).willReturn("mock 05");
-		given(service06.greeting()).willReturn("mock 06");
-		given(service07.greeting()).willReturn("mock 07");
+	MockitoBeansByTypeIntegrationTests(@MockitoBean ConstructorService01 constructorService01) {
+		this.constructorService01 = constructorService01;
 	}
 
-	@Test
-	void checkMocks() {
+
+	@BeforeEach
+	void configureMocks() {
 		assertIsMock(service01, "service01");
 		assertIsMock(service02, "service02");
 		assertIsMock(service03, "service03");
 		assertIsMock(service04, "service04");
 		assertIsMock(service05, "service05");
 		assertIsMock(service06, "service06");
+		assertIsMock(constructorService01, "constructorService01");
 		assertIsMock(service07, "service07");
 
+		given(service01.greeting()).willReturn("mock 01");
+		given(service02.greeting()).willReturn("mock 02");
+		given(service03.greeting()).willReturn("mock 03");
+		given(service04.greeting()).willReturn("mock 04");
+		given(service05.greeting()).willReturn("mock 05");
+		given(service06.greeting()).willReturn("mock 06");
+		given(constructorService01.greeting()).willReturn("mock constructor 01");
+		given(service07.greeting()).willReturn("mock 07");
+	}
+
+	@Test
+	void checkMocks() {
 		assertThat(service01.greeting()).isEqualTo("mock 01");
 		assertThat(service02.greeting()).isEqualTo("mock 02");
 		assertThat(service03.greeting()).isEqualTo("mock 03");
 		assertThat(service04.greeting()).isEqualTo("mock 04");
 		assertThat(service05.greeting()).isEqualTo("mock 05");
 		assertThat(service06.greeting()).isEqualTo("mock 06");
+		assertThat(constructorService01.greeting()).isEqualTo("mock constructor 01");
 		assertThat(service07.greeting()).isEqualTo("mock 07");
 	}
 
@@ -127,6 +137,21 @@ class MockitoBeansByTypeIntegrationTests implements MockTestInterface01 {
 
 		@BeforeEach
 		void configureMocks() {
+			assertIsMock(service01, "service01");
+			assertIsMock(service02, "service02");
+			assertIsMock(service03, "service03");
+			assertIsMock(service04, "service04");
+			assertIsMock(service05, "service05");
+			assertIsMock(service06, "service06");
+			assertIsMock(constructorService01, "constructorService01");
+			assertIsMock(service07, "service07");
+			assertIsMock(service08, "service08");
+			assertIsMock(service09, "service09");
+			assertIsMock(service10, "service10");
+			assertIsMock(service11, "service11");
+			assertIsMock(service12, "service12");
+			assertIsMock(service13, "service13");
+
 			given(service08.greeting()).willReturn("mock 08");
 			given(service09.greeting()).willReturn("mock 09");
 			given(service10.greeting()).willReturn("mock 10");
@@ -137,26 +162,13 @@ class MockitoBeansByTypeIntegrationTests implements MockTestInterface01 {
 
 		@Test
 		void checkMocks() {
-			assertIsMock(service01, "service01");
-			assertIsMock(service02, "service02");
-			assertIsMock(service03, "service03");
-			assertIsMock(service04, "service04");
-			assertIsMock(service05, "service05");
-			assertIsMock(service06, "service06");
-			assertIsMock(service07, "service07");
-			assertIsMock(service08, "service08");
-			assertIsMock(service09, "service09");
-			assertIsMock(service10, "service10");
-			assertIsMock(service11, "service11");
-			assertIsMock(service12, "service12");
-			assertIsMock(service13, "service13");
-
 			assertThat(service01.greeting()).isEqualTo("mock 01");
 			assertThat(service02.greeting()).isEqualTo("mock 02");
 			assertThat(service03.greeting()).isEqualTo("mock 03");
 			assertThat(service04.greeting()).isEqualTo("mock 04");
 			assertThat(service05.greeting()).isEqualTo("mock 05");
 			assertThat(service06.greeting()).isEqualTo("mock 06");
+			assertThat(constructorService01.greeting()).isEqualTo("mock constructor 01");
 			assertThat(service07.greeting()).isEqualTo("mock 07");
 			assertThat(service08.greeting()).isEqualTo("mock 08");
 			assertThat(service09.greeting()).isEqualTo("mock 09");

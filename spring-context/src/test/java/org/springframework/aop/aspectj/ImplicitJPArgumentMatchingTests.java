@@ -32,7 +32,7 @@ class ImplicitJPArgumentMatchingTests {
 
 	@Test
 	@SuppressWarnings("resource")
-	void testAspect() {
+	void aspect() {
 		// nothing to really test; it is enough if we don't get error while creating app context
 		new ClassPathXmlApplicationContext(getClass().getSimpleName() + ".xml", getClass());
 	}

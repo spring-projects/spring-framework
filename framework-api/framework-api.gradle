@@ -15,11 +15,12 @@ repositories {
 }
 
 dependencies {
-	moduleProjects.each { moduleProject ->
-		javadoc moduleProject
+	rootProject.ext.moduleProjects.each { moduleProject ->
+		javadoc project(moduleProject.path)
 	}
 }
 
+def springAspectsOutput = project(":spring-aspects").sourceSets.main.output
 javadoc {
 	javadocTool.set(javaToolchains.javadocToolFor({
 		languageVersion = JavaLanguageVersion.of(25)
@@ -48,10 +49,10 @@ javadoc {
 	maxMemory = "1024m"
 	doFirst {
 		classpath += files(
-				// ensure the javadoc process can resolve types compiled from .aj sources
-				project(":spring-aspects").sourceSets.main.output
+			// ensure the javadoc process can resolve types compiled from .aj sources
+			springAspectsOutput
 		)
-		classpath += files(moduleProjects.collect { it.sourceSets.main.compileClasspath })
+		classpath += files(rootProject.ext.moduleProjects.collect { it.sourceSets.main.compileClasspath })
 	}
 }
 
@@ -95,7 +96,7 @@ tasks.register('schemaZip', Zip) {
 	description = "Builds -${archiveClassifier} archive containing all " +
 			"XSDs for deployment at https://springframework.org/schema."
 	duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-	moduleProjects.each { module ->
+	rootProject.ext.moduleProjects.each { module ->
 		def Properties schemas = new Properties();
 
 		module.sourceSets.main.resources.find {

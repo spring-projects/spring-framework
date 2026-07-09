@@ -31,7 +31,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  *
  * @author Stephane Nicoll
  */
-public class Gh23206Tests {
+class Gh23206Tests {
 
 	@Test
 	void componentScanShouldFailWithRegisterBeanCondition() {

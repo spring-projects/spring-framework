@@ -36,7 +36,7 @@ class NullPrimitiveTests {
 	}
 
 	@Test
-	void testNullPrimitiveWithJdkProxy() {
+	void nullPrimitiveWithJdkProxy() {
 
 		class SimpleFoo implements Foo {
 			@Override
@@ -62,7 +62,7 @@ class NullPrimitiveTests {
 	}
 
 	@Test
-	void testNullPrimitiveWithCglibProxy() {
+	void nullPrimitiveWithCglibProxy() {
 
 		Bar target = new Bar();
 		ProxyFactory factory = new ProxyFactory(target);

@@ -180,7 +180,7 @@ public class RedirectView extends AbstractUrlBasedView {
 	}
 
 	/**
-	 * Create the target URL and, if necessary, pre-pend the contextPath, expand
+	 * Create the target URL and, if necessary, prepend the contextPath, expand
 	 * URI template variables, append the current request query, and apply the
 	 * configured {@link #getRequestDataValueProcessor()
 	 * RequestDataValueProcessor}.

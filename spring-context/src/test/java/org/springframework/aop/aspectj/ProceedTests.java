@@ -60,19 +60,19 @@ class ProceedTests {
 
 
 	@Test
-	void testSimpleProceedWithChangedArgs() {
+	void simpleProceedWithChangedArgs() {
 		this.testBean.setName("abc");
 		assertThat(this.testBean.getName()).as("Name changed in around advice").isEqualTo("ABC");
 	}
 
 	@Test
-	void testGetArgsIsDefensive() {
+	void getArgsIsDefensive() {
 		this.testBean.setAge(5);
 		assertThat(this.testBean.getAge()).as("getArgs is defensive").isEqualTo(5);
 	}
 
 	@Test
-	void testProceedWithArgsInSameAspect() {
+	void proceedWithArgsInSameAspect() {
 		this.testBean.setMyFloat(1.0F);
 		assertThat(this.testBean.getMyFloat()).as("value changed in around advice").isGreaterThan(1.9F);
 		assertThat(this.firstTestAspect.getLastBeforeFloatValue()).as("changed value visible to next advice in chain")
@@ -80,7 +80,7 @@ class ProceedTests {
 	}
 
 	@Test
-	void testProceedWithArgsAcrossAspects() {
+	void proceedWithArgsAcrossAspects() {
 		this.testBean.setSex("male");
 		assertThat(this.testBean.getSex()).as("value changed in around advice").isEqualTo("MALE");
 		assertThat(this.secondTestAspect.getLastBeforeStringValue()).as("changed value visible to next before advice in chain").isEqualTo("MALE");

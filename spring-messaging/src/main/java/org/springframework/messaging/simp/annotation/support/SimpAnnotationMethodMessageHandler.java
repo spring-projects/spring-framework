@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Predicate;
 
 import org.apache.commons.logging.Log;
 import org.jspecify.annotations.Nullable;
@@ -117,6 +118,8 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 	private @Nullable StringValueResolver valueResolver;
 
 	private @Nullable MessageHeaderInitializer headerInitializer;
+
+	private @Nullable Predicate<String> headerFilter;
 
 	private @Nullable Integer phase;
 
@@ -269,6 +272,22 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 	}
 
 	/**
+	 * Add a filter to determine which headers from the input message should be
+	 * propagated to the output message. Applies to return value handling of
+	 * {@code @SendTo}, {@code @SendToUser}, and {@code @SubscribeMapping}
+	 * controller methods. The filter is applied to the "native headers" submap.
+	 * Multiple filters are combined with {@link Predicate#or(Predicate)}.
+	 * <p>By default, no headers are propagated if this is not set.
+	 * @since 7.0.4
+	 * @see SendToMethodReturnValueHandler#addHeaderFilter(Predicate)
+	 * @see SubscriptionMethodReturnValueHandler#addHeaderFilter(Predicate)
+	 */
+	public void addHeaderFilter(Predicate<String> filter) {
+		Assert.notNull(filter, "'headerFilter' predicate must not be null");
+		this.headerFilter = (this.headerFilter != null ? this.headerFilter.or(filter) : filter);
+	}
+
+	/**
 	 * Set the phase that this handler should run in.
 	 * <p>By default, this is {@link SmartLifecycle#DEFAULT_PHASE}, but with
 	 * {@code @EnableWebSocketMessageBroker} configuration it is set to 0.
@@ -353,11 +372,17 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 		SendToMethodReturnValueHandler sendToHandler =
 				new SendToMethodReturnValueHandler(this.brokerTemplate, true);
 		sendToHandler.setHeaderInitializer(this.headerInitializer);
+		if (this.headerFilter != null) {
+			sendToHandler.addHeaderFilter(this.headerFilter);
+		}
 		handlers.add(sendToHandler);
 
 		SubscriptionMethodReturnValueHandler subscriptionHandler =
 				new SubscriptionMethodReturnValueHandler(this.clientMessagingTemplate);
 		subscriptionHandler.setHeaderInitializer(this.headerInitializer);
+		if (this.headerFilter != null) {
+			subscriptionHandler.addHeaderFilter(this.headerFilter);
+		}
 		handlers.add(subscriptionHandler);
 
 		// Custom return value types
@@ -368,6 +393,9 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 
 		sendToHandler = new SendToMethodReturnValueHandler(this.brokerTemplate, false);
 		sendToHandler.setHeaderInitializer(this.headerInitializer);
+		if (this.headerFilter != null) {
+			sendToHandler.addHeaderFilter(this.headerFilter);
+		}
 		handlers.add(sendToHandler);
 
 		return handlers;

@@ -43,7 +43,7 @@ public interface JsonConverterDelegate {
 	 * serialization and deserialization to and from JSON. This is useful for
 	 * mapping generic maps and lists to higher level Objects.
 	 * @param value the value to map
-	 * @param targetType the target tyep
+	 * @param targetType the target type
 	 * @return the decoded object
 	 * @param <T> the target type
 	 */

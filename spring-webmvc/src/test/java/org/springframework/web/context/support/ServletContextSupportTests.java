@@ -44,7 +44,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 class ServletContextSupportTests {
 
 	@Test
-	void testServletContextAttributeFactoryBean() {
+	void servletContextAttributeFactoryBean() {
 		MockServletContext sc = new MockServletContext();
 		sc.setAttribute("myAttr", "myValue");
 
@@ -60,7 +60,7 @@ class ServletContextSupportTests {
 	}
 
 	@Test
-	void testServletContextAttributeFactoryBeanWithAttributeNotFound() {
+	void servletContextAttributeFactoryBeanWithAttributeNotFound() {
 		MockServletContext sc = new MockServletContext();
 
 		StaticWebApplicationContext wac = new StaticWebApplicationContext();
@@ -76,7 +76,7 @@ class ServletContextSupportTests {
 	}
 
 	@Test
-	void testServletContextParameterFactoryBean() {
+	void servletContextParameterFactoryBean() {
 		MockServletContext sc = new MockServletContext();
 		sc.addInitParameter("myParam", "myValue");
 
@@ -92,7 +92,7 @@ class ServletContextSupportTests {
 	}
 
 	@Test
-	void testServletContextParameterFactoryBeanWithAttributeNotFound() {
+	void servletContextParameterFactoryBeanWithAttributeNotFound() {
 		MockServletContext sc = new MockServletContext();
 
 		StaticWebApplicationContext wac = new StaticWebApplicationContext();
@@ -108,7 +108,7 @@ class ServletContextSupportTests {
 	}
 
 	@Test
-	void testServletContextAttributeExporter() {
+	void servletContextAttributeExporter() {
 		TestBean tb = new TestBean();
 		Map<String, Object> attributes = new HashMap<>();
 		attributes.put("attr1", "value1");
@@ -124,7 +124,7 @@ class ServletContextSupportTests {
 	}
 
 	@Test
-	void testServletContextResourceLoader() {
+	void servletContextResourceLoader() {
 		MockServletContext sc = new MockServletContext("classpath:org/springframework/web/context");
 		ServletContextResourceLoader rl = new ServletContextResourceLoader(sc);
 		assertThat(rl.getResource("/WEB-INF/web.xml").exists()).isTrue();
@@ -134,7 +134,7 @@ class ServletContextSupportTests {
 	}
 
 	@Test
-	void testServletContextResourcePatternResolver() throws IOException {
+	void servletContextResourcePatternResolver() throws IOException {
 		final Set<String> paths = new HashSet<>();
 		paths.add("/WEB-INF/context1.xml");
 		paths.add("/WEB-INF/context2.xml");
@@ -161,7 +161,7 @@ class ServletContextSupportTests {
 	}
 
 	@Test
-	void testServletContextResourcePatternResolverWithPatternPath() throws IOException {
+	void servletContextResourcePatternResolverWithPatternPath() throws IOException {
 		final Set<String> dirs = new HashSet<>();
 		dirs.add("/WEB-INF/mydir1/");
 		dirs.add("/WEB-INF/mydir2/");
@@ -194,7 +194,7 @@ class ServletContextSupportTests {
 	}
 
 	@Test
-	void testServletContextResourcePatternResolverWithUnboundedPatternPath() throws IOException {
+	void servletContextResourcePatternResolverWithUnboundedPatternPath() throws IOException {
 		final Set<String> dirs = new HashSet<>();
 		dirs.add("/WEB-INF/mydir1/");
 		dirs.add("/WEB-INF/mydir2/");
@@ -235,7 +235,7 @@ class ServletContextSupportTests {
 	}
 
 	@Test
-	void testServletContextResourcePatternResolverWithAbsolutePaths() throws IOException {
+	void servletContextResourcePatternResolverWithAbsolutePaths() throws IOException {
 		final Set<String> paths = new HashSet<>();
 		paths.add("C:/webroot/WEB-INF/context1.xml");
 		paths.add("C:/webroot/WEB-INF/context2.xml");

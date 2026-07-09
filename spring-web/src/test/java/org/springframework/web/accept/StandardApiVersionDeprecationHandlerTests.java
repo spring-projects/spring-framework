@@ -31,7 +31,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * Unit tests for {@link StandardApiVersionDeprecationHandler}.
  * @author Rossen Stoyanchev
  */
-public class StandardApiVersionDeprecationHandlerTests {
+class StandardApiVersionDeprecationHandlerTests {
 
 	private final MockHttpServletRequest request = new MockHttpServletRequest();
 

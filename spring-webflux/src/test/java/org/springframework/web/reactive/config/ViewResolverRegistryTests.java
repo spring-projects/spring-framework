@@ -92,7 +92,7 @@ class ViewResolverRegistryTests {
 	}
 
 	@Test  // SPR-16431
-	public void scriptTemplate() {
+	void scriptTemplate() {
 		this.registry.scriptTemplate().prefix("/").suffix(".html");
 
 		List<ViewResolver> viewResolvers = this.registry.getViewResolvers();

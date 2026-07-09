@@ -26,43 +26,7 @@ To do so:
 
 The following example shows how to set a `MultipartConfigElement` on the Servlet registration:
 
-[tabs]
-======
-Java::
-+
-[source,java,indent=0,subs="verbatim,quotes"]
-----
-	public class AppInitializer extends AbstractAnnotationConfigDispatcherServletInitializer {
-
-		// ...
-
-		@Override
-		protected void customizeRegistration(ServletRegistration.Dynamic registration) {
-
-			// Optionally also set maxFileSize, maxRequestSize, fileSizeThreshold
-			registration.setMultipartConfig(new MultipartConfigElement("/tmp"));
-		}
-
-	}
-----
-
-Kotlin::
-+
-[source,kotlin,indent=0,subs="verbatim,quotes"]
-----
-	class AppInitializer : AbstractAnnotationConfigDispatcherServletInitializer() {
-
-		// ...
-
-		override fun customizeRegistration(registration: ServletRegistration.Dynamic) {
-
-			// Optionally also set maxFileSize, maxRequestSize, fileSizeThreshold
-			registration.setMultipartConfig(MultipartConfigElement("/tmp"))
-		}
-
-	}
-----
-======
+include-code::./AppInitializer[tag=snippet,indent=0]
 
 Once the Servlet multipart configuration is in place, you can add a bean of type
 `StandardServletMultipartResolver` with a name of `multipartResolver`.

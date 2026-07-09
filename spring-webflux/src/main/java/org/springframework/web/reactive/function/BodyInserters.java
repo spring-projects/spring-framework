@@ -98,7 +98,8 @@ public abstract class BodyInserters {
 	public static <T> BodyInserter<T, ReactiveHttpOutputMessage> fromValue(T body) {
 		Assert.notNull(body, "'body' must not be null");
 		Assert.isNull(registry.getAdapter(body.getClass()),
-				"'body' should be an object, for reactive types use a variant specifying a publisher/producer and its related element type");
+				"'body' should not be a reactive type. " +
+						"For reactive types use a variant with a publisher/producer and the element type");
 		return (message, context) ->
 				writeWithMessageWriters(message, context, Mono.just(body), ResolvableType.forInstance(body), null);
 	}
@@ -124,9 +125,12 @@ public abstract class BodyInserters {
 		Assert.notNull(body, "'body' must not be null");
 		Assert.notNull(bodyType, "'bodyType' must not be null");
 		Assert.isNull(registry.getAdapter(body.getClass()),
-				"'body' should be an object, for reactive types use a variant specifying a publisher/producer and its related element type");
+				"'body' should not be a reactive type. " +
+						"For reactive types use a variant with a publisher/producer and the element type");
+		ResolvableType bodyTypeToUse = (bodyType.getType().equals(Object.class) ?
+				ResolvableType.forInstance(body) : ResolvableType.forType(bodyType));
 		return (message, context) ->
-				writeWithMessageWriters(message, context, Mono.just(body), ResolvableType.forType(bodyType), null);
+				writeWithMessageWriters(message, context, Mono.just(body), bodyTypeToUse, null);
 	}
 
 	/**

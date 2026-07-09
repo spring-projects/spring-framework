@@ -28,6 +28,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.http.MediaType;
+import org.springframework.http.converter.xml.Jaxb2RootElementHttpMessageConverter;
 import org.springframework.stereotype.Controller;
 import org.springframework.test.web.Person;
 import org.springframework.test.web.servlet.MockMvc;
@@ -48,7 +49,7 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standal
  * @see ContentAssertionTests
  * @see XpathAssertionTests
  */
-public class XmlContentAssertionTests {
+class XmlContentAssertionTests {
 
 	private static final String PEOPLE_XML =
 		"<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>" +
@@ -63,8 +64,9 @@ public class XmlContentAssertionTests {
 
 
 	@BeforeEach
-	public void setup() {
+	void setup() {
 		this.mockMvc = standaloneSetup(new MusicController())
+				.setMessageConverters(new Jaxb2RootElementHttpMessageConverter())
 				.defaultRequest(get("/").accept(MediaType.APPLICATION_XML, MediaType.parseMediaType("application/xml;charset=UTF-8")))
 				.alwaysExpect(status().isOk())
 				.alwaysExpect(content().contentType(MediaType.parseMediaType("application/xml;charset=UTF-8")))
@@ -72,12 +74,12 @@ public class XmlContentAssertionTests {
 	}
 
 	@Test
-	public void testXmlEqualTo() throws Exception {
+	void xmlEqualTo() throws Exception {
 		this.mockMvc.perform(get("/music/people")).andExpect(content().xml(PEOPLE_XML));
 	}
 
 	@Test
-	public void testNodeHamcrestMatcher() throws Exception {
+	void nodeHamcrestMatcher() throws Exception {
 		this.mockMvc.perform(get("/music/people"))
 			.andExpect(content().node(hasXPath("/people/composers/composer[1]")));
 	}

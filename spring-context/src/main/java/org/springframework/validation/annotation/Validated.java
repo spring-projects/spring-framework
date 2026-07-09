@@ -41,6 +41,9 @@ import java.lang.annotation.Target;
  * for a specific bean to begin with. Can also be used as a meta-annotation on a
  * custom stereotype annotation or a custom group-specific validated annotation.
  *
+ * <p>This annotation may be used as a <em>meta-annotation</em> to create custom
+ * <em>composed annotations</em>.
+ *
  * @author Juergen Hoeller
  * @since 3.1
  * @see jakarta.validation.Validator#validate(Object, Class[])

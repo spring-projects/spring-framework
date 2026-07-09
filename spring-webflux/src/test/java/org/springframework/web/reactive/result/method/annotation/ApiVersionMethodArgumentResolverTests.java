@@ -24,6 +24,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.core.MethodParameter;
+import org.springframework.web.accept.ApiVersionHolder;
 import org.springframework.web.accept.SemanticApiVersionParser;
 import org.springframework.web.accept.SemanticApiVersionParser.Version;
 import org.springframework.web.reactive.BindingContext;
@@ -43,7 +44,7 @@ class ApiVersionMethodArgumentResolverTests {
 
 	private final ApiVersionMethodArgumentResolver resolver = new ApiVersionMethodArgumentResolver();
 
-	private final MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/"));
+	private MockServerWebExchange exchange;
 
 	private MethodParameter param;
 	private MethodParameter nullableParam;
@@ -53,6 +54,9 @@ class ApiVersionMethodArgumentResolverTests {
 
 	@BeforeEach
 	void setUp() throws Exception {
+
+		this.exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/"));
+		this.exchange.getAttributes().put(HandlerMapping.API_VERSION_ATTRIBUTE, ApiVersionHolder.EMPTY);
 
 		Method method = getClass().getDeclaredMethod(
 				"handle", Version.class, Version.class, Optional.class, int.class);
@@ -74,7 +78,7 @@ class ApiVersionMethodArgumentResolverTests {
 	@Test
 	void resolveArgument() throws Exception {
 		Version version = new SemanticApiVersionParser().parseVersion("1.2");
-		this.exchange.getAttributes().put(HandlerMapping.API_VERSION_ATTRIBUTE, version);
+		this.exchange.getAttributes().put(HandlerMapping.API_VERSION_ATTRIBUTE, ApiVersionHolder.fromVersion(version));
 
 		Object actual = this.resolver.resolveArgumentValue(this.param, new BindingContext(), exchange);
 
@@ -92,7 +96,7 @@ class ApiVersionMethodArgumentResolverTests {
 	@Test
 	void resolveOptionalArgument() {
 		Version version = new SemanticApiVersionParser().parseVersion("1.2");
-		this.exchange.getAttributes().put(HandlerMapping.API_VERSION_ATTRIBUTE, version);
+		this.exchange.getAttributes().put(HandlerMapping.API_VERSION_ATTRIBUTE, ApiVersionHolder.fromVersion(version));
 
 		Object actual = this.resolver.resolveArgumentValue(this.optionalParam, new BindingContext(), exchange);
 		assertThat(actual).asInstanceOf(OPTIONAL).hasValue(version);

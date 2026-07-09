@@ -97,7 +97,7 @@ public class DelegatingIntroductionInterceptor extends IntroductionInfoSupport
 
 	/**
 	 * Subclasses may need to override this if they want to perform custom
-	 * behaviour in around advice. However, subclasses should invoke this
+	 * behavior in around advice. However, subclasses should invoke this
 	 * method, which handles introduced interfaces and forwarding to the target.
 	 */
 	@Override

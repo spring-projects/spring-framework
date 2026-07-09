@@ -30,7 +30,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  * @author Juergen Hoeller
  * @since 6.2
  */
-public class CustomObjectProviderTests {
+class CustomObjectProviderTests {
 
 	@Test
 	void getObject() {

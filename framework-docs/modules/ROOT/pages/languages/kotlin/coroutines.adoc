@@ -1,8 +1,8 @@
 [[coroutines]]
 = Coroutines
 
-Kotlin {kotlin-docs}/coroutines-overview.html[Coroutines] are Kotlin
-lightweight threads allowing to write non-blocking code in an imperative way. On language side,
+Kotlin {kotlin-docs}/coroutines-overview.html[Coroutines] are instances of
+suspendable computations allowing to write non-blocking code in an imperative way. On language side,
 suspending functions provides an abstraction for asynchronous operations while on library side
 {kotlin-github-org}/kotlinx.coroutines[kotlinx.coroutines] provides functions like
 {kotlin-coroutines-api}/kotlinx-coroutines-core/kotlinx.coroutines/async.html[`async { }`]

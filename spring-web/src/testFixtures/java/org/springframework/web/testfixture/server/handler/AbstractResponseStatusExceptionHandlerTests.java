@@ -61,21 +61,21 @@ public abstract class AbstractResponseStatusExceptionHandlerTests {
 
 
 	@Test
-	protected void handleResponseStatusException() {
+	void handleResponseStatusException() {
 		Throwable ex = new ResponseStatusException(HttpStatus.BAD_REQUEST, "");
 		this.handler.handle(this.exchange, ex).block(Duration.ofSeconds(5));
 		assertThat(this.exchange.getResponse().getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
 	}
 
 	@Test
-	protected void handleNestedResponseStatusException() {
+	void handleNestedResponseStatusException() {
 		Throwable ex = new Exception(new ResponseStatusException(HttpStatus.BAD_REQUEST, ""));
 		this.handler.handle(this.exchange, ex).block(Duration.ofSeconds(5));
 		assertThat(this.exchange.getResponse().getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
 	}
 
 	@Test // gh-23741
-	protected void handleMethodNotAllowed() {
+	void handleMethodNotAllowed() {
 		Throwable ex = new MethodNotAllowedException(HttpMethod.PATCH, Arrays.asList(HttpMethod.POST, HttpMethod.PUT));
 		this.handler.handle(this.exchange, ex).block(Duration.ofSeconds(5));
 
@@ -85,7 +85,7 @@ public abstract class AbstractResponseStatusExceptionHandlerTests {
 	}
 
 	@Test // gh-23741
-	protected void handleResponseStatusExceptionWithHeaders() {
+	void handleResponseStatusExceptionWithHeaders() {
 		Throwable ex = new NotAcceptableStatusException(Arrays.asList(MediaType.TEXT_PLAIN, MediaType.TEXT_HTML));
 		this.handler.handle(this.exchange, ex).block(Duration.ofSeconds(5));
 
@@ -95,14 +95,14 @@ public abstract class AbstractResponseStatusExceptionHandlerTests {
 	}
 
 	@Test
-	protected void unresolvedException() {
+	void unresolvedException() {
 		Throwable expected = new IllegalStateException();
 		Mono<Void> mono = this.handler.handle(this.exchange, expected);
 		StepVerifier.create(mono).consumeErrorWith(actual -> assertThat(actual).isSameAs(expected)).verify();
 	}
 
 	@Test  // SPR-16231
-	protected void responseCommitted() {
+	void responseCommitted() {
 		Throwable ex = new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Oops");
 		this.exchange.getResponse().setStatusCode(HttpStatus.CREATED);
 		Mono<Void> mono = this.exchange.getResponse().setComplete()

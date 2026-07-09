@@ -29,7 +29,7 @@ import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.client.RestClient;
 import org.springframework.web.reactive.config.CorsRegistry;
 import org.springframework.web.reactive.config.WebFluxConfigurationSupport;
 import org.springframework.web.testfixture.http.server.reactive.bootstrap.HttpServer;
@@ -63,9 +63,9 @@ class GlobalCorsConfigIntegrationTests extends AbstractRequestMappingIntegration
 	}
 
 	@Override
-	protected RestTemplate initRestTemplate() {
+	protected RestClient initRestClient(RestClient.Builder builder) {
 		// JDK default HTTP client disallowed headers like Origin
-		return new RestTemplate(new HttpComponentsClientHttpRequestFactory());
+		return builder.requestFactory(new HttpComponentsClientHttpRequestFactory()).build();
 	}
 
 

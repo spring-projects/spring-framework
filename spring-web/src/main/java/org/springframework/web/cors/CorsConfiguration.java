@@ -189,7 +189,7 @@ public class CorsConfiguration {
 	 * domain1.com on port 8080 or port 8081
 	 * <li>{@literal https://*.domain1.com:[*]} -- domains ending with
 	 * domain1.com on any port, including the default port
-	 * <li>comma-delimited list of patters, for example,
+	 * <li>comma-delimited list of patterns, for example,
 	 * {@code "https://*.a1.com,https://*.a2.com"}; this is convenient when a
 	 * value is resolved through a property placeholder, for example, {@code "${origin}"};
 	 * note that such placeholders must be resolved externally.

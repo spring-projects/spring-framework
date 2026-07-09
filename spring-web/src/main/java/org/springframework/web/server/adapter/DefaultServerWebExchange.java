@@ -117,7 +117,7 @@ public class DefaultServerWebExchange implements ServerWebExchange {
 		this(request, response, sessionManager, codecConfigurer, localeContextResolver, null);
 	}
 
-	protected DefaultServerWebExchange(ServerHttpRequest request, ServerHttpResponse response,
+	public DefaultServerWebExchange(ServerHttpRequest request, ServerHttpResponse response,
 			WebSessionManager sessionManager, ServerCodecConfigurer codecConfigurer,
 			LocaleContextResolver localeContextResolver, @Nullable ApplicationContext applicationContext) {
 

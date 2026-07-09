@@ -46,7 +46,10 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
  *
  * @author Rossen Stoyanchev
  * @since 3.2
- * @deprecated in favor of {@link RestTestClient#bindTo(MockMvc)}
+ * @deprecated in favor of
+ * {@link org.springframework.test.web.servlet.client.MockMvcClientHttpRequestFactory},
+ * or consider also using {@link RestTestClient#bindTo(MockMvc)} for tests against a
+ * MockMvc server through a test client.
  */
 @Deprecated(since = "7.0")
 public class MockMvcClientHttpRequestFactory implements ClientHttpRequestFactory {

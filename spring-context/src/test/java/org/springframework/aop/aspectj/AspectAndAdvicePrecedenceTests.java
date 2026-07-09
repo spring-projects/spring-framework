@@ -66,7 +66,7 @@ class AspectAndAdvicePrecedenceTests {
 
 
 	@Test
-	void testAdviceOrder() {
+	void adviceOrder() {
 		PrecedenceTestAspect.Collaborator collaborator = new PrecedenceVerifyingCollaborator();
 		this.highPrecedenceAspect.setCollaborator(collaborator);
 		this.lowPrecedenceAspect.setCollaborator(collaborator);

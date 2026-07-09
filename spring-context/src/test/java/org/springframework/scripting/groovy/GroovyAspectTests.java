@@ -94,9 +94,9 @@ class GroovyAspectTests {
 		TestService bean = (TestService) factory.getProxy();
 
 		assertThat(logAdvice.getCountThrows()).isEqualTo(0);
-		assertThatExceptionOfType(TestException.class).isThrownBy(
-				bean::sayHello)
-			.withMessage(message);
+		assertThatExceptionOfType(TestException.class)
+				.isThrownBy(bean::sayHello)
+				.withMessage(message);
 		assertThat(logAdvice.getCountThrows()).isEqualTo(1);
 	}
 

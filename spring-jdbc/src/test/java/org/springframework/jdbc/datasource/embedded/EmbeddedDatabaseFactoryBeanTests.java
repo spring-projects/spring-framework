@@ -40,7 +40,7 @@ class EmbeddedDatabaseFactoryBeanTests {
 	}
 
 	@Test
-	void testFactoryBeanLifecycle() {
+	void factoryBeanLifecycle() {
 		EmbeddedDatabaseFactoryBean bean = new EmbeddedDatabaseFactoryBean();
 		ResourceDatabasePopulator populator = new ResourceDatabasePopulator(resource("db-schema.sql"),
 			resource("db-test-data.sql"));

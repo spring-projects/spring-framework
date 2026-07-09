@@ -27,6 +27,7 @@ import org.springframework.util.backoff.ExponentialBackOff;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.assertj.core.api.Assertions.assertThatNoException;
 
 /**
  * Tests for {@link ExponentialBackOff}.
@@ -116,6 +117,33 @@ class ExponentialBackOffTests {
 	void invalidInterval() {
 		ExponentialBackOff backOff = new ExponentialBackOff();
 		assertThatIllegalArgumentException().isThrownBy(() -> backOff.setMultiplier(0.9));
+	}
+
+	@Test  // gh-36932
+	void jitterWithZeroInitialInterval() {
+		ExponentialBackOff backOff = new ExponentialBackOff();
+		backOff.setInitialInterval(0);
+		backOff.setJitter(100);
+		BackOffExecution execution = backOff.start();
+
+		// 'initialInterval = 0' and 'jitter > 0' are both individually accepted
+		// configurations, so their combination must not throw.
+		assertThatNoException().isThrownBy(execution::nextBackOff);
+	}
+
+	@Test  // gh-36943
+	void jitterScalesProportionallyWithInterval() {
+		ExponentialBackOff backOff = new ExponentialBackOff();
+		backOff.setJitter(100);
+		BackOffExecution execution = backOff.start();
+
+		// Default: initialInterval=2000, multiplier=1.5
+		// Attempt 1: interval=2000, scale=1.0,  applicableJitter=100 → [max(1900,2000), 2100) = [2000, 2099]
+		assertThat(execution.nextBackOff()).isBetween(2000L, 2099L);
+		// Attempt 2: interval=3000, scale=1.5,  applicableJitter=150 → [max(2850,2000), 3150) = [2850, 3149]
+		assertThat(execution.nextBackOff()).isBetween(2850L, 3149L);
+		// Attempt 3: interval=4500, scale=2.25, applicableJitter=225 → [max(4275,2000), 4725) = [4275, 4724]
+		assertThat(execution.nextBackOff()).isBetween(4275L, 4724L);
 	}
 
 	@Test

@@ -50,7 +50,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 	@ContextConfiguration("../../context/servlet-context.xml")
 })
 @DisabledInAotMode("@ContextHierarchy is not supported in AOT")
-public class WebAppResourceTests {
+class WebAppResourceTests {
 
 	@Autowired
 	private WebApplicationContext wac;
@@ -59,14 +59,14 @@ public class WebAppResourceTests {
 
 
 	@BeforeEach
-	public void setup() {
+	void setup() {
 		this.testClient = MockMvcWebTestClient.bindToApplicationContext(this.wac).build();
 	}
 
 	// Resources served via <mvc:resources/>
 
 	@Test
-	public void resourceRequest() {
+	void resourceRequest() {
 		testClient.get().uri("/resources/Spring.js")
 				.exchange()
 				.expectStatus().isOk()
@@ -77,7 +77,7 @@ public class WebAppResourceTests {
 	// Forwarded to the "default" servlet via <mvc:default-servlet-handler/>
 
 	@Test
-	public void resourcesViaDefaultServlet() throws Exception {
+	void resourcesViaDefaultServlet() throws Exception {
 		EntityExchangeResult<Void> result = testClient.get().uri("/unknown/resource")
 				.exchange()
 				.expectStatus().isOk()

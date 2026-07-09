@@ -90,7 +90,7 @@ class MessageWriterResultHandlerTests {
 
 
 	@Test  // SPR-12894
-	public void useDefaultContentType() {
+	void useDefaultContentType() {
 		Resource body = new ClassPathResource("logo.png", getClass());
 		MethodParameter type = on(TestController.class).resolveReturnType(Resource.class);
 		this.resultHandler.writeBody(body, type, this.exchange).block(Duration.ofSeconds(5));
@@ -99,7 +99,7 @@ class MessageWriterResultHandlerTests {
 	}
 
 	@Test  // SPR-13631
-	public void useDefaultCharset() {
+	void useDefaultCharset() {
 		this.exchange.getAttributes().put(PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE,
 				Collections.singleton(APPLICATION_JSON));
 
@@ -137,7 +137,7 @@ class MessageWriterResultHandlerTests {
 	}
 
 	@Test  // SPR-13135
-	public void unsupportedReturnType() {
+	void unsupportedReturnType() {
 		ByteArrayOutputStream body = new ByteArrayOutputStream();
 		MethodParameter type = on(TestController.class).resolveReturnType(OutputStream.class);
 
@@ -148,7 +148,7 @@ class MessageWriterResultHandlerTests {
 	}
 
 	@Test  // SPR-12811
-	public void jacksonTypeOfListElement() {
+	void jacksonTypeOfListElement() {
 
 		MethodParameter returnType = on(TestController.class).resolveReturnType(List.class, ParentClass.class);
 		List<ParentClass> body = Arrays.asList(new Foo("foo"), new Bar("bar"));
@@ -160,7 +160,7 @@ class MessageWriterResultHandlerTests {
 	}
 
 	@Test  // SPR-13318
-	public void jacksonTypeWithSubType() {
+	void jacksonTypeWithSubType() {
 		SimpleBean body = new SimpleBean(123L, "foo");
 		MethodParameter type = on(TestController.class).resolveReturnType(Identifiable.class);
 		this.resultHandler.writeBody(body, type, this.exchange).block(Duration.ofSeconds(5));
@@ -170,7 +170,7 @@ class MessageWriterResultHandlerTests {
 	}
 
 	@Test  // SPR-13318
-	public void jacksonTypeWithSubTypeOfListElement() {
+	void jacksonTypeWithSubTypeOfListElement() {
 
 		MethodParameter returnType = on(TestController.class).resolveReturnType(List.class, Identifiable.class);
 

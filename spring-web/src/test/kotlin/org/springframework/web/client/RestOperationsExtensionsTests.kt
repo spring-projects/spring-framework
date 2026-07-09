@@ -34,6 +34,7 @@ import kotlin.reflect.jvm.kotlinFunction
  *
  * @author Sebastien Deleuze
  */
+@Suppress("REMOVAL", "DEPRECATION")
 class RestOperationsExtensionsTests {
 
 	val template = mockk<RestOperations>()

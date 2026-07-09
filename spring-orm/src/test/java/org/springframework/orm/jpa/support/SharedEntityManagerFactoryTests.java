@@ -38,11 +38,10 @@ import static org.mockito.Mockito.verify;
 class SharedEntityManagerFactoryTests {
 
 	@Test
-	void testValidUsage() {
+	void validUsage() {
 		Object o = new Object();
 
 		EntityManager mockEm = mock();
-		given(mockEm.isOpen()).willReturn(true);
 
 		EntityManagerFactory mockEmf = mock();
 		given(mockEmf.createEntityManager()).willReturn(mockEm);
@@ -58,8 +57,7 @@ class SharedEntityManagerFactoryTests {
 		assertThat(proxyFactoryBean.getObject()).isSameAs(proxy);
 		assertThat(proxy.contains(o)).isFalse();
 
-		boolean condition = proxy instanceof EntityManagerProxy;
-		assertThat(condition).isTrue();
+		assertThat(proxy).isInstanceOf(EntityManagerProxy.class);
 		EntityManagerProxy emProxy = (EntityManagerProxy) proxy;
 		assertThatIllegalStateException().as("outside of transaction").isThrownBy(
 				emProxy::getTargetEntityManager);

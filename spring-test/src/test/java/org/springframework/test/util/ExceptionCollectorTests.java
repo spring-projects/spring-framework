@@ -30,7 +30,7 @@ import static org.assertj.core.api.Assertions.assertThatNoException;
  * @author Sam Brannen
  * @since 5.3.10
  */
-public class ExceptionCollectorTests {
+class ExceptionCollectorTests {
 
 	private static final char EOL = '\n';
 

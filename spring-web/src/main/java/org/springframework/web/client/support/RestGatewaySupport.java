@@ -32,7 +32,10 @@ import org.springframework.web.client.RestTemplate;
  * @since 3.0
  * @see #setRestTemplate
  * @see org.springframework.web.client.RestTemplate
+ * @deprecated as of 7.1, in favor of {@link org.springframework.web.client.RestClient}.
  */
+@Deprecated(since = "7.1", forRemoval = true)
+@SuppressWarnings("removal")
 public class RestGatewaySupport {
 
 	/** Logger available to subclasses. */

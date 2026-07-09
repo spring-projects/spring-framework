@@ -49,7 +49,6 @@ import static org.springframework.build.architecture.ArchitectureRules.classesSh
 import static org.springframework.build.architecture.ArchitectureRules.javaClassesShouldNotImportKotlinAnnotations;
 import static org.springframework.build.architecture.ArchitectureRules.noClassesShouldCallStringToLowerCaseWithoutLocale;
 import static org.springframework.build.architecture.ArchitectureRules.noClassesShouldCallStringToUpperCaseWithoutLocale;
-import static org.springframework.build.architecture.ArchitectureRules.packageInfoShouldBeNullMarked;
 
 /**
  * {@link Task} that checks for architecture problems.
@@ -64,8 +63,7 @@ public abstract class ArchitectureCheck extends DefaultTask {
 	public ArchitectureCheck() {
 		getOutputDirectory().convention(getProject().getLayout().getBuildDirectory().dir(getName()));
 		getProhibitObjectsRequireNonNull().convention(true);
-		getRules().addAll(packageInfoShouldBeNullMarked(),
-				classesShouldNotImportForbiddenTypes(),
+		getRules().addAll(classesShouldNotImportForbiddenTypes(),
 				javaClassesShouldNotImportKotlinAnnotations(),
 				allPackagesShouldBeFreeOfTangles(),
 				noClassesShouldCallStringToLowerCaseWithoutLocale(),

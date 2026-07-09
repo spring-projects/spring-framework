@@ -64,7 +64,7 @@ class PathResourceResolverTests {
 	}
 
 	@Test  // gh-22272
-	public void resolveWithEncodedPath() throws IOException {
+	void resolveWithEncodedPath() throws IOException {
 		Resource classpathLocation = new ClassPathResource("test/", PathResourceResolver.class);
 		testWithEncodedPath(classpathLocation);
 		testWithEncodedPath(new FileUrlResource(classpathLocation.getURL()));
@@ -105,7 +105,7 @@ class PathResourceResolverTests {
 	}
 
 	@Test  // gh-23463
-	public void ignoreInvalidEscapeSequence() throws IOException {
+	void ignoreInvalidEscapeSequence() throws IOException {
 		UrlResource location = new UrlResource(getClass().getResource("./test/"));
 
 		Resource resource = new UrlResource(location.getURL() + "test%file.txt");
@@ -130,7 +130,7 @@ class PathResourceResolverTests {
 	}
 
 	@Test  // SPR-12624
-	public void checkRelativeLocation() throws Exception {
+	void checkRelativeLocation() throws Exception {
 		String location= new UrlResource(getClass().getResource("./test/")).getURL().toExternalForm();
 		location = location.replace("/test/org/springframework","/test/org/../org/springframework");
 
@@ -141,13 +141,13 @@ class PathResourceResolverTests {
 	}
 
 	@Test  // SPR-12747
-	public void checkFileLocation() throws Exception {
+	void checkFileLocation() throws Exception {
 		Resource resource = getResource("main.css");
 		assertThat(this.resolver.checkResource(resource, resource)).isTrue();
 	}
 
 	@Test  // SPR-13241
-	public void resolvePathRootResource() {
+	void resolvePathRootResource() {
 		Resource webjarsLocation = new ClassPathResource("/META-INF/resources/webjars/", PathResourceResolver.class);
 		String path = this.resolver.resolveUrlPathInternal(
 				"", Collections.singletonList(webjarsLocation), null).block(TIMEOUT);

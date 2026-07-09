@@ -72,8 +72,13 @@ public class CompositeRetryListener implements RetryListener {
 
 
 	@Override
-	public void beforeRetry(RetryPolicy retryPolicy, Retryable<?> retryable) {
-		this.listeners.forEach(retryListener -> retryListener.beforeRetry(retryPolicy, retryable));
+	public void onRetryableExecution(RetryPolicy retryPolicy, Retryable<?> retryable, RetryState retryState) {
+		this.listeners.forEach(listener -> listener.onRetryableExecution(retryPolicy, retryable, retryState));
+	}
+
+	@Override
+	public void beforeRetry(RetryPolicy retryPolicy, Retryable<?> retryable, RetryState retryState) {
+		this.listeners.forEach(retryListener -> retryListener.beforeRetry(retryPolicy, retryable, retryState));
 	}
 
 	@Override
@@ -84,11 +89,6 @@ public class CompositeRetryListener implements RetryListener {
 	@Override
 	public void onRetryFailure(RetryPolicy retryPolicy, Retryable<?> retryable, Throwable throwable) {
 		this.listeners.forEach(listener -> listener.onRetryFailure(retryPolicy, retryable, throwable));
-	}
-
-	@Override
-	public void onRetryableExecution(RetryPolicy retryPolicy, Retryable<?> retryable, RetryState retryState) {
-		this.listeners.forEach(listener -> listener.onRetryableExecution(retryPolicy, retryable, retryState));
 	}
 
 	@Override

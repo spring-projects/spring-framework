@@ -22,7 +22,6 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.jspecify.annotations.Nullable;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.AnnotatedElementUtils;
@@ -103,13 +102,12 @@ public abstract class AnnotationConfigContextLoaderUtils {
 	 * @param clazz the class to check
 	 * @return {@code true} if the supplied class meets the candidate criteria
 	 */
-	private static boolean isDefaultConfigurationClassCandidate(@Nullable Class<?> clazz) {
-		return (clazz != null && isStaticNonPrivateAndNonFinal(clazz) &&
+	private static boolean isDefaultConfigurationClassCandidate(Class<?> clazz) {
+		return (isStaticNonPrivateAndNonFinal(clazz) &&
 				AnnotatedElementUtils.hasAnnotation(clazz, Configuration.class));
 	}
 
 	private static boolean isStaticNonPrivateAndNonFinal(Class<?> clazz) {
-		Assert.notNull(clazz, "Class must not be null");
 		int modifiers = clazz.getModifiers();
 		return (Modifier.isStatic(modifiers) && !Modifier.isPrivate(modifiers) && !Modifier.isFinal(modifiers));
 	}

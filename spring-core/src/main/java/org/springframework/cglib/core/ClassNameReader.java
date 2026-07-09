@@ -34,9 +34,11 @@ public class ClassNameReader {
 	private static class EarlyExitException extends RuntimeException {
 	}
 
+	// SPRING PATCH BEGIN
 	public static String getClassName(ClassReader r) {
-		return getClassInfo(r)[0];
+		return r.getClassName().replace('/', '.');
 	}
+	// SPRING PATCH END
 
     public static String[] getClassInfo(ClassReader r) {
         final List<String> array = new ArrayList<>();

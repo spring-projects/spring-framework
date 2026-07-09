@@ -31,8 +31,6 @@ import org.springframework.http.HttpStatus.Series;
 import org.springframework.http.MediaType;
 import org.springframework.test.http.HttpHeadersAssert;
 import org.springframework.test.http.MediaTypeAssert;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
 import org.springframework.util.function.SingletonSupplier;
 
 /**
@@ -65,9 +63,9 @@ public abstract class AbstractHttpServletResponseAssert<R extends HttpServletRes
 	}
 
 	private static HttpHeaders getHttpHeaders(HttpServletResponse response) {
-		MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
+		HttpHeaders headers = new HttpHeaders();
 		response.getHeaderNames().forEach(name -> headers.put(name, new ArrayList<>(response.getHeaders(name))));
-		return new HttpHeaders(headers);
+		return headers;
 	}
 
 	/**

@@ -1005,13 +1005,14 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 	private static class MessageRejectedWhileStoppingException extends RuntimeException {
 	}
 
+
 	private abstract static class MicrometerInstrumentation {
 
 		static Session instrumentSession(Session session, ObservationRegistry registry) {
 			return JmsInstrumentation.instrumentSession(session, registry);
 		}
-
 	}
+
 
 	private abstract static class ObservationFactory {
 

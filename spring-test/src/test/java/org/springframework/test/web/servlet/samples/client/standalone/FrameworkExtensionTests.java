@@ -47,7 +47,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  *
  * @author Rossen Stoyanchev
  */
-public class FrameworkExtensionTests {
+class FrameworkExtensionTests {
 
 	private final WebTestClient client =
 			MockMvcWebTestClient.bindToController(new SampleController())
@@ -56,7 +56,7 @@ public class FrameworkExtensionTests {
 
 
 	@Test
-	public void fooHeader() {
+	void fooHeader() {
 		this.client.mutateWith(headers().foo("a=b"))
 				.get().uri("/")
 				.exchange()
@@ -64,7 +64,7 @@ public class FrameworkExtensionTests {
 	}
 
 	@Test
-	public void barHeader() {
+	void barHeader() {
 		this.client.mutateWith(headers().bar("a=b"))
 				.get().uri("/")
 				.exchange()

@@ -61,7 +61,7 @@ class ConfigurationClassWithPlaceholderConfigurerBeanTests {
 	 */
 	@Test
 	@SuppressWarnings("resource")
-	public void valueFieldsAreNotProcessedWhenPlaceholderConfigurerIsIntegrated() {
+	void valueFieldsAreNotProcessedWhenPlaceholderConfigurerIsIntegrated() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(ConfigWithValueFieldAndPlaceholderConfigurer.class);
 		System.setProperty("test.name", "foo");
@@ -75,7 +75,7 @@ class ConfigurationClassWithPlaceholderConfigurerBeanTests {
 
 	@Test
 	@SuppressWarnings("resource")
-	public void valueFieldsAreProcessedWhenStaticPlaceholderConfigurerIsIntegrated() {
+	void valueFieldsAreProcessedWhenStaticPlaceholderConfigurerIsIntegrated() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(ConfigWithValueFieldAndStaticPlaceholderConfigurer.class);
 		System.setProperty("test.name", "foo");
@@ -88,7 +88,7 @@ class ConfigurationClassWithPlaceholderConfigurerBeanTests {
 
 	@Test
 	@SuppressWarnings("resource")
-	public void valueFieldsAreProcessedWhenPlaceholderConfigurerIsSegregated() {
+	void valueFieldsAreProcessedWhenPlaceholderConfigurerIsSegregated() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(ConfigWithValueField.class);
 		ctx.register(ConfigWithPlaceholderConfigurer.class);
@@ -102,7 +102,7 @@ class ConfigurationClassWithPlaceholderConfigurerBeanTests {
 
 	@Test
 	@SuppressWarnings("resource")
-	public void valueFieldsResolveToPlaceholderSpecifiedDefaultValuesWithPlaceholderConfigurer() {
+	void valueFieldsResolveToPlaceholderSpecifiedDefaultValuesWithPlaceholderConfigurer() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(ConfigWithValueField.class);
 		ctx.register(ConfigWithPlaceholderConfigurer.class);
@@ -114,7 +114,7 @@ class ConfigurationClassWithPlaceholderConfigurerBeanTests {
 
 	@Test
 	@SuppressWarnings("resource")
-	public void valueFieldsResolveToPlaceholderSpecifiedDefaultValuesWithoutPlaceholderConfigurer() {
+	void valueFieldsResolveToPlaceholderSpecifiedDefaultValuesWithoutPlaceholderConfigurer() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(ConfigWithValueField.class);
 		// ctx.register(ConfigWithPlaceholderConfigurer.class);

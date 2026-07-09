@@ -92,14 +92,14 @@ public class MockitoResetTestExecutionListener extends AbstractTestExecutionList
 
 	@Override
 	public void beforeTestMethod(TestContext testContext) {
-		if (isEnabled()) {
+		if (isEnabled() && testContext.hasApplicationContext()) {
 			resetMocks(testContext.getApplicationContext(), MockReset.BEFORE);
 		}
 	}
 
 	@Override
 	public void afterTestMethod(TestContext testContext) {
-		if (isEnabled()) {
+		if (isEnabled() && testContext.hasApplicationContext()) {
 			resetMocks(testContext.getApplicationContext(), MockReset.AFTER);
 		}
 	}
@@ -113,14 +113,15 @@ public class MockitoResetTestExecutionListener extends AbstractTestExecutionList
 
 	private static void resetMocks(ConfigurableApplicationContext applicationContext, MockReset reset) {
 		ConfigurableListableBeanFactory beanFactory = applicationContext.getBeanFactory();
-		String[] beanNames = beanFactory.getBeanDefinitionNames();
 		Set<String> instantiatedSingletons = new HashSet<>(Arrays.asList(beanFactory.getSingletonNames()));
-		for (String beanName : beanNames) {
-			BeanDefinition beanDefinition = beanFactory.getBeanDefinition(beanName);
-			if (beanDefinition.isSingleton() && instantiatedSingletons.contains(beanName)) {
-				Object bean = getBean(beanFactory, beanName);
-				if (bean != null && reset == MockReset.get(bean)) {
-					Mockito.reset(bean);
+		for (String beanName : beanFactory.getBeanDefinitionNames()) {
+			if (instantiatedSingletons.contains(beanName)) {
+				BeanDefinition beanDefinition = beanFactory.getBeanDefinition(beanName);
+				if (beanDefinition.isSingleton()) {
+					Object bean = getBean(beanFactory, beanName);
+					if (bean != null && reset == MockReset.get(bean)) {
+						Mockito.reset(bean);
+					}
 				}
 			}
 		}

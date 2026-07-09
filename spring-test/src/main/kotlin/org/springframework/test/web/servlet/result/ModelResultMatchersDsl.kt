@@ -32,7 +32,7 @@ class ModelResultMatchersDsl internal constructor (private val actions: ResultAc
 	/**
 	 * @see ModelResultMatchers.attribute
 	 */
-	fun <T> attribute(name: String, matcher: Matcher<T>) {
+	fun <T : Any> attribute(name: String, matcher: Matcher<T>) {
 		actions.andExpect(matchers.attribute(name, matcher))
 	}
 

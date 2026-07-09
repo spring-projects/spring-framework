@@ -80,7 +80,7 @@ class ServletCookieValueMethodArgumentResolverTests {
 	}
 
 	@Test // gh-26989
-	public void resolveCookieWithEncodingTurnedOff() throws Exception {
+	void resolveCookieWithEncodingTurnedOff() throws Exception {
 		Cookie cookie = new Cookie("name", "Tl=Q/0AUSOx[n)2z4(t]20FZv#?[Ge%H");
 		request.setCookies(cookie);
 

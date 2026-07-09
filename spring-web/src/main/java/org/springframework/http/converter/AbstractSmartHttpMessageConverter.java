@@ -106,10 +106,9 @@ public abstract class AbstractSmartHttpMessageConverter<T> extends AbstractHttpM
 						}
 					}, hints);
 				}
-
 				@Override
 				public boolean repeatable() {
-					return supportsRepeatableWrites(t);
+					return canWriteRepeatedly(t, contentType);
 				}
 			});
 		}

@@ -52,14 +52,14 @@ public final class JettyHeadersAdapter implements MultiValueMap<String, String> 
 
 
 	/**
-	 * Creates a new {@code JettyHeadersAdapter} based on the given
+	 * Construct a new {@code JettyHeadersAdapter} based on the given
 	 * {@code HttpFields} instance.
 	 * @param headers the {@code HttpFields} to base this adapter on
 	 */
 	public JettyHeadersAdapter(HttpFields headers) {
 		Assert.notNull(headers, "Headers must not be null");
 		this.headers = headers;
-		this.mutable = headers instanceof HttpFields.Mutable m ? m : null;
+		this.mutable = (headers instanceof HttpFields.Mutable m ? m : null);
 	}
 
 
@@ -146,12 +146,12 @@ public final class JettyHeadersAdapter implements MultiValueMap<String, String> 
 	public @Nullable List<String> get(Object key) {
 		List<String> list = null;
 		if (key instanceof String name) {
-			for (HttpField f : this.headers) {
-				if (f.is(name)) {
+			for (HttpField field : this.headers) {
+				if (field.is(name)) {
 					if (list == null) {
 						list = new ArrayList<>();
 					}
-					list.add(f.getValue());
+					list.add(field.getValue());
 				}
 			}
 		}
@@ -162,7 +162,6 @@ public final class JettyHeadersAdapter implements MultiValueMap<String, String> 
 	public @Nullable List<String> put(String key, List<String> value) {
 		HttpFields.Mutable mutableHttpFields = mutableFields();
 		List<String> oldValues = get(key);
-
 		if (oldValues == null) {
 			switch (value.size()) {
 				case 0 -> {}

@@ -491,7 +491,12 @@ public class HttpHeaders implements Serializable {
 	 */
 	public static HttpHeaders copyOf(MultiValueMap<String, String> headers) {
 		HttpHeaders httpHeadersCopy = new HttpHeaders();
-		headers.forEach((key, values) -> httpHeadersCopy.put(key, new ArrayList<>(values)));
+		for (String name : headers.keySet()) {
+			List<String> values = headers.get(name);
+			if (values != null) {
+				httpHeadersCopy.put(name, new ArrayList<>(values));
+			}
+		}
 		return httpHeadersCopy;
 	}
 
@@ -1841,11 +1846,12 @@ public class HttpHeaders implements Serializable {
 
 	/**
 	 * Return this HttpHeaders as a {@code Map} with the first values for each
-	 * header name.
+	 * header name. This method is susceptible to include multiple
+	 * casing variants of a given header name, see {@link #asMultiValueMap()}
+	 * javadoc.
 	 * <p>The difference between this method and {@link #asSingleValueMap()} is
 	 * that this method returns a copy of the headers, whereas the latter
-	 * returns a view. This copy also ensures that collection-iterating methods
-	 * like {@code entrySet()} are case-insensitive.
+	 * returns a view.
 	 * @return a single value representation of these headers
 	 */
 	public Map<String, String> toSingleValueMap() {
@@ -1854,16 +1860,14 @@ public class HttpHeaders implements Serializable {
 
 	/**
 	 * Return this HttpHeaders as a {@code Map} with the first values for each
-	 * header name.
-	 * <p>The difference between this method and {@link #toSingleValueMap()} is
-	 * that this method returns a view of the headers, whereas the latter
-	 * returns a copy. This method is also susceptible to include multiple
+	 * header name. This method is susceptible to include multiple
 	 * casing variants of a given header name, see {@link #asMultiValueMap()}
 	 * javadoc.
+	 * <p>The difference between this method and {@link #toSingleValueMap()} is
+	 * that this method returns a view of the headers, whereas the latter
+	 * returns a copy.
 	 * @return a single value representation of these headers
-	 * @deprecated in favor of {@link #toSingleValueMap()} which performs a copy but
-	 * ensures that collection-iterating methods like {@code entrySet()} are
-	 * case-insensitive
+	 * @deprecated in favor of {@link #toSingleValueMap()} which performs a copy
 	 */
 	@Deprecated(since = "7.0", forRemoval = true)
 	public Map<String, String> asSingleValueMap() {
@@ -1985,7 +1989,9 @@ public class HttpHeaders implements Serializable {
 	 * @see #put(String, List)
 	 */
 	public void putAll(Map<? extends String, ? extends List<String>> headers) {
-		headers.forEach(this::put);
+		for (String name : headers.keySet()) {
+			put(name, headers.get(name));
+		}
 	}
 
 	/**
@@ -2182,6 +2188,7 @@ public class HttpHeaders implements Serializable {
 		private static final Object VALUE = new Object();
 
 		private final MultiValueMap<String, String> headers;
+
 		private final Map<String, Object> deduplicatedNames;
 
 		public CaseInsensitiveHeaderNameSet(MultiValueMap<String, String> headers) {
@@ -2223,12 +2230,14 @@ public class HttpHeaders implements Serializable {
 		}
 	}
 
+
 	private static class HeaderNamesIterator implements Iterator<String> {
 
-		private @Nullable String currentName;
-
 		private final MultiValueMap<String, String> headers;
+
 		private final Iterator<String> namesIterator;
+
+		private @Nullable String currentName;
 
 		public HeaderNamesIterator(MultiValueMap<String, String> headers, Map<String, Object> caseInsensitiveNames) {
 			this.headers = headers;
@@ -2263,6 +2272,7 @@ public class HttpHeaders implements Serializable {
 	private static final class CaseInsensitiveEntrySet extends AbstractSet<Entry<String, List<String>>> {
 
 		private final MultiValueMap<String, String> headers;
+
 		private final CaseInsensitiveHeaderNameSet nameSet;
 
 		public CaseInsensitiveEntrySet(MultiValueMap<String, String> headers) {
@@ -2279,6 +2289,7 @@ public class HttpHeaders implements Serializable {
 		public int size() {
 			return this.nameSet.size();
 		}
+
 
 		private final class CaseInsensitiveIterator implements Iterator<Entry<String, List<String>>> {
 
@@ -2304,6 +2315,7 @@ public class HttpHeaders implements Serializable {
 			}
 		}
 
+
 		private final class CaseInsensitiveEntry implements Entry<String, List<String>> {
 
 			private final String key;
@@ -2324,26 +2336,21 @@ public class HttpHeaders implements Serializable {
 
 			@Override
 			public List<String> setValue(List<String> value) {
-				List<String> previousValues = Objects.requireNonNull(
-						CaseInsensitiveEntrySet.this.headers.get(this.key));
+				List<String> previous = Objects.requireNonNull(CaseInsensitiveEntrySet.this.headers.get(this.key));
 				CaseInsensitiveEntrySet.this.headers.put(this.key, value);
-				return previousValues;
+				return previous;
 			}
 
 			@Override
-			public boolean equals(Object o) {
-				if (this == o) {
-					return true;
-				}
-				if (!(o instanceof Map.Entry<?,?> that)) {
-					return false;
-				}
-				return ObjectUtils.nullSafeEquals(getKey(), that.getKey()) && ObjectUtils.nullSafeEquals(getValue(), that.getValue());
+			public boolean equals(@Nullable Object other) {
+				return (this == other || (other instanceof Map.Entry<?, ?> that &&
+						ObjectUtils.nullSafeEquals(getKey(), that.getKey()) &&
+						ObjectUtils.nullSafeEquals(getValue(), that.getValue())));
 			}
 
 			@Override
 			public int hashCode() {
-				return ObjectUtils.nullSafeHash(getKey(), getValue());
+				return this.key.hashCode();  // avoid value lookup for hashCode
 			}
 		}
 	}

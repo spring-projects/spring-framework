@@ -40,7 +40,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 
 /**
- * Abstract base class for a {@link MessageHandler} that broker messages to
+ * Abstract base class for a {@link MessageHandler} that brokers messages to
  * registered subscribers.
  *
  * @author Rossen Stoyanchev

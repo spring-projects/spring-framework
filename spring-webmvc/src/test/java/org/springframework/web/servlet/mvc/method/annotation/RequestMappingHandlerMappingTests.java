@@ -23,6 +23,7 @@ import java.lang.annotation.Target;
 import java.lang.reflect.Method;
 import java.security.Principal;
 import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
 
@@ -35,6 +36,10 @@ import org.springframework.core.annotation.AliasFor;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.ClassUtils;
+import org.springframework.web.accept.DefaultApiVersionStrategy;
+import org.springframework.web.accept.HeaderApiVersionResolver;
+import org.springframework.web.accept.InvalidApiVersionException;
+import org.springframework.web.accept.SemanticApiVersionParser;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -44,6 +49,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.support.StaticWebApplicationContext;
+import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.method.HandlerTypePredicate;
 import org.springframework.web.service.annotation.HttpExchange;
 import org.springframework.web.service.annotation.PostExchange;
@@ -60,6 +66,7 @@ import org.springframework.web.util.pattern.PathPatternParser;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Named.named;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.Mockito.mock;
@@ -158,6 +165,36 @@ class RequestMappingHandlerMappingTests {
 		else {
 			mapping.getUrlPathHelper().resolveAndCacheLookupPath(request);
 		}
+	}
+
+	@PathPatternsParameterizedTest
+	void version(RequestMappingHandlerMapping mapping) throws Exception {
+		MockHttpServletRequest request = initRequestForVersionTest(mapping, "1.1");
+		HandlerMethod handlerMethod = (HandlerMethod) mapping.getHandler(request).getHandler();
+		assertThat(handlerMethod.getMethod().getName()).isEqualTo("foo1_1");
+	}
+
+	@PathPatternsParameterizedTest
+	void versionInvalid(RequestMappingHandlerMapping mapping) throws Exception {
+		MockHttpServletRequest request = initRequestForVersionTest(mapping, "99");
+		assertThatThrownBy(() -> mapping.getHandler(request)).isInstanceOf(InvalidApiVersionException.class);
+	}
+
+	private static MockHttpServletRequest initRequestForVersionTest(
+			RequestMappingHandlerMapping mapping, String version) {
+
+		((StaticWebApplicationContext) mapping.getApplicationContext())
+				.registerSingleton("controller", VersionController.class);
+
+		DefaultApiVersionStrategy versionStrategy = new DefaultApiVersionStrategy(
+				List.of(new HeaderApiVersionResolver("API-Version")), new SemanticApiVersionParser(),
+				true, null, true, null, null);
+		mapping.setApiVersionStrategy(versionStrategy);
+		mapping.afterPropertiesSet();
+
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/foo");
+		request.addHeader("API-Version", version);
+		return request;
 	}
 
 	@PathPatternsParameterizedTest
@@ -622,6 +659,22 @@ class RequestMappingHandlerMappingTests {
 		@GetMapping("/{id}")
 		public Principal getUser() {
 			return mock();
+		}
+	}
+
+
+	@RestController
+	@RequestMapping("/foo")
+	static class VersionController {
+
+		@GetMapping
+		public String foo() {
+			return "foo";
+		}
+
+		@GetMapping(version = "1.1")
+		public String foo1_1() {
+			return "foo1_1";
 		}
 	}
 

@@ -84,6 +84,16 @@ public interface EntityManagerFactoryInfo {
 	@Nullable Class<? extends EntityManager> getEntityManagerInterface();
 
 	/**
+	 * Return the (potentially vendor-specific) EntityAgent interface
+	 * that this factory's EntityAgents will implement.
+	 * <p>A {@code null} return value suggests that autodetection is supposed
+	 * to happen: either based on a target {@code EntityAgent} instance
+	 * or simply defaulting to {@code jakarta.persistence.EntityAgent}.
+	 * @since 7.1
+	 */
+	@Nullable Class<?> getEntityAgentInterface();
+
+	/**
 	 * Return the vendor-specific JpaDialect implementation for this
 	 * EntityManagerFactory, or {@code null} if not known.
 	 */

@@ -47,6 +47,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
+import org.springframework.web.reactive.resource.ResourceHandlerUtils;
 import org.springframework.web.reactive.result.view.AbstractUrlBasedView;
 import org.springframework.web.server.ServerWebExchange;
 
@@ -57,10 +58,6 @@ import org.springframework.web.server.ServerWebExchange;
  * <p>If not set, each property is auto-detected by looking up a single
  * {@link ScriptTemplateConfig} bean in the web application context and using
  * it to obtain the configured properties.
- *
- * <p>The Nashorn JavaScript engine requires Java 8+ and may require setting the
- * {@code sharedEngine} property to {@code false} in order to run properly. See
- * {@link ScriptTemplateConfigurer#setSharedEngine(Boolean)} for more details.
  *
  * @author Sebastien Deleuze
  * @author Juergen Hoeller
@@ -162,14 +159,13 @@ public class ScriptTemplateView extends AbstractUrlBasedView {
 	 */
 	public void setResourceLoaderPath(String resourceLoaderPath) {
 		String[] paths = StringUtils.commaDelimitedListToStringArray(resourceLoaderPath);
-		this.resourceLoaderPaths = new String[paths.length + 1];
-		this.resourceLoaderPaths[0] = "";
+		this.resourceLoaderPaths = new String[paths.length];
 		for (int i = 0; i < paths.length; i++) {
 			String path = paths[i];
 			if (!path.endsWith("/") && !path.endsWith(":")) {
 				path = path + "/";
 			}
-			this.resourceLoaderPaths[i + 1] = path;
+			this.resourceLoaderPaths[i] = path;
 		}
 	}
 
@@ -297,11 +293,26 @@ public class ScriptTemplateView extends AbstractUrlBasedView {
 	}
 
 	protected @Nullable Resource getResource(String location) {
-		if (this.resourceLoaderPaths != null) {
+		String normalizedLocation = ResourceHandlerUtils.normalizeInputPath(location);
+		if (this.resourceLoaderPaths != null && !ResourceHandlerUtils.shouldIgnoreInputPath(normalizedLocation)) {
+			ApplicationContext context = obtainApplicationContext();
 			for (String path : this.resourceLoaderPaths) {
-				Resource resource = obtainApplicationContext().getResource(path + location);
-				if (resource.exists()) {
-					return resource;
+				Resource resource = context.getResource(path + normalizedLocation);
+				try {
+					if (resource.exists() && ResourceHandlerUtils.isResourceUnderLocation(context.getResource(path), resource)) {
+						return resource;
+					}
+				}
+				catch (IOException ex) {
+					if (logger.isDebugEnabled()) {
+						String error = "Skip location [" + normalizedLocation + "] due to error";
+						if (logger.isTraceEnabled()) {
+							logger.trace(error, ex);
+						}
+						else {
+							logger.debug(error + ": " + ex.getMessage());
+						}
+					}
 				}
 			}
 		}

@@ -48,10 +48,10 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Rossen Stoyanchev
  */
-public class HttpHandlerConnectorTests {
+class HttpHandlerConnectorTests {
 
 	@Test
-	public void adaptRequest() {
+	void adaptRequest() {
 
 		TestHttpHandler handler = new TestHttpHandler(response -> {
 			response.setStatusCode(HttpStatus.OK);
@@ -79,7 +79,7 @@ public class HttpHandlerConnectorTests {
 	}
 
 	@Test
-	public void adaptResponse() {
+	void adaptResponse() {
 
 		ResponseCookie cookie = ResponseCookie.from("custom-cookie", "c0").build();
 
@@ -105,7 +105,7 @@ public class HttpHandlerConnectorTests {
 	}
 
 	@Test // gh-23936
-	public void handlerOnNonBlockingThread() {
+	void handlerOnNonBlockingThread() {
 
 		TestHttpHandler handler = new TestHttpHandler(response -> {
 

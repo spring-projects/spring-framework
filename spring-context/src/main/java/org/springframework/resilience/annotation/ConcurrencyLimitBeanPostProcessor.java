@@ -35,7 +35,9 @@ import org.springframework.aop.support.DefaultPointcutAdvisor;
 import org.springframework.aop.support.annotation.AnnotationMatchingPointcut;
 import org.springframework.context.EmbeddedValueResolverAware;
 import org.springframework.core.annotation.AnnotatedElementUtils;
+import org.springframework.resilience.InvocationRejectedException;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.util.StringValueResolver;
 
@@ -99,14 +101,14 @@ public class ConcurrencyLimitBeanPostProcessor extends AbstractBeanFactoryAwareA
 					interceptor = holder.methodInterceptors.get(method);
 					if (interceptor == null) {
 						boolean perMethod = false;
-						ConcurrencyLimit annotation = AnnotatedElementUtils.getMergedAnnotation(method, ConcurrencyLimit.class);
+						ConcurrencyLimit annotation = AnnotatedElementUtils.findMergedAnnotation(method, ConcurrencyLimit.class);
 						if (annotation != null) {
 							perMethod = true;
 						}
 						else {
 							interceptor = holder.classInterceptor;
 							if (interceptor == null) {
-								annotation = AnnotatedElementUtils.getMergedAnnotation(targetClass, ConcurrencyLimit.class);
+								annotation = AnnotatedElementUtils.findMergedAnnotation(targetClass, ConcurrencyLimit.class);
 							}
 						}
 						if (interceptor == null) {
@@ -115,7 +117,10 @@ public class ConcurrencyLimitBeanPostProcessor extends AbstractBeanFactoryAwareA
 							if (concurrencyLimit < -1) {
 								throw new IllegalStateException(annotation + " must be configured with a valid limit");
 							}
-							interceptor = new ConcurrencyThrottleInterceptor(concurrencyLimit);
+							String name = (perMethod ? ClassUtils.getQualifiedMethodName(method) : targetClass.getName());
+							interceptor = (annotation.policy() == ConcurrencyLimit.ThrottlePolicy.REJECT ?
+									new RejectingConcurrencyThrottleInterceptor(concurrencyLimit, name, instance) :
+									new ResilienceConcurrencyThrottleInterceptor(concurrencyLimit, name, instance));
 							if (!perMethod) {
 								holder.classInterceptor = interceptor;
 							}
@@ -146,6 +151,38 @@ public class ConcurrencyLimitBeanPostProcessor extends AbstractBeanFactoryAwareA
 		final Map<Method, MethodInterceptor> methodInterceptors = new ConcurrentHashMap<>();
 
 		@Nullable MethodInterceptor classInterceptor;
+	}
+
+
+	private static class ResilienceConcurrencyThrottleInterceptor extends ConcurrencyThrottleInterceptor {
+
+		private final String identifier;
+
+		private final Object target;
+
+		public ResilienceConcurrencyThrottleInterceptor(int concurrencyLimit, String identifier, Object target) {
+			super(concurrencyLimit);
+			this.identifier = identifier;
+			this.target = target;
+		}
+
+		@Override
+		protected void onAccessRejected(String msg) {
+			throw new InvocationRejectedException(msg + " " + this.identifier, this.target);
+		}
+	}
+
+
+	private static class RejectingConcurrencyThrottleInterceptor extends ResilienceConcurrencyThrottleInterceptor {
+
+		public RejectingConcurrencyThrottleInterceptor(int concurrencyLimit, String identifier, Object target) {
+			super(concurrencyLimit, identifier, target);
+		}
+
+		@Override
+		protected void onLimitReached() {
+			onAccessRejected("Concurrency limit reached: " + getConcurrencyLimit() + " - not allowed to enter");
+		}
 	}
 
 }

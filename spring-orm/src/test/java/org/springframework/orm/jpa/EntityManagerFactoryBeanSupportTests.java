@@ -27,7 +27,7 @@ import static org.mockito.Mockito.verify;
 class EntityManagerFactoryBeanSupportTests extends AbstractEntityManagerFactoryBeanTests {
 
 	@Test
-	void testHookIsCalled() {
+	void hookIsCalled() {
 		DummyEntityManagerFactoryBean demf = new DummyEntityManagerFactoryBean(mockEmf);
 
 		demf.afterPropertiesSet();

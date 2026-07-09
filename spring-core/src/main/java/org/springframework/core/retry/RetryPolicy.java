@@ -67,7 +67,7 @@ public interface RetryPolicy {
 	 * @see Builder#timeout(Duration)
 	 */
 	default Duration getTimeout() {
-		return Duration.ZERO;
+		return Builder.DEFAULT_TIMEOUT;
 	}
 
 	/**
@@ -158,15 +158,21 @@ public interface RetryPolicy {
 		public static final long DEFAULT_DELAY = 1000;
 
 		/**
+		 * The default {@linkplain #multiplier(double) multiplier}: {@value}.
+		 */
+		public static final double DEFAULT_MULTIPLIER = 1.0;
+
+		/**
 		 * The default {@linkplain #maxDelay(Duration) max delay}: {@value} ms.
 		 * @see Long#MAX_VALUE
 		 */
 		public static final long DEFAULT_MAX_DELAY = Long.MAX_VALUE;
 
 		/**
-		 * The default {@linkplain #multiplier(double) multiplier}: {@value}.
+		 * The default {@linkplain #timeout(Duration) timeout}: {@link Duration#ZERO}.
+		 * @since 7.0.9
 		 */
-		public static final double DEFAULT_MULTIPLIER = 1.0;
+		public static final Duration DEFAULT_TIMEOUT = Duration.ZERO;
 
 
 		private @Nullable BackOff backOff;
@@ -219,6 +225,9 @@ public interface RetryPolicy {
 		 * invoked at least once and at most 5 times.
 		 * <p>The default is {@value #DEFAULT_MAX_RETRIES}.
 		 * <p>The supplied value will override any previously configured value.
+		 * Note that {@link RetryTemplate} effectively only supports an integer
+		 * range since it stores all exceptions, so it will always exhaust at
+		 * {@code Integer#MAX_VALUE} even if a larger value is specified here.
 		 * <p>You should not specify this configuration option if you have
 		 * configured a custom {@link #backOff(BackOff) BackOff} strategy.
 		 * @param maxRetries the maximum number of retry attempts;
@@ -278,6 +287,11 @@ public interface RetryPolicy {
 		 * {@linkplain #maxDelay(Duration) max delay}.
 		 * <p>If a {@linkplain #multiplier(double) multiplier} is specified, it
 		 * is applied to the jitter value as well.
+		 * <p>When the configured {@linkplain #delay(Duration) delay} is zero
+		 * combined with a positive jitter, the delay never grows regardless of
+		 * any configured multiplier, so the full configured jitter is applied
+		 * directly as a random delay in the range from zero to
+		 * {@code min(jitter, maxDelay)}.
 		 * <p>The default is no jitter.
 		 * <p>The supplied value will override any previously configured value.
 		 * <p>You should not specify this configuration option if you have

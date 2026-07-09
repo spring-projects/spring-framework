@@ -15,7 +15,6 @@
  */
 package org.springframework.web.reactive.function.client.support
 
-import kotlinx.coroutines.runBlocking
 import mockwebserver3.MockResponse
 import mockwebserver3.MockWebServer
 import org.assertj.core.api.Assertions.assertThat
@@ -69,12 +68,10 @@ class KotlinWebClientHttpServiceGroupAdapterServiceProxyTests {
 	}
 
 	@Test
-	fun greetingSuspending() {
+	suspend fun greetingSuspending() {
 		prepareResponse { it.setHeader("Content-Type", "text/plain").body("Hello Spring!") }
-		runBlocking {
-			val greeting = initHttpService().getGreetingSuspending()
-			assertThat(greeting).isEqualTo("Hello Spring!")
-		}
+		val greeting = initHttpService().getGreetingSuspending()
+		assertThat(greeting).isEqualTo("Hello Spring!")
 	}
 
 	@Test
@@ -94,7 +91,7 @@ class KotlinWebClientHttpServiceGroupAdapterServiceProxyTests {
 	}
 
 	@Test
-	fun greetingSuspendingWithRequestAttribute() {
+	suspend fun greetingSuspendingWithRequestAttribute() {
 		val attributes: MutableMap<String, Any> = HashMap()
 		val webClient = WebClient.builder()
 			.baseUrl(server.url("/").toString())
@@ -105,11 +102,9 @@ class KotlinWebClientHttpServiceGroupAdapterServiceProxyTests {
 			.build()
 		prepareResponse { it.setHeader("Content-Type", "text/plain").body("Hello Spring!") }
 		val service = initHttpService(webClient)
-		runBlocking {
-			val greeting = service.getGreetingSuspendingWithAttribute("myAttributeValue")
-			assertThat(greeting).isEqualTo("Hello Spring!")
-			assertThat(attributes).containsEntry("myAttribute", "myAttributeValue")
-		}
+		val greeting = service.getGreetingSuspendingWithAttribute("myAttributeValue")
+		assertThat(greeting).isEqualTo("Hello Spring!")
+		assertThat(attributes).containsEntry("myAttribute", "myAttributeValue")
 	}
 
 	@Test

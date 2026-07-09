@@ -26,6 +26,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 
+import jakarta.xml.bind.annotation.XmlRootElement;
 import mockwebserver3.MockResponse;
 import mockwebserver3.MockWebServer;
 import mockwebserver3.RecordedRequest;
@@ -36,6 +37,7 @@ import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -46,6 +48,7 @@ import org.springframework.web.bind.annotation.RequestAttribute;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.client.ApiVersionInserter;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.service.annotation.GetExchange;
@@ -99,7 +102,7 @@ class WebClientAdapterTests {
 	void greeting() {
 		prepareResponse(builder -> builder.setHeader("Content-Type", "text/plain").body("Hello Spring!"));
 
-		StepVerifier.create(initService().getGreeting())
+		StepVerifier.create(initService(Service.class).getGreeting())
 				.expectNext("Hello Spring!")
 				.expectComplete()
 				.verify(Duration.ofSeconds(5));
@@ -119,12 +122,48 @@ class WebClientAdapterTests {
 
 		prepareResponse(response -> response.setHeader("Content-Type", "text/plain").body("Hello Spring!"));
 
-		StepVerifier.create(initService(webClient).getGreetingWithAttribute("myAttributeValue"))
+		StepVerifier.create(initService(webClient, Service.class).getGreetingWithAttribute("myAttributeValue"))
 				.expectNext("Hello Spring!")
 				.expectComplete()
 				.verify(Duration.ofSeconds(5));
 
 		assertThat(attributes).containsEntry("myAttribute", "myAttributeValue");
+	}
+
+	@Test // gh-36514
+	void greetingWithDefaultApiVersion() throws InterruptedException {
+		prepareResponse(builder -> builder.setHeader("Content-Type", "text/plain").body("Hello Spring 2!"));
+
+		WebClient webClient = WebClient.builder()
+				.baseUrl(this.server.url("/").toString())
+				.defaultApiVersion("1.0")
+				.apiVersionInserter(ApiVersionInserter.useHeader("X-Version"))
+				.build();
+
+		StepVerifier.create(initService(webClient, Service.class).getGreeting())
+				.expectNext("Hello Spring 2!")
+				.expectComplete()
+				.verify(Duration.ofSeconds(5));
+
+		RecordedRequest request = this.server.takeRequest();
+		assertThat(request.getHeaders().get("X-Version")).isEqualTo("1.0");
+	}
+
+	@Test // see gh-36326
+	void getBodyWithGenericReturnType() {
+		prepareResponse(r -> r.setHeader("Content-Type", "application/json").body("{\"name\":\"Karl\"}"));
+		Person person = initService(PersonClient.class).getBody();
+
+		assertThat(person.getName()).isEqualTo("Karl");
+	}
+
+
+	@Test // see gh-36326
+	void getEntityWithGenericReturnType() {
+		prepareResponse(r -> r.setHeader("Content-Type", "application/json").body("{\"name\":\"Karl\"}"));
+		ResponseEntity<Person> entity = initService(PersonClient.class).getEntity();
+
+		assertThat(entity.getBody().getName()).isEqualTo("Karl");
 	}
 
 	@Test // gh-29624
@@ -133,7 +172,7 @@ class WebClientAdapterTests {
 		prepareResponse(response -> response.code(200).body(expectedBody));
 
 		URI dynamicUri = this.server.url("/greeting/123").uri();
-		String actualBody = initService().getGreetingById(dynamicUri, "456");
+		String actualBody = initService(Service.class).getGreetingById(dynamicUri, "456");
 
 		assertThat(actualBody).isEqualTo(expectedBody);
 		assertThat(this.server.takeRequest().getUrl().uri()).isEqualTo(dynamicUri);
@@ -147,7 +186,7 @@ class WebClientAdapterTests {
 		map.add("param1", "value 1");
 		map.add("param2", "value 2");
 
-		initService().postForm(map);
+		initService(Service.class).postForm(map);
 
 		RecordedRequest request = this.server.takeRequest();
 		assertThat(request.getHeaders().get("Content-Type")).isEqualTo("application/x-www-form-urlencoded");
@@ -162,7 +201,7 @@ class WebClientAdapterTests {
 		MultipartFile file = new MockMultipartFile(
 				fileName, originalFileName, MediaType.APPLICATION_JSON_VALUE, "test".getBytes());
 
-		initService().postMultipart(file, "test2");
+		initService(Service.class).postMultipart(file, "test2");
 
 		RecordedRequest request = this.server.takeRequest();
 		assertThat(request.getHeaders().get("Content-Type")).startsWith("multipart/form-data;boundary=");
@@ -181,12 +220,30 @@ class WebClientAdapterTests {
 		persons.add(new Person("John"));
 		persons.add(new Person("Richard"));
 
-		initService().postPersonSet(persons);
+		initService(Service.class).postPersonSet(persons);
 
 		RecordedRequest request = server.takeRequest();
 		assertThat(request.getMethod()).isEqualTo("POST");
 		assertThat(request.getTarget()).isEqualTo("/persons");
 		assertThat(request.getBody().utf8()).isEqualTo("[{\"name\":\"John\"},{\"name\":\"Richard\"}]");
+	}
+
+	@Test // gh-36078
+	void postObject() throws InterruptedException {
+		prepareResponse(response -> response.code(201));
+
+		WebClient webClient = WebClient.builder()
+				.baseUrl(this.server.url("/").toString())
+				.defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_XML_VALUE)
+				.build();
+
+		initService(webClient, Service.class).postObject(new Person("John"));
+
+		RecordedRequest request = server.takeRequest();
+		assertThat(request.getMethod()).isEqualTo("POST");
+		assertThat(request.getTarget()).isEqualTo("/object");
+		assertThat(request.getBody().utf8()).isEqualTo(
+				"<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?><person><name>John</name></person>");
 	}
 
 	@Test
@@ -195,7 +252,7 @@ class WebClientAdapterTests {
 		prepareResponse(response -> response.code(200).body(ignoredResponseBody));
 		UriBuilderFactory factory = new DefaultUriBuilderFactory(this.anotherServer.url("/").toString());
 
-		String actualBody = initService().getWithUriBuilderFactory(factory);
+		String actualBody = initService(Service.class).getWithUriBuilderFactory(factory);
 
 		assertThat(actualBody).isEqualTo(ANOTHER_SERVER_RESPONSE_BODY);
 		assertThat(this.anotherServer.takeRequest().getTarget()).isEqualTo("/greeting");
@@ -208,7 +265,7 @@ class WebClientAdapterTests {
 		prepareResponse(response -> response.code(200).body(ignoredResponseBody));
 		UriBuilderFactory factory = new DefaultUriBuilderFactory(this.anotherServer.url("/").toString());
 
-		String actualBody = initService().getWithUriBuilderFactory(factory, "123", "test");
+		String actualBody = initService(Service.class).getWithUriBuilderFactory(factory, "123", "test");
 
 		assertThat(actualBody).isEqualTo(ANOTHER_SERVER_RESPONSE_BODY);
 		assertThat(this.anotherServer.takeRequest().getTarget()).isEqualTo("/greeting/123?param=test");
@@ -222,7 +279,7 @@ class WebClientAdapterTests {
 		URI dynamicUri = this.server.url("/greeting/123").uri();
 		UriBuilderFactory factory = new DefaultUriBuilderFactory(this.anotherServer.url("/").toString());
 
-		String actualBody = initService().getWithIgnoredUriBuilderFactory(dynamicUri, factory);
+		String actualBody = initService(Service.class).getWithIgnoredUriBuilderFactory(dynamicUri, factory);
 
 		assertThat(actualBody).isEqualTo(expectedResponseBody);
 		assertThat(this.server.takeRequest().getUrl().uri()).isEqualTo(dynamicUri);
@@ -265,14 +322,14 @@ class WebClientAdapterTests {
 		return anotherServer;
 	}
 
-	private Service initService() {
+	private <S> S initService(Class<S> serviceType) {
 		WebClient webClient = WebClient.builder().baseUrl(this.server.url("/").toString()).build();
-		return initService(webClient);
+		return initService(webClient, serviceType);
 	}
 
-	private Service initService(WebClient webClient) {
+	private <S> S initService(WebClient webClient, Class<S> serviceType) {
 		WebClientAdapter adapter = WebClientAdapter.create(webClient);
-		return HttpServiceProxyFactory.builderFor(adapter).build().createClient(Service.class);
+		return HttpServiceProxyFactory.builderFor(adapter).build().createClient(serviceType);
 	}
 
 	private void prepareResponse(Function<MockResponse.Builder, MockResponse.Builder> f) {
@@ -304,6 +361,9 @@ class WebClientAdapterTests {
 		@PostExchange("/persons")
 		void postPersonSet(@RequestBody Set<Person> set);
 
+		@PostExchange("/object")
+		void postObject(@RequestBody Object object);
+
 		@GetExchange("/greeting")
 		String getWithUriBuilderFactory(UriBuilderFactory uriBuilderFactory);
 
@@ -316,9 +376,13 @@ class WebClientAdapterTests {
 	}
 
 
+	@XmlRootElement
 	static final class Person {
 
-		private final String name;
+		private String name;
+
+		public Person() {
+		}
 
 		Person(String name) {
 			this.name = name;
@@ -328,6 +392,23 @@ class WebClientAdapterTests {
 			return this.name;
 		}
 
+		public void setName(String name) {
+			this.name = name;
+		}
+	}
+
+
+	private interface BaseClient<T> {
+
+		@GetExchange
+		T getBody();
+
+		@GetExchange
+		ResponseEntity<T> getEntity();
+	}
+
+
+	private interface PersonClient extends BaseClient<Person> {
 	}
 
 }

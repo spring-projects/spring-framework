@@ -371,6 +371,13 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 
 	@Override
 	public @Nullable V computeIfAbsent(@Nullable K key, Function<@Nullable ? super K, @Nullable ? extends V> mappingFunction) {
+		// Avoid locking if entry is present
+		Reference<K, V> ref = getReference(key, Restructure.NEVER);
+		Entry<K, V> entry = (ref != null ? ref.get() : null);
+		if (entry != null) {
+			return entry.getValue();
+		}
+
 		return doTask(key, new Task<V>(TaskOption.RESTRUCTURE_BEFORE, TaskOption.RESIZE) {
 			@Override
 			protected @Nullable V execute(@Nullable Reference<K, V> ref, @Nullable Entry<K, V> entry, @Nullable Entries<V> entries) {
@@ -390,6 +397,13 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 
 	@Override
 	public @Nullable V computeIfPresent(@Nullable K key, BiFunction<@Nullable ? super K, @Nullable ? super V, @Nullable ? extends V> remappingFunction) {
+		// Avoid locking if entry is absent
+		Reference<K, V> ref = getReference(key, Restructure.NEVER);
+		Entry<K, V> entry = (ref != null ? ref.get() : null);
+		if (entry == null) {
+			return null;
+		}
+
 		return doTask(key, new Task<V>(TaskOption.RESTRUCTURE_BEFORE, TaskOption.RESIZE) {
 			@Override
 			protected @Nullable V execute(@Nullable Reference<K, V> ref, @Nullable Entry<K, V> entry, @Nullable Entries<V> entries) {
@@ -485,10 +499,17 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 	}
 
 	/**
-	 * Remove any entries that have been garbage collected and are no longer referenced.
-	 * Under normal circumstances garbage collected entries are automatically purged as
-	 * items are added or removed from the Map. This method can be used to force a purge,
-	 * and is useful when the Map is read frequently but updated less often.
+	 * Remove any entries that have been garbage-collected and are no longer referenced.
+	 * Note that this call implies segment locking and can lead to thread contention.
+	 * <p>Under normal circumstances, garbage-collected entries are automatically purged as
+	 * items are added or removed from the Map. This method can be used to force a purge
+	 * which is useful when the Map is read frequently but hardly ever updated anymore.
+	 * <p>Note that it may be preferable to simply {@link #clear() clear} the entire cache at
+	 * certain points of the lifecycle, not just dropping unreferenced entries but even the
+	 * entire cache content: assuming that most entries in the cache won't be needed anymore
+	 * after certain processing phases, therefore rather rebuilding the cache going forward.
+	 * @since 4.1.1
+	 * @see #clear()
 	 */
 	public void purgeUnreferencedEntries() {
 		for (Segment segment : this.segments) {
@@ -702,7 +723,7 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 			int currCount = this.count.get();
 			boolean needsResize = allowResize && (currCount > 0 && currCount >= this.resizeThreshold);
 			Reference<K, V> ref = this.referenceManager.pollForPurge();
-			if (ref != null || (needsResize)) {
+			if (ref != null || needsResize) {
 				restructure(allowResize, ref);
 			}
 		}

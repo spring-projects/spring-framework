@@ -28,4 +28,5 @@ public class BarRegistrar implements BeanRegistrar {
 	}
 
 	public record Bar() {}
+
 }

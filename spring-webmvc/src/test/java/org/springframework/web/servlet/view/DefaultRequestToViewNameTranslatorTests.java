@@ -21,15 +21,19 @@ import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Named;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.handler.PathPatternsParameterizedTest;
 import org.springframework.web.servlet.handler.PathPatternsTestUtils;
 import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
  * @author Rick Evans
  * @author Juergen Hoeller
+ * @author Sebastien Deleuze
  */
 class DefaultRequestToViewNameTranslatorTests {
 
@@ -119,6 +123,22 @@ class DefaultRequestToViewNameTranslatorTests {
 		MockHttpServletRequest request = requestFactory.apply(VIEW_NAME);
 		this.translator.setSuffix(null);
 		assertViewName(request, VIEW_NAME);
+	}
+
+	@PathPatternsParameterizedTest
+	void getViewNameWithRedirectPrefixFails(Function<String, MockHttpServletRequest> requestFactory) {
+		MockHttpServletRequest request = requestFactory.apply(UrlBasedViewResolver.REDIRECT_URL_PREFIX + VIEW_NAME);
+		assertThatExceptionOfType(ResponseStatusException.class)
+				.isThrownBy(() -> this.translator.getViewName(request))
+				.satisfies(ex -> assertThat(ex.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST));
+	}
+
+	@PathPatternsParameterizedTest
+	void getViewNameWithForwardPrefixFails(Function<String, MockHttpServletRequest> requestFactory) {
+		MockHttpServletRequest request = requestFactory.apply(UrlBasedViewResolver.FORWARD_URL_PREFIX + VIEW_NAME);
+		assertThatExceptionOfType(ResponseStatusException.class)
+				.isThrownBy(() -> this.translator.getViewName(request))
+				.satisfies(ex -> assertThat(ex.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST));
 	}
 
 

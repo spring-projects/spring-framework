@@ -21,11 +21,16 @@ import java.util.Date;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 /**
+ * Tests for {@link SimpleMailMessage}.
+ *
  * @author Dmitriy Kopylenko
  * @author Juergen Hoeller
  * @author Rick Evans
@@ -35,7 +40,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
 class SimpleMailMessageTests {
 
 	@Test
-	void testSimpleMessageCopyCtor() {
+	void simpleMessageCopyCtor() {
 		SimpleMailMessage message = new SimpleMailMessage();
 		message.setFrom("me@mail.org");
 		message.setTo("you@mail.org");
@@ -81,8 +86,7 @@ class SimpleMailMessageTests {
 	}
 
 	@Test
-	void testDeepCopyOfStringArrayTypedFieldsOnCopyCtor() {
-
+	void deepCopyOfStringArrayTypedFieldsOnCopyCtor() {
 		SimpleMailMessage original = new SimpleMailMessage();
 		original.setTo("fiona@mail.org", "apple@mail.org");
 		original.setCc("he@mail.org", "she@mail.org");
@@ -99,11 +103,69 @@ class SimpleMailMessageTests {
 		assertThat(copy.getBcc()[0]).isEqualTo("us@mail.org");
 	}
 
+	@Test  // gh-36626
+	void setSentDateStoresACopy() {
+		SimpleMailMessage message = new SimpleMailMessage();
+		Date sentDate = new Date(1234L);
+
+		message.setSentDate(sentDate);
+		sentDate.setTime(0L);
+
+		assertThat(message.getSentDate()).isEqualTo(new Date(1234L));
+	}
+
+	@Test  // gh-36626
+	void getSentDateReturnsACopy() {
+		SimpleMailMessage message = new SimpleMailMessage();
+		Date sentDate = new Date(1234L);
+		message.setSentDate(sentDate);
+
+		Date exportedDate = message.getSentDate();
+		exportedDate.setTime(0L);
+
+		assertThat(message.getSentDate()).isEqualTo(new Date(1234L));
+	}
+
+	@Test  // gh-36626
+	void copyConstructorCopiesSentDate() {
+		Date sentDate = new Date(1234L);
+		SimpleMailMessage original = new SimpleMailMessage();
+		original.setSentDate(sentDate);
+
+		SimpleMailMessage copy = new SimpleMailMessage(original);
+		sentDate.setTime(0L);
+
+		Date copiedDate = copy.getSentDate();
+		assertThat(copiedDate).isNotNull();
+		copiedDate.setTime(1L);
+
+		assertThat(original.getSentDate()).isEqualTo(new Date(1234L));
+		assertThat(copy.getSentDate()).isEqualTo(new Date(1234L));
+	}
+
+	@Test  // gh-36626
+	void copyToCopiesSentDate() {
+		SimpleMailMessage source = new SimpleMailMessage();
+		source.setSentDate(new Date(1234L));
+
+		MailMessage target = mock();
+		source.copyTo(target);
+
+		ArgumentCaptor<Date> dateCaptor = ArgumentCaptor.forClass(Date.class);
+		verify(target).setSentDate(dateCaptor.capture());
+
+		Date copiedDate = dateCaptor.getValue();
+		assertThat(copiedDate).isNotNull();
+		copiedDate.setTime(0L);
+
+		assertThat(source.getSentDate()).isEqualTo(new Date(1234L));
+	}
+
 	/**
 	 * Tests that two equal SimpleMailMessages have equal hash codes.
 	 */
 	@Test
-	public final void testHashCode() {
+	void equalMessagesHaveEqualHashCodes() {
 		SimpleMailMessage message1 = new SimpleMailMessage();
 		message1.setFrom("from@somewhere");
 		message1.setReplyTo("replyTo@somewhere");
@@ -118,11 +180,11 @@ class SimpleMailMessageTests {
 		SimpleMailMessage message2 = new SimpleMailMessage(message1);
 
 		assertThat(message2).isEqualTo(message1);
-		assertThat(message2.hashCode()).isEqualTo(message1.hashCode());
+		assertThat(message2).hasSameHashCodeAs(message1);
 	}
 
 	@Test
-	public final void testEqualsObject() {
+	void equalsBehavior() {
 		SimpleMailMessage message1;
 		SimpleMailMessage message2;
 
@@ -134,12 +196,10 @@ class SimpleMailMessageTests {
 		// Null object is not equal
 		message1 = new SimpleMailMessage();
 		message2 = null;
-		boolean condition1 = !(message1.equals(message2));
-		assertThat(condition1).isTrue();
+		assertThat(message1).isNotEqualTo(message2);
 
 		// Different class is not equal
-		boolean condition = !(message1.equals(new Object()));
-		assertThat(condition).isTrue();
+		assertThat(message1).isNotEqualTo(new Object());
 
 		// Equal values are equal
 		message1 = new SimpleMailMessage();
@@ -160,15 +220,13 @@ class SimpleMailMessageTests {
 	}
 
 	@Test
-	void testCopyCtorChokesOnNullOriginalMessage() {
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				new SimpleMailMessage(null));
+	void copyCtorChokesOnNullOriginalMessage() {
+		assertThatIllegalArgumentException().isThrownBy(() -> new SimpleMailMessage(null));
 	}
 
 	@Test
-	void testCopyToChokesOnNullTargetMessage() {
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				new SimpleMailMessage().copyTo(null));
+	void copyToChokesOnNullTargetMessage() {
+		assertThatIllegalArgumentException().isThrownBy(() -> new SimpleMailMessage().copyTo(null));
 	}
 
 }

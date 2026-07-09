@@ -47,7 +47,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
  *
  * @author Rossen Stoyanchev
  */
-public class AsyncRequestNotUsableTests {
+class AsyncRequestNotUsableTests {
 
 	private final MockHttpServletRequest request = new MockHttpServletRequest();
 

@@ -45,7 +45,7 @@ public interface AutowiredArguments {
 		Object value = getObject(index);
 		if (!ClassUtils.isAssignableValue(requiredType, value)) {
 			throw new IllegalArgumentException("Argument type mismatch: expected '" +
-					ClassUtils.getQualifiedName(requiredType) + "' for value [" + value + "]");
+					requiredType.getTypeName() + "' for value [" + value + "]");
 		}
 		return (T) value;
 	}

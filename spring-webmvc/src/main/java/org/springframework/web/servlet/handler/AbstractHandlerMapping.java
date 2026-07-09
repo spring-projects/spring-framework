@@ -39,6 +39,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.PathMatcher;
 import org.springframework.web.HttpRequestHandler;
+import org.springframework.web.accept.ApiVersionHolder;
 import org.springframework.web.accept.ApiVersionStrategy;
 import org.springframework.web.context.request.WebRequestInterceptor;
 import org.springframework.web.context.request.async.WebAsyncManager;
@@ -539,7 +540,7 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	 */
 	@Override
 	public final @Nullable HandlerExecutionChain getHandler(HttpServletRequest request) throws Exception {
-		initApiVersion(request);
+		ApiVersionHolder versionHolder = initApiVersion(request);
 		Object handler = getHandlerInternal(request);
 		if (handler == null) {
 			handler = getDefaultHandler();
@@ -547,6 +548,11 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 		if (handler == null) {
 			return null;
 		}
+
+		if (versionHolder.hasError() && !request.getDispatcherType().equals(DispatcherType.ERROR)) {
+			throw versionHolder.getError();
+		}
+
 		// Bean name or resolved handler?
 		if (handler instanceof String handlerName) {
 			handler = obtainApplicationContext().getBean(handlerName);
@@ -584,16 +590,22 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 		return executionChain;
 	}
 
-	private void initApiVersion(HttpServletRequest request) {
-		if (this.versionStrategy != null) {
-			Comparable<?> version = (Comparable<?>) request.getAttribute(API_VERSION_ATTRIBUTE);
-			if (version == null) {
-				version = this.versionStrategy.resolveParseAndValidateVersion(request);
-				if (version != null) {
-					request.setAttribute(API_VERSION_ATTRIBUTE, version);
-				}
+	private ApiVersionHolder initApiVersion(HttpServletRequest request) {
+		ApiVersionHolder versionHolder;
+		if (this.versionStrategy == null) {
+			versionHolder = ApiVersionHolder.EMPTY;
+		}
+		else {
+			try {
+				Comparable<?> version = this.versionStrategy.resolveParseAndValidateVersion(request);
+				versionHolder = ApiVersionHolder.fromVersion(version);
+			}
+			catch (RuntimeException ex) {
+				versionHolder = ApiVersionHolder.fromError(ex);
 			}
 		}
+		request.setAttribute(API_VERSION_ATTRIBUTE, versionHolder);
+		return versionHolder;
 	}
 
 	/**
@@ -683,8 +695,9 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 		}
 
 		if (this.versionStrategy != null) {
-			Comparable<?> version = (Comparable<?>) request.getAttribute(API_VERSION_ATTRIBUTE);
-			if (version != null) {
+			ApiVersionHolder versionHolder = (ApiVersionHolder) request.getAttribute(API_VERSION_ATTRIBUTE);
+			if (versionHolder.hasVersion()) {
+				Comparable<?> version = versionHolder.getVersion();
 				chain.addInterceptor(new ApiVersionDeprecationHandlerInterceptor(this.versionStrategy, version));
 			}
 		}

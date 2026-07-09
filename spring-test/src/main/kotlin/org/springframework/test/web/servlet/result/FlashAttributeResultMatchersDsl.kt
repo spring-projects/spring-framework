@@ -32,7 +32,7 @@ class FlashAttributeResultMatchersDsl internal constructor (private val actions:
 	/**
 	 * @see FlashAttributeResultMatchers.attribute
 	 */
-	fun <T> attribute(name: String, matcher: Matcher<T>) {
+	fun <T : Any> attribute(name: String, matcher: Matcher<T>) {
 		actions.andExpect(matchers.attribute(name, matcher))
 	}
 

@@ -177,7 +177,11 @@ final class BitsCronField extends CronField {
 		int next = nextSetBit(current);
 		if (next == -1) {
 			temporal = type().rollForward(temporal);
-			next = nextSetBit(0);
+			next = nextSetBit(type().get(temporal));
+			if (next == -1) {
+				temporal = type().rollForward(temporal);
+				next = nextSetBit(0);
+			}
 		}
 		if (next == current) {
 			return temporal;
@@ -191,7 +195,12 @@ final class BitsCronField extends CronField {
 				next = nextSetBit(current);
 				if (next == -1) {
 					temporal = type().rollForward(temporal);
-					next = nextSetBit(0);
+					next = nextSetBit(type().get(temporal));
+					if (next == -1) {
+						temporal = type().rollForward(temporal);
+						next = nextSetBit(0);
+					}
+					current = type().get(temporal);
 				}
 			}
 			if (count >= CronExpression.MAX_ATTEMPTS) {
@@ -247,7 +256,7 @@ final class BitsCronField extends CronField {
 
 
 	@Override
-	public boolean equals(Object other) {
+	public boolean equals(@Nullable Object other) {
 		return (this == other || (other instanceof BitsCronField that &&
 				type() == that.type() && this.bits == that.bits));
 	}

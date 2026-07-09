@@ -53,14 +53,14 @@ class RequestContextTests {
 	}
 
 	@Test
-	void testGetContextUrl() {
+	void getContextUrl() {
 		request.setContextPath("foo/");
 		RequestContext context = new RequestContext(request, response, servletContext, model);
 		assertThat(context.getContextUrl("bar")).isEqualTo("foo/bar");
 	}
 
 	@Test
-	void testGetContextUrlWithMap() {
+	void getContextUrlWithMap() {
 		request.setContextPath("foo/");
 		RequestContext context = new RequestContext(request, response, servletContext, model);
 		Map<String, Object> map = new HashMap<>();
@@ -70,7 +70,7 @@ class RequestContextTests {
 	}
 
 	@Test
-	void testGetContextUrlWithMapEscaping() {
+	void getContextUrlWithMapEscaping() {
 		request.setContextPath("foo/");
 		RequestContext context = new RequestContext(request, response, servletContext, model);
 		Map<String, Object> map = new HashMap<>();
@@ -80,7 +80,7 @@ class RequestContextTests {
 	}
 
 	@Test
-	void testPathToServlet() {
+	void pathToServlet() {
 		request.setContextPath("/app");
 		request.setServletPath("/servlet");
 		RequestContext context = new RequestContext(request, response, servletContext, model);

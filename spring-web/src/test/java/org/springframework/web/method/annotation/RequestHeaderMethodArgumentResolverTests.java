@@ -312,7 +312,7 @@ class RequestHeaderMethodArgumentResolverTests {
 	}
 
 	@Test
-	public void uuidPlaceholderConversionWithEmptyValue() {
+	void uuidPlaceholderConversionWithEmptyValue() {
 		try {
 			String expected = "name";
 			servletRequest.addHeader(expected, "");

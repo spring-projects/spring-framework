@@ -270,7 +270,7 @@ is applicable for typical implementations of indexed structures.
 NOTE: `ReflectiveIndexAccessor` also implements `CompilableIndexAccessor` in order to
 support xref:core/expressions/evaluation.adoc#expressions-spel-compilation[compilation]
 to bytecode for read access. Note, however, that the configured read-method must be
-invokable via a `public` class or `public` interface for compilation to succeed.
+invocable via a `public` class or `public` interface for compilation to succeed.
 
 The following code listings define a `Color` enum and `FruitMap` type that behaves like a
 map but does not implement the `java.util.Map` interface. Thus, if you want to index into

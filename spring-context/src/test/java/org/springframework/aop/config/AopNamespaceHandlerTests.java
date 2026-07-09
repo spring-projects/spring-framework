@@ -53,7 +53,7 @@ class AopNamespaceHandlerTests {
 
 
 	@Test
-	void testIsProxy() {
+	void isProxy() {
 		ITestBean bean = getTestBean();
 
 		assertThat(AopUtils.isAopProxy(bean)).as("Bean is not a proxy").isTrue();
@@ -66,7 +66,7 @@ class AopNamespaceHandlerTests {
 	}
 
 	@Test
-	void testAdviceInvokedCorrectly() {
+	void adviceInvokedCorrectly() {
 		CountingBeforeAdvice getAgeCounter = (CountingBeforeAdvice) this.context.getBean("getAgeCounter");
 		CountingBeforeAdvice getNameCounter = (CountingBeforeAdvice) this.context.getBean("getNameCounter");
 
@@ -87,7 +87,7 @@ class AopNamespaceHandlerTests {
 	}
 
 	@Test
-	void testAspectApplied() {
+	void aspectApplied() {
 		ITestBean bean = getTestBean();
 
 		CountingAspectJAdvice advice = (CountingAspectJAdvice) this.context.getBean("countingAdvice");
@@ -107,7 +107,7 @@ class AopNamespaceHandlerTests {
 	}
 
 	@Test
-	void testAspectAppliedForInitializeBeanWithEmptyName() {
+	void aspectAppliedForInitializeBeanWithEmptyName() {
 		ITestBean bean = (ITestBean) this.context.getAutowireCapableBeanFactory().initializeBean(new TestBean(), "");
 
 		CountingAspectJAdvice advice = (CountingAspectJAdvice) this.context.getBean("countingAdvice");
@@ -127,7 +127,7 @@ class AopNamespaceHandlerTests {
 	}
 
 	@Test
-	void testAspectAppliedForInitializeBeanWithNullName() {
+	void aspectAppliedForInitializeBeanWithNullName() {
 		ITestBean bean = (ITestBean) this.context.getAutowireCapableBeanFactory().initializeBean(new TestBean(), null);
 
 		CountingAspectJAdvice advice = (CountingAspectJAdvice) this.context.getBean("countingAdvice");

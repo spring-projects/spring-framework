@@ -24,7 +24,8 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Part;
 import org.junit.jupiter.api.Test;
 
-import org.springframework.http.converter.FormHttpMessageConverter;
+import org.springframework.http.MediaType;
+import org.springframework.http.converter.multipart.MultipartHttpMessageConverter;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
@@ -87,7 +88,7 @@ class StandardMultipartHttpServletRequestTests {
 		map.add(name, multipartFile.getResource());
 
 		MockHttpOutputMessage output = new MockHttpOutputMessage();
-		new FormHttpMessageConverter().write(map, null, output);
+		new MultipartHttpMessageConverter().write(map, null, output);
 
 		assertThat(output.getBodyAsString(StandardCharsets.UTF_8)).contains("""
 				Content-Disposition: form-data; name="file"; filename="myFile.txt"
@@ -123,8 +124,50 @@ class StandardMultipartHttpServletRequestTests {
 				.isThrownBy(() -> requestWithException(ex)).withCause(ex);
 	}
 
+	@Test  // gh-32549
+	void undertowRequestTooBigException() {
+		IOException ex = new IOException("Connection terminated as request was larger than 10000");
+
+		assertThatExceptionOfType(MaxUploadSizeExceededException.class)
+				.isThrownBy(() -> requestWithException(ex)).withCause(ex);
+	}
+
+	@Test  // gh-36317: Tomcat's Commons FileUpload
+	void commonsFileSizeLimitExceededException() {
+		IOException ex = new FileSizeLimitExceededException();
+
+		assertThatExceptionOfType(MaxUploadSizeExceededException.class)
+				.isThrownBy(() -> requestWithException(ex)).withCause(ex);
+	}
+
+	@Test  // gh-36317: Tomcat's Commons FileUpload
+	void commonsFileCountLimitExceededException() {
+		IOException ex = new FileCountLimitExceededException();
+
+		assertThatExceptionOfType(MaxUploadSizeExceededException.class)
+				.isThrownBy(() -> requestWithException(ex)).withCause(ex);
+	}
+
+	@Test  // gh-36317: Commons FileUpload 2.x
+	void commonsFileUploadByteCountLimitException() {
+		IOException ex = new FileUploadByteCountLimitException();
+
+		assertThatExceptionOfType(MaxUploadSizeExceededException.class)
+				.isThrownBy(() -> requestWithException(ex)).withCause(ex);
+	}
+
+	@Test  // gh-36317: Commons FileUpload 2.x
+	void commonsFileUploadFileCountLimitException() {
+		IOException ex = new FileUploadFileCountLimitException();
+
+		assertThatExceptionOfType(MaxUploadSizeExceededException.class)
+				.isThrownBy(() -> requestWithException(ex)).withCause(ex);
+	}
+
+
 	private static StandardMultipartHttpServletRequest requestWithPart(String name, String disposition, String content) {
 		MockHttpServletRequest request = new MockHttpServletRequest();
+		request.setContentType(MediaType.MULTIPART_FORM_DATA_VALUE);
 		MockPart part = new MockPart(name, null, content.getBytes(StandardCharsets.UTF_8));
 		part.getHeaders().set("Content-Disposition", disposition);
 		request.addPart(part);
@@ -139,6 +182,33 @@ class StandardMultipartHttpServletRequestTests {
 			}
 		};
 		return new StandardMultipartHttpServletRequest(request);
+	}
+
+	private static StandardMultipartHttpServletRequest requestWithException(IOException ex) {
+		MockHttpServletRequest request = new MockHttpServletRequest() {
+			@Override
+			public Collection<Part> getParts() throws IOException {
+				throw ex;
+			}
+		};
+		return new StandardMultipartHttpServletRequest(request);
+	}
+
+
+	@SuppressWarnings("serial")
+	private static class FileSizeLimitExceededException extends IOException {
+	}
+
+	@SuppressWarnings("serial")
+	private static class FileCountLimitExceededException extends IOException {
+	}
+
+	@SuppressWarnings("serial")
+	private static class FileUploadByteCountLimitException extends IOException {
+	}
+
+	@SuppressWarnings("serial")
+	private static class FileUploadFileCountLimitException extends IOException {
 	}
 
 }

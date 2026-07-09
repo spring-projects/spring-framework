@@ -222,10 +222,9 @@ public abstract class AbstractHttpMessageConverter<T> implements HttpMessageConv
 						}
 					});
 				}
-
 				@Override
 				public boolean repeatable() {
-					return supportsRepeatableWrites(t);
+					return canWriteRepeatedly(t, null);
 				}
 			});
 		}
@@ -253,13 +252,14 @@ public abstract class AbstractHttpMessageConverter<T> implements HttpMessageConv
 				contentTypeToUse = (mediaType != null ? mediaType : contentTypeToUse);
 			}
 			if (contentTypeToUse != null) {
+				String value = contentTypeToUse.toString();
 				if (contentTypeToUse.getCharset() == null) {
 					Charset defaultCharset = getDefaultCharset();
 					if (defaultCharset != null) {
-						contentTypeToUse = new MediaType(contentTypeToUse, defaultCharset);
+						value += ";charset=" + defaultCharset.name();
 					}
 				}
-				headers.setContentType(contentTypeToUse);
+				headers.set(HttpHeaders.CONTENT_TYPE, value);
 			}
 		}
 		if (headers.getContentLength() < 0 && !headers.containsHeader(HttpHeaders.TRANSFER_ENCODING)) {
@@ -304,9 +304,11 @@ public abstract class AbstractHttpMessageConverter<T> implements HttpMessageConv
 	 * @return {@code true} if {@code t} can be written repeatedly;
 	 * {@code false} otherwise
 	 * @since 6.1
+	 * @deprecated since 7.1 in favor of {@link #canWriteRepeatedly(Object, MediaType)}.
 	 */
+	@Deprecated(since = "7.1", forRemoval = true)
 	protected boolean supportsRepeatableWrites(T t) {
-		return false;
+		return canWriteRepeatedly(t, null);
 	}
 
 

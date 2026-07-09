@@ -35,25 +35,25 @@ import static org.mockito.Mockito.verify;
 class LocalConnectionFactoryBeanTests {
 
 	@Test
-	void testManagedConnectionFactoryIsRequired() {
+	void managedConnectionFactoryIsRequired() {
 		assertThatIllegalArgumentException().isThrownBy(
 				new LocalConnectionFactoryBean()::afterPropertiesSet);
 	}
 
 	@Test
-	void testIsSingleton() {
+	void isSingleton() {
 		LocalConnectionFactoryBean factory = new LocalConnectionFactoryBean();
 		assertThat(factory.isSingleton()).isTrue();
 	}
 
 	@Test
-	void testGetObjectTypeIsNullIfConnectionFactoryHasNotBeenConfigured() {
+	void getObjectTypeIsNullIfConnectionFactoryHasNotBeenConfigured() {
 		LocalConnectionFactoryBean factory = new LocalConnectionFactoryBean();
 		assertThat(factory.getObjectType()).isNull();
 	}
 
 	@Test
-	void testCreatesVanillaConnectionFactoryIfNoConnectionManagerHasBeenConfigured() throws Exception {
+	void createsVanillaConnectionFactoryIfNoConnectionManagerHasBeenConfigured() throws Exception {
 		final Object CONNECTION_FACTORY = new Object();
 		ManagedConnectionFactory managedConnectionFactory = mock();
 		given(managedConnectionFactory.createConnectionFactory()).willReturn(CONNECTION_FACTORY);
@@ -64,7 +64,7 @@ class LocalConnectionFactoryBeanTests {
 	}
 
 	@Test
-	void testCreatesManagedConnectionFactoryIfAConnectionManagerHasBeenConfigured() throws Exception {
+	void createsManagedConnectionFactoryIfAConnectionManagerHasBeenConfigured() throws Exception {
 		ManagedConnectionFactory managedConnectionFactory = mock();
 		ConnectionManager connectionManager = mock();
 		LocalConnectionFactoryBean factory = new LocalConnectionFactoryBean();

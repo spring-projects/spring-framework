@@ -12,18 +12,20 @@ The annotations can be applied in the following ways.
 * On a non-static field in a test class or any of its superclasses.
 * On a non-static field in an enclosing class for a `@Nested` test class or in any class
   in the type hierarchy or enclosing class hierarchy above the `@Nested` test class.
+* On a parameter in the constructor for a test class.
 * At the type level on a test class or any superclass or implemented interface in the
   type hierarchy above the test class.
 * At the type level on an enclosing class for a `@Nested` test class or on any class or
   interface in the type hierarchy or enclosing class hierarchy above the `@Nested` test
   class.
 
-When `@MockitoBean` or `@MockitoSpyBean` is declared on a field, the bean to mock or spy
-is inferred from the type of the annotated field. If multiple candidates exist in the
-`ApplicationContext`, a `@Qualifier` annotation can be declared on the field to help
-disambiguate. In the absence of a `@Qualifier` annotation, the name of the annotated
-field will be used as a _fallback qualifier_. Alternatively, you can explicitly specify a
-bean name to mock or spy by setting the `value` or `name` attribute in the annotation.
+When `@MockitoBean` or `@MockitoSpyBean` is declared on a field or constructor parameter,
+the bean to mock or spy is inferred from the type of the annotated field or parameter. If
+multiple candidates exist in the `ApplicationContext`, a `@Qualifier` annotation can be
+declared on the field or parameter to help disambiguate. In the absence of a `@Qualifier`
+annotation, the name of the annotated field or parameter will be used as a _fallback
+qualifier_. Alternatively, you can explicitly specify a bean name to mock or spy by
+setting the `value` or `name` attribute in the annotation.
 
 When `@MockitoBean` or `@MockitoSpyBean` is declared at the type level, the type of bean
 (or beans) to mock or spy must be supplied via the `types` attribute in the annotation –
@@ -140,6 +142,21 @@ Java::
 	}
 ----
 <1> Replace the bean with type `CustomService` with a Mockito mock.
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes"]
+----
+	@SpringJUnitConfig(TestConfig::class)
+	class BeanOverrideTests {
+
+		@MockitoBean // <1>
+		lateinit var customService: CustomService
+
+		// tests...
+	}
+----
+<1> Replace the bean with type `CustomService` with a Mockito mock.
 ======
 
 In the example above, we are creating a mock for `CustomService`. If more than one bean
@@ -168,6 +185,98 @@ Java::
 	}
 ----
 <1> Replace the bean named `service` with a Mockito mock.
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes"]
+----
+	@SpringJUnitConfig(TestConfig::class)
+	class BeanOverrideTests {
+
+		@MockitoBean("service") // <1>
+		lateinit var customService: CustomService
+
+		// tests...
+
+	}
+----
+<1> Replace the bean named `service` with a Mockito mock.
+======
+
+The following example shows how to use `@MockitoBean` on a constructor parameter for a
+by-type lookup.
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	@SpringJUnitConfig(TestConfig.class)
+	class BeanOverrideTests {
+
+		private final CustomService customService;
+
+		BeanOverrideTests(@MockitoBean CustomService customService) { // <1>
+			this.customService = customService;
+		}
+
+		// tests...
+	}
+----
+<1> Replace the bean with type `CustomService` with a Mockito mock and inject it into
+    the constructor.
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes"]
+----
+	@SpringJUnitConfig(TestConfig::class)
+	class BeanOverrideTests(@MockitoBean val customService: CustomService) { // <1>
+
+		// tests...
+	}
+----
+<1> Replace the bean with type `CustomService` with a Mockito mock and inject it into
+    the constructor.
+======
+
+The following example shows how to use `@MockitoBean` on a constructor parameter for a
+by-name lookup.
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	@SpringJUnitConfig(TestConfig.class)
+	class BeanOverrideTests {
+
+		private final CustomService customService;
+
+		BeanOverrideTests(@MockitoBean("service") CustomService customService) { // <1>
+			this.customService = customService;
+		}
+
+		// tests...
+	}
+----
+<1> Replace the bean named `service` with a Mockito mock and inject it into the
+    constructor.
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes"]
+----
+	@SpringJUnitConfig(TestConfig::class)
+	class BeanOverrideTests(@MockitoBean("service") val customService: CustomService) { // <1>
+
+		// tests...
+	}
+----
+<1> Replace the bean named `service` with a Mockito mock and inject it into the
+    constructor.
 ======
 
 The following `@SharedMocks` annotation registers two mocks by-type and one mock by-name.
@@ -184,6 +293,19 @@ Java::
 	@MockitoBean(name = "ps1", types = PrintingService.class) // <2>
 	public @interface SharedMocks {
 	}
+----
+<1> Register `OrderService` and `UserService` mocks by-type.
+<2> Register `PrintingService` mock by-name.
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes"]
+----
+	@Target(AnnotationTarget.CLASS)
+	@Retention(AnnotationRetention.RUNTIME)
+	@MockitoBean(types = [OrderService::class, UserService::class]) // <1>
+	@MockitoBean(name = "ps1", types = [PrintingService::class]) // <2>
+	annotation class SharedMocks
 ----
 <1> Register `OrderService` and `UserService` mocks by-type.
 <2> Register `PrintingService` mock by-name.
@@ -211,6 +333,34 @@ Java::
 
 		@Test
 		void testThatDependsOnMocks() {
+			// ...
+		}
+	}
+----
+<1> Register common mocks via the custom `@SharedMocks` annotation.
+<2> Optionally inject mocks to _stub_ or _verify_ them.
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes"]
+----
+	@SpringJUnitConfig(TestConfig::class)
+	@SharedMocks // <1>
+	class BeanOverrideTests {
+
+		@Autowired
+		lateinit var orderService: OrderService // <2>
+
+		@Autowired
+		lateinit var userService: UserService // <2>
+
+		@Autowired
+		lateinit var ps1: PrintingService // <2>
+
+		// Inject other components that rely on the mocks.
+
+		@Test
+		fun testThatDependsOnMocks() {
 			// ...
 		}
 	}
@@ -246,6 +396,21 @@ Java::
 	}
 ----
 <1> Wrap the bean with type `CustomService` with a Mockito spy.
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes"]
+----
+	@SpringJUnitConfig(TestConfig::class)
+	class BeanOverrideTests {
+
+		@MockitoSpyBean // <1>
+		lateinit var customService: CustomService
+
+		// tests...
+	}
+----
+<1> Wrap the bean with type `CustomService` with a Mockito spy.
 ======
 
 In the example above, we are wrapping the bean with type `CustomService`. If more than
@@ -271,6 +436,95 @@ Java::
 	}
 ----
 <1> Wrap the bean named `service` with a Mockito spy.
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes"]
+----
+	@SpringJUnitConfig(TestConfig::class)
+	class BeanOverrideTests {
+
+		@MockitoSpyBean("service") // <1>
+		lateinit var customService: CustomService
+
+		// tests...
+	}
+----
+<1> Wrap the bean named `service` with a Mockito spy.
+======
+
+The following example shows how to use `@MockitoSpyBean` on a constructor parameter for
+a by-type lookup.
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	@SpringJUnitConfig(TestConfig.class)
+	class BeanOverrideTests {
+
+		private final CustomService customService;
+
+		BeanOverrideTests(@MockitoSpyBean CustomService customService) { // <1>
+			this.customService = customService;
+		}
+
+		// tests...
+	}
+----
+<1> Wrap the bean with type `CustomService` with a Mockito spy and inject it into the
+    constructor.
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes"]
+----
+	@SpringJUnitConfig(TestConfig::class)
+	class BeanOverrideTests(@MockitoSpyBean val customService: CustomService) { // <1>
+
+		// tests...
+	}
+----
+<1> Wrap the bean with type `CustomService` with a Mockito spy and inject it into the
+    constructor.
+======
+
+The following example shows how to use `@MockitoSpyBean` on a constructor parameter for
+a by-name lookup.
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	@SpringJUnitConfig(TestConfig.class)
+	class BeanOverrideTests {
+
+		private final CustomService customService;
+
+		BeanOverrideTests(@MockitoSpyBean("service") CustomService customService) { // <1>
+			this.customService = customService;
+		}
+
+		// tests...
+	}
+----
+<1> Wrap the bean named `service` with a Mockito spy and inject it into the constructor.
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes"]
+----
+	@SpringJUnitConfig(TestConfig::class)
+	class BeanOverrideTests(@MockitoSpyBean("service") val customService: CustomService) { // <1>
+
+		// tests...
+	}
+----
+<1> Wrap the bean named `service` with a Mockito spy and inject it into the constructor.
 ======
 
 The following `@SharedSpies` annotation registers two spies by-type and one spy by-name.
@@ -287,6 +541,19 @@ Java::
 	@MockitoSpyBean(name = "ps1", types = PrintingService.class) // <2>
 	public @interface SharedSpies {
 	}
+----
+<1> Register `OrderService` and `UserService` spies by-type.
+<2> Register `PrintingService` spy by-name.
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes"]
+----
+	@Target(AnnotationTarget.CLASS)
+	@Retention(AnnotationRetention.RUNTIME)
+	@MockitoSpyBean(types = [OrderService::class, UserService::class]) // <1>
+	@MockitoSpyBean(name = "ps1", types = [PrintingService::class]) // <2>
+	annotation class SharedSpies
 ----
 <1> Register `OrderService` and `UserService` spies by-type.
 <2> Register `PrintingService` spy by-name.
@@ -314,6 +581,34 @@ Java::
 
 		@Test
 		void testThatDependsOnMocks() {
+			// ...
+		}
+	}
+----
+<1> Register common spies via the custom `@SharedSpies` annotation.
+<2> Optionally inject spies to _stub_ or _verify_ them.
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes"]
+----
+	@SpringJUnitConfig(TestConfig::class)
+	@SharedSpies // <1>
+	class BeanOverrideTests {
+
+		@Autowired
+		lateinit var orderService: OrderService // <2>
+
+		@Autowired
+		lateinit var userService: UserService // <2>
+
+		@Autowired
+		lateinit var ps1: PrintingService // <2>
+
+		// Inject other components that rely on the spies.
+
+		@Test
+		fun testThatDependsOnMocks() {
 			// ...
 		}
 	}

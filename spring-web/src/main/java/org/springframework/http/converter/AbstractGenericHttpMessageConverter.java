@@ -109,17 +109,15 @@ public abstract class AbstractGenericHttpMessageConverter<T> extends AbstractHtt
 						public OutputStream getBody() {
 							return outputStream;
 						}
-
 						@Override
 						public HttpHeaders getHeaders() {
 							return headers;
 						}
 					});
 				}
-
 				@Override
 				public boolean repeatable() {
-					return supportsRepeatableWrites(t);
+					return canWriteRepeatedly(t, contentType);
 				}
 			});
 		}

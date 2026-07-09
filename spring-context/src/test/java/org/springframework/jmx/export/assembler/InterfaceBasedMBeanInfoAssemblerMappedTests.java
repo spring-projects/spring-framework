@@ -36,7 +36,7 @@ class InterfaceBasedMBeanInfoAssemblerMappedTests extends AbstractJmxAssemblerTe
 	protected static final String OBJECT_NAME = "bean:name=testBean4";
 
 	@Test
-	void testGetAgeIsReadOnly() throws Exception {
+	void getAgeIsReadOnly() throws Exception {
 		ModelMBeanInfo info = getMBeanInfoFromAssembler();
 		ModelMBeanAttributeInfo attr = info.getAttribute(AGE_ATTRIBUTE);
 
@@ -45,19 +45,19 @@ class InterfaceBasedMBeanInfoAssemblerMappedTests extends AbstractJmxAssemblerTe
 	}
 
 	@Test
-	void testWithUnknownClass() {
+	void withUnknownClass() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				getWithMapping("com.foo.bar.Unknown"));
 	}
 
 	@Test
-	void testWithNonInterface() {
+	void withNonInterface() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				getWithMapping("JmxTestBean"));
 	}
 
 	@Test
-	void testWithFallThrough() throws Exception {
+	void withFallThrough() throws Exception {
 		InterfaceBasedMBeanInfoAssembler assembler =
 				getWithMapping("foobar", "org.springframework.jmx.export.assembler.ICustomJmxBean");
 		assembler.setManagedInterfaces(new Class<?>[] {IAdditionalTestMethods.class});
@@ -69,7 +69,7 @@ class InterfaceBasedMBeanInfoAssemblerMappedTests extends AbstractJmxAssemblerTe
 	}
 
 	@Test
-	void testNickNameIsExposed() throws Exception {
+	void nickNameIsExposed() throws Exception {
 		ModelMBeanInfo inf = (ModelMBeanInfo) getMBeanInfo();
 		MBeanAttributeInfo attr = inf.getAttribute("NickName");
 

@@ -267,7 +267,31 @@ class UriComponentsBuilderTests {
 	@EnumSource
 	void fromUriStringInvalidIPv6Host(ParserType parserType) {
 		assertThatIllegalArgumentException().isThrownBy(() ->
-				UriComponentsBuilder.fromUriString("http://[1abc:2abc:3abc::5ABC:6abc:8080/resource", parserType));
+				UriComponentsBuilder.fromUriString("https://[1abc:2abc:3abc::5ABC:6abc:8080/resource", parserType));
+
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				UriComponentsBuilder.fromUriString("https://[1abc:2abc:3abc::5ABC:6abc]resource", parserType));
+	}
+
+	@ParameterizedTest // gh-36759
+	@EnumSource
+	void fromUriStringRelativeUriWithFragment(ParserType parserType) {
+		UriComponents result = UriComponentsBuilder.fromUriString("path2#foo", parserType).build();
+		assertThat(result.getScheme()).isNull();
+		assertThat(result.getHost()).isNull();
+		assertThat(result.getPath()).isEqualTo("path2");
+		assertThat(result.getFragment()).isEqualTo("foo");
+		assertThat(result.toUriString()).isEqualTo("path2#foo");
+	}
+
+	@ParameterizedTest // gh-36759
+	@EnumSource
+	void fromUriStringRelativeUriWithEmptyFragment(ParserType parserType) {
+		UriComponents result = UriComponentsBuilder.fromUriString("path2#", parserType).build();
+		assertThat(result.getScheme()).isNull();
+		assertThat(result.getHost()).isNull();
+		assertThat(result.getPath()).isEqualTo("path2");
+		assertThat(result.getFragment()).isNull();
 	}
 
 	@ParameterizedTest // see SPR-11970
@@ -775,7 +799,7 @@ class UriComponentsBuilderTests {
 	}
 
 	@Test  // gh-25243
-	void testCloneAndMerge() {
+	void cloneAndMerge() {
 		UriComponentsBuilder builder1 = UriComponentsBuilder.newInstance();
 		builder1.scheme("http").host("e1.com").path("/p1").pathSegment("ps1").queryParam("q1", "x").fragment("f1").encode();
 
@@ -800,7 +824,7 @@ class UriComponentsBuilderTests {
 	}
 
 	@Test  // gh-24772
-	void testDeepClone() {
+	void deepClone() {
 		HashMap<String, Object> vars = new HashMap<>();
 		vars.put("ps1", "foo");
 		vars.put("ps2", "bar");
@@ -928,6 +952,15 @@ class UriComponentsBuilderTests {
 				.buildAndExpand(7777, "test")
 				.toUri();
 		assertThat(uri.toString()).isEqualTo("ws://localhost:7777/test");
+	}
+
+	@ParameterizedTest // gh-36029
+	@EnumSource
+	void singleCharFragment(ParserType parserType) {
+		URI uri = UriComponentsBuilder
+				.fromUriString("https://localhost/resource#a", parserType)
+				.build().toUri();
+		assertThat(uri.toString()).isEqualTo("https://localhost/resource#a");
 	}
 
 }

@@ -38,7 +38,7 @@ import org.springframework.util.ClassUtils;
  *
  * <p>This is the base class for
  * {@link org.springframework.beans.factory.annotation.QualifierAnnotationAutowireCandidateResolver},
- * providing an implementation all non-annotation-based resolution steps at this level.
+ * providing an implementation for all non-annotation-based resolution steps at this level.
  *
  * @author Juergen Hoeller
  * @since 4.0

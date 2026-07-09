@@ -36,6 +36,7 @@ import org.springframework.core.BridgeMethodResolver;
 import org.springframework.core.annotation.AnnotationTypeMapping.MirrorSets.MirrorSet;
 import org.springframework.core.annotation.MergedAnnotation.Adapt;
 import org.springframework.core.annotation.MergedAnnotations.SearchStrategy;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ConcurrentReferenceHashMap;
 import org.springframework.util.ReflectionUtils;
@@ -175,6 +176,23 @@ public abstract class AnnotationUtils {
 			return false;
 		}
 		return true;
+	}
+
+	/**
+	 * Load the specified annotation type, if available.
+	 * @param annotationName the fully-qualified name of the annotation type
+	 * @return the annotation type as a {@code Class}, or {@code null} if not found
+	 * @since 7.1
+	 */
+	@SuppressWarnings("unchecked")
+	public static @Nullable Class<? extends Annotation> loadAnnotationType(String annotationName) {
+		try {
+			return (Class<? extends Annotation>)
+					ClassUtils.forName(annotationName, AnnotationUtils.class.getClassLoader());
+		}
+		catch (ClassNotFoundException ex) {
+			return null;
+		}
 	}
 
 	/**

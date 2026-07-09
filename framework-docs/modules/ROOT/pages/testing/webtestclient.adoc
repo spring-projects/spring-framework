@@ -580,8 +580,8 @@ Kotlin::
 [[webtestclient-stream]]
 ==== Streaming Responses
 
-To test potentially infinite streams such as `"text/event-stream"` or
-`"application/x-ndjson"`, start by verifying the response status and headers, and then
+To test potentially infinite streams such as `"text/event-stream"`,
+`"application/jsonl"` or `"application/x-ndjson"`, start by verifying the response status and headers, and then
 obtain a `FluxExchangeResult`:
 
 [tabs]

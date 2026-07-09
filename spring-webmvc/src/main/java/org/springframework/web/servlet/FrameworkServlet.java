@@ -30,7 +30,6 @@ import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpServletResponseWrapper;
 import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.BeanUtils;
@@ -49,7 +48,6 @@ import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
@@ -172,7 +170,7 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	 * HTTP methods supported by {@link jakarta.servlet.http.HttpServlet}.
 	 */
 	private static final Set<String> HTTP_SERVLET_METHODS =
-			Set.of("DELETE", "HEAD", "GET", "OPTIONS", "POST", "PUT", "TRACE");
+			Set.of("DELETE", "HEAD", "GET", "OPTIONS", "PATCH", "POST", "PUT", "TRACE");
 
 
 	/** ServletContext attribute to find the WebApplicationContext in. */
@@ -181,7 +179,7 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	/** WebApplicationContext implementation class to create. */
 	private Class<?> contextClass = DEFAULT_CONTEXT_CLASS;
 
-	/** WebApplicationContext id to assign. */
+	/** WebApplicationContext ID to assign. */
 	private @Nullable String contextId;
 
 	/** Namespace for this servlet. */
@@ -197,28 +195,28 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	/** Comma-delimited ApplicationContextInitializer class names set through init param. */
 	private @Nullable String contextInitializerClasses;
 
-	/** Should we publish the context as a ServletContext attribute?. */
+	/** Whether to publish the context as a ServletContext attribute. */
 	private boolean publishContext = true;
 
-	/** Should we publish a ServletRequestHandledEvent at the end of each request?. */
+	/** Whether to publish a ServletRequestHandledEvent at the end of each request. */
 	private boolean publishEvents = true;
 
-	/** Expose LocaleContext and RequestAttributes as inheritable for child threads?. */
+	/** Whether to expose LocaleContext and RequestAttributes as inheritable for child threads. */
 	private boolean threadContextInheritable = false;
 
-	/** Should we dispatch an HTTP OPTIONS request to {@link #doService}?. */
+	/** Whether to dispatch an HTTP OPTIONS request to {@link #doService}. */
 	private boolean dispatchOptionsRequest = false;
 
-	/** Should we dispatch an HTTP TRACE request to {@link #doService}?. */
+	/** Whether to dispatch an HTTP TRACE request to {@link #doService}. */
 	private boolean dispatchTraceRequest = false;
 
-	/** Whether to log potentially sensitive info (request params at DEBUG + headers at TRACE). */
+	/** Whether to log potentially sensitive info (request params at DEBUG and headers at TRACE). */
 	private boolean enableLoggingRequestDetails = false;
 
 	/** WebApplicationContext for this servlet. */
 	private @Nullable WebApplicationContext webApplicationContext;
 
-	/** If the WebApplicationContext was injected via {@link #setApplicationContext}. */
+	/** Whether the WebApplicationContext was injected via {@link #setApplicationContext}. */
 	private boolean webApplicationContextInjected = false;
 
 	/** Flag used to detect whether onRefresh has already been called. */
@@ -242,7 +240,7 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	 * such as {@code AnnotationConfigWebApplicationContext}.
 	 * <p>Calling {@link #setContextInitializerClasses} (init-param 'contextInitializerClasses')
 	 * indicates which {@link ApplicationContextInitializer} classes should be used to
-	 * further configure the internal application context prior to refresh().
+	 * further configure the internal application context prior to refresh.
 	 * @see #FrameworkServlet(WebApplicationContext)
 	 */
 	public FrameworkServlet() {
@@ -269,7 +267,7 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	 * ConfigurableApplicationContext#setParent parent}, the root application context
 	 * will be set as the parent.</li>
 	 * <li>If the given context has not already been assigned an {@linkplain
-	 * ConfigurableApplicationContext#setId id}, one will be assigned to it</li>
+	 * ConfigurableApplicationContext#setId ID}, one will be assigned to it</li>
 	 * <li>{@code ServletContext} and {@code ServletConfig} objects will be delegated to
 	 * the application context</li>
 	 * <li>{@link #postProcessWebApplicationContext} will be called</li>
@@ -330,15 +328,15 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	}
 
 	/**
-	 * Specify a custom WebApplicationContext id,
-	 * to be used as serialization id for the underlying BeanFactory.
+	 * Specify a custom WebApplicationContext ID,
+	 * to be used as serialization ID for the underlying BeanFactory.
 	 */
 	public void setContextId(@Nullable String contextId) {
 		this.contextId = contextId;
 	}
 
 	/**
-	 * Return the custom WebApplicationContext id, if any.
+	 * Return the custom WebApplicationContext ID, if any.
 	 */
 	public @Nullable String getContextId() {
 		return this.contextId;
@@ -463,9 +461,9 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	 * <p>Default is "false", applying {@link jakarta.servlet.http.HttpServlet}'s
 	 * default behavior (i.e. reflecting the message received back to the client).
 	 * <p>Turn this flag on if you prefer TRACE requests to go through the
-	 * regular dispatching chain, just like other HTTP requests. This usually
-	 * means that your controllers will receive those requests; make sure
-	 * that those endpoints are actually able to handle a TRACE request.
+	 * regular dispatching chain, just like other HTTP requests. This usually means
+	 * that your controllers will receive those requests, in which case you must
+	 * make sure that those endpoints are actually able to handle a TRACE request.
 	 * <p>Note that HttpServlet's default TRACE processing will be applied
 	 * in any case if your controllers happen to not generate a response
 	 * of content type 'message/http' (as required for a TRACE response).
@@ -475,9 +473,9 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	}
 
 	/**
-	 * Whether to log request params at DEBUG level, and headers at TRACE level.
+	 * Set whether to log request parameters at DEBUG level and headers at TRACE level.
 	 * Both may contain sensitive information.
-	 * <p>By default set to {@code false} so that request details are not shown.
+	 * <p>Defaults to {@code false} so that request details are not shown.
 	 * @param enable whether to enable or not
 	 * @since 5.1
 	 */
@@ -486,7 +484,7 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	}
 
 	/**
-	 * Whether logging of potentially sensitive, request details at DEBUG and
+	 * Whether logging of potentially sensitive request details at DEBUG and
 	 * TRACE level is allowed.
 	 * @since 5.1
 	 */
@@ -565,7 +563,7 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 			wac = this.webApplicationContext;
 			if (wac instanceof ConfigurableWebApplicationContext cwac && !cwac.isActive()) {
 				// The context has not yet been refreshed -> provide services such as
-				// setting the parent context, setting the application context id, etc
+				// setting the parent context, setting the application context ID, etc
 				if (cwac.getParent() == null) {
 					// The context instance was injected without an explicit parent -> set
 					// the root application context (if any; may be null) as the parent
@@ -578,7 +576,7 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 			// No context instance was injected at construction time -> see if one
 			// has been registered in the servlet context. If one exists, it is assumed
 			// that the parent context (if any) has already been set and that the
-			// user has performed any initialization such as setting the context id
+			// user has performed any initialization such as setting the context ID
 			wac = findWebApplicationContext();
 		}
 		if (wac == null) {
@@ -666,13 +664,13 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 
 	protected void configureAndRefreshWebApplicationContext(ConfigurableWebApplicationContext wac) {
 		if (ObjectUtils.identityToString(wac).equals(wac.getId())) {
-			// The application context id is still set to its original default value
-			// -> assign a more useful id based on available information
+			// The application context ID is still set to its original default value
+			// -> assign a more useful ID based on available information
 			if (this.contextId != null) {
 				wac.setId(this.contextId);
 			}
 			else {
-				// Generate default id...
+				// Generate default ID...
 				wac.setId(ConfigurableWebApplicationContext.APPLICATION_CONTEXT_ID_PREFIX +
 						ObjectUtils.getDisplayString(getServletContext().getContextPath()) + '/' + getServletName());
 			}
@@ -864,7 +862,7 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 
 	/**
 	 * Override the parent class implementation in order to intercept requests
-	 * using PATCH or non-standard HTTP methods (WebDAV).
+	 * using non-standard HTTP methods (such as WebDAV).
 	 */
 	@Override
 	protected void service(HttpServletRequest request, HttpServletResponse response)
@@ -879,7 +877,7 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	}
 
 	/**
-	 * Delegate GET requests to processRequest/doService.
+	 * Delegate {@code GET} requests to processRequest/doService.
 	 * <p>Will also be invoked by HttpServlet's default implementation of {@code doHead},
 	 * with a {@code NoBodyResponse} that just captures the content length.
 	 * @see #doService
@@ -893,7 +891,19 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	}
 
 	/**
-	 * Delegate POST requests to {@link #processRequest}.
+	 * Delegate {@code PATCH} requests to {@link #processRequest}.
+	 * @since 7.1
+	 * @see #doService
+	 */
+	@Override
+	protected final void doPatch(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+
+		processRequest(request, response);
+	}
+
+	/**
+	 * Delegate {@code POST} requests to {@link #processRequest}.
 	 * @see #doService
 	 */
 	@Override
@@ -904,7 +914,7 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	}
 
 	/**
-	 * Delegate PUT requests to {@link #processRequest}.
+	 * Delegate {@code PUT} requests to {@link #processRequest}.
 	 * @see #doService
 	 */
 	@Override
@@ -915,7 +925,7 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	}
 
 	/**
-	 * Delegate DELETE requests to {@link #processRequest}.
+	 * Delegate {@code DELETE} requests to {@link #processRequest}.
 	 * @see #doService
 	 */
 	@Override
@@ -926,7 +936,7 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	}
 
 	/**
-	 * Delegate OPTIONS requests to {@link #processRequest}, if desired.
+	 * Delegate {@code OPTIONS} requests to {@link #processRequest}, if desired.
 	 * <p>Applies HttpServlet's standard OPTIONS processing otherwise,
 	 * and also if there is still no 'Allow' header set after dispatching.
 	 * @see #doService
@@ -943,20 +953,11 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 			}
 		}
 
-		// Use response wrapper in order to always add PATCH to the allowed methods
-		super.doOptions(request, new HttpServletResponseWrapper(response) {
-			@Override
-			public void setHeader(String name, String value) {
-				if (HttpHeaders.ALLOW.equals(name)) {
-					value = (StringUtils.hasLength(value) ? value + ", " : "") + HttpMethod.PATCH.name();
-				}
-				super.setHeader(name, value);
-			}
-		});
+		super.doOptions(request, response);
 	}
 
 	/**
-	 * Delegate TRACE requests to {@link #processRequest}, if desired.
+	 * Delegate {@code TRACE} requests to {@link #processRequest}, if desired.
 	 * <p>Applies HttpServlet's standard TRACE processing otherwise.
 	 * @see #doService
 	 */
@@ -971,10 +972,7 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 				return;
 			}
 		}
-		// Work around until https://github.com/jakartaee/servlet/pull/545 is fixed and in use
-		if (request.getDispatcherType() != DispatcherType.ERROR) {
-			super.doTrace(request, response);
-		}
+		super.doTrace(request, response);
 	}
 
 	/**
@@ -1157,7 +1155,9 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 
 	/**
 	 * Subclasses must implement this method to do the work of request handling,
-	 * receiving a centralized callback for GET, POST, PUT and DELETE.
+	 * receiving a centralized callback for {@code GET}, {@code PATCH}, {@code POST},
+	 * {@code PUT}, {@code DELETE}, {@code OPTIONS}, and {@code TRACE} requests
+	 * as well as for requests using non-standard HTTP methods (such as WebDAV).
 	 * <p>The contract is essentially the same as that for the commonly overridden
 	 * {@code doGet} or {@code doPost} methods of HttpServlet.
 	 * <p>This class intercepts calls to ensure that exception handling and

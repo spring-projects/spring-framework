@@ -80,7 +80,7 @@ public class ProtobufJsonEncoder implements HttpMessageEncoder<Message> {
 
 	@Override
 	public List<MediaType> getStreamingMediaTypes() {
-		return List.of(MediaType.APPLICATION_NDJSON);
+		return List.of(MediaType.APPLICATION_NDJSON, MediaType.APPLICATION_JSONL);
 	}
 
 	@Override

@@ -75,11 +75,9 @@ final class InstantiationModelAwarePointcutAdvisorImpl
 
 	private @Nullable Advice instantiatedAdvice;
 
-	@SuppressWarnings("NullAway.Init")
-	private Boolean isBeforeAdvice;
+	private @Nullable Boolean isBeforeAdvice;
 
-	@SuppressWarnings("NullAway.Init")
-	private Boolean isAfterAdvice;
+	private @Nullable Boolean isAfterAdvice;
 
 
 	public InstantiationModelAwarePointcutAdvisorImpl(AspectJExpressionPointcut declaredPointcut,
@@ -119,7 +117,7 @@ final class InstantiationModelAwarePointcutAdvisorImpl
 
 	/**
 	 * The pointcut for Spring AOP to use.
-	 * Actual behaviour of the pointcut will change depending on the state of the advice.
+	 * Actual behavior of the pointcut will change depending on the state of the advice.
 	 */
 	@Override
 	public Pointcut getPointcut() {
@@ -198,7 +196,7 @@ final class InstantiationModelAwarePointcutAdvisorImpl
 		if (this.isBeforeAdvice == null) {
 			determineAdviceType();
 		}
-		return this.isBeforeAdvice;
+		return (this.isBeforeAdvice == Boolean.TRUE);
 	}
 
 	@Override
@@ -206,7 +204,7 @@ final class InstantiationModelAwarePointcutAdvisorImpl
 		if (this.isAfterAdvice == null) {
 			determineAdviceType();
 		}
-		return this.isAfterAdvice;
+		return (this.isAfterAdvice == Boolean.TRUE);
 	}
 
 	/**
@@ -258,7 +256,7 @@ final class InstantiationModelAwarePointcutAdvisorImpl
 
 
 	/**
-	 * Pointcut implementation that changes its behaviour when the advice is instantiated.
+	 * Pointcut implementation that changes its behavior when the advice is instantiated.
 	 * Note that this is a <i>dynamic</i> pointcut; otherwise it might be optimized out
 	 * if it does not at first match statically.
 	 */

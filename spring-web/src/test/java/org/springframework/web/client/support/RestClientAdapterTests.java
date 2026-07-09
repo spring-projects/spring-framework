@@ -80,7 +80,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
  * @author Rossen Stoyanchev
  * @author Brian Clozel
  */
-@SuppressWarnings("JUnitMalformedDeclaration")
+@SuppressWarnings({"JUnitMalformedDeclaration", "removal"})
 class RestClientAdapterTests {
 
 	private final MockWebServer anotherServer = new MockWebServer();
@@ -198,6 +198,42 @@ class RestClientAdapterTests {
 		RecordedRequest request = anotherServer.takeRequest();
 		assertThat(request.getHeaders().get("API-Version")).isEqualTo("1.2");
 		assertThat(actualResponse).isEqualTo("Hello Spring 2!");
+	}
+
+	@Test // gh-36514
+	void greetingWithDefaultApiVersion() throws Exception {
+		prepareResponse(builder ->
+				builder.setHeader("Content-Type", "text/plain").body("Hello Spring 2!"));
+
+		RestClient restClient = RestClient.builder()
+				.baseUrl(anotherServer.url("/").toString())
+				.defaultApiVersion("1.0")
+				.apiVersionInserter(ApiVersionInserter.useHeader("X-Version"))
+				.build();
+
+		String actualResponse =
+				HttpServiceProxyFactory.builderFor(RestClientAdapter.create(restClient)).build()
+						.createClient(Service.class).getGreeting();
+
+		RecordedRequest request = anotherServer.takeRequest();
+		assertThat(request.getHeaders().get("X-Version")).isEqualTo("1.0");
+		assertThat(actualResponse).isEqualTo("Hello Spring 2!");
+	}
+
+	@Test // see gh-36326
+	void getBodyWithGenericReturnType() {
+		prepareResponse(r -> r.setHeader("Content-Type", "application/json").body("{\"name\":\"Karl\"}"));
+		Person person = initService(PersonClient.class).getBody();
+
+		assertThat(person.name()).isEqualTo("Karl");
+	}
+
+	@Test // see gh-36326
+	void getEntityWithGenericReturnType() {
+		prepareResponse(r -> r.setHeader("Content-Type", "application/json").body("{\"name\":\"Karl\"}"));
+		ResponseEntity<Person> entity = initService(PersonClient.class).getEntity();
+
+		assertThat(entity.getBody().name()).isEqualTo("Karl");
 	}
 
 	@ParameterizedAdapterTest
@@ -330,7 +366,7 @@ class RestClientAdapterTests {
 		prepareResponse(builder ->
 				builder.setHeader("Content-Type", "text/plain").body("Hello Spring 2!"));
 
-		InputStream inputStream = initService().getInputStream();
+		InputStream inputStream = initService(Service.class).getInputStream();
 
 		RecordedRequest request = this.anotherServer.takeRequest();
 		assertThat(request.getTarget()).isEqualTo("/input-stream");
@@ -341,7 +377,7 @@ class RestClientAdapterTests {
 	void getInputStreamWithError() {
 		prepareResponse(builder -> builder.code(400).body("rejected"));
 
-		assertThatThrownBy(() -> initService().getInputStream())
+		assertThatThrownBy(() -> initService(Service.class).getInputStream())
 				.isExactlyInstanceOf(HttpClientErrorException.BadRequest.class)
 				.hasMessage("400 Client Error: \"rejected\"");
 	}
@@ -352,7 +388,7 @@ class RestClientAdapterTests {
 				builder.setHeader("Content-Type", "text/plain").body("Hello Spring 2!"));
 
 		String body = "test stream";
-		initService().postOutputStream(outputStream -> outputStream.write(body.getBytes()));
+		initService(Service.class).postOutputStream(outputStream -> outputStream.write(body.getBytes()));
 
 		RecordedRequest request = this.anotherServer.takeRequest();
 		assertThat(request.getTarget()).isEqualTo("/output-stream");
@@ -377,11 +413,11 @@ class RestClientAdapterTests {
 		assertThat(responseEntity.getBody()).isNull();
 	}
 
-	private Service initService() {
+	private <S> S initService(Class<S> serviceType) {
 		String url = this.anotherServer.url("/").toString();
 		RestClient restClient = RestClient.builder().baseUrl(url).build();
 		RestClientAdapter adapter = RestClientAdapter.create(restClient);
-		return HttpServiceProxyFactory.builderFor(adapter).build().createClient(Service.class);
+		return HttpServiceProxyFactory.builderFor(adapter).build().createClient(serviceType);
 	}
 
 	private void prepareResponse(Function<MockResponse.Builder, MockResponse.Builder> f) {
@@ -443,6 +479,21 @@ class RestClientAdapterTests {
 
 
 	record Person(String name) {
+	}
+
+
+	private interface BaseClient<T> {
+
+		@GetExchange
+		T getBody();
+
+		@GetExchange
+		ResponseEntity<T> getEntity();
+	}
+
+
+	private interface PersonClient extends BaseClient<Person> {
+
 	}
 
 }

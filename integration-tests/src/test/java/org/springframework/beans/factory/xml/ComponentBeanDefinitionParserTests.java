@@ -50,13 +50,13 @@ class ComponentBeanDefinitionParserTests {
 	}
 
 	@Test
-	void testBionicBasic() {
+	void bionicBasic() {
 		Component cp = getBionicFamily();
 		assertThat(cp.getName()).isEqualTo("Bionic-1");
 	}
 
 	@Test
-	void testBionicFirstLevelChildren() {
+	void bionicFirstLevelChildren() {
 		Component cp = getBionicFamily();
 		List<Component> components = cp.getComponents();
 		assertThat(components).hasSize(2);
@@ -65,7 +65,7 @@ class ComponentBeanDefinitionParserTests {
 	}
 
 	@Test
-	void testBionicSecondLevelChildren() {
+	void bionicSecondLevelChildren() {
 		Component cp = getBionicFamily();
 		List<Component> components = cp.getComponents().get(0).getComponents();
 		assertThat(components).hasSize(2);

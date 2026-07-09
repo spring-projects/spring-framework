@@ -108,14 +108,16 @@ public abstract class ExchangeFunctions {
 						String logPrefix = getLogPrefix(clientRequest, httpResponse);
 						logResponse(httpResponse, logPrefix);
 						return new DefaultClientResponse(
-								httpResponse, this.strategies, logPrefix, httpMethod.name() + " " + url,
+								httpResponse, this.strategies, logPrefix,
+								WebClientUtils.getRequestDescription(httpMethod, url),
 								() -> createRequest(clientRequest));
 					});
 		}
 
 		private void logRequest(ClientRequest request) {
 			LogFormatUtils.traceDebug(logger, traceOn ->
-					request.logPrefix() + "HTTP " + request.method() + " " + request.url() +
+					request.logPrefix() + "HTTP " +
+							WebClientUtils.getRequestDescription(request.method(), request.url()) +
 							(traceOn ? ", headers=" + formatHeaders(request.headers()) : "")
 			);
 		}

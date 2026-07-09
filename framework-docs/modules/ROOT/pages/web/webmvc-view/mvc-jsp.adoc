@@ -16,38 +16,10 @@ a directory under the `WEB-INF` directory so there can be no direct access by cl
 This is what is done by the configuration below which registers a JSP view resolver using
 a default view name prefix of `"/WEB-INF/"` and a default suffix of `".jsp"`.
 
-[tabs]
-======
-Java::
-+
-[source,java,indent=0,subs="verbatim,quotes"]
-----
-@EnableWebMvc
-@Configuration
-public class WebConfig implements WebMvcConfigurer {
-
-    @Override
-    public void configureViewResolvers(ViewResolverRegistry registry) {
-        registry.jsp();
-    }
-}
-----
-
-XML::
-+
-[source,xml,indent=0,subs="verbatim,quotes"]
-----
-    <mvc:annotation-driven/>
-
-    <mvc:view-resolvers>
-        <mvc:jsp/>
-    </mvc:view-resolvers>
-----
-======
+include-code::./WebConfiguration[tag=snippet,indent=0]
 
 [NOTE]
 You can specify custom prefix and suffix.
-
 
 [[mvc-view-jsp-jstl]]
 == JSPs versus JSTL

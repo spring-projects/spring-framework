@@ -23,7 +23,6 @@ import java.nio.charset.StandardCharsets;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Base64;
 import java.util.Calendar;
 import java.util.Collections;
@@ -76,8 +75,8 @@ class HttpHeadersTests {
 	void writableHttpHeadersUnwrapsMultiple() {
 		HttpHeaders originalExchangeHeaders = HttpHeaders.readOnlyHttpHeaders(new HttpHeaders());
 		HttpHeaders firewallHeaders = new HttpHeaders(originalExchangeHeaders);
-		HttpHeaders writeable = new HttpHeaders(firewallHeaders);
-		writeable.setContentType(MediaType.APPLICATION_JSON);
+		HttpHeaders writable = new HttpHeaders(firewallHeaders);
+		writable.setContentType(MediaType.APPLICATION_JSON);
 	}
 
 	@Test
@@ -134,7 +133,7 @@ class HttpHeadersTests {
 	void acceptWithMultipleHeaderValues() {
 		headers.add("Accept", "text/html");
 		headers.add("Accept", "text/plain");
-		List<MediaType> expected = Arrays.asList(new MediaType("text", "html"), new MediaType("text", "plain"));
+		List<MediaType> expected = List.of(new MediaType("text", "html"), new MediaType("text", "plain"));
 		assertThat(headers.getAccept()).as("Invalid Accept header").isEqualTo(expected);
 	}
 
@@ -142,7 +141,7 @@ class HttpHeadersTests {
 	void acceptWithMultipleCommaSeparatedHeaderValues() {
 		headers.add("Accept", "text/html,text/pdf");
 		headers.add("Accept", "text/plain,text/csv");
-		List<MediaType> expected = Arrays.asList(new MediaType("text", "html"), new MediaType("text", "pdf"),
+		List<MediaType> expected = List.of(new MediaType("text", "html"), new MediaType("text", "pdf"),
 				new MediaType("text", "plain"), new MediaType("text", "csv"));
 		assertThat(headers.getAccept()).as("Invalid Accept header").isEqualTo(expected);
 	}
@@ -151,9 +150,7 @@ class HttpHeadersTests {
 	void acceptCharsets() {
 		Charset charset1 = StandardCharsets.UTF_8;
 		Charset charset2 = StandardCharsets.ISO_8859_1;
-		List<Charset> charsets = new ArrayList<>(2);
-		charsets.add(charset1);
-		charsets.add(charset2);
+		List<Charset> charsets = List.of(charset1, charset2);
 		headers.setAcceptCharset(charsets);
 		assertThat(headers.getAcceptCharset()).as("Invalid Accept header").isEqualTo(charsets);
 		assertThat(headers.getFirst("Accept-Charset")).as("Invalid Accept header").isEqualTo("utf-8, iso-8859-1");
@@ -162,12 +159,12 @@ class HttpHeadersTests {
 	@Test
 	void acceptCharsetWildcard() {
 		headers.set("Accept-Charset", "ISO-8859-1,utf-8;q=0.7,*;q=0.7");
-		assertThat(headers.getAcceptCharset()).as("Invalid Accept header").isEqualTo(Arrays.asList(StandardCharsets.ISO_8859_1, StandardCharsets.UTF_8));
+		assertThat(headers.getAcceptCharset()).as("Invalid Accept header").isEqualTo(List.of(StandardCharsets.ISO_8859_1, StandardCharsets.UTF_8));
 	}
 
 	@Test
 	void allow() {
-		Set<HttpMethod> methods = new LinkedHashSet<>(Arrays.asList(HttpMethod.GET, HttpMethod.POST));
+		Set<HttpMethod> methods = new LinkedHashSet<>(List.of(HttpMethod.GET, HttpMethod.POST));
 		headers.setAllow(methods);
 		assertThat(headers.getAllow()).as("Invalid Allow header").isEqualTo(methods);
 		assertThat(headers.getFirst("Allow")).as("Invalid Allow header").isEqualTo("GET,POST");
@@ -332,6 +329,7 @@ class HttpHeadersTests {
 	}
 
 	@Test
+	@SuppressWarnings("deprecation")  // for Locale constructors on JDK 19
 	void dateOtherLocale() {
 		Locale defaultLocale = Locale.getDefault();
 		try {
@@ -470,9 +468,9 @@ class HttpHeadersTests {
 	void accessControlAllowHeaders() {
 		List<String> allowedHeaders = headers.getAccessControlAllowHeaders();
 		assertThat(allowedHeaders).isEmpty();
-		headers.setAccessControlAllowHeaders(Arrays.asList("header1", "header2"));
+		headers.setAccessControlAllowHeaders(List.of("header1", "header2"));
 		allowedHeaders = headers.getAccessControlAllowHeaders();
-		assertThat(Arrays.asList("header1", "header2")).isEqualTo(allowedHeaders);
+		assertThat(List.of("header1", "header2")).isEqualTo(allowedHeaders);
 	}
 
 	@Test
@@ -482,16 +480,16 @@ class HttpHeadersTests {
 		headers.add(HttpHeaders.ACCESS_CONTROL_ALLOW_HEADERS, "header1, header2");
 		headers.add(HttpHeaders.ACCESS_CONTROL_ALLOW_HEADERS, "header3");
 		allowedHeaders = headers.getAccessControlAllowHeaders();
-		assertThat(allowedHeaders).isEqualTo(Arrays.asList("header1", "header2", "header3"));
+		assertThat(allowedHeaders).isEqualTo(List.of("header1", "header2", "header3"));
 	}
 
 	@Test
 	void accessControlAllowMethods() {
 		List<HttpMethod> allowedMethods = headers.getAccessControlAllowMethods();
 		assertThat(allowedMethods).isEmpty();
-		headers.setAccessControlAllowMethods(Arrays.asList(HttpMethod.GET, HttpMethod.POST));
+		headers.setAccessControlAllowMethods(List.of(HttpMethod.GET, HttpMethod.POST));
 		allowedMethods = headers.getAccessControlAllowMethods();
-		assertThat(Arrays.asList(HttpMethod.GET, HttpMethod.POST)).isEqualTo(allowedMethods);
+		assertThat(List.of(HttpMethod.GET, HttpMethod.POST)).isEqualTo(allowedMethods);
 	}
 
 	@Test
@@ -505,9 +503,9 @@ class HttpHeadersTests {
 	void accessControlExposeHeaders() {
 		List<String> exposedHeaders = headers.getAccessControlExposeHeaders();
 		assertThat(exposedHeaders).isEmpty();
-		headers.setAccessControlExposeHeaders(Arrays.asList("header1", "header2"));
+		headers.setAccessControlExposeHeaders(List.of("header1", "header2"));
 		exposedHeaders = headers.getAccessControlExposeHeaders();
-		assertThat(Arrays.asList("header1", "header2")).isEqualTo(exposedHeaders);
+		assertThat(List.of("header1", "header2")).isEqualTo(exposedHeaders);
 	}
 
 	@Test
@@ -521,9 +519,9 @@ class HttpHeadersTests {
 	void accessControlRequestHeaders() {
 		List<String> requestHeaders = headers.getAccessControlRequestHeaders();
 		assertThat(requestHeaders).isEmpty();
-		headers.setAccessControlRequestHeaders(Arrays.asList("header1", "header2"));
+		headers.setAccessControlRequestHeaders(List.of("header1", "header2"));
 		requestHeaders = headers.getAccessControlRequestHeaders();
-		assertThat(Arrays.asList("header1", "header2")).isEqualTo(requestHeaders);
+		assertThat(List.of("header1", "header2")).isEqualTo(requestHeaders);
 	}
 
 	@Test
@@ -564,7 +562,7 @@ class HttpHeadersTests {
 		headers.set(HttpHeaders.ACCEPT_LANGUAGE, headerValue);
 		assertThat(headers.getFirst(HttpHeaders.ACCEPT_LANGUAGE)).isEqualTo(headerValue);
 
-		List<Locale.LanguageRange> expectedRanges = Arrays.asList(
+		List<Locale.LanguageRange> expectedRanges = List.of(
 				new Locale.LanguageRange("en-us"),
 				new Locale.LanguageRange("en"),
 				new Locale.LanguageRange("nl")
@@ -614,7 +612,7 @@ class HttpHeadersTests {
 		headers.add(HttpHeaders.DATE, "Fri, 02 Jun 2017 02:22:00 GMT");
 		headers.add(HttpHeaders.DATE, "Sat, 18 Dec 2010 10:20:00 GMT");
 		assertThat(headers.getFirstZonedDateTime(HttpHeaders.DATE).isEqual(date)).isTrue();
-		assertThat(headers.get(HttpHeaders.DATE)).isEqualTo(Arrays.asList("Fri, 02 Jun 2017 02:22:00 GMT",
+		assertThat(headers.get(HttpHeaders.DATE)).isEqualTo(List.of("Fri, 02 Jun 2017 02:22:00 GMT",
 				"Sat, 18 Dec 2010 10:20:00 GMT"));
 
 		// obsolete RFC 850 format
@@ -686,12 +684,12 @@ class HttpHeadersTests {
 			assertThat(keySet.toArray()).isEqualTo(new String[] {"Alpha", "Bravo"});
 
 			// spliterator() via stream()
-			assertThat(keySet.stream().collect(toList())).isEqualTo(Arrays.asList("Alpha", "Bravo"));
+			assertThat(keySet.stream().collect(toList())).isEqualTo(List.of("Alpha", "Bravo"));
 
 			// iterator()
 			List<String> results = new ArrayList<>();
 			keySet.iterator().forEachRemaining(results::add);
-			assertThat(results).isEqualTo(Arrays.asList("Alpha", "Bravo"));
+			assertThat(results).isEqualTo(List.of("Alpha", "Bravo"));
 
 			// remove()
 			assertThat(keySet.remove("Alpha")).isTrue();

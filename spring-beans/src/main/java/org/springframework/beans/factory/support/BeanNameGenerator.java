@@ -23,6 +23,7 @@ import org.springframework.beans.factory.config.BeanDefinition;
  *
  * @author Juergen Hoeller
  * @since 2.0.3
+ * @see org.springframework.context.annotation.ConfigurationBeanNameGenerator
  */
 public interface BeanNameGenerator {
 

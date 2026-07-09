@@ -70,14 +70,14 @@ class HibernateNativeEntityManagerFactoryIntegrationTests extends AbstractContai
 
 	@Test
 	@Override
-	protected void testEntityManagerFactoryImplementsEntityManagerFactoryInfo() {
+	protected void entityManagerFactoryImplementsEntityManagerFactoryInfo() {
 		assertThat(entityManagerFactory).as("Must not have introduced config interface")
 				.isNotInstanceOf(EntityManagerFactoryInfo.class);
 	}
 
 	@Test
 	@SuppressWarnings("unchecked")
-	public void testEntityListener() {
+	void entityListener() {
 		String firstName = "Tony";
 		insertPerson(firstName);
 
@@ -88,7 +88,7 @@ class HibernateNativeEntityManagerFactoryIntegrationTests extends AbstractContai
 	}
 
 	@Test
-	public void testCurrentSession() {
+	void currentSession() {
 		String firstName = "Tony";
 		insertPerson(firstName);
 
@@ -99,7 +99,7 @@ class HibernateNativeEntityManagerFactoryIntegrationTests extends AbstractContai
 	}
 
 	@Test
-	public void testSharedSession() {
+	void sharedSession() {
 		String firstName = "Tony";
 		insertPerson(firstName);
 
@@ -126,7 +126,7 @@ class HibernateNativeEntityManagerFactoryIntegrationTests extends AbstractContai
 	}
 
 	@Test
-	public void testStatelessSession() {
+	void statelessSession() {
 		String firstName = "Tony";
 		insertPerson(firstName);
 
@@ -151,7 +151,7 @@ class HibernateNativeEntityManagerFactoryIntegrationTests extends AbstractContai
 	}
 
 	@Test  // SPR-16956
-	public void testReadOnly() {
+	void readOnly() {
 		assertThat(sessionFactory.getCurrentSession().getHibernateFlushMode()).isSameAs(FlushMode.AUTO);
 		assertThat(sessionFactory.getCurrentSession().isDefaultReadOnly()).isFalse();
 		endTransaction();

@@ -49,14 +49,15 @@ public class ForkJoinPoolFactoryBean implements FactoryBean<ForkJoinPool>, Initi
 
 
 	/**
-	 * Set whether to expose JDK 8's 'common' {@link ForkJoinPool}.
-	 * <p>Default is "false", creating a local {@link ForkJoinPool} instance based on the
-	 * {@link #setParallelism "parallelism"}, {@link #setThreadFactory "threadFactory"},
-	 * {@link #setUncaughtExceptionHandler "uncaughtExceptionHandler"} and
-	 * {@link #setAsyncMode "asyncMode"} properties on this FactoryBean.
-	 * <p><b>NOTE:</b> Setting this flag to "true" effectively ignores all other
+	 * Set whether to expose Java's 'common' {@link ForkJoinPool}.
+	 * <p>Default is {@code false} , creating a local {@link ForkJoinPool} instance
+	 * based on the {@link #setParallelism parallelism},
+	 * {@link #setThreadFactory threadFactory},
+	 * {@link #setUncaughtExceptionHandler uncaughtExceptionHandler}, and
+	 * {@link #setAsyncMode asyncMode} properties on this FactoryBean.
+	 * <p><b>NOTE:</b> Setting this flag to {@code true} effectively ignores all other
 	 * properties on this FactoryBean, reusing the shared common JDK {@link ForkJoinPool}
-	 * instead. This is a fine choice on JDK 8 but does remove the application's ability
+	 * instead. This is a fine choice but does remove the application's ability
 	 * to customize ForkJoinPool behavior, in particular the use of custom threads.
 	 * @since 3.2
 	 * @see java.util.concurrent.ForkJoinPool#commonPool()

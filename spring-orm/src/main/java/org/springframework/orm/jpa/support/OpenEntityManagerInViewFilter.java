@@ -240,7 +240,7 @@ public class OpenEntityManagerInViewFilter extends OncePerRequestFilter {
 	 * @see jakarta.persistence.EntityManagerFactory#createEntityManager()
 	 */
 	protected EntityManager createEntityManager(EntityManagerFactory emf) {
-		return emf.createEntityManager();
+		return EntityManagerFactoryUtils.createEntityManager(emf, null);
 	}
 
 	private boolean applyEntityManagerBindingInterceptor(WebAsyncManager asyncManager, String key) {

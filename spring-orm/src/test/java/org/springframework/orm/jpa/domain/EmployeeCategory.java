@@ -17,6 +17,7 @@
 package org.springframework.orm.jpa.domain;
 
 public class EmployeeCategory {
+
 	private String name;
 
 	public String getName() {
@@ -26,4 +27,5 @@ public class EmployeeCategory {
 	public void setName(String name) {
 		this.name = name;
 	}
+
 }

@@ -149,10 +149,10 @@ public class DependencyDescriptor extends InjectionPoint implements Serializable
 
 	/**
 	 * Return whether this dependency is required.
-	 * <p>Optional semantics are derived from Java 8's {@link java.util.Optional},
-	 * any variant of a parameter-level {@code Nullable} annotation (such as from
-	 * JSR-305 or the FindBugs set of annotations), or a language-level nullable
-	 * type declaration in Kotlin.
+	 * <p>Optional semantics are derived from Java's {@link java.util.Optional},
+	 * any variant of a parameter-level {@code @Nullable} annotation (such as from
+	 * JSpecify, JSR-305, or the FindBugs set of annotations), or a language-level
+	 * nullable type declaration in Kotlin.
 	 */
 	public boolean isRequired() {
 		if (!this.required) {

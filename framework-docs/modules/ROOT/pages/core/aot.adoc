@@ -378,7 +378,7 @@ The container also supports creating a bean with {spring-framework-api}++/beans/
 
 . The custom arguments require dynamic introspection of a matching constructor or factory method.
 Those arguments cannot be detected by AOT, so the necessary reflection hints will have to be provided manually.
-. By-passing the instance supplier means that all other optimizations after creation are skipped as well.
+. Bypassing the instance supplier means that all other optimizations after creation are skipped as well.
 For instance, autowiring on fields and methods will be skipped as they are handled in the instance supplier.
 
 Rather than having prototype-scoped beans created with custom arguments, we recommend a manual factory pattern where a bean is responsible for the creation of the instance.

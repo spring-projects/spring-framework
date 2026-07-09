@@ -220,7 +220,7 @@ class ExtendedBeanInfo implements BeanInfo {
 	 */
 	@Override
 	public PropertyDescriptor[] getPropertyDescriptors() {
-		return this.propertyDescriptors.toArray(new PropertyDescriptor[0]);
+		return this.propertyDescriptors.toArray(PropertyDescriptorUtils.EMPTY_PROPERTY_DESCRIPTOR_ARRAY);
 	}
 
 	@Override

@@ -42,7 +42,7 @@ import org.springframework.util.Assert;
  * @param <T> the referenced type
  * @see <a href="https://gafter.blogspot.nl/2006/12/super-type-tokens.html">Neal Gafter on Super Type Tokens</a>
  */
-public abstract class ParameterizedTypeReference<T> {
+public abstract class ParameterizedTypeReference<T extends @Nullable Object> {
 
 	private final Type type;
 

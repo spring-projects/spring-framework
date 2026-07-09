@@ -16,6 +16,7 @@
 
 package org.springframework.beans.factory.config;
 
+import java.net.URI;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -44,8 +45,7 @@ import static org.assertj.core.api.InstanceOfAssertFactories.set;
  */
 class YamlProcessorTests {
 
-	private final YamlProcessor processor = new YamlProcessor() {
-	};
+	private final TestYamlProcessor processor = new TestYamlProcessor();
 
 
 	@Test
@@ -151,7 +151,7 @@ class YamlProcessorTests {
 
 	@Test
 	void customTypeNotSupportedByDefault() throws Exception {
-		URL url = new URL("https://localhost:9000/");
+		URL url = URI.create("https://localhost:9000/").toURL();
 		setYaml("value: !!java.net.URL [\"" + url + "\"]");
 		assertThatExceptionOfType(ComposerException.class)
 				.isThrownBy(() -> this.processor.process((properties, map) -> {}))
@@ -162,7 +162,7 @@ class YamlProcessorTests {
 	void customTypesSupportedDueToExplicitConfiguration() throws Exception {
 		this.processor.setSupportedTypes(URL.class, String.class);
 
-		URL url = new URL("https://localhost:9000/");
+		URL url = URI.create("https://localhost:9000/").toURL();
 		setYaml("value: !!java.net.URL [!!java.lang.String [\"" + url + "\"]]");
 
 		this.processor.process((properties, map) -> {
@@ -182,8 +182,51 @@ class YamlProcessorTests {
 				.withMessageContaining("Global tag is not allowed: tag:yaml.org,2002:java.net.URL");
 	}
 
+	@Test
+	void processAndFlattenWithoutIncludedNulls() {
+		setYaml("avalue: value\nanull: null\natilde: ~\nparent:\n  anempty: {}\n");
+		Map<String, Object> flattened = this.processor.processAndFlatten(false, null);
+		assertThat(flattened).containsOnly(
+				entry("avalue", "value"),
+				entry("anull", ""),
+				entry("atilde", ""));
+	}
+
+	@Test
+	void processAndFlattenWithIncludedNulls() {
+		setYaml("avalue: value\nanull: null\natilde: ~\nparent:\n  anempty: {}\n");
+		Map<String, Object> flattened = this.processor.processAndFlatten(true, null);
+		assertThat(flattened).containsOnly(
+				entry("avalue", "value"),
+				entry("anull", null),
+				entry("atilde", null),
+				entry("parent.anempty", null));
+	}
+
+	@Test
+	void processAndFlattenWithIncludedBlankString() {
+		setYaml("avalue: value\nanull: null\natilde: ~\nparent:\n  anempty: {}\n");
+		Map<String, Object> flattened = this.processor.processAndFlatten(true, "");
+		assertThat(flattened).containsOnly(
+				entry("avalue", "value"),
+				entry("anull", ""),
+				entry("atilde", ""),
+				entry("parent.anempty", ""));
+	}
+
 	private void setYaml(String yaml) {
 		this.processor.setResources(new ByteArrayResource(yaml.getBytes()));
+	}
+
+	private static class TestYamlProcessor extends YamlProcessor {
+
+		Map<String, Object> processAndFlatten(boolean includeEmpty, Object emptyValue) {
+			Map<String, Object> flattened = new LinkedHashMap<>();
+			process((properties, map) -> flattened.putAll(getFlattenedMap(map, includeEmpty, emptyValue)));
+			return flattened;
+		}
+
+
 	}
 
 }

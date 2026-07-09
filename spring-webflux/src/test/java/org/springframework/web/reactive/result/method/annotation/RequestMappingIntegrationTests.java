@@ -16,7 +16,6 @@
 
 package org.springframework.web.reactive.result.method.annotation;
 
-import java.net.URI;
 import java.time.Duration;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
@@ -31,7 +30,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -75,11 +73,8 @@ class RequestMappingIntegrationTests extends AbstractRequestMappingIntegrationTe
 	void emptyMapping(HttpServer httpServer) throws Exception {
 		startServer(httpServer);
 
-		String url = "http://localhost:" + this.port;
-		assertThat(getRestTemplate().getForObject(url, String.class)).isEqualTo("root");
-
-		url += "/";
-		assertThat(getRestTemplate().getForObject(url, String.class)).isEqualTo("root");
+		assertThat(getRestClient().get().retrieve().body(String.class)).isEqualTo("root");
+		assertThat(getRestClient().get().uri("/").retrieve().body(String.class)).isEqualTo("root");
 
 		assertThat(getApplicationContext().getBean(TestExecutor.class).invocationCount.get()).isEqualTo(4);
 		assertThat(getApplicationContext().getBean(TestPredicate.class).invocationCount.get()).isEqualTo(4);
@@ -89,9 +84,8 @@ class RequestMappingIntegrationTests extends AbstractRequestMappingIntegrationTe
 	void httpHead(HttpServer httpServer) throws Exception {
 		startServer(httpServer);
 
-		String url = "http://localhost:" + this.port + "/text";
-		HttpHeaders headers = getRestTemplate().headForHeaders(url);
-		String contentType = headers.getFirst("Content-Type");
+		ResponseEntity<Void> response = getRestClient().head().uri("/text").retrieve().toBodilessEntity();
+		String contentType = response.getHeaders().getFirst("Content-Type");
 		assertThat(contentType).isNotNull();
 	}
 
@@ -102,11 +96,11 @@ class RequestMappingIntegrationTests extends AbstractRequestMappingIntegrationTe
 		// One integration test to verify triggering of Forwarded header support.
 		// More fine-grained tests in ForwardedHeaderTransformerTests.
 
-		RequestEntity<Void> request = RequestEntity
-				.get(URI.create("http://localhost:" + this.port + "/uri"))
+		ResponseEntity<String> entity = getRestClient().get().uri("/uri")
 				.header("Forwarded", "host=84.198.58.199;proto=https")
-				.build();
-		ResponseEntity<String> entity = getRestTemplate().exchange(request, String.class);
+				.retrieve()
+				.toEntity(String.class);
+
 		assertThat(entity.getBody()).isEqualTo("https://84.198.58.199/uri");
 	}
 

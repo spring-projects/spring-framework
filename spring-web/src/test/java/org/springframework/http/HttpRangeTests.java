@@ -170,7 +170,7 @@ class HttpRangeTests {
 	}
 
 	@Test // gh-23576
-	public void toResourceRegionStartingAtResourceByteCount() {
+	void toResourceRegionStartingAtResourceByteCount() {
 		byte[] bytes = "Spring Framework".getBytes(StandardCharsets.UTF_8);
 		ByteArrayResource resource = new ByteArrayResource(bytes);
 		HttpRange range = HttpRange.createByteRange(resource.contentLength());

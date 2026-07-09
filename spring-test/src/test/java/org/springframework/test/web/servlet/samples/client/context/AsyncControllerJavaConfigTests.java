@@ -57,7 +57,7 @@ import static org.mockito.Mockito.mock;
 @WebAppConfiguration
 @ContextHierarchy(@ContextConfiguration(classes = AsyncControllerJavaConfigTests.WebConfig.class))
 @DisabledInAotMode("@ContextHierarchy is not supported in AOT")
-public class AsyncControllerJavaConfigTests {
+class AsyncControllerJavaConfigTests {
 
 	@Autowired
 	private WebApplicationContext wac;
@@ -69,12 +69,12 @@ public class AsyncControllerJavaConfigTests {
 
 
 	@BeforeEach
-	public void setup() {
+	void setup() {
 		this.testClient = MockMvcWebTestClient.bindToApplicationContext(this.wac).build();
 	}
 
 	@Test
-	public void callableInterceptor() throws Exception {
+	void callableInterceptor() throws Exception {
 		testClient.get().uri("/callable")
 				.accept(MediaType.APPLICATION_JSON)
 				.exchange()

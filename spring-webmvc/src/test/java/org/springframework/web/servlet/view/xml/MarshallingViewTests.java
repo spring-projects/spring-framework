@@ -192,7 +192,7 @@ class MarshallingViewTests {
 	}
 
 	@Test
-	void testRenderUnsupportedModel() {
+	void renderUnsupportedModel() {
 		Object toBeMarshalled = new Object();
 		String modelKey = "key";
 		Map<String, Object> model = new HashMap<>();

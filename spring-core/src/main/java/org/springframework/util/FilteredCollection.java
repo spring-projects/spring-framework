@@ -21,15 +21,18 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.function.Predicate;
 
+import org.jspecify.annotations.Nullable;
+
 /**
  * Collection that filters out values that do not match a predicate.
  * This type is used by {@link CompositeMap}.
  *
  * @author Arjen Poutsma
+ * @author Yanming Zhou
  * @since 6.2
  * @param <E> the type of elements maintained by this collection
  */
-class FilteredCollection<E> extends AbstractCollection<E> {
+class FilteredCollection<E extends @Nullable Object> extends AbstractCollection<E> {
 
 	private final Collection<E> delegate;
 

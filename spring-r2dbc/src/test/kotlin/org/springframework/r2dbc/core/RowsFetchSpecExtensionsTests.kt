@@ -37,14 +37,10 @@ import reactor.core.publisher.Mono
 class RowsFetchSpecExtensionsTests {
 
 	@Test
-	fun awaitOneWithValue() {
+	suspend fun awaitOneWithValue() {
 		val spec = mockk<RowsFetchSpec<String>>()
 		every { spec.one() } returns Mono.just("foo")
-
-		runBlocking {
-			assertThat(spec.awaitOne()).isEqualTo("foo")
-		}
-
+		assertThat(spec.awaitOne()).isEqualTo("foo")
 		verify {
 			spec.one()
 		}
@@ -54,53 +50,39 @@ class RowsFetchSpecExtensionsTests {
 	fun awaitOneWithNull() {
 		val spec = mockk<RowsFetchSpec<String>>()
 		every { spec.one() } returns Mono.empty()
-
 		assertThatExceptionOfType(EmptyResultDataAccessException::class.java).isThrownBy {
 			runBlocking { spec.awaitOne() }
 		}
-
 		verify {
 			spec.one()
 		}
 	}
 
 	@Test
-	fun awaitOneOrNullWithValue() {
+	suspend fun awaitOneOrNullWithValue() {
 		val spec = mockk<RowsFetchSpec<String>>()
 		every { spec.one() } returns Mono.just("foo")
-
-		runBlocking {
-			assertThat(spec.awaitOneOrNull()).isEqualTo("foo")
-		}
-
+		assertThat(spec.awaitOneOrNull()).isEqualTo("foo")
 		verify {
 			spec.one()
 		}
 	}
 
 	@Test
-	fun awaitOneOrNullWithNull() {
+	suspend fun awaitOneOrNullWithNull() {
 		val spec = mockk<RowsFetchSpec<String>>()
 		every { spec.one() } returns Mono.empty()
-
-		runBlocking {
-			assertThat(spec.awaitOneOrNull()).isNull()
-		}
-
+		assertThat(spec.awaitOneOrNull()).isNull()
 		verify {
 			spec.one()
 		}
 	}
 
 	@Test
-	fun awaitFirstWithValue() {
+	suspend fun awaitFirstWithValue() {
 		val spec = mockk<RowsFetchSpec<String>>()
 		every { spec.first() } returns Mono.just("foo")
-
-		runBlocking {
-			assertThat(spec.awaitSingle()).isEqualTo("foo")
-		}
-
+		assertThat(spec.awaitSingle()).isEqualTo("foo")
 		verify {
 			spec.first()
 		}
@@ -110,39 +92,29 @@ class RowsFetchSpecExtensionsTests {
 	fun awaitFirstWithNull() {
 		val spec = mockk<RowsFetchSpec<String>>()
 		every { spec.first() } returns Mono.empty()
-
 		assertThatExceptionOfType(EmptyResultDataAccessException::class.java).isThrownBy {
 			runBlocking { spec.awaitSingle() }
 		}
-
 		verify {
 			spec.first()
 		}
 	}
 
 	@Test
-	fun awaitSingleOrNullWithValue() {
+	suspend fun awaitSingleOrNullWithValue() {
 		val spec = mockk<RowsFetchSpec<String>>()
 		every { spec.first() } returns Mono.just("foo")
-
-		runBlocking {
-			assertThat(spec.awaitSingleOrNull()).isEqualTo("foo")
-		}
-
+		assertThat(spec.awaitSingleOrNull()).isEqualTo("foo")
 		verify {
 			spec.first()
 		}
 	}
 
 	@Test
-	fun awaitSingleOrNullWithNull() {
+	suspend fun awaitSingleOrNullWithNull() {
 		val spec = mockk<RowsFetchSpec<String>>()
 		every { spec.first() } returns Mono.empty()
-
-		runBlocking {
-			assertThat(spec.awaitSingleOrNull()).isNull()
-		}
-
+		assertThat(spec.awaitSingleOrNull()).isNull()
 		verify {
 			spec.first()
 		}
@@ -150,14 +122,10 @@ class RowsFetchSpecExtensionsTests {
 
 	@Test
 	@ExperimentalCoroutinesApi
-	fun allAsFlow() {
+	suspend fun allAsFlow() {
 		val spec = mockk<RowsFetchSpec<String>>()
 		every { spec.all() } returns Flux.just("foo", "bar", "baz")
-
-		runBlocking {
-			assertThat(spec.flow().toList()).contains("foo", "bar", "baz")
-		}
-
+		assertThat(spec.flow().toList()).contains("foo", "bar", "baz")
 		verify {
 			spec.all()
 		}

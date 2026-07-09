@@ -19,6 +19,7 @@ package org.springframework.expression.spel;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.expression.ConstructorResolver;
@@ -40,6 +41,11 @@ import static org.assertj.core.api.Assertions.assertThatException;
  * @see VariableAndFunctionTests
  */
 class ConstructorInvocationTests extends AbstractExpressionTests {
+
+	@BeforeEach
+	void resetCounter() {
+		Tester.counter = 0;
+	}
 
 	@Test
 	void constructorWithArgument() {

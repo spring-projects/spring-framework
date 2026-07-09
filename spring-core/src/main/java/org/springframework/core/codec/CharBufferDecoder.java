@@ -74,8 +74,8 @@ public final class CharBufferDecoder extends AbstractCharSequenceDecoder<CharBuf
 	 * @param stripDelimiter whether to remove delimiters from the resulting input strings
 	 */
 	public static CharBufferDecoder textPlainOnly(List<String> delimiters, boolean stripDelimiter) {
-		var textPlain = new MimeType("text", "plain", DEFAULT_CHARSET);
-		return new CharBufferDecoder(delimiters, stripDelimiter, textPlain);
+		MimeType mimeType = new MimeType("text", "plain", DEFAULT_CHARSET);
+		return new CharBufferDecoder(delimiters, stripDelimiter, mimeType);
 	}
 
 	/**
@@ -91,8 +91,8 @@ public final class CharBufferDecoder extends AbstractCharSequenceDecoder<CharBuf
 	 * @param stripDelimiter whether to remove delimiters from the resulting input strings
 	 */
 	public static CharBufferDecoder allMimeTypes(List<String> delimiters, boolean stripDelimiter) {
-		var textPlain = new MimeType("text", "plain", DEFAULT_CHARSET);
-		return new CharBufferDecoder(delimiters, stripDelimiter, textPlain, MimeTypeUtils.ALL);
+		MimeType mimeType = new MimeType("text", "plain", DEFAULT_CHARSET);
+		return new CharBufferDecoder(delimiters, stripDelimiter, mimeType, MimeTypeUtils.ALL);
 	}
 
 }

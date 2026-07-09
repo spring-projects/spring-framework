@@ -43,6 +43,7 @@ import static org.mockito.Mockito.mock;
  * Tests for {@link ExchangeFilterFunctions}.
  *
  * @author Arjen Poutsma
+ * @author Kai Zander
  */
 class ExchangeFilterFunctionsTests {
 
@@ -104,11 +105,28 @@ class ExchangeFilterFunctionsTests {
 
 		ExchangeFunction exchange = r -> {
 			assertThat(r.headers().containsHeader(HttpHeaders.AUTHORIZATION)).isTrue();
-			assertThat(r.headers().getFirst(HttpHeaders.AUTHORIZATION)).startsWith("Basic ");
+			assertThat(r.headers().getFirst(HttpHeaders.AUTHORIZATION)).isEqualTo("Basic Zm9vOmJhcg==");
 			return Mono.just(response);
 		};
 
 		ExchangeFilterFunction auth = ExchangeFilterFunctions.basicAuthentication("foo", "bar");
+		assertThat(request.headers().containsHeader(HttpHeaders.AUTHORIZATION)).isFalse();
+		ClientResponse result = auth.filter(request, exchange).block();
+		assertThat(result).isEqualTo(response);
+	}
+
+	@Test  // gh-36777
+	void basicAuthenticationUsernameAndUnicodePassword() {
+		ClientRequest request = ClientRequest.create(HttpMethod.GET, DEFAULT_URL).build();
+		ClientResponse response = mock();
+
+		ExchangeFunction exchange = r -> {
+			assertThat(r.headers().containsHeader(HttpHeaders.AUTHORIZATION)).isTrue();
+			assertThat(r.headers().getFirst(HttpHeaders.AUTHORIZATION)).isEqualTo("Basic Zm9vOvCfkqk=");
+			return Mono.just(response);
+		};
+
+		ExchangeFilterFunction auth = ExchangeFilterFunctions.basicAuthentication("foo", "\ud83d\udca9", StandardCharsets.UTF_8);
 		assertThat(request.headers().containsHeader(HttpHeaders.AUTHORIZATION)).isFalse();
 		ClientResponse result = auth.filter(request, exchange).block();
 		assertThat(result).isEqualTo(response);

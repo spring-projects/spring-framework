@@ -76,6 +76,7 @@ import org.springframework.util.Assert;
  *
  * @author Rossen Stoyanchev
  * @author Andy Wilkinson
+ * @author Sam Brannen
  * @since 4.0
  */
 public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler {
@@ -96,7 +97,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 
 	private static final byte[] EMPTY_PAYLOAD = new byte[0];
 
-	private static final CompletableFuture<Void> EMPTY_TASK = CompletableFuture.completedFuture(null);
+	private static final CompletableFuture<@Nullable Void> EMPTY_TASK = CompletableFuture.completedFuture(null);
 
 	private static final StompHeaderAccessor HEART_BEAT_ACCESSOR;
 
@@ -130,6 +131,15 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 	private @Nullable String virtualHost;
 
 	private @Nullable TcpOperations<byte[]> tcpClient;
+
+	/**
+	 * Tracks whether this {@code StompBrokerRelayMessageHandler} manages the
+	 * TCP client internally.
+	 * @since 7.0.4
+	 * @see #setTcpClient(TcpOperations)
+	 * @see #isPauseable()
+	 */
+	private boolean internallyManagedTcpClient = true;
 
 	private @Nullable MessageHeaderInitializer headerInitializer;
 
@@ -344,10 +354,12 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 	 * <p>By default {@link ReactorNettyTcpClient} is used.
 	 * <p><strong>Note:</strong> when this property is used, any
 	 * {@link #setRelayHost(String) host} or {@link #setRelayPort(int) port}
-	 * specified are effectively ignored.
+	 * specified will be effectively ignored, and {@link #isPauseable()} will
+	 * return {@code false}.
 	 */
 	public void setTcpClient(@Nullable TcpOperations<byte[]> tcpClient) {
 		this.tcpClient = tcpClient;
+		this.internallyManagedTcpClient = (tcpClient == null);
 	}
 
 	/**
@@ -415,6 +427,19 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 		return this.taskScheduler;
 	}
 
+	/**
+	 * Returns {@code true} if this {@code StompBrokerRelayMessageHandler} manages
+	 * the TCP client internally.
+	 * <p>Returns {@code false} if an externally managed TCP client has been
+	 * {@linkplain #setTcpClient(TcpOperations) registered}.
+	 * @since 7.0.4
+	 * @see #setTcpClient(TcpOperations)
+	 * @see org.springframework.context.SmartLifecycle#isPauseable()
+	 */
+	@Override
+	public boolean isPauseable() {
+		return this.internallyManagedTcpClient;
+	}
 
 	@Override
 	protected void startInternal() {
@@ -431,10 +456,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 		accessor.setLogin(this.systemLogin);
 		accessor.setPasscode(this.systemPasscode);
 		accessor.setHeartbeat(this.systemHeartbeatSendInterval, this.systemHeartbeatReceiveInterval);
-		String virtualHost = getVirtualHost();
-		if (virtualHost != null) {
-			accessor.setHost(virtualHost);
-		}
+		accessor.setHost(getVirtualHost() != null ? getVirtualHost() : null);
 		accessor.setSessionId(SYSTEM_SESSION_ID);
 		if (logger.isDebugEnabled()) {
 			logger.debug("Forwarding " + accessor.getShortLogMessage(EMPTY_PAYLOAD));
@@ -471,6 +493,9 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 			}
 			catch (Throwable ex) {
 				logger.error("Error in shutdown of TCP client", ex);
+			}
+			if (this.internallyManagedTcpClient) {
+				this.tcpClient = null;
 			}
 		}
 	}
@@ -554,9 +579,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 			stompHeaderAccessor = (stompHeaderAccessor.isMutable() ? stompHeaderAccessor : StompHeaderAccessor.wrap(message));
 			stompHeaderAccessor.setLogin(this.clientLogin);
 			stompHeaderAccessor.setPasscode(this.clientPasscode);
-			if (getVirtualHost() != null) {
-				stompHeaderAccessor.setHost(getVirtualHost());
-			}
+			stompHeaderAccessor.setHost(getVirtualHost() != null ? getVirtualHost() : null);
 			RelayConnectionHandler handler = new RelayConnectionHandler(sessionId, stompHeaderAccessor);
 			this.connectionHandlers.put(sessionId, handler);
 			this.stats.incrementConnectCount();
@@ -851,7 +874,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 		 * @return a future to wait for the result
 		 */
 		@SuppressWarnings("unchecked")
-		public CompletableFuture<Void> forward(final Message<?> message, final StompHeaderAccessor accessor) {
+		public CompletableFuture<@Nullable Void> forward(final Message<?> message, final StompHeaderAccessor accessor) {
 			TcpConnection<byte[]> conn = this.tcpConnection;
 
 			if (!this.isStompConnected || conn == null) {
@@ -887,7 +910,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 				logger.trace("Forwarding " + accessor.getDetailedLogMessage(message.getPayload()));
 			}
 
-			CompletableFuture<Void> future = conn.sendAsync((Message<byte[]>) messageToSend);
+			CompletableFuture<@Nullable Void> future = conn.sendAsync((Message<byte[]>) messageToSend);
 			future.whenComplete((unused, throwable) -> {
 				if (throwable == null) {
 					if (accessor.getCommand() == StompCommand.DISCONNECT) {
@@ -1067,9 +1090,9 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 		}
 
 		@Override
-		public CompletableFuture<Void> forward(Message<?> message, StompHeaderAccessor accessor) {
+		public CompletableFuture<@Nullable Void> forward(Message<?> message, StompHeaderAccessor accessor) {
 			try {
-				CompletableFuture<Void> future = super.forward(message, accessor);
+				CompletableFuture<@Nullable Void> future = super.forward(message, accessor);
 				if (message.getHeaders().get(SimpMessageHeaderAccessor.IGNORE_ERROR) == null) {
 					future.get();
 				}

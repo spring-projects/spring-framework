@@ -85,8 +85,11 @@ class SingleCharWildcardedPathElement extends PathElement {
 		else {
 			for (int i = 0; i < this.len; i++) {
 				char ch = this.text[i];
-				// TODO revisit performance if doing a lot of case insensitive matching
-				if ((ch != '?') && (ch != Character.toLowerCase(value.charAt(i)))) {
+				char valCh = value.charAt(i);
+				if (ch == valCh || ch == '?') {
+					continue;
+				}
+				if (ch != Character.toLowerCase(valCh)) {
 					return false;
 				}
 			}

@@ -213,7 +213,7 @@
 	By default, a SimpleAsyncTaskExecutor is used which does not re-use threads and is not recommended for production.
 
 	As of 5.0 this executor is also used when a controller returns a reactive type that does streaming
-	(for example, "text/event-stream" or "application/x-ndjson") for the blocking writes to the
+	(for example, "text/event-stream", "application/x-ndjson" or "application/jsonl") for the blocking writes to the
 	"jakarta.servlet.ServletOutputStream".
 
 								]]></xsd:documentation>
@@ -1201,9 +1201,7 @@
 					<xsd:documentation><![CDATA[
 	When set to false, use thread-local ScriptEngine instances instead of one single shared
 	instance. This flag should be set to false for those using non thread-safe script engines
-	with templating libraries not designed for concurrency, like Handlebars or React
-	running on Nashorn for example. In this case, Java 8u60 or greater is required due to
-	this bug: https://bugs.openjdk.java.net/browse/JDK-8076099.
+	with templating libraries not designed for concurrency.
 					]]></xsd:documentation>
 				</xsd:annotation>
 			</xsd:attribute>

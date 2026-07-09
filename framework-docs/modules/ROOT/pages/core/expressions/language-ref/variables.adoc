@@ -6,7 +6,7 @@ are set by using the `setVariable()` method in `EvaluationContext` implementatio
 
 [NOTE]
 ====
-Variable names must be begin with a letter (as defined below), an underscore, or a dollar
+Variable names must begin with a letter (as defined below), an underscore, or a dollar
 sign.
 
 Variable names must be composed of one or more of the following supported types of

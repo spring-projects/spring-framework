@@ -533,8 +533,7 @@ that returns a value:
 ----
 
 TIP: `@Async` methods may not only declare a regular `java.util.concurrent.Future` return
-type but also Spring's `org.springframework.util.concurrent.ListenableFuture` or, as of
-Spring 4.2, JDK 8's `java.util.concurrent.CompletableFuture`, for richer interaction with
+type but also `java.util.concurrent.CompletableFuture`, for richer interaction with
 the asynchronous task and for immediate composition with further processing steps.
 
 You can not use `@Async` in conjunction with lifecycle callbacks such as `@PostConstruct`.

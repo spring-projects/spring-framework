@@ -16,11 +16,11 @@
 
 package org.springframework.context.annotation.componentscan.importing;
 
-import org.springframework.context.annotation.ComponentScanAndImportAnnotationInteractionTests;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.ImportedConfig;
 
 @Configuration
-@Import(ComponentScanAndImportAnnotationInteractionTests.ImportedConfig.class)
+@Import(ImportedConfig.class)
 public class ImportingConfig {
 }

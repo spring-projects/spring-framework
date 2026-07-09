@@ -32,101 +32,101 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  *
  * @author Rossen Stoyanchev
  */
-public class XpathResultMatchersTests {
+class XpathResultMatchersTests {
 
 	private static final String RESPONSE_CONTENT = "<foo><bar>111</bar><bar>true</bar></foo>";
 
 
 	@Test
-	public void node() throws Exception {
+	void node() throws Exception {
 		new XpathResultMatchers("/foo/bar", null).node(Matchers.notNullValue()).match(getStubMvcResult());
 	}
 
 	@Test
-	public void nodeNoMatch() {
+	void nodeNoMatch() {
 		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
 				new XpathResultMatchers("/foo/bar", null).node(Matchers.nullValue()).match(getStubMvcResult()));
 	}
 
 	@Test
-	public void nodeList() throws Exception {
+	void nodeList() throws Exception {
 		new XpathResultMatchers("/foo/bar", null).nodeList(Matchers.notNullValue()).match(getStubMvcResult());
 	}
 
 	@Test
-	public void nodeListNoMatch() {
+	void nodeListNoMatch() {
 		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
 				new XpathResultMatchers("/foo/bar", null).nodeList(Matchers.nullValue()).match(getStubMvcResult()));
 	}
 
 	@Test
-	public void exists() throws Exception {
+	void exists() throws Exception {
 		new XpathResultMatchers("/foo/bar", null).exists().match(getStubMvcResult());
 	}
 
 	@Test
-	public void existsNoMatch() {
+	void existsNoMatch() {
 		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
 				new XpathResultMatchers("/foo/Bar", null).exists().match(getStubMvcResult()));
 	}
 
 	@Test
-	public void doesNotExist() throws Exception {
+	void doesNotExist() throws Exception {
 		new XpathResultMatchers("/foo/Bar", null).doesNotExist().match(getStubMvcResult());
 	}
 
 	@Test
-	public void doesNotExistNoMatch() {
+	void doesNotExistNoMatch() {
 		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
 				new XpathResultMatchers("/foo/bar", null).doesNotExist().match(getStubMvcResult()));
 	}
 
 	@Test
-	public void nodeCount() throws Exception {
+	void nodeCount() throws Exception {
 		new XpathResultMatchers("/foo/bar", null).nodeCount(2).match(getStubMvcResult());
 	}
 
 	@Test
-	public void nodeCountNoMatch() {
+	void nodeCountNoMatch() {
 		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
 				new XpathResultMatchers("/foo/bar", null).nodeCount(1).match(getStubMvcResult()));
 	}
 
 	@Test
-	public void string() throws Exception {
+	void string() throws Exception {
 		new XpathResultMatchers("/foo/bar[1]", null).string("111").match(getStubMvcResult());
 	}
 
 	@Test
-	public void stringNoMatch() {
+	void stringNoMatch() {
 		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
 				new XpathResultMatchers("/foo/bar[1]", null).string("112").match(getStubMvcResult()));
 	}
 
 	@Test
-	public void number() throws Exception {
+	void number() throws Exception {
 		new XpathResultMatchers("/foo/bar[1]", null).number(111.0).match(getStubMvcResult());
 	}
 
 	@Test
-	public void numberNoMatch() {
+	void numberNoMatch() {
 		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
 				new XpathResultMatchers("/foo/bar[1]", null).number(111.1).match(getStubMvcResult()));
 	}
 
 	@Test
-	public void booleanValue() throws Exception {
+	void booleanValue() throws Exception {
 		new XpathResultMatchers("/foo/bar[2]", null).booleanValue(true).match(getStubMvcResult());
 	}
 
 	@Test
-	public void booleanValueNoMatch() {
+	void booleanValueNoMatch() {
 		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
 				new XpathResultMatchers("/foo/bar[2]", null).booleanValue(false).match(getStubMvcResult()));
 	}
 
 	@Test
-	public void stringEncodingDetection() throws Exception {
+	void stringEncodingDetection() throws Exception {
 		String content = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n" +
 				"<person><name>Jürgen</name></person>";
 		byte[] bytes = content.getBytes(StandardCharsets.UTF_8);

@@ -18,7 +18,6 @@ package org.springframework.web.reactive.function.client
 
 import io.mockk.mockk
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
@@ -30,12 +29,10 @@ import org.junit.jupiter.api.Test
 class CoExchangeFilterFunctionTests {
 
 	@Test
-	fun exchange() {
+	suspend fun exchange() {
 		val response = mockk<ClientResponse>()
 		val exchangeFunction = MyCoExchangeFunction(response)
-		runBlocking {
-			assertThat(exchangeFunction.exchange(mockk())).isEqualTo(response)
-		}
+		assertThat(exchangeFunction.exchange(mockk())).isEqualTo(response)
 	}
 }
 

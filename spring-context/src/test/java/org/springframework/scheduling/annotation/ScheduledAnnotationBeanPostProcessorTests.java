@@ -331,8 +331,7 @@ class ScheduledAnnotationBeanPostProcessorTests {
 		assertThat(task.getExpression()).isEqualTo("0 0 0-4,6-23 * * ?");
 		Trigger trigger = task.getTrigger();
 		assertThat(trigger).isNotNull();
-		boolean condition = trigger instanceof CronTrigger;
-		assertThat(condition).isTrue();
+		assertThat(trigger).isInstanceOf(CronTrigger.class);
 		CronTrigger cronTrigger = (CronTrigger) trigger;
 		ZonedDateTime dateTime = ZonedDateTime.of(2013, 4, 15, 4, 0, 0, 0, ZoneId.of("GMT+10"));
 		Instant lastScheduledExecution = dateTime.toInstant();

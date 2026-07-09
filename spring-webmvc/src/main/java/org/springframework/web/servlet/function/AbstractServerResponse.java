@@ -17,6 +17,7 @@
 package org.springframework.web.servlet.function;
 
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.Collection;
 import java.util.Set;
 
@@ -29,6 +30,7 @@ import org.jspecify.annotations.Nullable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatusCode;
+import org.springframework.http.MediaType;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -51,14 +53,15 @@ abstract class AbstractServerResponse extends ErrorHandlingServerResponse {
 
 	private final MultiValueMap<String, Cookie> cookies;
 
+
 	protected AbstractServerResponse(
 			HttpStatusCode statusCode, HttpHeaders headers, MultiValueMap<String, Cookie> cookies) {
 
 		this.statusCode = statusCode;
 		this.headers = HttpHeaders.readOnlyHttpHeaders(headers);
-		this.cookies =
-				CollectionUtils.unmodifiableMultiValueMap(new LinkedMultiValueMap<>(cookies));
+		this.cookies = CollectionUtils.unmodifiableMultiValueMap(new LinkedMultiValueMap<>(cookies));
 	}
+
 
 	@Override
 	public final HttpStatusCode statusCode() {
@@ -110,14 +113,29 @@ abstract class AbstractServerResponse extends ErrorHandlingServerResponse {
 				servletResponse.addHeader(headerName, headerValue);
 			}
 		});
+
 		// HttpServletResponse exposes some headers as properties: we should include those if not already present
-		if (servletResponse.getContentType() == null && this.headers.getContentType() != null) {
-			servletResponse.setContentType(this.headers.getContentType().toString());
+		if (servletResponse.getContentType() == null && this.headers.containsHeader(HttpHeaders.CONTENT_TYPE)) {
+			servletResponse.setContentType(this.headers.getFirst(HttpHeaders.CONTENT_TYPE));
 		}
-		if (servletResponse.getCharacterEncoding() == null &&
-				this.headers.getContentType() != null &&
-				this.headers.getContentType().getCharset() != null) {
-			servletResponse.setCharacterEncoding(this.headers.getContentType().getCharset().name());
+		if (servletResponse.getCharacterEncoding() == null && this.headers.containsHeader(HttpHeaders.CONTENT_TYPE)) {
+			try {
+				// Lazy parsing into MediaType
+				MediaType contentType = this.headers.getContentType();
+				if (contentType != null) {
+					Charset charset = contentType.getCharset();
+					if (charset != null) {
+						servletResponse.setCharacterEncoding(charset);
+					}
+				}
+			}
+			catch (Exception ex) {
+				// Leave character encoding unspecified
+			}
+		}
+		long contentLength = this.headers.getContentLength();
+		if (contentLength != -1) {
+			servletResponse.setContentLengthLong(contentLength);
 		}
 	}
 

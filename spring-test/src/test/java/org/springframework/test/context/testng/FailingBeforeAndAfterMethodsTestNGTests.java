@@ -52,8 +52,8 @@ class FailingBeforeAndAfterMethodsTestNGTests {
 
 	@ParameterizedTest
 	@MethodSource("testData")
-	void runTestAndAssertCounters(Class<?> clazz, int expectedTestStartCount,
-			int expectedTestSuccessCount, int expectedFailureCount, int expectedFailedConfigurationsCount) throws Exception {
+	void runTestAndAssertCounters(Class<?> clazz, int expectedTestStartCount, int expectedTestSuccessCount,
+			int expectedFailureCount, int expectedFailedConfigurationsCount) {
 
 		TrackingTestNGTestListener listener = new TrackingTestNGTestListener();
 		TestNG testNG = new TestNG();
@@ -146,7 +146,7 @@ class FailingBeforeAndAfterMethodsTestNGTests {
 	abstract static class BaseTestCase extends AbstractTestNGSpringContextTests {
 
 		@org.testng.annotations.Test
-		void testNothing() {
+		void nothing() {
 		}
 	}
 
@@ -182,7 +182,7 @@ class FailingBeforeAndAfterMethodsTestNGTests {
 	static class FailingBeforeTransactionTestCase extends AbstractTransactionalTestNGSpringContextTests {
 
 		@org.testng.annotations.Test
-		void testNothing() {
+		void nothing() {
 		}
 
 		@BeforeTransaction
@@ -195,7 +195,7 @@ class FailingBeforeAndAfterMethodsTestNGTests {
 	static class FailingAfterTransactionTestCase extends AbstractTransactionalTestNGSpringContextTests {
 
 		@org.testng.annotations.Test
-		void testNothing() {
+		void nothing() {
 		}
 
 		@AfterTransaction

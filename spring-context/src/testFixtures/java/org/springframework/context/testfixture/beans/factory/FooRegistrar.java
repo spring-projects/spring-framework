@@ -28,4 +28,5 @@ public class FooRegistrar implements BeanRegistrar {
 	}
 
 	public record Foo() {}
+
 }

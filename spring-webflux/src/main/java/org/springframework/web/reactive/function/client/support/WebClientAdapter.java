@@ -98,49 +98,57 @@ public final class WebClientAdapter extends AbstractReactorHttpExchangeAdapter {
 		return newRequest(requestValues).retrieve().toEntityFlux(bodyType);
 	}
 
-	@SuppressWarnings({"ReactiveStreamsUnusedPublisher", "unchecked"})
-	private <B> WebClient.RequestBodySpec newRequest(HttpRequestValues values) {
-
+	/**
+	 * Build a request from the given {@code HttpRequestValues}.
+	 * @param values the values to use
+	 * @return the request spec
+	 * @since 7.0.6
+	 */
+	public WebClient.RequestBodySpec newRequest(HttpRequestValues values) {
 		HttpMethod httpMethod = values.getHttpMethod();
 		Assert.notNull(httpMethod, "HttpMethod is required");
-
 		WebClient.RequestBodyUriSpec uriSpec = this.webClient.method(httpMethod);
-
-		WebClient.RequestBodySpec bodySpec;
-		if (values.getUri() != null) {
-			bodySpec = uriSpec.uri(values.getUri());
-		}
-
-		else if (values.getUriTemplate() != null) {
-			UriBuilderFactory uriBuilderFactory = values.getUriBuilderFactory();
-			if(uriBuilderFactory != null){
-				URI uri = uriBuilderFactory.expand(values.getUriTemplate(), values.getUriVariables());
-				bodySpec = uriSpec.uri(uri);
-			}
-			else {
-				bodySpec = uriSpec.uri(values.getUriTemplate(), values.getUriVariables());
-			}
-		}
-		else {
-			throw new IllegalStateException("Neither full URL nor URI template");
-		}
-
+		WebClient.RequestBodySpec bodySpec = setUri(uriSpec, values);
 		bodySpec.headers(headers -> headers.putAll(values.getHeaders()));
 		bodySpec.cookies(cookies -> cookies.putAll(values.getCookies()));
-
 		if (values.getApiVersion() != null) {
 			bodySpec.apiVersion(values.getApiVersion());
 		}
-
 		bodySpec.attributes(attributes -> attributes.putAll(values.getAttributes()));
+		setBody(bodySpec, values);
+		return bodySpec;
+	}
 
+	private static WebClient.RequestBodySpec setUri(
+			WebClient.RequestBodyUriSpec spec, HttpRequestValues values) {
+
+		if (values.getUri() != null) {
+			return spec.uri(values.getUri());
+		}
+
+		if (values.getUriTemplate() != null) {
+			UriBuilderFactory uriBuilderFactory = values.getUriBuilderFactory();
+			if(uriBuilderFactory != null){
+				URI uri = uriBuilderFactory.expand(values.getUriTemplate(), values.getUriVariables());
+				return spec.uri(uri);
+			}
+			else {
+				return spec.uri(values.getUriTemplate(), values.getUriVariables());
+			}
+		}
+
+		throw new IllegalStateException("Neither full URL nor URI template");
+	}
+
+	@SuppressWarnings({"ReactiveStreamsUnusedPublisher", "unchecked"})
+	private <B> void setBody(WebClient.RequestBodySpec spec, HttpRequestValues values) {
 		if (values.getBodyValue() != null) {
 			if (values.getBodyValueType() != null) {
 				B body = (B) values.getBodyValue();
-				bodySpec.bodyValue(body, (ParameterizedTypeReference<B>) values.getBodyValueType());
+				spec.bodyValue(body, (ParameterizedTypeReference<B>) values.getBodyValueType());
 			}
 			else {
-				bodySpec.bodyValue(values.getBodyValue());
+				spec.bodyValue(values.getBodyValue());
 			}
 		}
 		else if (values instanceof ReactiveHttpRequestValues rhrv) {
@@ -148,11 +156,9 @@ public final class WebClientAdapter extends AbstractReactorHttpExchangeAdapter {
 			if (body != null) {
 				ParameterizedTypeReference<?> elementType = rhrv.getBodyPublisherElementType();
 				Assert.notNull(elementType, "Publisher body element type is required");
-				bodySpec.body(body, elementType);
+				spec.body(body, elementType);
 			}
 		}
-
-		return bodySpec;
 	}
 
 

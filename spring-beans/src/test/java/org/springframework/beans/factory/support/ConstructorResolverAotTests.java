@@ -600,7 +600,7 @@ class ConstructorResolverAotTests {
 		}
 	}
 
-	@SuppressWarnings("unnused")
+	@SuppressWarnings("unused")
 	static class ConstructorPrimitiveFallback {
 
 		public ConstructorPrimitiveFallback(boolean useDefaultExecutor) {

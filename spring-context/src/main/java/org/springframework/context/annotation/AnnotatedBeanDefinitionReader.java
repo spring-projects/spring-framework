@@ -109,7 +109,9 @@ public class AnnotatedBeanDefinitionReader {
 
 	/**
 	 * Set the {@code BeanNameGenerator} to use for detected bean classes.
-	 * <p>The default is a {@link AnnotationBeanNameGenerator}.
+	 * <p>The default is an {@link AnnotationBeanNameGenerator}.
+	 * @see FullyQualifiedAnnotationBeanNameGenerator
+	 * @see FullyQualifiedConfigurationBeanNameGenerator
 	 */
 	public void setBeanNameGenerator(@Nullable BeanNameGenerator beanNameGenerator) {
 		this.beanNameGenerator =

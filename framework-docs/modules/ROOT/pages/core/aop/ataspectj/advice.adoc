@@ -727,7 +727,7 @@ of determining parameter names, an exception will be thrown.
   parameter names. This discoverer is only used if such APIs are present on the classpath.
 `StandardReflectionParameterNameDiscoverer` :: Uses the standard `java.lang.reflect.Parameter`
   API to determine parameter names. Requires that code be compiled with the `-parameters`
-  flag for `javac`. Recommended approach on Java 8+.
+  flag for `javac`. Recommended approach.
 `AspectJAdviceParameterNameDiscoverer` :: Deduces parameter names from the pointcut
   expression, `returning`, and `throwing` clauses. See the
   {spring-framework-api}/aop/aspectj/AspectJAdviceParameterNameDiscoverer.html[javadoc]

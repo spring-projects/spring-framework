@@ -17,17 +17,14 @@
 package org.springframework.test.web.servlet.client;
 
 import java.io.IOException;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
 import mockwebserver3.MockResponse;
 import mockwebserver3.MockWebServer;
 import org.junit.jupiter.api.AutoClose;
-import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedClass;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -43,14 +40,9 @@ import static org.junit.jupiter.params.provider.Arguments.argumentSet;
 /**
  * Integration tests for {@link RestTestClient} against a live server.
  */
+@ParameterizedClass
+@MethodSource("clientHttpRequestFactories")
 class RestTestClientIntegrationTests {
-
-	@Retention(RetentionPolicy.RUNTIME)
-	@Target(ElementType.METHOD)
-	@ParameterizedTest
-	@MethodSource("clientHttpRequestFactories")
-	@interface ParameterizedRestClientTest {
-	}
 
 	static Stream<Arguments> clientHttpRequestFactories() {
 		return Stream.of(
@@ -62,22 +54,22 @@ class RestTestClientIntegrationTests {
 		);
 	}
 
+
 	@AutoClose
-	private MockWebServer server = new MockWebServer();
+	private final MockWebServer server = new MockWebServer();
 
-	private RestTestClient testClient;
+	private final RestTestClient testClient;
 
 
-	private void startServer(ClientHttpRequestFactory requestFactory) throws IOException {
+	RestTestClientIntegrationTests(ClientHttpRequestFactory requestFactory) throws IOException {
 		this.server.start();
 		this.testClient = RestTestClient.bindToServer(requestFactory)
 				.baseUrl(this.server.url("/").toString())
 				.build();
 	}
 
-	@ParameterizedRestClientTest // gh-35784
-	void sequentialRequestsNotConsumingBody(ClientHttpRequestFactory requestFactory) throws IOException {
-		startServer(requestFactory);
+	@Test // gh-35784
+	void sequentialRequestsNotConsumingBody() {
 		for (int i = 0; i < 10; i++) {
 			prepareResponse(builder ->
 					builder.setHeader("Content-Type", "text/plain").body("Hello Spring!"));

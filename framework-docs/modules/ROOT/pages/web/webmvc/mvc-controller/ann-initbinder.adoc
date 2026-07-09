@@ -107,7 +107,4 @@ Kotlin::
 
 
 [[mvc-ann-initbinder-model-design]]
-== Model Design
-[.small]#xref:web/webflux/controller/ann-initbinder.adoc#webflux-ann-initbinder-model-design[See equivalent in the Reactive stack]#
-
-include::partial$web/web-data-binding-model-design.adoc[]
+NOTE: For more guidance on model design, please see xref:web/webmvc/mvc-data-binding.adoc[Data Binding].

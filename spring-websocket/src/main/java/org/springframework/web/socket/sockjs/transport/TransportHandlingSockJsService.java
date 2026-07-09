@@ -17,6 +17,7 @@
 package org.springframework.web.socket.sockjs.transport;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.security.Principal;
 import java.time.Duration;
 import java.util.ArrayList;
@@ -308,7 +309,20 @@ public class TransportHandlingSockJsService extends AbstractSockJsService implem
 					Principal currentPrincipal = request.getPrincipal();
 					if (!principal.equals(currentPrincipal) &&
 							(currentPrincipal == null || !principal.getName().equals(currentPrincipal.getName()))) {
-						logger.debug("The user for the session does not match the user for the request.");
+						logger.debug("The user for the session and the request do not match.");
+						response.setStatusCode(HttpStatus.NOT_FOUND);
+						return;
+					}
+				}
+				else {
+					if (request.getPrincipal() != null) {
+						logger.debug("The request has a user, but the session does not.");
+						response.setStatusCode(HttpStatus.NOT_FOUND);
+						return;
+					}
+					InetSocketAddress remoteAddress = session.getRemoteAddress();
+					if (remoteAddress != null && !isSameAddress(remoteAddress, request.getRemoteAddress())) {
+						logger.debug("The remote address for the session and the request do not match.");
 						response.setStatusCode(HttpStatus.NOT_FOUND);
 						return;
 					}
@@ -349,6 +363,19 @@ public class TransportHandlingSockJsService extends AbstractSockJsService implem
 				chain.applyAfterHandshake(request, response, failure);
 				throw failure;
 			}
+		}
+	}
+
+	private boolean isSameAddress(InetSocketAddress address, InetSocketAddress that) {
+		// InetSocketAddress#equals minus port checks, which can vary by requests
+		if (address.getAddress() != null) {
+			return address.getAddress().equals(that.getAddress());
+		}
+		else if (address.getHostName() != null) {
+			return (that.getAddress() == null && address.getHostName().equalsIgnoreCase(that.getHostName()));
+		}
+		else {
+			return (that.getAddress() == null) && (that.getHostName() == null);
 		}
 	}
 

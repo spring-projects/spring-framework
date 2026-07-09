@@ -209,7 +209,7 @@ class ConfigurationClassBeanDefinitionReader {
 		String beanName = (explicitNames.length > 0 && StringUtils.hasText(explicitNames[0])) ? explicitNames[0] : null;
 		String localBeanName = defaultBeanName(beanName, methodName);
 		beanName = (this.importBeanNameGenerator instanceof ConfigurationBeanNameGenerator cbng ?
-				cbng.deriveBeanName(metadata, beanName) : defaultBeanName(beanName, methodName));
+				cbng.deriveBeanName(metadata, beanName) : localBeanName);
 		if (explicitNames.length > 0) {
 			// Register aliases even when overridden below.
 			for (int i = 1; i < explicitNames.length; i++) {
@@ -303,8 +303,8 @@ class ConfigurationClassBeanDefinitionReader {
 		}
 
 		if (logger.isTraceEnabled()) {
-			logger.trace("Registering bean definition for @Bean method %s.%s()"
-					.formatted(configClass.getMetadata().getClassName(), beanName));
+			logger.trace("Registering bean definition for @Bean method %s.%s() with bean name '%s'"
+					.formatted(configClass.getMetadata().getClassName(), methodName, beanName));
 		}
 		this.registry.registerBeanDefinition(beanName, beanDefToRegister);
 	}
@@ -368,8 +368,8 @@ class ConfigurationClassBeanDefinitionReader {
 					"@Bean definition illegally overridden by existing bean definition: " + existingBeanDef);
 		}
 		if (logger.isDebugEnabled()) {
-			logger.debug("Skipping bean definition for %s: a definition for bean '%s' already exists. " +
-					"This top-level bean definition is considered as an override.".formatted(beanMethod, beanName));
+			logger.debug(("Skipping bean definition for %s: a definition for bean '%s' already exists. " +
+					"This top-level bean definition is considered as an override.").formatted(beanMethod, beanName));
 		}
 		return true;
 	}
@@ -423,12 +423,14 @@ class ConfigurationClassBeanDefinitionReader {
 	}
 
 	private void loadBeanDefinitionsFromBeanRegistrars(MultiValueMap<String, BeanRegistrar> registrars) {
-		if (!(this.registry instanceof ListableBeanFactory beanFactory)) {
-			throw new IllegalStateException("Cannot support bean registrars since " +
-					this.registry.getClass().getName() + " does not implement ListableBeanFactory");
-		}
-		registrars.values().forEach(registrarList -> registrarList.forEach(registrar -> registrar.register(new BeanRegistryAdapter(
-				this.registry, beanFactory, this.environment, registrar.getClass()), this.environment)));
+		registrars.values().forEach(registrarList -> registrarList.forEach(registrar -> {
+			if (!(this.registry instanceof ListableBeanFactory beanFactory)) {
+				throw new IllegalStateException("Cannot support bean registrars since " +
+						this.registry.getClass().getName() + " does not implement ListableBeanFactory");
+			}
+			registrar.register(new BeanRegistryAdapter(
+					this.registry, beanFactory, this.environment, registrar.getClass()), this.environment);
+		}));
 	}
 
 

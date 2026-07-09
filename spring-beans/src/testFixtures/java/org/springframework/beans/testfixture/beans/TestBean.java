@@ -100,11 +100,11 @@ public class TestBean implements BeanNameAware, BeanFactoryAware, ITestBean, IOt
 
 	private Number someNumber;
 
-	private Colour favouriteColour;
+	private Color favoriteColor;
 
 	private Boolean someBoolean;
 
-	private List<?> otherColours;
+	private List<?> otherColors;
 
 	private List<?> pets;
 
@@ -389,12 +389,12 @@ public class TestBean implements BeanNameAware, BeanFactoryAware, ITestBean, IOt
 		this.someNumber = someNumber;
 	}
 
-	public Colour getFavouriteColour() {
-		return favouriteColour;
+	public Color getFavoriteColor() {
+		return favoriteColor;
 	}
 
-	public void setFavouriteColour(Colour favouriteColour) {
-		this.favouriteColour = favouriteColour;
+	public void setFavouriteColor(Color favoriteColor) {
+		this.favoriteColor = favoriteColor;
 	}
 
 	public Boolean getSomeBoolean() {
@@ -414,12 +414,12 @@ public class TestBean implements BeanNameAware, BeanFactoryAware, ITestBean, IOt
 		this.nestedIndexedBean = nestedIndexedBean;
 	}
 
-	public List<?> getOtherColours() {
-		return otherColours;
+	public List<?> getOtherColors() {
+		return otherColors;
 	}
 
-	public void setOtherColours(List<?> otherColours) {
-		this.otherColours = otherColours;
+	public void setOtherColors(List<?> otherColors) {
+		this.otherColors = otherColors;
 	}
 
 	public List<?> getPets() {

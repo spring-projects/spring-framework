@@ -17,7 +17,9 @@
 package org.springframework.orm.jpa.domain;
 
 import jakarta.persistence.AttributeConverter;
+import jakarta.persistence.Converter;
 
+@Converter
 public class EmployeeCategoryConverter implements AttributeConverter<EmployeeCategory, String> {
 
 	@Override
@@ -37,4 +39,5 @@ public class EmployeeCategoryConverter implements AttributeConverter<EmployeeCat
 		}
 		return null;
 	}
+
 }

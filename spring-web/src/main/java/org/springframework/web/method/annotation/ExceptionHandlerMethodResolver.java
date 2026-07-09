@@ -236,7 +236,7 @@ public class ExceptionHandlerMethodResolver {
 		}
 		if (!matches.isEmpty()) {
 			if (matches.size() > 1) {
-				matches.sort(new ExceptionMapingComparator(exceptionType, mediaType));
+				matches.sort(new ExceptionMappingComparator(exceptionType, mediaType));
 			}
 			return Objects.requireNonNull(this.mappedMethods.get(matches.get(0)));
 		}
@@ -263,13 +263,13 @@ public class ExceptionHandlerMethodResolver {
 		}
 	}
 
-	private static class ExceptionMapingComparator implements Comparator<ExceptionMapping> {
+	private static class ExceptionMappingComparator implements Comparator<ExceptionMapping> {
 
 		private final ExceptionDepthComparator exceptionDepthComparator;
 
 		private final MediaType mediaType;
 
-		public ExceptionMapingComparator(Class<? extends Throwable> exceptionType, MediaType mediaType) {
+		public ExceptionMappingComparator(Class<? extends Throwable> exceptionType, MediaType mediaType) {
 			this.exceptionDepthComparator = new ExceptionDepthComparator(exceptionType);
 			this.mediaType = mediaType;
 		}

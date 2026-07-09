@@ -19,10 +19,6 @@ its behavior changes.
 | Initialization of `SmartInitializingSingleton` beans.
 | `beanName` the name of the bean.
 
-| `spring.context.annotated-bean-reader.create`
-| Creation of the `AnnotatedBeanDefinitionReader`.
-|
-
 | `spring.context.base-packages.scan`
 | Scanning of base packages.
 | `packages` array of base packages for scanning.

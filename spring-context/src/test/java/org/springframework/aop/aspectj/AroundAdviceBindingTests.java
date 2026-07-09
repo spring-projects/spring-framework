@@ -67,25 +67,25 @@ class AroundAdviceBindingTests {
 	}
 
 	@Test
-	void testOneIntArg() {
+	void oneIntArg() {
 		testBeanProxy.setAge(5);
 		verify(mockCollaborator).oneIntArg(5);
 	}
 
 	@Test
-	void testOneObjectArgBoundToTarget() {
+	void oneObjectArgBoundToTarget() {
 		testBeanProxy.getAge();
 		verify(mockCollaborator).oneObjectArg(this.testBeanTarget);
 	}
 
 	@Test
-	void testOneIntAndOneObjectArgs() {
+	void oneIntAndOneObjectArgs() {
 		testBeanProxy.setAge(5);
 		verify(mockCollaborator).oneIntAndOneObject(5, this.testBeanProxy);
 	}
 
 	@Test
-	void testJustJoinPoint() {
+	void justJoinPoint() {
 		testBeanProxy.getAge();
 		verify(mockCollaborator).justJoinPoint("getAge");
 	}

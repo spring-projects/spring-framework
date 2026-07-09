@@ -32,11 +32,13 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Chris Beams
  * @since 20.05.2003
  */
+@Deprecated(since = "7.0.3", forRemoval = true)
+@SuppressWarnings("removal")
 class PagedListHolderTests {
 
 	@Test
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public void testPagedListHolder() {
+	void pagedListHolder() {
 		TestBean tb1 = new TestBean();
 		tb1.setName("eva");
 		tb1.setAge(25);

@@ -16,7 +16,6 @@
 
 package org.springframework.http.server.reactive;
 
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -24,16 +23,12 @@ import java.util.Map;
 import reactor.core.publisher.Mono;
 
 import org.springframework.http.HttpCookie;
-import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.testfixture.http.server.reactive.bootstrap.AbstractHttpHandlerIntegrationTests;
 import org.springframework.web.testfixture.http.server.reactive.bootstrap.HttpServer;
-import org.springframework.web.testfixture.http.server.reactive.bootstrap.JettyHttpServer;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 /**
  * @author Rossen Stoyanchev
@@ -54,10 +49,9 @@ class CookieIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 	public void basicTest(HttpServer httpServer) throws Exception {
 		startServer(httpServer);
 
-		URI url = URI.create("http://localhost:" + port);
-		String header = "SID=31d4d96e407aad42; lang=en-US";
-		ResponseEntity<Void> response = new RestTemplate().exchange(
-				RequestEntity.get(url).header("Cookie", header).build(), Void.class);
+		ResponseEntity<Void> response = getRestClient().get()
+				.header("Cookie", "SID=31d4d96e407aad42; lang=en-US")
+				.retrieve().toBodilessEntity();
 
 		Map<String, List<HttpCookie>> requestCookies = this.cookieHandler.requestCookies;
 		assertThat(requestCookies).hasSize(2);
@@ -79,13 +73,11 @@ class CookieIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 
 	@ParameterizedHttpServerTest
 	public void partitionedAttributeTest(HttpServer httpServer) throws Exception {
-		assumeFalse(httpServer instanceof JettyHttpServer, "Jetty does not support Servlet 6.1 yet");
 		startServer(httpServer);
 
-		URI url = URI.create("http://localhost:" + port);
-		String header = "SID=31d4d96e407aad42; lang=en-US";
-		ResponseEntity<Void> response = new RestTemplate().exchange(
-				RequestEntity.get(url).header("Cookie", header).build(), Void.class);
+		ResponseEntity<Void> response = getRestClient().get()
+				.header("Cookie", "SID=31d4d96e407aad42; lang=en-US")
+				.retrieve().toBodilessEntity();
 
 		List<String> headerValues = response.getHeaders().get("Set-Cookie");
 		assertThat(headerValues).hasSize(2);
@@ -100,10 +92,9 @@ class CookieIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 	public void cookiesWithSameNameTest(HttpServer httpServer) throws Exception {
 		startServer(httpServer);
 
-		URI url = new URI("http://localhost:" + port);
-		String header = "SID=31d4d96e407aad42; lang=en-US; lang=zh-CN";
-		new RestTemplate().exchange(
-				RequestEntity.get(url).header("Cookie", header).build(), Void.class);
+		getRestClient().get()
+				.header("Cookie", "SID=31d4d96e407aad42; lang=en-US; lang=zh-CN")
+				.retrieve().toBodilessEntity();
 
 		Map<String, List<HttpCookie>> requestCookies = this.cookieHandler.requestCookies;
 		assertThat(requestCookies).hasSize(2);

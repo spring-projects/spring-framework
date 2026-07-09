@@ -32,7 +32,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
  * Unit tests for {@link DefaultApiVersionStrategy}.
  * @author Rossen Stoyanchev
  */
-public class DefaultApiVersionStrategiesTests {
+class DefaultApiVersionStrategiesTests {
 
 	private static final SemanticApiVersionParser parser = new SemanticApiVersionParser();
 

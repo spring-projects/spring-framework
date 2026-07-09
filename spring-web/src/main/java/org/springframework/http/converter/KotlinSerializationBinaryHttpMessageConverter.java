@@ -91,7 +91,6 @@ public abstract class KotlinSerializationBinaryHttpMessageConverter<T extends Bi
 		try {
 			byte[] bytes = format.encodeToByteArray(serializer, object);
 			outputMessage.getBody().write(bytes);
-			outputMessage.getBody().flush();
 		}
 		catch (SerializationException ex) {
 			throw new HttpMessageNotWritableException("Could not write " + format + ": " + ex.getMessage(), ex);

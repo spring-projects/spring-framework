@@ -18,6 +18,8 @@ package org.springframework.core.type;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.Map;
+import java.util.stream.Stream;
 
 import example.type.AnnotatedComponent;
 import example.type.EnclosingAnnotation;
@@ -76,13 +78,29 @@ public abstract class AbstractMethodMetadataTests {
 	@Test
 	void verifyToString() {
 		assertThat(getTagged(WithMethod.class).toString())
-			.endsWith(WithMethod.class.getName() + ".test()");
+				.isEqualTo("public java.lang.String " + WithMethod.class.getName() + ".test()");
+
+		assertThat(getTagged(WithMethodWithLocalType.class).toString())
+				.isEqualTo("public org.springframework.core.type.AbstractMethodMetadataTests$LocalType " +
+						WithMethodWithLocalType.class.getName() + ".test()");
 
 		assertThat(getTagged(WithMethodWithOneArgument.class).toString())
-			.endsWith(WithMethodWithOneArgument.class.getName() + ".test(java.lang.String)");
+				.isEqualTo("public java.lang.String " + WithMethodWithOneArgument.class.getName() + ".test(java.lang.String)");
 
 		assertThat(getTagged(WithMethodWithTwoArguments.class).toString())
-			.endsWith(WithMethodWithTwoArguments.class.getName() + ".test(java.lang.String,java.lang.Integer)");
+				.isEqualTo("public java.lang.String " + WithMethodWithTwoArguments.class.getName() + ".test(java.lang.String,java.lang.Integer)");
+
+		assertThat(getTagged(WithPrimitiveArrayMethod.class).toString())
+				.isEqualTo("public int[] " + WithPrimitiveArrayMethod.class.getName() + ".test()");
+
+		assertThat(getTagged(WithStringArrayMethod.class).toString())
+				.isEqualTo("public java.lang.String[] " + WithStringArrayMethod.class.getName() + ".test()");
+
+		assertThat(getTagged(WithTwoDimensionalPrimitiveArrayMethod.class).toString())
+				.isEqualTo("public int[][] " + WithTwoDimensionalPrimitiveArrayMethod.class.getName() + ".test()");
+
+		assertThat(getTagged(WithTwoDimensionalStringArrayMethod.class).toString())
+				.isEqualTo("public java.lang.String[][] " + WithTwoDimensionalStringArrayMethod.class.getName() + ".test()");
 	}
 
 	@Test
@@ -92,14 +110,46 @@ public abstract class AbstractMethodMetadataTests {
 
 	@Test
 	void getDeclaringClassReturnsDeclaringClass() {
-		assertThat(getTagged(WithMethod.class).getDeclaringClassName()).isEqualTo(
-				WithMethod.class.getName());
+		assertThat(getTagged(WithMethod.class).getDeclaringClassName()).isEqualTo(WithMethod.class.getName());
 	}
 
 	@Test
-	void getReturnTypeReturnsReturnType() {
-		assertThat(getTagged(WithMethod.class).getReturnTypeName()).isEqualTo(
-				String.class.getName());
+	void getReturnTypeReturnsTypeName() {
+		assertThat(getTagged(WithMethod.class).getReturnTypeName()).isEqualTo(String.class.getTypeName());
+	}
+
+	@Test
+	void getReturnTypeReturnsTypeNameForLocalType() {
+		assertThat(getTagged(WithMethodWithLocalType.class).getReturnTypeName()).isEqualTo(LocalType.class.getTypeName());
+	}
+
+	@Test
+	void getReturnTypeReturnsVoidForVoidReturnType() {
+		assertThat(getTagged(WithVoidMethod.class).getReturnTypeName()).isEqualTo("void");
+	}
+
+	@Test
+	void getReturnTypeReturnsPrimitiveArrayForPrimitiveArrayReturnType() {
+		MethodMetadata methodMetadata = getTagged(WithPrimitiveArrayMethod.class);
+		assertThat(methodMetadata.getReturnTypeName()).isEqualTo("int[]");
+	}
+
+	@Test
+	void getReturnTypeReturnsStringArrayForStringArrayReturnType() {
+		MethodMetadata methodMetadata = getTagged(WithStringArrayMethod.class);
+		assertThat(methodMetadata.getReturnTypeName()).isEqualTo("java.lang.String[]");
+	}
+
+	@Test
+	void getReturnTypeReturnsTwoDimensionalPrimitiveArrayForTwoDimensionalPrimitiveArrayReturnType() {
+		MethodMetadata methodMetadata = getTagged(WithTwoDimensionalPrimitiveArrayMethod.class);
+		assertThat(methodMetadata.getReturnTypeName()).isEqualTo("int[][]");
+	}
+
+	@Test
+	void getReturnTypeReturnsTwoDimensionalStringArrayForTwoDimensionalStringArrayReturnType() {
+		MethodMetadata methodMetadata = getTagged(WithTwoDimensionalStringArrayMethod.class);
+		assertThat(methodMetadata.getReturnTypeName()).isEqualTo("java.lang.String[][]");
 	}
 
 	@Test
@@ -113,12 +163,12 @@ public abstract class AbstractMethodMetadataTests {
 	}
 
 	@Test
-	void isStatusWhenStaticReturnsTrue() {
+	void isStaticWhenStaticReturnsTrue() {
 		assertThat(getTagged(WithStaticMethod.class).isStatic()).isTrue();
 	}
 
 	@Test
-	void isStaticWhenNotStaticReturnsFalse() {
+	void isStaticWhenNonStaticReturnsFalse() {
 		assertThat(getTagged(WithMethod.class).isStatic()).isFalse();
 	}
 
@@ -147,36 +197,36 @@ public abstract class AbstractMethodMetadataTests {
 	@Test
 	void getAnnotationsReturnsDirectAnnotations() {
 		MethodMetadata metadata = getTagged(WithDirectAnnotation.class);
-		assertThat(metadata.getAnnotations().stream().filter(
-				MergedAnnotation::isDirectlyPresent).map(
-						a -> a.getType().getName())).containsExactlyInAnyOrder(
-								Tag.class.getName(),
-								DirectAnnotation.class.getName());
+		Stream<Class<?>> types = metadata.getAnnotations().stream()
+				.filter(MergedAnnotation::isDirectlyPresent)
+				.map(MergedAnnotation::getType);
+		// We do not use containsExactlyInAnyOrder(), because annotations
+		// must be returned in source declaration order.
+		assertThat(types).containsExactly(Tag.class, DirectAnnotation.class);
 	}
 
 	@Test
 	void isAnnotatedWhenMatchesDirectAnnotationReturnsTrue() {
-		assertThat(getTagged(WithDirectAnnotation.class).isAnnotated(
-				DirectAnnotation.class.getName())).isTrue();
+		assertThat(getTagged(WithDirectAnnotation.class).isAnnotated(DirectAnnotation.class.getName())).isTrue();
 	}
 
 	@Test
 	void isAnnotatedWhenMatchesMetaAnnotationReturnsTrue() {
-		assertThat(getTagged(WithMetaAnnotation.class).isAnnotated(
-				DirectAnnotation.class.getName())).isTrue();
+		assertThat(getTagged(WithMetaAnnotation.class).isAnnotated(DirectAnnotation.class.getName())).isTrue();
 	}
 
 	@Test
 	void isAnnotatedWhenDoesNotMatchDirectOrMetaAnnotationReturnsFalse() {
-		assertThat(getTagged(WithMethod.class).isAnnotated(
-				DirectAnnotation.class.getName())).isFalse();
+		assertThat(getTagged(WithMethod.class).isAnnotated(DirectAnnotation.class.getName())).isFalse();
 	}
 
 	@Test
 	void getAnnotationAttributesReturnsAttributes() {
-		assertThat(getTagged(WithAnnotationAttributes.class).getAnnotationAttributes(
-				AnnotationAttributes.class.getName())).containsOnly(entry("name", "test"),
-						entry("size", 1));
+		Map<String, Object> attributes = getTagged(WithAnnotationAttributes.class)
+				.getAnnotationAttributes(AnnotationAttributes.class.getName());
+		// We do not use containsExactlyInAnyOrder(), because annotations
+		// must be returned in source declaration order.
+		assertThat(attributes).containsExactly(entry("name", "test"), entry("size", 1));
 	}
 
 	@Test
@@ -184,12 +234,14 @@ public abstract class AbstractMethodMetadataTests {
 		MultiValueMap<String, Object> attributes = getTagged(WithMetaAnnotationAttributes.class)
 				.getAllAnnotationAttributes(AnnotationAttributes.class.getName());
 		assertThat(attributes).containsOnlyKeys("name", "size");
-		assertThat(attributes.get("name")).containsExactlyInAnyOrder("m1", "m2");
-		assertThat(attributes.get("size")).containsExactlyInAnyOrder(1, 2);
+		// We do not use containsExactlyInAnyOrder(), because annotations
+		// must be returned in source declaration order.
+		assertThat(attributes.get("name")).containsExactly("m1", "m2");
+		assertThat(attributes.get("size")).containsExactly(1, 2);
 	}
 
 	@Test // gh-24375
-	public void metadataLoadsForNestedAnnotations() {
+	void metadataLoadsForNestedAnnotations() {
 		AnnotationMetadata annotationMetadata = get(AnnotatedComponent.class);
 		assertThat(annotationMetadata.getAnnotationTypes()).containsExactly(EnclosingAnnotation.class.getName());
 	}
@@ -214,6 +266,52 @@ public abstract class AbstractMethodMetadataTests {
 		public String test() {
 			return "";
 		}
+
+	}
+
+	public static class LocalType {
+	}
+
+	public static class WithMethodWithLocalType {
+
+		@Tag
+		public LocalType test() {
+			return new LocalType();
+		}
+	}
+
+	public static class WithVoidMethod {
+
+		@Tag
+		public void test() {}
+
+	}
+
+	public static class WithPrimitiveArrayMethod {
+
+		@Tag
+		public int[] test() { return new int[0];}
+
+	}
+
+	public static class WithStringArrayMethod {
+
+		@Tag
+		public String[] test() { return new String[0];}
+
+	}
+
+	public static class WithTwoDimensionalPrimitiveArrayMethod {
+
+		@Tag
+		public int[][] test() { return new int[0][0];}
+
+	}
+
+	public static class WithTwoDimensionalStringArrayMethod {
+
+		@Tag
+		public String[][] test() { return new String[0][0];}
 
 	}
 

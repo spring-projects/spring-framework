@@ -32,7 +32,7 @@ import org.springframework.core.convert.converter.ConverterFactory;
 final class StringToEnumConverterFactory implements ConverterFactory<String, Enum> {
 
 	@Override
-	public <T extends Enum> Converter<String, T> getConverter(Class<T> targetType) {
+	public <T extends Enum> Converter<String, @Nullable T> getConverter(Class<T> targetType) {
 		return new StringToEnum(ConversionUtils.getEnumType(targetType));
 	}
 

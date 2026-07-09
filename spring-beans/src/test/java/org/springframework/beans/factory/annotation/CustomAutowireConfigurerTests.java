@@ -37,7 +37,7 @@ import static org.springframework.core.testfixture.io.ResourceTestUtils.qualifie
 class CustomAutowireConfigurerTests {
 
 	@Test
-	void testCustomResolver() {
+	void customResolver() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(bf).loadBeanDefinitions(
 				qualifiedResource(CustomAutowireConfigurerTests.class, "context.xml"));

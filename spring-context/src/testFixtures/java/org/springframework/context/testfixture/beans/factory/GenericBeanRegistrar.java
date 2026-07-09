@@ -32,4 +32,5 @@ public class GenericBeanRegistrar implements BeanRegistrar {
 	}
 
 	public record Foo() {}
+
 }

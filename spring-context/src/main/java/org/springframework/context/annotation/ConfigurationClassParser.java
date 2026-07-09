@@ -260,9 +260,11 @@ class ConfigurationClassParser {
 				return;
 			}
 			else if (configClass.isScanned()) {
-				String beanName = configClass.getBeanName();
-				if (StringUtils.hasLength(beanName) && this.registry.containsBeanDefinition(beanName)) {
-					this.registry.removeBeanDefinition(beanName);
+				if (existingClass.isImported()) {
+					String beanName = configClass.getBeanName();
+					if (StringUtils.hasLength(beanName) && this.registry.containsBeanDefinition(beanName)) {
+						this.registry.removeBeanDefinition(beanName);
+					}
 				}
 				// An implicitly scanned bean definition should not override an explicit import.
 				return;
@@ -443,7 +445,7 @@ class ConfigurationClassParser {
 			Set<MethodMetadata> beanMethods = retrieveBeanMethodMetadata(ifc);
 			for (MethodMetadata methodMetadata : beanMethods) {
 				if (!methodMetadata.isAbstract()) {
-					// A default method or other concrete method on a Java 8+ interface...
+					// A default method or other concrete method on a Java interface...
 					configClass.addBeanMethod(new BeanMethod(methodMetadata, configClass));
 				}
 			}

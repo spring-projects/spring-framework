@@ -16,7 +16,6 @@
 
 package org.springframework.web.servlet.mvc.method.annotation;
 
-import java.io.OutputStream;
 import java.util.concurrent.Callable;
 
 import jakarta.servlet.ServletRequest;
@@ -89,26 +88,26 @@ public class StreamingResponseBodyReturnValueHandler implements HandlerMethodRet
 		Assert.isInstanceOf(StreamingResponseBody.class, returnValue, "StreamingResponseBody expected");
 		StreamingResponseBody streamingBody = (StreamingResponseBody) returnValue;
 
-		Callable<Void> callable = new StreamingResponseBodyTask(outputMessage.getBody(), streamingBody);
+		Callable<Void> callable = new StreamingResponseBodyTask(outputMessage, streamingBody);
 		WebAsyncUtils.getAsyncManager(webRequest).startCallableProcessing(callable, mavContainer);
 	}
 
 
 	private static class StreamingResponseBodyTask implements Callable<Void> {
 
-		private final OutputStream outputStream;
+		private final ServerHttpResponse outputMessage;
 
 		private final StreamingResponseBody streamingBody;
 
-		public StreamingResponseBodyTask(OutputStream outputStream, StreamingResponseBody streamingBody) {
-			this.outputStream = outputStream;
+		public StreamingResponseBodyTask(ServerHttpResponse outputMessage, StreamingResponseBody streamingBody) {
+			this.outputMessage = outputMessage;
 			this.streamingBody = streamingBody;
 		}
 
 		@Override
 		public Void call() throws Exception {
-			this.streamingBody.writeTo(this.outputStream);
-			this.outputStream.flush();
+			this.streamingBody.writeTo(this.outputMessage.getBody());
+			this.outputMessage.flush();
 			return null;
 		}
 	}

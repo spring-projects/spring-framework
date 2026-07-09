@@ -16,8 +16,6 @@
 
 package org.springframework.web.reactive.result.condition;
 
-import java.util.Collection;
-
 import org.junit.jupiter.api.Test;
 
 import org.springframework.web.server.ServerWebExchange;
@@ -138,8 +136,7 @@ class ParamsRequestConditionTests {
 		ParamsRequestCondition condition2 = new ParamsRequestCondition("foo=baz");
 
 		ParamsRequestCondition result = condition1.combine(condition2);
-		Collection<?> conditions = result.getContent();
-		assertThat(conditions).hasSize(2);
+		assertThat(result.getContent()).hasSize(2);
 	}
 
 }

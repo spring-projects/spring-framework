@@ -24,6 +24,10 @@ import java.util.concurrent.RejectedExecutionException;
  * Exception thrown when a {@link TaskExecutor} rejects to accept
  * a given task for execution.
  *
+ * <p>Extends {@link RejectedExecutionException} as a common base class,
+ * allowing for custom catch blocks to cover both Spring scenarios and
+ * {@link java.util.concurrent.ExecutorService} rejection exceptions.
+ *
  * @author Juergen Hoeller
  * @since 2.0.1
  * @see TaskExecutor#execute(Runnable)

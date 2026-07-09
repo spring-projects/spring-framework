@@ -74,7 +74,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
  * @author Sam Brannen
  */
 @SuppressWarnings({"deprecation", "removal" })
-public class Jackson2ObjectMapperFactoryBeanTests {
+class Jackson2ObjectMapperFactoryBeanTests {
 
 	private static final String DATE_FORMAT = "yyyy-MM-dd";
 
@@ -345,7 +345,7 @@ public class Jackson2ObjectMapperFactoryBeanTests {
 	}
 
 	@Test  // SPR-14435
-	public void setFactory() {
+	void setFactory() {
 		this.factory.setFactory(new SmileFactory());
 		this.factory.afterPropertiesSet();
 

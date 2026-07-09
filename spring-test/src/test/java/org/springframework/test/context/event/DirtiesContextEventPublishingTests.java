@@ -198,17 +198,17 @@ class DirtiesContextEventPublishingTests {
 	static class Config {
 
 		@BeforeTestClass
-		public void beforeTestClass(BeforeTestClassEvent e) {
+		void beforeTestClass(BeforeTestClassEvent e) {
 			events.add(e.getClass());
 		}
 
 		@PrepareTestInstance
-		public void prepareTestInstance(PrepareTestInstanceEvent e) {
+		void prepareTestInstance(PrepareTestInstanceEvent e) {
 			events.add(e.getClass());
 		}
 
 		@BeforeTestMethod
-		public void beforeTestMethod(BeforeTestMethodEvent e) {
+		void beforeTestMethod(BeforeTestMethodEvent e) {
 			events.add(e.getClass());
 		}
 

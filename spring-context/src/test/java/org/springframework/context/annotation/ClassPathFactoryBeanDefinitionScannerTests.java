@@ -43,7 +43,7 @@ class ClassPathFactoryBeanDefinitionScannerTests {
 
 
 	@Test
-	void testSingletonScopedFactoryMethod() {
+	void singletonScopedFactoryMethod() {
 		GenericApplicationContext context = new GenericApplicationContext();
 		ClassPathBeanDefinitionScanner scanner = new ClassPathBeanDefinitionScanner(context);
 
@@ -79,8 +79,7 @@ class ClassPathFactoryBeanDefinitionScannerTests {
 
 		Object bean = context.getBean("requestScopedInstance"); //5
 		assertThat(AopUtils.isCglibProxy(bean)).isTrue();
-		boolean condition = bean instanceof ScopedObject;
-		assertThat(condition).isTrue();
+		assertThat(bean).isInstanceOf(ScopedObject.class);
 
 		QualifiedClientBean clientBean = context.getBean("clientBean", QualifiedClientBean.class);
 		assertThat(clientBean.testBean).isSameAs(context.getBean("publicInstance"));

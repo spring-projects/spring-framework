@@ -19,7 +19,6 @@ package org.springframework.http.codec.smile;
 import java.util.Arrays;
 import java.util.List;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -78,7 +77,6 @@ class JacksonSmileEncoderTests extends AbstractEncoderTests<JacksonSmileEncoder>
 	}
 
 	@Test
-	@Disabled("Determine why this fails with JacksonSmileEncoder but passes with Jackson2SmileEncoder")
 	void cannotEncodeServerSentEvent() {
 		ResolvableType sseType = ResolvableType.forClass(ServerSentEvent.class);
 		assertThat(this.encoder.canEncode(sseType, SMILE_MIME_TYPE)).isFalse();

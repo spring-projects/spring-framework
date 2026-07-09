@@ -54,7 +54,7 @@ public final class JsonContent implements AssertProvider<JsonContentAssert> {
 	 * use to deserialize content.
 	 * @param json the actual JSON content
 	 * @param converter the content converter to use
-	 * @deprecated in favour of {@link #JsonContent(String, JsonConverterDelegate)}
+	 * @deprecated in favor of {@link #JsonContent(String, JsonConverterDelegate)}
 	 */
 	@SuppressWarnings("removal")
 	@Deprecated(since = "7.0", forRemoval = true)
@@ -97,7 +97,7 @@ public final class JsonContent implements AssertProvider<JsonContentAssert> {
 
 	/**
 	 * Return the {@link HttpMessageContentConverter} to use to deserialize content.
-	 * @deprecated in favour of {@link #getJsonConverterDelegate()}
+	 * @deprecated in favor of {@link #getJsonConverterDelegate()}
 	 */
 	@SuppressWarnings("removal")
 	@Deprecated(since = "7.0", forRemoval = true)

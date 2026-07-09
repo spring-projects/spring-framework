@@ -156,16 +156,7 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 	@Override
 	public HttpHeaders getHeaders() {
 		if (this.headers == null) {
-			this.headers = new HttpHeaders();
-
-			for (Enumeration<?> names = this.servletRequest.getHeaderNames(); names.hasMoreElements();) {
-				String headerName = (String) names.nextElement();
-				for (Enumeration<?> headerValues = this.servletRequest.getHeaders(headerName);
-						headerValues.hasMoreElements();) {
-					String headerValue = (String) headerValues.nextElement();
-					this.headers.add(headerName, headerValue);
-				}
-			}
+			this.headers = new HttpHeaders(ServletRequestHeadersAdapter.create(this.servletRequest));
 
 			// HttpServletRequest exposes some headers as properties:
 			// we should include those if not already present
@@ -183,10 +174,10 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 				if (contentType != null && contentType.getCharset() == null) {
 					String requestEncoding = this.servletRequest.getCharacterEncoding();
 					if (StringUtils.hasLength(requestEncoding)) {
-						Charset charSet = Charset.forName(requestEncoding);
+						Charset charset = Charset.forName(requestEncoding);
 						Map<String, String> params = new LinkedCaseInsensitiveMap<>();
 						params.putAll(contentType.getParameters());
-						params.put("charset", charSet.toString());
+						params.put("charset", charset.toString());
 						MediaType mediaType = new MediaType(contentType.getType(), contentType.getSubtype(), params);
 						this.headers.setContentType(mediaType);
 					}
@@ -203,11 +194,9 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 				}
 			}
 		}
-
 		return this.headers;
 	}
 
-	@Override
 	public @Nullable Principal getPrincipal() {
 		return this.servletRequest.getUserPrincipal();
 	}

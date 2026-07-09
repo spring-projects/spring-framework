@@ -21,6 +21,7 @@ import java.util.List;
 import javax.sql.DataSource;
 
 import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.PersistenceConfiguration;
 import jakarta.persistence.PersistenceException;
 import jakarta.persistence.SharedCacheMode;
@@ -85,14 +86,11 @@ import org.springframework.util.StringUtils;
  * @author Juergen Hoeller
  * @author Rod Johnson
  * @since 2.0
- * @see #setPersistenceXmlLocation
  * @see #setJpaProperties
  * @see #setJpaVendorAdapter
  * @see #setLoadTimeWeaver
  * @see #setDataSource
- * @see EntityManagerFactoryInfo
  * @see LocalEntityManagerFactoryBean
- * @see org.springframework.orm.jpa.support.SharedEntityManagerBean
  * @see jakarta.persistence.spi.PersistenceProvider#createContainerEntityManagerFactory
  */
 @SuppressWarnings("serial")
@@ -141,9 +139,10 @@ public class LocalContainerEntityManagerFactoryBean extends AbstractEntityManage
 	}
 
 	/**
-	 * Uses the specified persistence unit name as the name of the default
-	 * persistence unit, if applicable.
-	 * <p><b>NOTE: Only applied if no external PersistenceUnitManager specified.</b>
+	 * Specify the name of the persistence unit configuration to use.
+	 * <p>Uses the specified persistence unit name as the name of the
+	 * default persistence unit, if applicable. Otherwise, it selects
+	 * among the available persistence units.
 	 * @see DefaultPersistenceUnitManager#setDefaultPersistenceUnitName
 	 */
 	@Override
@@ -284,6 +283,17 @@ public class LocalContainerEntityManagerFactoryBean extends AbstractEntityManage
 	 */
 	public void setValidationMode(ValidationMode validationMode) {
 		this.internalPersistenceUnitManager.setValidationMode(validationMode);
+	}
+
+	/**
+	 * Specify the JPA 4.0 default fetch type for all of this manager's persistence
+	 * units, overriding any value in {@code persistence.xml} if set.
+	 * <p><b>NOTE: Only applied if no external PersistenceUnitManager specified. Also,
+	 * this requires a JPA 4.0+ persistence provider and will be ignored otherwise.</b>
+	 * @since 7.0.4
+	 */
+	public void setDefaultToOneFetchType(FetchType defaultToOneFetchType) {
+		this.internalPersistenceUnitManager.setDefaultToOneFetchType(defaultToOneFetchType);
 	}
 
 	/**

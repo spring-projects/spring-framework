@@ -18,7 +18,6 @@ package org.springframework.web.reactive.result.method.annotation;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
-import java.net.URI;
 import java.util.Optional;
 
 import org.springframework.context.ApplicationContext;
@@ -28,13 +27,12 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.client.RestClient;
 import org.springframework.web.reactive.config.EnableWebFlux;
 import org.springframework.web.reactive.config.ViewResolverRegistry;
 import org.springframework.web.reactive.config.WebFluxConfigurer;
@@ -69,9 +67,9 @@ class RequestMappingViewResolutionIntegrationTests extends AbstractRequestMappin
 	void etagCheckWithNotModifiedResponse(HttpServer httpServer) throws Exception {
 		startServer(httpServer);
 
-		URI uri = URI.create("http://localhost:" + this.port + "/html");
-		RequestEntity<Void> request = RequestEntity.get(uri).ifNoneMatch("\"deadb33f8badf00d\"").build();
-		ResponseEntity<String> response = getRestTemplate().exchange(request, String.class);
+		ResponseEntity<String> response = getRestClient().get().uri("/html")
+				.headers(headers -> headers.setIfNoneMatch("\"deadb33f8badf00d\""))
+				.retrieve().toEntity(String.class);
 
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_MODIFIED);
 		assertThat(response.getBody()).isNull();
@@ -89,9 +87,10 @@ class RequestMappingViewResolutionIntegrationTests extends AbstractRequestMappin
 			}
 		};
 
-		URI uri = URI.create("http://localhost:" + this.port + "/redirect");
-		RequestEntity<Void> request = RequestEntity.get(uri).accept(MediaType.ALL).build();
-		ResponseEntity<Void> response = new RestTemplate(factory).exchange(request, Void.class);
+		RestClient restClient = RestClient.builder().requestFactory(factory)
+				.baseUrl("http://localhost:" + this.port).build();
+		ResponseEntity<Void> response = restClient.get().uri("/redirect").accept(MediaType.ALL)
+				.retrieve().toEntity(Void.class);
 
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.SEE_OTHER);
 		assertThat(response.getHeaders().getLocation().toString()).isEqualTo("/");

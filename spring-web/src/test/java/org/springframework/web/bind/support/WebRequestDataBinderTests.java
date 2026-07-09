@@ -17,19 +17,19 @@
 package org.springframework.web.bind.support;
 
 import java.beans.PropertyEditorSupport;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.Parameter;
+import org.junit.jupiter.params.ParameterizedClass;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
-import org.springframework.beans.PropertyValue;
-import org.springframework.beans.PropertyValues;
 import org.springframework.beans.testfixture.beans.ITestBean;
 import org.springframework.beans.testfixture.beans.TestBean;
-import org.springframework.web.bind.ServletRequestParameterPropertyValues;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.multipart.support.StringMultipartFileEditor;
 import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
@@ -37,17 +37,23 @@ import org.springframework.web.testfixture.servlet.MockMultipartFile;
 import org.springframework.web.testfixture.servlet.MockMultipartHttpServletRequest;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.web.bind.WebDataBinder.DEFAULT_FIELD_DEFAULT_PREFIX;
+import static org.springframework.web.bind.WebDataBinder.DEFAULT_FIELD_MARKER_PREFIX;
 
 /**
+ * Tests for {@link WebRequestDataBinder}.
+ *
  * @author Juergen Hoeller
+ * @author Brian Clozel
+ * @author Sam Brannen
  */
 class WebRequestDataBinderTests {
 
 	@Test
-	void testBindingWithNestedObjectCreation() {
+	void bindingWithNestedObjectCreation() {
 		TestBean tb = new TestBean();
 
-		WebRequestDataBinder binder = new WebRequestDataBinder(tb, "person");
+		WebRequestDataBinder binder = new WebRequestDataBinder(tb);
 		binder.registerCustomEditor(ITestBean.class, new PropertyEditorSupport() {
 			@Override
 			public void setAsText(String text) throws IllegalArgumentException {
@@ -65,10 +71,10 @@ class WebRequestDataBinderTests {
 	}
 
 	@Test
-	void testBindingWithNestedObjectCreationThroughAutoGrow() {
+	void bindingWithNestedObjectCreationThroughAutoGrow() {
 		TestBean tb = new TestBeanWithConcreteSpouse();
 
-		WebRequestDataBinder binder = new WebRequestDataBinder(tb, "person");
+		WebRequestDataBinder binder = new WebRequestDataBinder(tb);
 		binder.setIgnoreUnknownFields(false);
 
 		MockHttpServletRequest request = new MockHttpServletRequest();
@@ -79,10 +85,13 @@ class WebRequestDataBinderTests {
 		assertThat(tb.getSpouse().getName()).isEqualTo("test");
 	}
 
-	@Test
-	void testFieldPrefixCausesFieldReset() {
+	@ParameterizedTest
+	@ValueSource(booleans = { true, false })
+	void markerPrefixCausesFieldReset(boolean ignoreUnknownFields) {
 		TestBean target = new TestBean();
+
 		WebRequestDataBinder binder = new WebRequestDataBinder(target);
+		binder.setIgnoreUnknownFields(ignoreUnknownFields);
 
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.addParameter("_postProcessed", "visible");
@@ -96,24 +105,31 @@ class WebRequestDataBinderTests {
 	}
 
 	@Test
-	void testFieldPrefixCausesFieldResetWithIgnoreUnknownFields() {
+	void fieldWithArrayIndices() {
 		TestBean target = new TestBean();
 		WebRequestDataBinder binder = new WebRequestDataBinder(target);
-		binder.setIgnoreUnknownFields(false);
 
 		MockHttpServletRequest request = new MockHttpServletRequest();
-		request.addParameter("_postProcessed", "visible");
-		request.addParameter("postProcessed", "on");
+		request.addParameter("stringArray[0]", "ONE");
+		request.addParameter("stringArray[1]", "TWO");
 		binder.bind(new ServletWebRequest(request));
-		assertThat(target.isPostProcessed()).isTrue();
-
-		request.removeParameter("postProcessed");
-		binder.bind(new ServletWebRequest(request));
-		assertThat(target.isPostProcessed()).isFalse();
+		assertThat(target.getStringArray()).containsExactly("ONE", "TWO");
 	}
 
-	@Test // gh-25836
-	public void testFieldWithEmptyArrayIndex() {
+	@Test
+	void fieldWithMissingArrayIndex() {
+		TestBean target = new TestBean();
+		WebRequestDataBinder binder = new WebRequestDataBinder(target);
+
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		request.addParameter("stringArray", "ONE");
+		request.addParameter("stringArray", "TWO");
+		binder.bind(new ServletWebRequest(request));
+		assertThat(target.getStringArray()).containsExactly("ONE", "TWO");
+	}
+
+	@Test  // gh-25836
+	void fieldWithEmptyArrayIndex() {
 		TestBean target = new TestBean();
 		WebRequestDataBinder binder = new WebRequestDataBinder(target);
 
@@ -125,7 +141,7 @@ class WebRequestDataBinderTests {
 	}
 
 	@Test
-	void testFieldDefault() {
+	void fieldDefault() {
 		TestBean target = new TestBean();
 		WebRequestDataBinder binder = new WebRequestDataBinder(target);
 
@@ -140,9 +156,8 @@ class WebRequestDataBinderTests {
 		assertThat(target.isPostProcessed()).isFalse();
 	}
 
-	// SPR-13502
-	@Test
-	void testCollectionFieldsDefault() {
+	@Test  // SPR-13502
+	void collectionFieldsDefault() {
 		TestBean target = new TestBean();
 		target.setSomeSet(null);
 		target.setSomeList(null);
@@ -161,7 +176,7 @@ class WebRequestDataBinderTests {
 	}
 
 	@Test
-	void testFieldDefaultPreemptsFieldMarker() {
+	void fieldDefaultPreemptsFieldMarker() {
 		TestBean target = new TestBean();
 		WebRequestDataBinder binder = new WebRequestDataBinder(target);
 
@@ -182,7 +197,7 @@ class WebRequestDataBinderTests {
 	}
 
 	@Test
-	void testFieldDefaultWithNestedProperty() {
+	void fieldDefaultWithNestedProperty() {
 		TestBean target = new TestBean();
 		target.setSpouse(new TestBean());
 		WebRequestDataBinder binder = new WebRequestDataBinder(target);
@@ -204,7 +219,7 @@ class WebRequestDataBinderTests {
 	}
 
 	@Test
-	void testFieldDefaultNonBoolean() {
+	void fieldDefaultNonBoolean() {
 		TestBean target = new TestBean();
 		WebRequestDataBinder binder = new WebRequestDataBinder(target);
 
@@ -220,7 +235,7 @@ class WebRequestDataBinderTests {
 	}
 
 	@Test
-	void testWithCommaSeparatedStringArray() {
+	void withCommaSeparatedStringArray() {
 		TestBean target = new TestBean();
 		WebRequestDataBinder binder = new WebRequestDataBinder(target);
 
@@ -238,7 +253,7 @@ class WebRequestDataBinderTests {
 	}
 
 	@Test
-	void testEnumBinding() {
+	void enumBinding() {
 		EnumHolder target = new EnumHolder();
 		WebRequestDataBinder binder = new WebRequestDataBinder(target);
 
@@ -249,7 +264,7 @@ class WebRequestDataBinderTests {
 	}
 
 	@Test
-	void testMultipartFileAsString() {
+	void multipartFileAsString() {
 		TestBean target = new TestBean();
 		WebRequestDataBinder binder = new WebRequestDataBinder(target);
 		binder.registerCustomEditor(String.class, new StringMultipartFileEditor());
@@ -261,7 +276,7 @@ class WebRequestDataBinderTests {
 	}
 
 	@Test
-	void testMultipartFileAsStringArray() {
+	void multipartFileAsStringArray() {
 		TestBean target = new TestBean();
 		WebRequestDataBinder binder = new WebRequestDataBinder(target);
 		binder.registerCustomEditor(String.class, new StringMultipartFileEditor());
@@ -274,7 +289,7 @@ class WebRequestDataBinderTests {
 	}
 
 	@Test
-	void testMultipartFilesAsStringArray() {
+	void multipartFilesAsStringArray() {
 		TestBean target = new TestBean();
 		WebRequestDataBinder binder = new WebRequestDataBinder(target);
 		binder.registerCustomEditor(String.class, new StringMultipartFileEditor());
@@ -288,79 +303,116 @@ class WebRequestDataBinderTests {
 		assertThat(target.getStringArray()[1]).isEqualTo("Eva");
 	}
 
-	@Test
-	void testNoPrefix() {
-		MockHttpServletRequest request = new MockHttpServletRequest();
-		request.addParameter("forname", "Tony");
-		request.addParameter("surname", "Blair");
-		request.addParameter("age", "" + 50);
 
-		ServletRequestParameterPropertyValues pvs = new ServletRequestParameterPropertyValues(request);
-		doTestTony(pvs);
-	}
+	@ParameterizedClass  // gh-36625
+	@ValueSource(strings = { DEFAULT_FIELD_DEFAULT_PREFIX, DEFAULT_FIELD_MARKER_PREFIX })
+	@Nested
+	class DefaultAndMarkerPrefixTests {
 
-	@Test
-	void testPrefix() {
-		MockHttpServletRequest request = new MockHttpServletRequest();
-		request.addParameter("test_forname", "Tony");
-		request.addParameter("test_surname", "Blair");
-		request.addParameter("test_age", "" + 50);
+		@Parameter
+		String prefix;
 
-		ServletRequestParameterPropertyValues pvs = new ServletRequestParameterPropertyValues(request);
-		boolean condition = !pvs.contains("forname");
-		assertThat(condition).as("Didn't find normal when given prefix").isTrue();
-		assertThat(pvs.contains("test_forname")).as("Did treat prefix as normal when not given prefix").isTrue();
+		@Test
+		void shouldNotTriggerBindingWhenFieldIsNotAllowed() {
+			TestBean tb = new TestBean();
 
-		pvs = new ServletRequestParameterPropertyValues(request, "test");
-		doTestTony(pvs);
-	}
+			WebRequestDataBinder binder = new WebRequestDataBinder(tb);
+			binder.setAllowedFields("name");
 
-	/**
-	 * Must contain: forname=Tony surname=Blair age=50
-	 */
-	protected void doTestTony(PropertyValues pvs) {
-		assertThat(pvs.getPropertyValues().length).as("Contains 3").isEqualTo(3);
-		assertThat(pvs.contains("forname")).as("Contains forname").isTrue();
-		assertThat(pvs.contains("surname")).as("Contains surname").isTrue();
-		assertThat(pvs.contains("age")).as("Contains age").isTrue();
-		boolean condition1 = !pvs.contains("tory");
-		assertThat(condition1).as("Doesn't contain tory").isTrue();
+			MockHttpServletRequest request = new MockHttpServletRequest();
+			request.addParameter("name", "spring");
+			request.addParameter(prefix + "country", "test");
+			binder.bind(new ServletWebRequest(request));
 
-		PropertyValue[] pvArray = pvs.getPropertyValues();
-		Map<String, String> m = new HashMap<>();
-		m.put("forname", "Tony");
-		m.put("surname", "Blair");
-		m.put("age", "50");
-		for (PropertyValue pv : pvArray) {
-			Object val = m.get(pv.getName());
-			assertThat(val).as("Can't have unexpected value").isNotNull();
-			boolean condition = val instanceof String;
-			assertThat(condition).as("Val i string").isTrue();
-			assertThat(val.equals(pv.getValue())).as("val matches expected").isTrue();
-			m.remove(pv.getName());
+			assertThat(tb.getName()).isEqualTo("spring");
+			assertThat(tb.getCountry()).isNull();
 		}
-		assertThat(m.size()).as("Map size is 0").isEqualTo(0);
-	}
 
-	@Test
-	void testNoParameters() {
-		MockHttpServletRequest request = new MockHttpServletRequest();
-		ServletRequestParameterPropertyValues pvs = new ServletRequestParameterPropertyValues(request);
-		assertThat(pvs.getPropertyValues().length).as("Found no parameters").isEqualTo(0);
-	}
+		@Test
+		void shouldNotTriggerBindingWhenFieldIsDisallowed() {
+			TestBean tb = new TestBean();
 
-	@Test
-	void testMultipleValuesForParameter() {
-		MockHttpServletRequest request = new MockHttpServletRequest();
-		String[] original = new String[] {"Tony", "Rod"};
-		request.addParameter("forname", original);
+			WebRequestDataBinder binder = new WebRequestDataBinder(tb);
+			binder.setDisallowedFields("country");
 
-		ServletRequestParameterPropertyValues pvs = new ServletRequestParameterPropertyValues(request);
-		assertThat(pvs.getPropertyValues().length).as("Found 1 parameter").isEqualTo(1);
-		boolean condition = pvs.getPropertyValue("forname").getValue() instanceof String[];
-		assertThat(condition).as("Found array value").isTrue();
-		String[] values = (String[]) pvs.getPropertyValue("forname").getValue();
-		assertThat(Arrays.asList(original)).as("Correct values").isEqualTo(Arrays.asList(values));
+			MockHttpServletRequest request = new MockHttpServletRequest();
+			request.addParameter("name", "spring");
+			request.addParameter(prefix + "country", "test");
+			binder.bind(new ServletWebRequest(request));
+
+			assertThat(tb.getName()).isEqualTo("spring");
+			assertThat(tb.getCountry()).isNull();
+		}
+
+		@Test
+		void shouldNotTriggerBindingWhenFieldIsNotAllowedWithEmptyArrayIndex() {
+			TestBean tb = new TestBean();
+
+			WebRequestDataBinder binder = new WebRequestDataBinder(tb);
+			binder.setAllowedFields("name");
+
+			MockHttpServletRequest request = new MockHttpServletRequest();
+			request.addParameter("name", "spring");
+			request.addParameter(prefix + "stringArray[]", "ONE");
+			request.addParameter(prefix + "stringArray[]", "TWO");
+			binder.bind(new ServletWebRequest(request));
+
+			assertThat(tb.getName()).isEqualTo("spring");
+			assertThat(tb.getStringArray()).isNull();
+		}
+
+		@ParameterizedTest
+		@ValueSource(strings = { "stringArray*", "stringArray[]" })
+		void shouldNotTriggerBindingWhenFieldIsDisallowedWithEmptyArrayIndex(String disallowedField) {
+			TestBean tb = new TestBean();
+
+			WebRequestDataBinder binder = new WebRequestDataBinder(tb);
+			binder.setDisallowedFields(disallowedField);
+
+			MockHttpServletRequest request = new MockHttpServletRequest();
+			request.addParameter("name", "spring");
+			request.addParameter(prefix + "stringArray[]", "ONE");
+			request.addParameter(prefix + "stringArray[]", "TWO");
+			binder.bind(new ServletWebRequest(request));
+
+			assertThat(tb.getName()).isEqualTo("spring");
+			assertThat(tb.getStringArray()).isNull();
+		}
+
+		@Test
+		void shouldNotTriggerAutoGrowWhenFieldIsNotAllowed() {
+			TestBean tb = new TestBean();
+			tb.setSomeMap(null);
+
+			WebRequestDataBinder binder = new WebRequestDataBinder(tb);
+			binder.setAllowedFields("name");
+
+			MockHttpServletRequest request = new MockHttpServletRequest();
+			request.addParameter("name", "spring");
+			request.addParameter(prefix + "someMap[key1]", "test");
+			binder.bind(new ServletWebRequest(request));
+
+			assertThat(tb.getName()).isEqualTo("spring");
+			assertThat(tb.getSomeMap()).isNull();
+		}
+
+		@ParameterizedTest
+		@ValueSource(strings = { "someMap*", "someMap[*]", "someMap[key1]" })
+		void shouldNotTriggerAutoGrowWhenFieldIsDisallowed(String disallowedField) {
+			TestBean tb = new TestBean();
+			tb.setSomeMap(null);
+
+			WebRequestDataBinder binder = new WebRequestDataBinder(tb);
+			binder.setDisallowedFields(disallowedField);
+
+			MockHttpServletRequest request = new MockHttpServletRequest();
+			request.addParameter("name", "spring");
+			request.addParameter(prefix + "someMap[key1]", "test");
+			binder.bind(new ServletWebRequest(request));
+
+			assertThat(tb.getName()).isEqualTo("spring");
+			assertThat(tb.getSomeMap()).isNull();
+		}
 	}
 
 
@@ -390,6 +442,5 @@ class WebRequestDataBinderTests {
 			return (TestBean) getSpouse();
 		}
 	}
-
 
 }

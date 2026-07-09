@@ -315,7 +315,7 @@ class VariableAndFunctionTests extends AbstractExpressionTests {
 			// Since ArrayHolder is an "instanceof Object" and Object is the varargs component type,
 			// we expect the ArrayHolder not to be converted to an array but rather to be passed
 			// "as is" as a single argument to the varargs method.
-			evaluate("#varargsObjectFunction(#arrayHolder)", "[" + arrayHolder.toString() + "]");
+			evaluate("#varargsObjectFunction(#arrayHolder)", "[" + arrayHolder + "]");
 		}
 
 		@Test
@@ -328,7 +328,7 @@ class VariableAndFunctionTests extends AbstractExpressionTests {
 			// Since ArrayHolder is an "instanceof Object" and Object is the varargs component type,
 			// we expect the ArrayHolder not to be converted to an array but rather to be passed
 			// "as is" as a single argument to the varargs method.
-			evaluate("#varargsObjectFunctionHandle(#arrayHolder)", "[" + arrayHolder.toString() + "]");
+			evaluate("#varargsObjectFunctionHandle(#arrayHolder)", "[" + arrayHolder + "]");
 		}
 
 		private void evaluate(String expression, Object expectedValue) {

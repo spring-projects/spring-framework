@@ -15,7 +15,7 @@ configuration options. You should instantiate the `SimpleJdbcInsert` in the data
 layer's initialization method. For this example, the initializing method is the
 `setDataSource` method. You do not need to subclass the `SimpleJdbcInsert` class. Instead,
 you can create a new instance and set the table name by using the `withTableName` method.
-Configuration methods for this class follow the `fluid` style that returns the instance
+Configuration methods for this class follow the `fluent` style that returns the instance
 of the `SimpleJdbcInsert`, which lets you chain all configuration methods. The following
 example uses only one configuration method (we show examples of multiple methods later):
 
@@ -349,11 +349,11 @@ parameters return the data read from the table.
 
 You can declare `SimpleJdbcCall` in a manner similar to declaring `SimpleJdbcInsert`. You
 should instantiate and configure the class in the initialization method of your data-access
-layer. Compared to the `StoredProcedure` class, you need not create a subclass
-and you need not to declare parameters that can be looked up in the database metadata.
-The following example of a `SimpleJdbcCall` configuration uses the preceding stored
-procedure (the only configuration option, in addition to the `DataSource`, is the name
-of the stored procedure):
+layer. In contrast to the `StoredProcedure` class, you do not need to create a subclass,
+and you do not need to declare parameters that can be looked up in the database metadata.
+The following `SimpleJdbcCall` configuration example uses the preceding stored procedure.
+The only configuration option (other than the `DataSource`) is the name of the stored
+procedure.
 
 [tabs]
 ======

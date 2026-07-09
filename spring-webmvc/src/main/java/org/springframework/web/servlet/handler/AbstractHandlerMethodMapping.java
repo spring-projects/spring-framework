@@ -409,10 +409,8 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 					logger.trace(matches.size() + " matching mappings: " + matches);
 				}
 				if (CorsUtils.isPreFlightRequest(request)) {
-					for (Match match : matches) {
-						if (match.hasCorsConfig()) {
-							return PREFLIGHT_AMBIGUOUS_MATCH;
-						}
+					if (matches.stream().allMatch(Match::hasCorsConfig)) {
+						return PREFLIGHT_AMBIGUOUS_MATCH;
 					}
 				}
 				else {
@@ -605,14 +603,15 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 				HandlerMethod handlerMethod = createHandlerMethod(handler, method);
 				validateMethodMapping(handlerMethod, mapping);
 
-				Set<String> directPaths = AbstractHandlerMethodMapping.this.getDirectPaths(mapping);
+				Set<String> directPaths = getDirectPaths(mapping);
 				for (String path : directPaths) {
 					this.pathLookup.add(path, mapping);
 				}
 
 				String name = null;
-				if (getNamingStrategy() != null) {
-					name = getNamingStrategy().getName(handlerMethod, mapping);
+				HandlerMethodMappingNamingStrategy<T> namingStrategy = getNamingStrategy();
+				if (namingStrategy != null) {
+					name = namingStrategy.getName(handlerMethod, mapping);
 					addMappingName(name, handlerMethod);
 				}
 

@@ -19,7 +19,6 @@ package org.springframework.aop.framework
 import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.toList
-import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import reactor.core.publisher.Flux
@@ -37,39 +36,31 @@ class CoroutinesUtilsTests {
 	fun awaitSingleNonNullValue() {
 		val value = "foo"
 		val continuation = Continuation<Any>(CoroutineName("test")) { }
-		runBlocking {
-			assertThat(CoroutinesUtils.awaitSingleOrNull(value, continuation)).isEqualTo(value)
-		}
+		assertThat(CoroutinesUtils.awaitSingleOrNull(value, continuation)).isEqualTo(value)
 	}
 
 	@Test
 	fun awaitSingleNullValue() {
 		val value = null
 		val continuation = Continuation<Any>(CoroutineName("test")) { }
-		runBlocking {
-			assertThat(CoroutinesUtils.awaitSingleOrNull(value, continuation)).isNull()
-		}
+		assertThat(CoroutinesUtils.awaitSingleOrNull(value, continuation)).isNull()
 	}
 
 	@Test
 	fun awaitSingleMonoValue() {
 		val value = "foo"
 		val continuation = Continuation<Any>(CoroutineName("test")) { }
-		runBlocking {
-			assertThat(CoroutinesUtils.awaitSingleOrNull(Mono.just(value), continuation)).isEqualTo(value)
-		}
+		assertThat(CoroutinesUtils.awaitSingleOrNull(Mono.just(value), continuation)).isEqualTo(value)
 	}
 
 	@Test
 	@Suppress("UNCHECKED_CAST")
-	fun flow() {
+	suspend fun flow() {
 		val value1 = "foo"
 		val value2 = "bar"
 		val values = Flux.just(value1, value2)
 		val flow = CoroutinesUtils.asFlow(values) as Flow<String>
-		runBlocking {
-			assertThat(flow.toList()).containsExactly(value1, value2)
-		}
+		assertThat(flow.toList()).containsExactly(value1, value2)
 	}
 
 }

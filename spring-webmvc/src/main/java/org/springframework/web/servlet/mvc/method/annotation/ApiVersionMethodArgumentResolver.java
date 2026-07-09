@@ -23,6 +23,7 @@ import org.jspecify.annotations.Nullable;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.util.Assert;
+import org.springframework.web.accept.ApiVersionHolder;
 import org.springframework.web.accept.MissingApiVersionException;
 import org.springframework.web.accept.SemanticApiVersionParser;
 import org.springframework.web.bind.support.WebDataBinderFactory;
@@ -51,7 +52,8 @@ public class ApiVersionMethodArgumentResolver implements HandlerMethodArgumentRe
 
 		HttpServletRequest request = webRequest.getNativeRequest(HttpServletRequest.class);
 		Assert.state(request != null, "No HttpServletRequest");
-		Object version = request.getAttribute(HandlerMapping.API_VERSION_ATTRIBUTE);
+		ApiVersionHolder versionHolder = (ApiVersionHolder) request.getAttribute(HandlerMapping.API_VERSION_ATTRIBUTE);
+		Object version = versionHolder.getVersionIfPresent();
 
 		if (parameter.getParameterType() == Optional.class) {
 			return Optional.ofNullable(version);

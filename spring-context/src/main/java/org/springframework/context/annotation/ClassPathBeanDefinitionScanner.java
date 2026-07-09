@@ -43,11 +43,11 @@ import org.springframework.util.PatternMatchUtils;
  * or {@code ApplicationContext}).
  *
  * <p>Candidate classes are detected through configurable type filters. The
- * default filters include classes that are annotated with Spring's
- * {@link org.springframework.stereotype.Component @Component},
+ * default filters include classes that are annotated or meta-annotated with Spring's
+ * {@link org.springframework.stereotype.Component @Component} annotation, such as the
  * {@link org.springframework.stereotype.Repository @Repository},
- * {@link org.springframework.stereotype.Service @Service}, or
- * {@link org.springframework.stereotype.Controller @Controller} stereotype.
+ * {@link org.springframework.stereotype.Service @Service}, and
+ * {@link org.springframework.stereotype.Controller @Controller} stereotypes.
  *
  * <p>Also supports JSR-330's {@link jakarta.inject.Named} annotations, if available.
  *
@@ -204,8 +204,11 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 	}
 
 	/**
-	 * Set the BeanNameGenerator to use for detected bean classes.
-	 * <p>Default is a {@link AnnotationBeanNameGenerator}.
+	 * Set the {@link BeanNameGenerator} to use for detected bean classes.
+	 * <p>Default is an {@code AnnotationBeanNameGenerator}.
+	 * @see AnnotationBeanNameGenerator
+	 * @see FullyQualifiedAnnotationBeanNameGenerator
+	 * @see FullyQualifiedConfigurationBeanNameGenerator
 	 */
 	public void setBeanNameGenerator(@Nullable BeanNameGenerator beanNameGenerator) {
 		this.beanNameGenerator =

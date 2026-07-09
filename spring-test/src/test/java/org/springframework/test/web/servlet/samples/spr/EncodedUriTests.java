@@ -54,7 +54,7 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppC
  * @author Sebastien Deleuze
  */
 @SpringJUnitWebConfig
-public class EncodedUriTests {
+class EncodedUriTests {
 
 	private final MockMvc mockMvc;
 

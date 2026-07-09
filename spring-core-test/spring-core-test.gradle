@@ -12,8 +12,8 @@ dependencies {
 jar {
 	manifest {
 		attributes(
-				'Premain-Class': 'org.springframework.aot.agent.RuntimeHintsAgent',
-				'Can-Redefine-Classes': 'true'
+			'Premain-Class': 'org.springframework.aot.agent.RuntimeHintsAgent',
+			'Can-Redefine-Classes': 'true'
 		)
 	}
 }

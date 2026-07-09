@@ -46,7 +46,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Rossen Stoyanchev
  */
-public class WebClientProxyRegistryIntegrationTests {
+class WebClientProxyRegistryIntegrationTests {
 
 	private final MockWebServer server = new MockWebServer();
 

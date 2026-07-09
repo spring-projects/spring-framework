@@ -430,8 +430,8 @@ abstract class AbstractAspectJAdvisorFactoryTests {
 		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(itb::getAge);
 	}
 
-	// TODO document this behaviour.
-	// Is it different AspectJ behaviour, at least for checked exceptions?
+	// TODO document this behavior.
+	// Is it different AspectJ behavior, at least for checked exceptions?
 	@Test
 	void aspectMethodThrowsExceptionIllegalOnSignature() {
 		TestBean target = new TestBean();

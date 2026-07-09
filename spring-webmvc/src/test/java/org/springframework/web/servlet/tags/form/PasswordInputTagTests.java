@@ -77,7 +77,7 @@ class PasswordInputTagTests extends InputTagTests {
 
 	@Test
 	@Override
-	public void dynamicTypeAttribute() {
+	void dynamicTypeAttribute() {
 		assertThatIllegalArgumentException()
 				.isThrownBy(() -> getTag().setDynamicAttribute(null, "type", "email"))
 				.withMessage("Attribute type=\"email\" is not allowed");

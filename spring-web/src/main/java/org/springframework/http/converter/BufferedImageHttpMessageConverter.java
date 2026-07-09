@@ -229,7 +229,6 @@ public class BufferedImageHttpMessageConverter implements HttpMessageConverter<B
 				public void writeTo(OutputStream outputStream) throws IOException {
 					BufferedImageHttpMessageConverter.this.writeInternal(image, selectedContentType, outputStream);
 				}
-
 				@Override
 				public boolean repeatable() {
 					return true;

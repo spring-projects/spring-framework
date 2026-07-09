@@ -40,7 +40,7 @@ class PropertyPathFactoryBeanTests {
 
 
 	@Test
-	void testPropertyPathFactoryBeanWithSingletonResult() {
+	void propertyPathFactoryBeanWithSingletonResult() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(xbf).loadBeanDefinitions(CONTEXT);
 		assertThat(xbf.getBean("propertyPath1")).isEqualTo(12);
@@ -55,7 +55,7 @@ class PropertyPathFactoryBeanTests {
 	}
 
 	@Test
-	void testPropertyPathFactoryBeanWithPrototypeResult() {
+	void propertyPathFactoryBeanWithPrototypeResult() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(xbf).loadBeanDefinitions(CONTEXT);
 		assertThat(xbf.getType("tb.spouse")).isNull();
@@ -75,7 +75,7 @@ class PropertyPathFactoryBeanTests {
 	}
 
 	@Test
-	void testPropertyPathFactoryBeanWithNullResult() {
+	void propertyPathFactoryBeanWithNullResult() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(xbf).loadBeanDefinitions(CONTEXT);
 		assertThat(xbf.getType("tb.spouse.spouse")).isNull();
@@ -83,7 +83,7 @@ class PropertyPathFactoryBeanTests {
 	}
 
 	@Test
-	void testPropertyPathFactoryBeanAsInnerBean() {
+	void propertyPathFactoryBeanAsInnerBean() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(xbf).loadBeanDefinitions(CONTEXT);
 		TestBean spouse = (TestBean) xbf.getBean("otb.spouse");
@@ -94,14 +94,14 @@ class PropertyPathFactoryBeanTests {
 	}
 
 	@Test
-	void testPropertyPathFactoryBeanAsNullReference() {
+	void propertyPathFactoryBeanAsNullReference() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(xbf).loadBeanDefinitions(CONTEXT);
 		assertThat(xbf.getBean("tbWithNullReference", TestBean.class).getSpouse()).isNull();
 	}
 
 	@Test
-	void testPropertyPathFactoryBeanAsInnerNull() {
+	void propertyPathFactoryBeanAsInnerNull() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(xbf).loadBeanDefinitions(CONTEXT);
 		assertThat(xbf.getBean("tbWithInnerNull", TestBean.class).getSpouse()).isNull();

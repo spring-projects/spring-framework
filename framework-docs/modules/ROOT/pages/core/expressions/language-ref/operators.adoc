@@ -53,7 +53,7 @@ Kotlin::
 	val trueValue = parser.parseExpression("'black' < 'block'").getValue(Boolean::class.java)
 
 	// uses CustomValue:::compareTo
-	val trueValue = parser.parseExpression("new CustomValue(1) < new CustomValue(2)").getValue(Boolean::class.java);
+	val trueValue = parser.parseExpression("new CustomValue(1) < new CustomValue(2)").getValue(Boolean::class.java)
 ----
 ======
 
@@ -167,7 +167,7 @@ Kotlin::
 [CAUTION]
 ====
 The syntax for the `between` operator is `<input> between {<range_begin>, <range_end>}`,
-which is effectively a shortcut for `<input> >= <range_begin> && <input> \<= <range_end>}`.
+which is effectively a shortcut for `<input> >= <range_begin> && <input> \<= <range_end>`.
 
 Consequently, `1 between {1, 5}` evaluates to `true`, while `1 between {5, 1}` evaluates
 to `false`.
@@ -312,13 +312,13 @@ Kotlin::
 
 	// evaluates to 'a'
 	val ch = parser.parseExpression("'d' - 3")
-			.getValue(Character::class.java);
+			.getValue(Char::class.java)
 
 	// -- Repeat --
 
 	// evaluates to "abcabc"
 	val repeated = parser.parseExpression("'abc' * 2")
-			.getValue(String::class.java);
+			.getValue(String::class.java)
 ----
 ======
 
@@ -485,7 +485,7 @@ Kotlin::
 
 	// -- Operator precedence --
 
-	val minusTwentyOne = parser.parseExpression("1+2-3*8").getValue(Int::class.java)  // -21	
+	val minusTwentyOne = parser.parseExpression("1+2-3*8").getValue(Int::class.java)  // -21
 ----
 ======
 
@@ -541,32 +541,7 @@ For example, if we want to overload the `ADD` operator to allow two lists to be
 concatenated using the `+` sign, we can implement a custom `OperatorOverloader` as
 follows.
 
-[source,java,indent=0,subs="verbatim,quotes"]
-----
-	pubic class ListConcatenation implements OperatorOverloader {
-
-		@Override
-		public boolean overridesOperation(Operation operation, Object left, Object right) {
-			return (operation == Operation.ADD &&
-					left instanceof List && right instanceof List);
-		}
-
-		@Override
-		@SuppressWarnings("unchecked")
-		public Object operate(Operation operation, Object left, Object right) {
-			if (operation == Operation.ADD &&
-					left instanceof List list1 && right instanceof List list2) {
-
-				List result = new ArrayList(list1);
-				result.addAll(list2);
-				return result;
-			}
-			throw new UnsupportedOperationException(
-				"No overload for operation %s and operands [%s] and [%s]"
-					.formatted(operation, left, right));
-		}
-	}
-----
+include-code::./ListConcatenation[]
 
 If we register `ListConcatenation` as the `OperatorOverloader` in a
 `StandardEvaluationContext`, we can then evaluate expressions like `{1, 2, 3} + {4, 5}`
@@ -589,8 +564,8 @@ Kotlin::
 +
 [source,kotlin,indent=0,subs="verbatim,quotes"]
 ----
-	StandardEvaluationContext context = StandardEvaluationContext()
-	context.setOperatorOverloader(ListConcatenation())
+	val context = StandardEvaluationContext()
+	context.operatorOverloader = ListConcatenation()
 
 	// evaluates to a new list: [1, 2, 3, 4, 5]
 	parser.parseExpression("{1, 2, 3} + {2 + 2, 5}").getValue(context, List::class.java)

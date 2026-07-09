@@ -54,5 +54,4 @@ public class RealLiteral extends Literal {
 		cf.pushDescriptor(this.exitTypeDescriptor);
 	}
 
-
 }

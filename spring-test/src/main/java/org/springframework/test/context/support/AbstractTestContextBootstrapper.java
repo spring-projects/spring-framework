@@ -30,6 +30,7 @@ import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.BeanInstantiationException;
 import org.springframework.beans.BeanUtils;
+import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.test.context.BootstrapContext;
 import org.springframework.test.context.CacheAwareContextLoaderDelegate;
@@ -233,7 +234,7 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 				Class<?> declaringClass = reversedList.get(0).getDeclaringClass();
 
 				mergedConfig = buildMergedContextConfiguration(
-						declaringClass, reversedList, null, parentConfig, cacheAwareContextLoaderDelegate, true);
+						declaringClass, reversedList, parentConfig, cacheAwareContextLoaderDelegate, true);
 				parentConfig = mergedConfig;
 			}
 
@@ -244,7 +245,7 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 		else {
 			return buildMergedContextConfiguration(testClass,
 					ContextLoaderUtils.resolveContextConfigurationAttributes(testClass),
-					null, null, cacheAwareContextLoaderDelegate, true);
+					null, cacheAwareContextLoaderDelegate, true);
 		}
 	}
 
@@ -253,24 +254,25 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 
 		List<ContextConfigurationAttributes> defaultConfigAttributesList =
 				ContextLoaderUtils.resolveDefaultContextConfigurationAttributes(testClass);
+		MergedContextConfiguration mergedConfig = buildMergedContextConfiguration(
+				testClass, defaultConfigAttributesList, null, cacheAwareContextLoaderDelegate, false);
 
-		ContextLoader contextLoader = resolveContextLoader(testClass, defaultConfigAttributesList);
 		if (logger.isTraceEnabled()) {
 			logger.trace(String.format(
 					"Neither @ContextConfiguration nor @ContextHierarchy found for test class [%s]: using %s",
-					testClass.getName(), contextLoader.getClass().getName()));
+					testClass.getName(), mergedConfig.getContextLoader().getClass().getName()));
 		}
 		else if (logger.isDebugEnabled()) {
 			logger.debug(String.format(
 					"Neither @ContextConfiguration nor @ContextHierarchy found for test class [%s]: using %s",
-					testClass.getSimpleName(), contextLoader.getClass().getSimpleName()));
+					testClass.getSimpleName(), mergedConfig.getContextLoader().getClass().getSimpleName()));
 		}
-		return buildMergedContextConfiguration(testClass, defaultConfigAttributesList, contextLoader, null,
-				cacheAwareContextLoaderDelegate, false);
+
+		return mergedConfig;
 	}
 
 	/**
-	 * Build the {@link MergedContextConfiguration merged context configuration}
+	 * Build the {@linkplain MergedContextConfiguration merged context configuration}
 	 * for the supplied {@link Class testClass}, context configuration attributes,
 	 * and parent context configuration.
 	 * @param testClass the test class for which the {@code MergedContextConfiguration}
@@ -279,7 +281,6 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 	 * specified test class, ordered <em>bottom-up</em> (i.e., as if we were
 	 * traversing up the class hierarchy and enclosing class hierarchy); never
 	 * {@code null} or empty
-	 * @param contextLoader a pre-resolved {@link ContextLoader} to use; may be {@code null}
 	 * @param parentConfig the merged context configuration for the parent application
 	 * context in a context hierarchy, or {@code null} if there is no parent
 	 * @param cacheAwareContextLoaderDelegate the cache-aware context loader delegate to
@@ -297,20 +298,16 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 	 * @see MergedContextConfiguration
 	 */
 	private MergedContextConfiguration buildMergedContextConfiguration(Class<?> testClass,
-			List<ContextConfigurationAttributes> configAttributesList, @Nullable ContextLoader contextLoader,
+			List<ContextConfigurationAttributes> configAttributesList,
 			@Nullable MergedContextConfiguration parentConfig,
 			CacheAwareContextLoaderDelegate cacheAwareContextLoaderDelegate,
 			boolean requireLocationsClassesOrInitializers) {
 
 		Assert.notEmpty(configAttributesList, "ContextConfigurationAttributes list must not be null or empty");
 
-		if (contextLoader == null) {
-			contextLoader = resolveContextLoader(testClass, configAttributesList);
-		}
+		ContextLoader contextLoader = resolveContextLoader(testClass, configAttributesList);
 		List<String> locations = new ArrayList<>();
 		List<Class<?>> classes = new ArrayList<>();
-		List<Class<?>> initializers = new ArrayList<>();
-
 		for (ContextConfigurationAttributes configAttributes : configAttributesList) {
 			if (logger.isTraceEnabled()) {
 				logger.trace(String.format("Processing locations and classes for context configuration attributes %s",
@@ -334,30 +331,27 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 				}
 				// Legacy ContextLoaders don't know how to process classes
 			}
-			if (configAttributes.getInitializers().length > 0) {
-				initializers.addAll(0, Arrays.asList(configAttributes.getInitializers()));
-			}
 			if (!configAttributes.isInheritLocations()) {
 				break;
 			}
 		}
 
+		Set<Class<? extends ApplicationContextInitializer<?>>> initializers =
+				ApplicationContextInitializerUtils.resolveInitializerClasses(configAttributesList);
 		Set<ContextCustomizer> contextCustomizers = getContextCustomizers(testClass,
 				Collections.unmodifiableList(configAttributesList));
 
-		ContextLoader effectivelyFinalContextLoader = contextLoader;
 		Assert.state(!(requireLocationsClassesOrInitializers &&
 				areAllEmpty(locations, classes, initializers, contextCustomizers)), () -> """
 					%s was unable to detect defaults, and no ApplicationContextInitializers \
 					or ContextCustomizers were declared for context configuration attributes %s\
-					""".formatted(effectivelyFinalContextLoader.getClass().getSimpleName(), configAttributesList));
+					""".formatted(contextLoader.getClass().getSimpleName(), configAttributesList));
 
 		MergedTestPropertySources mergedTestPropertySources =
 				TestPropertySourceUtils.buildMergedTestPropertySources(testClass);
 		MergedContextConfiguration mergedConfig = new MergedContextConfiguration(testClass,
 				StringUtils.toStringArray(locations), ClassUtils.toClassArray(classes),
-				ApplicationContextInitializerUtils.resolveInitializerClasses(configAttributesList),
-				ActiveProfilesUtils.resolveActiveProfiles(testClass),
+				initializers, ActiveProfilesUtils.resolveActiveProfiles(testClass),
 				mergedTestPropertySources.getPropertySourceDescriptors(),
 				mergedTestPropertySources.getProperties(),
 				contextCustomizers, contextLoader, cacheAwareContextLoaderDelegate, parentConfig);

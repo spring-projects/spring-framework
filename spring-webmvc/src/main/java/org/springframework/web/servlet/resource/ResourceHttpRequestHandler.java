@@ -170,10 +170,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 	public void setLocations(List<Resource> locations) {
 		Assert.notNull(locations, "Locations list must not be null");
 		this.locationResources.clear();
-		for (Resource location : locations) {
-			ResourceHandlerUtils.assertResourceLocation(location);
-			this.locationResources.add(location);
-		}
+		this.locationResources.addAll(locations);
 	}
 
 	/**
@@ -199,7 +196,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 
 	/**
 	 * Configure the list of {@link ResourceResolver ResourceResolvers} to use.
-	 * <p>By default {@link PathResourceResolver} is configured. If using this property,
+	 * <p>By default, {@link PathResourceResolver} is configured. If using this property,
 	 * it is recommended to add {@link PathResourceResolver} as the last resolver.
 	 */
 	public void setResourceResolvers(@Nullable List<ResourceResolver> resourceResolvers) {
@@ -218,7 +215,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 
 	/**
 	 * Configure the list of {@link ResourceTransformer ResourceTransformers} to use.
-	 * <p>By default no transformers are configured for use.
+	 * <p>By default, no transformers are configured for use.
 	 */
 	public void setResourceTransformers(@Nullable List<ResourceTransformer> resourceTransformers) {
 		this.resourceTransformers.clear();
@@ -236,7 +233,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 
 	/**
 	 * Configure the {@link ResourceHttpMessageConverter} to use.
-	 * <p>By default a {@link ResourceHttpMessageConverter} will be configured.
+	 * <p>By default, a {@link ResourceHttpMessageConverter} will be configured.
 	 * @since 4.3
 	 */
 	public void setResourceHttpMessageConverter(@Nullable ResourceHttpMessageConverter messageConverter) {
@@ -253,7 +250,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 
 	/**
 	 * Configure the {@link ResourceRegionHttpMessageConverter} to use.
-	 * <p>By default a {@link ResourceRegionHttpMessageConverter} will be configured.
+	 * <p>By default, a {@link ResourceRegionHttpMessageConverter} will be configured.
 	 * @since 4.3
 	 */
 	public void setResourceRegionHttpMessageConverter(@Nullable ResourceRegionHttpMessageConverter messageConverter) {
@@ -294,7 +291,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 
 	/**
 	 * Specify the CORS configuration for resources served by this handler.
-	 * <p>By default this is not set in which allows cross-origin requests.
+	 * <p>By default, this is not set in which allows cross-origin requests.
 	 */
 	public void setCorsConfiguration(CorsConfiguration corsConfiguration) {
 		this.corsConfiguration = corsConfiguration;
@@ -471,6 +468,10 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 		}
 
 		result.addAll(this.locationResources);
+		for (Resource location : result) {
+			ResourceHandlerUtils.assertResourceLocation(location);
+		}
+
 		if (isOptimizeLocations()) {
 			result = result.stream().filter(Resource::exists).toList();
 		}
@@ -523,7 +524,6 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 		// For very general mappings (for example, "/") we need to check 404 first
 		Resource resource = getResource(request);
 		if (resource == null) {
-			logger.debug("Resource not found");
 			throw new NoResourceFoundException(HttpMethod.valueOf(request.getMethod()), request.getRequestURI(), getPath(request));
 		}
 
@@ -539,10 +539,12 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 		prepareResponse(response);
 
 		// Header phase
-		String eTagValue = (getEtagGenerator() != null ? getEtagGenerator().apply(resource) : null);
+		String etagValue = (getEtagGenerator() != null ? getEtagGenerator().apply(resource) : null);
 		long lastModified = (isUseLastModified() ? resource.lastModified() : -1);
-		if (new ServletWebRequest(request, response).checkNotModified(eTagValue, lastModified)) {
-			logger.trace("Resource not modified");
+		if (new ServletWebRequest(request, response).checkNotModified(etagValue, lastModified)) {
+			if (logger.isTraceEnabled()) {
+				logger.trace("Resource not modified: " + resource);
+			}
 			return;
 		}
 
@@ -553,8 +555,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 		// Content phase
 		ServletServerHttpResponse outputMessage = new ServletServerHttpResponse(response);
 		if (request.getHeader(HttpHeaders.RANGE) == null) {
-			Assert.state(this.resourceHttpMessageConverter != null, "Not initialized");
-
+			Assert.state(this.resourceHttpMessageConverter != null, "Converter not initialized");
 			if (HttpMethod.HEAD.matches(request.getMethod())) {
 				this.resourceHttpMessageConverter.addDefaultHeaders(outputMessage, resource, mediaType);
 				outputMessage.flush();
@@ -564,7 +565,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 			}
 		}
 		else {
-			Assert.state(this.resourceRegionHttpMessageConverter != null, "Not initialized");
+			Assert.state(this.resourceRegionHttpMessageConverter != null, "Converter not initialized");
 			ServletServerHttpRequest inputMessage = new ServletServerHttpRequest(request);
 			try {
 				List<HttpRange> httpRanges = inputMessage.getHeaders().getRange();
@@ -584,14 +585,21 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 		String path = getPath(request);
 		path = processPath(path);
 		if (ResourceHandlerUtils.shouldIgnoreInputPath(path) || isInvalidPath(path)) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Ignoring invalid resource path [" + path + "]");
+			}
 			return null;
 		}
 
-		Assert.state(this.resolverChain != null, "ResourceResolverChain not initialized.");
-		Assert.state(this.transformerChain != null, "ResourceTransformerChain not initialized.");
-
+		Assert.state(this.resolverChain != null, "ResourceResolverChain not initialized");
+		Assert.state(this.transformerChain != null, "ResourceTransformerChain not initialized");
 		Resource resource = this.resolverChain.resolveResource(request, path, getLocations());
-		if (resource != null) {
+		if (resource == null) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Resource not found for path [" + path + "]");
+			}
+		}
+		else {
 			resource = this.transformerChain.transform(request, resource);
 		}
 		return resource;
@@ -706,8 +714,8 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 
 	private String locationToString(List<Resource> locations) {
 		return locations.toString()
-				.replaceAll("class path resource", "classpath")
-				.replaceAll("ServletContext resource", "ServletContext");
+				.replace("class path resource", "classpath")
+				.replace("ServletContext resource", "ServletContext");
 	}
 
 }

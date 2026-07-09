@@ -897,7 +897,7 @@ public class ClassWriter extends ClassVisitor {
    * @deprecated this method is superseded by {@link #newHandle(int, String, String, String,
    *     boolean)}.
    */
-  @Deprecated
+  @Deprecated(forRemoval = false)
   public int newHandle(
       final int tag, final String owner, final String name, final String descriptor) {
     return newHandle(tag, owner, name, descriptor, tag == Opcodes.H_INVOKEINTERFACE);

@@ -88,13 +88,10 @@ final class ProfilesParser {
 				}
 				case "!" -> elements.add(not(parseTokens(expression, tokens, Context.NEGATE)));
 				case ")" -> {
-					Profiles merged = merge(expression, elements, operator);
 					if (context == Context.PARENTHESIS) {
-						return merged;
+						return merge(expression, elements, operator);
 					}
-					elements.clear();
-					elements.add(merged);
-					operator = null;
+					assertWellFormed(expression, false);
 				}
 				default -> {
 					Profiles value = equals(token);
@@ -105,6 +102,7 @@ final class ProfilesParser {
 				}
 			}
 		}
+		assertWellFormed(expression, context != Context.PARENTHESIS);
 		return merge(expression, elements, operator);
 	}
 

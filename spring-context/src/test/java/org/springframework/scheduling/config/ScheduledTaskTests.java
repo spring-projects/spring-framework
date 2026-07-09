@@ -95,7 +95,7 @@ class ScheduledTaskTests {
 		assertThat(scheduledTask.nextExecution()).isNull();
 	}
 
-	class CountingRunnable implements Runnable {
+	static class CountingRunnable implements Runnable {
 
 		int executionCount;
 

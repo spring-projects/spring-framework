@@ -82,6 +82,19 @@ class HeadersAdaptersTests {
 				.hasSize(0);
 	}
 
+	@ParameterizedHeadersTest
+	void shouldReturnNullWhenRemoveUnknown(MultiValueMap<String, String> headers) {
+		assertThat(headers.remove("unknown")).isEqualTo(null);
+	}
+
+	@ParameterizedHeadersTest
+	void shouldReturnPreviousValuesWhenRemove(MultiValueMap<String, String> headers) {
+		headers.add("TestHeader", "first");
+		headers.add("TestHEADER", "second");
+
+		assertThat(headers.remove("testheader")).hasSize(2);
+	}
+
 	@ParameterizedPopulatedHeadersTest
 	void toString(MultiValueMap<String, String> headers) {
 		String expectedFirstHeader = "TestHeader:\"first\", \"second\", \"third\"";
@@ -285,12 +298,14 @@ class HeadersAdaptersTests {
 
 	static Stream<Arguments> nativeHeadersWithCasedEntries() {
 		return Stream.of(
-				argumentSet("Netty", new Netty4HeadersAdapter(withHeaders(new DefaultHttpHeaders(), h -> h::add))),
-				argumentSet("Tomcat", new TomcatHeadersAdapter(withHeaders(new MimeHeaders(),
-						h -> (k, v) -> h.addValue(k).setString(v)))),
-				argumentSet("Jetty", new JettyHeadersAdapter(withHeaders(HttpFields.build(), h -> h::add))),
-				argumentSet("HttpComponents", new HttpComponentsHeadersAdapter(withHeaders(new HttpGet("https://example.com"),
-						h -> h::addHeader)))
+				argumentSet("Netty", new Netty4HeadersAdapter(
+						withHeaders(new DefaultHttpHeaders(), h -> h::add))),
+				argumentSet("Tomcat", new TomcatHeadersAdapter(
+						withHeaders(new MimeHeaders(), h -> (k, v) -> h.addValue(k).setString(v)))),
+				argumentSet("Jetty", new JettyHeadersAdapter(
+						withHeaders(HttpFields.build(), h -> h::add))),
+				argumentSet("HttpComponents", new HttpComponentsHeadersAdapter(
+						withHeaders(new HttpGet("https://example.com"), h -> h::addHeader)))
 		);
 	}
 

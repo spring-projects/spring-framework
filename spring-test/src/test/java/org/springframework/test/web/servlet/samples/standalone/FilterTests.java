@@ -65,10 +65,10 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standal
  * Tests with {@link Filter}'s.
  * @author Rob Winch
  */
-public class FilterTests {
+class FilterTests {
 
 	@Test
-	public void whenFiltersCompleteMvcProcessesRequest() throws Exception {
+	void whenFiltersCompleteMvcProcessesRequest() throws Exception {
 		standaloneSetup(new PersonController())
 			.addFilters(new ContinueFilter()).build()
 			.perform(post("/persons").param("name", "Andy"))
@@ -81,7 +81,7 @@ public class FilterTests {
 	}
 
 	@Test
-	public void filtersProcessRequest() throws Exception {
+	void filtersProcessRequest() throws Exception {
 		standaloneSetup(new PersonController())
 			.addFilters(new ContinueFilter(), new RedirectFilter()).build()
 			.perform(post("/persons").param("name", "Andy"))
@@ -89,7 +89,7 @@ public class FilterTests {
 	}
 
 	@Test
-	public void filterMappedBySuffix() throws Exception {
+	void filterMappedBySuffix() throws Exception {
 		standaloneSetup(new PersonController())
 			.addFilter(new RedirectFilter(), "*.html").build()
 			.perform(post("/persons.html").param("name", "Andy"))
@@ -97,7 +97,7 @@ public class FilterTests {
 	}
 
 	@Test
-	public void filterWithExactMapping() throws Exception {
+	void filterWithExactMapping() throws Exception {
 		standaloneSetup(new PersonController())
 			.addFilter(new RedirectFilter(), "/p", "/persons").build()
 			.perform(post("/persons").param("name", "Andy"))
@@ -105,7 +105,7 @@ public class FilterTests {
 	}
 
 	@Test
-	public void filterSkipped() throws Exception {
+	void filterSkipped() throws Exception {
 		standaloneSetup(new PersonController())
 			.addFilter(new RedirectFilter(), "/p", "/person").build()
 			.perform(post("/persons").param("name", "Andy"))
@@ -118,7 +118,7 @@ public class FilterTests {
 	}
 
 	@Test
-	public void filterWrapsRequestResponse() throws Exception {
+	void filterWrapsRequestResponse() throws Exception {
 		standaloneSetup(new PersonController())
 			.addFilters(new WrappingRequestResponseFilter()).build()
 			.perform(post("/user"))
@@ -126,7 +126,7 @@ public class FilterTests {
 	}
 
 	@Test // SPR-16067, SPR-16695
-	public void filterWrapsRequestResponseAndPerformsAsyncDispatch() throws Exception {
+	void filterWrapsRequestResponseAndPerformsAsyncDispatch() throws Exception {
 		MockMvc mockMvc = standaloneSetup(new PersonController())
 				.addFilters(new WrappingRequestResponseFilter(), new ShallowEtagHeaderFilter())
 				.build();

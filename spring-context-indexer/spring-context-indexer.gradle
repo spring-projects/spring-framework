@@ -7,3 +7,7 @@ dependencies {
 	testImplementation("jakarta.persistence:jakarta.persistence-api")
 	testImplementation("jakarta.transaction:jakarta.transaction-api")
 }
+
+nullability {
+	requireExplicitNullMarking = false
+}

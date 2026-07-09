@@ -363,12 +363,12 @@ public abstract class NamedParameterUtils {
 		for (int i = 0; i < paramNames.size(); i++) {
 			String paramName = paramNames.get(i);
 			try {
-				SqlParameter param = findParameter(declaredParams, paramName, i);
 				Object paramValue = paramSource.getValue(paramName);
 				if (paramValue instanceof SqlParameterValue) {
 					paramArray[i] = paramValue;
 				}
 				else {
+					SqlParameter param = findParameter(declaredParams, paramName, i);
 					paramArray[i] = (param != null ? new SqlParameterValue(param, paramValue) :
 							SqlParameterSourceUtils.getTypedValue(paramSource, paramName));
 				}

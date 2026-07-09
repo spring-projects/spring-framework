@@ -58,7 +58,8 @@ public class GsonEncoder extends AbstractEncoder<Object> implements HttpMessageE
 	private static final MimeType[] DEFAULT_JSON_MIME_TYPES = new MimeType[] {
 			MediaType.APPLICATION_JSON,
 			new MediaType("application", "*+json"),
-			MediaType.APPLICATION_NDJSON
+			MediaType.APPLICATION_NDJSON,
+			MediaType.APPLICATION_JSONL
 	};
 
 	private final Gson gson;
@@ -68,11 +69,12 @@ public class GsonEncoder extends AbstractEncoder<Object> implements HttpMessageE
 	/**
 	 * Construct a new encoder using a default {@link Gson} instance
 	 * and the {@code "application/json"} and {@code "application/*+json"}
-	 * MIME types. The {@code "application/x-ndjson"} is configured for streaming.
+	 * MIME types. The {@code "application/jsonl"} and {@code "application/x-ndjson"}
+	 * are configured for streaming.
 	 */
 	public GsonEncoder() {
 		this(new Gson(), DEFAULT_JSON_MIME_TYPES);
-		setStreamingMediaTypes(List.of(MediaType.APPLICATION_NDJSON));
+		setStreamingMediaTypes(List.of(MediaType.APPLICATION_NDJSON, MediaType.APPLICATION_JSONL));
 	}
 
 	/**

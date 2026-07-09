@@ -38,7 +38,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Rossen Stoyanchev
  */
-public class RestTestClientResponseTests {
+class RestTestClientResponseTests {
 
 	private final RestTestClient client =
 			RestTestClient.bindToController(HelloController.class)

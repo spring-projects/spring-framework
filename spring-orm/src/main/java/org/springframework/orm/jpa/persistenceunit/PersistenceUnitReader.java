@@ -26,6 +26,7 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
+import jakarta.persistence.FetchType;
 import jakarta.persistence.PersistenceUnitTransactionType;
 import jakarta.persistence.SharedCacheMode;
 import jakarta.persistence.ValidationMode;
@@ -85,6 +86,8 @@ final class PersistenceUnitReader {
 
 	private static final String VALIDATION_MODE = "validation-mode";
 
+	private static final String DEFAULT_TO_ONE_FETCH_TYPE = "default-to-one-fetch-type";
+
 	private static final String PROPERTIES = "properties";
 
 	private static final String META_INF = "META-INF";
@@ -112,20 +115,11 @@ final class PersistenceUnitReader {
 
 
 	/**
-	 * Parse and build all persistence unit infos defined in the specified XML file(s).
-	 * @param persistenceXmlLocation the resource location (can be a pattern)
-	 * @return the resulting PersistenceUnitInfo instances
-	 */
-	public SpringPersistenceUnitInfo[] readPersistenceUnitInfos(String persistenceXmlLocation) {
-		return readPersistenceUnitInfos(new String[] {persistenceXmlLocation});
-	}
-
-	/**
 	 * Parse and build all persistence unit infos defined in the given XML files.
 	 * @param persistenceXmlLocations the resource locations (can be patterns)
 	 * @return the resulting PersistenceUnitInfo instances
 	 */
-	public SpringPersistenceUnitInfo[] readPersistenceUnitInfos(String[] persistenceXmlLocations) {
+	public SpringPersistenceUnitInfo[] readPersistenceUnitInfos(String... persistenceXmlLocations) {
 		ErrorHandler handler = new SimpleSaxErrorHandler(logger);
 		List<SpringPersistenceUnitInfo> infos = new ArrayList<>(1);
 		String resourceLocation = null;
@@ -249,6 +243,12 @@ final class PersistenceUnitReader {
 		String validationMode = DomUtils.getChildElementValueByTagName(persistenceUnit, VALIDATION_MODE);
 		if (StringUtils.hasText(validationMode)) {
 			unitInfo.setValidationMode(ValidationMode.valueOf(validationMode));
+		}
+
+		// set JPA 4.0 default fetch type
+		String fetchType = DomUtils.getChildElementValueByTagName(persistenceUnit, DEFAULT_TO_ONE_FETCH_TYPE);
+		if (StringUtils.hasText(fetchType)) {
+			unitInfo.setDefaultToOneFetchType(FetchType.valueOf(fetchType));
 		}
 
 		parseQualifiers(persistenceUnit, unitInfo);

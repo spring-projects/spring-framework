@@ -135,19 +135,25 @@ abstract class ReactorUriHelper {
 			if (c == '/' || c == '?' || c == '#') {
 				break;
 			}
-			if (c == ':' && (i + 2 < length)) {
-				if (uri.charAt(i + 1) == '/' && uri.charAt(i + 2) == '/') {
-					for (int j = i + 3; j < length; j++) {
-						c = uri.charAt(j);
-						if (c == '/' || c == '?' || c == '#') {
-							builder.append(uri, j, length);
-							return;
-						}
+			if (hasAuthority(uri, c, i, length)) {
+				for (i = i + 3; i < length; i++) {
+					c = uri.charAt(i);
+					if (c == '/' || c == '?' || c == '#') {
+						builder.append(uri, i, length);
+						return;
 					}
-					return;
 				}
+				return;
 			}
+		}
+		if (length > 0 && uri.charAt(0) != '/') {
+			builder.append('/');
 		}
 		builder.append(uri);
 	}
+
+	private static boolean hasAuthority(String uri, char c, int i, int length) {
+		return (c == ':' && (i + 2 < length) && (uri.charAt(i + 1) == '/' && uri.charAt(i + 2) == '/'));
+	}
+
 }

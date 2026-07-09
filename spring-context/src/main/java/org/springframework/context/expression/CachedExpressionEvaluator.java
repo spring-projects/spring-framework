@@ -38,8 +38,6 @@ public abstract class CachedExpressionEvaluator {
 
 	private final SpelExpressionParser parser;
 
-	private final ParameterNameDiscoverer parameterNameDiscoverer = new DefaultParameterNameDiscoverer();
-
 
 	/**
 	 * Create a new instance with the default {@link SpelExpressionParser}.
@@ -69,7 +67,7 @@ public abstract class CachedExpressionEvaluator {
 	 * @since 4.3
 	 */
 	protected ParameterNameDiscoverer getParameterNameDiscoverer() {
-		return this.parameterNameDiscoverer;
+		return DefaultParameterNameDiscoverer.getSharedInstance();
 	}
 
 	/**

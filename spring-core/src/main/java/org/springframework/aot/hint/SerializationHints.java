@@ -30,7 +30,10 @@ import org.jspecify.annotations.Nullable;
  * @author Stephane Nicoll
  * @since 6.0
  * @see Serializable
+ * @deprecated in favor of {@link ReflectionHints}
  */
+@Deprecated(since = "7.0.6", forRemoval = true)
+@SuppressWarnings("removal")
 public class SerializationHints {
 
 	private final Set<JavaSerializationHint> javaSerializationHints;

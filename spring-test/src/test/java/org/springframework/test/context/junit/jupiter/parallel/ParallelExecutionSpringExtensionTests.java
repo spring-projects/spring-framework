@@ -20,21 +20,19 @@ import java.lang.reflect.Parameter;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Constants;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.RepeatedTest;
-import org.junit.platform.launcher.Launcher;
-import org.junit.platform.launcher.LauncherDiscoveryRequest;
-import org.junit.platform.launcher.core.LauncherFactory;
-import org.junit.platform.launcher.listeners.SummaryGeneratingListener;
+import org.junit.platform.testkit.engine.EngineExecutionResults;
+import org.junit.platform.testkit.engine.EngineTestKit;
+import org.junit.platform.testkit.engine.Events;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClass;
-import static org.junit.platform.launcher.core.LauncherDiscoveryRequestBuilder.request;
 
 /**
  * Integration tests which verify that {@code @BeforeEach} and {@code @AfterEach} methods
@@ -48,23 +46,24 @@ class ParallelExecutionSpringExtensionTests {
 
 	private static final int NUM_TESTS = 1000;
 
-	@RepeatedTest(10)
+	@RepeatedTest(value = 10, failureThreshold = 1)
 	void runTestsInParallel() {
-		Launcher launcher = LauncherFactory.create();
-		SummaryGeneratingListener listener = new SummaryGeneratingListener();
-		launcher.registerTestExecutionListeners(listener);
-
-		LauncherDiscoveryRequest request = request()//
-				.configurationParameter("junit.jupiter.conditions.deactivate", "org.junit.jupiter.engine.extension.DisabledCondition")//
-				.configurationParameter("junit.jupiter.execution.parallel.enabled", "true")//
-				.configurationParameter("junit.jupiter.execution.parallel.config.dynamic.factor", "10")//
+		EngineExecutionResults results = EngineTestKit.engine("junit-jupiter")//
+				.configurationParameter("junit.platform.discovery.issue.severity.critical", "INFO")//
+				.configurationParameter(Constants.DEACTIVATE_CONDITIONS_PATTERN_PROPERTY_NAME, "*DisabledCondition")//
+				.configurationParameter(Constants.PARALLEL_EXECUTION_ENABLED_PROPERTY_NAME, "true")//
+				.configurationParameter(Constants.PARALLEL_CONFIG_DYNAMIC_FACTOR_PROPERTY_NAME, "10")//
+				.configurationParameter(Constants.PARALLEL_CONFIG_EXECUTOR_SERVICE_PROPERTY_NAME, "WORKER_THREAD_POOL")
 				.selectors(selectClass(TestCase.class))//
-				.build();
+				.execute();
 
-		launcher.execute(request);
+		// List failed events in case of errors to get a sense of what failed.
+		Events failedEvents = results.allEvents().failed();
+		if (failedEvents.count() > 0) {
+			failedEvents.debug();
+		}
 
-		assertThat(listener.getSummary().getTestsSucceededCount()).as(
-			"number of tests executed successfully").isEqualTo(NUM_TESTS);
+		results.testEvents().assertStatistics(stats -> stats.started(NUM_TESTS).succeeded(NUM_TESTS).failed(0));
 	}
 
 	@SpringJUnitConfig

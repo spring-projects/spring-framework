@@ -334,10 +334,8 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 					logger.trace(exchange.getLogPrefix() + matches.size() + " matching mappings: " + matches);
 				}
 				if (CorsUtils.isPreFlightRequest(exchange.getRequest())) {
-					for (Match match : matches) {
-						if (match.hasCorsConfig()) {
-							return PREFLIGHT_AMBIGUOUS_MATCH;
-						}
+					if (matches.stream().allMatch(Match::hasCorsConfig)) {
+						return PREFLIGHT_AMBIGUOUS_MATCH;
 					}
 				}
 				else {

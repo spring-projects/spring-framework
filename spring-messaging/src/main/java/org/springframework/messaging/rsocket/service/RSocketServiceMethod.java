@@ -30,7 +30,6 @@ import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.KotlinDetector;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ParameterizedTypeReference;
@@ -90,11 +89,9 @@ final class RSocketServiceMethod {
 			count -= 1;
 		}
 
-		DefaultParameterNameDiscoverer nameDiscoverer = new DefaultParameterNameDiscoverer();
 		MethodParameter[] parameters = new MethodParameter[count];
 		for (int i = 0; i < count; i++) {
 			parameters[i] = new SynthesizingMethodParameter(method, i);
-			parameters[i].initParameterNameDiscovery(nameDiscoverer);
 		}
 		return parameters;
 	}

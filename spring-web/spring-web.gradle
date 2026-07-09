@@ -76,6 +76,8 @@ dependencies {
 	testImplementation(testFixtures(project(":spring-beans")))
 	testImplementation(testFixtures(project(":spring-context")))
 	testImplementation(testFixtures(project(":spring-core")))
+	testImplementation(testFixtures(project(":spring-messaging")))
+	testImplementation(testFixtures(project(":spring-tx")))
 	testImplementation("com.fasterxml.jackson.datatype:jackson-datatype-jdk8")
 	testImplementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
 	testImplementation("com.fasterxml.jackson.module:jackson-module-kotlin")

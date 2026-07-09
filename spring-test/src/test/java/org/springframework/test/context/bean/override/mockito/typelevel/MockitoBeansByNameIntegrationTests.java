@@ -48,6 +48,10 @@ import static org.springframework.test.mockito.MockitoAssertions.assertIsNotMock
 @MockitoBean(name = "s2", types = ExampleService.class)
 class MockitoBeansByNameIntegrationTests {
 
+	final ExampleService service0A;
+	final ExampleService service0B;
+	final ExampleService service0C;
+
 	@Autowired
 	ExampleService s1;
 
@@ -62,8 +66,23 @@ class MockitoBeansByNameIntegrationTests {
 	ExampleService service4;
 
 
+	MockitoBeansByNameIntegrationTests(@MockitoBean ExampleService s0A,
+			@MockitoBean(name = "s0B") ExampleService service0B,
+			@MockitoBean @Qualifier("s0C") ExampleService service0C) {
+
+		this.service0A = s0A;
+		this.service0B = service0B;
+		this.service0C = service0C;
+	}
+
+
 	@BeforeEach
 	void configureMocks() {
+		assertIsMock(s1, "s1");
+		assertIsMock(s2, "s2");
+		assertIsMock(service3, "service3");
+		assertIsNotMock(service4, "service4");
+
 		given(s1.greeting()).willReturn("mock 1");
 		given(s2.greeting()).willReturn("mock 2");
 		given(service3.greeting()).willReturn("mock 3");
@@ -71,11 +90,6 @@ class MockitoBeansByNameIntegrationTests {
 
 	@Test
 	void checkMocksAndStandardBean() {
-		assertIsMock(s1, "s1");
-		assertIsMock(s2, "s2");
-		assertIsMock(service3, "service3");
-		assertIsNotMock(service4, "service4");
-
 		assertThat(s1.greeting()).isEqualTo("mock 1");
 		assertThat(s2.greeting()).isEqualTo("mock 2");
 		assertThat(service3.greeting()).isEqualTo("mock 3");
@@ -85,6 +99,21 @@ class MockitoBeansByNameIntegrationTests {
 
 	@Configuration
 	static class Config {
+
+		@Bean
+		ExampleService s0A() {
+			return () -> "prod 0A";
+		}
+
+		@Bean
+		ExampleService s0B() {
+			return () -> "prod 0B";
+		}
+
+		@Bean
+		ExampleService s0C() {
+			return () -> "prod 0C";
+		}
 
 		@Bean
 		ExampleService s1() {

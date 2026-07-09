@@ -57,7 +57,7 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standal
  * @author Sam Brannen
  * @author Brian Clozel
  */
-public class HeaderAssertionTests {
+class HeaderAssertionTests {
 
 	private static final String ERROR_MESSAGE = "Should have thrown an AssertionError";
 
@@ -74,7 +74,7 @@ public class HeaderAssertionTests {
 
 
 	@BeforeEach
-	public void setup() {
+	void setup() {
 		this.dateFormat = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz", Locale.US);
 		this.dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
 		this.now = dateFormat.format(new Date(this.currentTime));
@@ -87,56 +87,56 @@ public class HeaderAssertionTests {
 
 
 	@Test
-	public void stringWithCorrectResponseHeaderValue() throws Exception {
+	void stringWithCorrectResponseHeaderValue() throws Exception {
 		this.mockMvc.perform(get("/persons/1").header(IF_MODIFIED_SINCE, minuteAgo))
 				.andExpect(header().string(LAST_MODIFIED, now));
 	}
 
 	@Test
-	public void stringWithMatcherAndCorrectResponseHeaderValue() throws Exception {
+	void stringWithMatcherAndCorrectResponseHeaderValue() throws Exception {
 		this.mockMvc.perform(get("/persons/1").header(IF_MODIFIED_SINCE, minuteAgo))
 				.andExpect(header().string(LAST_MODIFIED, equalTo(now)));
 	}
 
 	@Test
-	public void multiStringHeaderValue() throws Exception {
+	void multiStringHeaderValue() throws Exception {
 		this.mockMvc.perform(get("/persons/1")).andExpect(header().stringValues(VARY, "foo", "bar"));
 	}
 
 	@Test
-	public void multiStringHeaderValueWithMatchers() throws Exception {
+	void multiStringHeaderValueWithMatchers() throws Exception {
 		this.mockMvc.perform(get("/persons/1"))
 				.andExpect(header().stringValues(VARY, hasItems(containsString("foo"), startsWith("bar"))));
 	}
 
 	@Test
-	public void dateValueWithCorrectResponseHeaderValue() throws Exception {
+	void dateValueWithCorrectResponseHeaderValue() throws Exception {
 		this.mockMvc.perform(get("/persons/1").header(IF_MODIFIED_SINCE, minuteAgo))
 				.andExpect(header().dateValue(LAST_MODIFIED, this.currentTime));
 	}
 
 	@Test
-	public void longValueWithCorrectResponseHeaderValue() throws Exception {
+	void longValueWithCorrectResponseHeaderValue() throws Exception {
 		this.mockMvc.perform(get("/persons/1"))
 				.andExpect(header().longValue("X-Rate-Limiting", 42));
 	}
 
 	@Test
-	public void stringWithMissingResponseHeader() throws Exception {
+	void stringWithMissingResponseHeader() throws Exception {
 		this.mockMvc.perform(get("/persons/1").header(IF_MODIFIED_SINCE, now))
 				.andExpect(status().isNotModified())
 				.andExpect(header().stringValues("X-Custom-Header"));
 	}
 
 	@Test
-	public void stringWithMatcherAndMissingResponseHeader() throws Exception {
+	void stringWithMatcherAndMissingResponseHeader() throws Exception {
 		this.mockMvc.perform(get("/persons/1").header(IF_MODIFIED_SINCE, now))
 				.andExpect(status().isNotModified())
 				.andExpect(header().string("X-Custom-Header", nullValue()));
 	}
 
 	@Test
-	public void longValueWithMissingResponseHeader() throws Exception {
+	void longValueWithMissingResponseHeader() throws Exception {
 		try {
 			this.mockMvc.perform(get("/persons/1").header(IF_MODIFIED_SINCE, now))
 					.andExpect(status().isNotModified())
@@ -153,35 +153,35 @@ public class HeaderAssertionTests {
 	}
 
 	@Test
-	public void exists() throws Exception {
+	void exists() throws Exception {
 		this.mockMvc.perform(get("/persons/1")).andExpect(header().exists(LAST_MODIFIED));
 	}
 
 	@Test
-	public void existsFail() {
+	void existsFail() {
 		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
 				this.mockMvc.perform(get("/persons/1")).andExpect(header().exists("X-Custom-Header")));
 	}
 
 	@Test  // SPR-10771
-	public void doesNotExist() throws Exception {
+	void doesNotExist() throws Exception {
 		this.mockMvc.perform(get("/persons/1")).andExpect(header().doesNotExist("X-Custom-Header"));
 	}
 
 	@Test // SPR-10771
-	public void doesNotExistFail() {
+	void doesNotExistFail() {
 		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
 				this.mockMvc.perform(get("/persons/1")).andExpect(header().doesNotExist(LAST_MODIFIED)));
 	}
 
 	@Test
-	public void longValueWithIncorrectResponseHeaderValue() {
+	void longValueWithIncorrectResponseHeaderValue() {
 		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
 				this.mockMvc.perform(get("/persons/1")).andExpect(header().longValue("X-Rate-Limiting", 1)));
 	}
 
 	@Test
-	public void stringWithMatcherAndIncorrectResponseHeaderValue() throws Exception {
+	void stringWithMatcherAndIncorrectResponseHeaderValue() throws Exception {
 		long secondLater = this.currentTime + 1000;
 		String expected = this.dateFormat.format(new Date(secondLater));
 		assertIncorrectResponseHeader(header().string(LAST_MODIFIED, expected), expected);

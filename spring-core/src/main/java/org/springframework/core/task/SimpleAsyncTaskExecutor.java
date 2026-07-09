@@ -19,10 +19,12 @@ package org.springframework.core.task;
 import java.io.Serializable;
 import java.util.Set;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.jspecify.annotations.Nullable;
 
@@ -31,13 +33,15 @@ import org.springframework.util.ConcurrencyThrottleSupport;
 import org.springframework.util.CustomizableThreadCreator;
 
 /**
- * {@link TaskExecutor} implementation that fires up a new Thread for each task,
- * executing it asynchronously. Provides a virtual thread option on JDK 21.
+ * {@link TaskExecutor} implementation that fires up a new Thread for each task.
+ * Provides a {@link #setVirtualThreads virtual threads} option on JDK 21+.
  *
  * <p>Supports a graceful shutdown through {@link #setTaskTerminationTimeout},
  * at the expense of task tracking overhead per execution thread at runtime.
- * Supports limiting concurrent threads through {@link #setConcurrencyLimit}.
- * By default, the number of concurrent task executions is unlimited.
+ * Supports limiting concurrent threads through {@link #setConcurrencyLimit};
+ * by default, the number of concurrent task executions is unlimited. Can be
+ * combined with {@link org.springframework.core.retry.support.RetryTask} for
+ * re-executing submitted tasks after failure, according to a retry policy.
  *
  * <p><b>NOTE: This implementation does not reuse threads!</b> Consider a
  * thread-pooling TaskExecutor implementation instead, in particular for
@@ -54,6 +58,7 @@ import org.springframework.util.CustomizableThreadCreator;
  * @see #setVirtualThreads
  * @see #setTaskTerminationTimeout
  * @see #setConcurrencyLimit
+ * @see org.springframework.core.retry.support.RetryTask
  * @see org.springframework.scheduling.concurrent.SimpleAsyncTaskScheduler
  * @see org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor
  */
@@ -91,7 +96,9 @@ public class SimpleAsyncTaskExecutor extends CustomizableThreadCreator
 
 	private boolean rejectTasksWhenLimitReached = false;
 
-	private volatile boolean active = true;
+	private final AtomicBoolean closed = new AtomicBoolean();
+
+	private boolean cancelled = false;  // within activeThreads synchronization
 
 
 	/**
@@ -211,10 +218,13 @@ public class SimpleAsyncTaskExecutor extends CustomizableThreadCreator
 
 	/**
 	 * Specify whether to reject tasks when the concurrency limit has been reached,
-	 * throwing {@link TaskRejectedException} on any further submission attempts.
+	 * throwing {@link TaskRejectedException} (which extends the common
+	 * {@link java.util.concurrent.RejectedExecutionException})
+	 * on any further execution attempts.
 	 * <p>The default is {@code false}, blocking the caller until the submission can
 	 * be accepted. Switch this to {@code true} for immediate rejection instead.
 	 * @since 6.2.6
+	 * @see #setConcurrencyLimit
 	 */
 	public void setRejectTasksWhenLimitReached(boolean rejectTasksWhenLimitReached) {
 		this.rejectTasksWhenLimitReached = rejectTasksWhenLimitReached;
@@ -263,7 +273,7 @@ public class SimpleAsyncTaskExecutor extends CustomizableThreadCreator
 	 * @see #close()
 	 */
 	public boolean isActive() {
-		return this.active;
+		return !this.closed.get();
 	}
 
 	/**
@@ -301,24 +311,24 @@ public class SimpleAsyncTaskExecutor extends CustomizableThreadCreator
 	public void execute(Runnable task, long startTimeout) {
 		Assert.notNull(task, "Runnable must not be null");
 		if (!isActive()) {
-			throw new TaskRejectedException(getClass().getSimpleName() + " has been closed already");
+			throw new TaskRejectedException(getClass().getSimpleName() + " is not active");
 		}
 
 		Runnable taskToUse = (this.taskDecorator != null ? this.taskDecorator.decorate(task) : task);
+		Future<?> future = (task instanceof Future<?> f ? f : null);
 		if (isThrottleActive() && startTimeout > TIMEOUT_IMMEDIATE) {
 			this.concurrencyThrottle.beforeAccess();
 			try {
-				doExecute(new TaskTrackingRunnable(taskToUse));
+				doExecute(new TaskTrackingRunnable(taskToUse, future));
 			}
 			catch (Throwable ex) {
 				// Release concurrency permit if thread creation fails
 				this.concurrencyThrottle.afterAccess();
-				throw new TaskRejectedException(
-						"Failed to start execution thread for task: " + task, ex);
+				throw new TaskRejectedException("Failed to start execution thread for task: " + task, ex);
 			}
 		}
 		else if (this.activeThreads != null) {
-			doExecute(new TaskTrackingRunnable(taskToUse));
+			doExecute(new TaskTrackingRunnable(taskToUse, future));
 		}
 		else {
 			doExecute(taskToUse);
@@ -378,11 +388,13 @@ public class SimpleAsyncTaskExecutor extends CustomizableThreadCreator
 	 */
 	@Override
 	public void close() {
-		if (this.active) {
-			this.active = false;
+		if (this.closed.compareAndSet(false, true)) {
 			Set<Thread> threads = this.activeThreads;
 			if (threads != null) {
 				if (this.cancelRemainingTasksOnClose) {
+					synchronized (threads) {
+						this.cancelled = true;
+					}
 					// Early interrupt for remaining tasks on close
 					threads.forEach(Thread::interrupt);
 				}
@@ -396,6 +408,7 @@ public class SimpleAsyncTaskExecutor extends CustomizableThreadCreator
 						catch (InterruptedException ex) {
 							Thread.currentThread().interrupt();
 						}
+						this.cancelled = true;
 					}
 					if (!this.cancelRemainingTasksOnClose) {
 						// Late interrupt for remaining tasks after timeout
@@ -403,6 +416,15 @@ public class SimpleAsyncTaskExecutor extends CustomizableThreadCreator
 					}
 				}
 			}
+		}
+	}
+
+	private void checkCancelled(@Nullable Future<?> future) {
+		if (this.cancelled) {  // within synchronization from TaskTrackingRunnable
+			if (future != null) {
+				future.cancel(false);
+			}
+			throw new CancellationException(getClass().getSimpleName() + " has cancelled all remaining tasks");
 		}
 	}
 
@@ -422,9 +444,14 @@ public class SimpleAsyncTaskExecutor extends CustomizableThreadCreator
 		@Override
 		protected void onLimitReached() {
 			if (rejectTasksWhenLimitReached) {
-				throw new TaskRejectedException("Concurrency limit reached: " + getConcurrencyLimit());
+				onAccessRejected("Concurrency limit reached: " + getConcurrencyLimit());
 			}
 			super.onLimitReached();
+		}
+
+		@Override
+		protected void onAccessRejected(String msg) {
+			throw new TaskRejectedException(msg);
 		}
 
 		@Override
@@ -442,9 +469,12 @@ public class SimpleAsyncTaskExecutor extends CustomizableThreadCreator
 
 		private final Runnable task;
 
-		public TaskTrackingRunnable(Runnable task) {
+		private final @Nullable Future<?> future;
+
+		public TaskTrackingRunnable(Runnable task, @Nullable Future<?> future) {
 			Assert.notNull(task, "Task must not be null");
 			this.task = task;
+			this.future = future;
 		}
 
 		@Override
@@ -453,7 +483,10 @@ public class SimpleAsyncTaskExecutor extends CustomizableThreadCreator
 			Thread thread = null;
 			if (threads != null) {
 				thread = Thread.currentThread();
-				threads.add(thread);
+				synchronized (threads) {
+					checkCancelled(this.future);
+					threads.add(thread);
+				}
 			}
 			try {
 				this.task.run();
@@ -461,7 +494,7 @@ public class SimpleAsyncTaskExecutor extends CustomizableThreadCreator
 			finally {
 				if (threads != null) {
 					threads.remove(thread);
-					if (!isActive()) {
+					if (closed.get()) {
 						synchronized (threads) {
 							if (threads.isEmpty()) {
 								threads.notify();

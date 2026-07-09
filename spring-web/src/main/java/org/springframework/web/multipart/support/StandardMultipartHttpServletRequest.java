@@ -58,8 +58,7 @@ import org.springframework.web.multipart.MultipartFile;
  */
 public class StandardMultipartHttpServletRequest extends AbstractMultipartHttpServletRequest {
 
-	@SuppressWarnings("NullAway.Init")
-	private Set<String> multipartParameterNames;
+	private @Nullable Set<String> multipartParameterNames;
 
 
 	/**
@@ -117,10 +116,11 @@ public class StandardMultipartHttpServletRequest extends AbstractMultipartHttpSe
 		// MaxUploadSizeExceededException ?
 		Throwable cause = ex;
 		do {
-			String msg = cause.getMessage();
+			String msg = cause.toString();
 			if (msg != null) {
 				msg = msg.toLowerCase(Locale.ROOT);
-				if ((msg.contains("exceed") && (msg.contains("size") || msg.contains("length"))) ||
+				if (((msg.contains("exceed") || msg.contains("limit")) &&
+						(msg.contains("size") || msg.contains("length") || msg.contains("count"))) ||
 						(msg.contains("request") && (msg.contains("big") || msg.contains("large")))) {
 					throw new MaxUploadSizeExceededException(-1, ex);
 				}
@@ -143,7 +143,7 @@ public class StandardMultipartHttpServletRequest extends AbstractMultipartHttpSe
 		if (this.multipartParameterNames == null) {
 			initializeMultipart();
 		}
-		if (this.multipartParameterNames.isEmpty()) {
+		if (CollectionUtils.isEmpty(this.multipartParameterNames)) {
 			return super.getParameterNames();
 		}
 
@@ -163,7 +163,7 @@ public class StandardMultipartHttpServletRequest extends AbstractMultipartHttpSe
 		if (this.multipartParameterNames == null) {
 			initializeMultipart();
 		}
-		if (this.multipartParameterNames.isEmpty()) {
+		if (CollectionUtils.isEmpty(this.multipartParameterNames)) {
 			return super.getParameterMap();
 		}
 
@@ -266,7 +266,7 @@ public class StandardMultipartHttpServletRequest extends AbstractMultipartHttpSe
 			if (dest.isAbsolute() && !dest.exists()) {
 				// Servlet Part.write is not guaranteed to support absolute file paths:
 				// may translate the given path to a relative location within a temp dir
-				// (for example, on Jetty whereas Tomcat detects absolute paths).
+				// (for example, on Jetty whereas Tomcat and Undertow detect absolute paths).
 				// At least we offloaded the file from memory storage; it'll get deleted
 				// from the temp dir eventually in any case. And for our user's purposes,
 				// we can manually copy it to the requested location as a fallback.

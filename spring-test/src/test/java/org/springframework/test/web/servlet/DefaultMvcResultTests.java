@@ -22,6 +22,7 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.mock.web.MockHttpServletRequest;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 
 /**
@@ -29,21 +30,36 @@ import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
  *
  * @author Rossen Stoyanchev
  */
-public class DefaultMvcResultTests {
+class DefaultMvcResultTests {
 
 	private final DefaultMvcResult mvcResult = new DefaultMvcResult(new MockHttpServletRequest(), null);
 
 	@Test
-	public void getAsyncResultSuccess() {
+	void getAsyncResultSuccess() {
 		this.mvcResult.setAsyncResult("Foo");
 		this.mvcResult.setAsyncDispatchLatch(new CountDownLatch(0));
 		this.mvcResult.getAsyncResult();
 	}
 
 	@Test
-	public void getAsyncResultFailure() {
+	void getAsyncResultFailure() {
 		assertThatIllegalStateException().isThrownBy(() ->
 				this.mvcResult.getAsyncResult(0));
+	}
+
+	@Test
+	void getAsyncResultRestoresInterruptStatusWhenInterrupted() {
+		this.mvcResult.setAsyncDispatchLatch(new CountDownLatch(1));
+		Thread.currentThread().interrupt();
+		try {
+			assertThatIllegalStateException().isThrownBy(() ->
+					this.mvcResult.getAsyncResult(1000));
+			assertThat(Thread.currentThread().isInterrupted()).isTrue();
+		}
+		finally {
+			// Clear the interrupt status so it does not leak to other tests.
+			Thread.interrupted();
+		}
 	}
 
 }

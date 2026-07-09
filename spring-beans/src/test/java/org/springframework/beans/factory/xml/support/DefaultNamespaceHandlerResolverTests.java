@@ -34,7 +34,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
 class DefaultNamespaceHandlerResolverTests {
 
 	@Test
-	void testResolvedMappedHandler() {
+	void resolvedMappedHandler() {
 		DefaultNamespaceHandlerResolver resolver = new DefaultNamespaceHandlerResolver(getClass().getClassLoader());
 		NamespaceHandler handler = resolver.resolve("http://www.springframework.org/schema/util");
 		assertThat(handler).as("Handler should not be null.").isNotNull();
@@ -42,7 +42,7 @@ class DefaultNamespaceHandlerResolverTests {
 	}
 
 	@Test
-	void testResolvedMappedHandlerWithNoArgCtor() {
+	void resolvedMappedHandlerWithNoArgCtor() {
 		DefaultNamespaceHandlerResolver resolver = new DefaultNamespaceHandlerResolver();
 		NamespaceHandler handler = resolver.resolve("http://www.springframework.org/schema/util");
 		assertThat(handler).as("Handler should not be null.").isNotNull();
@@ -50,25 +50,25 @@ class DefaultNamespaceHandlerResolverTests {
 	}
 
 	@Test
-	void testNonExistentHandlerClass() {
+	void nonExistentHandlerClass() {
 		String mappingPath = "org/springframework/beans/factory/xml/support/nonExistent.properties";
 		new DefaultNamespaceHandlerResolver(getClass().getClassLoader(), mappingPath);
 	}
 
 	@Test
-	void testCtorWithNullClassLoaderArgument() {
+	void ctorWithNullClassLoaderArgument() {
 		// simply must not bail...
 		new DefaultNamespaceHandlerResolver(null);
 	}
 
 	@Test
-	void testCtorWithNullClassLoaderArgumentAndNullMappingLocationArgument() {
+	void ctorWithNullClassLoaderArgumentAndNullMappingLocationArgument() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				new DefaultNamespaceHandlerResolver(null, null));
 	}
 
 	@Test
-	void testCtorWithNonExistentMappingLocationArgument() {
+	void ctorWithNonExistentMappingLocationArgument() {
 		// simply must not bail; we don't want non-existent resources to result in an Exception
 		new DefaultNamespaceHandlerResolver(null, "738trbc bobabloobop871");
 	}

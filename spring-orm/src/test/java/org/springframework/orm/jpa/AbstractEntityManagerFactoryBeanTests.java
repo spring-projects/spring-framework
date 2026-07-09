@@ -56,7 +56,7 @@ public abstract class AbstractEntityManagerFactoryBeanTests {
 	protected void checkInvariants(AbstractEntityManagerFactoryBean emfb) {
 		assertThat(EntityManagerFactory.class.isAssignableFrom(emfb.getObjectType())).isTrue();
 		EntityManagerFactory emf = emfb.getObject();
-		assertThat(emf instanceof EntityManagerFactoryInfo).as("Object created by factory implements EntityManagerFactoryInfo").isTrue();
+		assertThat(emf).as("Object created by factory implements EntityManagerFactoryInfo").isInstanceOf(EntityManagerFactoryInfo.class);
 		EntityManagerFactoryInfo emfi = (EntityManagerFactoryInfo) emf;
 		assertThat(emfb.getObject()).as("Successive invocations of getObject() return same object").isSameAs(emfi);
 		assertThat(emfb.getObject()).isSameAs(emfi);

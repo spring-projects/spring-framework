@@ -16,6 +16,8 @@
 
 package org.springframework.core.convert.support;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.convert.converter.ConverterFactory;
 import org.springframework.util.NumberUtils;
@@ -41,7 +43,7 @@ import org.springframework.util.NumberUtils;
 final class CharacterToNumberFactory implements ConverterFactory<Character, Number> {
 
 	@Override
-	public <T extends Number> Converter<Character, T> getConverter(Class<T> targetType) {
+	public <T extends Number> Converter<Character, @Nullable T> getConverter(Class<T> targetType) {
 		return new CharacterToNumber<>(targetType);
 	}
 

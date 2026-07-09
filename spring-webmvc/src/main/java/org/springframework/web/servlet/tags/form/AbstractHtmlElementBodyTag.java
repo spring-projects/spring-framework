@@ -133,7 +133,7 @@ public abstract class AbstractHtmlElementBodyTag extends AbstractHtmlElementTag 
 	}
 
 	/**
-	 * The user customised the output of the error messages - flush the
+	 * The user customized the output of the error messages - flush the
 	 * buffered content into the main {@link jakarta.servlet.jsp.JspWriter}.
 	 */
 	protected void flushBufferedBodyContent(BodyContent bodyContent) throws JspException {

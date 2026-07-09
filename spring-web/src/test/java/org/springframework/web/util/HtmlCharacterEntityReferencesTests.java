@@ -38,7 +38,7 @@ class HtmlCharacterEntityReferencesTests {
 	private static final String DTD_FILE = "HtmlCharacterEntityReferences.dtd";
 
 	@Test
-	void testSupportsAllCharacterEntityReferencesDefinedByHtml() {
+	void supportsAllCharacterEntityReferencesDefinedByHtml() {
 		HtmlCharacterEntityReferences references = new HtmlCharacterEntityReferences();
 		Map<Integer, String> charactersMap = getReferenceCharacterMap();
 		for (int character = 0; character < 10000; character++) {
@@ -81,7 +81,7 @@ class HtmlCharacterEntityReferencesTests {
 
 	// SPR-9293
 	@Test
-	void testConvertToReferenceUTF8() {
+	void convertToReferenceUTF8() {
 		HtmlCharacterEntityReferences entityReferences = new HtmlCharacterEntityReferences();
 		String utf8 = "UTF-8";
 		assertThat(entityReferences.convertToReference('<', utf8)).isEqualTo("&lt;");

@@ -189,6 +189,9 @@ public final class PathPatternsRequestCondition extends AbstractRequestCondition
 	@Override
 	public @Nullable PathPatternsRequestCondition getMatchingCondition(HttpServletRequest request) {
 		PathContainer path = ServletRequestPathUtils.getParsedRequestPath(request).pathWithinApplication();
+		if (this.patterns.size() == 1) {
+			return (this.patterns.first().matches(path) ? this : null);
+		}
 		SortedSet<PathPattern> matches = getMatchingPatterns(path);
 		return (matches != null ? new PathPatternsRequestCondition(matches) : null);
 	}

@@ -28,6 +28,8 @@ import org.springframework.http.MediaType.APPLICATION_ATOM_XML
 import org.springframework.http.MediaType.APPLICATION_JSON
 import org.springframework.http.MediaType.APPLICATION_XML
 import org.springframework.http.MediaType.TEXT_PLAIN
+import org.springframework.http.converter.json.JacksonJsonHttpMessageConverter
+import org.springframework.http.converter.xml.Jaxb2RootElementHttpMessageConverter
 import org.springframework.test.json.JsonCompareMode
 import org.springframework.test.web.Person
 import org.springframework.test.web.servlet.setup.MockMvcBuilders
@@ -52,7 +54,9 @@ import java.util.Locale
  */
 class MockMvcExtensionsTests {
 
-	private val mockMvc = MockMvcBuilders.standaloneSetup(PersonController()).build()
+	private val mockMvc = MockMvcBuilders.standaloneSetup(PersonController())
+		.setMessageConverters(JacksonJsonHttpMessageConverter(), Jaxb2RootElementHttpMessageConverter())
+		.build()
 
 	@Test
 	fun request() {

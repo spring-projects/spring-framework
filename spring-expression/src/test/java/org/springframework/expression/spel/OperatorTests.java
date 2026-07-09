@@ -574,21 +574,26 @@ class OperatorTests extends AbstractExpressionTests {
 
 	@Test
 	void stringRepeat() {
-		evaluate("'abc' * 0", "", String.class);
-		evaluate("'abc' * 1", "abc", String.class);
-		evaluate("'abc' * 2", "abcabc", String.class);
+		String EMPTY = "";
+		evaluate("'' * 0", EMPTY, String.class);
+		evaluate("'' * 2", EMPTY, String.class);
+		evaluate("'abc' * 0", EMPTY, String.class);
+
+		evaluate("'Abc' * 1", "Abc", String.class);
+		evaluate("'Abc' * 2", "AbcAbc", String.class);
+		evaluate("'Abc' * 3", "AbcAbcAbc", String.class);
 
 		Expression expr = parser.parseExpression("'a' * 256");
 		assertThat(expr.getValue(context, String.class)).hasSize(256);
 
-		// 4 is the position of the '*' (repeat operator)
-		evaluateAndCheckError("'a' * 257", String.class, MAX_REPEATED_TEXT_SIZE_EXCEEDED, 4);
+		// 6 is the position of the repeatCount
+		evaluateAndCheckError("'a' * 257", String.class, MAX_REPEATED_TEXT_SIZE_EXCEEDED, 6);
 
 		// Integer overflow: 2 * ((Integer.MAX_VALUE / 2) + 1) --> integer overflow
 		int repeatCount = (Integer.MAX_VALUE / 2) + 1;
 		assertThat(2 * repeatCount).isNegative();
-		// 5 is the position of the '*' (repeat operator)
-		evaluateAndCheckError("'ab' * " + repeatCount, String.class, MAX_REPEATED_TEXT_SIZE_EXCEEDED, 5);
+		// 7 is the position of the repeatCount
+		evaluateAndCheckError("'ab' * " + repeatCount, String.class, MAX_REPEATED_TEXT_SIZE_EXCEEDED, 7);
 	}
 
 	@Test
@@ -623,11 +628,18 @@ class OperatorTests extends AbstractExpressionTests {
 		assertThat(expr.getValue(context, String.class)).hasSize(maxSize);
 
 		// Text is too big
+		context.setVariable("text1", createString(maxSize));
+		context.setVariable("text2", createString(maxSize));
+		evaluateAndCheckError("#text1 + #text2", String.class, MAX_CONCATENATED_STRING_LENGTH_EXCEEDED, 7);
+
 		context.setVariable("text1", createString(maxSize + 1));
 		evaluateAndCheckError("#text1 + ''", String.class, MAX_CONCATENATED_STRING_LENGTH_EXCEEDED, 7);
 		evaluateAndCheckError("#text1 + true", String.class, MAX_CONCATENATED_STRING_LENGTH_EXCEEDED, 7);
 		evaluateAndCheckError("'' + #text1", String.class, MAX_CONCATENATED_STRING_LENGTH_EXCEEDED, 3);
 		evaluateAndCheckError("true + #text1", String.class, MAX_CONCATENATED_STRING_LENGTH_EXCEEDED, 5);
+
+		context.setVariable("text1", createString(maxSize - 1));
+		evaluateAndCheckError("#text1 + 'YZ'", String.class, MAX_CONCATENATED_STRING_LENGTH_EXCEEDED, 7);
 
 		context.setVariable("text1", createString(maxSize / 2));
 		context.setVariable("text2", createString((maxSize / 2) + 1));

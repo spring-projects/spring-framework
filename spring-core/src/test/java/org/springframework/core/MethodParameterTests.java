@@ -96,7 +96,7 @@ class MethodParameterTests {
 	}
 
 	@Test
-	void testHashCode() throws NoSuchMethodException {
+	void hashCodeBehavior() throws NoSuchMethodException {
 		assertThat(stringParameter.hashCode()).isEqualTo(stringParameter.hashCode());
 		assertThat(longParameter.hashCode()).isEqualTo(longParameter.hashCode());
 		assertThat(intReturnType.hashCode()).isEqualTo(intReturnType.hashCode());
@@ -109,7 +109,7 @@ class MethodParameterTests {
 
 	@Test
 	@SuppressWarnings("deprecation")
-	void testFactoryMethods() {
+	void factoryMethods() {
 		assertThat(MethodParameter.forMethodOrConstructor(method, 0)).isEqualTo(stringParameter);
 		assertThat(MethodParameter.forMethodOrConstructor(method, 1)).isEqualTo(longParameter);
 
@@ -253,6 +253,12 @@ class MethodParameterTests {
 	}
 
 	@Test
+	void parameterNames() {
+		assertThat(stringParameter.getParameterName()).isEqualTo("str");
+		assertThat(longParameter.getParameterName()).isEqualTo("lng");
+	}
+
+	@Test
 	void jspecifyNullableParameter() {
 		assertThat(jspecifyNullableParameter.isOptional()).isTrue();
 	}
@@ -272,7 +278,8 @@ class MethodParameterTests {
 		assertThat(springNonNullParameter.isOptional()).isFalse();
 	}
 
-	public int method(String p1, long p2) {
+
+	public int method(String str, long lng) {
 		return 42;
 	}
 

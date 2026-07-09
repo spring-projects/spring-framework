@@ -55,7 +55,8 @@ public class JacksonJsonEncoder extends AbstractJacksonEncoder<JsonMapper> {
 	private static final MimeType[] DEFAULT_JSON_MIME_TYPES = new MimeType[] {
 			MediaType.APPLICATION_JSON,
 			new MediaType("application", "*+json"),
-			MediaType.APPLICATION_NDJSON
+			MediaType.APPLICATION_NDJSON,
+			MediaType.APPLICATION_JSONL
 	};
 
 
@@ -99,7 +100,7 @@ public class JacksonJsonEncoder extends AbstractJacksonEncoder<JsonMapper> {
 	 */
 	public JacksonJsonEncoder(JsonMapper.Builder builder, MimeType... mimeTypes) {
 		super(builder.addMixIn(ProblemDetail.class, ProblemDetailJacksonMixin.class), mimeTypes);
-		setStreamingMediaTypes(List.of(MediaType.APPLICATION_NDJSON));
+		setStreamingMediaTypes(List.of(MediaType.APPLICATION_NDJSON, MediaType.APPLICATION_JSONL));
 		this.ssePrettyPrinter = initSsePrettyPrinter();
 	}
 
@@ -110,7 +111,7 @@ public class JacksonJsonEncoder extends AbstractJacksonEncoder<JsonMapper> {
 	 */
 	public JacksonJsonEncoder(JsonMapper mapper, MimeType... mimeTypes) {
 		super(mapper, mimeTypes);
-		setStreamingMediaTypes(List.of(MediaType.APPLICATION_NDJSON));
+		setStreamingMediaTypes(List.of(MediaType.APPLICATION_NDJSON, MediaType.APPLICATION_JSONL));
 		this.ssePrettyPrinter = initSsePrettyPrinter();
 	}
 
@@ -123,7 +124,7 @@ public class JacksonJsonEncoder extends AbstractJacksonEncoder<JsonMapper> {
 
 	@Override
 	public boolean canEncode(ResolvableType elementType, @Nullable MimeType mimeType) {
-		return super.canEncode(elementType, mimeType) && !String.class.isAssignableFrom(elementType.toClass());
+		return (super.canEncode(elementType, mimeType) && String.class != elementType.toClass());
 	}
 
 	@Override

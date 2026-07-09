@@ -414,7 +414,7 @@ public abstract class MethodVisitor {
    * @param descriptor the method's descriptor (see {@link Type}).
    * @deprecated use {@link #visitMethodInsn(int, String, String, String, boolean)} instead.
    */
-  @Deprecated
+  @Deprecated(forRemoval = false)
   public void visitMethodInsn(
       final int opcode, final String owner, final String name, final String descriptor) {
     int opcodeAndSource = opcode | (api < Opcodes.ASM5 ? Opcodes.SOURCE_DEPRECATED : 0);

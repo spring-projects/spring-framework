@@ -32,7 +32,7 @@ import org.dom4j.io.SAXReader;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.propertyeditors.StringTrimmerEditor;
-import org.springframework.beans.testfixture.beans.Colour;
+import org.springframework.beans.testfixture.beans.Color;
 import org.springframework.beans.testfixture.beans.Pet;
 import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.validation.BeanPropertyBindingResult;
@@ -448,8 +448,8 @@ class CheckboxTagTests extends AbstractFormTagTests {
 	}
 
 	@Test
-	void collectionOfColoursSelected() throws Exception {
-		this.tag.setPath("otherColours");
+	void collectionOfColorsSelected() throws Exception {
+		this.tag.setPath("otherColors");
 		this.tag.setValue("RED");
 
 		int result = this.tag.doStartTag();
@@ -465,13 +465,13 @@ class CheckboxTagTests extends AbstractFormTagTests {
 		Element checkboxElement = document.getRootElement().elements().get(0);
 		assertThat(checkboxElement.getName()).isEqualTo("input");
 		assertThat(checkboxElement.attribute("type").getValue()).isEqualTo("checkbox");
-		assertThat(checkboxElement.attribute("name").getValue()).isEqualTo("otherColours");
+		assertThat(checkboxElement.attribute("name").getValue()).isEqualTo("otherColors");
 		assertThat(checkboxElement.attribute("checked").getValue()).isEqualTo("checked");
 	}
 
 	@Test
-	void collectionOfColoursNotSelected() throws Exception {
-		this.tag.setPath("otherColours");
+	void collectionOfColorsNotSelected() throws Exception {
+		this.tag.setPath("otherColors");
 		this.tag.setValue("PURPLE");
 
 		int result = this.tag.doStartTag();
@@ -487,7 +487,7 @@ class CheckboxTagTests extends AbstractFormTagTests {
 		Element checkboxElement = document.getRootElement().elements().get(0);
 		assertThat(checkboxElement.getName()).isEqualTo("input");
 		assertThat(checkboxElement.attribute("type").getValue()).isEqualTo("checkbox");
-		assertThat(checkboxElement.attribute("name").getValue()).isEqualTo("otherColours");
+		assertThat(checkboxElement.attribute("name").getValue()).isEqualTo("otherColors");
 		assertThat(checkboxElement.attribute("checked")).isNull();
 	}
 
@@ -660,10 +660,7 @@ class CheckboxTagTests extends AbstractFormTagTests {
 
 	@Override
 	protected TestBean createTestBean() {
-		List colours = new ArrayList();
-		colours.add(Colour.BLUE);
-		colours.add(Colour.RED);
-		colours.add(Colour.GREEN);
+		List colors = List.of(Color.BLUE, Color.RED, Color.GREEN);
 
 		List pets = new ArrayList();
 		pets.add(new Pet("Rudiger"));
@@ -685,7 +682,7 @@ class CheckboxTagTests extends AbstractFormTagTests {
 		this.bean.setSomeBoolean(Boolean.TRUE);
 		this.bean.setStringArray(new String[] {"bar", "foo"});
 		this.bean.setSomeIntegerArray(new Integer[] {2, 1});
-		this.bean.setOtherColours(colours);
+		this.bean.setOtherColors(colors);
 		this.bean.setPets(pets);
 		this.bean.setSomeList(someList);
 		this.bean.setSomeMap(someMap);

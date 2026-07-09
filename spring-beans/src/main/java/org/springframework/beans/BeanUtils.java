@@ -45,7 +45,6 @@ import org.jspecify.annotations.Nullable;
 import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.KotlinDetector;
 import org.springframework.core.MethodParameter;
-import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.ResolvableType;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -71,9 +70,6 @@ import org.springframework.util.StringUtils;
  * @author Sebastien Deleuze
  */
 public abstract class BeanUtils {
-
-	private static final ParameterNameDiscoverer parameterNameDiscoverer =
-			new DefaultParameterNameDiscoverer();
 
 	private static final Set<Class<?>> unknownEditorTypes =
 			Collections.newSetFromMap(new ConcurrentReferenceHashMap<>(64));
@@ -659,7 +655,8 @@ public abstract class BeanUtils {
 	@SuppressWarnings("NullAway") // Dataflow analysis limitation
 	public static @Nullable String[] getParameterNames(Constructor<?> ctor) {
 		ConstructorProperties cp = ctor.getAnnotation(ConstructorProperties.class);
-		@Nullable String[] paramNames = (cp != null ? cp.value() : parameterNameDiscoverer.getParameterNames(ctor));
+		@Nullable String[] paramNames = (cp != null ? cp.value() :
+				DefaultParameterNameDiscoverer.getSharedInstance().getParameterNames(ctor));
 		Assert.state(paramNames != null, () -> "Cannot resolve parameter names for constructor " + ctor);
 		int parameterCount = (KOTLIN_REFLECT_PRESENT && KotlinDelegate.hasDefaultConstructorMarker(ctor) ?
 				ctor.getParameterCount() - 1 : ctor.getParameterCount());

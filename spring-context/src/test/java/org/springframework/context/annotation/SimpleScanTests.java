@@ -36,7 +36,7 @@ class SimpleScanTests {
 	}
 
 	@Test
-	void testFooService() {
+	void fooService() {
 		ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext(getConfigLocations(), getClass());
 
 		FooService fooService = (FooService) ctx.getBean("fooServiceImpl");

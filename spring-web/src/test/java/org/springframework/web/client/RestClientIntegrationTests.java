@@ -24,6 +24,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.file.Files;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -40,6 +41,8 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -54,6 +57,9 @@ import org.springframework.http.client.JdkClientHttpRequestFactory;
 import org.springframework.http.client.JettyClientHttpRequestFactory;
 import org.springframework.http.client.ReactorClientHttpRequestFactory;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
+import org.springframework.http.converter.multipart.FilePart;
+import org.springframework.http.converter.multipart.FormFieldPart;
+import org.springframework.http.converter.multipart.Part;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.FastByteArrayOutputStream;
 import org.springframework.util.FileCopyUtils;
@@ -65,7 +71,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
-import static org.junit.jupiter.api.Assumptions.assumeFalse;
+import static org.assertj.core.api.Assumptions.assumeThat;
 import static org.junit.jupiter.params.provider.Arguments.argumentSet;
 
 /**
@@ -355,6 +361,35 @@ class RestClientIntegrationTests {
 	}
 
 	@ParameterizedRestClientTest
+	void retrieveMultipart(ClientHttpRequestFactory requestFactory) throws IOException {
+		startServer(requestFactory);
+		Resource resource = new ClassPathResource("simple.multipart", getClass());
+		String multipartBody = Files.readString(resource.getFile().toPath());
+
+		prepareResponse(builder -> builder
+				.setHeader("Content-Type", "multipart/form-data; boundary=---------------------------testboundary")
+				.body(multipartBody));
+
+		MultiValueMap<String, Part> result = this.restClient.get()
+				.uri("/multipart")
+				.accept(MediaType.MULTIPART_FORM_DATA)
+				.retrieve()
+				.body(new ParameterizedTypeReference<>() {});
+
+		assertThat(result).hasSize(3);
+		assertThat(result).containsKeys("text1", "text2", "file1");
+		assertThat(result.get("text1").get(0)).isInstanceOfSatisfying(FormFieldPart.class, part -> assertThat(part.value()).isEqualTo("a"));
+		assertThat(result.get("text2").get(0)).isInstanceOfSatisfying(FormFieldPart.class, part -> assertThat(part.value()).isEqualTo("b"));
+		assertThat(result.get("file1").get(0)).isInstanceOfSatisfying(FilePart.class, part -> assertThat(part.filename()).isEqualTo("a.txt"));
+
+		expectRequestCount(1);
+		expectRequest(request -> {
+			assertThat(request.getTarget()).isEqualTo("/multipart");
+			assertThat(request.getHeaders().get(HttpHeaders.ACCEPT)).isEqualTo("multipart/form-data");
+		});
+	}
+
+	@ParameterizedRestClientTest
 	void retrieve404(ClientHttpRequestFactory requestFactory) throws IOException {
 		startServer(requestFactory);
 
@@ -406,8 +441,10 @@ class RestClientIntegrationTests {
 		}
 		catch (HttpServerErrorException ex) {
 			assertThat(ex.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
-			assumeFalse(requestFactory instanceof JdkClientHttpRequestFactory, "JDK HttpClient does not expose status text");
-			assertThat(ex.getStatusText()).isEqualTo("Server Error");
+			// JDK HttpClient does not expose status text
+			if (!(requestFactory instanceof JdkClientHttpRequestFactory)) {
+				assertThat(ex.getStatusText()).isEqualTo("Server Error");
+			}
 			assertThat(ex.getResponseHeaders().getContentType()).isEqualTo(MediaType.TEXT_PLAIN);
 			assertThat(ex.getResponseBodyAsString()).isEqualTo(errorMessage);
 		}
@@ -476,7 +513,9 @@ class RestClientIntegrationTests {
 
 		}
 		catch (HttpServerErrorException ex) {
-			assumeFalse(requestFactory instanceof JdkClientHttpRequestFactory, "JDK HttpClient does not expose status text");
+			assumeThat(requestFactory).as("JDK HttpClient does not expose status text")
+					.isNotInstanceOf(JdkClientHttpRequestFactory.class);
+
 			assertThat(ex.getMessage()).isEqualTo("555 Server Error: \"Something went wrong\"");
 			assertThat(ex.getStatusText()).isEqualTo("Server Error");
 			assertThat(ex.getResponseHeaders().getContentType()).isEqualTo(MediaType.TEXT_PLAIN);

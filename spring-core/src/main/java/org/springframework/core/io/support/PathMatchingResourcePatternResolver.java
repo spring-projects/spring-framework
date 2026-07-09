@@ -611,6 +611,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 		}
 	}
 
+	@SuppressWarnings("deprecation")  // for deprecated URL constructor on JDK 20
 	private Set<ClassPathManifestEntry> getClassPathManifestEntriesFromJar(File jar) throws IOException {
 		URL base = jar.toURI().toURL();
 		File parent = jar.getAbsoluteFile().getParentFile();

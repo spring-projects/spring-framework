@@ -43,13 +43,13 @@ class CustomScopeConfigurerTests {
 
 
 	@Test
-	void testWithNoScopes() {
+	void withNoScopes() {
 		CustomScopeConfigurer figurer = new CustomScopeConfigurer();
 		figurer.postProcessBeanFactory(factory);
 	}
 
 	@Test
-	void testSunnyDayWithBonaFideScopeInstance() {
+	void sunnyDayWithBonaFideScopeInstance() {
 		Scope scope = mock();
 		factory.registerScope(FOO_SCOPE, scope);
 		Map<String, Object> scopes = new HashMap<>();
@@ -60,7 +60,7 @@ class CustomScopeConfigurerTests {
 	}
 
 	@Test
-	void testSunnyDayWithBonaFideScopeClass() {
+	void sunnyDayWithBonaFideScopeClass() {
 		Map<String, Object> scopes = new HashMap<>();
 		scopes.put(FOO_SCOPE, NoOpScope.class);
 		CustomScopeConfigurer figurer = new CustomScopeConfigurer();
@@ -70,7 +70,7 @@ class CustomScopeConfigurerTests {
 	}
 
 	@Test
-	void testSunnyDayWithBonaFideScopeClassName() {
+	void sunnyDayWithBonaFideScopeClassName() {
 		Map<String, Object> scopes = new HashMap<>();
 		scopes.put(FOO_SCOPE, NoOpScope.class.getName());
 		CustomScopeConfigurer figurer = new CustomScopeConfigurer();
@@ -80,7 +80,7 @@ class CustomScopeConfigurerTests {
 	}
 
 	@Test
-	void testWhereScopeMapHasNullScopeValueInEntrySet() {
+	void whereScopeMapHasNullScopeValueInEntrySet() {
 		Map<String, Object> scopes = new HashMap<>();
 		scopes.put(FOO_SCOPE, null);
 		CustomScopeConfigurer figurer = new CustomScopeConfigurer();
@@ -90,7 +90,7 @@ class CustomScopeConfigurerTests {
 	}
 
 	@Test
-	void testWhereScopeMapHasNonScopeInstanceInEntrySet() {
+	void whereScopeMapHasNonScopeInstanceInEntrySet() {
 		Map<String, Object> scopes = new HashMap<>();
 		scopes.put(FOO_SCOPE, this);  // <-- not a valid value...
 		CustomScopeConfigurer figurer = new CustomScopeConfigurer();
@@ -101,7 +101,7 @@ class CustomScopeConfigurerTests {
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Test
-	void testWhereScopeMapHasNonStringTypedScopeNameInKeySet() {
+	void whereScopeMapHasNonStringTypedScopeNameInKeySet() {
 		Map scopes = new HashMap();
 		scopes.put(this, new NoOpScope());  // <-- not a valid value (the key)...
 		CustomScopeConfigurer figurer = new CustomScopeConfigurer();

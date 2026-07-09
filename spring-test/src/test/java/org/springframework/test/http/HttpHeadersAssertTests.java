@@ -161,8 +161,8 @@ class HttpHeadersAssertTests {
 	@Test
 	void hasValueWithStringMatch() {
 		HttpHeaders headers = new HttpHeaders();
-		headers.addAll("header", List.of("a", "b", "c"));
-		assertThat(headers).hasValue("header", "a");
+		headers.addAll("Header", List.of("a", "b", "c"));
+		assertThat(headers).hasValue("hEADer", "a");
 	}
 
 	@Test

@@ -169,8 +169,7 @@ class PayloadMethodArgumentResolverTests {
 
 		Object value = result.block(Duration.ofSeconds(5));
 		if (value != null) {
-			Class<?> expectedType = param.getParameterType();
-			assertThat(expectedType.isAssignableFrom(value.getClass())).as("Unexpected return value type: " + value).isTrue();
+			assertThat(value).isInstanceOf(param.getParameterType());
 		}
 		return (T) value;
 	}

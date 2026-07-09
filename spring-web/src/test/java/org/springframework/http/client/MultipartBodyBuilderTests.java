@@ -91,7 +91,7 @@ class MultipartBodyBuilderTests {
 	}
 
 	@Test // SPR-16601
-	public void publisherEntityAcceptedAsInput() {
+	void publisherEntityAcceptedAsInput() {
 
 		Publisher<String> publisher = Flux.just("foo", "bar", "baz");
 		MultipartBodyBuilder builder = new MultipartBodyBuilder();

@@ -251,7 +251,7 @@ public class ComplexWebApplicationContext extends StaticWebApplicationContext {
 
 		@Override
 		public boolean supports(Object handler) {
-			return handler != null && MyHandler.class.isAssignableFrom(handler.getClass());
+			return (handler instanceof MyHandler);
 		}
 
 		@Override
@@ -268,7 +268,7 @@ public class ComplexWebApplicationContext extends StaticWebApplicationContext {
 
 		@Override
 		public boolean supports(Object handler) {
-			return handler != null && MyHandler.class.isAssignableFrom(handler.getClass());
+			return (handler instanceof MyHandler);
 		}
 
 		@Override

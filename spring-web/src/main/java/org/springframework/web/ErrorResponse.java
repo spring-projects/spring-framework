@@ -29,15 +29,15 @@ import org.springframework.http.ProblemDetail;
 
 /**
  * Representation of a complete RFC 9457 error response including status,
- * headers, and an RFC 9457 formatted {@link ProblemDetail} body. Allows any
- * exception to expose HTTP error response information.
+ * headers, and an RFC 9457 formatted {@link ProblemDetail} body.
+ * Allows any exception to expose HTTP error response information.
  *
  * <p>{@link ErrorResponseException} is a default implementation of this
  * interface and a convenient base class for other exceptions to use.
  *
  * <p>{@code ErrorResponse} is supported as a return value from
- * {@code @ExceptionHandler} methods that render directly to the response, for example,
- * by being marked {@code @ResponseBody}, or declared in an
+ * {@code @ExceptionHandler} methods that render directly to the response,
+ * for example, by being marked {@code @ResponseBody}, or declared in an
  * {@code @RestController} or {@code RestControllerAdvice} class.
  *
  * @author Rossen Stoyanchev

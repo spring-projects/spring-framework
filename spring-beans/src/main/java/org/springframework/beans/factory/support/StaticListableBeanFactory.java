@@ -17,6 +17,7 @@
 package org.springframework.beans.factory.support;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -64,6 +65,7 @@ import org.springframework.util.StringUtils;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Sam Brannen
+ * @author Yanming Zhou
  * @since 06.01.2003
  * @see DefaultListableBeanFactory
  */
@@ -144,6 +146,17 @@ public class StaticListableBeanFactory implements ListableBeanFactory {
 		}
 
 		if (requiredType != null && !requiredType.isInstance(bean)) {
+			throw new BeanNotOfRequiredTypeException(name, requiredType, bean.getClass());
+		}
+		return (T) bean;
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public <T> T getBean(String name, ParameterizedTypeReference<T> typeReference) throws BeansException {
+		Object bean = getBean(name);
+		Type requiredType = typeReference.getType();
+		if (!ResolvableType.forType(requiredType).isInstance(bean)) {
 			throw new BeanNotOfRequiredTypeException(name, requiredType, bean.getClass());
 		}
 		return (T) bean;
@@ -234,7 +247,8 @@ public class StaticListableBeanFactory implements ListableBeanFactory {
 		String beanName = BeanFactoryUtils.transformedBeanName(name);
 		Object bean = obtainBean(beanName);
 		if (bean instanceof FactoryBean<?> factoryBean && !BeanFactoryUtils.isFactoryDereference(name)) {
-			return isTypeMatch(factoryBean, typeToMatch.toClass());
+			Class<?> classToMatch = typeToMatch.resolve();
+			return (classToMatch != null && isTypeMatch(factoryBean, classToMatch));
 		}
 		return typeToMatch.isInstance(bean);
 	}
@@ -372,8 +386,8 @@ public class StaticListableBeanFactory implements ListableBeanFactory {
 	public String[] getBeanNamesForType(@Nullable ResolvableType type,
 			boolean includeNonSingletons, boolean allowEagerInit) {
 
-		Class<?> resolved = (type != null ? type.resolve() : null);
-		boolean isFactoryType = (resolved != null && FactoryBean.class.isAssignableFrom(resolved));
+		Class<?> clazz = (type != null ? type.resolve() : null);
+		boolean isFactoryType = (clazz != null && FactoryBean.class.isAssignableFrom(clazz));
 		List<String> matches = new ArrayList<>();
 
 		for (Map.Entry<String, Object> entry : this.beans.entrySet()) {
@@ -381,7 +395,7 @@ public class StaticListableBeanFactory implements ListableBeanFactory {
 			Object beanInstance = entry.getValue();
 			if (beanInstance instanceof FactoryBean<?> factoryBean && !isFactoryType) {
 				if ((includeNonSingletons || factoryBean.isSingleton()) &&
-						(type == null || isTypeMatch(factoryBean, type.toClass()))) {
+						(type == null || (clazz != null && isTypeMatch(factoryBean, clazz)))) {
 					matches.add(beanName);
 				}
 			}

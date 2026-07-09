@@ -35,14 +35,14 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @since 3.2
  */
 @SpringJUnitConfig(initializers = { FooBarAliasInitializer.class, DevProfileInitializer.class })
-public class MultipleInitializersXmlConfigTests {
+class MultipleInitializersXmlConfigTests {
 
 	@Autowired
 	private String foo, bar, baz;
 
 
 	@Test
-	public void activeBeans() {
+	void activeBeans() {
 		assertThat(foo).isEqualTo("foo");
 		assertThat(bar).isEqualTo("foo");
 		assertThat(baz).isEqualTo("dev profile config");

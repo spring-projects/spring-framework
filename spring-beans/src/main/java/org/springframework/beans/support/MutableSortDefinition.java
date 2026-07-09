@@ -30,8 +30,11 @@ import org.springframework.util.StringUtils;
  * @author Jean-Pierre Pawlak
  * @since 26.05.2003
  * @see #setToggleAscendingOnProperty
+ * @deprecated as severely outdated and superseded by more modern solutions,
+ * for example in Spring Data Commons
  */
-@SuppressWarnings("serial")
+@Deprecated(since = "7.0.3", forRemoval = true)
+@SuppressWarnings({"removal", "serial"})
 public class MutableSortDefinition implements SortDefinition, Serializable {
 
 	private String property = "";

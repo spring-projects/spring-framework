@@ -51,7 +51,7 @@ class ExpressionValueMethodArgumentResolverTests {
 	private NativeWebRequest webRequest;
 
 	@BeforeEach
-	public void setUp() throws Exception {
+	void setUp() throws Exception {
 		GenericWebApplicationContext context = new GenericWebApplicationContext();
 		context.refresh();
 		resolver = new ExpressionValueMethodArgumentResolver(context.getBeanFactory());

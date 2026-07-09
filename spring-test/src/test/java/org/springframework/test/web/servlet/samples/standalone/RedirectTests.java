@@ -45,19 +45,19 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standal
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
  */
-public class RedirectTests {
+class RedirectTests {
 
 	private MockMvc mockMvc;
 
 
 	@BeforeEach
-	public void setup() {
+	void setup() {
 		this.mockMvc = standaloneSetup(new PersonController()).build();
 	}
 
 
 	@Test
-	public void save() throws Exception {
+	void save() throws Exception {
 		this.mockMvc.perform(post("/persons").param("name", "Andy"))
 			.andExpect(status().isFound())
 			.andExpect(redirectedUrl("/persons/Joe"))
@@ -68,7 +68,7 @@ public class RedirectTests {
 	}
 
 	@Test
-	public void saveSpecial() throws Exception {
+	void saveSpecial() throws Exception {
 		this.mockMvc.perform(post("/people").param("name", "Andy"))
 				.andExpect(status().isFound())
 				.andExpect(redirectedUrl("/persons/Joe"))
@@ -79,7 +79,7 @@ public class RedirectTests {
 	}
 
 	@Test
-	public void saveWithErrors() throws Exception {
+	void saveWithErrors() throws Exception {
 		this.mockMvc.perform(post("/persons"))
 			.andExpect(status().isOk())
 			.andExpect(forwardedUrl("persons/add"))
@@ -89,7 +89,7 @@ public class RedirectTests {
 	}
 
 	@Test
-	public void saveSpecialWithErrors() throws Exception {
+	void saveSpecialWithErrors() throws Exception {
 		this.mockMvc.perform(post("/people"))
 				.andExpect(status().isOk())
 				.andExpect(forwardedUrl("persons/add"))
@@ -99,7 +99,7 @@ public class RedirectTests {
 	}
 
 	@Test
-	public void getPerson() throws Exception {
+	void getPerson() throws Exception {
 		this.mockMvc.perform(get("/persons/Joe").flashAttr("message", "success!"))
 			.andExpect(status().isOk())
 			.andExpect(forwardedUrl("persons/index"))

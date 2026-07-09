@@ -34,7 +34,7 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 class ImplicitJPArgumentMatchingAtAspectJTests {
 
 	@Test
-	void testAspect() {
+	void aspect() {
 		// nothing to really test; it is enough if we don't get error while creating the app context
 		new ClassPathXmlApplicationContext(getClass().getSimpleName() + ".xml", getClass());
 	}

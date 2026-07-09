@@ -26,7 +26,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class TransportTypeTests {
 
 	@Test
-	void testFromValue() {
+	void fromValue() {
 		assertThat(TransportType.fromValue("websocket")).isEqualTo(TransportType.WEBSOCKET);
 		assertThat(TransportType.fromValue("xhr")).isEqualTo(TransportType.XHR);
 		assertThat(TransportType.fromValue("xhr_send")).isEqualTo(TransportType.XHR_SEND);

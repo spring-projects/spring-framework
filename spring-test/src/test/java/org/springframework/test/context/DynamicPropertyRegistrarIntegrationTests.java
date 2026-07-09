@@ -69,7 +69,7 @@ class DynamicPropertyRegistrarIntegrationTests {
 	}
 
 	@Test
-	void testReceivesDynamicProperties(@Value("${api.url.1}") String apiUrl1, @Value("${api.url.2}") String apiUrl2) {
+	void receivesDynamicProperties(@Value("${api.url.1}") String apiUrl1, @Value("${api.url.2}") String apiUrl2) {
 		assertApiUrlIsDynamic1(apiUrl1);
 		assertApiUrlIsDynamic2(apiUrl2);
 	}

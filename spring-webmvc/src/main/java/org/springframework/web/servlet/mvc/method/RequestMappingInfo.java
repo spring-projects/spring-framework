@@ -104,7 +104,7 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 
 	private final RequestConditionHolder customConditionHolder;
 
-	private final int hashCode;
+	private @Nullable Integer hashCode;
 
 	private final BuilderConfiguration options;
 
@@ -169,6 +169,22 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 			ProducesRequestCondition producesCondition, VersionRequestCondition versionCondition,
 			RequestConditionHolder customCondition, BuilderConfiguration options) {
 
+		this(name, pathPatternsCondition, patternsCondition,
+				methodsCondition, paramsCondition, headersCondition,
+				consumesCondition, producesCondition, versionCondition,
+				customCondition, options, true);
+	}
+
+	@SuppressWarnings("removal")
+	private RequestMappingInfo(@Nullable String name,
+			@Nullable PathPatternsRequestCondition pathPatternsCondition,
+			@Nullable PatternsRequestCondition patternsCondition,
+			RequestMethodsRequestCondition methodsCondition, ParamsRequestCondition paramsCondition,
+			HeadersRequestCondition headersCondition, ConsumesRequestCondition consumesCondition,
+			ProducesRequestCondition producesCondition, VersionRequestCondition versionCondition,
+			RequestConditionHolder customCondition, BuilderConfiguration options,
+			boolean calculateHashCode) {
+
 		Assert.isTrue(pathPatternsCondition != null || patternsCondition != null,
 				"Neither PathPatterns nor String patterns condition");
 
@@ -184,11 +200,9 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 		this.customConditionHolder = customCondition;
 		this.options = options;
 
-		this.hashCode = calculateHashCode(
-				this.pathPatternsCondition, this.patternsCondition,
-				this.methodsCondition, this.paramsCondition, this.headersCondition,
-				this.consumesCondition, this.producesCondition, this.versionCondition,
-				this.customConditionHolder);
+		if (calculateHashCode) {
+			this.hashCode = calculateHashCode();
+		}
 	}
 
 
@@ -448,7 +462,7 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 			return null;
 		}
 		return new RequestMappingInfo(this.name, pathPatterns, patterns,
-				methods, params, headers, consumes, produces, version, custom, this.options);
+				methods, params, headers, consumes, produces, version, custom, this.options, false);
 	}
 
 	/**
@@ -519,20 +533,26 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 
 	@Override
 	public int hashCode() {
+		if (this.hashCode == null) {
+			this.hashCode = calculateHashCode();
+		}
 		return this.hashCode;
 	}
 
 	@SuppressWarnings({"ConstantConditions", "NullAway", "removal"})
-	private static int calculateHashCode(
-			@Nullable PathPatternsRequestCondition pathPatterns, @Nullable PatternsRequestCondition patterns,
-			RequestMethodsRequestCondition methods, ParamsRequestCondition params, HeadersRequestCondition headers,
-			ConsumesRequestCondition consumes, ProducesRequestCondition produces,
-			VersionRequestCondition version, RequestConditionHolder custom) {
+	private int calculateHashCode() {
 
-		return (pathPatterns != null ? pathPatterns : patterns).hashCode() * 31 +
-				methods.hashCode() + params.hashCode() +
-				headers.hashCode() + consumes.hashCode() + produces.hashCode() +
-				version.hashCode() + custom.hashCode();
+		int result = (this.pathPatternsCondition != null ?
+				this.pathPatternsCondition : this.patternsCondition).hashCode();
+
+		result = 31 * result + this.methodsCondition.hashCode();
+		result = 31 * result + this.paramsCondition.hashCode();
+		result = 31 * result + this.headersCondition.hashCode();
+		result = 31 * result + this.consumesCondition.hashCode();
+		result = 31 * result + this.producesCondition.hashCode();
+		result = 31 * result + this.versionCondition.hashCode();
+		result = 31 * result + this.customConditionHolder.hashCode();
+		return result;
 	}
 
 	@Override

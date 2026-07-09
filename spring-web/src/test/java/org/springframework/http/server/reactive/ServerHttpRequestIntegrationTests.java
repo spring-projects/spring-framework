@@ -21,9 +21,7 @@ import java.net.URI;
 import reactor.core.publisher.Mono;
 
 import org.springframework.http.HttpStatus;
-import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.testfixture.http.server.reactive.bootstrap.AbstractHttpHandlerIntegrationTests;
 import org.springframework.web.testfixture.http.server.reactive.bootstrap.HttpServer;
 
@@ -44,9 +42,7 @@ class ServerHttpRequestIntegrationTests extends AbstractHttpHandlerIntegrationTe
 	void checkUri(HttpServer httpServer) throws Exception {
 		startServer(httpServer);
 
-		URI url = URI.create("http://localhost:" + port + "/foo?param=bar");
-		RequestEntity<Void> request = RequestEntity.post(url).build();
-		ResponseEntity<Void> response = new RestTemplate().exchange(request, Void.class);
+		ResponseEntity<Void> response = getRestClient().post().uri("/foo?param=bar").retrieve().toBodilessEntity();
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 	}
 

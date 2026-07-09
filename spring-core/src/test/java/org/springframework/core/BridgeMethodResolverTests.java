@@ -74,7 +74,12 @@ class BridgeMethodResolverTests {
 		assertThat(bridgedMethod.isBridge()).isFalse();
 		assertThat(bridgedMethod.getName()).isEqualTo("add");
 		assertThat(bridgedMethod.getParameterCount()).isEqualTo(1);
-		assertThat(bridgedMethod.getParameterTypes()[0]).isEqualTo(Date.class);
+		if (IdeUtils.runningInEclipse()) {
+			assertThat(bridgedMethod.getParameterTypes()).containsOnly(Serializable.class);
+		}
+		else {
+			assertThat(bridgedMethod.getParameterTypes()).containsOnly(Date.class);
+		}
 	}
 
 	@Test
@@ -231,8 +236,7 @@ class BridgeMethodResolverTests {
 			}
 		}
 		assertThat(bridgeMethod != null && bridgeMethod.isBridge()).isTrue();
-		boolean condition = bridgedMethod != null && !bridgedMethod.isBridge();
-		assertThat(condition).isTrue();
+		assertThat(bridgedMethod != null && !bridgedMethod.isBridge()).isTrue();
 		assertThat(BridgeMethodResolver.findBridgedMethod(bridgeMethod)).isEqualTo(bridgedMethod);
 	}
 
@@ -369,12 +373,12 @@ class BridgeMethodResolverTests {
 	}
 
 	@Test  // SPR-16103
-	void testClassHierarchy() throws Exception {
+	void classHierarchy() throws Exception {
 		doTestHierarchyResolution(FooClass.class);
 	}
 
 	@Test  // SPR-16103
-	void testInterfaceHierarchy() throws Exception {
+	void interfaceHierarchy() throws Exception {
 		doTestHierarchyResolution(FooInterface.class);
 	}
 
@@ -491,10 +495,12 @@ class BridgeMethodResolverTests {
 
 	interface DefaultMethods extends InterfaceMethods<Integer> {
 
+		@Override
 		default Integer getValue() {
 			return 0;
 		}
 
+		@Override
 		default Integer[] getValues() {
 			return new Integer[0];
 		}

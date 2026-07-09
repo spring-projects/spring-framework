@@ -95,7 +95,7 @@ public class Attribute {
    *     a Code attribute that contains labels.
    * @deprecated no longer used by ASM.
    */
-  @Deprecated
+  @Deprecated(forRemoval = false)
   protected Label[] getLabels() {
     return new Label[0];
   }
@@ -174,6 +174,7 @@ public class Attribute {
    * ClassReader overrides {@link ClassReader#readLabel}. Hence {@link #read(ClassReader, int, int,
    * char[], int, Label[])} must not manually create {@link Label} instances.
    *
+   * @param classReader the class that contains the attribute to be read.
    * @param bytecodeOffset a bytecode offset in a method.
    * @param labels the already created labels, indexed by their offset. If a label already exists
    *     for bytecodeOffset this method does not create a new one. Otherwise it stores the new label

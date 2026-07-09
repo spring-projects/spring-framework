@@ -95,7 +95,7 @@ class DefaultServletHandlerConfigurerTests {
 	}
 
 	@Test // gh-30113
-	public void handleIncludeRequest() throws Exception {
+	void handleIncludeRequest() throws Exception {
 		configurer.enable();
 		SimpleUrlHandlerMapping mapping = configurer.buildHandlerMapping();
 		HttpRequestHandler handler = (DefaultServletHttpRequestHandler) mapping.getUrlMap().get("/**");

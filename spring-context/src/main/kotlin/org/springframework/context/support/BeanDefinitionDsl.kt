@@ -78,7 +78,7 @@ fun beans(init: BeanDefinitionDsl.() -> Unit) = BeanDefinitionDsl(init)
  * Class implementing functional bean definition Kotlin DSL.
  *
  * @constructor Create a new bean definition DSL.
- * @param condition the predicate to fulfill in order to take in account the inner
+ * @param condition the predicate to fulfill in order to take into account the inner
  * bean definition block
  * @author Sebastien Deleuze
  * @since 5.0
@@ -1200,7 +1200,7 @@ open class BeanDefinitionDsl internal constructor (private val init: BeanDefinit
 	/**
 	 * Take in account bean definitions enclosed in the provided lambda only when the
 	 * specified environment-based predicate is true.
-	 * @param condition the predicate to fulfill in order to take in account the inner
+	 * @param condition the predicate to fulfill in order to take into account the inner
 	 * bean definition block
 	 */
 	fun environment(condition: ConfigurableEnvironment.() -> Boolean,

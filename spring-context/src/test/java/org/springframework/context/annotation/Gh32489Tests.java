@@ -33,7 +33,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Stephane Nicoll
  */
-public class Gh32489Tests {
+class Gh32489Tests {
 
 	@Test
 	void resolveFactoryBeansWithWildcard() {

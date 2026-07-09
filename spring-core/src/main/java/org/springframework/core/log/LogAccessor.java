@@ -24,7 +24,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * A convenient accessor for Commons Logging, providing not only
  * {@code CharSequence} based log methods but also {@code Supplier}
- * based variants for use with Java 8 lambda expressions.
+ * based variants for use with Java lambda expressions.
  *
  * @author Juergen Hoeller
  * @since 5.2

@@ -49,7 +49,7 @@ class QualifierAnnotationAutowireBeanFactoryTests {
 
 
 	@Test
-	void testAutowireCandidateDefaultWithIrrelevantDescriptor() throws Exception {
+	void autowireCandidateDefaultWithIrrelevantDescriptor() throws Exception {
 		ConstructorArgumentValues cavs = new ConstructorArgumentValues();
 		cavs.addGenericArgumentValue(JUERGEN);
 		RootBeanDefinition rbd = new RootBeanDefinition(Person.class, cavs, null);
@@ -63,7 +63,7 @@ class QualifierAnnotationAutowireBeanFactoryTests {
 	}
 
 	@Test
-	void testAutowireCandidateExplicitlyFalseWithIrrelevantDescriptor() throws Exception {
+	void autowireCandidateExplicitlyFalseWithIrrelevantDescriptor() throws Exception {
 		ConstructorArgumentValues cavs = new ConstructorArgumentValues();
 		cavs.addGenericArgumentValue(JUERGEN);
 		RootBeanDefinition rbd = new RootBeanDefinition(Person.class, cavs, null);
@@ -78,7 +78,7 @@ class QualifierAnnotationAutowireBeanFactoryTests {
 	}
 
 	@Test
-	void testAutowireCandidateWithFieldDescriptor() throws Exception {
+	void autowireCandidateWithFieldDescriptor() throws Exception {
 		lbf.setAutowireCandidateResolver(new QualifierAnnotationAutowireCandidateResolver());
 
 		ConstructorArgumentValues cavs1 = new ConstructorArgumentValues();
@@ -104,7 +104,7 @@ class QualifierAnnotationAutowireBeanFactoryTests {
 	}
 
 	@Test
-	void testAutowireCandidateExplicitlyFalseWithFieldDescriptor() throws Exception {
+	void autowireCandidateExplicitlyFalseWithFieldDescriptor() throws Exception {
 		ConstructorArgumentValues cavs = new ConstructorArgumentValues();
 		cavs.addGenericArgumentValue(JUERGEN);
 		RootBeanDefinition person = new RootBeanDefinition(Person.class, cavs, null);
@@ -123,7 +123,7 @@ class QualifierAnnotationAutowireBeanFactoryTests {
 	}
 
 	@Test
-	void testAutowireCandidateWithShortClassName() throws Exception {
+	void autowireCandidateWithShortClassName() throws Exception {
 		ConstructorArgumentValues cavs = new ConstructorArgumentValues();
 		cavs.addGenericArgumentValue(JUERGEN);
 		RootBeanDefinition person = new RootBeanDefinition(Person.class, cavs, null);
@@ -141,7 +141,7 @@ class QualifierAnnotationAutowireBeanFactoryTests {
 	}
 
 	@Test
-	void testAutowireCandidateWithConstructorDescriptor() throws Exception {
+	void autowireCandidateWithConstructorDescriptor() throws Exception {
 		lbf.setAutowireCandidateResolver(new QualifierAnnotationAutowireCandidateResolver());
 
 		ConstructorArgumentValues cavs1 = new ConstructorArgumentValues();
@@ -165,7 +165,7 @@ class QualifierAnnotationAutowireBeanFactoryTests {
 	}
 
 	@Test
-	void testAutowireCandidateWithMethodDescriptor() throws Exception {
+	void autowireCandidateWithMethodDescriptor() throws Exception {
 		lbf.setAutowireCandidateResolver(new QualifierAnnotationAutowireCandidateResolver());
 
 		ConstructorArgumentValues cavs1 = new ConstructorArgumentValues();
@@ -197,7 +197,7 @@ class QualifierAnnotationAutowireBeanFactoryTests {
 	}
 
 	@Test
-	void testAutowireCandidateWithMultipleCandidatesDescriptor() throws Exception {
+	void autowireCandidateWithMultipleCandidatesDescriptor() throws Exception {
 		ConstructorArgumentValues cavs1 = new ConstructorArgumentValues();
 		cavs1.addGenericArgumentValue(JUERGEN);
 		RootBeanDefinition person1 = new RootBeanDefinition(Person.class, cavs1, null);

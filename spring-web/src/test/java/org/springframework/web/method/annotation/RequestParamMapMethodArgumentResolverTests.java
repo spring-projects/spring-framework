@@ -82,8 +82,7 @@ class RequestParamMapMethodArgumentResolverTests {
 		MethodParameter param = this.testMethod.annot(requestParam().noName()).arg(Map.class, String.class, String.class);
 		Object result = resolver.resolveArgument(param, null, webRequest, null);
 
-		boolean condition = result instanceof Map;
-		assertThat(condition).isTrue();
+		assertThat(result).isInstanceOf(Map.class);
 		assertThat(result).as("Invalid result").isEqualTo(expected);
 	}
 
@@ -101,14 +100,13 @@ class RequestParamMapMethodArgumentResolverTests {
 		MethodParameter param = this.testMethod.annotPresent(RequestParam.class).arg(MultiValueMap.class, String.class, String.class);
 		Object result = resolver.resolveArgument(param, null, webRequest, null);
 
-		boolean condition = result instanceof MultiValueMap;
-		assertThat(condition).isTrue();
+		assertThat(result).isInstanceOf(MultiValueMap.class);
 		assertThat(result).as("Invalid result").isEqualTo(expected);
 	}
 
 	@Test
 	@SuppressWarnings("unchecked")
-	public void resolveMapOfMultipartFile() throws Exception {
+	void resolveMapOfMultipartFile() throws Exception {
 		MockMultipartHttpServletRequest request = new MockMultipartHttpServletRequest();
 		MultipartFile expected1 = new MockMultipartFile("mfile", "Hello World".getBytes());
 		MultipartFile expected2 = new MockMultipartFile("other", "Hello World 3".getBytes());
@@ -119,8 +117,7 @@ class RequestParamMapMethodArgumentResolverTests {
 		MethodParameter param = this.testMethod.annot(requestParam().noName()).arg(Map.class, String.class, MultipartFile.class);
 		Object result = resolver.resolveArgument(param, null, webRequest, null);
 
-		boolean condition = result instanceof Map;
-		assertThat(condition).isTrue();
+		assertThat(result).isInstanceOf(Map.class);
 		Map<String, MultipartFile> resultMap = (Map<String, MultipartFile>) result;
 		assertThat(resultMap).hasSize(2);
 		assertThat(resultMap.get("mfile")).isEqualTo(expected1);
@@ -129,7 +126,7 @@ class RequestParamMapMethodArgumentResolverTests {
 
 	@Test
 	@SuppressWarnings("unchecked")
-	public void resolveMultiValueMapOfMultipartFile() throws Exception {
+	void resolveMultiValueMapOfMultipartFile() throws Exception {
 		MockMultipartHttpServletRequest request = new MockMultipartHttpServletRequest();
 		MultipartFile expected1 = new MockMultipartFile("mfilelist", "Hello World 1".getBytes());
 		MultipartFile expected2 = new MockMultipartFile("mfilelist", "Hello World 2".getBytes());
@@ -142,8 +139,7 @@ class RequestParamMapMethodArgumentResolverTests {
 		MethodParameter param = this.testMethod.annot(requestParam().noName()).arg(MultiValueMap.class, String.class, MultipartFile.class);
 		Object result = resolver.resolveArgument(param, null, webRequest, null);
 
-		boolean condition = result instanceof MultiValueMap;
-		assertThat(condition).isTrue();
+		assertThat(result).isInstanceOf(MultiValueMap.class);
 		MultiValueMap<String, MultipartFile> resultMap = (MultiValueMap<String, MultipartFile>) result;
 		assertThat(resultMap).hasSize(2);
 		assertThat(resultMap.get("mfilelist")).containsExactly(expected1, expected2);
@@ -152,7 +148,7 @@ class RequestParamMapMethodArgumentResolverTests {
 
 	@Test
 	@SuppressWarnings("unchecked")
-	public void resolveMapOfPart() throws Exception {
+	void resolveMapOfPart() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.setContentType("multipart/form-data");
 		Part expected1 = new MockPart("mfile", "Hello World".getBytes());
@@ -164,8 +160,7 @@ class RequestParamMapMethodArgumentResolverTests {
 		MethodParameter param = this.testMethod.annot(requestParam().noName()).arg(Map.class, String.class, Part.class);
 		Object result = resolver.resolveArgument(param, null, webRequest, null);
 
-		boolean condition = result instanceof Map;
-		assertThat(condition).isTrue();
+		assertThat(result).isInstanceOf(Map.class);
 		Map<String, Part> resultMap = (Map<String, Part>) result;
 		assertThat(resultMap).hasSize(2);
 		assertThat(resultMap.get("mfile")).isEqualTo(expected1);
@@ -174,7 +169,7 @@ class RequestParamMapMethodArgumentResolverTests {
 
 	@Test
 	@SuppressWarnings("unchecked")
-	public void resolveMultiValueMapOfPart() throws Exception {
+	void resolveMultiValueMapOfPart() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.setContentType("multipart/form-data");
 		Part expected1 = new MockPart("mfilelist", "Hello World 1".getBytes());
@@ -188,8 +183,7 @@ class RequestParamMapMethodArgumentResolverTests {
 		MethodParameter param = this.testMethod.annot(requestParam().noName()).arg(MultiValueMap.class, String.class, Part.class);
 		Object result = resolver.resolveArgument(param, null, webRequest, null);
 
-		boolean condition = result instanceof MultiValueMap;
-		assertThat(condition).isTrue();
+		assertThat(result).isInstanceOf(MultiValueMap.class);
 		MultiValueMap<String, Part> resultMap = (MultiValueMap<String, Part>) result;
 		assertThat(resultMap).hasSize(2);
 		assertThat(resultMap.get("mfilelist")).containsExactly(expected1, expected2);

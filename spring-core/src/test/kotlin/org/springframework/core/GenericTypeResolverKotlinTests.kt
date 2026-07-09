@@ -32,7 +32,7 @@ class GenericTypeResolverKotlinTests {
 	@Test
 	fun methodReturnTypes() {
 		assertThat(resolveReturnTypeArgument(findMethod(MyTypeWithMethods::class.java, "integer")!!,
-				MyInterfaceType::class.java)).isEqualTo(Integer::class.java)
+				MyInterfaceType::class.java)).isEqualTo(Int::class.javaObjectType)
 		assertThat(resolveReturnTypeArgument(findMethod(MyTypeWithMethods::class.java, "string")!!,
 				MyInterfaceType::class.java)).isEqualTo(String::class.java)
 		assertThat(resolveReturnTypeArgument(findMethod(MyTypeWithMethods::class.java, "raw")!!,

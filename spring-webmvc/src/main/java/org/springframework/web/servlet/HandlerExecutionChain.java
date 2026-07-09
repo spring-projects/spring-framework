@@ -175,7 +175,7 @@ public class HandlerExecutionChain {
 				interceptor.afterCompletion(request, response, this.handler, ex);
 			}
 			catch (Throwable ex2) {
-				logger.error("HandlerInterceptor.afterCompletion threw exception", ex2);
+				logger.error("HandlerInterceptor.afterCompletion threw exception in interceptor [" + interceptor + "]", ex2);
 			}
 		}
 	}

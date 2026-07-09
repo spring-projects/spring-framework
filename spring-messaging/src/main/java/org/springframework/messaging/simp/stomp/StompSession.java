@@ -95,7 +95,7 @@ public interface StompSession {
 	 * in an ACK or NACK frame respectively.
 	 * <p><strong>Note:</strong> to use this when subscribing you must set the
 	 * {@link StompHeaders#setAck(String) ack} header to "client" or
-	 * "client-individual" in order ot use this.
+	 * "client-individual" in order to use this.
 	 * @param messageId the id of the message
 	 * @param consumed whether the message was consumed or not
 	 * @return a Receiptable for tracking receipts

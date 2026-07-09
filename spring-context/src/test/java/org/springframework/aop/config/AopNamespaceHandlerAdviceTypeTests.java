@@ -31,12 +31,12 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 class AopNamespaceHandlerAdviceTypeTests {
 
 	@Test
-	void testParsingOfAdviceTypes() {
+	void parsingOfAdviceTypes() {
 		new ClassPathXmlApplicationContext(getClass().getSimpleName() + "-ok.xml", getClass());
 	}
 
 	@Test
-	void testParsingOfAdviceTypesWithError() {
+	void parsingOfAdviceTypesWithError() {
 		assertThatExceptionOfType(BeanDefinitionStoreException.class).isThrownBy(() ->
 				new ClassPathXmlApplicationContext(getClass().getSimpleName() + "-error.xml", getClass()))
 			.matches(ex -> ex.contains(SAXParseException.class));

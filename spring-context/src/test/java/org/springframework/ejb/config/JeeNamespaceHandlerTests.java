@@ -57,7 +57,7 @@ class JeeNamespaceHandlerTests {
 
 
 	@Test
-	void testSimpleDefinition() {
+	void simpleDefinition() {
 		BeanDefinition beanDefinition = this.beanFactory.getMergedBeanDefinition("simple");
 		assertThat(beanDefinition.getBeanClassName()).isEqualTo(JndiObjectFactoryBean.class.getName());
 		assertPropertyValue(beanDefinition, "jndiName", "jdbc/MyDataSource");
@@ -65,7 +65,7 @@ class JeeNamespaceHandlerTests {
 	}
 
 	@Test
-	void testComplexDefinition() {
+	void complexDefinition() {
 		BeanDefinition beanDefinition = this.beanFactory.getMergedBeanDefinition("complex");
 		assertThat(beanDefinition.getBeanClassName()).isEqualTo(JndiObjectFactoryBean.class.getName());
 		assertPropertyValue(beanDefinition, "jndiName", "jdbc/MyDataSource");
@@ -79,21 +79,21 @@ class JeeNamespaceHandlerTests {
 	}
 
 	@Test
-	void testWithEnvironment() {
+	void withEnvironment() {
 		BeanDefinition beanDefinition = this.beanFactory.getMergedBeanDefinition("withEnvironment");
 		assertPropertyValue(beanDefinition, "jndiEnvironment", "foo=bar");
 		assertPropertyValue(beanDefinition, "defaultObject", new RuntimeBeanReference("myBean"));
 	}
 
 	@Test
-	void testWithReferencedEnvironment() {
+	void withReferencedEnvironment() {
 		BeanDefinition beanDefinition = this.beanFactory.getMergedBeanDefinition("withReferencedEnvironment");
 		assertPropertyValue(beanDefinition, "jndiEnvironment", new RuntimeBeanReference("myEnvironment"));
 		assertThat(beanDefinition.getPropertyValues().contains("environmentRef")).isFalse();
 	}
 
 	@Test
-	void testSimpleLocalSlsb() {
+	void simpleLocalSlsb() {
 		BeanDefinition beanDefinition = this.beanFactory.getMergedBeanDefinition("simpleLocalEjb");
 		assertThat(beanDefinition.getBeanClassName()).isEqualTo(JndiObjectFactoryBean.class.getName());
 		assertPropertyValue(beanDefinition, "jndiName", "ejb/MyLocalBean");
@@ -104,7 +104,7 @@ class JeeNamespaceHandlerTests {
 	}
 
 	@Test
-	void testSimpleRemoteSlsb() {
+	void simpleRemoteSlsb() {
 		BeanDefinition beanDefinition = this.beanFactory.getMergedBeanDefinition("simpleRemoteEjb");
 		assertThat(beanDefinition.getBeanClassName()).isEqualTo(JndiObjectFactoryBean.class.getName());
 		assertPropertyValue(beanDefinition, "jndiName", "ejb/MyRemoteBean");
@@ -115,7 +115,7 @@ class JeeNamespaceHandlerTests {
 	}
 
 	@Test
-	void testComplexLocalSlsb() {
+	void complexLocalSlsb() {
 		BeanDefinition beanDefinition = this.beanFactory.getMergedBeanDefinition("complexLocalEjb");
 		assertThat(beanDefinition.getBeanClassName()).isEqualTo(JndiObjectFactoryBean.class.getName());
 		assertPropertyValue(beanDefinition, "jndiName", "ejb/MyLocalBean");
@@ -126,7 +126,7 @@ class JeeNamespaceHandlerTests {
 	}
 
 	@Test
-	void testComplexRemoteSlsb() {
+	void complexRemoteSlsb() {
 		BeanDefinition beanDefinition = this.beanFactory.getMergedBeanDefinition("complexRemoteEjb");
 		assertThat(beanDefinition.getBeanClassName()).isEqualTo(JndiObjectFactoryBean.class.getName());
 		assertPropertyValue(beanDefinition, "jndiName", "ejb/MyRemoteBean");
@@ -137,7 +137,7 @@ class JeeNamespaceHandlerTests {
 	}
 
 	@Test
-	void testLazyInitJndiLookup() {
+	void lazyInitJndiLookup() {
 		BeanDefinition definition = this.beanFactory.getMergedBeanDefinition("lazyDataSource");
 		assertThat(definition.isLazyInit()).isTrue();
 		definition = this.beanFactory.getMergedBeanDefinition("lazyLocalBean");

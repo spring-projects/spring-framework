@@ -55,7 +55,7 @@ class MappingJackson2MessageConverterTests {
 	}
 
 	@Test  // SPR-12724
-	public void mimetypeParametrizedConstructor() {
+	void mimetypeParametrizedConstructor() {
 		MimeType mimetype = new MimeType("application", "xml", StandardCharsets.UTF_8);
 		MappingJackson2MessageConverter converter = new MappingJackson2MessageConverter(mimetype);
 		assertThat(converter.getSupportedMimeTypes()).contains(mimetype);
@@ -64,13 +64,29 @@ class MappingJackson2MessageConverterTests {
 	}
 
 	@Test  // SPR-12724
-	public void mimetypesParametrizedConstructor() {
+	void mimetypesParametrizedConstructor() {
 		MimeType jsonMimetype = new MimeType("application", "json", StandardCharsets.UTF_8);
 		MimeType xmlMimetype = new MimeType("application", "xml", StandardCharsets.UTF_8);
 		MappingJackson2MessageConverter converter = new MappingJackson2MessageConverter(jsonMimetype, xmlMimetype);
 		assertThat(converter.getSupportedMimeTypes()).contains(jsonMimetype, xmlMimetype);
 		assertThat(converter.getObjectMapper().getDeserializationConfig()
 				.isEnabled(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)).isFalse();
+	}
+
+	@Test
+	void supportJsonMimeType() {
+		MappingJackson2MessageConverter converter = new MappingJackson2MessageConverter();
+		Message<String> message = MessageBuilder.withPayload("foo")
+				.setHeader(MessageHeaders.CONTENT_TYPE, "application/json").build();
+		assertThat(converter.supportsMimeType(message.getHeaders())).isTrue();
+	}
+
+	@Test
+	void supportVendorJsonMimeTypes() {
+		MappingJackson2MessageConverter converter = new MappingJackson2MessageConverter();
+		Message<String> message = MessageBuilder.withPayload("foo")
+				.setHeader(MessageHeaders.CONTENT_TYPE, "application/vnd.springframework.type+json").build();
+		assertThat(converter.supportsMimeType(message.getHeaders())).isTrue();
 	}
 
 	@Test
@@ -107,7 +123,7 @@ class MappingJackson2MessageConverterTests {
 	}
 
 	@Test  // gh-22386
-	public void fromMessageMatchingInstance() {
+	void fromMessageMatchingInstance() {
 		MyBean myBean = new MyBean();
 		MappingJackson2MessageConverter converter = new MappingJackson2MessageConverter();
 		Message<?> message = MessageBuilder.withPayload(myBean).build();
@@ -133,7 +149,7 @@ class MappingJackson2MessageConverterTests {
 	}
 
 	@Test  // SPR-16252
-	public void fromMessageToList() throws Exception {
+	void fromMessageToList() throws Exception {
 		MappingJackson2MessageConverter converter = new MappingJackson2MessageConverter();
 		String payload = "[1, 2, 3, 4, 5, 6, 7, 8, 9]";
 		Message<?> message = MessageBuilder.withPayload(payload.getBytes(StandardCharsets.UTF_8)).build();
@@ -147,7 +163,7 @@ class MappingJackson2MessageConverterTests {
 	}
 
 	@Test  // SPR-16486
-	public void fromMessageToMessageWithPojo() throws Exception {
+	void fromMessageToMessageWithPojo() throws Exception {
 		MappingJackson2MessageConverter converter = new MappingJackson2MessageConverter();
 		String payload = "{\"string\":\"foo\"}";
 		Message<?> message = MessageBuilder.withPayload(payload.getBytes(StandardCharsets.UTF_8)).build();

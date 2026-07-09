@@ -7,4 +7,7 @@
  * dependencies on CGLIB at the application level or from third-party
  * libraries and frameworks.
  */
+@NullUnmarked
 package org.springframework.cglib;
+
+import org.jspecify.annotations.NullUnmarked;

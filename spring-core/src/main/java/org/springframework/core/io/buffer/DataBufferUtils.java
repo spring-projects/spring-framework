@@ -1138,9 +1138,11 @@ public abstract class DataBufferUtils {
 		protected void hookOnNext(DataBuffer dataBuffer) {
 			try {
 				try (DataBuffer.ByteBufferIterator iterator = dataBuffer.readableByteBuffers()) {
-					ByteBuffer byteBuffer = iterator.next();
-					while (byteBuffer.hasRemaining()) {
-						this.channel.write(byteBuffer);
+					while (iterator.hasNext()) {
+						ByteBuffer byteBuffer = iterator.next();
+						while (byteBuffer.hasRemaining()) {
+							this.channel.write(byteBuffer);
+						}
 					}
 				}
 				this.sink.next(dataBuffer);
@@ -1205,7 +1207,18 @@ public abstract class DataBufferUtils {
 				long pos = this.position.get();
 				Attachment attachment = new Attachment(byteBuffer, dataBuffer, iterator);
 				this.writing.set(true);
-				this.channel.write(byteBuffer, pos, attachment, this);
+				try {
+					this.channel.write(byteBuffer, pos, attachment, this);
+				}
+				catch (RuntimeException ex) {
+					// If the exception escapes, route it to the failure handler
+					failed(ex, attachment);
+				}
+			}
+			else {
+				iterator.close();
+				this.sink.next(dataBuffer);
+				request(1);
 			}
 		}
 
@@ -1230,7 +1243,6 @@ public abstract class DataBufferUtils {
 		@Override
 		public void completed(Integer written, Attachment attachment) {
 			DataBuffer.ByteBufferIterator iterator = attachment.iterator();
-			iterator.close();
 
 			long pos = this.position.addAndGet(written);
 			ByteBuffer byteBuffer = attachment.byteBuffer();
@@ -1240,9 +1252,11 @@ public abstract class DataBufferUtils {
 			}
 			else if (iterator.hasNext()) {
 				ByteBuffer next = iterator.next();
-				this.channel.write(next, pos, attachment, this);
+				Attachment nextAttachment = new Attachment(next, attachment.dataBuffer(), iterator);
+				this.channel.write(next, pos, nextAttachment, this);
 			}
 			else {
+				iterator.close();
 				this.sink.next(attachment.dataBuffer());
 				this.writing.set(false);
 

@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 
 import static java.util.Map.entry;
@@ -27,6 +28,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Arjen Poutsma
+ * @author Yanming Zhou
  */
 class FilteredMapTests {
 
@@ -99,5 +101,16 @@ class FilteredMapTests {
 
 		Set<String> keySet = filtered.keySet();
 		assertThat(keySet).containsExactlyInAnyOrder("foo", "quux");
+	}
+
+	@Test
+	void nullable() {
+		Map<String, @Nullable String> map = new HashMap<>();
+		map.put("foo", null);
+		map.put("bar", "bar");
+		map.put("baz", "baz");
+		FilteredMap<String, @Nullable String> filtered = new FilteredMap<>(map, s -> !s.equals("baz"));
+
+		assertThat(filtered).containsEntry("foo", null).containsEntry("bar", "bar").doesNotContainKeys("baz");
 	}
 }

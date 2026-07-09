@@ -31,6 +31,7 @@ import org.springframework.util.ClassUtils;
  * {@link AbstractEntityManagerFactoryBean} and {@link SharedEntityManagerCreator} are registered.
  *
  * @author Sebastien Deleuze
+ * @author Juergen Hoeller
  * @since 6.0
  */
 class EntityManagerRuntimeHints implements RuntimeHintsRegistrar {
@@ -44,6 +45,12 @@ class EntityManagerRuntimeHints implements RuntimeHintsRegistrar {
 
 	// As of Hibernate 7.1
 	private static final String SQM_QUERY_IMPL_CLASS_NAME = "org.hibernate.query.sqm.internal.SqmQueryImpl";
+
+	// As of Hibernate 8.0
+	private static final String SELECTION_QUERY_IMPL_CLASS_NAME = "org.hibernate.query.internal.SelectionQueryImpl";
+
+	// As of Hibernate 8.0
+	private static final String MUTATION_QUERY_IMPL_CLASS_NAME = "org.hibernate.query.internal.MutationQueryImpl";
 
 	private static final String NATIVE_QUERY_IMPL_CLASS_NAME = "org.hibernate.query.sql.internal.NativeQueryImpl";
 
@@ -72,6 +79,18 @@ class EntityManagerRuntimeHints implements RuntimeHintsRegistrar {
 		}
 		try {
 			Class<?> clazz = ClassUtils.forName(SQM_QUERY_IMPL_CLASS_NAME, classLoader);
+			hints.proxies().registerJdkProxy(ClassUtils.getAllInterfacesForClass(clazz, classLoader));
+		}
+		catch (ClassNotFoundException ignored) {
+		}
+		try {
+			Class<?> clazz = ClassUtils.forName(SELECTION_QUERY_IMPL_CLASS_NAME, classLoader);
+			hints.proxies().registerJdkProxy(ClassUtils.getAllInterfacesForClass(clazz, classLoader));
+		}
+		catch (ClassNotFoundException ignored) {
+		}
+		try {
+			Class<?> clazz = ClassUtils.forName(MUTATION_QUERY_IMPL_CLASS_NAME, classLoader);
 			hints.proxies().registerJdkProxy(ClassUtils.getAllInterfacesForClass(clazz, classLoader));
 		}
 		catch (ClassNotFoundException ignored) {

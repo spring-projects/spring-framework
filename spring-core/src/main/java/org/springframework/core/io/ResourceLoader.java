@@ -42,18 +42,47 @@ import org.springframework.util.ResourceUtils;
  */
 public interface ResourceLoader {
 
-	/** Pseudo URL prefix for loading from the class path: "classpath:". */
+	/**
+	 * Pseudo URL prefix for loading from the class path: {@value}.
+	 * <p>This retrieves the "nearest" matching resource in the classpath.
+	 * @see ClassLoader#getResource
+	 */
 	String CLASSPATH_URL_PREFIX = ResourceUtils.CLASSPATH_URL_PREFIX;
+
+	/**
+	 * Pseudo URL prefix for all matching resources from the class path: {@value}.
+	 * <p>This differs from the common {@link #CLASSPATH_URL_PREFIX "classpath:"} prefix
+	 * in that it retrieves all matching resources for a given path. For example, to
+	 * locate all "messages.properties" files in the root of all deployed JAR files
+	 * you can use the location pattern {@code "classpath*:/messages.properties"}.
+	 * <p>As of Spring Framework 6.0, the semantics for the {@code "classpath*:"}
+	 * prefix have been expanded to include the module path as well as the class path.
+	 * <p>As of Spring Framework 7.1, this prefix is supported for {@link #getResource}
+	 * calls as well (exposing a multi-content resource handle), rather than just for
+	 * {@link org.springframework.core.io.support.ResourcePatternResolver#getResources}.
+	 * @since 7.1 (previously only declared on the
+	 * {@link org.springframework.core.io.support.ResourcePatternResolver} sub-interface)
+	 * @see ClassLoader#getResources
+	 * @see Resource#consumeContent
+	 */
+	String CLASSPATH_ALL_URL_PREFIX = "classpath*:";
 
 
 	/**
 	 * Return a {@code Resource} handle for the specified resource location.
 	 * <p>The handle should always be a reusable resource descriptor,
 	 * allowing for multiple {@link Resource#getInputStream()} calls.
-	 * <p><ul>
-	 * <li>Must support fully qualified URLs, for example, "file:C:/test.dat".
-	 * <li>Must support classpath pseudo-URLs, for example, "classpath:test.dat".
-	 * <li>Should support relative file paths, for example, "WEB-INF/test.dat".
+	 * <ul>
+	 * <li>Must support fully qualified URLs, for example, "file:C:/test.properties".
+	 * <li>Must support classpath pseudo-URLs, for example, "classpath:test.properties".
+	 * (Exposing the "nearest" resource in the classpath; see {@link ClassLoader#getResource}.)
+	 * <li>Should support classpath-all URLs, for example, "classpath*:test.properties".
+	 * (If supported, the returned {@code Resource} needs to expose the entire content of
+	 * all same-named resources in the classpath through {@link Resource#consumeContent};
+	 * see {@link ClassLoader#getResources}.
+	 * For individual access to each such matching resource in the classpath, use
+	 * {@link org.springframework.core.io.support.ResourcePatternResolver#getResources}.)
+	 * <li>Should support relative file paths, for example, "WEB-INF/test.properties".
 	 * (This will be implementation-specific, typically provided by an
 	 * ApplicationContext implementation.)
 	 * </ul>
@@ -62,8 +91,9 @@ public interface ResourceLoader {
 	 * @param location the resource location
 	 * @return a corresponding {@code Resource} handle (never {@code null})
 	 * @see #CLASSPATH_URL_PREFIX
+	 * @see #CLASSPATH_ALL_URL_PREFIX
 	 * @see Resource#exists()
-	 * @see Resource#getInputStream()
+	 * @see Resource#consumeContent
 	 */
 	Resource getResource(String location);
 

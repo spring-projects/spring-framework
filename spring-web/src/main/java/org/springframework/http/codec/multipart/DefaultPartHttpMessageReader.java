@@ -34,6 +34,7 @@ import reactor.core.scheduler.Schedulers;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.DecodingException;
 import org.springframework.core.io.buffer.DataBufferLimitException;
+import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.http.MediaType;
 import org.springframework.http.ReactiveHttpInputMessage;
 import org.springframework.http.codec.HttpMessageReader;
@@ -75,7 +76,6 @@ public class DefaultPartHttpMessageReader extends LoggingCodecSupport implements
 
 	/**
 	 * Configure the maximum amount of memory that is allowed per headers section of each part.
-	 * When the limit
 	 * @param byteCount the maximum amount of memory for headers
 	 */
 	public void setMaxHeadersSize(int byteCount) {
@@ -93,8 +93,8 @@ public class DefaultPartHttpMessageReader extends LoggingCodecSupport implements
 	 * Configure the maximum amount of memory allowed per part.
 	 * When the limit is exceeded:
 	 * <ul>
-	 * <li>file parts are written to a temporary file.
-	 * <li>non-file parts are rejected with {@link DataBufferLimitException}.
+	 * <li>File parts are written to a temporary file.
+	 * <li>Non-file parts are rejected with {@link DataBufferLimitException}.
 	 * </ul>
 	 * <p>By default this is set to 256K.
 	 * @param maxInMemorySize the in-memory limit in bytes; if set to -1 the entire
@@ -158,7 +158,7 @@ public class DefaultPartHttpMessageReader extends LoggingCodecSupport implements
 
 	/**
 	 * Set the character set used to decode headers.
-	 * Defaults to UTF-8 as per RFC 7578.
+	 * <p>Defaults to UTF-8 as per RFC 7578.
 	 * @param headersCharset the charset to use for decoding headers
 	 * @since 5.3.6
 	 * @see <a href="https://tools.ietf.org/html/rfc7578#section-5.1">RFC-7578 Section 5.1</a>
@@ -201,8 +201,14 @@ public class DefaultPartHttpMessageReader extends LoggingCodecSupport implements
 					.windowUntil(MultipartParser.Token::isLast)
 					.concatMap(partsTokens -> {
 						if (tooManyParts(partCount)) {
-							return Mono.error(new DecodingException("Too many parts (" + partCount.get() + "/" +
-									this.maxParts + " allowed)"));
+							return partsTokens
+									.doOnNext(token -> {
+										if (token instanceof MultipartParser.BodyToken bodyToken) {
+											DataBufferUtils.release(bodyToken.buffer());
+										}
+									})
+									.then(Mono.error(new DecodingException("Too many parts (" + partCount.get() + "/" +
+											this.maxParts + " allowed)")));
 						}
 						else {
 							return PartGenerator.createPart(partsTokens,
@@ -217,6 +223,5 @@ public class DefaultPartHttpMessageReader extends LoggingCodecSupport implements
 		int count = partCount.incrementAndGet();
 		return this.maxParts > 0 && count > this.maxParts;
 	}
-
 
 }

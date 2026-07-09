@@ -60,7 +60,7 @@ class ClassFileTransformerAdapter implements ClassFileTransformer {
 		synchronized (this) {
 			if (this.currentlyTransforming) {
 				// Defensively back out when called from within the transform delegate below:
-				// in particular, for the over-eager transformer implementation in Hibernate 5.
+				// in particular, for the over-eager transformer implementation in Hibernate.
 				return null;
 			}
 

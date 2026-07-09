@@ -190,7 +190,7 @@ class ResourceHttpRequestHandlerTests {
 		}
 
 		@Test
-		void testResourceNotFound() {
+		void resourceNotFound() {
 			for (HttpMethod method : HttpMethod.values()) {
 				this.request = new MockHttpServletRequest("GET", "");
 				this.request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "not-there.css");

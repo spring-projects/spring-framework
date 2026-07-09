@@ -33,6 +33,7 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -621,12 +622,12 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 	 * <p>A 'required' dependency means that autowiring should fail when no beans
 	 * are found. Otherwise, the autowiring process will simply bypass the field
 	 * or method when no beans are found.
-	 * @param ann the Autowired annotation
+	 * @param ann a {@link MergedAnnotation} representing the Autowired annotation
 	 * @return whether the annotation indicates that a dependency is required
 	 */
 	protected boolean determineRequiredStatus(MergedAnnotation<?> ann) {
-		return (ann.getValue(this.requiredParameterName).isEmpty() ||
-				this.requiredParameterValue == ann.getBoolean(this.requiredParameterName));
+		Optional<Boolean> requiredAttribute = ann.getValue(this.requiredParameterName, Boolean.class);
+		return (requiredAttribute.isEmpty() || this.requiredParameterValue == requiredAttribute.get());
 	}
 
 	/**

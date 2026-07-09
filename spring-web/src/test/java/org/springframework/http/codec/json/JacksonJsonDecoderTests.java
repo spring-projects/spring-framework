@@ -75,7 +75,7 @@ class JacksonJsonDecoderTests extends AbstractDecoderTests<JacksonJsonDecoder> {
 
 	@Test
 	@Override
-	public void canDecode() {
+	protected void canDecode() {
 		assertThat(decoder.canDecode(ResolvableType.forClass(Pojo.class), APPLICATION_JSON)).isTrue();
 		assertThat(decoder.canDecode(ResolvableType.forClass(Pojo.class), APPLICATION_NDJSON)).isTrue();
 		assertThat(decoder.canDecode(ResolvableType.forClass(Pojo.class), null)).isTrue();

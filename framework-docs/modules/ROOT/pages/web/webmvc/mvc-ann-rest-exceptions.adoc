@@ -32,9 +32,9 @@ any `@RequestMapping` method to render an RFC 9457 response. This is processed a
 - The `status` property of `ProblemDetail` determines the HTTP status.
 - The `instance` property of `ProblemDetail` is set from the current URL path, if not
 already set.
-- For content negotiation, the Jackson `HttpMessageConverter` prefers
-"application/problem+json" over "application/json" when rendering a `ProblemDetail`,
-and also falls back on it if no compatible media type is found.
+- The Jackson JSON and XML codecs use "application/problem+json" or
+"application/problem+xml" respectively as the producible media types for `ProblemDetail`
+to ensure they are favored for content negotiation.
 
 To enable RFC 9457 responses for Spring MVC exceptions and for any
 `ErrorResponseException`, extend `ResponseEntityExceptionHandler` and declare it as an
@@ -65,6 +65,13 @@ The copy constructor in `ProblemDetail` allows a subclass to make it easy to be 
 from an existing `ProblemDetail`. This could be done centrally, for example, from an
 `@ControllerAdvice` such as `ResponseEntityExceptionHandler` that re-creates the
 `ProblemDetail` of an exception into a subclass with the additional non-standard fields.
+
+TIP: In Spring Boot, the `spring.mvc.problemdetails.enabled` property autoconfigures
+a `ResponseEntityExceptionHandler` that handles built-in exceptions with problem details.
+In that case, you may prefer to create another `@ControllerAdvice` instead of extending
+`ResponseEntityExceptionHandler` if you want to take over the handling of a specific
+built-in exception. You'll need to ensure your handler is ordered ahead of the one
+configured by Spring Boot whose order is 0.
 
 
 [[mvc-ann-rest-exceptions-i18n]]
@@ -184,7 +191,7 @@ Message codes and arguments for each error are also resolved via `MessageSource`
 |===
 
 NOTE: Unlike other exceptions, the message arguments for
-`MethodArgumentValidException` and `HandlerMethodValidationException` are based on a list of
+`MethodArgumentNotValidException` and `HandlerMethodValidationException` are based on a list of
 `MessageSourceResolvable` errors that can also be customized through a
 xref:core/beans/context-introduction.adoc#context-functionality-messagesource[MessageSource]
 resource bundle. See

@@ -36,7 +36,7 @@ import static org.mockito.Mockito.verify;
 class JndiTemplateTests {
 
 	@Test
-	void testLookupSucceeds() throws Exception {
+	void lookupSucceeds() throws Exception {
 		Object o = new Object();
 		String name = "foo";
 		final Context context = mock();
@@ -55,7 +55,7 @@ class JndiTemplateTests {
 	}
 
 	@Test
-	void testLookupFails() throws Exception {
+	void lookupFails() throws Exception {
 		NameNotFoundException ne = new NameNotFoundException();
 		String name = "foo";
 		final Context context = mock();
@@ -74,7 +74,7 @@ class JndiTemplateTests {
 	}
 
 	@Test
-	void testLookupReturnsNull() throws Exception {
+	void lookupReturnsNull() throws Exception {
 		String name = "foo";
 		final Context context = mock();
 		given(context.lookup(name)).willReturn(null);
@@ -92,7 +92,7 @@ class JndiTemplateTests {
 	}
 
 	@Test
-	void testLookupFailsWithTypeMismatch() throws Exception {
+	void lookupFailsWithTypeMismatch() throws Exception {
 		Object o = new Object();
 		String name = "foo";
 		final Context context = mock();
@@ -111,7 +111,7 @@ class JndiTemplateTests {
 	}
 
 	@Test
-	void testBind() throws Exception {
+	void bind() throws Exception {
 		Object o = new Object();
 		String name = "foo";
 		final Context context = mock();
@@ -129,7 +129,7 @@ class JndiTemplateTests {
 	}
 
 	@Test
-	void testRebind() throws Exception {
+	void rebind() throws Exception {
 		Object o = new Object();
 		String name = "foo";
 		final Context context = mock();
@@ -147,7 +147,7 @@ class JndiTemplateTests {
 	}
 
 	@Test
-	void testUnbind() throws Exception {
+	void unbind() throws Exception {
 		String name = "something";
 		final Context context = mock();
 

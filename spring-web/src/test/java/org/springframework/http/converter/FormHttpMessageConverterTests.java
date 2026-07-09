@@ -16,33 +16,16 @@
 
 package org.springframework.http.converter;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
-import java.util.LinkedHashMap;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.xml.transform.Source;
-import javax.xml.transform.stream.StreamSource;
-
-import org.apache.tomcat.util.http.fileupload.FileItem;
-import org.apache.tomcat.util.http.fileupload.FileUpload;
-import org.apache.tomcat.util.http.fileupload.RequestContext;
-import org.apache.tomcat.util.http.fileupload.UploadContext;
-import org.apache.tomcat.util.http.fileupload.disk.DiskFileItemFactory;
 import org.junit.jupiter.api.Test;
 
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.Resource;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
+import org.springframework.core.ResolvableType;
 import org.springframework.http.MediaType;
-import org.springframework.http.StreamingHttpOutputMessage;
-import org.springframework.http.converter.support.AllEncompassingFormHttpMessageConverter;
-import org.springframework.http.converter.xml.SourceHttpMessageConverter;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.testfixture.http.MockHttpInputMessage;
@@ -52,86 +35,123 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED;
-import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.http.MediaType.MULTIPART_FORM_DATA;
 import static org.springframework.http.MediaType.MULTIPART_MIXED;
 import static org.springframework.http.MediaType.MULTIPART_RELATED;
-import static org.springframework.http.MediaType.TEXT_XML;
 
 /**
- * Tests for {@link FormHttpMessageConverter} and
- * {@link AllEncompassingFormHttpMessageConverter}.
+ * Tests for {@link FormHttpMessageConverter}.
  *
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
  * @author Sam Brannen
  * @author Sebastien Deleuze
+ * @author Brian Clozel
  */
 class FormHttpMessageConverterTests {
 
-	private final FormHttpMessageConverter converter = new AllEncompassingFormHttpMessageConverter();
+	private static final ResolvableType LINKED_MULTI_VALUE_MAP =
+			ResolvableType.forClassWithGenerics(LinkedMultiValueMap.class, String.class, String.class);
 
+	private static final ResolvableType MULTI_VALUE_MAP =
+			ResolvableType.forClassWithGenerics(MultiValueMap.class, String.class, String.class);
+
+	private static final ResolvableType MAP =
+			ResolvableType.forClassWithGenerics(Map.class, String.class, String.class);
+
+	private final FormHttpMessageConverter converter = new FormHttpMessageConverter();
 
 	@Test
-	void canRead() {
-		assertCanRead(MultiValueMap.class, null);
-		assertCanRead(APPLICATION_FORM_URLENCODED);
+	void cannotReadToMapsWhenMediaTypeMissing() {
+		assertCannotRead(MAP, null);
+		assertCannotRead(MULTI_VALUE_MAP, null);
+		assertCannotRead(LINKED_MULTI_VALUE_MAP, null);
+		// without generics
+		assertCannotRead(ResolvableType.forClass(Map.class), null);
+		assertCannotRead(ResolvableType.forClass(MultiValueMap.class), null);
+		assertCannotRead(ResolvableType.forClass(LinkedMultiValueMap.class), null);
+	}
 
-		assertCannotRead(String.class, null);
-		assertCannotRead(String.class, APPLICATION_FORM_URLENCODED);
+	@Test
+	void canReadToMapTypes() {
+		assertCanRead(MAP, APPLICATION_FORM_URLENCODED);
+		assertCanRead(MULTI_VALUE_MAP, APPLICATION_FORM_URLENCODED);
+		assertCanRead(LINKED_MULTI_VALUE_MAP, APPLICATION_FORM_URLENCODED);
+		// without generics
+		assertCanRead(ResolvableType.forClass(Map.class), APPLICATION_FORM_URLENCODED);
+		assertCanRead(ResolvableType.forClass(MultiValueMap.class), APPLICATION_FORM_URLENCODED);
+		assertCanRead(ResolvableType.forClass(LinkedMultiValueMap.class), APPLICATION_FORM_URLENCODED);
 	}
 
 	@Test
 	void cannotReadMultipart() {
 		// Without custom multipart types supported
-		asssertCannotReadMultipart();
+		assertCannotReadMultipart();
 
 		// Should still be the case with custom multipart types supported
-		asssertCannotReadMultipart();
+		assertCannotReadMultipart();
 	}
 
 	@Test
 	void canWrite() {
 		assertCanWrite(APPLICATION_FORM_URLENCODED);
-		assertCanWrite(MULTIPART_FORM_DATA);
-		assertCanWrite(MULTIPART_MIXED);
-		assertCanWrite(MULTIPART_RELATED);
-		assertCanWrite(new MediaType("multipart", "form-data", UTF_8));
-		assertCanWrite(MediaType.ALL);
-		assertCanWrite(null);
+		assertCannotWrite(MediaType.ALL);
+	}
+
+
+	@Test
+	void canWriteMapTypes() {
+		assertCanWrite(MAP, APPLICATION_FORM_URLENCODED);
+		assertCanWrite(MULTI_VALUE_MAP, APPLICATION_FORM_URLENCODED);
+		assertCanWrite(LINKED_MULTI_VALUE_MAP, APPLICATION_FORM_URLENCODED);
+		// without generics
+		assertCanWrite(ResolvableType.forClass(Map.class), APPLICATION_FORM_URLENCODED);
+		assertCanWrite(ResolvableType.forClass(MultiValueMap.class), APPLICATION_FORM_URLENCODED);
+		assertCanWrite(ResolvableType.forClass(LinkedMultiValueMap.class), APPLICATION_FORM_URLENCODED);
 	}
 
 	@Test
-	void setSupportedMediaTypes() {
-		this.converter.setSupportedMediaTypes(List.of(MULTIPART_FORM_DATA));
+	void cannotWriteMultipart() {
+		assertCannotWrite(MULTIPART_FORM_DATA);
 		assertCannotWrite(MULTIPART_MIXED);
-
-		this.converter.setSupportedMediaTypes(List.of(MULTIPART_MIXED));
-		assertCanWrite(MULTIPART_MIXED);
+		assertCannotWrite(MULTIPART_RELATED);
+		assertCannotWrite(new MediaType("multipart", "form-data", UTF_8));
+		assertCannotWrite(null);
 	}
 
 	@Test
-	void addSupportedMediaTypes() {
-		this.converter.setSupportedMediaTypes(List.of(MULTIPART_FORM_DATA));
-		assertCannotWrite(MULTIPART_MIXED);
-
-		this.converter.addSupportedMediaTypes(MULTIPART_RELATED);
-		assertCanWrite(MULTIPART_RELATED);
-	}
-
-	@Test
-	void readForm() throws Exception {
+	@SuppressWarnings("unchecked")
+	void readFormAsMultiValueMap() throws Exception {
 		String body = "name+1=value+1&name+2=value+2%2B1&name+2=value+2%2B2&name+3";
 		MockHttpInputMessage inputMessage = new MockHttpInputMessage(body.getBytes(StandardCharsets.ISO_8859_1));
 		inputMessage.getHeaders().setContentType(
 				new MediaType("application", "x-www-form-urlencoded", StandardCharsets.ISO_8859_1));
-		MultiValueMap<String, String> result = this.converter.read(null, inputMessage);
+		Object result = this.converter.read(ResolvableType.forClass(MultiValueMap.class), inputMessage, null);
 
-		assertThat(result).as("Invalid result").hasSize(3);
-		assertThat(result.getFirst("name 1")).as("Invalid result").isEqualTo("value 1");
-		List<String> values = result.get("name 2");
+		assertThat(result).isInstanceOf(MultiValueMap.class);
+		MultiValueMap<String, String> form = (MultiValueMap<String, String>) result;
+		assertThat(form).as("Invalid result").hasSize(3);
+		assertThat(form.getFirst("name 1")).as("Invalid result").isEqualTo("value 1");
+		List<String> values = form.get("name 2");
 		assertThat(values).as("Invalid result").containsExactly("value 2+1", "value 2+2");
-		assertThat(result.getFirst("name 3")).as("Invalid result").isNull();
+		assertThat(form.getFirst("name 3")).as("Invalid result").isNull();
+	}
+
+	@Test
+	@SuppressWarnings("unchecked")
+	void readFormAsMap() throws Exception {
+		String body = "name+1=value+1&name+2=value+2&name+3";
+		MockHttpInputMessage inputMessage = new MockHttpInputMessage(body.getBytes(StandardCharsets.ISO_8859_1));
+		inputMessage.getHeaders().setContentType(
+				new MediaType("application", "x-www-form-urlencoded", StandardCharsets.ISO_8859_1));
+		Object result = this.converter.read(ResolvableType.forClass(Map.class), inputMessage, null);
+
+		assertThat(result).isInstanceOf(Map.class);
+		Map<String, String> form = (Map<String, String>) result;
+		assertThat(form).as("Invalid result").hasSize(3);
+		assertThat(form.get("name 1")).as("Invalid result").isEqualTo("value 1");
+		assertThat(form.get("name 2")).as("Invalid result").isEqualTo("value 2");
+		assertThat(form.get("name 3")).as("Invalid result").isNull();
 	}
 
 	@Test
@@ -156,7 +176,7 @@ class FormHttpMessageConverterTests {
 	}
 
 	@Test
-	void writeForm() throws IOException {
+	void writeFormFromMultiValueMap() throws IOException {
 		MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
 		body.set("name 1", "value 1");
 		body.add("name 2", "value 2+1");
@@ -174,245 +194,26 @@ class FormHttpMessageConverterTests {
 	}
 
 	@Test
-	void writeMultipart() throws Exception {
-
-		MultiValueMap<String, Object> parts = new LinkedMultiValueMap<>();
-		parts.add("name 1", "value 1");
-		parts.add("name 2", "value 2+1");
-		parts.add("name 2", "value 2+2");
-		parts.add("name 3", null);
-
-		Resource logo = new ClassPathResource("/org/springframework/http/converter/logo.jpg");
-		parts.add("logo", logo);
-
-		// SPR-12108
-		Resource utf8 = new ClassPathResource("/org/springframework/http/converter/logo.jpg") {
-			@Override
-			public String getFilename() {
-				return "Hall\u00F6le.jpg";
-			}
-		};
-		parts.add("utf8", utf8);
-
-		MyBean myBean = new MyBean();
-		myBean.setString("foo");
-		HttpHeaders entityHeaders = new HttpHeaders();
-		entityHeaders.setContentType(APPLICATION_JSON);
-		HttpEntity<MyBean> entity = new HttpEntity<>(myBean, entityHeaders);
-		parts.add("json", entity);
-
-		Map<String, String> parameters = new LinkedHashMap<>(2);
-		parameters.put("charset", UTF_8.name());
-		parameters.put("foo", "bar");
-
-		StreamingMockHttpOutputMessage outputMessage = new StreamingMockHttpOutputMessage();
-		this.converter.write(parts, new MediaType("multipart", "form-data", parameters), outputMessage);
-
-		final MediaType contentType = outputMessage.getHeaders().getContentType();
-		assertThat(contentType.getParameters()).containsKeys("charset", "boundary", "foo"); // gh-21568, gh-25839
-
-		// see if Commons FileUpload can read what we wrote
-		FileUpload fileUpload = new FileUpload();
-		fileUpload.setFileItemFactory(new DiskFileItemFactory());
-		RequestContext requestContext = new MockHttpOutputMessageRequestContext(outputMessage);
-		List<FileItem> items = fileUpload.parseRequest(requestContext);
-		assertThat(items).hasSize(6);
-		FileItem item = items.get(0);
-		assertThat(item.isFormField()).isTrue();
-		assertThat(item.getFieldName()).isEqualTo("name 1");
-		assertThat(item.getString()).isEqualTo("value 1");
-
-		item = items.get(1);
-		assertThat(item.isFormField()).isTrue();
-		assertThat(item.getFieldName()).isEqualTo("name 2");
-		assertThat(item.getString()).isEqualTo("value 2+1");
-
-		item = items.get(2);
-		assertThat(item.isFormField()).isTrue();
-		assertThat(item.getFieldName()).isEqualTo("name 2");
-		assertThat(item.getString()).isEqualTo("value 2+2");
-
-		item = items.get(3);
-		assertThat(item.isFormField()).isFalse();
-		assertThat(item.getFieldName()).isEqualTo("logo");
-		assertThat(item.getName()).isEqualTo("logo.jpg");
-		assertThat(item.getContentType()).isEqualTo("image/jpeg");
-		assertThat(item.getSize()).isEqualTo(logo.getFile().length());
-
-		item = items.get(4);
-		assertThat(item.isFormField()).isFalse();
-		assertThat(item.getFieldName()).isEqualTo("utf8");
-		assertThat(item.getName()).isEqualTo("Hall\u00F6le.jpg");
-		assertThat(item.getContentType()).isEqualTo("image/jpeg");
-		assertThat(item.getSize()).isEqualTo(logo.getFile().length());
-
-		item = items.get(5);
-		assertThat(item.getFieldName()).isEqualTo("json");
-		assertThat(item.getContentType()).isEqualTo("application/json");
-
-		assertThat(outputMessage.wasRepeatable()).isTrue();
-	}
-
-	@Test
-	void writeMultipartWithSourceHttpMessageConverter() throws Exception {
-
-		converter.setPartConverters(List.of(
-				new StringHttpMessageConverter(),
-				new ResourceHttpMessageConverter(),
-				new SourceHttpMessageConverter<>()));
-
-		MultiValueMap<String, Object> parts = new LinkedMultiValueMap<>();
-		parts.add("name 1", "value 1");
-		parts.add("name 2", "value 2+1");
-		parts.add("name 2", "value 2+2");
-		parts.add("name 3", null);
-
-		Resource logo = new ClassPathResource("/org/springframework/http/converter/logo.jpg");
-		parts.add("logo", logo);
-
-		// SPR-12108
-		Resource utf8 = new ClassPathResource("/org/springframework/http/converter/logo.jpg") {
-			@Override
-			public String getFilename() {
-				return "Hall\u00F6le.jpg";
-			}
-		};
-		parts.add("utf8", utf8);
-
-		Source xml = new StreamSource(new StringReader("<root><child/></root>"));
-		HttpHeaders entityHeaders = new HttpHeaders();
-		entityHeaders.setContentType(TEXT_XML);
-		HttpEntity<Source> entity = new HttpEntity<>(xml, entityHeaders);
-		parts.add("xml", entity);
-
-		Map<String, String> parameters = new LinkedHashMap<>(2);
-		parameters.put("charset", UTF_8.name());
-		parameters.put("foo", "bar");
-
-		StreamingMockHttpOutputMessage outputMessage = new StreamingMockHttpOutputMessage();
-		this.converter.write(parts, new MediaType("multipart", "form-data", parameters), outputMessage);
-
-		final MediaType contentType = outputMessage.getHeaders().getContentType();
-		assertThat(contentType.getParameters()).containsKeys("charset", "boundary", "foo"); // gh-21568, gh-25839
-
-		// see if Commons FileUpload can read what we wrote
-		FileUpload fileUpload = new FileUpload();
-		fileUpload.setFileItemFactory(new DiskFileItemFactory());
-		RequestContext requestContext = new MockHttpOutputMessageRequestContext(outputMessage);
-		List<FileItem> items = fileUpload.parseRequest(requestContext);
-		assertThat(items).hasSize(6);
-		FileItem item = items.get(0);
-		assertThat(item.isFormField()).isTrue();
-		assertThat(item.getFieldName()).isEqualTo("name 1");
-		assertThat(item.getString()).isEqualTo("value 1");
-
-		item = items.get(1);
-		assertThat(item.isFormField()).isTrue();
-		assertThat(item.getFieldName()).isEqualTo("name 2");
-		assertThat(item.getString()).isEqualTo("value 2+1");
-
-		item = items.get(2);
-		assertThat(item.isFormField()).isTrue();
-		assertThat(item.getFieldName()).isEqualTo("name 2");
-		assertThat(item.getString()).isEqualTo("value 2+2");
-
-		item = items.get(3);
-		assertThat(item.isFormField()).isFalse();
-		assertThat(item.getFieldName()).isEqualTo("logo");
-		assertThat(item.getName()).isEqualTo("logo.jpg");
-		assertThat(item.getContentType()).isEqualTo("image/jpeg");
-		assertThat(item.getSize()).isEqualTo(logo.getFile().length());
-
-		item = items.get(4);
-		assertThat(item.isFormField()).isFalse();
-		assertThat(item.getFieldName()).isEqualTo("utf8");
-		assertThat(item.getName()).isEqualTo("Hall\u00F6le.jpg");
-		assertThat(item.getContentType()).isEqualTo("image/jpeg");
-		assertThat(item.getSize()).isEqualTo(logo.getFile().length());
-
-		item = items.get(5);
-		assertThat(item.getFieldName()).isEqualTo("xml");
-		assertThat(item.getContentType()).isEqualTo("text/xml");
-
-		assertThat(outputMessage.wasRepeatable()).isFalse();
-	}
-
-	@Test  // SPR-13309
-	public void writeMultipartOrder() throws Exception {
-		MyBean myBean = new MyBean();
-		myBean.setString("foo");
-
-		MultiValueMap<String, Object> parts = new LinkedMultiValueMap<>();
-		parts.add("part1", myBean);
-
-		HttpHeaders entityHeaders = new HttpHeaders();
-		entityHeaders.setContentType(TEXT_XML);
-		HttpEntity<MyBean> entity = new HttpEntity<>(myBean, entityHeaders);
-		parts.add("part2", entity);
-
+	void writeFormFromMap() throws IOException {
+		Map<String, String> body = new HashMap<>();
+		body.put("name 1", "value 1");
+		body.put("name 2", "value 2");
 		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
-		this.converter.setMultipartCharset(UTF_8);
-		this.converter.write(parts, new MediaType("multipart", "form-data", UTF_8), outputMessage);
+		this.converter.write(body, APPLICATION_FORM_URLENCODED, outputMessage);
 
-		final MediaType contentType = outputMessage.getHeaders().getContentType();
-		assertThat(contentType.getParameter("boundary")).as("No boundary found").isNotNull();
-
-		// see if Commons FileUpload can read what we wrote
-		FileUpload fileUpload = new FileUpload();
-		fileUpload.setFileItemFactory(new DiskFileItemFactory());
-		RequestContext requestContext = new MockHttpOutputMessageRequestContext(outputMessage);
-		List<FileItem> items = fileUpload.parseRequest(requestContext);
-		assertThat(items).hasSize(2);
-
-		FileItem item = items.get(0);
-		assertThat(item.isFormField()).isTrue();
-		assertThat(item.getFieldName()).isEqualTo("part1");
-		assertThat(item.getString()).isEqualTo("{\"string\":\"foo\"}");
-
-		item = items.get(1);
-		assertThat(item.isFormField()).isTrue();
-		assertThat(item.getFieldName()).isEqualTo("part2");
-
-		// With developer builds we get: <MyBean><string>foo</string></MyBean>
-		// But on CI server we get: <MyBean xmlns=""><string>foo</string></MyBean>
-		// So... we make a compromise:
-		assertThat(item.getString())
-				.startsWith("<MyBean")
-				.endsWith("><string>foo</string></MyBean>");
+		assertThat(outputMessage.getBodyAsString(UTF_8))
+				.as("Invalid result").isEqualTo("name+2=value+2&name+1=value+1");
+		assertThat(outputMessage.getHeaders().getContentType())
+				.as("Invalid content-type").isEqualTo(APPLICATION_FORM_URLENCODED);
+		assertThat(outputMessage.getHeaders().getContentLength())
+				.as("Invalid content-length").isEqualTo(outputMessage.getBodyAsBytes().length);
 	}
 
-	@Test
-	void writeMultipartCharset() throws Exception {
-		MultiValueMap<String, Object> parts = new LinkedMultiValueMap<>();
-		Resource logo = new ClassPathResource("/org/springframework/http/converter/logo.jpg");
-		parts.add("logo", logo);
-
-		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
-		this.converter.write(parts, MULTIPART_FORM_DATA, outputMessage);
-
-		MediaType contentType = outputMessage.getHeaders().getContentType();
-		Map<String, String> parameters = contentType.getParameters();
-		assertThat(parameters).containsOnlyKeys("boundary");
-
-		this.converter.setCharset(StandardCharsets.ISO_8859_1);
-
-		outputMessage = new MockHttpOutputMessage();
-		this.converter.write(parts, MULTIPART_FORM_DATA, outputMessage);
-
-		parameters = outputMessage.getHeaders().getContentType().getParameters();
-		assertThat(parameters).containsOnlyKeys("boundary", "charset");
-		assertThat(parameters).containsEntry("charset", "ISO-8859-1");
+	private void assertCanRead(ResolvableType type, MediaType mediaType) {
+		assertThat(this.converter.canRead(type, mediaType)).as(type.toClass().getSimpleName() + " : " + mediaType).isTrue();
 	}
 
-	private void assertCanRead(MediaType mediaType) {
-		assertCanRead(MultiValueMap.class, mediaType);
-	}
-
-	private void assertCanRead(Class<?> clazz, MediaType mediaType) {
-		assertThat(this.converter.canRead(clazz, mediaType)).as(clazz.getSimpleName() + " : " + mediaType).isTrue();
-	}
-
-	private void asssertCannotReadMultipart() {
+	private void assertCannotReadMultipart() {
 		assertCannotRead(new MediaType("multipart", "*"));
 		assertCannotRead(MULTIPART_FORM_DATA);
 		assertCannotRead(MULTIPART_MIXED);
@@ -420,21 +221,25 @@ class FormHttpMessageConverterTests {
 	}
 
 	private void assertCannotRead(MediaType mediaType) {
-		assertCannotRead(MultiValueMap.class, mediaType);
+		assertCannotRead(MULTI_VALUE_MAP, mediaType);
 	}
 
-	private void assertCannotRead(Class<?> clazz, MediaType mediaType) {
-		assertThat(this.converter.canRead(clazz, mediaType)).as(clazz.getSimpleName() + " : " + mediaType).isFalse();
+	private void assertCannotRead(ResolvableType type, MediaType mediaType) {
+		assertThat(this.converter.canRead(type, mediaType)).as(type + " : " + mediaType).isFalse();
+	}
+
+	private void assertCanWrite(ResolvableType type, MediaType mediaType) {
+		assertThat(this.converter.canWrite(type, LinkedMultiValueMap.class, mediaType))
+				.as(type + " : " + mediaType).isTrue();
 	}
 
 	private void assertCanWrite(MediaType mediaType) {
-		Class<?> clazz = MultiValueMap.class;
-		assertThat(this.converter.canWrite(clazz, mediaType)).as(clazz.getSimpleName() + " : " + mediaType).isTrue();
+		assertCanWrite(MULTI_VALUE_MAP, mediaType);
 	}
 
 	private void assertCannotWrite(MediaType mediaType) {
-		Class<?> clazz = MultiValueMap.class;
-		assertThat(this.converter.canWrite(clazz, mediaType)).as(clazz.getSimpleName() + " : " + mediaType).isFalse();
+		assertThat(this.converter.canWrite(MULTI_VALUE_MAP, MultiValueMap.class, mediaType))
+				.as(MultiValueMap.class.getSimpleName() + " : " + mediaType).isFalse();
 	}
 
 	private void assertInvalidFormIsRejectedWithSpecificException(String body) {
@@ -442,80 +247,10 @@ class FormHttpMessageConverterTests {
 		inputMessage.getHeaders().setContentType(
 				new MediaType("application", "x-www-form-urlencoded", StandardCharsets.ISO_8859_1));
 
-		assertThatThrownBy(() -> this.converter.read(null, inputMessage))
+		assertThatThrownBy(() -> this.converter.read(MULTI_VALUE_MAP, inputMessage, null))
 				.isInstanceOf(HttpMessageNotReadableException.class)
 				.hasCauseInstanceOf(IllegalArgumentException.class)
 				.hasMessage("Could not decode HTTP form payload");
-	}
-
-
-	private static class StreamingMockHttpOutputMessage extends MockHttpOutputMessage implements StreamingHttpOutputMessage {
-
-		private boolean repeatable;
-
-		public boolean wasRepeatable() {
-			return this.repeatable;
-		}
-
-		@Override
-		public void setBody(Body body) {
-			try {
-				this.repeatable = body.repeatable();
-				body.writeTo(getBody());
-			}
-			catch (IOException ex) {
-				throw new RuntimeException(ex);
-			}
-		}
-	}
-
-
-	private static class MockHttpOutputMessageRequestContext implements UploadContext {
-
-		private final MockHttpOutputMessage outputMessage;
-
-		private final byte[] body;
-
-		private MockHttpOutputMessageRequestContext(MockHttpOutputMessage outputMessage) {
-			this.outputMessage = outputMessage;
-			this.body = this.outputMessage.getBodyAsBytes();
-		}
-
-		@Override
-		public String getCharacterEncoding() {
-			MediaType type = this.outputMessage.getHeaders().getContentType();
-			return (type != null && type.getCharset() != null ? type.getCharset().name() : null);
-		}
-
-		@Override
-		public String getContentType() {
-			MediaType type = this.outputMessage.getHeaders().getContentType();
-			return (type != null ? type.toString() : null);
-		}
-
-		@Override
-		public InputStream getInputStream() {
-			return new ByteArrayInputStream(body);
-		}
-
-		@Override
-		public long contentLength() {
-			return body.length;
-		}
-	}
-
-
-	public static class MyBean {
-
-		private String string;
-
-		public String getString() {
-			return this.string;
-		}
-
-		public void setString(String string) {
-			this.string = string;
-		}
 	}
 
 }

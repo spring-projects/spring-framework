@@ -28,7 +28,7 @@ import reactor.core.publisher.Mono
  * @author Sebastien Deleuze
  */
 @Suppress("DEPRECATION")
-suspend fun <T> RowsFetchSpec<T>.awaitOne(): T {
+suspend fun <T : Any> RowsFetchSpec<T>.awaitOne(): T {
 	return one().awaitSingleOrNull() ?: throw EmptyResultDataAccessException(1)
 }
 
@@ -38,7 +38,7 @@ suspend fun <T> RowsFetchSpec<T>.awaitOne(): T {
  * @author Sebastien Deleuze
  */
 @Suppress("DEPRECATION")
-suspend fun <T> RowsFetchSpec<T>.awaitOneOrNull(): T? =
+suspend fun <T : Any> RowsFetchSpec<T>.awaitOneOrNull(): T? =
 		one().awaitSingleOrNull()
 
 /**
@@ -48,7 +48,7 @@ suspend fun <T> RowsFetchSpec<T>.awaitOneOrNull(): T? =
  * @author Sebastien Deleuze
  */
 @Suppress("DEPRECATION")
-suspend fun <T> RowsFetchSpec<T>.awaitSingle(): T {
+suspend fun <T : Any> RowsFetchSpec<T>.awaitSingle(): T {
 	return first().awaitSingleOrNull() ?: throw EmptyResultDataAccessException(1)
 }
 
@@ -58,7 +58,7 @@ suspend fun <T> RowsFetchSpec<T>.awaitSingle(): T {
  * @author Sebastien Deleuze
  */
 @Suppress("DEPRECATION")
-suspend fun <T> RowsFetchSpec<T>.awaitSingleOrNull(): T? =
+suspend fun <T : Any> RowsFetchSpec<T>.awaitSingleOrNull(): T? =
 		first().awaitSingleOrNull()
 
 /**

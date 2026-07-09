@@ -309,7 +309,8 @@ set of multiple matches for the specific bean type (as returned by the factory m
 
 Note that the standard `jakarta.annotation.Priority` annotation is not available at the
 `@Bean` level, since it cannot be declared on methods. Its semantics can be modeled
-through `@Order` values in combination with `@Primary` on a single bean for each type.
+through `@Order` values in combination with `@Primary` or `@Fallback` on a single bean
+for each type.
 ====
 
 Even typed `Map` instances can be autowired as long as the expected key type is `String`.

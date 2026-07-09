@@ -20,14 +20,14 @@ import java.io.IOException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
-import com.github.benmanes.caffeine.cache.Caffeine;
 import org.junit.jupiter.api.Test;
 
+import org.springframework.core.OverridingClassLoader;
 import org.springframework.core.type.AbstractAnnotationMetadataTests;
 import org.springframework.core.type.AnnotationMetadata;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
  * Tests for {@link SimpleAnnotationMetadata} and
@@ -41,9 +41,8 @@ class SimpleAnnotationMetadataTests extends AbstractAnnotationMetadataTests {
 	@Override
 	protected AnnotationMetadata get(Class<?> source) {
 		try {
-			return new SimpleMetadataReaderFactory(
-					source.getClassLoader()).getMetadataReader(
-							source.getName()).getAnnotationMetadata();
+			return new SimpleMetadataReaderFactory(source.getClassLoader())
+					.getMetadataReader(source.getName()).getAnnotationMetadata();
 		}
 		catch (IOException ex) {
 			throw new IllegalStateException(ex);
@@ -51,19 +50,47 @@ class SimpleAnnotationMetadataTests extends AbstractAnnotationMetadataTests {
 	}
 
 	@Test
-	void getClassAttributeWhenUnknownClass() {
-		var annotation = get(WithClassMissingFromClasspath.class).getAnnotations().get(ClassAttributes.class);
-		assertThat(annotation.getStringArray("types")).contains("com.github.benmanes.caffeine.cache.Caffeine");
-		assertThatIllegalArgumentException().isThrownBy(() -> annotation.getClassArray("types"));
+	void getClassAttributeWhenUnknownClass() throws IOException {
+		var classLoader = new FilteringClassLoader(getClass().getClassLoader());
+		var mergedAnnotation = new SimpleMetadataReaderFactory(classLoader)
+				.getMetadataReader(WithClassMissingFromClasspath.class.getName())
+				.getAnnotationMetadata()
+				.getAnnotations()
+				.get(ClassAttributes.class);
+		assertThat(mergedAnnotation.getStringArray("types")).contains("javax.annotation.meta.When");
+		assertThatExceptionOfType(TypeNotPresentException.class)
+				.isThrownBy(() -> mergedAnnotation.getClassArray("types"))
+				.withMessageContaining("javax.annotation.meta.When");
 	}
 
-	@ClassAttributes(types = {Caffeine.class})
-	public static class WithClassMissingFromClasspath {
+
+	private static class FilteringClassLoader extends OverridingClassLoader {
+
+		FilteringClassLoader(ClassLoader parent) {
+			super(parent);
+		}
+
+		@Override
+		protected boolean isEligibleForOverriding(String className) {
+			return className.startsWith("javax.annotation.");
+		}
+
+		@Override
+		protected Class<?> loadClassForOverriding(String name) throws ClassNotFoundException {
+			throw new ClassNotFoundException(name);
+		}
+	}
+
+
+	@ClassAttributes(types = {javax.annotation.meta.When.class})
+	@javax.annotation.Nonnull(when = javax.annotation.meta.When.MAYBE)
+	static class WithClassMissingFromClasspath {
 	}
 
 
 	@Retention(RetentionPolicy.RUNTIME)
-	public @interface ClassAttributes {
+	@interface ClassAttributes {
+
 		Class<?>[] types();
 	}
 

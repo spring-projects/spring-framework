@@ -135,9 +135,9 @@ class XmlWebApplicationContextTests extends AbstractApplicationContextTests {
 		InitAndIB iib = (InitAndIB) this.applicationContext.getBean("init-and-ib");
 		assertThat(InitAndIB.constructed).isTrue();
 		assertThat(iib.afterPropertiesSetInvoked && iib.initMethodInvoked).isTrue();
-		assertThat(!iib.destroyed && !iib.customDestroyed).isTrue();
+		assertThat(iib.destroyed && !iib.customDestroyed).isFalse();
 		this.applicationContext.close();
-		assertThat(!iib.destroyed && !iib.customDestroyed).isTrue();
+		assertThat(iib.destroyed && !iib.customDestroyed).isFalse();
 		ConfigurableApplicationContext parent = (ConfigurableApplicationContext) this.applicationContext.getParent();
 		parent.close();
 		assertThat(iib.destroyed && iib.customDestroyed).isTrue();

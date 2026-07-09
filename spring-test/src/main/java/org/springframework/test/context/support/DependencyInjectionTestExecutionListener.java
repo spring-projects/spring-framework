@@ -151,10 +151,11 @@ public class DependencyInjectionTestExecutionListener extends AbstractTestExecut
 	 */
 	protected void injectDependencies(TestContext testContext) throws Exception {
 		Object bean = testContext.getTestInstance();
-		Class<?> clazz = testContext.getTestClass();
+		String beanName = testContext.getTestClass().getName() + AutowireCapableBeanFactory.ORIGINAL_INSTANCE_SUFFIX;
+
 		AutowireCapableBeanFactory beanFactory = testContext.getApplicationContext().getAutowireCapableBeanFactory();
 		beanFactory.autowireBeanProperties(bean, AutowireCapableBeanFactory.AUTOWIRE_NO, false);
-		beanFactory.initializeBean(bean, clazz.getName() + AutowireCapableBeanFactory.ORIGINAL_INSTANCE_SUFFIX);
+		beanFactory.initializeBean(bean, beanName);
 		testContext.removeAttribute(REINJECT_DEPENDENCIES_ATTRIBUTE);
 	}
 

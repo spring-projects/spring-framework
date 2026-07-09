@@ -36,10 +36,10 @@ import static org.springframework.http.MediaType.TEXT_EVENT_STREAM;
  *
  * @author Rossen Stoyanchev
  */
-public class ReactiveReturnTypeTests {
+class ReactiveReturnTypeTests {
 
 	@Test
-	public void sseWithFlux() {
+	void sseWithFlux() {
 
 		WebTestClient testClient =
 				MockMvcWebTestClient.bindToController(new ReactiveController()).build();

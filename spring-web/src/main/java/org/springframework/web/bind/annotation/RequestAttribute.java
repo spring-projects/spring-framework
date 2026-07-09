@@ -57,9 +57,9 @@ public @interface RequestAttribute {
 	/**
 	 * Whether the request attribute is required.
 	 * <p>Defaults to {@code true}, leading to an exception being thrown if
-	 * the attribute is missing. Switch this to {@code false} if you prefer
-	 * a {@code null} or Java 8 {@code java.util.Optional} if the attribute
-	 * doesn't exist.
+	 * the attribute is missing.
+	 * <p>Switch this to {@code false} if you prefer a {@code null} or
+	 * {@code java.util.Optional} if the attribute does not exist.
 	 */
 	boolean required() default true;
 

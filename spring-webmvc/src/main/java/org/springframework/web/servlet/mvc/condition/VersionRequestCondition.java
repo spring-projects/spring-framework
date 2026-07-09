@@ -25,6 +25,7 @@ import org.jspecify.annotations.Nullable;
 
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
+import org.springframework.web.accept.ApiVersionHolder;
 import org.springframework.web.accept.ApiVersionStrategy;
 import org.springframework.web.accept.NotAcceptableApiVersionException;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -98,11 +99,16 @@ public final class VersionRequestCondition extends AbstractRequestCondition<Vers
 
 	@Override
 	public @Nullable VersionRequestCondition getMatchingCondition(HttpServletRequest request) {
-		Comparable<?> requestVersion = (Comparable<?>) request.getAttribute(HandlerMapping.API_VERSION_ATTRIBUTE);
-
-		if (this.version == null || requestVersion == null) {
+		if (this.version == null) {
 			return this;
 		}
+
+		ApiVersionHolder versionHolder = (ApiVersionHolder) request.getAttribute(HandlerMapping.API_VERSION_ATTRIBUTE);
+		if (!versionHolder.hasVersion()) {
+			return this;
+		}
+
+		Comparable<?> requestVersion = versionHolder.getVersion();
 
 		// Always use a baseline match here in order to select the highest version (baseline or fixed)
 		// The fixed version match is enforced at the end in handleMatch()
@@ -129,8 +135,8 @@ public final class VersionRequestCondition extends AbstractRequestCondition<Vers
 		else {
 			// Prefer mappings with a version unless the request is without a version
 			int result = this.version != null ? -1 : 1;
-			Comparable<?> version = (Comparable<?>) request.getAttribute(HandlerMapping.API_VERSION_ATTRIBUTE);
-			return (version == null ? -1 * result : result);
+			ApiVersionHolder holder = (ApiVersionHolder) request.getAttribute(HandlerMapping.API_VERSION_ATTRIBUTE);
+			return (!holder.hasVersion() ? -1 * result : result);
 		}
 	}
 
@@ -150,7 +156,8 @@ public final class VersionRequestCondition extends AbstractRequestCondition<Vers
 	 */
 	public void handleMatch(HttpServletRequest request) {
 		if (this.version != null && !this.baselineVersion) {
-			Comparable<?> version = (Comparable<?>) request.getAttribute(HandlerMapping.API_VERSION_ATTRIBUTE);
+			ApiVersionHolder holder = (ApiVersionHolder) request.getAttribute(HandlerMapping.API_VERSION_ATTRIBUTE);
+			Comparable<?> version = holder.getVersionIfPresent();
 			if (version != null && !this.version.equals(version)) {
 				throw new NotAcceptableApiVersionException(version.toString());
 			}

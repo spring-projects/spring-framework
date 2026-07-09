@@ -16,6 +16,8 @@
 
 package org.springframework.core.convert.support;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.ConditionalConverter;
 import org.springframework.core.convert.converter.Converter;
@@ -43,7 +45,7 @@ import org.springframework.util.NumberUtils;
 final class NumberToNumberConverterFactory implements ConverterFactory<Number, Number>, ConditionalConverter {
 
 	@Override
-	public <T extends Number> Converter<Number, T> getConverter(Class<T> targetType) {
+	public <T extends Number> Converter<Number, @Nullable T> getConverter(Class<T> targetType) {
 		return new NumberToNumber<>(targetType);
 	}
 

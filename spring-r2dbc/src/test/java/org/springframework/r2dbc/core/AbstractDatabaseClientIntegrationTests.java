@@ -47,7 +47,7 @@ abstract class AbstractDatabaseClientIntegrationTests {
 
 
 	@BeforeEach
-	public void before() {
+	protected void before() {
 		connectionFactory = createConnectionFactory();
 
 		Mono.from(connectionFactory.create())

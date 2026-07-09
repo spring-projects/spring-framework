@@ -20,7 +20,9 @@ import java.util.stream.Stream;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.Parameter;
+import org.junit.jupiter.params.ParameterizedClass;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -45,14 +47,21 @@ import static org.junit.jupiter.params.provider.Arguments.argumentSet;
  * @author Sam Brannen
  * @since 2.5
  */
+@ParameterizedClass
+@MethodSource("contextConfigurationLocationsData")
 class GenericXmlContextLoaderResourceLocationsTests {
 
 	private static final Log logger = LogFactory.getLog(GenericXmlContextLoaderResourceLocationsTests.class);
 
+	@Parameter(0)
+	Class<?> testClass;
 
-	@ParameterizedTest
-	@MethodSource("contextConfigurationLocationsData")
-	void assertContextConfigurationLocations(Class<?> testClass, String[] expectedLocations) {
+	@Parameter(1)
+	String[] expectedLocations;
+
+
+	@Test
+	void assertContextConfigurationLocations() {
 		ContextConfiguration contextConfig = testClass.getAnnotation(ContextConfiguration.class);
 		String[] configuredLocations = contextConfig.value();
 		ContextConfigurationAttributes configAttributes =

@@ -28,6 +28,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
+import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.UrlResource;
@@ -36,6 +37,7 @@ import org.springframework.http.converter.json.JacksonJsonHttpMessageConverter;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
+import org.springframework.web.servlet.config.annotation.ApiVersionConfigurer;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.PathMatchConfigurer;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
@@ -121,7 +123,7 @@ class ResourceHttpRequestHandlerIntegrationTests {
 	}
 
 	@Test
-	void testNoResourceFoundException() throws Exception {
+	void noResourceFoundException() throws Exception {
 		AnnotationConfigWebApplicationContext context = new AnnotationConfigWebApplicationContext();
 		context.setServletConfig(this.servletConfig);
 		context.register(WebConfig.class);
@@ -147,6 +149,29 @@ class ResourceHttpRequestHandlerIntegrationTests {
 				"title":"Not Found"\
 				}\
 				""");
+	}
+
+	@Test // gh-36059
+	void invalidApiVersion() throws Exception {
+		AnnotationConfigWebApplicationContext context = new AnnotationConfigWebApplicationContext();
+		context.setServletConfig(this.servletConfig);
+		context.register(WebConfig.class, VersionConfig.class);
+		context.refresh();
+
+		DispatcherServlet servlet = new DispatcherServlet();
+		servlet.setApplicationContext(context);
+		servlet.init(this.servletConfig);
+
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/cp/test/foo.css");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+
+		request.addHeader("API-Version", "Invalid");
+
+		servlet.service(request, response);
+
+		assertThat(response.getStatus()).isEqualTo(200);
+		assertThat(response.getContentType()).isEqualTo("text/css");
+		assertThat(response.getContentAsString()).isEqualTo("h1 { color:red; }");
 	}
 
 	private DispatcherServlet initDispatcherServlet(
@@ -255,6 +280,16 @@ class ResourceHttpRequestHandlerIntegrationTests {
 
 	@ControllerAdvice
 	private static class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
+	}
+
+
+	@Configuration
+	static class VersionConfig implements WebMvcConfigurer {
+
+		@Override
+		public void configureApiVersioning(ApiVersionConfigurer configurer) {
+			configurer.useRequestHeader("API-Version");
+		}
 	}
 
 }

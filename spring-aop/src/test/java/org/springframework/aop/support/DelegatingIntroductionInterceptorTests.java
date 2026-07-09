@@ -47,14 +47,14 @@ import static org.mockito.Mockito.mock;
 class DelegatingIntroductionInterceptorTests {
 
 	@Test
-	void testNullTarget() {
+	void nullTarget() {
 		// Shouldn't accept null target
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				new DelegatingIntroductionInterceptor(null));
 	}
 
 	@Test
-	void testIntroductionInterceptorWithDelegation() {
+	void introductionInterceptorWithDelegation() {
 		TestBean raw = new TestBean();
 		assertThat(raw).isNotInstanceOf(TimeStamped.class);
 		ProxyFactory factory = new ProxyFactory(raw);
@@ -70,7 +70,7 @@ class DelegatingIntroductionInterceptorTests {
 	}
 
 	@Test
-	void testIntroductionInterceptorWithInterfaceHierarchy() {
+	void introductionInterceptorWithInterfaceHierarchy() {
 		TestBean raw = new TestBean();
 		assertThat(raw).isNotInstanceOf(SubTimeStamped.class);
 		ProxyFactory factory = new ProxyFactory(raw);
@@ -86,7 +86,7 @@ class DelegatingIntroductionInterceptorTests {
 	}
 
 	@Test
-	void testIntroductionInterceptorWithSuperInterface() {
+	void introductionInterceptorWithSuperInterface() {
 		TestBean raw = new TestBean();
 		assertThat(raw).isNotInstanceOf(TimeStamped.class);
 		ProxyFactory factory = new ProxyFactory(raw);
@@ -103,7 +103,7 @@ class DelegatingIntroductionInterceptorTests {
 	}
 
 	@Test
-	void testAutomaticInterfaceRecognitionInDelegate() throws Exception {
+	void automaticInterfaceRecognitionInDelegate() throws Exception {
 		final long t = 1001L;
 		class Tester implements TimeStamped, ITester {
 			@Override
@@ -133,7 +133,7 @@ class DelegatingIntroductionInterceptorTests {
 
 
 	@Test
-	void testAutomaticInterfaceRecognitionInSubclass() throws Exception {
+	void automaticInterfaceRecognitionInSubclass() throws Exception {
 		final long t = 1001L;
 		@SuppressWarnings("serial")
 		class TestII extends DelegatingIntroductionInterceptor implements TimeStamped, ITester {
@@ -178,7 +178,7 @@ class DelegatingIntroductionInterceptorTests {
 	}
 
 	@Test
-	void testIntroductionInterceptorDoesNotReplaceToString() {
+	void introductionInterceptorDoesNotReplaceToString() {
 		TestBean raw = new TestBean();
 		assertThat(raw).isNotInstanceOf(TimeStamped.class);
 		ProxyFactory factory = new ProxyFactory(raw);
@@ -199,7 +199,7 @@ class DelegatingIntroductionInterceptorTests {
 	}
 
 	@Test
-	void testDelegateReturnsThisIsMassagedToReturnProxy() {
+	void delegateReturnsThisIsMassagedToReturnProxy() {
 		NestedTestBean target = new NestedTestBean();
 		String company = "Interface21";
 		target.setCompany(company);
@@ -220,7 +220,7 @@ class DelegatingIntroductionInterceptorTests {
 	}
 
 	@Test
-	void testSerializableDelegatingIntroductionInterceptorSerializable() throws Exception {
+	void serializableDelegatingIntroductionInterceptorSerializable() throws Exception {
 		SerializablePerson serializableTarget = new SerializablePerson();
 		String name = "Tony";
 		serializableTarget.setName("Tony");
@@ -245,7 +245,7 @@ class DelegatingIntroductionInterceptorTests {
 
 	// Test when target implements the interface: should get interceptor by preference.
 	@Test
-	void testIntroductionMasksTargetImplementation() {
+	void introductionMasksTargetImplementation() {
 		final long t = 1001L;
 		@SuppressWarnings("serial")
 		class TestII extends DelegatingIntroductionInterceptor implements TimeStamped {

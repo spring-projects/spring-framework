@@ -34,7 +34,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * Tests for {@link MockMultipartHttpServletRequestBuilder}.
  * @author Rossen Stoyanchev
  */
-public class MockMultipartHttpServletRequestBuilderTests {
+class MockMultipartHttpServletRequestBuilderTests {
 
 	@Test // gh-26166
 	void addFileAndParts() throws Exception {

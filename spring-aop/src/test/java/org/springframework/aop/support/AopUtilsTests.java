@@ -45,7 +45,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class AopUtilsTests {
 
 	@Test
-	void testPointcutCanNeverApply() {
+	void pointcutCanNeverApply() {
 		class TestPointcut extends StaticMethodMatcherPointcut {
 			@Override
 			public boolean matches(Method method, @Nullable Class<?> clazzy) {
@@ -58,13 +58,13 @@ class AopUtilsTests {
 	}
 
 	@Test
-	void testPointcutAlwaysApplies() {
+	void pointcutAlwaysApplies() {
 		assertThat(AopUtils.canApply(new DefaultPointcutAdvisor(new NopInterceptor()), Object.class)).isTrue();
 		assertThat(AopUtils.canApply(new DefaultPointcutAdvisor(new NopInterceptor()), TestBean.class)).isTrue();
 	}
 
 	@Test
-	void testPointcutAppliesToOneMethodOnObject() {
+	void pointcutAppliesToOneMethodOnObject() {
 		class TestPointcut extends StaticMethodMatcherPointcut {
 			@Override
 			public boolean matches(Method method, @Nullable Class<?> clazz) {
@@ -84,7 +84,7 @@ class AopUtilsTests {
 	 * that's subverted the singleton construction limitation.
 	 */
 	@Test
-	void testCanonicalFrameworkClassesStillCanonicalOnDeserialization() throws Exception {
+	void canonicalFrameworkClassesStillCanonicalOnDeserialization() throws Exception {
 		assertThat(SerializationTestUtils.serializeAndDeserialize(MethodMatcher.TRUE)).isSameAs(MethodMatcher.TRUE);
 		assertThat(SerializationTestUtils.serializeAndDeserialize(ClassFilter.TRUE)).isSameAs(ClassFilter.TRUE);
 		assertThat(SerializationTestUtils.serializeAndDeserialize(Pointcut.TRUE)).isSameAs(Pointcut.TRUE);
@@ -95,7 +95,7 @@ class AopUtilsTests {
 	}
 
 	@Test
-	void testInvokeJoinpointUsingReflection() throws Throwable {
+	void invokeJoinpointUsingReflection() throws Throwable {
 		String name = "foo";
 		TestBean testBean = new TestBean(name);
 		Method method = ReflectionUtils.findMethod(TestBean.class, "getName");

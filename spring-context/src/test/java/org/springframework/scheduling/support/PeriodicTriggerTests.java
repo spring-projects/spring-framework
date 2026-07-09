@@ -184,7 +184,7 @@ class PeriodicTriggerTests {
 	void equalsVerification() {
 		PeriodicTrigger trigger1 = new PeriodicTrigger(Duration.ofMillis(3000));
 		PeriodicTrigger trigger2 = new PeriodicTrigger(Duration.ofMillis(3000));
-		assertThat(trigger1.equals(new String("not a trigger"))).isFalse();
+		assertThat(trigger1).isNotEqualTo(new String("not a trigger"));
 		assertThat(trigger1).isNotEqualTo(null);
 		assertThat(trigger1).isEqualTo(trigger1);
 		assertThat(trigger2).isEqualTo(trigger2);

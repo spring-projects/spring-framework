@@ -79,8 +79,7 @@ class ResourceHandlerFunctionTests {
 
 		Mono<Void> result = responseMono.flatMap(response -> {
 			assertThat(response.statusCode()).isEqualTo(HttpStatus.OK);
-			boolean condition = response instanceof EntityResponse;
-			assertThat(condition).isTrue();
+			assertThat(response).isInstanceOf(EntityResponse.class);
 			@SuppressWarnings("unchecked")
 					EntityResponse<Resource> entityResponse = (EntityResponse<Resource>) response;
 			assertThat(entityResponse.entity()).isEqualTo(this.resource);
@@ -116,8 +115,7 @@ class ResourceHandlerFunctionTests {
 
 		Mono<Void> result = responseMono.flatMap(response -> {
 			assertThat(response.statusCode()).isEqualTo(HttpStatus.OK);
-			boolean condition = response instanceof EntityResponse;
-			assertThat(condition).isTrue();
+			assertThat(response).isInstanceOf(EntityResponse.class);
 			@SuppressWarnings("unchecked")
 			EntityResponse<Resource> entityResponse = (EntityResponse<Resource>) response;
 			assertThat(entityResponse.entity().getFilename()).isEqualTo(this.resource.getFilename());

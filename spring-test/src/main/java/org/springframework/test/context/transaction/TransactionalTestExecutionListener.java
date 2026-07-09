@@ -100,9 +100,8 @@ import org.springframework.util.StringUtils;
  * execute certain <em>set up</em> or <em>tear down</em> code outside a
  * transaction. {@code TransactionalTestExecutionListener} provides such
  * support for methods annotated with {@link BeforeTransaction @BeforeTransaction}
- * or {@link AfterTransaction @AfterTransaction}. As of Spring Framework 4.3,
- * {@code @BeforeTransaction} and {@code @AfterTransaction} may also be declared
- * on Java 8 based interface default methods.
+ * or {@link AfterTransaction @AfterTransaction}. {@code @BeforeTransaction} and
+ * {@code @AfterTransaction} may also be declared on interface default methods.
  *
  * <h3>Configuring a Transaction Manager</h3>
  * <p>{@code TransactionalTestExecutionListener} expects a

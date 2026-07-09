@@ -167,6 +167,13 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 	protected static final Log pageNotFoundLogger = LogFactory.getLog(PAGE_NOT_FOUND_LOG_CATEGORY);
 
 
+	private static final String DISCONNECTED_CLIENT_LOG_CATEGORY =
+			"org.springframework.web.servlet.handler.DisconnectedClient";
+
+	private static final DisconnectedClientHelper disconnectedClientHelper =
+			new DisconnectedClientHelper(DISCONNECTED_CLIENT_LOG_CATEGORY);
+
+
 	/**
 	 * Sets the {@linkplain #setOrder(int) order} to {@link #LOWEST_PRECEDENCE}.
 	 */
@@ -246,7 +253,7 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 				return handleAsyncRequestNotUsableException(
 						(AsyncRequestNotUsableException) ex, request, response, handler);
 			}
-			else if (DisconnectedClientHelper.isClientDisconnectedException(ex)) {
+			else if (disconnectedClientHelper.checkAndLogClientDisconnectedException(ex)) {
 				return handleDisconnectedClientException(ex, request, response, handler);
 			}
 		}
@@ -506,11 +513,11 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 	}
 
 	/**
-	 * Handle an Exception that indicates the client has gone away. This is
-	 * typically an {@link IOException} of a specific subtype or with a message
-	 * specific to the underlying Servlet container. Those are detected through
-	 * {@link DisconnectedClientHelper#isClientDisconnectedException(Throwable)}
-	 * <p>By default, do nothing since the response is not usable.
+	 * Handle an Exception that indicates the client has gone away as determined
+	 * via {@link DisconnectedClientHelper}.
+	 * <p>By default, as of 7.1 this method attempts to set the response status
+	 * to 500 in case the exception is due to a connection issue to a remote host,
+	 * as part of request handling, rather than to the client.
 	 * @param ex the {@code Exception} to be handled
 	 * @param request current HTTP request
 	 * @param response current HTTP response
@@ -522,6 +529,13 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 	protected ModelAndView handleDisconnectedClientException(
 			Exception ex, HttpServletRequest request, HttpServletResponse response, @Nullable Object handler) {
 
+		// Attempt to send 500 in case of onward (rather than client) connection issue
+		try {
+			sendServerError(ex, request, response);
+		}
+		catch (Exception ex2) {
+			// ignore
+		}
 		return new ModelAndView();
 	}
 

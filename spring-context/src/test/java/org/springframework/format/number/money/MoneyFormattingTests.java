@@ -55,7 +55,7 @@ class MoneyFormattingTests {
 
 
 	@Test
-	void testAmountAndUnit() {
+	void amountAndUnit() {
 		MoneyHolder bean = new MoneyHolder();
 		DataBinder binder = new DataBinder(bean);
 		binder.setConversionService(conversionService);
@@ -81,7 +81,7 @@ class MoneyFormattingTests {
 	}
 
 	@Test
-	void testAmountWithNumberFormat1() {
+	void amountWithNumberFormat1() {
 		FormattedMoneyHolder1 bean = new FormattedMoneyHolder1();
 		DataBinder binder = new DataBinder(bean);
 		binder.setConversionService(conversionService);
@@ -104,7 +104,7 @@ class MoneyFormattingTests {
 	}
 
 	@Test
-	void testAmountWithNumberFormat2() {
+	void amountWithNumberFormat2() {
 		FormattedMoneyHolder2 bean = new FormattedMoneyHolder2();
 		DataBinder binder = new DataBinder(bean);
 		binder.setConversionService(conversionService);
@@ -119,7 +119,7 @@ class MoneyFormattingTests {
 	}
 
 	@Test
-	void testAmountWithNumberFormat3() {
+	void amountWithNumberFormat3() {
 		FormattedMoneyHolder3 bean = new FormattedMoneyHolder3();
 		DataBinder binder = new DataBinder(bean);
 		binder.setConversionService(conversionService);
@@ -134,7 +134,7 @@ class MoneyFormattingTests {
 	}
 
 	@Test
-	void testAmountWithNumberFormat4() {
+	void amountWithNumberFormat4() {
 		FormattedMoneyHolder4 bean = new FormattedMoneyHolder4();
 		DataBinder binder = new DataBinder(bean);
 		binder.setConversionService(conversionService);
@@ -149,7 +149,7 @@ class MoneyFormattingTests {
 	}
 
 	@Test
-	void testAmountWithNumberFormat5() {
+	void amountWithNumberFormat5() {
 		FormattedMoneyHolder5 bean = new FormattedMoneyHolder5();
 		DataBinder binder = new DataBinder(bean);
 		binder.setConversionService(conversionService);

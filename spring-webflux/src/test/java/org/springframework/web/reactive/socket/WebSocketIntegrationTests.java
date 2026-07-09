@@ -16,7 +16,9 @@
 
 package org.springframework.web.reactive.socket;
 
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -27,21 +29,28 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.netty.http.client.WebsocketClientSpec;
 import reactor.util.retry.Retry;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.web.filter.reactive.ServerWebExchangeContextFilter;
 import org.springframework.web.reactive.HandlerMapping;
 import org.springframework.web.reactive.handler.SimpleUrlHandlerMapping;
+import org.springframework.web.reactive.socket.adapter.NettyWebSocketSessionSupport;
+import org.springframework.web.reactive.socket.client.JettyWebSocketClient;
+import org.springframework.web.reactive.socket.client.ReactorNettyWebSocketClient;
+import org.springframework.web.reactive.socket.client.TomcatWebSocketClient;
 import org.springframework.web.reactive.socket.client.WebSocketClient;
 import org.springframework.web.server.WebFilter;
 import org.springframework.web.testfixture.http.server.reactive.bootstrap.HttpServer;
 import org.springframework.web.testfixture.http.server.reactive.bootstrap.TomcatHttpServer;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 
 /**
  * Integration tests with server-side {@link WebSocketHandler}s.
@@ -186,6 +195,51 @@ class WebSocketIntegrationTests extends AbstractReactiveWebSocketIntegrationTest
 		assertThat(cookie.get()).isEqualTo("project=spring");
 	}
 
+	@ParameterizedWebSocketTest
+	void largePayload(WebSocketClient client, HttpServer server, Class<?> serverConfigClass) throws Exception {
+
+		int defaultFrameMaxSize = NettyWebSocketSessionSupport.DEFAULT_FRAME_MAX_SIZE;
+		int extendedLimit = 2 * defaultFrameMaxSize;
+
+		WebSocketClient extendedClient = extendLimits(client, extendedLimit);
+
+		startServer(extendedClient, server, serverConfigClass);
+
+		AtomicReference<Integer> payloadSizeRef = new AtomicReference<>();
+		assertThatCode(() -> extendedClient.execute(getUrl("/large-payload"),
+						session -> session.receive()
+								.map(WebSocketMessage::getPayload)
+								.map(DataBuffer::readableByteCount)
+								.reduce(Integer::sum)
+								.doOnNext(payloadSizeRef::set)
+								.then())
+				.block(TIMEOUT))
+				.doesNotThrowAnyException();
+
+		assertThat(payloadSizeRef.get()).isGreaterThan(defaultFrameMaxSize);
+		assertThat(payloadSizeRef.get()).isEqualTo(extendedLimit);
+	}
+
+	private WebSocketClient extendLimits(WebSocketClient client, int limit) {
+		if (client instanceof ReactorNettyWebSocketClient netty) {
+			client = new ReactorNettyWebSocketClient(
+					netty.getHttpClient(),
+					() -> WebsocketClientSpec.builder().maxFramePayloadLength(limit));
+		}
+
+		if (client instanceof TomcatWebSocketClient tomcat) {
+			tomcat.getWebSocketContainer().setDefaultMaxTextMessageBufferSize(limit);
+		}
+
+		if (client instanceof JettyWebSocketClient) {
+			org.eclipse.jetty.websocket.client.WebSocketClient jetty =
+					new org.eclipse.jetty.websocket.client.WebSocketClient();
+			jetty.setMaxTextMessageSize(limit);
+			client = new JettyWebSocketClient(jetty);
+		}
+
+		return client;
+	}
 
 	@Configuration
 	static class WebConfig {
@@ -198,6 +252,7 @@ class WebSocketIntegrationTests extends AbstractReactiveWebSocketIntegrationTest
 			map.put("/custom-header", new CustomHeaderHandler());
 			map.put("/close", new SessionClosingHandler());
 			map.put("/cookie", new CookieHandler());
+			map.put("/large-payload", new LargePayloadHandler());
 			return new SimpleUrlHandlerMapping(map);
 		}
 
@@ -274,4 +329,16 @@ class WebSocketIntegrationTests extends AbstractReactiveWebSocketIntegrationTest
 		}
 	}
 
+	private static class LargePayloadHandler implements WebSocketHandler {
+
+		@Override
+		public Mono<Void> handle(WebSocketSession session) {
+			int doubledFrameSize = 2 * NettyWebSocketSessionSupport.DEFAULT_FRAME_MAX_SIZE;
+			byte[] payload = new byte[doubledFrameSize];
+			Arrays.fill(payload, (byte) 'x');
+			String text = new String(payload, StandardCharsets.UTF_8);
+			WebSocketMessage message = session.textMessage(text);
+			return session.send(Mono.just(message));
+		}
+	}
 }

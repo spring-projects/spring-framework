@@ -31,6 +31,7 @@ import reactor.core.publisher.Mono;
 import reactor.core.publisher.Sinks;
 
 import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.client.reactive.ClientHttpConnector;
@@ -196,11 +197,21 @@ class WiretapConnector implements ClientHttpConnector {
 					//  1. Mock server never consumed request body (for example, error before read)
 					//  2. FluxExchangeResult: getResponseBodyContent called before getResponseBody
 					//noinspection ConstantConditions
-					(this.publisher != null ? this.publisher : this.publisherNested)
-							.onErrorMap(ex -> new IllegalStateException(
-									"Content has not been consumed, and " +
-											"an error was raised while attempting to produce it.", ex))
-							.subscribe();
+					if (this.publisher != null) {
+						this.publisher.doOnNext(DataBufferUtils::release)
+								.onErrorMap(ex -> new IllegalStateException(
+										"Content has not been consumed, and " +
+												"an error was raised while attempting to produce it.", ex))
+								.subscribe();
+					}
+					else if (this.publisherNested != null) {
+						this.publisherNested
+								.map(pub -> Flux.from(pub).doOnNext(DataBufferUtils::release))
+								.onErrorMap(ex -> new IllegalStateException(
+										"Content has not been consumed, and " +
+												"an error was raised while attempting to produce it.", ex))
+								.subscribe();
+					}
 				}
 				return this.content.asMono();
 			});

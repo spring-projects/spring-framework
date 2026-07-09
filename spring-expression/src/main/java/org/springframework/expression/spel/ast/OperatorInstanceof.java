@@ -62,6 +62,7 @@ public class OperatorInstanceof extends Operator {
 		Object leftValue = left.getValue();
 		Object rightValue = right.getValue();
 		BooleanTypedValue result;
+		state.trackOperation();
 		if (!(rightValue instanceof Class<?> rightClass)) {
 			throw new SpelEvaluationException(getRightOperand().getStartPosition(),
 					SpelMessage.INSTANCEOF_OPERATOR_NEEDS_CLASS_OPERAND,
@@ -71,7 +72,7 @@ public class OperatorInstanceof extends Operator {
 			result = BooleanTypedValue.FALSE;  // null is not an instanceof anything
 		}
 		else {
-			result = BooleanTypedValue.forValue(rightClass.isAssignableFrom(leftValue.getClass()));
+			result = BooleanTypedValue.forValue(rightClass.isInstance(leftValue));
 		}
 		this.type = rightClass;
 		if (rightOperand instanceof TypeReference) {

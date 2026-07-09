@@ -46,7 +46,7 @@ class AopUtilsKotlinTests {
 	@Test
 	fun `Invoking suspending function on bridged method should return Mono`() {
 		val value = "foo"
-		val bridgedMethod = ReflectionUtils.findMethod(WithInterface::class.java, "handle", Object::class.java, Continuation::class.java)!!
+		val bridgedMethod = ReflectionUtils.findMethod(WithInterface::class.java, "handle", Any::class.java, Continuation::class.java)!!
 		val continuation = Continuation<Any>(CoroutineName("test")) { }
 		val result = AopUtils.invokeJoinpointUsingReflection(WithInterface(), bridgedMethod, arrayOf(value, continuation))
 		assertThat(result).isInstanceOfSatisfying(Mono::class.java) {

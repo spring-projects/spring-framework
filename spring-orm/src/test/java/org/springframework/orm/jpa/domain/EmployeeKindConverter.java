@@ -17,7 +17,9 @@
 package org.springframework.orm.jpa.domain;
 
 import jakarta.persistence.AttributeConverter;
+import jakarta.persistence.Converter;
 
+@Converter(autoApply = true)
 public class EmployeeKindConverter implements AttributeConverter<EmployeeKind, String> {
 
 	@Override
@@ -37,4 +39,5 @@ public class EmployeeKindConverter implements AttributeConverter<EmployeeKind, S
 		}
 		return null;
 	}
+
 }

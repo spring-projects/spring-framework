@@ -113,7 +113,7 @@ class DateTimeFormattingTests {
 
 
 	@Test
-	void testBindLocalDate() {
+	void bindLocalDate() {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("localDate", "10/31/09");
 		binder.bind(propertyValues);
@@ -122,7 +122,7 @@ class DateTimeFormattingTests {
 	}
 
 	@Test
-	void testBindLocalDateWithISO() {
+	void bindLocalDateWithISO() {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("localDate", "2009-10-31");
 		binder.bind(propertyValues);
@@ -131,7 +131,7 @@ class DateTimeFormattingTests {
 	}
 
 	@Test
-	void testBindLocalDateWithSpecificStyle() {
+	void bindLocalDateWithSpecificStyle() {
 		DateTimeFormatterRegistrar registrar = new DateTimeFormatterRegistrar();
 		registrar.setDateStyle(FormatStyle.LONG);
 		setup(registrar);
@@ -143,7 +143,7 @@ class DateTimeFormattingTests {
 	}
 
 	@Test
-	void testBindLocalDateWithSpecificFormatter() {
+	void bindLocalDateWithSpecificFormatter() {
 		DateTimeFormatterRegistrar registrar = new DateTimeFormatterRegistrar();
 		registrar.setDateFormatter(DateTimeFormatter.ofPattern("yyyyMMdd"));
 		setup(registrar);
@@ -155,7 +155,7 @@ class DateTimeFormattingTests {
 	}
 
 	@Test
-	void testBindLocalDateArray() {
+	void bindLocalDateArray() {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("localDate", new String[] {"10/31/09"});
 		binder.bind(propertyValues);
@@ -163,7 +163,7 @@ class DateTimeFormattingTests {
 	}
 
 	@Test
-	void testBindLocalDateAnnotated() {
+	void bindLocalDateAnnotated() {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("styleLocalDate", "Oct 31, 2009");
 		binder.bind(propertyValues);
@@ -172,7 +172,7 @@ class DateTimeFormattingTests {
 	}
 
 	@Test
-	void testBindLocalDateAnnotatedWithError() {
+	void bindLocalDateAnnotatedWithError() {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("styleLocalDate", "Oct -31, 2009");
 		binder.bind(propertyValues);
@@ -181,7 +181,7 @@ class DateTimeFormattingTests {
 	}
 
 	@Test
-	void testBindNestedLocalDateAnnotated() {
+	void bindNestedLocalDateAnnotated() {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("children[0].styleLocalDate", "Oct 31, 2009");
 		binder.bind(propertyValues);
@@ -190,7 +190,7 @@ class DateTimeFormattingTests {
 	}
 
 	@Test
-	void testBindLocalDateAnnotatedWithDirectFieldAccess() {
+	void bindLocalDateAnnotatedWithDirectFieldAccess() {
 		binder.initDirectFieldAccess();
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("styleLocalDate", "Oct 31, 2009");
@@ -200,7 +200,7 @@ class DateTimeFormattingTests {
 	}
 
 	@Test
-	void testBindLocalDateAnnotatedWithDirectFieldAccessAndError() {
+	void bindLocalDateAnnotatedWithDirectFieldAccessAndError() {
 		binder.initDirectFieldAccess();
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("styleLocalDate", "Oct -31, 2009");
@@ -210,7 +210,7 @@ class DateTimeFormattingTests {
 	}
 
 	@Test
-	void testBindLocalDateFromJavaUtilCalendar() {
+	void bindLocalDateFromJavaUtilCalendar() {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("localDate", new GregorianCalendar(2009, 9, 31, 0, 0));
 		binder.bind(propertyValues);
@@ -219,7 +219,7 @@ class DateTimeFormattingTests {
 	}
 
 	@Test
-	void testBindLocalTime() {
+	void bindLocalTime() {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("localTime", "12:00%sPM".formatted(TIME_SEPARATOR));
 		binder.bind(propertyValues);
@@ -229,7 +229,7 @@ class DateTimeFormattingTests {
 	}
 
 	@Test
-	void testBindLocalTimeWithISO() {
+	void bindLocalTimeWithISO() {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("localTime", "12:00:00");
 		binder.bind(propertyValues);
@@ -239,7 +239,7 @@ class DateTimeFormattingTests {
 	}
 
 	@Test
-	void testBindLocalTimeWithSpecificStyle() {
+	void bindLocalTimeWithSpecificStyle() {
 		DateTimeFormatterRegistrar registrar = new DateTimeFormatterRegistrar();
 		registrar.setTimeStyle(FormatStyle.MEDIUM);
 		setup(registrar);
@@ -252,7 +252,7 @@ class DateTimeFormattingTests {
 	}
 
 	@Test
-	void testBindLocalTimeWithSpecificFormatter() {
+	void bindLocalTimeWithSpecificFormatter() {
 		DateTimeFormatterRegistrar registrar = new DateTimeFormatterRegistrar();
 		registrar.setTimeFormatter(DateTimeFormatter.ofPattern("HHmmss"));
 		setup(registrar);
@@ -264,7 +264,7 @@ class DateTimeFormattingTests {
 	}
 
 	@Test
-	void testBindLocalTimeAnnotated() {
+	void bindLocalTimeAnnotated() {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("styleLocalTime", "12:00:00%sPM".formatted(TIME_SEPARATOR));
 		binder.bind(propertyValues);
@@ -274,7 +274,7 @@ class DateTimeFormattingTests {
 	}
 
 	@Test
-	void testBindLocalTimeFromJavaUtilCalendar() {
+	void bindLocalTimeFromJavaUtilCalendar() {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("localTime", new GregorianCalendar(1970, 0, 0, 12, 0));
 		binder.bind(propertyValues);
@@ -284,7 +284,7 @@ class DateTimeFormattingTests {
 	}
 
 	@Test
-	void testBindLocalDateTime() {
+	void bindLocalDateTime() {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("localDateTime", LocalDateTime.of(2009, 10, 31, 12, 0));
 		binder.bind(propertyValues);
@@ -295,7 +295,7 @@ class DateTimeFormattingTests {
 	}
 
 	@Test
-	void testBindLocalDateTimeWithISO() {
+	void bindLocalDateTimeWithISO() {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("localDateTime", "2009-10-31T12:00:00");
 		binder.bind(propertyValues);
@@ -306,7 +306,7 @@ class DateTimeFormattingTests {
 	}
 
 	@Test
-	void testBindLocalDateTimeAnnotated() {
+	void bindLocalDateTimeAnnotated() {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("styleLocalDateTime", LocalDateTime.of(2009, 10, 31, 12, 0));
 		binder.bind(propertyValues);
@@ -317,7 +317,7 @@ class DateTimeFormattingTests {
 	}
 
 	@Test
-	void testBindLocalDateTimeFromJavaUtilCalendar() {
+	void bindLocalDateTimeFromJavaUtilCalendar() {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("localDateTime", new GregorianCalendar(2009, 9, 31, 12, 0));
 		binder.bind(propertyValues);
@@ -328,7 +328,7 @@ class DateTimeFormattingTests {
 	}
 
 	@Test
-	void testBindDateTimeWithSpecificStyle() {
+	void bindDateTimeWithSpecificStyle() {
 		DateTimeFormatterRegistrar registrar = new DateTimeFormatterRegistrar();
 		registrar.setDateTimeStyle(FormatStyle.MEDIUM);
 		setup(registrar);
@@ -342,7 +342,7 @@ class DateTimeFormattingTests {
 	}
 
 	@Test
-	void testBindPatternLocalDateTime() {
+	void bindPatternLocalDateTime() {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("patternLocalDateTime", "10/31/09 12:00 PM");
 		binder.bind(propertyValues);
@@ -351,7 +351,7 @@ class DateTimeFormattingTests {
 	}
 
 	@Test
-	void testBindDateTimeOverflow() {
+	void bindDateTimeOverflow() {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("patternLocalDateTime", "02/29/09 12:00 PM");
 		binder.bind(propertyValues);
@@ -359,7 +359,7 @@ class DateTimeFormattingTests {
 	}
 
 	@Test
-	void testBindISODate() {
+	void bindISODate() {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("isoLocalDate", "2009-10-31");
 		binder.bind(propertyValues);
@@ -398,7 +398,7 @@ class DateTimeFormattingTests {
 	}
 
 	@Test
-	void testBindISOTime() {
+	void bindISOTime() {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("isoLocalTime", "12:00:00");
 		binder.bind(propertyValues);
@@ -407,7 +407,7 @@ class DateTimeFormattingTests {
 	}
 
 	@Test
-	void testBindISOTimeWithZone() {
+	void bindISOTimeWithZone() {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("isoLocalTime", "12:00:00.000-05:00");
 		binder.bind(propertyValues);
@@ -416,7 +416,7 @@ class DateTimeFormattingTests {
 	}
 
 	@Test
-	void testBindISODateTime() {
+	void bindISODateTime() {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("isoLocalDateTime", "2009-10-31T12:00:00");
 		binder.bind(propertyValues);
@@ -425,7 +425,7 @@ class DateTimeFormattingTests {
 	}
 
 	@Test
-	void testBindISODateTimeWithZone() {
+	void bindISODateTimeWithZone() {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("isoLocalDateTime", "2009-10-31T12:00:00.000Z");
 		binder.bind(propertyValues);
@@ -434,7 +434,7 @@ class DateTimeFormattingTests {
 	}
 
 	@Test
-	void testBindInstant() {
+	void bindInstant() {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("instant", "2009-10-31T12:00:00.000Z");
 		binder.bind(propertyValues);
@@ -443,7 +443,7 @@ class DateTimeFormattingTests {
 	}
 
 	@Test
-	void testBindInstantAnnotated() {
+	void bindInstantAnnotated() {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("styleInstant", "2017-02-21T13:00");
 		binder.bind(propertyValues);
@@ -453,7 +453,7 @@ class DateTimeFormattingTests {
 
 	@Test
 	@SuppressWarnings("deprecation")
-	void testBindInstantFromJavaUtilDate() {
+	void bindInstantFromJavaUtilDate() {
 		TimeZone defaultZone = TimeZone.getDefault();
 		TimeZone.setDefault(TimeZone.getTimeZone("GMT"));
 		try {
@@ -469,7 +469,7 @@ class DateTimeFormattingTests {
 	}
 
 	@Test
-	void testBindPeriod() {
+	void bindPeriod() {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("period", "P6Y3M1D");
 		binder.bind(propertyValues);
@@ -478,7 +478,7 @@ class DateTimeFormattingTests {
 	}
 
 	@Test
-	void testBindDuration() {
+	void bindDuration() {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("duration", "PT8H6M12.345S");
 		binder.bind(propertyValues);
@@ -487,7 +487,7 @@ class DateTimeFormattingTests {
 	}
 
 	@Test
-	void testBindDurationAnnotated() {
+	void bindDurationAnnotated() {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("styleDuration", "2ms");
 		binder.bind(propertyValues);
@@ -498,7 +498,7 @@ class DateTimeFormattingTests {
 	}
 
 	@Test
-	void testBindYear() {
+	void bindYear() {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("year", "2007");
 		binder.bind(propertyValues);
@@ -507,7 +507,7 @@ class DateTimeFormattingTests {
 	}
 
 	@Test
-	void testBindMonth() {
+	void bindMonth() {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("month", "JULY");
 		binder.bind(propertyValues);
@@ -516,7 +516,7 @@ class DateTimeFormattingTests {
 	}
 
 	@Test
-	void testBindMonthInAnyCase() {
+	void bindMonthInAnyCase() {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("month", "July");
 		binder.bind(propertyValues);
@@ -525,7 +525,7 @@ class DateTimeFormattingTests {
 	}
 
 	@Test
-	void testBindYearMonth() {
+	void bindYearMonth() {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("yearMonth", "2007-12");
 		binder.bind(propertyValues);
@@ -534,7 +534,7 @@ class DateTimeFormattingTests {
 	}
 
 	@Test
-	void testBindYearMonthAnnotatedPattern() {
+	void bindYearMonthAnnotatedPattern() {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("yearMonthAnnotatedPattern", "12/2007");
 		binder.bind(propertyValues);
@@ -544,7 +544,7 @@ class DateTimeFormattingTests {
 	}
 
 	@Test
-	void testBindMonthDay() {
+	void bindMonthDay() {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("monthDay", "--12-03");
 		binder.bind(propertyValues);
@@ -553,7 +553,7 @@ class DateTimeFormattingTests {
 	}
 
 	@Test
-	void testBindMonthDayAnnotatedPattern() {
+	void bindMonthDayAnnotatedPattern() {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("monthDayAnnotatedPattern", "1/3");
 		binder.bind(propertyValues);
@@ -695,7 +695,7 @@ class DateTimeFormattingTests {
 		}
 
 		@Test
-		void testBindInstantAsLongEpochMillis() {
+		void bindInstantAsLongEpochMillis() {
 			MutablePropertyValues propertyValues = new MutablePropertyValues();
 			propertyValues.add("instant", 1234L);
 			binder.bind(propertyValues);

@@ -46,6 +46,7 @@ import org.springframework.util.ClassUtils;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.Errors;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.validation.annotation.ValidationAnnotationUtils;
 import org.springframework.validation.method.MethodValidationException;
 import org.springframework.validation.method.MethodValidationResult;
 import org.springframework.validation.method.ParameterErrors;
@@ -224,7 +225,7 @@ public class MethodValidationInterceptor implements MethodInterceptor {
 	 */
 	protected Class<?>[] determineValidationGroups(MethodInvocation invocation) {
 		Object target = getTarget(invocation);
-		return this.validationAdapter.determineValidationGroups(target, invocation.getMethod());
+		return ValidationAnnotationUtils.determineValidationGroups(target, invocation.getMethod());
 	}
 
 

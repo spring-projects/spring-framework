@@ -72,7 +72,7 @@ class JacksonJsonEncoderTests extends AbstractEncoderTests<JacksonJsonEncoder> {
 	@Test
 	@Override
 	@SuppressWarnings("removal")
-	public void canEncode() {
+	protected void canEncode() {
 		ResolvableType pojoType = ResolvableType.forClass(Pojo.class);
 		assertThat(this.encoder.canEncode(pojoType, APPLICATION_JSON)).isTrue();
 		assertThat(this.encoder.canEncode(pojoType, APPLICATION_NDJSON)).isTrue();
@@ -90,6 +90,7 @@ class JacksonJsonEncoderTests extends AbstractEncoderTests<JacksonJsonEncoder> {
 
 		// SPR-15910
 		assertThat(this.encoder.canEncode(ResolvableType.forClass(Object.class), APPLICATION_OCTET_STREAM)).isFalse();
+		assertThat(this.encoder.canEncode(ResolvableType.forClass(String.class), null)).isFalse();
 
 		assertThatThrownBy(() -> this.encoder.canEncode(ResolvableType.forClass(MappingJacksonValue.class), APPLICATION_JSON))
 				.isInstanceOf(UnsupportedOperationException.class);
@@ -97,7 +98,7 @@ class JacksonJsonEncoderTests extends AbstractEncoderTests<JacksonJsonEncoder> {
 
 	@Test
 	@Override
-	public void encode() throws Exception {
+	protected void encode() throws Exception {
 		Flux<Object> input = Flux.just(new Pojo("foo", "bar"),
 				new Pojo("foofoo", "barbar"),
 				new Pojo("foofoofoo", "barbarbar"));
@@ -111,7 +112,7 @@ class JacksonJsonEncoderTests extends AbstractEncoderTests<JacksonJsonEncoder> {
 	}
 
 	@Test  // SPR-15866
-	public void canEncodeWithCustomMimeType() {
+	void canEncodeWithCustomMimeType() {
 		MimeType textJavascript = new MimeType("text", "javascript", StandardCharsets.UTF_8);
 		JacksonJsonEncoder encoder = new JacksonJsonEncoder(new JsonMapper(), textJavascript);
 
@@ -181,7 +182,7 @@ class JacksonJsonEncoderTests extends AbstractEncoderTests<JacksonJsonEncoder> {
 
 
 	@Test  // SPR-15727
-	public void encodeStreamWithCustomStreamingType() {
+	void encodeStreamWithCustomStreamingType() {
 		MediaType fooMediaType = new MediaType("application", "foo");
 		MediaType barMediaType = new MediaType("application", "bar");
 		this.encoder.setStreamingMediaTypes(Arrays.asList(fooMediaType, barMediaType));
@@ -279,7 +280,7 @@ class JacksonJsonEncoderTests extends AbstractEncoderTests<JacksonJsonEncoder> {
 	}
 
 	@Test  // gh-22771
-	public void encodeWithFlushAfterWriteOff() {
+	void encodeWithFlushAfterWriteOff() {
 		JsonMapper mapper = JsonMapper.builder().configure(SerializationFeature.FLUSH_AFTER_WRITE_VALUE, false).build();
 		JacksonJsonEncoder encoder = new JacksonJsonEncoder(mapper);
 

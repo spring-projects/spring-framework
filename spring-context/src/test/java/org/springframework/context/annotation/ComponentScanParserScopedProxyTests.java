@@ -37,7 +37,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 class ComponentScanParserScopedProxyTests {
 
 	@Test
-	void testDefaultScopedProxy() {
+	void defaultScopedProxy() {
 		ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(
 				"org/springframework/context/annotation/scopedProxyDefaultTests.xml");
 		context.getBeanFactory().registerScope("myScope", new SimpleMapScope());
@@ -49,7 +49,7 @@ class ComponentScanParserScopedProxyTests {
 	}
 
 	@Test
-	void testNoScopedProxy() {
+	void noScopedProxy() {
 		ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(
 				"org/springframework/context/annotation/scopedProxyNoTests.xml");
 		context.getBeanFactory().registerScope("myScope", new SimpleMapScope());
@@ -61,7 +61,7 @@ class ComponentScanParserScopedProxyTests {
 	}
 
 	@Test
-	void testInterfacesScopedProxy() throws Exception {
+	void interfacesScopedProxy() throws Exception {
 		ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(
 				"org/springframework/context/annotation/scopedProxyInterfacesTests.xml");
 		context.getBeanFactory().registerScope("myScope", new SimpleMapScope());
@@ -79,7 +79,7 @@ class ComponentScanParserScopedProxyTests {
 	}
 
 	@Test
-	void testTargetClassScopedProxy() throws Exception {
+	void targetClassScopedProxy() throws Exception {
 		ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(
 				"org/springframework/context/annotation/scopedProxyTargetClassTests.xml");
 		context.getBeanFactory().registerScope("myScope", new SimpleMapScope());
@@ -97,7 +97,7 @@ class ComponentScanParserScopedProxyTests {
 
 	@Test
 	@SuppressWarnings("resource")
-	public void testInvalidConfigScopedProxy() {
+	void invalidConfigScopedProxy() {
 		assertThatExceptionOfType(BeanDefinitionParsingException.class).isThrownBy(() ->
 				new ClassPathXmlApplicationContext("org/springframework/context/annotation/scopedProxyInvalidConfigTests.xml"))
 			.withMessageContaining("Cannot define both 'scope-resolver' and 'scoped-proxy' on <component-scan> tag")

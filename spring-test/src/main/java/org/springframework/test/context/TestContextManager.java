@@ -674,9 +674,6 @@ public class TestContextManager {
 	}
 
 	private static String typeName(Object obj) {
-		if (obj == null) {
-			return "null";
-		}
 		if (obj instanceof Class<?> type) {
 			return type.getName();
 		}

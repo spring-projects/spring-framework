@@ -243,7 +243,7 @@ abstract class ContextLoaderUtils {
 	private static void resolveDefaultContextConfigurationAttributes(
 			List<ContextConfigurationAttributes> results, Class<?> testClass) {
 
-		results.add(0, new ContextConfigurationAttributes(testClass));
+		results.add(new ContextConfigurationAttributes(testClass));
 
 		Class<?> superclass = testClass.getSuperclass();
 		if (superclass != null && superclass != Object.class) {

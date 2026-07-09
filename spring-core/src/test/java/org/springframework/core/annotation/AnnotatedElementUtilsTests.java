@@ -32,10 +32,6 @@ import java.util.List;
 import java.util.Set;
 
 import javax.annotation.RegEx;
-import javax.annotation.Syntax;
-import javax.annotation.concurrent.ThreadSafe;
-import javax.annotation.meta.TypeQualifierNickname;
-import javax.annotation.meta.When;
 
 import jakarta.annotation.Resource;
 import org.jspecify.annotations.Nullable;
@@ -344,22 +340,6 @@ class AnnotatedElementUtilsTests {
 	}
 
 	@Test
-	@SuppressWarnings("deprecation")
-	void getAllAnnotationAttributesOnLangType() {
-		MultiValueMap<String, Object> attributes = getAllAnnotationAttributes(
-				org.springframework.lang.NonNullApi.class, javax.annotation.Nonnull.class.getName());
-		assertThat(attributes).as("Annotation attributes map for @Nonnull on @NonNullApi").isNotNull();
-		assertThat(attributes.get("when")).as("value for @NonNullApi").isEqualTo(List.of(When.ALWAYS));
-	}
-
-	@Test
-	void getAllAnnotationAttributesOnJavaxType() {
-		MultiValueMap<String, Object> attributes = getAllAnnotationAttributes(RegEx.class, Syntax.class.getName());
-		assertThat(attributes).as("Annotation attributes map for @Syntax on @RegEx").isNotNull();
-		assertThat(attributes.get("when")).as("value for @RegEx").isEqualTo(List.of(When.ALWAYS));
-	}
-
-	@Test
 	void getMergedAnnotationAttributesOnClassWithLocalAnnotation() {
 		Class<?> element = TxConfig.class;
 		String name = TX_NAME;
@@ -663,8 +643,7 @@ class AnnotatedElementUtilsTests {
 			}
 		}
 		assertThat(bridgeMethod != null && bridgeMethod.isBridge()).isTrue();
-		boolean condition = bridgedMethod != null && !bridgedMethod.isBridge();
-		assertThat(condition).isTrue();
+		assertThat(bridgedMethod != null && !bridgedMethod.isBridge()).isTrue();
 
 		AnnotationAttributes attributes = findMergedAnnotationAttributes(bridgeMethod, Order.class);
 		assertThat(attributes).as("Should find @Order on StringGenericParameter.getFor() bridge method").isNotNull();
@@ -848,17 +827,9 @@ class AnnotatedElementUtilsTests {
 	}
 
 	@Test
-	void javaxAnnotationTypeViaFindMergedAnnotation() {
+	void jakartaAnnotationTypeViaFindMergedAnnotation() {
 		assertThat(findMergedAnnotation(ResourceHolder.class, Resource.class)).isEqualTo(ResourceHolder.class.getAnnotation(Resource.class));
 		assertThat(findMergedAnnotation(SpringAppConfigClass.class, Resource.class)).isEqualTo(SpringAppConfigClass.class.getAnnotation(Resource.class));
-	}
-
-	@Test
-	void javaxMetaAnnotationTypeViaFindMergedAnnotation() {
-		assertThat(findMergedAnnotation(ThreadSafe.class, Documented.class))
-				.isEqualTo(ThreadSafe.class.getAnnotation(Documented.class));
-		assertThat(findMergedAnnotation(ResourceHolder.class, TypeQualifierNickname.class))
-				.isEqualTo(RegEx.class.getAnnotation(TypeQualifierNickname.class));
 	}
 
 	@Test
@@ -1548,7 +1519,7 @@ class AnnotatedElementUtilsTests {
 		@Nullable Object doIt();
 	}
 
-	class TransactionalServiceImpl implements TransactionalService {
+	static class TransactionalServiceImpl implements TransactionalService {
 
 		@Override
 		public @Nullable Object doIt() {

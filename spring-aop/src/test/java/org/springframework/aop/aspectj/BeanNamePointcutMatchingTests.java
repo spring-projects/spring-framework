@@ -31,7 +31,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class BeanNamePointcutMatchingTests {
 
 	@Test
-	void testMatchingPointcuts() {
+	void matchingPointcuts() {
 		assertMatch("someName", "bean(someName)");
 
 		// Spring bean names are less restrictive compared to AspectJ names (methods, types etc.)
@@ -66,7 +66,7 @@ class BeanNamePointcutMatchingTests {
 	}
 
 	@Test
-	void testNonMatchingPointcuts() {
+	void nonMatchingPointcuts() {
 		assertMisMatch("someName", "bean(someNamex)");
 		assertMisMatch("someName", "bean(someX*Name)");
 

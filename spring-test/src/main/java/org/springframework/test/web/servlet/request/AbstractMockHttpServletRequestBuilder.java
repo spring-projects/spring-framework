@@ -46,6 +46,7 @@ import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.Mergeable;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+import org.springframework.core.ResolvableType;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpMethod;
@@ -1038,7 +1039,8 @@ public abstract class AbstractMockHttpServletRequestBuilder<B extends AbstractMo
 		};
 
 		try {
-			return new FormHttpMessageConverter().read(null, message);
+			return (MultiValueMap<String, String>) new FormHttpMessageConverter()
+					.read(ResolvableType.forClassWithGenerics(MultiValueMap.class, String.class, String.class), message, null);
 		}
 		catch (IOException ex) {
 			throw new IllegalStateException("Failed to parse form data in request body", ex);

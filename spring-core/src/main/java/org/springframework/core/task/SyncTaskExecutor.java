@@ -18,6 +18,8 @@ package org.springframework.core.task;
 
 import java.io.Serializable;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.util.Assert;
 import org.springframework.util.ConcurrencyThrottleSupport;
 
@@ -40,10 +42,35 @@ import org.springframework.util.ConcurrencyThrottleSupport;
 @SuppressWarnings("serial")
 public class SyncTaskExecutor extends ConcurrencyThrottleSupport implements TaskExecutor, Serializable {
 
+	private boolean rejectTasksWhenLimitReached = false;
+
+
+	/**
+	 * Specify whether to reject tasks when the concurrency limit has been reached,
+	 * throwing {@link TaskRejectedException} (which extends the common
+	 * {@link java.util.concurrent.RejectedExecutionException})
+	 * on any further execution attempts.
+	 * <p>The default is {@code false}, blocking the caller until the submission can
+	 * be accepted. Switch this to {@code true} for immediate rejection instead.
+	 * @since 7.0.3
+	 * @see #setConcurrencyLimit
+	 */
+	public void setRejectTasksWhenLimitReached(boolean rejectTasksWhenLimitReached) {
+		this.rejectTasksWhenLimitReached = rejectTasksWhenLimitReached;
+	}
+
+
 	/**
 	 * Execute the given {@code task} synchronously, through direct
 	 * invocation of its {@link Runnable#run() run()} method.
+	 * <p>This can be used with a {@link #setConcurrencyLimit concurrency limit},
+	 * analogous to a concurrency-bounded {@link SimpleAsyncTaskExecutor} setup.
+	 * Also, the provided task may apply a retry policy via
+	 * {@link org.springframework.core.retry.support.RetryTask}.
 	 * @throws RuntimeException if propagated from the given {@code Runnable}
+	 * @see #setConcurrencyLimit
+	 * @see #setRejectTasksWhenLimitReached
+	 * @see org.springframework.core.retry.support.RetryTask#wrap(Runnable)
 	 */
 	@Override
 	public void execute(Runnable task) {
@@ -65,12 +92,19 @@ public class SyncTaskExecutor extends ConcurrencyThrottleSupport implements Task
 	/**
 	 * Execute the given {@code task} synchronously, through direct
 	 * invocation of its {@link TaskCallback#call() call()} method.
+	 * <p>This can be used with a {@link #setConcurrencyLimit concurrency limit},
+	 * analogous to a concurrency-bounded {@link SimpleAsyncTaskExecutor} setup.
+	 * Also, the provided task may apply a retry policy via
+	 * {@link org.springframework.core.retry.support.RetryTask}.
 	 * @param <V> the returned value type, if any
 	 * @param <E> the exception propagated, if any
 	 * @throws E if propagated from the given {@code TaskCallback}
 	 * @since 7.0
+	 * @see #setConcurrencyLimit
+	 * @see #setRejectTasksWhenLimitReached
+	 * @see org.springframework.core.retry.support.RetryTask#RetryTask(TaskCallback)
 	 */
-	public <V, E extends Exception> V execute(TaskCallback<V, E> task) throws E {
+	public <V extends @Nullable Object, E extends Exception> V execute(TaskCallback<V, E> task) throws E {
 		Assert.notNull(task, "Task must not be null");
 		if (isThrottleActive()) {
 			beforeAccess();
@@ -84,6 +118,19 @@ public class SyncTaskExecutor extends ConcurrencyThrottleSupport implements Task
 		else {
 			return task.call();
 		}
+	}
+
+	@Override
+	protected void onLimitReached() {
+		if (this.rejectTasksWhenLimitReached) {
+			onAccessRejected("Concurrency limit reached: " + getConcurrencyLimit());
+		}
+		super.onLimitReached();
+	}
+
+	@Override
+	protected void onAccessRejected(String msg) {
+		throw new TaskRejectedException(msg);
 	}
 
 }

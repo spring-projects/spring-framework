@@ -310,7 +310,7 @@ class SetValueTests extends AbstractExpressionTests {
 			if (DEBUG) {
 				SpelUtilities.printAbstractSyntaxTree(System.out, e);
 			}
-			assertThat(e.isWritable(context)).as("Expression is not writeable but should be").isTrue();
+			assertThat(e.isWritable(context)).as("Expression is not writable but should be").isTrue();
 			e.setValue(context, value);
 			assertThat(e.getValue(context, expectedType)).as("Retrieved value was not equal to set value").isEqualTo(value);
 		}
@@ -330,7 +330,7 @@ class SetValueTests extends AbstractExpressionTests {
 			if (DEBUG) {
 				SpelUtilities.printAbstractSyntaxTree(System.out, e);
 			}
-			assertThat(e.isWritable(context)).as("Expression is not writeable but should be").isTrue();
+			assertThat(e.isWritable(context)).as("Expression is not writable but should be").isTrue();
 			e.setValue(context, value);
 			assertThat(expectedValue).isEqualTo(e.getValue(context));
 		}

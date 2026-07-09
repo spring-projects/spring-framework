@@ -270,11 +270,12 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	}
 
 	/**
-	 * Specify the limit for array and collection auto-growing.
+	 * Specify the limit for array and collection/set/list auto-growing.
 	 * <p>Default is 256, preventing OutOfMemoryErrors in case of large indexes.
 	 * Raise this limit if your auto-growing needs are unusually high.
-	 * <p>Used for setter/field injection via {@link #bind(PropertyValues)}, and not
-	 * applicable to constructor binding via {@link #construct}.
+	 * <p>Used for setter injection - and as of 7.1 also for field injection -
+	 * via {@link #bind(PropertyValues)}; not applicable to map properties and
+	 * not to constructor binding via {@link #construct} either.
 	 * @see #initBeanPropertyAccess()
 	 * @see org.springframework.beans.BeanWrapper#setAutoGrowCollectionLimit
 	 */
@@ -325,6 +326,8 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	/**
 	 * Initialize direct field access for this DataBinder,
 	 * as alternative to the default bean property access.
+	 * <p><b>NOTE: This is an advanced option for trusted scenarios.</b>
+	 * Do not use direct field access for data binding from untrusted sources.
 	 * @see #initBeanPropertyAccess()
 	 * @see #createDirectFieldBindingResult()
 	 */
@@ -341,7 +344,7 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	 */
 	protected AbstractPropertyBindingResult createDirectFieldBindingResult() {
 		DirectFieldBindingResult result = new DirectFieldBindingResult(getTarget(),
-				getObjectName(), isAutoGrowNestedPaths());
+				getObjectName(), isAutoGrowNestedPaths(), getAutoGrowCollectionLimit());
 
 		if (this.conversionService != null) {
 			result.initConversion(this.conversionService);

@@ -21,45 +21,7 @@ Configuration is standard for a simple Spring web application: The MVC configura
 has to define an `XsltViewResolver` bean and regular MVC annotation configuration.
 The following example shows how to do so:
 
-[tabs]
-======
-Java::
-+
-[source,java,indent=0,subs="verbatim,quotes"]
-----
-	@EnableWebMvc
-	@ComponentScan
-	@Configuration
-	public class WebConfig implements WebMvcConfigurer {
-
-		@Bean
-		public XsltViewResolver xsltViewResolver() {
-			XsltViewResolver viewResolver = new XsltViewResolver();
-			viewResolver.setPrefix("/WEB-INF/xsl/");
-			viewResolver.setSuffix(".xslt");
-			return viewResolver;
-		}
-	}
-----
-
-Kotlin::
-+
-[source,kotlin,indent=0,subs="verbatim,quotes"]
-----
-	@EnableWebMvc
-	@ComponentScan
-	@Configuration
-	class WebConfig : WebMvcConfigurer {
-
-		@Bean
-		fun xsltViewResolver() = XsltViewResolver().apply {
-			setPrefix("/WEB-INF/xsl/")
-			setSuffix(".xslt")	
-		}
-	}
-----
-======
-
+include-code::./WebConfiguration[tag=snippet,indent=0]
 
 [[mvc-view-xslt-controllercode]]
 == Controller

@@ -16,6 +16,7 @@
 
 package org.springframework.web.service.invoker;
 
+import org.aopalliance.intercept.MethodInterceptor;
 import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 
@@ -30,7 +31,7 @@ import static org.mockito.Mockito.mock;
  *
  * @author Rossen Stoyanchev
  */
-public class HttpServiceProxyFactoryTests {
+class HttpServiceProxyFactoryTests {
 
 	@Test
 	void httpExchangeAdapterDecorator() {
@@ -41,6 +42,18 @@ public class HttpServiceProxyFactoryTests {
 
 		Service service = factory.createClient(Service.class);
 		assertThat(service.execute()).isEqualTo("decorated");
+	}
+
+	@Test
+	void proxyFactoryCustomizer() {
+		var interceptor = (MethodInterceptor) invocation -> "intercepted";
+		var proxyFactory = HttpServiceProxyFactory.builderFor(mock(HttpExchangeAdapter.class))
+				.proxyFactoryCustomizer((factory, serviceType) -> factory.addAdvice(0, interceptor))
+				.build();
+
+		String result = proxyFactory.createClient(Service.class).execute();
+
+		assertThat(result).isEqualTo("intercepted");
 	}
 
 

@@ -33,6 +33,7 @@ import org.springframework.orm.jpa.hibernate.beans.BeanSource;
 import org.springframework.orm.jpa.hibernate.beans.MultiplePrototypesInSpringContextTestBean;
 import org.springframework.orm.jpa.hibernate.beans.NoDefinitionInSpringContextTestBean;
 import org.springframework.orm.jpa.hibernate.beans.SinglePrototypeInSpringContextTestBean;
+import org.springframework.orm.jpa.hibernate.beans.TestBean;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -42,6 +43,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  *
  * @author Yoann Rodiere
  * @author Juergen Hoeller
+ * @author Yanming Zhou
  */
 class HibernateNativeEntityManagerFactorySpringBeanContainerIntegrationTests
 		extends AbstractEntityManagerFactoryIntegrationTests {
@@ -69,7 +71,7 @@ class HibernateNativeEntityManagerFactorySpringBeanContainerIntegrationTests
 
 
 	@Test
-	void testCanRetrieveBeanByTypeWithJpaCompliantOptions() {
+	void canRetrieveBeanByTypeWithJpaCompliantOptions() {
 		BeanContainer beanContainer = getBeanContainer();
 		assertThat(beanContainer).isNotNull();
 
@@ -85,7 +87,7 @@ class HibernateNativeEntityManagerFactorySpringBeanContainerIntegrationTests
 	}
 
 	@Test
-	void testCanRetrieveBeanByNameWithJpaCompliantOptions() {
+	void canRetrieveBeanByNameWithJpaCompliantOptions() {
 		BeanContainer beanContainer = getBeanContainer();
 		assertThat(beanContainer).isNotNull();
 
@@ -102,7 +104,7 @@ class HibernateNativeEntityManagerFactorySpringBeanContainerIntegrationTests
 	}
 
 	@Test
-	void testCanRetrieveBeanByTypeWithNativeOptions() {
+	void canRetrieveBeanByTypeWithNativeOptions() {
 		BeanContainer beanContainer = getBeanContainer();
 		assertThat(beanContainer).isNotNull();
 
@@ -130,7 +132,7 @@ class HibernateNativeEntityManagerFactorySpringBeanContainerIntegrationTests
 	}
 
 	@Test
-	void testCanRetrieveBeanByNameWithNativeOptions() {
+	void canRetrieveBeanByNameWithNativeOptions() {
 		BeanContainer beanContainer = getBeanContainer();
 		assertThat(beanContainer).isNotNull();
 
@@ -158,7 +160,7 @@ class HibernateNativeEntityManagerFactorySpringBeanContainerIntegrationTests
 	}
 
 	@Test
-	void testCanRetrieveFallbackBeanByTypeWithJpaCompliantOptions() {
+	void canRetrieveFallbackBeanByTypeWithJpaCompliantOptions() {
 		BeanContainer beanContainer = getBeanContainer();
 		assertThat(beanContainer).isNotNull();
 		NoDefinitionInSpringContextTestBeanInstanceProducer fallbackProducer = new NoDefinitionInSpringContextTestBeanInstanceProducer();
@@ -179,7 +181,7 @@ class HibernateNativeEntityManagerFactorySpringBeanContainerIntegrationTests
 	}
 
 	@Test
-	void testCanRetrieveFallbackBeanByNameWithJpaCompliantOptions() {
+	void canRetrieveFallbackBeanByNameWithJpaCompliantOptions() {
 		BeanContainer beanContainer = getBeanContainer();
 		assertThat(beanContainer).isNotNull();
 		NoDefinitionInSpringContextTestBeanInstanceProducer fallbackProducer = new NoDefinitionInSpringContextTestBeanInstanceProducer();
@@ -201,7 +203,7 @@ class HibernateNativeEntityManagerFactorySpringBeanContainerIntegrationTests
 	}
 
 	@Test
-	void testCanRetrieveFallbackBeanByTypeWithNativeOptions() {
+	void canRetrieveFallbackBeanByTypeWithNativeOptions() {
 		BeanContainer beanContainer = getBeanContainer();
 		assertThat(beanContainer).isNotNull();
 		NoDefinitionInSpringContextTestBeanInstanceProducer fallbackProducer = new NoDefinitionInSpringContextTestBeanInstanceProducer();
@@ -222,7 +224,7 @@ class HibernateNativeEntityManagerFactorySpringBeanContainerIntegrationTests
 	}
 
 	@Test
-	void testCanRetrieveFallbackBeanByNameWithNativeOptions() {
+	void canRetrieveFallbackBeanByNameWithNativeOptions() {
 		BeanContainer beanContainer = getBeanContainer();
 		assertThat(beanContainer).isNotNull();
 		NoDefinitionInSpringContextTestBeanInstanceProducer fallbackProducer = new NoDefinitionInSpringContextTestBeanInstanceProducer();
@@ -244,7 +246,7 @@ class HibernateNativeEntityManagerFactorySpringBeanContainerIntegrationTests
 	}
 
 	@Test
-	void testFallbackExceptionInCaseOfNoSpringBeanFound() {
+	void fallbackExceptionInCaseOfNoSpringBeanFound() {
 		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() ->
 			getBeanContainer().getBean(NoDefinitionInSpringContextTestBean.class,
 					NativeLifecycleOptions.INSTANCE, IneffectiveBeanInstanceProducer.INSTANCE
@@ -252,7 +254,7 @@ class HibernateNativeEntityManagerFactorySpringBeanContainerIntegrationTests
 	}
 
 	@Test
-	void testOriginalExceptionInCaseOfFallbackProducerFailure() {
+	void originalExceptionInCaseOfFallbackProducerFailure() {
 		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(() ->
 			getBeanContainer().getBean(AttributeConverter.class,
 					NativeLifecycleOptions.INSTANCE, IneffectiveBeanInstanceProducer.INSTANCE
@@ -260,7 +262,7 @@ class HibernateNativeEntityManagerFactorySpringBeanContainerIntegrationTests
 	}
 
 	@Test
-	void testFallbackExceptionInCaseOfNoSpringBeanFoundByName() {
+	void fallbackExceptionInCaseOfNoSpringBeanFoundByName() {
 		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() ->
 			getBeanContainer().getBean("some name", NoDefinitionInSpringContextTestBean.class,
 					NativeLifecycleOptions.INSTANCE, IneffectiveBeanInstanceProducer.INSTANCE
@@ -268,11 +270,25 @@ class HibernateNativeEntityManagerFactorySpringBeanContainerIntegrationTests
 	}
 
 	@Test
-	void testOriginalExceptionInCaseOfFallbackProducerFailureByName() {
+	void originalExceptionInCaseOfFallbackProducerFailureByName() {
 		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(() ->
 			getBeanContainer().getBean("invalid", AttributeConverter.class,
 					NativeLifecycleOptions.INSTANCE, IneffectiveBeanInstanceProducer.INSTANCE
 			));
+	}
+
+	@Test
+	void retrieveBeanShouldRetainOriginalBeanType() {
+		BeanContainer beanContainer = getBeanContainer();
+		assertThat(beanContainer).isNotNull();
+
+		ContainedBean<TestBean> bean = beanContainer.getBean(
+				"single", TestBean.class,
+				NativeLifecycleOptions.INSTANCE, IneffectiveBeanInstanceProducer.INSTANCE
+		);
+
+		assertThat(bean).isNotNull();
+		assertThat(bean.getBeanClass()).isSameAs(TestBean.class);
 	}
 
 

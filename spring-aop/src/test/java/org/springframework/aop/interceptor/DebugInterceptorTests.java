@@ -38,7 +38,7 @@ import static org.mockito.Mockito.verify;
 class DebugInterceptorTests {
 
 	@Test
-	void testSunnyDayPathLogsCorrectly() throws Throwable {
+	void sunnyDayPathLogsCorrectly() throws Throwable {
 		MethodInvocation methodInvocation = mock();
 
 		Log log = mock();
@@ -52,7 +52,7 @@ class DebugInterceptorTests {
 	}
 
 	@Test
-	void testExceptionPathStillLogsCorrectly() throws Throwable {
+	void exceptionPathStillLogsCorrectly() throws Throwable {
 		MethodInvocation methodInvocation = mock();
 
 		IllegalArgumentException exception = new IllegalArgumentException();

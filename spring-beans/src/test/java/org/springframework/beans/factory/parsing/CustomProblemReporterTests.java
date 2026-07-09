@@ -53,7 +53,7 @@ class CustomProblemReporterTests {
 
 
 	@Test
-	void testErrorsAreCollated() {
+	void errorsAreCollated() {
 		this.reader.loadBeanDefinitions(qualifiedResource(CustomProblemReporterTests.class, "context.xml"));
 		assertThat(this.problemReporter.getErrors()).as("Incorrect number of errors collated").hasSize(4);
 

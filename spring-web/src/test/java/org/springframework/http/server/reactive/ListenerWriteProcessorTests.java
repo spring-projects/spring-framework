@@ -53,7 +53,7 @@ class ListenerWriteProcessorTests {
 
 
 	@Test // SPR-17410
-	public void writePublisherError() {
+	void writePublisherError() {
 
 		// Turn off writing so next item will be cached
 		this.processor.setWritePossible(false);
@@ -68,7 +68,7 @@ class ListenerWriteProcessorTests {
 	}
 
 	@Test // SPR-17410
-	public void ioExceptionDuringWrite() {
+	void ioExceptionDuringWrite() {
 
 		// Fail on next write
 		this.processor.setWritePossible(true);
@@ -83,7 +83,7 @@ class ListenerWriteProcessorTests {
 	}
 
 	@Test // SPR-17410
-	public void onNextWithoutDemand() {
+	void onNextWithoutDemand() {
 
 		// Disable writing: next item will be cached.
 		this.processor.setWritePossible(false);

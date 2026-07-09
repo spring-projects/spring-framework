@@ -20,7 +20,6 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import io.r2dbc.spi.Parameters
-import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Test
 import reactor.core.publisher.Mono
 
@@ -37,11 +36,7 @@ class DatabaseClientExtensionsTests {
 	fun bindByIndexShouldBindValue() {
 		val spec = mockk<DatabaseClient.GenericExecuteSpec>()
 		every { spec.bind(eq(0), any()) } returns spec
-
-		runBlocking {
-			spec.bind<String>(0, "foo")
-		}
-
+		spec.bind<String>(0, "foo")
 		verify {
 			spec.bind(0, Parameters.`in`("foo"))
 		}
@@ -51,11 +46,7 @@ class DatabaseClientExtensionsTests {
 	fun bindByIndexShouldBindNull() {
 		val spec = mockk<DatabaseClient.GenericExecuteSpec>()
 		every { spec.bind(eq(0), any()) } returns spec
-
-		runBlocking {
-			spec.bind<String>(0, null)
-		}
-
+		spec.bind<String>(0, null)
 		verify {
 			spec.bind(0, Parameters.`in`(String::class.java))
 		}
@@ -65,11 +56,7 @@ class DatabaseClientExtensionsTests {
 	fun bindByNameShouldBindValue() {
 		val spec = mockk<DatabaseClient.GenericExecuteSpec>()
 		every { spec.bind(eq("field"), any()) } returns spec
-
-		runBlocking {
-			spec.bind<String>("field", "foo")
-		}
-
+		spec.bind<String>("field", "foo")
 		verify {
 			spec.bind("field", Parameters.`in`("foo"))
 		}
@@ -79,25 +66,17 @@ class DatabaseClientExtensionsTests {
 	fun bindByNameShouldBindNull() {
 		val spec = mockk<DatabaseClient.GenericExecuteSpec>()
 		every { spec.bind(eq("field"), any()) } returns spec
-
-		runBlocking {
-			spec.bind<String>("field", null)
-		}
-
+		spec.bind<String>("field", null)
 		verify {
 			spec.bind("field", Parameters.`in`(String::class.java))
 		}
 	}
 
 	@Test
-	fun genericExecuteSpecAwait() {
+	suspend fun genericExecuteSpecAwait() {
 		val spec = mockk<DatabaseClient.GenericExecuteSpec>()
 		every { spec.then() } returns Mono.empty()
-
-		runBlocking {
-			spec.await()
-		}
-
+		spec.await()
 		verify {
 			spec.then()
 		}

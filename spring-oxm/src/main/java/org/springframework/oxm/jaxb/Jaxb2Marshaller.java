@@ -892,17 +892,29 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 			// By default, Spring will prevent the processing of external entities.
 			// This is a mitigation against XXE attacks.
 			if (xmlReader == null) {
-				SAXParserFactory saxParserFactory = this.sourceParserFactory;
-				if (saxParserFactory == null) {
-					saxParserFactory = SAXParserFactory.newInstance();
-					saxParserFactory.setNamespaceAware(true);
-					saxParserFactory.setFeature(
-							"http://apache.org/xml/features/disallow-doctype-decl", !isSupportDtd());
-					saxParserFactory.setFeature(
-							"http://xml.org/sax/features/external-general-entities", isProcessExternalEntities());
-					this.sourceParserFactory = saxParserFactory;
+				SAXParserFactory factory = this.sourceParserFactory;
+				if (factory == null) {
+					factory = SAXParserFactory.newInstance();
+					factory.setNamespaceAware(true);
+					try {
+						factory.setFeature(
+								"http://apache.org/xml/features/disallow-doctype-decl", !isSupportDtd());
+					}
+					catch (Exception ex) {
+						// Xerces properties not recognized/supported - ignore
+					}
+					try {
+						factory.setFeature(
+								"http://xml.org/sax/features/external-general-entities", isProcessExternalEntities());
+						factory.setFeature(
+								"http://xml.org/sax/features/external-parameter-entities", isProcessExternalEntities());
+					}
+					catch (Exception ex) {
+						// SAX properties not recognized/supported - ignore
+					}
+					this.sourceParserFactory = factory;
 				}
-				SAXParser saxParser = saxParserFactory.newSAXParser();
+				SAXParser saxParser = factory.newSAXParser();
 				xmlReader = saxParser.getXMLReader();
 			}
 			if (!isProcessExternalEntities()) {
@@ -910,8 +922,8 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 			}
 			return new SAXSource(xmlReader, inputSource);
 		}
-		catch (SAXException | ParserConfigurationException ex) {
-			logger.info("Processing of external entities could not be disabled", ex);
+		catch (Exception ex) {
+			logger.warn("Processing of external entities could not be disabled", ex);
 			return source;
 		}
 	}

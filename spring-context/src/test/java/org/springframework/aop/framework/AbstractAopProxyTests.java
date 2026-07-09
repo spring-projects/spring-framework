@@ -337,7 +337,7 @@ abstract class AbstractAopProxyTests {
 
 	@Test
 	// Should fail to get proxy as exposeProxy wasn't set to true
-	public void targetCantGetProxyByDefault() {
+	void targetCantGetProxyByDefault() {
 		NeedsToSeeProxy et = new NeedsToSeeProxy();
 		ProxyFactory pf1 = new ProxyFactory(et);
 		assertThat(pf1.isExposeProxy()).isFalse();
@@ -854,8 +854,7 @@ abstract class AbstractAopProxyTests {
 		assertThat(proxied.getAge()).isEqualTo(10);
 		assertThat(mba.getCalls()).isEqualTo(1);
 
-		boolean condition = proxied instanceof Advised;
-		assertThat(condition).as("Cannot be cast to Advised").isFalse();
+		assertThat(proxied).as("Cannot be cast to Advised").isNotInstanceOf(Advised.class);
 	}
 
 	@Test

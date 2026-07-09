@@ -43,6 +43,7 @@ class DefaultContextConfigurationDetectionWithNestedTests {
 	@Autowired
 	String greeting;
 
+
 	@Test
 	void test(@Autowired String localGreeting) {
 		// This class must NOT be annotated with @SpringJUnitConfig or @ContextConfiguration.
@@ -51,6 +52,7 @@ class DefaultContextConfigurationDetectionWithNestedTests {
 		assertThat(greeting).isEqualTo("TEST");
 		assertThat(localGreeting).isEqualTo("TEST");
 	}
+
 
 	@Nested
 	class NestedTests {
@@ -61,6 +63,7 @@ class DefaultContextConfigurationDetectionWithNestedTests {
 			assertThat(localGreeting).isEqualTo("TEST");
 		}
 	}
+
 
 	@Configuration
 	static class DefaultConfig {

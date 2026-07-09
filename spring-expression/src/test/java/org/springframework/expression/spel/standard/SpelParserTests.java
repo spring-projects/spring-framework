@@ -244,7 +244,7 @@ class SpelParserTests {
 	}
 
 	@Test
-	void testStringLiterals_DoubleQuotes_spr9620() {
+	void stringLiterals_DoubleQuotes_spr9620() {
 		SpelExpression expr = parser.parseRaw("\"double quote: \"\".\"");
 		assertThat(expr.getValue()).isEqualTo("double quote: \".");
 		expr = parser.parseRaw("\"hello \"\" world\"");
@@ -252,7 +252,7 @@ class SpelParserTests {
 	}
 
 	@Test
-	void testStringLiterals_DoubleQuotes_spr9620_2() {
+	void stringLiterals_DoubleQuotes_spr9620_2() {
 		assertParseExceptionThrownBy(() -> parser.parseRaw("\"double quote: \\\"\\\".\""))
 			.satisfies(ex -> {
 				assertThat(ex.getPosition()).isEqualTo(17);

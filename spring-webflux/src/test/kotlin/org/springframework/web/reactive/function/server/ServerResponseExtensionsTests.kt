@@ -21,7 +21,6 @@ import io.mockk.mockk
 import io.mockk.verify
 import io.reactivex.rxjava3.core.Flowable
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.reactivestreams.Publisher
@@ -63,39 +62,33 @@ class ServerResponseExtensionsTests {
 	}
 
 	@Test
-	fun `BodyBuilder#bodyAndAwait with object parameter`() {
+	suspend fun `BodyBuilder#bodyAndAwait with object parameter`() {
 		val response = mockk<ServerResponse>()
 		val body = "foo"
 		every { bodyBuilder.bodyValue(ofType<String>()) } returns Mono.just(response)
-		runBlocking {
-			bodyBuilder.bodyValueAndAwait(body)
-		}
+		bodyBuilder.bodyValueAndAwait(body)
 		verify {
 			bodyBuilder.bodyValue(ofType<String>())
 		}
 	}
 
 	@Test
-	fun `BodyBuilder#bodyValueWithTypeAndAwait with object parameter and reified type parameters`() {
+	suspend fun `BodyBuilder#bodyValueWithTypeAndAwait with object parameter and reified type parameters`() {
 		val response = mockk<ServerResponse>()
 		val body = listOf("foo", "bar")
 		every { bodyBuilder.bodyValue(ofType<List<String>>(), object : ParameterizedTypeReference<List<String>>() {}) } returns Mono.just(response)
-		runBlocking {
-			bodyBuilder.bodyValueWithTypeAndAwait<List<String>>(body)
-		}
+		bodyBuilder.bodyValueWithTypeAndAwait<List<String>>(body)
 		verify {
 			bodyBuilder.bodyValue(body, object : ParameterizedTypeReference<List<String>>() {})
 		}
 	}
 
 	@Test
-	fun `BodyBuilder#bodyAndAwait with flow parameter`() {
+	suspend fun `BodyBuilder#bodyAndAwait with flow parameter`() {
 		val response = mockk<ServerResponse>()
 		val body = mockk<Flow<List<Foo>>>()
 		every { bodyBuilder.body(ofType<Flow<List<Foo>>>(), object : ParameterizedTypeReference<List<Foo>>() {}) } returns Mono.just(response)
-		runBlocking {
-			bodyBuilder.bodyAndAwait(body)
-		}
+		bodyBuilder.bodyAndAwait(body)
 		verify {
 			bodyBuilder.body(ofType<Flow<List<Foo>>>(), object : ParameterizedTypeReference<List<Foo>>() {})
 		}
@@ -126,38 +119,32 @@ class ServerResponseExtensionsTests {
 	}
 
 	@Test
-	fun `BodyBuilder#renderAndAwait with a vararg parameter`() {
+	suspend fun `BodyBuilder#renderAndAwait with a vararg parameter`() {
 		val response = mockk<ServerResponse>()
 		every { bodyBuilder.render("foo", any(), any()) } returns Mono.just(response)
-		runBlocking {
-			bodyBuilder.renderAndAwait("foo", "bar", "baz")
-		}
+		bodyBuilder.renderAndAwait("foo", "bar", "baz")
 		verify {
 			bodyBuilder.render("foo", any(), any())
 		}
 	}
 
 	@Test
-	fun `BodyBuilder#renderAndAwait with a Map parameter`() {
+	suspend fun `BodyBuilder#renderAndAwait with a Map parameter`() {
 		val response = mockk<ServerResponse>()
 		val map = mockk<Map<String, *>>()
 		every { bodyBuilder.render("foo", map) } returns Mono.just(response)
-		runBlocking {
-			bodyBuilder.renderAndAwait("foo", map)
-		}
+		bodyBuilder.renderAndAwait("foo", map)
 		verify {
 			bodyBuilder.render("foo", map)
 		}
 	}
 
 	@Test
-	fun `HeadersBuilder#buildAndAwait`() {
+	suspend fun `HeadersBuilder#buildAndAwait`() {
 		val response = mockk<ServerResponse>()
 		val builder = mockk<ServerResponse.HeadersBuilder<*>>()
 		every { builder.build() } returns Mono.just(response)
-		runBlocking {
-			assertThat(builder.buildAndAwait()).isEqualTo(response)
-		}
+		assertThat(builder.buildAndAwait()).isEqualTo(response)
 	}
 
 	class Foo

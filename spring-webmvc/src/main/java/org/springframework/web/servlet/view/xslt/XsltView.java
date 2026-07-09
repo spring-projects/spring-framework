@@ -395,7 +395,7 @@ public class XsltView extends AbstractUrlBasedView {
 	 * Configure the supplied {@link HttpServletResponse}.
 	 * <p>The default implementation of this method sets the
 	 * {@link HttpServletResponse#setContentType content type} and
-	 * {@link HttpServletResponse#setCharacterEncoding encoding}
+	 * {@link HttpServletResponse#setCharacterEncoding(String) encoding}
 	 * from the "media-type" and "encoding" output properties
 	 * specified in the {@link Transformer}.
 	 * @param model merged output Map (never {@code null})

@@ -16,9 +16,6 @@
 
 package org.springframework.context.annotation.configuration.spr9031;
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,7 +34,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Chris Beams
  * @since 3.1.1
  */
-public class Spr9031Tests {
+class Spr9031Tests {
 
 	/**
 	 * Use of @Import to register LowLevelConfig results in ASM-based annotation
@@ -75,8 +72,5 @@ public class Spr9031Tests {
 		// annotation is not parsed
 		@Autowired Spr9031Component scanned;
 	}
-
-	@Retention(RetentionPolicy.RUNTIME)
-	public @interface MarkerAnnotation {}
 
 }

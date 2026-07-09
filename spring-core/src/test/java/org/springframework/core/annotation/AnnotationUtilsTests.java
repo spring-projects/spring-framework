@@ -30,10 +30,6 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
 
-import javax.annotation.RegEx;
-import javax.annotation.Syntax;
-import javax.annotation.concurrent.ThreadSafe;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -160,10 +156,11 @@ class AnnotationUtilsTests {
 		assertThat(getAnnotation(bridgeMethod, Order.class)).isNull();
 		assertThat(findAnnotation(bridgeMethod, Order.class)).isNotNull();
 
-		// As of JDK 8, invoking getAnnotation() on a bridge method actually finds an
-		// annotation on its 'bridged' method [1]; however, the Eclipse compiler does
-		// not support this [2]. Thus, we effectively ignore the following
-		// assertion if the test is currently executing within the Eclipse IDE.
+		// For code compiled with OpenJDK, invoking getAnnotation() on a bridge
+		// method actually finds an annotation on its 'bridged' method [1]; however,
+		// the Eclipse compiler does not support this [2]. Thus, we effectively
+		// ignore the following assertion if the test is currently executing within
+		// the Eclipse IDE.
 		//
 		// [1] https://bugs.openjdk.java.net/browse/JDK-6695379
 		// [2] https://bugs.eclipse.org/bugs/show_bug.cgi?id=495396
@@ -429,8 +426,6 @@ class AnnotationUtilsTests {
 	@Test
 	void isAnnotationMetaPresentForPlainType() {
 		assertThat(isAnnotationMetaPresent(Order.class, Documented.class)).isTrue();
-		assertThat(isAnnotationMetaPresent(ThreadSafe.class, Documented.class)).isTrue();
-		assertThat(isAnnotationMetaPresent(RegEx.class, Syntax.class)).isTrue();
 	}
 
 	@Test
@@ -576,7 +571,7 @@ class AnnotationUtilsTests {
 		final List<String> expectedValuesJava = asList("A", "B", "C");
 		final List<String> expectedValuesSpring = asList("A", "B", "C", "meta1");
 
-		// Java 8
+		// Java
 		MyRepeatable[] array = MyRepeatableClass.class.getAnnotationsByType(MyRepeatable.class);
 		assertThat(array).isNotNull();
 		List<String> values = stream(array).map(MyRepeatable::value).collect(toList());
@@ -601,7 +596,7 @@ class AnnotationUtilsTests {
 		final List<String> expectedValuesJava = asList("A", "B", "C");
 		final List<String> expectedValuesSpring = asList("A", "B", "C", "meta1");
 
-		// Java 8
+		// Java
 		MyRepeatable[] array = clazz.getAnnotationsByType(MyRepeatable.class);
 		assertThat(array).isNotNull();
 		List<String> values = stream(array).map(MyRepeatable::value).collect(toList());
@@ -626,7 +621,7 @@ class AnnotationUtilsTests {
 		final List<String> expectedValuesJava = asList("X", "Y", "Z");
 		final List<String> expectedValuesSpring = asList("X", "Y", "Z", "meta2");
 
-		// Java 8
+		// Java
 		MyRepeatable[] array = clazz.getAnnotationsByType(MyRepeatable.class);
 		assertThat(array).isNotNull();
 		List<String> values = stream(array).map(MyRepeatable::value).collect(toList());
@@ -651,7 +646,7 @@ class AnnotationUtilsTests {
 		final List<String> expectedValuesJava = asList("X", "Y", "Z");
 		final List<String> expectedValuesSpring = asList("X", "Y", "Z", "meta2");
 
-		// Java 8
+		// Java
 		MyRepeatable[] array = clazz.getAnnotationsByType(MyRepeatable.class);
 		assertThat(array).isNotNull();
 		List<String> values = stream(array).map(MyRepeatable::value).collect(toList());
@@ -675,7 +670,7 @@ class AnnotationUtilsTests {
 		final List<String> expectedValuesJava = asList("A", "B", "C");
 		final List<String> expectedValuesSpring = asList("A", "B", "C", "meta1");
 
-		// Java 8
+		// Java
 		MyRepeatable[] array = MyRepeatableClass.class.getDeclaredAnnotationsByType(MyRepeatable.class);
 		assertThat(array).isNotNull();
 		List<String> values = stream(array).map(MyRepeatable::value).collect(toList());
@@ -699,7 +694,7 @@ class AnnotationUtilsTests {
 	void getDeclaredRepeatableAnnotationsDeclaredOnSuperclass() {
 		final Class<?> clazz = SubMyRepeatableClass.class;
 
-		// Java 8
+		// Java
 		MyRepeatable[] array = clazz.getDeclaredAnnotationsByType(MyRepeatable.class);
 		assertThat(array).isNotNull();
 		assertThat(array).isEmpty();
@@ -723,11 +718,11 @@ class AnnotationUtilsTests {
 		ImplicitAliasesWithMissingDefaultValuesContextConfig config = clazz.getAnnotation(annotationType);
 		assertThat(config).isNotNull();
 
-		assertThatExceptionOfType(AnnotationConfigurationException.class).isThrownBy(() ->
-				synthesizeAnnotation(config, clazz))
+		assertThatExceptionOfType(AnnotationConfigurationException.class)
+			.isThrownBy(() -> synthesizeAnnotation(config, clazz))
 			.withMessageStartingWith("Misconfigured aliases:")
-			.withMessageContaining("attribute 'location1' in annotation [" + annotationType.getName() + "]")
-			.withMessageContaining("attribute 'location2' in annotation [" + annotationType.getName() + "]")
+			.withMessageContaining("attribute 'location1' in annotation [%s]", annotationType.getCanonicalName())
+			.withMessageContaining("attribute 'location2' in annotation [%s]", annotationType.getCanonicalName())
 			.withMessageContaining("default values");
 	}
 
@@ -738,11 +733,11 @@ class AnnotationUtilsTests {
 				ImplicitAliasesWithDifferentDefaultValuesContextConfig.class;
 		ImplicitAliasesWithDifferentDefaultValuesContextConfig config = clazz.getAnnotation(annotationType);
 		assertThat(config).isNotNull();
-		assertThatExceptionOfType(AnnotationConfigurationException.class).isThrownBy(() ->
-				synthesizeAnnotation(config, clazz))
+		assertThatExceptionOfType(AnnotationConfigurationException.class)
+			.isThrownBy(() -> synthesizeAnnotation(config, clazz))
 			.withMessageStartingWith("Misconfigured aliases:")
-			.withMessageContaining("attribute 'location1' in annotation [" + annotationType.getName() + "]")
-			.withMessageContaining("attribute 'location2' in annotation [" + annotationType.getName() + "]")
+			.withMessageContaining("attribute 'location1' in annotation [%s]", annotationType.getCanonicalName())
+			.withMessageContaining("attribute 'location2' in annotation [%s]", annotationType.getCanonicalName())
 			.withMessageContaining("same default value");
 	}
 
@@ -924,8 +919,18 @@ class AnnotationUtilsTests {
 		Map<String, Object> map = Collections.singletonMap(VALUE, 42L);
 		assertThatIllegalStateException().isThrownBy(() ->
 				synthesizeAnnotation(map, Component.class, null).value())
-			.withMessageContaining("Attribute 'value' in annotation org.springframework.core.testfixture.stereotype.Component " +
-					"should be compatible with java.lang.String but a java.lang.Long value was returned");
+			.withMessageContaining("Attribute 'value' in annotation %s should be compatible with " +
+					"java.lang.String but a java.lang.Long value was returned",
+					Component.class.getCanonicalName());
+	}
+
+	@Test
+	void synthesizeAnnotationFromMapWithAttributeOfIncorrectArrayType() {
+		Map<String, Object> map = Collections.singletonMap(VALUE, new int[] {42});
+		assertThatIllegalStateException().isThrownBy(() ->
+				synthesizeAnnotation(map, CharsContainer.class, null).chars())
+			.withMessageContaining("Attribute 'chars' in annotation %s should be compatible with " +
+					"char[] but a int[] value was returned", CharsContainer.class.getCanonicalName());
 	}
 
 	@Test

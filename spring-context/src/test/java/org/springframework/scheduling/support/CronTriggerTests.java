@@ -16,6 +16,7 @@
 
 package org.springframework.scheduling.support;
 
+import java.time.ZoneId;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -31,6 +32,7 @@ import org.springframework.scheduling.TriggerContext;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.junit.jupiter.api.Named.named;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 /**
@@ -47,8 +49,8 @@ import static org.junit.jupiter.params.provider.Arguments.arguments;
 class CronTriggerTests {
 
 	static List<Arguments> parameters = List.of(
-			arguments(new Date(), TimeZone.getTimeZone("PST")),
-			arguments(new Date(), TimeZone.getTimeZone("CET")));
+			arguments(new Date(), named("PST", TimeZone.getTimeZone("PST"))),
+			arguments(new Date(), named("CET", TimeZone.getTimeZone("CET"))));
 
 
 	private final Calendar calendar = new GregorianCalendar();
@@ -743,6 +745,20 @@ class CronTriggerTests {
 		TriggerContext context = getTriggerContext(lastCompletionTime);
 		Object nextExecutionTime = trigger.nextExecutionTime(context);
 		assertThat(nextExecutionTime).isEqualTo(this.calendar.getTime());
+	}
+
+	@Test
+	void equalsAndHashCodeConsiderZoneId() {
+		String expression = "0 0 9 * * *";
+		CronTrigger amsterdam1 = new CronTrigger(expression, ZoneId.of("Europe/Amsterdam"));
+		CronTrigger amsterdam2 = new CronTrigger(expression, ZoneId.of("Europe/Amsterdam"));
+		CronTrigger newYork = new CronTrigger(expression, ZoneId.of("America/New_York"));
+
+		assertThat(amsterdam1)
+				.isEqualTo(amsterdam2)
+				.hasSameHashCodeAs(amsterdam2)
+				.isNotEqualTo(newYork)
+				.doesNotHaveSameHashCodeAs(newYork);
 	}
 
 

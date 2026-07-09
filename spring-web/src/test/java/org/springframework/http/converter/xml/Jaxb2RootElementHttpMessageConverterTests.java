@@ -155,7 +155,7 @@ class Jaxb2RootElementHttpMessageConverterTests {
 	}
 
 	@Test
-	void testXmlBomb() throws Exception {
+	void xmlBomb() throws Exception {
 		// https://en.wikipedia.org/wiki/Billion_laughs
 		// https://msdn.microsoft.com/en-us/magazine/ee335713.aspx
 		String content = """

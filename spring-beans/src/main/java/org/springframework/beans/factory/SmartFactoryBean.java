@@ -65,7 +65,7 @@ public interface SmartFactoryBean<T> extends FactoryBean<T> {
 	 * @see #supportsType(Class)
 	 */
 	@SuppressWarnings("unchecked")
-	default <S> @Nullable S getObject(Class<S> type) throws Exception{
+	default <S> @Nullable S getObject(Class<S> type) throws Exception {
 		Class<?> objectType = getObjectType();
 		return (objectType != null && type.isAssignableFrom(objectType) ? (S) getObject() : null);
 	}

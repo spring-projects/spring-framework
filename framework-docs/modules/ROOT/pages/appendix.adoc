@@ -74,12 +74,22 @@ expressions used in XML bean definitions, `@Value`, etc.
 | The mode to use when compiling expressions for the
 xref:core/expressions/evaluation.adoc#expressions-compiler-configuration[Spring Expression Language].
 
+| `spring.expression.maxOperations`
+| The default maximum number of operations permitted during
+xref:core/expressions/evaluation.adoc#expressions-parser-configuration[Spring Expression Language]
+expression evaluation.
+
 | `spring.getenv.ignore`
 | Instructs Spring to ignore operating system environment variables if a Spring
 `Environment` property -- for example, a placeholder in a configuration String -- isn't
 resolvable otherwise. See
 {spring-framework-api}++/core/env/AbstractEnvironment.html#IGNORE_GETENV_PROPERTY_NAME++[`AbstractEnvironment`]
 for details.
+
+| `spring.http.response.flush.enabled`
+| Configures the Spring MVC `ServletServerHttpResponse` to allow flushing on the `OutputStream`
+returned by `ServletServerHttpResponse#getBody()`. By default, such flush calls are ignored and
+only `ServletServerHttpResponse#flush()` will actually flush the response to the network.
 
 | `spring.jdbc.getParameterType.ignore`
 | Instructs Spring to ignore `java.sql.ParameterMetaData.getParameterType` completely.
@@ -124,10 +134,19 @@ on a test class. See xref:testing/annotations/integration-junit-jupiter.adoc#int
 | The maximum size of the context cache in the _Spring TestContext Framework_. See
 xref:testing/testcontext-framework/ctx-management/caching.adoc[Context Caching].
 
+| `spring.test.context.cache.pause`
+| The pause mode for the context cache in the _Spring TestContext Framework_. See
+xref:testing/testcontext-framework/ctx-management/context-pausing.adoc[Context Pausing].
+
 | `spring.test.context.failure.threshold`
 | The failure threshold for errors encountered while attempting to load an `ApplicationContext`
 in the _Spring TestContext Framework_. See
 xref:testing/testcontext-framework/ctx-management/failure-threshold.adoc[Context Failure Threshold].
+
+| `spring.test.extension.context.scope`
+| The default _extension context scope_ used by the `SpringExtension` in `@Nested` test
+class hierarchies. See
+xref:testing/annotations/integration-junit-jupiter.adoc#integration-testing-annotations-springextensionconfig[`@SpringExtensionConfig`].
 
 | `spring.test.enclosing.configuration`
 | The default _enclosing configuration inheritance mode_ to use if

@@ -113,7 +113,7 @@ class RowMapperTests {
 
 	@Test
 	@SuppressWarnings("deprecation")
-	public void queryWithArgsAndRowMapper() throws SQLException {
+	void queryWithArgsAndRowMapper() throws SQLException {
 		result = template.query("some SQL", new Object[] { "test1", "test2" }, testRowMapper);
 		preparedStatement.setString(1, "test1");
 		preparedStatement.setString(2, "test2");

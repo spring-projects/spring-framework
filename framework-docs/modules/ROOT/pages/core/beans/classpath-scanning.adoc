@@ -556,18 +556,11 @@ Kotlin::
 ======
 
 If you do not want to rely on the default bean-naming strategy, you can provide a custom
-bean-naming strategy. First, implement the
-{spring-framework-api}/beans/factory/support/BeanNameGenerator.html[`BeanNameGenerator`]
+bean-naming strategy. First, implement either the
+{spring-framework-api}/beans/factory/support/BeanNameGenerator.html[`BeanNameGenerator`] or
+{spring-framework-api}/context/annotation/ConfigurationBeanNameGenerator.html[`ConfigurationBeanNameGenerator`]
 interface, and be sure to include a default no-arg constructor. Then, provide the fully
-qualified class name when configuring the scanner, as the following example annotation
-and bean definition show.
-
-TIP: If you run into naming conflicts due to multiple autodetected components having the
-same non-qualified class name (i.e., classes with identical names but residing in
-different packages), you may need to configure a `BeanNameGenerator` that defaults to the
-fully qualified class name for the generated bean name. The
-`FullyQualifiedAnnotationBeanNameGenerator` located in package
-`org.springframework.context.annotation` can be used for such purposes.
+qualified class name when configuring the scanner, as the following examples show.
 
 [tabs]
 ======
@@ -601,6 +594,27 @@ Kotlin::
 			name-generator="org.example.MyNameGenerator" />
 	</beans>
 ----
+
+[TIP]
+====
+If you run into naming conflicts due to multiple autodetected components having the same
+non-qualified class name (for example, classes with identical names but residing in
+different packages), you can configure a `BeanNameGenerator` that defaults to the
+fully-qualified class name for the generated bean name. The
+`FullyQualifiedAnnotationBeanNameGenerator` can be used for such purposes.
+
+As of Spring Framework 7.0, if you encounter naming conflicts among `@Bean` methods in
+`@Configuration` classes, you can alternatively configure a
+`ConfigurationBeanNameGenerator` that generates unique bean names for `@Bean` methods.
+The `FullyQualifiedConfigurationBeanNameGenerator` can be used to generate
+fully-qualified default bean names for `@Bean` methods without an explicit `name`
+attribute — for example, `com.example.MyConfig.myBean` for an `@Bean` method named
+`myBean()` declared in `@Configuration` class `com.example.MyConfig`.
+
+The `FullyQualifiedAnnotationBeanNameGenerator` and
+`FullyQualifiedConfigurationBeanNameGenerator` both reside in the
+`org.springframework.context.annotation` package.
+====
 
 As a general rule, consider specifying the name with the annotation whenever other
 components may be making explicit references to it. On the other hand, the

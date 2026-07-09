@@ -16,8 +16,6 @@
 
 package org.springframework.web.reactive.result.condition;
 
-import java.util.Collection;
-
 import org.junit.jupiter.api.Test;
 
 import org.springframework.web.server.ServerWebExchange;
@@ -121,7 +119,7 @@ class HeadersRequestConditionTests {
 	}
 
 	@Test // SPR-16674
-	public void compareToWithMoreSpecificMatchByValue() {
+	void compareToWithMoreSpecificMatchByValue() {
 		ServerWebExchange exchange = MockServerWebExchange.from(get("/"));
 
 		HeadersRequestCondition condition1 = new HeadersRequestCondition("foo=a");
@@ -147,8 +145,7 @@ class HeadersRequestConditionTests {
 		HeadersRequestCondition condition2 = new HeadersRequestCondition("foo=baz");
 
 		HeadersRequestCondition result = condition1.combine(condition2);
-		Collection<?> conditions = result.getContent();
-		assertThat(conditions).hasSize(2);
+		assertThat(result.getContent()).hasSize(2);
 	}
 
 	@Test

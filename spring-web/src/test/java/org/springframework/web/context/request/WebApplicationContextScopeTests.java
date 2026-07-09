@@ -49,7 +49,7 @@ class WebApplicationContextScopeTests {
 	}
 
 	@Test
-	void testRequestScope() {
+	void requestScope() {
 		WebApplicationContext ac = initApplicationContext(WebApplicationContext.SCOPE_REQUEST);
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		ServletRequestAttributes requestAttributes = new ServletRequestAttributes(request);
@@ -68,7 +68,7 @@ class WebApplicationContextScopeTests {
 	}
 
 	@Test
-	void testSessionScope() {
+	void sessionScope() {
 		WebApplicationContext ac = initApplicationContext(WebApplicationContext.SCOPE_SESSION);
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		ServletRequestAttributes requestAttributes = new ServletRequestAttributes(request);
@@ -87,7 +87,7 @@ class WebApplicationContextScopeTests {
 	}
 
 	@Test
-	void testApplicationScope() {
+	void applicationScope() {
 		WebApplicationContext ac = initApplicationContext(WebApplicationContext.SCOPE_APPLICATION);
 		assertThat(ac.getServletContext().getAttribute(NAME)).isNull();
 		DerivedTestBean bean = ac.getBean(NAME, DerivedTestBean.class);

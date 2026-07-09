@@ -166,8 +166,7 @@ class ClassPathBeanDefinitionScannerScopeIntegrationTests {
 
 		// should be dynamic proxy, implementing both interfaces
 		assertThat(AopUtils.isJdkDynamicProxy(bean)).isTrue();
-		boolean condition = bean instanceof AnotherScopeTestInterface;
-		assertThat(condition).isTrue();
+		assertThat(bean).isInstanceOf(AnotherScopeTestInterface.class);
 
 		assertThat(bean.getName()).isEqualTo(DEFAULT_NAME);
 		bean.setName(MODIFIED_NAME);
@@ -188,8 +187,7 @@ class ClassPathBeanDefinitionScannerScopeIntegrationTests {
 
 		// should be a class-based proxy
 		assertThat(AopUtils.isCglibProxy(bean)).isTrue();
-		boolean condition = bean instanceof RequestScopedTestBean;
-		assertThat(condition).isTrue();
+		assertThat(bean).isInstanceOf(RequestScopedTestBean.class);
 
 		assertThat(bean.getName()).isEqualTo(DEFAULT_NAME);
 		bean.setName(MODIFIED_NAME);
@@ -231,8 +229,7 @@ class ClassPathBeanDefinitionScannerScopeIntegrationTests {
 
 		// should be dynamic proxy, implementing both interfaces
 		assertThat(AopUtils.isJdkDynamicProxy(bean)).isTrue();
-		boolean condition = bean instanceof AnotherScopeTestInterface;
-		assertThat(condition).isTrue();
+		assertThat(bean).isInstanceOf(AnotherScopeTestInterface.class);
 
 		assertThat(bean.getName()).isEqualTo(DEFAULT_NAME);
 		bean.setName(MODIFIED_NAME);
@@ -259,10 +256,8 @@ class ClassPathBeanDefinitionScannerScopeIntegrationTests {
 
 		// should be a class-based proxy
 		assertThat(AopUtils.isCglibProxy(bean)).isTrue();
-		boolean condition1 = bean instanceof ScopedTestBean;
-		assertThat(condition1).isTrue();
-		boolean condition = bean instanceof SessionScopedTestBean;
-		assertThat(condition).isTrue();
+		assertThat(bean).isInstanceOf(ScopedTestBean.class);
+		assertThat(bean).isInstanceOf(SessionScopedTestBean.class);
 
 		assertThat(bean.getName()).isEqualTo(DEFAULT_NAME);
 		bean.setName(MODIFIED_NAME);

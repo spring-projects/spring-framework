@@ -63,16 +63,20 @@ public final class HttpServiceProxyFactory {
 
 	private final @Nullable StringValueResolver embeddedValueResolver;
 
+	private final List<ProxyFactoryCustomizer> proxyFactoryCustomizers;
+
 
 	private HttpServiceProxyFactory(
 			HttpExchangeAdapter exchangeAdapter, List<HttpServiceArgumentResolver> argumentResolvers,
 			List<HttpRequestValues.Processor> requestValuesProcessor,
-			@Nullable StringValueResolver embeddedValueResolver) {
+			@Nullable StringValueResolver embeddedValueResolver,
+			List<ProxyFactoryCustomizer> proxyFactoryCustomizers) {
 
 		this.exchangeAdapter = exchangeAdapter;
 		this.argumentResolvers = argumentResolvers;
 		this.requestValuesProcessor = new CompositeHttpRequestValuesProcessor(requestValuesProcessor);
 		this.embeddedValueResolver = embeddedValueResolver;
+		this.proxyFactoryCustomizers = proxyFactoryCustomizers;
 	}
 
 
@@ -84,7 +88,6 @@ public final class HttpServiceProxyFactory {
 	 * @return the created proxy
 	 */
 	public <S> S createClient(Class<S> serviceType) {
-
 		List<HttpServiceMethod> httpServiceMethods =
 				MethodIntrospector.selectMethods(serviceType, this::isExchangeMethod).stream()
 						.map(method -> createHttpServiceMethod(serviceType, method))
@@ -97,6 +100,9 @@ public final class HttpServiceProxyFactory {
 	private <S> S getProxy(Class<S> serviceType, List<HttpServiceMethod> httpServiceMethods) {
 		MethodInterceptor interceptor = new HttpServiceMethodInterceptor(httpServiceMethods);
 		ProxyFactory factory = new ProxyFactory(serviceType, interceptor);
+		for (ProxyFactoryCustomizer customizer : this.proxyFactoryCustomizers) {
+			customizer.customize(factory, serviceType);
+		}
 		return (S) factory.getProxy(serviceType.getClassLoader());
 	}
 
@@ -146,6 +152,8 @@ public final class HttpServiceProxyFactory {
 		private final List<HttpRequestValues.Processor> requestValuesProcessors = new ArrayList<>();
 
 		private @Nullable StringValueResolver embeddedValueResolver;
+
+		private final List<ProxyFactoryCustomizer> proxyFactoryCustomizers = new ArrayList<>();
 
 		private Builder() {
 		}
@@ -217,6 +225,18 @@ public final class HttpServiceProxyFactory {
 		}
 
 		/**
+		 * Register a callback to customize the {@link ProxyFactory} used to
+		 * create the proxy for each HTTP service interface.
+		 * @param customizer the customizer to add
+		 * @return this same builder instance
+		 * @since 7.1
+		 */
+		public Builder proxyFactoryCustomizer(ProxyFactoryCustomizer customizer) {
+			this.proxyFactoryCustomizers.add(customizer);
+			return this;
+		}
+
+		/**
 		 * Build the {@link HttpServiceProxyFactory} instance.
 		 */
 		public HttpServiceProxyFactory build() {
@@ -225,7 +245,7 @@ public final class HttpServiceProxyFactory {
 
 			return new HttpServiceProxyFactory(
 					adapterToUse, initArgumentResolvers(), this.requestValuesProcessors,
-					this.embeddedValueResolver);
+					this.embeddedValueResolver, this.proxyFactoryCustomizers);
 		}
 
 		@SuppressWarnings({"DataFlowIssue", "NullAway"})
@@ -311,6 +331,23 @@ public final class HttpServiceProxyFactory {
 				processor.process(method, parameters, arguments, builder);
 			}
 		}
+	}
+
+	/**
+	 * Callback mechanism to customize the {@link ProxyFactory} used to create the
+	 * proxy for each HTTP service interface, e.g. to add AOP interceptors.
+	 * @author Dung Dang Minh
+	 * @since 7.1
+	 */
+	public interface ProxyFactoryCustomizer {
+
+		/**
+		 * Customize the {@link ProxyFactory} for the given HTTP service type.
+		 * @param proxyFactory will never be {@literal null}.
+		 * @param serviceType the HTTP service interface type
+		 */
+		void customize(ProxyFactory proxyFactory, Class<?> serviceType);
+
 	}
 
 }

@@ -57,8 +57,15 @@ class HttpMethodTests {
 		HttpMethod get = HttpMethod.valueOf("GET");
 		assertThat(get).isSameAs(HttpMethod.GET);
 
-		HttpMethod foo = HttpMethod.valueOf("FOO");
-		HttpMethod other = HttpMethod.valueOf("FOO");
+		get = HttpMethod.valueOf("Get");
+		assertThat(get).isSameAs(HttpMethod.GET);
+
+		get = HttpMethod.valueOf("get");
+		assertThat(get).isSameAs(HttpMethod.GET);
+
+		HttpMethod foo = HttpMethod.valueOf("foo");
+		HttpMethod other = HttpMethod.valueOf("foo");
+		assertThat(foo).isNotSameAs(other);
 		assertThat(foo).isEqualTo(other);
 	}
 
@@ -73,4 +80,5 @@ class HttpMethodTests {
 		assertThat(HttpMethod.GET.matches("GET")).isTrue();
 		assertThat(HttpMethod.GET.matches("FOO")).isFalse();
 	}
+
 }

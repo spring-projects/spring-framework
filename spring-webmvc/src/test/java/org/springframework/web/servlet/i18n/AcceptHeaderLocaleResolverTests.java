@@ -105,6 +105,14 @@ class AcceptHeaderLocaleResolverTests {
 		assertThat(this.resolver.resolveLocale(request)).isEqualTo(US);
 	}
 
+	@Test
+	void defaultLocaleWithBlankAcceptLanguageHeader() {
+		this.resolver.setDefaultLocale(JAPANESE);
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		request.addHeader("Accept-Language", "");
+		assertThat(this.resolver.resolveLocale(request)).isEqualTo(JAPANESE);
+	}
+
 
 	private HttpServletRequest request(Locale... locales) {
 		MockHttpServletRequest request = new MockHttpServletRequest();

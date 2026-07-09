@@ -150,7 +150,7 @@ class WebAsyncManagerTimeoutTests {
 
 	@Test
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public void startCallableProcessingTimeoutAndCheckThreadInterrupted() throws Exception {
+	void startCallableProcessingTimeoutAndCheckThreadInterrupted() throws Exception {
 
 		StubCallable callable = new StubCallable();
 		Future future = mock();

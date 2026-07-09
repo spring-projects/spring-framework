@@ -32,7 +32,6 @@ import org.springframework.core.io.ResourceLoader;
  */
 public class SimpleMetadataReaderFactory extends AbstractMetadataReaderFactory {
 
-
 	/**
 	 * Create a new SimpleMetadataReaderFactory for the default class loader.
 	 */
@@ -56,6 +55,7 @@ public class SimpleMetadataReaderFactory extends AbstractMetadataReaderFactory {
 	public SimpleMetadataReaderFactory(@Nullable ClassLoader classLoader) {
 		super(classLoader);
 	}
+
 
 	@Override
 	public MetadataReader getMetadataReader(Resource resource) throws IOException {

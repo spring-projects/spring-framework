@@ -27,4 +27,5 @@ public class EmployeeLocation {
 	public void setLocation(String location) {
 		this.location = location;
 	}
+
 }

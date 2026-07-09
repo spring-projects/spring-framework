@@ -22,7 +22,6 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.reactive.asFlow
-import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -53,7 +52,7 @@ class RSocketServiceMethodKotlinTests {
 	}
 
 	@Test
-	fun fireAndForget(): Unit = runBlocking {
+	suspend fun fireAndForget() {
 		val service = proxyFactory.createClient(SuspendingFunctionsService::class.java)
 
 		val requestPayload = "request"
@@ -65,7 +64,7 @@ class RSocketServiceMethodKotlinTests {
 	}
 
 	@Test
-	fun requestResponse(): Unit = runBlocking {
+	suspend fun requestResponse() {
 		val service = proxyFactory.createClient(SuspendingFunctionsService::class.java)
 
 		val requestPayload = "request"
@@ -80,7 +79,7 @@ class RSocketServiceMethodKotlinTests {
 	}
 
 	@Test
-	fun requestStream(): Unit = runBlocking {
+	suspend fun requestStream() {
 		val service = proxyFactory.createClient(SuspendingFunctionsService::class.java)
 
 		val requestPayload = "request"
@@ -97,7 +96,7 @@ class RSocketServiceMethodKotlinTests {
 	}
 
 	@Test
-	fun nonSuspendingRequestStream(): Unit = runBlocking {
+	suspend fun nonSuspendingRequestStream() {
 		val service = proxyFactory.createClient(NonSuspendingFunctionsService::class.java)
 
 		val requestPayload = "request"
@@ -114,7 +113,7 @@ class RSocketServiceMethodKotlinTests {
 	}
 
 	@Test
-	fun requestChannel(): Unit = runBlocking {
+	suspend fun requestChannel() {
 		val service = proxyFactory.createClient(SuspendingFunctionsService::class.java)
 
 		val requestPayload1 = "request1"

@@ -22,6 +22,7 @@ import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -32,7 +33,9 @@ import org.springframework.aot.hint.ConditionalHint;
 import org.springframework.aot.hint.ExecutableHint;
 import org.springframework.aot.hint.ExecutableMode;
 import org.springframework.aot.hint.FieldHint;
+import org.springframework.aot.hint.JavaSerializationHint;
 import org.springframework.aot.hint.JdkProxyHint;
+import org.springframework.aot.hint.LambdaHint;
 import org.springframework.aot.hint.MemberCategory;
 import org.springframework.aot.hint.ReflectionHints;
 import org.springframework.aot.hint.RuntimeHints;
@@ -61,15 +64,35 @@ class ReflectionHintsAttributes {
 				return leftSignature.compareTo(rightSignature);
 			};
 
+	private static final Comparator<LambdaHint> LAMBDA_HINT_COMPARATOR =
+			Comparator.comparing(LambdaHint::getDeclaringClass)
+					.thenComparing(LambdaHint::getDeclaringMethod, Comparator.nullsFirst(
+							Comparator.comparing(LambdaHint.DeclaringMethod::name)));
+
+
 	public List<Map<String, Object>> reflection(RuntimeHints hints) {
-		List<Map<String, Object>> reflectionHints = new ArrayList<>();
-		reflectionHints.addAll(hints.reflection().typeHints()
-				.sorted(Comparator.comparing(TypeHint::getType))
-				.map(this::toAttributes).toList());
+		List<Map<String, Object>> reflectionHints = new ArrayList<>(reflectionHints(hints));
 		reflectionHints.addAll(hints.proxies().jdkProxyHints()
 				.sorted(JDK_PROXY_HINT_COMPARATOR)
 				.map(this::toAttributes).toList());
 		return reflectionHints;
+	}
+
+	@SuppressWarnings("removal")
+	private List<Map<String, Object>> reflectionHints(RuntimeHints hints) {
+		Map<TypeReference, Map<String, Object>> allTypeHints = hints.reflection().typeHints()
+				.map(this::toAttributes).collect(Collectors.toMap((attributes -> (TypeReference) Objects.requireNonNull(attributes.get("type"))),
+						attributes -> attributes));
+		hints.serialization().javaSerializationHints().forEach(hint -> {
+			allTypeHints.merge(hint.getType(), toAttributes(hint),
+					(currentAttributes, newAttributes) -> {
+						handleSerializable(currentAttributes, true);
+						return currentAttributes;
+					});
+		});
+		return Stream.concat(
+				allTypeHints.entrySet().stream().sorted(Map.Entry.comparingByKey()).map(Map.Entry::getValue),
+				hints.reflection().lambdaHints().sorted(LAMBDA_HINT_COMPARATOR).map(this::toAttributes)).toList();
 	}
 
 	public List<Map<String, Object>> jni(RuntimeHints hints) {
@@ -88,6 +111,33 @@ class ReflectionHintsAttributes {
 		handleFields(attributes, hint.fields());
 		handleExecutables(attributes, Stream.concat(
 				hint.constructors(), hint.methods()).sorted().toList());
+		handleSerializable(attributes, hint.hasJavaSerialization());
+		return attributes;
+	}
+
+	private Map<String, Object> toAttributes(LambdaHint hint) {
+		Map<String, Object> attributes = new LinkedHashMap<>();
+		Map<String, Object> lambdaAttributes = new LinkedHashMap<>();
+		lambdaAttributes.put("declaringClass", hint.getDeclaringClass());
+		LambdaHint.DeclaringMethod declaringMethod = hint.getDeclaringMethod();
+		if (declaringMethod != null) {
+			Map<String, Object> methodAttributes = new LinkedHashMap<>();
+			methodAttributes.put("name", declaringMethod.name());
+			methodAttributes.put("parameterTypes", declaringMethod.parameterTypes());
+			lambdaAttributes.put("declaringMethod", methodAttributes);
+		}
+		lambdaAttributes.put("interfaces", hint.getInterfaces());
+
+		attributes.put("lambda", lambdaAttributes);
+		return Map.of("type", attributes);
+	}
+
+	@SuppressWarnings("removal")
+	private Map<String, Object> toAttributes(JavaSerializationHint serializationHint) {
+		LinkedHashMap<String, Object> attributes = new LinkedHashMap<>();
+		handleCondition(attributes, serializationHint);
+		attributes.put("type", serializationHint.getType());
+		handleSerializable(attributes, true);
 		return attributes;
 	}
 
@@ -148,7 +198,14 @@ class ReflectionHintsAttributes {
 		Map<String, Object> attributes = new LinkedHashMap<>();
 		handleCondition(attributes, hint);
 		attributes.put("type", Map.of("proxy", hint.getProxiedInterfaces()));
+		handleSerializable(attributes, hint.hasJavaSerialization());
 		return attributes;
+	}
+
+	private void handleSerializable(Map<String, Object> attributes, boolean serializable) {
+		if (serializable) {
+			attributes.put("serializable", serializable);
+		}
 	}
 
 }

@@ -14,68 +14,7 @@ NOTE: The Groovy Markup Template engine requires Groovy 2.3.1+.
 
 The following example shows how to configure the Groovy Markup Template Engine:
 
-[tabs]
-======
-Java::
-+
-[source,java,indent=0,subs="verbatim,quotes"]
-----
-	@Configuration
-	@EnableWebMvc
-	public class WebConfig implements WebMvcConfigurer {
-
-		@Override
-		public void configureViewResolvers(ViewResolverRegistry registry) {
-			registry.groovy();
-		}
-
-		// Configure the Groovy Markup Template Engine...
-
-		@Bean
-		public GroovyMarkupConfigurer groovyMarkupConfigurer() {
-			GroovyMarkupConfigurer configurer = new GroovyMarkupConfigurer();
-			configurer.setResourceLoaderPath("/WEB-INF/");
-			return configurer;
-		}
-	}
-----
-
-Kotlin::
-+
-[source,kotlin,indent=0,subs="verbatim,quotes"]
-----
-	@Configuration
-	@EnableWebMvc
-	class WebConfig : WebMvcConfigurer {
-
-		override fun configureViewResolvers(registry: ViewResolverRegistry) {
-			registry.groovy()
-		}
-
-		// Configure the Groovy Markup Template Engine...
-
-		@Bean
-		fun groovyMarkupConfigurer() = GroovyMarkupConfigurer().apply {
-			resourceLoaderPath = "/WEB-INF/"
-		}
-	}
-----
-======
-
-The following example shows how to configure the same in XML:
-
-[source,xml,indent=0,subs="verbatim,quotes"]
-----
-	<mvc:annotation-driven/>
-
-	<mvc:view-resolvers>
-		<mvc:groovy/>
-	</mvc:view-resolvers>
-
-	<!-- Configure the Groovy Markup Template Engine... -->
-	<mvc:groovy-configurer resource-loader-path="/WEB-INF/"/>
-----
-
+include-code::./WebConfiguration[tag=snippet,indent=0]
 
 [[mvc-view-groovymarkup-example]]
 == Example

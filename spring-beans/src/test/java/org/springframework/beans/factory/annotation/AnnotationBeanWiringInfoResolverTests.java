@@ -30,27 +30,27 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
 class AnnotationBeanWiringInfoResolverTests {
 
 	@Test
-	void testResolveWiringInfo() {
+	void resolveWiringInfo() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				new AnnotationBeanWiringInfoResolver().resolveWiringInfo(null));
 	}
 
 	@Test
-	void testResolveWiringInfoWithAnInstanceOfANonAnnotatedClass() {
+	void resolveWiringInfoWithAnInstanceOfANonAnnotatedClass() {
 		AnnotationBeanWiringInfoResolver resolver = new AnnotationBeanWiringInfoResolver();
 		BeanWiringInfo info = resolver.resolveWiringInfo("java.lang.String is not @Configurable");
 		assertThat(info).as("Must be returning null for a non-@Configurable class instance").isNull();
 	}
 
 	@Test
-	void testResolveWiringInfoWithAnInstanceOfAnAnnotatedClass() {
+	void resolveWiringInfoWithAnInstanceOfAnAnnotatedClass() {
 		AnnotationBeanWiringInfoResolver resolver = new AnnotationBeanWiringInfoResolver();
 		BeanWiringInfo info = resolver.resolveWiringInfo(new Soap());
 		assertThat(info).as("Must *not* be returning null for a non-@Configurable class instance").isNotNull();
 	}
 
 	@Test
-	void testResolveWiringInfoWithAnInstanceOfAnAnnotatedClassWithAutowiringTurnedOffExplicitly() {
+	void resolveWiringInfoWithAnInstanceOfAnAnnotatedClassWithAutowiringTurnedOffExplicitly() {
 		AnnotationBeanWiringInfoResolver resolver = new AnnotationBeanWiringInfoResolver();
 		BeanWiringInfo info = resolver.resolveWiringInfo(new WirelessSoap());
 		assertThat(info).as("Must *not* be returning null for an @Configurable class instance even when autowiring is NO").isNotNull();
@@ -59,7 +59,7 @@ class AnnotationBeanWiringInfoResolverTests {
 	}
 
 	@Test
-	void testResolveWiringInfoWithAnInstanceOfAnAnnotatedClassWithAutowiringTurnedOffExplicitlyAndCustomBeanName() {
+	void resolveWiringInfoWithAnInstanceOfAnAnnotatedClassWithAutowiringTurnedOffExplicitlyAndCustomBeanName() {
 		AnnotationBeanWiringInfoResolver resolver = new AnnotationBeanWiringInfoResolver();
 		BeanWiringInfo info = resolver.resolveWiringInfo(new NamedWirelessSoap());
 		assertThat(info).as("Must *not* be returning null for an @Configurable class instance even when autowiring is NO").isNotNull();

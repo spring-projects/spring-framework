@@ -9,7 +9,6 @@ and can be used anywhere in the Spring Framework.
 * `@Qualifier`
 * `@Value`
 * `@Resource` (jakarta.annotation) if JSR-250 is present
-* `@ManagedBean` (jakarta.annotation) if JSR-250 is present
 * `@Inject` (jakarta.inject) if JSR-330 is present
 * `@Named` (jakarta.inject) if JSR-330 is present
 * `@PersistenceContext` (jakarta.persistence) if JPA is present

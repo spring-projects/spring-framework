@@ -73,7 +73,7 @@ class SimpleScopeTests {
 
 
 	@Test
-	void testCanGetScopedObject() {
+	void canGetScopedObject() {
 		TestBean tb1 = (TestBean) beanFactory.getBean("usesScope");
 		TestBean tb2 = (TestBean) beanFactory.getBean("usesScope");
 		assertThat(tb2).isNotSameAs(tb1);

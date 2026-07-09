@@ -66,8 +66,7 @@ class WebHttpHandlerBuilderTests {
 		context.refresh();
 
 		HttpHandler httpHandler = WebHttpHandlerBuilder.applicationContext(context).build();
-		boolean condition = httpHandler instanceof HttpWebHandlerAdapter;
-		assertThat(condition).isTrue();
+		assertThat(httpHandler).isInstanceOf(HttpWebHandlerAdapter.class);
 		assertThat(((HttpWebHandlerAdapter) httpHandler).getApplicationContext()).isSameAs(context);
 
 		MockServerHttpRequest request = MockServerHttpRequest.get("/").build();
@@ -180,6 +179,37 @@ class WebHttpHandlerBuilderTests {
 				DuplicateConventionObservationConfig.class);
 		assertThatThrownBy(() -> WebHttpHandlerBuilder.applicationContext(applicationContext).build())
 				.isInstanceOf(NoUniqueBeanDefinitionException.class);
+	}
+
+	@Test
+	void defaultHtmlEscape() {
+		HttpHandler httpHandler = WebHttpHandlerBuilder
+				.webHandler(exchange -> Mono.empty())
+				.defaultHtmlEscape(true)
+				.build();
+
+		assertThat(httpHandler).isInstanceOf(HttpWebHandlerAdapter.class);
+		assertThat(((HttpWebHandlerAdapter) httpHandler).getDefaultHtmlEscape()).isTrue();
+	}
+
+	@Test
+	void defaultHtmlEscapeNotConfigured() {
+		HttpHandler httpHandler = WebHttpHandlerBuilder
+				.webHandler(exchange -> Mono.empty())
+				.build();
+
+		assertThat(httpHandler).isInstanceOf(HttpWebHandlerAdapter.class);
+		assertThat(((HttpWebHandlerAdapter) httpHandler).getDefaultHtmlEscape()).isNull();
+	}
+
+	@Test
+	void cloneWithDefaultHtmlEscape() {
+		WebHttpHandlerBuilder builder = WebHttpHandlerBuilder
+				.webHandler(exchange -> Mono.empty())
+				.defaultHtmlEscape(true);
+
+		assertThat(((HttpWebHandlerAdapter) builder.build()).getDefaultHtmlEscape()).isTrue();
+		assertThat(((HttpWebHandlerAdapter) builder.clone().build()).getDefaultHtmlEscape()).isTrue();
 	}
 
 	private static Mono<Void> writeToResponse(ServerWebExchange exchange, String value) {
@@ -308,7 +338,7 @@ class WebHttpHandlerBuilderTests {
 	static class ObservationConfig {
 
 		@Bean
-		public TestObservationRegistry testObservationRegistry() {
+		public TestObservationRegistry observationRegistry() {
 			return TestObservationRegistry.create();
 		}
 

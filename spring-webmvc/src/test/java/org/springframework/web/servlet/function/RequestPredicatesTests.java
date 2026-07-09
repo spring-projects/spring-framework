@@ -27,6 +27,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
+import org.springframework.web.accept.ApiVersionHolder;
 import org.springframework.web.accept.ApiVersionStrategy;
 import org.springframework.web.accept.DefaultApiVersionStrategy;
 import org.springframework.web.accept.SemanticApiVersionParser;
@@ -284,7 +285,8 @@ class RequestPredicatesTests {
 
 		MockHttpServletRequest servletRequest =
 				PathPatternsTestUtils.initRequest("GET", null, "/path", true,
-						req -> req.setAttribute(API_VERSION_ATTRIBUTE, strategy.parseVersion(version)));
+						req -> req.setAttribute(API_VERSION_ATTRIBUTE,
+								ApiVersionHolder.fromVersion(strategy.parseVersion(version))));
 
 		return new DefaultServerRequest(servletRequest, Collections.emptyList(), strategy);
 	}

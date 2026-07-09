@@ -244,7 +244,7 @@ class BodyInsertersTests {
 	}
 
 	@Test // gh-24366
-	public void ofResourceWithExplicitMediaType() throws IOException {
+	void ofResourceWithExplicitMediaType() throws IOException {
 		Resource resource = new ClassPathResource("response.txt", getClass());
 
 		MockClientHttpRequest request = new MockClientHttpRequest(HttpMethod.POST, "/");
@@ -389,7 +389,7 @@ class BodyInsertersTests {
 	}
 
 	@Test  // SPR-16350
-	public void fromMultipartDataWithMultipleValues() {
+	void fromMultipartDataWithMultipleValues() {
 		MultiValueMap<String, Object> map = new LinkedMultiValueMap<>();
 		map.put("name", Arrays.asList("value1", "value2"));
 		BodyInserters.FormInserter<Object> inserter = BodyInserters.fromMultipartData(map);

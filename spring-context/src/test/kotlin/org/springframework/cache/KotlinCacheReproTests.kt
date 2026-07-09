@@ -16,7 +16,6 @@
 
 package org.springframework.cache
 
-import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.testfixture.beans.TestBean
@@ -33,51 +32,47 @@ import org.springframework.context.annotation.Configuration
 class KotlinCacheReproTests {
 
 	@Test
-	fun spr14235AdaptsToSuspendingFunction() {
-		runBlocking {
-			val context = AnnotationConfigApplicationContext(
-				Spr14235Config::class.java,
-				Spr14235SuspendingService::class.java
-			)
-			val bean = context.getBean(Spr14235SuspendingService::class.java)
-			val cache = context.getBean(CacheManager::class.java).getCache("itemCache")!!
-			val tb: TestBean = bean.findById("tb1")
-			assertThat(bean.findById("tb1")).isSameAs(tb)
-			assertThat(cache["tb1"]!!.get()).isSameAs(tb)
-			bean.clear()
-			val tb2: TestBean = bean.findById("tb1")
-			assertThat(tb2).isNotSameAs(tb)
-			assertThat(cache["tb1"]!!.get()).isSameAs(tb2)
-			bean.clear()
-			bean.insertItem(tb)
-			assertThat(bean.findById("tb1")).isSameAs(tb)
-			assertThat(cache["tb1"]!!.get()).isSameAs(tb)
-			context.close()
-		}
+	suspend fun spr14235AdaptsToSuspendingFunction() {
+		val context = AnnotationConfigApplicationContext(
+			Spr14235Config::class.java,
+			Spr14235SuspendingService::class.java
+		)
+		val bean = context.getBean(Spr14235SuspendingService::class.java)
+		val cache = context.getBean(CacheManager::class.java).getCache("itemCache")!!
+		val tb: TestBean = bean.findById("tb1")
+		assertThat(bean.findById("tb1")).isSameAs(tb)
+		assertThat(cache["tb1"]!!.get()).isSameAs(tb)
+		bean.clear()
+		val tb2: TestBean = bean.findById("tb1")
+		assertThat(tb2).isNotSameAs(tb)
+		assertThat(cache["tb1"]!!.get()).isSameAs(tb2)
+		bean.clear()
+		bean.insertItem(tb)
+		assertThat(bean.findById("tb1")).isSameAs(tb)
+		assertThat(cache["tb1"]!!.get()).isSameAs(tb)
+		context.close()
 	}
 
 	@Test
-	fun spr14235AdaptsToSuspendingFunctionWithSync() {
-		runBlocking {
-			val context = AnnotationConfigApplicationContext(
-				Spr14235Config::class.java,
-				Spr14235SuspendingServiceSync::class.java
-			)
-			val bean = context.getBean(Spr14235SuspendingServiceSync::class.java)
-			val cache = context.getBean(CacheManager::class.java).getCache("itemCache")!!
-			val tb = bean.findById("tb1")
-			assertThat(bean.findById("tb1")).isSameAs(tb)
-			assertThat(cache["tb1"]!!.get()).isSameAs(tb)
-			cache.clear()
-			val tb2 = bean.findById("tb1")
-			assertThat(tb2).isNotSameAs(tb)
-			assertThat(cache["tb1"]!!.get()).isSameAs(tb2)
-			cache.clear()
-			bean.insertItem(tb)
-			assertThat(bean.findById("tb1")).isSameAs(tb)
-			assertThat(cache["tb1"]!!.get()).isSameAs(tb)
-			context.close()
-		}
+	suspend fun spr14235AdaptsToSuspendingFunctionWithSync() {
+		val context = AnnotationConfigApplicationContext(
+			Spr14235Config::class.java,
+			Spr14235SuspendingServiceSync::class.java
+		)
+		val bean = context.getBean(Spr14235SuspendingServiceSync::class.java)
+		val cache = context.getBean(CacheManager::class.java).getCache("itemCache")!!
+		val tb = bean.findById("tb1")
+		assertThat(bean.findById("tb1")).isSameAs(tb)
+		assertThat(cache["tb1"]!!.get()).isSameAs(tb)
+		cache.clear()
+		val tb2 = bean.findById("tb1")
+		assertThat(tb2).isNotSameAs(tb)
+		assertThat(cache["tb1"]!!.get()).isSameAs(tb2)
+		cache.clear()
+		bean.insertItem(tb)
+		assertThat(bean.findById("tb1")).isSameAs(tb)
+		assertThat(cache["tb1"]!!.get()).isSameAs(tb)
+		context.close()
 	}
 
 	@Test
