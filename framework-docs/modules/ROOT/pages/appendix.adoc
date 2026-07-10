@@ -74,6 +74,12 @@ expressions used in XML bean definitions, `@Value`, etc.
 | The mode to use when compiling expressions for the
 xref:core/expressions/evaluation.adoc#expressions-compiler-configuration[Spring Expression Language].
 
+| `spring.expression.maxBigPowerBits`
+| The default maximum number of bits permitted in the result of a `BigDecimal` or
+`BigInteger` power operation within a
+xref:core/expressions/evaluation.adoc#expressions-parser-configuration[Spring Expression Language]
+expression.
+
 | `spring.expression.maxOperations`
 | The default maximum number of operations permitted during
 xref:core/expressions/evaluation.adoc#expressions-parser-configuration[Spring Expression Language]
