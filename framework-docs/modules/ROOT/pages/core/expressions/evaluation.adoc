@@ -574,6 +574,19 @@ property or Spring property named `spring.expression.maxOperations` to the maxim
 of operations required by your application (see
 xref:appendix.adoc#appendix-spring-properties[Supported Spring Properties]).
 
+In addition, the result of a `BigDecimal` or `BigInteger` power operation within a SpEL
+expression cannot exceed 1,000,000 bits by default – approximately equivalent to a
+decimal number with 300,000 digits. Power operations involving large base values or large
+exponents can be computationally expensive, and this limit ensures that evaluations
+remain bounded; however, the `maximumBigPowerBits` value is configurable. If you create a
+`SpelExpressionParser` programmatically (the recommended approach), you can specify a
+custom `maximumBigPowerBits` value when creating the `SpelParserConfiguration` that you
+provide to the `SpelExpressionParser`. To remove this limit entirely, pass
+`Integer.MAX_VALUE` as the `maximumBigPowerBits` value. If you are not able to configure
+an explicit value for `maximumBigPowerBits` via `SpelParserConfiguration`, you can set a
+JVM system property or Spring property named `spring.expression.maxBigPowerBits` to the
+maximum result size in bits (see xref:appendix.adoc#appendix-spring-properties[Supported
+Spring Properties]).
 
 [[expressions-spel-compilation]]
 == SpEL Compilation
