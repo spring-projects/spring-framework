@@ -1707,6 +1707,20 @@ class DefaultListableBeanFactoryTests {
 	}
 
 	@Test
+	void getBeanByNameWithWildcardTypeReference() {
+		RootBeanDefinition bd1 = new RootBeanDefinition(StringTemplate.class);
+		RootBeanDefinition bd2 = new RootBeanDefinition(NumberTemplate.class);
+		lbf.registerBeanDefinition("bd1", bd1);
+		lbf.registerBeanDefinition("bd2", bd2);
+
+		Template<?> stringTemplate = lbf.getBean("bd1", new ParameterizedTypeReference<>() {});
+		Template<?> numberTemplate = lbf.getBean("bd2", new ParameterizedTypeReference<>() {});
+
+		assertThat(stringTemplate).isInstanceOf(StringTemplate.class);
+		assertThat(numberTemplate).isInstanceOf(NumberTemplate.class);
+	}
+
+	@Test
 	void getBeanByTypeWithPrimary() {
 		RootBeanDefinition bd1 = new RootBeanDefinition(TestBean.class);
 		bd1.setLazyInit(true);
