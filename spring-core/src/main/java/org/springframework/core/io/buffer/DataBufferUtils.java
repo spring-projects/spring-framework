@@ -917,6 +917,14 @@ public abstract class DataBufferUtils {
 			super(delimiter);
 			Assert.isTrue(delimiter.length == 2, "Expected a 2-byte delimiter");
 		}
+
+		@Override
+		public boolean match(byte b) {
+			if (getMatches() > 0 && b != delimiter()[getMatches()]) {
+				setMatches(0);
+			}
+			return super.match(b);
+		}
 	}
 
 
