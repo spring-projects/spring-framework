@@ -208,7 +208,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	public <T> T getBean(String name, ParameterizedTypeReference<T> typeReference) throws BeansException {
 		Object bean = getBean(name);
 		Type requiredType = typeReference.getType();
-		if (!ResolvableType.forType(requiredType).isInstance(bean)) {
+		if (!isTypeMatch(name, ResolvableType.forType(requiredType), true)) {
 			throw new BeanNotOfRequiredTypeException(name, requiredType, bean.getClass());
 		}
 		return (T) bean;
