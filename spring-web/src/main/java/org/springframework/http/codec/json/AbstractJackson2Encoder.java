@@ -28,6 +28,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import com.fasterxml.jackson.core.JsonEncoding;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.util.BufferRecycler;
 import com.fasterxml.jackson.core.util.ByteArrayBuilder;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -171,7 +172,8 @@ public abstract class AbstractJackson2Encoder extends Jackson2CodecSupport imple
 				}
 
 				ObjectWriter writer = createObjectWriter(mapper, elementType, mimeType, null, hintsToUse);
-				ByteArrayBuilder byteBuilder = new ByteArrayBuilder(writer.getFactory()._getBufferRecycler());
+				BufferRecycler recycler = writer.getFactory()._getBufferRecycler();
+				ByteArrayBuilder byteBuilder = new ByteArrayBuilder(recycler);
 				JsonEncoding encoding = getJsonEncoding(mimeType);
 				JsonGenerator generator = mapper.getFactory().createGenerator(byteBuilder, encoding);
 				SequenceWriter sequenceWriter = writer.writeValues(generator);
@@ -216,6 +218,11 @@ public abstract class AbstractJackson2Encoder extends Jackson2CodecSupport imple
 							catch (IOException ex) {
 								logger.error("Could not close Encoder resources", ex);
 							}
+							finally {
+								// Release strictly after the generator and builder are done: the
+								// recycler returns to a concurrent pool and may be reused at once.
+								recycler.releaseToPool();
+							}
 						});
 			}
 			catch (IOException ex) {
@@ -247,7 +254,8 @@ public abstract class AbstractJackson2Encoder extends Jackson2CodecSupport imple
 			writer = writer.with(filters);
 		}
 
-		ByteArrayBuilder byteBuilder = new ByteArrayBuilder(writer.getFactory()._getBufferRecycler());
+		BufferRecycler recycler = writer.getFactory()._getBufferRecycler();
+		ByteArrayBuilder byteBuilder = new ByteArrayBuilder(recycler);
 		try {
 			JsonEncoding encoding = getJsonEncoding(mimeType);
 
@@ -276,6 +284,7 @@ public abstract class AbstractJackson2Encoder extends Jackson2CodecSupport imple
 		}
 		finally {
 			byteBuilder.release();
+			recycler.releaseToPool();
 		}
 	}
 
