@@ -41,8 +41,10 @@ import org.springframework.web.reactive.function.client.CoExchangeFilterFunction
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Hooks
 import reactor.core.publisher.Mono
+import reactor.util.retry.Retry
 import java.time.Duration
 import java.util.concurrent.CompletableFuture
+import java.util.concurrent.atomic.AtomicInteger
 import java.util.function.Function
 import kotlin.coroutines.AbstractCoroutineContextElement
 import kotlin.coroutines.CoroutineContext
@@ -250,6 +252,42 @@ class WebClientExtensionsTests {
 				})
 				.build().get().uri("/path").retrieve().awaitEntity<Foo>()
 			val capturedContext = slot.captured.attribute(COROUTINE_CONTEXT_ATTRIBUTE).get() as CoroutineContext
+			assertThat(capturedContext[FooContextElement.Key]!!.foo).isEqualTo(foo)
+			assertThat(responseEntity.body).isEqualTo(foo)
+		}
+	}
+
+	@Test
+	fun `ResponseSpec#awaitEntityWithRetry with coroutine context propagation`() {
+		val exchangeFunction = mockk<ExchangeFunction>()
+		val mockResponse = mockk<ClientResponse>()
+		val mockClientHeaders = mockk<ClientResponse.Headers>()
+		val foo = mockk<Foo>()
+		val slot = slot<ClientRequest>()
+		val atomicInteger = AtomicInteger(0)
+		every { exchangeFunction.exchange(capture(slot)) } answers {
+			if (atomicInteger.getAndIncrement() < 2) {
+				Mono.error(Exception())
+			} else {
+				Mono.just(mockResponse)
+			}
+		}
+		every { mockResponse.statusCode() } returns HttpStatus.OK
+		every { mockResponse.headers() } returns mockClientHeaders
+		every { mockClientHeaders.asHttpHeaders() } returns HttpHeaders()
+		every { mockResponse.bodyToMono(object : ParameterizedTypeReference<Foo>() {}) } returns Mono.just(foo)
+		runBlocking(FooContextElement(foo)) {
+			val responseEntity = WebClient.builder()
+				.exchangeFunction(exchangeFunction)
+				.filter(object : CoExchangeFilterFunction() {
+					override suspend fun filter(request: ClientRequest, next: CoExchangeFunction): ClientResponse {
+						assertThat(currentCoroutineContext()[FooContextElement.Key]!!.foo).isEqualTo(foo)
+						return next.exchange(request)
+					}
+				})
+				.build().get().uri("/path").retrieve().awaitEntityWithRetry<Foo>(Retry.max(2))
+			val capturedContext = slot.captured.attribute(COROUTINE_CONTEXT_ATTRIBUTE).get() as CoroutineContext
+			assertThat(atomicInteger.get()).isEqualTo(3)
 			assertThat(capturedContext[FooContextElement.Key]!!.foo).isEqualTo(foo)
 			assertThat(responseEntity.body).isEqualTo(foo)
 		}

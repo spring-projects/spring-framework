@@ -17,14 +17,17 @@
 package org.springframework.util;
 
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Set;
 
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Arjen Poutsma
+ * @author Yanming Zhou
  */
 class FilteredSetTests {
 
@@ -38,5 +41,16 @@ class FilteredSetTests {
 		assertThat(filtered).isEqualTo(expected);
 		assertThat(filtered).isNotEqualTo(set);
 		assertThat(filtered).isNotEqualTo(Collections.emptySet());
+	}
+
+	@Test
+	void nullable() {
+		Set<@Nullable String> set = new HashSet<>();
+		set.add("foo");
+		set.add("bar");
+		set.add(null);
+		FilteredSet<@Nullable String> filtered = new FilteredSet<>(set, s -> !"bar".equals(s));
+
+		assertThat(filtered).containsExactlyInAnyOrder("foo", null);
 	}
 }

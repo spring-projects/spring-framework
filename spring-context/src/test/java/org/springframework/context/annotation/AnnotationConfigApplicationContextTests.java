@@ -105,8 +105,29 @@ class AnnotationConfigApplicationContextTests {
 		context.getBean(Config.class.getName() + ".testBean");
 		assertThat(context.getBean(NameConfig.class.getName() + ".name")).isEqualTo("foo");
 		assertThat(context.getBean(NameConfig.class.getName() + ".prefixName")).isEqualTo("barfoo");
+		assertThat(context.getBean("name")).isEqualTo("foo");
+		assertThat(context.getBean("prefixName")).isEqualTo("barfoo");
 		Map<String, Object> beans = context.getBeansWithAnnotation(Configuration.class);
 		assertThat(beans).hasSize(2);
+	}
+
+	@Test
+	void registerAndRefreshWithOverlappingFullyQualifiedBeanNames() {
+		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
+		context.setBeanNameGenerator(FullyQualifiedConfigurationBeanNameGenerator.INSTANCE);
+		context.setAllowBeanDefinitionOverriding(false);
+		context.register(Config.class, NameConfig.class, OtherNameConfig.class);
+		context.refresh();
+
+		context.getBean(Config.class.getName() + ".testBean");
+		assertThat(context.getBean(NameConfig.class.getName() + ".name")).isEqualTo("foo");
+		assertThat(context.getBean(NameConfig.class.getName() + ".prefixName")).isEqualTo("barfoo");
+		assertThat(context.getBean(OtherNameConfig.class.getName() + ".name")).isEqualTo("fooX");
+		assertThat(context.getBean(OtherNameConfig.class.getName() + ".prefixName")).isEqualTo("barXfooX");
+		assertThat(context.getBean("name")).isEqualTo("foo");
+		assertThat(context.getBean("prefixName")).isEqualTo("barfoo");
+		Map<String, Object> beans = context.getBeansWithAnnotation(Configuration.class);
+		assertThat(beans).hasSize(3);
 	}
 
 	@Test
@@ -630,6 +651,14 @@ class AnnotationConfigApplicationContextTests {
 		@Bean String name() { return "foo"; }
 
 		@Bean(autowireCandidate = false) String prefixName() { return "bar" + name(); }
+	}
+
+	@Configuration
+	static class OtherNameConfig {
+
+		@Bean String name() { return "fooX"; }
+
+		@Bean(autowireCandidate = false) String prefixName() { return "barX" + name(); }
 	}
 
 	@Configuration

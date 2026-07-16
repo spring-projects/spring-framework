@@ -20,12 +20,14 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Arjen Poutsma
+ * @author Yanming Zhou
  */
 class CompositeSetTests {
 
@@ -44,4 +46,16 @@ class CompositeSetTests {
 		assertThat(composite).isNotEqualTo(Collections.emptySet());
 	}
 
+	@Test
+	void nullable() {
+		Set<@Nullable String> first = new HashSet<>();
+		first.add("foo");
+		first.add(null);
+		Set<@Nullable String> second = new HashSet<>();
+		second.add("bar");
+		first.add(null);
+		CompositeSet<@Nullable String> composite = new CompositeSet<>(first, second);
+
+		assertThat(composite).containsExactlyInAnyOrder("foo", null, "bar");
+	}
 }

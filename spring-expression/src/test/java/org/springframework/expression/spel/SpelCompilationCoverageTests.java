@@ -1624,6 +1624,55 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 			o = expression.getValue();
 			assertThat(o).isEqualTo("op");
 		}
+
+		@Test  // gh-37001
+		@SuppressWarnings("unchecked")
+		void compiledInlineListIsUnmodifiable() {
+			expression = parser.parseExpression("{1, 2, 3}");
+			List<Object> interpreted = (List<Object>) expression.getValue();
+			assertThat(interpreted).containsExactly(1, 2, 3);
+
+			// Interpreted --> unmodifiable
+			assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() -> interpreted.add("boom"));
+
+			assertCanCompile(expression);
+
+			List<Object> compiled = (List<Object>) expression.getValue();
+			assertThat(compiled).containsExactly(1, 2, 3);
+
+			// Compiled --> unmodifiable
+			assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() -> compiled.add("boom"));
+
+			// Same list reference must be returned on every evaluation
+			assertThat(expression.getValue()).isSameAs(compiled);
+		}
+
+		@Test  // gh-37001
+		@SuppressWarnings("unchecked")
+		void compiledNestedInlineListsAreUnmodifiable() {
+			expression = parser.parseExpression("{{1, 2}, {3, 4}}");
+			List<Object> interpreted = (List<Object>) expression.getValue();
+			assertThat(interpreted.toString()).isEqualTo("[[1, 2], [3, 4]]");
+
+			// Interpreted --> unmodifiable
+			assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() -> interpreted.add("boom"));
+			List<Object> nested1Interpreted = (List<Object>) interpreted.get(0);
+			List<Object> nested2Interpreted = (List<Object>) interpreted.get(1);
+			assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() -> nested1Interpreted.add("boom"));
+			assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() -> nested2Interpreted.add("boom"));
+
+			assertCanCompile(expression);
+
+			List<Object> compiled = (List<Object>) expression.getValue();
+			assertThat(compiled.toString()).isEqualTo("[[1, 2], [3, 4]]");
+
+			// Compiled --> unmodifiable
+			assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() -> compiled.add("boom"));
+			List<Object> nested1Compiled = (List<Object>) compiled.get(0);
+			List<Object> nested2Compiled = (List<Object>) compiled.get(1);
+			assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() -> nested1Compiled.add("boom"));
+			assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() -> nested2Compiled.add("boom"));
+		}
 	}
 
 	@Nested
