@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.jupiter.api.Test;
@@ -94,6 +95,10 @@ class SyncTaskExecutorTests {
 
 	@Test
 	void taskRejectedWhenConcurrencyLimitReached() throws Exception {
+		if (ForkJoinPool.getCommonPoolParallelism() < 4) {
+			return;  // not enough concurrency possible
+		}
+
 		SyncTaskExecutor executor = new SyncTaskExecutor();
 		executor.setConcurrencyLimit(2);
 		executor.setRejectTasksWhenLimitReached(true);
@@ -104,7 +109,7 @@ class SyncTaskExecutorTests {
 			futures.add(CompletableFuture.runAsync(() -> executor.execute(target::concurrentOperation)));
 		}
 		Thread.sleep(10);
-		for (int i = 2; i < 10; i++) {
+		for (int i = 2; i < 4; i++) {
 			futures.add(CompletableFuture.runAsync(() ->
 					assertThatExceptionOfType(TaskRejectedException.class).isThrownBy(() -> executor.execute(target::concurrentOperation))));
 		}
