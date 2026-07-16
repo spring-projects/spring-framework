@@ -32,6 +32,7 @@ import tools.jackson.core.JacksonException;
 import tools.jackson.core.JsonEncoding;
 import tools.jackson.core.JsonGenerator;
 import tools.jackson.core.exc.JacksonIOException;
+import tools.jackson.core.util.BufferRecycler;
 import tools.jackson.core.util.ByteArrayBuilder;
 import tools.jackson.databind.JavaType;
 import tools.jackson.databind.ObjectMapper;
@@ -159,7 +160,8 @@ public abstract class AbstractJacksonEncoder<T extends ObjectMapper> extends Jac
 				}
 
 				ObjectWriter writer = createObjectWriter(mapper, elementType, mimeType, hintsToUse);
-				ByteArrayBuilder byteBuilder = new ByteArrayBuilder(writer.generatorFactory()._getBufferRecycler());
+				BufferRecycler recycler = writer.generatorFactory()._getBufferRecycler();
+				ByteArrayBuilder byteBuilder = new ByteArrayBuilder(recycler);
 				JsonEncoding encoding = getJsonEncoding(mimeType);
 				JsonGenerator generator = mapper.createGenerator(byteBuilder, encoding);
 				SequenceWriter sequenceWriter = writer.writeValues(generator);
@@ -204,6 +206,11 @@ public abstract class AbstractJacksonEncoder<T extends ObjectMapper> extends Jac
 							catch (JacksonIOException ex) {
 								logger.error("Could not close Encoder resources", ex);
 							}
+							finally {
+								// Release strictly after the generator and builder are done: the
+								// recycler returns to a concurrent pool and may be reused at once.
+								recycler.releaseToPool();
+							}
 						});
 			}
 			catch (JacksonIOException ex) {
@@ -223,7 +230,8 @@ public abstract class AbstractJacksonEncoder<T extends ObjectMapper> extends Jac
 
 		ObjectWriter writer = createObjectWriter(mapper, valueType, mimeType, hints);
 
-		ByteArrayBuilder byteBuilder = new ByteArrayBuilder(writer.generatorFactory()._getBufferRecycler());
+		BufferRecycler recycler = writer.generatorFactory()._getBufferRecycler();
+		ByteArrayBuilder byteBuilder = new ByteArrayBuilder(recycler);
 		try {
 			JsonEncoding encoding = getJsonEncoding(mimeType);
 
@@ -249,6 +257,7 @@ public abstract class AbstractJacksonEncoder<T extends ObjectMapper> extends Jac
 		}
 		finally {
 			byteBuilder.release();
+			recycler.releaseToPool();
 		}
 	}
 

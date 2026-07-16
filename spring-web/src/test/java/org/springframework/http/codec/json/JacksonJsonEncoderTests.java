@@ -21,6 +21,7 @@ import java.time.Duration;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import com.fasterxml.jackson.annotation.JsonFilter;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
@@ -29,6 +30,10 @@ import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
+import tools.jackson.core.json.JsonFactory;
+import tools.jackson.core.util.BufferRecycler;
+import tools.jackson.core.util.JsonRecyclerPools;
+import tools.jackson.core.util.RecyclerPool;
 import tools.jackson.databind.SerializationFeature;
 import tools.jackson.databind.json.JsonMapper;
 import tools.jackson.databind.ser.FilterProvider;
@@ -37,6 +42,7 @@ import tools.jackson.databind.ser.std.SimpleFilterProvider;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.core.testfixture.codec.AbstractEncoderTests;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.json.JacksonViewBean.MyJacksonView1;
@@ -305,6 +311,41 @@ class JacksonJsonEncoderTests extends AbstractEncoderTests<JacksonJsonEncoder> {
 		);
 	}
 
+	@Test
+	void releasesBufferRecyclerToPool() {
+		CountingRecyclerPool pool = new CountingRecyclerPool();
+		JsonFactory factory = JsonFactory.builder().recyclerPool(pool).build();
+		JacksonJsonEncoder encoder = new JacksonJsonEncoder(JsonMapper.builder(factory).build());
+
+		Pojo pojo = new Pojo("foo", "bar");
+		ResolvableType type = ResolvableType.forClass(Pojo.class);
+
+		// encodeValue (Mono path)
+		drain(encoder.encode(Mono.just(pojo), this.bufferFactory, type, APPLICATION_JSON, null));
+		// Flux joined into a JSON array (non-streaming path)
+		drain(encoder.encode(Flux.just(pojo, pojo), this.bufferFactory, type, APPLICATION_JSON, null));
+		// Flux with a streaming media type (NDJSON separator path)
+		drain(encoder.encode(Flux.just(pojo, pojo), this.bufferFactory, type, APPLICATION_NDJSON, null));
+
+		// Error termination of the streaming path must still release via doAfterTerminate
+		encoder.encode(Flux.error(new IllegalStateException("boom")), this.bufferFactory, type, APPLICATION_NDJSON, null)
+				.as(StepVerifier::create)
+				.expectError(IllegalStateException.class)
+				.verify();
+
+		assertThat(pool.acquired).hasPositiveValue();
+		assertThat(pool.released).hasValue(pool.acquired.get());
+	}
+
+	private static void drain(Flux<DataBuffer> output) {
+		output.as(StepVerifier::create)
+				.thenConsumeWhile(buffer -> {
+					DataBufferUtils.release(buffer);
+					return true;
+				})
+				.verifyComplete();
+	}
+
 
 	@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type")
 	private static class ParentClass {
@@ -320,6 +361,28 @@ class JacksonJsonEncoderTests extends AbstractEncoderTests<JacksonJsonEncoder> {
 
 	@JsonFilter("myJacksonFilter")
 	record JacksonFilteredBean(String property1, String property2) {
+	}
+
+	@SuppressWarnings("serial")
+	private static final class CountingRecyclerPool implements RecyclerPool<BufferRecycler> {
+
+		final AtomicInteger acquired = new AtomicInteger();
+
+		final AtomicInteger released = new AtomicInteger();
+
+		private final RecyclerPool<BufferRecycler> delegate = JsonRecyclerPools.newConcurrentDequePool();
+
+		@Override
+		public BufferRecycler acquirePooled() {
+			this.acquired.incrementAndGet();
+			return this.delegate.acquirePooled();
+		}
+
+		@Override
+		public void releasePooled(BufferRecycler recycler) {
+			this.released.incrementAndGet();
+			this.delegate.releasePooled(recycler);
+		}
 	}
 
 }
