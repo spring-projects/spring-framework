@@ -210,6 +210,11 @@ class ConfigurationClassBeanDefinitionReader {
 		String localBeanName = defaultBeanName(beanName, methodName);
 		beanName = (this.importBeanNameGenerator instanceof ConfigurationBeanNameGenerator cbng ?
 				cbng.deriveBeanName(metadata, beanName) : localBeanName);
+		if (!localBeanName.equals(beanName) && !this.registry.containsBeanDefinition(localBeanName) &&
+				!this.registry.isAlias(localBeanName)) {
+			// Register original name as alias unless registered already.
+			this.registry.registerAlias(beanName, localBeanName);
+		}
 		if (explicitNames.length > 0) {
 			// Register aliases even when overridden below.
 			for (int i = 1; i < explicitNames.length; i++) {
