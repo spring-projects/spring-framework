@@ -117,7 +117,7 @@ final class CompositeMap<K, V extends @Nullable Object> implements Map<K, V> {
 	}
 
 	@Override
-	public V remove(Object key) {
+	public @Nullable V remove(Object key) {
 		V firstResult = this.first.remove(key);
 		V secondResult = this.second.remove(key);
 		if (firstResult != null) {
