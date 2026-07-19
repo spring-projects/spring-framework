@@ -240,6 +240,26 @@ class ContentDispositionTests {
 			assertThat(parsed.toString()).isEqualTo(cd.toString());
 		}
 
+		@Test  // gh-37064
+		void parseFormattedWithNameQuotedPairs() {
+			ContentDisposition cd = ContentDisposition.formData()
+					.name("foo\"bar\\baz")
+					.filename("foo\\bar \"baz\" qux \\\" quux.txt")
+					.build();
+			ContentDisposition parsed = ContentDisposition.parse(cd.toString());
+			assertThat(parsed).isEqualTo(cd);
+			assertThat(parsed.toString()).isEqualTo(cd.toString());
+		}
+
+		@Test  // gh-37064
+		void parseNameWithQuotedPairs() {
+			String header = "form-data; name=\"foo\\\"bar\\\\baz\"; filename=\"x.txt\"";
+			ContentDisposition cd = ContentDisposition.parse(header);
+			assertThat(cd.getName()).isEqualTo("foo\"bar\\baz");
+			assertThat(cd.getFilename()).isEqualTo("x.txt");
+			assertThat(cd.toString()).isEqualTo(header);
+		}
+
 		@Test // gh-30252
 		void parseFormattedWithQuestionMark() {
 			String filename = "filename with ?问号.txt";
@@ -359,6 +379,18 @@ class ContentDispositionTests {
 							.filename("test.txt", StandardCharsets.UTF_16)
 							.build()
 							.toString());
+		}
+
+		@Test  // gh-37064
+		void formatWithNameWithQuotes() {
+			BiConsumer<String, String> tester = (input, output) ->
+					assertThat(ContentDisposition.formData().name(input).build().toString())
+							.isEqualTo("form-data; name=\"" + output + "\"");
+
+			tester.accept("foo\"bar", "foo\\\"bar");
+			tester.accept("foo\\bar", "foo\\\\bar");
+			tester.accept("foo\\\"bar", "foo\\\\\\\"bar");
+			tester.accept("\"foo\"", "\\\"foo\\\"");
 		}
 	}
 

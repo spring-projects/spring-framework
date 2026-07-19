@@ -172,7 +172,7 @@ public final class ContentDisposition {
 			sb.append(this.type);
 		}
 		if (this.name != null) {
-			sb.append("; name=\"").append(this.name).append('\"');
+			sb.append("; name=\"").append(encodeQuotedPairs(this.name)).append('\"');
 		}
 		if (this.filename != null) {
 			if (this.charset == null || StandardCharsets.US_ASCII.equals(this.charset)) {
@@ -253,7 +253,7 @@ public final class ContentDisposition {
 						part.substring(eqIndex + 2, part.length() - 1) :
 						part.substring(eqIndex + 1));
 				if (attribute.equals("name") ) {
-					name = value;
+					name = (value.indexOf('\\') != -1 ? decodeQuotedPairs(value) : value);
 				}
 				else if (attribute.equals("filename*") ) {
 					int idx1 = value.indexOf('\'');
