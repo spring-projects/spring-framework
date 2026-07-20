@@ -29,7 +29,7 @@ class RequestMethodTests {
 
 	@Test
 	void resolveString() {
-		String[] methods = new String[]{"GET", "HEAD", "POST", "PUT", "PATCH", "DELETE", "OPTIONS", "TRACE"};
+		String[] methods = new String[]{"GET", "HEAD", "POST", "PUT", "PATCH", "DELETE", "QUERY", "OPTIONS", "TRACE"};
 		for (String httpMethod : methods) {
 			RequestMethod requestMethod = RequestMethod.resolve(httpMethod);
 			assertThat(requestMethod).isNotNull();

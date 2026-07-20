@@ -74,6 +74,12 @@ public final class HttpMethod implements Comparable<HttpMethod>, Serializable {
 	public static final HttpMethod DELETE = new HttpMethod("DELETE");
 
 	/**
+	 * The HTTP method {@code QUERY}.
+	 * @see <a href="https://www.rfc-editor.org/info/rfc10008">RFC 10008</a>
+	 */
+	public static final HttpMethod QUERY = new HttpMethod("QUERY");
+
+	/**
 	 * The HTTP method {@code OPTIONS}.
 	 * @see <a href="https://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html#sec9.2">HTTP 1.1, section 9.2</a>
 	 */
@@ -85,7 +91,7 @@ public final class HttpMethod implements Comparable<HttpMethod>, Serializable {
 	 */
 	public static final HttpMethod TRACE = new HttpMethod("TRACE");
 
-	private static final HttpMethod[] values = new HttpMethod[] { GET, HEAD, POST, PUT, PATCH, DELETE, OPTIONS, TRACE };
+	private static final HttpMethod[] values = new HttpMethod[] { GET, HEAD, POST, PUT, PATCH, DELETE, QUERY, OPTIONS, TRACE };
 
 
 	private final String name;
@@ -98,7 +104,7 @@ public final class HttpMethod implements Comparable<HttpMethod>, Serializable {
 	/**
 	 * Returns an array containing the standard HTTP methods. Specifically,
 	 * this method returns an array containing {@link #GET}, {@link #HEAD},
-	 * {@link #POST}, {@link #PUT}, {@link #PATCH}, {@link #DELETE},
+	 * {@link #POST}, {@link #PUT}, {@link #PATCH}, {@link #DELETE}, {@link #QUERY},
 	 * {@link #OPTIONS}, and {@link #TRACE}.
 	 *
 	 * <p>Note that the returned value does not include any HTTP methods defined
@@ -135,6 +141,7 @@ public final class HttpMethod implements Comparable<HttpMethod>, Serializable {
 			case "PUT" -> PUT;
 			case "PATCH" -> PATCH;
 			case "DELETE" -> DELETE;
+			case "QUERY" -> QUERY;
 			case "OPTIONS" -> OPTIONS;
 			case "TRACE" -> TRACE;
 			default -> new HttpMethod(method);

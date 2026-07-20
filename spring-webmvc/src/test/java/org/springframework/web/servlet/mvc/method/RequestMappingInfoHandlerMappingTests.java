@@ -193,7 +193,7 @@ class RequestMappingInfoHandlerMappingTests {
 	void getHandlerHttpOptions(TestRequestMappingInfoHandlerMapping mapping) throws Exception {
 		testHttpOptions(mapping, "/foo", "GET,HEAD,OPTIONS", null);
 		testHttpOptions(mapping, "/person/1", "PUT,OPTIONS", null);
-		testHttpOptions(mapping, "/persons", "GET,HEAD,POST,PUT,PATCH,DELETE,OPTIONS", null);
+		testHttpOptions(mapping, "/persons", "GET,HEAD,POST,PUT,PATCH,DELETE,QUERY,OPTIONS", null);
 		testHttpOptions(mapping, "/something", "PUT,POST", null);
 		testHttpOptions(mapping, "/qux", "PATCH,GET,HEAD,OPTIONS", new MediaType("foo", "bar"));
 	}

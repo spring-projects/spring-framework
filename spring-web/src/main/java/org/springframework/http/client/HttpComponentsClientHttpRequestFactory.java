@@ -32,6 +32,7 @@ import org.apache.hc.client5.http.classic.methods.HttpPatch;
 import org.apache.hc.client5.http.classic.methods.HttpPost;
 import org.apache.hc.client5.http.classic.methods.HttpPut;
 import org.apache.hc.client5.http.classic.methods.HttpTrace;
+import org.apache.hc.client5.http.classic.methods.HttpUriRequestBase;
 import org.apache.hc.client5.http.config.Configurable;
 import org.apache.hc.client5.http.config.RequestConfig;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
@@ -293,6 +294,9 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 		}
 		else if (HttpMethod.DELETE.equals(httpMethod)) {
 			return new HttpDelete(uri);
+		}
+		else if (HttpMethod.QUERY.equals(httpMethod)) {
+			return new HttpUriRequestBase(httpMethod.name(), uri);
 		}
 		else if (HttpMethod.OPTIONS.equals(httpMethod)) {
 			return new HttpOptions(uri);

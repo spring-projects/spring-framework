@@ -61,6 +61,7 @@ class HttpComponentsClientHttpRequestFactoryTests extends AbstractHttpRequestFac
 	void httpMethods() throws Exception {
 		super.httpMethods();
 		assertHttpMethod("patch", HttpMethod.PATCH);
+		assertHttpMethod("query", HttpMethod.QUERY);
 	}
 
 	@Test
@@ -186,7 +187,7 @@ class HttpComponentsClientHttpRequestFactoryTests extends AbstractHttpRequestFac
 	}
 
 	static Stream<HttpMethod> unsafeHttpMethods() {
-		return Stream.of(HttpMethod.POST, HttpMethod.PUT, HttpMethod.DELETE, HttpMethod.PATCH);
+		return Stream.of(HttpMethod.POST, HttpMethod.PUT, HttpMethod.DELETE, HttpMethod.PATCH, HttpMethod.QUERY);
 	}
 
 	@ParameterizedTest
