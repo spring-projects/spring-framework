@@ -70,6 +70,13 @@ class PropertyDescriptorUtilsPropertyResolutionTests {
 		}
 
 		@Test
+		void classWithStaticGetters() {
+			var pdMap = resolver.resolve(ClassWithStaticGetters.class);
+
+			assertThat(pdMap).containsOnlyKeys("class");
+		}
+
+		@Test
 		void classWithOnlySetter() {
 			var pdMap = resolver.resolve(ClassWithOnlySetter.class);
 
@@ -131,6 +138,17 @@ class PropertyDescriptorUtilsPropertyResolutionTests {
 
 			public Number getId() {
 				return 42;
+			}
+		}
+
+		static class ClassWithStaticGetters {
+
+			public static Long getId() {
+				return 42L;
+			}
+
+			public static boolean isActive() {
+				return true;
 			}
 		}
 
