@@ -47,7 +47,7 @@ import org.springframework.util.MimeType;
  * A {@code Decoder} that reads {@link com.google.protobuf.Message}s using
  * <a href="https://developers.google.com/protocol-buffers/">Google Protocol Buffers</a>.
  *
- * <p>Flux deserialized via
+ * <p>Flux values deserialized via
  * {@link #decode(Publisher, ResolvableType, MimeType, Map)} are expected to use
  * <a href="https://developers.google.com/protocol-buffers/docs/techniques?hl=en#streaming">
  * delimited Protobuf messages</a> with the size of each message specified before
@@ -56,7 +56,7 @@ import org.springframework.util.MimeType;
  * to use regular Protobuf message format (without the size prepended before
  * the message).
  *
- * <p>Notice that default instance of Protobuf message produces empty byte
+ * <p>Notice that the default instance of a Protobuf message produces an empty byte
  * array, so {@code Mono.just(Msg.getDefaultInstance())} sent over the network
  * will be deserialized as an empty {@link Mono}.
  *
@@ -308,7 +308,7 @@ public class ProtobufDecoder extends ProtobufCodecSupport implements Decoder<Mes
 
 	/**
 	 * Default reader for Protobuf messages.
-	 * <p>Parses the message size as a varint from the input stream.
+	 * <p>Parses the message size as a variant from the input stream.
 	 * Inspired by {@link CodedInputStream#readRawVarint32(int, java.io.InputStream)},
 	 * @see <a href="https://developers.google.com/protocol-buffers/docs/encoding#varints">Base 128 Varints</a>
 	 */
