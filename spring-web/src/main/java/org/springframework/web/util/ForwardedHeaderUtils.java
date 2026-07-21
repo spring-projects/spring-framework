@@ -18,6 +18,10 @@ package org.springframework.web.util;
 
 import java.net.InetSocketAddress;
 import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.LinkedHashMap;
+import java.util.Locale;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -56,6 +60,7 @@ public abstract class ForwardedHeaderUtils {
 
 	private static final Pattern FORWARDED_BY_PATTERN = Pattern.compile("(?i:by)=" + FORWARDED_VALUE);
 
+
 	/**
 	 * Parse the "Forwarded" header.
 	 * @param uri the request {@code URI}
@@ -66,7 +71,7 @@ public abstract class ForwardedHeaderUtils {
 	 * @since 7.1
 	 * @see <a href="https://tools.ietf.org/html/rfc7239">RFC 7239</a>
 	 */
-	public static ForwardedInfo parseForwardedHeader(URI uri, HttpHeaders headers,
+	public static ForwardedInfo parseStandardHeader(URI uri, HttpHeaders headers,
 			@Nullable InetSocketAddress remoteAddress, @Nullable InetSocketAddress localAddress) {
 
 		UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.fromUri(uri);
@@ -75,31 +80,164 @@ public abstract class ForwardedHeaderUtils {
 
 		String forwardedHeader = headers.getFirst("Forwarded");
 		if (StringUtils.hasText(forwardedHeader)) {
-			String forwardedToUse = getLeftMostValue(forwardedHeader);
+			Map<String, String> pairs = parseFirstElement(forwardedHeader);
 
-			Matcher matcher = FORWARDED_PROTO_PATTERN.matcher(forwardedToUse);
-			if (matcher.find()) {
-				uriComponentsBuilder.scheme(matcher.group(1).trim());
+			String proto = pairs.get("proto");
+			if (proto != null) {
+				uriComponentsBuilder.scheme(proto);
 				uriComponentsBuilder.port(null);
 			}
-			matcher = FORWARDED_HOST_PATTERN.matcher(forwardedToUse);
-			if (matcher.find()) {
-				adaptForwardedHost(uriComponentsBuilder, matcher.group(1).trim());
+			String host = pairs.get("host");
+			if (host != null) {
+				adaptForwardedHost(uriComponentsBuilder, host);
 			}
 			uriComponentsBuilder.resetPortIfDefaultForScheme();
 
-			matcher = FORWARDED_FOR_PATTERN.matcher(forwardedToUse);
-			if (matcher.find()) {
-				forAddress = parseInetSocketAddress(matcher.group(1).trim(), getPortToUse(remoteAddress, uri));
+			String forValue = pairs.get("for");
+			if (forValue != null) {
+				forAddress = parseInetSocketAddress(forValue, getPortToUse(remoteAddress, uri));
 			}
-
-			matcher = FORWARDED_BY_PATTERN.matcher(forwardedToUse);
-			if (matcher.find()) {
-				byAddress = parseInetSocketAddress(matcher.group(1).trim(), getPortToUse(localAddress, uri));
+			String byValue = pairs.get("by");
+			if (byValue != null) {
+				byAddress = parseInetSocketAddress(byValue, getPortToUse(localAddress, uri));
 			}
 		}
 
 		return new ForwardedInfo(uriComponentsBuilder, forAddress, byAddress);
+	}
+
+	/**
+	 * Parse the first "forwarded-element" of the "Forwarded" header into its
+	 * "forwarded-pair" parameters, keyed by lower-case name, using the
+	 * ABNF grammar from RFC 7239, Section 4.
+	 * <p>Parameter values are parsed more leniently than the strict "token"
+	 * production, allowing any character up to the next delimiter to
+	 * accept an unquoted host:port or IPv6 "node" value.
+	 */
+	private static Map<String, String> parseFirstElement(String header) {
+		Map<String, String> pairs = new LinkedHashMap<>(4);
+		int index = 0;
+		int length = header.length();
+		while (index < length) {
+			index = skipWhiteSpaces(header, index);
+			if (index == length || header.charAt(index) == ',') {
+				// End of the first "forwarded-element"
+				break;
+			}
+			if (header.charAt(index) == ';') {
+				// Empty "forwarded-pair"
+				index++;
+				continue;
+			}
+			// forwarded-pair = token "=" value
+			int nameStart = index;
+			while (index < length && isTokenChar(header.charAt(index))) {
+				index++;
+			}
+			String name = header.substring(nameStart, index);
+			index = skipWhiteSpaces(header, index);
+			if (!name.isEmpty() && index < length && header.charAt(index) == '=') {
+				index = skipWhiteSpaces(header, index + 1);
+				String value;
+				if (index < length && header.charAt(index) == '"') {
+					// quoted-string
+					StringBuilder sb = new StringBuilder();
+					index++;
+					while (index < length) {
+						char c = header.charAt(index++);
+						if (c == '"') {
+							break;
+						}
+						if (c == '\\' && index < length) {
+							// quoted-pair
+							c = header.charAt(index++);
+						}
+						sb.append(c);
+					}
+					value = sb.toString();
+				}
+				else {
+					int valueStart = index;
+					index = skipToDelimiter(header, index);
+					value = header.substring(valueStart, index);
+				}
+				pairs.putIfAbsent(name.toLowerCase(Locale.ROOT), value.trim());
+			}
+			index = skipToDelimiter(header, index);
+			if (index < length && header.charAt(index) == ',') {
+				break;
+			}
+			index++;
+		}
+		return pairs;
+	}
+
+	private static int skipWhiteSpaces(String header, int index) {
+		while (index < header.length() && (header.charAt(index) == ' ' || header.charAt(index) == '\t')) {
+			index++;
+		}
+		return index;
+	}
+
+	private static int skipToDelimiter(String header, int index) {
+		while (index < header.length() && header.charAt(index) != ';' && header.charAt(index) != ',') {
+			index++;
+		}
+		return index;
+	}
+
+	private static boolean isTokenChar(char c) {
+		return ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') ||
+				c == '!' || c == '#' || c == '$' || c == '%' || c == '&' || c == '\'' ||
+				c == '*' || c == '+' || c == '-' || c == '.' || c == '^' || c == '_' ||
+				c == '`' || c == '|' || c == '~');
+	}
+
+	private static void adaptForwardedHost(UriComponentsBuilder uriComponentsBuilder, String rawValue) {
+		int portSeparatorIdx = rawValue.lastIndexOf(':');
+		int squareBracketIdx = rawValue.lastIndexOf(']');
+		if (portSeparatorIdx > squareBracketIdx) {
+			if (squareBracketIdx == -1 && rawValue.indexOf(':') != portSeparatorIdx) {
+				throw new IllegalArgumentException("Invalid IPv4 address: " + rawValue);
+			}
+			uriComponentsBuilder.host(rawValue.substring(0, portSeparatorIdx));
+			try {
+				uriComponentsBuilder.port(
+						Integer.parseInt(rawValue, portSeparatorIdx + 1, rawValue.length(), 10));
+			}
+			catch (NumberFormatException ex) {
+				throw new IllegalArgumentException(
+						"Failed to parse port in forwarded host value: " + rawValue + "\"");
+			}
+		}
+		else {
+			uriComponentsBuilder.host(rawValue);
+			uriComponentsBuilder.port(null);
+		}
+	}
+
+	private static int getPortToUse(@Nullable InetSocketAddress address, URI uri) {
+		return (address != null ? address.getPort() : "https".equals(uri.getScheme()) ? 443 : 80);
+	}
+
+	private static InetSocketAddress parseInetSocketAddress(String value, int port) {
+		String host = value;
+		int portSeparatorIdx = value.lastIndexOf(':');
+		int squareBracketIdx = value.lastIndexOf(']');
+		if (portSeparatorIdx > squareBracketIdx) {
+			if (squareBracketIdx == -1 && value.indexOf(':') != portSeparatorIdx) {
+				throw new IllegalArgumentException("Invalid IPv4 address: " + value);
+			}
+			host = value.substring(0, portSeparatorIdx);
+			try {
+				port = Integer.parseInt(value, portSeparatorIdx + 1, value.length(), 10);
+			}
+			catch (NumberFormatException ex) {
+				throw new IllegalArgumentException(
+						"Failed to parse port in forwarded address value: " + value);
+			}
+		}
+		return InetSocketAddress.createUnresolved(host, port);
 	}
 
 	/**
@@ -164,53 +302,6 @@ public abstract class ForwardedHeaderUtils {
 	private static boolean isForwardedSslOn(HttpHeaders headers) {
 		String forwardedSsl = headers.getFirst("X-Forwarded-Ssl");
 		return (StringUtils.hasText(forwardedSsl) && forwardedSsl.equalsIgnoreCase("on"));
-	}
-
-	private static void adaptForwardedHost(UriComponentsBuilder uriComponentsBuilder, String rawValue) {
-		int portSeparatorIdx = rawValue.lastIndexOf(':');
-		int squareBracketIdx = rawValue.lastIndexOf(']');
-		if (portSeparatorIdx > squareBracketIdx) {
-			if (squareBracketIdx == -1 && rawValue.indexOf(':') != portSeparatorIdx) {
-				throw new IllegalArgumentException("Invalid IPv4 address: " + rawValue);
-			}
-			uriComponentsBuilder.host(rawValue.substring(0, portSeparatorIdx));
-			try {
-				uriComponentsBuilder.port(
-						Integer.parseInt(rawValue, portSeparatorIdx + 1, rawValue.length(), 10));
-			}
-			catch (NumberFormatException ex) {
-				throw new IllegalArgumentException(
-						"Failed to parse port in forwarded host value: " + rawValue + "\"");
-			}
-		}
-		else {
-			uriComponentsBuilder.host(rawValue);
-			uriComponentsBuilder.port(null);
-		}
-	}
-
-	private static int getPortToUse(@Nullable InetSocketAddress address, URI uri) {
-		return (address != null ? address.getPort() : "https".equals(uri.getScheme()) ? 443 : 80);
-	}
-
-	private static InetSocketAddress parseInetSocketAddress(String value, int port) {
-		String host = value;
-		int portSeparatorIdx = value.lastIndexOf(':');
-		int squareBracketIdx = value.lastIndexOf(']');
-		if (portSeparatorIdx > squareBracketIdx) {
-			if (squareBracketIdx == -1 && value.indexOf(':') != portSeparatorIdx) {
-				throw new IllegalArgumentException("Invalid IPv4 address: " + value);
-			}
-			host = value.substring(0, portSeparatorIdx);
-			try {
-				port = Integer.parseInt(value, portSeparatorIdx + 1, value.length(), 10);
-			}
-			catch (NumberFormatException ex) {
-				throw new IllegalArgumentException(
-						"Failed to parse port in forwarded address value: " + value);
-			}
-		}
-		return InetSocketAddress.createUnresolved(host, port);
 	}
 
 	/**
@@ -349,6 +440,20 @@ public abstract class ForwardedHeaderUtils {
 	 */
 	public record ForwardedInfo(UriComponentsBuilder uriComponentsBuilder,
 			@Nullable InetSocketAddress forAddress, @Nullable InetSocketAddress byAddress) {
+
+		/**
+		 * Return a {@link URI} initialized from {@link #uriComponentsBuilder()}.
+		 */
+		public URI uri() {
+			// URI should be encoded, but avoid validation with build(true) for lenient handling (gh-30137)
+			UriComponents components = uriComponentsBuilder().build();
+			try {
+				return new URI(components.toUriString());
+			}
+			catch (URISyntaxException ex) {
+				throw new IllegalStateException("Could not create URI object: " + ex.getMessage(), ex);
+			}
+		}
 	}
 
 }
