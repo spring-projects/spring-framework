@@ -299,7 +299,7 @@ public class ProtobufDecoder extends ProtobufCodecSupport implements Decoder<Mes
 		/**
 		 * Read the message size from the given buffer. This method may be
 		 * called multiple times before the message size is fully read.
-		 * @return return the message size, or {@code null} if the data in the
+		 * @return the message size, or {@code null} if the data in the
 		 * input buffer was insufficient
 		 */
 		@Nullable Integer readMessageSize(DataBuffer input);
