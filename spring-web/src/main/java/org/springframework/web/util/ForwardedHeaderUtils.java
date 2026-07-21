@@ -57,6 +57,163 @@ public abstract class ForwardedHeaderUtils {
 	private static final Pattern FORWARDED_BY_PATTERN = Pattern.compile("(?i:by)=" + FORWARDED_VALUE);
 
 	/**
+	 * Parse the "Forwarded" header.
+	 * @param uri the request {@code URI}
+	 * @param headers the HTTP headers to get the "Forwarded" header from
+	 * @param remoteAddress for a default port for the parsed "for" value
+	 * @param localAddress for a default port for the parsed "by" value
+	 * @return a {@link ForwardedInfo} with the parse results
+	 * @since 7.1
+	 * @see <a href="https://tools.ietf.org/html/rfc7239">RFC 7239</a>
+	 */
+	public static ForwardedInfo parseForwardedHeader(URI uri, HttpHeaders headers,
+			@Nullable InetSocketAddress remoteAddress, @Nullable InetSocketAddress localAddress) {
+
+		UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.fromUri(uri);
+		InetSocketAddress forAddress = null;
+		InetSocketAddress byAddress = null;
+
+		String forwardedHeader = headers.getFirst("Forwarded");
+		if (StringUtils.hasText(forwardedHeader)) {
+			String forwardedToUse = getLeftMostValue(forwardedHeader);
+
+			Matcher matcher = FORWARDED_PROTO_PATTERN.matcher(forwardedToUse);
+			if (matcher.find()) {
+				uriComponentsBuilder.scheme(matcher.group(1).trim());
+				uriComponentsBuilder.port(null);
+			}
+			matcher = FORWARDED_HOST_PATTERN.matcher(forwardedToUse);
+			if (matcher.find()) {
+				adaptForwardedHost(uriComponentsBuilder, matcher.group(1).trim());
+			}
+			uriComponentsBuilder.resetPortIfDefaultForScheme();
+
+			matcher = FORWARDED_FOR_PATTERN.matcher(forwardedToUse);
+			if (matcher.find()) {
+				forAddress = parseInetSocketAddress(matcher.group(1).trim(), getPortToUse(remoteAddress, uri));
+			}
+
+			matcher = FORWARDED_BY_PATTERN.matcher(forwardedToUse);
+			if (matcher.find()) {
+				byAddress = parseInetSocketAddress(matcher.group(1).trim(), getPortToUse(localAddress, uri));
+			}
+		}
+
+		return new ForwardedInfo(uriComponentsBuilder, forAddress, byAddress);
+	}
+
+	/**
+	 * Parse the "X-Forwarded-Proto", "X-Forwarded-Host", "X-Forwarded-Port", and
+	 * "X-Forwarded-For" headers, the alternative to the "Forwarded" header.
+	 * <p>There is no parsing of "X-Forwarded-By" currently, so the
+	 * {@code byAddress} in {@link ForwardedInfo} is always {@code null}.
+	 * @param uri the request {@code URI}
+	 * @param headers the HTTP headers to get the "Forwarded" header from
+	 * @param remoteAddress for a default port for the parsed "for" value
+	 * @param localAddress for a default port for the parsed "by" value
+	 * @return a {@link ForwardedInfo} with the scheme, host, and port adapted
+	 * from the "X-Forwarded-*" headers, and the parsed "for" address
+	 * @since 7.1
+	 */
+	public static ForwardedInfo parseXForwardedHeaders(URI uri, HttpHeaders headers,
+			@Nullable InetSocketAddress remoteAddress, @Nullable InetSocketAddress localAddress) {
+
+		UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.fromUri(uri);
+
+		String protocolHeader = headers.getFirst("X-Forwarded-Proto");
+		if (StringUtils.hasText(protocolHeader)) {
+			uriComponentsBuilder.scheme(getLeftMostValue(protocolHeader));
+			uriComponentsBuilder.port(null);
+		}
+		else if (isForwardedSslOn(headers)) {
+			uriComponentsBuilder.scheme("https");
+			uriComponentsBuilder.port(null);
+		}
+		String hostHeader = headers.getFirst("X-Forwarded-Host");
+		if (StringUtils.hasText(hostHeader)) {
+			adaptForwardedHost(uriComponentsBuilder, getLeftMostValue(hostHeader));
+		}
+		String portHeader = headers.getFirst("X-Forwarded-Port");
+		if (StringUtils.hasText(portHeader)) {
+			try {
+				uriComponentsBuilder.port(Integer.parseInt(getLeftMostValue(portHeader)));
+			}
+			catch (NumberFormatException ex) {
+				throw new IllegalArgumentException("Failed to parse \"X-Forwarded-Port: " + portHeader + "\"");
+			}
+		}
+		uriComponentsBuilder.resetPortIfDefaultForScheme();
+
+		InetSocketAddress forAddress = null;
+		String forHeader = headers.getFirst("X-Forwarded-For");
+		if (StringUtils.hasText(forHeader)) {
+			String host = getLeftMostValue(forHeader);
+			boolean ipv6 = (host.indexOf(':') != -1);
+			host = (ipv6 && !host.startsWith("[") && !host.endsWith("]") ? "[" + host + "]" : host);
+			int port = getPortToUse(remoteAddress, uri);
+			forAddress = InetSocketAddress.createUnresolved(host, port);
+		}
+
+		return new ForwardedInfo(uriComponentsBuilder, forAddress, null);
+	}
+
+	private static String getLeftMostValue(String headerValue) {
+		return StringUtils.tokenizeToStringArray(headerValue, ",")[0];
+	}
+
+	private static boolean isForwardedSslOn(HttpHeaders headers) {
+		String forwardedSsl = headers.getFirst("X-Forwarded-Ssl");
+		return (StringUtils.hasText(forwardedSsl) && forwardedSsl.equalsIgnoreCase("on"));
+	}
+
+	private static void adaptForwardedHost(UriComponentsBuilder uriComponentsBuilder, String rawValue) {
+		int portSeparatorIdx = rawValue.lastIndexOf(':');
+		int squareBracketIdx = rawValue.lastIndexOf(']');
+		if (portSeparatorIdx > squareBracketIdx) {
+			if (squareBracketIdx == -1 && rawValue.indexOf(':') != portSeparatorIdx) {
+				throw new IllegalArgumentException("Invalid IPv4 address: " + rawValue);
+			}
+			uriComponentsBuilder.host(rawValue.substring(0, portSeparatorIdx));
+			try {
+				uriComponentsBuilder.port(
+						Integer.parseInt(rawValue, portSeparatorIdx + 1, rawValue.length(), 10));
+			}
+			catch (NumberFormatException ex) {
+				throw new IllegalArgumentException(
+						"Failed to parse port in forwarded host value: " + rawValue + "\"");
+			}
+		}
+		else {
+			uriComponentsBuilder.host(rawValue);
+			uriComponentsBuilder.port(null);
+		}
+	}
+
+	private static int getPortToUse(@Nullable InetSocketAddress address, URI uri) {
+		return (address != null ? address.getPort() : "https".equals(uri.getScheme()) ? 443 : 80);
+	}
+
+	private static InetSocketAddress parseInetSocketAddress(String value, int port) {
+		String host = value;
+		int portSeparatorIdx = value.lastIndexOf(':');
+		int squareBracketIdx = value.lastIndexOf(']');
+		if (portSeparatorIdx > squareBracketIdx) {
+			if (squareBracketIdx == -1 && value.indexOf(':') != portSeparatorIdx) {
+				throw new IllegalArgumentException("Invalid IPv4 address: " + value);
+			}
+			host = value.substring(0, portSeparatorIdx);
+			try {
+				port = Integer.parseInt(value, portSeparatorIdx + 1, value.length(), 10);
+			}
+			catch (NumberFormatException ex) {
+				throw new IllegalArgumentException(
+						"Failed to parse port in forwarded address value: " + value);
+			}
+		}
+		return InetSocketAddress.createUnresolved(host, port);
+	}
+
+	/**
 	 * Adapt the scheme+host+port of the given {@link URI} from the "Forwarded" header
 	 * (see <a href="https://tools.ietf.org/html/rfc7239">RFC 7239</a>) or from the
 	 * "X-Forwarded-Host", "X-Forwarded-Port", and "X-Forwarded-Proto" headers if
@@ -88,7 +245,7 @@ public abstract class ForwardedHeaderUtils {
 			else {
 				String protocolHeader = headers.getFirst("X-Forwarded-Proto");
 				if (StringUtils.hasText(protocolHeader)) {
-					uriComponentsBuilder.scheme(StringUtils.tokenizeToStringArray(protocolHeader, ",")[0]);
+					uriComponentsBuilder.scheme(getLeftMostValue(protocolHeader));
 					uriComponentsBuilder.port(null);
 				}
 				else if (isForwardedSslOn(headers)) {
@@ -97,11 +254,11 @@ public abstract class ForwardedHeaderUtils {
 				}
 				String hostHeader = headers.getFirst("X-Forwarded-Host");
 				if (StringUtils.hasText(hostHeader)) {
-					adaptForwardedHost(uriComponentsBuilder, StringUtils.tokenizeToStringArray(hostHeader, ",")[0]);
+					adaptForwardedHost(uriComponentsBuilder, getLeftMostValue(hostHeader));
 				}
 				String portHeader = headers.getFirst("X-Forwarded-Port");
 				if (StringUtils.hasText(portHeader)) {
-					uriComponentsBuilder.port(Integer.parseInt(StringUtils.tokenizeToStringArray(portHeader, ",")[0]));
+					uriComponentsBuilder.port(Integer.parseInt(getLeftMostValue(portHeader)));
 				}
 			}
 		}
@@ -114,27 +271,6 @@ public abstract class ForwardedHeaderUtils {
 		uriComponentsBuilder.resetPortIfDefaultForScheme();
 
 		return uriComponentsBuilder;
-	}
-
-	private static boolean isForwardedSslOn(HttpHeaders headers) {
-		String forwardedSsl = headers.getFirst("X-Forwarded-Ssl");
-		return StringUtils.hasText(forwardedSsl) && forwardedSsl.equalsIgnoreCase("on");
-	}
-
-	private static void adaptForwardedHost(UriComponentsBuilder uriComponentsBuilder, String rawValue) {
-		int portSeparatorIdx = rawValue.lastIndexOf(':');
-		int squareBracketIdx = rawValue.lastIndexOf(']');
-		if (portSeparatorIdx > squareBracketIdx) {
-			if (squareBracketIdx == -1 && rawValue.indexOf(':') != portSeparatorIdx) {
-				throw new IllegalArgumentException("Invalid IPv4 address: " + rawValue);
-			}
-			uriComponentsBuilder.host(rawValue.substring(0, portSeparatorIdx));
-			uriComponentsBuilder.port(Integer.parseInt(rawValue, portSeparatorIdx + 1, rawValue.length(), 10));
-		}
-		else {
-			uriComponentsBuilder.host(rawValue);
-			uriComponentsBuilder.port(null);
-		}
 	}
 
 	/**
@@ -150,25 +286,22 @@ public abstract class ForwardedHeaderUtils {
 	public static @Nullable InetSocketAddress parseForwardedFor(
 			URI uri, HttpHeaders headers, @Nullable InetSocketAddress remoteAddress) {
 
-		int port = (remoteAddress != null ?
-				remoteAddress.getPort() : "https".equals(uri.getScheme()) ? 443 : 80);
-
 		String forwardedHeader = headers.getFirst("Forwarded");
 		if (StringUtils.hasText(forwardedHeader)) {
-			String forwardedToUse = StringUtils.tokenizeToStringArray(forwardedHeader, ",")[0];
+			String forwardedToUse = getLeftMostValue(forwardedHeader);
 			Matcher matcher = FORWARDED_FOR_PATTERN.matcher(forwardedToUse);
 			if (matcher.find()) {
 				String value = matcher.group(1).trim();
-				return parseInetSocketAddress(value, port);
+				return parseInetSocketAddress(value, getPortToUse(remoteAddress, uri));
 			}
 		}
 
 		String forHeader = headers.getFirst("X-Forwarded-For");
 		if (StringUtils.hasText(forHeader)) {
-			String host = StringUtils.tokenizeToStringArray(forHeader, ",")[0];
+			String host = getLeftMostValue(forHeader);
 			boolean ipv6 = (host.indexOf(':') != -1);
 			host = (ipv6 && !host.startsWith("[") && !host.endsWith("]") ? "[" + host + "]" : host);
-			return InetSocketAddress.createUnresolved(host, port);
+			return InetSocketAddress.createUnresolved(host, getPortToUse(remoteAddress, uri));
 		}
 
 		return null;
@@ -188,40 +321,34 @@ public abstract class ForwardedHeaderUtils {
 	public static @Nullable InetSocketAddress parseForwardedBy(
 			URI uri, HttpHeaders headers, @Nullable InetSocketAddress localAddress) {
 
-		int port = (localAddress != null ?
-				localAddress.getPort() : "https".equals(uri.getScheme()) ? 443 : 80);
-
 		String forwardedHeader = headers.getFirst("Forwarded");
 		if (StringUtils.hasText(forwardedHeader)) {
-			String forwardedToUse = StringUtils.tokenizeToStringArray(forwardedHeader, ",")[0];
+			String forwardedToUse = getLeftMostValue(forwardedHeader);
 			Matcher matcher = FORWARDED_BY_PATTERN.matcher(forwardedToUse);
 			if (matcher.find()) {
 				String value = matcher.group(1).trim();
-				return parseInetSocketAddress(value, port);
+				return parseInetSocketAddress(value, getPortToUse(localAddress, uri));
 			}
 		}
 
 		return null;
 	}
 
-	private static InetSocketAddress parseInetSocketAddress(String value, int port) {
-		String host = value;
-		int portSeparatorIdx = value.lastIndexOf(':');
-		int squareBracketIdx = value.lastIndexOf(']');
-		if (portSeparatorIdx > squareBracketIdx) {
-			if (squareBracketIdx == -1 && value.indexOf(':') != portSeparatorIdx) {
-				throw new IllegalArgumentException("Invalid IPv4 address: " + value);
-			}
-			host = value.substring(0, portSeparatorIdx);
-			try {
-				port = Integer.parseInt(value, portSeparatorIdx + 1, value.length(), 10);
-			}
-			catch (NumberFormatException ex) {
-				throw new IllegalArgumentException(
-						"Failed to parse a port from \"forwarded\"-type header value: " + value);
-			}
-		}
-		return InetSocketAddress.createUnresolved(host, port);
+
+	/**
+	 * Container for the combined results of parsing either the "Forwarded"
+	 * header or the "X-Forwarded-*" alternative headers.
+	 * @since 7.1
+	 * @param uriComponentsBuilder the request URI adapted with the scheme, host,
+	 * and port from forwarded header values
+	 * @param forAddress the address parsed from the "Forwarded" header "for" or
+	 * "X-Forwarded-For" value, representing the client, or {@code null} if not present
+	 * @param byAddress the address parsed from the "Forwarded" header "by",
+	 * representing the server, or {@code null} if not present;
+	 * always {@code null} when returned from {@link #parseXForwardedHeaders}
+	 */
+	public record ForwardedInfo(UriComponentsBuilder uriComponentsBuilder,
+			@Nullable InetSocketAddress forAddress, @Nullable InetSocketAddress byAddress) {
 	}
 
 }
