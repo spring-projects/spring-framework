@@ -219,7 +219,9 @@ class ServletUriComponentsBuilderTests {
 	// SPR-16668
 	private HttpServletRequest adaptFromForwardedHeaders(HttpServletRequest request) throws Exception {
 		MockFilterChain chain = new MockFilterChain();
-		new ForwardedHeaderFilter().doFilter(request, new MockHttpServletResponse(), chain);
+		ForwardedHeaderFilter filter = new ForwardedHeaderFilter(false);
+		filter.setUseForwardedPrefix(true);
+		filter.doFilter(request, new MockHttpServletResponse(), chain);
 		return (HttpServletRequest) chain.getRequest();
 	}
 
