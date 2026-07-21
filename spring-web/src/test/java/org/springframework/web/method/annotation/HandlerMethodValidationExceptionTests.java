@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.web.method.support;
+package org.springframework.web.method.annotation;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -50,7 +50,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.method.HandlerMethod;
-import org.springframework.web.method.annotation.HandlerMethodValidationException;
 import org.springframework.web.testfixture.method.ResolvableMethod;
 
 import static org.assertj.core.api.Assertions.assertThat;
