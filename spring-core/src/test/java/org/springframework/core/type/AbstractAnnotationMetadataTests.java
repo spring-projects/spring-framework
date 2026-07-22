@@ -302,12 +302,17 @@ public abstract class AbstractAnnotationMetadataTests {
 		void getComplexAttributeTypesReturnsAll() {
 			MultiValueMap<String, Object> attributes =
 					get(WithComplexAttributeTypes.class).getAllAnnotationAttributes(ComplexAttributes.class.getName());
-			assertThat(attributes).containsOnlyKeys("names", "count", "types", "subAnnotation");
+			assertThat(attributes).containsOnlyKeys("names", "count", "types", "bytes", "floats", "shorts", "chars", "booleans", "subAnnotation");
 			assertThat(attributes.get("names")).hasSize(1);
 			assertThat(attributes.get("names").get(0)).isEqualTo(new String[]{"first", "second"});
 			assertThat(attributes.get("count").get(0)).isEqualTo(new TestEnum[]{TestEnum.ONE, TestEnum.TWO});
 			assertThat(attributes.get("types").get(0)).isEqualTo(new Class[]{TestEnum.class});
 			assertThat(attributes.get("subAnnotation")).hasSize(1);
+			assertThat(attributes.get("bytes").get(0)).isEqualTo(new byte[]{1, 2});
+			assertThat(attributes.get("floats").get(0)).isEqualTo(new float[]{1.0f, 2.0f});
+			assertThat(attributes.get("shorts").get(0)).isEqualTo(new short[]{1, 2});
+			assertThat(attributes.get("chars").get(0)).isEqualTo(new char[]{'a', 'b'});
+			assertThat(attributes.get("booleans").get(0)).isEqualTo(new boolean[]{true, false});
 		}
 
 		@Test
@@ -324,7 +329,7 @@ public abstract class AbstractAnnotationMetadataTests {
 		void getAnnotationAttributeIntType() {
 			MultiValueMap<String, Object> attributes =
 					get(WithIntType.class).getAllAnnotationAttributes(ComplexAttributes.class.getName());
-			assertThat(attributes).containsOnlyKeys("names", "count", "types", "subAnnotation");
+			assertThat(attributes).containsOnlyKeys("names", "count", "types", "bytes", "floats", "shorts", "chars", "booleans", "subAnnotation");
 			assertThat(attributes.get("types").get(0)).isEqualTo(new Class[]{int.class});
 		}
 
@@ -471,13 +476,15 @@ public abstract class AbstractAnnotationMetadataTests {
 
 
 		@ComplexAttributes(names = {"first", "second"}, count = {TestEnum.ONE, TestEnum.TWO},
-				types = {TestEnum.class}, subAnnotation = @SubAnnotation(name="spring"))
+				types = {TestEnum.class}, subAnnotation = @SubAnnotation(name="spring"), bytes = {1, 2},
+				floats = {1.0f, 2.0f}, shorts = {1, 2}, chars = {'a', 'b'}, booleans = {true, false})
 		@Metadata(mv = {42})
 		public static class WithComplexAttributeTypes {
 		}
 
 		@ComplexAttributes(names = "void", count = TestEnum.ONE, types = int.class,
-				subAnnotation = @SubAnnotation(name="spring"))
+				subAnnotation = @SubAnnotation(name="spring"), bytes = {1, 2},
+				floats = {1.0f, 2.0f}, shorts = {1, 2}, chars = {'a', 'b'}, booleans = {true, false})
 		public static class WithIntType {
 
 		}
@@ -490,6 +497,16 @@ public abstract class AbstractAnnotationMetadataTests {
 			TestEnum[] count();
 
 			Class<?>[] types();
+
+			byte[] bytes();
+
+			float[] floats();
+
+			short[] shorts();
+
+			char[] chars();
+
+			boolean[] booleans();
 
 			SubAnnotation subAnnotation();
 		}

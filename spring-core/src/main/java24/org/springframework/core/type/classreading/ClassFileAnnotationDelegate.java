@@ -27,7 +27,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.jspecify.annotations.Nullable;
 
@@ -108,27 +107,13 @@ abstract class ClassFileAnnotationDelegate {
 	}
 
 	private static Object parseArrayValue(String className, @Nullable ClassLoader classLoader, AnnotationValue.OfArray arrayValue) {
-		if (arrayValue.values().isEmpty()) {
-			return new Object[0];
+		List<AnnotationValue> values = arrayValue.values();
+		Class<?> arrayElementType = (values.isEmpty() ? Object.class : resolveArrayElementType(values, classLoader));
+		Object array = Array.newInstance(arrayElementType, values.size());
+		for (int i = 0; i < values.size(); i++) {
+			Array.set(array, i, readAnnotationValue(className, values.get(i), classLoader));
 		}
-		Stream<AnnotationValue> stream = arrayValue.values().stream();
-		switch (arrayValue.values().getFirst()) {
-			case AnnotationValue.OfInt _ -> {
-				return stream.map(AnnotationValue.OfInt.class::cast).mapToInt(AnnotationValue.OfInt::intValue).toArray();
-			}
-			case AnnotationValue.OfDouble _ -> {
-				return stream.map(AnnotationValue.OfDouble.class::cast).mapToDouble(AnnotationValue.OfDouble::doubleValue).toArray();
-			}
-			case AnnotationValue.OfLong _ -> {
-				return stream.map(AnnotationValue.OfLong.class::cast).mapToLong(AnnotationValue.OfLong::longValue).toArray();
-			}
-			default -> {
-				Class<?> arrayElementType = resolveArrayElementType(arrayValue.values(), classLoader);
-				return stream
-						.map(rawValue -> readAnnotationValue(className, rawValue, classLoader))
-						.toArray(length -> (Object[]) Array.newInstance(arrayElementType, length));
-			}
-		}
+		return array;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -143,24 +128,21 @@ abstract class ClassFileAnnotationDelegate {
 	}
 
 	private static Class<?> resolveArrayElementType(List<AnnotationValue> values, @Nullable ClassLoader classLoader) {
-		AnnotationValue firstValue = values.getFirst();
-		switch (firstValue) {
-			case AnnotationValue.OfConstant constantValue -> {
-				return constantValue.resolvedValue().getClass();
-			}
-			case AnnotationValue.OfAnnotation _ -> {
-				return MergedAnnotation.class;
-			}
-			case AnnotationValue.OfClass _ -> {
-				return String.class;
-			}
-			case AnnotationValue.OfEnum enumValue -> {
-				return loadEnumClass(enumValue, classLoader);
-			}
-			default -> {
-				return Object.class;
-			}
-		}
+		return switch (values.getFirst()) {
+			case AnnotationValue.OfByte _ -> byte.class;
+			case AnnotationValue.OfChar _ -> char.class;
+			case AnnotationValue.OfDouble _ -> double.class;
+			case AnnotationValue.OfFloat _ -> float.class;
+			case AnnotationValue.OfInt _ -> int.class;
+			case AnnotationValue.OfLong _ -> long.class;
+			case AnnotationValue.OfShort _ -> short.class;
+			case AnnotationValue.OfBoolean _ -> boolean.class;
+			case AnnotationValue.OfString _ -> String.class;
+			case AnnotationValue.OfAnnotation _ -> MergedAnnotation.class;
+			case AnnotationValue.OfClass _ -> String.class;
+			case AnnotationValue.OfEnum enumValue -> loadEnumClass(enumValue, classLoader);
+			case AnnotationValue.OfArray _ -> Object.class;
+		};
 	}
 
 
