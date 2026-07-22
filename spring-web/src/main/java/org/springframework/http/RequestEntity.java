@@ -156,7 +156,7 @@ public class RequestEntity<T extends @Nullable Object> extends HttpEntity<T> {
 	 * @param url the URL
 	 * @deprecated in favor of {@link #RequestEntity(HttpHeaders, HttpMethod, URI)}
 	 */
-	@SuppressWarnings("NullAway")
+	@SuppressWarnings({"removal", "NullAway"})
 	@Deprecated(since = "7.0", forRemoval = true)
 	public RequestEntity(MultiValueMap<String, String> headers, HttpMethod method, URI url) {
 		this(null, headers, method, url, null);
@@ -170,6 +170,7 @@ public class RequestEntity<T extends @Nullable Object> extends HttpEntity<T> {
 	 * @param url the URL
 	 * @deprecated in favor of {@link #RequestEntity(Object, HttpHeaders, HttpMethod, URI)}
 	 */
+	@SuppressWarnings("removal")
 	@Deprecated(since = "7.0", forRemoval = true)
 	public RequestEntity(
 			T body, @Nullable MultiValueMap<String, String> headers,
