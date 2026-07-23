@@ -29,7 +29,9 @@ import org.jspecify.annotations.Nullable;
  * @author Thomas Risberg
  * @author Juergen Hoeller
  * @since 2.5
+ * @deprecated Apache Derby is retired, switch to H2 or HSQLDB
  */
+@Deprecated(forRemoval = true, since = "7.1")
 public class DerbyCallMetaDataProvider extends GenericCallMetaDataProvider {
 
 	public DerbyCallMetaDataProvider(DatabaseMetaData databaseMetaData) throws SQLException {

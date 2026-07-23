@@ -31,7 +31,12 @@ public enum EmbeddedDatabaseType {
 	/** The <a href="https://h2database.com">H2</a> Embedded Java SQL Database Engine. */
 	H2,
 
-	/** The <a href="https://db.apache.org/derby">Apache Derby</a> Embedded SQL Database. */
+	/**
+	 * The <a href="https://db.apache.org/derby">Apache Derby</a> Embedded SQL Database.
+	 *
+	 * @deprecated Apache Derby is retired, switch to HSQLDB or H2
+	 */
+	@Deprecated(forRemoval = true, since = "7.1")
 	DERBY
 
 }
