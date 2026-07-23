@@ -633,7 +633,9 @@ class ConfigurationClassParser {
 						// process it as an @Configuration class
 						this.importStack.registerImport(
 								currentSourceClass.getMetadata(), candidate.getMetadata().getClassName());
-						processConfigurationClass(candidate.asConfigClass(configClass), filter);
+						ConfigurationClass importedConfigClass = candidate.asConfigClass(configClass);
+						configClass.addDirectImport(importedConfigClass); 
+						processConfigurationClass(importedConfigClass, filter);
 					}
 				}
 			}
