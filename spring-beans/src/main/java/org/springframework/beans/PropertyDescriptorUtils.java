@@ -19,6 +19,7 @@ package org.springframework.beans;
 import java.beans.IntrospectionException;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Enumeration;
@@ -71,11 +72,13 @@ abstract class PropertyDescriptorUtils {
 				setter = true;
 				nameIndex = 3;
 			}
-			else if (methodName.startsWith("get") && method.getParameterCount() == 0 && method.getReturnType() != void.class) {
+			else if (methodName.startsWith("get") && method.getParameterCount() == 0 &&
+					method.getReturnType() != void.class && !Modifier.isStatic(method.getModifiers())) {
 				setter = false;
 				nameIndex = 3;
 			}
-			else if (methodName.startsWith("is") && method.getParameterCount() == 0 && method.getReturnType() == boolean.class) {
+			else if (methodName.startsWith("is") && method.getParameterCount() == 0 &&
+					method.getReturnType() == boolean.class && !Modifier.isStatic(method.getModifiers())) {
 				setter = false;
 				nameIndex = 2;
 			}
