@@ -17,12 +17,14 @@
 package org.springframework.web.servlet;
 
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -42,9 +44,14 @@ import org.jspecify.annotations.Nullable;
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.support.AbstractBeanDefinition;
+import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.i18n.LocaleContext;
+import org.springframework.core.OrderComparator;
+import org.springframework.core.Ordered;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.support.PropertiesLoaderUtils;
@@ -513,7 +520,7 @@ public class DispatcherServlet extends FrameworkServlet {
 			if (!matchingBeans.isEmpty()) {
 				this.handlerMappings = new ArrayList<>(matchingBeans.values());
 				// We keep HandlerMappings in sorted order.
-				AnnotationAwareOrderComparator.sort(this.handlerMappings);
+				sortStrategyBeans(context, matchingBeans, this.handlerMappings);
 			}
 		}
 		else {
@@ -559,7 +566,7 @@ public class DispatcherServlet extends FrameworkServlet {
 			if (!matchingBeans.isEmpty()) {
 				this.handlerAdapters = new ArrayList<>(matchingBeans.values());
 				// We keep HandlerAdapters in sorted order.
-				AnnotationAwareOrderComparator.sort(this.handlerAdapters);
+				sortStrategyBeans(context, matchingBeans, this.handlerAdapters);
 			}
 		}
 		else {
@@ -598,7 +605,7 @@ public class DispatcherServlet extends FrameworkServlet {
 			if (!matchingBeans.isEmpty()) {
 				this.handlerExceptionResolvers = new ArrayList<>(matchingBeans.values());
 				// We keep HandlerExceptionResolvers in sorted order.
-				AnnotationAwareOrderComparator.sort(this.handlerExceptionResolvers);
+				sortStrategyBeans(context, matchingBeans, this.handlerExceptionResolvers);
 			}
 		}
 		else {
@@ -663,7 +670,7 @@ public class DispatcherServlet extends FrameworkServlet {
 			if (!matchingBeans.isEmpty()) {
 				this.viewResolvers = new ArrayList<>(matchingBeans.values());
 				// We keep ViewResolvers in sorted order.
-				AnnotationAwareOrderComparator.sort(this.viewResolvers);
+				sortStrategyBeans(context, matchingBeans, this.viewResolvers);
 			}
 		}
 		else {
@@ -710,6 +717,24 @@ public class DispatcherServlet extends FrameworkServlet {
 						"': using default [" + this.flashMapManager.getClass().getSimpleName() + "]");
 			}
 		}
+	}
+
+	/**
+	 * Sort the given strategy beans using {@link AnnotationAwareOrderComparator}, additionally
+	 * consulting each bean's merged {@link BeanDefinition} for an
+	 * {@link AbstractBeanDefinition#ORDER_ATTRIBUTE order attribute}, factory method or
+	 * declared target type. This mirrors the ordering behavior the bean factory uses when
+	 * resolving sorted dependency injections (see
+	 * {@code DefaultListableBeanFactory.FactoryAwareOrderSourceProvider}), so programmatic
+	 * ordering via {@code BeanRegistrar}, {@code GenericApplicationContext.registerBean(..., order)},
+	 * or a direct {@code ORDER_ATTRIBUTE} on a bean definition is reflected here.
+	 */
+	private static <T> void sortStrategyBeans(ApplicationContext context, Map<String, T> matchingBeans, List<T> beans) {
+		if (beans.size() <= 1) {
+			return;
+		}
+		beans.sort(AnnotationAwareOrderComparator.INSTANCE.withSourceProvider(
+				new BeanDefinitionOrderSourceProvider(context, matchingBeans)));
 	}
 
 	/**
@@ -1403,6 +1428,65 @@ public class DispatcherServlet extends FrameworkServlet {
 			uri = request.getRequestURI();
 		}
 		return uri;
+	}
+
+	/**
+	 * {@link OrderComparator.OrderSourceProvider} that resolves order metadata for a given
+	 * bean instance from its merged {@link BeanDefinition}: an
+	 * {@link AbstractBeanDefinition#ORDER_ATTRIBUTE order attribute}, a factory method, and
+	 * a declared target type when distinct from the bean's runtime class. Mirrors
+	 * {@code DefaultListableBeanFactory.FactoryAwareOrderSourceProvider} so that
+	 * DispatcherServlet's strategy detection sees the same ordering inputs the bean factory
+	 * uses for sorted dependency injection. Standard {@code @Order} / {@link Ordered}
+	 * fallback handling is left to the comparator.
+	 */
+	private static class BeanDefinitionOrderSourceProvider implements OrderComparator.OrderSourceProvider {
+
+		private final @Nullable ApplicationContext context;
+
+		private final Map<Object, String> instancesToBeanNames;
+
+		BeanDefinitionOrderSourceProvider(@Nullable ApplicationContext context, Map<String, ?> matchingBeans) {
+			this.context = context;
+			this.instancesToBeanNames = new IdentityHashMap<>(matchingBeans.size());
+			matchingBeans.forEach((name, instance) -> this.instancesToBeanNames.put(instance, name));
+		}
+
+		@Override
+		public @Nullable Object getOrderSource(Object obj) {
+			String beanName = this.instancesToBeanNames.get(obj);
+			if (beanName == null || !(this.context instanceof ConfigurableApplicationContext cac)) {
+				return null;
+			}
+			try {
+				BeanDefinition beanDefinition = cac.getBeanFactory().getMergedBeanDefinition(beanName);
+				List<Object> sources = new ArrayList<>(3);
+				Object orderAttribute = beanDefinition.getAttribute(AbstractBeanDefinition.ORDER_ATTRIBUTE);
+				if (orderAttribute != null) {
+					if (orderAttribute instanceof Integer order) {
+						sources.add((Ordered) () -> order);
+					}
+					else {
+						throw new IllegalStateException("Invalid value type for attribute '" +
+								AbstractBeanDefinition.ORDER_ATTRIBUTE + "': " + orderAttribute.getClass().getName());
+					}
+				}
+				if (beanDefinition instanceof RootBeanDefinition rootBeanDefinition) {
+					Method factoryMethod = rootBeanDefinition.getResolvedFactoryMethod();
+					if (factoryMethod != null) {
+						sources.add(factoryMethod);
+					}
+					Class<?> targetType = rootBeanDefinition.getTargetType();
+					if (targetType != null && targetType != obj.getClass()) {
+						sources.add(targetType);
+					}
+				}
+				return sources.toArray();
+			}
+			catch (NoSuchBeanDefinitionException ex) {
+				return null;
+			}
+		}
 	}
 
 }
