@@ -84,8 +84,6 @@ import static org.mockito.Mockito.mock;
 @SuppressWarnings("unused")
 class ExceptionHandlerExceptionResolverTests {
 
-	//TODO
-
 	private static int DEFAULT_RESOLVER_COUNT;
 
 	private static int DEFAULT_HANDLER_COUNT;
