@@ -314,7 +314,10 @@ public abstract class ForwardedHeaderUtils {
 	 * @param headers the HTTP headers to consider
 	 * @return a {@link UriComponentsBuilder} that reflects the request URI and
 	 * additional updates from forwarded headers
+	 * @deprecated as of 7.1 in favor of {@link #parseStandardHeader} and
+	 * {@link #parseXForwardedHeaders}
 	 */
+	@Deprecated(since = "7.1", forRemoval = true)
 	public static UriComponentsBuilder adaptFromForwardedHeaders(URI uri, HttpHeaders headers) {
 		UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.fromUri(uri);
 		try {
@@ -373,8 +376,10 @@ public abstract class ForwardedHeaderUtils {
 	 * @param remoteAddress the current remote address
 	 * @return an {@code InetSocketAddress} with the extracted host and port, or
 	 * {@code null} if the headers are not present
-	 * @see <a href="https://tools.ietf.org/html/rfc7239#section-5.2">RFC 7239, Section 5.2</a>
+	 * @deprecated as of 7.1 in favor of {@link #parseStandardHeader} and
+	 * {@link #parseXForwardedHeaders}
 	 */
+	@Deprecated(since = "7.1", forRemoval = true)
 	public static @Nullable InetSocketAddress parseForwardedFor(
 			URI uri, HttpHeaders headers, @Nullable InetSocketAddress remoteAddress) {
 
@@ -408,8 +413,10 @@ public abstract class ForwardedHeaderUtils {
 	 * @return an {@code InetSocketAddress} with the extracted host and port, or
 	 * {@code null} if the headers are not present
 	 * @since 7.0
-	 * @see <a href="https://tools.ietf.org/html/rfc7239#section-5.1">RFC 7239, Section 5.1</a>
+	 * @deprecated as of 7.1 in favor of {@link #parseStandardHeader} and
+	 * {@link #parseXForwardedHeaders}
 	 */
+	@Deprecated(since = "7.1", forRemoval = true)
 	public static @Nullable InetSocketAddress parseForwardedBy(
 			URI uri, HttpHeaders headers, @Nullable InetSocketAddress localAddress) {
 

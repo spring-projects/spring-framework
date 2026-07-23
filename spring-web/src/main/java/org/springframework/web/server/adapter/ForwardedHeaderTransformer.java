@@ -83,12 +83,28 @@ public class ForwardedHeaderTransformer implements Function<ServerHttpRequest, S
 	}
 
 
-	private final boolean useStandardHeader;
+	private final @Nullable Boolean useStandardHeader;
 
 	private boolean useForwardedPrefix;
 
 	private boolean removeOnly;
 
+
+	/**
+	 * A default constructor with the historic behavior so far, which is to check
+	 * both the standard "Forwarded" header and the "X-Forwarded-*" alternative
+	 * headers in that order, also with "X-Forwarded-Prefix" enabled by default.
+	 * <p>This behavior depends on proxies being configured correctly
+	 * to clear both standard "Forwarded" and "X-Forwarded-*" header values coming
+	 * from the outside. Going forward, applications must explicitly declare which
+	 * forwarded headers are expected.
+	 * @deprecated as of 7.1, in favor of {@link #ForwardedHeaderTransformer(boolean)}
+	 */
+	@Deprecated(since = "7.1", forRemoval = true)
+	public ForwardedHeaderTransformer() {
+		this.useStandardHeader = null;
+		this.useForwardedPrefix = true;
+	}
 
 	/**
 	 * Create an instance of the transformer and specify whether it should use the
@@ -146,9 +162,8 @@ public class ForwardedHeaderTransformer implements Function<ServerHttpRequest, S
 			InetSocketAddress remoteAddress = request.getRemoteAddress();
 			InetSocketAddress localAddress = request.getLocalAddress();
 
-			ForwardedHeaderUtils.ForwardedInfo info = (this.useStandardHeader ?
-					ForwardedHeaderUtils.parseStandardHeader(originalUri, headers, remoteAddress, localAddress) :
-					ForwardedHeaderUtils.parseXForwardedHeaders(originalUri, headers, remoteAddress, localAddress));
+			ForwardedHeaderUtils.ForwardedInfo info = getForwardedInfo(
+					this.useStandardHeader, originalUri, headers, remoteAddress, localAddress);
 
 			URI uri = info.uri();
 			builder.uri(uri);
@@ -184,6 +199,24 @@ public class ForwardedHeaderTransformer implements Function<ServerHttpRequest, S
 			}
 		}
 		return false;
+	}
+
+	@SuppressWarnings("removal")
+	private static ForwardedHeaderUtils.ForwardedInfo getForwardedInfo(
+			@Nullable Boolean useStandardHeader, URI uri, HttpHeaders headers,
+			@Nullable InetSocketAddress remoteAddress, @Nullable InetSocketAddress localAddress) {
+
+		if (useStandardHeader == null) {
+			return new ForwardedHeaderUtils.ForwardedInfo(
+					ForwardedHeaderUtils.adaptFromForwardedHeaders(uri, headers),
+					ForwardedHeaderUtils.parseForwardedFor(uri, headers, remoteAddress),
+					ForwardedHeaderUtils.parseForwardedBy(uri, headers, localAddress));
+		}
+		else {
+			return (useStandardHeader ?
+					ForwardedHeaderUtils.parseStandardHeader(uri, headers, remoteAddress, localAddress) :
+					ForwardedHeaderUtils.parseXForwardedHeaders(uri, headers, remoteAddress, localAddress));
+		}
 	}
 
 	private void removeForwardedHeaders(ServerHttpRequest.Builder builder) {

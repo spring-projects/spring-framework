@@ -97,7 +97,7 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 	}
 
 
-	private final boolean useStandardHeader;
+	private final @Nullable Boolean useStandardHeader;
 
 	private boolean useForwardedPrefix;
 
@@ -105,6 +105,22 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 
 	private boolean relativeRedirects;
 
+
+	/**
+	 * A default constructor with the historic behavior so far, which is to check
+	 * both the standard "Forwarded" header and the "X-Forwarded-*" alternative
+	 * headers in that order, also with "X-Forwarded-Prefix" enabled by default.
+	 * <p>This behavior depends on proxies being configured correctly
+	 * to clear both standard "Forwarded" and "X-Forwarded-*" header values coming
+	 * from the outside. Going forward, applications must explicitly declare which
+	 * forwarded headers are expected.
+	 * @deprecated as of 7.1, in favor of {@link #ForwardedHeaderFilter(boolean)}
+	 */
+	@Deprecated(since = "7.1", forRemoval = true)
+	public ForwardedHeaderFilter() {
+		this.useStandardHeader = null;
+		this.useForwardedPrefix = true;
+	}
 
 	/**
 	 * Create an instance of the filter and specify whether it should use the
@@ -220,6 +236,24 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 		doFilterInternal(request, response, filterChain);
 	}
 
+	@SuppressWarnings("removal")
+	private static ForwardedHeaderUtils.ForwardedInfo getForwardedInfo(
+			@Nullable Boolean useStandardHeader, URI uri, HttpHeaders headers,
+			@Nullable InetSocketAddress remoteAddress, @Nullable InetSocketAddress localAddress) {
+
+		if (useStandardHeader == null) {
+			return new ForwardedHeaderUtils.ForwardedInfo(
+					ForwardedHeaderUtils.adaptFromForwardedHeaders(uri, headers),
+					ForwardedHeaderUtils.parseForwardedFor(uri, headers, remoteAddress),
+					ForwardedHeaderUtils.parseForwardedBy(uri, headers, localAddress));
+		}
+		else {
+			return (useStandardHeader ?
+					ForwardedHeaderUtils.parseStandardHeader(uri, headers, remoteAddress, localAddress) :
+					ForwardedHeaderUtils.parseXForwardedHeaders(uri, headers, remoteAddress, localAddress));
+		}
+	}
+
 
 	/**
 	 * Hide "Forwarded" or "X-Forwarded-*" headers.
@@ -290,19 +324,15 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 		private final ForwardedPrefixExtractor forwardedPrefixExtractor;
 
 		ForwardedHeaderExtractingRequest(
-				HttpServletRequest servletRequest, boolean useStandardHeader, boolean useForwardedPrefix) {
+				HttpServletRequest servletRequest, @Nullable Boolean useStandardHeader, boolean useForwardedPrefix) {
 
 			super(servletRequest);
 
 			ServerHttpRequest request = new ServletServerHttpRequest(servletRequest);
-			URI uri = request.getURI();
-			HttpHeaders headers = request.getHeaders();
-			InetSocketAddress remoteAddress = request.getRemoteAddress();
-			InetSocketAddress localAddress = request.getLocalAddress();
 
-			ForwardedHeaderUtils.ForwardedInfo info = (useStandardHeader ?
-					ForwardedHeaderUtils.parseStandardHeader(uri, headers, remoteAddress, localAddress) :
-					ForwardedHeaderUtils.parseXForwardedHeaders(uri, headers, remoteAddress, localAddress));
+			ForwardedHeaderUtils.ForwardedInfo info = getForwardedInfo(
+					useStandardHeader, request.getURI(), request.getHeaders(),
+					request.getRemoteAddress(), request.getLocalAddress());
 
 			UriComponents uriComponents = info.uriComponentsBuilder().build();
 			int port = uriComponents.getPort();
@@ -516,10 +546,10 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 
 		private final HttpServletRequest request;
 
-		private final boolean useStandardHeader;
+		private final @Nullable Boolean useStandardHeader;
 
 		ForwardedHeaderExtractingResponse(
-				HttpServletResponse response, HttpServletRequest request, boolean useStandardHeader) {
+				HttpServletResponse response, HttpServletRequest request, @Nullable Boolean useStandardHeader) {
 
 			super(response);
 			this.request = request;
@@ -555,9 +585,8 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 			URI uri = httpRequest.getURI();
 			HttpHeaders headers = httpRequest.getHeaders();
 
-			ForwardedHeaderUtils.ForwardedInfo info = (this.useStandardHeader ?
-					ForwardedHeaderUtils.parseStandardHeader(uri, headers, null, null) :
-					ForwardedHeaderUtils.parseXForwardedHeaders(uri, headers, null, null));
+			ForwardedHeaderUtils.ForwardedInfo info =
+					getForwardedInfo(this.useStandardHeader, uri, headers, null, null);
 
 			String result = info.uriComponentsBuilder()
 					.replacePath(path)
