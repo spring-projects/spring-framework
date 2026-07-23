@@ -251,7 +251,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
 	private @Nullable HttpSession session;
 
-	private boolean requestedSessionIdValid = true;
+	private @Nullable Boolean requestedSessionIdValid;
 
 	private boolean requestedSessionIdFromCookie = true;
 
@@ -1350,9 +1350,25 @@ public class MockHttpServletRequest implements HttpServletRequest {
 		this.requestedSessionIdValid = requestedSessionIdValid;
 	}
 
+	/**
+	 * Return whether the requested session ID is still valid.
+	 * <p>If {@link #setRequestedSessionIdValid} has not been called explicitly,
+	 * this method calculates the value based on whether the
+	 * {@linkplain #getRequestedSessionId() requested session ID} matches the
+	 * ID of the {@linkplain #getSession(boolean) current session}, aligning
+	 * with the Servlet 6.1 specification.
+	 */
 	@Override
 	public boolean isRequestedSessionIdValid() {
-		return this.requestedSessionIdValid;
+		if (this.requestedSessionIdValid != null) {
+			return this.requestedSessionIdValid;
+		}
+		String requestedId = getRequestedSessionId();
+		if (requestedId == null) {
+			return false;
+		}
+		HttpSession currentSession = getSession(false);
+		return (currentSession != null && requestedId.equals(currentSession.getId()));
 	}
 
 	public void setRequestedSessionIdFromCookie(boolean requestedSessionIdFromCookie) {
