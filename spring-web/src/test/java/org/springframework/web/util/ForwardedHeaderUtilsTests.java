@@ -531,7 +531,7 @@ class ForwardedHeaderUtilsTests {
 
 		HttpRequest httpRequest = new ServletServerHttpRequest(request);
 		ForwardedHeaderUtils.ForwardedInfo info =
-				ForwardedHeaderUtils.parseForwardedHeader(httpRequest.getURI(), httpRequest.getHeaders(), null, null);
+				ForwardedHeaderUtils.parseStandardHeader(httpRequest.getURI(), httpRequest.getHeaders(), null, null);
 
 		assertThat(info.forAddress()).isNotNull();
 		assertThat(info.forAddress().getHostString()).isEqualTo("192.0.2.0");
@@ -559,7 +559,7 @@ class ForwardedHeaderUtilsTests {
 		HttpHeaders headers = new HttpHeaders();
 		headers.add("Forwarded", "by=[fd00:fefe:1::4], 192.168.0.1");
 
-		InetSocketAddress address = ForwardedHeaderUtils.parseForwardedHeader(
+		InetSocketAddress address = ForwardedHeaderUtils.parseStandardHeader(
 				URI.create("https://example.com"), headers, null, null).byAddress();
 
 		assertThat(address.getHostName()).isEqualTo("[fd00:fefe:1::4]");
@@ -567,7 +567,7 @@ class ForwardedHeaderUtilsTests {
 
 
 	private static UriComponents adaptFromForwardedHeader(URI uri, HttpHeaders headers) {
-		return ForwardedHeaderUtils.parseForwardedHeader(uri, headers, null, null)
+		return ForwardedHeaderUtils.parseStandardHeader(uri, headers, null, null)
 				.uriComponentsBuilder().build();
 	}
 

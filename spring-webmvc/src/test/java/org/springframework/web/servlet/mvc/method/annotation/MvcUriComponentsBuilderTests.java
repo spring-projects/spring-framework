@@ -210,7 +210,7 @@ class MvcUriComponentsBuilderTests {
 	// SPR-16668
 	private void adaptRequestFromForwardedHeaders() throws Exception {
 		MockFilterChain chain = new MockFilterChain();
-		new ForwardedHeaderFilter().doFilter(this.request, new MockHttpServletResponse(), chain);
+		new ForwardedHeaderFilter(false).doFilter(this.request, new MockHttpServletResponse(), chain);
 		HttpServletRequest adaptedRequest = (HttpServletRequest) chain.getRequest();
 		RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(adaptedRequest));
 	}

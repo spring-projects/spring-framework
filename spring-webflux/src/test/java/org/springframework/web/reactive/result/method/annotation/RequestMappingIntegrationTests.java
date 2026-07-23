@@ -148,7 +148,7 @@ class RequestMappingIntegrationTests extends AbstractRequestMappingIntegrationTe
 
 		@Bean
 		public ForwardedHeaderTransformer forwardedHeaderTransformer() {
-			return new ForwardedHeaderTransformer();
+			return new ForwardedHeaderTransformer(true);
 		}
 	}
 

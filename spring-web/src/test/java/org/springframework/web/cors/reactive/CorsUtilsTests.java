@@ -116,7 +116,7 @@ class CorsUtilsTests {
 			builder.header("X-Forwarded-Port", String.valueOf(forwardedPort));
 		}
 
-		ServerHttpRequest request = adaptFromForwardedHeaders(builder);
+		ServerHttpRequest request = adaptFromForwardedHeaders(builder, false);
 		assertThat(CorsUtils.isCorsRequest(request)).isFalse();
 	}
 
@@ -132,14 +132,16 @@ class CorsUtilsTests {
 				.header("Forwarded", forwardedHeader)
 				.header(HttpHeaders.ORIGIN, originHeader);
 
-		ServerHttpRequest request = adaptFromForwardedHeaders(builder);
+		ServerHttpRequest request = adaptFromForwardedHeaders(builder, true);
 		assertThat(CorsUtils.isCorsRequest(request)).isFalse();
 	}
 
 	// SPR-16668
-	private ServerHttpRequest adaptFromForwardedHeaders(MockServerHttpRequest.BaseBuilder<?> builder) {
+	private ServerHttpRequest adaptFromForwardedHeaders(
+			MockServerHttpRequest.BaseBuilder<?> builder, boolean useStandardForwardedHeader) {
+
 		MockServerWebExchange exchange = MockServerWebExchange.from(builder);
-		return new ForwardedHeaderTransformer().apply(exchange.getRequest());
+		return new ForwardedHeaderTransformer(useStandardForwardedHeader).apply(exchange.getRequest());
 	}
 
 }

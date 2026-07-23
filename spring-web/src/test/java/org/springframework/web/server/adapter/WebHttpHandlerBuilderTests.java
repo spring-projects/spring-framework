@@ -316,7 +316,7 @@ class WebHttpHandlerBuilderTests {
 
 		@Bean
 		public ForwardedHeaderTransformer forwardedHeaderTransformer() {
-			return new ForwardedHeaderTransformer();
+			return new ForwardedHeaderTransformer(true);
 		}
 
 		@Bean

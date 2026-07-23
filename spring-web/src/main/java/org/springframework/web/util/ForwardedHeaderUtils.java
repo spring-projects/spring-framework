@@ -248,7 +248,8 @@ public abstract class ForwardedHeaderUtils {
 	 * @param uri the request {@code URI}
 	 * @param headers the HTTP headers to get the "Forwarded" header from
 	 * @param remoteAddress for a default port for the parsed "for" value
-	 * @param localAddress for a default port for the parsed "by" value
+	 * @param localAddress for a default port for the parsed "by" value;
+	 * this argument is ignored currently and the byAddress is always {@code null}
 	 * @return a {@link ForwardedInfo} with the scheme, host, and port adapted
 	 * from the "X-Forwarded-*" headers, and the parsed "for" address
 	 * @since 7.1
