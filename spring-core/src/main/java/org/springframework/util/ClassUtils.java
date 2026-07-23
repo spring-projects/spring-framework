@@ -67,6 +67,7 @@ import org.springframework.lang.Contract;
  * @author Sam Brannen
  * @author Sebastien Deleuze
  * @author Sungbin Yang
+ * @author Chengang Guan
  * @since 1.1
  * @see TypeUtils
  * @see ReflectionUtils
@@ -308,16 +309,27 @@ public abstract class ClassUtils {
 			return Class.forName(name, false, clToUse);
 		}
 		catch (ClassNotFoundException ex) {
-			int lastDotIndex = name.lastIndexOf(PACKAGE_SEPARATOR);
-			int previousDotIndex = name.lastIndexOf(PACKAGE_SEPARATOR, lastDotIndex - 1);
-			if (lastDotIndex != -1 && previousDotIndex != -1 && Character.isUpperCase(name.charAt(previousDotIndex + 1))) {
-				String nestedClassName =
-						name.substring(0, lastDotIndex) + NESTED_CLASS_SEPARATOR + name.substring(lastDotIndex + 1);
-				try {
-					return Class.forName(nestedClassName, false, clToUse);
+			if (name.lastIndexOf(NESTED_CLASS_SEPARATOR) > 0) {
+				// not java source style
+				throw ex;
+			}
+			String curName = name;
+			for (;;) {
+				int lastDotIndex = curName.lastIndexOf(PACKAGE_SEPARATOR);
+				int previousDotIndex = curName.lastIndexOf(PACKAGE_SEPARATOR, lastDotIndex - 1);
+				if (lastDotIndex != -1 && previousDotIndex != -1 &&
+						Character.isUpperCase(curName.charAt(previousDotIndex + 1))) {
+					curName = curName.substring(0, lastDotIndex) + NESTED_CLASS_SEPARATOR +
+							curName.substring(lastDotIndex + 1);
+					try {
+						return Class.forName(curName, false, clToUse);
+					}
+					catch (ClassNotFoundException ex2) {
+						// Swallow - let original exception get through
+					}
 				}
-				catch (ClassNotFoundException ex2) {
-					// Swallow - let original exception get through
+				else {
+					break;
 				}
 			}
 			throw ex;
